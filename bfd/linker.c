@@ -424,6 +424,7 @@ static boolean generic_link_check_archive_element
 static boolean generic_link_add_symbol_list
   PARAMS ((bfd *, struct bfd_link_info *, bfd_size_type count, asymbol **,
 	   boolean collect));
+static bfd *hash_entry_bfd PARAMS ((struct bfd_link_hash_entry *));
 static void set_symbol_from_hash
   PARAMS ((asymbol *, struct bfd_link_hash_entry *));
 static boolean generic_add_output_symbol
@@ -455,10 +456,7 @@ _bfd_link_hash_newfunc (entry, table, string)
     ret = ((struct bfd_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry)));
   if (ret == (struct bfd_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct bfd_link_hash_entry *)
@@ -568,10 +566,7 @@ generic_link_hash_newfunc (entry, table, string)
     ret = ((struct generic_link_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry)));
   if (ret == (struct generic_link_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct generic_link_hash_entry *)
@@ -770,10 +765,7 @@ archive_hash_newfunc (entry, table, string)
     ret = ((struct archive_hash_entry *)
 	   bfd_hash_allocate (table, sizeof (struct archive_hash_entry)));
   if (ret == (struct archive_hash_entry *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct archive_hash_entry *)
@@ -1321,7 +1313,7 @@ enum link_action
 static const enum link_action link_action[8][8] =
 {
   /* current\prev    new    undef  undefw def    defw   com    indr   warn  */
-  /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
+  /* UNDEF_ROW 	*/  {UND,   NOACT, UND,   REF,   REF,   NOACT, REFC,  WARNC },
   /* UNDEFW_ROW	*/  {WEAK,  NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
   /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  DEF,   CDEF,  MDEF,  CYCLE },
   /* DEFW_ROW 	*/  {DEFW,  DEFW,  DEFW,  NOACT, NOACT, NOACT, NOACT, CYCLE },
@@ -1353,6 +1345,30 @@ static const enum link_action link_action[8][8] =
 
    Adding an entry to a set does not count as a reference to a set,
    and no warning is issued (SET_ROW/warn).  */
+
+/* Return the BFD in which a hash entry has been defined, if known.  */
+
+static bfd *
+hash_entry_bfd (h)
+     struct bfd_link_hash_entry *h;
+{
+  while (h->type == bfd_link_hash_warning)
+    h = h->u.i.link;
+  switch (h->type)
+    {
+    default:
+      return NULL;
+    case bfd_link_hash_undefined:
+    case bfd_link_hash_undefweak:
+      return h->u.undef.abfd;
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+      return h->u.def.section->owner;
+    case bfd_link_hash_common:
+      return h->u.c.p->section->owner;
+    }
+  /*NOTREACHED*/
+}
 
 /* Add a symbol to the global hash table.
    ABFD is the BFD the symbol comes from.
@@ -1737,7 +1753,9 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  /* Issue a warning and cycle.  */
 	  if (h->u.i.warning != NULL)
 	    {
-	      if (! (*info->callbacks->warning) (info, h->u.i.warning))
+	      if (! (*info->callbacks->warning) (info, h->u.i.warning,
+						 abfd, (asection *) NULL,
+						 (bfd_vma) 0))
 		return false;
 	      /* Only issue a warning once.  */
 	      h->u.i.warning = NULL;
@@ -1759,7 +1777,9 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 
 	case WARN:
 	  /* Issue a warning.  */
-	  if (! (*info->callbacks->warning) (info, string))
+	  if (! (*info->callbacks->warning) (info, string,
+					     hash_entry_bfd (h),
+					     (asection *) NULL, (bfd_vma) 0))
 	    return false;
 	  break;
 
@@ -1771,7 +1791,10 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	     ensure this.  */
 	  if (h->next != NULL || info->hash->undefs_tail == h)
 	    {
-	      if (! (*info->callbacks->warning) (info, string))
+	      if (! (*info->callbacks->warning) (info, string,
+						 hash_entry_bfd (h),
+						 (asection *) NULL,
+						 (bfd_vma) 0))
 		return false;
 	      break;
 	    }
@@ -1783,27 +1806,33 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 
 	    /* STRING is the warning to give.  */
 	    sub = ((struct bfd_link_hash_entry *)
-		   bfd_hash_allocate (&info->hash->table,
-				      sizeof (struct bfd_link_hash_entry)));
-	    if (!sub)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		return false;
-	      }
+		   ((*info->hash->table.newfunc)
+		    ((struct bfd_hash_entry *) NULL, &info->hash->table,
+		     h->root.string)));
+	    if (sub == NULL)
+	      return false;
 	    *sub = *h;
-	    h->type = bfd_link_hash_warning;
-	    h->u.i.link = sub;
+	    sub->type = bfd_link_hash_warning;
+	    sub->u.i.link = h;
 	    if (! copy)
-	      h->u.i.warning = string;
+	      sub->u.i.warning = string;
 	    else
 	      {
 		char *w;
 
 		w = bfd_hash_allocate (&info->hash->table,
 				       strlen (string) + 1);
+		if (w == NULL)
+		  return false;
 		strcpy (w, string);
-		h->u.i.warning = w;
+		sub->u.i.warning = w;
 	      }
+
+	    bfd_hash_replace (&info->hash->table,
+			      (struct bfd_hash_entry *) h,
+			      (struct bfd_hash_entry *) sub);
+	    if (hashp != NULL)
+	      *hashp = sub;
 	  }
 	  break;
 	}
@@ -1886,7 +1915,8 @@ _bfd_generic_final_link (abfd, info)
 							symbols);
 		  if (reloc_count < 0)
 		    return false;
-		  BFD_ASSERT (reloc_count == input_section->reloc_count);
+		  BFD_ASSERT ((unsigned long) reloc_count
+			      == input_section->reloc_count);
 		  o->reloc_count += reloc_count;
 		  free (relocs);
 		}
@@ -2209,8 +2239,22 @@ set_symbol_from_hash (sym, h)
   switch (h->type)
     {
     default:
-    case bfd_link_hash_new:
       abort ();
+      break;
+    case bfd_link_hash_new:
+      /* This can happen when a constructor symbol is seen but we are
+         not building constructors.  */
+      if (sym->section != NULL)
+	{
+	  BFD_ASSERT ((sym->flags & BSF_CONSTRUCTOR) != 0);
+	}
+      else
+	{
+	  sym->flags |= BSF_CONSTRUCTOR;
+	  sym->section = bfd_abs_section_ptr;
+	  sym->value = 0;
+	}
+      break;
     case bfd_link_hash_undefined:
       sym->section = bfd_und_section_ptr;
       sym->value = 0;
@@ -2598,7 +2642,8 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
     }
 
   /* Get and relocate the section contents.  */
-  contents = (bfd_byte *) malloc (bfd_section_size (input_bfd, input_section));
+  contents = ((bfd_byte *)
+	      malloc ((size_t) bfd_section_size (input_bfd, input_section)));
   if (contents == NULL && bfd_section_size (input_bfd, input_section) != 0)
     {
       bfd_set_error (bfd_error_no_memory);

@@ -217,7 +217,7 @@ linux_link_hash_table_create (abfd)
   struct linux_link_hash_table *ret;
 
   ret = ((struct linux_link_hash_table *)
-	 malloc (sizeof (struct linux_link_hash_table)));
+	 bfd_alloc (abfd, sizeof (struct linux_link_hash_table)));
   if (ret == (struct linux_link_hash_table *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -586,7 +586,7 @@ bfd_linux_size_dynamic_sections (output_bfd, info)
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      memset (s->contents, 0, s->_raw_size);
+      memset (s->contents, 0, (size_t) s->_raw_size);
     }
 
   return true;
@@ -607,7 +607,7 @@ linux_finish_dynamic_link (output_bfd, info)
   struct fixup *f;
   unsigned int new_addr;
   int section_offset;
-  int fixups_written;
+  unsigned int fixups_written;
 
   if (linux_hash_table (info)->dynobj == NULL)
     return true;

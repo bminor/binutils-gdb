@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -27,21 +27,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/stab_gnu.h"
 #include "libaout.h"		/* BFD a.out internal data structures */
 
-extern bfd_target a_out_adobe_vec;		/* Forward decl */
+extern const bfd_target a_out_adobe_vec;		/* Forward decl */
 
-PROTO (static bfd_target *, aout_adobe_callback, (bfd *));
+static const bfd_target *aout_adobe_callback PARAMS ((bfd *));
 
-PROTO (boolean, aout_32_slurp_symbol_table, (bfd *abfd));
-PROTO (boolean , aout_32_write_syms, ());
-PROTO (static void, aout_adobe_write_section, (bfd *abfd, sec_ptr sect));
+extern boolean aout_32_slurp_symbol_table PARAMS ((bfd *abfd));
+extern boolean aout_32_write_syms PARAMS ((bfd *));
+static void aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
 
-PROTO(void, aout_adobe_swap_exec_header_in,
-      (bfd *abfd,
-      struct external_exec *raw_bytes,
-      struct internal_exec *execp));
+void aout_adobe_swap_exec_header_in
+  PARAMS ((bfd *abfd, struct external_exec *raw_bytes,
+	   struct internal_exec *execp));
 	 
 void
 aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
@@ -89,7 +88,7 @@ aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
 }
 
 
-static bfd_target *
+static const bfd_target *
 aout_adobe_object_p (abfd)
      bfd *abfd;
 {
@@ -133,7 +132,7 @@ aout_adobe_object_p (abfd)
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
 
-static bfd_target *
+static const bfd_target *
 aout_adobe_callback (abfd)
      bfd *abfd;
 {
@@ -387,10 +386,10 @@ aout_adobe_write_section (abfd, sect)
 static boolean
 aout_adobe_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
-     sec_ptr section;
-     unsigned char *location;
+     asection *section;
+     PTR location;
      file_ptr offset;
-      int count;
+     bfd_size_type count;
 {
   file_ptr section_start;
   sec_ptr sect;
@@ -444,9 +443,11 @@ aout_adobe_set_arch_mach (abfd, arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-  bfd_default_set_arch_mach(abfd, arch, machine);
+  if (! bfd_default_set_arch_mach (abfd, arch, machine))
+    return false;
 
-  if (arch == bfd_arch_unknown)	/* Unknown machine arch is OK */
+  if (arch == bfd_arch_unknown
+      || arch == bfd_arch_m68k)
     return true;
 
   return false;
@@ -471,7 +472,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 #define aout_32_bfd_reloc_type_lookup \
-  ((CONST struct reloc_howto_struct *(*) \
+  ((reloc_howto_type *(*) \
     PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 
 #define	aout_32_set_arch_mach		aout_adobe_set_arch_mach
@@ -485,8 +486,9 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
   _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_add_symbols	_bfd_generic_link_add_symbols
 #define aout_32_bfd_final_link		_bfd_generic_final_link
+#define aout_32_bfd_link_split_section	_bfd_generic_link_split_section
 
-bfd_target a_out_adobe_vec =
+const bfd_target a_out_adobe_vec =
 {
   "a.out.adobe",		/* name */
   bfd_target_aout_flavour,

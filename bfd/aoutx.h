@@ -117,8 +117,7 @@ DESCRIPTION
    (Just want to make these explicit, so the conditions tested in this
    file make sense if you're more familiar with a.out than with BFD.)  */
 
-#define KEEPIT flags
-#define KEEPITTYPE int
+#define KEEPIT udata.i
 
 #include <string.h>		/* For strchr and friends */
 #include "bfd.h"
@@ -189,9 +188,9 @@ reloc_howto_type howto_table_ext[] =
   HOWTO(RELOC_BASE10, 0,  2, 	16, false, 0, complain_overflow_bitfield,0,"BASE10",   false, 0,0x0000ffff, false),
   HOWTO(RELOC_BASE13, 0,  2,	13, false, 0, complain_overflow_bitfield,0,"BASE13",   false, 0,0x00001fff, false),
   HOWTO(RELOC_BASE22, 0,  2,	0,  false, 0, complain_overflow_bitfield,0,"BASE22",   false, 0,0x00000000, false),
-  HOWTO(RELOC_PC10,   0,  2,	10, false, 0, complain_overflow_bitfield,0,"PC10",	false, 0,0x000003ff, false),
-  HOWTO(RELOC_PC22,   0,  2,	22, false, 0, complain_overflow_bitfield,0,"PC22",	false, 0,0x003fffff, false),
-  HOWTO(RELOC_JMP_TBL,0,  2,	32, false, 0, complain_overflow_bitfield,0,"JMP_TBL",	false, 0,0xffffffff, false),
+  HOWTO(RELOC_PC10,   0,  2,	10, true,  0, complain_overflow_dont,0,"PC10",	false, 0,0x000003ff, true),
+  HOWTO(RELOC_PC22,   10,  2,	22, true,  0, complain_overflow_signed,0,"PC22", false, 0,0x003fffff, true),
+  HOWTO(RELOC_JMP_TBL,2,  2, 	30, true,  0, complain_overflow_signed,0,"JMP_TBL", 	false, 0,0x3fffffff, false),
   HOWTO(RELOC_SEGOFF16,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"SEGOFF16",	false, 0,0x00000000, false),
   HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"GLOB_DAT",	false, 0,0x00000000, false),
   HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, complain_overflow_bitfield,0,"JMP_SLOT",	false, 0,0x00000000, false),
@@ -267,7 +266,13 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 	EXT (BFD_RELOC_32_PCREL_S2, 6);
 	EXT (BFD_RELOC_SPARC_WDISP22, 7);
 	EXT (BFD_RELOC_SPARC13, 10);
+	EXT (BFD_RELOC_SPARC_GOT10, 14);
 	EXT (BFD_RELOC_SPARC_BASE13, 15);
+	EXT (BFD_RELOC_SPARC_GOT13, 15);
+	EXT (BFD_RELOC_SPARC_GOT22, 16);
+	EXT (BFD_RELOC_SPARC_PC10, 17);
+	EXT (BFD_RELOC_SPARC_PC22, 18);
+	EXT (BFD_RELOC_SPARC_WPLT30, 19);
       default: return (reloc_howto_type *) NULL;
       }
   else
@@ -675,7 +680,10 @@ NAME(aout,machine_type) (arch, machine, unknown)
 
   switch (arch) {
   case bfd_arch_sparc:
-    if (machine == 0)	arch_flags = M_SPARC;
+    if (machine == 0
+	|| machine == bfd_mach_sparc
+	|| machine == bfd_mach_sparc64)
+      arch_flags = M_SPARC;
     break;
 
   case bfd_arch_m68k:
@@ -1873,7 +1881,7 @@ NAME(aout,write_syms) (abfd)
 	  != EXTERNAL_NLIST_SIZE)
 	goto error_return;
 
-      /* NB: `KEEPIT' currently overlays `flags', so set this only
+      /* NB: `KEEPIT' currently overlays `udata.p', so set this only
 	 here, at the end.  */
       g->KEEPIT = count;
     }
@@ -1966,7 +1974,7 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
       {
 	/* Fill in symbol */
 	r_extern = 1;
-	r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+	r_index = (*(g->sym_ptr_ptr))->KEEPIT;
 
       }
     }
@@ -2024,7 +2032,9 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
 
   r_type = (unsigned int) g->howto->type;
 
-  r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
+  r_addend = g->addend;
+  if ((sym->flags & BSF_SECTION_SYM) != 0)
+    r_addend += (*(g->sym_ptr_ptr))->section->output_section->vma;
 
   /* If this relocation is relative to a symbol then set the
      r_index to the symbols index, and the r_extern bit.
@@ -2033,29 +2043,22 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
      from the abs section, or as a symbol which has an abs value.
      check for that here.  */
 
-  if (bfd_is_com_section (output_section)
-      || bfd_is_abs_section (output_section)
-      || bfd_is_und_section (output_section))
-  {
-    if (bfd_abs_section_ptr->symbol == sym)
+  if (bfd_is_abs_section (bfd_get_section (sym)))
     {
-      /* Whoops, looked like an abs symbol, but is really an offset
-	 from the abs section */
-      r_index = 0;
       r_extern = 0;
-     }
-    else
+      r_index = 0;
+    }
+  else if ((sym->flags & BSF_SECTION_SYM) == 0)
     {
       r_extern = 1;
-      r_index =  stoi((*(g->sym_ptr_ptr))->KEEPIT);
+      r_index = (*(g->sym_ptr_ptr))->KEEPIT;
     }
-  }
   else
-  {
-    /* Just an ordinary section */
-    r_extern = 0;
-    r_index  = output_section->target_index;
-  }
+    {
+      /* Just an ordinary section */
+      r_extern = 0;
+      r_index = output_section->target_index;
+    }
 
   /* now the fun stuff */
   if (abfd->xvec->header_byteorder_big_p != false) {
@@ -2127,7 +2130,7 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      asymbol **symbols;
      bfd_size_type symcount;
 {
-  int r_index;
+  unsigned int r_index;
   int r_extern;
   unsigned int r_type;
   struct aoutdata *su = &(abfd->tdata.aout_data->a);
@@ -2180,13 +2183,13 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      asymbol **symbols;
      bfd_size_type symcount;
 {
-  int r_index;
+  unsigned int r_index;
   int r_extern;
   unsigned int r_length;
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
   struct aoutdata  *su = &(abfd->tdata.aout_data->a);
-  int howto_idx;
+  unsigned int howto_idx;
 
   cache_ptr->address = bfd_h_get_32 (abfd, bytes->r_address);
 
@@ -2219,7 +2222,7 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
 	      + 16 * r_jmptable + 32 * r_relative;
   BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
   cache_ptr->howto =  howto_table_std + howto_idx;
-  BFD_ASSERT (cache_ptr->howto->type != -1);
+  BFD_ASSERT (cache_ptr->howto->type != (unsigned int) -1);
 
   /* Base relative relocs are always against the symbol table,
      regardless of the setting of r_extern.  r_extern just reflects
@@ -2636,7 +2639,7 @@ NAME(aout,find_nearest_line)
   CONST char *main_file_name = NULL;
   CONST char *current_file_name = NULL;
   CONST char *line_file_name = NULL; /* Value of current_file_name at line number. */
-  bfd_vma high_line_vma = ~0;
+  bfd_vma low_line_vma = 0;
   bfd_vma low_func_vma = 0;
   asymbol *func = 0;
   *filename_ptr = abfd->filename;
@@ -2671,13 +2674,15 @@ NAME(aout,find_nearest_line)
 
       case N_DSLINE:
       case N_BSLINE:
-	/* We'll keep this if it resolves nearer than the one we have already */
-	if (q->symbol.value >= offset &&
-	    q->symbol.value < high_line_vma) {
-	  *line_ptr = q->desc;
-	  high_line_vma = q->symbol.value;
-	  line_file_name = current_file_name;
-	}
+	/* We'll keep this if it resolves nearer than the one we have
+           already.  */
+	if (q->symbol.value >= low_line_vma
+	    && q->symbol.value <= offset)
+	  {
+	    *line_ptr = q->desc;
+	    low_line_vma = q->symbol.value;
+	    line_file_name = current_file_name;
+	  }
 	break;
       case N_FUN:
 	{
@@ -2687,29 +2692,8 @@ NAME(aout,find_nearest_line)
 	    low_func_vma = q->symbol.value;
 	    func = (asymbol *)q;
 	  }
-	  if (*line_ptr && func) {
-	    CONST char *function = func->name;
-	    char *p;
-
-	    /* The caller expects a symbol name.  We actually have a
-	       function name, without the leading underscore.  Put the
-	       underscore back in, so that the caller gets a symbol
-	       name.  */
-	    if (bfd_get_symbol_leading_char (abfd) == '\0')
-	      strncpy (buffer, function, sizeof (buffer) - 1);
-	    else
-	      {
-		buffer[0] = bfd_get_symbol_leading_char (abfd);
-		strncpy (buffer + 1, function, sizeof (buffer) - 2);
-	      }
-	    buffer[sizeof(buffer)-1] = 0;
-	    /* Have to remove : stuff */
-	    p = strchr(buffer,':');
-	    if (p != NULL) { *p = '\0'; }
-	    *functionname_ptr = buffer;
+	  else if (q->symbol.value > offset)
 	    goto done;
-
-	  }
 	}
 	break;
       }
@@ -2728,8 +2712,29 @@ NAME(aout,find_nearest_line)
 	  *filename_ptr = filename_buffer;
       }
   }
-  return true;
+  if (func)
+    {
+      CONST char *function = func->name;
+      char *p;
 
+      /* The caller expects a symbol name.  We actually have a
+	 function name, without the leading underscore.  Put the
+	 underscore back in, so that the caller gets a symbol name.  */
+      if (bfd_get_symbol_leading_char (abfd) == '\0')
+	strncpy (buffer, function, sizeof (buffer) - 1);
+      else
+	{
+	  buffer[0] = bfd_get_symbol_leading_char (abfd);
+	  strncpy (buffer + 1, function, sizeof (buffer) - 2);
+	}
+      buffer[sizeof(buffer)-1] = 0;
+      /* Have to remove : stuff */
+      p = strchr(buffer,':');
+      if (p != NULL)
+	*p = '\0';
+      *functionname_ptr = buffer;
+    }
+  return true;
 }
 
 /*ARGSUSED*/
@@ -3404,6 +3409,9 @@ NAME(aout,final_link) (abfd, info, callback)
   register struct bfd_link_order *p;
   asection *o;
   boolean have_link_order_relocs;
+
+  if (info->shared)
+    abfd->flags |= DYNAMIC;
 
   aout_info.info = info;
   aout_info.output_bfd = abfd;
@@ -4324,7 +4332,8 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
   boolean (*check_dynamic_reloc) PARAMS ((struct bfd_link_info *,
 					  bfd *, asection *,
 					  struct aout_link_hash_entry *,
-					  PTR, boolean *));
+					  PTR, bfd_byte *, boolean *,
+					  bfd_vma *));
   bfd *output_bfd;
   boolean relocateable;
   struct external_nlist *syms;
@@ -4357,12 +4366,9 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
       int r_index;
       int r_extern;
       int r_pcrel;
-      int r_baserel;
-      int r_jmptable;
-      int r_relative;
-      int r_length;
-      int howto_idx;
+      int r_baserel = 0;
       reloc_howto_type *howto;
+      struct aout_link_hash_entry *h = NULL;
       bfd_vma relocation;
       bfd_reloc_status_type r;
 
@@ -4371,37 +4377,47 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 #ifdef MY_reloc_howto
       howto = MY_reloc_howto(input_bfd, rel, r_index, r_extern, r_pcrel);
 #else      
-      if (input_bfd->xvec->header_byteorder_big_p)
-	{
-	  r_index   =  ((rel->r_index[0] << 16)
-			| (rel->r_index[1] << 8)
-			| rel->r_index[2]);
-	  r_extern  = (0 != (rel->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
-	  r_pcrel   = (0 != (rel->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
-	  r_baserel = (0 != (rel->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
-	  r_jmptable= (0 != (rel->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
-	  r_relative= (0 != (rel->r_type[0] & RELOC_STD_BITS_RELATIVE_BIG));
-	  r_length  = ((rel->r_type[0] & RELOC_STD_BITS_LENGTH_BIG)
-		       >> RELOC_STD_BITS_LENGTH_SH_BIG);
-	}
-      else
-	{
-	  r_index   = ((rel->r_index[2] << 16)
-		       | (rel->r_index[1] << 8)
-		       | rel->r_index[0]);
-	  r_extern  = (0 != (rel->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
-	  r_pcrel   = (0 != (rel->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
-	  r_baserel = (0 != (rel->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
-	  r_jmptable= (0 != (rel->r_type[0] & RELOC_STD_BITS_JMPTABLE_LITTLE));
-	  r_relative= (0 != (rel->r_type[0] & RELOC_STD_BITS_RELATIVE_LITTLE));
-	  r_length  = ((rel->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE)
-		       >> RELOC_STD_BITS_LENGTH_SH_LITTLE);
-	}
+      {
+	int r_jmptable;
+	int r_relative;
+	int r_length;
+	unsigned int howto_idx;
 
-      howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel
-		  + 16 * r_jmptable + 32 * r_relative;
-      BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
-      howto = howto_table_std + howto_idx;
+	if (input_bfd->xvec->header_byteorder_big_p)
+	  {
+	    r_index   =  ((rel->r_index[0] << 16)
+			  | (rel->r_index[1] << 8)
+			  | rel->r_index[2]);
+	    r_extern  = (0 != (rel->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
+	    r_pcrel   = (0 != (rel->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
+	    r_baserel = (0 != (rel->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
+	    r_jmptable= (0 != (rel->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
+	    r_relative= (0 != (rel->r_type[0] & RELOC_STD_BITS_RELATIVE_BIG));
+	    r_length  = ((rel->r_type[0] & RELOC_STD_BITS_LENGTH_BIG)
+			 >> RELOC_STD_BITS_LENGTH_SH_BIG);
+	  }
+	else
+	  {
+	    r_index   = ((rel->r_index[2] << 16)
+			 | (rel->r_index[1] << 8)
+			 | rel->r_index[0]);
+	    r_extern  = (0 != (rel->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
+	    r_pcrel   = (0 != (rel->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
+	    r_baserel = (0 != (rel->r_type[0]
+			       & RELOC_STD_BITS_BASEREL_LITTLE));
+	    r_jmptable= (0 != (rel->r_type[0]
+			       & RELOC_STD_BITS_JMPTABLE_LITTLE));
+	    r_relative= (0 != (rel->r_type[0]
+			       & RELOC_STD_BITS_RELATIVE_LITTLE));
+	    r_length  = ((rel->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE)
+			 >> RELOC_STD_BITS_LENGTH_SH_LITTLE);
+	  }
+
+	howto_idx = (r_length + 4 * r_pcrel + 8 * r_baserel
+		     + 16 * r_jmptable + 32 * r_relative);
+	BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
+	howto = howto_table_std + howto_idx;
+      }
 #endif
 
       if (relocateable)
@@ -4410,8 +4426,6 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	     modify the reloc accordingly.  */
 	  if (r_extern)
 	    {
-	      struct aout_link_hash_entry *h;
-
 	      /* If we know the symbol this relocation is against,
 		 convert it into a relocation against a section.  This
 		 is what the native linker does.  */
@@ -4539,25 +4553,14 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	}
       else
 	{
+	  boolean hundef;
+
 	  /* We are generating an executable, and must do a full
 	     relocation.  */
+	  hundef = false;
 	  if (r_extern)
 	    {
-	      struct aout_link_hash_entry *h;
-
 	      h = sym_hashes[r_index];
-
-	      if (check_dynamic_reloc != NULL)
-		{
-		  boolean skip;
-
-		  if (! ((*check_dynamic_reloc)
-			 (finfo->info, input_bfd, input_section, h,
-			  (PTR) rel, &skip)))
-		    return false;
-		  if (skip)
-		    continue;
-		}
 
 	      if (h != (struct aout_link_hash_entry *) NULL
 		  && (h->root.type == bfd_link_hash_defined
@@ -4572,13 +4575,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		relocation = 0;
 	      else
 		{
-		  const char *name;
-
-		  name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
-		  if (! ((*finfo->info->callbacks->undefined_symbol)
-			 (finfo->info, name, input_bfd, input_section,
-			  r_addr)))
-		    return false;
+		  hundef = true;
 		  relocation = 0;
 		}
 	    }
@@ -4592,6 +4589,31 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 			    - section->vma);
 	      if (r_pcrel)
 		relocation += input_section->vma;
+	    }
+
+	  if (check_dynamic_reloc != NULL)
+	    {
+	      boolean skip;
+
+	      if (! ((*check_dynamic_reloc)
+		     (finfo->info, input_bfd, input_section, h,
+		      (PTR) rel, contents, &skip, &relocation)))
+		return false;
+	      if (skip)
+		continue;
+	    }
+
+	  /* Now warn if a global symbol is undefined.  We could not
+             do this earlier, because check_dynamic_reloc might want
+             to skip this reloc.  */
+	  if (hundef && ! finfo->info->shared && ! r_baserel)
+	    {
+	      const char *name;
+
+	      name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
+	      if (! ((*finfo->info->callbacks->undefined_symbol)
+		     (finfo->info, name, input_bfd, input_section, r_addr)))
+		return false;
 	    }
 
 	  r = _bfd_final_link_relocate (howto,
@@ -4649,7 +4671,8 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
   boolean (*check_dynamic_reloc) PARAMS ((struct bfd_link_info *,
 					  bfd *, asection *,
 					  struct aout_link_hash_entry *,
-					  PTR, boolean *));
+					  PTR, bfd_byte *, boolean *,
+					  bfd_vma *));
   bfd *output_bfd;
   boolean relocateable;
   struct external_nlist *syms;
@@ -4681,8 +4704,10 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
       bfd_vma r_addr;
       int r_index;
       int r_extern;
-      int r_type;
+      unsigned int r_type;
       bfd_vma r_addend;
+      struct aout_link_hash_entry *h = NULL;
+      asection *r_section = NULL;
       bfd_vma relocation;
 
       r_addr = GET_SWORD (input_bfd, rel->r_address);
@@ -4708,8 +4733,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 
       r_addend = GET_SWORD (input_bfd, rel->r_addend);
 
-      BFD_ASSERT (r_type >= 0
-		  && r_type < TABLE_SIZE (howto_table_ext));
+      BFD_ASSERT (r_type < TABLE_SIZE (howto_table_ext));
 
       if (relocateable)
 	{
@@ -4717,8 +4741,6 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	     modify the reloc accordingly.  */
 	  if (r_extern)
 	    {
-	      struct aout_link_hash_entry *h;
-
 	      /* If we know the symbol this relocation is against,
 		 convert it into a relocation against a section.  This
 		 is what the native linker does.  */
@@ -4823,14 +4845,12 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	    }
 	  else
 	    {
-	      asection *section;
-
 	      /* This is a relocation against a section.  We must
 		 adjust by the amount that the section moved.  */
-	      section = aout_reloc_index_to_section (input_bfd, r_index);
-	      relocation = (section->output_section->vma
-			    + section->output_offset
-			    - section->vma);
+	      r_section = aout_reloc_index_to_section (input_bfd, r_index);
+	      relocation = (r_section->output_section->vma
+			    + r_section->output_offset
+			    - r_section->vma);
 
 	      /* If this is a PC relative reloc, then the addend is
 		 the difference in VMA between the destination and the
@@ -4857,27 +4877,15 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	}
       else
 	{
+	  boolean hundef;
 	  bfd_reloc_status_type r;
 
 	  /* We are generating an executable, and must do a full
 	     relocation.  */
+	  hundef = false;
 	  if (r_extern)
 	    {
-	      struct aout_link_hash_entry *h;
-
 	      h = sym_hashes[r_index];
-
-	      if (check_dynamic_reloc != NULL)
-		{
-		  boolean skip;
-
-		  if (! ((*check_dynamic_reloc)
-			 (finfo->info, input_bfd, input_section, h,
-			  (PTR) rel, &skip)))
-		    return false;
-		  if (skip)
-		    continue;
-		}
 
 	      if (h != (struct aout_link_hash_entry *) NULL
 		  && (h->root.type == bfd_link_hash_defined
@@ -4892,21 +4900,43 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		relocation = 0;
 	      else
 		{
-		  const char *name;
-
-		  name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
-		  if (! ((*finfo->info->callbacks->undefined_symbol)
-			 (finfo->info, name, input_bfd, input_section,
-			  r_addr)))
-		    return false;
+		  hundef = true;
 		  relocation = 0;
 		}
 	    }
+	  else if (r_type == RELOC_BASE10
+		   || r_type == RELOC_BASE13
+		   || r_type == RELOC_BASE22)
+	    {
+	      struct external_nlist *sym;
+	      int type;
+
+	      /* For base relative relocs, r_index is always an index
+                 into the symbol table, even if r_extern is 0.  */
+	      sym = syms + r_index;
+	      type = bfd_h_get_8 (input_bfd, sym->e_type);
+	      if ((type & N_TYPE) == N_TEXT
+		  || type == N_WEAKT)
+		r_section = obj_textsec (input_bfd);
+	      else if ((type & N_TYPE) == N_DATA
+		       || type == N_WEAKD)
+		r_section = obj_datasec (input_bfd);
+	      else if ((type & N_TYPE) == N_BSS
+		       || type == N_WEAKB)
+		r_section = obj_bsssec (input_bfd);
+	      else if ((type & N_TYPE) == N_ABS
+		       || type == N_WEAKA)
+		r_section = bfd_abs_section_ptr;
+	      else
+		abort ();
+	      relocation = (r_section->output_section->vma
+			    + r_section->output_offset
+			    + (GET_WORD (input_bfd, sym->e_value)
+			       - r_section->vma));
+	    }
 	  else
 	    {
-	      asection *section;
-
-	      section = aout_reloc_index_to_section (input_bfd, r_index);
+	      r_section = aout_reloc_index_to_section (input_bfd, r_index);
 
 	      /* If this is a PC relative reloc, then R_ADDEND is the
 		 difference between the two vmas, or
@@ -4934,11 +4964,40 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		 RELOCATION to the change in the destination VMA, or
 		   new_dest_sec - old_dest_sec
 		 */
-	      relocation = (section->output_section->vma
-			    + section->output_offset
-			    - section->vma);
+	      relocation = (r_section->output_section->vma
+			    + r_section->output_offset
+			    - r_section->vma);
 	      if (howto_table_ext[r_type].pc_relative)
 		relocation += input_section->vma;
+	    }
+
+	  if (check_dynamic_reloc != NULL)
+	    {
+	      boolean skip;
+
+	      if (! ((*check_dynamic_reloc)
+		     (finfo->info, input_bfd, input_section, h,
+		      (PTR) rel, contents, &skip, &relocation)))
+		return false;
+	      if (skip)
+		continue;
+	    }
+
+	  /* Now warn if a global symbol is undefined.  We could not
+             do this earlier, because check_dynamic_reloc might want
+             to skip this reloc.  */
+	  if (hundef
+	      && ! finfo->info->shared
+	      && r_type != RELOC_BASE10
+	      && r_type != RELOC_BASE13
+	      && r_type != RELOC_BASE22)
+	    {
+	      const char *name;
+
+	      name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
+	      if (! ((*finfo->info->callbacks->undefined_symbol)
+		     (finfo->info, name, input_bfd, input_section, r_addr)))
+		return false;
 	    }
 
 	  r = _bfd_final_link_relocate (howto_table_ext + r_type,
@@ -4956,7 +5015,10 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		  {
 		    const char *name;
 
-		    if (r_extern)
+		    if (r_extern
+			|| r_type == RELOC_BASE10
+			|| r_type == RELOC_BASE13
+			|| r_type == RELOC_BASE22)
 		      name = strings + GET_WORD (input_bfd,
 						 syms[r_index].e_strx);
 		    else
@@ -5059,48 +5121,51 @@ aout_link_reloc_link_order (finfo, o, p)
 
   if (obj_reloc_entry_size (finfo->output_bfd) == RELOC_STD_SIZE)
     {
-      int r_pcrel;
-      int r_baserel;
-      int r_jmptable;
-      int r_relative;
-      int r_length;
-
 #ifdef MY_put_reloc
-      MY_put_reloc(finfo->output_bfd, r_extern, r_index, p->offset, howto, &srel);
+      MY_put_reloc(finfo->output_bfd, r_extern, r_index, p->offset, howto,
+		   &srel);
 #else
-      r_pcrel = howto->pc_relative;
-      r_baserel = (howto->type & 8) != 0;
-      r_jmptable = (howto->type & 16) != 0;
-      r_relative = (howto->type & 32) != 0;
-      r_length = howto->size;
+      {
+	int r_pcrel;
+	int r_baserel;
+	int r_jmptable;
+	int r_relative;
+	int r_length;
 
-      PUT_WORD (finfo->output_bfd, p->offset, srel.r_address);
-      if (finfo->output_bfd->xvec->header_byteorder_big_p)
-	{
-	  srel.r_index[0] = r_index >> 16;
-	  srel.r_index[1] = r_index >> 8;
-	  srel.r_index[2] = r_index;
-	  srel.r_type[0] =
-	    ((r_extern ?     RELOC_STD_BITS_EXTERN_BIG : 0)
-	     | (r_pcrel ?    RELOC_STD_BITS_PCREL_BIG : 0)
-	     | (r_baserel ?  RELOC_STD_BITS_BASEREL_BIG : 0)
-	     | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_BIG : 0)
-	     | (r_relative ? RELOC_STD_BITS_RELATIVE_BIG : 0)
-	     | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG));
-	}
-      else
-	{
-	  srel.r_index[2] = r_index >> 16;
-	  srel.r_index[1] = r_index >> 8;
-	  srel.r_index[0] = r_index;
-	  srel.r_type[0] =
-	    ((r_extern ?     RELOC_STD_BITS_EXTERN_LITTLE : 0)
-	     | (r_pcrel ?    RELOC_STD_BITS_PCREL_LITTLE : 0)
-	     | (r_baserel ?  RELOC_STD_BITS_BASEREL_LITTLE : 0)
-	     | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_LITTLE : 0)
-	     | (r_relative ? RELOC_STD_BITS_RELATIVE_LITTLE : 0)
-	     | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE));
-	}
+	r_pcrel = howto->pc_relative;
+	r_baserel = (howto->type & 8) != 0;
+	r_jmptable = (howto->type & 16) != 0;
+	r_relative = (howto->type & 32) != 0;
+	r_length = howto->size;
+
+	PUT_WORD (finfo->output_bfd, p->offset, srel.r_address);
+	if (finfo->output_bfd->xvec->header_byteorder_big_p)
+	  {
+	    srel.r_index[0] = r_index >> 16;
+	    srel.r_index[1] = r_index >> 8;
+	    srel.r_index[2] = r_index;
+	    srel.r_type[0] =
+	      ((r_extern ?     RELOC_STD_BITS_EXTERN_BIG : 0)
+	       | (r_pcrel ?    RELOC_STD_BITS_PCREL_BIG : 0)
+	       | (r_baserel ?  RELOC_STD_BITS_BASEREL_BIG : 0)
+	       | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_BIG : 0)
+	       | (r_relative ? RELOC_STD_BITS_RELATIVE_BIG : 0)
+	       | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG));
+	  }
+	else
+	  {
+	    srel.r_index[2] = r_index >> 16;
+	    srel.r_index[1] = r_index >> 8;
+	    srel.r_index[0] = r_index;
+	    srel.r_type[0] =
+	      ((r_extern ?     RELOC_STD_BITS_EXTERN_LITTLE : 0)
+	       | (r_pcrel ?    RELOC_STD_BITS_PCREL_LITTLE : 0)
+	       | (r_baserel ?  RELOC_STD_BITS_BASEREL_LITTLE : 0)
+	       | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_LITTLE : 0)
+	       | (r_relative ? RELOC_STD_BITS_RELATIVE_LITTLE : 0)
+	       | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE));
+	  }
+      }
 #endif
       rel_ptr = (PTR) &srel;
 

@@ -704,6 +704,13 @@ coff_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
 	  bfd_h_get_32 (abfd, src->DataDirectory[idx][1]);
       }
   }
+
+  if (aouthdr_int->entry)
+    aouthdr_int->entry += a->ImageBase;
+  if (aouthdr_int->tsize) 
+    aouthdr_int->text_start += a->ImageBase;
+  if (aouthdr_int->dsize) 
+    aouthdr_int->data_start += a->ImageBase;
 }
 
 
@@ -993,35 +1000,43 @@ pe_print_private_bfd_data (abfd, vfile)
   int j;
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
-  fprintf (file,"ImageBase\t\t%08x\n", i->ImageBase);
-  fprintf (file,"SectionAlignment\t%08x\n", i->SectionAlignment);
-  fprintf (file,"FileAlignment\t\t%08x\n", i->FileAlignment);
+  fprintf (file,"ImageBase\t\t");
+  fprintf_vma (file, i->ImageBase);
+  fprintf (file,"SectionAlignment\t");
+  fprintf_vma (file, i->SectionAlignment);
+  fprintf (file,"FileAlignment\t\t");
+  fprintf_vma (file, i->FileAlignment);
   fprintf (file,"MajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
   fprintf (file,"MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
   fprintf (file,"MajorImageVersion\t%d\n", i->MajorImageVersion);
   fprintf (file,"MinorImageVersion\t%d\n", i->MinorImageVersion);
   fprintf (file,"MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
   fprintf (file,"MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
-  fprintf (file,"Reserved1\t\t%08x\n", i->Reserved1);
-  fprintf (file,"SizeOfImage\t\t%08x\n", i->SizeOfImage);
-  fprintf (file,"SizeOfHeaders\t\t%08x\n", i->SizeOfHeaders);
-  fprintf (file,"CheckSum\t\t%08x\n", i->CheckSum);
+  fprintf (file,"Reserved1\t\t%08lx\n", i->Reserved1);
+  fprintf (file,"SizeOfImage\t\t%08lx\n", i->SizeOfImage);
+  fprintf (file,"SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
+  fprintf (file,"CheckSum\t\t%08lx\n", i->CheckSum);
   fprintf (file,"Subsystem\t\t%08x\n", i->Subsystem);
   fprintf (file,"DllCharacteristics\t%08x\n", i->DllCharacteristics);
-  fprintf (file,"SizeOfStackReserve\t%08x\n", i->SizeOfStackReserve);
-  fprintf (file,"SizeOfStackCommit\t%08x\n", i->SizeOfStackCommit);
-  fprintf (file,"SizeOfHeapReserve\t%08x\n", i->SizeOfHeapReserve);
-  fprintf (file,"SizeOfHeapCommit\t%08x\n", i->SizeOfHeapCommit);
-  fprintf (file,"LoaderFlags\t\t%08x\n", i->LoaderFlags);
-  fprintf (file,"NumberOfRvaAndSizes\t%08x\n", i->NumberOfRvaAndSizes);
+  fprintf (file,"SizeOfStackReserve\t");
+  fprintf_vma (file, i->SizeOfStackReserve);
+  fprintf (file,"SizeOfStackCommit\t");
+  fprintf_vma (file, i->SizeOfStackCommit);
+  fprintf (file,"SizeOfHeapReserve\t");
+  fprintf_vma (file, i->SizeOfHeapReserve);
+  fprintf (file,"SizeOfHeapCommit\t");
+  fprintf_vma (file, i->SizeOfHeapCommit);
+  fprintf (file,"LoaderFlags\t\t%08lx\n", i->LoaderFlags);
+  fprintf (file,"NumberOfRvaAndSizes\t%08lx\n", i->NumberOfRvaAndSizes);
 
   for (j = 0; j < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; j++) 
     {
-      fprintf(file, "Entry %2d %08x %08x\n", 
-	      j, 
-	      i->DataDirectory[j].VirtualAddress,
-	      i->DataDirectory[j].Size);
+      fprintf (file, "Entry %2d ", j);
+      fprintf_vma (file, i->DataDirectory[j].VirtualAddress);
+      fprintf (file, " %08lx\n", i->DataDirectory[j].Size);
     }
+
+  return true;
 }
 
 static boolean

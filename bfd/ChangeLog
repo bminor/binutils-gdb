@@ -1,3 +1,12 @@
+Tue Sep 12 12:14:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Extensive minor changes to avoid various gcc warnings.  Also:
+	* Makefile.in (BFD32_BACKENDS): Remove coff-arm.o.
+	* archures.c (bfd_arch_info_type): Change mach field from long to
+	unsigned long.
+	(bfd_lookup_arch): Change machine parameter from long to unsigned
+	long.
+
 Mon Sep 11 10:55:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c (sunos_scan_std_relocs): Fix BFD_ASSERT: it's OK to find

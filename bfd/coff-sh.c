@@ -368,7 +368,7 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	sym_value -= 0x1000;
       insn = (insn & 0xf000) | (sym_value & 0xfff);
       bfd_put_16 (abfd, insn, hit_data);
-      if (sym_value < -0x1000 || sym_value >= 0x1000)
+      if (sym_value < (bfd_vma) -0x1000 || sym_value >= 0x1000)
 	return bfd_reloc_overflow;
       break;
     default:
@@ -624,8 +624,7 @@ sh_relax_section (abfd, sec, link_info, again)
       if (coff_section_data (abfd, sec) == NULL)
 	{
 	  sec->used_by_bfd =
-	    ((struct coff_section_tdata *)
-	     bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
+	    ((PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	  if (sec->used_by_bfd == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -748,8 +747,7 @@ sh_relax_section (abfd, sec, link_info, again)
 	  if (coff_section_data (abfd, sec) == NULL)
 	    {
 	      sec->used_by_bfd =
-		((struct coff_section_tdata *)
-		 bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
+		((PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
 	      if (sec->used_by_bfd == NULL)
 		{
 		  bfd_set_error (bfd_error_no_memory);
@@ -877,8 +875,8 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
 				&sym);
 	  if (sym.n_sclass != C_EXT
 	      && sym.n_scnum == sec->target_index
-	      && (sym.n_value < addr
-		  || sym.n_value >= toaddr))
+	      && ((bfd_vma) sym.n_value <= addr
+		  || (bfd_vma) sym.n_value >= toaddr))
 	    {
 	      bfd_vma val;
 
@@ -1080,8 +1078,8 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
 				&sym);
 	  if (sym.n_sclass != C_EXT
 	      && sym.n_scnum == sec->target_index
-	      && (sym.n_value < addr
-		  || sym.n_value >= toaddr))
+	      && ((bfd_vma) sym.n_value <= addr
+		  || (bfd_vma) sym.n_value >= toaddr))
 	    {
 	      bfd_vma val;
 
@@ -1146,8 +1144,8 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
       bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &isym);
 
       if (isym.n_scnum == sec->target_index
-	  && isym.n_value >= addr
-	  && isym.n_value < toaddr)
+	  && (bfd_vma) isym.n_value > addr
+	  && (bfd_vma) isym.n_value < toaddr)
 	{
 	  isym.n_value -= count;
 

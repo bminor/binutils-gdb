@@ -100,45 +100,6 @@ static boolean coff_reloc_link_order
   PARAMS ((bfd *, struct coff_final_link_info *, asection *,
 	   struct bfd_link_order *));
 
-
-/* These new data and data types are used to keep track of the .idata$4 and
-   .idata$5 relocations which are put into the .idata section for all of the
-   *.dll input libraries linked in.  This is not a great solution, and may
-   break in the future if MS changes the format of its libraries, but it
-   does work for the collection of mstools libraries we are currently working
-   with.  The main problem is that there are some new majic symbols defined
-   in the libraries which are non-standard coff and simply aren't handled 
-   completely by ld.  What has been included here will help finish up the job.
-     Basically, during the link, .idata$4 and .idata$5 pointers are correctly
-   relocated to the image.  At the very end of the link, the .idata$2
-   information is written.  This data appears at the beginning of the .idata
-   section and a 'set' of information appears for each *.dll passed in.
-   Each set of information consists of 3 addresses, a pointer to the .idata$4
-   start, a pointer to .idata$6 (which has the name of the dll), and a pointer
-   to .idata$5 start.  The idata$4 and 5 information is a list of pointers
-   which appear to point to the name of various functions found within the dll.
-   When invoked, the loader will write over these names with the correct
-   addresses to use for these functions.  
-     Without this 'fix', all information appears correctly except for the
-   addresses of the .idata$4 and 5 starts within the .idata$2 portion of the
-   .idata section.  What we will do is to keep track of the dll's processed
-   and the number of functions needed from each dll.  From this information
-   we can correctly compute the start of the idata$4 and 5 lists for each
-   dll in the idata section */
-static int num_DLLs_done = 0;
-static int num_DLLs      = 0;
-static int all_entries   = 0;
-struct DLL_struct {
-  const char * DLL_name;
-  int          num_entries;
-};
-struct DLL_struct MS_DLL[10];
-static bfd_vma idata_4_prev = 0;
-static bfd_vma idata_5_prev = 0;
-static bfd_vma add_to_val   = 0;
-
-
-
 /* Create an entry in a COFF linker hash table.  */
 
 static struct bfd_hash_entry *
@@ -519,128 +480,7 @@ coff_link_add_symbols (abfd, info)
   return true;
 }
 
-/* parse out a -heap <reserved>,<commit> line */
 
-static char *
-dores_com (ptr, res, com)
-     char *ptr;
-     bfd_link_pe_info_dval *res;
-     bfd_link_pe_info_dval *com;
-{
-  res->defined = 1;
-  res->value = strtoul (ptr, &ptr, 0);
-  if (ptr[0] == ',') 
-    {
-      com->value = strtoul (ptr+1, &ptr, 0);
-      com->defined =  1;
-    }
-  return ptr;
-}
-
-static char *get_name(ptr, dst)
-char *ptr;
-char **dst;
-{
-  while (*ptr == ' ')
-    ptr++;
-  *dst = ptr;
-  while (*ptr && *ptr != ' ')
-    ptr++;
-  *ptr = 0;
-  return ptr+1;
-}
-/* Process any magic embedded commands in a section called .drectve */
-			
-static int
-process_embedded_commands (info,  abfd)
-     struct bfd_link_info *info;
-     bfd *abfd;
-{
-  asection *sec = bfd_get_section_by_name (abfd, ".drectve");
-  char *s;
-  char *e;
-  char *copy;
-  if (!sec) 
-    return 1;
-  
-  copy = malloc ((size_t) sec->_raw_size);
-  if (!copy) 
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return 0;
-    }
-  if (! bfd_get_section_contents(abfd, sec, copy, 0, sec->_raw_size)) 
-    {
-      free (copy);
-      return 0;
-    }
-  e = copy + sec->_raw_size;
-  for (s = copy;  s < e ; ) 
-    {
-      if (s[0]!= '-') {
-	s++;
-	continue;
-      }
-      if (strncmp (s,"-attr", 5) == 0)
-	{
-	  char *name;
-	  char *attribs;
-	  asection *asec;
-
-	  int loop = 1;
-	  int had_write = 0;
-	  int had_read = 0;
-	  int had_exec= 0;
-	  int had_shared= 0;
-	  s += 5;
-	  s = get_name(s, &name);
-	  s = get_name(s, &attribs);
-	  while (loop) {
-	    switch (*attribs++) 
-	      {
-	      case 'W':
-		had_write = 1;
-		break;
-	      case 'R':
-		had_read = 1;
-		break;
-	      case 'S':
-		had_shared = 1;
-		break;
-	      case 'X':
-		had_exec = 1;
-		break;
-	      default:
-		loop = 0;
-	      }
-	  }
-	  asec = bfd_get_section_by_name (abfd, name);
-	  if (asec) {
-	    if (had_exec)
-	      asec->flags |= SEC_CODE;
-	    if (!had_write)
-	      asec->flags |= SEC_READONLY;
-	  }
-	}
-      else if (strncmp (s,"-heap", 5) == 0)
-	{
-	  s = dores_com (s+5, 
-			 &info->pe_info->heap_reserve,	
-			 &info->pe_info->heap_commit);
-	}
-      else if (strncmp (s,"-stack", 6) == 0)
-	{
-	  s = dores_com (s+6,
-			 &info->pe_info->stack_reserve,	
-			 &info->pe_info->stack_commit);
-
-	}
-      else 
-	s++;
-    }
-  free (copy);
-  return 1;
-}
 /* Do the final link step.  */
 
 boolean
@@ -941,7 +781,7 @@ _bfd_coff_final_link (abfd, info)
      index of the first external symbol.  Write it out again if
      necessary.  */
   if (finfo.last_file_index != -1
-      && finfo.last_file.n_value != obj_raw_syment_count (abfd))
+      && (unsigned int) finfo.last_file.n_value != obj_raw_syment_count (abfd))
     {
       finfo.last_file.n_value = obj_raw_syment_count (abfd);
       bfd_coff_swap_sym_out (abfd, (PTR) &finfo.last_file,
@@ -1202,6 +1042,137 @@ _bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
   return NULL;
 }
 
+
+
+/* parse out a -heap <reserved>,<commit> line */
+
+static char *
+dores_com (ptr, output_bfd, heap)
+     char *ptr;
+     bfd *output_bfd;
+     int heap;
+{
+  if (coff_data(output_bfd)->pe) 
+    {
+      int val = strtoul (ptr, &ptr, 0);
+      if (heap)
+	pe_data(output_bfd)->pe_opthdr.SizeOfHeapReserve =val;
+      else
+	pe_data(output_bfd)->pe_opthdr.SizeOfStackReserve =val;
+
+      if (ptr[0] == ',') 
+	{
+	  int val = strtoul (ptr+1, &ptr, 0);
+	  if (heap)
+	    pe_data(output_bfd)->pe_opthdr.SizeOfHeapCommit =val;
+	  else
+	    pe_data(output_bfd)->pe_opthdr.SizeOfStackCommit =val;
+	}
+    }
+  return ptr;
+}
+
+static char *get_name(ptr, dst)
+char *ptr;
+char **dst;
+{
+  while (*ptr == ' ')
+    ptr++;
+  *dst = ptr;
+  while (*ptr && *ptr != ' ')
+    ptr++;
+  *ptr = 0;
+  return ptr+1;
+}
+/* Process any magic embedded commands in a section called .drectve */
+			
+int
+process_embedded_commands (output_bfd, info,  abfd)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *abfd;
+{
+  asection *sec = bfd_get_section_by_name (abfd, ".drectve");
+  char *s;
+  char *e;
+  char *copy;
+  if (!sec) 
+    return 1;
+  
+  copy = malloc ((size_t) sec->_raw_size);
+  if (!copy) 
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return 0;
+    }
+  if (! bfd_get_section_contents(abfd, sec, copy, 0, sec->_raw_size)) 
+    {
+      free (copy);
+      return 0;
+    }
+  e = copy + sec->_raw_size;
+  for (s = copy;  s < e ; ) 
+    {
+      if (s[0]!= '-') {
+	s++;
+	continue;
+      }
+      if (strncmp (s,"-attr", 5) == 0)
+	{
+	  char *name;
+	  char *attribs;
+	  asection *asec;
+
+	  int loop = 1;
+	  int had_write = 0;
+	  int had_read = 0;
+	  int had_exec= 0;
+	  int had_shared= 0;
+	  s += 5;
+	  s = get_name(s, &name);
+	  s = get_name(s, &attribs);
+	  while (loop) {
+	    switch (*attribs++) 
+	      {
+	      case 'W':
+		had_write = 1;
+		break;
+	      case 'R':
+		had_read = 1;
+		break;
+	      case 'S':
+		had_shared = 1;
+		break;
+	      case 'X':
+		had_exec = 1;
+		break;
+	      default:
+		loop = 0;
+	      }
+	  }
+	  asec = bfd_get_section_by_name (abfd, name);
+	  if (asec) {
+	    if (had_exec)
+	      asec->flags |= SEC_CODE;
+	    if (!had_write)
+	      asec->flags |= SEC_READONLY;
+	  }
+	}
+      else if (strncmp (s,"-heap", 5) == 0)
+	{
+	  s = dores_com (s+5, output_bfd, 1);
+	}
+      else if (strncmp (s,"-stack", 6) == 0)
+	{
+	  s = dores_com (s+6, output_bfd, 0);
+	}
+      else 
+	s++;
+    }
+  free (copy);
+  return 1;
+}
+
 /* Link an input file into the linker output file.  This function
    handles all the sections and relocations of the input file at once.  */
 
@@ -1228,7 +1199,7 @@ coff_link_input_bfd (finfo, input_bfd)
   struct internal_syment *isymp;
   asection **secpp;
   long *indexp;
-  long output_index;
+  unsigned long output_index;
   bfd_byte *outsym;
   struct coff_link_hash_entry **sym_hash;
   asection *o;
@@ -1269,9 +1240,9 @@ coff_link_input_bfd (finfo, input_bfd)
   output_index = syment_base;
   outsym = finfo->outsyms;
 
-  if (obj_pe (output_bfd))
+  if (coff_data(output_bfd)->pe)
       {
-	if (!process_embedded_commands (finfo->info, input_bfd))
+	if (!process_embedded_commands (output_bfd, finfo->info, input_bfd))
 	  return false;
       }
 
@@ -1408,11 +1379,11 @@ coff_link_input_bfd (finfo, input_bfd)
 	  if (isym.n_sclass == C_FILE)
 	    {
 	      if (finfo->last_file_index != -1
-		  && finfo->last_file.n_value != output_index)
+		  && finfo->last_file.n_value != (long) output_index)
 		{
 		  /* We must correct the value of the last C_FILE entry.  */
 		  finfo->last_file.n_value = output_index;
-		  if (finfo->last_file_index >= syment_base)
+		  if ((bfd_size_type) finfo->last_file_index >= syment_base)
 		    {
 		      /* The last C_FILE symbol is in this input file.  */
 		      bfd_coff_swap_sym_out (output_bfd,
@@ -1559,7 +1530,7 @@ coff_link_input_bfd (finfo, input_bfd)
 		}
 	      else if (isymp->n_sclass != C_STAT || isymp->n_type != T_NULL)
 		{
-		  long indx;
+		  unsigned long indx;
 
 		  if (ISFCN (isymp->n_type)
 		      || ISTAG (isymp->n_sclass)
@@ -1587,11 +1558,13 @@ coff_link_input_bfd (finfo, input_bfd)
 		  indx = auxp->x_sym.x_tagndx.l;
 		  if (indx > 0 && indx < obj_raw_syment_count (input_bfd))
 		    {
-		      indx = finfo->sym_indices[indx];
-		      if (indx < 0)
+		      long symindx;
+
+		      symindx = finfo->sym_indices[indx];
+		      if (symindx < 0)
 			auxp->x_sym.x_tagndx.l = 0;
 		      else
-			auxp->x_sym.x_tagndx.l = indx;
+			auxp->x_sym.x_tagndx.l = symindx;
 		    }
 		}
 
@@ -1652,7 +1625,7 @@ coff_link_input_bfd (finfo, input_bfd)
 	      if (iline.l_lnno != 0)
 		iline.l_addr.l_paddr += offset;
 	      else if (iline.l_addr.l_symndx >= 0
-		       && (iline.l_addr.l_symndx
+		       && ((unsigned long) iline.l_addr.l_symndx
 			   < obj_raw_syment_count (input_bfd)))
 		{
 		  long indx;
@@ -1730,7 +1703,7 @@ coff_link_input_bfd (finfo, input_bfd)
      normal case, this will save us from writing out the C_FILE symbol
      again.  */
   if (finfo->last_file_index != -1
-      && finfo->last_file_index >= syment_base)
+      && (bfd_size_type) finfo->last_file_index >= syment_base)
     {
       finfo->last_file.n_value = output_index;
       bfd_coff_swap_sym_out (output_bfd, (PTR) &finfo->last_file,
@@ -1745,8 +1718,9 @@ coff_link_input_bfd (finfo, input_bfd)
       if (bfd_seek (output_bfd,
 		    obj_sym_filepos (output_bfd) + syment_base * osymesz,
 		    SEEK_SET) != 0
-	  || bfd_write (finfo->outsyms, outsym - finfo->outsyms, 1,
-			output_bfd) != outsym - finfo->outsyms)
+	  || (bfd_write (finfo->outsyms, outsym - finfo->outsyms, 1,
+			output_bfd)
+	      != (bfd_size_type) (outsym - finfo->outsyms)))
 	return false;
 
       BFD_ASSERT ((obj_raw_syment_count (output_bfd)
@@ -2282,8 +2256,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	  /* So if this is non pcrelative, and is referenced
 	     to a section or a common symbol, then it needs a reloc */
 	  if (!howto->pc_relative
-	      && (sym->n_scnum
-		  || sym->n_value))
+	      && sym && (sym->n_scnum || sym->n_value))
 	    {
 	      /* relocation to a symbol in a section which
 		 isn't absolute - we output the address here 
@@ -2291,6 +2264,8 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      bfd_vma addr = rel->r_vaddr 
 		+ input_section->output_offset 
 		  + input_section->output_section->vma;
+	      if (coff_data(output_bfd)->pe)
+		addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
 	      fwrite (&addr, 1,4, (FILE *) info->base_file);
 	    }
 	}

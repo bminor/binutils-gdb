@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define UNDERSCORE_HACK 1
 #include "bfd.h"
 #include "sysdep.h"
+#include <ctype.h>
 #include "libbfd.h"
 #include "oasys.h"
 #include "liboasys.h"
@@ -1351,7 +1352,7 @@ oasys_set_section_contents (abfd, section, location, offset, count)
 	}
       (void) memcpy ((PTR) (oasys_per_section (section)->data + offset),
 		     location,
-		     count);
+		     (size_t) count);
     }
   return true;
 }

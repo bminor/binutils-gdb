@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Most of this hacked by  Steve Chamberlain, sac@cygnus.com.
    Split out of coffcode.h by Ian Taylor, ian@cygnus.com.  */
@@ -476,7 +476,7 @@ coff_renumber_symbols (bfd_ptr, first_undef)
      I'm not certain.  [raeburn:19920508.1711EST]  */
   {
     asymbol **newsyms;
-    int i;
+    unsigned int i;
 
     newsyms = (asymbol **) bfd_alloc_by_size_t (bfd_ptr,
 						sizeof (asymbol *)
@@ -1167,8 +1167,8 @@ static void
 coff_pointerize_aux (abfd, table_base, type, class, auxent)
      bfd *abfd;
      combined_entry_type *table_base;
-     int type;
-     int class;
+     unsigned int type;
+     unsigned int class;
      combined_entry_type *auxent;
 {
   /* Don't bother if this is a file or a section */
@@ -1196,39 +1196,6 @@ coff_pointerize_aux (abfd, table_base, type, class, auxent)
 	table_base + auxent->u.auxent.x_sym.x_tagndx.l;
       auxent->fix_tag = 1;
     }
-}
-
-static char *
-build_string_table (abfd)
-     bfd *abfd;
-{
-  char string_table_size_buffer[STRING_SIZE_SIZE];
-  unsigned int string_table_size;
-  char *string_table;
-
-  /* At this point we should be "seek"'d to the end of the
-     symbols === the symbol table size.  */
-  if (bfd_read ((char *) string_table_size_buffer,
-		sizeof (string_table_size_buffer),
-		1, abfd) != sizeof (string_table_size))
-    return (NULL);
-
-#if STRING_SIZE_SIZE == 4
-  string_table_size = bfd_h_get_32 (abfd, (bfd_byte *) string_table_size_buffer);
-#else
- #error Change bfd_h_get_32
-#endif
-
-  if ((string_table = (PTR) bfd_alloc (abfd,
-				     string_table_size -= STRING_SIZE_SIZE))
-      == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return (NULL);
-    }				/* on mallocation error */
-  if (bfd_read (string_table, string_table_size, 1, abfd) != string_table_size)
-    return (NULL);
-  return string_table;
 }
 
 /* Allocate space for the ".debug" section, and read it.
@@ -1303,6 +1270,122 @@ copy_name (abfd, name, maxlen)
   return newname;
 }
 
+/* Read in the external symbols.  */
+
+boolean
+_bfd_coff_get_external_symbols (abfd)
+     bfd *abfd;
+{
+  bfd_size_type symesz;
+  size_t size;
+  PTR syms;
+
+  if (obj_coff_external_syms (abfd) != NULL)
+    return true;
+
+  symesz = bfd_coff_symesz (abfd);
+
+  size = obj_raw_syment_count (abfd) * symesz;
+
+  syms = malloc (size);
+  if (syms == NULL && size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+      || bfd_read (syms, size, 1, abfd) != size)
+    {
+      if (syms != NULL)
+	free (syms);
+      return false;
+    }
+
+  obj_coff_external_syms (abfd) = syms;
+
+  return true;
+}
+
+/* Read in the external strings.  The strings are not loaded until
+   they are needed.  This is because we have no simple way of
+   detecting a missing string table in an archive.  */
+
+const char *
+_bfd_coff_read_string_table (abfd)
+     bfd *abfd;
+{
+  char extstrsize[STRING_SIZE_SIZE];
+  size_t strsize;
+  char *strings;
+
+  if (obj_coff_strings (abfd) != NULL)
+    return obj_coff_strings (abfd);
+
+  if (bfd_seek (abfd,
+		(obj_sym_filepos (abfd)
+		 + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd)),
+		SEEK_SET) != 0)
+    return NULL;
+    
+  if (bfd_read (extstrsize, sizeof extstrsize, 1, abfd) != sizeof extstrsize)
+    {
+      if (bfd_get_error () != bfd_error_file_truncated)
+	return NULL;
+
+      /* There is no string table.  */
+      strsize = STRING_SIZE_SIZE;
+    }
+  else
+    {
+#if STRING_SIZE_SIZE == 4
+      strsize = bfd_h_get_32 (abfd, (bfd_byte *) extstrsize);
+#else
+ #error Change bfd_h_get_32
+#endif
+    }
+
+  strings = malloc (strsize);
+  if (strings == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  if (bfd_read (strings + STRING_SIZE_SIZE,
+		strsize - STRING_SIZE_SIZE, 1, abfd)
+      != strsize - STRING_SIZE_SIZE)
+    {
+      free (strings);
+      return NULL;
+    }
+
+  obj_coff_strings (abfd) = strings;
+
+  return strings;
+}
+
+/* Free up the external symbols and strings read from a COFF file.  */
+
+boolean
+_bfd_coff_free_symbols (abfd)
+     bfd *abfd;
+{
+  if (obj_coff_external_syms (abfd) != NULL
+      && ! obj_coff_keep_syms (abfd))
+    {
+      free (obj_coff_external_syms (abfd));
+      obj_coff_external_syms (abfd) = NULL;
+    }
+  if (obj_coff_strings (abfd) != NULL
+      && ! obj_coff_keep_strings (abfd))
+    {
+      free (obj_coff_strings (abfd));
+      obj_coff_strings (abfd) = NULL;
+    }
+  return true;
+}
+
 /* Read a symbol table into freshly bfd_allocated memory, swap it, and
    knit the symbol names into a normalized form.  By normalized here I
    mean that all symbols have an n_offset pointer that points to a null-
@@ -1317,13 +1400,11 @@ coff_get_normalized_symtab (abfd)
   combined_entry_type *symbol_ptr;
   combined_entry_type *internal_end;
   bfd_size_type symesz;
-  PTR raw;
   char *raw_src;
   char *raw_end;
-  char *string_table = NULL;
+  const char *string_table = NULL;
   char *debug_section = NULL;
   unsigned long size;
-  unsigned int raw_size;
 
   if (obj_raw_syments (abfd) != NULL)
     return obj_raw_syments (abfd);
@@ -1337,27 +1418,20 @@ coff_get_normalized_symtab (abfd)
     }
   internal_end = internal + obj_raw_syment_count (abfd);
 
-  symesz = bfd_coff_symesz (abfd);
-  raw_size = obj_raw_syment_count (abfd) * symesz;
-  raw = bfd_alloc (abfd, raw_size);
-  if (raw == NULL && raw_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) == -1
-      || bfd_read (raw, raw_size, 1, abfd) != raw_size)
+  if (! _bfd_coff_get_external_symbols (abfd))
     return NULL;
 
+  raw_src = (char *) obj_coff_external_syms (abfd);
+
   /* mark the end of the symbols */
-  raw_end = (char *) raw + obj_raw_syment_count (abfd) * symesz;
+  symesz = bfd_coff_symesz (abfd);
+  raw_end = (char *) raw_src + obj_raw_syment_count (abfd) * symesz;
 
   /* FIXME SOMEDAY.  A string table size of zero is very weird, but
      probably possible.  If one shows up, it will probably kill us.  */
 
   /* Swap all the raw entries */
-  for (raw_src = (char *) raw, internal_ptr = internal;
+  for (internal_ptr = internal;
        raw_src < raw_end;
        raw_src += symesz, internal_ptr++)
     {
@@ -1401,9 +1475,10 @@ coff_get_normalized_symtab (abfd)
 	}
     }
 
-  /* Free all the raw stuff */
-  if (raw != NULL)
-    bfd_release (abfd, raw);
+  /* Free the raw symbols, but not the strings (if we have them).  */
+  obj_coff_keep_strings (abfd) = true;
+  if (! _bfd_coff_free_symbols (abfd))
+    return NULL;
 
   for (internal_ptr = internal; internal_ptr < internal_end;
        internal_ptr++)
@@ -1417,11 +1492,16 @@ coff_get_normalized_symtab (abfd)
 	    {
 	      /* the filename is a long one, point into the string table */
 	      if (string_table == NULL)
-		string_table = build_string_table (abfd);
+		{
+		  string_table = _bfd_coff_read_string_table (abfd);
+		  if (string_table == NULL)
+		    return NULL;
+		}
 
 	      internal_ptr->u.syment._n._n_n._n_offset =
-		(long) (string_table - STRING_SIZE_SIZE +
-			(internal_ptr + 1)->u.auxent.x_file.x_n.x_offset);
+		((long)
+		 (string_table
+		  + (internal_ptr + 1)->u.auxent.x_file.x_n.x_offset));
 	    }
 	  else
 	    {
@@ -1466,11 +1546,15 @@ coff_get_normalized_symtab (abfd)
 	      /* Long name already.  Point symbol at the string in the
                  table.  */
 	      if (string_table == NULL)
-		string_table = build_string_table (abfd);
-	      internal_ptr->u.syment._n._n_n._n_offset = (long int)
-		(string_table
-		 - STRING_SIZE_SIZE
-		 + internal_ptr->u.syment._n._n_n._n_offset);
+		{
+		  string_table = _bfd_coff_read_string_table (abfd);
+		  if (string_table == NULL)
+		    return NULL;
+		}
+	      internal_ptr->u.syment._n._n_n._n_offset =
+		((long int)
+		 (string_table
+		  + internal_ptr->u.syment._n._n_n._n_offset));
 	    }
 	  else
 	    {
@@ -1485,7 +1569,8 @@ coff_get_normalized_symtab (abfd)
     }
 
   obj_raw_syments (abfd) = internal;
-  BFD_ASSERT (obj_raw_syment_count (abfd) == internal_ptr - internal);
+  BFD_ASSERT (obj_raw_syment_count (abfd)
+	      == (unsigned int) (internal_ptr - internal));
 
   return (internal);
 }				/* coff_get_normalized_symtab() */
@@ -1753,8 +1838,8 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
 	    }
 
 	  if (p2 < pend
-	      && offset >= p2->u.syment.n_value
-	      && offset - p2->u.syment.n_value < maxdiff)
+	      && offset >= (bfd_vma) p2->u.syment.n_value
+	      && offset - (bfd_vma) p2->u.syment.n_value < maxdiff)
 	    {
 	      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
 	      maxdiff = offset - p2->u.syment.n_value;

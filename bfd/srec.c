@@ -874,6 +874,7 @@ srec_write_record (abfd, type, address, data, end)
   CONST bfd_byte *src = data;
   char *dst = buffer;
   char *length;
+  bfd_size_type wrlen;
 
   *dst++ = 'S';
   *dst++ = '0' + type;
@@ -916,7 +917,8 @@ srec_write_record (abfd, type, address, data, end)
 
   *dst++ = '\r';
   *dst++ = '\n';
-  if (bfd_write ((PTR) buffer, 1, dst - buffer, abfd) != dst - buffer)
+  wrlen = dst - buffer;
+  if (bfd_write ((PTR) buffer, 1, wrlen, abfd) != wrlen)
     return false;
   return true;
 }
@@ -1032,8 +1034,7 @@ srec_write_symbols (abfd)
 		&& s->name[0] != 't')
 	    {
 	      /* Just dump out non debug symbols */
-
-	      int l;
+	      bfd_size_type l;
 	      char buf2[40], *p;
 
 	      sprintf_vma (buf2,

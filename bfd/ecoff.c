@@ -579,8 +579,8 @@ _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
     debug->off2 = (type) NULL; \
   else \
     debug->off2 = (type) ((char *) raw \
-			  + internal_symhdr->off1 \
-			  - raw_base)
+			  + (internal_symhdr->off1 \
+			     - raw_base))
   FIX (cbLineOffset, line, unsigned char *);
   FIX (cbDnOffset, external_dnr, PTR);
   FIX (cbPdOffset, external_pdr, PTR);
@@ -1181,7 +1181,7 @@ ecoff_type_to_string (abfd, fdr, indx)
       qualifiers[i].stride = 0;
     }
 
-  if (AUX_GET_ISYM (bigendian, &aux_ptr[indx]) == -1)
+  if (AUX_GET_ISYM (bigendian, &aux_ptr[indx]) == (bfd_vma) -1)
     return "-1 (no type)";
   _bfd_ecoff_swap_tir_in (bigendian, &aux_ptr[indx++].a_ti, &u.ti);
 
@@ -2437,7 +2437,7 @@ _bfd_ecoff_write_object_contents (abfd)
       siz = filhsz;
     if (siz < aoutsz)
       siz = aoutsz;
-    buff = (PTR) malloc (siz);
+    buff = (PTR) malloc ((size_t) siz);
     if (buff == NULL)
       {
 	bfd_set_error (bfd_error_no_memory);
@@ -3313,12 +3313,12 @@ _bfd_ecoff_bfd_link_hash_table_create (abfd)
   struct ecoff_link_hash_table *ret;
 
   ret = ((struct ecoff_link_hash_table *)
-	 malloc (sizeof (struct ecoff_link_hash_table)));
-  if (!ret)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	return NULL;
-      }
+	 bfd_alloc (abfd, sizeof (struct ecoff_link_hash_table)));
+  if (ret == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   ecoff_link_hash_newfunc))
     {
@@ -3574,7 +3574,8 @@ ecoff_link_check_archive_element (abfd, info, pneeded)
     }
 
   if (bfd_seek (abfd, symhdr->cbSsExtOffset, SEEK_SET) != 0
-      || bfd_read (ssext, 1, symhdr->issExtMax, abfd) != symhdr->issExtMax)
+      || (bfd_read (ssext, 1, symhdr->issExtMax, abfd) !=
+	  (bfd_size_type) symhdr->issExtMax))
     goto error_return;
 
   /* Look through the external symbols to see if they define some
@@ -3698,7 +3699,8 @@ ecoff_link_add_object_symbols (abfd, info)
     }
 
   if (bfd_seek (abfd, symhdr->cbSsExtOffset, SEEK_SET) != 0
-      || bfd_read (ssext, 1, symhdr->issExtMax, abfd) != symhdr->issExtMax)
+      || (bfd_read (ssext, 1, symhdr->issExtMax, abfd)
+	  != (bfd_size_type) symhdr->issExtMax))
     goto error_return;
 
   result = ecoff_link_add_externals (abfd, info, external_ext, ssext);
@@ -4161,7 +4163,7 @@ ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info, handle)
     debug->ptr = NULL;							\
   else									\
     {									\
-      debug->ptr = (type) malloc (size * symhdr->count);		\
+      debug->ptr = (type) malloc ((size_t) (size * symhdr->count));	\
       if (debug->ptr == NULL)						\
 	{								\
           bfd_set_error (bfd_error_no_memory);				\
@@ -4404,8 +4406,8 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   /* Get the section contents.  We allocate memory for the larger of
      the size before relocating and the size after relocating.  */
   contents = (bfd_byte *) malloc (raw_size >= cooked_size
-				  ? raw_size
-				  : cooked_size);
+				  ? (size_t) raw_size
+				  : (size_t) cooked_size);
   if (contents == NULL && raw_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -4417,7 +4419,7 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
      simply reuse the old buffer in case cooked_size > raw_size.  */
   if (section_tdata != (struct ecoff_section_tdata *) NULL
       && section_tdata->contents != (bfd_byte *) NULL)
-    memcpy (contents, section_tdata->contents, raw_size);
+    memcpy (contents, section_tdata->contents, (size_t) raw_size);
   else
     {
       if (! bfd_get_section_contents (input_bfd, input_section,
@@ -4435,7 +4437,7 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
     external_relocs = section_tdata->external_relocs;
   else
     {
-      external_relocs = (PTR) malloc (external_relocs_size);
+      external_relocs = (PTR) malloc ((size_t) external_relocs_size);
       if (external_relocs == NULL && external_relocs_size != 0)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -4651,7 +4653,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 
   /* Get some memory and swap out the reloc.  */
   external_reloc_size = ecoff_backend (output_bfd)->external_reloc_size;
-  rbuf = (bfd_byte *) malloc (external_reloc_size);
+  rbuf = (bfd_byte *) malloc ((size_t) external_reloc_size);
   if (rbuf == (bfd_byte *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);

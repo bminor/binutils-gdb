@@ -2808,7 +2808,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			  + o->output_section->reloc_count);
 	      for (; irela < irelaend; irela++, rel_hash++)
 		{
-		  long r_symndx;
+		  unsigned long r_symndx;
 		  Elf_Internal_Sym *isym;
 		  asection *sec;
 

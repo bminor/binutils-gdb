@@ -249,7 +249,7 @@ struct elf_backend_data
      entire ELF symbol table.  */
   boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *,
 							  elf_symbol_type *,
-							  int));
+							  unsigned int));
 
   /* A function to do additional processing on the ELF section header
      just before writing it out.  This is used to set the flags and
@@ -488,12 +488,13 @@ struct elf_obj_tdata
   Elf_Internal_Shdr strtab_hdr;
   Elf_Internal_Shdr dynsymtab_hdr;
   Elf_Internal_Shdr dynstrtab_hdr;
-  int symtab_section, shstrtab_section, strtab_section, dynsymtab_section;
+  unsigned int symtab_section, shstrtab_section;
+  unsigned int strtab_section, dynsymtab_section;
   file_ptr next_file_pos;
   void *prstatus;		/* The raw /proc prstatus structure */
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
   bfd_vma gp;			/* The gp value (MIPS only, for now) */
-  int gp_size;			/* The gp size (MIPS only, for now) */
+  unsigned int gp_size;		/* The gp size (MIPS only, for now) */
 
   /* This is set to true if the object was created by the backend
      linker.  */

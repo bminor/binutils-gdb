@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 #include "bfd.h"
@@ -41,7 +41,7 @@ static bfd_reloc_status_type calljx_callback
 	   asection *));
 static bfd_reloc_status_type callj_callback
   PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR data,
-	   unsigned int srcidx, unsigned int dstidx, asection *));
+	   unsigned int srcidx, unsigned int dstidx, asection *, boolean));
 static bfd_vma get_value PARAMS ((arelent *, struct bfd_link_info *,
 				  asection *));
 static int abs32code PARAMS ((bfd *, asection *, arelent *,
@@ -330,7 +330,7 @@ calljx_callback (abfd, link_info, reloc_entry, src, dst, input_section)
 /* Magic to turn call into callj */
 static bfd_reloc_status_type
 callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
-		input_section)
+		input_section, shrinking)
      bfd *abfd;
      struct bfd_link_info *link_info;
      arelent *reloc_entry;
@@ -338,6 +338,7 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
      unsigned int srcidx;
      unsigned int dstidx;
      asection *input_section;
+     boolean shrinking;
 {
   int word = bfd_get_32 (abfd, (bfd_byte *) data + srcidx);
   asymbol *symbol_in = *(reloc_entry->sym_ptr_ptr);
@@ -368,12 +369,21 @@ callj_callback (abfd, link_info, reloc_entry,  data, srcidx, dstidx,
 		     - output_addr (input_section))
 		    & BAL_MASK);
     }
+  else if ((symbol->symbol.flags & BSF_SECTION_SYM) != 0)
+    {
+      /* A callj against a symbol in the same section is a fully
+         resolved relative call.  We don't need to do anything here.
+         If the symbol is not in the same section, I'm not sure what
+         to do; fortunately, this case will probably never arise.  */
+      BFD_ASSERT (! shrinking);
+      BFD_ASSERT (symbol->symbol.section == input_section);
+    }
   else
     {
       word = CALL | (((word & BAL_MASK)
 		      + value
 		      + reloc_entry->addend
-		      - dstidx
+		      - (shrinking ? dstidx : 0)
 		      - output_addr (input_section))
 		     & BAL_MASK);
     }
@@ -425,7 +435,7 @@ static reloc_howto_type howto_done_align_table[] = {
   HOWTO (ALIGNDONE, 0xf, 0xf, 0, false, 0, complain_overflow_dont, 0, "donealign128", false, 0, 0, false),
 };
 
-static const reloc_howto_type *
+static reloc_howto_type *
 b_out_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -479,6 +489,11 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     goto doit;
   }
 
+  if (asect == obj_bsssec (abfd)) {
+    reloc_size = 0;
+    goto doit;
+  }
+
   bfd_set_error (bfd_error_invalid_operation);
   return false;
 
@@ -494,14 +509,16 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   }
   reloc_cache = (arelent *) malloc ((count+1) * sizeof (arelent));
   if (!reloc_cache) {
-    free ((char*)relocs);
+    if (relocs != NULL)
+      free ((char*)relocs);
     bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
   if (bfd_read ((PTR) relocs, 1, reloc_size, abfd) != reloc_size) {
     free (reloc_cache);
-    free (relocs);
+    if (relocs != NULL)
+      free (relocs);
     return false;
   }
 
@@ -593,7 +610,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 	if (raw[7] & pcrel_mask)
 	  {
 	    cache_ptr->howto = &howto_align_table[(raw[7] >> length_shift) & 3];
-	    cache_ptr->sym_ptr_ptr = &bfd_abs_symbol;
+	    cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  }
 	else
 	  {
@@ -657,7 +674,8 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   }
 
 
-  free (relocs);
+  if (relocs != NULL)
+    free (relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
 
@@ -758,11 +776,11 @@ b_out_squirt_out_relocs (abfd, section)
     if (r_idx != 0)
       /* already mucked with r_extern, r_idx */;
     else if (bfd_is_com_section (output_section)
-	     || output_section == &bfd_abs_section
-	     || output_section == &bfd_und_section)
+	     || bfd_is_abs_section (output_section)
+	     || bfd_is_und_section (output_section))
     {
 
-      if (bfd_abs_section.symbol == sym)
+      if (bfd_abs_section_ptr->symbol == sym)
       {
 	/* Whoops, looked like an abs symbol, but is really an offset
 	   from the abs section */
@@ -814,17 +832,30 @@ b_out_canonicalize_reloc (abfd, section, relptr, symbols)
      arelent **relptr;
      asymbol **symbols;
 {
-  arelent *tblptr = section->relocation;
-  unsigned int count = 0;
+  arelent *tblptr;
+  unsigned int count;
 
-  if (!(tblptr || b_out_slurp_reloc_table (abfd, section, symbols)))
-    return -1;
-  tblptr = section->relocation;
+  if ((section->flags & SEC_CONSTRUCTOR) != 0)
+    {
+      arelent_chain *chain = section->constructor_chain;
+      for (count = 0; count < section->reloc_count; count++)
+	{
+	  *relptr++ = &chain->relent;
+	  chain = chain->next;
+	}
+    }
+  else
+    {
+      if (section->relocation == NULL
+	  && ! b_out_slurp_reloc_table (abfd, section, symbols))
+	return -1;
 
-  for (; count++ < section->reloc_count;)
-    *relptr++ = tblptr++;
+      tblptr = section->relocation;
+      for (count = 0; count++ < section->reloc_count;)
+	*relptr++ = tblptr++;
+    }
 
-  *relptr = 0;
+  *relptr = NULL;
 
   return section->reloc_count;
 }
@@ -838,6 +869,9 @@ b_out_get_reloc_upper_bound (abfd, asect)
     bfd_set_error (bfd_error_invalid_operation);
     return -1;
   }
+
+  if (asect->flags & SEC_CONSTRUCTOR)
+    return sizeof (arelent *) * (asect->reloc_count + 1);
 
   if (asect == obj_datasec (abfd))
     return (sizeof (arelent *) *
@@ -859,10 +893,10 @@ b_out_get_reloc_upper_bound (abfd, asect)
 static boolean
 b_out_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
-     sec_ptr section;
-     unsigned char *location;
+     asection *section;
+     PTR location;
      file_ptr offset;
-      int count;
+     bfd_size_type count;
 {
 
   if (abfd->output_has_begun == false) { /* set by bfd.c handler */
@@ -935,7 +969,7 @@ get_value (reloc, link_info, input_section)
      base of the section.  To relocate, we find where the section will
      live in the output and add that in */
 
-  if (symbol->section == &bfd_und_section)
+  if (bfd_is_und_section (symbol->section))
     {
       struct bfd_link_hash_entry *h;
 
@@ -947,7 +981,8 @@ get_value (reloc, link_info, input_section)
       h = bfd_link_hash_lookup (link_info->hash, bfd_asymbol_name (symbol),
 				false, false, true);
       if (h != (struct bfd_link_hash_entry *) NULL
-	  && h->type == bfd_link_hash_defined)
+	  && (h->type == bfd_link_hash_defined
+	      || h->type == bfd_link_hash_defweak))
 	value = h->u.def.value + output_addr (h->u.def.section);
       else if (h != (struct bfd_link_hash_entry *) NULL
 	       && h->type == bfd_link_hash_common)
@@ -995,11 +1030,11 @@ perform_slip (abfd, slip, input_section, value)
       if (p->value > value)
       {
 	p->value -=slip;
-	if (p->udata != NULL)
+	if (p->udata.p != NULL)
 	  {
 	    struct generic_link_hash_entry *h;
 
-	    h = (struct generic_link_hash_entry *) p->udata;
+	    h = (struct generic_link_hash_entry *) p->udata.p;
 	    BFD_ASSERT (h->root.type == bfd_link_hash_defined);
 	    h->root.u.def.value -= slip;
 	    BFD_ASSERT (h->root.u.def.value == p->value);
@@ -1275,7 +1310,7 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 		  break;
 		case CALLJ:
 		  callj_callback (in_abfd, link_info, reloc, data, src_address,
-				  dst_address, input_section);
+				  dst_address, input_section, false);
 		  src_address+=4;
 		  dst_address+=4;
 		  break;
@@ -1290,7 +1325,8 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 		  /* This used to be a callx, but we've found out that a
 		     callj will reach, so do the right thing.  */
 		  callj_callback (in_abfd, link_info, reloc, data,
-				  src_address + 4, dst_address, input_section);
+				  src_address + 4, dst_address, input_section,
+				  true);
 		  dst_address+=4;
 		  src_address+=8;
 		  break;
@@ -1358,6 +1394,8 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 #define b_out_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define b_out_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define b_out_bfd_final_link _bfd_generic_final_link
+#define b_out_bfd_link_split_section  _bfd_generic_link_split_section
+
 
 const bfd_target b_out_vec_big_host =
 {

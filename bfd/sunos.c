@@ -89,7 +89,7 @@ struct sunos_dynamic_info
   /* Dynamic information.  */
   struct internal_sun4_dynamic_link dyninfo;
   /* Number of dynamic symbols.  */
-  long dynsym_count;
+  unsigned long dynsym_count;
   /* Read in nlists for dynamic symbols.  */
   struct external_nlist *dynsym;
   /* asymbol structures for dynamic symbols.  */
@@ -97,7 +97,7 @@ struct sunos_dynamic_info
   /* Read in dynamic string table.  */
   char *dynstr;
   /* Number of dynamic relocs.  */
-  long dynrel_count;
+  unsigned long dynrel_count;
   /* Read in dynamic relocs.  This may be reloc_std_external or
      reloc_ext_external.  */
   PTR dynrel;
@@ -122,7 +122,7 @@ sunos_read_dynamic_info (abfd)
 {
   struct sunos_dynamic_info *info;
   asection *dynsec;
-  file_ptr dynoff;
+  bfd_vma dynoff;
   struct external_sun4_dynamic dyninfo;
   unsigned long dynver;
   struct external_sun4_dynamic_link linkinfo;
@@ -177,7 +177,7 @@ sunos_read_dynamic_info (abfd)
   else
     dynsec = obj_datasec (abfd);
   dynoff -= bfd_get_section_vma (abfd, dynsec);
-  if (dynoff < 0 || dynoff > bfd_section_size (abfd, dynsec))
+  if (dynoff > bfd_section_size (abfd, dynsec))
     return true;
 
   /* This executable appears to be dynamically linked in a way that we
@@ -207,13 +207,15 @@ sunos_read_dynamic_info (abfd)
   info->dynsym_count = ((info->dyninfo.ld_symbols - info->dyninfo.ld_stab)
 			/ EXTERNAL_NLIST_SIZE);
   BFD_ASSERT (info->dynsym_count * EXTERNAL_NLIST_SIZE
-	      == info->dyninfo.ld_symbols - info->dyninfo.ld_stab);
+	      == (unsigned long) (info->dyninfo.ld_symbols
+				  - info->dyninfo.ld_stab));
 
   /* Similarly, the relocs end at the hash table.  */
   info->dynrel_count = ((info->dyninfo.ld_hash - info->dyninfo.ld_rel)
 			/ obj_reloc_entry_size (abfd));
   BFD_ASSERT (info->dynrel_count * obj_reloc_entry_size (abfd)
-	      == info->dyninfo.ld_hash - info->dyninfo.ld_rel);
+	      == (unsigned long) (info->dyninfo.ld_hash
+				  - info->dyninfo.ld_rel));
 
   info->valid = true;
 
@@ -249,7 +251,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
      asymbol **storage;
 {
   struct sunos_dynamic_info *info;
-  long i;
+  unsigned long i;
 
   /* Get the general dynamic information.  */
   if (obj_aout_dynamic_info (abfd) == NULL)
@@ -422,7 +424,7 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
      asymbol **syms;
 {
   struct sunos_dynamic_info *info;
-  long i;
+  unsigned long i;
 
   /* Get the general dynamic information.  */
   if (obj_aout_dynamic_info (abfd) == (PTR) NULL)
@@ -1520,7 +1522,7 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
   relend = relocs + rel_size / RELOC_EXT_SIZE;
   for (rel = relocs; rel < relend; rel++)
     {
-      int r_index;
+      unsigned int r_index;
       int r_extern;
       int r_type;
       struct sunos_link_hash_entry *h = NULL;

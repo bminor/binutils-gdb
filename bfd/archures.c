@@ -151,7 +151,7 @@ DESCRIPTION
 .  int bits_per_address;
 .  int bits_per_byte;
 .  enum bfd_architecture arch;
-.  long mach;
+.  unsigned long mach;
 .  char *arch_name;
 .  CONST  char *printable_name;
 .  unsigned int section_align_power;
@@ -732,7 +732,7 @@ SYNOPSIS
 	bfd_arch_info_type *bfd_lookup_arch
 		(enum bfd_architecture
 		arch,
-		long machine);
+		unsigned long machine);
 
 DESCRIPTION
 	Look for the architecure info structure which matches the
@@ -744,7 +744,7 @@ DESCRIPTION
 bfd_arch_info_type * 
 bfd_lookup_arch (arch, machine)
      enum bfd_architecture arch;
-     long machine;
+     unsigned long machine;
 {
     bfd_arch_info_type *ap;
     bfd_check_init();  

@@ -23,7 +23,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This port currently only handles reading object files, except when
    compiled on an RS/6000 host.  -- no archive support, no core files.
@@ -43,6 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"
 
 /* The main body of code is in coffcode.h.  */
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
 
 /* The XCOFF reloc table.  Actually, XCOFF relocations specify the
    bitsize and whether they are signed or not, along with a
@@ -410,7 +412,7 @@ rs6000coff_rtype2howto (relent, internal)
      relocation, as well as indicating whether it is signed or not.
      Doublecheck that the relocation information gathered from the
      type matches this information.  */
-  if (relent->howto->bitsize != (internal->r_size & 0x1f) + 1)
+  if (relent->howto->bitsize != ((unsigned int) internal->r_size & 0x1f) + 1)
     abort ();
 #if 0
   if ((internal->r_size & 0x80) != 0
@@ -422,10 +424,10 @@ rs6000coff_rtype2howto (relent, internal)
 
 #define coff_bfd_reloc_type_lookup rs6000coff_reloc_type_lookup
 
-static const struct reloc_howto_struct *rs6000coff_reloc_type_lookup
+static reloc_howto_type *rs6000coff_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 rs6000coff_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -471,7 +473,10 @@ rs6000coff_reloc_type_lookup (abfd, code)
 
 #define rs6000coff_slurp_armap bfd_slurp_coff_armap
 #define rs6000coff_slurp_extended_name_table _bfd_slurp_extended_name_table
+#define rs6000coff_construct_extended_name_table \
+  _bfd_archive_coff_construct_extended_name_table
 #define rs6000coff_truncate_arname bfd_dont_truncate_arname
+#define rs6000coff_update_armap_timestamp bfd_true
 
 #undef	coff_mkarchive
 #define	coff_mkarchive			rs6000coff_mkarchive
@@ -620,7 +625,7 @@ rs6000coff_openr_next_archived_file(archive, last_file)
 }
 
 
-static bfd_target *
+static const bfd_target *
 rs6000coff_archive_p (abfd)
      bfd *abfd;
 {
@@ -710,10 +715,10 @@ rs6000coff_write_armap (arch, elength, map, orl_count, stridx)
 #define coff_core_file_matches_executable_p \
   _bfd_nocore_core_file_matches_executable_p
 
-#ifdef HOST_AIX
+#ifdef AIX_CORE
 #undef CORE_FILE_P
 #define CORE_FILE_P rs6000coff_core_p
-extern bfd_target * rs6000coff_core_p ();
+extern const bfd_target * rs6000coff_core_p ();
 extern boolean rs6000coff_get_section_contents ();
 extern boolean rs6000coff_core_file_matches_executable_p ();
 
@@ -723,13 +728,13 @@ extern boolean rs6000coff_core_file_matches_executable_p ();
 
 #undef	coff_get_section_contents
 #define	coff_get_section_contents	rs6000coff_get_section_contents
-#endif /* HOST_AIX */
+#endif /* AIX_CORE */
 
-#ifdef HOST_LYNX
+#ifdef LYNX_CORE
 
 #undef CORE_FILE_P
 #define CORE_FILE_P lynx_core_file_p
-extern bfd_target *lynx_core_file_p PARAMS ((bfd *abfd));
+extern const bfd_target *lynx_core_file_p PARAMS ((bfd *abfd));
 
 extern boolean lynx_core_file_matches_executable_p PARAMS ((bfd *core_bfd,
 							    bfd *exec_bfd));
@@ -744,11 +749,11 @@ extern int lynx_core_file_failing_signal PARAMS ((bfd *abfd));
 #undef coff_core_file_failing_signal
 #define coff_core_file_failing_signal lynx_core_file_failing_signal
 
-#endif /* HOST_LYNX */
+#endif /* LYNX_CORE */
 
 /* The transfer vector that leads the outside world to all of the above. */
 
-bfd_target rs6000coff_vec =
+const bfd_target rs6000coff_vec =
 {
   "aixcoff-rs6000",		/* name */
   bfd_target_coff_flavour,	
@@ -791,6 +796,7 @@ bfd_target rs6000coff_vec =
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };

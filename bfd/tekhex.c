@@ -1,5 +1,5 @@
 /* BFD backend for Extended Tektronix Hex Format  objects.
-   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -17,7 +17,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SUBSECTION
@@ -72,6 +72,7 @@ serial protocol, so big files are unlikely, so we keep a list of 8k chunks
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "libiberty.h"
 
 typedef struct
   {
@@ -87,23 +88,17 @@ typedef struct tekhex_symbol_struct
 
   } tekhex_symbol_type;
 
-static char digs[] = "0123456789ABCDEF";
+static const char digs[] = "0123456789ABCDEF";
 
 static char sum_block[256];
 
-/* Horrible ascii dependent macros for converting between hex and
-   binary */
-
-#define CHARS_IN_SET 256
-static char hex_value[CHARS_IN_SET];
-
 #define NOT_HEX 20
-#define NIBBLE(x) hex_value[x]
+#define NIBBLE(x) hex_value(x)
 #define HEX(buffer) ((NIBBLE((buffer)[0])<<4) + NIBBLE((buffer)[1]))
 #define TOHEX(d,x) \
 (d)[1] = digs[(x) & 0xf]; \
 (d)[0] = digs[((x)>>4)&0xf];
-#define	ISHEX(x)  (hex_value[x] != NOT_HEX)
+#define	ISHEX(x)  hex_p(x)
 
 /*
 Here's an example
@@ -223,24 +218,8 @@ tekhex_init ()
 
   if (inited == false)
     {
-
       inited = true;
-
-      for (i = 0; i < CHARS_IN_SET; i++)
-	{
-	  hex_value[i] = NOT_HEX;
-	}
-
-      for (i = 0; i < 10; i++)
-	{
-	  hex_value[i + '0'] = i;
-
-	}
-      for (i = 0; i < 6; i++)
-	{
-	  hex_value[i + 'a'] = i + 10;
-	  hex_value[i + 'A'] = i + 10;
-	}
+      hex_init ();
       val = 0;
       for (i = 0; i < 10; i++)
 	{
@@ -305,13 +284,13 @@ getvalue (srcp)
 {
   char *src = *srcp;
   bfd_vma value = 0;
-  unsigned int len = hex_value[*src++];
+  unsigned int len = hex_value(*src++);
 
   if (len == 0)
     len = 16;
   while (len--)
     {
-      value = value << 4 | hex_value[*src++];
+      value = value << 4 | hex_value(*src++);
     }
   *srcp = src;
   return value;
@@ -324,7 +303,7 @@ getsym (dstp, srcp)
 {
   char *src = *srcp;
   unsigned int i;
-  unsigned int len = hex_value[*src++];
+  unsigned int len = hex_value(*src++);
 
   if (len == 0)
     len = 16;
@@ -350,7 +329,6 @@ find_chunk (abfd, vma)
   if (!d)
     {
       char *sname = bfd_alloc (abfd, 12);
-      asection *s;
 
       /* No chunk for this address, so make one up */
       d = (struct data_struct *)
@@ -392,7 +370,7 @@ first_phase (abfd, type, src)
      char type;
      char *src;
 {
-  asection *section = &bfd_abs_section;
+  asection *section = bfd_abs_section_ptr;
   int len;
   char sym[17];			/* A symbol can only be 16chars long */
 
@@ -432,15 +410,13 @@ first_phase (abfd, type, src)
 	{
 	  switch (*src)
 	    {
-	      asection *s;
-
 	    case '1':		/* section range */
 	      src++;
 	      section->vma = getvalue (&src);
 	      section->_raw_size = getvalue (&src) - section->vma;
 	      section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 	      break;
-
+	    case '0':
 	    case '2':
 	    case '3':
 	    case '4':
@@ -504,7 +480,6 @@ static void
       char buffer[MAXCHUNK];
       char *src = buffer;
       char type;
-      bfd_vma address = 0;
 
       /* Find first '%' */
       eof = (boolean) (bfd_read (src, 1, 1, abfd) != 1);
@@ -591,7 +566,6 @@ tekhex_object_p (abfd)
      bfd *abfd;
 {
   char b[4];
-  asection *section;
 
   tekhex_init ();
 
@@ -608,7 +582,7 @@ tekhex_object_p (abfd)
   return abfd->xvec;
 }
 
-static boolean
+static void
 move_section_contents (abfd, section, locationp, offset, count, get)
      bfd *abfd;
      asection *section;
@@ -797,6 +771,7 @@ out (abfd, type, start, end)
   int sum = 0;
   char *s;
   char front[6];
+  bfd_size_type wrlen;
 
   front[0] = '%';
   TOHEX (front + 1, end - start + 5);
@@ -804,17 +779,18 @@ out (abfd, type, start, end)
 
   for (s = start; s < end; s++)
     {
-      sum += sum_block[*s];
+      sum += sum_block[(unsigned char) *s];
     }
 
-  sum += sum_block[front[1]];	/*  length */
-  sum += sum_block[front[2]];
-  sum += sum_block[front[3]];	/* type */
+  sum += sum_block[(unsigned char) front[1]];	/*  length */
+  sum += sum_block[(unsigned char) front[2]];
+  sum += sum_block[(unsigned char) front[3]];	/* type */
   TOHEX (front + 4, sum);
   if (bfd_write (front, 1, 6, abfd) != 6)
     abort ();
   end[0] = '\n';
-  if (bfd_write (start, 1, end - start + 1, abfd) != end - start + 1)
+  wrlen = end - start + 1;
+  if (bfd_write (start, 1, wrlen, abfd) != wrlen)
     abort ();
 }
 
@@ -825,8 +801,6 @@ tekhex_write_object_contents (abfd)
   int bytes_written;
   char buffer[100];
   asymbol **p;
-  tdata_type *tdata = abfd->tdata.tekhex_data;
-  tekhex_data_list_type *list;
   asection *s;
   struct data_struct *d;
 
@@ -929,7 +903,7 @@ tekhex_write_object_contents (abfd)
     }
 
   /* And the terminator */
-  if (bfd_write ("%7081010\n", 1, 9, abfd) != 9)
+  if (bfd_write ("%0781010\n", 1, 9, abfd) != 9)
     abort ();
   return true;
 }
@@ -1007,6 +981,8 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 #define tekhex_get_lineno _bfd_nosymbols_get_lineno
 #define tekhex_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define tekhex_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define tekhex_read_minisymbols _bfd_generic_read_minisymbols
+#define tekhex_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define tekhex_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
@@ -1014,6 +990,7 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 #define tekhex_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define tekhex_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define tekhex_bfd_final_link _bfd_generic_final_link
+#define tekhex_bfd_link_split_section _bfd_generic_link_split_section
 
 const bfd_target tekhex_vec =
 {

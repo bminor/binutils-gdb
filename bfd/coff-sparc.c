@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -25,6 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/sparc.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
 
 #define BADMAG(x) ((x).f_magic != SPARCMAGIC && (x).f_magic != LYNXCOFFMAGIC)
 
@@ -156,12 +158,12 @@ static CONST struct coff_reloc_map sparc_reloc_map[] =
   /*  { BFD_RELOC_SPARC_UA32, R_SPARC_UA32 }, not used?? */
 };
 
-static CONST struct reloc_howto_struct *
+static reloc_howto_type *
 coff_sparc_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-  int i;
+  unsigned int i;
   for (i = 0; i < sizeof (sparc_reloc_map) / sizeof (struct coff_reloc_map); i++)
     {
       if (sparc_reloc_map[i].bfd_reloc_val == code)
@@ -184,8 +186,9 @@ rtype2howto (cache_ptr, dst)
 
 #define SWAP_IN_RELOC_OFFSET	bfd_h_get_32
 #define SWAP_OUT_RELOC_OFFSET	bfd_h_put_32
-/* This is just like the standard one, except for the addition of the
-   last line, the adjustment of the addend.  */
+/* This is just like the standard one, except that we don't set up an
+   addend for relocs against global symbols (otherwise linking objects
+   created by -r fails), and we add in the reloc offset at the end.  */
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)                \
   {                                                             \
     coff_symbol_type *coffsym = (coff_symbol_type *) NULL;      \
@@ -198,7 +201,8 @@ rtype2howto (cache_ptr, dst)
         && coffsym->native->u.syment.n_scnum == 0)              \
       cache_ptr->addend = 0;                                    \
     else if (ptr && bfd_asymbol_bfd (ptr) == abfd               \
-             && ptr->section != (asection *) NULL)              \
+             && ptr->section != (asection *) NULL               \
+	     && (ptr->flags & BSF_GLOBAL) == 0)			\
       cache_ptr->addend = - (ptr->section->vma + ptr->value);   \
     else                                                        \
       cache_ptr->addend = 0;                                    \
@@ -220,7 +224,7 @@ rtype2howto (cache_ptr, dst)
 
 #include "coffcode.h"
 
-bfd_target
+const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
@@ -238,10 +242,10 @@ bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* leading underscore */
+  '_',				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 

@@ -1,5 +1,5 @@
 /* BFD library support routines for the i960 architecture.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,11 +16,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 
@@ -29,15 +29,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    info_struct pointer */
 
 static boolean
-DEFUN(scan_960_mach, (ap, string),
-      CONST bfd_arch_info_struct_type *ap AND
-      CONST char *string)
+scan_960_mach (ap, string)
+     CONST bfd_arch_info_type *ap;
+     CONST char *string;
 {
   unsigned long machine;
 
   /* Look for the string i960, or somesuch at the front of the string  */
 
-  if (strncmp("i960",string) == 0) {
+  if (strncmp("i960",string,4) == 0) {
     string+=4;
   }
   else {
@@ -75,6 +75,10 @@ DEFUN(scan_960_mach, (ap, string),
     machine = bfd_mach_i960_ka_sa;
   else if (string[0] == 's' && string[1] == 'a')
     machine = bfd_mach_i960_ka_sa;
+  /* start-sanitize-i960xl */
+  else if (string[0] == 'x' && string[1] == 'l')
+    machine = bfd_mach_i960_xl;
+  /* end-sanitize-i960xl */
   else
     return false;
   if (machine == ap->mach)   return true;
@@ -87,15 +91,18 @@ DEFUN(scan_960_mach, (ap, string),
    machine which would be compatible with both and returns a pointer
    to its info structure */
 
-CONST bfd_arch_info_struct_type *
-DEFUN(compatible,(a,b),
-      CONST bfd_arch_info_struct_type *a AND
-      CONST bfd_arch_info_struct_type *b)
+static CONST bfd_arch_info_type *
+compatible (a,b)
+     CONST bfd_arch_info_type *a;
+     CONST bfd_arch_info_type *b;
 {
 
-  /* The i960 has two distinct subspecies which may not interbreed:
-     CORE CA          
-     CORE KA KB MC XA
+  /* The i960 has distinct subspecies which may not interbreed:
+	CORE CA          
+	CORE KA KB MC XA
+     start-sanitize-i960xl
+	CORE XL
+     end-sanitize-i960xl
      Any architecture on the same line is compatible, the one on
      the right is the least restrictive.  
      
@@ -108,23 +115,33 @@ DEFUN(compatible,(a,b),
 #define MC 	bfd_mach_i960_mc    /*4*/
 #define XA 	bfd_mach_i960_xa    /*5*/
 #define CA 	bfd_mach_i960_ca    /*6*/
+#define MAX_ARCH ((int)CA)
+
+/* start-sanitize-i960xl */
+#define XL	bfd_mach_i960_xl    /*7*/
+#undef MAX_ARCH
+#define MAX_ARCH ((int)XL)
+/* end-sanitize-i960xl */
 
 
-  static CONST char matrix[7][7] = 
-      {
-	ERROR,CORE,	KA,	KB,	MC,	XA,	CA,
-	CORE,	CORE,	KA,	KB,	MC,	XA,	CA,
-	KA,	KA,	KA,	KB,	MC,	XA,	ERROR,
-	KB,	KB,	KB,	KB,	MC,	XA,	ERROR,
-	MC,	MC,	MC,	MC,	MC,	XA,	ERROR,
-	XA,	XA,	XA,	XA,	XA,	XA,	ERROR,
-	CA,	CA,	ERROR,	ERROR,	ERROR,	ERROR,	CA 
-	};
+  static CONST unsigned long matrix[MAX_ARCH+1][MAX_ARCH+1] = 
+    {
+      { ERROR,	CORE,	KA,	KB,	MC,	XA,	CA },
+      { CORE,	CORE,	KA,	KB,	MC,	XA,	CA },
+      { KA,	KA,	KA,	KB,	MC,	XA,	ERROR },
+      { KB,	KB,	KB,	KB,	MC,	XA,	ERROR },
+      { MC,	MC,	MC,	MC,	MC,	XA,	ERROR },
+      { XA,	XA,	XA,	XA,	XA,	XA,	ERROR },
+      { CA,	CA,	ERROR,	ERROR,	ERROR,	ERROR,	CA },
+      /* start-sanitize-i960xl */
+      { XL,	ERROR,  ERROR,	ERROR,	ERROR,	ERROR,	ERROR,  XL },
+      /* end-sanitize-i960xl */
+    };
 
 
   if (a->arch != b->arch || matrix[a->mach][b->mach] == ERROR) 
     {
-    return (bfd_arch_info_struct_type *)NULL;
+    return NULL;
     }
   else 
     {
@@ -136,23 +153,27 @@ DEFUN(compatible,(a,b),
 
 int bfd_default_scan_num_mach();
 #define N(a,b,d) \
-{ 32, 32, 8,bfd_arch_i960,a,"i960",b,d,compatible,scan_960_mach,0,}
+{ 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach,0,}
 
-static bfd_arch_info_struct_type arch_info_struct[] = 
+static bfd_arch_info_type arch_info_struct[] = 
 { 
-  N(bfd_mach_i960_core,"i960:core",true),
+  N(bfd_mach_i960_core, "i960:core", true),
   N(bfd_mach_i960_ka_sa,"i960:ka_sa",false),
   N(bfd_mach_i960_kb_sb,"i960:kb_sb",false),
-  N(bfd_mach_i960_mc,"i960:mc",false),
-  N(bfd_mach_i960_xa,"i960:xa",false),
-  N(bfd_mach_i960_ca,"i960:ca",false)
-  };
+  N(bfd_mach_i960_mc,   "i960:mc",   false),
+  N(bfd_mach_i960_xa,   "i960:xa",   false),
+  N(bfd_mach_i960_ca,   "i960:ca",   false),
+  /* start-sanitize-i960xl */
+  N(bfd_mach_i960_xl,   "i960:xl",   false),
+  /* end-sanitize-i960xl */
+};
 
 
-void DEFUN_VOID(bfd_i960_arch)
+void
+bfd_i960_arch ()
 {
   unsigned int i;
-  for (i = 0; i < 6; i++)  {
+  for (i = 0; i < sizeof(arch_info_struct)/sizeof (*arch_info_struct); i++)  {
     bfd_arch_linkin(arch_info_struct + i);
   }
 }

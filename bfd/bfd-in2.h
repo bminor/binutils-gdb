@@ -1078,7 +1078,7 @@ typedef struct bfd_arch_info
   int bits_per_address;
   int bits_per_byte;
   enum bfd_architecture arch;
-  long mach;
+  unsigned long mach;
   char *arch_name;
   CONST  char *printable_name;
   unsigned int section_align_power;
@@ -1132,7 +1132,7 @@ bfd_arch_info_type *
 bfd_lookup_arch
  PARAMS ((enum bfd_architecture
     arch,
-    long machine));
+    unsigned long machine));
 
 CONST char *
 bfd_printable_arch_mach

@@ -134,7 +134,6 @@ BFD32_BACKENDS = \
 	cf-sparclynx.o \
 	coff-a29k.o \
 	coff-apollo.o \
-	coff-arm.o \
 	coff-h8300.o \
 	coff-h8500.o \
 	coff-i386.o \

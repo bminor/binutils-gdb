@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 @setfilename archive-info
@@ -675,6 +675,40 @@ bfd_generic_archive_p (abfd)
       bfd_release (abfd, bfd_ardata (abfd));
       abfd->tdata.aout_ar_data = NULL;
       return NULL;
+    }
+
+  if (bfd_has_map (abfd) && abfd->target_defaulted)
+    {
+      bfd *first;
+
+      /* This archive has a map, so we may presume that the contents
+	 are object files.  Make sure that the first file in the
+	 archive can be recognized as an object file for this target.
+	 If not, assume that this is the wrong format.
+
+	 This is done because any normal format will recognize any
+	 normal archive, regardless of the format of the object files.
+	 We do accept an empty archive.  */
+
+      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
+      if (first != NULL)
+	{
+	  first->target_defaulted = false;
+	  if (! bfd_check_format (first, bfd_object))
+	    {
+	      bfd_error_type err;
+
+	      err = bfd_get_error ();
+	      (void) bfd_close (first);
+	      bfd_release (abfd, bfd_ardata (abfd));
+	      abfd->tdata.aout_ar_data = NULL;
+	      bfd_set_error (err);
+	      return NULL;
+	    }
+
+	  /* We ought to close first here, but we can't, because we
+             have no way to remove it from the archive cache.  FIXME.  */
+	}
     }
 
   return abfd->xvec;
@@ -1450,9 +1484,9 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
      intel's release is out the door. */
 
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
-  int length;
+  size_t length;
   const char *filename;
-  int maxlen = ar_maxnamelen (abfd);
+  size_t maxlen = ar_maxnamelen (abfd);
 
   if ((bfd_get_file_flags (abfd) & BFD_TRADITIONAL_FORMAT) != 0)
     {
@@ -1871,7 +1905,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   bfd *current = arch->archive_head;
   bfd *last_elt = current;	/* last element arch seen */
   bfd_byte temp[4];
-  int count;
+  unsigned int count;
   struct ar_hdr hdr;
   struct stat statbuf;
   unsigned int i;
@@ -1957,7 +1991,7 @@ _bfd_archive_bsd_update_armap_timestamp (arch)
 {
   struct stat archstat;
   struct ar_hdr hdr;
-  int i;
+  unsigned int i;
 
   /* Flush writes, get last-write timestamp from file, and compare it
      to the timestamp IN the file.  */
@@ -2024,7 +2058,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
   unsigned int mapsize = stringsize + ranlibsize;
   file_ptr archive_member_file_ptr;
   bfd *current = arch->archive_head;
-  int count;
+  unsigned int count;
   struct ar_hdr hdr;
   unsigned int i;
   int padit = mapsize & 1;

@@ -94,7 +94,7 @@ typedef struct ecoff_tdata
   /* The maximum size of objects to optimize using gp.  This is
      typically set by the -G option to the compiler, assembler or
      linker.  */
-  int gp_size;
+  unsigned int gp_size;
 
   /* The register masks.  When linking, all the masks found in the
      input files are combined into the masks of the output file.
@@ -253,7 +253,7 @@ extern boolean _bfd_ecoff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
   _bfd_generic_bfd_copy_private_symbol_data
 
 #define _bfd_ecoff_bfd_print_private_bfd_data \
-  _bfd_generic_bfd_pritn_private_bfd_data
+  _bfd_generic_bfd_print_private_bfd_data
 
 #define _bfd_ecoff_bfd_merge_private_bfd_data \
   _bfd_generic_bfd_merge_private_bfd_data

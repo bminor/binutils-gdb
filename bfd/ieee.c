@@ -543,7 +543,8 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 #define ieee_seek(abfd, offset) \
   IEEE_DATA(abfd)->h.input_p = IEEE_DATA(abfd)->h.first_byte + offset
 
-#define ieee_pos(abfd)   IEEE_DATA(abfd)->h.input_p -IEEE_DATA(abfd)->h.first_byte
+#define ieee_pos(abfd) \
+  (IEEE_DATA(abfd)->h.input_p - IEEE_DATA(abfd)->h.first_byte)
 
 static unsigned int last_index;
 static char last_type;		/* is the index for an X or a D */
@@ -1133,7 +1134,7 @@ ieee_archive_p (abfd)
 
 	  /* Make sure that we don't go over the end of the buffer */
 
-	  if (ieee_pos (abfd) > sizeof (buffer) / 2)
+	  if ((size_t) ieee_pos (abfd) > sizeof (buffer) / 2)
 	    {
 	      /* Past half way, reseek and reprime */
 	      buffer_offset += ieee_pos (abfd);
@@ -1936,7 +1937,7 @@ do_with_relocs (abfd, s)
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
-	  memset ((PTR) stream, 0, s->_raw_size);
+	  memset ((PTR) stream, 0, (size_t) s->_raw_size);
 	}
       while (current_byte_index < s->_raw_size)
 	{
@@ -2116,7 +2117,7 @@ flush ()
 {
   if (bfd_write ((PTR) (output_ptr_start), 1, output_ptr - output_ptr_start,
 		 output_bfd)
-      != output_ptr - output_ptr_start)
+      != (bfd_size_type) (output_ptr - output_ptr_start))
     abort ();
   output_ptr = output_ptr_start;
   output_buffer++;

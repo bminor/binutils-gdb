@@ -77,7 +77,7 @@ static char *
 elf_read (abfd, offset, size)
      bfd * abfd;
      long offset;
-     int size;
+     unsigned int size;
 {
   char *buf;
 
@@ -609,8 +609,40 @@ bfd_section_from_shdr (abfd, shindex)
 	Elf_Internal_Shdr *hdr2;
 	int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
 
+	/* For some incomprehensible reason Oracle distributes
+	   libraries for Solaris in which some of the objects have
+	   bogus sh_link fields.  It would be nice if we could just
+	   reject them, but, unfortunately, some people need to use
+	   them.  We scan through the section headers; if we find only
+	   one suitable symbol table, we clobber the sh_link to point
+	   to it.  I hope this doesn't break anything.  */
+	if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_SYMTAB
+	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_DYNSYM)
+	  {
+	    int scan;
+	    int found;
+
+	    found = 0;
+	    for (scan = 1; scan < ehdr->e_shnum; scan++)
+	      {
+		if (elf_elfsections (abfd)[scan]->sh_type == SHT_SYMTAB
+		    || elf_elfsections (abfd)[scan]->sh_type == SHT_DYNSYM)
+		  {
+		    if (found != 0)
+		      {
+			found = 0;
+			break;
+		      }
+		    found = scan;
+		  }
+	      }
+	    if (found != 0)
+	      hdr->sh_link = found;
+	  }
+
 	/* Get the symbol table.  */
-	if (! bfd_section_from_shdr (abfd, hdr->sh_link))
+	if (elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_SYMTAB
+	    && ! bfd_section_from_shdr (abfd, hdr->sh_link))
 	  return false;
 
 	/* If this reloc section does not use the main symbol table we
@@ -757,6 +789,7 @@ bfd_section_from_phdr (abfd, hdr, index)
   if (newsect == NULL)
     return false;
   newsect->vma = hdr->p_vaddr;
+  newsect->lma = hdr->p_paddr;
   newsect->_raw_size = hdr->p_filesz;
   newsect->filepos = hdr->p_offset;
   newsect->flags |= SEC_HAS_CONTENTS;
@@ -790,6 +823,7 @@ bfd_section_from_phdr (abfd, hdr, index)
       if (newsect == NULL)
 	return false;
       newsect->vma = hdr->p_vaddr + hdr->p_filesz;
+      newsect->lma = hdr->p_paddr + hdr->p_filesz;
       newsect->_raw_size = hdr->p_memsz - hdr->p_filesz;
       if (hdr->p_type == PT_LOAD)
 	{
@@ -836,10 +870,22 @@ elf_fake_sections (abfd, asect, failedptrarg)
     }
 
   this_hdr->sh_flags = 0;
+
+  /* FIXME: This should really use vma, rather than lma.  However,
+     that would mean that the lma information was lost, which would
+     mean that the AT keyword in linker scripts would not work.
+     Fortunately, native scripts do not use the AT keyword, so we can
+     get away with using lma here.  The right way to handle this is to
+     1) read the program headers as well as the section headers, and
+     set the lma fields of the BFD sections based on the p_paddr
+     fields of the program headers, and 2) set the p_paddr fields of
+     the program headers based on the section lma fields when writing
+     them out.  */
   if ((asect->flags & SEC_ALLOC) != 0)
-    this_hdr->sh_addr = asect->vma;
+    this_hdr->sh_addr = asect->lma;
   else
     this_hdr->sh_addr = 0;
+
   this_hdr->sh_offset = 0;
   this_hdr->sh_size = asect->_raw_size;
   this_hdr->sh_link = 0;
@@ -1434,6 +1480,7 @@ get_program_header_size (abfd, sorted_hdrs, count, maxpagesize)
 {
   size_t segs;
   asection *s;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* We can't return a different result each time we're called.  */
   if (elf_tdata (abfd)->program_header_size != 0)
@@ -1538,7 +1585,12 @@ get_program_header_size (abfd, sorted_hdrs, count, maxpagesize)
       ++segs;
     }
 
-  elf_tdata (abfd)->program_header_size = segs * get_elf_backend_data (abfd)->s->sizeof_phdr;
+  /* Let the backend count up any program headers it might need.  */
+  if (bed->elf_backend_create_program_headers)
+    segs = ((*bed->elf_backend_create_program_headers)
+	    (abfd, (Elf_Internal_Phdr *) NULL, segs));
+
+  elf_tdata (abfd)->program_header_size = segs * bed->s->sizeof_phdr;
   return elf_tdata (abfd)->program_header_size;
 }
 
@@ -1574,7 +1626,10 @@ map_program_segments (abfd, off, first, sorted_hdrs, phdr_size)
   phdr_count = 0;
   phdr = phdrs;
 
-  phdr_size_adjust = 0;
+  if (bed->want_hdr_in_seg)
+    phdr_size_adjust = first->sh_offset - phdr_size;
+  else
+    phdr_size_adjust = 0;
 
   /* If we have a loadable .interp section, we must create a PT_INTERP
      segment which must precede all PT_LOAD segments.  We assume that
@@ -1693,8 +1748,9 @@ map_program_segments (abfd, off, first, sorted_hdrs, phdr_size)
       phdr->p_align = bed->maxpagesize;
 
       if (hdr == first
-	  && sinterp != NULL
-	  && (sinterp->flags & SEC_LOAD) != 0)
+	  && (bed->want_hdr_in_seg
+	      || (sinterp != NULL
+		  && (sinterp->flags & SEC_LOAD) != 0)))
 	{
 	  phdr->p_offset -= phdr_size + phdr_size_adjust;
 	  phdr->p_vaddr -= phdr_size + phdr_size_adjust;
@@ -1731,6 +1787,12 @@ map_program_segments (abfd, off, first, sorted_hdrs, phdr_size)
       ++phdr;
       ++phdr_count;
     }
+
+  /* Let the backend create additional program headers.  */
+  if (bed->elf_backend_create_program_headers)
+    phdr_count = (*bed->elf_backend_create_program_headers) (abfd,
+							     phdrs,
+							     phdr_count);
 
   /* Make sure the return value from get_program_header_size matches
      what we computed here.  Actually, it's OK if we allocated too
@@ -1864,8 +1926,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	}
 
       memcpy (sorted_hdrs, i_shdrpp + 1, hdrppsize);
-      qsort (sorted_hdrs, i_ehdrp->e_shnum - 1, sizeof (Elf_Internal_Shdr *),
-	     elf_sort_hdrs);
+      qsort (sorted_hdrs, (size_t) i_ehdrp->e_shnum - 1,
+	     sizeof (Elf_Internal_Shdr *), elf_sort_hdrs);
 
       /* We can't actually create the program header until we have set the
 	 file positions for the sections, and we can't do that until we know
@@ -1874,7 +1936,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
       phdr_size = get_program_header_size (abfd,
 					   sorted_hdrs, i_ehdrp->e_shnum - 1,
 					   maxpagesize);
-      if (phdr_size == (file_ptr) -1)
+      if (phdr_size == (bfd_size_type) -1)
 	return false;
 
       /* Compute the file offsets of each section.  */
@@ -1900,6 +1962,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		  hdr->sh_offset = -1;
 		  continue;
 		}
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
+							       true);
 	    }
 	  else
 	    {
@@ -1910,9 +1974,9 @@ assign_file_positions_except_relocs (abfd, dosyms)
 		 the page size.  This is required by the program
 		 header.  */
 	      off += (hdr->sh_addr - off) % maxpagesize;
+	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
+							       false);
 	    }
-
-	  off = _bfd_elf_assign_file_position_for_section (hdr, off, false);
 	}
 
       /* Create the program header.  */
@@ -1920,7 +1984,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 				       phdr_size);
       if (phdr_map == (file_ptr) -1)
 	return false;
-      BFD_ASSERT ((bfd_size_type) phdr_map <= (bfd_size_type) phdr_off + phdr_size);
+      BFD_ASSERT ((bfd_size_type) phdr_map
+		  <= (bfd_size_type) phdr_off + phdr_size);
 
       free (sorted_hdrs);
     }
