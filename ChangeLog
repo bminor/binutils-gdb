@@ -1,3 +1,7 @@
+Tue Jan  5 07:55:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure: Accept -with arguments.
+
 Sun Jan  3 15:15:09 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in: added h8300sim 
