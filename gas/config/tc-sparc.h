@@ -166,6 +166,11 @@ extern void sparc_md_end PARAMS ((void));
 
 #endif
 
+#ifdef OBJ_ELF
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) sparc_cons (EXP, NBYTES)
+extern void sparc_cons PARAMS ((expressionS *, int));
+#endif
+
 #define TC_CONS_FIX_NEW cons_fix_new_sparc
 extern void cons_fix_new_sparc
   PARAMS ((struct frag *, int, unsigned int, struct expressionS *));

@@ -1,3 +1,19 @@
+2001-12-21  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Fix dst_mask for
+	R_SPARC_DISP32.  Support R_SPARC_PLT32.
+	(sparc_reloc_map): Add BFD_RELOC_16_PCREL and BFD_RELOC_SPARC_PLT32.
+	(elf32_sparc_check_relocs): Handle R_SPARC_PLT32.
+	(elf32_sparc_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_howto_table): Fix dst_mask for
+	R_SPARC_DISP32.  Support R_SPARC_PLT32 and R_SPARC_PLT64.
+	(sparc_reloc_map): Add BFD_RELOC_16_PCREL, BFD_RELOC_64_PCREL
+	and BFD_RELOC_SPARC_PLT32.
+	(sparc64_elf_check_relocs): Handle R_SPARC_PLT32 and R_SPARC_PLT64.
+	(sparc64_elf_relocate_section): Likewise.
+	* reloc.c (bfd_reloc_code_type): Add BFD_RELOC_SPARC_PLT32.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
 2001-12-20  Tom Rix  <trix@redhat.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Add special AIX 

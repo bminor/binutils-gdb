@@ -3313,6 +3313,12 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_UA16:
     case BFD_RELOC_SPARC_UA32:
     case BFD_RELOC_SPARC_UA64:
+    case BFD_RELOC_8_PCREL:
+    case BFD_RELOC_16_PCREL:
+    case BFD_RELOC_32_PCREL:
+    case BFD_RELOC_64_PCREL:
+    case BFD_RELOC_SPARC_PLT32:
+    case BFD_RELOC_SPARC_PLT64:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
       code = fixp->fx_r_type;
@@ -3402,9 +3408,11 @@ tc_gen_reloc (section, fixp)
 
 #else /* elf or coff  */
 
-  if (reloc->howto->pc_relative == 0
-      || code == BFD_RELOC_SPARC_PC10
-      || code == BFD_RELOC_SPARC_PC22)
+  if (code != BFD_RELOC_32_PCREL_S2
+      && code != BFD_RELOC_SPARC_WDISP22
+      && code != BFD_RELOC_SPARC_WDISP16
+      && code != BFD_RELOC_SPARC_WDISP19
+      && code != BFD_RELOC_SPARC_WPLT30)
     reloc->addend = fixp->fx_addnumber;
   else if (symbol_section_p (fixp->fx_addsy))
     reloc->addend = (section->vma
@@ -3900,6 +3908,11 @@ s_proc (ignore)
 
 static int sparc_no_align_cons = 0;
 
+/* This static variable is set by sparc_cons to emit requested types
+   of relocations in cons_fix_new_sparc.  */
+
+static const char *sparc_cons_special_reloc;
+
 /* This handles the unaligned space allocation pseudo-ops, such as
    .uaword.  .uaword is just like .word, but the value does not need
    to be aligned.  */
@@ -4172,6 +4185,134 @@ sparc_elf_final_processing ()
   else if (current_architecture == SPARC_OPCODE_ARCH_V9B)
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1|EF_SPARC_SUN_US3;
 }
+
+void
+sparc_cons (exp, size)
+     expressionS *exp;
+     int size;
+{
+  char *save;
+
+  SKIP_WHITESPACE ();
+  sparc_cons_special_reloc = NULL;
+  save = input_line_pointer;
+  if (input_line_pointer[0] == '%'
+      && input_line_pointer[1] == 'r'
+      && input_line_pointer[2] == '_')
+    {
+      if (strncmp (input_line_pointer + 3, "disp", 4) == 0)
+	{
+	  input_line_pointer += 7;
+	  sparc_cons_special_reloc = "disp";
+	}
+      else if (strncmp (input_line_pointer + 3, "plt", 3) == 0)
+	{
+	  if (size != 4 && size != 8)
+	    as_bad (_("Illegal operands: %%r_plt in %d-byte data field"), size);
+	  else
+	    {
+	      input_line_pointer += 6;
+	      sparc_cons_special_reloc = "plt";
+	    }
+	}
+      if (sparc_cons_special_reloc)
+	{
+	  int bad = 0;
+
+	  switch (size)
+	    {
+	    case 1:
+	      if (*input_line_pointer != '8')
+		bad = 1;
+	      input_line_pointer--;
+	      break;
+	    case 2:
+	      if (input_line_pointer[0] != '1' || input_line_pointer[1] != '6')
+		bad = 1;
+	      break;
+	    case 4:
+	      if (input_line_pointer[0] != '3' || input_line_pointer[1] != '2')
+		bad = 1;
+	      break;
+	    case 8:
+	      if (input_line_pointer[0] != '6' || input_line_pointer[1] != '4')
+		bad = 1;
+	      break;
+	    default:
+	      bad = 1;
+	      break;
+	    }
+
+	  if (bad)
+	    {
+	      as_bad (_("Illegal operands: Only %%r_%s%d allowed in %d-byte data fields"),
+		      sparc_cons_special_reloc, size * 8, size);
+	    }
+	  else
+	    {
+	      input_line_pointer += 2;
+	      if (*input_line_pointer != '(')
+		{
+		  as_bad (_("Illegal operands: %%r_%s%d requires arguments in ()"),
+			  sparc_cons_special_reloc, size * 8);
+		  bad = 1;
+		}
+	    }
+
+	  if (bad)
+	    {
+	      input_line_pointer = save;
+	      sparc_cons_special_reloc = NULL;
+	    }
+	  else
+	    {
+	      int c;
+	      char *end = ++input_line_pointer;
+	      int npar = 0;
+
+	      while (! is_end_of_line[(c = *end)])
+		{
+		  if (c == '(')
+	  	    npar++;
+		  else if (c == ')')
+	  	    {
+		      if (!npar)
+	      		break;
+		      npar--;
+		    }
+	    	  end++;
+		}
+
+	      if (c != ')')
+		as_bad (_("Illegal operands: %%r_%s%d requires arguments in ()"),
+			sparc_cons_special_reloc, size * 8);
+	      else
+		{
+		  *end = '\0';
+		  expression (exp);
+		  *end = c;
+		  if (input_line_pointer != end)
+		    {
+		      as_bad (_("Illegal operands: %%r_%s%d requires arguments in ()"),
+			      sparc_cons_special_reloc, size * 8);
+		    }
+		  else
+		    {
+		      input_line_pointer++;
+		      SKIP_WHITESPACE ();
+		      c = *input_line_pointer;
+		      if (! is_end_of_line[c] && c != ',')
+			as_bad (_("Illegal operands: garbage after %%r_%s%d()"),
+			        sparc_cons_special_reloc, size * 8);
+		    }
+		}
+	    }
+	}
+    }
+  if (sparc_cons_special_reloc == NULL)
+    expression (exp);
+}
+
 #endif
 
 /* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
@@ -4196,7 +4337,25 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
       && now_seg->flags & SEC_ALLOC)
     r = BFD_RELOC_SPARC_REV32;
 
-  if (sparc_no_align_cons)
+  if (sparc_cons_special_reloc)
+    {
+      if (*sparc_cons_special_reloc == 'd')
+	switch (nbytes)
+	  {
+	  case 1: r = BFD_RELOC_8_PCREL; break;
+	  case 2: r = BFD_RELOC_16_PCREL; break;
+	  case 4: r = BFD_RELOC_32_PCREL; break;
+	  case 8: r = BFD_RELOC_64_PCREL; break;
+	  default: abort ();
+	  }
+      else
+	switch (nbytes)
+	  {
+	  case 4: r = BFD_RELOC_SPARC_PLT32; break;
+	  case 8: r = BFD_RELOC_SPARC_PLT64; break;
+	  }
+    }
+  else if (sparc_no_align_cons)
     {
       switch (nbytes)
 	{

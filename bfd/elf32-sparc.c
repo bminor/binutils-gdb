@@ -76,7 +76,7 @@ reloc_howto_type _bfd_sparc_elf_howto_table[] =
   HOWTO(R_SPARC_32,        0,2,32,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_32",      false,0,0xffffffff,true),
   HOWTO(R_SPARC_DISP8,     0,0, 8,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_DISP8",   false,0,0x000000ff,true),
   HOWTO(R_SPARC_DISP16,    0,1,16,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_DISP16",  false,0,0x0000ffff,true),
-  HOWTO(R_SPARC_DISP32,    0,2,32,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_DISP32",  false,0,0x00ffffff,true),
+  HOWTO(R_SPARC_DISP32,    0,2,32,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_DISP32",  false,0,0xffffffff,true),
   HOWTO(R_SPARC_WDISP30,   2,2,30,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP30", false,0,0x3fffffff,true),
   HOWTO(R_SPARC_WDISP22,   2,2,22,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP22", false,0,0x003fffff,true),
   HOWTO(R_SPARC_HI22,     10,2,22,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_HI22",    false,0,0x003fffff,true),
@@ -94,7 +94,7 @@ reloc_howto_type _bfd_sparc_elf_howto_table[] =
   HOWTO(R_SPARC_JMP_SLOT,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_JMP_SLOT",false,0,0x00000000,true),
   HOWTO(R_SPARC_RELATIVE,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_RELATIVE",false,0,0x00000000,true),
   HOWTO(R_SPARC_UA32,      0,2,32,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA32",    false,0,0xffffffff,true),
-  HOWTO(R_SPARC_PLT32,     0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PLT32",    false,0,0x00000000,true),
+  HOWTO(R_SPARC_PLT32,     0,0,00,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_PLT32",   false,0,0xffffffff,true),
   HOWTO(R_SPARC_HIPLT22,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_HIPLT22",  false,0,0x00000000,true),
   HOWTO(R_SPARC_LOPLT10,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_LOPLT10",  false,0,0x00000000,true),
   HOWTO(R_SPARC_PCPLT32,   0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_PCPLT32",  false,0,0x00000000,true),
@@ -146,6 +146,7 @@ static const struct elf_reloc_map sparc_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_SPARC_NONE, },
   { BFD_RELOC_16, R_SPARC_16, },
+  { BFD_RELOC_16_PCREL, R_SPARC_DISP16 },
   { BFD_RELOC_8, R_SPARC_8 },
   { BFD_RELOC_8_PCREL, R_SPARC_DISP8 },
   { BFD_RELOC_CTOR, R_SPARC_32 },
@@ -154,6 +155,7 @@ static const struct elf_reloc_map sparc_reloc_map[] =
   { BFD_RELOC_HI22, R_SPARC_HI22 },
   { BFD_RELOC_LO10, R_SPARC_LO10, },
   { BFD_RELOC_32_PCREL_S2, R_SPARC_WDISP30 },
+  { BFD_RELOC_SPARC_PLT32, R_SPARC_PLT32 },
   { BFD_RELOC_SPARC22, R_SPARC_22 },
   { BFD_RELOC_SPARC13, R_SPARC_13 },
   { BFD_RELOC_SPARC_GOT10, R_SPARC_GOT10 },
@@ -494,6 +496,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 
 	  break;
 
+	case R_SPARC_PLT32:
 	case R_SPARC_WPLT30:
 	  /* This symbol requires a procedure linkage table entry.  We
              actually build the entry in adjust_dynamic_symbol,
@@ -507,6 +510,8 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
                  reloc for a local symbol if you assemble a call from
                  one section to another when using -K pic.  We treat
                  it as WDISP30.  */
+	      if (ELF32_R_TYPE (rel->r_info) != R_SPARC_WPLT30)
+		goto r_sparc_plt32;
 	      break;
 	    }
 
@@ -519,6 +524,8 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 
+	  if (ELF32_R_TYPE (rel->r_info) != R_SPARC_WPLT30)
+	    goto r_sparc_plt32;
 	  break;
 
 	case R_SPARC_PC10:
@@ -566,6 +573,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	  if (h != NULL)
 	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
+	r_sparc_plt32:
 	  if (info->shared && (sec->flags & SEC_ALLOC))
 	    {
 	      /* When creating a shared object, we must copy these
@@ -1127,6 +1135,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
+      boolean is_plt = false;
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
@@ -1182,7 +1191,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if ((r_type == R_SPARC_WPLT30
+	      if (((r_type == R_SPARC_WPLT30
+		    || r_type == R_SPARC_PLT32)
 		   && h->plt.offset != (bfd_vma) -1)
 		  || ((r_type == R_SPARC_GOT10
 		       || r_type == R_SPARC_GOT13
@@ -1351,6 +1361,13 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  break;
 
+	case R_SPARC_PLT32:
+	  if (h == NULL || h->plt.offset == (bfd_vma) -1)
+	    {
+	      r_type = R_SPARC_32;
+	      goto r_sparc_plt32;
+	    }
+	  /* Fall through.  */
 	case R_SPARC_WPLT30:
 	  /* Relocation is to the entry for this symbol in the
              procedure linkage table.  */
@@ -1379,6 +1396,12 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (splt->output_section->vma
 			+ splt->output_offset
 			+ h->plt.offset);
+	  if (r_type == R_SPARC_PLT32)
+	    {
+	      r_type = R_SPARC_32;
+	      is_plt = true;
+	      goto r_sparc_plt32;
+	    }
 	  break;
 
 	case R_SPARC_PC10:
@@ -1409,6 +1432,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SPARC_LO10:
 	case R_SPARC_UA16:
 	case R_SPARC_UA32:
+	r_sparc_plt32:
 	  if (info->shared
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC))
@@ -1476,7 +1500,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if the symbol was marked to
                  become local.  */
-	      else if (h != NULL
+	      else if (h != NULL && ! is_plt
 		       && ((! info->symbolic && h->dynindx != -1)
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
@@ -1496,7 +1520,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      long indx;
 
-		      if (h == NULL)
+		      if (is_plt)
+			sec = splt;
+		      else if (h == NULL)
 			sec = local_sections[r_symndx];
 		      else
 			{
