@@ -1,3 +1,9 @@
+Thu Jun  4 08:25:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_compare_command): New function, new command.
+	Compare object file binary image with corresponding memory on
+	remote target.  Report differences.
+
 Tue Jun  2 19:05:04 1998  Mark Alexander  <marka@cygnus.com>
 
 	* sparc-tdep.c (sparc_target_architecture_hook): Set target
