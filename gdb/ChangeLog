@@ -1,5 +1,24 @@
 2003-12-01  Andrew Cagney  <cagney@redhat.com>
 
+	Obsolete old MIPS SVr3 and SVr4 systems.
+	* NEWS: Mention obsoleted systems.
+	* configure.tgt: Mark mips*-*-sysv4* as obsolete.
+	* configure.host: Mark mips-dec-*, mips-little-*, mips-sony-*,
+	mips-*-sysv4*, mips-*-sysv*, mips-*-riscos* and mips-*-mach3* as
+	obsolete.
+	* config/mips/decstation.mh: Mark as obsolete.
+	* config/mips/littlemips.mh: Mark as obsolete.
+	* config/mips/nm-mips.h: Mark as obsolete.
+	* config/mips/xm-mips.h: Mark as obsolete.
+	* config/mips/news-mips.mh: Mark as obsolete.
+	* config/mips/nm-news-mips.h: Mark as obsolete.
+	* config/mips/riscos.mh: Mark as obsolete.
+	* config/mips/nm-riscos.h: Mark as obsolete.
+	* config/mips/xm-riscos.h: Mark as obsolete.
+	* config/mips/mipsv4.mt: Mark as obsolete.
+	* config/mips/tm-mipsv4.h: Mark as obsolete.
+	* config/mips/xm-mipsv4.h: Mark as obsolete.
+
 	Obsolete old m68k systems.
 	* configure.host: Mark m68*-sun-*, m68*-sun-sunos4*,
 	m68*-sun-sunos3*, m68*-motorola-*, m68*-*-sysv4*, m68*-*-lynxos*,

@@ -37,6 +37,10 @@ Sun 2, running SunOS 4				m68000-*-sunos4*
 Motorola 680x0 running LynxOS			m68*-*-lynxos*
 AT&T 3b1/Unix pc				m68*-att-*
 Bull DPX2 (68k, System V release 3)		m68*-bull-sysv*
+decstation					mips-dec-* mips-little-*
+riscos						mips-*-riscos* mips-*-sysv*
+sonymips					mips-sony-*
+sysv					mips*-*-sysv4* (IRIX 5/6 not included)
 
 * REMOVED configurations and files
 

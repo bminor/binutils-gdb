@@ -91,17 +91,17 @@ m68*-*-netbsd*)		gdb_host=nbsdaout ;;
 # OBSOLETE m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 # OBSOLETE m68*-sun-*)		gdb_host=sun3os4 ;;
 
-mips-dec-*)		gdb_host=decstation ;;
-mips-little-*)		gdb_host=littlemips ;;
+# OBSOLETE mips-dec-*)		gdb_host=decstation ;;
+# OBSOLETE mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;
-mips-sony-*)		gdb_host=news-mips ;;
+# OBSOLETE mips-sony-*)		gdb_host=news-mips ;;
 mips*-*-linux*)		gdb_host=linux ;;
 mips*-*-netbsd*)	gdb_host=nbsd ;;
-mips-*-mach3*)		gdb_host=mipsm3 ;;
-mips-*-sysv4*)		gdb_host=mipsv4 ;;
-mips-*-sysv*)		gdb_host=riscos ;;
-mips-*-riscos*)		gdb_host=riscos ;;
+# OBSOLETE mips-*-mach3*)		gdb_host=mipsm3 ;;
+# OBSOLETE mips-*-sysv4*)		gdb_host=mipsv4 ;;
+# OBSOLETE mips-*-sysv*)		gdb_host=riscos ;;
+# OBSOLETE mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
