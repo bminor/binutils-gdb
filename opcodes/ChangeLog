@@ -1,5 +1,20 @@
 Mon Sep  4 14:28:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Run ../bfd/configure.host before AC_PROG_CC.
+	Subsitute CFLAGS and AR.  Call AC_PROG_INSTALL.  Don't substitute
+	host_makefile_frag or frags.
+	* aclocal.m4: New file.
+	* configure: Rebuild.
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_PROGRAM): Set to @INSTALL_PROGRAM@.
+	(INSTALL_DATA): Set to @INSTALL_DATA@.
+	(AR): Set to @AR@.
+	(AR_FLAGS): Set to rc rather than qc.
+	(CC): Define as @CC@.
+	(CFLAGS): Set to @CFLAGS@.
+	(@host_makefile_frag@): Remove.
+	(config.status): Remove dependency upon @frags@.
+
 	* configure.in: ../bfd/config.bfd now just sets shell variables.
 	Use them rather than looking through target Makefile fragments.
 	* configure: Rebuild.

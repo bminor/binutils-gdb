@@ -41,6 +41,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+aclocal.m4
 alpha-dis.c
 alpha-opc.h
 arm-dis.c
