@@ -3982,7 +3982,7 @@ build_instruction (doisa, features, mips16, insn)
       printf("for(i=0;i<WORDS_IN_MMI_REGS;i++)\n");
       printf("  {\n");
       printf("  int x = RT_UW(i);\n");
-      printf("  GPR_UW(destreg,i) = ((x & (1  << 15)) << (24 - 15))  \n");
+      printf("  GPR_UW(destreg,i) = ((x & (1  << 15)) << (31 - 15))  \n");
       printf("                    | ((x & (31 << 10)) << (19 - 10))  \n");
       printf("                    | ((x & (31 << 5))  << (11 - 5))   \n");
       printf("                    | ((x & (31 << 0))  << (3  - 0));  \n");
