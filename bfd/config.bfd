@@ -15,18 +15,18 @@ cpu=`echo $canon | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 
 case "${canon}" in
   alpha-*-*)		bfd_name=alphaosf ;;
-  a29k-*-ebmon)		bfd_name=a29k-coff ;;
-  a29k-*-udi)		bfd_name=a29k-coff ;;
-  a29k-*-aout)		bfd_name=a29k-aout ;;
-  a29k-*-coff)		bfd_name=a29k-coff ;;
-  a29k-*-sym1)		bfd_name=a29k-coff ;;
+  a29k-*-ebmon*)	bfd_name=a29k-coff ;;
+  a29k-*-udi*)		bfd_name=a29k-coff ;;
+  a29k-*-aout*)		bfd_name=a29k-aout ;;
+  a29k-*-coff*)		bfd_name=a29k-coff ;;
+  a29k-*-sym1*)		bfd_name=a29k-coff ;;
   h8300*-*-*)		bfd_name=h8300-coff ;;
   h8500-*-*)		bfd_name=h8500-coff ;;
   sh-*-*)		bfd_name=sh-coff ;;
   hppa*-*-bsd*)		bfd_name=hppabsd ;;
   hppa*-*-hpux*)	bfd_name=hppahpux ;;
   hppa*-*-hiux*)	bfd_name=hppahpux ;;
-  hppa*-*-osf)		bfd_name=hppa-elf ;;
+  hppa*-*-osf*)		bfd_name=hppa-elf ;;
   i[34]86-*-sysv4*)	bfd_name=i386-elf ;;
   i[34]86-*-solaris2*)	bfd_name=i386-elf ;;
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
@@ -43,17 +43,18 @@ case "${canon}" in
   i[34]86-*-mach*)	bfd_name=i386-mach3 ;;
   i[34]86-*-osf1mk*)	bfd_name=i386-mach3 ;;
   i[34]86-none-*)	bfd_name=i386-coff ;;
-  i960-*-vxworks)	bfd_name=i960-bout ;;
-  i960-*-aout)		bfd_name=i960-bout ;;
-  i960-*-bout)		bfd_name=i960-bout ;;
+  i960-*-vxworks*)	bfd_name=i960-bout ;;
+  i960-*-aout*)		bfd_name=i960-bout ;;
+  i960-*-bout*)		bfd_name=i960-bout ;;
   i960-*-nindy*)	bfd_name=i960-bout ;;
+  m68*-apollo-bsd*)	bfd_name=apollo ;;
   m68*-bull-sysv*)	bfd_name=u68k-coff ;;
   m68*-hp-bsd*)		bfd_name=hp300bsd ;;
-  m68*-*-aout)		bfd_name=m68k-aout ;;
-  m68*-*-coff)		bfd_name=m68k-coff ;;
+  m68*-*-aout*)		bfd_name=m68k-aout ;;
+  m68*-*-coff*)		bfd_name=m68k-coff ;;
   m68*-*-hpux*)		bfd_name=hp300hpux ;;
   m68*-*-lynxos*)	bfd_name=m68k-lynx ;;
-  m68*-*-os68k)		bfd_name=m68k-aout ;;
+  m68*-*-os68k*)	bfd_name=m68k-aout ;;
   m68*-*-sunos*)	bfd_name=m68k-aout ;;
   m68*-*-sysv*)		bfd_name=m68k-coff ;;
   m68*-*-vxworks*)	bfd_name=m68k-aout ;;
@@ -87,21 +88,21 @@ case "${canon}" in
 #	end-sanitize-v9
   sparc*-*-*)		bfd_name=sparc-aout ;;
   tahoe-*-*)		bfd_name=tahoe ;;
-  vax-*-vms)		bfd_name=vax-vms ;;
+  vax-*-vms*)		bfd_name=vax-vms ;;
   vax-*-*)		bfd_name=vax ;;
   we32k-*-*)		bfd_name=we32k ;;
   z8k*-*-*)		bfd_name=z8k-coff ;;
 
-  *-*-aout)		bfd_name=${cpu}-aout ;;
+  *-*-aout*)		bfd_name=${cpu}-aout ;;
   *-*-bsd*)		bfd_name=${cpu}-aout ;;
   *-*-netware*)		bfd_name=${cpu}-nlm ;;
   *-*-sysv4*)		bfd_name=${cpu}-elf ;;
   *-*-solaris2*)	bfd_name=${cpu}-elf ;;
-  *-*-go32)		bfd_name=${cpu}-aout ;;
+  *-*-go32*)		bfd_name=${cpu}-aout ;;
   *-*-sysv*)		bfd_name=${cpu}-coff ;;
 
-  *-*-aout64)		bfd_name=${cpu}-aout64 ; target64=true ;;
-  *-*-elf64)		bfd_name=${cpu}-elf64 ; target64=true ;;
+  *-*-aout64*)		bfd_name=${cpu}-aout64 ; target64=true ;;
+  *-*-elf64*)		bfd_name=${cpu}-elf64 ; target64=true ;;
 
   *-adobe-*)		bfd_name=adobe ;;
   *-sony-*)		bfd_name=news ;;
