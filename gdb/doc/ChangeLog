@@ -1,3 +1,8 @@
+Thu Feb  4 13:56:46 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* gdbint.texinfo: Slightly expand section on supporting a new
+	object file format.
+
 Thu Feb  4 01:49:04 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (refcard.ps, lrefcard.ps):  Remove psref.tex
