@@ -1,3 +1,17 @@
+Mon Oct  5 17:50:16 1992  Per Bothner  (bothner@cygnus.com)
+
+	* gen-c-prog.awk:  New awk script, lightly changed from
+	previously deleted make-c-prog.awk.  Converts a text file
+	to a c function that prints that text.
+	* flat_bl.m, fsf_callg_bl.m, bsd_callg_bl.m:  New files.
+	Inputs to gen-c-prog.awk, containing text describing
+	gprof output.
+	* blurbs.c:  Removed.  Use *_bl.c instead.
+	* Makefile.in: Use gen-cprog.awk to generate *_bl.c files
+	from *_bl.m files.  Also, improve *clean rules.
+	* printgprof.c (printgprof):  Usw new function names from *_bl.c.
+	
+
 Sun Aug 30 19:54:53 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* gprof.h, gprof.c, printfgprof.c:  Add support for two

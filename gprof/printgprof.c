@@ -212,7 +212,7 @@ printgprof(timesortnlp)
 	 *	Print out the structured profiling list
 	 */
     if ( bflag && bsd_style_output ) {
-	callg_blurb(stdout);
+	bsd_callg_blurb(stdout);
     }
     gprofheader();
     for ( index = 0 ; index < nname + ncycle ; index ++ ) {
@@ -246,7 +246,7 @@ printgprof(timesortnlp)
     }
     cfree( timesortnlp );
     if ( bflag && !bsd_style_output) {
-	callg_blurb(stdout);
+	fsf_callg_blurb(stdout);
     }
 }
 

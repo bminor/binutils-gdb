@@ -27,12 +27,15 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 arcs.c
-blurbs.c
+bsd_callg_bl.m
 config
 configure.in
 dfn.c
 dummy.c
 dummy.h
+flat_bl.m
+fsf_callg_bl.m
+gen-c-prog.awk
 gmon.h
 gprof.1
 gprof.c

@@ -26,16 +26,30 @@ SRCS=	gprof.c arcs.c dfn.c lookup.c $(MACHINE).c hertz.c \
 	printgprof.c printlist.c
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-OBJS=	blurbs.o gprof.o arcs.o dfn.o lookup.o $(MACHINE).o hertz.o \
-	printgprof.o printlist.o
+OBJS=	gprof.o arcs.o dfn.o lookup.o $(MACHINE).o hertz.o \
+	printgprof.o printlist.o \
+	flat_bl.o bsd_callg_bl.o fsf_callg_bl.o
+
+# Files that can be generated, but should be included in distribution.
+DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
 CFLAGS=	
 .c.o:
 	$(CC) -c $(CFLAGS) -I$(srcdir) -I$(srcdir)/../include -DMACHINE_H=\"$(MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
 
-all:	$(PROG)
+all:	diststuff $(PROG)
 
 .PHONY: check info install-info
+.SUFFIXES: .m
+
+.m.c:
+	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \
+	    FUNCTION=`(echo $*|sed -e 's/_bl//')`_blurb \
+	    FILE=$*.m $(srcdir)/$*.m
+
+diststuff: $(DISTSTUFF)
+	
+
 check:
 info:
 install-info:
@@ -53,8 +67,14 @@ install: all
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
 
-clean:
-	-rm -f $(OBJS) core gprof nohup.out
+mostlyclean:
+	-rm -f *.o core gprof nohup.out
+clean: mostlyclean
+	-rm -f gprof
+distclean: clean
+	-rm -f config.status Makefile
+realclean: distclean
+	-rm -f $(DISTSTUFF)
 
 Makefile : Makefile.in
 	sh config.status
@@ -69,4 +89,6 @@ $(MACHINE).o: $(MACHINE).c
 hertz.o: hertz.c
 printgprof.o: printgprof.c
 printlist.o: printlist.c
-blurbs.o: blurbs.c
+flat_bl.o: flat_bl.c
+bsd_callg_bl.o: bsd_callg_bl.c
+fsf_callg_bl.o: fsf_callg_bl.c
