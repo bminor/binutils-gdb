@@ -2261,32 +2261,35 @@ elf_sort_hdrs (arg1, arg2)
   const Elf_Internal_Shdr *hdr1 = *(const Elf_Internal_Shdr **) arg1;
   const Elf_Internal_Shdr *hdr2 = *(const Elf_Internal_Shdr **) arg2;
 
-#define TOEND(x) (((x)->sh_flags &  SHF_ALLOC)==0)
+#define TOEND(x) (((x)->sh_flags & SHF_ALLOC)==0)
 
-  if (TOEND(hdr1))
-    if (TOEND(hdr2))
+  if (TOEND (hdr1))
+    if (TOEND (hdr2))
       return 0;
     else 
       return 1;
 
-  if (TOEND(hdr2))
-	return -1;
+  if (TOEND (hdr2))
+    return -1;
 
-      if (hdr1->sh_addr < hdr2->sh_addr)
-	return -1;
-      else if (hdr1->sh_addr > hdr2->sh_addr)
-	return 1;
-      /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
-         The main loop in map_program_segments requires this. */
-      ret = (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
-      if (ret != 0)
-	return ret;
+  if (hdr1->sh_addr < hdr2->sh_addr)
+    return -1;
+  else if (hdr1->sh_addr > hdr2->sh_addr)
+    return 1;
+
+  /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
+     The main loop in map_program_segments requires this. */
+
+  ret = (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
+
+  if (ret != 0)
+    return ret;
   if (hdr1->sh_size < hdr2->sh_size)
-	return -1;
+    return -1;
   if (hdr1->sh_size > hdr2->sh_size)
-	return 1;
-      return 0;
-    }
+    return 1;
+  return 0;
+}
 
 
 
@@ -4696,7 +4699,9 @@ elf_link_add_object_symbols (abfd, info)
       hlook->weakdef = NULL;
 
       BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
-		  || hlook->root.type == bfd_link_hash_defweak);
+		  || hlook->root.type == bfd_link_hash_defweak
+		  || hlook->root.type == bfd_link_hash_common
+		  || hlook->root.type == bfd_link_hash_indirect);
       slook = hlook->root.u.def.section;
       vlook = hlook->root.u.def.value;
 

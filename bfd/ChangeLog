@@ -1,8 +1,9 @@
 Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Correct
-	BFD_ASSERT to handle __start_SECNAME symbols automatically defined
-	by the linker.
+	* elfcode.h (elf_link_add_object_symbols): Permit common and
+	indirect symbols in weakdefs BFD_ASSERT.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Simplify
+	BFD_ASSERT to permit some legal, but odd, cases.
 	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
 	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
 
@@ -241,8 +242,6 @@ Wed May 24 10:52:01 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* linker.c (_bfd_generic_link_output_symbols): Cope with
 	indirect symbols.
-
-	pr ld/6997
 
 	* elf32-i386.c (elf_i386_relocate_section): Give error
 	message when linking to a shared reloc which isn't there.

@@ -581,22 +581,14 @@ elf_m68k_adjust_dynamic_symbol (info, h)
   dynobj = elf_hash_table (info)->dynobj;
 
   /* Make sure we know what is going on here.  */
-  BFD_ASSERT (dynobj != NULL);
-  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
-	      || ((h->elf_link_hash_flags
-		   & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		  && (h->elf_link_hash_flags
-		      & ELF_LINK_HASH_REF_REGULAR) != 0
-		  && (h->elf_link_hash_flags
-		      & ELF_LINK_HASH_DEF_REGULAR) == 0
-		  && (h->root.type == bfd_link_hash_defined
-		      || h->root.type == bfd_link_hash_defweak)
-		  && (h->root.u.def.section->owner == NULL
-		      || ((elf_elfheader (h->root.u.def.section->owner)->e_type
-			   == ET_DYN)
-			  && (bfd_get_flavour (h->root.u.def.section->owner)
-			      == bfd_target_elf_flavour)
-			  && h->root.u.def.section->output_section == NULL))));
+  BFD_ASSERT (dynobj != NULL
+	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+		  || ((h->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_REF_REGULAR) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
