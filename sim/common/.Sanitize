@@ -22,7 +22,7 @@ else
         lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
-am30_files="dv-core.c dv-pal.c dv-glue.c hw-base.c hw-base.h hw-device.c hw-device.h hw-ports.c hw-ports.h hw-properties.c hw-properties.h hw-tree.c hw-tree.h sim-hw.h"
+am30_files="dv-core.c dv-pal.c dv-glue.c hw-base.c hw-base.h hw-device.c hw-device.h hw-ports.c hw-ports.h hw-properties.c hw-properties.h hw-tree.c hw-tree.h sim-hw.h sim-hw.c"
 if ( echo $* | grep keep\-am30 > /dev/null ) ; then
         keep_these_too="${am30_files} ${keep_these_too}"
 else
@@ -154,7 +154,7 @@ else
         done
 fi
 
-am30_files="ChangeLog"
+am30_files="ChangeLog sim-module.c sim-base.h Make-common.in"
 if ( echo $* | grep keep\-am30 > /dev/null ) ; then
         for i in $am30_files ; do
                 if test ! -d $i && (grep sanitize-am30 $i > /dev/null) ; then

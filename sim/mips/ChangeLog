@@ -1,3 +1,7 @@
+Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Mar 27 15:01:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (mips_option_handler): Iterate over MAX_NR_PROCESSORS.

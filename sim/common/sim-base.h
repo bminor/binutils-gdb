@@ -230,6 +230,13 @@ typedef struct {
   struct sim_breakpoint *breakpoints;
 #define STATE_BREAKPOINTS(sd) ((sd)->base.breakpoints)
 
+  /* start-sanitize-am30 */
+#if WITH_HW
+  struct sim_hw *hw;
+#define STATE_HW(sd) ((sd)->base.hw)
+#endif
+
+  /* end-sanitize-am30 */
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch
      miscompilation errors.  */
