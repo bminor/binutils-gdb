@@ -1,3 +1,8 @@
+2002-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldgram.y (memory_spec): Provide empty action.
+	(section <NAME>): Likewise.
+
 2002-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (MAXPAGESIZE): Set to 0x10000.
