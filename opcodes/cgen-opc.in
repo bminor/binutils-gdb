@@ -30,6 +30,14 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "@prefix@-opc.h"
 #include "opintl.h"
 
+/* The hash functions are recorded here to help keep assembler code out of
+   the disassembler and vice versa.  */
+
+static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int asm_hash_insn PARAMS ((const char *));
+static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int dis_hash_insn PARAMS ((const char *, unsigned long));
+
 /* Look up instruction INSN_VALUE and extract its fields.
    INSN, if non-null, is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
@@ -42,7 +50,8 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    wasn't recognized.  */
 
 const CGEN_INSN *
-@arch@_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
+@arch@_cgen_lookup_insn (od, insn, insn_value, length, fields, alias_p)
+     CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
      cgen_insn_t insn_value;
      int length;
@@ -62,13 +71,13 @@ const CGEN_INSN *
 	  buf[0] = insn_value;
 	  break;
 	case 16:
-	  if (cgen_current_endian == CGEN_ENDIAN_BIG)
+	  if (CGEN_OPCODE_ENDIAN (od) == CGEN_ENDIAN_BIG)
 	    bfd_putb16 (insn_value, buf);
 	  else
 	    bfd_putl16 (insn_value, buf);
 	  break;
 	case 32:
-	  if (cgen_current_endian == CGEN_ENDIAN_BIG)
+	  if (CGEN_OPCODE_ENDIAN (od) == CGEN_ENDIAN_BIG)
 	    bfd_putb32 (insn_value, buf);
 	  else
 	    bfd_putl32 (insn_value, buf);
@@ -83,7 +92,7 @@ const CGEN_INSN *
       /* The instructions are stored in hash lists.
 	 Pick the first one and keep trying until we find the right one.  */
 
-      insn_list = CGEN_DIS_LOOKUP_INSN (buf, insn_value);
+      insn_list = CGEN_DIS_LOOKUP_INSN (od, buf, insn_value);
       while (insn_list != NULL)
 	{
 	  insn = insn_list->insn;
@@ -97,7 +106,7 @@ const CGEN_INSN *
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
 		  /* ??? 0 is passed for `pc' */
-		  int elength = (*CGEN_EXTRACT_FN (insn)) (insn, NULL,
+		  int elength = (*CGEN_EXTRACT_FN (insn)) (od, insn, NULL,
 							   insn_value, fields,
 							   (bfd_vma) 0);
 		  if (elength > 0)
@@ -124,7 +133,7 @@ const CGEN_INSN *
 	abort ();
 
       /* ??? 0 is passed for `pc' */
-      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields,
+      length = (*CGEN_EXTRACT_FN (insn)) (od, insn, NULL, insn_value, fields,
 					  (bfd_vma) 0);
       /* Sanity check: must succeed.
 	 Could relax this later if it ever proves useful.  */
@@ -141,7 +150,8 @@ const CGEN_INSN *
    in.  */
 
 void
-@arch@_cgen_get_insn_operands (insn, fields, indices)
+@arch@_cgen_get_insn_operands (od, insn, fields, indices)
+     CGEN_OPCODE_DESC od;
      const CGEN_INSN * insn;
      const CGEN_FIELDS * fields;
      int *indices;
@@ -172,7 +182,8 @@ void
    recognized.  */
 
 const CGEN_INSN *
-@arch@_cgen_lookup_get_insn_operands (insn, insn_value, length, indices)
+@arch@_cgen_lookup_get_insn_operands (od, insn, insn_value, length, indices)
+     CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
      cgen_insn_t insn_value;
      int length;
@@ -182,11 +193,11 @@ const CGEN_INSN *
 
   /* Pass non-zero for ALIAS_P only if INSN != NULL.
      If INSN == NULL, we want a real insn.  */
-  insn = @arch@_cgen_lookup_insn (insn, insn_value, length, &fields,
+  insn = @arch@_cgen_lookup_insn (od, insn, insn_value, length, &fields,
 				  insn != NULL);
   if (! insn)
     return NULL;
 
-  @arch@_cgen_get_insn_operands (insn, &fields, indices);
+  @arch@_cgen_get_insn_operands (od, insn, &fields, indices);
   return insn;
 }

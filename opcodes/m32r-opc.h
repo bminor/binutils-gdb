@@ -226,7 +226,15 @@ typedef enum cgen_insn_type {
 /* start-sanitize-m32rx */
  , M32R_INSN_MACLO_A
 /* end-sanitize-m32rx */
- , M32R_INSN_MACWHI, M32R_INSN_MACWLO, M32R_INSN_MUL, M32R_INSN_MULHI
+ , M32R_INSN_MACWHI
+/* start-sanitize-m32rx */
+ , M32R_INSN_MACWHI_A
+/* end-sanitize-m32rx */
+ , M32R_INSN_MACWLO
+/* start-sanitize-m32rx */
+ , M32R_INSN_MACWLO_A
+/* end-sanitize-m32rx */
+ , M32R_INSN_MUL, M32R_INSN_MULHI
 /* start-sanitize-m32rx */
  , M32R_INSN_MULHI_A
 /* end-sanitize-m32rx */
@@ -234,7 +242,15 @@ typedef enum cgen_insn_type {
 /* start-sanitize-m32rx */
  , M32R_INSN_MULLO_A
 /* end-sanitize-m32rx */
- , M32R_INSN_MULWHI, M32R_INSN_MULWLO, M32R_INSN_MV, M32R_INSN_MVFACHI
+ , M32R_INSN_MULWHI
+/* start-sanitize-m32rx */
+ , M32R_INSN_MULWHI_A
+/* end-sanitize-m32rx */
+ , M32R_INSN_MULWLO
+/* start-sanitize-m32rx */
+ , M32R_INSN_MULWLO_A
+/* end-sanitize-m32rx */
+ , M32R_INSN_MV, M32R_INSN_MVFACHI
 /* start-sanitize-m32rx */
  , M32R_INSN_MVFACHI_A
 /* end-sanitize-m32rx */
@@ -387,16 +403,16 @@ extern CGEN_KEYWORD m32r_cgen_opval_h_cr;
 extern CGEN_KEYWORD m32r_cgen_opval_h_accums;
 /* end-sanitize-m32rx */
 
-#define CGEN_INIT_PARSE() \
+#define CGEN_INIT_PARSE(od) \
 {\
 }
-#define CGEN_INIT_INSERT() \
+#define CGEN_INIT_INSERT(od) \
 {\
 }
-#define CGEN_INIT_EXTRACT() \
+#define CGEN_INIT_EXTRACT(od) \
 {\
 }
-#define CGEN_INIT_PRINT() \
+#define CGEN_INIT_PRINT(od) \
 {\
 }
 
