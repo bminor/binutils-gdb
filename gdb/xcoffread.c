@@ -1598,19 +1598,26 @@ process_xcoff_symbol (cs, objfile)
       break;
 #endif
 
-    case C_DECL:      			/* a type decleration?? */
-
-      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
-      if (sym != NULL)
-	SYMBOL_SECTION (sym) = cs->c_secnum;
-      return sym;
-
     case C_GSYM:
       add_stab_to_list (name, &global_stabs);
       break;
 
+    case C_BCOMM:
+      common_block_start (cs->c_name, objfile);
+      break;
+
+    case C_ECOMM:
+      common_block_end (objfile);
+      break;
+
+    default:
+      complain (&storclass_complaint, cs->c_sclass);
+      /* FALLTHROUGH */
+
+    case C_DECL:
     case C_PSYM:
     case C_RPSYM:
+    case C_ECOML:
 
       sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
       if (sym != NULL)
@@ -1624,7 +1631,7 @@ process_xcoff_symbol (cs, objfile)
 	/* If we are going to use Sun dbx's define_symbol(), we need to
 	   massage our stab string a little. Change 'V' type to 'S' to be
 	   comparible with Sun. */
-        /* FIXME: I believe this is to avoid a Sun-specific hack somewhere.
+        /* FIXME: Is this to avoid a Sun-specific hack somewhere?
 	   Needs more investigation.  */
 
 	if (*name == ':' || (pp = (char *) strchr(name, ':')) == NULL)
@@ -1694,10 +1701,6 @@ process_xcoff_symbol (cs, objfile)
 	  complain (&rsym_complaint, name);
 	  return NULL;
 	}
-
-    default	:
-      complain (&storclass_complaint, cs->c_sclass);
-      return NULL;
     }
   }
   return sym2;

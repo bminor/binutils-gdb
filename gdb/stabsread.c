@@ -3388,6 +3388,103 @@ read_args (pp, end, objfile)
   memcpy (rval, types, n * sizeof (struct type *));
   return rval;
 }
+
+/* Common block handling.  */
+
+/* List of symbols declared since the last BCOMM.  This list is a tail
+   of local_symbols.  When ECOMM is seen, the symbols on the list
+   are noted so their proper addresses can be filled in later,
+   using the common block base address gotten from the assembler
+   stabs.  */
+
+static struct pending *common_block;
+static int common_block_i;
+
+/* Name of the current common block.  We get it from the BCOMM instead of the
+   ECOMM to match IBM documentation (even though IBM puts the name both places
+   like everyone else).  */
+static char *common_block_name;
+
+/* Process a N_BCOMM symbol.  The storage for NAME is not guaranteed
+   to remain after this function returns.  */
+
+void
+common_block_start (name, objfile)
+     char *name;
+     struct objfile *objfile;
+{
+  if (common_block_name != NULL)
+    {
+      static struct complaint msg = {
+	"Invalid symbol data: common block within common block",
+	0, 0};
+      complain (&msg);
+    }
+  common_block = local_symbols;
+  common_block_i = local_symbols ? local_symbols->nsyms : 0;
+  common_block_name = obsavestring (name, strlen (name),
+				    &objfile -> symbol_obstack);
+}
+
+/* Process a N_ECOMM symbol.  */
+
+void
+common_block_end (objfile)
+     struct objfile *objfile;
+{
+  /* Symbols declared since the BCOMM are to have the common block
+     start address added in when we know it.  common_block and
+     common_block_i point to the first symbol after the BCOMM in
+     the local_symbols list; copy the list and hang it off the
+     symbol for the common block name for later fixup.  */
+  int i;
+  struct symbol *sym;
+  struct pending *new = 0;
+  struct pending *next;
+  int j;
+
+  if (common_block_name == NULL)
+    {
+      static struct complaint msg = {"ECOMM symbol unmatched by BCOMM", 0, 0};
+      complain (&msg);
+      return;
+    }
+
+  sym = (struct symbol *) 
+    obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
+  memset (sym, 0, sizeof (struct symbol));
+  SYMBOL_NAME (sym) = common_block_name;
+  SYMBOL_CLASS (sym) = LOC_BLOCK;
+
+  /* Now we copy all the symbols which have been defined since the BCOMM.  */
+
+  /* Copy all the struct pendings before common_block.  */
+  for (next = local_symbols;
+       next != NULL && next != common_block;
+       next = next->next)
+    {
+      for (j = 0; j < next->nsyms; j++)
+	add_symbol_to_list (next->symbol[j], &new);
+    }
+
+  /* Copy however much of COMMON_BLOCK we need.  If COMMON_BLOCK is
+     NULL, it means copy all the local symbols (which we already did
+     above).  */
+
+  if (common_block != NULL)
+    for (j = common_block_i; j < common_block->nsyms; j++)
+      add_symbol_to_list (common_block->symbol[j], &new);
+
+  SYMBOL_NAMESPACE (sym) = (enum namespace)((long) new);
+
+  /* Should we be putting local_symbols back to what it was?
+     Does it matter?  */
+
+  i = hashname (SYMBOL_NAME (sym));
+  SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
+  global_sym_chain[i] = sym;
+  common_block_name = NULL;
+}
 
 /* Add a common block's start address to the offset of each symbol
    declared to be in it (by being between a BCOMM/ECOMM pair that uses
@@ -3624,6 +3721,9 @@ void start_stabs ()
   n_this_object_header_files = 1;
   type_vector_length = 0;
   type_vector = (struct type **) 0;
+
+  /* FIXME: If common_block_name is not already NULL, we should complain().  */
+  common_block_name = NULL;
 }
 
 /* Call after end_symtab() */

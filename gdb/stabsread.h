@@ -44,6 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 EXTERN struct symbol *global_sym_chain[HASHSIZE];
 
+extern void common_block_start PARAMS ((char *, struct objfile *));
+extern void common_block_end PARAMS ((struct objfile *));
+
 /* Kludge for xcoffread.c */
 
 struct pending_stabs
@@ -54,15 +57,6 @@ struct pending_stabs
 };
 
 EXTERN struct pending_stabs *global_stabs;
-
-/* List of symbols declared since the last BCOMM.  This list is a tail
-   of local_symbols.  When ECOMM is seen, the symbols on the list
-   are noted so their proper addresses can be filled in later,
-   using the common block base address gotten from the assembler
-   stabs.  */
-
-EXTERN struct pending *common_block;
-EXTERN int common_block_i;
 
 /* The type code that process_one_symbol saw on its previous invocation.
    Used to detect pairs of N_SO symbols. */

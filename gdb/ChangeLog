@@ -1,3 +1,16 @@
+Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.h, stabsread.c, dbxread.c (common_block*, copy_pending):
+	Move common block handling from dbxread.c to stabsread.c.
+	Use the name from the BCOMM instead of the ECOMM.
+	Allocate things on the symbol_obstack.
+	* xcoffread.c (process_xcoff_symbol): Process C_BCOMM, C_ECOMM,
+	and C_ECOML.  On unrecognized storage classes, go ahead and call
+	define_symbol (after the complaint).
+
+	* dbxread.c (process_one_symbol): Don't relocate 'S' symbols by
+	the text offset.
+
 Tue Oct 12 12:33:09 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* osfsolib.c (solib_create_inferior_hook):  Reset stop_soon_quietly
