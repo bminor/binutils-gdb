@@ -40,7 +40,7 @@ AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h stdlib.h sys/procfs.h link.h endian.h)
+AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h stdlib.h sys/procfs.h link.h endian.h objlist.h)
 AC_HEADER_STAT
 
 AC_C_CONST

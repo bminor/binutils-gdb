@@ -389,6 +389,15 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		    default:
 		      ms_type = mst_abs;
 		    }
+
+		  /* If it is an Irix dynamic symbol, skip section name
+		     symbols, relocate all others. */
+		  if (ms_type != mst_abs)
+		    {
+		      if (sym->name[0] == '.')
+			continue;
+		      symaddr += addr;
+		    }
 		}
 	      else if (sym -> section -> flags & SEC_CODE)
 		{
@@ -603,7 +612,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
      special ELF sections.  We first have to find them... */
 
   bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
-  if (dwarf2_has_info (abfd) && !offset)
+  if (dwarf2_has_info (abfd))
     {
       /* DWARF 2 sections */
       dwarf2_build_psymtabs (objfile, section_offsets, mainline);

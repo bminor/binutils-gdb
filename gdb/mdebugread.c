@@ -254,8 +254,8 @@ static int cur_sdx;
 /* Note how much "debuggable" this image is.  We would like
    to see at least one FDR with full symbols */
 
-static max_gdbinfo;
-static max_glevel;
+static int max_gdbinfo;
+static int max_glevel;
 
 /* When examining .o files, report on undefined symbols */
 
@@ -2745,12 +2745,12 @@ parse_partial_symbols (objfile, section_offsets)
 		    add_psymbol_to_list (name, strlen (name),
 					 VAR_NAMESPACE, LOC_BLOCK,
 					 &objfile->global_psymbols,
-					 sh.value, 0, psymtab_language, objfile);
+					 0, sh.value, psymtab_language, objfile);
 		  else
 		    add_psymbol_to_list (name, strlen (name),
 					 VAR_NAMESPACE, LOC_BLOCK,
 					 &objfile->static_psymbols,
-					 sh.value, 0, psymtab_language, objfile);
+					 0, sh.value, psymtab_language, objfile);
 
 		  /* Skip over procedure to next one. */
 		  if (sh.index >= hdr->iauxMax)
@@ -2841,7 +2841,7 @@ parse_partial_symbols (objfile, section_offsets)
 		      add_psymbol_to_list (name, strlen (name),
 					   STRUCT_NAMESPACE, LOC_TYPEDEF,
 					   &objfile->static_psymbols,
-					   sh.value, 0,
+					   0, (CORE_ADDR) 0,
 					   psymtab_language, objfile);
 		    }
 		  handle_psymbol_enumerators (objfile, fh, sh.st, sh.value);
@@ -2879,8 +2879,8 @@ parse_partial_symbols (objfile, section_offsets)
 	      /* Use this gdb symbol */
 	      add_psymbol_to_list (name, strlen (name),
 				   VAR_NAMESPACE, class,
-				   &objfile->static_psymbols, sh.value,
-				   0, psymtab_language, objfile);
+				   &objfile->static_psymbols,
+				   0, sh.value, psymtab_language, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol */
 	    }
@@ -3127,7 +3127,7 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
       add_psymbol_to_list (name, strlen (name),
 			   VAR_NAMESPACE, LOC_CONST,
 			   &objfile->static_psymbols, 0,
-			   0, psymtab_language, objfile);
+			   (CORE_ADDR) 0, psymtab_language, objfile);
       ext_sym += external_sym_size;
     }
 }
