@@ -1,3 +1,8 @@
+Wed Jan 10 12:37:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_insn_arg): Print cases 'i' and 'u' in hex.
+	(_print_insn_mips): Change i from int to unsigned int.
+
 Thu Jan  4 17:21:10 1996  David Edelsohn  <edelsohn@mhpcc.edu>
 
 	* ppc-opc.c (powerpc_opcodes): tlbi POWER opcode form different
