@@ -1,3 +1,8 @@
+Wed Apr  1 12:55:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_WARNINGS): Add.
+	configure: Re-generate.
+
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
