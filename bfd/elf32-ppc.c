@@ -3901,6 +3901,9 @@ ppc_elf_begin_write_processing (abfd, link_info)
   unsigned long length;
   const char *  error_message = NULL;
 
+  if (link_info == NULL)
+    return;
+
   /* Scan the input bfds, looking for apuinfo sections.  */
   num_input_sections = 0;
   output_section_size = 0;
@@ -4023,7 +4026,7 @@ ppc_elf_write_section (abfd, asec, contents)
      asection * asec;
      bfd_byte * contents ATTRIBUTE_UNUSED;
 {
-  return strcmp (asec->name, APUINFO_SECTION_NAME) == 0;
+  return apuinfo_list_length () && strcmp (asec->name, APUINFO_SECTION_NAME) == 0;
 }
 
 
@@ -4042,6 +4045,9 @@ ppc_elf_final_write_processing (abfd, linker)
 
   asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
   if (asec == NULL)
+    return;
+
+  if (apuinfo_list_length () == 0)
     return;
 
   length = asec->_raw_size;
