@@ -1,5 +1,11 @@
 Tue Sep 21 11:44:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c (print_scalar_formatted): When truncating value we are
+	going to print as unsigned, handle it generally for any length
+	less than sizeof (LONGEST), rather than special-casing sizeof (char),
+	sizeof (short), and sizeof (long).  Clarify comment on what this
+	is for.
+
 	* symfile.c (deduce_language_from_filename): Accept .cxx for C++.
 	* buildsym.c (start_subfile): Use deduce_language_from_filename
 	rather than checking for .C or .cc ourself.
