@@ -255,8 +255,3 @@ do_status (ptr, frame)
 
   *ptr = '\000';
 }
-
-void
-StopBell()
-{
-}

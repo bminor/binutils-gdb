@@ -1,3 +1,9 @@
+Thu Mar 16 15:54:00 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* nlm/gdbserve.c (handle_exception): #if out call to StopBell,
+	  as it is not available on NetWare 3 or PIN.
+	* nlm/ppc.c (StopBell): Removed.
+
 Thu Mar 16 12:14:41 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab): When creating a dummy parameter

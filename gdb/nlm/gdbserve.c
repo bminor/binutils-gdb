@@ -529,9 +529,13 @@ handle_exception (frame)
   static struct DBG_LoadDefinitionStructure *ldinfo = 0;
   static unsigned char first_insn[BREAKPOINT_SIZE]; /* The first instruction in the program.  */
 
-  /* Apparently the bell can sometimes be ringing at this point, and
-     should be stopped.  */
+#if 0
+  /* According to some documentation from Novell, the bell sometimes
+     may be ringing at this point.  This can be stopped on Netware 4
+     systems by calling the undocumented StopBell() function. */
+
   StopBell ();
+#endif
 
   if (remote_debug)
     {
