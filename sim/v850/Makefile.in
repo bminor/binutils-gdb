@@ -47,20 +47,6 @@ NL_TARGET = -DNL_TARGET_v850
 
 ## COMMON_POST_CONFIG_FRAG
 
-simops.h table.c: tmp-gencode
-tmp-gencode: gencode
-	./gencode >tmp-table.c
-	mv tmp-table.c table.c
-	./gencode -h >tmp-simops.h
-	mv tmp-simops.h simops.h
-	touch tmp-gencode
-gencode.o: gencode.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
-gencode: gencode.o ../../opcodes/libopcodes.a ../../intl/libintl.a
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o ../../opcodes/libopcodes.a ../../intl/libintl.a
-
-
-
 BUILT_SRC_FROM_IGEN = \
 	icache.h \
 	icache.c \
@@ -77,7 +63,7 @@ BUILT_SRC_FROM_IGEN = \
 	engine.h \
 	engine.c \
 	irun.c
-$(BUILT_SRC_FROM_IGEN): tmp-igen simops.h
+$(BUILT_SRC_FROM_IGEN): tmp-igen
 #
 
 .PHONY: clean-igen

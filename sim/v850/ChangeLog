@@ -1,3 +1,11 @@
+2001-12-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (simops.h, table.c): Delete targets.
+	(tmp-gencode, gencode.o, gencode): Delete targets.
+	(simops.h): New file.
+	($(BUILT_SRC_FROM_IGEN)): Do not depend on simops.h.
+	* gencode.c: Delete file.
+	
 2001-04-15  J.T. Conklin  <jtc@redback.com>
 
 	* Makefile.in (simops.o): Add simops.h to dependency list.
