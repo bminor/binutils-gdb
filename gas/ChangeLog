@@ -1,3 +1,8 @@
+2001-06-28  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/obj-coff.c (obj_coff_ln): Treat a .ln directive
+	outside of a function as a .appline directive.
+
 2001-06-28  Eric Christopher <echristo@redhat.com>
 	    H.J. Lu  <hjl@gnu.org>
 

@@ -493,13 +493,13 @@ obj_coff_ln (appline)
     }
 
   l = get_absolute_expression ();
-  if (!appline)
-    {
-      add_lineno (frag_now, frag_now_fix (), l);
-    }
 
-  if (appline)
+  /* If there is no lineno symbol, treat a .ln
+     directive as if it were a .appline directive.  */
+  if (appline || current_lineno_sym == NULL)
     new_logical_line ((char *) NULL, l - 1);
+  else
+    add_lineno (frag_now, frag_now_fix (), l);
 
 #ifndef NO_LISTING
   {
