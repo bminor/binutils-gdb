@@ -9,12 +9,16 @@ Unpacking and Installation -- quick overview
 ==========================
 
 In this release, the GDB debugger sources, the generic GNU include
-files, the BFD ("binary file description") library, the readline library,
-and other libraries all have directories of their own underneath
-the gdb-4.9 directory.  The idea is that a variety of GNU tools can
-share a common copy of these things.  Configuration scripts and
-makefiles exist to cruise up and down this directory tree and
-automatically build all the pieces in the right order.
+files, the BFD ("binary file description") library, the readline
+library, and other libraries all have directories of their own
+underneath the gdb-4.9 directory.  The idea is that a variety of GNU
+tools can share a common copy of these things.  Be aware of variation
+over time--for example don't try to build gdb with a copy of bfd from
+a release other than the gdb release (such as a binutils or gas
+release), especially if the releases are more than a few weeks apart.
+Configuration scripts and makefiles exist to cruise up and down this
+directory tree and automatically build all the pieces in the right
+order.
 
 When you unpack the gdb-4.9.tar.z or gdb-4.9.tar.Z file, you'll find
 a directory called `gdb-4.9', which contains:
@@ -366,12 +370,19 @@ GDB or its supporting libraries.
 Languages other than C
 =======================
 
-GDB provides some support for debugging C++ progams.  Partial Modula-2
-and Chill support is now in GDB.  GDB should work with FORTRAN programs.
-(If you have problems, please send a bug report; you may have to refer to
-some FORTRAN variables with a trailing underscore).  Pascal programs which
-use sets, subranges, file variables, or nested functions will not
-currently work.
+GDB provides some support for debugging C++ programs, however that support
+only works well with GNU C++, and even then only on systems that use stabs
+debugging format.  In particular, cfront based compilers such as Sun's C++
+are not fully supported.
+
+GDB should work with FORTRAN programs.  If you have problems, please send a
+bug report; you may have to refer to some FORTRAN variables with a trailing
+underscore.
+
+Pascal programs which use sets, subranges, file variables, or nested functions
+will not currently work.
+
+Partial Modula-2 and Chill support is now in GDB.
 
 
 Kernel debugging
@@ -438,11 +449,12 @@ section of the GDB manual (gdb/doc/gdb.texinfo).
 
 Known bugs:
 
-  * Under Ultrix 4.2 (DECstation-3100), we have seen problems with backtraces
-    after interrupting the inferior out of a read().  The problem is caused by
-    ptrace() returning an incorrect value for register 30.  As far as we can
-    tell, this is a kernel problem.  Any help with this would be greatly
-    appreciated.
+  * Under Ultrix 4.2 (DECstation-3100) or Alphas under OSF/1, we have
+    seen problems with backtraces after interrupting the inferior out
+    of a read().  The problem is caused by ptrace() returning an
+    incorrect value for the frame pointer register (15 or 30).  As far
+    as we can tell, this is a kernel problem.  Any help with this
+    would be greatly appreciated.
 
   * On the SPARC GDB reports incorrect values of struct arguments to
     functions, for the seventh and subsequent arguments.  We have been looking
@@ -452,10 +464,31 @@ Known bugs:
     various BFD modules.  None of them is a cause for alarm, they are actually
     a result of bugs in the DECstation compiler.
 
-  * On Solaris using the "run" command when the program is already running
-    restarts the program, but may leave a core dump from the previous
-    execution in the current directory.  Other SVR4 based systems don't seem
-    to have this problem, using the same gdb source code.
+  * On Solaris (2.1, at least) using the "run" command when the program
+    is already running restarts the program, but may leave a core dump
+    from the previous execution in the current directory.  Other SVR4
+    based systems don't seem to have this problem, using the same gdb
+    source code.
+
+  * Notes for the DEC Alpha using OSF/1:
+    The debugging output of native cc has two known problems; we view these
+    as compiler bugs.
+    The linker miscompacts symbol tables, which causes gdb to confuse the
+    type of variables or results in `struct <illegal>' type outputs.
+    dbx has the same problems with those executables.  A workaround is to
+    specify -Wl,-b when linking, but that will increase the executable size
+    considerably.
+    If a structure is declared as opaque in one file (e.g. "struct foo *"
+    without a definition for "struct foo"), gdb will be unable to find the
+    structure definition in another file.
+    It has been reported that the Ultrix 4.3A compiler on destations has the
+    same problems.
+
+    If you intend to compile gdb with gcc-2.4.5, be warned that the file
+    bfd/libbfd.c will be miscompiled due to a bug in gcc, you have
+    to compile this file with native cc.  You will get many warnings from
+    gcc while compiling gdb, but these can be ignored for now.  Again, these
+    problems are Alpha-specific.
 
 GDB can produce warnings about symbols that it does not understand.  By
 default, these warnings are disabled.  You can enable them by executing
