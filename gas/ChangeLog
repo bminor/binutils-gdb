@@ -1,3 +1,8 @@
+Wed Feb 19 00:53:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (get_line_sb): Don't end the line on a semicolon inside a
+	string.
+
 start-sanitize-d30v
 Tue Feb 18 18:42:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
