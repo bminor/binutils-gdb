@@ -1,3 +1,14 @@
+Mon Feb 26 14:32:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Check for bison before byacc.
+
+Tue Feb 20 23:12:35 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in configure:  Change the way LEX and BISON/YACC are
+	set.  configure now defines DEFAULT_LEX and DEFAULT_YACC by
+	searching PATH.  These are used as fallbacks by Makefile.in if
+	flex/bison/byacc aren't in objdir.
+
 Mon Feb 19 11:45:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Make everything which depends upon all-bfd also
