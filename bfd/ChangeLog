@@ -1,3 +1,7 @@
+2002-06-08  Matt Thomas  <matt@3am-software.com>
+
+	* libaout.h (enum machine_type): Add M_VAX4K_NETBSD.
+
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-sh64.c (sh64_elf64_link_output_symbol_hook): Make static.
