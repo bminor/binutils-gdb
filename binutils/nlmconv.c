@@ -59,7 +59,7 @@
 extern char *strerror (int);
 
 #ifndef localtime
-extern struct tm *localtime ();
+extern struct tm *localtime (const time_t *);
 #endif
 
 #ifndef SEEK_SET

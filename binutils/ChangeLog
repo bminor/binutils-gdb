@@ -1,3 +1,8 @@
+2005-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* nlmconv.c: Provide a full prototype for the localtime() function
+	in order to avoid a compile time warning.
+
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (group_count): Don't initialize it.
