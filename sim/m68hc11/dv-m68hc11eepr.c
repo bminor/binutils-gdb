@@ -1,5 +1,5 @@
 /*  dv-m68hc11eepr.c -- Simulation of the 68HC11 Internal EEPROM.
-    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+    Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
     
@@ -269,10 +269,10 @@ m68hc11eepr_port_event (struct hw *me,
            The EEPROM CONFIG register is still enabled and can be programmed
            for a next configuration (taken into account only after a reset,
            see Motorola spec).  */
-        if (cpu->ios[M6811_CONFIG] & M6811_EEON)
+        if (!(cpu->ios[M6811_CONFIG] & M6811_EEON))
           {
             if (controller->mapped)
-              hw_attach_address (hw_parent (me), M6811_EEPROM_LEVEL,
+              hw_detach_address (hw_parent (me), M6811_EEPROM_LEVEL,
                                  controller->attach_space,
                                  controller->base_address,
                                  controller->size - 1,
@@ -282,7 +282,7 @@ m68hc11eepr_port_event (struct hw *me,
         else
           {
             if (!controller->mapped)
-              hw_detach_address (hw_parent (me), M6811_EEPROM_LEVEL,
+              hw_attach_address (hw_parent (me), M6811_EEPROM_LEVEL,
                                  controller->attach_space,
                                  controller->base_address,
                                  controller->size - 1,
@@ -368,7 +368,7 @@ m68hc11eepr_info (struct hw *me)
         sim_io_printf (sd, "  Programming CONFIG register ");
       else
         sim_io_printf (sd, "  Programming: 0x%04x ",
-                       controller->eeprom_waddr);
+                       controller->eeprom_waddr + controller->base_address);
 
       sim_io_printf (sd, "with 0x%02x\n",
 		     controller->eeprom_wbyte);
