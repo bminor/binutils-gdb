@@ -787,17 +787,23 @@ PowerPC options:\n\
 static void
 ppc_set_cpu ()
 {
+  const char *default_os  = TARGET_OS;
   const char *default_cpu = TARGET_CPU;
 
   if (ppc_cpu == 0)
     {
-      if (strcmp (default_cpu, "rs6000") == 0)
+      if (strncmp (default_os, "aix", 3) == 0
+	  && default_os[3] >= '4' && default_os[3] <= '9')
+	ppc_cpu = PPC_OPCODE_COMMON;
+      else if (strncmp (default_os, "aix3", 4) == 0)
+	ppc_cpu = PPC_OPCODE_POWER;
+      else if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu = PPC_OPCODE_POWER;
       else if (strcmp (default_cpu, "powerpc") == 0
 	       || strcmp (default_cpu, "powerpcle") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
       else
-	as_fatal ("Unknown default cpu = %s", default_cpu);
+	as_fatal ("Unknown default cpu = %s, os = %s", default_cpu, default_os);
     }
 }
 
@@ -1138,12 +1144,21 @@ ppc_elf_validate_fix (fixp, seg)
       && !fixp->fx_done
       && !fixp->fx_pcrel
       && fixp->fx_r_type <= BFD_RELOC_UNUSED
+      && fixp->fx_r_type != BFD_RELOC_16_GOTOFF
+      && fixp->fx_r_type != BFD_RELOC_HI16_GOTOFF
+      && fixp->fx_r_type != BFD_RELOC_LO16_GOTOFF
+      && fixp->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
+      && fixp->fx_r_type != BFD_RELOC_32_BASEREL
+      && fixp->fx_r_type != BFD_RELOC_LO16_BASEREL
+      && fixp->fx_r_type != BFD_RELOC_HI16_BASEREL
+      && fixp->fx_r_type != BFD_RELOC_HI16_S_BASEREL
       && strcmp (segment_name (seg), ".got2") != 0
       && strcmp (segment_name (seg), ".dtors") != 0
       && strcmp (segment_name (seg), ".ctors") != 0
       && strcmp (segment_name (seg), ".fixup") != 0
       && strcmp (segment_name (seg), ".stab") != 0
-      && strcmp (segment_name (seg), ".gcc_except_table") != 0)
+      && strcmp (segment_name (seg), ".gcc_except_table") != 0
+      && strcmp (segment_name (seg), ".ex_shared") != 0)
     {
       if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
 	  || fixp->fx_r_type != BFD_RELOC_CTOR)

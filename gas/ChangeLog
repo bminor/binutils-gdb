@@ -1,3 +1,7 @@
+Fri May 24 12:07:54 1996  David Edelsohn  <edelsohn@mhpcc.edu>
+
+	* config/tc-ppc.c (ppc_set_cpu): Change defaults to match AIX.
+
 Thu May 23 17:34:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* read.c (potable): Add .skip as a synonym for .space.
