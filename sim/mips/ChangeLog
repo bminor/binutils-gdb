@@ -1,3 +1,7 @@
+2003-01-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* Makefile.in (tmp-run-multi): Fix mips16 filter.
+
 2003-01-04  Richard Sandiford  <rsandifo@redhat.com>
 	    Andrew Cagney  <ac131313@redhat.com>
 	    Gavin Romig-Koch  <gavin@redhat.com>

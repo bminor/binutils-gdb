@@ -371,7 +371,7 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 tmp-run-multi: $(srcdir)/m16run.c
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
 	  case $${t} in \
-	    *:*mips16*:*) \
+	    m16*) \
 	      m=`echo $${t} | sed -e 's/^m16//' -e 's/:.*//'`; \
 	      sed <  $(srcdir)/m16run.c > tmp-run \
 		    -e "s/^sim_/m16$${m}_/" \
