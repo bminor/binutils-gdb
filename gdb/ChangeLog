@@ -1,5 +1,9 @@
 2004-07-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* bsd-kvm.c (bsd_kvm_cmdlist): Remove unecessary initialization.
+
+2004-07-03  Mark Kettenis  <kettenis@gnu.org>
+
 	* bsd-kvm.c: Include "cli/cli-cmds.h", "command.h", "value.h" and
 	<sys/proc.h>.
 	(bsd_kvm_cmdlist): New variable.

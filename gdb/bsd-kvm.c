@@ -206,7 +206,7 @@ bsd_kvm_fetch_registers (int regnum)
 
 
 /* Kernel memory interface commands.  */
-struct cmd_list_element *bsd_kvm_cmdlist = NULL;
+struct cmd_list_element *bsd_kvm_cmdlist;
 
 static void
 bsd_kvm_cmd (char *arg, int fromtty)
