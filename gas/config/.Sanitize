@@ -119,10 +119,7 @@ te-sun3.h
 te-sysv32.h
 vax-inst.h
 vms
-<<<<<<< .Sanitize
 z8k.mt
-=======
->>>>>>> 1.23
 
 
 
@@ -144,7 +141,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.24  1992/08/25 22:12:38  sac
+# Revision 1.25  1992/08/31 00:01:22  wilson
+# Resolve someone else's CVS update conflict.
+#
+# Revision 1.24  1992/08/25  22:12:38  sac
 # Support for the Z8k
 #
 # Revision 1.23  1992/07/23  18:23:44  gumby
