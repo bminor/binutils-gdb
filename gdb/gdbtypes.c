@@ -3153,17 +3153,31 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "float", (struct objfile *) NULL);
+/* vinschen@redhat.com 2002-02-08:
+   The below lines are disabled since they are doing the wrong
+   thing for non-multiarch targets.  They are setting the correct
+   type of floats for the target but while on multiarch targets
+   this is done everytime the architecture changes, it's done on
+   non-multiarch targets only on startup, leaving the wrong values
+   in even if the architecture changes (eg. from big-endian to
+   little-endian).  */
+#if 0
   TYPE_FLOATFORMAT (builtin_type_float) = TARGET_FLOAT_FORMAT;
+#endif
   builtin_type_double =
     init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "double", (struct objfile *) NULL);
+#if 0
   TYPE_FLOATFORMAT (builtin_type_double) = TARGET_DOUBLE_FORMAT;
+#endif
   builtin_type_long_double =
     init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "long double", (struct objfile *) NULL);
+#if 0
   TYPE_FLOATFORMAT (builtin_type_long_double) = TARGET_LONG_DOUBLE_FORMAT;
+#endif
   builtin_type_complex =
     init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
