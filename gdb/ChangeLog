@@ -1,3 +1,7 @@
+2003-08-14  Michael Snyder  <msnyder@redhat.com>
+
+	* disasm.c (gdb_disassemble_info): Set info->insn_sets to zero.
+
 2003-08-13  J. Brobecker  <brobecker@gnat.com>
 
 	* hppa-hpux-tdep.c (_initialize_hppa_hpux_tdep): Use the correct
