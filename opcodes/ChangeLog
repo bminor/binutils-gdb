@@ -1,10 +1,16 @@
+Mon Feb 12 17:38:59 CET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* i386-dis.c (prefix_user_t): Add 'Y' to SSE ineger converison
+	instructions.
+	(putop): Handle 'Y'
+
 2001-02-05  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-asmtab.c: Revert 2000-12-16 change.
 
 Thu Feb  1 16:41:58 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* (dis386_att, grps): Use 'T' for push/pop
+	* i387-dis.c (dis386_att, grps): Use 'T' for push/pop
 	(putop): Handle 'T', alphabetize order, fix 'I' handling in Intel syntax
 
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>

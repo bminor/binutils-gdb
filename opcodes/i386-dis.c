@@ -439,6 +439,7 @@ struct dis386 {
    'T' => print 'q' in 64bit mode and behave as 'I' otherwise
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'W' => print 'b' or 'w' ("w" or "de" in intel mode)
+   'Y' => 'q' if instruction has an REX 64bit overwrite prefix
 */
 
 static const struct dis386 dis386_att[] = {
@@ -2578,23 +2579,23 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP2 */
   {
     { "cvtpi2ps", XM, EM, XX },
-    { "cvtsi2ss", XM, Ev, XX },
+    { "cvtsi2ssY", XM, Ev, XX },
     { "cvtpi2pd", XM, EM, XX },
-    { "cvtsi2sd", XM, Ev, XX },
+    { "cvtsi2sdY", XM, Ev, XX },
   },
   /* PREGRP3 */
   {
     { "cvtps2pi", MX, EX, XX },
-    { "cvtss2si", Gv, EX, XX },
+    { "cvtss2siY", Gv, EX, XX },
     { "cvtpd2pi", MX, EX, XX },
-    { "cvtsd2si", Gv, EX, XX },
+    { "cvtsd2siY", Gv, EX, XX },
   },
   /* PREGRP4 */
   {
     { "cvttps2pi", MX, EX, XX },
-    { "cvttss2si", Gv, EX, XX },
+    { "cvttss2siY", Gv, EX, XX },
     { "cvttpd2pi", MX, EX, XX },
-    { "cvttsd2si", Gv, EX, XX },
+    { "cvttsd2siY", Gv, EX, XX },
   },
   /* PREGRP5 */
   {
@@ -3849,6 +3850,15 @@ putop (template, sizeflag)
 	  else
 	    *obufp++ = 's';
           used_prefixes |= (prefixes & PREFIX_DATA);
+	  break;
+	case 'Y':
+          if (intel_syntax)
+            break;
+	  if (rex & REX_MODE64)
+	    {
+	      USED_REX (REX_MODE64);
+	      *obufp++ = 'q';
+	    }
 	  break;
 	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
 	case 'W':
