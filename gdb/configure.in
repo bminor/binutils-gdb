@@ -338,6 +338,9 @@ WIN32LDAPP=
 AC_SUBST(WIN32LIBS)
 AC_SUBST(WIN32LDAPP)
 
+WINDRES=${WINDRES-windres}
+AC_SUBST(WINDRES)
+
 if test x$gdb_cv_os_cygwin32 = xyes; then
     if test x$enable_ide = xyes; then
 	WIN32LIBS="-ladvapi32"
@@ -414,6 +417,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   if test x$gdb_cv_os_cygwin32 = xyes; then
 	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32 -luser32"
 	      WIN32LDAPP="-Wl,--subsystem,windows"
+	      CONFIG_OBS="${CONFIG_OBS} gdbres.o"
 	   fi
 	fi
     fi

@@ -1,3 +1,126 @@
+Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	Merged changes from Foundry: list follows by author:
+	
+	- Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (gdbres.o): New target.
+	(WINDRES): New define.
+	* configure: Rebuilt.
+	* configure.in (WINDRES): Define.
+	(CONFIG_OBS): Include gdbres.o on Windows.
+	* gdbtool.ico: New file.
+	* gdb.rc: New file.
+        * gdbtk.c (gdbtk_init): Call ide_create_messagebox_command.
+	(gdbtk_cleanup): Call ide_interface_deregister_all.
+	(gdbtk_init): Pass event handle to cleanup.
+	(TclDebug): Use Tcl_Merge to construct command.
+	(gdbtk_init): Call ide_create_cygwin_path_command.
+
+        - Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_set_bp): Set addr_string for bp.
+	(gdb_get_breakpoint_info): Demangle function 
+	names in breakpoint info.
+	Include "demangle.h".
+	(gdb_loc, gdb_listfuncs): Demangle C++ 
+	function names.
+	(gdb_set_bp): Properly quote filename to fix
+	problems with spaces. Send pc back as a hex string.
+	(gdb_listfuncs): Remove debugging line.
+	 Turn off some debugging lines.
+ 	(breakpoint_notify): Return correct line number.
+	(gdb_get_breakpoint_info): Return correct line number.
+	(gdb_set_bp): New function to provide a better way to
+	set breakpoints.
+	(gdbtk_readline, gdbtk_readline_begin): Memory 
+	allocated by tcl needs to be freed by Tcl_Free().
+	(find_file_in_dir): Deleted.
+	(gdb_find_file_command): Call full_lookup_symtab().
+	(gdb_listfuncs): Call full_lookup_symtab().
+	(full_lookup_symtab): New function.  Like lookup_symtab
+	except handles multiple files with the same basename,
+	full pathnames, and always sets symtab->fullname.
+	(gdb_loadfile): Call full_lookup_symtab(). Clear
+	realloc'd memory.
+	(gdb_loadfile):  Don't tag lines without source.
+	Tag source lines with source_tag.
+	(gdb_find_file_command, find_file_in_dir):
+ 	Rewrite.  Now searches symtabs and psymtabs for a match
+	on the partial or full filename.  Returns the full pathname.
+	(gdb_loadfile): Realloc additional memory
+	if someone loads in a file with more than 160,000
+	lines.  I don't know if this really works because
+	I don't have enough memory to test it.
+	(gdb_sourcelines): Deleted.
+	(gdb_loadfile): New function. Takes a text widget
+	and loads it with the contents of a file.  Marks
+	and tags source lines.
+	(pc_changed): New function.
+	(get_pc_register): Returns the value of
+	the PC to GDB.
+	(gdb_loc): If looking on the stack, return
+	real pc along with calling source line.
+	(gdb_loc): Return "" instead of "N/A" if
+	filename is not found.
+	(gdb_get_breakpoint_info): Same.
+	(get_register): For Natural mode, set format to 0.
+	 Minor bugfixes from keiths.
+	(TclDebug): New function for debugging use.
+	(gdb_loc): Return correct PC for frames
+	that are not the innermost frame.
+	(gdb_listfiles): Rewritten to use object
+	API.  Now takes an optional dirname which will cause
+	only files in that directory or its subdirectories
+	to be returned.  Now returns basenames instead of
+	full pathnames.
+	(gdb_cmd): Set/reset load_in_progress flag.
+	(call_wrapper): Don't pop up dialog for errors in
+	downloads; just abort download.
+	(gdbtk_load_hash): Set return value correctly.
+
+        -  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Define the ui_loop_hook so that it can be
+	called by routines which might block, allowing us to update the GUI.
+	(gdbtk_wait): Move timer calls to annotation hooks.
+	(gdbtk_init): Define the annotation hooks.
+	(gdbtk_annotate_starting): New function for cygwin32 hosts.
+	(gdbtk_annotate_stopped): New function for cygwin32 hosts.
+	(gdbtk_annotate_exited): New function for cygwin32 hosts.
+	(gdbtk_annotate_signalled): New function. for cygwin32 hosts.
+	(gdbtk_init): Use gdbtk_print_frame_info hook.
+	(gdbtk_print_frame_info): New function which sets current_source_symtab
+	based on the given symtab and line info.
+	(gdb_immediate_command): New function which does 
+	not buffer any
+	output. (Contrast to gdb_cmd.)
+	(gdb_prompt_command): New function to return gdb's prompt.
+	(find_file_in_dir): New functon which searches source paths 
+	for a given filename.
+	(gdb_find_file): New function which returns path to given file -- uses
+	find_file_in_dir.
+	(gdbtk_init): Install "gdb_immediate", "gdb_find_file", and 
+	"gdb_prompt"
+ 	commands into interpreter.
+
+        -  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_timer_going): If __CYGWIN32__, new static
+	variable.
+	(gdb_cmd): If __CYGWIN32__, if executing the load command, call
+	gdbtk_start_timer and gdbtk_stop_timer.
+	(call_wrapper): If __CYGWIN32__, if the timer is going, turn it
+	off.  Clear load_in_progress.
+	(x_event): If load_in_progress, quit if download_cancel_ok.
+	(gdbtk_start_timer): Set gdbtk_timer_going.
+	(gdbtk_stop_timer): Clear gdbtk_timer_going.
+	(gdbtk_wait): Call x_event.
+	(gdbtk_init): Call ide_create_win_grab_command if
+	__CYGIN32__.
+	(gdb_clear_file): Clear stop_pc.
+
+
 Tue Feb 10 17:50:37 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdbtk_modify_tracepoint): Define new tracepoint modification hook.

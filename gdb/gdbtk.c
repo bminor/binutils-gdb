@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 #include "tracepoint.h"
+#include "demangle.h"
 
 #ifdef _WIN32
 #include <winuser.h>
@@ -71,6 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #ifdef __CYGWIN32__
+#include "annotate.h"
 #include <sys/time.h>
 #endif
 
@@ -92,6 +94,16 @@ int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
+
+/* This is a disgusting hack. Unfortunately, the UI will lock up if we
+   are doing something like blocking in a system call, waiting for serial I/O,
+   or what have you.
+
+   This hook should be used whenever we might block. This means adding appropriate
+   timeouts to code and what not to allow this hook to be called. */
+void (*ui_loop_hook) PARAMS ((int));
+
+char * get_prompt PARAMS ((void));
 
 static void null_routine PARAMS ((int));
 static void gdbtk_flush PARAMS ((FILE *));
@@ -120,6 +132,7 @@ static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_immediate_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_fetch_registers PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static void gdbtk_readline_end PARAMS ((void));
+static void pc_changed PARAMS ((void));
 static int gdb_changed_register_list PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static void register_changed_p PARAMS ((int, void *));
 static int gdb_get_breakpoint_list PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -130,7 +143,6 @@ static void gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
 static void gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
 static int gdb_loc PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_eval PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
-static int gdb_sourcelines PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int map_arg_registers PARAMS ((int, char *[], void (*) (int, void *), void *));
 static void get_register_name PARAMS ((int, void *));
 static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -156,9 +168,19 @@ static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
 void gdbtk_pre_add_symbol PARAMS ((char *));
 void gdbtk_post_add_symbol PARAMS ((void));
+static int get_pc_register PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_loadfile PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static struct symtab *full_lookup_symtab PARAMS ((char *file));
+static int gdb_get_mem PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+#ifdef __CYGWIN32__
+static void gdbtk_annotate_starting PARAMS ((void));
+static void gdbtk_annotate_stopped PARAMS ((void));
+static void gdbtk_annotate_signalled PARAMS ((void));
+static void gdbtk_annotate_exited PARAMS ((void));
+#endif
 
 /* Handle for TCL interpreter */
-
 static Tcl_Interp *interp = NULL;
 
 #ifndef WINNT
@@ -360,7 +382,7 @@ gdbtk_readline_begin (va_alist)
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
   Tcl_Eval (interp, command);
-  free (command);
+  Tcl_Free (command);
 }
 
 static char *
@@ -379,7 +401,7 @@ gdbtk_readline (prompt)
   merge[1] = prompt;
   command = Tcl_Merge (2, merge);
   result = Tcl_Eval (interp, command);
-  free (command);
+  Tcl_Free (command);
   if (result == TCL_OK)
     {
       return (strdup (interp -> result));
@@ -396,6 +418,12 @@ static void
 gdbtk_readline_end ()
 {
   Tcl_Eval (interp, "gdbtk_tcl_readline_end");
+}
+
+static void
+pc_changed()
+{
+  Tcl_Eval (interp, "gdbtk_pc_changed");
 }
 
 
@@ -489,8 +517,8 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
   int bpnum;
   struct breakpoint *b;
   extern struct breakpoint *breakpoint_chain;
-  char *funcname, *filename;
-  
+  char *funcname, *fname, *filename;
+
   if (argc != 2)
     error ("wrong # args");
 
@@ -509,9 +537,17 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
   if (filename == NULL)
     filename = "";
   Tcl_DStringAppendElement (result_ptr, filename);
+
   find_pc_partial_function (b->address, &funcname, NULL, NULL);
-  Tcl_DStringAppendElement (result_ptr, funcname);
-  dsprintf_append_element (result_ptr, "%d", sal.line);
+  fname = cplus_demangle (funcname, 0);
+  if (fname)
+    {
+      Tcl_DStringAppendElement (result_ptr, fname);
+      free (fname);
+    }
+  else
+    Tcl_DStringAppendElement (result_ptr, funcname);
+  dsprintf_append_element (result_ptr, "%d", b->line_number);
   dsprintf_append_element (result_ptr, "0x%lx", b->address);
   Tcl_DStringAppendElement (result_ptr, bptypes[b->type]);
   Tcl_DStringAppendElement (result_ptr, b->enable == enabled ? "1" : "0");
@@ -549,9 +585,10 @@ breakpoint_notify(b, action)
   sal = find_pc_line (b->address, 0);
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
-    filename = "N/A";
+    filename = "";
+
   sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s}", action, b->number, 
-	   (long)b->address, sal.line, filename);
+	   (long)b->address, b->line_number, filename);
 
   v = Tcl_Eval (interp, buf);
 
@@ -583,8 +620,9 @@ gdbtk_modify_breakpoint(b)
   breakpoint_notify (b, "modify");
 }
 
-/* This implements the TCL command `gdb_loc', which returns a list consisting
-   of the source and line number associated with the current pc. */
+/* This implements the TCL command `gdb_loc', which returns a list  */
+/* consisting of the following:                                     */
+/* basename, function name, filename, line number, address, current pc */
 
 static int
 gdb_loc (clientData, interp, argc, argv)
@@ -595,7 +633,7 @@ gdb_loc (clientData, interp, argc, argv)
 {
   char *filename;
   struct symtab_and_line sal;
-  char *funcname;
+  char *funcname, *fname;
   CORE_ADDR pc;
 
   if (!have_full_symbols () && !have_partial_symbols ())
@@ -603,18 +641,28 @@ gdb_loc (clientData, interp, argc, argv)
       Tcl_SetResult (interp, "No symbol table is loaded", TCL_STATIC);
       return TCL_ERROR;
     }
-
+  
   if (argc == 1)
     {
-      if (selected_frame)
+      if (selected_frame && (selected_frame->pc != stop_pc))
 	{
+	  /* Note - this next line is not correct on all architectures. */
+	  /* For a graphical debugged we really want to highlight the */
+	  /* assembly line that called the next function on the stack. */
+	  /* Many architectures have the next instruction saved as the */
+	  /* pc on the stack, so what happens is the next instruction is hughlighted. */
+	  /* FIXME */
+	  pc = selected_frame->pc;
 	  sal = find_pc_line (selected_frame->pc,
 			      selected_frame->next != NULL
 			      && !selected_frame->next->signal_handler_caller
 			      && !frame_in_dummy (selected_frame->next));
 	}
       else
-	sal = find_pc_line (stop_pc, 0);
+	{
+	  pc = stop_pc;
+	  sal = find_pc_line (stop_pc, 0);
+	}
     }
   else if (argc == 2)
     {
@@ -640,11 +688,17 @@ gdb_loc (clientData, interp, argc, argv)
     Tcl_DStringAppendElement (result_ptr, "");
 
   find_pc_partial_function (pc, &funcname, NULL, NULL);
-  Tcl_DStringAppendElement (result_ptr, funcname);
-
+  fname = cplus_demangle (funcname, 0);
+  if (fname)
+    {
+      Tcl_DStringAppendElement (result_ptr, fname);
+      free (fname);
+    }
+  else
+    Tcl_DStringAppendElement (result_ptr, funcname);
   filename = symtab_to_filename (sal.symtab);
   if (filename == NULL)
-    filename = "N/A";
+    filename = "";
 
   Tcl_DStringAppendElement (result_ptr, filename);
   dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
@@ -771,55 +825,6 @@ gdb_get_mem (clientData, interp, argc, argv)
 }
 
 
-/* This implements the TCL command `gdb_sourcelines', which returns a list of
-   all of the lines containing executable code for the specified source file
-   (ie: lines where you can put breakpoints). */
-
-static int
-gdb_sourcelines (clientData, interp, argc, argv)
-     ClientData clientData;
-     Tcl_Interp *interp;
-     int argc;
-     char *argv[];
-{
-  struct symtab *symtab;
-  struct linetable_entry *le;
-  int nlines;
-
-  if (argc != 2)
-    error ("wrong # args");
-
-  symtab = lookup_symtab (argv[1]);
-
-  if (!symtab)
-    error ("No such file");
-
-  /* If there's no linetable, or no entries, then we are done. */
-
-  if (!symtab->linetable
-      || symtab->linetable->nitems == 0)
-    {
-      Tcl_DStringAppendElement (result_ptr, "");
-      return TCL_OK;
-    }
-
-  le = symtab->linetable->item;
-  nlines = symtab->linetable->nitems;
-
-  for (;nlines > 0; nlines--, le++)
-    {
-      /* If the pc of this line is the same as the pc of the next line, then
-	 just skip it.  */
-      if (nlines > 1
-	  && le->pc == (le + 1)->pc)
-	continue;
-
-      dsprintf_append_element (result_ptr, "%d", le->line);
-    }
-
-  return TCL_OK;
-}
-
 static int
 map_arg_registers (argc, argv, func, argp)
      int argc;
@@ -909,6 +914,9 @@ get_register (regnum, fp)
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   int format = (int)fp;
 
+  if (format == 'N')
+    format = 0;
+
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
     {
       Tcl_DStringAppendElement (result_ptr, "Optimized out");
@@ -944,6 +952,17 @@ get_register (regnum, fp)
 }
 
 static int
+get_pc_register (clientData, interp, argc, argv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int argc;
+  char *argv[];
+{
+  sprintf(interp->result,"0x%llx",(long long)read_register(PC_REGNUM));
+  return TCL_OK;
+}
+
+static int
 gdb_fetch_registers (clientData, interp, argc, argv)
      ClientData clientData;
      Tcl_Interp *interp;
@@ -955,12 +974,10 @@ gdb_fetch_registers (clientData, interp, argc, argv)
   if (argc < 2)
     error ("wrong # args");
 
-  argc--;
+  argc -= 2;
   argv++;
-
-  argc--;
   format = **argv++;
-
+  
   return map_arg_registers (argc, argv, get_register, (void *) format);
 }
 
@@ -1160,14 +1177,9 @@ call_wrapper (clientData, interp, argc, argv)
       running_now = 0;
       Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
-
-  /* if the download was cancelled, don't print the error */
-  if (load_in_progress) 
-    {
-      Tcl_DStringInit (&error_string);
-      wrapped_args.val = TCL_OK;
-      load_in_progress = 0;
-    }
+  
+  /* do not suppress any errors -- a remote target could have errored */
+  load_in_progress = 0;
 
   if (Tcl_DStringLength (&error_string) == 0)
     {
@@ -1206,7 +1218,6 @@ comp_files (file1, file2)
   return strcmp(*file1,*file2);
 }
 
-
 static int
 gdb_listfiles (clientData, interp, objc, objv)
   ClientData clientData;
@@ -1217,14 +1228,10 @@ gdb_listfiles (clientData, interp, objc, objv)
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   struct symtab *symtab;
-  char *lastfile, *pathname, **files;
-  int files_size;
+  char *lastfile, *pathname, *files[1000];
   int i, numfiles = 0, len = 0;
   Tcl_Obj *mylist;
   
-  files_size = 1000;
-  files = (char **) xmalloc (sizeof (char *) * files_size);
-
   if (objc > 2)
     {
       Tcl_WrongNumArgs (interp, 1, objv, "Usage: gdb_listfiles ?pathname?");
@@ -1237,11 +1244,6 @@ gdb_listfiles (clientData, interp, objc, objv)
 
   ALL_PSYMTABS (objfile, psymtab)
     {
-      if (numfiles == files_size)
-        {
-           files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char *) * files_size);
-        }
       if (len == 0)
 	{
 	  if (psymtab->filename)
@@ -1255,11 +1257,6 @@ gdb_listfiles (clientData, interp, objc, objv)
 
   ALL_SYMTABS (objfile, symtab)
     {
-      if (numfiles == files_size)
-        {
-           files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char *) * files_size);
-        }
       if (len == 0)
 	{
 	  if (symtab->filename)
@@ -1281,7 +1278,6 @@ gdb_listfiles (clientData, interp, objc, objv)
       lastfile = files[i];
     }
   Tcl_SetObjResult (interp, mylist);
-  free (files);
   return TCL_OK;
 }
 
@@ -1296,13 +1292,13 @@ gdb_listfuncs (clientData, interp, argc, argv)
   struct blockvector *bv;
   struct block *b;
   struct symbol *sym;
+  char buf[128];
   int i,j;
-         
+
   if (argc != 2)
     error ("wrong # args");
   
-  symtab = lookup_symtab (argv[1]);
-  
+  symtab = full_lookup_symtab (argv[1]);
   if (!symtab)
     error ("No such file");
 
@@ -1318,7 +1314,15 @@ gdb_listfuncs (clientData, interp, argc, argv)
 	  sym = BLOCK_SYM (b, j);
 	  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 	    {
-	      Tcl_DStringAppendElement (result_ptr, SYMBOL_NAME(sym));
+	      
+	      char *name = cplus_demangle (SYMBOL_NAME(sym), 0);
+	      if (name)
+		{
+		  sprintf (buf,"{%s} 1", name);		  
+		}
+	      else
+		sprintf (buf,"{%s} 0", SYMBOL_NAME(sym));
+	      Tcl_DStringAppendElement (result_ptr, buf);
 	    }
 	}
     }
@@ -1708,9 +1712,9 @@ x_event (signo)
      int signo;
 {
   /* Process pending events */
-
   while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0)
     ;
+
 
   /* If we are doing a download, see if the download should be
      cancelled.  FIXME: We should use a better variable name.  */
@@ -1746,6 +1750,7 @@ gdbtk_start_timer ()
   struct sigaction action;
   struct itimerval it;
 
+  /*TclDebug ("Starting timer....");*/
   sigemptyset (&nullsigmask);
 
   action.sa_handler = x_event;
@@ -1772,7 +1777,8 @@ gdbtk_stop_timer ()
   struct itimerval it;
 
   gdbtk_timer_going = 0;
-
+  
+  /*TclDebug ("Stopping timer.");*/
   sigemptyset (&nullsigmask);
 
   action.sa_handler = SIG_IGN;
@@ -1813,20 +1819,7 @@ gdbtk_wait (pid, ourstatus)
   sigaction(SIGIO, &action, NULL);
 #endif /* WINNT */
 
-#ifdef __CYGWIN32__
-  /* Call x_event ourselves now, as well as starting the timer;
-     otherwise, if single stepping, we may never wait long enough for
-     the timer to trigger.  */
-  x_event (SIGALRM);
-
-  gdbtk_start_timer ();
-#endif
-
   pid = target_wait (pid, ourstatus);
-
-#ifdef __CYGWIN32__
-  gdbtk_stop_timer ();
-#endif
 
 #ifndef WINNT
   action.sa_handler = SIG_IGN;
@@ -1900,6 +1893,11 @@ static void
 gdbtk_cleanup (dummy)
      PTR dummy;
 {
+#ifdef IDE
+  struct ide_event_handle *h = (struct ide_event_handle *) dummy;
+
+  ide_interface_deregister_all (h);
+#endif
   Tcl_Finalize ();
 }
 
@@ -1945,7 +1943,11 @@ gdbtk_init ( argv0 )
   if (Tcl_Init(interp) != TCL_OK)
     error ("Tcl_Init failed: %s", interp->result);
 
-  make_final_cleanup (gdbtk_cleanup, NULL);
+#ifndef IDE
+  /* For the IDE we register the cleanup later, after we've
+     initialized events.  */
+  make_final_cleanup (gdbtk_cleanup,  NULL);
+#endif
 
   /* Initialize the Paths variable.  */
   if (ide_initialize_paths (interp, "gdbtcl") != TCL_OK)
@@ -1960,6 +1962,7 @@ gdbtk_init ( argv0 )
   IluTk_Init ();
 
   h = ide_event_init_from_environment (&errmsg, libexecdir);
+  make_final_cleanup (gdbtk_cleanup, h);
   if (h == NULL)
     {
       Tcl_AppendResult (interp, "can't initialize event system: ", errmsg,
@@ -2023,6 +2026,8 @@ gdbtk_init ( argv0 )
     error ("Tix_Init failed: %s", interp->result);
 
 #ifdef __CYGWIN32__
+  if (ide_create_messagebox_command (interp) != TCL_OK)
+    error ("messagebox command initialization failed");
   /* On Windows, create a sizebox widget command */
   if (ide_create_sizebox_command (interp) != TCL_OK)
     error ("sizebox creation failed");
@@ -2033,6 +2038,11 @@ gdbtk_init ( argv0 )
   if (ide_create_shell_execute_command (interp) != TCL_OK)
     error ("shell execute command initialization failed");
   /* end-sanitize-ide */
+  if (ide_create_win_grab_command (interp) != TCL_OK)
+    error ("grab support command initialization failed");
+  /* Path conversion functions.  */
+  if (ide_create_cygwin_path_command (interp) != TCL_OK)
+    error ("cygwin path command initialization failed");
 #endif
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
@@ -2040,8 +2050,6 @@ gdbtk_init ( argv0 )
                      gdb_immediate_command, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
   Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
-  Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,
-		     NULL);
   Tcl_CreateObjCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
 		     NULL);
@@ -2091,8 +2099,11 @@ gdbtk_init ( argv0 )
   Tcl_CreateObjCommand (interp, "gdb_find_file",
                         gdb_find_file_command, NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_list",
-                        gdb_get_tracepoint_list, NULL, NULL);
-  
+                        gdb_get_tracepoint_list, NULL, NULL);  
+  Tcl_CreateCommand (interp, "gdb_pc_reg", get_pc_register, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_loadfile", gdb_loadfile, NULL, NULL);
+  Tcl_CreateObjCommand (interp, "gdb_set_bp", gdb_set_bp, NULL, NULL);
+
   command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook = gdbtk_print_frame_info;
   query_hook = gdbtk_query;
@@ -2112,7 +2123,14 @@ gdbtk_init ( argv0 )
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
-
+  pc_changed_hook = pc_changed;
+#ifdef __CYGWIN32__
+  annotate_starting_hook  = gdbtk_annotate_starting;
+  annotate_stopped_hook   = gdbtk_annotate_stopped;
+  annotate_signalled_hook = gdbtk_annotate_signalled;
+  annotate_exited_hook    = gdbtk_annotate_exited;
+  ui_loop_hook            = x_event;
+#endif
 #ifndef WINNT
   /* Get the file descriptor for the X server */
 
@@ -2613,6 +2631,71 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
   return TCL_OK;
 }
 
+
+/* TclDebug (const char *fmt, ...) works just like printf() but */
+/* sends the output to the GDB TK debug window. */
+/* Not for normal use; just a convenient tool for debugging */
+void
+#ifdef ANSI_PROTOTYPES
+TclDebug (const char *fmt, ...)
+#else
+TclDebug (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+  char buf[512], *v[2], *merge;
+
+#ifdef ANSI_PROTOTYPES
+  va_start (args, fmt);
+#else
+  char *fmt;
+  va_start (args);
+  fmt = va_arg (args, char *);
+#endif
+
+  v[0] = "debug";
+  v[1] = buf;
+
+  vsprintf (buf, fmt, args);
+  va_end (args);
+
+  merge = Tcl_Merge (2, v);
+  Tcl_Eval (interp, merge);
+  Tcl_Free (merge);
+}
+
+
+/* Find the full pathname to a file, searching the symbol tables */
+
+static int
+gdb_find_file_command (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+{
+  char *filename = NULL;
+  struct symtab *st;
+
+  if (objc != 2)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "filename");
+      return TCL_ERROR;
+    }
+
+  st = full_lookup_symtab (Tcl_GetStringFromObj (objv[1], NULL));
+  if (st)
+    filename = st->fullname;
+
+  if (filename == NULL)
+    Tcl_SetObjResult (interp, Tcl_NewStringObj ("", 0));
+  else
+    Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
+
+  return TCL_OK;
+}
+
 static void
 gdbtk_create_tracepoint (tp)
   struct tracepoint *tp;
@@ -2816,80 +2899,6 @@ gdb_get_tracepoint_list (clientData, interp, objc, objv)
   return TCL_OK;
 }
 
-/* This is stolen from source.c */
-#ifdef CRLF_SOURCE_FILES
-
-/* Define CRLF_SOURCE_FILES in an xm-*.h file if source files on the
-   host use \r\n rather than just \n.  Defining CRLF_SOURCE_FILES is
-   much faster than defining LSEEK_NOT_LINEAR.  */
-
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
-#define OPEN_MODE (O_RDONLY | O_BINARY)
-
-#else /* ! defined (CRLF_SOURCE_FILES) */
-
-#define OPEN_MODE O_RDONLY
-
-#endif /* ! defined (CRLF_SOURCE_FILES) */
-
-/* Find the pathname to a file, searching the source_dir */
-/* we may actually need to use openp to find the the full pathname
-   so we don't have any "../" et al in it. */
-static int
-gdb_find_file_command (clientData, interp, objc, objv)
-  ClientData clientData;
-  Tcl_Interp *interp;
-  int objc;
-  Tcl_Obj *CONST objv[];
-{
-  char *file, *filename;
-
-  if (objc != 2)
-    {
-      Tcl_AppendResult (interp, "wrong # of args: should be \"",
-                        Tcl_GetStringFromObj (objv[0], NULL),
-                        " filename\"");
-      return TCL_ERROR;
-    }
-
-  file  = Tcl_GetStringFromObj (objv[1], NULL);
-  filename = find_file_in_dir (file);
-  
-  if (filename == NULL)
-    Tcl_SetResult (interp, "", TCL_STATIC);
-  else
-    Tcl_SetObjResult (interp, Tcl_NewStringObj (filename, -1));
-
-  return TCL_OK;
-}
-
-static char *
-find_file_in_dir (file)
-     char *file;
-{
-  struct symtab *st = NULL;
-
-  if (file != NULL)
-    {
-      /* try something simple first */
-      if (access (file, R_OK) == 0)
-        return file;
-      
-      /* We really need a symtab for this to work... */
-      st = lookup_symtab (file);
-      if (st != NULL)
-        {
-          file = symtab_to_filename (st);
-          if (file != NULL)
-            return file;
-        }
-    }
-  
-  return NULL;
-}
 
 /* This hook is called whenever we are ready to load a symbol file so that
    the UI can notify the user... */
@@ -2911,34 +2920,6 @@ gdbtk_post_add_symbol ()
 }
 
 
-/* TclDebug (const char *fmt, ...) works just like printf() but */
-/* sends the output to the GDB TK debug window. */
-/* Not for normal use; just a convenient tool for debugging */
-void
-#ifdef ANSI_PROTOTYPES
-TclDebug (const char *fmt, ...)
-#else
-TclDebug (va_alist)
-     va_dcl
-#endif
-{
-  va_list args;
-  char buf[512];
-
-#ifdef ANSI_PROTOTYPES
-  va_start (args, fmt);
-#else
-  char *fmt;
-  va_start (args);
-  fmt = va_arg (args, char *);
-#endif
-
-  strcpy (buf, "debug \"");
-  vsprintf (&buf[7], fmt, args);
-  va_end (args);
-  strcat (buf, "\"");
-  Tcl_Eval (interp, buf);
-}
 
 static void
 gdbtk_print_frame_info (s, line, stopline, noerror)
@@ -2950,6 +2931,318 @@ gdbtk_print_frame_info (s, line, stopline, noerror)
   current_source_symtab = s;
   current_source_line = line;
 }
+
+
+/* The lookup_symtab() in symtab.c doesn't work correctly */
+/* It will not work will full pathnames and if multiple */
+/* source files have the same basename, it will return */
+/* the first one instead of the correct one.  This version */
+/* also always makes sure symtab->fullname is set. */
+
+static struct symtab *
+full_lookup_symtab(file)
+     char *file;
+{
+  struct symtab *st;
+  struct objfile *objfile;
+  char *bfile, *fullname;
+  struct partial_symtab *pt;
+
+  if (!file)
+    return NULL;
+
+  /* first try a direct lookup */
+  st = lookup_symtab (file);
+  if (st)
+    {
+      if (!st->fullname)
+	  symtab_to_filename(st);
+      return st;
+    }
+  
+  /* if the direct approach failed, try */
+  /* looking up the basename and checking */
+  /* all matches with the fullname */
+  bfile = basename (file);
+  ALL_SYMTABS (objfile, st)
+    {
+      if (!strcmp (bfile, basename(st->filename)))
+	{
+	  if (!st->fullname)
+	    fullname = symtab_to_filename (st);
+	  else
+	    fullname = st->fullname;
+
+	  if (!strcmp (file, fullname))
+	    return st;
+	}
+    }
+  
+  /* still no luck?  look at psymtabs */
+  ALL_PSYMTABS (objfile, pt)
+    {
+      if (!strcmp (bfile, basename(pt->filename)))
+	{
+	  st = PSYMTAB_TO_SYMTAB (pt);
+	  if (st)
+	    {
+	      fullname = symtab_to_filename (st);
+	      if (!strcmp (file, fullname))
+		return st;
+	    }
+	}
+    }
+  return NULL;
+}
+
+
+/* gdb_loadfile loads a c source file into a text widget. */
+
+/* LTABLE_SIZE is the number of bytes to allocate for the */
+/* line table.  Its size limits the maximum number of lines */
+/* in a file to 8 * LTABLE_SIZE.  This memory is freed after */
+/* the file is loaded, so it is OK to make this very large. */
+/* Additional memory will be allocated if needed. */
+#define LTABLE_SIZE 20000
+
+static int
+gdb_loadfile (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+{
+  char *file, *widget, *line, *buf, msg[128];
+  int linenumbers, ln, anum, lnum, ltable_size;
+  Tcl_Obj *a[2], *b[2], *cmd;
+  FILE *fp;
+  char *ltable;
+  struct symtab *symtab;
+  struct linetable_entry *le;
+ 
+  if (objc != 4)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "widget filename linenumbers");
+      return TCL_ERROR; 
+    }
+
+  widget = Tcl_GetStringFromObj (objv[1], NULL);
+  file  = Tcl_GetStringFromObj (objv[2], NULL);
+  Tcl_GetBooleanFromObj (interp, objv[3], &linenumbers);
+
+  if ((fp = fopen ( file, "r" )) == NULL)
+    return TCL_ERROR;
+
+  symtab = full_lookup_symtab (file);
+  if (!symtab)
+    {
+      fclose (fp);
+      return TCL_ERROR;
+    }
+
+  /* Source linenumbers don't appear to be in order, and a sort is */
+  /* too slow so the fastest solution is just to allocate a huge */
+  /* array and set the array entry for each linenumber */
+
+  ltable_size = LTABLE_SIZE;
+  ltable = (char *)malloc (LTABLE_SIZE);
+  if (ltable == NULL)
+    {
+      sprintf(msg, "Out of memory.");
+      Tcl_SetStringObj ( Tcl_GetObjResult (interp), msg, -1);
+      fclose (fp);
+      return TCL_ERROR;
+    }
+
+  memset (ltable, 0, LTABLE_SIZE);
+
+  if (symtab->linetable && symtab->linetable->nitems)
+    {
+      le = symtab->linetable->item;
+      for (ln = symtab->linetable->nitems ;ln > 0; ln--, le++)
+	{
+	  lnum = le->line >> 3;
+	  if (lnum >= ltable_size)
+	    {
+	      char *new_ltable;
+	      new_ltable = (char *)realloc (ltable, ltable_size*2);
+	      memset (new_ltable + ltable_size, 0, ltable_size);
+	      ltable_size *= 2;
+	      if (new_ltable == NULL)
+		{
+		  sprintf(msg, "Out of memory.");
+		  Tcl_SetStringObj ( Tcl_GetObjResult (interp), msg, -1);
+		  free (ltable);
+		  fclose (fp);
+		  return TCL_ERROR;
+		}
+	      ltable = new_ltable;
+	    }
+	  ltable[lnum] |= 1 << (le->line % 8);
+	}
+    }
+
+  /* create an object with enough space, then grab its */
+  /* buffer and sprintf directly into it. */
+  a[0] = Tcl_NewStringObj (ltable, 1024);
+  a[1] = Tcl_NewListObj(0,NULL);
+  buf = a[0]->bytes;
+  b[0] = Tcl_NewStringObj (ltable,1024);  
+  b[1] = Tcl_NewStringObj ("source_tag", -1);  
+  Tcl_IncrRefCount (b[0]);
+  Tcl_IncrRefCount (b[1]);
+  line = b[0]->bytes + 1;
+  strcpy(b[0]->bytes,"\t");
+
+  ln = 1;
+  while (fgets (line, 980, fp))
+    {
+      if (linenumbers)
+	{
+	  if (ltable[ln >> 3] & (1 << (ln % 8)))
+	    a[0]->length = sprintf (buf,"%s insert end {-\t%d} break_tag", widget, ln);
+	  else
+	    a[0]->length = sprintf (buf,"%s insert end {\t%d} \"\"", widget, ln);
+	}
+      else
+	{
+	  if (ltable[ln >> 3] & (1 << (ln % 8)))
+	   a[0]->length = sprintf (buf,"%s insert end {-\t} break_tag", widget);
+	  else
+	   a[0]->length = sprintf (buf,"%s insert end {\t} \"\"", widget);
+	}
+      b[0]->length = strlen(b[0]->bytes);
+      Tcl_SetListObj(a[1],2,b);
+      cmd = Tcl_ConcatObj(2,a);
+      Tcl_EvalObj (interp, cmd);
+      Tcl_DecrRefCount (cmd);
+      ln++;
+    }
+  Tcl_DecrRefCount (b[0]);
+  Tcl_DecrRefCount (b[0]);
+  Tcl_DecrRefCount (b[1]);
+  Tcl_DecrRefCount (b[1]);
+  free (ltable);
+  fclose (fp);
+  return TCL_OK;
+}
+
+/* at some point make these static in breakpoint.c and move GUI code there */
+extern struct breakpoint *set_raw_breakpoint (struct symtab_and_line sal);
+extern void set_breakpoint_count (int);
+extern int breakpoint_count;
+
+/* set a breakpoint by source file and line number */
+/* flags are as follows: */
+/* least significant 2 bits are disposition, rest is */
+/* type (normally 0).
+
+enum bptype {
+  bp_breakpoint,		 Normal breakpoint 
+  bp_hardware_breakpoint,	Hardware assisted breakpoint
+}
+
+Disposition of breakpoint.  Ie: what to do after hitting it.
+enum bpdisp {
+  del,				Delete it
+  del_at_next_stop,		Delete at next stop, whether hit or not
+  disable,			Disable it 
+  donttouch			Leave it alone 
+  };
+*/
+
+static int
+gdb_set_bp (clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+
+{
+  struct symtab_and_line sal;
+  int line, flags, ret;
+  struct breakpoint *b;
+  char buf[64];
+  Tcl_Obj *a[5], *cmd;
+
+  if (objc != 4)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "filename line type");
+      return TCL_ERROR; 
+    }
+  
+  sal.symtab = full_lookup_symtab (Tcl_GetStringFromObj( objv[1], NULL));
+  if (sal.symtab == NULL)
+    return TCL_ERROR;
+
+  if (Tcl_GetIntFromObj( interp, objv[2], &line) == TCL_ERROR)
+    return TCL_ERROR;
+
+  if (Tcl_GetIntFromObj( interp, objv[3], &flags) == TCL_ERROR)
+    return TCL_ERROR;
+
+  sal.line = line;
+  sal.pc = find_line_pc (sal.symtab, sal.line);
+  if (sal.pc == 0)
+    return TCL_ERROR;
+
+  sal.section = find_pc_overlay (sal.pc);
+  b = set_raw_breakpoint (sal);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  b->type = flags >> 2;
+  b->disposition = flags & 3;
+
+  /* FIXME: this won't work for duplicate basenames! */
+  sprintf (buf, "%s:%d", basename(Tcl_GetStringFromObj( objv[1], NULL)), line);
+  b->addr_string = strsave (buf);
+
+  /* now send notification command back to GUI */
+  sprintf (buf, "0x%x", sal.pc);
+  a[0] = Tcl_NewStringObj ("gdbtk_tcl_breakpoint create", -1);
+  a[1] = Tcl_NewIntObj (b->number);
+  a[2] = Tcl_NewStringObj (buf, -1);
+  a[3] = objv[2];
+  a[4] = Tcl_NewListObj (1,&objv[1]);
+  cmd = Tcl_ConcatObj(5,a);
+  ret = Tcl_EvalObj (interp, cmd);
+  Tcl_DecrRefCount (cmd);
+  return ret;
+}
+
+#ifdef __CYGWIN32__
+/* The whole timer idea is an easy one, but POSIX does not appear to have
+   some sort of interval timer requirement. Consequently, we cannot rely
+   on cygwin32 to always deliver the timer's signal. This is especially
+   painful given that all serial I/O will block the timer right now. */
+static void
+gdbtk_annotate_starting ()
+{
+  /* TclDebug ("### STARTING ###"); */
+  gdbtk_start_timer ();
+}
+
+static void
+gdbtk_annotate_stopped ()
+{
+  /* TclDebug ("### STOPPED ###"); */
+  gdbtk_stop_timer ();
+}
+
+static void
+gdbtk_annotate_exited ()
+{
+  /* TclDebug ("### EXITED ###"); */
+  gdbtk_stop_timer ();
+}
+
+static void
+gdbtk_annotate_signalled ()
+{
+  /* TclDebug ("### SIGNALLED ###"); */
+  gdbtk_stop_timer ();
+}
+#endif
 
 /* Come here during initialize_all_files () */
 

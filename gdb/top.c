@@ -439,6 +439,9 @@ void (*interactive_hook) PARAMS ((void));
 
 void (*registers_changed_hook) PARAMS ((void));
 
+/* tell the GUI someone changed the PC */
+void (*pc_changed_hook) PARAMS ((void));
+
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
@@ -2877,7 +2880,12 @@ quit_confirm ()
     {
       char *s;
 
-      if (attach_flag)
+      /* This is something of a hack.  But there's no reliable way to
+	 see if a GUI is running.  The `use_windows' variable doesn't
+	 cut it.  */
+      if (init_ui_hook)
+	s = "A debugging session is active.\nDo you still want to close the debugger?";
+      else if (attach_flag)
 	s = "The program is running.  Quit anyway (and detach it)? ";
       else
 	s = "The program is running.  Exit anyway? ";

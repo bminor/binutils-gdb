@@ -93,3 +93,8 @@ extern void annotate_elt_rep PARAMS ((unsigned int));
 extern void annotate_elt_rep_end PARAMS ((void));
 extern void annotate_elt PARAMS ((void));
 extern void annotate_array_section_end PARAMS ((void));
+
+extern void (*annotate_starting_hook) PARAMS ((void));
+extern void (*annotate_stopped_hook) PARAMS ((void));
+extern void (*annotate_signalled_hook) PARAMS ((void));
+extern void (*annotate_exited_hook) PARAMS ((void));
