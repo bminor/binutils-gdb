@@ -22,12 +22,20 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "targ-cpu.h"
 
+/* This macro controls subsection alignment within a section.
+ *
+ * Under VAX/VMS, the linker (and PSECT specifications)
+ * take care of correctly aligning the segments.
+ * Doing the alignment here (on initialized data) can
+ * mess up the calculation of global data PSECT sizes.
+ */
+#define SUB_SEGMENT_ALIGN(SEG)	(((SEG) == data_section) ? 0 : 2)
+
 /* This flag is used to remember whether we are in the const or the
    data section.  By and large they are identical, but we set a no-write
    bit for psects in the const section.  */
 
 extern char const_flag;
-
 
 /* These are defined in obj-vms.c. */
 extern const short seg_N_TYPE[];
