@@ -192,9 +192,10 @@ static bfd_vma mips_elf_create_local_got_entry
   PARAMS ((bfd *, struct mips_got_info *, asection *, bfd_vma));
 static bfd_vma mips_elf_got16_entry 
   PARAMS ((bfd *, struct bfd_link_info *, bfd_vma));
-static unsigned int mips_elf_create_dynamic_relocation 
+static boolean mips_elf_create_dynamic_relocation 
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
-	   long, bfd_vma, asection *));
+	   struct mips_elf_link_hash_entry *, asection *,
+	   bfd_vma, bfd_vma *, asection *));
 static void mips_elf_allocate_dynamic_relocations 
   PARAMS ((bfd *, unsigned int));
 static boolean mips_elf_stub_section_p 
@@ -5541,7 +5542,7 @@ mips_elf_got16_entry (abfd, info, value)
      want, it is really the %high value.  The complete value is
      calculated with a `addiu' of a LO16 relocation, just as with a
      HI16/LO16 pair.  */
-  value = mips_elf_high (value);
+  value = mips_elf_high (value) << 16;
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
   /* Look to see if we already have an appropriate entry.  */
@@ -5594,19 +5595,21 @@ mips_elf_next_lo16_relocation (relocation, relend)
   return NULL;
 }
 
-/* Create a rel.dyn relocation for the dynamic linker to resolve.  The
-   relocatin is against the symbol with the dynamic symbol table index
-   DYNINDX.  REL is the original relocation, which is now being made
-   dynamic.  */
+/* Create a rel.dyn relocation for the dynamic linker to resolve.  REL
+   is the original relocation, which is now being transformed into a
+   dyanmic relocation.  The ADDENDP is adjusted if necessary; the
+   caller should store the result in place of the original addend.  */
 
-static unsigned int
-mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
-				    addend, input_section)
+static boolean
+mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
+				    symbol, addendp, input_section)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const Elf_Internal_Rela *rel;
-     long dynindx;
-     bfd_vma addend;
+     struct mips_elf_link_hash_entry *h;
+     asection *sec;
+     bfd_vma symbol;
+     bfd_vma *addendp;
      asection *input_section;
 {
   Elf_Internal_Rel outrel;
@@ -5624,36 +5627,94 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
 
   skip = false;
 
-  /* The symbol for the relocation is the same as it was for the
-     original relocation.  */
-  outrel.r_info = ELF32_R_INFO (dynindx, R_MIPS_REL32);
-
-  /* The offset for the dynamic relocation is the same as for the
-     original relocation, adjusted by the offset at which the original
-     section is output.  */
+  /* We begin by assuming that the offset for the dynamic relocation
+     is the same as for the original relocation.  We'll adjust this
+     later to reflect the correct output offsets.  */
   if (elf_section_data (input_section)->stab_info == NULL)
     outrel.r_offset = rel->r_offset;
   else
     {
-      bfd_vma off;
-
-      off = (_bfd_stab_section_offset
-	     (output_bfd, &elf_hash_table (info)->stab_info,
-	      input_section,
-	      &elf_section_data (input_section)->stab_info,
-	      rel->r_offset));
-      if (off == (bfd_vma) -1)
+      /* Except that in a stab section things are more complex.
+	 Because we compress stab information, the offset given in the
+	 relocation may not be the one we want; we must let the stabs
+	 machinery tell us the offset.  */
+      outrel.r_offset 
+	= (_bfd_stab_section_offset
+	   (output_bfd, &elf_hash_table (info)->stab_info,
+	    input_section,
+	    &elf_section_data (input_section)->stab_info,
+	    rel->r_offset));
+      /* If we didn't need the relocation at all, this value will be
+	 -1.  */
+      if (outrel.r_offset == (bfd_vma) -1)
 	skip = true;
-      outrel.r_offset = off;
     }
-  outrel.r_offset += (input_section->output_section->vma
-		      + input_section->output_offset);
 
   /* If we've decided to skip this relocation, just output an emtpy
-     record.  */
+     record.  Note that R_MIPS_NONE == 0, so that this call to memset
+     is a way of setting R_TYPE to R_MIPS_NONE.  */
   if (skip)
     memset (&outrel, 0, sizeof (outrel));
+  else
+    {
+      long indx;
+      bfd_vma section_offset;
 
+      /* We must now calculate the dynamic symbol table index to use
+	 in the relocation.  */
+      if (h != NULL
+	  && (! info->symbolic || (h->root.elf_link_hash_flags
+				   & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	{
+	  indx = h->root.dynindx;
+	  BFD_ASSERT (indx != -1);
+	}
+      else
+	{
+	  if (sec != NULL && bfd_is_abs_section (sec))
+	    indx = 0;
+	  else if (sec == NULL || sec->owner == NULL)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	  else
+	    {
+	      indx = elf_section_data (sec->output_section)->dynindx;
+	      if (indx == 0)
+		abort ();
+	    }
+
+	  /* Figure out how far the target of the relocation is from
+	     the beginning of its section.  */
+	  section_offset = symbol - sec->output_section->vma;
+	  /* The relocation we're building is section-relative.
+	     Therefore, the original addend must be adjusted by the
+	     section offset.  */
+	  *addendp += symbol - sec->output_section->vma;
+	  /* Now, the relocation is just against the section.  */
+	  symbol = sec->output_section->vma;
+	}
+      
+      /* If the relocation was previously an absolute relocation, we
+	 must adjust it by the value we give it in the dynamic symbol
+	 table.  */
+      if (r_type != R_MIPS_REL32)
+	*addendp += symbol;
+
+      /* The relocation is always an REL32 relocation because we don't
+	 know where the shared library will wind up at load-time.  */
+      outrel.r_info = ELF32_R_INFO (indx, R_MIPS_REL32);
+
+      /* Adjust the output offset of the relocation to reference the
+	 correct location in the output file.  */
+      outrel.r_offset += (input_section->output_section->vma
+			  + input_section->output_offset);
+    }
+
+  /* Put the relocation back out.  We have to use the special
+     relocation outputter in the 64-bit case since the 64-bit
+     relocation format is non-standard.  */
   if (ABI_64_P (output_bfd))
     {
       (*get_elf_backend_data (output_bfd)->s->swap_reloc_out)
@@ -5666,6 +5727,15 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
 			      (((Elf32_External_Rel *)
 				sreloc->contents)
 			       + sreloc->reloc_count));
+
+  /* Record the index of the first relocation referencing H.  This
+     information is later emitted in the .msym section.  */
+  if (h != NULL
+      && (h->min_dyn_reloc_index == 0 
+	  || sreloc->reloc_count < h->min_dyn_reloc_index))
+    h->min_dyn_reloc_index = sreloc->reloc_count;
+
+  /* We've now added another relocation.  */
   ++sreloc->reloc_count;
 
   /* Make sure the output section is writable.  The dynamic linker
@@ -5692,7 +5762,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
 	  else
 	    mips_elf_set_cr_type (cptrel, CRT_MIPS_WORD);
 	  mips_elf_set_cr_dist2to (cptrel, 0);
-	  cptrel.konst = addend;
+	  cptrel.konst = *addendp;
 
 	  cr = (scpt->contents
 		+ sizeof (Elf32_External_compact_rel));
@@ -5703,7 +5773,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, dynindx,
 	}
     }
 
-  return sreloc->reloc_count - 1;
+  return true;
 }
 
 /* Calculate the value produced by the RELOCATION (which comes from
@@ -6024,27 +6094,28 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS_32:
     case R_MIPS_REL32:
     case R_MIPS_64:
-      /* If we're creating a shared library, or this relocation is
-	 against a symbol in a shared library, then we can't know
-	 where the symbol will end up.  So, we create a relocation
-	 record in the output, and leave the job up to the dynamic
-	 linker.  */
-      if (info->shared || !sec->output_section)
+      if ((info->shared
+	   || (elf_hash_table (info)->dynamic_sections_created
+	       && h != NULL
+	       && ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
+		   == 0)))
+	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
-	  unsigned int reloc_index;
-
-	  BFD_ASSERT (h != NULL);
-	  reloc_index 
-	    = mips_elf_create_dynamic_relocation (abfd, 
-						  info, 
-						  relocation,
-						  h->root.dynindx,
-						  addend,
-						  input_section);
-	  if (h->min_dyn_reloc_index == 0
-	      || reloc_index < h->min_dyn_reloc_index)
-	    h->min_dyn_reloc_index = reloc_index;
-	  value = symbol + addend;
+	  /* If we're creating a shared library, or this relocation is
+	     against a symbol in a shared library, then we can't know
+	     where the symbol will end up.  So, we create a relocation
+	     record in the output, and leave the job up to the dynamic
+	     linker.  */
+	  value = addend;
+	  if (!mips_elf_create_dynamic_relocation (abfd, 
+						   info, 
+						   relocation,
+						   h,
+						   sec,
+						   symbol,
+						   &value,
+						   input_section))
+	    return false;
 	}
       else
 	{
@@ -7488,7 +7559,8 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		 this symbol, a symbol must have a dynamic symbol
 		 table index greater that DT_GOTSYM if there are
 		 dynamic relocations against it.  */
-	      if (!mips_elf_record_global_got_symbol (h, info, g))
+	      if (h != NULL
+		  && !mips_elf_record_global_got_symbol (h, info, g))
 		return false;
 	    }
 
