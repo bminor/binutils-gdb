@@ -1,5 +1,9 @@
 Fri Sep 18 02:07:39 1992  John Gilmore  (gnu@cygnus.com)
 
+	* main.c (gdb_readline):  Avoid printf_filtered, which sets char
+	position wrong if used for the prompt.
+	* utils.c (puts_filtered):  Comment:  NOT a puts() replacement!
+
 	Support for accessing arbitrary MIPS stack frames in memory.
 
 	* blockframe.c (get_prev_frame_info):  If INIT_FRAME_PC_FIRST is

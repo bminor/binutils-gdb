@@ -1010,7 +1010,10 @@ gdb_readline (prrompt)
 
   if (prrompt)
     {
-      printf_filtered (prrompt);
+      /* Don't use a _filtered function here.  It causes the assumed
+	 character position to be off, since the newline we read from
+	 the user is not accounted for.  */
+      fputs (prrompt, stdout);
       fflush (stdout);
     }
   
