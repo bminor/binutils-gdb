@@ -1,4 +1,13 @@
+Sun Aug 27 17:41:05 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arm.c (do_swi): Allow optional leading '#'.
+
 Sat Aug 26 17:24:20 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-m68k.c (comment_chars): If TE_DELTA is defined,
+	include '#'.
+	* config/tc-m68k.h (NO_PSEUDO_DOT): Define if TE_DELTA is
+	defined.
 
 	* config/te-delta.h: Include obj-format.h.
 	* config/te-sco386.h: Likewise.
