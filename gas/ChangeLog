@@ -1,5 +1,11 @@
 2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (md_begin): Fix .reginfo and .MIPS.option section
+	alignment for NewABI. Let n32 use .reginfo. Remove useless casts.
+	(mips_elf_final_processing): Let n32 use .reginfo.
+
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (append_insn): Fix too small range of variable.
 
 2002-05-14  Nick Clifton  <nickc@cambridge.redhat.com>

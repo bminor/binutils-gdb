@@ -1379,12 +1379,12 @@ md_begin ()
 	if (strcmp (TARGET_OS, "elf") != 0)
 	  flags |= SEC_ALLOC | SEC_LOAD;
 
-	if (! HAVE_NEWABI)
+	if (file_mips_abi != N64_ABI)
 	  {
 	    sec = subseg_new (".reginfo", (subsegT) 0);
 
-	    (void) bfd_set_section_flags (stdoutput, sec, flags);
-	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
+	    bfd_set_section_flags (stdoutput, sec, flags);
+	    bfd_set_section_alignment (stdoutput, sec, HAVE_NEWABI ? 3 : 2);
 
 #ifdef OBJ_ELF
 	    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
@@ -1395,8 +1395,8 @@ md_begin ()
 	    /* The 64-bit ABI uses a .MIPS.options section rather than
                .reginfo section.  */
 	    sec = subseg_new (".MIPS.options", (subsegT) 0);
-	    (void) bfd_set_section_flags (stdoutput, sec, flags);
-	    (void) bfd_set_section_alignment (stdoutput, sec, 3);
+	    bfd_set_section_flags (stdoutput, sec, flags);
+	    bfd_set_section_alignment (stdoutput, sec, 3);
 
 #ifdef OBJ_ELF
 	    /* Set up the option header.  */
@@ -12763,7 +12763,7 @@ void
 mips_elf_final_processing ()
 {
   /* Write out the register information.  */
-  if (! HAVE_NEWABI)
+  if (file_mips_abi != N64_ABI)
     {
       Elf32_RegInfo s;
 
