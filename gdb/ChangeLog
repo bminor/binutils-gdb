@@ -1,5 +1,8 @@
 Tue Apr 11 09:35:20 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c (print_address_numeric): Pass use_local to
+	print_longest, rather than always passing 1.
+
 	* nlm/Makefile.in: Remove comments discussing munch.
 
 Tue Apr 11 11:07:12 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
