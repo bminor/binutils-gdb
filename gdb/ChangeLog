@@ -1,3 +1,10 @@
+2002-04-19  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.c (setup_arbitrary_frame): Rename...
+	(alpha_setup_arbitrary_frame): ...to this.
+	* config/alpha/tm-alpha.h (SETUP_ARBITRARY_FRAME): Update
+	for alpha_setup_arbitrary_frame.
+
 2002-04-18  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (BREAKPOINT_FROM_PC): Return a const buffer.

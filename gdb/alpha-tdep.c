@@ -1009,7 +1009,7 @@ alpha_frame_args_address (struct frame_info *fi)
    arguments without difficulty.  */
 
 struct frame_info *
-setup_arbitrary_frame (int argc, CORE_ADDR *argv)
+alpha_setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 {
   if (argc != 2)
     error ("ALPHA frame specifications require two arguments: sp and pc");

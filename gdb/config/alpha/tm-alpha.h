@@ -408,8 +408,9 @@ extern void alpha_print_extra_frame_info (struct frame_info *);
    up so that the primary value is the SP, and the PC is used to disambiguate
    multiple functions with the same SP that are at different stack levels. */
 
-#define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
+#define SETUP_ARBITRARY_FRAME(argc, argv) \
+  alpha_setup_arbitrary_frame (argc, argv)
+extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
 
 /* This is used by heuristic_proc_start.  It should be shot it the head.  */
 #ifndef VM_MIN_ADDRESS
