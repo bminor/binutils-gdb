@@ -1,3 +1,14 @@
+2005-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-support.c (cp_class_name_from_physname): Rewrite.
+	(unqualified_name_from_comp): New function, broken out from
+	method_name_from_physname.  Correct handling for typed names
+	and templates.
+	(method_name_from_physname): Use unqualified_name_from_comp.
+	(cp_func_name, remove_params): Move earlier in the file.  Add
+	better comments.  Use the component tree to parse the name.
+	(_initialize_cp_support): Remove stray whitespace.
+
 2005-03-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* exec.c (bfdsec_to_vmap): Use strcmp instead of DEPRECATED_STREQ.

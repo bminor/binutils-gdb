@@ -51,8 +51,6 @@ static int sym_return_val_size;
 static int sym_return_val_index;
 static struct symbol **sym_return_val;
 
-static char *remove_params (const char *demangled_name);
-
 static void overload_list_add_symbol (struct symbol *sym,
 				      const char *oload_name);
 
@@ -151,7 +149,7 @@ cp_class_name_from_physname (const char *physname)
 {
   void *storage;
   char *demangled_name = NULL, *ret;
-  struct demangle_component *ret_comp, *prev_comp;
+  struct demangle_component *ret_comp, *prev_comp, *cur_comp;
   int done;
 
   ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &storage,
@@ -160,19 +158,11 @@ cp_class_name_from_physname (const char *physname)
     return NULL;
 
   done = 0;
-  prev_comp = NULL;
+
+  /* First strip off any qualifiers, if we have a function or method.  */
   while (!done)
     switch (ret_comp->type)
       {
-      case DEMANGLE_COMPONENT_TYPED_NAME:
-	prev_comp = NULL;
-        ret_comp = d_right (ret_comp);
-        break;
-      case DEMANGLE_COMPONENT_QUAL_NAME:
-      case DEMANGLE_COMPONENT_LOCAL_NAME:
-	prev_comp = ret_comp;
-        ret_comp = d_right (ret_comp);
-        break;
       case DEMANGLE_COMPONENT_CONST:
       case DEMANGLE_COMPONENT_RESTRICT:
       case DEMANGLE_COMPONENT_VOLATILE:
@@ -180,11 +170,38 @@ cp_class_name_from_physname (const char *physname)
       case DEMANGLE_COMPONENT_RESTRICT_THIS:
       case DEMANGLE_COMPONENT_VOLATILE_THIS:
       case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-	prev_comp = NULL;
         ret_comp = d_left (ret_comp);
         break;
-      case DEMANGLE_COMPONENT_NAME:
+      default:
+	done = 1;
+	break;
+      }
+
+  /* If what we have now is a function, discard the argument list.  */
+  if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
+    ret_comp = d_left (ret_comp);
+
+  /* If what we have now is a template, strip off the template
+     arguments.  The left subtree may be a qualified name.  */
+  if (ret_comp->type == DEMANGLE_COMPONENT_TEMPLATE)
+    ret_comp = d_left (ret_comp);
+
+  /* What we have now should be a name, possibly qualified.  Additional
+     qualifiers could live in the left subtree or the right subtree.  Find
+     the last piece.  */
+  done = 0;
+  prev_comp = NULL;
+  cur_comp = ret_comp;
+  while (!done)
+    switch (cur_comp->type)
+      {
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
+	prev_comp = cur_comp;
+        cur_comp = d_right (cur_comp);
+        break;
       case DEMANGLE_COMPONENT_TEMPLATE:
+      case DEMANGLE_COMPONENT_NAME:
       case DEMANGLE_COMPONENT_CTOR:
       case DEMANGLE_COMPONENT_DTOR:
       case DEMANGLE_COMPONENT_OPERATOR:
@@ -193,23 +210,80 @@ cp_class_name_from_physname (const char *physname)
 	break;
       default:
 	done = 1;
-	prev_comp = NULL;
-	ret_comp = NULL;
+	cur_comp = NULL;
 	break;
       }
 
   ret = NULL;
-  if (prev_comp != NULL)
+  if (cur_comp != NULL && prev_comp != NULL)
     {
+      /* We want to discard the rightmost child of PREV_COMP.  */
       *prev_comp = *d_left (prev_comp);
       /* The ten is completely arbitrary; we don't have a good estimate.  */
-      ret = cp_comp_to_string (prev_comp, 10);
+      ret = cp_comp_to_string (ret_comp, 10);
     }
 
   xfree (storage);
   if (demangled_name)
     xfree (demangled_name);
   return ret;
+}
+
+/* Return the child of COMP which is the basename of a method, variable,
+   et cetera.  All scope qualifiers are discarded, but template arguments
+   will be included.  The component tree may be modified.  */
+
+static struct demangle_component *
+unqualified_name_from_comp (struct demangle_component *comp)
+{
+  struct demangle_component *ret_comp = comp, *last_template;
+  int done;
+
+  done = 0;
+  last_template = NULL;
+  while (!done)
+    switch (ret_comp->type)
+      {
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
+        ret_comp = d_right (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_TYPED_NAME:
+        ret_comp = d_left (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_TEMPLATE:
+	gdb_assert (last_template == NULL);
+	last_template = ret_comp;
+	ret_comp = d_left (ret_comp);
+	break;
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+        ret_comp = d_left (ret_comp);
+        break;
+      case DEMANGLE_COMPONENT_NAME:
+      case DEMANGLE_COMPONENT_CTOR:
+      case DEMANGLE_COMPONENT_DTOR:
+      case DEMANGLE_COMPONENT_OPERATOR:
+      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
+	done = 1;
+	break;
+      default:
+	return NULL;
+	break;
+      }
+
+  if (last_template)
+    {
+      d_left (last_template) = ret_comp;
+      return last_template;
+    }
+
+  return ret_comp;
 }
 
 /* Return the name of the method whose linkage name is PHYSNAME.  */
@@ -227,37 +301,7 @@ method_name_from_physname (const char *physname)
   if (ret_comp == NULL)
     return NULL;
 
-  done = 0;
-  while (!done)
-    switch (ret_comp->type)
-      {
-      case DEMANGLE_COMPONENT_QUAL_NAME:
-      case DEMANGLE_COMPONENT_LOCAL_NAME:
-      case DEMANGLE_COMPONENT_TYPED_NAME:
-        ret_comp = d_right (ret_comp);
-        break;
-      case DEMANGLE_COMPONENT_CONST:
-      case DEMANGLE_COMPONENT_RESTRICT:
-      case DEMANGLE_COMPONENT_VOLATILE:
-      case DEMANGLE_COMPONENT_CONST_THIS:
-      case DEMANGLE_COMPONENT_RESTRICT_THIS:
-      case DEMANGLE_COMPONENT_VOLATILE_THIS:
-      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-        ret_comp = d_left (ret_comp);
-        break;
-      case DEMANGLE_COMPONENT_NAME:
-      case DEMANGLE_COMPONENT_TEMPLATE:
-      case DEMANGLE_COMPONENT_CTOR:
-      case DEMANGLE_COMPONENT_DTOR:
-      case DEMANGLE_COMPONENT_OPERATOR:
-      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
-	done = 1;
-	break;
-      default:
-	done = 1;
-	ret_comp = NULL;
-	break;
-      }
+  ret_comp = unqualified_name_from_comp (ret_comp);
 
   ret = NULL;
   if (ret_comp != NULL)
@@ -267,6 +311,79 @@ method_name_from_physname (const char *physname)
   xfree (storage);
   if (demangled_name)
     xfree (demangled_name);
+  return ret;
+}
+
+/* If FULL_NAME is the demangled name of a C++ function (including an
+   arg list, possibly including namespace/class qualifications),
+   return a new string containing only the function name (without the
+   arg list/class qualifications).  Otherwise, return NULL.  The
+   caller is responsible for freeing the memory in question.  */
+
+char *
+cp_func_name (const char *full_name)
+{
+  void *storage;
+  char *ret;
+  struct demangle_component *ret_comp;
+  int done;
+
+  ret_comp = cp_demangled_name_to_comp (full_name, &storage, NULL);
+  if (!ret_comp)
+    return NULL;
+
+  ret_comp = unqualified_name_from_comp (ret_comp);
+
+  ret = NULL;
+  if (ret_comp != NULL)
+    ret = cp_comp_to_string (ret_comp, 10);
+
+  xfree (storage);
+  return ret;
+}
+
+/* DEMANGLED_NAME is the name of a function, including parameters and
+   (optionally) a return type.  Return the name of the function without
+   parameters or return type, or NULL if we can not parse the name.  */
+
+static char *
+remove_params (const char *demangled_name)
+{
+  int done = 0;
+  struct demangle_component *ret_comp;
+  void *storage;
+  char *ret = NULL;
+
+  if (demangled_name == NULL)
+    return NULL;
+
+  ret_comp = cp_demangled_name_to_comp (demangled_name, &storage, NULL);
+  if (ret_comp == NULL)
+    return NULL;
+
+  /* First strip off any qualifiers, if we have a function or method.  */
+  while (!done)
+    switch (ret_comp->type)
+      {
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
+        ret_comp = d_left (ret_comp);
+        break;
+      default:
+	done = 1;
+	break;
+      }
+
+  /* What we have now should be a function.  Return its name.  */
+  if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
+    ret = cp_comp_to_string (d_left (ret_comp), 10);
+
+  xfree (storage);
   return ret;
 }
 
@@ -479,77 +596,7 @@ cp_entire_prefix_len (const char *name)
   return previous_len;
 }
 
-/* If FULL_NAME is the demangled name of a C++ function (including an
-   arg list, possibly including namespace/class qualifications),
-   return a new string containing only the function name (without the
-   arg list/class qualifications).  Otherwise, return NULL.  The
-   caller is responsible for freeing the memory in question.  */
-
-char *
-cp_func_name (const char *full_name)
-{
-  const char *previous_component = full_name;
-  const char *next_component;
-
-  if (!full_name)
-    return NULL;
-
-  for (next_component = (previous_component
-			 + cp_find_first_component (previous_component));
-       *next_component == ':';
-       next_component = (previous_component
-			 + cp_find_first_component (previous_component)))
-    {
-      /* Skip '::'.  */
-      previous_component = next_component + 2;
-    }
-
-  return remove_params (previous_component);
-}
-
 /* Overload resolution functions.  */
-
-static char *
-remove_params (const char *demangled_name)
-{
-  const char *argp;
-  char *new_name;
-  int depth;
-
-  if (demangled_name == NULL)
-    return NULL;
-
-  /* First find the end of the arg list.  */
-  argp = strrchr (demangled_name, ')');
-  if (argp == NULL)
-    return NULL;
-
-  /* Back up to the beginning.  */
-  depth = 1;
-
-  while (argp-- > demangled_name)
-    {
-      if (*argp == ')')
-	depth ++;
-      else if (*argp == '(')
-	{
-	  depth --;
-
-	  if (depth == 0)
-	    break;
-	}
-    }
-  if (depth != 0)
-    internal_error (__FILE__, __LINE__,
-		    _("bad demangled name %s\n"), demangled_name);
-  while (argp[-1] == ' ' && argp > demangled_name)
-    argp --;
-
-  new_name = xmalloc (argp - demangled_name + 1);
-  memcpy (new_name, demangled_name, argp - demangled_name);
-  new_name[argp - demangled_name] = '\0';
-  return new_name;
-}
 
 /* Test to see if SYM is a symbol that we haven't seen corresponding
    to a function named OLOAD_NAME.  If so, add it to the current
@@ -838,5 +885,4 @@ _initialize_cp_support (void)
   add_cmd ("first_component", class_maintenance, first_component_command,
 	   _("Print the first class/namespace component of NAME."),
 	   &maint_cplus_cmd_list);
-		  
 }
