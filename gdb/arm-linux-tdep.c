@@ -58,39 +58,9 @@ LONGEST arm_linux_call_dummy_words[] =
   0xe1a0e00f, 0xe1a0f004, 0xef9f001
 };
 
-#ifdef GET_LONGJMP_TARGET
-
-/* Figure out where the longjmp will land.  We expect that we have
-   just entered longjmp and haven't yet altered r0, r1, so the
-   arguments are still in the registers.  (ARM_A1_REGNUM) points at
-   the jmp_buf structure from which we extract the pc (JB_PC) that we
-   will land at.  The pc is copied into ADDR.  This routine returns
-   true on success. */
-
-#define LONGJMP_TARGET_SIZE 	sizeof(int)
-#define JB_ELEMENT_SIZE		sizeof(int)
-#define JB_SL			18
-#define JB_FP			19
-#define JB_SP			20
+/* Description of the longjmp buffer.  */
+#define JB_ELEMENT_SIZE		INT_REGISTER_RAW_SIZE
 #define JB_PC			21
-
-int
-arm_get_longjmp_target (CORE_ADDR * pc)
-{
-  CORE_ADDR jb_addr;
-  char buf[LONGJMP_TARGET_SIZE];
-
-  jb_addr = read_register (ARM_A1_REGNUM);
-
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
-			  LONGJMP_TARGET_SIZE))
-    return 0;
-
-  *pc = extract_address (buf, LONGJMP_TARGET_SIZE);
-  return 1;
-}
-
-#endif /* GET_LONGJMP_TARGET */
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -548,6 +518,9 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->lowest_pc = 0x8000;
   tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
+
+  tdep->jb_pc = JB_PC;
+  tdep->jb_elt_size = JB_ELEMENT_SIZE;
 }
 
 void

@@ -22,6 +22,10 @@
 
 #include "arm-tdep.h"
 
+/* Description of the longjmp buffer.  */
+#define JB_PC 24
+#define JB_ELEMENT_SIZE INT_REGISTER_RAW_SIZE
+
 /* For compatibility with previous implemenations of GDB on arm/NetBSD,
    override the default little-endian breakpoint.  */
 static const char arm_nbsd_arm_le_breakpoint[] = {0x11, 0x00, 0x00, 0xe6};
@@ -35,6 +39,9 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
   tdep->lowest_pc = 0x8000;
   tdep->arm_breakpoint = arm_nbsd_arm_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_nbsd_arm_le_breakpoint);
+
+  tdep->jb_pc = JB_PC;
+  tdep->jb_elt_size = JB_ELEMENT_SIZE;
 }
   
 static void

@@ -114,15 +114,6 @@ static ptid_t previous_inferior_ptid;
 
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
-/* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
-   program.  It needs to examine the jmp_buf argument and extract the PC
-   from it.  The return value is non-zero on success, zero otherwise. */
-
-#ifndef GET_LONGJMP_TARGET
-#define GET_LONGJMP_TARGET(PC_ADDR) 0
-#endif
-
-
 /* Dynamic function trampolines are similar to solib trampolines in that they
    are between the caller and the callee.  The difference is that when you
    enter a dynamic trampoline, you can't determine the callee's address.  Some
@@ -2306,7 +2297,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  disable_longjmp_breakpoint ();
 	  remove_breakpoints ();
 	  breakpoints_inserted = 0;
-	  if (!GET_LONGJMP_TARGET (&jmp_buf_pc))
+	  if (!GET_LONGJMP_TARGET_P ()
+	      || !GET_LONGJMP_TARGET (&jmp_buf_pc))
 	    {
 	      keep_going (ecs);
 	      return;

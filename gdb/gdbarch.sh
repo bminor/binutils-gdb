@@ -466,6 +466,8 @@ f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::default_regist
 F:2:REGISTER_BYTES_OK:int:register_bytes_ok:long nr_bytes:nr_bytes::0:0
 f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_register_not::0
 f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
+# setjmp/longjmp support.
+F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 #
 # Non multi-arch DUMMY_FRAMES are a mess (multi-arch ones are not that
 # much better but at least they are vaguely consistent).  The headers

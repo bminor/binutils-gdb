@@ -883,6 +883,45 @@ extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+/* setjmp/longjmp support. */
+
+#if defined (GET_LONGJMP_TARGET)
+/* Legacy for systems yet to multi-arch GET_LONGJMP_TARGET */
+#if !defined (GET_LONGJMP_TARGET_P)
+#define GET_LONGJMP_TARGET_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (GET_LONGJMP_TARGET_P)
+#define GET_LONGJMP_TARGET_P() (0)
+#endif
+
+extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_LONGJMP_TARGET_P)
+#error "Non multi-arch definition of GET_LONGJMP_TARGET"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_LONGJMP_TARGET_P)
+#define GET_LONGJMP_TARGET_P() (gdbarch_get_longjmp_target_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (GET_LONGJMP_TARGET)
+#define GET_LONGJMP_TARGET(pc) (internal_error (__FILE__, __LINE__, "GET_LONGJMP_TARGET"), 0)
+#endif
+
+typedef int (gdbarch_get_longjmp_target_ftype) (CORE_ADDR *pc);
+extern int gdbarch_get_longjmp_target (struct gdbarch *gdbarch, CORE_ADDR *pc);
+extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get_longjmp_target_ftype *get_longjmp_target);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_LONGJMP_TARGET)
+#error "Non multi-arch definition of GET_LONGJMP_TARGET"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_LONGJMP_TARGET)
+#define GET_LONGJMP_TARGET(pc) (gdbarch_get_longjmp_target (current_gdbarch, pc))
+#endif
+#endif
+
 /* Non multi-arch DUMMY_FRAMES are a mess (multi-arch ones are not that
    much better but at least they are vaguely consistent).  The headers
    and body contain convoluted #if/#else sequences for determine how

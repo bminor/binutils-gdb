@@ -143,9 +143,7 @@ static int cover_target_enable_exception_callback (PTR);
 
 static void maintenance_info_breakpoints (char *, int);
 
-#ifdef GET_LONGJMP_TARGET
 static void create_longjmp_breakpoint (char *);
-#endif
 
 static void create_overlay_event_breakpoint (char *);
 
@@ -3758,7 +3756,6 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
   return b;
 }
 
-#ifdef GET_LONGJMP_TARGET
 
 static void
 create_longjmp_breakpoint (char *func_name)
@@ -3781,8 +3778,6 @@ create_longjmp_breakpoint (char *func_name)
   if (func_name)
     b->addr_string = xstrdup (func_name);
 }
-
-#endif /* #ifdef GET_LONGJMP_TARGET */
 
 /* Call this routine when stepping and nexting to enable a breakpoint
    if we do a longjmp().  When we hit that breakpoint, call
@@ -6967,13 +6962,14 @@ breakpoint_re_set (void)
   set_language (save_language);
   input_radix = save_input_radix;
 
-#ifdef GET_LONGJMP_TARGET
-  create_longjmp_breakpoint ("longjmp");
-  create_longjmp_breakpoint ("_longjmp");
-  create_longjmp_breakpoint ("siglongjmp");
-  create_longjmp_breakpoint ("_siglongjmp");
-  create_longjmp_breakpoint (NULL);
-#endif
+  if (GET_LONGJMP_TARGET_P ())
+    {
+      create_longjmp_breakpoint ("longjmp");
+      create_longjmp_breakpoint ("_longjmp");
+      create_longjmp_breakpoint ("siglongjmp");
+      create_longjmp_breakpoint ("_siglongjmp");
+      create_longjmp_breakpoint (NULL);
+    }
   
   create_overlay_event_breakpoint ("_ovly_debug_event");
 }

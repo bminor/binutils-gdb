@@ -123,10 +123,16 @@ struct gdbarch_tdep
   const char *abi_name;		/* Name of the above.  */
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
-  const char *arm_breakpoint;
-  int arm_breakpoint_size;
-  const char *thumb_breakpoint;
-  int thumb_breakpoint_size;
+
+  const char *arm_breakpoint;	/* Breakpoint pattern for an ARM insn.  */
+  int arm_breakpoint_size;	/* And its size.  */
+  const char *thumb_breakpoint;	/* Breakpoint pattern for an ARM insn.  */
+  int thumb_breakpoint_size;	/* And its size.  */
+
+  int jb_pc;			/* Offset to PC value in jump buffer. 
+				   If this is negative, longjmp support
+				   will be disabled.  */
+  size_t jb_elt_size;		/* And the size of each entry in the buf.  */
 };
 
 #ifndef LOWEST_PC

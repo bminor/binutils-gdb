@@ -2272,6 +2272,23 @@ arm_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
   write_register (ARM_A1_REGNUM, addr);
 }
 
+static int
+arm_get_longjmp_target (CORE_ADDR *pc)
+{
+  CORE_ADDR jb_addr;
+  char buf[INT_REGISTER_RAW_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  
+  jb_addr = read_register (ARM_A1_REGNUM);
+
+  if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
+			  INT_REGISTER_RAW_SIZE))
+    return 0;
+
+  *pc = extract_address (buf, INT_REGISTER_RAW_SIZE);
+  return 1;
+}
+
 /* Return non-zero if the PC is inside a thumb call thunk.  */
 
 int
@@ -2775,7 +2792,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "arm_gdbarch_init: bad byte order for float format");
     }
 
+  /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
+  tdep->jb_pc = -1; /* Longjump support not enabled by default.  */
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
@@ -2903,6 +2922,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */
+
+  if (tdep->jb_pc >= 0)
+    set_gdbarch_get_longjmp_target (gdbarch, arm_get_longjmp_target);
 
   /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
      references the old architecture vector, not the one we are

@@ -97,9 +97,3 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 #else
 #error Not FETCH_INFERIOR_REGISTERS 
 #endif /* !FETCH_INFERIOR_REGISTERS */
-
-int 
-get_longjmp_target (CORE_ADDR *addr)
-{
-  return 0;
-}

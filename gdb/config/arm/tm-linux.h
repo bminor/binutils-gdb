@@ -76,14 +76,6 @@ extern CORE_ADDR arm_linux_push_arguments (int, struct value **, CORE_ADDR,
 /* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
 #define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
 
-/* Figure out where the longjmp will land.  The code expects that longjmp
-   has just been entered and the code had not altered the registers, so
-   the arguments are are still in r0-r1.  r0 points at the jmp_buf structure
-   from which the target pc (JB_PC) is extracted.  This pc value is copied
-   into ADDR.  This routine returns true on success */
-extern int arm_get_longjmp_target (CORE_ADDR *);
-#define GET_LONGJMP_TARGET(addr)	arm_get_longjmp_target (addr)
-
 /* On ARM Linux, each call to a library routine goes through a small piece
    of trampoline code in the ".plt" section.  The  wait_for_inferior() 
    routine uses this macro to detect when we have stepped into one of 

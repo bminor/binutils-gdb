@@ -24,23 +24,10 @@
 #include "arm/tm-arm.h"
 #include "tm-nbsd.h"
 
-#define JB_ELEMENT_SIZE sizeof(long)	/* jmp_buf[_JBLEN] is array of ints */
-#define JB_PC	24		/* Setjmp()'s return PC saved here */
-
 /* Return non-zero if inside a shared-library entry stub.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
   STREQ ((name), "_PROCEDURE_LINKAGE_TABLE_")
-
-/* Figure out where the longjmp will land.  Slurp the args out of the stack.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-extern int
-get_longjmp_target (CORE_ADDR *);
-
-#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
 /* By convention, NetBSD uses the "other" register names. */
 #define DEFAULT_REGISTER_NAMES additional_register_names

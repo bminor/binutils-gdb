@@ -182,6 +182,7 @@ struct gdbarch
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
+  gdbarch_get_longjmp_target_ftype *get_longjmp_target;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -319,6 +320,7 @@ struct gdbarch startup_gdbarch =
   generic_register_raw_size,
   0,
   generic_register_virtual_size,
+  0,
   0,
   0,
   0,
@@ -638,6 +640,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
+  /* Skip verify of get_longjmp_target, has predicate */
   if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->use_generic_dummy_frames == -1))
     fprintf_unfiltered (log, "\n\tuse_generic_dummy_frames");
@@ -1281,6 +1284,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: FUNCTION_START_OFFSET = %ld\n",
                       (long) FUNCTION_START_OFFSET);
+#endif
+#ifdef GET_LONGJMP_TARGET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "GET_LONGJMP_TARGET(pc)",
+                      XSTRING (GET_LONGJMP_TARGET (pc)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: GET_LONGJMP_TARGET = 0x%08lx\n",
+                        (long) current_gdbarch->get_longjmp_target
+                        /*GET_LONGJMP_TARGET ()*/);
 #endif
 #ifdef GET_SAVED_REGISTER
 #if GDB_MULTI_ARCH
@@ -3027,6 +3041,30 @@ set_gdbarch_cannot_store_register (struct gdbarch *gdbarch,
                                    gdbarch_cannot_store_register_ftype cannot_store_register)
 {
   gdbarch->cannot_store_register = cannot_store_register;
+}
+
+int
+gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->get_longjmp_target != 0;
+}
+
+int
+gdbarch_get_longjmp_target (struct gdbarch *gdbarch, CORE_ADDR *pc)
+{
+  if (gdbarch->get_longjmp_target == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_get_longjmp_target invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_get_longjmp_target called\n");
+  return gdbarch->get_longjmp_target (pc);
+}
+
+void
+set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch,
+                                gdbarch_get_longjmp_target_ftype get_longjmp_target)
+{
+  gdbarch->get_longjmp_target = get_longjmp_target;
 }
 
 int

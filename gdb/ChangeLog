@@ -1,3 +1,29 @@
+2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gdbarch.sh (GET_LONGJMP_TARGET): Add rule.
+	* gdbarch.c gdbarch.h: Regenerate.
+	* breakpoint.c (create_longjmp_breakpoint): Always compile this
+	function.
+	(breakpoint_reset): Test GET_LONGJMP_TARGET_P().
+	* infrun.c (GET_LONGJMP_TARGET): Delete default definition.
+	(handle_inferior_event): Test GET_LONGJMP_TARGET_P().
+
+	* arm-tdep.h (struct gdbarch_tdep): Add jb_pc and jb_elt_size fields.
+	* arm-tdep.c (arm_get_longjmp_target): New function.
+	(arm_gdbarch_init): Initialize jb_pc to -1.  If ABI handler changes
+	this to a positive value register arm_get_longjmp_target as the
+	longjmp handler.
+	* arm-linux-tdep.c (arm_get_longjmp_target): Delete.
+	(arm_linux_init_abi): Set up longjmp description in tdep.
+	* armnbsd-nat.c (get_longjmp_target): Delete.
+	* armnbsd-tdep.c (arm_netbsd_init_abi_common): Set up longjmp
+	description in tdep.
+	* config/arm/tm-nbsd.h (JB_ELEMENT_SIZE, JB_PC): Delete.
+	(get_longjmp_target): Delete declaration.
+	(GET_LONGJMP_TARGET): Delete.
+	* config/arm/tm-linux.h (arm_get_longjmp_target): Delete declaration.
+	(GET_LONGJMP_TARGET): Delete.
+
 2002-02-17  Kevin Buettner  <kevinb@redhat.com>
 
 	From Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>:
