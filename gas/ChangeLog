@@ -1,3 +1,9 @@
+2003-09-03  Robert Millan  <robertmh@gnu.org>
+
+	* configure.in: Match GNU/KFreeBSD with new kfreebsd*-gnu
+	triplet.
+	* configure: Regenerate.
+
 2003-09-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Update AC_PREREQ to 2.57.  Use AC_CONFIG_FILES

@@ -1,3 +1,9 @@
+2003-08-30  Robert Millan  <robertmh@gnu.org>
+
+	* configure.in: Match GNU/KFreeBSD with new kfreebsd*-gnu triplet.
+	* config.bfd: Likewise.
+	* configure: Regenerate.
+
 2003-08-31  Christian Groessler  <chris@groessler.org>
 
 	* elf32-i860.c (i860_howto_pc26_reloc): Finish relocation here

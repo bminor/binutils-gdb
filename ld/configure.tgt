@@ -48,7 +48,7 @@ sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
 sparc*-*-sysv4*)	targ_emul=elf32_sparc ;;
-sparc64-*-freebsd* | sparcv9-*-freebsd*)
+sparc64-*-freebsd* | sparcv9-*-freebsd* | sparc64-*-kfreebsd*-gnu | sparcv9-*-kfreebsd*-gnu)
 			targ_emul=elf64_sparc_fbsd
 			targ_extra_emuls="elf64_sparc elf32_sparc"
 			targ_extra_libpath=$targ_extra_emuls
@@ -109,7 +109,8 @@ i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-rtems*)		targ_emul=gld960coff ;;
 i960-*-elf*)		targ_emul=elf32_i960 ;;
 ia64-*-elf*)		targ_emul=elf64_ia64 ;;
-ia64-*-freebsd*)	targ_emul=elf64_ia64_fbsd
+ia64-*-freebsd* | ia64-*-kfreebsd*-gnu)
+		        targ_emul=elf64_ia64_fbsd
 			targ_extra_emuls="elf64_ia64" ;;
 ia64-*-netbsd*)		targ_emul=elf64_ia64 ;;
 ia64-*-linux*)		targ_emul=elf64_ia64 ;;
@@ -196,9 +197,11 @@ i[3-7]86-*-elf*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-kaos*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-freebsdaout* | i[3-7]86-*-freebsd[12].* | i[3-7]86-*-freebsd[12])
 			targ_emul=i386bsd ;;
-i[3-7]86-*-freebsd*)	targ_emul=elf_i386_fbsd
+i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
+		        targ_emul=elf_i386_fbsd
 			targ_extra_emuls="elf_i386 i386bsd" ;;
-x86_64-*-freebsd*)	targ_emul=elf_x86_64_fbsd
+x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
+			targ_emul=elf_x86_64_fbsd
 			targ_extra_emuls="elf_i386_fbsd elf_x86_64 elf_i386"
 			tdir_elf_i386=`echo ${targ_alias} \
 			    | sed -e 's/x86_64/i386/'`
@@ -233,7 +236,8 @@ arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
 arm-*-vxworks)		targ_emul=armcoff ;;
-arm-*-freebsd*)		targ_emul=armelf_fbsd
+arm-*-freebsd* | arm-*-kfreebsd*-gnu)
+	       		targ_emul=armelf_fbsd
 			targ_extra_emuls="armelf" ;;
 armeb-*-netbsdelf*)	targ_emul=armelfb_nbsd;
 			targ_extra_emuls="armelf_nbsd armelf armnbsd" ;;
@@ -437,7 +441,8 @@ mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300 ;;
 msp430-*-*)             targ_emul=msp430x110
                         targ_extra_emuls="msp430x112 msp430x1101 msp430x1111 msp430x1121 msp430x1122 msp430x1132 msp430x122 msp430x123 msp430x1222 msp430x1232 msp430x133 msp430x135 msp430x1331 msp430x1351 msp430x147 msp430x148 msp430x149 msp430x155 msp430x156 msp430x157 msp430x167 msp430x168 msp430x169 msp430x311 msp430x312 msp430x313 msp430x314 msp430x315 msp430x323 msp430x325 msp430x336 msp430x337 msp430x412 msp430x413 msp430xE423 msp430xE425 msp430xE427 msp430xW423 msp430xW425 msp430xW427 msp430x435 msp430x436 msp430x437 msp430x447 msp430x448 msp430x449" ;;
-alpha*-*-freebsd*)	targ_emul=elf64alpha_fbsd
+alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+		        targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/freebsd/freebsdecoff/'`
 			;;
@@ -462,7 +467,8 @@ or32-*-rtems)           targ_emul=or32 ;;
 pdp11-*-*)		targ_emul=pdp11 ;;
 pjl*-*-*)	        targ_emul=pjlelf ; targ_extra_emuls="elf_i386" ;;
 pj*-*-*)	        targ_emul=pjelf ;;
-powerpc-*-freebsd*)	targ_emul=elf32ppc_fbsd;
+powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
+			targ_emul=elf32ppc_fbsd;
 			targ_extra_emuls="elf32ppc elf32ppcsim";
 			targ_extra_libpath=elf32ppc;
 			tdir_elf32ppcsim=`echo ${targ_alias} | sed -e 's/ppc/ppcsim/'`

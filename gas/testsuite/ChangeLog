@@ -1,3 +1,8 @@
+2003-09-03  Robert Millan  <robertmh@gnu.org>
+
+	* gas/alpha/alpha.exp: Match GNU/KFreeBSD with new kfreebsd*-gnu
+	triplet.
+
 2003-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/cris/diffexp-ovwr.d: Remove regexp for empty section

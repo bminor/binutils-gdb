@@ -20,6 +20,7 @@ if { [istarget alpha*-*-*] } then {
     set elf [expr [istarget *-*-elf*] \
 		  || [istarget *-*-linux*] \
 		  || [istarget *-*-freebsd*] \
+		  || [istarget *-*-kfreebsd*-gnu] \
 		  || [istarget *-*-netbsd*] ]
 
     if $elf {
