@@ -32,6 +32,8 @@
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
+#else
+#define INT_MAX (int) (((unsigned)(-1)) >> 1)
 #endif
 
 #ifdef BFD_ASSEMBLER
