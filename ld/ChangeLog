@@ -1,3 +1,53 @@
+2001-08-02  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ldmain.c (main): initialize link_info.pei386_auto_import
+	* pe-dll.c: new tables for auto-export filtering
+	(auto_export): change API, pass abfd for contextual filtering.
+	Loop thru tables of excluded symbols instead of comparing 
+	"by hand".
+
+2001-08-02  Paul Sokolovsky  <paul.sokolovsky@technologist.com>
+
+	* pe-dll.c: new variable pe_dll_enable_extra_debug. New 
+	static variable current_sec (static struct sec *). Add 
+	forward declaration for add_bfd_to_link.
+	(process_def_file): Don't export undefined symbols. Do not 
+	export symbols starting with  "_imp__".  Call auto_export() 
+	with new API.
+	(pe_walk_relocs_of_symbol): New function.
+	(generate_reloc): add optional extra debugging
+	(pe_dll_generate_def_file): eliminate extraneous initial blank 
+	line in output
+	(make_one): enlarge symtab to make room for __nm__ symbols 
+	(DATA auto-import support).
+	(make_singleton_name_thunk): New function.
+	(make_import_fixup_mark): New function.
+	(make_import_fixup_entry): New function.
+	(pe_create_import_fixup): New function.
+	(add_bfd_to_link): Specify that 'name' argument is a CONST 
+	char *.
+	* pe-dll.h: declare new variable pe_dll_extra_pe_debug; 
+	declare new functions pe_walk_relocs_of_symbol and 
+	pe_create_import_fixup.
+	* emultempl/pe.em: add new options --enable-auto-import,
+	--disable-auto-import, and --enable-extra-pe-debug.
+	(make_import_fixup): New function.
+	(pe_find_data_imports): New function.
+	(pr_sym): New function.
+	(gld_${EMULATION_NAME}_after_open): Add optional extra pe 
+	debugging. Call pe_find_data_imports.  Mark .idata as DATA, not
+	CODE.
+
+2001-08-02  Charles Wilson  <cwilson@ece.gatech.edu>
+	
+	* ld.texinfo: add additional documentation for
+	--export-all-symbols.  Document --out-implib,
+	--enable-auto-image-base, --disable-auto-image-base,
+	--dll-search-prefix, --enable-auto-import, and 
+	--disable-auto-import.  
+	* ldint.texinfo: Add detailed documentation on auto-import
+	implementation.
+
 2001-07-30  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld.texinfo (Simple Assignments): Fix computation in SECTIONS

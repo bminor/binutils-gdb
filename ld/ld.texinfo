@@ -1601,8 +1601,22 @@ otherwise wouldn't be any exported symbols.  When symbols are
 explicitly exported via DEF files or implicitly exported via function
 attributes, the default is to not export anything else unless this
 option is given.  Note that the symbols @code{DllMain@@12},
-@code{DllEntryPoint@@0}, and @code{impure_ptr} will not be automatically
-exported.
+@code{DllEntryPoint@@0}, @code{DllMainCRTStartup@@12}, and 
+@code{impure_ptr} will not be automatically
+exported.  Also, symbols imported from other DLLs will not be 
+re-exported, nor will symbols specifying the DLL's internal layout 
+such as those beginning with @code{_head_} or ending with 
+@code{_iname}.  In addition, no symbols from @code{libgcc}, 
+@code{libstd++}, @code{libmingw32}, or @code{crtX.o} will be exported.
+Symbols whose names begin with @code{__rtti_} or @code{__builtin_} will
+not be exported, to help with C++ DLLs.  Finally, there is an
+extensive list of cygwin-private symbols that are not exported 
+(obviously, this applies on when building DLLs for cygwin targets).
+These cygwin-excludes are: @code{_cygwin_dll_entry@@12}, 
+@code{_cygwin_crt0_common@@8}, @code{_cygwin_noncygwin_dll_entry@@12},
+@code{_fmode}, @code{_impure_ptr}, @code{cygwin_attach_dll}, 
+@code{cygwin_premain0}, @code{cygwin_premain1}, @code{cygwin_premain2},
+@code{cygwin_premain3}, and @code{environ}. 
 
 @kindex --exclude-symbols
 @item --exclude-symbols @var{symbol},@var{symbol},...
@@ -1671,6 +1685,55 @@ file corresponding to the DLL the linker is generating.  This DEF file
 (which should be called @code{*.def}) may be used to create an import
 library with @code{dlltool} or may be used as a reference to
 automatically or implicitly exported symbols.
+
+@cindex DLLs, creating
+@kindex --out-implib
+@item --out-implib @var{file}
+The linker will create the file @var{file} which will contain an
+import lib corresponding to the DLL the linker is generating. This
+import lib (which should be called @code{*.dll.a} or @code{*.a}
+may be used to link clients against the generated DLL; this behavior
+makes it possible to skip a separate @code{dlltool} import library
+creation step.
+
+@kindex --enable-auto-image-base
+@item --enable-auto-image-base
+Automatically choose the image base for DLLs, unless one is specified
+using the @code{--image-base} argument.  By using a hash generated
+from the dllname to create unique image bases for each DLL, in-memory
+collisions and relocations which can delay program execution are
+avoided.
+
+@kindex --disable-auto-image-base
+@item --disable-auto-image-base
+Do not automatically generate a unique image base.  If there is no
+user-specified image base (@code{--image-base}) then use the platform
+default.
+
+@cindex DLLs, linking to
+@kindex --dll-search-prefix
+@item --dll-search-prefix @var{string}
+When linking dynamically to a dll without an import library, i
+search for @code{<string><basename>.dll} in preference to 
+@code{lib<basename>.dll}. This behavior allows easy distinction
+between DLLs built for the various "subplatforms": native, cygwin,
+uwin, pw, etc.  For instance, cygwin DLLs typically use
+@code{--dll-search-prefix=cyg}. 
+
+@kindex --enable-auto-import
+@item --enable-auto-import
+Do sophisticalted linking of @code{_symbol} to @code{__imp__symbol} for 
+DATA imports from DLLs, and create the necessary thunking symbols when 
+building the DLLs with those DATA exports.
+
+@kindex --disable-auto-import
+@item --disable-auto-import
+Do not attempt to do sophisticalted linking of @code{_symbol} to 
+@code{__imp__symbol} for DATA imports from DLLs.
+
+@kindex --enable-extra-pe-debug
+@item --enable-extra-pe-debug
+Show additional debug info related to auto-import symbol thunking.
 
 @kindex --section-alignment
 @item --section-alignment
