@@ -1,5 +1,9 @@
 Mon Nov 20 13:37:05 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* Makefile.in (TARG_CPU_DEP_alpha): Mention alpha-opcode.h.
+	* config/alpha-opcode.h: Include one-operand variants of jmp and
+	jsr.
+
 	* config/te-delt88.h: Renamed from te-delta88.h, to avoid conflict
 	with te-delta.h in 8.3 file systems.
 	* configure.in: Adjusted.
