@@ -14458,6 +14458,24 @@ cooked-registers} includes the (cooked) value of all registers.
 
 Takes an optional file parameter.
 
+@kindex maint set profile
+@kindex maint show profile
+@cindex profiling GDB
+@item maint set profile
+@itemx maint show profile
+Control profiling of @value{GDBN}.
+
+Profiling will be disabled until you use the @samp{maint set profile}
+command to enable it.  When you enable profiling, the system will begin
+collecting timing and execution count data; when you disable profiling or
+exit @value{GDBN}, the results will be written to a log file.  Remember that
+if you use profiling, @value{GDBN} will overwrite the profiling log file
+(often called @file{gmon.out}).  If you have a record of important profiling
+data in a @file{gmon.out} file, be sure to move it to a safe location.
+
+Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
+compiled with the @samp{-pg} compiler option. 
+
 @end table
 
 
