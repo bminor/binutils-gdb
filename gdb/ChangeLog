@@ -1,3 +1,9 @@
+2002-10-09  David Carlton  <carlton@math.stanford.edu>
+
+	* symfile.h: Add opaque declaration for struct obstack.
+	Declare obsavestring to take a const char *.
+	* symfile.c (obsavestring): Make first argument a const char *.
+
 2002-10-16  Adam Fedor  <fedor@gnu.org>
 
 	* breakpoint.c (parse_breakpoint_sals): Ignore ObjC method

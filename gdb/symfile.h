@@ -25,6 +25,10 @@
 
 /* This file requires that you first include "bfd.h".  */
 
+/* Opaque declarations.  */
+
+struct obstack;
+
 /* Partial symbols are stored in the psymbol_cache and pointers to them
    are kept in a dynamically grown array that is obtained from malloc and
    grown as necessary via realloc.  Each objfile typically has two of these,
@@ -208,7 +212,7 @@ extern void sort_symtab_syms (struct symtab *);
    (and add a null character at the end in the copy).
    Returns the address of the copy.  */
 
-extern char *obsavestring (char *, int, struct obstack *);
+extern char *obsavestring (const char *, int, struct obstack *);
 
 /* Concatenate strings S1, S2 and S3; return the new string.
    Space is found in the symbol_obstack.  */
