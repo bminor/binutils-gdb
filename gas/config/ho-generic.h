@@ -25,6 +25,11 @@
 
 #define HAVE_STRERROR
 
+#ifdef __STDC__
+extern void *malloc (), *realloc ();
+#else
+extern char *malloc (), *realloc ();
+#endif
 extern int free ();
 
 /* end of ho-generic.h */
