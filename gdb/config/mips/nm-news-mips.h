@@ -31,4 +31,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
-#include "nm-mips.h"
+#include "mips/nm-mips.h"

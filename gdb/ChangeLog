@@ -1,3 +1,9 @@
+Sat Oct  2 19:28:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mips/news-mips.mh: Remove coredep.o; mips-nat.o does it.
+	* config/mips/news-mips.mh: Define NAT_FILE not NM_FILE.
+	* config/mips/nm-news-mips.h: Include mips/nm-mips.h not nm-mips.h.
+
 Sat Oct  2 16:05:22 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in, coff-solib.c, coff-solib.h, i386lynx.mt,
