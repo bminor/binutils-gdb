@@ -1,6 +1,9 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c: Add notes about needing special insert/extract
+	for all the load/store insns, except "ld.b" and "st.b".
+
 	* v850-opc.c (insert_d22, extract_d22): New functions.
 	(v850_operands): Use insert_d22 and extract_d22 for
 	D22 operands.

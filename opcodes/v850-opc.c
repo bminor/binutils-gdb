@@ -1,6 +1,12 @@
 #include "ansidecl.h"
 #include "opcode/v850.h"
 
+/* TODO:
+
+   * ld.h, ld.w st.h and st.w will need special insert/extract code.
+
+   * All sld instructions will need special insert/extrat code. */
+
 /* Local insertion and extraction functions.  */
 static unsigned long insert_d9 PARAMS ((unsigned long, long, const char **));
 static long extract_d9 PARAMS ((unsigned long, int *));
