@@ -247,6 +247,9 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
   fprintf (file, _("  --output-def <file>                Generate a .DEF file for the built DLL\n"));
+  fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
+  fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n"));
+  fprintf (file, _("                                       create __imp_<SYMBOL> as well.\n"));
 #endif
 }
 
