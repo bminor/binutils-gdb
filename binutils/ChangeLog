@@ -1,3 +1,8 @@
+Wed Jul 10 13:32:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (stab_demangle_fund_type): Return a void * for a
+	template, rather than simply aborting.
+
 Mon Jul  8 15:28:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ar.c (open_inarch): Add file parameter.  Change all callers.  If
