@@ -121,8 +121,9 @@ typedef (*find_byte_func_type)
      PARAMS ((char *, unsigned char *, unsigned char *,
 	      unsigned char *, unsigned char *));
 
-/* Print one instruction from MEMADDR on STREAM.
+/* Print one instruction from MEMADDR on INFO->STREAM.
    Return the size of the instruction (always 4 on a29k).  */
+
 static int
 print_insn (memaddr, info)
      bfd_vma memaddr;
