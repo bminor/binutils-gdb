@@ -1,3 +1,7 @@
+2001-01-18  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-alpha.c: Fix formatting.
+
 2001-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (ldm_flags): Remove redundant bit from "fa" and
