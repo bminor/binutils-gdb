@@ -156,7 +156,7 @@ struct external_lineno {
 
 
 #define	LINENO	struct external_lineno
-#define	LINESZ	sizeof(LINENO) 
+#define	LINESZ	6
 
 
 /********************** SYMBOLS **********************/
