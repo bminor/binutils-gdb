@@ -1,5 +1,8 @@
 Mon Jan 23 21:57:54 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/commands.exp: Make test names unique; every test either
+	passes or fails.  Update some comments.
+
 	* gdb.disasm/hppa.exp (do_system_control_tests): Update.
 
 Sat Jan 21 15:34:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
