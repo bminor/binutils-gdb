@@ -1,3 +1,16 @@
+Sun Aug 10 14:45:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-stgo32.c: Rename from coff-stubgo32.c to avoid old System V
+	file system 14 character limit.
+	* Makefile.am, configure.in: Corresponding changes.
+	* Makefile.in, configure: Rebuild.
+
+Fri Aug  8 18:34:36 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: (ALL_MACHINES_CFILES): Add elf32-d10v.c.
+	Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 Wed Aug  6 18:56:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (docdir): Define.
