@@ -1,6 +1,6 @@
 _divert__(-1)
 _define__(<_H8__>,<1>)
-_define__(<_AS__>,<as83>)
+_define__(<_AS__>,<as>)
 _define__(<_GENERIC__>,<0>)
 _define__(<_HOST__>,<H8/300>)
 _define__(<_MACH_DEP__>,<H8/300-Dependent>)
