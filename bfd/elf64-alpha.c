@@ -3462,8 +3462,17 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ ((relocation >> 15) & 1));
 	  goto default_reloc;
 
-	case R_ALPHA_BRADDR:
 	case R_ALPHA_HINT:
+	  /* A call to a dynamic symbol is definitely out of range of
+	     the 16-bit displacement.  Don't bother writing anything.  */
+	  if (h && alpha_elf_dynamic_symbol_p (&h->root, info))
+	    {
+	      r = bfd_reloc_ok;
+	      break;
+	    }
+	  /* FALLTHRU */
+
+	case R_ALPHA_BRADDR:
 	  /* The regular PC-relative stuff measures from the start of
 	     the instruction rather than the end.  */
 	  addend -= 4;
