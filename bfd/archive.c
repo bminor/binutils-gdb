@@ -1574,21 +1574,35 @@ compute_and_write_armap (arch, elength)
      bfd *arch;
      unsigned int elength;
 {
+  char *first_name;
   bfd *current;
   file_ptr elt_no = 0;
   struct orl *map;
-  int orl_max = 15000;		/* fine initial default */
+  int orl_max = 1024;		/* fine initial default */
   int orl_count = 0;
   int stridx = 0;		/* string index */
+  asymbol **syms = NULL;
+  unsigned int syms_max = 0;
+  boolean ret;
 
   /* Dunno if this is the best place for this info... */
   if (elength != 0)
     elength += sizeof (struct ar_hdr);
   elength += elength % 2;
 
-  map = (struct orl *) bfd_zalloc (arch, orl_max * sizeof (struct orl));
+  map = (struct orl *) malloc (orl_max * sizeof (struct orl));
   if (map == NULL)
     {
+      bfd_error = no_memory;
+      return false;
+    }
+
+  /* We put the symbol names on the arch obstack, and then discard
+     them when done.  */
+  first_name = bfd_alloc (arch, 1);
+  if (first_name == NULL)
+    {
+      free (map);
       bfd_error = no_memory;
       return false;
     }
@@ -1607,7 +1621,6 @@ compute_and_write_armap (arch, elength)
       if ((bfd_check_format (current, bfd_object) == true)
 	  && ((bfd_get_file_flags (current) & HAS_SYMS)))
 	{
-	  asymbol **syms;
 	  unsigned int storage;
 	  unsigned int symcount;
 	  unsigned int src_count;
@@ -1615,11 +1628,19 @@ compute_and_write_armap (arch, elength)
 	  storage = get_symtab_upper_bound (current);
 	  if (storage != 0)
 	    {
-	      syms = (asymbol **) bfd_zalloc (arch, storage);
-	      if (syms == NULL)
+	      if (storage > syms_max)
 		{
-		  bfd_error = no_memory;	/* FIXME -- memory leak */
-		  return false;
+		  if (syms_max > 0)
+		    free (syms);
+		  syms_max = storage;
+		  syms = (asymbol **) malloc (syms_max);
+		  if (syms == NULL)
+		    {
+		      free (map);
+		      bfd_release (arch, first_name);
+		      bfd_error = no_memory;
+		      return false;
+		    }
 		}
 	      symcount = bfd_canonicalize_symtab (current, syms);
 
@@ -1635,21 +1656,43 @@ compute_and_write_armap (arch, elength)
 		       bfd_is_com_section (sec))
 		      && (sec != &bfd_und_section))
 		    {
+		      size_t namelen;
+		      struct orl *new_map;
+
 		      /* This symbol will go into the archive header */
 		      if (orl_count == orl_max)
 			{
 			  orl_max *= 2;
-			  map = ((struct orl *)
-				 bfd_realloc (arch, (char *) map,
+			  new_map = ((struct orl *)
+				     realloc ((PTR) map,
 					      orl_max * sizeof (struct orl)));
+			  if (new_map == (struct orl *) NULL)
+			    {
+			    free_and_quit:
+			      free (syms);
+			      free (map);
+			      bfd_release (arch, first_name);
+			      bfd_error = no_memory;
+			      return false;
+			    }
+
+			  map = new_map;
 			}
 
-		      (map[orl_count]).name =
-			(char **) &((syms[src_count])->name);
+		      namelen = strlen (syms[src_count]->name);
+		      map[orl_count].name = ((char **)
+					     bfd_alloc (arch,
+							sizeof (char *)));
+		      if (map[orl_count].name == NULL)
+			goto free_and_quit;
+		      *(map[orl_count].name) = bfd_alloc (arch, namelen + 1);
+		      if (*(map[orl_count].name) == NULL)
+			goto free_and_quit;
+		      strcpy (*(map[orl_count].name), syms[src_count]->name);
 		      (map[orl_count]).pos = (file_ptr) current;
 		      (map[orl_count]).namidx = stridx;
 
-		      stridx += strlen ((syms[src_count])->name) + 1;
+		      stridx += namelen + 1;
 		      ++orl_count;
 		    }
 		}
@@ -1658,11 +1701,15 @@ compute_and_write_armap (arch, elength)
     }
 
   /* OK, now we have collected all the data, let's write them out */
-  if (!BFD_SEND (arch, write_armap,
-		 (arch, elength, map, orl_count, stridx)))
-    return false;
+  ret = BFD_SEND (arch, write_armap,
+		  (arch, elength, map, orl_count, stridx));
 
-  return true;
+  if (syms_max > 0)
+    free (syms);
+  free (map);
+  bfd_release (arch, first_name);
+
+  return ret;
 }
 
 boolean
