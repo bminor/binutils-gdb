@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "regex.h"
 #include "inferior.h"
+#include "language.h"
 
 #define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
 
@@ -57,6 +58,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BKPT_AT_SYMBOL 1
 
+#if defined (BKPT_AT_SYMBOL) && defined (SVR4_SHARED_LIBS)
 static char *bkpt_names[] = {
 #ifdef SOLIB_BKPT_NAME
   SOLIB_BKPT_NAME,		/* Prefer configured name if it exists. */
@@ -65,6 +67,7 @@ static char *bkpt_names[] = {
   "main",
   NULL
 };
+#endif
 
 /* local data declarations */
 
@@ -103,7 +106,7 @@ struct so_list {
   struct section_table *sections;
   struct section_table *sections_end;
   struct section_table *textsection;
-  bfd *bfd;
+  bfd *abfd;
 };
 
 static struct so_list *so_list_head;	/* List of known shared objects */
@@ -212,9 +215,9 @@ solib_map_sections (so)
     {
       perror_with_name (filename);
     }
-  /* Leave scratch_pathname allocated.  bfd->name will point to it.  */
+  /* Leave scratch_pathname allocated.  abfd->name will point to it.  */
 
-  abfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
+  abfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
   if (!abfd)
     {
       close (scratch_chan);
@@ -222,7 +225,7 @@ solib_map_sections (so)
 	     scratch_pathname, bfd_errmsg (bfd_error));
     }
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
-  so -> bfd = abfd;
+  so -> abfd = abfd;
   abfd -> cacheable = true;
 
   if (!bfd_check_format (abfd, bfd_object))
@@ -259,37 +262,16 @@ solib_map_sections (so)
 
 #ifndef SVR4_SHARED_LIBS
 
-/* This routine can be a real performance hog.  According to some gprof data
-   which mtranle@paris.IntelliCorp.COM (Minh Tran-Le) sent, almost all the
-   time spend in solib_add (up to 20 minutes with 35 shared libraries) is
-   spent here, with 5/6 in lookup_minimal_symbol and 1/6 in read_memory.
+/* In GDB 4.9 this routine was a real performance hog.  According to
+   some gprof data which mtranle@paris.IntelliCorp.COM (Minh Tran-Le)
+   sent, almost all the time spend in solib_add (up to 20 minutes with
+   35 shared libraries) was spent here, with 5/6 in
+   lookup_minimal_symbol and 1/6 in read_memory.
 
-   Possible solutions:
-
-   * Hash the minimal symbols.
-
-   * Just record the name of the minimal symbol and lazily patch the
-   addresses.
-
-   * Tell everyone to switch to Solaris2.  
-
-(1)  Move the call to special_symbol_handling out of the find_solib
-loop in solib_add.  This will call it once, rather than 35 times, when
-you have 35 shared libraries.  It's in the loop to pass the current
-solib's objfile so the symbols are added to that objfile's minsym.
-But since the symbols are in common (BSS), it doesn't really matter
-which objfile's minsyms they are added to, I think.
-
-(2)  Indeed, it might be best to create an objfile just for common minsyms,
-thus not needing any objfile argument to solib_add_common_symbols.
-
-(3)  Remove the call to lookup_minimal_symbol from
-solib_add_common_symbols.  If a symbol appears multiple times in the
-minsyms, we probably cope, more or less.  Note that if we had an
-objfile for just minsyms, install_minimal_symbols would automatically
-remove duplicates caused by running solib_add_common_symbols several
-times.
-*/
+   To fix this, we moved the call to special_symbol_handling out of the
+   loop in solib_add, so this only gets called once, rather than once
+   for every shared library, and also removed the call to lookup_minimal_symbol
+   in this routine.  */
 
 static void
 solib_add_common_symbols (rtc_symp, objfile)
@@ -330,10 +312,16 @@ solib_add_common_symbols (rtc_symp, objfile)
 	      name++;
 	    }
 
+#if 0
+	  /* I think this is unnecessary, GDB can probably deal with
+	     duplicate minimal symbols, more or less.  And the duplication
+	     which used to happen because this was called for each shared
+	     library is gone now that we are just called once.  */
 	  /* FIXME:  Do we really want to exclude symbols which happen
 	     to match symbols for other locations in the inferior's
 	     address space, even when they are in different linkage units? */
 	  if (lookup_minimal_symbol (name, (struct objfile *) NULL) == NULL)
+#endif
 	    {
 	      name = obsavestring (name, strlen (name),
 				   &objfile -> symbol_obstack);
@@ -463,7 +451,7 @@ look_for_base (fd, baseaddr)
      we have no way currently to find the filename.  Don't gripe about
      any problems we might have, just fail. */
 
-  if ((interp_bfd = bfd_fdopenr ("unnamed", NULL, fd)) == NULL)
+  if ((interp_bfd = bfd_fdopenr ("unnamed", gnutarget, fd)) == NULL)
     {
       return (0);
     }
@@ -771,6 +759,10 @@ solib_add (arg_string, from_tty, target)
      struct target_ops *target;
 {	
   register struct so_list *so = NULL;   	/* link map state variable */
+
+  /* Last shared library that we read.  */
+  struct so_list *so_last = NULL;
+
   char *re_err;
   int count;
   int old;
@@ -801,7 +793,7 @@ solib_add (arg_string, from_tty, target)
 		    "Error while reading shared library symbols:\n",
 		    RETURN_MASK_ALL))
 	    {
-	      special_symbol_handling (so);
+	      so_last = so;
 	      so -> symbols_loaded = 1;
 	    }
 	}
@@ -829,14 +821,14 @@ solib_add (arg_string, from_tty, target)
 	    {
 	      old = target -> to_sections_end - target -> to_sections;
 	      target -> to_sections = (struct section_table *)
-		realloc ((char *)target -> to_sections,
+		xrealloc ((char *)target -> to_sections,
 			 (sizeof (struct section_table)) * (count + old));
 	    }
 	  else
 	    {
 	      old = 0;
 	      target -> to_sections = (struct section_table *)
-		malloc ((sizeof (struct section_table)) * count);
+		xmalloc ((sizeof (struct section_table)) * count);
 	    }
 	  target -> to_sections_end = target -> to_sections + (count + old);
 	  
@@ -854,6 +846,19 @@ solib_add (arg_string, from_tty, target)
 	    }
 	}
     }
+
+  /* Calling this once at the end means that we put all the minimal
+     symbols for commons into the objfile for the last shared library.
+     Since they are in common, this should not be a problem.  If we
+     delete the objfile with the minimal symbols, we can put all the
+     symbols into a new objfile (and will on the next call to solib_add).
+
+     An alternate approach would be to create an objfile just for
+     common minsyms, thus not needing any objfile argument to
+     solib_add_common_symbols.  */
+
+  if (so_last)
+    special_symbol_handling (so_last);
 }
 
 /*
@@ -895,8 +900,12 @@ info_sharedlibrary_command (ignore, from_tty)
 		     "Shared Object Library");
 	      header_done++;
 	    }
-	  printf ("%-12s", local_hex_string_custom ((int) LM_ADDR (so), "08"));
-	  printf ("%-12s", local_hex_string_custom (so -> lmend, "08"));
+	  printf ("%-12s",
+		  local_hex_string_custom ((unsigned long) LM_ADDR (so),
+					   "08l"));
+	  printf ("%-12s",
+		  local_hex_string_custom ((unsigned long) so -> lmend,
+					   "08l"));
 	  printf ("%-12s", so -> symbols_loaded ? "Yes" : "No");
 	  printf ("%s\n",  so -> so_name);
 	}
@@ -965,10 +974,10 @@ clear_solib()
 	{
 	  free ((PTR)so_list_head -> sections);
 	}
-      if (so_list_head -> bfd)
+      if (so_list_head -> abfd)
 	{
-	  bfd_filename = bfd_get_filename (so_list_head -> bfd);
-	  bfd_close (so_list_head -> bfd);
+	  bfd_filename = bfd_get_filename (so_list_head -> abfd);
+	  bfd_close (so_list_head -> abfd);
 	}
       else
 	/* This happens for the executable on SVR4.  */
@@ -1259,7 +1268,7 @@ solib_create_inferior_hook()
   stop_signal = 0;
   do
     {
-      target_resume (0, stop_signal);
+      target_resume (inferior_pid, 0, stop_signal);
       wait_for_inferior ();
     }
   while (stop_signal != SIGTRAP);

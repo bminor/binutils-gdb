@@ -1,3 +1,9 @@
+Fri Oct  8 15:54:06 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* osfsolib.c, remote-sim.c, remote.c, solib.c, xcoffexec.c, 
+	xcoffsolib.h:  Use 'abfd' for bfd variables instead of 'bfd'.
+	Sun cc doesn't like variable names that match their typedef'd type.
+
 Fri Oct  8 14:56:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* inflow.c: Remove unused includes of sys/param.h, etc.

@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 struct vmap {
 	struct vmap *nxt;	/* ^ to next in chain			*/
-	bfd *bfd;		/* BFD for mappable object library	*/
+	bfd *abfd;		/* BFD for mappable object library	*/
 	char *name;		/* ^ to object file name		*/
 	char *member;		/* ^ to member name			*/
 	CORE_ADDR tstart;	/* virtual addr where member is mapped	*/

@@ -96,7 +96,7 @@ struct so_list {
   struct section_table *sections;
   struct section_table *sections_end;
   struct section_table *textsection;
-  bfd *bfd;
+  bfd *abfd;
 };
 
 static struct so_list *so_list_head;	/* List of known shared objects */
@@ -195,7 +195,7 @@ solib_map_sections (so)
 	     scratch_pathname, bfd_errmsg (bfd_error));
     }
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
-  so -> bfd = abfd;
+  so -> abfd = abfd;
   abfd -> cacheable = true;
 
   if (!bfd_check_format (abfd, bfd_object))
@@ -670,10 +670,10 @@ clear_solib()
 	{
 	  free ((PTR)so_list_head -> sections);
 	}
-      if (so_list_head -> bfd)
+      if (so_list_head -> abfd)
 	{
-	  bfd_filename = bfd_get_filename (so_list_head -> bfd);
-	  bfd_close (so_list_head -> bfd);
+	  bfd_filename = bfd_get_filename (so_list_head -> abfd);
+	  bfd_close (so_list_head -> abfd);
 	}
       else
 	/* This happens for the executable on SVR4.  */

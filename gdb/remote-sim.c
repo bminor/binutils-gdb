@@ -165,7 +165,7 @@ gdbsim_load (prog, fromtty)
  * This is a utility routine that sim_load() can call to do the work.
  * The result is 0 for success, non-zero for failure.
  *
- * Eg: int sim_load (bfd *bfd, char *prog) { return sim_load_standard (bfd); }
+ * Eg: int sim_load (bfd *abfd, char *prog) { return sim_load_standard (abfd); }
  */
 
 sim_load_standard (abfd)
