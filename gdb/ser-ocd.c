@@ -159,7 +159,7 @@ ocd_write (scb, str, len)
 {
   char c;
 
-#ifdef __CYGWIN32__ 
+#ifdef _WIN32 
   /* send packet to Wigglers.dll and store response so we can give it to
 	remote-wiggler.c when get_packet is run */
   dll_do_command (str, from_wiggler_buffer);

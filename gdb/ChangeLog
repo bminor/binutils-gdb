@@ -1,3 +1,21 @@
+Mon Aug 11 16:22:36 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* ocd.c (ocd_insert_breakpoint, ocd_remove_breakpoint): macro
+	BDM_BREAKPOINT already has braces around it, remove erroneous ones.
+	* ser-ocd.c (ocd_write): conditionalize on _WIN32 instead of
+	__CYGWIN32__
+	* config/powerpc/tm-ppc-eabi.h: remove BDM_NUM_REGS, BDM_REGMAP
+	* ppc-bdm.c: move BDM_NUM_REGS, BDM_REGMAP here from tm.h file,
+	fill in doc fields of bdm_ppc_ops.
+	(bdm_ppc_fetch_registers): don't ask for invalid registers such
+	as the MQ or floating point regs not present on ppc 8xx boards
+	(bdm_ppc_store_registers): don't write those same invalid registers
+	* config/i386/cygwin32.mh: stop including ocd.o ser-ocd.o
+	* config/powerpc/ppc-eabi.mt:
+	* config/powerpc/ppcle-eabi.mt:
+	* config/powerpc/ppc-sim.mt:
+	* config/powerpc/ppcle-sim.mt: include ser-ocd.o
+
 Mon Aug 11 16:08:52 1997  Fred Fish  <fnf@cygnus.com>
 
 	* frame.h (enum lval_type): Conditionalize on __GNUC__

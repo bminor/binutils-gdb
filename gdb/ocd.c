@@ -1278,13 +1278,12 @@ ocd_load (args, from_tty)
   clear_symtab_users ();
 }
 
-/* This should be defined in each targets tm.h file */
+/* This should be defined for each target */
 /* But we want to be able to compile this file for some configurations
    not yet supported fully */
    
-#ifndef BDM_BREAKPOINT
 #define BDM_BREAKPOINT {0x0,0x0,0x0,0x0} /* For ppc 8xx */
-#endif
+/* #define BDM_BREAKPOINT {0x4a,0xfa} /* BGND insn used for CPU32 */
 
 /* BDM (at least on CPU32) uses a different breakpoint */
 
@@ -1293,7 +1292,7 @@ ocd_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  static char break_insn[] = {BDM_BREAKPOINT};
+  static char break_insn[] = BDM_BREAKPOINT;
   int val;
 
   val = target_read_memory (addr, contents_cache, sizeof (break_insn));
@@ -1309,7 +1308,7 @@ ocd_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  static char break_insn[] = {BDM_BREAKPOINT};
+  static char break_insn[] = BDM_BREAKPOINT;
   int val;
 
   val = target_write_memory (addr, contents_cache, sizeof (break_insn));
