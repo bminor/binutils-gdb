@@ -376,14 +376,15 @@ classify_argument (struct type *type,
 		{
 		  int num = classify_argument (TYPE_FIELDS (type)[j].type,
 					       subclasses,
-					       (TYPE_FIELDS (type)[j].loc.bitpos
-						+ bit_offset) % 256);
+					       (TYPE_FIELDS (type)[j].loc.
+						bitpos + bit_offset) % 256);
 		  if (!num)
 		    return 0;
 		  for (i = 0; i < num; i++)
 		    {
 		      int pos =
-			(TYPE_FIELDS (type)[j].loc.bitpos + bit_offset) / 8 / 8;
+			(TYPE_FIELDS (type)[j].loc.bitpos +
+			 bit_offset) / 8 / 8;
 		      classes[i + pos] =
 			merge_classes (subclasses[i], classes[i + pos]);
 		    }
@@ -490,7 +491,7 @@ classify_argument (struct type *type,
 	}
     case TYPE_CODE_VOID:
       return 0;
-    default: /* Avoid warning.  */
+    default:			/* Avoid warning.  */
       break;
     }
   internal_error (__FILE__, __LINE__,
@@ -797,12 +798,23 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 }
 
 
-static char *
-x86_64_register_name (int reg_nr)
+char *
+x86_64_register_nr2name (int reg_nr)
 {
   if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
     return NULL;
   return x86_64_register_info_table[reg_nr].name;
+}
+
+int
+x86_64_register_name2nr (const char *name)
+{
+  int reg_nr;
+
+  for (reg_nr = 0; reg_nr < X86_64_NUM_REGS; reg_nr++)
+    if (strcmp (name, x86_64_register_info_table[reg_nr].name) == 0)
+      return reg_nr;
+  return -1;
 }
 
 
@@ -862,7 +874,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
   /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
   for (i = 0; i < PROLOG_BUFSIZE; i++)
     if (prolog_expect[i] != prolog_buf[i])
-      return pc;	/* ... no, it doesn't. Nothing to skip.  */
+      return pc;		/* ... no, it doesn't. Nothing to skip.  */
 
   /* OK, we have found the prologue and want PC of the first 
      non-prologue instruction.  */
@@ -982,7 +994,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
-  set_gdbarch_register_name (gdbarch, x86_64_register_name);
+  set_gdbarch_register_name (gdbarch, x86_64_register_nr2name);
   set_gdbarch_register_size (gdbarch, 8);
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);

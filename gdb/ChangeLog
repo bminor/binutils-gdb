@@ -1,3 +1,15 @@
+2002-06-07  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (x86_64_fxsave_offset): New.
+	(supply_fpregset, fill_fpregset): Don't call i387_*_fxsave,
+	better do the things actually here.
+	* x86-64-tdep.c (x86_64_register_name2nr): New.
+	(x86_64_register_name): Renamed to x86_64_register_nr2name.
+	(x86_64_gdbarch_init): Respect the above change.
+	* x86-64-tdep.h (x86_64_register_name2nr)
+	(x86_64_register_nr2name): Add prototypes.
+	* config/i386/x86-64linux.mt (TDEPFILES): Remove i387-tdep.o.
+
 2002-06-06  Michael Snyder  <msnyder@redhat.com>
 
 	* d10v-tdep.c (d10v_push_arguments): Handle struct_return.
