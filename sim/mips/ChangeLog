@@ -1,5 +1,12 @@
 2002-02-11  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen: Add some additional comments about supported
+	models, and about which instructions go where.
+	(BC1b, MFC0, MTC0, RFE): Sort supported models in the same
+	order as is used in the rest of the file.
+
+2002-02-11  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (ADD, ADDI, DADDI, DSUB, SUB): Add comment
 	indicating that ALU32_END or ALU64_END are there to check
 	for overflow.

@@ -34,16 +34,32 @@
 // :option:::multi-sim:true
 
 
-// Models known by this simulator
+// Models known by this simulator are defined below.
+
+//  MIPS ISAs:
+//
+//  Instructions and related functions for these models are included in
+//  this file.
 :model:::mipsI:mips3000:
 :model:::mipsII:mips6000:
 :model:::mipsIII:mips4000:
 :model:::mipsIV:mips8000:
-:model:::mips16:mips16:
-:model:::r3900:mips3900:
-:model:::vr4100:mips4100:
-:model:::vr5000:mips5000:
 
+//  Vendor ISAs:
+//
+//  Standard MIPS ISA instructions used for these models are listed here,
+//  as are functions needed by those standard instructions.  Instructions
+//  which are model-dependent and which are not in the standard MIPS ISAs
+//  (or which pre-date or use different encodings than the standard
+//  instructions) are (for the most part) in separate .igen files.
+:model:::vr4100:mips4100:		// vr.igen
+:model:::vr5000:mips5000:
+:model:::r3900:mips3900:		// tx.igen
+
+//  MIPS Application Specific Extensions (ASEs)
+//
+//  Instructions for the ASEs are in separate .igen files.
+:model:::mips16:mips16:			// m16.igen (and m16.dc)
 
 
 // Pseudo instructions known by IGEN
@@ -219,7 +235,7 @@
 
 
 //
-// Mips Architecture:
+// MIPS Architecture:
 //
 //        CPU Instruction Set (mipsI - mipsIV)
 //
@@ -2708,8 +2724,8 @@
 "bc1%s<TF>%s<ND> <OFFSET>":CC == 0
 "bc1%s<TF>%s<ND> <CC>, <OFFSET>"
 *mipsIV:
-*vr5000:
 #*vr4100:
+*vr5000:
 *r3900:
 {
   check_branch_bug ();
@@ -3863,9 +3879,9 @@
 010000,00000,5.RT,5.RD,00000,6.REGX:COP0:32::MFC0
 "mfc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
-*r3900:
 *vr4100:
 *vr5000:
+*r3900:
 {
   TRACE_ALU_INPUT0 ();
   DecodeCoproc (instruction_0);
@@ -3875,9 +3891,9 @@
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
 *mipsI,mipsII,mipsIII,mipsIV:
-*r3900:
 *vr4100:
 *vr5000:
+*r3900:
 {
   DecodeCoproc (instruction_0);
 }
@@ -3886,9 +3902,9 @@
 010000,1,0000000000000000000,010000:COP0:32::RFE
 "rfe"
 *mipsI,mipsII,mipsIII,mipsIV:
-*r3900:
 *vr4100:
 *vr5000:
+*r3900:
 {
   DecodeCoproc (instruction_0);
 }
