@@ -1,3 +1,17 @@
+2000-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (GDBMI_DIR): New variable.
+	(SET_TEXINPUTS): Add $(GDBMI_DIR).
+	(SFILES_DOC): Add $(GDBMI_DIR)/gdbmi.texinfo.
+	(gdbmi.texinfo): New target, for texi2roff.
+	(gdb.me, gdb.ms, gdb.mm): Depend on gdbmi.texinfo.
+	(gdb.info, gdb_toc.html): Add "-I ${GDBMI_DIR}".
+
+	* gdb.texinfo (Top): Add GDB/MI to the main menu and @include
+	gdbmi.texinfo.
+	(Mode Options): Add xref to GDB/MI docs and remove a FIXME
+	comment.
+
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.texinfo (Files): Update description of add-symbol-file
