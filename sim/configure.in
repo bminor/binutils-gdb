@@ -102,6 +102,9 @@ case "${target}" in
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
+	# Unfortunately erc32 won't build on many hosts, so don't
+	# build it at all
+	sim_target=none
 	only_if_gcc=yes
 	;;
   *)			sim_target=none ;;
