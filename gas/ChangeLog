@@ -1,3 +1,14 @@
+Fri Oct 14 19:06:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (BISON): Use bison -y, not bison.
+
+Thu Oct 13 19:22:54 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (VERSION): Updated to 2.5.
+	(clean-here): Delete stamp-mk.com.
+	(distclean): Delete .gdbinit.
+	* Version 2.5 released.
+
 Wed Oct 12 20:30:51 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/te-nbsd532.h: Renamed from te-netbsd532.h.
