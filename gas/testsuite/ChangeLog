@@ -1,3 +1,9 @@
+2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/mips.exp: Change naming of some conditionals to reflect
+	the object format they actually mean. Don't try mips-abi32 and
+	mips-abi32-pic tests for ecoff.
+
 2001-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/bspec-2.d, gas/mmix/bspec-1.d, gas/mmix/comment-1.d:

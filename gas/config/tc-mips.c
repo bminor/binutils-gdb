@@ -697,7 +697,9 @@ static void mips16_immed PARAMS ((char *, unsigned int, int, offsetT, boolean,
 static int my_getSmallParser PARAMS ((char **, unsigned int *, int *));
 static int my_getSmallExpression PARAMS ((expressionS *, char *));
 static void my_getExpression PARAMS ((expressionS *, char *));
+#ifdef OBJ_ELF
 static int support_64bit_objects PARAMS((void));
+#endif
 static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
@@ -9486,6 +9488,7 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
+#ifdef OBJ_ELF
 static int support_64bit_objects(void)
 {
   const char **list, **l;
@@ -9504,6 +9507,7 @@ static int support_64bit_objects(void)
   free (list);
   return (*l != NULL);
 }
+#endif /* OBJ_ELF */
 
 CONST char *md_shortopts = "nO::g::G:";
 
@@ -9518,83 +9522,82 @@ struct option md_longopts[] =
   {"mips3", no_argument, NULL, OPTION_MIPS3},
 #define OPTION_MIPS4 (OPTION_MD_BASE + 4)
   {"mips4", no_argument, NULL, OPTION_MIPS4},
-#define OPTION_MCPU (OPTION_MD_BASE + 5)
-  {"mcpu", required_argument, NULL, OPTION_MCPU},
-#define OPTION_MEMBEDDED_PIC (OPTION_MD_BASE + 6)
+#define OPTION_MIPS5 (OPTION_MD_BASE + 5)
+  {"mips5", no_argument, NULL, OPTION_MIPS5},
+#define OPTION_MIPS32 (OPTION_MD_BASE + 6)
+  {"mips32", no_argument, NULL, OPTION_MIPS32},
+#define OPTION_MIPS64 (OPTION_MD_BASE + 7)
+  {"mips64", no_argument, NULL, OPTION_MIPS64},
+#define OPTION_MEMBEDDED_PIC (OPTION_MD_BASE + 8)
   {"membedded-pic", no_argument, NULL, OPTION_MEMBEDDED_PIC},
-#define OPTION_TRAP (OPTION_MD_BASE + 7)
+#define OPTION_TRAP (OPTION_MD_BASE + 9)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
-#define OPTION_BREAK (OPTION_MD_BASE + 8)
+#define OPTION_BREAK (OPTION_MD_BASE + 10)
   {"break", no_argument, NULL, OPTION_BREAK},
   {"no-trap", no_argument, NULL, OPTION_BREAK},
-#define OPTION_EB (OPTION_MD_BASE + 9)
+#define OPTION_EB (OPTION_MD_BASE + 11)
   {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL (OPTION_MD_BASE + 10)
+#define OPTION_EL (OPTION_MD_BASE + 12)
   {"EL", no_argument, NULL, OPTION_EL},
-#define OPTION_M4650 (OPTION_MD_BASE + 11)
-  {"m4650", no_argument, NULL, OPTION_M4650},
-#define OPTION_NO_M4650 (OPTION_MD_BASE + 12)
-  {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
-#define OPTION_M4010 (OPTION_MD_BASE + 13)
-  {"m4010", no_argument, NULL, OPTION_M4010},
-#define OPTION_NO_M4010 (OPTION_MD_BASE + 14)
-  {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
-#define OPTION_M4100 (OPTION_MD_BASE + 15)
-  {"m4100", no_argument, NULL, OPTION_M4100},
-#define OPTION_NO_M4100 (OPTION_MD_BASE + 16)
-  {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
-#define OPTION_MIPS16 (OPTION_MD_BASE + 17)
+#define OPTION_MIPS16 (OPTION_MD_BASE + 13)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
-#define OPTION_NO_MIPS16 (OPTION_MD_BASE + 18)
+#define OPTION_NO_MIPS16 (OPTION_MD_BASE + 14)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
-#define OPTION_M3900 (OPTION_MD_BASE + 19)
-  {"m3900", no_argument, NULL, OPTION_M3900},
-#define OPTION_NO_M3900 (OPTION_MD_BASE + 20)
-  {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
-#define OPTION_MABI (OPTION_MD_BASE + 21)
-  {"mabi", required_argument, NULL, OPTION_MABI},
-#define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 22)
+#define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 15)
   {"mfix7000", no_argument, NULL, OPTION_M7000_HILO_FIX},
-#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 23)
+#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 16)
   {"no-fix-7000", no_argument, NULL, OPTION_NO_M7000_HILO_FIX},
-#define OPTION_GP32 (OPTION_MD_BASE + 24)
-  {"mgp32", no_argument, NULL, OPTION_GP32},
-#define OPTION_GP64 (OPTION_MD_BASE + 25)
-  {"mgp64", no_argument, NULL, OPTION_GP64},
-#define OPTION_CONSTRUCT_FLOATS (OPTION_MD_BASE + 26)
-  {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
-#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MD_BASE + 27)
-  {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
-#define OPTION_MIPS32 (OPTION_MD_BASE + 28)
-  {"mips32", no_argument, NULL, OPTION_MIPS32},
-#define OPTION_MIPS5 (OPTION_MD_BASE + 29)
-  {"mips5", no_argument, NULL, OPTION_MIPS5},
-#define OPTION_MIPS64 (OPTION_MD_BASE + 30)
-  {"mips64", no_argument, NULL, OPTION_MIPS64},
-#define OPTION_MARCH (OPTION_MD_BASE + 31)
-  {"march", required_argument, NULL, OPTION_MARCH},
-#define OPTION_MTUNE (OPTION_MD_BASE + 32)
-  {"mtune", required_argument, NULL, OPTION_MTUNE},
-#define OPTION_FP32 (OPTION_MD_BASE + 33)
+#define OPTION_FP32 (OPTION_MD_BASE + 17)
   {"mfp32", no_argument, NULL, OPTION_FP32},
+#define OPTION_GP32 (OPTION_MD_BASE + 18)
+  {"mgp32", no_argument, NULL, OPTION_GP32},
+#define OPTION_CONSTRUCT_FLOATS (OPTION_MD_BASE + 19)
+  {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
+#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MD_BASE + 20)
+  {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
+#define OPTION_MARCH (OPTION_MD_BASE + 21)
+  {"march", required_argument, NULL, OPTION_MARCH},
+#define OPTION_MTUNE (OPTION_MD_BASE + 22)
+  {"mtune", required_argument, NULL, OPTION_MTUNE},
+#define OPTION_MCPU (OPTION_MD_BASE + 23)
+  {"mcpu", required_argument, NULL, OPTION_MCPU},
+#define OPTION_M4650 (OPTION_MD_BASE + 24)
+  {"m4650", no_argument, NULL, OPTION_M4650},
+#define OPTION_NO_M4650 (OPTION_MD_BASE + 25)
+  {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
+#define OPTION_M4010 (OPTION_MD_BASE + 26)
+  {"m4010", no_argument, NULL, OPTION_M4010},
+#define OPTION_NO_M4010 (OPTION_MD_BASE + 27)
+  {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
+#define OPTION_M4100 (OPTION_MD_BASE + 28)
+  {"m4100", no_argument, NULL, OPTION_M4100},
+#define OPTION_NO_M4100 (OPTION_MD_BASE + 29)
+  {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
+#define OPTION_M3900 (OPTION_MD_BASE + 30)
+  {"m3900", no_argument, NULL, OPTION_M3900},
+#define OPTION_NO_M3900 (OPTION_MD_BASE + 31)
+  {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
+#define OPTION_GP64 (OPTION_MD_BASE + 32)
+  {"mgp64", no_argument, NULL, OPTION_GP64},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 33)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
-#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 1)
-#define OPTION_XGOT        (OPTION_ELF_BASE + 2)
-#define OPTION_32 	   (OPTION_ELF_BASE + 3)
-#define OPTION_N32 	   (OPTION_ELF_BASE + 4)
-#define OPTION_64          (OPTION_ELF_BASE + 5)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
+#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 1)
   {"non_shared",  no_argument, NULL, OPTION_NON_SHARED},
+#define OPTION_XGOT        (OPTION_ELF_BASE + 2)
   {"xgot",        no_argument, NULL, OPTION_XGOT},
+#define OPTION_MABI        (OPTION_ELF_BASE + 3)
+  {"mabi", required_argument, NULL, OPTION_MABI},
+#define OPTION_32 	   (OPTION_ELF_BASE + 4)
   {"32",          no_argument, NULL, OPTION_32},
+#define OPTION_N32 	   (OPTION_ELF_BASE + 5)
   {"n32",         no_argument, NULL, OPTION_N32},
+#define OPTION_64          (OPTION_ELF_BASE + 6)
   {"64",          no_argument, NULL, OPTION_64},
-#endif
-
+#endif /* OBJ_ELF */
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -9871,6 +9874,7 @@ md_parse_option (c, arg)
       if (! support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
+#endif /* OBJ_ELF */
 
     case OPTION_GP32:
       file_mips_gp32 = 1;
@@ -9890,6 +9894,7 @@ md_parse_option (c, arg)
 	mips_opts.abi = NO_ABI;
       break;
 
+#ifdef OBJ_ELF
     case OPTION_MABI:
       if (strcmp (arg, "32") == 0)
 	mips_opts.abi = O32_ABI;

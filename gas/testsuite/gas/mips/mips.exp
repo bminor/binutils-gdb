@@ -17,8 +17,8 @@ proc run_list_test { name opts } {
 
 if { [istarget mips*-*-*] } then {
     set no_mips16 0
-    set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
-    set empic [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
+    set elf [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
+    set ecoff [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-openbsd*] ]
     set ilocks [istarget mipstx39*-*-*]
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
@@ -47,27 +47,27 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "bltu"
     if !$ilocks { run_dump_test "div" } else { run_dump_test "div-ilocks" }
     run_dump_test "dli"
-    if $svr4pic {
+    if $elf {
 	run_dump_test "elf-jal"
     } else {
 	run_dump_test "jal"
     }
-    if $svr4pic { run_dump_test "jal-svr4pic" }
-    if $svr4pic { run_dump_test "jal-xgot" }
-    if $empic { run_dump_test "jal-empic" }
+    if $elf { run_dump_test "jal-svr4pic" }
+    if $elf { run_dump_test "jal-xgot" }
+    if $ecoff { run_dump_test "jal-empic" }
     if !$aout { run_dump_test "la" }
-    if $svr4pic { run_dump_test "la-svr4pic" }
-    if $svr4pic { run_dump_test "la-xgot" }
-    if $empic { run_dump_test "la-empic" }
+    if $elf { run_dump_test "la-svr4pic" }
+    if $elf { run_dump_test "la-xgot" }
+    if $ecoff { run_dump_test "la-empic" }
     if !$aout { run_dump_test "lb" }
-    if $svr4pic { run_dump_test "lb-svr4pic" }
-    if $svr4pic {
+    if $elf { run_dump_test "lb-svr4pic" }
+    if $elf {
 	# Both versions specify the cpu, so we can run both regardless of
 	# the interlocking in the configured default cpu.
 	run_dump_test "lb-xgot"
 	run_dump_test "lb-xgot-ilocks"
     }
-    if $empic { run_dump_test "lb-empic" }
+    if $ecoff { run_dump_test "lb-empic" }
     if !$aout { 
         if !$gpr_ilocks { 
             run_dump_test "ld" 
@@ -79,23 +79,23 @@ if { [istarget mips*-*-*] } then {
             }
         }
     }
-    if $svr4pic { run_dump_test "ld-svr4pic" }
-    if $svr4pic { run_dump_test "ld-xgot" }
-    if $empic { run_dump_test "ld-empic" }
+    if $elf { run_dump_test "ld-svr4pic" }
+    if $elf { run_dump_test "ld-xgot" }
+    if $ecoff { run_dump_test "ld-empic" }
     run_dump_test "li"
     if !$aout { run_dump_test "lifloat" }
-    if $svr4pic { run_dump_test "lif-svr4pic" }
-    if $svr4pic { run_dump_test "lif-xgot" }
-    if $empic { run_dump_test "lif-empic" }
+    if $elf { run_dump_test "lif-svr4pic" }
+    if $elf { run_dump_test "lif-xgot" }
+    if $ecoff { run_dump_test "lif-empic" }
     run_dump_test "mips4"
     if !$ilocks { run_dump_test "mul" } else { run_dump_test "mul-ilocks" }
     run_dump_test "rol"
     if !$aout { run_dump_test "sb" }
     run_dump_test "trunc"
     if !$aout { run_dump_test "ulh" }
-    if $svr4pic { run_dump_test "ulh-svr4pic" }
-    if $svr4pic { run_dump_test "ulh-xgot" }
-    if $empic { run_dump_test "ulh-empic" }
+    if $elf { run_dump_test "ulh-svr4pic" }
+    if $elf { run_dump_test "ulh-xgot" }
+    if $ecoff { run_dump_test "ulh-empic" }
     if !$aout {
 	run_dump_test "ulw"
 	run_dump_test "uld"
@@ -105,7 +105,7 @@ if { [istarget mips*-*-*] } then {
     }
     # The mips16 test can only be run on ELF, because only ELF
     # supports the necessary mips16 reloc.
-    if { $svr4pic && !$no_mips16 } { run_dump_test "mips16" }
+    if { $elf && !$no_mips16 } { run_dump_test "mips16" }
     run_dump_test "delay"
     run_dump_test "nodelay"
     run_dump_test "mips4010"
@@ -130,9 +130,8 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "mips-gp32-fp64"
     run_dump_test "mips-gp64-fp32"
     run_dump_test "mips-gp64-fp64"
-    run_dump_test "mips-abi32"
 
-    if $svr4pic {
+    if $elf {
 	# Make sure that -mcpu=FOO and -mFOO are equivalent.  Assemble a file
 	# containing 4650-specific instructions with -m4650 and -mcpu=4650,
 	# and verify that they're the same.  Specifically, we're checking
@@ -148,7 +147,9 @@ if { [istarget mips*-*-*] } then {
  	run_dump_test "mips-gp32-fp64-pic"
  	run_dump_test "mips-gp64-fp32-pic"
  	run_dump_test "mips-gp64-fp64-pic"
-	run_dump_test "mips-abi32-pic"
+
+  	run_dump_test "mips-abi32"
+  	run_dump_test "mips-abi32-pic"
 
 	run_dump_test "elf${el}-rel"
 	if [istarget mips64*-*-*] { 

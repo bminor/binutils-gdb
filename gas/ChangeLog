@@ -1,5 +1,14 @@
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (support_64bit_objects): Define for OBJ_ELF only.
+	(md_longopts): Allow OPTION_MABI for ELF compilation only. RE-allow
+	OPTION_GP32, OPTION_GP64, OPTION_FP32 for non-ELF compilation.
+	Sort options a bit more logical.
+	(md_parse_option): Allow OPTION_32, OPTION_N32, OPTION_N64,
+	OPTION_MABI only for elf targets.
+
+2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (set_at): Add cast needed for varargs.
 	(load_register): Likewise.
 	(macro): Likewise. Some code reformatting.
