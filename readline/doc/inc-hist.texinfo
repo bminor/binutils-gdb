@@ -23,10 +23,8 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end ignore
 
-@ifclear GDBN
 @node Using History Interactively
 @chapter Using History Interactively
-@end ifclear
 
 @ifset BashFeatures
 This chapter describes how to use the GNU History Library interactively,

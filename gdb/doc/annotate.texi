@@ -55,10 +55,8 @@
 
 @syncodeindex fn cp
 
-@ifclear GDBN
 @node Annotations
 @chapter @value{GDBN} Annotations
-@end ifclear
 
 This chapter describes annotations in @value{GDBN}.  Annotations are
 designed to interface @value{GDBN} to graphical user interfaces or other

@@ -1,3 +1,9 @@
+Tue Mar 28 16:06:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* inc-hist.texinfo, rluser.texinfo: Revert change Fri Mar 24
+ 	18:04:32 2000 Andrew Cagney <cagney@b1.cygnus.com>.
+  	Unconditionally provide @chapter and @node.
+
 Fri Mar 24 18:04:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* inc-hist.texinfo: When GDBN omit the chapter/node.

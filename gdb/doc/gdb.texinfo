@@ -12209,8 +12209,6 @@ environment.  Users of this environment can use a new command,
 each value is printed in its own window.
 @end ignore
 
-@node Annotations
-@chapter @value{GDBN} Annotations
 @include annotate.texi
 
 @node GDB Bugs
@@ -12454,14 +12452,7 @@ things without first using the debugger to find the facts.
 @c     inc-hist.texinfo
 @c Use -I with makeinfo to point to the appropriate directory,
 @c environment var TEXINPUTS with TeX.
-
-@node Command Line Editing
-@chapter Command Line Editing
 @include rluser.texinfo
-
-
-@node Using History Interactively
-@chapter Using History Interactively
 @include inc-hist.texinfo
 
 

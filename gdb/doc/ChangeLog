@@ -1,3 +1,10 @@
+Tue Mar 28 16:06:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.texinfo: Revert remainder of Fri Mar 24 18:06:34 2000 Andrew
+ 	Cagney <cagney@b1.cygnus.com>.  Move @chapter and @node entries
+ 	back to annotate.texi, rluser.texinfo and inc-hist.texinfo.
+	* annotate.texi: Update.
+
 2000-03-28  Stan Shebs  <shebs@apple.com>
 
 	* gdb.texinfo: Update dates, bump to Eighth Edition (note
