@@ -3,8 +3,9 @@
 #source: group1.s
 
 #...
+[ 	]*\[.*\][ 	]+\.foo_group[ 	]+GROUP.*
+#...
 [ 	]*\[.*\][ 	]+\.text[ 	]+PROGBITS.*[ 	]+AX[ 	]+.*
 #...
 [ 	]*\[.*\][ 	]+\.text[ 	]+PROGBITS.*[ 	]+AXG[ 	]+.*
-[ 	]*\[.*\][ 	]+\.foo_group[ 	]+GROUP.*
 #pass

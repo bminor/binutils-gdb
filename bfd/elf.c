@@ -2725,18 +2725,35 @@ assign_section_numbers (bfd *abfd)
   unsigned int section_number, secn;
   Elf_Internal_Shdr **i_shdrp;
   bfd_size_type amt;
+  struct bfd_elf_section_data *d;
 
   section_number = 1;
 
   _bfd_elf_strtab_clear_all_refs (elf_shstrtab (abfd));
 
+  /* Put SHT_GROUP sections first.  */
   for (sec = abfd->sections; sec; sec = sec->next)
     {
-      struct bfd_elf_section_data *d = elf_section_data (sec);
+      d = elf_section_data (sec);
 
-      if (section_number == SHN_LORESERVE)
-	section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-      d->this_idx = section_number++;
+      if (d->this_hdr.sh_type == SHT_GROUP)
+	{
+	  if (section_number == SHN_LORESERVE)
+	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
+	  d->this_idx = section_number++;
+	}
+    }
+
+  for (sec = abfd->sections; sec; sec = sec->next)
+    {
+      d = elf_section_data (sec);
+
+      if (d->this_hdr.sh_type != SHT_GROUP)
+	{
+	  if (section_number == SHN_LORESERVE)
+	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
+	  d->this_idx = section_number++;
+	}
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->this_hdr.sh_name);
       if ((sec->flags & SEC_RELOC) == 0)
 	d->rel_idx = 0;

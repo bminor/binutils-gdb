@@ -1,5 +1,9 @@
 2004-11-24  Paul Brook  <paul@codesourcery.com>
 
+	* elf.c (assign_section_numbers): Number SHT_GROUP sections first.
+
+2004-11-24  Paul Brook  <paul@codesourcery.com>
+
 	* elf32-arm.c (elf32_arm_swap_symbol_in): New function.
 	(elf32_arm_swap_symbol_out): New function.
 	(elf32_arm_size_info): Add.
