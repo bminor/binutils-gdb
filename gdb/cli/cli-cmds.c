@@ -850,8 +850,9 @@ disassemble_command (char *arg, int from_tty)
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
-      else if (tui_active)
-	low = tuiGetLowDisassemblyAddress (low, pc);
+      if (tui_active)
+	/* FIXME: cagney/2004-02-07: This should be an observer.  */
+	low = tui_get_low_disassembly_address (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
     }
@@ -864,8 +865,9 @@ disassemble_command (char *arg, int from_tty)
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
-      else if (tui_active)
-	low = tuiGetLowDisassemblyAddress (low, pc);
+      if (tui_active)
+	/* FIXME: cagney/2004-02-07: This should be an observer.  */
+	low = tui_get_low_disassembly_address (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
     }

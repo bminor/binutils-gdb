@@ -175,7 +175,7 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
 enum tui_status
 tui_set_disassem_content (CORE_ADDR pc)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   register int i;
   register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
   register int lineWidth, maxLines;
@@ -358,7 +358,7 @@ tui_get_begin_asm_address (void)
    disassembly window.  This may or may not be the same as the
    low address input.  */
 CORE_ADDR
-tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
+tui_get_low_disassembly_address (CORE_ADDR low, CORE_ADDR pc)
 {
   int pos;
 
@@ -377,7 +377,7 @@ void
 tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
 			      int numToScroll)
 {
-  if (disassemWin->generic.content != (OpaquePtr) NULL)
+  if (disassemWin->generic.content != NULL)
     {
       CORE_ADDR pc;
       tui_win_content content;

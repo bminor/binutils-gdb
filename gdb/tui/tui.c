@@ -456,17 +456,6 @@ tui_disable (void)
   tui_update_gdb_sizes ();
 }
 
-/* Wrapper on top of free() to ensure that input address
-   is greater than 0x0.  */
-void
-tuiFree (char *ptr)
-{
-  if (ptr != (char *) NULL)
-    {
-      xfree (ptr);
-    }
-}
-
 void
 strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
@@ -577,7 +566,7 @@ tui_show_assembly (CORE_ADDR addr)
 }
 
 int
-tui_is_window_visible (TuiWinType type)
+tui_is_window_visible (enum tui_win_type type)
 {
   if (tui_active == 0)
     return 0;

@@ -48,7 +48,7 @@
 enum tui_status
 tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
 
   if (s != (struct symtab *) NULL && s->filename != (char *) NULL)
     {
@@ -214,7 +214,7 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 		      curLineNo++;
 		    }
 		  if (offset > 0)
-		    tuiFree (srcLine);
+		    xfree (srcLine);
 		  fclose (stream);
 		  srcWin->generic.contentSize = nlines;
 		  ret = TUI_SUCCESS;
@@ -323,7 +323,7 @@ void
 tui_vertical_source_scroll (enum tui_scroll_direction scrollDirection,
 			    int numToScroll)
 {
-  if (srcWin->generic.content != (OpaquePtr) NULL)
+  if (srcWin->generic.content != NULL)
     {
       union tui_line_or_address l;
       struct symtab *s;

@@ -76,19 +76,19 @@
 /*****************************************
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
-static TuiStatus _tuiSetRegsContent
+static enum tui_status _tuiSetRegsContent
   (int, int, struct frame_info *, enum tui_register_display_type, int);
 static const char *_tuiRegisterName (int);
-static TuiStatus _tuiGetRegisterRawValue (int, char *, struct frame_info *);
+static enum tui_status _tuiGetRegisterRawValue (int, char *, struct frame_info *);
 static void _tuiSetRegisterElement
   (int, struct frame_info *, struct tui_data_element *, int);
 static void _tuiDisplayRegister (int, struct tui_gen_win_info *, enum precision_type);
 static void _tuiRegisterFormat
   (char *, int, int, struct tui_data_element *, enum precision_type);
-static TuiStatus _tuiSetGeneralRegsContent (int);
-static TuiStatus _tuiSetSpecialRegsContent (int);
-static TuiStatus _tuiSetGeneralAndSpecialRegsContent (int);
-static TuiStatus _tuiSetFloatRegsContent (enum tui_register_display_type, int);
+static enum tui_status _tuiSetGeneralRegsContent (int);
+static enum tui_status _tuiSetSpecialRegsContent (int);
+static enum tui_status _tuiSetGeneralAndSpecialRegsContent (int);
+static enum tui_status _tuiSetFloatRegsContent (enum tui_register_display_type, int);
 static int _tuiRegValueHasChanged
   (struct tui_data_element *, struct frame_info *, char *);
 static void _tuiShowFloat_command (char *, int);
@@ -211,7 +211,7 @@ tui_calculate_regs_column_count (enum tui_register_display_type dpyType)
 void
 tui_show_registers (enum tui_register_display_type dpyType)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   int refreshValuesOnly = FALSE;
 
   /* Say that registers should be displayed, even if there is a problem */
@@ -641,7 +641,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
    ** _tuiSetGeneralRegsContent().
    **      Set the content of the data window to consist of the general registers.
  */
-static TuiStatus
+static enum tui_status
 _tuiSetGeneralRegsContent (int refreshValuesOnly)
 {
   return (_tuiSetRegsContent (0,
@@ -663,10 +663,10 @@ _tuiSetGeneralRegsContent (int refreshValuesOnly)
    ** _tuiSetSpecialRegsContent().
    **      Set the content of the data window to consist of the special registers.
  */
-static TuiStatus
+static enum tui_status
 _tuiSetSpecialRegsContent (int refreshValuesOnly)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   int endRegNum;
 
   endRegNum = FP0_REGNUM - 1;
@@ -684,10 +684,10 @@ _tuiSetSpecialRegsContent (int refreshValuesOnly)
    ** _tuiSetGeneralAndSpecialRegsContent().
    **      Set the content of the data window to consist of the special registers.
  */
-static TuiStatus
+static enum tui_status
 _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   int endRegNum = (-1);
 
   endRegNum = FP0_REGNUM - 1;
@@ -701,10 +701,10 @@ _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
    ** _tuiSetFloatRegsContent().
    **        Set the content of the data window to consist of the float registers.
  */
-static TuiStatus
+static enum tui_status
 _tuiSetFloatRegsContent (enum tui_register_display_type dpyType, int refreshValuesOnly)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   int startRegNum;
 
   startRegNum = FP0_REGNUM;
@@ -759,10 +759,10 @@ _tuiRegValueHasChanged (struct tui_data_element * dataElement,
    ** _tuiGetRegisterRawValue().
    **        Get the register raw value.  The raw value is returned in regValue.
  */
-static TuiStatus
+static enum tui_status
 _tuiGetRegisterRawValue (int regNum, char *regValue, struct frame_info *frame)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
 
   if (target_has_registers)
     {
@@ -796,9 +796,9 @@ _tuiSetRegisterElement (int regNum, struct frame_info *frame,
 	  dataElement->name = _tuiRegisterName (regNum);
 	  dataElement->highlight = FALSE;
 	}
-      if (dataElement->value == (Opaque) NULL)
-	dataElement->value = (Opaque) xmalloc (MAX_REGISTER_SIZE);
-      if (dataElement->value != (Opaque) NULL)
+      if (dataElement->value == NULL)
+	dataElement->value = xmalloc (MAX_REGISTER_SIZE);
+      if (dataElement->value != NULL)
 	_tuiGetRegisterRawValue (regNum, dataElement->value, frame);
     }
 
@@ -812,13 +812,13 @@ _tuiSetRegisterElement (int regNum, struct frame_info *frame,
    **        numbered from startRegNum to endRegNum.  Note that if
    **        refreshValuesOnly is TRUE, startRegNum and endRegNum are ignored.
  */
-static TuiStatus
+static enum tui_status
 _tuiSetRegsContent (int startRegNum, int endRegNum,
                     struct frame_info *frame,
                     enum tui_register_display_type dpyType,
                     int refreshValuesOnly)
 {
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
   int numRegs = endRegNum - startRegNum + 1;
   int allocatedHere = FALSE;
 
@@ -842,7 +842,7 @@ _tuiSetRegsContent (int startRegNum, int endRegNum,
 
       if (!refreshValuesOnly || allocatedHere)
 	{
-	  dataWin->generic.content = (OpaquePtr) NULL;
+	  dataWin->generic.content = NULL;
 	  dataWin->generic.contentSize = 0;
 	  tui_add_content_elements (&dataWin->generic, numRegs);
 	  dataWin->detail.dataDisplayInfo.regsContent =

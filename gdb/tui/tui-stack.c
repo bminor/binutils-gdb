@@ -280,7 +280,7 @@ tui_set_locator_filename (const char *filename)
   struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
   struct tui_locator_element * element;
 
-  if (locator->content[0] == (Opaque) NULL)
+  if (locator->content[0] == NULL)
     {
       tui_set_locator_info (filename, NULL, 0, 0);
       return;
@@ -302,7 +302,7 @@ tui_set_locator_info (const char *filename, const char *procname, int lineno,
   /* Allocate the locator content if necessary.  */
   if (locator->contentSize <= 0)
     {
-      locator->content = (OpaquePtr) tui_alloc_content (1, locator->type);
+      locator->content = (void **) tui_alloc_content (1, locator->type);
       locator->contentSize = 1;
     }
 
@@ -366,7 +366,7 @@ tui_show_frame_info (struct frame_info *fi)
 					    &low, (CORE_ADDR) NULL) == 0)
 		error ("No function contains program counter for selected frame.\n");
 	      else
-		low = tuiGetLowDisassemblyAddress (low, get_frame_pc (fi));
+		low = tui_get_low_disassembly_address (low, get_frame_pc (fi));
 	    }
 
 	  if (winInfo == srcWin)

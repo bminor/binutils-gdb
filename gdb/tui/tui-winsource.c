@@ -91,7 +91,7 @@ void
 tui_update_source_window_as_is (struct tui_win_info * winInfo, struct symtab *s,
 				union tui_line_or_address lineOrAddr, int noerror)
 {
-  TuiStatus ret;
+  enum tui_status ret;
 
   if (winInfo->generic.type == SRC_WIN)
     ret = tui_set_source_content (s, lineOrAddr.lineNo, noerror);
@@ -314,7 +314,7 @@ tui_horizontal_source_scroll (struct tui_win_info * winInfo,
 			      enum tui_scroll_direction direction,
 			      int numToScroll)
 {
-  if (winInfo->generic.content != (OpaquePtr) NULL)
+  if (winInfo->generic.content != NULL)
     {
       int offset;
       struct symtab *s;
@@ -459,20 +459,20 @@ tui_update_breakpoint_info (struct tui_win_info * win, int current_only)
    **      based upon the input window which is either the source or
    **      disassembly window.
  */
-TuiStatus
+enum tui_status
 tuiSetExecInfoContent (struct tui_win_info * winInfo)
 {
-  TuiStatus ret = TUI_SUCCESS;
+  enum tui_status ret = TUI_SUCCESS;
 
   if (winInfo->detail.sourceInfo.executionInfo != (struct tui_gen_win_info *) NULL)
     {
       struct tui_gen_win_info * execInfoPtr = winInfo->detail.sourceInfo.executionInfo;
 
-      if (execInfoPtr->content == (OpaquePtr) NULL)
+      if (execInfoPtr->content == NULL)
 	execInfoPtr->content =
-	  (OpaquePtr) tui_alloc_content (winInfo->generic.height,
+	  (void **) tui_alloc_content (winInfo->generic.height,
 					 execInfoPtr->type);
-      if (execInfoPtr->content != (OpaquePtr) NULL)
+      if (execInfoPtr->content != NULL)
 	{
 	  int i;
 
@@ -575,7 +575,7 @@ tui_alloc_source_buffer (struct tui_win_info *winInfo)
 {
   register char *srcLineBuf;
   register int i, lineWidth, maxLines;
-  TuiStatus ret = TUI_FAILURE;
+  enum tui_status ret = TUI_FAILURE;
 
   maxLines = winInfo->generic.height;	/* less the highlight box */
   lineWidth = winInfo->generic.width - 1;
@@ -584,7 +584,7 @@ tui_alloc_source_buffer (struct tui_win_info *winInfo)
      ** will be re-used for all source displays.  The only other time this will
      ** be done is when a window's size changes.
    */
-  if (winInfo->generic.content == (OpaquePtr) NULL)
+  if (winInfo->generic.content == NULL)
     {
       srcLineBuf = (char *) xmalloc ((maxLines * lineWidth) * sizeof (char));
       if (srcLineBuf == (char *) NULL)
@@ -595,9 +595,9 @@ tui_alloc_source_buffer (struct tui_win_info *winInfo)
 	{
 	  /* allocate the content list */
 	  if ((winInfo->generic.content =
-	  (OpaquePtr) tui_alloc_content (maxLines, SRC_WIN)) == (OpaquePtr) NULL)
+	  (void **) tui_alloc_content (maxLines, SRC_WIN)) == NULL)
 	    {
-	      tuiFree (srcLineBuf);
+	      xfree (srcLineBuf);
 	      srcLineBuf = (char *) NULL;
 	      fputs_unfiltered (
 				 "Unable to Allocate Memory for Source or Disassembly Display.\n",

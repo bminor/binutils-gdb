@@ -51,10 +51,10 @@
 ** Static Local Decls
 ********************************/
 static void showLayout (enum tui_layout_type);
-static void _initGenWinInfo (struct tui_gen_win_info *, TuiWinType, int, int, int, int);
-static void _initAndMakeWin (Opaque *, TuiWinType, int, int, int, int, int);
+static void _initGenWinInfo (struct tui_gen_win_info *, enum tui_win_type, int, int, int, int);
+static void _initAndMakeWin (void **, enum tui_win_type, int, int, int, int, int);
 static void _showSourceOrDisassemAndCommand (enum tui_layout_type);
-static void _makeSourceOrDisassemWindow (struct tui_win_info * *, TuiWinType, int, int);
+static void _makeSourceOrDisassemWindow (struct tui_win_info * *, enum tui_win_type, int, int);
 static void _makeCommandWindow (struct tui_win_info * *, int, int);
 static void _makeSourceWindow (struct tui_win_info * *, int, int);
 static void _makeDisassemWindow (struct tui_win_info * *, int, int);
@@ -137,7 +137,7 @@ enum tui_status
 tui_set_layout (enum tui_layout_type layoutType,
 		enum tui_register_display_type regsDisplayType)
 {
-  TuiStatus status = TUI_SUCCESS;
+  enum tui_status status = TUI_SUCCESS;
 
   if (layoutType != UNDEFINED_LAYOUT || regsDisplayType != TUI_UNDEFINED_REGS)
     {
@@ -325,7 +325,7 @@ tui_add_win_to_layout (enum tui_win_type type)
    **        type and the layout.
  */
 int
-tuiDefaultWinHeight (TuiWinType type, enum tui_layout_type layout)
+tuiDefaultWinHeight (enum tui_win_type type, enum tui_layout_type layout)
 {
   int h;
 
@@ -422,10 +422,10 @@ Source/Disassembly/Command layouts.\n");
    **    Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, REGS,
    **        $REGS, $GREGS, $FREGS, $SREGS.
  */
-TuiStatus
+enum tui_status
 tui_set_layout_for_display_command (const char *layoutName)
 {
-  TuiStatus status = TUI_SUCCESS;
+  enum tui_status status = TUI_SUCCESS;
 
   if (layoutName != (char *) NULL)
     {
@@ -673,7 +673,7 @@ _prevLayout (void)
 static void
 _makeCommandWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
-  _initAndMakeWin ((Opaque *) winInfoPtr,
+  _initAndMakeWin ((void **) winInfoPtr,
 		   CMD_WIN,
 		   height,
 		   tui_term_width (),
@@ -717,7 +717,7 @@ _makeDisassemWindow (struct tui_win_info * * winInfoPtr, int height, int originY
 static void
 _makeDataWindow (struct tui_win_info * * winInfoPtr, int height, int originY)
 {
-  _initAndMakeWin ((Opaque *) winInfoPtr,
+  _initAndMakeWin ((void **) winInfoPtr,
 		   DATA_WIN,
 		   height,
 		   tui_term_width (),
@@ -804,7 +804,7 @@ _showSourceDisassemCommand (void)
 	  if (m_winPtrIsNull (disassemWin))
 	    {
 	      _makeDisassemWindow (&disassemWin, asmHeight, srcHeight - 1);
-	      _initAndMakeWin ((Opaque *) & locator,
+	      _initAndMakeWin ((void **) & locator,
 			       LOCATOR_WIN,
 			       2 /* 1 */ ,
 			       tui_term_width (),
@@ -881,7 +881,7 @@ _showData (enum tui_layout_type newLayout)
 {
   int totalHeight = (tui_term_height () - cmdWin->generic.height);
   int srcHeight, dataHeight;
-  TuiWinType winType;
+  enum tui_win_type winType;
   struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
 
 
@@ -901,7 +901,7 @@ _showData (enum tui_layout_type newLayout)
 	_makeSourceWindow (&winList[winType], srcHeight, dataHeight - 1);
       else
 	_makeDisassemWindow (&winList[winType], srcHeight, dataHeight - 1);
-      _initAndMakeWin ((Opaque *) & locator,
+      _initAndMakeWin ((void **) & locator,
 		       LOCATOR_WIN,
 		       2 /* 1 */ ,
 		       tui_term_width (),
@@ -945,7 +945,7 @@ _showData (enum tui_layout_type newLayout)
    ** _initGenWinInfo().
  */
 static void
-_initGenWinInfo (struct tui_gen_win_info * winInfo, TuiWinType type,
+_initGenWinInfo (struct tui_gen_win_info * winInfo, enum tui_win_type type,
                  int height, int width, int originX, int originY)
 {
   int h = height;
@@ -971,25 +971,25 @@ _initGenWinInfo (struct tui_gen_win_info * winInfo, TuiWinType type,
    ** _initAndMakeWin().
  */
 static void
-_initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
+_initAndMakeWin (void ** winInfoPtr, enum tui_win_type winType,
                  int height, int width, int originX, int originY, int boxIt)
 {
-  Opaque opaqueWinInfo = *winInfoPtr;
+  void *opaqueWinInfo = *winInfoPtr;
   struct tui_gen_win_info * generic;
 
-  if (opaqueWinInfo == (Opaque) NULL)
+  if (opaqueWinInfo == NULL)
     {
       if (m_winIsAuxillary (winType))
-	opaqueWinInfo = (Opaque) tui_alloc_generic_win_info ();
+	opaqueWinInfo = (void *) tui_alloc_generic_win_info ();
       else
-	opaqueWinInfo = (Opaque) tui_alloc_win_info (winType);
+	opaqueWinInfo = (void *) tui_alloc_win_info (winType);
     }
   if (m_winIsAuxillary (winType))
     generic = (struct tui_gen_win_info *) opaqueWinInfo;
   else
     generic = &((struct tui_win_info *) opaqueWinInfo)->generic;
 
-  if (opaqueWinInfo != (Opaque) NULL)
+  if (opaqueWinInfo != NULL)
     {
       _initGenWinInfo (generic, winType, height, width, originX, originY);
       if (!m_winIsAuxillary (winType))
@@ -1009,7 +1009,7 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
    ** _makeSourceOrDisassemWindow().
  */
 static void
-_makeSourceOrDisassemWindow (struct tui_win_info * * winInfoPtr, TuiWinType type,
+_makeSourceOrDisassemWindow (struct tui_win_info * * winInfoPtr, enum tui_win_type type,
                              int height, int originY)
 {
   struct tui_gen_win_info * executionInfo = (struct tui_gen_win_info *) NULL;
@@ -1021,7 +1021,7 @@ _makeSourceOrDisassemWindow (struct tui_win_info * * winInfoPtr, TuiWinType type
     executionInfo = tui_source_exec_info_win_ptr ();
   else
     executionInfo = tui_disassem_exec_info_win_ptr ();
-  _initAndMakeWin ((Opaque *) & executionInfo,
+  _initAndMakeWin ((void **) & executionInfo,
 		   EXEC_INFO_WIN,
 		   height,
 		   3,
@@ -1031,7 +1031,7 @@ _makeSourceOrDisassemWindow (struct tui_win_info * * winInfoPtr, TuiWinType type
   /*
      ** Now create the source window.
    */
-  _initAndMakeWin ((Opaque *) winInfoPtr,
+  _initAndMakeWin ((void **) winInfoPtr,
 		   type,
 		   height,
 		   tui_term_width () - executionInfo->width,
@@ -1076,7 +1076,7 @@ _showSourceOrDisassemAndCommand (enum tui_layout_type layoutType)
 	    _makeSourceWindow (winInfoPtr, srcHeight - 1, 0);
 	  else
 	    _makeDisassemWindow (winInfoPtr, srcHeight - 1, 0);
-	  _initAndMakeWin ((Opaque *) & locator,
+	  _initAndMakeWin ((void **) & locator,
 			   LOCATOR_WIN,
 			   2 /* 1 */ ,
 			   tui_term_width (),

@@ -38,63 +38,44 @@
 
 struct ui_file;
 
-/* Opaque data type */
-typedef char *Opaque;
-typedef
-Opaque (*OpaqueFuncPtr) (va_list);
-     typedef char **OpaqueList;
-     typedef OpaqueList OpaquePtr;
-
-/* Generic function pointer */
-     typedef void (*TuiVoidFuncPtr) (va_list);
-     typedef int (*TuiIntFuncPtr) (va_list);
-/*
-   typedef Opaque (*TuiOpaqueFuncPtr) (va_list);
- */
-     typedef OpaqueFuncPtr TuiOpaqueFuncPtr;
-
 extern void strcat_to_buf (char *, int, const char *);
 
-/* Types of error returns */
-     typedef enum tui_status
-       {
-	 TUI_SUCCESS,
-	 TUI_FAILURE
-       }
-TuiStatus, *TuiStatusPtr;
+/* Types of error returns.  */
+enum tui_status
+{
+  TUI_SUCCESS,
+  TUI_FAILURE
+};
 
 /* Types of windows */
-typedef enum tui_win_type
-       {
-	 SRC_WIN = 0,
-	 DISASSEM_WIN,
-	 DATA_WIN,
-	 CMD_WIN,
-	 /* This must ALWAYS be AFTER the major windows last */
-	 MAX_MAJOR_WINDOWS,
-	 /* auxillary windows */
-	 LOCATOR_WIN,
-	 EXEC_INFO_WIN,
-	 DATA_ITEM_WIN,
-	 /* This must ALWAYS be next to last */
-	 MAX_WINDOWS,
-	 UNDEFINED_WIN		/* LAST */
-       }
-TuiWinType, *TuiWinTypePtr;
+enum tui_win_type
+{
+  SRC_WIN = 0,
+  DISASSEM_WIN,
+  DATA_WIN,
+  CMD_WIN,
+  /* This must ALWAYS be AFTER the major windows last.  */
+  MAX_MAJOR_WINDOWS,
+  /* Auxillary windows.  */
+  LOCATOR_WIN,
+  EXEC_INFO_WIN,
+  DATA_ITEM_WIN,
+  /* This must ALWAYS be next to last.  */
+  MAX_WINDOWS,
+  UNDEFINED_WIN		/* LAST */
+};
 
-/* This is a point definition */
-     typedef struct _TuiPoint
-       {
-	 int x, y;
-       }
-TuiPoint, *TuiPointPtr;
+/* This is a point definition.  */
+struct tui_point
+{
+  int x, y;
+};
 
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */
-extern void tuiFree (char *);
-extern CORE_ADDR tuiGetLowDisassemblyAddress (CORE_ADDR, CORE_ADDR);
+extern CORE_ADDR tui_get_low_disassembly_address (CORE_ADDR, CORE_ADDR);
 extern void tui_show_assembly (CORE_ADDR addr);
-extern int tui_is_window_visible (TuiWinType type);
+extern int tui_is_window_visible (enum tui_win_type type);
 extern int tui_get_command_dimension (int *width, int *height);
 
 /* Initialize readline and configure the keymap for the switching
@@ -137,10 +118,10 @@ extern void tui_show_source (const char *file, int line);
 
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
-/* tuiLayout.c */
+/* tui-layout.c */
 extern enum tui_status tui_set_layout_for_display_command (const char *name);
 
-/* tuiSourceWin.c */
-extern void tuiUpdateAllExecInfos (void);
+/* tui-winsource.c */
+extern void tui_update_all_exec_infos (void);
 
 #endif /* TUI_H */

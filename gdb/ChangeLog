@@ -1,3 +1,23 @@
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui.h (Opaque, OpaquePtr OpaqueList): Delete definition.
+	(TuiPoint, TuiPointPtr): Ditto.
+	(TuiStatus, TuiStatusPtr): Ditto.
+	(TuiWinType, TuiWinTypePtr): Ditto.
+	(struct tui_point): Rename _TuiPoint.
+	(tui_get_low_disassembly_address): Rename
+	tuiGetLowDisassemblyAddress.
+	(tui_update_all_exec_infos): Rename tuiUpdateAllExecInfos.
+	(tuiFree): Delete declaration.
+	(OpaqueFuncPtr, TuiOpaqueFuncPtr): Delete definitions.
+	(TuiVoidFuncPtr, TuiIntFuncPtr): Delete definitions.
+	* tui/tui.c (tuiFree): Delete function.
+	* cli/cli-cmds.c (disassemble_command): Update references.
+	* tui/tui-data.c, tui/tui-data.h, tui/tui-disasm.c: Ditto.
+	* tui/tui-layout.c, tui/tui-regs.c, tui/tui-source.c: Ditto.
+	* tui/tui-stack.c, tui/tui-win.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c: Ditto.
+
 2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* objfiles.h (struct objfile): Add objfile_obstack field.

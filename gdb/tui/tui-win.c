@@ -63,7 +63,7 @@
 ********************************/
 static void _makeVisibleWithNewHeight (struct tui_win_info *);
 static void _makeInvisibleAndSetNewHeight (struct tui_win_info *, int);
-static TuiStatus _tuiAdjustWinHeights (struct tui_win_info *, int);
+static enum tui_status _tuiAdjustWinHeights (struct tui_win_info *, int);
 static int _newHeightOk (struct tui_win_info *, int);
 static void _tuiSetTabWidth_command (char *, int);
 static void _tuiRefreshAll_command (char *, int);
@@ -563,7 +563,7 @@ tui_scroll (enum tui_scroll_direction direction,
 void
 tui_refresh_all_win (void)
 {
-  TuiWinType type;
+  enum tui_win_type type;
 
   clearok (curscr, TRUE);
   tui_refresh_all (winList);
@@ -613,7 +613,7 @@ tuiResizeAll (void)
       struct tui_win_info *firstWin;
       struct tui_win_info *secondWin;
       struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
-      TuiWinType winType;
+      enum tui_win_type winType;
       int newHeight, splitDiff, cmdSplitDiff, numWinsDisplayed = 2;
 
       /* turn keypad off while we resize */
@@ -885,7 +885,7 @@ The window name specified must be valid and visible.\n");
 
       if (dataWin && dataWin->generic.isVisible)
 	tui_refresh_data_win ();
-      tuiFree (bufPtr);
+      xfree (bufPtr);
       printf_filtered ("Focus set to %s window.\n",
 		       tui_win_name ((struct tui_gen_win_info *) tui_win_with_focus ()));
     }
@@ -913,7 +913,7 @@ _tuiSetFocus_command (char *arg, int fromTTY)
 static void
 _tuiAllWindowsInfo (char *arg, int fromTTY)
 {
-  TuiWinType type;
+  enum tui_win_type type;
   struct tui_win_info * winWithFocus = tui_win_with_focus ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
@@ -1052,7 +1052,7 @@ The window name specified must be valid and visible.\n");
 	printf_filtered (WIN_HEIGHT_USAGE);
 
       if (buf != (char *) NULL)
-	tuiFree (buf);
+	xfree (buf);
     }
   else
     printf_filtered (WIN_HEIGHT_USAGE);
@@ -1122,10 +1122,10 @@ _tuiXDBsetWinHeight_command (char *arg, int fromTTY)
    ** _tuiAdjustWinHeights().
    **        Function to adjust all window heights around the primary
  */
-static TuiStatus
+static enum tui_status
 _tuiAdjustWinHeights (struct tui_win_info * primaryWinInfo, int newHeight)
 {
-  TuiStatus status = TUI_FAILURE;
+  enum tui_status status = TUI_FAILURE;
 
   if (_newHeightOk (primaryWinInfo, newHeight))
     {
@@ -1350,7 +1350,7 @@ _makeVisibleWithNewHeight (struct tui_win_info * winInfo)
     case DISASSEM_WIN:
       tui_free_win_content (winInfo->detail.sourceInfo.executionInfo);
       tui_make_visible (winInfo->detail.sourceInfo.executionInfo);
-      if (winInfo->generic.content != (OpaquePtr) NULL)
+      if (winInfo->generic.content != NULL)
 	{
 	  union tui_line_or_address lineOrAddr;
 	  struct symtab_and_line cursal
@@ -1582,7 +1582,7 @@ The window name specified must be valid and visible.\n");
 	  else if (*winToScroll == cmdWin)
 	    *winToScroll = (struct tui_win_info *) (tui_source_windows ())->list[0];
 	}
-      tuiFree (buf);
+      xfree (buf);
     }
 
   return;

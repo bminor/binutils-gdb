@@ -35,11 +35,11 @@
 struct tui_gen_win_info
 {
   WINDOW *handle;	/* window handle */
-  TuiWinType type;	/* type of window */
+  enum tui_win_type type;	/* type of window */
   int width;		/* window width */
   int height;		/* window height */
-  TuiPoint origin;	/* origin of window */
-  OpaquePtr content;	/* content of window */
+  struct tui_point origin;	/* origin of window */
+  void **content;	/* content of window */
   int contentSize;	/* Size of content (# of elements) */
   int contentInUse;	/* Can it be used, or is it already used? */
   int viewportHeight;	/* viewport height */
@@ -107,7 +107,7 @@ enum tui_scroll_direction
 /* General list struct.  */
 struct tui_list
 {
-  OpaqueList list;
+  void **list;
   int count;
 };
 
@@ -153,7 +153,7 @@ union tui_line_or_address
 /* Current Layout definition */
 struct tui_layout_def
 {
-  TuiWinType displayMode;
+  enum tui_win_type displayMode;
   int split;
   enum tui_register_display_type regsDisplayType;
   enum tui_register_display_type floatRegsDisplayType;
@@ -175,7 +175,7 @@ struct tui_data_element
   const char *name;
   int itemNo;			/* the register number, or data display number */
   enum tui_data_type type;
-  Opaque value;
+  void *value;
   int highlight;
 };
 
@@ -276,7 +276,7 @@ struct tui_win_info
     struct tui_source_info sourceInfo;
     struct tui_data_info dataDisplayInfo;
     struct tui_command_info commandInfo;
-    Opaque opaque;
+    void *opaque;
   }
   detail;
   int canHighlight;		/* Can this window ever be highlighted? */
@@ -324,7 +324,7 @@ extern struct tui_win_info *(winList[MAX_MAJOR_WINDOWS]);
 /* Data Manipulation Functions */
 extern void tui_initialize_static_data (void);
 extern struct tui_gen_win_info *tui_alloc_generic_win_info (void);
-extern struct tui_win_info *tui_alloc_win_info (TuiWinType);
+extern struct tui_win_info *tui_alloc_win_info (enum tui_win_type);
 extern void tui_init_generic_part (struct tui_gen_win_info *);
 extern void tui_init_win_info (struct tui_win_info *);
 extern tui_win_content tui_alloc_content (int, enum tui_win_type);
