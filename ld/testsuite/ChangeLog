@@ -1,6 +1,6 @@
 2004-09-07  Hans-Peter Nilsson  <hp@axis.com>
 
-	* ld-cris/hiddef1.d, ld-cris/hiddef1.d, ld-cris/hidrefgotplt1.s:
+	* ld-cris/hiddef1.d, ld-cris/hiddef1.s, ld-cris/hidrefgotplt1.s:
 	New test.
 
 2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
