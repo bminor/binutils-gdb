@@ -1,3 +1,12 @@
+start-sanitize-d30v
+Wed Dec 10 14:10:44 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfd30v.sc: Add .rel and .rela sections for all
+	defined sections.  Set up __{D,C}TOR_{LIST,END}__.  Add onchip and
+	external memory sections for rodata.  Delete .string, .rodata1,
+	and .data1 sections.
+
+end-sanitize-d30v
 Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.am: Add Oct 23 changes to Makefile.in here.
