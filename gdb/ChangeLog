@@ -1,3 +1,8 @@
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* ns32k-tdep.c (ns32k_gdbarch_init): Set the call dummy breakpoint
+	offset.
+
 2003-03-29  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_push_arguments): Delete.
