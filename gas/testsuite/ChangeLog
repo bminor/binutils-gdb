@@ -1,5 +1,11 @@
 2002-04-23  H.J. Lu <hjl@gnu.org>
 
+	* gas/mips/elempic.d: Use empic.l.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+
+2002-04-23  H.J. Lu <hjl@gnu.org>
+
 	* gas/hppa/parse/parse.exp: Don't expect failure on line separator
 	test on hppa*-*-linux* nor hppa*-*-netbsd*.
 

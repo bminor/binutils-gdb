@@ -2,6 +2,7 @@
 #name: MIPS empic
 #as: -membedded-pic -mips3
 #source: empic.s
+#stderr: empic.l
 
 # Check GNU-specific embedded relocs, for ELF.
 
