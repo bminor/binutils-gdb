@@ -1,3 +1,8 @@
+2003-05-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp (mips_arch_init): Reimplement in
+	a way that's safe with ancient versions of tcl/expect.
+
 2003-05-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips.exp (mips_arch_init): New function.

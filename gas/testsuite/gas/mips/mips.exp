@@ -84,7 +84,9 @@
 # to be empty.
 proc mips_arch_init {} {
     global mips_arches
-    array unset mips_arches
+
+    # Catch becuase the variable won't be set the first time through.
+    catch {unset mips_arches}
 }
 
 # mips_arch_create ARCH GPRSIZE EXTENDS PROPS AS_FLAGS OBJDUMP_FLAGS \
