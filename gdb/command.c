@@ -57,6 +57,8 @@ static struct cmd_list_element *find_cmd PARAMS ((char *command,
 static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
 		    		struct re_pattern_buffer *, char *);
 
+static void help_all (struct ui_file *stream);
+
 void apropos_command (char *, int);
 
 void _initialize_command PARAMS ((void));
@@ -609,8 +611,7 @@ Command name abbreviations are allowed if unambiguous.\n",
 }
 
 static void
-help_all (stream)
-     struct ui_file *stream;
+help_all (struct ui_file *stream)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
