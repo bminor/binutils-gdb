@@ -1,3 +1,31 @@
+Fri Sep 29 11:09:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Don't set link_info.shared for -assert
+	pure-text.  Pass true, not 1, to lang_add_entry.
+	* emultempl/sunos.em (find_assign): New static variable.
+	(found_assign): New static variable.
+	(gld${EMULATION_NAME}_before_allocation): Rename local h to hdyn.
+	If not a relocateable link, and no start symbol was specified on
+	the command line, and there are any undefined symbols, set
+	link_info.shared.  If link_info.shared is set, set the address of
+	the .text section to 0x20.
+	(gld${EMULATION_NAME}_find_assignment): Rename from
+	gld${EMULATION_NAME}_find_statement_assignment.  If find_assign is
+	set, then just set found_assign based on whether an assignment is
+	found to find_assign.
+	(gld${EMULATION_NAME}_get_script): Don't use a special script when
+	producing a shared library.
+	* emulparams/sun4.sh (GENERATE_SHLIB_SCRIPT): Remove.
+	* scripttempl/aout.sc: Remove CREATE_SHLIB tests.
+	* ldlang.c (entry_from_cmdline): New global variable.
+	(lang_add_entry): Change cmdline parameter from int to boolean.
+	Use global entry_from_cmdline rather than function static
+	from_cmdline.
+	* ldlang.h (entry_from_cmdline): Declare.
+	(lang_add_entry): Change declaration of second parameter from int
+	to boolean.
+	* ldgram.y: Pass false, not 0, to lang_add_entry.
+
 Thu Sep 28 12:34:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (parsing_defsym): Declare.
