@@ -1,5 +1,15 @@
 2005-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/Makefile.in (stamp-v10fcpu, stamp-v32fcpu): Add kludge to
+	include cgen-ops.h in decodev10.c and decodev32.c.
+	* cris/sim-main.h: Don't include cgen-ops.h here.
+	* cris/arch.c, cris/arch.h, cris/cpuall.h, cris/cpuv10.c,
+	cris/cpuv10.h, cris/cpuv32.c, cris/cpuv32.h, cris/cris-desc.c,
+	cris/cris-desc.h, cris/cris-opc.h, cris/decodev10.c,
+	cris/decodev10.h, cris/decodev32.c, cris/decodev32.h,
+	cris/modelv10.c, cris/modelv32.c, cris/semcrisv10f-switch.c,
+	cris/semcrisv32f-switch.c: Regenerate.
+
 	* cris/traps.c (cris_break_13_handler) <case
 	TARGET_SYS_rt_sigaction>: Rename sa_handler, sa_flags,
 	sa_restorer, sa_mask_low, sa_mask_high to target_sa_handler etc.

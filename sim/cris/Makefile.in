@@ -140,11 +140,14 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/cris.cpu Makefile
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
+# The sed-hack is supposed to be temporary, until we get CGEN to emit it.
 stamp-v10fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/cris.cpu Makefile
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  archfile=$(CGEN_CPU_DIR)/cris.cpu \
 	  cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
 	$(SHELL) $(srcroot)/move-if-change $(srcdir)/semv10-switch.c $(srcdir)/semcrisv10f-switch.c
+	sed -ne 'p; s/^\(#include "sim-assert.h"\)$$/#include "cgen-ops.h"/p' < $(srcdir)/decodev10.c > decodev10.c.tmp
+	mv decodev10.c.tmp $(srcdir)/decodev10.c
 	touch stamp-v10fcpu
 cpuv10.h cpuv10.c semcrisv10f-switch.c modelv10.c decodev10.c decodev10.h: $(CGEN_MAINT) stamp-v10fcpu
 
@@ -153,6 +156,8 @@ stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DI
 	  archfile=$(CGEN_CPU_DIR)/cris.cpu \
 	  cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
 	$(SHELL) $(srcroot)/move-if-change $(srcdir)/semv32-switch.c $(srcdir)/semcrisv32f-switch.c
+	sed -ne 'p; s/^\(#include "sim-assert.h"\)$$/#include "cgen-ops.h"/p' < $(srcdir)/decodev32.c > decodev32.c.tmp
+	mv decodev32.c.tmp $(srcdir)/decodev32.c
 	touch stamp-v32fcpu
 cpuv32.h cpuv32.c semcrisv32f-switch.c modelv32.c decodev32.c decodev32.h: $(CGEN_MAINT) stamp-v32fcpu
 

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2004 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "cgen-ops.h"
 
 /* The instruction descriptor array.
    This is computed at runtime.  Space for it is not malloc'd to save a

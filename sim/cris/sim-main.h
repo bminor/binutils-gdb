@@ -56,9 +56,6 @@ do { \
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "cris-sim.h"
-
-/* For occurrences of ANDIF in decodev32.c.  */
-#include "cgen-ops.h"
 
 struct cris_sim_mmapped_page {
   USI addr;
