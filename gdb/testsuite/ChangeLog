@@ -1,12 +1,3 @@
-2003-04-16  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb.base/args.exp: Invoke gdb_load for simulator targets.
-
-2003-04-16  Elena Zannoni  <ezannoni@redhat.com>
-
-	* gdb.base/completion.exp: Make 'info func mark' complete on 'info
-        func marke' instead. Update test name.
-
 2003-04-15  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/maint.exp: New file.

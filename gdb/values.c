@@ -1240,9 +1240,7 @@ value_being_returned (struct type *valtype, struct regcache *retbuf,
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
-  /* If the function returns void, don't bother fetching the return value.  */
-  if (TYPE_CODE (valtype) != TYPE_CODE_VOID)
-    EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
+  EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
 
   return val;
 }

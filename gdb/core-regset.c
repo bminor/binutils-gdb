@@ -1,6 +1,5 @@
 /* Machine independent GDB support for core files on systems using "regsets".
-
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -20,43 +19,66 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* This file is used by most systems that use ELF for their core
-   dumps.  This includes most systems that have SVR4-ish variant of
-   /proc.  For these systems, the registers are laid out the same way
-   in core files as in the gregset_t and fpregset_t structures that
-   are used in the interaction with /proc (Irix 4 is an exception and
-   therefore doesn't use this file).  Quite a few systems without a
-   SVR4-ish /proc define these structures too, and can make use of
-   this code too.  */
+
+/*                      N  O  T  E  S
+
+   This file is used by most systems that implement /proc.  For these systems,
+   the general registers are laid out the same way in both the core file and
+   the gregset_p structure.  The current exception to this is Irix-4.*, where
+   the gregset_p structure is split up into two pieces in the core file.
+
+   The general register and floating point register sets are manipulated by
+   separate ioctl's.  This file makes the assumption that if FP0_REGNUM is
+   defined, then support for the floating point register set is desired,
+   regardless of whether or not the actual target has floating point hardware.
+
+ */
 
 #include "defs.h"
-#include "command.h"
-#include "gdbcore.h"
-#include "inferior.h"
-#include "target.h"
 
-#include <fcntl.h>
-#include <errno.h>
-#include "gdb_string.h"
 #include <time.h>
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif
+#include <fcntl.h>
+#include <errno.h>
+#include "gdb_string.h"
 
-/* Prototypes for supply_gregset etc.  */
+#include "inferior.h"
+#include "target.h"
+#include "command.h"
+#include "gdbcore.h"
+
+/* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
-/* Provide registers to GDB from a core file.
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
-   CORE_REG_SECT points to an array of bytes, which are the contents
-   of a `note' from a core file which BFD thinks might contain
-   register contents.  CORE_REG_SIZE is its size.
+void _initialize_core_regset (void);
 
-   WHICH says which register set corelow suspects this is:
-     0 --- the general-purpose register set, in gregset_t format
-     2 --- the floating-point register set, in fpregset_t format
+/*
 
-   REG_ADDR is ignored.  */
+   GLOBAL FUNCTION
+
+   fetch_core_registers -- fetch current registers from core file
+
+   SYNOPSIS
+
+   void fetch_core_registers (char *core_reg_sect,
+   unsigned core_reg_size,
+   int which, CORE_ADDR reg_addr)
+
+   DESCRIPTION
+
+   Read the values of either the general register set (WHICH equals 0)
+   or the floating point register set (WHICH equals 2) from the core
+   file data (pointed to by CORE_REG_SECT), and update gdb's idea of
+   their current values.  The CORE_REG_SIZE parameter is compared to
+   the size of the gregset or fpgregset structures (as appropriate) to
+   validate the size of the structure from the core file.  The
+   REG_ADDR parameter is ignored.
+
+ */
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -65,40 +87,36 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   gdb_gregset_t gregset;
   gdb_fpregset_t fpregset;
 
-  switch (which)
+  if (which == 0)
     {
-    case 0:
       if (core_reg_size != sizeof (gregset))
-	warning ("Wrong size gregset in core file.");
+	{
+	  warning ("wrong size gregset struct in core file");
+	}
       else
 	{
-	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
+	  memcpy ((char *) &gregset, core_reg_sect, sizeof (gregset));
 	  supply_gregset (&gregset);
 	}
-      break;
-
-    case 2:
+    }
+  else if (which == 2)
+    {
       if (core_reg_size != sizeof (fpregset))
-	warning ("Wrong size fpregset in core file.");
+	{
+	  warning ("wrong size fpregset struct in core file");
+	}
       else
 	{
-	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
+	  memcpy ((char *) &fpregset, core_reg_sect, sizeof (fpregset));
 	  if (FP0_REGNUM >= 0)
 	    supply_fpregset (&fpregset);
 	}
-      break;
-
-    default:
-      /* We've covered all the kinds of registers we know about here,
-         so this must be something we wouldn't know what to do with
-         anyway.  Just ignore it.  */
-      break;
     }
 }
 
 
-/* Register that we are able to handle ELF core file formats using
-   standard procfs "regset" structures.  */
+/* Register that we are able to handle ELF file formats using standard
+   procfs "regset" structures.  */
 
 static struct core_fns regset_core_fns =
 {
@@ -108,9 +126,6 @@ static struct core_fns regset_core_fns =
   fetch_core_registers,			/* core_read_registers */
   NULL					/* next */
 };
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_core_regset (void);
 
 void
 _initialize_core_regset (void)

@@ -305,9 +305,7 @@ bfd_check_format_matches (abfd, format, matching)
 	}
     }
 
-  if (match_count > 1
-      && bfd_associated_vector != NULL
-      && matching)
+  if (match_count > 1 && bfd_associated_vector != NULL)
     {
       const bfd_target * const *assoc = bfd_associated_vector;
 
