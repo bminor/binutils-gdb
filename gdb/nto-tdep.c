@@ -311,13 +311,6 @@ static struct core_fns regset_core_fns = {
 void
 _initialize_nto_tdep (void)
 {
-	/*
-  add_show_from_set (add_set_cmd ("nto-debug", class_maintenance, var_zinteger, (char *) &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
-When non-zero, nto specific debug info is\n\
-displayed. Different information is displayed\n\
-for different positive values.", &setdebuglist),
-		     &showdebuglist);
-		     */
   add_setshow_cmd ("nto-debug", class_maintenance, var_zinteger,
 		  &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
 When non-zero, nto specific debug info is\n\
