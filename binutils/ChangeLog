@@ -10,6 +10,8 @@
 	encodes as binary 8.
 
 	* resrc.c: Print style even if it is 0.
+
+	* resbin.c: Use signature to identify DIALOGEX.
 	
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 

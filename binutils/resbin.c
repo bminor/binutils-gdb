@@ -1,5 +1,5 @@
 /* resbin.c -- manipulate the Windows binary resource format.
-   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -68,6 +68,9 @@ static struct res_resource *bin_to_res_version
   PARAMS ((const unsigned char *, unsigned long, int));
 static struct res_resource *bin_to_res_userdata
   PARAMS ((const unsigned char *, unsigned long, int));
+static void get_version_header
+  PARAMS ((const unsigned char *, unsigned long, int, const char *,
+	   unichar **, int *, int *, int *, int *));
 
 /* Given a resource type ID, a pointer to data, a length, return a
    res_resource structure which represents that resource.  The caller
@@ -460,7 +463,7 @@ bin_to_res_dialog (data, length, big_endian)
      unsigned long length;
      int big_endian;
 {
-  int version;
+  int signature;
   struct dialog *d;
   int c, sublen, i;
   unsigned int off;
@@ -472,8 +475,8 @@ bin_to_res_dialog (data, length, big_endian)
 
   d = (struct dialog *) res_alloc (sizeof *d);
 
-  version = get_16 (big_endian, data);
-  if (version != 1)
+  signature = get_16 (big_endian, data + 2);
+  if (signature != 0xffff)
     {
       d->ex = NULL;
       d->style = get_32 (big_endian, data);
@@ -482,11 +485,11 @@ bin_to_res_dialog (data, length, big_endian)
     }
   else
     {
-      int signature;
-
-      signature = get_16 (big_endian, data + 2);
-      if (signature != 0xffff)
-	fatal (_("unexpected dialog signature %d"), signature);
+      int version;
+      
+      version = get_16 (big_endian, data);
+      if (version != 1)
+	fatal (_("unexpected DIALOGEX version %d"), version);
 
       d->ex = (struct dialog_ex *) res_alloc (sizeof (struct dialog_ex));
       d->ex->help = get_32 (big_endian, data + 4);
@@ -808,7 +811,7 @@ static struct res_resource *
 bin_to_res_rcdata (data, length, big_endian)
      const unsigned char *data;
      unsigned long length;
-     int big_endian;
+     int big_endian ATTRIBUTE_UNUSED;
 {
   struct rcdata_item *ri;
   struct res_resource *r;
@@ -1019,7 +1022,7 @@ bin_to_res_version (data, length, big_endian)
   struct res_resource *r;
 
   get_version_header (data, length, big_endian, "VS_VERSION_INFO",
-		      (unichar *) NULL, &verlen, &vallen, &type, &off);
+		      (unichar **) NULL, &verlen, &vallen, &type, &off);
 
   if ((unsigned int) verlen != length)
     fatal (_("version length %d does not match resource length %lu"),
@@ -1091,7 +1094,7 @@ bin_to_res_version (data, length, big_endian)
 	  vi->type = VERINFO_STRING;
 
 	  get_version_header (data, length, big_endian, "StringFileInfo",
-			      (unichar *) NULL, &verlen, &vallen, &type,
+			      (unichar **) NULL, &verlen, &vallen, &type,
 			      &off);
 
 	  if (vallen != 0)
@@ -1163,7 +1166,7 @@ bin_to_res_version (data, length, big_endian)
 	  vi->type = VERINFO_VAR;
 
 	  get_version_header (data, length, big_endian, "VarFileInfo",
-			      (unichar *) NULL, &verlen, &vallen, &type,
+			      (unichar **) NULL, &verlen, &vallen, &type,
 			      &off);
 
 	  if (vallen != 0)
@@ -1231,7 +1234,7 @@ static struct res_resource *
 bin_to_res_userdata (data, length, big_endian)
      const unsigned char *data;
      unsigned long length;
-     int big_endian;
+     int big_endian ATTRIBUTE_UNUSED;
 {
   struct rcdata_item *ri;
   struct res_resource *r;
