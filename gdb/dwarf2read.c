@@ -980,6 +980,19 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
+  /* Since the objects we're extracting from dwarf_info_buffer vary in
+     length, only the individual functions to extract them (like
+     read_comp_unit_head and read_partial_die) can really know whether
+     the buffer is large enough to hold another complete object.
+
+     At the moment, they don't actually check that.  If
+     dwarf_info_buffer holds just one extra byte after the last
+     compilation unit's dies, then read_comp_unit_head will happily
+     read off the end of the buffer.  read_partial_die is similarly
+     casual.  Those functions should be fixed.
+
+     For this loop condition, simply checking whether there's any data
+     left at all should be sufficient.  */
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
       struct comp_unit_head cu_header;
