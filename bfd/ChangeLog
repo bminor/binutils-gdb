@@ -1,3 +1,14 @@
+Sun Apr  3 18:27:29 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_slurp_string_table): Use malloc to allocate space
+	for the cached copy of the native string table.
+	(som_slurp_symbol_table): Likewise for the native symbol table.
+	(som_slurp_reloc_table): Likewise for the native and generic
+	relocation tables.
+	(som_bfd_free_cached_info): Free the cached native strings,
+	symbols, and relocations.  Also free the canonical cached
+	relocations.
+
 Fri Apr  1 12:40:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (aout_link_write_symbols): If keep_memory is false, make

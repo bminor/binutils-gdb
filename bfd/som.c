@@ -3530,8 +3530,17 @@ som_slurp_string_table (abfd)
   if (obj_som_stringtab (abfd) != NULL)
     return true;
 
+  /* I don't think this can currently happen, and I'm not sure it should
+     really be an error, but it's better than getting unpredictable results
+     from the host's malloc when passed a size of zero.  */
+  if (obj_som_stringtab_size (abfd) == 0)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      return false;
+    }
+
   /* Allocate and read in the string table.  */
-  stringtab = bfd_zalloc (abfd, obj_som_stringtab_size (abfd));
+  stringtab = malloc (obj_som_stringtab_size (abfd));
   if (stringtab == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -3634,7 +3643,7 @@ som_slurp_symbol_table (abfd)
   stringtab = obj_som_stringtab (abfd);
 
   symbase = (som_symbol_type *)
-    bfd_zalloc (abfd, symbol_count * sizeof (som_symbol_type));
+    malloc (symbol_count * sizeof (som_symbol_type));
   if (symbase == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -4122,7 +4131,7 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
      parsed.  We must do so now to know how many relocations exist.  */
   if (section->reloc_count == -1)
     {
-      external_relocs = (char *) bfd_zalloc (abfd, fixup_stream_size);
+      external_relocs = (char *) malloc (fixup_stream_size);
       if (external_relocs == (char *) NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -4158,8 +4167,7 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
   if (section->relocation != (arelent *) NULL)
     return true;
 
-  internal_relocs = (arelent *) bfd_zalloc (abfd,
-					    num_relocs * sizeof (arelent));
+  internal_relocs = (arelent *) malloc (num_relocs * sizeof (arelent));
   if (internal_relocs == (arelent *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -5442,6 +5450,32 @@ som_write_armap (abfd)
   return true;
 }
 
+/* Free all information we have cached for this BFD.  We can always
+   read it again later if we need it.  */
+
+static boolean
+som_bfd_free_cached_info (abfd)
+     bfd *abfd;
+{
+  asection *o;
+
+#define FREE(x) if (x != NULL) { free (x); x = NULL; }
+  /* Free the native string and symbol tables.  */
+  FREE (obj_som_symtab (abfd));
+  FREE (obj_som_stringtab (abfd));
+  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+    {
+      /* Free the native relocations.  */
+      o->reloc_count = -1;
+      FREE (som_section_data (o)->reloc_stream);
+      /* Free the generic relocations.  */
+      FREE (o->relocation);
+    }
+#undef FREE
+
+  return true;
+}
+
 /* End of miscellaneous support functions. */
 
 #define som_bfd_debug_info_start        bfd_void
@@ -5464,7 +5498,6 @@ som_write_armap (abfd)
 #define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
-#define som_bfd_free_cached_info bfd_true
 
 /* Core file support is in the hpux-core backend.  */
 #define som_core_file_failing_command	_bfd_dummy_core_file_failing_command
