@@ -50,6 +50,8 @@ int (*print_sh_insn) (bfd_vma, disassemble_info*);
 CORE_ADDR (*skip_prologue_hard_way) (CORE_ADDR);
 void (*do_pseudo_register) (int);
 
+#define SH_DEFAULT_NUM_REGS 59
+
 /* Define other aspects of the stack frame.
    we keep a copy of the worked out return pc lying around, since it
    is a useful bit of info */
@@ -1906,12 +1908,12 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_raw_size (gdbarch, 4);
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_num_regs (gdbarch, 59);
+  set_gdbarch_num_regs (gdbarch, SH_DEFAULT_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, 15);
   set_gdbarch_fp_regnum (gdbarch, 14);
   set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, NUM_REGS * 4);
+  set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
   set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
   set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   set_gdbarch_do_registers_info (gdbarch, sh_do_registers_info);
