@@ -1,3 +1,23 @@
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* findvar.c (read_var_value): Remove case for thread local storage
+	variables.  It is now entirely handled by the dwarf2 location
+	expression code.
+	* printcmd.c (address_info): Ditto.
+	* symtab.h (address_class): Remove LOC_THREAD_LOCAL_STATIC
+	enumeration value.
+	(struct symbol): Remove objfile field, which was used by
+	LOC_THREAD_LOCAL_STATIC only.
+	* dwarf2read.c (decode_locdesc): Remove is_thread_local variable.
+	* dwarf2loc.h (struct dwarf2_loclist_baton): Add comment about
+	usage of objfile pointer.
+	* dwarf2loc.c (locexpr_describe_location): Add case to handle
+	thread local variables.
+	Add include of objfiles.h.
+	* dwarf2expr.c (execute_stack_op): Add comments about thread local
+	storage variables.
+	* Makefile.in (dwarf2loc.o): Update dependencies.
+
 2003-07-21  Andrew Cagney  <cagney@redhat.com>
 
 	* dwarf2-frame.h (dwarf2_frame_sniffer): Replace "dwarf2_frame_p".
