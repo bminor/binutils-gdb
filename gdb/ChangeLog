@@ -1,5 +1,10 @@
 2003-04-03  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (legacy_get_prev_frame): Revert a frame_id_eq test,
+	instead comparing the frame PCs.
+
+2003-04-03  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (frame_id_eq): Update.  Compare function addresses.
 	(get_frame_func): New function.
 	(frame_func_unwind): New function.

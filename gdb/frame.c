@@ -1415,8 +1415,10 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      check this in DEPRECATED_FRAME_CHAIN or thereabouts, but it seems
      like there is no reason this can't be an architecture-independent
      check.  */
-  if (this_frame->level > 0
-      && frame_id_eq (get_frame_id (prev), get_frame_id (this_frame)))
+  /* NOTE: cagney/2003-04-04: Don't convert this to frame_id_eq.  At
+     this stage the ID's address is not valid, so need to use the pc.  */
+  if (prev->id.stack_addr == this_frame->id.stack_addr
+      && get_frame_pc (prev) == get_frame_pc (this_frame))
     {
       this_frame->prev = NULL;
       obstack_free (&frame_cache_obstack, prev);
