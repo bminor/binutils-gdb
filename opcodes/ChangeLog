@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Thu Jan 30 11:30:45 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-dis.c (print_operand): Change address printing
+	to correctly handle PC wrapping.  Fixes PR11490.
+
+end-sanitize-d10v	
 Wed Jan 29 09:39:17 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_operands): Make 8 and 16 bit pc-relative
