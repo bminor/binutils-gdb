@@ -1,3 +1,7 @@
+2002-12-23  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.base/maint.exp: Update expect output to include 'ObjC'.
+
 2002-12-23  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Allow initial brace
