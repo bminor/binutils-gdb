@@ -180,6 +180,7 @@ f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::#
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::#
+f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double
 f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
 #
 f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr::0:0
@@ -881,7 +882,13 @@ echo "  /* basic architecture information */"
 function_list | while eval read $read
 do
   case "${class}" in
-    "i" ) echo "  ${default}," ;;
+    "i" ) 
+      if [ "${default}" = "" ]; then
+        echo "  0,"
+      else
+        echo "  ${default},"
+      fi
+    ;;
   esac
 done
 cat <<EOF
@@ -894,7 +901,13 @@ EOF
 function_list | while eval read $read
 do
   case "${class}" in
-    "f" | "v" ) echo "  ${default}," ;;
+    "f" | "v" )
+      if [ "${default}" = "" ]; then
+        echo "  0,"
+      else
+        echo "  ${default},"
+      fi
+    ;;
   esac
 done
 cat <<EOF
