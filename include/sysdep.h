@@ -55,6 +55,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HP300BSD_SYS 19
 #define	ULTRA3_SYS 20		/* NYU Ultracomputer */
 #define	NEWSOS3_SYS 21		/* Sony NewsOS 3.x (bsd-4.3 based) */
+#define	AMIX_SYS 22		/* Amiga Unix */
 
 #include <ansidecl.h>
 
@@ -156,6 +157,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if HOST_SYS == ULTRA3_SYS
 #include <sys/h-ultra3.h>
+#endif
+
+#if HOST_SYS == AMIX_SYS
+#include <sys/h-amix.h>
 #endif
 
 #endif /* _SYSDEP_H */

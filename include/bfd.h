@@ -61,7 +61,8 @@ typedef struct _bfd bfd;
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
    force me to change it. */
-typedef enum boolean {false, true} boolean;
+/* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
+typedef enum bfd_boolean {false, true} boolean;
 
 /* Try to avoid breaking stuff */
 typedef  long int file_ptr;
@@ -1952,6 +1953,7 @@ of a file.
   enum target_flavour_enum {
     bfd_target_aout_flavour_enum,
     bfd_target_coff_flavour_enum,
+    bfd_target_elf_flavour_enum,
     bfd_target_ieee_flavour_enum,
     bfd_target_oasys_flavour_enum,
     bfd_target_srec_flavour_enum} flavour;
@@ -2086,7 +2088,7 @@ Standard stuff.
 Symbols and reloctions
 */
 
- SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
+  SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
   SDEF (unsigned int, _bfd_canonicalize_symtab,
            (bfd *, struct symbol_cache_entry **));
   SDEF (unsigned int, _get_reloc_upper_bound, (bfd *, sec_ptr));
