@@ -62,6 +62,8 @@ fi
 
 emulations=""
 
+using_cgen=no
+
 for this_target in $target $canon_targets ; do
 
 changequote(,)dnl
@@ -145,15 +147,14 @@ changequote([,])dnl
       dvp-*-*)		    fmt=elf bfd_gas=yes install_tooldir= ;;
 # end-sanitize-sky
 
-# start-sanitize-fr30
       fr30-*-*)		    fmt=elf bfd_gas=yes ;;
-# end-sanitize-fr30
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
       hppa-*-osf*)          fmt=som em=hppa ;;
       hppa-*-rtems*)        fmt=elf em=hppa ;;
       hppa-*-hpux*)         fmt=som em=hppa ;;
+      hppa-*-mpeix*)        fmt=som em=hppa ;;
       hppa-*-bsd*)          fmt=som em=hppa ;;
       hppa-*-hiux*)         fmt=som em=hppa ;;
 
@@ -306,11 +307,9 @@ dnl end-sanitize-beos
 # end-sanitize-tic80
 
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
-
-# start-sanitize-v850e
       v850e-*-*)	    fmt=elf bfd_gas=yes ;;
       v850ea-*-*)	    fmt=elf bfd_gas=yes ;;
-# end-sanitize-v850e
+
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;
       vax-*-vms)            fmt=vms ;;
@@ -381,25 +380,14 @@ dnl end-sanitize-beos
     esac
 
     case ${cpu_type} in
-      m32r)
+      fr30 | m32r)
 	case "x${extra_objects}" in
 	*cgen.o*) ;;
 	*) extra_objects="$extra_objects cgen.o"
-	   AC_DEFINE(USING_CGEN)
+	   using_cgen=yes
 	   ;;
 	esac
 	;;
-
-# start-sanitize-fr30
-      fr30)
-	case "x${extra_objects}" in
-	*cgen.o*) ;;
-	*) extra_objects="$extra_objects cgen.o"
-	   AC_DEFINE(USING_CGEN)
-	   ;;
-	esac
-	;;
-# end-sanitize-fr30
 
       m68k)
 	case ${extra_objects} in
@@ -492,14 +480,13 @@ esac
 
 # Unfortunately the cpu in cpu-opc.h file isn't always $(TARGET_CPU).
 cgen_cpu_prefix=""
-case "x${extra_objects}" in
-  *cgen.o*)
-	case ${target_cpu} in
-	  *) cgen_cpu_prefix=${target_cpu} ;;
-	esac
-	;;
-esac
-AC_SUBST(cgen_cpu_prefix)
+if test "x$using_cgen" = xyes ; then
+  case ${target_cpu} in
+    *) cgen_cpu_prefix=${target_cpu} ;;
+  esac
+  AC_SUBST(cgen_cpu_prefix)
+  AC_DEFINE(USING_CGEN)
+fi
 
 dnl
 dnl Make sure the desired support files exist.
@@ -747,14 +734,12 @@ AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in po/Makefile.in:po/Make-in,
  echo '#include "obj-'"${obj_format}"'.h"' > obj-format.h
  echo '#include "te-'"${te_file}"'.h"' > targ-env.h
  echo '#include "itbl-'"${target_cpu_type}"'.h"' > itbl-cpu.h
- case ${target_cpu_type} in
- m32r) echo '#include "opcodes/'"${target_cpu_type}"'-opc.h"' > cgen-opc.h ;;
-# start-sanitize-fr30
- fr30) echo '#include "opcodes/'"${target_cpu_type}"'-opc.h"' > cgen-opc.h ;;
-# end-sanitize-fr30
- esac
+ if test "x$cgen_cpu_prefix" != x ; then
+   echo '#include "opcodes/'"${cgen_cpu_prefix}"'-opc.h"' > cgen-opc.h
+ fi
 
  sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile],
 [target_cpu_type=${target_cpu_type}
+ cgen_cpu_prefix=${cgen_cpu_prefix}
  obj_format=${obj_format}
  te_file=${te_file}])

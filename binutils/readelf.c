@@ -772,6 +772,24 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", relocatable-lib");
 	  break;
 
+	case EM_CYGNUS_V850:
+	  switch (e_flags & EF_V850_ARCH)
+	    {
+	    case E_V850E_ARCH:
+	      strcat (buf, ", v850e");
+	      break;
+	    case E_V850EA_ARCH:
+	      strcat (buf, ", v850ea");
+	      break;
+	    case E_V850_ARCH:
+	      strcat (buf, ", v850");
+	      break;
+	    default:
+	      strcat (buf, ", unknown v850 architecture variant");
+	      break;
+	    }
+	  break;
+	  
 	case EM_CYGNUS_M32R:
 	  if ((e_flags & EF_M32R_ARCH) == E_M32R_ARCH)
 	    strcat (buf, ", m32r");

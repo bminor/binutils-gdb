@@ -3847,7 +3847,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;
 	bfd_i386_arch)		ta="$ta i386-dis.lo" ;;
 	bfd_i860_arch)		;;
-	bfd_i960_arch)		ta="$ta i960-dis.lo" ;;
+	bfd_i960_arch)		ta="$ta $cgen_files i960-dis.lo i960c-opc.lo i960c-asm.lo i960c-dis.lo" ;;
 	bfd_m32r_arch)		ta="$ta $cgen_files m32r-opc.lo m32r-asm.lo m32r-dis.lo" ;;
 	bfd_m68k_arch)		ta="$ta m68k-dis.lo m68k-opc.lo" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.lo" ;;
@@ -3870,10 +3870,8 @@ if test x${all_targets} = xfalse ; then
 	bfd_dvp_arch)		ta="$ta mips-dis.lo mips-opc.lo mips16-opc.lo dvp-dis.lo dvp-opc.lo" ;;
 # end-sanitize-sky
 	bfd_v850_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
-# start-sanitize-v850e
 	bfd_v850e_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
 	bfd_v850ea_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
-# end-sanitize-v850e
 	bfd_vax_arch)		ta="$ta vax-dis.lo" ;;
 	bfd_w65_arch)		ta="$ta w65-dis.lo" ;;
 	bfd_we32k_arch)		;;

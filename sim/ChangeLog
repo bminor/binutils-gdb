@@ -1,3 +1,19 @@
+1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Require autoconf 2.12.1 or higher.
+
+1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
+
+	* configure.in (i960-*-*): Add.
+	* configure: Rebuild.
+
+start-sanitize-gxsim
+1998-11-13  Frank Ch. Eigler  <fche@elastic.org>
+
+	* configure.in: Added "--enable-sim-gx" option.
+	* configure: Regenerated.
+
+end-sanitize-gxsim
 Wed Nov  4 19:11:43 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* configure.in: Added case for fr30-*-*.
@@ -63,13 +79,11 @@ Wed Oct  8 12:38:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	target.
 	* configure: Regenerate.
 	
-start-sanitize-v850e
 Fri Sep 12 13:10:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (extra_subdirs): v850ea needs igen.
 	* configure: Re-generate.
 	
-end-sanitize-v850e
 Mon Sep  1 16:48:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (testdir): When a testsuite directory, add that to
@@ -91,7 +105,6 @@ Mon Aug 25 16:26:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	simulator.
 	* configure: Regenerate.
 	
-start-sanitize-v850e
 Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (extra_subdirs): Add v850e target.
@@ -100,7 +113,6 @@ Mon Aug 18 10:56:59 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (extra_subdirs): Add v850ea target.
 
-end-sanitize-v850e
 Fri Jul 25 11:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc*-*-*): Don't build erc32.

@@ -73,35 +73,6 @@ Things-to-lose:
 
 Do-last:
 
-v850e_files="ChangeLog v850.h"
-
-if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 tx49_files="ChangeLog mips.h"
 
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then

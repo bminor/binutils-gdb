@@ -175,35 +175,6 @@ else
 	done
 fi
 
-v850e_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c v850-opc.c v850-dis.c"
-if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-
 r5900_files="ChangeLog mips-opc.c mips-dis.c Makefile.am Makefile.in"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do

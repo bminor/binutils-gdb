@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-11-04 16:53-0500\n"
+"POT-Creation-Date: 1998-11-12 13:28-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1261,7 +1261,7 @@ msgstr ""
 msgid "expression too complex for %%st"
 msgstr ""
 
-#: config/tc-arc.c:1324 config/tc-arm.c:2915 config/tc-d10v.c:1442
+#: config/tc-arc.c:1324 config/tc-arm.c:2915 config/tc-d10v.c:1448
 #: config/tc-d30v.c:1792 config/tc-mips.c:3341 config/tc-mips.c:4297
 #: config/tc-mips.c:5082 config/tc-mips.c:5628 config/tc-ppc.c:4668
 #: config/tc-v850.c:2402
@@ -1918,12 +1918,12 @@ msgstr ""
 msgid "reloc %d not supported by object file format"
 msgstr ""
 
-#: config/tc-d10v.c:1492
+#: config/tc-d10v.c:1498
 #, c-format
 msgid "line %d: rep or repi must include at least 4 instructions"
 msgstr ""
 
-#: config/tc-d10v.c:1505 config/tc-d30v.c:1909
+#: config/tc-d10v.c:1517 config/tc-d30v.c:1909
 #, c-format
 msgid "line %d: unknown relocation type: 0x%x"
 msgstr ""
@@ -1943,7 +1943,7 @@ msgid ""
 "-N\t\t\tWarn about NOPs inserted after word multiplies.\n"
 "-c                      Warn about symbols whoes names match register "
 "names.\n"
-"-C                      Opposite of -C.  -c is the default.\n"
+"-C                      Opposite of -C.  -C is the default.\n"
 msgstr ""
 
 #: config/tc-d30v.c:450
@@ -5337,7 +5337,6 @@ msgstr ""
 msgid "  -mv850                    The code is targeted at the v850\n"
 msgstr ""
 
-#. start-sanitize-v850e
 #: config/tc-v850.c:1218
 msgid "  -mv850e                   The code is targeted at the v850e\n"
 msgstr ""

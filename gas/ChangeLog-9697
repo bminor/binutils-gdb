@@ -708,7 +708,6 @@ Wed Sep 17 16:54:20 1997  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-v850.c (v850_reloc_prefix): Recoded to use CHECK_ ()
 	macro. 
 	(handle_tdaoff, handle_zdaoff, handle_sdaoff): New functions.
-start-sanitize-v850e	
 
 	* config/tc-v850.c (md_assemble): Corrected typo.
 	* config/tc-v850.c Add new sections: call_table_data and
@@ -717,7 +716,6 @@ start-sanitize-v850e
 	(handle_ctoff): New Function.
 
 	* doc/c-v850.texi (V850 Opcodes): Document call table relocations.
-end-sanitize-v850e
 
 Tue Sep 16 14:18:22 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -737,10 +735,6 @@ Mon Sep 15 18:33:06 1997  Nick Clifton  <nickc@cygnus.com>
 	processor. 
 
 	* config/tc-v850.h (TARGET_PROCESSOR): New constant.
-start-sanitize-v850e
-	(TARGET_PROCESSOR): New constant.
-	(TARGET_PROCESSOR): New constant.
-end-sanitize-v850e
 
 start-sanitize-tx19
 Mon Sep 15 17:26:46 1997  Gavin Koch  <gavin@cygnus.com>
@@ -804,9 +798,7 @@ Mon Sep 15 11:28:04 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 Wed Sep 10 10:07:08 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-v850e
 	* config/tc-v850.c (md_assemble): Corrected spelling mistake.
-end-sanitize-v850e
 	* configure.in (emulations): Add v850 emulation.
 
 Tue Sep  9 17:14:33 1997  Doug Evans  <dje@canuck.cygnus.com>
@@ -825,21 +817,17 @@ Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
 	* doc/c-v850.texi (V850 Opcodes): Document hi0() reloc prefix.
 	Correct description of hi() reloc prefix.
 
-start-sanitize-v850e
 	* doc/c-v850.texi (V850 Opcodes): Document new reloc prefix.
 	* config/tc-v850.c (v850_reloc_prefix): Add hilo() reloc prefix.
 	* config/tc-v850.c (md_assemble): Add support for BFD_RELOC_32.
-end-sanitize-v850e
 
 	* doc/c-v850.texi: Document new pseudo ops and command line
 	options.
 
 	* config/tc-v850.c (set_machine): New function.
 	* config/tc-v850.c (.v850): New pseudo op.
-start-sanitize-v850e
 	* config/tc-v850.c (.v850e): New pseudo op.
 	* config/tc-v850.c (.v850ea): New pseudo op.
-end-sanitize-v850e
 	
 
 Mon Sep  8 23:08:04 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -978,10 +966,8 @@ Mon Aug 25 11:21:48 1997  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-v850.c (md_assemble): Restore input_line_pointer upon
 	exit. 
 	
-start-sanitize-v850e
 	* config/tc-v850.c (parse_register_list): Support constant
 	expressions as register lists.
-end-sanitize-v850e
 
 Mon Aug 25 10:19:34 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -1072,7 +1058,6 @@ Mon Aug 18 11:26:36 1997  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-v850.c (md_apply_fix3): Add support for new 16 bit PC
 	relative reloc.
 
-start-sanitize-v850e
 Mon Aug 18 11:24:21 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c: Remove support_v850e flag and command line
@@ -1090,7 +1075,6 @@ Mon Aug 18 11:24:21 1997  Nick Clifton  <nickc@cygnus.com>
 	* configure.in (emulations): Add support for v850ea target
 
 	* configure (emulations): Add support for v850ea target
-end-sanitize-v850e
 
 Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1124,13 +1108,11 @@ Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-v850e
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
 	Add support for v850ea instructions.
 
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
 	Add support for v850e instructions.
-end-sanitize-v850e
 	
 	* config/tc-v850.c (md_assemble): Fix error recovery to reload
 	text of entire opcode. 

@@ -603,10 +603,8 @@ Mon Sep 15 18:28:37 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.h (struct v850_opcode): Add processors field.
 	(PROCESSOR_V850, PROCESSOR_ALL): New bit constants.
-start-sanitize-v850e
 	(PROCESSOR_V850E, PROCESSOR_NOT_V850): New bit constants.
 	(PROCESSOR_V850EA): New bit constants.
-end-sanitize-v850e
 
 Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
 
@@ -664,11 +662,8 @@ Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
 	* v850.h (struct v850_opcode): Add flags field.
 	(struct v850_operand): Extend meaning of 'bits' and 'shift'
 	fields.
-
-start-sanitize-v850e
 	(V850E_INSTRUCTION, V850EA_INSTRUCTION): New flags.
 	(V850E_PUSH_POP, V850E_IMMEDIATE16, V850E_IMMEDIATE32): New flags.
-end-sanitize-v850e
 
 Fri Aug  8 16:58:42 1997  Doug Evans  <dje@canuck.cygnus.com>
 

@@ -1207,10 +1207,9 @@ Tue Jun 23 17:47:31 1998  Jim Wilson  <wilson@cygnus.com>
 	char with code that explicitly sign-extends.
 
 Tue Jun 23 13:54:57 1998  Nick Clifton  <nickc@cygnus.com>
-start-sanitize-v850e	
+	
 	* config/tc-v850.c (md_begin): Restore text section as the current
 	section after creating call table sections.
-end-sanitize-v850e
 	* config/obj-coff.h (SYM_AUXINFO): New macro to conceal ugly
 	code. 
 
@@ -1469,13 +1468,11 @@ Mon Jun  8 12:20:30 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	(md_assemble): Allow immediate operands without suffix or
 	other reg operand to default in size to the current code size.
 
-start-sanitize-v850e
 Mon Jun  8 09:45:00 1998  Catherine Moore  <clm@cygnus.com>
  
         * config/tc-v850.c (md_begin):  Restore creation of
         .call_table_text and .call_table_data sections.
 
-end-sanitize-v850e
 Sat Jun  6 00:02:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_assemble): Set execution type to unknown
@@ -3045,11 +3042,10 @@ Fri Feb  6 16:08:30 1998  Jeffrey A Law  (law@cygnus.com)
         bit size of an address instead of looking at the isa level.
         (macro, macro2, s_cprestore, s_cpadd): Likewise.
 
-start-sanitize-v850e
 Fri Feb  6 14:44:34 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_parse_option): Add -mv850any command line option.
-end-sanitize-v850e
+
 Thu Feb  5 12:39:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ehopt.c: New file.

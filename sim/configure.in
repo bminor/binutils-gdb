@@ -97,7 +97,6 @@ case "${target}" in
 	extra_subdirs="${extra_subdirs} igen"
 	only_if_gcc=yes
 	;;
-# start-sanitize-v850e
   v850e-*-*)
 	# The V850 simulator can only be compiled by gcc.
 	sim_target=v850
@@ -110,7 +109,6 @@ case "${target}" in
 	extra_subdirs="${extra_subdirs} igen"
 	only_if_gcc=yes
 	;;
-# end-sanitize-v850e
   w65-*-*)
 	sim_target=w65
 	# The w65 is suffering from gradual decay.

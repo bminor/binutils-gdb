@@ -1335,13 +1335,11 @@ Wed Sep 17 16:45:34 1997  Nick Clifton  <nickc@cygnus.com>
 	* Makefile.am, Makefile.in: Add rule for ev850.c
 	* configure.tgt (targ_extra_emuls): Add v850 target.
 
-start-sanitize-v850e
 Wed Sep 17 16:43:39 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/v850.sh (CALL_TABLE_START_ADDR): New entry.
 	* scripttempl/v850.sc: Add call table data area
 
-end-sanitize-v850e
 Mon Sep 15 11:29:13 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge change from Martin Hunt:
@@ -1390,7 +1388,6 @@ Wed Aug 20 11:14:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* ld.texinfo (Section Definition): Clarify use of whitespace.
 	(Section Placement): Likewise.
 
-start-sanitize-v850e
 Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for v850e target.
@@ -1398,7 +1395,6 @@ Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
 Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for v850e target.
-end-sanitize-v850e
 
 Sat Aug  9 00:42:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 

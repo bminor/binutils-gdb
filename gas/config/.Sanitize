@@ -323,34 +323,6 @@ else
 	done
 fi
 
-v850e_files="tc-v850.c tc-v850.h"
-if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850e_files ; do
-		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 m32rx_files="tc-m32r.c tc-m32r.h"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
 	for i in $m32rx_files ; do
