@@ -590,8 +590,7 @@ depend: $(SOURCES) Makefile.in
 	  -e 's; $(INCLUDE_DIR)/; $(INCLUDE_DEP)/;g'  \
 	  -e 's; $(READLINE_DIR)/; $(READLINE_DEP)/;g'  \
 	  -e 's; [a-z0-9./]*bfd/; $(BFD_DEP)/;g'  \
-	  -e 's; $(BFD_DEP)/bfd\.h; ../bfd/bfd.h;g'  \
-	  -e 's; $(INCLUDE_DEP)/../bfd/bfd\.h; ../bfd/bfd.h;g'  \
+	  -e 's; $(INCLUDE_DEP)/bfd\.h; $$(BFD_OBJ_DIR)/../include/bfd.h;g'  \
 	  -e 's; \./xm.h; xm.h config.status;g'  \
 	  -e 's; \./tm.h; tm.h config.status;g'  \
 	  -e 's; \./nm.h; nm.h config.status;g'  \

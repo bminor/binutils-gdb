@@ -40,6 +40,7 @@ ${srcdir}/i960-tdep.c\
 ${srcdir}/infptrace.c\
 ${srcdir}/inftarg.c\
 ${srcdir}/irix4-nat.c\
+${srcdir}/isi-xdep.c\
 ${srcdir}/m68k-pinsn.c\
 ${srcdir}/m68k-tdep.c\
 ${srcdir}/m88k-nat.c\

@@ -1,3 +1,9 @@
+Wed Jun 16 12:21:49 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (depend):  Bfd.h keeps moving, keep up with it.
+	* alldeps.mak, depend:  Update to latest automatically built
+	versions.
+
 Tue Jun 15 12:26:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remote-vx.c: include gdbcmd.h for setlist.
