@@ -2901,8 +2901,14 @@ mips_load (file, from_tty)
 
   mips_initialize ();
 
-/* Finally, make the PC point at the start address */
-
+  /* Finally, make the PC point at the start address */
+  if (mips_monitor == MON_CAIRO)
+    {
+      /* Work around problem where CAIRO monitor does not update the
+         PC after a load. The following ensures that the write_pc()
+         WILL update the PC value: */
+      register_valid[PC_REGNUM] = 0;
+    }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 

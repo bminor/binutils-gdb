@@ -1,3 +1,8 @@
+Mon Sep 16 14:32:58 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* remote-mips.c (mips_load): Ensure that the PC is explicitly
+ 	loaded after a load to a CAIRO PMON system.
+ 	
 Fri Sep 13 12:02:39 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (INTERNAL_LDFLAGS): Add @HLDFLAGS@ to list.
