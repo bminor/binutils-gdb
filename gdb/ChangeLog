@@ -1,3 +1,9 @@
+2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        * remote-e7000.c (write_small, e7000_read_inferior_memory,
+        e7000_read_inferior_memory_large, e7000_insert_breakpoint,
+        e7000_remove_breakpoint): Use paddr_nz() to print addresses.
+
 2002-04-10  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (child_resume, child_xfer_memory): Delete.
