@@ -1,3 +1,9 @@
+Tue Feb 17 14:32:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register):
+ 	Pass register size to sim_{fetch,store}_register.  Check nr of
+ 	register bytes transfered is correct.
+
 Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-d10v.c (remote_d10v_open): Call push_remote_target

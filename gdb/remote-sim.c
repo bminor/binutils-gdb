@@ -337,7 +337,7 @@ gdb_os_error (p, va_alist)
 
 static void
 gdbsim_fetch_register (regno)
-int regno;
+     int regno;
 {
   if (regno == -1) 
     {
@@ -347,8 +347,12 @@ int regno;
   else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
     {
       char buf[MAX_REGISTER_RAW_SIZE];
-
-      sim_fetch_register (gdbsim_desc, regno, buf);
+      int nr_bytes = sim_fetch_register (gdbsim_desc, regno, buf, REGISTER_RAW_SIZE (regno));
+      if (nr_bytes == 0)
+	/* register not applicable, supply zero's */
+	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+      else if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
+	fatal ("Register size different to expected");
       supply_register (regno, buf);
       if (sr_get_debug ())
 	{
@@ -362,7 +366,7 @@ int regno;
 
 static void
 gdbsim_store_register (regno)
-int regno;
+     int regno;
 {
   if (regno  == -1) 
     {
@@ -371,10 +375,12 @@ int regno;
     }
   else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
     {
-      /* FIXME: Until read_register() returns LONGEST, we have this.  */
       char tmp[MAX_REGISTER_RAW_SIZE];
+      int nr_bytes;
       read_register_gen (regno, tmp);
-      sim_store_register (gdbsim_desc, regno, tmp);
+      nr_bytes = sim_store_register (gdbsim_desc, regno, tmp, REGISTER_RAW_SIZE (regno));
+      if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
+	fatal ("Register size different to expected");
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
