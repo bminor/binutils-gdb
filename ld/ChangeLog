@@ -1,3 +1,14 @@
+Fri Sep  1 13:13:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (warning_callback): Add abfd, section, and address
+	parameters.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Change call to warning accordingly.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): If not
+	relocateable and not shared, put .gnu.warning.SYMBOL sections into
+	the .text section.
+
 Fri Sep  1 08:35:16 1995  James G. Smith  <jsmith@beauty.cygnus.com>
 
 	* configure.in: Added mips*vr4300-idt-elf* and
