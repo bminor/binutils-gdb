@@ -1,3 +1,7 @@
+Wed Aug 19 15:53:52 1998  Anthony Green  <green@hoser.cygnus.com>
+
+	* i386v4-nat.c: Include sys/reg.h if present.
+
 Wed Aug 19 03:07:53 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/alpha/alpha-linux (XDEPFILES): Build ser-tcp.
