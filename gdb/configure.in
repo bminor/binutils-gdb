@@ -995,19 +995,10 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   CY_AC_PATH_ITCLCONFIG
            if test -z "${no_itcl}"; then
-             CY_AC_LOAD_ITCLCONFIG
-	     case "${host}" in
-	     *-*-cygwin*)
-		itcldir=../itcl/itcl/win/
-		;;
-	     *)
-		itcldir=../itcl/itcl/unix/
-		;;
-	     esac
- 
+             CY_AC_LOAD_ITCLCONFIG 
 
 	     ITCLLIB="${ITCL_BUILD_LIB_SPEC}"
-	     ITCL_DEPS="${itcldir}${ITCL_LIB_FILE}"
+	     ITCL_DEPS="${ITCL_LIB_FULL_PATH}"
            fi
 
 	   
@@ -1016,17 +1007,8 @@ if test "${enable_gdbtk}" = "yes"; then
            if test -z "${no_itcl}"; then
              CY_AC_LOAD_ITKCONFIG
 
-	     case "${host}" in
-	       *-*-cygwin*)
-		 itkdir=../itcl/itk/win/
-		 ;;
-	       *)
-		 itkdir=../itcl/itk/unix/
-		 ;;
-	       esac 
-
 	     ITKLIB="${ITK_BUILD_LIB_SPEC}"
-	     ITK_DEPS="${itkdir}${ITK_LIB_FILE}"
+	     ITK_DEPS="${ITK_LIB_FULL_PATH}"
            fi
 
 	   # now look for Tix library stuff

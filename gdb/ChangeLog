@@ -1,3 +1,11 @@
+2001-09-06  Keith Seitz  <keiths@redhat.com>
+
+	From Ian Roxborough  <irox@redhat.com>
+	* configure.in: Use ITCL_LIB_FULL_PATH and
+	ITK_LIB_FULL_PATH to set Itcl and Itk dependancies
+	for gdb.
+	* configure: Regenerated.
+
 2001-09-06  Kevin Buettner  <kevinb@redhat.com>
 	
 	* dbxread.c (process_one_symbol): Don't use error result from
