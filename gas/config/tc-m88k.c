@@ -129,7 +129,7 @@ static char *get_cr PARAMS ((char *param, unsigned *regnop));
 static char *get_fcr PARAMS ((char *param, unsigned *regnop));
 static char *get_imm16 PARAMS ((char *param, struct m88k_insn *insn));
 static char *get_o6 PARAMS ((char *param, unsigned *valp));
-static char *get_reg PARAMS ((char *param, unsigned *regnop, int reg_prefix));
+static char *get_reg PARAMS ((char *param, unsigned *regnop, char reg_prefix));
 static char *get_vec9 PARAMS ((char *param, unsigned *valp));
 static char *getval PARAMS ((char *param, unsigned int *valp));
 
@@ -221,15 +221,15 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 void
 md_show_usage (stream)
-     FILE *stream;
+     FILE *stream ATTRIBUTE_UNUSED;
 {
 }
 
@@ -345,7 +345,7 @@ calcop (format, param, insn)
   int f;
   unsigned val;
   unsigned opcode;
-  int reg_prefix = 'r';
+  char reg_prefix = 'r';
 
   insn->opcode = format->opcode;
   opcode = 0;
@@ -477,9 +477,9 @@ static char *
 get_reg (param, regnop, reg_prefix)
      char *param;
      unsigned *regnop;
-     int reg_prefix;
+     char reg_prefix;
 {
-  unsigned c;
+  char c;
   unsigned regno;
 
   c = *param++;
@@ -910,7 +910,7 @@ getval (param, valp)
      unsigned int *valp;
 {
   unsigned int val = 0;
-  unsigned int c;
+  char c;
 
   c = *param++;
   if (c == '0')
@@ -1123,7 +1123,8 @@ int md_short_jump_size = 4;
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     addressT from_addr, to_addr;
+     addressT from_addr ATTRIBUTE_UNUSED;
+     addressT to_addr ATTRIBUTE_UNUSED;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1145,7 +1146,8 @@ int md_long_jump_size = 4;
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     addressT from_addr, to_addr;
+     addressT from_addr ATTRIBUTE_UNUSED;
+     addressT to_addr ATTRIBUTE_UNUSED;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1164,8 +1166,8 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 
 int
 md_estimate_size_before_relax (fragP, segment_type)
-     fragS *fragP;
-     segT segment_type;
+     fragS *fragP ATTRIBUTE_UNUSED;
+     segT segment_type ATTRIBUTE_UNUSED;
 {
   as_fatal (_("Relaxation should never occur"));
   return (-1);

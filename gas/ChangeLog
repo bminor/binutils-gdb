@@ -1,5 +1,15 @@
 2001-06-24  Ben Elliston  <bje@redhat.com>
 
+	* config/tc-m88k.c (get_reg): Adjust type of `reg_prefix' to char.
+	(md_parse_option): Mark parameters as unused.
+	(md_show_usage): Ditto.
+	(calcop): Adjust type of `reg_prefix' to char.
+	(get_reg): Ditto.
+	(getval): Adjust type of local `c' to char.
+	(md_create_short_jump): Mark from_addr, to_addr params as unused.
+	(md_create_long_jump): Ditto.
+	(md_estimate_size_before_relax): Mark parameters as unused.
+	
 	* config/tc-m88k.c (md_pseudo_table): Properly terminate the table
 	to allay a possible compiler warning.
 
