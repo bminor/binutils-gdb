@@ -1,3 +1,7 @@
+2002-05-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/expdyn1.d: Tweak for change in elf.sc.
+
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline
