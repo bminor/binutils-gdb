@@ -1,3 +1,8 @@
+Tue Jan  5 09:35:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in (post-target): If --with-minimal-bfd is specified,
+	set MINIMIZE=1.
+
 Mon Jan  4 07:20:01 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* srec.c (srec_write_records): one of my boards wants a CR between
