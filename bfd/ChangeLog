@@ -3,6 +3,10 @@ Fri Dec 13 13:18:49 1996  Dan Wilder  <dan@gasboy.com>
 	* coffcode.h (coff_set_flags): Use MC68KBCSMAGIC for bfd_arch_m68k
 	if NAMES_HAVE_UNDERSCORE is defined.
 
+Fri Dec 13 11:13:23 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* libaout.h (enum machine_type): Change M_SPARCLET from 142 to 131.
+
 Thu Dec 12 15:07:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Move R_PPC_PLTREL24 into the
