@@ -25,6 +25,16 @@
 .*:100: Warning:.*
 .*:101: Warning:.*
 .*:135: Warning:.*
+.*:163: Warning:.*
+.*:165: Warning:.*
+.*:167: Warning:.*
+.*:169: Warning:.*
+.*:171: Warning:.*
+.*:177: Warning:.*
+.*:179: Warning:.*
+.*:181: Warning:.*
+.*:183: Warning:.*
+.*:185: Warning:.*
    1                       	.psize 0
    2                       	.text
    3                       	# test various segment reg insns
@@ -209,5 +219,46 @@
  156 0160 67668984 248C0000 		movl	%eax,140\(%esp\)
  156      00
  157                       	
- 158                       		# Force a good alignment.
- 159 0169 00000000 000000[ 	]*.p2align	4,0
+ 158                       	.code32
+ 159                       	.extern xxx
+ 160 0169 EB98              		jmp	1b
+ 161 016b E9FCFFFF FF       		jmp	xxx
+ 162 0170 FF250000 0000     		jmp	\*xxx
+ 163 0176 FF250000 0000     		jmp	xxx\(,1\)
+.*Warning:.*
+ 164 017c FFE7              		jmp	\*%edi
+ 165 017e FFE7              		jmp	%edi
+.*Warning:.*
+ 166 0180 FF27              		jmp	\*\(%edi\)
+ 167 0182 FF27              		jmp	\(%edi\)
+.*Warning:.*
+ 168 0184 FF2CBD00 000000   		ljmp	\*xxx\(,%edi,4\)
+ 169 018b FF2CBD00 000000   		ljmp	xxx\(,%edi,4\)
+.*Warning:.*
+ 170 0192 FF2D0000 0000     		ljmp	\*xxx
+ 171 0198 FF2D0000 0000     		ljmp	xxx\(,1\)
+.*Warning:.*
+ 172 019e EA000000 003412   		ljmp	\$0x1234,\$xxx
+ 173                       	
+ 174 01a5 E859FFFF FF       		call	1b
+ 175 01aa E8FCFFFF FF       		call	xxx
+ 176 01af FF150000 0000     		call	\*xxx
+ 177 01b5 FF150000 0000     		call	xxx\(,1\)
+.*Warning:.*
+ 178 01bb FFD7              		call	\*%edi
+ 179 01bd FFD7              		call	%edi
+.*Warning:.*
+ 180 01bf FF17              		call	\*\(%edi\)
+ 181 01c1 FF17              		call	\(%edi\)
+.*Warning:.*
+ 182 01c3 FF1CBD00 000000   		lcall	\*xxx\(,%edi,4\)
+ 183 01ca FF1CBD00 000000   		lcall	xxx\(,%edi,4\)
+.*Warning:.*
+ 184 01d1 FF1D0000 0000     		lcall	\*xxx
+ 185 01d7 FF1D0000 0000     		lcall	xxx\(,1\)
+.*Warning:.*
+ 186 01dd 9A000000 003412   		lcall	\$0x1234,\$xxx
+ 187                       	
+ 188                       		# Force a good alignment.
+ 189 01e4 00000000 00000000 		.p2align	4,0
+ 189      00000000 

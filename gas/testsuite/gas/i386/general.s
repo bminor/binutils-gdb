@@ -155,5 +155,35 @@
 	leal	-1760(%ebp),%ebx
 	movl	%eax,140(%esp)
 
+.code32
+.extern xxx
+	jmp	1b
+	jmp	xxx
+	jmp	*xxx
+	jmp	xxx(,1)
+	jmp	*%edi
+	jmp	%edi
+	jmp	*(%edi)
+	jmp	(%edi)
+	ljmp	*xxx(,%edi,4)
+	ljmp	xxx(,%edi,4)
+	ljmp	*xxx
+	ljmp	xxx(,1)
+	ljmp	$0x1234,$xxx
+
+	call	1b
+	call	xxx
+	call	*xxx
+	call	xxx(,1)
+	call	*%edi
+	call	%edi
+	call	*(%edi)
+	call	(%edi)
+	lcall	*xxx(,%edi,4)
+	lcall	xxx(,%edi,4)
+	lcall	*xxx
+	lcall	xxx(,1)
+	lcall	$0x1234,$xxx
+
 	# Force a good alignment.
 	.p2align	4,0
