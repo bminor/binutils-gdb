@@ -1227,7 +1227,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
-	      /* This call used to pass `DEPRECATED_SYMBOL_NAME (msymbol)' as the
+	      /* This call used to pass `SYMBOL_LINKAGE_NAME (msymbol)' as the
 	         `name' argument to lookup_block_symbol.  But the name
 	         of a minimal symbol is always mangled, so that seems
 	         to be clearly the wrong thing to pass as the
@@ -1961,7 +1961,8 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
   if (msymbol != NULL)
     if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
       {
-	mfunsym = lookup_minimal_symbol_text (DEPRECATED_SYMBOL_NAME (msymbol), NULL, NULL);
+	mfunsym = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol),
+					      NULL, NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
@@ -1972,12 +1973,12 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	   * so of course we can't find the real func/line info,
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning. RT */
-	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else if (SYMBOL_VALUE (mfunsym) == SYMBOL_VALUE (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
-	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else
 	  return find_pc_line (SYMBOL_VALUE (mfunsym), 0);
@@ -2911,7 +2912,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		       symbol associated to a given minimal symbol (if
 		       any).  */
 		    if (kind == FUNCTIONS_DOMAIN
-			|| lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
+			|| lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
 					  (struct block *) NULL,
 					  VAR_DOMAIN,
 					0, (struct symtab **) NULL) == NULL)
@@ -3003,7 +3004,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		    (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
 		  {
 		    /* Variables/Absolutes:  Look up by name */
-		    if (lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol),
+		    if (lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
 				       (struct block *) NULL, VAR_DOMAIN,
 				       0, (struct symtab **) NULL) == NULL)
 		      {
@@ -3183,12 +3184,12 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol == NULL)
 	{
-	  char *string = (char *) alloca (strlen (p->symtab->filename)
-					  + strlen (DEPRECATED_SYMBOL_NAME (p->symbol))
-					  + 4);
+	  char *string = alloca (strlen (p->symtab->filename)
+				 + strlen (SYMBOL_LINKAGE_NAME (p->symbol))
+				 + 4);
 	  strcpy (string, p->symtab->filename);
 	  strcat (string, ":'");
-	  strcat (string, DEPRECATED_SYMBOL_NAME (p->symbol));
+	  strcat (string, SYMBOL_LINKAGE_NAME (p->symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN,
@@ -3199,7 +3200,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  break_command (DEPRECATED_SYMBOL_NAME (p->msymbol), from_tty);
+	  break_command (SYMBOL_LINKAGE_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
@@ -3216,17 +3217,8 @@ static int return_val_index;
 static char **return_val;
 
 #define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-  do { \
-    if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
-      /* Put only the mangled name on the list.  */ \
-      /* Advantage:  "b foo<TAB>" completes to "b foo(int, int)" */ \
-      /* Disadvantage:  "b foo__i<TAB>" doesn't complete.  */ \
       completion_list_add_name \
-	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
-    else \
-      completion_list_add_name \
-	(DEPRECATED_SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
-  } while (0)
+	(SYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN

@@ -1,3 +1,11 @@
+2003-06-12  David Carlton  <carlton@kealia.com>
+
+	* symtab.c (lookup_symbol_aux_minsyms): Replace
+	DEPRECATED_SYMBOL_NAME by SYMBOL_LINKAGE_NAME.
+	(find_pc_sect_line, search_symbols, rbreak_command): Ditto.
+	(COMPLETION_LIST_ADD_SYMBOL): Rewrite in terms of
+	SYMBOL_NATURAL_NAME.
+
 2003-06-12  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (tuiDisassem.o): Update dependencies.
