@@ -1,4 +1,9 @@
 start-sanitize-gdbtk
+Sun Jun 28 22:34:34 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdb.gdbtk/simple.c (main): Make main return an
+	int so compiler will stop complaining.
+
 Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* lib/gdb.exp (gdbtk_start): Add startup for gdbtk.
