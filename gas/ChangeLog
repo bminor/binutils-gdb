@@ -1,5 +1,23 @@
 Sun Nov  7 01:02:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* First cut at cleaning up PA instruction parsing.
+	* config/tc-hppa.c (pa_get_absolute_expression): Accept pointer to
+	insn structure as an argument, and a pointer to a string.  All
+	callers changed.  Always read any field selector here.  Call
+	evaluate absolute to get a return value.
+	(evaluate_absolute): Addept pointer to insn structure as its
+	argument.  All callers changed.
+	(INSERT_FIELD_AND_CONTINUE): New macro for inserting a bitfield
+	into an instruction and continuing the main pa_ip loop.
+	(CHECK_FIELD): New macro for simple range checking of fields.
+	(pa_ip): Delete unused variables.  Use INSERT_FIELD_AND_CONTINUE
+	and CHECK_FIELD.  All immediate fields now pass through
+	pa_get_absolute_expression which will also handle field selectors.
+	Delete dead code.  Simplify.
+	(md_apply_fix_1): Use CHECK_FIELD to verify any fixes that are
+	applied are in range.  Use bfd_put_32 rather than inserting each
+	byte of the fixed instrution into the buffer ourselves.
+
 	* write.c (fixup_segment): Delete {SEG,GLOBAL}_DIFF_ALLOWED code,
 	it was PA specific and is no longer needed (it's now handled 
 	within the PA backend).
