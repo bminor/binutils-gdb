@@ -1,3 +1,7 @@
+Sat Aug 29 10:07:55 1992  Fred Fish  (fnf@cygnus.com)
+
+	* obstack.h:  Merge comment change from current FSF version.
+
 Thu Aug 27 12:59:29 1992  Brendan Kehoe  (brendan@cygnus.com)
 
 	* bfd.h: add we32k
