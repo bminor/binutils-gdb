@@ -1002,15 +1002,17 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
          If so, read the rest of the partial symbols from this comp unit.
          If not, there's no more debug_info for this comp unit. */
       if (comp_unit_die.has_children)
-         info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc);
-
-      /* If the compilation unit didn't have an explicit address range,
-	 then use the information extracted from its child dies.  */
-      if (!comp_unit_has_pc_info)
 	{
-	  comp_unit_die.lowpc  = lowpc;
-	  comp_unit_die.highpc = highpc;
-        }
+	  info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc);
+
+	  /* If the compilation unit didn't have an explicit address range,
+	     then use the information extracted from its child dies.  */
+	  if (!comp_unit_has_pc_info)
+	    {
+	      comp_unit_die.lowpc  = lowpc;
+	      comp_unit_die.highpc = highpc;
+	    }
+	}
       pst->textlow  = comp_unit_die.lowpc + baseaddr;
       pst->texthigh = comp_unit_die.highpc + baseaddr;
 

@@ -1,5 +1,5 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -2749,11 +2749,12 @@ parse_partial_symbols (objfile, section_offsets)
 		    /* Concatinate stabstring2 with stabstring1 */
 		    if (stabstring
 			&& stabstring != debug_info->ss + fh->issBase + sh.iss)
-		      stabstring = realloc (stabstring, len + len2 + 1);
+		      stabstring = xrealloc (stabstring, len + len2 + 1);
 		    else
-		      stabstring = malloc (len + len2 + 1);
+		      stabstring = xmalloc (len + len2 + 1);
 		    strcpy (stabstring, stabstring1);
 		    strcpy (stabstring + len, stabstring2);
+		    len += len2;
 		  }
 
 #define SET_NAMESTRING() \

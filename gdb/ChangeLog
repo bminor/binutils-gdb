@@ -1,3 +1,11 @@
+Sun Oct 11 12:08:07 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard):  Do not adjust the
+	address range of a compilation unit without children.
+
+	* mdebugread.c (parse_partial_symbols):  Fix handling of stabs
+	continuations, use xmalloc and xrealloc.
+
 Fri Oct  9 18:14:43 1998  Mark Alexander  <marka@cygnus.com>
 
 	* rs6000-tdep.c: Don't include tm.h twice.
