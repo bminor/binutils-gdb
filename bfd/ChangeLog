@@ -1,3 +1,7 @@
+2004-11-02  Daniel Jacobowitz  <dan@debian.org>
+
+	* config.bfd: Mark arm-*-oabi and thumb-*-oabi as obsolete.
+
 2004-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-iq2000.c: Convert to ISO C90 formatting.

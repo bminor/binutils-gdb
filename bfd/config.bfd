@@ -34,6 +34,8 @@ case $targ in
  m68*-*-lynxos* | \
  sparc-*-lynxos* | \
  vax-*-vms* | \
+ arm-*-oabi | \
+ thumb-*-oabi | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
