@@ -149,7 +149,7 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
-remote-hds.c
+remote-hms.c
 remote-mm.c
 remote-nindy.c
 remote-vx.c
