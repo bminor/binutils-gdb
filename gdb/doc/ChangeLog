@@ -1,3 +1,7 @@
+Fri Jul 24 17:51:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.texinfo (Method Type Descriptor): Expand and correct.
+
 Mon May  4 10:37:12 1998  Brian Youmans (3diff@gnu.org)
 
 	* refcard.tex:  Copyright, address updates.
