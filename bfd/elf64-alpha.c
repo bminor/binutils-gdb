@@ -4577,7 +4577,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      case STO_ALPHA_NOPV:
 	        break;
 	      case STO_ALPHA_STD_GPLOAD:
-		addend += 8;
+		value += 8;
 		break;
 	      default:
 		if (h != NULL)

@@ -1,3 +1,8 @@
+2002-10-14  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: Increment
+	VALUE, not ADDEND.
+
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-arm.c (record_arm_to_thumb_glue): Avoid type-punned pointers.
