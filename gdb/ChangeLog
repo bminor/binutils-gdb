@@ -1,3 +1,8 @@
+2001-03-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* TODO (GDB 5.1 Known Problems): Document problem of building GDB
+	with SID on Solaris 8.
+
 2001-03-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* defs.h: Provide prototypes for floatformat_is_negative,

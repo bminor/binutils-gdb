@@ -84,34 +84,6 @@ Mark
 
 --
 
-Re: GDB 5.0.1?
-http://sources.redhat.com/ml/gdb/2000-07/msg00038.html
-
-Is the Solaris 8 x86 problem fixed?  When you configure it, configure
-incorrectly determines that I have no curses.h.  This causes mucho
-compilation errors later on.
-
-Simply editing the config.h to define CURSES_H fixes the problem, and
-then the build works fine.
-
-The status for this problem:
-
-Solaris 8 x86 (PIII-560)
-gcc 2.95.2
-
-I had the same problem with several of the snapshots shortly before
-5.0 became official, and 5.0 has the same problem.
-
-I sent some mail in about it long ago, and never saw a reply.
-
-I haven't had time to figure it out myself, especially since I get all
-confused trying to figure out what configure does, I was happy to find
-the workaround.
-
-Mike
-
---
-
 		GDB 5.1 - New features
 		======================
 
@@ -249,6 +221,22 @@ z8k
 
 The z8k has suffered bit rot and is known to not build.  The problem
 was occuring in the opcodes directory.
+
+--
+
+Solaris 8 x86 CURSES_H problem
+http://sources.redhat.com/ml/gdb/2000-07/msg00038.html
+
+The original problem was worked around with:
+
+    2000-06-06  Michael Snyder  <msnyder@cygnus.com>
+
+        * configure.in: Enable autoconf to find curses.h on Solaris 2.8.
+        * configure: Regenerate.
+
+When building both GDB and SID using the same source tree the problem
+will still occure. sid/component/configure.in mis-configures
+<curses.h> and leaves wrong information in the config cache.
 
 --
 
