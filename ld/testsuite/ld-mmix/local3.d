@@ -47,8 +47,8 @@ Symbol table '\.symtab' contains 17 entries:
      6: 0+     0 SECTION LOCAL  DEFAULT    6 
      7: 0+     0 SECTION LOCAL  DEFAULT    7 
      8: 0+     0 SECTION LOCAL  DEFAULT    8 
-     9: 0+fd     0 NOTYPE  LOCAL  DEFAULT  PRC lsym
-    10: 0+fe     0 NOTYPE  LOCAL  DEFAULT  PRC lsym
+     9: 0+fd     0 NOTYPE  LOCAL  DEFAULT PRC\[0xff00\] lsym
+    10: 0+fe     0 NOTYPE  LOCAL  DEFAULT PRC\[0xff00\] lsym
     11: 0+fc     0 NOTYPE  GLOBAL DEFAULT  ABS ext1
     12: 0+4     0 NOTYPE  GLOBAL DEFAULT    1 _start
 #...

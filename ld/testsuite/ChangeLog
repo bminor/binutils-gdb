@@ -1,3 +1,8 @@
+2002-11-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/local1.d, ld-mmix/local3.d, ld-mmix/local5.d,
+	ld-mmix/local7.d: Tweak for change in readelf output.
+
 2002-11-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elfvsb/define.s: Avoid use of @ in .type directive.
