@@ -155,249 +155,6 @@ lookup_hash (sd, ins)
   return (h);
 }
 
-/* FIXME These would more efficient to use than load_mem/store_mem,
-   but need to be changed to use the memory map.  */
-
-uint8
-get_byte (x)
-     uint8 *x;
-{
-  return *x;
-}
-
-uint16
-get_half (x)
-     uint8 *x;
-{
-  uint8 *a = x;
-  return (a[1] << 8) + (a[0]);
-}
-
-uint32
-get_word (x)
-      uint8 *x;
-{
-  uint8 *a = x;
-  return (a[3]<<24) + (a[2]<<16) + (a[1]<<8) + (a[0]);
-}
-
-void
-put_byte (addr, data)
-     uint8 *addr;
-     uint8 data;
-{
-  uint8 *a = addr;
-  a[0] = data;
-}
-
-void
-put_half (addr, data)
-     uint8 *addr;
-     uint16 data;
-{
-  uint8 *a = addr;
-  a[0] = data & 0xff;
-  a[1] = (data >> 8) & 0xff;
-}
-
-void
-put_word (addr, data)
-     uint8 *addr;
-     uint32 data;
-{
-  uint8 *a = addr;
-  a[0] = data & 0xff;
-  a[1] = (data >> 8) & 0xff;
-  a[2] = (data >> 16) & 0xff;
-  a[3] = (data >> 24) & 0xff;
-}
-
-uint8 *
-map (addr)
-     SIM_ADDR addr;
-{
-  /* Mask down to 24 bits. */
-  addr &= 0xffffff;
-
-  if (addr < 0x100000)
-    {
-      /* "Mirror" the addresses below 1MB. */
-      addr = addr & (simulator->rom_size - 1);
-      return (uint8 *) (simulator->mem) + addr;
-    }
-  else if (addr < simulator->low_end)
-    {
-      /* chunk is just after the rom */
-      addr = addr - 0x100000 + simulator->rom_size;
-      return (uint8 *) (simulator->mem) + addr;
-    }
-  else if (addr >= simulator->high_start)
-    {
-      /* If in the peripheral I/O region, mirror 1K region across 4K,
-	 and similarly if in the internal RAM region.  */
-      if (addr >= 0xfff000)
-	addr &= 0xfff3ff;
-      else if (addr >= 0xffe000)
-	addr &= 0xffe3ff;
-      addr = addr - simulator->high_start + simulator->high_base;
-      return (uint8 *) (simulator->mem) + addr;
-    }
-  else
-    {
-      sim_io_eprintf (simulator, "segmentation fault: access address: %lx not below %lx or above %lx [ep = %lx]\n",
-		      (long) addr,
-		      (long) simulator->low_end,
-		      (long) simulator->high_start,
-		      State.regs[30]);
-      
-      /* Signal a memory error. */
-      State.exception = SIGSEGV;
-      /* Point to a location not in main memory - renders invalid
-	 addresses harmless until we get back to main insn loop. */
-      return (uint8 *) &(State.dummy_mem);
-    }
-}
-
-uint32
-load_mem (addr, len)
-     SIM_ADDR addr;
-     int len;
-{
-  uint8 *p = map (addr);
-
-  switch (len)
-    {
-    case 1:
-      return p[0];
-    case 2:
-      return p[1] << 8 | p[0];
-    case 4:
-      return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
-    default:
-      abort ();
-    }
-}
-
-void
-store_mem (addr, len, data)
-     SIM_ADDR addr;
-     int len;
-     uint32 data;
-{
-  uint8 *p = map (addr);
-
-  switch (len)
-    {
-    case 1:
-      p[0] = data;
-      return;
-    case 2:
-      p[0] = data;
-      p[1] = data >> 8;
-      return;
-    case 4:
-      p[0] = data;
-      p[1] = data >> 8;
-      p[2] = data >> 16;
-      p[3] = data >> 24;
-      return;
-    default:
-      abort ();
-    }
-}
-
-static void
-sim_memory_init (SIM_DESC sd)
-{
-  int totsize;
-
-  if (sd->mem)
-    zfree (sd->mem);
-  
-  totsize = (simulator->rom_size
-	     + (sd->low_end - 0x100000)
-	     + (0x1000000 - sd->high_start));
-    
-  sd->high_base = sd->rom_size + (sd->low_end - 0x100000);
-	     
-  sd->mem = zalloc (totsize);
-  if (!sd->mem)
-    {
-      sim_io_error (sd, "Allocation of main memory failed.");
-    }
-}
-
-static int
-sim_parse_number (str, rest)
-     char *str, **rest;
-{
-  if (str[0] == '0' && str[1] == 'x')
-    return strtoul (str, rest, 16);
-  else if (str[0] == '0')
-    return strtoul (str, rest, 16);
-  else
-    return strtoul (str, rest, 10);
-}
-
-static void
-sim_set_memory_map (sd, spec)
-     SIM_DESC sd;
-     char *spec;
-{
-  char *reststr, *nreststr;
-  SIM_ADDR new_low_end, new_high_start;
-
-  new_low_end = sd->low_end;
-  new_high_start = sd->high_start;
-  if (! strncmp (spec, "hole=", 5))
-    {
-      new_low_end = sim_parse_number (spec + 5, &reststr);
-      if (new_low_end < 0x100000)
-	{
-	  sim_io_printf (sd, "Low end must be at least 0x100000\n");
-	  return;
-	}
-      if (*reststr == ',')
-	{
-	  ++reststr;
-	  new_high_start = sim_parse_number (reststr, &nreststr);
-	  /* FIXME Check high_start also */
-	}
-      sim_io_printf (sd, "Hole goes from 0x%x to 0x%x\n",
-		     new_low_end, new_high_start);
-    }
-  else
-    {
-      sim_io_printf (sd, "Invalid specification for memory map, must be `hole=<m>[,<n>]'\n");
-    }
-
-  if (new_low_end != sd->low_end || new_high_start != sd->high_start)
-    {
-      sd->low_end = new_low_end;
-      sd->high_start = new_high_start;
-      sim_io_printf (sd, "Reconfiguring memory (old contents will be lost)\n");
-      sim_memory_init (sd);
-    }
-}
-
-/* Parse a number in hex, octal, or decimal form.  */
-
-int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
-{
-  int i;
-
-  for (i = 0; i < size; i++)
-    store_mem (addr + i, 1, buffer[i]);
-
-  return size;
-}
-
-
 SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
@@ -405,6 +162,7 @@ sim_open (kind, cb, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
+  char *buf;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   struct simops *s;
   struct hash_entry *h;
@@ -412,15 +170,22 @@ sim_open (kind, cb, abfd, argv)
   /* for compatibility */
   simulator = sd;
 
-  sd->rom_size = V850_ROM_SIZE;
-  sd->low_end = V850_LOW_END;
-  sd->high_start = V850_HIGH_START;
-
-  /* Allocate memory */
-  sim_memory_init (sd);
-
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
+
+  /* Allocate core managed memory */
+  /* "Mirror" the ROM addresses below 1MB. */
+  asprintf (&buf, "memory region 0,0x100000,0x%lx", V850_ROM_SIZE);
+  sim_do_command (sd, buf);
+  free (buf);
+  /* Chunk of ram adjacent to rom */
+  asprintf (&buf, "memory region 0x100000,0x%lx", V850_LOW_END - 0x100000);
+  sim_do_command (sd, buf);
+  free (buf);
+  /* peripheral I/O region - mirror 1K across 4k (0x1000) */
+  sim_do_command (sd, "memory region 0xfff000,0x1000,1024");
+  /* similarly if in the internal RAM region */
+  sim_do_command (sd, "memory region 0xffe000,0x1000,1024");
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
@@ -718,7 +483,7 @@ sim_fetch_register (sd, rn, memory)
      int rn;
      unsigned char *memory;
 {
-  put_word (memory, State.regs[rn]);
+  *(unsigned32*)memory = H2T_4 (State.regs[rn]);
 }
  
 void
@@ -727,22 +492,20 @@ sim_store_register (sd, rn, memory)
      int rn;
      unsigned char *memory;
 {
-  State.regs[rn] = get_word (memory);
+  State.regs[rn] = T2H_4 (*(unsigned32*)memory);
 }
 
-int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+static int
+sim_parse_number (str, rest)
+     char *str, **rest;
 {
-  int i;
-  for (i = 0; i < size; i++)
-    buffer[i] = load_mem (addr + i, 1);
-
-  return size;
-} 
+  if (str[0] == '0' && str[1] == 'x')
+    return strtoul (str, rest, 16);
+  else if (str[0] == '0')
+    return strtoul (str, rest, 16);
+  else
+    return strtoul (str, rest, 10);
+}
 
 int current_intgen_number = 1;
 
@@ -890,24 +653,13 @@ sim_do_command (sd, cmd)
   char *mm_cmd = "memory-map";
   char *int_cmd = "interrupt";
 
-  if (! strncmp (cmd, mm_cmd, strlen (mm_cmd))
-      && strchr (" 	", cmd[strlen(mm_cmd)]))
-    sim_set_memory_map (sd, cmd + strlen(mm_cmd) + 1);
+  if (strncmp (cmd, mm_cmd, strlen (mm_cmd) == 0))
+    sim_io_eprintf (sd, "`memory-map' command replaced by `sim memory'\n");
 
   else if (! strncmp (cmd, int_cmd, strlen (int_cmd))
       && strchr (" 	", cmd[strlen(int_cmd)]))
     sim_set_interrupt (sd, cmd + strlen(int_cmd) + 1);
 
-  else if (! strcmp (cmd, "help"))
-    {
-      sim_io_printf (sd, "V850 simulator commands:\n\n");
-      sim_io_printf (sd, "interrupt add <inttype> { pc | time } <value> -- Set up an interrupt generator\n");
-      sim_io_printf (sd, "interrupt remove <n> -- Remove an existing interrupt generator\n");
-      sim_io_printf (sd, "interrupt info -- List all the interrupt generators\n");
-      sim_io_printf (sd, "memory-map hole=<m>,<n> -- Set the memory map to have a hole between <m> and <n>\n");
-      sim_io_printf (sd, "\n");
-    }
-  else
-    sim_io_printf (sd, "\"%s\" is not a valid V850 simulator command.\n",
-				       cmd);
+  else if (sim_args_command (sd, cmd) != SIM_RC_OK)
+    sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
 }

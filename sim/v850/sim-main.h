@@ -43,11 +43,13 @@ struct sim_state {
 #else
 #define STATE_CPU(sd,n) (&(sd)->cpu[0])
 #endif
+#if 0
   SIM_ADDR rom_size;
   SIM_ADDR low_end;
   SIM_ADDR high_start;
   SIM_ADDR high_base;
   void *mem;
+#endif
   sim_state_base base;
 };
 
@@ -158,14 +160,18 @@ extern struct simops Simops[];
 
 /* Function declarations.  */
 
-uint32 get_word PARAMS ((uint8 *));
-uint16 get_half PARAMS ((uint8 *));
-uint8 get_byte PARAMS ((uint8 *));
-void put_word PARAMS ((uint8 *, uint32));
-void put_half PARAMS ((uint8 *, uint16));
-void put_byte PARAMS ((uint8 *, uint8));
+#define IMEM(EA) \
+sim_core_read_aligned_2 (STATE_CPU (sd, 0), \
+			 PC, sim_core_execute_map, (EA))
 
-extern uint32 load_mem PARAMS ((SIM_ADDR addr, int len));
-extern void store_mem PARAMS ((SIM_ADDR addr, int len, uint32 data));
+#define IMEM_IMMED(EA,N) \
+sim_core_read_aligned_2 (STATE_CPU (sd, 0), \
+			 PC, sim_core_execute_map, (EA) + (N) * 4)
 
-extern uint8 *map PARAMS ((SIM_ADDR addr));
+#define load_mem(ADDR,LEN) \
+sim_core_read_unaligned_##LEN (STATE_CPU (simulator, 0), \
+			       PC, sim_core_read_map, (ADDR))
+
+#define store_mem(ADDR,LEN,DATA) \
+sim_core_write_unaligned_##LEN (STATE_CPU (simulator, 0), \
+				PC, sim_core_write_map, (ADDR), (DATA))

@@ -25,8 +25,10 @@ SIM_OBJS = interp.o table.o simops.o \
 	sim-endian.o \
 	sim-events.o \
 	sim-hload.o \
+	sim-hrw.o \
 	sim-io.o \
 	sim-load.o \
+	sim-memopt.o \
 	sim-module.o \
 	sim-options.o \
 	sim-profile.o \

@@ -11,11 +11,17 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
  /* FIXME - should be including a version of syscall.h that does not
     pollute the name space */
 #include "../../libgloss/v850/sys/syscall.h"
 
 #include "bfd.h"
+#include "libiberty.h"
+
 #include <errno.h>
 #if !defined(__GO32__) && !defined(_WIN32)
 #include <sys/stat.h>
@@ -587,6 +593,50 @@ Multiply64 (boolean sign, unsigned long op0)
   State.regs[ OP[2] >> 11 ] = RdHi;
 
   return;
+}
+
+
+/* Read a null terminated string from memory, return in a buffer */
+static char *
+fetch_str (sd, addr)
+     SIM_DESC sd;
+     address_word addr;
+{
+  char *buf;
+  int nr = 0;
+  while (sim_core_read_1 (STATE_CPU (sd, 0),
+			  PC, sim_core_read_map, addr + nr) != 0)
+    nr++;
+  buf = NZALLOC (char, nr + 1);
+  sim_read (simulator, addr, buf, nr);
+  return buf;
+}
+
+/* Read a null terminated argument vector from memory, return in a
+   buffer */
+static char **
+fetch_argv (sd, addr)
+     SIM_DESC sd;
+     address_word addr;
+{
+  int max_nr = 64;
+  int nr = 0;
+  char **buf = xmalloc (max_nr * sizeof (char*));
+  while (1)
+    {
+      unsigned32 a = sim_core_read_4 (STATE_CPU (sd, 0),
+				      PC, sim_core_read_map, addr + nr * 4);
+      if (a == 0) break;
+      buf[nr] = fetch_str (sd, a);
+      nr ++;
+      if (nr == max_nr - 1)
+	{
+	  max_nr += 50;
+	  buf = xrealloc (buf, max_nr * sizeof (char*));
+	}
+    }
+  buf[nr] = 0;
+  return buf;
 }
 
 
@@ -2226,7 +2276,7 @@ OP_10007E0 ()
       switch (FUNC)
 	{
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef HAVE_FORK
 #ifdef SYS_fork
 	case SYS_fork:
 	  RETVAL = fork ();
@@ -2234,20 +2284,33 @@ OP_10007E0 ()
 #endif
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef HAVE_EXECVE
 #ifdef SYS_execv
 	case SYS_execve:
-	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
-			   (char **)MEMPTR (PARM3));
-	  break;
+	  {
+	    char *path = fetch_str (simulator, PARM1);
+	    char **argv = fetch_argv (simulator, PARM2);
+	    char **envp = fetch_argv (simulator, PARM3);
+	    RETVAL = execve (path, argv, envp);
+	    zfree (path);
+	    freeargv (argv);
+	    freeargv (envp);
+	    break;
+	  }
 #endif
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#if HAVE_EXECV
 #ifdef SYS_execv
 	case SYS_execv:
-	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
-	  break;
+	  {
+	    char *path = fetch_str (simulator, PARM1);
+	    char **argv = fetch_argv (simulator, PARM2);
+	    RETVAL = execv (path, argv);
+	    zfree (path);
+	    freeargv (argv);
+	    break;
+	  }
 #endif
 #endif
 
@@ -2283,17 +2346,27 @@ OP_10007E0 ()
 
 #ifdef SYS_read
 	case SYS_read:
-	  RETVAL = sim_io_read (simulator, PARM1, MEMPTR (PARM2), PARM3);
-	  break;
+	  {
+	    char *buf = zalloc (PARM3);
+	    RETVAL = sim_io_read (simulator, PARM1, buf, PARM3);
+	    sim_write (simulator, PARM2, buf, PARM3);
+	    zfree (buf);
+	    break;
+	  }
 #endif
 
 #ifdef SYS_write
 	case SYS_write:
-	  if (PARM1 == 1)
-	    RETVAL = sim_io_write_stdout (simulator, MEMPTR (PARM2), PARM3);
-	  else
-	    RETVAL = sim_io_write (simulator, PARM1, MEMPTR (PARM2), PARM3);
-	  break;
+	  {
+	    char *buf = zalloc (PARM3);
+	    sim_read (simulator, PARM2, buf, PARM3);
+	    if (PARM1 == 1)
+	      RETVAL = sim_io_write_stdout (simulator, buf, PARM3);
+	    else
+	      RETVAL = sim_io_write (simulator, PARM1, buf, PARM3);
+	    zfree (buf);
+	    break;
+	  }
 #endif
 
 #ifdef SYS_lseek
@@ -2310,8 +2383,12 @@ OP_10007E0 ()
 
 #ifdef SYS_open
 	case SYS_open:
-	  RETVAL = sim_io_open (simulator, MEMPTR (PARM1), PARM2);
-	  break;
+	  {
+	    char *buf = fetch_str (simulator, PARM1);
+	    RETVAL = sim_io_open (simulator, buf, PARM2);
+	    zfree (buf);
+	    break;
+	  }
 #endif
 
 #ifdef SYS_exit
@@ -2332,9 +2409,11 @@ OP_10007E0 ()
 	  {
 	    struct stat host_stat;
 	    reg_t buf;
+	    char *path = fetch_str (simulator, PARM1);
 
-	    RETVAL = stat (MEMPTR (PARM1), &host_stat);
+	    RETVAL = stat (path, &host_stat);
 
+	    zfree (path);
 	    buf = PARM2;
 
 	    /* Just wild-assed guesses.  */
@@ -2354,18 +2433,26 @@ OP_10007E0 ()
 #endif
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32)
+#ifdef HAVE_CHOWN
 #ifdef SYS_chown
 	case SYS_chown:
-	  RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
+	  {
+	    char *path = fetch_str (simulator, PARM1);
+	    RETVAL = chown (path, PARM2, PARM3);
+	    zfree (path);
+	  }
 	  break;
 #endif
 #endif
 
-#ifdef SYS_chmod
 #if HAVE_CHMOD
+#ifdef SYS_chmod
 	case SYS_chmod:
-	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
+	  {
+	    char *path = fetch_str (simulator, PARM1);
+	    RETVAL = chmod (path, PARM2);
+	    zfree (path);
+	  }
 	  break;
 #endif
 #endif
@@ -2416,9 +2503,12 @@ OP_10007E0 ()
 #ifdef SYS_utime
 #if HAVE_UTIME
 	case SYS_utime:
-	  /* Cast the second argument to void *, to avoid type mismatch
-	     if a prototype is present.  */
-	  RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
+	  {
+	    /* Cast the second argument to void *, to avoid type mismatch
+	       if a prototype is present.  */
+	    sim_io_error (simulator, "Utime not supported");
+	    /* RETVAL = utime (path, (void *) MEMPTR (PARM2)); */
+	  }
 	  break;
 #endif
 #endif

@@ -1,3 +1,43 @@
+Thu Sep  4 18:11:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (fetch_argv): New function, fetch a arg vector from
+ 	simulator memory.
+
+	* configure.in: Check for fork, execve, execv.
+	* configure: Regenerate.
+
+	* interp.c (sim_store_register, sim_fetch_register): Use H2T_4 and
+ 	T2H_4 for byte swapping.
+
+	* sim-main.h, interp.c (get_word, get_half, get_byte, put_word,
+ 	put_half, put_byte): Delete.
+
+	* Makefile.in (SIM_OBJS): Add sim-memopt.o module.
+
+	* sim-main.h (load_mem, store_mem): Redefine as macros.
+	(IMEM, IMEM_IMMED): New macros - fetch instructions.
+
+	* simops.c (OP_10007E0): For SYS_read, SYS_write, SYS_open
+ 	transfer data via a buffer.
+	(fetch_str): New function, fetch string from memory.
+
+	* Makefile.in (SIM_OBJS): Add sim-hrw.o module.
+
+	* interp.c (sim_open): Establish memory maps using sim-memopt.c
+ 	via sim_do_command.
+	(sim_do_command): Print error if memory-map command is used. Call
+ 	sim_args_command.
+	(map): Delete, replaced by sim-core.
+	(sim_memory_init): Delete, replaced by sim-core.
+	(sim_set_memory_map): Delete, replaced by sim-memopt.
+	(load_mem): Delete, replaced by sim-core.
+	(store_mem): Delete, replaced by sim-core.
+	(sim_write): Delete, replaced by sim-hrw.
+	(sim_read): Delete, replaced by sim-hrw.
+
+	* sim-main.h (struct sim_state): Remove memory members, using
+ 	sim-core.c
+
 Wed Sep  3 10:18:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h: Replace SIM_HAVE_FLATMEM with mem ptr.
