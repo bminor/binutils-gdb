@@ -1,3 +1,10 @@
+2001-12-19  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/printcmds.exp: Expect the null character to be printed
+	as '\0', and the '\013' to be printed as '\v'.
+	* gdb.base/callfuncs.exp ("backtrace at nested call level 4"): Same.
+	* gdb.base/setvar.exp: Same.
+
 2001-12-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/completion.exp: Rather than completing very long

@@ -134,7 +134,7 @@ proc test_integer_literals_rejected {} {
 proc test_print_all_chars {} {
     global gdb_prompt
 
-    gdb_test "p ctable1\[0\]"   " = 0 '\\\\000'"
+    gdb_test "p ctable1\[0\]"   " = 0 '\\\\0'"
     gdb_test "p ctable1\[1\]"   " = 1 '\\\\001'"
     gdb_test "p ctable1\[2\]"   " = 2 '\\\\002'"
     gdb_test "p ctable1\[3\]"   " = 3 '\\\\003'"
@@ -145,7 +145,7 @@ proc test_print_all_chars {} {
     gdb_test "p ctable1\[8\]"   " = 8 '\\\\b'"
     gdb_test "p ctable1\[9\]"   " = 9 '\\\\t'"
     gdb_test "p ctable1\[10\]"  " = 10 '\\\\n'"
-    gdb_test "p ctable1\[11\]"  " = 11 '\\\\013'"
+    gdb_test "p ctable1\[11\]"  " = 11 '\\\\v'"
     gdb_test "p ctable1\[12\]"  " = 12 '\\\\f'"
     gdb_test "p ctable1\[13\]"  " = 13 '\\\\r'"
     gdb_test "p ctable1\[14\]"  " = 14 '\\\\016'"
@@ -475,7 +475,7 @@ proc test_print_strings {} {
     gdb_test "p &ctable1\[1\]" \
 	" = \\(unsigned char \\*\\) \"\\\\001\\\\002\\\\003\\\\004\\\\005\\\\006\\\\a\\\\b\"..."
     gdb_test "p &ctable1\[1*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\b\\\\t\\\\n\\\\013\\\\f\\\\r\\\\016\\\\017\"..."
+	" = \\(unsigned char \\*\\) \"\\\\b\\\\t\\\\n\\\\v\\\\f\\\\r\\\\016\\\\017\"..."
     gdb_test "p &ctable1\[2*8\]" \
 	" = \\(unsigned char \\*\\) \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
     gdb_test "p &ctable1\[3*8\]" \
@@ -622,7 +622,7 @@ proc test_print_string_constants {} {
     setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"a string\""		" = \"a string\""
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\000 null\""
+    gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\0 null\""
     setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"abcd\"\[2\]"	" = 99 'c'"
     setup_xfail "a29k-*-udi" 2416
