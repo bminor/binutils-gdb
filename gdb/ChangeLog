@@ -1,5 +1,8 @@
 2003-05-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf-frame.c: Add support for .eh_frame sections.  Fix a few
+	bugs.
+
 	* i386-tdep.c (i386_gdbarch_init): Don't hook in the DWARF CFI
 	frame base methods.
 
