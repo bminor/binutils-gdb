@@ -50,6 +50,7 @@ libiberty.h
 nlm
 oasys.h
 obstack.h
+os9k.h
 opcode
 wait.h
 
