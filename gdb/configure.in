@@ -18,13 +18,12 @@ c[12]-*-*)		gdb_host=convex ;;
 hppa*-hp-hpux)		gdb_host=hppahpux ;;
 hppa*-hp-bsd)		gdb_host=hppabsd ;;
 
-i[34]86-sun-*)		gdb_host=sun386 ;;
-i[34]86-sco-*)		gdb_host=i386sco ;;
 i[34]86-sequent-*)	gdb_host=symmetry ;;
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 
 i[34]86-*-go32)		gdb_host=go32 ;;
 i[34]86-*-sysv32)	gdb_host=i386v32 ;;
+i[34]86-*-sunos*)	gdb_host=sun386 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;
 i[34]86-*-scosysv*)	gdb_host=i386sco ;;
@@ -37,10 +36,7 @@ m68k-apollo*-sysv*)	gdb_host=apollo68v ;;
 
 m68k-att-*)		gdb_host=3b1 ;;
 
-m68k-altos-*)		case "$gas" in
-			yes)	gdb_host=altosgas ;;
-			*)	gdb_host=altos ;;	
-			esac ;;
+m68k-altos-*)		gdb_host=altos ;;
 
 m68k-cbm-sysv4*)	gdb_host=amix ;;
 
@@ -119,7 +115,7 @@ m68k)
 	altos)	gdb_target=altos ;;
 	cbm)
 		case ${target_os} in
-		amigados)	gdb_host=amigados ;;
+		amigados)	gdb_target=amigados ;;
 		sysv4*)		gdb_target=amix ;;
 		esac
 		;;

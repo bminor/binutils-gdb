@@ -2,7 +2,8 @@ Wed Aug 26 21:10:52 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in (host configurations):  Reformat nested cases into
 	easy-to-maintain table.
-	(altos-*-gas):  Use -gas flag instead of OS "gas".
+	(m68k-altos-*, i386v*):  We don't care whether coff encap is used.
+	config/{altosgas.mh, i386v-g.mh, i386v32-g.mh}:  Remove.
 
 Wed Aug 26 16:02:01 1992  Fred Fish  (fnf@cygnus.com)
 
