@@ -394,21 +394,21 @@ m32r_cgen_insert_operand (opindex, fields, buffer, pc)
     case M32R_OPERAND_DISP8 :
       {
         long value = fields->f_disp8;
-        value = ((((value) - (((pc) & (-4))))) >> (2));
+        value = ((int) (((value) - (((pc) & (-4))))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case M32R_OPERAND_DISP16 :
       {
         long value = fields->f_disp16;
-        value = ((((value) - (pc))) >> (2));
+        value = ((int) (((value) - (pc))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case M32R_OPERAND_DISP24 :
       {
         long value = fields->f_disp24;
-        value = ((((value) - (pc))) >> (2));
+        value = ((int) (((value) - (pc))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
