@@ -1,3 +1,8 @@
+Sat May 16 13:04:30 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-if.c (sim_stop): Update call to @cpu@_engine_stop.
+	(sim_sync_stop): New function.
+
 Fri May 15 16:43:27 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Makefile.in (devices.o): Add dependencies.

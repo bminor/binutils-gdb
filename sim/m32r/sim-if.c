@@ -17,16 +17,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
-#include <signal.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "sim-core.h"
 #include "targ-vals.h"
 
-static SIM_RC alloc_cpu (SIM_DESC, struct _bfd *, char **);
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
 
@@ -34,39 +32,14 @@ static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
    called from gdb.  */
 SIM_DESC current_state;
 
-/* Scan the args and bfd to see what kind of cpus are in use and allocate
-   space for them.  */
-
-static SIM_RC
-alloc_cpu (SIM_DESC sd, struct _bfd *abfd, char **argv)
-{
-  /* Compute the size of the SIM_CPU struct.
-     For now its the max of all the possible sizes.  */
-  int size = 0;
-  const MACH *mach;
-
-  for (mach = &machs[0]; MACH_NAME (mach) != NULL; ++mach)
-    {
-      int mach_size = IMP_PROPS_SIM_CPU_SIZE (MACH_IMP_PROPS (mach));
-      size = mach_size > size ? mach_size : size;
-    }
-  if (size == 0)
-    abort ();
-
-  /* `sizeof (SIM_CPU)' is the size of the generic part, and `size' is the
-     size of the cpu-specific part.  */
-  STATE_CPU (sd, 0) = zalloc (sizeof (SIM_CPU) + size);
-
-  return SIM_RC_OK;
-}
-
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
 static void
 free_state (SIM_DESC sd)
 {
-  if (STATE_CPU (sd, 0))
-    zfree (STATE_CPU (sd, 0));
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+  sim_cpu_free_all (sd);
   sim_state_free (sd);
 }
 
@@ -82,11 +55,20 @@ sim_open (kind, callback, abfd, argv)
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (alloc_cpu (sd, abfd, argv) != SIM_RC_OK)
+  if (sim_cpu_alloc_all (sd, 1, cgen_cpu_max_extra_bytes ()) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
     }
+
+#if 0 /* FIXME: pc is in mach-specific struct */
+  /* FIXME: watchpoints code shouldn't need this */
+  {
+    SIM_CPU *current_cpu = STATE_CPU (sd, 0);
+    STATE_WATCHPOINTS (sd)->pc = &(PC);
+    STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
+  }
+#endif
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     {
@@ -108,10 +90,11 @@ sim_open (kind, callback, abfd, argv)
   /* Allocate a handler for the MSPR register.  */
   sim_core_attach (sd, NULL,
 		   0 /*level*/,
-		   access_write,
+		   access_read_write,
 		   0 /*space ???*/,
-		   MSPR_ADDR, 1 /*nr_bytes*/, 0 /*modulo*/,
-		   &m32r_mspr_device,
+		   M32R_DEVICE_ADDR, M32R_DEVICE_LEN /*nr_bytes*/,
+		   0 /*modulo*/,
+		   &m32r_devices,
 		   NULL /*buffer*/);
 
   /* getopt will print the error message so we just have to exit if this fails.
@@ -119,34 +102,71 @@ sim_open (kind, callback, abfd, argv)
      print_filtered.  */
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
       free_state (sd);
       return 0;
     }
 
-  /* check for/establish the a reference program image */
+  /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
 			   (STATE_PROG_ARGV (sd) != NULL
 			    ? *STATE_PROG_ARGV (sd)
 			    : NULL),
 			   abfd) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
       free_state (sd);
       return 0;
     }
 
+  /* If both cpu model and state architecture are set, ensure they're
+     compatible.  If only one is set, set the other.  If neither are set,
+     use the default model.  STATE_ARCHITECTURE is the bfd_arch_info data
+     for the selected "mach" (bfd terminology).  */
+  {
+    SIM_CPU *cpu = STATE_CPU (sd, 0);
+
+    if (! STATE_ARCHITECTURE (sd)
+	/* Only check cpu 0.  STATE_ARCHITECTURE is for that one only.  */
+	&& ! CPU_MACH (cpu))
+      {
+	/* Set the default model.  */
+	const MODEL *model = sim_model_lookup (WITH_DEFAULT_MODEL);
+	sim_model_set (sd, NULL, model);
+      }
+    if (STATE_ARCHITECTURE (sd)
+	&& CPU_MACH (cpu))
+      {
+	if (strcmp (STATE_ARCHITECTURE (sd)->printable_name,
+		    MACH_NAME (CPU_MACH (cpu))) != 0)
+	  {
+	    sim_io_eprintf (sd, "invalid model `%s' for `%s'\n",
+			    MODEL_NAME (CPU_MODEL (cpu)),
+			    STATE_ARCHITECTURE (sd)->printable_name);
+	    free_state (sd);
+	    return 0;
+	  }
+      }
+    else if (STATE_ARCHITECTURE (sd))
+      {
+	/* Use the default model for the selected machine.
+	   The default model is the first one in the list.  */
+	const MACH *mach = sim_mach_lookup (STATE_ARCHITECTURE (sd)->printable_name);
+	sim_model_set (sd, NULL, MACH_MODELS (mach));
+      }
+    else
+      {
+        STATE_ARCHITECTURE (sd) = bfd_scan_arch (MACH_NAME (CPU_MACH (cpu)));
+      }
+  }
+
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
       free_state (sd);
       return 0;
     }
 
   if (sim_post_argv_init (sd) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
       free_state (sd);
       return 0;
     }
@@ -155,15 +175,15 @@ sim_open (kind, callback, abfd, argv)
   cgen_init (sd);
 
   {
-    int i;
+    int c;
 
-    for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+    for (c = 0; c < MAX_NR_PROCESSORS; ++c)
       {
 	/* Only needed for profiling, but the structure member is small.  */
-	memset (& CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i)), 0,
-		sizeof (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, i))));
+	memset (& CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c)), 0,
+		sizeof (CPU_M32R_MISC_PROFILE (STATE_CPU (sd, c))));
 	/* Hook in callback for reporting these stats */
-	PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, i)))
+	PROFILE_INFO_CPU_CALLBACK (CPU_PROFILE_DATA (STATE_CPU (sd, c)))
 	  = print_m32r_misc_cpu;
       }
   }
@@ -197,7 +217,7 @@ sim_create_inferior (sd, abfd, argv, envp)
     addr = bfd_get_start_address (abfd);
   else
     addr = 0;
-  h_pc_set (current_cpu, addr);
+  sim_pc_set (current_cpu, addr);
 
 #if 0
   STATE_ARGV (sd) = sim_copy_argv (argv);
@@ -213,11 +233,34 @@ sim_stop (SIM_DESC sd)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_m32r :
-      return m32r_engine_stop (sd);
+      return m32r_engine_stop (sd, NULL, NULL_CIA, sim_stopped, SIM_SIGINT);
 /* start-sanitize-m32rx */
 #ifdef HAVE_CPU_M32RX
     case bfd_mach_m32rx :
-      return m32rx_engine_stop (sd);
+      return m32rx_engine_stop (sd, NULL, NULL_CIA, sim_stopped, SIM_SIGINT);
+#endif
+/* end-sanitize-m32rx */
+    default :
+      abort ();
+    }
+}
+
+/* This isn't part of the official interface.
+   This is just a good place to put this for now.  */
+
+void
+sim_sync_stop (SIM_DESC sd, SIM_CPU *cpu, PCADDR pc, enum sim_stop reason, int sigrc)
+{
+  switch (STATE_ARCHITECTURE (sd)->mach)
+    {
+    case bfd_mach_m32r :
+      (void) m32r_engine_stop (sd, cpu, pc, reason, sigrc);
+      break;
+/* start-sanitize-m32rx */
+#ifdef HAVE_CPU_M32RX
+    case bfd_mach_m32rx :
+      (void) m32rx_engine_stop (sd, cpu, pc, reason, sigrc);
+      break;
 #endif
 /* end-sanitize-m32rx */
     default :
@@ -230,6 +273,8 @@ sim_resume (sd, step, siggnal)
      SIM_DESC sd;
      int step, siggnal;
 {
+  sim_module_resume (sd);
+
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_m32r :
@@ -245,6 +290,8 @@ sim_resume (sd, step, siggnal)
     default :
       abort ();
     }
+
+  sim_module_suspend (sd);
 }
 
 /* PROFILE_CPU_CALLBACK */
@@ -274,22 +321,9 @@ sim_fetch_register (sd, rn, buf, length)
      unsigned char *buf;
      int length;
 {
-  switch (STATE_ARCHITECTURE (sd)->mach)
-    {
-    case bfd_mach_m32r :
-      m32r_fetch_register (sd, rn, buf);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      m32rx_fetch_register (sd, rn, buf);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-  return -1;
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
+  return (* CPU_REG_FETCH (cpu)) (cpu, rn, buf, length);
 }
  
 /* The contents of BUF are in target byte order.  */
@@ -301,22 +335,9 @@ sim_store_register (sd, rn, buf, length)
      unsigned char *buf;
      int length;
 {
-  switch (STATE_ARCHITECTURE (sd)->mach)
-    {
-    case bfd_mach_m32r :
-      m32r_store_register (sd, rn, buf);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      m32rx_store_register (sd, rn, buf);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-  return -1;
+  SIM_CPU *cpu = STATE_CPU (sd, 0);
+
+  return (* CPU_REG_STORE (cpu)) (cpu, rn, buf, length);
 }
 
 void
@@ -339,46 +360,7 @@ sim_engine_illegal_insn (current_cpu, pc)
 		   sim_stopped, SIM_SIGILL);
 }
 
-/* Utility fns to access registers, without knowing the current mach.
-   FIXME: Machine generate?  */
-
-USI
-h_pc_get (SIM_CPU *current_cpu)
-{
-  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
-    {
-    case bfd_mach_m32r :
-      return m32r_h_pc_get (current_cpu);
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      return m32rx_h_pc_get (current_cpu);
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-}
-
-void
-h_pc_set (SIM_CPU *current_cpu, USI newval)
-{
-  switch (STATE_ARCHITECTURE (CPU_STATE (current_cpu))->mach)
-    {
-    case bfd_mach_m32r :
-      m32r_h_pc_set (current_cpu, newval);
-      break;
-/* start-sanitize-m32rx */
-#ifdef HAVE_CPU_M32RX
-    case bfd_mach_m32rx :
-      m32rx_h_pc_set (current_cpu, newval);
-      break;
-#endif
-/* end-sanitize-m32rx */
-    default :
-      abort ();
-    }
-}
+/* Utility fns to access registers, without knowing the current mach.  */
 
 SI
 h_gr_get (SIM_CPU *current_cpu, UINT regno)
@@ -427,7 +409,7 @@ syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
   SIM_DESC sd = (SIM_DESC) sc->p1;
   SIM_CPU *cpu = (SIM_CPU *) sc->p2;
 
-  return sim_core_read_buffer (sd, cpu, sim_core_read_map, buf, taddr, bytes);
+  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
 }
 
 static int
@@ -437,16 +419,37 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
   SIM_DESC sd = (SIM_DESC) sc->p1;
   SIM_CPU *cpu = (SIM_CPU *) sc->p2;
 
-  return sim_core_write_buffer (sd, cpu, sim_core_write_map, buf, taddr, bytes);
+  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
 }
 
-/* Trap support.  */
+/* Trap support.
+   The result is the pc address to continue at.  */
 
-void
+USI
 do_trap (SIM_CPU *current_cpu, int num)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
   host_callback *cb = STATE_CALLBACK (sd);
+
+#ifdef SIM_HAVE_BREAKPOINTS
+  /* Check for breakpoints "owned" by the simulator first, regardless
+     of --environment.  */
+  if (num == 1)
+    {
+      /* First try sim-break.c.  If it's a breakpoint the simulator "owns"
+	 it doesn't return.  Otherwise it returns and let's us try.  */
+      sim_handle_breakpoint (sd, current_cpu, sim_pc_get (current_cpu));
+      /* Fall through.  */
+    }
+#endif
+
+  if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
+    {
+      /* The new pc is the trap vector entry.
+	 We assume there's a branch there to some handler.  */
+      USI new_pc = num * 4;
+      return new_pc;
+    }
 
   switch (num)
     {
@@ -463,7 +466,7 @@ do_trap (SIM_CPU *current_cpu, int num)
 
 	if (s.func == TARGET_SYS_exit)
 	  {
-	    sim_engine_halt (sd, current_cpu, NULL, h_pc_get (current_cpu),
+	    sim_engine_halt (sd, current_cpu, NULL, sim_pc_get (current_cpu),
 			     sim_exited, s.arg1);
 	  }
 
@@ -484,7 +487,10 @@ do_trap (SIM_CPU *current_cpu, int num)
       break;
 
     default :
-      /* Unless environment operating, ignore other traps.  */
+      /* Unless in the operating environment, ignore other traps.  */
       break;
     }
+
+  /* Fake an "rte" insn.  */
+  return (sim_pc_get (current_cpu) & -4) + 4;
 }
