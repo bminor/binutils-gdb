@@ -1,3 +1,8 @@
+2003-07-09  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (register_size): Only check REGISTER_RAW_SIZE once.
+	Add comments about the checks.
+
 2003-07-08  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in: Make dependency section headers consistent.

@@ -290,8 +290,11 @@ register_size (struct gdbarch *gdbarch, int regnum)
   int size;
   gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
   size = descr->sizeof_register[regnum];
+  /* NB: The deprecated REGISTER_RAW_SIZE, if not provided, defaults
+     to the size of the register's type.  */
   gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
-  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  /* NB: Don't check the register's virtual size.  It, in say the case
+     of the MIPS, may not match the raw size!  */
   return size;
 }
 
