@@ -182,6 +182,11 @@ proc gdb_exit {} {
     }
     }
     catch "close"
+    # Before this was here sometimes "uit" would get sent to the next GDB
+    # (assuming this is immediately followed by gdb_start), which would
+    # cause a loss of syncronization (i.e. all the stuff that swallows a
+    # prompt would swallow the wrong one).
+    wait
 
     if $verbose>1 then {
 	send_user "Quitting $GDB $GDBFLAGS\n"

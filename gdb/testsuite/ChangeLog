@@ -1,3 +1,19 @@
+Thu Aug  5 12:18:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/unix-gdb.exp (gdb_exit): Add "wait".
+
+Thu Aug  5 18:14:06 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t06/signals.exp:  xfail the continue from the handler for all
+	targets.
+
+	* gdb.t07/watchpoint.exp:  clear_xfail for i386 when calling a
+	function with watchpoints enabled, the i386 call dummy starts with
+	a call.
+
+	* gdb.t00/teststrategy.exp, gdb.t09/Makefile.in:  Handle the way
+	386 bsd names its corefiles.
+
 Wed Aug  4 08:53:41 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t10/Makefile.in (nodebug.o):  Don't use "-c -o", many
