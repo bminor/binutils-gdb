@@ -1,12 +1,35 @@
+Fri Mar 13 08:23:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/mt-<foo> renamed to <foo>.mt
+	* config/mh-<foo> renamed to <foo>.mt
+	* configure.in changed to reflect this
+	* genscripts.sh now make .xbn files rather than .xN files
+
+Sat Mar  7 03:40:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* ldver.h: fix decl of ldversion.
+
+Fri Mar  6 22:00:35 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
+
 Fri Mar  6 06:59:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c (Q_enter_file_symbols): now aliases work again
+
+Thu Mar  5 21:39:29 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added clean-info target.
 
 Thu Mar  5 16:55:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldexp.c (exp_print_tree): don't try and follow null pointers
 	around.
 	* ldgram.y: remove 11 shift reduce errors
+
+Tue Mar  3 15:46:39 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: added tooldir and program_prefix.
 
 Fri Feb 28 08:17:45 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
@@ -22,6 +45,12 @@ Thu Feb 27 09:20:41 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 	* ldver.c: if -V, prints list of emulations compiled in
 	* ldmisc.c: support for cplus demangling
 
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
 
 Thu Feb 20 17:43:46 1992  Per Bothner  (bothner at cygnus.com)
 

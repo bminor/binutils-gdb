@@ -1,5 +1,5 @@
 # Makefile for the GNU linker ld (version 2)
-# Copyright (C) 1989-1991 Free Software Foundation, Inc.
+# Copyright (C) 1989-1992 Free Software Foundation, Inc.
 
 # This file is part of GNU ld..
 
@@ -22,10 +22,14 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+program_prefix =
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -35,7 +39,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -53,7 +57,7 @@ BISON = bison -y
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-#version=/`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
+#version=/`./../gcc/gcc -dumpversion`
 version=
 
 # Seach path to override the default search path for -lfoo libraries.
@@ -86,7 +90,7 @@ ROFF = groff
 CFLAGS	= $(INCLUDES) $(MINUS_G) $(HDEFINES) $(TDEFINES) $(CDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
-.SUFFIXES: .y .x .xr .xu .xn .xN .sc .scu .scr .scn $(SUFFIXES)
+.SUFFIXES: .y .x .xr .xu .xn .xbn .sc .scu .scr .scn $(SUFFIXES)
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -94,8 +98,8 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 LD_PROG	= ld.new
 
 # for self hosting
-BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
-LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
+BFDLIB=./../bfd/libbfd.a
+LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=ld__lnk960.o ld__sun3.o ld__i386aout.o \
 	ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
@@ -106,7 +110,7 @@ EMULATION_OFILES=${ALL_EMULATIONS}
 
 OFILES= ldgram.o ldlex.o lexsup.o ldlang.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o ldsym.o \
-	ldfile.o relax.o  lderror.o ${EMULATION_OFILES}
+	ldfile.o relax.o  lderror.o cplus-dem.o ${EMULATION_OFILES}
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 	ldsym.h ldctor.h ldlang.h ldexp.h \
@@ -117,7 +121,7 @@ MANSOURCES=ld.tex
 LDCSOURCES=ldlang.c lexsup.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
 	ld__gld.c ld__sun3.c ld__m88k.c ld__ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
-	relax.c  lderror.c
+	relax.c  lderror.c cplus-dem.c
 
 GENERATED_SOURCES=ldgram.c ldlex.c ld__*.c ldemul-list.h
 GENERATED_HEADERS=ldgram.h ldemul-list.h
@@ -133,6 +137,7 @@ STAGESTUFF = *.x *.x[runN] *.sc[runN] $(GENERATED_SOURCES) $(GENERATED_HEADERS) 
 
 all: Makefile $(LD_PROG)
 
+check:
 info: ld.info
 
 ldgram.h ldgram.c: ldgram.y
@@ -321,7 +326,7 @@ ld-index.me: ld.me
 
 ######################################################################
 
-mkscript: $(srcdir)/mkscript.c
+./mkscript: $(srcdir)/mkscript.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mkscript $(srcdir)/mkscript.c $(LOADLIBES)
 
 ldlex.c: ldlex.l ldgram.h
@@ -389,20 +394,27 @@ tags TAGS:$(SOURCES) $(HEADERS)
 
 objdump:objdump.c 
 
+.PHONY: install
 install: $(LD_PROG)
-	$(INSTALL_PROGRAM) ld.new $(bindir)/ld
+	-rm -f $(bindir)/$(program_prefix)ld
+	$(INSTALL_PROGRAM) ld.new $(bindir)/$(program_prefix)ld
+	-rm -f $(tooldir)/ld
+	ln $(bindir)/$(program_prefix)ld $(tooldir)/ld
 
 install-info: info
 	for i in ld.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
+clean-info:
+	-rm -rf *.info*
+
 # Something like the following might make sense for install, but doesn't work
 # - it is too fragile, depending on a gcc binary int the right place.
 # Perhaps using gcc/version.c might work?
 #	# If $(gcclibdir) exists, install ld there, and put a link to it
 #	# from $(bindir);  otherwise put ld in $(bindir).
-#	if ([ -x $(unsubdir)/../gcc$(subdir)/gcc -a -d $(gcclibdir) ]); then \
+#	if ([ -x ./../gcc/gcc -a -d $(gcclibdir) ]); then \
 #	    $(INSTALL_PROGRAM) ld.new $(gcclibdir)/ld; \
 #	    cd $(bindir); rm -f ld; ln -s $(gcclibdir)/ld ld; \
 #	else \

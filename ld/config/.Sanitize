@@ -30,27 +30,27 @@ fi
 # with rm -rf.
 
 Things-to-keep:
-mh-decstation
-mh-delta88
-mh-dgux
-mh-news
-mh-rtbsd
-mh-sparc
-mh-sparc-ll
-mh-sun3
-mt-coff-a29k
-mt-ebmon29k
-mt-coff-h8300
-mt-i386-aout
-mt-i386v
-mt-m68k
-mt-m68kv
-mt-m88k-bcs
-mt-news
-mt-sun3
-mt-sun4
-mt-vxworks68
-mt-vxworks960
+decstation.mh
+delta88.mh
+dgux.mh
+news.mh
+rtbsd.mh
+sparc.mh
+sparc-ll.mh
+sun3.mh
+coff-a29k.mt
+ebmon29k.mt
+coff-h8300.mt
+i386-aout.mt
+i386v.mt
+m68k.mt
+m68kv.mt
+m88k-bcs.mt
+news.mt
+sun3.mt
+sun4.mt
+vxworks68.mt
+vxworks960.mt
 Do-last:
 
 echo Done in `pwd`.
