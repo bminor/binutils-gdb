@@ -19,11 +19,13 @@
     */
 
 
-#ifndef _SIM_CORE_H_
-#define _SIM_CORE_H_
+#ifndef SIM_CORE_H
+#define SIM_CORE_H
 
 
-/* core signals (error conditions) */
+/* core signals (error conditions)
+   Define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for
+   details.  */
 
 typedef enum {
   sim_core_unmapped_signal,
@@ -31,9 +33,12 @@ typedef enum {
   nr_sim_core_signals,
 } sim_core_signals;
 
-/* define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for
-   details */
+/* Type of SIM_CORE_SIGNAL handler.  */
+typedef void (SIM_CORE_SIGNAL_FN)
+     (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, unsigned map, int nr_bytes,
+      address_word addr, transfer_type transfer, sim_core_signals sig);
 
+extern SIM_CORE_SIGNAL_FN sim_core_signal;
 
 
 /* basic types */
@@ -51,7 +56,11 @@ struct _sim_core_mapping {
   void *free_buffer;
   void *buffer;
   /* callback map */
+#if (WITH_HW)
+  struct hw *device;
+#else
   device *device;
+#endif
   /* tracing */
   int trace;
   /* growth */
@@ -63,16 +72,9 @@ struct _sim_core_map {
   sim_core_mapping *first;
 };
 
-typedef enum {
-  sim_core_read_map,
-  sim_core_write_map,
-  sim_core_execute_map,
-  nr_sim_core_maps,
-} sim_core_maps;
-
 
 typedef struct _sim_core_common {
-  sim_core_map map[nr_sim_core_maps];
+  sim_core_map map[nr_maps];
 } sim_core_common;
 
 
@@ -101,53 +103,58 @@ EXTERN_SIM_CORE\
 
 
 
-/* Create a memory space within the core.
+/* Create a memory region within the core.
 
-   CPU, when non NULL, specifes the single processor that the memory
-   space is to be attached to. (UNIMPLEMENTED).
+   CPU - when non NULL, specifes the single processor that the memory
+   space is to be attached to. (INIMPLEMENTED).
 
-   LEVEL specifies the ordering of the memory region.  Lower regions
+   LEVEL - specifies the ordering of the memory region.  Lower regions
    are searched first.  Within a level, memory regions can not
    overlap.
 
-   DEVICE, when non NULL, specifies a callback memory space.
-   (UNIMPLEMENTED, see the ppc simulator for an example).
+   MAPMASK - Bitmask specifying the memory maps that the region is to
+   be attached to.  Typically the enums sim-basics.h:access_* are used.
 
-   MODULO, when the simulator has been configured WITH_MODULO support
+   ADDRESS_SPACE - For device regions, a MAP:ADDRESS pair is
+   translated into ADDRESS_SPACE:OFFSET before being passed to the
+   client device.
+
+   MODULO - when the simulator has been configured WITH_MODULO support
    and is greater than zero, specifies that accesses to the region
    [ADDR .. ADDR+NR_BYTES) should be mapped onto the sub region [ADDR
    .. ADDR+MODULO).  The modulo value must be a power of two.
 
-   OPTIONAL_BUFFER, when non NULL, specifies the buffer to use for
+   DEVICE - When non NULL, indicates that this is a callback memory
+   space and specified device's memory callback handler should be
+   called.
+
+   OPTIONAL_BUFFER - when non NULL, specifies the buffer to use for
    data read & written to the region.  Normally a more efficient
    internal structure is used.  It is assumed that buffer is allocated
    such that the byte alignmed of OPTIONAL_BUFFER matches ADDR vis
    (OPTIONAL_BUFFER % 8) == (ADDR % 8)).  It is defined to be a sub-optimal
    hook that allows clients to do nasty things that the interface doesn't
-   accomodate.  ??? That seems unnecessarily restrictive.  */
+   accomodate. */
 
 EXTERN_SIM_CORE\
 (void) sim_core_attach
 (SIM_DESC sd,
  sim_cpu *cpu,
  int level,
- access_type access,
+ unsigned mapmask,
  int address_space,
  address_word addr,
  address_word nr_bytes,
  unsigned modulo,
+#if (WITH_HW)
+ struct hw *client,
+#else
  device *client,
+#endif
  void *optional_buffer);
 
 
-/* Utility to return the name of a map.  */
-
-EXTERN_SIM_CORE\
-(const char *) sim_core_map_to_str
-(sim_core_maps);
-
-
-/* Delete a memory space within the core.
+/* Delete a memory section within the core.
 
  */
 
@@ -177,7 +184,7 @@ EXTERN_SIM_CORE\
 (unsigned) sim_core_read_buffer
 (SIM_DESC sd,
  sim_cpu *cpu,
- sim_core_maps map,
+ unsigned map,
  void *buffer,
  address_word addr,
  unsigned nr_bytes);
@@ -186,7 +193,7 @@ EXTERN_SIM_CORE\
 (unsigned) sim_core_write_buffer
 (SIM_DESC sd,
  sim_cpu *cpu,
- sim_core_maps map,
+ unsigned map,
  const void *buffer,
  address_word addr,
  unsigned nr_bytes);
@@ -226,7 +233,7 @@ EXTERN_SIM_CORE\
 (unsigned) sim_core_xor_read_buffer
 (SIM_DESC sd,
  sim_cpu *cpu,
- sim_core_maps map,
+ unsigned map,
  void *buffer,
  address_word addr,
  unsigned nr_bytes);
@@ -235,7 +242,7 @@ EXTERN_SIM_CORE\
 (unsigned) sim_core_xor_write_buffer
 (SIM_DESC sd,
  sim_cpu *cpu,
- sim_core_maps map,
+ unsigned map,
  const void *buffer,
  address_word addr,
  unsigned nr_bytes);
@@ -268,7 +275,7 @@ INLINE_SIM_CORE\
 (void) sim_core_write_##ALIGNMENT##_##N \
 (sim_cpu *cpu, \
  sim_cia cia, \
- sim_core_maps map, \
+ unsigned map, \
  address_word addr, \
  unsigned_##M val);
 
@@ -307,7 +314,7 @@ INLINE_SIM_CORE\
 (unsigned_##M) sim_core_read_##ALIGNMENT##_##N \
 (sim_cpu *cpu, \
  sim_cia cia, \
- sim_core_maps map, \
+ unsigned map, \
  address_word addr);
 
 DECLARE_SIM_CORE_READ_N(aligned,1,1)
@@ -339,5 +346,6 @@ DECLARE_SIM_CORE_READ_N(misaligned,7,8)
 #define sim_core_read_word XCONCAT2(sim_core_read_,WITH_TARGET_WORD_BITSIZE)
 
 #undef DECLARE_SIM_CORE_READ_N
+
 
 #endif

@@ -1,3 +1,8 @@
+Thu Jun 11 00:50:03 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-core.h (SIM_CORE_SIGNAL_FN): New typedef.
+	* sim-core.c (sim_core_signal): Make extern, always define.
+
 Wed Jun 10 16:02:29 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (CGEN_FLAGS_TO_PASS): New variable.
