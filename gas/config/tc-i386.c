@@ -161,6 +161,8 @@ static reg_entry *ebp, *esp;
 
 static int this_operand;	/* current operand we are working on */
 
+static int flag_do_long_jump;	/* FIXME what does this do? */
+
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
    one for unconditional jumps.  This is because the these two types
@@ -1649,7 +1651,7 @@ md_assemble (line)
       }
 
 #ifdef DEBUG386
-    if (flagseen['D'])
+    if (flag_debug)
       {
 	pi (line, &i);
       }
@@ -2242,7 +2244,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 {
   long offset;
 
-  if (flagseen['m'])
+  if (flag_do_long_jump)
     {
       offset = to_addr - S_GET_VALUE (to_symbol);
       md_number_to_chars (ptr, (valueT) 0xe9, 1);/* opcode for long jmp */
@@ -2427,7 +2429,11 @@ parse_register (reg_string)
   return (reg_entry *) hash_find (reg_hash, reg_name_given);
 }
 
-CONST char *md_shortopts = "";
+#ifdef OBJ_ELF
+CONST char *md_shortopts = "mVQ:";
+#else
+CONST char *md_shortopts = "m";
+#endif
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
@@ -2438,13 +2444,36 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  return 0;
+  switch (c)
+    {
+    case 'm':
+      flag_do_long_jump = 1;
+      break;
+
+#ifdef OBJ_ELF
+      /* -V: SVR4 argument to print version ID.  */
+    case 'V':
+      print_version_id ();
+      break;
+
+      /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
+	 should be emitted or not.  FIXME: Not implemented.  */
+    case 'Q':
+      break;
+#endif
+
+    default:
+      return 0;
+    }
+  return 1;
 }
 
 void
 md_show_usage (stream)
      FILE *stream;
 {
+  fprintf (stream, "\
+-m			do long jump\n");
 }
 
 /* We have no need to default values of symbols.  */
@@ -2551,8 +2580,8 @@ tc_gen_reloc (section, fixp)
       name = S_GET_NAME (fixp->fx_addsy);
       if (name == NULL)
 	name = "<unknown>";
-      as_fatal ("Cannot find relocation type for symbol %s, code %d",
-		name, (int) code);
+      as_fatal ("Cannot generate relocation type for symbol %s, code %s",
+		name, bfd_get_reloc_code_name (code));
     }
 
   return rel;

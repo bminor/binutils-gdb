@@ -1906,6 +1906,19 @@ md_apply_fix (fixP, value)
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL_S2 && fixP->fx_addsy)
     val += fixP->fx_where + fixP->fx_frag->fr_address;
 
+#ifdef OBJ_AOUT
+  /* FIXME: More ridiculous gas reloc hacking.  If we are going to
+     generate a reloc, then we just want to let the reloc addend set
+     the value.  We do not want to also stuff the addend into the
+     object file.  Including the addend in the object file works when
+     doing a static link, because the linker will ignore the object
+     file contents.  However, the dynamic linker does not ignore the
+     object file contents.  */
+  if (fixP->fx_addsy != NULL
+      && fixP->fx_r_type != BFD_RELOC_32_PCREL_S2)
+    val = 0;
+#endif
+
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_16:
@@ -2113,8 +2126,8 @@ tc_gen_reloc (section, fixp)
   if (reloc->howto == 0)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "internal error: can't export reloc type %d",
-		    fixp->fx_r_type);
+		    "internal error: can't export reloc type %d (`%s')",
+		    fixp->fx_r_type, bfd_get_reloc_code_name (code));
       return 0;
     }
   assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);

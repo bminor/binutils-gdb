@@ -130,6 +130,7 @@ static void emit_ldah_num PARAMS ((int, bfd_vma, int));
 static void emit_addq_r PARAMS ((int, int, int));
 static void emit_lda_n PARAMS ((int, bfd_vma, int));
 static void emit_add64 PARAMS ((int, int, bfd_vma));
+static int in_range PARAMS ((bfd_vma, int, int));
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -383,8 +384,8 @@ tc_gen_reloc (sec, fixp)
   assert (reloc->howto != 0);
   if (!fixp->fx_pcrel != !reloc->howto->pc_relative)
     {
-      as_fatal ("bug in handling type-%d relocs", fixp->fx_r_type);
-      abort ();
+      as_fatal ("internal error? cannot generate `%s' relocation",
+		bfd_get_reloc_code_name (fixp->fx_r_type));
     }
   assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
@@ -1074,7 +1075,6 @@ build_mem (opc, ra, rb, disp)
      int opc, ra, rb;
      bfd_signed_vma disp;
 {
-  fprintf (stderr, "build_mem: disp=%lx\n", disp);
   if ((disp >> 15) != 0
       && (disp >> 15) + 1 != 0)
     abort ();
@@ -1148,7 +1148,7 @@ emit_add64 (in, out, num)
       emit_ldah_num (out, snum >> 16, in);
       return;
     }
-  /* I'm not sure this one is getting invoked when it could.
+  /* I'm not sure this one is getting invoked when it could.  */
   if ((num & 1) == 0 && in == ZERO)
     {
       if (in_range (snum >> 1, 16, 0))
@@ -1195,7 +1195,6 @@ emit_add64 (in, out, num)
     if (lo & 0x80000000)
       lo -= ((bfd_vma)0x10000000 << 4);
     snum -= lo;
-    printf ("splitting load of 0x%lx: 0x%lx 0x%lx\n", num, snum, lo);
     emit_add64 (ZERO, out, snum >> 32);
     emit_sll_n (out, 32, out);
     if (lo != 0)
