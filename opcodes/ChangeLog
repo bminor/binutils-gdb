@@ -1,3 +1,8 @@
+Wed Apr 19 14:07:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* m68k-dis.c (opcode): Finish change made by Kung Hsu on April
+	17th, so that it builds again using GCC as the compiler.
+
 Tue Apr 18 12:14:51 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* mips-dis.c (print_insn_little_mips): Cast return value from
