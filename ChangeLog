@@ -1,3 +1,7 @@
+Mon Nov  6 19:32:17 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* cfg-ml-com.in (sh-*-*): Add m2 and ml/m2 to multidirs.
+
 Sun Nov  5 00:15:41 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* configure:  Remove dubious bug reporting address.

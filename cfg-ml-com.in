@@ -114,9 +114,9 @@ jaguar-*-*)
 	;;
 # end-sanitize-jaguar
 sh-*-*)
-	multidirs="ml"
+	multidirs="ml m2 ml/m2"
 # start-sanitize-sh3e
-	multidirs="ml m3e"
+	multidirs="ml m2 ml/m2 m3e ml/m3e"
 # end-sanitize-sh3e
 	;;
 mips*-*-*)
