@@ -1,3 +1,93 @@
+Thu Apr 29 11:30:32 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Makefile.in: Build elf32-hppa.o.
+
+	* syms.c (BSF_FUNCTION): New symbol flag.
+
+	* elf32-hppa.c: Fixed to work with elf32-target.h.
+
+	* hp300hpux.c (NAME, NAME_swap_exec_header_in): Fix for
+	traditional C.
+	* libaout.h (NAME): Don't define if already defined.
+
+	* libelf.h: Protect against multiple inclusions.
+	(elf_symbol_type): Moved here, added new fields.
+	(struct elf_backend_data): New field `global_sym'; I suspect this
+	may be misplaced.
+	* elf32.c (elf_symbol_type): Deleted from here.
+	(struct elf_obj_tdata): New fields raw_syms and internal_syms, to
+	point to backend versions of symbols.
+	(obj_symbols, obj_raw_syms, obj_internal_syms): New macros.
+	(elf_swap_phdr_out, elf_build_phdrs, elf_write_phdrs): New
+	functions.
+	(elf_write_object_contents): Write program headers if appropriate.
+	(bfd_section_from_shdr): Unnamed sections get empty string for
+	name, not "unnamed".  Handle SHT_NOBITS separately from
+	SHT_PROGBITS, and set some different flags.
+	(elf_file_p): New routine.
+	(elf_object_p, elf_core_file_p): Call it.
+	(elf_object_p): Handle EM_HPPA.
+	(elf_symbol_from, elf_idx_of_sym): New functions.
+	(elf_make_sections): Get symbol number right for relocations.  Set
+	SHF_ALLOC, SHF_WRITE, SHF_EXECINSTR when appropriate.
+	(elf_fake_sections): BSS section should be SHT_NOBITS, not
+	SHT_PROGBITS.  Always generate symtab and strtab, not only if
+	relocations are needed.  Set SHF_* flags as appropriate.
+	(elf_compute_section_file_positions): Handle bfd_arch_hppa.
+	(elf_write_object_contents): Fix off-by-one error in symbol count.
+	Store a correct value for the symbol; write the size field
+	properly; make some guesses about the type field.  Set section
+	type correctly for string tables.
+	(section_from_elf_index): Check for absolute and common sections
+	first.
+	(elf_section_from_bfd_section): Ditto.
+	(elf_slurp_symbol_table): Use elf_symbol_type instead of asymbol.
+	Use empty string instead of "unnamed" for nameless symbols.
+	Handle STTY_FUNC type, and weirdness with "$global$" symbol for
+	HPPA (only?).  Don't free raw symbols; keep the pointer around for
+	later.
+	(elf_set_arch_mach): Handle bfd_arch_hppa.
+	(elf_find_nearest_line): Just return false.
+	(elf_write_object_contents, elf_set_section_contents): Set
+	output_has_begun field after computing file positions.
+	(elf_set_section_contents): Write section contents immediately,
+	rather than caching the whole file and writing it at close time.
+
+	* libhppa.h (enum hppa_reloc_field_selector_type, enum
+	hppa_reloc_field_selector_typ_alt, enum hppa_reloc_expr_type, enum
+	hppa_reloc_expr_type_alt): New enumerator types.
+
+	* config/hppa-elf.mt,. config/hppaosf.mh: HP PA/OSF support.
+	* configure.in, configure.host: Use them.
+
+Wed Apr 28 23:21:01 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf32-target.h: Allow overrides of armap defaults.
+
+	* elf32-hppa.c, elf32-hppa.h: New files.
+
+	* config/hp300hpux.mt: New file.
+
+Tue Apr 27 05:39:40 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* aix386-core.c (NO_GETS): New macro; NO_GET for signed values.
+	(aix386_core_vec): Update for new fields.
+
+	* archive.c (bfd_generic_archive_p): Call target-specific
+	slurp_armap code, instead of bfd_slurp_armap.
+	(bfd_slurp_bsd_armap_f2): New function.
+	* libbfd-in.h (bfd_slurp_bsd_armap_f2): Declare it.
+	* aout-target.h (AR_PAD_CHAR): Define it if not already defined.
+	(vec): Use it.
+	* libaout.h (struct aoutdata): New field for subformat, for
+	differentiating between highly similar a.out formats.
+	* aoutx.h (NAME_swap_exec_header_in): New macro, defaults to local
+	version of function.
+	(swap_exec_header_in): Don't define if NAME_swap_exec_header_in is
+	already defined.
+	* hp300hpux.c: New file.
+	* Makefile.in: Include it.
+
 Mon Apr 26 13:24:43 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in, archures.c, coffcode.h, targets.c: Support for
