@@ -70,7 +70,7 @@ AC_C_CONST
 
 AC_CHECK_FUNCS(setpgid sbrk select poll sigaction)
 
-# If we are configured native on Linux, work around problems with sys/procfs.h
+# If we are configured native on GNU/Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
   case "${host}" in
   i[[3456]]86-*-linux*)

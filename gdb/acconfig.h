@@ -30,7 +30,7 @@
 /* Define if using Solaris thread debugging.  */
 #undef HAVE_THREAD_DB_LIB
 
-/* Define on a Linux system to work around problems in sys/procfs.h.  */
+/* Define on a GNU/Linux system to work around problems in sys/procfs.h.  */
 #undef START_INFERIOR_TRAPS_EXPECTED
 #undef sys_quotactl
 

@@ -5,12 +5,12 @@
 
 * New native configurations
 
-Alpha Linux					alpha*-*-linux*
+Alpha GNU/Linux					alpha*-*-linux*
 Unixware 2.x					i[3456]86-unixware2*
 Irix 6.x					mips*-sgi-irix6*
-PowerPC Linux					powerpc-*-linux*
+PowerPC GNU/Linux				powerpc-*-linux*
 PowerPC Solaris					powerpcle-*-solaris*
-Sparc Linux					sparc-*-linux*
+Sparc GNU/Linux					sparc-*-linux*
 Motorola sysV68 R3V7.1				m68k-motorola-sysv
 
 * New targets

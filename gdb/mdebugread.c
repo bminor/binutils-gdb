@@ -881,7 +881,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
 	  if (STREQ(name, "malloc") && t->code == TYPE_CODE_VOID)
 	    {
-	      /* I don't know why, but, at least under Linux/Alpha,
+	      /* I don't know why, but, at least under Alpha GNU/Linux,
 		 when linking against a malloc without debugging
 		 symbols, its read as a function returning void---this
 		 is bad because it means we cannot call functions with

@@ -1544,7 +1544,7 @@ enable_break ()
 
 	 This address is stored on the stack.  However, I've been unable
 	 to find any magic formula to find it for Solaris (appears to
-	 be trivial on Linux).  Therefore, we have to try an alternate
+	 be trivial on GNU/Linux).  Therefore, we have to try an alternate
 	 mechanism to find the dynamic linker's base address.  */
       tmp_bfd = bfd_openr (buf, gnutarget);
       if (tmp_bfd == NULL)
@@ -1703,8 +1703,8 @@ solib_create_inferior_hook()
       return;
     }
 
-#ifndef SVR4_SHARED_LIBS
-  /* Only SunOS needs the loop below, other systems should be using the
+#if !defined(SVR4_SHARED_LIBS) || defined(_SCO_DS)
+  /* SCO and SunOS need the loop below, other systems should be using the
      special shared library breakpoints and the shared library breakpoint
      service routine.
 
@@ -1723,7 +1723,8 @@ solib_create_inferior_hook()
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
   stop_soon_quietly = 0;
-  
+
+#if !defined(_SCO_DS)
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust
      the PC as necessary after a breakpoint, disable the breakpoint, and
@@ -1742,6 +1743,7 @@ solib_create_inferior_hook()
 
   if (auto_solib_add)
     solib_add ((char *) 0, 0, (struct target_ops *) 0);
+#endif /* ! _SCO_DS */
 #endif
 }
 

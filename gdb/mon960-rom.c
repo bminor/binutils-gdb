@@ -140,7 +140,7 @@ static char *mon960_regnames[NUM_REGS];
 #if 0
 /* FIXME: this extremely long init string causes MON960 to return two NAKS
    instead of performing the autobaud recognition, at least when gdb
-   is running on Linux.  The short string below works on Linux, and on
+   is running on GNU/Linux.  The short string below works on Linux, and on
    SunOS using a tcp serial connection.  Must retest on SunOS using a
    direct serial connection; if that works, get rid of the long string. */
 static char *mon960_inits[] = {"\n\r\r\r\r\r\r\r\r\r\r\r\r\r\r\n\r\n\r\n", NULL};
