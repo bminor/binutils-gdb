@@ -48,7 +48,9 @@
 #endif
 #include <signal.h>
 #include <fcntl.h>
+#if 0
 #include <termio.h>
+#endif
 #include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
