@@ -1,4 +1,9 @@
-Sun Mar 20 15:40:21 1994  Jeffrey A. Law  (law@cygnus.com)
+Tue Mar 22 10:50:52 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gprof.c (funcsymbol): Use bfd_get_symbol_info instead of
+	bfd_decode_symclass.
+
+Sun Mar 20 15:40:21 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in: Avoid bug in hpux sed.
 

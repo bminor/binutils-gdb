@@ -690,6 +690,7 @@ funcsymbol( symp )
   CONST char	*name;
   int i;
   char		symprefix;
+  symbol_info	syminfo;
 
   /*
    *	must be a text symbol,
@@ -707,8 +708,10 @@ funcsymbol( symp )
     return FALSE;
   }
 
+
   symprefix = bfd_get_symbol_leading_char (abfd);
-  i = bfd_decode_symclass (symp);
+  bfd_get_symbol_info (abfd, symp, &syminfo);
+  i = syminfo.type;
 #if defined(DEBUG) && 0
   if (i != 'T' && i != 't')
     fprintf (stderr, "%s(%d):  %s is of class %c\n", __FILE__, __LINE__, symp->name, i);
