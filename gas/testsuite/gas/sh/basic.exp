@@ -83,4 +83,6 @@ proc do_fp {} {
 if [istarget sh*-*-*] then {
     # Test the basic instruction parser.
     do_fp
+    # Test DSP instructions
+    run_dump_test "dsp"
 }
