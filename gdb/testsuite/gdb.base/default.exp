@@ -61,12 +61,6 @@ gdb_expect {
     timeout { fail "(timeout) attach" }
 }
 
-# OBSOLETE # FIXME: attach kills the udi connection
-# OBSOLETE if { [istarget "a29k-*-udi"] } {
-# OBSOLETE     gdb_exit
-# OBSOLETE     gdb_start
-# OBSOLETE }
-
 if ![target_info exists use_gdb_stub] {
     gdb_test "break" "No default breakpoint address now." "break"
     foreach i "b br bre brea" {
@@ -75,7 +69,6 @@ if ![target_info exists use_gdb_stub] {
 
     
     setup_xfail "mips-idt-*"
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_test "backtrace" "No stack."
 
     # ba and bac are no longer unique command prefixes. So these tests
@@ -84,7 +77,6 @@ if ![target_info exists use_gdb_stub] {
     #
     foreach i "bt ba bac" {
 	setup_xfail "mips-idt-*"
-	# OBSOLETE setup_xfail "a29k-*-udi"
 	gdb_test $i "No stack." "backtrace \"$i\" abbreviation"
     }
 } else {
@@ -93,17 +85,9 @@ if ![target_info exists use_gdb_stub] {
 
 # This works on the MIPS IDT board, but confuses future tests.
 if ![istarget "mips-idt-*"] then {
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_test "continue" "The program is not being run." "continue"
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_test "c" "The program is not being run." "continue \"c\" abbreviation"
 }
-
-# OBSOLETE # FIXME: continue kills the udi connection
-# OBSOLETE if [istarget "a29k-*-udi"] then {
-# OBSOLETE     gdb_exit
-# OBSOLETE     gdb_start
-# OBSOLETE }
 
 #test call
 gdb_test "call" "The history is empty..*" "call"
@@ -152,11 +136,6 @@ gdb_expect {
 #test detach
 gdb_test "detach" "" "detach"
 
-# OBSOLETE # FIXME: continue kills the udi connection
-# OBSOLETE if [istarget "a29k-*-udi"] then {
-# OBSOLETE     gdb_exit
-# OBSOLETE     gdb_start
-# OBSOLETE }
 if [istarget "h8300-*-hms"] then {
     gdb_exit
     gdb_start
@@ -250,13 +229,10 @@ gdb_expect {
 }
 
 #test frame "f" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "f" "No stack." "frame \"f\" abbreviation"
 #test frame
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "frame" "No stack." "frame"
 #test fg
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "fg" "The program is not being run." "fg"
 # FIXME: fg kills the udi connection
 #test file
@@ -277,7 +253,6 @@ gdb_expect {
 }
 
 #test finish
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "finish" "The program is not running." "finish"
 #test forward-search
 # The message here comes from the regexp library, not gdb, and so can
@@ -319,7 +294,6 @@ gdb_test "ignore" "Argument required .a breakpoint number.*" "ignore"
 #test info address
 gdb_test "info address" "Argument required." "info address"
 #test info all-registers
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "info all-registers" "The program has no registers now." "info all-registers"
 #test info args
 gdb_test "info args" "No frame selected." "info args"
@@ -364,16 +338,12 @@ gdb_test "info functions" "All defined functions:" "info functions"
 #test info locals
 gdb_test "info locals" "No frame selected." "info locals"
 #test info program
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "info program" "The program being debugged is not being run." "info program"
 #test info registers
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "info registers" "The program has no registers now." "info registers"
 #test info stack "s" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "info s" "No stack." "info stack \"s\" abbreviation"
 #test info stack
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "info stack" "No stack." "info stack"
 #test info set
 # FIXME -- needs to match the entire output
@@ -400,7 +370,6 @@ gdb_test "info watchpoints" "No breakpoints or watchpoints." "info watchpoints"
 #test inspect
 gdb_test "inspect" "The history is empty." "inspect"
 #test jump
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "jump" "The program is not being run." "jump"
 #test kill
 gdb_test "kill" "The program is not being run." "kill"
@@ -414,16 +383,12 @@ gdb_test "list" "No symbol table is loaded.  Use the \"file\" command.*" "list"
 # to deduce the filename from the exec file.
 gdb_test "load" "You can't do that when your target is `None'.*|The load command takes a file name.*|Must specify at least a file name with the load command.*|.*Use the .file. or .exec-file. command.*" "load"
 #test next "n" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "n" "The program is not being run." "next \"n\" abbreviation"
 #test next
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "next" "The program is not being run." "next"
 #test nexti "ni" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "ni" "The program is not being run." "nexti \"ni\" abbreviation"
 #test nexti
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "nexti" "The program is not being run." "nexti"
 #test output
 gdb_test "output" "Argument required .expression to compute.*" "output"
@@ -521,7 +486,7 @@ gdb_test "rbreak" "" "rbreak"
 gdb_test "restore" "You can't do that without a process to debug\."
 
 #test return
-# The middle case accomodated the OBSOLETE a29k, where doing the "ni"
+# The middle case accomodated the obsolete a29k, where doing the "ni"
 # above causes an initial stack to be created.
 gdb_test "return" "No selected frame..*" "return"  "Make .* return now.*y or n. $" "y"
 
@@ -529,10 +494,8 @@ gdb_test "return" "No selected frame..*" "return"  "Make .* return now.*y or n. 
 #test reverse-search
 gdb_test "reverse-search" "No previous regular expression.*|There is no previous regular expression.*" "reverse-search"
 #test step "s" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "s" "The program is not being run." "step \"s\" abbreviation #1"
 #test step
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "step" "The program is not being run." "step #1"
 #test search
 gdb_test "search" "No previous regular expression.*|There is no previous regular expression.*" "search"
@@ -717,21 +680,16 @@ gdb_test "show write" "Writing into executable and core files is o.*" "show writ
 #test show
 gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200..*" "show"
 #test stepi "si" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test  "si" "The program is not being run." "stepi \"si\" abbreviation"
 #test stepi
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "stepi" "The program is not being run." "stepi"
 #test signal
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "signal" "The program is not being run." "signal"
 #test source
 gdb_test "source" "source command requires pathname of file to source..*|No such file or directory.*" "source"
 #test step "s" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "s" "The program is not being run." "step \"s\" abbreviation #2"
 #test step
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "step" "The program is not being run." "step #2"
 #test symbol-file
 gdb_test "symbol-file" "" "symbol-file"
@@ -802,10 +760,8 @@ gdb_test "tbreak" "No default breakpoint address now." "tbreak"
 #test tty
 gdb_test "tty" "Argument required .terminal name for running target process.*" "tty"
 #test until "u" abbreviation
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "u" "The program is not running." "until \"u\" abbreviation"
 #test until
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "until" "The program is not running." "until"
 #test undisplay
 # FIXME -- need to dump full output to detailed log
@@ -848,7 +804,6 @@ gdb_test "watch" "Argument required .expression to compute.*" "watch"
 #test whatis
 gdb_test "whatis" "The history is empty." "whatis"
 #test where
-# OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test "where" "No stack." "where"
 #test x
 #The case in which it prints a number is for vxgdb.

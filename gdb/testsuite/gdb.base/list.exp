@@ -164,12 +164,10 @@ proc test_listsize {} {
 proc test_list_include_file {} {
     global gdb_prompt
 
-    # OBSOLETE setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     gdb_test "list list0.h:1" "1\[ \t\]+/\[*\]+ An include file .*10\[ \t\]+bar \\(x\\+\\+\\);" "list line 1 in include file"
 
-    # OBSOLETE setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     gdb_test "list list0.h:100" "Line number 95 out of range; .*list0.h has 3\[67\] lines." "list message for lines past EOF"
@@ -231,7 +229,6 @@ proc test_list_function {} {
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
     # SunPRO cc is the second case below, it's also correct.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_test "list main" "(5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;|1\[ \t\]+#include .*10\[ \t\]+x = 0;)" "list function in source file 1"
 
     # Ultrix gdb takes the second case below; it's also correct.
@@ -396,7 +393,6 @@ proc test_list_filename_and_function {} {
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
     # SunPRO cc is the second case below, it's also correct.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     send_gdb "list list0.c:main\n"
     gdb_expect {
 	-re "1\[ \t\]+#include .*10\[ \t\]+x = 0;\r\n$gdb_prompt $" {
@@ -410,7 +406,6 @@ proc test_list_filename_and_function {} {
     }
 
     # The i960 is a second case
-    # OBSOLETE # The a29k-amd-udi is a second case
 
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
@@ -434,7 +429,6 @@ proc test_list_filename_and_function {} {
     # SunPRO cc is the third case.
     setup_xfail "rs6000-*-*" 1804
     setup_xfail "powerpc-*-*" 1804
-    # OBSOLETE setup_xfail "a29k-*-udi"
     setup_xfail_format "DWARF 1"
     setup_xfail_format "COFF"
     send_gdb "list list0.h:foo\n"
@@ -456,7 +450,6 @@ proc test_list_filename_and_function {} {
     }
 
     # Ultrix gdb is the second case.
-    # OBSOLETE # a29k-amd-udi is the third case.
     send_gdb "list list1.c:bar\n"
     gdb_expect {
 	-re "4\[ \t\]+void.*13\[ \t\]+\}\r\n$gdb_prompt $" {
@@ -473,7 +466,6 @@ proc test_list_filename_and_function {} {
     }
 
     # The i960 is a second case
-    # OBSOLETE # The a29k-amd-udi is a second case
 
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.

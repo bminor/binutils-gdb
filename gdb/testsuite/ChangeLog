@@ -1,3 +1,22 @@
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/default.exp: Remove obsolete code.
+	* gdb.c++/misc.exp: Ditto.  Update copyright.
+	* gdb.c++/cplusfuncs.exp: Ditto.  Update copyright.
+	* gdb.base/whatis.exp: Ditto.  Update copyright.
+	* gdb.base/scope.exp: Ditto.  Update copyright.
+	* gdb.base/ptype.exp: Ditto.  Update copyright.
+	* gdb.base/printcmds.exp: Ditto.  Update copyright.
+	* gdb.base/opaque.exp: Ditto.  Update copyright.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.  Update copyright.
+	* gdb.hp/gdb.threads-hp/usrthbasic.c: Delete.
+	* gdb.hp/gdb.threads-hp/usrthbasic.exp: Delete.
+	* gdb.hp/gdb.threads-hp/usrthcore.c: Delete.
+	* gdb.hp/gdb.threads-hp/usrthcore.exp: Delete.
+	* gdb.hp/gdb.threads-hp/usrthfork.c: Delete.
+	* gdb.hp/gdb.threads-hp/usrthfork.exp: Delete.
+
 2002-05-02  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/watchpoint.exp: Add xscale target.

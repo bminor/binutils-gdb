@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1997, 1999, 2001 Free Software Foundation, Inc.
+# Copyright 1992, 1997, 1999, 2001, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -319,13 +319,6 @@ proc test_lookup_operator_functions {} {
     global dm_type_foo_ref
     global dm_type_void
     global dm_type_void_star
-
-    # OBSOLETE # # These tests don't work for COFF targets; don't even try them
-    # OBSOLETE # if [istarget "a29k-*-udi"] then {
-    # OBSOLETE #     setup_xfail "a29k-*-udi"
-    # OBSOLETE #     fail "skipping operator tests"
-    # OBSOLETE #     return
-    # OBSOLETE #  }
 
     # operator* requires quoting so that GDB does not treat it as a regexp.
     info_func "operator\\*("	"void foo::operator*($dm_type_foo_ref);"

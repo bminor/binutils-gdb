@@ -1,5 +1,5 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000
-# Free Software Foundation, Inc.
+# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2002 Free
+# Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -619,25 +619,16 @@ proc test_print_string_constants {} {
     # (Test may involve inferior malloc() calls).
     set timeout 60;
 
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"a string\""		" = \"a string\""
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\0 null\""
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"abcd\"\[2\]"	" = 99 'c'"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p sizeof (\"abcdef\")"	" = 7"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype \"foo\""		" = char \\\[4\\\]"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p *\"foo\""		" = 102 'f'"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype *\"foo\""		" = char"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p &*\"foo\""		" = \"foo\""
     setup_xfail "*-*-*"
     gdb_test "ptype &*\"foo\""	"type = char \\*"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p (char *)\"foo\""	" = \"foo\""
 }
 
@@ -653,17 +644,11 @@ proc test_print_array_constants {} {
     # (Test may involve inferior malloc() calls).
     set timeout 60;
 
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print {'a','b','c'}"	" = \"abc\""
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {0,1,2}"    " = {0, 1, 2}"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {(long)0,(long)1,(long)2}"  " = {0, 1, 2}"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print {4,5,6}\[2\]"	" = 6"
-    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print *&{4,5,6}\[1\]"	" = 5"
 }
 
