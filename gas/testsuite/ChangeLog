@@ -1,3 +1,9 @@
+Mon Jun  8 18:47:11 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/d30v/array.d: Updated to match latest assembler results.
+	* gas/d30v/reloc.d: Partially updated to match latest assembler
+	results. 
+
 start-sanitize-sky
 Mon Jun  8 15:40:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
