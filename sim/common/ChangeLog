@@ -1,3 +1,8 @@
+Wed Nov 26 16:49:38 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* syscall.c (cb_syscall): If writing to stdout or stderr, flush
+	the stream immediately.
+
 Wed Nov 26 12:32:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-io.c (sim_io_getstring): Delete unused len2.

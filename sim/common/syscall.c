@@ -318,9 +318,15 @@ cb_syscall (cb, sc)
 		goto FinishSyscall;
 	      }
 	    if (fd == 1)
-	      result = (int) (*cb->write_stdout) (cb, buf, bytes_read);
+	      {
+		result = (int) (*cb->write_stdout) (cb, buf, bytes_read);
+		(*cb->flush_stdout) (cb);
+	      }
 	    if (fd == 2)
-	      result = (int) (*cb->write_stderr) (cb, buf, bytes_read);
+	      {
+		result = (int) (*cb->write_stderr) (cb, buf, bytes_read);
+		(*cb->flush_stderr) (cb);
+	      }
 	    else
 	      result = (int) (*cb->write) (cb, fd, buf, bytes_read);
 	    if (result == -1)
