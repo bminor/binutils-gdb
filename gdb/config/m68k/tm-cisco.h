@@ -47,3 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+/* BFD handles finding the registers in the core file, so they are at
+   the start of the BFD .reg section.  */
+#define REGISTER_U_ADDR(addr,blockend,regno) 0
+#define KERNEL_U_ADDR 0
