@@ -1209,14 +1209,14 @@ int mach_really_waiting;
    There is no other way to exit this loop.
 
    Returns the inferior_pid for rest of gdb.
-   Side effects: Set unix exit value to *w.
- */
+   Side effects: Set *OURSTATUS.  */
 int
 mach_really_wait (w)
-     WAITTYPE *w;
+     struct target_waitstatus *ourstatus;
 {
   int pid;
   kern_return_t ret;
+  int w;
 
   struct msg {
     mach_msg_header_t    header;
@@ -1258,7 +1258,7 @@ mach_really_wait (w)
 	    {
 	      /* Collect Unix exit status for gdb */
 
-	      wait3(w, WNOHANG, 0);
+	      wait3(&w, WNOHANG, 0);
 
 	      /* This mess is here to check that the rest of
 	       * gdb knows that the inferior died. It also
@@ -1267,25 +1267,26 @@ mach_really_wait (w)
 	       * has happened to it's children when mach-magic
 	       * is applied on them.
 	       */
-	      if ((!WIFEXITED(*w) && WIFSTOPPED(*w))         ||
-		  (WIFEXITED(*w)  && WEXITSTATUS(*w) > 0377))
+	      if ((!WIFEXITED(w) && WIFSTOPPED(w))         ||
+		  (WIFEXITED(w)  && WEXITSTATUS(w) > 0377))
 		{
-		  WSETEXIT(*w, 0);
+		  WSETEXIT(w, 0);
 		  warning ("Using exit value 0 for terminated task");
 		}
-	      else if (!WIFEXITED(*w))
+	      else if (!WIFEXITED(w))
 		{
-		  int sig = WTERMSIG(*w);
+		  int sig = WTERMSIG(w);
 
 		  /* Signals cause problems. Warn the user. */
 		  if (sig != SIGKILL) /* Bad luck if garbage matches this */
 		    warning ("The terminating signal stuff may be nonsense");
 		  else if (sig > NSIG)
 		    {
-		      WSETEXIT(*w, 0);
+		      WSETEXIT(w, 0);
 		      warning ("Using exit value 0 for terminated task");
 		    }
 		}
+	      store_waitstatus (ourstatus, w);
 	      return inferior_pid;
 	    }
 	}
@@ -1316,10 +1317,11 @@ mach_really_wait (w)
       if (stopped_in_exception)
 	{
 	  /* Get unix state. May be changed in mach3_exception_actions() */
-	  wait3(w, WNOHANG, 0);
+	  wait3(&w, WNOHANG, 0);
 
-	  mach3_exception_actions (w, FALSE, "Task");
+	  mach3_exception_actions (&w, FALSE, "Task");
 
+	  store_waitstatus (ourstatus, w);
 	  return inferior_pid;
 	}
     }
@@ -3908,7 +3910,7 @@ void
 m3_resume (pid, step, signal)
      int pid;
      int step;
-     int signal;
+     enum target_signal signal;
 {
   kern_return_t	ret;
 
@@ -3938,7 +3940,7 @@ m3_resume (pid, step, signal)
   vm_read_cache_valid = FALSE;
 
   if (signal && inferior_pid > 0) /* Do not signal, if attached by MID */
-    kill (inferior_pid, signal);
+    kill (inferior_pid, target_signal_to_host (signal));
 
   if (step)
     {

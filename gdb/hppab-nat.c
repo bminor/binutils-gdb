@@ -258,7 +258,7 @@ void
 child_resume (pid, step, signal)
      int pid;
      int step;
-     int signal;
+     enum target_signal signal;
 {
   errno = 0;
 

@@ -577,7 +577,7 @@ static void
 vx_resume (pid, step, siggnal)
      int pid;
      int step;
-     int siggnal;
+     enum target_signal siggnal;
 {
   int status;
   Rptrace ptrace_in;
@@ -860,10 +860,9 @@ sleep_ms (ms)
 static int
 vx_wait (pid_to_wait_for, status)
      int pid_to_wait_for;
-     int *status;
+     struct target_waitstatus *status;
 {
   register int pid;
-  WAITTYPE w;
   RDB_EVENT rdbEvent;
   int quit_failed;
 
@@ -912,51 +911,48 @@ vx_wait (pid_to_wait_for, status)
 	       local_hex_string((unsigned long) pid));
     } while (pid == 0);
 
-  /* FIXME, eventually do more then SIGTRAP on everything...  */
+  /* The mostly likely kind.  */
+  status->kind = TARGET_WAITKIND_STOPPED;
+
   switch (rdbEvent.eventType)
     {
     case EVENT_EXIT:
-      WSETEXIT (w, 0);
+      status->kind = TARGET_WAITKIND_EXITED;
       /* FIXME is it possible to distinguish between a
-	 XXX   normal vs abnormal exit in VxWorks? */
+	 normal vs abnormal exit in VxWorks? */
+      status->value.integer = 0;
       break;
 
-    case EVENT_START:		/* Task was just started. */
-      WSETSTOP (w, SIGTRAP);
+    case EVENT_START:
+      /* Task was just started. */
+      status->value.sig = TARGET_SIGNAL_TRAP;
       break;
 
     case EVENT_STOP:
-      WSETSTOP (w, SIGTRAP);
+      status->value.sig = TARGET_SIGNAL_TRAP;
       /* XXX was it stopped by a signal?  act accordingly */
       break;
 
     case EVENT_BREAK:		/* Breakpoint was hit. */
-      WSETSTOP (w, SIGTRAP);
+      status->value.sig = TARGET_SIGNAL_TRAP;
       break;
 
     case EVENT_SUSPEND:		/* Task was suspended, probably by ^C. */
-      WSETSTOP (w, SIGINT);
+      status->value.sig = TARGET_SIGNAL_INT;
       break;
 
     case EVENT_BUS_ERR:		/* Task made evil nasty reference. */
-      WSETSTOP (w, SIGBUS);
+      status->value.sig = TARGET_SIGNAL_BUS;
       break;
 
     case EVENT_ZERO_DIV:	/* Division by zero */
-      WSETSTOP (w, SIGFPE);	/* Like Unix, call it a float exception. */
+      status->value.sig = TARGET_SIGNAL_FPE;
       break;
 
     case EVENT_SIGNAL:
-      /* The target is not running Unix, and its
-	 faults/traces do not map nicely into Unix signals.
-	 Make sure they do not get confused with Unix signals
-	 by numbering them with values higher than the highest
-	 legal Unix signal.  code in the arch-dependent PRINT_RANDOM_SIGNAL
-	 routine will interpret the value for wait_for_inferior.  */
-      WSETSTOP (w, rdbEvent.sigType + NSIG);
+      status->value.sig = i960_fault_to_signal (rdbEvent.sigType);
       break;
     } /* switch */
-  *status = *(int *)&w;		/* Grumble union wait crap Grumble */
   return pid;
 }
 

@@ -736,13 +736,13 @@ solib_create_inferior_hook()
  
   clear_proceed_status ();
   stop_soon_quietly = 1;
-  stop_signal = 0;
+  stop_signal = TARGET_SIGNAL_0;
   do
     {
       target_resume (-1, 0, stop_signal);
       wait_for_inferior ();
     }
-  while (stop_signal != SIGTRAP);
+  while (stop_signal != TARGET_SIGNAL_TRAP);
 
   /*  solib_add will call reinit_frame_cache via symbol_file_add.
       But we are stopped in the runtime loader and we do not have symbols

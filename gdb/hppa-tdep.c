@@ -864,7 +864,7 @@ restore_pc_queue (fsr)
   CORE_ADDR pc = read_pc ();
   CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM], 4);
   int pid;
-  WAITTYPE w;
+  struct target_waitstatus w;
   int insn_count;
 
   /* Advance past break instruction in the call dummy. */
@@ -894,14 +894,15 @@ restore_pc_queue (fsr)
 	 any other choice?  Is there *any* way to do this stuff with
 	 ptrace() or some equivalent?).  */
       resume (1, 0);
-      target_wait(inferior_pid, &w);
+      target_wait (inferior_pid, &w);
 
-      if (!WIFSTOPPED (w))
+      if (w.kind == TARGET_WAITKIND_SIGNALLED)
         {
-          stop_signal = WTERMSIG (w);
+          stop_signal = w.value.sig;
           terminal_ours_for_output ();
-          printf_unfiltered ("\nProgram terminated with signal %d, %s\n",
-                  stop_signal, safe_strsignal (stop_signal));
+          printf_unfiltered ("\nProgram terminated with signal %s, %s.\n",
+			     target_signal_to_name (stop_signal),
+			     target_signal_to_string (stop_signal));
           gdb_flush (gdb_stdout);
           return 0;
         }

@@ -256,10 +256,11 @@ non_dle( buf, n )
 
 void
 nindy_resume (pid, step, siggnal)
-     int pid, step, siggnal;
+     int pid, step;
+     enum target_signal siggnal;
 {
-	if (siggnal != 0 && siggnal != stop_signal)
-	  error ("Can't send signals to remote NINDY targets.");
+  if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
+    warning ("Can't send signals to remote NINDY targets.");
 
 	dcache_flush(nindy_dcache);
 	if ( regs_changed ){
@@ -301,7 +302,7 @@ You may need to reset the 80960 and/or reload your program.\n");
 static int
 nindy_wait( pid, status )
     int pid;
-    WAITTYPE *status;
+    struct target_waitstatus *status;
 {
   fd_set fds;
   char buf[500];	/* FIXME, what is "500" here? */
@@ -312,7 +313,8 @@ nindy_wait( pid, status )
   struct cleanup *old_cleanups;
   long ip_value, fp_value, sp_value;	/* Reg values from stop */
 
-  WSETEXIT( (*status), 0 );
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
   /* OPERATE IN PASSTHROUGH MODE UNTIL NINDY SENDS A DLE CHARACTER */
 
@@ -391,30 +393,13 @@ nindy_wait( pid, status )
 
   if (stop_exit)
     {
-      /* User program exited */
-      WSETEXIT ((*status), stop_code);
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = stop_code;
     }
   else
     {
-      /* Fault or trace */
-      switch (stop_code)
-	{
-	case STOP_GDB_BPT:
-	case TRACE_STEP:
-	  /* Breakpoint or single stepping.  */
-	  stop_code = SIGTRAP;
-	  break;
-	default:
-	  /* The target is not running Unix, and its faults/traces do
-	     not map nicely into Unix signals.  Make sure they do not
-	     get confused with Unix signals by numbering them with
-	     values higher than the highest legal Unix signal.  code
-	     in i960_print_fault(), called via PRINT_RANDOM_SIGNAL,
-	     will interpret the value.  */
-	  stop_code += NSIG;
-	  break;
-	}
-      WSETSTOP ((*status), stop_code);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = i960_fault_to_signal (stop_code);
     }
   return inferior_pid;
 }

@@ -578,60 +578,40 @@ pop_frame ()
   set_current_frame (create_new_frame (read_register (FP_REGNUM), read_pc ()));
 }
 
-/* Print out text describing a "signal number" with which the i80960 halted.
-  
-   See the file "fault.c" in the nindy monitor source code for a list
-   of stop codes.  */
+/* Given a 960 stop code (fault or trace), return the signal which
+   corresponds.  */
 
-void
-print_fault( siggnal )
-    int siggnal;	/* Signal number, as returned by target_wait() */
+enum target_signal
+i960_fault_to_signal (fault)
+    int fault;
 {
-	static char unknown[] = "Unknown fault or trace";
-	static char *sigmsgs[] = {
-		/* FAULTS */
-		"parallel fault",	/* 0x00 */
-		unknown,		/* 0x01 */
-		"operation fault",	/* 0x02 */
-		"arithmetic fault",	/* 0x03 */
-		"floating point fault",	/* 0x04 */
-		"constraint fault",	/* 0x05 */
-		"virtual memory fault",	/* 0x06 */
-		"protection fault",	/* 0x07 */
-		"machine fault",	/* 0x08 */
-		"structural fault",	/* 0x09 */
-		"type fault",		/* 0x0a */
-		"reserved (0xb) fault",	/* 0x0b */
-		"process fault",	/* 0x0c */
-		"descriptor fault",	/* 0x0d */
-		"event fault",		/* 0x0e */
-		"reserved (0xf) fault",	/* 0x0f */
-
-		/* TRACES */
-		"single-step trace",	/* 0x10 */
-		"branch trace",		/* 0x11 */
-		"call trace",		/* 0x12 */
-		"return trace",		/* 0x13 */
-		"pre-return trace",	/* 0x14 */
-		"supervisor call trace",/* 0x15 */
-		"breakpoint trace",	/* 0x16 */
-	};
-#	define NUMMSGS ((int)( sizeof(sigmsgs) / sizeof(sigmsgs[0]) ))
-
-	if (siggnal < NSIG) {
-	      printf_unfiltered ("\nProgram received signal %d, %s\n",
-		      siggnal, safe_strsignal (siggnal));
-	} else {
-		/* The various target_wait()s bias the 80960 "signal number"
-		   by adding NSIG to it, so it won't get confused with any
-		   of the Unix signals elsewhere in GDB.  We need to
-		   "unbias" it before using it.  */
-		siggnal -= NSIG;
-
-		printf_unfiltered("Program stopped for reason #%d: %s.\n", siggnal,
-				(siggnal < NUMMSGS && siggnal >= 0)?
-				sigmsgs[siggnal] : unknown );
-	}
+  switch (fault)
+    {
+    case 0: return TARGET_SIGNAL_BUS; /* parallel fault */
+    case 1: return TARGET_SIGNAL_UNKNOWN;
+    case 2: return TARGET_SIGNAL_BUS; /* operation fault */
+    case 3: return TARGET_SIGNAL_FPE; /* arithmetic fault */
+    case 4: return TARGET_SIGNAL_FPE; /* floating point fault */
+    case 5: return TARGET_SIGNAL_BUS; /* constraint fault */
+    case 6: return TARGET_SIGNAL_SEGV; /* virtual memory fault */
+    case 7: return TARGET_SIGNAL_SEGV; /* protection fault */
+    case 8: return TARGET_SIGNAL_BUS; /* machine fault */
+    case 9: return TARGET_SIGNAL_BUS; /* structural fault */
+    case 0xa: return TARGET_SIGNAL_BUS; /* type fault */
+    case 0xb: return TARGET_SIGNAL_UNKNOWN; /* reserved fault */
+    case 0xc: return TARGET_SIGNAL_BUS; /* process fault */
+    case 0xd: return TARGET_SIGNAL_SEGV; /* descriptor fault */
+    case 0xe: return TARGET_SIGNAL_BUS; /* event fault */
+    case 0xf: return TARGET_SIGNAL_UNKNOWN; /* reserved fault */
+    case 0x10: return TARGET_SIGNAL_TRAP; /* single-step trace */
+    case 0x11: return TARGET_SIGNAL_TRAP; /* branch trace */
+    case 0x12: return TARGET_SIGNAL_TRAP; /* call trace */
+    case 0x13: return TARGET_SIGNAL_TRAP; /* return trace */
+    case 0x14: return TARGET_SIGNAL_TRAP; /* pre-return trace */
+    case 0x15: return TARGET_SIGNAL_TRAP; /* supervisor call trace */
+    case 0x16: return TARGET_SIGNAL_TRAP; /* breakpoint trace */
+    default: return TARGET_SIGNAL_UNKNOWN;
+    }
 }
 
 /* Initialization stub */

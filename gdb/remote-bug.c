@@ -242,7 +242,8 @@ bug_open (args, from_tty)
 
 void
 bug_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
   dcache_flush (gr_get_dcache());
 
@@ -275,12 +276,13 @@ static char *wait_strings[] = {
 int
 bug_wait (pid, status)
      int pid;
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   int old_timeout = sr_get_timeout();
   int old_immediate_quit = immediate_quit;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
   /* read off leftovers from resume so that the rest can be passed
      back out as stdout.  */
@@ -297,13 +299,15 @@ bug_wait (pid, status)
   switch (gr_multi_scan(wait_strings, need_artificial_trap == 0))
     {
     case 0: /* breakpoint case */
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       /* user output from the target can be discarded here. (?) */
       gr_expect_prompt();
       break;
 
     case 1: /* bus error */
-      WSETSTOP ((*status), SIGBUS);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_BUS;
       /* user output from the target can be discarded here. (?) */
       gr_expect_prompt();
       break;
@@ -313,14 +317,16 @@ bug_wait (pid, status)
       if (need_artificial_trap != 0)
 	{
 	  /* stepping */
-	  WSETSTOP ((*status), SIGTRAP);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  need_artificial_trap--;
 	  break;
 	}
       else
 	{
 	  /* exit case */
-	  WSETEXIT ((*status), 0);
+	  status->kind = TARGET_WAITKIND_EXITED;
+	  status->value.integer = 0;
 	  break;
 	}
 

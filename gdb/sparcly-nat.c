@@ -310,10 +310,13 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer STATUS.  */
 
+/* FIXME: Not sparc-specific.  Should be using lynx-nat.c instead; the
+   child_wait's are identical.  */
+
 int
 child_wait (pid, status)
      int pid;
-     int *status;
+     struct target_waitstatus *ourstatus;
 {
   int save_errno;
   int thread;
@@ -335,9 +338,11 @@ child_wait (pid, status)
 	{
 	  if (save_errno == EINTR)
 	    continue;
-	  fprintf (stderr, "Child process unexpectedly missing: %s.\n",
+	  fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing: %s.\n",
 		   safe_strerror (save_errno));
-	  *status = 42;		/* Claim it exited with signal 42 */
+	  /* Claim it exited with unknown signal.  */
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
 	  return -1;
 	}
 
@@ -357,6 +362,8 @@ child_wait (pid, status)
 	}
 
       pid = BUILDPID (pid, thread);
+
+      store_waitstatus (ourstatus, status);
 
       return pid;
     }

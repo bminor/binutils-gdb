@@ -124,7 +124,7 @@ target_command (arg, from_tty)
      int from_tty;
 {
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
-		  stdout);
+		  gdb_stdout);
 }
 
 /* Add a possible target architecture to the list.  */
@@ -135,7 +135,7 @@ add_target (t)
 {
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf_unfiltered(gdb_stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -214,7 +214,7 @@ default_terminal_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf("No saved terminal information.\n");
+  printf_unfiltered("No saved terminal information.\n");
 }
 
 #if 0
@@ -257,7 +257,7 @@ kill_or_be_killed (from_tty)
 {
   if (target_has_execution)
     {
-      printf ("You are already running a program:\n");
+      printf_unfiltered ("You are already running a program:\n");
       target_files_info ();
       if (query ("Kill it? ")) {
 	target_kill ();
@@ -302,7 +302,7 @@ cleanup_target (t)
      the struct definition, but not all the places that initialize one.  */
   if (t->to_magic != OPS_MAGIC)
     {
-      fprintf(stderr, "Magic number of %s target struct wrong\n", 
+      fprintf_unfiltered(gdb_stderr, "Magic number of %s target struct wrong\n", 
 	t->to_shortname);
       abort();
     }
@@ -621,7 +621,7 @@ target_info (args, from_tty)
   int has_all_mem = 0;
   
   if (symfile_objfile != NULL)
-    printf ("Symbols from \"%s\".\n", symfile_objfile->name);
+    printf_unfiltered ("Symbols from \"%s\".\n", symfile_objfile->name);
 
 #ifdef FILES_INFO_HOOK
   if (FILES_INFO_HOOK ())
@@ -635,8 +635,8 @@ target_info (args, from_tty)
       if ((int)(t->to_stratum) <= (int)dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf("\tWhile running this, gdb does not access memory from...\n");
-      printf("%s:\n", t->to_longname);
+	printf_unfiltered("\tWhile running this, gdb does not access memory from...\n");
+      printf_unfiltered("%s:\n", t->to_longname);
       (t->to_files_info)(t);
       has_all_mem = t->to_has_all_memory;
     }
@@ -672,11 +672,6 @@ target_detach (args, from_tty)
   DO_DEFERRED_STORES;
 #endif
   (current_target->to_detach) (args, from_tty);
-
-  /* It is correct to do this because the top process can never be as high
-     as process_stratum now.  This is needed at least in the case where
-     we detach a corefile, and thus need to flush the frame cache.  */
-  generic_mourn_inferior ();
 }
 
 /* Look through the list of possible targets for a target that can
@@ -763,7 +758,101 @@ find_core_target ()
   
   return(count == 1 ? runable : NULL);
 }
-  
+
+/* This table must match in order and size the signals in enum target_signal
+   in target.h.  */
+static struct {
+  char *name;
+  char *string;
+  } signals [] =
+{
+  {"0", "Signal 0"},
+  {"SIGHUP", "Hangup"},
+  {"SIGINT", "Interrupt"},
+  {"SIGQUIT", "Quit"},
+  {"SIGILL", "Illegal instruction"},
+  {"SIGTRAP", "Trace/breakpoint trap"},
+  {"SIGABRT", "Aborted"},
+  {"SIGEMT", "Emulation trap"},
+  {"SIGFPE", "Arithmetic exception"},
+  {"SIGKILL", "Killed"},
+  {"SIGBUS", "Bus error"},
+  {"SIGSEGV", "Segmentation fault"},
+  {"SIGSYS", "Bad system call"},
+  {"SIGPIPE", "Broken pipe"},
+  {"SIGALRM", "Alarm clock"},
+  {"SIGTERM", "Terminated"},
+  {"SIGURG", "Urgent I/O condition"},
+  {"SIGSTOP", "Stopped (signal)"},
+  {"SIGTSTP", "Stopped (user)"},
+  {"SIGCONT", "Continued"},
+  {"SIGCHLD", "Child status changed"},
+  {"SIGTTIN", "Stopped (tty input)"},
+  {"SIGTTOU", "Stopped (tty output)"},
+  {"SIGIO", "I/O possible"},
+  {"SIGXCPU", "CPU time limit exceeded"},
+  {"SIGXFSZ", "File size limit exceeded"},
+  {"SIGVTALRM", "Virtual timer expired"},
+  {"SIGPROF", "Profiling timer expired"},
+  {"SIGWINCH", "Window size changed"},
+  {"SIGLOST", "Resource lost"},
+  {"SIGUSR1", "User defined signal 1"},
+  {"SIGUSR2", "User defined signal 2"},
+  {"SIGPWR", "Power fail/restart"},
+  {"SIGPOLL", "Pollable event occurred"},
+  {"SIGWIND", "SIGWIND"},
+  {"SIGPHONE", "SIGPHONE"},
+  {"SIGWAITING", "Process's LWPs are blocked"},
+  {"SIGLWP", "Signal LWP"},
+  {"SIGDANGER", "Swap space dangerously low"},
+  {"SIGGRANT", "Monitor mode granted"},
+  {"SIGRETRACT", "Need to relinguish monitor mode"},
+  {"SIGMSG", "Monitor mode data available"},
+  {"SIGSOUND", "Sound completed"},
+  {"SIGSAK", "Secure attention"},
+  {NULL, "Unknown signal"},
+  /* Last entry, used to check whether the table is the right size.  */
+  {NULL, "TARGET_SIGNAL_MAGIC"}
+};
+
+/* Return the string for a signal.  */
+char *
+target_signal_to_string (sig)
+     enum target_signal sig;
+{
+  return signals[sig].string;
+}
+
+/* Return the name for a signal.  */
+char *
+target_signal_to_name (sig)
+     enum target_signal sig;
+{
+  if (sig == TARGET_SIGNAL_UNKNOWN)
+    /* I think the code which prints this will always print it along with
+       the string, so no need to be verbose.  */
+    return "?";
+  return signals[sig].name;
+}
+
+/* Given a name, return its signal.  */
+enum target_signal
+target_signal_from_name (name)
+     char *name;
+{
+  enum target_signal sig;
+
+  /* It's possible we also should allow "SIGCLD" as well as "SIGCHLD"
+     for TARGET_SIGNAL_SIGCHLD.  SIGIOT, on the other hand, is more
+     questionable; seems like by now people should call it SIGABRT
+     instead.  */
+
+  for (sig = TARGET_SIGNAL_HUP; signals[sig].name != NULL; ++sig)
+    if (STREQ (name, signals[sig].name))
+      return sig;
+  return TARGET_SIGNAL_UNKNOWN;
+}
+
 /* Convert a normal process ID to a string.  Returns the string in a static
    buffer.  */
 
@@ -777,7 +866,7 @@ normal_pid_to_str (pid)
 
   return buf;
 }
-
+
 static char targ_desc[] = 
     "Names of targets and files being debugged.\n\
 Shows the entire stack of targets currently in use (including the exec-file,\n\
@@ -791,4 +880,7 @@ _initialize_targets ()
 
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
+
+  if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
+    abort ();
 }

@@ -209,6 +209,7 @@ sim_detach (args, from_tty)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 #if 0
+/* See remote-sim.c for how this is done now.  */
 int
 sim_wait (pid, status)
      int pid;
@@ -316,9 +317,9 @@ static void
 rem_resume (pid, a, b)
      int pid;
      int a;
-     int b;
+     enum target_signal siggnal;
 {
-  sim_resume (a, b);
+  sim_resume (a, target_signal_to_host (siggnal));
 }
 
 

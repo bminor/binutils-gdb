@@ -476,7 +476,8 @@ eb_detach (from_tty)
 
 void
 eb_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
   if (step)
     {
@@ -517,7 +518,7 @@ eb_resume (pid, step, sig)
 
 int
 eb_wait (status)
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character
@@ -542,11 +543,13 @@ eb_wait (status)
 
   int old_timeout = timeout;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
   if (need_artificial_trap != 0)
     {
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       need_artificial_trap--;
       return 0;
     }
@@ -595,9 +598,15 @@ eb_wait (status)
     }
   expect_prompt ();
   if (*bp== '\0')
-    WSETSTOP ((*status), SIGTRAP);
+    {
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
+    }
   else
-    WSETEXIT ((*status), 0);
+    {
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = 0;
+    }
   timeout = old_timeout;
 
   return 0;

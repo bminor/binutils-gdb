@@ -639,7 +639,8 @@ hms_detach (args, from_tty)
 
 void
 hms_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
   dcache_flush ();
 
@@ -666,7 +667,7 @@ hms_resume (pid, step, sig)
 int
 hms_wait (pid, status)
      int pid;
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   /* Strings to look for.  '?' means match any single character.
      Note that with the algorithm we use, the initial character
@@ -694,11 +695,13 @@ hms_wait (pid, status)
   int old_immediate_quit = immediate_quit;
   int swallowed_cr = 0;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
   if (need_artificial_trap != 0)
     {
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       need_artificial_trap--;
       return 0;
     }
@@ -758,12 +761,14 @@ hms_wait (pid, status)
     }
   if (*bp == '\0')
     {
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       expect_prompt ();
     }
   else
     {
-      WSETEXIT ((*status), 0);
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = 0;
     }
 
   timeout = old_timeout;

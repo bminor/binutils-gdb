@@ -1564,9 +1564,9 @@ procfs_notice_signals (pid)
 
   for (signo = 0; signo < NSIG; signo++)
     {
-      if (signal_stop_state (signo) == 0 &&
-	  signal_print_state (signo) == 0 &&
-	  signal_pass_state (signo) == 1)
+      if (signal_stop_state (target_signal_from_host (signo)) == 0 &&
+	  signal_print_state (target_signal_from_host (signo)) == 0 &&
+	  signal_pass_state (target_signal_from_host (signo)) == 1)
 	{
 	  prdelset (&pi->prrun.pr_trace, signo);
 	}
@@ -2217,7 +2217,7 @@ NOTES
 static int
 procfs_wait (pid, statloc)
      int pid;
-     int *statloc;
+     struct target_waitstatus *ourstatus;
 {
   short what;
   short why;
@@ -2402,15 +2402,14 @@ wait_again:
 	     pi->prstatus.pr_flags);
     }
 
-  if (statloc)
-    {
-      *statloc = statval;
-    }
+  store_waitstatus (ourstatus, statval);
 
   if (rtnval == -1)		/* No more children to wait for */
     {
       fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing.\n");
-      *statloc = 42;	/* Claim it exited with signal 42 */
+      /* Claim it exited with unknown signal.  */
+      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+      ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       return rtnval;
     }
 
@@ -2493,7 +2492,7 @@ static void
 procfs_resume (pid, step, signo)
      int pid;
      int step;
-     int signo;
+     enum target_signal signo;
 {
   int signal_to_pass;
   struct procinfo *pi, *procinfo;
@@ -2523,7 +2522,7 @@ procfs_resume (pid, step, signo)
 #endif
 #endif
 
-  if (signo == SIGSTOP && pi->nopass_next_sigstop)
+  if (signo == TARGET_SIGNAL_STOP && pi->nopass_next_sigstop)
     /* When attaching to a child process, if we forced it to stop with
        a PIOCSTOP, then we will have set the nopass_next_sigstop flag.
        Upon resuming the first time after such a stop, we explicitly
@@ -2535,7 +2534,7 @@ procfs_resume (pid, step, signo)
        deal with the inferior a little smarter, and possibly even allow
        an inferior to continue running at the same time as gdb.  (FIXME?)  */
     signal_to_pass = 0;
-  else if (signo == SIGTSTP
+  else if (signo == TARGET_SIGNAL_TSTP
 	   && pi->prstatus.pr_cursig == SIGTSTP
 	   && pi->prstatus.pr_action.sa_handler == SIG_DFL)
 
@@ -2555,7 +2554,7 @@ procfs_resume (pid, step, signo)
        because the handler needs to get executed.  */
     signal_to_pass = 0;
   else
-    signal_to_pass = signo;
+    signal_to_pass = target_signal_to_host (signo);
 
   if (signal_to_pass)
     {
@@ -3475,7 +3474,7 @@ procfs_create_inferior (exec_file, allargs, env)
   procfs_set_sproc_trap (current_procinfo);
 #endif
 
-  proceed ((CORE_ADDR) -1, 0, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 /* Clean up after the inferior dies.  */

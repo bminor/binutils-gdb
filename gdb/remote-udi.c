@@ -361,7 +361,8 @@ udi_detach (args,from_tty)
 
 static void
 udi_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
   UDIError tip_error;
   UDIUInt32 Steps = 1;
@@ -389,7 +390,7 @@ udi_resume (pid, step, sig)
 static int
 udi_wait (pid, status)
      int pid;
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   UDIInt32	MaxTime;
   UDIPId	PId;
@@ -399,7 +400,8 @@ udi_wait (pid, status)
   int 		old_immediate_quit = immediate_quit;
   int		i;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
 /* wait for message to arrive. It should be:
   If the target stops executing, udi_wait() should return.
@@ -467,17 +469,22 @@ udi_wait (pid, status)
 	{
 	case 0:			/* Illegal opcode */
 	  printf_unfiltered("	(break point)\n");
-	  WSETSTOP ((*status), SIGTRAP);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  break;
 	case 1:			/* Unaligned Access */
-	  WSETSTOP ((*status), SIGBUS);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_BUS;
 	  break;
 	case 3:
 	case 4:
-	  WSETSTOP ((*status), SIGFPE);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_FPE;
 	  break;
 	case 5:			/* Protection Violation */
-	  WSETSTOP ((*status), SIGILL);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  /* Why not SEGV?  What is a Protection Violation?  */
+	  status->value.sig = TARGET_SIGNAL_ILL;
 	  break;
 	case 6:
 	case 7:
@@ -485,17 +492,21 @@ udi_wait (pid, status)
 	case 9:			/* User Data Mapping Miss */
 	case 10:		/* Supervisor Instruction Mapping Miss */
 	case 11:		/* Supervisor Data Mapping Miss */
-	  WSETSTOP ((*status), SIGSEGV);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_SEGV;
 	  break;
 	case 12:
 	case 13:
-	  WSETSTOP ((*status), SIGILL);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_ILL;
 	  break;
 	case 14:		/* Timer */
-	  WSETSTOP ((*status), SIGALRM);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_ALRM;
 	  break;
 	case 15:		/* Trace */
-	  WSETSTOP ((*status), SIGTRAP);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  break;
 	case 16:		/* INTR0 */
 	case 17:		/* INTR1 */
@@ -503,40 +514,52 @@ udi_wait (pid, status)
 	case 19:		/* INTR3/Internal */
 	case 20:		/* TRAP0 */
 	case 21:		/* TRAP1 */
-	  WSETSTOP ((*status), SIGINT);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_INT;
 	  break;
 	case 22:		/* Floating-Point Exception */
-	  WSETSTOP ((*status), SIGILL);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  /* Why not FPE?  */
+	  status->value.sig = TARGET_SIGNAL_ILL;
 	  break;
 	case 77:		/* assert 77 */
-	  WSETSTOP ((*status), SIGTRAP);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  break;
 	default:
-	  WSETEXIT ((*status), 0);
+	  status->kind = TARGET_WAITKIND_EXITED;
+	  status->value.integer = 0;
 	}
       break;
     case UDINotExecuting:
-      WSETSTOP ((*status), SIGTERM);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TERM;
       break;
     case UDIStopped:
-      WSETSTOP ((*status), SIGTSTP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TSTP;
       break;
     case UDIWarned:
-      WSETSTOP ((*status), SIGURG);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_URG;
       break;
     case UDIStepped:
     case UDIBreak:
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       break;
     case UDIWaiting:
-      WSETSTOP ((*status), SIGSTOP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_STOP;
       break;
     case UDIHalted:
-      WSETSTOP ((*status), SIGKILL);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_KILL;
       break;
     case UDIExited:
     default:
-      WSETEXIT ((*status), 0);
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = 0;
     }
 
   timeout = old_timeout;	/* Restore original timeout value */

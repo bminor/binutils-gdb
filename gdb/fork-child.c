@@ -276,7 +276,7 @@ startup_inferior (ntraps)
     {
       stop_soon_quietly = 1;	/* Make wait_for_inferior be quiet */
       wait_for_inferior ();
-      if (stop_signal != SIGTRAP)
+      if (stop_signal != TARGET_SIGNAL_TRAP)
 	{
 	  /* Let shell child handle its own signals in its own way */
 	  /* FIXME, what if child has exit()ed?  Must exit loop somehow */
@@ -302,7 +302,7 @@ startup_inferior (ntraps)
 	    }
 	  if (0 == --pending_execs)
 	    break;
-	  resume (0, 0);		/* Just make it go on */
+	  resume (0, TARGET_SIGNAL_0);		/* Just make it go on */
 	}
     }
   stop_soon_quietly = 0;

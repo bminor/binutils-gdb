@@ -476,10 +476,11 @@ mm_detach (args,from_tty)
 
 static void
 mm_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
-  if (sig)
-    error ("Can't send signals to a remote MiniMon system.");
+  if (sig != TARGET_SIGNAL_0)
+    warning ("Can't send signals to a remote MiniMon system.");
 
   if (step) {
       out_msg_buf->step_msg.code= STEP;
@@ -499,14 +500,14 @@ mm_resume (pid, step, sig)
 
 static int
 mm_wait (status)
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   int i, result;
   int old_timeout = timeout;
   int old_immediate_quit = immediate_quit;
 
-  WSETEXIT ((*status), 0);
-
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
 /* wait for message to arrive. It should be:
 	- A HIF service request.
@@ -559,59 +560,78 @@ halted:
   if (in_msg_buf->halt_msg.trap_number== 0)
   { printf("Am290*0 received vector number %d (break point)\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGTRAP);
+    status->kind = TARGET_WAITKIND_STOPPED;
+    status->value.sig = TARGET_SIGNAL_TRAP;
   }
   else if (in_msg_buf->halt_msg.trap_number== 1)
-  { printf("Am290*0 received vector number %d\n",
-	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGBUS);
-  }
+    {
+      printf("Am290*0 received vector number %d\n",
+	     in_msg_buf->halt_msg.trap_number);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_BUS;
+    }
   else if (in_msg_buf->halt_msg.trap_number== 3
         || in_msg_buf->halt_msg.trap_number== 4)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGFPE);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_FPE;
   }
   else if (in_msg_buf->halt_msg.trap_number== 5)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGILL);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_ILL;
   }
   else if (in_msg_buf->halt_msg.trap_number >= 6
         && in_msg_buf->halt_msg.trap_number <= 11)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGSEGV);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_SEGV;
   }
   else if (in_msg_buf->halt_msg.trap_number== 12
         || in_msg_buf->halt_msg.trap_number== 13)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGILL);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_ILL;
   }
   else if (in_msg_buf->halt_msg.trap_number== 14)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGALRM);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_ALRM;
   }
   else if (in_msg_buf->halt_msg.trap_number== 15)
-    WSETSTOP ((*status), SIGTRAP);
+    {
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
+    }
   else if (in_msg_buf->halt_msg.trap_number >= 16
         && in_msg_buf->halt_msg.trap_number <= 21)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGINT);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_INT;
   }
   else if (in_msg_buf->halt_msg.trap_number== 22)
   { printf("Am290*0 received vector number %d\n",
 	in_msg_buf->halt_msg.trap_number);
-    WSETSTOP ((*status), SIGILL);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_ILL;
   } /* BREAK message was sent */
   else if (in_msg_buf->halt_msg.trap_number== 75)
-    WSETSTOP ((*status), SIGTRAP);
+    {
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
+    }
   else
 exit:
-    WSETEXIT ((*status), 0);
+    {
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = 0;
+    }
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;

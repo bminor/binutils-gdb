@@ -276,12 +276,13 @@ gdbsim_detach (args,from_tty)
 
 static void
 gdbsim_resume (pid, step, siggnal)
-     int pid, step, siggnal;
+     int pid, step;
+     enum target_signal siggnal;
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
 
-  sim_resume (step, siggnal);
+  sim_resume (step, target_signal_to_host (siggnal));
 }
 
 /* Wait for inferior process to do something.  Return pid of child,
@@ -291,20 +292,35 @@ gdbsim_resume (pid, step, siggnal)
 static int
 gdbsim_wait (pid, status)
      int pid;
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   int sigrc;
   enum sim_stop reason;
 
   if (sr_get_debug ())
-    printf_filtered ("gdbsim_wait: ");
+    printf_filtered ("gdbsim_wait\n");
+
   sim_stop_reason (&reason, &sigrc);
-  if (reason == sim_exited)
-    WSETEXIT (*status, sigrc);
-  else
-    WSETSTOP (*status, sigrc);
-  if (sr_get_debug ())
-    printf_filtered ("status %d\n", *status);
+  switch (reason)
+    {
+    case sim_exited:
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = sigrc;
+      break;
+    case sim_stopped:
+      status->kind = TARGET_WAITKIND_STOPPED;
+      /* The signal in sigrc is a host signal.  That probably
+	 should be fixed.  */
+      status->value.sig = target_signal_from_host (sigrc);
+      break;
+    case sim_signalled:
+      status->kind = TARGET_WAITKIND_SIGNALLED;
+      /* The signal in sigrc is a host signal.  That probably
+	 should be fixed.  */
+      status->value.sig = target_signal_from_host (sigrc);
+      break;
+    }
+
   return inferior_pid;
 }
 

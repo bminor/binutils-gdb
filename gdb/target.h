@@ -49,6 +49,118 @@ enum strata {
 	process_stratum		/* Executing processes */
 };
 
+/* Stuff for target_wait.  */
+
+/* Generally, what has the program done?  */
+enum target_waitkind {
+  /* The program has exited.  The exit status is in value.integer.  */
+  TARGET_WAITKIND_EXITED,
+
+  /* The program has stopped with a signal.  Which signal is in value.sig.  */
+  TARGET_WAITKIND_STOPPED,
+
+  /* The program has terminated with a signal.  Which signal is in
+     value.sig.  */
+  TARGET_WAITKIND_SIGNALLED
+  };
+
+/* The numbering of these signals is chosen to match traditional unix
+   signals (insofar as various unices use the same numbers, anyway).
+   It is also the numbering of the GDB remote protocol.  Other remote
+   protocols, if they use a different numbering, should make sure to
+   translate appropriately.  */
+
+/* This is based strongly on Unix/POSIX signals for several reasons:
+   (1) This set of signals represents a widely-accepted attempt to
+   represent events of this sort in a portable fashion, (2) we want a
+   signal to make it from wait to child_wait to the user intact, (3) many
+   remote protocols use a similar encoding.  However, it is
+   recognized that this set of signals has limitations (such as not
+   distinguishing between various kinds of SIGSEGV, or not
+   distinguishing hitting a breakpoint from finishing a single step).
+   So in the future we may get around this either by adding additional
+   signals for breakpoint, single-step, etc., or by adding signal
+   codes; the latter seems more in the spirit of what BSD, System V,
+   etc. are doing to address these issues.  */
+
+/* For an explanation of what each signal means, see
+   target_signal_to_string.  */
+
+enum target_signal {
+  /* Used some places (e.g. stop_signal) to record the concept that
+     there is no signal.  */
+  TARGET_SIGNAL_0 = 0,
+  TARGET_SIGNAL_HUP = 1,
+  TARGET_SIGNAL_INT = 2,
+  TARGET_SIGNAL_QUIT = 3,
+  TARGET_SIGNAL_ILL = 4,
+  TARGET_SIGNAL_TRAP = 5,
+  TARGET_SIGNAL_ABRT = 6,
+  TARGET_SIGNAL_EMT = 7,
+  TARGET_SIGNAL_FPE = 8,
+  TARGET_SIGNAL_KILL = 9,
+  TARGET_SIGNAL_BUS = 10,
+  TARGET_SIGNAL_SEGV = 11,
+  TARGET_SIGNAL_SYS = 12,
+  TARGET_SIGNAL_PIPE = 13,
+  TARGET_SIGNAL_ALRM = 14,
+  TARGET_SIGNAL_TERM = 15,
+  TARGET_SIGNAL_URG = 16,
+  TARGET_SIGNAL_STOP = 17,
+  TARGET_SIGNAL_TSTP = 18,
+  TARGET_SIGNAL_CONT = 19,
+  TARGET_SIGNAL_CHLD = 20,
+  TARGET_SIGNAL_TTIN = 21,
+  TARGET_SIGNAL_TTOU = 22,
+  TARGET_SIGNAL_IO = 23,
+  TARGET_SIGNAL_XCPU = 24,
+  TARGET_SIGNAL_XFSZ = 25,
+  TARGET_SIGNAL_VTALRM = 26,
+  TARGET_SIGNAL_PROF = 27,
+  TARGET_SIGNAL_WINCH = 28,
+  TARGET_SIGNAL_LOST = 29,
+  TARGET_SIGNAL_USR1 = 30,
+  TARGET_SIGNAL_USR2 = 31,
+  TARGET_SIGNAL_PWR = 32,
+  /* Similar to SIGIO.  Perhaps they should have the same number.  */
+  TARGET_SIGNAL_POLL = 33,
+  TARGET_SIGNAL_WIND = 34,
+  TARGET_SIGNAL_PHONE = 35,
+  TARGET_SIGNAL_WAITING = 36,
+  TARGET_SIGNAL_LWP = 37,
+  TARGET_SIGNAL_DANGER = 38,
+  TARGET_SIGNAL_GRANT = 39,
+  TARGET_SIGNAL_RETRACT = 40,
+  TARGET_SIGNAL_MSG = 41,
+  TARGET_SIGNAL_SOUND = 42,
+  TARGET_SIGNAL_SAK = 43,
+
+  /* Some signal we don't know about.  */
+  TARGET_SIGNAL_UNKNOWN,
+
+  /* Last and unused enum value, for sizing arrays, etc.  */
+  TARGET_SIGNAL_LAST
+};
+
+struct target_waitstatus {
+  enum target_waitkind kind;
+
+  /* Exit status or signal number.  */
+  union {
+    int integer;
+    enum target_signal sig;
+  } value;
+};
+
+/* Return the string for a signal.  */
+extern char *target_signal_to_string PARAMS ((enum target_signal));
+
+/* Return the name (SIGHUP, etc.) for a signal.  */
+extern char *target_signal_to_name PARAMS ((enum target_signal));
+
+/* Given a name (SIGHUP, etc.), return its signal.  */
+enum target_signal target_signal_from_name PARAMS ((char *));
+
 struct target_ops
 {
   char	       *to_shortname;	/* Name this target type */
@@ -60,8 +172,8 @@ struct target_ops
   void 	      (*to_close) PARAMS ((int));
   void 	      (*to_attach) PARAMS ((char *, int));
   void 	      (*to_detach) PARAMS ((char *, int));
-  void 	      (*to_resume) PARAMS ((int, int, int));
-  int  	      (*to_wait) PARAMS ((int *));
+  void 	      (*to_resume) PARAMS ((int, int, enum target_signal));
+  int  	      (*to_wait) PARAMS ((int, struct target_waitstatus *));
   void 	      (*to_fetch_registers) PARAMS ((int));
   void 	      (*to_store_registers) PARAMS ((int));
   void 	      (*to_prepare_to_store) PARAMS ((void));
@@ -102,7 +214,7 @@ struct target_ops
   void 	      (*to_create_inferior) PARAMS ((char *, char *, char **));
   void 	      (*to_mourn_inferior) PARAMS ((void));
   int	      (*to_can_run) PARAMS ((void));
-  void	      (*to_notice_signals) PARAMS ((void));
+  void	      (*to_notice_signals) PARAMS ((int pid));
   enum strata   to_stratum;
   struct target_ops
     	       *to_next;
@@ -180,11 +292,12 @@ target_detach PARAMS ((char *, int));
 #define	target_resume(pid, step, siggnal)	\
 	(*current_target->to_resume) (pid, step, siggnal)
 
-/* Wait for inferior process to do something.  Return pid of child,
-   or -1 in case of error; store status through argument pointer STATUS.  */
+/* Wait for process pid to do something.  Pid = -1 to wait for any pid to do
+   something.  Return pid of child, or -1 in case of error; store status
+   through argument pointer STATUS.  */
 
-#define	target_wait(status)		\
-	(*current_target->to_wait) (status)
+#define	target_wait(pid, status)		\
+	(*current_target->to_wait) (pid, status)
 
 /* Fetch register REGNO, or all regs if regno == -1.  No result.  */
 
@@ -340,8 +453,8 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 /* post process changes to signal handling in the inferior.  */
 
-#define target_notice_signals() \
-  	(*current_target->to_notice_signals) ()
+#define target_notice_signals(pid) \
+  	(*current_target->to_notice_signals) (pid)
 
 /* Pointer to next target in the chain, e.g. a core file and an exec file.  */
 
@@ -461,4 +574,22 @@ find_default_create_inferior PARAMS ((char *, char *, char **));
 struct target_ops *
 find_core_target PARAMS ((void));
 
+/* Stuff that should be shared among the various remote targets.  */
+
+/* Debugging level.  0 is off, and non-zero values mean to print some debug
+   information (higher values, more information).  */
+extern int remote_debug;
+
+/* Speed in bits per second.  */
+extern int baud_rate;
+
+/* Functions for helping to write a native target.  */
+
+/* This is for native targets which use a unix/POSIX-style waitstatus.  */
+extern void store_waitstatus PARAMS ((struct target_waitstatus *, int));
+
+/* Convert between host signal numbers and enum target_signal's.  */
+extern enum target_signal target_signal_from_host PARAMS ((int));
+extern int target_signal_to_host PARAMS ((enum target_signal));
+
 #endif	/* !defined (TARGET_H) */

@@ -213,12 +213,12 @@ store_inferior_registers (regno)
 }
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
-   of error; store status through argument pointer STATUS.  */
+   of error; store status through argument pointer OURSTATUS.  */
 
 int
 child_wait (pid, status)
      int pid;
-     int *status;
+     struct target_waitstatus *ourstatus;
 {
   int save_errno;
   int thread;
@@ -242,7 +242,9 @@ child_wait (pid, status)
 	    continue;
 	  fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing: %s.\n",
 		   safe_strerror (save_errno));
-	  *status = 42;		/* Claim it exited with signal 42 */
+	  /* Claim it exited with unknown signal.  */
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
 	  return -1;
 	}
 
@@ -262,6 +264,8 @@ child_wait (pid, status)
 	}
 
       pid = BUILDPID (pid, thread);
+
+      store_waitstatus (ourstatus, status);
 
       return pid;
     }

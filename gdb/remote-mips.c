@@ -72,8 +72,8 @@ mips_close PARAMS ((int quitting));
 static void
 mips_detach PARAMS ((char *args, int from_tty));
 
-static void
-mips_resume PARAMS ((int pid, int step, int siggnal));
+static void mips_resume PARAMS ((int pid, int step,
+				 enum target_signal siggnal));
 
 static int
 mips_wait PARAMS ((int pid, WAITTYPE *status));
@@ -1011,11 +1011,13 @@ mips_detach (args, from_tty)
 
 static void
 mips_resume (pid, step, siggnal)
-     int pid, step, siggnal;
+     int pid, step;
+     enum target_signal siggnal;
 {
-  if (siggnal)
-    mips_error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
-	   siggnal);
+  if (siggnal != TARGET_SIGNAL_0)
+    warning
+      ("Can't send signals to a remote system.  Try `handle %s ignore'.",
+       target_signal_to_name (siggnal));
 
   mips_request (step ? 's' : 'c',
 		(unsigned int) 1,
@@ -1029,7 +1031,7 @@ mips_resume (pid, step, siggnal)
 static int
 mips_wait (pid, status)
      int pid;
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   int rstatus;
   int err;
@@ -1039,7 +1041,8 @@ mips_wait (pid, status)
      indicating that it is stopped.  */
   if (! mips_need_reply)
     {
-      WSETSTOP (*status, SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       return 0;
     }
 
@@ -1048,16 +1051,32 @@ mips_wait (pid, status)
   if (err)
     mips_error ("Remote failure: %s", safe_strerror (errno));
 
-  /* FIXME: The target board uses numeric signal values which are
-     those used on MIPS systems.  If the host uses different signal
-     values, we need to translate here.  I believe all Unix systems
-     use the same values for the signals the board can return, which
-     are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
-
-  /* FIXME: The target board uses a standard Unix wait status int.  If
-     the host system does not, we must translate here.  */
-
-  *status = rstatus;
+  /* Translate a MIPS waitstatus.  We use constants here rather than WTERMSIG
+     and so on, because the constants we want here are determined by the
+     MIPS protocol and have nothing to do with what host we are running on.  */
+  if ((rstatus & 0x377) == 0)
+    {
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = (((rstatus) >> 8) & 0377);
+    }
+  else if ((rstatus & 0x377) == 0x177)
+    {
+      status->kind = TARGET_WAIT_KIND_STOPPED;
+      /* Don't want to use target_signal_from_host because we are converting
+	 from MIPS signal numbers, not host ones.  Our internal numbers
+	 match the MIPS numbers for the signals the board can return, which
+	 are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
+      status->value.sig = (enum target_signal) (((rstatus) >> 8) & 0377);
+    }
+  else
+    {
+      status->kind = TARGET_WAITKIND_SIGNALLED;
+      /* Don't want to use target_signal_from_host because we are converting
+	 from MIPS signal numbers, not host ones.  Our internal numbers
+	 match the MIPS numbers for the signals the board can return, which
+	 are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
+      status->value.sig = (enum target_signal) (rstatus & 0x177);
+    }
 
   return 0;
 }

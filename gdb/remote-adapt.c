@@ -650,7 +650,8 @@ adapt_detach (args,from_tty)
 
 void
 adapt_resume (pid, step, sig)
-     int pid, step, sig;
+     int pid, step;
+     enum target_signal sig;
 {
   if (step)	
     {
@@ -680,7 +681,7 @@ adapt_resume (pid, step, sig)
 
 int
 adapt_wait (status)
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character
@@ -705,11 +706,13 @@ adapt_wait (status)
   int old_timeout = timeout;
   int old_immediate_quit = immediate_quit;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
 
   if (need_artificial_trap != 0)
     {
-      WSETSTOP ((*status), SIGTRAP);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
       need_artificial_trap--;
       return 0;
     }
@@ -750,9 +753,15 @@ adapt_wait (status)
   }
   expect_prompt ();
   if (*bp== '\0')
-    WSETSTOP ((*status), SIGTRAP);
+    {
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_TRAP;
+    }
   else
-    WSETEXIT ((*status), 0);
+    {
+      status->kind = TARGET_WAITKIND_EXITED;
+      status->value.integer = 0;
+    }
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
   return 0;

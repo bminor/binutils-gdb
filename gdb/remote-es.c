@@ -161,8 +161,7 @@ es1800_prepare_to_store PARAMS ((void));
 static int
 es1800_wait PARAMS ((WAITTYPE *));
 
-static void
-es1800_resume PARAMS ((int, int, int));
+static void es1800_resume PARAMS ((int, int, enum target_signal));
 
 static void
 es1800_detach PARAMS ((char *, int));
@@ -654,7 +653,7 @@ static void
 es1800_resume (pid, step, siggnal)
      int pid;
      int step;
-     int siggnal;
+     enum target_signal siggnal;
 {
   char buf[PBUFSIZ];
 
@@ -679,12 +678,14 @@ es1800_resume (pid, step, siggnal)
  
 static int
 es1800_wait (status)
-     WAITTYPE *status;
+     struct target_waitstatus *status;
 {
   unsigned char buf[PBUFSIZ];
   int old_timeout = timeout;
 
-  WSETEXIT ((*status), 0);
+  status->kind = TARGET_WAITKIND_EXITED;
+  status->value.integer = 0;
+
   timeout = 0;		/* Don't time out -- user program is running. */
   if (!setjmp (interrupt))
     {
@@ -694,7 +695,8 @@ es1800_wait (status)
 	  getmessage (buf, sizeof(buf));
 	  if (strncmp ( buf, "\r\n* BREAK *", 11) == 0) 
 	    {
-	      WSETSTOP ((*status), SIGTRAP);
+	      status->kind = TARGET_WAITKIND_STOPPED;
+	      status->value.sig = TARGET_SIGNAL_TRAP;
 	      send_command ("STP");	/* Restore stack and PC and such */
 	      if (m68020)
 		{
@@ -704,7 +706,8 @@ es1800_wait (status)
 	    }
 	  if (strncmp (buf, "STP\r\n ", 6) == 0)
 	    {
-	      WSETSTOP ((*status), SIGTRAP);
+	      status->kind = TARGET_WAITKIND_STOPPED;
+	      status->value.sig = TARGET_SIGNAL_TRAP;
 	      break;
 	    }
 	  if (buf[strlen (buf) - 2] == 'R')
@@ -714,7 +717,8 @@ es1800_wait (status)
 	  else
 	    {
 	      printf ("Unexpected stop: \n%s\n", buf);
-	      WSETSTOP ((*status), SIGQUIT);
+	      status->kind = TARGET_WAITKIND_STOPPED;
+	      status->value.sig = TARGET_SIGNAL_QUIT;
 	      break;
 	    }
         }
@@ -728,7 +732,8 @@ es1800_wait (status)
 	  old_sigint = signal (SIGINT, es1800_request_quit);
 	  send_command ("STP");
 	  printf (" emulator stopped\n");
-	  WSETSTOP ((*status), SIGINT);
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_INT;
         }
       else
 	{

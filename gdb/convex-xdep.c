@@ -731,6 +731,7 @@ wait (w)
 
   select_thread (signal_stack->thread);
 
+ FIXME: need to convert from host sig.
   stop_signal = signal_stack->signo;
   stop_sigcode = signal_stack->subsig;
 
