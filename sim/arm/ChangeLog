@@ -1,3 +1,9 @@
+2003-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (GetWord): Only call XScale_check_memacc if in XScale
+	mode.
+	(PutWord): Likewise.
+
 2003-03-30  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (CON_FLAGS): Remove.
