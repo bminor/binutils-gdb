@@ -32,6 +32,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
+#include "solib-svr4.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -2066,6 +2067,49 @@ arm_othernames (char *names, int n)
 
   disassembly_flavor = valid_flavors[current_option];
   set_disassembly_flavor (); 
+}
+
+/* Fetch, and possibly build, an appropriate link_map_offsets structure
+   for ARM linux targets using the struct offsets defined in <link.h>.
+   Note, however, that link.h is not actually referred to in this file.
+   Instead, the relevant structs offsets were obtained from examining
+   link.h.  (We can't refer to link.h from this file because the host
+   system won't necessarily have it, or if it does, the structs which
+   it defines will refer to the host system, not the target.)  */
+
+struct link_map_offsets *
+arm_linux_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
+
+  if (lmp == 0)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
+                                   need. */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
+                                   need. */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+    return lmp;
 }
 
 void

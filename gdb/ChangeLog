@@ -1,3 +1,11 @@
+2001-11-30  Kevin Buettner  <kevinb@redhat.com>
+
+	From Louis Hamilton  <hamilton@redhat.com>:
+	* arm-tdep.c (solib-svr4.h): Include.
+	(arm_linux_svr4_fetch_link_map_offsets): New function.
+	* config/arm/tm-linux.h (SVR4_FETCH_LINK_MAP_OFFSETS): Define.
+	(arm_linux_svr4_fetch_link_map_offsets): Declare.
+
 2001-11-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* values.c (value_primitive_field): Add embedded_offset to the
