@@ -1,3 +1,10 @@
+2000-05-08  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/djconfig.sh: Use more warning switches.
+
+	* config/djgpp/fnchange.lst: Replace the leading gdb-0222 with the
+        @V@ placebo.  djunpack.bat changed accordingly.
+
 2000-05-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c: Define PT_READ_U and PT_WRITE_U if they're not

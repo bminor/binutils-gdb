@@ -120,7 +120,8 @@ fi
 # since it relies on file names which will never work on DOS.
 echo "Running the configure script..."
 $srcdir/configure --srcdir="$srcdir" --prefix='${DJDIR}' \
-  --disable-shared --disable-nls --verbose $*
+  --disable-shared --disable-nls --verbose --enable-build-warnings=\
+-Wimplicit,-Wcomment,-Wformat,-Wparentheses,-Wpointer-arith $*
 
 if test -f ${srcdir}/install- ; then
   mv ${srcdir}/install- ${srcdir}/install-.sh
