@@ -156,7 +156,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* ia64-specific option processing:  */
 
-const char *md_shortopts = "M:N:x::";
+const char *md_shortopts = "m:N:x::";
 
 struct option md_longopts[] =
   {
@@ -3588,6 +3588,7 @@ dot_endp (dummy)
 {
   expressionS e;
   unsigned char *ptr;
+  int bytes_per_address;
   long where;
   segT saved_seg;
   subsegT saved_subseg;
@@ -3612,19 +3613,20 @@ dot_endp (dummy)
   set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND]);
   ptr = frag_more (24);
   where = frag_now_fix () - 24;
+  bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
 
   /* Issue the values of  a) Proc Begin,  b) Proc End,  c) Unwind Record.  */
   e.X_op = O_pseudo_fixup;
   e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
   e.X_add_number = 0;
   e.X_add_symbol = unwind.proc_start;
-  ia64_cons_fix_new (frag_now, where, 8, &e);
+  ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
 
   e.X_op = O_pseudo_fixup;
   e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
   e.X_add_number = 0;
   e.X_add_symbol = unwind.proc_end;
-  ia64_cons_fix_new (frag_now, where + 8, 8, &e);
+  ia64_cons_fix_new (frag_now, where + bytes_per_address, bytes_per_address, &e);
 
   if (unwind.info != 0)
     {
@@ -3632,10 +3634,10 @@ dot_endp (dummy)
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
       e.X_add_symbol = unwind.info;
-      ia64_cons_fix_new (frag_now, where + 16, 8, &e);
+      ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2), bytes_per_address, &e);
     }
   else
-    md_number_to_chars (ptr + 16, 0, 8);
+    md_number_to_chars (ptr + (bytes_per_address * 2), 0, bytes_per_address);
 
   subseg_set (saved_seg, saved_subseg);
   unwind.proc_start = unwind.proc_end = unwind.info = 0;
@@ -5562,8 +5564,8 @@ emit_one_bundle ()
   t0 = end_of_insn_group | (template << 1) | (insn[0] << 5) | (insn[1] << 46);
   t1 = ((insn[1] >> 18) & 0x7fffff) | (insn[2] << 23);
 
-  md_number_to_chars (f + 0, t0, 8);
-  md_number_to_chars (f + 8, t1, 8);
+  number_to_chars_littleendian (f + 0, t0, 8);
+  number_to_chars_littleendian (f + 8, t1, 8);
 }
 
 int
@@ -5574,7 +5576,7 @@ md_parse_option (c, arg)
   switch (c)
     {
     /* Switches from the Intel assembler.  */
-    case 'M':
+    case 'm':
       if (strcmp (arg, "ilp64") == 0
 	  || strcmp (arg, "lp64") == 0
 	  || strcmp (arg, "p64") == 0)
@@ -5688,8 +5690,8 @@ md_show_usage (stream)
 {
   fputs (_("\
 IA-64 options:\n\
-  -Milp32|-Milp64|-Mlp64|-Mp64	select data model (default -Mlp64)\n\
-  -Mle | -Mbe		  select little- or big-endian byte order (default -Mle)\n\
+  -milp32|-milp64|-mlp64|-mp64	select data model (default -mlp64)\n\
+  -mle | -mbe		  select little- or big-endian byte order (default -mle)\n\
   -x | -xexplicit	  turn on dependency violation checking (default)\n\
   -xauto		  automagically remove dependency violations\n\
   -xdebug		  debug dependency violation checker\n"),
@@ -5740,7 +5742,7 @@ extra_goodness (int templ, int slot)
 void
 md_begin ()
 {
-  int i, j, k, t, total, ar_base, cr_base, goodness, best, regnum;
+  int i, j, k, t, total, ar_base, cr_base, goodness, best, regnum, ok;
   const char *err;
   char name[8];
 
@@ -5749,7 +5751,7 @@ md_begin ()
 
   bfd_set_section_alignment (stdoutput, text_section, 4);
 
-  target_big_endian = 0;
+  target_big_endian = TARGET_BYTES_BIG_ENDIAN;
   pseudo_func[FUNC_FPTR_RELATIVE].u.sym =
     symbol_new (".<fptr>", undefined_section, FUNC_FPTR_RELATIVE,
 		&zero_address_frag);
@@ -5948,14 +5950,51 @@ md_begin ()
 		  name, err);
     }
 
-  /* Default to 64-bit mode.  */
-  /* ??? This overrides the -M options, but they aren't working anyways.  */
-  md.flags |= EF_IA_64_ABI64;
+  /* Set the architecture and machine depending on defaults and command line
+     options.  */
+  if (md.flags & EF_IA_64_ABI64)
+    ok = bfd_set_arch_mach (stdoutput, bfd_arch_ia64, bfd_mach_ia64_elf64);
+  else
+    ok = bfd_set_arch_mach (stdoutput, bfd_arch_ia64, bfd_mach_ia64_elf32);
+
+  if (! ok)
+     as_warn (_("Could not set architecture and machine"));
 
   md.mem_offset.hint = 0;
   md.path = 0;
   md.maxpaths = 0;
   md.entry_labels = NULL;
+}
+
+/* Set the elf type to 64 bit ABI by default.  Cannot do this in md_begin
+   because that is called after md_parse_option which is where we do the
+   dynamic changing of md.flags based on -mlp64 or -milp32.  Also, set the
+   default endianness.  */
+
+void
+ia64_init (argc, argv)
+     int argc;
+     char **argv;
+{
+  md.flags = EF_IA_64_ABI64;
+  if (TARGET_BYTES_BIG_ENDIAN)
+    md.flags |= EF_IA_64_BE;
+}
+
+/* Return a string for the target object file format.  */
+
+const char *
+ia64_target_format ()
+{
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    {
+      if (md.flags & EF_IA_64_ABI64)
+	return "elf64-ia64-big";
+      else
+	return "elf32-ia64-big";
+    }
+  else
+    return "unknown-format";
 }
 
 void
@@ -9345,8 +9384,8 @@ fix_insn (fix, odesc, value)
 
   t0 = control_bits | (insn[0] << 5) | (insn[1] << 46);
   t1 = ((insn[1] >> 18) & 0x7fffff) | (insn[2] << 23);
-  md_number_to_chars (fixpos + 0, t0, 8);
-  md_number_to_chars (fixpos + 8, t1, 8);
+  number_to_chars_littleendian (fixpos + 0, t0, 8);
+  number_to_chars_littleendian (fixpos + 8, t1, 8);
 }
 
 /* Attempt to simplify or even eliminate a fixup.  The return value is

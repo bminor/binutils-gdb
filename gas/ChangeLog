@@ -1,3 +1,22 @@
+2000-11-06  Steve Ellcey <sje@cup.hp.com>
+
+	* config/tc-ia64.c (md_shortopts, md_parse_option, md_show_usage):
+	Change M to m for -milp32 or -mlp64 to match gcc.
+	(dot_endp): Use bytes_per_address instead of 8.
+	(emit_one_bundle): Use number_to_chars_littleendian instead of
+	md_number_to_chars.
+	(fix_insn): Likewise.
+	(ia64_init): New function.
+	(ia64_target_format): New function.
+	(md_begin): Set endianness, arch, and machine as appropriate.
+	* config/tc-ia64.h: (TARGET_BYTES_BIG_ENDIAN, md_number_to_chars):
+	Make these macros depend on TE_HPUX macro.
+	(TARGET_FORMAT): Define.
+	(HOST_SPECIAL_INIT): Define.
+	* config/te-hpux.h: New file.
+	* configure.in: Add "ia64-*-hpux*" target to configure.
+	* configure: Regenerate.
+	
 2000-11-06  Kazu Hirata  <kazu@hxi.com>
 
 	* as.c: Fix formatting.

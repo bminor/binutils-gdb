@@ -24,14 +24,27 @@
 
 #define TC_IA64
 
-#define TARGET_FORMAT (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
-		       ? "elf64-ia64-little"				\
-		       : "unknown-format")
+/* Linux is little endian by default.  HPUX is big endian by default.  */
+#ifdef TE_HPUX
+#define md_number_to_chars		number_to_chars_bigendian
+#define TARGET_BYTES_BIG_ENDIAN		1
+#else
+#define md_number_to_chars		number_to_chars_littleendian
+#define TARGET_BYTES_BIG_ENDIAN		0
+#endif /* TE_HPUX */
+
+/* We need to set the default object file format in ia64_init and not in
+   md_begin.  This is because parse_args is called before md_begin, and we
+   do not want md_begin to wipe out the flag settings set by options parsed in
+   md_parse_args.  */
+
+#define HOST_SPECIAL_INIT ia64_init
+
+#define TARGET_FORMAT ia64_target_format()
+extern const char *ia64_target_format PARAMS ((void));
 
 #define TARGET_ARCH			bfd_arch_ia64
-#define TARGET_BYTES_BIG_ENDIAN		0
 #define DOUBLESLASH_LINE_COMMENTS	/* allow //-style comments */
-#define md_number_to_chars		number_to_chars_littleendian
 #define TC_HANDLES_FX_DONE
 
 #define NEED_LITERAL_POOL		/* need gp literal pool */

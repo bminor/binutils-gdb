@@ -285,6 +285,7 @@ changequote([,])dnl
 
       ia64-*-elf*)	    fmt=elf ;;
       ia64-*-linux-gnu*)    fmt=elf em=linux ;;
+      ia64-*-hpux*)	    fmt=elf em=hpux ;;
 
       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
 
