@@ -340,7 +340,7 @@ arm_rdi_create_inferior (exec_file, args, env)
   CORE_ADDR entry_point;
 
   if (exec_file == 0 || exec_bfd == 0)
-   error ("No exec file specified.");
+   error ("No executable file specified.");
 
   entry_point = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 

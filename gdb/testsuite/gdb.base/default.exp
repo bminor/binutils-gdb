@@ -273,7 +273,7 @@ gdb_test "info files" "" "info files"
 #test info float
 if [istarget "arm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} else if [istarget "thumb-*-*"] then {
+} elseif [istarget "thumb-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } else {
     gdb_test "info float" "No floating point info available for this processor." "info float"
@@ -386,7 +386,7 @@ You must specify a function name to run, and arguments if any"\
 You can't do that when your target is `None'.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
-No exec file specified.*
+No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run \"r\" abbreviation" }
 	    -re "Starting program:  .*
@@ -415,7 +415,7 @@ You must specify a function name to run, and arguments if any"
     gdb_expect {
 	    -re "Starting program:.*You can't do that when your target is `None'.*$gdb_prompt $" { pass "run" }
 	    -re "Starting program:  .*
-No exec file specified.*
+No executable file specified.*
 Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
 			{ pass "run" }
 	    -re "Starting program:  .*

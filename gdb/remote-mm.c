@@ -162,7 +162,7 @@ mm_create_inferior (execfile, args, env)
     error ("Can't pass arguments to remote mm process (yet).");
 
   if (execfile == 0 /* || exec_bfd == 0 */ )
-    error ("No exec file specified");
+    error ("No executable file specified");
 
   if (!mm_stream) {
         printf("Minimon not open yet.\n");

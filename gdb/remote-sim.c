@@ -456,7 +456,7 @@ gdbsim_create_inferior (exec_file, args, env)
   char *arg_buf,**argv;
 
   if (exec_file == 0 || exec_bfd == 0)
-    warning ("No exec file specified.");
+    warning ("No executable file specified.");
   if (! program_loaded)
     warning ("No program loaded.");
 

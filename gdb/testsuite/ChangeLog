@@ -1,3 +1,7 @@
+Thu Oct  1 20:56:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/default.exp: Replace "exec" with "executable".
+
 1998-09-29  Keith Seitz  <keiths@cygnus.com>
 
         * gdb.gdbtk/browser.test: Fix tests which incorrectly assume

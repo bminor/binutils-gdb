@@ -491,7 +491,7 @@ gr_create_inferior (execfile, args, env)
     error ("Can't pass arguments to remote process.");
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No exec file specified");
+    error ("No executable file specified");
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
   sr_check_open ();

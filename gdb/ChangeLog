@@ -1,3 +1,37 @@
+Thu Oct  1 20:52:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-rdp.c (remote_rdp_create_inferior), remote-os9k.c
+ 	(rombug_create_inferior), remote-mm.c (mm_create_inferior),
+ 	remote-eb.c (eb_create_inferior), remote-es.c
+ 	(es1800_create_inferior), remote-rdi.c (arm_rdi_create_inferior),
+ 	remote-sim.c (gdbsim_create_inferior), remote-utils.c
+ 	(gr_create_inferior), remote-st.c (st2000_create_inferior),
+ 	remote-nindy.c (nindy_create_inferior), remote-hms.c
+ 	(hms_create_inferior), remote-e7000.c (e7000_create_inferior),
+ 	remote-array.c (array_create_inferior), remote-adapt.c
+ 	(adapt_create_inferior): Replace "exec" with "executable" in
+ 	messages.
+
+1998-09-25  Keith Seitz  <keiths@cygnus.com>
+
+        * rdi-share/unixcomm.c: If using cygwin32, also use the SERPORT and
+        PARPORT defines for win32.
+        (Unix_MatchValidSerialDevice): For cygwin32, valid serial port names
+        start with "com", not "/dev/tty".
+        (Unix_OpenSerial): Do not use O_NONBLOCK on cygwin32.
+
+        * rdi-share/devsw.c (DevSW_Close): Free the device's state (SwitcherState)
+        so that the device may be reopened.
+
+        * remote-rdi.c (mywritec): Send all output through gdb's *_unfiltered
+        functions, ignoring non-ASCII chars, so that non-tty UI's can snarf
+        the output from fputs_hook.
+        (mywrite): Ditto.
+        (arm_rdi_open): Set inferior_pid.
+        (arm_rdi_detach): Pop the target off the target stack so that
+        users can attach and detach multiple times.
+        (arm_rdi_close): Close the opened device and reset inferior_pid, too.
+
 1998-09-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Change --enable-warnings to --enable-build-warnings.
@@ -207,26 +241,6 @@ Tue Sep  1 12:04:57 EDT 1998  Zdenek Radouch   (radouch@cygnus.com)
 Mon Aug 31 15:42:10 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* top.c (context_hook): Define.
-
-1998-08-26  Keith Seitz  <keiths@cygnus.com>
-
-        * rdi-share/unixcomm.c: If using cygwin32, also use the SERPORT and
-        PARPORT defines for win32.
-        (Unix_MatchValidSerialDevice): For cygwin32, valid serial port names
-        start with "com", not "/dev/tty".
-        (Unix_OpenSerial): Do not use O_NONBLOCK on cygwin32.
-
-        * rdi-share/devsw.c (DevSW_Close): Free the device's state (SwitcherState)
-        so that the device may be reopened.
-
-        * remote-rdi.c (mywritec): Send all output through gdb's *_unfiltered
-        functions, ignoring non-ASCII chars, so that non-tty UI's can snarf
-        the output from fputs_hook.
-        (mywrite): Ditto.
-        (arm_rdi_open): Set inferior_pid.
-        (arm_rdi_detach): Pop the target off the target stack so that
-        users can attach and detach multiple times.
-        (arm_rdi_close): Close the opened device and reset inferior_pid, too.
 
 Tue Aug 25 13:21:58 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
