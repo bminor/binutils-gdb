@@ -1,3 +1,11 @@
+2001-10-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_map_symbols): Don't create new section symbols; Use
+	existing section syms.  Update comments.
+	(copy_private_bfd_data): Formatting fixes.
+	(elfcore_grok_win32pstatus): Likewise.
+	(swap_out_syms): Likewise.  Remove unnecessary level of braces.
+
 2001-10-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct bfd_elf_section_data): Rename "group" to

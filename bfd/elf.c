@@ -2387,7 +2387,6 @@ elf_map_symbols (abfd)
   unsigned int num_locals2 = 0;
   unsigned int num_globals2 = 0;
   int max_index = 0;
-  unsigned int num_sections = 0;
   unsigned int idx;
   asection *asect;
   asymbol **new_syms;
@@ -2398,8 +2397,6 @@ elf_map_symbols (abfd)
   fflush (stderr);
 #endif
 
-  /* Add a section symbol for each BFD section.  FIXME: Is this really
-     necessary?  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
       if (max_index < asect->index)
@@ -2414,6 +2411,8 @@ elf_map_symbols (abfd)
   elf_section_syms (abfd) = sect_syms;
   elf_num_section_syms (abfd) = max_index;
 
+  /* Init sect_syms entries for any section symbols we have already
+     decided to output.  */
   for (idx = 0; idx < symcount; idx++)
     {
       asymbol *sym = syms[idx];
@@ -2434,15 +2433,16 @@ elf_map_symbols (abfd)
 
 		  sec = sec->output_section;
 
-		  /* Empty sections in the input files may have had a section
-		     symbol created for them.  (See the comment near the end of
-		     _bfd_generic_link_output_symbols in linker.c).  If the linker
-		     script discards such sections then we will reach this point.
-		     Since we know that we cannot avoid this case, we detect it
-		     and skip the abort and the assignment to the sect_syms array.
-		     To reproduce this particular case try running the linker
-		     testsuite test ld-scripts/weak.exp for an ELF port that uses
-		     the generic linker.  */
+		  /* Empty sections in the input files may have had a
+		     section symbol created for them.  (See the comment
+		     near the end of _bfd_generic_link_output_symbols in
+		     linker.c).  If the linker script discards such
+		     sections then we will reach this point.  Since we know
+		     that we cannot avoid this case, we detect it and skip
+		     the abort and the assignment to the sect_syms array.
+		     To reproduce this particular case try running the
+		     linker testsuite test ld-scripts/weak.exp for an ELF
+		     port that uses the generic linker.  */
 		  if (sec->owner == NULL)
 		    continue;
 
@@ -2453,31 +2453,6 @@ elf_map_symbols (abfd)
 	}
     }
 
-  for (asect = abfd->sections; asect; asect = asect->next)
-    {
-      asymbol *sym;
-
-      if (sect_syms[asect->index] != NULL)
-	continue;
-
-      sym = bfd_make_empty_symbol (abfd);
-      if (sym == NULL)
-	return false;
-      sym->the_bfd = abfd;
-      sym->name = asect->name;
-      sym->value = 0;
-      /* Set the flags to 0 to indicate that this one was newly added.  */
-      sym->flags = 0;
-      sym->section = asect;
-      sect_syms[asect->index] = sym;
-      num_sections++;
-#ifdef DEBUG
-      fprintf (stderr,
- _("creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"),
-	       asect->name, (long) asect->vma, asect->index, (long) asect);
-#endif
-    }
-
   /* Classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
@@ -2486,17 +2461,19 @@ elf_map_symbols (abfd)
       else
 	num_globals++;
     }
+
+  /* We will be adding a section symbol for each BFD section.  Most normal
+     sections will already have a section symbol in outsymbols, but
+     eg. SHT_GROUP sections will not, and we need the section symbol mapped
+     at least in that case.  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      if (sect_syms[asect->index] != NULL
-	  && sect_syms[asect->index]->flags == 0)
+      if (sect_syms[asect->index] == NULL)
 	{
-	  sect_syms[asect->index]->flags = BSF_SECTION_SYM;
-	  if (!sym_is_global (abfd, sect_syms[asect->index]))
+	  if (!sym_is_global (abfd, asect->symbol))
 	    num_locals++;
 	  else
 	    num_globals++;
-	  sect_syms[asect->index]->flags = 0;
 	}
     }
 
@@ -2521,13 +2498,12 @@ elf_map_symbols (abfd)
     }
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      if (sect_syms[asect->index] != NULL
-	  && sect_syms[asect->index]->flags == 0)
+      if (sect_syms[asect->index] == NULL)
 	{
-	  asymbol *sym = sect_syms[asect->index];
+	  asymbol *sym = asect->symbol;
 	  unsigned int i;
 
-	  sym->flags = BSF_SECTION_SYM;
+	  sect_syms[asect->index] = sym;
 	  if (!sym_is_global (abfd, sym))
 	    i = num_locals2++;
 	  else
@@ -4233,7 +4209,8 @@ copy_private_bfd_data (ibfd, obfd)
 						 ? iehdr->e_ehsize
 						 : 0)
 					      + (map->includes_phdrs
-						 ? iehdr->e_phnum * iehdr->e_phentsize
+						 ? (iehdr->e_phnum
+						    * iehdr->e_phentsize)
 						 : 0))))
 		map->p_paddr = segment->p_vaddr;
 
@@ -4358,9 +4335,11 @@ copy_private_bfd_data (ibfd, obfd)
 		      /* If the gap between the end of the previous section
 			 and the start of this section is more than
 			 maxpagesize then we need to start a new segment.  */
-		      if ((BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size, maxpagesize)
+		      if ((BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size,
+				      maxpagesize)
 			  < BFD_ALIGN (output_section->lma, maxpagesize))
-			  || ((prev_sec->lma + prev_sec->_raw_size) > output_section->lma))
+			  || ((prev_sec->lma + prev_sec->_raw_size)
+			      > output_section->lma))
 			{
 			  if (suggested_lma == 0)
 			    suggested_lma = output_section->lma;
@@ -4592,223 +4571,225 @@ swap_out_syms (abfd, sttp, relocatable_p)
      struct bfd_strtab_hash **sttp;
      int relocatable_p;
 {
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_backend_data *bed;
+  int symcount;
+  asymbol **syms;
+  struct bfd_strtab_hash *stt;
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Shdr *symstrtab_hdr;
+  char *outbound_syms;
+  int idx;
+  bfd_size_type amt;
 
   if (!elf_map_symbols (abfd))
     return false;
 
   /* Dump out the symtabs.  */
+  stt = _bfd_elf_stringtab_init ();
+  if (stt == NULL)
+    return false;
+
+  bed = get_elf_backend_data (abfd);
+  symcount = bfd_get_symcount (abfd);
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr->sh_type = SHT_SYMTAB;
+  symtab_hdr->sh_entsize = bed->s->sizeof_sym;
+  symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
+  symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
+  symtab_hdr->sh_addralign = bed->s->file_align;
+
+  symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
+  symstrtab_hdr->sh_type = SHT_STRTAB;
+
+  amt = (bfd_size_type) (1 + symcount) * bed->s->sizeof_sym;
+  outbound_syms = bfd_alloc (abfd, amt);
+  if (outbound_syms == NULL)
+    return false;
+  symtab_hdr->contents = (PTR) outbound_syms;
+
+  /* now generate the data (for "contents") */
   {
-    int symcount = bfd_get_symcount (abfd);
-    asymbol **syms = bfd_get_outsymbols (abfd);
-    struct bfd_strtab_hash *stt;
-    Elf_Internal_Shdr *symtab_hdr;
-    Elf_Internal_Shdr *symstrtab_hdr;
-    char *outbound_syms;
-    int idx;
-    bfd_size_type amt;
+    /* Fill in zeroth symbol and swap it out.  */
+    Elf_Internal_Sym sym;
+    sym.st_name = 0;
+    sym.st_value = 0;
+    sym.st_size = 0;
+    sym.st_info = 0;
+    sym.st_other = 0;
+    sym.st_shndx = SHN_UNDEF;
+    bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
+    outbound_syms += bed->s->sizeof_sym;
+  }
 
-    stt = _bfd_elf_stringtab_init ();
-    if (stt == NULL)
-      return false;
-
-    symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-    symtab_hdr->sh_type = SHT_SYMTAB;
-    symtab_hdr->sh_entsize = bed->s->sizeof_sym;
-    symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
-    symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
-    symtab_hdr->sh_addralign = bed->s->file_align;
-
-    symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
-    symstrtab_hdr->sh_type = SHT_STRTAB;
-
-    amt = (bfd_size_type) (1 + symcount) * bed->s->sizeof_sym;
-    outbound_syms = bfd_alloc (abfd, amt);
-    if (outbound_syms == NULL)
-      return false;
-    symtab_hdr->contents = (PTR) outbound_syms;
-
-    /* now generate the data (for "contents") */
+  syms = bfd_get_outsymbols (abfd);
+  for (idx = 0; idx < symcount; idx++)
     {
-      /* Fill in zeroth symbol and swap it out.  */
       Elf_Internal_Sym sym;
-      sym.st_name = 0;
-      sym.st_value = 0;
-      sym.st_size = 0;
-      sym.st_info = 0;
-      sym.st_other = 0;
-      sym.st_shndx = SHN_UNDEF;
+      bfd_vma value = syms[idx]->value;
+      elf_symbol_type *type_ptr;
+      flagword flags = syms[idx]->flags;
+      int type;
+
+      if ((flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
+	{
+	  /* Local section symbols have no name.  */
+	  sym.st_name = 0;
+	}
+      else
+	{
+	  sym.st_name = (unsigned long) _bfd_stringtab_add (stt,
+							    syms[idx]->name,
+							    true, false);
+	  if (sym.st_name == (unsigned long) -1)
+	    return false;
+	}
+
+      type_ptr = elf_symbol_from (abfd, syms[idx]);
+
+      if ((flags & BSF_SECTION_SYM) == 0
+	  && bfd_is_com_section (syms[idx]->section))
+	{
+	  /* ELF common symbols put the alignment into the `value' field,
+	     and the size into the `size' field.  This is backwards from
+	     how BFD handles it, so reverse it here.  */
+	  sym.st_size = value;
+	  if (type_ptr == NULL
+	      || type_ptr->internal_elf_sym.st_value == 0)
+	    sym.st_value = value >= 16 ? 16 : (1 << bfd_log2 (value));
+	  else
+	    sym.st_value = type_ptr->internal_elf_sym.st_value;
+	  sym.st_shndx = _bfd_elf_section_from_bfd_section
+	    (abfd, syms[idx]->section);
+	}
+      else
+	{
+	  asection *sec = syms[idx]->section;
+	  int shndx;
+
+	  if (sec->output_section)
+	    {
+	      value += sec->output_offset;
+	      sec = sec->output_section;
+	    }
+	  /* Don't add in the section vma for relocatable output.  */
+	  if (! relocatable_p)
+	    value += sec->vma;
+	  sym.st_value = value;
+	  sym.st_size = type_ptr ? type_ptr->internal_elf_sym.st_size : 0;
+
+	  if (bfd_is_abs_section (sec)
+	      && type_ptr != NULL
+	      && type_ptr->internal_elf_sym.st_shndx != 0)
+	    {
+	      /* This symbol is in a real ELF section which we did
+		 not create as a BFD section.  Undo the mapping done
+		 by copy_private_symbol_data.  */
+	      shndx = type_ptr->internal_elf_sym.st_shndx;
+	      switch (shndx)
+		{
+		case MAP_ONESYMTAB:
+		  shndx = elf_onesymtab (abfd);
+		  break;
+		case MAP_DYNSYMTAB:
+		  shndx = elf_dynsymtab (abfd);
+		  break;
+		case MAP_STRTAB:
+		  shndx = elf_tdata (abfd)->strtab_section;
+		  break;
+		case MAP_SHSTRTAB:
+		  shndx = elf_tdata (abfd)->shstrtab_section;
+		  break;
+		default:
+		  break;
+		}
+	    }
+	  else
+	    {
+	      shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+
+	      if (shndx == -1)
+		{
+		  asection *sec2;
+
+		  /* Writing this would be a hell of a lot easier if
+		     we had some decent documentation on bfd, and
+		     knew what to expect of the library, and what to
+		     demand of applications.  For example, it
+		     appears that `objcopy' might not set the
+		     section of a symbol to be a section that is
+		     actually in the output file.  */
+		  sec2 = bfd_get_section_by_name (abfd, sec->name);
+		  BFD_ASSERT (sec2 != 0);
+		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
+		  BFD_ASSERT (shndx != -1);
+		}
+	    }
+
+	  sym.st_shndx = shndx;
+	}
+
+      if ((flags & BSF_FUNCTION) != 0)
+	type = STT_FUNC;
+      else if ((flags & BSF_OBJECT) != 0)
+	type = STT_OBJECT;
+      else
+	type = STT_NOTYPE;
+
+      /* Processor-specific types */
+      if (type_ptr != NULL
+	  && bed->elf_backend_get_symbol_type)
+	type = ((*bed->elf_backend_get_symbol_type)
+		(&type_ptr->internal_elf_sym, type));
+
+      if (flags & BSF_SECTION_SYM)
+	{
+	  if (flags & BSF_GLOBAL)
+	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
+	  else
+	    sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	}
+      else if (bfd_is_com_section (syms[idx]->section))
+	sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
+      else if (bfd_is_und_section (syms[idx]->section))
+	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
+				    ? STB_WEAK
+				    : STB_GLOBAL),
+				   type);
+      else if (flags & BSF_FILE)
+	sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
+      else
+	{
+	  int bind = STB_LOCAL;
+
+	  if (flags & BSF_LOCAL)
+	    bind = STB_LOCAL;
+	  else if (flags & BSF_WEAK)
+	    bind = STB_WEAK;
+	  else if (flags & BSF_GLOBAL)
+	    bind = STB_GLOBAL;
+
+	  sym.st_info = ELF_ST_INFO (bind, type);
+	}
+
+      if (type_ptr != NULL)
+	sym.st_other = type_ptr->internal_elf_sym.st_other;
+      else
+	sym.st_other = 0;
+
       bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
       outbound_syms += bed->s->sizeof_sym;
     }
-    for (idx = 0; idx < symcount; idx++)
-      {
-	Elf_Internal_Sym sym;
-	bfd_vma value = syms[idx]->value;
-	elf_symbol_type *type_ptr;
-	flagword flags = syms[idx]->flags;
-	int type;
 
-	if ((flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
-	  {
-	    /* Local section symbols have no name.  */
-	    sym.st_name = 0;
-	  }
-	else
-	  {
-	    sym.st_name = (unsigned long) _bfd_stringtab_add (stt,
-							      syms[idx]->name,
-							      true, false);
-	    if (sym.st_name == (unsigned long) -1)
-	      return false;
-	  }
+  *sttp = stt;
+  symstrtab_hdr->sh_size = _bfd_stringtab_size (stt);
+  symstrtab_hdr->sh_type = SHT_STRTAB;
 
-	type_ptr = elf_symbol_from (abfd, syms[idx]);
-
-	if ((flags & BSF_SECTION_SYM) == 0
-	    && bfd_is_com_section (syms[idx]->section))
-	  {
-	    /* ELF common symbols put the alignment into the `value' field,
-	       and the size into the `size' field.  This is backwards from
-	       how BFD handles it, so reverse it here.  */
-	    sym.st_size = value;
-	    if (type_ptr == NULL
-		|| type_ptr->internal_elf_sym.st_value == 0)
-	      sym.st_value = value >= 16 ? 16 : (1 << bfd_log2 (value));
-	    else
-	      sym.st_value = type_ptr->internal_elf_sym.st_value;
-	    sym.st_shndx = _bfd_elf_section_from_bfd_section
-	      (abfd, syms[idx]->section);
-	  }
-	else
-	  {
-	    asection *sec = syms[idx]->section;
-	    int shndx;
-
-	    if (sec->output_section)
-	      {
-		value += sec->output_offset;
-		sec = sec->output_section;
-	      }
-	    /* Don't add in the section vma for relocatable output.  */
-	    if (! relocatable_p)
-	      value += sec->vma;
-	    sym.st_value = value;
-	    sym.st_size = type_ptr ? type_ptr->internal_elf_sym.st_size : 0;
-
-	    if (bfd_is_abs_section (sec)
-		&& type_ptr != NULL
-		&& type_ptr->internal_elf_sym.st_shndx != 0)
-	      {
-		/* This symbol is in a real ELF section which we did
-                   not create as a BFD section.  Undo the mapping done
-                   by copy_private_symbol_data.  */
-		shndx = type_ptr->internal_elf_sym.st_shndx;
-		switch (shndx)
-		  {
-		  case MAP_ONESYMTAB:
-		    shndx = elf_onesymtab (abfd);
-		    break;
-		  case MAP_DYNSYMTAB:
-		    shndx = elf_dynsymtab (abfd);
-		    break;
-		  case MAP_STRTAB:
-		    shndx = elf_tdata (abfd)->strtab_section;
-		    break;
-		  case MAP_SHSTRTAB:
-		    shndx = elf_tdata (abfd)->shstrtab_section;
-		    break;
-		  default:
-		    break;
-		  }
-	      }
-	    else
-	      {
-		shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
-
-		if (shndx == -1)
-		  {
-		    asection *sec2;
-
-		    /* Writing this would be a hell of a lot easier if
-		       we had some decent documentation on bfd, and
-		       knew what to expect of the library, and what to
-		       demand of applications.  For example, it
-		       appears that `objcopy' might not set the
-		       section of a symbol to be a section that is
-		       actually in the output file.  */
-		    sec2 = bfd_get_section_by_name (abfd, sec->name);
-		    BFD_ASSERT (sec2 != 0);
-		    shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
-		    BFD_ASSERT (shndx != -1);
-		  }
-	      }
-
-	    sym.st_shndx = shndx;
-	  }
-
-	if ((flags & BSF_FUNCTION) != 0)
-	  type = STT_FUNC;
-	else if ((flags & BSF_OBJECT) != 0)
-	  type = STT_OBJECT;
-	else
-	  type = STT_NOTYPE;
-
-        /* Processor-specific types */
-        if (type_ptr != NULL
-	    && bed->elf_backend_get_symbol_type)
-          type = (*bed->elf_backend_get_symbol_type) (&type_ptr->internal_elf_sym, type);
-
-	if (flags & BSF_SECTION_SYM)
-	  {
-	    if (flags & BSF_GLOBAL)
-	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
-	    else
-	      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-	  }
-	else if (bfd_is_com_section (syms[idx]->section))
-	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
-	else if (bfd_is_und_section (syms[idx]->section))
-	  sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
-				      ? STB_WEAK
-				      : STB_GLOBAL),
-				     type);
-	else if (flags & BSF_FILE)
-	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
-	else
-	  {
-	    int bind = STB_LOCAL;
-
-	    if (flags & BSF_LOCAL)
-	      bind = STB_LOCAL;
-	    else if (flags & BSF_WEAK)
-	      bind = STB_WEAK;
-	    else if (flags & BSF_GLOBAL)
-	      bind = STB_GLOBAL;
-
-	    sym.st_info = ELF_ST_INFO (bind, type);
-	  }
-
-	if (type_ptr != NULL)
-	  sym.st_other = type_ptr->internal_elf_sym.st_other;
-	else
-	  sym.st_other = 0;
-
-	bed->s->swap_symbol_out (abfd, &sym, (PTR) outbound_syms);
-	outbound_syms += bed->s->sizeof_sym;
-      }
-
-    *sttp = stt;
-    symstrtab_hdr->sh_size = _bfd_stringtab_size (stt);
-    symstrtab_hdr->sh_type = SHT_STRTAB;
-
-    symstrtab_hdr->sh_flags = 0;
-    symstrtab_hdr->sh_addr = 0;
-    symstrtab_hdr->sh_entsize = 0;
-    symstrtab_hdr->sh_link = 0;
-    symstrtab_hdr->sh_info = 0;
-    symstrtab_hdr->sh_addralign = 1;
-  }
+  symstrtab_hdr->sh_flags = 0;
+  symstrtab_hdr->sh_addr = 0;
+  symstrtab_hdr->sh_entsize = 0;
+  symstrtab_hdr->sh_link = 0;
+  symstrtab_hdr->sh_info = 0;
+  symstrtab_hdr->sh_addralign = 1;
 
   return true;
 }
@@ -6032,8 +6013,9 @@ elfcore_grok_win32pstatus (abfd, note)
 	return false;
 
       sect->_raw_size = sizeof (pstatus.data.thread_info.thread_context);
-      sect->filepos = note->descpos + offsetof (struct win32_pstatus,
-						data.thread_info.thread_context);
+      sect->filepos = (note->descpos
+		       + offsetof (struct win32_pstatus,
+				   data.thread_info.thread_context));
       sect->flags = SEC_HAS_CONTENTS;
       sect->alignment_power = 2;
 
