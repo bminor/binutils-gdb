@@ -1,5 +1,11 @@
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* mips-opc.c (mips_builtin_opcodes): Move coprocessor 2
+	move/branch operations to the bottom so that VR5400 multimedia
+	instructions take precedence in disassembly.
+
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* mips-opc.c (mips_builtin_opcodes): Remove the MIPS32
 	ISA-specific "break" encoding.
 

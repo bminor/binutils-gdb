@@ -1,5 +1,10 @@
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/vr5400.d: Update for a correct disassembly of
+	"racm.ob".
+
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/mips32.s: Adjust for the unified "break" syntax.  Add
 	another "break" case.  Update the comment accordingly.
 	* gas/mips/set-arch.s: Likewise.

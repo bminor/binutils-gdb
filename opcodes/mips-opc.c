@@ -209,10 +209,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc1t",    "N,p",      0x45010000, 0xffe30000, CBD|RD_CC|FP_S, 	I4|I32	},
 {"bc1tl",   "p",	0x45030000, 0xffff0000,	CBL|RD_CC|FP_S,		I2|T3	},
 {"bc1tl",   "N,p",      0x45030000, 0xffe30000, CBL|RD_CC|FP_S, 	I4|I32	},
-{"bc2f",    "p",	0x49000000, 0xffff0000,	CBD|RD_CC,		I1	},
-{"bc2fl",   "p",	0x49020000, 0xffff0000,	CBL|RD_CC,		I2|T3	},
-{"bc2t",    "p",	0x49010000, 0xffff0000,	CBD|RD_CC,		I1	},
-{"bc2tl",   "p",	0x49030000, 0xffff0000,	CBL|RD_CC,		I2|T3	},
+/* bc2* are at the bottom of the table.  */
 {"bc3f",    "p",	0x4d000000, 0xffff0000,	CBD|RD_CC,		I1	},
 {"bc3fl",   "p",	0x4d020000, 0xffff0000,	CBL|RD_CC,		I2|T3	},
 {"bc3t",    "p",	0x4d010000, 0xffff0000,	CBD|RD_CC,		I1	},
@@ -443,14 +440,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cfc0",    "t,G",	0x40400000, 0xffe007ff,	LCD|WR_t|RD_C0,		I1	},
 {"cfc1",    "t,G",	0x44400000, 0xffe007ff,	LCD|WR_t|RD_C1|FP_S,	I1	},
 {"cfc1",    "t,S",	0x44400000, 0xffe007ff,	LCD|WR_t|RD_C1|FP_S,	I1	},
-{"cfc2",    "t,G",	0x48400000, 0xffe007ff,	LCD|WR_t|RD_C2,		I1	},
+/* cfc2 is at the bottom of the table.  */
 {"cfc3",    "t,G",	0x4c400000, 0xffe007ff,	LCD|WR_t|RD_C3,		I1	},
 {"clo",     "U,s",      0x70000021, 0xfc0007ff, WR_d|WR_t|RD_s, 	I32|N55 },
 {"clz",     "U,s",      0x70000020, 0xfc0007ff, WR_d|WR_t|RD_s, 	I32|N55 },
 {"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|WR_CC,		I1	},
 {"ctc1",    "t,G",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
 {"ctc1",    "t,S",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
-{"ctc2",    "t,G",	0x48c00000, 0xffe007ff,	COD|RD_t|WR_CC,		I1	},
+/* ctc2 is at the bottom of the table.  */
 {"ctc3",    "t,G",	0x4cc00000, 0xffe007ff,	COD|RD_t|WR_CC,		I1	},
 {"cvt.d.l", "D,S",	0x46a00021, 0xffff003f,	WR_D|RD_S|FP_D,		I3	},
 {"cvt.d.s", "D,S",	0x46000021, 0xffff003f,	WR_D|RD_S|FP_D|FP_S,	I1	},
@@ -539,10 +536,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dmfc1",   "t,G",      0x44200000, 0xffe007ff, LCD|WR_t|RD_S|FP_S,     I3      },
 {"dmtc1",   "t,S",	0x44a00000, 0xffe007ff, COD|RD_t|WR_S|FP_S,	I3	},
 {"dmtc1",   "t,G",      0x44a00000, 0xffe007ff, COD|RD_t|WR_S|FP_S,     I3      },
-{"dmfc2",   "t,G",      0x48200000, 0xffe007ff, LCD|WR_t|RD_C2, 	I3      },
-{"dmfc2",   "t,G,H",    0x48200000, 0xffe007f8, LCD|WR_t|RD_C2, 	I64     },
-{"dmtc2",   "t,G",      0x48a00000, 0xffe007ff, COD|RD_t|WR_C2|WR_CC,   I3      },
-{"dmtc2",   "t,G,H",    0x48a00000, 0xffe007f8, COD|RD_t|WR_C2|WR_CC,   I64     },
+/* dmfc2 is at the bottom of the table.  */
+/* dmtc2 is at the bottom of the table.  */
 {"dmfc3",   "t,G",      0x4c200000, 0xffe007ff, LCD|WR_t|RD_C3, 	I3      },
 {"dmfc3",   "t,G,H",    0x4c200000, 0xffe007f8, LCD|WR_t|RD_C3, 	I64     },
 {"dmtc3",   "t,G",      0x4ca00000, 0xffe007ff, COD|RD_t|WR_C3|WR_CC,   I3      },
@@ -740,9 +735,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1	},
 {"mfhc1",   "t,S",	0x44600000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I33	},
 {"mfhc1",   "t,G",	0x44600000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I33	},
-{"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LCD|WR_t|RD_C2,		I1	},
-{"mfc2",    "t,G,H",    0x48000000, 0xffe007f8, LCD|WR_t|RD_C2, 	I32     },
-{"mfhc2",   "t,i",	0x48600000, 0xffe00000,	LCD|WR_t|RD_C2,		I33	},
+/* mfc2 is at the bottom of the table.  */
+/* mfhc2 is at the bottom of the table.  */
 {"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	LCD|WR_t|RD_C3,		I1	},
 {"mfc3",    "t,G,H",    0x4c000000, 0xffe007f8, LCD|WR_t|RD_C3, 	I32     },
 {"mfdr",    "t,G",	0x7000003d, 0xffe007ff,	LCD|WR_t|RD_C0,		N5      },
@@ -804,9 +798,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
 {"mthc1",   "t,S",	0x44e00000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I33	},
 {"mthc1",   "t,G",	0x44e00000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I33	},
-{"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I1	},
-{"mtc2",    "t,G,H",    0x48800000, 0xffe007f8, COD|RD_t|WR_C2|WR_CC,   I32     },
-{"mthc2",   "t,i",	0x48e00000, 0xffe00000,	COD|RD_t|WR_C2|WR_CC,	I33	},
+/* mtc2 is at the bottom of the table.  */
+/* mthc2 is at the bottom of the table.  */
 {"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3|WR_CC,	I1	},
 {"mtc3",    "t,G,H",    0x4c800000, 0xffe007f8, COD|RD_t|WR_C3|WR_CC,   I32     },
 {"mtdr",    "t,G",	0x7080003d, 0xffe007ff,	COD|RD_t|WR_C0,		N5	},
@@ -1185,6 +1178,25 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"xor.ob",  "D,S,k",	0x4bc0000d, 0xffe0003f,	WR_D|RD_S|RD_T,		N54	},
 {"xor.qh",  "X,Y,Q",	0x7820000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX	},
 {"xori",    "t,r,i",	0x38000000, 0xfc000000,	WR_t|RD_s,		I1	},
+
+/* Coprocessor 2 move/branch operations overlap with VR5400 .ob format
+   instructions so they are here for the latters to take precedence.  */
+{"bc2f",    "p",	0x49000000, 0xffff0000,	CBD|RD_CC,		I1	},
+{"bc2fl",   "p",	0x49020000, 0xffff0000,	CBL|RD_CC,		I2|T3	},
+{"bc2t",    "p",	0x49010000, 0xffff0000,	CBD|RD_CC,		I1	},
+{"bc2tl",   "p",	0x49030000, 0xffff0000,	CBL|RD_CC,		I2|T3	},
+{"cfc2",    "t,G",	0x48400000, 0xffe007ff,	LCD|WR_t|RD_C2,		I1	},
+{"ctc2",    "t,G",	0x48c00000, 0xffe007ff,	COD|RD_t|WR_CC,		I1	},
+{"dmfc2",   "t,G",	0x48200000, 0xffe007ff,	LCD|WR_t|RD_C2,		I3	},
+{"dmfc2",   "t,G,H",	0x48200000, 0xffe007f8,	LCD|WR_t|RD_C2,		I64	},
+{"dmtc2",   "t,G",	0x48a00000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I3	},
+{"dmtc2",   "t,G,H",	0x48a00000, 0xffe007f8,	COD|RD_t|WR_C2|WR_CC,	I64	},
+{"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LCD|WR_t|RD_C2,		I1	},
+{"mfc2",    "t,G,H",	0x48000000, 0xffe007f8,	LCD|WR_t|RD_C2,		I32	},
+{"mfhc2",   "t,i",	0x48600000, 0xffe00000,	LCD|WR_t|RD_C2,		I33	},
+{"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I1	},
+{"mtc2",    "t,G,H",	0x48800000, 0xffe007f8,	COD|RD_t|WR_C2|WR_CC,	I32	},
+{"mthc2",   "t,i",	0x48e00000, 0xffe00000,	COD|RD_t|WR_C2|WR_CC,	I33	},
 
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
