@@ -26,6 +26,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 #endif
 
+/* FIXME, this triggers host-and-target (``native'') dependent code
+   which currently sits in mips-xdep.c.  Needs to be moved out to
+   mips-nat.c or some such.  */
+#define	GDB_TARGET_IS_MIPS
+
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
@@ -33,14 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 /*#define NAMES_HAVE_UNDERSCORE*/
-
-/* Debugger information will be in mips' format */
-
-#define READ_MIPS_FORMAT
-
-/* File format is coff, but with additions */
-
-#define COFF_FORMAT
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

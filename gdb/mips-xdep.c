@@ -20,38 +20,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#ifdef sgi
-#include <sys/inst.h>
-#else
-#include <mips/inst.h>
-#endif
-#include "frame.h"
 #include "inferior.h"
-#include "symtab.h"
-#include "value.h"
-
-#ifdef USG
-#include <sys/types.h>
-#endif
-
-#include <sys/param.h>
-#include <sys/dir.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-/* #include <fcntl.h>  Can we live without this?  */
-
 #include "gdbcore.h"
-
-#include <sys/user.h>		/* After a.out.h  */
-#include <sys/file.h>
-#include <sys/stat.h>
 
 /* For now we stub this out; sgi format is super-hairy (and completely
    different in the new release) */
 
-#ifdef sgi
+#if defined(sgi) || !defined(GDB_TARGET_IS_MIPS)
 void
-fetch_core_registers ()
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
+     char *core_reg_sect;
+     unsigned core_reg_size;
+     int which;
+     unsigned int reg_addr;
 {
   return;
 }
