@@ -1,5 +1,5 @@
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright (C) 1986, 1989, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -22,6 +22,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define DEFS_H
 
 #include <stdio.h>
+#include <errno.h>		/* System call error return status */
+
+/* Just in case they're not defined in stdio.h. */
+
+#ifndef SEEK_SET
+#define SEEK_SET 0
+#endif
+#ifndef SEEK_CUR
+#define SEEK_CUR 1
+#endif
 
 /* First include ansidecl.h so we can use the various macro definitions
    here and in all subsequent file inclusions.  */
@@ -70,7 +80,8 @@ typedef bfd_vma CORE_ADDR;
    the program's identifiers (such as $this and $$vptr).  */
 #define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
 
-#include <errno.h>		/* System call error return status */
+/* Check if a character is one of the commonly used C++ marker characters.  */
+extern int is_cplus_marker PARAMS ((int));
 
 extern int quit_flag;
 extern int immediate_quit;
@@ -263,38 +274,38 @@ extern int fputc_unfiltered PARAMS ((int c, GDB_FILE *));
 
 extern int putchar_unfiltered PARAMS ((int c));
 
-extern void puts_filtered PARAMS ((char *));
+extern void puts_filtered PARAMS ((const char *));
 
-extern void puts_unfiltered PARAMS ((char *));
+extern void puts_unfiltered PARAMS ((const char *));
 
-extern void vprintf_filtered PARAMS ((char *, va_list))
+extern void vprintf_filtered PARAMS ((const char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_filtered PARAMS ((FILE *, char *, va_list))
+extern void vfprintf_filtered PARAMS ((FILE *, const char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_filtered PARAMS ((FILE *, char *, ...))
+extern void fprintf_filtered PARAMS ((FILE *, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
-extern void fprintfi_filtered PARAMS ((int, FILE *, char *, ...))
+extern void fprintfi_filtered PARAMS ((int, FILE *, const char *, ...))
      ATTR_FORMAT(printf, 3, 4);
 
-extern void printf_filtered PARAMS ((char *, ...))
+extern void printf_filtered PARAMS ((const char *, ...))
      ATTR_FORMAT(printf, 1, 2);
 
-extern void printfi_filtered PARAMS ((int, char *, ...))
+extern void printfi_filtered PARAMS ((int, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
-extern void vprintf_unfiltered PARAMS ((char *, va_list))
+extern void vprintf_unfiltered PARAMS ((const char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_unfiltered PARAMS ((FILE *, char *, va_list))
+extern void vfprintf_unfiltered PARAMS ((FILE *, const char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_unfiltered PARAMS ((FILE *, char *, ...))
+extern void fprintf_unfiltered PARAMS ((FILE *, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
-extern void printf_unfiltered PARAMS ((char *, ...))
+extern void printf_unfiltered PARAMS ((const char *, ...))
      ATTR_FORMAT(printf, 1, 2);
 
 extern void print_spaces PARAMS ((int, GDB_FILE *));
@@ -648,7 +659,7 @@ extern void free ();
 
 #endif /* MALLOC_INCOMPATIBLE */
 
-#ifndef WIN32
+#ifndef __WIN32__
 
 #ifndef strchr
 extern char *strchr ();
@@ -670,7 +681,7 @@ extern char *strtok ();
 extern char *strerror ();
 #endif
 
-#endif	/* !WIN32 */
+#endif	/* !__WIN32__ */
 
 /* Various possibilities for alloca.  */
 #ifndef alloca
@@ -909,7 +920,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_P
-#if defined(__GO32__)||defined(WIN32)
+#if defined(__GO32__)||defined(__WIN32__)
 #define SLASH_P(X) ((X)=='\\')
 #else
 #define SLASH_P(X) ((X)=='/')
@@ -917,7 +928,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_CHAR
-#if defined(__GO32__)||defined(WIN32)
+#if defined(__GO32__)||defined(__WIN32__)
 #define SLASH_CHAR '\\'
 #else
 #define SLASH_CHAR '/'
@@ -925,7 +936,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_STRING
-#if defined(__GO32__)||defined(WIN32)
+#if defined(__GO32__)||defined(__WIN32__)
 #define SLASH_STRING "\\"
 #else
 #define SLASH_STRING "/"

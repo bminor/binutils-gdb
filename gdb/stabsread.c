@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -565,7 +565,7 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_LINE(sym) = 0;			/* unknown */
     }
 
-  if (string[0] == CPLUS_MARKER)
+  if (is_cplus_marker (string[0]))
     {
       /* Special GNU C++ names.  */
       switch (string[1])
@@ -2000,7 +2000,7 @@ read_member_functions (fip, pp, type, objfile)
       make_cleanup (free, new_fnlist);
       memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
       
-      if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && (*pp)[2] == CPLUS_MARKER)
+      if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && is_cplus_marker ((*pp)[2]))
 	{
 	  /* This is a completely wierd case.  In order to stuff in the
 	     names that might contain colons (the usual name delimiter),
@@ -2535,12 +2535,9 @@ read_struct_fields (fip, pp, type, objfile)
       /* If is starts with CPLUS_MARKER it is a special abbreviation,
 	 unless the CPLUS_MARKER is followed by an underscore, in
 	 which case it is just the name of an anonymous type, which we
-	 should handle like any other type name.  We accept either '$'
-	 or '.', because a field name can never contain one of these
-	 characters except as a CPLUS_MARKER (we probably should be
-	 doing that in most parts of GDB).  */
+	 should handle like any other type name.  */
 
-      if ((*p == '$' || *p == '.') && p[1] != '_')
+      if (is_cplus_marker (p[0]) && p[1] != '_')
 	{
 	  if (!read_cpp_abbrev (fip, pp, type, objfile))
 	    return 0;

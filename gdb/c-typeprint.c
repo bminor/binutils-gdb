@@ -1,5 +1,5 @@
 /* Support for printing C and C++ types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1993, 1994
+   Copyright 1986, 1988, 1989, 1991, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -582,8 +582,8 @@ c_type_print_base (type, stream, show, level)
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if ((TYPE_FIELD_NAME (type, i))[5] == CPLUS_MARKER &&
-		  !strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5))
+	      if (STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
+		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
 	      /* If this is a C++ class we can print the various C++ section
@@ -737,7 +737,7 @@ c_type_print_base (type, stream, show, level)
 		      free (mangled_name);
 		    }
 		  else if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		        && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
+		          && is_cplus_marker (TYPE_FN_FIELD_PHYSNAME (f, j)[1]))
 		    cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j) + 1,
 					       "~", method_name, 0, stream);
 		  else

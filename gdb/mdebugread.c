@@ -785,7 +785,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       top_stack->numargs++;
 
       /* Special GNU C++ name.  */
-      if (name[0] == CPLUS_MARKER && name[1] == 't' && name[2] == 0)
+      if (is_cplus_marker (name[0]) && name[1] == 't' && name[2] == 0)
 	name = "this";		/* FIXME, not alloc'd in obstack */
       s = new_symbol (name);
 

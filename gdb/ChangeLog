@@ -1,3 +1,15 @@
+Thu Feb 15 21:40:52 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* demangle.c (is_cplus_marker):  New function, checks if a
+	character is one of the commonly used C++ marker characters.
+	* defs.h (is_cplus_marker):  Add prototype.
+	* c-typeprint.c (c_type_print_base), ch-lang.c (chill_demangle),
+	cp-valprint.c (cp_print_class_method), mdebugread.c (parse_symbol),
+	stabsread.c (define_symbol, read_member_functions, read_struct_fields),
+	symtab.h (OPNAME_PREFIX_P, VTBL_PREFIX_P, DESTRUCTOR_PREFIX_P),
+	values.c (vb_match):  Use is_cplus_marker instead of comparison
+	with CPLUS_MARKER.
+
 Thu Feb 15 18:08:13 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symfile.h (INLINE_ADD_PSYMBOL): Default this to 0 and possibly

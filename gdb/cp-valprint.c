@@ -1,5 +1,5 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1994, 1995
+   Copyright 1986, 1988, 1989, 1991, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -124,7 +124,7 @@ cp_print_class_method (valaddr, type, stream)
       c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
       fprintf_unfiltered (stream, kind);
       if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-	  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
+	  && is_cplus_marker (TYPE_FN_FIELD_PHYSNAME (f, j)[1]))
 	{
 	  cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
 				     TYPE_FN_FIELDLIST_NAME (domain, i),

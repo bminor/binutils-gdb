@@ -931,7 +931,7 @@ struct partial_symtab
    Note that this macro is g++ specific (FIXME). */
 
 #define OPNAME_PREFIX_P(NAME) \
-  ((NAME)[0] == 'o' && (NAME)[1] == 'p' && (NAME)[2] == CPLUS_MARKER)
+  ((NAME)[0] == 'o' && (NAME)[1] == 'p' && is_cplus_marker ((NAME)[2]))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
    names.  Note that this macro is g++ specific (FIXME).
@@ -939,15 +939,16 @@ struct partial_symtab
    style, using thunks (where '$' is really CPLUS_MARKER). */
 
 #define VTBL_PREFIX_P(NAME) \
-  ((NAME)[3] == CPLUS_MARKER && (NAME)[0] == '_' \
+  ((NAME)[0] == '_' \
    && (((NAME)[1] == 'V' && (NAME)[2] == 'T') \
-       || ((NAME)[1] == 'v' && (NAME)[2] == 't')))
+       || ((NAME)[1] == 'v' && (NAME)[2] == 't')) \
+   && is_cplus_marker ((NAME)[3]))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
    names.  Note that this macro is g++ specific (FIXME).  */
 
 #define DESTRUCTOR_PREFIX_P(NAME) \
-  ((NAME)[0] == '_' && (NAME)[1] == CPLUS_MARKER && (NAME)[2] == '_')
+  ((NAME)[0] == '_' && is_cplus_marker ((NAME)[1]) && (NAME)[2] == '_')
 
 
 /* External variables and functions for the objects described above. */
@@ -963,6 +964,10 @@ extern int current_source_line;
 /* See the comment in symfile.c about how current_objfile is used. */
 
 extern struct objfile *current_objfile;
+
+/* True if we are nested inside psymtab_to_symtab. */
+
+extern int currently_reading_symtab;
 
 /* From utils.c.  */
 extern int demangle;

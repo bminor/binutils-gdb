@@ -1,5 +1,5 @@
 /* Basic C++ demangling support for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1996 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -160,6 +160,31 @@ set_demangling_style (style)
     }
   current_demangling_style_string = savestring (style, strlen (style));
   set_demangling_command ((char *) NULL, 0);
+}
+
+/* In order to allow a single demangler executable to demangle strings
+   using various common values of CPLUS_MARKER, as well as any specific
+   one set at compile time, we maintain a string containing all the
+   commonly used ones, and check to see if the marker we are looking for
+   is in that string.  CPLUS_MARKER is usually '$' on systems where the
+   assembler can deal with that.  Where the assembler can't, it's usually
+   '.' (but on many systems '.' is used for other things).  We put the
+   current defined CPLUS_MARKER first (which defaults to '$'), followed
+   by the next most common value, followed by an explicit '$' in case
+   the value of CPLUS_MARKER is not '$'.
+
+   We could avoid this if we could just get g++ to tell us what the actual
+   cplus marker character is as part of the debug information, perhaps by
+   ensuring that it is the character that terminates the gcc<n>_compiled
+   marker symbol (FIXME). */
+
+static char cplus_markers[] = { CPLUS_MARKER, '.', '$', '\0' };
+
+int
+is_cplus_marker (c)
+     int c;
+{
+  return c && strchr (cplus_markers, c) != NULL;
 }
 
 void

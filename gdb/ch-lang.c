@@ -1,5 +1,5 @@
 /* Chill language support routines for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -35,11 +35,20 @@ char *
 chill_demangle (mangled)
      const char *mangled;
 {
-  char *joiner;
+  const char *joiner = NULL;
   char *demangled;
+  const char *cp = mangled;
 
-  joiner = strchr (mangled, CPLUS_MARKER);
-  if (joiner != NULL && *(joiner + 1) == CPLUS_MARKER)
+  while (*cp)
+    {
+      if (is_cplus_marker (*cp))
+	{
+	  joiner = cp;
+	  break;
+	}
+      cp++;
+    }
+  if (joiner != NULL && *(joiner + 1) == *joiner)
     {
       demangled = savestring (mangled, joiner - mangled);
     }

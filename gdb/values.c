@@ -1,5 +1,5 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1039,7 +1039,7 @@ vb_match (type, index, basetype)
   if (*name != '_')
     return 0;
   /* gcc 2.4 uses _vb$.  */
-  if (name[1] == 'v' && name[2] == 'b' && name[3] == CPLUS_MARKER)
+  if (name[1] == 'v' && name[2] == 'b' && is_cplus_marker (name[3]))
     field_class_name = name + 4;
   /* gcc 2.5 will use __vb_.  */
   if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
