@@ -417,7 +417,7 @@ tip_connect:
     udr_UDISessionId(udrs, &session[*Session].tip_id);
 
     udr_UDIError(udrs, &dfe_errno);
-    if (dfe_errno > 0) UDIKill(Session, 0);
+    if (dfe_errno > 0) UDIKill(*Session, 0);
 
     return dfe_errno;
 
