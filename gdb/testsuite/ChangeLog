@@ -1,5 +1,13 @@
 Sat Jan 21 15:34:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	The following fixes a FAIL caused by the fact that the alpha stabs
+	configuration didn't use the ".if alpha" code in weird.def.
+	* gdb.stabs/weird.def (v_comb): Use type attribute to specify 32
+	bit pointer, so the 32 bit version works even on the alpha.
+	* gdb.stabs/{alpha.mt,ecoff.mt,aout.sed,hppa.sed,xcoff.sed,weird.def}:
+	Remove the stuff which allowed us to have separate versions for
+	alpha and everything else.
+
 	* gdb.c++/cplusfuncs.exp (test_lookup_operator_functions): Fix
 	regexp which "info func operator\[\](" is supposed to match.  Fix
 	string to send to GDB.  Note that GDB still doesn't work right.  Add a
