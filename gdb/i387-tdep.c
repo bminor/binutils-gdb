@@ -312,7 +312,7 @@ print_i387_control_word (unsigned int control, struct ui_file *file)
     }
 }
 
-/* Print out the i387 floating poin state.  Note that we ignore FRAME
+/* Print out the i387 floating point state.  Note that we ignore FRAME
    in the code below.  That's OK since floating-point registers are
    never saved on the stack.  */
 
