@@ -231,6 +231,7 @@ static autofilter_entry_type autofilter_symbollist[] =
 /* Do not specify library suffix explicitly, to allow for dllized versions.  */
 static autofilter_entry_type autofilter_liblist[] =
 {
+  { "libcygwin", 9 },
   { "libgcc", 6 },
   { "libstdc++", 9 },
   { "libmingw32", 10 },

@@ -1,3 +1,7 @@
+2003-07-17  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld/pe-dll.c: Add libcygwin to autofilter_liblist[]
+
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: New Spanish translation.
