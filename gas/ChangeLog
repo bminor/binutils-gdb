@@ -1,3 +1,7 @@
+Fri Aug  6 09:46:35 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* config/tc-hppa.c (pa_ip):  Add 64 bit condition completers.
+
 1999-08-06  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* config/tc-sparc.h (tc_fix_adjustable): Fix check for PIC local

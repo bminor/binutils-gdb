@@ -1729,13 +1729,24 @@ pa_ip (str)
  		    INSERT_FIELD_AND_CONTINUE (opcode, cond, 0);
 
 		  /* Handle an add condition.  */
+		  case 'A':
 		  case 'a':
  		    cmpltr = 0;
  		    flag = 0;
 		    if (*s == ',')
 		      {
 			s++;
+
+			/* 64 bit conditions.  */
+			if (*args == 'A')
+			  {
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  }
 			name = s;
+
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -1794,7 +1805,8 @@ pa_ip (str)
 			    cmpltr = 7;
 			    flag = 1;
 			  }
-			else
+			/* ",*" is a valid condition.  */
+			else if (*args == 'a')
 			  as_bad (_("Invalid Add Condition: %s"), name);
 			*s = c;
 		      }
@@ -1810,6 +1822,18 @@ pa_ip (str)
 			cmpltr = 0;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+
+		  /* Handle negated add and branch condition.  */
+		  case 'D':
+		    abort ();
+
+		  /* Handle wide-mode non-negated add and branch condition.  */
+		  case 'w':
+		    abort ();
+
+		  /* Handle wide-mode negated add and branch condition.  */
+		  case 'W':
+		    abort();
 
 		  /* Handle a negated or non-negated add and branch 
 		     condition.  */
@@ -1834,11 +1858,21 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
 		  /* Handle branch on bit conditions.  */
+		  case 'B':
 		  case 'b':
 		    cmpltr = 0;
 		    if (*s == ',')
 		      {
 			s++;
+
+			if (*args == 'B')
+			  {
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  }
+
 			if (strncmp (s, "<", 1) == 0)
 			  {
 			    cmpltr = 0;
@@ -1855,13 +1889,24 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 15);
 
 		  /* Handle a compare/subtract condition.  */
+		  case 'S':
 		  case 's':
 		    cmpltr = 0;
 		    flag = 0;
 		    if (*s == ',')
 		      {
 			s++;
+
+			/* 64 bit conditions.  */
+			if (*args == 'S')
+			  { 
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  } 
 			name = s;
+			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -1920,7 +1965,8 @@ pa_ip (str)
 			    cmpltr = 7;
 			    flag = 1;
 			  }
-			else
+			/* ",*" is a valid condition.  */
+			else if (*args != 'S')
 			  as_bad (_("Invalid Compare/Subtract Condition: %s"),
 				  name);
 			*s = c;
@@ -1937,6 +1983,22 @@ pa_ip (str)
 			cmpltr = 0;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+
+		  /* Handle a negated compare condition.  */
+		  case 'T':
+		    abort ();
+  
+		  /* Handle a 64 bit non-negated compare condition.  */
+		  case 'r':
+		    abort ();
+  
+		  /* Handle a 64 bit negated compare condition.  */
+		  case 'R':
+		    abort ();
+  
+		  /* Handle a 64 bit cmpib condition.  */
+		  case 'Q':
+		    abort ();
   
 		  /* Handle a negated or non-negated compare/subtract
 		     condition.  */
@@ -1962,13 +2024,24 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
 		    /* Handle a logical instruction condition.  */
+		  case 'L':
 		  case 'l':
 		    cmpltr = 0;
 		    flag = 0;
 		    if (*s == ',')
 		      {
 			s++;
+
+			/* 64 bit conditions.  */
+			if (*args == 'L')
+			  {
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  }
 			name = s;
+			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -2008,7 +2081,8 @@ pa_ip (str)
 			    cmpltr = 7;
 			    flag = 1;
 			  }
-			else
+			/* ",*" is a valid condition.  */
+			else if (*args != 'L')
 			  as_bad (_("Invalid Logical Instruction Condition."));
 			*s = c;
 		      }
@@ -2016,6 +2090,7 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
 		  /* Handle a shift/extract/deposit condition.  */
+		  case 'X':
 		  case 'x':
 		  case 'y':
 		    cmpltr = 0;
@@ -2023,7 +2098,16 @@ pa_ip (str)
 		      {
 			save_s = s++;
 
+			/* 64 bit conditions.  */
+			if (*args == 'X')
+			  {
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  }
 			name = s;
+			    
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -2050,20 +2134,31 @@ pa_ip (str)
 			    s = save_s;
 			    continue;
 			  }
-			else
+			/* ",*" is a valid condition.  */
+			else if (*args != 'X')
 			  as_bad (_("Invalid Shift/Extract/Deposit Condition."));
 			*s = c;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
 		  /* Handle a unit instruction condition.  */
-		  case 'u':	/* unit */
+		  case 'U':
+		  case 'u':
 		    cmpltr = 0;
 		    flag = 0;
 		    if (*s == ',')
 		      {
 			s++;
 	    
+			/* 64 bit conditions.  */
+			if (*args == 'U')
+			  {
+			    if (*s == '*')
+			      s++;
+			    else
+			      break;
+			  }
+			    
 			if (strncasecmp (s, "sbz", 3) == 0)
 			  {
 			    cmpltr = 2;
@@ -2125,7 +2220,8 @@ pa_ip (str)
 			    flag = 1;
 			    s += 3;
 			  }
-			else
+			/* ",*" is a valid condition.  */
+			else if (*args != 'U')
 			  as_bad (_("Invalid Unit Instruction Condition."));
 		      }
 		    opcode |= cmpltr << 13;
