@@ -3,7 +3,7 @@
 #
 # Usage: /bin/sh cgen.sh {"arch"|"cpu"|"decode"|"defs"|"cpu-decode"} \
 #	srcdir cgen cgendir cgenflags \
-#	arch archflags cpu mach suffix archfile extrafiles
+#	arch archflags cpu mach suffix archfile extrafiles opcfile
 #
 # We store the generated files in the source directory until we decide to
 # ship a Scheme interpreter (or other implementation) with gdb/binutils.
@@ -26,8 +26,11 @@ shift ; mach=$9
 shift ; suffix=$9
 shift ; archfile=$9
 shift ; extrafiles=$9
+shift ; opcfile=$9
 
 rootdir=${srcdir}/../..
+
+test -z "${opcfile}" && opcfile=/dev/null
 
 if test -z "$isa" ; then
   isa=all
@@ -196,6 +199,7 @@ desc)
 	${cgen} -s ${cgendir}/cgen-opc.scm \
 		-s ${cgendir} \
 		${cgenflags} \
+		-OPC ${opcfile} \
 		-f "${archflags}" \
 		-m ${mach} \
 		-a ${archfile} \

@@ -739,6 +739,6 @@ cgen-desc: force
 	$(SHELL) $(srccom)/cgen.sh desc $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
 		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" \
-		$(archfile) ignored
+		$(archfile) ignored $(opcfile)
 
 ## End COMMON_POST_CONFIG_FRAG
