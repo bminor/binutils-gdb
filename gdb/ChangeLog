@@ -1,3 +1,9 @@
+2004-09-05  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_insn16_frame_cache): Fix parameter in call to
+	heuristic_proc_desc.
+	(mips_insn32_frame_cache): Likewise.
+
 2004-09-04  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips32_heuristic_proc_desc): Remove code that was

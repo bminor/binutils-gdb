@@ -1813,7 +1813,7 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
       start_addr = heuristic_proc_start (pc);
 
 #ifdef NOT_YET
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, this_cache);
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
 #else
     proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, NULL);
 #endif
@@ -2074,7 +2074,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
       start_addr = heuristic_proc_start (pc);
 
 #ifdef NOT_YET
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, this_cache);
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
 #else
     proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, NULL);
 #endif
