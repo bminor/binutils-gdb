@@ -1,5 +1,12 @@
 Mon Feb  5 16:14:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i960-dis.c (mem): Add HX dcinva instruction.
+	(reg): Add HX instructions.
+	start-sanitize-i960xl
+	The HX instructions are the XL instructions, so this just involves
+	arranges for them to not be sanitized.
+	end-sanitize-i960xl
+
 	Support for building as a shared library, based on patches from
 	Alan Modra <alan@spri.levels.unisa.edu.au>:
 	* configure.in: Add AC_ARG_ENABLE for shared and commonbfdlib.
