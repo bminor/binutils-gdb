@@ -1277,7 +1277,7 @@ wait_for_inferior (void)
   struct execution_control_state ecss;
   struct execution_control_state *ecs;
 
-  old_cleanups = make_cleanup (delete_breakpoint_current_contents,
+  old_cleanups = make_cleanup (delete_step_resume_breakpoint,
 			       &step_resume_breakpoint);
   make_cleanup (delete_breakpoint_current_contents,
 		&through_sigtramp_breakpoint);
@@ -1341,7 +1341,7 @@ fetch_inferior_event (void *client_data)
 
   if (!async_ecs->wait_some_more)
     {
-      old_cleanups = make_exec_cleanup (delete_breakpoint_current_contents,
+      old_cleanups = make_exec_cleanup (delete_step_resume_breakpoint, 
 					&step_resume_breakpoint);
       make_exec_cleanup (delete_breakpoint_current_contents,
 			 &through_sigtramp_breakpoint);
@@ -2362,8 +2362,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     interferes with us */
 	  if (step_resume_breakpoint != NULL)
 	    {
-	      delete_breakpoint (step_resume_breakpoint);
-	      step_resume_breakpoint = NULL;
+	      delete_step_resume_breakpoint (&step_resume_breakpoint);
 	    }
 	  /* Not sure whether we need to blow this away too, but probably
 	     it is like the step-resume breakpoint.  */
@@ -2461,8 +2460,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      step_resume_breakpoint =
 		bpstat_find_step_resume_breakpoint (stop_bpstat);
 	    }
-	  delete_breakpoint (step_resume_breakpoint);
-	  step_resume_breakpoint = NULL;
+	  delete_step_resume_breakpoint (&step_resume_breakpoint);
 	  break;
 
 	case BPSTAT_WHAT_THROUGH_SIGTRAMP:

@@ -65,6 +65,23 @@ static void restore_current_thread (ptid_t);
 static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
 
+void
+delete_step_resume_breakpoint (void *arg)
+{
+  struct breakpoint **breakpointp = (struct breakpoint **) arg;
+  struct thread_info *tp;
+
+  if (*breakpointp != NULL)
+    {
+      delete_breakpoint (*breakpointp);
+      for (tp = thread_list; tp; tp = tp->next)
+	if (tp->step_resume_breakpoint == *breakpointp)
+	  tp->step_resume_breakpoint = NULL;
+
+      *breakpointp = NULL;
+    }
+}
+
 static void
 free_thread (struct thread_info *tp)
 {

@@ -78,6 +78,9 @@ extern struct thread_info *add_thread (ptid_t ptid);
 /* Delete an existing thread list entry.  */
 extern void delete_thread (ptid_t);
 
+/* Delete a step_resume_breakpoint from the thread database. */
+extern void delete_step_resume_breakpoint (void *);
+
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */
 extern ptid_t thread_id_to_pid (int);

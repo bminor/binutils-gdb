@@ -1719,13 +1719,19 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 struct breakpoint *
 bpstat_find_step_resume_breakpoint (bpstat bsp)
 {
+  int current_thread;
+
   if (bsp == NULL)
     error ("Internal error (bpstat_find_step_resume_breakpoint)");
+
+  current_thread = pid_to_thread_id (inferior_ptid);
 
   for (; bsp != NULL; bsp = bsp->next)
     {
       if ((bsp->breakpoint_at != NULL) &&
-	  (bsp->breakpoint_at->type == bp_step_resume))
+	  (bsp->breakpoint_at->type == bp_step_resume) &&
+	  (bsp->breakpoint_at->thread == current_thread || 
+	   bsp->breakpoint_at->thread == -1))
 	return bsp->breakpoint_at;
     }
 

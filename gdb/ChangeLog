@@ -1,5 +1,17 @@
 2001-06-01  Michael Snyder  <msnyder@redhat.com>
 
+	* thread.c (delete_step_resume_breakpoint): New function.
+	Maintain internal consistency of the thread list while deleting
+	a step_resume_breakpoint.
+	* gdbthread.h (delete_step_resume_breakpoint): Export.
+	* breakpoint.c (bpstat_find_step_resume_breakpoint):
+	Make thread-aware: don't return a step_resume_breakpoint 
+	for the wrong thread.
+	* infrun.c (wait_for_inferior): Call delete_step_resume_breakpoint
+	instead of delete_breakpoint_current_contents.
+	(fetch_inferior_event): Ditto.
+	(handle_inferior_event): Call delete_step_resume_breakpoint
+	instead of delete_breakpoint.
 	* infrun.c (handle_inferior_event): After singlestepping over a
 	thread-specific breakpoint, use currently_stepping() to decide
 	whether to step or continue.
