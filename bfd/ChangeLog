@@ -1,5 +1,8 @@
 Mon Sep 26 11:00:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (assign_file_positions_except_relocs): Align the
+	section VMA and the file position even if D_PAGED is not set.
+
 	* bfd-in.h (bfd_seek): Change declaration to not mark fp const.
 	* bfd-in2.h: Rebuild.
 	* libbfd.c (bfd_seek): Don't mark parameters const, to avoid
