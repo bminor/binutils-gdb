@@ -1,3 +1,9 @@
+2002-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Removed.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Adjust for the removal of
+	this macro.  Include "value.h".
+
 2002-06-30  Aidan Skinner  <aidan@velvet.net>
 
 	* ada-exp.tab.c: remove as it's a generated file

@@ -23,14 +23,6 @@
 
 #include "i386/tm-i386v4.h"
 
-/* If the current gcc for for this target does not produce correct
-   debugging information for float parameters, both prototyped and
-   unprototyped, then define this macro.  This forces gdb to always
-   assume that floats are passed as doubles and then converted in the
-   callee. */
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
-
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
