@@ -1,3 +1,11 @@
+2004-01-14  David Carlton  <carlton@bactrian.org>
+
+	* gdb.cp/rtti.exp: Update copyright.  KFAIL test with repect to
+	PR c++/1511 and update coment.
+	* gdb.cp/templates.exp: Update patterns to match current output.
+	If changes involve something other than whitespace, KFAIL
+	w.r.t. PR c++/1512 or PR c++/931 as appropriate.
+
 2004-01-14  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/namespace.exp: Add tests involving classes defined within
