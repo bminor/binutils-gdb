@@ -1,4 +1,10 @@
+Fri Mar 21 12:28:41 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* emulparams/delta68.sh (OUTPUT_FORMAT): Set to "m68k-coff-sysv".
+
 Tue Mar 18 11:16:23 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Rebuild dependencies.
 
 	* emultempl/aix.em: Include "obstack.h".
 
