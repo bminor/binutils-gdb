@@ -1017,7 +1017,7 @@ sim_fetch_register (sd,rn,memory,length)
   /* start-sanitize-r5900 */
   if (rn >= 90 && rn < 90 + 32)
     {
-      *(unsigned64*)memory = GPR1[rn - 90];
+      *((unsigned64*)memory) = H2T_8 (GPR1[rn - 90]);
       return 8;
     }
   switch (rn)
