@@ -1,3 +1,30 @@
+Mon Jan 11 10:08:03 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes are part of the HP merge.
+
+	* gdb.base/break.exp: new tests to verify that catchpoints for
+	fork, vfork, and exec don't trigger inappropriately.
+
+	* gdb.base/opaque.exp: compile one file at a time, then link.
+
+	* gdb.base/signals.exp: be more restrictive about which hppa
+	systems receive a setup_xfail.  new tests.
+
+	* gdb.c++/classes.exp: if on HPUX and not using gcc, skip the
+	tests.  New tests for enums inside classes.
+
+	* gdb.c++/compiler.cc: indicate support of template debugging.
+
+	* gdb.c++/demangle.exp: run hp style demangling tests.
+
+	* gdb.c++/inherit.exp: if on HPUX and not using gcc, skip the
+	tests.
+
+	* gdb.c++/misc.cc: changes to support new tests.
+
+	* gdb.c++/templates.cc: changes to support HP's compiler; changes
+	to support new tests.
+
 Sun Jan 10 23:44:11 1999  David Taylor  <taylor@texas.cygnus.com>
 
 
