@@ -248,6 +248,7 @@ BASE_FLAGS_TO_PASS = \
 	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"SHELL=$(SHELL)" \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
@@ -1054,7 +1055,7 @@ DISTSTUFFDIRS= ld gprof gdb libg++ binutils
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 # Directories where "info" should be built.
-DISTDOCDIRS= ld gprof binutils gas bfd
+DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb
 
 .PHONY: taz
 
@@ -1155,6 +1156,11 @@ LIBGXX_SUPPORT_DIRS=include libio libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
 	$(MAKE) -f Makefile.in taz TOOL=libg++ \
 		SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)"
+
+GNATS_SUPPORT_DIRS=include libiberty send-pr
+gnats.tar.gz: $(DIST_SUPPORT) $(GNATS_SUPPORT_DIRS) gnats
+	$(MAKE) -f  Makefile.in taz TOOL=gnats
+		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
 
 .NOEXPORT:
 MAKEOVERRIDES=
