@@ -104,6 +104,8 @@ DESCRIPTION
 .  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
+.#define bfd_mach_i386_i386 0
+.#define bfd_mach_i386_i8086 1
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}

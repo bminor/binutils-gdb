@@ -1,7 +1,7 @@
-Mon Jul 15 16:39:43 1996  Stu Grossman  (grossman@critters.cygnus.com)
+Tue Jul 16 23:49:02 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
-	* bfd-in2.h:  Add bfd_mach_i386_i386 and bfd_mach_i386_i8086
-	machine types.
+	* archures.c bfd-in2.h:  Add bfd_mach_i386_i386 and
+	bfd_mach_i386_i8086 machine types.
 
 Wed Jul 10 12:42:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
