@@ -573,6 +573,7 @@ dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
+sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 sim_d10v_h =	$(INCLUDE_DIR)/gdb/sim-d10v.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
@@ -1307,7 +1308,7 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) $(doublest_h) \
 	$(value_h) $(arch_utils_h) $(solib_svr4_h) $(arm_tdep_h) \
 	$(BFD_SRC)/elf-bfd.h $(INCLUDE_DIR)/coff/internal.h \
-	$(INCLUDE_DIR)/elf/arm.h 
+	$(INCLUDE_DIR)/elf/arm.h $(sim_arm_h) $(gdb_assert_h)
 
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)

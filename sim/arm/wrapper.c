@@ -36,6 +36,7 @@
 #include "ansidecl.h"
 #include "sim-utils.h"
 #include "run-sim.h"
+#include "gdb/sim-arm.h"
 
 host_callback *sim_callback;
 
@@ -386,13 +387,45 @@ sim_store_register (sd, rn, memory, length)
 {
   init ();
 
-  if (rn == 25)
+  switch ((enum sim_arm_regs) rn)
     {
+    case SIM_ARM_R0_REGNUM:
+    case SIM_ARM_R1_REGNUM:
+    case SIM_ARM_R2_REGNUM:
+    case SIM_ARM_R3_REGNUM:
+    case SIM_ARM_R4_REGNUM:
+    case SIM_ARM_R5_REGNUM:
+    case SIM_ARM_R6_REGNUM:
+    case SIM_ARM_R7_REGNUM:
+    case SIM_ARM_R8_REGNUM:
+    case SIM_ARM_R9_REGNUM:
+    case SIM_ARM_R10_REGNUM:
+    case SIM_ARM_R11_REGNUM:
+    case SIM_ARM_R12_REGNUM:
+    case SIM_ARM_R13_REGNUM:
+    case SIM_ARM_R14_REGNUM:
+    case SIM_ARM_R15_REGNUM: /* PC */
+    case SIM_ARM_FP0_REGNUM:
+    case SIM_ARM_FP1_REGNUM:
+    case SIM_ARM_FP2_REGNUM:
+    case SIM_ARM_FP3_REGNUM:
+    case SIM_ARM_FP4_REGNUM:
+    case SIM_ARM_FP5_REGNUM:
+    case SIM_ARM_FP6_REGNUM:
+    case SIM_ARM_FP7_REGNUM:
+    case SIM_ARM_FPS_REGNUM:
+      ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+      break;
+
+    case SIM_ARM_PS_REGNUM:
       state->Cpsr = frommem (state, memory);
       ARMul_CPSRAltered (state);
+      break;
+
+    default:
+      return 0;
     }
-  else
-    ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+
   return -1;
 }
 
@@ -407,14 +440,46 @@ sim_fetch_register (sd, rn, memory, length)
 
   init ();
 
-  if (rn < 16)
-    regval = ARMul_GetReg (state, state->Mode, rn);
-  else if (rn == 25)
-    /* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h.  */
-    regval = ARMul_GetCPSR (state);
-  else
-    /* FIXME: should report an error.  */
-    regval = 0;
+  switch ((enum sim_arm_regs) rn)
+    {
+    case SIM_ARM_R0_REGNUM:
+    case SIM_ARM_R1_REGNUM:
+    case SIM_ARM_R2_REGNUM:
+    case SIM_ARM_R3_REGNUM:
+    case SIM_ARM_R4_REGNUM:
+    case SIM_ARM_R5_REGNUM:
+    case SIM_ARM_R6_REGNUM:
+    case SIM_ARM_R7_REGNUM:
+    case SIM_ARM_R8_REGNUM:
+    case SIM_ARM_R9_REGNUM:
+    case SIM_ARM_R10_REGNUM:
+    case SIM_ARM_R11_REGNUM:
+    case SIM_ARM_R12_REGNUM:
+    case SIM_ARM_R13_REGNUM:
+    case SIM_ARM_R14_REGNUM:
+    case SIM_ARM_R15_REGNUM: /* PC */
+      regval = ARMul_GetReg (state, state->Mode, rn);
+      break;
+
+    case SIM_ARM_FP0_REGNUM:
+    case SIM_ARM_FP1_REGNUM:
+    case SIM_ARM_FP2_REGNUM:
+    case SIM_ARM_FP3_REGNUM:
+    case SIM_ARM_FP4_REGNUM:
+    case SIM_ARM_FP5_REGNUM:
+    case SIM_ARM_FP6_REGNUM:
+    case SIM_ARM_FP7_REGNUM:
+    case SIM_ARM_FPS_REGNUM:
+      memset (memory, 0, length);
+      return 0;
+
+    case SIM_ARM_PS_REGNUM:
+      regval = ARMul_GetCPSR (state);
+      break;
+
+    default:
+      return 0;
+    }
 
   while (length)
     {

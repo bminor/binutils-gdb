@@ -36,10 +36,13 @@
 #include "solib-svr4.h"
 
 #include "arm-tdep.h"
+#include "gdb/sim-arm.h"
 
 #include "elf-bfd.h"
 #include "coff/internal.h"
 #include "elf/arm.h"
+
+#include "gdb_assert.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -1636,6 +1639,27 @@ arm_register_virtual_size (int regnum)
     return STATUS_REGISTER_SIZE;
 }
 
+/* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
+static int
+arm_register_sim_regno (int regnum)
+{
+  int reg = regnum;
+  gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (reg < NUM_GREGS)
+    return SIM_ARM_R0_REGNUM + reg;
+  reg -= NUM_GREGS;
+
+  if (reg < NUM_FREGS)
+    return SIM_ARM_FP0_REGNUM + reg;
+  reg -= NUM_FREGS;
+
+  if (reg < NUM_SREGS)
+    return SIM_ARM_FPS_REGNUM + reg;
+  reg -= NUM_SREGS;
+
+  internal_error (__FILE__, __LINE__, "Bad REGNUM %d", regnum);
+}
 
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
    convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
@@ -2869,6 +2893,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
   set_gdbarch_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
+
+  /* Internal <-> external register number maps.  */
+  set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
 
   /* Integer registers are 4 bytes.  */
   set_gdbarch_register_size (gdbarch, 4);

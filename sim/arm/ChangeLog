@@ -1,3 +1,11 @@
+2002-06-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Update copyright.
+	(wrapper.o): Specify dependencies.
+	* wrapper.c: Include "gdb/sim-arm.h".
+	(sim_store_register, sim_fetch_register): Rewrite using `enum
+	arm_sim_regs' and a switch.
+
 2002-06-09  Andrew Cagney  <cagney@redhat.com>
 
 	* wrapper.c: Include "gdb/callback.h" and "gdb/remote-sim.h".

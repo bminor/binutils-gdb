@@ -1,3 +1,12 @@
+2002-06-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (sim_arm_h): Define.
+	(arm-tdep.o): Add $(sim_arm_h) and $(gdb_assert_h).
+	* arm-tdep.c: Include "gdb/sim-arm.h" and "gdb_assert.h".
+	(arm_register_sim_regno): New function, map an internal REGNUM
+	onto a simulator register number.
+	(arm_gdbarch_init): Set register_sim_regno.
+
 2002-06-09  Aldy Hernandez  <aldyh@redhat.com>
 
 	* MAINTAINERS: Add self.
