@@ -107,6 +107,7 @@ static int target_little_endian_data;
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash;
 
+static int log2 PARAMS ((int));
 static void s_data1 PARAMS ((void));
 static void s_seg PARAMS ((int));
 static void s_proc PARAMS ((int));
@@ -2937,6 +2938,24 @@ md_pcrel_from (fixP)
   return ret;
 }
 
+/* Return log2 (VALUE), or -1 if VALUE is not an exact positive power
+   of two.  */
+
+static int
+log2 (value)
+     int value;
+{
+  int shift;
+
+  if (value <= 0)
+    return -1;
+
+  for (shift = 0; (value & 1) == 0; value >>= 1)
+    ++shift;
+
+  return (value == 1) ? shift : -1;
+}
+
 /*
  * sort of like s_lcomm
  */
@@ -3003,38 +3022,43 @@ s_reserve (ignore)
       SKIP_WHITESPACE ();
       if (*input_line_pointer == '\n')
 	{
-	  as_bad (_("Missing alignment"));
+	  as_bad (_("missing alignment"));
+	  ignore_rest_of_line ();
 	  return;
 	}
 
-      align = get_absolute_expression ();
+      align = (int) get_absolute_expression ();
+
 #ifndef OBJ_ELF
       if (align > max_alignment)
 	{
 	  align = max_alignment;
-	  as_warn (_("Alignment too large: %d. assumed."), align);
+	  as_warn (_("alignment too large; assuming %d"), align);
 	}
 #endif
+
       if (align < 0)
 	{
-	  align = 0;
-	  as_warn (_("Alignment negative. 0 assumed."));
+	  as_bad (_("negative alignment"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      if (align != 0)
+	{
+	  temp = log2 (align);
+	  if (temp < 0)
+	    {
+	      as_bad (_("alignment not a power of 2"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+
+	  align = temp;
 	}
 
       record_alignment (bss_section, align);
-
-      /* convert to a power of 2 alignment */
-      for (temp = 0; (align & 1) == 0; align >>= 1, ++temp);;
-
-      if (align != 1)
-	{
-	  as_bad (_("Alignment not a power of 2"));
-	  ignore_rest_of_line ();
-	  return;
-	}			/* not a power of two */
-
-      align = temp;
-    }				/* if has optional alignment */
+    }
   else
     align = 0;
 
@@ -3145,18 +3169,22 @@ s_common (ignore)
   if (*input_line_pointer != '"')
     {
       temp = get_absolute_expression ();
+
 #ifndef OBJ_ELF
       if (temp > max_alignment)
 	{
 	  temp = max_alignment;
-	  as_warn (_("Common alignment too large: %d. assumed"), temp);
+	  as_warn (_("alignment too large; assuming %d"), temp);
 	}
 #endif
+
       if (temp < 0)
 	{
-	  temp = 0;
-	  as_warn (_("Common alignment negative; 0 assumed"));
+	  as_bad (_("negative alignment"));
+	  ignore_rest_of_line ();
+	  return;
 	}
+
 #ifdef OBJ_ELF
       if (symbolP->local)
 	{
@@ -3167,7 +3195,19 @@ s_common (ignore)
 
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
-	  align = temp;
+
+	  if (temp == 0)
+	    align = 0;
+	  else
+	    align = log2 (temp);
+
+	  if (align < 0)
+	    {
+	      as_bad (_("alignment not a power of 2"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+
 	  record_alignment (bss_section, align);
 	  subseg_set (bss_section, 0);
 	  if (align)
@@ -3183,7 +3223,7 @@ s_common (ignore)
 	  subseg_set (old_sec, old_subsec);
 	}
       else
-#endif
+#endif /* OBJ_ELF */
 	{
 	allocate_common:
 	  S_SET_VALUE (symbolP, (valueT) size);
@@ -3349,15 +3389,11 @@ sparc_cons_align (nbytes)
       return;
     }
 
-  nalign = 0;
-  while ((nbytes & 1) == 0)
-    {
-      ++nalign;
-      nbytes >>= 1;
-    }
-
+  nalign = log2 (nbytes);
   if (nalign == 0)
     return;
+
+  assert (nalign > 0);
 
   if (now_seg == absolute_section)
     {

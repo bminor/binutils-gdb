@@ -1,3 +1,12 @@
+Tue Jul 14 12:33:44 1998  Chris Torek  <torek@bsdi.com>
+
+	* config/tc-sparc.c (log2): New static function.
+	(s_reserve): Use log2 to convert alignment before calling
+	record_alignment.
+	(s_common): Use log2 to convert alignment before calling
+	record_alignment and frag_align.
+	(sparc_cons_align): Use log2.
+
 Tue Jul 14 11:58:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.c (sparc_handle_align): Reindent a bit.  Correct
