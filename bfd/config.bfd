@@ -38,6 +38,7 @@ i[3456]86) targ_archs=bfd_i386_arch ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
 m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
+pj*)	targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*) targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 sparc*) targ_archs=bfd_sparc_arch ;;
@@ -560,6 +561,16 @@ case "${targ}" in
   ns32k-*-netbsd* | ns32k-*-lites* | ns32k-*-openbsd*)
     targ_defvec=pc532netbsd_vec
     targ_underscore=yes
+    ;;
+
+  pj-*-*)
+    targ_defvec=bfd_elf32_pj_vec
+    targ_selvecs="bfd_elf32_pj_vec bfd_elf32_pjl_vec"
+    ;;
+
+  pjl-*-*)
+    targ_defvec=bfd_elf32_pjl_vec
+    targ_selvecs="bfd_elf32_pjl_vec bfd_elf32_pj_vec bfd_elf32_i386_vec"
     ;;
 
   powerpc-*-aix* | powerpc-*-beos*)

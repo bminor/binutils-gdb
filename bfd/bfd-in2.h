@@ -1350,6 +1350,7 @@ enum bfd_architecture
   bfd_arch_fr30,
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
+  bfd_arch_pj,
   bfd_arch_last
   };
 
@@ -1884,6 +1885,14 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_NS32K_DISP_8_PCREL,
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
+
+/* Picojava relocs.  Not all of these appear in object files. */
+  BFD_RELOC_PJ_CODE_HI16,
+  BFD_RELOC_PJ_CODE_LO16,
+  BFD_RELOC_PJ_CODE_DIR16,
+  BFD_RELOC_PJ_CODE_DIR32,
+  BFD_RELOC_PJ_CODE_REL16,
+  BFD_RELOC_PJ_CODE_REL32,
 
 /* Power(rs6000) and PowerPC relocations. */
   BFD_RELOC_PPC_B26,

@@ -1,3 +1,23 @@
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* cpu-pj.c: New file.
+	* elf32-pj.c: New file.
+	* config.bfd (pj*): New cpu.
+	(pj-*-*, pjl-*-*): New targets.
+	* configure.in (bfd_elf32_pj_vec): New target vector.
+	(bfd_elf32_pjl_vec): New target vector.
+ 	* archures.c (bfd_arch_pj): Define.
+	* elf.c (prep_headers): Handle bfd_arch_pj.
+	* reloc.c: Define BFD_RELOC_PJ_* relocations.
+	* targets.c (bfd_elf32_pj_vec, bfd_elf32_pjl_vec): Declare and add
+	to target vector list.
+	* Makefile.am: Rebuild dependencies.
+	(ALL_MACHINES): Add cpu-pj.lo.
+	(ALL_MACHINES_CFILES): Add cpu-pj.c.
+	(BFD32_BACKENDS): Add elf32-pj.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-pj.c.
+	* configure, Makefile.in, bfd-in2.h, libbfd.h: Rebuild.
+
 1999-09-04  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf-bfd.h (ELF_LINK_NON_GOT_REF): Define.

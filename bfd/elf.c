@@ -3185,6 +3185,9 @@ prep_headers (abfd)
     case bfd_arch_mn10300:
       i_ehdrp->e_machine = EM_CYGNUS_MN10300;
       break;
+    case bfd_arch_pj:
+      i_ehdrp->e_machine = EM_PJ;
+      break;
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;
