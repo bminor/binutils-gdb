@@ -1,3 +1,8 @@
+2002-02-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (md_parse_option): Complain about invalid -mabi
+	option input.
+
 2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/obj-coff.h: Check !target_big_endian, not shl, for coff-sh.

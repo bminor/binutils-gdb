@@ -10080,7 +10080,10 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "eabi") == 0)
 	mips_opts.abi = EABI_ABI;
       else
-	mips_opts.abi = NO_ABI;
+	{
+	  as_fatal (_("invalid abi -mabi=%s"), arg);
+	  return 0;
+	}
       break;
 #endif /* OBJ_ELF */
 
