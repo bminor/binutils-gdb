@@ -1,3 +1,8 @@
+Tue Jul 28 11:00:09 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Add entries for "no_match_operands" field in
+	the opcode table.
+
 start-sanitize-am33
 Fri Jul 24 15:22:40 1998  Jeffrey A Law  (law@cygnus.com)
 
