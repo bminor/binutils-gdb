@@ -1,3 +1,7 @@
+Thu Jun  3 16:41:10 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* hppa.c (hppa_get_symbol_info):  New func needed for JUMP_TABLE.
+
 Thu Jun  3 15:33:57 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* hppa.c (hppa_get_symbol_info): New function.

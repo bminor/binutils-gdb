@@ -1006,6 +1006,17 @@ DEFUN (hppa_field_adjust, (value, constant_value, r_field),
 
 }
 
+/* Return information about SOM symbol SYMBOL in RET.  */
+
+static void
+hppa_get_symbol_info (ignore_abfd, symbol, ret)
+     bfd *ignore_abfd;		/* Ignored.  */
+     asymbol *symbol;
+     symbol_info *ret;
+{
+  bfd_symbol_info (symbol, ret);
+}
+
 /* End of miscellaneous support functions. */
 
 #ifdef HOST_HPPABSD
