@@ -2000,7 +2000,7 @@ s390_pop_frame_regular (struct frame_info *frame)
             ULONGEST value;
             
             value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
-                                                  REGISTER_RAW_SIZE (regnum));
+                                                  DEPRECATED_REGISTER_RAW_SIZE (regnum));
             write_register (regnum, value);
           }
 

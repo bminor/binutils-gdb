@@ -19517,9 +19517,9 @@ Reply:
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} @var{packet} are
-determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE}
-and @var{REGISTER_NAME} macros.  The specification of several standard
-@code{g} packets is specified below.
+determined by the @value{GDBN} internal macros
+@var{DEPRECATED_REGISTER_RAW_SIZE} and @var{REGISTER_NAME} macros.  The
+specification of several standard @code{g} packets is specified below.
 @item E@var{NN}
 for an error.
 @end table
@@ -19971,12 +19971,13 @@ conventions is used.
 
 @var{AA} = two hex digit signal number; @var{n...} = register number
 (hex), @var{r...}  = target byte ordered register contents, size defined
-by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
-thread process ID, this is a hex integer; @var{n...} = (@samp{watch} | 
-@samp{rwatch} | @samp{awatch}, @var{r...} = data address, this is a hex
-integer; @var{n...} = other string not starting with valid hex digit.
-@value{GDBN} should ignore this @var{n...}, @var{r...} pair and go on
-to the next.  This way we can extend the protocol.
+by @code{DEPRECATED_REGISTER_RAW_SIZE}; @var{n...} = @samp{thread},
+@var{r...} = thread process ID, this is a hex integer; @var{n...} =
+(@samp{watch} | @samp{rwatch} | @samp{awatch}, @var{r...} = data
+address, this is a hex integer; @var{n...} = other string not starting
+with valid hex digit.  @value{GDBN} should ignore this @var{n...},
+@var{r...} pair and go on to the next.  This way we can extend the
+protocol.
 
 @item W@var{AA}
 

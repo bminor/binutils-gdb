@@ -486,7 +486,7 @@ F::DEPRECATED_REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::gene
 # sizes agree with the value computed from REGISTER_TYPE,
 # DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
 # registers.
-F:2:REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size
+F:2:DEPRECATED_REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size
 # If all registers have identical raw and virtual sizes and those
 # sizes agree with the value computed from REGISTER_TYPE,
 # DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print

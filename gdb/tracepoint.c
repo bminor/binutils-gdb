@@ -1215,7 +1215,7 @@ collect_symbol (struct collection_list *collect, struct symbol *sym,
       /* check for doubles stored in two registers */
       /* FIXME: how about larger types stored in 3 or more regs? */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
-	  len > REGISTER_RAW_SIZE (reg))
+	  len > DEPRECATED_REGISTER_RAW_SIZE (reg))
 	add_register (collect, reg + 1);
       break;
     case LOC_REF_ARG:

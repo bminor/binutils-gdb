@@ -1224,7 +1224,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
           /* SRP was saved on the stack; non-leaf function.  */
           get_frame_extra_info (fi)->return_pc =
             read_memory_integer (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM], 
-                                 REGISTER_RAW_SIZE (SRP_REGNUM));
+                                 DEPRECATED_REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
         {
@@ -4184,8 +4184,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, cris_register_name);
   
-  /* Length of ordinary registers used in push_word and a few other places. 
-     REGISTER_RAW_SIZE is the real way to know how big a register is.  */
+  /* Length of ordinary registers used in push_word and a few other
+     places.  DEPRECATED_REGISTER_RAW_SIZE is the real way to know how
+     big a register is.  */
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   
   /* NEW */
@@ -4239,7 +4240,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The length of the registers in the actual machine representation.  */
   set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_RAW_SIZE can have.  */
+  /* The largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
   
   /* The length of the registers in the program's representation.  */

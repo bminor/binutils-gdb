@@ -500,7 +500,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
 		{
                   int size;
 
-                  size = REGISTER_RAW_SIZE (dataElementPtr->itemNo);
+                  size = DEPRECATED_REGISTER_RAW_SIZE (dataElementPtr->itemNo);
 		  for (j = 0; j < size; j++)
 		    ((char *) dataElementPtr->value)[j] = rawBuf[j];
 		  _tuiDisplayRegister (
@@ -763,7 +763,7 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
       if (_tuiGetRegisterRawValue (
 			 dataElement->itemNo, rawBuf, frame) == TUI_SUCCESS)
 	{
-          int size = REGISTER_RAW_SIZE (dataElement->itemNo);
+          int size = DEPRECATED_REGISTER_RAW_SIZE (dataElement->itemNo);
           
 	  for (i = 0; (i < size && !hasChanged); i++)
 	    hasChanged = (((char *) dataElement->value)[i] != rawBuf[i]);

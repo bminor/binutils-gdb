@@ -703,7 +703,8 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
 /* frame_register_read ()
 
    Find and return the value of REGNUM for the specified stack frame.
-   The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
+   The number of bytes copied is DEPRECATED_REGISTER_RAW_SIZE
+   (REGNUM).
 
    Returns 0 if the register value could not be found.  */
 
@@ -966,7 +967,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	  if (bufferp != NULL)
 	    /* NOTE: cagney/2003-05-09: In-lined store_address with
                it's body - store_unsigned_integer.  */
-	    store_unsigned_integer (bufferp, REGISTER_RAW_SIZE (regnum),
+	    store_unsigned_integer (bufferp, DEPRECATED_REGISTER_RAW_SIZE (regnum),
 				    deprecated_get_frame_saved_regs (frame)[regnum]);
 	}
       else
@@ -993,15 +994,15 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	      if (regs[regnum] == NULL)
 		{
 		  regs[regnum]
-		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
+		    = frame_obstack_zalloc (DEPRECATED_REGISTER_RAW_SIZE (regnum));
 		  read_memory (deprecated_get_frame_saved_regs (frame)[regnum], regs[regnum],
-			       REGISTER_RAW_SIZE (regnum));
+			       DEPRECATED_REGISTER_RAW_SIZE (regnum));
 		}
-	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
+	      memcpy (bufferp, regs[regnum], DEPRECATED_REGISTER_RAW_SIZE (regnum));
 #else
 	      /* Read the value in from memory.  */
 	      read_memory (deprecated_get_frame_saved_regs (frame)[regnum], bufferp,
-			   REGISTER_RAW_SIZE (regnum));
+			   DEPRECATED_REGISTER_RAW_SIZE (regnum));
 #endif
 	    }
 	}
@@ -1109,7 +1110,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		    /* NOTE: cagney/2003-05-09: In-line store_address
                        with it's body - store_unsigned_integer.  */
 		    store_unsigned_integer (raw_buffer,
-					    REGISTER_RAW_SIZE (regnum),
+					    DEPRECATED_REGISTER_RAW_SIZE (regnum),
 					    deprecated_get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
@@ -1118,7 +1119,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 		  if (raw_buffer)
 		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
-				 REGISTER_RAW_SIZE (regnum));
+				 DEPRECATED_REGISTER_RAW_SIZE (regnum));
 		}
 	      return;
 	    }

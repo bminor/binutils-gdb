@@ -627,7 +627,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    {
 	      int offset;
 	      for (reg_offset = value_reg, offset = 0;
-		   offset + REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
+		   offset + DEPRECATED_REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
 		   reg_offset++);
 	      byte_offset = VALUE_OFFSET (toval) - offset;
 	    }
@@ -645,7 +645,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* Copy it in.  */
 	    for (regno = reg_offset, amount_copied = 0;
 		 amount_copied < amount_to_copy;
-		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
 	      frame_register_read (frame, regno, buffer + amount_copied);
 	    
 	    /* Modify what needs to be modified.  */
@@ -662,7 +662,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* Copy it out.  */
 	    for (regno = reg_offset, amount_copied = 0;
 		 amount_copied < amount_to_copy;
-		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
 	      put_frame_register (frame, regno, buffer + amount_copied);
 
 	  }

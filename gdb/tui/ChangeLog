@@ -1,3 +1,8 @@
+2003-09-27  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c: Rename REGISTER_RAW_SIZE to
+	DEPRECATED_REGISTER_RAW_SIZE.
+
 2003-09-13  Andrew Cagney  <cagney@redhat.com>
 
 	* tui.h (struct ui_file): Add opaque declaration.

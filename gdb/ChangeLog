@@ -1,3 +1,25 @@
+2003-10-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_REGISTER_RAW_SIZE): Rename
+	REGISTER_RAW_SIZE.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* aix-thread.c, alpha-tdep.h, arm-tdep.c, core-sol2.c: Update.
+	* cris-tdep.c, dve3900-rom.c, findvar.c, frame.c: Update.
+	* hppa-tdep.c, hppab-nat.c, hppah-nat.c, hppam3-nat.c: Update.
+	* hpux-thread.c, i386gnu-nat.c, ia64-aix-nat.c: Update.
+	* ia64-linux-nat.c, ia64-tdep.c, infcmd.c, infptrace.c: Update.
+	* infrun.c, irix5-nat.c, lynx-nat.c, mips-linux-tdep.c: Update.
+	* mips-nat.c, mips-tdep.c, mipsv4-nat.c, mn10300-tdep.c: Update.
+	* monitor.c, ns32k-tdep.c, ppc-linux-nat.c, regcache.c: Update.
+	* remote-e7000.c, remote-mips.c, remote-sim.c: Update.
+	* remote-vxmips.c, remote-vxsparc.c, remote.c: Update.
+	* rom68k-rom.c, rs6000-nat.c, rs6000-tdep.c, s390-tdep.c: Update.
+	* sh64-tdep.c, sparc-nat.c, sparc-tdep.c, stack.c: Update.
+	* target.c, tracepoint.c, v850-tdep.c, v850ice.c, valops.c: Update.
+	* vax-tdep.c, vax-tdep.h, x86-64-tdep.c, xstormy16-tdep.c: Update.
+	* config/m68k/tm-delta68.h, config/m68k/tm-vx68.h: Update.
+	* config/sparc/tm-sparc.h, config/sparc/tm-sparclynx.h: Update.
+	
 2003-10-02  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (struct die_info): Doc fix.

@@ -929,7 +929,7 @@ monitor_supply_register (int regno, char *valstr)
 
   /* supply register stores in target byte order, so swap here */
 
-  store_unsigned_integer (regbuf, REGISTER_RAW_SIZE (regno), val);
+  store_unsigned_integer (regbuf, DEPRECATED_REGISTER_RAW_SIZE (regno), val);
 
   supply_register (regno, regbuf);
 
@@ -1235,7 +1235,7 @@ monitor_fetch_register (int regno)
      spaces, but stop reading if something else is seen.  Some monitors
      like to drop leading zeros.  */
 
-  for (i = 0; i < REGISTER_RAW_SIZE (regno) * 2; i++)
+  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno) * 2; i++)
     {
       int c;
       c = readchar (timeout);
@@ -1352,7 +1352,7 @@ monitor_store_register (int regno)
 
   val = read_register (regno);
   monitor_debug ("MON storeg %d %s\n", regno,
-		 phex (val, REGISTER_RAW_SIZE (regno)));
+		 phex (val, DEPRECATED_REGISTER_RAW_SIZE (regno)));
 
   /* send the register deposit command */
 

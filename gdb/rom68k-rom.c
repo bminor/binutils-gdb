@@ -101,7 +101,7 @@ rom68k_supply_one_register (int regno, unsigned char *hex)
   while (is_whitespace (*hex))
     hex++;
 
-  store_unsigned_integer (regbuf, REGISTER_RAW_SIZE (regno), value);
+  store_unsigned_integer (regbuf, DEPRECATED_REGISTER_RAW_SIZE (regno), value);
   supply_register (regno, regbuf);
 
   return hex;

@@ -83,7 +83,7 @@ fetch_inferior_registers (int regno)
   for (regno = 1; regno < NUM_REGS; regno++)
     {
       regaddr = register_ptrace_addr (regno);
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+      for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  *(int *) &buf[i] = ptrace (PT_READ_U, PIDGET (inferior_ptid),
 				     (PTRACE_ARG3_TYPE) regaddr, 0);

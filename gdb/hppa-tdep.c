@@ -2983,7 +2983,7 @@ pa_print_fp_reg (int i)
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
-  memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
+  memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (i));
 
   fputs_filtered (REGISTER_NAME (i), gdb_stdout);
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
@@ -3001,8 +3001,8 @@ pa_print_fp_reg (int i)
       frame_register_read (deprecated_selected_frame, i + 1, raw_buffer);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
-      memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buffer,
-	      REGISTER_RAW_SIZE (i));
+      memcpy (virtual_buffer + DEPRECATED_REGISTER_RAW_SIZE (i), raw_buffer,
+	      DEPRECATED_REGISTER_RAW_SIZE (i));
 
       /* Dump it as a double.  */
       fputs_filtered (REGISTER_NAME (i), gdb_stdout);
@@ -3029,7 +3029,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
-  memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
+  memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (i));
 
   if (precision == double_precision && (i % 2) == 0)
     {
@@ -3040,7 +3040,8 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
       frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
-      memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buf, REGISTER_RAW_SIZE (i));
+      memcpy (virtual_buffer + DEPRECATED_REGISTER_RAW_SIZE (i), raw_buf,
+	      DEPRECATED_REGISTER_RAW_SIZE (i));
 
       val_print (builtin_type_double, virtual_buffer, 0, 0, stream, 0,
 		 1, 0, Val_pretty_default);

@@ -1154,7 +1154,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
-      int reg_size = REGISTER_RAW_SIZE (ii + 3);
+      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (ii + 3);
 
       arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
@@ -1334,7 +1334,7 @@ e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *
          is a pseudo register.  */
       int offset = 0;
       int return_regnum = tdep->ppc_gp0_regnum + 3;
-      int reg_size = REGISTER_RAW_SIZE (return_regnum);
+      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (return_regnum);
       int reg_part_size;
       char *val_buffer;
       int copied = 0;
@@ -1360,7 +1360,7 @@ e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *
          if the value is smaller than the register.  */
       while (copied < vallen)
         {
-          reg_part_size = REGISTER_RAW_SIZE (return_regnum + i);
+          reg_part_size = DEPRECATED_REGISTER_RAW_SIZE (return_regnum + i);
 	  /* It is a pseudo/cooked register.  */
           regcache_cooked_read (regbuf, return_regnum + i,
 				val_buffer + copied);
@@ -1421,8 +1421,8 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
     {
       /* return value is copied starting from r3. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
-	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
+	  && TYPE_LENGTH (valtype) < DEPRECATED_REGISTER_RAW_SIZE (3))
+	offset = DEPRECATED_REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
       memcpy (valbuf,
 	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,
@@ -1700,7 +1700,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	  for (i = fdatap->saved_vr; i < 32; i++)
 	    {
 	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_vr0_regnum + i] = vr_addr;
-	      vr_addr += REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+	      vr_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 	    }
 	}
     }
@@ -1717,7 +1717,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	    {
 	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_ev0_regnum + i] = ev_addr;
               deprecated_get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
-	      ev_addr += REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
+	      ev_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
             }
 	}
     }
@@ -1782,7 +1782,7 @@ frame_initial_stack_address (struct frame_info *fi)
       {
 	get_frame_extra_info (fi)->initial_sp
 	  = extract_unsigned_integer (tmpbuf,
-				      REGISTER_RAW_SIZE (fdata.alloca_reg));
+				      DEPRECATED_REGISTER_RAW_SIZE (fdata.alloca_reg));
       }
     else
       /* NOTE: cagney/2002-04-17: At present the only time
@@ -1932,13 +1932,13 @@ static void
 rs6000_register_convert_to_virtual (int n, struct type *type,
 				    char *from, char *to)
 {
-  if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
+  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
     {
-      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      double val = deprecated_extract_floating (from, DEPRECATED_REGISTER_RAW_SIZE (n));
       deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
-    memcpy (to, from, REGISTER_RAW_SIZE (n));
+    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM
@@ -1948,13 +1948,13 @@ static void
 rs6000_register_convert_to_raw (struct type *type, int n,
 				const char *from, char *to)
 {
-  if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
+  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
     {
       double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
-      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
+      deprecated_store_floating (to, DEPRECATED_REGISTER_RAW_SIZE (n), val);
     }
   else
-    memcpy (to, from, REGISTER_RAW_SIZE (n));
+    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
 }
 
 static void
@@ -2060,7 +2060,7 @@ e500_store_return_value (struct type *type, char *valbuf)
   while (copied < len)
     {
       int regnum = gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3 + i;
-      int reg_size = REGISTER_RAW_SIZE (regnum);
+      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (regnum);
       char *reg_val_buf = alloca (reg_size);
 
       memcpy (reg_val_buf, valbuf + copied, reg_size);

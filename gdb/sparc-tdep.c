@@ -815,7 +815,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       if (raw_buffer != NULL)
 	{
 	  /* Put it back in target format.  */
-	  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
+	  store_unsigned_integer (raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
 	}
       if (addrp != NULL)
 	*addrp = 0;
@@ -923,14 +923,14 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (raw_buffer != NULL)
 	    {
 	      /* Put it back in target format.  */
-	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
+	      store_unsigned_integer (raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum), addr);
 	    }
 	  if (addrp != NULL)
 	    *addrp = 0;
 	  return;
 	}
       if (raw_buffer != NULL)
-	read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+	read_memory (addr, raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum));
     }
   else
     {
@@ -974,10 +974,10 @@ sparc_push_dummy_frame (void)
       /* PC, NPC, CCR, FSR, FPRS, Y, ASI */
       deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PC_REGNUM),
 				      &register_temp[0],
-				      REGISTER_RAW_SIZE (PC_REGNUM) * 7);
+				      DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM) * 7);
       deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (PSTATE_REGNUM), 
 				      &register_temp[7 * SPARC_INTREG_SIZE],
-				      REGISTER_RAW_SIZE (PSTATE_REGNUM));
+				      DEPRECATED_REGISTER_RAW_SIZE (PSTATE_REGNUM));
       /* FIXME: not sure what needs to be saved here.  */
     }
   else
@@ -985,7 +985,7 @@ sparc_push_dummy_frame (void)
       /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
       deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (Y_REGNUM),
 				      &register_temp[0],
-				      REGISTER_RAW_SIZE (Y_REGNUM) * 8);
+				      DEPRECATED_REGISTER_RAW_SIZE (Y_REGNUM) * 8);
     }
 
   deprecated_read_register_bytes (DEPRECATED_REGISTER_BYTE (O0_REGNUM),
@@ -1308,29 +1308,29 @@ sparc_pop_frame (void)
     if (fsr[PS_REGNUM])
       write_register (PS_REGNUM, 
 		      read_memory_integer (fsr[PS_REGNUM], 
-					   REGISTER_RAW_SIZE (PS_REGNUM)));
+					   DEPRECATED_REGISTER_RAW_SIZE (PS_REGNUM)));
 
   if (fsr[Y_REGNUM])
     write_register (Y_REGNUM, 
 		    read_memory_integer (fsr[Y_REGNUM], 
-					 REGISTER_RAW_SIZE (Y_REGNUM)));
+					 DEPRECATED_REGISTER_RAW_SIZE (Y_REGNUM)));
   if (fsr[PC_REGNUM])
     {
       /* Explicitly specified PC (and maybe NPC) -- just restore them. */
       write_register (PC_REGNUM, 
 		      read_memory_integer (fsr[PC_REGNUM],
-					   REGISTER_RAW_SIZE (PC_REGNUM)));
+					   DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM)));
       if (fsr[DEPRECATED_NPC_REGNUM])
 	write_register (DEPRECATED_NPC_REGNUM,
 			read_memory_integer (fsr[DEPRECATED_NPC_REGNUM],
-					     REGISTER_RAW_SIZE (DEPRECATED_NPC_REGNUM)));
+					     DEPRECATED_REGISTER_RAW_SIZE (DEPRECATED_NPC_REGNUM)));
     }
   else if (get_frame_extra_info (frame)->flat)
     {
       if (get_frame_extra_info (frame)->pc_addr)
 	pc = PC_ADJUST ((CORE_ADDR)
 			read_memory_integer (get_frame_extra_info (frame)->pc_addr,
-					     REGISTER_RAW_SIZE (PC_REGNUM)));
+					     DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM)));
       else
 	{
 	  /* I think this happens only in the innermost frame, if so then
@@ -1713,7 +1713,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 	{
 	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
 	}
     }
 
@@ -1722,7 +1722,7 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       {
 	from = (char *)&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)];
 	to = (char *) &fpregsetp->pr_fsr;
-	memcpy (to, from, REGISTER_RAW_SIZE (FPS_REGNUM));
+	memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (FPS_REGNUM));
       }
 }
 
@@ -2071,13 +2071,13 @@ sparc_print_registers (struct gdbarch *gdbarch,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
+	  for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (i); j++)
 	    {
 	      int idx;
 	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
-		idx = REGISTER_RAW_SIZE (i) - 1 - j;
+		idx = DEPRECATED_REGISTER_RAW_SIZE (i) - 1 - j;
 	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");
@@ -2408,10 +2408,10 @@ sparc_store_return_value (struct type *type, char *valbuf)
     regno = O0_REGNUM;
 
   /* Add leading zeros to the value. */
-  if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (regno))
+  if (TYPE_LENGTH (type) < DEPRECATED_REGISTER_RAW_SIZE (regno))
     {
-      memset (buffer, 0, REGISTER_RAW_SIZE (regno));
-      memcpy (buffer + REGISTER_RAW_SIZE (regno) - TYPE_LENGTH (type), valbuf,
+      memset (buffer, 0, DEPRECATED_REGISTER_RAW_SIZE (regno));
+      memcpy (buffer + DEPRECATED_REGISTER_RAW_SIZE (regno) - TYPE_LENGTH (type), valbuf,
 	      TYPE_LENGTH (type));
       deprecated_write_register_gen (regno, buffer);
     }
@@ -2722,7 +2722,7 @@ sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
 			   int bitoffset)
 {
   int typelen = TYPE_LENGTH (type);
-  int regsize = REGISTER_RAW_SIZE (O0_REGNUM);
+  int regsize = DEPRECATED_REGISTER_RAW_SIZE (O0_REGNUM);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
     {

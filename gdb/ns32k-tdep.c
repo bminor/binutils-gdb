@@ -498,7 +498,7 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), DEPRECATED_REGISTER_RAW_SIZE (0)));
 }
 
 void

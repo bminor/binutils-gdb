@@ -1524,6 +1524,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_register_convert_to_virtual
                       /*DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL ()*/);
 #endif
+#ifdef DEPRECATED_REGISTER_RAW_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_RAW_SIZE_P()",
+                      XSTRING (DEPRECATED_REGISTER_RAW_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_RAW_SIZE_P() = %d\n",
+                      DEPRECATED_REGISTER_RAW_SIZE_P ());
+#endif
+#ifdef DEPRECATED_REGISTER_RAW_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_RAW_SIZE(reg_nr)",
+                      XSTRING (DEPRECATED_REGISTER_RAW_SIZE (reg_nr)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_RAW_SIZE = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_register_raw_size
+                      /*DEPRECATED_REGISTER_RAW_SIZE ()*/);
+#endif
 #ifdef DEPRECATED_REGISTER_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
@@ -2088,25 +2107,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: REGISTER_NAME = <0x%08lx>\n",
                       (long) current_gdbarch->register_name
                       /*REGISTER_NAME ()*/);
-#endif
-#ifdef REGISTER_RAW_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_RAW_SIZE_P()",
-                      XSTRING (REGISTER_RAW_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_RAW_SIZE_P() = %d\n",
-                      REGISTER_RAW_SIZE_P ());
-#endif
-#ifdef REGISTER_RAW_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_RAW_SIZE(reg_nr)",
-                      XSTRING (REGISTER_RAW_SIZE (reg_nr)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: REGISTER_RAW_SIZE = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_register_raw_size
-                      /*REGISTER_RAW_SIZE ()*/);
 #endif
 #ifdef REGISTER_SIM_REGNO
   fprintf_unfiltered (file,

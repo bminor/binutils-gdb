@@ -1074,7 +1074,7 @@ v850_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          pointed to by R6. */
       return_buffer =
 	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_V0_REGNUM),
-				  REGISTER_RAW_SIZE (E_V0_REGNUM));
+				  DEPRECATED_REGISTER_RAW_SIZE (E_V0_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }

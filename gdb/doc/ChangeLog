@@ -1,6 +1,12 @@
-2003-09-30  Andrew Cagney  <cagney@redhat.com>
+2003-10-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Rename
+	REGISTER_RAW_SIZE to DEPRECATED_REGISTER_RAW_SIZE.
+	* gdb.texinfo (Packets, Stop Reply Packets): Ditto.
+	* gdbint.texinfo (Target Architecture Definition): Rename
+
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
+
 	REGISTER_VIRTUAL_SIZE to DEPRECATED_REGISTER_VIRTUAL_SIZE.
 	(Target Architecture Definition): 
 

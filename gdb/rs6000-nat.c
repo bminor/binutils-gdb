@@ -71,7 +71,7 @@
 #ifndef ARCH3264
 # define ARCH64() 0
 #else
-# define ARCH64() (REGISTER_RAW_SIZE (0) == 8)
+# define ARCH64() (DEPRECATED_REGISTER_RAW_SIZE (0) == 8)
 #endif
 
 /* Union of 32-bit and 64-bit ".reg" core file sections. */
@@ -251,7 +251,7 @@ fetch_register (int regno)
 	     even if the register is really only 32 bits. */
 	  long long buf;
 	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
-	  if (REGISTER_RAW_SIZE (regno) == 8)
+	  if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
 	    *addr = buf;
@@ -320,7 +320,7 @@ store_register (int regno)
 	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
 	     area, even if the register is really only 32 bits. */
 	  long long buf;
-	  if (REGISTER_RAW_SIZE (regno) == 8)
+	  if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 8)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;

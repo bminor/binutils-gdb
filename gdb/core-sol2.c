@@ -98,7 +98,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 
 	  /* The globals and output registers.  */
 	  memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (G1_REGNUM)],
-		  &gregs->r_g1, 15 * REGISTER_RAW_SIZE (G1_REGNUM));
+		  &gregs->r_g1, 15 * DEPRECATED_REGISTER_RAW_SIZE (G1_REGNUM));
 	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)]
 	    = gregs->r_ps;
 	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)]
@@ -119,7 +119,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	    sp = *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (SP_REGNUM)];
 	    if (0 != target_read_memory (sp,
 					 &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-					 16 * REGISTER_RAW_SIZE (L0_REGNUM)))
+					 16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM)))
 	      {
 		warning ("couldn't read input and local registers from core file\n");
 	      }

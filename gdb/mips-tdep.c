@@ -181,9 +181,9 @@ unmake_mips16_addr (CORE_ADDR addr)
 static LONGEST
 read_signed_register (int regnum)
 {
-  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  void *buf = alloca (DEPRECATED_REGISTER_RAW_SIZE (regnum));
   deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
+  return (extract_signed_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)));
 }
 
 static LONGEST
@@ -279,7 +279,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
   switch (endian)
     {
     case BFD_ENDIAN_BIG:
-      reg_offset = REGISTER_RAW_SIZE (reg_num) - length;
+      reg_offset = DEPRECATED_REGISTER_RAW_SIZE (reg_num) - length;
       break;
     case BFD_ENDIAN_LITTLE:
       reg_offset = 0;
@@ -325,7 +325,7 @@ mips2_fp_compat (void)
 {
   /* MIPS1 and MIPS2 have only 32 bit FPRs, and the FR bit is not
      meaningful.  */
-  if (REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
+  if (DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
     return 0;
 
 #if 0
@@ -654,7 +654,7 @@ mips_register_raw_size (int regnum)
 	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
 	 raw size is changing according to the ABI
 	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
+	 combination of DEPRECATED_REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
       if (mips64_transfers_32bit_regs_p)
 	return DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
       else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
@@ -717,7 +717,7 @@ mips_register_convertible (int reg_nr)
   if (mips64_transfers_32bit_regs_p)
     return 0;
   else
-    return (REGISTER_RAW_SIZE (reg_nr) > DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr));
+    return (DEPRECATED_REGISTER_RAW_SIZE (reg_nr) > DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr));
 }
 
 static void
@@ -726,7 +726,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     memcpy (virt_buf,
-	    raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+	    raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    TYPE_LENGTH (virtual_type));
   else
     memcpy (virt_buf,
@@ -738,9 +738,9 @@ static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
 			      const char *virt_buf, char *raw_buf)
 {
-  memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
+  memset (raw_buf, 0, DEPRECATED_REGISTER_RAW_SIZE (n));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    memcpy (raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+    memcpy (raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    virt_buf,
 	    TYPE_LENGTH (virtual_type));
   else
@@ -753,7 +753,7 @@ static int
 mips_convert_register_p (int regnum, struct type *type)
 {
   return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && REGISTER_RAW_SIZE (regnum) == 4
+	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4
 	  && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
 	  && TYPE_CODE(type) == TYPE_CODE_FLT
 	  && TYPE_LENGTH(type) == 8);
@@ -4065,7 +4065,7 @@ static void
 mips_read_fp_register_single (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = REGISTER_RAW_SIZE (regno);
+  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
   char *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
@@ -4097,7 +4097,7 @@ static void
 mips_read_fp_register_double (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = REGISTER_RAW_SIZE (regno);
+  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
 
   if (raw_size == 8 && !mips2_fp_compat ())
     {
@@ -4136,13 +4136,13 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, namelen;
 
-  raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
+  raw_buffer = (char *) alloca (2 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM));
 
   fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
   fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
 		    "");
 
-  if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
+  if (DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
     {
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
@@ -4229,7 +4229,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     fprintf_filtered (file, ": ");
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    offset = REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+    offset = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
   else
     offset = 0;
 
@@ -4301,8 +4301,8 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	for (byte = REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
-	     byte < REGISTER_RAW_SIZE (regnum);
+	for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	     byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	     byte++)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
       else
@@ -4641,7 +4641,7 @@ return_value_location (struct type *valtype,
 	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
+			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
 			    ? 4 : 0);
 	  hi->reg_offset = lo->reg_offset;
 	  lo->reg = FP0_REGNUM + 0;
@@ -4654,7 +4654,7 @@ return_value_location (struct type *valtype,
 	  /* The floating point value fits in a single floating-point
 	     register. */
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8
+			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8
 			     && len == 4)
 			    ? 4 : 0);
 	  lo->reg = FP0_REGNUM;
@@ -4710,7 +4710,7 @@ return_value_location (struct type *valtype,
 	    }
 	}
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && REGISTER_RAW_SIZE (regnum) == 8
+	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 8
 	  && MIPS_SAVED_REGSIZE == 4)
 	{
 	  /* Account for the fact that only the least-signficant part
@@ -4778,14 +4778,14 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   REGISTER_RAW_SIZE (lo.reg));
+				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       REGISTER_RAW_SIZE (hi.reg));
+				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4800,14 +4800,14 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   REGISTER_RAW_SIZE (lo.reg));
+				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       REGISTER_RAW_SIZE (hi.reg));
+				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4902,9 +4902,9 @@ mips_o32_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -5013,9 +5013,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -5033,9 +5033,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  int pos = 0;
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;

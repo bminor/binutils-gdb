@@ -216,7 +216,7 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == REGISTER_RAW_SIZE (regnum); at present.  */
+  /* long size in bytes;  == DEPRECATED_REGISTER_RAW_SIZE (regnum); at present.  */
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
 
@@ -3023,9 +3023,9 @@ Packet: '%s'\n",
 		      error ("Remote sent bad register number %s: %s\nPacket: '%s'\n",
 			     phex_nz (pnum, 0), p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (reg->regnum, regs);
 		  }
@@ -3271,9 +3271,9 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		      error ("Remote sent bad register number %ld: %s\nPacket: '%s'\n",
 			     pnum, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (reg->regnum, regs);
 		  }
@@ -3548,7 +3548,7 @@ store_register_using_P (int regnum)
   sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache_collect (reg->regnum, regp);
-  bin2hex (regp, p, REGISTER_RAW_SIZE (reg->regnum));
+  bin2hex (regp, p, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
   return buf[0] != '\0';

@@ -223,7 +223,7 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
    address).  Some vendors get it wrong.  */
 
 #define	FRAME_SAVED_L0	0
-#define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (L0_REGNUM))
+#define	FRAME_SAVED_I0	(8 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM))
 
 #define FRAME_STRUCT_ARGS_ADDRESS(FI) (get_frame_base (FI))
 

@@ -134,7 +134,7 @@ static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
   return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (4),
-				   REGISTER_RAW_SIZE (4));
+				   DEPRECATED_REGISTER_RAW_SIZE (4));
 }
 
 static void
@@ -749,7 +749,7 @@ mn10300_pop_frame_regular (struct frame_info *frame)
         ULONGEST value;
 
         value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
-                                              REGISTER_RAW_SIZE (regnum));
+                                              DEPRECATED_REGISTER_RAW_SIZE (regnum));
         write_register (regnum, value);
       }
 
@@ -1039,8 +1039,8 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
       int byte;
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
-	  for (byte = REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
-	       byte < REGISTER_RAW_SIZE (regnum);
+	  for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	       byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	       byte++)
 	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
 	}

@@ -1103,7 +1103,7 @@ arm_make_sigtramp_cache (struct frame_info *next_frame)
   cache->framereg = ARM_SP_REGNUM;
   cache->prev_sp
     = read_memory_integer (cache->saved_regs[cache->framereg].addr,
-			   REGISTER_RAW_SIZE (cache->framereg));
+			   DEPRECATED_REGISTER_RAW_SIZE (cache->framereg));
 
   return cache;
 }

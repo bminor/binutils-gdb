@@ -2766,7 +2766,7 @@ You should not use @code{REGISTER_CONVERT_TO_VIRTUAL} for a register
 unless this macro returns a non-zero value for that register.
 @end deftypefn
 
-@deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
+@deftypefn {Target Macro} int DEPRECATED_REGISTER_RAW_SIZE (int @var{reg})
 The size of register number @var{reg}'s raw value.  This is the number
 of bytes the register will occupy in @code{registers}, or in a @value{GDBN}
 remote protocol packet.
@@ -3505,8 +3505,8 @@ Convert the raw contents of register @var{regnum} into a value of type
 @var{type}.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item REGISTER_RAW_SIZE (@var{reg})
-@findex REGISTER_RAW_SIZE
+@item DEPRECATED_REGISTER_RAW_SIZE (@var{reg})
+@findex DEPRECATED_REGISTER_RAW_SIZE
 Return the raw size of @var{reg}; defaults to the size of the register's
 virtual type.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
