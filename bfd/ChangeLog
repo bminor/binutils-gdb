@@ -1,3 +1,10 @@
+2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (x86_64-*-netbsd*): New target.
+	* configure.in (x86_64-*-netbsd*): Set COREFILE
+	to netbsd-core.lo.
+	* configure: Regenerated.
+
 2002-01-03  Tom Rix  <trix@redhat.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): Update .pad section ordering
@@ -28,23 +35,23 @@
 	anything.
 
 2001-12-27  Tom Rix  <trix@redhat.com>
-	
+
 	* coff-rs6000.c (xcoff_generate_rtinit): Clean data_buffer alloc/free.
 	* coff64-rs6000.c (xcoff64_generate_rtinit): Same.
 	(xcoff_write_archive_contents_big): Rewrite.
 	(xcoff_write_armap_big): Rewrite.
 	(xcoff_write_one_armap_big): Delete.
-	* libxcoff.h : Clean up. 
+	* libxcoff.h : Clean up.
 
 2001-12-21  Tom Rix  <trix@redhat.com>
- 
-        * xcofflink.c (bfd_xcoff_link_generate_rtinit): New function.  
+
+        * xcofflink.c (bfd_xcoff_link_generate_rtinit): New function.
 	Interface to linker for generation of __rtinit.
-	* libxcoff.h (struct xcoff_backend_data_rec): Add new ops to xcoff 
+	* libxcoff.h (struct xcoff_backend_data_rec): Add new ops to xcoff
 	backend to generate special linker symbol __rtinit.
-	* coff-rs6000.c (bfd_xcoff_backend_data, bfd_pmac_xcoff_backend_data) 
+	* coff-rs6000.c (bfd_xcoff_backend_data, bfd_pmac_xcoff_backend_data)
 	:  Add new rtinit ops
-	* coff64-rs6000.c (bfd_xcoff_aix5_backend_data, 
+	* coff64-rs6000.c (bfd_xcoff_aix5_backend_data,
 	bfd_xcoff_backend_data): Same.
 	* bfd-in.h: Add bfd_xcoff_link_generate_rtinit.
 	* bfd-in2.h : Regenerate.
@@ -67,11 +74,11 @@
 
 2001-12-20  Tom Rix  <trix@redhat.com>
 
-	* coffcode.h (coff_compute_section_file_positions): Add special AIX 
+	* coffcode.h (coff_compute_section_file_positions): Add special AIX
 	loader alignment of text section.
 
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
-	
+
 	* config.bfd (mips-dec-netbsd*): Delete alias for mips*el-*-netbsd*.
 
 	* config.bfd (arm-*-netbsdelf*): Add target.
@@ -148,7 +155,7 @@
 	to _bfd_elf_copy_private_bfd_data.
 
 2001-12-18  Martin Schwidefsky  <schwidefsky@de.ibm.com>
- 
+
 	* elf32-s390 (elf_s390_check_relocs): Pass addend to
 	gc_record_vtentry.
 	* elf64-s390 (elf_s390_check_relocs): Likewise.
@@ -596,7 +603,7 @@
 2001-12-07  Jim Blandy  <jimb@redhat.com>
 
 	* elf32-s390.c (elf32_s390_grok_prstatus): New function.
-	(elf_backend_grok_prstatus): Define.	
+	(elf_backend_grok_prstatus): Define.
 
 2001-12-07  Jakub Jelinek  <jakub@redhat.com>
 
@@ -838,7 +845,7 @@
 
 	* section.c (bfd_is_const_section): New macro.  Return true if the
 	given seciton is one of the special, constant, sections.
-	* bfd-in2.h: Regenerate.	
+	* bfd-in2.h: Regenerate.
 	* coffgen.c (coff_count_linenumbers): Use bfd_is_const_section.
 	(coff_write_native_symbol): Use bfd_is_const_section.
 

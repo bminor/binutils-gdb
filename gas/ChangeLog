@@ -1,3 +1,9 @@
+2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in (i386-*-netbsdelf*): Collapse target into...
+	(i386-*-netbsd*): ...this.  Add support for x86-64.
+	* configure: Regenerated.
+
 2002-01-03  matthew green  <mrg@redhat.com>
 
 	* config/tc-ppc.c (md_parse_option): BookE is not Motorola specific.
@@ -69,7 +75,7 @@
 2001-12-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-mips.h (TC_HANDLE_FX_DONE): Remove redundant
-	definition. 
+	definition.
 
 2001-12-18  Niibe Yutaka  <gniibe@m17n.org>
 
@@ -182,8 +188,8 @@
 	(md_assemble): Simplify ARM instruction handling.
 
 2001-12-05  Arati Dikey <aratid@kpit.com>
- 
- 	* tc-sh.c (parse_at): Corrected incorrect op->type selection due
+
+	* tc-sh.c (parse_at): Corrected incorrect op->type selection due
 	to missing 'else'.
 
 2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
@@ -309,7 +315,7 @@
 	* stabs.c (stabs_generate_asm_lineno): Remember file and line number
 	from one call to the next, and eliminate consecutive duplicates
 	(thereby emitting only one line symbol per source line).
-	* dwarf2dbg.c (dwarf2_gen_line_info): Ditto.	
+	* dwarf2dbg.c (dwarf2_gen_line_info): Ditto.
 
 2001-11-16  Alan Modra  <amodra@bigpond.net.au>
 
@@ -628,7 +634,7 @@
 	    Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-sh.c (shl): Remove.
- 	(big): New function.
+	(big): New function.
 	(little): Remove shl handling.  Emit error for endian mismatch.
 	(md_show_usage): Add description of -big.
 	(md_parse_option): Handle OPTION_BIG.  Remove shl handling.

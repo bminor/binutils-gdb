@@ -1,6 +1,10 @@
+2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.tgt (x86_64-*-netbsd*): New target.
+
 2001-12-21  Tom Rix  <trix@redhat.com>
 
-	(gld*_create_output_section_statements): New function.  
+	(gld*_create_output_section_statements): New function.
 	For -binitfini support.
 	* emultempl/aix.em (gld*_before_parse): Fix comment.
 	* emultempl/aix.em (gld*_parse_args): Fix comment.
