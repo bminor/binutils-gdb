@@ -246,7 +246,7 @@ LIBS = ../opcodes/libopcodes.a $(BFDLIB) $(LOCAL_LOADLIBES) \
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I../include -I$(srcdir) -I$(srcdir)/config -I$(srcdir)/../include
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include
 SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 
 # Always use -I$(srcdir)/config when compiling.
