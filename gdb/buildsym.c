@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    They originated in dbxread.c of gdb-4.2, and were split out to
    make xcoffread.c more maintainable by sharing code.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "obstack.h"
 #include "symtab.h"
@@ -31,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"		/* for bfd stuff for symfile.h */
 #include "symfile.h"		/* Needed for "struct complaint" */
 #include "stab.gnu.h"		/* We always use GNU stabs, not native */
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 

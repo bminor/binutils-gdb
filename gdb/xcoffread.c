@@ -19,10 +19,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "bfd.h"
-
-#include <stdio.h>
 
 /* AIX COFF names have a preceeding dot `.' */
 #define NAMES_HAVE_DOT 1

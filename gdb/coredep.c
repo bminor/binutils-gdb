@@ -20,13 +20,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* core.c is supposed to be the more machine-independent aspects of this;
    this file is more machine-specific.  */
 
-#include "defs.h"
-#include "gdbcore.h"
 #include <stdio.h>
-
-/* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #include <sys/types.h>
 #include <sys/param.h>
+#include "defs.h"
+#include "gdbcore.h"
+
+/* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #ifndef USG
 #include <sys/dir.h>
 #include <sys/file.h>
