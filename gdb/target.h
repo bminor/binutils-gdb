@@ -1124,13 +1124,13 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #define target_pid_to_exec_file(pid) \
      (current_target.to_pid_to_exec_file) (pid)
 
-/* Hook to call target-dependant code after reading in a new symbol table.  */
+/* Hook to call target-dependent code after reading in a new symbol table.  */
 
 #ifndef TARGET_SYMFILE_POSTREAD
 #define TARGET_SYMFILE_POSTREAD(OBJFILE)
 #endif
 
-/* Hook to call target dependant code just after inferior target process has
+/* Hook to call target dependent code just after inferior target process has
    started.  */
 
 #ifndef TARGET_CREATE_INFERIOR_HOOK

@@ -64,7 +64,7 @@ struct psymbol_allocation_list
 #define MAX_SECTIONS 40
 struct section_addr_info 
 {
-  /* Sections whose names are file format dependant. */
+  /* Sections whose names are file format dependent. */
   struct other_sections
   {
     CORE_ADDR addr;
