@@ -898,8 +898,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     space allocations for outgoing arguments.  The ABI also
 	     mandates minimum stack alignments which we must
 	     preserve.  */
-	  param_end = struct_end + max (align_up (param_ptr, 8),
-					REG_PARM_STACK_SPACE);
+	  param_end = struct_end + max (align_up (param_ptr, 8), 16);
 	}
     }
 
@@ -1022,8 +1021,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	     space allocations for outgoing arguments.  The ABI also
 	     mandates minimum stack alignments which we must
 	     preserve.  */
-	  param_end = struct_end + max (align_up (param_ptr, 16),
-					REG_PARM_STACK_SPACE);
+	  param_end = struct_end + max (align_up (param_ptr, 16), 64);
 	}
     }
 

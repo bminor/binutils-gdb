@@ -1,5 +1,11 @@
 2004-04-03  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/tm-hppa.h (REG_PARM_STACK_SPACE): Delete.
+	* config/pa/tm-hppa64.h (PA20W_CALLING_CONVENTIONS) 
+	(REG_PARM_STACK_SPACE): Delete.
+	* hppa-tdep.c (hppa64_push_dummy_call, hppa32_push_dummy_call):
+	Inline reference to REG_PARM_STACK_SPACE.
+
 	* config/pa/tm-hppah.h (FRAME_SAVED_PC_IN_SIGTRAMP)
 	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP)
 	(hppa32_hpux_frame_find_saved_regs_in_sigtramp)

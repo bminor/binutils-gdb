@@ -57,14 +57,6 @@ extern int hpread_adjust_stack_address (CORE_ADDR);
 
 /* jimb: omitted dynamic linking stuff here */
 
-/* The PA64 ABI reserves 64 bytes of stack space for outgoing register
-   parameters.  */
-#undef REG_PARM_STACK_SPACE
-#define REG_PARM_STACK_SPACE 64
-
-/* Use the 64-bit calling conventions designed for the PA2.0 in wide mode.  */
-#define PA20W_CALLING_CONVENTIONS
-
 #undef FUNC_LDIL_OFFSET
 #undef FUNC_LDO_OFFSET
 #undef SR4EXPORT_LDIL_OFFSET

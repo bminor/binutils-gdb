@@ -101,8 +101,6 @@ extern int hppa_instruction_nullified (void);
 
 #define INSTRUCTION_SIZE 4
 
-#define REG_PARM_STACK_SPACE 16
-
 /*
  * Unwind table and descriptor.
  */
