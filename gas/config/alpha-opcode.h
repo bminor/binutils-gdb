@@ -28,17 +28,6 @@
  *  5-Oct-93  Alessandro Forin (af) at Carnegie-Mellon University
  *	First checkin.
  *
- * $Log$
- * Revision 1.1  1994/01/28 01:36:59  raeburn
- * New Alpha support files, based on files from CMU.
- * Still to do:
- *  - fix floating-point handling
- *  - figure out if we can adapt to using ../opcodes/alpha-opc.h
- *  - gcc bootstrap testing
- *  - 32-bit mode support?
- *  - test cross-assembly
- *
- *
  *    Author:	Alessandro Forin, Carnegie Mellon University
  *    Date:	Jan 1993
  */
