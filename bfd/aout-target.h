@@ -1,5 +1,5 @@
 /* Define a target vector and some small routines for a variant of a.out.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -258,11 +258,7 @@ MY(write_object_contents) (abfd)
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
 
-#if CHOOSE_RELOC_SIZE
-  CHOOSE_RELOC_SIZE(abfd);
-#else
   obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-#endif
 
   WRITE_HEADERS(abfd, execp);
 

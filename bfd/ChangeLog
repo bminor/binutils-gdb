@@ -1,3 +1,13 @@
+2000-03-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* aout-target.h (MY(write_object_contents)): Remove unused
+	and unusable "#if CHOOSE_RELOC_SIZE".
+	* pc532-mach.c (MY(write_object_contents)): Ditto.
+	* netbsd.h (MY(write_object_contents)): Ditto.
+	* hp300hpux.c (MY(write_object_contents)): Ditto.
+	* freebsd.h (MY(write_object_contents)): Ditto.
+	* aout-tic30.c (tic30_aout_write_object_contents): Ditto.
+
 2000-02-29  H.J. Lu  <hjl@gnu.org>
 
 	* peicode.h (jtab): Make it static.
