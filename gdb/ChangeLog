@@ -1,3 +1,8 @@
+Sun Jul 11 12:32:08 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/sparc/tm-sparc.h (PRINT_REGISTER_HOOK): Fix typo, add
+	more parens around macro arg.
+
 Sat Jul 10 09:54:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c: Remove step_resume_{duplicate,shadow}.  Replace
