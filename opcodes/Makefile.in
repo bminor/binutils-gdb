@@ -120,11 +120,11 @@ lib_LTLIBRARIES = libopcodes.la
 BFD_H = ../bfd/bfd.h
 
 # Header files.
-HFILES =  	arm-opc.h 	h8500-opc.h 	sh-opc.h 	sysdep.h 	w65-opc.h 	z8k-opc.h
+HFILES =  	arm-opc.h 	fr30-opc.h 	h8500-opc.h 	sh-opc.h 	sysdep.h 	w65-opc.h 	z8k-opc.h
 
 
 # C source files that correspond to .o's.
-CFILES =  	a29k-dis.c 	alpha-dis.c 	alpha-opc.c 	arm-dis.c 	cgen-asm.c 	cgen-dis.c 	cgen-opc.c 	d10v-dis.c 	d10v-opc.c 	d30v-dis.c 	d30v-opc.c 	dis-buf.c 	disassemble.c 	h8300-dis.c 	h8500-dis.c 	hppa-dis.c 	i386-dis.c 	i960-dis.c 	i960c-asm.c 	i960c-dis.c 	i960c-opc.c 	m32r-asm.c 	m32r-dis.c 	m32r-opc.c 	m68k-dis.c 	m68k-opc.c 	m88k-dis.c 	mips-dis.c 	mips-opc.c 	mips16-opc.c 	m10200-dis.c 	m10200-opc.c 	m10300-dis.c 	m10300-opc.c 	ns32k-dis.c 	ppc-dis.c 	ppc-opc.c 	sh-dis.c 	sparc-dis.c 	sparc-opc.c 	tic30-dis.c 	vax-dis.c 	w65-dis.c 	z8k-dis.c 	z8kgen.c
+CFILES =  	a29k-dis.c 	alpha-dis.c 	alpha-opc.c 	arm-dis.c 	cgen-asm.c 	cgen-dis.c 	cgen-opc.c 	d10v-dis.c 	d10v-opc.c 	d30v-dis.c 	d30v-opc.c 	dis-buf.c 	disassemble.c 	fr30-asm.c 	fr30-dis.c 	fr30-opc.c 	h8300-dis.c 	h8500-dis.c 	hppa-dis.c 	i386-dis.c 	i960-dis.c 	i960c-asm.c 	i960c-dis.c 	i960c-opc.c 	m32r-asm.c 	m32r-dis.c 	m32r-opc.c 	m68k-dis.c 	m68k-opc.c 	m88k-dis.c 	mips-dis.c 	mips-opc.c 	mips16-opc.c 	m10200-dis.c 	m10200-opc.c 	m10300-dis.c 	m10300-opc.c 	ns32k-dis.c 	ppc-dis.c 	ppc-opc.c 	sh-dis.c 	sparc-dis.c 	sparc-opc.c 	tic30-dis.c 	vax-dis.c 	w65-dis.c 	z8k-dis.c 	z8kgen.c
 
 
 ALL_MACHINES =  	a29k-dis.lo 	alpha-dis.lo 	alpha-opc.lo 	arc-dis.lo 	arc-opc.lo 	arm-dis.lo 	cgen-asm.lo 	cgen-dis.lo 	cgen-opc.lo 	d10v-dis.lo 	d10v-opc.lo 	d30v-dis.lo 	d30v-opc.lo 	fr30-asm.lo 	fr30-dis.lo 	fr30-opc.lo 	h8300-dis.lo 	h8500-dis.lo 	hppa-dis.lo 	i386-dis.lo 	i960-dis.lo 	i960c-asm.lo 	i960c-dis.lo 	i960c-opc.lo 	m32r-asm.lo 	m32r-dis.lo 	m32r-opc.lo 	m68k-dis.lo 	m68k-opc.lo 	m88k-dis.lo 	m10200-dis.lo 	m10200-opc.lo 	m10300-dis.lo 	m10300-opc.lo 	mips-dis.lo 	mips-opc.lo 	mips16-opc.lo 	ppc-dis.lo 	ppc-opc.lo 	ns32k-dis.lo 	sh-dis.lo 	sparc-dis.lo 	sparc-opc.lo 	tic30-dis.lo 	$(start-sanitize-tic80) 	tic80-dis.lo 	tic80-opc.lo 	$(end-sanitize-tic80) 	$(start-sanitize-sky) 	dvp-dis.lo 	dvp-opc.lo 	$(end-sanitize-sky) 	v850-dis.lo 	v850-opc.lo 	vax-dis.lo 	w65-dis.lo 	z8k-dis.lo
@@ -682,7 +682,8 @@ alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
