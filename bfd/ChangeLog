@@ -1,5 +1,7 @@
 Tue Jan 19 09:06:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* bfd-in.h (bfd_asymbol_value): Add needed parentheses.
+
 	* libcoff-in.h: Update prototype for coff_count_linenumbers.
 
 Fri Jan 15 18:13:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
