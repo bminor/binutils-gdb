@@ -1,3 +1,9 @@
+2005-01-16  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* defilep.y (def_name, def_library): Combine into...
+	(def_image_name): New function.  Strip name to basename,
+	with warning.
+
 2005-01-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Be sure to invoke config.sub using the shell.
