@@ -1,12 +1,26 @@
-/* Print rs6000 instructions for objdump.
-   This file is part of the binutils.
-*/
+/* Print IBM RS/6000 instructions for GNU software.
+   Copyright 1991 Free Software Foundation, Inc.
+   Contributed by IBM Corporation.
 
+This file is part of GDB and the GNU binutils.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
 #include "rs6k-opcode.h"
-
 
 /* Print the rs6k instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
@@ -165,7 +179,7 @@ int	insn_no;
     }
   }
 
-  /* tab between orerator and operand */
+  /* tab between operator and operand */
   *qq++ = '\t';
 
   /* parse the operand now. */
@@ -191,14 +205,6 @@ int	insn_no;
 	sprintf (qq, "%s", cond_code [tmp]);
 	break;
 
-#if 0
-      case A2	:
-	tmp = (insn_word >> 2) & 0x3fff;
-	if (tmp & 0x2000)
-	 tmp -= 0x4000;
-	sprintf (qq, "0x%x", tmp * 4 + memaddr);
-	break;
-#endif
       case A2	:
       case TA14	:
 	tmp = (insn_word & 0xfffc);
@@ -358,10 +364,10 @@ int	insn_no;
 	break;
 
       default	:
-	sprintf (qq, "Unknown operand format identifier????");
+	sprintf (qq, "Unknown operand format identifier %d????", *pp);
 	abort ();
     }
-    while (*qq) ++qq;
+    while (*qq) ++qq;		/* Walk to end of string printed so far.  */
     ++pp;
 
     if (*pp == '\0')
@@ -374,4 +380,3 @@ int	insn_no;
   fprintf (stream, "0x%08x\t%s%s", 
   	insn_word, rs6k_ops[insn_no].operator, buf);
 }
-

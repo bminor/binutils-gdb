@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -159,6 +157,10 @@ remote-mm.c
 remote-nindy.c
 remote-vx.c
 remote.c
+rs6000-pinsn.c
+rs6000-tdep.c
+rs6000-xdep.c
+rs6k-opcode.h
 saber.suppress
 signals.h
 signame.c
@@ -197,6 +199,7 @@ tm-amix.h
 tm-arm.h
 tm-bigmips.h
 tm-convex.h
+tm-delta88.h
 tm-hp300bsd.h
 tm-hp300hpux.h
 tm-i386v-g.h
@@ -211,6 +214,7 @@ tm-nindy960.h
 tm-np1.h
 tm-pn.h
 tm-pyr.h
+tm-rs6000.h
 tm-sparc.h
 tm-sun2.h
 tm-sun2os4.h
@@ -238,6 +242,8 @@ values.c
 vax-opcode.h
 vax-pinsn.c
 vx-share
+xcoffexec.c
+xcoffread.c
 xconfig
 xm-3b1.h
 xm-m88k.h
@@ -246,6 +252,7 @@ xm-amix.h
 xm-arm.h
 xm-bigmips.h
 xm-convex.h
+xm-delta88.h
 xm-hp300bsd.h
 xm-hp300hpux.h
 xm-i386mach.h
@@ -262,6 +269,7 @@ xm-news1000.h
 xm-np1.h
 xm-pn.h
 xm-pyr.h
+xm-rs6000.h
 xm-rtbsd.h
 xm-sparc.h
 xm-sun2.h
