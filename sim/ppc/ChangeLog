@@ -1,8 +1,19 @@
+Sat Dec 16 09:54:18 1995  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* emul_netbsd.c (emul_netbsd_create): Deal with new BFD that
+	changed how big/little endian support is recorded, while remaining
+	compatible with the old BFD with #ifdefs.
+	* emul_chirp.c (emul_chirp_create): Ditto.
+	* emul_bugapi.c (emul_bugapi_create): Ditto.
+
 Fri Dec 15 15:55:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* std-config.h (MODEL_INLINE): Turn off INLINE_MODULE by default.
 
 	* corefile.h: Delete declarations for unknown functions.
 	* device.h: Ditto.
 	* interrupts.h: Ditto.
+	* interrupts.c: Ditto.
 
 Thu Dec 14 18:49:34 1995  Andrew Cagney  <cagney@highland.com.au>
 
