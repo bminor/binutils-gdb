@@ -1,3 +1,8 @@
+Sun Aug 11 13:11:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/term.exp: Set 7-bit strings, address off, width to 0,
+	and don't expect address info in breakpoint confirmations.
+
 Wed Aug  7 20:47:43 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/list.exp (test_forward_search): Increase timeout
