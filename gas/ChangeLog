@@ -1,3 +1,55 @@
+2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	
+	Add V6 support.
+	* config/tc-arm.c (ARM_EXT_V6): New macro.
+	(ARM_ARCH_V6): Likewise.
+	(SHIFT_IMMEDIATE): Likewise.
+	(SHIFT_LSL_OR_ASR_IMMEDIATE): Likewise.
+	(SHIFT_ASR_IMMEDIATE): Likewise.
+	(SHIFT_LSL_IMMMEDIATE): Likewise.
+	(do_cps): New function.
+	(do_cpsi): Likewise.
+	(do_ldrex): Likewise.
+	(do_pkhbt): Likewise.
+	(do_pkhtb): Likewise.
+	(do_qadd16): Likewise.
+	(do_rev): Likewise.
+	(do_rfe): Likewise.
+	(do_sxtah): Likewise.
+	(do_sxth): Likewise.
+	(do_setend): Likewise.
+	(do_smlad): Likewise.
+	(do_smlald): Likewise.
+	(do_smmul): Likewise.
+	(do_ssat): Likewise.
+	(do_usat): Likewise.
+	(do_srs): Likewise.
+	(do_ssat16): Likewise.
+	(do_usat16): Likewise.
+	(do_strex): Likewise.
+	(do_umaal): Likewise.
+	(do_cps_mode): Likewise.
+	(do_cps_flags): Likewise.
+	(do_endian_specifier): Likewise.
+	(do_pkh_core): Likewise.
+	(do_sat): Likewise.
+	(do_sat16): Likewise.
+	(insns): Add V6 instructions.
+	(do_t_cps): New function.
+	(do_t_cpy): Likewise.
+	(do_t_setend): Likewise.
+	(THUMB_CPY): New macro.
+	(tinsns): Add V6 instructions.
+	(decode_shift): Handle V6 restricted-shift options.
+	(thumb_mov_compare): Support CPY.
+	(arm_cores): Add arm1136js and arm1136jfs.
+	(arm_archs): Add armv6.
+	(arm_fpus): Add arm1136jfs.
+	* doc/c-arm.texi (ARM Options): Mention arm1136js, arm1136jfs, and
+	armv6 options.
+
 2003-12-06  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (parse_reg): Be case insensitive when checking

@@ -55,6 +55,7 @@
 #define ARM_EXT_V5ExP	 0x00000200	/* DSP core set.           */
 #define ARM_EXT_V5E	 0x00000400	/* DSP Double transfers.   */
 #define ARM_EXT_V5J	 0x00000800	/* Jazelle extension.	   */
+#define ARM_EXT_V6       0x00001000     /* ARM V6.                 */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00800000	/* Allow MIA etc.          */
@@ -82,6 +83,7 @@
 #define ARM_ARCH_V5TExP	(ARM_ARCH_V5T	| ARM_EXT_V5ExP)
 #define ARM_ARCH_V5TE	(ARM_ARCH_V5TExP | ARM_EXT_V5E)
 #define ARM_ARCH_V5TEJ	(ARM_ARCH_V5TE	| ARM_EXT_V5J)
+#define ARM_ARCH_V6     (ARM_ARCH_V5TEJ | ARM_EXT_V6)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE)
@@ -288,8 +290,16 @@ static const struct asm_shift_name shift_names [] =
   { "RRX", shift_properties + SHIFT_RRX }
 };
 
+/* Any kind of shift is accepted.  */
 #define NO_SHIFT_RESTRICT 1
-#define SHIFT_RESTRICT	  0
+/* The shift operand must be an immediate value, not a register.  */
+#define SHIFT_IMMEDIATE	  0
+/* The shift must be LSL or ASR and the operand must be an immediate.  */
+#define SHIFT_LSL_OR_ASR_IMMEDIATE 2
+/* The shift must be ASR and the operand must be an immediate.  */
+#define SHIFT_ASR_IMMEDIATE 3
+/* The shift must be LSL and the operand must be an immediate.  */
+#define SHIFT_LSL_IMMEDIATE 4
 
 #define NUM_FLOAT_VALS 8
 
@@ -856,6 +866,36 @@ static void do_co_reg2c		PARAMS ((char *));
 /* ARM v5TEJ.  */
 static void do_bxj		PARAMS ((char *));
 
+/* ARM V6. */
+static void do_cps              PARAMS ((char *));
+static void do_cpsi             PARAMS ((char *));
+static void do_ldrex            PARAMS ((char *));
+static void do_pkhbt            PARAMS ((char *));
+static void do_pkhtb            PARAMS ((char *));
+static void do_qadd16           PARAMS ((char *));
+static void do_rev              PARAMS ((char *));
+static void do_rfe              PARAMS ((char *));
+static void do_sxtah            PARAMS ((char *));
+static void do_sxth             PARAMS ((char *));
+static void do_setend           PARAMS ((char *));
+static void do_smlad            PARAMS ((char *));
+static void do_smlald           PARAMS ((char *));
+static void do_smmul            PARAMS ((char *));
+static void do_ssat             PARAMS ((char *));
+static void do_usat             PARAMS ((char *));
+static void do_srs              PARAMS ((char *));
+static void do_ssat16           PARAMS ((char *));
+static void do_usat16           PARAMS ((char *));
+static void do_strex            PARAMS ((char *));
+static void do_umaal            PARAMS ((char *));
+
+static void do_cps_mode         PARAMS ((char **));
+static void do_cps_flags        PARAMS ((char **, int));
+static int do_endian_specifier  PARAMS ((char *));
+static void do_pkh_core         PARAMS ((char *, int));
+static void do_sat              PARAMS ((char **, int));
+static void do_sat16            PARAMS ((char **, int));
+
 /* Coprocessor Instructions.  */
 static void do_cdp		PARAMS ((char *));
 static void do_lstc		PARAMS ((char *));
@@ -1272,6 +1312,107 @@ static const struct asm_opcode insns[] =
 
   /*  ARM Architecture 5TEJ.  */
   {"bxj",	 0xe12fff20, 3,  ARM_EXT_V5J,	   do_bxj},
+
+  /*  ARM V6.  */
+  { "cps",       0xf1020000, 0,  ARM_EXT_V6,       do_cps},
+  { "cpsie",     0xf1080000, 0,  ARM_EXT_V6,       do_cpsi},
+  { "cpsid",     0xf10C0000, 0,  ARM_EXT_V6,       do_cpsi},
+  { "ldrex",     0xe1900f9f, 5,  ARM_EXT_V6,       do_ldrex},
+  { "mcrr2",     0xfc400000, 0,  ARM_EXT_V6,       do_co_reg2c},
+  { "mrrc2",     0xfc500000, 0,  ARM_EXT_V6,       do_co_reg2c},
+  { "pkhbt",     0xe6800010, 5,  ARM_EXT_V6,       do_pkhbt},
+  { "pkhtb",     0xe6800050, 5,  ARM_EXT_V6,       do_pkhtb},
+  { "qadd16",    0xe6200f10, 6,  ARM_EXT_V6,       do_qadd16},
+  { "qadd8",     0xe6200f90, 5,  ARM_EXT_V6,       do_qadd16},
+  { "qaddsubx",  0xe6200f30, 8,  ARM_EXT_V6,       do_qadd16},
+  { "qsub16",    0xe6200f70, 6,  ARM_EXT_V6,       do_qadd16},
+  { "qsub8",     0xe6200ff0, 5,  ARM_EXT_V6,       do_qadd16},
+  { "qsubaddx",  0xe6200f50, 8,  ARM_EXT_V6,       do_qadd16},
+  { "sadd16",    0xe6100f10, 6,  ARM_EXT_V6,       do_qadd16},
+  { "sadd8",     0xe6100f90, 5,  ARM_EXT_V6,       do_qadd16},
+  { "saddsubx",  0xe6100f30, 8,  ARM_EXT_V6,       do_qadd16},
+  { "shadd16",   0xe6300f10, 7,  ARM_EXT_V6,       do_qadd16},
+  { "shadd8",    0xe6300f90, 6,  ARM_EXT_V6,       do_qadd16},
+  { "shaddsubx", 0xe6300f30, 9,  ARM_EXT_V6,       do_qadd16},
+  { "shsub16",   0xe6300f70, 7,  ARM_EXT_V6,       do_qadd16},
+  { "shsub8",    0xe6300ff0, 6,  ARM_EXT_V6,       do_qadd16},
+  { "shsubaddx", 0xe6300f50, 9,  ARM_EXT_V6,       do_qadd16},
+  { "ssub16",    0xe6100f70, 6,  ARM_EXT_V6,       do_qadd16},
+  { "ssub8",     0xe6100ff0, 5,  ARM_EXT_V6,       do_qadd16},
+  { "ssubaddx",  0xe6100f50, 8,  ARM_EXT_V6,       do_qadd16},
+  { "uadd16",    0xe6500f10, 6,  ARM_EXT_V6,       do_qadd16},
+  { "uadd8",     0xe6500f90, 5,  ARM_EXT_V6,       do_qadd16},
+  { "uaddsubx",  0xe6500f30, 8,  ARM_EXT_V6,       do_qadd16},
+  { "uhadd16",   0xe6700f10, 7,  ARM_EXT_V6,       do_qadd16},
+  { "uhadd8",    0xe6700f90, 6,  ARM_EXT_V6,       do_qadd16},
+  { "uhaddsubx", 0xe6700f30, 9,  ARM_EXT_V6,       do_qadd16},
+  { "uhsub16",   0xe6700f70, 7,  ARM_EXT_V6,       do_qadd16},
+  { "uhsub8",    0xe6700ff0, 6,  ARM_EXT_V6,       do_qadd16},
+  { "uhsubaddx", 0xe6700f50, 9,  ARM_EXT_V6,       do_qadd16},
+  { "uqadd16",   0xe6600f10, 7,  ARM_EXT_V6,       do_qadd16},
+  { "uqadd8",    0xe6600f90, 6,  ARM_EXT_V6,       do_qadd16},
+  { "uqaddsubx", 0xe6600f30, 9,  ARM_EXT_V6,       do_qadd16},
+  { "uqsub16",   0xe6600f70, 7,  ARM_EXT_V6,       do_qadd16},
+  { "uqsub8",    0xe6600ff0, 6,  ARM_EXT_V6,       do_qadd16},
+  { "uqsubaddx", 0xe6600f50, 9,  ARM_EXT_V6,       do_qadd16},
+  { "usub16",    0xe6500f70, 6,  ARM_EXT_V6,       do_qadd16},
+  { "usub8",     0xe6500ff0, 5,  ARM_EXT_V6,       do_qadd16},
+  { "usubaddx",  0xe6500f50, 8,  ARM_EXT_V6,       do_qadd16},
+  { "rev",       0xe6bf0f30, 3,  ARM_EXT_V6,       do_rev},
+  { "rev16",     0xe6bf0fb0, 5,  ARM_EXT_V6,       do_rev},
+  { "revsh",     0xe6ff0fb0, 5,  ARM_EXT_V6,       do_rev},
+  { "rfeia",     0xf8900a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfeib",     0xf9900a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfeda",     0xf8100a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfedb",     0xf9100a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfefd",     0xf8900a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfefa",     0xf9900a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfeea",     0xf8100a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "rfeed",     0xf9100a00, 0,  ARM_EXT_V6,       do_rfe},
+  { "sxtah",     0xe6b00070, 5,  ARM_EXT_V6,       do_sxtah},
+  { "sxtab16",   0xe6800070, 7,  ARM_EXT_V6,       do_sxtah},
+  { "sxtab",     0xe6a00070, 5,  ARM_EXT_V6,       do_sxtah},
+  { "sxth",      0xe6bf0070, 4,  ARM_EXT_V6,       do_sxth},
+  { "sxtb16",    0xe68f0070, 6,  ARM_EXT_V6,       do_sxth},
+  { "sxtb",      0xe6af0070, 4,  ARM_EXT_V6,       do_sxth},
+  { "uxtah",     0xe6f00070, 5,  ARM_EXT_V6,       do_sxtah},
+  { "uxtab16",   0xe6c00070, 7,  ARM_EXT_V6,       do_sxtah},
+  { "uxtab",     0xe6e00070, 5,  ARM_EXT_V6,       do_sxtah},
+  { "uxth",      0xe6ff0070, 4,  ARM_EXT_V6,       do_sxth},
+  { "uxtb16",    0xe6cf0070, 6,  ARM_EXT_V6,       do_sxth},
+  { "uxtb",      0xe6ef0070, 4,  ARM_EXT_V6,       do_sxth},
+  { "sel",       0xe68000b0, 3,  ARM_EXT_V6,       do_qadd16},
+  { "setend",    0xf1010000, 0,  ARM_EXT_V6,       do_setend},
+  { "smlad",     0xe7000010, 5,  ARM_EXT_V6,       do_smlad},
+  { "smladx",    0xe7000030, 6,  ARM_EXT_V6,       do_smlad},
+  { "smlald",    0xe7400010, 6,  ARM_EXT_V6,       do_smlald},
+  { "smlaldx",   0xe7400030, 7,  ARM_EXT_V6,       do_smlald},
+  { "smlsd",     0xe7000050, 5,  ARM_EXT_V6,       do_smlad},
+  { "smlsdx",    0xe7000070, 6,  ARM_EXT_V6,       do_smlad},
+  { "smlsld",    0xe7400050, 6,  ARM_EXT_V6,       do_smlald},
+  { "smlsldx",   0xe7400070, 7,  ARM_EXT_V6,       do_smlald},
+  { "smmla",     0xe7500010, 5,  ARM_EXT_V6,       do_smlad},
+  { "smmlar",    0xe7500030, 6,  ARM_EXT_V6,       do_smlad},
+  { "smmls",     0xe75000d0, 5,  ARM_EXT_V6,       do_smlad},
+  { "smmlsr",    0xe75000f0, 6,  ARM_EXT_V6,       do_smlad},
+  { "smmul",     0xe750f010, 5,  ARM_EXT_V6,       do_smmul},
+  { "smmulr",    0xe750f030, 6,  ARM_EXT_V6,       do_smmul},
+  { "smuad",     0xe700f010, 5,  ARM_EXT_V6,       do_smmul},
+  { "smuadx",    0xe700f030, 6,  ARM_EXT_V6,       do_smmul},
+  { "smusd",     0xe700f050, 5,  ARM_EXT_V6,       do_smmul},
+  { "smusdx",    0xe700f070, 6,  ARM_EXT_V6,       do_smmul},
+  { "srsia",     0xf8cd0500, 0,  ARM_EXT_V6,       do_srs},
+  { "srsib",     0xf9cd0500, 0,  ARM_EXT_V6,       do_srs},
+  { "srsda",     0xf84d0500, 0,  ARM_EXT_V6,       do_srs},
+  { "srsdb",     0xf94d0500, 0,  ARM_EXT_V6,       do_srs},
+  { "ssat",      0xe6a00010, 4,  ARM_EXT_V6,       do_ssat},
+  { "ssat16",    0xe6a00f30, 6,  ARM_EXT_V6,       do_ssat16},
+  { "strex",     0xe1800f90, 5,  ARM_EXT_V6,       do_strex},
+  { "umaal",     0xe0400090, 5,  ARM_EXT_V6,       do_umaal},
+  { "usad8",     0xe780f010, 5,  ARM_EXT_V6,       do_smmul},
+  { "usada8",    0xe7800010, 6,  ARM_EXT_V6,       do_smlad},
+  { "usat",      0xe6e00010, 4,  ARM_EXT_V6,       do_usat},
+  { "usat16",    0xe6e00f30, 6,  ARM_EXT_V6,       do_usat16},
 
   /* Core FPA instruction set (V1).  */
   {"wfs",        0xee200110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
@@ -2146,6 +2287,11 @@ static void do_t_adr		PARAMS ((char *));
 static void do_t_blx		PARAMS ((char *));
 static void do_t_bkpt		PARAMS ((char *));
 
+/* ARM V6.  */
+static void do_t_cps            PARAMS ((char *));
+static void do_t_cpy            PARAMS ((char *));
+static void do_t_setend         PARAMS ((char *));;
+
 #define T_OPCODE_MUL 0x4340
 #define T_OPCODE_TST 0x4200
 #define T_OPCODE_CMN 0x42c0
@@ -2214,6 +2360,7 @@ static int thumb_reg		PARAMS ((char ** str, int hi_lo));
 
 #define THUMB_MOVE 0
 #define THUMB_COMPARE 1
+#define THUMB_CPY 2
 
 #define THUMB_LOAD 0
 #define THUMB_STORE 1
@@ -2306,6 +2453,19 @@ static const struct thumb_opcode tinsns[] =
   /* Thumb v2 (ARMv5T).  */
   {"blx",	0,		0,	ARM_EXT_V5T, do_t_blx},
   {"bkpt",	0xbe00,		2,	ARM_EXT_V5T, do_t_bkpt},
+
+  /* ARM V6.  */
+  {"cpsie",	0xb660,		2,	ARM_EXT_V6,  do_t_cps},
+  {"cpsid",     0xb670,		2,	ARM_EXT_V6,  do_t_cps},
+  {"cpy",	0x4600,		2,	ARM_EXT_V6,  do_t_cpy},
+  {"rev",	0xba00,		2,	ARM_EXT_V6,  do_t_arit},
+  {"rev16",	0xba40,		2,	ARM_EXT_V6,  do_t_arit},
+  {"revsh",	0xbac0,		2,	ARM_EXT_V6,  do_t_arit},
+  {"setend",	0xb650,		2,	ARM_EXT_V6,  do_t_setend},
+  {"sxth",	0xb200,		2,	ARM_EXT_V6,  do_t_arit},
+  {"sxtb",	0xb240,		2,	ARM_EXT_V6,  do_t_arit},
+  {"uxth",	0xb280,		2,	ARM_EXT_V6,  do_t_arit},
+  {"uxtb",	0xb2c0,		2,	ARM_EXT_V6,  do_t_arit},
 };
 
 #define BAD_ARGS 	_("bad arguments to instruction")
@@ -4701,6 +4861,951 @@ do_bxj (str)
   end_of_line (str);
 }
 
+/* ARM V6 umaal (argument parse). */
+
+static void
+do_umaal (str)
+     char *str;
+{
+
+  int rdlo, rdhi, rm, rs;
+
+  skip_whitespace (str);
+  if ((rdlo = reg_required_here (& str, 12)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rdhi = reg_required_here (& str, 16)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 8)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;      
+    }
+
+  if (rdlo == REG_PC || rdhi == REG_PC || rm == REG_PC || rs == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  end_of_line (str);
+}
+
+/* ARM V6 strex (argument parse). */
+
+static void 
+do_strex (str)
+     char *str;
+{
+  int rd, rm, rn;
+
+  /* Parse Rd, Rm,. */
+  skip_whitespace (str);
+  if ((rd = reg_required_here (& str, 12)) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || (rm = reg_required_here (& str, 0)) == FAIL
+      || skip_past_comma (& str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if (rd == REG_PC || rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  if (rd == rm)
+    {
+      inst.error = _("Rd equal to Rm or Rn yields unpredictable results");
+      return;
+    }
+
+  /* Skip past '['. */
+  if ((strlen (str) >= 1) 
+      && strncmp (str, "[", 1) == 0)
+    str+=1;
+  skip_whitespace (str);  
+
+  /* Parse Rn. */
+  if ((rn = reg_required_here (& str, 16)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rn == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  if (rd == rn)
+    {
+      inst.error = _("Rd equal to Rm or Rn yields unpredictable results");
+      return;
+    }
+  skip_whitespace (str);  
+
+  /* Skip past ']'. */
+  if ((strlen (str) >= 1) 
+      && strncmp (str, "]", 1) == 0)
+    str+=1;
+  
+  end_of_line (str);
+}
+
+/* ARM V6 ssat (argument parse). */
+
+static void
+do_ssat (str)
+     char* str;
+{
+  do_sat (&str, /*bias=*/-1);
+  end_of_line (str);
+}
+
+/* ARM V6 usat (argument parse). */
+
+static void
+do_usat (str)
+     char* str;
+{
+  do_sat (&str, /*bias=*/0);
+  end_of_line (str);
+}
+
+static void
+do_sat (str, bias)
+     char **str;
+     int    bias;
+{
+  int rd, rm;
+  expressionS expr;
+
+  skip_whitespace (*str);
+  
+  /* Parse <Rd>, field. */
+  if ((rd = reg_required_here (str, 12)) == FAIL
+      || skip_past_comma (str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  /* Parse #<immed>,  field. */
+  if (is_immediate_prefix (**str))
+    (*str)++;
+  else
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+  if (my_get_expression (&expr, str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  if (expr.X_add_number + bias < 0
+      || expr.X_add_number + bias > 31)
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+  inst.instruction |= (expr.X_add_number + bias) << 16;
+  if (skip_past_comma (str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Parse <Rm> field. */
+  if ((rm = reg_required_here (str, 0)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if (rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  if (skip_past_comma (str) == SUCCESS)
+    decode_shift (str, SHIFT_LSL_OR_ASR_IMMEDIATE);
+}
+
+/* ARM V6 ssat16 (argument parse). */
+
+static void
+do_ssat16 (str)
+     char *str;
+{
+  do_sat16 (&str, /*bias=*/-1);
+  end_of_line (str);
+}
+
+static void
+do_usat16 (str)
+     char *str;
+{
+  do_sat16 (&str, /*bias=*/0);
+  end_of_line (str);
+}
+
+static void
+do_sat16 (str, bias)
+     char **str;
+     int bias;
+{
+  int rd, rm;
+  expressionS expr;
+
+  skip_whitespace (*str);
+
+  /* Parse the <Rd> field. */
+  if ((rd = reg_required_here (str, 12)) == FAIL
+      || skip_past_comma (str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  /* Parse #<immed>, field. */
+  if (is_immediate_prefix (**str))
+    (*str)++;
+  else
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+  if (my_get_expression (&expr, str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  if (expr.X_add_number + bias < 0
+      || expr.X_add_number + bias > 15)
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+  inst.instruction |= (expr.X_add_number + bias) << 16;
+  if (skip_past_comma (str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Parse <Rm> field. */
+  if ((rm = reg_required_here (str, 0)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if (rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+}
+
+/* ARM V6 srs (argument parse). */
+
+static void
+do_srs (str)
+     char* str;
+{
+  char *exclam;
+  skip_whitespace (str);
+  exclam = strchr (str, '!');
+  if (exclam)
+    *exclam = '\0';
+  do_cps_mode (&str);
+  if (exclam)
+    *exclam = '!';
+  if (*str == '!') 
+    {
+      inst.instruction |= WRITE_BACK;
+      str++;
+    }
+  end_of_line (str);
+}
+
+/* ARM V6 SMMUL (argument parse). */
+
+static void
+do_smmul (str)
+     char* str;
+{
+  int rd, rm, rs;
+  
+  skip_whitespace (str);
+  if ((rd = reg_required_here (&str, 16)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rs = reg_required_here (&str, 8)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (rd == REG_PC 
+      || rm == REG_PC
+      || rs == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  end_of_line (str);
+  
+}
+
+/* ARM V6 SMLALD (argument parse). */
+
+static void
+do_smlald (str)
+    char* str;
+{
+  int rdlo, rdhi, rm, rs;
+  skip_whitespace (str);
+  if ((rdlo = reg_required_here (&str, 12)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rdhi = reg_required_here (&str, 16)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rs = reg_required_here (&str, 8)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (rdlo == REG_PC 
+      || rdhi == REG_PC 
+      || rm == REG_PC
+      || rs == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  end_of_line (str);
+}
+
+/* ARM V6 SMLAD (argument parse).  Signed multiply accumulate dual. 
+   smlad{x}{<cond>} Rd, Rm, Rs, Rn */
+
+static void 
+do_smlad (str)
+     char *str;
+{
+  int rd, rm, rs, rn;
+  
+  skip_whitespace (str);
+  if ((rd = reg_required_here (&str, 16)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rs = reg_required_here (&str, 8)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rn = reg_required_here (&str, 12)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  
+  if (rd == REG_PC 
+      || rn == REG_PC 
+      || rs == REG_PC
+      || rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  end_of_line (str);
+} 
+
+/* ARM V6 SETEND (argument parse).  Sets the E bit in the CPSR while
+   preserving the other bits.
+
+   setend <endian_specifier>, where <endian_specifier> is either 
+   BE or LE. */
+
+static void 
+do_setend (str)
+     char *str;
+{
+  if (do_endian_specifier (str))
+    inst.instruction |= 0x200;
+}
+
+/* Returns true if the endian-specifier indicates big-endianness.  */
+
+static int
+do_endian_specifier (str)
+     char *str;
+{
+  int big_endian = 0;
+
+  skip_whitespace (str);
+  if (strlen (str) < 2)
+    inst.error = _("missing endian specifier");
+  else if (strncasecmp (str, "BE", 2) == 0)
+    {
+      str += 2;
+      big_endian = 1;
+    }
+  else if (strncasecmp (str, "LE", 2) == 0)
+    str += 2;
+  else
+    inst.error = _("valid endian specifiers are be or le");
+
+  end_of_line (str);
+
+  return big_endian;
+}
+
+/* ARM V6 SXTH.
+
+   SXTH {<cond>} <Rd>, <Rm>{, <rotation>}
+   Condition defaults to COND_ALWAYS.
+   Error if any register uses R15. */
+
+static void 
+do_sxth (str)
+     char *str;
+{
+  int rd, rm;
+  expressionS expr;
+  int rotation_clear_mask = 0xfffff3ff;
+  int rotation_eight_mask = 0x00000400;
+  int rotation_sixteen_mask = 0x00000800;
+  int rotation_twenty_four_mask = 0x00000c00;
+  
+  skip_whitespace (str);
+  if ((rd = reg_required_here (&str, 12)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  else if (rd == REG_PC || rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  
+  /* Zero out the rotation field. */
+  inst.instruction &= rotation_clear_mask;
+  
+  /* Check for lack of optional rotation field. */
+  if (skip_past_comma (&str) == FAIL)
+    {
+      end_of_line (str);
+      return;
+    }
+  
+  /* Move past 'ROR'. */
+  skip_whitespace (str);
+  if (strncasecmp (str, "ROR", 3) == 0)
+    str+=3;
+  else
+    {
+      inst.error = _("missing rotation field after comma");
+      return;
+    }
+  
+  /* Get the immediate constant. */
+  skip_whitespace (str);
+  if (is_immediate_prefix (* str))
+    str++;
+  else
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+  
+  if (my_get_expression (&expr, &str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  
+  switch (expr.X_add_number) 
+    {
+    case 0:
+      /* Rotation field has already been zeroed. */
+      break;
+    case 8:
+      inst.instruction |= rotation_eight_mask;
+      break;
+
+    case 16:
+      inst.instruction |= rotation_sixteen_mask;
+      break;
+      
+    case 24:
+      inst.instruction |= rotation_twenty_four_mask;
+      break;
+
+    default:
+      inst.error = _("rotation can be 8, 16, 24 or 0 when field is ommited");
+      break;
+    }
+
+  end_of_line (str);
+  
+}
+
+/* ARM V6 SXTAH extracts a 16-bit value from a register, sign
+   extends it to 32-bits, and adds the result to a value in another
+   register.  You can specify a rotation by 0, 8, 16, or 24 bits
+   before extracting the 16-bit value.
+   SXTAH{<cond>} <Rd>, <Rn>, <Rm>{, <rotation>}
+   Condition defaults to COND_ALWAYS.
+   Error if any register uses R15. */
+
+static void 
+do_sxtah (str)
+     char *str;
+{
+  int rd, rn, rm;
+  expressionS expr;
+  int rotation_clear_mask = 0xfffff3ff;
+  int rotation_eight_mask = 0x00000400;
+  int rotation_sixteen_mask = 0x00000800;
+  int rotation_twenty_four_mask = 0x00000c00;
+  
+  skip_whitespace (str);
+  if ((rd = reg_required_here (&str, 12)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rn = reg_required_here (&str, 16)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  else if (rd == REG_PC || rn == REG_PC || rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  
+  /* Zero out the rotation field. */
+  inst.instruction &= rotation_clear_mask;
+  
+  /* Check for lack of optional rotation field. */
+  if (skip_past_comma (&str) == FAIL)
+    {
+      end_of_line (str);
+      return;
+    }
+  
+  /* Move past 'ROR'. */
+  skip_whitespace (str);
+  if (strncasecmp (str, "ROR", 3) == 0)
+    str+=3;
+  else
+    {
+      inst.error = _("missing rotation field after comma");
+      return;
+    }
+  
+  /* Get the immediate constant. */
+  skip_whitespace (str);
+  if (is_immediate_prefix (* str))
+    str++;
+  else
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+  
+  if (my_get_expression (&expr, &str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  
+  switch (expr.X_add_number) 
+    {
+    case 0:
+      /* Rotation field has already been zeroed. */
+      break;
+
+    case 8:
+      inst.instruction |= rotation_eight_mask;
+      break;
+
+    case 16:
+      inst.instruction |= rotation_sixteen_mask;
+      break;
+      
+    case 24:
+      inst.instruction |= rotation_twenty_four_mask;
+      break;
+
+    default:
+      inst.error = _("rotation can be 8, 16, 24 or 0 when field is ommited");
+      break;
+    }
+
+  end_of_line (str);
+  
+}
+   
+
+/* ARM V6 RFE (Return from Exception) loads the PC and CPSR from the
+   word at the specified address and the following word
+   respectively. 
+   Unconditionally executed.
+   Error if Rn is R15.   
+*/
+
+static void
+do_rfe (str)
+     char *str;
+{
+  int rn;
+
+  skip_whitespace (str);
+  
+  if ((rn = reg_required_here (&str, 16)) == FAIL)
+    return;
+
+  if (rn == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  skip_whitespace (str);
+  
+  if (*str == '!')
+    {
+      inst.instruction |= WRITE_BACK;
+      str++;
+    }
+  end_of_line (str);
+}
+
+/* ARM V6 REV (Byte Reverse Word) reverses the byte order in a 32-bit
+   register (argument parse).
+   REV{<cond>} Rd, Rm.
+   Condition defaults to COND_ALWAYS.
+   Error if Rd or Rm are R15. */ 
+
+static void
+do_rev (str)
+     char* str;
+{
+  int rd, rm;
+
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (&str, 12)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC)
+    inst.error = BAD_PC;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V6 Perform Two Sixteen Bit Integer Additions. (argument parse).
+   QADD16{<cond>} <Rd>, <Rn>, <Rm>  
+   Condition defaults to COND_ALWAYS.
+   Error if Rd, Rn or Rm are R15.  */
+
+static void
+do_qadd16 (str) 
+     char* str;
+{
+  int rd, rm, rn;
+
+  skip_whitespace (str);
+
+  if ((rd = reg_required_here (&str, 12)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rn = reg_required_here (&str, 16)) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || (rm = reg_required_here (&str, 0)) == FAIL)
+    inst.error = BAD_ARGS;
+
+  else if (rd == REG_PC || rm == REG_PC || rn == REG_PC)
+    inst.error = BAD_PC;
+
+  else
+    end_of_line (str);
+}
+
+/* ARM V6 Pack Halfword Bottom Top instruction (argument parse).
+   PKHBT {<cond>} <Rd>, <Rn>, <Rm> {, LSL #<shift_imm>} 
+   Condition defaults to COND_ALWAYS.
+   Error if Rd, Rn or Rm are R15.  */
+
+static void 
+do_pkhbt (str)
+     char* str;
+{
+  do_pkh_core (str, SHIFT_LSL_IMMEDIATE);
+}
+
+/* ARM V6 PKHTB (Argument Parse). */
+
+static void 
+do_pkhtb (str)
+     char* str;
+{
+  do_pkh_core (str, SHIFT_ASR_IMMEDIATE);
+}
+
+static void
+do_pkh_core (str, shift)
+     char* str;
+     int shift;
+{
+  int rd, rn, rm;
+
+  skip_whitespace (str);
+  if (((rd = reg_required_here (&str, 12)) == FAIL)
+      || (skip_past_comma (&str) == FAIL)
+      || ((rn = reg_required_here (&str, 16)) == FAIL)
+      || (skip_past_comma (&str) == FAIL)
+      || ((rm = reg_required_here (&str, 0)) == FAIL))
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  else if (rd == REG_PC || rn == REG_PC || rm == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  /* Check for optional shift immediate constant. */
+  if (skip_past_comma (&str) == FAIL) 
+    {
+      if (shift == SHIFT_ASR_IMMEDIATE)
+	{
+	  /* If the shift specifier is ommited, turn the instruction
+	     into pkhbt rd, rm, rn.  First, switch the instruction
+	     code, and clear the rn and rm fields.  */
+	  inst.instruction &= 0xfff0f010;
+	  /* Now, re-encode the registers.  */
+	  inst.instruction |= (rm << 16) | rn;
+	}
+      return;
+    }
+
+  decode_shift (&str, shift);
+}
+
+/* ARM V6 Load Register Exclusive instruction (argument parse).
+   LDREX{<cond>} <Rd, [<Rn>]
+   Condition defaults to COND_ALWAYS.
+   Error if Rd or Rn are R15. 
+   See ARMARMv6 A4.1.27: LDREX. */
+
+
+static void
+do_ldrex (str)
+     char * str;
+{
+  int rd, rn;
+
+  skip_whitespace (str);
+
+  /* Parse Rd. */
+  if (((rd = reg_required_here (&str, 12)) == FAIL)
+      || (skip_past_comma (&str) == FAIL))
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  skip_whitespace (str);  
+
+  /* Skip past '['. */
+  if ((strlen (str) >= 1) 
+      &&strncmp (str, "[", 1) == 0)
+    str+=1;
+  skip_whitespace (str);  
+
+  /* Parse Rn. */
+  if ((rn = reg_required_here (&str, 16)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rn == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+  skip_whitespace (str);  
+
+  /* Skip past ']'. */
+  if ((strlen (str) >= 1) 
+      && strncmp (str, "]", 1) == 0)
+    str+=1;
+  
+  end_of_line (str);
+}
+
+/* ARM V6 change processor state instruction (argument parse)
+      CPS, CPSIE, CSPID . */
+
+static void
+do_cps (str)
+     char * str;
+{
+  do_cps_mode (&str);
+  end_of_line (str);
+}
+
+static void
+do_cpsi (str)
+     char * str;
+{
+  do_cps_flags (&str, /*thumb_p=*/0);
+
+  if (skip_past_comma (&str) == SUCCESS)
+    {
+      skip_whitespace (str);
+      do_cps_mode (&str);
+    }
+  end_of_line (str);
+}
+
+static void
+do_cps_mode (str)
+     char **str;
+{
+  expressionS expr;
+
+  skip_whitespace (*str);
+
+  if (! is_immediate_prefix (**str))
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+
+  (*str)++; /* Strip off the immediate signifier. */
+  if (my_get_expression (&expr, str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  
+  /* The mode is a 5 bit field.  Valid values are 0-31. */
+  if (((unsigned) expr.X_add_number) > 31
+      || (inst.reloc.exp.X_add_number) < 0)
+    {
+      inst.error = _("invalid constant");
+      return;
+    }
+  
+  inst.instruction |= expr.X_add_number;
+  return;
+}
+
+static void
+do_cps_flags (str, thumb_p)
+     char **str;
+     int    thumb_p;
+{
+  struct cps_flag { 
+    char character;
+    unsigned long arm_value;
+    unsigned long thumb_value;
+  };
+  static struct cps_flag flag_table[] = {
+    {'a', 0x100, 0x4 },
+    {'i', 0x080, 0x2 },
+    {'f', 0x040, 0x1 }
+  };
+
+  int saw_a_flag = 0;
+
+  skip_whitespace (*str);
+
+  /* Get the a, f and i flags. */
+  while (**str && **str != ',')
+    {
+      struct cps_flag *p;
+      struct cps_flag *q = flag_table + sizeof (flag_table)/sizeof (*p);
+      for (p = flag_table; p < q; ++p)
+	if (strncasecmp (*str, &p->character, 1) == 0)
+	  {
+	    inst.instruction |= (thumb_p ? p->thumb_value : p->arm_value);
+	    saw_a_flag = 1;
+	    break;
+	  }
+      if (p == q)
+	{
+	  inst.error = _("unrecognized flag");
+	  return;
+	}
+      (*str)++;
+    }
+  if (!saw_a_flag) 
+    inst.error = _("no 'a', 'i', or 'f' flags for 'cps'");
+}
+
 /* THUMB V5 breakpoint instruction (argument parse)
 	BKPT <immed_8>.  */
 
@@ -4928,6 +6033,35 @@ do_bkpt (str)
   inst.instruction |= number & 0xf;
 
   end_of_line (str);
+}
+
+/* THUMB CPS instruction (argument parse).  */
+
+static void
+do_t_cps (str)
+     char *str;
+{
+  do_cps_flags (&str, /*thumb_p=*/1);
+  end_of_line (str);
+}
+
+/* THUMB CPY instruction (argument parse).  */
+
+static void
+do_t_cpy (str)
+     char *str;
+{
+  thumb_mov_compare (str, THUMB_CPY);
+}
+
+/* THUMB SETEND instruction (argument parse).  */
+
+static void
+do_t_setend (str)
+     char *str;
+{
+  if (do_endian_specifier (str))
+    inst.instruction |= 0x8;
 }
 
 static unsigned long check_iwmmxt_insn PARAMS ((char *, enum iwmmxt_insn_type, int));
@@ -5777,13 +6911,12 @@ md_operand (expr)
     }
 }
 
-/* UNRESTRICT should be one if <shift> <register> is permitted for this
-   instruction.  */
+/* KIND indicates what kind of shifts are accepted.  */
 
 static int
-decode_shift (str, unrestrict)
+decode_shift (str, kind)
      char ** str;
-     int     unrestrict;
+     int     kind;
 {
   const struct asm_shift_name * shift;
   char * p;
@@ -5813,6 +6946,26 @@ decode_shift (str, unrestrict)
 
   assert (shift->properties->index == shift_properties[shift->properties->index].index);
 
+  if (kind == SHIFT_LSL_OR_ASR_IMMEDIATE
+      && shift->properties->index != SHIFT_LSL
+      && shift->properties->index != SHIFT_ASR)
+    {
+      inst.error = _("'LSL' or 'ASR' required");
+      return FAIL;
+    }
+  else if (kind == SHIFT_LSL_IMMEDIATE
+	   && shift->properties->index != SHIFT_LSL)
+    {
+      inst.error = _("'LSL' required");
+      return FAIL;
+    }
+  else if (kind == SHIFT_ASR_IMMEDIATE
+	   && shift->properties->index != SHIFT_ASR)
+    {
+      inst.error = _("'ASR' required");
+      return FAIL;
+    }
+    
   if (shift->properties->index == SHIFT_RRX)
     {
       * str = p;
@@ -5822,7 +6975,7 @@ decode_shift (str, unrestrict)
 
   skip_whitespace (p);
 
-  if (unrestrict && reg_required_here (& p, 8) != FAIL)
+  if (kind == NO_SHIFT_RESTRICT && reg_required_here (& p, 8) != FAIL)
     {
       inst.instruction |= shift->properties->bit_field | SHIFT_BY_REG;
       * str = p;
@@ -5830,7 +6983,7 @@ decode_shift (str, unrestrict)
     }
   else if (! is_immediate_prefix (* p))
     {
-      inst.error = (unrestrict
+      inst.error = (NO_SHIFT_RESTRICT
 		    ? _("shift requires register or #expression")
 		    : _("shift requires #expression"));
       * str = p;
@@ -6309,7 +7462,7 @@ ldst_extend (str)
 
       inst.instruction |= add | OFFSET_REG;
       if (skip_past_comma (str) == SUCCESS)
-	return decode_shift (str, SHIFT_RESTRICT);
+	return decode_shift (str, SHIFT_IMMEDIATE);
 
       return SUCCESS;
     }
@@ -8900,7 +10053,7 @@ thumb_mov_compare (str, move)
       return;
     }
 
-  if (is_immediate_prefix (*str))
+  if (move != THUMB_CPY && is_immediate_prefix (*str))
     {
       str++;
       if (my_get_expression (&inst.reloc.exp, &str))
@@ -8911,7 +10064,7 @@ thumb_mov_compare (str, move)
 
   if (Rs != FAIL)
     {
-      if (Rs < 8 && Rd < 8)
+      if (move != THUMB_CPY && Rs < 8 && Rd < 8)
 	{
 	  if (move == THUMB_MOVE)
 	    /* A move of two lowregs is encoded as ADD Rd, Rs, #0
@@ -8925,7 +10078,7 @@ thumb_mov_compare (str, move)
 	{
 	  if (move == THUMB_MOVE)
 	    inst.instruction = T_OPCODE_MOV_HR;
-	  else
+	  else if (move != THUMB_CPY)
 	    inst.instruction = T_OPCODE_CMP_HR;
 
 	  if (Rd > 7)
@@ -12197,6 +13350,8 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
   {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+  {"arm1136js",		ARM_ARCH_V6,     FPU_NONE},
+  {"arm1136jfs",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* ??? iwmmxt is not a processor.  */
@@ -12235,6 +13390,7 @@ static struct arm_arch_option_table arm_archs[] =
   {"armv5te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP},
   {"armv5texp",		ARM_ARCH_V5TExP, FPU_ARCH_VFP},
   {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_VFP},
+  {"armv6",             ARM_ARCH_V6,     FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
   {NULL, 0, 0}
@@ -12282,6 +13438,7 @@ static struct arm_fpu_option_table arm_fpus[] =
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
+  {"arm1136jfs",	FPU_ARCH_VFP_V2},
   {NULL, 0}
 };
 

@@ -90,6 +90,8 @@ recognized:
 @code{arm1020},
 @code{arm1020t},
 @code{arm1020e}, 
+@code{arm1136js},
+@code{arm1136jfs},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
 @code{i80200} (Intel XScale processor)
 @code{iwmmxt} (Intel(r) XScale processor with Wireless MMX(tm) technology coprocessor)
@@ -128,7 +130,8 @@ names are recognized:
 @code{armv5t},
 @code{armv5txm},
 @code{armv5te},
-@code{armv5texp}
+@code{armv5texp},
+@code{armv6},
 @code{iwmmxt}
 and
 @code{xscale}.
@@ -161,9 +164,10 @@ The following format options are recognized:
 @code{vfp10-r0},
 @code{vfp9},
 @code{vfpxd},
-@code{arm1020t}
+@code{arm1020t},
+@code{arm1020e},
 and
-@code{arm1020e}.
+@code{arm1136jfs}.
 
 In addition to determining which instructions are assembled, this option
 also affects the way in which the @code{.double} assembler directive behaves

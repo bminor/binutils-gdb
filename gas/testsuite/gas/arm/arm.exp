@@ -66,6 +66,10 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "maverick"
     
+    run_dump_test "archv6"
+
+    run_dump_test "thumbv6"
+
     if {[istarget *-*-elf*] || [istarget *-*-linux*]} then {
 	run_dump_test "pic"
 

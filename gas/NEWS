@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added support for ARM V6.
+
 * Added support for sh4a and variants.
 
 * Support for Renesas M32R2 added.

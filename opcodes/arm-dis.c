@@ -639,6 +639,16 @@ print_insn_arm (pc, info, given)
 				  func (stream, "%d", reg);
 				}
 				break;
+			      case 'W':
+				{
+				  long reg;
+				  
+				  reg = given >> bitstart;
+				  reg &= (2 << (bitend - bitstart)) - 1;
+				  
+				  func (stream, "%d", reg + 1);
+				}
+				break;
 			      case 'x':
 				{
 				  long reg;

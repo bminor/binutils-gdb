@@ -1,3 +1,11 @@
+2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (print_arm_insn): Add 'W' macro.
+	* arm-opc.h (arm_opcodes): Add V6 instructions.
+	(thumb_opcodes): Likewise.
+
 2003-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* openrisc-asm.c: Regenerate.

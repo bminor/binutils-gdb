@@ -1,3 +1,13 @@
+2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/arm.exp: Add archv6 and thumbv6.
+	* gas/arm/archv6.d: New file.
+	* gas/arm/archv6.s: Likewise.
+	* gas/arm/thumbv6.d: Likewise.
+	* gas/arm/thumbv6.s: Likewise.
+
 2003-12-06  Christian Groessler  <chris@groessler.org>
 
 	* gas/z8k/ctrl-names.d: New file.
