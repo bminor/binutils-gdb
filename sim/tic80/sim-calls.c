@@ -237,7 +237,7 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
     {
       *reason = sim_stopped;
       *sigrc = SIGINT;
-      keep_running = 0;
+      keep_running = 1;
     }
   else
     {

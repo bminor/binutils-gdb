@@ -1,5 +1,11 @@
 Mon May 12 11:12:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-calls.c (sim_stop_reason): Restore keep_running after a
+ 	CNTRL-C, don't re-clear it.
+
+	* interp.c (engine_error): stop rather than signal with SIGABRT
+ 	when an error.
+
 	* insns (do_ld): For 64bit loads, always store LSW in rDest, MSW in
  	rDest + 1. Also done by Michael Meissner  <meissner@cygnus.com>
 	(do_st): Converse for store.
