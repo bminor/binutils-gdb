@@ -1,6 +1,6 @@
 /* Definitions for running gdb on a host machine running any flavor of SVR4.
-   Copyright (C) 1991, Free Software Foundation, Inc.
-   Written by Fred Fish at Cygnus Support (fnf@cygint)
+   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
 This file is part of GDB.
 
@@ -29,6 +29,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* SVR4 has termio facilities. */
 
 #define HAVE_TERMIO
+
+/* SVR4 has mmap facilities */
+
+#define HAVE_MMAP
 
 /* TIOCGETC and TIOCGLTC are picked up somewhere, but struct tchars
    and struct ltchars are not.  This makes problems for inflow.c.

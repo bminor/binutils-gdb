@@ -1,6 +1,6 @@
 /* Macro definitions for GDB hosted on a Stratus machine.
-   Copyright (C) 1992, Free Software Foundation, Inc.
-   Contributed by Peggy Fieland (pfieland@stratus.com)
+   Copyright 1992 Free Software Foundation, Inc.
+   Contributed by Peggy Fieland (pfieland@stratus.com).
 
 This file is part of GDB.
 
@@ -25,5 +25,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Pick up more stuff from the generic SVR4 host include file. */
 
 #include "xm-svr4.h"
-#define NOVOLVOID 1 /* compiler doesn't like volatile void declaration on functions*/
+
+/* The native compiler complains about using volatile to indicate functions
+   that never return.  So shut it up by simply defining away "NORETURN", which
+   is normally defined to "volatile". */
+
+#ifndef __GNUC__
+# define NORETURN /**/
+#endif
+
 #define NO_JOB_CONTROL
