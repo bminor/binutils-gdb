@@ -52,6 +52,7 @@ coff-mips.c
 coff-rs6000.c
 coffcode.h
 config
+configdos.bat
 configure.in
 core.c
 demo64.c
@@ -81,6 +82,7 @@ libcoff-in.h
 libcoff.h
 libieee.h
 liboasys.h
+makefile.dos
 newsos3.c
 oasys.c
 opncls.c
@@ -117,7 +119,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.32  1991/11/27 16:58:22  sac
+# Revision 1.33  1991/12/12 03:19:36  sac
+# Added configdos.bat makefile.dos
+#
+# Revision 1.32  1991/11/27  16:58:22  sac
 # Added h8
 #
 # Revision 1.31  1991/11/22  05:00:08  bothner
