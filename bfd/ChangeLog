@@ -1,5 +1,8 @@
 Wed Jun 22 10:52:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* aout64.c (BMAGIC, QMAGIC): Define if not already defined.  From
+	Peter Schauer <pes@regent.e-technik.tu-muenchen.de>.
+
 	Linux ZMAGIC support from Eric Youngdale <ericy@cais.cais.com>.
 	* libaout.h (struct aoutdata): Add field zmagic_disk_block_size.
 	* aout-target.h (MY(callback)): Only set alignment according to
