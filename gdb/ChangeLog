@@ -1,3 +1,18 @@
+Tue Jan 31 09:40:11 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (process_xcoff_symbol): Use new variables
+	func_symbol_type and var_symbol_type as type of functions and
+	variables which don't have any stabs associated with them.
+	Reindent most of function.
+	(_initialize_xcoffread): Initialize *_symbol_type.
+
+	* xcoffread.c (read_xcoff_symtab): Reindent most of function.
+	Put C_HIDEXT symbols in the minimal symbols, rather than ignoring
+	them (this part commented out as I didn't quite get it to work).
+	(cs_to_section, find_targ_sec): New functions, to support above code.
+	* xcoffread.c (RECORD_MINIMAL_SYMBOL): Only skip '.' if it is
+	actually present.
+
 Mon Jan 30 17:34:24 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl (create_file_win):  Disable old popup menu for source
