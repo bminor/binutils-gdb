@@ -1,3 +1,8 @@
+Fri Jun 30 16:07:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Compare
+	the full text of .reloc or .edata section names.
+
 Fri Jun 30 15:47:37 1995  Fred Fish  <fnf@deneb.cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section):

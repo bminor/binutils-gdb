@@ -2305,16 +2305,15 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 		     + sec->output_offset
 		     + sym->n_value
 		     - sec->vma);
-	      if (obj_pe(output_bfd)) {
-		/* Make a correction here to val if the sec is either .rsrc
-		   or .idata */
+	      if (obj_pe (output_bfd)) 
+		{
+		/* Make a correction here to val if the sec is either .rsrc$nnn
+		   or .idata$nnn or reloc or edata */
 		if (strcmp (input_section->name, ".text") != 0)
 		  {
-		    if (strncmp (sec->name, ".idata$", 7) == 0)
-		      val -= NT_IMAGE_BASE;
-		    if (strncmp (sec->name, ".reloc", 6) == 0)
-		      val -= NT_IMAGE_BASE;
-		    else if (strncmp (sec->name, ".edata", 5) == 0)
+		    if (strncmp (sec->name, ".idata$", 7) == 0
+			|| strcmp (sec->name, ".reloc") == 0
+			|| strcmp (sec->name, ".edata") == 0)
 		      val -= NT_IMAGE_BASE;
 		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
 		      {
@@ -2337,15 +2336,13 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 		     + sec->output_section->vma
 		     + sec->output_offset);
 	      if (obj_pe (output_bfd)) {
-		/* Make a correction here to val if the sec is either .rsrc
-		   or .idata */
+		/* Make a correction here to val if the sec is either .rsrc$nnn
+		   or .idata$nnnn or reloc or edata. */
 		if (strcmp (input_section->name, ".text") != 0)
 		  {
-		    if (strncmp (sec->name, ".idata$", 7) == 0)
-		      val -= NT_IMAGE_BASE;
-		    else if (strncmp (sec->name, ".reloc", 5) == 0)
-		      val -= NT_IMAGE_BASE;
-		    else if (strncmp (sec->name, ".edata", 5) == 0)
+		    if (strncmp (sec->name, ".idata$", 7) == 0
+			|| strcmp (sec->name, ".reloc") == 0
+			|| strcmp (sec->name, ".edata") == 0)
 		      val -= NT_IMAGE_BASE;
 		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
 		      {
@@ -2471,7 +2468,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      /* relocation to a symbol in a section which
 		 isn't absolute - we output the address here 
 		 to a file */
-	      bfd_vma addr = rel->r_vaddr
+	      bfd_vma addr = rel->r_vaddr 
 		+ input_section->output_offset 
 		  + input_section->output_section->vma;
 	      fwrite (&addr, 1,4, info->base_file);
@@ -2503,7 +2500,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	      name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
 	    else
 	      {
-		strncpy (buf, sym->_n._n_name, SYMNMLEN);
+ 		strncpy (buf, sym->_n._n_name, SYMNMLEN);
 		buf[SYMNMLEN] = '\0';
 		name = buf;
 	      }
