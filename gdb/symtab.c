@@ -83,11 +83,13 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
-static struct symbol *lookup_symbol_aux_local (const char *name,
-					       const char *mangled_name,
-					       const struct block *block,
-					       const namespace_enum namespace,
-					       struct symtab **symtab);
+static
+struct symbol *lookup_symbol_aux_local (const char *name,
+					const char *mangled_name,
+					const struct block *block,
+					const namespace_enum namespace,
+					struct symtab **symtab,
+					const struct block **static_block);
 
 static
 struct symbol *lookup_symbol_aux_block (const char *name,
@@ -801,6 +803,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
+  const struct block *static_block;
 
   /* FIXME: carlton/2002-11-05: This variable is here so that
      lookup_symbol_aux will sometimes return NULL after receiving a
@@ -810,10 +813,11 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   
   int force_return;
 
-  /* Search specified block and its superiors.  */
+  /* Search specified block and its superiors.  Don't search
+     STATIC_BLOCK or GLOBAL_BLOCK.  */
 
   sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
-				 symtab);
+				 symtab, &static_block);
   if (sym != NULL)
     return sym;
 
@@ -877,6 +881,38 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    *symtab = NULL;
 	  return NULL;
 	}
+    }
+
+  /* If there's a static block to search, search it next.  */
+
+  /* NOTE: carlton/2002-12-05: There is a question as to whether or
+     not it would be appropriate to search the current global block
+     here as well.  (That's what this code used to do before the
+     is_a_field_of_this check was moved up.)  On the one hand, it's
+     redundant with the lookup_symbol_aux_symtabs search that happens
+     next.  On the other hand, if decode_line_1 is passed an argument
+     like filename:var, then the user presumably wants 'var' to be
+     searched for in filename.  On the third hand, there shouldn't be
+     multiple global variables all of which are named 'var', and it's
+     not like decode_line_1 has ever restricted its search to only
+     global variables in a single filename.  All in all, only
+     searching the static block here seems best: it's correct and it's
+     cleanest.  */
+
+  /* NOTE: carlton/2002-12-05: There's also a possible performance
+     issue here: if you usually search for global symbols in the
+     current file, then it would be slightly better to search the
+     current global block before searching all the symtabs.  But there
+     are other factors that have a much greater effect on performance
+     than that one, so I don't think we should worry about that for
+     now.  */
+
+  if (static_block != NULL)
+    {
+      sym = lookup_symbol_aux_block (name, mangled_name, static_block,
+				     namespace, symtab);
+      if (sym != NULL)
+	return sym;
     }
 
   /* Now search all global blocks.  Do the symtab's first, then
@@ -961,18 +997,28 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   return NULL;
 }
 
-/* Check to see if the symbol is defined in BLOCK or its
-   superiors.  */
+/* Check to see if the symbol is defined in BLOCK or its superiors.
+   Don't search STATIC_BLOCK or GLOBAL_BLOCK.  If we don't find a
+   match, store the address of STATIC_BLOCK in static_block.  */
 
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *mangled_name,
 			 const struct block *block,
 			 const namespace_enum namespace,
-			 struct symtab **symtab)
+			 struct symtab **symtab,
+			 const struct block **static_block)
 {
   struct symbol *sym;
   
-  while (block != 0)
+  /* Check if either no block is specified or it's a global block.  */
+
+  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
+    {
+      *static_block = NULL;
+      return NULL;
+    }
+
+  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
     {
       sym = lookup_symbol_aux_block (name, mangled_name, block, namespace,
 				     symtab);
@@ -981,6 +1027,9 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
+  /* We've reached the static block.  */
+
+  *static_block = block;
   return NULL;
 }
 

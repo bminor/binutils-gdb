@@ -1,5 +1,12 @@
 2002-12-05  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (lookup_symbol_aux_local): Add 'static_block'
+	argument.
+	(lookup_symbol_aux): Do the 'field_of_this' check before checking
+	the static block.  See PR gdb/804.
+
+2002-12-05  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (lookup_symbol_aux_block): New function.
 	(lookup_symbol_aux_local): Move code into lookup_symbol_aux_block.
 
