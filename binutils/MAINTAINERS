@@ -51,7 +51,6 @@ maintainer.  The first maintainer is free to devolve that
 responsibility among the other maintainers.
 
   ALPHA            Richard Henderson <rth@redhat.com>
-  ARC		   Peter Targett <peter.targett@arc.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
