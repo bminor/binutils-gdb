@@ -1,3 +1,12 @@
+Tue Jul 27 12:51:43 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* nlm{32,64}-gen.c (JUMP_TABLE_PREFIX):  Delete.
+	* nlm{32,64}-gen.c (JUMP_TABLE_INIT):  New macro that works with
+	older cpp's, that don't do additional replacement on the JUMP_TABLE
+	macro's argument.
+	* nlm-target.h (JUMP_TABLE_INIT):  Use new macro in place of
+	JUMP_TABLE macro.
+
 Mon Jul 26 17:39:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	Yet another trad-core variant:

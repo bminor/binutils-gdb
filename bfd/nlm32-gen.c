@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_LITTLE_SYM		nlmNAME(little_generic_vec)
 #define TARGET_BIG_NAME			"nlm32-big"
 #define TARGET_BIG_SYM			nlmNAME(big_generic_vec)
-#define JUMP_TABLE_PREFIX		nlm32
+#define JUMP_TABLE_INIT			JUMP_TABLE(nlm32)
 
 /* We don't have core files.  */
 
