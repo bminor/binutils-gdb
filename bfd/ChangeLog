@@ -1,3 +1,10 @@
+Wed Feb  4 19:11:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set libtool_enable_shared rather than
+	libtool_shared.  Remove diversion hack.
+	* configure, Makefile.in, doc/Makefile.in, aclocal.m4: Rebuild
+	with new libtool.
+
 Wed Feb  4 16:10:21 1998  Brent Baccala  <baccala@freesoft.org>
 
 	* syms.c (struct stab_cache): Define.
