@@ -1,4 +1,4 @@
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -409,26 +409,26 @@ int main ()
   use (&v_boolean2);
   use (&v_misordered);
 
-  use (v_char_func);
-  use (v_signed_char_func);
-  use (v_unsigned_char_func);
+  use (&v_char_func);
+  use (&v_signed_char_func);
+  use (&v_unsigned_char_func);
 
-  use (v_short_func);
-  use (v_signed_short_func);
-  use (v_unsigned_short_func);
+  use (&v_short_func);
+  use (&v_signed_short_func);
+  use (&v_unsigned_short_func);
 
-  use (v_int_func);
-  use (v_signed_int_func);
-  use (v_unsigned_int_func);
+  use (&v_int_func);
+  use (&v_signed_int_func);
+  use (&v_unsigned_int_func);
 
-  use (v_long_func);
-  use (v_signed_long_func);
-  use (v_unsigned_long_func);
+  use (&v_long_func);
+  use (&v_signed_long_func);
+  use (&v_unsigned_long_func);
 
-  use (v_long_long_func);
-  use (v_signed_long_long_func);
-  use (v_unsigned_long_long_func);
+  use (&v_long_long_func);
+  use (&v_signed_long_long_func);
+  use (&v_unsigned_long_long_func);
 
-  use (v_float_func);
-  use (v_double_func);
+  use (&v_float_func);
+  use (&v_double_func);
 }
