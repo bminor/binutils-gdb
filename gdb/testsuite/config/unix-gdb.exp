@@ -41,8 +41,8 @@ proc gdb_version {} {
     global GDBFLAGS
     if {[which $GDB] != 0} then {
     set tmp [exec echo "q" | $GDB]
-    set version [lindex $tmp [lsearch $tmp "\[0-9\]*"]]
-    set version [string range $version 0 [expr [string length $version]-2]]
+	set version "[lindex $tmp [lsearch $tmp "\[0-9\]*"]]"
+	set version "[string range $version 0 [expr [string length $version]-2]]"
     clone_output "[which $GDB] version $version $GDBFLAGS\n"
     } else {
 	warning "$GDB does not exist"
