@@ -201,7 +201,9 @@ AC_SUBST(sim_gen)
 
 case "${target}" in
 # start-sanitize-sky
-  mips64r59*-sky-*)  mips_extra_objs='$(SIM_SKY_OBJS)' ;;
+  mips64r59*-sky-*)  mips_extra_objs='$(SIM_SKY_OBJS)' ;
+  		     SIM_SUBTARGET="-DWITH_DEVICES=1 -DDEVICE_INIT=1";;
+
 # end-sanitize-sky
   *)                 mips_extra_objs="" ;;
 esac

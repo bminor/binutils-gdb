@@ -252,6 +252,15 @@ interrupt_event (SIM_DESC sd, void *data)
 }
 
 
+/*---------------------------------------------------------------------------*/
+/*-- Device registration hook -----------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+static device_init(SIM_DESC sd) {
+#ifdef DEVICE_INIT
+  extern void register_devices(SIM_DESC);
+  register_devices(sd);
+#endif
+}
 
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
@@ -291,6 +300,8 @@ sim_open (kind, cb, abfd, argv)
 		   K1BASE, K0SIZE,
 		   MEM_SIZE, /* actual size */
 		   K0BASE);
+
+  device_init(sd);
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
