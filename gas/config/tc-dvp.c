@@ -890,8 +890,9 @@ md_pcrel_from_section (fixP, sec)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
       /* The symbol is undefined (or is defined but not in this section).
-	 Let the linker figure it out.  */
-      return 0;
+	 Let the linker figure it out.  +8: branch offsets are relative to the
+	 delay slot.  */
+      return 8;
     }
 
   /* We assume this is a vu branch.
@@ -1388,8 +1389,7 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
 {
   if (operand->bits != 32)
     {
-      long min, max;
-      offsetT test;
+      offsetT min, max, test;
 
       if ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0)
 	{
