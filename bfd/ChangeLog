@@ -1,3 +1,12 @@
+2001-04-27  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_sections): Only swap
+	out handled entries.
+	(elf64_x86_64_finish_dynamic_symbol): Set up GOT entries.
+	(elf64_x86_64_relocate_section): Fix GOTPCREL calculation.
+	(elf64_x86_64_relocate_section): Merge entries for GOTPCREL and
+	GOT32.
+
 2001-04-27  Sean McNeil <sean@mcneil.com>
 
 	* config.bfd: Add arm-vxworks target.
@@ -48,12 +57,12 @@
 	(cpu-openrisc.lo, elf32-openrisc.lo): New rules.
 	* Makefile.in: Regenerated.
 	* config.bfd: (openrisc-*-elf): New target.
-	* configure.in (bfd_elf32_openrisc_vec): New vector. 
+	* configure.in (bfd_elf32_openrisc_vec): New vector.
 	* configure: Regenerated.
 	* libbfd.h: Regenerated.
 	* bfd-in2.h: Regenerated.
 	* reloc.c: Add OpenRISC relocations.
-	* targets.c (bfd_elf32_openrisc_vec): Declare. 
+	* targets.c (bfd_elf32_openrisc_vec): Declare.
 	(bfd_target_vect): Add bfd_elf32_openrisc_vec.
 	* archures.c (enum bfd_architecture): Add bfd_arch_openrisc.
 	(bfd_openrisc_arch): Declare.
