@@ -1,3 +1,8 @@
+2004-02-25  J. Brobecker  <brobecker@gnat.com>
+
+	* configure.in: Refine the previous change.
+	* configure: Regenerate.
+
 2004-02-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-tdep.h: Renamed from x86-64-tdep.h.

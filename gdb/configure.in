@@ -152,9 +152,8 @@ AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
 # additional library.  So if we did not find this function inside
 # the curses library, try some alternate libraries we know might
 # provide it.
-AC_CHECK_FUNC(wborder, [wborder_available=yes],
-    [AC_SEARCH_LIBS(wborder, [cur_colr], [wborder_available=yes],
-        [AC_MSG_WARN([no wborder function found])])])
+AC_SEARCH_LIBS(wborder, [cur_colr], [],
+    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
 
 # Enable TUI.
 AC_ARG_ENABLE(tui,
@@ -167,7 +166,7 @@ AC_ARG_ENABLE(tui,
   esac],enable_tui=yes)
 if test x"$enable_tui" = xyes; then
   if test -d $srcdir/tui; then
-    if test "$ac_cv_search_initscr" != no -a "$wborder_available" = "yes"; then
+    if test "$ac_cv_search_initscr" != no -a "$ac_cv_search_wborder" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
