@@ -186,8 +186,6 @@ sim_open(kind, argv)
       argc++;
     while (stat < argc) {
 	if (argv[stat][0] == '-') {
-	    if (strcmp(argv[stat], "-E") == 0)
-	      ++stat; /* ignore endian spec */
 	    if (strcmp(argv[stat], "-v") == 0) {
 		sis_verbose = 1;
 	    } else
