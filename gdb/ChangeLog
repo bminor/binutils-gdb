@@ -1,3 +1,15 @@
+Tue Aug 20 15:37:03 1996  Fred Fish  <fnf@taarna.cygnus.com>
+
+	* solib.c (_initialize_solib): Add missing '\' chars at ends of
+ 	strings that continue on next line.
+	(enable_break): Replace "return 0" with setting success to zero
+ 	and letting normal return handle the return.
+
+Sat Aug 17 14:16:23 1996  Fred Fish  <fnf@cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Make sure sp and struct_addr
+	are properly aligned.
+
 Fri Aug 16 17:54:26 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* rs6000-tdep.c (rs6000_fix_call_dummy): Add full set of arguments.
