@@ -33,7 +33,7 @@ static bfd_signed_vma read_signed_leb128
 static int get_DW_EH_PE_width
   PARAMS ((int, int));
 static bfd_vma read_value
-  PARAMS ((bfd *, bfd_byte *, int));
+  PARAMS ((bfd *, bfd_byte *, int, int));
 static void write_value
   PARAMS ((bfd *, bfd_byte *, bfd_vma, int));
 static int cie_compare
@@ -141,22 +141,42 @@ int get_DW_EH_PE_width (encoding, ptr_size)
   return 0;
 }
 
+#define get_DW_EH_PE_signed(encoding) (((encoding) & DW_EH_PE_signed) != 0)
+
 /* Read a width sized value from memory.  */
 
 static bfd_vma
-read_value (abfd, buf, width)
+read_value (abfd, buf, width, is_signed)
      bfd *abfd;
      bfd_byte *buf;
      int width;
+     int is_signed;
 {
   bfd_vma value;
 
   switch (width)
     {
-    case 2: value = bfd_get_16 (abfd, buf); break;
-    case 4: value = bfd_get_32 (abfd, buf); break;
-    case 8: value = bfd_get_64 (abfd, buf); break;
-    default: BFD_FAIL (); return 0;
+    case 2:
+      if (is_signed)
+	value = bfd_get_signed_16 (abfd, buf);
+      else
+	value = bfd_get_16 (abfd, buf);
+      break;
+    case 4:
+      if (is_signed)
+	value = bfd_get_signed_32 (abfd, buf);
+      else
+	value = bfd_get_32 (abfd, buf);
+      break;
+    case 8:
+      if (is_signed)
+	value = bfd_get_signed_64 (abfd, buf);
+      else
+	value = bfd_get_64 (abfd, buf);
+      break;
+    default:
+      BFD_FAIL ();
+      return 0;
     }
 
   return value;
@@ -925,7 +945,9 @@ _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
 		      {
 			bfd_vma value;
 
-			value = read_value (abfd, buf, per_width);
+			value = read_value (abfd, buf, per_width,
+					    get_DW_EH_PE_signed
+					    (per_encoding));
 			value += (sec_info->entry[i].offset
 				  - sec_info->entry[i].new_offset);
 			write_value (abfd, buf, value, per_width);
@@ -961,7 +983,9 @@ _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
 	  buf += 4;
 	  width = get_DW_EH_PE_width (sec_info->entry[i].fde_encoding,
 				      ptr_size);
-	  address = value = read_value (abfd, buf, width);
+	  address = value = read_value (abfd, buf, width,
+					get_DW_EH_PE_signed
+					(sec_info->entry[i].fde_encoding));
 	  if (value)
 	    {
 	      switch (sec_info->entry[i].fde_encoding & 0xf0)
@@ -1005,7 +1029,9 @@ _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
 	      buf += sec_info->entry[i].lsda_offset;
 	      width = get_DW_EH_PE_width (sec_info->entry[i].lsda_encoding,
 					  ptr_size);
-	      value = read_value (abfd, buf, width);
+	      value = read_value (abfd, buf, width,
+				  get_DW_EH_PE_signed
+				  (sec_info->entry[i].lsda_encoding));
 	      if (value)
 		{
 		  if ((sec_info->entry[i].lsda_encoding & 0xf0)

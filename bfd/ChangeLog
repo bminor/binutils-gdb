@@ -1,3 +1,11 @@
+2003-02-06  Andreas Schwab  <schwab@suse.de>
+
+	* elf-eh-frame.c (get_DW_EH_PE_signed): Define.
+	(read_value): Add parameter is_signed, use signed extraction if
+	the value is signed.
+	(_bfd_elf_write_section_eh_frame): Pass signed flag of the
+	encoding to read_value.
+
 2003-02-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy got and
