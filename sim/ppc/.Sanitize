@@ -73,7 +73,10 @@ filter_filename.h
 hw_com.c
 hw_cpu.c
 hw_cpu.h
+hw_disk.c
 hw_eeprom.c
+hw_htab.c
+hw_init.c
 hw_iobus.c
 hw_memory.c
 hw_nvram.c
@@ -82,6 +85,9 @@ hw_pci_ide.c
 hw_phb.c
 hw_phb.h
 hw_pic.c
+hw_register.c
+hw_trace.c
+hw_vm.c
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
@@ -101,6 +107,7 @@ options.c
 options.h
 os_emul.c
 os_emul.h
+pk_disklabel.c
 ppc-cache-rules
 ppc-instructions
 ppc-opcode-complex
