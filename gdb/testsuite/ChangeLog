@@ -1,3 +1,11 @@
+2000-08-02  Jimmy Guo  <guo@hpcleara.cup.hp.com>
+
+	* gdb.base/sizeof.c: include <stdio.h>.
+
+	* gdb.c++/classes.exp: Use gdb_test instead of send_gdb to
+        'finish', otherwise uncaptured gdb_prompt would potentially
+        throw remaining test points out of sync.
+
 2000-07-26  Scott Bambrough <scottb@netwinder.org>
 
 	* gdb.base/recurse.exp: Run tests for all targets.
