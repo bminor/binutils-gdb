@@ -1,3 +1,13 @@
+Wed Mar 27 14:42:12 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* interp.c, gencode.c: Some more (TODO) tidying.
+
+Thu Mar  7 11:19:33 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gencode.c, interp.c: Replaced explicit long long references with
+ 	WORD64HI, WORD64LO, SET64HI and SET64LO macro calls.
+	* support.h (SET64LO, SET64HI): Macros added.
+
 Wed Feb 21 12:16:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate with autoconf 2.7.

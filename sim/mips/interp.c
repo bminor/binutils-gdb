@@ -312,8 +312,8 @@ printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n
                              callback->printf_filtered(callback,"SIM Warning: Attempt to over-write pending value\n");\
                             pending_slot_count[pending_in] = 2;\
                             pending_slot_reg[pending_in] = (r);\
-                            pending_slot_value[pending_in] = (v);\
-printf("DBG: FILL        reg %d value = 0x%08X%08X\n",(r),(unsigned int)(((unsigned long long)(v))>>32),(unsigned int)((v)&0xFFFFFFFF));\
+                            pending_slot_value[pending_in] = (uword64)(v);\
+printf("DBG: FILL        reg %d value = 0x%08X%08X\n",(r),WORD64HI(v),WORD64LO(v));\
                             pending_total++;\
                             pending_in++;\
                             if (pending_in == PSLOTS)\
@@ -425,7 +425,7 @@ unsigned membank_size = (1 << 20); /* (16 << 20); */ /* power-of-2 */
 /* Simple run-time monitor support */
 unsigned char *monitor = NULL;
 ut_reg monitor_base = 0xBFC00000;
-unsigned monitor_size = (1 << 9); /* power-of-2 */
+unsigned monitor_size = (1 << 11); /* power-of-2 */
 
 #if defined(TRACE)
 char *tracefile = "trace.din"; /* default filename for trace log */
@@ -448,9 +448,9 @@ int profile_shift = 0; /* address shift amount */
 static void dotrace PARAMS((FILE *tracefh,int type,unsigned int address,int width,char *comment,...));
 extern void sim_error PARAMS((char *fmt,...));
 static void ColdReset PARAMS((void));
-static int AddressTranslation PARAMS((unsigned long long vAddr,int IorD,int LorS,unsigned long long *pAddr,int *CCA,int host,int raw));
-static void StoreMemory PARAMS((int CCA,int AccessLength,unsigned long long MemElem,unsigned long long pAddr,unsigned long long vAddr,int raw));
-static unsigned long long LoadMemory PARAMS((int CCA,int AccessLength,unsigned long long pAddr,unsigned long long vAddr,int IorD,int raw));
+static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
+static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 pAddr,uword64 vAddr,int raw));
+static uword64 LoadMemory PARAMS((int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
 static void SignalException PARAMS((int exception,...));
 static void simulate PARAMS((void));
 static long getnum(char *value);
@@ -675,16 +675,17 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
     fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",monitor_size);
   } else {
     int loop;
+    /* TODO: Provide support for PMON monitor */
     /* Entry into the IDT monitor is via fixed address vectors, and
        not using machine instructions. To avoid clashing with use of
        the MIPS TRAP system, we place our own (simulator specific)
        "undefined" instructions into the relevant vector slots. */
     for (loop = 0; (loop < monitor_size); loop += 4) {
-      unsigned long long vaddr = (monitor_base + loop);
-      unsigned long long paddr;
+      uword64 vaddr = (monitor_base + loop);
+      uword64 paddr;
       int cca;
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-       StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | (loop >> 2)),paddr,vaddr,isRAW);
+       StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | ((loop >> 2) & RSVD_INSTRUCTION_AMASK)),paddr,vaddr,isRAW);
     }
   }
 
@@ -848,11 +849,11 @@ sim_write (addr,buffer,size)
      int size;
 {
   int index = size;
-  unsigned long long vaddr = (unsigned long long)addr;
+  uword64 vaddr = (uword64)addr;
 
   /* Return the number of bytes written, or zero if error. */
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_write(0x%08X%08X,buffer,%d);\n",(unsigned int)((unsigned long long)(addr)>>32),(unsigned int)(addr&0xFFFFFFFF),size);
+  callback->printf_filtered(callback,"sim_write(0x%08X%08X,buffer,%d);\n",WORD64HI(addr),WORD64LO(addr),size);
 #endif
 
   /* We provide raw read and write routines, since we do not want to
@@ -869,29 +870,29 @@ sim_write (addr,buffer,size)
      way. We can then perform doubleword transfers to and from the
      simulator memory for optimum performance. */
   if (index && (index & 1)) {
-    unsigned long long paddr;
+    uword64 paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      unsigned long long value = ((unsigned long long)(*buffer++));
+      uword64 value = ((uword64)(*buffer++));
       StoreMemory(cca,AccessLength_BYTE,value,paddr,vaddr,isRAW);
     }
     vaddr++;
     index &= ~1; /* logical operations usually quicker than arithmetic on RISC systems */
   }
   if (index && (index & 2)) {
-    unsigned long long paddr;
+    uword64 paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      unsigned long long value;
+      uword64 value;
       /* We need to perform the following magic to ensure that that
          bytes are written into same byte positions in the target memory
          world, regardless of the endianness of the host. */
       if (BigEndianMem) {
-        value =  ((unsigned long long)(*buffer++) << 8);
-        value |= ((unsigned long long)(*buffer++) << 0);
+        value =  ((uword64)(*buffer++) << 8);
+        value |= ((uword64)(*buffer++) << 0);
       } else {
-        value =  ((unsigned long long)(*buffer++) << 0);
-        value |= ((unsigned long long)(*buffer++) << 8);
+        value =  ((uword64)(*buffer++) << 0);
+        value |= ((uword64)(*buffer++) << 8);
       }
       StoreMemory(cca,AccessLength_HALFWORD,value,paddr,vaddr,isRAW);
     }
@@ -899,20 +900,20 @@ sim_write (addr,buffer,size)
     index &= ~2;
   }
   if (index && (index & 4)) {
-    unsigned long long paddr;
+    uword64 paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      unsigned long long value;
+      uword64 value;
       if (BigEndianMem) {
-        value =  ((unsigned long long)(*buffer++) << 24);
-        value |= ((unsigned long long)(*buffer++) << 16);
-        value |= ((unsigned long long)(*buffer++) << 8);
-        value |= ((unsigned long long)(*buffer++) << 0);
+        value =  ((uword64)(*buffer++) << 24);
+        value |= ((uword64)(*buffer++) << 16);
+        value |= ((uword64)(*buffer++) << 8);
+        value |= ((uword64)(*buffer++) << 0);
       } else {
-        value =  ((unsigned long long)(*buffer++) << 0);
-        value |= ((unsigned long long)(*buffer++) << 8);
-        value |= ((unsigned long long)(*buffer++) << 16);
-        value |= ((unsigned long long)(*buffer++) << 24);
+        value =  ((uword64)(*buffer++) << 0);
+        value |= ((uword64)(*buffer++) << 8);
+        value |= ((uword64)(*buffer++) << 16);
+        value |= ((uword64)(*buffer++) << 24);
       }
       StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
     }
@@ -920,28 +921,28 @@ sim_write (addr,buffer,size)
     index &= ~4;
   }
   for (;index; index -= 8) {
-    unsigned long long paddr;
+    uword64 paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
-      unsigned long long value;
+      uword64 value;
       if (BigEndianMem) {
-        value =  ((unsigned long long)(*buffer++) << 56);
-        value |= ((unsigned long long)(*buffer++) << 48);
-        value |= ((unsigned long long)(*buffer++) << 40);
-        value |= ((unsigned long long)(*buffer++) << 32);
-        value |= ((unsigned long long)(*buffer++) << 24);
-        value |= ((unsigned long long)(*buffer++) << 16);
-        value |= ((unsigned long long)(*buffer++) << 8);
-        value |= ((unsigned long long)(*buffer++) << 0);
+        value =  ((uword64)(*buffer++) << 56);
+        value |= ((uword64)(*buffer++) << 48);
+        value |= ((uword64)(*buffer++) << 40);
+        value |= ((uword64)(*buffer++) << 32);
+        value |= ((uword64)(*buffer++) << 24);
+        value |= ((uword64)(*buffer++) << 16);
+        value |= ((uword64)(*buffer++) << 8);
+        value |= ((uword64)(*buffer++) << 0);
       } else {
-        value =  ((unsigned long long)(*buffer++) << 0);
-        value |= ((unsigned long long)(*buffer++) << 8);
-        value |= ((unsigned long long)(*buffer++) << 16);
-        value |= ((unsigned long long)(*buffer++) << 24);
-        value |= ((unsigned long long)(*buffer++) << 32);
-        value |= ((unsigned long long)(*buffer++) << 40);
-        value |= ((unsigned long long)(*buffer++) << 48);
-        value |= ((unsigned long long)(*buffer++) << 56);
+        value =  ((uword64)(*buffer++) << 0);
+        value |= ((uword64)(*buffer++) << 8);
+        value |= ((uword64)(*buffer++) << 16);
+        value |= ((uword64)(*buffer++) << 24);
+        value |= ((uword64)(*buffer++) << 32);
+        value |= ((uword64)(*buffer++) << 40);
+        value |= ((uword64)(*buffer++) << 48);
+        value |= ((uword64)(*buffer++) << 56);
       }
       StoreMemory(cca,AccessLength_DOUBLEWORD,value,paddr,vaddr,isRAW);
     }
@@ -961,7 +962,7 @@ sim_read (addr,buffer,size)
 
   /* Return the number of bytes read, or zero if error. */
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_read(0x%08X%08X,buffer,%d);\n",(unsigned int)((unsigned long long)(addr)>>32),(unsigned int)(addr&0xFFFFFFFF),size);
+  callback->printf_filtered(callback,"sim_read(0x%08X%08X,buffer,%d);\n",WORD64HI(addr),WORD64LO(addr),size);
 #endif /* DEBUG */
 
   /* TODO: Perform same optimisation as the sim_write() code
@@ -969,9 +970,9 @@ sim_read (addr,buffer,size)
      to ensure that the source physical address is doubleword aligned
      before, and then deal with trailing bytes. */
   for (index = 0; (index < size); index++) {
-    unsigned long long vaddr,paddr,value;
+    uword64 vaddr,paddr,value;
     int cca;
-    vaddr = (unsigned long long)addr + index;
+    vaddr = (uword64)addr + index;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&cca,isTARGET,isRAW)) {
       value = LoadMemory(cca,AccessLength_BYTE,paddr,vaddr,isDATA,isRAW);
       buffer[index] = (unsigned char)(value&0xFF);
@@ -1000,7 +1001,7 @@ sim_store_register (rn,memory)
     if (register_widths[rn] == 32)
      registers[rn] = *((unsigned int *)memory);
     else
-     registers[rn] = *((unsigned long long *)memory);
+     registers[rn] = *((uword64 *)memory);
   }
 
   return;
@@ -1012,7 +1013,7 @@ sim_fetch_register (rn,memory)
      unsigned char *memory;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_fetch_register(%d=0x%08X%08X,mem) : place simulator registers into memory\n",rn,(unsigned int)(registers[rn]>>32),(unsigned int)(registers[rn]&0xFFFFFFFF));
+  callback->printf_filtered(callback,"sim_fetch_register(%d=0x%08X%08X,mem) : place simulator registers into memory\n",rn,WORD64HI(registers[rn]),WORD64LO(registers[rn]));
 #endif /* DEBUG */
 
   if (register_widths[rn] == 0)
@@ -1021,7 +1022,7 @@ sim_fetch_register (rn,memory)
     if (register_widths[rn] == 32)
      *((unsigned int *)memory) = (registers[rn] & 0xFFFFFFFF);
     else /* 64bit register */
-     *((unsigned long long *)memory) = registers[rn];
+     *((uword64 *)memory) = registers[rn];
   }
   return;
 }
@@ -1104,7 +1105,7 @@ sim_info (verbose)
 
   callback->printf_filtered(callback,"%s endian memory model\n",(BigEndianMem ? "Big" : "Little"));
 
-  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%08X%08X\n",(unsigned int)membank_size,(unsigned int)(membank_base>>32),(unsigned int)(membank_base&0xFFFFFFFF));
+  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%08X%08X\n",(unsigned int)membank_size,WORD64HI(membank_base),WORD64LO(membank_base));
 
 #if !defined(FASTSIM)
   callback->printf_filtered(callback,"Instruction fetches = %d\n",instruction_fetches);
@@ -1153,7 +1154,7 @@ sim_create_inferior (start_address,argv,env)
   /* argv and env are NULL terminated lists of pointers */
 
 #if 1
-  PC = (unsigned long long)start_address;
+  PC = (uword64)start_address;
 #else
   /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
   PC = SIGNEXTEND(start_address,32);
@@ -1386,6 +1387,7 @@ sim_trace()
 /*-- Private simulator support interface ------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+/* Simple monitor interface (currently setup for the IDT monitor) */
 static void
 sim_monitor(reason)
      unsigned int reason;
@@ -1402,7 +1404,7 @@ sim_monitor(reason)
     case 6: /* int open(char *path,int flags) */
       {
         const char *ptr;
-        unsigned long long paddr;
+        uword64 paddr;
         int cca;
         if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = callback->open(callback,(char *)((int)paddr),(int)A1);
@@ -1414,7 +1416,7 @@ sim_monitor(reason)
     case 7: /* int read(int file,char *ptr,int len) */
       {
         const char *ptr;
-        unsigned long long paddr;
+        uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = callback->read(callback,(int)A0,(char *)((int)paddr),(int)A2);
@@ -1426,7 +1428,7 @@ sim_monitor(reason)
     case 8: /* int write(int file,char *ptr,int len) */
       {
         const char *ptr;
-        unsigned long long paddr;
+        uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = callback->write(callback,(int)A0,(const char *)((int)paddr),(int)A2);
@@ -1470,8 +1472,8 @@ sim_monitor(reason)
       /*      [A0 + 4] = instruction cache size */
       /*      [A0 + 8] = data cache size */
       {
-        unsigned long long vaddr = A0;
-        unsigned long long paddr, value;
+        uword64 vaddr = A0;
+        uword64 paddr, value;
         int cca;
         int failed = 0;
 
@@ -1481,7 +1483,7 @@ sim_monitor(reason)
 
         /* Memory size */
         if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
-          value = (unsigned long long)membank_size;
+          value = (uword64)membank_size;
           StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
           /* We re-do the address translations, in-case the block
              overlaps a memory boundary: */
@@ -1505,8 +1507,8 @@ sim_monitor(reason)
       break;
 
     default:
-      callback->printf_filtered(callback,"TODO: sim_monitor(%d) : PC = 0x%08X%08X\n",reason,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
-      callback->printf_filtered(callback,"(Arguments : A0 = 0x%08X%08X : A1 = 0x%08X%08X : A2 = 0x%08X%08X : A3 = 0x%08X%08X)\n",(unsigned int)(A0>>32),(unsigned int)(A0&0xFFFFFFFF),(unsigned int)(A1>>32),(unsigned int)(A1&0xFFFFFFFF),(unsigned int)(A2>>32),(unsigned int)(A2&0xFFFFFFFF),(unsigned int)(A3>>32),(unsigned int)(A3&0xFFFFFFFF));
+      callback->printf_filtered(callback,"TODO: sim_monitor(%d) : PC = 0x%08X%08X\n",reason,WORD64HI(IPC),WORD64LO(IPC));
+      callback->printf_filtered(callback,"(Arguments : A0 = 0x%08X%08X : A1 = 0x%08X%08X : A2 = 0x%08X%08X : A3 = 0x%08X%08X)\n",WORD64HI(A0),WORD64LO(A0),WORD64HI(A1),WORD64LO(A1),WORD64HI(A2),WORD64LO(A2),WORD64HI(A3),WORD64LO(A3));
       break;
   }
   return;
@@ -1646,7 +1648,7 @@ static void
 ColdReset()
 {
   /* RESET: Fixed PC address: */
-  PC = (((unsigned long long)0xFFFFFFFF<<32) | 0xBFC00000);
+  PC = (((uword64)0xFFFFFFFF<<32) | 0xBFC00000);
   /* The reset vector address is in the unmapped, uncached memory space. */
 
   SR &= ~(status_SR | status_TS | status_RP);
@@ -1702,10 +1704,10 @@ ColdReset()
 
 static int
 AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
-     unsigned long long vAddr;
+     uword64 vAddr;
      int IorD;
      int LorS;
-     unsigned long long *pAddr;
+     uword64 *pAddr;
      int *CCA;
      int host;
      int raw;
@@ -1713,7 +1715,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
   int res = -1; /* TRUE : Assume good return */
 
 #ifdef DEBUG
-  callback->printf_filtered(callback,"AddressTranslation(0x%08X%08X,%s,%s,...);\n",(unsigned int)(vAddr >> 32),(unsigned int)(vAddr & 0xFFFFFFFF),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
+  callback->printf_filtered(callback,"AddressTranslation(0x%08X%08X,%s,%s,...);\n",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
 #endif
 
   /* Check that the address is valid for this memory model */
@@ -1735,14 +1737,14 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
      *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
   } else {
 #if 1 /* def DEBUG */
-    callback->printf_filtered(callback,"Failed: AddressTranslation(0x%08X%08X,%s,%s,...);\n",(unsigned int)(vAddr >> 32),(unsigned int)(vAddr & 0xFFFFFFFF),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"));
+    callback->printf_filtered(callback,"Failed: AddressTranslation(0x%08X%08X,%s,%s,...);\n",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"));
 #endif /* DEBUG */
     res = 0; /* AddressTranslation has failed */
     *pAddr = -1;
     if (!raw) /* only generate exceptions on real memory transfers */
      SignalException((LorS == isSTORE) ? AddressStore : AddressLoad);
     else
-     callback->printf_filtered(callback,"AddressTranslation for %s %s from 0x%08X%08X failed\n",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),(unsigned int)(vAddr>>32),(unsigned int)(vAddr&0xFFFFFFFF));
+     callback->printf_filtered(callback,"AddressTranslation for %s %s from 0x%08X%08X failed\n",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),WORD64HI(vAddr),WORD64LO(vAddr));
   }
 
   return(res);
@@ -1756,13 +1758,13 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
 static void
 Prefetch(CCA,pAddr,vAddr,DATA,hint)
      int CCA;
-     unsigned long long pAddr;
-     unsigned long long vAddr;
+     uword64 pAddr;
+     uword64 vAddr;
      int DATA;
      int hint;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"Prefetch(%d,0x%08X%08X,0x%08X%08X,%d,%d);\n",CCA,(unsigned int)(pAddr >> 32),(unsigned int)(pAddr & 0xFFFFFFFF),(unsigned int)(vAddr >> 32),(unsigned int)(vAddr & 0xFFFFFFFF),DATA,hint);
+  callback->printf_filtered(callback,"Prefetch(%d,0x%08X%08X,0x%08X%08X,%d,%d);\n",CCA,WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),DATA,hint);
 #endif /* DEBUG */
 
   /* For our simple memory model we do nothing */
@@ -1784,20 +1786,20 @@ Prefetch(CCA,pAddr,vAddr,DATA,hint)
    alignment block of memory is read and loaded into the cache to
    satisfy a load reference. At a minimum, the block is the entire
    memory element. */
-static unsigned long long
+static uword64
 LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
      int CCA;
      int AccessLength;
-     unsigned long long pAddr;
-     unsigned long long vAddr;
+     uword64 pAddr;
+     uword64 vAddr;
      int IorD;
      int raw;
 {
-  unsigned long long value;
+  uword64 value;
 
 #ifdef DEBUG
   if (membank == NULL)
-   callback->printf_filtered(callback,"DBG: LoadMemory(%d,%d,0x%08X%08X,0x%08X%08X,%s,%s)\n",CCA,AccessLength,(unsigned int)(pAddr >> 32),(unsigned int)(pAddr & 0xFFFFFFFF),(unsigned int)(vAddr >> 32),(unsigned int)(vAddr & 0xFFFFFFFF),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
+   callback->printf_filtered(callback,"DBG: LoadMemory(%d,%d,0x%08X%08X,0x%08X%08X,%s,%s)\n",CCA,AccessLength,WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
@@ -1806,7 +1808,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK) {
     /* In reality this should be a Bus Error */
-    sim_error("AccessLength of %d would extend over 64bit aligned boundary for physical address 0x%08X%08X\n",AccessLength,(unsigned int)(pAddr>>32),(unsigned int)(pAddr&0xFFFFFFFF));
+    sim_error("AccessLength of %d would extend over 64bit aligned boundary for physical address 0x%08X%08X\n",AccessLength,WORD64HI(pAddr),WORD64LO(pAddr));
   }
 #endif /* WARN_MEM */
 
@@ -1825,8 +1827,6 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
     unsigned int index;
     unsigned char *mem = NULL;
 
-    /* TODO: #assert (isRAW) - check that our boolean is the correct way around */
-
 #if defined(TRACE)
     if (!raw)
      dotrace(tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
@@ -1843,7 +1843,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       mem = monitor;
     }
     if (mem == NULL)
-     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",(unsigned int)(pAddr>>32),(unsigned int)(pAddr&0xFFFFFFFF));
+     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",WORD64HI(pAddr),WORD64LO(pAddr));
     else {
       /* If we obtained the endianness of the host, and it is the same
          as the target memory system we can optimise the memory
@@ -1860,13 +1860,13 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       if (BigEndianMem)
        switch (AccessLength) { /* big-endian memory */
          case AccessLength_DOUBLEWORD :
-          value |= ((unsigned long long)mem[index++] << 56);
+          value |= ((uword64)mem[index++] << 56);
          case AccessLength_SEPTIBYTE :
-          value |= ((unsigned long long)mem[index++] << 48);
+          value |= ((uword64)mem[index++] << 48);
          case AccessLength_SEXTIBYTE :
-          value |= ((unsigned long long)mem[index++] << 40);
+          value |= ((uword64)mem[index++] << 40);
          case AccessLength_QUINTIBYTE :
-          value |= ((unsigned long long)mem[index++] << 32);
+          value |= ((uword64)mem[index++] << 32);
          case AccessLength_WORD :
           value |= ((unsigned int)mem[index++] << 24);
          case AccessLength_TRIPLEBYTE :
@@ -1881,27 +1881,27 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
         index += (AccessLength + 1);
         switch (AccessLength) { /* little-endian memory */
           case AccessLength_DOUBLEWORD :
-           value |= ((unsigned long long)mem[--index] << 56);
+           value |= ((uword64)mem[--index] << 56);
           case AccessLength_SEPTIBYTE :
-           value |= ((unsigned long long)mem[--index] << 48);
+           value |= ((uword64)mem[--index] << 48);
           case AccessLength_SEXTIBYTE :
-           value |= ((unsigned long long)mem[--index] << 40);
+           value |= ((uword64)mem[--index] << 40);
           case AccessLength_QUINTIBYTE :
-           value |= ((unsigned long long)mem[--index] << 32);
+           value |= ((uword64)mem[--index] << 32);
           case AccessLength_WORD :
-           value |= ((unsigned long long)mem[--index] << 24);
+           value |= ((uword64)mem[--index] << 24);
           case AccessLength_TRIPLEBYTE :
-           value |= ((unsigned long long)mem[--index] << 16);
+           value |= ((uword64)mem[--index] << 16);
           case AccessLength_HALFWORD :
-           value |= ((unsigned long long)mem[--index] << 8);
+           value |= ((uword64)mem[--index] << 8);
           case AccessLength_BYTE :
-           value |= ((unsigned long long)mem[--index] << 0);
+           value |= ((uword64)mem[--index] << 0);
            break;
         }
       }
 
 #ifdef DEBUG
-      printf("DBG: LoadMemory() : (offset %d) : value = 0x%08X%08X\n",(int)(pAddr & LOADDRMASK),(unsigned int)(value>>32),(unsigned int)(value&0xFFFFFFFF));
+      printf("DBG: LoadMemory() : (offset %d) : value = 0x%08X%08X\n",(int)(pAddr & LOADDRMASK),WORD64HI(value),WORD64LO(value));
 #endif /* DEBUG */
 
       /* TODO: We could try and avoid the shifts when dealing with raw
@@ -1916,8 +1916,8 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       }
 
 #ifdef DEBUG
-      printf("DBG: LoadMemory() : shifted value = 0x%08X%08X\n",(unsigned int)(value>>32),(unsigned int)(value&0xFFFFFFFF));
-#endif DEBUG
+      printf("DBG: LoadMemory() : shifted value = 0x%08X%08X\n",WORD64HI(value),WORD64LO(value));
+#endif /* DEBUG */
     }
   }
 
@@ -1939,13 +1939,13 @@ static void
 StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
      int CCA;
      int AccessLength;
-     unsigned long long MemElem;
-     unsigned long long pAddr;
-     unsigned long long vAddr;
+     uword64 MemElem;
+     uword64 pAddr;
+     uword64 vAddr;
      int raw;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%08X%08X,0x%08X%08X,0x%08X%08X,%s)\n",CCA,AccessLength,(unsigned int)(MemElem >> 32),(unsigned int)(MemElem & 0xFFFFFFFF),(unsigned int)(pAddr >> 32),(unsigned int)(pAddr & 0xFFFFFFFF),(unsigned int)(vAddr >> 32),(unsigned int)(vAddr & 0xFFFFFFFF),(raw ? "isRAW" : "isREAL"));
+  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%08X%08X,0x%08X%08X,0x%08X%08X,%s)\n",CCA,AccessLength,WORD64HI(MemElem),WORD64LO(MemElem),WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
@@ -1953,7 +1953,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
    callback->printf_filtered(callback,"SIM Warning: StoreMemory CCA (%d) is not uncached (currently all accesses treated as cached)\n",CCA);
  
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-   sim_error("AccessLength of %d would extend over 64bit aligned boundary for physical address 0x%08X%08X\n",AccessLength,(unsigned int)(pAddr>>32),(unsigned int)(pAddr&0xFFFFFFFF));
+   sim_error("AccessLength of %d would extend over 64bit aligned boundary for physical address 0x%08X%08X\n",AccessLength,WORD64HI(pAddr),WORD64LO(pAddr));
 #endif /* WARN_MEM */
 
 #if defined(TRACE)
@@ -1979,12 +1979,12 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
     }
 
     if (mem == NULL)
-     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",(unsigned int)(pAddr>>32),(unsigned int)(pAddr&0xFFFFFFFF));
+     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",WORD64HI(pAddr),WORD64LO(pAddr));
     else {
       int shift = 0;
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: offset = %d MemElem = 0x%08X%08X\n",(unsigned int)(pAddr & LOADDRMASK),(unsigned int)(MemElem>>32),(unsigned int)(MemElem&0xFFFFFFFF));
+      printf("DBG: StoreMemory: offset = %d MemElem = 0x%08X%08X\n",(unsigned int)(pAddr & LOADDRMASK),WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
       if (BigEndianMem) {
@@ -2000,7 +2000,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       }
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: shift = %d MemElem = 0x%08X%08X\n",shift,(unsigned int)(MemElem>>32),(unsigned int)(MemElem&0xFFFFFFFF));
+      printf("DBG: StoreMemory: shift = %d MemElem = 0x%08X%08X\n",shift,WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
       if (BigEndianMem) {
@@ -2089,7 +2089,7 @@ SignalException(exception)
        reality we should either simulate them, or allow the user to
        ignore them at run-time. */
     case Trap :
-     callback->printf_filtered(callback,"Ignoring instruction TRAP (PC 0x%08X%08X)\n",(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"Ignoring instruction TRAP (PC 0x%08X%08X)\n",WORD64HI(IPC),WORD64LO(IPC));
      break;
 
     case ReservedInstruction :
@@ -2116,12 +2116,12 @@ SignalException(exception)
             case with the current IDT monitor). */
          break; /* out of the switch statement */
        } /* else fall through to normal exception processing */
-       callback->printf_filtered(callback,"DBG: ReservedInstruction 0x%08X at IPC = 0x%08X%08X\n",instruction,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+       callback->printf_filtered(callback,"DBG: ReservedInstruction 0x%08X at IPC = 0x%08X%08X\n",instruction,WORD64HI(IPC),WORD64LO(IPC));
      }
 
     default:
 #if 1 /* def DEBUG */
-     callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%08X%08X\n",exception,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%08X%08X\n",exception,WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
      /* Store exception code into current exception id variable (used
         by exit code): */
@@ -2167,7 +2167,7 @@ SignalException(exception)
 static void
 UndefinedResult()
 {
-  callback->printf_filtered(callback,"UndefinedResult: IPC = 0x%08X%08X\n",(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+  callback->printf_filtered(callback,"UndefinedResult: IPC = 0x%08X%08X\n",WORD64HI(IPC),WORD64LO(IPC));
 #if 0 /* Disabled for the moment, since it actually happens a lot at the moment. */
   state |= simSTOP;
 #endif
@@ -2178,14 +2178,14 @@ UndefinedResult()
 static void
 CacheOp(op,pAddr,vAddr,instruction)
      int op;
-     unsigned long long pAddr;
-     unsigned long long vAddr;
+     uword64 pAddr;
+     uword64 vAddr;
      unsigned int instruction;
 {
   /* If CP0 is not useable (User or Supervisor mode) and the CP0
      enable bit in the Status Register is clear - a coprocessor
      unusable exception is taken. */
-  callback->printf_filtered(callback,"TODO: Cache availability checking (PC = 0x%08X%08X)\n",(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+  callback->printf_filtered(callback,"TODO: Cache availability checking (PC = 0x%08X%08X)\n",WORD64HI(IPC),WORD64LO(IPC));
 
   switch (op & 0x3) {
     case 0: /* instruction cache */
@@ -2269,7 +2269,7 @@ CacheOp(op,pAddr,vAddr,instruction)
 
 /* Extract sign-bit: */
 #define FP_S_s(v)    (((v) & ((unsigned)1 << 31)) ? 1 : 0)
-#define FP_D_s(v)    (((v) & ((unsigned long long)1 << 63)) ? 1 : 0)
+#define FP_D_s(v)    (((v) & ((uword64)1 << 63)) ? 1 : 0)
 /* Extract biased exponent: */
 #define FP_S_be(v)   (((v) >> 23) & 0xFF)
 #define FP_D_be(v)   (((v) >> 52) & 0x7FF)
@@ -2278,7 +2278,7 @@ CacheOp(op,pAddr,vAddr,instruction)
 #define FP_D_e(v)    (FP_D_be(v) - 0x3FF)
 /* Extract complete fraction field: */
 #define FP_S_f(v)    ((v) & ~((unsigned)0x1FF << 23))
-#define FP_D_f(v)    ((v) & ~((unsigned long long)0xFFF << 52))
+#define FP_D_f(v)    ((v) & ~((uword64)0xFFF << 52))
 /* Extract numbered fraction bit: */
 #define FP_S_fb(b,v) (((v) & (1 << (23 - (b)))) ? 1 : 0)
 #define FP_D_fb(b,v) (((v) & (1 << (52 - (b)))) ? 1 : 0)
@@ -2286,24 +2286,24 @@ CacheOp(op,pAddr,vAddr,instruction)
 /* Explicit QNaN values used when value required: */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
 #define FPQNaN_WORD     (0x7FFFFFFF)
-#define FPQNaN_DOUBLE   (((unsigned long long)0x7FF7FFFF << 32) | 0xFFFFFFFF)
-#define FPQNaN_LONG     (((unsigned long long)0x7FFFFFFF << 32) | 0xFFFFFFFF)
+#define FPQNaN_DOUBLE   (((uword64)0x7FF7FFFF << 32) | 0xFFFFFFFF)
+#define FPQNaN_LONG     (((uword64)0x7FFFFFFF << 32) | 0xFFFFFFFF)
 
 /* Explicit Infinity values used when required: */
 #define FPINF_SINGLE    (0x7F800000)
-#define FPINF_DOUBLE    (((unsigned long long)0x7FF00000 << 32) | 0x00000000)
+#define FPINF_DOUBLE    (((uword64)0x7FF00000 << 32) | 0x00000000)
 
 #if 1 /* def DEBUG */
 #define RMMODE(v) (((v) == FP_RM_NEAREST) ? "Round" : (((v) == FP_RM_TOZERO) ? "Trunc" : (((v) == FP_RM_TOPINF) ? "Ceil" : "Floor")))
 #define DOFMT(v)  (((v) == fmt_single) ? "single" : (((v) == fmt_double) ? "double" : (((v) == fmt_word) ? "word" : (((v) == fmt_long) ? "long" : (((v) == fmt_unknown) ? "<unknown>" : (((v) == fmt_uninterpreted) ? "<uninterpreted>" : "<format error>"))))))
 #endif /* DEBUG */
 
-static unsigned long long
+static uword64
 ValueFPR(fpr,fmt)
          int fpr;
          FP_formats fmt;
 {
-  unsigned long long value;
+  uword64 value;
   int err = 0;
 
   /* Treat unused register values, as fixed-point 64bit values: */
@@ -2324,7 +2324,7 @@ ValueFPR(fpr,fmt)
 #endif /* DEBUG */
   }
   if (fmt != fpr_state[fpr]) {
-    callback->printf_filtered(callback,"Warning: FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%08X%08X)\n",fpr,DOFMT(fpr_state[fpr]),DOFMT(fmt),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+    callback->printf_filtered(callback,"Warning: FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%08X%08X)\n",fpr,DOFMT(fpr_state[fpr]),DOFMT(fmt),WORD64HI(IPC),WORD64LO(IPC));
     fpr_state[fpr] = fmt_unknown;
   }
 
@@ -2391,7 +2391,7 @@ ValueFPR(fpr,fmt)
    SignalException(SimulatorFault,"Unrecognised FP format in ValueFPR()");
 
 #ifdef DEBUG
-  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),(unsigned int)(value>>32),(unsigned int)(value&0xFFFFFFFF),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF),SizeFGR());
+  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),WORD64HI(value),WORD64LO(value),WORD64HI(IPC),WORD64LO(IPC),SizeFGR());
 #endif /* DEBUG */
 
   return(value);
@@ -2401,19 +2401,19 @@ static void
 StoreFPR(fpr,fmt,value)
      int fpr;
      FP_formats fmt;
-     unsigned long long value;
+     uword64 value;
 {
   int err = 0;
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),(unsigned int)(value>>32),(unsigned int)(value&0xFFFFFFFF),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF),SizeFGR());
+  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),WORD64HI(value),WORD64LO(value),WORD64HI(IPC),WORD64LO(IPC),SizeFGR());
 #endif /* DEBUG */
 
   if (SizeFGR() == 64) {
     switch (fmt) {
       case fmt_single :
       case fmt_word :
-       FGR[fpr] = (((unsigned long long)0xDEADC0DE << 32) | (value & 0xFFFFFFFF));
+       FGR[fpr] = (((uword64)0xDEADC0DE << 32) | (value & 0xFFFFFFFF));
        fpr_state[fpr] = fmt;
        break;
 
@@ -2453,14 +2453,17 @@ StoreFPR(fpr,fmt,value)
        err = -1;
        break;
     }
-  } else
-   UndefinedResult();
+  }
+#if defined(WARN_RESULT)
+  else
+    UndefinedResult();
+#endif /* WARN_RESULT */
 
   if (err)
    SignalException(SimulatorFault,"Unrecognised FP format in StoreFPR()");
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr[%d] = 0x%08X%08X (format %s)\n",fpr,(unsigned int)(FGR[fpr]>>32),(unsigned int)(FGR[fpr]&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: StoreFPR: fpr[%d] = 0x%08X%08X (format %s)\n",fpr,WORD64HI(FGR[fpr]),WORD64LO(FGR[fpr]),DOFMT(fmt));
 #endif /* DEBUG */
 
   return;
@@ -2468,7 +2471,7 @@ StoreFPR(fpr,fmt,value)
 
 static int
 NaN(op,fmt)
-     unsigned long long op;
+     uword64 op;
      FP_formats fmt; 
 {
   int boolean = 0;
@@ -2496,7 +2499,7 @@ NaN(op,fmt)
   }
 
 #ifdef DEBUG
-printf("DBG: NaN: returning %d for 0x%08X%08X (format = %s)\n",boolean,(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF),DOFMT(fmt));
+printf("DBG: NaN: returning %d for 0x%08X%08X (format = %s)\n",boolean,WORD64HI(op),WORD64LO(op),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -2504,13 +2507,13 @@ printf("DBG: NaN: returning %d for 0x%08X%08X (format = %s)\n",boolean,(unsigned
 
 static int
 Infinity(op,fmt)
-     unsigned long long op;
+     uword64 op;
      FP_formats fmt; 
 {
   int boolean = 0;
 
 #ifdef DEBUG
-  printf("DBG: Infinity: format %s 0x%08X%08X (PC = 0x%08X%08X)\n",DOFMT(fmt),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+  printf("DBG: Infinity: format %s 0x%08X%08X (PC = 0x%08X%08X)\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op),WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
 
   /* Check if (((E - bias) == (E_max + 1)) && (fraction == 0)). We
@@ -2529,7 +2532,7 @@ Infinity(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Infinity: returning %d for 0x%08X%08X (format = %s)\n",boolean,(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Infinity: returning %d for 0x%08X%08X (format = %s)\n",boolean,WORD64HI(op),WORD64LO(op),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -2537,17 +2540,17 @@ Infinity(op,fmt)
 
 static int
 Less(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
   int boolean = 0;
 
-#ifdef DEBUG
-  printf("DBG: Less: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
-#endif /* DEBUG */
+  /* Argument checking already performed by the FPCOMPARE code */
 
-  /* TODO: Perform argument error checking */
+#ifdef DEBUG
+  printf("DBG: Less: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+#endif /* DEBUG */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2572,17 +2575,17 @@ Less(op1,op2,fmt)
 
 static int
 Equal(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
   int boolean = 0;
 
-#ifdef DEBUG
-  printf("DBG: Equal: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
-#endif /* DEBUG */
+  /* Argument checking already performed by the FPCOMPARE code */
 
-  /* TODO: Perform argument error checking */
+#ifdef DEBUG
+  printf("DBG: Equal: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+#endif /* DEBUG */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2601,15 +2604,15 @@ Equal(op1,op2,fmt)
   return(boolean);
 }
 
-static unsigned long long
+static uword64
 Negate(op,fmt)
-     unsigned long long op;
+     uword64 op;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Negate: %s: op = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF));
+  printf("DBG: Negate: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -2618,13 +2621,13 @@ Negate(op,fmt)
     {
       unsigned int wop = (unsigned int)op;
       float tmp = ((float)0.0 - *(float *)&wop);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = ((double)0.0 - *(double *)&op);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
@@ -2632,19 +2635,20 @@ Negate(op,fmt)
   return(result);
 }
 
-static unsigned long long
+static uword64
 Add(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Add: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
+  printf("DBG: Add: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2653,37 +2657,38 @@ Add(op1,op2,fmt)
       unsigned int wop1 = (unsigned int)op1;
       unsigned int wop2 = (unsigned int)op2;
       float tmp = (*(float *)&wop1 + *(float *)&wop2);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = (*(double *)&op1 + *(double *)&op2);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Add: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Add: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 Sub(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Sub: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
+  printf("DBG: Sub: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64H(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2692,37 +2697,38 @@ Sub(op1,op2,fmt)
       unsigned int wop1 = (unsigned int)op1;
       unsigned int wop2 = (unsigned int)op2;
       float tmp = (*(float *)&wop1 - *(float *)&wop2);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = (*(double *)&op1 - *(double *)&op2);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Sub: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Sub: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 Multiply(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Multiply: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
+  printf("DBG: Multiply: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2731,37 +2737,38 @@ Multiply(op1,op2,fmt)
       unsigned int wop1 = (unsigned int)op1;
       unsigned int wop2 = (unsigned int)op2;
       float tmp = (*(float *)&wop1 * *(float *)&wop2);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = (*(double *)&op1 * *(double *)&op2);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Multiply: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Multiply: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 Divide(op1,op2,fmt)
-     unsigned long long op1;
-     unsigned long long op2;
+     uword64 op1;
+     uword64 op2;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Divide: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op1>>32),(unsigned int)(op1&0xFFFFFFFF),(unsigned int)(op2>>32),(unsigned int)(op2&0xFFFFFFFF));
+  printf("DBG: Divide: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2770,36 +2777,37 @@ Divide(op1,op2,fmt)
       unsigned int wop1 = (unsigned int)op1;
       unsigned int wop2 = (unsigned int)op2;
       float tmp = (*(float *)&wop1 / *(float *)&wop2);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = (*(double *)&op1 / *(double *)&op2);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Divide: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Divide: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 Recip(op,fmt)
-     unsigned long long op;
+     uword64 op;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Recip: %s: op = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF));
+  printf("DBG: Recip: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2807,36 +2815,37 @@ Recip(op,fmt)
     {
       unsigned int wop = (unsigned int)op;
       float tmp = ((float)1.0 / *(float *)&wop);
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = ((double)1.0 / *(double *)&op);
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: Recip: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: Recip: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 SquareRoot(op,fmt)
-     unsigned long long op;
+     uword64 op;
      FP_formats fmt; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: %s: op = 0x%08X%08X\n",DOFMT(fmt),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF));
+  printf("DBG: SquareRoot: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
 #endif /* DEBUG */
 
-  /* TODO: Perform argument error checking */
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
 
   /* The format type should already have been checked: */
   switch (fmt) {
@@ -2844,35 +2853,35 @@ SquareRoot(op,fmt)
     {
       unsigned int wop = (unsigned int)op;
       float tmp = ((float)sqrt((double)*(float *)&wop));
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
    case fmt_double:
     {
       double tmp = (sqrt(*(double *)&op));
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
   }
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: returning 0x%08X%08X (format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(fmt));
+  printf("DBG: SquareRoot: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
 }
 
-static unsigned long long
+static uword64
 Convert(rm,op,from,to)
      int rm;
-     unsigned long long op;
+     uword64 op;
      FP_formats from; 
      FP_formats to; 
 {
-  unsigned long long result;
+  uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Convert: mode %s : op 0x%08X%08X : from %s : to %s : (PC = 0x%08X%08X)\n",RMMODE(rm),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF),DOFMT(from),DOFMT(to),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+  printf("DBG: Convert: mode %s : op 0x%08X%08X : from %s : to %s : (PC = 0x%08X%08X)\n",RMMODE(rm),WORD64HI(op),WORD64LO(op),DOFMT(from),DOFMT(to),WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
 
   /* The value "op" is converted to the destination format, rounding
@@ -2900,22 +2909,31 @@ Convert(rm,op,from,to)
 
       switch (rm) {
        case FP_RM_NEAREST:
-        printf("TODO: FPConvert: round(float)\n");
+        /* Round result to nearest representable value. When two
+           representable values are equally near, round to the value
+           that has a least significant bit of zero (i.e. is even). */
+        tmp = (float)anint((double)tmp);
         break;
 
        case FP_RM_TOZERO:
-        printf("TODO: FPConvert: trunc(float)\n");
+        /* Round result to the value closest to, and not greater in
+           magnitude than, the result. */
+        tmp = (float)aint((double)tmp);
         break;
 
        case FP_RM_TOPINF:
-        printf("TODO: FPConvert: ceil(float)\n");
+        /* Round result to the value closest to, and not less than,
+           the result. */
+        tmp = (float)ceil((double)tmp);
         break;
 
        case FP_RM_TOMINF:
-        printf("TODO: FPConvert: floor(float)\n");
+        /* Round result to the value closest to, and not greater than,
+           the result. */
+        tmp = (float)floor((double)tmp);
         break;
       }
-      result = (unsigned long long)*(unsigned int *)&tmp;
+      result = (uword64)*(unsigned int *)&tmp;
     }
     break;
 
@@ -2932,20 +2950,21 @@ Convert(rm,op,from,to)
         break;
 
        case fmt_word:
-        tmp = (double)((long long)SIGNEXTEND((op & 0xFFFFFFFF),32));
+        tmp = (double)((word64)SIGNEXTEND((op & 0xFFFFFFFF),32));
         break;
 
        case fmt_long:
-        tmp = (double)((long long)op);
+        tmp = (double)((word64)op);
         break;
       }
+
       switch (rm) {
        case FP_RM_NEAREST:
-        printf("TODO: FPConvert: round(double)\n");
+        tmp = anint(*(double *)&tmp);
         break;
 
        case FP_RM_TOZERO:
-        printf("TODO: FPConvert: trunc(double)\n");
+        tmp = aint(*(double *)&tmp);
         break;
 
        case FP_RM_TOPINF:
@@ -2956,7 +2975,7 @@ Convert(rm,op,from,to)
         tmp = floor(*(double *)&tmp);
         break;
       }
-      result = *(unsigned long long *)&tmp;
+      result = *(uword64 *)&tmp;
     }
     break;
 
@@ -2978,21 +2997,21 @@ Convert(rm,op,from,to)
          case fmt_double:
           tmp = (unsigned int)*((double *)&op);
 #ifdef DEBUG
-          printf("DBG: from double %.30f (0x%08X%08X) to word: 0x%08X\n",*((double *)&op),(unsigned int)(op>>32),(unsigned int)(op&0xFFFFFFFF),tmp);
+          printf("DBG: from double %.30f (0x%08X%08X) to word: 0x%08X\n",*((double *)&op),WORD64HI(op),WORD64LO(op),tmp);
 #endif /* DEBUG */
           break;
         }
-        result = (unsigned long long)tmp;
+        result = (uword64)tmp;
       } else { /* fmt_long */
         switch (from) {
          case fmt_single:
           {
             unsigned int wop = (unsigned int)op;
-            result = (unsigned long long)*((float *)&wop);
+            result = (uword64)*((float *)&wop);
           }
           break;
          case fmt_double:
-          result = (unsigned long long)*((double *)&op);
+          result = (uword64)*((double *)&op);
           break;
         }
       }
@@ -3001,7 +3020,7 @@ Convert(rm,op,from,to)
   }
 
 #ifdef DEBUG
-  printf("DBG: Convert: returning 0x%08X%08X (to format = %s)\n",(unsigned int)(result>>32),(unsigned int)(result&0xFFFFFFFF),DOFMT(to));
+  printf("DBG: Convert: returning 0x%08X%08X (to format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(to));
 #endif /* DEBUG */
 
   return(result);
@@ -3027,14 +3046,14 @@ COP_LW(coproc_num,coproc_reg,memword)
 #if defined(HASFPU)
     case 1:
 #ifdef DEBUG
-    printf("DBG: COP_LW: memword = 0x%08X (unsigned long long)memword = 0x%08X%08X\n",memword,(unsigned int)(((unsigned long long)memword)>>32),(unsigned int)(((unsigned long long)memword)&0xFFFFFFFF));
+    printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%08X%08X\n",memword,WORD64HI(memword),WORD64LO(memword));
 #endif
-     StoreFPR(coproc_reg,fmt_uninterpreted,(unsigned long long)memword);
+     StoreFPR(coproc_reg,fmt_uninterpreted,(uword64)memword);
      break;
 #endif /* HASFPU */
 
     default:
-     callback->printf_filtered(callback,"COP_LW(%d,%d,0x%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"COP_LW(%d,%d,0x%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,WORD64HI(IPC),WORD64LO(IPC));
      break;
   }
 
@@ -3044,7 +3063,7 @@ COP_LW(coproc_num,coproc_reg,memword)
 static void
 COP_LD(coproc_num,coproc_reg,memword)
      int coproc_num, coproc_reg;
-     unsigned long long memword;
+     uword64 memword;
 {
   switch (coproc_num) {
 #if defined(HASFPU)
@@ -3054,7 +3073,7 @@ COP_LD(coproc_num,coproc_reg,memword)
 #endif /* HASFPU */
 
     default:
-     callback->printf_filtered(callback,"COP_LD(%d,%d,0x%08X%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,(unsigned int)(memword >> 32),(unsigned int)(memword & 0xFFFFFFFF),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"COP_LD(%d,%d,0x%08X%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(memword),WORD64LO(memword),WORD64HI(IPC),WORD64LO(IPC));
      break;
   }
 
@@ -3085,18 +3104,18 @@ COP_SW(coproc_num,coproc_reg)
 #endif /* HASFPU */
 
     default:
-     callback->printf_filtered(callback,"COP_SW(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"COP_SW(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(IPC),WORD64LO(IPC));
      break;
   }
 
   return(value);
 }
 
-static unsigned long long
+static uword64
 COP_SD(coproc_num,coproc_reg)
      int coproc_num, coproc_reg;
 {
-  unsigned long long value = 0;
+  uword64 value = 0;
   switch (coproc_num) {
 #if defined(HASFPU)
     case 1:
@@ -3116,7 +3135,7 @@ COP_SD(coproc_num,coproc_reg)
 #endif /* HASFPU */
 
     default:
-     callback->printf_filtered(callback,"COP_SD(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"COP_SD(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(IPC),WORD64LO(IPC));
      break;
   }
 
@@ -3185,15 +3204,15 @@ decode_coproc(instruction)
             callback->printf_filtered(callback,"Warning: MTC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
           }
         } else
-         callback->printf_filtered(callback,"Warning: Unrecognised COP0 instruction 0x%08X at IPC = 0x%08X%08X : No handler present\n",instruction,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
-        /* TODO: When executed an ERET or RFE instruction we should
+         callback->printf_filtered(callback,"Warning: Unrecognised COP0 instruction 0x%08X at IPC = 0x%08X%08X : No handler present\n",instruction,WORD64HI(IPC),WORD64LO(IPC));
+        /* TODO: When executing an ERET or RFE instruction we should
            clear LLBIT, to ensure that any out-standing atomic
            read/modify/write sequence fails. */
       }
       break;
 
     case 2: /* undefined co-processor */
-      callback->printf_filtered(callback,"Warning: COP2 instruction 0x%08X at IPC = 0x%08X%08X : No handler present\n",instruction,(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+      callback->printf_filtered(callback,"Warning: COP2 instruction 0x%08X at IPC = 0x%08X%08X : No handler present\n",instruction,WORD64HI(IPC),WORD64LO(IPC));
       break;
 
     case 1: /* should not occur (FPU co-processor) */
@@ -3229,8 +3248,8 @@ simulate ()
   /* main controlling loop */
   do {
     /* Fetch the next instruction from the simulator memory: */
-    unsigned long long vaddr = (unsigned long long)PC;
-    unsigned long long paddr;
+    uword64 vaddr = (uword64)PC;
+    uword64 paddr;
     int cca;
     unsigned int instruction;
     int dsstate = (state & simDELAYSLOT);
@@ -3248,25 +3267,25 @@ simulate ()
 
 #ifdef DEBUG
     if (dsstate)
-     callback->printf_filtered(callback,"DBG: DSPC = 0x%08X%08X\n",(unsigned int)(DSPC>>32),(unsigned int)(DSPC&0xFFFFFFFF));
+     callback->printf_filtered(callback,"DBG: DSPC = 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
 #endif /* DEBUG */
 
     if (AddressTranslation(PC,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) { /* Copy the action of the LW instruction */
       unsigned int reverse = (ReverseEndian ? 1 : 0);
       unsigned int bigend = (BigEndianCPU ? 1 : 0);
-      unsigned long long value;
+      uword64 value;
       unsigned int byte;
       paddr = ((paddr & ~0x7) | ((paddr & 0x7) ^ (reverse << 2)));
       value = LoadMemory(cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
       byte = ((vaddr & 0x7) ^ (bigend << 2));
       instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
     } else {
-      fprintf(stderr,"Cannot translate address for PC = 0x%08X%08X failed\n",(unsigned int)(PC>>32),(unsigned int)(PC&0xFFFFFFFF));
+      fprintf(stderr,"Cannot translate address for PC = 0x%08X%08X failed\n",WORD64HI(PC),WORD64LO(PC));
       exit(1);
     }
 
 #ifdef DEBUG
-    callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%08X%08X\n",instruction,(unsigned int)(PC>>32),(unsigned int)(PC&0xFFFFFFFF));
+    callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%08X%08X\n",instruction,WORD64HI(PC),WORD64LO(PC));
 #endif /* DEBUG */
 
 #if !defined(FASTSIM) || defined(PROFILE)
@@ -3365,7 +3384,7 @@ simulate ()
          than within the simulator, since it will help keep the simulator
          small. */
       if (ZERO != 0) {
-        callback->printf_filtered(callback,"SIM Warning: The ZERO register has been updated with 0x%08X%08X (PC = 0x%08X%08X)\nSIM Warning: Resetting back to zero\n",(unsigned int)(ZERO>>32),(unsigned int)(ZERO&0xFFFFFFFF),(unsigned int)(IPC>>32),(unsigned int)(IPC&0xFFFFFFFF));
+        callback->printf_filtered(callback,"SIM Warning: The ZERO register has been updated with 0x%08X%08X (PC = 0x%08X%08X)\nSIM Warning: Resetting back to zero\n",WORD64HI(ZERO),WORD64LO(ZERO),WORD64HI(IPC),WORD64LO(IPC));
         ZERO = 0; /* reset back to zero before next instruction */
       }
 #endif /* WARN_ZERO */
@@ -3376,7 +3395,7 @@ simulate ()
        executed, then update the PC to its new value: */
     if (dsstate) {
 #ifdef DEBUG
-      printf("DBG: dsstate set before instruction execution - updating PC to 0x%08X%08X\n",(unsigned int)(DSPC>>32),(unsigned int)(DSPC&0xFFFFFFFF));
+      printf("DBG: dsstate set before instruction execution - updating PC to 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
 #endif /* DEBUG */
       PC = DSPC;
       state &= ~simDELAYSLOT;
@@ -3406,7 +3425,7 @@ simulate ()
             if (--(pending_slot_count[index]) == 0) {
 #ifdef DEBUG
               printf("pending_slot_reg[%d] = %d\n",index,pending_slot_reg[index]);
-              printf("pending_slot_value[%d] = 0x%08X%08X\n",index,(unsigned int)(pending_slot_value[index]>>32),(unsigned int)(pending_slot_value[index]&0xFFFFFFFF));
+              printf("pending_slot_value[%d] = 0x%08X%08X\n",index,WORD64HI(pending_slot_value[index]),WORD64LO(pending_slot_value[index]));
 #endif /* DEBUG */
               if (pending_slot_reg[index] == COCIDX) {
                 SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
@@ -3421,7 +3440,7 @@ simulate ()
 #endif /* HASFPU */
               }
 #ifdef DEBUG
-              printf("registers[%d] = 0x%08X%08X\n",pending_slot_reg[index],(unsigned int)(registers[pending_slot_reg[index]]>>32),(unsigned int)(registers[pending_slot_reg[index]]&0xFFFFFFFF));
+              printf("registers[%d] = 0x%08X%08X\n",pending_slot_reg[index],WORD64HI(registers[pending_slot_reg[index]]),WORD64LO(registers[pending_slot_reg[index]]));
 #endif /* DEBUG */
               pending_slot_reg[index] = (LAST_EMBED_REGNUM + 1);
               pending_out++;

@@ -698,6 +698,30 @@ build_operands(flags)
 }
 
 /*---------------------------------------------------------------------------*/
+
+typedef enum {
+  s_left,
+  s_right
+} e_endshift;
+
+static void
+build_endian_shift(proc64,datalen,endbit,direction,shift)
+     int proc64;
+     int datalen;
+     int endbit;
+     e_endshift direction;
+     int shift;
+{
+  if (proc64 && (datalen == 4)) {
+    printf("    if ((vaddr & (1 << %d)) ^ (BigEndianCPU << %d)) {\n",endbit,endbit);
+    printf("     memval %s= %d;\n",direction == s_left ? "<<" : ">>",shift);
+    printf("    }\n");
+  }
+
+  return;
+}
+
+/*---------------------------------------------------------------------------*/
 /* doisa = number of MIPS ISA simulator table is being constructed for.
  * proc64 = TRUE if constructing 64bit processor world.
  * dofp = boolean, TRUE if FP instructions are to be included.
@@ -1069,8 +1093,8 @@ process_instructions(doarch,features)
          }
          printf("   {\n");
          if (GETDATASIZE() == DOUBLEWORD) {
-           printf("   LO = ((%slong long)op1 / (%slong long)op2);\n",(boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
-           printf("   HI = ((%slong long)op1 %c (%slong long)op2);\n",(boolU ? "unsigned " : ""),'%',(boolU ? "unsigned " : ""));
+           printf("   LO = ((%sword64)op1 / (%sword64)op2);\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
+           printf("   HI = ((%sword64)op1 %c (%sword64)op2);\n",(boolU ? "u" : ""),'%',(boolU ? "u" : ""));
          } else {
            printf("   LO = SIGNEXTEND(((%sint)op1 / (%sint)op2),32);\n",(boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
            printf("   HI = SIGNEXTEND(((%sint)op1 %c (%sint)op2),32);\n",(boolU ? "unsigned " : ""),'%',(boolU ? "unsigned " : ""));
@@ -1123,9 +1147,9 @@ process_instructions(doarch,features)
             dealing with 32bit shift lefts, since the sign-extension
             code will replace any remaining hi-bits: */
          if (MIPS_DECODE[loop].flags & LEFT)
-          printf("   GPR[destreg] = ((unsigned long long)op2 << op1);\n");
+          printf("   GPR[destreg] = ((uword64)op2 << op1);\n");
          else
-          printf("   GPR[destreg] = ((unsigned long long)(op2%s) >> op1);\n",((bits == 32) ? " & 0xFFFFFFFF" : ""));
+          printf("   GPR[destreg] = ((uword64)(op2%s) >> op1);\n",((bits == 32) ? " & 0xFFFFFFFF" : ""));
 
          /* For ARITHMETIC shifts, we must duplicate the sign-bit */
          if (MIPS_DECODE[loop].flags & ARITHMETIC)
@@ -1195,9 +1219,9 @@ process_instructions(doarch,features)
            exit(8);
          }
 
-         printf("  if ((%slong long)op1 ",(boolU ? "unsigned " : ""));
+         printf("  if ((%sword64)op1 ",(boolU ? "u" : ""));
          printf("%c%s",(boolNOT ? '!' : (boolLT ? '<' : (boolGT ? '>' : '='))),(boolEQ ? "=" : ""));
-         printf(" (%slong long)op2)\n",(boolU ? "unsigned " : ""));
+         printf(" (%sword64)op2)\n",(boolU ? "u" : ""));
          printf("   SignalException(Trap);\n");
         }
         break ;
@@ -1211,7 +1235,7 @@ process_instructions(doarch,features)
            exit(8);
          }
 
-         printf("   if ((%slong long)op1 < (%slong long)op2)\n",(boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
+         printf("   if ((%sword64)op1 < (%sword64)op2)\n",(boolU ? "u" : ""),(boolU ? "u" : ""));
          printf("    GPR[destreg] = 1;\n");
          printf("   else\n");
          printf("    GPR[destreg] = 0;\n");
@@ -1376,9 +1400,9 @@ process_instructions(doarch,features)
          }
 
          if (MIPS_DECODE[loop].flags & REG)
-          printf("   uword64 vaddr = ((unsigned long long)op1 + op2);\n");
+          printf("   uword64 vaddr = ((uword64)op1 + op2);\n");
          else
-          printf("   uword64 vaddr = ((unsigned long long)op1 + offset);\n");
+          printf("   uword64 vaddr = ((uword64)op1 + offset);\n");
          printf("   uword64 paddr;\n");
          printf("   int uncached;\n");
 
@@ -1441,16 +1465,23 @@ process_instructions(doarch,features)
                      /* For WORD transfers work out if the value will
                         be in the top or bottom of the DOUBLEWORD
                         returned: */
+#if 1
+                     build_endian_shift(proc64,datalen,2,s_right,32);
+#else
                      if (proc64 && (datalen == 4)) {
                        printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
                        printf("      memval >>= 32;\n");
                        printf("     }\n");
                      }
+#endif
                      printf("     GPR[destreg] = ((memval << ((%d - byte) * 8)) | (GPR[destreg] & (((uword64)1 << ((%d - byte) * 8)) - 1)));\n",(datalen - 1),(datalen - 1));
                      if (proc64 && (datalen == 4))
                       printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
                    } else { /* store */
                      printf("     memval = (op2 >> (8 * (%d - byte)));\n",(datalen - 1));
+#if 1
+                     build_endian_shift(proc64,datalen,2,s_left,32);
+#else
                      /* TODO: This is duplicated in the LOAD code
                         above - and the RIGHT LOAD and STORE code
                         below. It should be merged if possible. */
@@ -1459,15 +1490,20 @@ process_instructions(doarch,features)
                        printf("     memval <<= 32;\n");
                        printf("    }\n");
                      }
+#endif
                      printf("     StoreMemory(uncached,byte,memval,paddr,vaddr,isREAL);\n");
                    }
                  } else { /* RIGHT */
                    if (isload) {
+#if 1
+                     build_endian_shift(proc64,datalen,2,s_right,32);
+#else
                      if (proc64 && (datalen == 4)) {
                        printf("     if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {\n");
                        printf("      memval >>= 32;\n");
                        printf("     }\n");
                      }
+#endif
                      printf("     {\n");
                      printf("      uword64 srcmask;\n");
                      /* All of this extra code is just a bodge
@@ -1582,12 +1618,12 @@ process_instructions(doarch,features)
                   printf("     paddr = ((paddr & ~0x7) | ((paddr & 0x7) ^ (ReverseEndian << 2)));\n");
                   printf("     byte = ((vaddr & 0x7) ^ (BigEndianCPU << 2));\n");
                   if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (((unsigned long long)COP_SW(((instruction >> 26) & 0x3),%s)) << (8 * byte));\n",((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
+                   printf("     memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),%s)) << (8 * byte));\n",((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
                   else
                    printf("     memval = (op2 << (8 * byte));\n");
                 } else { /* !proc64 SC and SW, plus proc64 SD and SCD */
                   if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (unsigned long long)COP_S%c(((instruction >> 26) & 0x3),%s);\n",((datalen == 8) ? 'D' : 'W'),((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
+                   printf("     memval = (uword64)COP_S%c(((instruction >> 26) & 0x3),%s);\n",((datalen == 8) ? 'D' : 'W'),((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
                   else
                    printf("     memval = op2;\n");
                 }
@@ -1637,7 +1673,7 @@ process_instructions(doarch,features)
 
        case FPPREFX:
         /* This code could be merged with the PREFIX generation above: */
-        printf("   uword64 vaddr = ((unsigned long long)op1 + (unsigned long long)op2);\n");
+        printf("   uword64 vaddr = ((uword64)op1 + (uword64)op2);\n");
         printf("   uword64 paddr;\n");
         printf("   int uncached;\n");
         printf("   if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
@@ -1971,8 +2007,8 @@ process_instructions(doarch,features)
         printf("      int less = 0;\n");
         printf("      int equal = 0;\n");
         printf("      int unordered = 1;\n");
-        printf("      unsigned long long ofs = ValueFPR(fs,format);\n");
-        printf("      unsigned long long oft = ValueFPR(ft,format);\n");
+        printf("      uword64 ofs = ValueFPR(fs,format);\n");
+        printf("      uword64 oft = ValueFPR(ft,format);\n");
         printf("      if (NaN(ofs,format) || NaN(oft,format)) {\n");
         printf("      if (FCSR & FP_ENABLE(IO)) {\n");
         printf("       FCSR |= FP_CAUSE(IO);\n");
