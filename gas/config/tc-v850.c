@@ -52,6 +52,7 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
+
 /* local functions */
 static unsigned long v850_insert_operand
   PARAMS ((unsigned long insn, const struct v850_operand *operand,
@@ -60,9 +61,7 @@ static int reg_name_search PARAMS ((const struct reg_name *, int, const char *))
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
 static boolean cc_name PARAMS ((expressionS *expressionP));
-static int postfix PARAMS ((char *p));
-static bfd_reloc_code_real_type get_reloc PARAMS ((struct v850_operand *op));
-static unsigned long build_insn PARAMS ((struct v850_opcode *opcode, expressionS *opers));
+static bfd_reloc_code_real_type v850_reloc_prefix PARAMS ((void));
 
 
 /* fixups */
@@ -85,15 +84,6 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  /*
-  { "byte",     ppc_byte,       0 },
-  { "long",     ppc_elf_cons,   4 },
-  { "word",     ppc_elf_cons,   2 },
-  { "short",    ppc_elf_cons,   2 },
-  { "rdata",    ppc_elf_rdata,  0 },
-  { "rodata",   ppc_elf_rdata,  0 },
-  { "lcomm",    ppc_elf_lcomm,  0 },
-  */
   { NULL,       NULL,           0 }
 };
 
@@ -440,7 +430,6 @@ md_begin ()
 {
   char *prev_name = "";
   register const struct v850_opcode *op;
-  const struct v850_opcode *op_end;
 
   v850_hash = hash_new();
 
@@ -460,7 +449,6 @@ md_begin ()
       op++;
     }
 }
-
 
 static bfd_reloc_code_real_type
 v850_reloc_prefix()
@@ -495,15 +483,11 @@ md_assemble (str)
   struct v850_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex;
-  unsigned long insn;
+  unsigned long insn, size;
   char *f;
   int i;
-  int numops;
   int match;
   bfd_reloc_code_real_type reloc;
-
-  int numopts;
-  expressionS myops[5];
 
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
@@ -538,7 +522,6 @@ md_assemble (str)
 	  const struct v850_operand *operand;
 	  char *hold;
 	  expressionS ex;
-	  char endc;
 
 	  if (next_opindex == 0)
 	    {
@@ -586,6 +569,9 @@ md_assemble (str)
 		    case BFD_RELOC_HI16_S:
 		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
 			+ ((ex.X_add_number >> 15) & 1);
+		      break;
+
+		    default:
 		      break;
 		    }
 
@@ -741,12 +727,15 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  /* Write out the instruction 
-     FIXME: we can determine the size of the opcode by the instruction
-     pattern, it does not have to be stored in the opcode table. */
-  f = frag_more (opcode->size);
-  md_number_to_chars (f, insn, opcode->size);
+  /* Write out the instruction.
 
+     Four byte insns have an opcode with the two high bits on.  */ 
+  if ((insn & 0x0600) == 0x0600)
+    size = 4;
+  else
+    size = 2;
+  f = frag_more (size);
+  md_number_to_chars (f, insn, size);
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the
@@ -825,10 +814,14 @@ md_estimate_size_before_relax (fragp, seg)
 } 
 
 long
-md_pcrel_from (fixp)
+md_pcrel_from_section (fixp, sec)
      fixS *fixp;
+     segT sec;
 {
-  if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
+  /* If the symbol is undefined, or in a section other than our own,
+     then let the linker figure it out.  */
+  if ((fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
+      || (fixp->fx_addsy && S_GET_SEGMENT (fixp->fx_addsy) != sec))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;
@@ -844,8 +837,6 @@ md_apply_fix3 (fixp, valuep, seg)
 {
   valueT value;
   char *where;
-  unsigned long insn;
-  int op_type;
 
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
@@ -949,12 +940,6 @@ v850_insert_operand (insn, operand, val, file, line)
 
       if ((operand->flags & V850_OPERAND_SIGNED) != 0)
         {
-#if 0
-          if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0
-              && ppc_size == PPC_OPCODE_32)
-            max = (1 << operand->bits) - 1;
-          else
-#endif
             max = (1 << (operand->bits - 1)) - 1;
           min = - (1 << (operand->bits - 1));
         }
@@ -964,12 +949,7 @@ v850_insert_operand (insn, operand, val, file, line)
           min = 0;
         }
 
-#if 0
-      if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
-        test = - val;
-      else
-#endif
-        test = val;
+      test = val;
 
 
       if (test < (offsetT) min || test > (offsetT) max)
@@ -989,7 +969,7 @@ v850_insert_operand (insn, operand, val, file, line)
   if (operand->insert)
     {
       const char *message = NULL;
-      insn = (operand->insert) (insn, val, &message);
+      insn = (*operand->insert) (insn, val, &message);
       if (message != NULL)
 	{
 	  if (file == (char *) NULL)
