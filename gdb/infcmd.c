@@ -977,6 +977,11 @@ do_registers_info (regnum, fpregs)
 	  continue;
       }
 
+      /* If the register name is empty, it is undefined for this
+	 processor, so don't display anything.  */
+      if (reg_names[i] == NULL || *(reg_names[i]) == '\0')
+	continue;
+
       fputs_filtered (reg_names[i], gdb_stdout);
       print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);
 
@@ -1132,7 +1137,7 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  extern int auto_solib_add_at_startup;
+  extern int auto_solib_add;
 
   dont_repeat ();			/* Not for the faint of heart */
 
@@ -1167,7 +1172,7 @@ attach_command (args, from_tty)
 #endif
 
 #ifdef SOLIB_ADD
-  if (auto_solib_add_at_startup)
+  if (auto_solib_add)
   /* Add shared library symbols from the newly attached process, if any.  */
     SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
 #endif

@@ -1,5 +1,5 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright (C) 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -31,6 +31,52 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "value.h"
 #include "dis-asm.h"
+
+/* Default to the original SH.  */
+
+#define DEFAULT_SH_TYPE "sh"
+
+/* This value is the model of SH in use.  */
+
+char *sh_processor_type;
+
+char *tmp_sh_processor_type;
+
+/* A set of original names, to be used when restoring back to generic
+   registers from a specific set.  */
+
+char *sh_generic_reg_names[] = REGISTER_NAMES;
+
+char *sh_reg_names[] = {
+  "r0", "r1", "r2",  "r3",  "r4",  "r5",   "r6",  "r7",
+  "r8", "r9", "r10", "r11", "r12", "r13",  "r14", "r15",
+  "pc", "pr", "gbr", "vbr", "mach","macl", "sr",
+  "fpul", "fpscr",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", ""
+};
+
+char *sh3_reg_names[] = {
+  "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
+  "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+  "pc",  "pr",  "gbr", "vbr", "mach","macl","sr",
+  "fpul", "fpscr",
+  "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
+  "fr8", "fr9", "fr10","fr11","fr12","fr13","fr14","fr15",
+  "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
+  "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1"
+};
+
+struct {
+  char *name;
+  char **regnames;
+} sh_processor_type_table[] = {
+  { "sh", sh_reg_names },
+  { "sh3", sh3_reg_names },
+  { NULL, NULL }
+};
 
 /* Prologue looks like
    [mov.l	<regs>,@-r15]...
@@ -264,6 +310,74 @@ pop_frame ()
   flush_cached_frames ();
 }
 
+/* Command to set the processor type.  */
+
+void
+sh_set_processor_type_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int i;
+  char *temp;
+
+  /* The `set' commands work by setting the value, then calling the hook,
+     so we let the general command modify a scratch location, then decide
+     here if we really want to modify the processor type.  */
+  if (tmp_sh_processor_type == NULL || *tmp_sh_processor_type == '\0')
+    {
+      printf_unfiltered ("The known SH processor types are as follows:\n\n");
+      for (i = 0; sh_processor_type_table[i].name != NULL; ++i)
+	printf_unfiltered ("%s\n", sh_processor_type_table[i].name);
+
+      /* Restore the value.  */
+      tmp_sh_processor_type = strsave (sh_processor_type);
+
+      return;
+    }
+  
+  if (!sh_set_processor_type (tmp_sh_processor_type))
+    {
+      /* Restore to a valid value before erroring out.  */
+      temp = tmp_sh_processor_type;
+      tmp_sh_processor_type = strsave (sh_processor_type);
+      error ("Unknown processor type `%s'.", temp);
+    }
+}
+
+static void
+sh_show_processor_type_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+}
+
+/* Modify the actual processor type. */
+
+int
+sh_set_processor_type (str)
+     char *str;
+{
+  int i, j;
+
+  if (str == NULL)
+    return 0;
+
+  for (i = 0; sh_processor_type_table[i].name != NULL; ++i)
+    {
+      if (strcasecmp (str, sh_processor_type_table[i].name) == 0)
+	{
+	  sh_processor_type = str;
+
+	  for (j = 0; j < NUM_REGS; ++j)
+	    reg_names[j] = sh_processor_type_table[i].regnames[j];
+
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Print the registers in a form similar to the E7000 */
 
 static void
@@ -301,7 +415,22 @@ show_regs (args, from_tty)
 void
 _initialize_sh_tdep ()
 {
+  struct cmd_list_element *c;
+
   tm_print_insn = gdb_print_insn_sh;
+
+  c = add_set_cmd ("processor", class_support, var_string_noescape,
+		   (char *) &tmp_sh_processor_type,
+		   "Set the type of SH processor in use.\n\
+Set this to be able to access processor-type-specific registers.\n\
+",
+		   &setlist);
+  c->function.cfunc = sh_set_processor_type_command;
+  c = add_show_from_set (c, &showlist);
+  c->function.cfunc = sh_show_processor_type_command;
+
+  tmp_sh_processor_type = strsave (DEFAULT_SH_TYPE);
+  sh_set_processor_type_command (strsave (DEFAULT_SH_TYPE), 0);
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 }

@@ -43,64 +43,72 @@ sh3_supply_register (regname, regnamelen, val, vallen)
   regno = -1;
 
   if (regnamelen == 2)
-    switch (regname[0])
-      {
-      case 'S':
-	if (regname[1] == 'R')
-	  regno = SR_REGNUM;
-	break;
-      case 'P':
-	if (regname[1] == 'C')
-	  regno = PC_REGNUM;
-	else if (regname[1] == 'R')
-	  regno = PR_REGNUM;
-	break;
-      }
+    {
+      switch (regname[0])
+	{
+	case 'S':
+	  if (regname[1] == 'R')
+	    regno = SR_REGNUM;
+	  break;
+	case 'P':
+	  if (regname[1] == 'C')
+	    regno = PC_REGNUM;
+	  else if (regname[1] == 'R')
+	    regno = PR_REGNUM;
+	  break;
+	}
+    }
   else if (regnamelen == 3)
-    switch (regname[0])
-      {
-      case 'G':
-      case 'V':
-	if (regname[1] == 'B' && regname[2] == 'R')
-	  if (regname[0] == 'G')
-	    regno = VBR_REGNUM;
-	  else
-	    regno = GBR_REGNUM;
-	break;
+    {
+      switch (regname[0])
+	{
+	case 'G':
+	case 'V':
+	  if (regname[1] == 'B' && regname[2] == 'R')
+	    if (regname[0] == 'G')
+	      regno = VBR_REGNUM;
+	    else
+	      regno = GBR_REGNUM;
+	  break;
 #if 0
-      case 'S':
-	if (regname[1] == 'S' && regname[2] == 'R')
-	  regno = SSR_REGNUM;
-	else if (regname[1] == 'P' && regname[2] == 'C')
-	  regno = SPC_REGNUM;
-	break;
+	case 'S':
+	  if (regname[1] == 'S' && regname[2] == 'R')
+	    regno = SSR_REGNUM;
+	  else if (regname[1] == 'P' && regname[2] == 'C')
+	    regno = SPC_REGNUM;
+	  break;
 #endif
-      }
+	}
+    }
   else if (regnamelen == 4)
-    switch (regname[0])
-      {
-      case 'M':
-	if (regname[1] == 'A' && regname[2] == 'C')
-	  if (regname[3] == 'H')
-	    regno = MACH_REGNUM;
-	  else if (regname[3] == 'L')
-	    regno = MACL_REGNUM;
-	break;
-      case 'R':
-	if (regname[1] == '0' && regname[2] == '-' && regname[3] == '7')
-	  {
-	    regno = R0_REGNUM;
-	    numregs = 8;
-	  }
-      }
+    {
+      switch (regname[0])
+	{
+	case 'M':
+	  if (regname[1] == 'A' && regname[2] == 'C')
+	    if (regname[3] == 'H')
+	      regno = MACH_REGNUM;
+	    else if (regname[3] == 'L')
+	      regno = MACL_REGNUM;
+	  break;
+	case 'R':
+	  if (regname[1] == '0' && regname[2] == '-' && regname[3] == '7')
+	    {
+	      regno = R0_REGNUM;
+	      numregs = 8;
+	    }
+	}
+    }
   else if (regnamelen == 5)
-    if (regname[1] == '8' && regname[2] == '-' && regname[3] == '1'
-	&& regname[4] =='5')
-      {
-	regno = R0_REGNUM + 8;
-	numregs = 8;
-      }
-
+    {
+      if (regname[1] == '8' && regname[2] == '-' && regname[3] == '1'
+	  && regname[4] =='5')
+	{
+	  regno = R0_REGNUM + 8;
+	  numregs = 8;
+	}
+    }
+	
   if (regno >= 0)
     while (numregs-- > 0)
       val = monitor_supply_register (regno++, val);
@@ -139,10 +147,17 @@ sh3_load (desc, file, hashmark)
    either. So, typing "info reg sp" becomes a "r30".  */
 
 static char *sh3_regnames[NUM_REGS] = {
-  "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
-  "R8", "R9", "R10","R11","R12","R13","R14","R15",
-  "PC", "PR", "GBR","VBR","MACH","MACL","SR",NULL,
-  NULL,  NULL, NULL, NULL};
+  "R0", "R1", "R2",  "R3", "R4",  "R5",   "R6",  "R7",
+  "R8", "R9", "R10", "R11","R12", "R13",  "R14", "R15",
+  "PC", "PR", "GBR", "VBR","MACH","MACL", "SR",
+  NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  "R0_BANK0", "R1_BANK0", "R2_BANK0", "R3_BANK0",
+  "R4_BANK0", "R5_BANK0", "R6_BANK0", "R7_BANK0",
+  "R0_BANK1", "R1_BANK1", "R2_BANK1", "R3_BANK1",
+  "R4_BANK1", "R5_BANK1", "R6_BANK1", "R7_BANK1"
+};
 
 /* Define the monitor command strings. Since these are passed directly
    through to a printf style function, we may include formatting
@@ -217,9 +232,10 @@ sh3_open (args, from_tty)
 {
   char *serial_port_name = args;
   char *parallel_port_name = 0;
+
   if (args) 
     {
-      char *cursor =  serial_port_name = strsave (args);
+      char *cursor = serial_port_name = strsave (args);
 
       while (*cursor && *cursor != ' ')
  	cursor++;
@@ -239,12 +255,15 @@ sh3_open (args, from_tty)
   if (parallel_port_name)
     {
       parallel = SERIAL_OPEN (parallel_port_name);
+
       if (!parallel)
-	{
-	  perror_with_name ("Unable to open parallel port.");
-	}
+	perror_with_name ("Unable to open parallel port.");
+
       parallel_in_use = 1;
     }
+
+  /* If we connected successfully, we know the processor is an SH3.  */
+  sh_set_processor_type ("sh3");
 }
 
 

@@ -1,3 +1,21 @@
+Thu Mar  7 17:40:50 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infcmd.c (do_registers_info): Ignore anonymous registers.
+	* sh-tdep.c (set processor): New command to set specific
+	processor type.
+	(sh_reg_names, sh3_reg_names): Arrays of register names for
+	SH and SH3 processors.
+	(sh_set_processor_type): New function.
+	* sh3-rom.c (sh3_open): Call it.
+	(sh3_regname): Add names of all the bank registers.
+	(sh3_supply_register): Clean up formatting.
+	* config/sh/tm-sh.h (NUM_REGS, NUM_REALREGS): Increase to include
+ 	bank registers.
+	(REGISTER_NAMES): Add names of bank registers.
+	(FP15_REGNUM): Define.
+	(REGISTER_VIRTUAL_TYPE): Use it.
+	* monitor.c: Clean up some comments.
+
 Thu Mar  7 12:09:51 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* i386b-nat.c: Revert part of Mar 5 change.  FreeBSD collapsed the
@@ -12,7 +30,7 @@ Wed Mar  6 17:57:59 1996  Jeffrey A Law  (law@cygnus.com)
 	* breakpoint.c (bfd_lookup_symbol): Provide for all SVR4 systems,
 	not just those with HANDLE_SVR4_EXEC_EMULATORS.
 
-	* From Peter Schauer:
+	From Peter Schauer:
 	* breakpoint.c (internal_breakpoint_number): Move to file scope.
 	(create_solib_event_breakpoint): Use an internal breakpoint number.
 
