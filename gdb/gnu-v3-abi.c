@@ -374,15 +374,11 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 {
   struct type *vtable_type = gdbarch_data (current_gdbarch,
 					   vtable_type_gdbarch_data);
-  struct type *basetype = TYPE_BASECLASS (type, index);
-  struct value *full_object, *vbase_object, *orig_object;
-  struct value *vtable, *orig_typeinfo, *orig_base_info;
-  struct type *orig_type, *vbasetype;
+  struct value *vtable;
+  struct type *vbasetype;
   struct value *offset_val, *vbase_array;
   CORE_ADDR vtable_address;
   long int cur_base_offset, base_offset;
-  int to_top;
-  int baseclasses, i;
 
   /* If it isn't a virtual base, this is easy.  The offset is in the
      type definition.  */
@@ -405,15 +401,22 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
     / ((int) TYPE_LENGTH (builtin_type_void_data_ptr));
 
   /* We're now looking for the cur_base_offset'th entry (negative index)
-     in the vcall_and_vbase_offsets array.  */
+     in the vcall_and_vbase_offsets array.  We used to cast the object to
+     its TYPE_VPTR_BASETYPE, and reference the vtable as TYPE_VPTR_FIELDNO;
+     however, that cast can not be done without calling baseclass_offset again
+     if the TYPE_VPTR_BASETYPE is a virtual base class, as described in the
+     v3 C++ ABI Section 2.4.I.2.b.  Fortunately the ABI guarantees that the
+     vtable pointer will be located at the beginning of the object, so we can
+     bypass the casting.  Verify that the TYPE_VPTR_FIELDNO is in fact at the
+     start of whichever baseclass it resides in, as a sanity measure.  */
 
-  orig_object = value_at_lazy (type, address, NULL);
-  vbasetype = TYPE_VPTR_BASETYPE (VALUE_TYPE (orig_object));
-  vbase_object = value_cast (vbasetype, orig_object);
+  vbasetype = TYPE_VPTR_BASETYPE (type);
+  if (TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)
+    error ("Illegal vptr offset in class %s",
+	   TYPE_NAME (vbasetype) ? TYPE_NAME (vbasetype) : "<unknown>");
 
-  vtable_address
-    = value_as_address (value_field (vbase_object,
-				     TYPE_VPTR_FIELDNO (vbasetype)));
+  vtable_address = value_as_address (value_at_lazy (builtin_type_void_data_ptr,
+						    address, NULL));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset (),
                           NULL);

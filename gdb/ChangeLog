@@ -1,3 +1,10 @@
+2002-07-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/595, gdb/602
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Remove unused variables.
+	Don't call value_cast, just read the vtable pointer; update comments
+	to match.
+
 2002-07-05  Grace Sainsbury  <graces@redhat.com>
 
 	* config/mcore/tm-mcore.h: Remove file.
