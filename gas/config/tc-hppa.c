@@ -472,6 +472,7 @@ static int pa_parse_nonneg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_add_cmpltr PARAMS ((char **, int));
 static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
+static void pa_align PARAMS ((int));
 static void pa_block PARAMS ((int));
 static void pa_call PARAMS ((int));
 static void pa_call_args PARAMS ((struct call_desc *));
@@ -583,7 +584,7 @@ const pseudo_typeS md_pseudo_table[] =
 {
   /* align pseudo-ops on the PA specify the actual alignment requested,
      not the log2 of the requested alignment.  */
-  {"align", s_align_bytes, 8},
+  {"align", pa_align, 8},
   {"block", pa_block, 1},
   {"blockz", pa_block, 0},
   {"byte", pa_cons, 1},
@@ -1173,7 +1174,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   hppa_fix->segment = now_seg;
 #ifdef OBJ_SOM
   if (r_type == R_ENTRY || r_type == R_EXIT)
-    new_fix->fx_addnumber = *unwind_bits;
+    new_fix->fx_offset = *unwind_bits;
 #endif
 
   /* foo-$global$ is used to access non-automatic storage.  $global$
@@ -2603,10 +2604,7 @@ tc_gen_reloc (section, fixp)
 	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
 	default:
-	  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_FUNCTION)
-	    reloc->addend = 0;
-	  else
-	    reloc->addend = fixp->fx_addnumber;
+	  reloc->addend = fixp->fx_offset;
 	  break;
 	}
       break;
@@ -2660,15 +2658,11 @@ tc_gen_reloc (section, fixp)
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
 	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
-	  relocs[i]->addend = fixp->fx_addnumber;
+	  relocs[i]->addend = fixp->fx_offset;
 	  break;
 
 	default:
-	  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_FUNCTION)
-	    relocs[i]->addend = 0;
-	  else
-	    relocs[i]->addend = fixp->fx_addnumber;
-	  break;
+	  relocs[i]->addend = fixp->fx_offset;
 	}
     }
 #endif
@@ -2812,7 +2806,6 @@ md_apply_fix (fixP, valp)
   struct hppa_fix_struct *hppa_fixP;
   long new_val, result;
   unsigned int w1, w2, w;
-  valueT val = *valp;
 
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
@@ -2820,7 +2813,7 @@ md_apply_fix (fixP, valp)
 #ifdef OBJ_SOM
   if (fixP->fx_r_type == R_HPPA_ENTRY
       || fixP->fx_r_type == R_HPPA_EXIT)
-    return 1;
+    return;
 #endif
 
   /* There should have been an HPPA specific fixup associated
@@ -2830,41 +2823,32 @@ md_apply_fix (fixP, valp)
       unsigned long buf_wd = bfd_get_32 (stdoutput, buf);
       unsigned char fmt = bfd_hppa_insn2fmt (buf_wd);
 
-      if (fixP->fx_r_type == R_HPPA_NONE)
-	fmt = 0;
-
-      /* Remember this value for emit_reloc.  FIXME, is this braindamage
-         documented anywhere!?!  */
-      fixP->fx_addnumber = val;
-
-      /* Check if this is an undefined symbol.  No relocation can
-	 possibly be performed in this case.
-
-	 Also avoid doing anything for pc-relative fixups in which the
-	 fixup is in a different space than the symbol it references.  */
-      if ((fixP->fx_addsy && fixP->fx_addsy->bsym->section == &bfd_und_section)
-	  || (fixP->fx_subsy
-	      && fixP->fx_subsy->bsym->section == &bfd_und_section)
-	  || (fixP->fx_pcrel
-	      && fixP->fx_addsy
-	      && S_GET_SEGMENT (fixP->fx_addsy) != hppa_fixP->segment)
-	  || (fixP->fx_pcrel
-	      && fixP->fx_subsy
-	      && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
-	return 1;
-
-      /* PLABEL field selectors should not be passed to hppa_field_adjust.  */
-      if (fmt != 0 && hppa_fixP->fx_r_field != R_HPPA_PSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_LPSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_TSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_LTSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_RTSEL
-	  && !(fixP->fx_addsy && fixP->fx_addsy->bsym->flags & BSF_FUNCTION))
-	new_val = hppa_field_adjust (val, 0, hppa_fixP->fx_r_field);
+      /* If there is a symbol associated with this fixup, then it's something
+	 which will need a SOM relocation (except for some PC-relative relocs).
+	 In such cases we should treat the "val" or "addend" as zero since it
+	 will be added in as needed from fx_offset in tc_gen_reloc.  */
+      if (fixP->fx_addsy != NULL
+	  || fixP->fx_r_type == R_HPPA_NONE)
+	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
       else
-	new_val = 0;
+	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
 
+      /* Handle pc-relative exceptions from above.  */
+#define stub_needed(CALLER, CALLEE) \
+  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
+      if ((fmt == 12 || fmt == 17)
+	  && fixP->fx_addsy
+	  && fixP->fx_pcrel
+	  && !stub_needed (((obj_symbol_type *)
+			    fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
+			   hppa_fixP->fx_arg_reloc)
+	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
+	  && !(fixP->fx_subsy
+	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
+	      
+	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
+#undef stub_needed
+	
       switch (fmt)
 	{
 	/* Handle all opcodes with the 'j' operand type.  */
@@ -2916,20 +2900,6 @@ md_apply_fix (fixP, valp)
 
 	/* Handle some of the opcodes with the 'W' operand type.  */
 	case 17:
-
-#define stub_needed(CALLER, CALLEE) \
-  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
-	/* It is necessary to force PC-relative calls/jumps to have a
-	   relocation entry if they're going to need either a argument
-	   relocation or long call stub.  FIXME.  Can't we need the same
-	   for absolute calls?  */
-	if (fixP->fx_addsy
-	    && (stub_needed (((obj_symbol_type *)
-			      fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
-			     hppa_fixP->fx_arg_reloc)))
-	  return 1;
-#undef stub_needed
-
 	  CHECK_FIELD (new_val, 262143, -262144, 0);
 
 	  /* Mask off 17 bits to be changed.  */
@@ -2943,35 +2913,23 @@ md_apply_fix (fixP, valp)
 
 	case 32:
 	  result = 0;
-	  fixP->fx_addnumber = fixP->fx_offset;
-	  /* If we have a real relocation, then we want zero to
-	     be stored in the object file.  If no relocation is going
-	     to be emitted, then we need to store new_val into the
-	     object file.  */
-	  if (fixP->fx_addsy)
-	    bfd_put_32 (stdoutput, 0, buf);
-	  else
-	    bfd_put_32 (stdoutput, new_val, buf);
-	  return 1;
+	  bfd_put_32 (stdoutput, new_val, buf);
 	  break;
-
-	case 0:
-	  return 1;
 
 	default:
 	  as_bad ("Unknown relocation encountered in md_apply_fix.");
-	  return 1;
+	  return;
 	}
 
       /* Insert the relocation.  */
       bfd_put_32 (stdoutput, bfd_get_32 (stdoutput, buf) | result, buf);
-      return 1;
+      return;
     }
   else
     {
       printf ("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n",
 	      (unsigned int) fixP, fixP->fx_r_type);
-      return 0;
+      return;
     }
 }
 
@@ -3885,6 +3843,20 @@ pa_parse_neg_add_cmpltr (s, isbranch)
   return cmpltr;
 }
 
+/* Handle an alignment directive.  Special so that we can update the
+   alignment of the subspace if necessary.  */
+static void
+pa_align (bytes)
+{
+  /* Let the generic gas code do most of the work.  */
+  s_align_bytes (bytes);
+
+  /* If bytes is a power of 2, then update the current subspace's
+     alignment if necessary.  */
+  if (log2 (bytes) != -1)
+    record_alignment (current_subspace->ssd_seg, log2 (bytes));
+}
+
 /* Handle a .BLOCK type pseudo-op.  */
 
 static void
@@ -4761,41 +4733,6 @@ pa_proc (unused)
   callinfo_found = FALSE;
   within_procedure = TRUE;
 
-#if 0
-  Enabling this code creates severe problems with GDB.  It appears as if
-  inserting linker stubs between functions within a single .o makes GDB
-  blow chunks.
-
-  /* Create a new CODE subspace for each procedure if we are not
-     using space/subspace aliases.  */
-  if (!USE_ALIASES && call_info_root != NULL)
-    {
-      segT seg;
-
-      /* Force creation of a new $CODE$ subspace; inherit attributes from
-	 the first $CODE$ subspace.  */
-      seg = subseg_force_new ("$CODE$", 0);
-
-      /* Now set the flags.  */
-      bfd_set_section_flags (stdoutput, seg,
-			     bfd_get_section_flags (abfd, text_section));
-
-      /* Record any alignment request for this section.  */
-      record_alignment (seg,
-			bfd_get_section_alignment (stdoutput, text_section));
-
-      /* Change the "text_section" to be our new $CODE$ subspace.  */
-      text_section = seg;
-      subseg_set (text_section, 0);
-
-#ifdef obj_set_subsection_attributes
-      /* Need a way to inherit the the access bits, sort key and quadrant
-	 from the first $CODE$ subspace.  FIXME.  */
-      obj_set_subsection_attributes (seg, current_space->sd_seg, 0x2c, 24, 0);
-#endif
-    }
-#endif
-
   /* Create another call_info structure.  */
   call_info = (struct call_info *) xmalloc (sizeof (struct call_info));
 
@@ -4834,18 +4771,6 @@ pa_proc (unused)
 	  {
 	    last_call_info->start_symbol = label_symbol->lss_label;
 	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
-#if 0
-	    if (! USE_ALIASES)
-	      {
-		/* The label was defined in a different segment.  Fix that
-		   along with the value and associated fragment.  */
-		S_SET_SEGMENT (last_call_info->start_symbol, now_seg);
-                S_SET_VALUE (last_call_info->start_symbol,
-			     ((char*)obstack_next_free (&frags)
-			       - frag_now->fr_literal));
-		last_call_info->start_symbol->sy_frag = frag_now;
-	      }
-#endif
 	  }
 	else
 	  as_bad ("Missing function name for .PROC (corrupted label chain)");
@@ -5248,7 +5173,7 @@ pa_subspace (unused)
       code_only = 0;
       zero = 0;
       space_index = ~0;
-      alignment = 0;
+      alignment = 1;
       quadrant = 0;
       alias = NULL;
 
@@ -6124,6 +6049,9 @@ pa_text (unused)
    any fixup which creates entries in the DLT (eg they use "T" field
    selectors).
 
+   Reject reductions involving symbols with external scope; such
+   reductions make life a living hell for object file editors.
+
    FIXME.  Also reject R_HPPA relocations which are 32 bits
    wide.  Helps with code lables in arrays for SOM.  (SOM BFD code
    needs to generate relocations to push the addend and symbol value
@@ -6146,6 +6074,9 @@ hppa_fix_adjustable (fixp)
   if (hppa_fix->fx_r_field == e_tsel
       || hppa_fix->fx_r_field == e_ltsel
       || hppa_fix->fx_r_field == e_rtsel)
+    return 0;
+
+  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_GLOBAL)
     return 0;
 
   /* Reject reductions of function symbols.  */

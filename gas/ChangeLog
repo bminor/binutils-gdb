@@ -1,3 +1,12 @@
+Tue Nov 15 21:44:13 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_align): New function.  Aligns the current
+	offset within the current subspace along with updating the
+	alignment of the subspace itself.
+	(pa_subspace): Default alignment to one byte rathern than zero
+	bytes to avoid setting alignment to log2(0).
+	(md_pseudo_table): Use pa_alignment for .align.
+
 Tue Nov 15 15:24:45 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* messages.c (as_fatal): Always put a space after "fatal error:"
