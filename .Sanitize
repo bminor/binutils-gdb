@@ -81,12 +81,15 @@ else
 fi
 
 # This is for newlib net releases.
-newlib_files="COPYING.NEWLIB"
+newlib_file="COPYING.NEWLIB"
 
-if ( echo $* | grep keep\-newlib > /dev/null) ; then
-	keep_these_too="${keep_these_too} ${newlib_files}"
+if (echo $* | grep keep\-newlib > /dev/null) ; then
+	if (echo $* | grep -v keep\-cygnus > /dev/null) ; then
+		keep_these_too="${keep_these_too} ${newlib_file}"
+		lose_these_too="`echo ${lose_these_too} | sed -e s/${newlib_file}//`"
+	fi
 else
-	lose_these_too="${lose_these_too} ${newlib_files}"
+	true; # Let keep-cygnus handle it.
 fi
 
 # This top-level directory is special.  We often check out only subsets
