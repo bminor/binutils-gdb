@@ -1840,7 +1840,8 @@ xcoff64_slurp_armap (abfd)
       return true;
     }
 
-  off = strtol (xcoff_ardata_big (abfd)->symoff64, (char **) NULL, 10);
+  off = bfd_scan_vma (xcoff_ardata_big (abfd)->symoff64,
+		      (const char **) NULL, 10);
   if (off == 0)
     {
       bfd_has_map (abfd) = false;
@@ -1861,10 +1862,7 @@ xcoff64_slurp_armap (abfd)
   if (bfd_seek (abfd, pos, SEEK_CUR) != 0)
     return false;
 
-  /* XXX This actually has to be a call to strtoll (at least on 32-bit
-     machines) since the field width is 20 and there numbers with more
-     than 32 bits can be represented.  */
-  sz = strtol (hdr.size, (char **) NULL, 10);
+  sz = bfd_scan_vma (hdr.size, (const char **) NULL, 10);
 
   /* Read in the entire symbol table.  */
   contents = (bfd_byte *) bfd_alloc (abfd, sz);
@@ -1920,6 +1918,7 @@ static const bfd_target *
 xcoff64_archive_p (abfd)
      bfd *abfd;
 {
+  struct artdata *tdata_hold;
   char magic[SXCOFFARMAG];
   /* This is the new format.  */
   struct xcoff_ar_file_hdr_big hdr;
@@ -1938,50 +1937,46 @@ xcoff64_archive_p (abfd)
       return NULL;
     }
 
-  /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
-     involves a cast, we can't do it as the left operand of
-     assignment.  */
-  amt = sizeof (struct artdata);
-  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
-
-  if (bfd_ardata (abfd) == (struct artdata *) NULL)
-    return NULL;
-
-  bfd_ardata (abfd)->cache = NULL;
-  bfd_ardata (abfd)->archive_head = NULL;
-  bfd_ardata (abfd)->symdefs = NULL;
-  bfd_ardata (abfd)->extended_names = NULL;
-
   /* Copy over the magic string.  */
   memcpy (hdr.magic, magic, SXCOFFARMAG);
 
   /* Now read the rest of the file header.  */
-  if (bfd_bread ((PTR) &hdr.memoff,
-		(bfd_size_type) (SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG),
-		abfd) != SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG)
+  amt = SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG;
+  if (bfd_bread ((PTR) &hdr.memoff, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
-  /* XXX This actually has to be a call to strtoll (at least on 32-bit
-     machines) since the field width is 20 and there numbers with more
-     than 32 bits can be represented.  */
-  bfd_ardata (abfd)->first_file_filepos = strtol (hdr.firstmemoff,
-						  (char **) NULL, 10);
+  tdata_hold = bfd_ardata (abfd);
+
+  amt = sizeof (struct artdata);
+  bfd_ardata (abfd) = (struct artdata *) bfd_zalloc (abfd, amt);
+  if (bfd_ardata (abfd) == (struct artdata *) NULL)
+    goto error_ret_restore;
+
+  bfd_ardata (abfd)->cache = NULL;
+  bfd_ardata (abfd)->archive_head = NULL;
+  bfd_ardata (abfd)->symdefs = NULL;
+  bfd_ardata (abfd)->extended_names = NULL;
+  bfd_ardata (abfd)->first_file_filepos = bfd_scan_vma (hdr.firstmemoff,
+							(const char **) NULL,
+							10);
 
   amt = SIZEOF_AR_FILE_HDR_BIG;
   bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd)->tdata == NULL)
-    return NULL;
+    goto error_ret;
 
   memcpy (bfd_ardata (abfd)->tdata, &hdr, SIZEOF_AR_FILE_HDR_BIG);
 
   if (! xcoff64_slurp_armap (abfd))
     {
+    error_ret:
       bfd_release (abfd, bfd_ardata (abfd));
-      abfd->tdata.aout_ar_data = (struct artdata *) NULL;
+    error_ret_restore:
+      bfd_ardata (abfd) = tdata_hold;
       return NULL;
     }
 
@@ -2011,20 +2006,15 @@ xcoff64_openr_next_archived_file (archive, last_file)
     }
   else
     {
-      /* XXX These actually have to be a calls to strtoll (at least
-	 on 32-bit machines) since the fields's width is 20 and
-	 there numbers with more than 32 bits can be represented.  */
-      filestart = strtol (arch_xhdr_big (last_file)->nextoff, (char **) NULL,
-			  10);
+      filestart = bfd_scan_vma (arch_xhdr_big (last_file)->nextoff,
+				(const char **) NULL, 10);
     }
-  /* XXX These actually have to be calls to strtoll (at least on 32-bit
-     machines) since the fields's width is 20 and there numbers with more
-     than 32 bits can be represented.  */
+
   if (filestart == 0
-      || filestart == strtol (xcoff_ardata_big (archive)->memoff,
-			      (char **) NULL, 10)
-      || filestart == strtol (xcoff_ardata_big (archive)->symoff,
-			      (char **) NULL, 10))
+      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->memoff,
+				    (const char **) NULL, 10)
+      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->symoff,
+				    (const char **) NULL, 10))
     {
       bfd_set_error (bfd_error_no_more_archived_files);
       return NULL;

@@ -1243,10 +1243,11 @@ const bfd_target *
 _bfd_xcoff_archive_p (abfd)
      bfd *abfd;
 {
+  struct artdata *tdata_hold;
   char magic[SXCOFFARMAG];
-  bfd_size_type amt;
+  bfd_size_type amt = SXCOFFARMAG;
 
-  if (bfd_bread ((PTR) magic, (bfd_size_type) SXCOFFARMAG, abfd) != SXCOFFARMAG)
+  if (bfd_bread ((PTR) magic, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -1260,13 +1261,12 @@ _bfd_xcoff_archive_p (abfd)
       return NULL;
     }
 
-  /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
-     involves a cast, we can't do it as the left operand of
-     assignment.  */
+  tdata_hold = bfd_ardata (abfd);
+
   amt = sizeof (struct artdata);
-  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
+  bfd_ardata (abfd) = (struct artdata *) bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
-    return NULL;
+    goto error_ret_restore;
 
   bfd_ardata (abfd)->cache = NULL;
   bfd_ardata (abfd)->archive_head = NULL;
@@ -1283,13 +1283,12 @@ _bfd_xcoff_archive_p (abfd)
       memcpy (hdr.magic, magic, SXCOFFARMAG);
 
       /* Now read the rest of the file header.  */
-      if (bfd_bread ((PTR) &hdr.memoff,
-		    (bfd_size_type) SIZEOF_AR_FILE_HDR - SXCOFFARMAG, abfd)
-	  != SIZEOF_AR_FILE_HDR - SXCOFFARMAG)
+      amt = SIZEOF_AR_FILE_HDR - SXCOFFARMAG;
+      if (bfd_bread ((PTR) &hdr.memoff, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
-	  return NULL;
+	  goto error_ret;
 	}
 
       bfd_ardata (abfd)->first_file_filepos = strtol (hdr.firstmemoff,
@@ -1298,7 +1297,7 @@ _bfd_xcoff_archive_p (abfd)
       amt = SIZEOF_AR_FILE_HDR;
       bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, amt);
       if (bfd_ardata (abfd)->tdata == NULL)
-	return NULL;
+	goto error_ret;
 
       memcpy (bfd_ardata (abfd)->tdata, &hdr, SIZEOF_AR_FILE_HDR);
     }
@@ -1311,33 +1310,32 @@ _bfd_xcoff_archive_p (abfd)
       memcpy (hdr.magic, magic, SXCOFFARMAG);
 
       /* Now read the rest of the file header.  */
-      if (bfd_bread ((PTR) &hdr.memoff,
-		    (bfd_size_type) SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG, abfd)
-	  != SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG)
+      amt = SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG;
+      if (bfd_bread ((PTR) &hdr.memoff, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
-	  return NULL;
+	  goto error_ret;
 	}
 
-      /* XXX This actually has to be a call to strtoll (at least on 32-bit
-	 machines) since the field width is 20 and there numbers with more
-	 than 32 bits can be represented.  */
-      bfd_ardata (abfd)->first_file_filepos = strtol (hdr.firstmemoff,
-						      (char **) NULL, 10);
+      bfd_ardata (abfd)->first_file_filepos = bfd_scan_vma (hdr.firstmemoff,
+							    (const char **) 0,
+							    10);
 
       amt = SIZEOF_AR_FILE_HDR_BIG;
       bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, amt);
       if (bfd_ardata (abfd)->tdata == NULL)
-	return NULL;
+	goto error_ret;
 
       memcpy (bfd_ardata (abfd)->tdata, &hdr, SIZEOF_AR_FILE_HDR_BIG);
     }
 
   if (! _bfd_xcoff_slurp_armap (abfd))
     {
+    error_ret:
       bfd_release (abfd, bfd_ardata (abfd));
-      abfd->tdata.aout_ar_data = (struct artdata *) NULL;
+    error_ret_restore:
+      bfd_ardata (abfd) = tdata_hold;
       return NULL;
     }
 

@@ -1,5 +1,35 @@
 2002-07-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* aoutx.h (some_aout_object_p): Clean up tdata properly on error.
+	* archive.c (bfd_generic_archive_p): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_archive_p): Likewise.
+	(_bfd_xcoff_archive_p): Use bfd_scan_vma in place of strtol.
+	* coff64-rs6000.c (xcoff64_slurp_armap): Likewise.
+	(xcoff64_archive_p): Likewise.
+	(xcoff64_openr_next_archived_file): Likewise.
+	(xcoff64_archive_p): Clean up tdata properly on error.
+	* coffgen.c (coff_real_object_p): Likewise.
+	(coff_object_p): Release filehdr and opthdr.
+	* ecoff.c (_bfd_ecoff_archive_p): Clean up tdata properly on error.
+	* ieee.c (ieee_archive_p): Likewise.
+	* ihex.c (ihex_object_p): Likewise.
+	(ihex_mkobject): Always allocate tdata.
+	* peicode.h (pe_ILF_object_p): Release bfd_alloc'd buffer on error.
+	* srec.c (srec_mkobject): Always allocate tdata.
+	(srec_object_p): Clean up tdata properly on error.
+	(symbolsrec_object_p): Likewise.
+	* versados.c (versados_object_p): Likewise.
+	* vms-misc.c (_bfd_vms_get_record): Use bfd_malloc instead of malloc,
+	and bfd_realloc instead of realloc.
+	(add_new_contents): Use bfd_alloc instead of bfd_malloc for sections.
+	* vms.c (vms_initialize): Always allocate tdata.  Use bfd_alloc in
+	place of bfd_malloc, simplifying error freeing.  Free hash table too.
+	(vms_object_p): Clean up tdata on error.
+	(vms_mkobject): Don't complain on stderr if vms_initialize fails.
+	(vms_close_and_cleanup): Adjust for bfd_alloc use.
+
+2002-07-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* elfxx-ia64.c (elfNN_ia64_final_write_processing): Set e_flags.
 
 2002-07-26  Chris Demetriou  <cgd@broadcom.com>

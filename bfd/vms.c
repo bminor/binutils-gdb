@@ -238,13 +238,10 @@ vms_initialize (abfd)
   int i;
   bfd_size_type amt;
 
-  if (abfd->tdata.any != 0)
-    return true;
-
   bfd_set_start_address (abfd, (bfd_vma) -1);
 
   amt = sizeof (struct vms_private_data_struct);
-  abfd->tdata.any = (struct vms_private_data_struct*) bfd_malloc (amt);
+  abfd->tdata.any = (struct vms_private_data_struct*) bfd_alloc (abfd, amt);
   if (abfd->tdata.any == 0)
     return false;
 
@@ -261,49 +258,32 @@ vms_initialize (abfd)
   PRIV (sections) = NULL;
 
   amt = sizeof (struct stack_struct) * STACKSIZE;
-  PRIV (stack) = (struct stack_struct *) bfd_malloc (amt);
+  PRIV (stack) = (struct stack_struct *) bfd_alloc (abfd, amt);
   if (PRIV (stack) == 0)
-    {
-     vms_init_no_mem1:
-      free (abfd->tdata.any);
-      abfd->tdata.any = 0;
-      return false;
-    }
+    goto error_ret1;
   PRIV (stackptr) = 0;
 
   amt = sizeof (struct bfd_hash_table);
-  PRIV (vms_symbol_table) = (struct bfd_hash_table *) bfd_malloc (amt);
+  PRIV (vms_symbol_table) = (struct bfd_hash_table *) bfd_alloc (abfd, amt);
   if (PRIV (vms_symbol_table) == 0)
-    {
-     vms_init_no_mem2:
-      free (PRIV (stack));
-      PRIV (stack) = 0;
-      goto vms_init_no_mem1;
-    }
+    goto error_ret1;
 
   if (!bfd_hash_table_init (PRIV (vms_symbol_table), _bfd_vms_hash_newfunc))
-    return false;
+    goto error_ret1;
 
   amt = sizeof (struct location_struct) * LOCATION_SAVE_SIZE;
-  PRIV (location_stack) = (struct location_struct *) bfd_malloc (amt);
+  PRIV (location_stack) = (struct location_struct *) bfd_alloc (abfd, amt);
   if (PRIV (location_stack) == 0)
-    {
-     vms_init_no_mem3:
-      free (PRIV (vms_symbol_table));
-      PRIV (vms_symbol_table) = 0;
-      goto vms_init_no_mem2;
-    }
+    goto error_ret2;
 
   for (i = 0; i < VMS_SECTION_COUNT; i++)
     PRIV (vms_section_table)[i] = NULL;
 
-  PRIV (output_buf) = (unsigned char *) malloc (MAX_OUTREC_SIZE);
+  amt = MAX_OUTREC_SIZE;
+  PRIV (output_buf) = (unsigned char *) bfd_alloc (abfd, amt);
   if (PRIV (output_buf) == 0)
-    {
-      free (PRIV (location_stack));
-      PRIV (location_stack) = 0;
-      goto vms_init_no_mem3;
-    }
+    goto error_ret2;
+
   PRIV (push_level) = 0;
   PRIV (pushed_size) = 0;
   PRIV (length_pos) = 2;
@@ -311,6 +291,13 @@ vms_initialize (abfd)
   PRIV (output_alignment) = 1;
 
   return true;
+
+ error_ret2:
+  bfd_hash_table_free (PRIV (vms_symbol_table));
+ error_ret1:
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = 0;
+  return false;
 }
 
 /* Fill symbol->section with section ptr
@@ -394,22 +381,17 @@ vms_object_p (abfd)
   int prev_type;
   const struct bfd_target *target_vector = 0;
   const bfd_arch_info_type *arch = 0;
+  PTR tdata_save = abfd->tdata.any;
 
 #if VMS_DEBUG
   vms_debug (1, "vms_object_p(%p)\n", abfd);
 #endif
 
   if (!vms_initialize (abfd))
-    {
-      fprintf (stderr, "vms_initialize () failed !!\n");
-      return 0;
-    }
+    goto error_ret;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
-    {
-      bfd_set_error (bfd_error_file_truncated);
-      return 0;
-    }
+    goto err_wrong_format;
 
   prev_type = -1;
 
@@ -423,8 +405,7 @@ vms_object_p (abfd)
 #if VMS_DEBUG
 	  vms_debug (2, "next_record failed\n");
 #endif
-	  bfd_set_error (bfd_error_wrong_format);
-	  return 0;
+	  goto err_wrong_format;
 	}
 
       if ((prev_type == EOBJ_S_C_EGSD)
@@ -435,8 +416,7 @@ vms_object_p (abfd)
 #if VMS_DEBUG
 	      vms_debug (2, "vms_fixup_sections failed\n");
 #endif
-	      bfd_set_error (bfd_error_wrong_format);
-	      return 0;
+	      goto err_wrong_format;
 	    }
 	}
 
@@ -488,8 +468,7 @@ vms_object_p (abfd)
 #if VMS_DEBUG
 	  vms_debug (2, "slurp type %d failed with %d\n", prev_type, err);
 #endif
-	  bfd_set_error (bfd_error_wrong_format);
-	  return 0;
+	  goto err_wrong_format;
 	}
     }
   while ((prev_type != EOBJ_S_C_EEOM) && (prev_type != OBJ_S_C_EOM) && (prev_type != OBJ_S_C_EOMW));
@@ -501,8 +480,7 @@ vms_object_p (abfd)
 #if VMS_DEBUG
 	  vms_debug (2, "vms_fixup_sections failed\n");
 #endif
-	  bfd_set_error (bfd_error_wrong_format);
-	  return 0;
+	  goto err_wrong_format;
 	}
 
       /* set arch_info to vax  */
@@ -529,12 +507,19 @@ vms_object_p (abfd)
 #if VMS_DEBUG
       vms_debug (2, "arch not found\n");
 #endif
-      bfd_set_error (bfd_error_wrong_format);
-      return 0;
+      goto err_wrong_format;
     }
   abfd->arch_info = arch;
 
   return target_vector;
+
+ err_wrong_format:
+  bfd_set_error (bfd_error_wrong_format);
+ error_ret:
+  if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
+    bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = tdata_save;
+  return NULL;
 }
 
 /* Check the format for a file being read.
@@ -562,10 +547,7 @@ vms_mkobject (abfd)
 #endif
 
   if (!vms_initialize (abfd))
-    {
-      fprintf (stderr, "vms_initialize () failed !!\n");
-      return 0;
-    }
+    return 0;
 
   {
 #ifdef __VAX
@@ -646,10 +628,6 @@ static boolean
 vms_close_and_cleanup (abfd)
      bfd *abfd;
 {
-  asection *sec;
-  vms_section *es, *es1;
-  int i;
-
 #if VMS_DEBUG
   vms_debug (1, "vms_close_and_cleanup(%p)\n", abfd);
 #endif
@@ -657,63 +635,15 @@ vms_close_and_cleanup (abfd)
     return true;
 
   if (PRIV (vms_buf) != NULL)
-    {
-      free (PRIV (vms_buf));
-      PRIV (vms_buf) = NULL;
-    }
-  PRIV (buf_size) = 0;
-
-  if (PRIV (output_buf) != 0)
-    {
-      free (PRIV (output_buf));
-      PRIV (output_buf) = 0;
-    }
-
-  sec = abfd->sections;
-  while (sec != NULL)
-    {
-      if (sec->contents)
-	free (sec->contents);
-      sec = sec->next;
-    }
+    free (PRIV (vms_buf));
 
   if (PRIV (sections) != NULL)
-    {
-      free (PRIV (sections));
-      PRIV (sections) = NULL;
-    }
+    free (PRIV (sections));
 
   if (PRIV (vms_symbol_table))
-    {
-      bfd_hash_table_free (PRIV (vms_symbol_table));
-      PRIV (vms_symbol_table) = 0;
-    }
+    bfd_hash_table_free (PRIV (vms_symbol_table));
 
-  if (PRIV (stack))
-    {
-      free (PRIV (stack));
-      PRIV (stack) = 0;
-    }
-
-  if (PRIV (location_stack))
-    {
-      free (PRIV (location_stack));
-      PRIV (location_stack) = 0;
-    }
-
-  for (i = 0; i < VMS_SECTION_COUNT; i++)
-    {
-      es = PRIV (vms_section_table)[i];
-      while (es != NULL)
-	{
-	  es1 = es->next;
-	  free (es);
-	  es = es1;
-	}
-      PRIV (vms_section_table)[i] = NULL;
-   }
-
-  free (abfd->tdata.any);
+  bfd_release (abfd, abfd->tdata.any);
   abfd->tdata.any = NULL;
 
   return true;

@@ -1207,7 +1207,10 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
     return NULL;
 
   if (bfd_bread (ptr, size, abfd) != size)
-    return NULL;
+    {
+      bfd_release (abfd, ptr);
+      return NULL;
+    }
 
   symbol_name = ptr;
   source_dll  = ptr + strlen (ptr) + 1;
@@ -1219,14 +1222,17 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
 	(_("%s: string not null terminated in ILF object file."),
 	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_malformed_archive);
-
+      bfd_release (abfd, ptr);
       return NULL;
     }
 
   /* Now construct the bfd.  */
   if (! pe_ILF_build_a_bfd (abfd, magic, symbol_name,
 			    source_dll, ordinal, types))
-    return NULL;
+    {
+      bfd_release (abfd, ptr);
+      return NULL;
+    }
 
   return abfd->xvec;
 }
