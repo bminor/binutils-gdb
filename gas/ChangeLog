@@ -1,3 +1,27 @@
+2000-06-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* expr.c (operand): Test is_end_of_line outside switch to catch
+	line separator chars that are also operators.
+	(operator): Return O_illegal for line separator chars.
+
+	* read.c (is_end_of_line): Use 1 instead of 99.  Don't set `;'
+	entry (or `!' entry for TC_HPPA).
+
+	* config/tc-arm.c (my_get_float_expression): Cast to unsigned char
+	before indexing is_end_of_line.  Remove redundant check for '\0'.
+	(fp_op2): Likewise.
+	* config/tc-h8500.c (md_assemble): Likewise.
+	* config/tc-mcore.c (md_assemble): Likewise.
+	* config/tc-tic30.c (tic30_find_parallel_insn): Likewise.
+	(md_atof): Likewise
+
+	* config/tc-m88k.c (s_bss): Cast to unsigned char before indexing
+	is_end_of_line.
+	* config/tc-mcore.c (mcore_cons): Likewise.
+	(mcore_float_cons): Likewise.
+	(mcore_stringer): Likewise.
+	* config/tc-tic30.c (tic30_find_parallel_insn): Likewise.
+
 2000-06-01  Scott Bambrough <scottb@netwinder.org>
 
 	* config/tc-arm.c (do_mrs): Allow SPSR_BIT to be set correctly.

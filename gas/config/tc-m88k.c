@@ -1311,7 +1311,7 @@ s_bss ()
       as_warn (_("Ignoring attempt to re-define symbol %s."), name);
     }
 
-  while (!is_end_of_line[*input_line_pointer])
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       input_line_pointer++;
     }

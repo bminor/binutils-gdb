@@ -799,6 +799,9 @@ operand (expressionP)
   SKIP_WHITESPACE ();		/* leading whitespace is part of operand. */
   c = *input_line_pointer++;	/* input_line_pointer->past char in c. */
 
+  if (is_end_of_line[(unsigned char) c])
+    goto eol;
+
   switch (c)
     {
     case '1':
@@ -1166,9 +1169,8 @@ operand (expressionP)
 	{
 	  goto isname;
 	}
+
     case ',':
-    case '\n':
-    case '\0':
     eol:
       /* can't imagine any other kind of operand */
       expressionP->X_op = O_absent;
@@ -1211,8 +1213,6 @@ operand (expressionP)
 #ifdef TC_M68K
     de_fault:
 #endif
-      if (is_end_of_line[(unsigned char) c])
-	goto eol;
       if (is_name_beginner (c))	/* here if did not begin with a digit */
 	{
 	  /*
@@ -1570,6 +1570,9 @@ operator ()
   operatorT ret;
 
   c = *input_line_pointer & 0xff;
+
+  if (is_end_of_line[c])
+    return O_illegal;
 
   switch (c)
     {

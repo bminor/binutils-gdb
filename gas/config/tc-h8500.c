@@ -1104,8 +1104,7 @@ DEFUN (md_assemble, (str),
 
   /* find the op code end */
   for (op_start = op_end = str;
-       *op_end &&
-       !is_end_of_line[*op_end] && *op_end != ' ';
+       !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
        op_end++)
     {
       if (			/**op_end != '.'

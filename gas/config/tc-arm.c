@@ -2219,7 +2219,7 @@ my_get_float_expression (str)
   memset (words, 0, MAX_LITTLENUMS * sizeof (LITTLENUM_TYPE));
   /* Look for a raw floating point number */
   if ((save_in = atof_ieee (*str, 'x', words)) != NULL
-      && (is_end_of_line [(int)(*save_in)] || *save_in == '\0'))
+      && is_end_of_line [(unsigned char) *save_in])
     {
       for (i = 0; i < NUM_FLOAT_VALS; i++)
 	{
@@ -2644,7 +2644,7 @@ fp_op2 (str)
 		  char *start = *str;
 
 		  *str += strlen (fp_const[i]);
-		  if (is_end_of_line[(int)**str] || **str == '\0')
+		  if (is_end_of_line[(unsigned char) **str])
 		    {
 		      inst.instruction |= i + 8;
 		      return SUCCESS;

@@ -239,7 +239,7 @@ mcore_cons (nbytes)
       int    commas = 1;
       
       /* Count the number of commas on the line.  */
-      while (! is_end_of_line [* ptr])
+      while (! is_end_of_line [(unsigned char) * ptr])
 	commas += * ptr ++ == ',';
       
       poolspan += nbytes * commas;
@@ -268,7 +268,7 @@ mcore_float_cons (float_type)
 #endif
       
       /* Count the number of commas on the line.  */
-      while (! is_end_of_line [* ptr])
+      while (! is_end_of_line [(unsigned char) * ptr])
 	commas += * ptr ++ == ',';
 
       /* We would like to compute "hex_float (float_type) * commas"
@@ -301,7 +301,7 @@ mcore_stringer (append_zero)
 	 estimate, which is OK, and automatically allows for the
 	 appending a zero byte, since the real string(s) is/are
 	 required to be enclosed in double quotes.  */
-      while (! is_end_of_line [* ptr])
+      while (! is_end_of_line [(unsigned char) * ptr])
 	ptr ++;
 
       poolspan += ptr - input_line_pointer;
@@ -975,7 +975,7 @@ md_assemble (str)
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       * op_end && nlen < 20 && !is_end_of_line [*op_end] && *op_end != ' ';
+       nlen < 20 && !is_end_of_line [(unsigned char) *op_end] && *op_end != ' ';
        op_end++)
     {
       name[nlen] = op_start[nlen];
