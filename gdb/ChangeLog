@@ -1,3 +1,8 @@
+2004-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (legacy_get_prev_frame): Pass correct frame to
+	frame_unwind_find_by_frame.
+
 2004-03-17  David Carlton  <carlton@kealia.com>
 
 	* NEWS: Mention C++ nested types and namespaces

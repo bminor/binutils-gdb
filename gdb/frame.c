@@ -1493,7 +1493,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
+	  prev->unwind = frame_unwind_find_by_frame (this_frame);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunately, legacy code, called by
