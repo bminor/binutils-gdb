@@ -4127,9 +4127,9 @@ decode_coproc(instruction)
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:
 		if (code == 0x00)
-		  callback->printf_filtered(callback,"Warning: MFC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
+		  callback->printf_filtered(callback,"Warning: MFC0 %d,%d ignored (architecture specific)\n",rt,rd);
 		else
-		  callback->printf_filtered(callback,"Warning: MTC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
+		  callback->printf_filtered(callback,"Warning: MTC0 %d,%d ignored (architecture specific)\n",rt,rd);
 	      }
 	  }
 	else if (code == 0x10 && (instruction & 0x3f) == 0x18)
