@@ -23,6 +23,8 @@ if $tracelevel then {
 	strace $tracelevel
 	}
 
+global usestubs
+
 #
 # test running programs
 #
@@ -42,6 +44,14 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
+if $usestubs {
+    send "step\n"
+    # if use stubs step out of the breakpoint() function.
+    expect {
+        -re "main.* at .*$prompt $" {}
+        timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
+    }
+}
 #
 # test simple breakpoint setting commands
 #
@@ -111,7 +121,7 @@ gdb_test "break $srcfile:70" \
 #
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:60.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:57.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:76.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:64.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:64.*
@@ -234,7 +244,7 @@ gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Te
 send "info break\n"
 expect {
     -re "Num Type.*Disp Enb Address.*What.*
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:60.*
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:57.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:76.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:64.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:70.*$prompt $" {
@@ -281,10 +291,10 @@ proc test_next_with_recursion {} {
     if [istarget "*-*-vxworks*"] then {
 	send "run vxmain \"6\"\n"
     } else {
-	    send "run\n"
+	gdb_run_cmd
     }
     expect {
-	-re "Starting .*Break.* factorial .value=6. .*$prompt $" {}
+	-re "Break.* factorial .value=6. .*$prompt $" {}
 	timeout { fail "run to factorial(6)" ; return }
     }
 
