@@ -1,4 +1,4 @@
-#   Copyright 1988, 1990, 1991, 1992, 1994, 1997, 1999, 2000
+#   Copyright 1988, 1990, 1991, 1992, 1994, 1997, 1999, 2000, 2002
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -392,7 +392,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     set description "backtrace through signal handler"
     send_gdb "backtrace\n"
     gdb_expect {
-	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$gdb_prompt $" {
+	-re "#0.*(read|poll).*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
 	-re ".*$gdb_prompt $" {

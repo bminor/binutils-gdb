@@ -1,5 +1,9 @@
 2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/selftest.exp: Update for current gdb.
+
+2002-12-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/maint.exp: Only dump symbols from one source file
 	or objfile.
 
