@@ -600,6 +600,11 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
+#ifndef TEXT_SECTION_NAME
+#define TEXT_SECTION_NAME	".text"
+#define DATA_SECTION_NAME	".data"
+#define BSS_SECTION_NAME	".bss"
+#endif
 
 #include "struc-symbol.h"
 #include "write.h"
