@@ -11876,12 +11876,18 @@ s_cpsetup (ignore)
       return;
     }
   else
-    input_line_pointer++;
+    ++input_line_pointer;
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '$')
-    mips_cpreturn_register = tc_get_register (0);
+    {
+      mips_cpreturn_register = tc_get_register (0);
+      mips_cpreturn_offset = -1;
+    }
   else
-    mips_cpreturn_offset = get_absolute_expression ();
+    {
+      mips_cpreturn_offset = get_absolute_expression ();
+      mips_cpreturn_register = -1;
+    }
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
