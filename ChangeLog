@@ -1,3 +1,7 @@
+Thu Jan 25 17:05:26 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config.sub: Add recognition for mips64vr4100*-* targets.
+
 Wed Jan 24 12:47:55 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* test-build.mk: Add checking of `hpux9' rather than just `hpux'.
