@@ -1,5 +1,7 @@
 Wed Aug 11 08:26:11 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/i386v.mh, config/irix4.mh: Use gcc
+	-print-libgcc-file-name rather than $(libdir)/libgcc.a.
 	* config/i386sco.mh: New file; copy of i386v.mh to correspond to
 	bfd/configure.host change.
 
