@@ -1,3 +1,7 @@
+2000-12-05  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-mips.c: Fix formatting.
+
 2000-12-04  Matthew Hiller  <hiller@redhat.com>
 	
         * config/tc-d10v.c (flag_allow_gstabs_packing): New variable.
