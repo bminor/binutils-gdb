@@ -42,3 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FETCH_INFERIOR_REGISTERS
 
 #define PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
+
+/* <errno.h> only defines this if __STDC__!!! */
+extern int errno;

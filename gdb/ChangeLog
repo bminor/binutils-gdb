@@ -1,5 +1,7 @@
 Tue Apr  7 16:34:07 1992  Per Bothner  (bothner@cygnus.com)
 
+	* xm-i386mach.h:  add decl for errno.
+
 	* breakpoint.c (breakpoint_1):  Add (int) casts for enums
 	used in array index context (otherwise, some compilers barf).	
 
