@@ -21,62 +21,67 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*doc*
-@section Constructors
-Classes in C++ have 'constructors' and 'destructors'.  These are
-functions which are called automatically by the language whenever data
-of a class is created or destroyed.  Class data which is static data
-may also be have a type which requires 'construction', the contructor
-must be called before the data can be referenced, so the contructor
-must be called before the program begins.
+/*
+SECTION
+	Constructors
 
-The common solution to this problem is for the compiler to call a
-magic function as the first statement @code{main}.  This magic
-function, (often called @code{__main}) runs around calling the
-constructors for all the things needing it.
+DESCRIPTION
+	Classes in C++ have 'constructors' and 'destructors'.  These
+	are functions which are called automatically by the language
+	whenever data of a class is created or destroyed.  Class data
+	which is static data may also be have a type which requires
+	'construction', the contructor must be called before the data
+	can be referenced, so the contructor must be called before the
+	program begins. 
 
-With COFF the compile has a bargain with the linker et al.  All
-constructors are given strange names, for example
-@code{__GLOBAL__$I$foo} might be the label of a contructor for the
-class @var{foo}.  The solution on unfortunate systems (most system V
-machines) is to perform a partial link on all the .o files, do an
-@code{nm} on the result, run @code{awk} or some such over the result
-looking for strange @code{__GLOBAL__$} symbols, generate a C program
-from this, compile it and link with the partially linked input. This
-process is usually called @code{collect}.
+	The common solution to this problem is for the compiler to
+	call a magic function as the first statement <<main>>.
+	This magic function, (often called <<__main>>) runs around
+	calling the constructors for all the things needing it.
 
-Some versions of @code{a.out} use something called the
-@code{set_vector} mechanism.  The constructor symbols are output from
-the compiler with a special stab code saying that they are
-constructors, and the linker can deal with them directly.
+	With COFF the compile has a bargain with the linker et al.
+	All constructors are given strange names, for example
+	<<__GLOBAL__$I$foo>> might be the label of a contructor for
+	the class @var{foo}.  The solution on unfortunate systems
+	(most system V machines) is to perform a partial link on all
+	the .o files, do an <<nm>> on the result, run <<awk>> or some
+	such over the result looking for strange <<__GLOBAL__$>>
+	symbols, generate a C program from this, compile it and link
+	with the partially linked input. This process is usually
+	called <<collect>>. 
 
-BFD allows applications (ie the linker) to deal with constructor
-information independently of their external implimentation by
-providing a set of entry points for the indiviual object back ends to
-call which maintains a database of the contructor information.  The
-application can interrogate the database to find out what it wants.
+	Some versions of <<a.out>> use something called the
+	<<set_vector>> mechanism.  The constructor symbols are output
+	from the compiler with a special stab code saying that they
+	are constructors, and the linker can deal with them directly. 
 
-The construction data essential for the linker to be able to perform
-its job are:
+	BFD allows applications (ie the linker) to deal with
+	constructor information independently of their external
+	implimentation by providing a set of entry points for the
+	indiviual object back ends to call which maintains a database
+	of the contructor information.  The application can
+	interrogate the database to find out what it wants.  The
+	construction data essential for the linker to be able to
+	perform its job are: 
 
-@itemize @bullet
-@item 	asymbol
-The asymbol of the contructor entry point contains all the information
-necessary to call the function.
-@item	table id
-The type of symbol, ie is it a contructor, a destructor or something
-else someone dreamed up to make our lives difficult.
-@end itemize
+	o asymbol
+	The asymbol of the contructor entry point contains all the
+	information necessary to call the function. 
 
-This module takes this information and then builds extra sections
-attached to the bfds which own the entry points.  It creates these
-sections as if they were tables of pointers to the entry points, and
-builds relocation entries to go with them so that the tables can be
-relocated along with the data they reference.
+	o table id
+	The type of symbol, ie is it a contructor, a destructor or
+	something else someone dreamed up to make our lives difficult.
 
-These sections are marked with a special bit (@code{SEC_CONSTRUCTOR})
-which the linker notices and do with what it wants.
+	This module takes this information and then builds extra
+	sections attached to the bfds which own the entry points.  It
+	creates these sections as if they were tables of pointers to
+	the entry points, and builds relocation entries to go with
+	them so that the tables can be relocated along with the data
+	they reference. 
 
+	These sections are marked with a special bit
+	(<<SEC_CONSTRUCTOR>>) which the linker notices and do with
+	what it wants.
 
 */
 
@@ -86,22 +91,23 @@ which the linker notices and do with what it wants.
 
 
 
-/*proto-internal* bfd_constructor_entry 
+/*
+INTERNAL FUNCTION
+	bfd_constructor_entry 
 
-This function is called with an a symbol describing the
-function to be called, an string which descibes the xtor type, eg
-something like "CTOR" or "DTOR" would be fine. And the bfd which owns
-the function.
+DESCRIPTION
+	This function is called with an a symbol describing the
+	function to be called, an string which descibes the xtor type,
+	eg something like "CTOR" or "DTOR" would be fine. And the bfd
+	which owns the function. Its duty is to create a section
+	called "CTOR" or "DTOR" or whatever if the bfd doesn't already
+	have one, and grow a relocation table for the entry points as
+	they accumulate.
 
-It's duty is to create a section called "CTOR" or "DTOR" or whatever
-if the bfd doesn't already have one, and grow a relocation table for
-the entry points as they accumulate.
-
-
-*; PROTO(void, bfd_constructor_entry,
-           (bfd *abfd, 
-	    asymbol **symbol_ptr_ptr,
-	    CONST char*type));
+SYNOPSIS
+	void bfd_constructor_entry(bfd *abfd, 
+		asymbol **symbol_ptr_ptr,
+		CONST char*type);
 
 */
 

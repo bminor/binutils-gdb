@@ -20,18 +20,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*doc*
 @setfilename archive-info
-@section Archives
+SECTION
+	Archives
 
-Gumby, you promised to write this bit...
+DESCRIPTION
+	Gumby, you promised to write this bit...
 
-Archives are supported in BFD in @code{archive.c}.
+	Archives are supported in BFD in <<archive.c>>.
 
-An archive is represented internally just like another BFD, with a
-pointer to a chain of contained BFDs. Archives can be created by
-opening BFDs, linking them together and attaching them as children to
-another BFD and then closing the parent BFD. 
+	An archive is represented internally just like another BFD,
+	with a pointer to a chain of contained BFDs. Archives can be
+	created by opening BFDs, linking them together and attaching
+	them as children to another BFD and then closing the parent
+	BFD. 
 
-*-*/
+*/
 
 /* Assumes:
    o - all archive elements start on an even boundary, newline padded;
@@ -84,9 +87,15 @@ _bfd_generic_mkarchive (abfd)
   return true;
 }
 
-/*proto* bfd_get_next_mapent
-What this does
-*; PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
+/*
+FUNCTION
+	bfd_get_next_mapent
+
+DESCRIPTION
+	What this does
+
+SYNOPSIS
+	symindex bfd_get_next_mapent(bfd *, symindex, carsym **);
 */
 symindex
 bfd_get_next_mapent (abfd, prev, entry)
@@ -123,12 +132,17 @@ _bfd_create_empty_archive_element_shell (obfd)
   return nbfd;
 }
 
-/*proto* bfd_set_archive_head
+/*
+FUNCTION
+	bfd_set_archive_head
 
-Used whilst processing archives. Sets the head of the chain of BFDs
-contained in an archive to @var{new_head}. (see chapter on archives)
+DESCRIPTION
+	Used whilst processing archives. Sets the head of the chain of
+	BFDs contained in an archive to @var{new_head}. (see chapter
+	on archives)
 
-*; PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
+SYNOPSIS
+	boolean bfd_set_archive_head(bfd *output, bfd *new_head);
 
 */
 
@@ -342,10 +356,15 @@ get_elt_at_filepos (archive, filepos)
   return NULL;
 }
 
-/*proto* bfd_get_elt_at_index
-Return the sub bfd contained within the archive at archive index n.
+/*
+FUNCTION
+	bfd_get_elt_at_index
 
-*; PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
+DESCRIPTION
+	Return the sub bfd contained within the archive at archive index n.
+
+SYNOPSIS
+	bfd *bfd_get_elt_at_index(bfd *, int);
 
 */
 bfd *
@@ -359,15 +378,20 @@ bfd_get_elt_at_index (abfd, index)
   return result;
 }
 
-/*proto* bfd_openr_next_archived_file
-Initially provided a BFD containing an archive and NULL, opens a BFD
-on the first contained element and returns that. Subsequent calls to
-bfd_openr_next_archived_file should pass the archive and the previous
-return value to return a created BFD to the next contained element.
-NULL is returned when there are no more.
+/*
+FUNCTION
+	bfd_openr_next_archived_file
 
-*; PROTO(bfd*, bfd_openr_next_archived_file,
-               (bfd *archive, bfd *previous));
+DESCRIPTION
+	Initially provided a BFD containing an archive and NULL, opens
+	a BFD on the first contained element and returns that.
+	Subsequent calls to bfd_openr_next_archived_file should pass
+	the archive and the previous return value to return a created
+	BFD to the next contained element. NULL is returned when there
+	are no more.
+
+SYNOPSIS
+	bfd* bfd_openr_next_archived_file(bfd *archive, bfd *previous);
 
 */
 
@@ -1234,7 +1258,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 
 
 /* A coff armap looks like :
- ARMAG
+ lARMAG
  struct ar_hdr with name = '/' 
  number of symbols
  offset of file for symbol 0
