@@ -3118,7 +3118,14 @@ get_frame_name (interp, list, fi)
   
   if (sal.symtab)
     {
-      objv[0] = Tcl_NewStringObj (funname, -1);
+      char *name = NULL;
+
+      if (funlang == language_cplus)
+        name = cplus_demangle (funname, 0);
+      if (name == NULL)
+        name = funname;
+
+      objv[0] = Tcl_NewStringObj (name, -1);
       Tcl_ListObjAppendElement (interp, list, objv[0]);
     }
   else
