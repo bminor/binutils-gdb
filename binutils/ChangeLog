@@ -1,5 +1,10 @@
 Mon Mar 18 18:05:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Add AC_FUNC_VFORK.
+	* configure, config.in: Rebuild.
+	* dlltool.c, nlmconv.c: Include <vfork.h> if HAVE_VFORK_H is
+	defined.
+
 	* stabs.c (parse_stab_range_type): A complex type is defined as a
 	subrange of itself with the high bound zero.
 	* ieee.c (ieee_complex_type): Don't crash on sizes of 12 or 16.
