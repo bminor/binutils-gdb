@@ -1,3 +1,16 @@
+start-sanitize-r5900
+Fri Oct 23 13:01:24 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* gas/mips/vu0.[sd]: Update tests for VRNEXT and VRGET
+	instructions, to match corrected operand synatx.
+
+end-sanitize-r5900
+Tue Oct 20 11:35:06 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/i386.exp: Run AMD insn test.
+	* gas/i386/amd.s: New test.
+	* gas/i386/amd.d: New test results.
+
 Sun Sep 20 01:00:01 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* gas/vtable/inherit1.l: Require only the word GAS somewere in the
