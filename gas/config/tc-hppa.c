@@ -1364,6 +1364,9 @@ cons_fix_new_hppa (frag, where, size, exp)
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, reloc_type,
 		hppa_field_selector, 32, 0, (char *) 0);
+
+  /* Reset field selector to its default state.  */
+  hppa_field_selector = 0;
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -3480,7 +3483,7 @@ pa_parse_number (s, result)
 	     or for an empty string.  For an empty string we
 	     will return zero.  That's a concession made for
 	     compatability with the braindamaged HP assemblers.  */
-	  if (*p == 0)
+	  if (*name == 0)
 	    num = 0;
 	  else
 	    {
