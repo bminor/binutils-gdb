@@ -72,6 +72,7 @@ CC = @CC@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
+GDBINIT = @GDBINIT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GT_NO = @GT_NO@
@@ -1599,7 +1600,7 @@ DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  .gdbinit
+CONFIG_CLEAN_FILES =  ${GDBINIT}
 noinst_PROGRAMS =  as-new$(EXEEXT) gasp-new$(EXEEXT)
 PROGRAMS =  $(noinst_PROGRAMS)
 
@@ -1687,7 +1688,7 @@ distclean-hdr:
 	-rm -f config.h
 
 maintainer-clean-hdr:
-.gdbinit: $(top_builddir)/config.status gdbinit.in
+${GDBINIT}: $(top_builddir)/config.status gdbinit.in
 	cd $(top_builddir) && CONFIG_FILES=$@:gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-noinstPROGRAMS:
