@@ -207,7 +207,7 @@ objcopy_SOURCES = objcopy.c not-strip.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 
 readelf_SOURCES = readelf.c version.c
-readelf_LDADD   = $(INTLLIBS)
+readelf_LDADD   = $(INTLLIBS) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
@@ -327,7 +327,7 @@ addr2line_LDADD = $(LDADD)
 addr2line_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 addr2line_LDFLAGS = 
 readelf_OBJECTS =  readelf.o version.o
-readelf_DEPENDENCIES = 
+readelf_DEPENDENCIES =  ../libiberty/libiberty.a
 readelf_LDFLAGS = 
 nm_new_OBJECTS =  nm.o bucomm.o version.o filemode.o
 nm_new_LDADD = $(LDADD)
@@ -1100,8 +1100,8 @@ mostlyclean-local:
 install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(tooldir)/bin

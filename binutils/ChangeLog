@@ -1,3 +1,9 @@
+Tue Jun 23 14:55:05 1998  Mike Stump  <mrs@wrs.com>
+
+	* Makefile.am (install-exec-local): Don't let EXEEXT interfere
+	with the program transform name.
+	* Makefile.in: Rebuild.
+
 Tue Jun 23 11:08:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: Rewrite to use fopen/fread ratehr than mmap.
