@@ -1,5 +1,8 @@
 2003-09-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* regcache.h (get_regcache_arch): New prototype.
+	* regcache.c (get_regcache_arch): New function.
+
 	* x86-64-tdep.c (x86_64_store_return_value): Remove spurious
 	whitespace.
 

@@ -32,6 +32,10 @@ void regcache_xfree (struct regcache *regcache);
 struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
 struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 
+/* Return REGCACHE's architecture.  */
+
+extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 

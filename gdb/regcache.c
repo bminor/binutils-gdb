@@ -344,6 +344,14 @@ make_cleanup_regcache_xfree (struct regcache *regcache)
   return make_cleanup (do_regcache_xfree, regcache);
 }
 
+/* Return REGCACHE's architecture.  */
+
+struct gdbarch *
+get_regcache_arch (const struct regcache *regcache)
+{
+  return regcache->descr->gdbarch;
+}
+
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 static char *
