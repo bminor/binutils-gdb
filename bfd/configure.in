@@ -88,17 +88,6 @@ case ${with_64_bit_bfd} in
     ;;
 esac
 
-case ${host64}-${target64}-${want64} in
-  *true*)
-    echo WORDSIZE=64 >> Makefile.2
-    echo 'ALL_BACKENDS = $(BFD64_BACKENDS) $(BFD32_BACKENDS)' >> Makefile.2
-    ;;
-  false-false-false)
-    echo WORDSIZE=32 >> Makefile.2
-    echo 'ALL_BACKENDS = $(BFD32_BACKENDS)' >> Makefile.2
-    ;;
-esac
-
 # The default vector in the primary target.
 DEFAULT_VECTOR=`sed -n '
 s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
@@ -161,12 +150,16 @@ if [ x${all_targets} = xfalse ]; then
 	bfd_elf32_m68k_vec)	tb="$tb elf32-m68k.o elf32.o elf.o" ;;
 	bfd_elf32_m88k_vec)	tb="$tb elf32-m88k.o elf32.o elf.o" ;;
 	bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
-	bfd_elf64_big_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o" ;;
-	bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o" ;;
+	bfd_elf64_big_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
+				target64=true ;;
+	bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
+				target64=true ;;
 #	start-sanitize-v9
-	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o" ;;
+	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o"
+				target64=true ;;
 #	end-sanitize-v9
-	demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o" ;;
+	demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o"
+				target64=true ;;
 	ecoff_big_vec)		tb="$tb coff-mips.o" ;;
 	ecoff_little_vec)	tb="$tb coff-mips.o" ;;
 	ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
@@ -192,8 +185,10 @@ if [ x${all_targets} = xfalse ]; then
 	nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
 	nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
 	nlm32_little_generic_vec) tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
-	nlm64_big_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o" ;;
-	nlm64_little_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o" ;;
+	nlm64_big_generic_vec)	tb="$tb nlm64-gen.o nlm64.o nlm.o"
+				target64=true ;;
+	nlm64_little_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o"
+				target64=true ;;
 	rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
 	shcoff_vec)		tb="$tb coff-sh.o reloc16.o" ;;
 	sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
@@ -231,8 +226,8 @@ if [ x${all_targets} = xfalse ]; then
     done
     ta="$f"
 
-    echo "BFD_BACKENDS = $tb" >> Makefile.2
-    echo "BFD_MACHINES = $ta" >> Makefile.2
+    bfd_backends="$tb"
+    bfd_machines="$ta"
 
     # Only set these if they will be nonempty, for the clever echo.
     test -n "$SELECT_VECS" &&
@@ -241,9 +236,25 @@ if [ x${all_targets} = xfalse ]; then
       selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
 
 else	# all_targets is true
-    echo 'BFD_BACKENDS = $(ALL_BACKENDS)' >> Makefile.2
-    echo 'BFD_MACHINES = $(ALL_MACHINES)' >> Makefile.2
+    bfd_backends='$(ALL_BACKENDS)'
+    bfd_machines='$(ALL_MACHINES)'
 fi	# all_targets is true
+
+case ${host64}-${target64}-${want64} in
+  *true*)
+    wordsize=64
+    all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
+    ;;
+  false-false-false)
+    wordsize=32
+    all_backends='$(BFD32_BACKENDS)'
+    ;;
+esac
+
+echo WORDSIZE=${wordsize}		>> Makefile.2
+echo ALL_BACKENDS=${all_backends}	>> Makefile.2
+echo BFD_BACKENDS=${bfd_backends}	>> Makefile.2
+echo BFD_MACHINES=${bfd_machines}	>> Makefile.2
 
 test -n "$DEFAULT_VECTOR" && defvec="$DEFAULT_VECTOR"
 
