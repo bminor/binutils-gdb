@@ -1,3 +1,8 @@
+Fri Jun  5 18:09:58 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (howto_table_ext): Change RELOC_BASE13 to use
+	complain_overflow_signed instead of complain_overflow_bitfield.
+
 Fri Jun  5 15:11:11 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elf.c (elf_map_symbols): Don't add section VMA to symbol value
