@@ -1,3 +1,10 @@
+2004-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/group-1.d: New.
+	* gas/ia64/group-1.s: Likewise.
+
+	* gas/ia64/ia64.exp: Add group-1 to test comdat group.
+
 2004-06-30  James E Wilson  <wilson@specifixinc.com>
 
 	* gas/ia64/dv-imply.d: Update.
