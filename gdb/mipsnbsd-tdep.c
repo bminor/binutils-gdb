@@ -1,5 +1,5 @@
 /* Target-dependent code for MIPS systems running NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -28,6 +28,7 @@
 
 #include "nbsd-tdep.h"
 #include "mipsnbsd-tdep.h"
+#include "mips-tdep.h"
 
 #include "solib-svr4.h"
 
