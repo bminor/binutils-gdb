@@ -1,3 +1,8 @@
+2001-11-27  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_bfd_discard_info): Skip if the input bfd isn't
+	ELF.
+
 Mon Nov 26 12:33:44 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* stabs.c (_bfd_discard_section_stabs): Use PARAMS in function

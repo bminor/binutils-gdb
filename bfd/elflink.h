@@ -7861,6 +7861,9 @@ elf_bfd_discard_info (info)
     return false;
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {
+      if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	continue;
+
       bed = get_elf_backend_data (abfd);
 
       if ((abfd->flags & DYNAMIC) != 0)
