@@ -34,6 +34,12 @@
 #include <string.h>
 #endif
 
+#ifdef NEED_DECLARATION_STRERROR
+#ifndef strerror
+extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
+#endif
+#endif
+
 #ifndef ATTR_NORETURN
 #if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))

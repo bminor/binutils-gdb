@@ -54,14 +54,15 @@ static void
 perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
-  extern int sys_nerr;
-  extern char *sys_errlist[];
   extern int errno;
 #endif
   const char *err;
   char *combined;
 
-  err = (errno < sys_nerr) ? sys_errlist[errno] : "unknown error";
+  err = strerror (errno);
+  if (err == NULL)
+    err = "unknown error";
+
   combined = (char *) alloca (strlen (err) + strlen (string) + 3);
   strcpy (combined, string);
   strcat (combined, ": ");

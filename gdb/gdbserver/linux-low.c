@@ -175,8 +175,7 @@ linux_attach_lwp (int pid, int tid)
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
       fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
-	       errno < sys_nerr ? sys_errlist[errno] : "unknown error",
-	       errno);
+	       strerror (errno), errno);
       fflush (stderr);
 
       /* If we fail to attach to an LWP, just return.  */

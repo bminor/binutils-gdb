@@ -1,5 +1,14 @@
 2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Check whether we need to prototype strerror.
+	* server.h: Optionally prototype strerror.
+	* gdbreplay.c (perror_with_name): Use strerror.
+	* linux-low.c (linux_attach_lwp): Use strerror.
+	* utils.c (perror_with_name): Use strerror.
+	* config.in, configure: Regenerated.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
 	* linux-sh-low.c (sh_regmap): Fix FP register offsets, reported by
 	SUGIOKA Toshinobu <sugioka@itonet.co.jp>.
 
