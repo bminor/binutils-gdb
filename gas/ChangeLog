@@ -1,3 +1,39 @@
+2002-06-08  Matt Thomas  <matt@3am-software.com>
+
+	* configure.in (vax-*-netbsdelf*, vax-*-netbsdaout*)
+	(vax-*-netbsd*): New targets.
+	* configure: Regenerate.
+	* config/aout_gnu.h (enum machine_type): Add M_VAX4K_NETBSD. 
+	* config/tc-vax.c: Add support for ELF and PIC.
+	(flag_want_pic): New flag. 
+	(float_cons): Fix prototype.
+	(md_apply_fix3): Adjust for BFD_ASSEMBLER.
+	(md_assemble): Introduce a new is_absolute local, and use it
+	rather than repeating the test.  Make fatal errors actually
+	fatal by using as_fatal as appropriate.  Adjust for BFD_ASSEMBLER. 
+	Add support for ELF.  Add support for PIC.
+	(md_convert_frag): Adjust for BFD_ASSEMBLER. 
+	(tc_aout_fix_to_chars): Only include if OBJ_AOUT and not
+	BFD_ASSEMBLER.
+	(vax_reg_parse): Make the % register prefix mandatory for ELF, 
+	optional for a.out, and not allowed for VMS.  Adjust all callers.
+	(md_create_short_jump): Add ATTRIBUTE_UNUSED to unused arguments.
+	(md_create_long_jump): Likewise. 
+	(md_undefined_symbol): Likewise.
+	(md_section_align): Likewise.
+	(md_shortopts): Allow -k and -K for ELF.
+	(md_parse_option): Set flag_want_pic if -k or -K.
+	(tc_headers_hook): New function if OBJ_AOUT and not BFD_ASSEMBLER.
+	(tc_gen_reloc): New function if BFD_ASSEMBLER.
+	* config/tc-vax.h (tc_headers_hook): Remove.
+	(TARGET_FORMAT): Set according to object format and target
+	environment.
+	(BFD_ARCH, TARGET_ARCH): Define.
+	(NO_RELOC): Adjust for BFD_ASSEMBLER.
+	(TC_RELOC_RTSYM_LOC_FIXUP, TC_FIX_ADJUSTABLE)
+	(tc_fix_adjustable): Define if BFD_ASSEMBLER.
+	* config/vax-inst.h (VAX_JSB, VAX_CALLS, VAX_CALLG): Define.
+
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

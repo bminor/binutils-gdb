@@ -480,6 +480,9 @@ changequote([,])dnl
       v850e-*-*)	    fmt=elf bfd_gas=yes ;;
       v850ea-*-*)	    fmt=elf bfd_gas=yes ;;
 
+      vax-*-netbsdelf*)     fmt=elf em=nbsd bfd_gas=yes ;;
+      vax-*-netbsdaout* | vax-*-netbsd*)
+			    fmt=aout em=nbsd ;;
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;
       vax-*-vms)            fmt=vms ;;
