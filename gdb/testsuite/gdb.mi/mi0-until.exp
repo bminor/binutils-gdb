@@ -60,6 +60,9 @@ proc test_running_to_foo {} {
 	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"foo\",args=\{\},file=\".*until.c\",line=\"10\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to main"
 	}
+	-re ".*$mi_gdb_prompt$" {
+	    fail "run to main (2)"
+	}
 	timeout {
 	    fail "run to main (timeout)"
 	}
