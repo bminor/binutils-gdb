@@ -195,7 +195,7 @@ gdb_expect {
 	    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }
-	    -re ".*in __wrap_main ().*$gdb_prompt $" {
+	    -re ".*in __wrap__?main ().*$gdb_prompt $" {
 		pass "step out of main (status wrapper)"
 	    }
             -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
@@ -245,7 +245,7 @@ if {! [target_info exists use_gdb_stub]
 		# exit" message.
 		pass "step to end of run"
 	    }
-	    -re "Single.*EXIT code 0.*Program exited normally.*$gdb_prompt $" {
+	    -re "Single.*EXIT code 0\r\n.*Program exited normally.*$gdb_prompt $" {
 		pass "step to end of run (status wrapper)"
 	    }
 	    -re ".*Single.*Program exited.*$gdb_prompt $" {

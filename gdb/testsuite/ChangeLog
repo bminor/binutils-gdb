@@ -1,5 +1,12 @@
 2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
 
+	* gdb.base/ending-run.exp: Fix expected string for _wrap_main to
+	allow correct handling of #ifdef UNDERSCORES from dejagnu/testglue.c.
+	Add newline to expected string in "step out of main (status wrapper)"
+	case.
+
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
 	* lib/gdb.exp (rerun_to_main): Allow restarting application.
 	* gdb.base/ena-dis-br.exp (rerun_to_main): Eliminate.
 
