@@ -80,7 +80,6 @@
 	* gdb.mi/basics.c: Add copyright notice.
 	* gdb.mi/var-cmd.c: Add copyright notice.
 
->>>>>>> 1.1015
 2004-08-23  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* lib/gdb.exp: Remove signed_keyword_not_used.
