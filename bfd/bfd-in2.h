@@ -1866,8 +1866,19 @@ This is a 24 bit absolute address. */
 /* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
   BFD_RELOC_M32R_18_PCREL,
 
-/* This is an 26-bit reloc with the right 2 bits assumed to be 0. */
+/* This is a 26-bit reloc with the right 2 bits assumed to be 0. */
   BFD_RELOC_M32R_26_PCREL,
+
+/* This is a 16-bit reloc containing the high 16 bits of an address
+used when the lower 16 bits are treated as unsigned. */
+  BFD_RELOC_M32R_HI16_ULO,
+
+/* This is a 16-bit reloc containing the high 16 bits of an address
+used when the lower 16 bits are treated as signed. */
+  BFD_RELOC_M32R_HI16_SLO,
+
+/* This is a 16-bit reloc containing the lower 16 bits of an address. */
+  BFD_RELOC_M32R_LO16,
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */

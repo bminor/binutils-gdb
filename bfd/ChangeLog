@@ -1,3 +1,11 @@
+start-sanitize-m32r
+Mon Jan 27 12:07:35 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* reloc.c: Add relocs BFD_RELOC_M32R_{HI16_[US]LO,LO16}.
+	* bfd-in2.h, libbfd.h: Regenerated.
+	* elf32-m32r.c: Add support for them.
+
+end-sanitize-m32r
 Mon Jan 27 12:25:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-arm.c (MY_swap_std_reloc_in): Remove unused r_length.

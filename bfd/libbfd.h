@@ -753,6 +753,9 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M32R_10_PCREL",
   "BFD_RELOC_M32R_18_PCREL",
   "BFD_RELOC_M32R_26_PCREL",
+  "BFD_RELOC_M32R_HI16_ULO",
+  "BFD_RELOC_M32R_HI16_SLO",
+  "BFD_RELOC_M32R_LO16",
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */

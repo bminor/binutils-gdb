@@ -1,5 +1,6 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996, 1997
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1663,6 +1664,8 @@ ENUMX
 ENUMX
   BFD_RELOC_26
 ENUMX
+  BFD_RELOC_24
+ENUMX
   BFD_RELOC_16
 ENUMX
   BFD_RELOC_14
@@ -1952,6 +1955,11 @@ ENUM
 ENUMDOC
   Bits 27..2 of the relocation address shifted right 2 bits;
      simple reloc otherwise.
+
+ENUM
+  BFD_RELOC_MIPS16_JMP
+ENUMDOC
+  The MIPS16 jump instruction.
 
 ENUM
   BFD_RELOC_HI16
@@ -2252,22 +2260,36 @@ COMMENT
 COMMENT
 {* start-sanitize-m32r *}
 ENUM
-  BFD_RELOC_M32R_UIMM24
+  BFD_RELOC_M32R_24
 ENUMDOC
   Mitsubishi M32R relocs.
-  This is a 24 bit address.
+  This is a 24 bit absolute address.
 ENUM
-  BFD_RELOC_M32R_DISP8
+  BFD_RELOC_M32R_10_PCREL
 ENUMDOC
-  This is a 10-bit reloc with the right 2 bits assumed to be 0.
+  This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0.
 ENUM
-  BFD_RELOC_M32R_DISP16
+  BFD_RELOC_M32R_18_PCREL
 ENUMDOC
   This is an 18-bit reloc with the right 2 bits assumed to be 0.
 ENUM
-  BFD_RELOC_M32R_DISP24
+  BFD_RELOC_M32R_26_PCREL
 ENUMDOC
-  This is an 26-bit reloc with the right 2 bits assumed to be 0.
+  This is a 26-bit reloc with the right 2 bits assumed to be 0.
+ENUM
+  BFD_RELOC_M32R_HI16_ULO
+ENUMDOC
+  This is a 16-bit reloc containing the high 16 bits of an address
+  used when the lower 16 bits are treated as unsigned.
+ENUM
+  BFD_RELOC_M32R_HI16_SLO
+ENUMDOC
+  This is a 16-bit reloc containing the high 16 bits of an address
+  used when the lower 16 bits are treated as signed.
+ENUM
+  BFD_RELOC_M32R_LO16
+ENUMDOC
+  This is a 16-bit reloc containing the lower 16 bits of an address.
 COMMENT
 {* end-sanitize-m32r *}
 
@@ -2296,6 +2318,16 @@ ENUMDOC
 COMMENT
 {* end-sanitize-v850 *}
 
+ENUM
+  BFD_RELOC_MN10300_32_PCREL
+ENUMDOC
+  This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
+  instruction.
+ENUM
+  BFD_RELOC_MN10300_16_PCREL
+ENUMDOC
+  This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
+  instruction.
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT
