@@ -442,6 +442,17 @@ static struct type *mips_double_register_type (void);
 static struct cmd_list_element *setmipscmdlist = NULL;
 static struct cmd_list_element *showmipscmdlist = NULL;
 
+/* FIXME: brobecker/2004-10-15: I suspect these two declarations can
+   be removed by a better ordering of the functions below.  But I want
+   to do that as a separate change later in order to separate real
+   changes and changes that just move some code around.  */
+static CORE_ADDR mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+                                       struct frame_info *next_frame,
+                                       struct mips_frame_cache *this_cache);
+static CORE_ADDR mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+                                       struct frame_info *next_frame,
+                                       struct mips_frame_cache *this_cache);
+
 /* Integer registers 0 thru 31 are handled explicitly by
    mips_register_name().  Processor specific registers 32 and above
    are listed in the followign tables.  */
@@ -1738,7 +1749,7 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       return cache;
 
-    heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
+    mips16_scan_prologue (start_addr, pc, next_frame, *this_cache);
   }
   
   /* SP_REGNUM, contains the value and not the address.  */
@@ -1841,7 +1852,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       return cache;
 
-    heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
+    mips32_scan_prologue (start_addr, pc, next_frame, *this_cache);
   }
   
   /* SP_REGNUM, contains the value and not the address.  */
@@ -2258,12 +2269,13 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
    Return the address of the first instruction past the prologue.  */
 
 static CORE_ADDR
-mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
+mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
                       struct frame_info *next_frame,
                       struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
+  CORE_ADDR sp;
   long frame_offset = 0;        /* Size of stack frame.  */
   long frame_adjust = 0;        /* Offset of FP from SP.  */
   int frame_reg = MIPS_SP_REGNUM;
@@ -2275,6 +2287,16 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
   int extend_bytes = 0;
   int prev_extend_bytes;
   CORE_ADDR end_prologue_addr = 0;
+
+  /* Can be called when there's no process, and hence when there's no
+     NEXT_FRAME.  */
+  if (next_frame != NULL)
+    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
+  else
+    sp = 0;
+
+  if (limit_pc > start_pc + 200)
+    limit_pc = start_pc + 200;
 
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
     {
@@ -2464,18 +2486,29 @@ reset_saved_regs (struct mips_frame_cache *this_cache)
    Return the address of the first instruction past the prologue.  */
 
 static CORE_ADDR
-mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
+mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
                       struct frame_info *next_frame,
                       struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
+  CORE_ADDR sp;
   long frame_offset;
   int  frame_reg = MIPS_SP_REGNUM;
 
   CORE_ADDR end_prologue_addr = 0;
   int seen_sp_adjust = 0;
   int load_immediate_bytes = 0;
+
+  /* Can be called when there's no process, and hence when there's no
+     NEXT_FRAME.  */
+  if (next_frame != NULL)
+    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
+  else
+    sp = 0;
+
+  if (limit_pc > start_pc + 200)
+    limit_pc = start_pc + 200;
 
 restart:
 
@@ -2650,28 +2683,19 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 		     struct frame_info *next_frame,
 		     struct mips_frame_cache *this_cache)
 {
-  CORE_ADDR sp;
-
-  /* Can be called when there's no process, and hence when there's no
-     NEXT_FRAME.  */
-  if (next_frame != NULL)
-    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
-  else
-    sp = 0;
-
   if (start_pc == 0)
     return NULL;
+
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
 
-  if (start_pc + 200 < limit_pc)
-    limit_pc = start_pc + 200;
   if (pc_is_mips16 (start_pc))
-    mips16_scan_prologue (start_pc, limit_pc, sp, next_frame, this_cache);
+    mips16_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
   else
-    mips32_scan_prologue (start_pc, limit_pc, sp, next_frame, this_cache);
+    mips32_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
+
   return &temp_proc_desc;
 }
 
@@ -4995,9 +5019,9 @@ mips_skip_prologue (CORE_ADDR pc)
     limit_pc = pc + 100;          /* Magic.  */
 
   if (pc_is_mips16 (pc))
-    return mips16_scan_prologue (pc, limit_pc, 0, NULL, NULL);
+    return mips16_scan_prologue (pc, limit_pc, NULL, NULL);
   else
-    return mips32_scan_prologue (pc, limit_pc, 0, NULL, NULL);
+    return mips32_scan_prologue (pc, limit_pc, NULL, NULL);
 }
 
 /* Root of all "set mips "/"show mips " commands. This will eventually be
