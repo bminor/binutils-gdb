@@ -1,5 +1,16 @@
 2004-12-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-hpux-nat.c (ss_mpsfu_high): Remove define.
+	(hppa_hpux_save_state_offset): New function, replacing variable
+	with the same name.
+	(hppa_cannot_fetch_register, hppa_cannot_store_register): Remove
+	functions.
+	(hppa_hpux_fetch_register): Don't call hppa_cannot_fetch_register.
+	Use new hppa_hpux_save_state_offset function.  Add special
+	handling for handling 64-bit "flags" register.
+	(hppa_hpux_store_register): Likewise.
+	(hppa_hpux_child_can_run): Tweak comment.
+
 	* inf-ttrace.c (inf_ttrace_him): Set TTEVT_BPT_SSTEP if available.
 	(inf_ttrace_attach): Likewise.
 	(inf_ttrace_resume_callback): New function.

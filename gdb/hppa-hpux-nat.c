@@ -36,159 +36,48 @@
 #include "inf-ptrace.h"
 #include "inf-ttrace.h"
 
-/* HP-UX 10.20 has a different name than HP-UX 11.00 and later.
-   Apparently, the intended usage changed.  Unfortunately HP didn't
-   care about backwards compatibility.  */
-#ifdef ss_tlsp
-#define ss_mpsfu_high ss_tlsp
-#endif
+/* Non-zero if we should pretend not to be a runnable target.  */
+int child_suppress_run = 0;
 
-int child_suppress_run = 0;     /* Non-zero if we should pretend not to be
-				   a runnable target.  */
+/* Return the offset of register REGNUM within `struct save_state'.
+   The offset returns depends on the flags in the "flags" register and
+   the register size (32-bit or 64-bit).  These are taken from
+   REGCACHE.  */
 
-static int hppa_hpux_save_state_offset[] =
+LONGEST
+hppa_hpux_save_state_offset (struct regcache *regcache, int regnum)
 {
-  ssoff(ss_flags),
-  ssoff(ss_narrow.ss_gr1),
-  ssoff(ss_narrow.ss_rp),
-  ssoff(ss_narrow.ss_gr3),
-  ssoff(ss_narrow.ss_gr4),
-  ssoff(ss_narrow.ss_gr5),
-  ssoff(ss_narrow.ss_gr6),
-  ssoff(ss_narrow.ss_gr7),
-  ssoff(ss_narrow.ss_gr8),
-  ssoff(ss_narrow.ss_gr9),
-  ssoff(ss_narrow.ss_gr10),
-  ssoff(ss_narrow.ss_gr11),
-  ssoff(ss_narrow.ss_gr12),
-  ssoff(ss_narrow.ss_gr13),
-  ssoff(ss_narrow.ss_gr14),
-  ssoff(ss_narrow.ss_gr15),
-  ssoff(ss_narrow.ss_gr16),
-  ssoff(ss_narrow.ss_gr17),
-  ssoff(ss_narrow.ss_gr18),
-  ssoff(ss_narrow.ss_gr19),
-  ssoff(ss_narrow.ss_gr20),
-  ssoff(ss_narrow.ss_gr21),
-  ssoff(ss_narrow.ss_gr22),
-  ssoff(ss_narrow.ss_arg3),
-  ssoff(ss_narrow.ss_arg2),
-  ssoff(ss_narrow.ss_arg1),
-  ssoff(ss_narrow.ss_arg0),
-  ssoff(ss_narrow.ss_dp),
-  ssoff(ss_narrow.ss_ret0),
-  ssoff(ss_narrow.ss_ret1),
-  ssoff(ss_narrow.ss_sp),
-  ssoff(ss_narrow.ss_gr31),
-  ssoff(ss_narrow.ss_cr11),
-  ssoff(ss_narrow.ss_pcoq_head),
-  ssoff(ss_narrow.ss_pcsq_head),
-  ssoff(ss_narrow.ss_pcoq_tail),
-  ssoff(ss_narrow.ss_pcsq_tail),
-  ssoff(ss_narrow.ss_cr15),
-  ssoff(ss_narrow.ss_cr19),
-  ssoff(ss_narrow.ss_cr20),
-  ssoff(ss_narrow.ss_cr21),
-  ssoff(ss_narrow.ss_cr22),
-  ssoff(ss_narrow.ss_cpustate),
-  ssoff(ss_narrow.ss_sr4),
-  ssoff(ss_narrow.ss_sr0),
-  ssoff(ss_narrow.ss_sr1),
-  ssoff(ss_narrow.ss_sr2),
-  ssoff(ss_narrow.ss_sr3),
-  ssoff(ss_narrow.ss_sr5),
-  ssoff(ss_narrow.ss_sr6),
-  ssoff(ss_narrow.ss_sr7),
-  ssoff(ss_narrow.ss_cr0),
-  ssoff(ss_narrow.ss_cr8),
-  ssoff(ss_narrow.ss_cr9),
-  ssoff(ss_narrow.ss_cr10),
-  ssoff(ss_narrow.ss_cr12),
-  ssoff(ss_narrow.ss_cr13),
-  ssoff(ss_narrow.ss_cr24),
-  ssoff(ss_narrow.ss_cr25),
-  ssoff(ss_narrow.ss_cr26),
-  ssoff(ss_narrow.ss_mpsfu_high),
-  ssoff(ss_narrow.ss_mpsfu_low),
-  ssoff(ss_narrow.ss_mpsfu_ovflo),
-  ssoff(ss_pad),
-  ssoff(ss_frstat),
-  ssoff(ss_frexcp1),
-  ssoff(ss_frexcp2),
-  ssoff(ss_frexcp3),
-  ssoff(ss_frexcp4),
-  ssoff(ss_frexcp5),
-  ssoff(ss_frexcp6),
-  ssoff(ss_frexcp7),
-  ssoff(ss_fr4_hi),
-  ssoff(ss_fr4_lo),
-  ssoff(ss_fr5_hi),
-  ssoff(ss_fr5_lo),
-  ssoff(ss_fr6_hi),
-  ssoff(ss_fr6_lo),
-  ssoff(ss_fr7_hi),
-  ssoff(ss_fr7_lo),
-  ssoff(ss_fr8_hi),
-  ssoff(ss_fr8_lo),
-  ssoff(ss_fr9_hi),
-  ssoff(ss_fr9_lo),
-  ssoff(ss_fr10_hi),
-  ssoff(ss_fr10_lo),
-  ssoff(ss_fr11_hi),
-  ssoff(ss_fr11_lo),
-  ssoff(ss_fr12_hi),
-  ssoff(ss_fr12_lo),
-  ssoff(ss_fr13_hi),
-  ssoff(ss_fr13_lo),
-  ssoff(ss_fr14_hi),
-  ssoff(ss_fr14_lo),
-  ssoff(ss_fr15_hi),
-  ssoff(ss_fr15_lo),
-  ssoff(ss_fr16_hi),
-  ssoff(ss_fr16_lo),
-  ssoff(ss_fr17_hi),
-  ssoff(ss_fr17_lo),
-  ssoff(ss_fr18_hi),
-  ssoff(ss_fr18_lo),
-  ssoff(ss_fr19_hi),
-  ssoff(ss_fr19_lo),
-  ssoff(ss_fr20_hi),
-  ssoff(ss_fr20_lo),
-  ssoff(ss_fr21_hi),
-  ssoff(ss_fr21_lo),
-  ssoff(ss_fr22_hi),
-  ssoff(ss_fr22_lo),
-  ssoff(ss_fr23_hi),
-  ssoff(ss_fr23_lo),
-  ssoff(ss_fr24_hi),
-  ssoff(ss_fr24_lo),
-  ssoff(ss_fr25_hi),
-  ssoff(ss_fr25_lo),
-  ssoff(ss_fr26_hi),
-  ssoff(ss_fr26_lo),
-  ssoff(ss_fr27_hi),
-  ssoff(ss_fr27_lo),
-  ssoff(ss_fr28_hi),
-  ssoff(ss_fr28_lo),
-  ssoff(ss_fr29_hi),
-  ssoff(ss_fr29_lo),
-  ssoff(ss_fr30_hi),
-  ssoff(ss_fr30_lo),
-  ssoff(ss_fr31_hi),
-  ssoff(ss_fr31_lo)
-};
+  LONGEST offset;
 
-static int
-hppa_hpux_cannot_fetch_register (int regnum)
-{
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
-  return (regnum >= ARRAY_SIZE(hppa_hpux_save_state_offset));
-}
+  if (regnum == HPPA_FLAGS_REGNUM)
+    return ssoff (ss_flags);
 
-static int
-hppa_hpux_cannot_store_register (int regnum)
-{
-  return hppa_hpux_cannot_fetch_register (regnum);
+  if (HPPA_R0_REGNUM < regnum && regnum < HPPA_FP0_REGNUM)
+    {
+      struct gdbarch *arch = get_regcache_arch (regcache);
+      size_t size = register_size (arch, HPPA_R1_REGNUM);
+      ULONGEST flags;
+
+      gdb_assert (size == 4 || size == 8);
+
+      regcache_cooked_read_unsigned (regcache, HPPA_FLAGS_REGNUM, &flags);
+      if (flags & SS_WIDEREGS)
+	offset = ssoff (ss_wide) + (8 - size) + (regnum - HPPA_R0_REGNUM) * 8;
+      else
+	offset = ssoff (ss_narrow) + (regnum - HPPA_R1_REGNUM) * 4;
+    }
+  else
+    {
+      struct gdbarch *arch = get_regcache_arch (regcache);
+      size_t size = register_size (arch, HPPA_FP0_REGNUM);
+
+      gdb_assert (size == 4 || size == 8);
+      gdb_assert (regnum >= HPPA_FP0_REGNUM);
+      offset = ssoff(ss_fpblock) + (regnum - HPPA_FP0_REGNUM) * size;
+    }
+
+  gdb_assert (offset < sizeof (save_state_t));
+  return offset;
 }
 
 /* Just in case a future version of PA-RISC HP-UX won't have ptrace(2)
@@ -206,16 +95,10 @@ hppa_hpux_fetch_register (int regnum)
   pid_t pid;
   int i;
 
-  if (hppa_hpux_cannot_fetch_register (regnum))
-    {
-      regcache_raw_supply (current_regcache, regnum, NULL);
-      return;
-    }
-
   pid = ptid_get_pid (inferior_ptid);
 
-  /* This isn't really an address.  But ptrace thinks of it as one.  */
-  addr = hppa_hpux_save_state_offset[regnum];
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = hppa_hpux_save_state_offset(current_regcache, regnum);
   size = register_size (current_gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
@@ -247,6 +130,14 @@ hppa_hpux_fetch_register (int regnum)
   }
 #endif
 
+  /* Take care with the "flags" register.  It's stored as an `int' in
+     `struct save_state', even for 64-bit code.  */
+  if (regnum == HPPA_FLAGS_REGNUM && size == 8)
+    {
+      ULONGEST flags = extract_unsigned_integer (buf, 4);
+      store_unsigned_integer (buf, 8, flags);
+    }
+
   regcache_raw_supply (current_regcache, regnum, buf);
 }
 
@@ -270,19 +161,25 @@ hppa_hpux_store_register (int regnum)
   PTRACE_TYPE_RET *buf;
   pid_t pid;
 
-  if (hppa_hpux_cannot_store_register (regnum))
-    return;
-
   pid = ptid_get_pid (inferior_ptid);
 
-  /* This isn't really an address.  But ptrace thinks of it as one.  */
-  addr = hppa_hpux_save_state_offset[regnum];
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = hppa_hpux_save_state_offset(current_regcache, regnum);
   size = register_size (current_gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
 
   regcache_raw_collect (current_regcache, regnum, buf);
+
+  /* Take care with the "flags" register.  It's stored as an `int' in
+     `struct save_state', even for 64-bit code.  */
+  if (regnum == HPPA_FLAGS_REGNUM && size == 8)
+    {
+      ULONGEST flags = extract_unsigned_integer (buf, 8);
+      store_unsigned_integer (buf, 4, flags);
+      size = 4;
+    }
 
 #ifdef HAVE_TTRACE
   {
@@ -327,10 +224,9 @@ hppa_hpux_store_inferior_registers (int regnum)
 static int
 hppa_hpux_child_can_run (void)
 {
-  /* This variable is controlled by modules that layer their own process
-     structure atop that provided here.  hpux-thread.c does this because
-     of the HP-UX user-mode level thread model.  */
-
+  /* This variable is controlled by modules that layer their own
+     process structure atop that provided here.  hpux-thread.c does
+     this because of the HP-UX user-mode level thread model.  */
   return !child_suppress_run;
 }
 
