@@ -65,26 +65,21 @@ static int set_target_endian = 0;
 /* #ha(value) denotes the high adjusted value: bits 16 through 31 of
   the indicated value, compensating for #lo() being treated as a
   signed number.  */
-#define PPC_HA(v) ((((v) >> 16) + (((v) >> 15) & 1)) & 0xffff)
+#define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
 /* #higher(value) denotes bits 32 through 47 of the indicated value.  */
 #define PPC_HIGHER(v) (((v) >> 32) & 0xffff)
 
 /* #highera(value) denotes bits 32 through 47 of the indicated value,
    compensating for #lo() being treated as a signed number.  */
-#define PPC_HIGHERA(v) \
-  ((((v) >> 32) + (((v) & 0xffff8000) == 0xffff8000)) & 0xffff)
+#define PPC_HIGHERA(v) PPC_HIGHER ((v) + 0x8000)
 
 /* #highest(value) denotes bits 48 through 63 of the indicated value.  */
 #define PPC_HIGHEST(v) (((v) >> 48) & 0xffff)
 
 /* #highesta(value) denotes bits 48 through 63 of the indicated value,
-   compensating for #lo being treated as a signed number.
-   Generate 0xffffffff8000 with arithmetic here, for portability.  */
-#define PPC_HIGHESTA(v) \
-  ((((v) >> 48)								      \
-    + (((v) & (((valueT) 1 << 48) - 0x8000)) == ((valueT) 1 << 48) - 0x8000)) \
-   & 0xffff)
+   compensating for #lo being treated as a signed number.  */
+#define PPC_HIGHESTA(v) PPC_HIGHEST ((v) + 0x8000)
 
 #define SEX16(val) ((((val) & 0xffff) ^ 0x8000) - 0x8000)
 
@@ -704,7 +699,9 @@ static int ppc_cpu = 0;
 
 /* The size of the processor we are assembling for.  This is either
    PPC_OPCODE_32 or PPC_OPCODE_64.  */
-static unsigned long ppc_size = PPC_OPCODE_32;
+static unsigned long ppc_size = (BFD_DEFAULT_TARGET_SIZE == 64
+				 ? PPC_OPCODE_64
+				 : PPC_OPCODE_32);
 
 /* Whether to target xcoff64.  */
 static int ppc_xcoff64 = 0;
@@ -799,14 +796,14 @@ symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
 #endif /* OBJ_ELF */
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "b:l:usm:K:VQ:";
+const char *const md_shortopts = "b:l:usm:K:VQ:";
 #else
-CONST char *md_shortopts = "um:";
+const char *const md_shortopts = "um:";
 #endif
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -1130,9 +1127,11 @@ ppc_target_format ()
 #endif
 #endif
 #ifdef OBJ_ELF
+  boolean is64 = BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64;
+
   return (target_big_endian
-	  ? (BFD_DEFAULT_TARGET_SIZE == 64 ? "elf64-powerpc" : "elf32-powerpc")
-	  : (BFD_DEFAULT_TARGET_SIZE == 64 ? "elf64-powerpcle" : "elf32-powerpcle"));
+	  ? (is64 ? "elf64-powerpc" : "elf32-powerpc")
+	  : (is64 ? "elf64-powerpcle" : "elf32-powerpcle"));
 #endif
 }
 
@@ -1152,11 +1151,6 @@ md_begin ()
   ppc_set_cpu ();
 
 #ifdef OBJ_ELF
-  /* If we're going to generate a 64-bit ABI file, then we need
-     the 64-bit capable instructions.  */
-  if (BFD_DEFAULT_TARGET_SIZE == 64)
-    ppc_size = PPC_OPCODE_64;
-
   /* Set the ELF flags if desired.  */
   if (ppc_flags && !msolaris)
     bfd_set_private_flags (stdoutput, ppc_flags);
@@ -1329,7 +1323,7 @@ ppc_elf_suffix (str_p, exp_p)
   struct map_bfd {
     char *string;
     int length;
-    bfd_reloc_code_real_type reloc;
+    int reloc;
   };
 
   char ident[20];
@@ -1337,65 +1331,65 @@ ppc_elf_suffix (str_p, exp_p)
   char *str2;
   int ch;
   int len;
-  struct map_bfd *ptr;
+  const struct map_bfd *ptr;
 
 #define MAP(str,reloc) { str, sizeof (str)-1, reloc }
 
-  static struct map_bfd mapping[] = {
-    MAP ("l",		BFD_RELOC_LO16),
-    MAP ("h",		BFD_RELOC_HI16),
-    MAP ("ha",		BFD_RELOC_HI16_S),
-    MAP ("brtaken",	BFD_RELOC_PPC_B16_BRTAKEN),
-    MAP ("brntaken",	BFD_RELOC_PPC_B16_BRNTAKEN),
-    MAP ("got",		BFD_RELOC_16_GOTOFF),
-    MAP ("got@l",	BFD_RELOC_LO16_GOTOFF),
-    MAP ("got@h",	BFD_RELOC_HI16_GOTOFF),
-    MAP ("got@ha",	BFD_RELOC_HI16_S_GOTOFF),
-    MAP ("fixup",	BFD_RELOC_CTOR),   /* warnings with -mrelocatable */
-    MAP ("plt",		BFD_RELOC_24_PLT_PCREL),
-    MAP ("pltrel24",	BFD_RELOC_24_PLT_PCREL),
-    MAP ("copy",	BFD_RELOC_PPC_COPY),
-    MAP ("globdat",	BFD_RELOC_PPC_GLOB_DAT),
-    MAP ("local24pc",	BFD_RELOC_PPC_LOCAL24PC),
-    MAP ("local",	BFD_RELOC_PPC_LOCAL24PC),
-    MAP ("pltrel",	BFD_RELOC_32_PLT_PCREL),
-    MAP ("plt@l",	BFD_RELOC_LO16_PLTOFF),
-    MAP ("plt@h",	BFD_RELOC_HI16_PLTOFF),
-    MAP ("plt@ha",	BFD_RELOC_HI16_S_PLTOFF),
-    MAP ("sdarel",	BFD_RELOC_GPREL16),
-    MAP ("sectoff",	BFD_RELOC_32_BASEREL),
-    MAP ("sectoff@l",	BFD_RELOC_LO16_BASEREL),
-    MAP ("sectoff@h",	BFD_RELOC_HI16_BASEREL),
-    MAP ("sectoff@ha",	BFD_RELOC_HI16_S_BASEREL),
-    MAP ("naddr",	BFD_RELOC_PPC_EMB_NADDR32),
-    MAP ("naddr16",	BFD_RELOC_PPC_EMB_NADDR16),
-    MAP ("naddr@l",	BFD_RELOC_PPC_EMB_NADDR16_LO),
-    MAP ("naddr@h",	BFD_RELOC_PPC_EMB_NADDR16_HI),
-    MAP ("naddr@ha",	BFD_RELOC_PPC_EMB_NADDR16_HA),
-    MAP ("sdai16",	BFD_RELOC_PPC_EMB_SDAI16),
-    MAP ("sda2rel",	BFD_RELOC_PPC_EMB_SDA2REL),
-    MAP ("sda2i16",	BFD_RELOC_PPC_EMB_SDA2I16),
-    MAP ("sda21",	BFD_RELOC_PPC_EMB_SDA21),
-    MAP ("mrkref",	BFD_RELOC_PPC_EMB_MRKREF),
-    MAP ("relsect",	BFD_RELOC_PPC_EMB_RELSEC16),
-    MAP ("relsect@l",	BFD_RELOC_PPC_EMB_RELST_LO),
-    MAP ("relsect@h",	BFD_RELOC_PPC_EMB_RELST_HI),
-    MAP ("relsect@ha",	BFD_RELOC_PPC_EMB_RELST_HA),
-    MAP ("bitfld",	BFD_RELOC_PPC_EMB_BIT_FLD),
-    MAP ("relsda",	BFD_RELOC_PPC_EMB_RELSDA),
-    MAP ("xgot",	BFD_RELOC_PPC_TOC16),
+  static const struct map_bfd mapping[] = {
+    MAP ("l",		(int) BFD_RELOC_LO16),
+    MAP ("h",		(int) BFD_RELOC_HI16),
+    MAP ("ha",		(int) BFD_RELOC_HI16_S),
+    MAP ("brtaken",	(int) BFD_RELOC_PPC_B16_BRTAKEN),
+    MAP ("brntaken",	(int) BFD_RELOC_PPC_B16_BRNTAKEN),
+    MAP ("got",		(int) BFD_RELOC_16_GOTOFF),
+    MAP ("got@l",	(int) BFD_RELOC_LO16_GOTOFF),
+    MAP ("got@h",	(int) BFD_RELOC_HI16_GOTOFF),
+    MAP ("got@ha",	(int) BFD_RELOC_HI16_S_GOTOFF),
+    MAP ("fixup",	(int) BFD_RELOC_CTOR), /* warning with -mrelocatable */
+    MAP ("plt",		(int) BFD_RELOC_24_PLT_PCREL),
+    MAP ("pltrel24",	(int) BFD_RELOC_24_PLT_PCREL),
+    MAP ("copy",	(int) BFD_RELOC_PPC_COPY),
+    MAP ("globdat",	(int) BFD_RELOC_PPC_GLOB_DAT),
+    MAP ("local24pc",	(int) BFD_RELOC_PPC_LOCAL24PC),
+    MAP ("local",	(int) BFD_RELOC_PPC_LOCAL24PC),
+    MAP ("pltrel",	(int) BFD_RELOC_32_PLT_PCREL),
+    MAP ("plt@l",	(int) BFD_RELOC_LO16_PLTOFF),
+    MAP ("plt@h",	(int) BFD_RELOC_HI16_PLTOFF),
+    MAP ("plt@ha",	(int) BFD_RELOC_HI16_S_PLTOFF),
+    MAP ("sdarel",	(int) BFD_RELOC_GPREL16),
+    MAP ("sectoff",	(int) BFD_RELOC_32_BASEREL),
+    MAP ("sectoff@l",	(int) BFD_RELOC_LO16_BASEREL),
+    MAP ("sectoff@h",	(int) BFD_RELOC_HI16_BASEREL),
+    MAP ("sectoff@ha",	(int) BFD_RELOC_HI16_S_BASEREL),
+    MAP ("naddr",	(int) BFD_RELOC_PPC_EMB_NADDR32),
+    MAP ("naddr16",	(int) BFD_RELOC_PPC_EMB_NADDR16),
+    MAP ("naddr@l",	(int) BFD_RELOC_PPC_EMB_NADDR16_LO),
+    MAP ("naddr@h",	(int) BFD_RELOC_PPC_EMB_NADDR16_HI),
+    MAP ("naddr@ha",	(int) BFD_RELOC_PPC_EMB_NADDR16_HA),
+    MAP ("sdai16",	(int) BFD_RELOC_PPC_EMB_SDAI16),
+    MAP ("sda2rel",	(int) BFD_RELOC_PPC_EMB_SDA2REL),
+    MAP ("sda2i16",	(int) BFD_RELOC_PPC_EMB_SDA2I16),
+    MAP ("sda21",	(int) BFD_RELOC_PPC_EMB_SDA21),
+    MAP ("mrkref",	(int) BFD_RELOC_PPC_EMB_MRKREF),
+    MAP ("relsect",	(int) BFD_RELOC_PPC_EMB_RELSEC16),
+    MAP ("relsect@l",	(int) BFD_RELOC_PPC_EMB_RELST_LO),
+    MAP ("relsect@h",	(int) BFD_RELOC_PPC_EMB_RELST_HI),
+    MAP ("relsect@ha",	(int) BFD_RELOC_PPC_EMB_RELST_HA),
+    MAP ("bitfld",	(int) BFD_RELOC_PPC_EMB_BIT_FLD),
+    MAP ("relsda",	(int) BFD_RELOC_PPC_EMB_RELSDA),
+    MAP ("xgot",	(int) BFD_RELOC_PPC_TOC16),
 #if BFD_DEFAULT_TARGET_SIZE == 64
-    MAP ("higher",	BFD_RELOC_PPC64_HIGHER),
-    MAP ("highera",	BFD_RELOC_PPC64_HIGHER_S),
-    MAP ("highest",	BFD_RELOC_PPC64_HIGHEST),
-    MAP ("highesta",	BFD_RELOC_PPC64_HIGHEST_S),
-    MAP ("tocbase",	BFD_RELOC_PPC64_TOC),
-    MAP ("toc",		BFD_RELOC_PPC_TOC16),
-    MAP ("toc@l",       BFD_RELOC_PPC64_TOC16_LO),
-    MAP ("toc@h",       BFD_RELOC_PPC64_TOC16_HI),
-    MAP ("toc@ha",      BFD_RELOC_PPC64_TOC16_HA),
+    MAP ("higher",	- (int) BFD_RELOC_PPC64_HIGHER),
+    MAP ("highera",	- (int) BFD_RELOC_PPC64_HIGHER_S),
+    MAP ("highest",	- (int) BFD_RELOC_PPC64_HIGHEST),
+    MAP ("highesta",	- (int) BFD_RELOC_PPC64_HIGHEST_S),
+    MAP ("tocbase",	- (int) BFD_RELOC_PPC64_TOC),
+    MAP ("toc",		- (int) BFD_RELOC_PPC_TOC16),
+    MAP ("toc@l",	- (int) BFD_RELOC_PPC64_TOC16_LO),
+    MAP ("toc@h",	- (int) BFD_RELOC_PPC64_TOC16_HI),
+    MAP ("toc@ha",	- (int) BFD_RELOC_PPC64_TOC16_HA),
 #endif
-    { (char *) 0,	0,	BFD_RELOC_UNUSED }
+    { (char *) 0, 0,	(int) BFD_RELOC_UNUSED }
   };
 
   if (*str++ != '@')
@@ -1418,11 +1412,20 @@ ppc_elf_suffix (str_p, exp_p)
 	&& len == ptr->length
 	&& memcmp (ident, ptr->string, ptr->length) == 0)
       {
+	int reloc = ptr->reloc;
+
+	if (BFD_DEFAULT_TARGET_SIZE == 64 && reloc < 0)
+	  {
+	    if (ppc_size != PPC_OPCODE_64)
+	      return BFD_RELOC_UNUSED;
+	    reloc = -reloc;
+	  }
+
 	if (exp_p->X_add_number != 0
-	    && (ptr->reloc == BFD_RELOC_16_GOTOFF
-		|| ptr->reloc == BFD_RELOC_LO16_GOTOFF
-		|| ptr->reloc == BFD_RELOC_HI16_GOTOFF
-		|| ptr->reloc == BFD_RELOC_HI16_S_GOTOFF))
+	    && (reloc == (int) BFD_RELOC_16_GOTOFF
+		|| reloc == (int) BFD_RELOC_LO16_GOTOFF
+		|| reloc == (int) BFD_RELOC_HI16_GOTOFF
+		|| reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
 	  as_warn (_("identifier+constant@got means identifier@got+constant"));
 
 	/* Now check for identifier@suffix+constant.  */
@@ -1445,7 +1448,7 @@ ppc_elf_suffix (str_p, exp_p)
 	*str_p = str;
 
 	if (BFD_DEFAULT_TARGET_SIZE == 64
-	    && ptr->reloc == BFD_RELOC_PPC64_TOC
+	    && reloc == (int) BFD_RELOC_PPC64_TOC
 	    && exp_p->X_op == O_symbol)
 	  {
 	    /* This reloc type ignores the symbol.  Change the symbol
@@ -1454,7 +1457,7 @@ ppc_elf_suffix (str_p, exp_p)
 	    exp_p->X_add_symbol = &abs_symbol;
 	  }
 
-	return ptr->reloc;
+	return (bfd_reloc_code_real_type) reloc;
       }
 
   return BFD_RELOC_UNUSED;
@@ -3651,7 +3654,12 @@ ppc_tc (ignore)
 }
 
 /* Pseudo-op .machine.  */
-/* FIXME: `.machine' is a nop for the moment.  */
+/* FIXME: `.machine' is a nop for the moment.  It would be nice to
+   accept this directive on the first line of input and set ppc_size
+   and the target format accordingly.  Unfortunately, the target
+   format is selected in output-file.c:output_file_create before we
+   even get to md_begin, so it's not possible without changing
+   as.c:main.  */
 
 static void
 ppc_machine (ignore)

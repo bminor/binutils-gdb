@@ -1,5 +1,18 @@
 2001-10-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (PPC_HA, PPC_HIGHERA, PPC_HIGHESTA): Simplify.
+	(ppc_size): Select PPC_OPCODE_64 if 64 bit.
+	(md_begin): Don't set ppc_size here.
+	(ppc_target_format): Test ppc_size as well as BFD_DEFAULT_TARGET_SIZE.
+	(md_shortopts): Constify.
+	(md_longopts): Likewise.
+	(md_longopts_size): Likewise.
+	(ppc_elf_suffix): Only allow 64-bit relocs when ppc_size specifies
+	64-bit opcodes.
+	(ppc_machine): Explain why this function is a nop.
+
+2001-10-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* bit_fix.h: Comment typo fix.
 	* config/tc-mips.c: Likewise.
 	* config/tc-sh.c: Likewise.
