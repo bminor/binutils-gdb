@@ -2913,12 +2913,11 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   /* Search until we get a match for NAME.  */
   while (1)
     {
+      /* It is assumed here that macros will never generate 
+         MIPS-3D instructions.  */
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo,
-			       (mips_opts.isa
-	      		        | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
-			       mips_arch)
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch)
 	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
