@@ -234,6 +234,7 @@ som_solib_add (arg_string, from_tty, target)
       struct so_list *new_so;
       struct so_list *so_list = so_list_head;
       struct section_table *p;
+      struct stat statbuf;
 
       if (addr == 0)
 	break;
@@ -268,7 +269,22 @@ som_solib_add (arg_string, from_tty, target)
 	  so_list = so_list->next;
 	}
 
-      /* We've already loaded this one or it's the main program, skip it.  */
+      /* See if the file exists.  If not, give a warning, but don't
+	 die.  */
+      status = stat (name, &statbuf);
+      if (status == -1)
+	{
+	  warning ("Can't find file %s referenced in dld_list.", name);
+
+	  status = target_read_memory (addr + 36, buf, 4);
+	  if (status != 0)
+	    goto err;
+
+	  addr = (CORE_ADDR) extract_unsigned_integer (buf, 4);
+	  continue;
+	}
+
+      /* If we've already loaded this one or it's the main program, skip it.  */
       if (so_list || !strcmp (name, symfile_objfile->name))
 	{
 	  status = target_read_memory (addr + 36, buf, 4);

@@ -1,3 +1,10 @@
+Fri Oct 13 10:57:40 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* somsolib.c (som_solib_add): Just give a warning if a file
+	mentioned in the dld_list can't be found.
+	* config/pa/tm-hppah.h (FRAME_SAVED_PC_IN_SIGTRAMP): Dig out
+	the PC from the PC queues rather than %r31.
+
 Thu Oct 12 13:36:15 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* corelow.c (core_open): Don't update the to_sections and
