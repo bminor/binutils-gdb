@@ -182,9 +182,9 @@ typedef struct _i386_insn i386_insn;
 /* List of chars besides those in app.c:symbol_chars that can start an
    operand.  Used to prevent the scrubber eating vital white-space.  */
 #ifdef LEX_AT
-const char extra_symbol_chars[] = "*%-(@";
+const char extra_symbol_chars[] = "*%-(@[";
 #else
-const char extra_symbol_chars[] = "*%-(";
+const char extra_symbol_chars[] = "*%-([";
 #endif
 
 #if (defined (TE_I386AIX)				\

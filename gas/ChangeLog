@@ -1,3 +1,7 @@
+2002-05-01  Andrew Macleod  <amacleod@cygnus.com>
+
+	* config/tc-i386.c (extra_symbol_chars): Add '[' to the list.
+
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (cvt_frag_to_fill): Set fr_offset to zero on .org
