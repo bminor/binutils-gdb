@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.0
+VERSION = 4.0.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -226,7 +226,7 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
 OTHERS = Makefile.in depend alldeps.mak \
 	 createtags munch configure configure.in config.sub \
-	 ChangeLog ChangeLog-3.x \
+	 ChangeLog ChangeLog-3.x refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING expread.tab.c \
 	 copying.c Convex.notes copying.awk \
@@ -278,7 +278,7 @@ install: gdb
 	mv $(bindir)/gdb.new $(bindir)/gdb
 	$(M_INSTALL)
 
-init.c: $(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(TSOBS)
+init.c: $(srcdir)/munch $(OBS) $(TSOBS)
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(TSOBS) > init.c
 
 gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
@@ -632,6 +632,12 @@ force_update :
 cplus-dem.o : cplus-dem.c
 	${CC} -c ${CFLAGS} -Dnounderscore \
 	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
+
+# GNU Make has an annoying habit of putting *all* the Makefile variables
+# into the environment, unless you include this target as a circumvention.
+# Rumor is that this will be fixed (and this target can be removed)
+# in GNU Make 4.0.
+.NOEXPORT:
 
 # This is the end of "Makefile.in".  When built into "Makefile"
 # by the configure script, two things are added below this point:

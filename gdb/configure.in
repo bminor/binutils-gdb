@@ -65,6 +65,7 @@ mips)
 	sony)	gdb_host=bigmips ;;
 	dec)	gdb_host=dec3100 ;;
 	little)	gdb_host=littlemips ;;
+	sgi)	gdb_host=irix3 ;;
 	esac
 	;;
 
@@ -161,6 +162,7 @@ mips)
 	sony)	gdb_target=bigmips ;;
 	dec)	gdb_target=dec3100 ;;
 	little)	gdb_target=littlemips ;;
+	sgi)	gdb_target=irix3 ;;
 	esac
 	;;
 

@@ -20,7 +20,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
+#ifdef sgi
+#include <sys/inst.h>
+#else
 #include <mips/inst.h>
+#endif
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -43,6 +47,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
+
+/* For now we stub this out; sgi format is super-hairy (and completely
+   different in the new release) */
+
+#ifdef sgi
+void
+fetch_core_registers ()
+{
+  return;
+}
+
+void
+fetch_inferior_registers ()
+{
+  return;
+}
+
+store_inferior_registers (regno)
+     int regno;
+{
+  return;
+}
+
+
+#else
 
 /* Get all registers from the inferior */
 
@@ -72,9 +101,10 @@ fetch_inferior_registers ()
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
+void
 store_inferior_registers (regno)
      int regno;
-{
+ {
   register unsigned int regaddr;
   char buf[80];
 
@@ -109,6 +139,8 @@ store_inferior_registers (regno)
 	}
     }
 }
+
+#endif /* sgi */
 
 #if 0
 void
