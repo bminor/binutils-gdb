@@ -13,35 +13,56 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   oYou should have received a copy of the GNU General Public License
+   You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef __struc_symbol_h__
 #define __struc_symbol_h__
 
-struct symbol			/* our version of an nlist node */
+#ifdef BFD_ASSEMBLER
+/* The BFD code wants to walk the list in both directions.  */
+#undef  SYMBOLS_NEED_BACKPOINTERS
+#define SYMBOLS_NEED_BACKPOINTERS
+#endif
+
+/* our version of an nlist node */
+struct symbol
 {
-  obj_symbol_type sy_symbol;	/* what we write in .o file (if permitted) */
-  unsigned long sy_name_offset;	/* 4-origin position of sy_name in symbols */
-  /* part of object file. */
-  /* 0 for (nameless) .stabd symbols. */
-  /* Not used until write_object_file() time. */
-  long sy_number;		/* 24 bit symbol number. */
-  /* Symbol numbers start at 0 and are */
-  /* unsigned. */
+#ifndef BFD_ASSEMBLER
+  /* The (4-origin) position of sy_name in the symbol table of the object
+     file.  This will be 0 for (nameless) .stabd symbols.
+
+     Not used until write_object_file() time. */
+  unsigned long sy_name_offset;
+
+  /* What we write in .o file (if permitted).  */
+  obj_symbol_type sy_symbol;
+
+  /* The 24 bit symbol number.  Symbol numbers start at 0 and are unsigned. */
+  long sy_number;
+#else
+  /* BFD symbol */
+  asymbol *bsym;
+#endif
+
   struct symbol *sy_next;	/* forward chain, or NULL */
 #ifdef SYMBOLS_NEED_BACKPOINTERS
   struct symbol *sy_previous;	/* backward chain, or NULL */
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
+
   struct frag *sy_frag;		/* NULL or -> frag this symbol attaches to. */
+
   struct symbol *sy_forward;	/* value is really that of this other symbol */
-  /* We will probably want to add a sy_segment here soon. */
+
+  int written : 1;
+
+#ifdef TARGET_SYMBOL_FIELDS
+  TARGET_SYMBOL_FIELDS
+#endif
 };
 
 typedef struct symbol symbolS;
-
-typedef unsigned valueT;	/* The type of n_value. Helps casting. */
 
 #ifndef WORKING_DOT_WORD
 struct broken_word
@@ -52,7 +73,7 @@ struct broken_word
     fragS *dispfrag;		/* where to add the break */
     symbolS *add;		/* symbol_x */
     symbolS *sub;		/* - symbol_y */
-    long addnum;		/* + addnum */
+    offsetT addnum;		/* + addnum */
     int added;			/* nasty thing happend yet? */
     /* 1: added and has a long-jump */
     /* 2: added but uses someone elses long-jump */
@@ -67,7 +88,7 @@ extern struct broken_word *broken_words;
  * This will change for infinite-segments support (e.g. COFF).
  */
 /* #define	SYMBOL_TYPE_TO_SEGMENT(symP)  ( N_TYPE_seg [(int) (symP)->sy_type & N_TYPE] ) */
-extern segT N_TYPE_seg[];	/* subseg.c */
+extern const segT N_TYPE_seg[];	/* subseg.c */
 
 #define	SEGMENT_TO_SYMBOL_TYPE(seg)  ( seg_N_TYPE [(int) (seg)] )
 extern const short seg_N_TYPE[];/* subseg.c */
@@ -75,21 +96,13 @@ extern const short seg_N_TYPE[];/* subseg.c */
 #define	N_REGISTER	30	/* Fake N_TYPE value for SEG_REGISTER */
 
 #ifdef SYMBOLS_NEED_BACKPOINTERS
-#if __STDC__ == 1
 
-void symbol_clear_list_pointers (symbolS * symbolP);
-void symbol_insert (symbolS * addme, symbolS * target, symbolS ** rootP, symbolS ** lastP);
-void symbol_remove (symbolS * symbolP, symbolS ** rootP, symbolS ** lastP);
-void verify_symbol_chain (symbolS * rootP, symbolS * lastP);
-
-#else /* not __STDC__ */
-
-void symbol_clear_list_pointers ();
-void symbol_insert ();
-void symbol_remove ();
-void verify_symbol_chain ();
-
-#endif /* not __STDC__ */
+void symbol_clear_list_pointers PARAMS ((symbolS * symbolP));
+void symbol_insert PARAMS ((symbolS * addme, symbolS * target,
+			    symbolS ** rootP, symbolS ** lastP));
+void symbol_remove PARAMS ((symbolS * symbolP, symbolS ** rootP,
+			    symbolS ** lastP));
+void verify_symbol_chain PARAMS ((symbolS * rootP, symbolS * lastP));
 
 #define symbol_previous(s) ((s)->sy_previous)
 
@@ -99,21 +112,11 @@ void verify_symbol_chain ();
 
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 
-#if __STDC__ == 1
-void symbol_append (symbolS * addme, symbolS * target, symbolS ** rootP, symbolS ** lastP);
-#else /* not __STDC__ */
-void symbol_append ();
-#endif /* not __STDC__ */
+void symbol_append PARAMS ((symbolS * addme, symbolS * target,
+			    symbolS ** rootP, symbolS ** lastP));
 
 #define symbol_next(s)	((s)->sy_next)
 
 #endif /* __struc_symbol_h__ */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of struc-symbol.h */

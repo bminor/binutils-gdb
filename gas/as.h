@@ -52,6 +52,14 @@
 #include "host.h"
 #include "flonum.h"
 
+/* Make Saber happier on obstack.h.  */
+#ifdef SABER
+#undef  __PTR_TO_INT
+#define __PTR_TO_INT(P) ((int)(P))
+#undef  __INT_TO_PTR
+#define __INT_TO_PTR(P) ((char *)(P))
+#endif
+
 #ifndef __LINE__
 #define __LINE__ "unknown"
 #endif /* __LINE__ */
@@ -60,15 +68,24 @@
 #define __FILE__ "unknown"
 #endif /* __FILE__ */
 
+#ifndef __STDC__
+#ifndef const
+#define const
+#endif
+#ifndef volatile
+#define volatile
+#endif
+#endif /* ! __STDC__ */
+
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 
 #define xfree free
 
-#define BAD_CASE(value) \
+#define BAD_CASE(val) \
 { \
       as_fatal("Case value %d unexpected at line %d of file \"%s\"\n", \
-	       value, __LINE__, __FILE__); \
+	       val, __LINE__, __FILE__); \
 	   }
 
 
@@ -76,7 +93,15 @@
 
 #ifdef BFD_ASSEMBLER
 extern bfd *stdoutput;
+typedef bfd_vma addressT;
+typedef bfd_signed_vma offsetT;
+#else
+typedef unsigned long addressT;
+typedef long offsetT;
 #endif
+
+/* Type of symbol value, etc.  For use in prototypes.  */
+typedef addressT valueT;
 
 #ifndef COMMON
 #ifdef TEST
@@ -174,7 +199,7 @@ typedef enum _segT
     SEG_DEBUG,			/* Debug segment */
     SEG_NTV,			/* Transfert vector preload segment */
     SEG_PTV,			/* Transfert vector postload segment */
-    SEG_REGISTER,		/* Mythical: a register-valued expression */
+    SEG_REGISTER		/* Mythical: a register-valued expression */
   } segT;
 
 #define SEG_MAXIMUM_ORDINAL (SEG_REGISTER)
@@ -199,7 +224,7 @@ COMMON segT now_seg;
 #ifdef BFD_ASSEMBLER
 #define segment_name(SEG)	bfd_get_section_name (stdoutput, SEG)
 #else
-extern char *CONST seg_name[];
+extern char *const seg_name[];
 #define segment_name(SEG)	seg_name[(int) (SEG)]
 #endif
 
@@ -243,11 +268,11 @@ typedef enum _relax_state
        character. */
     rs_org,
 
-    rs_machine_dependent,
+    rs_machine_dependent
 
 #ifndef WORKING_DOT_WORD
     /* JF: gunpoint */
-    rs_broken_word,
+      , rs_broken_word
 #endif
   } relax_stateT;
 
@@ -258,7 +283,7 @@ typedef unsigned long relax_substateT;
 
 /* Enough bits for address, but still an integer type.
    Could be a problem, cross-assembling for 64-bit machines.  */
-typedef unsigned long relax_addressT;
+typedef addressT relax_addressT;
 
 
 /* frags.c */
@@ -281,18 +306,18 @@ typedef unsigned long relax_addressT;
 struct frag
 {
   /* Object file address. */
-  unsigned long fr_address;
+  addressT fr_address;
   /* Chain forward; ascending address order.  Rooted in frch_root. */
   struct frag *fr_next;
 
   /* (Fixed) number of chars we know we have.  May be 0. */
-  long fr_fix;
+  offsetT fr_fix;
   /* (Variable) number of chars after above.  May be 0. */
-  long fr_var;
+  offsetT fr_var;
   /* For variable-length tail. */
   struct symbol *fr_symbol;
   /* For variable-length tail. */
-  long fr_offset;
+  offsetT fr_offset;
   /* Points to opcode low addr byte, for relaxation.  */
   char *fr_opcode;
 
@@ -323,7 +348,7 @@ typedef struct frag fragS;
    included in frchain_now.  The fr_fix field is bogus; instead, use:
    obstack_next_free(&frags)-frag_now->fr_literal.  */
 COMMON fragS *frag_now;
-#define frag_now_fix() (obstack_next_free (&frags) - frag_now->fr_literal)
+#define frag_now_fix() ((char*)obstack_next_free (&frags) - frag_now->fr_literal)
 
 /* For foreign-segment symbol fixups. */
 COMMON fragS zero_address_frag;
@@ -387,6 +412,8 @@ PRINTF_LIKE (as_bad);
 PRINTF_LIKE (as_fatal);
 PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
+void fprint_value PARAMS ((FILE *file, addressT value));
+void sprint_value PARAMS ((char *buf, addressT value));
 
 int had_errors PARAMS ((void));
 int had_warnings PARAMS ((void));
@@ -396,7 +423,9 @@ char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
 char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
+#if 0 /* incompatible with solaris 2 native cc */
 char *strstr PARAMS ((const char *s, const char *wanted));
+#endif
 char *xmalloc PARAMS ((long size));
 char *xrealloc PARAMS ((char *ptr, long n));
 int do_scrub_next_char PARAMS ((int (*get) (), void (*unget) ()));
@@ -426,7 +455,7 @@ void scrub_to_string PARAMS ((int ch));
 void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
 #ifdef BFD_ASSEMBLER
-segT subseg_new PARAMS ((char *name, subsegT subseg));
+segT subseg_new PARAMS ((const char *name, subsegT subseg));
 void subseg_set PARAMS ((segT seg, subsegT subseg));
 #else
 void subseg_new PARAMS ((segT seg, subsegT subseg));
@@ -449,5 +478,21 @@ void subseg_new PARAMS ((segT seg, subsegT subseg));
 #include "obj.h"
 
 #include "listing.h"
+
+#ifdef BFD_ASSEMBLER
+/* Someday perhaps this will be selectable at run-time.  */
+#if defined (OBJ_AOUT) || defined (OBJ_BOUT)
+#define OUTPUT_FLAVOR bfd_target_aout_flavour
+#endif
+#ifdef OBJ_COFF
+#define OUTPUT_FLAVOR bfd_target_coff_flavour
+#endif
+#ifdef OBJ_ECOFF
+#define OUTPUT_FLAVOR bfd_target_ecoff_flavour
+#endif
+#ifdef OBJ_ELF
+#define OUTPUT_FLAVOR bfd_target_elf_flavour
+#endif
+#endif /* BFD_ASSEMBLER */
 
 /* end of as.h */
