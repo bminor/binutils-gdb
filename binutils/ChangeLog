@@ -1,3 +1,10 @@
+2001-02-28  Philip Blundell  <pb@futuretv.com>
+
+	* readelf.c (decode_ARM_machine_flags): Explicitly mention which
+	ABI is in use; remove ambiguity between the "unknown" EABI and
+	unrecognised ABIs.  Handle version 2 ARM EABI.  Update uses of
+	renamed EF_xx constants.
+
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in (BFD_VERSION): New.

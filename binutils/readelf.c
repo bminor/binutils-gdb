@@ -1359,12 +1359,13 @@ decode_ARM_machine_flags (e_flags, buf)
   switch (eabi)
     {
     default:
-      strcat (buf, ", <unknown EABI>");
+      strcat (buf, ", <unrecognised EABI>");
       if (e_flags)
 	unknown = 1;
       break;
 
     case EF_ARM_EABI_VER1:
+      strcat (buf, ", Version1 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -1375,7 +1376,7 @@ decode_ARM_machine_flags (e_flags, buf)
 
 	  switch (flag)
 	    {
-	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_INTERWORK.  */
+	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
 	      strcat (buf, ", sorted symbol tables");
 	      break;
 
@@ -1386,7 +1387,8 @@ decode_ARM_machine_flags (e_flags, buf)
 	}
       break;
 
-    case EF_ARM_EABI_UNKNOWN:
+    case EF_ARM_EABI_VER2:
+      strcat (buf, ", Version2 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -1397,35 +1399,66 @@ decode_ARM_machine_flags (e_flags, buf)
 
 	  switch (flag)
 	    {
-	    case EF_INTERWORK:
+	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
+	      strcat (buf, ", sorted symbol tables");
+	      break;
+
+	    case EF_ARM_DYNSYMSUSESEGIDX:
+	      strcat (buf, ", dynamic symbols use segment index");
+	      break;
+
+	    case EF_ARM_MAPSYMSFIRST:
+	      strcat (buf, ", mapping symbols precede others");
+	      break;
+
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+      break;
+
+    case EF_ARM_EABI_UNKNOWN:
+      strcat (buf, ", GNU EABI");
+      while (e_flags)
+	{
+	  unsigned flag;
+
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+
+	  switch (flag)
+	    {
+	    case EF_ARM_INTERWORK:
 	      strcat (buf, ", interworking enabled");
 	      break;
 
-	    case EF_APCS_26:
+	    case EF_ARM_APCS_26:
 	      strcat (buf, ", uses APCS/26");
 	      break;
 
-	    case EF_APCS_FLOAT:
+	    case EF_ARM_APCS_FLOAT:
 	      strcat (buf, ", uses APCS/float");
 	      break;
 
-	    case EF_PIC:
+	    case EF_ARM_PIC:
 	      strcat (buf, ", position independent");
 	      break;
 
-	    case EF_ALIGN8:
+	    case EF_ARM_ALIGN8:
 	      strcat (buf, ", 8 bit structure alignment");
 	      break;
 
-	    case EF_NEW_ABI:
+	    case EF_ARM_NEW_ABI:
 	      strcat (buf, ", uses new ABI");
 	      break;
 
-	    case EF_OLD_ABI:
+	    case EF_ARM_OLD_ABI:
 	      strcat (buf, ", uses old ABI");
 	      break;
 
-	    case EF_SOFT_FLOAT:
+	    case EF_ARM_SOFT_FLOAT:
 	      strcat (buf, ", software FP");
 	      break;
 
