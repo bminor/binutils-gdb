@@ -48,7 +48,7 @@
 #include "serial.h"
 
 #include "block_io.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include "env.h"
 
 /* Number of bytes that we send to nindy.  I believe this is defined by

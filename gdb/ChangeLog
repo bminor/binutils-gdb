@@ -14,6 +14,7 @@ Wed Feb  9 18:59:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	infttrace.c, lin-thread.c, infptrace.c, gnu-nat.c, gdbarch.c,
  	fork-child.c, command.c: Include "gdb_wait.h" instead of <wait.h>
  	or <sys/wait.h>.
+	* nindy-share/nindy.c, nindy-share/Onindy.c: Ditto.
 
 	* gdb_wait.h: New file.  Based on ../include/wait.h. Include
  	<sys/wait.h> or <wait.h> and then define any missing WIF macros.
