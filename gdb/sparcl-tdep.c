@@ -392,7 +392,7 @@ send_udp_buf (fd, buf, len)
 
   error ("Short count in send: tried %d, sent %d\n", len, cc);
 }
-#endif /* __GO32__ */
+#endif /* HAVE_SOCKETS */
 
 static void
 sparclite_open (name, from_tty)
@@ -500,7 +500,7 @@ or: target sparclite udp host");
 	error ("SPARClite appears to be ill.");
 #else
       error ("UDP downloading is not supported for DOS hosts.");
-#endif /* __GO32__ */
+#endif /* HAVE_SOCKETS */
     }
 
   printf_unfiltered ("[SPARClite appears to be alive]\n");
@@ -812,7 +812,7 @@ sparclite_udp_write (from_bfd, from_sec, from_addr, to_addr, len)
     }
 }
 
-#endif /* __GO32__ */
+#endif /* HAVE_SOCKETS */
 
 static void
 sparclite_download (filename, from_tty)
