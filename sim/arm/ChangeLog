@@ -1,3 +1,7 @@
+2001-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.h (NEGBRANCH): Fix defintion.
+
 2001-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c (LoadSMult): Update base address register after
