@@ -914,15 +914,9 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
   struct cmd_list_element *last_list = 0;
   struct cmd_list_element *c =
   lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
-#if 0
-  /* This is wrong for complete_command.  */
-  char *ptr = (*line) + strlen (*line) - 1;
 
-  /* Clear off trailing whitespace.  */
-  while (ptr >= *line && (*ptr == ' ' || *ptr == '\t'))
-    ptr--;
-  *(ptr + 1) = '\0';
-#endif
+  /* Note: Do not remove trailing whitespace here because this
+     would be wrong for complete_command.  Jim Kingdon  */
 
   if (!c)
     {
