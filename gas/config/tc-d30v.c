@@ -28,7 +28,7 @@
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
-const char *md_shortopts = "OnN";
+const char *md_shortopts = "OnNcC";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
@@ -36,6 +36,7 @@ const char FLT_CHARS[] = "dD";
 #define NOP_ALL 2
 static int warn_nops = 0;
 static int Optimizing = 0;
+static int warn_register_name_conflicts = 1;
 
 #define FORCE_SHORT	1
 #define FORCE_LONG	2
@@ -112,7 +113,8 @@ static struct d30v_format *find_format PARAMS ((struct d30v_opcode *opcode,
 			expressionS ops[],int fsize, int cmp_hack));
 static long long build_insn PARAMS ((struct d30v_insn *opcode, expressionS *opers));
 static void write_long PARAMS ((struct d30v_insn *opcode, long long insn, Fixups *fx));
-static void write_1_short PARAMS ((struct d30v_insn *opcode, long long insn, Fixups *fx));
+static void write_1_short PARAMS ((struct d30v_insn *opcode, long long insn,
+				   Fixups *fx, int use_sequential));
 static int write_2_short PARAMS ((struct d30v_insn *opcode1, long long insn1, 
 		   struct d30v_insn *opcode2, long long insn2, exec_type_enum exec_type, Fixups *fx));
 static long long do_assemble PARAMS ((char *str, struct d30v_insn *opcode,
@@ -166,6 +168,13 @@ reg_name_search (name)
   low = 0;
   high = reg_name_cnt () - 1;
 
+  if (symbol_find (name) != NULL)
+    {
+      if (warn_register_name_conflicts)
+	as_warn ("Register name %s conflicts with symbol of the same name",
+		 name);
+    }
+  
   do
     {
       middle = (low + high) / 2;
@@ -175,9 +184,10 @@ reg_name_search (name)
       else if (cmp > 0)
 	low = middle + 1;
       else 
-	  return pre_defined_registers[middle].value;
+	return pre_defined_registers[middle].value;
     }
   while (low <= high);
+  
   return -1;
 }
 
@@ -263,8 +273,10 @@ md_show_usage (stream)
   fprintf (stream, _("\nD30V options:\n\
 -O                      Make adjacent short instructions parallel if possible.\n\
 -n                      Warn about all NOPs inserted by the assembler.\n\
--N			Warn about NOPs inserted after word multiplies.\n"));
-} 
+-N			Warn about NOPs inserted after word multiplies.\n\
+-c                      Warn about symbols whoes names match register names.\n\
+-C                      Opposite of -C.  -c is the default.\n"));
+}
 
 int
 md_parse_option (c, arg)
@@ -289,6 +301,14 @@ md_parse_option (c, arg)
       warn_nops = NOP_MULTIPLY;
       break;
 
+    case 'c':
+      warn_register_name_conflicts = 1;
+      break;
+
+    case 'C':
+      warn_register_name_conflicts = 0;
+      break;
+      
     default:
       return 0;
     }
@@ -663,26 +683,46 @@ write_long (opcode, insn, fx)
 }
 
 
-/* write out a short form instruction by itself */
+/* Write out a short form instruction by itself.  */
 static void
-write_1_short (opcode, insn, fx) 
+write_1_short (opcode, insn, fx, use_sequential) 
      struct d30v_insn *opcode;
      long long insn;
      Fixups *fx;
+     int use_sequential;
 {
   char *f = frag_more (8);
   int i, where;
 
   if (warn_nops == NOP_ALL)
-    as_warn (_("NOP inserted"));
+    as_warn (_("%s NOP inserted"), use_sequential ?
+	     _("sequential") : _("parallel"));
 
-  /* the other container needs to be NOP */
-  /* according to 4.3.1: for FM=00, sub-instructions performed only
-     by IU cannot be encoded in L-container. */
+  /* The other container needs to be NOP. */
+  if (use_sequential)
+    {
+      /* Use a sequential NOP rather than a parallel one,
+	 as the current instruction is a FLAG_MUL32 type one
+	 and the next instruction is a load.  */
+      
+      /* According to 4.3.1: for FM=01, sub-instructions performed
+	 only by IU cannot be encoded in L-container. */
+      
+      if (opcode->op->unit == IU)
+	insn |= FM10 | NOP_LEFT;	/* right then left */
+      else
+	insn = FM01 | (insn << 32) | NOP_RIGHT;	/* left then right */
+    }
+  else
+    {
+      /* According to 4.3.1: for FM=00, sub-instructions performed
+	 only by IU cannot be encoded in L-container. */
+      
   if (opcode->op->unit == IU)
     insn |= FM00 | NOP_LEFT;			/* right container */
   else
     insn = FM00 | (insn << 32) | NOP_RIGHT;	/* left container */
+    }
 
   d30v_number_to_chars (f, insn, 8);
 
@@ -720,8 +760,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
-      write_1_short (opcode1, insn1, fx->next);
-      return (1);
+      write_1_short (opcode1, insn1, fx->next, false);
+      return 1;
     }
 
   switch (exec_type) 
@@ -1097,7 +1137,7 @@ md_assemble (str)
 
   if ((prev_insn != -1) && prev_seg
        && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
-    d30v_cleanup ();
+    d30v_cleanup (false);
 
   if (d30v_current_align < 3)
     d30v_align (3, NULL, d30v_last_label);
@@ -1135,7 +1175,7 @@ md_assemble (str)
 	  
 	  /* if two instructions are present and we already have one saved
 	     then first write it out */
-	  d30v_cleanup ();
+	  d30v_cleanup (false);
 	  
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode, 1, 0);
@@ -1193,29 +1233,32 @@ md_assemble (str)
       else
 	{
 	  /* Can't parallelize, flush previous instruction and emit a word of NOPS,
-	     unless the previous instruction is a NOP, in whcih case just flush it,
+	     unless the previous instruction is a NOP, in which case just flush it,
 	     as this will generate a word of NOPs for us.  */
 
 	  if (prev_insn != -1 && (strcmp (prev_opcode.op->name, "nop") == 0))
-	    {
-	      d30v_cleanup ();
-	    }
+	    d30v_cleanup (false);
 	  else
 	    {
 	      char * f;
 	      
-	      d30v_cleanup ();
-
-	      f = frag_more (8);
-	      d30v_number_to_chars (f, NOP2, 8);
-	      if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
+	      if (prev_insn != -1)
+		d30v_cleanup (true);
+	      else
 		{
-		  if (opcode.op->flags_used & FLAG_MEM)
-		    as_warn (_("word of NOPs added between word multiply and load"));
-		  else
-		    as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
+		  f = frag_more (8);
+		  d30v_number_to_chars (f, NOP2, 8);
+		  
+		  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
+		    {
+		      if (opcode.op->flags_used & FLAG_MEM)
+			as_warn (_("word of NOPs added between word multiply and load"));
+		      else
+			as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
+		    }
 		}
 	    }
+	  
 	  extype = EXEC_UNKNOWN;
 	}
     }
@@ -1223,23 +1266,8 @@ md_assemble (str)
 	   && cur_mul32_p
 	   && (prev_opcode.op->flags_used & (FLAG_MEM | FLAG_MUL16)))
     {
-      /* Can't parallelize, flush current instruction and emit a word of NOPS */
-      write_1_short (& opcode, (long) insn, fixups->next->next);
-      
-      if (strcmp (opcode.op->name, "nop") != 0)
-	{
-	  char * f;
-	  	  
-	  f = frag_more (8);
-	  d30v_number_to_chars (f, NOP2, 8);
-	  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)
-	    {
-	      if (opcode.op->flags_used & FLAG_MEM)
-		as_warn (_("word of NOPs added between word multiply and load"));
-	      else
-		as_warn (_("word of NOPs added between word multiply and 16-bit multiply"));
-	    }
-	}
+      /* Can't parallelize, flush current instruction and add a sequential NOP. */
+      write_1_short (& opcode, (long) insn, fixups->next->next, true);
       
       /* Make the previous instruction the current one.  */
       extype = EXEC_UNKNOWN;
@@ -1249,6 +1277,7 @@ md_assemble (str)
       prev_insn = -1;
       cur_mul32_p = prev_mul32_p;
       prev_mul32_p = 0;
+      memcpy (&opcode, &prev_opcode, sizeof (prev_opcode));
     }
 
   /* If this is a long instruction, write it and any previous short instruction.  */
@@ -1256,7 +1285,7 @@ md_assemble (str)
     {
       if (extype != EXEC_UNKNOWN) 
 	as_fatal (_("Unable to mix instructions as specified"));
-      d30v_cleanup ();
+      d30v_cleanup (false);
       write_long (&opcode, insn, fixups);
       prev_insn = -1;
     }
@@ -1512,7 +1541,9 @@ find_format (opcode, myops, fsize, cmp_hack)
 		{
 		  if (X_op != O_register
 		      || ((flags & OPERAND_ACC) && !(num & OPERAND_ACC))
+		      || (!(flags & OPERAND_ACC) && (num & OPERAND_ACC))
 		      || ((flags & OPERAND_FLAG) && !(num & OPERAND_FLAG))
+		      || (!(flags & OPERAND_FLAG) && (num & OPERAND_FLAG))
 		      || ((flags & OPERAND_CONTROL)
 			  && !(num & (OPERAND_CONTROL | OPERAND_FLAG))))
 		    {
@@ -1536,6 +1567,15 @@ find_format (opcode, myops, fsize, cmp_hack)
 		{
 		  /* A number can be a constant or symbol expression.  */
 
+		  /* If we have found a register name, but that name also
+		     matches a symbol, then re-parse the name as an expression.  */
+		  if (X_op == O_register
+		      && symbol_find ((char *) myops[j].X_op_symbol))
+		    {
+		      input_line_pointer = (char *) myops[j].X_op_symbol;
+		      expression (& myops[j]);
+		    }
+		      
 		  /* Turn an expression into a symbol for later resolution.  */
 		  if (X_op != O_absent && X_op != O_constant
 		      && X_op != O_symbol && X_op != O_register
@@ -1795,7 +1835,8 @@ md_apply_fix3 (fixp, valuep, seg)
    instructions to see if it can package them with the next instruction, there may
    be a short instruction that still needs written.  */
 int
-d30v_cleanup ()
+d30v_cleanup (use_sequential)
+     int use_sequential;
 {
   segT seg;
   subsegT subseg;
@@ -1805,9 +1846,11 @@ d30v_cleanup ()
       seg = now_seg;
       subseg = now_subseg;
       subseg_set (prev_seg, prev_subseg);
-      write_1_short (&prev_opcode, (long)prev_insn, fixups->next);
+      write_1_short (&prev_opcode, (long)prev_insn, fixups->next, use_sequential);
       subseg_set (seg, subseg);
       prev_insn = -1;
+      if (use_sequential)
+	prev_mul32_p = false;
     }
   return 1;
 }
@@ -1840,7 +1883,7 @@ d30v_start_line ()
     c++;
 
   if (*c == '.')
-    d30v_cleanup ();
+    d30v_cleanup (false);
 }
 
 static void 
@@ -1872,7 +1915,7 @@ d30v_frob_label (lab)
      symbolS *lab;
 {
   /* Emit any pending instructions.  */
-  d30v_cleanup ();
+  d30v_cleanup (false);
 
   /* Update the label's address with the current output pointer.  */
   lab->sy_frag = frag_now;
@@ -1923,7 +1966,7 @@ d30v_align (n, pfill, label)
      can be changed under our feet, for example by a .ascii
      directive in the source code.  cf testsuite/gas/d30v/reloc.s  */
 
-  d30v_cleanup ();
+  d30v_cleanup (false);
 
   if (pfill == NULL)
     {

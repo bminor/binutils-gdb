@@ -1,3 +1,14 @@
+Tue Sep 22 15:44:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (find_format): Do not accept flag registers as
+	general purpose registers.
+	(find_format): If an immediate value is expected at a given place
+	in a format, but a register name has been provided instead, check
+	to see if that register name matches the name of a predefined
+	symbol and if it does, then use the symbol instead.
+	(reg_name_search): If a register name matches a symbol name,
+	prefer the register name to the symbol name.
+
 start-sanitize-sky
 Mon Sep 21 13:08:01 1998  Doug Evans  <devans@canuck.cygnus.com>
 
