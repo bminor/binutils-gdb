@@ -1417,14 +1417,13 @@ obj_elf_version (ignore)
 {
   char *name;
   unsigned int c;
-  char ch;
   char *p;
   asection *seg = now_seg;
   subsegT subseg = now_subseg;
   Elf_Internal_Note i_note;
   Elf_External_Note e_note;
   asection *note_secp = (asection *) NULL;
-  int i, len;
+  int len;
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
@@ -1454,19 +1453,14 @@ obj_elf_version (ignore)
       i_note.descsz = 0;	/* no description */
       i_note.type = NT_VERSION;
       p = frag_more (sizeof (e_note.namesz));
-      md_number_to_chars (p, (valueT) i_note.namesz, 4);
+      md_number_to_chars (p, (valueT) i_note.namesz, sizeof (e_note.namesz));
       p = frag_more (sizeof (e_note.descsz));
-      md_number_to_chars (p, (valueT) i_note.descsz, 4);
+      md_number_to_chars (p, (valueT) i_note.descsz, sizeof (e_note.descsz));
       p = frag_more (sizeof (e_note.type));
-      md_number_to_chars (p, (valueT) i_note.type, 4);
+      md_number_to_chars (p, (valueT) i_note.type, sizeof (e_note.type));
+      p = frag_more (len + 1);
+      strcpy (p, name);
 
-      for (i = 0; i < len; i++)
-	{
-	  ch = *(name + i);
-	  {
-	    FRAG_APPEND_1_CHAR (ch);
-	  }
-	}
       frag_align (2, 0, 0);
 
       subseg_set (seg, subseg);

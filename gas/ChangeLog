@@ -1,3 +1,8 @@
+2001-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_version): Ensure terminating NUL is
+	put in note section.  Use sizeof instead of hard-coded constants.
+
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (support_64bit_objects): Define for OBJ_ELF only.
@@ -50,7 +55,7 @@
 
 	* config/tc-avr.c (mcu_types): Update for new devices.
 
-2001-11-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+2001-11-09  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* doc/Makefile.am (POD2MAN): Use 'GNU Development Tools' for
 	the page man title.
