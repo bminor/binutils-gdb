@@ -105,7 +105,7 @@ extern boolean write_map;
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
-static void EXFUN(lang_add_data,( int type ,   union etree_union *exp));
+void EXFUN(lang_add_data,( int type ,   union etree_union *exp));
 
 static void 
 DEFUN(print_size,(value),
