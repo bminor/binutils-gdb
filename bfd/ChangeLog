@@ -1,3 +1,8 @@
+2005-02-24  Julian Brown  <julian@sirius.codesourcery.com>
+
+	* elflink.c (elf_link_add_object_symbols): Force symbols in discarded
+	COMDAT group sections to have default visibility.
+
 2005-02-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* coffcode.h (coff_print_aux): Warning fix.
