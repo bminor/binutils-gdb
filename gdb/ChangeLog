@@ -1,3 +1,9 @@
+Thu Feb 18 22:44:40 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* am29k-pinsn.c (print_insn):  Minor nits with const.
+	* am29k-tdep.c:  More minor nits with arg types for
+	supply_register, NULL vs. 0, read_register_gen, & reginv_com.
+
 Thu Feb 18 16:13:28 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* nm-hp300bsd.h (PTRACE_ARG3_TYPE): FSF's hp300's have int* not

@@ -127,7 +127,7 @@ print_insn (memaddr, stream)
   /* The four bytes of the instruction.  */
   unsigned char insn24, insn16, insn8, insn0;
 
-  struct a29k_opcode *opcode;
+  struct a29k_opcode const * opcode;
 
   read_memory (memaddr, &insn[0], 4);
 

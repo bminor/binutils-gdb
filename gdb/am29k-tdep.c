@@ -518,7 +518,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
       if (myaddr != NULL)
 	*(int*)myaddr = val;		/* Provide bogusness */
-      supply_register(regnum,&val);	/* More bogusness */
+      supply_register(regnum, (char *)&val);	/* More bogusness */
       if (lval != NULL)
 	*lval = lval_register;
       if (actual_mem_addr != NULL)
@@ -578,7 +578,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
     {
       /* It's in a register, but off the end of the stack.  */
       if (actual_mem_addr != NULL)
-	*actual_mem_addr = NULL; 
+	*actual_mem_addr = 0; 
     }
   else if (memaddr < rfb)
     {
@@ -589,7 +589,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
       if (myaddr != NULL)
 	write_register (regnum, *(long *)myaddr);
       if (actual_mem_addr != NULL)
-	*actual_mem_addr = NULL;
+	*actual_mem_addr = 0;
     }
   else
     {
@@ -769,8 +769,8 @@ push_dummy_frame ()
       for (i = 0; i < num_bytes; i += 4)
 	{
 	  /* Note:  word is in target byte order.  */
-	  read_register_gen (LR0_REGNUM + i / 4, &word);
-	  write_memory (rfb - num_bytes + i, &word, 4);
+	  read_register_gen (LR0_REGNUM + i / 4, (char *) &word);
+	  write_memory (rfb - num_bytes + i, (char *) &word, 4);
 	}
     }
 
@@ -797,6 +797,7 @@ push_dummy_frame ()
   write_register (lrnum, read_register (NPC_REGNUM));
 }
 
+static void
 reginv_com (args, fromtty)
      char       *args;
      int        fromtty;
