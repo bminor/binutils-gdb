@@ -1,3 +1,12 @@
+start-sanitize-sky
+Tue Jun  9 08:55:05 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/dma.h: New file.
+	* sim/sky/vif.h: New file.
+	* sim/sky/vu.h: New file.
+	* sim/sky/sce_main.c: Move magic numbers to .h files.
+
+end-sanitize-sky
 Mon Jun  8 16:08:27 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim/m32r/trap.cgs: Test trap 2.
