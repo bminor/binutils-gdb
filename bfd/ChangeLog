@@ -1,5 +1,8 @@
 Thu Aug  4 11:32:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coff-m68k.c (_bfd_coff_m68k_reloc_type_lookup): New function.
+	(coff_bfd_reloc_type_lookup): Define.
+
 	* elfcode.h (elf_bfd_final_link): Force the vma of sections which
 	do not have SEC_ALLOC set to be 0.  This is needed to handle
 	relocs against debugging sections.

@@ -30,6 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define LYNX_SPECIAL_FN 0
 #endif
 
+/* The page size is a guess based on ELF.  */
+#define COFF_PAGE_SIZE 0x2000
+
 /* Clean up namespace.  */
 #define m68kcoff_howto_table	_bfd_m68kcoff_howto_table
 #define m68k_rtype2howto	_bfd_m68kcoff_rtype2howto
@@ -60,6 +63,8 @@ reloc_howto_type m68kcoff_howto_table[] =
 #ifdef ONLY_DECLARE_RELOCS
 extern void m68k_rtype2howto PARAMS ((arelent *internal, int relocentry));
 extern int m68k_howto2rtype PARAMS ((CONST struct reloc_howto_struct *));
+extern const reloc_howto_type *_bfd_coff_m68k_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 #else
 void
 m68k_rtype2howto(internal, relocentry)
@@ -102,6 +107,27 @@ m68k_howto2rtype (internal)
   }
   return R_RELLONG;    
 }
+
+const reloc_howto_type *
+_bfd_coff_m68k_reloc_type_lookup (abfd, code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
+{
+  switch (code)
+    {
+    default:			return NULL;
+    case BFD_RELOC_8:		return m68kcoff_howto_table + 0;
+    case BFD_RELOC_16:		return m68kcoff_howto_table + 1;
+    case BFD_RELOC_CTOR:
+    case BFD_RELOC_32:		return m68kcoff_howto_table + 2;
+    case BFD_RELOC_8_PCREL:	return m68kcoff_howto_table + 3;
+    case BFD_RELOC_16_PCREL:	return m68kcoff_howto_table + 4;
+    case BFD_RELOC_32_PCREL:	return m68kcoff_howto_table + 5;
+      /* FIXME: There doesn't seem to be a code for R_RELLONG_NEG.  */
+    }
+  /*NOTREACHED*/
+}
+
 #endif /* not ONLY_DECLARE_RELOCS */
 
 #define RTYPE2HOWTO(internal, relocentry) \
@@ -110,9 +136,11 @@ m68k_howto2rtype (internal)
 #define SELECT_RELOC(external, internal) \
   external.r_type = m68k_howto2rtype(internal);
 
+#define coff_bfd_reloc_type_lookup _bfd_coff_m68k_reloc_type_lookup
+
 #include "coffcode.h"
 
-bfd_target 
+const bfd_target 
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
@@ -130,7 +158,7 @@ bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
 #ifdef NAMES_HAVE_UNDERSCORE
@@ -163,6 +191,7 @@ bfd_target
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE
  };
