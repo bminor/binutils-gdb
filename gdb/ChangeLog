@@ -1,3 +1,22 @@
+2005-01-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_prepare_to_store)
+	(inf_ptrace_post_startup_inferior)
+	(inf_ptrace_acknowledge_created_inferior)
+	(inf_ptrace_insert_fork_catchpoint)
+	(inf_ptrace_remove_fork_catchpoint)
+	(inf_ptrace_insert_vfork_catchpoint):
+	(inf_ptrace_remove_vfork_catchpoint, inf_ptrace_follow_fork)
+	(inf_ptrace_insert_exec_catchpoint)
+	(inf_ptrace_remove_exec_catchpoint): Remove functions.
+	(inf_ptrace_reported_exec_events_per_exec_call): Tweak comment.
+	(inf_ptrace_target): Don't set to_prepare_to_store,
+	to_post_startup_inferior, to_acknowledge_created_inferior,
+	to_insert_fork_ctachpoint, to_remove_fork_catchpoint,
+	to_insert_vfork_catchpoint, to_remove_vfork_catchpoint,
+	to_follow_fork, to_insert_exec_catchpoint,
+	to_remove_exec_catchpoint.
+
 2005-01-18  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (struct target_ops): Change return type of

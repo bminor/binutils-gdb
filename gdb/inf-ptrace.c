@@ -275,17 +275,6 @@ inf_ptrace_detach (char *args, int from_tty)
   unpush_target (ptrace_ops_hack);
 }
 
-/* Get ready to modify the registers array.  On machines which store
-   individual registers, this doesn't need to do anything.  On
-   machines which store all the registers in one fell swoop, this
-   makes sure that registers contains all the registers from the
-   program being debugged.  */
-
-static void
-inf_ptrace_prepare_to_store (void)
-{
-}
-
 /* Print status information about what we're accessing.  */
 
 static void
@@ -354,73 +343,10 @@ inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
-static void
-inf_ptrace_post_startup_inferior (ptid_t ptid)
-{
-  /* This version of Unix doesn't require a meaningful "post startup
-     inferior" operation by a debugger.  */
-}
-
-static void
-inf_ptrace_acknowledge_created_inferior (int pid)
-{
-  /* This version of Unix doesn't require a meaningful "acknowledge
-     created inferior" operation by a debugger.  */
-}
-
-static int
-inf_ptrace_insert_fork_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of fork events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_remove_fork_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of fork events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_insert_vfork_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of vfork events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_remove_vfork_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of vfork events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_follow_fork (int follow_child)
-{
-  /* This version of Unix doesn't support following fork or vfork events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_insert_exec_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of exec events.  */
-  return 0;
-}
-
-static int
-inf_ptrace_remove_exec_catchpoint (int pid)
-{
-  /* This version of Unix doesn't support notification of exec events.  */
-  return 0;
-}
-
 static int
 inf_ptrace_reported_exec_events_per_exec_call (void)
 {
-  /* This version of Unix doesn't support notification of exec events.  */
+  /* Typically, we get a single SIGTRAP per exec.  */
   return 1;
 }
 
@@ -609,21 +535,10 @@ inf_ptrace_target (void)
   t->to_detach = inf_ptrace_detach;
   t->to_resume = inf_ptrace_resume;
   t->to_wait = inf_ptrace_wait;
-  t->to_prepare_to_store = inf_ptrace_prepare_to_store;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
   t->to_files_info = inf_ptrace_files_info;
   t->to_kill = inf_ptrace_kill_inferior;
   t->to_create_inferior = inf_ptrace_create_inferior;
-  t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
-  t->to_acknowledge_created_inferior =
-    inf_ptrace_acknowledge_created_inferior;
-  t->to_insert_fork_catchpoint = inf_ptrace_insert_fork_catchpoint;
-  t->to_remove_fork_catchpoint = inf_ptrace_remove_fork_catchpoint;
-  t->to_insert_vfork_catchpoint = inf_ptrace_insert_vfork_catchpoint;
-  t->to_remove_vfork_catchpoint = inf_ptrace_remove_vfork_catchpoint;
-  t->to_follow_fork = inf_ptrace_follow_fork;
-  t->to_insert_exec_catchpoint = inf_ptrace_insert_exec_catchpoint;
-  t->to_remove_exec_catchpoint = inf_ptrace_remove_exec_catchpoint;
   t->to_reported_exec_events_per_exec_call =
     inf_ptrace_reported_exec_events_per_exec_call;
   t->to_has_exited = inf_ptrace_has_exited;
