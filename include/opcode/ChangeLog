@@ -1,3 +1,12 @@
+Tue Sep 28 19:19:08 1993  Jeffrey A Law (law@snake.cs.utah.edu)
+
+	* hppa.h (be, ble): Use operand type 'z' to denote absolute branch
+	addresses.
+
+Tue Sep 14 14:04:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i960.h (i960_opcodes): Properly bracket initializers.
+
 Mon Sep 13 12:50:52 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* m88k.h (BOFLAG): rewrite to avoid nested comment.
