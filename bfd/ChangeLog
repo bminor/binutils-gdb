@@ -1,3 +1,11 @@
+2003-03-26  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(elf_m68k_relocate_section): Use it to correctly handle symbols
+	forced to be local.
+	(elf_m68k_finish_dynamic_symbol): Emit RELATIVE reloc for got
+	entries for symbols that are forced to be local.
+
 2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (_bfd_mips_relax_section): New function.
