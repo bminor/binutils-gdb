@@ -10,12 +10,14 @@
 #  HDEFINES		host specific compiler options
 #  host64		set to true if this is a 64 bit host
 #  HOST_64BIT_TYPE	host 64 bit type
+#  HOST_U_64BIT_TYPE	unsigned 64 bit type (not needed if 64BIT_TYPE is long)
 #  SHLIB_CC		compiler to use when building shared library
 #  SHLIB_CFLAGS		flags to use when building shared library
 #  PICFLAG		may be set to flag to use to compile PIC
 #  SHLINK		may be set to the name to link the shared library to
 #  ALLLIBS		may be set to libraries to build
 #  HLDFLAGS		LDFLAGS specific to the host
+#  HLDENV		environment variable to set when linking for the host
 #  RPATH_ENVVAR		environment variable used to find shared libraries
 #  INSTALL_SHLIB	install a shared library
 
@@ -32,26 +34,50 @@ hppa*-*-hiux*)		HDEFINES=-DHOST_HPPAHPUX ;;
 hppa*-*-bsd*)		HDEFINES=-DHOST_HPPABSD ;;
 hppa*-*-osf*)		HDEFINES=-DHOST_HPPAOSF ;;
 
-i[345]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
-i[345]86-sequent-sysv4*) ;;
-i[345]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
+i[3456]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
+i[3456]86-sequent-sysv4*) ;;
+i[3456]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
 
 mips-dec-netbsd*)	;;
 mips-dec-*)		HDEFINES="-G 4"	;;
 mips-sgi-irix3*)	HDEFINES="-G 4" ;;
 mips-sgi-irix4*)	HDEFINES="-G 4" ;;
+mips-sgi-irix6*)	# We can use __int64_t here because bfd.h
+			# includes obstack.h which includes stddef.h.
+			host64=true
+			HOST_64BIT_TYPE=__int64_t
+			HOST_U_64BIT_TYPE=__uint64_t
+			;;
 mips-*-sysv4*)		;;
 mips-*-sysv*)		HDEFINES="-G 4" ;;
 mips-*-riscos*)		HDEFINES="-G 4" ;;
 
 m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
-
+*-*-windows*)
+			host64=true
+			HOST_64BIT_TYPE=__int64
+			HOST_U_64BIT_TYPE="unsigned __int64"
+# The following krock is necessary because we can't run the build compiler
+# (MSVC) on the configure host, so we have to explicitly set the values here.
+# Note that this file is never run through autoconf, so we can't use any
+# autoconf macros here.  Because of this, we have to muck with autoconf
+# variables explicitly.
+			ac_cv_func_mmap=no
+			ac_cv_header_time=no
+			ac_cv_func_getpagesize=no
+			ac_cv_func_madvise=no
+			ac_cv_func_mprotect=no
+			ac_cv_header_sys_file_h=no
+			ac_cv_header_sys_time_h=no
+			ac_cv_header_unistd_h=no
+			;;
 esac
 
 # If we are configuring with --enable-shared, adjust the shared
 # library support based on the host.  This support must work for both
 # the BFD and the opcodes libraries.
 HLDFLAGS=
+HLDENV=
 RPATH_ENVVAR=LD_LIBRARY_PATH
 SHLIB_CC='$(CC)'
 SHLIB_CFLAGS='-shared'
@@ -59,7 +85,7 @@ INSTALL_SHLIB='$(INSTALL_PROGRAM) $$f $(libdir)/$$tf;'
 if [ "${shared}" = "true" ]; then
   case "${host}" in
   hppa*-*-*)		picfrag=${srcdir}/../config/mh-papic ;;
-  i[3456]86-*-*)	picfrag=${srcdir}/../config/mh-x86pic ;;
+  i[34566]86-*-*)	picfrag=${srcdir}/../config/mh-x86pic ;;
   *-*-*)		picfrag=${srcdir}/../config/mh-${host_cpu}pic ;;
   esac
   if [ -f "${picfrag}" ]; then
@@ -99,9 +125,13 @@ if [ "${shared}" = "true" ]; then
       *) HLDFLAGS='-Wl,-rpath,$(libdir)' ;;
     esac
     ;;
-  *-*-sysv4* | *-*-solaris*)
+  *-*-solaris*)
     SHLIB_CFLAGS='-shared -h $(SONAME)'
     HLDFLAGS='-R $(libdir)'
+    ;;
+  *-*-sysv4*)
+    SHLIB_CFLAGS='-shared -h $(SONAME)'
+    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
     ;;
   *-*-sunos*)
     # Build a libTARGET-bfd.so.VERSION symlink in the object directory.
