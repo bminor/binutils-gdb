@@ -3091,11 +3091,6 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
     FRV_INSN_LDQFI, "ldqfi", "ldqfi", 32,
     { 0|A(FR_ACCESS), { (1<<MACH_FRV), UNIT_LOAD, FR400_MAJOR_NONE, FR500_MAJOR_I_2 } }
   },
-/* nldqi$pack @($GRi,$d12),$GRk */
-  {
-    FRV_INSN_NLDQI, "nldqi", "nldqi", 32,
-    { 0|A(NON_EXCEPTING), { (1<<MACH_FRV), UNIT_LOAD, FR400_MAJOR_NONE, FR500_MAJOR_I_2 } }
-  },
 /* nldqfi$pack @($GRi,$d12),$FRintk */
   {
     FRV_INSN_NLDQFI, "nldqfi", "nldqfi", 32,

@@ -2177,12 +2177,6 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', '@', '(', OP (GRI), ',', OP (D12), ')', ',', OP (FRINTK), 0 } },
     & ifmt_ldbfi, { 0xf00000 }
   },
-/* nldqi$pack @($GRi,$d12),$GRk */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', '@', '(', OP (GRI), ',', OP (D12), ')', ',', OP (GRK), 0 } },
-    & ifmt_ldsbi, { 0x1180000 }
-  },
 /* nldqfi$pack @($GRi,$d12),$FRintk */
   {
     { 0, 0, 0, 0 },

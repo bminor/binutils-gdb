@@ -1,3 +1,7 @@
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.c, frv-opc.c, frv-opc.h: Regenerated.
+
 2003-09-14  Andreas Jaeger  <aj@suse.de>
 
 	* i386-dis.c: Convert to ISO C90 prototypes.
