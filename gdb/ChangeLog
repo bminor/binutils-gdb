@@ -1,3 +1,12 @@
+2003-05-15  Andrew Cagney  <cagney@redhat.com>
+
+	* dummy-frame.h (deprecated_find_dummy_frame_regcache): Rename
+	generic_find_dummy_frame.
+	* dummy-frame.c (deprecated_find_dummy_frame_regcache): Update.
+	(deprecated_generic_find_dummy_frame): Update.
+	(deprecated_read_register_dummy): Update.
+	* frame.c (deprecated_generic_get_saved_register): Update.
+
 2003-05-15  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_breakpoint_from_pc): New function.

@@ -1112,8 +1112,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		   fly, constructs either a raw or pseudo register
 		   from the raw register cache.  */
 		regcache_raw_read
-		  (generic_find_dummy_frame (get_frame_pc (frame),
-					     get_frame_base (frame)),
+		  (deprecated_find_dummy_frame_regcache (get_frame_pc (frame),
+							 get_frame_base (frame)),
 		   regnum, raw_buffer);
 	      return;
 	    }
