@@ -1,5 +1,9 @@
 2002-12-09  David Carlton  <carlton@math.stanford.edu>
 
+	* p-exp.y: Rename TRUE and FALSE to TRUEKEYWORD and FALSEKEYWORD.
+
+2002-12-09  David Carlton  <carlton@math.stanford.edu>
+
 	* linespec.c (symtab_from_filename): New function.
 	(decode_line_1): Move code into symtab_from_filename.
 

@@ -205,7 +205,7 @@ static int search_field;
 
 /* Object pascal */
 %token THIS
-%token <lval> TRUE FALSE
+%token <lval> TRUEKEYWORD FALSEKEYWORD
 
 %left ','
 %left ABOVE_COMMA
@@ -434,13 +434,13 @@ exp	:	exp ASSIGN exp
 			{ write_exp_elt_opcode (BINOP_ASSIGN); }
 	;
 
-exp	:	TRUE
+exp	:	TRUEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
-exp	:	FALSE
+exp	:	FALSEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_BOOL); }
@@ -1379,14 +1379,14 @@ yylex ()
       if (STREQ (uptokstart, "FALSE"))
 	{
           yylval.lval = 0;
-          return FALSE;
+          return FALSEKEYWORD;
         }
       break;
     case 4:
       if (STREQ (uptokstart, "TRUE"))
 	{
           yylval.lval = 1;
-  	  return TRUE;
+  	  return TRUEKEYWORD;
         }
       if (STREQ (uptokstart, "SELF"))
         {
