@@ -1,3 +1,8 @@
+Mon Aug  8 11:59:51 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/config/tc-hppa.c (md_pseudo_table): Delete redundant
+	upper-case versions of the pseudo-ops.
+
 Mon Aug  8 13:42:16 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-sparc.c (md_apply_fix): If we are going to generate a
