@@ -37,13 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #include <sys/ioctl.h>
 #include <fcntl.h>
-
-#ifdef COFF_ENCAPSULATE
-#include "a.out.encap.h"
-#else
-#include <a.out.h>
-#endif
-
 #include <sys/file.h>
 #include <sys/stat.h>
 
