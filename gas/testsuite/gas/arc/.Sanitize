@@ -35,7 +35,7 @@ insn3.s
 insn3.d
 j.s
 j.d
-ld.s
+ld.d
 ld.s
 math.s
 math.d
