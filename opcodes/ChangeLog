@@ -2,6 +2,11 @@ Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_format_table): Change definition of SHORT_B3
 	and SHORT_B3b formats to use Rb instead of Ra.
+	
+	Add FLAG_MUL16 to MUL2XH opcode.
+
+	Add FLAG_ADDSUBppp to SRC and SATHp opcodes to implement extension
+	to existing 1.1.1 parallelisation prohibition procedure.
 
 Fri May 22 16:00:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 
