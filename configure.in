@@ -98,7 +98,7 @@ case "${host}" in
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
-  *-sun-solaris*)         host_makefile_frag=config/mh-solaris ;;
+  *-sun-solaris2*)        host_makefile_frag=config/mh-solaris ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
@@ -116,6 +116,21 @@ case "${target}" in
 		  exit 1
 		  ;;
 esac
+
+
+# some tools are so dependent upon X11 that if we're not building with X, 
+# it's not even worth trying to configure, much less build, that tool.
+
+case ${with_x} in
+  yes)  ;;
+  no | "")
+    	configdirs=`echo ${configdirs} | sed -e 's/tk//'`
+	;;
+  *)
+    	echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2
+    	;;
+esac
+
 
 
 # some tools are only suitable for building in a "native" situation.
@@ -142,11 +157,13 @@ fi
 # target this usually means that a port of the program doesn't
 # exist yet.
 
-#case "${host}" in
-#  hppa*-*-*)
-#    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
-#    ;;
-#esac
+case "${host}" in
+  i[34]86-*-go32)
+    configdirs=`echo ${configdirs} | sed -e 's/tcl//;s/expect//;s/deja-gnu//'`
+    configdirs=`echo ${configdirs} | sed -e 's/make//;s/texinfo//'`
+    configdirs=`echo ${configdirs} | sed -e 's/patch//;s/flex//;s/byacc//;s/send_pr//'`
+    ;;
+esac
 
 case "${target}" in
   mips-dec-bsd*)
@@ -162,7 +179,7 @@ case "${target}" in
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
-  *-*-solaris2)
+  *-*-solaris2*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
     ;;
   *-*-vms)

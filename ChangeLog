@@ -1,3 +1,8 @@
+Fri Mar 12 18:30:14 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: canonicalize all instances to *-*-solaris2*,
+	also strip out a number of tools to not build for go32 host
+
 Wed Mar 10 12:08:27 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* config.guess: add GPL.
