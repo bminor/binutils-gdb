@@ -1,5 +1,12 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-mn10200.c (md_parse_option <c, arg>): Add ATTRIBUTE_UNUSED.
+	(md_undefined_symbol <name>): Likewise.
+	(md_convert_frag <abfd>): Likewise.
+	(tc_gen_reloc <seg>): Likewise.
+	(check_operand <insn>): Likewise.
+	(md_convert_frag): Fix format strings.
+	(tc_gen_reloc): Delete fx_addsy - fx_subsy code.
 	* config/tc-openrisc.c (ignore_pseudo): Prototype.
 	(md_atof): Remove declaration of atof_ieee.
 	* config/tc-or32.c (parse_operand): Prototype non-BFD too.

@@ -322,15 +322,15 @@ none yet\n"));
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int c ATTRIBUTE_UNUSED;
+     char *arg ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -378,7 +378,7 @@ md_atof (type, litp, sizep)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      fragS *fragP;
 {
@@ -437,7 +437,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
@@ -494,7 +494,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 1, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
@@ -582,7 +582,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
@@ -662,7 +662,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_literal[offset + 1] = opcode;
 
       /* Create a fixup for the reversed conditional branch.  */
-      sprintf (buf, ".%s_%d", FAKE_LABEL_NAME, label_count++);
+      sprintf (buf, ".%s_%ld", FAKE_LABEL_NAME, label_count++);
       fix_new (fragP, fragP->fr_fix + 2, 1,
 	       symbol_new (buf, sec, 0, fragP->fr_next),
 	       fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
@@ -1227,7 +1227,7 @@ keep_going:
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1242,26 +1242,9 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-
-  if (fixp->fx_addsy && fixp->fx_subsy)
-    {
-      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
-	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
-	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"Difference of symbols in different sections is not supported");
-	  return NULL;
-	}
-      reloc->sym_ptr_ptr = &bfd_abs_symbol;
-      reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
-		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
-    }
-  else
-    {
-      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-      reloc->addend = fixp->fx_offset;
-    }
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  reloc->addend = fixp->fx_offset;
   return reloc;
 }
 
@@ -1375,7 +1358,7 @@ mn10200_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
 static unsigned long
 check_operand (insn, operand, val)
-     unsigned long insn;
+     unsigned long insn ATTRIBUTE_UNUSED;
      const struct mn10200_operand *operand;
      offsetT val;
 {
