@@ -231,9 +231,6 @@ static ut_reg EPC = 0; /* Exception PC */
 static FP_formats fpr_state[32];
 #endif /* HASFPU */
 
-/* VR4300 CP0 configuration register: */
-static unsigned int CONFIG = 0;
-
 /* The following are internal simulator state variables: */
 static ut_reg IPC = 0; /* internal Instruction PC */
 static ut_reg DSPC = 0;  /* delay-slot PC */
@@ -256,13 +253,6 @@ static ut_reg DSPC = 0;  /* delay-slot PC */
 #define status_TS        (1 << 21)      /* TLB shutdown has occurred */
 #define status_ERL       (1 <<  2)      /* Error level */
 #define status_RP        (1 << 27)      /* Reduced Power mode */
-
-#define config_EP_mask   (0xF)
-#define config_EP_shift  (27)
-#define config_EP_D      (0x0)
-#define config_EP_DxxDxx (0x6)
-
-#define config_BE        (1 << 15)
 
 #define cause_BD        ((unsigned)1 << 31)     /* Exception in branch delay slot */
 
@@ -331,6 +321,7 @@ static ut_reg pending_slot_value[PSLOTS];
 static void dotrace PARAMS((FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
 static void sim_warning PARAMS((char *fmt,...));
 extern void sim_error PARAMS((char *fmt,...));
+static void set_endianness PARAMS((void));
 static void ColdReset PARAMS((void));
 static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
 static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 pAddr,uword64 vAddr,int raw));
@@ -399,14 +390,9 @@ static ut_reg HLPC = 0;
 /* UserMode */
 #define UserMode        ((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
 
-/* BigEndianMem */
-/* Hardware configuration. Affects endianness of LoadMemory and
-   StoreMemory and the endianness of Kernel and Supervisor mode
-   execution. The value is 0 for little-endian; 1 for big-endian. */
-#define BigEndianMem    ((CONFIG & config_BE) ? 1 : 0)
-/* NOTE: Problems will occur if the simulator memory model does not
-   match the host program expectation. i.e. if the host is writing
-   big-endian values to a little-endian memory model. */
+/* ByteSwapMem */
+/* This is true if the host and target have different endianness.  */
+#define ByteSwapMem (!(state & simHOSTBE) != !(state & simBE))
 
 /* ReverseEndian */
 /* This mode is selected if in User mode with the RE bit being set in
@@ -418,8 +404,8 @@ static ut_reg HLPC = 0;
 /* The endianness for load and store instructions (0=little;1=big). In
    User mode this endianness may be switched by setting the state_RE
    bit in the SR register. Thus, BigEndianCPU may be computed as
-   (BigEndienMem EOR ReverseEndian). */
-#define BigEndianCPU    (BigEndianMem ^ ReverseEndian) /* Already bits */
+   (!ByteSwapMem EOR ReverseEndian). */
+#define BigEndianCPU    (!ByteSwapMem ^ ReverseEndian) /* Already bits */
 
 #if !defined(FASTSIM) || defined(PROFILE)
 /* At the moment these values will be the same, since we do not have
@@ -449,6 +435,7 @@ static unsigned int pipeline_ticks = 0;
 #define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
 #define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
+#define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
 static unsigned int state = 0;
 static unsigned int rcexit = 0; /* _exit() reason code holder */
@@ -459,10 +446,18 @@ static unsigned int rcexit = 0; /* _exit() reason code holder */
                           state |= simDELAYSLOT;\
                         }
 
+#define JALDELAYSLOT()	{\
+			  DELAYSLOT ();\
+			  state |= simJALDELAYSLOT;\
+			}
+
 #define NULLIFY()       {\
                           state &= ~simDELAYSLOT;\
                           state |= simSKIPNEXT;\
                         }
+
+#define INDELAYSLOT()	((state & simDELAYSLOT) != 0)
+#define INJALDELAYSLOT() ((state & simJALDELAYSLOT) != 0)
 
 #define K0BASE  (0x80000000)
 #define K0SIZE  (0x20000000)
@@ -543,6 +538,8 @@ sim_open (args)
     if (*((char *)&data) != 0x12)
      state |= simHOSTBE; /* big-endian host */
   }
+
+  set_endianness ();
 
 #if defined(HASFPU)
   /* Check that the host FPU conforms to IEEE 754-1985 for the SINGLE
@@ -1057,7 +1054,7 @@ sim_write (addr,buffer,size)
       /* We need to perform the following magic to ensure that that
          bytes are written into same byte positions in the target memory
          world, regardless of the endianness of the host. */
-      if (BigEndianMem) {
+      if (!ByteSwapMem) {
         value =  ((uword64)(*buffer++) << 8);
         value |= ((uword64)(*buffer++) << 0);
       } else {
@@ -1074,7 +1071,7 @@ sim_write (addr,buffer,size)
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
-      if (BigEndianMem) {
+      if (!ByteSwapMem) {
         value =  ((uword64)(*buffer++) << 24);
         value |= ((uword64)(*buffer++) << 16);
         value |= ((uword64)(*buffer++) << 8);
@@ -1095,7 +1092,7 @@ sim_write (addr,buffer,size)
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
-      if (BigEndianMem) {
+      if (!ByteSwapMem) {
         value =  ((uword64)(*buffer++) << 56);
         value |= ((uword64)(*buffer++) << 48);
         value |= ((uword64)(*buffer++) << 40);
@@ -1278,7 +1275,7 @@ sim_info (verbose)
 
   callback->printf_filtered(callback,"MIPS %d-bit simulator\n",(PROCESSOR_64BIT ? 64 : 32));
 
-  callback->printf_filtered(callback,"%s endian memory model\n",(BigEndianMem ? "Big" : "Little"));
+  callback->printf_filtered(callback,"%s endian memory model\n",(state & simBE ? "Big" : "Little"));
 
   callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%08X%08X\n",(unsigned int)membank_size,WORD64HI(membank_base),WORD64LO(membank_base));
 
@@ -1962,67 +1959,37 @@ void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...
    simulation, at the cost of increasing the image and source size. */
 
 static unsigned int
-#ifdef _MSC_VER
 xfer_direct_word(unsigned char *memory)
-#else
-xfer_direct_word(memory)
-     unsigned char *memory;
-#endif
 {
   return *((unsigned int *)memory);
 }
 
 static uword64
-#ifdef _MSC_VER
 xfer_direct_long(unsigned char *memory)
-#else
-xfer_direct_long(memory)
-     unsigned char *memory;
-#endif
 {
   return *((uword64 *)memory);
 }
 
 static unsigned int
-#ifdef _MSC_VER
 swap_direct_word(unsigned int data)
-#else
-swap_direct_word(data)
-     unsigned int data;
-#endif
 {
   return data;
 }
 
 static uword64
-#ifdef _MSC_VER
 swap_direct_long(uword64 data)
-#else
-swap_direct_long(data)
-     uword64 data;
-#endif
 {
   return data;
 }
 
 static unsigned int
-#ifdef _MSC_VER
 xfer_big_word(unsigned char *memory)
-#else
-xfer_big_word(memory)
-     unsigned char *memory;
-#endif
 {
   return ((memory[0] << 24) | (memory[1] << 16) | (memory[2] << 8) | memory[3]);
 }
 
 static uword64
-#ifdef _MSC_VER
 xfer_big_long(unsigned char *memory)
-#else
-xfer_big_long(memory)
-     unsigned char *memory;
-#endif
 {
   return (((uword64)memory[0] << 56) | ((uword64)memory[1] << 48)
           | ((uword64)memory[2] << 40) | ((uword64)memory[3] << 32)
@@ -2031,23 +1998,13 @@ xfer_big_long(memory)
 }
 
 static unsigned int
-#ifdef _MSC_VER
 xfer_little_word(unsigned char *memory)
-#else
-xfer_little_word(memory)
-     unsigned char *memory;
-#endif
 {
   return ((memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
 }
 
 static uword64
-#ifdef _MSC_VER
 xfer_little_long(unsigned char *memory)
-#else
-xfer_little_long(memory)
-     unsigned char *memory;
-#endif
 {
   return (((uword64)memory[7] << 56) | ((uword64)memory[6] << 48)
           | ((uword64)memory[5] << 40) | ((uword64)memory[4] << 32)
@@ -2056,27 +2013,16 @@ xfer_little_long(memory)
 }
 
 static unsigned int
-#ifdef _MSC_VER
 swap_word(unsigned int data)
-#else
-swap_word(data)
-     unsigned int data;
-#endif
 {
   unsigned int result;
-  result = data ^ ((data << 16) | (data >> 16));
-  result &= ~0x00FF0000;
-  data = (data << 24) | (data >> 8);
-  return data ^ (result >> 8);
+  result = (((data & 0xff) << 24) | ((data & 0xff00) << 8)
+	    | ((data >> 8) & 0xff00) | ((data >> 24) & 0xff));
+  return result;
 }
 
 static uword64
-#ifdef _MSC_VER
 swap_long(uword64 data)
-#else
-swap_long(data)
-     uword64 data;
-#endif
 {
   unsigned int tmphi = WORD64HI(data);
   unsigned int tmplo = WORD64LO(data);
@@ -2091,6 +2037,36 @@ swap_long(data)
 /*---------------------------------------------------------------------------*/
 
 static void
+set_endianness ()
+{
+  /* In reality this check should be performed at various points
+     within the simulation, since it is possible to change the
+     endianness of user programs. However, we perform the check here
+     to ensure that the start-of-day values agree.  */
+  if (target_byte_order == 4321)
+    state |= simBE;
+
+  /* ??? This is a lot more code than is necessary to solve the problem.
+     It would be simpler to handle this like the SH simulator.  */
+  if (!ByteSwapMem) {
+    host_read_word = xfer_direct_word;
+    host_read_long = xfer_direct_long;
+    host_swap_word = swap_direct_word;
+    host_swap_long = swap_direct_long;
+  } else if (state & simHOSTBE) {
+    host_read_word = xfer_little_word;
+    host_read_long = xfer_little_long;
+    host_swap_word = swap_word;
+    host_swap_long = swap_long;
+  } else { /* HOST little-endian */
+    host_read_word = xfer_big_word;
+    host_read_long = xfer_big_long;
+    host_swap_word = swap_word;
+    host_swap_long = swap_long;
+  }
+}
+
+static void
 ColdReset()
 {
   /* RESET: Fixed PC address: */
@@ -2099,10 +2075,6 @@ ColdReset()
 
   SR &= ~(status_SR | status_TS | status_RP);
   SR |= (status_ERL | status_BEV);
-  /* VR4300 starts in Big-Endian mode */
-  CONFIG &= ~(config_EP_mask << config_EP_shift);
-  CONFIG |= ((config_EP_D << config_EP_shift) | config_BE);
-  /* TODO: The VR4300 CONFIG register is not modelled fully at the moment */
 
 #if defined(HASFPU) && (GPRLEN == (64))
   /* Cheat and allow access to the complete register set immediately: */
@@ -2126,35 +2098,6 @@ ColdReset()
      fpr_state[rn] = fmt_uninterpreted;
   }
 #endif /* HASFPU */
-
-  /* In reality this check should be performed at various points
-     within the simulation, since it is possible to change the
-     endianness of user programs. However, we perform the check here
-     to ensure that the start-of-day values agree: */
-  state |= (BigEndianCPU ? simBE : 0);
-  if ((target_byte_order == 1234) != !(state & simBE)) {
-    fprintf(stderr,"ColdReset: GDB (%s) and simulator (%s) do not agree on target endianness\n",
-            target_byte_order == 1234 ? "little" : "big",
-            state & simBE ? "big" : "little");
-    exit(1);
-  }
-
-  if (!(state & simHOSTBE) == !(state & simBE)) {
-    host_read_word = xfer_direct_word;
-    host_read_long = xfer_direct_long;
-    host_swap_word = swap_direct_word;
-    host_swap_long = swap_direct_long;
-  } else if (state & simHOSTBE) {
-    host_read_word = xfer_little_word;
-    host_read_long = xfer_little_long;
-    host_swap_word = swap_word;
-    host_swap_long = swap_long;
-  } else { /* HOST little-endian */
-    host_read_word = xfer_big_word;
-    host_read_long = xfer_big_long;
-    host_swap_word = swap_word;
-    host_swap_long = swap_long;
-  }
 
   return;
 }
@@ -2353,7 +2296,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          extracts the required bytes. However, to keep performance
          high we only load the required bytes into the relevant
          slots. */
-      if (BigEndianMem)
+      if (!ByteSwapMem)
        switch (AccessLength) { /* big-endian memory */
          case AccessLength_DOUBLEWORD :
           value |= ((uword64)mem[index++] << 56);
@@ -2405,7 +2348,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          StoreMemory routines to avoid shifting the data before
          returning or using it. */
       if (!raw) { /* do nothing for raw accessess */
-        if (BigEndianMem)
+        if (!ByteSwapMem)
          value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
         else /* little-endian only needs to be shifted up to the correct byte offset */
          value <<= ((pAddr & LOADDRMASK) * 8);
@@ -2483,7 +2426,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       printf("DBG: StoreMemory: offset = %d MemElem = 0x%08X%08X\n",(unsigned int)(pAddr & LOADDRMASK),WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
-      if (BigEndianMem) {
+      if (!ByteSwapMem) {
         if (raw)
          shift = ((7 - AccessLength) * 8);
         else /* real memory access */
@@ -2499,7 +2442,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       printf("DBG: StoreMemory: shift = %d MemElem = 0x%08X%08X\n",shift,WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
-      if (BigEndianMem) {
+      if (!ByteSwapMem) {
         switch (AccessLength) { /* big-endian memory */
           case AccessLength_DOUBLEWORD :
            mem[index++] = (unsigned char)(MemElem >> 56);
@@ -4040,7 +3983,7 @@ simulate ()
       printf("DBG: dsstate set before instruction execution - updating PC to 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
 #endif /* DEBUG */
       PC = DSPC;
-      state &= ~simDELAYSLOT;
+      state &= ~(simDELAYSLOT | simJALDELAYSLOT);
     }
 
     if (MIPSISA < 4) { /* The following is only required on pre MIPS IV processors: */

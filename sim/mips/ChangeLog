@@ -1,3 +1,33 @@
+Mon Dec 16 14:59:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (build_mips16_operands): Fix base PC value for PC
+	relative operands.
+	(build_instruction): Call JALDELAYSLOT rather than DELAYSLOT for a
+	jal instruction.
+	* interp.c (simJALDELAYSLOT): Define.
+ 	(JALDELAYSLOT): Define.
+	(INDELAYSLOT, INJALDELAYSLOT): Define.
+	(simulate): Clear simJALDELAYSLOT when simDELAYSLOT is cleared.
+
+Wed Dec 11 13:53:51 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* gencode.c (build_instruction): Use !ByteSwapMem instead of
+	BigEndianMem.
+	* interp.c (CONFIG, config_EP_{mask,shift,D,DxxDxx, config_BE): Delete.
+	(BigEndianMem): Rename to ByteSwapMem and change sense.
+	(BigEndianCPU, sim_write, LoadMemory, StoreMemory): Change
+	BigEndianMem references to !ByteSwapMem.
+	(set_endianness): New function, with prototype.
+	(sim_open): Call set_endianness.
+	(sim_info): Use simBE instead of BigEndianMem.
+	(xfer_direct_word, xfer_direct_long, swap_direct_word,
+	swap_direct_long, xfer_big_word, xfer_big_long, xfer_little_word,
+	xfer_little_long, swap_word, swap_long): Delete unnecessary MSC_VER
+	ifdefs, keeping the prototype declaration.
+	(swap_word): Rewrite correctly.
+	(ColdReset): Delete references to CONFIG.  Delete endianness related
+	code; moved to set_endianness.
+	
 Tue Dec 10 11:32:04 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* gencode.c (build_instruction, case JUMP): Truncate PC to 32 bits.

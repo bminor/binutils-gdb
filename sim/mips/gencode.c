@@ -954,10 +954,10 @@ build_mips16_operands (bitmap)
 	    {
 	      int j;
 
-	      printf ("PC & ~ (uword64) 1");
+	      printf ("((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : IPC) & ~ (uword64) 1)");
 	      for (j = 0; j < opindex; j++)
 		if (ops[j]->shift != 0)
-		  printf (" & 0x%x", ~ ((1 << op->shift) - 1));
+		  printf (" & ~ (uword64) 0x%x", (1 << ops[j]->shift) - 1);
 	    }
 	  else if ((op->flags & MIPS16_ZERO) != 0)
 	    printf ("0");
@@ -1867,7 +1867,10 @@ build_instruction (doisa, features, mips16, insn)
      printf("   op1 = WORD64LO(op1);\n");
      printf("   /* NOTE: The jump occurs AFTER the next instruction has been executed */\n");
      printf("   DSPC = op1;\n");
-     printf("   DELAYSLOT();\n");
+     if (insn->flags & LINK)
+       printf("   JALDELAYSLOT();\n");
+     else
+       printf("   DELAYSLOT();\n");
      break ;
 
     case BRANCH: /* execute delay slot instruction before branch unless (LIKELY && branch_not_taken) */
