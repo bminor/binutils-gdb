@@ -1,3 +1,13 @@
+Sun Apr  5 16:04:39 1998  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (stamp-lib): Check that .libs/libopcodes.a exists
+	before trying to copy it.
+	* Makefile.in: Rebuild.
+
+Thu Apr  2 17:25:49 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-opc.c: Use signed immediate values for CMPUI instruction.
+
 start-sanitize-m32rx
 Thu Apr  2 16:44:23 1998  Nick Clifton  <nickc@cygnus.com>
 

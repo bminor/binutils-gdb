@@ -136,8 +136,10 @@ libopcodes_la_LDFLAGS = -release $(VERSION)
 noinst_LIBRARIES = libopcodes.a
 
 stamp-lib: libopcodes.la
-	cp .libs/libopcodes.a libopcodes.tmp
-	$(SHELL) $(srcdir)/../move-if-change libopcodes.tmp libopcodes.a
+	if [ -f .libs/libopcodes.a ]; then \
+	  cp .libs/libopcodes.a libopcodes.tmp; \
+	  $(SHELL) $(srcdir)/../move-if-change libopcodes.tmp libopcodes.a; \
+	else true; fi
 	touch stamp-lib
 
 libopcodes.a: stamp-lib ; @true
@@ -291,9 +293,9 @@ mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h
 mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
-start-sanitize-r5900
+# start-sanitize-r5900
 mips-opc.lo: vu0.h
-end-sanitize-r5900
+# end-sanitize-r5900
 mips16-opc.lo: mips16-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 m10200-dis.lo: m10200-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
