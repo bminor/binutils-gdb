@@ -198,6 +198,7 @@ BFD32_BACKENDS = \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-sh.lo \
+	elf32-sh-lin.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
 	elf32.lo \
@@ -335,6 +336,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-pj.c \
 	elf32-ppc.c \
 	elf32-sh.c \
+	elf32-sh-lin.c \
 	elf32-sparc.c \
 	elf32-v850.c \
 	elf32.c \
@@ -1009,6 +1011,11 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+# Keep this one in sync with the one above
+elf32-sh-lin.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h elf32-sh-lin.c
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \

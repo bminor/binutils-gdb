@@ -547,6 +547,8 @@ extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shl_vec;
+extern const bfd_target bfd_elf32_shlin_vec;
+extern const bfd_target bfd_elf32_shblin_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;

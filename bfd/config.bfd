@@ -683,6 +683,11 @@ case "${targ}" in
     targ_defvec=rs6000coff_vec
     ;;
 
+  sh-*-linux*)
+    targ_defvec=bfd_elf32_shblin_vec
+    targ_selvecs=bfd_elf32_shlin_vec
+    ;;
+
   sh-*-elf* | sh-*-rtemself*)
     targ_defvec=bfd_elf32_sh_vec
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"

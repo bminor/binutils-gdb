@@ -1,3 +1,13 @@
+2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config.bfd (sh-*-linux*): Added.
+	* configure.in (bfd_elf32_shlin_vec, bfd_elf32_shblin_vec): New.
+	* targets.c: Declare them.
+	* elf32-sh-lin.c: New file.
+	* Makefile.am: Compile it.
+	* elf32-sh.c: Don't override defines from elf32-sh-lin.c.
+	* configure, Makefile.in: Rebuilt.
+
 2000-09-06  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* xcofflink.c (xcoff_link_input_bfd): Include the .tocbss

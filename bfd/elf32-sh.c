@@ -4154,6 +4154,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+#ifndef ELF_ARCH
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
 #define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
@@ -4163,6 +4164,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 #define ELF_MAXPAGESIZE		0x1
 
 #define elf_symbol_leading_char '_'
+#endif /* ELF_ARCH */
 
 #define bfd_elf32_bfd_reloc_type_lookup	sh_elf_reloc_type_lookup
 #define elf_info_to_howto		sh_elf_info_to_howto
