@@ -336,7 +336,7 @@ inf_ptrace_attach (char *args, int from_tty)
   dummy = args;
   pid = strtol (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr! */
-  if ((pid == 0) && (args == dummy))
+  if (pid == 0 && args == dummy)
     error ("Illegal process-id: %s\n", args);
 
   if (pid == getpid ())		/* Trying to masturbate? */
@@ -356,7 +356,15 @@ inf_ptrace_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  attach (pid);
+#ifdef PT_ATTACH
+  errno = 0;
+  ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
+  if (errno != 0)
+    perror_with_name ("ptrace");
+  attach_flag = 1;
+#else
+  error ("This system does not support attaching to a process");
+#endif
 
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
@@ -379,7 +387,7 @@ inf_ptrace_post_attach (int pid)
 static void
 inf_ptrace_detach (char *args, int from_tty)
 {
-  int siggnal = 0;
+  int sig = 0;
   int pid = PIDGET (inferior_ptid);
 
   if (from_tty)
@@ -392,9 +400,17 @@ inf_ptrace_detach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   if (args)
-    siggnal = atoi (args);
+    sig = atoi (args);
 
-  detach (siggnal);
+#ifdef PT_DETACH
+  errno = 0;
+  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, sig);
+  if (errno != 0)
+    perror_with_name ("ptrace");
+  attach_flag = 0;
+#else
+  error ("This system does not support detaching from a process");
+#endif
 
   inferior_ptid = null_ptid;
   unpush_target (ptrace_ops_hack);

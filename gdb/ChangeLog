@@ -1,5 +1,9 @@
 2004-09-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ptrace.c (inf_ptrace_attach): Remove redundant parenthesis.
+	Inline attach call.
+	(inf_ptrace_detach): Inline detach call.
+
 	* configure.in: Check for waddstr instead of mvwaddstr when
 	searching for curses library.  Check for wborder.
 	* configure, config.in: Regenerate.
