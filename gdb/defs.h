@@ -253,7 +253,7 @@ struct cleanup
    works everywhere we use it. */
 
 #ifndef ATTR_NORETURN
-#if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))
 #else
 #define ATTR_NORETURN		/* nothing */
@@ -261,7 +261,7 @@ struct cleanup
 #endif
 
 #ifndef ATTR_FORMAT
-#if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
 #define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
 #else
 #define ATTR_FORMAT(type, x, y)	/* nothing */

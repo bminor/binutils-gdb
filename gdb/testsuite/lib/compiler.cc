@@ -13,7 +13,7 @@
    definition made with 'set" to see if one already exists, and if so
    warn about conflicts if it is being set to something else.  */
 
-#if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 6
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6))
 set supports_template_debugging 1
 #else
 set supports_template_debugging 0

@@ -523,7 +523,7 @@ public:
 };
 T5<x> t5x(5);
 
-#if !defined(__GNUC__) || (__GNUC__ >= 2 && __GNUC_MINOR__ >= 6)
+#if !defined(__GNUC__) || (__GNUC__ > 2) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 6)
 template class T5<char>;
 template class T5<int>;
 template class T5<int (*)(char, void *)>;
