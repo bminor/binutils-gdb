@@ -1,5 +1,11 @@
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
+	* monitor.h (monitor_dump_reg_block): Remove ATTR_FORMAT.
+	* cli/cli-script.c (define_command): Call query directly, instead
+	of passing it a buffer.
+	* ocd.c (ocd_error): Pass error a constant format string.
+	* remote-mips.c (mips_error): Use fputs_filtered.
+
 	* solib-svr4.c (_initialize_svr4_solib): Update
 	register_gdbarch_data call.
 	* mips-linux-tdep.c (_initialize_mips_linux_tdep): Ditto.

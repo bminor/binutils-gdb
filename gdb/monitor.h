@@ -245,8 +245,12 @@ extern void monitor_close (int quitting);
 extern char *monitor_supply_register (int regno, char *valstr);
 extern int monitor_expect (char *prompt, char *buf, int buflen);
 extern int monitor_expect_prompt (char *buf, int buflen);
-extern void monitor_printf (char *, ...) ATTR_FORMAT (printf, 1, 2);
-extern void monitor_printf_noecho (char *, ...) ATTR_FORMAT (printf, 1, 2);
+/* Note: The variable argument functions monitor_printf and
+   monitor_printf_noecho vararg do not take take standard format style
+   arguments.  Instead they take custom formats interpretered directly
+   by monitor_vsprintf.  */
+extern void monitor_printf (char *, ...);
+extern void monitor_printf_noecho (char *, ...);
 extern void monitor_write (char *buf, int buflen);
 extern int monitor_readchar (void);
 extern char *monitor_get_dev_name (void);
