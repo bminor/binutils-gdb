@@ -4899,6 +4899,7 @@ allocate_lineno_list ()
   return ptr;
 }
 
+void
 ecoff_set_gp_prolog_size (sz)
      int sz;
 {

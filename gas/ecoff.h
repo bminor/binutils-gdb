@@ -1,0 +1,77 @@
+/* ecoff.h -- header file for ECOFF debugging support
+   Copyright (C) 1993 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.
+   Put together by Ian Lance Taylor <ian@cygnus.com>.
+
+   This file is part of GAS, the GNU Assembler.
+
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#ifdef ECOFF_DEBUGGING
+
+#include "coff/sym.h"
+#include "coff/ecoff.h"
+
+/* This function should be called at the start of assembly, by
+   obj_read_begin_hook.  */
+extern void ecoff_read_begin_hook PARAMS ((void));
+
+/* This function should be called when a new symbol is created, by
+   obj_symbol_new_hook.  */
+extern void ecoff_symbol_new_hook PARAMS ((struct symbol *));
+
+/* Build the ECOFF debugging information.  This should be called by
+   obj_frob_file.  This fills in the counts in *HDR; the offsets are
+   filled in relative to the start of the *BUFP.  It sets *BUFP to a
+   block of memory holding the debugging information.  It returns the
+   length of *BUFP.  */
+extern unsigned long ecoff_build_debug
+  PARAMS ((HDRR *hdr, char **bufp, const struct ecoff_debug_swap *));
+
+/* Functions to handle the ECOFF debugging directives.  */
+extern void ecoff_directive_begin PARAMS ((int));
+extern void ecoff_directive_bend PARAMS ((int));
+extern void ecoff_directive_end PARAMS ((int));
+extern void ecoff_directive_ent PARAMS ((int));
+extern void ecoff_directive_fmask PARAMS ((int));
+extern void ecoff_directive_frame PARAMS ((int));
+extern void ecoff_directive_loc PARAMS ((int));
+extern void ecoff_directive_mask PARAMS ((int));
+
+/* Functions to handle the COFF debugging directives.  */
+extern void ecoff_directive_def PARAMS ((int));
+extern void ecoff_directive_dim PARAMS ((int));
+extern void ecoff_directive_endef PARAMS ((int));
+extern void ecoff_directive_file PARAMS ((int));
+extern void ecoff_directive_scl PARAMS ((int));
+extern void ecoff_directive_size PARAMS ((int));
+extern void ecoff_directive_tag PARAMS ((int));
+extern void ecoff_directive_type PARAMS ((int));
+extern void ecoff_directive_val PARAMS ((int));
+
+/* Handle stabs.  */
+extern void ecoff_stab PARAMS ((int what, const char *string,
+				int type, int other, int desc));
+
+/* Set the GP prologue size.  */
+extern void ecoff_set_gp_prolog_size PARAMS ((int sz));
+
+/* This routine is called from the ECOFF code to set the external
+   information for a symbol.  */
+#ifndef obj_ecoff_set_ext
+extern void obj_ecoff_set_ext PARAMS ((struct symbol *, EXTR *));
+#endif
+
+#endif /* ECOFF_DEBUGGING */

@@ -1,3 +1,8 @@
+Mon Jan 17 15:40:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (ecoff_set_gp_prolog_size): Declare.
+	* ecoff.c (ecoff_set_gp_prolog_size): Return type is void.
+
 Mon Jan 17 00:18:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Explicitly check for comma before 'u'
