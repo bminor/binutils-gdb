@@ -1,3 +1,20 @@
+2005-01-21  Ben Elliston  <bje@au.ibm.com>
+
+	* dlltool.c (dump_iat): Remove unused function.
+	(gen_exp_file): Remove #if 0'd code.
+	(make_one_lib_file): Likewise.
+	* srconv.c: Remove #if 0'd code throughout.
+	* size.c (lprint_number): Remove.
+	(print_berkeley_format): Remove #if 0'd code.
+	* ar.c (do_quick_append): Remove declaration and definiton.
+	(main): Remove #if 0'd code.
+	* filemode.c (filemodestring): Remove #if 0'd function.
+	* sysdump.c (unit_info_list): Remove function.
+	(object_body_list): Likewise.
+	(program_structure): Likewise.
+	(debug_list): Likewise.
+	(module): Remove #if 0'd code.
+
 2005-01-20  Mark Mitchell  <mark@codesourcery.com>
 
 	* BRANCHES: Add binutils-2_15-branch.

@@ -59,18 +59,6 @@ static void setst (unsigned long, char *);
 	otherwise.
 	'T' if the file is sticky but not executable.  */
 
-#if 0
-
-/* This is not used; only mode_string is used.  */
-
-void
-filemodestring (struct stat *statp, char *str)
-{
-  mode_string ((unsigned long) statp->st_mode, str);
-}
-
-#endif
-
 /* Get definitions for the file permission bits.  */
 
 #ifndef S_IRWXU

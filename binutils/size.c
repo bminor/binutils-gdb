@@ -66,9 +66,6 @@ static void display_file (char *);
 static void display_bfd (bfd *);
 static void display_archive (bfd *);
 static int size_number (bfd_size_type);
-#if 0
-static void lprint_number (int, bfd_size_type);
-#endif
 static void rprint_number (int, bfd_size_type);
 static void print_berkeley_format (bfd *);
 static void sysv_internal_sizer (bfd *, asection *, void *);
@@ -382,25 +379,6 @@ size_number (bfd_size_type num)
   return strlen (buffer);
 }
 
-#if 0
-
-/* This is not used.  */
-
-static void
-lprint_number (int width, bfd_size_type num)
-{
-  char buffer[40];
-
-  sprintf (buffer,
-	   (radix == decimal ? "%lu" :
-	   ((radix == octal) ? "0%lo" : "0x%lx")),
-	   (unsigned long) num);
-
-  printf ("%-*s", width, buffer);
-}
-
-#endif
-
 static void
 rprint_number (int width, bfd_size_type num)
 {
@@ -451,14 +429,8 @@ print_berkeley_format (bfd *abfd)
   bfd_map_over_sections (abfd, berkeley_sum, NULL);
 
   if (files_seen++ == 0)
-#if 0
-    /* Intel doesn't like bss/stk because they don't have core files.  */
-    puts ((radix == octal) ? "   text\t   data\tbss/stk\t    oct\t    hex\tfilename" :
-	  "   text\t   data\tbss/stk\t    dec\t    hex\tfilename");
-#else
     puts ((radix == octal) ? "   text\t   data\t    bss\t    oct\t    hex\tfilename" :
 	  "   text\t   data\t    bss\t    dec\t    hex\tfilename");
-#endif
 
   total = textsize + datasize + bsssize;
 

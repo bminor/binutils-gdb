@@ -515,48 +515,6 @@ opt (int x)
   return getone (x);
 }
 
-#if 0
-
-/* This is no longer used.  */
-
-static void
-unit_info_list (void)
-{
-  while (opt (IT_un_CODE))
-    {
-      getone (IT_us_CODE);
-
-      while (getone (IT_sc_CODE))
-	getone (IT_ss_CODE);
-
-      while (getone (IT_er_CODE))
-	;
-
-      while (getone (IT_ed_CODE))
-	;
-    }
-}
-
-#endif
-
-#if 0
-
-/* This is no longer used.  */
-
-static void
-object_body_list (void)
-{
-  while (getone (IT_sh_CODE))
-    {
-      while (getone (IT_ob_CODE))
-	;
-      while (getone (IT_rl_CODE))
-	;
-    }
-}
-
-#endif
-
 static void
 must (int x)
 {
@@ -649,45 +607,6 @@ derived_type (void)
   tab (-1, "");
 }
 
-#if 0
-
-/* This is no longer used.  */
-
-static void
-program_structure (void)
-{
-  tab (1, "PROGRAM STRUCTURE");
-  while (opt (IT_dps_CODE))
-    {
-      must (IT_dso_CODE);
-      opt (IT_dss_CODE);
-      dump_symbol_info ();
-      must (IT_dps_CODE);
-    }
-  tab (-1, "");
-}
-
-#endif
-
-#if 0
-
-/* This is no longer used.  */
-
-static void
-debug_list (void)
-{
-  tab (1, "DEBUG LIST");
-
-  must (IT_du_CODE);
-  opt (IT_dus_CODE);
-  program_structure ();
-  must (IT_dln_CODE);
-
-  tab (-1, "");
-}
-
-#endif
-
 static void
 module (void)
 {
@@ -705,17 +624,6 @@ module (void)
     }
   while (getone (c) && c != IT_tr_CODE);
 
-#if 0
-  must (IT_cs_CODE);
-  must (IT_hd_CODE);
-  opt (IT_hs_CODE);
-
-  unit_info_list ();
-  object_body_list ();
-  debug_list ();
-
-  must (IT_tr_CODE);
-#endif
   tab (-1, "");
 
   c = getc (file);

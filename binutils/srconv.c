@@ -317,12 +317,8 @@ wr_un (struct coff_ofile *ptr, struct coff_sfile *sfile, int first,
     un.format = FORMAT_OM;
   un.spare1 = 0;
 
-#if 1
-  un.nsections = ptr->nsections - 1;	/*  Don't count the abs section.  */
-#else
-  /*NEW - only count sections with size.  */
-  un.nsections = nsecs;
-#endif
+  /* Don't count the abs section.  */
+  un.nsections = ptr->nsections - 1;
 
   un.nextdefs = 0;
   un.nextrefs = 0;
@@ -1208,11 +1204,6 @@ wr_du (struct coff_ofile *p, struct coff_sfile *sfile, int n)
 {
   struct IT_du du;
   int lim;
-#if 0
-  struct coff_symbol *symbol;
-  static int incit = 0x500000;
-  int used = 0;
-#endif
   int i;
   int j;
   unsigned int *lowest = (unsigned *) nints (p->nsections);
@@ -1233,47 +1224,6 @@ wr_du (struct coff_ofile *p, struct coff_sfile *sfile, int n)
       lowest[i] = ~0;
       highest[i] = 0;
     }
-
-  /* Look through all the symbols and try and work out the extents in this
-     source file.  */
-#if 0
-  for (symbol = sfile->scope->vars_head;
-       symbol;
-       symbol = symbol->next)
-    {
-      if (symbol->type->type == coff_secdef_type)
-	{
-	  unsigned int low = symbol->where->offset;
-	  unsigned int high = symbol->where->offset + symbol->type->size - 1;
-	  struct coff_section *section = symbol->where->section;
-
-	  int sn = section->number;
-	  if (low < lowest[sn])
-	    lowest[sn] = low;
-	  if (high > highest[sn])
-	    highest[sn] = high;
-	}
-    }
-
-  for (i = 0; i < du.sections; i++)
-    {
-      if (highest[i] == 0)
-	lowest[i] = highest[i] = incit;
-
-      du.san[used] = i;
-      du.length[used] = highest[i] - lowest[i];
-      du.address[used] = bfd_get_file_flags (abfd) & EXEC_P ? lowest[i] : 0;
-
-      if (debug)
-	{
-	  printf (" section %6s 0x%08x..0x%08x\n",
-		  p->sections[i + 1].name,
-		  lowest[i],
-		  highest[i]);
-	}
-      used++;
-    }
-#endif
 
   lim = du.sections;
   for (j = 0; j < lim; j++)
@@ -1328,22 +1278,8 @@ wr_dus (struct coff_ofile *p ATTRIBUTE_UNUSED, struct coff_sfile *sfile)
   dus.spare = nints (dus.ns);
   dus.ndir = 0;
   /* Find the filenames.  */
-#if 0
-  i = 0;
-
-  for (sfile = p->source_head;
-       sfile;
-       sfile = sfile->next)
-    {
-      dus.drb[i] = 0;
-      dus.spare[i] = 0;
-      dus.fname[i] = sfile->name;
-      i++;
-    }
-#else
   dus.drb[0] = 0;
   dus.fname[0] = sfile->name;
-#endif
 
   sysroff_swap_dus_out (file, &dus);
 
@@ -1362,69 +1298,6 @@ static void
 wr_dln (struct coff_ofile *p ATTRIBUTE_UNUSED, struct coff_sfile *sfile,
 	int n ATTRIBUTE_UNUSED)
 {
-#if 0
-  if (n == 0)
-    {
-      /* Count up all the linenumbers */
-      struct coff_symbol *sy;
-      int lc = 0;
-      struct IT_dln dln;
-
-      int idx;
-
-      for (sy = p->symbol_list_head;
-	   sy;
-	   sy = sy->next_in_ofile_list)
-	{
-	  struct coff_type *t = sy->type;
-	  if (t->type == coff_function_type)
-	    {
-	      struct coff_line *l = t->u.function.lines;
-	      lc += l->nlines;
-	    }
-	}
-
-      dln.sfn = nints (lc);
-      dln.sln = nints (lc);
-      dln.lln = nints (lc);
-      dln.section = nints (lc);
-
-      dln.from_address = nints (lc);
-      dln.to_address = nints (lc);
-
-
-      dln.neg = 0x1001;
-
-      dln.nln = lc;
-
-      /* Run through once more and fill up the structure */
-      idx = 0;
-      for (sy = p->symbol_list_head;
-	   sy;
-	   sy = sy->next_in_ofile_list)
-	{
-	  if (sy->type->type == coff_function_type)
-	    {
-	      int i;
-	      struct coff_line *l = sy->type->u.function.lines;
-	      for (i = 0; i < l->nlines; i++)
-		{
-		  dln.section[idx] = sy->where->section->number;
-		  dln.sfn[idx] = n;
-		  dln.sln[idx] = l->lines[i];
-		  dln.from_address[idx] = l->addresses[i];
-		  if (idx)
-		    dln.to_address[idx - 1] = dln.from_address[idx];
-		  idx++;
-		}
-	    }
-	  n++;
-	}
-      sysroff_swap_dln_out (file, &dln);
-    }
-
-#endif
-#if 1
   /* Count up all the linenumbers */
 
   struct coff_symbol *sy;
@@ -1491,7 +1364,6 @@ wr_dln (struct coff_ofile *p ATTRIBUTE_UNUSED, struct coff_sfile *sfile,
     }
   if (lc)
     sysroff_swap_dln_out (file, &dln);
-#endif
 }
 
 /* Write the global symbols out to the debug info.  */
@@ -1692,16 +1564,9 @@ wr_sc (struct coff_ofile *ptr, struct coff_sfile *sfile)
 	{
 	  sc.contents = CONTENTS_CODE;
 	}
-#if 0
-      /* NEW */
-      if (sc.length)
-	{
-#endif
-	  sysroff_swap_sc_out (file, &sc);
-	  scount++;
-#if 0
-	}
-#endif
+
+      sysroff_swap_sc_out (file, &sc);
+      scount++;
     }
   return scount;
 }
