@@ -108,16 +108,15 @@ STAGESTUFF = $(PROGS) *.o
 DISTSTUFF=arparse.c arlex.c
 
 BASEDIR = $(srcdir)/..
-LIBDIR  = ./../bfd
-OPCODEDIR = ./../opcodes
+BFDDIR = $(BASEDIR)/bfd
+INCDIR	= $(BASEDIR)/include
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 
 #### host and target dependant Makefile fragments come in here.
 ###
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BASEDIR)/include -I$(BASEDIR)/bfd
-
 .c.o:
-	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
+	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $<
 
 #
 ## Random definitions
@@ -135,17 +134,15 @@ INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-LIBIBERTY_SRC_DIR = $(srcdir)/../libiberty
-LIBIBERTY_BIN_DIR = ./../libiberty
-LIBIBERTY = $(LIBIBERTY_BIN_DIR)/libiberty.a
+LIBIBERTY = ../libiberty/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
 ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY) 
 
-BFD = $(LIBDIR)/libbfd.a
-OPCODES = $(OPCODEDIR)/libopcodes.a
+BFD = ../bfd/libbfd.a
+OPCODES = ../opcodes/libopcodes.a
 
 RUNTEST = runtest
 RUNTESTFLAGS = 
@@ -188,26 +185,26 @@ info: binutils.info
 
 dvi: binutils.dvi
 
-#$(BFD):$(LIBDIR)/../common/*.c
-#	(cd $(LIBDIR); make)
-
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRINGS_PROG): $(ADDL_LIBS) strings.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(BFD) $(OPCODES)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+
+objdump.o: objdump.c
+	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(ARCHDEFS) $(CFLAGS) $(srcdir)/objdump.c
 
 underscore.c:
 	echo "int xxy_us_dummy;" >dummy.c
@@ -220,27 +217,29 @@ underscore.c:
 	fi
 	-rm -f dummy.c dummy.o
 
-cplus-dem.o: $(LIBIBERTY_SRC_DIR)/cplus-dem.c
-	$(CC) -c -DMAIN $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(LIBIBERTY_SRC_DIR)/cplus-dem.c
+version.o: version.c
+	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' $(CFLAGS) -c $(srcdir)/version.c
+
+cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h 
+	$(CC) -c -DMAIN $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
+	$(CC) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
 
-arparse.c:arparse.y
+arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
 	-mv y.tab.c arparse.c
 	-mv y.tab.h arparse.h
-
 
 arlex.c: arlex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/arlex.l
 	mv lex.yy.c arlex.c
 
 $(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -250,30 +249,72 @@ $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
 # Alternatively, you can install ranlib.sh as ranlib.
 
 ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
 # objcopy and strip in one binary that uses argv[0] to decide its action.
 
 objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
 nlmheader.c: nlmheader.y
-	$(BISON) $<
+	$(BISON) $(srcdir)/nlmheader.y
 	rm -f nlmheader.c
-	mv y.tab.c nlmheader.c
-
-nlmheader.o: nlmheader.c nlmconv.h $(BASEDIR)/include/nlm/common.h \
-  $(BASEDIR)/include/nlm/internal.h
-
-nlmconv.o: nlmconv.c nlmconv.h $(BASEDIR)/include/nlm/common.h \
-  $(BASEDIR)/include/nlm/internal.h $(BASEDIR)/bfd/libnlm.h
+	-mv y.tab.c nlmheader.c
 
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
+
+# This list of dependencies was generated by doing a make with gcc -MM
+# saving the output in a file and removing the gcc commands
+# changing "../../devo/binutils/../bfd" to "$(BFDDIR)"
+# removing "../../devo/binutils/"
+# changing "../include" to "$(INCDIR)"
+
+bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h 
+filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h 
+size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h 
+objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h \
+  $(INCDIR)/dis-asm.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/aout/stab.def 
+nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h bucomm.h $(INCDIR)/getopt.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ranlib.h 
+ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h bucomm.h $(INCDIR)/aout/ar.h \
+  $(BFDDIR)/libbfd.h arsup.h 
+arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h arsup.h 
+arlex.o: arlex.c ./arparse.h 
+not-ranlib.o: not-ranlib.c 
+arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h arsup.h bucomm.h 
+strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h bucomm.h 
+objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/fopen-same.h bucomm.h 
+is-strip.o: is-strip.c 
+is-ranlib.o: is-ranlib.c 
+not-strip.o: not-strip.c 
+nlmheader.o: nlmheader.c nlmconv.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h
+nlmconv.o: nlmconv.c nlmconv.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h $(BFDDIR)/libnlm.h
 
 stage1: force
 	- mkdir stage1
@@ -388,7 +429,7 @@ realclean: distclean
 etags tags: TAGS
 
 TAGS: force
-	etags $(srcdir)/../include/*.h $(srcdir)/*.[hc] 
+	etags $(INCDIR)/*.h $(srcdir)/*.[hc] 
 
 install: all
 	for i in $(PROGS) ; do \
@@ -436,32 +477,6 @@ $(DIST_NAME).tar.z:
 	cd ..; chmod og=u `find . -print`
 	cd ../..; tar chf - $(DIST_NAME) | gzip >$(DIST_NAME).tar.z
 	rm -rf ../../$(DIST_NAME)
-
-# These get around a bug in Sun Make in SunOS 4.1.1
-alloca.o:alloca.c
-ar.o: ar.c
-arsup.o: arsup.c
-bucomm.o: bucomm.c
-objcopy.o: objcopy.c
-filemode.o:filemode.c
-getopt.o:getopt.c
-getopt1.o:getopt1.c
-gmalloc.o:gmalloc.c
-is-ranlib.o:is-ranlib.c
-is-strip.o:is-strip.c
-maybe-ranlib.o:maybe-ranlib.c
-maybe-strip.o:maybe-strip.c
-nm.o: nm.c
-not-ranlib.o:not-ranlib.c
-not-strip.o:not-strip.c
-objdump.o: objdump.c
-size.o: size.c
-strings.o:strings.c
-strip.o:strip.c
-version.o: $(srcdir)/version.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
-
-ar.o arsup.o nm.o objcopy.o strings.o: bucomm.h
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
