@@ -1,3 +1,10 @@
+Sun Nov  3 14:37:05 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/classes.exp: Modify to handle current gcc C++ member ordering
+	and accept older ordering as obsolescent gcc or gdb.
+	* gdb.c++/templates.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Ditto.
+
 Fri Nov  1 11:56:09 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/coremaker.c: Add code to mmap some data so we
