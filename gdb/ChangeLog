@@ -1,5 +1,8 @@
 Fri Jun 17 20:58:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* breakpoint.c: Include annotate.h.  Call annotate_field rather
+	than printing annotation directly.
+
 	* main.c: Include string.h.
 
 Thu Jun 16 14:41:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
