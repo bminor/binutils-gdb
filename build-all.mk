@@ -15,11 +15,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930106
+DATE	= 930202
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /cirdan/justice/devo-test/$(TAG)
+INSTALLDIR = /justice/devo-test/$(TAG)
 
 GCC = gcc -O -g
 CFLAGS = -g
@@ -78,10 +78,10 @@ endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 #TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
-TARGETS	= m68k-aout		i386-aout	a29k-amd-udi \
-	i960-vxworks		m68k-coff	m68k-vxworks \
-	i960-intel-nindy	sparc-aout	sparc-vxworks \
-	sparclite-aout          sparclitefrwcompat-aout
+TARGETS	= m68k-aout	i386-aout	a29k-amd-udi \
+	  i960-vxworks	m68k-coff	m68k-vxworks \
+	  sparc-aout			sparc-vxworks \
+	  sparclite-aout		sparclitefrwcompat-aout
 CC = cc 
 all: all-native
 endif
