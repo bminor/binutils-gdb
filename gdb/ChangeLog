@@ -1,3 +1,14 @@
+2003-06-01  Andrew Cagney  <cagney@redhat.com>
+
+	* solib-irix.c (extract_mips_address): Inline extract_address,
+	replacing it with extract_signed_integer.
+	* solib-svr4.c (SOLIB_EXTRACT_ADDRESS): Ditto.
+	(LM_NAME, IGNORE_FIRST_LINK_MAP_ENTRY): Ditto.
+	(first_link_map_member, open_symbol_file_object): Ditto.
+	(svr4_fetch_objfile_link_map, svr4_fetch_objfile_link_map): Ditto.
+	* solib-sunos.c (SOLIB_EXTRACT_ADDRESS): Ditto.
+	(LM_NEXT, LM_NAME): Ditto.
+
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
         * alpha-tdep.h (ALPHA_FP_REGNUM): Remove.
