@@ -910,7 +910,24 @@ psim_write_memory(psim *system,
 INLINE_PSIM void
 psim_print_info(psim *system, int verbose)
 {
+  psim_status status;
   int i;
+
+
+  status = psim_get_status(system);
+  switch (status.reason) {
+  default:
+    break;	/* our caller will print an appropriate error message */
+
+  case was_exited:
+    printf ("Exit status = %d\n", status.signal);
+    break;
+
+  case was_signalled:
+    printf ("Got signal %d\n", status.signal);
+    break;
+  }
+
   for (i = 0; i < system->nr_cpus; i++)
     cpu_print_info (system->processors[i], verbose);
 }

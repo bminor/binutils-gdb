@@ -1,3 +1,7 @@
+Fri Oct  6 17:23:10 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* psim.c (psim_print_info): Print exit status or signal number.
+
 Mon Oct  2 11:46:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cpu.c (struct _cpu): Add number_of_insns field to trace how many
