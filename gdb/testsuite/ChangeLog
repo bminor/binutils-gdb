@@ -2,12 +2,12 @@ Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t03/ptype.exp: For UDI, skip tests which call malloc.
 
-	* gdb.t02/whatis.exp: Remove xfails for PRs 1838 and 2417; they
-	are fixed.
+	* gdb.t02/whatis.exp, gdb.t03/ptype.exp: Remove xfails for PRs
+	1838 and 2417; they are fixed.
 
-	* gdb.t02/whatis.exp: Remove xfails for v_char_array and
-	v_signed_char_array; the test is looser than when the xfails were
-	added.
+	* gdb.t02/whatis.exp (v_char_array, v_signed_char_array),
+	gdb.t03/ptype.exp (ptype structure, ptype union):
+	Remove xfails; the test is looser than when the xfails were added.
 
 	* gdb.t00/{help.exp,default.exp}: Don't test "target remote" on UDI.
 	* gdb.t00/help.exp: Don't expect remote to be in "help target" output.
