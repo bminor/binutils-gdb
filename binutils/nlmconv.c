@@ -330,7 +330,7 @@ main (argc, argv)
   if (! bfd_set_format (outbfd, bfd_object))
     bfd_fatal (output_file);
 
-  assert (outbfd->xvec->flavour == bfd_target_nlm_flavour);
+  assert (bfd_get_flavour (outbfd) == bfd_target_nlm_flavour);
 
   if (bfd_arch_get_compatible (inbfd, outbfd) == NULL)
     fprintf (stderr,

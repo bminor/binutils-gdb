@@ -1,5 +1,10 @@
 Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* nlmconv.c (main): Use bfd_get_flavour instead of struct member.
+	* ar.c (print_contents, extract_file), size.c
+	(print_berkeley_format): Use bfd_get_filename and 
+	bfd_my_archive instead of dereferencing the structs directly.
+
 	* ar.c: Use bfd_fatal and bfd_nonfatal instead of bfd_perror and exit.
 	Indent.  Remove DEFUNs.
 

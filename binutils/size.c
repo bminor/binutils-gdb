@@ -369,8 +369,8 @@ print_berkeley_format (abfd)
 	  (unsigned long) total, (unsigned long) total);
 
   fputs (bfd_get_filename (abfd), stdout);
-  if (abfd->my_archive)
-    printf (" (ex %s)", abfd->my_archive->filename);
+  if (bfd_my_archive (abfd))
+    printf (" (ex %s)", bfd_get_filename (bfd_my_archive (abfd)));
 }
 
 /* I REALLY miss lexical functions! */

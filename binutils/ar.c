@@ -528,7 +528,8 @@ print_contents (abfd)
       nread = bfd_read (cbuf, 1, tocopy, abfd);	/* oops -- broke
 							   abstraction!  */
       if (nread != tocopy)
-	fatal ("%s is not a valid archive", abfd->my_archive->filename);
+	fatal ("%s is not a valid archive",
+	       bfd_get_filename (bfd_my_archive (abfd)));
       fwrite (cbuf, 1, nread, stdout);
       ncopied += tocopy;
     }
@@ -583,7 +584,8 @@ extract_file (abfd)
 
 	nread = bfd_read (cbuf, 1, tocopy, abfd);
 	if (nread != tocopy)
-	  fatal ("%s is not a valid archive", abfd->my_archive->filename);
+	  fatal ("%s is not a valid archive",
+		 bfd_get_filename (bfd_my_archive (abfd)));
 
 	/* See comment above; this saves disk arm motion */
 	if (!ostream)
