@@ -439,9 +439,9 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 #ifdef BFD_ASSEMBLER
 		  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
 #endif
-		    sprintf(od_buf, "%d.%d.",
-			    S_GET_OTHER (symbolP),
-			    S_GET_DESC (symbolP));
+		    sprintf (od_buf, "%d.%d.",
+			     S_GET_OTHER (symbolP),
+			     S_GET_DESC (symbolP));
 #endif
 		  as_bad (_("symbol `%s' is already defined as \"%s\"/%s%ld"),
 			    sym_name,
@@ -1878,7 +1878,7 @@ S_SET_EXTERNAL (s)
     {
       char * file;
       unsigned int line;
-      
+
       /* Do not reassign section symbols.  */
       as_where (& file, & line);
       as_warn_where (file, line,

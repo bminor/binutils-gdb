@@ -241,7 +241,7 @@ dwarf2_gen_line_info (ofs, loc)
      symbols apply to assembler code.  It is necessary to emit
      duplicate line symbols when a compiler asks for them, because GDB
      uses them to determine the end of the prologue.  */
-  if (debug_type == DEBUG_DWARF2 
+  if (debug_type == DEBUG_DWARF2
       && line == loc->line && filenum == loc->filenum)
     return;
 

@@ -168,7 +168,7 @@ extern char **environ;
 
 /* Hack to make "gcc -Wall" not complain about obstack macros.  */
 #if !defined (memcpy) && !defined (bcopy)
-#define bcopy(src,dest,size)	memcpy(dest,src,size)
+#define bcopy(src,dest,size)	memcpy (dest, src, size)
 #endif
 
 /* Make Saber happier on obstack.h.  */

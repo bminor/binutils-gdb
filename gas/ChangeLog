@@ -1,3 +1,16 @@
+2002-05-02  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* as.h: Fix formatting.
+	* cgen.c: Likewise.
+	* cgen.h: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* frags.h: Likewise.
+	* gasp.c: Likewise.
+	* macro.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+
 2002-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* app.c (mri_pseudo): Only declare for TC_M68K.

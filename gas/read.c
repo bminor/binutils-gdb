@@ -45,7 +45,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ecoff.h"
 
 #ifndef TC_START_LABEL
-#define TC_START_LABEL(x,y) (x==':')
+#define TC_START_LABEL(x,y) (x == ':')
 #endif
 
 /* Set by the object-format or the target.  */

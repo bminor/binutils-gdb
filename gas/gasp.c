@@ -575,7 +575,7 @@ is_flonum (idx, string)
 
   if (regcomp (&reg, "^[0-9]*\\.[0-9]+([eE][+-]?[0-9]+)?", REG_EXTENDED) != 0)
     return 0;
-    
+
   rc = regexec (&reg, &buf.ptr[idx], 0, NULL, 0);
   sb_kill (&buf);
   regfree (&reg);
