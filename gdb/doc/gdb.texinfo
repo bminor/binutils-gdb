@@ -12973,6 +12973,14 @@ default is off.
 @item show debug expression
 Displays the current state of displaying @value{GDBN} expression
 debugging info.
+@kindex set debug frame
+@item set debug frame
+Turns on or off display of @value{GDBN} frame debugging info.  The
+default is off.
+@kindex show debug frame
+@item show debug frame
+Displays the current state of displaying @value{GDBN} frame debugging
+info.
 @kindex set debug overload
 @item set debug overload
 Turns on or off display of @value{GDBN} C@t{++} overload debugging
