@@ -656,8 +656,8 @@ void
 mips_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const void *from)
 {
-  put_frame_register (frame, regnum + 0, (const char *) + 4);
-  put_frame_register (frame, regnum + 1, (const char *) + 0);
+  put_frame_register (frame, regnum + 0, (const char *) from + 4);
+  put_frame_register (frame, regnum + 1, (const char *) from + 0);
 }
 
 /* Return the GDB type object for the "standard" data type

@@ -1,3 +1,7 @@
+2003-06-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips_value_to_register): Fix.
+
 2003-06-06  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (put_frame_register): Declare.
