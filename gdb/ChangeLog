@@ -1,3 +1,11 @@
+Fri Jun 13 14:14:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Fix some comments.
+	Add missing return statements after finding an "add imm{16,32},sp"
+	instruction.
+	(mn10300_frame_chain): Add in size of our register save area to find
+	our caller's frame if our caller does not have a frame pointer.
+
 Fri Jun 13 12:55:49 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* symfile.c (generic_load): Check return code of target_write_memory.
