@@ -1,3 +1,9 @@
+2001-11-27  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (register_names): Call the general-purpose registers
+	`r0' -- `r15', and the floating-point registers `f0' -- `f15', to
+	match the assembly language.
+
 2001-11-26 Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* config/i386/tm-cygwin.h: Define HAVE_SSE_REGS if

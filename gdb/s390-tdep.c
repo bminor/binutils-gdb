@@ -149,15 +149,15 @@ s390_register_name (int reg_nr)
 {
   static char *register_names[] = {
     "pswm", "pswa",
-    "gpr0", "gpr1", "gpr2", "gpr3", "gpr4", "gpr5", "gpr6", "gpr7",
-    "gpr8", "gpr9", "gpr10", "gpr11", "gpr12", "gpr13", "gpr14", "gpr15",
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     "acr0", "acr1", "acr2", "acr3", "acr4", "acr5", "acr6", "acr7",
     "acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15",
     "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
     "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
     "fpc",
-    "fpr0", "fpr1", "fpr2", "fpr3", "fpr4", "fpr5", "fpr6", "fpr7",
-    "fpr8", "fpr9", "fpr10", "fpr11", "fpr12", "fpr13", "fpr14", "fpr15"
+    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+    "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15"
   };
 
   if (reg_nr >= S390_LAST_REGNUM)
