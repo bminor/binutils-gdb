@@ -1,5 +1,7 @@
 Wed Jul  3 16:05:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.h (AOUT_MACHTYPE): Define as 0 if TE_386BSD.
+
 	Based on patches from Tom Quiggle <quiggle@sgi.com>:
 	* ecoff.c (last_lineno): New static variable.
 	(add_procedure): Set last_lineno.
