@@ -289,6 +289,7 @@ all:	$(ALL)
 .PHONY: do-info do-check do-dvi do-install-info
 .PHONY: do-clean do-mostlyclean do-distclean do-realclean
 .NOEXPORT:
+MAKEOVERRIDES=
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
 # ``make X'' in all subdirectories (because, in general, there is a
