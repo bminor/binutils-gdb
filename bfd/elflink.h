@@ -1211,10 +1211,10 @@ elf_link_add_object_symbols (abfd, info)
 	  if (h->root.type == bfd_link_hash_common)
 	    old_alignment = h->root.u.c.p->alignment_power;
 
-	  if (ever != NULL
+	  if (elf_tdata (abfd)->verdef != NULL
 	      && ! override
 	      && vernum > 1
-	      && (h->verinfo.verdef == NULL || definition))
+	      && definition)
 	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
 	}
 
@@ -2102,6 +2102,15 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     h->root.type = bfd_link_hash_undefined;
+
+  /* If this symbol is not being provided by the linker script, and it is
+     currently defined by a dynamic object, but not by a regular object,
+     then clear out any version information because the symbol will not be
+     associated with the dynamic object any more.  */
+  if (!provide
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    h->verinfo.verdef = NULL;
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
