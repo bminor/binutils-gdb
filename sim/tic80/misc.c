@@ -119,7 +119,7 @@ static char tic80_trace_buffer[1024];
 static int  tic80_size_name;
 
 #define SIZE_HEX	8
-#define SIZE_DECIMAL	12
+#define SIZE_DECIMAL	13
 
 /* Initialize tracing by calculating the maximum name size */
 static void

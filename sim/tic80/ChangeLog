@@ -1,3 +1,7 @@
+Thu May  8 11:57:47 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* misc.c (SIZE_DECIMAL): Bump to 13.
+
 Thu May  8 14:07:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_do_command): Implement.
