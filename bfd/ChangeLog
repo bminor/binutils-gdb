@@ -1,3 +1,8 @@
+2002-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (WIN32LIBADD): Don't eval PICFLAG assignment.
+	* configure: Regenerate.
+
 2002-02-26  Andrew Macleod  <amacleod@cygnus.com>
 
 	* elflink.h (elf_bfd_final_link): Don't crash on SHN_UNDEF local

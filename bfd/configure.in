@@ -424,11 +424,10 @@ case "${host}" in
     fi
     ;;
   *)
-    PICFLAG=
-    changequote(,)dnl
-    eval `grep "^[ 	]*PICFLAG[ 	]*=" ../libiberty/Makefile | sed -e "s/[ 	]*//g"`
-    changequote([,])dnl
-    if test -n "$PICFLAG"; then
+changequote(,)dnl
+    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | tail -1`
+changequote([,])dnl
+    if test -n "$x"; then
       WIN32LIBADD="-L../libiberty/pic -liberty"
     fi
   ;;
