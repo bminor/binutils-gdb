@@ -34,7 +34,7 @@
    Frame Descriptors.  */
 struct cie_unit
 {
-  /* Offset of this unit in dwarf_frame_buffer.  */
+  /* Offset of this unit in .debug_frame or .eh_frame.  */
   ULONGEST offset;
 
   /* A null-terminated string that identifies the augmentation to this CIE or
@@ -176,6 +176,14 @@ struct frame_state
   struct objfile *objfile;
 };
 
+enum ptr_encoding { 
+  PE_absptr = DW_EH_PE_absptr,
+  PE_pcrel = DW_EH_PE_pcrel,
+  PE_textrel = DW_EH_PE_textrel,
+  PE_datarel = DW_EH_PE_datarel,
+  PE_funcrel = DW_EH_PE_funcrel
+};
+
 #define UNWIND_CONTEXT(fi) ((struct context *) (fi->context))
 
 
@@ -188,8 +196,6 @@ extern file_ptr dwarf_frame_offset;
 extern unsigned int dwarf_frame_size;
 extern file_ptr dwarf_eh_frame_offset;
 extern unsigned int dwarf_eh_frame_size;
-
-static char *dwarf_frame_buffer;
 
 
 extern char *dwarf2_read_section (struct objfile *objfile, file_ptr offset,
@@ -219,6 +225,7 @@ static LONGEST read_sleb128 (bfd * abfd, char **p);
 static CORE_ADDR read_pointer (bfd * abfd, char **p);
 static CORE_ADDR read_encoded_pointer (bfd * abfd, char **p,
 				       unsigned char encoding);
+static enum ptr_encoding pointer_encoding (unsigned char encoding);
 
 static LONGEST read_initial_length (bfd * abfd, char *buf, int *bytes_read);
 static ULONGEST read_length (bfd * abfd, char *buf, int *bytes_read,
@@ -494,6 +501,9 @@ read_pointer (bfd * abfd, char **p)
     }
 }
 
+/* This functions only reads appropriate amount of data from *p 
+ * and returns the resulting value. Calling function must handle
+ * different encoding possibilities itself!  */
 static CORE_ADDR
 read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
 {
@@ -537,22 +547,34 @@ read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
 		      "read_encoded_pointer: unknown pointer encoding");
     }
 
-  if (ret != 0)
-    switch (encoding & 0xf0)
-      {
-      case DW_EH_PE_absptr:
-	break;
-      case DW_EH_PE_pcrel:
-	ret += (CORE_ADDR) * p;
-	break;
-      case DW_EH_PE_textrel:
-      case DW_EH_PE_datarel:
-      case DW_EH_PE_funcrel:
-      default:
-	internal_error (__FILE__, __LINE__,
-			"read_encoded_pointer: unknown pointer encoding");
-      }
+  return ret;
+}
 
+/* Variable 'encoding' carries 3 different flags:
+ * - encoding & 0x0f : size of the address (handled in read_encoded_pointer())
+ * - encoding & 0x70 : type (absolute, relative, ...)
+ * - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
+enum ptr_encoding
+pointer_encoding (unsigned char encoding)
+{
+  int ret;
+
+  if (encoding & DW_EH_PE_indirect)
+    warning ("CFI: Unsupported pointer encoding: DW_EH_PE_indirect");
+  
+  switch (encoding & 0x70)
+    {
+    case DW_EH_PE_absptr:
+    case DW_EH_PE_pcrel:
+    case DW_EH_PE_textrel:
+    case DW_EH_PE_datarel:
+    case DW_EH_PE_funcrel:
+      ret = encoding & 0x70;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+    		  "CFI: unknown pointer encoding");
+    }
   return ret;
 }
 
@@ -627,6 +649,10 @@ execute_cfa_program (struct objfile *objfile, char *insn_ptr, char *insn_end,
 	  case DW_CFA_set_loc:
 	    fs->pc = read_encoded_pointer (objfile->obfd, &insn_ptr,
 					   fs->addr_encoding);
+	    
+	    if (pointer_encoding (fs->addr_encoding) != PE_absptr)
+		warning ("CFI: DW_CFA_set_loc uses relative addressing");
+	    
 	    break;
 
 	  case DW_CFA_advance_loc1:
@@ -1380,39 +1406,46 @@ compare_fde_unit (const void *a, const void *b)
 }
 
 /*  Build the cie_chunks and fde_chunks tables from informations
-    in .debug_frame section.  */
-void
-dwarf2_build_frame_info (struct objfile *objfile)
+    found in .debug_frame and .eh_frame sections.  */
+/* We can handle both of these sections almost in the same way, however there
+   are some exceptions:
+   - CIE ID is -1 in debug_frame, but 0 in eh_frame
+   - eh_frame may contain some more information that are used only by gcc 
+     (eg. personality pointer, LSDA pointer, ...). Most of them we can ignore.
+   - In debug_frame FDE's item cie_id contains offset of it's parent CIE.
+     In eh_frame FDE's item cie_id is a relative pointer to the parent CIE.
+     Anyway we don't need to bother with this, because we are smart enough 
+     to keep the pointer to the parent CIE of oncomming FDEs in 'last_cie'.
+   - Although debug_frame items can contain Augmentation as well as 
+     eh_frame ones, I have never seen them non-empty. Thus only in eh_frame 
+     we can encounter for example non-absolute pointers (Aug. 'R').  
+                                                              -- mludvig  */
+static void
+parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
+		  unsigned int frame_size, int eh_frame)
 {
   bfd *abfd = objfile->obfd;
+  asection *curr_section_ptr;
   char *start = NULL;
   char *end = NULL;
-  int from_eh = 0;
+  char *frame_buffer = NULL;
+  char *curr_section_name, *aug_data;
+  struct cie_unit *last_cie = NULL;
+  int last_dup_fde = 0;
+  int aug_len, i;
+  CORE_ADDR curr_section_vma = 0;
 
   unwind_tmp_obstack_init ();
 
-  dwarf_frame_buffer = 0;
+  frame_buffer = dwarf2_read_section (objfile, frame_offset, frame_size);
 
-  if (dwarf_frame_offset)
-    {
-      dwarf_frame_buffer = dwarf2_read_section (objfile,
-						dwarf_frame_offset,
-						dwarf_frame_size);
+  start = frame_buffer;
+  end = frame_buffer + frame_size;
 
-      start = dwarf_frame_buffer;
-      end = dwarf_frame_buffer + dwarf_frame_size;
-    }
-  else if (dwarf_eh_frame_offset)
-    {
-      dwarf_frame_buffer = dwarf2_read_section (objfile,
-						dwarf_eh_frame_offset,
-						dwarf_eh_frame_size);
-
-      start = dwarf_frame_buffer;
-      end = dwarf_frame_buffer + dwarf_eh_frame_size;
-
-      from_eh = 1;
-    }
+  curr_section_name = eh_frame ? ".eh_frame" : ".debug_frame";
+  curr_section_ptr = bfd_get_section_by_name (abfd, curr_section_name);
+  if (curr_section_ptr)
+    curr_section_vma = curr_section_ptr->vma;
 
   if (start)
     {
@@ -1420,9 +1453,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	{
 	  unsigned long length;
 	  ULONGEST cie_id;
-	  ULONGEST unit_offset = start - dwarf_frame_buffer;
-	  int bytes_read;
-	  int dwarf64;
+	  ULONGEST unit_offset = start - frame_buffer;
+	  int bytes_read, dwarf64, flag_pcrel;
 	  char *block_end;
 
 	  length = read_initial_length (abfd, start, &bytes_read);
@@ -1430,10 +1462,16 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  dwarf64 = (bytes_read == 12);
 	  block_end = start + length;
 
+	  if (length == 0)
+	    {
+	      start = block_end;
+	      continue;
+	    }
+
 	  cie_id = read_length (abfd, start, &bytes_read, dwarf64);
 	  start += bytes_read;
 
-	  if ((from_eh && cie_id == 0) || is_cie (cie_id, dwarf64))
+	  if ((eh_frame && cie_id == 0) || is_cie (cie_id, dwarf64))
 	    {
 	      struct cie_unit *cie = cie_unit_alloc ();
 	      char *aug;
@@ -1449,87 +1487,186 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      start++;		/* version */
 
 	      cie->augmentation = aug = start;
-	      while (*start)
-		start++;
-	      start++;		/* skip past NUL */
+	      while (*start++);	/* Skips last NULL as well */
 
 	      cie->code_align = read_uleb128 (abfd, &start);
 	      cie->data_align = read_sleb128 (abfd, &start);
 	      cie->ra = read_1u (abfd, &start);
 
+	      /* Augmentation:
+	         z      Indicates that a uleb128 is present to size the
+	         augmentation section.
+	         L      Indicates the encoding (and thus presence) of
+	         an LSDA pointer in the FDE augmentation.
+	         R      Indicates a non-default pointer encoding for
+	         FDE code pointers.
+	         P      Indicates the presence of an encoding + language
+	         personality routine in the CIE augmentation.
+
+	         [This info comes from GCC's dwarf2out.c]
+	       */
 	      if (*aug == 'z')
 		{
-		  int xtra = read_uleb128 (abfd, &start);
-		  start += xtra;
+		  aug_len = read_uleb128 (abfd, &start);
+		  aug_data = start;
+		  start += aug_len;
 		  ++aug;
 		}
+
+	      cie->data = start;
+	      cie->data_length = block_end - cie->data;
 
 	      while (*aug != '\0')
 		{
 		  if (aug[0] == 'e' && aug[1] == 'h')
 		    {
-		      start += sizeof (void *);
-		      aug += 2;
+		      aug_data += sizeof (void *);
+		      aug++;
 		    }
 		  else if (aug[0] == 'R')
-		    {
-		      cie->addr_encoding = *start++;
-		      aug += 1;
-		    }
+		    cie->addr_encoding = *aug_data++;
 		  else if (aug[0] == 'P')
 		    {
-		      CORE_ADDR ptr;
-		      ptr = read_encoded_pointer (abfd, &start,
-						  cie->addr_encoding);
-		      aug += 1;
+		      CORE_ADDR pers_addr;
+		      int pers_addr_enc;
+
+		      pers_addr_enc = *aug_data++;
+		      /* We don't need pers_addr value and so we 
+		         don't care about it's encoding.  */
+		      pers_addr = read_encoded_pointer (abfd, &aug_data,
+							pers_addr_enc);
+		    }
+		  else if (aug[0] == 'L' && eh_frame)
+		    {
+		      int lsda_addr_enc;
+
+		      /* Perhaps we should save this to CIE for later use?
+		         Do we need it for something in GDB?  */
+		      lsda_addr_enc = *aug_data++;
 		    }
 		  else
-		    warning ("%s(): unknown augmentation", __func__);
+		    warning ("CFI warning: unknown augmentation \"%c\""
+			     " in \"%s\" of\n"
+			     "\t%s", aug[0], curr_section_name,
+			     objfile->name);
+		  aug++;
 		}
 
-	      cie->data = start;
-	      cie->data_length = block_end - start;
+	      last_cie = cie;
 	    }
 	  else
 	    {
 	      struct fde_unit *fde;
 	      struct cie_unit *cie;
+	      int dup = 0;
+	      CORE_ADDR init_loc;
 
-	      fde_chunks_need_space ();
-	      fde = fde_unit_alloc ();
-
-	      fde_chunks.array[fde_chunks.elems++] = fde;
-
-	      fde->initial_location = read_pointer (abfd, &start)
-		+ ANOFFSET (objfile->section_offsets,
-			    SECT_OFF_TEXT (objfile));
-	      fde->address_range = read_pointer (abfd, &start);
-
-	      cie = cie_chunks;
-	      while (cie)
+	      /* We assume that debug_frame is in order 
+	         CIE,FDE,CIE,FDE,FDE,...  and thus the CIE for this FDE
+	         should be stored in last_cie pointer. If not, we'll 
+	         try to find it by the older way.  */
+	      if (last_cie)
+		cie = last_cie;
+	      else
 		{
-		  if (cie->objfile == objfile)
-		    {
-		      if (from_eh
-			  && (cie->offset ==
-			      (unit_offset + bytes_read - cie_id)))
-			break;
-		      if (!from_eh && (cie->offset == cie_id))
-			break;
-		    }
+		  warning ("CFI: last_cie == NULL. "
+			   "Perhaps a malformed %s section in '%s'...?\n",
+			   curr_section_name, objfile->name);
 
-		  cie = cie->next;
+		  cie = cie_chunks;
+		  while (cie)
+		    {
+		      if (cie->objfile == objfile)
+			{
+			  if (eh_frame &&
+			      (cie->offset ==
+			       (unit_offset + bytes_read - cie_id)))
+			    break;
+			  if (!eh_frame && (cie->offset == cie_id))
+			    break;
+			}
+
+		      cie = cie->next;
+		    }
+		  if (!cie)
+		    error ("CFI: can't find CIE pointer");
 		}
 
-	      if (!cie)
-		error ("%s(): can't find CIE pointer", __func__);
-	      fde->cie_ptr = cie;
+	      init_loc = read_encoded_pointer (abfd, &start,
+					       cie->addr_encoding);
 
-	      if (cie->augmentation[0] == 'z')
-		read_uleb128 (abfd, &start);
+	      switch (pointer_encoding (cie->addr_encoding))
+	      {
+		case PE_absptr:
+			break;
+		case PE_pcrel:
+			/* start-frame_buffer gives offset from 
+		           the beginning of actual section.  */
+			init_loc += curr_section_vma + start - frame_buffer;
+			break;
+		default:
+			warning ("CFI: Unsupported pointer encoding\n");
+	      }
 
-	      fde->data = start;
-	      fde->data_length = block_end - start;
+	      /* For relocatable objects we must add an offset telling
+	         where the section is actually mapped in the memory.  */
+	      init_loc += ANOFFSET (objfile->section_offsets,
+				    SECT_OFF_TEXT (objfile));
+
+	      /* If we have both .debug_frame and .eh_frame present in 
+	         a file, we must eliminate duplicate FDEs. For now we'll 
+	         run through all entries in fde_chunks and check it one 
+	         by one. Perhaps in the future we can implement a faster 
+	         searching algorithm.  */
+	      /* eh_frame==2 indicates, that this file has an already 
+	         parsed .debug_frame too. When eh_frame==1 it means, that no
+	         .debug_frame is present and thus we don't need to check for
+	         duplicities. eh_frame==0 means, that we parse .debug_frame
+	         and don't need to care about duplicate FDEs, because
+	         .debug_frame is parsed first.  */
+	      if (eh_frame == 2)
+	        for (i = 0; eh_frame == 2 && i < fde_chunks.elems; i++)
+		{
+		  /* We assume that FDEs in .debug_frame and .eh_frame 
+		     have the same order (if they are present, of course).
+		     If we find a duplicate entry for one FDE and save
+		     it's index to last_dup_fde it's very likely, that 
+		     we'll find an entry for the following FDE right after 
+		     the previous one. Thus in many cases we'll run this 
+		     loop only once.  */
+		  last_dup_fde = (last_dup_fde + i) % fde_chunks.elems;
+		  if (fde_chunks.array[last_dup_fde]->initial_location
+		      == init_loc)
+		    {
+		      dup = 1;
+		      break;
+		    }
+		}
+
+	      /* Allocate a new entry only if this FDE isn't a duplicate of
+	         something we have already seen.   */
+	      if (!dup)
+		{
+		  fde_chunks_need_space ();
+		  fde = fde_unit_alloc ();
+
+		  fde_chunks.array[fde_chunks.elems++] = fde;
+
+		  fde->initial_location = init_loc;
+		  fde->address_range = read_encoded_pointer (abfd, &start,
+							     cie->
+							     addr_encoding);
+
+		  fde->cie_ptr = cie;
+
+		  /* Here we intentionally ignore augmentation data
+		     from FDE, because we don't need them.  */
+		  if (cie->augmentation[0] == 'z')
+		    start += read_uleb128 (abfd, &start);
+
+		  fde->data = start;
+		  fde->data_length = block_end - start;
+		}
 	    }
 	  start = block_end;
 	}
@@ -1537,7 +1674,30 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	     sizeof (struct fde_unit *), compare_fde_unit);
     }
 }
-
+
+/* We must parse both .debug_frame section and .eh_frame because 
+ * not all frames must be present in both of these sections. */
+void
+dwarf2_build_frame_info (struct objfile *objfile)
+{
+  int after_debug_frame = 0;
+
+  /* If we have .debug_frame then the parser is called with 
+     eh_frame==0 for .debug_frame and eh_frame==2 for .eh_frame, 
+     otherwise it's only called once for .eh_frame with argument 
+     eh_frame==1.  */
+
+  if (dwarf_frame_offset)
+  {
+    parse_frame_info (objfile, dwarf_frame_offset,
+		      dwarf_frame_size, 0 /* = debug_frame */);
+    after_debug_frame = 1;
+  }
+
+  if (dwarf_eh_frame_offset)
+    parse_frame_info (objfile, dwarf_eh_frame_offset, dwarf_eh_frame_size, 
+		      1 /* = eh_frame */ + after_debug_frame);
+}
 
 /* Return the frame address.  */
 CORE_ADDR

@@ -1,3 +1,15 @@
+2002-06-21  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (read_encoded_pointer): Don't handle pointer 
+	encoding anymore.
+	(pointer_encoding, enum ptr_encoding): New.
+	(execute_cfa_program): Take care about pointer encoding.	
+	(dwarf2_build_frame_info): Only call parse_frame_info for 
+	.debug_frame and .eh_frame.
+	(parse_frame_info): New, derived from former dwarf2_build_frame_info.
+	fixed augmentation handling, added relative addressing, 
+	ignore duplicate FDEs. Added comments.
+	
 2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
 
 	* event-top.c (command_handler): Don't use space_at_cmd_start
