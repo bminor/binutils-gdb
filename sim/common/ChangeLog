@@ -1,4 +1,52 @@
-Wed May  6 10:08:16 1998  Doug Evans  <devans@canuck.cygnus.com>
+Fri May 15 15:03:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* Make-common.in (install-common): Rename and install libsim.a.
+
+Tue May 12 15:23:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-io.c (unistd.h): Include.
+
+Wed May  6 16:04:18 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common (sim_main_headers): Sort.
+	(cgen-*.o): Add cgen-sim.h dependency.
+
+	* cgen-scache.c (scache_init): Only allocate space if scache element
+	size is non-zero.
+	(scache_flush,scache_print_profile): Check if scache in use first.
+
+	* cgen-sim.h (IDESC): Provide forward declaration.
+	(DECODE): Delete.
+	(CGEN_CPU): Always define scache member.  New members idesc,opcode.
+	(cgen_cpu_max_extra_bytes): Declare.
+	* cgen-utils.c (cgen_cpu_max_extra_bytes): New function.
+
+	* cgen.sh: s/@arch@/${arch}/ for cpu files.
+
+	* sim-cpu.h: New file.  sim_cpu_base moved here.
+	Move sim_cpu_lookup decl here.
+	* sim-base.h: #include "sim-cpu.h".
+	* sim-cpu.c: New file.
+	* Make-common (sim_main_headers): Add sim-cpu.h.
+	(sim-cpu.o): Add rule for.
+
+	* sim-model.c (set_model): Delete.
+	(sim_model_set,model_set): New functions.
+	(sim_model_install): Renamed from model_install.
+	Don't set default model here.
+	(model_option_handler): Rewrite --model processing.
+	(sim_model_lookup,sim_mach_lookup): New functions.
+	* sim-model.h (MAX_MODELS,MAX_INSNS): Delete.
+	(insn_timing): Delete.
+	(INSN_TIMING): New member `num'.
+	(IMP_PROPERTIES): Always define scache_elm_size member.
+	(MACH): New member init_cpu.
+	(sim_machs): Renamed from machs.
+	(sim_model_install): Renamed from model_install.
+	(sim_model_set,sim_model_lookup,sim_mach_lookup): Declare.
+	* sim-module.c (modules): Update.
+
+	* sim-profile.c (profile_print_insn): Add cpu arg to INSN_NAME macro.
 
 	* sim-io.c: #include <errno.h>.
 
