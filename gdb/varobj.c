@@ -1203,7 +1203,7 @@ child_exists (struct varobj *var, char *name)
 
   for (vc = var->children; vc != NULL; vc = vc->next)
     {
-      if (STREQ (vc->child->name, name))
+      if (strcmp (vc->child->name, name) == 0)
 	return vc->child;
     }
 
@@ -2123,9 +2123,9 @@ cplus_number_of_children (struct varobj *var)
       type = get_type_deref (var->parent);
 
       cplus_class_num_children (type, kids);
-      if (STREQ (var->name, "public"))
+      if (strcmp (var->name, "public") == 0)
 	children = kids[v_public];
-      else if (STREQ (var->name, "private"))
+      else if (strcmp (var->name, "private") == 0)
 	children = kids[v_private];
       else
 	children = kids[v_protected];
@@ -2176,7 +2176,6 @@ cplus_name_of_child (struct varobj *parent, int index)
 {
   char *name;
   struct type *type;
-  int children[3];
 
   if (CPLUS_FAKE_CHILD (parent))
     {
@@ -2191,55 +2190,97 @@ cplus_name_of_child (struct varobj *parent, int index)
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      cplus_class_num_children (type, children);
-
       if (CPLUS_FAKE_CHILD (parent))
 	{
-	  int i;
+	  /* The fields of the class type are ordered as they
+	     appear in the class.  We are given an index for a
+	     particular access control type ("public","protected",
+	     or "private").  We must skip over fields that don't
+	     have the access control we are looking for to properly
+	     find the indexed field. */
+	  int type_index = TYPE_N_BASECLASSES (type);
+	  if (strcmp (parent->name, "private") == 0)
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (TYPE_FIELD_PRIVATE (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
+	  else if (strcmp (parent->name, "protected") == 0)
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (TYPE_FIELD_PROTECTED (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
+	  else
+	    {
+	      while (index >= 0)
+		{
+	  	  if (TYPE_VPTR_BASETYPE (type) == type
+	      	      && type_index == TYPE_VPTR_FIELDNO (type))
+		    ; /* ignore vptr */
+		  else if (!TYPE_FIELD_PRIVATE (type, type_index) &&
+		      !TYPE_FIELD_PROTECTED (type, type_index))
+		    --index;
+		  ++type_index;
+		}
+	      --type_index;
+	    }
 
-	  /* Skip over vptr, if it exists. */
-	  if (TYPE_VPTR_BASETYPE (type) == type
-	      && index >= TYPE_VPTR_FIELDNO (type))
-	    index++;
-
-	  /* FIXME: This assumes that type orders
-	     inherited, public, private, protected */
-	  i = index + TYPE_N_BASECLASSES (type);
-	  if (STREQ (parent->name, "private")
-	      || STREQ (parent->name, "protected"))
-	    i += children[v_public];
-	  if (STREQ (parent->name, "protected"))
-	    i += children[v_private];
-
-	  name = TYPE_FIELD_NAME (type, i);
+	  name = TYPE_FIELD_NAME (type, type_index);
 	}
       else if (index < TYPE_N_BASECLASSES (type))
+	/* We are looking up the name of a base class */
 	name = TYPE_FIELD_NAME (type, index);
       else
 	{
+	  int children[3];
+	  cplus_class_num_children(type, children);
+
 	  /* Everything beyond the baseclasses can
-	     only be "public", "private", or "protected" */
+	     only be "public", "private", or "protected"
+
+	     The special "fake" children are always output by varobj in
+	     this order. So if INDEX == 2, it MUST be "protected". */
 	  index -= TYPE_N_BASECLASSES (type);
 	  switch (index)
 	    {
 	    case 0:
-	      if (children[v_public] != 0)
-		{
-		  name = "public";
-		  break;
-		}
+	      if (children[v_public] > 0)
+	 	name = "public";
+	      else if (children[v_private] > 0)
+	 	name = "private";
+	      else 
+	 	name = "protected";
+	      break;
 	    case 1:
-	      if (children[v_private] != 0)
+	      if (children[v_public] > 0)
 		{
-		  name = "private";
-		  break;
+		  if (children[v_private] > 0)
+		    name = "private";
+		  else
+		    name = "protected";
 		}
+	      else if (children[v_private] > 0)
+	 	name = "protected";
+	      break;
 	    case 2:
-	      if (children[v_protected] != 0)
-		{
-		  name = "protected";
-		  break;
-		}
+	      /* Must be protected */
+	      name = "protected";
+	      break;
 	    default:
 	      /* error! */
 	      break;

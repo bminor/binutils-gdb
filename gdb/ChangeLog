@@ -1,3 +1,11 @@
+2002-11-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* varobj.c (child_exists, cplus_number_of_children): Change
+	STREQ macro references to strcmp.
+	(cplus_name_of_child): Change code to handle the fact that
+	fields are not necessarily contiguous with regards to their 
+	access control. This is a fix for PR gdb/792.
+
 2002-11-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (GET_SAVED_REGISTER): Change to a predicate function.
