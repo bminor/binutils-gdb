@@ -205,21 +205,21 @@ _bfd_ecoff_set_arch_mach_hook (abfd, filehdr)
     case MIPS_MAGIC_LITTLE:
     case MIPS_MAGIC_BIG:
       arch = bfd_arch_mips;
-      mach = bfd_mach_mips3000;
+      mach = 3000;
       break;
 
     case MIPS_MAGIC_LITTLE2:
     case MIPS_MAGIC_BIG2:
       /* MIPS ISA level 2: the r6000.  */
       arch = bfd_arch_mips;
-      mach = bfd_mach_mips6000;
+      mach = 6000;
       break;
 
     case MIPS_MAGIC_LITTLE3:
     case MIPS_MAGIC_BIG3:
       /* MIPS ISA level 3: the r4000.  */
       arch = bfd_arch_mips;
-      mach = bfd_mach_mips4000;
+      mach = 4000;
       break;
 
     case ALPHA_MAGIC:
@@ -252,17 +252,17 @@ ecoff_get_magic (abfd)
 	{
 	default:
 	case 0:
-	case bfd_mach_mips3000:
+	case 3000:
 	  big = MIPS_MAGIC_BIG;
 	  little = MIPS_MAGIC_LITTLE;
 	  break;
 
-	case bfd_mach_mips6000:
+	case 6000:
 	  big = MIPS_MAGIC_BIG2;
 	  little = MIPS_MAGIC_LITTLE2;
 	  break;
 
-	case bfd_mach_mips4000:
+	case 4000:
 	  big = MIPS_MAGIC_BIG3;
 	  little = MIPS_MAGIC_LITTLE3;
 	  break;

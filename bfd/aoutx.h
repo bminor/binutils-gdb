@@ -757,9 +757,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
       break;
 
     case bfd_arch_i386:
-      if (machine == 0
-	  || machine == bfd_mach_i386_i386
-	  || machine == bfd_mach_i386_i386_intel_syntax)
+      if (machine == 0)
 	arch_flags = M_386;
       break;
 

@@ -803,8 +803,7 @@ static void dwarf2_attach_fields_to_type (struct field_info *,
 					  struct type *, struct objfile *);
 
 static void dwarf2_add_member_fn (struct field_info *,
-				  struct die_info *, struct type *,
-				  struct objfile *objfile,
+				  struct die_info *, struct objfile *objfile,
 				  const struct comp_unit_head *);
 
 static void dwarf2_attach_fn_fields_to_type (struct field_info *,
@@ -2260,7 +2259,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
 static void
 dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
-		      struct type *type, struct objfile *objfile,
+		      struct objfile *objfile,
 		      const struct comp_unit_head *cu_header)
 {
   struct attribute *attr;
@@ -2328,9 +2327,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       struct type *return_type = TYPE_TARGET_TYPE (die->type);
       int nparams = TYPE_NFIELDS (die->type);
 
-      /* TYPE is the domain of this method, and DIE->TYPE is the type
-	   of the method itself (TYPE_CODE_METHOD).  */
-      smash_to_method_type (fnp->type, type,
+      smash_to_method_type (fnp->type, die->type,
 			    TYPE_TARGET_TYPE (die->type),
 			    TYPE_FIELDS (die->type),
 			    TYPE_NFIELDS (die->type),
@@ -2519,7 +2516,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	    {
 	      /* C++ member function. */
 	      process_die (child_die, objfile, cu_header);
-	      dwarf2_add_member_fn (&fi, child_die, type, objfile, cu_header);
+	      dwarf2_add_member_fn (&fi, child_die, objfile, cu_header);
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {

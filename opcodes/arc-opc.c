@@ -20,7 +20,6 @@
 #include "sysdep.h"
 #include <stdio.h>
 #include "ansidecl.h"
-#include "bfd.h"
 #include "opcode/arc.h"
 
 #define INSERT_FN(fn) \
@@ -514,7 +513,7 @@ arc_get_opcode_mach (bfd_mach, big_p)
     ARC_MACH_7,
     ARC_MACH_8
   };
-  return mach_type_map[bfd_mach - bfd_mach_arc_5] | (big_p ? ARC_MACH_BIG : 0);
+  return mach_type_map[bfd_mach] | (big_p ? ARC_MACH_BIG : 0);
 }
 
 /* Initialize any tables that need it.
