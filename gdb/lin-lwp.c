@@ -579,11 +579,8 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
   struct lwp_info *lp;
   int resume_all;
 
-  /* Apparently the interpretation of PID is dependent on STEP: If
-     STEP is non-zero, a specific PID means `step only this process
-     id'.  But if STEP is zero, then PID means `continue *all*
-     processes, but give the signal only to this one'.  */
-  resume_all = (PIDGET (ptid) == -1) || !step;
+  /* A specific PTID means `step only this process id'.  */
+  resume_all = (PIDGET (ptid) == -1);
 
   if (resume_all)
     iterate_over_lwps (resume_set_callback, NULL);

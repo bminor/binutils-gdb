@@ -1,5 +1,9 @@
 2002-10-31  Daniel Jacobowitz  <drow@mvista.com>
 
+	* lin-lwp.c (lin_lwp_resume): Remove resume_all test for !step.
+
+2002-10-31  Daniel Jacobowitz  <drow@mvista.com>
+
 	* i386-linux-tdep.c (i386_linux_pc_in_sigtramp): Check for
 	trampolines in sigaction.
 
