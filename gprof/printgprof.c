@@ -91,21 +91,19 @@ flatprofheader()
     if (bsd_style_output) {
 	printf( "\ngranularity: each sample hit covers %d byte(s)" ,
 	       (long) scale * sizeof(UNIT) );
-	if ( totime > 0.0 ) {
-	    printf( " for %.2f%% of %.2f seconds\n\n" ,
-		   100.0/totime , totime / hz );
-	} else {
-	    printf( " no time accumulated\n\n" );
-	    /*
-	     *	this doesn't hurt since all the numerators will be zero.
-	     */
-	    totime = 1.0;
-	}
+	if (totime > 0.0)
+	  printf(" for %.2f%% of %.2f seconds\n\n", 100.0/totime, totime / hz);
     }
     else {
 	printf( "\nEach sample counts as %g seconds.\n",
 	       1.0 / hz);
     }
+    if (totime <= 0.0)
+      {
+	printf(" no time accumulated\n\n");
+	/* This doesn't hurt since all the numerators will be zero.  */
+	totime = 1.0;
+      }
     printf( "%5.5s %10.10s %8.8s %8.8s %8.8s %8.8s  %-8.8s\n" ,
 	    "%  " , "cumulative" , "self  " , "" , "self  " , "total " , "" );
     printf( "%5.5s %10.10s %8.8s %8.8s %8.8s %8.8s  %-8.8s\n" ,

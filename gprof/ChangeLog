@@ -1,3 +1,9 @@
+Fri Oct 21 18:58:02 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* printgprof.c (flatprofheader): Always set totime to 1.0 if not
+	greater than 0.0.  Suggested by Harold Assink
+	<carlo@sg.tn.tudelft.nl>.
+
 Fri Sep 23 15:06:45 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* printgprof.c (printprof): Use free, not cfree.
