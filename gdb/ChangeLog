@@ -1,3 +1,9 @@
+2003-08-13  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-hpux-tdep.c (_initialize_hppa_hpux_tdep): Use the correct
+	bfd arch_info when registering the GDB_OSABI_HPUX_ELF initialization
+	routine.
+
 2003-08-13  Michael Snyder  <msnyder@redhat.com>
 
 	* frv-tdep.c (frv_push_arguments): Use deprecated ftype.
