@@ -375,6 +375,35 @@ void remote_console_output PARAMS ((char *));
 
 static void check_binary_download PARAMS ((CORE_ADDR addr));
 
+#if __STDC__
+struct packet_config;
+#endif
+
+static void show_packet_config_cmd PARAMS ((struct packet_config * config));
+
+static void set_packet_config_cmd PARAMS ((struct packet_config * config,
+					      struct cmd_list_element * c));
+
+static void add_packet_config_cmd PARAMS ((struct packet_config * config,
+					   char *name,
+					   char *title,
+   void (*set_func) (char *args, int from_tty, struct cmd_list_element * c),
+			       void (*show_func) (char *name, int from_tty),
+					   struct cmd_list_element **setlist,
+					   struct cmd_list_element **showlist));
+
+static void init_packet_config PARAMS ((struct packet_config * config));
+
+static void set_remote_protocol_P_packet_cmd PARAMS ((char *args,
+						      int from_tty,
+					      struct cmd_list_element * c));
+
+static void show_remote_protocol_P_packet_cmd PARAMS ((char *args,
+						       int from_tty));
+
+
+
+
 /* Define the target subroutine names */
 
 void open_remote_target PARAMS ((char *, int, struct target_ops *, int));
@@ -471,9 +500,163 @@ static int remote_address_size;
 
 static int remote_register_buf_size = 0;
 
-/* Should we try the 'P' request?  If this is set to one when the stub
-   doesn't support 'P', the only consequence is some unnecessary traffic.  */
-static int stub_supports_P = 1;
+/* Generic configuration support for packets the stub optionally
+   supports. Allows the user to specify the use of the packet as well
+   as allowing GDB to auto-detect support in the remote stub. */
+
+enum packet_support
+  {
+    PACKET_SUPPORT_UNKNOWN = 0,
+    PACKET_ENABLE,
+    PACKET_DISABLE
+  };
+
+enum packet_detect
+  {
+    PACKET_AUTO_DETECT = 0,
+    PACKET_MANUAL_DETECT
+  };
+
+struct packet_config
+  {
+    char *state;
+    char *name;
+    char *title;
+    enum packet_detect detect;
+    enum packet_support support;
+  };
+
+static char packet_support_auto[] = "auto";
+static char packet_enable[] = "enable";
+static char packet_disable[] = "disable";
+static char *packet_support_enums[] =
+{
+  packet_support_auto,
+  packet_enable,
+  packet_disable,
+  0,
+};
+
+static void
+set_packet_config_cmd (config, c)
+     struct packet_config *config;
+     struct cmd_list_element *c;
+{
+  if (config->state == packet_enable)
+    {
+      config->detect = PACKET_MANUAL_DETECT;
+      config->support = PACKET_ENABLE;
+    }
+  else if (config->state == packet_disable)
+    {
+      config->detect = PACKET_MANUAL_DETECT;
+      config->support = PACKET_DISABLE;
+    }
+  else if (config->state == packet_support_auto)
+    {
+      config->detect = PACKET_AUTO_DETECT;
+      config->support = PACKET_SUPPORT_UNKNOWN;
+    }
+  else
+    fatal ("Bad enum value");
+}
+
+static void
+show_packet_config_cmd (config)
+     struct packet_config *config;
+{
+  char *support = "internal-error";
+  switch (config->support)
+    {
+    case PACKET_ENABLE:
+      support = "enabled";
+      break;
+    case PACKET_DISABLE:
+      support = "disabled";
+      break;
+    case PACKET_SUPPORT_UNKNOWN:
+      support = "unknown";
+      break;
+    }
+  switch (config->detect)
+    {
+    case PACKET_AUTO_DETECT:
+      printf_filtered ("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n",
+		       config->name, config->title, support);
+      break;
+    case PACKET_MANUAL_DETECT:
+      printf_filtered ("Support for remote protocol `%s' (%s) is currently %s.\n",
+		       config->name, config->title, support);
+    }
+}
+
+static void
+add_packet_config_cmd (config, name, title, set_func, show_func,
+		       setlist, showlist)
+     struct packet_config *config;
+     char *name;
+     char *title;
+     void (*set_func) PARAMS ((char *args, int from_tty,
+			       struct cmd_list_element * c));
+     void (*show_func) PARAMS ((char *name, int from_tty));
+     struct cmd_list_element **setlist;
+     struct cmd_list_element **showlist;
+{
+  struct cmd_list_element *c;
+  char *set_doc;
+  char *show_doc;
+  char *full_name;
+  config->name = name;
+  config->title = title;
+  asprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
+	    name, title);
+  asprintf (&show_doc, "Show current use of remote protocol `%s' (%s) packet",
+	    name, title);
+  asprintf (&full_name, "%s-packet", name);
+  c = add_set_enum_cmd (full_name,
+			class_obscure, packet_support_enums,
+			(char *) &config->state,
+			set_doc, setlist);
+  c->function.sfunc = set_func;
+  add_cmd (full_name, class_obscure, show_func, show_doc, showlist);
+}
+
+static void
+init_packet_config (config)
+     struct packet_config *config;
+{
+  switch (config->detect)
+    {
+    case PACKET_AUTO_DETECT:
+      config->support = PACKET_SUPPORT_UNKNOWN;
+      break;
+    case PACKET_MANUAL_DETECT:
+      /* let the user beware */
+      break;
+    }
+}
+
+/* Should we try the 'P' (set register) request?  */
+
+static struct packet_config remote_protocol_P;
+
+static void
+set_remote_protocol_P_packet_cmd (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  set_packet_config_cmd (&remote_protocol_P, c);
+}
+
+static void
+show_remote_protocol_P_packet_cmd (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  show_packet_config_cmd (&remote_protocol_P);
+}
+
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT */
 PTR sigint_remote_twice_token;
@@ -1718,11 +1901,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
     }
   push_target (target);		/* Switch to using remote target now */
 
-  /* Start out by trying the 'P' request to set registers.  We set
-     this each time that we open a new target so that if the user
-     switches from one stub to another, we can (if the target is
-     closed and reopened) cope.  */
-  stub_supports_P = 1;
+  init_packet_config (&remote_protocol_P);
 
   general_thread = -2;
   continue_thread = -2;
@@ -1812,11 +1991,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
 
   push_target (target);		/* Switch to using remote target now */
 
-  /* Start out by trying the 'P' request to set registers.  We set
-     this each time that we open a new target so that if the user
-     switches from one stub to another, we can (if the target is
-     closed and reopened) cope.  */
-  stub_supports_P = 1;
+  init_packet_config (&remote_protocol_P);
 
   general_thread = -2;
   continue_thread = -2;
@@ -2735,8 +2910,44 @@ static void
 remote_prepare_to_store ()
 {
   /* Make sure the entire registers array is valid.  */
-  read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
+  switch (remote_protocol_P.support)
+    {
+    case PACKET_DISABLE:
+    case PACKET_SUPPORT_UNKNOWN:
+      read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
+      break;
+    case PACKET_ENABLE:
+      break;
+    }
 }
+
+/* Helper: Attempt to store REGNO using the P packet.  Return fail IFF
+   packet was not recognized. */
+
+static int
+store_register_using_P (regno)
+     int regno;
+{
+  /* Try storing a single register.  */
+  char *buf = alloca (PBUFSIZ);
+  char *regp;
+  char *p;
+  int i;
+
+  sprintf (buf, "P%x=", regno);
+  p = buf + strlen (buf);
+  regp = &registers[REGISTER_BYTE (regno)];
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
+    {
+      *p++ = tohex ((regp[i] >> 4) & 0xf);
+      *p++ = tohex (regp[i] & 0xf);
+    }
+  *p = '\0';
+  remote_send (buf);
+
+  return buf[0] != '\0';
+}
+
 
 /* Store register REGNO, or all registers if REGNO == -1, from the contents
    of REGISTERS.  FIXME: ignores errors.  */
@@ -2751,31 +2962,33 @@ remote_store_registers (regno)
 
   set_thread (inferior_pid, 1);
 
-  if (regno >= 0 && stub_supports_P)
+  if (regno >= 0)
     {
-      /* Try storing a single register.  */
-      char *regp;
-
-      sprintf (buf, "P%x=", regno);
-      p = buf + strlen (buf);
-      regp = &registers[REGISTER_BYTE (regno)];
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
+      switch (remote_protocol_P.support)
 	{
-	  *p++ = tohex ((regp[i] >> 4) & 0xf);
-	  *p++ = tohex (regp[i] & 0xf);
+	case PACKET_DISABLE:
+	  break;
+	case PACKET_ENABLE:
+	  if (store_register_using_P (regno))
+	    return;
+	  else
+	    error ("Protocol error: P packet not recognized by stub");
+	case PACKET_SUPPORT_UNKNOWN:
+	  if (store_register_using_P (regno))
+	    {
+	      /* The stub recognized the 'P' packet.  Remember this.  */
+	      remote_protocol_P.support = PACKET_ENABLE;
+	      return;
+	    }
+	  else
+	    {
+	      /* The stub does not support the 'P' packet.  Use 'G'
+	         instead, and don't try using 'P' in the future (it
+	         will just waste our time).  */
+	      remote_protocol_P.support = PACKET_DISABLE;
+	      break;
+	    }
 	}
-      *p = '\0';
-      remote_send (buf);
-      if (buf[0] != '\0')
-	{
-	  /* The stub understands the 'P' request.  We are done.  */
-	  return;
-	}
-
-      /* The stub does not support the 'P' request.  Use 'G' instead,
-         and don't try using 'P' in the future (it will just waste our
-         time).  */
-      stub_supports_P = 0;
     }
 
   buf[0] = 'G';
@@ -4409,10 +4622,7 @@ device is attached to the remote system (e.g. host:port).");
 
   push_target (&remote_cisco_ops);	/* Switch to using cisco target now */
 
-  /* Start out by trying the 'P' request to set registers.  We set this each
-     time that we open a new target so that if the user switches from one
-     stub to another, we can (if the target is closed and reopened) cope.  */
-  stub_supports_P = 1;
+  init_packet_config (&remote_protocol_P);
 
   general_thread = -2;
   continue_thread = -2;
@@ -4773,6 +4983,15 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 }
 
 static void
+set_remote_cmd (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  
+}
+
+
+static void
 build_remote_gdbarch_data ()
 {
   tty_input = xmalloc (PBUFSIZ);
@@ -4781,6 +5000,9 @@ build_remote_gdbarch_data ()
 void
 _initialize_remote ()
 {
+  static struct cmd_list_element *remote_set_cmdlist;
+  static struct cmd_list_element *remote_show_cmdlist;
+
   /* architecture specific data */
   build_remote_gdbarch_data ();
   register_gdbarch_swap (&tty_input, sizeof (&tty_input), NULL);
@@ -4808,6 +5030,19 @@ _initialize_remote ()
 #if 0
   init_remote_threadtests ();
 #endif
+
+  add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, "\
+Remote protocol specific variables\n\
+Configure various remote-protocol specific variables such as\n\
+the packets being used",
+		  &remote_set_cmdlist, "remote ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, "\
+Remote protocol specific variables\n\
+Configure various remote-protocol specific variables such as\n\
+the packets being used",
+		  &remote_show_cmdlist, "remote ",
+		  0/*allow-unknown*/, &showlist);
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command,
 	   "Compare section data on target to the exec file.\n\
@@ -4862,4 +5097,8 @@ in a memory packet.\n",
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
 
+  add_packet_config_cmd (&remote_protocol_P, "P", "set-register",
+			 set_remote_protocol_P_packet_cmd,
+			 show_remote_protocol_P_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist);
 }

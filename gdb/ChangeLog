@@ -1,3 +1,28 @@
+Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (enum packet_support, enum packet_detect, struct
+ 	packet_config): Define.
+	(set_packet_config_cmd, show_packet_config_cmd,
+ 	add_packet_config_cmd, init_packet_config): New functions.
+  	Generic support for optional packets.
+	(remote_protocol_P): Replace stub_supports_P.
+ 	(set_remote_protocol_P_packet_cmd, show_remote_protocol_P_packet_cmd):
+ 	New functions.
+	(_initialize_remote): Add ``set remote-protocol-P-packet'' command.
+	(remote_open_1, remote_async_open_1, remote_cisco_open):
+ 	Initialize ``remote_protocol_P''.
+	(remote_store_registers): Re-write ``P'' probe logic.
+	(store_register_using_P): New function.
+
+	From Ian Lance Taylor <ian@airs.com>:
+	(remote_prepare_to_store): Only read registers when ``P'' packet
+ 	is in state unsupported or support-unknown.
+	
+1999-07-24  Fred Fish  <fnf@cygnus.com>
+
+        * symfile.c (default_symfile_offsets): Clear section_offsets
+        before filling it in.
+
 1999-07-16  Keith Seitz  <keiths@cygnus.com>
 
 	* remote.c (_initialize_remote): "remotebreak" should be a var_boolean.

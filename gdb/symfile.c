@@ -471,6 +471,7 @@ default_symfile_offsets (objfile, addr)
   objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+  memset (section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
   for (i = 0; i < SECT_OFF_MAX; i++)
     ANOFFSET (section_offsets, i) = addr;

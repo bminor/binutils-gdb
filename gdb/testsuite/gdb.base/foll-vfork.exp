@@ -21,13 +21,17 @@ if $tracelevel then {
 	strace $tracelevel
 	}
 
-if [istarget "hppa2.0w-hp-hpux*"] {
-  warning "Don't run gdb.base/foll-vfork.exp until JAGaa43495 kernel problem is fixed."
-  return 0
+if { ![isnative] } then {
+    continue
 }
 
 set prms_id 0
 set bug_id 0
+
+if [istarget "hppa2.0w-hp-hpux*"] {
+  warning "Don't run gdb.base/foll-vfork.exp until JAGaa43495 kernel problem is fixed."
+  return 0
+}
 
 set testfile "foll-vfork"
 set testfile2 "vforked-prog"
