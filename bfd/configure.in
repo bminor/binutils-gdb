@@ -59,6 +59,7 @@ i386)
 	*)
 		case "${host_os}" in
 		sysv*)	my_host=i386v ;;
+		svr4*)	my_host=i386v4 ;;
 		mach*)	my_host=i386mach ;;
 		msdos*)	my_host=dose ;;
 		esac
@@ -112,9 +113,9 @@ fi
 
 case "${target_vendor}" in
 aout | coff | bout | elf) bfd_target=${target_cpu}-${target_vendor} ;;
-sony)	bfd_target=news ;;
-intel)	bfd_target=${target_cpu}-coff ;;	
-cbm)	bfd_target=${target_cpu}-elf ;;
+sony)		bfd_target=news ;;
+intel)		bfd_target=${target_cpu}-coff ;;	
+cbm | ncr)	bfd_target=${target_cpu}-elf ;;
 
 ibm)	my_host=rs6000
 	case "${target_cpu}" in
@@ -185,13 +186,13 @@ none|nyu|sco)
 	;;
 harris)
 	case "${target_cpu}" in
-		m88k) bfd_target=m88kbcs ;;
+		m88k) bfd_target=m88k-coff ;;
 		esac
 	;;
 
 motorola)
 	case "${target_cpu}" in
-		m88k) bfd_target=m88kbcs ;;
+		m88k) bfd_target=m88k-coff ;;
 		esac
 	;;
 *)
@@ -206,6 +207,7 @@ if [ ! -f config/mt-${bfd_target} ] ; then
 		echo '***' No file config/mt-${bfd_target}
 	fi
 	echo '***' BFD does not support target ${target}
+	echo '***' Look in bfd/configure.in for supported targets
 	exit 1
 fi
 target_makefile_frag=config/mt-${bfd_target}
