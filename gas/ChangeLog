@@ -1,3 +1,15 @@
+Thu Jun 15 16:53:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/obj-coff.c: Don't use "bfd/" when including libbfd.h
+	and libcoff.h.
+	(fill_section): Call PROGRESS.
+	* Makefile.in (INCLUDES): Add bfd srcdir.
+
+	* mpw-config.in: Add bfd_gas flag and set for each config.
+	(i386-unknown-go32, m68k-unknown-coff): Recognize.
+	* mpw-make.in (HACK_O_RAMA, OBJ_COFF_OMIT_TIMESTAMP): Add to
+	config.h.
+
 Thu Jun 15 10:04:26 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-arm.h (LOCAL_LABEL): Prepend '.' if not OBJ_AOUT.

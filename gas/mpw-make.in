@@ -103,10 +103,12 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS} "{o}"Version.r
 	Echo '#define WANT_FOPEN_BIN'			>> "{o}"config.new
 	Echo '#define HAVE_ERRNO_H'			>> "{o}"config.new
 	Echo '#define HAVE_STDARG_H'			>> "{o}"config.new
-	Echo '#define BFD_ASSEMBLER'			>> "{o}"config.new
+	Echo '#define ' {HACK_O_RAMA}			>> "{o}"config.new
+	Echo '#define OBJ_COFF_OMIT_TIMESTAMP'		>> "{o}"config.new
 	Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
+
 
 "{o}"Version.r \Option-f "{o}"version-stamp
 

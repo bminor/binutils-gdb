@@ -6,16 +6,27 @@ Set target_arch `echo {target_canonical} | sed -e 's/-.*-.*//'`
 
 Set obj_format `echo {target_canonical} | sed -e 's/.*-.*-//'`
 
+Set bfd_gas no
+
 Set TDEFINES ""
 
 If "{target_canonical}" =~ /m68k-apple-macos/
 	Set obj_format "coff"
+	Set TDEFINES '-d M68KCOFF'
 Else If "{target_canonical}" =~ /ppc-apple-macos/
 	Set obj_format "xcoff"
+	Set bfd_gas yes
+Else If "{target_canonical}" =~ /i386-unknown-go32/
+	Set obj_format "coff"
+	Set TDEFINES '-d I386COFF'
+Else If "{target_canonical}" =~ /m68k-unknown-coff/
+	Set TDEFINES '-d M68KCOFF'
+Else If "{target_canonical}" =~ /mips-idt-ecoff/
+	Set bfd_gas yes
+	Set TDEFINES '-d TARGET_BYTES_BIG_ENDIAN'
 Else If "{target_canonical}" =~ /sh-hitachi-hms/
 	Set obj_format "coff"
-Else If "{target_canonical}" =~ /mips-idt-ecoff/
-	Set TDEFINES '-d TARGET_BYTES_BIG_ENDIAN'
+	forward-include "{srcroot}"opcodes:sh-opc.h 'opcodes/sh-opc.h'
 End If
 
 forward-include "{srcdir}"config:tc-{target_arch}.c targ-cpu.c
@@ -44,6 +55,13 @@ End If
 Echo '# From mpw-config.in'      > "{o}"mk.tmp
 
 Echo 'VERSION = ' `Search 'VERSION=' "{srcdir}"Makefile.in | sed -e 's/.*VERSION=\(.*\)/\1/'` >> "{o}"mk.tmp
+
+If "{bfd_gas}" =~ /yes/
+	Echo "HACK_O_RAMA = BFD_ASSEMBLER" >> "{o}"mk.tmp
+Else
+	Echo "HACK_O_RAMA = MANY_SEGMENTS" >> "{o}"mk.tmp
+End If
+
 Echo "TDEFINES = " {TDEFINES}	>> "{o}"mk.tmp
 
 Echo '# End from mpw-config.in'	>> "{o}"mk.tmp

@@ -1306,8 +1306,9 @@ symbol_dump ()
 #include "frags.h"
 /* This is needed because we include internal bfd things. */
 #include <time.h>
-#include "bfd/libbfd.h"
-#include "bfd/libcoff.h"
+
+#include "libbfd.h"
+#include "libcoff.h"
 
 /* The NOP_OPCODE is for the alignment fill value.  Fill with nop so
    that we can stick sections together without causing trouble.  */
@@ -1681,8 +1682,9 @@ fill_section (abfd, h, file_cursor)
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       unsigned int offset = 0;
-
       struct internal_scnhdr *s = &(segment_info[i].scnhdr);
+
+      PROGRESS (1);
 
       if (s->s_name[0])
 	{
@@ -2949,13 +2951,11 @@ write_object_file ()
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
 
-#if !defined(TC_H8300) && !defined(TC_Z8K)
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       fixup_mdeps (segment_info[i].frchainP->frch_root, &headers, i);
       fixup_segment (&segment_info[i], i);
     }
-#endif
 
   /* Look for ".stab" segments and fill in their initial symbols
      correctly. */
@@ -3489,6 +3489,9 @@ fixup_segment (segP, this_segment_type)
   register fragS *fragP;
   register segT add_symbol_segment = absolute_section;
 
+  if (linkrelax)
+    return;
+
   for (fixP = segP->fix_root; fixP; fixP = fixP->fx_next)
     {
       fragP = fixP->fx_frag;
@@ -3644,7 +3647,8 @@ fixup_segment (segP, this_segment_type)
 		  break;
 		default:
 
-#ifdef TC_A29K
+
+#if defined(TC_A29K) || (defined(TE_PE) && defined(TC_I386))
 		  /* This really should be handled in the linker, but
 		     backward compatibility forbids.  */
 		  add_number += S_GET_VALUE (add_symbolP);
@@ -3687,7 +3691,7 @@ fixup_segment (segP, this_segment_type)
 
       if (pcrel)
 	{
-#ifndef TC_M88K
+#if !defined(TC_M88K) && !(defined(TE_PE) && defined(TC_I386))
 	  /* This adjustment is not correct on the m88k, for which the
 	     linker does all the computation.  */
 	  add_number -= md_pcrel_from (fixP);
