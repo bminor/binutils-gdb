@@ -1,3 +1,47 @@
+Mon Jan 19 12:45:45 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (cgen-{arch,cpu,decode}): New targets.
+	* cgen.sh: New file.
+	* cgen-scache.h: Deleted.
+	* cgen-scache.c: Only compile contents if WITH_SCACHE.
+	(scache_init): Use runtime computed size of SCACHE.
+	(scache_flush): Likewise.
+	* cgen-mem.h (GETIMEMU[QHSD]I): Declare.
+	([GS]ETT{QI,UQI,HI,UHI,SI,USI,DI,UDI}): Declare.
+	* cgen-sim.h: Scache support moved here.
+	(PC): Redo definition.
+	(ARGBUF,SCACHE,PARALLEL_EXEC): Provide forward decls.
+	(DECODE): Add parallel execution support.
+	Only include semantic label members if using switch.
+	(SWITCH,CASE,BREAK,DEFAULT,ENDSWITCH): Portable computed goto support.
+	(CGEN_CPU): Delete members exec_state, halt_sigrc, halt_jmp_buf.
+	(IADDR,CIA,SEM_ARG,EX_FN_NAME,SEM_FN_NAME,RECORD_IADDR,SEM_ARGBUF,
+	SEM_NEXT_PC,SEM_BRANCH_VIA_{CACHE,ADDR},SEM_NEW_PC_ADDR): Moved here
+	from cgen-types.h.
+	(engine_{stop,run,resume,halt,signal}): Delete decls.
+	* cgen-types.h (CGEN_{XCAT3,CAT3}): Delete.
+	(argbuf,scache): Delete forward decls.
+	(STATE): Delete decl.
+	* cgen-utils.c: Don't include decode.h, mem-ops.h, sem-ops.h.
+	Include cgen-mem.h, cgen-ops.h.
+	(engine_halt,engine_signal): Delete.
+	({ex,exc,sem,semc}_illegal): Delete.
+	(sim_disassemble_insn): Result of extract fn is in bits.
+	* genmloop.sh: Rewrite.
+
+	* cgen-trace.c (trace_insn): Set printed_result_p=0 if not tracing
+	line numbers.
+
+	* sim-base.h (sim_state_base): Delete member `model'.
+	(sim_cpu_base): Add member `model'.
+	* sim-model.h (IMP_PROPERTIES): New type.
+	(MACH): New members imp_props, models.
+	(models): Delete decl.
+	* sim-model.c (set_model): Update.
+	* sim-profile.c (profile_print_model): Update.
+
+	* sim-utils.c (sim_state_alloc): Delete setting of cpu backlink here.
+
 Fri Jan 16 12:33:09 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* cgen-trace.c (trace_insn): Call CGEN_INSN_MNEMONIC() rather than
