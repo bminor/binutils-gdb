@@ -152,6 +152,8 @@ DESCRIPTION
 .  bfd_target_msdos_flavour
 .};
 .
+.enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
+.
 .{* Forward declaration.  *}
 .typedef struct bfd_link_info _bfd_link_info;
 .
@@ -169,11 +171,11 @@ of a file.
 
 The order of bytes within the data area of a file.
 
-.  boolean byteorder_big_p;
+.  enum bfd_endian byteorder;
 
 The order of bytes within the header parts of a file.
 
-.  boolean header_byteorder_big_p;
+.  enum bfd_endian header_byteorder;
 
 A mask of all the flags which an executable may have set -
 from the set <<NO_FLAGS>>, <<HAS_RELOC>>, ...<<D_PAGED>>.
@@ -507,6 +509,7 @@ extern const bfd_target som_vec;
 extern const bfd_target i386aout_vec;
 extern const bfd_target i386bsd_vec;
 extern const bfd_target i386dynix_vec;
+extern const bfd_target i386freebsd_vec;
 extern const bfd_target i386os9k_vec;
 extern const bfd_target i386coff_vec;
 extern const bfd_target bfd_powerpc_pe_vec;
@@ -664,6 +667,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386aout_vec,
 	&i386bsd_vec,
 	&i386coff_vec,
+	&i386freebsd_vec,
 	&i860coff_vec,
 	&bfd_powerpc_pe_vec,
 	&bfd_powerpcle_pe_vec,

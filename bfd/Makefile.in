@@ -86,7 +86,13 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o corefile.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	elf.o srec.o binary.o tekhex.o 
+	elf.o srec.o binary.o tekhex.o ihex.o
+
+BFD_LIBS_CFILES = \
+	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
+	format.c init.c libbfd.c opncls.c reloc.c \
+	section.c syms.c targets.c hash.c linker.c \
+	elf.c srec.c binary.c tekhex.c ihex.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -118,6 +124,29 @@ ALL_MACHINES = \
 	cpu-we32k.o \
 	cpu-w65.o \
 	cpu-z8k.o
+
+ALL_MACHINES_CFILES = \
+	cpu-a29k.c \
+	cpu-alpha.c \
+	cpu-arm.c \
+	cpu-h8300.c \
+	cpu-h8500.c \
+	cpu-hppa.c \
+	cpu-i386.c \
+	cpu-i860.c \
+	cpu-i960.c \
+	cpu-m68k.c \
+	cpu-m88k.c \
+	cpu-mips.c \
+	cpu-ns32k.c \
+	cpu-powerpc.c \
+	cpu-rs6000.c \
+	cpu-sh.c \
+	cpu-sparc.c \
+	cpu-vax.c \
+	cpu-we32k.c \
+	cpu-w65.c \
+	cpu-z8k.c
 
 # The .o files needed by all of the 32 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all.
@@ -174,6 +203,7 @@ BFD32_BACKENDS = \
 	som.o \
 	i386aout.o \
 	i386bsd.o \
+	i386freebsd.o \
 	i386linux.o \
 	i386lynx.o \
 	i386msdos.o \
@@ -209,86 +239,7 @@ BFD32_BACKENDS = \
 	versados.o \
 	xcofflink.o
 
-# The .o files needed by all of the 64 bit vectors that are configured into
-# target_vector in targets.c if configured with --enable-targets=all
-# and --enable-64-bit-bfd.
-BFD64_BACKENDS = \
-	aout64.o \
-	coff-alpha.o \
-	demo64.o \
-	elf64-gen.o \
-	elf64-sparc.o \
-	elf64.o \
-	nlm32-alpha.o \
-	nlm64.o
-
-OPTIONAL_BACKENDS = \
-	aix386-core.o \
-	hpux-core.o \
-	irix-core.o \
-	lynx-core.o \
-	osf-core.o \
-	trad-core.o \
-	cisco-core.o
-
-# These are defined by configure.in:
-WORDSIZE = @wordsize@
-ALL_BACKENDS = @all_backends@
-BFD_BACKENDS = @bfd_backends@
-BFD_MACHINES = @bfd_machines@
-TDEFAULTS = @tdefaults@
-
-all:
-
-FLAGS_TO_PASS = \
-	"prefix=$(prefix)" \
-	"exec_prefix=$(exec_prefix)" \
-	"against=$(against)" \
-	"AR=$(AR)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"CC=$(CC)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"CFLAGS=$(CFLAGS)" \
-	"RANLIB=$(RANLIB)" \
-	"MAKEINFO=$(MAKEINFO)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
-
-ALL_CFLAGS=@HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(CFLAGS)
-.c.o:
-	$(CC) -c $(ALL_CFLAGS) $<
-
-# C source files that correspond to .o's.
-CFILES = \
-	$(bfd_libs_here) \
-	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
-	format.c init.c libbfd.c opncls.c reloc.c \
-	section.c syms.c targets.c hash.c linker.c \
-	elf.c srec.c binary.c tekhex.c \
-	$(all_machines_here) \
-	cpu-a29k.c \
-	cpu-alpha.c \
-	cpu-arm.c \
-	cpu-h8300.c \
-	cpu-h8500.c \
-	cpu-hppa.c \
-	cpu-i386.c \
-	cpu-i860.c \
-	cpu-i960.c \
-	cpu-m68k.c \
-	cpu-m88k.c \
-	cpu-mips.c \
-	cpu-ns32k.c \
-	cpu-powerpc.c \
-	cpu-rs6000.c \
-	cpu-sh.c \
-	cpu-sparc.c \
-	cpu-vax.c \
-	cpu-we32k.c \
-	cpu-w65.c \
-	cpu-z8k.c \
-	$(bfd32_backends_here) \
+BFD32_BACKENDS_CFILES = \
 	aout-adobe.c \
 	aout-ns32k.c \
 	aout0.c \
@@ -335,6 +286,7 @@ CFILES = \
 	som.c \
 	i386aout.c \
 	i386bsd.c \
+	i386freebsd.c \
 	i386linux.c \
 	i386lynx.c \
 	i386msdos.c \
@@ -368,8 +320,22 @@ CFILES = \
 	sunos.c \
 	tekhex.c \
 	versados.c \
-	xcofflink.c \
-	$(bfd64_backends) \
+	xcofflink.c
+
+# The .o files needed by all of the 64 bit vectors that are configured into
+# target_vector in targets.c if configured with --enable-targets=all
+# and --enable-64-bit-bfd.
+BFD64_BACKENDS = \
+	aout64.o \
+	coff-alpha.o \
+	demo64.o \
+	elf64-gen.o \
+	elf64-sparc.o \
+	elf64.o \
+	nlm32-alpha.o \
+	nlm64.o
+
+BFD64_BACKENDS_CFILES = \
 	aout64.c \
 	coff-alpha.c \
 	demo64.c \
@@ -377,12 +343,67 @@ CFILES = \
 	elf64-sparc.c \
 	elf64.c \
 	nlm32-alpha.c \
-	nlm64.c \
-	$(core_files_here) \
-	trad-core.c cisco-core.c \
-	aix386-core.c hpux-core.c \
-	irix-core.c lynx-core.c osf-core.c  \
-	$(configs_not_included_in_all_targets_option_here) \
+	nlm64.c
+
+OPTIONAL_BACKENDS = \
+	aix386-core.o \
+	hpux-core.o \
+	irix-core.o \
+	lynx-core.o \
+	osf-core.o \
+	trad-core.o \
+	cisco-core.o
+
+OPTIONAL_BACKENDS_CFILES = \
+	aix386-core.c \
+	hpux-core.c \
+	irix-core.c \
+	lynx-core.c \
+	osf-core.c \
+	trad-core.c \
+	cisco-core.c
+
+# These are defined by configure.in:
+WORDSIZE = @wordsize@
+ALL_BACKENDS = @all_backends@
+BFD_BACKENDS = @bfd_backends@
+BFD_MACHINES = @bfd_machines@
+TDEFAULTS = @tdefaults@
+
+all:
+
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"against=$(against)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"CFLAGS=$(CFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+
+ALL_CFLAGS=@HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(CFLAGS)
+.c.o:
+	$(CC) -c $(ALL_CFLAGS) $<
+
+bfd_libs_here =
+all_machines_here =
+bfd32_backends_here =
+core_files_here =
+configs_not_included_in_all_targets_option_here =
+
+# C source files that correspond to .o's.
+CFILES = \
+	$(BFD_LIBS_CFILES) \
+	$(ALL_MACHINES_CFILES) \
+	$(BFD32_BACKENDS_CFILES) \
+	$(BFD64_BACKENDS_CFILES) \
+	$(OPTIONAL_BACKENDS_CFILES) \
 	i386dynix.c hp300bsd.c
 
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
@@ -595,11 +616,16 @@ config.status: configure configure.host config.bfd
 	sed -f dep.sed <.dep1 >.dep
 
 # This rule really wants a mkdep that runs "gcc -MM".
+# The NetBSD mkdep overwrites any existing file contents, and doesn't insert
+# the "DO NOT DELETE" line.
+# Other mkdep versions require a file that already exists, and do insert it.
+# Hence the weirdness....
 .dep1: $(CFILES)
 	rm -f .dep2 .dep2a
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
+	echo > .dep2a
 	$(DEP) -f .dep2a $(ALL_CFLAGS) $?
-	cat .dep2a >> .dep2
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
 	rm -f .dep2a
 	$(srcdir)/../move-if-change .dep2 .dep1
 
@@ -671,7 +697,6 @@ end-sanitize-arc:
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
 archive.o: archive.c $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h
 archures.o: archures.c
 bfd.o: bfd.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
@@ -697,6 +722,7 @@ elf.o: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
 srec.o: srec.c $(INCDIR)/libiberty.h
 binary.o: binary.c
 tekhex.o: tekhex.c $(INCDIR)/libiberty.h
+ihex.o: ihex.c $(INCDIR)/libiberty.h
 cpu-a29k.o: cpu-a29k.c
 cpu-alpha.o: cpu-alpha.c
 cpu-arm.o: cpu-arm.c
@@ -843,6 +869,9 @@ i386aout.o: i386aout.c libaout.h $(INCDIR)/bfdlink.h \
 i386bsd.o: i386bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+i386freebsd.o: i386freebsd.c freebsd.h libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386linux.o: i386linux.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h
@@ -952,14 +981,15 @@ nlm32-alpha.o: nlm32-alpha.c $(INCDIR)/nlm/alpha-ext.h \
   $(INCDIR)/nlm/external.h nlmswap.h nlm-target.h
 nlm64.o: nlm64.c nlmcode.h libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h
-trad-core.o: trad-core.c libaout.h $(INCDIR)/bfdlink.h
-cisco-core.o: cisco-core.c
 aix386-core.o: aix386-core.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h
 hpux-core.o: hpux-core.c
 irix-core.o: irix-core.c
 lynx-core.o: lynx-core.c
 osf-core.o: osf-core.c
+trad-core.o: trad-core.c libaout.h $(INCDIR)/bfdlink.h \
+  hosts/i386bsd.h
+cisco-core.o: cisco-core.c
 i386dynix.o: i386dynix.c $(INCDIR)/aout/dynix3.h aoutx.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
@@ -967,5 +997,4 @@ i386dynix.o: i386dynix.c $(INCDIR)/aout/dynix3.h aoutx.h \
 hp300bsd.o: hp300bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
-
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

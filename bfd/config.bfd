@@ -102,6 +102,7 @@ case "${targ}" in
     ;;
 
   sh-*-*)
+    targ_defvec=shcoff_vec
     targ_selvecs="shcoff_vec shlcoff_vec"
     targ_underscore=yes
     ;;
@@ -140,8 +141,13 @@ case "${targ}" in
     targ_defvec=i386dynix_vec
     targ_underscore=yes
     ;;
-  i[345]86-*-bsd* | i[345]86-*-freebsd*)
+  i[345]86-*-bsd*)
     targ_defvec=i386bsd_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-freebsd*)
+    targ_defvec=i386freebsd_vec
+    targ_selvecs=i386bsd_vec
     targ_underscore=yes
     ;;
   i[345]86-*-netbsd*)
@@ -200,7 +206,10 @@ case "${targ}" in
     targ_defvec=i386aout_vec
     ;;
 
-  i860-*-sysv4*)
+  i860-*-mach3* | i860-*-osf1* | i860-*-coff*)
+    targ_defvec=i860coff_vec
+    ;;
+  i860-*-sysv4* | i860-*-elf*)
     targ_defvec=bfd_elf32_i860_vec
     ;;
 
@@ -239,7 +248,7 @@ case "${targ}" in
     targ_selvecs=cisco_core_vec
     targ_underscore=yes
     ;;
-  m68*-*-elf* | m68*-*-sysv4* | m68*-cbm-*)
+  m68*-*-elf* | m68*-*-sysv4*)
     targ_defvec=bfd_elf32_m68k_vec
     targ_selvecs=m68kcoff_vec
     ;;
@@ -274,6 +283,10 @@ case "${targ}" in
     targ_defvec=sunos_big_vec
     targ_selvecs="m68kcoff_vec tekhex_vec"
     targ_underscore=yes
+    ;;
+  m68*-cbm-*)
+    targ_defvec=bfd_elf32_m68k_vec
+    targ_selvecs=m68kcoff_vec
     ;;
 
   m88*-harris-cxux* | m88*-*-dgux* | m88*-*-sysv4*)
@@ -399,18 +412,18 @@ case "${targ}" in
     targ_defvec=sparcnetbsd_vec
     targ_underscore=yes
     ;;
-  sparc-*-solaris2* | sparc-*-sysv4*)
+  sparc-*-elf* | sparc-*-sysv4* | sparc-*-solaris2*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs=sunos_big_vec
-    ;;
-  sparc64-*-aout*)
-    targ_defvec=sunos_big_vec
-    targ_underscore=yes
     ;;
   sparc64-*-elf* | sparc64-*-sysv4* | sparc64-*-solaris2*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs=bfd_elf32_sparc_vec
     ;;    
+  sparc64-*-aout*)
+    targ_defvec=sunos_big_vec
+    targ_underscore=yes
+    ;;
   sparc-*-netware*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="nlm32_sparc_vec sunos_big_vec"

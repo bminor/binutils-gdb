@@ -1,3 +1,18 @@
+Thu Jan  4 17:12:37 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config.bfd (i[345]86-*-freebsd*): Add target.
+	* configure.in (i386freebsd_vec): Add vec.
+	* configure: Regenerate.
+	* Makefile.in (BFD32_BACKENDS): Add i386freebsd.o.
+	(BFD32_BACKENDS_CFILES): Add i386freebsd.c.
+	Rebuild dependencies..
+	* freebsd.h: New file.
+	* i386freebsd.c: New file.
+	* targets.c (i386freebsd_vec): Declare.
+	(bfd_target_vector): Add i386freebsd_vec.
+	* i386linux.c (SEGMENT_SIZE): Define as TARGET_PAGE_SIZE
+	* i386netbsd.c (SEGMENT_SIZE):  Define as TARGET_PAGE_SIZE
+	
 Thu Jan  4 16:27:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_slurp_debug): New static function.

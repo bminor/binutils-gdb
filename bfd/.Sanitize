@@ -155,6 +155,7 @@ elflink.c
 elflink.h
 filemode.c
 format.c
+freebsd.h
 gen-aout.c
 genlink.h
 hash.c
@@ -168,6 +169,7 @@ hpux-core.c
 i386aout.c
 i386bsd.c
 i386dynix.c
+i386freebsd.c
 i386linux.c
 i386netbsd.c
 i386lynx.c
