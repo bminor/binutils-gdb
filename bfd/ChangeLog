@@ -1,3 +1,13 @@
+Mon Jul  3 17:03:52 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (hppa_som_gen_reloc_type): New argument "sym_diff",
+	nonzero when we're generating relocations for an expression
+	using the difference of two symbols.  All callers changed.
+	Handle difference of symbols for both R_HPPA and R_COMPLEX
+	cases.
+	(som_write_fixups): Handle R_COMP1, R_COMP2 and R_CODE_EXPR
+	fixups.
+
 Mon Jul  3 13:55:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* config.bfd (win32): New configuration.

@@ -167,6 +167,8 @@ static asymbol * som_make_empty_symbol PARAMS ((bfd *));
 static void som_print_symbol PARAMS ((bfd *, PTR,
 				      asymbol *, bfd_print_symbol_type));
 static boolean som_new_section_hook PARAMS ((bfd *, asection *));
+static boolean som_bfd_copy_private_symbol_data PARAMS ((bfd *, asymbol *,
+							  bfd *, asymbol *));
 static boolean som_bfd_copy_private_section_data PARAMS ((bfd *, asection *,
 							  bfd *, asection *));
 static boolean som_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
@@ -254,6 +256,7 @@ static boolean som_is_space PARAMS ((asection *));
 static boolean som_is_subspace PARAMS ((asection *));
 static boolean som_is_container PARAMS ((asection *, asection *));
 static boolean som_bfd_free_cached_info PARAMS ((bfd *));
+static boolean som_bfd_link_split_section PARAMS ((bfd *, asection *));
 	
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
@@ -1394,15 +1397,16 @@ hppa_som_reloc (abfd, reloc_entry, symbol_in, data,
    and a field selector, return one or more appropriate SOM relocations.  */
 
 int **
-hppa_som_gen_reloc_type (abfd, base_type, format, field)
+hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
      bfd *abfd;
      int base_type;
      int format;
      enum hppa_reloc_field_selector_type_alt field;
+     int sym_diff;
 {
   int *final_type, **final_types;
 
-  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 3);
+  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 6);
   final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
   if (!final_types || !final_type)
     {
@@ -1507,8 +1511,29 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
   switch (base_type)
     {
     case R_HPPA:
+      /* The difference of two symbols needs *very* special handling.  */
+      if (sym_diff)
+	{
+	  final_types[0] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[1] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[2] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[3] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  if (!final_types[0] || !final_types[1] || !final_types[2])
+          {
+            bfd_set_error (bfd_error_no_memory);
+            return NULL;
+          }
+	  *final_types[0] = R_FSEL;
+	  *final_types[1] = R_COMP2;
+	  *final_types[2] = R_COMP2;
+	  *final_types[3] = R_COMP1;
+	  final_types[4] = final_type;
+	  *final_types[4] = R_CODE_EXPR;
+	  final_types[5] = NULL;
+	  break;
+	}
       /* PLABELs get their own relocation type.  */
-      if (field == e_psel
+      else if (field == e_psel
 	  || field == e_lpsel
 	  || field == e_rpsel)
 	{
@@ -1537,6 +1562,31 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 	  || field == e_rpsel)
 	*final_type = R_DATA_PLABEL;
       break;
+
+    case R_HPPA_COMPLEX:
+      /* The difference of two symbols needs *very* special handling.  */
+      if (sym_diff)
+	{
+	  final_types[0] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[1] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[2] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  final_types[3] = (int *)bfd_alloc_by_size_t (abfd, sizeof (int));
+	  if (!final_types[0] || !final_types[1] || !final_types[2])
+          {
+            bfd_set_error (bfd_error_no_memory);
+            return NULL;
+          }
+	  *final_types[1] = R_FSEL;
+	  *final_types[1] = R_COMP2;
+	  *final_types[2] = R_COMP2;
+	  *final_types[3] = R_COMP1;
+	  final_types[4] = final_type;
+	  *final_types[4] = R_CODE_EXPR;
+	  final_types[5] = NULL;
+	  break;
+	}
+      else
+	break;
 
     case R_HPPA_NONE:
     case R_HPPA_ABS_CALL:
@@ -2556,6 +2606,8 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_FSEL:
 		case R_LSEL:
 		case R_RSEL:
+		case R_COMP1:
+		case R_COMP2:
 		  reloc_offset = bfd_reloc->address;
 		  break;
 
@@ -2685,6 +2737,37 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_FSEL:
 		case R_LSEL:
 		case R_RSEL:
+		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		  subspace_reloc_size += 1;
+		  p += 1;
+		  break;
+
+		case R_COMP1:
+		  /* The only time we generate R_COMP1, R_COMP2 and 
+		     R_CODE_EXPR relocs is for the difference of two
+		     symbols.  Hence we can cheat here.  */
+		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		  bfd_put_8 (abfd, 0x44, p + 1);
+		  p = try_prev_fixup (abfd, &subspace_reloc_size,
+				      p, 2, reloc_queue);
+		  break;
+
+		case R_COMP2:
+		  /* The only time we generate R_COMP1, R_COMP2 and 
+		     R_CODE_EXPR relocs is for the difference of two
+		     symbols.  Hence we can cheat here.  */
+		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		  bfd_put_8 (abfd, 0x80, p + 1);
+		  bfd_put_8 (abfd, sym_num >> 16, p + 2);
+		  bfd_put_16 (abfd, sym_num, p + 3);
+		  p = try_prev_fixup (abfd, &subspace_reloc_size,
+				      p, 5, reloc_queue);
+		  break;
+
+		case R_CODE_EXPR:
+		  /* The only time we generate R_COMP1, R_COMP2 and 
+		     R_CODE_EXPR relocs is for the difference of two
+		     symbols.  Hence we can cheat here.  */
 		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
 		  subspace_reloc_size += 1;
 		  p += 1;
@@ -4185,8 +4268,11 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		 the stack.  */
 	      else if (islower (c))
 		{
+		  int bits = (c - 'a') * 8;
 		  for (v = 0; c > 'a'; --c)
 		    v = (v << 8) | *fixup++;
+		  if (varname == 'V')
+		    v = sign_extend (v, bits);
 		  push (v);
 		}
 
@@ -4571,6 +4657,31 @@ som_new_section_hook (abfd, newsect)
   newsect->alignment_power = 3;
 
   /* We allow more than three sections internally */
+  return true;
+}
+
+/* Copy any private info we understand from the input symbol
+   to the output symbol.  */
+
+static boolean
+som_bfd_copy_private_symbol_data (ibfd, isymbol, obfd, osymbol)
+     bfd *ibfd;
+     asymbol *isymbol;
+     bfd *obfd;
+     asymbol *osymbol;
+{
+  struct som_symbol *input_symbol = isymbol;
+  struct som_symbol *output_symbol = osymbol;
+
+  /* One day we may try to grok other private data.  */
+  if (ibfd->xvec->flavour != bfd_target_som_flavour
+      || obfd->xvec->flavour != bfd_target_som_flavour)
+    return false;
+
+  /* The only private information we need to copy is the argument relocation
+     bits.  */
+  output_symbol->tc_data.hppa_arg_reloc = input_symbol->tc_data.hppa_arg_reloc;
+
   return true;
 }
 
@@ -5812,6 +5923,15 @@ som_bfd_free_cached_info (abfd)
 }
 
 /* End of miscellaneous support functions. */
+
+/* Linker support functions.  */
+static boolean
+som_bfd_link_split_section (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  return (som_is_subspace (sec) && sec->_raw_size > 240000);
+}
 
 #define	som_close_and_cleanup		som_bfd_free_cached_info
 

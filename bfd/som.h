@@ -30,6 +30,12 @@
 #include <lst.h>
 #include <ar.h>
 
+/* The SOM BFD backend doesn't currently use anything from these
+   two include files, but it's likely to need them in the future.  */
+#ifdef R_DLT_REL
+#include <shl.h>
+#include <dl.h>
+#endif
 
 #if defined(HOST_HPPABSD) || defined (HOST_HPPAOSF)
 /* BSD uses a completely different scheme for object file identification.
@@ -107,6 +113,7 @@ struct somdata
        need not be copied for objcopy or strip to work.  */
     som_symbol_type *symtab;
     char *stringtab;
+    asymbol **sorted_syms;
 
     /* We remember these offsets so that after check_file_format, we have
        no dependencies on the particular format of the exec_hdr.
@@ -179,6 +186,7 @@ struct som_section_data_struct
 #define obj_som_str_filepos(bfd)	(somdata(bfd).str_filepos)
 #define obj_som_stringtab_size(bfd)	(somdata(bfd).stringtab_size)
 #define obj_som_reloc_filepos(bfd)	(somdata(bfd).reloc_filepos)
+#define obj_som_sorted_syms(bfd)	(somdata(bfd).sorted_syms)
 #define som_section_data(sec) \
   ((struct som_section_data_struct *)sec->used_by_bfd)
 #define som_symbol_data(symbol)		((som_symbol_type *) symbol)
@@ -210,5 +218,5 @@ boolean bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
 void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
 boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
 int ** hppa_som_gen_reloc_type
-  PARAMS ((bfd *, int, int, enum hppa_reloc_field_selector_type_alt));
+  PARAMS ((bfd *, int, int, enum hppa_reloc_field_selector_type_alt, int));
 #endif /* _SOM_H */
