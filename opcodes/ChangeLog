@@ -1,3 +1,7 @@
+Fri Oct 17 13:18:53 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (bnezl,beqzl): Mark these as also tx39.
+
 Thu Oct 16 11:55:20 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-opc.c: Note that 'jalx' is (probably incorrectly) marked I1.
