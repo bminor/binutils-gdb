@@ -1,3 +1,9 @@
+Tue Nov 10 15:26:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-fr30
+	* disassemble.c (disassembler): Add support for FR30 target.
+end-sanitize-fr30
+
 Tue Nov 10 11:00:04 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 start-sanitize-cygnus
@@ -7,16 +13,13 @@ end-sanitize-cygnus
 	* m32r-dis.c,m32r-opc.c,m32r-opc.h: Rebuild.
 start-sanitize-fr30
 	* fr30-dis.c,fr30-opc.c,fr30-opc.h: Rebuild.
-end-sanitize-fr30
 
-start-sanitize-fr30
 Mon Nov  9 18:22:55 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/opcodes.pot: Regenerate.
 	* po/POTFILES.in: Regenerate.
 	* fr30-opc.c: Regenerate.
 	* fr30-opc.h: Regenerate.
-
 end-sanitize-fr30
 Fri Nov  6 17:21:38 1998  Doug Evans  <devans@canuck.cygnus.com>
 
