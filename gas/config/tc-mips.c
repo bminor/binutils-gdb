@@ -1726,6 +1726,7 @@ macro (ip)
   offsetT maxnum;
   bfd_reloc_code_real_type r;
   char *p;
+  int hold_mips_optimize;
 
   treg = (ip->insn_opcode >> 16) & 0x1f;
   dreg = (ip->insn_opcode >> 11) & 0x1f;
@@ -2542,7 +2543,13 @@ macro (ip)
 		  off1 = -8;
 		}
 
+	      /* Set mips_optimize around the lui instruction to avoid
+		 inserting an unnecessary nop after the lw.  */
+	      hold_mips_optimize = mips_optimize;
+	      mips_optimize = 2;
 	      macro_build_lui ((char *) NULL, &icnt, &expr1, AT);
+	      mips_optimize = hold_mips_optimize;
+
 	      macro_build ((char *) NULL, &icnt, &expr1,
 			   mips_isa < 3 ? "addiu" : "daddiu",
 			   "t,r,j", AT, AT, (int) BFD_RELOC_LO16);
@@ -2989,7 +2996,14 @@ macro (ip)
       return;
 
     case M_LI_SS:
-      if (mips_pic == NO_PIC)
+      if (imm_expr.X_op == O_constant)
+	{
+	  load_register (&icnt, AT, &imm_expr);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		       "mtc1", "t,G", AT, treg);
+	  break;
+	}
+      else
 	{
 	  assert (offset_expr.X_op == O_symbol
 		  && strcmp (segment_name (S_GET_SEGMENT
@@ -2998,20 +3012,6 @@ macro (ip)
 		  && offset_expr.X_add_number == 0);
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		       treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
-	  return;
-	}
-      else if (mips_pic == SVR4_PIC
-	       || mips_pic == EMBEDDED_PIC)
-	{
-	  assert (imm_expr.X_op == O_constant);
-	  load_register (&icnt, AT, &imm_expr);
-	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		       "mtc1", "t,G", AT, treg);
-	  break;
-	}
-      else
-	{
-	  abort ();
 	  return;
 	}
 
@@ -3068,15 +3068,11 @@ macro (ip)
       break;
 
     case M_LI_DD:
-      if (mips_pic == NO_PIC
-	  || mips_pic == EMBEDDED_PIC)
+      assert (offset_expr.X_op == O_symbol
+	      && offset_expr.X_add_number == 0);
+      s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
+      if (strcmp (s, ".lit8") == 0)
 	{
-	  /* Load a floating point number from the .lit8 section.  */
-	  assert (offset_expr.X_op == O_symbol
-		  && strcmp (segment_name (S_GET_SEGMENT
-					   (offset_expr.X_add_symbol)),
-			     ".lit8") == 0
-		  && offset_expr.X_add_number == 0);
 	  if (mips_isa >= 2)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
@@ -3087,24 +3083,29 @@ macro (ip)
 	  r = BFD_RELOC_MIPS_LITERAL;
 	  goto dob;
 	}
-      else if (mips_pic == SVR4_PIC)
+      else
 	{
-	  /* Load the double from the .rdata section.  */
-	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       mips_isa < 3 ? "lw" : "ld",
-		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+	  assert (strcmp (s, RDATA_SECTION_NAME) == 0);
+	  if (mips_pic == SVR4_PIC)
+	    macro_build ((char *) NULL, &icnt, &offset_expr,
+			 mips_isa < 3 ? "lw" : "ld",
+			 "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+	  else
+	    {
+	      /* FIXME: This won't work for a 64 bit address.  */
+	      macro_build_lui ((char *) NULL, &icnt, &offset_expr, AT);
+	    }
+	      
 	  if (mips_isa >= 2)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
-			   "T,o(b)", treg, (int) BFD_RELOC_LO16, GP);
+			   "T,o(b)", treg, (int) BFD_RELOC_LO16, AT);
 	      break;
 	    }
 	  breg = AT;
 	  r = BFD_RELOC_LO16;
 	  goto dob;
 	}
-      else
-	abort ();
 
     case M_L_DOB:
       /* Even on a big endian machine $fn comes before $fn+1.  We have
@@ -3249,9 +3250,16 @@ macro (ip)
 			   coproc ? treg + 1 : treg,
 			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
 	      offset_expr.X_add_number += 4;
+
+	      /* Set mips_optimize to 2 to avoid inserting an
+                 undesired nop.  */
+	      hold_mips_optimize = mips_optimize;
+	      mips_optimize = 2;
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   coproc ? treg : treg + 1,
 			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
+	      mips_optimize = hold_mips_optimize;
+
 	      p = frag_var (rs_machine_dependent, 12 + off, 0,
 			    RELAX_ENCODE (8 + off, 12 + off, 0, 4 + off, 1,
 					  used_at && mips_noat),
@@ -3331,9 +3339,16 @@ macro (ip)
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_LO16, AT);
 	  expr1.X_add_number += 4;
+
+	  /* Set mips_optimize to 2 to avoid inserting an undesired
+             nop.  */
+	  hold_mips_optimize = mips_optimize;
+	  mips_optimize = 2;
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
+	  mips_optimize = hold_mips_optimize;
+
 	  (void) frag_var (rs_machine_dependent, 0, 0,
 			   RELAX_ENCODE (0, 0, -16 - off, -8, 1, 0),
 			   offset_expr.X_add_symbol, (long) 0,
@@ -4449,15 +4464,15 @@ mips_ip (str, ip)
 		    f -- immediate value
 		    l -- .lit4
 
-		    When generating SVR4 PIC code, we do not use the
-		    .lit8 or .lit4 sections at all, in order to
-		    reserve the entire global offset table.  When
-		    generating embedded PIC code, we use the .lit8
-		    section but not the .lit4 section (we can do .lit4
-		    inline easily; we need to put .lit8 somewhere in
-		    the data segment, and using .lit8 permits the
-		    linker to eventually combine identical .lit8
-		    entries).  */
+		    The .lit4 and .lit8 sections are only used if
+		    permitted by the -G argument.
+
+		    When generating embedded PIC code, we use the
+		    .lit8 section but not the .lit4 section (we can do
+		    .lit4 inline easily; we need to put .lit8
+		    somewhere in the data segment, and using .lit8
+		    permits the linker to eventually combine identical
+		    .lit8 entries).  */
 
 		f64 = *args == 'F' || *args == 'L';
 
@@ -4477,7 +4492,12 @@ mips_ip (str, ip)
 		assert (length == (f64 ? 8 : 4));
 
 		if (*args == 'f'
-		    || (mips_pic != NO_PIC && *args == 'l'))
+		    || (*args == 'l'
+			&& (mips_pic == EMBEDDED_PIC
+#ifdef GPOPT
+			    || g_switch_value < 4
+#endif
+			    )))
 		  {
 		    imm_expr.X_op = O_constant;
 		    if (byte_order == LITTLE_ENDIAN)
@@ -4505,15 +4525,19 @@ mips_ip (str, ip)
 		      {
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
-			newname = (mips_pic != SVR4_PIC
-				   ? ".lit8"
-				   : RDATA_SECTION_NAME);
+			newname = ".lit8";
+#ifdef GPOPT
+			if (g_switch_value < 8)
+			  newname = RDATA_SECTION_NAME;
+#endif
 			break;
 		      case 'F':
 			newname = RDATA_SECTION_NAME;
 			break;
 		      case 'l':
-			assert (mips_pic == NO_PIC);
+#ifdef GPOPT
+			assert (g_switch_value >= 4);
+#endif
 			newname = ".lit4";
 			break;
 		      }
@@ -5019,7 +5043,9 @@ md_parse_option (c, arg)
 	      case '4':
 		if (strcmp (p, "4000") == 0
 		    || strcmp (p, "4k") == 0
-		    || strcmp (p, "4K") == 0)
+		    || strcmp (p, "4K") == 0
+		    || strcmp (p, "4400") == 0
+		    || strcmp (p, "4600") == 0)
 		  mips_isa = 3;
 		break;
 
@@ -5028,6 +5054,11 @@ md_parse_option (c, arg)
 		    || strcmp (p, "6k") == 0
 		    || strcmp (p, "6K") == 0)
 		  mips_isa = 2;
+		break;
+
+	      case 'o':
+		if (strcmp (p, "orion") == 0)
+		  mips_isa = 3;
 		break;
 	      }
 

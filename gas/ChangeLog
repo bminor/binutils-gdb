@@ -1,3 +1,14 @@
+Tue Aug  9 11:12:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (md_parse_option): Accept -mcpu=4400, 4600, and
+	orion.
+
+Mon Aug  8 16:28:08 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* as.h: Remove FOPEN_WB patch of Aug 6.
+	* configure.in: Configure for ho-go32 correctly.
+	* config/ho-go32.h: Fix copyright.
+
 Mon Aug  8 11:59:51 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/config/tc-hppa.c (md_pseudo_table): Delete redundant
