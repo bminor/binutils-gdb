@@ -1,5 +1,22 @@
 2001-09-21  Jiri Smid   <smid@suse.cz>
 
+	* config/i386/x86-64linux.mh: New file.
+	* config/i386/x86-64linux.mt: New file.
+	* config/i386/nm-x86_64.h: New file.
+	* x86-64-linux-tdep.c: New file.
+	* x86-64-linux-nat.c: New file.
+	* x86-64-tdep.c: New file.
+	* x86-64-tdep.h: New file.
+	* i386-tdep.h: New file.
+	* i387-nat.c: Include i386-tdep.h when multiarch.
+	* i387-tdep.c: Ditto.
+	* config/djgpp/fnchange.lst: Add entries for x86_64-linux-tdep.c
+	and x86_64-linux-nat.c
+	* Makefile.in: Add x86_64-linux-tdep.o, x86_64-tdep.o,
+	x86_64-linux-tdep.o, x86_64-nat.o, update dependencies.
+
+2001-09-21  Jiri Smid   <smid@suse.cz>
+
 	* MAINTAINERS: Add myself to the write-after-approval list.
 	* i386-nat.c (TARGET_HAS_DR_LEN_8, DR_LEN_8): Declare.
 	(i386_length_and_rw_bits, i386_handle_nonaligned_watchpoint,
