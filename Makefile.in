@@ -152,8 +152,28 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 		$(host) +target=$(target))
 
 #
+# Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
+
+DEVO_SUPPORT= README.configure Makefile.in configure configure.in 
+GDB_SUPPORT_DIRS= bfd include libiberty readline texinfo/fsf/texinfo.tex
+
+bfd.ilrt.tar.Z: force_update
+	./configure -template=./configure
+	./configure sun4
+	make clean
+	./configure -rm sun4
+	rm -f bfd.ilrt.tar.Z
+	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) \
+		| compress -v >bfd.ilrt.tar.Z
+
+force_update:
+
+#
 # $Log$
-# Revision 1.19  1991/07/27 07:46:34  rich
+# Revision 1.20  1991/07/31 02:47:14  gnu
+# Add bfd.ilrt.tar.Z "make" rules.
+#
+# Revision 1.19  1991/07/27  07:46:34  rich
 # Changes to accomodate using the freshly built bison in place.
 #
 # Revision 1.18  1991/07/16  00:01:40  gnu
