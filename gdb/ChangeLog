@@ -1,3 +1,22 @@
+Fri Sep 25 09:52:47 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+        Separate core functions along target vector in preparation for
+        native support.  Functions above vector now live in core.c.  Those
+        below in corelow.c.
+
+	* core.c (solib_add_stub, core_close, core_open, core_detach,
+	  get_core_registers, core_files_info, core_ops): moved to corelow.c
+	  (_initialize_core): removed addition of core_ops target.
+	* corelow.c: new file.
+	(solib_add_stub, core_close, core_open, core_detach,
+	get_core_registers, core_files_info, core_ops): moved from core.c
+	(_initialize_corelow): new function.
+	* gdbcore.h (core_open, core_detach): added prototypes.
+	(core_ops): add forward declaration.
+	* Makefile.in (SFILES_MAINDIR): add core.c
+	(OBS): add core.o
+	(TSOBS): change core.o to corelow.o
+
 Wed Sep 23 11:14:53 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* m68k-tdep.c (m68k_saved_pc_after_call):  Use 'GDB_TARGET_IS_SUN3'
