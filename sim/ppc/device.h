@@ -42,40 +42,47 @@
    */
 
 
-/* Constructing the device tree:
-
-   The initial device tree populated with devices and basic properties
-   is created using the function <<device_tree_add_parsed()>>.  This
-   function parses a PSIM device specification and uses it to populate
-   the tree accordingly.
-
-   This function accepts a printf style formatted string as the
-   argument that describes the entry.  Any properties or interrupt
-   connections added to a device tree using this function are marked
-   as having a permenant disposition.  When the tree is (re)
-   initialized they will be restored to their initial value.
-
-   */
-
-EXTERN_DEVICE\
-(device *) device_tree_add_parsed
-(device *current,
- const char *fmt,
- ...) __attribute__ ((format (printf, 2, 3)));
-
-
-/* Initializing the created tree:
-
-   Once a device tree has been created the <<device_tree_init()>>
-   function is used to initialize it.  The exact sequence of events
-   that occure during initialization are described separatly.
-
-   */
+/* Device creation: */
 
 INLINE_DEVICE\
-(void) device_tree_init
+(device *) device_create
+(device *parent,
+ const char *base,
+ const char *name,
+ const char *unit_address,
+ const char *args);
+
+INLINE_DEVICE\
+(void) device_usage
+(int verbose);
+
+
+/* Device initialization: */
+
+INLINE_DEVICE\
+(void) device_clean
 (device *root,
- psim *system);
+ void *data);
+
+INLINE_DEVICE\
+(void) device_init_static_properties
+(device *me,
+ void *data);
+
+INLINE_DEVICE\
+(void) device_init_address
+(device *me,
+ void *data);
+
+INLINE_DEVICE\
+(void) device_init_runtime_properties
+(device *me,
+ void *data);
+
+INLINE_DEVICE\
+(void) device_init_data
+(device *me,
+ void *data);
 
 
 /* Relationships:
@@ -91,6 +98,10 @@ INLINE_DEVICE\
 (device *me);
 
 INLINE_DEVICE\
+(device *) device_root
+(device *me);
+
+INLINE_DEVICE\
 (device *) device_sibling
 (device *me);
 
@@ -100,6 +111,10 @@ INLINE_DEVICE\
 
 INLINE_DEVICE\
 (const char *) device_name
+(device *me);
+
+INLINE_DEVICE\
+(const char *) device_base
 (device *me);
 
 INLINE_DEVICE\
@@ -116,11 +131,61 @@ INLINE_DEVICE\
 
 typedef struct _device_unit {
   int nr_cells;
-  unsigned32 cells[4]; /* unused cells are zero */
+  unsigned_cell cells[4]; /* unused cells are zero */
 } device_unit;
 
 INLINE_DEVICE\
 (const device_unit *) device_unit_address
+(device *me);
+
+INLINE_DEVICE\
+(int) device_decode_unit
+(device *bus,
+ const char *unit,
+ device_unit *address);
+
+INLINE_DEVICE\
+(int) device_encode_unit
+(device *bus,
+ const device_unit *unit_address,
+ char *buf,
+ int sizeof_buf);
+
+
+/* Convert an Open Firmware size into a form suitable for attach
+   address calls.
+
+   Return a zero result if the address should be ignored when looking
+   for attach addresses */
+
+INLINE_DEVICE\
+(int) device_address_to_attach_address
+(device *me,
+ const device_unit *address,
+ int *attach_space,
+ unsigned_word *attach_address,
+ device *client);
+
+
+/* Convert an Open Firmware size into a form suitable for attach
+   address calls
+
+   Return a zero result if the address should be ignored */
+
+INLINE_DEVICE\
+(int) device_size_to_attach_size
+(device *me,
+ const device_unit *size,
+ unsigned *nr_bytes,
+ device *client);
+
+
+INLINE_DEVICE\
+(unsigned) device_nr_address_cells
+(device *me);
+
+INLINE_DEVICE\
+(unsigned) device_nr_size_cells
 (device *me);
 
 
@@ -132,15 +197,18 @@ INLINE_DEVICE\
 
    */
 
-/* The following are valid property types.  The property `array' is a
+/* The following are valid property types.  The property `array' is
    for generic untyped data. */
 
 typedef enum {
   array_property,
   boolean_property,
-  ihandle_property,
+  ihandle_property, /*runtime*/
   integer_property,
+  range_array_property,
+  reg_array_property,
   string_property,
+  string_array_property,
 } device_property_type;
 
 typedef struct _device_property device_property;
@@ -176,8 +244,24 @@ INLINE_DEVICE\
    FIND returns the specified properties value, aborting the
    simulation if the property is missing.  Code locating a property
    should first check its type (using device_find_property above) and
-   then obtain its value using the below. */
+   then obtain its value using the below.
 
+   void device_add_<type>_property(device *, const char *, <type>)
+   void device_add_*_array_property(device *, const char *, const <type>*, int)
+   void device_set_*_property(device *, const char *, <type>)
+   void device_set_*_array_property(device *, const char *, const <type>*, int)
+   <type> device_find_*_property(device *, const char *)
+   int device_find_*_array_property(device *, const char *, int, <type>*)
+
+   */
+
+
+INLINE_DEVICE\
+(void) device_add_array_property
+(device *me,
+ const char *property,
+ const void *array,
+ int sizeof_array);
 
 INLINE_DEVICE\
 (void) device_set_array_property
@@ -192,13 +276,12 @@ INLINE_DEVICE\
  const char *property);
 
 
-#if 0
+
 INLINE_DEVICE\
-(void) device_set_boolean_property
+(void) device_add_boolean_property
 (device *me,
  const char *property,
  int bool);
-#endif
 
 INLINE_DEVICE\
 (int) device_find_boolean_property
@@ -206,13 +289,30 @@ INLINE_DEVICE\
  const char *property);
 
 
-#if 0
+
+typedef struct _ihandle_runtime_property_spec {
+  device *phandle;
+  const char *full_path;
+  const char *args;
+} ihandle_runtime_property_spec;
+
+INLINE_DEVICE\
+(void) device_add_ihandle_runtime_property
+(device *me,
+ const char *property,
+ const ihandle_runtime_property_spec *ihandle);
+
+INLINE_DEVICE\
+(void) device_find_ihandle_runtime_property
+(device *me,
+ const char *property,
+ ihandle_runtime_property_spec *ihandle);
+
 INLINE_DEVICE\
 (void) device_set_ihandle_property
 (device *me,
  const char *property,
  device_instance *ihandle);
-#endif
 
 INLINE_DEVICE\
 (device_instance *) device_find_ihandle_property
@@ -220,32 +320,107 @@ INLINE_DEVICE\
  const char *property);
 
 
-#if 0
-INLINE_DEVICE\
-(void) device_set_integer_property
-(device *me,
- const char *property,
- signed_word integer);
-#endif
 
 INLINE_DEVICE\
-(signed_word) device_find_integer_property
+(void) device_add_integer_property
+(device *me,
+ const char *property,
+ signed_cell integer);
+
+INLINE_DEVICE\
+(signed_cell) device_find_integer_property
 (device *me,
  const char *property);
 
-
-#if 0
 INLINE_DEVICE\
-(void) device_set_string_property
+(int) device_find_integer_array_property
+(device *me,
+ const char *property,
+ unsigned index,
+ signed_word *integer);
+
+
+
+typedef struct _range_property_spec {
+  device_unit child_address;
+  device_unit parent_address;
+  device_unit size;
+} range_property_spec;
+
+INLINE_DEVICE\
+(void) device_add_range_array_property
+(device *me,
+ const char *property,
+ const range_property_spec *ranges,
+ unsigned nr_ranges);
+
+INLINE_DEVICE\
+(int) device_find_range_array_property
+(device *me,
+ const char *property,
+ unsigned index,
+ range_property_spec *range);
+
+
+
+typedef struct _reg_property_spec {
+  device_unit address;
+  device_unit size;
+} reg_property_spec;
+
+INLINE_DEVICE\
+(void) device_add_reg_array_property
+(device *me,
+ const char *property,
+ const reg_property_spec *reg,
+ unsigned nr_regs);
+
+INLINE_DEVICE\
+(int) device_find_reg_array_property
+(device *me,
+ const char *property,
+ unsigned index,
+ reg_property_spec *reg);
+
+
+
+INLINE_DEVICE\
+(void) device_add_string_property
 (device *me,
  const char *property,
  const char *string);
-#endif
 
 INLINE_DEVICE\
 (const char *) device_find_string_property
 (device *me,
  const char *property);
+
+
+
+typedef const char *string_property_spec;
+
+INLINE_DEVICE\
+(void) device_add_string_array_property
+(device *me,
+ const char *property,
+ const string_property_spec *strings,
+ unsigned nr_strings);
+
+INLINE_DEVICE\
+(int) device_find_string_array_property
+(device *me,
+ const char *property,
+ unsigned index,
+ string_property_spec *string);
+
+
+
+INLINE_DEVICE\
+(void) device_add_duplicate_property
+(device *me,
+ const char *property,
+ const device_property *original);
+
 
 
 /* Instances:
@@ -277,7 +452,8 @@ INLINE_DEVICE\
 INLINE_DEVICE\
 (device_instance *) device_create_instance
 (device *me,
- const char *device_specifier);
+ const char *full_path,
+ const char *args);
 
 INLINE_DEVICE\
 (void) device_instance_delete
@@ -302,17 +478,13 @@ INLINE_DEVICE\
  unsigned_word pos_lo);
 
 INLINE_DEVICE\
-(unsigned_word) device_instance_claim
+(int) device_instance_call_method
 (device_instance *instance,
- unsigned_word address,
- unsigned_word length,
- unsigned_word alignment);
-
-INLINE_DEVICE\
-(void) device_instance_release
-(device_instance *instance,
- unsigned_word address,
- unsigned_word length);
+ const char *method,
+ int n_stack_args,
+ unsigned_cell stack_args[/*n_stack_args*/],
+ int n_stack_returns,
+ unsigned_cell stack_returns[/*n_stack_returns*/]);
 
 INLINE_DEVICE\
 (device *) device_instance_device
@@ -378,6 +550,20 @@ INLINE_DEVICE\
  device *dest,
  int dest_port);
 
+typedef void (device_interrupt_traverse_function)
+     (device *me,
+      int my_port,
+      device *dest,
+      int my_dest,
+      void *data);
+
+INLINE_DEVICE\
+(void) device_interrupt_traverse
+(device *me,
+ device_interrupt_traverse_function *handler,
+ void *data);
+ 
+
 /* DESTINATION is attached (detached) to LINE of the device ME
 
 
@@ -393,14 +579,16 @@ INLINE_DEVICE\
 INLINE_DEVICE\
 (int) device_interrupt_decode
 (device *me,
- const char *symbolic_name);
+ const char *symbolic_name,
+ port_direction direction);
 
 INLINE_DEVICE\
 (int) device_interrupt_encode
 (device *me,
  int port_number,
  char *buf,
- int sizeof_buf);
+ int sizeof_buf,
+ port_direction direction);
  
 
 /* Hardware operations:
@@ -480,24 +668,22 @@ typedef enum _attach_type {
 INLINE_DEVICE\
 (void) device_attach_address
 (device *me,
- const char *name,
  attach_type attach,
  int space,
  unsigned_word addr,
  unsigned nr_bytes,
  access_type access,
- device *who); /*callback/default*/
+ device *client); /*callback/default*/
 
 INLINE_DEVICE\
 (void) device_detach_address
 (device *me,
- const char *name,
  attach_type attach,
  int space,
  unsigned_word addr,
  unsigned nr_bytes,
  access_type access,
- device *who); /*callback/default*/
+ device *client); /*callback/default*/
 
 /* Utilities:
 
@@ -513,11 +699,20 @@ INLINE_DEVICE\
 
    */
 
+typedef enum {
+  device_ioctl_break, /* unsigned_word requested_break */
+  device_ioctl_set_trace, /* void */
+  device_ioctl_create_stack, /* unsigned_word *sp, char **argv, char **envp */
+  device_ioctl_change_media, /* const char *new_image (possibly NULL) */
+  nr_device_ioctl_requests,
+} device_ioctl_request;
+
 EXTERN_DEVICE\
 (int) device_ioctl
 (device *me,
  cpu *processor,
  unsigned_word cia,
+ device_ioctl_request request,
  ...);
 
 
@@ -539,60 +734,10 @@ EXTERN_DEVICE\
  const char *fmt,
  ...) __attribute__ ((format (printf, 2, 3)));
 
-/* Tree traversal::
-
-   The entire device tree can be traversed using the
-   <<device_tree_traverse()>> function.  The traversal can be in
-   either pre- or postfix order.
-
-   */
-
-typedef void (device_tree_traverse_function)
-     (device *device,
-      void *data);
-
 INLINE_DEVICE\
-(void) device_tree_traverse
-(device *root,
- device_tree_traverse_function *prefix,
- device_tree_traverse_function *postfix,
- void *data);
+(int) device_trace
+(device *me);
 
-/* Device description::
-
-   */
-
-INLINE_DEVICE\
-(void) device_tree_print_device
-(device *device,
- void *ignore_data_argument);
-
-
-/* Tree lookup::
-
-   The function <<device_tree_find_device()>> will attempt to locate
-   the specified device within the tree.  If the device is not found a
-   NULL device is returned.
-
-   */
-
-INLINE_DEVICE\
-(device *) device_tree_find_device
-(device *root,
- const char *path);
-
-
-/* Device list or usage::
-
-   The <<device_usage()>> function outputs a list of all the devices
-   compiled into PSIM.  The verbose option will result in additional
-   information being printed (for instance, the interrupt ports).
-
-   */
-
-INLINE_DEVICE\
-(void) device_usage
-(int verbose);
 
 
 /* External representation:
@@ -612,19 +757,43 @@ INLINE_DEVICE\
 INLINE_DEVICE\
 (device *) external_to_device
 (device *tree_member,
- unsigned32 phandle);
+ unsigned_cell phandle);
 
 INLINE_DEVICE\
-(unsigned32) device_to_external
+(unsigned_cell) device_to_external
 (device *me);
 
 INLINE_DEVICE\
 (device_instance *) external_to_device_instance
 (device *tree_member,
- unsigned32 ihandle);
+ unsigned_cell ihandle);
 
 INLINE_DEVICE\
-(unsigned32) device_instance_to_external
+(unsigned_cell) device_instance_to_external
 (device_instance *me);
+
+
+/* Event queue:
+
+   The device inherets certain event queue operations from the main
+   simulation. */
+
+typedef void device_event_handler(void *data);
+
+INLINE_DEVICE\
+(event_entry_tag) device_event_queue_schedule
+(device *me,
+ signed64 delta_time,
+ device_event_handler *handler,
+ void *data);
+
+INLINE_EVENTS\
+(void) device_event_queue_deschedule
+(device *me,
+ event_entry_tag event_to_remove);
+
+INLINE_EVENTS\
+(signed64) device_event_queue_time
+(device *me);
 
 #endif /* _DEVICE_H_ */

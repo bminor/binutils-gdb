@@ -43,6 +43,8 @@
 #endif
 #endif
 
+#include <errno.h>
+
 #if !defined(O_NDELAY) || !defined(F_GETFL) || !defined(F_SETFL)
 #undef WITH_STDIO
 #define WITH_STDIO DO_USE_STDIO
@@ -69,6 +71,7 @@ error (char *msg, ...)
   va_list ap;
   va_start(ap, msg);
   vprintf(msg, ap);
+  printf("\n");
   va_end(ap);
 
   /* any final clean up */
@@ -98,6 +101,7 @@ sim_io_write_stdout(const char *buf,
   default:
     error("sim_io_write_stdout: invalid switch\n");
   }
+  return 0;
 }
 
 int
@@ -120,6 +124,7 @@ sim_io_write_stderr(const char *buf,
   default:
     error("sim_io_write_stdout: invalid switch\n");
   }
+  return 0;
 }
 
 int
@@ -128,10 +133,20 @@ sim_io_read_stdin(char *buf,
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    if (fgets(buf, sizeof_buf, stdin) == NULL)
-      return sim_io_eof;
-    else
-      return strlen(buf);
+    if (sizeof_buf > 1) {
+      if (fgets(buf, sizeof_buf, stdin) != NULL)
+	return strlen(buf);
+    }
+    else if (sizeof_buf == 1) {
+      char b[2];
+      if (fgets(b, sizeof(b), stdin) != NULL) {
+	memcpy(buf, b, strlen(b));
+	return strlen(b);
+      }
+    }
+    else if (sizeof_buf == 0)
+      return 0;
+    return sim_io_eof;
     break;
   case DONT_USE_STDIO:
     {
@@ -139,6 +154,7 @@ sim_io_read_stdin(char *buf,
       int flags;
       int status;
       int nr_read;
+      int result;
       /* get the old status */
       flags = fcntl(0, F_GETFL, 0);
       if (flags == -1) {
@@ -152,25 +168,32 @@ sim_io_read_stdin(char *buf,
 	return sim_io_eof;
       }
       /* try for input */
-      nr_read = read(0, &buf, sizeof_buf);
+      nr_read = read(0, buf, sizeof_buf);
+      if (nr_read > 0
+	  || (nr_read == 0 && sizeof_buf == 0))
+	result = nr_read;
+      else if (nr_read == 0)
+	result = sim_io_eof;
+      else { /* nr_read < 0 */
+	if (errno == EAGAIN)
+	  result = sim_io_not_ready;
+	else 
+	  result = sim_io_eof;
+      }
       /* return to regular vewing */
       status = fcntl(0, F_SETFL, flags);
       if (status == -1) {
 	perror("sim_io_read_stdin");
 	return sim_io_eof;
       }
-      if (status > 0)
-	return 1;
-      else if (status < 0)
-	return sim_io_eof;
-      else
-	return sim_io_not_ready;
+      return result;
     }
     break;
   default:
     error("sim_io_read_stdin: invalid switch\n");
     break;
   }
+  return 0;
 }
 
 void
@@ -215,8 +238,14 @@ main(int argc, char **argv)
 
   /* parse the arguments */
   argv = psim_options(root, argv + 1);
-  if (argv[0] == NULL)
-    psim_usage(0);
+  if (argv[0] == NULL) {
+    if (ppc_trace[trace_opts]) {
+      print_options ();
+      return 0;
+    } else {
+      psim_usage(0);
+    }
+  }
   name_of_file = argv[0];
 
   if (ppc_trace[trace_opts])

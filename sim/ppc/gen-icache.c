@@ -83,45 +83,51 @@ print_icache_declaration(insn_table *entry,
 static void
 print_icache_extraction(lf *file,
 			insn *instruction,
-			char *field_name,
-			char *field_type,
-			char *field_expression,
+			const char *entry_name,
+			const char *entry_type,
+			const char *entry_expression,
+			const char *original_name,
 			const char *file_name,
 			int line_nr,
 			insn_field *cur_field,
 			insn_bits *bits,
-			int use_defines,
-			int get_value_from_cache,
-			int put_value_in_cache)
+			icache_decl_type what_to_declare,
+			icache_body_type what_to_do)
 {
-  ASSERT(field_name != NULL);
-  if (use_defines && put_value_in_cache) {
+  ASSERT(entry_name != NULL);
+
+  /* Define a storage area for the cache element */
+  if (what_to_declare == undef_variables) {
     /* We've finished with the value - destory it */
     lf_indent_suppress(file);
-    lf_printf(file, "#undef %s\n", field_name);
+    lf_printf(file, "#undef %s\n", entry_name);
     return;
   }
-  else if (use_defines && get_value_from_cache) {
-      lf_indent_suppress(file);
-      lf_printf(file, "#define %s ", field_name);
+  else if (what_to_declare == define_variables) {
+    lf_indent_suppress(file);
+    lf_printf(file, "#define %s ", entry_name);
   }
   else {
-    lf_print__external_reference(file, line_nr, file_name);
-    lf_printf(file, "%s const %s __attribute__((__unused__)) = ",
-	      field_type == NULL ? "unsigned" : field_type,
-	      field_name);
+    if (file_name != NULL)
+      lf_print__external_reference(file, line_nr, file_name);
+    lf_printf(file, "%s const %s UNUSED = ",
+	      entry_type == NULL ? "unsigned" : entry_type,
+	      entry_name);
   }
 
+  /* define a value for that storage area as determined by what is in
+     the cache */
   if (bits != NULL
-      && ((bits->opcode->is_boolean
-	   && bits->value == 0)
-	  || !bits->opcode->is_boolean)
-      && strcmp(field_name, cur_field->val_string) == 0) {
+      && strcmp(entry_name, cur_field->val_string) == 0
+      && ((bits->opcode->is_boolean && bits->value == 0)
+	  || (!bits->opcode->is_boolean))) {
     /* The field has been made constant (as a result of expanding
-       instructions or similar) - define a constant variable with the
-       corresponding value. */
+       instructions or similar).  Remember that for a boolean field,
+       value is either 0 (implying the required boolean_constant) or
+       nonzero (implying some other value) - Define the variable
+       accordingly */
     ASSERT(bits->field == cur_field);
-    ASSERT(field_type == NULL);
+    ASSERT(entry_type == NULL);
     if (bits->opcode->is_boolean)
       lf_printf(file, "%d", bits->opcode->boolean_constant);
     else if (bits->opcode->last < bits->field->last)
@@ -130,30 +136,48 @@ print_icache_extraction(lf *file,
     else
       lf_printf(file, "%d", bits->value);
   }
+  else if (bits != NULL
+	   && bits->opcode->is_boolean
+	   && original_name != NULL
+	   && strncmp(entry_name,
+		      original_name, strlen(original_name)) == 0
+	   && strncmp(entry_name + strlen(original_name),
+		      "_is_", strlen("_is_")) == 0
+	   && (atol(entry_name + strlen(original_name) + strlen("_is_"))
+	       == bits->opcode->boolean_constant)) {
+    /* An entry, derived from ORIGINAL_NAME, is testing to see of the
+       ORIGINAL_NAME has a specific constant value.  That value
+       matching a boolean bit field */
+    lf_printf(file, "%d /* %s == %d */",
+	      bits->value == 0, original_name, bits->opcode->boolean_constant);
+  }
   else {
     /* put the field in the local variable, possibly also enter it
        into the cache */
-    /* getting it from the cache */
-    if (get_value_from_cache || put_value_in_cache) {
+    /* handle the cache */
+    if ((what_to_do & get_values_from_icache)
+	|| (what_to_do & put_values_in_icache)) {
       lf_printf(file, "cache_entry->crack.%s.%s",
 		instruction->file_entry->fields[insn_form],
-		field_name);
-      if (put_value_in_cache) /* also put it in the cache? */
+		entry_name);
+      if (what_to_do & put_values_in_icache) /* also put it in the cache? */
 	lf_printf(file, " = ");
     }
-    if (!get_value_from_cache) {
-      if (strcmp(field_name, cur_field->val_string) == 0)
+    if ((what_to_do & put_values_in_icache)
+	|| what_to_do == do_not_use_icache) {
+      if (cur_field != NULL && strcmp(entry_name, cur_field->val_string) == 0)
 	lf_printf(file, "EXTRACTED32(instruction, %d, %d)",
 		  i2target(hi_bit_nr, cur_field->first),
 		  i2target(hi_bit_nr, cur_field->last));
-      else if (field_expression != NULL)
-	lf_printf(file, "%s", field_expression);
+      else if (entry_expression != NULL)
+	lf_printf(file, "%s", entry_expression);
       else
-	lf_printf(file, "eval_%s", field_name);
+	lf_printf(file, "eval_%s", entry_name);
     }
   }
 
-  if (use_defines && get_value_from_cache)
+  if ((what_to_declare == define_variables)
+      || (what_to_declare == undef_variables))
     lf_printf(file, "\n");
   else
     lf_printf(file, ";\n");
@@ -165,16 +189,41 @@ print_icache_body(lf *file,
 		  insn *instruction,
 		  insn_bits *expanded_bits,
 		  cache_table *cache_rules,
-		  int use_defines,
-		  int get_value_from_cache,
-		  int put_value_in_cache)
+		  icache_decl_type what_to_declare,
+		  icache_body_type what_to_do)
 {
   insn_field *cur_field;
   
   /* extract instruction fields */
-  lf_printf(file, "/* extraction: %s defines=%d get-value=%d put-value=%d */\n",
-	    instruction->file_entry->fields[insn_format],
-	    use_defines, get_value_from_cache, put_value_in_cache);
+  lf_printf(file, "/* extraction: %s ",
+	    instruction->file_entry->fields[insn_format]);
+  switch (what_to_declare) {
+  case define_variables:
+    lf_printf(file, "#define");
+    break;
+  case declare_variables:
+    lf_printf(file, "declare");
+    break;
+  case undef_variables:
+    lf_printf(file, "#undef");
+    break;
+  }
+  lf_printf(file, " ");
+  switch (what_to_do) {
+  case get_values_from_icache:
+    lf_printf(file, "get-values-from-icache");
+    break;
+  case put_values_in_icache:
+    lf_printf(file, "put-values-in-icache");
+    break;
+  case both_values_and_icache:
+    lf_printf(file, "get-values-from-icache|put-values-in-icache");
+    break;
+  case do_not_use_icache:
+    lf_printf(file, "do-not-use-icache");
+    break;
+  }
+  lf_printf(file, " */\n");
   
   for (cur_field = instruction->fields->first;
        cur_field->first < insn_bit_size;
@@ -190,100 +239,98 @@ print_icache_body(lf *file,
 	  break;
       }
       /* try the cache rule table for what to do */
-      if (get_value_from_cache || put_value_in_cache) {      
+      {
 	cache_table *cache_rule;
 	for (cache_rule = cache_rules;
 	     cache_rule != NULL;
 	     cache_rule = cache_rule->next) {
-	  if (strcmp(cur_field->val_string, cache_rule->old_name) == 0) {
+	  if (strcmp(cur_field->val_string, cache_rule->field_name) == 0) {
 	    found_rule = 1;
-	    if (cache_rule->type == compute_value
-		&& put_value_in_cache
-		&& !use_defines)
+	    if (cache_rule->type == scratch_value
+		&& ((what_to_do & put_values_in_icache)
+		    || what_to_do == do_not_use_icache))
 	      print_icache_extraction(file,
 				      instruction,
-				      cache_rule->new_name,
+				      cache_rule->derived_name,
 				      cache_rule->type_def,
 				      cache_rule->expression,
+				      cache_rule->field_name,
 				      cache_rule->file_entry->file_name,
 				      cache_rule->file_entry->line_nr,
 				      cur_field,
 				      bits,
-				      0 /*use_defines*/,
-				      0 /*get-value-from-cache*/,
-				      0 /*put-value-in-cache*/);
-	    else if (cache_rule->type == cache_value)
+				      what_to_declare,
+				      do_not_use_icache);
+	    else if (cache_rule->type == compute_value
+		     && ((what_to_do & get_values_from_icache)
+			 || what_to_do == do_not_use_icache))
 	      print_icache_extraction(file,
 				      instruction,
-				      cache_rule->new_name,
+				      cache_rule->derived_name,
 				      cache_rule->type_def,
 				      cache_rule->expression,
+				      cache_rule->field_name,
 				      cache_rule->file_entry->file_name,
 				      cache_rule->file_entry->line_nr,
 				      cur_field,
 				      bits,
-				      use_defines,
-				      get_value_from_cache,
-				      put_value_in_cache);
+				      what_to_declare,
+				      do_not_use_icache);
+	    else if (cache_rule->type == cache_value
+		     && ((what_to_declare != undef_variables)
+			 || !(what_to_do & put_values_in_icache)))
+	      print_icache_extraction(file,
+				      instruction,
+				      cache_rule->derived_name,
+				      cache_rule->type_def,
+				      cache_rule->expression,
+				      cache_rule->field_name,
+				      cache_rule->file_entry->file_name,
+				      cache_rule->file_entry->line_nr,
+				      cur_field,
+				      bits,
+				      ((what_to_do & put_values_in_icache)
+				       ? declare_variables
+				       : what_to_declare),
+				      what_to_do);
 	  }
 	}
       }
-      if (found_rule == 0)
+      /* No rule at all, assume that it should go into the cache */
+      if (found_rule == 0
+	  && ((what_to_declare != undef_variables)
+	      || !(what_to_do & put_values_in_icache)))
 	print_icache_extraction(file,
 				instruction,
 				cur_field->val_string,
-				0,
-				0,
+				NULL, NULL, NULL, /* type, exp, orig */
 				instruction->file_entry->file_name,
 				instruction->file_entry->line_nr,
 				cur_field,
 				bits,
-				use_defines,
-				get_value_from_cache,
-				put_value_in_cache);
-      /* if any (XXX == 0), output a corresponding test */
-      if (instruction->file_entry->annex != NULL) {
-	char *field_name = cur_field->val_string;
-	char *is_0_ptr = instruction->file_entry->annex;
-	int field_len = strlen(field_name);
-	if (strlen(is_0_ptr) >= (strlen("_is_0") + field_len)) {
-	  is_0_ptr += field_len;
-	  while ((is_0_ptr = strstr(is_0_ptr, "_is_0")) != NULL) {
-	    if (strncmp(is_0_ptr - field_len, field_name, field_len) == 0
-		&& !isalpha(is_0_ptr[ - field_len - 1])) {
-	      if (!use_defines || (use_defines && get_value_from_cache)) {
-		if (use_defines) {
-		  lf_indent_suppress(file);
-		  lf_printf(file, "#define %s_is_0 ", field_name);
-		}
-		else {
-		  table_entry_print_cpp_line_nr(file, instruction->file_entry);
-		  lf_printf(file, "const unsigned %s_is_0 __attribute__((__unused__)) = ",
-			    field_name);
-		}
-		if (bits != NULL)
-		  lf_printf(file, "(%d == 0)", bits->value);
-		else
-		  lf_printf(file, "(%s == 0)", field_name);
-		if (use_defines)
-		  lf_printf(file, "\n");
-		else
-		  lf_printf(file, ";\n");
-	      }
-	      else if (use_defines && put_value_in_cache) {
-		lf_indent_suppress(file);
-		lf_printf(file, "#undef %s_is_0\n", field_name);
-	      }
-	      break;
-	    }
-	    is_0_ptr += strlen("_is_0");
-	  }
-	}
-      }
+				((what_to_do & put_values_in_icache)
+				 ? declare_variables
+				 : what_to_declare),
+				what_to_do);
       /* any thing else ... */
     }
   }
+
   lf_print__internal_reference(file);
+
+  if ((code & generate_with_insn_in_icache)) {
+    lf_printf(file, "\n");
+    print_icache_extraction(file,
+			    instruction,
+			    "insn",
+			    "instruction_word",
+			    "instruction",
+			    NULL, /* origin */
+			    NULL, 0, /* file_name & line_nr */
+			    NULL, NULL,
+			    what_to_declare,
+			    what_to_do);
+  }
 }
 
 
@@ -356,6 +403,7 @@ print_icache_struct(insn_table *instructions,
 {
   icache_tree *tree = insn_table_cache_fields(instructions);
   
+  lf_printf(file, "\n");
   lf_printf(file, "#define WITH_IDECODE_CACHE_SIZE %d\n",
 	    (code & generate_with_icache) ? icache_size : 0);
   lf_printf(file, "\n");
@@ -372,6 +420,8 @@ print_icache_struct(insn_table *instructions,
 	 form = form->next) {
       icache_tree *field;
       lf_printf(file, "    struct {\n");
+      if (code & generate_with_insn_in_icache)
+	lf_printf(file, "      instruction_word insn;\n");
       for (field = form->children;
 	   field != NULL;
 	   field = field->next) {
@@ -380,15 +430,15 @@ print_icache_struct(insn_table *instructions,
 	for (cache_rule = cache_rules;
 	     cache_rule != NULL;
 	     cache_rule = cache_rule->next) {
-	  if (strcmp(field->name, cache_rule->old_name) == 0) {
+	  if (strcmp(field->name, cache_rule->field_name) == 0) {
 	    found_rule = 1;
-	    if (cache_rule->new_name != NULL)
+	    if (cache_rule->derived_name != NULL)
 	      lf_printf(file, "      %s %s; /* %s */\n",
 			(cache_rule->type_def == NULL
 			 ? "unsigned" 
 			 : cache_rule->type_def),
-			cache_rule->new_name,
-			cache_rule->old_name);
+			cache_rule->derived_name,
+			cache_rule->field_name);
 	  }
 	}
 	if (!found_rule)
@@ -400,23 +450,11 @@ print_icache_struct(insn_table *instructions,
     lf_printf(file, "} idecode_cache;\n");
   }
   else {
-    /* alernativly, since no cache, #define the fields to be
-       extractions from the instruction variable.  Emit a dummy
-       definition for idecode_cache to allow model_issue to not
-       be #ifdefed at the call level */
-    cache_table *cache_rule;
-    lf_printf(file, "\n");
+    /* alernativly, since no cache, emit a dummy definition for
+       idecode_cache so that code refering to the type can still compile */
     lf_printf(file, "typedef void idecode_cache;\n");
-    lf_printf(file, "\n");
-    for (cache_rule = cache_rules;
-	 cache_rule != NULL;
-	 cache_rule = cache_rule->next) {
-      if (cache_rule->expression != NULL
-	  && strlen(cache_rule->expression) > 0)
-	lf_printf(file, "#define %s %s\n",
-		  cache_rule->new_name, cache_rule->expression);
-    }
   }
+  lf_printf(file, "\n");
 }
 
 
@@ -445,7 +483,7 @@ print_icache_function(lf *file,
   lf_printf(file, "{\n");
   lf_indent(file, +2);
   
-  print_define_my_index(file, instruction->file_entry);
+  print_my_defines(file, expanded_bits, instruction->file_entry);
   print_itrace(file, instruction->file_entry, 1/*putting-value-in-cache*/);
   
   print_idecode_validate(file, instruction, opcodes);
@@ -453,47 +491,60 @@ print_icache_function(lf *file,
   lf_printf(file, "\n");
   lf_printf(file, "{\n");
   lf_indent(file, +2);
+  if ((code & generate_with_semantic_icache))
+    lf_printf(file, "unsigned_word nia;\n");
   print_icache_body(file,
 		    instruction,
 		    expanded_bits,
 		    cache_rules,
-		    0/*use_defines*/,
-		    0/*get_value_from_cache*/,
-		    1/*put_value_in_cache*/);
+		    ((code & generate_with_direct_access)
+		     ? define_variables
+		     : declare_variables),
+		    ((code & generate_with_semantic_icache)
+		     ? both_values_and_icache
+		     : put_values_in_icache));
   
+  lf_printf(file, "\n");
+  lf_printf(file, "cache_entry->address = cia;\n");
+  lf_printf(file, "cache_entry->semantic = ");
+  print_function_name(file,
+		      instruction->file_entry->fields[insn_name],
+		      expanded_bits,
+		      function_name_prefix_semantics);
+  lf_printf(file, ";\n");
+  lf_printf(file, "\n");
+
   if ((code & generate_with_semantic_icache)) {
-    lf_printf(file, "unsigned_word nia;\n");
-    lf_printf(file, "cache_entry->address = cia;\n");
-    lf_printf(file, "cache_entry->semantic = ");
-    print_function_name(file,
-			instruction->file_entry->fields[insn_name],
-			expanded_bits,
-			function_name_prefix_semantics);
-    lf_printf(file, ";\n");
+    lf_printf(file, "/* semantic routine */\n");
     print_semantic_body(file,
 			instruction,
 			expanded_bits,
 			opcodes);
-    lf_printf(file, "\n");
     lf_printf(file, "return nia;\n");
   }
-  lf_indent(file, -2);
-  lf_printf(file, "}\n");
   
   if (!(code & generate_with_semantic_icache)) {
-    /* return the function propper (main sorts this one out) */
-    lf_printf(file, "\n");
-    lf_printf(file, "/* semantic routine */\n");
-    table_entry_print_cpp_line_nr(file, instruction->file_entry);
+    lf_printf(file, "/* return the function proper */\n");
     lf_printf(file, "return ");
     print_function_name(file,
 			instruction->file_entry->fields[insn_name],
 			expanded_bits,
 			function_name_prefix_semantics);
     lf_printf(file, ";\n");
-    lf_print__internal_reference(file);
   }
   
+  if ((code & generate_with_direct_access))
+    print_icache_body(file,
+		      instruction,
+		      expanded_bits,
+		      cache_rules,
+		      undef_variables,
+		      ((code & generate_with_semantic_icache)
+		       ? both_values_and_icache
+		       : put_values_in_icache));
+
+  lf_indent(file, -2);
+  lf_printf(file, "}\n");
   lf_indent(file, -2);
   lf_printf(file, "}\n");
 }

@@ -237,11 +237,11 @@ fi])dnl
 
 
 AC_ARG_ENABLE(sim-icache,
-[  --enable-sim-icache=size		Specify instruction cache size.],
-[icache=""
+[  --enable-sim-icache=size		Specify instruction-decode cache size and type.],
+[icache="-R"
  case "${enableval}" in
   yes)		icache="1024"; sim_icache="-I $icache";;
-  no)		sim_icache="";;
+  no)		sim_icache="-R";;
   *) icache=1024
      sim_icache="-"
      for x in `echo "${enableval}" | sed -e "s/,/ /g"`; do
@@ -257,7 +257,7 @@ AC_ARG_ENABLE(sim-icache,
 esac
 if test x"$silent" != x"yes" && test x"$icache" != x""; then
   echo "Setting instruction cache size to $icache ($sim_icache)"
-fi],[sim_icache="-CSI 1024"
+fi],[sim_icache="-CSRI 1024"
 if test x"$silent" != x"yes"; then
   echo "Setting instruction cache size to 1024 ($sim_icache)"
 fi])dnl
@@ -307,7 +307,7 @@ AC_ARG_ENABLE(sim-jump,
 esac
 if test x"$silent" != x"yes" && test x"$sim_jump" != x""; then
   echo "Setting jump flag = $sim_jump" 6>&1
-fi],[sim_jump="-E"
+fi],[sim_jump=""
 if test x"$silent" != x"yes"; then
   echo "Setting jump flag = $sim_jump" 6>&1
 fi])dnl

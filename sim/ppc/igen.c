@@ -48,7 +48,7 @@ int insn_bit_size = max_insn_bit_size;
 igen_code code = generate_calls;
 
 int generate_expanded_instructions;
-int icache_size;
+int icache_size = 1024;
 int generate_smp;
 
 /****************************************************************/
@@ -127,9 +127,11 @@ print_function_name(lf *file,
 
 
 void
-print_define_my_index(lf *file,
-		      table_entry *file_entry)
+print_my_defines(lf *file,
+		 insn_bits *expanded_bits,
+		 table_entry *file_entry)
 {
+  /* #define MY_INDEX xxxxx */
   lf_indent_suppress(file);
   lf_printf(file, "#undef MY_INDEX\n");
   lf_indent_suppress(file);
@@ -138,6 +140,16 @@ print_define_my_index(lf *file,
                       file_entry->fields[insn_name],
                       NULL,
                       function_name_prefix_itable);
+  lf_printf(file, "\n");
+  /* #define MY_PREFIX xxxxxx */
+  lf_indent_suppress(file);
+  lf_printf(file, "#undef MY_PREFIX\n");
+  lf_indent_suppress(file);
+  lf_printf(file, "#define MY_PREFIX ");
+  print_function_name(file,
+		      file_entry->fields[insn_name],
+		      expanded_bits,
+		      function_name_prefix_none);
   lf_printf(file, "\n");
 }
 
@@ -321,9 +333,10 @@ main(int argc,
     printf("  igen <config-opts> ... <input-opts>... <output-opts>...\n");
     printf("Config options:\n");
     printf("  -F <filter-out-flag>  eg -F 64 to skip 64bit instructions\n");
-    printf("  -C                    Include semantics in cache functions\n");
     printf("  -E                    Expand (duplicate) semantic functions\n");
     printf("  -I <icache-size>      Generate cracking cache version\n");
+    printf("  -C                    Include semantics in cache functions\n");
+    printf("  -S                    Include insn (instruction) in icache\n");
     printf("  -R                    Use defines to reference cache vars\n");
     printf("  -L                    Supress line numbering in output files\n");
     printf("  -B <bit-size>         Set the number of bits in an instruction\n");
@@ -348,15 +361,17 @@ main(int argc,
   }
 
   while ((ch = getopt(argc, argv,
-		      "F:EI:RLJCB:H:N:o:k:i:n:hc:d:m:s:t:f:"))
+		      "F:EI:RSLJCB:H:N:o:k:i:n:hc:d:m:s:t:f:"))
 	 != -1) {
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
     switch(ch) {
     case 'C':
       code |= generate_with_icache;
       code |= generate_with_semantic_icache;
-      if (icache_size == 0)
-	icache_size = 1024;
+      break;
+    case 'S':
+      code |= generate_with_icache;
+      code |= generate_with_insn_in_icache;
       break;
     case 'L':
       file_references = lf_omit_references;
@@ -372,10 +387,7 @@ main(int argc,
       generate_smp = a2i(optarg);
       break;
     case 'R':
-      code |= generate_with_icache;
-      code |= generate_with_direct_access_icache;
-      if (icache_size == 0)
-	icache_size = 1024;
+      code |= generate_with_direct_access;
       break;
     case 'B':
       insn_bit_size = a2i(optarg);

@@ -42,6 +42,7 @@ lf_print_opcodes(lf *file,
 {
   if (table != NULL) {
     while (1) {
+      ASSERT(table->opcode != NULL);
       lf_printf(file, "_%d_%d",
 		table->opcode->first,
 		table->opcode->last);
@@ -70,9 +71,10 @@ print_idecode_table(lf *file,
 		    insn_table *entry,
 		    const char *result)
 {
-  /* int can_assume_leaf; */
+#if 0
+  /* FIXME: I don't think the second part of this is correct! */
+  int can_assume_leaf;
   decode_table *opcode_rule;
-
   /* have a look at the rule table, if all table rules follow all
      switch rules, I can assume that all end points are leaves */
   opcode_rule = entry->opcode_rule;
@@ -80,9 +82,6 @@ print_idecode_table(lf *file,
 	 && (opcode_rule->gen == switch_gen
 	     || opcode_rule->gen == padded_switch_gen))
     opcode_rule = opcode_rule->next;
-
-#if 0
-  /* FIXME: I don't get this bit! */
   while (opcode_rule != NULL
 	 && (opcode_rule->gen == switch_gen
 	     || opcode_rule->gen == padded_switch_gen)
@@ -189,6 +188,7 @@ print_idecode_table_leaf(insn_table *entry,
       lf_printf(file, " },\n");
     }
     else if (entry->opcode_rule->gen == switch_gen
+	     || entry->opcode_rule->gen == goto_switch_gen
 	     || entry->opcode_rule->gen == padded_switch_gen) {
       /* table calling switch statement */
       lf_printf(file, "  /*%d*/ { table_function_entry, 0, 0, 0, ",
@@ -250,11 +250,88 @@ print_idecode_table_padding(insn_table *table,
 /****************************************************************/
 
 
+static void
+print_goto_switch_name(lf *file,
+		       insn_table *entry)
+{
+  lf_printf(file, "case_");
+  if (entry->opcode == NULL)
+    print_function_name(file,
+			entry->insns->file_entry->fields[insn_name],
+			entry->expanded_bits,
+			((code & generate_with_icache)
+			 ? function_name_prefix_icache
+			 : function_name_prefix_semantics));
+  else
+    lf_print_table_name(file, entry);
+}
+
+static void
+print_goto_switch_table_leaf(insn_table *entry,
+			     lf *file,
+			     void *data,
+			     insn *instruction,
+			     int depth)
+{
+  ASSERT(entry->parent != NULL);
+  ASSERT(depth == 0);
+  ASSERT(entry->parent->opcode_rule->gen == goto_switch_gen);
+  ASSERT(entry->parent->opcode);
+
+  lf_printf(file, "&&");
+  print_goto_switch_name(file, entry);
+  lf_printf(file, ",\n");
+}
+
+static void
+print_goto_switch_table_padding(insn_table *table,
+				lf *file,
+				void *data,
+				int depth,
+				int opcode_nr)
+{
+  ASSERT(depth == 0);
+  ASSERT(table->opcode_rule->gen == goto_switch_gen);
+
+  lf_printf(file, "&&illegal_");
+  lf_print_table_name(file, table);
+  lf_printf(file, ",\n");
+}
+
+static void
+print_goto_switch_break(lf *file,
+			insn_table *entry)
+{
+  lf_printf(file, "goto break_");
+  lf_print_table_name(file, entry->parent);
+  lf_printf(file, ";\n");
+}
+
+
+static void
+print_goto_switch_table(lf *file,
+			insn_table *table)
+{
+  lf_printf(file, "const static void *");
+  lf_print_table_name(file, table);
+  lf_printf(file, "[] = {\n");
+  lf_indent(file, +2);
+  insn_table_traverse_tree(table,
+			   file, NULL/*data*/,
+			   0,
+			   NULL/*start*/,
+			   print_goto_switch_table_leaf,
+			   NULL/*end*/,
+			   print_goto_switch_table_padding);
+  lf_indent(file, -2);
+  lf_printf(file, "};\n");
+}
+
+
 void print_idecode_switch
 (lf *file, 
  insn_table *table,
  const char *result);
-
 
 static void
 idecode_switch_start(insn_table *table,
@@ -265,15 +342,39 @@ idecode_switch_start(insn_table *table,
   /* const char *result = data; */
   ASSERT(depth == 0);
   ASSERT(table->opcode_rule->gen == switch_gen
-	 || table->opcode_rule->gen == padded_switch_gen
-	 || table->opcode_rule->gen == goto_gen);
+	 || table->opcode_rule->gen == goto_switch_gen
+	 || table->opcode_rule->gen == padded_switch_gen);
 
-  switch (table->opcode_rule->gen) {
-  default:
+  if (table->opcode->is_boolean
+      || table->opcode_rule->gen == switch_gen
+	 || table->opcode_rule->gen == padded_switch_gen) {
     lf_printf(file, "switch (EXTRACTED32(instruction, %d, %d)) {\n",
 	      i2target(hi_bit_nr, table->opcode->first),
 	      i2target(hi_bit_nr, table->opcode->last));
-    break;
+  }
+  else if (table->opcode_rule->gen == goto_switch_gen) {
+    if (table->parent != NULL
+	&& (table->parent->opcode_rule->gen == switch_gen
+	    || table->parent->opcode_rule->gen == goto_switch_gen
+	    || table->parent->opcode_rule->gen == padded_switch_gen)) {
+      lf_printf(file, "{\n");
+      lf_indent(file, +2);
+    }
+    print_goto_switch_table(file, table);
+    lf_printf(file, "ASSERT(EXTRACTED32(instruction, %d, %d)\n",
+	      i2target(hi_bit_nr, table->opcode->first),
+	      i2target(hi_bit_nr, table->opcode->last));
+    lf_printf(file, "       < (sizeof(");
+    lf_print_table_name(file, table);
+    lf_printf(file, ") / sizeof(void*)));\n");
+    lf_printf(file, "goto *");
+    lf_print_table_name(file, table);
+    lf_printf(file, "[EXTRACTED32(instruction, %d, %d)];\n",
+	      i2target(hi_bit_nr, table->opcode->first),
+	      i2target(hi_bit_nr, table->opcode->last));
+  }
+  else {
+    ASSERT("bad switch" == NULL);
   }
 }
 
@@ -289,16 +390,34 @@ idecode_switch_leaf(insn_table *entry,
   ASSERT(entry->parent != NULL);
   ASSERT(depth == 0);
   ASSERT(entry->parent->opcode_rule->gen == switch_gen
+	 || entry->parent->opcode_rule->gen == goto_switch_gen
 	 || entry->parent->opcode_rule->gen == padded_switch_gen);
   ASSERT(entry->parent->opcode);
 
   if (entry->parent->opcode->is_boolean
-      && entry->opcode_nr == 0)
+      && entry->opcode_nr == 0) {
+    /* boolean false target */
     lf_printf(file, "case %d:\n", entry->parent->opcode->boolean_constant);
-  else if (!entry->parent->opcode->is_boolean)
-    lf_printf(file, "case %d:\n", entry->opcode_nr);
-  else
+  }
+  else if (entry->parent->opcode->is_boolean
+	   && entry->opcode_nr != 0) {
+    /* boolean true case */
     lf_printf(file, "default:\n");
+  }
+  else if (entry->parent->opcode_rule->gen == switch_gen
+	   || entry->parent->opcode_rule->gen == padded_switch_gen) {
+    /* normal goto */
+    lf_printf(file, "case %d:\n", entry->opcode_nr);
+  }
+  else if (entry->parent->opcode_rule->gen == goto_switch_gen) {
+    /* lf_indent(file, -1); */
+    print_goto_switch_name(file, entry);
+    lf_printf(file, ":\n");
+    /* lf_indent(file, +1); */
+  }
+  else {
+    ASSERT("bad switch" == NULL);
+  }
   lf_indent(file, +2);
   {
     if (entry->opcode == NULL) {
@@ -318,6 +437,7 @@ idecode_switch_leaf(insn_table *entry,
       lf_printf(file, ";\n");
     }
     else if (entry->opcode_rule->gen == switch_gen
+	     || entry->opcode_rule->gen == goto_switch_gen
 	     || entry->opcode_rule->gen == padded_switch_gen) {
       /* switch calling switch */
       print_idecode_switch(file, entry, result);
@@ -330,7 +450,17 @@ idecode_switch_leaf(insn_table *entry,
       lf_indent(file, -2);
       lf_printf(file, "}\n");
     }
-    lf_printf(file, "break;\n");
+    if (entry->parent->opcode->is_boolean
+	|| entry->parent->opcode_rule->gen == switch_gen
+	|| entry->parent->opcode_rule->gen == padded_switch_gen) {
+      lf_printf(file, "break;\n");
+    }
+    else if (entry->parent->opcode_rule->gen == goto_switch_gen) {
+      print_goto_switch_break(file, entry);
+    }
+    else {
+      ASSERT("bad switch" == NULL);
+    }
   }
   lf_indent(file, -2);
 }
@@ -342,7 +472,7 @@ print_idecode_switch_illegal(lf *file,
 {
   lf_indent(file, +2);
   print_idecode_illegal(file, result);
-  /*lf_printf(file, "break;\n");*/
+  lf_printf(file, "break;\n");
   lf_indent(file, -2);
 }
 
@@ -355,11 +485,15 @@ idecode_switch_end(insn_table *table,
   const char *result = data;
   ASSERT(depth == 0);
   ASSERT(table->opcode_rule->gen == switch_gen
-	 || table->opcode_rule->gen == padded_switch_gen
-	 || table->opcode_rule->gen == goto_gen);
+	 || table->opcode_rule->gen == goto_switch_gen
+	 || table->opcode_rule->gen == padded_switch_gen);
   ASSERT(table->opcode);
 
-  if (!table->opcode->is_boolean) {
+  if (table->opcode->is_boolean) {
+    lf_printf(file, "}\n");
+  }
+  else if (table->opcode_rule->gen == switch_gen
+	   || table->opcode_rule->gen == padded_switch_gen) {
     lf_printf(file, "default:\n");
     switch (table->opcode_rule->gen) {
     case switch_gen:
@@ -370,10 +504,29 @@ idecode_switch_end(insn_table *table,
       lf_printf(file, "  break;\n");
       break;
     default:
-      error("idecode_switch_end - unknown switch type\n");
+      ASSERT("bad switch" == NULL);
+    }
+    lf_printf(file, "}\n");
+  }
+  else if (table->opcode_rule->gen == goto_switch_gen) {
+    lf_printf(file, "illegal_");
+    lf_print_table_name(file, table);
+    lf_printf(file, ":\n");
+    print_idecode_illegal(file, result);
+    lf_printf(file, "break_");
+    lf_print_table_name(file, table);
+    lf_printf(file, ":;\n");
+    if (table->parent != NULL
+	&& (table->parent->opcode_rule->gen == switch_gen
+	    || table->parent->opcode_rule->gen == goto_switch_gen
+	    || table->parent->opcode_rule->gen == padded_switch_gen)) {
+      lf_indent(file, -2);
+      lf_printf(file, "}\n");
     }
   }
-  lf_printf(file, "}\n");
+  else {
+    ASSERT("bad switch" == NULL);
+  }
 }
 
 static void
@@ -386,15 +539,21 @@ idecode_switch_padding(insn_table *table,
   const char *result = data;
   ASSERT(depth == 0);
   ASSERT(table->opcode_rule->gen == switch_gen
+	 || table->opcode_rule->gen == goto_switch_gen
 	 || table->opcode_rule->gen == padded_switch_gen);
 
-  if (table->opcode_rule->gen == padded_switch_gen) {
+  switch (table->opcode_rule->gen) {
+  case switch_gen:
+    break;
+  case padded_switch_gen:
     lf_printf(file, "case %d:\n", opcode_nr);
     print_idecode_switch_illegal(file, result);
-  }
-  else if (table->opcode_rule->gen == goto_gen) {
-    lf_printf(file, "goto_%d:\n", opcode_nr);
-    print_idecode_switch_illegal(file, result);
+    break;
+  case goto_switch_gen:
+    /* no padding needed */
+    break;
+  default:
+    ASSERT("bad switch" != NULL);
   }
 }
 
@@ -452,12 +611,13 @@ idecode_declare_if_switch(insn_table *table,
 			  int depth)
 {
   if ((table->opcode_rule->gen == switch_gen
+       || table->opcode_rule->gen == goto_switch_gen
        || table->opcode_rule->gen == padded_switch_gen)
       && table->parent != NULL /* don't declare the top one yet */
       && table->parent->opcode_rule->gen == array_gen) {
     print_idecode_switch_function_header(file,
-					    table,
-					    0/*isnt function definition*/);
+					 table,
+					 0/*isnt function definition*/);
   }
 }
 
@@ -469,6 +629,7 @@ idecode_expand_if_switch(insn_table *table,
 			 int depth)
 {
   if ((table->opcode_rule->gen == switch_gen
+       || table->opcode_rule->gen == goto_switch_gen
        || table->opcode_rule->gen == padded_switch_gen)
       && table->parent != NULL /* don't expand the top one yet */
       && table->parent->opcode_rule->gen == array_gen) {
@@ -537,6 +698,7 @@ print_idecode_body(lf *file,
   lf_putstr(file, "{\n");
   lf_indent(file, +2);
   if (table->opcode_rule->gen == switch_gen
+      || table->opcode_rule->gen == goto_switch_gen
       || table->opcode_rule->gen == padded_switch_gen)
     print_idecode_switch(file, table, result);
   else
@@ -565,8 +727,6 @@ print_run_until_stop_body(lf *file,
 
   lf_putstr(file, "{\n");
   lf_indent(file, +2);
-  if (!can_stop)
-    lf_putstr(file, "int *keep_running = NULL;\n");
   lf_putstr(file, "jmp_buf halt;\n");
   lf_putstr(file, "jmp_buf restart;\n");
   lf_putstr(file, "cpu *processor = NULL;\n");
@@ -630,6 +790,11 @@ print_run_until_stop_body(lf *file,
     if (!(code & generate_with_icache)) {
       lf_putstr(file, "instruction = vm_instruction_map_read(cpu_instruction_map(processor), processor, cia);\n");
       print_idecode_body(file, table, "cia =", "");
+      /* tail */
+      if (can_stop) {
+	lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+      }
     }
 
     if ((code & generate_with_icache)) {
@@ -638,6 +803,12 @@ print_run_until_stop_body(lf *file,
       lf_putstr(file, "  /* cache hit */\n");
       lf_putstr(file, "  idecode_semantic *const semantic = cache_entry->semantic;\n");
       lf_putstr(file, "  cia = semantic(processor, cache_entry, cia);\n");
+      /* tail */
+      if (can_stop) {
+	lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+      }
+      lf_putstr(file, "  continue;\n");
       lf_putstr(file, "}\n");
       lf_putstr(file, "else {\n");
       lf_putstr(file, "  /* cache miss */\n");
@@ -656,11 +827,15 @@ print_run_until_stop_body(lf *file,
 	print_idecode_body(file, table, "semantic =", "  ");
 	lf_putstr(file, "  cia = semantic(processor, cache_entry, cia);\n");
       }
+      /* tail */
+      if (can_stop) {
+	lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+      }
+      lf_putstr(file, "  continue;\n");
       lf_putstr(file, "}\n");
     }
 
-    lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
-    lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
     lf_indent(file, -2);
     lf_putstr(file, "}\n");
   }
@@ -698,41 +873,63 @@ print_run_until_stop_body(lf *file,
     if (!(code & generate_with_icache)) {
       lf_putstr(file, "instruction = vm_instruction_map_read(cpu_instruction_map(processor), processor, cia);\n");
       print_idecode_body(file, table, "cia =", "");
+      if (can_stop) {
+	lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+      }
+      lf_putstr(file, "cpu_set_program_counter(processor, cia);\n");
+      lf_putstr(file, "continue;\n");
     }
 
     if ((code & generate_with_icache)) {
       lf_putstr(file, "cache_entry = cpu_icache_entry(processor, cia);\n");
       lf_putstr(file, "if (cache_entry->address == cia) {\n");
-      lf_putstr(file, "  /* cache hit */\n");
-      lf_putstr(file, "  idecode_semantic *semantic = cache_entry->semantic;\n");
-      lf_putstr(file, "  cia = semantic(processor, cache_entry, cia);\n");
-      lf_putstr(file, "}\n");
-      lf_putstr(file, "else {\n");
-      lf_putstr(file, "  /* cache miss */\n");
-      if (!(code & generate_with_semantic_icache)) {
+      {
 	lf_indent(file, +2);
-	lf_putstr(file, "  idecode_semantic *semantic;\n");
+	lf_putstr(file, "/* cache hit */\n");
+	lf_putstr(file, "idecode_semantic *semantic = cache_entry->semantic;\n");
+	lf_putstr(file, "cia = semantic(processor, cache_entry, cia);\n");
+	/* tail */
+	if (can_stop) {
+	  lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	  lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+	}
+	lf_putstr(file, "cpu_set_program_counter(processor, cia);\n");
+	lf_putstr(file, "continue;\n");
 	lf_indent(file, -2);
       }
-      lf_putstr(file, "  instruction =\n");
-      lf_putstr(file, "    vm_instruction_map_read(cpu_instruction_map(processor), processor, cia);\n");
-      lf_putstr(file, "  if (WITH_MON != 0)\n");
-      lf_putstr(file, "    mon_event(mon_event_icache_miss, processors[current_cpu], cia);\n");
-      if ((code & generate_with_semantic_icache)) {
-	print_idecode_body(file, table, "cia =", "  ");
-      }
-      else {
-	print_idecode_body(file, table, "semantic = ", "  ");
+      lf_putstr(file, "}\n");
+      lf_putstr(file, "else {\n");
+      {
 	lf_indent(file, +2);
-	lf_putstr(file, "cia = semantic(processor, cache_entry, cia));\n");
+	lf_putstr(file, "/* cache miss */\n");
+	if (!(code & generate_with_semantic_icache)) {
+	  lf_putstr(file, "idecode_semantic *semantic;\n");
+	}
+	lf_putstr(file, "instruction =\n");
+	lf_putstr(file, "  vm_instruction_map_read(cpu_instruction_map(processor), processor, cia);\n");
+	lf_putstr(file, "if (WITH_MON != 0)\n");
+	lf_putstr(file, "  mon_event(mon_event_icache_miss, processors[current_cpu], cia);\n");
+	if ((code & generate_with_semantic_icache)) {
+	  print_idecode_body(file, table, "cia =", "");
+	}
+	else {
+	  print_idecode_body(file, table, "semantic = ", "  ");
+	  lf_putstr(file, "cia = semantic(processor, cache_entry, cia);\n");
+	}
+	/* tail */
+	if (can_stop) {
+	  lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
+	  lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
+	}
+	lf_putstr(file, "cpu_set_program_counter(processor, cia);\n");
+	lf_putstr(file, "continue;\n");
 	lf_indent(file, -2);
       }
       lf_putstr(file, "}\n");
     }
 
-    lf_putstr(file, "if (keep_running != NULL && !*keep_running)\n");
-    lf_putstr(file, "  cpu_halt(processor, cia, was_continuing, 0/*ignore*/);\n");
-    lf_putstr(file, "cpu_set_program_counter(processor, cia);\n");
+    /* tail */
     lf_indent(file, -2);
     lf_putstr(file, "}\n");
   }
@@ -765,10 +962,11 @@ print_jump(lf *file,
   }
 
   if (generate_smp) {
-    lf_putstr(file, "cpu_set_program_counter(processor, nia);\n");
+    if (is_tail)
+      lf_putstr(file, "cpu_set_program_counter(processor, nia);\n");
     lf_putstr(file, "if (WITH_EVENTS) {\n");
     lf_putstr(file, "  current_cpu += 1;\n");
-    lf_putstr(file, "  if (current_cpu == nr_cpus) {\n");
+    lf_putstr(file, "  if (current_cpu >= nr_cpus) {\n");
     lf_putstr(file, "    if (event_queue_tick(events)) {\n");
     lf_putstr(file, "      event_queue_process(events);\n");
     lf_putstr(file, "    }\n");
@@ -793,7 +991,7 @@ print_jump(lf *file,
     }
   }
 
-  if (!(code & generate_with_icache)) {
+  if (!(code & generate_with_icache) && is_tail) {
     lf_printf(file, "goto idecode;\n");
   }
 
@@ -813,7 +1011,7 @@ print_jump_insn(lf *file,
 
   /* what we are for the moment */
   lf_printf(file, "\n");
-  print_define_my_index(file, instruction->file_entry);
+  print_my_defines(file, expanded_bits, instruction->file_entry);
 
   /* output the icache entry */
   if ((code & generate_with_icache)) {
@@ -837,9 +1035,8 @@ print_jump_insn(lf *file,
 		      instruction,
 		      expanded_bits,
 		      cache_rules,
-		      0,
-		      0/*get_value_from_cache*/,
-		      1/*put_value_in_cache*/);
+		      0, /*use_defines*/
+		      put_values_in_icache);
     lf_printf(file, "cache_entry->address = nia;\n");
     lf_printf(file, "cache_entry->semantic = &&");
     print_function_name(file,
@@ -884,13 +1081,25 @@ print_jump_insn(lf *file,
 		    instruction,
 		    expanded_bits,
 		    cache_rules,
-		    (code & generate_with_direct_access_icache),
-		    (code & generate_with_icache)/*get_value_from_cache*/,
-		    0/*put_value_in_cache*/);
+		    ((code & generate_with_direct_access)
+		     ? define_variables
+		     : declare_variables),
+		    ((code & generate_with_icache)
+		     ? get_values_from_icache
+		     : do_not_use_icache));
   print_semantic_body(file,
 		      instruction,
 		      expanded_bits,
 		      opcodes);
+  if (code & generate_with_direct_access)
+    print_icache_body(file,
+		      instruction,
+		      expanded_bits,
+		      cache_rules,
+		      undef_variables,
+		      ((code & generate_with_icache)
+		       ? get_values_from_icache
+		       : do_not_use_icache));
   print_jump(file, 1/*is tail*/);
   lf_indent(file, -2);
   lf_printf(file, "}\n");

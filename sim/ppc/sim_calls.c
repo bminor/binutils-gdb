@@ -40,10 +40,9 @@
 #endif
 #endif
 
-#include "../../gdb/defs.h"
-
-#include "../../gdb/remote-sim.h"
-#include "../../gdb/callback.h"
+#include "defs.h"
+#include "callback.h"
+#include "remote-sim.h"
 
 
 /* Structures used by the simulator, for gdb just have static structures */
@@ -280,9 +279,9 @@ sim_do_command (char *cmd)
 {
   TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n",
 		    cmd ? cmd : "(null)"));
-  if (cmd) {
+  if (cmd != NULL) {
     char **argv = buildargv(cmd);
-    psim_options(root_device, argv);
+    psim_command(root_device, argv);
     freeargv(argv);
   }
 }
@@ -312,6 +311,7 @@ sim_io_read_stdin(char *buf,
     error("sim_io_read_stdin: unaccounted switch\n");
     break;
   }
+  return 0;
 }
 
 int
@@ -329,6 +329,7 @@ sim_io_write_stdout(const char *buf,
     error("sim_io_write_stdout: unaccounted switch\n");
     break;
   }
+  return 0;
 }
 
 int
@@ -347,6 +348,7 @@ sim_io_write_stderr(const char *buf,
     error("sim_io_write_stderr: unaccounted switch\n");
     break;
   }
+  return 0;
 }
 
 

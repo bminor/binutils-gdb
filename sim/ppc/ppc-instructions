@@ -1109,18 +1109,14 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	int rbit = 0;
 	int xbit = 0;
 	int sign = EXTRACTED64(frb, 0, 0);
-	enum { start, finish, Infinity_Operand, SNaN_Operand, QNaN_Operand, Large_Operand, Done } label = start;
-	while (label != finish) switch (label) {
-	case finish:
-	  error("Unhandled switch\n");
-	case start:
+	/***/
 	  if (EXTRACTED64(frb, 1, 11) == 2047 && EXTRACTED64(frb, 12, 63) == 0)
-	    { label = Infinity_Operand; break; }
+	    GOTO(Infinity_Operand);
 	  if (EXTRACTED64(frb, 1, 11) == 2047 && EXTRACTED64(frb, 12, 12) == 0)
-	    { label = SNaN_Operand; break; }
+	    GOTO(SNaN_Operand);
 	  if (EXTRACTED64(frb, 1, 11) == 2047 && EXTRACTED64(frb, 12, 12) == 1)
-	    { label = QNaN_Operand; break; }
-	  if (EXTRACTED64(frb, 1, 11) > 1086) { label = Large_Operand; break; }
+	    GOTO(QNaN_Operand);
+	  if (EXTRACTED64(frb, 1, 11) > 1086) GOTO(Large_Operand);
 	  if (EXTRACTED64(frb, 1, 11) > 0) exp = EXTRACTED64(frb, 1, 11) - 1023;
 	  if (EXTRACTED64(frb, 1, 11) == 0) exp = -1022;
 	  if (EXTRACTED64(frb, 1, 11) > 0) { /* normal */
@@ -1148,25 +1144,25 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	  }
 	  if (tgt_precision == 32 /* can ignore frac64 in compare */
 	      && (signed64)frac > (signed64)MASK64(33+1, 63)/*2^31-1 >>1*/)
-	    { label = Large_Operand; break; }
+	    GOTO(Large_Operand);
 	  if (tgt_precision == 64 /* can ignore frac64 in compare */
 	      && (signed64)frac > (signed64)MASK64(1+1, 63)/*2^63-1 >>1*/)
-	    { label = Large_Operand; break; }
+	    GOTO(Large_Operand);
 	  if (tgt_precision == 32 /* can ignore frac64 in compare */
 	      && (signed64)frac < (signed64)MASK64(0, 32+1)/*-2^31 >>1*/)
-	    { label = Large_Operand; break; }
+	    GOTO(Large_Operand);
 	  if (tgt_precision == 64 /* can ignore frac64 in compare */
 	      && (signed64)frac < (signed64)MASK64(0, 0+1)/*-2^63 >>1*/)
-	    { label = Large_Operand; break; }
+	    GOTO(Large_Operand);
 	  FPSCR_SET_XX(FPSCR & fpscr_fi);
 	  if (tgt_precision == 32)
 	    *frt = MASKED64(*frt, 0, 31) | (EXTRACTED64(frac, 33, 63) << 1) | frac64;
 	  if (tgt_precision == 64)
 	    *frt = (EXTRACTED64(frac, 1, 63) << 1) | frac64;
 	  /*FPSCR[fprf] = undefined */
-	  { label = Done; break; }
+	  GOTO(Done);
 	  /**/
-	case Infinity_Operand:
+	LABEL(Infinity_Operand):
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
 	  FPSCR_OR_VX(fpscr_vxcvi);
@@ -1181,9 +1177,9 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	    }
 	    /* FPSCR[FPRF] = undefined */
 	  }
-	  { label = Done; break; }
+	  GOTO(Done);
 	/**/
-	case SNaN_Operand:
+	LABEL(SNaN_Operand):
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
 	  FPSCR_OR_VX(fpscr_vxsnan | fpscr_vxcvi);
@@ -1192,9 +1188,9 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	    if (tgt_precision == 64) *frt = BIT64(0); /*0x8000_0000_0000_0000*/
 	    /* FPSCR[fprf] = undefined */
 	  }
-	  { label = Done; break; }
+	  GOTO(Done);
 	/**/
-	case QNaN_Operand:
+	LABEL(QNaN_Operand):
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
 	  FPSCR_OR_VX(fpscr_vxcvi);
@@ -1203,9 +1199,9 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	    if (tgt_precision == 64) *frt = BIT64(0);/*0x8000_0000_0000_0000*/
 	    /* FPSCR[fprf] = undefined */
 	  }
-	  { label = Done; break; }
+	  GOTO(Done);
 	/**/
-	case Large_Operand:
+	LABEL(Large_Operand):
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
 	  FPSCR_OR_VX(fpscr_vxcvi);
@@ -1221,9 +1217,7 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	    /* FPSCR[fprf] = undefined */
 	  }
 	/**/
-	case Done:
-	  { label = finish; break; }
-	}
+	LABEL(Done):
 
 
 # extract out raw fields of a FP number
@@ -2126,8 +2120,40 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.46,6.RT,11.RA,16.D:D:::Load Multiple Word
+	unsigned_word EA;
+	unsigned_word b;
+	int r;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + EXTS(D);
+	r = RT;
+	if (RA >= r)
+	  program_interrupt(processor, cia,
+	                  illegal_instruction_program_interrupt);
+	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT || (EA % 4 != 0))
+	  alignment_interrupt(processor, cia, EA);
+	while (r <= 31) {
+	  GPR(r) = MEM(unsigned, EA, 4);
+	  r = r + 1;
+	  EA = EA + 4;
+	}
 
 0.47,6.RS,11.RA,16.D:D:::Store Multiple Word
+	unsigned_word EA;
+	unsigned_word b;
+	int r;
+	if (RA == 0) b = 0;
+	else         b = *rA;
+	EA = b + EXTS(D);
+	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT
+	    || (EA % 4 != 0))
+	  alignment_interrupt(processor, cia, EA);
+	r = RS;
+	while (r <= 31) {
+	  STORE(EA, 4, GPR(r));
+	  r = r + 1;
+	  EA = EA + 4;
+	}
 
 
 #
@@ -2135,12 +2161,116 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6.RT,11.RA,16.NB,21.597,31./:X:::Load String Word Immediate
+#	unsigned_word EA;
+#	int n;
+#	int r;
+#	int i;
+#	int nr;
+#	if (RA == 0) EA = 0;
+#	else         EA = *rA;
+#	if (NB == 0) n = 32;
+#	else         n = NB;
+#	r = RT - 1;
+#	i = 32;
+#	nr = (n + 3) / 4;
+#	if ((RT + nr >= 32)
+#	    ? (RA >= RT && RA < RT + nr)
+#	    : (RA >= RT || RA < (RT + nr) % 32))
+#	  program_interrupt(processor, cia,
+#	                    illegal_instruction_program_interrupt);
+#	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT)
+#	  alignment_interrupt(processor, cia, EA);
+#	while (n > 0) {
+#	  if (i == 32) {
+#	    r = (r + 1) % 32;
+#	    GPR(r) = 0;
+#	  }
+#	  GPR(r) |= INSERTED(MEM(unsigned, EA, 1), i, i+7);
+#	  if (i == 64) i = 32;
+#	  EA = EA + 1;
+#	  n = n - 1;
+#	}
 
 0.31,6.RT,11.RA,16.RB,21.533,31./:X:::Load String Word Indexed
+#	unsigned_word EA;
+#	unsigned_word b;
+#	int n;
+#	int r;
+#	int i;
+#	int nr;
+#	if (RA == 0) b = 0;
+#	else         b = *rA;
+#	EA = b + *rB;
+#	n = EXTRACTED32(XER, 25, 31);
+#	r = RT - 1;
+#	i = 32;
+#	nr = (n + 3) / 4;
+#	if (((RT + n >= 32)
+#	     ? ((RA >= RT && RA < RT + n)
+#	        || (RB >= RT && RB < RT + n))
+#	     : ((RA >= RT || RA < (RT + n) % 32)
+#	        || (RB >= RT || RB < (RT + n) % 32)))
+#	    || (RT == RA || RT == RB))
+#	  program_interrupt(processor, cia,
+#	                  illegal_instruction_program_interrupt);
+#	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT)
+#	  alignment_interrupt(processor, cia, EA);
+#	while (n > 0) {
+#	  if (i == 32) {
+#	    r = (r + 1) % 32;
+#	    GPR(i) = 0;
+#	  }
+#	  GPR(r) |= INSERTED(MEM(unsigned, EA, 1), i, i+7);
+#	  i = i + 8;
+#	  if (i == 64) i = 32;
+#	  EA = EA + 1;
+#	  n = n - 1;
+#	}
 
 0.31,6.RS,11.RA,16.NB,21.725,31./:X:::Store String Word Immedate
+#	unsigned_word EA;
+#	int n;
+#	int r;
+#	int i;
+#	if (RA == 0) EA = 0;
+#	else         EA = *rA;
+#	if (NB == 0) n = 32;
+#	else         n = NB;
+#	r = RS - 1;
+#	i = 32;
+#	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT)
+#	  alignment_interrupt(processor, cia, EA);
+#	while (n > 0) {
+#	  if (i == 32) r = (r + 1) % 32;
+#	  STORE(EA, 1, EXTRACTED(GPR(r), i, i+7));
+#	  i = i + 8;
+#	  if (i == 64) i = 32;
+#	  EA = EA + 1;
+#	  n = n - 1;
+#	}
 
 0.31,6.RS,11.RA,16.RB,21.661,31./:X:::Store String Word Indexed
+#	unsigned_word EA;
+#	unsigned_word b;
+#	int n;
+#	int r;
+#	int i;
+#	if (RA == 0) b = 0;
+#	else         b = *rA;
+#	EA = b + *rB;
+#	if (CURRENT_ALIGNMENT == STRICT_ALIGNMENT)
+#	  alignment_interrupt(processor, cia, EA);
+#	n = EXTRACTED32(XER, 25, 31);
+#	r = RS - 1;
+#	i = 32;
+#	while (n > 0) {
+#	  if (i == 32) r = (r + 1) % 32;
+#	  STORE(EA, 1, EXTRACTED(GPR(r), i, i+7));
+#	  i = i + 8;
+#	  if (i == 64) i = 32;
+#	  EA = EA + 1;
+#	  n = n - 1;
+#	}
 
 
 #
@@ -2944,12 +3074,12 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	CR0_COMPARE(result, 0, Rc);
 
 0.23,6.RS,11.RA,16.RB,21.MB,26.ME,31.Rc:M:::Rotate Left Word then AND with Mask
-#	long n = MASKED(*rB, 59, 63);
-#	unsigned32 r = ROTL32(*rS, n);
-#	unsigned32 m = MASK(MB+32, ME+32);
-#	signed_word result = r & m;
-#	*rA = result;
-#	CR0_COMPARE(result, 0, Rc);
+	long n = MASKED(*rB, 59, 63);
+	unsigned32 r = ROTL32(*rS, n);
+	unsigned32 m = MASK(MB+32, ME+32);
+	signed_word result = r & m;
+	*rA = result;
+	CR0_COMPARE(result, 0, Rc);
 
 0.30,6.RS,11.RA,16.sh_0_4,21.mb,27.3,30.sh_5,31.Rc:MD:64::Rotate Left Doubleword Immediate then Mask Insert
 #	long n = (sh_5 << 4) | sh_0_4;
@@ -3124,8 +3254,23 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
 	else {
-	  /* HACK - some SPR's need to get their value extracted specially */
-	  *rT = SPREG(n);
+	  /* HACK - time base registers need to be calculated */
+	  if (WITH_TIME_BASE) {
+	    switch (n) {
+	    case spr_dec:
+	      *rT = cpu_get_decrementer(processor);
+	      break;
+	    case spr_tbu:
+	    case spr_tbl:
+	      /* NOTE - these SPR's are not readable. Use mftb[ul] */
+	    default:
+	      *rT = SPREG(n);
+	      break;
+	    }
+	  }
+	  else {
+	    *rT = SPREG(n);
+	  }
 	}
 	PPC_INSN_FROM_SPR(RT_BITMASK, n);
 
@@ -3149,6 +3294,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	PPC_INSN_MTCR(RS_BITMASK, FXM);
 
 0.31,6.BF,9./,11./,16./,21.512,31./:X:::Move to Condition Register from XER
+#	CR_SET(BF, EXTRACTED32(XER, 0, 3));
+#	MBLIT32(XER, 0, 3, 0);
 
 0.31,6.RT,11./,16./,21.19,31./:X:::Move From Condition Register
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4010,32 +4157,29 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	int sign;
 	int exp;
 	unsigned64 frac_grx;
-	enum { start, finish, Disabled_Exponent_Underflow, Enabled_Exponent_Underflow, Disabled_Exponent_Overflow, Enabled_Exponent_Overflow, Normal_Operand, Zero_Operand, Infinity_Operand, QNaN_Operand, SNaN_Operand, Enabled_Overflow, Done } label = start;
-	while (label != finish) switch (label) {
-	case finish:
-	  error("Unhandled switch\n");
-	case start:
+	/***/
 	  /* split off cases for what to do */
 	  if (EXTRACTED64(*frB, 1, 11) < 897
 	      && EXTRACTED64(*frB, 1, 63) > 0) {
-	      if ((FPSCR & fpscr_ue) == 0) { label = Disabled_Exponent_Underflow; break; }
-	      if ((FPSCR & fpscr_ue) != 0) { label = Enabled_Exponent_Underflow; break; }
+	      if ((FPSCR & fpscr_ue) == 0) GOTO(Disabled_Exponent_Underflow);
+	      if ((FPSCR & fpscr_ue) != 0) GOTO(Enabled_Exponent_Underflow);
 	  }
 	  if (EXTRACTED64(*frB, 1, 11) > 1150
 	      && EXTRACTED64(*frB, 1, 11) < 2047) {
-	      if ((FPSCR & fpscr_oe) == 0) { label = Disabled_Exponent_Overflow; break; }
-	      if ((FPSCR & fpscr_oe) != 0) { label = Enabled_Exponent_Overflow; break; }
+	      if ((FPSCR & fpscr_oe) == 0) GOTO(Disabled_Exponent_Overflow);
+	      if ((FPSCR & fpscr_oe) != 0) GOTO(Enabled_Exponent_Overflow);
 	  }
 	  if (EXTRACTED64(*frB, 1, 11) > 896
-	      && EXTRACTED64(*frB, 1, 11) < 1151) { label = Normal_Operand; break; }
-	  if (EXTRACTED64(*frB, 1, 63) == 0) { label = Zero_Operand; break; }
+	      && EXTRACTED64(*frB, 1, 11) < 1151) GOTO(Normal_Operand);
+	  if (EXTRACTED64(*frB, 1, 63) == 0) GOTO(Zero_Operand);
 	  if (EXTRACTED64(*frB, 1, 11) == 2047) {
-	    if (EXTRACTED64(*frB, 12, 63) == 0) { label = Infinity_Operand; break; }
-	    if (EXTRACTED64(*frB, 12, 12) == 1) { label = QNaN_Operand; break; }
+	    if (EXTRACTED64(*frB, 12, 63) == 0) GOTO(Infinity_Operand);
+	    if (EXTRACTED64(*frB, 12, 12) == 1) GOTO(QNaN_Operand);
 	    if (EXTRACTED64(*frB, 12, 12) == 0
-	        && EXTRACTED64(*frB, 13, 63) > 0) { label = SNaN_Operand; break; }
+	        && EXTRACTED64(*frB, 13, 63) > 0) GOTO(SNaN_Operand);
 	  }
-	case Disabled_Exponent_Underflow:
+	/**/
+	LABEL(Disabled_Exponent_Underflow):
 	  sign = EXTRACTED64(*frB, 0, 0);
 	  if (EXTRACTED64(*frB, 1, 11) == 0) {
 	    exp = -1022;
@@ -4077,8 +4221,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	            | INSERTED64(exp + 1023, 1, 11)
 	            | INSERTED64(EXTRACTED64(frac_grx, 1, 52), 12, 63));
 	  }
-	  { label = Done; break; }
-	case Enabled_Exponent_Underflow:
+	  GOTO(Done);
+	/**/
+	LABEL(Enabled_Exponent_Underflow):
 	  FPSCR_SET_UX(1);
 	  sign = EXTRACTED64(*frB, 0, 0);
 	  if (EXTRACTED64(*frB, 1, 11) == 0) {
@@ -4103,8 +4248,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	          | INSERTED64(EXTRACTED64(frac_grx, 1, 52), 12, 63));
 	  if (sign == 0) FPSCR_SET_FPRF(fpscr_rf_pos_normal_number);
 	  if (sign == 1) FPSCR_SET_FPRF(fpscr_rf_neg_normal_number);
-	  { label = Done; break; }
-	case Disabled_Exponent_Overflow:
+	  GOTO(Done);
+	/**/
+	LABEL(Disabled_Exponent_Overflow):
 	  FPSCR_SET_OX(1);
 	  if ((FPSCR & fpscr_rn) == fpscr_rn_round_to_nearest) {
 	    if (EXTRACTED64(*frB, 0, 0) == 0) {
@@ -4149,14 +4295,16 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  /* FPSCR[FR] <- undefined */
 	  FPSCR_SET_FI(1);
 	  FPSCR_SET_XX(1);
-	  { label = Done; break; }
-	case Enabled_Exponent_Overflow:
+	  GOTO(Done);
+	/**/
+	LABEL(Enabled_Exponent_Overflow):
 	  sign = EXTRACTED64(*frB, 0, 0);
 	  exp = EXTRACTED64(*frB, 1, 11) - 1023;
 	  frac_grx = BIT64(0) | INSERTED64(EXTRACTED64(*frB, 12, 63), 1, 52);
 	  Round_Single(processor, sign, &exp, &frac_grx);
 	  FPSCR_SET_XX(FPSCR & fpscr_fi);
-	case Enabled_Overflow:
+	/**/
+	LABEL(Enabled_Overflow):
 	  FPSCR_SET_OX(1);
 	  exp = exp - 192;
 	  *frT = (INSERTED64(sign, 0, 0)
@@ -4164,28 +4312,32 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	          | INSERTED64(EXTRACTED64(frac_grx, 1, 52), 12, 63));
 	  if (sign == 0) FPSCR_SET_FPRF(fpscr_rf_pos_normal_number);
 	  if (sign == 1) FPSCR_SET_FPRF(fpscr_rf_neg_normal_number);
-	  { label = Done; break; }
-	case Zero_Operand:
+	  GOTO(Done);
+	/**/
+	LABEL(Zero_Operand):
 	  *frT = *frB;
 	  if (EXTRACTED64(*frB, 0, 0) == 0) FPSCR_SET_FPRF(fpscr_rf_pos_zero);
 	  if (EXTRACTED64(*frB, 0, 0) == 1) FPSCR_SET_FPRF(fpscr_rf_neg_zero);
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
-	  { label = Done; break; }
-	case Infinity_Operand:
+	  GOTO(Done);
+	/**/
+	LABEL(Infinity_Operand):
 	  *frT = *frB;
 	  if (EXTRACTED64(*frB, 0, 0) == 0) FPSCR_SET_FPRF(fpscr_rf_pos_infinity);
 	  if (EXTRACTED64(*frB, 0, 0) == 1) FPSCR_SET_FPRF(fpscr_rf_neg_infinity);
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
-	  { label = Done; break; }
-	case QNaN_Operand:
+	  GOTO(Done);
+	/**/
+	LABEL(QNaN_Operand):
 	  *frT = INSERTED64(EXTRACTED64(*frB, 0, 34), 0, 34);
 	  FPSCR_SET_FPRF(fpscr_rf_quiet_nan);
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
-	  { label = Done; break; }
-	case SNaN_Operand:
+	  GOTO(Done);
+	/**/
+	LABEL(SNaN_Operand):
 	  FPSCR_OR_VX(fpscr_vxsnan);
 	  if ((FPSCR & fpscr_ve) == 0) {
 	    *frT = (MASKED64(*frB, 0, 11)
@@ -4195,31 +4347,35 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
-	  { label = Done; break; }
-	case Normal_Operand:
+	  GOTO(Done);
+	/**/
+	LABEL(Normal_Operand):
 	  sign = EXTRACTED64(*frB, 0, 0);
 	  exp = EXTRACTED64(*frB, 1, 11) - 1023;
 	  frac_grx = BIT64(0) | INSERTED64(EXTRACTED64(*frB, 12, 63), 1, 52);
 	  Round_Single(processor, sign, &exp, &frac_grx);
 	  FPSCR_SET_XX(FPSCR & fpscr_fi);
-	  if (exp > 127 && (FPSCR & fpscr_oe) == 0) { label = Disabled_Exponent_Overflow; break; }
-	  if (exp > 127 && (FPSCR & fpscr_oe) != 0) { label = Enabled_Overflow; break; }
+	  if (exp > 127 && (FPSCR & fpscr_oe) == 0) GOTO(Disabled_Exponent_Overflow);
+	  if (exp > 127 && (FPSCR & fpscr_oe) != 0) GOTO(Enabled_Overflow);
 	  *frT = (INSERTED64(sign, 0, 0)
 	          | INSERTED64(exp + 1023, 1, 11)
 	          | INSERTED64(EXTRACTED64(frac_grx, 1, 52), 12, 63));
 	  if (sign == 0) FPSCR_SET_FPRF(fpscr_rf_pos_normal_number);
 	  if (sign == 1) FPSCR_SET_FPRF(fpscr_rf_neg_normal_number);
-	  { label = Done; break; }
-	case Done:
+	  GOTO(Done);
+	/**/
+	LABEL(Done):
 	  PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
-	  { label = finish; break; }
-	}
+
 
 0.63,6.FRT,11./,16.FRB,21.814,31.Rc:X:64,f::Floating Convert To Integer Doubleword
+	floating_point_assist_interrupt(processor, cia);
 
 0.63,6.FRT,11./,16.FRB,21.815,31.Rc:X:64,f::Floating Convert To Integer Doubleword with round towards Zero
+	floating_point_assist_interrupt(processor, cia);
 
 0.63,6.FRT,11./,16.FRB,21.14,31.Rc:X:f::Floating Convert To Integer Word
+	floating_point_assist_interrupt(processor, cia);
 
 0.63,6.FRT,11./,16.FRB,21.15,31.Rc:X:f:fctiwz:Floating Convert To Integer Word with round towards Zero
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -4237,12 +4393,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	int sign = EXTRACTED64(*frB, 0, 0);
 	int exp = 63;
 	unsigned64 frac = *frB;
-	enum { start, finish, Zero_Operand, Done } label = start;
-	while (label != finish) switch (label) {
-	case finish:
-	  error("Unhandled switch\n");
-	case start:
-	  if (frac == 0) { label = Zero_Operand; break; }
+	/***/
+	  if (frac == 0) GOTO(Zero_Operand);
 	  if (sign == 1) frac = ~frac + 1;
 	  while (EXTRACTED64(frac, 0, 0) == 0) {
 	    /*??? do the loop 0 times if (FRB) = max negative integer */
@@ -4255,19 +4407,18 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *frT = (INSERTED64(sign, 0, 0)
 	          | INSERTED64(exp + 1023, 1, 11)
 	          | INSERTED64(EXTRACTED64(frac, 1, 52), 12, 63));
-	  { label = Done; break; }
+	  GOTO(Done);
 	/**/
-	case Zero_Operand:
+	LABEL(Zero_Operand):
 	  FPSCR_SET_FR(0);
 	  FPSCR_SET_FI(0);
 	  FPSCR_SET_FPRF(fpscr_rf_pos_zero);
 	  *frT = 0;
-	  { label = Done; break; }
+	  GOTO(Done);
 	/**/
-	case Done:
+	LABEL(Done):
 	  PPC_INSN_FLOAT(FRT_BITMASK, FRB_BITMASK, Rc);
-	  { label = finish; break; }
-	}
+
 
 #
 # I.4.6.7 Floating-Point Compare Instructions
@@ -4329,41 +4480,115 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.63,6.FRT,11./,16./,21.583,31.Rc:X:f::Move From FPSCR
+	floating_point_assist_interrupt(processor, cia);
+#	FPSCR_BEGIN;
+#	*frT = FPSCR;
+#	FPSCR_END(Rc);
 
 0.63,6.BF,9./,11.BFA,14./,16./,21.64,31./:X:f::Move to Condition Register from FPSCR
+	floating_point_assist_interrupt(processor, cia);
+#	FPSCR_BEGIN;
+#	unsigned field = FPSCR_FIELD(BFA);
+#	CR_SET(BF, field);
+#	switch (BFA) {
+#	case 0:
+#	  FPSCR &= ~(fpscr_fx | fpscr_ox);
+#	  break;
+#	case 1:
+#	  FPSCR &= ~(fpscr_ux | fpscr_zx | fpscr_xx | fpscr_vxsnan);
+#	  break;
+#	case 2:
+#	  FPSCR &= ~(fpscr_vxisi | fpscr_vxidi | fpscr_vxzdz | fpscr_vximz);
+#	  break;
+#	case 3:
+#	  FPSCR &= ~(fpscr_vxvc);
+#	  break;
+#	case 5:
+#	  FPSCR &= ~(fpscr_vxsoft | fpscr_vxsqrt | fpscr_vxcvi);
+#	  break;
+#	}
+#	FPSCR_END(0);
 
 0.64,6.BF,9./,11./,16.U,20./,21.134,31.Rc:X:f::Move To FPSCR Field Immediate
+	floating_point_assist_interrupt(processor, cia);
+#	FPSCR_BEGIN;
+#	FPSCR_SET(BF, U);
+#	/* FIXME - what about the effect this has on exception bits */
+#	FPSCR_END(Rc);
 
 0.63,6./,7.FLM,15./,16.FRB,21.711,31.Rc:XFL:f::Move To FPSCR Fields
+	FPSCR_BEGIN;
+	int i;
+	for (i = 0; i < 8; i++) {
+	  if ((FLM & BIT8(i))) {
+	    FPSCR &= ~MASK32(i*4, i*4+3);
+	    FPSCR |= MASKED32(*frB, i*4, i*4+3);
+	  }
+	}
+	FPSCR_END(Rc);
 
 0.63,6.BT,11./,16./,21.70,31.Rc:X:f::Move To FPSCR Bit 0
+	floating_point_assist_interrupt(processor, cia);
+#	FPSCR_BEGIN;
+#	unsigned32 mask = ~BIT32(BT) | (fpscr_fex | fpscr_vx);
+#	FPSCR &= mask;
+#	/* FIXME - what about the effect this has on exception bits */
+#	FPSCR_END(Rc);
 
 0.63,6.BT,11./,16./,21.38,31.Rc:X:f::Move To FPSCR Bit 1
+	floating_point_assist_interrupt(processor, cia);
+#	FPSCR_BEGIN;
+#	unsigned32 bit = BIT32(BT) & ~(fpscr_fex | fpscr_vx);
+#	FPSCR |= bit;
+#	/* FIXME - need to take care of when and why FX is set */
+#	/* FIXME - if FX (or another exception bit is set) shall
+#	           an exception occure */
+#	/* FPSCR |= fpscr_fx; */
+#	/* FIXME - what about the effect this has on exception bits */
+#	FPSCR_END(Rc);
 
 
 #
 # I.A.1.1 Floating-Point Store Instruction
 #
-0.31,6.FRS,11.RA,16.RB,21.983,31./:X:f::Store Floating-Point as Integer Word Indexed
+0.31,6.FRS,11.RA,16.RB,21.983,31./:X:f,o::Store Floating-Point as Integer Word Indexed
+	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
 #
 # I.A.1.2 Floating-Point Arithmetic Instructions
 #
 
-0.63,6.FRT,11./,16.FRB,21./,26.22,31.Rc:A:f::Floating Square Root
+0.63,6.FRT,11./,16.FRB,21./,26.22,31.Rc:A:f,o::Floating Square Root
+	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
-0.59,6.FRT,11./,16.FRB,21./,26.22,31.Rc:A:f::Floating Square Root Single
+0.59,6.FRT,11./,16.FRB,21./,26.22,31.Rc:A:f,o::Floating Square Root Single
+	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
-0.59,6.FRT,11./,16.FRB,21./,26.24,31.Rc:A:f::Floating Reciprocal Estimate Single
+0.59,6.FRT,11./,16.FRB,21./,26.24,31.Rc:A:f,o::Floating Reciprocal Estimate Single
+	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
-0.63,6.FRT,11./,16.FRB,21./,26.26,31.Rc:A:f::Floating Reciprocal Square Root Estimate
+0.63,6.FRT,11./,16.FRB,21./,26.26,31.Rc:A:f,o::Floating Reciprocal Square Root Estimate
+	program_interrupt(processor, cia, optional_instruction_program_interrupt);
 
 #
 # I.A.1.3 Floating-Point Select Instruction
 #
 
-0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.23,31.Rc:A:f::Floating Select
-
+0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.23,31.Rc:A:f,o::Floating Select
+*601: PPC_UNIT_BAD,   PPC_UNIT_BAD,   0,  0,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	if (CURRENT_MODEL == MODEL_ppc601) {
+	  program_interrupt(processor, cia, optional_instruction_program_interrupt);
+	} else {
+	  unsigned64 zero = 0;
+	  FPSCR_BEGIN;
+	  if (is_NaN(*frA, 0) || is_less_than (frA, &zero)) *frT = *frB;
+	  else						    *frT = *frC;
+	  FPSCR_END(Rc);
+	  PPC_INSN_FLOAT(FRT_BITMASK, FRA_BITMASK | FRB_BITMASK | FRC_BITMASK, Rc);
+	}
 
 #
 # II.3.2 Cache Management Instructions
@@ -4385,7 +4610,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
-	cpu_synchronize_context(processor);
+	cpu_synchronize_context(processor, cia);
 	PPC_INSN_INT(0, 0, 0);
 
 
@@ -4481,7 +4706,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	         | MASKED(SRR1, 37, 41)
 	         | MASKED(SRR1, 48, 63));
 	  NIA = MASKED(SRR0, 0, 61);
-	  cpu_synchronize_context(processor);
+	  cpu_synchronize_context(processor, cia);
 	  check_masked_interrupts(processor);
 	}
 
