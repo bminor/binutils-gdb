@@ -180,7 +180,7 @@ static bfd_boolean do_pad
 static bfd_boolean do_copy
   PARAMS ((bfd *, bfd *));
 static bfd_boolean do_shared_object_padding
-  PARAMS ((bfd *, bfd *, ufile_ptr *, int));
+  PARAMS ((bfd *, bfd *, file_ptr *, int));
 
 /* Relocation functions */
 static bfd_boolean xcoff_reloc_type_br
@@ -1742,7 +1742,7 @@ static bfd_boolean
 do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
      bfd *out_bfd;
      bfd *in_bfd;
-     ufile_ptr *offset;
+     file_ptr *offset;
      int ar_header_size;
 {
   if (bfd_check_format (in_bfd, bfd_object)
@@ -1779,7 +1779,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
   const bfd_arch_info_type *arch_info = NULL;
   bfd *current_bfd;
   size_t string_length;
-  ufile_ptr nextoff, prevoff;
+  file_ptr nextoff, prevoff;
 
   /* First, we look through the symbols and work out which are
      from 32-bit objects and which from 64-bit ones.  */
@@ -2076,7 +2076,7 @@ xcoff_write_archive_contents_old (abfd)
   file_ptr *offsets;
   bfd_boolean makemap;
   bfd_boolean hasobjects;
-  ufile_ptr prevoff, nextoff;
+  file_ptr prevoff, nextoff;
   bfd *sub;
   size_t i;
   struct xcoff_ar_hdr ahdr;
@@ -2306,7 +2306,7 @@ xcoff_write_archive_contents_big (abfd)
   file_ptr *offsets;
   bfd_boolean makemap;
   bfd_boolean hasobjects;
-  ufile_ptr prevoff, nextoff;
+  file_ptr prevoff, nextoff;
   bfd *current_bfd;
   size_t i;
   struct xcoff_ar_hdr_big *hdr, ahdr;

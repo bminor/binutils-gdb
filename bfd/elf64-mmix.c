@@ -229,10 +229,6 @@ static void
 mmix_set_relaxable_size
   PARAMS ((bfd *, asection *, void *));
 
-static bfd_boolean
-mmix_elf_get_section_contents
-  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
-
 
 /* Watch out: this currently needs to have elements with the same index as
    their R_MMIX_ number.  */

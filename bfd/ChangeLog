@@ -1,3 +1,15 @@
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* pdp11.c (struct pdp11_aout_reloc_external): Delete.  Replace
+	occurrences with bfd_btye * thoughout file.
+
+	* coff-rs6000.c (do_shared_object_padding): Warning fix.
+	(xcoff_write_armap_big): Likewise.
+	(xcoff_write_archive_contents_old): Likewise.
+	(xcoff_write_archive_contents_big): Likewise.
+
+	* elf64-mmix.c (mmix_elf_get_section_contents): Delete declaration.
+
 2004-08-13  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h: Convert to ISO C90.
