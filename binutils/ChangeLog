@@ -1,3 +1,9 @@
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* objdump.c: Refer to init_disassemble_info in comments.
+	(disassemble_data): Replace INIT_DISASSEMBLE_INFO with
+	init_disassemble_info.
+
 2003-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (struct objdump_disasm_info): Add new fields

@@ -1,3 +1,11 @@
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* dis-init.c (init_disassemble_info): New file and function.
+	* Makefile.am (CFILES): Add "dis-init.c".
+	(libopcodes_la_SOURCES): Add "dis-init.c".
+	(dis-init.lo): Specify dependencies.
+	* Makefile.in: Regenerate.
+
 2003-09-03  Dave Brolley  <brolley@redhat.com>
 
 	* frv-*: Regenerated.

@@ -66,7 +66,7 @@
 #include "aout/aout64.h"
 
 #ifdef NEED_DECLARATION_FPRINTF
-/* This is needed by INIT_DISASSEMBLE_INFO.  */
+/* This is needed by init_disassemble_info().  */
 extern int fprintf (FILE *, const char *, ...);
 #endif
 
@@ -1789,7 +1789,7 @@ disassemble_data (bfd *abfd)
   /* Sort the symbols into section and symbol order.  */
   qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
-  INIT_DISASSEMBLE_INFO (disasm_info, stdout, fprintf);
+  init_disassemble_info (&disasm_info, stdout, fprintf);
 
   disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;

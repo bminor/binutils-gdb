@@ -174,6 +174,7 @@ CFILES = \
 	d30v-opc.c \
 	dlx-dis.c \
 	dis-buf.c \
+	dis-init.c \
 	disassemble.c \
 	fr30-asm.c \
 	fr30-desc.c \
@@ -391,7 +392,7 @@ OFILES = @BFD_MACHINES@
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 
-libopcodes_la_SOURCES = dis-buf.c disassemble.c
+libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 libopcodes_la_DEPENDENCIES = $(OFILES) ../bfd/libbfd.la
 libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@ ../bfd/libbfd.la
 libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
@@ -455,7 +456,7 @@ libopcodes_a_SOURCES = libopcodes.a.c
 libopcodes_a_OBJECTS =  libopcodes.a.$(OBJEXT)
 LTLIBRARIES =  $(bfdlib_LTLIBRARIES)
 
-libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
+libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo dis-init.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -1048,6 +1049,8 @@ d30v-opc.lo: d30v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 dlx-dis.lo: dlx-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/dlx.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
+dis-init.lo: dis-init.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 disassemble.lo: disassemble.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
