@@ -1,3 +1,14 @@
+start-sanitize-r5900
+Fri Sep  4 10:37:57 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* r5900.igen (mtsab): Correct typo in input register.
+
+	* sim-main.h (TMP_*): New macros for accessing local 128-bit
+	temporary for multimedia instructions.
+	* r5900.igen (*): Convert most instructions to use new TMP
+	macros to store output result during computation.
+
+end-sanitize-r5900
 start-sanitize-tx3904
 Tue Sep  1 15:39:18 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

@@ -90,7 +90,7 @@ typedef enum {
  fmt_unknown       = 0x10000000,
  fmt_uninterpreted = 0x20000000,
  fmt_uninterpreted_32 = 0x40000000,
- fmt_uninterpreted_64 = 0x80000000,
+ fmt_uninterpreted_64 = 0x80000000U,
 } FP_formats;
 
 unsigned64 value_fpr PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int fpr, FP_formats));
@@ -349,6 +349,19 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 #define GPR_UW(R,I) SUB_REG_UW(&GPR[R], &GPR1[R], I)
 #define GPR_UD(R,I) SUB_REG_UD(&GPR[R], &GPR1[R], I)
 
+#define TMP_DCL unsigned64 tmp_reg, tmp_reg1
+
+#define TMP_SB(I) SUB_REG_SB(&tmp_reg, &tmp_reg1, I)
+#define TMP_SH(I) SUB_REG_SH(&tmp_reg, &tmp_reg1, I)
+#define TMP_SW(I) SUB_REG_SW(&tmp_reg, &tmp_reg1, I)
+#define TMP_SD(I) SUB_REG_SD(&tmp_reg, &tmp_reg1, I)
+
+#define TMP_UB(I) SUB_REG_UB(&tmp_reg, &tmp_reg1, I)
+#define TMP_UH(I) SUB_REG_UH(&tmp_reg, &tmp_reg1, I)
+#define TMP_UW(I) SUB_REG_UW(&tmp_reg, &tmp_reg1, I)
+#define TMP_UD(I) SUB_REG_UD(&tmp_reg, &tmp_reg1, I)
+
+#define TMP_WRT(R) do { GPR[R] = tmp_reg; GPR1[R] = tmp_reg1; } while(0)
 
 #define RS_SB(I) SUB_REG_SB(&rs_reg, &rs_reg1, I)
 #define RS_SH(I) SUB_REG_SH(&rs_reg, &rs_reg1, I)
@@ -562,12 +575,13 @@ struct _sim_cpu {
 #ifdef TARGET_SKY
 #ifndef TM_TXVU_H
 /* Number of machine registers */
-#define NUM_VU_REGS	153
+#define NUM_VU_REGS	160
+
 #define NUM_VU_INTEGER_REGS 16
+#define FIRST_VEC_REG	32
 
 #define NUM_VIF_REGS	26
 
-#define FIRST_VEC_REG	25
 #define NUM_CORE_REGS	128
 
 #undef NUM_REGS
@@ -704,11 +718,11 @@ enum float_operation
   sim_r5900_cpu r5900;
 
   /* end-sanitize-r5900 */
-  /* start-sanitize-vr5400 */
+  /* start-sanitize-cygnus */
 
   /* The MDMX ISA has a very very large accumulator */
   unsigned8 acc[3 * 8];
-  /* end-sanitize-vr5400 */
+  /* end-sanitize-cygnus */
   /* start-sanitize-sky */
 
 #ifdef TARGET_SKY
@@ -1054,7 +1068,8 @@ enum txvu_cpu_context
 };
 
 /* memory segment for communication with GDB */
-#define GDB_COMM_AREA	0x21010000	/* Random choice */
+#define VIO_BASE        0xa0000000
+#define GDB_COMM_AREA	0x19810000	/* Random choice */
 #define GDB_COMM_SIZE	0x4000
 
 /* Memory address containing last device to execute */
