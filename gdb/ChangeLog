@@ -1,3 +1,8 @@
+2004-11-01  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.tgt: Mark d10v-*-* as obsolete.
+	* config/d10v/d10v.mt, d10v-tdep.c: Obsolete files.
+
 2004-11-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* values.c (modify_field): Correct handling of bit-fields that

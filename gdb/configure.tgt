@@ -69,7 +69,7 @@ avr-*-*)		gdb_target=avr ;;
 
 cris*)                  gdb_target=cris ;;
 
-d10v-*-*)		gdb_target=d10v ;;
+# OBSOLETE d10v-*-*)		gdb_target=d10v ;;
 
 h8300-*-*)		gdb_target=h8300 ;;
 
