@@ -1,3 +1,8 @@
+Thu Aug 10 16:07:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgrok.c (do_type): Handle array dimensions the same way gdb
+	does.
+
 Tue Aug  8 17:10:42 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (mtable): New fields.
@@ -434,7 +439,7 @@ Thu Jan 26 12:03:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 Wed Jan 18 10:02:12 1995  Steve Chamberlain  <sac@splat>
 
 	* coffdump.c: Include sysdep.h.
-	(dump_coff_type): Hanlde coff_secdef_type.
+	(dump_coff_type): Handle coff_secdef_type.
 	* coffgrok.c : Include sysdep.h.
 	* srconv.c: Include libiberty.h
 	(absolute_p, dty_start, dty_end, dump_tree_structure): Remove.
