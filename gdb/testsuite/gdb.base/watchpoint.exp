@@ -27,9 +27,9 @@ set prms_id 0
 set bug_id 0
 
 set testfile "watchpoint"
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+if  { [compile "${srcdir}/${subdir}/${srcfile} -g -o ${binfile}"] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
@@ -127,6 +127,7 @@ proc test_simple_watchpoint {} {
     global prompt
     global hex
     global decimal
+    global noresults
 
     # Ensure that the watchpoint is disabled when we startup.
 
@@ -230,6 +231,8 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     # Run until process exits.
 
+    if $noresults==1 then { return }
+
     gdb_test "cont" "Continuing.*Program exited normally.*" \
 	"continue to exit in test_simple_watchpoint"
 }
@@ -242,6 +245,7 @@ proc test_disabling_watchpoints {} {
     global srcfile
     global decimal
     global hex
+    global noresults
 
     # Ensure that the watchpoint is disabled when we startup.
 
@@ -320,6 +324,8 @@ proc test_disabling_watchpoints {} {
     gdb_test "cont" "Continuing.*Breakpoint.*marker2 \\(\\).*" \
 	"disabled watchpoint skipped"
     
+    if $noresults==1 then { return }
+
     gdb_test "cont" "Continuing.*Program exited normally.*" \
 	"continue to exit in test_disabling_watchpoints"
 }

@@ -1,5 +1,10 @@
 Wed Jan 31 14:21:09 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.base/break.exp: Don't test for program exit or exit status
+	if $noresults if nonzero.
+	* gdb.base/langs.exp: Likewise.
+	* gdb.base/watchpoint.exp: Likewise.
+
 	* gdb.base/default.exp: Remove extraneous call to load gdb.exp.
 	* gdb.chill/pr-8405.exp: Move skip_chill_tests check to just before
 	trying to compile the testcase.
