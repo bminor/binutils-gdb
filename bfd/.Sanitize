@@ -276,6 +276,7 @@ rs6000-core.c
 section.c
 som.c
 som.h
+sparclinux.c
 sparclynx.c
 sparcnetbsd.c
 srec.c
