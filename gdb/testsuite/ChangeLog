@@ -2837,9 +2837,67 @@ Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/vr4300.exp: New file.
 
-	* gdb.*/*.exp: Call gdb_expect instead of expect.
-	
-	* lib/gdb.exp(gdb_expect): New function.
+	* lib/gdb.exp (gdb_expect): New function.
+	* config/m32r-stub.exp: Call gdb_expect instead of expect.
+	* config/monitor.exp: Ditto.
+	* config/netware.exp: Ditto.
+	* config/sim.exp: Ditto.
+	* config/slite.exp: Ditto.
+	* config/sparclet.exp: Ditto.
+	* config/udi.exp: Ditto.
+	* config/vx.exp: Ditto.
+	* gdb.base/a2-run.exp: Ditto.
+	* gdb.base/bitfields.exp: Ditto.
+	* gdb.base/break.exp: Ditto.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/corefile.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/gdbvars.exp: Ditto.
+	* gdb.base/interrupt.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/ptype.exp: Ditto.
+	* gdb.base/return.exp: Ditto.
+	* gdb.base/scope.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/setvar.exp: Ditto.
+	* gdb.base/sigall.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+	* gdb.base/structs.exp: Ditto.
+	* gdb.base/term.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.c++/classes.exp: Ditto.
+	* gdb.c++/cplusfuncs.exp: Ditto.
+	* gdb.c++/demangle.exp: Ditto.
+	* gdb.c++/inherit.exp: Ditto.
+	* gdb.c++/misc.exp: Ditto.
+	* gdb.c++/templates.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Ditto.
+	* gdb.chill/builtins.exp: Ditto.
+	* gdb.chill/callch.exp: Ditto.
+	* gdb.chill/chexp.exp: Ditto.
+	* gdb.chill/enum.exp: Ditto.
+	* gdb.chill/gch1041.exp: Ditto.
+	* gdb.chill/gch1272.exp: Ditto.
+	* gdb.chill/gch1280.exp: Ditto.
+	* gdb.chill/gch922.exp: Ditto.
+	* gdb.chill/gch981.exp: Ditto.
+	* gdb.chill/misc.exp: Ditto.
+	* gdb.chill/powerset.exp: Ditto.
+	* gdb.chill/pr-5984.exp: Ditto.
+	* gdb.chill/pr-6292.exp: Ditto.
+	* gdb.chill/pr-9946.exp: Ditto.
+	* gdb.chill/tests1.exp: Ditto.
+	* gdb.chill/tests2.exp: Ditto.
+	* gdb.disasm/hppa.exp: Ditto.
+	* gdb.disasm/mn10200.exp: Ditto.
+	* gdb.disasm/sh3.exp: Ditto.
+	* gdb.stabs/weird.exp: Ditto.
+	* gdb.threads/pthreads.exp: Ditto.
+	* gdb.threads/step.exp: Ditto.
+	* gdb.threads/step2.exp: Ditto.
+	* lib/gdb.exp: Ditto.
 
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
