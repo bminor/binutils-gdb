@@ -1,3 +1,15 @@
+Wed Jun 28 17:49:59 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* doc/as.texinfo (H8/500, SH): Indicate that IEEE FP numbers are
+	for the standard emulation code.
+	* doc/*.m4: Deleted.
+
+Thu Jun 22 19:26:25 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sun May  7 11:53:41 MDT 1995  Bryan Ford  <baford@cs.utah.edu>
+
+	* configure.in: Added i386-*-moss* target.
+
 Thu Jun 22 14:41:23 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* write.c (write_object_file): Cast decode_local_label_name
