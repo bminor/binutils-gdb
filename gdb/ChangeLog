@@ -1,5 +1,19 @@
 2004-07-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
+	* ada-lang.c (decode_packed_array): Minor change to comment.
+	(ada_value_slice_ptr): New function. 
+	(ada_value_slice): New function. 
+	(ada_evaluate_subexp): Remove XVS-suffix code from subscripting
+	test.  Don't know why it is there.
+	Change slice code to use ada_value_slice_ptr and ada_value_slice, and
+	to avoid dereferencing huge arrays from which one is slicing.  
+	(empty_array): Correct to return an array rather than
+	a subrange value.
+	* ada-valprint.c (print_optional_low_bound): Don't print lower bound
+	on empty arrays (let'em use 'FIRST instead).
+
+2004-07-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
 	Address complaints from gdb_ari.sh:
 	
 	* ada-exp.y: Include gdb_string.h rather than string.h.

@@ -2170,6 +2170,37 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
   return value_ind (arr);
 }
 
+/* Given that ARRAY_PTR is a pointer or reference to an array of type TYPE (the
+   actual type of ARRAY_PTR is ignored), returns a reference to
+   the Ada slice of HIGH-LOW+1 elements starting at index LOW.  The lower
+   bound of this array is LOW, as per Ada rules. */
+static struct value *
+ada_value_slice_ptr (struct value *array_ptr, struct type *type, 
+                     int low, int high)
+{
+  CORE_ADDR base = value_as_address (array_ptr) 
+    + ((low - TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)))
+       * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+  struct type *index_type = 
+    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type)), 
+                       low, high);
+  struct type *slice_type = 
+    create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+  return value_from_pointer (lookup_reference_type (slice_type), base);
+}
+
+
+static struct value *
+ada_value_slice (struct value *array, int low, int high)
+{
+  struct type *type = VALUE_TYPE (array);
+  struct type *index_type = 
+    create_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
+  struct type *slice_type = 
+    create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+  return value_cast (slice_type, value_slice (array, low, high-low+1));
+}
+
 /* If type is a record type in the form of a standard GNAT array
    descriptor, returns the number of dimensions for type.  If arr is a
    simple array, returns the number of "array of"s that prefix its
@@ -2400,8 +2431,11 @@ ada_array_length (struct value *arr, int n)
 static struct value *
 empty_array (struct type *arr_type, int low)
 {
-  return allocate_value (create_range_type (NULL, TYPE_INDEX_TYPE (arr_type),
-                                            low, low - 1));
+  struct type *index_type = 
+    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type)),
+                       low, low - 1);
+  struct type *elt_type = ada_array_element_type (arr_type, 1);
+  return allocate_value (create_array_type (NULL, elt_type, index_type));
 }
 
 
@@ -8922,11 +8956,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           {
             int arity;
 
-            /* Make sure to use the parallel ___XVS type if any.
-               Otherwise, we won't be able to find the array arity
-               and element type.  */
-            type = ada_get_base_type (type);
-
             arity = ada_array_arity (type);
             type = ada_array_element_type (type, nargs);
             if (type == NULL)
@@ -8981,14 +9010,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         if (noside == EVAL_SKIP)
           goto nosideret;
 
-        /* If this is a reference type or a pointer type, and
-           the target type has an XVS parallel type, then get
-           the real target type.  */
-        if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_REF
-            || TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_PTR)
-          TYPE_TARGET_TYPE (VALUE_TYPE (array)) =
-            ada_get_base_type (TYPE_TARGET_TYPE (VALUE_TYPE (array)));
-
         /* If this is a reference to an aligner type, then remove all
            the aligners.  */
         if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_REF
@@ -9007,26 +9028,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           array = value_addr (array);
 
         if (noside == EVAL_AVOID_SIDE_EFFECTS
-            && ada_is_array_descriptor_type
-            (check_typedef (VALUE_TYPE (array))))
-          {
-            /* Try dereferencing the array, in case it is an access
-               to array.  */
-            struct type *arrType = ada_type_of_array (array, 0);
-            if (arrType != NULL)
-              array = value_at_lazy (arrType, 0, NULL);
-          }
+            && ada_is_array_descriptor_type (check_typedef 
+					     (VALUE_TYPE (array))))
+          return empty_array (ada_type_of_array (array, 0), low_bound);
 
         array = ada_coerce_to_simple_array_ptr (array);
 
-        /* When EVAL_AVOID_SIDE_EFFECTS, we may get the bounds wrong,
-           but only in contexts where the value is not being requested
-           (FIXME?).  */
         if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_PTR)
           {
-            if (noside == EVAL_AVOID_SIDE_EFFECTS)
-              return ada_value_ind (array);
-            else if (high_bound < low_bound)
+            if (high_bound < low_bound || noside == EVAL_AVOID_SIDE_EFFECTS)
               return empty_array (TYPE_TARGET_TYPE (VALUE_TYPE (array)),
                                   low_bound);
             else
@@ -9034,15 +9044,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 struct type *arr_type0 =
                   to_fixed_array_type (TYPE_TARGET_TYPE (VALUE_TYPE (array)),
                                        NULL, 1);
-                struct value *item0 =
-                  ada_value_ptr_subscript (array, arr_type0, 1,
-                                           &low_bound_val);
-                struct value *slice =
-                  value_repeat (item0, high_bound - low_bound + 1);
-                struct type *arr_type1 = VALUE_TYPE (slice);
-                TYPE_LOW_BOUND (TYPE_INDEX_TYPE (arr_type1)) = low_bound;
-                TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (arr_type1)) += low_bound;
-                return slice;
+                return ada_value_slice_ptr (array, arr_type0,
+                                            (int) low_bound, (int) high_bound);
               }
           }
         else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -9050,7 +9053,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         else if (high_bound < low_bound)
           return empty_array (VALUE_TYPE (array), low_bound);
         else
-          return value_slice (array, low_bound, high_bound - low_bound + 1);
+          return ada_value_slice (array, (int) low_bound, (int) high_bound);
       }
 
     case UNOP_IN_RANGE:

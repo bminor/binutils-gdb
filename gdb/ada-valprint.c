@@ -86,10 +86,10 @@ adjust_type_signedness (struct type *type)
     TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
 }
 
-/* Assuming TYPE is a simple array type, prints its lower bound on STREAM,
-   if non-standard (i.e., other than 1 for numbers, other than lower bound
-   of index type for enumerated type).  Returns 1 if something printed,
-   otherwise 0.  */
+/* Assuming TYPE is a simple, non-empty array type, prints its lower bound 
+   on STREAM, if non-standard (i.e., other than 1 for numbers, other
+   than lower bound of index type for enumerated type).  Returns 1 
+   if something printed, otherwise 0.  */
 
 static int
 print_optional_low_bound (struct ui_file *stream, struct type *type)
@@ -105,6 +105,8 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
   if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
     {
       low_bound = TYPE_LOW_BOUND (index_type);
+      if (low_bound > TYPE_HIGH_BOUND (index_type))
+	return 0;
       index_type = TYPE_TARGET_TYPE (index_type);
     }
   else
