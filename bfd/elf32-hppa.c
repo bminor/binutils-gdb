@@ -3128,9 +3128,19 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 					   + sym_sec->output_section->vma);
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefweak)
-			;
+			{
+			  if (! info->shared)
+			    continue;
+			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefined)
-			;
+			{
+			  if (! (info->shared
+				 && !info->no_undefined
+				 && (ELF_ST_VISIBILITY (hash->elf.other)
+				     == STV_DEFAULT)
+				 && hash->elf.type != STT_PARISC_MILLI))
+			    continue;
+			}
 		      else
 			{
 			  bfd_set_error (bfd_error_bad_value);
