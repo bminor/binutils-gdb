@@ -1,3 +1,9 @@
+2003-04-02  J. Brobecker  <brobecker@gnat.com>
+
+	* observer.texi (GDB Observers): Adjust the documentation for the
+	normal_stop notification to better describe reality. Fix a couple
+	of minor typos.
+
 2003-04-02  Bob Rossi  <bob_rossi@cox.net>
 
 	* gdb.texinfo (GDB/MI Program Control): Add 
