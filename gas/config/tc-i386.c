@@ -1,5 +1,5 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 91, 92, 93, 94, 95, 1996 Free Software Foundation.
+   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -249,7 +249,7 @@ i386_align_code (fragP, count)
 {
   /* Various efficient no-op patterns for aligning code labels.  */
   static const char f32_1[] = {0x90};
-  static const char f32_2[] = {0x8d,0x36};
+  static const char f32_2[] = {0x89,0xf6};
   static const char f32_3[] = {0x8d,0x76,0x00};
   static const char f32_4[] = {0x8d,0x74,0x26,0x00};
   static const char f32_5[] = {0x90,
@@ -258,29 +258,29 @@ i386_align_code (fragP, count)
   static const char f32_7[] = {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
   static const char f32_8[] = {0x90,
 			       0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
-  static const char f32_9[] = {0x8d,0x36,
-			       0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+  static const char f32_9[] = {0x89,0xf6,
+			       0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};
   static const char f32_10[] = {0x8d,0x76,0x00,
-				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+				0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};
   static const char f32_11[] = {0x8d,0x74,0x26,0x00,
-				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+				0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};
   static const char f32_12[] = {0x8d,0xb6,0x00,0x00,0x00,0x00,
-				0x8d,0xb6,0x00,0x00,0x00,0x00};
+				0x8d,0xbf,0x00,0x00,0x00,0x00};
   static const char f32_13[] = {0x8d,0xb6,0x00,0x00,0x00,0x00,
-				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+				0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};
   static const char f32_14[] = {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,
-				0x8d,0xb4,0x26,0x00,0x00,0x00,0x00};
+				0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};
   static const char f32_15[] = {0xeb,0x0d,0x90,0x90,0x90,0x90,0x90,
 				0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
   static const char f16_4[] = {0x8d,0xb6,0x00,0x00};
   static const char f16_5[] = {0x90,
 			       0x8d,0xb6,0x00,0x00};
-  static const char f16_6[] = {0x8d,0x36,
-			       0x8d,0xb6,0x00,0x00};
+  static const char f16_6[] = {0x89,0xf6,
+			       0x8d,0xbd,0x00,0x00};
   static const char f16_7[] = {0x8d,0x76,0x00,
-			       0x8d,0xb6,0x00,0x00};
+			       0x8d,0xbd,0x00,0x00};
   static const char f16_8[] = {0x8d,0xb6,0x00,0x00,
-			       0x8d,0xb6,0x00,0x00};
+			       0x8d,0xbd,0x00,0x00};
   static const char *const f32_patt[] = {
     f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
     f32_9, f32_10, f32_11, f32_12, f32_13, f32_14, f32_15
@@ -774,7 +774,11 @@ tc_i386_fix_adjustable(fixP)
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
-#endif
+#ifdef BFD_ASSEMBLER
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+#endif /* BFD_ASSEMBLER */
+#endif /* ! defined (OBJ_AOUT) */
 #ifdef BFD_ASSEMBLER
   /* adjust_reloc_syms doesn't know about the GOT */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
@@ -822,8 +826,8 @@ md_assemble (line)
     unsigned int expecting_operand = 0;
     /* 1 if we found a prefix only acceptable with string insns. */
     unsigned int expecting_string_instruction = 0;
-    /* Non-zero if operand parens not balenced. */
-    unsigned int paren_not_balenced;
+    /* Non-zero if operand parens not balanced. */
+    unsigned int paren_not_balanced;
     char *token_start = l;
 
     while (!is_space_char (*l) && *l != END_OF_INSN)
@@ -942,14 +946,14 @@ md_assemble (line)
 		l++;
 	      }
 	    token_start = l;	/* after white space */
-	    paren_not_balenced = 0;
-	    while (paren_not_balenced || *l != ',')
+	    paren_not_balanced = 0;
+	    while (paren_not_balanced || *l != ',')
 	      {
 		if (*l == END_OF_INSN)
 		  {
-		    if (paren_not_balenced)
+		    if (paren_not_balanced)
 		      {
-			as_bad ("unbalenced parenthesis in %s operand.",
+			as_bad ("unbalanced parenthesis in %s operand.",
 				ordinal_names[i.operands]);
 			return;
 		      }
@@ -964,9 +968,9 @@ md_assemble (line)
 		    return;
 		  }
 		if (*l == '(')
-		  ++paren_not_balenced;
+		  ++paren_not_balanced;
 		if (*l == ')')
-		  --paren_not_balenced;
+		  --paren_not_balanced;
 		l++;
 	      }
 	    if (l != token_start)
@@ -2117,18 +2121,18 @@ i386_operand (operand_string)
       found_base_index_form = 0;
       if (*base_string == ')')
 	{
-	  unsigned int parens_balenced = 1;
+	  unsigned int parens_balanced = 1;
 	  /* We've already checked that the number of left & right ()'s are
 	     equal, so this loop will not be infinite. */
 	  do
 	    {
 	      base_string--;
 	      if (*base_string == ')')
-		parens_balenced++;
+		parens_balanced++;
 	      if (*base_string == '(')
-		parens_balenced--;
+		parens_balanced--;
 	    }
-	  while (parens_balenced);
+	  while (parens_balanced);
 	  base_string++;	/* Skip past '('. */
 	  if (*base_string == REGISTER_PREFIX || *base_string == ',')
 	    found_base_index_form = 1;
@@ -2626,7 +2630,9 @@ md_apply_fix3 (fixP, valp, seg)
    */
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
     {
+#ifndef OBJ_AOUT
       value += fixP->fx_where + fixP->fx_frag->fr_address;
+#endif
 #ifdef OBJ_ELF
       if (S_GET_SEGMENT (fixP->fx_addsy) == seg
 	  || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
@@ -3067,99 +3073,4 @@ tc_coff_sizemachdep (frag)
 
 #endif /* BFD_ASSEMBLER? */
 
-#ifdef SCO_ELF
-
-/* Heavily plagarized from obj_elf_version.  The idea is to emit the
-   SCO specific identifier in the .notes section to satisfy the SCO
-   linker.
-
-   This looks more complicated than it really is.  As opposed to the
-   "obvious" solution, this should handle the cross dev cases
-   correctly.  (i.e, hosting on a 64 bit big endian processor, but
-   generating SCO Elf code) Efficiency isn't a concern, as there
-   should be exactly one of these sections per object module.
-
-   SCO OpenServer 5 identifies it's ELF modules with a standard ELF
-   .note section.
-
-   int_32 namesz  = 4 ;  Name size 
-   int_32 descsz  = 12 ; Descriptive information 
-   int_32 type    = 1 ;  
-   char   name[4] = "SCO" ; Originator name ALWAYS SCO + NULL 
-   int_32 version = (major ver # << 16)  | version of tools ;
-   int_32 source  = (tool_id << 16 ) | 1 ;
-   int_32 info    = 0 ;    These are set by the SCO tools, but we
-                           don't know enough about the source 
-			   environment to set them.  SCO ld currently
-			   ignores them, and recommends we set them
-			   to zero.  */
-
-#define SCO_MAJOR_VERSION 0x1
-#define SCO_MINOR_VERSION 0x1
-
-void
-sco_id ()
-{
-  char *name;
-  unsigned int c;
-  char ch;
-  char *p;
-  asection *seg = now_seg;
-  subsegT subseg = now_subseg;
-  Elf_Internal_Note i_note;
-  Elf_External_Note e_note;
-  asection *note_secp = (asection *) NULL;
-  int i, len;
-
-  /* create the .note section */
-
-  note_secp = subseg_new (".note", 0);
-  bfd_set_section_flags (stdoutput,
-			 note_secp,
-			 SEC_HAS_CONTENTS | SEC_READONLY);
-
-  /* process the version string */
-
-  i_note.namesz = 4; 
-  i_note.descsz = 12;		/* 12 descriptive bytes */
-  i_note.type = NT_VERSION;	/* Contains a version string */
-
-  p = frag_more (sizeof (i_note.namesz));
-  md_number_to_chars (p, (valueT) i_note.namesz, 4);
-
-  p = frag_more (sizeof (i_note.descsz));
-  md_number_to_chars (p, (valueT) i_note.descsz, 4);
-
-  p = frag_more (sizeof (i_note.type));
-  md_number_to_chars (p, (valueT) i_note.type, 4);
-
-  p = frag_more (4);
-  strcpy (p, "SCO"); 
-
-  /* Note: this is the version number of the ELF we're representing */
-  p = frag_more (4);
-  md_number_to_chars (p, (SCO_MAJOR_VERSION << 16) | (SCO_MINOR_VERSION), 4);
-
-  /* Here, we pick a magic number for ourselves (yes, I "registered"
-     it with SCO.  The bottom bit shows that we are compat with the
-     SCO ABI.  */
-  p = frag_more (4);
-  md_number_to_chars (p, 0x4c520000 | 0x0001, 4);
-
-  /* If we knew (or cared) what the source language options were, we'd
-     fill them in here.  SCO has given us permission to ignore these
-     and just set them to zero.  */
-  p = frag_more (4);
-  md_number_to_chars (p, 0x0000, 4);
- 
-  frag_align (2, 0); 
-
-  /* We probably can't restore the current segment, for there likely
-     isn't one yet...  */
-  if (seg && subseg)
-    subseg_set (seg, subseg);
-}
-
-#endif /* SCO_ELF */
-
 /* end of tc-i386.c */

@@ -1,3 +1,7 @@
+Thu Jan 30 12:28:18 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_align_code): Improve the nop patterns.
+
 Thu Jan 30 12:08:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Ideas from Srinivas Addagarla <srinivas@cdotd.ernet.in>:
