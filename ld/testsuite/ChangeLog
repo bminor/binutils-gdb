@@ -1,3 +1,13 @@
+2004-05-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/sh64/crange1.rd: Update sh_info to decimal.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+
 2004-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.r: Update sh_info to decimal.

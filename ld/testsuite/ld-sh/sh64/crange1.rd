@@ -13,7 +13,7 @@ Section Headers:
   \[ 8\] \.stack            PROGBITS        00080000 000180 000004 00  WA  0   0  1
   \[ 9\] \.cranges          LOUSER\+1        00000000 000184 00001e 00   W  0   0  1
   \[10\] \.shstrtab         STRTAB          00000000 0001a2 000056 00      0   0  1
-  \[11\] \.symtab           SYMTAB          00000000 000400 000180 10     12   e  4
+  \[11\] \.symtab           SYMTAB          00000000 000400 000180 10     12  14  4
   \[12\] \.strtab           STRTAB          00000000 000580 000064 00      0   0  1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
