@@ -1,3 +1,9 @@
+2004-04-29  Joel Brobecker  <brobecker@gnat.com>
+
+	Committed by Andrew Cagney.
+        * infrun.c (handle_inferior_event): Rely on frame IDs to detect
+        function calls.
+
 2004-04-29  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_abi_regsize): Replace tdep parameter with

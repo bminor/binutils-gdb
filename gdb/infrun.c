@@ -2465,6 +2465,18 @@ process_event_stop_test:
       return;
     }
 
+  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
+      && ecs->stop_func_name == NULL)
+    {
+      /* There is no symbol, not even a minimal symbol, corresponding
+         to the address where we just stopped.  So we just stepped
+         inside undebuggable code.  Since we want to step over this
+         kind of code, we keep going until the inferior returns from
+         the current function.  */
+      handle_step_into_function (ecs);
+      return;
+    }
+
   /* We can't update step_sp every time through the loop, because
      reading the stack pointer would slow down stepping too much.
      But we can update it every time we leave the step range.  */
@@ -2543,11 +2555,8 @@ process_event_stop_test:
       return;
     }
 
-  if (((stop_pc == ecs->stop_func_start	/* Quick test */
-	|| in_prologue (stop_pc, ecs->stop_func_start))
-       && !IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
-      || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, ecs->stop_func_name)
-      || ecs->stop_func_name == 0)
+  if (frame_id_eq (get_frame_id (get_prev_frame (get_current_frame ())),
+                   step_frame_id))
     {
       /* It's a subroutine call.  */
       handle_step_into_function (ecs);
