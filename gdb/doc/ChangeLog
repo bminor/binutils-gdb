@@ -1,4 +1,13 @@
-Wed Aug 15 10:47:28 2001  Christopher Faylor <cgf@cygnus.com>
+2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* stabs.texinfo:
+	* gdb.texinfo:
+	* gdbint.texinfo:
+	* libgdb.texinfo:
+	* annotate.texinfo: Fix the application of GFDL in the Copyright
+	notice.
+
+2001-08-15  Christopher Faylor <cgf@cygnus.com>
 
 	* gdbint.texinfo: Add a cautionary note about macro use.
 

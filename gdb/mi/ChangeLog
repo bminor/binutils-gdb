@@ -1,3 +1,7 @@
+2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbmi.texinfo: Fix the application of GFDL in the Copyright notice.
+
 2001-07-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c: Include "gdb.h".
