@@ -1,3 +1,16 @@
+Tue Sep 24 19:05:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (float_cons): Call md_flush_pending_output if it is
+	defined.
+
+start-sanitize-d10v
+Tue Sep 24 12:22:18 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_operand): Created.  Allows operands to 
+	start with '#'.
+	* config/tc-d10v.h (md_operand): Undefined.
+
+end-sanitize-d10v	
 Mon Sep 23 12:13:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (add_fix): Treat a width of '3' like 'B'.
