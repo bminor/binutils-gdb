@@ -379,7 +379,7 @@ vectors which use the same sets of functions.
 @node BFD target vector swap
 @subsection Swapping functions
 
-Every target vector has fuction pointers used for swapping information
+Every target vector has function pointers used for swapping information
 in and out of the target representation.  There are two sets of
 functions: one for data information, and one for header information.
 Each set has three sizes: 64-bit, 32-bit, and 16-bit.  Each size has
@@ -1291,10 +1291,13 @@ doing a link in which the output object file format is S-records.
 @item
 Using the linker to generate relocateable output in a different object
 file format is impossible in the general case, so you generally don't
-have to worry about that.  Linking input files of different object file
-formats together is quite unusual, but if you're really dedicated you
-may want to consider testing this case, both when the output object file
-format is the same as your format, and when it is different.
+have to worry about that.  The GNU linker makes sure to stop that from
+happening when an input file in a different format has relocations.
+
+Linking input files of different object file formats together is quite
+unusual, but if you're really dedicated you may want to consider testing
+this case, both when the output object file format is the same as your
+format, and when it is different.
 @end itemize
 
 @node BFD relocation codes
