@@ -1,3 +1,19 @@
+Sun Jun 30 13:34:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd-in.h (itos, stoi): Don't define.
+	* libbfd.h: Rebuild.
+	* i386lynx.c (KEEPIT): Define as udata.i.
+	(NAME(lynx,swap_std_reloc_out)): Don't use stoi.
+	(NAME(lynx,swap_ext_reloc_out)): Likewise.
+	* riscix.c (riscix_swap_std_reloc_out): Use udata.i rather than
+	flags.  Don't use stoi.
+
+	* elf32-mips.c (ELF_MAGPAGESIZE): Change definition to 0x1000.
+
+	* elf.c (map_sections_to_segments): Don't start a new segment for
+ 	a writable section if it's on the same page as the previous
+ 	segment.  Reset the writable variable for a readonly section.
+
 Sat Jun 29 16:18:51 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_in): Missing initializations of
