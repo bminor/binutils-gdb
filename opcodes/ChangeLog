@@ -382,7 +382,7 @@ Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 	* po/POTFILES.in: Regenerated
 	* po/opcodes.pot: Regenerated
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Nov  2 20:08:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.c (m32r_cgen_insn_table_entries): Add FILL_SLOT attribute
@@ -390,7 +390,7 @@ Mon Nov  2 20:08:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(macro_insn_table_entries): Add FILL_SLOT attribute
 	to bcl8r,bncl8r entries.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*
@@ -609,14 +609,14 @@ Thu Jul 30 21:41:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* d30v-opc.c (d30v_opcode_table): Add new "LKR" flag to some
 	instructions.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Tue Jul 28 13:15:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	Add support for new versions of mulwhi,mulwlo,macwhi,macwlo that
 	accept an accumulator choice.
 	* m32r-opc.c,m32r-opc.h: Regenerate.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue Jul 28 11:00:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Add entries for "no_match_operands" field in
@@ -1050,10 +1050,10 @@ Fri May 15 14:58:31 1998  Doug Evans  <devans@seba.cygnus.com>
 	* cgen-opc.c (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.
 	(cgen_hw_lookup_by_num): New function.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* m32r-opc.c, m32r-opc.h: Regenerate, delete h-abort.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Wed May 13 17:03:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c: Regenerate (handle uppercase HIGH/SHIGH/LOW/SDA).
@@ -1063,7 +1063,7 @@ Wed May 13 14:34:31 1998  Mark Alexander  <marka@cygnus.com>
 	* sparc-dis.c (print_insn_sparc): Always fetch instructions
 	as big-endian on SPARClite.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Regenerated - SPECIAL attribute added to some
@@ -1071,7 +1071,7 @@ Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
 	* m32r-opc.h: Regenerated - SPECIAL attribute added to some
 	insns.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
 
 	* d30v-opc.c (pre_defined_register): Remove alias for r0.
@@ -1319,12 +1319,12 @@ Thu Apr  2 17:25:49 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Use signed immediate values for CMPUI instruction.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Thu Apr  2 16:44:23 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Fix bit patterns for SAT and SATB.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Wed Apr  1 16:20:27 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
 
         * ns32k-dis.c (bit_extract_simple): New function to extract bits
@@ -1332,13 +1332,13 @@ Wed Apr  1 16:20:27 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
         using fetch_data().
         (invalid_float): use bit_extract_simple() instead of bit_extract().
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Wed Apr  1 14:57:54 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Fix SATB bit pattern.  Add extra control registers.
 	* m32r-opc.h: Add extra control registers.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue Mar 31 11:09:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From H.J. Lu <hjl@gnu.org>:
@@ -1484,13 +1484,13 @@ Tue Mar 24 18:11:13 1998  Jeffrey A Law  (law@cygnus.com)
         opcode extensions.
 
 end-sanitize-r5900
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Mar 23 11:32:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c (m32r_cgen_insn_table_entries): Fix SATH bit pattern
 	(PR15418).
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Mon Mar 23 09:45:04 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -1881,14 +1881,14 @@ Mon Feb  2 19:22:15 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
 	(ALL_MACHINES): Add tic30-dis.lo.
 	* configure, Makefile.in: Rebuild.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Feb  2 11:04:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c, m32r-opc.h, m32r-asm.c m32r-dis.c: Newly generated
 	versions after updates to m32r.cpu to remove mulwhi-a, mulwlo-a,
 	macwhi-a and macwlo-a instructions.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Fri Jan 30 17:39:21 1998  Ian Carmichael  <iancarm@cygnus.com>
 
