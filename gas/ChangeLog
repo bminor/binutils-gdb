@@ -1,3 +1,8 @@
+Mon Aug 14 14:08:07 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Don't try to apply BEGIN_BRTAB
+	or END_BRTAB fixups.
+
 Mon Aug 14 15:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gasp.c (strip_comments): Comment out; it's not used.
