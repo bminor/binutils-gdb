@@ -1768,6 +1768,42 @@ time @value{GDBN} read its symbols, @value{GDBN} discards its symbol
 table, and reads it again.  When it does this, @value{GDBN} tries to retain
 your current breakpoints.
 
+@table @code
+@kindex start
+@item start
+@cindex run to main procedure
+The name of the main procedure can vary from language to language.
+With C or C@t{++}, the main procedure name is always @code{main}, but
+other languages such as Ada do not require a specific name for their
+main procedure.  The debugger provides a convenient way to start the
+execution of the program and to stop at the beginning of the main
+procedure, depending on the language used.
+
+The @samp{start} command does the equivalent of setting a temporary
+breakpoint at the beginning of the main procedure and then invoking
+the @samp{run} command.
+
+Some programs contain an elaboration phase where some startup code is
+executed before the main program is called.  This depends on the
+languages used to write your program. In C@t{++} for instance,
+constructors for static and global objects are executed before
+@code{main} is called.  It is therefore possible that the debugger stops
+before reaching the main procedure.  However, the temporary breakpoint
+will remain to halt execution.
+
+Specify the arguments to give to your program as arguments to the
+@samp{start} command.  These arguments will be given verbatim to the
+underlying @samp{run} command.  Note that the same arguments will be
+reused if no argument is provided during subsequent calls to
+@samp{start} or @samp{run}.
+
+It is sometimes necessary to debug the program during elaboration.  In
+these cases, using the @code{start} command would stop the execution of
+your program too late, as the program would have already completed the
+elaboration phase.  Under these circumstances, insert breakpoints in your
+elaboration code before running your program.
+@end table
+
 @node Arguments
 @section Your program's arguments
 

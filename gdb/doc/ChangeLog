@@ -1,3 +1,7 @@
+2004-05-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.texinfo (Starting): Document new start command.
+
 2004-05-21  Andrew Cagney  <cagney@redhat.com>
 
 	* observer.texi (GDB Observers): Document "inferior_created".
