@@ -1,3 +1,9 @@
+2001-08-03  Ben Harris <bjh21@netbsd.org>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Include offset of
+	reloc from start of section when computing value for R_ARM_REL32
+	reloc.
+
 2001-08-03  Alan Modra  <amodra@bigpond.net.au>
 
 	From  H.J. Lu  <hjl@gnu.org>
