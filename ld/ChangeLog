@@ -1,3 +1,8 @@
+2002-11-11  Christopher Faylor  <cgf@redhat.com>
+
+	* configure.tgt (LIB_PATH): Default to searching w32api directory under
+	cygwin.
+
 2002-11-11  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* pe-dll.c (autofilter_liblist): add libmingwex and libgcj to the list
