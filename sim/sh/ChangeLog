@@ -1,3 +1,9 @@
+Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* Makefile.in (interp.o): Depend on $(srcroot)/include/gdb/sim-sh.h.
+	* interp.c: Include "gdb/sim-sh.h".
+	(sim_store_register, sim_fetch_register): Use constants defined there.
+
 Tue Jun 18 16:53:11 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* interp.c (sim_resume): Fix setting of bus error for

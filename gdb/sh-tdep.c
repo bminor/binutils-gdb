@@ -4182,6 +4182,47 @@ sh_linux_svr4_fetch_link_map_offsets (void)
 #endif /* SVR4_SHARED_LIBS */
 
 
+enum
+{
+   DSP_DSR_REGNUM = 24,
+   DSP_A0G_REGNUM,
+   DSP_A0_REGNUM,
+   DSP_A1G_REGNUM,
+   DSP_A1_REGNUM,
+   DSP_M0_REGNUM,
+   DSP_M1_REGNUM,
+   DSP_X0_REGNUM,
+   DSP_X1_REGNUM,
+   DSP_Y0_REGNUM,
+   DSP_Y1_REGNUM,
+ 
+   DSP_MOD_REGNUM = 40,
+ 
+   DSP_RS_REGNUM = 43,
+   DSP_RE_REGNUM,
+ 
+   DSP_R0_BANK_REGNUM = 51,
+   DSP_R7_BANK_REGNUM = DSP_R0_BANK_REGNUM + 7
+};
+
+static int
+sh_dsp_register_sim_regno (int nr)
+{
+  if (legacy_register_sim_regno (nr) < 0)
+    return legacy_register_sim_regno (nr);
+  if (nr >= DSP_DSR_REGNUM && nr < DSP_Y1_REGNUM)
+    return nr - DSP_DSR_REGNUM + SIM_SH_DSR_REGNUM;
+  if (nr == DSP_MOD_REGNUM)
+    return SIM_SH_MOD_REGNUM;
+  if (nr == DSP_RS_REGNUM)
+    return SIM_SH_RS_REGNUM;
+  if (nr == DSP_RE_REGNUM)
+    return SIM_SH_RE_REGNUM;
+  if (nr >= DSP_R0_BANK_REGNUM && nr <= DSP_R7_BANK_REGNUM)
+    return nr - DSP_R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
+  return nr;
+}
+
 static gdbarch_init_ftype sh_gdbarch_init;
 
 static struct gdbarch *
@@ -4280,6 +4321,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
   set_gdbarch_pop_frame (gdbarch, sh_pop_frame);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
+  set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
   skip_prologue_hard_way = sh_skip_prologue_hard_way;
   do_pseudo_register = sh_do_pseudo_register;
 
@@ -4314,6 +4356,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
       tdep->A0_REGNUM = 26;

@@ -1,3 +1,8 @@
+Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* sh-tdep.c (sh_dsp_register_sim_regno): New function.
+	(sh_gdbarch_init): Use it for sh-dsp.
+
 2002-07-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (read_initial_length): Handle older, non-standard,

@@ -24,7 +24,7 @@ SIM_EXTRA_CLEAN = sh-clean
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: interp.c code.c table.c ppi.c
+interp.o: interp.c code.c table.c ppi.c $(srcroot)/include/gdb/sim-sh.h
 
 code.c: gencode
 	./gencode -x >code.c
