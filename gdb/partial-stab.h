@@ -401,7 +401,7 @@ switch (CUR_SYMBOL_TYPE)
 	   function relative stabs, or the address of the function's
 	   end for old style stabs.  */
 	valu = CUR_SYMBOL_VALUE + last_function_start;
-	if (pst && pst->texthigh == 0 || valu > pst->texthigh)
+	if (pst->texthigh == 0 || valu > pst->texthigh)
 	  pst->texthigh = valu;
 	break;
       }

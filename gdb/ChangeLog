@@ -1,5 +1,10 @@
 2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
 
+	* partial-stab.h (DBX_READ): Eliminate redundant check for null
+	``pst''.  Also fixes GCC warning.
+
+2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
+
 	* rs6000-nat.c (set_host_arch): Check value returned by
 	gdbarch_update_p.
 	* gdbarch.sh (gdbarch_update_p): Rename gdbarch_update.
