@@ -136,11 +136,13 @@ static struct symbol *step_start_function;
 
 static int trap_expected;
 
+#ifdef HP_OS_BUG
 /* Nonzero if the next time we try to continue the inferior, it will
    step one instruction and generate a spurious trace trap.
    This is used to compensate for a bug in HP-UX.  */
 
 static int trap_expected_after_continue;
+#endif
 
 /* Nonzero means expecting a trace trap
    and should stop the inferior and return silently when it happens.  */
@@ -317,6 +319,7 @@ proceed (addr, siggnal, step)
     oneproc = 1;
 #endif /* PREPARE_TO_PROCEED */
 
+#ifdef HP_OS_BUG
   if (trap_expected_after_continue)
     {
       /* If (step == 0), a trap will be automatically generated after
@@ -326,6 +329,7 @@ proceed (addr, siggnal, step)
       oneproc = 1;
       trap_expected_after_continue = 0;
     }
+#endif /* HP_OS_BUG */
 
   if (oneproc)
     /* We will get a trace trap after one instruction.
@@ -351,6 +355,10 @@ The same program may be running in another process.");
     stop_signal = TARGET_SIGNAL_0;
 
   annotate_starting ();
+
+  /* Make sure that output from GDB appears before output from the
+     inferior.  */
+  gdb_flush (gdb_stdout);
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
@@ -395,7 +403,9 @@ init_wait_for_inferior ()
   prev_func_start = 0;
   prev_func_name = NULL;
 
+#ifdef HP_OS_BUG
   trap_expected_after_continue = 0;
+#endif
   breakpoints_inserted = 0;
   breakpoint_init_inferior ();
 
@@ -491,6 +501,24 @@ wait_for_inferior ()
 	  continue;
 	}
 
+      stop_signal = w.value.sig;
+
+      stop_pc = read_pc_pid (pid);
+
+      if (STOPPED_BY_WATCHPOINT (w))
+	{
+	  write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+
+	  remove_breakpoints ();
+	  target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
+
+	  if (target_wait_hook)
+	    target_wait_hook (pid, &w);
+	  else
+	    target_wait (pid, &w);
+	  insert_breakpoints ();
+	}
+
       switch (w.kind)
 	{
 	case TARGET_WAITKIND_LOADED:
@@ -558,10 +586,6 @@ wait_for_inferior ()
 	     end in a continue or goto.  */
 	  break;
 	}
-
-      stop_signal = w.value.sig;
-
-      stop_pc = read_pc_pid (pid);
 
       /* See if a thread hit a thread-specific breakpoint that was meant for
 	 another thread.  If so, then step that thread past the breakpoint,
@@ -678,45 +702,6 @@ wait_for_inferior ()
 	  resume (1, 0);
 	  continue;
 	}
-
-#ifdef HAVE_STEPPABLE_WATCHPOINT
-      /* It may not be necessary to disable the watchpoint to stop over
-	 it.  For example, the PA can (with some kernel cooperation) 
-	 single step over a watchpoint without disabling the watchpoint.  */
-      if (STOPPED_BY_WATCHPOINT (w))
-	{
-	  resume (1, 0);
-	  continue;
-	}
-#endif
-
-#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
-      /* It is far more common to need to disable a watchpoint
-	 to step the inferior over it.  FIXME.  What else might
-	 a debug register or page protection watchpoint scheme need
-	 here?  */
-      if (STOPPED_BY_WATCHPOINT (w))
-	{
-	  remove_breakpoints ();
-	  resume (1, 0);
-
-	  /* FIXME: This is bogus.  You can't interact with the
-	     inferior except when it is stopped.  It apparently
-	     happens to work on Irix4, but it depends on /proc
-	     allowing us to muck with the memory of a running process,
-	     and the kernel deciding to run one instruction of the
-	     inferior before it executes our insert_breakpoints code,
-	     which seems like an awfully dubious assumption.  */
-	  insert_breakpoints ();
-
-	  continue;
-	}
-#endif
-
-#ifdef HAVE_CONTINUABLE_WATCHPOINT
-      /* It may be possible to simply continue after a watchpoint.  */
-      STOPPED_BY_WATCHPOINT (w);
-#endif
 
       stop_func_start = 0;
       stop_func_name = 0;
@@ -1748,10 +1733,11 @@ handle_command (args, from_tty)
 	     anyway, and the common ones like SIGHUP, SIGINT, SIGALRM, etc.
 	     will work right anyway.  */
 
-	  sigfirst = siglast = atoi (*argv);
+	  sigfirst = siglast = (int) target_signal_from_command (atoi (*argv));
 	  if ((*argv)[digits] == '-')
 	    {
-	      siglast = atoi ((*argv) + digits + 1);
+	      siglast =
+		(int) target_signal_from_command (atoi ((*argv) + digits + 1));
 	    }
 	  if (sigfirst > siglast)
 	    {
@@ -1759,14 +1745,6 @@ handle_command (args, from_tty)
 	      signum = sigfirst;
 	      sigfirst = siglast;
 	      siglast = signum;
-	    }
-	  if (sigfirst < 0 || sigfirst >= nsigs)
-	    {
-	      error ("Signal %d not in range 0-%d", sigfirst, nsigs - 1);
-	    }
-	  if (siglast < 0 || siglast >= nsigs)
-	    {
-	      error ("Signal %d not in range 0-%d", siglast, nsigs - 1);
 	    }
 	}
       else
@@ -1807,6 +1785,11 @@ Are you sure you want to change it? ",
 			gdb_flush (gdb_stdout);
 		      }
 		  }
+		break;
+	      case TARGET_SIGNAL_0:
+	      case TARGET_SIGNAL_DEFAULT:
+	      case TARGET_SIGNAL_UNKNOWN:
+		/* Make sure that "all" doesn't print these.  */
 		break;
 	      default:
 		sigs[signum] = 1;
@@ -1854,20 +1837,9 @@ signals_info (signum_exp, from_tty)
       oursig = target_signal_from_name (signum_exp);
       if (oursig == TARGET_SIGNAL_UNKNOWN)
 	{
-	  /* Nope, maybe it's an address which evaluates to a signal
-	     number.  */
-	  /* The numeric signal refers to our own internal
-	     signal numbering from target.h, not to host/target signal number.
-	     This is a feature; users really should be using symbolic names
-	     anyway, and the common ones like SIGHUP, SIGINT, SIGALRM, etc.
-	     will work right anyway.  */
-	  int i = parse_and_eval_address (signum_exp);
-	  if (i >= (int)TARGET_SIGNAL_LAST
-	      || i < 0
-	      || i == (int)TARGET_SIGNAL_UNKNOWN
-	      || i == (int)TARGET_SIGNAL_DEFAULT)
-	    error ("Signal number out of bounds.");
-	  oursig = (enum target_signal)i;
+	  /* No, try numeric.  */
+	  oursig =
+	    target_signal_from_command (parse_and_eval_address (signum_exp));
 	}
       sig_print_info (oursig);
       return;
@@ -2029,23 +2001,24 @@ _initialize_infrun ()
 
   add_info ("signals", signals_info,
 	    "What debugger does when program gets various signals.\n\
-Specify a signal number as argument to print info on that signal only.");
+Specify a signal as argument to print info on that signal only.");
   add_info_alias ("handle", "signals", 0);
 
   add_com ("handle", class_run, handle_command,
-	   "Specify how to handle a signal.\n\
-Args are signal numbers and actions to apply to those signals.\n\
-Signal numbers may be numeric (ex. 11) or symbolic (ex. SIGSEGV).\n\
-Numeric ranges may be specified with the form LOW-HIGH (ex. 14-21).\n\
+	   concat ("Specify how to handle a signal.\n\
+Args are signals and actions to apply to those signals.\n\
+Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
+from 1-15 are allowed for compatibility with old versions of GDB.\n\
+Numeric ranges may be specified with the form LOW-HIGH (e.g. 1-5).\n\
 The special arg \"all\" is recognized to mean all signals except those\n\
-used by the debugger, typically SIGTRAP and SIGINT.\n\
-Recognized actions include \"stop\", \"nostop\", \"print\", \"noprint\",\n\
+used by the debugger, typically SIGTRAP and SIGINT.\n",
+"Recognized actions include \"stop\", \"nostop\", \"print\", \"noprint\",\n\
 \"pass\", \"nopass\", \"ignore\", or \"noignore\".\n\
 Stop means reenter debugger if this signal happens (implies print).\n\
 Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
-Pass and Stop may be combined.");
+Pass and Stop may be combined.", NULL));
 
   stop_command = add_cmd ("stop", class_obscure, not_just_help_class_command,
 	   "There is no `stop' command, but you can set a hook on `stop'.\n\

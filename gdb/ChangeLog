@@ -1,3 +1,12 @@
+Mon May 15 12:12:34 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* infrun.c:  Add #ifdef HP_OS_BUG to all references to
+	trap_expected_after_continue.
+	* (wait_for_inferior):  Fix for remote watchpoints.  Don't try to
+	insert breakpoints while target is running (this only works on
+	*some* native targets).  This may also speed up native watchpoints
+	considerably.
+
 Sat May 13 13:55:04 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dwarfread.c (struct dwfinfo), dbxread.c (struct symloc),
