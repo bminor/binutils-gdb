@@ -106,6 +106,8 @@ static ptid_t previous_inferior_ptid;
 
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
+static int debug_infrun = 0;
+
 /* If the program uses ELF-style shared libraries, then calls to
    functions in shared libraries go through stubs, which live in a
    table called the PLT (Procedure Linkage Table).  The first time the
@@ -517,6 +519,9 @@ resume (int step, enum target_signal sig)
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
+  if (debug_infrun)
+    printf_unfiltered ("infrun: resume (step=%d, signal=%d)\n", step, sig);
+
   /* FIXME: calling breakpoint_here_p (read_pc ()) three times! */
 
 
@@ -731,6 +736,10 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     {
       write_pc (addr);
     }
+
+  if (debug_infrun)
+    printf_unfiltered ("infrun: proceed (addr=0x%s, signal=%d, step=%d)\n",
+		       paddr_nz (addr), siggnal, step);
 
   /* In a multi-threaded task we may select another thread
      and then continue or step.
@@ -949,6 +958,9 @@ wait_for_inferior (void)
   struct cleanup *old_cleanups;
   struct execution_control_state ecss;
   struct execution_control_state *ecs;
+
+  if (debug_infrun)
+    printf_unfiltered ("infrun: wait_for_inferior\n");
 
   old_cleanups = make_cleanup (delete_step_resume_breakpoint,
 			       &step_resume_breakpoint);
@@ -1234,6 +1246,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   switch (ecs->infwait_state)
     {
     case infwait_thread_hop_state:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: infwait_thread_hop_state\n");
       /* Cancel the waiton_ptid. */
       ecs->waiton_ptid = pid_to_ptid (-1);
       /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
@@ -1247,6 +1261,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     case infwait_normal_state:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: infwait_normal_state\n");
       /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
          is serviced in this loop, below. */
       if (ecs->enable_hw_watchpoints_after_wait)
@@ -1258,10 +1274,14 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     case infwait_nullified_state:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: infwait_nullified_state\n");
       stepped_after_stopped_by_watchpoint = 0;
       break;
 
     case infwait_nonstep_watch_state:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: infwait_nonstep_watch_state\n");
       insert_breakpoints ();
 
       /* FIXME-maybe: is this cleaner than setting a flag?  Does it
@@ -1296,6 +1316,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   switch (ecs->ws.kind)
     {
     case TARGET_WAITKIND_LOADED:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_LOADED\n");
       /* Ignore gracefully during startup of the inferior, as it
          might be the shell which has just loaded some objects,
          otherwise add the symbols for the newly loaded objects.  */
@@ -1340,11 +1362,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
 
     case TARGET_WAITKIND_SPURIOUS:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_SPURIOUS\n");
       resume (0, TARGET_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
 
     case TARGET_WAITKIND_EXITED:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_EXITED\n");
       target_terminal_ours ();	/* Must do this before mourn anyway */
       print_stop_reason (EXITED, ecs->ws.value.integer);
 
@@ -1361,6 +1387,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
 
     case TARGET_WAITKIND_SIGNALLED:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_SIGNALLED\n");
       stop_print_frame = 0;
       stop_signal = ecs->ws.value.sig;
       target_terminal_ours ();	/* Must do this before mourn anyway */
@@ -1381,6 +1409,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          the above cases end in a continue or goto. */
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_FORKED\n");
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
@@ -1403,6 +1433,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       goto process_event_stop_test;
 
     case TARGET_WAITKIND_EXECD:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_EXECED\n");
       stop_signal = TARGET_SIGNAL_TRAP;
 
       /* NOTE drow/2002-12-05: This code should be pushed down into the
@@ -1470,6 +1502,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          Also, be careful not to try to gather much state about a thread
          that's in a syscall.  It's frequently a losing proposition. */
     case TARGET_WAITKIND_SYSCALL_ENTRY:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
       number_of_threads_in_syscalls++;
       if (number_of_threads_in_syscalls == 1)
 	{
@@ -1494,6 +1528,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          here, which will be serviced immediately after the target
          is waited on. */
     case TARGET_WAITKIND_SYSCALL_RETURN:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 
       if (number_of_threads_in_syscalls > 0)
@@ -1506,6 +1542,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
 
     case TARGET_WAITKIND_STOPPED:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_STOPPED\n");
       stop_signal = ecs->ws.value.sig;
       break;
 
@@ -1519,6 +1557,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          circumstance is any event which the lower level knows will be
          reported multiple times without an intervening resume.  */
     case TARGET_WAITKIND_IGNORE:
+      if (debug_infrun)
+        printf_unfiltered ("infrun: TARGET_WAITKIND_IGNORE\n");
       prepare_to_wait (ecs);
       return;
     }
@@ -1539,6 +1579,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   stop_pc = read_pc_pid (ecs->ptid);
 
+  if (debug_infrun)
+    printf_unfiltered ("infrun: stop_pc = 0x%s\n", paddr_nz (stop_pc));
+
   if (stepping_past_singlestep_breakpoint)
     {
       gdb_assert (SOFTWARE_SINGLE_STEP_P ()
@@ -1553,6 +1596,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          we could tell, but we can't reliably.  */
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	{
+	  if (debug_infrun)
+	    printf_unfiltered ("infrun: stepping_past_singlestep_breakpoint\n");
 	  /* Pull the single step breakpoints out of the target.  */
 	  SOFTWARE_SINGLE_STEP (0, 0);
 	  singlestep_breakpoints_inserted_p = 0;
@@ -1608,6 +1653,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (thread_hop_needed)
 	{
 	  int remove_status;
+
+	  if (debug_infrun)
+	    printf_unfiltered ("infrun: thread_hop_needed\n");
 
 	  /* Saw a breakpoint, but it was hit by the wrong thread.
 	     Just continue. */
@@ -1674,6 +1722,9 @@ handle_inferior_event (struct execution_control_state *ecs)
      so, then switch to that thread.  */
   if (!ptid_equal (ecs->ptid, inferior_ptid))
     {
+      if (debug_infrun)
+	printf_unfiltered ("infrun: context switch\n");
+
       context_switch (ecs);
 
       if (deprecated_context_hook)
@@ -1696,6 +1747,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   /*      if (INSTRUCTION_NULLIFIED && currently_stepping (ecs)) */
   if (INSTRUCTION_NULLIFIED)
     {
+      if (debug_infrun)
+	printf_unfiltered ("infrun: INSTRUCTION_NULLIFIED\n");
       registers_changed ();
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 
@@ -1715,6 +1768,8 @@ handle_inferior_event (struct execution_control_state *ecs)
      single step over a watchpoint without disabling the watchpoint.  */
   if (HAVE_STEPPABLE_WATCHPOINT && STOPPED_BY_WATCHPOINT (ecs->ws))
     {
+      if (debug_infrun)
+	printf_unfiltered ("infrun: STOPPED_BY_WATCHPOINT\n");
       resume (1, 0);
       prepare_to_wait (ecs);
       return;
@@ -1742,6 +1797,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          includes evaluating watchpoints, things will come to a
          stop in the correct manner.  */
 
+      if (debug_infrun)
+	printf_unfiltered ("infrun: STOPPED_BY_WATCHPOINT\n");
       remove_breakpoints ();
       registers_changed ();
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);	/* Single step */
@@ -1787,6 +1844,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       int step_through_delay
 	= gdbarch_single_step_through_delay (current_gdbarch,
 					     get_current_frame ());
+      if (debug_infrun && step_through_delay)
+	printf_unfiltered ("infrun: step through delay\n");
       if (step_range_end == 0 && step_through_delay)
 	{
 	  /* The user issued a continue when stopped at a breakpoint.
@@ -1835,6 +1894,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     {
       if (stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
 	{
+          if (debug_infrun)
+	    printf_unfiltered ("infrun: stopped\n");
 	  stop_print_frame = 0;
 	  stop_stepping (ecs);
 	  return;
@@ -1844,6 +1905,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          shared libraries hook functions.  */
       if (stop_soon == STOP_QUIETLY)
 	{
+          if (debug_infrun)
+	    printf_unfiltered ("infrun: quietly stopped\n");
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -1863,7 +1926,11 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Don't even think about breakpoints if just proceeded over a
          breakpoint.  */
       if (stop_signal == TARGET_SIGNAL_TRAP && trap_expected)
-	bpstat_clear (&stop_bpstat);
+	{
+          if (debug_infrun)
+	    printf_unfiltered ("infrun: trap expected\n");
+	  bpstat_clear (&stop_bpstat);
+	}
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
@@ -1923,6 +1990,9 @@ process_event_stop_test:
     {
       /* Signal not for debugging purposes.  */
       int printed = 0;
+
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: random signal %d\n", stop_signal);
 
       stopped_by_random_signal = 1;
 
@@ -2003,6 +2073,8 @@ process_event_stop_test:
 	/* If we hit the breakpoint at longjmp, disable it for the
 	   duration of this command.  Then, install a temporary
 	   breakpoint at the target of the jmp_buf. */
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_SET_LONGJMP_RESUME\n");
 	disable_longjmp_breakpoint ();
 	remove_breakpoints ();
 	breakpoints_inserted = 0;
@@ -2026,6 +2098,8 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE:
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_CLEAR_LONGJMP_RESUME\n");
 	remove_breakpoints ();
 	breakpoints_inserted = 0;
 	disable_longjmp_breakpoint ();
@@ -2035,6 +2109,8 @@ process_event_stop_test:
 	/* else fallthrough */
 
       case BPSTAT_WHAT_SINGLE:
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_SINGLE\n");
 	if (breakpoints_inserted)
 	  {
 	    remove_breakpoints ();
@@ -2046,6 +2122,8 @@ process_event_stop_test:
 	break;
 
       case BPSTAT_WHAT_STOP_NOISY:
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_STOP_NOISY\n");
 	stop_print_frame = 1;
 
 	/* We are about to nuke the step_resume_breakpointt via the
@@ -2055,6 +2133,8 @@ process_event_stop_test:
 	return;
 
       case BPSTAT_WHAT_STOP_SILENT:
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_STOP_SILENT\n");
 	stop_print_frame = 0;
 
 	/* We are about to nuke the step_resume_breakpoin via the
@@ -2081,6 +2161,9 @@ process_event_stop_test:
 	   step-resume bp, but it makes no effort to ensure that
 	   the one deleted is the one currently stopped at.  MVS  */
 
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_STEP_RESUME\n");
+
 	if (step_resume_breakpoint == NULL)
 	  {
 	    step_resume_breakpoint =
@@ -2102,6 +2185,8 @@ process_event_stop_test:
 	break;
 
       case BPSTAT_WHAT_THROUGH_SIGTRAMP:
+        if (debug_infrun)
+	  printf_unfiltered ("infrun: BPSTATE_WHAT_THROUGH_SIGTRAMP\n");
 	/* If were waiting for a trap, hitting the step_resume_break
 	   doesn't count as getting it.  */
 	if (trap_expected)
@@ -2112,6 +2197,8 @@ process_event_stop_test:
       case BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK:
 #ifdef SOLIB_ADD
 	{
+          if (debug_infrun)
+	    printf_unfiltered ("infrun: BPSTATE_WHAT_CHECK_SHLIBS\n");
 	  /* Remove breakpoints, we eventually want to step over the
 	     shlib event breakpoint, and SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
@@ -2224,11 +2311,15 @@ process_event_stop_test:
       /* Have we reached our destination?  If not, keep going. */
       if (SOLIB_IN_DYNAMIC_LINKER (PIDGET (ecs->ptid), stop_pc))
 	{
+          if (debug_infrun)
+	    printf_unfiltered ("infrun: stepping in dynamic linker\n");
 	  ecs->another_trap = 1;
 	  keep_going (ecs);
 	  return;
 	}
 #endif
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: step past dynamic linker\n");
       /* Else, stop and report the catchpoint(s) whose triggering
          caused us to begin stepping. */
       ecs->stepping_through_solib_after_catch = 0;
@@ -2242,6 +2333,9 @@ process_event_stop_test:
 
   if (step_resume_breakpoint)
     {
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: step-resume breakpoint\n");
+
       /* Having a step-resume breakpoint overrides anything
          else having to do with stepping commands until
          that breakpoint is reached.  */
@@ -2251,6 +2345,8 @@ process_event_stop_test:
 
   if (step_range_end == 0)
     {
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: no stepping, continue\n");
       /* Likewise if we aren't even stepping.  */
       keep_going (ecs);
       return;
@@ -2263,6 +2359,10 @@ process_event_stop_test:
      within it! */
   if (stop_pc >= step_range_start && stop_pc < step_range_end)
     {
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepping inside range [0x%s-0x%s]\n",
+			    paddr_nz (step_range_start),
+			    paddr_nz (step_range_end));
       keep_going (ecs);
       return;
     }
@@ -2278,6 +2378,9 @@ process_event_stop_test:
     {
       CORE_ADDR pc_after_resolver =
 	gdbarch_skip_solib_resolver (current_gdbarch, stop_pc);
+
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped into dynsym resolve code\n");
 
       if (pc_after_resolver)
 	{
@@ -2299,6 +2402,8 @@ process_event_stop_test:
 	  || step_over_calls == STEP_OVER_ALL)
       && get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME)
     {
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped into signal trampoline\n");
       /* The inferior, while doing a "step" or "next", has ended up in
          a signal trampoline (either by a signal being delivered or by
          the signal handler returning).  Just single-step until the
@@ -2312,6 +2417,9 @@ process_event_stop_test:
     {
       /* It's a subroutine call.  */
       CORE_ADDR real_stop_pc;
+
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped into subroutine\n");
 
       if ((step_over_calls == STEP_OVER_NONE)
 	  || ((step_range_end == 1)
@@ -2403,6 +2511,9 @@ process_event_stop_test:
       /* Determine where this trampoline returns.  */
       CORE_ADDR real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
 
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped into solib return tramp\n");
+
       /* Only proceed through if we know where it's going.  */
       if (real_stop_pc)
 	{
@@ -2431,6 +2542,9 @@ process_event_stop_test:
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
       && ecs->stop_func_name == NULL)
     {
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped into undebuggable function\n");
+
       /* The inferior just stepped into, or returned to, an
          undebuggable function (where there is no symbol, not even a
          minimal symbol, corresponding to the address where the
@@ -2461,6 +2575,8 @@ process_event_stop_test:
     {
       /* It is stepi or nexti.  We always want to stop stepping after
          one instruction.  */
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepi/nexti\n");
       stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
@@ -2475,6 +2591,8 @@ process_event_stop_test:
          stepping (does this always happen right after one instruction,
          when we do "s" in a function with no line numbers,
          or can this happen as a result of a return or longjmp?).  */
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: no line number info\n");
       stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
@@ -2489,6 +2607,8 @@ process_event_stop_test:
          we don't stop if we step into the middle of a different line.
          That is said to make things like for (;;) statements work
          better.  */
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped to a different line\n");
       stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
@@ -2509,6 +2629,8 @@ process_event_stop_test:
          This is particularly necessary for a one-line function,
          in which after skipping the prologue we better stop even though
          we will be in mid-line.  */
+      if (debug_infrun)
+	 printf_unfiltered ("infrun: stepped to a different function\n");
       stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
@@ -2545,6 +2667,8 @@ process_event_stop_test:
       step_frame_id = current_frame;
   }
 
+  if (debug_infrun)
+     printf_unfiltered ("infrun: keep going\n");
   keep_going (ecs);
 }
 
@@ -2681,6 +2805,9 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 static void
 stop_stepping (struct execution_control_state *ecs)
 {
+  if (debug_infrun)
+    printf_unfiltered ("infrun: stop_stepping\n");
+
   /* Let callers know we don't want to wait for the inferior anymore.  */
   ecs->wait_some_more = 0;
 }
@@ -2758,6 +2885,8 @@ keep_going (struct execution_control_state *ecs)
 static void
 prepare_to_wait (struct execution_control_state *ecs)
 {
+  if (debug_infrun)
+    printf_unfiltered ("infrun: prepare_to_wait\n");
   if (ecs->infwait_state == infwait_normal_state)
     {
       overlay_cache_invalid = 1;
@@ -3794,6 +3923,10 @@ Pass and Stop may be combined.", NULL));
       add_cmd ("stop", class_obscure, not_just_help_class_command, "There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the program stops.", &cmdlist);
+
+  add_set_cmd ("infrun", class_maintenance, var_zinteger,
+		  &debug_infrun, "Set inferior debugging.\n\
+When non-zero, inferior specific debugging is enabled.", &setdebuglist);
 
   numsigs = (int) TARGET_SIGNAL_LAST;
   signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);

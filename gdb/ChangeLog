@@ -1,3 +1,10 @@
+2004-11-08  Randolph Chung  <tausq@debian.org>
+
+	* infrun.c (debug_infrun): New variable.
+	(resume, proceed, wait_for_inferior): Annotate with debug messages.
+	(handle_inferior_event, keep_going): Likewise.
+	(_initialize_infrun): Register "set debug infrun" command.
+
 2004-11-08  Andreas Schwab  <schwab@suse.de>
 
 	* linux-nat.c (PTRACE_EVENT_VFORK_DONE): Renamed from
