@@ -683,6 +683,8 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
 {
   union internal_auxent *in = (union internal_auxent *)inp;
   AUXENT *ext = (AUXENT *)extp;
+
+  memset((PTR)ext, 0, AUXESZ);
   switch (class) {
   case C_FILE:
     if (in->x_file.x_fname[0] == 0) {
@@ -733,13 +735,13 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
     bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
+    PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
+    PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
+
     if (ISFCN(type)) {
       PUTWORD(abfd, in->x_sym.x_misc.x_fsize, (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
-      PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
-      PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
     }
     else {
-
       if (ISARY(type) || class == C_BLOCK) {
 #if DIMNUM != E_DIMNUM
 	-> Error, we need to cope with truncating or extending DIMNUM!;
@@ -752,11 +754,6 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
       }
       PUT_LNSZ_LNNO(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
       PUT_LNSZ_SIZE(abfd, in->x_sym.x_misc.x_lnsz.x_size, ext);
-
-      PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
-      PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
-
-
     }
   }
 return sizeof(AUXENT);
@@ -1594,7 +1591,6 @@ unsigned int written)
   for (j = 0; j < native->u.syment.n_numaux;  j++)
   {
     AUXENT buf1;
-    memset((PTR)&buf, 0, AUXESZ);
     coff_swap_aux_out(abfd,
 		      &( (native + j + 1)->u.auxent), type, class, &buf1);
     bfd_write((PTR) (&buf1), 1, AUXESZ, abfd);
