@@ -69,7 +69,6 @@ reloc.h
 sparc-opcode.h
 stab.def
 stab.gnu.h
-symseg.h
 sys
 sysdep.h
 tahoe-opcode.h
@@ -103,7 +102,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/07/24 01:07:25  gnu
+# Revision 1.7  1991/07/31 03:11:46  gnu
+# Remove symseg.h, the ancient GDB symbol-segments (gdb-specific debug
+# information) definition.
+#
+# Revision 1.6  1991/07/24  01:07:25  gnu
 # Add COPYING file.
 #
 # Revision 1.5  1991/07/24  00:47:13  gnu
