@@ -1,5 +1,10 @@
 2000-11-16  H.J. Lu  <hjl@gnu.org>
 
+	* gas/symver/symver0.d: Add 64bit support.
+	* gas/symver/symver1.d: Likewise.
+
+2000-11-16  H.J. Lu  <hjl@gnu.org>
+
 	* gas/symver/symver.exp: Don't run symver4 nor symver5.
 
 2000-11-13  H.J. Lu  <hjl@gnu.org>
