@@ -1,5 +1,13 @@
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
 
+	* infcmd.c (interrupt_target_command_wrapper): Delete.
+	(interrupt_target_command): Make non static.
+	(nofp_registers_info): Make static.
+	* stack.c (return_command_wrapper): Delete.
+	(return_command): Make non static.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
 	* event-top.c (gdb_setup_readline): New function. Code moved from
 	_initialize_event_loop().
 	(_initialize_event_loop): Call gdb_setup_readline().

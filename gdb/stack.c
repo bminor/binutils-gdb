@@ -50,9 +50,9 @@ void (*selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
 
-/* Prototypes for local functions. */
+void return_command (char *, int);
 
-static void return_command (char *, int);
+/* Prototypes for local functions. */
 
 static void down_command (char *, int);
 
@@ -1755,12 +1755,6 @@ down_command (char *count_exp, int from_tty)
 }
 
 void
-return_command_wrapper (char *retval_exp, int from_tty)
-{
-  return_command (retval_exp, from_tty);
-}
-
-static void
 return_command (char *retval_exp, int from_tty)
 {
   struct symbol *thisfun;
