@@ -862,6 +862,12 @@ static const struct frame_unwind i386_frame_unwind =
   i386_frame_this_id,
   i386_frame_prev_register
 };
+
+static const struct frame_unwind *
+i386_frame_p (CORE_ADDR pc)
+{
+  return &i386_frame_unwind;
+}
 
 
 /* Signal trampolines.  */
@@ -920,10 +926,9 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
   i386_sigtramp_frame_this_id,
   i386_sigtramp_frame_prev_register
 };
-
 
-const struct frame_unwind *
-i386_frame_p (CORE_ADDR pc)
+static const struct frame_unwind *
+i386_sigtramp_frame_p (CORE_ADDR pc)
 {
   char *name;
 
@@ -931,8 +936,9 @@ i386_frame_p (CORE_ADDR pc)
   if (PC_IN_SIGTRAMP (pc, name))
     return &i386_sigtramp_frame_unwind;
 
-  return &i386_frame_unwind;
+  return NULL;
 }
+
 
 static CORE_ADDR
 i386_frame_base_address (struct frame_info *next_frame, void **this_cache)
@@ -1707,15 +1713,17 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
-
   /* Hook in the DWARF CFI frame unwinder.  */
   frame_unwind_append_predicate (gdbarch, dwarf_frame_p);
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
-  
-  frame_unwind_append_predicate (gdbarch, i386_frame_p);
+
   frame_base_set_default (gdbarch, &i386_frame_base);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
+  frame_unwind_append_predicate (gdbarch, i386_sigtramp_frame_p);
+  frame_unwind_append_predicate (gdbarch, i386_frame_p);
 
   return gdbarch;
 }

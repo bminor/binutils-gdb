@@ -1,3 +1,11 @@
+2003-05-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_frame_p): Move signal trampoline unwinder...
+	(i386_sigtramp_frame_p): ...here.  Make both functions static.
+	(i386_gdbarch_init): Register signal trampoline unwinder.  Change
+	order in which frame unwinders and frame baase methods are
+	registered to make overriding them easier.
+
 2003-05-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_analyze_struct_return): Correctly indent
