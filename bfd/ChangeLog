@@ -1,3 +1,9 @@
+2002-01-31  Nick Clifton  <nickc@cambridge.redhat.com>
+	    Don Lindsay  <lindsayd@cisco.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Replace 'return
+	false' with a return of a bfd_reloc_ error code.
+
 2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't

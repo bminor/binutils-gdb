@@ -6788,7 +6788,7 @@ mips_elf_calculate_relocation (abfd,
 	{
 	  g = mips_elf_local_got_index (abfd, info, symbol + addend);
 	  if (g == (bfd_vma) -1)
-	    return false;
+	    return bfd_reloc_outofrange;
 	}
 
       /* Convert GOT indices to actual offsets.  */
@@ -6848,7 +6848,7 @@ mips_elf_calculate_relocation (abfd,
 						   symbol,
 						   &value,
 						   input_section))
-	    return false;
+	    return bfd_reloc_undefined;
 	}
       else
 	{
@@ -6969,7 +6969,7 @@ mips_elf_calculate_relocation (abfd,
 						  local_sections, false);
 	  value = mips_elf_got16_entry (abfd, info, symbol + addend, forced);
 	  if (value == (bfd_vma) -1)
-	    return false;
+	    return bfd_reloc_outofrange;
 	  value
 	    = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
 					      abfd,
@@ -7013,7 +7013,7 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS_GOT_PAGE:
       value = mips_elf_got_page (abfd, info, symbol + addend, NULL);
       if (value == (bfd_vma) -1)
-	return false;
+	return bfd_reloc_outofrange;
       value = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
 					      abfd,
 					      value);
