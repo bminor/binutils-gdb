@@ -27,3 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define LSEEK_NOT_LINEAR
 
 #define CANT_FORK
+
+#undef QUIT
+#define QUIT  { pollquit(); }

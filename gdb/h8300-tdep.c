@@ -217,15 +217,15 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   register struct pic_prologue_code *pcode;
   INSN_WORD insn_word;
   int size, offset;
-  unsigned int reg_save_depth = 2;	/* Number of things pushed onto
+  unsigned int reg_save_depth = 2; /* Number of things pushed onto
 				      stack, starts at 2, 'cause the
 				      PC is already there */
 
   unsigned int auto_depth = 0;	/* Number of bytes of autos */
 
-  char in_frame[8];	/* One for each reg */
+  char in_frame[11];		/* One for each reg */
 
-  memset (in_frame, 1, 8);
+  memset (in_frame, 1, 11);
   for (r = 0; r < 8; r++)
     {
       fsr->regs[r] = 0;
