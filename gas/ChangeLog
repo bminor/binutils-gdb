@@ -1,3 +1,20 @@
+Fri Mar 11 17:42:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-vms.c (Close_VMS_Object_File): Add comment pointing
+	out some code that doesn't belong in this file.
+
+	* config/obj-vms.h: Include aout/stab_gnu.h.
+	(N_GSYM, ..., N_LENG): Deleted.
+	(NO_RELOC): Undefine before defining as part of enum reloc_type.
+
+	* config/tc-alpha.c: Add comment questioning need for all the
+	characters in FLT_CHARS.
+
+	* as.c (main) [OBJ_VMS]: Don't call output_file_close.
+
+	* config/obj-ecoff.c (ecoff_frob_file): Set strict order for
+	sections with recognized names, before computing VMA values.
+
 Fri Mar 11 17:56:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Accept numbers between 0x8000 and
