@@ -46,10 +46,13 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 common
+config
 configure
 configure.in
 d10v-elf
+lib
 m32r-elf
+sim
 
 Things-to-lose:
 
