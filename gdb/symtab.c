@@ -117,8 +117,7 @@ struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  const char *mangled_name,
 					  const namespace_enum namespace,
 					  int *is_a_field_of_this,
-					  struct symtab **symtab,
-					  int *force_return);
+					  struct symtab **symtab);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -805,14 +804,6 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   struct symbol *sym;
   const struct block *static_block;
 
-  /* FIXME: carlton/2002-11-05: This variable is here so that
-     lookup_symbol_aux will sometimes return NULL after receiving a
-     NULL return value from lookup_symbol_aux_minsyms, without
-     proceeding on to the partial symtab and static variable tests.  I
-     suspect that that's a bad idea.  */
-  
-  int force_return;
-
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
@@ -931,13 +922,11 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      a mangled variable that is stored in one of the minimal symbol tables.
      Eventually, all global symbols might be resolved in this way.  */
 
-  force_return = 0;
-
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
 				   namespace, is_a_field_of_this,
-				   symtab, &force_return);
+				   symtab);
   
-  if (sym != NULL || force_return == 1)
+  if (sym != NULL)
     return sym;
 
 #endif
@@ -981,13 +970,11 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
    */
 
 
-  force_return = 0;
-
   sym = lookup_symbol_aux_minsyms (name, mangled_name,
 				   namespace, is_a_field_of_this,
-				   symtab, &force_return);
+				   symtab);
   
-  if (sym != NULL || force_return == 1)
+  if (sym != NULL)
     return sym;
 
 #endif
@@ -1172,13 +1159,20 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
    tables.  Eventually, all global symbols might be resolved in this
    way.  */
 
+/* NOTE: carlton/2002-12-05: At one point, this function was part of
+   lookup_symbol_aux, and what are now 'return' statements within
+   lookup_symbol_aux_minsyms returned from lookup_symbol_aux, even if
+   sym was NULL.  As far as I can tell, this was basically accidental;
+   it didn't happen every time that msymbol was non-NULL, but only if
+   some additional conditions held as well, and it caused problems
+   with HP-generated symbol tables.  */
+
 static struct symbol *
 lookup_symbol_aux_minsyms (const char *name,
 			   const char *mangled_name,
 			   const namespace_enum namespace,
 			   int *is_a_field_of_this,
-			   struct symtab **symtab,
-			   int *force_return)
+			   struct symtab **symtab)
 {
   struct symbol *sym;
   struct blockvector *bv;
@@ -1271,7 +1265,6 @@ lookup_symbol_aux_minsyms (const char *name,
 
 	      if (symtab != NULL && sym != NULL)
 		*symtab = s;
-	      *force_return = 1;
 	      return fixup_symbol_section (sym, s->objfile);
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
@@ -1280,7 +1273,6 @@ lookup_symbol_aux_minsyms (const char *name,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      *force_return = 1;
 	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
 					NULL, namespace, is_a_field_of_this,
 					symtab);
@@ -2904,12 +2896,31 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	      {
 		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		  {
-		    if (kind == FUNCTIONS_NAMESPACE
-			|| lookup_symbol (SYMBOL_NAME (msymbol),
-					  (struct block *) NULL,
-					  VAR_NAMESPACE,
-					0, (struct symtab **) NULL) == NULL)
-		      found_misc = 1;
+		    if (kind == FUNCTIONS_NAMESPACE)
+		      {
+			found_misc = 1;
+		      }
+		    else
+		      {
+			struct symbol *sym;
+
+			if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
+			  sym
+			    = lookup_symbol_aux_minsyms (SYMBOL_DEMANGLED_NAME
+							 (msymbol),
+							 SYMBOL_NAME (msymbol),
+							 VAR_NAMESPACE,
+							 NULL, NULL);
+			else
+			  sym
+			    = lookup_symbol_aux_minsyms (SYMBOL_NAME (msymbol),
+							 NULL,
+							 VAR_NAMESPACE,
+							 NULL, NULL);
+
+			if (sym == NULL)
+			  found_misc = 1;
+		      }
 		  }
 	      }
 	  }
