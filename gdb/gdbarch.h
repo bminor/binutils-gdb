@@ -56,12 +56,6 @@ extern struct gdbarch *current_gdbarch;
    converted. */
 
 #if GDB_MULTI_ARCH
-#if defined (EXTRA_FRAME_INFO)
-#error "EXTRA_FRAME_INFO: replaced by struct frame_extra_info"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
 #if defined (FRAME_FIND_SAVED_REGS)
 #error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif

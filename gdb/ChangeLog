@@ -1,5 +1,14 @@
 2003-04-05  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_frame_id): Update comment.
+	(legacy_get_prev_frame): Update comment.
+	* gdbarch.sh: Delete check for EXTRA_FRAME_INFO.
+	* gdbarch.h: Regenerate.
+	* config/sparc/tm-sparc.h (EXTRA_FRAME_INFO): Delete.
+	* frame.h: Delete #ifdef EXTRA_FRAME_INFO code.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
 	* stack.c (print_frame_info): Use get_frame_pc.
 
 2003-04-04  Andrew Cagney  <cagney@redhat.com>

@@ -320,7 +320,7 @@ extern void frame_pop (struct frame_info *frame);
 
 /* Describe the saved registers of a frame.  */
 
-#if defined (EXTRA_FRAME_INFO) || defined (FRAME_FIND_SAVED_REGS)
+#if defined (FRAME_FIND_SAVED_REGS)
 /* XXXX - deprecated */
 struct frame_saved_regs
   {
@@ -387,13 +387,6 @@ struct frame_info
     /* Allocated by frame_saved_regs_zalloc () which is called /
        initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
     CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
-
-#ifdef EXTRA_FRAME_INFO
-    /* XXXX - deprecated */
-    /* Anything extra for this structure that may have been defined
-       in the machine dependent files. */
-      EXTRA_FRAME_INFO
-#endif
 
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */

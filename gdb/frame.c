@@ -65,9 +65,7 @@ get_frame_id (struct frame_info *fi)
       fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
       fi->id_p = 1;
       /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  Unfortunatly, some
-	 architectures (HP/UX) still reply on EXTRA_FRAME_INFO and,
-	 hence, still poke at the "struct frame_info" object directly.  */
+	 store the frame ID in PREV_FRAME.  */
       fi->frame = fi->id.base;
     }
   return frame_id_build (fi->frame, get_frame_pc (fi));
@@ -1150,9 +1148,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	 frame base, in the frame object.  */
 
       /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  Unfortunatly, some
-	 architectures (HP/UX) still reply on EXTRA_FRAME_INFO and,
-	 hence, still poke at the "struct frame_info" object directly.  */
+	 store the frame ID in PREV_FRAME.  */
       /* FIXME: cagney/2003-04-04: Once ->frame is eliminated, this
          assignment can go.  */
       prev->frame = prev->id.base;
