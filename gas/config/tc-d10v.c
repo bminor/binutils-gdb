@@ -64,6 +64,13 @@ static Fixups *fixups;
 
 static int do_not_ignore_hash = 0;
 
+typedef int packing_type;
+#define PACK_UNSPEC 	(0)	/* packing order not specified */
+#define PACK_PARALLEL	(1)	/* "||" */
+#define PACK_LEFT_RIGHT (2)	/* "->" */
+#define PACK_RIGHT_LEFT (3)	/* "<-" */
+static packing_type etype = PACK_UNSPEC; /* used by d10v_cleanup */
+
 /* True if instruction swapping warnings should be inhibited.  */
 static unsigned char flag_warn_suppress_instructionswap; /* --nowarnswap */
 
@@ -79,13 +86,13 @@ static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS
 static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
-				  struct d10v_opcode *opcode2, unsigned long insn2, int exec_type, Fixups *fx));
+				  struct d10v_opcode *opcode2, unsigned long insn2, packing_type exec_type, Fixups *fx));
 static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode));
 static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
 						   offsetT value, int left, fixS *fix));
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
 				struct d10v_opcode *opcode2, unsigned long insn2,
-				int exec_type));
+				packing_type exec_type));
 static symbolS * find_symbol_matching_register PARAMS ((expressionS *));
 
 struct option md_longopts[] =
@@ -724,38 +731,40 @@ write_1_short (opcode, insn, fx)
   fx->fc = 0;
 }
 
-/* write out a short form instruction if possible */
-/* return number of instructions not written out */
+/* Expects two short instructions.
+   If possible, writes out both as a single packed instruction.
+   Otherwise, writes out the first one, packed with a NOP.
+   Returns number of instructions not written out. */
+
 static int
 write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx) 
      struct d10v_opcode *opcode1, *opcode2;
      unsigned long insn1, insn2;
-     int exec_type;
+     packing_type exec_type;
      Fixups *fx;
 {
   unsigned long insn;
   char *f;
   int i,j, where;
 
-  if ( (exec_type != 1) && ((opcode1->exec_type & PARONLY)
+  if ( (exec_type != PACK_PARALLEL) && ((opcode1->exec_type & PARONLY)
 	                || (opcode2->exec_type & PARONLY)))
     as_fatal (_("Instruction must be executed in parallel"));
   
   if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
     as_fatal (_("Long instructions may not be combined."));
 
-  if(opcode1->exec_type & BRANCH_LINK && exec_type == 0)
-    {
-      /* Instructions paired with a subroutine call are executed before the
-	 subroutine, so don't do these pairings unless explicitly requested.  */
-      write_1_short (opcode1, insn1, fx->next);
-      return (1);
-    }
 
   switch (exec_type) 
     {
-    case 0:	/* order not specified */
-      if ( Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
+    case PACK_UNSPEC:	/* order not specified */
+      if (opcode1->exec_type & ALONE)
+	{
+	  /* Case of a short branch on a separate GAS line.  Pack with NOP. */
+	  write_1_short (opcode1, insn1, fx->next);
+	  return 1;
+	}
+      if (Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
 	{
 	  /* parallel */
 	  if (opcode1->unit == IU)
@@ -765,25 +774,27 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  else
 	    {
 	      insn = FM00 | (insn1 << 15) | insn2;  
+	      /* Advance over dummy fixup since packed insn1 in L */
 	      fx = fx->next;
 	    }
 	}
       else if (opcode1->unit == IU) 
-	{
-	  /* reverse sequential */
-	  insn = FM10 | (insn2 << 15) | insn1;
-	}
+	/* reverse sequential with IU opcode1 on right and done first */
+	insn = FM10 | (insn2 << 15) | insn1;
       else
 	{
-	  /* sequential */
+	  /* sequential with non-IU opcode1 on left and done first */
 	  insn = FM01 | (insn1 << 15) | insn2;
-	  fx = fx->next;  
+	 /* Advance over dummy fixup since packed insn1 in L */
+	  fx = fx->next;
 	}
       break;
-    case 1:	/* parallel */
-      if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
-	as_fatal (_("One of these instructions may not be executed in parallel."));
 
+
+    case PACK_PARALLEL:
+      if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
+	as_fatal 
+	    (_("One of these instructions may not be executed in parallel."));
       if (opcode1->unit == IU)
 	{
 	  if (opcode2->unit == IU)
@@ -803,23 +814,31 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       else
 	{
 	  insn = FM00 | (insn1 << 15) | insn2;  
+	  /* Advance over dummy fixup since packed insn1 in L */
 	  fx = fx->next;
 	}
       break;
-    case 2:	/* sequential */
+
+
+    case PACK_LEFT_RIGHT:
       if (opcode1->unit != IU)
 	insn = FM01 | (insn1 << 15) | insn2;  
       else if (opcode2->unit == MU || opcode2->unit == EITHER)
 	{
           if (!flag_warn_suppress_instructionswap)
 	    as_warn (_("Swapping instruction order"));
-	  insn = FM10 | (insn2 << 15) | insn1;  
+	  insn = FM10 | (insn2 << 15) | insn1;
 	}
       else
 	as_fatal (_("IU instruction may not be in the left container"));
+      if (opcode1->exec_type & ALONE)
+	as_warn (_("Instruction in R container is squashed by flow control instruction in L container."));
+      /* Advance over dummy fixup */
       fx = fx->next;
       break;
-    case 3:	/* reverse sequential */
+
+
+    case PACK_RIGHT_LEFT:
       if (opcode2->unit != MU)
 	insn = FM10 | (insn1 << 15) | insn2;
       else if (opcode1->unit == IU || opcode1->unit == EITHER)
@@ -830,14 +849,28 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	}
       else
 	as_fatal (_("MU instruction may not be in the right container"));
+      if (opcode2->exec_type & ALONE)
+	as_warn (_("Instruction in R container is squashed by flow control instruction in L container."));
+      /* Advance over dummy fixup */
       fx = fx->next;
       break;
+
+
     default:
       as_fatal (_("unknown execution type passed to write_2_short()"));
     }
 
+
   f = frag_more(4);
   number_to_chars_bigendian (f, insn, 4);
+
+  /* Process fixup chains.  
+     Note that the packing code above advanced fx conditionally.
+     dlindsay@cygnus.com:  There's something subtle going on here involving
+	_dummy_first_bfd_reloc_code_real.  This is related to the
+	difference between BFD_RELOC_D10V_10_PCREL_R and _L, ie whether
+	a fixup is done in the L or R container.  A bug in this code
+	can pass Plum Hall fine, yet still affect hand-written assembler. */
 
   for (j=0; j<2; j++) 
     {
@@ -876,7 +909,7 @@ static int
 parallel_ok (op1, insn1, op2, insn2, exec_type)
      struct d10v_opcode *op1, *op2;
      unsigned long insn1, insn2;
-     int exec_type;
+     packing_type exec_type;
 {
   int i, j, flags, mask, shift, regno;
   unsigned long ins, mod[2], used[2];
@@ -889,9 +922,10 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
       || (op1->unit == MU && op2->unit == MU))
     return 0;
 
-  /* If the first instruction is a branch and this is auto parallazation,
-     don't combine with any second instruction.  */
-  if (exec_type == 0 && (op1->exec_type & BRANCH) != 0)
+  /* If this is auto parallization, and either instruction is a branch,
+     don't parallel. */
+  if (exec_type == PACK_UNSPEC
+      && (op1->exec_type & ALONE || op2->exec_type & ALONE))
     return 0;
 
   /* The idea here is to create two sets of bitmasks (mod and used)
@@ -1005,33 +1039,35 @@ static unsigned long prev_insn;
 static struct d10v_opcode *prev_opcode = 0;
 static subsegT prev_subseg;
 static segT prev_seg = 0;;
-static int etype = 0;		/* saved extype.  used for multiline instructions */
 
 void
 md_assemble (str)
      char *str;
 {
+  /* etype is saved extype. for multiline instructions */
+
+  packing_type extype = PACK_UNSPEC;		/* parallel, etc */
+
   struct d10v_opcode * opcode;
   unsigned long insn;
-  int extype = 0;		/* execution type; parallel, etc */
   char * str2;
 
-  if (etype == 0)
+  if (etype == PACK_UNSPEC)
     {
       /* look for the special multiple instruction separators */
       str2 = strstr (str, "||");
       if (str2) 
-	extype = 1;
+	extype = PACK_PARALLEL;
       else
 	{
 	  str2 = strstr (str, "->");
 	  if (str2) 
-	    extype = 2;
+	    extype = PACK_LEFT_RIGHT;
 	  else
 	    {
 	      str2 = strstr (str, "<-");
 	      if (str2) 
-		extype = 3;
+		extype = PACK_RIGHT_LEFT;
 	    }
 	}
       /* str2 points to the separator, if one */
@@ -1040,7 +1076,7 @@ md_assemble (str)
 	  *str2 = 0;
 	  
 	  /* if two instructions are present and we already have one saved
-	     then first write it out */
+	     then first write out the save one */
 	  d10v_cleanup ();
 	  
 	  /* assemble first instruction and save it */
@@ -1055,7 +1091,7 @@ md_assemble (str)
   insn = do_assemble (str, &opcode);
   if (insn == -1)
     {
-      if (extype)
+      if (extype != PACK_UNSPEC)
 	{
 	  etype = extype;
 	  return;
@@ -1063,16 +1099,16 @@ md_assemble (str)
       as_fatal (_("can't find opcode "));
     }
 
-  if (etype)
+  if (etype != PACK_UNSPEC)
     {
       extype = etype;
-      etype = 0;
+      etype = PACK_UNSPEC;
     }
 
   /* if this is a long instruction, write it and any previous short instruction */
   if (opcode->format & LONG_OPCODE) 
     {
-      if (extype) 
+      if (extype != PACK_UNSPEC) 
 	as_fatal (_("Unable to mix instructions as specified"));
       d10v_cleanup ();
       write_long (opcode, insn, fixups);
@@ -1081,7 +1117,7 @@ md_assemble (str)
     }
   
   if (prev_opcode && prev_seg && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
-    d10v_cleanup();
+    d10v_cleanup ();
   
   if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, extype, fixups) == 0)) 
     {
@@ -1090,7 +1126,7 @@ md_assemble (str)
     }
   else
     {
-      if (extype) 
+      if (extype != PACK_UNSPEC) 
 	as_fatal (_("Unable to mix instructions as specified"));
       /* save off last instruction so it may be packed on next pass */
       prev_opcode = opcode;
@@ -1570,14 +1606,16 @@ md_apply_fix3 (fixp, valuep, seg)
 /* d10v_cleanup() is called after the assembler has finished parsing the input 
    file or after a label is defined.  Because the D10V assembler sometimes saves short 
    instructions to see if it can package them with the next instruction, there may
-   be a short instruction that still needs written.  */
+   be a short instruction that still needs written.
+   NOTE: accesses a global, etype.
+   NOTE: invoked by various macros such as md_cleanup: see.  */
 int
 d10v_cleanup ()
 {
   segT seg;
   subsegT subseg;
 
-  if (prev_opcode && etype == 0)
+  if (prev_opcode && etype == PACK_UNSPEC)
     {
       seg = now_seg;
       subseg = now_subseg;

@@ -1,3 +1,12 @@
+Thu May  4 15:27:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* config/tc-d10v.c (write_2_short, parallel_ok, md_assemble,
+	d10v_cleanup) implement Mitsubishi's newly explained branch-packing
+	rules, with warning when a GAS statement specifies a packing that
+	will result in an instruction being squashed.
+	Added typdef packing_type and enumerals, changed various integer literals
+	to use the enumerals.
+
 2000-05-24  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (dot_restorereg_p): New function.
