@@ -55,18 +55,21 @@ machine; for example, use @file{sparc-stub.c} to debug programs on
 @cindex remote serial stub list
 These working remote stubs are distributed with @value{GDBN}:
 
-@c FIXME! verify these...
 @table @code
 @item sparc-stub.c
 @kindex sparc-stub.c
 For @sc{sparc} architectures.
 
 @item m68k-stub.c
-@kindex m68-stub.c
+@kindex m68k-stub.c
+@kindex Motorola 680x0
+@kindex 680x0
 For Motorola 680x0 architectures.
 
 @item i386-stub.c
-@kindex i36-stub.c
+@kindex i386-stub.c
+@kindex Intel
+@kindex 386
 For Intel 386 and compatible architectures.
 @end table
 
@@ -203,6 +206,20 @@ Insert these lines near the top of your program:
 set_debug_traps();
 breakpoint();
 @end example
+
+@item
+For the 680x0 stub only, you need to provide a variable called
+exceptionHook.  Normally you just use
+
+@example
+void (*exceptionHook)() = 0;
+@end example
+
+but if you, before calling @code{set_debug_traps}, set it to point to
+a function, that function will be called when the debugger continues
+from a trap (for example, bus error) which causes the debugger to be
+entered.  It is passed one parameter---an @code{int} which is the
+exception number.
 
 @item
 Compile and link together: your program, the @value{GDBN} debugging stub for

@@ -1,3 +1,7 @@
+Wed Jun  9 10:58:16 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdbinv-s.texi (Debug Session): Document exceptionHook.
+
 Tue Jun  8 13:42:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.texinfo (Print Settings): Move all stuff relating to symbolic
