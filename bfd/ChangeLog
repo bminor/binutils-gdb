@@ -1,3 +1,24 @@
+Thu Feb 12 17:31:11 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
+	* vaxnetbsd.c: New file.
+	* netbsd-core.c: Clean up.  Remove unused macros.  Use netbsd
+	rather than netbsd_core.
+	* targets.c (vaxnetbsd_vec): Declare.
+	(bfd_target_vector): Add vaxnetbsd_vec.  If NETBSD_CORE is
+	defined, add netbsd_core_vec.
+	* configure.in: Set COREFILE for alpha*-*-netbsd* and
+	powerpc-*-netbsd* to netbsd-core.lo.  If COREFILE is
+	netbsd-core.lo, set COREFLAG to -DNETBSD_CORE.
+	* config.bfd (alpha*-*-netbsd*): New target.
+	* Makefile.am: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add vaxnetbsd.lo.
+	(BFD32_BACKENDS_CFILES): Add vaxnetbsd.c.
+	* configure, Makefile.in: Rebuild.
+
+	* configure.host: Remove the old shared library build stuff.  We
+	now use libtool instead.
+
 Wed Feb 11 17:13:09 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tekhex.c (tekhex_write_object_contents): Call tekhex_init.

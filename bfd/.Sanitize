@@ -285,6 +285,7 @@ targets.c
 targmatch.sed
 tekhex.c
 trad-core.c
+vaxnetbsd.c
 versados.c
 xcofflink.c
 

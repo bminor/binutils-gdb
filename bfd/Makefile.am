@@ -66,6 +66,7 @@ ALL_MACHINES = \
 	cpu-rs6000.lo \
 	cpu-sh.lo \
 	cpu-sparc.lo \
+	cpu-tic30.lo \
 	$(start-sanitize-tic80) \
 	cpu-tic80.lo \
 	$(end-sanitize-tic80) \
@@ -97,6 +98,7 @@ ALL_MACHINES_CFILES = \
 	cpu-rs6000.c \
 	cpu-sh.c \
 	cpu-sparc.c \
+	cpu-tic30.c \
 	cpu-v850.c \
 	cpu-vax.c \
 	cpu-we32k.c \
@@ -110,6 +112,7 @@ BFD32_BACKENDS = \
 	aout-arm.lo \
 	aout-ns32k.lo \
 	aout-sparcle.lo \
+	aout-tic30.lo \
 	aout0.lo \
 	aout32.lo \
 	bout.lo \
@@ -135,6 +138,7 @@ BFD32_BACKENDS = \
 	coff-sparc.lo \
 	coff-stgo32.lo \
 	coff-svm68k.lo \
+	coff-tic30.lo \
 	$(start-sanitize-tic80) \
 	coff-tic80.lo \
 	$(end-sanitize-tic80) \
@@ -209,6 +213,7 @@ BFD32_BACKENDS = \
 	sparclynx.lo \
 	sparcnetbsd.lo \
 	sunos.lo \
+	vaxnetbsd.lo \
 	versados.lo \
 	xcofflink.lo
 
@@ -217,6 +222,7 @@ BFD32_BACKENDS_CFILES = \
 	aout-arm.c \
 	aout-ns32k.c \
 	aout-sparcle.c \
+	aout-tic30.c \
 	aout0.c \
 	aout32.c \
 	bout.c \
@@ -242,6 +248,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-sparc.c \
 	coff-stgo32.c \
 	coff-svm68k.c \
+	coff-tic30.c \
 	coff-u68k.c \
 	coff-we32k.c \
 	coff-w65.c \
@@ -310,6 +317,7 @@ BFD32_BACKENDS_CFILES = \
 	sparclynx.c \
 	sparcnetbsd.c \
 	sunos.c \
+	vaxnetbsd.c \
 	versados.c \
 	xcofflink.c
 
@@ -550,21 +558,21 @@ headers:
 # We only rebuild the header files automatically if we have been
 # configured with --enable-maintainer-mode.
 
-$(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h
+$(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h ; @true
 stmp-bin2-h: $(BFD_H_FILES)
 	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) bfd.h)
 	cp $(docdir)/bfd.h bfd-in2.h-new
 	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 	touch stmp-bin2-h
 
-$(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h
+$(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h ; @true
 stmp-lbfd-h: $(LIBBFD_H_FILES)
 	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) libbfd.h)
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 	touch stmp-lbfd-h
 
-$(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h
+$(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h ; @true
 stmp-lcoff-h: $(LIBCOFF_H_FILES)
 	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) libcoff.h)
 	cp $(docdir)/libcoff.h libcoff.h-new
@@ -644,6 +652,7 @@ cpu-powerpc.lo: cpu-powerpc.c
 cpu-rs6000.lo: cpu-rs6000.c
 cpu-sh.lo: cpu-sh.c
 cpu-sparc.lo: cpu-sparc.c
+cpu-tic30.lo: cpu-tic30.c
 cpu-v850.lo: cpu-v850.c
 cpu-vax.lo: cpu-vax.c
 cpu-we32k.lo: cpu-we32k.c
@@ -661,6 +670,9 @@ aout-sparcle.lo: aout-sparcle.c $(INCDIR)/bfdlink.h \
   libaout.h aoutf1.h $(INCDIR)/aout/sun4.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
+aout-tic30.lo: aout-tic30.c libaout.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h aoutx.h
 aout0.lo: aout0.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
@@ -728,6 +740,8 @@ coff-stgo32.lo: coff-stgo32.c coff-i386.c $(INCDIR)/coff/i386.h \
 coff-svm68k.lo: coff-svm68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
+coff-tic30.lo: coff-tic30.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic30.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -923,6 +937,9 @@ sparcnetbsd.lo: sparcnetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
 sunos.lo: sunos.c $(INCDIR)/bfdlink.h libaout.h aoutf1.h \
   $(INCDIR)/aout/sun4.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
+vaxnetbsd.lo: vaxnetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 versados.lo: versados.c $(INCDIR)/libiberty.h
 xcofflink.lo: xcofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libcoff.h

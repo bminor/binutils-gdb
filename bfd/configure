@@ -2322,6 +2322,7 @@ if test "${target}" = "${host}"; then
 EOF
 
 	;;
+  alpha*-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   alpha*-*-*)		COREFILE=osf-core.lo ;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
@@ -2511,6 +2512,7 @@ EOF
   powerpc-*-aix4*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.lo ;;
   powerpc-*-beos*)	;;
+  powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
@@ -2557,6 +2559,7 @@ EOF
   hpux-core.lo)		COREFLAG=-DHPUX_CORE ;;
   irix-core.lo)		COREFLAG=-DIRIX_CORE ;;
   lynx-core.lo)		COREFLAG=-DLYNX_CORE ;;
+  netbsd-core.lo)	COREFLAG=-DNETBSD_CORE ;;
   osf-core.lo)		COREFLAG=-DOSF_CORE ;;
   ptrace-core.lo)	COREFLAG=-DPTRACE_CORE ;;
   rs6000-core.lo)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
@@ -2567,19 +2570,19 @@ EOF
   # Define HAVE_SYS_PROCFS_H if the file exists and defines
   # prstatus_t.
   echo $ac_n "checking for sys/procfs.h""... $ac_c" 1>&6
-echo "configure:2571: checking for sys/procfs.h" >&5
+echo "configure:2574: checking for sys/procfs.h" >&5
   if eval "test \"`echo '$''{'bfd_cv_header_sys_procfs_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2576 "configure"
+#line 2579 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() {
 prstatus_t t;
 ; return 0; }
 EOF
-if { (eval echo configure:2583: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:2586: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_header_sys_procfs_h=yes
 else
@@ -2801,7 +2804,7 @@ do
     shlcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     som_vec)			tb="$tb som.lo" ;;
     sparcle_aout_vec)		tb="$tb aout-sparcle.lo aout32.lo" ;;
-    sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo stab-syms.lo" ;;
+    sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.lo lynx-core.lo aout32.lo" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.lo lynx-core.lo" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.lo aout32.lo" ;;
@@ -2900,17 +2903,17 @@ for ac_hdr in unistd.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:2904: checking for $ac_hdr" >&5
+echo "configure:2907: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2909 "configure"
+#line 2912 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2914: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2917: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2939,12 +2942,12 @@ done
 for ac_func in getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:2943: checking for $ac_func" >&5
+echo "configure:2946: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2948 "configure"
+#line 2951 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2967,7 +2970,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2971: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2974: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -2992,7 +2995,7 @@ fi
 done
 
 echo $ac_n "checking for working mmap""... $ac_c" 1>&6
-echo "configure:2996: checking for working mmap" >&5
+echo "configure:2999: checking for working mmap" >&5
 if eval "test \"`echo '$''{'ac_cv_func_mmap_fixed_mapped'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3000,7 +3003,7 @@ else
   ac_cv_func_mmap_fixed_mapped=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 3004 "configure"
+#line 3007 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test.
@@ -3140,7 +3143,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:3144: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:3147: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_mmap_fixed_mapped=yes
 else
@@ -3165,12 +3168,12 @@ fi
 for ac_func in madvise mprotect
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:3169: checking for $ac_func" >&5
+echo "configure:3172: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3174 "configure"
+#line 3177 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -3193,7 +3196,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:3197: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:3200: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
