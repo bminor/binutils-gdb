@@ -1,3 +1,9 @@
+2004-03-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Update copyright year.
+	(CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER): Undefine and then
+	define unconditionally.
+
 2004-03-15  Mark Kettenis  <m.kettenis@osp.nl>
 
 	* i387-tdep.h (i387_collect_fsave): New prototype.

@@ -1,5 +1,6 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,14 +53,12 @@ typedef struct fpreg fpregset_t;
    presence, and deal gracefully with their absence.  */
 
 /* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
+#undef CANNOT_FETCH_REGISTER
 #define CANNOT_FETCH_REGISTER(regno) cannot_fetch_register (regno)
-#endif
 
 /* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
+#undef CANNOT_STORE_REGISTER
 #define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
-#endif
 
 /* Offset to the gregset_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (gregset_t, reg)
