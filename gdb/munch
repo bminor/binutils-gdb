@@ -7,12 +7,15 @@ echo 'void initialize_all_files () {'
 
 NMOPT=""
 case $1 in
--*)	NMOPT=$1; shift ;;
+MUNCH_NM=*)
+	MUNCH_NM=`echo $1 | sed 's/MUNCH_NM=//'`; shift ;;
+-*)
+	NMOPT=$1; shift ;;
 esac
 
 # make it easy to use a different nm, e.g. for cross-developing
 
-MUNCH_NM="nm $NMOPT"
+MUNCH_NM="${MUNCH_NM-nm} $NMOPT"
 if test "`$MUNCH_NM main.o | egrep 'T _?main$'`" = "" ; then
     # System V style nm
     shift;
@@ -20,8 +23,9 @@ if test "`$MUNCH_NM main.o | egrep 'T _?main$'`" = "" ; then
 	sed -e 's/^.*\(_initialize_[a-zA-Z0-9_]*\)[^a-zA-Z0-9_].*$/   {extern void \1 (); \1 ();}/'
 else
     # BSD style nm
-    $MUNCH_NM -p $* | egrep 'T *_?_initialize_' | \
-	sed -e 's/^.*T *_*\(.*\)/    {extern void _\1 (); _\1 ();}/'
+    # We now accept either text or data symbols, since the RT/PC uses data.
+    $MUNCH_NM -p $* | egrep '[TD] *_?_initialize_' | \
+	sed -e 's/^.*[TD] *_*\(.*\)/    {extern void _\1 (); _\1 ();}/'
 fi
 
 echo '}'

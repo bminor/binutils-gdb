@@ -125,8 +125,8 @@ TERMCAP = -ltermcap
 
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
-# TERMCAP comes last, since readline depends on it.
-CLIBS = $(XM_CLIBS) ${TM_CLIBS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB} ${TERMCAP}
+# TERMCAP comes after readline, since readline depends on it.
+CLIBS = ${BFD_LIB} ${LIBIBERTY} ${RL_LIB} ${TERMCAP} ${XM_CLIBS} ${TM_CLIBS}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
@@ -316,7 +316,7 @@ gdb1: gdb
 # remote support.
 rapp: $(RAPP_OBS)
 	rm -f rapp_init.c
-	${srcdir}/munch ${RAPP_OBS} > rapp_init.c
+	${srcdir}/munch ${MUNCH_DEFINE} ${RAPP_OBS} > rapp_init.c
 	${CC-LD} $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 	
 # Support for building Makefile out of configured pieces, automatically
