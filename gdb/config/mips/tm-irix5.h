@@ -84,13 +84,6 @@
       ((N) - FP0_REGNUM) * sizeof(double) : \
       32 * sizeof(double) + ((N) - 32) * mips_regsize (current_gdbarch))
 
-#undef  MIPS_REGISTER_TYPE
-#define MIPS_REGISTER_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
-	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
-	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
-	 : builtin_type_int)
-
 #endif /* N32 */
 
 

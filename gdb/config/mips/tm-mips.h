@@ -94,17 +94,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 
 #define MIPS_REGISTER_BYTE(N) ((N) * mips_regsize (current_gdbarch))
 
-/* Return the GDB type object for the "standard" data type of data in
-   register N.  */
-
-#ifndef MIPS_REGISTER_TYPE
-#define MIPS_REGISTER_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_float \
-	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
-	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
-	 : builtin_type_int)
-#endif
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 

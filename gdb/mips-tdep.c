@@ -649,9 +649,8 @@ mips_register_raw_size (int regnum)
   else if (regnum < 2 * NUM_REGS)
     {
       /* For the moment map [NUM_REGS .. 2*NUM_REGS) onto the same raw
-	 registers, but always return the virtual size.  */
-      int rawnum = regnum % NUM_REGS;
-      return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, rawnum));
+	 registers, but return the register's virtual size.  */
+      return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
     }
   else
     internal_error (__FILE__, __LINE__, "Register %d out of range", regnum);
@@ -681,8 +680,7 @@ mips_register_byte (int regnum)
       /* Add space for all the proceeding registers based on their
          real size.  */
       for (reg = NUM_REGS; reg < regnum; reg++)
-	byte += TYPE_LENGTH (gdbarch_register_type (current_gdbarch,
-                                                    (reg % NUM_REGS)));
+	byte += TYPE_LENGTH (gdbarch_register_type (current_gdbarch, reg));
       return byte;
     }
   else
@@ -762,35 +760,40 @@ mips_value_to_register (struct frame_info *frame, int regnum,
 static struct type *
 mips_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  /* For moment, map [NUM_REGS .. 2*NUM_REGS) onto the same raw
-     registers.  Even return the same type.  */
-  int rawnum = regnum % NUM_REGS;
-  gdb_assert (rawnum >= 0 && rawnum < NUM_REGS);
-#ifdef MIPS_REGISTER_TYPE
-  return MIPS_REGISTER_TYPE (rawnum);
-#else
-  if (FP0_REGNUM <= rawnum && rawnum < FP0_REGNUM + 32)
+  gdb_assert (regnum >= 0 && regnum < 2 * NUM_REGS);
+  if ((regnum % NUM_REGS) >= FP0_REGNUM
+      && (regnum % NUM_REGS) < FP0_REGNUM + 32)
     {
-      /* Floating point registers...  */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	return builtin_type_ieee_double_big;
-      else
-	return builtin_type_ieee_double_little;
+      /* The floating-point registers raw, or cooked, always match
+         mips_regsize(), and also map 1:1, byte for byte.  */
+      switch (gdbarch_byte_order (gdbarch))
+	{
+	case BFD_ENDIAN_BIG:
+	  if (mips_regsize (gdbarch) == 4)
+	    return builtin_type_ieee_single_big;
+	  else
+	    return builtin_type_ieee_double_big;
+	case BFD_ENDIAN_LITTLE:
+	  if (mips_regsize (gdbarch) == 4)
+	    return builtin_type_ieee_single_little;
+	  else
+	    return builtin_type_ieee_double_little;
+	case BFD_ENDIAN_UNKNOWN:
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
+	}
     }
-  else if (rawnum == PS_REGNUM /* CR */)
-    return builtin_type_uint32;
-  else if (FCRCS_REGNUM <= rawnum && rawnum <= LAST_EMBED_REGNUM)
-    return builtin_type_uint32;
+  else if (regnum >= (NUM_REGS + FCRCS_REGNUM)
+	   && regnum <= NUM_REGS + LAST_EMBED_REGNUM)
+    /* The pseudo/cooked view of the embedded registers is always
+       32-bit.  The raw view is handled below.  */
+    return builtin_type_int32;
+  else if (mips_regsize (gdbarch) == 8)
+    /* 64-bit ISA.  */
+    return builtin_type_int64;
   else
-    {
-      /* Everything else...
-         Return type appropriate for width of register.  */
-      if (mips_regsize (current_gdbarch) == TYPE_LENGTH (builtin_type_uint64))
-	return builtin_type_uint64;
-      else
-	return builtin_type_uint32;
-    }
-#endif
+    /* 32-bit ISA.  */
+    return builtin_type_int32;
 }
 
 /* TARGET_READ_SP -- Remove useless bits from the stack pointer.  */

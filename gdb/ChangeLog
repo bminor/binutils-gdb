@@ -1,5 +1,18 @@
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_register_type): Simplify.  Eliminate reference
+	to MIPS_REGISTER_TYPE.  Make integer registers signed.  Make IRIX
+	n32 registers 64 bit.
+	(mips_register_raw_size, mips_register_byte): For pseudo
+	registers, use the register's pseudo size and not the
+	corresponding raw register's size.
+	* config/mips/tm-mips64.h (MIPS_REGISTER_TYPE): Delete macro.
+	* config/mips/tm-mips.h (MIPS_REGISTER_TYPE): Delete macro.
+	* config/mips/tm-irix6.h: Don't #undef MIPS_REGISTER_TYPE.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_TYPE): Delete macro.
+
+2003-11-15  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (struct gdbarch_tdep): Delete member
 	gdb_target_is_mips64.
 	(GDB_TARGET_IS_MIPS64): Delete macro.
