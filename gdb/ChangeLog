@@ -1,5 +1,10 @@
 Wed Sep  2 13:45:27 1992  John Gilmore  (gnu@cygnus.com)
 
+	* config/rs6000.mh (MH_CFLAGS):  Circumvent IBM <rpc/rpc.h> bug,
+	for files in vx-share/*.c.
+	* xm-rs6000.h (fd_set):  Circumvent the rs6000.mh circumvention,
+	for normal GDB source files.
+
 	* Makefile.in (VERSION):  Roll to 4.6.6.
 
 	* tm-vx68.h, tm-es1800.h:  Use tm-68k.h rather than tm-sun3.h.

@@ -1,5 +1,5 @@
 /* Parameters for hosting on an RS6000, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
 This file is part of GDB.
@@ -17,6 +17,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* The following text is taken from config/rs6000.mh:
+ * # The IBM version of /usr/include/rpc/rpc.h has a bug -- it says
+ * # `extern fd_set svc_fdset;' without ever defining the type fd_set.
+ * # Unfortunately this occurs in the vx-share code, which is not configured
+ * # like the rest of GDB (e.g. it doesn't include "defs.h").
+ * # We circumvent this bug by #define-ing fd_set here, but undefining it in
+ * # the xm-rs6000.h file before ordinary modules try to use it.  FIXME, IBM!
+ * MH_CFLAGS='-Dfd_set=int'
+ * So, here we do the undefine...which has to occur before we include
+ * <sys/select.h> below.
+ */
+#undef fd_set
 
 #include <sys/select.h>
 #include <sys/ptrace.h>
