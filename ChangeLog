@@ -1,3 +1,14 @@
+Sun Mar 10 13:18:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Restore Canadian Cross handling of BISON and LEX,
+	removed in Feb 20 change.
+
+Fri Mar  8 20:07:09 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* README:  Suggestions from Torbjorn Granlund <tege@matematik.su.se>:
+	Mention make install.  Remove the old copyright date as well the
+	clumsy and rather pointless copyright on the README file.
+
 Fri Mar  8 17:51:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in ($(CONFIGURE_TARGET_MODULES)): If there is a
