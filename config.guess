@@ -17,7 +17,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #
-# This script attempts to guess a cononical system name similar to
+# This script attempts to guess a canonical system name similar to
 # config.sub. If it succeeds, it prints the system name on stdout, and
 # exits with 0.  Otherwise, it prints an error message on stderr, and
 # exits with 1.
@@ -40,8 +40,8 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     alpha:OSF1:1.*:*)
 	echo alpha-dec-osf${UNAME_RELEASE}
         exit 0 ;;
-    sun4*:SunOS:[5-9].*:*)
-	echo sparc-sun-solaris2
+    sun4*:SunOS:5.*:*)
+	echo sparc-sun-solaris2`echo ${UNAME_RELEASE}|sed -e 's/[^.]*//'`
 	exit 0 ;;
     sun4*:SunOS:*:*)
 	echo sparc-sun-sunos${UNAME_RELEASE}
@@ -160,7 +160,8 @@ main()
 #if defined(sequent)
 #if defined(i386)
   printf("i386-sequent-dynix\n"); exit(0);
-#elif defined (ns32000)
+#endif
+#if defined (ns32000)
   printf("ns32k-sequent-dynix\n"); exit(0);
 #endif
 #endif
