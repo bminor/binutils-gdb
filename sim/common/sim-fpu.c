@@ -713,7 +713,7 @@ sim_fpu_is_lt (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d < r.val.d);
   else
     return 0;
@@ -725,7 +725,7 @@ sim_fpu_is_le (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d <= r.val.d);
   else
     return 0;
@@ -737,7 +737,7 @@ sim_fpu_is_eq (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d == r.val.d);
   else
     return 0;
@@ -749,7 +749,7 @@ sim_fpu_is_ne (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d != r.val.d);
   else
     return 0;
@@ -761,7 +761,7 @@ sim_fpu_is_ge (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d >= r.val.d);
   else
     return 0;
@@ -773,7 +773,7 @@ sim_fpu_is_gt (sim_fpu l,
 {
   sim_ufpu tl = fpu2ufpu (&l);
   sim_ufpu tr = fpu2ufpu (&r);
-  if (is_ufpu_number (&tl) && is_ufpu_number (&tr))
+  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
     return (l.val.d > r.val.d);
   else
     return 0;

@@ -1,3 +1,8 @@
+Fri May 16 22:26:43 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* sim-fpu.c (sim_fpu_is_{eq,ne,lt,le,gt,ge}): Compare Infinities
+	just like normal numbers as per IEEE rules.
+
 Wed May 14 21:20:38 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* callback.c (os_close): Mark the descriptor as being
