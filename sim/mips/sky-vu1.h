@@ -7,9 +7,9 @@
 
 #include "sim-main.h"
 
-void vu1_attach(SIM_DESC sd);
 void vu1_issue(void);
 void vu1_init(SIM_DESC sd);
+int vu1_status(void);
 
 #define VU1_MEM0_WINDOW_START 	0x11008000
 #define VU1_MEM0_SIZE		0x4000    /* 16K = 16384 */

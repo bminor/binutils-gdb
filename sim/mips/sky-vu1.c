@@ -9,6 +9,9 @@
 #include "sky-vu1.h"
 #include "sky-libvpe.h"
 #include "sky-vu.h"
+#include "sky-bits.h"
+
+#include <assert.h>
 
 VectorUnitState vu1_state;
 
@@ -36,24 +39,35 @@ vu1_io_read_register_window(device *me,
 {
 	/* Slow and crappy hack ... */
 
+	
 	int i;
 
 	char source_buffer[VU1_REGISTER_WINDOW_SIZE];
 	char* src;
 
+	assert(nr_bytes == 1 || nr_bytes == 2 || nr_bytes == 4 || nr_bytes == 8 || nr_bytes == 16);
+
 	memcpy(source_buffer, &vu1_state.regs.VF[0][0], 0x200);	/* copy VF registers */	
 	for (i = 0; i<16; i++ ) {
 	    *(short*)&source_buffer[0x200 + i*16] = vu1_state.regs.VI[i];
 	}
-	*(u_long*)&source_buffer[VU1_MST - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MST;
-	*(u_long*)&source_buffer[VU1_MMC - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MMC;
-	*(u_long*)&source_buffer[VU1_MCP - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MCP;
-	*(u_long*)&source_buffer[VU1_MR  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MR;
-	*(u_long*)&source_buffer[VU1_MI  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MI;
-	*(u_long*)&source_buffer[VU1_MQ  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MQ;
-	*(u_long*)&source_buffer[VU1_MP  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MP;
-	*(u_long*)&source_buffer[VU1_MTPC - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MTPC;
-	*(VpeStat*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = vu1_state.regs.VPE_STAT;
+	*(u_long*)&source_buffer[VU1_MST   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MST;
+	*(u_long*)&source_buffer[VU1_MMC   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MMC;
+	*(u_long*)&source_buffer[VU1_MCP   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MCP;
+	*(u_long*)&source_buffer[VU1_MR    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MR;
+	*(u_long*)&source_buffer[VU1_MI    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MI;
+	*(u_long*)&source_buffer[VU1_MQ    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MQ;
+	*(u_long*)&source_buffer[VU1_MP    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MP;
+	*(u_long*)&source_buffer[VU1_MTPC  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MTPC;
+
+	{
+	    u_long stat;
+	    stat = 0;
+	    if (vu1_state.runState == VU_RUN || vu1_state.runState == VU_BREAK)
+		SET_BIT(stat, VPU_STAT_VBS1_BIT);
+	    
+	    *(u_long*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = stat;
+	}
 
 #if 0
 	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
@@ -84,7 +98,6 @@ vu1_io_write_register_window(device *me,
 	if (addr == VPE1_STAT && nr_bytes == 4) {
 	    /* Magic to switch VU to run state, until other methods are available. */
 	    vu1_state.runState = VU_RUN;
-	    vu1_state.regs.VPE_STAT.vbs = 1;
 	    vu1_state.junk.eflag = 0;
 	    vu1_state.junk.peflag = 0;
 /*printf("Magic start run...\n");*/

@@ -24,7 +24,7 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h"
+sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h sky-bits.h"
 sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
 sky_files="$sky_files sky-hardware.c sky-hardware.h"
 sky_files="$sky_files sky-libvpe.c sky-libvpe.h sky-pke.c sky-pke.h"
