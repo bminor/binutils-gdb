@@ -1,3 +1,16 @@
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-i386.c (elf_i386_info_to_howto_rel): Give a warning for
+	invalid relocation types, and change them to R_386_NONE.
+
+2000-02-22  H.J. Lu  <hjl@gnu.org>
+
+        * elflink.h (elf_bfd_final_link): Call output_extsym for global
+	symbols converted to local symbols even when stripping all
+	symbols.
+        (elf_link_output_extsym): Process global symbols converted to
+	local symbols even if they are being stripped.
+
 2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* archures.c (bfd_octets_per_byte): Return unsigned int.
