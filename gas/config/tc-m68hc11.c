@@ -2595,9 +2595,9 @@ md_estimate_size_before_relax (fragP, segment)
 		 necessary for the unresolved symbol address.  */
 	      fragP->fr_opcode[0] = convert_branch (fragP->fr_opcode[0]);
 
-	      fragP->fr_fix++;
-	      fix_new (fragP, old_fr_fix - 1, 2, fragP->fr_symbol,
+	      fix_new (fragP, fragP->fr_fix - 1, 2, fragP->fr_symbol,
 		       fragP->fr_offset, 0, BFD_RELOC_16);
+	      fragP->fr_fix++;
 	      break;
 
 	    case STATE_CONDITIONAL_BRANCH:
