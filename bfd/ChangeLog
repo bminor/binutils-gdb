@@ -1,3 +1,10 @@
+Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* hosts/symmetry.h:  Redefine `shared' to enable compilation
+	with the native Dynix cc compiler.
+	* i386dynix.c:  Include aoutx.h instead of using routines
+	from aout32.c.
+
 Wed Jan 11 21:31:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* reloc.c (reloc_howto_type): Make typedef include `const'.
