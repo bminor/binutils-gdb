@@ -1,3 +1,8 @@
+Fri Jan  3 14:04:40 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo (Operators): Remove '@' from @smallexmple in comment
+	to avoid confusing texi2roff.
+
 start-sanitize-v850
 Fri Jan  3 11:27:02 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 

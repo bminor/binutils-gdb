@@ -1435,7 +1435,7 @@ Notes:
 @end ifinfo
 @tex
 \vskip \baselineskip
-%"lispnarrowing" is the extra indent used generally for @smallexample
+%"lispnarrowing" is the extra indent used generally for smallexample
 \hskip\lispnarrowing\vbox{\offinterlineskip
 \hrule
 \halign
