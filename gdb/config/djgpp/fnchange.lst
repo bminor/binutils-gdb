@@ -62,8 +62,10 @@
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
-@V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
 @V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
+@V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
+@V@/gdb/amd64nbsd-nat.c @V@/gdb/a64nb-nat.c
+@V@/gdb/amd64nbsd-tdep.c @V@/gdb/a64nb-tdep.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-tdep.c @V@/gdb/alphnb-tdep.c
@@ -109,6 +111,8 @@
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386linux-tdep.c
 @V@/gdb/i386bsd-nat.c @V@/gdb/i3bsd-nat.c
 @V@/gdb/i386bsd-tdep.c @V@/gdb/i3bsd-tdep.c
+@V@/gdb/i386fbsd-nat.c @V@/gdb/i3fbsd-nat.c
+@V@/gdb/i386fbsd-tdep.c @V@/gdb/i3fbsd-tdep.c
 @V@/gdb/i386gnu-nat.c @V@/gdb/i3gnu-nat.c
 @V@/gdb/i386gnu-tdep.c @V@/gdb/i3gnu-tdep.c
 @V@/gdb/i386nbsd-nat.c @V@/gdb/i3nbsd-nat.c
@@ -149,6 +153,8 @@
 @V@/gdb/remote-vx68.c @V@/gdb/rmt-vx68.c
 @V@/gdb/remote-vxmips.c @V@/gdb/rmt-vxmips.c
 @V@/gdb/remote-vxsparc.c @V@/gdb/rmt-vxsparc.c
+@V@/gdb/sparc64fbsd-nat.c @V@/gdb/sp64fb-nat.c
+@V@/gdb/sparc64fbsd-tdep.c @V@/gdb/sp64fb-tdep.c
 @V@/gdb/sparcnbsd-nat.c @V@/gdb/spnb-nat.c
 @V@/gdb/sparcnbsd-tdep.c @V@/gdb/spnb-tdep.c
 @V@/gdb/testsuite/.gdbinit @V@/gdb/testsuite/gdb.ini

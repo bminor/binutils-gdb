@@ -1,3 +1,10 @@
+2003-10-19  Michael Chastain <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Add lines for:
+	gdb/amd64nbsd-nat.c, gdb/amd64nbsd-tdep.c,
+	gdb/i386fbsd-nat.c, gdb/i386fbsd-tdep.c,
+	gdb/sparc64fbsd-nat.c, gdb/sparc64bsd-tdep.c.
+
 2003-10-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64fbsd-nat.c (fetch_inferior_registers,
