@@ -1,5 +1,10 @@
 2001-11-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (distclean): Explicitly delete Makefile et.al. in
+	gdbserver sub directory.
+
+2001-11-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* README: Mention need for alloca().  Mention problems with
 	alpha-dec-osf4.0e.  Clarify that comments refer to GDB 5.1.
 

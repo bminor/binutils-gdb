@@ -944,8 +944,13 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # I believe this is wrong; the makefile standards for distclean just
 # describe removing files; the only sort of "re-create a distribution"
 # functionality described is if the distributed files are unmodified.
+# NB: While GDBSERVER might be configured on native systems, it isn't
+# always included in SUBDIRS.  Remove the gdbserver files explictly.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
+	rm -f gdbserver/config.status gdbserver/config.log
+	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
+	rm -f gdbserver/Makefile gdbserver/config.cache
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
