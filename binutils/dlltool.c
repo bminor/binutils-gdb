@@ -1765,12 +1765,11 @@ fill_ordinals (d_export_vec)
 
   qsort (d_export_vec, d_nfuncs, sizeof (export_type *), pfunc);
 
-
-  /* Work out the lowest ordinal number */
-  if (d_export_vec[0])
-    d_low_ord = d_export_vec[0]->ordinal;
+  /* Work out the lowest and highest ordinal numbers.  */
   if (d_nfuncs) 
     {
+      if (d_export_vec[0])
+	d_low_ord = d_export_vec[0]->ordinal;
       if (d_export_vec[d_nfuncs-1])
 	d_high_ord = d_export_vec[d_nfuncs-1]->ordinal;
     }

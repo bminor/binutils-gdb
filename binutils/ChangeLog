@@ -1,3 +1,8 @@
+Tue Nov 28 17:23:44 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dlltool.c (fill_ordinals): Don't reference d_export_vec if
+	there are no exported functions.
+
 Mon Nov 27 13:05:59 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate with autoconf 2.7.
