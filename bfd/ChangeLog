@@ -1,3 +1,9 @@
+Thu Jul 20 19:19:06 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (hppa_elf_gen_reloc_type): Add new (ignored)
+	argument.
+	* elf32-hppa.h: Corresponding change.
+
 Thu Jul 20 19:01:07 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* libaout.h (set_aout_section_data): New macro.
