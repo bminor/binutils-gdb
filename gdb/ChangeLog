@@ -1,5 +1,17 @@
 Fri Mar 25 10:14:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* tm-hppa.h (NUM_REGS): Bump to 128 registers.
+	(REGISTER_NAMES): Add entries for "right-half" of FP registers.
+	(REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE): Do not treat FP regs
+	differently.  All registers are four bytes.
+	(REGISTER_BYTES, REGISTER_BYTE): Simplify now that all registers are
+	the same size.
+	(REGISTER_VIRTUAL_TYPE): Use builtin_type_float for all FP regs.
+
+	* hppa-tdep.c (pa_print_fp_reg): Update to print even numbered FP
+	registers as both single and double values (fetching 2nd 32bit half
+	as necessary).  Annotate each register printed with its precision.
+
 	* paread.c (read_unwind_info): Fix off-by-one error.
 
 Fri Mar 25 08:33:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)

@@ -1220,27 +1220,40 @@ pa_print_fp_reg (i)
   unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
   unsigned char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
 
-  /* Get the data in raw format.  */
+  /* Get 32bits of data.  */
   read_relative_register_raw_bytes (i, raw_buffer);
 
-  /* Convert raw data to virtual format if necessary.  */
-#ifdef REGISTER_CONVERTIBLE
-  if (REGISTER_CONVERTIBLE (i))
-    {
-      REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
-				   raw_buffer, virtual_buffer);
-    }
-  else
-#endif
-    memcpy (virtual_buffer, raw_buffer,
-	    REGISTER_VIRTUAL_SIZE (i));
+  /* Put it in the buffer.  No conversions are ever necessary.  */
+  memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
 
   fputs_filtered (reg_names[i], gdb_stdout);
-  print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);
+  print_spaces_filtered (8 - strlen (reg_names[i]), gdb_stdout);
+  fputs_filtered ("(single precision)     ", gdb_stdout);
 
   val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, gdb_stdout, 0,
 	     1, 0, Val_pretty_default);
   printf_filtered ("\n");
+
+  /* If "i" is even, then this register can also be a double-precision
+     FP register.  Dump it out as such.  */
+  if ((i % 2) == 0)
+    {
+      /* Get the data in raw format for the 2nd half.  */
+      read_relative_register_raw_bytes (i + 1, raw_buffer);
+
+      /* Copy it into the appropriate part of the virtual buffer.  */
+      memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buffer,
+	      REGISTER_RAW_SIZE (i));
+
+      /* Dump it as a double.  */
+      fputs_filtered (reg_names[i], gdb_stdout);
+      print_spaces_filtered (8 - strlen (reg_names[i]), gdb_stdout);
+      fputs_filtered ("(double precision)     ", gdb_stdout);
+
+      val_print (builtin_type_double, virtual_buffer, 0, gdb_stdout, 0,
+		 1, 0, Val_pretty_default);
+      printf_filtered ("\n");
+    }
 }
 
 /* Function calls that pass into a new compilation unit must pass through a
