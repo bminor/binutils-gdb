@@ -885,7 +885,7 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 	  
-//fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name );
+/*fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name );*/
 
 	  /* lo(), hi(), hi0(), etc... */
 	  if ((reloc = v850_reloc_prefix()) != BFD_RELOC_UNUSED)
@@ -1075,7 +1075,7 @@ md_assemble (str)
 	      if (errmsg)
 		goto error;
 	      
-//fprintf (stderr, "insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number );
+/*fprintf (stderr, "insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number );*/
 
 	      switch (ex.X_op) 
 		{
