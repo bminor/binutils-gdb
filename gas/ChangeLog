@@ -1,3 +1,8 @@
+Tue Jul  2 23:02:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (build_bytes): If an operand type is 
+	marked as SRC_IN_DST retrieve it from the "destination" op.
+
 Sat Jun 29 13:38:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (arm-*-riscix*): Set emulation to riscix.
