@@ -458,9 +458,12 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
-   all (-1).  FIXME: cagney/2002-04-05: As of the time of writing, only
-   the PS_REGNUM was optional - code still depends on the others (fp,
-   pc, sp) designating registers. */
+   all (-1). */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SP_REGNUM)
+#define SP_REGNUM (-1)
+#endif
 
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
@@ -473,6 +476,11 @@ extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FP_REGNUM)
+#define FP_REGNUM (-1)
+#endif
+
 extern int gdbarch_fp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FP_REGNUM)
@@ -482,6 +490,11 @@ extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FP_REGNUM)
 #define FP_REGNUM (gdbarch_fp_regnum (current_gdbarch))
 #endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PC_REGNUM)
+#define PC_REGNUM (-1)
 #endif
 
 extern int gdbarch_pc_regnum (struct gdbarch *gdbarch);

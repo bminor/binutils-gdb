@@ -294,9 +294,9 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
-  0,
-  0,
+  -1,
+  -1,
+  -1,
   -1,
   0,
   0,
@@ -586,15 +586,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->num_regs == -1))
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->sp_regnum == -1))
-    fprintf_unfiltered (log, "\n\tsp_regnum");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->fp_regnum == -1))
-    fprintf_unfiltered (log, "\n\tfp_regnum");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->pc_regnum == -1))
-    fprintf_unfiltered (log, "\n\tpc_regnum");
+  /* Skip verify of sp_regnum, invalid_p == 0 */
+  /* Skip verify of fp_regnum, invalid_p == 0 */
+  /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
@@ -2547,9 +2541,7 @@ set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
 int
 gdbarch_sp_regnum (struct gdbarch *gdbarch)
 {
-  if (gdbarch->sp_regnum == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_sp_regnum invalid");
+  /* Skip verify of sp_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_sp_regnum called\n");
   return gdbarch->sp_regnum;
@@ -2565,9 +2557,7 @@ set_gdbarch_sp_regnum (struct gdbarch *gdbarch,
 int
 gdbarch_fp_regnum (struct gdbarch *gdbarch)
 {
-  if (gdbarch->fp_regnum == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_fp_regnum invalid");
+  /* Skip verify of fp_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_fp_regnum called\n");
   return gdbarch->fp_regnum;
@@ -2583,9 +2573,7 @@ set_gdbarch_fp_regnum (struct gdbarch *gdbarch,
 int
 gdbarch_pc_regnum (struct gdbarch *gdbarch)
 {
-  if (gdbarch->pc_regnum == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_pc_regnum invalid");
+  /* Skip verify of pc_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_regnum called\n");
   return gdbarch->pc_regnum;
