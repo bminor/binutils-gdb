@@ -1,3 +1,8 @@
+2003-06-17  Rainer Keuchel  <rkeuchel@allgeier.com>
+
+	* pe-dll.c (generate_reloc): Catch and ignore an ARM_26D
+	reloc.  
+
 2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
 
 	* configure.host (*-*-freebsd*): Add known path for ld-elf.so.1

@@ -1202,6 +1202,13 @@ generate_reloc (abfd, info)
 		      reloc_data[total_relocs].type = 5;
 		      total_relocs++;
 		      break;
+		    case BITS_AND_SHIFT (24, 2):
+		      if (relocs[i]->howto->type == 5)
+			/* This is an ARM_26D reloc, which is an ARM_26 reloc
+			   that has already been fully processed during a
+			   previous link stage, so ignore it here.  */
+			break;
+		      /* Fall through.  */
 		    default:
 		      /* xgettext:c-format */
 		      einfo (_("%XError: %d-bit reloc in dll\n"),
