@@ -520,12 +520,8 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	    {
 	      ARMword tmp = (pc + 2);
 
-	      /* Bit one of the destination address comes from bit one of the
-		 address of the first (H == 10) half of the instruction, not
-		 from the offset in the instruction.  */
 	      state->Reg[15] = ((state->Reg[14]
-				 + ((tinstr & 0x07FE) << 1)
-				 + ((pc - 2) & 2))
+				 + ((tinstr & 0x07FE) << 1))
 				& 0xFFFFFFFC);
 	      CLEART;
 	      state->Reg[14] = (tmp | 1);
@@ -538,6 +534,7 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	  break;
 	}
       /* else we fall through to process the second half of the BL */
+      pc += 2;			/* point the pc at the 2nd half */
     case 31:			/* BL instruction 2 */
       /* Format 19 */
       /* There is no single ARM instruction equivalent for this

@@ -1,3 +1,9 @@
+2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* thumbemu.c (ARMul_ThumbDecode): When decoding a BLX(1)
+	instruction do not add in the second bit of the base address -
+	this has already been accounted for.
+
 2002-05-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armcopro.c (check_cp13_access): Allow access to register 1 when
