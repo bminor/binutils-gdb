@@ -147,6 +147,9 @@
 /* Define if <sys/ptrace.h> defines the PTRACE_GETFPXREGS request.  */
 #undef HAVE_PTRACE_GETFPXREGS
 
+/* Define if <sys/ptrace.h> defines the PT_GETDBREGS request.  */
+#undef HAVE_PT_GETDBREGS
+
 /* Define if gnu-regex.c included with GDB should be used. */
 #undef USE_INCLUDED_REGEX
 

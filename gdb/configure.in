@@ -135,7 +135,7 @@ AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask
 AC_FUNC_VFORK
 AC_FUNC_ALLOCA
 
-# See if machine/reg.h supports the %fs and %gs i386 segment registers.
+# See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
 AC_CACHE_CHECK([for r_fs in struct reg], gdb_cv_struct_reg_r_fs,
 [AC_TRY_COMPILE([#include <machine/reg.h>], [struct reg r; r.r_fs;],
@@ -150,7 +150,7 @@ if test $gdb_cv_struct_reg_r_gs = yes; then
   AC_DEFINE(HAVE_STRUCT_REG_R_GS)
 fi
 
-dnl See if ptrace.h provides the PTRACE_GETREGS request.
+# See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
 AC_MSG_CHECKING(for PTRACE_GETREGS)
 AC_CACHE_VAL(gdb_cv_have_ptrace_getregs,
 [AC_TRY_COMPILE([#include <sys/ptrace.h>],
@@ -162,7 +162,7 @@ if test $gdb_cv_have_ptrace_getregs = yes; then
   AC_DEFINE(HAVE_PTRACE_GETREGS)
 fi
 
-dnl See if ptrace.h provides the PTRACE_GETFPXREGS request.
+# See if <sys/ptrace.h> provides the PTRACE_GETFPXREGS request.
 AC_MSG_CHECKING(for PTRACE_GETFPXREGS)
 AC_CACHE_VAL(gdb_cv_have_ptrace_getfpxregs,
 [AC_TRY_COMPILE([#include <sys/ptrace.h>],
@@ -173,6 +173,20 @@ AC_MSG_RESULT($gdb_cv_have_ptrace_getfpxregs)
 if test $gdb_cv_have_ptrace_getfpxregs = yes; then
   AC_DEFINE(HAVE_PTRACE_GETFPXREGS)
 fi
+
+# See if <sys/ptrace.h> provides the PT_GETDBREGS request.
+AC_MSG_CHECKING(for PT_GETDBREGS)
+AC_CACHE_VAL(gdb_cv_have_pt_getdbregs,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/ptrace.h>],
+		[PT_GETDBREGS;],
+		[gdb_cv_have_pt_getdbregs=yes],
+		[gdb_cv_have_pt_getdbregs=no])])
+AC_MSG_RESULT($gdb_cv_have_pt_getdbregs)
+if test $gdb_cv_have_pt_getdbregs = yes; then
+  AC_DEFINE(HAVE_PT_GETDBREGS)
+fi
+
 
 AC_CHECK_LIB(socket, socketpair)
 AC_CHECK_FUNCS(socketpair)

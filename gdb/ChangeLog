@@ -1,5 +1,23 @@
 2001-03-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c: Include "gdb_assert.h".
+	[HAVE_PT_GETDBREGS] (DBREG_DRX): Define if not
+	already defined.
+	[HAVE_PT_GETDBREGS] (i386bsd_dr_set, i386bsd_dr_set_control,
+	i386bsd_dr_set_addr, i386bsd_dr_reset_addr,
+	i386bsd_dr_get_status): New functions.
+	* config/i386/nm-fbsd.h [HAVE_PT_GETDBREGS]
+	(I386_USE_GENERIC_WATCHPOINTS): Define.
+	Include "i386/nm-i386.h".
+	(I386_DR_LOW_SET_CONTROL, I386_DR_LOW_SET_ADDR,
+	I386_DR_LOW_RESET_ADDR, I386_DR_LOW_GET_STATUS): New macros.
+	(i386bsd_dr_set_control, i386bsd_dr_set_addr,
+	i386bsd_dr_reset_addr, i386bsd_dr_get_status): New prototypes.
+	* acconfig.h (HAVE_PT_GETDBREGS): New configure macro.
+	* configure.in: Cleanup a few comments.  Check for PT_GETDBREGS
+	ptrace request.
+	* config.in, configure: Regenerate.
+
 	* i386-nat.c (i386_insert_aligned_watchpoint): Set address
 	register before enabling it by setting the control register.
 	(i386_remove_aligned_watchpoint): Reset address register after

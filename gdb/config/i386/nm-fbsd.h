@@ -1,5 +1,5 @@
 /* Native-dependent definitions for FreeBSD/i386.
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1997, 2000
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1997, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,6 +21,31 @@
 
 #ifndef NM_FBSD_H
 #define NM_FBSD_H
+
+#ifdef HAVE_PT_GETDBREGS
+#define I386_USE_GENERIC_WATCHPOINTS
+#endif
+
+#include "i386/nm-i386.h"
+
+/* Provide access to the i386 hardware debugging registers.  */
+
+#define I386_DR_LOW_SET_CONTROL(control) \
+  i386bsd_dr_set_control (control)
+extern void i386bsd_dr_set_control (unsigned long control);
+
+#define I386_DR_LOW_SET_ADDR(regnum, addr) \
+  i386bsd_dr_set_addr (regnum, addr)
+extern void i386bsd_dr_set_addr (int regnum, CORE_ADDR addr);
+
+#define I386_DR_LOW_RESET_ADDR(regnum) \
+  i386bsd_dr_reset_addr (regnum)
+extern void i386bsd_dr_reset_addr (int regnum);
+
+#define I386_DR_LOW_GET_STATUS() \
+  i386bsd_dr_get_status ()
+extern unsigned long i386bsd_dr_get_status (void);
+
 
 /* Type of the third argument to the `ptrace' system call.  */
 #define PTRACE_ARG3_TYPE caddr_t
