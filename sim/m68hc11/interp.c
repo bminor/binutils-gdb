@@ -166,7 +166,7 @@ sim_board_reset (SIM_DESC sd)
   cpu_restart (cpu);
 }
 
-int
+static int
 sim_hw_configure (SIM_DESC sd)
 {
   const struct bfd_arch_info *arch;
@@ -291,7 +291,7 @@ sim_hw_configure (SIM_DESC sd)
       sim_hw_parse (sd, "/m68hc12 > port-d cpu-write-port /m68hc12");
       cpu->hw_cpu = sim_hw_parse (sd, "/m68hc12");
     }
-  return 0;
+  return 1;
 }
 
 static int
@@ -301,7 +301,9 @@ sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
 
   cpu = STATE_CPU (sd, 0);
 
-  sim_hw_configure (sd);
+  if (!sim_hw_configure (sd))
+    return SIM_RC_FAIL;
+
   if (abfd != NULL)
     {
       cpu->cpu_elf_start = bfd_get_start_address (abfd);
