@@ -39,6 +39,7 @@ m68k.h
 m88k.h
 mips.h
 pe.h
+powerpc.h
 rs6000.h
 sh.h
 sparc.h
