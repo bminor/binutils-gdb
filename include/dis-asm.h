@@ -174,7 +174,8 @@ extern int print_insn_v850		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_tic80		PARAMS ((bfd_vma, disassemble_info*));
 /* end-sanitize-tic80 */
 /* start-sanitize-sky */
-extern int print_insn_txvu		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_dvp		PARAMS ((bfd_vma, disassemble_info*));
+extern int dvp_insn_p			PARAMS ((disassemble_info*));
 /* end-sanitize-sky */
 
 /* Fetch the disassembler for a given BFD, if that support is available.  */
