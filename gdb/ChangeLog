@@ -1,3 +1,7 @@
+Tue Oct 26 22:05:03 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* mips-tdep.c (mips_pop_frame): If proc_desc is NULL, don't dump core.
+
 Tue Oct 26 15:07:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	gcc -Wall lint:
