@@ -1,3 +1,8 @@
+2005-02-01  Orjan Friberg  <orjanf@axis.com>
+
+	* regformats/reg-cris.dat: New file with register definitions for CRIS.
+	* regformats/reg-crisv32.dat: Ditto for CRISv32.
+
 2005-01-31  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4.
