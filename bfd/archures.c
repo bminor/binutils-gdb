@@ -93,12 +93,11 @@ DESCRIPTION
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
 .#define bfd_mach_sparc			1
-. {* start-sanitize-v8plus *}
+{* The difference between v8plus and v9 is that v9 is a true 64 bit env.  *}
 .#define bfd_mach_sparc_v8plus		2
-.#define bfd_mach_sparc_v8plusa		3
-. {* end-sanitize-v8plus *}
+.#define bfd_mach_sparc_v8plusa		3 {* with ultrasparc add'ns *}
 .#define bfd_mach_sparc_v9		4
-.#define bfd_mach_sparc_v9a		5 {* v9 with ultrasparc add'ns *}
+.#define bfd_mach_sparc_v9a		5 {* with ultrasparc add'ns *}
 .{* Nonzero if MACH has the v9 instruction set.  *}
 .#define bfd_mach_sparc_v9_p(mach) ((mach) != bfd_mach_sparc)
 .  bfd_arch_mips,      {* MIPS Rxxxx *}

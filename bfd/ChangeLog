@@ -1,3 +1,11 @@
+Wed Jan 24 10:38:34 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Delete checking
+	of flags, only flags used are controlled by mach number.  Bump up
+	output file mach number to highest of input file mach numbers.
+	(elf32_sparc_object_p): Watch for EF_SPARC_SUN_US1.
+	(elf32_sparc_final_write_processing): Set EF_SPARC_SUN_US1 if v8plusa.
+
 Tue Jan 23 14:33:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_copy_private_bfd_data): Don't complain if
@@ -38,9 +46,7 @@ Mon Jan 22 08:52:04 1996  Doug Evans  <dje@charmed.cygnus.com>
 	* elflink.h (elf_finish_pointer_linker_section): Fix typo.
 
 	* archures.c (bfd_mach_sparc_v9): Renamed from bfd_mach_sparc64.
-start-sanitize-v8plus
 	(bfd_mach_sparc_{v8plus,v8plusa}): Define.
-end-sanitize-v8plus
 	(bfd_mach_sparc_v9a): Define.
 	(bfd_mach_sparc_v9_p): Define.
 	* bfd-in2.h: Regenerated.
@@ -50,20 +56,14 @@ end-sanitize-v8plus
 	* config.bfd (sparc64-*-sysv4*,sparc64-*-solaris2*): Set targ_defvec
 	to bfd_elf32_sparc_vec.
 	* cpu-sparc.c (arch_info_struct): Renamed from sparc_arch_info.
-start-sanitize-v8plus
 	Add v8plus{,a} support.
-end-sanitize-v8plus
 	Add v9a support.
-start-sanitize-v8plus
 	(sparc_compatible): New function.
 	* elf32-sparc.h: #include "elf/sparc.h".
-	(elf32_sparc_set_private_flags, elf32_sparc_copy_private_bfd_data,
-	elf32_sparc_merge_private_bfd_data, elf32_sparc_object_p,
+	(elf32_sparc_merge_private_bfd_data, elf32_sparc_object_p,
 	elf32_sparc_final_write_processing): New functions.
-	(bfd_elf32_bfd_set_private_flags, bfd_elf32_bfd_copy_private_bfd_data,
-	bfd_elf32_bfd_merge_private_bfd_data, elf_backend_object_p,
+	(bfd_elf32_bfd_merge_private_bfd_data, elf_backend_object_p,
 	elf_backend_final_write_processing): Define.
-end-sanitize-v8plus
 
 Mon Jan 22 11:21:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -113,11 +113,9 @@ Mon Jan 22 11:21:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(_bfd_elf_make_linker_section_rela): Make a RELA section
 	corresponding to the generated linker section.
 
-start-sanitize-v8plus
 Sat Jan 20 08:36:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elf32-sparc.c (ELF_MACHINE_ALT1): Define.
-end-sanitize-v8plus
 
 Thu Jan 18 18:25:34 1996  Kim Knuttila  <krk@cygnus.com>
 

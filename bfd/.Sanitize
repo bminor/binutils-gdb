@@ -356,34 +356,6 @@ else
 	done
 fi
 
-v8plus_files="ChangeLog archures.c bfd-in2.h cpu-sparc.c elf32-sparc.c"
-if ( echo $* | grep keep\-v8plus > /dev/null ) ; then
-	for i in $v8plus_files ; do
-		if test ! -d $i && (grep sanitize-v8plus $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v8plus stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v8plus_files ; do
-		if test ! -d $i && (grep sanitize-v8plus $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v8plus\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v8plus/,/end-\sanitize\-v8plus/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
