@@ -678,6 +678,9 @@ value_assign (struct value *toval, struct value *fromval)
 			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
 #endif
 	}
+
+      register_update_event (VALUE_REGNO (toval));
+
       /* Assigning to the stack pointer, frame pointer, and other
          (architecture and calling convention specific) registers may
          cause the frame cache to be out of date.  We just do this
@@ -763,8 +766,11 @@ value_assign (struct value *toval, struct value *fromval)
 	      error ("Attempt to assign to an unmodifiable value.");
 	  }
 
+	if (regno > VALUE_FRAME_REGNUM (toval) + reg_offset)
+	  regno = -1;
 	if (register_changed_hook)
-	  register_changed_hook (-1);
+	  register_changed_hook (regno);
+	register_update_event (regno);
       }
       break;
 
