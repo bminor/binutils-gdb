@@ -1,3 +1,8 @@
+Tue Sep 17 12:06:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add a case for "div" and "divu" with two registers
+	and a destination of $0.
+
 Tue Sep 10 16:12:39 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* mips-dis.c (print_insn_arg): Add prototype.
