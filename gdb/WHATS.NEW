@@ -1,6 +1,58 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.3:
+
+ * New machines supported (host and target)
+
+SCO Unix on i386 IBM PC clones		i386-sco-sysv	or  i386sco
+Amiga 3000 running Amix			m68k-cbm-svr4	or  amix
+NCR 3000 386 running SVR4		i386-ncr-svr4	or  ncr3000
+Motorola Delta 88000 running Sys V	m88k-motorola-sysv  or  delta88
+
+There is no core file support on SCO Unix.
+
+ * Preliminary ELF and DWARF support
+
+GDB can read ELF object files on System V Release 4, and can handle
+debugging records for C, in DWARF format, in ELF files.  This support
+is preliminary.  If you bring up GDB on another SVR4 system, please
+send mail to bug-gdb@prep.ai.mit.edu to let us know what changes were
+reqired (if any).
+
+ * Bugs fixed
+
+The `stepi' bug that many of you noticed has been squashed.
+Many bugs in C++ have been handled.  Many more remain to be handled.
+See the various ChangeLog files (primarily in gdb and bfd) for details.
+
+ * State of the MIPS world (in case you wondered):
+
+GDB can understand the symbol tables emitted by the compilers
+supplied by most vendors of MIPS-based machines, including DEC.  These
+symbol tables are in a format that essentially nobody else uses.
+
+Some versions of gcc come with an assembler post-processor called
+mips-tfile.  This program is required if you want to do source-level
+debugging of gcc-compiled programs.  I believe FSF does not ship
+mips-tfile with gcc version 1, but it will eventually come with gcc
+version 2.
+
+Debugging of g++ output remains a problem.  g++ version 1.xx does not
+really support it at all.  (If you're lucky, you should be able to get
+line numbers and stack traces to work, but no parameters or local
+variables.)  With some work it should be possible to improve the
+situation somewhat.
+
+When gcc version 2 is released, you will have somewhat better luck.
+However, even then you will get confusing results for inheritance and
+methods.
+
+We will eventually provide full debugging of g++ output on
+DECstations.  This will probably involve some kind of stabs-in-ecoff
+encapulation, but the details have not been worked out yet.
+
+
 *** Changes in GDB-4.2:
 
  *  Improved configuration

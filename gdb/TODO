@@ -66,8 +66,14 @@ is also IEEE.  Death on a vax.
 
 Test cross-debugging Unix-to-Unix.
 
-Check the RAPP remote protocol.  What is it?  It's in Makefile.in
-and one ChangeLog entry.
+Integrate the RAPP remote debugging protocol.
+`rapp' runs under unix and acts as a remote stub (like rem-multi.shar
+distributed with GDB version 3).  Currently it just works over UDP
+(network), not over a serial line.  To get it running
+* Compile GDB on the host machine as usual
+* Compile rapp on the target machine, giving for both host and target
+  the type of the target machine
+* Install "gdb" in /etc/services on both machines.
 
 Set up interface between GDB and INFO so that you can hop into interactive
 INFO and back out again.  When running under Emacs, should use Emacs
