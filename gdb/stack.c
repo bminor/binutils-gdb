@@ -1517,6 +1517,15 @@ select_frame (struct frame_info *fi)
   if (selected_frame_level_changed_hook)
     selected_frame_level_changed_hook (frame_relative_level (fi));
 
+  /* FIXME: kseitz/2002-08-28: It would be nice to call
+     selected_frame_level_changed_event right here, but due to limitations
+     in the current interfaces, we would end up flooding UIs with events
+     because select_frame is used extensively internally.
+
+     Once we have frame-parameterized frame (and frame-related) commands,
+     the event notification can be moved here, since this function will only
+     be called when the users selected frame is being changed. */
+
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
@@ -1620,8 +1629,8 @@ select_frame_command_wrapper (char *level_exp, int from_tty)
 static void
 select_frame_command (char *level_exp, int from_tty)
 {
-  register struct frame_info *frame, *frame1;
-  unsigned int level = 0;
+  struct frame_info *frame;
+  int level = frame_relative_level (selected_frame);
 
   if (!target_has_stack)
     error ("No stack.");
@@ -1629,6 +1638,8 @@ select_frame_command (char *level_exp, int from_tty)
   frame = parse_frame_specification (level_exp);
 
   select_frame (frame);
+  if (level != frame_relative_level (selected_frame))
+    selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1674,6 +1685,7 @@ up_silently_base (char *count_exp)
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 static void
@@ -1719,6 +1731,7 @@ down_silently_base (char *count_exp)
     }
 
   select_frame (frame);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* ARGSUSED */

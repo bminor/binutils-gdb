@@ -1,3 +1,13 @@
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (select_frame): Add FIXME concerning selected-frame
+	events.
+	(select_frame_command): Send selected-frame-level-changed
+	event notification, but only if the level actually changed.
+	(up_silently_base): Add selected-frame-level-changed event
+	notification.
+	(down_silently_base): Likewise.
+
 2002-08-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Update dependencies for all gdb/*.c files.
