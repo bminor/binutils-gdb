@@ -1,3 +1,25 @@
+Wed Jul 12 01:12:12 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
+
+	* write.c (fix_new): Use int, not short int, for argument type.
+	(fix_new_exp): Ditto.
+
+	* configure.in (arm-*-riscix*): Don't set emulations.
+
+	* config/tc-mips.c (NO_ECOFF_DEBUGGING): Define if ECOFF_DEBUGGING
+	wasn't previously defined.
+	(s_extern): Don't set ecoff_extern_size if NO_ECOFF_DEBUGGING.
+	(nopic_need_relax): Don't check it if NO_ECOFF_DEBUGGING.
+	(macro_build) [!USE_STDARG]: Don't use variadic prototype.
+	(mips_local_label) [NO_ECOFF_DEBUGGING]: Don't preserve potential
+	ECOFF debugging symbols.
+
+	* emul.h (struct emulation): Use unsigned, not unsigned char, for
+	bitfields.
+	* obj.h (struct format_ops): Likewise.
+
+	* config/tc-arm.c (symbol_make_empty) [BFD_ASSEMBLER]: Set
+	udata.p, not udata.
+
 Tue Jul 11 14:30:19 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/c-mips.texi: Document -m4010 and -mno-4010.

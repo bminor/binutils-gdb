@@ -196,7 +196,7 @@ fixS *
 fix_new (frag, where, size, add_symbol, offset, pcrel, r_type)
      fragS *frag;		/* Which frag? */
      int where;			/* Where in that frag? */
-     short int size;		/* 1, 2, or 4 usually. */
+     int size;			/* 1, 2, or 4 usually. */
      symbolS *add_symbol;	/* X_add_symbol. */
      offsetT offset;		/* X_add_number. */
      int pcrel;			/* TRUE if PC-relative relocation. */
@@ -218,7 +218,7 @@ fixS *
 fix_new_exp (frag, where, size, exp, pcrel, r_type)
      fragS *frag;		/* Which frag? */
      int where;			/* Where in that frag? */
-     short int size;		/* 1, 2, or 4 usually. */
+     int size;			/* 1, 2, or 4 usually. */
      expressionS *exp;		/* Expression.  */
      int pcrel;			/* TRUE if PC-relative relocation. */
 #ifdef BFD_ASSEMBLER
@@ -2149,6 +2149,7 @@ fixup_segment (fixP, this_segment_type)
       
       if (sub_symbolP)
 	{
+	  resolve_symbol_value (sub_symbolP);
 	  if (!add_symbolP)
 	    {
 	      /* Its just -sym */
