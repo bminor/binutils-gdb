@@ -1,5 +1,21 @@
 2004-01-20  Andrew Cagney  <cagney@redhat.com>
 
+	* ax-gdb.c (print_axs_value): Delete unused function.
+	* jv-lang.c (java_lookup_type): Delete unused function.
+	* cli/cli-dump.c (dump_filetype): Delete unused function.
+	* remote-mips.c (remote_mips_insert_hw_breakpoint)
+	(remote_mips_remove_hw_breakpoint): Delete unused functions.
+	(mips_getstring): Delete unused function.
+	(pmon_insert_breakpoint): Delete #if0ed function.
+	(PMON_MAX_BP): Delete #if0ed MACRO.
+	(mips_pmon_bp_info): Delete #if0ed variable.
+	(pmon_remove_breakpoint): Delete #if0ed function.
+	* monitor.c (monitor_write_even_block): Delete unused function.
+	(monitor_write_memory_block): Delete #if0ed code.
+	* dink32-rom.c (dink32_load): Delete unused function.
+	(_initialize_dink32_rom): Delete #if0ed code.
+	* d10v-tdep.c (d10v_daddr_p): Delete unused function.
+
 	* tui/tui-command.c: Update references.
 	* tui/tui-io.c: Update references.
 	* tui/tui-command.h: Update copyright.

@@ -58,7 +58,6 @@ static void java_demangled_signature_copy (char *, char *);
 static struct symtab *get_java_class_symtab (void);
 static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
 static int java_class_is_primitive (struct value *clas);
-static struct type *java_lookup_type (char *signature);
 static struct value *java_value_string (char *ptr, int len);
 
 static void java_emit_char (int c, struct ui_file * stream, int quoter);
@@ -762,19 +761,6 @@ java_demangle_type_signature (char *signature)
   java_demangled_signature_copy (result, signature);
   result[length] = '\0';
   return result;
-}
-
-struct type *
-java_lookup_type (char *signature)
-{
-  switch (signature[0])
-    {
-    case 'L':
-    case '[':
-      error ("java_lookup_type not fully implemented");
-    default:
-      return java_primitive_type (signature[0]);
-    }
 }
 
 /* Return the type of TYPE followed by DIMS pairs of [ ].

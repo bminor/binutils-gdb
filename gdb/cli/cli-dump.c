@@ -331,36 +331,6 @@ dump_value_command (char *cmd, char *mode)
 }
 
 static void
-dump_filetype (char *cmd, char *mode, char *filetype)
-{
-  char *suffix = cmd;
-
-  if (cmd == NULL || *cmd == '\0')
-    error ("Missing subcommand: try 'help %s %s'.", 
-	   mode[0] == 'a' ? "append" : "dump", 
-	   filetype);
-
-  suffix += strcspn (cmd, " \t");
-
-  if (suffix != cmd)
-    {
-      if (strncmp ("memory", cmd, suffix - cmd) == 0)
-	{
-	  dump_memory_to_file (suffix, mode, filetype);
-	  return;
-	}
-      else if (strncmp ("value", cmd, suffix - cmd) == 0)
-	{
-	  dump_value_to_file (suffix, mode, filetype);
-	  return;
-	}
-    }
-
-  error ("dump %s: unknown subcommand '%s' -- try 'value' or 'memory'.",
-	 filetype, cmd);
-}
-
-static void
 dump_srec_memory (char *args, int from_tty)
 {
   dump_memory_to_file (args, FOPEN_WB, "srec");
