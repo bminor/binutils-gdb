@@ -22,6 +22,18 @@ Wed Oct  1 14:03:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 	arguments are parsed.
 	* configure: Rebuild.
 
+Tue Sep 30 14:18:32 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): R_SPARC_GLOB_JMP
+	renamed to R_SPARC_UNUSED_42.
+	(sparc_reloc_map): Delete R_SPARC_GLOB_JMP entry.
+	* elf64-sparc.c (_bfd_sparc_elf_howto_table): R_SPARC_GLOB_JMP
+	renamed to R_SPARC_UNUSED_42.
+	(sparc_reloc_map): Delete R_SPARC_GLOB_JMP entry.
+	* reloc.c (BFD_RELOC_SPARC_GLOB_JMP): Delete.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
 Thu Sep 25 12:15:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_merge_symbol): Don't check the hash creator until
