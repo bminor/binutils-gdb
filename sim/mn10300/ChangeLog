@@ -1,6 +1,6 @@
 Wed Oct 22 14:43:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* wrapper.c (sim_load): Pass lma_p and sim_write args to
+	* interp.c (sim_load): Pass lma_p and sim_write args to
  	sim_load_file.
 
 Tue Oct 21 10:12:03 1997  Jeffrey A Law  (law@cygnus.com)

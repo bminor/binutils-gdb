@@ -1,6 +1,6 @@
 Wed Oct 22 14:43:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* wrapper.c (sim_load): Pass lma_p and sim_write args to
+	* compile.c (sim_load): Pass lma_p and sim_write args to
  	sim_load_file.
 
 Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
