@@ -1,3 +1,14 @@
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (struct gdbarch_data): Add field init_p.
+	(register_gdbarch_data): Initialize init_p.
+	(gdbarch_data): Initialize data pointer using the init function.
+	(init_gdbarch_data): Delete function.
+	(gdbarch_update_p): Update.
+	(initialize_non_multiarch): Update.
+	(struct gdbarch): Add field initialized_p.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2002-06-07  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (x86_64_fxsave_offset): New.

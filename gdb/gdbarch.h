@@ -2591,20 +2591,15 @@ extern int gdbarch_update_p (struct gdbarch_info info);
    for the reserved data-pointer is returned.  That identifer should
    be saved in a local static variable.
 
-   The per-architecture data-pointer can be initialized in one of two
-   ways: The value can be set explicitly using a call to
-   set_gdbarch_data(); the value can be set implicitly using the value
-   returned by a non-NULL INIT() callback.  INIT(), when non-NULL is
-   called after the basic architecture vector has been created.
+   The per-architecture data-pointer is either initialized explicitly
+   (set_gdbarch_data()) or implicitly (by INIT() via a call to
+   gdbarch_data()).  FREE() is called to delete either an existing
+   data-poitner overridden by set_gdbarch_data() or when the
+   architecture object is being deleted.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is
-   restored.  INIT() is not called.
-
-   During initialization, multiple assignments of the data-pointer are
-   allowed, non-NULL values are deleted by calling FREE().  If the
-   architecture is deleted using gdbarch_free() all non-NULL data
-   pointers are also deleted using FREE().
+   restored.  INIT() is not re-called.
 
    Multiple registrarants for any architecture are allowed (and
    strongly encouraged).  */

@@ -1082,20 +1082,15 @@ extern int gdbarch_update_p (struct gdbarch_info info);
    for the reserved data-pointer is returned.  That identifer should
    be saved in a local static variable.
 
-   The per-architecture data-pointer can be initialized in one of two
-   ways: The value can be set explicitly using a call to
-   set_gdbarch_data(); the value can be set implicitly using the value
-   returned by a non-NULL INIT() callback.  INIT(), when non-NULL is
-   called after the basic architecture vector has been created.
+   The per-architecture data-pointer is either initialized explicitly
+   (set_gdbarch_data()) or implicitly (by INIT() via a call to
+   gdbarch_data()).  FREE() is called to delete either an existing
+   data-poitner overridden by set_gdbarch_data() or when the
+   architecture object is being deleted.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is
-   restored.  INIT() is not called.
-
-   During initialization, multiple assignments of the data-pointer are
-   allowed, non-NULL values are deleted by calling FREE().  If the
-   architecture is deleted using gdbarch_free() all non-NULL data
-   pointers are also deleted using FREE().
+   restored.  INIT() is not re-called.
 
    Multiple registrarants for any architecture are allowed (and
    strongly encouraged).  */
@@ -1249,7 +1244,6 @@ cat <<EOF
 
 static void verify_gdbarch (struct gdbarch *gdbarch);
 static void alloc_gdbarch_data (struct gdbarch *);
-static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void clear_gdbarch_swap (struct gdbarch *);
@@ -1271,6 +1265,8 @@ printf "/* Maintain the struct gdbarch object */\n"
 printf "\n"
 printf "struct gdbarch\n"
 printf "{\n"
+printf "  /* Has this architecture been fully initialized?  */\n"
+printf "  int initialized_p;\n"
 printf "  /* basic architectural information */\n"
 function_list | while do_read
 do
@@ -1343,6 +1339,7 @@ printf "extern const struct bfd_arch_info bfd_default_arch_struct;\n"
 printf "\n"
 printf "struct gdbarch startup_gdbarch =\n"
 printf "{\n"
+printf "  1, /* Always initialized.  */\n"
 printf "  /* basic architecture information */\n"
 function_list | while do_read
 do
@@ -1381,7 +1378,6 @@ initialize_non_multiarch ()
      they are starting from scratch.  */
   clear_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_swap (&startup_gdbarch);
-  init_gdbarch_data (&startup_gdbarch);
 }
 EOF
 
@@ -1747,6 +1743,7 @@ cat <<EOF
 struct gdbarch_data
 {
   unsigned index;
+  int init_p;
   gdbarch_data_init_ftype *init;
   gdbarch_data_free_ftype *free;
 };
@@ -1773,6 +1770,7 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
                        gdbarch_data_free_ftype *free)
 {
   struct gdbarch_data_registration **curr;
+  /* Append the new registraration.  */
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
@@ -1781,30 +1779,11 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
   (*curr)->data->init = init;
+  (*curr)->data->init_p = 1;
   (*curr)->data->free = free;
   return (*curr)->data;
 }
 
-
-/* Walk through all the registered users initializing each in turn. */
-
-static void
-init_gdbarch_data (struct gdbarch *gdbarch)
-{
-  struct gdbarch_data_registration *rego;
-  for (rego = gdbarch_data_registry.registrations;
-       rego != NULL;
-       rego = rego->next)
-    {
-      struct gdbarch_data *data = rego->data;
-      gdb_assert (data->index < gdbarch->nr_data);
-      if (data->init != NULL)
-        {
-          void *pointer = data->init (gdbarch);
-          set_gdbarch_data (gdbarch, data, pointer);
-        }
-    }
-}
 
 /* Create/delete the gdbarch data vector. */
 
@@ -1838,7 +1817,7 @@ free_gdbarch_data (struct gdbarch *gdbarch)
 }
 
 
-/* Initialize the current value of thee specified per-architecture
+/* Initialize the current value of the specified per-architecture
    data-pointer. */
 
 void
@@ -1847,8 +1826,11 @@ set_gdbarch_data (struct gdbarch *gdbarch,
                   void *pointer)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  if (data->free != NULL && gdbarch->data[data->index] != NULL)
-    data->free (gdbarch, gdbarch->data[data->index]);
+  if (gdbarch->data[data->index] != NULL)
+    {
+      gdb_assert (data->free != NULL);
+      data->free (gdbarch, gdbarch->data[data->index]);
+    }
   gdbarch->data[data->index] = pointer;
 }
 
@@ -1859,6 +1841,20 @@ void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
   gdb_assert (data->index < gdbarch->nr_data);
+  /* The data-pointer isn't initialized, call init() to get a value but
+     only if the architecture initializaiton has completed.  Otherwise
+     punt - hope that the caller knows what they are doing.  */
+  if (gdbarch->data[data->index] == NULL
+      && gdbarch->initialized_p)
+    {
+      /* Be careful to detect an initialization cycle.  */
+      gdb_assert (data->init_p);
+      data->init_p = 0;
+      gdb_assert (data->init != NULL);
+      gdbarch->data[data->index] = data->init (gdbarch);
+      data->init_p = 1;
+      gdb_assert (gdbarch->data[data->index] != NULL);
+    }
   return gdbarch->data[data->index];
 }
 
@@ -2252,8 +2248,9 @@ gdbarch_update_p (struct gdbarch_info info)
     rego->arches = this;
   }    
 
-  /* Switch to this new architecture.  Dump it out. */
+  /* Switch to this new architecture marking it initialized.  */
   current_gdbarch = new_gdbarch;
+  current_gdbarch->initialized_p = 1;
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -2272,10 +2269,8 @@ gdbarch_update_p (struct gdbarch_info info)
      called. */
   init_gdbarch_swap (new_gdbarch);
   
-  /* Initialize the per-architecture data-pointer of all parties that
-     registered an interest in this architecture.  CURRENT_GDBARCH
+  /* Initialize the per-architecture data.  CURRENT_GDBARCH
      must be updated before these modules are called. */
-  init_gdbarch_data (new_gdbarch);
   architecture_changed_event ();
 
   if (gdbarch_debug)
