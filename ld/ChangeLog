@@ -1,3 +1,7 @@
+2001-09-12  Andrew MacLeod  <amacleod@redhat.com>
+
+     * scripttempl/v850.sc: Add gcc_except_table sections.
+
 Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparams/h8300helf.sh: Move stack to a much higher memory address.
