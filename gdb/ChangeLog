@@ -1,8 +1,8 @@
 Wed Aug 24 17:45:14 1994  J.T. Conklin  (jtc@cygnus.com)
 
 	* config/xm-nbsd.h: New file, support for all NetBSD ports.
-	* config/sparc/{nm-nbsd.h,tm-nbsd.h,xm-nbsd.h}: New files, support
-	  for NetBSD/sparc.
+	* config/sparc/{nm-sparcnbsd.h,tm-sparcnbsd.h,xm-sparcnbsd.h}: 
+	  New files, support for NetBSD/sparc.
 	* configure.in: Add sparc-*-netbsd target.
 
 Wed Aug 24 13:17:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
