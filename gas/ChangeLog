@@ -1,5 +1,8 @@
 Thu Nov 16 00:21:44 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	Version 2.6 released.
+	* Makefile.in (VERSION): Updated to 2.6.
+
 	* config/obj-coff.c (write_object_file): Change use of md_do_align
 	to pass a pointer rather than a fill value, to match other uses.
 
