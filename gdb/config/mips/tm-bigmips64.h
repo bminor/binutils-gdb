@@ -18,18 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define GDB_TARGET_IS_MIPS64 1
+#define TARGET_BYTE_ORDER BIG_ENDIAN
 
-/* force LONGEST to be long long in gdb */
-#define FORCE_LONG_LONG
-
-/* Use eight byte registers.  */
-#define MIPS_REGSIZE 8
-
-/* Load double words in CALL_DUMMY.  */
-#define OP_LDFPR 065	/* ldc1 */
-#define OP_LDGPR 067	/* ld */
-
-/* Get the basic MIPS definitions.  Default to big endian, since that
-   is how the chips are mostly used.  */
-#include "tm-bigmips.h"
+#include "mips/tm-mips64.h"
