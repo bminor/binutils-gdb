@@ -278,7 +278,7 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 
       /* We over-compute the size.  It shouldn't matter.  */
       for (i = 0; i < argc; ++i)
-	length += 2 * strlen (argv[i]) + 1;
+	length += 2 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
 
       result = (char *) xmalloc (length);
       out = result;
@@ -288,11 +288,20 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 	  if (i > 0)
 	    *out++ = ' ';
 
-	  for (cp = argv[i]; *cp; ++cp)
+	  /* Need to handle empty arguments specially.  */
+	  if (argv[i][0] == '\0')
 	    {
-	      if (strchr (special, *cp) != NULL)
-		*out++ = '\\';
-	      *out++ = *cp;
+	      *out++ = '\'';
+	      *out++ = '\'';
+	    }
+	  else
+	    {
+	      for (cp = argv[i]; *cp; ++cp)
+		{
+		  if (strchr (special, *cp) != NULL)
+		    *out++ = '\\';
+		  *out++ = *cp;
+		}
 	    }
 	}
       *out = '\0';
