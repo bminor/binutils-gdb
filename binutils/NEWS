@@ -1,5 +1,8 @@
 -*- text -*-
 
+* readelf: Support added for DWARF 2.1 extensions.  Support added for
+  displaying the contents of .debug.macinfo sections.
+
 * New command line switches added to objcopy to allow symbols to be kept as
   global symbols, and also to specify files containing lists of such symbols.
   by Honda Hiroki.

@@ -1,3 +1,15 @@
+2001-07-05  Daniel Berlin  <dan@cgsoftware.com>
+
+	* readelf.c (display_debug_macinfo): New function, display
+	.debug_macinfo section.
+	(do_debug_macinfo): New variable.
+	(parse_args): Handle "-w[mM]" to mean display macro info.
+	(process_section_headers): Handle debug_macinfo.
+	(debug_displays): Replace unsupported function with macinfo
+	function for .debug_macinfo display. 
+	* doc/binutils.texi: Document new command line switch.
+	* NEWS: Document new feature of readelf.
+	
 2001-07-05  H.J. Lu  <hjl@gnu.org>
 
 	* objcopy.c (filter_symbols): Don't turn undefined symbols

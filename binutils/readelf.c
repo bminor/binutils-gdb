@@ -119,6 +119,7 @@ int                     do_debug_pubnames;
 int                     do_debug_aranges;
 int                     do_debug_frames;
 int                     do_debug_frames_interp;
+int			do_debug_macinfo;
 int                     do_arch;
 int                     do_notes;
 int			is_32bit_elf;
@@ -210,6 +211,7 @@ static int                display_debug_lines         PARAMS ((Elf32_Internal_Sh
 static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_frames        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_macinfo       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
@@ -2019,7 +2021,7 @@ usage ()
   fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
   fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
   fprintf (stdout, _("                            Dump the contents of section <number>\n"));
-  fprintf (stdout, _("  -w[liaprf] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=frames]\n"));
+  fprintf (stdout, _("  -w[liaprmf] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames]\n"));
   fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
@@ -2187,6 +2189,11 @@ parse_args (argc, argv)
 		  do_debug_frames_interp = 1;
 		case 'f':
 		  do_debug_frames = 1;
+		  break;
+
+		case 'm':
+		case 'M':
+		  do_debug_macinfo = 1;
 		  break;
 
 		default:
@@ -2935,7 +2942,7 @@ process_section_headers (file)
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
-		|| do_debug_frames)
+		|| do_debug_frames || do_debug_macinfo)
 	       && strncmp (name, ".debug_", 7) == 0)
 	{
 	  name += 7;
@@ -2947,6 +2954,7 @@ process_section_headers (file)
 	      || (do_debug_pubnames && (strcmp (name, "pubnames") == 0))
 	      || (do_debug_aranges  && (strcmp (name, "aranges") == 0))
 	      || (do_debug_frames   && (strcmp (name, "frame") == 0))
+	      || (do_debug_macinfo  && (strcmp (name, "macinfo") == 0))
 	      )
 	    request_dump (i, DEBUG_DUMP);
 	}
@@ -6265,6 +6273,80 @@ process_abbrev_section (start, end)
 
 
 static int
+display_debug_macinfo (section, start, file)
+     Elf32_Internal_Shdr * section;
+     unsigned char *       start;
+     FILE *                file ATTRIBUTE_UNUSED;
+{
+  unsigned char * end = start + section->sh_size;
+  unsigned char * curr = start;
+  unsigned int bytes_read;
+  enum dwarf_macinfo_record_type op;
+
+  printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
+
+  while (curr < end)
+    {
+      unsigned int lineno;
+      const char * string;
+
+      op = * curr;
+      curr ++;
+
+      switch (op)
+	{
+	case DW_MACINFO_start_file:
+	  {
+	    unsigned int filenum;
+
+	    lineno = read_leb128 (curr, & bytes_read, 0);
+	    curr += bytes_read;
+	    filenum = read_leb128 (curr, & bytes_read, 0);
+	    curr += bytes_read;
+
+	    printf (_(" DW_MACINFO_start_file - lineno: %d filenum: %d\n"), lineno, filenum);
+	  }
+	  break;
+
+	case DW_MACINFO_end_file:
+	  printf (_(" DW_MACINFO_end_file\n"));
+	  break;
+
+	case DW_MACINFO_define:
+	  lineno = read_leb128 (curr, & bytes_read, 0);
+	  curr += bytes_read;
+	  string = curr;
+	  curr += strlen (string) + 1;
+	  printf (_(" DW_MACINFO_define - lineno : %d macro : %s\n"), lineno, string);
+	  break;
+
+	case DW_MACINFO_undef:
+	  lineno = read_leb128 (curr, & bytes_read, 0);
+	  curr += bytes_read;
+	  string = curr;
+	  curr += strlen (string) + 1;
+	  printf (_(" DW_MACINFO_undef - lineno : %d macro : %s\n"), lineno, string);
+	  break;
+
+	case DW_MACINFO_vendor_ext:
+	  {
+	    unsigned int constant;
+
+	    constant = read_leb128 (curr, & bytes_read, 0);
+	    curr += bytes_read;
+	    string = curr;
+	    curr += strlen (string) + 1;
+	    printf (_(" DW_MACINFO_vendor_ext - constant : %d string : %s\n"), constant, string);
+	  }
+	  break;
+	}
+    }
+
+  return 1;
+}
+  
+
+static int
 display_debug_abbrev (section, start, file)
      Elf32_Internal_Shdr * section;
      unsigned char *       start;
@@ -7846,7 +7928,7 @@ debug_displays[] =
   { ".debug_pubnames",    display_debug_pubnames, NULL },
   { ".debug_frame",       display_debug_frames, NULL },
   { ".eh_frame",          display_debug_frames, NULL },
-  { ".debug_macinfo",     display_debug_not_supported, NULL },
+  { ".debug_macinfo",     display_debug_macinfo, NULL },
   { ".debug_str",         display_debug_not_supported, NULL },
   { ".debug_static_func", display_debug_not_supported, NULL },
   { ".debug_static_vars", display_debug_not_supported, NULL },

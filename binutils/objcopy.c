@@ -807,7 +807,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	keep = 1;
       if (keep && is_strip_section (abfd, bfd_get_section (sym)))
 	keep = 0;
-            
+
       if (keep && (flags & BSF_GLOBAL) != 0
 	  && (weaken || is_specified_symbol (name, weaken_specific_list)))
 	{
@@ -1570,9 +1570,7 @@ copy_section (ibfd, isection, obfdarg)
 	  || strip_symbols == STRIP_ALL
 	  || discard_locals == LOCALS_ALL
 	  || convert_debugging))
-    {
-      return;
-    }
+    return;
 
   p = find_section_list (bfd_section_name (ibfd, isection), false);
 
@@ -1586,7 +1584,6 @@ copy_section (ibfd, isection, obfdarg)
 
   if (size == 0 || osection == 0)
     return;
-
 
   relsize = bfd_get_reloc_upper_bound (ibfd, isection);
   if (relsize < 0)
@@ -1619,6 +1616,33 @@ copy_section (ibfd, isection, obfdarg)
 	  free (relpp);
 	  relpp = temp_relpp;
 	}
+      else if (sections_removed)
+	{
+	  /* Remove relocations which are against symbols
+	     in sections that have been removed, unless
+	     the symbols are going to be preserved.  */
+	  arelent ** temp_relpp;
+	  asymbol *  sym;
+	  long temp_relcount = 0;
+	  long i;
+
+	  temp_relpp = (arelent **) xmalloc (relsize);
+	  for (i = 0; i < relcount; i++)
+	    {
+	      sym = *relpp [i]->sym_ptr_ptr;
+
+	      /* FIXME: Should we warn about deleted relocs ?  */
+	      if (is_specified_symbol (bfd_asymbol_name (sym),
+				       keep_specific_list)
+		  || bfd_get_output_section (sym) != NULL)
+		temp_relpp [temp_relcount++] = relpp [i];
+	    }
+
+	  relcount = temp_relcount;
+	  free (relpp);
+	  relpp = temp_relpp;
+	}
+
       bfd_set_reloc (obfd, osection,
 		     (relcount == 0 ? (arelent **) NULL : relpp), relcount);
     }
@@ -1753,14 +1777,22 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
   if (relcount < 0)
     bfd_fatal (bfd_get_filename (ibfd));
 
-  /* Examine each symbol used in a relocation.  If it's not one of the
-     special bfd section symbols, then mark it with BSF_KEEP.  */
+  /* Examine each symbol used in a relocation.  */
   for (i = 0; i < relcount; i++)
     {
-      if (*relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
-	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section_ptr->symbol
-	  && *relpp[i]->sym_ptr_ptr != bfd_und_section_ptr->symbol)
-	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;
+      asymbol * sym = * relpp[i]->sym_ptr_ptr;
+      
+      /* If the symbol's output section does not exist (because it
+	 has been removed with -R) then do not keep the symbol.  */
+      if (bfd_get_output_section (sym) == NULL)
+	continue;
+      
+      /* If the symbols is not one of the special bfd
+	 section symbols, then mark it with BSF_KEEP.  */
+      if (sym != bfd_com_section_ptr->symbol
+	  && sym != bfd_abs_section_ptr->symbol
+	  && sym != bfd_und_section_ptr->symbol)
+	sym->flags |= BSF_KEEP;
     }
 
   if (relpp != NULL)
