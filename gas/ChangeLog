@@ -1,3 +1,8 @@
+2002-05-03  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-s390.c (md_gather_operands): Emit dwarf2 line-number
+	information for instructions.
+
 2002-05-02  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* as.h: Fix formatting.
