@@ -1,3 +1,12 @@
+Fri Nov  3 12:38:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Permit user to override DEMANGLER_PROG from command line.  From
+	Manfred Hollstein <manfred@lts.sel.alcatel.de>.
+	* Makefile.in ($(DEMANGLER_PROG)): Depend upon
+	$(DEMANGLER_PROG).1.
+	(install): Don't depend upon $(DEMANGLER_PROG).1.  Only install
+	$(DEMANGLER_PROG).1 if $(DEMANGLER_PROG) is not empty.
+
 Wed Nov  1 15:04:57 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* Makefile.in (syslex.o): add -I$(srcdir) if compiling in a

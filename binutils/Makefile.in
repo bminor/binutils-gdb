@@ -259,7 +259,7 @@ version.o: version.c Makefile
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(CC) -c -DMAIN -DVERSION='"$(VERSION)"' $(ALL_CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
-$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o
+$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o $(DEMANGLER_PROG).1
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
 
 arparse.c: arparse.y
@@ -565,14 +565,16 @@ etags tags: TAGS
 TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.[hc] 
 
-install: all $(DEMANGLER_PROG).1
+install: all
 	for i in $(PROGS) ; do \
 	  $(INSTALL_XFORM) $$i $(bindir)/`echo $$i | sed -e 's/.new//'` ; \
 	done
 	for i in $(MANPAGES) ; do \
 	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
 	done
-	$(INSTALL_XFORM1) $(DEMANGLER_PROG).1 $(man1dir)/$(DEMANGLER_PROG).1
+	if [ x$(DEMANGLER_PROG) != x ]; then \
+	  $(INSTALL_XFORM1) $(DEMANGLER_PROG).1 $(man1dir)/$(DEMANGLER_PROG).1; \
+	fi
 	-if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
 	  for i in $(TOOL_PROGS) ; do \
