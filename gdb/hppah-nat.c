@@ -32,58 +32,6 @@ extern CORE_ADDR text_end;
 
 static void fetch_register ();
 
-/* This function simply calls ptrace with the given arguments.  
-   It exists so that all calls to ptrace are isolated in this 
-   machine-dependent file. */
-int
-call_ptrace (request, pid, addr, data)
-     int request, pid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
-{
-  return ptrace (request, pid, addr, data, 0);
-}
-
-void
-kill_inferior ()
-{
-  if (inferior_pid == 0)
-    return;
-  ptrace (PT_EXIT, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0, 0);
-  wait ((int *)0);
-  target_mourn_inferior ();
-}
-
-/* Start debugging the process whose number is PID.  */
-int
-attach (pid)
-     int pid;
-{
-  errno = 0;
-  ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0, 0);
-  if (errno)
-    perror_with_name ("ptrace");
-  attach_flag = 1;
-  return pid;
-}
-
-/* Stop debugging the process whose number is PID
-   and continue it with signal number SIGNAL.
-   SIGNAL = 0 means just continue it.  */
-
-void
-detach (signal)
-     int signal;
-{
-  errno = 0;
-  ptrace (PT_DETACH, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
-  if (errno)
-    perror_with_name ("ptrace");
-  attach_flag = 0;
-}
-
-/* Fetch all registers, or just one, from the child process.  */
-
 void
 fetch_inferior_registers (regno)
      int regno;
@@ -198,34 +146,6 @@ fetch_register (regno)
     buf[3] &= ~0x3;
   supply_register (regno, buf);
  error_exit:;
-}
-
-/* Resume execution of process PID.
-   If STEP is nonzero, single-step it.
-   If SIGNAL is nonzero, give it that signal.  */
-
-void
-child_resume (pid, step, signal)
-     int pid;
-     int step;
-     enum target_signal signal;
-{
-  errno = 0;
-
-  if (pid == -1)
-    pid = inferior_pid;
-
-  /* An address of (PTRACE_ARG3_TYPE) 1 tells ptrace to continue from where
-     it was. (If GDB wanted it to start some other way, we have already
-     written a new PC value to the child.)  */
-
-  if (step)
-    ptrace (PT_SINGLE, pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
-  else
-    ptrace (PT_CONTIN, pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
-
-  if (errno)
-    perror_with_name ("ptrace");
 }
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR

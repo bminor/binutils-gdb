@@ -125,14 +125,19 @@ void
 child_resume (pid, step, signal)
      int pid;
      int step;
-     int signal;
+     enum target_signal signal;
 {
   errno = 0;
 
   if (pid == -1)
-#ifdef PIDGET			/* XXX Lynx */
+    /* Resume all threads.  */
+#ifdef PIDGET
+    /* This is for Lynx, and should be cleaned up by having Lynx be
+       a separate debugging target, with its own target_resume function.  */
     pid = PIDGET (inferior_pid);
 #else
+    /* I think this only gets used in the non-threaded case, where "resume
+       all threads" and "resume inferior_pid" are the same.  */
     pid = inferior_pid;
 #endif
 
@@ -146,9 +151,11 @@ child_resume (pid, step, signal)
      instructions), so we don't have to worry about that here.  */
 
   if (step)
-    ptrace (PT_STEP,     pid, (PTRACE_ARG3_TYPE) 1, signal);
+    ptrace (PT_STEP,     pid, (PTRACE_ARG3_TYPE) 1,
+	    target_signal_to_host (signal));
   else
-    ptrace (PT_CONTINUE, pid, (PTRACE_ARG3_TYPE) 1, signal);
+    ptrace (PT_CONTINUE, pid, (PTRACE_ARG3_TYPE) 1,
+	    target_signal_to_host (signal));
 
   if (errno)
     perror_with_name ("ptrace");
@@ -342,6 +349,8 @@ store_inferior_registers (regno)
 }
 #endif /* !defined (FETCH_INFERIOR_REGISTERS).  */
 
+
+#if !defined (CHILD_XFER_MEMORY)
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
    in the NEW_SUN_PTRACE case.
    It ought to be straightforward.  But it appears that writing did
@@ -440,3 +449,4 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
     }
   return len;
 }
+#endif /* !defined (CHILD_XFER_MEMORY).  */
