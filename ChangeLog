@@ -1,3 +1,7 @@
+Thu May  5 17:35:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config.sub (sparclitefrw, sparclitefrwcompat): Don't set the os.
+
 Thu May  5 20:06:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/mh-lynxrs6k: Renamed from mh-lynxosrs6k, to make it
@@ -24,6 +28,14 @@ Thu May  5 00:16:36 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* configure.in (mips*-dec-bsd*): New target; do build linker.
 	(mips*-*-bsd*): New target; don't build linker.
+
+Wed May  4 20:10:10 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* configure.in: support rs6000-*-lynxos* configuration.
+	support sunos4 as a cross target.
+
+	* config.sub: look for lynx*, not lynx since the OS version may
+	legitimately be part of the name.
 
 Tue May  3 21:48:11 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
