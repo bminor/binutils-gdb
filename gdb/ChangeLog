@@ -1,6 +1,29 @@
+Fri Jan 31 00:05:01 1992  John Gilmore  (gnu at cygnus.com)
+
+	* exec.c (exec_files_info):  Split out into print_section_info.
+	Print BFD filename of each section if it's not the default one.
+	* core.c (core_files_info):  Call print_section_info.
+
+	* xm-vax.h:  Include a few system header files whose definitions
+	must precede defs.h.
+	* language.c, language.h:  Make some things const.
+	* expression.h, main.c:  const spreads like ooze.
+
+	* mem-break.c (break_insn, break_insn_size):  Use unsigned chars,
+	since BREAKPOINT values can be >0x80.
+
 Thu Jan 30 17:21:14 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c, xm-i386sco.h:  SCO needs to use setpgid().
+
+Thu Jan 30 01:04:23 1992  John Gilmore  (gnu at cygnus.com)
+
+	* sparc-pinsn.c:  Remove kludge for preferring architectures.
+	Remove #ifdef's for SORT_NEEDED.  We need to sort the table, now
+	and forever.  Add `add' instruction to the set that get checked
+	for a preceding `sethi' in order to print an absolute address.
+	Corresponding changes in ../include/opcode/sparc.h needed
+	to eliminate garbage instructions.
 
 Wed Jan 29 19:24:34 1992  Per Bothner  (bothner at cygnus.com)
 

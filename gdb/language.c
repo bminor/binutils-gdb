@@ -47,7 +47,7 @@ extern volatile void return_to_top_level ();
 static void set_type_range ();
 
 /* Forward declaration */
-extern struct language_defn unknown_language_defn;
+extern const struct language_defn unknown_language_defn;
 
 /* The current (default at startup) state of type and range checking.
     (If the modes are set to "auto", though, these are changed based
@@ -61,7 +61,7 @@ enum type_check type_check = type_check_off;
 
 /* The current language and language_mode (see language.h) */
 
-struct language_defn *current_language = &unknown_language_defn;
+const struct language_defn *current_language = &unknown_language_defn;
 enum language_mode language_mode = language_mode_auto;
 
 /* The list of supported languages.  The list itself is malloc'd.  */

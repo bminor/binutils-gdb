@@ -85,7 +85,7 @@ const struct op_print
    always points to *some* valid struct; it can be used without checking
    it for validity.  */
 
-extern struct language_defn *current_language;
+extern const struct language_defn *current_language;
 
 /* language_mode == 
    language_mode_auto:   current_language automatically set upon selection
