@@ -1,3 +1,8 @@
+2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
+
+	* f-lang.c (get_bf_for_fcn): Replace fprintf (stderr,...
+	with fprintf_unfiltered (gdb_stderr,....
+
 2002-04-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix PR gdb/508.
