@@ -1,3 +1,7 @@
+2001-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (LOCAL_LABEL_PREFIX): Change defintion to "".
+
 2001-01-07  Philip Blundell  <philb@gnu.org>
 
 	* README: Replace `bug-gnu-utils@gnu.org' with
