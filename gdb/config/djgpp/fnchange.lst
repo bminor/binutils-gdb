@@ -43,6 +43,7 @@
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386linux-tdep.c
 @V@/gdb/arm-linux-tdep.c @V@/gdb/armlin-tdep.c
 @V@/gdb/arm-linux-nat.c @V@/gdb/armlin-nat.c
+@V@/gdb/ia64-aix-nat.c @V@/gdb/ia64aix-nat.c
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64linux-nat.c
 @V@/gdb/config/alpha/alpha-osf1.mh @V@/gdb/config/alpha/alphosf1.mh
 @V@/gdb/config/alpha/alpha-osf2.mh @V@/gdb/config/alpha/alphosf2.mh

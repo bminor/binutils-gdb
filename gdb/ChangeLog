@@ -1,3 +1,7 @@
+2001-03-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/djgpp/fnchange.lst (ia64-aix-nat.c): Add entry.
+
 2001-03-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h: Remove #if __STDC__, assume an ISO-C compiler.
