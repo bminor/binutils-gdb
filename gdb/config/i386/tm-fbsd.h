@@ -24,56 +24,17 @@
 #define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
-/* FreeBSD/ELF uses stabs-in-ELF with the DWARF register numbering
-   scheme by default, so we must redefine STAB_REG_TO_REGNUM.  This
-   messes up the floating-point registers for a.out, but there is not
-   much we can do about that.  */
-
-#undef STAB_REG_TO_REGNUM
-#define STAB_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
-
-/* FreeBSD uses the old gcc convention for struct returns.  */
-
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-  generic_use_struct_convention (1, type)
-
-
-/* Support for longjmp.  */
-
-/* Details about jmp_buf.  It's supposed to be an array of integers.  */
-
-#define JB_ELEMENT_SIZE 4	/* Size of elements in jmp_buf.  */
-#define JB_PC		0	/* Array index of saved PC.  */
-
-/* Figure out where the longjmp will land.  Store the address that
-   longjmp will jump to in *ADDR, and return non-zero if successful.  */
-
-#define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
-extern int get_longjmp_target (CORE_ADDR *addr);
-
-
-/* Support for signal handlers.  */
-
-#define IN_SIGTRAMP(pc, name) i386bsd_in_sigtramp (pc, name)
-extern int i386bsd_in_sigtramp (CORE_ADDR pc, char *name);
-
 /* These defines allow the recognition of sigtramps as a function name
    <sigtramp>.
 
-   FIXME: kettenis/2001-07-13: These should be added to the target
-   vector and turned into functions when we go "multi-arch".  */
+   FIXME: kettenis/2002-05-12: Of course these defines will have to go
+   if we go truly "multi-arch", but I don't know yet how to get rid of
+   them.  */
 
-#define SIGTRAMP_START(pc) i386bsd_sigtramp_start
-#define SIGTRAMP_END(pc) i386bsd_sigtramp_end
-extern CORE_ADDR i386bsd_sigtramp_start;
-extern CORE_ADDR i386bsd_sigtramp_end;
-
-/* Override FRAME_SAVED_PC to enable the recognition of signal handlers.  */
-
-#undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(frame) i386bsd_frame_saved_pc (frame)
-extern CORE_ADDR i386bsd_frame_saved_pc (struct frame_info *frame);
-
+#define SIGTRAMP_START(pc) i386bsd_sigtramp_start (pc)
+#define SIGTRAMP_END(pc) i386bsd_sigtramp_end (pc)
+extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
+extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
 
 /* Shared library support.  */
 

@@ -1,5 +1,6 @@
-/* Macro definitions for i386 running under NetBSD.
-   Copyright 1994, 1996, 2000, 2002 Free Software Foundation, Inc.
+/* Target-dependent code for Linux/x86.
+   Copyright 2002
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,24 +19,18 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NBSD_H
-#define TM_NBSD_H
+#ifndef I386_LINUX_TDEP_H
+#define I386_LINUX_TDEP_H
 
-#define HAVE_I387_REGS
-#define HAVE_SSE_REGS
+/* The Linux kernel pretends there is an additional "orig_eax"
+   register.  Since GDB needs access to that register to be able to
+   properly restart system calls when necessary (see
+   i386-linux-tdep.c) we need our own versions of a number of
+   functions that deal with GDB's register cache.  */
 
-#include "i386/tm-i386.h"
+/* Register number for the "orig_eax" pseudo-register.  If this
+   pseudo-register contains a value >= 0 it is interpreted as the
+   system call number that the kernel is supposed to restart.  */
+#define I386_LINUX_ORIG_EAX_REGNUM I386_SSE_NUM_REGS
 
-/* These defines allow the recognition of sigtramps as a function name
-   <sigtramp>.
-
-   FIXME: kettenis/2002-05-12: Of course these defines will have to go
-   if we go truly "multi-arch", but I don't know yet how to get rid of
-   them.  */
-
-#define SIGTRAMP_START(pc) i386bsd_sigtramp_start (pc)
-#define SIGTRAMP_END(pc) i386bsd_sigtramp_end (pc)
-extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
-extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
-
-#endif /* TM_NBSD_H */
+#endif /* i386-linux-tdep.h */

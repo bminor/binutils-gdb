@@ -1,3 +1,174 @@
+2002-06-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/i386sol2.mt (TDEPFILES): Add i386-sol2-tdep.o and
+	i386bsd-tdep.o.  Remove solib.o, solib-svr4.o and solib-legacy.o.
+	Move these to ...
+	* config/i386/i386sol2.mh: ... here.
+	* config/i386/tm-i386sol2.h (STAB_REG_TO_REGNUM): Remove define.
+	(sigtramp_saved_pc, I386V4_SIGTRAMP_SAVED_PC): Don't #undef.
+	(SIGCONTEXT_PC_OFFSET): Remove define.
+	(IN_SIGTRAMP): Remove define.
+	* i386-sol2-tdep.c: New file.
+	
+	* config/i386/i386nw.mt (TM_FILE): Change to tm-i386.h.
+	* config/i386/tm-i386nw.h: Removed.
+
+	* config/i386/tm-fbsd.h (STAB_REG_TO_REGNUM,
+	USE_STRUCT_CONVENTION): Remove defines.
+	(JB_ELEMENT_SIZE, JB_PC, GET_LONGJMP_TARGET): Remove defines.
+	(get_longjmp_target): Remove prototype.
+	(IN_SIGTRAMP): Remove define.
+	(i386bsd_in_sigtramp): Remove prototype.
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Turn into a
+	function.  Update comment accordingly
+	(SIGTRAMP_START, SIGTRAMP): Adjust definition accordingly.
+	(FRAME_SAVED_PC): Remove define.
+	(i386bsd_frame_saved_pc): Remove prototype.
+	* config/i386/tm-nbsd.h (JB_ELEMENT_SIZE, JB_PC,
+	GET_LONGJMP_TARGET): Remove defines.
+	(get_longjmp_target): Remove prototype.
+	(IN_SIGTRAMP): Remove define.
+	(i386bsd_in_sigtramp): Remove prototype.
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Turn into a
+	function.  Update comment accordingly
+	(SIGTRAMP_START, SIGTRAMP): Adjust definition accordingly.
+	(FRAME_SAVED_PC): Remove define.
+	(i386bsd_frame_saved_pc): Remove prototype.
+	* config/i386/tm-nbsdaout.h (i386nbsd_aout_use_struct_convention):
+	Remove prototype.
+	(USE_STRUCT_CONVENTION): Remove prototype.
+	* i386bsd-nat.c (i386bsd_sigcontext_pc_offset): Remove
+	declaration.
+	(_initialize_i386bsd_nat): Revise logic to determine some
+	constants at compile time when compiling a native GDB.  Warn if
+	things don't match up with what we expect.
+	* i386bsd-tdep.c (i386bsd_sigtramp_start, i386bsd_sigtramp_end):
+	Remove variables.
+	(i386bsd_in_sigtramp): Rename tp i386bsd_pc_in_sigtramp.  Rewrite
+	to use date stored in `struct gdbarch_tdep'.
+	(i386bsd_sigcontext_offset): Remove varaible.
+	(i386bsd_sigtramp_saved_pc): Make public.  Rewrite to use data
+	stored in `struct gdbarch_tdep'.
+	(i386bsd_frame_saved_pc): Make static.
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): New functions.
+	(i386bsd_sc_pc_offset, i386nbsd_sc_pc_offset,
+	i386fbsd_sigtramp_start, i386fbsd_sigtramp_end,
+	i386fbsd4_sc_pc_offset): New variables.
+	(i386bsd_init_abi, i386nbsd_init_abi, i386nbsdelf_init_abi,
+	i386fbsdaout_init_abi, i386fbsd_init_abi, i386fbsd4_init_abi): New
+	functions.
+	(i386bsd_aout_osabi_sniffer, _initialize_i386bsd_tdep): New
+	functions.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Fix type in comment.
+	Modify the value of i386fbsd_sigtramp_start and
+	i386fbsd_sigtramp_end instead of i386bsd_sigtramp_start and
+	i386fbsd_sigtramp_end.
+	* i386nbsd-tdep.c: (i386nbsd_aout_use_struct_convention): Remove
+	function.
+
+	* config/i386/tm-linux.h (I386_LINUX_ORIG_EAX_REGNUM): Move
+	define to i386-linux-tdep.h.
+	(NUM_REGS, MAX_NUM_REGS, REGISTER_BYTES, REGISTER_NAME,
+	REGISTER_BYTE, REGISTER_RAW_SIZE, STAB_REG_TO_REGNUM): Remove
+	defines.
+	(i386_linux_register_name, i386_linux_register_byte,
+	i386_linux_register_raw_size): Remove prototypes.
+	(i386_linux_svr4_fetch_link_map_offsets): Remove prototype.
+	(SVR4_FETCH_LINK_MAP_OFFSETS): Remove define.
+	(IN_SIGTRAMP, FRAME_CHAIN, FRAME_SAVED_PC, SAVED_PC_AFTER_CALL,
+	TARGET_WRITE_PC): Remove defines.
+	(i386_linux_in_sigtramp, i386_linux_frame_chain,
+	i386_linux_frame_saved_pc, i386_linux_saved_pc_after_call,
+	i386_linux_write_pc): Remove prototypes.
+	(JB_ELEMENT_SIZE, JB_PC, GET_LONGJMP_TARGET): Remove defines.
+	(get_longjmp_target): Remove prototype.
+	* i386-linux-tdep.h: New file.
+	* i386-linux-nat.c: Include "i386-linux-tdep.h".
+	* i386-linux-tdep.c: Include "i386-tdep.h" and
+	"i386-linux-tdep.h".
+	(i386_linux_register_name, i386_linux_register_byte,
+	i386_linux_register_raw_size, i386_linux_in_sigtramp,
+	i386_linux_write_pc, i386_linux_svr4_fetch_link_map_offsets):
+	Make static.
+	(i386_linux_init_abi): New function.
+	(_initialize_i386_linux_tdep): New function.
+
+	* config/i386/tm-i386.h (SAVED_PC_AFTER_CALL): Remove define.
+	(i386_saved_pc_after_call): Remove prototype.
+	(MAX_NUM_REGS): Increase to deal with Linux's orig_eax "register".
+	(REGISTER_NAME, STAB_REG_TO_REGNUM, SDB_REG_TO_REGNUM,
+	DWARF_REG_TO_REGNUM, DWARF2_REG_TO_REGNUM): Remove defines.
+	(i386_register_name, i386_stab_reg_to_regnum,
+	i386_dwarf_reg_to_regnum): Remove prototypes.
+	(SIZEOF_GREGS, SIZEOF_FPU_REGS, SIZEOF_FPU_CTL_REGS,
+	SIZEOF_SSE_REGS): Remove defines.
+	(REGISTER_BYTES): Remove define.
+	(REGISTER_BYTE, REGISTER_RAW_SIZE): Remove defines.
+	(i386_register_byte, i386_register_raw_size): Remove prototypes.
+	(FRAME_CHAIN, FRAME_SAVED_PC): Remove defines.
+	(i386_frame_chain, i386_frame_saved_pc): Remove prototypes.
+	* config/i386/tm-i386v4.h (FRAME_CHAIN_VALID): Remove define.
+	(JB_ELEMENT_SIZE, JB_PC, JB_EBX, JB_ESI, JB_EDI, JB_EBP, JB_ESP,
+	JB_EDX, GET_LONGJMP_TARGET): Remove defines.
+	(get_longjmp_target): Remove prototype.
+	(I386V4_SIGTRAMP_SAVED_PC, IN_SIGTRAMP): Remove defines.
+	(sigtramp_saved_pc): Remove define.
+	(i386v4_sigtramp_saved_pc): Remove prototype.
+	* config/i386/tm-go32.h (FRAME_CHAIN,
+	FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC): Remove defines.
+	(i386go32_frame_saved_pc): Remove prototype.
+	(JB_ELEMENT_SIZE, JB_PC, GET_LONGJMP_TARGET): Remove defines.
+	(get_longjmp_target): Remove prototype.
+	* i386-tdep.h: Include "osabi.h".
+	(enum i386_abi): Removed.
+	(enum struct_return): New enum.
+	(struct gdbarch_tdep): Remove abi member, add osabi, jb_pc_offset,
+	struct_return, sigtramp_saved_pc, sigtramp_start, sigtramp_end and
+	sc_pc_offset members.
+	(i386_gdbarch_register_os_abi): Remove prototype.
+	(I386_NUM_GREGS, I386_NUM_FREGS, I386_NUM_XREGS,
+	I386_SSE_NUM_REGS): New defines.
+	(I386_SIZEOF_GREGS, I386_SIZEOF_FREGS, I386_SIZEOF_XREGS,
+	I386_SSE_SIZEOF_REGS): New defines.
+	(i386_register_name, i386_register_byte, i386_register_raw_size):
+	New prototypes.
+	(i386_elf_init_abi, i386_svr4_init_abi): New prototypes.
+	(i386bsd_sigtramp_saved_pc): New prototype.
+	* i386-tdep.c: Don't include "elf-bfd.h".
+	(i386_stab_reg_to_regnum, i386_dwarf_reg_to_regnum,
+	i386_frame_chain, i386_saved_pc_after_call): Make static.
+	(i386_frame_saved_pc): Rewrite to call architecture dependent
+	function to deal with signal handlers.  Make static.
+	(i386go32_frame_saved_pc): Removed.
+	[GET_LONGJMP_TARGET] (JB_PC, JB_ELEMENT_SIZE, get_longjmp_target):
+	Removed.
+	(i386_get_longjmp_target): New function.
+	(default_struct_convention, pcc_struct_convention,
+	reg_struct_convention, valid_conventions, struct_convention): New
+	variables.
+	(i386_use_struct_convention): New function.
+	(i386v4_sigtramp_saved_pc): Renamed to
+	i386_svr4_sigtramp_saved_pc.  Made static.  Moved.
+	(i386_pc_in_sigtramp): New function.
+	(i386_abi_names): Removed.
+	(ABI_TAG_OS_GNU_LINUX, ABI_TAG_OS_GNU_HURD,
+	ABI_TAG_OS_GNU_SOLARIS, ABI_TAG_OS_FREEBSD, ABI_TAG_OS_NETBSD):
+	Removed.
+	(process_note_sections, i386_elf_abi_from_note, i386_elf_abi,
+	i386_gdbarch_register_os_abi): Removed.
+	(struct i386_abi_handler): Removed.
+	(i386_abi_handler_list): Removed.
+	(i386_svr4_pc_in_sigtramp, i386_go32_pc_in_sigtramp): New
+	functions.
+	(i386_elf_init_abi, i386_svr4_init_abi, i386_go32_init_abi,
+	i386_nw_init_abi): New functions.
+	(i386_gdbarch_init): Rewritten to use generic OS ABI framework.
+	Use set_gdbarch_xxx() calls instead of relying on macros for a
+	number of calls.
+	(i386_coff_osabi_sniffer, i386_nlm_osabi_sniffer): New functions.
+	(_initialize_i386_tdep): Add new 'struct-convcention' command.
+	Register the various architecture variants defined in this file.
+
 2002-06-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbtypes.h (TYPE_FLAG_VARARGS): Update comment.

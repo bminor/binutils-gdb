@@ -31,49 +31,4 @@
 
 #include "config/tm-sysv4.h"
 
-/* Use the alternate method of determining valid frame chains. */
-
-#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
-
-/* Offsets (in target ints) into jmp_buf.  Not defined in any system header
-   file, so we have to step through setjmp/longjmp with a debugger and figure
-   them out.  Note that <setjmp> defines _JBLEN as 10, which is the default
-   if no specific machine is selected, even though we only use 6 slots. */
-
-#define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
-
-#define JB_EBX	0
-#define JB_ESI	1
-#define JB_EDI	2
-#define JB_EBP	3
-#define JB_ESP	4
-#define JB_EDX	5
-
-#define JB_PC	JB_EDX		/* Setjmp()'s return PC saved in EDX */
-
-/* Figure out where the longjmp will land.  Slurp the args out of the stack.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-extern int get_longjmp_target (CORE_ADDR *);
-
-#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-
-/* The following redefines make backtracing through sigtramp work.
-   They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
-   from the ucontext structure which is pushed by the kernel on the
-   user stack. Unfortunately there are three variants of sigtramp handlers.  */
-
-#define I386V4_SIGTRAMP_SAVED_PC
-#define IN_SIGTRAMP(pc, name) ((name)					\
-			       && (STREQ ("_sigreturn", name)		\
-				   || STREQ ("_sigacthandler", name)	\
-				   || STREQ ("sigvechandler", name)))
-
-/* Saved Pc.  Get it from ucontext if within sigtramp.  */
-
-#define sigtramp_saved_pc i386v4_sigtramp_saved_pc
-extern CORE_ADDR i386v4_sigtramp_saved_pc (struct frame_info *);
-
 #endif /* ifndef TM_I386V4_H */
