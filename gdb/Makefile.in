@@ -397,7 +397,7 @@ alldeps.mak: ${srcdir}/config
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" \
-		|| $$1 == "NATDEPFILES" { \
+		|| $$1 == "NATDEPFILES=" { \
 	      for (i = 2; i <= NF; i++) \
 	        print $$i >> "alldeps.tmp" ; \
             } \
