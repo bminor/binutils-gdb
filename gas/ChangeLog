@@ -1,3 +1,8 @@
+Sat May  4 12:49:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Don't adjust
+	any reloc with an LR% or RR% field selector for SOM.
+
 Sat May  4 11:26:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Add subsegs.h to appropriate TARG_CPU_DEP_*
