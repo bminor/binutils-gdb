@@ -1,3 +1,8 @@
+Mon May  5 13:57:32 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* coffgen.c (coff_find_nearest_line): If there are no syments,
+	just return false.
+
 Mon May  5 18:18:45 1997  Philip Blundell  <pjb27@cam.ac.uk>
 
 	* config.bfd: cope with '*-*-linux-gnuaout' targets.
