@@ -1,3 +1,7 @@
+2001-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (allocate_plt_and_got): Skip indirect and warning syms.
+
 2001-06-02  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-hppa.c (elf32_hppa_object_p): Check ELFOSABI_LINUX

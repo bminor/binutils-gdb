@@ -2077,6 +2077,10 @@ allocate_plt_and_got (h, inf)
   struct elf32_hppa_link_hash_table *hplink;
   asection *s;
 
+  if (h->root.type == bfd_link_hash_indirect
+      || h->root.type == bfd_link_hash_warning)
+    return true;
+
   info = (struct bfd_link_info *) inf;
   hplink = hppa_link_hash_table (info);
   if ((hplink->root.dynamic_sections_created
