@@ -254,7 +254,9 @@ disassemble (memaddr, info, insn, size)
 	mysize = 7;
 	
       if ((op->mask & insn) == op->opcode
-	  && size == (unsigned int) mysize)
+	  && size == (unsigned int) mysize
+	  && (op->machine == 0
+	      || op->machine == info->mach))
 	{
 	  const unsigned char *opindex_ptr;
 	  unsigned int nocomma;

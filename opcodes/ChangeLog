@@ -1,3 +1,10 @@
+Fri Jun 26 11:08:55 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-dis.c: Only recognize instructions from the currently
+	selected machine.
+	* m10300-opc.c: Add field indicating the particular variant of
+	the mn10300 each instruction is available on.
+
 Fri Jun 26 12:04:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: For bfd_vax_arch, build vax-dis.lo.
