@@ -199,6 +199,7 @@ sparclite-*-*)		gdb_target=sun4os4 ;;
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
 
+z8k-unknown-sim)	gdb_target=z8ksim ;;
 esac
 
 if [ ! -f ${srcdir}/config/${gdb_target}.mt ]; then
