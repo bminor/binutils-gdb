@@ -21,10 +21,10 @@ else
         lose_these_too="${lose_these_too} mt-r5900"
 fi
 
-if ( echo $* | grep keep\-mswin > /dev/null ) ; then
-	keep_these_too="${keep_these_too} mh-windows"
-else
+if ( echo $* | grep lose\-mswin > /dev/null ) ; then
         lose_these_too="${lose_these_too} mh-windows"
+else
+	keep_these_too="${keep_these_too} mh-windows"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
