@@ -1,3 +1,8 @@
+2001-11-19  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_input_bfd): Assert r_symndx != 0 when
+	discarding relocations.
+
 2001-11-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* section.c (bfd_is_const_section): New macro.  Return true if the

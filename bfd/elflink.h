@@ -6328,6 +6328,7 @@ elf_link_input_bfd (finfo, input_bfd)
 				 _("warning: relocation against removed section; zeroing"),
 				 NULL, input_bfd, o, rel->r_offset);
 #endif
+			      BFD_ASSERT (r_symndx != 0);
 			      memset (rel, 0, sizeof (*rel));
 			    }
 			  else
@@ -6359,6 +6360,7 @@ elf_link_input_bfd (finfo, input_bfd)
 				 _("warning: relocation against removed section"),
 				 NULL, input_bfd, o, rel->r_offset);
 #endif
+			      BFD_ASSERT (r_symndx != 0);
 			      rel->r_info
 				= ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
 			      rel->r_addend = 0;
