@@ -410,7 +410,7 @@ lookup_member_type (type, domain)
   return (mtype);
 }
 
-/* Allocate a stub method whose return type is TYPE.  
+/* Allocate a stub method whose return type is TYPE.
    This apparently happens for speed of symbol reading, since parsing
    out the arguments to the method is cpu-intensive, the way we are doing
    it.  So, we will fill in arguments later.
@@ -534,8 +534,8 @@ get_discrete_bounds (type, lowp, highp)
     case TYPE_CODE_CHAR:
       *lowp = 0;
       /* This round-about calculation is to avoid shifting by
-         TYPE_LENGTH (type) * TARGET_CHAR_BIT, which will not work
-         if TYPE_LENGTH (type) == sizeof (LONGEST). */
+	 TYPE_LENGTH (type) * TARGET_CHAR_BIT, which will not work
+	 if TYPE_LENGTH (type) == sizeof (LONGEST). */
       *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1);
       *highp = (*highp - 1) | *highp;
       return 0;
@@ -679,7 +679,7 @@ init_simd_type (char *name,
 }
 
 
-/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
+/* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE.
    A MEMBER is a wierd thing -- it amounts to a typed offset into
    a struct, e.g. "an int at offset 8".  A MEMBER TYPE doesn't
    include the offset (that's the value of the MEMBER itself), but does
@@ -750,7 +750,7 @@ type_name_no_tag (type)
   return TYPE_NAME (type);
 }
 
-/* Lookup a primitive type named NAME. 
+/* Lookup a primitive type named NAME.
    Return zero if NAME is not a primitive type. */
 
 struct type *
@@ -939,7 +939,7 @@ lookup_template_type (name, type, block)
   return (SYMBOL_TYPE (sym));
 }
 
-/* Given a type TYPE, lookup the type of the component of type named NAME.  
+/* Given a type TYPE, lookup the type of the component of type named NAME.
 
    TYPE can be either a struct or union, or a pointer or reference to a struct or
    union.  If it is a pointer or reference, its target type is automatically used.
@@ -994,7 +994,7 @@ lookup_struct_elt_type (type, name, noerr)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && STREQ_IW (t_field_name, name))
 	{
 	  return TYPE_FIELD_TYPE (type, i);
 	}
@@ -1045,7 +1045,7 @@ fill_in_vptr_fieldno (type)
       int i;
 
       /* We must start at zero in case the first (and only) baseclass is
-         virtual (and hence we cannot share the table pointer).  */
+	 virtual (and hence we cannot share the table pointer).  */
       for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
 	  fill_in_vptr_fieldno (TYPE_BASECLASS (type, i));
@@ -1100,7 +1100,7 @@ get_destructor_fn_field (t, method_indexp, field_indexp)
    be a mistake, though--we might load in more symbols which contain a
    full definition for the type.
 
-   This used to be coded as a macro, but I don't think it is called 
+   This used to be coded as a macro, but I don't think it is called
    often enough to merit such treatment.  */
 
 struct complaint stub_noname_complaint =
@@ -1168,9 +1168,9 @@ check_typedef (type)
     {
       char *name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
-         TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
-         as appropriate?  (this code was written before TYPE_NAME and
-         TYPE_TAG_NAME were separate).  */
+	 TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
+	 as appropriate?  (this code was written before TYPE_NAME and
+	 TYPE_TAG_NAME were separate).  */
       struct symbol *sym;
       if (name == NULL)
 	{
@@ -1378,7 +1378,7 @@ cfront_mangle_name (type, i, j)
 
   f = TYPE_FN_FIELDLIST1 (type, i);	/* moved from below */
 
-  /* kludge to support cfront methods - gdb expects to find "F" for 
+  /* kludge to support cfront methods - gdb expects to find "F" for
      ARM_mangled names, so when we mangle, we have to add it here */
   if (ARM_DEMANGLING)
     {
@@ -1693,7 +1693,7 @@ chill_varying_type (type)
   return 1;
 }
 
-/* Check whether BASE is an ancestor or base class or DCLASS 
+/* Check whether BASE is an ancestor or base class or DCLASS
    Return 1 if so, and 0 if not.
    Note: callers may want to check for identity of the types before
    calling this function -- identical types are considered to satisfy
@@ -1797,7 +1797,7 @@ static struct vbase *current_vbase_list = NULL;
    items. The vbasetype pointer of each item in the list points to the
    type information for a virtual base of the argument DCLASS.
 
-   Helper function for virtual_base_list(). 
+   Helper function for virtual_base_list().
    Note: the list goes backward, right-to-left. virtual_base_list()
    copies the items out in reverse order.  */
 
@@ -2136,8 +2136,8 @@ rank_function (parms, nparms, args, nargs)
   LENGTH_MATCH (bv) = (nargs != nparms) ? LENGTH_MISMATCH_BADNESS : 0;
 
   /* Now rank all the parameters of the candidate function */
-  for (i = 1; i <= min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i - 1], args[i - 1]);
+  for (i = 1; i < min_len; i++)
+    bv->rank[i] = rank_one_type (parms[i], args[i]);
 
   /* If more arguments than parameters, add dummy entries */
   for (i = min_len + 1; i <= nargs; i++)
@@ -2178,7 +2178,13 @@ rank_one_type (parm, arg)
   if (parm == arg)
     return 0;
 
-#if 0
+  /* See through references, since we can almost make non-references references*/
+  if (TYPE_CODE (arg) == TYPE_CODE_REF)
+    return rank_one_type(TYPE_TARGET_TYPE(arg),parm) + REFERENCE_CONVERSION_BADNESS;
+  if (TYPE_CODE (parm) == TYPE_CODE_REF)
+    return rank_one_type(arg,TYPE_TARGET_TYPE(parm)) + REFERENCE_CONVERSION_BADNESS;
+
+#ifdef DEBUG_OLOAD
   /* Debugging only */
   printf ("------ Arg is %s [%d], parm is %s [%d]\n",
       TYPE_NAME (arg), TYPE_CODE (arg), TYPE_NAME (parm), TYPE_CODE (parm));
@@ -2233,7 +2239,7 @@ rank_one_type (parm, arg)
 	  if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
 	    {
 	      /* Deal with signed, unsigned, and plain chars and
-	         signed and unsigned ints */
+		 signed and unsigned ints */
 	      if (TYPE_NOSIGN (parm))
 		{
 		  /* This case only for character types */
@@ -2246,16 +2252,16 @@ rank_one_type (parm, arg)
 		{
 		  if (TYPE_UNSIGNED (arg))
 		    {
-		      if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+		      if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
 			return 0;	/* unsigned int -> unsigned int, or unsigned long -> unsigned long */
-		      else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+		      else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
 		      else
 			return INTEGER_COERCION_BADNESS;	/* unsigned long -> unsigned int */
 		    }
 		  else
 		    {
-		      if (!strcmp (TYPE_NAME (arg), "long") && !strcmp (TYPE_NAME (parm), "int"))
+		      if (!strcmp_iw (TYPE_NAME (arg), "long") && !strcmp_iw (TYPE_NAME (parm), "int"))
 			return INTEGER_COERCION_BADNESS;	/* signed long -> unsigned int */
 		      else
 			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
@@ -2263,9 +2269,9 @@ rank_one_type (parm, arg)
 		}
 	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 		{
-		  if (!strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+		  if (!strcmp_iw (TYPE_NAME (parm), TYPE_NAME (arg)))
 		    return 0;
-		  else if (!strcmp (TYPE_NAME (arg), "int") && !strcmp (TYPE_NAME (parm), "long"))
+		  else if (!strcmp_iw (TYPE_NAME (arg), "int") && !strcmp_iw (TYPE_NAME (parm), "long"))
 		    return INTEGER_PROMOTION_BADNESS;
 		  else
 		    return INTEGER_COERCION_BADNESS;
@@ -2827,8 +2833,8 @@ recursive_dump_type (type, spaces)
 
     default:
       /* We have to pick one of the union types to be able print and test
-         the value.  Pick cplus_struct_type, even though we know it isn't
-         any particular one. */
+	 the value.  Pick cplus_struct_type, even though we know it isn't
+	 any particular one. */
       printfi_filtered (spaces, "type_specific ");
       gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);
       if (TYPE_CPLUS_SPECIFIC (type) != NULL)

@@ -165,7 +165,7 @@ enum type_code
 
 #define TYPE_FLAG_TARGET_STUB (1 << 3)
 
-/* Static type.  If this is set, the corresponding type had 
+/* Static type.  If this is set, the corresponding type had
  * a static modifier.
  * Note: This may be unnecessary, since static data members
  * are indicated by other means (bitpos == -1)
@@ -368,7 +368,7 @@ struct type
      *fields;
 
     /* For types with virtual functions (TYPE_CODE_STRUCT), VPTR_BASETYPE
-       is the base class which defined the virtual function table pointer.  
+       is the base class which defined the virtual function table pointer.
 
        For types that are pointer to member types (TYPE_CODE_MEMBER),
        VPTR_BASETYPE is the type that this pointer is a member of.
@@ -439,7 +439,7 @@ struct cplus_struct_type
     /* The "declared_type" field contains a code saying how the
        user really declared this type, e.g., "class s", "union s",
        "struct s".
-       The 3 above things come out from the C++ compiler looking like classes, 
+       The 3 above things come out from the C++ compiler looking like classes,
        but we keep track of the real declaration so we can give
        the correct information on "ptype". (Note: TEMPLATE may not
        belong in this list...)  */
@@ -521,7 +521,7 @@ struct cplus_struct_type
 
 	    /* The function type for the method.
 	       (This comment used to say "The return value of the method",
-	       but that's wrong. The function type 
+	       but that's wrong. The function type
 	       is expected here, i.e. something with TYPE_CODE_FUNC,
 	       and *not* the return-value type). */
 
@@ -575,7 +575,7 @@ struct cplus_struct_type
       }
      *fn_fieldlists;
 
-    /* If this "struct type" describes a template, then it 
+    /* If this "struct type" describes a template, then it
      * has arguments. "template_args" points to an array of
      * template arg descriptors, of length "ntemplate_args".
      * The only real information in each of these template arg descriptors
@@ -608,7 +608,7 @@ struct cplus_struct_type
      *
      * Fields in structure pointed to:
      * ->HAS_VTABLE : 0 => no virtual table, 1 => vtable present
-     * 
+     *
      * ->PRIMARY_BASE points to the first non-virtual base class that has
      * a virtual table.
      *
@@ -820,9 +820,9 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_LOCALTYPE_LINE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->line)
 
 #define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
-                                   (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
-                                  (TYPE_NFIELDS (thistype) == 0)                     && \
-                                  (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)))
+				   (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
+				  (TYPE_NFIELDS (thistype) == 0)                     && \
+				  (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)))
 
 
 
@@ -1081,9 +1081,9 @@ count_virtual_fns PARAMS ((struct type *));
  * typeinfo pointer, and dup base info pointer */
 #define HP_ACC_VFUNC_START        4
 
-/* (Negative) Offset where virtual base offset entries begin 
+/* (Negative) Offset where virtual base offset entries begin
  * in the virtual table. Skips over metavtable pointer and
- * the self-offset entry. 
+ * the self-offset entry.
  * NOTE: NEGATE THIS BEFORE USING! The virtual base offsets
  * appear before the address point of the vtable (the slot
  * pointed to by the object's vtable pointer), i.e. at lower
@@ -1129,9 +1129,10 @@ count_virtual_fns PARAMS ((struct type *));
 #define POINTER_CONVERSION_BADNESS     2
 /* Badness of conversion of pointer to void pointer */
 #define VOID_PTR_CONVERSION_BADNESS    2
-/* Badness of convering derived to base class */
+/* Badness of converting derived to base class */
 #define BASE_CONVERSION_BADNESS        2
-
+/* Badness of converting from non-reference to reference*/
+#define REFERENCE_CONVERSION_BADNESS   2
 /* Non-standard conversions allowed by the debugger */
 /* Converting a pointer to an int is usually OK */
 #define NS_POINTER_CONVERSION_BADNESS 10

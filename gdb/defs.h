@@ -122,6 +122,7 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
 #define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : (int)*(a) - (int)*(b))
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
+#define STREQ_IW(a,b) (*(a) == *(b) ? !strcmp_iw ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 
 /* The character GNU C++ uses to build identifiers that must be unique from
@@ -516,11 +517,11 @@ extern void print_address_symbolic (CORE_ADDR, struct ui_file *, int,
 				    char *);
 
 extern int build_address_symbolic (CORE_ADDR addr,
-				   int do_demangle, 
-				   char **name, 
-				   int *offset, 
-				   char **filename, 
-				   int *line, 	
+				   int do_demangle,
+				   char **name,
+				   int *offset,
+				   char **filename,
+				   int *line,
 				   int *unmapped);
 
 extern void print_address_numeric (CORE_ADDR, int, struct ui_file *);
@@ -619,8 +620,8 @@ extern struct command_line *read_command_lines (char *, int);
 
 extern void free_command_lines (struct command_line **);
 
-/* To continue the execution commands when running gdb asynchronously. 
-   A continuation structure contains a pointer to a function to be called 
+/* To continue the execution commands when running gdb asynchronously.
+   A continuation structure contains a pointer to a function to be called
    to finish the command, once the target has stopped. Such mechanism is
    used bt the finish and until commands, and in the remote protocol
    when opening an extended-remote connection. */
@@ -762,7 +763,7 @@ enum val_prettyprint
 
 extern int longest_to_int (LONGEST);
 
-/* Assorted functions we can declare, now that const and volatile are 
+/* Assorted functions we can declare, now that const and volatile are
    defined.  */
 
 extern char *savestring (const char *, int);
@@ -1160,9 +1161,9 @@ extern int event_loop_p;
 extern void (*init_ui_hook) (char *argv0);
 extern void (*command_loop_hook) (void);
 extern void (*show_load_progress) (const char *section,
-				   unsigned long section_sent, 
-				   unsigned long section_size, 
-				   unsigned long total_sent, 
+				   unsigned long section_sent,
+				   unsigned long section_size,
+				   unsigned long total_sent,
 				   unsigned long total_size);
 extern void (*print_frame_info_listing_hook) (struct symtab * s,
 					      int line, int stopline,
