@@ -159,7 +159,7 @@ int inhibit_gdbinit = 0;
 
 /* Disable windows if non-zero */
 
-int no_windows = 0;
+int use_windows = 0;		/* Defaults to off for now */
 
 /* Version number of GDB, as a string.  */
 

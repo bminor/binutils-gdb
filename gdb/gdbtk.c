@@ -551,10 +551,10 @@ gdbtk_init ()
 void
 _initialize_gdbtk ()
 {
-  if (no_windows)
-    return;
+  if (use_windows)
+    {
+      /* Tell the rest of the world that Gdbtk is now set up. */
 
-  /* Tell the rest of the world that Gdbtk is now set up. */
-
-  init_ui_hook = gdbtk_init;
+      init_ui_hook = gdbtk_init;
+    }
 }

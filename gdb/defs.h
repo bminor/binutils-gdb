@@ -886,6 +886,6 @@ extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 
 /* Inhibit window interface if non-zero. */
 
-extern int no_windows;
+extern int use_windows;
 
 #endif /* !defined (DEFS_H) */

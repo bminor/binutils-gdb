@@ -1,3 +1,9 @@
+Wed Oct 26 15:41:07 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* defs.h, gdbtk.c, main.c, top.c:  Change sense and name of
+	no_windows variable.  Now called use_windows, and defaults to off
+	(for compatibility).
+
 Wed Oct 26 12:20:53 1994  Jim Kingdon  <kingdon@cygnus.com>
 
 	* coffread.c (coff_symtab_read): If we get the address from
