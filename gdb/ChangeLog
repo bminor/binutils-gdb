@@ -1,5 +1,8 @@
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* tracepoint.c (tracepoint_save_command): From Klee Dienes --
+	use tilde_expand and strerror for opening save-tracepoints file.
+
 	* thread-db.c (thread_db_new_objfile): Indendation fix.
 
 	* infptrace.c (GDB_MAX_ALLOCA): New define.

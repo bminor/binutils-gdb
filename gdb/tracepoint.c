@@ -2263,7 +2263,7 @@ tracepoint_save_command (char *args, int from_tty)
   struct action_line *line;
   FILE *fp;
   char *i1 = "    ", *i2 = "      ";
-  char *indent, *actionline;
+  char *indent, *actionline, *pathname;
   char tmp[40];
 
   if (args == 0 || *args == 0)
@@ -2275,9 +2275,12 @@ tracepoint_save_command (char *args, int from_tty)
       return;
     }
 
-  if (!(fp = fopen (args, "w")))
-    error ("Unable to open file '%s' for saving tracepoints");
-
+  pathname = tilde_expand (args);
+  if (!(fp = fopen (pathname, "w")))
+    error ("Unable to open file '%s' for saving tracepoints (%s)",
+	   args, strerror (errno));
+  xfree (pathname);
+  
   ALL_TRACEPOINTS (tp)
   {
     if (tp->addr_string)
