@@ -1,3 +1,9 @@
+2002-04-18  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (COMMON_UISA_NOFP_REGS): New macro.
+	(registers_powerpc_nofp): New register set for processors
+	without floating point unit.
+
 2002-04-18  David S. Miller  <davem@redhat.com>
 
 	* MAINTAINERS: Add myself to write-after-approval.

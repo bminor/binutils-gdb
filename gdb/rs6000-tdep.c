@@ -2055,6 +2055,17 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /* 56 */ F(f24),F(f25),F(f26),F(f27),F(f28),F(f29),F(f30),F(f31), \
   /* 64 */ R(pc), R(ps)
 
+#define COMMON_UISA_NOFP_REGS \
+  /*  0 */ R(r0), R(r1), R(r2), R(r3), R(r4), R(r5), R(r6), R(r7),  \
+  /*  8 */ R(r8), R(r9), R(r10),R(r11),R(r12),R(r13),R(r14),R(r15), \
+  /* 16 */ R(r16),R(r17),R(r18),R(r19),R(r20),R(r21),R(r22),R(r23), \
+  /* 24 */ R(r24),R(r25),R(r26),R(r27),R(r28),R(r29),R(r30),R(r31), \
+  /* 32 */ R0,    R0,    R0,    R0,    R0,    R0,    R0,    R0,     \
+  /* 40 */ R0,    R0,    R0,    R0,    R0,    R0,    R0,    R0,     \
+  /* 48 */ R0,    R0,    R0,    R0,    R0,    R0,    R0,    R0,     \
+  /* 56 */ R0,    R0,    R0,    R0,    R0,    R0,    R0,    R0,     \
+  /* 64 */ R(pc), R(ps)
+
 /* UISA-level SPRs for PowerPC.  */
 #define PPC_UISA_SPRS \
   /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R4(fpscr)
@@ -2102,6 +2113,14 @@ static const struct reg registers_powerpc[] =
   COMMON_UISA_REGS,
   PPC_UISA_SPRS,
   PPC_ALTIVEC_REGS
+};
+
+/* PowerPC UISA - a PPC processor as viewed by user-level
+   code, but without floating point registers.  */
+static const struct reg registers_powerpc_nofp[] =
+{
+  COMMON_UISA_NOFP_REGS,
+  PPC_UISA_SPRS
 };
 
 /* IBM PowerPC 403. */
