@@ -1,5 +1,9 @@
 Tue Apr 13 08:28:26 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* expprint.c (print_subexp): If opcode not found in op_print_tab,
+	stop with an error().
+	eval.c (evaluate_subexp): Change error message.
+
 	* objfiles.c (build_objfile_section_table): Cast return value
 	from obstack_finish.
 
