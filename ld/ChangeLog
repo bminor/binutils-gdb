@@ -1,3 +1,7 @@
+Mon Sep 22 17:24:06 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (wild_doit): Revert patch of September 3.
+
 Wed Sep 17 16:45:34 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am, Makefile.in: Add rule for ev850.c
@@ -60,13 +64,11 @@ Wed Aug 20 11:14:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* ld.texinfo (Section Definition): Clarify use of whitespace.
 	(Section Placement): Likewise.
 
-start-sanitize-v850eq
+start-sanitize-v850e
 Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for v850e target.
-end-sanitize-v850eq
 
-start-sanitize-v850e
 Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for v850e target.
