@@ -237,7 +237,7 @@ struct dwfinfo {
    local scope, and all other local scopes as nested local scopes, and worked
    fine.  Check to see if we really need to distinguish these in buildsym.c */
 
-struct pending **list_in_scope;
+struct pending **list_in_scope = &file_symbols;
 
 /* DIES which have user defined types or modified user defined types refer to
    other DIES for the type information.  Thus we need to associate the offset

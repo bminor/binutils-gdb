@@ -2,6 +2,12 @@ Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
 
 	* ansidecl.h:  Removed, is duplicate of ../include/ansidecl.h
 
+	* Makefile.in (MALLOCSRC):  Removed reference to removed local
+	copy of ansidecl.h.
+
+	* dwarfread.c (list_in_scope):  Needs an initial value, use file
+	scope.
+
 Mon Jan 20 19:06:28 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* main.c (main):  Make option_index local to keep new getopt happy.
