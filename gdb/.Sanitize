@@ -233,7 +233,6 @@ pyr-tdep.c
 pyr-xdep.c
 regex.c
 regex.h
-rem-multi.shar
 remote-adapt.c
 remote-array.c
 remote-bug.c
