@@ -1,3 +1,14 @@
+Wed Apr 27 11:29:52 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* h8300.h (dec, inc): Get encoding right.
+
+Mon Apr  4 13:12:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc.h (struct powerpc_operand): Removed signedp field; just use
+	a flag instead.
+	(PPC_OPERAND_SIGNED): Define.
+	(PPC_OPERAND_SIGNOPT): Define.
+
 Thu Mar 31 19:34:08 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* i386.h (IS_JUMP_ON_ECX_ZERO, "jcxz" pattern): Operand size
