@@ -73,7 +73,6 @@ boolean relaxing;
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_input_statement_type *script_file = 0;
-boolean option_longmap = false;
 lang_statement_list_type file_chain =
 {0};
 CONST char *entry_symbol = 0;
@@ -86,7 +85,6 @@ boolean lang_float_flag = false;
 /* IMPORTS */
 extern char *default_target;
 
-extern unsigned int undefined_global_sym_count;
 extern char *current_file;
 extern bfd *output_bfd;
 extern enum bfd_architecture ldfile_output_architecture;
@@ -96,7 +94,6 @@ extern ldsym_type *symbol_head;
 extern unsigned int commons_pending;
 extern args_type command_line;
 extern ld_config_type config;
-extern boolean had_script;
 extern boolean write_map;
 extern int g_switch_value;
 
@@ -351,10 +348,10 @@ lang_add_keepsyms_file (filename)
 {
   extern strip_symbols_type strip_symbols;
   if (keepsyms_file != 0)
-    info ("%X%P error: duplicated keep-symbols-file value\n");
+    info ("%X%P: error: duplicated keep-symbols-file value\n");
   keepsyms_file = filename;
   if (strip_symbols != STRIP_NONE)
-    info ("%P `-keep-only-symbols-file' overrides `-s' and `-S'\n");
+    info ("%P: `-keep-only-symbols-file' overrides `-s' and `-S'\n");
   strip_symbols = STRIP_SOME;
 }
 
@@ -569,7 +566,7 @@ init_os (s)
     s->bfd_section = bfd_make_section (output_bfd, s->name);
   if (s->bfd_section == (asection *) NULL)
     {
-      einfo ("%P%F output format %s cannot represent section called %s\n",
+      einfo ("%P%F: output format %s cannot represent section called %s\n",
 	     output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;
@@ -801,17 +798,20 @@ open_output (name)
     {
       if (bfd_error == invalid_target)
 	{
-	  einfo ("%P%F target %s not found\n", output_target);
+	  einfo ("%P%F: target %s not found\n", output_target);
 	}
-      einfo ("%P%F problem opening output file %s, %E\n", name);
+      einfo ("%P%F: cannot open output file %s: %E\n", name);
     }
 
   /*  output->flags |= D_PAGED;*/
 
-  bfd_set_format (output, bfd_object);
-  bfd_set_arch_mach (output,
-		     ldfile_output_architecture,
-		     ldfile_output_machine);
+  if (! bfd_set_format (output, bfd_object))
+    einfo ("%P%F:%s: can not make object file: %E\n", name);
+  if (! bfd_set_arch_mach (output,
+			   ldfile_output_architecture,
+			   ldfile_output_machine))
+    einfo ("%P%F:%s: can not set architecture: %E\n", name);
+
   bfd_set_gp_size (output, g_switch_value);
   return output;
 }
@@ -948,7 +948,7 @@ lang_place_undefineds ()
       *def_ptr = def;
       def->name = ptr->name;
       def->section = &bfd_und_section;
-      Q_enter_global_ref (def_ptr, ptr->name);
+      enter_global_ref (def_ptr, ptr->name);
       ptr = ptr->next;
     }
 }
@@ -1050,7 +1050,7 @@ map_input_to_output_sections (s, target, output_section_statement)
 	    os->addr_tree = s->address_statement.address;
 	    if (os->bfd_section == (asection *) NULL)
 	      {
-		einfo ("%P%F can't set the address of undefined section %s\n",
+		einfo ("%P%F: cannot set the address of undefined section %s\n",
 		       s->address_statement.section_name);
 	      }
 	  }
@@ -1640,7 +1640,7 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill, dot, relax)
               > os->region->origin + os->region->length)
 	     || ( os->region->origin > os->region->current ))
 	   {
-	     einfo ("%X%P: Region %s is full (%B section %s)\n",
+	     einfo ("%X%P: region %s is full (%B section %s)\n",
 		    os->region->name,
 		    os->bfd_section->owner,
 		    os->bfd_section->name);
@@ -1831,7 +1831,7 @@ DEFUN (lang_do_assignments, (s, output_section_statement, fill, dot),
 				   lang_final_phase_enum, dot, &dot);
 	    s->data_statement.value = value.value;
 	    if (value.valid == false)
-	      einfo ("%F%P: Invalid data statement\n");
+	      einfo ("%F%P: invalid data statement\n");
 	  }
 	  switch (s->data_statement.type)
 	    {
@@ -1968,14 +1968,14 @@ lang_finish ()
   }
   else
   {
-    /* Can't find anything reasonable,
+    /* Cannot find anything reasonable,
        use the first address in the text section
        */
     asection *ts = bfd_get_section_by_name (output_bfd, ".text");
     if (ts)
     {
       if (warn)
-       einfo ("%P: Warning, can't find entry symbol %s, defaulting to %V\n",
+       einfo ("%P: warning: cannot find entry symbol %s, defaulting to %V\n",
 	      entry_symbol, ts->vma);
 
       bfd_set_start_address (output_bfd, ts->vma);
@@ -1983,7 +1983,7 @@ lang_finish ()
     else 
     {
       if (warn)
-       einfo ("%P: Warning, can't find entry symbol %s, not setting start address\n",
+       einfo ("%P: warning: cannot find entry symbol %s, not setting start address\n",
 	      entry_symbol);
     }
   }
@@ -2024,13 +2024,15 @@ lang_check ()
       else
 	{
 
-	  info ("%P: warning, %s architecture of input file `%B' incompatible with %s output\n",
+	  info ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
 		bfd_printable_name (input_bfd), input_bfd,
 		bfd_printable_name (output_bfd));
 
-	  bfd_set_arch_mach (output_bfd,
-			     input_architecture,
-			     input_machine);
+	  if (! bfd_set_arch_mach (output_bfd,
+				   input_architecture,
+				   input_machine))
+	    einfo ("%P%F:%s: can't set architecture: %E\n",
+		   bfd_get_filename (output_bfd));
 	}
 
     }
@@ -2123,7 +2125,7 @@ lang_common ()
 							    name);
 			  /* BFD backend must provide this section. */
 			  if (newsec == (asection *) NULL)
-			    einfo ("%P%F: No output section %s", name);
+			    einfo ("%P%F: no output section %s", name);
 			  com->section = newsec;
 			}
 
@@ -2203,7 +2205,7 @@ lang_place_orphans ()
 		      if (default_common_section ==
 			  (lang_output_section_statement_type *) NULL)
 			{
-			  info ("%P: No [COMMON] command, defaulting to .bss\n");
+			  info ("%P: no [COMMON] command, defaulting to .bss\n");
 
 			  default_common_section =
 			    lang_output_section_statement_lookup (".bss");
@@ -2259,7 +2261,7 @@ lang_set_flags (ptr, flags)
 	  /*	  ptr->flag_loadable= state;*/
 	  break;
 	default:
-	  einfo ("%P%F illegal syntax in flags\n");
+	  einfo ("%P%F: invalid syntax in flags\n");
 	  break;
 	}
       flags++;
@@ -2438,26 +2440,13 @@ DEFUN (create_symbol, (name, flags, section),
   def->flags = flags;
   def->section = section;
   *def_ptr = def;
-  Q_enter_global_ref (def_ptr, name);
+  enter_global_ref (def_ptr, name);
   return def;
 }
 
 void
 lang_process ()
 {
-  if (had_script == false)
-    {
-      /* Read the emulation's appropriate default script.  */
-      char *scriptname = ldemul_get_script ();
-      /* sizeof counts the terminating NUL.  */
-      size_t size = strlen (scriptname) + sizeof ("-Tldscripts/");
-      char *buf = (char *) ldmalloc(size);
-
-      sprintf (buf, "-Tldscripts/%s", scriptname);
-      parse_line (buf, 0);
-      free (buf);
-    }
-
   lang_reasonable_defaults ();
   current_target = default_target;
 
@@ -2694,7 +2683,7 @@ lang_startup (name)
 {
   if (startup_file != (char *) NULL)
     {
-      einfo ("%P%FMultiple STARTUP files\n");
+      einfo ("%P%Fmultiple STARTUP files\n");
     }
   first_file->filename = name;
   first_file->local_sym_name = name;

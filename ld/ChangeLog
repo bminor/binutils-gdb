@@ -1,8 +1,12 @@
+Tue Aug 17 15:22:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (open_output, lang_check): Check return value of
+	bfd_set_arch_mach.
+
 Tue Aug 17 07:02:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* scripttempl/h8500.sc: Start all sections in a different segment.
 	* scripttempl/z8ksim.sc: Handle constructors
-
 
 Thu Aug 12 16:05:37 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
