@@ -1,3 +1,42 @@
+Tue Jul  6 13:24:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* reloc.c (enum bfd_reloc_code_real): Put simple power-of-two
+	relocs together, and add 64-bit versions.
+	(bfd_generic_get_relocated_section_contents): Argument to alloca
+	is size_t.
+
+	* libbfd.c (bfd_xmalloc_by_size_t): New function.
+	* opncls.c (bfd_cache_init, bfd_open_file): Add prototypes to
+	declarations.
+	(obstack_chunk_alloc): Use bfd_xmalloc_by_size_t.
+	(new_bfd): Prototype-style definition, using DEFUN.
+	(bfd_alloc_grow, bfd_alloc, bfd_zalloc, bfd_realloc): Size
+	argument is type size_t, not bfd_size_type.
+	* ieee.c (obstack_chunk_alloc): Use bfd_xmalloc_by_size_t.
+	* bfd.c (bfd_default_error_trap, bfd_error_trap,
+	bfd_error_nonrepresentabltrap): Prototypes.
+	* libbfd-in.h (bfd_alloc, bfd_zalloc, bfd_realloc,
+	bfd_alloc_grow): Adjusted prototypes for arg type change.
+	* archive.c (get_elt_at_filepos, do_slurp_bsd_armap, normalize,
+	do_slurp_coff_armap, bfd_construct_extended_name_table):
+	Prototypes.
+	* elfcode.h (elf_string_from_elf_strtab): Prototypes.
+
+	* Makefile.in (ALL_MACHINES): Renamed from BFD_MACHINES.
+	(ofiles): New target.  Build a list of unique file names, in case
+	any got duplicated.
+	(TARGETLIB): Use list of files from ofiles.
+	* configure.in: Set BFD_MACHINES and BFD_BACKENDS depending on
+	minimal-bfd flag and target makefile frag contents.
+
+	* elfcode.h (elf_read): Delete static declaration, since function
+	has moved.
+	(elf_map_symbols): Write out section symbols for all sections, for
+	now.
+	(elf_symbol_from_bfd_symbol): Allow match if both symbols are
+	section symbols for the same section.
+	(elf_find_nearest_line): Don't print message, just return false.
+
 Mon Jul  5 16:48:11 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* cpu-h8300.c (h8300_scan): Fix parsing of architecture string.
