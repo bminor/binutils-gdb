@@ -1,3 +1,8 @@
+2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
+
+	* configure.in: Accept i[3-7]86 variants.
+	* configure: Regenerate.
+
 2003-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.h: Fix comment formatting.

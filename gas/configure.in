@@ -119,7 +119,7 @@ changequote([,])dnl
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
-      i[3456]86)	cpu_type=i386 arch=i386;;
+      i[3-7]86)		cpu_type=i386 arch=i386;;
       x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
       ip2k)             cpu_type=ip2k endian=big ;; 

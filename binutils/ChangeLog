@@ -1,3 +1,9 @@
+2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
+
+	* configure.in: Accept i[3-7]86 variants. Escape '[]' for
+	i[3-7]86-*-interix.
+	* configure.in: Regenerate.
+
 2003-05-13  Michael Eager <eager@mvista.com>
 
 	* objcopy.c: Treat identical src/dst file names as if only one

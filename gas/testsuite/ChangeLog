@@ -1,3 +1,7 @@
+2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
+
+	* lib/gas-defs.exp: Accept i[3-7]86 variants.
+
 2003-05-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/macros/app1.s, gas/macros/app1.d, gas/macros/app2.s,

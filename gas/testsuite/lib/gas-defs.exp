@@ -168,7 +168,7 @@ proc gas_init { args } {
 
     case "$target_cpu" in {
 	"m68???"		{ set target_cpu_family m68k }
-	"i[34]86"		{ set target_cpu_family i386 }
+	"i[3-7]86"		{ set target_cpu_family i386 }
 	default			{ set target_cpu_family $target_cpu }
     }
 
