@@ -58,6 +58,7 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
+CC_FOR_BUILD = @CC_FOR_BUILD@
 
 #
 # UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
@@ -65,13 +66,7 @@ RANLIB = @RANLIB@
 # behaviour of UART interrupt routines ...
 #
 
-AR = ar
-AR_FLAGS = rc
 CFLAGS2 = -g -O3 -DSTAT -DFAST_UART -DIUREV0 -DMECREV0
-BISON = bison
-MAKEINFO = makeinfo
-RANLIB = ranlib
-CC = gcc
 
 INCDIR = $(srcdir)/../../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I../../bfd -I$(srcdir)/../../bfd \
@@ -88,7 +83,7 @@ OFILES =  exec.o erc32.o func.o help.o float.o
 all: end.h sis run $(TARGETLIB)
 
 end : $(srcdir)/end.c
-	$(CC) $(srcdir)/end.c -o end
+	$(CC_FOR_BUILD) $(srcdir)/end.c -o end
 
 end.h : end
 	./end > end.h
@@ -106,7 +101,7 @@ run: run.o interf.o $(OFILES)
 	-ltermcap -lm
 
 clean:
-	rm -f *.o libsim.a sis run end end.h
+	rm -f *.o libsim.a sis run end end.h config.log
 
 distclean: clean
 	rm -rf Makefile config.status sysdep.h
