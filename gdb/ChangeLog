@@ -1,3 +1,16 @@
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* buildsym.c: Update copyright years.
+	* c-typeprint.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* f-typeprint.c: Likewise.
+	* gdbtypes.c: Likewise.
+	* gdbtypes.h: Likewise.
+	* hp-symtab-read.c: Likewise.
+	* hpread.c: Likewise.
+	* mdebugread.c: Likewise.
+	* p-typeprint.c: Likewise.
+
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-sim.c (gdbsim_open): Simplify code testing the macro
