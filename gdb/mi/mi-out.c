@@ -318,7 +318,10 @@ mi_open (struct ui_out *uiout,
       fputc_unfiltered ('{', data->buffer);
       break;
     case ui_out_type_list:
-      fputc_unfiltered ('[', data->buffer);
+      if (data->mi_version > 0)
+	fputc_unfiltered ('[', data->buffer);
+      else
+	fputc_unfiltered ('{', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
@@ -336,7 +339,10 @@ mi_close (struct ui_out *uiout,
       fputc_unfiltered ('}', data->buffer);
       break;
     case ui_out_type_list:
-      fputc_unfiltered (']', data->buffer);
+      if (data->mi_version > 0)
+	fputc_unfiltered (']', data->buffer);
+      else
+	fputc_unfiltered ('}', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
