@@ -1,3 +1,72 @@
+Mon Jul 24 14:17:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (sh_coff_howtos): Mark R_SH_PCDISP8BY2 and R_SH_PCDISP
+	as PC relative.  Describe R_SH_IMM16.  Add entries for
+	R_SH_SWITCH16, R_SH_SWITCH32, R_SH_USES, R_SH_COUNT, and
+	R_SH_ALIGN.
+	(SWAP_IN_RELOC_OFFSET): Define.
+	(SWAP_OUT_RELOC_OFFSET): Define.
+	(CALC_ADDEND): Define.
+	(sh_reloc): Change sym_value and addr to type bfd_vma.  Skip reloc
+	types other than R_SH_IMM32 and R_SH_PCDISP on an external symbol.
+	(coff_bfd_relax_section): Define.
+	(coff_bfd_get_relocated_section_contents): Define.
+	(sh_relax_section): New static function.
+	(sh_relax_delete_bytes): New static function.
+	(sh_relocate_section): Handle R_SH_PCDISP on an external symbol.
+	(sh_coff_get_relocated_section_contents): New static function.
+
+	* cofflink.c (coff_link_add_object_symbols): Call
+	_bfd_coff_get_external_symbols, not coff_link_get_symbols.  Call
+	_bfd_coff_free_symbols, not coff_link_free_symbols.  Call
+	_bfd_coff_read_string_table, not coff_read_string_table.
+	(coff_link_check_archive_element): Likewise.
+	(coff_link_input_bfd): Likewise.
+	(coff_link_get_symbols): Move to coffgen.c.
+	(coff_read_string_table): Likewise.
+	(coff_link_free_symbols): Likewise.
+	(_bfd_coff_internal_syment_name): New static function.
+	(coff_link_check_ar_symbols): Use _bfd_coff_internal_syment_name.
+	(coff_link_add_symbols): Likewise.
+	(coff_link_input_bfd): Likewise.
+	(_bfd_coff_generic_relocate_section): Likewise.
+	(_bfd_coff_read_internal_relocs): New function.
+	(coff_link_input_bfd): Use cached section contents if available.
+	Use _bfd_coff_read_internal_relocs.
+	* coffcode.h (coff_slurp_symbol_table): Don't call bfd_seek.
+	(coff_bfd_get_relocated_section_contents): Only define if not
+	already defined.
+	(coff_bfd_relax_section): Likewise.
+	* coffgen.c (build_string_table): Remove.
+	(_bfd_coff_get_external_symbols): New function, moved in from old
+	coff_link_get_symbols in cofflink.c.
+	(_bfd_coff_read_string_table): New function, moved in from old
+	coff_read_string_table in cofflink.c.
+	(_bfd_coff_free_symbols): New function, moved in frmo old
+	coff_link_free_symbols in cofflink.c.
+	(coff_get_normalized_symtab): Use _bfd_coff_get_external_symbols
+	rather than reading the symbols directly.  To free them, call
+	_bfd_coff_free_symbols.  Use _bfd_coff_read_string_table rather
+	than build_string_table.
+	* libcoff-in.h (obj_coff_keep_syms): Define.
+	(obj_coff_keep_strings): Define.
+	(coff_data_type): Add fields keep_syms and keep_strings.
+	(coff_section_tdata): Define new structure.
+	(coff_section_data): Define.
+	(_bfd_coff_get_external_symbols): Declare.
+	(_bfd_coff_read_string_table): Declare.
+	(_bfd_coff_free_symbols): Declare.
+	(_bfd_coff_read_internal_relocs): Declare.
+	* libcoff.h: Rebuild.
+
+Fri Jul 21 22:32:54 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Add support for R_PPC_SDAREL
+	relocation.
+	(ppc_elf_reloc_type_lookup): Ditto.
+	(ppc_elf_got16_inner): Ditto.
+	(ppc_elf_relocate_section): Ditto.
+
 Thu Jul 20 19:19:06 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (hppa_elf_gen_reloc_type): Add new (ignored)
