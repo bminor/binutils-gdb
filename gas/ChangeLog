@@ -1,3 +1,8 @@
+Mon Oct 12 11:07:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (parallel_ok): Ignore conflicts when explicitly
+	parallel insns modift buts in the PSW as a side effect.
+
 Thu Oct  8 10:18:33 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (find_format): Test for missing flag and
