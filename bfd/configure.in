@@ -99,10 +99,11 @@ if [ ! -f ${files} ] ; then
 fi
 
 host_makefile_frag=
-if [ -f config/h-${my_host} ] ; then
-	host_makefile_frag=config/h-${my_host}
+if [ -f config/mh-${my_host} ] ; then
+	host_makefile_frag=config/mh-${my_host}
 fi
 
+echo ${host_makefile_frag}
 # per-target:
 
 case "${target_vendor}" in
@@ -160,9 +161,9 @@ sgi)
 		bfd_target=irix3 ;;
 	esac
 	;;
-none|nyu)
+none|nyu|sco)
 	case "${target_cpu}" in
-	i386) bfd_target=i386-coff ;;
+	i386) bfd_target=i386_coff ;;
 	a29k) case "${target_os}" in
 		aout) bfd_target=a29k-aout ;;
 		coff) bfd_target=a29k-coff ;;
@@ -179,15 +180,14 @@ none|nyu)
 	;;
 esac
 
-if [ ! -f config/t-${bfd_target} ] ; then
+if [ ! -f config/mt-${bfd_target} ] ; then
 	if [ -n "${bfd_target}" ] ; then
-		echo '***' No file config/t-${bfd_target}
+		echo '***' No file config/mt-${bfd_target}
 	fi
 	echo '***' BFD does not support target ${target}
 	exit 1
 fi
-
-target_makefile_frag=config/t-${bfd_target}
+target_makefile_frag=config/mt-${bfd_target}
 
 # We don't do any links based on the target system, just very minor makefile
 # config.
