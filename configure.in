@@ -423,6 +423,9 @@ case "${target}" in
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs gas ld binutils gprof textutils cvs"
     ;;
+  powerpc*-*-winnt*)
+    noconfigdirs="$noconfigdirs ld gdb"
+    ;;
   rs6000-*-lynxos*)
     # a gcc built textutils will cause the linker to hang on 'join'
     # The CVS server code doesn't work on the RS/6000
