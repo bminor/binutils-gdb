@@ -1,5 +1,14 @@
 2004-10-29  Andrew Cagney  <cagney@gnu.org>
 
+	* stack.c (parse_frame_specification_1): New function based on
+	parse_frame_specification.  Add message and selected_frame_p
+	paramters.  Truely always return non-NULL.
+	(parse_frame_specification): Call parse_frame_specification_1.
+	(frame_info): Update.  Eliminate target_has_stack check.
+	(select_frame_command): Update.
+
+2004-10-29  Andrew Cagney  <cagney@gnu.org>
+
 	* frame.h (get_selected_frame): Add message parameter.
 	* frame.c (get_selected_frame): Add and use message parameter.
 	* stack.c (current_frame_command, return_command, locals_info)

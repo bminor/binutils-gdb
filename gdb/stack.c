@@ -102,8 +102,6 @@ static void print_frame (struct frame_info *fi,
 
 static void backtrace_command (char *, int);
 
-struct frame_info *parse_frame_specification (char *);
-
 static void frame_info (char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
@@ -702,122 +700,149 @@ show_stack_frame (struct frame_info *fi)
 
 
 /* Read a frame specification in whatever the appropriate format is.
-   Call error() if the specification is in any way invalid (i.e.
-   this function never returns NULL).  */
+   Call error() if the specification is in any way invalid (i.e.  this
+   function never returns NULL).  When SEPECTED_P is non-NULL set it's
+   target to indicate that the default selected frame was used.  */
+
+static struct frame_info *
+parse_frame_specification_1 (const char *frame_exp, const char *message,
+			     int *selected_frame_p)
+{
+  int numargs;
+  struct value *args[4];
+  CORE_ADDR addrs[ARRAY_SIZE (args)];
+
+  if (frame_exp == NULL)
+    numargs = 0;
+  else
+    {
+      char *addr_string;
+      struct cleanup *tmp_cleanup;
+
+      numargs = 0;
+      while (1)
+	{
+	  char *addr_string;
+	  struct cleanup *cleanup;
+	  const char *p;
+
+	  /* Skip leading white space, bail of EOL.  */
+	  while (isspace (*frame_exp))
+	    frame_exp++;
+	  if (!*frame_exp)
+	    break;
+
+	  /* Parse the argument, extract it, save it.  */
+	  for (p = frame_exp;
+	       *p && !isspace (*p);
+	       p++);
+	  addr_string = savestring (frame_exp, p - frame_exp);
+	  frame_exp = p;
+	  cleanup = make_cleanup (xfree, addr_string);
+	  
+	  /* NOTE: Parse and evaluate expression, but do not use
+	     functions such as parse_and_eval_long or
+	     parse_and_eval_address to also extract the value.
+	     Instead value_as_long and value_as_address are used.
+	     This avoids problems with expressions that contain
+	     side-effects.  */
+	  if (numargs >= ARRAY_SIZE (args))
+	    error ("Too many args in frame specification");
+	  args[numargs++] = parse_and_eval (addr_string);
+
+	  do_cleanups (cleanup);
+	}
+    }
+
+  /* If no args, default to the selected frame.  */
+  if (numargs == 0)
+    {
+      if (selected_frame_p != NULL)
+	(*selected_frame_p) = 1;
+      return get_selected_frame (message);
+    }
+
+  /* None of the remaining use the selected frame.  */
+  if (selected_frame_p != NULL)
+    (*selected_frame_p) = 1;
+
+  /* Assume the single arg[0] is an integer, and try using that to
+     select a frame relative to current.  */
+  if (numargs == 1)
+    {
+      struct frame_info *fid;
+      int level = value_as_long (args[0]);
+      fid = find_relative_frame (get_current_frame (), &level);
+      if (level == 0)
+	/* find_relative_frame was successful */
+	return fid;
+    }
+
+  /* Convert each value into a corresponding address.  */
+  {
+    int i;
+    for (i = 0; i < numargs; i++)
+      addrs[i] = value_as_address (args[0]);
+  }
+
+  /* Assume that the single arg[0] is an address, use that to identify
+     a frame with a matching ID.  Should this also accept stack/pc or
+     stack/pc/special.  */
+  if (numargs == 1)
+    {
+      struct frame_id id = frame_id_build_wild (addrs[0]);
+      struct frame_info *fid;
+
+      /* If SETUP_ARBITRARY_FRAME is defined, then frame
+	 specifications take at least 2 addresses.  It is important to
+	 detect this case here so that "frame 100" does not give a
+	 confusing error message like "frame specification requires
+	 two addresses".  This of course does not solve the "frame
+	 100" problem for machines on which a frame specification can
+	 be made with one address.  To solve that, we need a new
+	 syntax for a specifying a frame by address.  I think the
+	 cleanest syntax is $frame(0x45) ($frame(0x23,0x45) for two
+	 args, etc.), but people might think that is too much typing,
+	 so I guess *0x23,0x45 would be a possible alternative (commas
+	 really should be used instead of spaces to delimit; using
+	 spaces normally works in an expression).  */
+#ifdef SETUP_ARBITRARY_FRAME
+      error ("No frame %s", paddr_d (addrs[0]));
+#endif
+      /* If (s)he specifies the frame with an address, he deserves
+	 what (s)he gets.  Still, give the highest one that matches.
+	 (NOTE: cagney/2004-10-29: Why highest, or outer-most, I don't
+	 know).  */
+      for (fid = get_current_frame ();
+	   fid != NULL;
+	   fid = get_prev_frame (fid))
+	{
+	  if (frame_id_eq (id, get_frame_id (fid)))
+	    {
+	      while (frame_id_eq (id, frame_unwind_id (fid)))
+		fid = get_prev_frame (fid);
+	      return fid;
+	    }
+	}
+      }
+
+  /* We couldn't identify the frame as an existing frame, but
+     perhaps we can create one with a single argument.  */
+#ifdef SETUP_ARBITRARY_FRAME
+  return SETUP_ARBITRARY_FRAME (numargs, addrs);
+#else
+  /* Usual case.  Do it here rather than have everyone supply a
+     SETUP_ARBITRARY_FRAME that does this.  */
+  if (numargs == 1)
+    return create_new_frame (addrs[0], 0);
+  error ("Too many args in frame specification");
+#endif
+}
 
 struct frame_info *
 parse_frame_specification (char *frame_exp)
 {
-  int numargs = 0;
-#define	MAXARGS	4
-  CORE_ADDR args[MAXARGS];
-  int level;
-
-  if (frame_exp)
-    {
-      char *addr_string, *p;
-      struct cleanup *tmp_cleanup;
-
-      while (*frame_exp == ' ')
-	frame_exp++;
-
-      while (*frame_exp)
-	{
-	  if (numargs > MAXARGS)
-	    error ("Too many args in frame specification");
-	  /* Parse an argument.  */
-	  for (p = frame_exp; *p && *p != ' '; p++)
-	    ;
-	  addr_string = savestring (frame_exp, p - frame_exp);
-
-	  {
-	    struct value *vp;
-
-	    tmp_cleanup = make_cleanup (xfree, addr_string);
-
-	    /* NOTE: we call parse_and_eval and then both
-	       value_as_long and value_as_address rather than calling
-	       parse_and_eval_long and parse_and_eval_address because
-	       of the issue of potential side effects from evaluating
-	       the expression.  */
-	    vp = parse_and_eval (addr_string);
-	    if (numargs == 0)
-	      level = value_as_long (vp);
-
-	    args[numargs++] = value_as_address (vp);
-	    do_cleanups (tmp_cleanup);
-	  }
-
-	  /* Skip spaces, move to possible next arg.  */
-	  while (*p == ' ')
-	    p++;
-	  frame_exp = p;
-	}
-    }
-
-  switch (numargs)
-    {
-    case 0:
-      if (deprecated_selected_frame == NULL)
-	error ("No selected frame.");
-      return deprecated_selected_frame;
-      /* NOTREACHED */
-    case 1:
-      {
-	struct frame_info *fid =
-	find_relative_frame (get_current_frame (), &level);
-	struct frame_info *tfid;
-
-	if (level == 0)
-	  /* find_relative_frame was successful */
-	  return fid;
-
-	/* If SETUP_ARBITRARY_FRAME is defined, then frame specifications
-	   take at least 2 addresses.  It is important to detect this case
-	   here so that "frame 100" does not give a confusing error message
-	   like "frame specification requires two addresses".  This of course
-	   does not solve the "frame 100" problem for machines on which
-	   a frame specification can be made with one address.  To solve
-	   that, we need a new syntax for a specifying a frame by address.
-	   I think the cleanest syntax is $frame(0x45) ($frame(0x23,0x45) for
-	   two args, etc.), but people might think that is too much typing,
-	   so I guess *0x23,0x45 would be a possible alternative (commas
-	   really should be used instead of spaces to delimit; using spaces
-	   normally works in an expression).  */
-#ifdef SETUP_ARBITRARY_FRAME
-	error ("No frame %s", paddr_d (args[0]));
-#endif
-
-	/* If (s)he specifies the frame with an address, he deserves what
-	   (s)he gets.  Still, give the highest one that matches.  */
-
-	for (fid = get_current_frame ();
-	     fid && get_frame_base (fid) != args[0];
-	     fid = get_prev_frame (fid))
-	  ;
-
-	if (fid)
-	  while ((tfid = get_prev_frame (fid)) &&
-		 (get_frame_base (tfid) == args[0]))
-	    fid = tfid;
-
-	/* We couldn't identify the frame as an existing frame, but
-	   perhaps we can create one with a single argument.  */
-      }
-
-    default:
-#ifdef SETUP_ARBITRARY_FRAME
-      return SETUP_ARBITRARY_FRAME (numargs, args);
-#else
-      /* Usual case.  Do it here rather than have everyone supply
-         a SETUP_ARBITRARY_FRAME that does this.  */
-      if (numargs == 1)
-	return create_new_frame (args[0], 0);
-      error ("Too many args in frame specification");
-#endif
-      /* NOTREACHED */
-    }
-  /* NOTREACHED */
+  return parse_frame_specification_1 (frame_exp, NULL, NULL);
 }
 
 /* Print verbosely the selected frame or the frame at address ADDR.
@@ -835,9 +860,9 @@ frame_info (char *addr_exp, int from_tty)
   char *funname = 0;
   enum language funlang = language_unknown;
   const char *pc_regname;
+  int selected_frame_p;
 
-  if (!target_has_stack)
-    error ("No stack.");
+  fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
      is not a good name.  */
@@ -852,10 +877,6 @@ frame_info (char *addr_exp, int from_tty)
        and that register's value, again, can easily not match
        get_frame_pc().  */
     pc_regname = "pc";
-
-  fi = parse_frame_specification (addr_exp);
-  if (fi == NULL)
-    error ("Invalid frame specified.");
 
   find_frame_sal (fi, &sal);
   func = get_frame_function (fi);
@@ -902,10 +923,10 @@ frame_info (char *addr_exp, int from_tty)
     }
   calling_frame_info = get_prev_frame (fi);
 
-  if (!addr_exp && frame_relative_level (deprecated_selected_frame) >= 0)
+  if (selected_frame_p && frame_relative_level (fi) >= 0)
     {
       printf_filtered ("Stack level %d, frame at ",
-		       frame_relative_level (deprecated_selected_frame));
+		       frame_relative_level (fi));
       print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
@@ -1640,14 +1661,7 @@ find_relative_frame (struct frame_info *frame,
 void
 select_frame_command (char *level_exp, int from_tty)
 {
-  struct frame_info *frame;
-
-  if (!target_has_stack)
-    error ("No stack.");
-
-  frame = parse_frame_specification (level_exp);
-
-  select_frame (frame);
+  select_frame (parse_frame_specification_1 (level_exp, "No stack.", NULL));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
