@@ -1,3 +1,11 @@
+Wed Jul  8 12:18:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mips.c (mips_ip, case 'i' and 'j'): Mask off high bits
+        for %lo expressions.
+        (mips_ip, case 'u'): Move range check after code to mask
+        off bits in %hi/%lo expressions.  Mask off high bits for
+        %lo expressions.
+
 Tue Jul  7 17:57:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/Makefile.am (gasver.texi): New target.
