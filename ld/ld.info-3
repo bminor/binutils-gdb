@@ -1,10 +1,10 @@
-This is ld.info, produced by makeinfo version 4.0f from ./ld.texinfo.
+This is ld.info, produced by makeinfo version 4.1 from ./ld.texinfo.
 
 START-INFO-DIR-ENTRY
 * Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 
-   This file documents the GNU linker LD version 2.12.
+   This file documents the GNU linker LD version 2.12.1.
 
    Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002
 Free Software Foundation, Inc.
@@ -358,7 +358,7 @@ Commands dealing with object file formats
 `OUTPUT_FORMAT(DEFAULT, BIG, LITTLE)'
      The `OUTPUT_FORMAT' command names the BFD format to use for the
      output file (*note BFD::).  Using `OUTPUT_FORMAT(BFDNAME)' is
-     exactly like using `-oformat BFDNAME' on the command line (*note
+     exactly like using `--oformat BFDNAME' on the command line (*note
      Command Line Options: Options.).  If both are used, the command
      line option takes precedence.
 

@@ -8,6 +8,7 @@ struct list *list ;
 
 } yystype;
 # define YYSTYPE yystype
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 # define	NEWLINE	257
 # define	VERBOSE	258
