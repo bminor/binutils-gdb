@@ -1,3 +1,9 @@
+2001-04-17  Michael Snyder  <msnyder@redhat.com>
+
+	* thread-db.c (check_thread_signals): When looping over all
+	signals, ignore signal zero.
+	(disable_thread_signals): Ditto.
+
 2001-04-17  Eirik Fuller <eirik@netapp.com>
 
 	* thread.c (do_captured_thread_select): Allow the argument to the

@@ -469,7 +469,7 @@ check_thread_signals (void)
       sigemptyset (&thread_stop_set);
       sigemptyset (&thread_print_set);
 
-      for (i = 0; i < NSIG; i++)
+      for (i = 1; i < NSIG; i++)
 	{
 	  if (sigismember (&mask, i))
 	    {
@@ -492,7 +492,7 @@ disable_thread_signals (void)
     {
       int i;
 
-      for (i = 0; i < NSIG; i++)
+      for (i = 1; i < NSIG; i++)
 	{
 	  if (sigismember (&thread_stop_set, i))
 	    signal_stop_update (target_signal_from_host (i), 1);
