@@ -928,7 +928,8 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   section->alignment_power = i;
 }
 
-#elif defined(COFF_WITH_PE) 
+#else /* ! I960 */
+#ifdef COFF_WITH_PE
 
 /* a couple of macros to help setting the alignment power field */
 #define ALIGN_SET(field,x,y) \
@@ -962,11 +963,51 @@ coff_set_alignment_hook (abfd, section, scnhdr)
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
 
-#else /* ! I960 */
+#else /* ! COFF_WITH_PE */
+#ifdef RS6000COFF_C
+
+/* We grossly abuse this function to handle XCOFF overflow headers.
+   When we see one, we correct the reloc and line number counts in the
+   real header, and remove the section we just created.  */
+
+static void
+coff_set_alignment_hook (abfd, section, scnhdr)
+     bfd *abfd;
+     asection *section;
+     PTR scnhdr;
+{
+  struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
+  asection *real_sec;
+  asection **ps;
+
+  if ((hdr->s_flags & STYP_OVRFLO) == 0)
+    return;
+
+  real_sec = coff_section_from_bfd_index (abfd, hdr->s_nreloc);
+  if (real_sec == NULL)
+    return;
+
+  real_sec->reloc_count = hdr->s_paddr;
+  real_sec->lineno_count = hdr->s_vaddr;
+
+  for (ps = &abfd->sections; *ps != NULL; ps = &(*ps)->next)
+    {
+      if (*ps == section)
+	{
+	  *ps = (*ps)->next;
+	  --abfd->section_count;
+	  break;
+	}
+    }
+}
+
+#else /* ! RS6000COFF_C */
 
 #define coff_set_alignment_hook \
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 
+#endif /* ! RS6000COFF_C */
+#endif /* ! COFF_WITH_PE */
 #endif /* ! I960 */
 
 #ifndef coff_mkobject
@@ -1234,7 +1275,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	       (because that's how they were bootstrapped originally),
 	       but they are always PowerPC architecture.  */
 	    arch = bfd_arch_powerpc;
-	    machine = 601;
+	    machine = 0;
 #else
 	    arch = bfd_arch_rs6000;
 	    machine = 6000;
@@ -1829,6 +1870,15 @@ coff_compute_section_file_positions (abfd)
 #endif
 
   sofar += abfd->section_count * SCNHSZ;
+
+#ifdef RS6000COFF_C
+  /* XCOFF handles overflows in the reloc and line number count fields
+     by allocating a new section header to hold the correct counts.  */
+  for (current = abfd->sections; current != NULL; current = current->next)
+    if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
+      sofar += SCNHSZ;
+#endif
+
   for (current = abfd->sections, count = 1;
        current != (asection *) NULL;
        current = current->next, ++count)
@@ -2010,15 +2060,15 @@ coff_write_object_contents (abfd)
 
   bfd_set_error (bfd_error_system_call);
 
-  if (abfd->output_has_begun == false)
-    coff_compute_section_file_positions (abfd);
-
-  reloc_base = obj_relocbase (abfd);
-
   /* Make a pass through the symbol table to count line number entries and
      put them into the correct asections */
 
   lnno_size = coff_count_linenumbers (abfd) * LINESZ;
+
+  if (abfd->output_has_begun == false)
+    coff_compute_section_file_positions (abfd);
+
+  reloc_base = obj_relocbase (abfd);
 
   /* Work out the size of the reloc and linno areas */
 
@@ -2137,6 +2187,15 @@ coff_write_object_contents (abfd)
       if (current->lineno_count != 0)
 	haslinno = true;
 
+#ifdef RS6000COFF_C
+      /* Indicate the use of an XCOFF overflow section header.  */
+      if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
+	{
+	  section.s_nreloc = 0xffff;
+	  section.s_nlnno = 0xffff;
+	}
+#endif
+
       section.s_flags = sec_to_styp_flags (current->name, current->flags);
 
       if (!strcmp (current->name, _TEXT))
@@ -2176,7 +2235,33 @@ coff_write_object_contents (abfd)
 	}
     }
 
+#ifdef RS6000COFF_C
+  /* XCOFF handles overflows in the reloc and line number count fields
+     by creating a new section header to hold the correct values.  */
+  for (current = abfd->sections; current != NULL; current = current->next)
+    {
+      if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
+	{
+	  struct internal_scnhdr scnhdr;
+	  SCNHDR buff;
 
+	  internal_f.f_nscns++;
+	  strncpy (&(scnhdr.s_name[0]), current->name, 8);
+	  scnhdr.s_paddr = current->reloc_count;
+	  scnhdr.s_vaddr = current->lineno_count;
+	  scnhdr.s_size = 0;
+	  scnhdr.s_scnptr = 0;
+	  scnhdr.s_relptr = current->rel_filepos;
+	  scnhdr.s_lnnoptr = current->line_filepos;
+	  scnhdr.s_nreloc = current->target_index;
+	  scnhdr.s_nlnno = current->target_index;
+	  scnhdr.s_flags = STYP_OVRFLO;
+	  if (coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
+	      || bfd_write ((PTR) &buff, 1, SCNHSZ, abfd) != SCNHSZ)
+	    return false;
+	}
+    }
+#endif
 
   /* OK, now set up the filehdr... */
 

@@ -1,3 +1,22 @@
+Sun Nov 12 12:23:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (bfd_libs_here, etc): Provide empty definitions.
+	* coff-rs6000.c (rs6000coff_vec): Add conditional defines
+	TARGET_SYM and TARGET_NAME for vector and BFD name.
+	* coff-pmac.c (pmac_xcoff_vec): Remove.
+	(TARGET_SYM, TARGET_NAME): Define.
+	* coffcode.h (coff_set_arch_mach_hook) [POWERMAC]: Set the
+	machine to 0, not all PowerMacs are 601s.
+
+Fri Nov 10 12:10:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_object_p): Read in any program headers.
+	* elf.c (_bfd_elf_make_section_from_shdr): Adjust section lma
+	based on the program headers, if any.
+	(elf_fake_sections): Set sh_addr from the vma, not the lma.
+	(map_program_segments): Set p_paddr of program headers based on
+	the lma.
+
 Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archive.c (bfd_generic_archive_p): Preserve tdata in case of
