@@ -1,3 +1,20 @@
+Mon Oct 11 17:25:18 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_mkobject): Check bfd_make_section return value.
+	(ecoff_mkobject_hook): New function.
+	(ecoff_new_section_hook, ecoff_sizeof_headers,
+	ecoff_compute_section_file_positions, ecoff_set_section_contents,
+	ecoff_write_object_contents): Handle dummy REGINFO section.
+	(ecoff_get_section_contents): New function to handle reading
+	REGINFO section.
+	* libecoff.h (ecoff_get_section_contents): Change from macro
+	definition to function prototype.
+	(ecoff_mkobject_hook): New prototype.
+	* coff-alpha.c (alpha_ecoff_mkobject_hook): Removed.
+	(alpha_ecoff_backend_data): Use ecoff_mkobject_hook.
+	* coff-mips.c (mips_ecoff_mkobject_hook): Removed.
+	(mips_ecoff_backend_data): Use ecoff_mkobject_hook.
+
 Fri Oct  8 15:25:33 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* libbfd.c (bfd_get*32, bfd_get*64):  Prevent ANSI sign extension

@@ -44,6 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for static functions.  */
 
+static int ecoff_get_magic PARAMS ((bfd *abfd));
 static void ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
 					   asymbol *asym, int ext,
 					   asymbol **indirect_ptr_ptr));
@@ -93,9 +94,62 @@ ecoff_mkobject (abfd)
 
   /* Always create a .scommon section for every BFD.  This is a hack so
      that the linker has something to attach scSCommon symbols to.  */
-  bfd_make_section (abfd, SCOMMON);
+  if (bfd_make_section (abfd, SCOMMON) == NULL)
+    return false;
 
   return true;
+}
+
+/* This is a hook called by coff_real_object_p to create any backend
+   specific information.  */
+
+PTR
+ecoff_mkobject_hook (abfd, filehdr, aouthdr)
+     bfd *abfd;
+     PTR filehdr;
+     PTR aouthdr;
+{
+  struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
+  struct internal_aouthdr *internal_a = (struct internal_aouthdr *) aouthdr;
+  ecoff_data_type *ecoff;
+  asection *regsec;
+
+  if (ecoff_mkobject (abfd) == false)
+    return NULL;
+
+  ecoff = ecoff_data (abfd);
+  ecoff->gp_size = 8;
+  ecoff->sym_filepos = internal_f->f_symptr;
+
+  /* Create the .reginfo section to give programs outside BFD a way to
+     see the information stored in the a.out header.  See the comment
+     in coff/ecoff.h.  */
+  regsec = bfd_make_section (abfd, REGINFO);
+  if (regsec == NULL)
+    return NULL;
+
+  if (internal_a != (struct internal_aouthdr *) NULL)
+    {
+      int i;
+
+      ecoff->text_start = internal_a->text_start;
+      ecoff->text_end = internal_a->text_start + internal_a->tsize;
+      ecoff->gp = internal_a->gp_value;
+      ecoff->gprmask = internal_a->gprmask;
+      for (i = 0; i < 4; i++)
+	ecoff->cprmask[i] = internal_a->cprmask[i];
+      ecoff->fprmask = internal_a->fprmask;
+      if (internal_a->magic == ECOFF_AOUT_ZMAGIC)
+	abfd->flags |= D_PAGED;
+    }
+
+  /* It turns out that no special action is required by the MIPS or
+     Alpha ECOFF backends.  They have different information in the
+     a.out header, but we just copy it all (e.g., gprmask, cprmask and
+     fprmask) and let the swapping routines ensure that only relevant
+     information is written out.  */
+
+  return (PTR) ecoff;
 }
 
 /* This is a hook needed by SCO COFF, but we have nothing to do.  */
@@ -129,6 +183,11 @@ ecoff_new_section_hook (abfd, section)
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
     section->flags |= SEC_ALLOC;
+  else if (strcmp (section->name, REGINFO) == 0)
+    {
+      section->flags |= SEC_HAS_CONTENTS | SEC_NEVER_LOAD;
+      section->_raw_size = sizeof (struct ecoff_reginfo);
+    }
 
   /* Probably any other section name is SEC_NEVER_LOAD, but I'm
      uncertain about .init on some systems and I don't know how shared
@@ -137,7 +196,10 @@ ecoff_new_section_hook (abfd, section)
   return true;
 }
 
-/* Determine the machine architecture and type.  */
+/* Determine the machine architecture and type.  This is called from
+   the generic COFF routines.  It is the inverse of ecoff_get_magic,
+   below.  This could be an ECOFF backend routine, with one version
+   for each target, but there aren't all that many ECOFF targets.  */
 
 boolean
 ecoff_set_arch_mach_hook (abfd, filehdr)
@@ -146,6 +208,7 @@ ecoff_set_arch_mach_hook (abfd, filehdr)
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   enum bfd_architecture arch;
+  unsigned long mach;
 
   switch (internal_f->f_magic)
     {
@@ -153,20 +216,78 @@ ecoff_set_arch_mach_hook (abfd, filehdr)
     case MIPS_MAGIC_LITTLE:
     case MIPS_MAGIC_BIG:
       arch = bfd_arch_mips;
+      mach = 3000;
+      break;
+
+    case MIPS_MAGIC_LITTLE2:
+    case MIPS_MAGIC_BIG2:
+      /* MIPS ISA level 2: the r6000 */
+      arch = bfd_arch_mips;
+      mach = 6000;
+      break;
+
+    case MIPS_MAGIC_LITTLE3:
+    case MIPS_MAGIC_BIG3:
+      /* MIPS ISA level 3: the r4000 */
+      arch = bfd_arch_mips;
+      mach = 4000;
       break;
 
     case ALPHA_MAGIC:
       arch = bfd_arch_alpha;
+      mach = 0;
       break;
 
     default:
       arch = bfd_arch_obscure;
+      mach = 0;
       break;
     }
 
-  bfd_default_set_arch_mach (abfd, arch, (unsigned long) 0);
+  return bfd_default_set_arch_mach (abfd, arch, mach);
+}
 
-  return true;
+/* Get the magic number to use based on the architecture and machine.
+   This is the inverse of ecoff_set_arch_mach_hook, above.  */
+
+static int
+ecoff_get_magic (abfd)
+     bfd *abfd;
+{
+  int big, little;
+
+  switch (bfd_get_arch (abfd))
+    {
+    case bfd_arch_mips:
+      switch (bfd_get_mach (abfd))
+	{
+	default:
+	case 0:
+	case 3000:
+	  big = MIPS_MAGIC_BIG;
+	  little = MIPS_MAGIC_LITTLE;
+	  break;
+
+	case 6000:
+	  big = MIPS_MAGIC_BIG2;
+	  little = MIPS_MAGIC_LITTLE2;
+	  break;
+
+	case 4000:
+	  big = MIPS_MAGIC_BIG3;
+	  little = MIPS_MAGIC_LITTLE3;
+	  break;
+	}
+
+      return abfd->xvec->byteorder_big_p ? big : little;
+
+    case bfd_arch_alpha:
+      return ALPHA_MAGIC;
+
+    default:
+      abort ();
+      return 0;
+    }
 }
 
 /* Get the section s_flags to use for a section.  */
@@ -198,6 +319,8 @@ ecoff_sec_to_styp_flags (name, flags)
     styp = STYP_SBSS;
   else if (strcmp (name, _INIT) == 0)
     styp = STYP_ECOFF_INIT;
+  else if (strcmp (name, _FINI) == 0)
+    styp = STYP_ECOFF_FINI;
   else if (flags & SEC_CODE) 
     styp = STYP_TEXT;
   else if (flags & SEC_DATA) 
@@ -232,7 +355,8 @@ ecoff_styp_to_sec_flags (abfd, hdr)
   /* For 386 COFF, at least, an unloadable text or data section is
      actually a shared library section.  */
   if ((styp_flags & STYP_TEXT)
-      || (styp_flags & STYP_ECOFF_INIT))
+      || (styp_flags & STYP_ECOFF_INIT)
+      || (styp_flags & STYP_ECOFF_FINI))
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
@@ -483,6 +607,8 @@ ecoff_slurp_symbolic_info (abfd)
   char *fraw_src;
   char *fraw_end;
   struct fdr *fdr_ptr;
+  bfd_size_type raw_end;
+  bfd_size_type cb_end;
 
   /* Check whether we've already gotten it, and whether there's any to
      get.  */
@@ -530,30 +656,34 @@ ecoff_slurp_symbolic_info (abfd)
   /* Read all the symbolic information at once.  */
   raw_base = ecoff_data (abfd)->sym_filepos + external_hdr_size;
 
-  if (internal_symhdr->cbExtOffset != 0)
-    raw_size = (internal_symhdr->cbExtOffset
-		- raw_base
-		+ internal_symhdr->iextMax * backend->external_ext_size);
-  else
-    {
-      long cbline, issmax, issextmax;
+  /* Alpha ecoff makes the determination of raw_size difficult. It has
+     an undocumented debug data section between the symhdr and the first
+     documented section. And the ordering of the sections varies between
+     statically and dynamically linked executables.
+     If bfd supports SEEK_END someday, this code could be simplified.  */
 
-      cbline = (internal_symhdr->cbLine + 3) &~ 3;
-      issmax = (internal_symhdr->issMax + 3) &~ 3;
-      issextmax = (internal_symhdr->issExtMax + 3) &~ 3;
-      raw_size = (cbline * sizeof (unsigned char)
-		  + internal_symhdr->idnMax * backend->external_dnr_size
-		  + internal_symhdr->ipdMax * backend->external_pdr_size
-		  + internal_symhdr->isymMax * backend->external_sym_size
-		  + internal_symhdr->ioptMax * backend->external_opt_size
-		  + internal_symhdr->iauxMax * sizeof (union aux_ext)
-		  + issmax * sizeof (char)
-		  + issextmax * sizeof (char)
-		  + internal_symhdr->ifdMax * backend->external_fdr_size
-		  + internal_symhdr->crfd * backend->external_rfd_size
-		  + internal_symhdr->iextMax * backend->external_ext_size);
-    }
+  raw_end = 0;
 
+#define UPDATE_RAW_END(start, count, size) \
+  cb_end = internal_symhdr->start + internal_symhdr->count * (size); \
+  if (cb_end > raw_end) \
+    raw_end = cb_end
+
+  UPDATE_RAW_END (cbLineOffset, cbLine, sizeof (unsigned char));
+  UPDATE_RAW_END (cbDnOffset, idnMax, backend->external_dnr_size);
+  UPDATE_RAW_END (cbPdOffset, ipdMax, backend->external_pdr_size);
+  UPDATE_RAW_END (cbSymOffset, isymMax, backend->external_sym_size);
+  UPDATE_RAW_END (cbOptOffset, ioptMax, backend->external_opt_size);
+  UPDATE_RAW_END (cbAuxOffset, iauxMax, sizeof (union aux_ext));
+  UPDATE_RAW_END (cbSsOffset, issMax, sizeof (char));
+  UPDATE_RAW_END (cbSsExtOffset, issExtMax, sizeof (char));
+  UPDATE_RAW_END (cbFdOffset, ifdMax, backend->external_fdr_size);
+  UPDATE_RAW_END (cbRfdOffset, crfd, backend->external_rfd_size);
+  UPDATE_RAW_END (cbExtOffset, iextMax, backend->external_ext_size);
+
+#undef UPDATE_RAW_END
+
+  raw_size = raw_end - raw_base;
   if (raw_size == 0)
     {
       ecoff_data (abfd)->sym_filepos = 0;
@@ -2821,16 +2951,63 @@ ecoff_set_arch_mach (abfd, arch, machine)
 }
 
 /* Get the size of the section headers.  We do not output the .scommon
-   section which we created in ecoff_mkobject.  */
+   section which we created in ecoff_mkobject, nor do we output any
+   .reginfo section.  */
 
 int
 ecoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
      boolean reloc;
 {
+  asection *current;
+  int c;
+
+  c = 0;
+  for (current = abfd->sections;
+       current != (asection *)NULL; 
+       current = current->next) 
+    if (strcmp (current->name, SCOMMON) != 0
+	&& strcmp (current->name, REGINFO) != 0)
+      ++c;
+
   return (bfd_coff_filhsz (abfd)
 	  + bfd_coff_aoutsz (abfd)
-	  + (abfd->section_count - 1) * bfd_coff_scnhsz (abfd));
+	  + c * bfd_coff_scnhsz (abfd));
+}
+
+
+/* Get the contents of a section.  This is where we handle reading the
+   .reginfo section, which implicitly holds the contents of an
+   ecoff_reginfo structure.  */
+
+boolean
+ecoff_get_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     asection *section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
+{
+  ecoff_data_type *tdata = ecoff_data (abfd);
+  struct ecoff_reginfo s;
+  int i;
+
+  if (strcmp (section->name, REGINFO) != 0)
+    return bfd_generic_get_section_contents (abfd, section, location,
+					     offset, count);
+
+  s.gp_value = tdata->gp;
+  s.gprmask = tdata->gprmask;
+  for (i = 0; i < 4; i++)
+    s.cprmask[i] = tdata->cprmask[i];
+  s.fprmask = tdata->fprmask;
+
+  /* bfd_get_section_contents has already checked that the offset and
+     size is reasonable.  We don't have to worry about swapping or any
+     such thing; the .reginfo section is defined such that the
+     contents are an ecoff_reginfo structure as seen on the host.  */
+  memcpy (location, ((char *) &s) + offset, count);
+  return true;
 }
 
 /* Calculate the file position for each section, and set
@@ -2857,7 +3034,8 @@ ecoff_compute_section_file_positions (abfd)
     {
       /* Only deal with sections which have contents */
       if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0
-	  || strcmp (current->name, SCOMMON) == 0)
+	  || strcmp (current->name, SCOMMON) == 0
+	  || strcmp (current->name, REGINFO) == 0)
 	continue;
 
       /* On Ultrix, the data sections in an executable file must be
@@ -2893,7 +3071,9 @@ ecoff_compute_section_file_positions (abfd)
   ecoff_data (abfd)->reloc_filepos = sofar;
 }
 
-/* Set the contents of a section.  */
+/* Set the contents of a section.  This is where we handle setting the
+   contents of the .reginfo section, which implicitly holds a
+   ecoff_reginfo structure.  */
 
 boolean
 ecoff_set_section_contents (abfd, section, location, offset, count)
@@ -2905,6 +3085,40 @@ ecoff_set_section_contents (abfd, section, location, offset, count)
 {
   if (abfd->output_has_begun == false)
     ecoff_compute_section_file_positions (abfd);
+
+  if (strcmp (section->name, REGINFO) == 0)
+    {
+      ecoff_data_type *tdata = ecoff_data (abfd);
+      struct ecoff_reginfo s;
+      int i;
+
+      /* If the caller is only changing part of the structure, we must
+	 retrieve the current information before the memcpy.  */
+      if (offset != 0 || count != sizeof (struct ecoff_reginfo))
+	{
+	  s.gp_value = tdata->gp;
+	  s.gprmask = tdata->gprmask;
+	  for (i = 0; i < 4; i++)
+	    s.cprmask[i] = tdata->cprmask[i];
+	  s.fprmask = tdata->fprmask;
+	}
+
+      /* bfd_set_section_contents has already checked that the offset
+	 and size is reasonable.  We don't have to worry about
+	 swapping or any such thing; the .reginfo section is defined
+	 such that the contents are an ecoff_reginfo structure as seen
+	 on the host.  */
+      memcpy (((char *) &s) + offset, location, count);
+
+      tdata->gp = s.gp_value;
+      tdata->gprmask = s.gprmask;
+      for (i = 0; i < 4; i++)
+	tdata->cprmask[i] = s.cprmask[i];
+      tdata->fprmask = s.fprmask;
+
+      return true;
+
+    }
 
   bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET);
 
@@ -2964,7 +3178,8 @@ ecoff_write_object_contents (abfd)
        current != (asection *)NULL; 
        current = current->next) 
     {
-      if (strcmp (current->name, SCOMMON) == 0)
+      if (strcmp (current->name, SCOMMON) == 0
+	  || strcmp (current->name, REGINFO) == 0)
 	continue;
       current->target_index = count;
       ++count;
@@ -3017,6 +3232,13 @@ ecoff_write_object_contents (abfd)
       if (strcmp (current->name, SCOMMON) == 0)
 	{
 	  BFD_ASSERT (bfd_get_section_size_before_reloc (current) == 0
+		      && current->reloc_count == 0);
+	  continue;
+	}
+      if (strcmp (current->name, REGINFO) == 0)
+	{
+	  BFD_ASSERT ((bfd_get_section_size_before_reloc (current)
+		       == sizeof (struct ecoff_reginfo))
 		      && current->reloc_count == 0);
 	  continue;
 	}
@@ -3084,10 +3306,7 @@ ecoff_write_object_contents (abfd)
 
   /* Set up the file header.  */
 
-  if (abfd->xvec->header_byteorder_big_p != false)
-    internal_f.f_magic = backend->big_magic;
-  else
-    internal_f.f_magic = backend->little_magic;
+  internal_f.f_magic = ecoff_get_magic (abfd);
 
   /* We will NOT put a fucking timestamp in the header here. Every
      time you put it back, I will come in and take it out again.  I'm
