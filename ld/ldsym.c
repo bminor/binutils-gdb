@@ -214,32 +214,46 @@ lang_input_statement_type *f;
 {
   fprintf (stdout, "  %s\n", f->filename);
   if (f->just_syms_flag) 
-      {
-	fprintf (stdout, " symbols only\n");
-      }
+  {
+    fprintf (stdout, " symbols only\n");
+  }
   else 
-      {
-	asection *s;
-	if (true || option_longmap) {
-	  for (s = f->the_bfd->sections;
-	       s != (asection *)NULL;
-	       s = s->next) {
+  {
+    asection *s;
+    if (true || option_longmap) {
+	for (s = f->the_bfd->sections;
+	     s != (asection *)NULL;
+	     s = s->next) {
 	    print_address(s->output_offset);
-	    printf (" %08x 2**%2ud %s\n",
-		    (unsigned)s->size, s->alignment_power, s->name);
+	    if (s->flags & SEC_HAS_CONTENTS) 
+	    {
+	      printf (" %08x 2**%2ud %s\n",
+		      (unsigned)bfd_get_section_size_after_reloc(s),
+		      s->alignment_power, s->name);
+	    }
+	    
+	    else 
+	    {
+	      printf (" %08x 2**%2ud %s\n",
+		      (unsigned)bfd_get_section_size_before_reloc(s),
+		      s->alignment_power, s->name);
+	    }
+	    
+
+	      
 	  }
-	}
-	else {	      
-	  for (s = f->the_bfd->sections;
-	       s != (asection *)NULL;
-	       s = s->next) {
+      }
+    else {	      
+	for (s = f->the_bfd->sections;
+	     s != (asection *)NULL;
+	     s = s->next) {
 	    printf("%s ", s->name);
 	    print_address(s->output_offset);
-	    printf("(%x)", (unsigned)s->size);
+	    printf("(%x)", (unsigned)bfd_get_section_size_after_reloc(s));
 	  }
-	  printf("hex \n");
-	}
+	printf("hex \n");
       }
+  }
   fprintf (stdout, "\n");
 }
 
@@ -345,7 +359,7 @@ LANG_FOR_EACH_INPUT_STATEMENT(entry)
 	{
 	  asymbol *p = entry->asymbols[i];
 
-	  if (flag_is_global(p->flags) || flag_is_absolute(p->flags))
+	  if (flag_is_global(p->flags) )
 	    {
 	      /* We are only interested in outputting 
 		 globals at this stage in special circumstances */
@@ -376,10 +390,10 @@ LANG_FOR_EACH_INPUT_STATEMENT(entry)
 		  *output_buffer++ = p;
 		}
 	      }
-	    else if (flag_is_undefined(p->flags)) 
+	    else if (p->section == &bfd_und_section)
 	      { /* This must be global */
 	      }
-	    else if (flag_is_common(p->flags)) {
+	    else if (p->section == &bfd_com_section) {
 	   /* And so must this */
 	    } 
 	    else if (p->flags & BSF_CTOR) {

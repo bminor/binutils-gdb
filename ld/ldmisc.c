@@ -1,10 +1,13 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* ldmisc.c
+   Copyright (C) 1991 Free Software Foundation, Inc.
+
+   Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -17,17 +20,14 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
- * $Id$ 
+$Id$ 
+
+
  */
 
-/*
-  ldmisc.c
-
-*/
-
+#include "bfd.h"
 #include "sysdep.h"
 #include <varargs.h>
-#include "bfd.h"
 
 #include "ld.h"
 #include "ldmisc.h"
@@ -45,7 +45,7 @@ void
 yyerror(arg) 
 char *arg;
 { 
-  info("%P%F: %S %s\n",arg);
+  einfo("%P%F: %S %s\n",arg);
 }
 
 extern int errno;
@@ -63,19 +63,19 @@ extern char *sys_errlist[];
  %X no object output, fail return
  %V hex bfd_vma
  %C Clever filename:linenumber 
+ %R info about a relent
  %
 */
-void info(va_alist)
-va_dcl
+static void
+vfinfo(fp, fmt, arg)
+     FILE *fp;
+     char *fmt;
+     va_list arg;
 {
-  char *fmt;
   boolean fatal = false;
-  va_list arg;
-  va_start(arg);
-  fmt = va_arg(arg, char *);
   while (*fmt) {
     while (*fmt != '%' && *fmt != '\0') {
-      fputc(*fmt, stderr);
+      putc(*fmt, fp);
       fmt++;
     }
     if (*fmt == '%') {
@@ -85,24 +85,23 @@ va_dcl
 	config.make_executable = false;
 	break;
       case 'V':
-	fprintf(stderr,"%08lx", va_arg(arg, bfd_vma));
+	  {
+	    bfd_vma value = va_arg(arg, bfd_vma);
+	    fprintf_vma(fp, value);
+	  }
 	break;
       case 'T':
 	{
 	  asymbol *symbol = va_arg(arg, asymbol *);
-	  if (symbol) {
+	  if (symbol) 
+	  {
 	    asection *section = symbol->section;
-	    if ((symbol->flags & BSF_UNDEFINED) == 0) {
-	    CONST char *section_name = section == (asection *)NULL ?
-		"absolute" : section->name;
-	      fprintf(stderr,"%s (%s)", symbol->name, section_name);
-	    }
-	    else {
-	      fprintf(stderr,"%s", symbol->name);
-	    }
+	    CONST char *section_name =  section->name;
+	    fprintf(fp,"%s (%s)", symbol->name, section_name);
 	  }
-	  else {
-	    fprintf(stderr,"no symbol");
+	  else 
+	  {
+	    fprintf(fp,"no symbol");
 	  }
 	}
 	break;
@@ -110,11 +109,11 @@ va_dcl
 	{ 
 	  bfd *abfd = va_arg(arg, bfd *);
 	  if (abfd->my_archive) {
-	    fprintf(stderr,"%s(%s)", abfd->my_archive->filename,
+	    fprintf(fp,"%s(%s)", abfd->my_archive->filename,
 		    abfd->filename);
 	  }
 	  else {
-	    fprintf(stderr,"%s", abfd->filename);
+	    fprintf(fp,"%s", abfd->filename);
 
 	  }
 	}
@@ -123,13 +122,13 @@ va_dcl
 	fatal = true;
 	break;
       case 'P':
-	fprintf(stderr,"%s", program_name);
+	fprintf(fp,"%s", program_name);
 	break;
       case 'E':
 	/* Replace with the most recent errno explanation */
 
 
-	fprintf(stderr, bfd_errmsg(bfd_error));
+	fprintf(fp, bfd_errmsg(bfd_error));
 
 
 	break;
@@ -138,7 +137,7 @@ va_dcl
 	  lang_input_statement_type *i =
 	    va_arg(arg,lang_input_statement_type *);
 	
-	  fprintf(stderr,"%s", i->local_sym_name);
+	  fprintf(fp,"%s", i->local_sym_name);
 	}
 	break;
       case 'S':
@@ -147,26 +146,44 @@ va_dcl
 	if (ldlex_input_stack) {
 	  extern unsigned int lineno;
 	  if (ldfile_input_filename == (char *)NULL) {
-	    fprintf(stderr,"command line");
+	    fprintf(fp,"command line");
 	  }
 	  else {
-	    fprintf(stderr,"%s:%u", ldfile_input_filename, lineno );
+	    fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
 	  }
 	}
 	else {
 	  int ch;
 	  int n = 0;
-	  fprintf(stderr,"command (just before \"");
+	  fprintf(fp,"command (just before \"");
 	  ch = lex_input();
 	  while (ch != 0 && n < 10) {
-	    fprintf(stderr, "%c", ch);
+	    fprintf(fp, "%c", ch);
 	    ch = lex_input();
 	    n++;
 	  }
-	  fprintf(stderr,"\")");
+	  fprintf(fp,"\")");
 	    
 	}
 	break;
+
+      case 'R':
+	/* Print all that's interesting about a relent */
+      {
+	arelent *relent = va_arg(arg, arelent *);
+	
+	fprintf(fp,"%s+0x%x (type %s)",
+		(*(relent->sym_ptr_ptr))->name,
+		relent->addend,
+		relent->howto->name);
+	
+
+      }
+	break;
+	
+
+
+	
       case 'C':
 	{
 	 CONST char *filename;
@@ -188,27 +205,31 @@ va_dcl
 		if (filename == (char *)NULL) 	
 		    filename = abfd->filename;
 		if (functionname != (char *)NULL)
-		    fprintf(stderr,"%s:%u: (%s)", filename, linenumber,  functionname);
+		    fprintf(fp,"%s:%u: (%s)", filename, linenumber,  functionname);
 		else if (linenumber != 0) 
-		    fprintf(stderr,"%s:%u", filename, linenumber);
+		    fprintf(fp,"%s:%u", filename, linenumber);
 		else
-		    fprintf(stderr,"%s", filename);
+		    fprintf(fp,"%s(%s+%0x)", filename,
+			    section->name,
+			    offset);
 
 	    }
 	  else {
-	    fprintf(stderr,"%s", abfd->filename);
+	    fprintf(fp,"%s(%s+%0x)", abfd->filename,
+		    section->name,
+		    offset);
 	  }
 	}
 	break;
 		
       case 's':
-	fprintf(stderr,"%s", va_arg(arg, char *));
+	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
       case 'd':
-	fprintf(stderr,"%d", va_arg(arg, int));
+	fprintf(fp,"%d", va_arg(arg, int));
 	break;
       default:
-	fprintf(stderr,"%s", va_arg(arg, char *));
+	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
       }
     }
@@ -219,16 +240,40 @@ va_dcl
       unlink(output_filename);
     exit(1);
   }
+}
+
+/* Format info message and print on stdout. */
+
+void info(va_alist)
+va_dcl
+{
+  char *fmt;
+  va_list arg;
+  va_start(arg);
+  fmt = va_arg(arg, char *);
+  vfinfo(stdout, fmt, arg);
   va_end(arg);
 }
 
+/* ('e' for error.) Format info message and print on stderr. */
+
+void einfo(va_alist)
+va_dcl
+{
+  char *fmt;
+  va_list arg;
+  va_start(arg);
+  fmt = va_arg(arg, char *);
+  vfinfo(stderr, fmt, arg);
+  va_end(arg);
+}
 
 void 
 info_assert(file, line)
 char *file;
 unsigned int line;
 {
-  info("%F%P internal error %s %d\n", file,line);
+  einfo("%F%P internal error %s %d\n", file,line);
 }
 
 /* Return a newly-allocated string
@@ -240,9 +285,9 @@ DEFUN(concat, (s1, s2, s3),
       CONST char *s2 AND
       CONST char *s3)
 {
-  size_t len1 = strlen (s1);
-  size_t len2 = strlen (s2);
-  size_t len3 = strlen (s3);
+  bfd_size_type len1 = strlen (s1);
+  bfd_size_type len2 = strlen (s2);
+  bfd_size_type len3 = strlen (s3);
   char *result = ldmalloc (len1 + len2 + len3 + 1);
 
   if (len1 != 0)
@@ -258,13 +303,14 @@ DEFUN(concat, (s1, s2, s3),
 
 
 
-char  *ldmalloc (size)
-size_t size;
+PTR
+DEFUN(ldmalloc, (size),
+bfd_size_type size)
 {
-  char * result =  malloc (size);
+  PTR result =  malloc ((int)size);
 
   if (result == (char *)NULL && size != 0)
-    info("%F%P virtual memory exhausted\n");
+    einfo("%F%P virtual memory exhausted\n");
 
   return result;
 } 
@@ -274,8 +320,30 @@ size_t size;
 char *DEFUN(buystring,(x),
 	    CONST char *CONST x)
 {
-  size_t  l = strlen(x)+1;
+  bfd_size_type  l = strlen(x)+1;
   char *r = ldmalloc(l);
   memcpy(r, x,l);
   return r;
+}
+
+
+/*----------------------------------------------------------------------
+  Functions to print the link map 
+ */
+
+void 
+DEFUN_VOID(print_space)
+{
+  printf(" ");
+}
+void 
+DEFUN_VOID(print_nl)
+{
+  printf("\n");
+}
+void 
+DEFUN(print_address,(value),
+      bfd_vma value)
+{
+  printf_vma(value);
 }

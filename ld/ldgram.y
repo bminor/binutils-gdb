@@ -1,18 +1,27 @@
+/* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
+   Copyright (C) 1991 Free Software Foundation, Inc.
+   Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
+
+This file is part of GNU ld.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 %{
 /*
- * $Id$ 
- *
- *
-*/
-
-/* 
-   This is a YACC grammer intended to parse a superset of the AT&T
-   linker scripting languaue.
-
-
-   Written by Steve Chamberlain steve@cygnus.com
-*/
-
+ * $Id$
+ */
 
 #define DONTDECLARE_MALLOC
 
@@ -33,7 +42,7 @@ boolean option_v;
 extern unsigned int lineno;
 extern boolean trace_files;
 extern boolean write_map;
-
+extern boolean option_longmap;
 boolean hex_mode;
 
 strip_symbols_type strip_symbols=STRIP_NONE;
@@ -127,8 +136,8 @@ boolean ldgram_had_equals = false;
 %token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
-%token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
-%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R
+%token OPTION_v OPTION_V OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
+%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
@@ -168,17 +177,26 @@ command_line_option:
 			ldversion();
 			option_v = true;
 			}
+	|	OPTION_V
+			{	
+			ldversion();
+			option_v = true;
+			}
 	|	OPTION_t {
 			trace_files = true;
 			}
 	|	OPTION_M {
+			if (write_map) {
+			    option_longmap = true;
+			}
 			write_map = true;
+
 			}
 	|	OPTION_n {
 			config.magic_demand_paged = false;
-			config.text_read_only = true;
 			}
         |       OPTION_N {
+			config.text_read_only = false;
 			config.magic_demand_paged = false;
 	                }
         |       OPTION_s {
@@ -195,11 +213,13 @@ command_line_option:
 			config.relocateable_output = true;
 			config.build_constructors = false;
 			config.magic_demand_paged = false;
+ 			config.text_read_only = false;
 			}
         |       OPTION_Ur {
 			config.relocateable_output = true;
 			config.build_constructors = true;
 			config.magic_demand_paged = false;
+ 			config.text_read_only = false;
 		      }	            
 	|	OPTION_o filename
 			{
@@ -224,6 +244,10 @@ command_line_option:
       }
     	|      OPTION_d {
 			  command_line.force_common_definition = true;
+			}
+
+    	|      OPTION_relax {
+			  command_line.relax = true;
 			}
     	|      OPTION_dc
 			 {

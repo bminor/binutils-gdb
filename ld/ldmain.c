@@ -35,7 +35,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldfile.h"
-
+#include "ldindr.h"
+#include "ldwarn.h"
+#include "ldctor.h"
 /* IMPORTS */
 extern boolean lang_has_input_file;
 extern boolean trace_files;
@@ -112,6 +114,7 @@ unsigned int total_symbols_seen;
  */
 unsigned int total_files_seen;
 
+
 /* IMPORTS */
 args_type command_line;
 ld_config_type config;
@@ -151,6 +154,8 @@ main (argc, argv)
   unix_relocate = 0;
   command_line.force_common_definition = false;
 
+  init_bfd_error_vector();
+  
   ldfile_add_arch("");
   ldfile_add_library_path("./");
   config.make_executable = true;
@@ -181,7 +186,7 @@ main (argc, argv)
     info("%P: mode %s\n", emulation);
   }
   if (lang_has_input_file == false) {
-    info("%P%F: No input files\n");
+    einfo("%P%F: No input files\n");
   }
 
   ldemul_after_parse();
@@ -190,35 +195,32 @@ main (argc, argv)
   /* Print error messages for any missing symbols, for any warning
      symbols, and possibly multiple definitions */
 
-  /* Print a map, if requested.  */
-
-  if (write_map) {
-    ldsym_print_symbol_table ();
-    lang_map(stdout);
-  }
 
   if (config.text_read_only) {
     /* Look for a text section and mark the readonly attribute in it */
     asection *found = bfd_get_section_by_name(output_bfd, ".text");
     if (found == (asection *)NULL) {
-      info("%P%F: text marked read only, but no text section present");
+      einfo("%P%F: text marked read only, but no text section present");
     }
     found->flags |= SEC_READONLY;
   }
 
   if (config.relocateable_output) {
     output_bfd->flags &= ~EXEC_P;
-    ldwrite();
+
+    ldwrite(write_map);
     bfd_close(output_bfd);
   }
   else {
     output_bfd->flags |= EXEC_P;
 
-    ldwrite();
-    bfd_close(output_bfd);
-    if (config.make_executable == false && force_make_executable == false) {
+    ldwrite(write_map);
+
+    if (config.make_executable == false && force_make_executable ==false) {
+
       unlink(output_filename);
     }
+    else {    bfd_close(output_bfd); };
     return (!config.make_executable);
   }
 
@@ -249,8 +251,8 @@ asymbol **nlist_p;
 {
   asymbol *sym = *nlist_p;
   sym->value = 0;
-  sym->flags = BSF_UNDEFINED;
-  sym->section = (asection *)NULL;
+  sym->flags = 0;
+  sym->section = &bfd_und_section;
   sym->udata =(PTR)( sp->srefs_chain);
   sp->srefs_chain = nlist_p;
 }
@@ -277,6 +279,7 @@ Whilst all this is going on we keep a count of the number of multiple
 definitions seen, undefined global symbols and pending commons.
 */
 
+extern boolean relaxing;
 
 void
 Q_enter_global_ref (nlist_p)
@@ -305,7 +308,7 @@ Q_enter_global_ref (nlist_p)
 
   }
   else {  
-    if (flag_is_common(this_symbol_flags)) {
+    if (sym->section == &bfd_com_section) {
       /* If we have a definition of this symbol already then
          this common turns into a reference. Also we only
          ever point to the largest common, so if we
@@ -351,7 +354,7 @@ Q_enter_global_ref (nlist_p)
       }
     }
 
-    else if (flag_is_defined(this_symbol_flags)) {
+    else if (sym->section != &bfd_und_section) {
       /* This is the definition of a symbol, add to def chain */
       if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section) {
 	/* Multiple definition */
@@ -362,18 +365,11 @@ Q_enter_global_ref (nlist_p)
 	asymbol ** stat_symbols = stat ? stat->asymbols:0;
       
 	multiple_def_count++;
-	info("%C: multiple definition of `%T'\n",
-	     sym->the_bfd,
-	     sym->section,
-	     stat1_symbols,
-	     sym->value,
-	     sym);
+	einfo("%C: multiple definition of `%T'\n",
+	      sym->the_bfd, sym->section, stat1_symbols, sym->value, sym);
 	   
-	info("%C: first seen here\n",
-	     sy->the_bfd,
-	     sy->section,
-	     stat_symbols,
-	     sy->value);
+	einfo("%C: first seen here\n",
+	      sy->the_bfd, sy->section, stat_symbols, sy->value);
       }
       else {
 	sym->udata =(PTR)( sp->sdefs_chain);
@@ -385,7 +381,7 @@ Q_enter_global_ref (nlist_p)
 	sp->scoms_chain = 0;
 	commons_pending--;
       }
-      else if (sp->srefs_chain) {
+      else if (sp->srefs_chain && relaxing == false) {
 	/* If previously was undefined, then remember as defined */
 	undefined_global_sym_count--;
       }
@@ -414,8 +410,9 @@ Q_enter_file_symbols (entry)
 lang_input_statement_type *entry;
 {
   asymbol **q ;
+
   entry->common_section =
-    bfd_make_section(entry->the_bfd, "COMMON");
+    bfd_make_section_old_way(entry->the_bfd, "COMMON");
   
   ldlang_add_file(entry);
 
@@ -430,7 +427,10 @@ lang_input_statement_type *entry;
     {
       asymbol *p = *q;
 
-      if (flag_is_undefined_or_global_or_common_or_constructor(p->flags))
+      if (p->section == &bfd_und_section
+	  || (p->flags & BSF_GLOBAL) 
+	  || p->section == &bfd_com_section
+	  || (p->flags & BSF_CONSTRUCTOR))
 	{
 	  Q_enter_global_ref(q);
 	}
@@ -441,7 +441,7 @@ lang_input_statement_type *entry;
       if (p->flags & BSF_WARNING) {
 	add_warning(p);
       }
-      ASSERT(p->flags != 0);
+
     }
 }
 
@@ -533,8 +533,8 @@ struct lang_input_statement_struct *entry;
 	}
       else 
 	{
-	  info("%F%B: malformed input file (not rel or archive) \n",
-						entry->the_bfd);
+	  einfo("%F%B: malformed input file (not rel or archive) \n",
+		entry->the_bfd);
 	}
     }
 
@@ -658,9 +658,8 @@ symdef_library (entry)
 					}
 
 					if (archive_member_lang_input_statement_struct == 0) {
-					  info ("%F%I contains invalid archive member %s\n",
-						entry,
-						sp->name);
+					  einfo ("%F%I contains invalid archive member %s\n",
+						 entry, sp->name);
 					}
 
 					if (archive_member_lang_input_statement_struct->loaded == false)  
@@ -779,7 +778,7 @@ struct lang_input_statement_struct *entry;
 	add_indirect(q);
       }
 
-      if (p->flags & BSF_FORT_COMM 
+      if (p->section == &bfd_com_section
 	  || p->flags & BSF_GLOBAL)
 	{
 	  register ldsym_type *sp = ldsym_get_soft (p->name);
@@ -795,7 +794,7 @@ struct lang_input_statement_struct *entry;
 		/* This is a symbol we are looking for.  It is either
 		   not yet defined or common.  */
 
-		if (flag_is_common(p->flags))
+		if (p->section == &bfd_com_section)
 		  {
 
 		    /* If the symbol in the table is a constructor, we won't to
@@ -824,7 +823,9 @@ struct lang_input_statement_struct *entry;
 			(asymbol **)((*(sp->srefs_chain))->udata);
 		      (*(sp->scoms_chain))->udata = (PTR)NULL;
 
-		      (*(  sp->scoms_chain))->flags = BSF_FORT_COMM;
+		      (*(  sp->scoms_chain))->section  =
+		       &bfd_com_section;
+		      (*(  sp->scoms_chain))->flags  = 0;
 		      /* Remember the size of this item */
 		      sp->scoms_chain[0]->value = p->value;
 		      commons_pending++;
@@ -836,7 +837,7 @@ struct lang_input_statement_struct *entry;
 			  (asection *)NULL) {
 			((lang_input_statement_type *)
 			 (com->the_bfd->usrdata))->common_section = 
-			   bfd_make_section(com->the_bfd, "COMMON");
+			   bfd_make_section_old_way(com->the_bfd, "COMMON");
 		      }
 		    }
 		  }
@@ -857,4 +858,5 @@ struct lang_input_statement_struct *entry;
 
   return false;
 }
+
 

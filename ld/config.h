@@ -33,13 +33,9 @@
 #define EBMON29K_EMULATION_NAME "ebmon29k"
 #define GLDI386AOUT_EMULATION_NAME "gldi386aout"
 /* Otherwise default to this emulation */
-#ifndef DEFAULT_EMULATION
-#ifdef GNU960
-#define DEFAULT_EMULATION GLD960_EMULATION_NAME
-#else
-#define DEFAULT_EMULATION GLD68K_EMULATION_NAME
-#endif
-#endif /* DEFAULT_EMULATION */
+
+#define DEFAULT_EMULATION LNK960_EMULATION_NAME
+
 
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"
@@ -47,6 +43,7 @@
 #define GLD_TARGET "a.out-sunos-big"
 #define GLD68K_TARGET "a.out-sunos-big"
 #define LNK960_TARGET "coff-Intel-big"
+#define LNK960_TARGET_LITTLE "coff-Intel-little"
 #define GLD960_TARGET "b.out.big"
 #define VANILLA_TARGET "a.out-sunos-big"
 #define GLDM88KBCS_TARGET "m88kbcs"

@@ -33,6 +33,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldemul.h"
 #include "ldlex.h"
 #include "ldmisc.h"
+#include "ldindr.h"
+#include "ldctor.h"
 /* FORWARDS */
 PROTO(static void, print_statements,(void));
 PROTO(static void, print_statement,(lang_statement_union_type *,
@@ -47,8 +49,8 @@ static lang_statement_list_type input_file_chain;
    stuff to the data section without pain */
 static lang_statement_list_type end_of_data_section_statement_list;
 
-/* List of statements needed to handle consxtructors */
-static lang_statement_list_type constructor_list;
+/* List of statements needed to handle constructors */
+extern lang_statement_list_type constructor_list;
 
 static boolean placed_commons = false;
 static lang_output_section_statement_type *default_common_section;
@@ -63,6 +65,7 @@ static asection common_section;
 static section_userdata_type common_section_userdata;
 static lang_statement_list_type statement_list;
 /* EXPORTS */
+boolean relaxing;
 
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_input_statement_type *script_file = 0;
@@ -186,7 +189,7 @@ DEFUN(lang_for_each_statement,(func),
 				 statement_list.head);
 }
 /*----------------------------------------------------------------------*/
-static void 
+void 
 DEFUN(lang_list_init,(list),
       lang_statement_list_type *list)
 {
@@ -492,17 +495,17 @@ static void
 DEFUN(init_os,(s),
       lang_output_section_statement_type *s)
 {
-  section_userdata_type *new =
-    (section_userdata_type *)
+    asection *section = bfd_get_section_by_name(output_bfd, s->name);
+    section_userdata_type *new =
+     (section_userdata_type *)
       ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
 
   s->bfd_section = bfd_get_section_by_name(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL)
     s->bfd_section = bfd_make_section(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL) {
-    info("%P%F output format %s cannot represent section called %s\n",
-	 output_bfd->xvec->name,
-	 s->name);
+    einfo("%P%F output format %s cannot represent section called %s\n",
+	  output_bfd->xvec->name, s->name);
   }
   s->bfd_section->output_section = s->bfd_section;
 /* s->bfd_section->flags = s->flags;*/
@@ -511,6 +514,7 @@ DEFUN(init_os,(s),
   /* vma to allow us to output a section through itself */
   s->bfd_section->output_offset = 0;
   get_userdata( s->bfd_section) = (PTR)new;
+
 }
 
 /***********************************************************************
@@ -678,12 +682,12 @@ DEFUN(open_output,(name),
   if (output == (bfd *)NULL) 
       {
 	if (bfd_error == invalid_target) {
-	  info("%P%F target %s not found\n", output_target);
+	  einfo("%P%F target %s not found\n", output_target);
 	}
-	info("%P%F problem opening output file %s, %E", name);
+	einfo("%P%F problem opening output file %s, %E", name);
       }
   
-  output->flags |= D_PAGED;
+/*  output->flags |= D_PAGED;*/
   bfd_set_format(output, bfd_object);
   return output;
 }
@@ -701,7 +705,7 @@ DEFUN(ldlang_open_output,(statement),
 	output_bfd = open_output(statement->output_statement.name);
 	ldemul_set_output_arch();
 	if (config.magic_demand_paged && !config.relocateable_output)
-	  output_bfd->flags |=  ~D_PAGED;
+	  output_bfd->flags |=  D_PAGED;
 	else
 	  output_bfd->flags &=  ~D_PAGED;
 	if (config.text_read_only)
@@ -809,8 +813,7 @@ DEFUN_VOID(lang_place_undefineds)
     def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
     *def_ptr= def;
     def->name = ptr->name;
-    def->flags = BSF_UNDEFINED;
-    def->section = (asection *)NULL;
+    def->section = &bfd_und_section;
     Q_enter_global_ref(def_ptr);
     ptr = ptr->next;
   }
@@ -901,8 +904,8 @@ DEFUN(map_input_to_output_sections,(s, target, output_section_statement),
 	      (s->address_statement.section_name);
 	  os->addr_tree = s->address_statement.address;
 	  if (os->bfd_section == (asection *)NULL) {
-	    info("%P%F can't set the address of undefined section %s\n",
-		 s->address_statement.section_name);
+	    einfo("%P%F can't set the address of undefined section %s\n",
+		  s->address_statement.section_name);
 	  }
 	}
 	break;
@@ -933,7 +936,7 @@ DEFUN(print_output_section_statement,(output_section_statement),
     print_space();
     print_address(section->vma);
     print_space();
-    print_size(section->size);
+    print_size(bfd_get_section_size_before_reloc(section));
     print_space();
     print_alignment(section->alignment_power);
     print_space();
@@ -1017,8 +1020,12 @@ DEFUN(print_input_section,(in),
       lang_input_section_type *in)
 {
   asection *i = in->section;
+  int size = i->flags & SEC_HAS_CONTENTS ?
+   bfd_get_section_size_after_reloc(i) :
+    bfd_get_section_size_before_reloc(i);
+  
 
-  if(i->size != 0) {
+  if(size != 0) {
     print_section("");
     printf(" ");
     print_section(i->name);
@@ -1026,7 +1033,7 @@ DEFUN(print_input_section,(in),
     if (i->output_section) {
       print_address(i->output_section->vma + i->output_offset);
       printf(" ");
-      print_size(i->size);
+      print_size(size);
       printf(" ");
       print_alignment(i->alignment_power);
       printf(" ");
@@ -1065,7 +1072,7 @@ DEFUN(print_input_section,(in),
       }
 
 
-      print_dot = outside_section_address(i) + i->size;
+      print_dot = outside_section_address(i) + size;
     }
     else {
       printf("No output section allocated\n");
@@ -1160,65 +1167,64 @@ DEFUN(print_statement,(s, os),
       lang_statement_union_type *s AND
       lang_output_section_statement_type *os)
 {
-  while (s) {
-    switch (s->header.type) {
-    case lang_constructors_statement_enum:
-      printf("constructors:\n");
-print_statement(constructor_list.head, os);
-break;	
-
-    case lang_wild_statement_enum:
-      print_wild_statement(&s->wild_statement, os);
-      break;
-    default:
-      printf("Fail with %d\n",s->header.type);
-      FAIL();
-      break;
-    case lang_address_statement_enum:
-      printf("address\n");
-      break;
-      break;
-    case lang_object_symbols_statement_enum:
-      printf("object symbols\n");
-      break;
-    case lang_fill_statement_enum:
-      print_fill_statement(&s->fill_statement);
-      break;
-    case lang_data_statement_enum:
-      print_data_statement(&s->data_statement);
-      break;
-    case lang_input_section_enum:
-      print_input_section(&s->input_section);
-      break;
-    case lang_padding_statement_enum:
-      print_padding_statement(&s->padding_statement);
-      break;
-    case lang_output_section_statement_enum:
-      print_output_section_statement(&s->output_section_statement);
-      break;
-    case lang_assignment_statement_enum:
-      print_assignment(&s->assignment_statement,
-		       os);
-      break;
-
-
-    case lang_target_statement_enum:
-      printf("TARGET(%s)\n", s->target_statement.target);
-      break;
-    case lang_output_statement_enum:
-      printf("OUTPUT(%s %s)\n",
-	     s->output_statement.name,
-	     output_target);
-      break;
-    case lang_input_statement_enum:
-      print_input_statement(&s->input_statement);
-      break;
-    case lang_afile_asection_pair_statement_enum:
-      FAIL();
-      break;
+    while (s) 
+    {
+	switch (s->header.type) 
+	{
+	   case lang_constructors_statement_enum:
+	    printf("constructors:\n");
+	    print_statement(constructor_list.head, os);
+	    break;	
+	   case lang_wild_statement_enum:
+	    print_wild_statement(&s->wild_statement, os);
+	    break;
+	   default:
+	    printf("Fail with %d\n",s->header.type);
+	    FAIL();
+	    break;
+	   case lang_address_statement_enum:
+	    printf("address\n");
+	    break;
+	    break;
+	   case lang_object_symbols_statement_enum:
+	    printf("object symbols\n");
+	    break;
+	   case lang_fill_statement_enum:
+	    print_fill_statement(&s->fill_statement);
+	    break;
+	   case lang_data_statement_enum:
+	    print_data_statement(&s->data_statement);
+	    break;
+	   case lang_input_section_enum:
+	    print_input_section(&s->input_section);
+	    break;
+	   case lang_padding_statement_enum:
+	    print_padding_statement(&s->padding_statement);
+	    break;
+	   case lang_output_section_statement_enum:
+	    print_output_section_statement(&s->output_section_statement);
+	    break;
+	   case lang_assignment_statement_enum:
+	    print_assignment(&s->assignment_statement,
+			     os);
+	    break;
+	   case lang_target_statement_enum:
+	    printf("TARGET(%s)\n", s->target_statement.target);
+	    break;
+	   case lang_output_statement_enum:
+	    printf("OUTPUT(%s %s)\n",
+		   s->output_statement.name,
+		   output_target);
+	    break;
+	   case lang_input_statement_enum:
+	    print_input_statement(&s->input_statement);
+	    break;
+	   case lang_afile_asection_pair_statement_enum:
+	    FAIL();
+	    break;
+	}
+	s = s->next;
     }
-    s = s->next;
-  }
 }
 
 
@@ -1268,7 +1274,7 @@ DEFUN(insert_pad,(this_ptr, fill, power, output_section_statement, dot),
   if (power > output_section_statement->alignment_power) {
     output_section_statement->alignment_power = power;
   }
-  output_section_statement->size += alignment_needed;
+  output_section_statement->_raw_size += alignment_needed;
   return alignment_needed + dot;
 
 }
@@ -1293,8 +1299,8 @@ DEFUN(size_input_section, (this_ptr, output_section_statement, fill,  dot),
        which we will actually allocate  */
     if (((i->flags & 
 	 (SEC_HAS_CONTENTS | SEC_LOAD)) == (SEC_HAS_CONTENTS | SEC_LOAD))
-	&& (i->size > largest_section)) {
-      largest_section = i->size;
+	&& (bfd_get_section_size_before_reloc(i) > largest_section)) {
+      largest_section = bfd_get_section_size_before_reloc(i);
     }
 
     /* Remember where in the output section this input section goes */
@@ -1302,8 +1308,8 @@ DEFUN(size_input_section, (this_ptr, output_section_statement, fill,  dot),
     i->output_offset = dot - output_section_statement->bfd_section->vma;
 
     /* Mark how big the output section must be to contain this now */
-    dot += i->size;
-    output_section_statement->bfd_section->size =
+    dot += bfd_get_section_size_before_reloc(i);
+output_section_statement->bfd_section->_raw_size =
       dot - output_section_statement->bfd_section->vma;
   }
   else
@@ -1314,16 +1320,18 @@ DEFUN(size_input_section, (this_ptr, output_section_statement, fill,  dot),
   return dot ;
 }
 
-
+#if 0
 /* Work out the size of the output sections 
- from the sizes of the input sections */
+   from the sizes of the input sections */
 static bfd_vma
-DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
+DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
+			  dot),
       lang_statement_union_type *s AND
       lang_output_section_statement_type * output_section_statement AND
       lang_statement_union_type **prev AND
       unsigned short fill AND
       bfd_vma dot)
+
 {
   /* Size up the sections from their constituent parts */
   for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
@@ -1354,7 +1362,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
 				  lang_allocating_phase_enum,
 				  dot, &dot);
 		if (r.valid == false) {
-		  info("%F%S: non constant address expression for section %s\n",
+		  einfo("%F%S: non constant address expression for section %s\n",
 		       os->name);
 		}
 		dot = r.value;
@@ -1399,7 +1407,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
 				      
 	case lang_data_statement_enum: 
 	    {
-	      unsigned int size;
+	      unsigned int size = 0;
 	      s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
 	      s->data_statement.output_section =
 		output_section_statement->bfd_section;
@@ -1492,7 +1500,200 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
       }
   return dot;
 }
+#else
+/* Sizing happens in two passes, first pass we allocate worst case
+   stuff. The second pass (if relaxing), we use what we learnt to
+   change the size of some relocs from worst case to better
+   */
+static boolean had_relax;
 
+static bfd_vma
+DEFUN(lang_size_sections,(s, output_section_statement, prev, fill,
+			  dot, relax),
+      lang_statement_union_type *s AND
+      lang_output_section_statement_type * output_section_statement AND
+      lang_statement_union_type **prev AND
+      unsigned short fill AND
+      bfd_vma dot AND
+      boolean relax)
+{
+  /* Size up the sections from their constituent parts */
+  for (; s != (lang_statement_union_type *)NULL ; s = s->next) 
+      {
+	switch (s->header.type) {
+	  
+	case lang_output_section_statement_enum:
+	    {
+	      bfd_vma after;
+	      lang_output_section_statement_type *os =
+		&(s->output_section_statement);
+	      /* The start of a section */
+	  
+	      if (os->addr_tree == (etree_type *)NULL) {
+		/* No address specified for this section, get one
+		   from the region specification
+		   */
+		if (os->region == (lang_memory_region_type *)NULL) {
+		  os->region = lang_memory_region_lookup("*default*");
+		}
+		dot = os->region->current;
+	      }
+	      else {
+		etree_value_type r ;
+		r = exp_fold_tree(os->addr_tree,
+				  (lang_output_section_statement_type *)NULL,
+				  lang_allocating_phase_enum,
+				  dot, &dot);
+		if (r.valid == false) {
+		  einfo("%F%S: non constant address expression for section %s\n",
+		       os->name);
+		}
+		dot = r.value;
+	      }
+	      /* The section starts here */
+	      /* First, align to what the section needs */
+
+	      dot = align_power(dot, os->bfd_section->alignment_power);
+	      os->bfd_section->vma = dot;
+	      os->bfd_section->output_offset = 0;
+
+	      (void)  lang_size_sections(os->children.head, os, &os->children.head,
+					 os->fill, dot, relax);
+	      /* Ignore the size of the input sections, use the vma and size to */
+	      /* align against */
+
+
+	      after = ALIGN(os->bfd_section->vma +
+			    os->bfd_section->_raw_size,
+			    os->block_value) ;
+
+
+	      os->bfd_section->_raw_size = after - os->bfd_section->vma;
+	      dot = os->bfd_section->vma + os->bfd_section->_raw_size;
+	      os->processed = true;
+
+	      /* Replace into region ? */
+	      if (os->addr_tree == (etree_type *)NULL 
+		  && os->region !=(lang_memory_region_type*)NULL ) {
+		os->region->current = dot;
+	      }
+	    }
+
+	  break;
+	case lang_constructors_statement_enum:
+	    dot = lang_size_sections(constructor_list.head,
+				      output_section_statement,
+				      &s->wild_statement.children.head,
+				      fill,
+				      dot, relax);
+	    break;
+				      
+	case lang_data_statement_enum: 
+	    {
+	      unsigned int size = 0;
+	      s->data_statement.output_vma = dot - output_section_statement->bfd_section->vma;
+	      s->data_statement.output_section =
+		output_section_statement->bfd_section;
+
+	      switch (s->data_statement.type) {
+	      case LONG:
+		size = LONG_SIZE;
+		break;
+	      case SHORT:
+		size = SHORT_SIZE;
+		break;
+	      case BYTE:
+		size = BYTE_SIZE;
+		break;
+
+	      }
+	      dot += size;
+	      output_section_statement->bfd_section->_raw_size += size;
+	    }
+	  break;
+
+	case lang_wild_statement_enum:
+
+	  dot =	lang_size_sections(s->wild_statement.children.head,
+				   output_section_statement,
+				   &s->wild_statement.children.head,
+
+				   fill, dot, relax);
+
+	  break;
+
+	case lang_object_symbols_statement_enum:
+	  create_object_symbols = output_section_statement;
+	  break;
+	case lang_output_statement_enum:
+	case lang_target_statement_enum:
+	  break;
+	case lang_input_section_enum:
+if (relax)
+{
+  relaxing = true;
+  
+
+had_relax |=  relax_section(prev);
+  relaxing = false;
+  
+}
+
+	  dot =	size_input_section(prev,
+				   output_section_statement,
+				   output_section_statement->fill, dot);
+	  break;
+	case lang_input_statement_enum:
+	  break;
+	case lang_fill_statement_enum:
+	  fill = s->fill_statement.fill;
+	  break;
+	case lang_assignment_statement_enum:
+	    {
+	      bfd_vma newdot = dot;
+	      exp_fold_tree(s->assignment_statement.exp,
+			    output_section_statement,
+			    lang_allocating_phase_enum,
+			    dot,
+			    &newdot);
+
+	      if (newdot != dot) 
+		/* We've been moved ! so insert a pad */
+		  {
+		    lang_statement_union_type *new = 
+		      (lang_statement_union_type *)
+			ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
+		    /* Link into existing chain */
+		    new->header.next = *prev;
+		    *prev = new;
+		    new->header.type = lang_padding_statement_enum;
+		    new->padding_statement.output_section =
+		      output_section_statement->bfd_section;
+		    new->padding_statement.output_offset =
+		      dot - output_section_statement->bfd_section->vma;
+		    new->padding_statement.fill = fill;
+		    new->padding_statement.size = newdot - dot;
+		    output_section_statement->bfd_section->_raw_size +=
+		      new->padding_statement.size;
+		    dot =   newdot;
+		  }
+	    }
+
+	  break;
+	default:
+	  FAIL();
+	  break;
+/* This can only get here when relaxing is turned on */
+	case lang_padding_statement_enum:
+
+	case lang_address_statement_enum:
+	  break;
+	}
+	prev = &s->header.next;      
+      }
+  return dot;
+}
+#endif
 
 static bfd_vma
 DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
@@ -1518,7 +1719,7 @@ DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
 	    &(s->output_section_statement);
 	  dot = os->bfd_section->vma;
 	  (void) lang_do_assignments(os->children.head, os, os->fill, dot);
-	  dot = os->bfd_section->vma + os->bfd_section->size;
+	  dot = os->bfd_section->vma + os->bfd_section->_raw_size;
 	}
 	break;
       case lang_wild_statement_enum:
@@ -1542,7 +1743,7 @@ DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
 	  value =   exp_fold_tree(s->data_statement.exp,
 				  0, lang_final_phase_enum, dot, &dot);
 	  s->data_statement.value = value.value;
-	  if (value.valid == false) info("%F%P: Invalid data statement\n");
+	  if (value.valid == false) einfo("%F%P: Invalid data statement\n");
 	}
 	switch (s->data_statement.type) {
 	case LONG:
@@ -1559,7 +1760,7 @@ DEFUN(lang_do_assignments,(s, output_section_statement, fill, dot),
       case lang_input_section_enum:
 	{
 	  asection *in =    s->input_section.section;
-	  dot += in->size;
+	  dot += bfd_get_section_size_before_reloc(in);
 	}
 	break;
 
@@ -1787,7 +1988,9 @@ DEFUN_VOID(lang_common)
 		((lang_input_statement_type *)
 		 (com->the_bfd->usrdata))->common_section;
 	      /*  Fix the size of the common section */
-	      com->section->size = ALIGN(com->section->size, align);
+
+	       com->section->_raw_size =
+		ALIGN(com->section->_raw_size, align);
 
 	      /* Remember if this is the biggest alignment ever seen */
 	      if (power_of_two > com->section->alignment_power) {
@@ -1798,7 +2001,7 @@ DEFUN_VOID(lang_common)
 		 we remember that it was common once. */
 
 	      com->flags = BSF_EXPORT | BSF_GLOBAL | BSF_OLD_COMMON;
-	      com->value = com->section->size;
+	      com->value = com->section->_raw_size;
 
 	      if (write_map) 
 		{
@@ -1809,7 +2012,7 @@ DEFUN_VOID(lang_common)
 			  com->the_bfd->filename);
 		}
 
-	      com->section->size += size;
+	      com->section->_raw_size += size;
 
 	    }
 	  }
@@ -1902,7 +2105,7 @@ DEFUN(lang_set_flags,(ptr, flags),
 /*	  ptr->flag_loadable= state;*/
 	  break;
 	default:
-	  info("%P%F illegal syntax in flags\n");
+	  einfo("%P%F illegal syntax in flags\n");
 	  break;
 	}
 	flags++;
@@ -2016,6 +2219,18 @@ DEFUN_VOID(lang_final)
 
 
 
+/* Reset the current counters in the regions */
+static void
+ DEFUN_VOID(reset_memory_regions) 
+{
+  lang_memory_region_type *p  = lang_memory_region_list;
+  for (p = lang_memory_region_list;
+       p != ( lang_memory_region_type *)NULL;
+       p = p->next) 
+  {
+    p->current = p->origin;
+  }
+}
 
 
 asymbol *
@@ -2038,95 +2253,14 @@ DEFUN(create_symbol,(name, flags, section),
   return def;
 }
 
-/* run through the symbol table, find all the symbols which are
-   constructors and for each one, create statements to do something
-   like..
-
-   for 
-   __CTOR_LIST__, foo
-
-   __CTOR_LIST__ = . ;
-   LONG(__CTOR_LIST_END - . / 4 - 2)
-   *(foo)
-   __CTOR_LIST_END= .
-
-   Put these statements onto a special list.
-
-*/
-
-typedef struct constructor_list 
-{
-ldsym_type *sym;
-  struct constructor_list *next;
-}  constructor_list_type;
-   
-static constructor_list_type *constructor_name_list;
-
-void
-DEFUN(ldlang_add_constructor,(name),
-ldsym_type *name)
-{
-
-  constructor_list_type *next   = constructor_name_list;
-
-  if (name->flags & SYM_CONSTRUCTOR) return;
-
-  next = (constructor_list_type *)  ldmalloc(sizeof(constructor_list_type));
-  next->next= constructor_name_list;
-  next->sym= name;
-  name->flags |= SYM_CONSTRUCTOR;
-  constructor_name_list = next;
-
-}
-
-void
-DEFUN_VOID(find_constructors)
-{
-  lang_statement_list_type *old = stat_ptr;
-  constructor_list_type *p = constructor_name_list;
-  stat_ptr = & constructor_list;
-  lang_list_init(stat_ptr);
-  while (p != (constructor_list_type *)NULL) 
-      {
-	/* Have we already done this one ? */
-	CONST char *name = p->sym->name;
-	int len = strlen(name);
-	char *end = ldmalloc(len+3);
-	strcpy(end, name);
-	strcat(end,"$e");
-
-	lang_add_assignment
-	  ( exp_assop('=',name, exp_nameop(NAME,".")));
-
-	lang_add_data
-	  (LONG, exp_binop('-',
-			   exp_binop ( '/',
-				      exp_binop ( '-',
-						 exp_nameop(NAME, end),
-						 exp_nameop(NAME,".")),
-				      exp_intop(4)),
-
-			   exp_intop(2)));
-
-				      
-	lang_add_wild(name, (char *)NULL);
-	lang_add_data(LONG, exp_intop(0));
-	lang_add_assignment
-	  (exp_assop('=', end, exp_nameop(NAME,".")));
-p = p->next;		    
-      }
 
 
-
-
-  stat_ptr = old;
-}
 void
 DEFUN_VOID(lang_process)
 {               
   if (had_script == false) {
-    parse_line(ldemul_get_script());
-  }
+      parse_line(ldemul_get_script());
+    }
   lang_reasonable_defaults();
   current_target = default_target;
 
@@ -2164,10 +2298,42 @@ DEFUN_VOID(lang_process)
 
   ldemul_before_allocation();
 
+
   /* Size up the sections */
   lang_size_sections(statement_list.head,
 		     (lang_output_section_statement_type *)NULL,
-		     &(statement_list.head), 0, (bfd_vma)0);
+		     &(statement_list.head), 0, (bfd_vma)0, false);
+
+
+  /* Move the global symbols around */
+  lang_relocate_globals();
+
+  /* Now run around and relax if we can */
+  if (command_line.relax) 
+  {
+    reset_memory_regions();
+    
+    had_relax = true;
+    while (had_relax) 
+    {
+      
+      had_relax = false;
+      
+      lang_size_sections(statement_list.head,
+			 (lang_output_section_statement_type *)NULL,
+			 &(statement_list.head), 0, (bfd_vma)0, true);
+      /* FIXME. Until the code in relax is fixed so that it only reads in
+	 stuff once, we cant iterate since there is no way for the linker to
+	 know what has been patched and what hasn't */
+      break;
+      
+    }
+    
+    
+
+
+  }
+  
 
   /* See if anything special should be done now we know how big
      everything is */
@@ -2180,12 +2346,10 @@ DEFUN_VOID(lang_process)
 		      (lang_output_section_statement_type *)NULL,
 		      0, (bfd_vma)0);
 
+
   /* Make sure that we're not mixing architectures */
 
   lang_check();
-
-  /* Move the global symbols around */
-  lang_relocate_globals();
 
   /* Final stuffs */
   lang_finish();
@@ -2301,7 +2465,7 @@ DEFUN(lang_startup,(name),
       CONST char *name)
 {
   if (startup_file != (char *)NULL) {
-   info("%P%FMultiple STARTUP files\n");
+   einfo("%P%FMultiple STARTUP files\n");
   }
   first_file->filename = name;
   first_file->local_sym_name = name;
@@ -2345,9 +2509,10 @@ DEFUN(lang_abs_symbol_at_beginning_of,(section, name),
   if (ldsym_undefined(name)) {
     asection *s = bfd_get_section_by_name(output_bfd, section);
     asymbol *def = create_symbol(name,
-				 BSF_GLOBAL | BSF_EXPORT |
-				 BSF_ABSOLUTE,
-				 (asection *)NULL);
+				 BSF_GLOBAL | BSF_EXPORT ,
+				 &bfd_abs_section);
+    
+
     if (s != (asection *)NULL) {
       def->value = s->vma;
     }
@@ -2372,11 +2537,11 @@ DEFUN(lang_abs_symbol_at_end_of,(section, name),
     asection *s = bfd_get_section_by_name(output_bfd, section);
     /* Add a symbol called _end */
     asymbol *def = create_symbol(name,
-				 BSF_GLOBAL | BSF_EXPORT |
-				 BSF_ABSOLUTE,
-				 (asection *)NULL);
+				 BSF_GLOBAL | BSF_EXPORT ,
+				 &bfd_abs_section);
+
     if (s != (asection *)NULL) {
-      def->value = s->vma + s->size;
+      def->value = s->vma + s->_raw_size;
     }
     else {
       def->value = 0;
