@@ -1,3 +1,9 @@
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/i386/general.s: Check 16-bit immediates, and move call/jump
+	checks to start.
+	* gas/i386/general.l: Likewise.
+
 2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* gas/mn10300/am33_5.s: Check that negative SP offsets are encoded
