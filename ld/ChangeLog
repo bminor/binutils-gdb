@@ -1,3 +1,12 @@
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em (after_open): Abort if input format is ARM and
+	output format is not. 
+	* emultempl/armcoff.em (after_open): Abort if input format is ARM
+	and output format is not. 
+	* emultempl/armelf.em (after_open): Abort if input format is ARM
+	and output format is not. 
+
 1999-07-02  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldlang.c: Revert change of 1999-06-23.

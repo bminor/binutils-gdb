@@ -308,12 +308,24 @@ gld${EMULATION_NAME}_after_open ()
 {
   struct bfd_link_needed_list *needed, *l;
 
-  LANG_FOR_EACH_INPUT_STATEMENT (is)
+  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
     {
-      /* The interworking bfd must be the last one to be processed */
-      if (!is->next)
-         bfd_elf32_arm_get_bfd_for_interworking (is->the_bfd, & link_info);
+      /* The arm backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an arm format,
+	 hence we do not support linking and changing output formats at the
+	 same time.  Use a link followed by objcopy to change output formats.  */
+      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
+      return;
     }
+
+  {
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	/* The interworking bfd must be the last one to be processed */
+	if (!is->next)
+	  bfd_elf32_arm_get_bfd_for_interworking (is->the_bfd, & link_info);
+      }
+  }
 
   /* We only need to worry about this when doing a final link.  */
   if (link_info.relocateable || link_info.shared)

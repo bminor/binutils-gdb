@@ -148,11 +148,23 @@ gld${EMULATION_NAME}_before_allocation ()
 static void
 gld${EMULATION_NAME}_after_open ()
 {
-  LANG_FOR_EACH_INPUT_STATEMENT (is)
+  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
     {
-      if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
-	break;
+      /* The arm backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an arm format,
+	 hence we do not support linking and changing output formats at the
+	 same time.  Use a link followed by objcopy to change output formats.  */
+      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
+      return;
     }
+  
+  {
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
+	  break;
+      }
+  }
 }
 
 static void

@@ -652,6 +652,15 @@ gld_${EMULATION_NAME}_after_open ()
 #endif
 
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
+    {
+      /* The arm backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an arm format,
+	 hence we do not support linking and changing output formats at the
+	 same time.  Use a link followed by objcopy to change output formats.  */
+      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
+      return;
+    }
   {
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
