@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -1887,6 +1887,18 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 #define bfd_free_cached_info(abfd) \
        BFD_SEND (abfd, _bfd_free_cached_info, (abfd))
 
+#define bfd_get_dynamic_symtab_upper_bound(abfd) \
+	BFD_SEND (abfd, _bfd_get_dynamic_symtab_upper_bound, (abfd))
+
+#define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
+	BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
+
+#define bfd_get_dynamic_reloc_upper_bound(abfd) \
+	BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
+
+#define bfd_canonicalize_dynamic_reloc(abfd, arels, asyms) \
+	BFD_SEND (abfd, _bfd_canonicalize_dynamic_reloc, (abfd, arels, asyms))
+
 symindex 
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
@@ -2114,16 +2126,33 @@ CAT(NAME,_bfd_final_link)
   boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
                     struct bfd_link_info *, boolean *again));
 
-  /* Create a hash table for the linker.  Different backends store
-    different information in this table.  */
- struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+   /* Create a hash table for the linker.  Different backends store
+     different information in this table.  */
+  struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
 
-  /* Add symbols from this object file into the hash table.  */
- boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+   /* Add symbols from this object file into the hash table.  */
+  boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
 
-  /* Do a link based on the link_order structures attached to each
-    section of the BFD.  */
- boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+   /* Do a link based on the link_order structures attached to each
+     section of the BFD.  */
+  boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Routines to handle dynamic symbols and relocs.  */
+#define BFD_JUMP_TABLE_DYNAMIC(NAME)\
+CAT(NAME,_get_dynamic_symtab_upper_bound),\
+CAT(NAME,_canonicalize_dynamic_symtab),\
+CAT(NAME,_get_dynamic_reloc_upper_bound),\
+CAT(NAME,_canonicalize_dynamic_reloc)
+   /* Get the amount of memory required to hold the dynamic symbols. */
+  long  (*_bfd_get_dynamic_symtab_upper_bound) PARAMS ((bfd *));
+   /* Read in the dynamic symbols.  */
+  long  (*_bfd_canonicalize_dynamic_symtab)
+    PARAMS ((bfd *, struct symbol_cache_entry **));
+   /* Get the amount of memory required to hold the dynamic relocs.  */
+  long  (*_bfd_get_dynamic_reloc_upper_bound) PARAMS ((bfd *));
+   /* Read in the dynamic relocs.  */
+  long  (*_bfd_canonicalize_dynamic_reloc)
+    PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
 
  PTR backend_data;
 } bfd_target;

@@ -376,16 +376,33 @@ The general target vector.
 .  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
 .                    struct bfd_link_info *, boolean *again));
 .
-. {* Create a hash table for the linker.  Different backends store
-.    different information in this table.  *}
-. struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+.  {* Create a hash table for the linker.  Different backends store
+.     different information in this table.  *}
+.  struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
 .
-. {* Add symbols from this object file into the hash table.  *}
-. boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+.  {* Add symbols from this object file into the hash table.  *}
+.  boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
 .
-. {* Do a link based on the link_order structures attached to each
-.    section of the BFD.  *}
-. boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+.  {* Do a link based on the link_order structures attached to each
+.     section of the BFD.  *}
+.  boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+.
+. {* Routines to handle dynamic symbols and relocs.  *}
+.#define BFD_JUMP_TABLE_DYNAMIC(NAME)\
+.CAT(NAME,_get_dynamic_symtab_upper_bound),\
+.CAT(NAME,_canonicalize_dynamic_symtab),\
+.CAT(NAME,_get_dynamic_reloc_upper_bound),\
+.CAT(NAME,_canonicalize_dynamic_reloc)
+.  {* Get the amount of memory required to hold the dynamic symbols. *}
+.  long  (*_bfd_get_dynamic_symtab_upper_bound) PARAMS ((bfd *));
+.  {* Read in the dynamic symbols.  *}
+.  long  (*_bfd_canonicalize_dynamic_symtab)
+.    PARAMS ((bfd *, struct symbol_cache_entry **));
+.  {* Get the amount of memory required to hold the dynamic relocs.  *}
+.  long  (*_bfd_get_dynamic_reloc_upper_bound) PARAMS ((bfd *));
+.  {* Read in the dynamic relocs.  *}
+.  long  (*_bfd_canonicalize_dynamic_reloc)
+.    PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
 .
 
 Data for use by back-end routines, which isn't generic enough to belong
