@@ -51,8 +51,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FT_STRING		23
 #define FT_FIXED_DECIMAL	24
 #define FT_FLOAT_DECIMAL	25
+#define FT_BYTE			26
+#define FT_UNSIGNED_BYTE	27
 
-#define FT_NUM_MEMBERS		26
+#define FT_NUM_MEMBERS		28	/* Highest FT_* above, plus one. */
 
 /* Different kinds of data types are distinguished by the `code' field.  */
 
@@ -80,7 +82,7 @@ enum type_code
 
   /* Modula-2 */
   TYPE_CODE_CHAR,		/* *real* character type */
-  TYPE_CODE_BOOL		/* Builtin BOOLEAN type */
+  TYPE_CODE_BOOL		/* BOOLEAN type */
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an

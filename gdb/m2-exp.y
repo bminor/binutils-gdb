@@ -1341,6 +1341,164 @@ m2_printstr (stream, string, length, force_ellipses)
     fputs_filtered ("...", stream);
 }
 
+/* FIXME:  This is a copy of c_create_fundamental_type(), before
+   all the non-C types were stripped from it.  Needs to be fixed
+   by an experienced Modula programmer. */
+
+static struct type *
+m2_create_fundamental_type (objfile, typeid)
+     struct objfile *objfile;
+     int typeid;
+{
+  register struct type *type = NULL;
+  register int nbytes;
+
+  switch (typeid)
+    {
+      default:
+	/* FIXME:  For now, if we are asked to produce a type not in this
+	   language, create the equivalent of a C integer type with the
+	   name "<?type?>".  When all the dust settles from the type
+	   reconstruction work, this should probably become an error. */
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  0, "<?type?>", objfile);
+        warning ("internal error: no Modula fundamental type %d", typeid);
+	break;
+      case FT_VOID:
+	type = init_type (TYPE_CODE_VOID,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  0, "void", objfile);
+	break;
+      case FT_BOOLEAN:
+	type = init_type (TYPE_CODE_BOOL,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "boolean", objfile);
+	break;
+      case FT_STRING:
+	type = init_type (TYPE_CODE_PASCAL_ARRAY,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  0, "string", objfile);
+	break;
+      case FT_CHAR:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  0, "char", objfile);
+	break;
+      case FT_SIGNED_CHAR:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "signed char", objfile);
+	break;
+      case FT_UNSIGNED_CHAR:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "unsigned char", objfile);
+	break;
+      case FT_SHORT:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			  0, "short", objfile);
+	break;
+      case FT_SIGNED_SHORT:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "short", objfile);	/* FIXME-fnf */
+	break;
+      case FT_UNSIGNED_SHORT:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
+	break;
+      case FT_INTEGER:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  0, "int", objfile);
+	break;
+      case FT_SIGNED_INTEGER:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "int", objfile); /* FIXME -fnf */
+	break;
+      case FT_UNSIGNED_INTEGER:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
+	break;
+      case FT_FIXED_DECIMAL:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  0, "fixed decimal", objfile);
+	break;
+      case FT_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			  0, "long", objfile);
+	break;
+      case FT_SIGNED_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "long", objfile); /* FIXME -fnf */
+	break;
+      case FT_UNSIGNED_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
+	break;
+      case FT_LONG_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			  0, "long long", objfile);
+	break;
+      case FT_SIGNED_LONG_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "signed long long", objfile);
+	break;
+      case FT_UNSIGNED_LONG_LONG:
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
+	break;
+      case FT_FLOAT:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			  0, "float", objfile);
+	break;
+      case FT_DBL_PREC_FLOAT:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			  0, "double", objfile);
+	break;
+      case FT_FLOAT_DECIMAL:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			  0, "floating decimal", objfile);
+	break;
+      case FT_EXT_PREC_FLOAT:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			  0, "long double", objfile);
+	break;
+      case FT_COMPLEX:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+			  0, "complex", objfile);
+	break;
+      case FT_DBL_PREC_COMPLEX:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+			  0, "double complex", objfile);
+	break;
+      case FT_EXT_PREC_COMPLEX:
+	type = init_type (TYPE_CODE_FLT,
+			  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+			  0, "long double complex", objfile);
+	break;
+      }
+  return (type);
+}
+
 
 /* Table of operators and their precedences for printing expressions.  */
 
@@ -1396,6 +1554,7 @@ const struct language_defn m2_language_defn = {
   m2_error,			/* parser error function */
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
+  m2_create_fundamental_type,	/* Create fundamental type in this language */
   &builtin_type_m2_int,		/* longest signed   integral type */
   &builtin_type_m2_card,	/* longest unsigned integral type */
   &builtin_type_m2_real,	/* longest floating point type */

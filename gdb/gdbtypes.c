@@ -910,28 +910,24 @@ init_type (code, length, flags, name, objfile)
    define fundamental types.
 
    For the formats which don't provide fundamental types, gdb can create
-   such types, using defaults reasonable for the current target machine.
+   such types, using defaults reasonable for the current language and
+   the current target machine.
 
-   FIXME:  Some compilers distinguish explicitly signed integral types
-   (signed short, signed int, signed long) from "regular" integral types
-   (short, int, long) in the debugging information.  There is some dis-
-   agreement as to how useful this feature is.  In particular, gcc does
-   not support this.  Also, only some debugging formats allow the
-   distinction to be passed on to a debugger.  For now, we always just
-   use "short", "int", or "long" as the type name, for both the implicit
-   and explicitly signed types.  This also makes life easier for the
-   gdb test suite since we don't have to account for the differences
-   in output depending upon what the compiler and debugging format
-   support.  We will probably have to re-examine the issue when gdb
-   starts taking it's fundamental type information directly from the
-   debugging information supplied by the compiler.  fnf@cygnus.com */
+   NOTE:  This routine is obsolescent.  Each debugging format reader
+   should manage it's own fundamental types, either creating them from
+   suitable defaults or reading them from the debugging information,
+   whichever is appropriate.  The DWARF reader has already been
+   fixed to do this.  Once the other readers are fixed, this routine
+   will go away.  Also note that fundamental types should be managed
+   on a compilation unit basis in a multi-language environment, not
+   on a linkage unit basis as is done here. */
+
 
 struct type *
 lookup_fundamental_type (objfile, typeid)
      struct objfile *objfile;
      int typeid;
 {
-  register struct type *type = NULL;
   register struct type **typep;
   register int nbytes;
 
@@ -939,187 +935,28 @@ lookup_fundamental_type (objfile, typeid)
     {
       error ("internal error - invalid fundamental type id %d", typeid);
     }
-  else
+
+  /* If this is the first time we need a fundamental type for this objfile
+     then we need to initialize the vector of type pointers. */
+  
+  if (objfile -> fundamental_types == NULL)
     {
-      /* If this is the first time we */
-      if (objfile -> fundamental_types == NULL)
-	{
-	  nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
-	  objfile -> fundamental_types = (struct type **)
-	    obstack_alloc (&objfile -> type_obstack, nbytes);
-	  memset ((char *) objfile -> fundamental_types, 0, nbytes);
-	}
-      typep = objfile -> fundamental_types + typeid;
-      if ((type = *typep) == NULL)
-	{
-	  switch (typeid)
-	    {
-	      default:
-	        error ("internal error: unhandled type id %d", typeid);
-		break;
-	      case FT_VOID:
-	        type = init_type (TYPE_CODE_VOID,
-				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "void", objfile);
-		break;
-	      case FT_BOOLEAN:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "boolean", objfile);
-		break;
-	      case FT_STRING:
-		type = init_type (TYPE_CODE_PASCAL_ARRAY,
-				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "string", objfile);
-		break;
-	      case FT_CHAR:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "char", objfile);
-		break;
-	      case FT_SIGNED_CHAR:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
-				  "signed char", objfile);
-		break;
-	      case FT_UNSIGNED_CHAR:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned char", objfile);
-		break;
-	      case FT_SHORT:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "short", objfile);
-		break;
-	      case FT_SIGNED_SHORT:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
-				  "short", objfile);	/* FIXME -fnf */
-		break;
-	      case FT_UNSIGNED_SHORT:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned short", objfile);
-		break;
-	      case FT_INTEGER:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "int", objfile);
-		break;
-	      case FT_SIGNED_INTEGER:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
-				  "int", objfile);	/* FIXME -fnf */
-		break;
-	      case FT_UNSIGNED_INTEGER:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned int", objfile);
-		break;
-	      case FT_FIXED_DECIMAL:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "fixed decimal", objfile);
-		break;
-	      case FT_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "long", objfile);
-		break;
-	      case FT_SIGNED_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
-				  "long", objfile);	/* FIXME -fnf */
-		break;
-	      case FT_UNSIGNED_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned long", objfile);
-		break;
-	      case FT_LONG_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "long long", objfile);
-		break;
-	      case FT_SIGNED_LONG_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
-				  "signed long long", objfile);
-		break;
-	      case FT_UNSIGNED_LONG_LONG:
-		type = init_type (TYPE_CODE_INT,
-				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned long long", objfile);
-		break;
-	      case FT_FLOAT:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "float", objfile);
-		break;
-	      case FT_DBL_PREC_FLOAT:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "double", objfile);
-		break;
-	      case FT_FLOAT_DECIMAL:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "floating decimal", objfile);
-		break;
-	      case FT_EXT_PREC_FLOAT:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "long double", objfile);
-		break;
-	      case FT_COMPLEX:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "complex", objfile);
-		break;
-	      case FT_DBL_PREC_COMPLEX:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "double complex", objfile);
-		break;
-	      case FT_EXT_PREC_COMPLEX:
-		type = init_type (TYPE_CODE_FLT,
-				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "long double complex", objfile);
-		break;
-	    }
-	  /* Install the newly created type in the objfile's fundamental_types
-	     vector. */
-	  *typep = type;
-	}
+      nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
+      objfile -> fundamental_types = (struct type **)
+	obstack_alloc (&objfile -> type_obstack, nbytes);
+      memset ((char *) objfile -> fundamental_types, 0, nbytes);
     }
-  return (type);
+
+  /* Look for this particular type in the fundamental type vector.  If one is
+     not found, create and install one appropriate for the current language. */
+
+  typep = objfile -> fundamental_types + typeid;
+  if (*typep == NULL)
+    {
+      *typep = create_fundamental_type (objfile, typeid);
+    }
+
+  return (*typep);
 }
 
 #if MAINTENANCE_CMDS

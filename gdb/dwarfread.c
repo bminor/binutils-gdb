@@ -50,6 +50,8 @@ other things to work on, if you get bored. :-)
 #include "elf/dwarf.h"
 #include "buildsym.h"
 #include "demangle.h"
+#include "expression.h"	/* Needed for enum exp_opcode in language.h, sigh... */
+#include "language.h"
 
 #include <varargs.h>
 #include <fcntl.h>
@@ -311,19 +313,38 @@ struct pending **list_in_scope = &file_symbols;
    we can divide any DIE offset by 4 to obtain a unique index into this fixed
    size array.  Since each element is a 4 byte pointer, it takes exactly as
    much memory to hold this array as to hold the DWARF info for a given
-   compilation unit.  But it gets freed as soon as we are done with it. */
+   compilation unit.  But it gets freed as soon as we are done with it.
+   This has worked well in practice, as a reasonable tradeoff between memory
+   consumption and speed, without having to resort to much more complicated
+   algorithms. */
 
 static struct type **utypes;	/* Pointer to array of user type pointers */
 static int numutypes;		/* Max number of user type pointers */
+
+/* Maintain an array of referenced fundamental types for the current
+   compilation unit being read.  For DWARF version 1, we have to construct
+   the fundamental types on the fly, since no information about the
+   fundamental types is supplied.  Each such fundamental type is created by
+   calling a language dependent routine to create the type, and then a
+   pointer to that type is then placed in the array at the index specified
+   by it's FT_<TYPENAME> value.  The array has a fixed size set by the
+   FT_NUM_MEMBERS compile time constant, which is the number of predefined
+   fundamental types gdb knows how to construct. */
+
+static struct type *ftypes[FT_NUM_MEMBERS];  /* Fundamental types */
 
 /* Record the language for the compilation unit which is currently being
    processed.  We know it once we have seen the TAG_compile_unit DIE,
    and we need it while processing the DIE's for that compilation unit.
    It is eventually saved in the symtab structure, but we don't finalize
    the symtab struct until we have processed all the DIE's for the
-   compilation unit. */
+   compilation unit.  We also need to get and save a pointer to the 
+   language struct for this language, so we can call the language
+   dependent routines for doing things such as creating fundamental
+   types. */
 
 static enum language cu_language;
+static const struct language_defn *cu_language_defn;
 
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
@@ -456,6 +477,66 @@ record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
 static void
 set_cu_language PARAMS ((struct dieinfo *));
 
+static struct type *
+dwarf_fundamental_type PARAMS ((struct objfile *, int));
+
+
+/*
+
+LOCAL FUNCTION
+
+	dwarf_fundamental_type -- lookup or create a fundamental type
+
+SYNOPSIS
+
+	struct type *
+	dwarf_fundamental_type (struct objfile *objfile, int typeid)
+
+DESCRIPTION
+
+	DWARF version 1 doesn't supply any fundamental type information,
+	so gdb has to construct such types.  It has a fixed number of
+	fundamental types that it knows how to construct, which is the
+	union of all types that it knows how to construct for all languages
+	that it knows about.  These are enumerated in gdbtypes.h.
+
+	As an example, assume we find a DIE that references a DWARF
+	fundamental type of FT_integer.  We first look in the ftypes
+	array to see if we already have such a type, indexed by the
+	gdb internal value of FT_INTEGER.  If so, we simply return a
+	pointer to that type.  If not, then we ask an appropriate
+	language dependent routine to create a type FT_INTEGER, using
+	defaults reasonable for the current target machine, and install
+	that type in ftypes for future reference.
+
+RETURNS
+
+	Pointer to a fundamental type.
+
+*/
+
+static struct type *
+dwarf_fundamental_type (objfile, typeid)
+     struct objfile *objfile;
+     int typeid;
+{
+  if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
+    {
+      error ("internal error - invalid fundamental type id %d", typeid);
+    }
+
+  /* Look for this particular type in the fundamental type vector.  If one is
+     not found, create and install one appropriate for the current language
+     and the current target machine. */
+
+  if (ftypes[typeid] == NULL)
+    {
+      ftypes[typeid] = cu_language_defn -> la_fund_type(objfile, typeid);
+    }
+
+  return (ftypes[typeid]);
+}
+
 /*
 
 LOCAL FUNCTION
@@ -510,6 +591,7 @@ set_cu_language (dip)
 	cu_language = language_unknown;
 	break;
     }
+  cu_language_defn = language_def (cu_language);
 }
 
 /*
@@ -787,7 +869,7 @@ alloc_utype (die_ref, utypep)
   typep = utypes + utypeidx;
   if ((utypeidx < 0) || (utypeidx >= numutypes))
     {
-      utypep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+      utypep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       dwarfwarn ("reference to DIE (0x%x) outside compilation unit", die_ref);
     }
   else if (*typep != NULL)
@@ -850,7 +932,7 @@ decode_die_type (dip)
     }
   else
     {
-      type = lookup_fundamental_type (current_objfile, FT_INTEGER);
+      type = dwarf_fundamental_type (current_objfile, FT_INTEGER);
     }
   return (type);
 }
@@ -1129,7 +1211,7 @@ decode_array_element_type (scan)
   if ((nbytes = attribute_size (attribute)) == -1)
     {
       SQUAWK (("bad array element type attribute 0x%x", attribute));
-      typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
     }
   else
     {
@@ -1156,7 +1238,7 @@ decode_array_element_type (scan)
 	    break;
 	  default:
 	    SQUAWK (("bad array element type attribute 0x%x", attribute));
-	    typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+	    typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	    break;
 	  }
     }
@@ -1309,7 +1391,7 @@ dwarf_read_array_type (dip)
 	    }
 	  TYPE_CODE (utype) = TYPE_CODE_ARRAY;
 	  TYPE_TARGET_TYPE (utype) = 
-      	    lookup_fundamental_type (current_objfile, FT_INTEGER);
+      	    dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	  TYPE_LENGTH (utype) = 1 * TYPE_LENGTH (TYPE_TARGET_TYPE (utype));
 	}
       else
@@ -1761,6 +1843,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));
   back_to = make_cleanup (free, utypes);
   memset (utypes, 0, numutypes * sizeof (struct type *));
+  memset (ftypes, 0, FT_NUM_MEMBERS * sizeof (struct type *));
   start_symtab (dip -> at_name, dip -> at_comp_dir, dip -> at_low_pc);
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
@@ -3073,7 +3156,7 @@ decode_modified_type (modifiers, modcount, mtype)
 	  break;
 	default:
 	  SQUAWK (("botched modified type decoding (mtype 0x%x)", mtype));
-	  typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+	  typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	  break;
 	}
     }
@@ -3138,100 +3221,100 @@ decode_fund_type (fundtype)
     {
 
     case FT_void:
-      typep = lookup_fundamental_type (current_objfile, FT_VOID);
+      typep = dwarf_fundamental_type (current_objfile, FT_VOID);
       break;
     
     case FT_boolean:		/* Was FT_set in AT&T version */
-      typep = lookup_fundamental_type (current_objfile, FT_BOOLEAN);
+      typep = dwarf_fundamental_type (current_objfile, FT_BOOLEAN);
       break;
 
     case FT_pointer:		/* (void *) */
-      typep = lookup_fundamental_type (current_objfile, FT_VOID);
+      typep = dwarf_fundamental_type (current_objfile, FT_VOID);
       typep = lookup_pointer_type (typep);
       break;
     
     case FT_char:
-      typep = lookup_fundamental_type (current_objfile, FT_CHAR);
+      typep = dwarf_fundamental_type (current_objfile, FT_CHAR);
       break;
     
     case FT_signed_char:
-      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_CHAR);
+      typep = dwarf_fundamental_type (current_objfile, FT_SIGNED_CHAR);
       break;
 
     case FT_unsigned_char:
-      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_CHAR);
+      typep = dwarf_fundamental_type (current_objfile, FT_UNSIGNED_CHAR);
       break;
     
     case FT_short:
-      typep = lookup_fundamental_type (current_objfile, FT_SHORT);
+      typep = dwarf_fundamental_type (current_objfile, FT_SHORT);
       break;
 
     case FT_signed_short:
-      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_SHORT);
+      typep = dwarf_fundamental_type (current_objfile, FT_SIGNED_SHORT);
       break;
     
     case FT_unsigned_short:
-      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_SHORT);
+      typep = dwarf_fundamental_type (current_objfile, FT_UNSIGNED_SHORT);
       break;
     
     case FT_integer:
-      typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       break;
 
     case FT_signed_integer:
-      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_INTEGER);
+      typep = dwarf_fundamental_type (current_objfile, FT_SIGNED_INTEGER);
       break;
     
     case FT_unsigned_integer:
-      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
+      typep = dwarf_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
       break;
     
     case FT_long:
-      typep = lookup_fundamental_type (current_objfile, FT_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_LONG);
       break;
 
     case FT_signed_long:
-      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_SIGNED_LONG);
       break;
     
     case FT_unsigned_long:
-      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
       break;
     
     case FT_long_long:
-      typep = lookup_fundamental_type (current_objfile, FT_LONG_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_LONG_LONG);
       break;
 
     case FT_signed_long_long:
-      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_LONG_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_SIGNED_LONG_LONG);
       break;
 
     case FT_unsigned_long_long:
-      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG_LONG);
+      typep = dwarf_fundamental_type (current_objfile, FT_UNSIGNED_LONG_LONG);
       break;
 
     case FT_float:
-      typep = lookup_fundamental_type (current_objfile, FT_FLOAT);
+      typep = dwarf_fundamental_type (current_objfile, FT_FLOAT);
       break;
     
     case FT_dbl_prec_float:
-      typep = lookup_fundamental_type (current_objfile, FT_DBL_PREC_FLOAT);
+      typep = dwarf_fundamental_type (current_objfile, FT_DBL_PREC_FLOAT);
       break;
     
     case FT_ext_prec_float:
-      typep = lookup_fundamental_type (current_objfile, FT_EXT_PREC_FLOAT);
+      typep = dwarf_fundamental_type (current_objfile, FT_EXT_PREC_FLOAT);
       break;
     
     case FT_complex:
-      typep = lookup_fundamental_type (current_objfile, FT_COMPLEX);
+      typep = dwarf_fundamental_type (current_objfile, FT_COMPLEX);
       break;
     
     case FT_dbl_prec_complex:
-      typep = lookup_fundamental_type (current_objfile, FT_DBL_PREC_COMPLEX);
+      typep = dwarf_fundamental_type (current_objfile, FT_DBL_PREC_COMPLEX);
       break;
     
     case FT_ext_prec_complex:
-      typep = lookup_fundamental_type (current_objfile, FT_EXT_PREC_COMPLEX);
+      typep = dwarf_fundamental_type (current_objfile, FT_EXT_PREC_COMPLEX);
       break;
     
     }
@@ -3239,7 +3322,7 @@ decode_fund_type (fundtype)
   if ((typep == NULL) && !(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
     {
       SQUAWK (("unexpected fundamental type 0x%x", fundtype));
-      typep = lookup_fundamental_type (current_objfile, FT_VOID);
+      typep = dwarf_fundamental_type (current_objfile, FT_VOID);
     }
     
   return (typep);

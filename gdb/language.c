@@ -1022,6 +1022,22 @@ range_error (va_alist)
 
 /* This page contains miscellaneous functions */
 
+/* Return the language struct for a given language enum. */
+
+const struct language_defn *
+language_def(lang)
+   enum language lang;
+{
+  int i;
+
+  for (i = 0; i < languages_size; i++) {
+    if (languages[i]->la_language == lang) {
+      return languages[i];
+    }
+  }
+  return NULL;
+}
+
 /* Return the language as a string */
 char *
 language_str(lang)
@@ -1116,6 +1132,14 @@ unk_lang_printstr (stream, string, length, force_ellipses)
   error ("internal error - unimplemented function unk_lang_printstr called.");
 }
 
+static struct type *
+unk_lang_create_fundamental_type (objfile, typeid)
+     struct objfile *objfile;
+     int typeid;
+{
+  error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
+}
+
 static struct type ** const (unknown_builtin_types[]) = { 0 };
 static const struct op_print unk_op_print_tab[] = { 0 };
 
@@ -1129,6 +1153,7 @@ const struct language_defn unknown_language_defn = {
   unk_lang_error,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_create_fundamental_type,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1151,6 +1176,7 @@ const struct language_defn auto_language_defn = {
   unk_lang_error,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_create_fundamental_type,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1172,6 +1198,7 @@ const struct language_defn local_language_defn = {
   unk_lang_error,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
+  unk_lang_create_fundamental_type,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */

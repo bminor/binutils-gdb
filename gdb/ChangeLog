@@ -1,3 +1,49 @@
+Thu Dec  3 12:00:06 1992  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y (c_create_fundamental_type):  New function to create
+	language specific fundamental types for C.
+	* m2-exp.y (m2_create_fundamental_type):  New function to create
+	language specific fundamental types for Modula 2.
+	* c-exp.y (c_language_defn, cplus_language_defn):  Add
+	c_create_fundamental_type to language struct initializers.
+	* m2-exp.y (m2_language_defn):  Add m2_create_fundamental_type
+	to language struct initializers.
+	* dwarfread.c (expression.h, language.h):  Include.
+	* dwarfread.c (ftypes):  New array to hold fundamental types
+	for current compilation unit.
+	* dwarfread.c (cu_language_defn):  New pointer to language
+	struct for language of current compilation unit.
+	* dwarfread.c (dwarf_fundamental_type):  New function to
+	create/lookup fundamental types.
+	* dwarfread.c (set_cu_language):  Initialize cu_language_defn.
+	* dwarfread.c (throughout):  Replace lookup_fundamental_type
+	with dwarf_fundamental_type.
+	* dwarfread.c (read_file_scope):  Zero out ftypes for each new
+	compilation unit (may be different language or different objfile).
+	* gdbtypes.c (lookup_fundamental_type):  Move actual type
+	creations into language specific fundamental type creation
+	functions and call via create_fundamental_type.  Add comment
+	about this function being obsolescent.
+	* gdbtypes.h (FT_BYTE, FT_UNSIGNED_BYTE):  New types, true byte
+	sized signed and unsigned integers.
+	* gdbtypes.h (FT_NUM_MEMBERS):  Increment, new types added.
+	* language.c (language_def):  New function to lookup a language
+	struct given it's enumeration.
+	* language.h (struct language_defn):  Add la_fund_type, a pointer
+	to a function that creates fundamental types for this language.
+	* language.h (create_fundamental_type):  New macro to create
+	fundamental types based on the current language.
+	* language.h (language_def):  Add prototype.
+	* language.c (unk_lang_create_fundamental_type):  New function
+	for initializing language structs, calls error if called.
+	* language.c (unk_language_defn, auto_language_defn, 
+	local_language_defn):  Use unk_lang_create_fundamental_type.	
+	**** start-sanitize-chill ****
+	ch-exp.y (chill_create_fundamental_type):  New function.
+	ch-exp.y (chill_language_defn):  Add chill_create_fundamental_type.
+	ch-exp.y (_initialize_chill_exp):  BOOL types are only one byte.
+	**** end-sanitize-chill ****
+
 	**** start-sanitize-chill ****
 Tue Dec  1 17:07:31 1992  Fred Fish  (fnf@cygnus.com)
 

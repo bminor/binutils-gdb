@@ -1431,6 +1431,70 @@ chill_printstr (stream, string, length, force_ellipses)
     }
 }
 
+static struct type *
+chill_create_fundamental_type (objfile, typeid)
+     struct objfile *objfile;
+     int typeid;
+{
+  register struct type *type = NULL;
+  register int nbytes;
+
+  switch (typeid)
+    {
+      default:
+	/* FIXME:  For now, if we are asked to produce a type not in this
+	   language, create the equivalent of a C integer type with the
+	   name "<?type?>".  When all the dust settles from the type
+	   reconstruction work, this should probably become an error. */
+	type = init_type (TYPE_CODE_INT,
+			  TARGET_INT_BIT / TARGET_CHAR_BIT,
+			  0, "<?type?>", objfile);
+        warning ("internal error: no chill fundamental type %d", typeid);
+	break;
+      case FT_BOOLEAN:
+	type = init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "BOOL", objfile);
+	break;
+      case FT_CHAR:
+	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "CHAR", objfile);
+	break;
+      case FT_BYTE:
+	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "BYTE", objfile);
+	break;
+      case FT_UNSIGNED_BYTE:
+	type = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "UBYTE", objfile);
+	break;
+      case FT_INTEGER:
+	type = init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "INT", objfile);
+	break;
+      case FT_UNSIGNED_INTEGER:
+	type = init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "UINT", objfile);
+	break;
+      case FT_LONG:
+	type = init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_SIGNED, "LONG", objfile);
+	break;
+      case FT_UNSIGNED_LONG:
+	type = init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			  TYPE_FLAG_UNSIGNED, "ULONG", objfile);
+	break;
+      case FT_FLOAT:
+	type = init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			  0, "REAL", objfile);
+	break;
+      case FT_DBL_PREC_FLOAT:
+	type = init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			  0, "LONG REAL", objfile);
+	break;
+      }
+  return (type);
+}
+
 
 /* Table of operators and their precedences for printing expressions.  */
 
@@ -1483,6 +1547,7 @@ const struct language_defn chill_language_defn = {
   chill_error,			/* parser error function */
   chill_printchar,		/* print a character constant */
   chill_printstr,		/* function to print a string constant */
+  chill_create_fundamental_type,/* Create fundamental type in this language */
   &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */
@@ -1500,7 +1565,7 @@ void
 _initialize_chill_exp ()
 {
   builtin_type_chill_bool =
-    init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOL", (struct objfile *) NULL);
   builtin_type_chill_char =

@@ -108,6 +108,7 @@ struct language_defn {
   void           (*la_error) PARAMS ((char *)); /* Parser error function */
   void		 (*la_printchar) PARAMS ((int, FILE *));
   void		 (*la_printstr) PARAMS ((FILE *, char *, unsigned int, int));
+  struct type   *(*la_fund_type) PARAMS ((struct objfile *, int));
   struct type	 **la_longest_int;	/* Longest signed integral type */
   struct type	 **la_longest_unsigned_int; /* Longest uns integral type */
   struct type	 **la_longest_float;	/* Longest floating point type */
@@ -175,6 +176,9 @@ set_language PARAMS ((enum language));
 #define	longest_int()		(*current_language->la_longest_int)
 #define	longest_unsigned_int()	(*current_language->la_longest_unsigned_int)
 #define	longest_float()		(*current_language->la_longest_float)
+
+#define create_fundamental_type(objfile,typeid) \
+  (current_language->la_fund_type(objfile, typeid))
 
 /* Return a format string for printf that will print a number in one of
    the local (language-specific) formats.  Result is static and is
@@ -319,6 +323,9 @@ extern int
 value_true PARAMS ((struct value *));
 
 /* Misc:  The string representing a particular enum language.  */
+
+extern const struct language_defn *
+language_def PARAMS ((enum language));
 
 extern char *
 language_str PARAMS ((enum language));
