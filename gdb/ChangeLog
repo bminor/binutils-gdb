@@ -1,3 +1,9 @@
+Sat Sep 19 04:23:54 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Fix bug I introduced in merging Rich's change.
+	* infrun.c (child_create_inferior):  Use proceed() rather than
+	doing all the same stuff by hand.
+
 Thu Sep 17 17:35:37 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in, configure.in: add support for files used only when
