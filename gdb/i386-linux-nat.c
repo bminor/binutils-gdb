@@ -146,7 +146,7 @@ fill_gregset (gregset_t *gregsetp,
       signed char valid[NUM_GREGS];
       memset (valid, 0, sizeof (valid));
       valid[regno] = 1;
-      convert_to_gregset (gregsetp, valid, valid);
+      convert_to_gregset (gregsetp, registers, valid);
     }
 }
 

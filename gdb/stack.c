@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 98, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -91,6 +91,12 @@ static int print_block_frame_locals PARAMS ((struct block *,
 					     struct frame_info *,
 					     int,
 					     GDB_FILE *));
+
+static void print_frame (struct frame_info *fi, 
+			 int level, 
+			 int source, 
+			 int args, 
+			 struct symtab_and_line sal);
 
 static void print_frame_info_base PARAMS ((struct frame_info *, int, int, int));
 
@@ -328,14 +334,14 @@ print_args_stub (args)
 }
 
 /* Print information about a frame for frame "fi" at level "level".
- * Used in "where" output, also used to emit breakpoint or step messages.
- * LEVEL is the level of the frame, or -1 if it is the innermost frame
- * but we don't want to print the level.
- * The meaning of the SOURCE argument is:
- * -1: Print only source line
- *  0: Print only location
- *  1: Print location and source line
- */
+   Used in "where" output, also used to emit breakpoint or step
+   messages.  
+   LEVEL is the level of the frame, or -1 if it is the
+   innermost frame but we don't want to print the level.  
+   The meaning of the SOURCE argument is: 
+   SRC_LINE: Print only source line
+   LOCATION: Print only location 
+   LOC_AND_SRC: Print location and source line.  */
 
 static void
 print_frame_info_base (fi, level, source, args)
@@ -345,9 +351,8 @@ print_frame_info_base (fi, level, source, args)
      int args;
 {
   struct symtab_and_line sal;
-  struct symbol *func;
-  register char *funname = 0;
-  enum language funlang = language_unknown;
+  int source_print;
+  int location_print;
 
 #if 0
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -406,6 +411,57 @@ print_frame_info_base (fi, level, source, args)
 		  && !fi->next->signal_handler_caller
 		  && !frame_in_dummy (fi->next));
 
+  location_print = (source == LOCATION 
+		    || source == LOC_AND_ADDRESS
+		    || source == SRC_AND_LOC);
+
+  if (location_print || !sal.symtab)
+    print_frame (fi, level, source, args, sal);
+
+  source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+
+  if (source_print && sal.symtab)
+    {
+      int done = 0;
+      int mid_statement = (source == SRC_LINE) && (fi->pc != sal.pc);
+
+      if (annotation_level)
+	done = identify_source_line (sal.symtab, sal.line, mid_statement,
+				     fi->pc);
+      if (!done)
+	{
+	  if (addressprint && mid_statement && !tui_version)
+	    {
+	      print_address_numeric (fi->pc, 1, gdb_stdout);
+	      printf_filtered ("\t");
+	    }
+	  if (print_frame_info_listing_hook)
+	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
+	  else if (!tui_version)
+	    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+	}
+      current_source_line = max (sal.line - lines_to_list / 2, 1);
+    }
+
+  if (source != 0)
+    set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
+
+  annotate_frame_end ();
+
+  gdb_flush (gdb_stdout);
+}
+
+static void
+print_frame (struct frame_info *fi, 
+	     int level, 
+	     int source, 
+	     int args, 
+	     struct symtab_and_line sal)
+{
+  struct symbol *func;
+  register char *funname = 0;
+  enum language funlang = language_unknown;
+
   func = find_pc_function (fi->pc);
   if (func)
     {
@@ -446,19 +502,17 @@ print_frame_info_base (fi, level, source, args)
 	}
       else
 	{
-	  /* I'd like to use SYMBOL_SOURCE_NAME() here, to display
-	   * the demangled name that we already have stored in
-	   * the symbol table, but we stored a version with
-	   * DMGL_PARAMS turned on, and here we don't want
-	   * to display parameters. So call the demangler again,
-	   * with DMGL_ANSI only. RT
-	   * (Yes, I know that printf_symbol_filtered() will
-	   * again try to demangle the name on the fly, but
-	   * the issue is that if cplus_demangle() fails here,
-	   * it'll fail there too. So we want to catch the failure
-	   * ("demangled==NULL" case below) here, while we still
-	   * have our hands on the function symbol.)
-	   */
+	  /* I'd like to use SYMBOL_SOURCE_NAME() here, to display the
+	     demangled name that we already have stored in the symbol
+	     table, but we stored a version with DMGL_PARAMS turned
+	     on, and here we don't want to display parameters. So call
+	     the demangler again, with DMGL_ANSI only. (Yes, I know
+	     that printf_symbol_filtered() will again try to demangle
+	     the name on the fly, but the issue is that if
+	     cplus_demangle() fails here, it'll fail there too. So we
+	     want to catch the failure ("demangled==NULL" case below)
+	     here, while we still have our hands on the function
+	     symbol.) */
 	  char *demangled;
 	  funname = SYMBOL_NAME (func);
 	  funlang = SYMBOL_LANGUAGE (func);
@@ -466,10 +520,9 @@ print_frame_info_base (fi, level, source, args)
 	    {
 	      demangled = cplus_demangle (funname, DMGL_ANSI);
 	      if (demangled == NULL)
-		/* If the demangler fails, try the demangled name
-		 * from the symbol table. This'll have parameters,
-		 * but that's preferable to diplaying a mangled name.
-		 */
+		/* If the demangler fails, try the demangled name from
+		   the symbol table. This'll have parameters, but
+		   that's preferable to diplaying a mangled name. */
 		funname = SYMBOL_SOURCE_NAME (func);
 	    }
 	}
@@ -484,104 +537,76 @@ print_frame_info_base (fi, level, source, args)
 	}
     }
 
-  if (source >= 0 || !sal.symtab)
-    {
-      annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+  annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
-      if (level >= 0)
-	printf_filtered ("#%-2d ", level);
-      if (addressprint)
-	if (fi->pc != sal.pc || !sal.symtab)
-	  {
-	    annotate_frame_address ();
-	    print_address_numeric (fi->pc, 1, gdb_stdout);
-	    annotate_frame_address_end ();
-	    printf_filtered (" in ");
-	  }
-      annotate_frame_function_name ();
-      fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
-			       DMGL_ANSI);
+
+  if (level >= 0)
+  printf_filtered ("#%-2d ", level);
+  if (addressprint)
+    if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
+      {
+	annotate_frame_address ();
+	print_address_numeric (fi->pc, 1, gdb_stdout);
+	annotate_frame_address_end ();
+	printf_filtered (" in ");
+      }
+  annotate_frame_function_name ();
+  fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
+			   DMGL_ANSI);
+  wrap_here ("   ");
+  annotate_frame_args ();
+      
+  fputs_filtered (" (", gdb_stdout);
+  if (args)
+    {
+      struct print_args_args args;
+      args.fi = fi;
+      args.func = func;
+      args.stream = gdb_stdout;
+      catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
+      QUIT;
+    }
+  printf_filtered (")");
+  if (sal.symtab && sal.symtab->filename)
+    {
+      annotate_frame_source_begin ();
       wrap_here ("   ");
-      annotate_frame_args ();
-      fputs_filtered (" (", gdb_stdout);
-      if (args)
-	{
-	  struct print_args_args args;
-	  args.fi = fi;
-	  args.func = func;
-	  args.stream = gdb_stdout;
-	  catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
-	  QUIT;
-	}
-      printf_filtered (")");
-      if (sal.symtab && sal.symtab->filename)
-	{
-	  annotate_frame_source_begin ();
-	  wrap_here ("   ");
-	  printf_filtered (" at ");
-	  annotate_frame_source_file ();
-	  printf_filtered ("%s", sal.symtab->filename);
-	  annotate_frame_source_file_end ();
-	  printf_filtered (":");
-	  annotate_frame_source_line ();
-	  printf_filtered ("%d", sal.line);
-	  annotate_frame_source_end ();
-	}
+      printf_filtered (" at ");
+      annotate_frame_source_file ();
+      printf_filtered ("%s", sal.symtab->filename);
+      annotate_frame_source_file_end ();
+      printf_filtered (":");
+      annotate_frame_source_line ();
+      printf_filtered ("%d", sal.line);
+      annotate_frame_source_end ();
+    }
 
 #ifdef PC_LOAD_SEGMENT
-      /* If we couldn't print out function name but if can figure out what
+  /* If we couldn't print out function name but if can figure out what
          load segment this pc value is from, at least print out some info
          about its load segment. */
-      if (!funname)
+  if (!funname)
+    {
+      annotate_frame_where ();
+      wrap_here ("  ");
+      printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
+    }
+#endif /* PC_LOAD_SEGMENT */
+
+#ifdef PC_SOLIB
+  if (!funname || (!sal.symtab || !sal.symtab->filename))
+    {
+      char *lib = PC_SOLIB (fi->pc);
+      if (lib)
 	{
 	  annotate_frame_where ();
 	  wrap_here ("  ");
-	  printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
+	  printf_filtered (" from %s", lib);
 	}
-#endif
-#ifdef PC_SOLIB
-      if (!funname || (!sal.symtab || !sal.symtab->filename))
-	{
-	  char *lib = PC_SOLIB (fi->pc);
-	  if (lib)
-	    {
-	      annotate_frame_where ();
-	      wrap_here ("  ");
-	      printf_filtered (" from %s", lib);
-	    }
-	}
-#endif
-      printf_filtered ("\n");
     }
+#endif /* PC_SOLIB */
 
-  if ((source != 0) && sal.symtab)
-    {
-      int done = 0;
-      int mid_statement = source < 0 && fi->pc != sal.pc;
-      if (annotation_level)
-	done = identify_source_line (sal.symtab, sal.line, mid_statement,
-				     fi->pc);
-      if (!done)
-	{
-	  if (addressprint && mid_statement && !tui_version)
-	    {
-	      print_address_numeric (fi->pc, 1, gdb_stdout);
-	      printf_filtered ("\t");
-	    }
-	  if (print_frame_info_listing_hook)
-	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
-	  else if (!tui_version)
-	    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
-	}
-      current_source_line = max (sal.line - lines_to_list / 2, 1);
-    }
-
-  if (source != 0)
-    set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
-
-  annotate_frame_end ();
-
-  gdb_flush (gdb_stdout);
+  printf_filtered ("\n");
 }
 
 

@@ -152,7 +152,7 @@ if test "${target}" = "${host}"; then
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
-  *-*-unixware* | *-*-sysv4.2uw2.* | *-*-sysv4.2uw7.*)
+  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
       AC_DEFINE(NEW_PROC_API)
       ;;
   # FIXME: we would like to define NEW_PROC_API for all versions of
@@ -488,7 +488,11 @@ AC_SUBST(TERM_LIB)
 # libreadline needs libuser32.a in a cygwin environment
 WIN32LIBS=
 if test x$gdb_cv_os_cygwin = xyes; then
-    WIN32LIBS="-luser32 -limagehlp"
+    WIN32LIBS="-luser32"
+    case "${target}" in
+	*cygwin*) WIN32LIBS="$WIN32LIBS -limagehlp"
+	;;
+    esac
 fi
 AC_SUBST(WIN32LIBS)
 

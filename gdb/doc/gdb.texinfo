@@ -2100,6 +2100,14 @@ breakpoint you want to change.  Each breakpoint may be @dfn{enabled} or
 @dfn{disabled}; if disabled, it has no effect on your program until you
 enable it again.
 
+@cindex breakpoint ranges
+@cindex ranges of breakpoints
+Some @value{GDBN} commands accept a range of breakpoints on which to
+operate.  A breakpoint range is either a single breakpoint number, like
+@samp{5}, or two such numbers, in increasing order, separated by a
+hyphen, like @samp{5-7}.  When a breakpoint range is given to a command,
+all breakpoint in that range are operated on.
+
 @menu
 * Set Breaks::                  Setting breakpoints
 * Set Watchpoints::             Setting watchpoints
@@ -2633,9 +2641,9 @@ Delete any breakpoints set at or within the code of the specified line.
 @cindex delete breakpoints
 @kindex delete
 @kindex d
-@item delete @r{[}breakpoints@r{]} @r{[}@var{bnums}@dots{}@r{]}
-Delete the breakpoints, watchpoints, or catchpoints of the numbers
-specified as arguments.  If no argument is specified, delete all
+@item delete @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
+Delete the breakpoints, watchpoints, or catchpoints of the breakpoint
+ranges specified as arguments.  If no argument is specified, delete all
 breakpoints (@value{GDBN} asks confirmation, unless you have @code{set
 confirm off}).  You can abbreviate this command as @code{d}.
 @end table
@@ -2681,7 +2689,7 @@ watchpoints, and catchpoints:
 @kindex disable breakpoints
 @kindex disable
 @kindex dis
-@item disable @r{[}breakpoints@r{]} @r{[}@var{bnums}@dots{}@r{]}
+@item disable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
 Disable the specified breakpoints---or all breakpoints, if none are
 listed.  A disabled breakpoint has no effect but is not forgotten.  All
 options such as ignore-counts, conditions and commands are remembered in
@@ -2690,15 +2698,15 @@ case the breakpoint is enabled again later.  You may abbreviate
 
 @kindex enable breakpoints
 @kindex enable
-@item enable @r{[}breakpoints@r{]} @r{[}@var{bnums}@dots{}@r{]}
+@item enable @r{[}breakpoints@r{]} @r{[}@var{range}@dots{}@r{]}
 Enable the specified breakpoints (or all defined breakpoints).  They
 become effective once again in stopping your program.
 
-@item enable @r{[}breakpoints@r{]} once @var{bnums}@dots{}
+@item enable @r{[}breakpoints@r{]} once @var{range}@dots{}
 Enable the specified breakpoints temporarily.  @value{GDBN} disables any
 of these breakpoints immediately after stopping your program.
 
-@item enable @r{[}breakpoints@r{]} delete @var{bnums}@dots{}
+@item enable @r{[}breakpoints@r{]} delete @var{range}@dots{}
 Enable the specified breakpoints to work once, then die.  @value{GDBN}
 deletes any of these breakpoints as soon as your program stops there.
 @end table

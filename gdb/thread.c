@@ -106,6 +106,7 @@ add_thread (pid)
   tp->stepping_through_solib_catchpoints = NULL;
   tp->stepping_through_sigtramp = 0;
   tp->next = thread_list;
+  tp->private = NULL;
   thread_list = tp;
   return tp;
 }
@@ -602,9 +603,6 @@ thread_command (tidstr, from_tty)
      char *tidstr;
      int from_tty;
 {
-  int num;
-  struct thread_info *tp;
-
   if (!tidstr)
     {
       /* Don't generate an error, just say which thread is current. */
@@ -621,7 +619,17 @@ thread_command (tidstr, from_tty)
 	error ("No stack.");
       return;
     }
-  num = atoi (tidstr);
+
+  gdb_thread_select (tidstr);
+}
+
+static int
+do_captured_thread_select (void *tidstr)
+{
+  int num;
+  struct thread_info *tp;
+
+  num = atoi ((char *)tidstr);
 
   tp = find_thread_id (num);
 
@@ -634,9 +642,6 @@ see the IDs of currently known threads.", num);
 
   switch_to_thread (tp->pid);
 
-  if (context_hook)
-    context_hook (num);
-
   printf_filtered ("[Switching to thread %d (%s)]\n",
 		   pid_to_thread_id (inferior_pid),
 #if defined(HPUXHPPA)
@@ -645,7 +650,16 @@ see the IDs of currently known threads.", num);
 		   target_pid_to_str (inferior_pid)
 #endif
     );
+
   print_stack_frame (selected_frame, selected_frame_level, 1);
+  return GDB_RC_OK;
+}
+
+enum gdb_rc
+gdb_thread_select (char *tidstr)
+{
+  return catch_errors (do_captured_thread_select, tidstr,
+		       NULL, RETURN_MASK_ALL);
 }
 
 /* Commands with a prefix of `thread'.  */

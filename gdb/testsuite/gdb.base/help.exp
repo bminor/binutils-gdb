@@ -504,7 +504,7 @@ gdb_test "help target core" ".*Use a core file as a target.*Specify the filename
 # test help target exec
 gdb_test "help target exec" "Use an executable file as a target..*\[\r\n\]+Specify the filename of the executable file." "help target exec"
 # test help target remote
-gdb_test "help target remote" "Use a remote computer via a serial line, using a gdb-specific protocol..*\[\r\n\]+Specify the serial device it is connected to .e.g. .*" "help target remote"
+gdb_test "help target remote" "Use a remote computer via a serial line, using a gdb-specific protocol..*\[\r\n\]+Specify the serial device it is connected to.*\[\r\n\]+.e.g. .*" "help target remote"
 # test help target
 # the child process target may be "target child" or "target procfs"
 gdb_test "help target" "Connect to a target machine or process..*\[\r\n\]+The first argument is the type or protocol of the target machine..*\[\r\n\]+Remaining arguments are interpreted by the target protocol.  For more.*\[\r\n\]+information on the arguments for a particular protocol, type.*\[\r\n\]+`help target ' followed by the protocol name..*\[\r\n\]+List of target subcommands:.*\[\r\n\]+target exec -- Use an executable file as a target.*\[\r\n\]+Type \"help target\" followed by target subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help target"

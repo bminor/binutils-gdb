@@ -1,5 +1,5 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1999 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -97,6 +97,20 @@ struct frame_info
 
     /* Pointers to the next and previous frame_info's in the frame cache.  */
     struct frame_info *next, *prev;
+  };
+
+/* Values for the source flag to be used in print_frame_info_base(). */
+enum print_what
+  { 
+    /* Print only the source line, like in stepi. */
+    SRC_LINE = -1, 
+    /* Print only the location, i.e. level, address (sometimes)
+       function, args, file, line, line num. */
+    LOCATION,
+    /* Print both of the above. */
+    SRC_AND_LOC, 
+    /* Print location only, but always include the address. */
+    LOC_AND_ADDRESS 
   };
 
 /* Allocate additional space for appendices to a struct frame_info. */

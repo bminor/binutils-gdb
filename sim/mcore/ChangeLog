@@ -1,3 +1,8 @@
+2000-01-13  Nick Clifton  <nickc@cygnus.com>
+
+	* interp.c (sim_resume): Do not rely upon host semantics of shift
+	operators to implement M*Core semantics.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

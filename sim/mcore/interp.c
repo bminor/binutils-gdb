@@ -1181,7 +1181,9 @@ sim_resume (sd, step, siggnal)
 	    unsigned long dst, src;
 	    dst = cpu.gr[RD];
 	    src = cpu.gr[RS];
-	    dst = dst >> src;	
+	    /* We must not rely solely upon the native shift operations, since they
+	       may not match the M*Core's behaviour on boundary conditions.  */
+	    dst = src > 31 ? 0 : dst >> src;
 	    cpu.gr[RD] = dst;
 	  }
 	  break;
@@ -1256,11 +1258,18 @@ sim_resume (sd, step, siggnal)
 	  break;
 
 	case 0x1A:					/* asr */
-	  cpu.gr[RD] = (long)cpu.gr[RD] >> cpu.gr[RS];
+	  /* We must not rely solely upon the native shift operations, since they
+	     may not match the M*Core's behaviour on boundary conditions.  */
+	  if (cpu.gr[RS] > 30)
+	    cpu.gr[RD] = ((long) cpu.gr[RD]) < 0 ? -1 : 0;
+	  else
+	    cpu.gr[RD] = (long) cpu.gr[RD] >> cpu.gr[RS];
 	  break;
 
 	case 0x1B:					/* lsl */
-	  cpu.gr[RD] = cpu.gr[RD] << cpu.gr[RS];
+	  /* We must not rely solely upon the native shift operations, since they
+	     may not match the M*Core's behaviour on boundary conditions.  */
+	  cpu.gr[RD] = cpu.gr[RS] > 31 ? 0 : cpu.gr[RD] << cpu.gr[RS];
 	  break;
 
 	case 0x1C:					/* addu */

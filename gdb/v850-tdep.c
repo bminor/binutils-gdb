@@ -869,6 +869,7 @@ v850_target_architecture_hook (ap)
       if (v850_processor_type_table[i].mach == ap->mach)
 	{
 	  v850_register_names = v850_processor_type_table[i].regnames;
+	  tm_print_insn_info.mach = ap->mach;
 	  return 1;
 	}
     }

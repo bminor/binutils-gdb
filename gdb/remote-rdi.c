@@ -251,7 +251,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   /* Make the basic low-level connection.  */
 
-  Adp_CloseDevice ();
+  arm_rdi_close (0);
   rslt = Adp_OpenDevice (devName, openArgs, rdi_heartbeat);
 
   if (rslt != adp_ok)

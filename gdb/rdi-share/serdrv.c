@@ -85,10 +85,10 @@ static struct writestate wstate;
  * The set of parameter options supported by the device
  */
 static unsigned int baud_options[] = {
-#ifdef B115200 || __hpux
+#if defined(B115200) || defined(__hpux)
     115200,
 #endif
-#ifdef B57600 || __hpux
+#if defined(B57600) || defined(__hpux)
     57600, 
 #endif
     38400, 19200, 9600

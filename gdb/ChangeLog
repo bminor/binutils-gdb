@@ -1,3 +1,82 @@
+2000-01-17  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in (NEW_PROC_API): Fix Unixware-matching regexp.
+	Fix from Robert Lipe <robertl@sco.com>.
+	* configure: Regenerated.
+
+2000-01-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* stack.c (print_frame_info_base): Break up into the frame info
+ 	(location) printing part and the rest (source line printing).
+	(print_frame): New function. Take care of printing the location
+ 	information.
+	Update copyright.
+
+	* infrun.c (normal_stop): Use enum values rather than integers for the
+	source_flag to be passed to show_and_print_stack_frame().
+        Update copyright.
+	
+	* frame.h (print_what): New enum for 'source' argument to
+ 	print_frame_info_base(). Use this instead of obscure numbers.
+	Update copyright.
+	
+Sun Jan 16 17:58:00 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* event-top.c (stdin_event_handler): call quit_command rather than
+ 	exit -- run cleanups, give target code a chance to say goodbye to
+ 	the target.  Fixes bug where the inferior processes were left
+ 	around on Solaris (and probably elsewhere) by the testsuite.
+
+2000-01-14  Mark Salter  <msalter@cygnus.com>
+
+	* v850-tdep.c (v850_target_architecture_hook): Setup correct
+ 	machine id for disassembly.
+
+Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
+
+	* uw-thread.c: Document libthread.so debugging interface.  Minor
+	comment and formatting tweaks.
+	(DEBUG): #define as 0 instead of 1.
+	(CALL_BASE): Include function name in error msg.
+	(libthread_stub): Adjust inferior_pid after thread exit.
+	(uw_thread_create_inferior): Deactivate uw_thread_ops before
+	asking procfs_ops to create inferior.
+	(libthread_init): Don't return nonlocally on error.
+
+2000-01-12  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/ardi.c (negotiate_params): Fix initialization of static
+	variable.
+
+2000-01-12  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote-rdi.c (arm_rdi_open): Call arm-rdi-close() to make sure
+	both sides are on the same state.
+
+2000-01-12  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/serdrv.c (find_baud_rate): Fix entries for 57600 and
+	115200 (minor syntax mistake).
+
+2000-01-12  Jim Blandy  <jimb@cygnus.com>
+
+	* config/sparc/tm-sun4sol2.h (MERGEPID): Provide a definition for
+	this here, to go along with the definitions of PIDGET and TIDGET.
+
+2000-01-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* thread.c (do_captured_thread_select): New function. Switch
+ 	current thread, safely from within catch_errors().
+	(gdb_thread_select): New function. Switch threads safely.
+	(thread_command): Use gdb_thread_select().
+
+2000-01-11  Christopher Faylor <cgf@cygnus.com>
+
+	* configure.in: Avoid linking -limagehlp unless it's a native build.
+	* configure: Regenerate.
+	* thread.cc (add_thread): Clear private data pointer here or suffer
+	strange behavior when it is checked for NULL later.
+
 2000-01-09  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32nat.c (handle_exceptions): Handle various arithmetic exceptions.

@@ -410,7 +410,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       delete_file_handler (input_fd);
       discard_all_continuations ();
       /* If stdin died, we may as well kill gdb. */
-      exit (1);
+      quit_command ((char *) 0, stdin == instream);
     }
   else
     (*call_readline) (client_data);

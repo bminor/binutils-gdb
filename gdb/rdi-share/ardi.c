@@ -320,9 +320,12 @@ static AdpErrs negotiate_params( const ParameterOptions *user_options )
 
     time_t t;
 
-    static volatile NegotiateState    n_state = {
-        FALSE, FALSE, FALSE, &accepted_config };
-
+    static volatile NegotiateState    n_state;
+    n_state.negotiate_resp = FALSE;
+    n_state.negotiate_ack = FALSE;
+    n_state.link_check_resp = FALSE;
+    n_state.accepted_config = &accepted_config;
+    
 #ifdef DEBUG
     angel_DebugPrint( "negotiate_params\n" );
 #endif

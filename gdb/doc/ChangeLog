@@ -1,3 +1,9 @@
+2000-01-16  Tom Tromey  <tromey@cygnus.com>
+
+	* gdb.texinfo (Breakpoints): Mention breakpoint ranges.
+	(Delete Breaks): Mention range arguments.
+	(Disabling): Likewise.
+
 2000-01-05  Dmitry Sivachenko <dima@Chg.RU>
 
 	* gdb.texinfo:  Wrap "ASCII" in @sc{}; clarify a few sentences.

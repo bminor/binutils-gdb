@@ -1,5 +1,5 @@
 /* Target-struct-independent code to start (run) and stop an inferior process.
-   Copyright 1986-1989, 1991-1999 Free Software Foundation, Inc.
+   Copyright 1986-1989, 1991-2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -3381,15 +3381,15 @@ The same program may be running in another process.\n");
 	      if (stop_step
 		  && step_frame_address == FRAME_FP (get_current_frame ())
 		  && step_start_function == find_pc_function (stop_pc))
-		source_flag = -1;   /* finished step, just print source line */
+		source_flag = SRC_LINE;   /* finished step, just print source line */
 	      else
-		source_flag = 1;    /* print location and source line */
+		source_flag = SRC_AND_LOC;    /* print location and source line */
 	      break;
 	    case PRINT_SRC_AND_LOC:
-	      source_flag = 1;	    /* print location and source line */
+	      source_flag = SRC_AND_LOC;    /* print location and source line */
 	      break;
 	    case PRINT_SRC_ONLY:
-	      source_flag = -1;
+	      source_flag = SRC_LINE;
 	      break;
 	    case PRINT_NOTHING:
 	      do_frame_printing = 0;
@@ -3400,9 +3400,9 @@ The same program may be running in another process.\n");
 
 	  /* The behavior of this routine with respect to the source
 	     flag is:
-	     -1: Print only source line
-	     0: Print only location
-	     1: Print location and source line */
+	     SRC_LINE: Print only source line
+	     LOCATION: Print only location
+	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
 	    show_and_print_stack_frame (selected_frame, -1, source_flag);
 

@@ -727,7 +727,7 @@ gdb_expect {
 if ![istarget "*-*-udi*"] then {
     send_gdb "target remote\n"
     gdb_expect {
-	-re "To open a remote debug connection, you need to specify what.*serial.*device is attached to the remote system .e.g. .*$gdb_prompt $"\
+	-re "To open a remote debug connection, you need to specify what.*serial.*device is attached to the remote system.*.e.g. .*$gdb_prompt $"\
 			{ pass "target remote" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	    send_gdb "n\n"
