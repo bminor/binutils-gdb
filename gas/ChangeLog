@@ -1,3 +1,8 @@
+Fri Dec  5 11:23:59 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.h (ELF_TC_SPECIAL_SECTIONS): Use
+	SHT_V850_{S|T|Z}COMMON to mark special common sections.
+
 Tue Dec  2 17:05:13 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c: Brought up to date with the branch.
