@@ -1,3 +1,19 @@
+Tue Nov 28 16:59:50 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Add segment_map field.
+	* elf.c (make_mapping): New static function.
+	(map_sections_to_segments): New static function.
+	(elf_sort_sections): New static function.
+	(assign_file_positions_for_segments): New static function.
+	(map_program_segments): Remove.
+	(get_program_header_size): Remove sorted_hdrs, count, and
+	maxpagesize parameters.  Simplify.
+	(assign_file_positions_except_relocs): When generating an
+	executable, use assign_file_positions_for_segments.
+	(elf_sort_hdrs): Remove.
+	(_bfd_elf_sizeof_headers): Remove eliminated parameters from call
+	to get_program_header_size.
+
 Mon Nov 27 12:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* hp300hpux.c (MY(callback)): Set lma as well as vma.
