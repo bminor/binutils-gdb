@@ -190,6 +190,8 @@ struct gdbarch
   int call_dummy_stack_adjust_p;
   int call_dummy_stack_adjust;
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
+  gdbarch_init_frame_pc_first_ftype *init_frame_pc_first;
+  gdbarch_init_frame_pc_ftype *init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
   gdbarch_coerce_float_to_double_ftype *coerce_float_to_double;
@@ -277,6 +279,8 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
+  0,
+  0,
   0,
   0,
   0,
@@ -460,6 +464,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_words = legacy_call_dummy_words;
   gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   gdbarch->call_dummy_stack_adjust_p = -1;
+  gdbarch->init_frame_pc_first = init_frame_pc_noop;
+  gdbarch->init_frame_pc = init_frame_pc_noop;
   gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->register_convertible = generic_register_convertible_not;
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
@@ -646,6 +652,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->fix_call_dummy == 0))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: fix_call_dummy invalid");
+  /* Skip verify of init_frame_pc_first, invalid_p == 0 */
+  /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->get_saved_register == 0))
@@ -1107,6 +1115,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
                       XSTRING (FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
+#endif
+#if defined (INIT_FRAME_PC_FIRST) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_FRAME_PC_FIRST(fromleaf, prev)",
+                      XSTRING (INIT_FRAME_PC_FIRST (fromleaf, prev)));
+#endif
+#if defined (INIT_FRAME_PC) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_FRAME_PC(fromleaf, prev)",
+                      XSTRING (INIT_FRAME_PC (fromleaf, prev)));
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -1813,6 +1835,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FIX_CALL_DUMMY = 0x%08lx\n",
                         (long) current_gdbarch->fix_call_dummy
                         /*FIX_CALL_DUMMY ()*/);
+#endif
+#ifdef INIT_FRAME_PC_FIRST
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INIT_FRAME_PC_FIRST = 0x%08lx\n",
+                        (long) current_gdbarch->init_frame_pc_first
+                        /*INIT_FRAME_PC_FIRST ()*/);
+#endif
+#ifdef INIT_FRAME_PC
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INIT_FRAME_PC = 0x%08lx\n",
+                        (long) current_gdbarch->init_frame_pc
+                        /*INIT_FRAME_PC ()*/);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -3264,6 +3300,42 @@ set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
                             gdbarch_fix_call_dummy_ftype fix_call_dummy)
 {
   gdbarch->fix_call_dummy = fix_call_dummy;
+}
+
+void
+gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
+{
+  if (gdbarch->init_frame_pc_first == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_init_frame_pc_first invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_frame_pc_first called\n");
+  gdbarch->init_frame_pc_first (fromleaf, prev);
+}
+
+void
+set_gdbarch_init_frame_pc_first (struct gdbarch *gdbarch,
+                                 gdbarch_init_frame_pc_first_ftype init_frame_pc_first)
+{
+  gdbarch->init_frame_pc_first = init_frame_pc_first;
+}
+
+void
+gdbarch_init_frame_pc (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
+{
+  if (gdbarch->init_frame_pc == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_init_frame_pc invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_frame_pc called\n");
+  gdbarch->init_frame_pc (fromleaf, prev);
+}
+
+void
+set_gdbarch_init_frame_pc (struct gdbarch *gdbarch,
+                           gdbarch_init_frame_pc_ftype init_frame_pc)
+{
+  gdbarch->init_frame_pc = init_frame_pc;
 }
 
 int

@@ -1,3 +1,17 @@
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh: Clarify pre/post default
+	(INIT_FRAME_PC_FIRST, INIT_FRAME_PC): Multiarch.
+	* blockframe.c (get_prev_frame): Remove #ifdef from around
+	INIT_FRAME_PC_FIRST call.
+	* arch-utils.c (init_frame_pc_noop): Define.
+	* arch-utils.h (init_frame_pc_noop): Declare.
+	* config/mips/tm-mips.h (INIT_FRAME_PC_FIRST): Delete.
+	(INIT_FRAME_PC, mips_init_frame_pc_first): Ditto.
+	* mips-tdep.c (mips_init_frame_pc_first): Make static.
+	(mips_gdbarch_init): Initialize init_frame_pc_first.
+	(mips_dump_tdep): Update.
+
 2001-06-15  Michael Snyder  <msnyder@redhat.com>
 
 	* infrun.c (context_switch): New function.  Abstract the operation

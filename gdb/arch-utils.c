@@ -300,6 +300,12 @@ generic_prepare_to_proceed (int select_it)
   
 }
 
+void
+init_frame_pc_noop (int fromleaf, struct frame_info *prev)
+{
+  return;
+}
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE

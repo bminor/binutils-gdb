@@ -383,15 +383,6 @@ extern void mips_pop_frame (void);
 #define CALL_DUMMY_ADDRESS() (mips_call_dummy_address ())
 extern CORE_ADDR mips_call_dummy_address (void);
 
-/* There's a mess in stack frame creation.  See comments in blockframe.c
-   near reference to INIT_FRAME_PC_FIRST.  */
-
-#define	INIT_FRAME_PC(fromleaf, prev)	/* nada */
-
-#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
-   mips_init_frame_pc_first(fromleaf, prev)
-extern void mips_init_frame_pc_first (int, struct frame_info *);
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 

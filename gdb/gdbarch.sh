@@ -248,17 +248,19 @@ do
 
     predefault ) : ;;
 
-	# A initial value to assign to MEMBER of the freshly
-	# malloc()ed gdbarch object.  After the gdbarch object has
-	# been initialized using PREDEFAULT, it is passed to the
-	# target code for further updates.
+	# An initial value to assign to MEMBER of the freshly
+	# malloc()ed gdbarch object.  After initialization, the
+	# freshly malloc()ed object is passed to the target
+	# architecture code for further updates.
 
 	# If PREDEFAULT is empty, zero is used.
 
-	# When POSTDEFAULT is empty, a non-empty PREDEFAULT and a zero
-	# INVALID_P will be used as default values when when
-	# multi-arch is disabled.  Specify a zero PREDEFAULT function
-	# to make that fallback call internal_error().
+	# A non-empty PREDEFAULT, an empty POSTDEFAULT and a zero
+	# INVALID_P are specified, PREDEFAULT will be used as the
+	# default for the non- multi-arch target.
+
+	# A zero PREDEFAULT function will force the fallback to call
+	# internal_error().
 
 	# Variable declarations can refer to ``gdbarch'' which will
 	# contain the current architecture.  Care should be taken.
@@ -266,15 +268,19 @@ do
     postdefault ) : ;;
 
 	# A value to assign to MEMBER of the new gdbarch object should
-	# the target code fail to change the PREDEFAULT value.  Also
-	# use POSTDEFAULT as the fallback value for the non-
-	# multi-arch case.
+	# the target architecture code fail to change the PREDEFAULT
+	# value.
 
 	# If POSTDEFAULT is empty, no post update is performed.
 
 	# If both INVALID_P and POSTDEFAULT are non-empty then
 	# INVALID_P will be used to determine if MEMBER should be
 	# changed to POSTDEFAULT.
+
+	# If a non-empty POSTDEFAULT and a zero INVALID_P are
+	# specified, POSTDEFAULT will be used as the default for the
+	# non- multi-arch target (regardless of the value of
+	# PREDEFAULT).
 
 	# You cannot specify both a zero INVALID_P and a POSTDEFAULT.
 
@@ -438,6 +444,8 @@ v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_
 v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
+f:2:INIT_FRAME_PC_FIRST:void:init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
+f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::

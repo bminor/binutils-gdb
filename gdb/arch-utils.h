@@ -111,4 +111,8 @@ extern int default_prepare_to_proceed (int select_it);
 
 extern int generic_prepare_to_proceed (int select_it);
 
+/* Version of init_frame_pc() that does nothing. */
+
+void init_frame_pc_noop (int fromleaf, struct frame_info *prev);
+
 #endif

@@ -442,9 +442,7 @@ get_prev_frame (struct frame_info *next_frame)
    Some machines won't use it.
    kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
 
-#ifdef INIT_FRAME_PC_FIRST
   INIT_FRAME_PC_FIRST (fromleaf, prev);
-#endif
 
 #ifdef INIT_EXTRA_FRAME_INFO
   INIT_EXTRA_FRAME_INFO (fromleaf, prev);

@@ -1379,7 +1379,7 @@ mips_addr_bits_remove (CORE_ADDR addr)
   return addr;
 }
 
-void
+static void
 mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   CORE_ADDR pc, tmp;
@@ -4127,6 +4127,10 @@ mips_gdbarch_init (struct gdbarch_info info,
      ensure that all 32 bit addresses are sign extended to 64 bits. */
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
+  /* There's a mess in stack frame creation.  See comments in
+     blockframe.c near reference to INIT_FRAME_PC_FIRST.  */
+  set_gdbarch_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
+
   /* Map debug register numbers onto internal register numbers. */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
   set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
@@ -4328,12 +4332,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
 		      XSTRING (IGNORE_HELPER_CALL (PC)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: INIT_FRAME_PC # %s\n",
-		      XSTRING (INIT_FRAME_PC (FROMLEAF, PREV)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: INIT_FRAME_PC_FIRST # %s\n",
-		      XSTRING (INIT_FRAME_PC_FIRST (FROMLEAF, PREV)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IN_SIGTRAMP # %s\n",
 		      XSTRING (IN_SIGTRAMP (PC, NAME)));
