@@ -1,3 +1,8 @@
+Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m68k/tm-m68k.h: Remove obsolete comment about duplicating
+	CALL_DUMMY between different 68k machines.
+
 Fri Jun 25 17:02:45 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* remote.c:  Add arg names to prototypes, in a modest effort at
