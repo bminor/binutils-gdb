@@ -1,3 +1,16 @@
+Wed Jan 12 20:53:16 1994  John Gilmore  (gnu@cygnus.com)
+
+	* printcmd.c (print_address_symbolic):  Make it search the
+	symtabs for variables as well as functions.  Add `set print
+	fast-symbolic-addr' and default it to fast (the old way).
+	Print line numbers for data items as well as functions.
+
+	* symtab.c (find_addr_symbol):  Return the symtab and the symbol
+	address, if a symbol is found (take two more args pointing to
+	where to store these results).
+
+	* symtab.h (find_addr_symbol):  Add prototype.
+
 Wed Jan 12 19:32:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* objfiles.h: Fix comments to reflect the fact that the phrase

@@ -1,5 +1,6 @@
 /* Print values for GNU debugger GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -72,6 +73,11 @@ static unsigned int max_symbolic_offset = UINT_MAX;
 /* Append the source filename and linenumber of the symbol when
    printing a symbolic value as `<symbol at filename:linenum>' if set.  */
 static int print_symbol_filename = 0;
+
+/* Switch for quick display of symbolic addresses -- only uses minsyms,
+   not full search of symtabs.  */
+
+int fast_symbolic_addr = 1;
 
 /* Number of auto-display expression currently being displayed.
    So that we can disable it if we get an error or a signal within it.
@@ -497,10 +503,11 @@ set_next_address (addr)
 
 /* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,
    after LEADIN.  Print nothing if no symbolic name is found nearby.
+   Optionally also print source file and line number, if available.
    DO_DEMANGLE controls whether to print a symbol in its native "raw" form,
    or to interpret it as a possible C++ name and convert it back to source
    form.  However note that DO_DEMANGLE can be overridden by the specific
-   settings of the demangle and asm_demangle variables. */
+   settings of the demangle and asm_demangle variables.  */
 
 void
 print_address_symbolic (addr, stream, do_demangle, leadin)
@@ -509,36 +516,40 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      int do_demangle;
      char *leadin;
 {
+  struct minimal_symbol *msymbol;
+  struct symbol *symbol;
+  struct symtab *symtab = 0;
   CORE_ADDR name_location;
-  register struct symbol *symbol;
   char *name;
 
-  /* First try to find the address in the symbol tables to find
-     static functions. If that doesn't succeed we try the minimal symbol
-     vector for symbols in non-text space.
-     FIXME: Should find a way to get at the static non-text symbols too.  */
-  
-  symbol = find_pc_function (addr);
+  /* First try to find the address in the symbol table, then
+     in the minsyms.  Take the closest one.  */
+
+  symbol = fast_symbolic_addr? 0: 
+	   find_addr_symbol (addr, &symtab, &name_location);
   if (symbol)
     {
-    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-    if (do_demangle)
-      name = SYMBOL_SOURCE_NAME (symbol);
-    else
-      name = SYMBOL_LINKAGE_NAME (symbol);
+      if (do_demangle)
+	name = SYMBOL_SOURCE_NAME (symbol);
+      else
+	name = SYMBOL_LINKAGE_NAME (symbol);
     }
-  else
-    {
-    register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (addr);
 
-    /* If nothing comes out, don't print anything symbolic.  */
-    if (msymbol == NULL)
-      return;
-    name_location = SYMBOL_VALUE_ADDRESS (msymbol);
-    if (do_demangle)
-      name = SYMBOL_SOURCE_NAME (msymbol);
-    else
-      name = SYMBOL_LINKAGE_NAME (msymbol);
+  msymbol = lookup_minimal_symbol_by_pc (addr);
+  if (msymbol != NULL)
+    {
+      if (SYMBOL_VALUE_ADDRESS (msymbol) > name_location)
+	{
+	  /* The msymbol is closer to the address than the symbol;
+	     use the msymbol instead.  */
+	  symbol = 0;
+	  symtab = 0;
+	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
+	  if (do_demangle)
+	    name = SYMBOL_SOURCE_NAME (msymbol);
+	  else
+	    name = SYMBOL_LINKAGE_NAME (msymbol);
+	}
     }
 
   /* If the nearest symbol is too far away, don't print anything symbolic.  */
@@ -558,17 +569,23 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   if (addr != name_location)
     fprintf_filtered (stream, "+%u", (unsigned int)(addr - name_location));
 
-  /* Append source filename and line number if desired.  */
-  if (symbol && print_symbol_filename)
+  /* Append source filename and line number if desired.  Give specific
+     line # of this addr, if we have it; else line # of the nearest symbol.  */
+  if (print_symbol_filename)
     {
       struct symtab_and_line sal;
 
       sal = find_pc_line (addr, 0);
       if (sal.symtab)
 	fprintf_filtered (stream, " at %s:%d", sal.symtab->filename, sal.line);
+      else if (symtab && symbol && symbol->line)
+	fprintf_filtered (stream, " at %s:%d", symtab->filename, symbol->line);
+      else if (symtab)
+	fprintf_filtered (stream, " in %s", symtab->filename);
     }
   fputs_filtered (">", stream);
 }
+
 
 /* Print address ADDR symbolically on STREAM.
    First print it as a number.  Then perhaps print
@@ -1506,16 +1523,50 @@ print_frame_args (func, fi, num, stream)
 	 and it is passed as a double and converted to float by
 	 the prologue (in the latter case the type of the LOC_ARG
 	 symbol is double and the type of the LOC_LOCAL symbol is
-	 float).  There are also LOC_ARG/LOC_REGISTER pairs which
-	 are not combined in symbol-reading.  */
+	 float).  */
       /* But if the parameter name is null, don't try it.
 	 Null parameter names occur on the RS/6000, for traceback tables.
 	 FIXME, should we even print them?  */
 
       if (*SYMBOL_NAME (sym))
-        sym = lookup_symbol
-	  (SYMBOL_NAME (sym),
-	   b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
+	{
+	  struct symbol *nsym;
+	  nsym = lookup_symbol
+	    (SYMBOL_NAME (sym),
+	     b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
+	  if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
+	    {
+	      /* There is a LOC_ARG/LOC_REGISTER pair.  This means that
+		 it was passed on the stack and loaded into a register,
+		 or passed in a register and stored in a stack slot.
+		 GDB 3.x used the LOC_ARG; GDB 4.0-4.11 used the LOC_REGISTER.
+
+		 Reasons for using the LOC_ARG:
+		 (1) because find_saved_registers may be slow for remote
+		 debugging,
+		 (2) because registers are often re-used and stack slots
+		 rarely (never?) are.  Therefore using the stack slot is
+		 much less likely to print garbage.
+
+		 Reasons why we might want to use the LOC_REGISTER:
+		 (1) So that the backtrace prints the same value as
+		 "print foo".  I see no compelling reason why this needs
+		 to be the case; having the backtrace print the value which
+		 was passed in, and "print foo" print the value as modified
+		 within the called function, makes perfect sense to me.
+
+		 Additional note:  It might be nice if "info args" displayed
+		 both values.
+		 One more note:  There is a case with sparc sturcture passing
+		 where we need to use the LOC_REGISTER, but this is dealt with
+		 by creating a single LOC_REGPARM in symbol reading.  */
+
+	      /* Leave sym (the LOC_ARG) alone.  */
+	      ;
+	    }
+	  else
+	    sym = nsym;
+	}
 
       /* Print the current arg.  */
       if (! first)
@@ -2080,6 +2131,13 @@ environment, the value is printed in its own window.");
       add_set_cmd ("symbol-filename", no_class, var_boolean,
 		   (char *)&print_symbol_filename,
 	"Set printing of source filename and line number with <symbol>.",
+		   &setprintlist),
+      &showprintlist);
+
+  add_show_from_set (
+      add_set_cmd ("fast-symbolic-addr", no_class, var_boolean,
+		   (char *)&fast_symbolic_addr,
+	"Set fast printing of symbolic addresses (using minimal symbols).",
 		   &setprintlist),
       &showprintlist);
 
