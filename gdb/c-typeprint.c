@@ -41,11 +41,9 @@
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;
 
-static void cp_type_print_method_args (struct type *mtype, char *prefix,
+static void cp_type_print_method_args (struct type *mtype,
 				       char *varstring, int staticp,
 				       struct ui_file *stream);
-
-static void c_type_print_args (struct type *, struct ui_file *);
 
 static void cp_type_print_derivation_info (struct ui_file *, struct type *);
 
@@ -153,36 +151,41 @@ cp_type_print_derivation_info (struct ui_file *stream, struct type *type)
 /* Print the C++ method arguments ARGS to the file STREAM.  */
 
 static void
-cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
+cp_type_print_method_args (struct type *mtype, char *varstring,
 			   int staticp, struct ui_file *stream)
 {
   struct field *args = TYPE_FIELDS (mtype);
   int nargs = TYPE_NFIELDS (mtype);
   int varargs = TYPE_VARARGS (mtype);
-  int i;
+  int i, printed_arg;
 
-  fprintf_symbol_filtered (stream, prefix, language_cplus, DMGL_ANSI);
   fprintf_symbol_filtered (stream, varstring, language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
 
-  /* Skip the class variable.  */
+  /* Always skip the class variable.  */
   i = staticp ? 0 : 1;
-  if (nargs > i)
+  printed_arg = 0;
+  while (i < nargs)
     {
-      while (i < nargs)
+      /* Don't print artificial arguments.  */
+      if (FIELD_ARTIFICIAL (args[i]))
 	{
-	  /* Don't recursively expand classes in method arguments.  */
-	  type_print (args[i++].type, "", stream, -1);
-
-	  if (i == nargs && varargs)
-	    fprintf_filtered (stream, ", ...");
-	  else if (i < nargs)
-	    fprintf_filtered (stream, ", ");
+	  i++;
+	  continue;
 	}
+
+      /* Don't recursively expand classes in method arguments.  */
+      type_print (args[i++].type, "", stream, -1);
+      printed_arg = 1;
+
+      if (i < nargs || varargs)
+	fprintf_filtered (stream, ", ");
     }
-  else if (varargs)
+
+  if (varargs)
     fprintf_filtered (stream, "...");
-  else if (current_language->la_language == language_cplus)
+  else if (printed_arg == 0
+	   && current_language->la_language == language_cplus)
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");
@@ -349,45 +352,6 @@ c_type_print_modifier_after (struct type *type, struct ui_file *stream)
   if (current_language->la_language == language_cplus)
     c_type_print_modifier (type, stream, 1, 0);
 }
-
-static void
-c_type_print_args (struct type *type, struct ui_file *stream)
-{
-  int i;
-  struct field *args;
-
-  fprintf_filtered (stream, "(");
-  args = TYPE_FIELDS (type);
-  if (args != NULL)
-    {
-      int i;
-
-      /* FIXME drow/2002-05-31: Always skips the first argument,
-	 should we be checking for static members?  */
-
-      for (i = 1; i < TYPE_NFIELDS (type); i++)
-	{
-	  c_print_type (args[i].type, "", stream, -1, 0);
-	  if (i != TYPE_NFIELDS (type))
-	    {
-	      fprintf_filtered (stream, ",");
-	      wrap_here ("    ");
-	    }
-	}
-      if (TYPE_VARARGS (type))
-	fprintf_filtered (stream, "...");
-      else if (i == 1
-	       && (current_language->la_language == language_cplus))
-	fprintf_filtered (stream, "void");
-    }
-  else if (current_language->la_language == language_cplus)
-    {
-      fprintf_filtered (stream, "void");
-    }
-
-  fprintf_filtered (stream, ")");
-}
-
 
 /* Return true iff the j'th overloading of the i'th method of TYPE
    is a type conversion operator, like `operator int () { ... }'.
@@ -569,9 +533,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, ")");
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
-	{
-	  c_type_print_args (type, stream);
-	}
+	cp_type_print_method_args (type, "", 0, stream);
       break;
 
     case TYPE_CODE_PTR:
@@ -945,12 +907,17 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      char *method_name;
 	      char *name = type_name_no_tag (type);
-	      int is_constructor, is_destructor;
+	      int is_constructor, is_destructor, name_len;
 
 	      check_stub_method_group (type, i);
+
 	      method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	      is_constructor = name && STREQ (method_name, name);
+	      name_len = strlen (method_name);
+	      is_constructor = name
+		&& !strncmp (method_name, name, name_len)
+		&& (name[name_len] == 0 || name[name_len] == '<');
 	      is_destructor = method_name[0] == '~';
+
 	      for (j = 0; j < len2; j++)
 		{
 		  /* Do not print out artificial methods.  */
@@ -1009,7 +976,6 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    }
 
 		  cp_type_print_method_args (TYPE_FN_FIELD_TYPE (f, j),
-					     "",
 					     method_name,
 					     TYPE_FN_FIELD_STATIC_P (f, j),
 					     stream);

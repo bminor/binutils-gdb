@@ -1,5 +1,14 @@
 2002-11-01  Daniel Jacobowitz  <drow@mvista.com>
 
+	* c-typeprint.c (c_type_print_args): Remove.
+	(cp_type_print_method_args): Remove unused PREFIX argument.
+	Simplify logic.  Skip FIELD_ARTIFICIAL arguments.
+	(c_type_print_varspec_suffix): Call cp_type_print_method_args.
+	(c_type_print_base): Handle template classes when looking for
+	constructor field names.  Update call to cp_type_print_method_args.
+
+2002-11-01  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbtypes.c (get_destructor_fn_field): Return obvious destructors
 	based on method name.
 
