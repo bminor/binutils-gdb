@@ -1,38 +1,38 @@
-/* Main loop for the standalone kernel debugger, for GDB, the GNU Debugger.
-   Copyright 1989, 1991, 1992, 2000 Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-#include "defs.h"
-
-static char *args[] =
-{"kdb", "kdb-symbols", 0};
-
-static char *environment[] =
-{0};
-
-char **environ;
-
-start (void)
-{
-  INIT_STACK (kdb_stack_beg, kdb_stack_end);
-
-  environ = environment;
-
-  main (2, args, environment);
-}
+/* OBSOLETE /* Main loop for the standalone kernel debugger, for GDB, the GNU Debugger. */
+/* OBSOLETE    Copyright 1989, 1991, 1992, 2000 Free Software Foundation, Inc. */
+/* OBSOLETE  */
+/* OBSOLETE    This file is part of GDB. */
+/* OBSOLETE  */
+/* OBSOLETE    This program is free software; you can redistribute it and/or modify */
+/* OBSOLETE    it under the terms of the GNU General Public License as published by */
+/* OBSOLETE    the Free Software Foundation; either version 2 of the License, or */
+/* OBSOLETE    (at your option) any later version. */
+/* OBSOLETE  */
+/* OBSOLETE    This program is distributed in the hope that it will be useful, */
+/* OBSOLETE    but WITHOUT ANY WARRANTY; without even the implied warranty of */
+/* OBSOLETE    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
+/* OBSOLETE    GNU General Public License for more details. */
+/* OBSOLETE  */
+/* OBSOLETE    You should have received a copy of the GNU General Public License */
+/* OBSOLETE    along with this program; if not, write to the Free Software */
+/* OBSOLETE    Foundation, Inc., 59 Temple Place - Suite 330, */
+/* OBSOLETE    Boston, MA 02111-1307, USA.  */ */
+/* OBSOLETE  */
+/* OBSOLETE #include "defs.h" */
+/* OBSOLETE  */
+/* OBSOLETE static char *args[] = */
+/* OBSOLETE {"kdb", "kdb-symbols", 0}; */
+/* OBSOLETE  */
+/* OBSOLETE static char *environment[] = */
+/* OBSOLETE {0}; */
+/* OBSOLETE  */
+/* OBSOLETE char **environ; */
+/* OBSOLETE  */
+/* OBSOLETE start (void) */
+/* OBSOLETE { */
+/* OBSOLETE   INIT_STACK (kdb_stack_beg, kdb_stack_end); */
+/* OBSOLETE  */
+/* OBSOLETE   environ = environment; */
+/* OBSOLETE  */
+/* OBSOLETE   main (2, args, environment); */
+/* OBSOLETE } */

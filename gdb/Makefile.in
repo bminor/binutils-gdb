@@ -692,10 +692,6 @@ OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
 TSOBS = inflow.o
 
-NTSOBS = standalone.o
-
-NTSSTART = kdb-start.o
-
 SUBDIRS = @SUBDIRS@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
@@ -901,10 +897,6 @@ xm-sun4os4.h: xm-sparc.h
 tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
-
-kdb:	$(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
-	ld -o kdb $(NTSSTART) $(OBS) $(CONFIG_OBS) $(NTSOBS) init.o \
-	 $(ADD_FILES) -lc $(CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those

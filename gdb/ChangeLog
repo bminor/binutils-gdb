@@ -1,5 +1,13 @@
 2001-03-22  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (NTSSTART): Delete.
+	(NTSOBS): Delete.
+	(kdb): Delete target.
+	* kdb-start.c, stuff.c: Mark as obsolete.
+	* NEWS: Update.
+
+2001-03-22  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/pa/xm-hppah.h (HPPA_COMPILER_BUG): Delete. GDB only
 	compiles using an ISO-C compiler.
 	(MALLOC_INCOMPATIBLE): Ditto.
