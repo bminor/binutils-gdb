@@ -3306,18 +3306,17 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
 
 
 
-/* C++: return the value of the class instance variable, if one exists.
+/* Return the value of the local variable, if one exists.
    Flag COMPLAIN signals an error if the request is made in an
    inappropriate context.  */
 
 struct value *
-value_of_this (int complain)
+value_of_local (const char *name, int complain)
 {
   struct symbol *func, *sym;
   struct block *b;
   int i;
-  static const char funny_this[] = "this";
-  struct value *this;
+  struct value * ret;
 
   if (selected_frame == 0)
     {
@@ -3331,7 +3330,7 @@ value_of_this (int complain)
   if (!func)
     {
       if (complain)
-	error ("no `this' in nameless context");
+	error ("no %s in nameless context", name);
       else
 	return 0;
     }
@@ -3341,26 +3340,39 @@ value_of_this (int complain)
   if (i <= 0)
     {
       if (complain)
-	error ("no args, no `this'");
+	error ("no args, no %s", name);
       else
 	return 0;
     }
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, funny_this, NULL, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, name, NULL, VAR_NAMESPACE);
   if (sym == NULL)
     {
       if (complain)
-	error ("current stack frame not in method");
+	error ("current stack frame does not contain a variable named \"%s\"", name);
       else
 	return NULL;
     }
 
-  this = read_var_value (sym, selected_frame);
-  if (this == 0 && complain)
-    error ("`this' argument at unknown address");
-  return this;
+  ret = read_var_value (sym, selected_frame);
+  if (ret == 0 && complain)
+    error ("%s argument unreadable", name);
+  return ret;
+}
+
+/* C++/Objective-C: return the value of the class instance variable,
+   if one exists.  Flag COMPLAIN signals an error if the request is
+   made in an inappropriate context.  */
+
+struct value *
+value_of_this (int complain)
+{
+  if (current_language->la_language == language_objc)
+    return value_of_local ("self", complain);
+  else
+    return value_of_local ("this", complain);
 }
 
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH elements

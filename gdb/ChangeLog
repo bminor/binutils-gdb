@@ -1,5 +1,11 @@
 2002-10-13  Adam Fedor  <fedor@gnu.org>
 
+	* valops.c (value_of_local): New function.
+	(value_of_this): Use it.
+	* value.h (value_of_local): Declared.
+
+2002-10-13  Adam Fedor  <fedor@gnu.org>
+
 	* parse.c: (length_of_subexp, prefixify_subexp): Handle
 	OP_MSGCALL, OP_SELECTOR, OP_NSSTRING, and OP_SELF.
 
