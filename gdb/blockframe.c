@@ -632,6 +632,8 @@ get_pc_function_start (CORE_ADDR pc)
   else if ((msymbol = lookup_minimal_symbol_by_pc (pc)) != NULL)
     {
       fstart = SYMBOL_VALUE_ADDRESS (msymbol);
+      if (!find_pc_section (fstart))
+	return 0;
     }
   else
     {

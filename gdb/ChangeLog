@@ -1,3 +1,8 @@
+2002-07-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* blockframe.c (get_pc_function_start): return 0 if the minimal symbol
+	found is not inside a section.
+
 2002-07-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* aix-thread.c (ptrace_check): Use safe_strerror() instead of
