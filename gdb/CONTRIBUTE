@@ -144,3 +144,10 @@ o	Please read your patch before submitting it.
 	arbitrary reformats will be returned with a request
 	to re-formatting / split it.
 
+
+o	If ``gdb/configure.in'' is modified then you don't
+	need to include patches to the regenerated file
+	``configure''.
+
+	The maintainer will re-generate those files
+	using autoconf (2.13 as of 2000-02-29).
