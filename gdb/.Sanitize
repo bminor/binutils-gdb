@@ -237,7 +237,6 @@ sparc-nat.c
 sparc-pinsn.c
 sparc-stub.c
 sparc-tdep.c
-sparcly-nat.c
 sparclite
 stabsread.c
 stabsread.h
