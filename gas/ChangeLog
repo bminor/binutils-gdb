@@ -1,3 +1,12 @@
+2004-12-22  Ian Lance Taylor  <ian@airs.com>
+
+	* configure.tgt: New.
+	* configure.in: Move setting of cpu_type, fmt, etc., to
+	configure.tgt.
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Add
+	$(srcdir)/configure.tgt.
+	* configure, Makefile.in: Rebuild.
+
 2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
     
 	* config/tc-avr.c: Add support for the new R_AVR_LDI, R_AVR_6 and
