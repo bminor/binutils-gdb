@@ -1,3 +1,10 @@
+Fri Jun 16 15:04:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* bfd-in.h (NT_subsystem, NT_stack_heap): Declare but don't
+	define.
+	* bfd-in2.h: Rebuilt.
+	* bfd.c (NT_subsystem, NT_stack_heap): Define.
+
 Fri Jun 16 00:07:25 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_bfd_link_link_relocate): Use the right
