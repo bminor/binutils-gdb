@@ -1,3 +1,8 @@
+2004-05-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR build/1648.
+	* version.in: Fix corrupted zero-length file.
+
 2004-05-13  Bryce McKinlay  <mckinlay@redhat.com>
 
 	* dwarf2loc.c (find_location_expression): Use ANOFFSET to adjust
