@@ -1,4 +1,8 @@
-Mon Jan  8 10:20:14 1996  Jeffrey A Law  (law@cygnus.com)
+Mon Jan  8 12:00:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* infptrace.c (initialize_infptrace): Move function out of
+	#ifdef conditional; put code within the function inside an
+	#ifdef conditional.
 
 	* buildsym.c (end_symtab): Remove sort_pending and sort_linevec
 	arguments.  Sorting is now dependent on OBJF_REORDERED.  All
