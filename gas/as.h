@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef GAS
 #define GAS 1
@@ -43,6 +43,9 @@
 /* Added #undef for DJ Delorie.  The right fix is to ensure that as.h
    is included first, before even any system header files, in all files
    that use it.  KR 1994.11.03 */
+/* Added void* version for STDC case.  This is to be compatible with
+   the declaration in bison.simple, used for m68k operand parsing.
+   --KR 1995.08.08 */
 
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
@@ -56,7 +59,11 @@
  #pragma alloca
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
+#    ifndef __STDC__
 char *alloca ();
+#    else
+void *alloca ();
+#    endif
 #   endif
 #  endif
 # endif
@@ -479,6 +486,9 @@ COMMON unsigned char flag_warn_displacement; /* -K */
 
 /* True if local symbols should be retained.  */
 COMMON unsigned char flag_keep_locals; /* -L */
+
+/* True if we are assembling using MRI syntax.  */
+COMMON int flag_mri;
 
 /* Should the data section be made read-only and appended to the text
    section?  */
