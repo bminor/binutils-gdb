@@ -45,7 +45,7 @@
 ;; who also hacked the mode to use comint.el.  Shane Hartman <shane@spr.com>
 ;; added support for xdb (HPUX debugger).
 
-;; Jim Kingdon added support for ^Z^Z^Z annotations.
+;; Cygnus Support added support for gdb's --annotate=2.
 
 ;;; Code:
 
@@ -169,7 +169,7 @@ we're in the GUD buffer)."
 (defvar gud-gdb-history nil)
 
 (defun gud-gdb-massage-args (file args)
-  (cons "-annotate=2" (cons file args)))
+  (cons "--annotate=2" (cons file args)))
 
 
 ;;
@@ -369,6 +369,9 @@ This filter may simply queue output for a later time."
   (let ((instance (gdb-proc->instance proc)))
     (gdb-instance-enqueue-input instance (concat string "\n"))))
 
+;; Note: Stuff enqueued here will be sent to the next prompt, even if it
+;; is a query, or other non-top-level prompt.  To guarantee stuff will get
+;; sent to the top-level prompt, currently it must be put in the idle queue.
 (defun gdb-instance-enqueue-input (instance item)
   "Enqueue an input item (a string or a list) for a gdb instance."
   (if (gdb-instance-prompting instance)
@@ -444,18 +447,13 @@ This filter may simply queue output for a later time."
     ("breakpoints-invalid" gdb-invalidate-breakpoints)
     ("pre-prompt" gdb-pre-prompt)
     ("prompt" gdb-prompt)
+    ("commands" gdb-subprompt)
+    ("overload-choice" gdb-subprompt)
+    ("query" gdb-subprompt)
+    ("prompt-for-continue" gdb-subprompt)
     ("post-prompt" gdb-post-prompt)
     ("source" gdb-source)
-    ("value-history-begin" gdb-ignore-annotation)
-    ("value-history-end" gdb-ignore-annotation)
-    ("arg-name-begin" gdb-ignore-annotation)
-    ("arg-name-end" gdb-ignore-annotation)
-    ("field-name-begin" gdb-ignore-annotation)
-    ("field-name-end" gdb-ignore-annotation)
-    ("field-begin" gdb-ignore-annotation)
-    ("field-end" gdb-ignore-annotation)
-    ("array-element-begin" gdb-ignore-annotation)
-    ("array-element-end" gdb-ignore-annotation))
+    )
   "An assoc mapping annotation tags to functions which process them.")
 
 
@@ -497,6 +495,13 @@ This sends the next command (if any) to gdb."
 	    (gdb-send-item instance lowest)
 	  (set-gdb-instance-prompting instance t))))))
 
+(defun gdb-subprompt (instance ignored)
+  "An annotation handler for non-top-level prompts."
+  (let ((highest (gdb-instance-dequeue-input instance)))
+    (if highest
+	(gdb-send-item instance highest)
+      (set-gdb-instance-prompting instance t))))
+
 (defun gdb-send-item (instance item)
   (dbug 'sending
 	(function
@@ -537,7 +542,7 @@ command if that happens to be in effect."
       (error "Output sink phase error 2.")))))
 
 (defun gdb-post-prompt (instance ignored)
-  "An annotation handler for `pre-prompt'.
+  "An annotation handler for `post-prompt'.
 This begins the collection of output from the current
 command if that happens to be appropriate."
   (gdb-invalidate-registers instance ignored)
@@ -702,7 +707,10 @@ buffer."
 		(funcall (car (cdr annotation-rule))
 			 instance
 			 annotation-arguments)
-	      (error "Bogon gdb annotation %s." annotation)))))
+	      ;; Else the annotation is not recognized.  Ignore it silently,
+	      ;; so that GDB can add new annotations without causing
+	      ;; us to blow up.
+	      ))))
 
 
       ;; Does the remaining text end in a partial line?
@@ -886,7 +894,7 @@ and source-file directory for your debugger."
    (list (read-from-minibuffer "Run gdb (like this): "
 			       (if (consp gud-gdb-history)
 				   (car gud-gdb-history)
-				 "/offsite/kingdon/devo/s4/gdb/gdb ")
+				 "gdb ")
 			       nil nil
 			       '(gud-gdb-history . 1))))
   (gud-overload-functions
