@@ -22,12 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#define WANT_CPU
-#define WANT_CPU_M32RX
-
-#include "sim-main.h"
-#include "cpu-sim.h"
-
 #ifdef DEFINE_LABELS
 #undef DEFINE_LABELS
 
@@ -41,26 +35,47 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     && case_read_READ_ILLEGAL,
     && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_1_ADD3,
+    && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_2_AND3,
+    && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_3_OR3,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_2_AND3,
     && case_read_READ_FMT_4_ADDI,
+    && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_5_ADDV3,
     && case_read_READ_FMT_6_ADDX,
     && case_read_READ_FMT_7_BC8,
     && case_read_READ_FMT_8_BC24,
     && case_read_READ_FMT_9_BEQ,
     && case_read_READ_FMT_10_BEQZ,
+    && case_read_READ_FMT_10_BEQZ,
+    && case_read_READ_FMT_10_BEQZ,
+    && case_read_READ_FMT_10_BEQZ,
+    && case_read_READ_FMT_10_BEQZ,
+    && case_read_READ_FMT_10_BEQZ,
     && case_read_READ_FMT_11_BL8,
     && case_read_READ_FMT_12_BL24,
     && case_read_READ_FMT_13_BCL8,
     && case_read_READ_FMT_14_BCL24,
+    && case_read_READ_FMT_7_BC8,
+    && case_read_READ_FMT_8_BC24,
+    && case_read_READ_FMT_9_BEQ,
     && case_read_READ_FMT_15_BRA8,
     && case_read_READ_FMT_16_BRA24,
+    && case_read_READ_FMT_13_BCL8,
+    && case_read_READ_FMT_14_BCL24,
     && case_read_READ_FMT_17_CMP,
     && case_read_READ_FMT_18_CMPI,
+    && case_read_READ_FMT_17_CMP,
     && case_read_READ_FMT_19_CMPUI,
+    && case_read_READ_FMT_17_CMP,
     && case_read_READ_FMT_20_CMPZ,
     && case_read_READ_FMT_21_DIV,
+    && case_read_READ_FMT_21_DIV,
+    && case_read_READ_FMT_21_DIV,
+    && case_read_READ_FMT_21_DIV,
+    && case_read_READ_FMT_22_JC,
     && case_read_READ_FMT_22_JC,
     && case_read_READ_FMT_23_JL,
     && case_read_READ_FMT_24_JMP,
@@ -70,28 +85,67 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     && case_read_READ_FMT_28_LDB_D,
     && case_read_READ_FMT_29_LDH,
     && case_read_READ_FMT_30_LDH_D,
+    && case_read_READ_FMT_27_LDB,
+    && case_read_READ_FMT_28_LDB_D,
+    && case_read_READ_FMT_29_LDH,
+    && case_read_READ_FMT_30_LDH_D,
+    && case_read_READ_FMT_25_LD,
     && case_read_READ_FMT_31_LD24,
     && case_read_READ_FMT_32_LDI8,
     && case_read_READ_FMT_33_LDI16,
+    && case_read_READ_FMT_0_ADD,
     && case_read_READ_FMT_34_MACHI_A,
+    && case_read_READ_FMT_34_MACHI_A,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_35_MULHI_A,
     && case_read_READ_FMT_35_MULHI_A,
     && case_read_READ_FMT_36_MV,
     && case_read_READ_FMT_37_MVFACHI_A,
+    && case_read_READ_FMT_37_MVFACHI_A,
+    && case_read_READ_FMT_37_MVFACHI_A,
     && case_read_READ_FMT_38_MVFC,
     && case_read_READ_FMT_39_MVTACHI_A,
+    && case_read_READ_FMT_39_MVTACHI_A,
     && case_read_READ_FMT_40_MVTC,
+    && case_read_READ_FMT_36_MV,
     && case_read_READ_FMT_41_NOP,
+    && case_read_READ_FMT_36_MV,
+    && case_read_READ_FMT_42_RAC_A,
     && case_read_READ_FMT_42_RAC_A,
     && case_read_READ_FMT_43_RTE,
     && case_read_READ_FMT_44_SETH,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_5_ADDV3,
     && case_read_READ_FMT_45_SLLI,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_5_ADDV3,
+    && case_read_READ_FMT_45_SLLI,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_5_ADDV3,
+    && case_read_READ_FMT_45_SLLI,
+    && case_read_READ_FMT_17_CMP,
     && case_read_READ_FMT_46_ST_D,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_46_ST_D,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_46_ST_D,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_0_ADD,
+    && case_read_READ_FMT_6_ADDX,
     && case_read_READ_FMT_47_TRAP,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_48_SATB,
     && case_read_READ_FMT_48_SATB,
     && case_read_READ_FMT_49_SAT,
+    && case_read_READ_FMT_20_CMPZ,
     && case_read_READ_FMT_50_SADD,
     && case_read_READ_FMT_51_MACWU1,
     && case_read_READ_FMT_52_MSBLO,
+    && case_read_READ_FMT_17_CMP,
+    && case_read_READ_FMT_51_MACWU1,
+    && case_read_READ_FMT_53_SC,
     && case_read_READ_FMT_53_SC,
     0
   };
@@ -118,7 +172,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_0_ADD) : /* e.g. add $dr,$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_0_add.f
+#define OPRND(f) par_exec->operands.fmt_0_add.f
   EXTRACT_FMT_0_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_0_ADD_CODE
 
@@ -131,7 +185,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_1_ADD3) : /* e.g. add3 $dr,$sr,#$slo16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_1_add3.f
+#define OPRND(f) par_exec->operands.fmt_1_add3.f
   EXTRACT_FMT_1_ADD3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_1_ADD3_CODE
 
@@ -144,7 +198,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_2_AND3) : /* e.g. and3 $dr,$sr,#$uimm16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_2_and3.f
+#define OPRND(f) par_exec->operands.fmt_2_and3.f
   EXTRACT_FMT_2_AND3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_2_AND3_CODE
 
@@ -157,7 +211,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_3_OR3) : /* e.g. or3 $dr,$sr,#$ulo16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_3_or3.f
+#define OPRND(f) par_exec->operands.fmt_3_or3.f
   EXTRACT_FMT_3_OR3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_3_OR3_CODE
 
@@ -170,7 +224,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_4_ADDI) : /* e.g. addi $dr,#$simm8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_4_addi.f
+#define OPRND(f) par_exec->operands.fmt_4_addi.f
   EXTRACT_FMT_4_ADDI_VARS /* f-op1 f-r1 f-simm8 */
   EXTRACT_FMT_4_ADDI_CODE
 
@@ -183,7 +237,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_5_ADDV3) : /* e.g. addv3 $dr,$sr,#$simm16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_5_addv3.f
+#define OPRND(f) par_exec->operands.fmt_5_addv3.f
   EXTRACT_FMT_5_ADDV3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_5_ADDV3_CODE
 
@@ -196,7 +250,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_6_ADDX) : /* e.g. addx $dr,$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_6_addx.f
+#define OPRND(f) par_exec->operands.fmt_6_addx.f
   EXTRACT_FMT_6_ADDX_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_6_ADDX_CODE
 
@@ -210,7 +264,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_7_BC8) : /* e.g. bc $disp8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_7_bc8.f
+#define OPRND(f) par_exec->operands.fmt_7_bc8.f
   EXTRACT_FMT_7_BC8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_7_BC8_CODE
 
@@ -223,7 +277,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_8_BC24) : /* e.g. bc $disp24 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_8_bc24.f
+#define OPRND(f) par_exec->operands.fmt_8_bc24.f
   EXTRACT_FMT_8_BC24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_8_BC24_CODE
 
@@ -236,7 +290,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_9_BEQ) : /* e.g. beq $src1,$src2,$disp16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_9_beq.f
+#define OPRND(f) par_exec->operands.fmt_9_beq.f
   EXTRACT_FMT_9_BEQ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_9_BEQ_CODE
 
@@ -250,7 +304,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_10_BEQZ) : /* e.g. beqz $src2,$disp16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_10_beqz.f
+#define OPRND(f) par_exec->operands.fmt_10_beqz.f
   EXTRACT_FMT_10_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
   EXTRACT_FMT_10_BEQZ_CODE
 
@@ -263,7 +317,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_11_BL8) : /* e.g. bl $disp8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_11_bl8.f
+#define OPRND(f) par_exec->operands.fmt_11_bl8.f
   EXTRACT_FMT_11_BL8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_11_BL8_CODE
 
@@ -276,7 +330,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_12_BL24) : /* e.g. bl $disp24 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_12_bl24.f
+#define OPRND(f) par_exec->operands.fmt_12_bl24.f
   EXTRACT_FMT_12_BL24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_12_BL24_CODE
 
@@ -289,7 +343,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_13_BCL8) : /* e.g. bcl $disp8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_13_bcl8.f
+#define OPRND(f) par_exec->operands.fmt_13_bcl8.f
   EXTRACT_FMT_13_BCL8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_13_BCL8_CODE
 
@@ -303,7 +357,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_14_BCL24) : /* e.g. bcl $disp24 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_14_bcl24.f
+#define OPRND(f) par_exec->operands.fmt_14_bcl24.f
   EXTRACT_FMT_14_BCL24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_14_BCL24_CODE
 
@@ -317,7 +371,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_15_BRA8) : /* e.g. bra $disp8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_15_bra8.f
+#define OPRND(f) par_exec->operands.fmt_15_bra8.f
   EXTRACT_FMT_15_BRA8_VARS /* f-op1 f-r1 f-disp8 */
   EXTRACT_FMT_15_BRA8_CODE
 
@@ -329,7 +383,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_16_BRA24) : /* e.g. bra $disp24 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_16_bra24.f
+#define OPRND(f) par_exec->operands.fmt_16_bra24.f
   EXTRACT_FMT_16_BRA24_VARS /* f-op1 f-r1 f-disp24 */
   EXTRACT_FMT_16_BRA24_CODE
 
@@ -341,7 +395,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_17_CMP) : /* e.g. cmp $src1,$src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_17_cmp.f
+#define OPRND(f) par_exec->operands.fmt_17_cmp.f
   EXTRACT_FMT_17_CMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_17_CMP_CODE
 
@@ -354,7 +408,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_18_CMPI) : /* e.g. cmpi $src2,#$simm16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_18_cmpi.f
+#define OPRND(f) par_exec->operands.fmt_18_cmpi.f
   EXTRACT_FMT_18_CMPI_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_18_CMPI_CODE
 
@@ -367,7 +421,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_19_CMPUI) : /* e.g. cmpui $src2,#$uimm16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_19_cmpui.f
+#define OPRND(f) par_exec->operands.fmt_19_cmpui.f
   EXTRACT_FMT_19_CMPUI_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_19_CMPUI_CODE
 
@@ -380,7 +434,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_20_CMPZ) : /* e.g. cmpz $src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_20_cmpz.f
+#define OPRND(f) par_exec->operands.fmt_20_cmpz.f
   EXTRACT_FMT_20_CMPZ_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_20_CMPZ_CODE
 
@@ -392,7 +446,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_21_DIV) : /* e.g. div $dr,$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_21_div.f
+#define OPRND(f) par_exec->operands.fmt_21_div.f
   EXTRACT_FMT_21_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_21_DIV_CODE
 
@@ -405,7 +459,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_22_JC) : /* e.g. jc $sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_22_jc.f
+#define OPRND(f) par_exec->operands.fmt_22_jc.f
   EXTRACT_FMT_22_JC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_22_JC_CODE
 
@@ -418,7 +472,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_23_JL) : /* e.g. jl $sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_23_jl.f
+#define OPRND(f) par_exec->operands.fmt_23_jl.f
   EXTRACT_FMT_23_JL_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_23_JL_CODE
 
@@ -431,7 +485,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_24_JMP) : /* e.g. jmp $sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_24_jmp.f
+#define OPRND(f) par_exec->operands.fmt_24_jmp.f
   EXTRACT_FMT_24_JMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_24_JMP_CODE
 
@@ -443,7 +497,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_25_LD) : /* e.g. ld $dr,@$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_25_ld.f
+#define OPRND(f) par_exec->operands.fmt_25_ld.f
   EXTRACT_FMT_25_LD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_25_LD_CODE
 
@@ -456,7 +510,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_26_LD_D) : /* e.g. ld $dr,@($slo16,$sr) */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_26_ld_d.f
+#define OPRND(f) par_exec->operands.fmt_26_ld_d.f
   EXTRACT_FMT_26_LD_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_26_LD_D_CODE
 
@@ -470,7 +524,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_27_LDB) : /* e.g. ldb $dr,@$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_27_ldb.f
+#define OPRND(f) par_exec->operands.fmt_27_ldb.f
   EXTRACT_FMT_27_LDB_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_27_LDB_CODE
 
@@ -483,7 +537,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_28_LDB_D) : /* e.g. ldb $dr,@($slo16,$sr) */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_28_ldb_d.f
+#define OPRND(f) par_exec->operands.fmt_28_ldb_d.f
   EXTRACT_FMT_28_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_28_LDB_D_CODE
 
@@ -497,7 +551,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_29_LDH) : /* e.g. ldh $dr,@$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_29_ldh.f
+#define OPRND(f) par_exec->operands.fmt_29_ldh.f
   EXTRACT_FMT_29_LDH_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_29_LDH_CODE
 
@@ -510,7 +564,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_30_LDH_D) : /* e.g. ldh $dr,@($slo16,$sr) */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_30_ldh_d.f
+#define OPRND(f) par_exec->operands.fmt_30_ldh_d.f
   EXTRACT_FMT_30_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_30_LDH_D_CODE
 
@@ -524,7 +578,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_31_LD24) : /* e.g. ld24 $dr,#$uimm24 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_31_ld24.f
+#define OPRND(f) par_exec->operands.fmt_31_ld24.f
   EXTRACT_FMT_31_LD24_VARS /* f-op1 f-r1 f-uimm24 */
   EXTRACT_FMT_31_LD24_CODE
 
@@ -536,7 +590,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_32_LDI8) : /* e.g. ldi $dr,#$simm8 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_32_ldi8.f
+#define OPRND(f) par_exec->operands.fmt_32_ldi8.f
   EXTRACT_FMT_32_LDI8_VARS /* f-op1 f-r1 f-simm8 */
   EXTRACT_FMT_32_LDI8_CODE
 
@@ -548,7 +602,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_33_LDI16) : /* e.g. ldi $dr,$slo16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_33_ldi16.f
+#define OPRND(f) par_exec->operands.fmt_33_ldi16.f
   EXTRACT_FMT_33_LDI16_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_33_LDI16_CODE
 
@@ -560,7 +614,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_34_MACHI_A) : /* e.g. machi $src1,$src2,$acc */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_34_machi_a.f
+#define OPRND(f) par_exec->operands.fmt_34_machi_a.f
   EXTRACT_FMT_34_MACHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_34_MACHI_A_CODE
 
@@ -574,7 +628,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_35_MULHI_A) : /* e.g. mulhi $src1,$src2,$acc */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_35_mulhi_a.f
+#define OPRND(f) par_exec->operands.fmt_35_mulhi_a.f
   EXTRACT_FMT_35_MULHI_A_VARS /* f-op1 f-r1 f-acc f-op23 f-r2 */
   EXTRACT_FMT_35_MULHI_A_CODE
 
@@ -587,7 +641,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_36_MV) : /* e.g. mv $dr,$sr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_36_mv.f
+#define OPRND(f) par_exec->operands.fmt_36_mv.f
   EXTRACT_FMT_36_MV_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_36_MV_CODE
 
@@ -599,7 +653,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_37_MVFACHI_A) : /* e.g. mvfachi $dr,$accs */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_37_mvfachi_a.f
+#define OPRND(f) par_exec->operands.fmt_37_mvfachi_a.f
   EXTRACT_FMT_37_MVFACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_37_MVFACHI_A_CODE
 
@@ -611,7 +665,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_38_MVFC) : /* e.g. mvfc $dr,$scr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_38_mvfc.f
+#define OPRND(f) par_exec->operands.fmt_38_mvfc.f
   EXTRACT_FMT_38_MVFC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_38_MVFC_CODE
 
@@ -623,7 +677,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_39_MVTACHI_A) : /* e.g. mvtachi $src1,$accs */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_39_mvtachi_a.f
+#define OPRND(f) par_exec->operands.fmt_39_mvtachi_a.f
   EXTRACT_FMT_39_MVTACHI_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_39_MVTACHI_A_CODE
 
@@ -636,7 +690,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_40_MVTC) : /* e.g. mvtc $sr,$dcr */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_40_mvtc.f
+#define OPRND(f) par_exec->operands.fmt_40_mvtc.f
   EXTRACT_FMT_40_MVTC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_40_MVTC_CODE
 
@@ -648,7 +702,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_41_NOP) : /* e.g. nop */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_41_nop.f
+#define OPRND(f) par_exec->operands.fmt_41_nop.f
   EXTRACT_FMT_41_NOP_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_41_NOP_CODE
 
@@ -659,7 +713,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_42_RAC_A) : /* e.g. rac $accs */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_42_rac_a.f
+#define OPRND(f) par_exec->operands.fmt_42_rac_a.f
   EXTRACT_FMT_42_RAC_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
   EXTRACT_FMT_42_RAC_A_CODE
 
@@ -671,7 +725,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_43_RTE) : /* e.g. rte */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_43_rte.f
+#define OPRND(f) par_exec->operands.fmt_43_rte.f
   EXTRACT_FMT_43_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_43_RTE_CODE
 
@@ -686,7 +740,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_44_SETH) : /* e.g. seth $dr,#$hi16 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_44_seth.f
+#define OPRND(f) par_exec->operands.fmt_44_seth.f
   EXTRACT_FMT_44_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
   EXTRACT_FMT_44_SETH_CODE
 
@@ -698,7 +752,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_45_SLLI) : /* e.g. slli $dr,#$uimm5 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_45_slli.f
+#define OPRND(f) par_exec->operands.fmt_45_slli.f
   EXTRACT_FMT_45_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
   EXTRACT_FMT_45_SLLI_CODE
 
@@ -711,7 +765,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_46_ST_D) : /* e.g. st $src1,@($slo16,$src2) */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_46_st_d.f
+#define OPRND(f) par_exec->operands.fmt_46_st_d.f
   EXTRACT_FMT_46_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
   EXTRACT_FMT_46_ST_D_CODE
 
@@ -725,7 +779,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_47_TRAP) : /* e.g. trap #$uimm4 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_47_trap.f
+#define OPRND(f) par_exec->operands.fmt_47_trap.f
   EXTRACT_FMT_47_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
   EXTRACT_FMT_47_TRAP_CODE
 
@@ -737,7 +791,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_48_SATB) : /* e.g. satb $dr,$src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_48_satb.f
+#define OPRND(f) par_exec->operands.fmt_48_satb.f
   EXTRACT_FMT_48_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_48_SATB_CODE
 
@@ -749,7 +803,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_49_SAT) : /* e.g. sat $dr,$src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_49_sat.f
+#define OPRND(f) par_exec->operands.fmt_49_sat.f
   EXTRACT_FMT_49_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
   EXTRACT_FMT_49_SAT_CODE
 
@@ -762,7 +816,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_50_SADD) : /* e.g. sadd */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_50_sadd.f
+#define OPRND(f) par_exec->operands.fmt_50_sadd.f
   EXTRACT_FMT_50_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_50_SADD_CODE
 
@@ -775,7 +829,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_51_MACWU1) : /* e.g. macwu1 $src1,$src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_51_macwu1.f
+#define OPRND(f) par_exec->operands.fmt_51_macwu1.f
   EXTRACT_FMT_51_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_51_MACWU1_CODE
 
@@ -789,7 +843,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_52_MSBLO) : /* e.g. msblo $src1,$src2 */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_52_msblo.f
+#define OPRND(f) par_exec->operands.fmt_52_msblo.f
   EXTRACT_FMT_52_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_52_MSBLO_CODE
 
@@ -803,7 +857,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
     CASE (read, READ_FMT_53_SC) : /* e.g. sc */
     {
-#define OPRND(f) CPU_PAR_EXEC (current_cpu)->operands.fmt_53_sc.f
+#define OPRND(f) par_exec->operands.fmt_53_sc.f
   EXTRACT_FMT_53_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_53_SC_CODE
 
