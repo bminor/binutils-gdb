@@ -286,6 +286,7 @@ static bfd_reloc_code_real_type offset_reloc;
 void
 md_begin ()
 {
+  boolean ok;
   register const char *retval = NULL;
   register unsigned int i = 0;
 
@@ -303,6 +304,21 @@ md_begin ()
       else
 	mips_isa = 1;
     }
+
+  switch (mips_isa)
+    {
+    case 1:
+      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 3000);
+      break;
+    case 2:
+      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 6000);
+      break;
+    case 3:
+      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, 4000);
+      break;
+    }
+  if (! ok)
+    as_warn ("Could not set architecture and machine");
 
   if ((op_hash = hash_new ()) == NULL)
     {
@@ -726,6 +742,9 @@ append_insn (ip, address_expr, reloc_type)
 		  & (INSN_UNCOND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_LIKELY))
+	      /* We can not swap with a trap instruction, since it
+		 might change the PC.  */
+	      || (prev_insn.insn_mo->pinfo & INSN_TRAP)
 	      /* If the branch reads a register that the previous
 		 instruction sets, we can not swap.  */
 	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
