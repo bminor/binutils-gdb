@@ -1,3 +1,8 @@
+2003-11-13  Tobias Burnus  <tobias.burnus@physik.fu-berlin.de>
+
+	* ar.c (open_inarch): Emit a warning when an archive is created
+	(only shown with -v) in order to confrom to POSIX specification.
+
 2003-11-11  Wang Li  <charles@linux.net.cn>
 
 	* objcopy.c (wildcard): New variable.  True if wildcard pattern

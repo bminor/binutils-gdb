@@ -750,6 +750,8 @@ open_inarch (const char *archive_filename, const char *file)
 	  || ! bfd_set_format (arch, bfd_archive)
 	  || ! bfd_close (arch))
 	bfd_fatal (archive_filename);
+      else if (!silent_create)
+        non_fatal (_("creating %s"), archive_filename);
 
       /* If we die creating a new archive, don't leave it around.  */
       output_filename = archive_filename;
