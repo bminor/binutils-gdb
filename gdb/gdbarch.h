@@ -46,6 +46,7 @@ struct frame_info;
 struct value;
 struct objfile;
 struct minimal_symbol;
+struct regbuf;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -1472,8 +1473,8 @@ extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-typedef void (gdbarch_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
-extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
+typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regbuf *regbuf, char *valbuf);
+extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regbuf *regbuf, char *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (EXTRACT_RETURN_VALUE)
 #error "Non multi-arch definition of EXTRACT_RETURN_VALUE"
@@ -1611,8 +1612,8 @@ extern int gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch);
 #define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (internal_error (__FILE__, __LINE__, "EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
 #endif
 
-typedef CORE_ADDR (gdbarch_extract_struct_value_address_ftype) (char *regbuf);
-extern CORE_ADDR gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
+typedef CORE_ADDR (gdbarch_extract_struct_value_address_ftype) (struct regbuf *regbuf);
+extern CORE_ADDR gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regbuf *regbuf);
 extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_extract_struct_value_address_ftype *extract_struct_value_address);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (EXTRACT_STRUCT_VALUE_ADDRESS)
 #error "Non multi-arch definition of EXTRACT_STRUCT_VALUE_ADDRESS"

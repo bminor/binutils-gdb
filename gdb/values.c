@@ -1224,7 +1224,8 @@ value_from_double (struct type *type, DOUBLEST num)
 
 /* ARGSUSED */
 struct value *
-value_being_returned (struct type *valtype, char *retbuf, int struct_return)
+value_being_returned (struct type *valtype, struct regbuf *retbuf,
+		      int struct_return)
 {
   struct value *val;
   CORE_ADDR addr;

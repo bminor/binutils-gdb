@@ -3754,7 +3754,7 @@ set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf)
+gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regbuf *regbuf, char *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->extract_return_value == 0)
@@ -3901,7 +3901,7 @@ gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf)
+gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regbuf *regbuf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->extract_struct_value_address == 0)

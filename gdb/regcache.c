@@ -26,12 +26,19 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "regbuf.h"
 
 /*
  * DATA STRUCTURE
  *
  * Here is the actual register cache.
  */
+
+/* Global structure containing the current regbuf.  */
+/* FIXME: cagney/2002-05-11: The two global arrays registers[] and
+   register_valid[] currently point into this structure.  */
+
+struct regbuf *regcache_regbuf;
 
 /* NOTE: this is a write-through cache.  There is no "dirty" bit for
    recording if the register values have been changed (eg. by the
@@ -755,37 +762,40 @@ reg_flush_command (char *command, int from_tty)
 static void
 build_regcache (void)
 {
-  int i;
-  int sizeof_register_valid;
-  /* Come up with the real size of the registers buffer.  */
-  int sizeof_registers = REGISTER_BYTES; /* OK use.  */
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    {
-      long regend;
-      /* Keep extending the buffer so that there is always enough
-         space for all registers.  The comparison is necessary since
-         legacy code is free to put registers in random places in the
-         buffer separated by holes.  Once REGISTER_BYTE() is killed
-         this can be greatly simplified.  */
-      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
-         REGISTER_BYTE().  Unfortunatly, legacy code likes to lay the
-         buffer out so that certain registers just happen to overlap.
-         Ulgh!  New targets use gdbarch's register read/write and
-         entirely avoid this uglyness.  */
-      regend = REGISTER_BYTE (i) + REGISTER_RAW_SIZE (i);
-      if (sizeof_registers < regend)
-	sizeof_registers = regend;
-    }
-  registers = xmalloc (sizeof_registers);
-  sizeof_register_valid = ((NUM_REGS + NUM_PSEUDO_REGS)
-			   * sizeof (*register_valid));
-  register_valid = xmalloc (sizeof_register_valid);
-  memset (register_valid, 0, sizeof_register_valid);
+  regcache_regbuf = regbuf_xmalloc (current_gdbarch);
+  registers = grub_around_regbuf_for_registers (regcache_regbuf);
+  register_valid = grub_around_regbuf_for_register_valid (regcache_regbuf);
+}
+
+void
+regcache_save (struct regbuf *regbuf)
+{
+  /* FIXME: cagney/2002-05-11: This assumes that the current
+     architecture and the regbuf architecture are identical.  */
+  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
+  char *regbuf_register_valid = grub_around_regbuf_for_register_valid (regbuf);
+  memcpy (regbuf_registers, registers, REGISTER_BYTES);
+  memcpy (regbuf_register_valid, register_valid, NUM_REGS + NUM_PSEUDO_REGS);
+}
+
+void
+regcache_restore (struct regbuf *regbuf)
+{
+  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
+  write_register_bytes (0, regbuf_registers, REGISTER_BYTES);
+}
+
+void
+regcache_restore_no_writethrough (struct regbuf *regbuf)
+{
+  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
+  memcpy (registers, regbuf_registers, REGISTER_BYTES);
 }
 
 void
 _initialize_regcache (void)
 {
+  REGISTER_GDBARCH_SWAP (regcache_regbuf);
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
   register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);

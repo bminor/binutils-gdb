@@ -42,6 +42,7 @@
 #include "inf-loop.h"
 #include "regcache.h"
 #include "value.h"
+#include "regbuf.h"
 
 /* Prototypes for local functions */
 
@@ -61,10 +62,6 @@ static void delete_breakpoint_current_contents (void *);
 
 static void set_follow_fork_mode_command (char *arg, int from_tty,
 					  struct cmd_list_element * c);
-
-static struct inferior_status *xmalloc_inferior_status (void);
-
-static void free_inferior_status (struct inferior_status *);
 
 static int restore_selected_frame (void *);
 
@@ -341,7 +338,7 @@ int proceed_to_finish;
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
-char *stop_registers;
+struct regbuf *stop_registers;
 
 /* Nonzero if program stopped due to error trying to insert breakpoints.  */
 
@@ -3505,7 +3502,7 @@ and/or watchpoints.\n");
   /* Save the function value return registers, if we care.
      We might be about to restore their previous contents.  */
   if (proceed_to_finish)
-    read_register_bytes (0, stop_registers, REGISTER_BYTES);
+    regcache_save (stop_registers);
 
   if (stop_stack_dummy)
     {
@@ -3911,36 +3908,18 @@ struct inferior_status
   int stop_after_trap;
   int stop_soon_quietly;
   CORE_ADDR selected_frame_address;
-  char *stop_registers;
+  struct regbuf *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
      registers and then decides to call error(), we better not have changed
      any registers.  */
-  char *registers;
+  struct regbuf *registers;
 
   int selected_level;
   int breakpoint_proceeded;
   int restore_stack_info;
   int proceed_to_finish;
 };
-
-static struct inferior_status *
-xmalloc_inferior_status (void)
-{
-  struct inferior_status *inf_status;
-  inf_status = xmalloc (sizeof (struct inferior_status));
-  inf_status->stop_registers = xmalloc (REGISTER_BYTES);
-  inf_status->registers = xmalloc (REGISTER_BYTES);
-  return inf_status;
-}
-
-static void
-free_inferior_status (struct inferior_status *inf_status)
-{
-  xfree (inf_status->registers);
-  xfree (inf_status->stop_registers);
-  xfree (inf_status);
-}
 
 void
 write_inferior_status_register (struct inferior_status *inf_status, int regno,
@@ -3949,7 +3928,7 @@ write_inferior_status_register (struct inferior_status *inf_status, int regno,
   int size = REGISTER_RAW_SIZE (regno);
   void *buf = alloca (size);
   store_signed_integer (buf, size, val);
-  memcpy (&inf_status->registers[REGISTER_BYTE (regno)], buf, size);
+  regbuf_write (inf_status->registers, regno, buf);
 }
 
 /* Save all of the information associated with the inferior<==>gdb
@@ -3959,7 +3938,7 @@ write_inferior_status_register (struct inferior_status *inf_status, int regno,
 struct inferior_status *
 save_inferior_status (int restore_stack_info)
 {
-  struct inferior_status *inf_status = xmalloc_inferior_status ();
+  struct inferior_status *inf_status = XMALLOC (struct inferior_status);
 
   inf_status->stop_signal = stop_signal;
   inf_status->stop_pc = stop_pc;
@@ -3983,9 +3962,9 @@ save_inferior_status (int restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
 
-  memcpy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
-
-  read_register_bytes (0, inf_status->registers, REGISTER_BYTES);
+  inf_status->stop_registers = regbuf_dup (stop_registers);
+  inf_status->registers = regbuf_xmalloc (current_gdbarch);
+  regcache_save (inf_status->registers);
 
   record_selected_frame (&(inf_status->selected_frame_address),
 			 &(inf_status->selected_level));
@@ -4049,13 +4028,15 @@ restore_inferior_status (struct inferior_status *inf_status)
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
 
-  /* FIXME: Is the restore of stop_registers always needed */
-  memcpy (stop_registers, inf_status->stop_registers, REGISTER_BYTES);
+  /* FIXME: Is the restore of stop_registers always needed?  */
+  regbuf_xfree (stop_registers);
+  stop_registers = inf_status->stop_registers;
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
-    write_register_bytes (0, inf_status->registers, REGISTER_BYTES);
+    regcache_restore (inf_status->registers);
+  regbuf_xfree (inf_status->registers);
 
   /* FIXME: If we are being called after stopping in a function which
      is called from gdb, we should not be trying to restore the
@@ -4083,7 +4064,7 @@ restore_inferior_status (struct inferior_status *inf_status)
 
     }
 
-  free_inferior_status (inf_status);
+  xfree (inf_status);
 }
 
 static void
@@ -4103,7 +4084,9 @@ discard_inferior_status (struct inferior_status *inf_status)
 {
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
-  free_inferior_status (inf_status);
+  regbuf_xfree (inf_status->registers);
+  regbuf_xfree (inf_status->stop_registers);
+  xfree (inf_status);
 }
 
 /* Oft used ptids */
@@ -4194,7 +4177,7 @@ save_inferior_ptid (void)
 static void
 build_infrun (void)
 {
-  stop_registers = xmalloc (REGISTER_BYTES);
+  stop_registers = regbuf_xmalloc (current_gdbarch);
 }
 
 void
@@ -4203,8 +4186,6 @@ _initialize_infrun (void)
   register int i;
   register int numsigs;
   struct cmd_list_element *c;
-
-  build_infrun ();
 
   register_gdbarch_swap (&stop_registers, sizeof (stop_registers), NULL);
   register_gdbarch_swap (NULL, 0, build_infrun);

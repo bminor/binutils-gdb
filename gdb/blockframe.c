@@ -34,6 +34,7 @@
 #include "inferior.h"		/* for read_pc */
 #include "annotate.h"
 #include "regcache.h"
+#include "regbuf.h"
 
 /* Prototypes for exported functions. */
 
@@ -1069,7 +1070,7 @@ struct dummy_frame
   CORE_ADDR fp;
   CORE_ADDR sp;
   CORE_ADDR top;
-  char *registers;
+  struct regbuf *regbuf;
 
   /* Address range of the call dummy code.  Look for PC in the range
      [LO..HI) (after allowing for DECR_PC_AFTER_BREAK).  */
@@ -1086,7 +1087,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-char *
+struct regbuf *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
@@ -1098,7 +1099,7 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 	    || fp == dummyframe->sp
 	    || fp == dummyframe->top))
       /* The frame in question lies between the saved fp and sp, inclusive */
-      return dummyframe->registers;
+      return dummyframe->regbuf;
 
   return 0;
 }
@@ -1131,11 +1132,10 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 CORE_ADDR
 generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
-  char *dummy_regs = generic_find_dummy_frame (pc, fp);
+  struct regbuf *dummy_regs = generic_find_dummy_frame (pc, fp);
 
   if (dummy_regs)
-    return extract_address (&dummy_regs[REGISTER_BYTE (regno)],
-			    REGISTER_RAW_SIZE (regno));
+    return regbuf_read_as_address (dummy_regs, regno);
   else
     return 0;
 }
@@ -1162,7 +1162,7 @@ generic_push_dummy_frame (void)
     if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
-	xfree (dummy_frame->registers);
+	regbuf_xfree (dummy_frame->regbuf);
 	xfree (dummy_frame);
 	dummy_frame = dummy_frame_stack;
       }
@@ -1170,13 +1170,13 @@ generic_push_dummy_frame (void)
       dummy_frame = dummy_frame->next;
 
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
-  dummy_frame->registers = xmalloc (REGISTER_BYTES);
+  dummy_frame->regbuf = regbuf_xmalloc (current_gdbarch);
+  regcache_save (dummy_frame->regbuf);
 
   dummy_frame->pc = read_pc ();
   dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
-  read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -1224,10 +1224,10 @@ generic_pop_dummy_frame (void)
   if (!dummy_frame)
     error ("Can't pop dummy frame!");
   dummy_frame_stack = dummy_frame->next;
-  write_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
+  regcache_restore (dummy_frame->regbuf);
   flush_cached_frames ();
 
-  xfree (dummy_frame->registers);
+  regbuf_xfree (dummy_frame->regbuf);
   xfree (dummy_frame);
 }
 
@@ -1320,10 +1320,8 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
 	  if (raw_buffer)
-	    memcpy (raw_buffer,
-		    generic_find_dummy_frame (frame->pc, frame->frame) +
-		    REGISTER_BYTE (regnum),
-		    REGISTER_RAW_SIZE (regnum));
+	    regbuf_read (generic_find_dummy_frame (frame->pc, frame->frame),
+			 regnum, raw_buffer);
 	  return;
 	}
 

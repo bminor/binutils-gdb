@@ -41,6 +41,7 @@
 #include "gdb.h"
 #include <ctype.h>
 #include <sys/time.h>
+#include "regbuf.h"
 
 enum
   {
@@ -55,7 +56,7 @@ struct ui_file *raw_stdout;
 static char *last_async_command;
 static char *previous_async_command;
 static char *mi_error_message;
-static char *old_regs;
+static struct regbuf *old_regs;
 
 extern void _initialize_mi_main (void);
 static char *mi_input (char *);
@@ -367,19 +368,16 @@ static int
 register_changed_p (int regnum)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char *old_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (! frame_register_read (selected_frame, regnum, raw_buffer))
     return -1;
-
-  if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	      REGISTER_RAW_SIZE (regnum)) == 0)
+  regbuf_read (old_regs, regnum, old_buffer);
+  if (memcmp (old_buffer, raw_buffer, REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
-  /* Found a changed register. Return 1. */
-
-  memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	  REGISTER_RAW_SIZE (regnum));
-
+  /* Found a changed register.  Update the buffer and return 1.  */
+  regbuf_write (old_regs, regnum, raw_buffer);
   return 1;
 }
 
@@ -1473,9 +1471,7 @@ mi1_command_loop (void)
 static void
 setup_architecture_data (void)
 {
-  /* don't trust REGISTER_BYTES to be zero. */
-  old_regs = xmalloc (REGISTER_BYTES + 1);
-  memset (old_regs, 0, REGISTER_BYTES + 1);
+  old_regs = regbuf_xmalloc (current_gdbarch);
 }
 
 static void

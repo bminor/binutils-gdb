@@ -46,6 +46,8 @@
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
+#include "regbuf.h"		/* For grub_around_regbuf_for_registers.  */
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register. Usually
@@ -1143,10 +1145,12 @@ ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    REGBUF, and copy that return value into VALBUF in virtual format. */
 
 static void
-rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
+rs6000_extract_return_value (struct type *valtype, struct regbuf *regs,
+			     char *valbuf)
 {
   int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  char *regbuf = grub_around_regbuf_for_registers (regs);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
@@ -1947,8 +1951,9 @@ rs6000_store_return_value (struct type *type, char *valbuf)
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 static CORE_ADDR
-rs6000_extract_struct_value_address (char *regbuf)
+rs6000_extract_struct_value_address (struct regbuf *regs)
 {
+  /* FIXME: cagney/2002-05-11: This global variable is just a hack!  */
   return rs6000_struct_return_address;
 }
 

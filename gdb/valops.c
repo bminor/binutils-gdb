@@ -1672,7 +1672,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char *retbuf = (char*) alloca (REGISTER_BYTES);
+    struct regbuf *retbuf = NULL;
     char *name;
     struct symbol *symbol;
 
@@ -1704,7 +1704,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* Execute the stack dummy routine, calling FUNCTION.
        When it is done, discard the empty frame
        after storing the contents of all regs into retbuf.  */
-    rc = run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, retbuf);
+    rc = run_stack_dummy (real_pc + CALL_DUMMY_START_OFFSET, &retbuf);
 
     if (rc == 1)
       {

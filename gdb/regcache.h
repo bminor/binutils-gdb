@@ -22,6 +22,8 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+struct regbuf;
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
@@ -46,6 +48,14 @@ extern char *registers;
    referenced thread. */
 
 extern signed char *register_valid;
+
+/* Save/restore the register cache using the regbuf.  The operation is
+   write through - it is strictly for code that needs to restore the
+   target's registers to a previous state.  */
+
+extern void regcache_save (struct regbuf *regbuf);
+extern void regcache_restore (struct regbuf *regbufx);
+extern void regcache_restore_no_writethrough (struct regbuf *regbufx);
 
 extern int register_cached (int regnum);
 

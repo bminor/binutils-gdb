@@ -1,3 +1,111 @@
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (regcache_restore): New function.
+	* regcache.h (regcache_restore): Declare.
+
+	* infrun.c (build_infrun): Allocate stop_registers using
+	regbuf_xmalloc.
+	(_initialize_infrun): Don't call build_infrun.
+
+	* Makefile.in (infrun.o): Add dependency on "regbuf.h".
+
+	* infrun.c: Include "regbuf.h".
+	(struct inferior_status): Change type of stop_registers
+	and registers to ``struct regbuf''.
+	(xmalloc_inferior_status): Allocate stop_registers and registers
+	using regbuf_xmalloc.
+	(free_inferior_status): Free registers and stop_registers using
+	regbuf_xfree.
+	(xmalloc_inferior_status): Delete.
+	(save_inferior_status): XMALLOC inf_status directly.  Use
+	regbuf_dup and regbuf_xmalloc.
+	(free_inferior_status): Delete.
+	(discard_inferior_status): Free inf_status directly.
+	(restore_inferior_status): Free inf_status directly.  Restore
+	stop_registers by replacing buffer.
+	(write_inferior_status_register): Use regbuf_write.
+
+	* Makefile.in (infcmd.o): Add $(regbuf_h).
+
+	* infcmd.c: Include "regbuf.h".
+	(run_stack_dummy): Duplicate the stop_registers.
+
+
+	* rs6000-tdep.c (rs6000_extract_struct_value_address): Change type
+	of regbuf parameter to ``struct regbuf''.
+
+	* Makefile.in (rs6000-tdep.o): Add $(regbuf_h).
+
+	* rs6000-tdep.c: Include "regbuf.h".
+
+	* infrun.c (normal_stop): Use regcache_save.
+
+	* rs6000-tdep.c (rs6000_extract_return_value): Change regbuf type
+	to ``struct regbuf''.  Use grub_around_regbuf_for_registers.
+
+	* inferior.h (stop_registers): Change type to a ``struct regbuf''.
+	* infrun.c (stop_registers): Update.
+
+	* values.c (value_being_returned): Update.
+
+	* infcmd.c (run_stack_dummy): Update.
+
+	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS): Change type of regbuf
+	to ``struct regbuf''.
+	(EXTRACT_RETURN_VALUE): 
+
+	* value.h (value_being_returned): Change regbuf parameter type to
+	``struct retbuf''.
+
+	* inferior.h (run_stack_dummy): Change retbuf parameter type to
+	``struct regbuf''.
+	
+	* valops.c (hand_function_call): Make retbuf a ``struct regbuf''.
+
+	* blockframe.c (generic_pop_dummy_frame): Use
+	regcache_restore_no_writethrough and regbuf_xfree.
+
+	* regcache.c (regcache_restore_no_writethrough): New function.
+	(regcache_save): New function.
+	* regcache.h (regcache_save): Declare.
+	(regcache_restore_no_writethrough): Declare.
+
+	* blockframe.c (generic_pop_dummy_frame): Use regbuf_xfree and
+	regcache_restore_regbuf.
+	(generic_get_saved_register): Use regbuf_read.
+
+
+	* blockframe.c: Include "regbuf.h".
+	(generic_push_dummy_frame): Use regbuf_xfree and regcache_save.
+
+	* frame.h (generic_find_dummy_frame): Change return type to
+	``struct regbuf''.
+
+	* Makefile.in (blockframe.o): Add dependency on $(regbuf_h).
+
+	* blockframe.c (struct dummy_frame): Replace registers with
+	regbuf.
+	(generic_find_dummy_frame): Change return type to `struct regbuf',
+	return regbuf.
+	(generic_read_register_dummy): Rewrite using
+	regbuf_read_as_address.
+
+	* regcache.c: Include "regbuf.h".
+	(_initialize_regcache): Register regcache_regbuf for swapping.
+	(regcache_regbuf): Define.
+	(build_regcache): Rewrite using regbuf_xmalloc,
+	grub_around_regbuf_for_registers and
+	grub_around_regbuf_for_register_valid.
+	
+	* Makefile.in (regcache.o): Add $(regbuf_h).
+
+	* defs.h (XCALLOC): Define.
+	* regbuf.c, regbuf.c: New files.
+	* Makefile.in (SFILES): Add regbuf.c.
+	(regbuf_h): Define.
+	(COMMON_OBS): Add regbuf.o.
+	(regbuf.o): Specify dependencies.
+
 2002-05-15  Jim Blandy  <jimb@redhat.com>
 
 	Add macro structures to GDB's symbol tables.  Nobody puts anything
