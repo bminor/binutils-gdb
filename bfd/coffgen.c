@@ -585,7 +585,8 @@ fixup_symbol_value (abfd, coff_symbol_ptr, syment)
       syment->n_scnum = N_UNDEF;
       syment->n_value = coff_symbol_ptr->symbol.value;
     }
-  else if (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING)
+  else if ((coff_symbol_ptr->symbol.flags & BSF_DEBUGGING) != 0
+	   && (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING_RELOC) == 0)
     {
       syment->n_value = coff_symbol_ptr->symbol.value;
     }

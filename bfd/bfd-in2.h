@@ -2303,7 +2303,7 @@ typedef struct symbol_cache_entry
           <<BSF_GLOBAL>> */
 
         /* The symbol is a debugging record. The value has an arbitary
-          meaning. */
+          meaning, unless BSF_DEBUGGING_RELOC is also set.  */
 #define BSF_DEBUGGING  0x08
 
         /* The symbol denotes a function entry point.  Used in ELF,
@@ -2360,6 +2360,11 @@ typedef struct symbol_cache_entry
         /* The symbol denotes a data object.  Used in ELF, and perhaps
           others someday.  */
 #define BSF_OBJECT        0x10000
+
+        /* This symbol is a debugging symbol.  The value is the offset
+          into the section of the data.  BSF_DEBUGGING should be set
+          as well.  */
+#define BSF_DEBUGGING_RELOC 0x20000
 
   flagword flags;
 
