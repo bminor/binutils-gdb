@@ -1,3 +1,12 @@
+2001-03-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/Makefile.in (EXECUTABLES): Add step-line.
+	* gdb.base/step-line.exp: New file.  Test step/next in presence of
+	#line directives.
+	* gdb.base/step-line.c: New file.  Test program for the above.
+	* gdb.base/step-line.inp: New file.  We pretend that this file has
+	been transformed by some other tool into step-line.c.
+
 2001-03-21  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/userdef.exp: Check that GDB tolerates whitespace in
