@@ -4,6 +4,9 @@
 	correctly sign-extend 32-bit ECOFF null values (0xffffffff, -1)
 	on 64 bit machines.
 	(ecoff_swap_sym_in) <iss>: Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_symbolic_info): Fix error reading
+	ECOFF information: 'ioptMax' refers to the actual *size*
+	of the optimization symtab, not the number of entries.
 
 2002-09-19  Daniel Jacobowitz  <drow@mvista.com>
 

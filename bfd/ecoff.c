@@ -553,7 +553,9 @@ _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
   UPDATE_RAW_END (cbDnOffset, idnMax, backend->debug_swap.external_dnr_size);
   UPDATE_RAW_END (cbPdOffset, ipdMax, backend->debug_swap.external_pdr_size);
   UPDATE_RAW_END (cbSymOffset, isymMax, backend->debug_swap.external_sym_size);
-  UPDATE_RAW_END (cbOptOffset, ioptMax, backend->debug_swap.external_opt_size);
+  /* eraxxon@alumni.rice.edu: ioptMax refers to the size of the
+     optimization symtab, not the number of entries */
+  UPDATE_RAW_END (cbOptOffset, ioptMax, sizeof (char));
   UPDATE_RAW_END (cbAuxOffset, iauxMax, sizeof (union aux_ext));
   UPDATE_RAW_END (cbSsOffset, issMax, sizeof (char));
   UPDATE_RAW_END (cbSsExtOffset, issExtMax, sizeof (char));
