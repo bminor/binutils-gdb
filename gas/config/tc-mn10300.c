@@ -435,6 +435,7 @@ md_assemble (str)
       const char *errmsg = NULL;
       int op_idx;
       char *hold;
+      int extra_shift = 0;
 
       fc = 0;
       match = 0;
@@ -587,8 +588,18 @@ md_assemble (str)
 		  goto error;
 		}
 		
+	      if (opcode->format == FMT_D1 || opcode->format == FMT_S1)
+		extra_shift = 8;
+	      else if (opcode->format == FMT_D2 || opcode->format == FMT_D4
+		       || opcode->format == FMT_S2 || opcode->format == FMT_S4
+		       || opcode->format == FMT_S6 || opcode->format == FMT_D5)
+		extra_shift = 16;
+	      else
+		extra_shift = 0;
+	      
 	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0);
+					  (char *) NULL, 0, extra_shift);
+
 	      break;
 
 	    case O_constant:
@@ -604,7 +615,7 @@ md_assemble (str)
 		}
 
 	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0);
+					  (char *) NULL, 0, 0);
 	      break;
 
 	    default:
@@ -795,7 +806,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
       insn = bfd_getl32((unsigned char *) where);
       insn = mn10300_insert_operand (insn, operand, (offsetT) value,
-				  fixp->fx_file, fixp->fx_line);
+				  fixp->fx_file, fixp->fx_line, 0);
       bfd_putl32((bfd_vma) insn, (unsigned char *) where);
 
       if (fixp->fx_done)
@@ -833,12 +844,13 @@ md_apply_fix3 (fixp, valuep, seg)
 /* Insert an operand value into an instruction.  */
 
 static unsigned long
-mn10300_insert_operand (insn, operand, val, file, line)
+mn10300_insert_operand (insn, operand, val, file, line, shift)
      unsigned long insn;
      const struct mn10300_operand *operand;
      offsetT val;
      char *file;
      unsigned int line;
+     unsigned int shift;
 {
   if (operand->bits != 32)
     {
@@ -873,7 +885,12 @@ mn10300_insert_operand (insn, operand, val, file, line)
         }
     }
 
-  insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+  insn |= (((long) val & ((1 << operand->bits) - 1))
+	   << (operand->shift + shift));
+
+  if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
+    insn |= (((long) val & ((1 << operand->bits) - 1))
+	     << (operand->shift + shift + 2));
   return insn;
 }
 

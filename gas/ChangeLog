@@ -1,3 +1,8 @@
+Mon Nov  4 12:53:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (mn10300_insert_operand): Handle
+	repeated register operands.
+
 Fri Nov  1 10:42:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo: Added section on reporting bugs.
