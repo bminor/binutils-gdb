@@ -1,3 +1,8 @@
+2000-11-14  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-pmac.c: Fix formatting.
+	* coff-ppc.c: Likewise.
+
 2000-11-13  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Also add indirect
