@@ -6,10 +6,6 @@ OUTPUT_FORMAT="elf32-ntradbigmips"
 BIG_OUTPUT_FORMAT="elf32-ntradbigmips"
 LITTLE_OUTPUT_FORMAT="elf32-ntradlittlemips"
 
-unset EXECUTABLE_SYMBOLS
-unset WRITABLE_RODATA
-unset SHLIB_TEXT_START_ADDR
-
 # Magic sections.
 OTHER_TEXT_SECTIONS='*(.mips16.fn.*) *(.mips16.call.*)'
 OTHER_SECTIONS='

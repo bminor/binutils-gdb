@@ -11,6 +11,9 @@ BIG_OUTPUT_FORMAT="elf32-bigmips"
 LITTLE_OUTPUT_FORMAT="elf32-littlemips"
 
 TEMPLATE_NAME=elf32
+LIB_PATH=/usr/lib32
+
+GENERATE_SHLIB_SCRIPT=yes
 
 TEXT_START_ADDR=0x10000000
 MAXPAGESIZE=0x100000
@@ -30,19 +33,6 @@ OTHER_SDATA_SECTIONS="
 TEXT_START_SYMBOLS='_ftext = . ;'
 DATA_START_SYMBOLS='_fdata = . ;'
 OTHER_BSS_SYMBOLS='_fbss = .;'
-# IRIX6 defines these symbols.  0x34 is the size of the ELF header.
-EXECUTABLE_SYMBOLS="
-  __dso_displacement = 0;
-  __elf_header = ${TEXT_START_ADDR};
-  __program_header_table = ${TEXT_START_ADDR} + 0x34;
-"
-
-# There are often dynamic relocations against the .rodata section.
-# Setting DT_TEXTREL in the .dynamic section does not convince the
-# IRIX6 linker to permit relocations against the text segment.
-# Following the IRIX linker, we simply put .rodata in the data
-# segment.
-WRITABLE_RODATA=
 
 OTHER_SECTIONS="
   .MIPS.events.text ${RELOCATING-0} :

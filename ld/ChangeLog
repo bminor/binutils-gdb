@@ -1,3 +1,23 @@
+2002-10-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32bmipn32-defs.sh (LIB_PATH): Set to /usr/lib32.
+	(GENERATE_SHLIB_SCRIPT): Set to yes.
+	(EXECUTABLE_SYMBOLS, WRITABLE_RODATA): Moved to...
+	* emulparams/elf32bmipn32.sh: here.
+	(GENERATE_SHLIB_SCRIPT): Deleted as redundant.
+	* emulparams/elf32btsmipn32.sh: Delete redundant unsets.
+	* emulparams/elf64bmip-defs.sh: New file.  Extend
+	elf32bmipn32-defs.sh by overiding ELFSIZE and LIB_PATH.
+	* emulparams/elf64bmip.sh: Bring in definitions from
+	elf64bmip-defs.sh.
+	(ELFSIZE, GENERATE_SHLIB_SCRIPT, LIB_PATH): Delete redundant
+	settings.
+	(WRITABLE_RODATA): Moved from elf32bmipn32-defs.sh.
+	* emulparams/elf64btsmip.sh: Bring in definitions from
+	elf64bmip-defs.sh.
+	(ELFSIZE, GENERATE_SHLIB_SCRIPT): Delete, redundant.
+	(EXECUTABLE_SYMBOLS, WRITABLE_RODATA): Delete redundant unsets.
+
 2002-10-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* configure.tgt (s390x-*-linux*): Add elf_s390 emulation.
