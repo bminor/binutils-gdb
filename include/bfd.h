@@ -259,11 +259,21 @@ typedef enum bfd_print_symbol
 { 
   bfd_print_symbol_name,
   bfd_print_symbol_more,
-  bfd_print_symbol_all,
-  bfd_print_symbol_nm	/* Pretty format suitable for nm program. */
+  bfd_print_symbol_all
 } bfd_print_symbol_type;
     
 
+/* Information about a symbol that nm needs.  */
+
+typedef struct _symbol_info
+{
+  symvalue value;
+  char type;                   /*  */
+  CONST char *name;            /* Symbol name.  */
+  char stab_other;             /* Unused. */
+  short stab_desc;             /* Info for N_TYPE.  */
+  CONST char *stab_name;
+} symbol_info;
 
 /* The code that implements targets can initialize a jump table with this
    macro.  It must name all its routines the same way (a prefix plus
@@ -297,6 +307,7 @@ CAT(NAME,_get_reloc_upper_bound),\
 CAT(NAME,_canonicalize_reloc),\
 CAT(NAME,_make_empty_symbol),\
 CAT(NAME,_print_symbol),\
+CAT(NAME,_get_symbol_info),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_set_arch_mach),\
 CAT(NAME,_openr_next_archived_file),\
@@ -1311,6 +1322,9 @@ bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 int 
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
+void 
+bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
+
 struct _bfd 
 {
      /* The filename the application opened the BFD with.  */
@@ -1612,6 +1626,10 @@ typedef struct bfd_target
                                       struct symbol_cache_entry *,
                                       bfd_print_symbol_type));
 #define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
+  void          (*_bfd_get_symbol_info) PARAMS ((bfd *,
+                                      struct symbol_cache_entry *,
+                                      symbol_info *));
+#define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
   alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 
   boolean    (*_bfd_set_arch_mach) PARAMS ((bfd *, enum bfd_architecture,
