@@ -81,8 +81,10 @@ static asection bfd_debug_section =
   "*DEBUG*", 0,   0,     NULL, 0,     0,            0,
   /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
      0,           0,                0,       0,
-  /* sec_info_type, use_rela_p, has_tls_reloc, flag11, flag12,     */
-     0,		    0,		0,	       0,      0,
+  /* sec_info_type, use_rela_p, has_tls_reloc,                     */
+     0,		    0,		0,
+  /* need_finalize_relax, has_gp_reloc,                            */
+     0,			  0,
   /* flag13, flag14, flag15, flag16, flag20, flag24,               */
      0,      0,      0,      0,      0,	     0,
   /* vma, lma, _cooked_size, _raw_size,                            */

@@ -1,3 +1,45 @@
+2003-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Move TARGET_LITTLE_SYM and other macros used by
+	elfxx-target.h so that we can use elf_backend_got_header_size.
+	(ELF_MACHINE_ALT1, ELF_MACHINE_ALT2): Delete.
+	(GLINK_CALL_STUB_SIZE): Modify.  Define new glink call stub and
+	associated macros.
+	(ppc64_elf_howto_raw <GOT_TPREL16_DS, GOT_TPREL16_LO_DS>): Correct
+	dst_mask.
+	(enum ppc_stub_type): Add ppc_stub_long_branch_r2off and
+	ppc_stub_plt_branch_r2off.
+	(struct ppc_stub_hash_entry): Reorganize.
+	(struct ppc_link_hash_table): Add no_multi_toc, multi_toc_needed,
+	toc_curr, toc_off and emit_stub_syms.
+	(ppc64_elf_link_hash_table_create): Init them.
+	(ppc_stub_name): Correct string size.
+	(ppc64_elf_check_relocs): Set has_gp_reloc on GOT and TOC relocs.
+	(ppc64_elf_size_dynamic_sections): Set no_multi_toc if GOT entries
+	used.
+	(ppc_type_of_stub): Tweak root.type test.
+	(build_plt_stub): Remove glink code.  Adjust for insn macro changes.
+	(ppc_size_one_stub): Handle ppc_stub_long_branch_r2off and
+	ppc_stub_plt_branch_r2off.
+	(ppc_build_one_stub): Likewise.  Fix var shadowing.  Correct addis,addi
+	range test.  Use toc_off to calculte r2 values.  Handle emit_stub_syms.
+	(ppc64_elf_setup_section_lists): Remove htab creator flavour test.
+	Initialize elf_gp and toc_curr.
+	(ppc64_elf_next_toc_section, ppc64_elf_reinit_toc): New functions.
+	(ppc64_elf_next_input_section): Set toc_off.
+	(group_sections): Ensure groups have the same TOC.
+	(ppc64_elf_size_stubs): Check whether we need a TOC adjusting stub.
+	(ppc64_elf_build_stubs): Add emit_stub_syms param, and stash in htab.
+	Build new glink stub.
+	(ppc64_elf_relocate_section): Handle multiple TOCs.  Fix comments.
+	(ppc64_elf_finish_dynamic_sections): Adjust DT_PPC64_GLINK.
+	* elf64-ppc.h (ppc64_elf_build_stubs): Update prototype.
+	(ppc64_elf_next_toc_section, ppc64_elf_reinit_toc): Declare.
+	* section.c (struct sec): Rename flag12 to has_gp_reloc.
+	(STD_SECTION): Update.
+	* ecoff.c (bfd_debug_section): Update comment.
+	* bfd-in2.h: Regenerate.
+
 2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfcode.h (elf_slurp_reloc_table_from_section): Don't dereference

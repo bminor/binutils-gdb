@@ -1308,8 +1308,10 @@ typedef struct sec
   /* Nonzero if this section needs the relax finalize pass.  */
   unsigned int need_finalize_relax:1;
 
+  /* Nonzero if this section has a gp reloc.  */
+  unsigned int has_gp_reloc:1;
+
   /* Usused bits.  */
-  unsigned int flag12:1;
   unsigned int flag13:1;
   unsigned int flag14:1;
   unsigned int flag15:1;

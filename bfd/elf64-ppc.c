@@ -60,6 +60,47 @@ static bfd_boolean ppc64_elf_new_section_hook
   PARAMS ((bfd *, asection *));
 
 
+#define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
+#define TARGET_LITTLE_NAME	"elf64-powerpcle"
+#define TARGET_BIG_SYM		bfd_elf64_powerpc_vec
+#define TARGET_BIG_NAME		"elf64-powerpc"
+#define ELF_ARCH		bfd_arch_powerpc
+#define ELF_MACHINE_CODE	EM_PPC64
+#define ELF_MAXPAGESIZE		0x10000
+#define elf_info_to_howto	ppc64_elf_info_to_howto
+
+#define elf_backend_want_got_sym 0
+#define elf_backend_want_plt_sym 0
+#define elf_backend_plt_alignment 3
+#define elf_backend_plt_not_loaded 1
+#define elf_backend_got_symbol_offset 0
+#define elf_backend_got_header_size 8
+#define elf_backend_plt_header_size PLT_INITIAL_ENTRY_SIZE
+#define elf_backend_can_gc_sections 1
+#define elf_backend_can_refcount 1
+#define elf_backend_rela_normal 1
+
+#define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
+#define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
+#define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
+#define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
+#define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
+
+#define elf_backend_object_p		      ppc64_elf_object_p
+#define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
+#define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
+#define elf_backend_check_relocs	      ppc64_elf_check_relocs
+#define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
+#define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
+#define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
+#define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
+#define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
+#define elf_backend_relocate_section	      ppc64_elf_relocate_section
+#define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
+#define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
+#define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
+
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so.1"
@@ -77,7 +118,10 @@ static bfd_boolean ppc64_elf_new_section_hook
 #define TP_OFFSET	0x7000
 #define DTP_OFFSET	0x8000
 
-/* .plt call stub instructions.  */
+/* .plt call stub instructions.  The normal stub is like this, but
+   sometimes the .plt entry crosses a 64k boundary and we need to
+   insert an addis to adjust r12.  */
+#define PLT_CALL_STUB_SIZE (7*4)
 #define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
 #define STD_R2_40R1	0xf8410028	/* std	 %r2,40(%r1)	     */
 #define LD_R11_0R12	0xe96c0000	/* ld	 %r11,xxx+0@l(%r12)  */
@@ -86,19 +130,31 @@ static bfd_boolean ppc64_elf_new_section_hook
 					/* ld	 %r11,xxx+16@l(%r12) */
 #define BCTR		0x4e800420	/* bctr			     */
 
-/* The normal stub is this size.  */
-#define PLT_CALL_STUB_SIZE (7*4)
 
-/* But sometimes the .plt entry crosses a 64k boundary, and we need
-   to adjust the high word with this insn.  */
-#define ADDIS_R12_R12_1	0x3d8c0001	/* addis %r12,%r12,1	*/
+#define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha  */
+#define ADDI_R2_R2	0x38420000	/* addi  %r2,%r2,off@l   */
 
-/* The .glink fixup call stub is the same as the .plt call stub, but
-   the first instruction restores r2, and the std is omitted.  */
-#define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)	*/
+#define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)     */
 
-/* Always allow this much space.  */
-#define GLINK_CALL_STUB_SIZE (8*4)
+/* glink call stub instructions.  We enter with the index in R0, and the
+   address of glink entry in CTR.  From that, we can calculate PLT0.  */
+#define GLINK_CALL_STUB_SIZE (16*4)
+#define MFCTR_R12	0x7d8902a6	/* mfctr  %r12			*/
+#define SLDI_R11_R0_3	0x780b1f24	/* sldi	  %r11,%r0,3		*/
+#define ADDIC_R2_R0_32K 0x34408000	/* addic. %r2,%r0,-32768	*/
+#define SUB_R12_R12_R11 0x7d8b6050	/* sub	  %r12,%r12,%r11	*/
+#define SRADI_R2_R2_63	0x7c42fe76	/* sradi  %r2,%r2,63		*/
+#define SLDI_R11_R0_2	0x780b1764	/* sldi	  %r11,%r0,2		*/
+#define AND_R2_R2_R11	0x7c425838	/* and	  %r2,%r2,%r11		*/
+					/* sub	  %r12,%r12,%r11	*/
+#define ADD_R12_R12_R2	0x7d8c1214	/* add	  %r12,%r12,%r2		*/
+#define ADDIS_R12_R12	0x3d8c0000	/* addis  %r12,%r12,xxx@ha	*/
+					/* ld	  %r11,xxx@l(%r12)	*/
+#define ADDI_R12_R12	0x398c0000	/* addi	  %r12,%r12,xxx@l	*/
+					/* ld	  %r2,8(%r12)		*/
+					/* mtctr  %r11			*/
+					/* ld	  %r11,16(%r12)		*/
+					/* bctr				*/
 
 /* Pad with this.  */
 #define NOP		0x60000000
@@ -1718,7 +1774,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_GOT_TPREL16_DS", /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0xfffc,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Like GOT_TPREL16_DS, but no overflow.  */
@@ -1733,7 +1789,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_GOT_TPREL16_LO_DS", /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0xfffc,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* Like GOT_TPREL16_LO_DS, but next higher group of 16 bits.  */
@@ -2574,12 +2630,31 @@ struct plt_entry
    .	mtctr	%r11
    .	ld	%r11,xxx+16@toc@l(%r12)
    .	bctr
+
+   ppc_stub_long_branch and ppc_stub_plt_branch may also have additional
+   code to adjust the value and save r2 to support multiple toc sections.
+   A ppc_stub_long_branch with an r2 offset looks like:
+   .	std	%r2,40(%r1)
+   .	addis	%r2,%r2,off@ha
+   .	addi	%r2,%r2,off@l
+   .	b	dest
+
+   A ppc_stub_plt_branch with an r2 offset looks like:
+   .	std	%r2,40(%r1)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r11,xxx@toc@l(%r12)
+   .	addis	%r2,%r2,off@ha
+   .	addi	%r2,%r2,off@l
+   .	mtctr	%r11
+   .	bctr
 */
 
 enum ppc_stub_type {
   ppc_stub_none,
   ppc_stub_long_branch,
+  ppc_stub_long_branch_r2off,
   ppc_stub_plt_branch,
+  ppc_stub_plt_branch_r2off,
   ppc_stub_plt_call
 };
 
@@ -2587,6 +2662,8 @@ struct ppc_stub_hash_entry {
 
   /* Base hash table entry structure.  */
   struct bfd_hash_entry root;
+
+  enum ppc_stub_type stub_type;
 
   /* The stub section.  */
   asection *stub_sec;
@@ -2598,8 +2675,6 @@ struct ppc_stub_hash_entry {
      value when building the stubs (so the stub knows where to jump.  */
   bfd_vma target_value;
   asection *target_section;
-
-  enum ppc_stub_type stub_type;
 
   /* The symbol table entry, if any, that this was derived from.  */
   struct ppc_link_hash_entry *h;
@@ -2687,7 +2762,16 @@ struct ppc_link_hash_table
     asection *link_sec;
     /* The stub section.  */
     asection *stub_sec;
+    /* Along with elf_gp, specifies the TOC pointer used in this group.  */
+    bfd_vma toc_off;
   } *stub_group;
+
+  /* Support for multiple toc sections.  */
+  unsigned int no_multi_toc;
+  unsigned int multi_toc_needed;
+
+  /* Temp used when calculating TOC pointers.  */
+  bfd_vma toc_curr;
 
   /* Assorted information used by ppc64_elf_size_stubs.  */
   int top_index;
@@ -2716,6 +2800,9 @@ struct ppc_link_hash_table
     bfd_signed_vma refcount;
     bfd_vma offset;
   } tlsld_got;
+
+  /* Set if we should emit symbols for stubs.  */
+  unsigned int emit_stub_syms;
 
   /* Set on error.  */
   unsigned int stub_error;
@@ -2799,7 +2886,7 @@ static enum ppc_stub_type ppc_type_of_stub
   PARAMS ((asection *, const Elf_Internal_Rela *,
 	   struct ppc_link_hash_entry **, bfd_vma));
 static bfd_byte *build_plt_stub
-  PARAMS ((bfd *, bfd_byte *, int, int));
+  PARAMS ((bfd *, bfd_byte *, int));
 static bfd_boolean ppc_build_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
 static bfd_boolean ppc_size_one_stub
@@ -2854,11 +2941,11 @@ stub_hash_newfunc (entry, table, string)
 
       /* Initialize the local fields.  */
       eh = (struct ppc_stub_hash_entry *) entry;
+      eh->stub_type = ppc_stub_none;
       eh->stub_sec = NULL;
       eh->stub_offset = 0;
       eh->target_value = 0;
       eh->target_section = NULL;
-      eh->stub_type = ppc_stub_none;
       eh->h = NULL;
       eh->id_sec = NULL;
     }
@@ -2964,6 +3051,9 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->add_stub_section = NULL;
   htab->layout_sections_again = NULL;
   htab->stub_group = NULL;
+  htab->no_multi_toc = 0;
+  htab->multi_toc_needed = 0;
+  htab->toc_curr = 0;
   htab->sgot = NULL;
   htab->srelgot = NULL;
   htab->splt = NULL;
@@ -2977,6 +3067,7 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->tls_sec = NULL;
   htab->tls_get_addr = NULL;
   htab->tlsld_got.refcount = 0;
+  htab->emit_stub_syms = 0;
   htab->stub_error = 0;
   htab->has_14bit_branch = 0;
   htab->have_undefweak = 0;
@@ -3038,7 +3129,7 @@ ppc_stub_name (input_section, sym_sec, h, rel)
     }
   else
     {
-      len = 8 + 1 + 8 + 1 + 8 + 1 + 16 + 1;
+      len = 8 + 1 + 8 + 1 + 8 + 1 + 8 + 1;
       stub_name = bfd_malloc (len);
       if (stub_name != NULL)
 	{
@@ -3622,6 +3713,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_GOT16_LO:
 	case R_PPC64_GOT16_LO_DS:
 	  /* This symbol requires a global offset table entry.  */
+	  sec->has_gp_reloc = 1;
 	  if (htab->sgot == NULL
 	      && !create_got_section (htab->elf.dynobj, info))
 	    return FALSE;
@@ -3690,12 +3782,6 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_SECTOFF_HA:
 	case R_PPC64_SECTOFF_DS:
 	case R_PPC64_SECTOFF_LO_DS:
-	case R_PPC64_TOC16:
-	case R_PPC64_TOC16_LO:
-	case R_PPC64_TOC16_HI:
-	case R_PPC64_TOC16_HA:
-	case R_PPC64_TOC16_DS:
-	case R_PPC64_TOC16_LO_DS:
 	case R_PPC64_DTPREL16:
 	case R_PPC64_DTPREL16_LO:
 	case R_PPC64_DTPREL16_HI:
@@ -3706,6 +3792,16 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
+	  break;
+
+	  /* Nor do these.  */
+	case R_PPC64_TOC16:
+	case R_PPC64_TOC16_LO:
+	case R_PPC64_TOC16_HI:
+	case R_PPC64_TOC16_HA:
+	case R_PPC64_TOC16_DS:
+	case R_PPC64_TOC16_LO_DS:
+	  sec->has_gp_reloc = 1;
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -4772,7 +4868,7 @@ get_sym_h (hp, symp, symsecp, tls_maskp, locsymsp, r_symndx, ibfd)
 
 /* Returns TLS_MASKP for the given REL symbol.  Function return is 0 on
    error, 2 on a toc GD type suitable for optimization, 3 on a toc LD
-   type suitable for optimization, and 1 otherwise.  */  
+   type suitable for optimization, and 1 otherwise.  */
 
 static int
 get_tls_mask (tls_maskp, locsymsp, rel, ibfd)
@@ -5867,8 +5963,16 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
       if (s == htab->sbrlt || s == htab->srelbrlt)
 	/* These haven't been allocated yet;  don't strip.  */
 	continue;
+      else if (s == htab->sgot)
+	{
+	  /* Automatic multiple tocs aren't possible if we are using the
+	     GOT.  The GOT is accessed via r2, so we can't adjust r2.
+	     FIXME: There's no reason why we couldn't lay out multiple
+	     GOTs too.  */
+	  if (s->_raw_size > elf_backend_got_header_size)
+	    htab->no_multi_toc = 1;
+	}
       else if (s == htab->splt
-	       || s == htab->sgot
 	       || s == htab->sglink)
 	{
 	  /* Strip this section if we don't need it; see the
@@ -6014,8 +6118,8 @@ ppc_type_of_stub (input_sec, rel, hash, destination)
 	      }
 	}
 
-      if (h->elf.root.type == bfd_link_hash_undefweak
-	  || h->elf.root.type == bfd_link_hash_undefined)
+      if (h->elf.root.type != bfd_link_hash_defined
+	  && h->elf.root.type != bfd_link_hash_defweak)
 	return ppc_stub_none;
     }
 
@@ -6043,28 +6147,24 @@ ppc_type_of_stub (input_sec, rel, hash, destination)
 /* Build a .plt call stub.  */
 
 static bfd_byte *
-build_plt_stub (obfd, p, offset, glink)
+build_plt_stub (obfd, p, offset)
      bfd *obfd;
      bfd_byte *p;
      int offset;
-     int glink;
 {
 #define PPC_LO(v) ((v) & 0xffff)
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
-  if (glink)
-    bfd_put_32 (obfd, LD_R2_40R1, p),			p += 4;
   bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
-  if (!glink)
-    bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+  bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
   bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
   if (PPC_HA (offset + 8) != PPC_HA (offset))
-    bfd_put_32 (obfd, ADDIS_R12_R12_1, p),		p += 4;
+    bfd_put_32 (obfd, ADDIS_R12_R12 | 1, p),		p += 4;
   offset += 8;
   bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset), p),	p += 4;
   if (PPC_HA (offset + 8) != PPC_HA (offset))
-    bfd_put_32 (obfd, ADDIS_R12_R12_1, p),		p += 4;
+    bfd_put_32 (obfd, ADDIS_R12_R12 | 1, p),		p += 4;
   offset += 8;
   bfd_put_32 (obfd, MTCTR_R11, p),			p += 4;
   bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
@@ -6101,11 +6201,28 @@ ppc_build_one_stub (gen_entry, in_arg)
   stub_entry->stub_offset = stub_sec->_cooked_size;
   loc = stub_sec->contents + stub_entry->stub_offset;
 
+  if (htab->emit_stub_syms)
+    {
+      struct elf_link_hash_entry *h;
+      h = elf_link_hash_lookup (&htab->elf, stub_entry->root.string,
+				TRUE, FALSE, FALSE);
+      if (h == NULL)
+	return FALSE;
+      h->root.type = bfd_link_hash_defined;
+      h->root.u.def.section = stub_entry->stub_sec;
+      h->root.u.def.value = stub_entry->stub_offset;
+      h->elf_link_hash_flags = (ELF_LINK_HASH_REF_REGULAR
+				| ELF_LINK_HASH_DEF_REGULAR
+				| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				| ELF_LINK_FORCED_LOCAL);
+    }
+
   stub_bfd = stub_sec->owner;
 
   switch (stub_entry->stub_type)
     {
     case ppc_stub_long_branch:
+    case ppc_stub_long_branch_r2off:
       /* Branches are relative.  This is where we are going to.  */
       off = (stub_entry->target_value
 	     + stub_entry->target_section->output_offset
@@ -6116,13 +6233,30 @@ ppc_build_one_stub (gen_entry, in_arg)
 	      + stub_sec->output_offset
 	      + stub_sec->output_section->vma);
 
-      BFD_ASSERT (off + (1 << 25) < (bfd_vma) (1 << 26));
+      if (stub_entry->stub_type != ppc_stub_long_branch_r2off)
+	size = 4;
+      else
+	{
+	  bfd_vma r2off;
 
+	  r2off = (htab->stub_group[stub_entry->target_section->id].toc_off
+		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
+	  bfd_put_32 (stub_bfd, (bfd_vma) STD_R2_40R1, loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDI_R2_R2 | PPC_LO (r2off), loc);
+	  loc += 4;
+	  off -= 12;
+	  size = 16;
+	}
       bfd_put_32 (stub_bfd, (bfd_vma) B_DOT | (off & 0x3fffffc), loc);
-      size = 4;
+
+      BFD_ASSERT (off + (1 << 25) < (bfd_vma) (1 << 26));
       break;
 
     case ppc_stub_plt_branch:
+    case ppc_stub_plt_branch_r2off:
       br_entry = ppc_branch_hash_lookup (&htab->branch_hash_table,
 					 stub_entry->root.string + 9,
 					 FALSE, FALSE);
@@ -6145,7 +6279,7 @@ ppc_build_one_stub (gen_entry, in_arg)
 	{
 	  /* Create a reloc for the branch lookup table entry.  */
 	  Elf_Internal_Rela rela;
-	  bfd_byte *loc;
+	  bfd_byte *rl;
 
 	  rela.r_offset = (br_entry->offset
 			   + htab->sbrlt->output_offset
@@ -6153,18 +6287,18 @@ ppc_build_one_stub (gen_entry, in_arg)
 	  rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 	  rela.r_addend = off;
 
-	  loc = htab->srelbrlt->contents;
-	  loc += htab->srelbrlt->reloc_count++ * sizeof (Elf64_External_Rela);
-	  bfd_elf64_swap_reloca_out (htab->srelbrlt->owner, &rela, loc);
+	  rl = htab->srelbrlt->contents;
+	  rl += htab->srelbrlt->reloc_count++ * sizeof (Elf64_External_Rela);
+	  bfd_elf64_swap_reloca_out (htab->srelbrlt->owner, &rela, rl);
 	}
 
       off = (br_entry->offset
 	     + htab->sbrlt->output_offset
 	     + htab->sbrlt->output_section->vma
 	     - elf_gp (htab->sbrlt->output_section->owner)
-	     - TOC_BASE_OFF);
+	     - htab->stub_group[stub_entry->id_sec->id].toc_off);
 
-      if (off + 0x80000000 > 0xffffffff || (off & 7) != 0)
+      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
 	  (*_bfd_error_handler)
 	    (_("linkage table error against `%s'"),
@@ -6175,11 +6309,34 @@ ppc_build_one_stub (gen_entry, in_arg)
 	}
 
       indx = off;
-      bfd_put_32 (stub_bfd, (bfd_vma) ADDIS_R12_R2 | PPC_HA (indx), loc);
-      bfd_put_32 (stub_bfd, (bfd_vma) LD_R11_0R12 | PPC_LO (indx), loc + 4);
-      bfd_put_32 (stub_bfd, (bfd_vma) MTCTR_R11, loc + 8);
-      bfd_put_32 (stub_bfd, (bfd_vma) BCTR, loc + 12);
-      size = 16;
+      if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
+	{
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDIS_R12_R2 | PPC_HA (indx), loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) LD_R11_0R12 | PPC_LO (indx), loc);
+	  size = 16;
+	}
+      else
+	{
+	  bfd_vma r2off;
+
+	  r2off = (htab->stub_group[stub_entry->target_section->id].toc_off
+		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
+	  bfd_put_32 (stub_bfd, (bfd_vma) STD_R2_40R1, loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDIS_R12_R2 | PPC_HA (indx), loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) LD_R11_0R12 | PPC_LO (indx), loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	  loc += 4;
+	  bfd_put_32 (stub_bfd, (bfd_vma) ADDI_R2_R2 | PPC_LO (r2off), loc);
+	  size = 28;
+	}
+      loc += 4;
+      bfd_put_32 (stub_bfd, (bfd_vma) MTCTR_R11, loc);
+      loc += 4;
+      bfd_put_32 (stub_bfd, (bfd_vma) BCTR, loc);
       break;
 
     case ppc_stub_plt_call:
@@ -6212,9 +6369,9 @@ ppc_build_one_stub (gen_entry, in_arg)
       off += (htab->splt->output_offset
 	      + htab->splt->output_section->vma
 	      - elf_gp (htab->splt->output_section->owner)
-	      - TOC_BASE_OFF);
+	      - htab->stub_group[stub_entry->id_sec->id].toc_off);
 
-      if (off + 0x80000000 > 0xffffffff || (off & 7) != 0)
+      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
 	  (*_bfd_error_handler)
 	    (_("linkage table error against `%s'"),
@@ -6224,7 +6381,7 @@ ppc_build_one_stub (gen_entry, in_arg)
 	  return FALSE;
 	}
 
-      p = build_plt_stub (stub_bfd, loc, (int) off, 0);
+      p = build_plt_stub (stub_bfd, loc, (int) off);
       size = p - loc;
       break;
 
@@ -6270,18 +6427,16 @@ ppc_size_one_stub (gen_entry, in_arg)
       off += (htab->splt->output_offset
 	      + htab->splt->output_section->vma
 	      - elf_gp (htab->splt->output_section->owner)
-	      - TOC_BASE_OFF);
+	      - htab->stub_group[stub_entry->id_sec->id].toc_off);
 
-      size = 28;
+      size = PLT_CALL_STUB_SIZE;
       if (PPC_HA ((int) off + 16) != PPC_HA ((int) off))
 	size += 4;
     }
   else
     {
-      /* ppc_stub_long_branch or ppc_stub_plt_branch.  */
-      stub_entry->stub_type = ppc_stub_long_branch;
-      size = 4;
-
+      /* ppc_stub_long_branch or ppc_stub_plt_branch, or their r2off
+	 variants.  */
       off = (stub_entry->target_value
 	     + stub_entry->target_section->output_offset
 	     + stub_entry->target_section->output_section->vma);
@@ -6289,6 +6444,19 @@ ppc_size_one_stub (gen_entry, in_arg)
 	      + stub_entry->stub_sec->output_offset
 	      + stub_entry->stub_sec->output_section->vma);
 
+      /* Reset the stub type from the plt variant in case we now
+	 can reach with a shorter stub.  */
+      if (stub_entry->stub_type >= ppc_stub_plt_branch)
+	stub_entry->stub_type += ppc_stub_long_branch - ppc_stub_plt_branch;
+
+      size = 4;
+      if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
+	{
+	  off -= 12;
+	  size = 16;
+	}
+
+      /* If the branch offset if too big, use a ppc_stub_plt_branch.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
 	  struct ppc_branch_hash_entry *br_entry;
@@ -6310,8 +6478,11 @@ ppc_size_one_stub (gen_entry, in_arg)
 	      br_entry->offset = htab->sbrlt->_raw_size;
 	      htab->sbrlt->_raw_size += 8;
 	    }
-	  stub_entry->stub_type = ppc_stub_plt_branch;
+
+	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
 	  size = 16;
+	  if (stub_entry->stub_type != ppc_stub_plt_branch)
+	    size = 28;
 	}
     }
 
@@ -6335,8 +6506,7 @@ ppc64_elf_setup_section_lists (output_bfd, info)
   bfd_size_type amt;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (htab->elf.root.creator->flavour != bfd_target_elf_flavour
-      || htab->sbrlt == NULL)
+  if (htab->sbrlt == NULL)
     return 0;
 
   /* Find the top input section id.  */
@@ -6357,6 +6527,8 @@ ppc64_elf_setup_section_lists (output_bfd, info)
   htab->stub_group = (struct map_stub *) bfd_zmalloc (amt);
   if (htab->stub_group == NULL)
     return -1;
+
+  elf_gp (output_bfd) = htab->toc_curr = ppc64_elf_toc (output_bfd);
 
   /* We can't use output_bfd->section_count here to find the top output
      section index as some sections may have been removed, and
@@ -6394,6 +6566,59 @@ ppc64_elf_setup_section_lists (output_bfd, info)
   return 1;
 }
 
+/* The linker repeatedly calls this function for each toc input
+   section.  Group input bfds such that the toc within a group
+   is less than 64k in size.  Will break with cute linker scripts
+   that play games with dot in the output toc section.  */
+
+void
+ppc64_elf_next_toc_section (info, isec)
+     struct bfd_link_info *info;
+     asection *isec;
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+
+  if (!htab->no_multi_toc)
+    {
+      bfd_vma addr = isec->output_offset + isec->output_section->vma;
+      bfd_vma off = addr - htab->toc_curr;
+      if (off + isec->_raw_size > 0x10000)
+	{
+	  htab->toc_curr = addr;
+	  htab->multi_toc_needed = 1;
+	}
+      elf_gp (isec->owner) = (htab->toc_curr
+			      - elf_gp (isec->output_section->owner)
+			      + TOC_BASE_OFF);
+    }
+}
+
+/* Called after the last call to the above function.  */
+
+void
+ppc64_elf_reinit_toc (output_bfd, info)
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  bfd *ibfd;
+  bfd_vma curr;
+
+  /* toc_curr tracks the TOC offset used for code sections below in
+     ppc64_elf_next_input_section.  Start off at 0x8000.  */
+  htab->toc_curr = curr = TOC_BASE_OFF;
+
+  /* Set the TOC base in all input bfds.  Some may not have a TOC
+     section and thus not be set in ppc64_elf_next_toc_section.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    {
+      if (elf_gp (ibfd) == 0)
+	elf_gp (ibfd) = curr;
+      else
+	curr = elf_gp (ibfd);
+    }
+}
+
 /* The linker repeatedly calls this function for each input section,
    in the order that input sections are linked into output sections.
    Build lists of input sections to determine groupings between which
@@ -6419,6 +6644,17 @@ ppc64_elf_next_input_section (info, isec)
 	  *list = isec;
 	}
     }
+
+  /* If a code section has a function that uses the TOC then we need
+     to use the right TOC (obviously).  Also, make sure that .opd gets
+     the correct TOC value.  */
+  if (isec->has_gp_reloc || (isec->flags & SEC_CODE) == 0)
+    htab->toc_curr = elf_gp (isec->owner);
+
+  /* Functions that don't use the TOC can belong in any TOC group.
+     Use the last TOC base.  This happens to make _init and _fini
+     pasting work.  */
+  htab->stub_group[isec->id].toc_off = htab->toc_curr;
 }
 
 /* See whether we can group stub sections together.  Grouping stub
@@ -6446,6 +6682,7 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  asection *prev;
 	  bfd_size_type total;
 	  bfd_boolean big_sec;
+	  bfd_vma curr_toc;
 
 	  curr = tail;
 	  if (tail->_cooked_size)
@@ -6453,10 +6690,12 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  else
 	    total = tail->_raw_size;
 	  big_sec = total >= stub_group_size;
+	  curr_toc = htab->stub_group[tail->id].toc_off;
 
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
-		     < stub_group_size))
+		     < stub_group_size)
+		 && htab->stub_group[prev->id].toc_off == curr_toc)
 	    curr = prev;
 
 	  /* OK, the size from the start of CURR to the end is less
@@ -6487,7 +6726,8 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	      total = 0;
 	      while (prev != NULL
 		     && ((total += tail->output_offset - prev->output_offset)
-			 < stub_group_size))
+			 < stub_group_size)
+		     && htab->stub_group[prev->id].toc_off == curr_toc)
 		{
 		  tail = prev;
 		  prev = PREV_SEC (tail);
@@ -6676,6 +6916,22 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		  /* Determine what (if any) linker stub is needed.  */
 		  stub_type = ppc_type_of_stub (section, irela, &hash,
 						destination);
+
+		  if (stub_type != ppc_stub_plt_call)
+		    {
+		      /* Check whether we need a TOC adjusting stub.
+			 Since the linker pastes together pieces from
+			 different object files when creating the
+			 _init and _fini functions, it may be that a
+			 call to what looks like a local sym is in
+			 fact a call needing a TOC adjustment.  */
+		      if (sym_sec != NULL
+			  && sym_sec->output_section != NULL
+			  && (htab->stub_group[sym_sec->id].toc_off
+			      != htab->stub_group[section->id].toc_off))
+			stub_type = ppc_stub_long_branch_r2off;
+		    }
+
 		  if (stub_type == ppc_stub_none)
 		    continue;
 
@@ -6728,9 +6984,9 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		      return FALSE;
 		    }
 
+		  stub_entry->stub_type = stub_type;
 		  stub_entry->target_value = sym_value;
 		  stub_entry->target_section = sym_sec;
-		  stub_entry->stub_type = stub_type;
 		  stub_entry->h = hash;
 		  stub_entry->addend = irela->r_addend;
 		  stub_changed = TRUE;
@@ -6842,14 +7098,15 @@ ppc64_elf_toc (obfd)
    hash table.  This function is called via gldelf64ppc_finish.  */
 
 bfd_boolean
-ppc64_elf_build_stubs (info)
+ppc64_elf_build_stubs (emit_stub_syms, info)
+     bfd_boolean emit_stub_syms;
      struct bfd_link_info *info;
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   asection *stub_sec;
-  bfd_vma plt_r2;
   bfd_byte *p;
 
+  htab->emit_stub_syms = emit_stub_syms;
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL;
        stub_sec = stub_sec->next)
@@ -6870,19 +7127,54 @@ ppc64_elf_build_stubs (info)
   if (htab->splt != NULL)
     {
       unsigned int indx;
+      bfd_vma plt0;
 
       /* Build the .glink plt call stub.  */
-      plt_r2 = (htab->splt->output_offset
-		+ htab->splt->output_section->vma
-		- elf_gp (htab->splt->output_section->owner)
-		- TOC_BASE_OFF);
-      p = htab->sglink->contents;
-      p = build_plt_stub (htab->sglink->owner, p, (int) plt_r2, 1);
-      while (p < htab->sglink->contents + GLINK_CALL_STUB_SIZE)
+      plt0 = (htab->splt->output_section->vma
+	      + htab->splt->output_offset
+	      - (htab->sglink->output_section->vma
+		 + htab->sglink->output_offset
+		 + GLINK_CALL_STUB_SIZE));
+      if (plt0 + 0x80008000 > 0xffffffff)
 	{
-	  bfd_put_32 (htab->sglink->owner, NOP, p);
-	  p += 4;
+	  (*_bfd_error_handler) (_(".glink and .plt too far apart"));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
 	}
+
+      p = htab->sglink->contents;
+      bfd_put_32 (htab->sglink->owner, MFCTR_R12, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, SLDI_R11_R0_3, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, ADDIC_R2_R0_32K, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, SUB_R12_R12_R11, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, SRADI_R2_R2_63, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, SLDI_R11_R0_2, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, AND_R2_R2_R11, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, SUB_R12_R12_R11, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, ADD_R12_R12_R2, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, ADDIS_R12_R12 | PPC_HA (plt0), p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, LD_R11_0R12 | PPC_LO (plt0), p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, ADDI_R12_R12 | PPC_LO (plt0), p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, LD_R2_0R12 | 8, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, MTCTR_R11, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, LD_R11_0R12 | 16, p);
+      p += 4;
+      bfd_put_32 (htab->sglink->owner, BCTR, p);
+      p += 4;
 
       /* Build the .glink lazy link call stubs.  */
       indx = 0;
@@ -7039,8 +7331,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r_type == R_PPC64_TOC)
 	{
-	  /* Relocation value is TOC base.  Symbol is ignored.  */
-	  relocation = TOCstart + TOC_BASE_OFF;
+	  /* Relocation value is TOC base.  */
+	  relocation = TOCstart + htab->stub_group[input_section->id].toc_off;
 	}
       else if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -7360,7 +7652,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (tls_gd == 0)
 		    {
 		      /* We changed the symbol on an LD reloc.  Start over
-			 in order to get h, sym, sec etc. right.  */ 
+			 in order to get h, sym, sec etc. right.  */
 		      rel--;
 		      continue;
 		    }
@@ -7453,16 +7745,24 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_PPC64_REL24:
-	  /* A REL24 branching to a linkage function is followed by a
-	     nop.  We replace the nop with a ld in order to restore
-	     the TOC base pointer.  Only calls to shared objects need
-	     to alter the TOC base.  These are recognized by their
-	     need for a PLT entry.  */
-	  if (h != NULL
-	      && (fdh = ((struct ppc_link_hash_entry *) h)->oh) != NULL
-	      && fdh->plt.plist != NULL
+	  /* Calls to functions with a different TOC, such as calls to
+	     shared objects, need to alter the TOC pointer.  This is
+	     done using a linkage stub.  A REL24 branching to these
+	     linkage stubs needs to be followed by a nop, as the nop
+	     will be replaced with an instruction to restore the TOC
+	     base pointer.  */
+	  if (((h != NULL
+		&& (fdh = ((struct ppc_link_hash_entry *) h)->oh) != NULL
+		&& fdh->plt.plist != NULL)
+	       || ((fdh = h, sec) != NULL
+		   && sec->output_section != NULL
+		   && (htab->stub_group[sec->id].toc_off
+		       != htab->stub_group[input_section->id].toc_off)))
 	      && (stub_entry = ppc_get_stub_entry (input_section, sec, fdh,
-						   rel, htab)) != NULL)
+						   rel, htab)) != NULL
+	      && (stub_entry->stub_type == ppc_stub_plt_call
+		  || stub_entry->stub_type == ppc_stub_plt_branch_r2off
+		  || stub_entry->stub_type == ppc_stub_long_branch_r2off))
 	    {
 	      bfd_boolean can_plt_call = 0;
 
@@ -7480,11 +7780,42 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (!can_plt_call)
 		{
-		  /* If this is a plain branch rather than a branch
-		     and link, don't require a nop.  */
-		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		  if ((insn & 1) == 0)
-		    can_plt_call = 1;
+		  if (stub_entry->stub_type == ppc_stub_plt_call)
+		    {
+		      /* If this is a plain branch rather than a branch
+			 and link, don't require a nop.  */
+		      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		      if ((insn & 1) == 0)
+			can_plt_call = 1;
+		    }
+		  else
+		    {
+		      if (strcmp (input_section->output_section->name,
+				  ".init") == 0
+			  || strcmp (input_section->output_section->name,
+				     ".fini") == 0)
+			(*_bfd_error_handler)
+			  (_("%s(%s+0x%lx): automatic multiple TOCs "
+			     "not supported using your crt files; "
+			     "recompile with -mminimal-toc or upgrade gcc"),
+			   bfd_archive_filename (input_bfd),
+			   input_section->name,
+			   (long) rel->r_offset);
+		      else
+			(*_bfd_error_handler)
+			  (_("%s(%s+0x%lx): sibling call optimization to `%s' "
+			     "does not allow automatic multiple TOCs; "
+			     "recompile with -mminimal-toc or "
+			     "-fno-optimize-sibling-calls, "
+			     "or make `%s' extern"),
+			   bfd_archive_filename (input_bfd),
+			   input_section->name,
+			   (long) rel->r_offset,
+			   sym_name,
+			   sym_name);
+		      bfd_set_error (bfd_error_bad_value);
+		      ret = FALSE;
+		    }
 		}
 
 	      if (can_plt_call)
@@ -7492,7 +7823,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  relocation = (stub_entry->stub_offset
 				+ stub_entry->stub_sec->output_offset
 				+ stub_entry->stub_sec->output_section->vma);
-		  unresolved_reloc = FALSE;
+		  if (stub_entry->stub_type == ppc_stub_plt_call)
+		    unresolved_reloc = FALSE;
 		}
 	    }
 
@@ -7690,8 +8022,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 		  }
 
-		/* Init the .got section contents if we're not
-		   emitting a reloc.  */
+		/* Init the .got section contents here if we're not
+		   emitting a reloc.  A reloc will also init the
+		   section contents via _bfd_final_link_relocate.  */
 		else
 		  {
 		    relocation += rel->r_addend;
@@ -7768,7 +8101,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_TOC16_DS:
 	case R_PPC64_TOC16_LO_DS:
 	case R_PPC64_TOC16_HA:
-	  addend -= TOCstart + TOC_BASE_OFF;
+	  addend -= TOCstart + htab->stub_group[input_section->id].toc_off;
 	  break;
 
 	  /* Relocate against the beginning of the section.  */
@@ -7921,7 +8254,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     or this is an opd section reloc which must point
 		     at a local function.  */
 		  outrel.r_addend += relocation;
-		  /* ??? why? */
+		  /* We need to relocate .opd contents for ld.so, and
+		     it doesn't hurt to relocate in other cases.  */
 		  relocate = TRUE;
 		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
@@ -8094,12 +8428,17 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  max_br_offset = 1 << 25;
 
 	branch_check:
-	  /* If the branch is out of reach, then redirect the
-	     call to the local stub for this function.  */
+	  /* If the branch is out of reach or the TOC register needs
+	     adjusting, then redirect the call to the local stub for
+	     this function.  */
 	  from = (rel->r_offset
 		  + input_section->output_offset
 		  + input_section->output_section->vma);
-	  if (relocation + addend - from + max_br_offset >= 2 * max_br_offset
+	  if ((relocation + addend - from + max_br_offset >= 2 * max_br_offset
+	       || (sec != NULL
+		   && sec->output_section != NULL
+		   && (htab->stub_group[sec->id].toc_off
+		       != htab->stub_group[input_section->id].toc_off)))
 	      && (stub_entry = ppc_get_stub_entry (input_section, sec, h,
 						   rel, htab)) != NULL)
 	    {
@@ -8322,6 +8661,11 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 	    case DT_PPC64_GLINK:
 	      s = htab->sglink;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+	      /* We stupidly defined DT_PPC64_GLINK to be the start
+		 of glink rather than the first entry point, which is
+		 what ld.so needs, and now have a bigger stub to
+		 support automatic multiple TOCs.  */
+	      dyn.d_un.d_ptr += GLINK_CALL_STUB_SIZE - 32;
 	      break;
 
 	    case DT_PPC64_OPD:
@@ -8399,54 +8743,5 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 
   return TRUE;
 }
-
-#define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
-#define TARGET_LITTLE_NAME	"elf64-powerpcle"
-#define TARGET_BIG_SYM		bfd_elf64_powerpc_vec
-#define TARGET_BIG_NAME		"elf64-powerpc"
-#define ELF_ARCH		bfd_arch_powerpc
-#define ELF_MACHINE_CODE	EM_PPC64
-#define ELF_MAXPAGESIZE		0x10000
-#define elf_info_to_howto	ppc64_elf_info_to_howto
-
-#ifdef  EM_CYGNUS_POWERPC
-#define ELF_MACHINE_ALT1	EM_CYGNUS_POWERPC
-#endif
-
-#ifdef EM_PPC_OLD
-#define ELF_MACHINE_ALT2	EM_PPC_OLD
-#endif
-
-#define elf_backend_want_got_sym 0
-#define elf_backend_want_plt_sym 0
-#define elf_backend_plt_alignment 3
-#define elf_backend_plt_not_loaded 1
-#define elf_backend_got_symbol_offset 0
-#define elf_backend_got_header_size 8
-#define elf_backend_plt_header_size PLT_INITIAL_ENTRY_SIZE
-#define elf_backend_can_gc_sections 1
-#define elf_backend_can_refcount 1
-#define elf_backend_rela_normal 1
-
-#define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
-#define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
-#define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
-#define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
-#define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
-
-#define elf_backend_object_p		      ppc64_elf_object_p
-#define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
-#define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
-#define elf_backend_check_relocs	      ppc64_elf_check_relocs
-#define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
-#define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
-#define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
-#define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
-#define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
-#define elf_backend_relocate_section	      ppc64_elf_relocate_section
-#define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
-#define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
-#define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 
 #include "elf64-target.h"
