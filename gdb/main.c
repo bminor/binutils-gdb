@@ -463,6 +463,21 @@ char *s;
   return 0;
 }
 
+/* Line number we are currently in in a file which is being sourced.  */
+static int source_line_number;
+
+/* Name of the file we are sourcing.  */
+static char *source_file_name;
+
+/* Buffer containing the error_pre_print used by the source stuff.
+   Malloc'd.  */
+static char *source_error;
+static int source_error_allocated;
+
+/* Something to glom on to the start of error_pre_print if source_file_name
+   is set.  */
+static char *source_pre_error;
+
 /* Clean up on error during a "source" command (or execution of a
    user-defined command).  */
 
@@ -1686,6 +1701,17 @@ command_line_input (prrompt, repeat)
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 
+      if (source_file_name != NULL)
+	{
+	  ++source_line_number;
+	  sprintf (source_error,
+		   "%s%s:%d: Error in sourced command file:\n",
+		   source_pre_error,
+		   source_file_name,
+		   source_line_number);
+	  error_pre_print = source_error;
+	}
+
       /* Don't use fancy stuff if not talking to stdin.  */
       if (command_editing_p && instream == stdin
 	  && ISATTY (instream))
@@ -2328,6 +2354,25 @@ cd_command (dir, from_tty)
     pwd_command ((char *) 0, 1);
 }
 
+struct source_cleanup_lines_args {
+  int old_line;
+  char *old_file;
+  char *old_pre_error;
+  char *old_error_pre_print;
+};
+
+static void
+source_cleanup_lines (args)
+     PTR args;
+{
+  struct source_cleanup_lines_args *p =
+    (struct source_cleanup_lines_args *)args;
+  source_line_number = p->old_line;
+  source_file_name = p->old_file;
+  source_pre_error = p->old_pre_error;
+  error_pre_print = p->old_error_pre_print;
+}
+
 /* ARGSUSED */
 static void
 source_command (args, from_tty)
@@ -2335,8 +2380,10 @@ source_command (args, from_tty)
      int from_tty;
 {
   FILE *stream;
-  struct cleanup *cleanups;
+  struct cleanup *old_cleanups;
   char *file = args;
+  struct source_cleanup_lines_args old_lines;
+  int needed_length;
 
   if (file == NULL)
     {
@@ -2344,17 +2391,43 @@ source_command (args, from_tty)
     }
 
   file = tilde_expand (file);
-  make_cleanup (free, file);
+  old_cleanups = make_cleanup (free, file);
 
   stream = fopen (file, FOPEN_RT);
   if (stream == 0)
     perror_with_name (file);
 
-  cleanups = make_cleanup (fclose, stream);
+  make_cleanup (fclose, stream);
+
+  old_lines.old_line = source_line_number;
+  old_lines.old_file = source_file_name;
+  old_lines.old_pre_error = source_pre_error;
+  old_lines.old_error_pre_print = error_pre_print;
+  make_cleanup (source_cleanup_lines, &old_lines);
+  source_line_number = 0;
+  source_file_name = file;
+  source_pre_error = error_pre_print == NULL ? "" : error_pre_print;
+  source_pre_error = savestring (source_pre_error, strlen (source_pre_error));
+  make_cleanup (free, source_pre_error);
+  /* This will get set every time we read a line.  So it won't stay "" for
+     long.  */
+  error_pre_print = "";
+
+  needed_length = strlen (source_file_name) + strlen (source_pre_error) + 80;
+  if (source_error_allocated < needed_length)
+    {
+      source_error_allocated *= 2;
+      if (source_error_allocated < needed_length)
+	source_error_allocated = needed_length;
+      if (source_error == NULL)
+	source_error = xmalloc (source_error_allocated);
+      else
+	source_error = xrealloc (source_error, source_error_allocated);
+    }
 
   read_command_file (stream);
 
-  do_cleanups (cleanups);
+  do_cleanups (old_cleanups);
 }
 
 /* ARGSUSED */
@@ -2800,7 +2873,7 @@ using remote targets.", &setlist),
 		     &showlist);
 
   add_show_from_set (
-    add_set_cmd ("remotedebug", no_class, var_boolean, (char *)&remote_debug,
+    add_set_cmd ("remotedebug", no_class, var_zinteger, (char *)&remote_debug,
 		   "Set debugging of remote protocol.\n\
 When enabled, each packet sent or received with the remote target\n\
 is displayed.", &setlist),

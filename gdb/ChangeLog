@@ -1,5 +1,8 @@
 Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* main.c (init_main): Change "set remotedebug" back to var_zinteger
+	from var_boolean.
+
 	* c-exp.y (yylex): Don't try to deal with nested types.
 
 	* cp-valprint.c (cplus_print_value): Call check_stub_type on
