@@ -1,5 +1,9 @@
 Fri Apr 25 12:03:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/internals.texi (Porting GAS): Correct documentation for
+	current configure handling of targ-cpu.h, et. al.
+	(CPU backend): Document listing macros.
+
 	* listing.c (data_buffer): Set size based on other listing macros,
 	rather than always using 100.
 	(data_buffer_size): Remove static variable.
