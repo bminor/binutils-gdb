@@ -4635,7 +4635,7 @@ else
 fi
 done
 
-for ac_func in sbrk realpath
+for ac_func in sbrk realpath glob
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:4642: checking for $ac_func" >&5

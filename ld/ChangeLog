@@ -1,3 +1,12 @@
+2005-02-15  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.in (AC_CHECK_FUNCS): Add glob.
+	* configure: Regenerated.
+	* emultempl/elf32.em (<glob.h>): Do not include if HAVE_GLOB is
+	not defined.
+	(gld${EMULATION_NAME}_parse_ld_so_conf_include): Do not use glob
+	if HAVE_GLOB is not defined.
+	
 2005-02-16  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Define

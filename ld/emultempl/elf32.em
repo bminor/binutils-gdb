@@ -67,7 +67,9 @@ if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
     *-*-linux-gnu*)
   cat >>e${EMULATION_NAME}.c <<EOF
+#ifdef HAVE_GLOB
 #include <glob.h>
+#endif
 EOF
     ;;
   esac
@@ -539,7 +541,9 @@ gld${EMULATION_NAME}_parse_ld_so_conf_include
       const char *pattern)
 {
   char *newp = NULL;
+#ifdef HAVE_GLOB
   glob_t gl;
+#endif
 
   if (pattern[0] != '/')
     {
@@ -552,6 +556,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf_include
       pattern = newp;
     }
 
+#ifdef HAVE_GLOB
   if (glob (pattern, 0, NULL, &gl) == 0)
     {
       size_t i;
@@ -560,6 +565,10 @@ gld${EMULATION_NAME}_parse_ld_so_conf_include
 	gld${EMULATION_NAME}_parse_ld_so_conf (info, gl.gl_pathv[i]);
       globfree (&gl);
     }
+#else
+  /* If we do not have glob, treat the pattern as a literal filename.  */
+  gld${EMULATION_NAME}_parse_ld_so_conf (info, pattern);
+#endif
 
   if (newp)
     free (newp);
