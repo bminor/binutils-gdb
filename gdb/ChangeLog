@@ -1,3 +1,19 @@
+2000-04-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* acconfig.h (HAVE_PRGREGSET_T, HAVE_PRFPREGSET_T, HAVE_LWPID_T,
+	HAVE_PSADDR_T): Add them here instead of in config.in.
+
+	* acconfig.h (PRFPREGSET_T_BROKEN): New define.
+	* configure.in: Add check for broken prfpregset_t type.
+	* lin-thread.c (gdb_prfpregset): New typedef, depends on
+	definition of PRFPREGSET_T_BROKEN.
+	(ps_lgetfpregs, ps_lsetfpregs, p_td_thr_getfpregs,
+	p_td_thr_setfpregs, thread_db_fetch_registers,
+	thread_db_store_registers): Use gdb_prfpregset_t instead of
+	prfpregset_t.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+
 Fri Apr 14 09:59:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.
