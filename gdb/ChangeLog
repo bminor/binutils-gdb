@@ -1,3 +1,8 @@
+Sat Mar 16 13:33:17 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Add gdbserver to configdirs under linux.
+	* configure: Regenerate.
+	
 Fri Mar 15 12:06:58 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/i386/nm-nbsd.h (FLOAT_INFO): Comment out.
