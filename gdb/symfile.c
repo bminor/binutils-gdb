@@ -854,7 +854,12 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
   orig_addrs = alloc_section_addr_info (bfd_count_sections (abfd));
   my_cleanups = make_cleanup (xfree, orig_addrs);
   if (addrs)
-    *orig_addrs = *addrs;
+    {
+      int i;
+      orig_addrs->num_sections = addrs->num_sections;
+      for (i = 0; i < addrs->num_sections; i++)
+	orig_addrs->other[i] = addrs->other[i];
+    }
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */

@@ -1,3 +1,8 @@
+2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure
+	orig_addrs is set up properly.
+
 2003-09-11  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_STACK_ALIGN): Rename STACK_ALIGN.
