@@ -627,7 +627,7 @@ gdbsim_stop (void)
 }
 
 /* GDB version of os_poll_quit callback.
-   Taken from gdb/util.c - should be in a library */
+   Taken from gdb/util.c - should be in a library.  */
 
 static int
 gdb_os_poll_quit (host_callback *p)
