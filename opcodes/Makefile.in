@@ -411,7 +411,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -1079,6 +1079,11 @@ openrisc-ibld.lo: openrisc-ibld.c sysdep.h config.h \
 openrisc-opc.lo: openrisc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
   openrisc-opc.h $(INCDIR)/libiberty.h
+or32-dis.lo: or32-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/or32.h \
+  $(INCDIR)/safe-ctype.h
+or32-opc.lo: or32-opc.c $(INCDIR)/safe-ctype.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/or32.h
 pdp11-dis.lo: pdp11-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/pdp11.h
 pdp11-opc.lo: pdp11-opc.c $(INCDIR)/opcode/pdp11.h

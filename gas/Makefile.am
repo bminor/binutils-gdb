@@ -1265,6 +1265,16 @@ DEPTC_openrisc_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/openrisc-desc.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/openrisc-opc.h \
   cgen.h
+DEPTC_or32_coff = $(INCDIR)/safe-ctype.h $(INCDIR)/symcat.h \
+  $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-or32.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/or32.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/opcode/or32.h $(INCDIR)/elf/or32.h \
+  $(INCDIR)/elf/reloc-macros.h
+DEPTC_or32_elf = $(INCDIR)/safe-ctype.h $(INCDIR)/symcat.h \
+  $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(srcdir)/config/tc-or32.h $(INCDIR)/opcode/or32.h \
+  $(INCDIR)/elf/or32.h $(INCDIR)/elf/reloc-macros.h
 DEPTC_pdp11_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-pdp11.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/opcode/pdp11.h
@@ -1717,6 +1727,15 @@ DEPOBJ_openrisc_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-openrisc.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/aout/aout64.h
+DEPOBJ_or32_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-or32.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/or32.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_or32_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-or32.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/aout/aout64.h
 DEPOBJ_pdp11_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-pdp11.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
@@ -2061,6 +2080,12 @@ DEP_openrisc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-openrisc.h \
 DEP_openrisc_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-openrisc.h
+DEP_or32_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-or32.h \
+  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/or32.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_or32_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-or32.h
 DEP_pdp11_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-pdp11.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_pdp11_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pdp11.h \

@@ -1,3 +1,8 @@
+2002-02-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
 2002-01-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* nm.c (print_value): Mark abfd unused.

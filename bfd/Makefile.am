@@ -856,6 +856,7 @@ cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
 cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
 cpu-mmix.lo: cpu-mmix.c $(INCDIR)/filenames.h
+cpu-or32.lo: cpu-or32.c $(INCDIR)/filenames.h
 cpu-ns32k.lo: cpu-ns32k.c $(INCDIR)/filenames.h ns32k.h
 cpu-openrisc.lo: cpu-openrisc.c $(INCDIR)/filenames.h
 cpu-pdp11.lo: cpu-pdp11.c $(INCDIR)/filenames.h
@@ -961,6 +962,9 @@ coff-mips.lo: coff-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h $(INCDIR)/coff/external.h \
   libcoff.h libecoff.h coffswap.h ecoffswap.h
+coff-or32.lo: coff-or32.c $(INCDIR)/filenames.h $(INCDIR)/coff/or32.h \
+  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
+  coffcode.h coffswap.h
 coff-rs6000.lo: coff-rs6000.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   $(INCDIR)/coff/rs6000.h libcoff.h libxcoff.h coffcode.h \
@@ -1121,8 +1125,8 @@ elf32-openrisc.lo: elf32-openrisc.c $(INCDIR)/filenames.h \
   elf32-target.h
 elf32-or32.lo: elf32-or32.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/or32.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/libiberty.h elf32-target.h
 elf32-pj.lo: elf32-pj.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/pj.h $(INCDIR)/elf/reloc-macros.h \
