@@ -1,3 +1,8 @@
+Sun Apr 26 15:21:01 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (autoconf-common autoheader-common): Don't pass -l
+	to autoconf and autoheader.
+
 Fri Apr 24 11:14:13 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (autoconf-common autoheader-common): Pass `-l

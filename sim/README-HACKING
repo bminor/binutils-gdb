@@ -128,9 +128,8 @@ are greppable and appear in the TAGS file.
 Generating "configure" files
 ============================
 
-For target's using the common framework, "configure" can be generated
-by running `autoconf -l ../common'.  This will ensure that the
-qaclocal.m4 from the `common' directory is found.
+For targets using the common framework, "configure" can be generated
+by running `autoconf'.
 
 To regenerate the configure files for all targets using the common framework:
 
