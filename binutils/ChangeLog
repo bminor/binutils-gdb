@@ -1,3 +1,9 @@
+1999-12-09  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mtable): Add epoc-arm specific entry.
+	Make default arm entry pass -mpacs-26 to assembler.
+	(flush_page): Do not mangle null entries.
+	
 1999-12-07  H . J . Lu  hjl@valinux.com
 
 	* readelf.c: Fix compile time warnings.  Support more than 999

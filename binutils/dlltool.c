@@ -512,7 +512,7 @@ mtable[] =
 #define MARM 0
     "arm", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4", "",
+    ".global", ".space", ".align\t2",".align\t4", "-mapcs-26",
     "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8
   }
@@ -537,7 +537,7 @@ mtable[] =
 #define MTHUMB 3
     "thumb", ".byte", ".short", ".long", ".asciz", "@",
     "push\t{r6}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tmov\tip, r6\n\tpop\t{r6}\n\tbx\tip",
-    ".global", ".space", ".align\t2",".align\t4", "=mthumb-interwork",
+    ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
     "pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12
   }
@@ -585,6 +585,15 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "elf32-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8
+  }
+  ,
+  {
+#define MARM_EPOC 9
+    "arm", ".byte", ".short", ".long", ".asciz", "@",
+    "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "epoc-pe-arm-little", bfd_arch_arm,
+    arm_jtab, sizeof (arm_jtab), 8
   }
   ,
   { 0 }
@@ -1248,7 +1257,6 @@ scan_drectve_symbols (abfd)
 		flags &= ~BSF_FUNCTION;
 	    }
 
-
 	  /* FIXME: The 5th arg is for the `constant' field.
 	     What should it be?  Not that it matters since it's not
 	     currently useful.  */
@@ -1302,7 +1310,7 @@ scan_filtered_symbols (abfd, minisyms, symcount, size)
 	++symbol_name;
 
       def_exports (xstrdup (symbol_name) , 0, -1, 0, 0,
-                   ! (sym->flags & BSF_FUNCTION));
+		   ! (sym->flags & BSF_FUNCTION));
 
       if (add_stdcall_alias && strchr (symbol_name, '@'))
         {
@@ -1574,9 +1582,15 @@ flush_page (f, need, page_addr, on_page)
 	   ASM_C);
   
   for (i = 0; i < on_page; i++)
-    fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT,
-	     ((need[i] - page_addr) | 0x3000) & 0xffff);
-
+    {
+      long needed = need[i];
+      
+      if (needed)
+	needed = ((needed - page_addr) | 0x3000) & 0xffff;
+  
+      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, needed);
+    }
+  
   /* And padding */
   if (on_page & 1)
     fprintf (f, "\t%s\t0x%x\n", ASM_SHORT, 0 | 0x0000);
