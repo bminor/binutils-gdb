@@ -41,6 +41,7 @@ encountered these.
 * New native configurations
 
 NetBSD/amd64					x86_64-*-netbsd*
+OpenBSD/amd64					x86_64-*-openbsd*
 OpenBSD/alpha					alpha*-*-openbsd*
 OpenBSD/sparc					sparc-*-openbsd*
 OpenBSD/sparc64					sparc64-*-openbsd*
