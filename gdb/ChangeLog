@@ -1,3 +1,10 @@
+2002-09-21  Andrew Cagney  <cagney@redhat.com>
+
+	* complaints.c (symfile_explanations): Remove new-line from
+	``isolated_message''.
+	(vcomplaint): When ISOLATED_MESSAGE, force a line break.
+	(clear_complaints): When a SUBSEQUENT_MESSAGE, force a line break.
+
 2002-09-20  Nick Clifton  <nickc@redhat.com>
 	
 	* NEWS: Announce that V850EA ISA is no longer supported.
