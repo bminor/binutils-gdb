@@ -1,3 +1,19 @@
+Fri Oct 11 04:12:28 1991  John Gilmore  (gnu at cygnus.com)
+
+	Restructure configuration scheme for bfd, binutils, ld.
+
+	* include/sys/h-*.h:  Move to bfd/hosts/h-*.h.
+	* configure.in:  Revise to symlink sysdep.h to ../bfd/hosts/h-xxx.h.
+	Change some config names to match other dirs.
+	* *.c:  Include bfd.h before sysdep.h, so ansidecl and PROTO()
+	get defined first.
+	* Makefile.in:  Use -I. to get sysdep.h.
+
+Wed Oct  9 22:42:56 1991  Per Bothner  (bothner at cygnus.com)
+
+	* nm.c (print_symbols):  Handle NULL name field of symbol.
+	* Makefile.in: Removed spurious comment.
+
 Tue Oct  8 16:55:03 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* binutils.texinfo: minor typos, phrasing, formatting fixes.
