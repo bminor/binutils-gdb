@@ -27,11 +27,9 @@ static void obj_elf_xstab PARAMS ((int what));
 static void obj_elf_line PARAMS ((void));
 void obj_elf_desc PARAMS ((void));
 void obj_elf_version PARAMS ((void));
-static void obj_elf_section PARAMS ((int));
 static void obj_elf_size PARAMS ((void));
 static void obj_elf_type PARAMS ((void));
 static void obj_elf_ident PARAMS ((void));
-static void obj_elf_previous PARAMS ((void));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -83,7 +81,7 @@ elf_file_symbol (s)
 static segT previous_section;
 static int previous_subsection;
 
-static void
+void
 obj_elf_section (xxx)
      int xxx;
 {
@@ -116,7 +114,10 @@ obj_elf_section (xxx)
       input_line_pointer = p;
     }
   if (!strcmp (string, ".rodata"))
-      default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC;
+    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC;
+  else if (!strcmp (string, ".init")
+	   || !strcmp (string, ".fini"))
+    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_CODE;
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     flags = default_flags;
@@ -179,7 +180,7 @@ obj_elf_section (xxx)
   subseg_set (sec, 0);
 }
 
-static void
+void
 obj_elf_previous ()
 {
   if (previous_section == 0)
@@ -253,7 +254,10 @@ obj_elf_frob_symbol (sym, punt)
      symbolS *sym;
      int *punt;
 {
+#if 0 /* ?? The return value is ignored.  Only the value of *punt is
+	 relevant.  */
   return obj_elf_write_symbol_p (sym);
+#endif
 }
 
 static void
@@ -388,6 +392,7 @@ obj_elf_stab_generic (what, secname)
   int saved_type = 0;
   int length;
   int goof = 0;
+  int seg_is_new = 0;
   long longint;
   asection *saved_seg = now_seg;
   asection *seg;
@@ -396,9 +401,9 @@ obj_elf_stab_generic (what, secname)
 #if 1
   /* This function doesn't work yet.
 
-     Actually, this function is okay, but some finalizations are needed
-     before writing the object file; that's not done yet, and the Solaris
-     linker chokes without it.
+     Actually, this function is okay, but some finalizations are
+     needed before writing the object file; that's not done yet, and
+     the Solaris linker chokes without it.
 
      In any case, this should effectively disable it for now.  */
   if (what == 's')
@@ -414,6 +419,7 @@ obj_elf_stab_generic (what, secname)
       bfd_set_section_flags (stdoutput, seg,
 			     SEC_READONLY | SEC_ALLOC | SEC_RELOC);
       subseg_set (saved_seg, subseg);
+      seg_is_new = 1;
     }
 
   /*
@@ -510,36 +516,55 @@ obj_elf_stab_generic (what, secname)
 	}
     }
 
-  if (!goof)
+  if (goof)
     {
-      subseg_new ((char *) seg->name, subseg);
-
-      /* Emit the stab symbol. */
-      elf_stab_symbol (symbolP, what);
-
-      if (what == 's' || what == 'n')
-	{
-	  cons (4);
-	  input_line_pointer--;
-	}
-      else
-	{
-	  char *p = frag_more (4);
-	  md_number_to_chars (p, 0, 0);
-	}
-      subseg_new ((char *) saved_seg->name, subseg);
-
-      if ((what == 's' || what == 'n')
-	  && symbolP->sy_value.X_op == O_constant)
-	{
-	  /* symbol is not needed in the regular symbol table */
-	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
-	}
-
+      ignore_rest_of_line ();
+      return;
     }
 
-#ifndef NO_LISTING
-  if (listing && !goof)
+  subseg_new ((char *) seg->name, subseg);
+
+  if (seg_is_new)
+    /* allocate and discard -- filled in later */
+    (void) frag_more (12);
+
+  /* Emit the stab symbol. */
+  elf_stab_symbol (symbolP, what);
+
+  if (what == 's' || what == 'n')
+    {
+      cons (4);
+      input_line_pointer--;
+    }
+  else
+    {
+      char *p = frag_more (4);
+      md_number_to_chars (p, 0, 0);
+    }
+
+  subseg_new ((char *) saved_seg->name, subseg);
+
+  if ((what == 's' || what == 'n')
+      && symbolP->sy_value.X_op == O_constant)
+    {
+      /* symbol is not needed in the regular symbol table */
+      symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
+    }
+
+  if (what == 's' && S_GET_TYPE (symbolP) == N_SO)
+    {
+      fragS *fragp = seg_info (seg)->frchainP->frch_root;
+      while (fragp
+	     && fragp->fr_address + fragp->fr_fix < 12)
+	fragp = fragp->fr_next;
+      assert (fragp != 0);
+      assert (fragp->fr_type == rs_fill);
+      assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
+      md_number_to_chars (fragp->fr_literal, (valueT) symbolP->sy_name_offset,
+			  4);
+    }
+
+  if (listing)
     switch (S_GET_TYPE (symbolP))
       {
       case N_SLINE:
@@ -550,12 +575,8 @@ obj_elf_stab_generic (what, secname)
 	listing_source_file (string);
 	break;
       }
-#endif
 
-  if (goof)
-    ignore_rest_of_line ();
-  else
-    demand_empty_rest_of_line ();
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -683,8 +704,8 @@ obj_elf_version ()
       subseg_new ((char *) note_secp->name, 0);
       len = strlen (name);
 
-      i_note.namesz = ((len + 1) + 3) & ~3;	/* round this to word boundary	*/
-      i_note.descsz = 0;	/* no description	*/
+      i_note.namesz = ((len + 1) + 3) & ~3; /* round this to word boundary */
+      i_note.descsz = 0;	/* no description */
       i_note.type = NT_VERSION;
       p = frag_more (sizeof (e_note.namesz));
       md_number_to_chars (p, (valueT) i_note.namesz, 4);
@@ -706,7 +727,7 @@ obj_elf_version ()
     }
   else
     {
-      as_bad ("Expected \"-ed string");
+      as_bad ("Expected quoted string");
     }
   demand_empty_rest_of_line ();
 }
@@ -826,15 +847,59 @@ obj_elf_ident ()
   subseg_set (old_section, old_subsection);
 }
 
+static void
+adjust_stab_sections (abfd, sec, xxx)
+     bfd *abfd;
+     asection *sec;
+     PTR xxx;
+{
+  char *name;
+  asection *strsec;
+  fragS *fragp;
+  int strsz, nsyms;
+
+  if (strncmp (".stab", sec->name, 5))
+    return;
+  if (!strcmp ("str", sec->name + strlen (sec->name) - 3))
+    return;
+
+  name = (char *) alloca (strlen (sec->name) + 4);
+  strcpy (name, sec->name);
+  strcat (name, "str");
+  strsec = bfd_get_section_by_name (abfd, name);
+  if (strsec)
+    strsz = bfd_section_size (abfd, strsec);
+  else
+    strsz = 0;
+  nsyms = bfd_section_size (abfd, sec) / 12 - 1;
+
+  fragp = seg_info (sec)->frchainP->frch_root;
+  while (fragp
+	 && fragp->fr_address + fragp->fr_fix < 12)
+    fragp = fragp->fr_next;
+  assert (fragp != 0);
+  assert (fragp->fr_type == rs_fill);
+  assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
+
+  bfd_h_put_16 (abfd, nsyms, fragp->fr_literal + 6);
+  bfd_h_put_32 (abfd, strsz, fragp->fr_literal + 8);
+}
+
 void 
 elf_frob_file ()
 {
-#ifdef elf_tc_symbol
-  int i;
+  bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
 
-  for (i = 0; i < stdoutput->symcount; i++)
-    elf_tc_symbol (stdoutput, (elf_symbol_type *) (stdoutput->outsymbols[i]), i + 1);
+#ifdef elf_tc_symbol
+  {
+    int i;
+
+    for (i = 0; i < stdoutput->symcount; i++)
+      elf_tc_symbol (stdoutput, (elf_symbol_type *) (stdoutput->outsymbols[i]),
+		     i + 1);
+  }
 #endif
+
 #ifdef elf_tc_final_processing
   elf_tc_final_processing_hook ();
 #endif

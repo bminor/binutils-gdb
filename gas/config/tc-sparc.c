@@ -80,9 +80,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"common", s_common, 0},
   {"global", s_globl, 0},
   {"half", cons, 2},
-#ifdef OBJ_ELF
-  {"local", s_local, 0},
-#endif
   {"optim", s_ignore, 0},
   {"proc", s_proc, 0},
   {"reserve", s_reserve, 0},
@@ -94,6 +91,14 @@ const pseudo_typeS md_pseudo_table[] =
   {"xword", s_xword, 0},
 #endif
 /* end-sanitize-v9 */
+#ifdef OBJ_ELF
+  {"local", s_local, 0},
+  /* these are specific to sparc/svr4 */
+  {"pushsection", obj_elf_section, 0},
+  {"popsection", obj_elf_previous, 0},
+  {"uaword", cons, 4},
+  {"uahalf", cons, 2},
+#endif
   {NULL, 0, 0},
 };
 
@@ -1967,6 +1972,17 @@ md_apply_fix (fixP, value)
 
       /* start-sanitize-v9 */
 #ifndef NO_V9
+    case BFD_RELOC_64:
+      buf[0] = 0;
+      buf[1] = 0;
+      buf[2] = 0;
+      buf[3] = 0;
+      buf[4] = 0;
+      buf[5] = 0;
+      buf[6] = 0;
+      buf[7] = 0;
+      break;
+
     case BFD_RELOC_SPARC_11:
       if (((val > 0) && (val & ~0x7ff))
 	  || ((val < 0) && (~(val - 1) & ~0x7ff)))
@@ -2160,6 +2176,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_BASE13:
     case BFD_RELOC_SPARC_WDISP22:
       /* start-sanitize-v9 */
+    case BFD_RELOC_64:
     case BFD_RELOC_SPARC_10:
     case BFD_RELOC_SPARC_11:
     case BFD_RELOC_SPARC_HH22:
@@ -2453,8 +2470,11 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
+#ifdef OBJ_AOUT
   /* Round all sects to multiple of 8 */
-  return (size + 7) & ~7;
+  size = (size + 7) & ~7;
+#endif
+  return size;
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
