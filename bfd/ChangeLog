@@ -1,3 +1,8 @@
+Tue Dec 20 11:11:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* coff-h8300.c (howto_table): All relocs get a special function.
+	(special): Never do anything when linking -r.
+
 Tue Dec 20 13:58:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Correct and expand the

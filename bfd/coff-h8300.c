@@ -27,25 +27,56 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
+
+
+/* special handling for H8/300 relocs.
+   We only come here for pcrel stuff and return normally if not an -r link.
+   When doing -r, we can't do any arithmetic for the pcrel stuff, because
+   the code in reloc.c assumes that we can manipulate the targets of
+   the pcrel branches.  This isn't so, since the H8/300 can do relaxing, 
+   which means that the gap after the instruction may not be enough to
+   contain the offset required for the branch, so we have to use the only
+   the addend until the final link */
+
+static bfd_reloc_status_type
+special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
+		 error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  symvalue diff;
+
+  if (output_bfd == (bfd *) NULL)
+    return bfd_reloc_continue;
+
+  return bfd_reloc_ok;
+}
+
 static reloc_howto_type howto_table[] =
 {
-  HOWTO (R_RELBYTE, 0, 0, 8, false, 0, complain_overflow_bitfield, 0, "8", true, 0x000000ff, 0x000000ff, false),
-  HOWTO (R_RELWORD, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "16", true, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_RELLONG, 0, 2, 32, false, 0, complain_overflow_bitfield, 0, "32", true, 0xffffffff, 0xffffffff, false),
-  HOWTO (R_PCRBYTE, 0, 0, 8, true, 0, complain_overflow_signed, 0, "DISP8", true, 0x000000ff, 0x000000ff, true),
-  HOWTO (R_PCRWORD, 0, 1, 16, true, 0, complain_overflow_signed, 0, "DISP16", true, 0x0000ffff, 0x0000ffff, true),
-  HOWTO (R_PCRLONG, 0, 2, 32, true, 0, complain_overflow_signed, 0, "DISP32", true, 0xffffffff, 0xffffffff, true),
-  HOWTO (R_MOVB1, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "16/8", true, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_MOVB2, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "8/16", true, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_JMP1, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "16/pcrel", true, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_JMP2, 0, 0, 8, false, 0, complain_overflow_bitfield, 0, "pcrecl/16", true, 0x000000ff, 0x000000ff, false),
+  HOWTO (R_RELBYTE, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "8", false, 0x000000ff, 0x000000ff, false),
+  HOWTO (R_RELWORD, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_RELLONG, 0, 2, 32, false, 0, complain_overflow_bitfield, special, "32", false, 0xffffffff, 0xffffffff, false),
+  HOWTO (R_PCRBYTE, 0, 0, 8, true, 0, complain_overflow_signed, special, "DISP8", false, 0x000000ff, 0x000000ff, true),
+  HOWTO (R_PCRWORD, 0, 1, 16, true, 0, complain_overflow_signed, special, "DISP16", false, 0x0000ffff, 0x0000ffff, true),
+  HOWTO (R_PCRLONG, 0, 2, 32, true, 0, complain_overflow_signed, special, "DISP32", false, 0xffffffff, 0xffffffff, true),
+  HOWTO (R_MOVB1, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16/8", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_MOVB2, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "8/16", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_JMP1, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16/pcrel", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_JMP2, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "pcrecl/16", false, 0x000000ff, 0x000000ff, false),
 
 
-  HOWTO (R_JMPL1, 0, 2, 32, false, 0, complain_overflow_bitfield, 0, "24/pcrell", true, 0x00ffffff, 0x00ffffff, false),
-  HOWTO (R_JMPL_B8, 0, 0, 8, false, 0, complain_overflow_bitfield, 0, "pc8/24", true, 0x000000ff, 0x000000ff, false),
+  HOWTO (R_JMPL1, 0, 2, 32, false, 0, complain_overflow_bitfield, special, "24/pcrell", false, 0x00ffffff, 0x00ffffff, false),
+  HOWTO (R_JMPL_B8, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "pc8/24", false, 0x000000ff, 0x000000ff, false),
 
-  HOWTO (R_MOVLB1, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "24/8", true, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_MOVLB2, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "8/24", true, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_MOVLB1, 0, 1, 16, false, 0, complain_overflow_bitfield,special, "24/8", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_MOVLB2, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "8/24", false, 0x0000ffff, 0x0000ffff, false),
 
 };
 
@@ -164,7 +195,7 @@ reloc_processing (relent, reloc, symbols, abfd, section)
     }
   else
     {
-      relent->sym_ptr_ptr = &(bfd_abs_symbol);
+      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
     }
 
 
@@ -329,7 +360,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 		    input_section, reloc->address)))
 	      abort ();
 	  }
-
+	gap &= ~1;
 	bfd_put_8 (abfd, gap, data + dst_address);
 	dst_address++;
 	src_address++;
@@ -363,7 +394,19 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       {
 	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
 						       input_section);
-	if (gap > 0xff && gap < ~0xff)
+	if (gap < 0xff 
+	    || (gap >= 0x0000ff00
+	        && gap <= 0x0000ffff)
+  	    || (   gap >= 0x00ffff00 
+		&& gap <= 0x00ffffff)
+	    || (   gap >= 0xffffff00
+		&& gap <= 0xffffffff))
+	  {
+	    bfd_put_8 (abfd, gap, data + dst_address);
+	    dst_address += 1;
+	    src_address += 1;
+	  }
+	else
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
 		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
@@ -371,12 +414,6 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 		    input_section, reloc->address)))
 	      abort ();
 	  }
-
-	bfd_put_8 (abfd, gap, data + dst_address);
-	dst_address += 1;
-	src_address += 1;
-
-
       }
       break;
     case R_JMP1:
