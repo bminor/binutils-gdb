@@ -17,9 +17,10 @@
 
 2002-02-18  David O'Brien  <obrien@FreeBSD.org>
 
-	* Makefile.in: Add new files earmelf_fbsd, eelf32ppc_fbsd,
+	* Makefile.am: Add new files earmelf_fbsd, eelf32ppc_fbsd,
 	eelf_i386_fbsd, eelf64_ia64_fbsd, eelf_x86_64_fbsd, eelf64_sparc_fbsd,
 	and eelf64alpha_fbsd.
+	* Makefile.in: Regenerate.
 	* configure.tgt(sparc64-*-freebsd, ia64-*-freebsd, i[3456]86-*-freebsd,
 	x86_64-*-freebsd, arm-*-freebsd, alpha*-*-freebsd, powerpc-*-freebsd):
 	use a FreeBSD-specific emulation rather than the psABI one.
