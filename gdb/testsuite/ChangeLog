@@ -1,3 +1,9 @@
+Tue Mar 21 17:08:47 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* lib/gdb.exp: add proc runto_main, for targets that use stubs, this
+	will not runto main but do a 'step' to step out of breakpoint().
+	* config/mt-slite: add -Dusestubs.
+
 Tue Mar 21 12:14:12 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/printcmds.exp (test_artificial_arrays): Send ^V@
