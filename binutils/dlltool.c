@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /*
@@ -172,6 +172,9 @@
 #include <string.h>
 #include "getopt.h"
 #include "bfd.h"
+
+
+
 int yydebug;
 char *def_file;
 char *program_name;
@@ -206,16 +209,20 @@ struct mac
     char *how_jump;
     char *how_global;
     char *how_space;
+    char *how_align_short;
+    char *how_rva_before;
+    char *how_rva_after;
   }
 mtable[]
 =
 {
   {
-    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space"
+    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space",".align\t2","(",")-0x400000"
   }
   ,
   {
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space"
+    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space",".align\t2",
+"(",")-0x400000"
   }
   ,
     0
@@ -229,7 +236,9 @@ mtable[]
 #define ASM_JUMP 	mtable[machine].how_jump
 #define ASM_GLOBAL	mtable[machine].how_global
 #define ASM_SPACE	mtable[machine].how_space
-
+#define ASM_ALIGN_SHORT mtable[machine].how_align_short
+#define ASM_RVA_BEFORE 	mtable[machine].how_rva_before
+#define ASM_RVA_AFTER  	mtable[machine].how_rva_after
 
 static char **oav;
 
@@ -596,6 +605,21 @@ sfunc (a, b)
   return *a - *b;
 }
 
+
+static char *rva_n (long addr)
+{
+  char b[20];
+  sprintf (b, "0x%08x - __rva");
+  return strdup (b);
+}
+
+static char *rva_s (char *s)
+{
+  char b[20];
+  sprintf (b, "0x%08x - __rva");
+  return strdup (b);
+}
+
 static void 
 flush_page (f, need, page_addr, on_page)
      FILE *f;
@@ -605,9 +629,9 @@ flush_page (f, need, page_addr, on_page)
 {
   int i;
   /* Flush this page */
-  fprintf (f, "\t%s\t0x%x\t%s Starting RVA for chunk\n",
+  fprintf (f, "\t%s\t%s\t%s Starting RVA for chunk\n",
 	   ASM_LONG,
-	   page_addr,
+	   rva_n(page_addr),
 	   ASM_C);
   fprintf (f, "\t%s\t0x%x\t%s Size of block\n",
 	   ASM_LONG,
@@ -850,19 +874,28 @@ gen_lib_file ()
 
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
-  fprintf (f, "\t%s\thname\t%s Ptr to image import by name list\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s\t%shname%s\t%sPtr to image import by name list\n", ASM_LONG, 
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
   fprintf (f, "\t%s\t%d\t%s time\n", ASM_LONG, time (0), ASM_C);
   fprintf (f, "\t%s\t0\t%s Forwarder chain\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s\tiname\t%s imported dll's name\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s\tfthunk\t%s pointer to firstthunk\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s\t%siname%s\t%s imported dll's name\n", ASM_LONG, 
+	   ASM_RVA_BEFORE,
+	   ASM_RVA_AFTER,
+	   ASM_C);
+  fprintf (f, "\t%s\t%sfthunk%s\t%s pointer to firstthunk\n", ASM_LONG,
+	   ASM_RVA_BEFORE,
+	   ASM_RVA_AFTER, ASM_C);
 
   fprintf (f, "%sStuff for compatibility\n", ASM_C);
+#if 0
   fprintf (f, "\t.section\t.idata$3\n");
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\t%s\t0\n", ASM_LONG);
+#endif
+
   fprintf (f, "\t.section\t.idata$5\n");
   fprintf (f, "\t%s\t0\n", ASM_LONG);
 
@@ -875,7 +908,10 @@ gen_lib_file ()
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
       fprintf (f, "__imp_%s:\n", exp->name);
-      fprintf (f, "\t%s\tID%d\n", ASM_LONG, i);
+      fprintf (f, "\t%s\t%sID%d%s\n", ASM_LONG,
+	       ASM_RVA_BEFORE,
+	       i,
+	       ASM_RVA_AFTER);
     }
   fprintf (f, "\t%s\t0\n", ASM_LONG);
 
@@ -884,7 +920,9 @@ gen_lib_file ()
   fprintf (f, "hname:\n");
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (f, "\t%s\tID%d\n", ASM_LONG, i);
+      fprintf (f, "\t%s\t%sID%d%s\n", ASM_LONG, ASM_RVA_BEFORE,
+	       i,
+	       ASM_RVA_AFTER);
     }
 
   fprintf (f, "\t%s\t0\n", ASM_LONG);
@@ -893,6 +931,7 @@ gen_lib_file ()
 
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
+      fprintf (f,"\t%s\n", ASM_ALIGN_SHORT);
       fprintf (f, "ID%d:\t%s\t%d\n", i, ASM_SHORT, exp->ordinal);
       fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, xlate (exp->name));
     }

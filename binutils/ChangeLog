@@ -1,4 +1,21 @@
+Tue Aug  8 17:10:42 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (mtable): New fields.
+	(ASM_RVA_BEFORE, ASM_RVA_AFTER): New.
+	(flush_page): Use new macros.
+
+Sat Aug  5 00:16:37 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* objcopy.c (mark_symbols_used_in_relocations): Handle sections
+	with no relocations.
+	* coffgrok.c (do_sections_p1): Likewise.
+
 Mon Jul 31 12:51:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* strings.c (print_strings): For compatibility with existing
+	strings programs, print strings which are not terminated with a
+	null byte or a newline.
+	* binutils.texi, strings.1: Update documentation accordingly.
 
 	* ar.c (replace_members): For compatibility with existing ar
 	programs, permit users to add the same file multiple times.
