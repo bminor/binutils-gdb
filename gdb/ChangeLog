@@ -1,5 +1,10 @@
 2001-12-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Remove powerpcle-eabi and rs6000-ibm-aix3.2 from
+	target list.
+
+2001-12-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* defs.h (LITTLE_ENDIAN): Delete definition.
 	* arch-utils.c, cris-tdep.c, d10v-tdep.c, defs.h, gdbarch.c,
 	gdbarch.sh, remote-rdp.c, remote-sim.c, sh-tdep.c, sparc-tdep.c,
