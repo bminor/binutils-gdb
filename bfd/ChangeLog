@@ -41,6 +41,9 @@
 	* elf32-m32r.c (m32r_reloc_map_old): Use #ifdef	USE_M32R_OLD_RELOC
 	to protect the declaration of this array.
 
+	* xsym.c (bfd_sym_parse_contained_variables_table_entry_v32):
+	Avoid call to memcpy with a size of 0.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for

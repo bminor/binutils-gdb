@@ -464,7 +464,9 @@ bfd_sym_parse_contained_variables_table_entry_v32 (buf, len, entry)
 	}
       else if (entry->entry.la_size <= BFD_SYM_CVTE_SCA)
 	{
+#if BFD_SYM_CVTE_SCA > 0
 	  memcpy (&entry->entry.address.lastruct.la, buf + 10, BFD_SYM_CVTE_SCA);
+#endif
 	  entry->entry.address.lastruct.la_kind = buf[23];
 	}
       else if (entry->entry.la_size == BFD_SYM_CVTE_BIG_LA)
