@@ -1,3 +1,9 @@
+Thu Feb  9 10:37:13 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): In some cases subtract the
+	value of the add symbol from valp.  Offsets braindamage in the
+	"machine independent" fixup_segment.
+
 Wed Feb  8 18:51:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* messages.c (as_abort): New function.
