@@ -1,3 +1,10 @@
+2003-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (parse_arm_disassembler_option): Do not expect
+	option string to be NUL terminated.
+        (parse_disassembler_options): Allow options to be space or
+	comma separated.  
+
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: New Spanish translation.

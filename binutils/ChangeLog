@@ -1,3 +1,10 @@
+2003-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (main) :Accept multiple -M switch.
+        * doc/binutils.texi: Document that multiple -M switches are
+        accepted and that a single -M switch can contain comma
+        separated options.
+
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (main): Issue a warning message if multiple -M

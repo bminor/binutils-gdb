@@ -1625,15 +1625,9 @@ architectures with the @option{-i} option.
 @item -M @var{options}
 @itemx --disassembler-options=@var{options}
 Pass target specific information to the disassembler.  Only supported on
-some targets.  Note only a single instance of the option on the
-command line is supported.  If the option occurs more than once, the
-earlier versions will be ignored.  If it is necessary to specify more
-than one disassembler option then they should be placed together into
-a space separated list.  ie:
-
-@smallexample
-  -M"first-disassembler-option second-disassembler-option"
-@end smallexample
+some targets.  If it is necessary to specify more than one
+disassembler option then multiple @option{-M} options can be used or
+can be placed together into a comma separated list.
 
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
