@@ -3591,6 +3591,7 @@ emit_expr (exp, nbytes)
       x->sub = exp->X_op_symbol;
       x->addnum = exp->X_add_number;
       x->added = 0;
+      x->use_jump = 0;
       new_broken_words++;
       return;
     }

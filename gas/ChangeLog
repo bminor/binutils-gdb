@@ -1,3 +1,7 @@
+2002-12-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* read.c (emit_expr) [WORKING_DOT_WORD]: Initialize x->use_jump.
+
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* config/tc-m68hc11.c (md_begin): Fix qsort warning.
