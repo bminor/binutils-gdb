@@ -1,3 +1,10 @@
+Sat Sep  9 01:35:39 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/signals.exp:  Rewrite `handle all print' test as
+	a procedure. Accept blanks or TABs as whitespace, increase
+	timeout and expect input buffer size for the large output
+	from the command. Remove "i*86-*-bsdi2.0" xfail.
+
 Sat Sep  2 06:41:26 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/setvar.exp:  Add new testcases for truncation when
