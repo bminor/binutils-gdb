@@ -138,6 +138,7 @@ libhppa.h
 libieee.h
 libnlm.h
 liboasys.h
+m68klynx.c
 mipsbsd.c
 newsos3.c
 netbsd386.c
