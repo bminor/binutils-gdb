@@ -1526,7 +1526,72 @@ yylex ()
       }
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
-	  yylval.tsym.type = SYMBOL_TYPE (sym);
+	  char *p;
+	  char *namestart;
+	  struct symbol *best_sym;
+
+	  /* Look ahead to detect nested types.  This probably should be
+	     done in the grammar, but trying seemed to introduce a lot
+	     of shift/reduce and reduce/reduce conflicts.  It's possible
+	     that it could be done, though.  Or perhaps a non-grammar, but
+	     less ad hoc, approach would work well.  */
+
+	  /* Since we do not currently have any way of distinguishing
+	     a nested type from a non-nested one (the stabs don't tell
+	     us whether a type is nested), we just ignore the
+	     containing type.  */
+
+	  p = lexptr;
+	  best_sym = sym;
+	  while (1)
+	    {
+	      /* Skip whitespace.  */
+	      while (*p == ' ' || *p == '\t' || *p == '\n')
+		++p;
+	      if (*p == ':' && p[1] == ':')
+		{
+		  /* Skip the `::'.  */
+		  p += 2;
+		  /* Skip whitespace.  */
+		  while (*p == ' ' || *p == '\t' || *p == '\n')
+		    ++p;
+		  namestart = p;
+		  while (*p == '_' || *p == '$' || (*p >= '0' && *p <= '9')
+			 || (*p >= 'a' && *p <= 'z')
+			 || (*p >= 'A' && *p <= 'Z'))
+		    ++p;
+		  if (p != namestart)
+		    {
+		      struct symbol *cur_sym;
+		      /* As big as the whole rest of the expression, which is
+			 at least big enough.  */
+		      char *tmp = alloca (strlen (namestart));
+
+		      memcpy (tmp, namestart, p - namestart);
+		      tmp[p - namestart] = '\0';
+		      cur_sym = lookup_symbol (tmp, expression_context_block,
+					       VAR_NAMESPACE, NULL);
+		      if (cur_sym)
+			{
+			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
+			    {
+			      best_sym = cur_sym;
+			      lexptr = p;
+			    }
+			  else
+			    break;
+			}
+		      else
+			break;
+		    }
+		  else
+		    break;
+		}
+	      else
+		break;
+	    }
+
+	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
 	  return TYPENAME;
         }
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)

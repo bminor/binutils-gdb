@@ -1,3 +1,7 @@
+Fri Jul 30 14:44:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* c-exp.y (yylex): Detect C++ nested types.
+
 start-sanitize-v9
 Fri Jul 30 11:07:37 1993  Doug Evans  (dje@canuck.cygnus.com)
 
