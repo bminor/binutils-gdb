@@ -7379,7 +7379,7 @@ of information in the following pattern:
 @end example
 
 For example, you can use the alias @code{sun4} as a @var{host} argument
-or in a @code{+target=@var{target}} option, but the equivalent full name
+or in a @code{--target=@var{target}} option, but the equivalent full name
 is @samp{sparc-sun-sunos4}.
 
 The following table shows all the architectures, hosts, and OS
