@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: VFP Single-precision instructions
-#as: -mvfpxd
+#as: -mfpu=vfpxd
 
 # Test the ARM VFP Single Precision instructions
 

@@ -274,18 +274,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset ARM
 
 @emph{Target ARM options:}
-   [@b{-m[arm]1}|@b{-m[arm]2}|@b{-m[arm]250}|@b{-m[arm]3}|
-    @b{-m[arm]6}|@b{-m[arm]60}|@b{-m[arm]600}|@b{-m[arm]610}|
-    @b{-m[arm]620}|@b{-m[arm]7[t][[d]m[i]][fe]}|@b{-m[arm]70}|
-    @b{-m[arm]700}|@b{-m[arm]710[c]}|@b{-m[arm]7100}|
-    @b{-m[arm]7500}|@b{-m[arm]8}|@b{-m[arm]810}|@b{-m[arm]9}|
-    @b{-m[arm]920}|@b{-m[arm]920t}|@b{-m[arm]9tdmi}|
-    @b{-mstrongarm}|@b{-mstrongarm110}|@b{-mstrongarm1100}]
-   [@b{-m[arm]v2}|@b{-m[arm]v2a}|@b{-m[arm]v3}|@b{-m[arm]v3m}|
-    @b{-m[arm]v4}|@b{-m[arm]v4t}|@b{-m[arm]v5}|@b{-[arm]v5t}|
-    @b{-[arm]v5te}]
-   [@b{-mthumb}|@b{-mall}]
-   [@b{-mfpa10}|@b{-mfpa11}|@b{-mfpe-old}|@b{-mno-fpu}]
+@c Don't document the deprecated options
+   [@b{-mcpu}=@var{processor}[+@var{extension}@dots]]
+   [@b{-march}=@var{architecture}[+@var{extension}@dots]]
+   [@b{-mfpu}=@var{floating-point-fromat}]
+   [@b{-mthumb}]
    [@b{-EB}|@b{-EL}]
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|
     @b{-mapcs-reentrant}]
@@ -568,14 +561,14 @@ The following options are available when @value{AS} is configured for the ARM
 processor family.
 
 @table @gcctabopt
-@item -m[arm][1|2|3|6|7|8|9][...] 
+@item -mcpu=@var{processor}[+@var{extension}@dots]
 Specify which ARM processor variant is the target.
-@item -m[arm]v[2|2a|3|3m|4|4t|5|5t]
+@item -march=@var{architecture}[+@var{extension}@dots]
 Specify which ARM architecture variant is used by the target.
-@item -mthumb | -mall
-Enable or disable Thumb only instruction decoding.
-@item -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu
+@item -mfpu=@var{floating-point-format}
 Select which Floating Point architecture is the target.
+@item -mthumb
+Enable Thumb only instruction decoding.
 @item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant | -moabi
 Select which procedure calling convention is in use.
 @item -EB | -EL

@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-address --show-raw-insn
 #name: Maverick
-#as: -marm9e
+#as: -mcpu=arm9+maverick
 
 # Test the instructions of Maverick
 

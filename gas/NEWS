@@ -1,4 +1,11 @@
 -*- text -*-
+The ARM assembler now accepts -march=..., -mcpu=... and -mfpu=... for
+specifying the target instruction set.  The old method of specifying the
+target processor has been deprecated, but is still accepted for
+compatibility.
+
+Support for the VFP floating-point instruction set has been added to
+the ARM assembler.
 
 New psuedo op: .incbin to include a set of binary data at a given point
 in the assembly.  Contributed by Anders Norlander.

@@ -1,3 +1,10 @@
+2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/vfp1.d: Use new command-line options.
+	* gas/arm/vfp1xD.d: Likewise.
+	* gas/arm/arm.exp (vfp-bad): Likewise.
+	* gas/arm/maverick.d: Likewise.
+
 2002-01-17  Timothy Wall  <twall@oculustech.com>
 
 	* gas/tic54x/labels.s (after_macro): Correct comments.

@@ -1,3 +1,28 @@
+2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* NEWS: Mention new ARM command-line options and VFP support.
+
+	* config/tc-arm.c (ARM_CEXT_XSCALE): Replaces ARM_EXT_XSCALE.  All 
+	uses changed.
+	(ARM_CEXT_MAVERICK): Similarly.
+	(ARM_ANY): Now means any core instruction.
+	(CPU_DEFAULT): Default to ARM_ANY.
+	(uses_apcs_26, atcps, support_interwork, uses_apcs_float)
+	(pic_code): Declare for all object types.  Make type int.
+	(legacy_cpu, legacy_fpu, mcpu_cpu_opt, mcpu_fpu_opt, march_cpu_opt)
+	(march_fpu_opt, mfpu_opt): Declare.
+	(md_longopts): Tidy up conditional definitions.
+	(arm_opts, arm_cpus, arm_archs, arm_fpus, arm_extensions)
+	(arm_long_opts): New tables.
+	(arm_parse_cpu, arm_parse_arch, arm_parse_fpu): New functions.
+	(arm_parse_extension): New function.
+	(md_parse_option): Rewrite using new table-driven system.
+	(md_show_usage): Use new table-driven system.
+	(md_begin): Calculate cpu_variant from command line option data.
+	* doc/as.texinfo (ARM ISA options): Docuement new ARM-specific
+	command-line options.
+	* doc/c-arm.texi: Likewise.
+
 2002-01-18  Andreas Jaeger  <aj@suse.de>
 
 	* as.c (parse_args): Update year.

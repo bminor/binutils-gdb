@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: VFP Double-precision instructions
-#as: -mvfp
+#as: -mfpu=vfp
 
 # Test the ARM VFP Double Precision instructions
 

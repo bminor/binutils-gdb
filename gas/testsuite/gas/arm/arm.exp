@@ -51,7 +51,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "vfp1"
 
-    run_errors_test "vfp-bad" "-mvfp" "VFP errors"
+    run_errors_test "vfp-bad" "-mfpu=vfp" "VFP errors"
 
     run_dump_test "xscale"
 
@@ -71,6 +71,7 @@ if [istarget arm-*-pe] {
     # Since big-endian numbers have the normal format, this doesn't exist.
     #run_dump_test "be-fpconst"
 }
+
 if [istarget arm9e-*] {
     run_dump_test "maverick"
 }
