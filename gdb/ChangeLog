@@ -1,3 +1,7 @@
+2004-01-21  Paul Brook  <paul@codesourcery.com>
+
+	* MAINTAINERS: Add myself to write-after-approval.
+
 2004-01-20  Andrew Cagney  <cagney@redhat.com>
 
 	* ax-gdb.c (print_axs_value): Delete unused function.
