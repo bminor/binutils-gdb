@@ -226,6 +226,13 @@ default_register_sim_regno (int num)
   return num;
 }
 
+
+CORE_ADDR
+default_convert_from_func_ptr_addr (CORE_ADDR addr)
+{
+  return addr;
+}
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE

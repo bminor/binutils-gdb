@@ -1249,12 +1249,7 @@ find_function_addr (value_ptr function, struct type **retval_type)
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
-#ifdef CONVERT_FROM_FUNC_PTR_ADDR
-	  /* FIXME: This is a workaround for the unusual function
-	     pointer representation on the RS/6000, see comment
-	     in config/rs6000/tm-rs6000.h  */
 	  funaddr = CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
-#endif
 	  value_type = TYPE_TARGET_TYPE (ftype);
 	}
       else

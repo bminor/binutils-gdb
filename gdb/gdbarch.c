@@ -232,6 +232,7 @@ struct gdbarch
   const struct floatformat * float_format;
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
+  gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
 };
 
 
@@ -304,6 +305,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -429,6 +431,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->frame_args_skip = -1;
   gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   gdbarch->extra_stack_alignment_needed = 1;
+  gdbarch->convert_from_func_ptr_addr = default_convert_from_func_ptr_addr;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -665,6 +668,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     gdbarch->double_format = default_double_format (gdbarch);
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = &floatformat_unknown;
+  /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
 }
 
 
@@ -1292,6 +1296,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT # %s\n",
                       XSTRING (TARGET_LONG_DOUBLE_FORMAT));
+#endif
+#ifdef CONVERT_FROM_FUNC_PTR_ADDR
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "CONVERT_FROM_FUNC_PTR_ADDR(addr)",
+                      XSTRING (CONVERT_FROM_FUNC_PTR_ADDR (addr)));
 #endif
 #ifdef TARGET_ARCHITECTURE
   if (TARGET_ARCHITECTURE != NULL)
@@ -1948,6 +1958,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_FORMAT);
+#endif
+#ifdef CONVERT_FROM_FUNC_PTR_ADDR
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CONVERT_FROM_FUNC_PTR_ADDR = 0x%08lx\n",
+                        (long) current_gdbarch->convert_from_func_ptr_addr
+                        /*CONVERT_FROM_FUNC_PTR_ADDR ()*/);
 #endif
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
@@ -3735,6 +3752,23 @@ set_gdbarch_long_double_format (struct gdbarch *gdbarch,
                                 const struct floatformat * long_double_format)
 {
   gdbarch->long_double_format = long_double_format;
+}
+
+CORE_ADDR
+gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  if (gdbarch->convert_from_func_ptr_addr == 0)
+    internal_error ("gdbarch: gdbarch_convert_from_func_ptr_addr invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_convert_from_func_ptr_addr called\n");
+  return gdbarch->convert_from_func_ptr_addr (addr);
+}
+
+void
+set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+                                        gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr)
+{
+  gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr;
 }
 
 

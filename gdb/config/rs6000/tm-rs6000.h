@@ -97,23 +97,6 @@ extern void aix_process_linenos (void);
 /* Default offset from SP where the LR is stored */
 #define	DEFAULT_LR_SAVE 8
 
-/* Usually a function pointer's representation is simply the address
-   of the function. On the RS/6000 however, a function pointer is
-   represented by a pointer to a TOC entry. This TOC entry contains
-   three words, the first word is the address of the function, the
-   second word is the TOC pointer (r2), and the third word is the
-   static chain value.  Throughout GDB it is currently assumed that a
-   function pointer contains the address of the function, which is not
-   easy to fix.  In addition, the conversion of a function address to
-   a function pointer would require allocation of a TOC entry in the
-   inferior's memory space, with all its drawbacks.  To be able to
-   call C++ virtual methods in the inferior (which are called via
-   function pointers), find_function_addr uses this macro to get the
-   function address from a function pointer.  */
-
-#define CONVERT_FROM_FUNC_PTR_ADDR rs6000_convert_from_func_ptr_addr
-extern CORE_ADDR rs6000_convert_from_func_ptr_addr (CORE_ADDR);
-
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
 

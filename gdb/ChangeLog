@@ -1,3 +1,20 @@
+2000-10-26  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* arch-utils.c, arch-utils.h (default_convert_from_func_ptr_addr):
+	New function.
+	* gdbarch.sh (CONVERT_FROM_FUNC_PTR_ADDR):  Add.
+	* gdbarch.c, gdbarch.h:  Regenerate.
+	* valops.c (find_function_addr):  Use CONVERT_FROM_FUNC_PTR_ADDR
+	unconditionally.
+
+	* config/rs6000/tm-rs6000.h (CONVERT_FROM_FUNC_PTR_ADDR):  Delete
+	definition.
+	* config/powerpc/tm-linux.h (CONVERT_FROM_FUNC_PTR_ADDR):  Remove
+	undef.
+	* rs6000-tdep.c (rs6000_convert_from_func_ptr_addr):  Fix comment.
+	(rs6000_gdbarch_init):  Register rs6000_convert_from_func_ptr_addr
+	if not ELFOSABI_LINUX.
+
 2000-10-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/rs6000/rs6000lynx.mt (TDEPFILES): Revert 2000-10-24

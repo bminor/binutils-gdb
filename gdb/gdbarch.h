@@ -1338,6 +1338,20 @@ extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struc
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CONVERT_FROM_FUNC_PTR_ADDR)
+#define CONVERT_FROM_FUNC_PTR_ADDR(addr) (default_convert_from_func_ptr_addr (addr))
+#endif
+
+typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (CORE_ADDR addr);
+extern CORE_ADDR gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CONVERT_FROM_FUNC_PTR_ADDR)
+#define CONVERT_FROM_FUNC_PTR_ADDR(addr) (gdbarch_convert_from_func_ptr_addr (current_gdbarch, addr))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

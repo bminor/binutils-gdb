@@ -1541,11 +1541,11 @@ rs6000_create_inferior (int pid)
    a function pointer would require allocation of a TOC entry in the
    inferior's memory space, with all its drawbacks.  To be able to
    call C++ virtual methods in the inferior (which are called via
-   function pointers), find_function_addr uses this macro to get the
+   function pointers), find_function_addr uses this function to get the
    function address from a function pointer.  */
 
-/* Return nonzero if ADDR (a function pointer) is in the data space and
-   is therefore a special function pointer.  */
+/* Return real function address if ADDR (a function pointer) is in the data
+   space and is therefore a special function pointer.  */
 
 CORE_ADDR
 rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
@@ -2196,6 +2196,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
       set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
+
+      /* Handle RS/6000 function pointers.  */
+      set_gdbarch_convert_from_func_ptr_addr (gdbarch,
+	rs6000_convert_from_func_ptr_addr);
     }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);

@@ -93,4 +93,8 @@ extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 
 extern int default_register_sim_regno (int reg_nr);
 
+/* Default conversion of function pointer address - returns address.  */
+
+extern CORE_ADDR default_convert_from_func_ptr_addr (CORE_ADDR addr);
+
 #endif
