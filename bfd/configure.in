@@ -183,7 +183,7 @@ do
     m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
-    m68klynx_coff_vec)		tb="$tb m68klynx-cf.o lynx-core.o stab-syms.o" ;;
+    m68klynx_coff_vec)		tb="$tb m68klynx-cf.o coff-m68k.o lynx-core.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
