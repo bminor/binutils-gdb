@@ -1,5 +1,10 @@
 2002-06-18  Chris Demetriou  <cgd@broadcom.com>
 
+	* emultempl/mipself.em (mips_elf${ELFSIZE}_check_sections): Check
+	section flags for SEC_DATA, rather than for SEC_CODE being unset.
+
+2002-06-18  Chris Demetriou  <cgd@broadcom.com>
+
 	* emultempl/mipself.em (mips_elf${ELFSIZE}_check_sections): Fix
 	format specifier used to print BFD name.
 

@@ -121,7 +121,7 @@ mips_elf${ELFSIZE}_check_sections (abfd, sec, sdatasec)
      asection *sec;
      PTR sdatasec;
 {
-  if ((bfd_get_section_flags (abfd, sec) & SEC_CODE) == 0
+  if ((bfd_get_section_flags (abfd, sec) & SEC_DATA)
       && sec != (asection *) sdatasec
       && sec->reloc_count != 0)
     einfo ("%B%X: section %s has relocs; cannot use --embedded-relocs\n",
