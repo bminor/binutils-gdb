@@ -77,13 +77,44 @@ SECTIONS
   /* Internal text space.  */
   .text :
   {
+    ${RELOCATING+. = ALIGN(2);}
     *(.init)
+    *(.init0)  /* Start here after reset.  */
+    *(.init1)
+    *(.init2)  /* Copy data loop  */
+    *(.init3)
+    *(.init4)  /* Clear bss  */
+    *(.init5)
+    *(.init6)  /* C++ constructors.  */
+    *(.init7)
+    *(.init8)
+    *(.init9)  /* Call main().  */
+
+    ${CONSTRUCTING+ __ctors_start = . ; }
+    ${CONSTRUCTING+ *(.ctors) }
+    ${CONSTRUCTING+ __ctors_end = . ; }
+    ${CONSTRUCTING+ __dtors_start = . ; }
+    ${CONSTRUCTING+ *(.dtors) }
+    ${CONSTRUCTING+ __dtors_end = . ; }
+
     ${RELOCATING+. = ALIGN(2);}
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
+
     ${RELOCATING+. = ALIGN(2);}
+    *(.fini9)  /*   */
+    *(.fini8)
+    *(.fini7)
+    *(.fini6)  /* C++ destructors.  */
+    *(.fini5)
+    *(.fini4)
+    *(.fini3)
+    *(.fini2)
+    *(.fini1)
+    *(.fini0)  /* Infinite loop after program termination.  */
     *(.fini)
+
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
 
