@@ -1,5 +1,25 @@
 2004-03-07  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (legacy_push_dummy_code): Delete #ifdef
+	GDB_TARGET_IS_HPPA code.
+	* config/pa/tm-hppa.h (DEPRECATED_FIX_CALL_DUMMY)
+	(hppa_fix_call_dummy, DEPRECATED_CALL_DUMMY_HAS_COMPLETED) 
+	(DEPRECATED_DUMMY_WRITE_SP, CALL_DUMMY): Delete.
+	* config/pa/tm-hppa64.h (CALL_DUMMY): Delete.
+	* hppa-tdep.c (hppa_frame_chain, hppa_frame_chain_valid) 
+	(hppa_push_dummy_frame, hppa_pop_frame, hppa_push_arguments) 
+	(hppa_fix_call_dummy, hppa64_stack_align, hppa_frame_saved_pc) 
+	(hppa_init_extra_frame_info, hppa_saved_pc_after_call)
+	(hppa64_call_dummy_breakpoint_offset, hppa_frame_init_saved_regs) 
+	(hppa_frameless_function_invocation, hppa64_store_return_value) 
+	(hppa_store_struct_return, hppa64_extract_return_value) 
+	(hppa64_use_struct_convention, hppa_frame_find_saved_regs)
+	(hppa32_call_dummy_length, hppa64_call_dummy_length) 
+	(find_dummy_frame_regs, FUNC_LDIL_OFFSET, FUNC_LDO_OFFSET)
+	(find_proc_framesize, deposit_21, restore_pc_queue) 
+	(find_return_regnum, pc_in_interrupt_handler, deposit_14) 
+	(rp_saved, pc_in_linker_stub): 
+
 	Unconditionally enable 64-bit frame and ABI code.
 	* hppa-tdep.c (hppa_gdbarch_init): Do not set deprecated
 	call_dummy_breakpoint_offset, call_dummy_length, stack_align,
@@ -9,7 +29,7 @@
 	init_frame_pc, frame_init_saved_regs, init_extra_frame_info,
 	frame_chain, frame_chain_valid, frameless_function_invocation,
 	frame_saved_pc, and pop_frame.
-	
+
 	* hppa-tdep.c: Replace PC_REGNUM with PCOQ_HEAD_REGNUM.
 	(hppa64_return_value, hppa64_push_dummy_call): Rewrite.
 	(hppa_gdbarch_init): Do not set PC_REGNUM.

@@ -26,9 +26,6 @@
 
 #include "regcache.h"
 
-/* Wonder if this is correct?  Should be using push_dummy_call().  */
-#define DEPRECATED_DUMMY_WRITE_SP(SP) deprecated_write_sp (SP)
-
 #define GDB_MULTI_ARCH 1
 
 /* Hack, get around problem with including "arch-utils.h".  */
@@ -107,101 +104,7 @@ extern int hppa_instruction_nullified (void);
 
 #define INSTRUCTION_SIZE 4
 
-/* This sequence of words is the instructions
-
-   ; Call stack frame has already been built by gdb. Since we could be calling 
-   ; a varargs function, and we do not have the benefit of a stub to put things in
-   ; the right place, we load the first 4 word of arguments into both the general
-   ; and fp registers.
-   call_dummy
-   ldw -36(sp), arg0
-   ldw -40(sp), arg1
-   ldw -44(sp), arg2
-   ldw -48(sp), arg3
-   ldo -36(sp), r1
-   fldws 0(0, r1), fr4
-   fldds -4(0, r1), fr5
-   fldws -8(0, r1), fr6
-   fldds -12(0, r1), fr7
-   ldil 0, r22                  ; FUNC_LDIL_OFFSET must point here
-   ldo 0(r22), r22                      ; FUNC_LDO_OFFSET must point here
-   ldsid (0,r22), r4
-   ldil 0, r1                   ; SR4EXPORT_LDIL_OFFSET must point here
-   ldo 0(r1), r1                        ; SR4EXPORT_LDO_OFFSET must point here
-   ldsid (0,r1), r20
-   combt,=,n r4, r20, text_space        ; If target is in data space, do a
-   ble 0(sr5, r22)                      ; "normal" procedure call
-   copy r31, r2
-   break 4, 8 
-   mtsp r21, sr0
-   ble,n 0(sr0, r22)
-   text_space                           ; Otherwise, go through _sr4export,
-   ble (sr4, r1)                        ; which will return back here.
-   stw r31,-24(r30)
-   break 4, 8
-   mtsp r21, sr0
-   ble,n 0(sr0, r22)
-   nop                          ; To avoid kernel bugs 
-   nop                          ; and keep the dummy 8 byte aligned
-
-   The dummy decides if the target is in text space or data space. If
-   it's in data space, there's no problem because the target can
-   return back to the dummy. However, if the target is in text space,
-   the dummy calls the secret, undocumented routine _sr4export, which
-   calls a function in text space and can return to any space. Instead
-   of including fake instructions to represent saved registers, we
-   know that the frame is associated with the call dummy and treat it
-   specially.
-
-   The trailing NOPs are needed to avoid a bug in HPUX, BSD and OSF1 
-   kernels.   If the memory at the location pointed to by the PC is
-   0xffffffff then a ptrace step call will fail (even if the instruction
-   is nullified).
-
-   The code to pop a dummy frame single steps three instructions
-   starting with the last mtsp.  This includes the nullified "instruction"
-   following the ble (which is uninitialized junk).  If the 
-   "instruction" following the last BLE is 0xffffffff, then the ptrace
-   will fail and the dummy frame is not correctly popped.
-
-   By placing a NOP in the delay slot of the BLE instruction we can be 
-   sure that we never try to execute a 0xffffffff instruction and
-   avoid the kernel bug.  The second NOP is needed to keep the call
-   dummy 8 byte aligned.  */
-
-#define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
-                    0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
-                    0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A4,\
-                    0x20200000, 0x34210000, 0x002010b4, 0x82842022,\
-                    0xe6c06000, 0x081f0242, 0x00010004, 0x00151820,\
-                    0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
-                    0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
-
 #define REG_PARM_STACK_SPACE 16
-
-/* If we've reached a trap instruction within the call dummy, then
-   we'll consider that to mean that we've reached the call dummy's
-   end after its successful completion. */
-#define DEPRECATED_CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
-  (DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
-   (read_memory_integer((pc), 4) == BREAKPOINT32))
-
-/* Insert the specified number of args and function address into a
-   call sequence of the above form stored at DUMMYNAME.
-
-   On the hppa we need to call the stack dummy through $$dyncall.
-   Therefore our version of DEPRECATED_FIX_CALL_DUMMY takes an extra
-   argument, real_pc, which is the location where gdb should start up
-   the inferior to do the function call.  */
-
-/* FIXME: brobecker 2002-12-26.  This macro is going to cause us some
-   problems before we can go to multiarch partial as it has been
-   diverted on HPUX to return the value of the PC!  */
-/* NOTE: cagney/2003-05-03: This has been replaced by push_dummy_code.
-   Hopefully that has all the parameters HP/UX needs.  */
-#define DEPRECATED_FIX_CALL_DUMMY hppa_fix_call_dummy
-extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
-		                      struct value **, struct type *, int);
 
 #define	GDB_TARGET_IS_HPPA
 

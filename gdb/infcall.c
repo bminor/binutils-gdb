@@ -277,10 +277,6 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
      (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
   if (!gdbarch_push_dummy_call_p (current_gdbarch))
     {
-#ifdef GDB_TARGET_IS_HPPA
-      (*real_pc) = DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs,
-					      args, value_type, using_gcc);
-#else
       if (DEPRECATED_FIX_CALL_DUMMY_P ())
 	{
 	  /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
@@ -288,7 +284,6 @@ legacy_push_dummy_code (struct gdbarch *gdbarch,
 				     value_type, using_gcc);
 	}
       (*real_pc) = start_sp;
-#endif
     }
   /* Yes, the offset is applied to the real_pc and not the dummy addr.
      Ulgh!  Blame the HP/UX target.  */
