@@ -1,3 +1,22 @@
+Thu Jan 25 12:08:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Add .rela.sdata{,2}
+	to sections we allocate.  Use bfd_zalloc to allocate initialial
+	sections, not bfd_alloc.
+	(ppc_elf_check_relocs): Remove BFD_ASSERTs for !shared from
+	SDA{,2}I16 relocations.
+	(ppc_elf_add_symbol_hook): Use the value of -G nn to determine
+	whether to put something in .sbss or not.
+	(ppc_elf_relocate_section): Add support for more relocations.  Add
+	in sec->output_offset where appropriate.
+
+	* elflink.c (_bfd_elf_create_linker_section): Lookup symbol before
+	trying to add it to the symbol table, so _GLOBAL_OFFSET_TABLE_
+	doesn't get redefined messages if -shared.
+
+	* elflink.h (elf_create_pointer_linker_section) Only bump RELA
+	section if the rel_section field has been set up.
+
 Wed Jan 24 20:40:26 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Fix typo in eabi

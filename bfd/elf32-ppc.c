@@ -1437,7 +1437,9 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	if (strcmp (name, ".plt") != 0
 	    && strcmp (name, ".got") != 0
 	    && strcmp (name, ".sdata") != 0
-	    && strcmp (name, ".sdata2") != 0)
+	    && strcmp (name, ".sdata2") != 0
+	    && strcmp (name, ".rela.sdata") != 0
+	    && strcmp (name, ".rela.sdata2") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -1458,7 +1460,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
     }
@@ -1625,7 +1627,6 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
 	    return false;
 
-	  BFD_ASSERT (!info->shared);
 	  if (!bfd_elf32_create_pointer_linker_section (abfd, info, sdata, h, rel))
 	    return false;
 
@@ -1638,7 +1639,6 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
 	    return false;
 
-	  BFD_ASSERT (!info->shared);
 	  if (!bfd_elf32_create_pointer_linker_section (abfd, info, sdata2, h, rel))
 	    return false;
 
@@ -1762,9 +1762,9 @@ ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **secp;
      bfd_vma *valp;
 {
-  if (sym->st_shndx == SHN_COMMON && sym->st_size <= 8)
+  if (sym->st_shndx == SHN_COMMON && sym->st_size <= bfd_get_gp_size (abfd))
     {
-      /* Common symbols less than or equal to 8 bytes are automatically
+      /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sdata.  */
       bfd *dynobj = elf_hash_table (info)->dynobj;
       elf_linker_section_t *sdata = elf_linker_section (dynobj, LINKER_SECTION_SDATA);
@@ -2242,7 +2242,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
 		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0)
 
-	  addend -= sec->output_section->vma + 0x8000;
+	  addend -= sec->output_section->vma + sec->output_offset + 0x8000;
 	  break;
 
 	/* arithmetic adjust relocations */
@@ -2267,7 +2267,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      continue;
 	    }
 	  addend -= (sdata->sym_hash->root.u.def.value
-		     + sdata->sym_hash->root.u.def.section->output_section->vma);
+		     + sdata->sym_hash->root.u.def.section->output_section->vma
+		     + sdata->sym_hash->root.u.def.section->output_offset);
 	  break;
 
 
@@ -2287,7 +2288,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      continue;
 	    }
 	  addend -= (sdata2->sym_hash->root.u.def.value
-		     + sdata2->sym_hash->root.u.def.section->output_section->vma);
+		     + sdata2->sym_hash->root.u.def.section->output_section->vma
+		     + sdata2->sym_hash->root.u.def.section->output_offset);
 	  break;
 
 
@@ -2303,14 +2305,16 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 		reg = 13;
 		addend -= (sdata->sym_hash->root.u.def.value
-			   + sdata->sym_hash->root.u.def.section->output_section->vma);
+			   + sdata->sym_hash->root.u.def.section->output_section->vma
+			   + sdata->sym_hash->root.u.def.section->output_offset);
 	      }
 
 	    else if (strcmp (name, ".sdata2") == 0 || strcmp (name, ".sbss2") == 0)
 	      {
 		reg = 2;
 		addend -= (sdata2->sym_hash->root.u.def.value
-			   + sdata2->sym_hash->root.u.def.section->output_section->vma);
+			   + sdata2->sym_hash->root.u.def.section->output_section->vma
+			   + sdata2->sym_hash->root.u.def.section->output_offset);
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0 || strcmp (name, ".PPC.EMB.sbss0") == 0)
@@ -2339,6 +2343,38 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
+	/* Relocate against the beginning of the section */
+	case (int)R_PPC_SECTOFF:
+	case (int)R_PPC_SECTOFF_LO:
+	case (int)R_PPC_SECTOFF_HI:
+	  BFD_ASSERT (sec != (asection *)0);
+	  addend -= sec->output_section->vma;
+	  break;
+
+	case (int)R_PPC_SECTOFF_HA:
+	  BFD_ASSERT (sec != (asection *)0);
+	  addend -= sec->output_section->vma;
+	  addend += ((relocation + addend) & 0x8000) << 1;
+	  break;
+
+	/* Negative relocations */
+	case (int)R_PPC_EMB_NADDR32:
+	case (int)R_PPC_EMB_NADDR16:
+	case (int)R_PPC_EMB_NADDR16_LO:
+	case (int)R_PPC_EMB_NADDR16_HI:
+	  addend -= 2*relocation;
+	  break;
+
+	case (int)R_PPC_EMB_NADDR16_HA:
+	  addend -= 2*relocation;
+	  addend += ((relocation + addend) & 0x8000) << 1;
+	  break;
+
+	/* NOP relocation that prevents garbage collecting linkers from omitting a
+	   reference.  */
+	case (int)R_PPC_EMB_MRKREF:
+	  continue;
+
 	case (int)R_PPC_PLTREL24:
 	case (int)R_PPC_COPY:
 	case (int)R_PPC_GLOB_DAT:
@@ -2350,22 +2386,11 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_PLT16_LO:
 	case (int)R_PPC_PLT16_HI:
 	case (int)R_PPC_PLT16_HA:
-	case (int)R_PPC_SECTOFF:
-	case (int)R_PPC_SECTOFF_LO:
-	case (int)R_PPC_SECTOFF_HI:
-	case (int)R_PPC_SECTOFF_HA:
-	case (int)R_PPC_EMB_NADDR32:
-	case (int)R_PPC_EMB_NADDR16:
-	case (int)R_PPC_EMB_NADDR16_LO:
-	case (int)R_PPC_EMB_NADDR16_HI:
-	case (int)R_PPC_EMB_NADDR16_HA:
-	case (int)R_PPC_EMB_MRKREF:
 	case (int)R_PPC_EMB_RELSEC16:
 	case (int)R_PPC_EMB_RELST_LO:
 	case (int)R_PPC_EMB_RELST_HI:
 	case (int)R_PPC_EMB_RELST_HA:
 	case (int)R_PPC_EMB_BIT_FLD:
-	unsupported:
 	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported.",
 				 bfd_get_filename (input_bfd),
 				 ppc_elf_howto_table[ (int)r_type ]->name);

@@ -3172,8 +3172,8 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
 	    return false;
 	}
 
-      BFD_ASSERT (lsect->rel_section != NULL);
-      lsect->rel_section->_raw_size += sizeof (Elf_External_Rela);
+      if (lsect->rel_section)
+	lsect->rel_section->_raw_size += sizeof (Elf_External_Rela);
     }
 
   else  /* Allocation of a pointer to a local symbol */
