@@ -1,4 +1,10 @@
+Mon Sep 18 23:08:26 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (noconfigdirs): Disable bfd, binutils, gas, gcc,
+	gdb, ld and opcodes on v810-*-*.
+
 Sat Sep 16 18:31:08 PDT 1995  Angela Marie Thomas <angela@cygnus.com>
+	
 	* config/mh-ncrsvr43: Removed AR_FLAGS
 
 Tue Sep 12 18:03:31 1995  Ian Lance Taylor  <ian@cygnus.com>

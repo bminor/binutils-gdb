@@ -473,6 +473,9 @@ case "${target}" in
            use_gnu_ld=no
     fi
     ;;
+  v810-*-*)
+    noconfigdirs="$noconfigdirs bfd binutils ld gas gcc gdb opcodes"
+    ;;
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld newlib opcodes"
     ;;
