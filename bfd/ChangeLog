@@ -1,5 +1,9 @@
 2004-01-11  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* elf32-h8300.c: Fix formatting.
+
+2004-01-11  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* elf32-cris.c (cris_elf_gc_sweep_hook): Return early if no
 	dynamic object is present.  Declare r_symndx and h in an inner
 	scope.

@@ -30,24 +30,19 @@ static void elf32_h8_info_to_howto
   (bfd *, arelent *, Elf_Internal_Rela *);
 static void elf32_h8_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
-static unsigned long elf32_h8_mach
-  (flagword);
-static void elf32_h8_final_write_processing
-  (bfd *, bfd_boolean);
-static bfd_boolean elf32_h8_object_p
-  (bfd *);
-static bfd_boolean elf32_h8_merge_private_bfd_data
-  (bfd *, bfd *);
+static unsigned long elf32_h8_mach (flagword);
+static void elf32_h8_final_write_processing (bfd *, bfd_boolean);
+static bfd_boolean elf32_h8_object_p (bfd *);
+static bfd_boolean elf32_h8_merge_private_bfd_data (bfd *, bfd *);
 static bfd_boolean elf32_h8_relax_section
   (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 static bfd_boolean elf32_h8_relax_delete_bytes
   (bfd *, asection *, bfd_vma, int);
-static bfd_boolean elf32_h8_symbol_address_p
-  (bfd *, asection *, bfd_vma);
+static bfd_boolean elf32_h8_symbol_address_p (bfd *, asection *, bfd_vma);
 static bfd_byte *elf32_h8_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *,
    bfd_byte *, bfd_boolean, asymbol **);
-static asection * elf32_h8_gc_mark_hook
+static asection *elf32_h8_gc_mark_hook
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 static bfd_boolean elf32_h8_gc_sweep_hook
@@ -645,8 +640,8 @@ elf32_h8_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       && bfd_get_mach (obfd) < bfd_get_mach (ibfd))
     {
       if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
-                               bfd_get_mach (ibfd)))
-        return FALSE;
+			       bfd_get_mach (ibfd)))
+	return FALSE;
     }
 
   return TRUE;
@@ -1444,26 +1439,26 @@ elf32_h8_gc_mark_hook (asection *sec,
     {
       switch (h->root.type)
         {
-         case bfd_link_hash_defined:
-         case bfd_link_hash_defweak:
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
           return h->root.u.def.section;
-          
-         case bfd_link_hash_common:
+
+	case bfd_link_hash_common:
           return h->root.u.c.p->section;
-          
-         default:
+
+	default:
           break;
         }
     }
   else
-    return bfd_section_from_elf_index(sec->owner, sym->st_shndx);
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
   return NULL;
 }
 
 static bfd_boolean
 elf32_h8_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 			struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                        asection *sec ATTRIBUTE_UNUSED,
+			asection *sec ATTRIBUTE_UNUSED,
 			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
 {
   return TRUE;
