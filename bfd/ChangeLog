@@ -1,3 +1,8 @@
+Wed Dec 10 11:15:55 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c: Update with patches from the branch to fix
+	HI16_S/LO16 reloc pairs.
+
 start-sanitize-d30v
 Wed Dec 10 14:06:48 1997  Michael Meissner  <meissner@cygnus.com>
 
