@@ -237,6 +237,7 @@ yyerror PARAMS ((char *));
 %token <voidval>	UPPER
 %token <voidval>	LOWER
 %token <voidval>	LENGTH
+%token <voidval>	ARRAY
 
 /* Tokens which are not Chill tokens used in expressions, but rather GDB
    specific things that we recognize in the same context as Chill tokens
@@ -606,6 +607,22 @@ expression_conversion:	mode_name parenthesised_expression
 			{
 			  write_exp_elt_opcode (UNOP_CAST);
 			  write_exp_elt_type ($1.type);
+			  write_exp_elt_opcode (UNOP_CAST);
+			}
+		|	ARRAY '(' ')' mode_name parenthesised_expression
+			/* This is pseudo-Chill, similar to C's '(TYPE[])EXPR'
+			   which casts to an artificial array. */
+			{
+			  struct type *range_type
+			    = create_range_type ((struct type *) NULL,
+						 builtin_type_int, 0, 0);
+			  struct type *array_type
+			    = create_array_type ((struct type *) NULL,
+						 $4.type, range_type);
+			  TYPE_ARRAY_UPPER_BOUND_TYPE(array_type)
+			    = BOUND_CANNOT_BE_DETERMINED;
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type (array_type);
 			  write_exp_elt_opcode (UNOP_CAST);
 			}
 		;
@@ -1717,6 +1734,7 @@ struct token
 
 static const struct token idtokentab[] =
 {
+    { "array", ARRAY },
     { "length", LENGTH },
     { "lower", LOWER },
     { "upper", UPPER },

@@ -1,3 +1,12 @@
+Tue Feb 21 20:48:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* valops.c (call_function_by_hand):  Set using_gcc to 2 if gcc-2.
+	Call error if too few arguments.
+	If REG_STRUCT_HAS_ADDR (structs passed by invisible reference),
+	copy and convert to reference *before* we calculate alignment.
+	Also, make sure structs allocated for return values and invisible
+	reference don't violate STACK_ALIGN.
+
 Tue Feb 21 11:47:26 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* top.c (print_gdb_version): Update the year.
