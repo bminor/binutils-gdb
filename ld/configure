@@ -179,7 +179,7 @@ fi
 # any existing configure script.
 
 configdirs=
-srctrigger=ldversion.c
+srctrigger=ldver.c
 srcname="linker"
 
 ## end of common part.
@@ -582,7 +582,11 @@ exit 0
 
 #
 # $Log$
-# Revision 1.9  1991/05/14 14:14:30  rich
+# Revision 1.10  1991/05/14 18:53:32  steve
+# Added make dep
+# Made filenames suitable for PCs
+#
+# Revision 1.9  1991/05/14  14:14:30  rich
 # see devo/configure 1.11
 #
 # Revision 1.10  1991/05/04  00:58:38  rich

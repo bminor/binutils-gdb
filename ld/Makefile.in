@@ -23,14 +23,14 @@ INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
-SCRIPTS = ld-gld68k.script ld-gld68k-Ur.script ld-gld68k-r.script \
-	ld-gld.script ld-gld-Ur.script ld-gld-r.script ld-lnk960.script \
-	ld-lnk960-r.script ld-gld960.script \
-	ld-gldm88kbcs.script ld-gldm88kbcs-Ur.script ld-gldm88kbcs-r.script
+SCRIPTS = ldgld68k.script ldgld68kUr.script ldgld68kr.script \
+	ldgld.script ldgldUr.script ldgldr.script ldlnk960.script \
+	ldlnk960r.script ldgld960.script \
+	ldgldm88kbcs.script ldgldm88kbcsUr.script ldgldm88kbcsr.script
 
-PROCESSED_SCRIPTS = ld-gld68k.x ld-gld68k-Ur.x ld-gld68k-r.x ld-gld.x \
-	ld-gld-Ur.x ld-gld-r.x ld-lnk960.x ld-lnk960-r.x ld-gld960.x \
-	ld-gldm88kbcs.x ld-gldm88kbcs-Ur.x ld-gldm88kbcs-r.x
+PROCESSED_SCRIPTS = ldgld68k.x ldgld68kUr.x ldgld68kr.x ldgld.x \
+	ldgldUr.x ldgldr.x ldlnk960.x ldlnk960r.x ldgld960.x \
+	ldgldm88kbcs.x ldgldm88kbcsUr.x ldgldm88kbcsr.x
 
 #### target and host dependent Makefile fragments come in here.
 ###
@@ -60,18 +60,18 @@ LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
 
-OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
-	ld-gldm88kbcs.o \
-	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ld-vanilla.o ldfile.o
+OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o \
+	ldgldm88kbcs.o \
+	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
-	ldlex.h ldwrite.h ldversion.h ld-emul.h ldfile.h ldgram.h ld.h
+	ldlex.h ldwrite.h ldver.h ldemul.h ldfile.h ldgram.h ld.h
 
 MANSOURCES=ld.tex
 
-LDCSOURCES=ldlang.c ldmain.c ldwrite.c ld-lnk960.c ld-gld.c ld-gld68k.c \
-	ld-gldm88kbcs.c \
-	ld-gld960.c ld-emul.c ldversion.c ldmisc.c ldexp.c ldsym.c ldfile.c ld-vanilla.c
+LDCSOURCES=ldlang.c ldmain.c ldwrite.c ldlnk960.c ldgld.c ldgld68k.c \
+	ldgldm88kbcs.c \
+	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
 GENERATED_SOURCES=ldgram.tab.c ldlex.c ldgram.tab.h y.tab.h
 GENERATED_HEADERS=ldgram.tab.h
@@ -97,7 +97,7 @@ $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY)
 
 #	(cd ../bfd; make)
-#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-sunos-big;./ldok -format a.out-sunos-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
 #	gld -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
 #	$(CC) -Bstatic -o ld.new $(OFILES) $(BFDLIB) $(LIBIBERTY)
 
@@ -120,26 +120,24 @@ ldgram.o: ldgram.y
 ldgram.tab.h:ldgram.y
 	cp y.tab.h ldgram.tab.h
 
-ld-gld.o: $(PROCESSED_SCRIPTS) ld-gld.c 
+ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
 ldlex.c: ldlex.l ldgram.tab.h
 ldlex.o: ldlex.c ldgram.tab.h
 
-ldmain.o: ldmain.c
-ldversion.o: ldversion.c
-ldfile.o: ldfile.c
-ldwrite.o: ldwrite.c
-ldlang.o: ldlang.c ldgram.tab.h
-
-ld-gld68k.o: $(PROCESSED_SCRIPTS) ld-gld68k.c
-ld-gld960.o: $(PROCESSED_SCRIPTS) ld-gld960.c
-ld-gldm88kbcs.o: $(PROCESSED_SCRIPTS) ld-gldm88kbcs.c
-ld-emul.o: ld-emul.c
-ld-vanilla.o: ld-vanilla.c
-ld-lnk960.o: $(PROCESSED_SCRIPTS) ld-lnk960.c
-ldexp.o: ldexp.c ldgram.tab.h
-ldmisc.o: ldmisc.c 
-ldsym.o: ldsym.c 
+ldgld68k.x :ldgld68k.script 
+ldgld68kUr.x :ldgld68kUr.script 
+ldgld68kr.x :ldgld68kr.script 
+ldgld.x :ldgld.script 
+ldgldUr.x :ldgldUr.script 
+ldgldr.x :ldgldr.script 
+ldlnk960.x :ldlnk960.script 
+ldlnk960r.x :ldlnk960r.script 
+ldgld960.x :ldgld960.script 
+ldgldm88kbcs.x :ldgldm88kbcs.script 
+ldgldm88kbcsUr.x :ldgldm88kbcsUr.script 
+ldgldm88kbcsr.x:ldgldm88kbcsr.script
+ldgld68k.x:ldgld68k.script
 
 stage1:	force
 	- mkdir stage1
@@ -221,6 +219,10 @@ roll:
 	echo $$V >VERSION		; \
 	echo Version $$V
 
+
+dep: $(LDSOURCES) $(PROCESSED_SCRIPTS)
+	mkdep $(CFLAGS) $?
+
 # Dummy target to force execution of dependent targets.
 #
 force:
@@ -254,10 +256,13 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 		./configure +destdir=$(destdir) \
 		+norecurse \
 		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		$(host) +target=$(target))
+		$(host) +target=$(target)) ; $(MAKE) dep
 
 ### Local Variables: ***
 ### mode:fundamental ***
 ### page-delimiter: "^#" ***
 ### End: ***
 ### end of file
+
+
+# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
