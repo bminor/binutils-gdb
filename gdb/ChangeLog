@@ -1,3 +1,9 @@
+2001-05-11  Fernando Nasser  <fnasser@redhat.com>
+
+	* ser-unix.c (rate_to_code): Issue warning if baud rate is invalid.
+	(hardwire_setbaudrate): Set errno to EINVAL and return with error
+	if the conversion of the baud rate to code fails.
+
 2001-05-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h (make_cleanup_ui_out_begin_end): Declare.

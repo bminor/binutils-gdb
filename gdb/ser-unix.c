@@ -741,9 +741,33 @@ rate_to_code (int rate)
   int i;
 
   for (i = 0; baudtab[i].rate != -1; i++)
-    if (rate == baudtab[i].rate)
-      return baudtab[i].code;
-
+    {
+      /* test for perfect macth. */
+      if (rate == baudtab[i].rate)
+        return baudtab[i].code;
+      else
+        {
+	  /* check if it is in between valid values. */
+          if (rate < baudtab[i].rate)
+	    {
+	      if (i)
+	        {
+	          warning ("Invalid baud rate %d.  Closest values are %d and %d.",
+	                    rate, baudtab[i - 1].rate, baudtab[i].rate);
+		}
+	      else
+	        {
+	          warning ("Invalid baud rate %d.  Minimum value is %d.",
+	                    rate, baudtab[0].rate);
+		}
+	      return -1;
+	    }
+        }
+    }
+ 
+  /* The requested speed was too large. */
+  warning ("Invalid baud rate %d.  Maximum value is %d.",
+            rate, baudtab[i - 1].rate);
   return -1;
 }
 
@@ -751,13 +775,22 @@ static int
 hardwire_setbaudrate (serial_t scb, int rate)
 {
   struct hardwire_ttystate state;
+  int baud_code = rate_to_code (rate);
+  
+  if (baud_code < 0)
+    {
+      /* The baud rate was not valid.
+         A warning has already been issued. */
+      errno = EINVAL;
+      return -1;
+    }
 
   if (get_tty_state (scb, &state))
     return -1;
 
 #ifdef HAVE_TERMIOS
-  cfsetospeed (&state.termios, rate_to_code (rate));
-  cfsetispeed (&state.termios, rate_to_code (rate));
+  cfsetospeed (&state.termios, baud_code);
+  cfsetispeed (&state.termios, baud_code);
 #endif
 
 #ifdef HAVE_TERMIO
@@ -766,12 +799,12 @@ hardwire_setbaudrate (serial_t scb, int rate)
 #endif
 
   state.termio.c_cflag &= ~(CBAUD | CIBAUD);
-  state.termio.c_cflag |= rate_to_code (rate);
+  state.termio.c_cflag |= baud_code;
 #endif
 
 #ifdef HAVE_SGTTY
-  state.sgttyb.sg_ispeed = rate_to_code (rate);
-  state.sgttyb.sg_ospeed = rate_to_code (rate);
+  state.sgttyb.sg_ispeed = baud_code;
+  state.sgttyb.sg_ospeed = baud_code;
 #endif
 
   return set_tty_state (scb, &state);
