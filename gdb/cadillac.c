@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "inferior.h"
 #include "command.h"
+#include "bfd.h"
+#include "symfile.h"
+#include "objfiles.h"
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/param.h>
@@ -56,9 +59,25 @@ static int inferior_tty = -1;
 
 static int has_run = 0;
 
+extern int pgrp_inferior;
+
+extern char *source_path;
+
 extern int cadillac;
 
 char **pprompt;			/* Pointer to pointer to prompt */
+
+/* Tell cadillac_command_line_input() where to get its text from */
+static int doing_breakcommands_message = 0;
+
+/* Stash command text here */
+static char *command_line_text = 0;
+static int command_line_length = 0;
+
+/* Flags returned by wait_for_events() */
+#define KERNEL_EVENT 1
+#define PTY_EVENT 2
+
 
 static void
 prompt()
@@ -77,6 +96,35 @@ cadillac_fputs(ptr)
     CVWriteTranscriptInfo (conn, instance_id, ptr);
   else
     fputs (ptr, stdout);
+}
+
+void
+cadillac_query(query, args)
+     char *query;
+     va_list args;
+{
+  char buf[100];
+
+  vsprintf(buf, query, args);
+
+  CVWriteQueryInfo(conn,
+		   instance_id,
+		   CQueryConfirm,
+		   qno_unknown,
+		   buf,
+		   "");		/* transcript */
+}
+
+void
+cadillac_acknowledge_query(ack)
+     char *ack;
+{
+  CVWriteQueryInfo(conn,
+		   instance_id,
+		   CQueryAcknowleged,
+		   0,
+		   ack,
+		   "");		/* transcript */
 }
 
 /* Copy all data from the pty to the kernel. */
@@ -136,6 +184,109 @@ kernel_to_pty(data, len)
 	     len, cc);
     }
 }
+
+static char *
+full_filename(symtab)
+     struct symtab *symtab;
+{
+  int pathlen;
+  char *filename;
+
+  if (!symtab)
+    return NULL;
+
+  pathlen = strlen(symtab->dirname) + strlen(symtab->filename);
+  filename = xmalloc(pathlen+1);
+  sprintf(filename, "%s%s", symtab->dirname, symtab->filename);
+
+  return filename;
+}
+
+/* Tell the cadillac kernel how high the stack is so that frame numbers (which
+   are relative to the current stack height make sense.
+
+   Calculate the number of frames on the stack, and the number of subroutine
+   invocations that haven't changed since the last call to this routine.  The
+   second number is calculated by comparing the PCs of the current stack frames
+   to the PCs of the previous set of stack frames.  The screw here is that a
+   subroutine may call several different procedures, which means that the PC
+   in its frame changes, even though you are still in the same subroutine.  We
+   resolve this by converting the frames PC into the PC at the start of the
+   function (for efficiency, this is done only if the simple comparison test
+   fails). */
+
+struct pclist
+{
+  CORE_ADDR pc;
+  struct pclist *next;
+};
+
+/* Non-zero means that Cadillac kernel already knows how high the stack is. */
+static int stack_info_valid = 0;
+
+static void
+send_stack_info()
+{
+  struct pclist *pclist = 0, *pli, *opli;
+  static struct pclist *old_pclist;
+  FRAME frame;
+  int height, similar;
+
+  if (stack_info_valid)
+    return;
+
+  height = 0;
+  similar = 0;
+
+/* First, calculate the stack height, and build the new pclist */
+
+  for (frame = get_current_frame();
+       frame != 0;
+       frame = get_prev_frame(frame))
+    {
+      (height)++;
+      pli = (struct pclist *)xmalloc(sizeof(struct pclist));
+
+      pli->pc = frame->pc;
+      pli->next = pclist;
+      pclist = pli;
+    }
+
+/* Now, figure out how much of the stack hasn't changed */
+
+  for (pli = pclist, opli = old_pclist;
+       pli != 0 && opli != 0;
+       pli = pli->next, opli = opli->next, (similar)++)
+    {
+      if ((pli->pc != opli->pc)
+	  && (get_pc_function_start(pli->pc)
+	      != get_pc_function_start(opli->pc)))
+	break;
+    }
+
+/* Free up all elements of the old pclist */
+
+  opli = old_pclist;
+
+  while (opli)
+    {
+      pli = opli->next;
+      free (opli);
+      opli = pli;
+    }
+
+  old_pclist = pclist;		/* Install the new pclist */
+
+  CVWriteStackSizeInfo(conn,
+		       instance_id,
+		       height,	/* Frame depth */
+		       CInnerFrameIs0,
+		       similar, /* Frame diff */
+		       ""	/* Transcript */
+		       );
+
+  stack_info_valid = 1;
+}
 
 /* Tell the kernel where we are in the program, and what the stack looks like.
    */
@@ -147,7 +298,6 @@ send_status()
   struct symtab_and_line sal;
   struct symbol *symbol;
   char *funcname, *filename;
-  static int foo = 0;
   static int sent_prog_inst = 0;
 
   if (!has_run)
@@ -166,7 +316,7 @@ send_status()
   symbol = find_pc_function(stop_pc);
 
   funcname = symbol ? symbol->name : "";
-  filename = sal.symtab ? sal.symtab->filename : "";
+  filename = full_filename(sal.symtab);
 
   if (!sent_prog_inst)
     {
@@ -180,13 +330,7 @@ send_status()
 				 );
     }
 
-  CVWriteStackSizeInfo(conn,
-		       instance_id,
-		       1, /* XXX - frame depth */
-		       CInnerFrameIs0,
-		       foo++ ? 1 : 0, /* XXX - frame diff */
-		       ""
-		       );
+  send_stack_info();
 
   CVWriteStackFrameInfo(conn,
 			instance_id,
@@ -205,8 +349,176 @@ send_status()
 			    funcname,
 			    ""	/* XXX ? transcript */
 			    );
+
+  if (filename)
+    free(filename);
 }
 
+/* Call this to output annotated function names.  Names will be demangled if
+   necessary.  arg_mode contains flags that are passed on to cplus_demangle. */
+
+void
+cadillac_annotate_function(funcname, arg_mode, level)
+     char *funcname;
+     int arg_mode;
+     int level;
+{
+  extern int demangle;
+  char *demangled_name = NULL;
+
+
+  if (funcname == NULL)
+    return;
+
+  if (demangle)
+    {
+      demangled_name = cplus_demangle(funcname, arg_mode);
+
+      if (demangled_name)
+	funcname = demangled_name;
+    }
+
+  send_stack_info();
+
+  if (level < 0) level = 0;
+
+  CVWriteBackTraceEntryInfo(conn,
+			    instance_id,
+			    level, /* frameNo */
+			    funcname);
+
+  if (demangled_name)
+    free(demangled_name);
+}
+
+/* Call this just prior to printing out the name & value of a variable.  This
+   tells the kernel where to annotate the output. */
+
+/* The args are:
+   expression - A text handle on what GDB can use to reference this value.
+   	        This can be a symbol name, or a convenience var, etc...
+   symbol - Used to determine the scope of the data.  May be NULL.
+   type - Determines if we have a pointer ref, and the print name of the type.
+          Used in ShowValue message.
+   valaddr - The address in target memory of the data.
+   field - The field name of the struct or union element being referenced.
+*/
+
+static char cum_expr[200];	/* Cumulative expression */
+static char *expr_stack[100] = {cum_expr}; /* Pointers to end of expressions */
+static char **last_expr = expr_stack;	/* Current expr stack pointer */
+
+void
+cadillac_start_variable_annotation(expression, symbol, type, valaddr, field)
+     char *expression;
+     struct symbol *symbol;
+     struct type *type;
+     CORE_ADDR valaddr;
+     char *field;
+{
+  int ref_type;
+  int stor_cl;
+  enum type_code type_code;
+  enum address_class sym_class;
+  char *type_cast;
+
+  send_stack_info();
+
+  strcpy(*last_expr++, expression);
+  *last_expr = *(last_expr-1) + strlen(expression);
+
+  switch (TYPE_CODE(type))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+      ref_type = CValueValueRef;
+      break;
+    case TYPE_CODE_PTR:
+      ref_type = CValuePointerRef;
+      break;
+    default:
+      ref_type = CValueUndefRef;
+      break;
+    }
+
+/* Make sure that pointer points at something we understand */
+
+  if (ref_type == CValuePointerRef)
+    switch (TYPE_CODE(TYPE_TARGET_TYPE(type)))
+      {
+      case TYPE_CODE_PTR:
+      case TYPE_CODE_ARRAY:
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+      case TYPE_CODE_ENUM:
+      case TYPE_CODE_INT:
+      case TYPE_CODE_FLT:
+	break;
+      default:
+	ref_type = CValueUndefRef;
+	break;
+      }
+
+  if (symbol)
+    {
+      sym_class = SYMBOL_CLASS(symbol);
+
+      switch (sym_class)
+	{
+	case LOC_CONST:
+	case LOC_CONST_BYTES:
+	  stor_cl = CValueStorStaticConst;
+	  break;
+	case LOC_STATIC:
+	  stor_cl = CValueStorStaticVar;
+	  break;
+	case LOC_REGISTER:
+	case LOC_REGPARM:
+	  stor_cl = CValueStorRegister;
+	  break;
+	case LOC_ARG:
+	case LOC_REF_ARG:
+	case LOC_LOCAL:
+	case LOC_LOCAL_ARG:
+	  stor_cl = CValueStorLocalVar;
+	  break;
+	default:
+	  stor_cl = CValueStorUndef;
+	  break;
+	}
+    }
+  else
+    stor_cl = CValueStorUndef;
+
+  type_cast = TYPE_NAME(type);
+
+  CVWriteValueBeginInfo(conn,
+			instance_id,
+			valaddr,
+			ref_type,
+		        stor_cl,
+		        0,	/* XXX - frameno */
+			cum_expr,
+			field,
+			type_cast,
+			"");	/* transcript */
+}
+
+void
+cadillac_end_variable_annotation()
+{
+  last_expr--;			/* Pop the expr stack */
+  **last_expr = '\000';		/* Cut off the last part of the expr */
+
+  CVWriteValueEndInfo(conn,
+		      instance_id,
+		      "");	/* transcript */
+}
+
 /* Tell the kernel that the target is now running. */
 
 static void
@@ -216,27 +528,103 @@ go_busy()
 			 instance_id,
 			 "");	/* XXX ? transcript */
   CWriteRequestBuffer(conn);	/* Must take place synchronusly! */
+  stack_info_valid = 0;
 }
 
-/* This wrapper routine is needed because execute_command modifies the command
-   string that it's given.  It also echos the commands. */
+
+cadillac_symbol_file(objfile)
+     struct objfile *objfile;
+{
+  CVWriteSymbolTableInfo(conn,
+			 objfile->name,
+			 "");	/* Transcript */
+}
+
+/* execute_command_1(echo, queue, cmd, args) - echo - non-zero means echo the
+   command.  queue - non-zero means don't execute it now, just save it away for
+   later.  cmd - string containing printf control sequences.  args - list of
+   arguments needed by those control sequences.
+ */
+
+/* Linked list of queued up commands */
+static struct command_line *queued_commands = 0;
+static struct command_line *last_queued_command = 0;
+
+/* Call this routine to save a command for later.  The command string is
+   copied into freshly malloc'ed memory. */
+
+static void
+queue_command(cmd)
+     char *cmd;
+{
+  char *buf;
+  struct command_line *cl;
+  unsigned long s;
+
+  s = (strlen(cmd) + 1) + 7 & ~(unsigned long)7;
+
+  buf = (char *)xmalloc(s + sizeof(struct command_line));
+  cl = (struct command_line *)(buf + s);
+  cl->next = 0;
+  cl->line = buf;
+
+  strncpy(cl->line, cmd, s);
+
+  if (queued_commands)
+    last_queued_command->next = cl;
+  else
+    queued_commands = cl;
+
+  last_queued_command = cl;
+}
+
+/* Call this procedure to take a command off of the command queue.  It returns
+   a pointer to a buf which the caller is responsible for freeing.  NULL is
+   returned if there are no commands queued. */
+
+static char *
+dequeue_command()
+{
+  struct command_line *cl;
+  char *cmd;
+
+  cl = queued_commands;
+
+  if (!cl)
+    return NULL;
+
+  queued_commands = cl->next;
+
+  return cl->line;
+}
 
 static void
 execute_command_1(va_alist)
      va_dcl
 {
   char buf[100];		/* XXX - make buf dynamic! */
+  
+  int echo;
+  int queue;
   char *cmd;
   va_list args;
 
   va_start(args);
 
+  echo = va_arg(args, int);
+  queue = va_arg(args, int);
   cmd = va_arg(args, char *);
 
   vsprintf(buf, cmd, args);
 
-  printf_filtered("%s\n", buf);
-  execute_command(buf, 1);
+  if (queue)
+    queue_command(buf);
+  else
+    {
+      if (echo)
+	printf_filtered("%s\n", buf);
+      execute_command(buf, 1);
+    }
 
   va_end(args);
 }
@@ -295,22 +683,19 @@ breakpoint_notify(b, action)
      struct breakpoint *b;
      int action;
 {
-  struct symtab *s;
-  struct symbol *s1;
-  char *funcname = "", *filename = "", *included_in_filename = "";
+  struct symbol *sym;
+  char *funcname = "";
+  char *filename;
+  char *included_in_filename = "";
 
   if (b->type != bp_breakpoint)
     return;
 
-  s = b->symtab;
+  filename = full_filename(b->symtab);
 
-  if (s)
-    {
-      filename = s->filename;
-      s1 = find_pc_function(b->address);
-      if (s1)
-	funcname = SYMBOL_NAME(s1);
-    }      
+  sym = find_pc_function(b->address);
+  if (sym)
+    funcname = SYMBOL_NAME(sym);
 
   CVWriteBreakpointInfo (conn,
 			 instance_id,
@@ -321,13 +706,18 @@ breakpoint_notify(b, action)
 			 action,
 			 b->ignore_count,
 			 funcname,
-			 filename,
+			 filename ? filename : "",
 			 "",	/* included_in_filename */
 			 ""	/* transcript */
 			 );
 
   if (b->commands)
     cadillac_commands_breakpoint(b);
+
+  cadillac_condition_breakpoint(b);
+
+  if (filename)
+    free(filename);
 }
 
 void
@@ -364,43 +754,7 @@ cadillac_ignore_breakpoint(b)
 {
   breakpoint_notify(b, CBreakAttrUnchanged);
 }
-
-static int command_line_length = 0;
-static char *command_line_text = 0;
-
-int
-cadillac_reading()
-{
-  if (command_line_text)
-    return 1;
-  else
-    return 0;
-}
-
-char *
-cadillac_command_line_input()
-{
-  char *p;
-
-  if (command_line_length <= 0)
-    return (char *)NULL;
-
-  p = command_line_text;
-
-  while (command_line_length-- > 0)
-    {
-      if (*command_line_text == '\n')
-	{
-	  *command_line_text = '\000';
-	  command_line_text++;
-	  break;
-	}
-      command_line_text++;
-    }
-
-  return p;
-}
-
+
 /* Open up a pty and its associated tty.  Return the fd of the tty. */
 
 char *
@@ -450,9 +804,9 @@ cadillac_getpty()
 /* Examine a protocol packet from the driver. */
 
 static int
-kernel_dispatch(interrupt)
-     int interrupt;		/* Non-zero means we are at interrupt level
-				   and can only do a few commands. */
+kernel_dispatch(queue)
+     int queue;			/* Non-zero means we should just queue up
+				   commands. */
 {
   register CHeader *head;
 
@@ -462,17 +816,6 @@ kernel_dispatch(interrupt)
       fprintf (stderr, "EOF on kernel read!\n");
       exit (1);
     }
-
-  if (interrupt)
-    switch (head->reqType)
-      {
-      case KillProgramRType:
-      case TextIORType:
-      case StopRType:
-	break;
-      default:
-	return;
-      }
 
   if (head->reqType < LastTtyRequestRType)
     {
@@ -526,64 +869,69 @@ kernel_dispatch(interrupt)
 	    arglist = req->openProgramInstance.progArglist.text;
 	    arglen = req->openProgramInstance.progArglist.byteLen;
 
-	    execute_command_1("break main");
-	    execute_command_1("enable delete $bpnum");
+	    execute_command_1(1, queue, "break main");
+	    execute_command_1(1, queue, "enable delete $bpnum");
 	    if (arglist)
 	      {
-		execute_command_1("set args %.*s", arglen, arglist);
+		execute_command_1(1, queue, "set args %.*s", arglen, arglist);
 	      }
-	    execute_command_1("run");
+	    execute_command_1(1, queue, "run");
 	  }
 	  break;
+	case SearchPathRType:
+	  directory_command(req->searchPath.searchPath.text, 0);
+	  break;
 	case QuitDebuggerRType:
-	  exit (0);
+	  execute_command_1(1, queue, "quit");
+	  break;
 	case RunRType:
 	  if (req->run.request->useArglist == CNewArglist)
 	    {
-	      execute_command_1("set args %.*s",
+	      execute_command_1(1, queue, "set args %.*s",
 				req->run.progArglist.byteLen,
 				req->run.progArglist.text);
 	    }
-	  execute_command_1("run");
+	  execute_command_1(1, queue, "run");
 	  break;
 	case ContinueRType:
-	  execute_command_1("continue");
+	  execute_command_1(1, queue, "continue");
 	  break;
 	case StepRType:
-	  execute_command_1("step %d", req->step.request->stepCount);
+	  execute_command_1(1, queue, "step %d", req->step.request->stepCount);
 	  break;
 	case NextRType:
-	  execute_command_1("next %d", req->next.request->nextCount);
+	  execute_command_1(1, queue, "next %d", req->next.request->nextCount);
 	  break;
 	case ChangeStackFrameRType:
 	  switch (req->changeStackFrame.request->frameMovement)
 	    {
 	    case CToCurrentStackFrame:
-	      execute_command_1("frame %d",
+	      execute_command_1(1, queue, "frame %d",
 				req->changeStackFrame.request->frameNo);
 	      break;
 	    case CToInnerStackFrame:
-	      execute_command_1("down %d",
+	      execute_command_1(1, queue, "down %d",
 				req->changeStackFrame.request->frameNo);
 	      break;
 	    case CToOuterStackFrame:
-	      execute_command_1("up %d",
+	      execute_command_1(1, queue, "up %d",
 				req->changeStackFrame.request->frameNo);
 	      break;
 	    case CToAbsoluteStackFrame:
-	      printf_filtered("ChangeStackFrame ToAbsolute\n");
+	      execute_command_1(1, queue, "frame %d",
+				req->changeStackFrame.request->frameNo);
 	      break;
 	    }
 	  break;
 	case BackTraceRType:
 	  /* XXX - deal with limit??? */
-	  execute_command_1("backtrace");
+	  execute_command_1(1, queue, "backtrace");
 	  break;
 	case FinishRType:
-	  execute_command_1("finish");
+	  execute_command_1(1, queue, "finish");
 	  break;
 	case TerminateProgramRType:
-	  execute_command_1("kill");
+	  execute_command_1(1, queue, "kill");
 	  break;
 	case NewBreakpointRType:
 	  {
@@ -596,17 +944,14 @@ kernel_dispatch(interrupt)
 	    else
 	      tail++;
 	    skipped = tail - req->newBreakpoint.fileName.text;
-	    execute_command_1("break %.*s:%d",
+	    execute_command_1(1, queue, "break %.*s:%d",
 			      req->newBreakpoint.fileName.byteLen - skipped,
 			      tail,
 			      req->newBreakpoint.request->fileLinePos);
 	  }
 	  break;
 	case StopRType:
-	  {
-	    extern int pgrp_inferior;
-	    killpg(pgrp_inferior, SIGINT);
-	  }
+	  killpg(pgrp_inferior, SIGINT);
 	  break;
 	case UserInputRType:
 	  {
@@ -620,44 +965,73 @@ kernel_dispatch(interrupt)
 	    len = req->userInput.userInput.byteLen;
 
 	    if (text[len-1] == '\n') text[len-1] = '\000';
-	    execute_command (text);
-	    break;
+
+	    while (*text == ' ' || *text == '\t') text++;
+
+	    if (strcmp(text, "]*[") == 0) /* XXX - What does this mean??? */
+	      break;
+
+	    if (*text != '\000')
+	      execute_command_1(0, queue, "%s", text);
+	    else
+	      prompt();	/* User just typed a blank line */
 	  }
+	  break;
+	case QueryResponseRType:
+	  {
+	    char *resp;
+
+	    if (req->queryResponse.request->response)
+	      resp = "y";
+	    else
+	      resp = "n";
+	    execute_command_1(1, 1, resp);
+	    printf_filtered("%s\n", resp);
+	  }
+	  break;
 	case ChangeBreakpointRType:
 	  switch (req->changeBreakpoint.request->breakpointAttr)
 	    {
-	    case CEnableBreakpoint:
-	      execute_command_1("enable %d",
-				req->changeBreakpoint.request->breakpointId);
-	      break;
-	    case CDisableBreakpoint:
-	      execute_command_1("disable %d",
-				req->changeBreakpoint.request->breakpointId);
-	      break;
-	    case CDeleteBreakpoint:
-	      execute_command_1("delete %d",
-				req->changeBreakpoint.request->breakpointId);
-	      break;
 	    case CBreakAttrUnchanged:
-	      execute_command_1("ignore %d %d",
+	      execute_command_1(1, queue, "ignore %d %d",
 				req->changeBreakpoint.request->breakpointId,
 				req->changeBreakpoint.request->ignoreCount);
 	      break;
+	    case CEnableBreakpoint:
+	      execute_command_1(1, queue, "enable %d",
+				req->changeBreakpoint.request->breakpointId);
+	      break;
+	    case CDisableBreakpoint:
+	      execute_command_1(1, queue, "disable %d",
+				req->changeBreakpoint.request->breakpointId);
+	      break;
+	    case CDeleteBreakpoint:
+	      execute_command_1(1, queue, "delete %d",
+				req->changeBreakpoint.request->breakpointId);
+	      break;
+	    case CEnableDisableBreakpoint:
+	      execute_command_1(1, queue, "enable once %d",
+				req->changeBreakpoint.request->breakpointId);
+	      break;
+	    case CEnableDeleteBreakpoint:
+	      execute_command_1(1, queue, "enable delete %d",
+				req->changeBreakpoint.request->breakpointId);
+	      break;
 	    default:
-	      printf_filtered("Got to ChangeBreakpoint\n");
+	      printf_filtered("ChangeBreakpointRType: unknown breakpointAttr\n");
+	      printf_filtered("  breakpointAttr = %d\n",
+			      req->changeBreakpoint.request->breakpointAttr);
 	      printf_filtered("  breakpointId = %d\n",
 			      req->changeBreakpoint.request->breakpointId);
 	      printf_filtered("  breakpointType = %d\n",
 			      req->changeBreakpoint.request->breakpointType);
-	      printf_filtered("  breakpointAttr = %d\n",
-			      req->changeBreakpoint.request->breakpointAttr);
 	      printf_filtered("  ignoreCount = %d\n",
 			      req->changeBreakpoint.request->ignoreCount);
 	      break;
 	    }
 	  break;
 	case BreakConditionRType:
-	  execute_command_1("condition %d %.*s",
+	  execute_command_1(1, queue, "condition %d %.*s",
 			  req->breakCondition.request->breakpointId,
 			  req->breakCondition.condition.byteLen,
 			  req->breakCondition.condition.text);
@@ -665,12 +1039,85 @@ kernel_dispatch(interrupt)
 	case BreakCommandsRType:
 	  /* Put pointers to where cadillac_command_line_input() can find
 	     them. */
+	  doing_breakcommands_message = 1;
 	  command_line_length = req->breakCommands.commands.byteLen;
 	  command_line_text = req->breakCommands.commands.text;
-	  execute_command_1("commands %d",
+	  execute_command_1(1, queue, "commands %d",
 			    req->breakCommands.request->breakpointId);
 	  command_line_text = (char *)NULL;
 	  command_line_length = 0;
+	  doing_breakcommands_message = 0;
+	  break;
+	case ShowValueRType:
+	  {
+	    char expr[100], *p = expr;
+
+	    expr[0] = 0;
+
+	    if (req->showValue.request->ref_type == CValuePointerRef)
+	      strcat(expr, "* ");
+
+	    if (req->showValue.type_cast.byteLen)
+	      {
+		strcat(expr, "(");
+		strncat(expr, req->showValue.type_cast.text,
+			req->showValue.type_cast.byteLen);
+		strcat(expr, ") ");
+	      }
+
+	    if (req->showValue.field.byteLen)
+	      strcat(expr, "(");
+
+	    strncat(expr, req->showValue.expression.text,
+		    req->showValue.expression.byteLen);
+
+	    if (req->showValue.field.byteLen)
+	      {
+		strcat(expr, ")");
+
+		strncat(expr, req->showValue.field.text,
+			req->showValue.field.byteLen);
+	      }
+
+	    execute_command_1(1, queue, "print %s", expr);
+	  }
+	  break;
+	case SetValueRType:
+	  {
+	    char expr[100], *p = expr;
+
+	    expr[0] = 0;
+
+	    if (req->setValue.request->ref_type == CValuePointerRef)
+	      strcat(expr, "* ");
+
+#if 0
+	    if (req->setValue.type_cast.byteLen)
+	      {
+		strcat(expr, "(");
+		strncat(expr, req->setValue.type_cast.text,
+			req->setValue.type_cast.byteLen);
+		strcat(expr, ") ");
+	      }
+#endif
+	    if (req->setValue.field.byteLen)
+	      strcat(expr, "(");
+
+	    strncat(expr, req->setValue.expression.text,
+		    req->setValue.expression.byteLen);
+
+	    if (req->setValue.field.byteLen)
+	      {
+		strcat(expr, ")");
+
+		strncat(expr, req->setValue.field.text,
+			req->setValue.field.byteLen);
+	      }
+
+	    execute_command_1(1, queue, "print %s = (%s) %s", expr,
+			      req->setValue.type_cast.text,
+			      req->setValue.value.text);
+	  }
 	  break;
 	default:
 	  fprintf(stderr, "Unknown request type = %d\n",
@@ -684,9 +1131,6 @@ kernel_dispatch(interrupt)
     }
 }
 
-#define KERNEL_EVENT 1
-#define PTY_EVENT 2
-
 /* Return a bitmask indicating if the kernel or the pty did something
    interesting.  Set poll to non-zero if you don't want to wait.  */
 
@@ -702,10 +1146,11 @@ wait_for_events(poll)
   /* Output all pending requests. */
   CWriteRequestBuffer(conn);
 
+  FD_ZERO(&readfds);
+
   /* Wait till there's some activity from the kernel or the pty. */
   do
     {
-      FD_ZERO(&readfds);
       FD_SET(kerfd, &readfds);
       if (inferior_pty > 0)
 	FD_SET(inferior_pty, &readfds);
@@ -723,6 +1168,79 @@ wait_for_events(poll)
     eventmask |= KERNEL_EVENT;
 
   return eventmask;
+}
+
+/* This is called from read_command_lines() to provide the text for breakpoint
+   commands, which is supplied in a BreakCommands message.  Each call to this
+   routine supplies a single line of text, with the newline removed. */
+
+/* This routine may be invoked in two different contexts.  In the first, it
+   is being called as a result of the BreakCommands message.  In this case,
+   all of the command text is immediately available.  In the second case, it is
+   called as a result of the user typing the 'command' command.  The command
+   text then needs to be glommed out of UserInput messages (and possibly other
+   messages as well).  The most 'straighforward' way of doing this is to
+   basically simulate the main loop, but just accumulate the command text
+   instead of sending it to execute_command().  */
+
+char *
+cadillac_command_line_input()
+{
+  char *p;
+
+  if (doing_breakcommands_message)
+    {
+      if (command_line_length <= 0)
+	return (char *)NULL;
+
+      p = command_line_text;
+
+      while (command_line_length-- > 0)
+	{
+	  if (*command_line_text == '\n')
+	    {
+	      *command_line_text = '\000';
+	      command_line_text++;
+	      break;
+	    }
+	  command_line_text++;
+	}
+
+      printf_filtered("%s\n", p);
+      return p;
+    }
+  else
+    {
+      /* We come here when the user has typed the 'command' or 'define' command
+	 to the GDB window.  We are basically deep inside of the 'command'
+	 command processing routine right now, and will be called to get a new
+	 line of input.  We expect that kernel_dispatch will queue up only one
+	 command at a time. */
+
+      int eventmask;
+      static char buf[100];
+      
+      eventmask = wait_for_events(0);
+
+      if (eventmask & PTY_EVENT)
+	pty_to_kernel();
+
+      if (eventmask & KERNEL_EVENT)
+	kernel_dispatch(1);	/* Queue up commands */
+
+/* Note that command has been echoed by the time we get here */
+
+      p = dequeue_command();
+
+      if (p)
+	{
+	  strncpy(buf, p, sizeof(buf));
+	  free(p);
+	  return buf;
+	}
+      else
+	return NULL;
+    }
 }
 
 /* Establish contact with the kernel. */
@@ -901,6 +1419,8 @@ cadillac_main_loop(pp)
 
   pprompt = pp;
 
+  doing_breakcommands_message = 0;
+
 /* We will come thru here any time there is an error, so send status if
    necessary. */
 
@@ -913,6 +1433,17 @@ cadillac_main_loop(pp)
   while (1)
     {
       int eventmask;
+      char *cmd;
+
+      old_chain = make_cleanup(null_routine, 0);
+
+/* First, empty out the command queue, then check for new requests. */
+
+      while (cmd = dequeue_command())
+	{
+	  execute_command_1(1, 0, cmd);
+	  free(cmd);
+	}
 
       eventmask = wait_for_events(0);
 
@@ -920,11 +1451,9 @@ cadillac_main_loop(pp)
 	pty_to_kernel();
 
       if (eventmask & KERNEL_EVENT)
-	{
-	  old_chain = make_cleanup(null_routine, 0);
-	  kernel_dispatch(0);
-	  bpstat_do_actions(&stop_bpstat);
-	  do_cleanups(old_chain);
-	}
+	kernel_dispatch(0);
+
+      bpstat_do_actions(&stop_bpstat);
+      do_cleanups(old_chain);
     }
 }
