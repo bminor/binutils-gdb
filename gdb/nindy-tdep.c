@@ -65,11 +65,9 @@ nindy_frame_chain_valid (chain, curframe)
 	if ( sym != 0 ){
 		a = sym->value.value;
 	} else {
-		for ( i = 0; strcmp(misc_function_vector[i].name,sf); i++ ){
-			if ( i >= misc_function_count ){
-				return 0;
-			}
-		}
+		i = lookup_misc_func (sf);
+		if (i < 0)
+			return 0;
 		a = misc_function_vector[i].address;
 	}
 
