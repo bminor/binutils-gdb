@@ -817,12 +817,6 @@ avr_skip_prologue (CORE_ADDR pc)
   return prologue_end;
 }
 
-static CORE_ADDR
-avr_frame_address (struct frame_info *fi)
-{
-  return avr_make_saddr (get_frame_base (fi));
-}
-
 /* Not all avr devices support the BREAK insn. Those that don't should treat
    it as a NOP. Thus, it should be ok. Since the avr is currently a remote
    only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
@@ -1362,8 +1356,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                              frameless_look_for_prologue);
-  set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);
 
   frame_unwind_append_predicate (gdbarch, avr_frame_p);
   frame_base_set_default (gdbarch, &avr_frame_base);

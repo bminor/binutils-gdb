@@ -1,3 +1,9 @@
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_frame_address): Delete function.
+	(avr_gdbarch_init): Don't call set_gdbarch_frame_args_address,
+	set_gdbarch_frame_args_address.
+
 2003-06-19  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE): Delete.
