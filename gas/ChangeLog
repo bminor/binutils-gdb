@@ -1,3 +1,7 @@
+Tue Jun  2 09:25:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* read.c (s_func): Prepend `leading char' by default.
+
 start-sanitize-r5900
 Mon Jun  1 17:04:56 1998  Jeffrey A Law  (law@cygnus.com)
 

@@ -4960,8 +4960,16 @@ s_func (end_p)
       SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	{
-	  /* Missing entry point, use function's name.  */
-	  label = name;
+	  char leading_char = 0;
+#ifdef BFD_ASSEMBLER
+	  leading_char = bfd_get_symbol_leading_char (stdoutput);
+#endif
+	  /* Missing entry point, use function's name with the leading
+	     char prepended.  */
+	  if (leading_char)
+	    asprintf (&label, "%c%s", leading_char, name);
+	  else
+	    label = name;
 	}
       else
 	{
