@@ -1,3 +1,8 @@
+2003-05-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c (get_pc_function_start): Rewrite to avoid
+	asignments in if-statements.
+
 2003-05-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
 
 	Committed by Elena Zannoni  <ezannoni@redhat.com>.

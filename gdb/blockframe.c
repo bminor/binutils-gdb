@@ -223,28 +223,31 @@ get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 CORE_ADDR
 get_pc_function_start (CORE_ADDR pc)
 {
-  register struct block *bl;
-  register struct symbol *symbol;
-  register struct minimal_symbol *msymbol;
-  CORE_ADDR fstart;
+  struct block *bl;
+  struct minimal_symbol *msymbol;
 
-  if ((bl = block_for_pc (pc)) != NULL &&
-      (symbol = block_function (bl)) != NULL)
+  bl = block_for_pc (pc);
+  if (bl)
     {
-      bl = SYMBOL_BLOCK_VALUE (symbol);
-      fstart = BLOCK_START (bl);
+      struct symbol *symbol = block_function (bl);
+
+      if (symbol)
+	{
+	  bl = SYMBOL_BLOCK_VALUE (symbol);
+	  return BLOCK_START (bl);
+	}
     }
-  else if ((msymbol = lookup_minimal_symbol_by_pc (pc)) != NULL)
+
+  msymbol = lookup_minimal_symbol_by_pc (pc);
+  if (msymbol)
     {
-      fstart = SYMBOL_VALUE_ADDRESS (msymbol);
-      if (!find_pc_section (fstart))
-	return 0;
+      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol);
+
+      if (find_pc_section (fstart))
+	return fstart;
     }
-  else
-    {
-      fstart = 0;
-    }
-  return (fstart);
+
+  return 0;
 }
 
 /* Return the symbol for the function executing in frame FRAME.  */
