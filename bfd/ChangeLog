@@ -1,3 +1,15 @@
+Wed Mar 16 00:02:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_prep_for_fixups): Detect section symbols based
+	on either the lack of private data or the symbol flags.  Do not
+	munge section symbol names anymore -- they no longer confuse GDB.
+	(som_begin_writing): Leave space for an exec header if writing
+	an executable.
+	(som_slurp_symbol_table): Recognize both forms of section symbol
+	names "L$0\002" and "$<FOO>$".  Change the name of "L$0\002"
+	section symbols to be the name of the section they represent.
+	Debugging  symbols begin with "L$0\001", not just "L$".
+
 Tue Mar 15 22:58:28 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* bfd-in2.h, libbfd.h, libcoff.h: Rebuilt.
