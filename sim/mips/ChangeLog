@@ -1,9 +1,21 @@
 start-sanitize-r5900
+Tue Feb 18 17:03:47 1997  Gavin Koch  <gavin@cetus.cygnus.com>
+
+	* gencode.c (MIPS_DECODE): Correct instruction feature flags for 
+	PMADDUW.
+
+end-sanitize-r5900
+Thu Feb 13 14:08:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (build_mips16_operands): Correct computation of base
+	address for extended PC relative instruction.
+
+start-sanitize-r5900
 Fri Feb  7 11:12:44 1997  Gavin Koch  <gavin@cygnus.com>
-        
-        * Makefile.in, configure, configure.in, gencode.c, 
-        interp.c, support.h: add r5900.
-        
+
+	* Makefile.in, configure, configure.in, gencode.c, 
+	interp.c, support.h: add r5900.
+
 end-sanitize-r5900
 Thu Feb  6 17:16:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
