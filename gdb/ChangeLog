@@ -1,3 +1,22 @@
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (xfree, mcalloc, mmalloc, mrealloc, mfree, xmmalloc,
+	xmrealloc): Move existing declarations to the one place and
+	re-order to be consistent.
+	(xmcalloc, xmfree): Declare.
+	(xmmalloc, xmrealoc): Assume ISO-C - use size_t and void* in
+	declaration.
+	
+	* utils.c (size_t): Delete #ifdef defining size_t.
+	(mmalloc, mrealloc, mcalloc, mfree): Re-order.
+	(mmalloc, mrealloc, mcalloc): Document as only calls in GDB
+	corresponding malloc, realloc, calloc.
+	(mfree): Call free directly.
+	(xmmalloc, xmrealloc): Clean up. Assume ISO-C.
+	(xmcalloc, xmfree): New functions. Copy old xcalloc and xfree
+	function bodies to here.
+	(xcalloc, xfree): Call xmcalloc and xmfree respectfully.
+	
 2001-03-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* fork-child.c (fork_inferior): Make ``argv'', ``exec_file'' and

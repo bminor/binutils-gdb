@@ -917,41 +917,36 @@ request_quit (int signo)
 
 /* Memory management stuff (malloc friends).  */
 
-/* Make a substitute size_t for non-ANSI compilers. */
-
-#ifndef HAVE_STDDEF_H
-#ifndef size_t
-#define size_t unsigned int
-#endif
-#endif
-
 #if !defined (USE_MMALLOC)
 
-PTR
-mcalloc (PTR md, size_t number, size_t size)
-{
-  return calloc (number, size);
-}
+/* NOTE: These must use PTR so that their definition matches the
+   declaration found in "mmalloc.h". */
 
 PTR
 mmalloc (PTR md, size_t size)
 {
-  return malloc (size);
+  return malloc (size); /* NOTE: GDB's only call to malloc() */
 }
 
 PTR
 mrealloc (PTR md, PTR ptr, size_t size)
 {
   if (ptr == 0)			/* Guard against old realloc's */
-    return malloc (size);
+    return mmalloc (md, size);
   else
-    return realloc (ptr, size);
+    return realloc (ptr, size); /* NOTE: GDB's only call to ralloc() */
+}
+
+PTR
+mcalloc (PTR md, size_t number, size_t size)
+{
+  return calloc (number, size); /* NOTE: GDB's only call to calloc() */
 }
 
 void
 mfree (PTR md, PTR ptr)
 {
-  xfree (ptr);
+  free (ptr); /* NOTE: GDB's only call to free() */
 }
 
 #endif /* USE_MMALLOC */
@@ -1028,33 +1023,38 @@ nomem (long size)
     }
 }
 
-/* Like mmalloc but get error if no storage available, and protect against
-   the caller wanting to allocate zero bytes.  Whether to return NULL for
-   a zero byte request, or translate the request into a request for one
-   byte of zero'd storage, is a religious issue. */
+/* The xmmalloc() family of memory management routines.
 
-PTR
-xmmalloc (PTR md, long size)
+   These are are like the mmalloc() family except that they implement
+   consistent semantics and guard against typical memory management
+   problems: if a malloc fails, an internal error is thrown; if
+   free(NULL) is called, it is ignored; if *alloc(0) is called, NULL
+   is returned.
+
+   All these routines are implemented using the mmalloc() family. */
+
+void *
+xmmalloc (void *md, size_t size)
 {
-  register PTR val;
+  void *val;
 
   if (size == 0)
     {
       val = NULL;
     }
-  else if ((val = mmalloc (md, size)) == NULL)
+  else
     {
-      nomem (size);
+      val = mmalloc (md, size);
+      if (val == NULL)
+	nomem (size);
     }
   return (val);
 }
 
-/* Like mrealloc but get error if no storage available.  */
-
-PTR
-xmrealloc (PTR md, PTR ptr, long size)
+void *
+xmrealloc (void *md, void *ptr, size_t size)
 {
-  register PTR val;
+  void *val;
 
   if (size == 0)
     {
@@ -1080,49 +1080,61 @@ xmrealloc (PTR md, PTR ptr, long size)
   return (val);
 }
 
-/* Like malloc but get error if no storage available, and protect against
-   the caller wanting to allocate zero bytes.  */
-
-PTR
-xmalloc (size_t size)
-{
-  return (xmmalloc ((PTR) NULL, size));
-}
-
-/* Like calloc but get error if no storage available */
-
-PTR
-xcalloc (size_t number, size_t size)
+void *
+xmcalloc (void *md, size_t number, size_t size)
 {
   void *mem;
-
   if (number == 0 || size == 0)
     mem = NULL;
   else
     {
-      mem = mcalloc (NULL, number, size);
+      mem = mcalloc (md, number, size);
       if (mem == NULL)
 	nomem (number * size);
     }
   return mem;
 }
 
-/* Like mrealloc but get error if no storage available.  */
+void
+xmfree (void *md, void *ptr)
+{
+  if (ptr != NULL)
+    mfree (md, ptr);
+}
+
+/* The xmalloc() (libiberty.h) family of memory management routines.
+
+   These are like the ISO-C malloc() family except that they implement
+   consistent semantics and guard against typical memory management
+   problems.  See xmmalloc() above for further information.
+
+   All these routines are wrappers to the xmmalloc() family. */
+
+/* NOTE: These are declared using PTR to ensure consistency with
+   "libiberty.h".  xfree() is GDB local.  */
+
+PTR
+xmalloc (size_t size)
+{
+  return xmmalloc (NULL, size);
+}
 
 PTR
 xrealloc (PTR ptr, size_t size)
 {
-  return (xmrealloc ((PTR) NULL, ptr, size));
+  return xmrealloc (NULL, ptr, size);
 }
 
-/* Free up space allocated by one of xmalloc(), xcalloc(), or
-   xrealloc().  */
+PTR
+xcalloc (size_t number, size_t size)
+{
+  return xmcalloc (NULL, number, size);
+}
 
 void
 xfree (void *ptr)
 {
-  if (ptr != NULL)
-    free (ptr); /* NOTE: GDB's only call to free() */
+  xmfree (NULL, ptr);
 }
 
 

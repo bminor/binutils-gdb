@@ -510,21 +510,9 @@ extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
 
-extern void xfree (void *);
-
 extern int myread (int, char *, int);
 
 extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);
-
-#if !defined (USE_MMALLOC)
-/* NOTE: cagney/2000-03-04: The mmalloc functions need to use PTR
-   rather than void* so that they are consistent with
-   ../mmalloc/mmalloc.h. */
-extern PTR mcalloc (PTR, size_t, size_t);
-extern PTR mmalloc (PTR, size_t);
-extern PTR mrealloc (PTR, PTR, size_t);
-extern void mfree (PTR, PTR);
-#endif
 
 extern void init_page_info (void);
 
@@ -953,15 +941,26 @@ extern char *msavestring (void *, const char *, size_t);
 
 extern char *mstrsave (void *, const char *);
 
-/* FIXME; was long, but this causes compile errors in msvc if already
-   defined */
-#ifdef _MSC_VER
-extern PTR xmmalloc (PTR, size_t);
-extern PTR xmrealloc (PTR, PTR, size_t);
-#else
-extern PTR xmmalloc (PTR, long);
-extern PTR xmrealloc (PTR, PTR, long);
+#if !defined (USE_MMALLOC)
+/* NOTE: cagney/2000-03-04: The mmalloc functions need to use PTR
+   rather than void* so that they are consistent with the delcaration
+   in ../mmalloc/mmalloc.h. */
+extern PTR mcalloc (PTR, size_t, size_t);
+extern PTR mmalloc (PTR, size_t);
+extern PTR mrealloc (PTR, PTR, size_t);
+extern void mfree (PTR, PTR);
 #endif
+
+/* Robust versions of same.  Throw an internal error when no memory,
+   guard against stray NULL arguments. */
+extern void *xmmalloc (void *md, size_t size);
+extern void *xmrealloc (void *md, void *ptr, size_t size);
+extern void *xmcalloc (void *md, size_t number, size_t size);
+extern void xmfree (void *md, void *ptr);
+
+/* xmalloc(), xrealloc() and xcalloc() have already been declared in
+   "libiberty.h". */
+extern void xfree (void *);
 
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
