@@ -132,7 +132,7 @@ struct comp_unit
   /* Keep the bdf convenient (for memory allocation).  */
   bfd *abfd;
 
-  /* The lowest and higest addresses contained in this compilation
+  /* The lowest and highest addresses contained in this compilation
      unit as specified in the compilation unit header.  */
   struct arange arange;
 
@@ -1326,7 +1326,6 @@ scan_unit_for_functions (struct comp_unit *unit)
       struct abbrev_info *abbrev;
       struct attribute attr;
       struct funcinfo *func;
-      char *name = 0;
 
       abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
@@ -1370,9 +1369,6 @@ scan_unit_for_functions (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_name:
-
-		  name = attr.u.str;
-
 		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
 		  if (func->name == NULL)
 		    func->name = attr.u.str;
@@ -1388,18 +1384,6 @@ scan_unit_for_functions (struct comp_unit *unit)
 
 		case DW_AT_high_pc:
 		  func->high = attr.u.val;
-		  break;
-
-		default:
-		  break;
-		}
-	    }
-	  else
-	    {
-	      switch (attr.name)
-		{
-		case DW_AT_name:
-		  name = attr.u.str;
 		  break;
 
 		default:

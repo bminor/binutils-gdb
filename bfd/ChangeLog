@@ -1,3 +1,9 @@
+2005-03-29  Fred Fish  <fnf@specifixinc.com>
+
+	* dwarf2.c (struct comp_unit): Fix typo.
+	(scan_unit_for_functions): Remove unused local variable "name"
+	and dead code that set it.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Phil Blundell  <philb@gnu.org>
 
