@@ -1477,9 +1477,8 @@ static const struct frame_base d10v_frame_base = {
 static struct frame_id
 d10v_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  ULONGEST base;
-  frame_unwind_unsigned_register (next_frame, D10V_SP_REGNUM, &base);
-  return frame_id_build (d10v_make_daddr (base), frame_pc_unwind (next_frame));
+  return frame_id_build (d10v_unwind_sp (gdbarch, next_frame),
+			 frame_pc_unwind (next_frame));
 }
 
 static gdbarch_init_ftype d10v_gdbarch_init;
@@ -1593,9 +1592,10 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_predicate (gdbarch, d10v_frame_p);
   frame_base_set_default (gdbarch, &d10v_frame_base);
 
-  /* Methods for saving / extracting a dummy frame's ID.  */
+  /* Methods for saving / extracting a dummy frame's ID.  The ID's
+     stack address must match the SP value returned by
+     PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
   set_gdbarch_unwind_dummy_id (gdbarch, d10v_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, d10v_unwind_pc);

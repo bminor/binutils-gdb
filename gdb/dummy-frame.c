@@ -360,10 +360,6 @@ dummy_frame_this_id (struct frame_info *next_frame,
      just asking for trouble.  */
   if (gdbarch_unwind_dummy_id_p (current_gdbarch))
     {
-      /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
-	 previously saved the dummy frame's ID.  Things only work if
-	 the two return the same value.  */
-      gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
       /* Use an architecture specific method to extract the prev's
 	 dummy ID from the next frame.  Note that this method uses
 	 frame_register_unwind to obtain the register values needed to

@@ -1544,7 +1544,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, alpha_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, alpha_unwind_pc);

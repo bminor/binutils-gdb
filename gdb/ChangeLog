@@ -1,3 +1,21 @@
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): When UNWIND_DUMMY_ID is
+	available, do not use the FP register, and always save the TOS.
+	* dummy-frame.c (dummy_frame_this_id): Do not assert
+	SAVE_DUMMY_FRAME_TOS.
+	* i386-tdep.c (i386_save_dummy_frame_tos): Delete function.
+	(i386_gdbarch_init): Do not set save_dummy_frame_tos.
+	(i386_push_dummy_call): Add 8 to the returned SP.
+	* frame.c (legacy_frame_p): Do not require SAVE_DUMMY_FRAME_TOS.
+	* d10v-tdep.c (d10v_unwind_dummy_id): Use d10v_unwind_sp.
+	(d10v_gdbarch_init): Do not set save_dummy_frame_tos.
+	* x86-64-tdep.c (x86_64_save_dummy_frame_tos): Delete function.
+	(x86_64_push_dummy_call): Return "sp + 16".
+	(x86_64_init_abi): Do not set save_dummy_frame_tos.
+	* alpha-tdep.c (alpha_gdbarch_init): Do not set
+	save_dummy_frame_tos.
+
 2003-06-13  Jim Blandy  <jimb@redhat.com>
 
 	* frv-tdep.c (frv_use_struct_convention): Delete static

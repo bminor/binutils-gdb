@@ -2288,8 +2288,7 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 	  || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
 	  || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
 	  || DEPRECATED_FRAME_CHAIN_P ()
-	  || !gdbarch_unwind_dummy_id_p (current_gdbarch)
-	  || !SAVE_DUMMY_FRAME_TOS_P ());
+	  || !gdbarch_unwind_dummy_id_p (current_gdbarch));
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */

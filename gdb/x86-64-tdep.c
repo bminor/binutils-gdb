@@ -783,7 +783,7 @@ x86_64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* ...and fake a frame pointer.  */
   regcache_cooked_write (regcache, X86_64_RBP_REGNUM, buf);
 
-  return sp;
+  return sp + 16;
 }
 
 
@@ -1122,12 +1122,6 @@ static const struct frame_base x86_64_frame_base =
   x86_64_frame_base_address
 };
 
-static void
-x86_64_save_dummy_frame_tos (CORE_ADDR sp)
-{
-  generic_save_dummy_frame_tos (sp + 16);
-}
-
 static struct frame_id
 x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -1196,7 +1190,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
 
   set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
 
   /* FIXME: kettenis/20021026: This is ELF-specific.  Fine for now,
      since all supported x86-64 targets are ELF, but that might change

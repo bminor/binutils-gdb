@@ -823,7 +823,15 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 
-  if (SAVE_DUMMY_FRAME_TOS_P ())
+  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+    {
+      /* Sanity.  The exact same SP value is returned by
+	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+	 unwind_dummy_id to form the frame ID's stack address.  */
+      gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+      generic_save_dummy_frame_tos (sp);
+    }
+  else if (SAVE_DUMMY_FRAME_TOS_P ())
     SAVE_DUMMY_FRAME_TOS (sp);
 
   /* Now proceed, having reached the desired place.  */
@@ -843,17 +851,29 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        set_momentary_breakpoint.  We need to give the breakpoint a
        frame ID so that the breakpoint code can correctly re-identify
        the dummy breakpoint.  */
-    /* The assumption here is that push_dummy_call() returned the
-       stack part of the frame ID.  Unfortunatly, many older
-       architectures were, via a convoluted mess, relying on the
-       poorly defined and greatly overloaded DEPRECATED_TARGET_READ_FP
-       or DEPRECATED_FP_REGNUM to supply the value.  */
-    if (DEPRECATED_TARGET_READ_FP_P ())
-      frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
-    else if (DEPRECATED_FP_REGNUM >= 0)
-      frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
+    if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+      {
+	/* Sanity.  The exact same SP value is returned by
+	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+	 unwind_dummy_id to form the frame ID's stack address.  */
+	gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+	frame = frame_id_build (sp, sal.pc);
+      }
     else
-      frame = frame_id_build (sp, sal.pc);
+      {
+	/* The assumption here is that push_dummy_call() returned the
+	   stack part of the frame ID.  Unfortunatly, many older
+	   architectures were, via a convoluted mess, relying on the
+	   poorly defined and greatly overloaded
+	   DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM to supply
+	   the value.  */
+	if (DEPRECATED_TARGET_READ_FP_P ())
+	  frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
+	else if (DEPRECATED_FP_REGNUM >= 0)
+	  frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
+	else
+	  frame = frame_id_build (sp, sal.pc);
+      }
     bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
     bpt->disposition = disp_del;
   }
