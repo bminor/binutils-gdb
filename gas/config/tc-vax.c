@@ -1,5 +1,5 @@
 /* tc-vax.c - vax-specific -
-   Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1991, 1992, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -257,7 +257,7 @@ md_begin ()
   FLONUM_TYPE *fP;
   int i;
 
-  if (errtxt = vip_begin (1, "$", "*", "`"))
+  if ((errtxt = vip_begin (1, "$", "*", "`")) != 0)
     {
       as_fatal ("VIP_BEGIN error:%s", errtxt);
     }
@@ -362,7 +362,7 @@ md_assemble (instruction_string)
    * and we can safely flush it, without causing interpass symbol phase
    * errors. That is, without changing label values in different passes.
    */
-  if (goofed = (*v.vit_error))
+  if ((goofed = (*v.vit_error)) != 0)
     {
       as_warn ("Ignoring statement due to \"%s\"", v.vit_error);
     }
@@ -587,8 +587,8 @@ md_assemble (instruction_string)
 		}
 	      else
 		{
-		  as_warn ("A bignum/flonum may not be a displacement: 0x%x used",
-			   expP->X_add_number = 0x80000000);
+		  as_warn ("A bignum/flonum may not be a displacement: 0x%lx used",
+			   (expP->X_add_number = 0x80000000L));
 		  /* Chosen so luser gets the most offset bits to patch later. */
 		}
 	      expP->X_add_number = floatP->low[0]
@@ -909,7 +909,8 @@ md_assemble (instruction_string)
 		{
 		  if (this_add_number < 0 || this_add_number >= 64)
 		    {
-		      as_warn ("Short literal overflow(%d.), immediate mode assumed.", this_add_number);
+		      as_warn ("Short literal overflow(%ld.), immediate mode assumed.",
+			       (long) this_add_number);
 		      operandP->vop_short = 'i';
 		      operandP->vop_mode = 8;
 		      operandP->vop_reg = 0xF;
@@ -1022,7 +1023,7 @@ md_assemble (instruction_string)
 		    {
 		      /* # or S^# or I^# */
 		      if (length == 0
-			  && to_seg == SEG_ABSOLUTE
+			  && to_seg == SEG_ABSOLUTE && (expP->X_op != O_big)
 			  && operandP->vop_mode == 8	/* No '@'. */
 			  && this_add_number < 64
 			  && this_add_number >= 0)
@@ -1040,7 +1041,7 @@ md_assemble (instruction_string)
 			  p = frag_more (nbytes + 1);
 			  know (operandP->vop_reg == 0xF);
 			  p[0] = (operandP->vop_mode << 4) | 0xF;
-			  if (to_seg == SEG_ABSOLUTE)
+			  if ((to_seg == SEG_ABSOLUTE) && (expP->X_op != O_big))
 			    {
 			      /*
 			       * If nbytes > 4, then we are scrod. We
@@ -1669,7 +1670,7 @@ static const struct vot
 /* CASEx has no branch addresses in our conception of it. */
 /* You should use ".word ..." statements after the "case ...". */
 
-  {"", ""}			/* empty is end sentinel */
+  {"",	{"", 0}}			/* empty is end sentinel */
 
 };				/* synthetic_votstrs */
 
@@ -1823,7 +1824,7 @@ vip (vitP, instring)
 		   */
 		  *q = 0;
 		  operandp->vop_width = p[1];
-		  operandp->vop_nbytes = vax_operand_width_size[p[1]];
+		  operandp->vop_nbytes = vax_operand_width_size[(unsigned) p[1]];
 		  operandp->vop_access = p[0];
 		  vip_op (instring, operandp);
 		  *q = c;	/* Restore input text. */
@@ -2187,7 +2188,7 @@ vip_op_1 (bit, syms)
 {
   unsigned char t;
 
-  while (t = *syms++)
+  while ((t = *syms++) != 0)
     vip_metacharacters[t] |= bit;
 }
 
@@ -2324,7 +2325,7 @@ vip_op (optext, vopP)
   if (*p == ' ')		/* Expect all whitespace reduced to ' '. */
     p++;			/* skip over whitespace */
 
-  if (at = INDIRECTP (*p))
+  if ((at = INDIRECTP (*p)) != 0)
     {				/* 1 if *p=='@'(or '*' for Un*x) */
       p++;			/* at is determined */
       if (*p == ' ')		/* Expect all whitespace reduced to ' '. */
@@ -2351,7 +2352,7 @@ vip_op (optext, vopP)
   if (*p == ' ')		/* Expect all whitespace reduced to ' '. */
     p++;			/* skip over whitespace */
 
-  if (hash = IMMEDIATEP (*p))	/* 1 if *p=='#' ('$' for Un*x) */
+  if ((hash = IMMEDIATEP (*p)) != 0)	/* 1 if *p=='#' ('$' for Un*x) */
     p++;			/* hash is determined */
 
   /*
@@ -3098,7 +3099,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 #ifdef OBJ_VMS
-CONST char *md_shortopts = "d:STt:V+1h:Hv:";
+CONST char *md_shortopts = "d:STt:V+1h:Hv::";
 #else
 CONST char *md_shortopts = "d:STt:V";
 #endif
@@ -3158,6 +3159,8 @@ md_parse_option (c, arg)
     case 'v':
       {
 	extern char *compiler_version_string;
+	if (!arg || !*arg || access (arg, 0) == 0)
+	  return 0;		/* have caller show the assembler version */
 	compiler_version_string = arg;
       }
       break;
@@ -3184,12 +3187,13 @@ VAX options:\n\
 -V			ignored\n");
 #ifdef OBJ_VMS
   fprintf (stream, "\
--+			hash names longer than 31 characters\n\
--1			don't do const thing\n\
+VMS options:\n\
+-+			hash encode names longer than 31 characters\n\
+-1			`const' handling compatible with gcc 1.x\n\
 -H			show new symbol after hash truncation\n\
 -h NUM			don't hash mixed-case names, and adjust case:\n\
 			0 = upper, 2 = lower, 3 = preserve case\n\
--vVERSION		compiler version is VERSION\n");
+-v\"VERSION\"		code being assembled was produced by compiler \"VERSION\"\n");
 #endif
 }
 

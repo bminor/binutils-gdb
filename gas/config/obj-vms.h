@@ -1,5 +1,5 @@
 /* VMS object file format
-   Copyright (C) 1989, 1990, 1991, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -215,11 +215,16 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 #define obj_symbol_new_hook(s)	{;}
 
 struct fix;
-void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT segment_address));
+extern void tc_aout_fix_to_chars PARAMS ((char *,struct fix *,relax_addressT));
 
 extern int vms_resolve_symbol_redef ();
 #define RESOLVE_SYMBOL_REDEFINITION(X)	vms_resolve_symbol_redef(X)
 
+extern void vms_check_for_main PARAMS ((void));
+
+extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
+					   struct frag *,struct frag *));
+
 /* The rest of this file contains definitions for constants used within the actual
    VMS object file.  We do not use a $ in the symbols (as per usual VMS
    convention) since System V gags on it.  */

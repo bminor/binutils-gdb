@@ -1177,7 +1177,7 @@ write_object_file ()
   /* Under VMS we try to be compatible with VAX-11 "C".  Thus, we call
      a routine to check for the definition of the procedure "_main",
      and if so -- fix it up so that it can be program entry point. */
-  VMS_Check_For_Main ();
+  vms_check_for_main ();
 #endif /* VMS */
 
   /* After every sub-segment, we fake an ".align ...". This conforms to
@@ -1527,7 +1527,7 @@ write_object_file ()
   /*
    *	Now do the VMS-dependent part of writing the object file
    */
-  VMS_write_object_file (H_GET_TEXT_SIZE (&headers),
+  vms_write_object_file (H_GET_TEXT_SIZE (&headers),
 			 H_GET_DATA_SIZE (&headers),
 			 H_GET_BSS_SIZE (&headers),
 			 text_frag_root, data_frag_root);

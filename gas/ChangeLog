@@ -1,3 +1,17 @@
+Thu Jan 19 14:49:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Cleanup of VAX and VMS code, from Pat Rankin:
+	* config/obj-vms.c: Changed exported function names to lower case.
+	(Changed call sites in write.c.)  Declare VMS system function
+	names used, conditional on actually being on VMS.  Changed many
+	functions that returned no useful value to now be declared to
+	return void.  Removed many unused variables.  Supply missing
+	return statements or values.  Supply `default' case in switch
+	statements.  Ensure local variables get initialized.
+	* config/tc-vax.c: Minor changes to silence "gcc -Wall".
+	* config/obj-vms.h, config/tc-vax.h: Added some missing
+	declarations.
+
 Wed Jan 18 13:49:26 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* atof-generic.c (flonum_print) [TRACE]: New function.
