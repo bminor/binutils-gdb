@@ -134,7 +134,7 @@ NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
 			Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
-Solaris/x86 native & host
+Solaris/x86 native & host (devolved)
 			Nick Duffek		nsd@cygnus.com
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host
