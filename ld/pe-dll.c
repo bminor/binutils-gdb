@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of GLD, the Gnu Linker.
@@ -223,6 +223,8 @@ static autofilter_entry_type autofilter_symbollist[] =
   { "_cygwin_crt0_common@8", 21 },
   { "_cygwin_noncygwin_dll_entry@12", 30 },
   { "impure_ptr", 10 },
+  { "_pei386_runtime_relocator", 25 },
+  { "do_pseudo_reloc", 15 },
   { NULL, 0 }
 };
 

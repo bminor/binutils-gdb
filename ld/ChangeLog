@@ -1,3 +1,8 @@
+2003-01-02 Charles Wilson <cwilson@ece.gatech.edu>
+
+	* pe-dll.c (autofilter_symbollist): Add do_pseudo_reloc 
+	and _pei386_runtime_relocator to the exclude list.
+
 2003-01-01  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ldfile.c: Fix comment typos.
