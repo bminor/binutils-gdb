@@ -1,3 +1,10 @@
+2003-10-23  Jim Blandy  <jimb@redhat.com>
+
+	* osabi.c (gdbarch_init_osabi): A handler is okay if it's for an
+	architecture the current arch can run code for --- but not if it's
+	a superset.
+	(can_run_code_for): New function.
+
 2003-10-22  James E Wilson  <wilson@specifixinc.com>
 
 	* MAINTAINERS: Move myself from paper trail section back to write
