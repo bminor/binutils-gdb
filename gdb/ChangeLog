@@ -1,3 +1,8 @@
+Fri Oct  9 00:28:25 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* remote-nindy.c (nindy_load): Replacement version from Steve
+	Chamberlain, doesn't require forking to run "strip" or "sx".
+
 Thu Oct  8 18:27:35 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (HFILES):  Add nm-*.h files.
