@@ -5231,7 +5231,6 @@ md_apply_fix (fixP, valueP)
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
-      assert (fixP->fx_pcrel);
       if (value & 0x3)
 	as_warn ("Branch to odd address (%lx)", value);
       value >>= 2;
