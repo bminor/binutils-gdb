@@ -3,7 +3,7 @@ Mon Apr 18 10:08:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* nm-hppab.h (KERNEL_U_ADDR): Define.
 	(FIVE_ARG_PTRACE): Likewise.
 	(CANNOT_STORE_REGISTER): Likewise.
-	nm-hppah.h (KERNEL_U_ADDR): Define.
+	* nm-hppah.h (KERNEL_U_ADDR): Define.
 	(FIVE_ARG_PTRACE): Likewise.
 	(CANNOT_STORE_REGISTER): Likewise.
 	(NEED_TEXT_START_END): Likewise.
