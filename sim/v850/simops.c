@@ -1,4 +1,9 @@
+#include "config.h"
+
 #include <signal.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "v850_sim.h"
 #include "simops.h"
 #include "sys/syscall.h"
@@ -272,7 +277,7 @@ trace_input (name, type, size)
 	case OP_COND_BR:
 	  values[0] = State.pc;
 	  values[1] = SEXT9 (OP[0]);
-	  values[2] = State.sregs[5];
+	  values[2] = PSW;
 	  num_values = 3;
 	  break;
 
@@ -325,7 +330,7 @@ trace_input (name, type, size)
 	  break;
 
 	case OP_EX1:
-	  values[0] = State.sregs[5];
+	  values[0] = PSW;
 	  num_values = 1;
 	  break;
 
@@ -620,7 +625,7 @@ OP_580 ()
 
   trace_input ("bv", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_OV) != 0)
     State.pc += op0;
@@ -638,7 +643,7 @@ OP_581 ()
 
   trace_input ("bl", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_CY) != 0)
     State.pc += op0;
@@ -656,7 +661,7 @@ OP_582 ()
 
   trace_input ("be", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_Z) != 0)
     State.pc += op0;
@@ -674,7 +679,7 @@ OP_583 ()
 
   trace_input ("bnh", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) != 0)
     State.pc += op0;
@@ -692,7 +697,7 @@ OP_584 ()
 
   trace_input ("bn", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_S) != 0)
     State.pc += op0;
@@ -723,7 +728,7 @@ OP_586 ()
 
   trace_input ("blt", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) != 0)
     State.pc += op0;
@@ -741,7 +746,7 @@ OP_587 ()
 
   trace_input ("ble", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_Z) != 0)
        || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) != 0)
@@ -760,7 +765,7 @@ OP_588 ()
 
   trace_input ("bnv", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_OV) == 0)
     State.pc += op0;
@@ -778,7 +783,7 @@ OP_589 ()
 
   trace_input ("bnl", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_CY) == 0)
     State.pc += op0;
@@ -796,7 +801,7 @@ OP_58A ()
 
   trace_input ("bne", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_Z) == 0)
     State.pc += op0;
@@ -814,7 +819,7 @@ OP_58B ()
 
   trace_input ("bh", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) == 0)
     State.pc += op0;
@@ -832,7 +837,7 @@ OP_58C ()
 
   trace_input ("bp", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_S) == 0)
     State.pc += op0;
@@ -850,7 +855,7 @@ OP_58D ()
 
   trace_input ("bsa", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((psw & PSW_SAT) != 0)
     State.pc += op0;
@@ -868,7 +873,7 @@ OP_58E ()
 
   trace_input ("bge", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) == 0)
     State.pc += op0;
@@ -886,7 +891,7 @@ OP_58F ()
 
   trace_input ("bgt", OP_COND_BR, 0);
   op0 = SEXT9 (OP[0]);
-  psw = State.sregs[5];
+  psw = PSW;
   
   if ((((psw & PSW_Z) != 0)
        || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) == 0)
@@ -947,8 +952,8 @@ OP_1C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		     | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_REG_REG);
 }
@@ -977,8 +982,8 @@ OP_240 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_IMM_REG);
 }
@@ -1007,8 +1012,8 @@ OP_600 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_IMM_REG_REG);
 }
@@ -1034,8 +1039,8 @@ OP_1A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_REG_REG);
 }
@@ -1061,8 +1066,8 @@ OP_180 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_REG_REG);
 }
@@ -1137,8 +1142,8 @@ OP_40 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (ov ? PSW_OV : 0));
   trace_output (OP_REG_REG);
 }
@@ -1163,8 +1168,8 @@ OP_1E0 ()
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
   /* Set condition codes.  */
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_REG_REG_CMP);
 }
@@ -1191,8 +1196,8 @@ OP_260 ()
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
   /* Set condition codes.  */
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
   trace_output (OP_IMM_REG_CMP);
 }
@@ -1207,7 +1212,7 @@ OP_7E0 ()
 
   trace_input ("setf", OP_EX1, 0);
   op0 = OP[0] & 0xf;
-  psw = State.sregs[5];
+  psw = PSW;
 
   switch (op0)
     {
@@ -1289,8 +1294,8 @@ OP_C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -1328,8 +1333,8 @@ OP_220 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -1364,8 +1369,8 @@ OP_A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -1402,8 +1407,8 @@ OP_660 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -1438,8 +1443,8 @@ OP_80 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -1469,8 +1474,8 @@ OP_160 ()
   s = (result & 0x80000000);
 
   /* Store the condition codes.  */
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_REG_REG_CMP);
 }
 
@@ -1535,8 +1540,8 @@ OP_2A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_IMM_REG);
 }
@@ -1559,8 +1564,8 @@ OP_A007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_REG_REG);
 }
@@ -1583,8 +1588,8 @@ OP_2C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_IMM_REG);
 }
@@ -1607,8 +1612,8 @@ OP_C007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_REG_REG);
 }
@@ -1631,8 +1636,8 @@ OP_280 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_IMM_REG);
 }
@@ -1655,8 +1660,8 @@ OP_8007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
   trace_output (OP_REG_REG);
 }
@@ -1680,8 +1685,8 @@ OP_100 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_REG_REG);
 }
 
@@ -1702,8 +1707,8 @@ OP_680 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_UIMM_REG_REG);
 }
 
@@ -1726,8 +1731,8 @@ OP_140 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_REG_REG);
 }
 
@@ -1747,8 +1752,8 @@ OP_6C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= (z ? PSW_Z : 0);
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= (z ? PSW_Z : 0);
   trace_output (OP_UIMM_REG_REG);
 }
 
@@ -1771,8 +1776,8 @@ OP_120 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_REG_REG);
 }
 
@@ -1793,8 +1798,8 @@ OP_6A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_UIMM_REG_REG);
 }
 
@@ -1815,8 +1820,8 @@ OP_20 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
   trace_output (OP_REG_REG_MOVE);
 }
 
@@ -1833,9 +1838,9 @@ OP_7C0 ()
   temp = SEXT16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
-  State.sregs[5] &= ~PSW_Z;
+  PSW &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
-    State.sregs[5] |= PSW_Z;
+    PSW |= PSW_Z;
   temp |= (1 << op1);
   store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
@@ -1854,9 +1859,9 @@ OP_47C0 ()
   temp = SEXT16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
-  State.sregs[5] &= ~PSW_Z;
+  PSW &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
-    State.sregs[5] |= PSW_Z;
+    PSW |= PSW_Z;
   temp ^= (1 << op1);
   store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
@@ -1875,9 +1880,9 @@ OP_87C0 ()
   temp = SEXT16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
-  State.sregs[5] &= ~PSW_Z;
+  PSW &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
-    State.sregs[5] |= PSW_Z;
+    PSW |= PSW_Z;
   temp &= ~(1 << op1);
   store_mem (op0 + op2, 1, temp);
   trace_output (OP_BIT);
@@ -1896,9 +1901,9 @@ OP_C7C0 ()
   temp = SEXT16 (OP[2]);
   op2 = temp;
   temp = load_mem (op0 + op2, 1);
-  State.sregs[5] &= ~PSW_Z;
+  PSW &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
-    State.sregs[5] |= PSW_Z;
+    PSW |= PSW_Z;
   trace_output (OP_BIT);
 }
 
@@ -1915,7 +1920,7 @@ void
 OP_16007E0 ()
 {
   trace_input ("di", OP_NONE, 0);
-  State.sregs[5] |= PSW_ID;
+  PSW |= PSW_ID;
   trace_output (OP_NONE);
 }
 
@@ -1924,39 +1929,41 @@ void
 OP_16087E0 ()
 {
   trace_input ("ei", OP_NONE, 0);
-  State.sregs[5] &= ~PSW_ID;
+  PSW &= ~PSW_ID;
   trace_output (OP_NONE);
 }
 
-/* halt, not supported */
+/* halt */
 void
 OP_12007E0 ()
 {
   trace_input ("halt", OP_NONE, 0);
+  /* FIXME this should put processor into a mode where NMI still handled */
   State.exception = SIGQUIT;
   trace_output (OP_NONE);
 }
 
-/* reti, not supported */
+/* reti */
 void
 OP_14007E0 ()
 {
   trace_input ("reti", OP_NONE, 0);
   trace_output (OP_NONE);
 
-  if ((State.sregs[5] & (PSW_NP | PSW_EP)) == PSW_NP)
-    {				/* Only NP is on */
-      PC = State.sregs[2] - 4;	/* FEPC */
-      State.sregs[5] = State.sregs[3];	/* FEPSW */
+  /* Restore for NMI if only NP on, otherwise is interrupt or exception.  */
+  if ((PSW & (PSW_NP | PSW_EP)) == PSW_NP)
+    {
+      PC = FEPC - 4;
+      PSW = FEPSW;
     }
   else
     {
-      PC = State.sregs[0] - 4;	/* EIPC */
-      State.sregs[5] = State.sregs[1];	/* EIPSW */
+      PC = EIPC - 4;
+      PSW = EIPSW;
     }
 }
 
-/* trap, not supportd */
+/* trap */
 void
 OP_10007E0 ()
 {
@@ -2048,10 +2055,7 @@ OP_10007E0 ()
 	case SYS_exit:
 	  /* EXIT - caller can look in PARM1 to work out the 
 	     reason */
-	  if (PARM1 == 0xdead || PARM1 == 0x1)
-	    State.exception = SIGABRT;
-	  else
-	    State.exception = SIGQUIT;
+	  State.exception = SIG_V850_EXIT;
 	  break;
 
 	case SYS_stat:	/* added at hmsi */
@@ -2086,7 +2090,11 @@ OP_10007E0 ()
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
 	case SYS_time:
-	  RETVAL = time (MEMPTR (PARM1));
+	  {
+	    time_t now;
+	    RETVAL = time (&now);
+	    store_mem (PARM1, 4, now);
+	  }
 	  break;
 	case SYS_times:
 	  {
@@ -2122,11 +2130,13 @@ OP_10007E0 ()
     }
   else
     {				/* Trap 0 -> 30 */
-      State.sregs[0] = PC + 4;	/* EIPC */
-      State.sregs[1] = State.sregs[5]; /* EIPSW */
-      State.sregs[4] &= 0xffff0000; /* Mask out EICC */
-      State.sregs[4] |= 0x40 + OP[0];	/* EICC */
-      State.sregs[5] |= PSW_EP | PSW_ID; /* Now doing exception processing */
+      EIPC = PC + 4;
+      EIPSW = PSW;
+      /* Mask out EICC */
+      ECR &= 0xffff0000;
+      ECR |= 0x40 + OP[0];
+      /* Flag that we are now doing exception processing.  */
+      PSW |= PSW_EP | PSW_ID;
       PC = ((OP[0] < 0x10) ? 0x40 : 0x50) - 4;
     }
 }
@@ -2143,7 +2153,7 @@ OP_2007E0 ()
   trace_output (OP_LDSR);
 }
 
-/* stsr, not supported */
+/* stsr */
 void
 OP_4007E0 ()
 {

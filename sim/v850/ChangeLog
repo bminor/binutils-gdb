@@ -1,3 +1,39 @@
+Fri Dec 27 14:44:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850_sim.h (SIG_V850_EXIT): Define as -1.
+
+	* interp.c (sim_open): Cast calloc function.
+	(sim_stop_reason): If signal is SIG_V850_EXIT, inform gdb the
+	program exited with the appropriate exit code.
+	(sim_set_interrupt): Declare buildargv.
+
+	* simops.c (OP_10007E0): Make exit signal normal exit.  Make time
+	type correct and work on big endian systems.
+
+Wed Nov 20 02:18:44 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Delete stuff moved to ../common/Make-common.in.
+	(SIM_OBJS,SIM_EXTRA_CFLAGS,SIM_EXTRA_CLEAN): Define.
+	* configure.in: Simplify using macros in ../common/aclocal.m4.
+	Call AC_CHECK_HEADERS(unistd.h).
+	* configure: Regenerated.
+	* config.in: New file.
+	* simops.c: #include "config.h".  #include <unistd.h> if present.
+
+Sun Nov  3 23:02:54 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* v850_sim.h (State): New slots dummy_mem, pending_nmi.
+	(EIPC, etc): New macros for system registers.
+	* simops.c, interp.c: Use everywhere.
+
+	* interp.c: Add support for interrupts issued by interrupt
+	generators, either PC- or time-based.  Controlled by simulator
+	command "sim interrupt".
+
+	* interp.c: Add support for variable-size allocation of memory,
+	via simulator command "sim memory-map".
+	(map): Issue SIGSEGV for references to invalid memory regions.
+	
 Thu Oct 31 14:44:10 1996  Gavin Koch  <gavin@cygnus.com>
         
         * simops.c: Include <sys/time.h> for struct timeval and 
