@@ -1,3 +1,8 @@
+2002-01-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gmon_io.c (gmon_out_read): Remove use of ngettext().  It is not
+	present under AIX.
+
 2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cg_print.c (print_header): Fix spelling typo.
