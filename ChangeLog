@@ -1,3 +1,9 @@
+Wed Jul 15 01:00:54 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in ($(CONFIGURE_TARGET_MODULES)): If there are any
+	multilibs, force reconfiguration the first time we create
+	multilib.out in a subdirectory, in case TARGET_SUBDIR is `.'.
+
 Tue Jul 14 23:41:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Strip any --no option from CONFIG_ARGUMENTS, to
