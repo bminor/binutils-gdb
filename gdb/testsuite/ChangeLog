@@ -1,5 +1,22 @@
 Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* gdb.base/all-bin.exp: new file.
+	* gdb.base/arithmet.exp: new file.
+	* gdb.base/assign.exp: new file.
+	* gdb.base/completion.exp: new file.
+	* gdb.base/cond-expr.exp: new file.
+	* gdb.base/condbreak.exp: new file.
+	* gdb.base/define.exp: new file.
+	* gdb.base/dollar.exp: new file.
+	* gdb.base/environment.exp: new file.
+	* gdb.base/eval-skip.exp: new file.
+	* gdb.base/jump.exp: new file.
+	* gdb.base/logical.exp: new file.
+	* gdb.base/pointers.exp: new file.
+	* gdb.base/relational.exp: new file.
+	* gdb.base/section_command.exp: new file.
+	* gdb.base/whatis-expr.exp: new file.
+
 	* gdb.base/all-types.c: new file.
 	* gdb.base/call-array-struct.c: new file.
 	* gdb.base/call-return-struct.c: new file.
