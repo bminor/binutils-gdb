@@ -1,3 +1,13 @@
+2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* emulparams/elf32bsmip.sh (EXTRA_EM_FILE): Define to irix.
+	* emulparams/elf64bmip.sh (EXTRA_EM_FILE): Likewise.
+	* emulparams/elf32bmipn32.sh (EXTRA_EM_FILE): Likewise.
+	* emultempl/irix.em: New file.
+	* Makefile.am (eelf32bsmip.c, eelf32bmipn32.c, eelf64bmip.c): Update
+	dependencies.
+	* Makefile.in: Regenerate.
+
 2004-04-01  Paul Brook  <paul@codesourcery.com>
 
 	* emultempl/armelf.em (byteswap_code): Add.
