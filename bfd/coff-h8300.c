@@ -733,7 +733,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Sanity check.  */
-      if (value < 0xff 
+      if (value <= 0xff
 	  || (value >= 0x0000ff00 && value <= 0x0000ffff)
   	  || (value >= 0x00ffff00 && value <= 0x00ffffff)
 	  || (value >= 0xffffff00 && value <= 0xffffffff))
@@ -741,7 +741,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  /* Everything looks OK.  Apply the relocation and update the
 	     src/dst address appropriately.  */
 
-	  bfd_put_8 (abfd, gap, data + dst_address);
+	  bfd_put_8 (abfd, value & 0xff, data + dst_address);
 	  dst_address += 1;
 	  src_address += 1;
 	}
