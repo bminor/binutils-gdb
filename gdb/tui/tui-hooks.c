@@ -277,6 +277,15 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
   tuiShowFrameInfo (selected_frame);
 }
 
+/* Called when the target process died or is detached.
+   Update the status line.  */
+static void
+tui_detach_hook (void)
+{
+  tuiShowFrameInfo (0);
+  tui_display_main ();
+}
+
 /* Install the TUI specific hooks.  */
 void
 tui_install_hooks (void)
@@ -292,6 +301,7 @@ tui_install_hooks (void)
 
   registers_changed_hook = tui_registers_changed_hook;
   register_changed_hook = tui_register_changed_hook;
+  detach_hook = tui_detach_hook;
 }
 
 /* Remove the TUI specific hooks.  */
@@ -304,6 +314,7 @@ tui_remove_hooks (void)
   query_hook = 0;
   registers_changed_hook = 0;
   register_changed_hook = 0;
+  detach_hook = 0;
 
   /* Restore the previous event hooks.  */
   set_gdb_event_hooks (tui_old_event_hooks);
