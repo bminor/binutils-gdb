@@ -552,7 +552,14 @@ value_as_pointer (val)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
+#if 0
+  /* ADDR_BITS_REMOVE is wrong if we are being called for a
+     non-address (e.g. argument to "signal", "info break", etc.), or
+     for pointers to char, in which the low bits *are* significant.  */
   return ADDR_BITS_REMOVE(value_as_long (val));
+#else
+  return value_as_long (val);
+#endif
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR

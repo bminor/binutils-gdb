@@ -587,7 +587,9 @@ print_address (addr, stream)
      CORE_ADDR addr;
      FILE *stream;
 {
-#ifdef ADDR_BITS_REMOVE
+#if 0 && defined (ADDR_BITS_REMOVE)
+  /* This is wrong for pointer to char, in which we do want to print
+     the low bits.  */
   fprintf_filtered (stream, local_hex_format(), ADDR_BITS_REMOVE(addr));
 #else
   fprintf_filtered (stream, local_hex_format(), addr);
@@ -1628,7 +1630,14 @@ typedef struct {
   MAKEVA_EXTRA_INFO
 #endif
 
-  char arg_bytes[1];
+  /* Some systems (mips, pa) would like this to be aligned, and it never
+     will hurt.  */
+  union
+    {
+      char arg_bytes[1];
+      double force_double_align;
+      LONGEST force_long_align;
+    } aligner;
 } makeva_list;
 
 /* Tell the caller how many bytes to allocate for a makeva_list with NARGS
@@ -1639,9 +1648,7 @@ makeva_size (nargs, max_arg_size)
      unsigned int nargs;
      unsigned int max_arg_size;
 {
-  return sizeof (makeva_list) + nargs * max_arg_size
-    /* The PA might need up to this much for alignment.  */
-    + max_arg_size - 1;
+  return sizeof (makeva_list) + nargs * max_arg_size;
 }
 
 /* Start working on LIST with NARGS arguments and whose largest
@@ -1671,7 +1678,7 @@ makeva_arg (list, argaddr, argsize)
 #if defined (MAKEVA_ARG)
   MAKEVA_ARG (list, argaddr, argsize);
 #else
-  memcpy (&list->arg_bytes[list->argindex], argaddr, argsize);
+  memcpy (&list->aligner.arg_bytes[list->argindex], argaddr, argsize);
   list->argindex += argsize;
 #endif
 }
@@ -1686,7 +1693,7 @@ makeva_end (list)
   MAKEVA_END (list);
 #else
   /* This works if a va_list is just a pointer to the arguments.  */
-  return (va_list) list->arg_bytes;
+  return (va_list) list->aligner.arg_bytes;
 #endif
 }
 
