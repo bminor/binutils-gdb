@@ -32,32 +32,6 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
-/* Advance PC across any function entry prologue instructions to reach some
-   "real" code.  */
-
-#define SKIP_PROLOGUE(frompc)   (i386_skip_prologue (frompc))
-
-extern int i386_skip_prologue (int);
-
-/* Stack grows downward.  */
-
-#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
-
-/* Sequence of bytes for breakpoint instruction.  */
-
-#define BREAKPOINT {0xcc}
-
-/* Amount PC must be decremented by after a breakpoint.  This is often the
-   number of bytes in BREAKPOINT but not always. */
-
-#define DECR_PC_AFTER_BREAK 1
-
-
 /* Return the GDB type object for the "standard" data type of data in
    register REGNUM.  */
 

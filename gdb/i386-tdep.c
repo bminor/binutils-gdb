@@ -666,8 +666,8 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
 /* Return PC of first real instruction.  */
 
-int
-i386_skip_prologue (int pc)
+CORE_ADDR
+i386_skip_prologue (CORE_ADDR pc)
 {
   unsigned char op;
   int i;
@@ -747,6 +747,24 @@ i386_skip_prologue (int pc)
   i386_follow_jump ();
 
   return (codestream_tell ());
+}
+
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.
+
+   On the i386 we have a single breakpoint that fits in a single byte
+   and can be inserted anywhere.  */
+   
+static const unsigned char *
+i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
+  
+  *len = sizeof (break_insn);
+  return break_insn;
 }
 
 void
@@ -1402,6 +1420,14 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+  set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
+
+  /* Stack grows downward.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
 
   /* The following redefines make backtracing through sigtramp work.
      They manufacture a fake sigtramp frame and obtain the saved pc in
