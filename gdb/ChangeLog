@@ -1,3 +1,13 @@
+2002-11-06  Joel Brobecker  <brobecker@gnat.com>
+
+	Put in place the framework necessary for multiarching the hppa targets.
+	* hppa-tdep.c (hppa_gdbarch_init): New function.
+	(hppa_dump_tdep): New function.
+	(_initialize_hppa_tdep): Register the hppa gdbarch init function and
+	tdep structure dumper.
+	* config/pa/tm-hppa.h (GDB_MULTI_ARCH): New macro, defined to 0
+	until the multi-arching conversion has partially been completed.
+
 2002-11-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* valops.c (value_assign): Merge lval_register case into

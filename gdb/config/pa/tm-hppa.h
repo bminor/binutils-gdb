@@ -24,6 +24,8 @@
 
 #include "regcache.h"
 
+#define GDB_MULTI_ARCH 0
+
 /* Forward declarations of some types we use in prototypes */
 
 struct frame_info;

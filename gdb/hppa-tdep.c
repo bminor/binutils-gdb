@@ -4724,6 +4724,28 @@ hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	    TYPE_LENGTH (type));
 }
 
+static struct gdbarch *
+hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch *gdbarch;
+
+  /* find a candidate among the list of pre-declared architectures.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+  /* If none found, then allocate and initialize one.  */
+  gdbarch = gdbarch_alloc (&info, NULL);
+
+  return gdbarch;
+}
+
+static void
+hppa_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+   /* Nothing to print for the moment.  */
+}
+
 void
 _initialize_hppa_tdep (void)
 {
@@ -4732,6 +4754,7 @@ _initialize_hppa_tdep (void)
   void tbreak_at_finish_command (char *arg, int from_tty);
   void break_at_finish_at_depth_command (char *arg, int from_tty);
 
+  gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
   tm_print_insn = print_insn_hppa;
 
   add_cmd ("unwind", class_maintenance, unwind_command,
