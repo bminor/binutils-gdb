@@ -1,3 +1,8 @@
+2002-11-25  Jim Blandy  <jimb@redhat.com>
+
+	* symfile.c (symbol_file_add): Flush gdb_stdout even if from_tty
+	|| info_verbose isn't true.
+
 2002-11-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS): Change

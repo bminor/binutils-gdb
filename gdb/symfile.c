@@ -907,9 +907,13 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
       else
 	{
 	  printf_filtered ("done.\n");
-	  gdb_flush (gdb_stdout);
 	}
     }
+
+  /* We print some messages regardless of whether 'from_tty ||
+     info_verbose' is true, so make sure they go out at the right
+     time.  */
+  gdb_flush (gdb_stdout);
 
   if (objfile->sf == NULL)
     return objfile;	/* No symbols. */
