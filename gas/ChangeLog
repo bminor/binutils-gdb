@@ -1,3 +1,21 @@
+Sun Oct 10 01:47:23 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org>
+
+	* config/tc-hppa.c (pa_ip):  Add new codes 'cc', 'cd', 'cC', 'co',
+	'@'.  Change autoincrement completers to fall through to cache control
+	completers.
+
+	* config/tc-hppa.c (pa_ip):  Remove unused args.  Add code to '?W'
+	arg. 
+	(pa_parse_addb_64_cmpltr):  New function.
+
+	* config/tc-hppa.c (pa_ip):  Change error message.
+	(pa_ip,pa_parse_cmpb_64_cmpltr,pa_parse_cmpib_64_cmpltr)  Fix '?N' and
+	'?Q' args to allow falling through.
+
+	* configtc-hppa.c (pa_ip):  Implement conditional codes "?N", "?Q".
+	Remove unused conditional codes.
+	(pa_parse_cmpb_64_cmpltr,pa_parse_cmpib_64_cmpltr):  New.
+
 Thu Oct  7 00:23:53 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* config/tc-d30v.c (CHAR_BIT): Define.

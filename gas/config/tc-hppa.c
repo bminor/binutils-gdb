@@ -495,6 +495,9 @@ static int pa_parse_nonneg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_add_cmpltr PARAMS ((char **, int));
 static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
+static int pa_parse_cmpb_64_cmpltr PARAMS ((char **));
+static int pa_parse_cmpib_64_cmpltr PARAMS ((char **));
+static int pa_parse_addb_64_cmpltr PARAMS ((char **));
 static void pa_block PARAMS ((int));
 static void pa_brtab PARAMS ((int));
 static void pa_try PARAMS ((int));
@@ -1393,7 +1396,7 @@ md_begin ()
   dummy_symbol = symbol_find_or_make ("L$dummy");
   S_SET_SEGMENT (dummy_symbol, text_section);
   /* Force the symbol to be converted to a real symbol. */
-  (void) symbol_get_bfdsym (dummy_symbol); 
+  (void) symbol_get_bfdsym (dummy_symbol);
 #endif
 }
 
@@ -1767,11 +1770,15 @@ pa_ip (str)
 			  }
 			else if (strncasecmp (s, "m", 1) == 0)
 			  m = 1;
-			else if (strncasecmp (s, "s", 1) == 0)
+			else if ((strncasecmp (s, "s ", 2) == 0)
+				 || (strncasecmp (s, "s,", 2) == 0))
 			  uu = 1;
 			/* When in strict mode this is a match failure.  */
 			else if (strict)
-			  break;
+			  {
+			    s--;
+			    break;
+			  }
 			else
 			  as_bad (_("Invalid Indexed Load Completer."));
 			s++;
@@ -1787,33 +1794,40 @@ pa_ip (str)
 		case 'm':
 		case 'q':
 		case 'J':
-		case 'c':
+		case 'e':
 		  {
 		    int a = 0;
 		    int m = 0;
 		    if (*s == ',')
 		      {
+			int found = 0;
 			s++;
 			if (strncasecmp (s, "ma", 2) == 0)
 			  {
 			    a = 0;
 			    m = 1;
+			    found = 1;
 			  }
 			else if (strncasecmp (s, "mb", 2) == 0)
 			  {
 			    a = 1;
 			    m = 1;
+			    found = 1;
 			  }
-			/* When in strict mode this is a match failure.  */
-			else if (strict)
-			  break;
+
+			/* When in strict mode, pass through for cache op.  */
+			if (!found && strict)
+			  s--;
 			else
-			  as_bad (_("Invalid Short Load/Store Completer."));
-			s += 2;
+			  {
+			    if (!found)
+			      as_bad (_("Invalid Short Load/Store Completer."));
+			    s += 2;
+			  }
 		      }
 		    /* If we did not get a ma/mb completer, then we do not
-		       consider this a positive match for 'cc'.  */
-		    else if (*args == 'c')
+		       consider this a positive match for 'ce'.  */
+		    else if (*args == 'e')
 		      break;
 
 		   /* 'J', 'm' and 'q' are the same, except for where they
@@ -1833,7 +1847,7 @@ pa_ip (str)
 		        /* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
-		    else if (*args == 'c')
+		    else if (*args == 'e')
 		      {
 			/* Gross!  Hide these values in the immediate field
 			   of the instruction, then pull them out later.  */
@@ -1854,13 +1868,17 @@ pa_ip (str)
 			s++;
 			if (strncasecmp (s, "m", 1) == 0)
 			  m = 1;
-			else if (strncasecmp (s, "b", 1) == 0)
+			else if ((strncasecmp (s, "b ", 2) == 0)
+				 || (strncasecmp (s, "b,", 2) == 0))
 			  a = 0;
 			else if (strncasecmp (s, "e", 1) == 0)
 			  a = 1;
 			/* When in strict mode this is a match failure.  */
 			else if (strict)
-			  break;
+			  {
+			    s--;
+			    break;
+			  }
 			else
 			  as_bad (_("Invalid Store Bytes Short Completer"));
 			s++;
@@ -1871,6 +1889,48 @@ pa_ip (str)
 		    opcode |= m << 5;
 		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 		  }
+
+		/* Handle load cache hint completer.  */
+		case 'c':
+		  cmpltr = 0;
+		  if (!strncmp(s, ",sl", 3))
+		    {
+		      s += 3;
+		      cmpltr = 2;
+		    }
+		  INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 10);
+
+		/* Handle store cache hint completer.  */
+		case 'C':
+		  cmpltr = 0;
+		  if (!strncmp(s, ",sl", 3))
+		    {
+		      s += 3;
+		      cmpltr = 2;
+		    }
+		  else if (!strncmp(s, ",bc", 3))
+		    {
+		      s += 3;
+		      cmpltr = 1;
+		    }
+		  INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 10);
+
+		/* Handle load and clear cache hint completer.  */
+		case 'd':
+		  cmpltr = 0;
+		  if (!strncmp(s, ",co", 3))
+		    {
+		      s += 3;
+		      cmpltr = 1;
+		    }
+		  INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 10);
+
+		/* Handle load ordering completer. */
+		case 'o':
+		  if (strncmp(s, ",o", 2) != 0)
+		    break;
+		  s += 2;
+		  continue;
 
 		/* Handle a branch gate completer.  */
 		case 'g':
@@ -1924,7 +1984,7 @@ pa_ip (str)
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 6);
 
 		/* Handle MFCTL wide completer.  */
-		case 'W':	
+		case 'W':
 		  if (strncasecmp (s, ",w", 2) != 0)
 		    break;
 		  s += 2;
@@ -1988,7 +2048,7 @@ pa_ip (str)
 		      flag = 3;
 		      s += 4;
 		    }
-		  
+
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 10);
 
 		/* Handle 64 bit carry for ADD.  */
@@ -2310,24 +2370,27 @@ pa_ip (str)
 		    cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
 		    if (cmpltr < 0)
 		      {
-			as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
+			as_bad (_("Invalid Add and Branch Condition: %c"), *s);
 			cmpltr = 0;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-		  /* Handle negated add and branch condition.  */
-		  case 'D':
-		    abort ();
-
-		  /* Handle wide-mode non-negated add and branch condition.  */
-		  case 'w':
-		    abort ();
-
-		  /* Handle wide-mode negated add and branch condition.  */
+		  /* Handle 64 bit wide-mode add and branch condition.  */
 		  case 'W':
-		    abort();
+		    cmpltr = pa_parse_addb_64_cmpltr (&s);
+		    if (cmpltr < 0)
+		      {
+			as_bad (_("Invalid Add and Branch Condition: %c"), *s);
+			cmpltr = 0;
+		      }
+		    else
+		      {
+			/* Negated condition requires an opcode change. */
+			opcode |= (cmpltr & 8) << 24;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr & 7, 13);
 
-		  /* Handle a negated or non-negated add and branch 
+		  /* Handle a negated or non-negated add and branch
 		     condition.  */
 		  case '@':
 		    save_s = s;
@@ -2393,16 +2456,16 @@ pa_ip (str)
 
 			/* 64 bit conditions.  */
 			if (*args == 'S')
-			  { 
+			  {
 			    if (*s == '*')
 			      s++;
 			    else
 			      break;
-			  } 
+			  }
 			else if (*s == '*')
 			  break;
 			name = s;
-			    
+
 			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
@@ -2481,24 +2544,7 @@ pa_ip (str)
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-		  /* Handle a negated compare condition.  */
-		  case 'T':
-		    abort ();
-  
-		  /* Handle a 64 bit non-negated compare condition.  */
-		  case 'r':
-		    abort ();
-  
-		  /* Handle a 64 bit negated compare condition.  */
-		  case 'R':
-		    abort ();
-  
-		  /* Handle a 64 bit cmpib condition.  */
-		  case 'Q':
-		    abort ();
-  
-		  /* Handle a negated or non-negated compare/subtract
-		     condition.  */
+		  /* Handle a 32 bit compare and branch condition.  */
 		  case 'n':
 		    save_s = s;
 		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
@@ -2508,7 +2554,7 @@ pa_ip (str)
 			cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
 			if (cmpltr < 0)
 			  {
-			    as_bad (_("Invalid Compare/Subtract Condition."));
+			    as_bad (_("Invalid Compare and Branch Condition."));
 			    cmpltr = 0;
 			  }
 			else
@@ -2517,7 +2563,30 @@ pa_ip (str)
 			    opcode |= 1 << 27;
 			  }
 		      }
-	    
+
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+
+		  /* Handle a 64 bit compare and branch condition.  */
+		  case 'N':
+		    cmpltr = pa_parse_cmpb_64_cmpltr (&s);
+		    if (cmpltr >= 0)
+		      {
+			/* Negated condition requires an opcode change. */
+			opcode |= (cmpltr & 8) << 26;
+		      }
+		    else
+		      /* Not a 64 bit cond.  Give 32 bit a chance. */
+		      break;
+
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr & 7, 13);
+
+		  /* Handle a 64 bit cmpib condition.  */
+		  case 'Q':
+		    cmpltr = pa_parse_cmpib_64_cmpltr (&s);
+		    if (cmpltr < 0)
+		      /* Not a 64 bit cond.  Give 32 bit a chance. */
+		      break;
+
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
 		    /* Handle a logical instruction condition.  */
@@ -2540,14 +2609,14 @@ pa_ip (str)
 			else if (*s == '*')
 			  break;
 			name = s;
-			    
+
 			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
 			*s = 0x00;
-	    
-	    
+
+
 			if (strcmp (name, "=") == 0)
 			  cmpltr = 1;
 			else if (strcmp (name, "<") == 0)
@@ -2609,7 +2678,7 @@ pa_ip (str)
 			else if (*s == '*')
 			  break;
 			name = s;
-			    
+
 			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
@@ -2652,7 +2721,7 @@ pa_ip (str)
 		    if (*s == ',')
 		      {
 			s++;
-	    
+
 			/* 64 bit conditions.  */
 			if (*args == 'U')
 			  {
@@ -2663,7 +2732,7 @@ pa_ip (str)
 			  }
 			else if (*s == '*')
 			  break;
-			    
+
 			if (strncasecmp (s, "sbz", 3) == 0)
 			  {
 			    cmpltr = 2;
@@ -3149,6 +3218,13 @@ pa_ip (str)
 	      s += 9;
 	      continue;
 
+	    /* Handle immediate value of 0 for ordered load/store instructions.  */
+	    case '@':
+	      if (*s != '0')
+		break;
+	      s++;
+	      continue;
+
 	    /* Handle a 2 bit shift count at 25.  */
 	    case '.':
 	      num = pa_get_absolute_expression (&the_insn, &s);
@@ -3250,7 +3326,7 @@ pa_ip (str)
 	      s = expr_end;
 	      CHECK_FIELD (num, 511, 1, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
-  
+
 	    /* Handle a 13 bit immediate at 18.  */
 	    case 'A':
 	      num = pa_get_absolute_expression (&the_insn, &s);
@@ -3373,7 +3449,7 @@ pa_ip (str)
 		flag = QUAD;
 	      opcode |= flag << 13;
 	      if (the_insn.fpof1 == SGL
-		  || the_insn.fpof1 == DBL 
+		  || the_insn.fpof1 == DBL
 		  || the_insn.fpof1 == QUAD)
 		{
 		  if (the_insn.fpof2 == SGL
@@ -3392,7 +3468,7 @@ pa_ip (str)
 		    abort ();
 		}
 	      else if (the_insn.fpof1 == W
-		       || the_insn.fpof1 == DW 
+		       || the_insn.fpof1 == DW
 		       || the_insn.fpof1 == QW)
 		{
 		  if (the_insn.fpof2 == SGL
@@ -3403,7 +3479,7 @@ pa_ip (str)
 		    abort ();
 		}
 	      else if (the_insn.fpof1 == UW
-		       || the_insn.fpof1 == UDW 
+		       || the_insn.fpof1 == UDW
 		       || the_insn.fpof1 == UQW)
 		{
 		  if (the_insn.fpof2 == SGL
@@ -3603,7 +3679,7 @@ pa_ip (str)
 		case 'j':
 		  {
 		    struct pa_11_fp_reg_struct result;
-		  
+
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
@@ -3626,7 +3702,7 @@ pa_ip (str)
 		case 'k':
 		  {
 		    struct pa_11_fp_reg_struct result;
-		  
+
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
@@ -3649,7 +3725,7 @@ pa_ip (str)
 		case 'l':
 		  {
 		    struct pa_11_fp_reg_struct result;
-		  
+
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
@@ -3672,7 +3748,7 @@ pa_ip (str)
 		case 'm':
 		  {
 		    struct pa_11_fp_reg_struct result;
-		  
+
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
@@ -4189,10 +4265,10 @@ md_apply_fix (fixP, valp)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
-	      
+
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
 #undef arg_reloc_stub_needed
-	
+
       switch (fmt)
 	{
 	/* Handle all opcodes with the 'j' operand type.  */
@@ -5259,6 +5335,169 @@ pa_parse_neg_cmpsub_cmpltr (s, isbranch)
 }
 
 
+/* Parse a 64 bit compare and branch completer returning the number (for
+   encoding in instrutions) of the given completer.
+
+   Nonnegated comparisons are returned as 0-7, negated comparisons are
+   returned as 8-15.  */
+
+static int
+pa_parse_cmpb_64_cmpltr (s)
+     char **s;
+{
+  int cmpltr;
+  char *name = *s + 1;
+  char c;
+  char *save_s = *s;
+
+  cmpltr = -1;
+  if (**s == ',')
+    {
+      *s += 1;
+      while (**s != ',' && **s != ' ' && **s != '\t')
+	*s += 1;
+      c = **s;
+      **s = 0x00;
+
+      if (strcmp (name, "*") == 0)
+	{
+	  cmpltr = 0;
+	}
+      else if (strcmp (name, "*=") == 0)
+	{
+	  cmpltr = 1;
+	}
+      else if (strcmp (name, "*<") == 0)
+	{
+	  cmpltr = 2;
+	}
+      else if (strcmp (name, "*<=") == 0)
+	{
+	  cmpltr = 3;
+	}
+      else if (strcmp (name, "*<<") == 0)
+	{
+	  cmpltr = 4;
+	}
+      else if (strcmp (name, "*<<=") == 0)
+	{
+	  cmpltr = 5;
+	}
+      else if (strcasecmp (name, "*sv") == 0)
+	{
+	  cmpltr = 6;
+	}
+      else if (strcasecmp (name, "*od") == 0)
+	{
+	  cmpltr = 7;
+	}
+      else if (strcasecmp (name, "*tr") == 0)
+	{
+	  cmpltr = 8;
+	}
+      else if (strcmp (name, "*<>") == 0)
+	{
+	  cmpltr = 9;
+	}
+      else if (strcmp (name, "*>=") == 0)
+	{
+	  cmpltr = 10;
+	}
+      else if (strcmp (name, "*>") == 0)
+	{
+	  cmpltr = 11;
+	}
+      else if (strcmp (name, "*>>=") == 0)
+	{
+	  cmpltr = 12;
+	}
+      else if (strcmp (name, "*>>") == 0)
+	{
+	  cmpltr = 13;
+	}
+      else if (strcasecmp (name, "*nsv") == 0)
+	{
+	  cmpltr = 14;
+	}
+      else if (strcasecmp (name, "*ev") == 0)
+	{
+	  cmpltr = 15;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
+      **s = c;
+    }
+
+
+  return cmpltr;
+}
+
+/* Parse a 64 bit compare immediate and branch completer returning the number
+   (for encoding in instrutions) of the given completer.  */
+
+static int
+pa_parse_cmpib_64_cmpltr (s)
+     char **s;
+{
+  int cmpltr;
+  char *name = *s + 1;
+  char c;
+  char *save_s = *s;
+
+  cmpltr = -1;
+  if (**s == ',')
+    {
+      *s += 1;
+      while (**s != ',' && **s != ' ' && **s != '\t')
+	*s += 1;
+      c = **s;
+      **s = 0x00;
+
+      if (strcmp (name, "*<<") == 0)
+	{
+	  cmpltr = 0;
+	}
+      else if (strcmp (name, "*=") == 0)
+	{
+	  cmpltr = 1;
+	}
+      else if (strcmp (name, "*<") == 0)
+	{
+	  cmpltr = 2;
+	}
+      else if (strcmp (name, "*<=") == 0)
+	{
+	  cmpltr = 3;
+	}
+      else if (strcmp (name, "*>>=") == 0)
+	{
+	  cmpltr = 4;
+	}
+      else if (strcmp (name, "*<>") == 0)
+	{
+	  cmpltr = 5;
+	}
+      else if (strcasecmp (name, "*>=") == 0)
+	{
+	  cmpltr = 6;
+	}
+      else if (strcasecmp (name, "*>") == 0)
+	{
+	  cmpltr = 7;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
+      **s = c;
+    }
+
+
+  return cmpltr;
+}
+
 /* Parse a non-negated addition completer returning the number
    (for encoding in instrutions) of the given completer.
 
@@ -5404,6 +5643,108 @@ pa_parse_neg_add_cmpltr (s, isbranch)
 
   /* Reset pointers if this was really a ,n for a branch instruction.  */
   if (cmpltr == 0 && *name == 'n' && isbranch)
+    *s = save_s;
+
+  return cmpltr;
+}
+
+/* Parse a 64 bit wide mode add and branch completer returning the number (for
+   encoding in instrutions) of the given completer.  */
+
+static int
+pa_parse_addb_64_cmpltr (s)
+     char **s;
+{
+  int cmpltr;
+  char *name = *s + 1;
+  char c;
+  char *save_s = *s;
+  int nullify = 0;
+
+  cmpltr = 0;
+  if (**s == ',')
+    {
+      *s += 1;
+      while (**s != ',' && **s != ' ' && **s != '\t')
+	*s += 1;
+      c = **s;
+      **s = 0x00;
+      if (strcmp (name, "=") == 0)
+	{
+	  cmpltr = 1;
+	}
+      else if (strcmp (name, "<") == 0)
+	{
+	  cmpltr = 2;
+	}
+      else if (strcmp (name, "<=") == 0)
+	{
+	  cmpltr = 3;
+	}
+      else if (strcasecmp (name, "nuv") == 0)
+	{
+	  cmpltr = 4;
+	}
+      else if (strcasecmp (name, "*=") == 0)
+	{
+	  cmpltr = 5;
+	}
+      else if (strcasecmp (name, "*<") == 0)
+	{
+	  cmpltr = 6;
+	}
+      else if (strcasecmp (name, "*<=") == 0)
+	{
+	  cmpltr = 7;
+	}
+      else if (strcmp (name, "tr") == 0)
+	{
+	  cmpltr = 8;
+	}
+      else if (strcmp (name, "<>") == 0)
+	{
+	  cmpltr = 9;
+	}
+      else if (strcmp (name, ">=") == 0)
+	{
+	  cmpltr = 10;
+	}
+      else if (strcmp (name, ">") == 0)
+	{
+	  cmpltr = 11;
+	}
+      else if (strcasecmp (name, "uv") == 0)
+	{
+	  cmpltr = 12;
+	}
+      else if (strcasecmp (name, "*<>") == 0)
+	{
+	  cmpltr = 13;
+	}
+      else if (strcasecmp (name, "*>=") == 0)
+	{
+	  cmpltr = 14;
+	}
+      else if (strcasecmp (name, "*>") == 0)
+	{
+	  cmpltr = 15;
+	}
+      /* If we have something like addb,n then there is no condition
+         completer.  */
+      else if (strcasecmp (name, "n") == 0)
+	{
+	  cmpltr = 0;
+	  nullify = 1;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
+      **s = c;
+    }
+
+  /* Reset pointers if this was really a ,n for a branch instruction.  */
+  if (nullify)
     *s = save_s;
 
   return cmpltr;
@@ -5621,7 +5962,7 @@ pa_build_unwind_subspace (call_info)
     reloc = R_PARISC_DIR32;
   else
     reloc = R_PARISC_SEGREL32;
-    
+
   /* Get into the right seg/subseg.  This may involve creating
      the seg the first time through.  Make sure to have the
      old seg/subseg so that we can reset things when we are done.  */
@@ -7836,7 +8177,7 @@ pa_text (unused)
    selectors).
 
    Reject reductions involving symbols with external scope; such
-   reductions make life a living hell for object file editors. 
+   reductions make life a living hell for object file editors.
 
    FIXME.  Also reject R_HPPA relocations which are 32bits wide in
    the code space.  The SOM BFD backend doesn't know how to pull the
@@ -7856,7 +8197,7 @@ hppa_fix_adjustable (fixp)
     return 0;
 
   /* Reject reductions of symbols in sym1-sym2 expressions when
-     the fixup will occur in a CODE subspace. 
+     the fixup will occur in a CODE subspace.
 
      XXX FIXME: Long term we probably want to reject all of these;
      for example reducing in the debug section would lose if we ever
