@@ -1,3 +1,14 @@
+start-sanitize-tic80
+Tue Dec 16 16:55:45 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (tic80_relax): New static variable.
+	(md_longopts): Add new OPTION_RELAX and OPTION_NO_RELAX options.
+	(md_parse_option): Handle new relax options.
+	(md_show_usage): Document new relax options.
+	(find_opcode): Don't use short forms of PC relative branches if
+	tic80_relax is set.
+
+end-sanitize-tic80
 start-sanitize-d30v
 Tue Dec 16 15:26:03 1997  Michael Meissner  <meissner@cygnus.com>
 

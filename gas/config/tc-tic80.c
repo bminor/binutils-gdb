@@ -75,6 +75,12 @@ static void build_insn PARAMS ((struct tic80_opcode *, expressionS *));
 static int get_operands PARAMS ((expressionS exp[]));
 static int const_overflow PARAMS ((unsigned long num, int bits, int flags));
 
+/* Replace short PC relative instructions with long form when necessary.  Currently
+   this is off by default or when given the -no-relax option.  Turning it on by using
+   the -relax option forces all PC relative instructions to use the long form, which
+   is why it is currently not the default. */
+static int tic80_relax = 0;
+
 
 int
 md_estimate_size_before_relax (fragP, segment_type)
@@ -393,16 +399,19 @@ find_opcode (opcode, myops)
 		}
 	      break;
 	    case O_symbol:
-	      if ((bits < 32) && (flags & TIC80_OPERAND_PCREL))
+	      if ((bits < 32) && (flags & TIC80_OPERAND_PCREL) && !tic80_relax)
 		{
-		  /* For now we only allow PC relative relocations in the
-		     short immediate fields, like the TI assembler.
+		  /* The default is to prefer the short form of PC relative relocations.
+		     This is the only form that the TI assembler supports.
+		     If the -relax option is given, we never use the short forms.
 		     FIXME: Should be able to choose "best-fit". */
 		}
 	      else if ((bits == 32) /* && (flags & TIC80_OPERAND_BASEREL) */)
 		{
-		  /* For now we only allow base relative relocations in
-		     the long immediate fields, like the TI assembler.
+		  /* The default is to prefer the long form of base relative relocations.
+		     This is the only form that the TI assembler supports.
+		     If the -no-relax option is given, we always use the long form of
+		     PC relative relocations.
 		     FIXME: Should be able to choose "best-fit". */
 		}
 	      else
@@ -896,6 +905,13 @@ CONST char *md_shortopts = "";
    that are passed to getopt. */
 
 struct option md_longopts[] = {
+
+#define OPTION_RELAX	(OPTION_MD_BASE)
+  {"relax", no_argument, NULL, OPTION_RELAX},
+
+#define OPTION_NO_RELAX	(OPTION_RELAX + 1)
+  {"no-relax", no_argument, NULL, OPTION_NO_RELAX},
+
   {NULL, no_argument, NULL, 0}
 };
 
@@ -910,7 +926,18 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  return (0);
+  switch (c)
+    {
+    case OPTION_RELAX:
+      tic80_relax = 1;
+      break;
+    case OPTION_NO_RELAX:
+      tic80_relax = 0;
+      break;
+    default:
+      return (0);
+    }
+  return (1);
 }
 
 /* The md_show_usage function will be called whenever a usage message is
@@ -921,6 +948,10 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
+  fprintf (stream, "\
+TIc80 options:\n\
+-relax			alter PC relative branch instructions to use long form when needed\n\
+-no-relax		always use short PC relative branch instructions, error on overflow\n");
 }
 
 
