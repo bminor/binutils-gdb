@@ -1,3 +1,9 @@
+2004-02-04  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1431.c: Add underbar prefixed version of global
+	function symbols and update copyright years.
+	* gdb.arch/gdb1291.c: Ditto.
+
 2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/virtfunc.exp: Accept both "ctor()" and "ctor(void)".
