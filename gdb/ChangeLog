@@ -58,6 +58,13 @@ Tue Nov  2 13:42:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* config/alpha/tm-alpha.h (REGISTER_CONVERTIBLE,
 	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW):  Use them.
 
+Tue Nov  2 12:45:23 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* gdbserver/configure.in: Recognize *-*-lynxos* instead of
+	*-*-lynx*, recognize sparc-*-lynxos*.
+	* gdbserver/Makefile.in (install, install_only): Add.
+	* gdbserver/gdbserver.1: New file, man page for gdbserver.
+
 Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c, symtab.h, source.c: Change find_line_pc_range to take
