@@ -1,3 +1,45 @@
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c: Update copyright year.
+	(struct amd64_register_info): Rename from x86_64_register_info.
+	(amd64_register_info): Rename from x86_64_register_info.
+	(AMD64_NUM_REGS): Rename from X86_64_NUM_REGS.
+	(amd64_register_name): Rename from x86_64_register_name.
+	(amd64_register_type): Rename from x86_64_register_type.
+	(amd64_dwarf_regmap): Rename from x86_64_dwarf_regmap.
+	(amd64_dwarf_regmap_len): Rename from x86_64_dwarf_regmap_len.
+	(amd64_dwarf_reg_to_regnum): Rename from
+	x86_64_dwarf_reg_to_regnum.
+	(amd64_convert_register_p): Rename from x86_64_convert_register_p.
+	(amd64_push_dummy_call): Rename from x86_64_push_dummy_call.
+	(AMD64_NUM_SAVED_REGS): Rename from X86_64_NUM_SAVED_REGS.
+	(struct amd64_frame_cache): Renamed from x86_64_frame_cache.
+	(amd64_alloc_frame_cache): Renamed from x86_64_alloc_frame_cache.
+	(amd64_analyze_prologue): Rename from x86_64_analyze_prologue.
+	(amd64_skip_prologue): Rename from x86_64_skip_prologue.
+	(amd64_frame_cache): Rename from x86_64_frame_cache.
+	(amd64_frame_this_id): Rename from x86_64_frame_this_id.
+	(amd64_frame_prev_register): Rename from
+	x86_64_frame_prev_register.
+	(amd64_frame_unwind): Rename from x86_64_frame_unwind.
+	(amd64_frame_sniffer): Rename from x86_64_frame_sniffer.
+	(amd64_sigtramp_frame_cache): Rename from
+	x86_64_sigtramp_frame_cache.
+	(amd64_sigtramp_frame_prev_register): Rename from
+	x86_64_sigtramp_frame_prev_register.
+	(amd64_sigtramp_frame_unwind): Rename from
+	x86_64_sigtramp_frame_unwind.
+	(amd64_sigtramp_frame_sniffer): Rename from
+	x86_64_sigtramp_frame_sniffer.
+	(amd64_frame_base_address): Rename from x86_64_frame_base_address.
+	(amd64_frame_base): Rename from x86_64_frame_base.
+	(amd64_unwind_dummy_id): Rename from x86_64_unwind_dummy_id.
+	(amd64_frame_align): Rename from x86_64_frame_align.
+	(amd64_supply_fpregset): Rename from x86_64_supply_fpregset.
+	(amd64_regset_from_core_section): Rename from
+	x86_64_regset_from_core_section.
+	(x86_64_init_abi): Update comments.
+
 2004-01-04  Nick Roberts  <nick@nick.uklinux.net>
 
 	* MAINTAINERS (write after approval): Add myself.
