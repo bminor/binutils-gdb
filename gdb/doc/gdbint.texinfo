@@ -5592,7 +5592,7 @@ permits, which, since the maintainers have many demands to meet, may not
 be for quite some time.
 
 Please send patches directly to
-@email{gdb-patches@@sourceware.cygnus.com, the @value{GDBN} maintainers}.
+@email{gdb-patches@@sources.redhat.com, the @value{GDBN} maintainers}.
 
 @section Obsolete Conditionals
 @cindex obsolete code

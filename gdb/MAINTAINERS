@@ -281,7 +281,7 @@ language support	(Blanket Write Privs Maintainers)
 			Anthony Green 		green@redhat.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
-  Pascal support	Pierre Muller		muller@sourceware.redhat.com
+  Pascal support	Pierre Muller		muller@sources.redhat.com
 Scheme support		Jim Blandy		jimb@redhat.com
 
 shared libs (devolved)	Jim Blandy		jimb@redhat.com
@@ -376,7 +376,7 @@ Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Jason Merrill					jason@redhat.com
 Jason Molenda					jmolenda@apple.com
-Pierre Muller					muller@sourceware.redhat.com
+Pierre Muller					muller@sources.redhat.com
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
 Mark Salter					msalter@redhat.com
@@ -397,9 +397,9 @@ Keith Walker					keith.walker@arm.com
 
 			Past Maintainers
 
-Jimmy Guo (gdb.hp, tui)				guo@cup.hp.com
-Jeff Law (hppa)					law@cygnus.com
-Daniel Berlin (C++ support)			dan@cgsoftware.com
+Jimmy Guo (gdb.hp, tui)				guo at cup dot hp dot com
+Jeff Law (hppa)					law at cygnus dot com
+Daniel Berlin (C++ support)			dan at cgsoftware dot com
 Nick Duffek (powerpc, SCO, Sol/x86)		nick at duffek dot com
 David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org

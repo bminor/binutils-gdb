@@ -1,5 +1,11 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* README: Remove references to cygnus.com.
+	* MAINTAINERS: Change Past Maintainer addresses to ``foo at bar
+	dot com'' form.  Remove references to cygnus.com and sourceware.
+
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2002-02-19 Paul Eggert <eggert@twinsun.com>:
 	* Makefile.in (VER): Change "head -1" to "sed q", since POSIX
 	1003.1-2001 no longer allows "head -1".

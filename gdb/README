@@ -504,7 +504,7 @@ Graphical interface to GDB -- X Windows, MS Windows
    Several graphical interfaces to GDB are available.  You should
 check:
 
-	http://sourceware.cygnus.com/gdb/#gui
+	http://www.gnu.org/software/gdb/gui/
 
 for an up-to-date list.
 
@@ -538,9 +538,9 @@ regression testing a GDB with local modifications.
 
    Running the testsuite requires the prior installation of DejaGNU,
 which is generally available via ftp.  The directory
-ftp://sourceware.cygnus.com/pub/dejagnu/ will contain a recent
-snapshot.  Once DejaGNU is installed, you can run the tests in one of
-the following ways:
+ftp://sources.redhat.com/pub/dejagnu/ will contain a recent snapshot.
+Once DejaGNU is installed, you can run the tests in one of the
+following ways:
 
   (1)	cd gdb-5.1.1
 	make check-gdb
