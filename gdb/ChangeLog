@@ -1,3 +1,7 @@
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_extract_return_value): Delete debugging fprintf.
+
 2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* varobj.c (get_type, get_target_type): Use check_typedef.

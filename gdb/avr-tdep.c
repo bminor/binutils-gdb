@@ -863,8 +863,6 @@ avr_extract_return_value (struct type *type, struct regcache *regcache,
         {
           regcache_cooked_read (regcache, lsb_reg + i,
                                 (bfd_byte *) valbuf + i);
-          fprintf_unfiltered (gdb_stderr, "reg = %d (0x%02x)\n",
-                              lsb_reg+i, *((unsigned char *)valbuf+i));
         }
     }
 }
