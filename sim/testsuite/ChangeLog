@@ -2,7 +2,7 @@ Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/default.exp (CC,SIM): Delete.
 start-sanitize-sky
-	* sky-defs.tcl (LDSCRIPT,SIM): Delete.
+	* sim/sky/sky-defs.tcl (LDSCRIPT,SIM): Delete.
 	(run_trc_test): Use sim_compile, sim_run.  Only delete temp files
 	if testcase passed.
 	(run_brn_test): Ditto.
