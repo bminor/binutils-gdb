@@ -1,3 +1,7 @@
+2005-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/elf/section5.s: Don't start directives in first column.
+
 2005-03-21  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/iwmmxt.s: Update instructions that use the "never" value
@@ -7,7 +11,7 @@
 
 2005-03-17  Jan Beulich  <jbeulich@novell.com>
 
-	* gas/i386/intel.d: Add stderr directive. 
+	* gas/i386/intel.d: Add stderr directive.
 	* gas/i386/intel.e: New.
 	* gas/i386/intel16.d: Add stderr directive. Adjust for changed
 	source.

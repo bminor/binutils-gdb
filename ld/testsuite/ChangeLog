@@ -1,3 +1,11 @@
+2005-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/tbss.s: Don't start directives in first column.
+	* ld-scripts/weak1.s: Likewise.
+	* ld-scripts/weak2.s: Likewise.
+	* ld-undefined/weak-undef.s: Likewise.
+	* ld-undefined/undefined.exp: Enable tests for hppa-elf.
+
 2005-03-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.r: Update.
