@@ -26,6 +26,8 @@
 #define tc_crawl_symbol_chain(a)	{;}	/* don't need it. */
 #define tc_aout_pre_write_hook(a)	{;}
 
+#define md_operand(x)
+
 /*
  * Local Variables:
  * comment-column: 0

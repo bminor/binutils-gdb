@@ -1475,11 +1475,6 @@ md_apply_fix (fixP, val)
     }
 }
 
-void
-DEFUN (md_operand, (expressionP), expressionS * expressionP)
-{
-}
-
 int md_long_jump_size;
 
 /*

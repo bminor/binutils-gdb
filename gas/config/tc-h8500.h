@@ -39,4 +39,6 @@
 #define TC_START_LABEL(ch, ptr)  (ch == ':' && start_label(ptr))
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 
+#define md_operand(x)
+
 /* end of tc-h8500.h */

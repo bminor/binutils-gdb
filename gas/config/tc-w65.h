@@ -43,5 +43,7 @@
 #define TC_CONS_RELOC tc_cons_reloc
 #define DONT_OVERFLOW
 int tc_cons_reloc;
-/* end of tc-w65.h */
 
+#define md_operand(x)
+
+/* end of tc-w65.h */

@@ -1986,17 +1986,6 @@ md_undefined_symbol (name)
   return 0;
 }				/* md_undefined_symbol() */
 
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do. */
-
-/* ARGSUSED */
-void 
-md_operand (expressionP)
-     expressionS *expressionP;
-{
-}				/* md_operand() */
-
 /* Round up a section size to the appropriate boundary. */
 valueT
 md_section_align (segment, size)
