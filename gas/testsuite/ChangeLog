@@ -1,5 +1,8 @@
 Tue Dec 10 13:01:05 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/mn10300/basic.exp: Update after endianness changes to
+	the assembler.
+
 	* gas/mn10200/{mov1.s,mov2.s,mov3.s,mov4.s,movx.s}: New tests.
 	* gas/mn10200/{movb.s, movbu.s}: Likewise.
 	* gas/mn10200/basic.exp: Run them.
