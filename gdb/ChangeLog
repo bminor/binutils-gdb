@@ -1,3 +1,9 @@
+Fri Feb 13 16:40:30 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/i386/i386mk.mt (OBJFORMATS): Delete, no longer used.
+	* config/i386/xm-i386mk.h: Fix an include.
+	* config/pyr/tm-pyr.h (PC_INNER_THAN): Remove, never used.
+
 Thu Feb 12 16:12:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* remote-mips.c (mips_enter_debug): Sleep before sending CR to
