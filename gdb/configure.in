@@ -130,6 +130,7 @@ AC_CHECK_HEADERS(ctype.h nlist.h link.h thread_db.h proc_service.h \
 AC_HEADER_STAT
 
 AC_C_CONST
+AC_C_INLINE
 
 AC_CHECK_FUNCS(bcopy btowc bzero canonicalize_file_name isascii poll \
 	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask )
