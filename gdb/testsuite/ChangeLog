@@ -1,3 +1,26 @@
+2002-01-07  Fred Fish  <fnf@redhat.com>
+
+	* gdb.c++/overload.exp: Remove unconditional xfails for:
+	print foo_instance1.overloadargs(1)
+	print foo_instance1.overloadargs(1, 2)
+	print foo_instance1.overloadargs(1, 2, 3)
+	print foo_instance1.overloadargs(1, 2, 3, 4)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+	print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+	print foo_instance1.overload1arg()
+	print foo_instance1.overload1arg((char)arg2)
+	print foo_instance1.overload1arg((signed char)arg3)
+	print foo_instance1.overload1arg((unsigned char)arg4)
+	print foo_instance1.overload1arg((int)arg7)
+	print foo_instance1.overload1arg((unsigned int)arg8)
+	print foo_instance1.overload1arg((float)arg11)
+	print foo_instance1.overload1arg((double)arg12)
+  
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/huge.exp: New test.  Print a very large target data object.

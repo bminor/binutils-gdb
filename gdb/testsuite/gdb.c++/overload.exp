@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -110,12 +110,6 @@ gdb_expect {
   }
 
 
-# The overload resolver added by HP (valops.c:find_overload_match) doesn't
-# work right for G++ output, since the list of parameters seems not to
-# be filled in correctly.  Until this gets fixed, don't expect to pass
-# these tests.
-
-setup_xfail "*-*-*" CLLbs16901
 send_gdb "print foo_instance1.overloadargs(1)\n"
 gdb_expect {
     -re ".\[0-9\]* = 1\r\n$gdb_prompt $" {
@@ -125,8 +119,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 1 arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2)\n"
 gdb_expect {
@@ -138,8 +130,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overloadargs(1, 2, 3)\n"
 gdb_expect {
     -re ".\[0-9\]* = 3\r\n$gdb_prompt $" {
@@ -149,8 +139,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 3 args" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4)\n"
 gdb_expect {
@@ -162,8 +150,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5)\n"
 gdb_expect {
     -re ".\[0-9\]* = 5\r\n$gdb_prompt $" {
@@ -173,8 +159,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 5 args" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6)\n"
 gdb_expect {
@@ -186,8 +170,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7)\n"
 gdb_expect {
     -re ".\[0-9\]* = 7\r\n$gdb_prompt $" {
@@ -197,8 +179,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 7 args" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8)\n"
 gdb_expect {
@@ -210,8 +190,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9)\n"
 gdb_expect {
     -re ".\[0-9\]* = 9\r\n$gdb_prompt $" {
@@ -221,8 +199,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 9 args" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)\n"
 gdb_expect {
@@ -234,8 +210,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)\n"
 gdb_expect {
     -re ".\[0-9\]* = 11\r\n$gdb_prompt $" {
@@ -245,8 +219,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func 11 args" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg()\n"
 gdb_expect {
@@ -258,8 +230,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((char)arg2)\n"
 gdb_expect {
     -re ".\[0-9\]* = 2\r\n$gdb_prompt $" {
@@ -269,8 +239,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func char arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((signed char)arg3)\n"
 gdb_expect {
@@ -282,8 +250,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((unsigned char)arg4)\n"
 gdb_expect {
     -re ".\[0-9\]* = 4\r\n$gdb_prompt $" {
@@ -293,6 +259,11 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func unsigned char arg" }
   }
 
+
+# The overload resolver added by HP (valops.c:find_overload_match) doesn't
+# work right for G++ output, since the list of parameters seems not to
+# be filled in correctly.  Until this gets fixed, don't expect to pass
+# some of these tests.
 
 setup_xfail "*-*-*" CLLbs16901
 
@@ -318,8 +289,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((int)arg7)\n"
 gdb_expect {
     -re ".\[0-9\]* = 7\r\n$gdb_prompt $" {
@@ -329,8 +298,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func int arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned int)arg8)\n"
 gdb_expect {
@@ -366,8 +333,6 @@ gdb_expect {
   }
 
 
-setup_xfail "*-*-*" CLLbs16901
-
 send_gdb "print foo_instance1.overload1arg((float)arg11)\n"
 gdb_expect {
     -re ".\[0-9\]* = 11\r\n$gdb_prompt $" {
@@ -377,8 +342,6 @@ gdb_expect {
     timeout           { fail "(timeout) print call overloaded func float arg" }
   }
 
-
-setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((double)arg12)\n"
 gdb_expect {
