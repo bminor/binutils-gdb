@@ -38,6 +38,7 @@ apollo.h
 arm.h
 aux-coff.h
 ecoff.h
+go32exe.h
 h8300.h
 h8500.h
 i386.h
