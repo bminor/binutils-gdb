@@ -1,3 +1,9 @@
+2002-02-12  Graydon Hoare  <graydon@redhat.com>
+
+	* cgen-asm.in (parse_insn_normal): Change call from
+	@arch@_cgen_parse_operand to cd->parse_operand, to 
+	facilitate CGEN_ASM_INIT_HOOK doing useful work.
+	
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* sparc-dis.c (print_insn_sparc): Make sure 0xFFFFFFFF is not
