@@ -6,6 +6,12 @@ Tue Dec 31 15:15:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 end-sanitize-v850
 Tue Dec 31 14:44:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd (mips*el-*-linux*): New target.
+	(mips*-*-linux*): New target.
+
+	* elf32-mips.c (_bfd_mips_elf_merge_private_bfd_data): Clean up.
+	Return a useful value.
+
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
 
 	* configure.in: Check ac_cv_func_mmap_fixed_mapped, not
