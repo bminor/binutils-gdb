@@ -1,3 +1,10 @@
+Mon Oct 20 17:23:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-bits.h (LSBIT, MSBIT, BIT): Force result to type
+ 	unsigned_word.
+	(LSBIT8, LSBIT16, LSBIT32, LSBIT64, MSBIT8, MSBIT16, MSBIT32,
+ 	MSBIT64): Force result to unsignedN.
+
 Thu Oct 16 11:38:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-alu.h (ALU16_BEGIN, ALU32_BEGIN, ALU64_BEGIN): Drop opening

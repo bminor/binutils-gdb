@@ -187,31 +187,31 @@
 
 /* LS/MS Bit operations */
 
-#define LSBIT8(POS)  ((natural8) 1 << (POS))
-#define LSBIT16(POS) ((natural16)1 << (POS))
-#define LSBIT32(POS) ((natural32)1 << (POS))
-#define LSBIT64(POS) ((natural64)1 << (POS))
+#define LSBIT8(POS)  ((unsigned8) 1 << (POS))
+#define LSBIT16(POS) ((unsigned16)1 << (POS))
+#define LSBIT32(POS) ((unsigned32)1 << (POS))
+#define LSBIT64(POS) ((unsigned64)1 << (POS))
 
 #if (WITH_TARGET_WORD_BITSIZE == 64)
 #define LSBIT(POS) LSBIT64 (POS)
 #else
-#define LSBIT(POS) ((POS) >= 32 \
-		    ? 0 \
-		    : (1 << ((POS) >= 32 ? 0 : (POS))))
+#define LSBIT(POS) ((unsigned32)((POS) >= 32 \
+		                 ? 0 \
+			         : (1 << ((POS) >= 32 ? 0 : (POS)))))
 #endif
 
 
-#define MSBIT8(POS)  ((natural8) 1 << ( 8 - 1 - (POS)))
-#define MSBIT16(POS) ((natural16)1 << (16 - 1 - (POS)))
-#define MSBIT32(POS) ((natural32)1 << (32 - 1 - (POS)))
-#define MSBIT64(POS) ((natural64)1 << (64 - 1 - (POS)))
+#define MSBIT8(POS)  ((unsigned8) 1 << ( 8 - 1 - (POS)))
+#define MSBIT16(POS) ((unsigned16)1 << (16 - 1 - (POS)))
+#define MSBIT32(POS) ((unsigned32)1 << (32 - 1 - (POS)))
+#define MSBIT64(POS) ((unsigned64)1 << (64 - 1 - (POS)))
 
 #if (WITH_TARGET_WORD_BITSIZE == 64)
 #define MSBIT(POS) MSBIT64 (POS)
 #else
-#define MSBIT(POS) ((POS) < 32 \
-		    ? 0 \
-		    : (1 << ((POS) < 32 ? 0 : (64 - 1) - (POS))))
+#define MSBIT(POS) ((unsigned32)((POS) < 32 \
+		                 ? 0 \
+		                 : (1 << ((POS) < 32 ? 0 : (64 - 1) - (POS)))))
 #endif
 
 
@@ -406,7 +406,7 @@ INLINE_SIM_BITS(unsigned_word) MSEXTRACTED (unsigned_word val, int start, int st
 #define SHUFFLED(WORD, OLD, NEW) _SHUFFLEDn (_word, WORD, OLD, NEW)
 
 
-/* move a group of bits around */
+/* Insert a group of bits into a bit position */
 
 INLINE_SIM_BITS(unsigned8)  LSINSERTED8  (unsigned8  val, int start, int stop);
 INLINE_SIM_BITS(unsigned16) LSINSERTED16 (unsigned16 val, int start, int stop);
@@ -436,9 +436,19 @@ INLINE_SIM_BITS(unsigned_word) MSINSERTED (unsigned_word val, int start, int sto
 
 
 
+/* MOVE bits from one loc to another (combination of extract/insert) */
+
+#define MOVED8(VAL,OH,OL,NH,NL)  INSERTED8 (EXTRACTED8 ((VAL), OH, OL), NH, NL)
+#define MOVED16(VAL,OH,OL,NH,NL) INSERTED16(EXTRACTED16((VAL), OH, OL), NH, NL)
+#define MOVED32(VAL,OH,OL,NH,NL) INSERTED32(EXTRACTED32((VAL), OH, OL), NH, NL)
+#define MOVED64(VAL,OH,OL,NH,NL) INSERTED64(EXTRACTED64((VAL), OH, OL), NH, NL)
+#define MOVED(VAL,OH,OL,NH,NL)   INSERTED  (EXTRACTED  ((VAL), OH, OL), NH, NL)
+
+
+
 /* Sign extend the quantity to the targets natural word size */
 
-#define EXTEND8(X) ((signed_word)(signed8)(X))
+#define EXTEND8(X)  ((signed_word)(signed8)(X))
 #define EXTEND16(X) ((signed_word)(signed16)(X))
 #define EXTEND32(X) ((signed_word)(signed32)(X))
 #define EXTEND64(X) ((signed_word)(signed64)(X))
