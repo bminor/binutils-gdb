@@ -1,5 +1,10 @@
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
+	* readelf.c (process_dynamic_segment): Change DF_1_NODEPLIB
+	to DF_1_NODEFLIB.
+
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
 	* readelf.c (get_dynamic_type): Fix DT_CHECKSUM.
 
 2000-07-19  H.J. Lu  <hjl@gnu.org>

@@ -3463,10 +3463,10 @@ process_dynamic_segment (file)
 		      printf (" INTERPOSE");
 		      val ^= DF_1_INTERPOSE;
 		    }
-		  if (val & DF_1_NODEPLIB)
+		  if (val & DF_1_NODEFLIB)
 		    {
-		      printf (" NODEPLIB");
-		      val ^= DF_1_NODEPLIB;
+		      printf (" NODEFLIB");
+		      val ^= DF_1_NODEFLIB;
 		    }
 		  if (val & DF_1_NODUMP)
 		    {
