@@ -162,7 +162,7 @@ Wed Jun 26 16:33:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-06-17  Tom Rix  <trix@redhat.com>
 
-	* emultempl/elf32.em: gld*_get_script:  Check for 
+	* emultempl/elf32.em: gld*_get_script:  Check for
 	GENERATE_COMBRELOC_SCRIPT.
 	* scripttempl/elfd10v.sc : Fix STACK and INSN.
 	* emulparams/d10velf.sh : Fix TEXT_START_ADDR.
@@ -273,7 +273,7 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* NEWS: Add entry for VAX ELF support.
 
 2002-05-29  Matt Thomas  <matt@3am-software.com>
-            Jason Thorpe  <thorpej@wasabisystems.com>
+	    Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32vax.o and evaxnbsd.o.
 	(eelf32vax.c)
@@ -445,15 +445,15 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add earmelfb_nbsd.o.
 	(earmelfb_nbsd.c): New rule.
-	* Makefile.in: Regenerate. 
+	* Makefile.in: Regenerate.
 	* configure.tgt (armeb-*-netbsdelf*): New target.
-	(arm-*-netbsdelf*): Add armelfb_nbsd to targ_extra_emuls. 
+	(arm-*-netbsdelf*): Add armelfb_nbsd to targ_extra_emuls.
 	(arm-*-netbsd*): Likewise.
 	* emulparams/armelfb_nbsd.sh: New file.
 
 2002-05-18  Tom Rix  <trix@redhat.com>
 
-	* emultempl/aix.em (gld*_parse_args): Add -bnortl and -bnortllib 
+	* emultempl/aix.em (gld*_parse_args): Add -bnortl and -bnortllib
 	support.
 
 2002-05-17  Marek Michalkiewicz  <marekm@amelek.gda.pl>
@@ -478,12 +478,12 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-05-10  Tom Rix  <trix@redhat.com>
 
-	* emultempl/aix.em: (gld*_set_output_arch): New function. Use 
+	* emultempl/aix.em: (gld*_set_output_arch): New function. Use
 	architecture and machine information in the output bfd.
 	(gld*_before_parse): Remove old arch and machine code.
 	(choose_target): Rename to gld*_choose_target.
-	(rtld): Change type to int. 
-	* ldfile.c (ldfile_try_open_bfd): Disable compatiblity check for 
+	(rtld): Change type to int.
+	* ldfile.c (ldfile_try_open_bfd): Disable compatiblity check for
 	objects in XCOFF archives.
 	* ldfile.h: Update copyright date.
 
@@ -572,9 +572,9 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-04-30  Tom Rix  <trix@redhat.com>
 
-	* emultempl/aix.em (gld*_parse_arge, gld*_before_allocation): Add 
-	-blibpath, -bnolibpath support. 
- 
+	* emultempl/aix.em (gld*_parse_arge, gld*_before_allocation): Add
+	-blibpath, -bnolibpath support.
+
 2002-04-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add elf32ppcwindiss.o.
@@ -582,7 +582,7 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* Makefile.in: Regenerated.
 	* configure.tgt: Add support for powerpc-*-windiss.
 	* emulparams/elf32ppcwindiss.sh: New file.
-	
+
 2002-04-30  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ldlang.c (print_assignment): Update print_dot for assignments to ".".
@@ -1807,6 +1807,10 @@ Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
 	* ld.h: Add command_line.inhibit_common_definition.
 	* ldmain.c (main): Initialize.
 	* ld.texinfo: Document.
+
+2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (section_already_linked): Remove assignment to kept_section.
 
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 
