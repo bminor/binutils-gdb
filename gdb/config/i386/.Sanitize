@@ -66,6 +66,7 @@ i386os9k.mt
 i386sco.mh
 i386sco4.mh
 i386sco5.mh
+i386sco5.mt
 i386sol2.mh
 i386sol2.mt
 i386v.mh
@@ -90,6 +91,7 @@ nm-i386mach.h
 nm-i386sco.h
 nm-i386sco4.h
 nm-i386sco5.h
+nm-i386sol2.h
 nm-i386v.h
 nm-i386v4.h
 nm-i386v42mp.h
@@ -118,6 +120,8 @@ tm-i386m3.h
 tm-i386mk.h
 tm-i386nw.h
 tm-i386os9k.h
+tm-i386sco5.h
+tm-i386sol2.h
 tm-i386v.h
 tm-i386v4.h
 tm-i386v42mp.h
