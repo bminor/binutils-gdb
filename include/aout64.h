@@ -175,8 +175,11 @@ struct internal_nlist {
 #define N_TEXT 	4
 #define N_DATA 	6
 #define N_BSS 	8
-#define N_FN	0x0e
 #define	N_COMM	0x12	/* Common symbol (visible after shared lib dynlink) */
+#define N_FN	0x1f	/* File name of .o file */
+/* Note: N_EXT can only usefully be OR-ed with N_UNDF, N_ABS, N_TEXT,
+   N_DATA, or N_BSS.  When the low-order bit of other types is set,
+   (e.g. N_WARNING versus N_FN), they are two different types.  */
 #define N_EXT 	1
 #define N_TYPE  0x1e
 #define N_STAB 	0xe0

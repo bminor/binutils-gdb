@@ -169,9 +169,12 @@ struct nlist {
 #define N_TEXT 4
 #define N_DATA 6
 #define N_BSS 8
-#define N_FN 0xe
 #define	N_COMM	0x12		/* common (visible in shared lib commons) */
+#define N_FN 0x1F		/* File name of a .o file */
 
+/* Note: N_EXT can only usefully be OR-ed with N_UNDF, N_ABS, N_TEXT,
+   N_DATA, or N_BSS.  When the low-order bit of other types is set,
+   (e.g. N_WARNING versus N_FN), they are two different types.  */
 #define N_EXT 1
 #define N_TYPE 036
 #define N_STAB 0340
