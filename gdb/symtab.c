@@ -854,6 +854,19 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   /* If there's a static block to search, search it next.  */
 
+  /* NOTE: carlton/2002-11-06: There is a question as to whether or
+     not it would be appropriate to search the current global block
+     here as well.  On the one hand, it's redundant with the
+     lookup_symbol_aux_symtabs search that happens next.  On the other
+     hand, if decode_line_1 is passed an argument like filename:var,
+     then the user presumably wants 'var' to be searched for in
+     filename.  On the third hand, there shouldn't be multiple global
+     variables all of which are named 'var', and it's not like the
+     code has ever restricted its search to only global variables in a
+     single filename.  All in all, only searching the static block
+     seems best: it's cleanest, it's correct, and it might be useful
+     for handling namespace scope issues completely correctly.  */
+
   if (static_block != NULL)
     {
       sym = lookup_symbol_aux_block (name, mangled_name, static_block,

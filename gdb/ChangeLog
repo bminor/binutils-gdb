@@ -1,3 +1,48 @@
+2002-11-06  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c: Delete declaration of operator_chars.
+
+	* symtab.c (lookup_symbol_aux): Add comment.
+
+	* linespec.c: Update copyright notice.
+	(examine_compound_token): Rename from dl1_examine_compound_token.
+	Misc. cleanups.
+	(locate_class_sym): Rename from dl1_locate_class_sym.
+	(decode_compound): Misc. cleanup.
+	(symbol_found): Rename from dl1_symbol_found; misc. cleanup.
+	(find_next_token): Rename from dl1_find_next_token; misc. cleanup.
+	(find_method): Rename from dl1_find_method.  Delete sym_arr
+	argument.  Misc. cleanup.
+	(count_methods): Rename from dl1_find_method.  Reorder arguments
+	to match find_methods.  Misc. cleanup.
+	(find_method_name): New function.
+	(add_matching_methods): New function.
+	(add_constructors): New fnuction.
+	(find_methods): Separate out some of code into find_method_name,
+	add_matching_methods, and add_constructors; misc. cleanup.
+	(is_all_digits): Rename from dl1_is_all_digits.
+	(decode_all_digits): Rename from dl1_all_digits.  Don't set
+	defaults: we already did that in initialize_defaults.
+	(skip_digits): Rename from dl1_skip_digits.
+	(handle_filename): Rename from dl1_handle_filename;
+	misc. cleanup.
+	(minsym_found): Rename from dl1_minsym_found; misc. cleanup.
+	(decode_dollar): Rename from dl1_decode_dollar; misc. cleanup.
+	(build_canonical_line_spec): Misc. cleanup.
+	(find_toplevel_char): Move; change 0 to NULL.
+	(decode_variable): Rename from dl1_variable; misc. cleanup.
+	(select_symbols): Rename from decode_line_2; misc. cleanup; fork
+	out some code into select_symbols_args.
+	(select_symbols_args): New function.
+	(decode_line_1): Misc. cleanup.
+
+2002-11-05  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (locate_first_half): Rename from
+	dl1_locate_first_half; miscellaneous cleanup.
+	(decode_compound): Rename from dl1_compound; miscellaneous
+	cleanup.
+
 2002-11-04  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (initialize_defaults): Rename from
