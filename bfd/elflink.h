@@ -868,8 +868,7 @@ elf_link_add_object_symbols (abfd, info)
 
 	  h = *hpp;
 	  if (h != NULL && h != hlook
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
+	      && h->root.type == bfd_link_hash_defined
 	      && h->root.u.def.section == slook
 	      && h->root.u.def.value == vlook)
 	    {
