@@ -166,7 +166,7 @@ LINTSOURCES=   $(LDCSOURCES) $(BFDSOURCES) $(GENERATED_SOURCES)
 
 STAGESTUFF = *.x *.x[ru] *.sc[ru] $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(OFILES) $(LD_PROG) mkscript
 
-all: Makefile $(LD_PROG)
+all: Makefile $(LD_PROG) ld.info
 
 ldgram.h ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
@@ -255,7 +255,7 @@ ld.dvi: $(srcdir)/ld.texinfo
 
 # info file for online browsing
 ld.info: $(srcdir)/ld.texinfo
-	makeinfo -o ld.info $(srcdir)/ld.texinfo
+	- $(MAKEINFO) -o ld.info $(srcdir)/ld.texinfo
 
 #separate targets for "ms", "me", and "mm" forms of roff doc
 # (we don't use a variable because we don't trust all makes to handle
@@ -403,6 +403,13 @@ objdump:objdump.c
 install: $(LD_PROG)
 	$(INSTALL_PROGRAM) ld.new $(ddestdir)/bin/ld
 	$(INSTALL_PROGRAM) ld.new $(gcclibdir)/ld
+	for i in ld.info* ; do \
+		echo Installing $$i... ; \
+		(cp $$i $(idestdir)/info/$$i.new \
+			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+		|| exit 1 ; \
+	done
+
 # Something like the following might make sense for install, but doesn't work
 # - it is too fragile, depending on a gcc binary int the right place.
 # Perhaps using gcc/version.c might work?
