@@ -11,9 +11,9 @@ SECTIONS
   { 					
    CREATE_OBJECT_SYMBOLS 		
     *(.text) 				
-    _etext  =  .;
+    _etext  =  ALIGN(0x1000);
     }
-  .data  .  :		
+  .data  ALIGN(0x1000) :		
   { 					
     *(.data) 				
       CONSTRUCTORS;

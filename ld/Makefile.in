@@ -52,7 +52,7 @@ SCRIPTS = ldgld68k.sc ldgld.sc \
 CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES) $(CDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
-.SUFFIXES: .y .x .xr .xu .sc .scu .scr $(SUFFIXES)
+.SUFFIXES: .y .x .xr .xu .xn .sc .scu .scr .scn $(SUFFIXES)
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -63,6 +63,8 @@ LD_PROG	= ld.new
 # sed is used to transform this script into two variant forms:
 # A .scr script is for linking without relocation (-r flag).
 # A .scu script is like .scr, but *do* create constructors.
+# A .scu script is for linking to non-demand-paged output (-N or -n).
+# The diference is that segments should (need) not be page aligned.
 
 # A sed pattern to translate .sc to .scu:
 SED_MAKE_RELOC_WITH_CONSTRUCTORS=\
@@ -73,13 +75,19 @@ SED_MAKE_RELOC_WITH_CONSTRUCTORS=\
   -e "/data/s/[.]data .*:/.data :/"
 # A sed pattern to translate .scu to .scr:
 SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
+# A sed pattern to translate .sc to .scn:
+# We assume that any reasonable page size ends with 00
+# (Some things are aligned on 8-byte boundaries; ignore those.)
+SED_DONT_ALIGN= -e '/ALIGN/s/ALIGN( *0x[0-9a-fA-F]*00 *)/./'
 
 .sc.scu:
 	sed $(SED_MAKE_RELOC_WITH_CONSTRUCTORS) $< >$*.scu
+.sc.scn:
+	sed $(SED_DONT_ALIGN) $< >$*.scn
 .scu.scr:
 	sed $(SED_REMOVE_CONSTRUCTORS) < $< >$*.scr
 
-# Each .sc .scr or .scu script is filtered by mkscript
+# Each .sc .scr .scu or .scn script is filtered by mkscript
 # into a string literal that can be included in a .c program.
 .sc.x:
 	if [ "x"$(LIB_PATH) = "x" ]; then ./mkscript < $< >$*.x ; \
@@ -92,11 +100,15 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 	./mkscript < $< >$*.xu
 .scr.xr:
 	./mkscript < $< >$*.xr
+.scn.xn:
+	./mkscript < $< >$*.xn
 .sc.xu:
 	sed $(SED_MAKE_RELOC_WITH_CONSTRUCTORS) < $< | ./mkscript >$*.xu
 .sc.xr:
 	sed $(SED_MAKE_RELOC_WITH_CONSTRUCTORS) $(SED_REMOVE_CONSTRUCTORS) \
 	< $< | ./mkscript >$*.xr
+.sc.xn:
+	sed $(SED_DONT_ALIGN) < $< | ./mkscript >$*.xn
 
 # for self hosting
 BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
@@ -162,12 +174,12 @@ ldm88k.c: $(srcdir)/ldtemplate
 	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$< >$@
 
 # The .c files for these are generated from ldtemplete.
-ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu
-news.o: ./mkscript news.x news.xr news.xu
-ebmon29k.o: ./mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu
-ldgld68k.o: ./mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu
-ldglda29k.o: ./mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu
-ldm88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu
+ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn
+news.o: ./mkscript news.x news.xr news.xu news.xn
+ebmon29k.o: ./mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu ebmon29k.xn
+ldgld68k.o: ./mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu ldgld68k.xn
+ldglda29k.o: ./mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu ldglda29k.xn
+ldm88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu ldm88k.xn
 
 # The .c files for these are (for now) specially written (not ldtemplete).
 ldgld960.o: ./mkscript ldgld960.x

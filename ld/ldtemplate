@@ -126,6 +126,9 @@ static char *gld<target>_script_option_Ur  =
 static char *gld<target>_script_option_r  =  
 #include "<ldtarget>.xr"
 ;
+static char *gld<target>_script_option_n  =  /* Used with -n and -N flags. */
+#include "<ldtarget>.xn"
+;
 
 static char *gld<target>_get_script()
 {			     
@@ -137,7 +140,8 @@ static char *gld<target>_get_script()
   if (config.relocateable_output == true) {
     return gld<target>_script_option_r;
   }
-	
+  if (config.magic_demand_paged == false)
+    return gld<target>_script_option_n;
   return gld<target>_script;
 }
 struct ld_emulation_xfer_struct ld_gld<target>_emulation = 
