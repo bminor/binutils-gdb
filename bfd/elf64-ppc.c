@@ -174,9 +174,17 @@ static bfd_vma opd_entry_value
 #define LIS_R0_0	0x3c000000	/* lis   %r0,0		*/
 #define ORI_R0_R0_0	0x60000000	/* ori	 %r0,%r0,0	*/
 
-/* Instructions to save and restore floating point regs.  */
+/* Instructions used by the save and restore reg functions.  */
+#define STD_R0_0R1	0xf8010000	/* std   %r0,0(%r1)	*/
+#define STD_R0_0R12	0xf80c0000	/* std   %r0,0(%r12)	*/
+#define LD_R0_0R1	0xe8010000	/* ld    %r0,0(%r1)	*/
+#define LD_R0_0R12	0xe80c0000	/* ld    %r0,0(%r12)	*/
 #define STFD_FR0_0R1	0xd8010000	/* stfd  %fr0,0(%r1)	*/
 #define LFD_FR0_0R1	0xc8010000	/* lfd   %fr0,0(%r1)	*/
+#define LI_R12_0	0x39800000	/* li    %r12,0		*/
+#define STVX_VR0_R12_R0	0x7c0c01ce	/* stvx  %v0,%r12,%r0	*/
+#define LVX_VR0_R12_R0	0x7c0c00ce	/* lvx   %v0,%r12,%r0	*/
+#define MTLR_R0		0x7c0803a6	/* mtlr  %r0		*/
 #define BLR		0x4e800020	/* blr			*/
 
 /* Since .opd is an array of descriptors and each entry will end up
@@ -5037,9 +5045,235 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
+/* The maximum size of .sfpr.  */
+#define SFPR_MAX (218*4)
+
+struct sfpr_def_parms
+{
+  const char *name;
+  unsigned int lo, hi;
+  bfd_byte * (*write_ent) (bfd *, bfd_byte *, int);
+  bfd_byte * (*write_tail) (bfd *, bfd_byte *, int);
+};
+
+/* Auto-generate _save*, _rest* functions in .sfpr.  */
+
+static unsigned int
+sfpr_define (struct bfd_link_info *info, const struct sfpr_def_parms *parm)
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  unsigned int i;
+  size_t len = strlen (parm->name);
+  bfd_boolean writing = FALSE;
+  char sym[20];
+
+  memcpy (sym, parm->name, len);
+  sym[len + 2] = 0;
+
+  for (i = parm->lo; i <= parm->hi; i++)
+    {
+      struct elf_link_hash_entry *h;
+
+      sym[len + 0] = i / 10 + '0';
+      sym[len + 1] = i % 10 + '0';
+      h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
+      if (h != NULL
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = htab->sfpr;
+	  h->root.u.def.value = htab->sfpr->size;
+	  h->type = STT_FUNC;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+	  writing = TRUE;
+	  if (htab->sfpr->contents == NULL)
+	    {
+	      htab->sfpr->contents = bfd_alloc (htab->elf.dynobj, SFPR_MAX);
+	      if (htab->sfpr->contents == NULL)
+		return FALSE;
+	    }
+	}
+      if (writing)
+	{
+	  bfd_byte *p = htab->sfpr->contents + htab->sfpr->size;
+	  if (i != parm->hi)
+	    p = (*parm->write_ent) (htab->elf.dynobj, p, i);
+	  else
+	    p = (*parm->write_tail) (htab->elf.dynobj, p, i);
+	  htab->sfpr->size = p - htab->sfpr->contents;
+	}
+    }
+
+  return TRUE;
+}
+
+static bfd_byte *
+savegpr0 (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, STD_R0_0R1 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savegpr0_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = savegpr0 (abfd, p, r);
+  bfd_put_32 (abfd, STD_R0_0R1 + 16, p);
+  p = p + 4;
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restgpr0 (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LD_R0_0R1 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restgpr0_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LD_R0_0R1 + 16, p);
+  p = p + 4;
+  p = restgpr0 (abfd, p, r);
+  bfd_put_32 (abfd, MTLR_R0, p);
+  p = p + 4;
+  if (r == 29)
+    {
+      p = restgpr0 (abfd, p, 30);
+      p = restgpr0 (abfd, p, 31);
+    }
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savegpr1 (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, STD_R0_0R12 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savegpr1_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = savegpr1 (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restgpr1 (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LD_R0_0R12 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restgpr1_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = restgpr1 (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savefpr (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, STFD_FR0_0R1 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savefpr0_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = savefpr (abfd, p, r);
+  bfd_put_32 (abfd, STD_R0_0R1 + 16, p);
+  p = p + 4;
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restfpr (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LFD_FR0_0R1 + (r << 21) + (1 << 16) - (32 - r) * 8, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restfpr0_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LD_R0_0R1 + 16, p);
+  p = p + 4;
+  p = restfpr (abfd, p, r);
+  bfd_put_32 (abfd, MTLR_R0, p);
+  p = p + 4;
+  if (r == 29)
+    {
+      p = restfpr (abfd, p, 30);
+      p = restfpr (abfd, p, 31);
+    }
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savefpr1_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = savefpr (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restfpr1_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = restfpr (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+savevr (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LI_R12_0 + (1 << 16) - (32 - r) * 16, p);
+  p = p + 4;
+  bfd_put_32 (abfd, STVX_VR0_R12_R0 + (r << 21), p);
+  return p + 4;
+}
+
+static bfd_byte *
+savevr_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = savevr (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
+static bfd_byte *
+restvr (bfd *abfd, bfd_byte *p, int r)
+{
+  bfd_put_32 (abfd, LI_R12_0 + (1 << 16) - (32 - r) * 16, p);
+  p = p + 4;
+  bfd_put_32 (abfd, LVX_VR0_R12_R0 + (r << 21), p);
+  return p + 4;
+}
+
+static bfd_byte *
+restvr_tail (bfd *abfd, bfd_byte *p, int r)
+{
+  p = restvr (abfd, p, r);
+  bfd_put_32 (abfd, BLR, p);
+  return p + 4;
+}
+
 /* Called via elf_link_hash_traverse to transfer dynamic linking
    information on function code symbol entries to their corresponding
    function descriptor symbol entries.  */
+
 static bfd_boolean
 func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 {
@@ -5179,111 +5413,48 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-#define MIN_SAVE_FPR 14
-#define MAX_SAVE_FPR 31
-
 /* Called near the start of bfd_elf_size_dynamic_sections.  We use
    this hook to a) provide some gcc support functions, and b) transfer
    dynamic linking information gathered so far on function code symbol
    entries, to their corresponding function descriptor symbol entries.  */
+
 static bfd_boolean
 ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
-  unsigned int lowest_savef = MAX_SAVE_FPR + 2;
-  unsigned int lowest_restf = MAX_SAVE_FPR + 2;
   unsigned int i;
-  struct elf_link_hash_entry *h;
-  bfd_byte *p;
-  char sym[10];
+  const struct sfpr_def_parms funcs[] =
+    {
+      { "_savegpr0_", 14, 31, savegpr0, savegpr0_tail },
+      { "_restgpr0_", 14, 29, restgpr0, restgpr0_tail },
+      { "_restgpr0_", 30, 31, restgpr0, restgpr0_tail },
+      { "_savegpr1_", 14, 31, savegpr1, savegpr1_tail },
+      { "_restgpr1_", 14, 31, restgpr1, restgpr1_tail },
+      { "_savefpr_", 14, 31, savefpr, savefpr0_tail },
+      { "_restfpr_", 14, 29, restfpr, restfpr0_tail },
+      { "_restfpr_", 30, 31, restfpr, restfpr0_tail },
+      { "._savef", 14, 31, savefpr, savefpr1_tail },
+      { "._restf", 14, 31, restfpr, restfpr1_tail },
+      { "_savevr_", 20, 31, savevr, savevr_tail },
+      { "_restvr_", 20, 31, restvr, restvr_tail }
+    };
 
   htab = ppc_hash_table (info);
-
   if (htab->sfpr == NULL)
     /* We don't have any relocs.  */
     return TRUE;
 
-  /* First provide any missing ._savef* and ._restf* functions.  */
-  memcpy (sym, "._savef14", 10);
-  for (i = MIN_SAVE_FPR; i <= MAX_SAVE_FPR; i++)
-    {
-      sym[7] = i / 10 + '0';
-      sym[8] = i % 10 + '0';
-      h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
-      if (h != NULL
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	{
-	  if (lowest_savef > i)
-	    lowest_savef = i;
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = htab->sfpr;
-	  h->root.u.def.value = (i - lowest_savef) * 4;
-	  h->type = STT_FUNC;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
-	}
-    }
-
-  memcpy (sym, "._restf14", 10);
-  for (i = MIN_SAVE_FPR; i <= MAX_SAVE_FPR; i++)
-    {
-      sym[7] = i / 10 + '0';
-      sym[8] = i % 10 + '0';
-      h = elf_link_hash_lookup (&htab->elf, sym, FALSE, FALSE, TRUE);
-      if (h != NULL
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	{
-	  if (lowest_restf > i)
-	    lowest_restf = i;
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = htab->sfpr;
-	  h->root.u.def.value = ((MAX_SAVE_FPR + 2 - lowest_savef) * 4
-				 + (i - lowest_restf) * 4);
-	  h->type = STT_FUNC;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-	  _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
-	}
-    }
+  /* Provide any missing _save* and _rest* functions.  */
+  htab->sfpr->size = 0;
+  for (i = 0; i < sizeof (funcs) / sizeof (funcs[0]); i++)
+    if (!sfpr_define (info, &funcs[i]))
+      return FALSE;
 
   elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
 
-  htab->sfpr->size = ((MAX_SAVE_FPR + 2 - lowest_savef) * 4
-		      + (MAX_SAVE_FPR + 2 - lowest_restf) * 4);
-
   if (htab->sfpr->size == 0)
-    {
-      _bfd_strip_section_from_output (info, htab->sfpr);
-      return TRUE;
-    }
-
-  p = bfd_alloc (htab->elf.dynobj, htab->sfpr->size);
-  if (p == NULL)
-    return FALSE;
-  htab->sfpr->contents = p;
-
-  for (i = lowest_savef; i <= MAX_SAVE_FPR; i++)
-    {
-      unsigned int fpr = i << 21;
-      unsigned int stackoff = (1 << 16) - (MAX_SAVE_FPR + 1 - i) * 8;
-      bfd_put_32 (htab->elf.dynobj, STFD_FR0_0R1 + fpr + stackoff, p);
-      p += 4;
-    }
-  if (lowest_savef <= MAX_SAVE_FPR)
-    {
-      bfd_put_32 (htab->elf.dynobj, BLR, p);
-      p += 4;
-    }
-
-  for (i = lowest_restf; i <= MAX_SAVE_FPR; i++)
-    {
-      unsigned int fpr = i << 21;
-      unsigned int stackoff = (1 << 16) - (MAX_SAVE_FPR + 1 - i) * 8;
-      bfd_put_32 (htab->elf.dynobj, LFD_FR0_0R1 + fpr + stackoff, p);
-      p += 4;
-    }
-  if (lowest_restf <= MAX_SAVE_FPR)
-    bfd_put_32 (htab->elf.dynobj, BLR, p);
+    _bfd_strip_section_from_output (info, htab->sfpr);
 
   return TRUE;
 }

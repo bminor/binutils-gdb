@@ -1,6 +1,21 @@
+2004-08-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (STD_R0_0R1, STD_R0_0R12, LD_R0_0R1, LD_R0_0R12,
+	LI_R12_0, STVX_VR0_R12_R0, LVX_VR0_R12_R0, MTLR_R0, SFPR_MAX): Define.
+	(struct sfpr_def_parms): New.
+	(sfpr_define): New function.
+	(savegpr0, savegpr0_tail, restgpr0, restgpr0_tail): New functions.
+	(savegpr1, savegpr1_tail, restgpr1, restgpr1_tail): New functions.
+	(savefpr, savefpr0_tail, restfpr, restfpr0_tail): New functions.
+	(savefpr1_tail, restfpr1_tail): New functions.
+	(savevr, savevr_tail, restvr, restvr_tail): New functions.
+	(MIN_SAVE_FPR, MAX_SAVE_FPR): Don't define.
+	(ppc64_elf_func_desc_adjust): Use sfpr_define in place of existing
+	code.  Define all ABI mandated _save and _rest functions.
+
 2004-08-26  Paul Brook  <paul@codesourcery.com>
 
-	* INTERWORK_FLAG: Return true for EABIv3 objects.
+	* elf32-arm.h (INTERWORK_FLAG): Return true for EABIv3 objects.
 
 2004-08-26  Alan Modra  <amodra@bigpond.net.au>
 
