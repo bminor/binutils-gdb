@@ -98,7 +98,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* The PA can watch any number of locations, there's no need for it to reject
    anything (generic routines already check that all intermediates are
    in memory).  */
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(B) 1
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
+	((type) == bp_hardware_watchpoint)
 
 /* When a hardware watchpoint fires off the PC will be left at the
    instruction which caused the watchpoint.  It will be necessary for
@@ -125,5 +126,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HAVE_STEPPABLE_WATCHPOINT
 
 /* Use these macros for watchpoint insertion/deletion.  */
-#define target_insert_watchpoint(addr, len) hppa_set_watchpoint (addr, len, 1)
-#define target_remove_watchpoint(addr, len) hppa_set_watchpoint (addr, len, 0)
+/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
+#define target_insert_watchpoint(addr, len, type) hppa_set_watchpoint (addr, len, 1)
+#define target_remove_watchpoint(addr, len, type) hppa_set_watchpoint (addr, len, 0)
