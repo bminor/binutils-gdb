@@ -4359,8 +4359,12 @@ mips_ip (str, ip)
 		}
 	      else
 		{
+		  /* The upper bound should be 0x8000, but
+		     unfortunately the MIPS assembler accepts numbers
+		     from 0x8000 to 0xffff and sign extends them, and
+		     we want to be compatible.  */
 		  if (imm_expr.X_add_number < -0x8000 ||
-		      imm_expr.X_add_number >= 0x8000)
+		      imm_expr.X_add_number >= 0x10000)
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))

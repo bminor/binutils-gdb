@@ -1,3 +1,9 @@
+Fri Mar 11 17:56:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Accept numbers between 0x8000 and
+	0xffff for 'j' to be compatible with MIPS assembler.  These
+	numbers are actually treated as negative.
+
 Thu Mar 10 13:36:29 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/tc-sparc.h (LOCAL_LABEL): Local labels are .Lfoo.
