@@ -1,3 +1,10 @@
+Sat Feb 12 22:34:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elfcode.h (elf_map_symbols): Fix typo.
+	(write_object_contents): Check return values from prep_headers and
+	elf_compute_section_file_positions.
+	(set_section_contents): Likewise.
+
 Fri Feb 11 16:56:50 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* archive.c (normalize) [VMS]: Call malloc, not bfd_xmalloc.

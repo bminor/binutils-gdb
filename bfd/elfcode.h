@@ -1434,7 +1434,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   sect_syms = (asymbol **) bfd_zalloc (abfd, max_index * sizeof (asymbol *));
   elf_section_syms (abfd) = sect_syms;
 
-  if (sect_syms != 0)
+  if (sect_syms == 0)
     {
       bfd_error = no_memory;
       return false;
@@ -2362,8 +2362,10 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 
   if (abfd->output_has_begun == false)
     {
-      prep_headers (abfd);
-      elf_compute_section_file_positions (abfd);
+      if (prep_headers (abfd) == false)
+	return false;
+      if (elf_compute_section_file_positions (abfd) == false)
+	return false;
       abfd->output_has_begun = true;
     }
 
@@ -3192,8 +3194,10 @@ DEFUN (elf_set_section_contents, (abfd, section, location, offset, count),
   if (abfd->output_has_begun == false)	/* set by bfd.c handler? */
     {
       /* do setup calculations (FIXME) */
-      prep_headers (abfd);
-      elf_compute_section_file_positions (abfd);
+      if (prep_headers (abfd) == false)
+	return false;
+      if (elf_compute_section_file_positions (abfd) == false)
+	return false;
       abfd->output_has_begun = true;
     }
 
