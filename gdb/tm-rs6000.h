@@ -18,20 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
-/* A successful ptrace(continue) might return errno != 0 in this particular port
-   of rs6000. I am not sure why. We will use this kludge and ignore it until
-   we figure out the real problem. */
-
-#define AIX_BUGGY_PTRACE_CONTINUE	\
-{ \
-  int ret = ptrace (PT_CONTINUE, inferior_pid, \
-		    (PTRACE_ARG3_TYPE) 1, signal, 0); \
-  if (errno) { \
-/*    printf ("ret: %d, errno: %d, signal: %d\n", ret, errno, signal); */ \
-    errno = 0; } \
-}
-
 extern int	symtab_relocated;
 
 /* Minimum possible text address in AIX */

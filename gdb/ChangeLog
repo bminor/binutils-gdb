@@ -34,6 +34,12 @@ Tue Sep 15 01:18:50 1992  John Gilmore  (gnu@cygnus.com)
 	here; it is dealt with at a gdb-target-independent level.
 	* rs6000-tdep.c (single_step):  Don't call ptrace, we are a
 	high toned routine.  Fix return type to void.
+	* tm-rs6000.h (AIX_BUGGY_PTRACE_CALL): Zap, we think we fixed it.
+	Rich and I believe the "real problem" was that both single_step
+	and target_resume were issuing PT_CONTINUE calls.  This would
+	cause the second PT_CONTINUE to sometimes fail because the process
+	was already running.
+	* infptrace.c (child_resume):  Remove AIX_BUGGY_PTRACE_CALL kludge.
 
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 

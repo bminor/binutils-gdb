@@ -128,13 +128,9 @@ child_resume (step, signal)
      instructions), so we don't have to worry about that here.  */
 
   if (step)
-    ptrace (PT_STEP, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
+    ptrace (PT_STEP,     inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
   else
-#ifdef AIX_BUGGY_PTRACE_CONTINUE
-    AIX_BUGGY_PTRACE_CONTINUE;
-#else
     ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
-#endif
 
   if (errno)
     perror_with_name ("ptrace");
