@@ -1,3 +1,7 @@
+Thu Jan 13 23:07:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_link_write_external): An ifd can be -1.
+
 Thu Jan 13 12:33:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_set_reloc_info): Provide a default symbol for
