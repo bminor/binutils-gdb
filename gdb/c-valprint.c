@@ -113,10 +113,6 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (format == 0 || format == 's'))
 	    {
-	      if (addressprint && format != 's')
-		{
-		  fprintf_filtered (stream, "0x%x ", address);
-		}
 	      LA_PRINT_STRING (stream, valaddr, len, 0);
 	      i = len;
 	    }

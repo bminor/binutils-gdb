@@ -43,18 +43,33 @@ static void
 set_print PARAMS ((char *, int));
 
 static void
-set_radix PARAMS ((char *, int, struct cmd_list_element *));
+set_radix PARAMS ((char *, int));
+
+static void
+show_radix PARAMS ((char *, int));
+
+static void
+set_input_radix PARAMS ((char *, int, struct cmd_list_element *));
+
+static void
+set_input_radix_1 PARAMS ((int, unsigned));
 
 static void
 set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
 
 static void
+set_output_radix_1 PARAMS ((int, unsigned));
+
+static void
 value_print_array_elements PARAMS ((value, FILE *, int, enum val_prettyprint));
 
-/* Maximum number of chars to print for a string pointer value
-   or vector contents, or UINT_MAX for no limit.  */
+/* Maximum number of chars to print for a string pointer value or vector
+   contents, or UINT_MAX for no limit.  Note that "set print elements 0"
+   stores UINT_MAX in print_max, which displays in a show command as
+   "unlimited". */
 
 unsigned int print_max;
+#define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value. */
 
 /* Default input and output radixes, and output format letter.  */
 
@@ -303,7 +318,7 @@ val_print_type_code_int (type, valaddr, stream)
 void
 print_longest (stream, format, use_local, val_long)
      FILE *stream;
-     char format;
+     int format;
      int use_local;
      LONGEST val_long;
 {
@@ -660,31 +675,7 @@ value_print_array_elements (val, stream, format, pretty)
 /*  Print a string from the inferior, starting at ADDR and printing up to LEN
     characters, to STREAM.  If LEN is zero, printing stops at the first null
     byte, otherwise printing proceeds (including null bytes) until either
-    print_max or LEN characters have been printed.
-
-    Always fetch print_max+1 characters, even though LA_PRINT_STRING might want
-    to print more or fewer (with repeated characters).  This is so that we
-    don't spend forever fetching if we print a long string consisting of the
-    same character repeated.  Also so we can do it all in one memory operation,
-    which is faster.  However, this will be slower if print_max is set high,
-    e.g. if you set print_max to 1000, not only will it take a long time to
-    fetch short strings, but if you are near the end of the address space, it
-    might not work.
-
-    If the number of characters we actually print is limited because of hitting
-    print_max, when LEN would have explicitly or implicitly (in the case of a
-    null terminated string with another non-null character available to print)
-    allowed us to print more, we print ellipsis ("...") after the printed string
-    to indicate that more characters were available to print but that we were
-    limited by print_max.  To do this correctly requires that we always fetch
-    one more than the number of characters we could potentially print, so that
-    if we do print the maximum number, we can tell whether or not a null byte
-    would have been the next character, in the case of C style strings.
-    For non-C style strings, only the value of LEN is pertinent in deciding
-    whether or not to print ellipsis.
-
-    FIXME:  If LEN is nonzero and less than print_max, we could get away
-    with only fetching the specified number of characters from the inferior. */
+    print_max or LEN characters have been printed, whichever is smaller. */
 
 int
 val_print_string (addr, len, stream)
@@ -692,92 +683,133 @@ val_print_string (addr, len, stream)
     unsigned int len;
     FILE *stream;
 {
-  int first_addr_err = 0;	/* Nonzero if first address out of bounds */
-  int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero */
-  int errcode;
-  unsigned char c;
-  char *string;
+  int first_addr_err = 0;	/* Nonzero if first address out of bounds. */
+  int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero. */
+  int errcode;			/* Errno returned from bad reads. */
+  unsigned int fetchlimit;	/* Maximum number of bytes to fetch. */
+  unsigned int nfetch;		/* Bytes to fetch / bytes fetched. */
+  unsigned int chunksize;	/* Size of each fetch, in bytes. */
+  int bufsize;			/* Size of current fetch buffer. */
+  char *buffer = NULL;		/* Dynamically growable fetch buffer. */
+  char *bufptr;			/* Pointer to next available byte in buffer. */
+  char *limit;			/* First location past end of fetch buffer. */
+  struct cleanup *old_chain;	/* Top of the old cleanup chain. */
+  char peekchar;		/* Place into which we can read one char. */
 
-  /* Get first character.  */
-  errcode = target_read_memory (addr, (char *)&c, 1);
-  if (errcode != 0)
+  /* First we need to figure out the limit on the number of characters we are
+     going to attempt to fetch and print.  This is actually pretty simple.  If
+     LEN is nonzero, then the limit is the minimum of LEN and print_max.  If
+     LEN is zero, then the limit is print_max.  This is true regardless of
+     whether print_max is zero, UINT_MAX (unlimited), or something in between,
+     because finding the null byte (or available memory) is what actually
+     limits the fetch. */
+
+  fetchlimit = (len == 0 ? print_max : min (len, print_max));
+
+  /* Now decide how large of chunks to try to read in one operation.  This
+     is also pretty simple.  If LEN is nonzero, then we want fetchlimit bytes,
+     so we might as well read them all in one operation.  If LEN is zero, we
+     are looking for a null terminator to end the fetching, so we might as
+     well read in blocks that are large enough to be efficient, but not so
+     large as to be slow if fetchlimit happens to be large.  So we choose the
+     minimum of DEFAULT_PRINT_MAX and fetchlimit. */
+
+  chunksize = (len == 0 ? min (PRINT_MAX_DEFAULT, fetchlimit) : fetchlimit);
+
+  /* Loop until we either have all the characters to print, or we encounter
+     some error, such as bumping into the end of the address space. */
+
+  bufsize = 0;
+  do {
+    QUIT;
+    /* Figure out how much to fetch this time, and grow the buffer to fit. */
+    nfetch = min (chunksize, fetchlimit - bufsize);
+    bufsize += nfetch;
+    if (buffer == NULL)
+      {
+	buffer = (char *) xmalloc (bufsize);
+	bufptr = buffer;
+      }
+    else
+      {
+	discard_cleanups (old_chain);
+	buffer = (char *) xrealloc (buffer, bufsize);
+	bufptr = buffer + bufsize - nfetch;
+      }
+    old_chain = make_cleanup (free, buffer);
+
+    /* Read as much as we can. */
+    nfetch = target_read_memory_partial (addr, bufptr, nfetch, &errcode);
+    if (len != 0)
+      {
+	addr += nfetch;
+	bufptr += nfetch;
+      }
+    else
+      {
+	/* Scan this chunk for the null byte that terminates the string
+	   to print.  If found, we don't need to fetch any more.  Note
+	   that bufptr is explicitly left pointing at the next character
+	   after the null byte, or at the next character after the end of
+	   the buffer. */
+	limit = bufptr + nfetch;
+	do {
+	  addr++;
+	  bufptr++;
+	} while (bufptr < limit && *(bufptr - 1) != '\0');
+      }
+  } while (errcode == 0					/* no error */
+	   && bufptr < buffer + fetchlimit		/* no overrun */
+	   && !(len == 0 && *(bufptr - 1) == '\0'));	/* no null term */
+
+  /* We now have either successfully filled the buffer to fetchlimit, or
+     terminated early due to an error or finding a null byte when LEN is
+     zero. */
+
+  if (len == 0 && *(bufptr - 1) != '\0')
     {
-      /* First address out of bounds.  */
-      first_addr_err = 1;
-    }
-  else if (print_max < UINT_MAX)
-    {
-      string = (char *) alloca (print_max + 1);
-      memset (string, 0, print_max + 1);
-      
-      QUIT;
-      errcode = target_read_memory (addr, string, print_max + 1);
-      if (errcode != 0)
+      /* We didn't find a null terminator we were looking for.  Attempt
+	 to peek at the next character.  If not successful, or it is not
+	 a null byte, then force ellipsis to be printed. */
+      if (target_read_memory (addr, &peekchar, 1) != 0 || peekchar != '\0')
 	{
-	  /* Try reading just one character.  If that succeeds, assume we hit
-	     the end of the address space, but the initial part of the string
-	     is probably safe. */
-	  char x[1];
-	  errcode = target_read_memory (addr, x, 1);
-	}
-      if (len == 0)
-	{
-	  /* When the length is unspecified, such as when printing C style
-	     null byte terminated strings, then scan the string looking for
-	     the terminator in the first print_max characters.  If a terminator
-	     is found, then it determines the length, otherwise print_max
-	     determines the length. */
-	  for (;len < print_max; len++)
-	    {
-	      if (string[len] == '\0')
-		{
-		  break;
-		}
-	    }
-	  /* If the first unprinted character is not the null terminator, set
-	     the flag to force ellipses.  This is true whether or not we broke
-	     out of the above loop because we found a terminator, or whether
-	     we simply hit the limit on how many characters to print. */
-	  if (string[len] != '\0')
-	    {
-	      force_ellipsis = 1;
-	    }
-	}
-      else if (len > print_max)
-	{
-	  /* Printing less than the number of characters actually requested
-	     always makes us print ellipsis. */
-	  len = print_max;
 	  force_ellipsis = 1;
 	}
-      QUIT;
-      
-      if (addressprint)
-	{
-	  fputs_filtered (" ", stream);
-	}
-      LA_PRINT_STRING (stream, string, len, force_ellipsis);
     }
+  else if ((len != 0 && errcode != 0) || (len > bufptr - buffer))
+    {
+      /* Getting an error when we have a requested length, or fetching less
+	 than the number of characters actually requested, always make us
+	 print ellipsis. */
+      force_ellipsis = 1;
+    }
+
+  QUIT;
   
-  if (errcode != 0)
+  if (addressprint)
+    {
+      fputs_filtered (" ", stream);
+    }
+  LA_PRINT_STRING (stream, buffer, bufptr - buffer, force_ellipsis);
+  
+  if (errcode != 0 && force_ellipsis)
     {
       if (errcode == EIO)
 	{
-	  fprintf_filtered (stream,
-			    (" <Address 0x%x out of bounds>" + first_addr_err),
-			    addr + len);
+	  fprintf_filtered (stream, " <Address 0x%x out of bounds>", addr);
 	}
       else
 	{
-	  error ("Error reading memory address 0x%x: %s.", addr + len,
+	  error ("Error reading memory address 0x%x: %s.", addr,
 		 safe_strerror (errcode));
 	}
     }
   fflush (stream);
-  return (len);
+  do_cleanups (old_chain);
+  return (bufptr - buffer);
 }
+
 
-#if 0
 /* Validate an input or output radix setting, and make sure the user
    knows what they really did here.  Radix setting is confusing, e.g.
    setting the input radix to "10" never changes it!  */
@@ -789,13 +821,34 @@ set_input_radix (args, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-  unsigned radix = *(unsigned *)c->var;
-
-  if (from_tty)
-    printf_filtered ("Input radix set to decimal %d, hex %x, octal %o\n",
-	radix, radix, radix);
+  set_input_radix_1 (from_tty, *(unsigned *)c->var);
 }
-#endif
+
+/* ARGSUSED */
+static void
+set_input_radix_1 (from_tty, radix)
+     int from_tty;
+     unsigned radix;
+{
+  /* We don't currently disallow any input radix except 0 or 1, which don't
+     make any mathematical sense.  In theory, we can deal with any input
+     radix greater than 1, even if we don't have unique digits for every
+     value from 0 to radix-1, but in practice we lose on large radix values.
+     We should either fix the lossage or restrict the radix range more.
+     (FIXME). */
+
+  if (radix < 2)
+    {
+      error ("Nonsense input radix ``decimal %u''; input radix unchanged.",
+	     radix);
+    }
+  input_radix = radix;
+  if (from_tty)
+    {
+      printf_filtered ("Input radix now set to decimal %u, hex %x, octal %o.\n",
+		       radix, radix, radix);
+    }
+}
 
 /* ARGSUSED */
 static void
@@ -804,50 +857,89 @@ set_output_radix (args, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-  unsigned radix = *(unsigned *)c->var;
+  set_output_radix_1 (from_tty, *(unsigned *)c->var);
+}
 
-  if (from_tty)
-    printf_filtered ("Output radix set to decimal %d, hex %x, octal %o\n",
-	radix, radix, radix);
-
-  /* FIXME, we really should be able to validate the setting BEFORE
-     it takes effect.  */
+static void
+set_output_radix_1 (from_tty, radix)
+     int from_tty;
+     unsigned radix;
+{
+  /* Validate the radix and disallow ones that we aren't prepared to
+     handle correctly, leaving the radix unchanged. */
   switch (radix)
     {
     case 16:
-      output_format = 'x';
+      output_format = 'x';		/* hex */
       break;
     case 10:
-      output_format = 0;
+      output_format = 0;		/* decimal */
       break;
     case 8:
       output_format = 'o';		/* octal */
       break;
     default:
-      output_format = 0;
-      error ("Unsupported radix ``decimal %d''; using decimal output",
-	      radix);
+      error ("Unsupported output radix ``decimal %u''; output radix unchanged.",
+	     radix);
+    }
+  output_radix = radix;
+  if (from_tty)
+    {
+      printf_filtered ("Output radix now set to decimal %u, hex %x, octal %o.\n",
+		       radix, radix, radix);
     }
 }
 
-/* Both at once */
+/* Set both the input and output radix at once.  Try to set the output radix
+   first, since it has the most restrictive range.  An radix that is valid as
+   an output radix is also valid as an input radix.
+
+   It may be useful to have an unusual input radix.  If the user wishes to
+   set an input radix that is not valid as an output radix, he needs to use
+   the 'set input-radix' command. */
+
 static void
-set_radix (arg, from_tty, c)
+set_radix (arg, from_tty)
      char *arg;
      int from_tty;
-     struct cmd_list_element *c;
 {
-  unsigned radix = *(unsigned *)c->var;
+  unsigned radix;
 
+  radix = (arg == NULL) ? 10 : parse_and_eval_address (arg);
+  set_output_radix_1 (0, radix);
+  set_input_radix_1 (0, radix);
   if (from_tty)
-    printf_filtered ("Radix set to decimal %d, hex %x, octal %o\n",
-	radix, radix, radix);
-
-  input_radix = radix;
-  output_radix = radix;
-
-  set_output_radix (arg, 0, c);
+    {
+      printf_filtered ("Input and output radices now set to decimal %u, hex %x, octal %o.\n",
+		       radix, radix, radix);
+    }
 }
+
+/* Show both the input and output radices. */
+
+/*ARGSUSED*/
+static void
+show_radix (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (from_tty)
+    {
+      if (input_radix == output_radix)
+	{
+	  printf_filtered ("Input and output radices set to decimal %u, hex %x, octal %o.\n",
+			   input_radix, input_radix, input_radix);
+	}
+      else
+	{
+	  printf_filtered ("Input radix set to decimal %u, hex %x, octal %o.\n",
+			   input_radix, input_radix, input_radix);
+	  printf_filtered ("Output radix set to decimal %u, hex %x, octal %o.\n",
+			   output_radix, output_radix, output_radix);
+	}
+    }
+}
+
 
 /*ARGSUSED*/
 static void
@@ -927,10 +1019,6 @@ _initialize_valprint ()
 		  &setprintlist),
      &showprintlist);
 
-#if 0
-  /* The "show radix" cmd isn't good enough to show two separate values.
-     The rest of the code works, but the show part is confusing, so don't
-     let them be set separately 'til we work out "show".  */
   c = add_set_cmd ("input-radix", class_support, var_uinteger,
 		   (char *)&input_radix,
 		  "Set default input radix for entering numbers.",
@@ -944,19 +1032,26 @@ _initialize_valprint ()
 		  &setlist);
   add_show_from_set (c, &showlist);
   c->function = set_output_radix;
-#endif 
 
-  c = add_set_cmd ("radix", class_support, var_uinteger,
-		   (char *)&output_radix,
-		  "Set default input and output number radix.",
-		  &setlist);
-  add_show_from_set (c, &showlist);
-  c->function.sfunc = set_radix;
+  /* The "set radix" and "show radix" commands are special in that they are
+     like normal set and show commands but allow two normally independent
+     variables to be either set or shown with a single command.  So the
+     usual add_set_cmd() and add_show_from_set() commands aren't really
+     appropriate. */
+  add_cmd ("radix", class_support, set_radix,
+	   "Set default input and output number radices.\n\
+Use 'set input-radix' or 'set output-radix' to independently set each.\n\
+Without an argument, sets both radices back to the default value of 10.",
+	   &setlist);
+  add_cmd ("radix", class_support, show_radix,
+	   "Show the default input and output number radices.\n\
+Use 'show input-radix' or 'show output-radix' to independently show each.",
+	   &showlist);
 
   /* Give people the defaults which they are used to.  */
   prettyprint_structs = 0;
   prettyprint_arrays = 0;
   unionprint = 1;
   addressprint = 1;
-  print_max = 200;
+  print_max = PRINT_MAX_DEFAULT;
 }

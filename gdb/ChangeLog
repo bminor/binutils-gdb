@@ -1,3 +1,20 @@
+Sat Jun 12 14:47:04 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.9.2.
+	* c-valprint.c (c_val_print):  For array of chars printed with
+	string syntax, don't print the address of the array.  From
+	bothner@cygnus.com.
+	* c-exp.y (yylex): Recognize '.' as indicating a floating point
+	number regardless of the radix.  From wilson@cygnus.com.
+	* valprint.c (set_input_radix_1, set_output_radix_1):  New
+	prototypes and functions that do the actual radix setting work.
+	* valprint.c (set_radix, set_output_radix, set_input_radix):
+	Rewrite to use set_input_radix_1 and set_output_radix_1.
+	* valprint.c (initialize_valprint):  Enable commands to
+	independently set and show input and output radices.
+	* valprint.c (show_radix):  New prototype and function that
+	handles separate input and output radices.
+
 Fri Jun 11 18:39:38 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	Patches from Jeff Law, law@cs.utah.edu:
@@ -8,6 +25,10 @@ Fri Jun 11 15:19:59 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* main.c (main): back to two periods for elipse.
 	  (print_gdb_version): revised format for configuration info.
+
+Fri Jun 11 10:24:35 1993  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (INT_MAX):  Cast unsigned shift result to int.
 
 Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 

@@ -1247,9 +1247,14 @@ yylex ()
 
 	for (;; ++p)
 	  {
+	    /* This test includes !hex because 'e' is a valid hex digit
+	       and thus does not indicate a floating point number when
+	       the radix is hex.  */
 	    if (!hex && !got_e && (*p == 'e' || *p == 'E'))
 	      got_dot = got_e = 1;
-	    else if (!hex && !got_dot && *p == '.')
+	    /* This test does not include !hex, because a '.' always indicates
+	       a decimal floating point number regardless of the radix.  */
+	    else if (!got_dot && *p == '.')
 	      got_dot = 1;
 	    else if (got_e && (p[-1] == 'e' || p[-1] == 'E')
 		     && (*p == '-' || *p == '+'))
