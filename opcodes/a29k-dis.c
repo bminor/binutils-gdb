@@ -151,6 +151,8 @@ print_insn (memaddr, info)
 
   (*find_byte_func) (insn, &insn0, &insn8, &insn16, &insn24);
 
+  printf ("%02x%02x%02x%02x ", insn24, insn16, insn8, insn0);
+
   /* Handle the nop (aseq 0x40,gr1,gr1) specially */
   if ((insn24==0x70) && (insn16==0x40) && (insn8==0x01) && (insn0==0x01)) {
     (*info->fprintf_func) (info->stream,"nop");

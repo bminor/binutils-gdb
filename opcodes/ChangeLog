@@ -1,3 +1,7 @@
+Thu Sep 15 16:30:22 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* a29k-dis.c (print_insn): Print the opcode.
+
 Wed Sep 14 17:52:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* mips-opc.c (mips_opcodes): Set WR_t for sc and scd.
