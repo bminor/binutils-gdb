@@ -150,7 +150,9 @@ elf-m10200.c
 elf-m10300.c
 elf.c
 elf32-arc.c
-elf32-arm.c
+elf32-arm-newabi.c
+elf32-arm-oldabi.c
+elf32-arm.h
 elf32-d10v.c
 elf32-d30v.c
 elf32-fr30.c
