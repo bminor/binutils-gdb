@@ -299,9 +299,9 @@ extern const struct ext_format ext_format_68881;
 #define FRAME_CHAIN(thisframe)  \
   (thisframe->signal_handler_caller \
    ? thisframe->frame \
-   : (!inside_entry_file ((thisframe)->pc) ? \
-      read_memory_integer ((thisframe)->frame, 4) :\
-      0)
+   : (!inside_entry_file ((thisframe)->pc) \
+      ? read_memory_integer ((thisframe)->frame, 4) \
+      : 0))
 
 /* Define other aspects of the stack frame.  */
 
