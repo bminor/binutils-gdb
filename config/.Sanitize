@@ -15,7 +15,6 @@
 
 Do-first:
 
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -29,6 +28,7 @@ mh-a68bsd
 mh-aix386
 mh-apollo68
 mh-cxux
+mh-cygwin32
 mh-decstation
 mh-delta88
 mh-dgux
