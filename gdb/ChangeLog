@@ -1,5 +1,14 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c: Include "gdb_assert.h".
+	(PTRACE_XFER_TYPE): Remove define.
+	(offsetof): Only define if U_REGS_OFFSET isn't defined.
+	(fetch_register, store_register): Rewrite to use PTRACE_TYPE_RET.
+	Tweak comment.
+	(fetch_inferior_registers, store_inferior_registers): Remove
+	redundant culry braces.  Tweak comment.  s/regno/regnum.
+	* Makefile.in (infptrace.o): Update dependencies.
+
 	* configure.in: Change test for return type of ptrace to default
 	to `long' instead of `int'.
 	* configure: Regenerate.	

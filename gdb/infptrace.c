@@ -53,6 +53,8 @@
 #include "gdb_stat.h"
 #endif
 
+#include "gdb_assert.h"
+
 #if !defined (FETCH_INFERIOR_REGISTERS)
 #include <sys/user.h>		/* Probably need to poke the user structure */
 #endif /* !FETCH_INFERIOR_REGISTERS */
@@ -269,153 +271,130 @@ detach (int signal)
 #endif
 }
 
-/* Default the type of the ptrace transfer to int.  */
-#ifndef PTRACE_XFER_TYPE
-#define PTRACE_XFER_TYPE int
-#endif
 
-#if !defined (FETCH_INFERIOR_REGISTERS)
+#ifndef FETCH_INFERIOR_REGISTERS
 
-#if !defined (offsetof)
+/* U_REGS_OFFSET is the offset of the registers within the u area.  */
+#ifndef U_REGS_OFFSET
+
+#ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 
-/* U_REGS_OFFSET is the offset of the registers within the u area.  */
-#if !defined (U_REGS_OFFSET)
 #define U_REGS_OFFSET \
   ptrace (PT_READ_U, PIDGET (inferior_ptid), \
 	  (PTRACE_TYPE_ARG3) (offsetof (struct user, u_ar0)), 0) \
     - KERNEL_U_ADDR
 #endif
 
-/* Fetch one register.  */
+/* Fetch register REGNUM from the inferior.  */
 
 static void
-fetch_register (int regno)
+fetch_register (int regnum)
 {
-  /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr;
-  char mess[128];		/* For messages */
-  int i;
-  unsigned int offset;		/* Offset of registers within the u area.  */
-  char buf[MAX_REGISTER_SIZE];
-  int tid;
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int tid, i;
 
-  if (CANNOT_FETCH_REGISTER (regno))
+  if (CANNOT_FETCH_REGISTER (regnum))
     {
-      regcache_raw_supply (current_regcache, regno, NULL);
+      regcache_raw_supply (current_regcache, regnum, NULL);
       return;
     }
 
-  /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
-  offset = U_REGS_OFFSET;
+  /* This isn't really an address.  But ptrace thinks of it as one.  */
+  addr = register_addr (regnum, U_REGS_OFFSET);
+  size = register_size (current_gdbarch, regnum);
 
-  regaddr = register_addr (regno, offset);
-  for (i = 0; i < register_size (current_gdbarch, regno); i += sizeof (PTRACE_XFER_TYPE))
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
+
+  /* Read the register contents from the inferior a chuck at the time.  */
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_TYPE_ARG3) regaddr, 0);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      buf[i] = ptrace (PT_READ_U, tid, (PTRACE_TYPE_ARG3) addr, 0);
       if (errno != 0)
-	{
-	  sprintf (mess, "reading register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
-	  perror_with_name (mess);
-	}
+	error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regnum),
+	       regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
     }
-  regcache_raw_supply (current_regcache, regno, buf);
+  regcache_raw_supply (current_regcache, regnum, buf);
 }
 
-
-/* Fetch register values from the inferior.
-   If REGNO is negative, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time). */
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
+   for all registers.  */
 
 void
-fetch_inferior_registers (int regno)
+fetch_inferior_registers (int regnum)
 {
-  if (regno >= 0)
-    {
-      fetch_register (regno);
-    }
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      fetch_register (regnum);
   else
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  fetch_register (regno);
-	}
-    }
+    fetch_register (regnum);
 }
 
-/* Store one register. */
+/* Store register REGNUM into the inferior.  */
 
 static void
-store_register (int regno)
+store_register (int regnum)
 {
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int tid, i;
+
+  if (CANNOT_STORE_REGISTER (regnum))
+    return;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
   /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr;
-  char mess[128];		/* For messages */
-  int i;
-  unsigned int offset;		/* Offset of registers within the u area.  */
-  int tid;
-  char buf[MAX_REGISTER_SIZE];
+  addr = register_addr (regnum, U_REGS_OFFSET);
+  size = register_size (current_gdbarch, regnum);
 
-  if (CANNOT_STORE_REGISTER (regno))
-    {
-      return;
-    }
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
 
-  /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
-
-  offset = U_REGS_OFFSET;
-
-  regaddr = register_addr (regno, offset);
-
-  /* Put the contents of regno into a local buffer */
-  regcache_raw_collect (current_regcache, regno, buf);
-
-  /* Store the local buffer into the inferior a chunk at the time. */
-  for (i = 0; i < register_size (current_gdbarch, regno); i += sizeof (PTRACE_XFER_TYPE))
+  /* Write the register contents into the inferior a chunk at the time.  */
+  regcache_raw_collect (current_regcache, regnum, buf);
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) regaddr,
-	      *(PTRACE_XFER_TYPE *) (buf + i));
-      regaddr += sizeof (PTRACE_XFER_TYPE);
+      ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) addr, buf[i]);
       if (errno != 0)
-	{
-	  sprintf (mess, "writing register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
-	  perror_with_name (mess);
-	}
+	error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regnum),
+	       regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
     }
 }
 
-/* Store our register values back into the inferior.
-   If REGNO is negative, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time).  */
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
+   this for all registers (including the floating point registers).  */
 
 void
-store_inferior_registers (int regno)
+store_inferior_registers (int regnum)
 {
-  if (regno >= 0)
-    {
-      store_register (regno);
-    }
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      store_register (regnum);
   else
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  store_register (regno);
-	}
-    }
+    store_register (regnum);
 }
-#endif /* !defined (FETCH_INFERIOR_REGISTERS).  */
+
+#endif /* not FETCH_INFERIOR_REGISTERS.  */
 
 
 /* Set an upper limit on alloca.  */
