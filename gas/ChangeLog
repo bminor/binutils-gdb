@@ -1,5 +1,15 @@
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
+	* config/tc-ia64.c (enum operand_match_result): New type.
+	(operand_match): Change return type to operand_match_result.
+	Fix all returns appropriately, adding support for returning the
+	out-of-range result.
+	(parse_operands): New locals result, error_pos, out_of_range_pos,
+	curr_out_of_range_pos.  Rewrite operand matching loop to give better
+	error messages.
+	
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
 	* config/tc-ia64.c (struct unwind): Add member "prologue_count".
 	(dot_proc): Clear unwind.prologue_count to zero.
 	(dot_prologue): Increment unwind.prologue_count.
