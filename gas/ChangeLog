@@ -1,5 +1,7 @@
 Tue Feb 18 02:21:25 1992  K. Richard Pixley  (rich at cygnus.com)
 
+	* configure.in: use the new atof-ns32.c for ns32k.
+
 	* write.c: comment change only.
 
 Mon Feb 17 07:51:06 1992  K. Richard Pixley  (rich at cygnus.com)
