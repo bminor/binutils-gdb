@@ -1,3 +1,9 @@
+Sun Mar 31 01:58:41 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* peicode.h (coff_swap_aouthdr_out): Delete test for .junk.
+	* coffcode.h (coff_compute_section_file_positions): Likewise.
+	(coff_write_object_contents): Likewise.
+	
 Fri Mar 29 12:44:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* section.c (SEC_LINK_ONCE): Define.

@@ -861,11 +861,6 @@ coff_swap_aouthdr_out (abfd, in, out)
       {
 	int rounded = FA(sec->_raw_size);
 
-	if (strcmp(sec->name,".junk") == 0)
-	  {
-	    continue;
-	  }
-
 	if (sec->flags & SEC_DATA) 
 	  dsize += rounded;
 	if (sec->flags & SEC_CODE)

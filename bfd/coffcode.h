@@ -2106,16 +2106,6 @@ coff_compute_section_file_positions (abfd)
       if (!(current->flags & SEC_HAS_CONTENTS))
 	continue;
 
-#ifdef COFF_WITH_PE
-      /* Do not include the .junk section.  This is where we collect section
-         data which we don't need.  This is mainly the MS .debug$ data which
-         stores codeview debug data. */
-      if (strcmp (current->name, ".junk") == 0)
-        {
-	  continue;
-        }
-#endif
-
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  I960 doesn't
 	 do this (FIXME) so we can stay in sync with Intel.  960
@@ -2353,14 +2343,6 @@ coff_write_object_contents (abfd)
       struct internal_scnhdr section;
 
 #ifdef COFF_WITH_PE
-      /* Do not include the .junk section.  This is where we collect section
-	 data which we don't need.  This is mainly the MS .debug$ data which
-	 stores codeview debug data. */
-      if (strcmp (current->name, ".junk") == 0)
-	{
-	  continue;
-	}
-
       /* If we've got a .reloc section, remember. */
 
 #ifdef COFF_IMAGE_WITH_PE
