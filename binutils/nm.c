@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "getopt.h"
-#include "stab.gnu.h"
+#include "aout/stab_gnu.h"
 #include <ranlib.h>
 
 
@@ -329,50 +329,6 @@ filter_symbols (abfd, syms, symcount)
   return dst_count;
 }
 
-
-/* Return a lower-case character corresponding to the symbol class of sym */
-char
-decode_symclass (sym)
-     asymbol *sym;
-{
-  flagword flags = sym->flags;
-  
-  if ((sym->value == 0) && (sym->section != NULL))
-    /* Huh?  All section names don't begin with "." */
-    return (sym->section->name)[1];
-
-  if (flags & BSF_FORT_COMM) return 'C';
-  if (flags & BSF_UNDEFINED) return 'U';
-  if (flags & BSF_ABSOLUTE)  return 'a';
-
- 
-   if ( (flags & BSF_GLOBAL) || (flags & BSF_LOCAL) ){
-     if (sym->section == (asection *)NULL) {
-       return '*';
-     }
-     else if ( !strcmp(sym->section->name, ".text") ){
-       return 't';
-     } else if ( !strcmp(sym->section->name, ".data") ){
-       return 'd';
-     } else if ( !strcmp(sym->section->name, ".bss") ){
-       return 'b';
-     } else {
-       return 'o';
-     }
-    }
-
-  /* We don't have to handle these cases just yet, but we will soon:
-     N_SETV: 'v'; 
-     N_SETA: 'l'; 
-     N_SETT: 'x';
-     N_SETD: 'z';
-     N_SETB: 's';
-     N_INDR: 'i';
-     */
- 
-  return '?';
-}
-
 static void
 print_symbols (abfd, syms, symcount)
      bfd *abfd;
@@ -392,17 +348,9 @@ print_symbols (abfd, syms, symcount)
     else {
       asymbol *p = *sym;
       if (p) {
-      class = decode_symclass (p);
-
-      if (p->flags & BSF_GLOBAL)
-	class = toupper (class);
-      
-      if (p->value || ((p->flags & BSF_UNDEFINED) !=  BSF_UNDEFINED)) 
-	printf_vma( (p->section ? p->value + p->section->vma : p->value));
-      else fputs ("        ", stdout);
-
-      printf (" %c %s\n", class, p->name ? p->name : "");
-    }
+	bfd_print_symbol(abfd, stdout, p, bfd_print_symbol_nm);
+	putchar('\n');
+      }
     }
   }
 }

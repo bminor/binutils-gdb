@@ -23,7 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
-#include "sparc-opcode.h"
+#include "opcode/sparc.h"
 
 extern int fputs();
 extern int print_address();
