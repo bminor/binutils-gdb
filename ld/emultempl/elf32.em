@@ -1023,7 +1023,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   if (! config.unique_orphan_sections)
     {
-      /* Look through the script to see where to place this section.  */ 
+      /* Look through the script to see where to place this section.  */
       os = lang_output_section_find (secname);
 
       if (os != NULL
