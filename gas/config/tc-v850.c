@@ -1046,7 +1046,7 @@ handle_ctoff (const struct v850_operand * operand)
     return BFD_RELOC_V850_CALLT_16_16_OFFSET;
 
   if (   operand->bits  != 6
-      || operand->shift == 0)
+      || operand->shift != 0)
     {
       as_bad ("ctoff() relocation used on an instruction which does not support it");
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
@@ -1066,7 +1066,7 @@ handle_sdaoff (const struct v850_operand * operand)
   /* end-sanitize-v850e */
   
   if (   operand->bits  != 16
-      || operand->shift == 16)
+      || operand->shift != 16)
     {
       as_bad ("sdaoff() relocation used on an instruction which does not support it");
       return BFD_RELOC_64;  /* Used to indicate an error condition.  */
