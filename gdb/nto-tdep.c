@@ -376,11 +376,12 @@ void
 _initialize_nto_tdep (void)
 {
   add_setshow_zinteger_cmd ("nto-debug", class_maintenance,
-			    &nto_internal_debugging, "\
-Set QNX NTO internal debugging.", "\
-Show QNX NTO internal debugging.", "\
+			    &nto_internal_debugging, _("\
+Set QNX NTO internal debugging."), _("\
+Show QNX NTO internal debugging."), _("\
 When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
-for different positive values.", "\
-QNX NTO internal debugging is %s.", NULL, NULL, &setdebuglist, &showdebuglist);
+for different positive values."),
+			    NULL, /* FIXME: i18n: QNX NTO internal debugging is %s.  */
+			    NULL, NULL, &setdebuglist, &showdebuglist);
 }

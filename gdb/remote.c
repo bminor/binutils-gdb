@@ -660,7 +660,7 @@ add_packet_config_cmd (struct packet_config *config,
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc,
-				"", NULL /*print*/,
+				"", NULL /* FIXME: i18n: Print message is? */,
 				set_func, show_func,
 				set_remote_list, show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
@@ -5597,11 +5597,11 @@ response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
 
-  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break, "\
-Set whether to send break if interrupted.", "\
-Show whether to send break if interrupted.", "\
-If set, a break, instead of a cntrl-c, is sent to the remote target.",
-			   NULL, /* PRINT: Whether to send break if interrupted is %s.  */
+  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break, _("\
+Set whether to send break if interrupted."), _("\
+Show whether to send break if interrupted."), _("\
+If set, a break, instead of a cntrl-c, is sent to the remote target."),
+			   NULL, /* FIXME: i18n: Whether to send break if interrupted is %s.  */
 			   NULL, NULL,
 			   &setlist, &showlist);
 
@@ -5639,19 +5639,19 @@ If set, a break, instead of a cntrl-c, is sent to the remote target.",
 	   &remote_show_cmdlist);
 
   add_setshow_zinteger_cmd ("hardware-watchpoint-limit", no_class,
-			    &remote_hw_watchpoint_limit, "\
-Set the maximum number of target hardware watchpoints.", "\
-Show the maximum number of target hardware watchpoints.", "\
-Specify a negative limit for unlimited.",
-			    NULL, /* PRINT: The maximum number of target hardware watchpoints is %s.  */
+			    &remote_hw_watchpoint_limit, _("\
+Set the maximum number of target hardware watchpoints."), _("\
+Show the maximum number of target hardware watchpoints."), _("\
+Specify a negative limit for unlimited."),
+			    NULL, /* FIXME: i18n: The maximum number of target hardware watchpoints is %s.  */
 			    NULL, NULL,
 			    &remote_set_cmdlist, &remote_show_cmdlist);
   add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
-			    &remote_hw_breakpoint_limit, "\
-Set the maximum number of target hardware breakpoints.", "\
-Show the maximum number of target hardware breakpoints.", "\
-Specify a negative limit for unlimited.",
-			    NULL, /* PRINT: The maximum number of target hardware breakpoints is %s.  */
+			    &remote_hw_breakpoint_limit, _("\
+Set the maximum number of target hardware breakpoints."), _("\
+Show the maximum number of target hardware breakpoints."), _("\
+Specify a negative limit for unlimited."),
+			    NULL, /* FIXME: i18n: The maximum number of target hardware breakpoints is %s.  */
 			    NULL, NULL,
 			    &remote_set_cmdlist, &remote_show_cmdlist);
 
@@ -5751,12 +5751,12 @@ in a memory packet.\n",
 
   /* Keep the old ``set remote Z-packet ...'' working.  */
   add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
-				&remote_Z_packet_detect, "\
-Set use of remote protocol `Z' packets", "\
-Show use of remote protocol `Z' packets ", "\
+				&remote_Z_packet_detect, _("\
+Set use of remote protocol `Z' packets"), _("\
+Show use of remote protocol `Z' packets "), _("\
 When set, GDB will attempt to use the remote breakpoint and watchpoint\n\
-packets.",
-				NULL, /* PRINT: Use of remote protocol `Z' packets is %s.  */
+packets."),
+				NULL, /* FIXME: i18n: Use of remote protocol `Z' packets is %s.  */
 				set_remote_protocol_Z_packet_cmd,
 				show_remote_protocol_Z_packet_cmd,
 				&remote_set_cmdlist, &remote_show_cmdlist);

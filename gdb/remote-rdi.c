@@ -991,22 +991,22 @@ _initialize_remote_rdi (void)
 	   "Withough an argument, it will display current state.\n",
 	   &maintenancelist);
 
-  add_setshow_boolean_cmd ("rdiromatzero", no_class, &rom_at_zero, "\
-Set target has ROM at addr 0.", "\
-Show if target has ROM at addr 0.", "\
+  add_setshow_boolean_cmd ("rdiromatzero", no_class, &rom_at_zero, _("\
+Set target has ROM at addr 0."), _("\
+Show if target has ROM at addr 0."), _("\
 A true value disables vector catching, false enables vector catching.\n\
-This is evaluated at the time the 'target rdi' command is executed.",
-			   NULL, /* PRINT: Target has ROM at addr 0 is %s.  */
+This is evaluated at the time the 'target rdi' command is executed."),
+			   NULL, /* FIXME: i18n: Target has ROM at addr 0 is %s.  */
 			   NULL, NULL,
 			   &setlist, &showlist);
 
-  add_setshow_boolean_cmd ("rdiheartbeat", no_class, &rdi_heartbeat, "\
-Set enable for ADP heartbeat packets.", "\
-Show enable for ADP heartbeat packets.", "\
+  add_setshow_boolean_cmd ("rdiheartbeat", no_class, &rdi_heartbeat, _("\
+Set enable for ADP heartbeat packets."), _("\
+Show enable for ADP heartbeat packets."), _("\
 I don't know why you would want this. If you enable them,\n\
 it will confuse ARM and EPI JTAG interface boxes as well\n\
-as the Angel Monitor.",
-			   NULL, /* PRINT: Enable for ADP heartbeat packets is %s.  */
+as the Angel Monitor."),
+			   NULL, /* FIXME: i18n: Enable for ADP heartbeat packets is %s.  */
 			   NULL, NULL,
 			   &setlist, &showlist);
 }

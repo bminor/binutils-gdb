@@ -1,5 +1,13 @@
 2005-02-14  Andrew Cagney  <cagney@gnu.org>
 
+	Mark up add_setshow functions, replace "PRINT:" comment prefix
+	with "FIXME: i18n:".
+	* aix-thread.c, alpha-tdep.c, arm-tdep.c, breakpoint.c: Update.
+	* cris-tdep.c, dwarf2read.c, frame.c, hppa-tdep.c: Update.
+	* infcall.c, m32r-rom.c, maint.c, mips-tdep.c: Update.
+	* nto-tdep.c, observer.c, remote-rdi.c, remote.c: Update.
+	* target.c, cli/cli-logging.c: Update.
+
 	* utils.c (paddress): New function.
 	* defs.h (paddress): Declare.
 	* printcmd.c (deprecated_print_address_numeric): Rename

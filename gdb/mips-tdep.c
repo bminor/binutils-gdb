@@ -5179,29 +5179,29 @@ _initialize_mips_tdep (void)
 
   /* Allow the user to override the saved register size. */
   add_setshow_enum_cmd ("saved-gpreg-size", class_obscure,
-			size_enums, &mips_abi_regsize_string, "\
-Set size of general purpose registers saved on the stack.\n", "\
-Show size of general purpose registers saved on the stack.\n", "\
+			size_enums, &mips_abi_regsize_string, _("\
+Set size of general purpose registers saved on the stack."), _("\
+Show size of general purpose registers saved on the stack."), _("\
 This option can be set to one of:\n\
   32    - Force GDB to treat saved GP registers as 32-bit\n\
   64    - Force GDB to treat saved GP registers as 64-bit\n\
   auto  - Allow GDB to use the target's default setting or autodetect the\n\
-          saved GP register size from information contained in the executable.\n\
-          (default: auto)",
-			NULL, /* PRINT: Size of general purpose registers saved on the stack is %s.  */
+          saved GP register size from information contained in the\n\
+          executable (default)."),
+			NULL, /* FIXME: i18n: Size of general purpose registers saved on the stack is %s.  */
 			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
   add_setshow_enum_cmd ("stack-arg-size", class_obscure,
-		       size_enums, &mips_stack_argsize_string, "\
-Set the amount of stack space reserved for each argument.\n", "\
-Show the amount of stack space reserved for each argument.\n", "\
+			size_enums, &mips_stack_argsize_string, _("\
+Set the amount of stack space reserved for each argument."), _("\
+Show the amount of stack space reserved for each argument."), _("\
 This option can be set to one of:\n\
   32    - Force GDB to allocate 32-bit chunks per argument\n\
   64    - Force GDB to allocate 64-bit chunks per argument\n\
   auto  - Allow GDB to determine the correct setting from the current\n\
-          target and executable (default)",
-			NULL, /* PRINT: The amount of stack space reserved for each argument is %s.  */
+          target and executable (default)"),
+			NULL, /* FIXME: i18n: The amount of stack space reserved for each argument is %s.  */
 			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
@@ -5247,45 +5247,49 @@ This option can be set to one of:\n\
      command.c doesn't deal with that.  So make it a var_zinteger
      because the user can always use "999999" or some such for unlimited.  */
   add_setshow_zinteger_cmd ("heuristic-fence-post", class_support,
-			    &heuristic_fence_post, "\
-Set the distance searched for the start of a function.\n", "\
-Show the distance searched for the start of a function.\n", "\
+			    &heuristic_fence_post, _("\
+Set the distance searched for the start of a function."), _("\
+Show the distance searched for the start of a function."), _("\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
-search.  The only need to set it is when debugging a stripped executable.",
-			    NULL, /* PRINT: The distance searched for the start of a function is %s.  */
+search.  The only need to set it is when debugging a stripped executable."),
+			    NULL, /* FIXME: i18n: The distance searched for the start of a function is %s.  */
 			    reinit_frame_cache_sfunc, NULL,
 			    &setlist, &showlist);
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
-  add_setshow_auto_boolean_cmd ("mask-address", no_class, &mask_address_var, "\
-Set zeroing of upper 32 bits of 64-bit addresses.", "\
-Show zeroing of upper 32 bits of 64-bit addresses.", "\
+  add_setshow_auto_boolean_cmd ("mask-address", no_class,
+				&mask_address_var, _("\
+Set zeroing of upper 32 bits of 64-bit addresses."), _("\
+Show zeroing of upper 32 bits of 64-bit addresses."), _("\
 Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
-allow GDB to determine the correct value.\n",
-				NULL, /* PRINT: Zerroing of upper 32 bits of 64-bit address is %s.  */
+allow GDB to determine the correct value."),
+				NULL, /* FIXME: i18n: Zerroing of upper 32 bits of 64-bit address is %s.  */
 				NULL, show_mask_address, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */
   add_setshow_boolean_cmd ("remote-mips64-transfers-32bit-regs", class_obscure,
-			   &mips64_transfers_32bit_regs_p, "\
-Set compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
-Show compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
+			   &mips64_transfers_32bit_regs_p, _("\
+Set compatibility with 64-bit MIPS target that transfers 32-bit quantities."),
+			   _("\
+Show compatibility with 64-bit MIPS target that transfers 32-bit quantities."),
+			   _("\
 Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
 that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
-64 bits for others.  Use \"off\" to disable compatibility mode",
-			   NULL, /* PRINT: Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.  */
- set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
+64 bits for others.  Use \"off\" to disable compatibility mode"),
+			   NULL, /* FIXME: i18n: Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.  */
+			   set_mips64_transfers_32bit_regs, NULL,
+			   &setlist, &showlist);
 
   /* Debug this files internals. */
   add_setshow_zinteger_cmd ("mips", class_maintenance,
-			    &mips_debug, "\
-Set mips debugging.\n", "\
-Show mips debugging.\n", "\
-When non-zero, mips specific debugging is enabled.\n",
-			    NULL, /* PRINT: Mips debugging is currently %s.  */
+			    &mips_debug, _("\
+Set mips debugging."), _("\
+Show mips debugging."), _("\
+When non-zero, mips specific debugging is enabled."),
+			    NULL, /* FIXME: i18n: Mips debugging is currently %s.  */
 			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }

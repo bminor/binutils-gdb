@@ -2872,12 +2872,13 @@ _initialize_hppa_tdep (void)
 	   &maintenanceprintlist);
 
   /* Debug this files internals. */
-  add_setshow_boolean_cmd ("hppa", class_maintenance, &hppa_debug, "\
-Set whether hppa target specific debugging information should be displayed.", "\
-Show whether hppa target specific debugging information is displayed.", "\
+  add_setshow_boolean_cmd ("hppa", class_maintenance, &hppa_debug, _("\
+Set whether hppa target specific debugging information should be displayed."),
+			   _("\
+Show whether hppa target specific debugging information is displayed."), _("\
 This flag controls whether hppa target specific debugging information is\n\
 displayed.  This information is particularly useful for debugging frame\n\
-unwinding problems.",
-			   NULL, /* PRINT hppa debug flag is %s.  */
+unwinding problems."),
+			   NULL, /* FIXME: i18n: hppa debug flag is %s.  */
 			   NULL, NULL, &setdebuglist, &showdebuglist);
 }

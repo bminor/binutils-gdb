@@ -1550,34 +1550,36 @@ Show backtrace variables such as the backtrace limit",
 		  0/*allow-unknown*/, &showlist);
 
   add_setshow_boolean_cmd ("past-main", class_obscure,
-			   &backtrace_past_main, "\
-Set whether backtraces should continue past \"main\".", "\
-Show whether backtraces should continue past \"main\".", "\
+			   &backtrace_past_main, _("\
+Set whether backtraces should continue past \"main\"."), _("\
+Show whether backtraces should continue past \"main\"."), _("\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
-of the stack trace.",
-			   NULL, /* PRINT: Whether backtraces should continue past \"main\" is %s.  */
+of the stack trace."),
+			   NULL, /* FIXME: i18n: Whether backtraces should continue past \"main\" is %s.  */
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
   add_setshow_boolean_cmd ("past-entry", class_obscure,
-			   &backtrace_past_entry, "\
-Set whether backtraces should continue past the entry point of a program.", "\
-Show whether backtraces should continue past the entry point of a program.", "\
+			   &backtrace_past_entry, _("\
+Set whether backtraces should continue past the entry point of a program."),
+			   _("\
+Show whether backtraces should continue past the entry point of a program."),
+			   _("\
 Normally there are no callers beyond the entry point of a program, so GDB\n\
 will terminate the backtrace there.  Set this variable if you need to see \n\
-the rest of the stack trace.",
-			   NULL, /* PRINT: Whether backtraces should continue past the entry point is %s.  */
+the rest of the stack trace."),
+			   NULL, /* FIXME: i18n: Whether backtraces should continue past the entry point is %s.  */
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,
-			    &backtrace_limit, "\
-Set an upper bound on the number of backtrace levels.", "\
-Show the upper bound on the number of backtrace levels.", "\
+			    &backtrace_limit, _("\
+Set an upper bound on the number of backtrace levels."), _("\
+Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
-Zero is unlimited.",
-			    NULL, /* PRINT: An upper bound on the number of backtrace levels is %s.  */
+Zero is unlimited."),
+			    NULL, /* FIXME: i18n: An upper bound on the number of backtrace levels is %s.  */
 			    NULL, NULL, &set_backtrace_cmdlist,
 			    &show_backtrace_cmdlist);
 

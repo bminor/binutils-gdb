@@ -1781,6 +1781,6 @@ _initialize_aix_thread (void)
 			    _("Set debugging of AIX thread module."),
 			    _("Show debugging of AIX thread module."),
 			    _("Enables debugging output (used to debug GDB)."),
-			    _("Debugging of AIX thread module is \"%d\"."),
+			    NULL, /* FIXME: i18n: Debugging of AIX thread module is \"%d\".  */
 			    NULL, NULL, &setdebuglist, &showdebuglist);
 }

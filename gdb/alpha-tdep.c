@@ -1586,16 +1586,13 @@ _initialize_alpha_tdep (void)
   /* We need to throw away the frame cache when we set this, since it
      might change our ability to get backtraces.  */
   add_setshow_zinteger_cmd ("heuristic-fence-post", class_support,
-			    &heuristic_fence_post,
-			    _("\
-Set the distance searched for the start of a function."),
-			    _("\
-Show the distance searched for the start of a function."),
-			    _("\
+			    &heuristic_fence_post, _("\
+Set the distance searched for the start of a function."), _("\
+Show the distance searched for the start of a function."), _("\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
 search.  The only need to set it is when debugging a stripped executable."),
-			    NULL, /* PRINT: The distance searched for the start of a function is \"%d\".  */
+			    NULL, /* FIXME: i18n: The distance searched for the start of a function is \"%d\".  */
 			    reinit_frame_cache_sfunc, NULL,
 			    &setlist, &showlist);
 }

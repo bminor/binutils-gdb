@@ -175,24 +175,24 @@ _initialize_cli_logging (void)
   add_prefix_cmd ("logging", class_support, show_logging_command,
 		  "Show logging options", &show_logging_cmdlist,
 		  "show logging ", 0, &showlist);
-  add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, "\
-Set whether logging overwrites or appends to the log file.", "\
-Show whether logging overwrites or appends to the log file.", "\
-If set, logging overrides the log file.",
-			   NULL, /* PRINT: Whether logging overwrites or appends to the log file is %s.  */
+  add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, _("\
+Set whether logging overwrites or appends to the log file."), _("\
+Show whether logging overwrites or appends to the log file."), _("\
+If set, logging overrides the log file."),
+			   NULL, /* FIXME: i18n: Whether logging overwrites or appends to the log file is %s.  */
 			   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
-  add_setshow_boolean_cmd ("redirect", class_support, &logging_redirect, "\
-Set the logging output mode.", "\
-Show the logging output mode.", "\
+  add_setshow_boolean_cmd ("redirect", class_support, &logging_redirect, _("\
+Set the logging output mode."), _("\
+Show the logging output mode."), _("\
 If redirect is off, output will go to both the screen and the log file.\n\
-If redirect is on, output will go only to the log file.",
-			   NULL, /* PRINT: The logging output mode is %s.  */
+If redirect is on, output will go only to the log file."),
+			   NULL, /* FIXME: i18n: The logging output mode is %s.  */
 			   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
-  add_setshow_filename_cmd ("file", class_support, &logging_filename, "\
-Set the current logfile.", "\
-Show the current logfile.", "\
-The logfile is used when directing GDB's output.",
-			    NULL, /* PRINT: The current logfile is %s.  */
+  add_setshow_filename_cmd ("file", class_support, &logging_filename, _("\
+Set the current logfile."), _("\
+Show the current logfile."), _("\
+The logfile is used when directing GDB's output."),
+			    NULL, /* FIXME: i18n: The current logfile is %s.  */
 			    NULL, NULL,
 			    &set_logging_cmdlist, &show_logging_cmdlist);
   add_cmd ("on", class_support, set_logging_on,

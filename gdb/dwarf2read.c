@@ -9643,17 +9643,13 @@ _initialize_dwarf2_read (void)
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_zinteger_cmd ("max-cache-age", class_obscure,
-			    &dwarf2_max_cache_age,
-			    "Set the upper bound on the age of cached "
-			    "dwarf2 compilation units.",
-			    "Show the upper bound on the age of cached "
-			    "dwarf2 compilation units.",
-			    "A higher limit means that cached "
-			    "compilation units will be stored\n"
-			    "in memory longer, and more total memory will "
-			    "be used.  Zero disables\n"
-			    "caching, which can slow down startup.",
-			    NULL, /* PRINT: The upper bound on the age of cached dwarf2 compilation units is %d.  */
+			    &dwarf2_max_cache_age, _("\
+Set the upper bound on the age of cached dwarf2 compilation units."), _("\
+Show the upper bound on the age of cached dwarf2 compilation units."), _("\
+A higher limit means that cached compilation units will be stored\n\
+in memory longer, and more total memory will be used.  Zero disables\n\
+caching, which can slow down startup."),
+			    NULL, /* FIXME: i18n: The upper bound on the age of cached dwarf2 compilation units is %d.  */
 			    NULL, NULL, &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
 }

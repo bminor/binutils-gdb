@@ -3916,19 +3916,19 @@ _initialize_cris_tdep (void)
   /* CRIS-specific user-commands.  */
   add_setshow_uinteger_cmd ("cris-version", class_support, 
 			    &usr_cmd_cris_version, 
-			    "Set the current CRIS version.",
-			    "Show the current CRIS version.",
-			    "Set if autodetection fails.",
-			    NULL, /* PRINT: Current CRIS version is %s.  */
+			    _("Set the current CRIS version."),
+			    _("Show the current CRIS version."),
+			    _("Set if autodetection fails."),
+			    NULL, /* FIXME: i18n: Current CRIS version is %s.  */
 			    set_cris_version, NULL,
 			    &setlist, &showlist);
   
   add_setshow_boolean_cmd ("cris-dwarf2-cfi", class_support,
 			   &usr_cmd_cris_dwarf2_cfi,
-			   "Set the usage of Dwarf-2 CFI for CRIS.",
-			   "Show the usage of Dwarf-2 CFI for CRIS.",
-			   "Set to \"off\" if using gcc-cris < R59.",
-			   NULL, /* PRINT: Usage of Dwarf-2 CFI for CRIS is %d.  */
+			   _("Set the usage of Dwarf-2 CFI for CRIS."),
+			   _("Show the usage of Dwarf-2 CFI for CRIS."),
+			   _("Set to \"off\" if using gcc-cris < R59."),
+			   NULL, /* FIXME: i18n: Usage of Dwarf-2 CFI for CRIS is %d.  */
 			   set_cris_dwarf2_cfi, NULL,
 			   &setlist, &showlist);
 

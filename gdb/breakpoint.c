@@ -7947,14 +7947,15 @@ pending breakpoint behavior",
 		  &breakpoint_show_cmdlist, "show breakpoint ",
 		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_auto_boolean_cmd ("pending", no_class, &pending_break_support, "\
-Set debugger's behavior regarding pending breakpoints.", "\
-Show debugger's behavior regarding pending breakpoints.", "\
+  add_setshow_auto_boolean_cmd ("pending", no_class,
+				&pending_break_support, _("\
+Set debugger's behavior regarding pending breakpoints."), _("\
+Show debugger's behavior regarding pending breakpoints."), _("\
 If on, an unrecognized breakpoint location will cause gdb to create a\n\
 pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
 an error.  If auto, an unrecognized breakpoint location results in a\n\
-user-query to see if a pending breakpoint should be created.",
-				NULL, /*  PRINT: Debugger's behavior regarding pending breakpoints is %s.  */
+user-query to see if a pending breakpoint should be created."),
+				NULL, /* FIXME: i18n: Debugger's behavior regarding pending breakpoints is %s.  */
 				NULL, NULL,
 				&breakpoint_set_cmdlist,
 				&breakpoint_show_cmdlist);
