@@ -24,12 +24,14 @@ Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	mtcrf instruction used.
 	(model_mon_info): Return structures counting the # of CRs that the
 	mtcrf instruction used.
+	(branches, sync instructions): Do not call model functions if
+	WITH_MODEL_ISSUE is 0.
 
 	* mon.c (stdlib.h): Include if the system supplies one.
  	(mon_sort_instruction_names): New function to sort instruction
 	names alphabetically.
 	(mon_print_info): Call qsort with mon_sort_instruction_names to
-	sort instruction names.
+	sort instruction names.  Don't abort if WITH_MODEL_ISSUE is 0.
 	
 	* debug.h (ITRACE): Make printf_filtered arguments type correct.
 	* idecode_expression.h (CR0_COMPARE): Ditto.

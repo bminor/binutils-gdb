@@ -1357,7 +1357,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
-	model_branches(cpu_model(processor), 1, -1);
+	if (WITH_MODEL_ISSUE)
+	  model_branches(cpu_model(processor), 1, -1);
 
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
@@ -1365,7 +1366,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	int M, ctr_ok, cond_ok, succeed;
-	if (! BO{0})
+	if (WITH_MODEL_ISSUE && ! BO{0})
 	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
@@ -1380,7 +1381,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed, BO);
+	if (WITH_MODEL_ISSUE)
+	  model_branches(cpu_model(processor), succeed, BO);
 	if (! BO{0}) {
 	  int reverse;
 	  if (BO{4}) {	/* branch prediction bit set, reverse sense of test */
@@ -1388,7 +1390,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  } else {	/* branch prediction bit not set */
 	    reverse = EXTS(BD_0b00) >= 0;
 	  }
-	  model_branch_predict(cpu_model(processor), reverse ? !succeed : succeed);
+	  if (WITH_MODEL_ISSUE)
+	    model_branch_predict(cpu_model(processor), reverse ? !succeed : succeed);
 	}
 
 0.19,6.BO,11.BI,16./,21.16,31.LK:XL:t::Branch Conditional to Link Register
@@ -1399,7 +1402,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	int M, ctr_ok, cond_ok, succeed;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
-	if (! BO{0})
+	if (WITH_MODEL_ISSUE && ! BO{0})
 	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	if (!BO{2}) CTR = CTR - 1;
 	ctr_ok = BO{2} || ((MASKED(CTR, M, 63) != 0) != BO{3});
@@ -1411,9 +1414,11 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed, BO);
-	if (! BO{0})
-	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
+	if (WITH_MODEL_ISSUE) {
+	  model_branches(cpu_model(processor), succeed, BO);
+	  if (! BO{0})
+	    model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
+	}
 
 0.19,6.BO,11.BI,16./,21.528,31.LK:XL:t::Branch Conditional to Count Register
 *601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
@@ -1421,7 +1426,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	int cond_ok, succeed;
-	if (! BO{0})
+	if (WITH_MODEL_ISSUE && ! BO{0})
 	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	cond_ok = BO{0} || (CR{BI} == BO{1});
 	if (cond_ok) {
@@ -1431,9 +1436,11 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  succeed = 0;
 	if (LK) LR = (spreg)IEA(CIA + 4);
-	model_branches(cpu_model(processor), succeed, BO);
-	if (! BO{0})
-	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
+	if (WITH_MODEL_ISSUE) {
+	  model_branches(cpu_model(processor), succeed, BO);
+	  if (! BO{0})
+	    model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
+	}
 
 #
 # I.2.4.2 System Call Instruction
@@ -1443,7 +1450,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	model_serialize(my_index, cpu_model(processor));
+	if (WITH_MODEL_ISSUE)
+	  model_serialize(my_index, cpu_model(processor));
 	system_call_interrupt(processor, cia);
 
 #

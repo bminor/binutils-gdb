@@ -265,7 +265,7 @@ mon_print_info(psim *system,
       printf_filtered ("\n");
     }
 
-    if (CURRENT_MODEL)
+    if (WITH_MODEL_ISSUE)
       {
 	model_data *model_ptr = cpu_model(psim_cpu(system, cpu_nr));
 	model_print *ptr = model_mon_info(model_ptr);
