@@ -1,3 +1,7 @@
+2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* NEWS: Move "set logging" entry into GDB 6.0 section.
+
 2003-07-02  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (struct frame_extra_info): new member:
