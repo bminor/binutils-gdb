@@ -26,7 +26,7 @@
 	config/ia64/xm-aix.h: New files.
 	* ia64-tdep.c (_initialize_ia64_tdep): Remove declaration.
 	(ia64_aix_sigcontext_register_address): New declaration.
-	(ia64_gdbarch_init): Provide for intialization of 
+	(ia64_gdbarch_init): Provide for initialization of 
 	sigcontext_register_address member of struct tdep when
 	on target is detected to be running AIX.
 	* config/ia64/linux.mt (TDEPFILES): Add ia64-aix-tdep.o to
