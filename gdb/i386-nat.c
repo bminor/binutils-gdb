@@ -28,7 +28,7 @@
 
    This provides several functions for inserting and removing
    hardware-assisted breakpoints and watchpoints, testing if
-   one or more of the watchpoints triggerd and at what address,
+   one or more of the watchpoints triggered and at what address,
    checking whether a given region can be watched, etc.
 
    A target which wants to use these functions should define

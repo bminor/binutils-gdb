@@ -7,6 +7,7 @@
 
 2001-04-17  Michael Snyder  <msnyder@redhat.com>
 
+	* i386-nat.c: Fix typo in comment.
 	* solib.c (no_shared_libraries): New function.  Discard all symbols
 	from shared libraries.
 	(_initialize_solib): Add command "nosharedlibrary" as complement
