@@ -1,3 +1,9 @@
+Thu Jul  8 14:41:43 1993  Mark Eichin  (eichin@cygnus.com)
+
+	* config/tc-i960.c (md_create_short_jump, md_create_long_jump,
+	md_number_to_chars, md_section_align): Adjusted to use valueT,
+	addressT, to match tc.h.
+
 Thu Jul  8 14:15:05 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (s_common): Revamp to handle both syntaxes,
