@@ -1,5 +1,11 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
+	From Ian Lance Taylor <ian@airs.com>:
+        * hw_nvram.c (hw_nvram_init_address): Correct call to memset--swap
+        second and third arguments.
+
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
 	* hw_com.c (hw_com_device_init_data): Check that the output, and
 	not input file opened.  Pointed out by masahino tky3.3web.ne.jp.
 
