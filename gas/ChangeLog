@@ -3,6 +3,8 @@ Thu Jul 20 13:00:56 1995  Ken Raeburn  <raeburn@cygnus.com>
 	* config/tc-m68k.c (md_convert_frag): Rename argument seg to sec,
 	since seg is a macro name in this file.
 
+	* configure.in (arm-*-riscix*): Don't set emulation.
+
 Wed Jul 19 16:08:29 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/obj-coff.h (TE_PE): Delete.
