@@ -42,6 +42,139 @@
 
 void _initialize_values (void);
 
+struct value
+{
+  /* Type of value; either not an lval, or one of the various
+     different possible kinds of lval.  */
+  enum lval_type lval;
+
+  /* Is it modifiable?  Only relevant if lval != not_lval.  */
+  int modifiable;
+
+  /* Location of value (if lval).  */
+  union
+  {
+    /* If lval == lval_memory, this is the address in the inferior.
+       If lval == lval_register, this is the byte offset into the
+       registers structure.  */
+    CORE_ADDR address;
+
+    /* Pointer to internal variable.  */
+    struct internalvar *internalvar;
+  } location;
+
+  /* Describes offset of a value within lval of a structure in bytes.
+     If lval == lval_memory, this is an offset to the address.  If
+     lval == lval_register, this is a further offset from
+     location.address within the registers structure.  Note also the
+     member embedded_offset below.  */
+  int offset;
+
+  /* Only used for bitfields; number of bits contained in them.  */
+  int bitsize;
+
+  /* Only used for bitfields; position of start of field.  For
+     BITS_BIG_ENDIAN=0 targets, it is the position of the LSB.  For
+     BITS_BIG_ENDIAN=1 targets, it is the position of the MSB. */
+  int bitpos;
+
+  /* Frame register value is relative to.  This will be described in
+     the lval enum above as "lval_register".  */
+  struct frame_id frame_id;
+
+  /* Type of the value.  */
+  struct type *type;
+
+  /* If a value represents a C++ object, then the `type' field gives
+     the object's compile-time type.  If the object actually belongs
+     to some class derived from `type', perhaps with other base
+     classes and additional members, then `type' is just a subobject
+     of the real thing, and the full object is probably larger than
+     `type' would suggest.
+
+     If `type' is a dynamic class (i.e. one with a vtable), then GDB
+     can actually determine the object's run-time type by looking at
+     the run-time type information in the vtable.  When this
+     information is available, we may elect to read in the entire
+     object, for several reasons:
+
+     - When printing the value, the user would probably rather see the
+     full object, not just the limited portion apparent from the
+     compile-time type.
+
+     - If `type' has virtual base classes, then even printing `type'
+     alone may require reaching outside the `type' portion of the
+     object to wherever the virtual base class has been stored.
+
+     When we store the entire object, `enclosing_type' is the run-time
+     type -- the complete object -- and `embedded_offset' is the
+     offset of `type' within that larger type, in bytes.  The
+     value_contents() macro takes `embedded_offset' into account, so
+     most GDB code continues to see the `type' portion of the value,
+     just as the inferior would.
+
+     If `type' is a pointer to an object, then `enclosing_type' is a
+     pointer to the object's run-time type, and `pointed_to_offset' is
+     the offset in bytes from the full object to the pointed-to object
+     -- that is, the value `embedded_offset' would have if we followed
+     the pointer and fetched the complete object.  (I don't really see
+     the point.  Why not just determine the run-time type when you
+     indirect, and avoid the special case?  The contents don't matter
+     until you indirect anyway.)
+
+     If we're not doing anything fancy, `enclosing_type' is equal to
+     `type', and `embedded_offset' is zero, so everything works
+     normally.  */
+  struct type *enclosing_type;
+  int embedded_offset;
+  int pointed_to_offset;
+
+  /* Values are stored in a chain, so that they can be deleted easily
+     over calls to the inferior.  Values assigned to internal
+     variables or put into the value history are taken off this
+     list.  */
+  struct value *next;
+
+  /* Register number if the value is from a register.  */
+  short regnum;
+
+  /* If zero, contents of this value are in the contents field.  If
+     nonzero, contents are in inferior memory at address in the
+     location.address field plus the offset field (and the lval field
+     should be lval_memory).
+
+     WARNING: This field is used by the code which handles watchpoints
+     (see breakpoint.c) to decide whether a particular value can be
+     watched by hardware watchpoints.  If the lazy flag is set for
+     some member of a value chain, it is assumed that this member of
+     the chain doesn't need to be watched as part of watching the
+     value itself.  This is how GDB avoids watching the entire struct
+     or array when the user wants to watch a single struct member or
+     array element.  If you ever change the way lazy flag is set and
+     reset, be sure to consider this use as well!  */
+  char lazy;
+
+  /* If nonzero, this is the value of a variable which does not
+     actually exist in the program.  */
+  char optimized_out;
+
+  /* Actual contents of the value.  For use of this value; setting it
+     uses the stuff above.  Not valid if lazy is nonzero.  Target
+     byte-order.  We force it to be aligned properly for any possible
+     value.  Note that a value therefore extends beyond what is
+     declared here.  */
+  union
+  {
+    bfd_byte contents[1];
+    DOUBLEST force_doublest_align;
+    LONGEST force_longest_align;
+    CORE_ADDR force_core_addr_align;
+    void *force_pointer_align;
+  } aligner;
+  /* Do not add any new members here -- contents above will trash
+     them.  */
+};
+
 /* Prototypes for local functions. */
 
 static void show_values (char *, int);
