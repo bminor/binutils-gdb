@@ -1,3 +1,9 @@
+Thu Sep  4 17:45:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Add memory before parsing arguments.
+	(sim_read): Delete, replace with sim-hrw.
+	(sim_write): Delete, replace with sim-hrw.
+
 Thu Sep  4 10:48:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_open): Use sim_do_command to add memory, only

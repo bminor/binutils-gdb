@@ -50,11 +50,25 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct _bfd *abfd,
 	  char **argv)
 {
+  char *buf;
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
 
+#define TIC80_MEM_START 0x2000000
+#define TIC80_MEM_SIZE 0x100000
+
+  /* main memory */
+  asprintf (&buf, "memory region 0x%lx,0x%lx",
+	    TIC80_MEM_START, TIC80_MEM_SIZE);
+  sim_do_command (sd, buf);
+  free (buf);
+  /* interrupt memory */
+  sim_do_command (sd, "memory region 0x1010000,0x1000");
+  /* some memory at zero */
+  sim_do_command (sd, "memory region 0,0x100000");
+  
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
@@ -92,23 +106,6 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-#define TIC80_MEM_START 0x2000000
-#define TIC80_MEM_SIZE 0x100000
-
-  if (!STATE_MEMOPT_P (sd))
-    {
-      char *buf;
-      /* main memory */
-      asprintf (&buf, "memory region 0x%lx,0x%lx",
-		TIC80_MEM_START, TIC80_MEM_SIZE);
-      sim_do_command (sd, buf);
-      free (buf);
-      /* interrupt memory */
-      sim_do_command (sd, "memory region 0x1010000,0x1000");
-      /* some memory at zero */
-      sim_do_command (sd, "memory region 0,0x100000");
-    }
-
  /* FIXME: for now */
   return sd;
 }
@@ -120,22 +117,6 @@ sim_close (SIM_DESC sd, int quitting)
   /* Uninstall the modules to avoid memory leaks,
      file descriptor leaks, etc.  */
   sim_module_uninstall (sd);
-}
-
-
-int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
-{
-  return sim_core_read_buffer (sd, NULL, sim_core_write_map,
-			       buf, mem, length);
-}
-
-
-int
-sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
-{
-  return sim_core_write_buffer (sd, NULL, sim_core_write_map,
-				buf, mem, length);
 }
 
 

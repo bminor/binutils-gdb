@@ -202,7 +202,6 @@ typedef struct {
 
   /* memory-options for managing the core */
 #define STATE_MEMOPT(sd) ((sd)->base.memopt)
-#define STATE_MEMOPT_P(sd) (STATE_MEMOPT (sd) != NULL)
   sim_memopt *memopt;
 
   /* event handler */

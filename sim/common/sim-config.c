@@ -20,6 +20,7 @@
 
 
 #include "sim-main.h"
+#include "sim-assert.h"
 #include "bfd.h"
 
 
@@ -135,6 +136,7 @@ SIM_RC
 sim_config (SIM_DESC sd)
 {
   int prefered_target_byte_order;
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* extract all relevant information */
   if (STATE_PROG_BFD (sd) == NULL)

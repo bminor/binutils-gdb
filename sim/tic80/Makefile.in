@@ -16,6 +16,7 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o \
 	sim-events.o \
 	sim-core.o \
 	sim-hload.o \
+	sim-hrw.o \
 	sim-io.o \
 	sim-utils.o \
 	sim-load.o \

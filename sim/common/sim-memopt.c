@@ -48,8 +48,11 @@ static DECLARE_OPTION_HANDLER (memory_option_handler);
 
 static const OPTION memory_options[] =
 {
+  { {"memory-delete", optional_argument, NULL, OPTION_MEMORY_DELETE },
+      '\0', "ADDRESS", "Delete memory at ADDRESS (all addresses)",
+      memory_option_handler },
   { {"delete-memory", required_argument, NULL, OPTION_MEMORY_DELETE },
-      '\0', "ADDRESS", "Delete memory at ADDRESS",
+      '\0', "ADDRESS", NULL,
       memory_option_handler },
 
   { {"memory-region", required_argument, NULL, OPTION_MEMORY_REGION },
@@ -68,12 +71,69 @@ static const OPTION memory_options[] =
       '\0', NULL, "Clear all memory regions",
       memory_option_handler },
 
+  { {"memory-info", no_argument, NULL, OPTION_MEMORY_INFO },
+      '\0', NULL, "List configurable memory regions",
+      memory_option_handler },
   { {"info-memory", no_argument, NULL, OPTION_MEMORY_INFO },
-      '\0', NULL, "Add memory at address zero",
+      '\0', NULL, NULL,
       memory_option_handler },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
+
+
+static sim_memopt *
+do_memopt_add (sd, addr, nr_bytes, modulo, entry, buffer)
+     SIM_DESC sd;
+     address_word addr;
+     address_word nr_bytes;
+     unsigned modulo;
+     sim_memopt **entry;
+     void *buffer;
+{
+  sim_core_attach (sd, NULL,
+		   attach_raw_memory, access_read_write_exec, 0,
+		   addr, nr_bytes, modulo, NULL, buffer);
+  while ((*entry) != NULL)
+    entry = &(*entry)->next;
+  (*entry) = ZALLOC (sim_memopt);
+  (*entry)->addr = addr;
+  (*entry)->nr_bytes = nr_bytes;
+  (*entry)->modulo = modulo;
+  (*entry)->buffer = buffer;
+  return (*entry);
+}
+
+static SIM_RC
+do_memopt_delete (sd, addr)
+     SIM_DESC sd;
+     address_word addr;
+{
+  sim_memopt **entry = &STATE_MEMOPT (sd);
+  sim_memopt *alias;
+  while ((*entry) != NULL && (*entry)->addr != addr)
+    entry = &(*entry)->next;
+  if ((*entry) == NULL)
+    {
+      sim_io_eprintf (sd, "Memory at 0x%lx not found, not deleted\n",
+		      (long) addr);
+      return SIM_RC_FAIL;
+    }
+  /* delete any buffer */
+  if ((*entry)->buffer != NULL)
+    zfree ((*entry)->buffer);
+  /* delete it and its aliases */
+  alias = *entry;
+  *entry = alias->next;
+  while (alias != NULL)
+    {
+      sim_memopt *dead = alias;
+      alias = alias->alias;
+      sim_core_detach (sd, NULL, attach_raw_memory, 0, dead->addr);
+      zfree (dead);
+    }
+  return SIM_RC_OK;
+}
 
 
 static SIM_RC
@@ -87,33 +147,17 @@ memory_option_handler (sd, opt, arg, is_command)
     {
 
     case OPTION_MEMORY_DELETE:
-      {
-	address_word addr = strtoul (arg, NULL, 0);
-	sim_memopt **entry = &STATE_MEMOPT (sd);
-	sim_memopt *alias;
-	while ((*entry) != NULL && (*entry)->addr != addr)
-	  entry = &(*entry)->next;
-	if ((*entry) == NULL)
-	  {
-	    sim_io_eprintf (sd, "Memory at 0x%lx not found, not deleted\n",
-			    (long) addr);
-	    return SIM_RC_FAIL;
-	  }
-	/* delete any buffer */
-	if ((*entry)->buf != NULL)
-	  zfree ((*entry)->buf);
-	/* delete it and its aliases */
-	alias = *entry;
-	*entry = alias->next;
-	while (alias != NULL)
-	  {
-	    sim_memopt *dead = alias;
-	    alias = alias->alias;
-	    sim_core_detach (sd, NULL, attach_raw_memory, 0, dead->addr);
-	    zfree (dead);
-	  }
-	return SIM_RC_OK;
-      }
+      if (arg == NULL)
+	{
+	  while (STATE_MEMOPT (sd) != NULL)
+	    do_memopt_delete (sd, STATE_MEMOPT (sd)->addr);
+	  return SIM_RC_OK;
+	}
+      else
+	{
+	  address_word addr = strtoul (arg, NULL, 0);
+	  return do_memopt_delete (sd, addr);
+	}
     
     case OPTION_MEMORY_REGION:
       {
@@ -121,7 +165,6 @@ memory_option_handler (sd, opt, arg, is_command)
 	address_word addr = 0;
 	address_word nr_bytes = 0;
 	unsigned modulo = 0;
-	sim_memopt **entry = &STATE_MEMOPT (sd);
 	/* parse the arguments */
 	addr = strtoul (chp, &chp, 0);
 	if (*chp != ',')
@@ -133,31 +176,48 @@ memory_option_handler (sd, opt, arg, is_command)
 	nr_bytes = strtoul (chp, &chp, 0);
 	if (*chp == ',')
 	  modulo = strtoul (chp + 1, NULL, 0);
-	/* try to attach it */
-	sim_core_attach (sd, NULL,
-			 attach_raw_memory, access_read_write_exec, 0,
-			 addr, nr_bytes, modulo, NULL, NULL);
-	/* ok, so insert it */
-	while ((*entry) != NULL)
-	  entry = &(*entry)->next;
-	(*entry) = ZALLOC (sim_memopt);
-	(*entry)->addr = addr;
-	(*entry)->nr_bytes = nr_bytes;
-	(*entry)->modulo = modulo;
+	/* try to attach/insert it */
+	do_memopt_add (sd, addr, nr_bytes, modulo, &STATE_MEMOPT (sd), NULL);
 	return SIM_RC_OK;
       }
 
     case OPTION_MEMORY_ALIAS:
       {
-	sim_io_eprintf (sd, "memory-alias not supported for for this simulator\n");
-	break;
+	char *chp = arg;
+	address_word addr = 0;
+	address_word nr_bytes = 0;
+	sim_memopt *entry;
+	/* parse the arguments */
+	addr = strtoul (chp, &chp, 0);
+	if (*chp != ',')
+	  {
+	    sim_io_eprintf (sd, "Missing size for memory-region\n");
+	    return SIM_RC_FAIL;
+	  }
+	chp++;
+	nr_bytes = strtoul (chp, &chp, 0);
+	/* try to attach/insert the main record */
+	entry = do_memopt_add (sd, addr, nr_bytes, 0/*modulo*/,
+			       &STATE_MEMOPT (sd), zalloc (nr_bytes));
+	/* now attach all the aliases */
+	while (*chp == ',')
+	  {
+	    address_word alias;
+	    chp++;
+	    alias = strtoul (chp, &chp, 0);
+	    do_memopt_add (sd, alias, nr_bytes, 0/*modulo*/,
+			   &entry->alias, entry->buffer);
+	  }
+	return SIM_RC_OK;
       }
 
     case OPTION_MEMORY_SIZE:
       {
-	sim_io_eprintf (sd, "memory-size not supported for for this simulator\n");
-	return SIM_RC_FAIL;
-	break;
+	address_word nr_bytes = strtoul (arg, NULL, 0);
+	/* try to attach/insert it */
+	do_memopt_add (sd, 0/*addr*/, nr_bytes, 0/*modulo*/,
+		       &STATE_MEMOPT (sd), NULL);
+	return SIM_RC_OK;
       }
 
     case OPTION_MEMORY_CLEAR:
@@ -206,8 +266,10 @@ memory_option_handler (sd, opt, arg, is_command)
 		sim_io_printf (sd, " alias 0x%08lx,0x%lx",
 			       (long) entry->addr,
 			       (long) entry->nr_bytes);
-		for (alias = entry->alias; alias != NULL; alias = alias->next)
-		  sim_io_printf (sd, ",0x%08lx", entry->addr);
+		for (alias = entry->alias;
+		     alias != NULL;
+		     alias = alias->next)
+		  sim_io_printf (sd, ",0x%08lx", alias->addr);
 	      }
 	    sim_io_printf (sd, "\n");
 	  }

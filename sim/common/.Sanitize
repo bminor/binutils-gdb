@@ -66,6 +66,7 @@ sim-events.h
 sim-fpu.c
 sim-fpu.h
 sim-hload.c
+sim-hrw.c
 sim-inline.c
 sim-inline.h
 sim-io.c

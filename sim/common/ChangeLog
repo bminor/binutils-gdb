@@ -1,5 +1,23 @@
 Thu Sep  4 09:27:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-config.c (sim_config): Add assert for SIM_MAGIC_NUMBER.
+
+	* sim-utils.h (NZALLOC): Define - zalloc * N.
+
+	* sim-hrw.c (sim_read, sim_write): New file.  Provide generic
+ 	implementation of read/write functions.
+
+	* Make-common.in (sim-hrw.o): New target.
+
+	* sim-base.h (STATE_MEMOPT_P): Delete, simulators _always_ add
+ 	memory.
+
+	* sim-memopt.c (memory_option_handler): Implement memory-size
+ 	command. Implement memory-alias command.  Let memory-delete delete
+ 	all memory regions.
+	(add_memopt): New function.  Add a memory region.
+	(do_memopt_delete): New function. Delete a memory region.
+
 	* sim-utils.c (sim_elapsed_time_get): Never return zero.
 
 	* sim-core.c (sim_core_detach): New function.

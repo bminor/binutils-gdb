@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void *zalloc (unsigned long size);
 
 #define ZALLOC(TYPE) (TYPE*)zalloc(sizeof (TYPE))
+#define NZALLOC(TYPE,N) (TYPE*)zalloc(sizeof (TYPE) * (N))
 
 void zfree(void*);
 
