@@ -1,3 +1,10 @@
+Wed Jan  4 11:35:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add note about "handle all nostop".
+
+	* gdb.base/{sigall.c, sigall.exp}: New test.
+	* gdb.base/Makefile.in: Add it.
+
 Thu Jan  5 17:34:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* lib/gdb.exp, gdb.base/corefile.exp: Supply -nw as argument

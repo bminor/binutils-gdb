@@ -183,6 +183,10 @@ compiler dependencies.
 Test more obscure wait_for_inferior cases, expanding on the tests in
 watchpoint.exp, signals.exp, etc.
 
+Test "handle all nostop".  Right now this is buggy--it (a) prints "?"
+for "Unknown signal", (b) prints signal zero (bug or feature?), (c)
+dumps core when it is done.
+
 Test that the copyright year in the startup message matches the
 current year (would produce a single spurious FAIL on old GDB's, but
 probably still a good idea).
