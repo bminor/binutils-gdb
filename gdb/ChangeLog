@@ -1,3 +1,8 @@
+Fri Oct 25 16:06:38 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* coffread.c, coredep.c, i386-xdep.c:  install patches for
+	SysV/386 3.2 from Mauro DePalma.
+
 Fri Oct 25 02:02:13 1991  John Gilmore  (gnu at cygnus.com)
 
 	* core.c (core_file_info), exec.c (exec_file_info):  Print file
