@@ -990,7 +990,7 @@ Add @var{directory} to the path to search for source files.
 supported on all systems.}@*
 If memory-mapped files are available on your system through the @code{mmap}
 system call, you can use this option 
-to cause _GDBN__ to write the symbols from your
+to have _GDBN__ write the symbols from your
 program into a reusable file in the current directory.  If the program you are debugging is
 called @file{/tmp/fred}, the mapped symbol file will be @file{./fred.syms}.
 Future _GDBN__ debugging sessions will notice the presence of this file,
@@ -2112,8 +2112,11 @@ the breakpoints are conditional, this is even useful
 _GDBN__ itself sometimes sets breakpoints in your program for special
 purposes, such as proper handling of @code{longjmp} (in C programs).
 These internal breakpoints are assigned negative numbers, starting with
-@code{-1}; @samp{info breakpoints} does not display them, but the
-similar command @samp{info all-breakpoints} does.
+@code{-1}; @samp{info breakpoints} does not display them.
+@ignore
+@c FIXME! Moved to maint; doc when maint details avail.
+You can see these breakpoints with the _GDBN__ maintenance command
+@samp{maint info breakpoints}.
 
 @table @code
 @kindex all-breakpoints
@@ -2146,6 +2149,7 @@ Temporary internal breakpoint used by the _GDBN__ @code{finish} command.
 @end table
 
 @end table
+@end ignore
 
 
 @node Set Watchpoints, Exception Handling, Set Breaks, Breakpoints
@@ -4569,8 +4573,11 @@ source files, and examining their extensions:
 Modula-2 source file
 
 @item *.c
+C source file
+
+@item *.C
 @itemx *.cc
-C or C++ source file.
+C++ source file
 @end table
 
 This information is recorded for each function or procedure in a source
@@ -4778,8 +4785,7 @@ being set automatically by _GDBN__.
 @node Support,  , Checks, Languages
 @section Supported Languages
 
-_GDBN__ 4 supports C, C++, and Modula-2.  The syntax for C and C++ is so
-closely related that _GDBN__ does not distinguish the two.  Some _GDBN__
+_GDBN__ 4 supports C, C++, and Modula-2.  Some _GDBN__
 features may be used in expressions regardless of the language you
 use: the _GDBN__ @code{@@} and @code{::} operators, and the
 @samp{@{type@}addr} construct (@pxref{Expressions, ,Expressions}) can be
@@ -4803,9 +4809,9 @@ look to these for a language reference or tutorial.
 @cindex C and C++
 
 @cindex expressions in C or C++
-Since C and C++ are so closely related, _GDBN__ does not distinguish
-between them when interpreting the expressions recognized in _GDBN__
-commands.
+Since C and C++ are so closely related, many features of _GDBN__ apply
+to both languages.  Whenever this is the case, we discuss both languages
+together.
 
 @cindex C++
 @kindex g++
@@ -5097,12 +5103,12 @@ debugging (@pxref{Variables, ,Program Variables}).
 
 If you allow _GDBN__ to set type and range checking automatically, they
 both default to @code{off} whenever the working language changes to
-C/C++.  This happens regardless of whether you, or _GDBN__,
+C or C++.  This happens regardless of whether you, or _GDBN__,
 selected the working language.
 
 If you allow _GDBN__ to set the language automatically, it sets the
-working language to C/C++ on entering code compiled from a source file
-whose name ends with @file{.c} or @file{.cc}.
+working language to C or C++ on entering code compiled from a source file
+whose name ends with @file{.c}, @file{.C}, or @file{.cc}.
 @xref{Automatically, ,Having _GDBN__ infer the source language}, for
 further details.
 
@@ -5786,6 +5792,9 @@ from the @code{ptype} command can be overwhelming and hard to use.  The
 which match the regular-expression @var{regexp}.
 @end ignore
 
+@ignore
+@c FIXME!! The following have been subsumed into a new "maint" command.
+@c restore descriptions in right place when details of maint available.
 @item printsyms @var{filename}
 @itemx printpsyms @var{filename}
 @itemx printmsyms @var{filename}
@@ -5808,6 +5817,7 @@ each object file from which _GDBN__ has read some symbols.  The description of
 @code{symbol-file} explains how _GDBN__ reads symbols; both @code{info
 source} and @code{symbol-file} are described in @ref{Files, ,Commands
 to Specify Files}.
+@end ignore
 @end table
 
 @node Altering, _GDBN__ Files, Symbols, Top
