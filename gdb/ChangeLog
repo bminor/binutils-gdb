@@ -1,3 +1,8 @@
+2003-08-10  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): Use xstrprintf instead of
+	sprintf.  Make "name" constant.
+
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (i387_register_to_value): Use get_frame_register

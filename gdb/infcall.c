@@ -937,7 +937,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (stopped_by_random_signal || !stop_stack_dummy)
     {
       /* Find the name of the function we're about to complain about.  */
-      char *name = NULL;
+      const char *name = NULL;
       {
 	struct symbol *symbol = find_pc_function (funaddr);
 	if (symbol)
@@ -949,17 +949,17 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    if (msymbol)
 	      name = SYMBOL_PRINT_NAME (msymbol);
 	  }
+	if (name == NULL)
+	  {
+	    /* Can't use a cleanup here.  It is discarded, instead use
+               an alloca.  */
+	    char *tmp = xstrprintf ("at %s", local_hex_string (funaddr));
+	    char *a = alloca (strlen (tmp) + 1);
+	    strcpy (a, tmp);
+	    xfree (tmp);
+	    name = a;
+	  }
       }
-      if (name == NULL)
-	{
-	  /* NOTE: cagney/2003-04-23: Don't blame me.  This code dates
-             back to 1993-07-08, I simply moved it.  */
-	  char format[80];
-	  sprintf (format, "at %s", local_hex_format ());
-	  name = alloca (80);
-	  /* FIXME-32x64: assumes funaddr fits in a long.  */
-	  sprintf (name, format, (unsigned long) funaddr);
-	}
       if (stopped_by_random_signal)
 	{
 	  /* We stopped inside the FUNCTION because of a random
