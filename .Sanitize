@@ -180,7 +180,7 @@ if [ -n "${verbose}" ] ; then
 	echo Processing \"arc\"...
 fi
 
-arc_files="config.sub configure.in"
+arc_files="config.sub configure.in cfg-ml-com.in"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
