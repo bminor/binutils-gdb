@@ -250,34 +250,6 @@ Things-to-lose:
 
 Do-last:
 
-rce_files="ChangeLog ChangeLog.2 Makefile.in archures.c bfd-in2.h config.bfd configure.in configure targets.c aoutx.h libaout.h"
-if ( echo $* | grep keep\-rce > /dev/null ) ; then
-	for i in $rce_files ; do
-		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping rce stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $rce_files ; do
-		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"rce\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-rce/,/end-\sanitize\-rce/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 arc_files="ChangeLog ChangeLog.2 Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
