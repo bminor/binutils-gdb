@@ -1,3 +1,9 @@
+2003-02-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (prev_reloc_op_frag): New variable.
+	(macro): Check it to decide whether a new frag is needed.
+	(my_getSmallExpression): Set it.
+
 2003-02-20  jmc  <jmc@prioris.mini.pw.edu.pl>
 
 	* cgen.c: Fix typo: intial -> initial.

@@ -555,6 +555,11 @@ struct mips_hi_fixup
 
 static struct mips_hi_fixup *mips_hi_fixup_list;
 
+/* The frag containing the last explicit relocation operator.
+   Null if explicit relocations have not been used.  */
+
+static fragS *prev_reloc_op_frag;
+
 /* Map normal MIPS register numbers to mips16 register numbers.  */
 
 #define X ILLEGAL_REG
@@ -4106,10 +4111,13 @@ macro (ip)
      #2.  This would confuse tc_gen_reloc, which expects the relocations
      for #2 to be the last for that frag.
 
-     If it looks like this situation could happen, put the macro
-     in a new frag.  */
-  if (mips_hi_fixup_list != 0
-      && mips_hi_fixup_list->fixp->fx_frag == frag_now)
+     Also, if tc_gen_reloc sees certain relocations in a variant frag,
+     it assumes that they belong to a relaxable macro.  We mustn't put
+     other uses of such relocations into a variant frag.
+
+     To avoid both problems, finish the current frag it contains a
+     %reloc() operator.  The macro then goes into a new frag.  */
+  if (prev_reloc_op_frag == frag_now)
     {
       frag_wane (frag_now);
       frag_new (0);
@@ -10103,9 +10111,14 @@ my_getSmallExpression (ep, reloc, str)
 
   expr_end = str;
 
-  reloc[0] = BFD_RELOC_LO16;
-  for (i = 0; i < reloc_index; i++)
-    reloc[i] = reversed_reloc[reloc_index - 1 - i];
+  if (reloc_index == 0)
+    reloc[0] = BFD_RELOC_LO16;
+  else
+    {
+      prev_reloc_op_frag = frag_now;
+      for (i = 0; i < reloc_index; i++)
+	reloc[i] = reversed_reloc[reloc_index - 1 - i];
+    }
 
   return reloc_index;
 }
