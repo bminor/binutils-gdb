@@ -1,5 +1,24 @@
 -*- text -*-
 
+Changes in binutils 2.10:
+
+* objcopy now takes --change-section-lma, --change-section-vma, and
+  --change-section-address options.  The old --adjust-section-vma option is
+  equivalent to --change-section-address.  The other --adjust-* options are now
+  renamed to --change-*, although --adjust-* continues to work.
+
+* dlltool now supports the IMPORTS command.
+
+Changes in binutils 2.9:
+
+* Added windres program, which can be used to manipulate resources in WIN32
+  files as used on Windows 95 and Windows NT.
+
+* The objcopy --gap-fill and --pad-to options operate on the LMA rather than
+  the VMA of the sections.
+
+* Added S modifier to ar to not build a symbol table.
+
 Changes in binutils 2.8:
 
 * The objdump disassembly format has been changed, and hopefully improved.  Use
@@ -23,6 +42,8 @@ Changes in binutils 2.8:
 * Added --adjust-vma option to objdump.
 
 * Added -C/--demangle option to objdump.
+
+* Added -p/--preserve-dates option to strip and objcopy.
 
 Changes in binutils 2.7:
 
