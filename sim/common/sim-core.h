@@ -138,6 +138,13 @@ EXTERN_SIM_CORE\
  void *optional_buffer);
 
 
+/* Utility to return the name of a map.  */
+
+EXTERN_SIM_CORE\
+(const char *) sim_core_map_to_str
+(sim_core_maps);
+
+
 /* Delete a memory space within the core.
 
  */
@@ -240,38 +247,45 @@ EXTERN_SIM_CORE\
    order (including xor endian).  Should the transfer fail, the
    operation shall abort (no return).
 
-   The aligned alternative makes the assumption that that the address
-   is N byte aligned (no alignment checks are made).
+   ALIGNED assumes yhat the specified ADDRESS is correctly alligned
+   for an N byte transfer (no alignment checks are made).  Passing an
+   incorrectly aligned ADDRESS is erroneous.
 
-   The unaligned alternative checks the address for correct byte
-   alignment.  Action, as defined by WITH_ALIGNMENT, being taken
-   should the check fail.
+   UNALIGNED checks/modifies the ADDRESS according to the requirements
+   of an N byte transfer. Action, as defined by WITH_ALIGNMENT, being
+   taken should the check fail.
+
+   MISSALIGNED transfers the data regardless.
 
    Misaligned xor-endian accesses are broken into a sequence of
    transfers each <= WITH_XOR_ENDIAN bytes */
 
 
-#define DECLARE_SIM_CORE_WRITE_N(ALIGNMENT,N) \
+#define DECLARE_SIM_CORE_WRITE_N(ALIGNMENT,N,M) \
 INLINE_SIM_CORE\
 (void) sim_core_write_##ALIGNMENT##_##N \
 (sim_cpu *cpu, \
  sim_cia cia, \
  sim_core_maps map, \
  address_word addr, \
- unsigned_##N val);
+ unsigned_##M val);
 
-DECLARE_SIM_CORE_WRITE_N(aligned,1)
-DECLARE_SIM_CORE_WRITE_N(aligned,2)
-DECLARE_SIM_CORE_WRITE_N(aligned,4)
-DECLARE_SIM_CORE_WRITE_N(aligned,8)
-DECLARE_SIM_CORE_WRITE_N(aligned,16)
+DECLARE_SIM_CORE_WRITE_N(aligned,1,1)
+DECLARE_SIM_CORE_WRITE_N(aligned,2,2)
+DECLARE_SIM_CORE_WRITE_N(aligned,4,4)
+DECLARE_SIM_CORE_WRITE_N(aligned,8,8)
+DECLARE_SIM_CORE_WRITE_N(aligned,16,16)
 
-DECLARE_SIM_CORE_WRITE_N(unaligned,1)
-DECLARE_SIM_CORE_WRITE_N(unaligned,2)
-DECLARE_SIM_CORE_WRITE_N(unaligned,4)
-DECLARE_SIM_CORE_WRITE_N(unaligned,8)
-DECLARE_SIM_CORE_WRITE_N(unaligned,16)
+#define sim_core_write_unaligned_1 sim_core_write_aligned_1 
+DECLARE_SIM_CORE_WRITE_N(unaligned,2,2)
+DECLARE_SIM_CORE_WRITE_N(unaligned,4,4)
+DECLARE_SIM_CORE_WRITE_N(unaligned,8,8)
+DECLARE_SIM_CORE_WRITE_N(unaligned,16,16)
 
+DECLARE_SIM_CORE_WRITE_N(misaligned,3,4)
+DECLARE_SIM_CORE_WRITE_N(misaligned,5,8)
+DECLARE_SIM_CORE_WRITE_N(misaligned,6,8)
+DECLARE_SIM_CORE_WRITE_N(misaligned,7,8)
 
 #define sim_core_write_1 sim_core_write_aligned_1
 #define sim_core_write_2 sim_core_write_aligned_2
@@ -286,25 +300,31 @@ DECLARE_SIM_CORE_WRITE_N(unaligned,16)
 #undef DECLARE_SIM_CORE_WRITE_N
 
 
-#define DECLARE_SIM_CORE_READ_N(ALIGNMENT,N) \
+#define DECLARE_SIM_CORE_READ_N(ALIGNMENT,N,M) \
 INLINE_SIM_CORE\
-(unsigned_##N) sim_core_read_##ALIGNMENT##_##N \
+(unsigned_##M) sim_core_read_##ALIGNMENT##_##N \
 (sim_cpu *cpu, \
  sim_cia cia, \
  sim_core_maps map, \
  address_word addr);
 
-DECLARE_SIM_CORE_READ_N(aligned,1)
-DECLARE_SIM_CORE_READ_N(aligned,2)
-DECLARE_SIM_CORE_READ_N(aligned,4)
-DECLARE_SIM_CORE_READ_N(aligned,8)
-DECLARE_SIM_CORE_READ_N(aligned,16)
+DECLARE_SIM_CORE_READ_N(aligned,1,1)
+DECLARE_SIM_CORE_READ_N(aligned,2,2)
+DECLARE_SIM_CORE_READ_N(aligned,4,4)
+DECLARE_SIM_CORE_READ_N(aligned,8,8)
+DECLARE_SIM_CORE_READ_N(aligned,16,16)
 
-DECLARE_SIM_CORE_READ_N(unaligned,1)
-DECLARE_SIM_CORE_READ_N(unaligned,2)
-DECLARE_SIM_CORE_READ_N(unaligned,4)
-DECLARE_SIM_CORE_READ_N(unaligned,8)
-DECLARE_SIM_CORE_READ_N(unaligned,16)
+#define sim_core_read_unaligned_1 sim_core_read_aligned_1
+DECLARE_SIM_CORE_READ_N(unaligned,2,2)
+DECLARE_SIM_CORE_READ_N(unaligned,4,4)
+DECLARE_SIM_CORE_READ_N(unaligned,8,8)
+DECLARE_SIM_CORE_READ_N(unaligned,16,16)
+
+DECLARE_SIM_CORE_READ_N(misaligned,3,4)
+DECLARE_SIM_CORE_READ_N(misaligned,5,8)
+DECLARE_SIM_CORE_READ_N(misaligned,6,8)
+DECLARE_SIM_CORE_READ_N(misaligned,7,8)
+
 
 #define sim_core_read_1 sim_core_read_aligned_1
 #define sim_core_read_2 sim_core_read_aligned_2

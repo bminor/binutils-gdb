@@ -127,7 +127,7 @@ sim_core_signal (SIM_DESC sd,
 #endif
 
 
-STATIC_INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (const char *)
 sim_core_map_to_str (sim_core_maps map)
 {

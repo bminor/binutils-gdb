@@ -711,20 +711,7 @@ profile_print_core (sim_cpu *cpu, int verbose)
 	{
 	  if (PROFILE_CORE_COUNT (data) [map] != 0)
 	    {
-	      switch (map)
-		{
-		case sim_core_read_map:
-		  sim_io_printf (sd, "     read:");
-		  break;
-		case sim_core_write_map:
-		  sim_io_printf (sd, "    write:");
-		  break;
-		case sim_core_execute_map:
-		  sim_io_printf (sd, "     exec:");
-		  break;
-		case nr_sim_core_maps:
-		  ; /* ignore */
-		}
+	      sim_io_printf (sd, "%10s:", sim_core_map_to_str (map));
 	      sim_io_printf (sd, "%*s: ",
 			     max_val < 10000 ? 5 : 10,
 			     COMMAS (PROFILE_CORE_COUNT (data) [map]));
