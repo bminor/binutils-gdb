@@ -1,3 +1,39 @@
+Fri Oct 28 16:46:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mmprivate.h: New file, was mmalloc.h.
+	(mmalloc.h): Include.
+	* mmalloc.h: Remove all but declarations of mmalloc functions.
+	(ansidecl.h): Include.
+	* attach.c, et al: Include mmprivate.h instead of mmalloc.h.
+
+Wed Aug 24 12:55:33 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i[34]86 to i[345]86.
+
+Mon Aug 22 11:36:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (distclean): Separate from realclean.
+	(realclean): Remove mmalloc.info.
+
+Fri May  6 13:04:25 1994  Steve Chamberlain  (sac@cygnus.com)
+
+        * config/go32.mh: New file
+	* configure.in (host==go32):  Use new fragment.
+
+Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mmtrace.c (tr_freehook, tr_mallochook, tr_reallochook):
+	Cast addresses put out via fprintf to unsigned long and use %lx.
+
+Tue Nov 16 20:33:17 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* COPYING.LIB: New file (standard version 2 LGPL, as already cited
+	by the source files).
+
+Fri Nov  5 11:47:33 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (info dvi install-info): Actually make the manual.
+
 Mon Nov  1 14:20:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mmalloc.texi: Fix typo ("for for" -> "for").
