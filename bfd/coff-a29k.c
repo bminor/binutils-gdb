@@ -45,7 +45,7 @@ static boolean coff_a29k_adjust_symndx
 #define EXTRACT_HWORD(WORD) \
     ((((WORD) & 0x00ff0000) >> 8) | ((WORD)& 0xff))
 #define SIGN_EXTEND_HWORD(HWORD) \
-    ((HWORD) & 0x8000 ? (HWORD)|0xffff0000 : (HWORD))
+    ((HWORD) & 0x8000 ? (HWORD)|(~0xffffL) : (HWORD))
 
 /* Provided the symbol, returns the value reffed */
 static long

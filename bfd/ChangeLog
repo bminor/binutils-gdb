@@ -1,3 +1,8 @@
+Wed Nov  8 20:03:44 1995  Eric Freudenthal <freudenthal@nyu.edu>
+
+	* coff-a29k.c (SIGN_EXTEND_HWORD): Use ~0xffff rather than
+	0xffff0000.
+
 Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd.c (bfd_get_file_window): Change writable parameter from
