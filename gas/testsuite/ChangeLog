@@ -1,3 +1,7 @@
+2001-06-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/x86_64.d: Update for 2001-06-11 disassembler change.
+
 2001-06-10  H.J. Lu  <hjl@gnu.org>
 
 	* gas/elf/section2.l: Match various white spaces.
