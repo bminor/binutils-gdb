@@ -1,3 +1,8 @@
+Fri Jun 30 15:47:37 1995  Fred Fish  <fnf@deneb.cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section):
+	Remove extra '+'.
+
 Thu Jun 29 17:24:52 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* coff-h8300.c (COFF_LONG_FILENAMES): Define.
