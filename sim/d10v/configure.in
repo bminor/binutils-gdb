@@ -2,74 +2,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
-AC_CANONICAL_SYSTEM
-AC_ARG_PROGRAM
-AC_PROG_CC
-AC_PROG_INSTALL
-AC_C_BIGENDIAN
+SIM_AC_COMMON
 
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-AC_C_CROSS
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
-fi
+AC_CHECK_HEADERS(unistd.h)
 
-. ${srcdir}/../../bfd/configure.host
-
-AC_ARG_ENABLE(sim-cflags,
-[  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
-[case "${enableval}" in
-  yes)	 sim_cflags="-O2";;
-  trace) AC_MSG_ERROR("Please use --enable-sim-debug instead."); sim_cflags="";;
-  no)	 sim_cflags="";;
-  *)	 sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_cflags" != x""; then
-  echo "Setting sim cflags = $sim_cflags" 6>&1
-fi],[sim_cflags=""])dnl
-
-AC_ARG_ENABLE(sim-debug,
-[  --enable-sim-debug=opts		Enable debugging flags],
-[case "${enableval}" in
-  yes)	sim_debug="-DDEBUG=7";;
-  no)	sim_debug="-DDEBUG=0";;
-  *)	sim_debug="-DDEBUG='(${enableval})'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_debug" != x""; then
-  echo "Setting sim debug = $sim_debug" 6>&1
-fi],[sim_cflags=""])dnl
-
-AC_ARG_ENABLE(sim-bswap,
-[  --enable-sim-bswap			Use the BSWAP instruction on Intel 486s and Pentiums.],
-[case "${enableval}" in
-  yes)	sim_bswap="-DUSE_BSWAP";;
-  no)	sim_bswap="";;
-  *)	AC_MSG_ERROR("--enable-sim-bswap does not take a value"); sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi],[sim_bswap=""])dnl
-
-AC_SUBST(CC_FOR_BUILD)
-AC_SUBST(CFLAGS)
-AC_SUBST(HDEFINES)
-AR=${AR-ar}
-AC_SUBST(AR)
-AC_PROG_RANLIB
-AC_SUBST(sim_cflags)
-AC_SUBST(sim_debug)
-AC_SUBST(sim_bswap)
-
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-AC_C_CROSS
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
-fi
-AC_SUBST(CC_FOR_BUILD)
-
-AC_OUTPUT(Makefile)
+SIM_AC_OUTPUT

@@ -1,5 +1,6 @@
 #include <signal.h>
 #include "sysdep.h"
+#include "callback.h"
 #include "remote-sim.h"
 
 #include "d10v_sim.h"
@@ -60,6 +61,7 @@ struct hash_entry
   struct hash_entry *next;
   long opcode;
   long mask;
+  int size;
   struct simops *ops;
 };
 
@@ -88,7 +90,7 @@ lookup_hash (ins, size)
   else
     h = &hash_table[(ins & 0x7E00) >> 9];
 
-  while ((ins & h->mask) != h->opcode)
+  while ((ins & h->mask) != h->opcode || h->size != size)
     {
       if (h->next == NULL)
 	{
@@ -493,6 +495,7 @@ sim_open (args)
 	  h->ops = s;
 	  h->mask = s->mask;
 	  h->opcode = s->opcode;
+	  h->size = s->is_long;
 	}
     }
 }
@@ -546,14 +549,14 @@ dmem_addr( addr )
       /* unified memory */
       /* this is ugly because we allocate unified memory in 128K segments and */
       /* dmap addresses 16k segments */
-      seg = (DMAP & 0x3ff) >> 2;
+      seg = (DMAP & 0x3ff) >> 3;
       if (State.umem[seg] == NULL)
 	{
 	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
 					     seg, (long)decode_pc ());
 	  exit(1);
 	}
-      return State.umem[seg] + (DMAP & 3) * 0x4000;
+      return State.umem[seg] + (DMAP & 7) * 0x4000;
     }
 
   return State.dmem + addr;
@@ -586,20 +589,32 @@ pc_addr()
 }
 
 
+static int stop_simulator;
+
+static void
+sim_ctrl_c()
+{
+  stop_simulator = 1;
+}
+
+
+/* Run (or resume) the program.  */
 void
 sim_resume (step, siggnal)
      int step, siggnal;
 {
+  void (*prev) ();
   uint32 inst;
-  reg_t oldpc = 0;
 
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
-
   State.exception = 0;
+  prev = signal(SIGINT, sim_ctrl_c);
+  stop_simulator = step;
+
   do
     {
       inst = get_longword( pc_addr() ); 
-      oldpc = PC;
+      State.pc_changed = 0;
       ins_type_counters[ (int)INS_CYCLES ]++;
       switch (inst & 0xC0000000)
 	{
@@ -628,16 +643,15 @@ sim_resume (step, siggnal)
 	  else
 	    PC = RPT_S;
 	}
-      
-      /* FIXME */
-      if (PC == oldpc)
+      else if (!State.pc_changed)
 	PC++;
-      
     } 
-  while ( !State.exception && !step);
+  while ( !State.exception && !stop_simulator);
   
   if (step && !State.exception)
     State.exception = SIGTRAP;
+
+  signal(SIGINT, prev);
 }
 
 int
@@ -790,7 +804,6 @@ void
 sim_set_callbacks(p)
      host_callback *p;
 {
-/*  printf ("sim_set_callbacks\n"); */
   d10v_callback = p;
 }
 

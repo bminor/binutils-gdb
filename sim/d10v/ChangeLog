@@ -1,3 +1,37 @@
+Wed Nov 20 01:23:03 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Delete all stuff moved to ../common/Make-common.in.
+	(SIM_OBJS,SIM_EXTRA_CFLAGS,SIM_EXTRA_CLEAN): Define.
+	* configure.in: Simplify using macros in ../common/aclocal.m4.
+	Call AC_CHECK_HEADERS(unistd.h).
+	* configure: Regenerated.
+	* config.in: New file.
+	* interp.c: #include "callback.h".
+	* simops.c: #include "config.h".  #include <unistd.h> if present.
+
+Fri Nov  8 16:19:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-sim.h (simops): Add flag is_long.
+	(State): Add pc_changed.  Instructions which update the PC should
+	use the JMP macro which sets this.
+	(JMP): New macro.  Sets the PC and the pc_changed flag.
+
+	* gencode.c (write_opcodes): Add is_long field.
+	
+	* interp.c (lookup_hash): If we blindly apply a short opcode's mask
+	to a long opcode we could get a false match.  Check the opcode size.
+	(hash): Add a size field to the hash table.
+	(sim_open): Initialize size field in hash table.
+	(sim_resume): Change to logic for setting the PC.  Used to increment the
+	PC if it had not been changed.  This didn't allow single-instruction loops.
+	Now checks the flag State.pc_changed.  Also now stops when ^C is received.
+	(dmem_addr): Fix translation of data segments to unified memory.
+	(sim_ctrl_c): New function.  When ^C is received, set stop_simulator flag.
+
+	* simops.c: Changed all branch and jump instructions to use new JMP macro.
+	(OP_20000000): Corrected trace information to show this is a ldi.l, not
+	a ldi.s instruction.
+	
 Thu Oct 31 19:13:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (sim_fetch_register, sim_store_register): Fix bug where
