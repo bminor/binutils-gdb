@@ -222,6 +222,8 @@ Start it from the beginning? "))
       target_kill ();
     }
 
+  clear_breakpoint_hit_counts ();
+
   exec_file = (char *) get_exec_file (0);
 
   /* The exec file is re-read every time we do a generic_mourn_inferior, so
@@ -464,8 +466,11 @@ jump_command (arg, from_tty)
   addr = sal.pc;
 
   if (from_tty)
-    printf_filtered ("Continuing at %s.\n",
-		     local_hex_string((unsigned long) addr));
+    {
+      printf_filtered ("Continuing at ");
+      print_address_numeric (addr, 1, gdb_stdout);
+      printf_filtered (".\n");
+    }
 
   clear_proceed_status ();
   proceed (addr, TARGET_SIGNAL_0, 0);
@@ -572,7 +577,7 @@ run_stack_dummy (addr, buffer)
 #if CALL_DUMMY_LOCATION != AT_ENTRY_POINT
     sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
 #else
-    sal.pc = entry_point_address ();
+    sal.pc = CALL_DUMMY_ADDRESS ();
 #endif
     sal.symtab = NULL;
     sal.line = 0;
@@ -741,7 +746,7 @@ finish_command (arg, from_tty)
       && function != 0)
     {
       struct type *value_type;
-      register value val;
+      register value_ptr val;
       CORE_ADDR funcaddr;
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
@@ -957,82 +962,6 @@ path_command (dirname, from_tty)
     path_info ((char *)NULL, from_tty);
 }
 
-/* This routine is getting awfully cluttered with #if's.  It's probably
-   time to turn this into READ_PC and define it in the tm.h file.
-   Ditto for write_pc.  */
-
-CORE_ADDR
-read_pc ()
-{
-#ifdef TARGET_READ_PC
-  return TARGET_READ_PC ();
-#else
-  return ADDR_BITS_REMOVE ((CORE_ADDR) read_register (PC_REGNUM));
-#endif
-}
-
-void
-write_pc (val)
-     CORE_ADDR val;
-{
-#ifdef TARGET_WRITE_PC
-  TARGET_WRITE_PC (val);
-#else
-  write_register (PC_REGNUM, (long) val);
-#ifdef NPC_REGNUM
-  write_register (NPC_REGNUM, (long) val + 4);
-#ifdef NNPC_REGNUM
-  write_register (NNPC_REGNUM, (long) val + 8);
-#endif
-#endif
-#endif
-}
-
-/* Cope with strage ways of getting to the stack and frame pointers */
-
-CORE_ADDR
-read_sp ()
-{
-#ifdef TARGET_READ_SP
-  return TARGET_READ_SP ();
-#else
-  return read_register (SP_REGNUM);
-#endif
-}
-
-void
-write_sp (val)
-     CORE_ADDR val;
-{
-#ifdef TARGET_WRITE_SP
-  TARGET_WRITE_SP (val);
-#else
-  write_register (SP_REGNUM, val);
-#endif
-}
-
-
-CORE_ADDR
-read_fp ()
-{
-#ifdef TARGET_READ_FP
-  return TARGET_READ_FP ();
-#else
-  return read_register (FP_REGNUM);
-#endif
-}
-
-void
-write_fp (val)
-     CORE_ADDR val;
-{
-#ifdef TARGET_WRITE_FP
-  TARGET_WRITE_FP (val);
-#else
-  write_register (FP_REGNUM, val);
-#endif
-}
-
 const char * const reg_names[] = REGISTER_NAMES;
 
 /* Print out the machine register regnum. If regnum is -1,
@@ -1242,7 +1171,12 @@ attach_command (args, from_tty)
   clear_proceed_status ();
   stop_soon_quietly = 1;
 
+#ifndef MACH
+  /* Mach 3 does not generate any traps when attaching to inferior,
+     and to set up frames we can do this.  */
+
   wait_for_inferior ();
+#endif
 
 #ifdef SOLIB_ADD
   /* Add shared library symbols from the newly attached process, if any.  */

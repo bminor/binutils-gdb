@@ -1,3 +1,15 @@
+Wed Jul 13 18:58:15 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Breakpoint hit counts, from Bob Rusk (rrusk@mail.csd.harris.com).
+	* breakpoint.h (hit_count): New breakpoint field.
+	* breakpoint.c (show_breakpoint_hit_counts): New variable.
+	(clear_breakpoint_hit_counts): New function.
+	(bpstat_stop_status): Increment the hit count.
+	(breakpoint_1): Display the hit count.
+	* infcmd.c (run_command): Reset breakpoint hit counts.
+	* target.c (generic_mourn_inferior): Don't clear ignore counts if
+	displaying hit counts.
+	
 Tue Jul 12 12:23:15 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elfread.c (elf_symfile_read):  Unconditionally add dynamic

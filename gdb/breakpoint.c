@@ -1,5 +1,6 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -35,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include <string.h>
 #include "demangle.h"
+#include "annotate.h"
 
 /* local function prototypes */
 
@@ -141,7 +143,6 @@ static int
 remove_breakpoint PARAMS ((struct breakpoint *));
 
 extern int addressprint;		/* Print machine addresses? */
-extern int demangle;			/* Print de-mangled symbol names? */
 
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
@@ -173,6 +174,10 @@ static int executing_breakpoint_commands;
 #define target_stopped_data_address() 0
 #endif
 
+/* True if breakpoint hit counts should be displayed in breakpoint info.  */
+
+int show_breakpoint_hit_counts = 1;
+
 /* Chain of all breakpoints defined.  */
 
 static struct breakpoint *breakpoint_chain;
@@ -182,6 +187,7 @@ static struct breakpoint *breakpoint_chain;
 static int breakpoint_count;
 
 /* Set breakpoint count to NUM.  */
+
 static void
 set_breakpoint_count (num)
      int num;
@@ -189,6 +195,17 @@ set_breakpoint_count (num)
   breakpoint_count = num;
   set_internalvar (lookup_internalvar ("bpnum"),
 		   value_from_longest (builtin_type_int, (LONGEST) num));
+}
+
+/* Used in run_command to zero the hit count when a new run starts. */
+
+void
+clear_breakpoint_hit_counts ()
+{
+  struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    b->hit_count = 0;
 }
 
 /* Default address, symtab and line to put a breakpoint at
@@ -1247,6 +1264,8 @@ bpstat_stop_status (pc, frame_address, not_a_breakpoint)
 
       /* Come here if it's a watchpoint, or if the break address matches */
 
+      ++(b->hit_count);
+
       bs = bpstat_alloc (b, bs);	/* Alloc a bpstat to explain stop */
 
       bs->stop = 1;
@@ -1689,8 +1708,7 @@ breakpoint_1 (bnum, allflag)
 	    /* Field 4, the address, is omitted (which makes the columns
 	       not line up too nicely with the headers, but the effect
 	       is relatively readable).  */
-	    if (annotation_level > 1)
-	      printf_filtered ("\n\032\032field 5\n");
+	    annotate_field (5);
 	    print_expression (b->exp, gdb_stdout);
 	    break;
 
@@ -1754,6 +1772,14 @@ breakpoint_1 (bnum, allflag)
 	    printf_filtered ("\tstop only if ");
 	    print_expression (b->cond, gdb_stdout);
 	    printf_filtered ("\n");
+	  }
+
+        if (show_breakpoint_hit_counts && b->hit_count)
+	  {
+	    /* FIXME should make an annotation for this */
+
+	    printf_filtered ("\tbreakpoint already hit %d times\n",
+			     b->hit_count);
 	  }
 
 	if (b->ignore_count)
@@ -2115,10 +2141,13 @@ clear_momentary_breakpoints ()
 #endif
 
 /* Tell the user we have just set a breakpoint B.  */
+
 static void
 mention (b)
      struct breakpoint *b;
 {
+  int say_where = 0;
+
   switch (b->type)
     {
     case bp_watchpoint:
@@ -2138,18 +2167,12 @@ mention (b)
       print_expression (b->exp, gdb_stdout);
       break;
     case bp_breakpoint:
-      printf_filtered ("Breakpoint %d at ", b->number);
-      print_address_numeric (b->address, 1, gdb_stdout);
-      if (b->source_file)
-	printf_filtered (": file %s, line %d.",
-			 b->source_file, b->line_number);
+      printf_filtered ("Breakpoint %d", b->number);
+      say_where = 1;
       break;
     case bp_hardware_breakpoint:
-      printf_filtered ("Hardware assisted breakpoint %d at ", b->number);
-      print_address_numeric (b->address, 1, gdb_stdout);
-      if (b->source_file)
-	printf_filtered (": file %s, line %d.",
-			 b->source_file, b->line_number);
+      printf_filtered ("Hardware assisted breakpoint %d", b->number);
+      say_where = 1;
       break;
     case bp_until:
     case bp_finish:
@@ -2160,6 +2183,17 @@ mention (b)
     case bp_call_dummy:
     case bp_watchpoint_scope:
       break;
+    }
+  if (say_where)
+    {
+      if (addressprint || b->source_file == NULL)
+	{
+	  printf_filtered (" at ");
+	  print_address_numeric (b->address, 1, gdb_stdout);
+	}
+      if (b->source_file)
+	printf_filtered (": file %s, line %d.",
+			 b->source_file, b->line_number);
     }
   printf_filtered ("\n");
 }
@@ -3974,6 +4008,7 @@ an expression is either read or written.");
 
   add_info ("watchpoints", breakpoints_info,
 	    "Synonym for ``info breakpoints''.");
+
 }
 
 /* OK, when we call objfile_relocate, we need to relocate breakpoints
