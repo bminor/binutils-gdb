@@ -45,9 +45,6 @@ extern char *realloc();
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
-void error ();
-void fatal ();
-
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
 
@@ -213,7 +210,7 @@ warning (va_alist)
    and the remaining args are passed as arguments to it.  */
 
 /* VARARGS */
-void
+volatile void
 error (va_alist)
      va_dcl
 {
@@ -238,7 +235,7 @@ error (va_alist)
    The arguments are printed a la printf.  */
 
 /* VARARGS */
-void
+volatile void
 fatal (va_alist)
      va_dcl
 {

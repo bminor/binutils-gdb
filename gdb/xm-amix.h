@@ -24,5 +24,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Pick up more stuff from the generic SVR4 host include file. */
 
-#include "xm-svr4.h"
+#include "xm-sysv4.h"
 

@@ -24,5 +24,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Pick up more stuff from the generic SVR4 host include file. */
 
-#include "xm-svr4.h"
+#include "xm-sysv4.h"
 
+/* The native AT&T compiler for i386/SVR4 complains about some of the
+   uses of volatile in the defs.h file.  So shut it up by simply defining
+   volatile away. */
+
+#ifndef __GNUC__
+#define volatile /**/
+#endif

@@ -43,5 +43,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FRAME_CHAIN_VALID_ALTERNATE
 
-#include "tm-svr4.h"
+#include "tm-sysv4.h"
 #include "tm-68k.h"

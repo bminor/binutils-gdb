@@ -22,7 +22,7 @@ m68k)
 	cbm)
 		case ${host_os} in
 		amigados)	gdb_host=amigados ;;
-		svr4)		gdb_host=amix ;;
+		sysv4*)		gdb_host=amix ;;
 		esac
 		;;
 
@@ -86,9 +86,9 @@ i386)
 	sequent)	gdb_host=symmetry ;;
 	*)
 		case "${host_os}" in
-		sysv)	gdb_host=i386v ;;
 		sysv32)	gdb_host=i386v32 ;;
-		svr4)	gdb_host=i386v4 ;;
+		sysv4*)	gdb_host=i386v4 ;;
+		sysv*)	gdb_host=i386v ;;
 		mach)	gdb_host=i386mach ;;
 		esac
 		;;
@@ -155,7 +155,7 @@ m68k)
 	cbm)
 		case ${target_os} in
 		amigados)	gdb_host=amigados ;;
-		svr4)		gdb_target=amix ;;
+		sysv4*)		gdb_target=amix ;;
 		esac
 		;;
 	hp)
@@ -243,9 +243,9 @@ i386)
 	sequent)	gdb_target=symmetry ;;
 	*)
 		case "${target_os}" in
-		sysv)	gdb_target=i386v ;;
 		sysv32)	gdb_target=i386v32 ;;
-		svr4)	gdb_target=i386v4 ;;
+		sysv4*)	gdb_target=i386v4 ;;
+		sysv*)	gdb_target=i386v ;;
 		mach)	gdb_target=i386mach ;;
 		coff)	gdb_target=i386v ;;
 		aout)	gdb_target=i386aout ;;

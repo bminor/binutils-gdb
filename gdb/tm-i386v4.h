@@ -28,8 +28,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
-#include "tm-svr4.h"
+/* Pick up most of what we need from the generic i386 target include file. */
+
 #include "tm-i386v.h"
+
+/* Pick up more stuff from the generic SVR4 host include file. */
+
+#include "tm-sysv4.h"
 
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */

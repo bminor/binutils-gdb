@@ -1,3 +1,14 @@
+Fri Dec 20 11:36:38 1991  Fred Fish  (fnf at cygnus.com)
+
+	* configure.in, tm-amix.h, tm-i386v4.h, xm-amix.h, xm-i386v4.h:
+	Change svr4 references to sysv4.
+
+	* source.c:  Move declaration of external function index to
+	front of file so it is in scope for all references.
+
+	* utils.c (error, fatal):  Make definitions consistent with
+	defs.h declarations (declared as "volatile void").
+
 Fri Dec 20 10:55:36 1991  John Gilmore  (gnu at cygnus.com)
 
 	* rs6k-opcode.h:  Bugfix sfe and stbrx.  By Al Kossow.
