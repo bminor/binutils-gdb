@@ -49,7 +49,7 @@ fi
 
 # these tools are built for the host environment
 #
-host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk"
+host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils"
 
 
 # these libraries are built for the target environment, and are built after

@@ -1,3 +1,8 @@
+Thu Nov 21 16:19:44 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: add findutils
+	* configure.in: add findutils to list of host_tools
+
 Wed Nov 20 10:09:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config.sub: Handle mn10200 and mn10300.
