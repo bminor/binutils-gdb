@@ -1,3 +1,7 @@
+2004-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Fix typo.
+
 2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.hp/gdb.aCC/exception.exp: Re-create as a nearly empty

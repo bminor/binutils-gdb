@@ -49,7 +49,7 @@ if ![runto_main] then {
 }
 
 # If we can examine what's at memory address 0, it is possible that we
-# could also execute it.  This could pobably make us run away,
+# could also execute it.  This could probably make us run away,
 # executing random code, which could have all sorts of ill effects,
 # especially on targets without an MMU.  Don't run the tests in that
 # case.
