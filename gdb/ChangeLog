@@ -104,7 +104,7 @@ Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* nec4102rom.c: New file implements ROM monitor adapter for
         nec-vr4102 board.  This board hosts the vr4111 chip.  This file
-        required extenstions to the monitor_ops structure, hooks for wait
+        required extensions to the monitor_ops structure, hooks for wait
         filter, new flags. This version does not support more than one
         breakpoint and resuming after a breakpoint in 16 bit mode is
         completely disfunctional.  
@@ -606,11 +606,11 @@ Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * tracepoint.c (trace_status_command): Recognize a boolean return
         value from the stub to indicate whether trace experiment is
-        running.  Export this value as a global state variable
+        running.  Export this value as a global state variable.
         (trace_running_p) for use by the GUI. (from Michael Snyder)
         (trace_pass_command) added call to modify_tracepoint_hook.
 
-        * tracepoint.h export trace_running_p
+        * tracepoint.h export trace_running_p.
 
 start-sanitize-sky
 Wed Mar 25 11:45:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
@@ -674,14 +674,14 @@ Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
         since we now effectively poll the serial port.
         Don't reset the current_timeout, either, since this member is used
         by hardwire_readchar to track the timeout and call the ui_loop_hook.
-        (hardwire_readchar): Poll the serial port for Cygwin32. We timeout every
-        second, update the UI, and loop around doing this until we have hit the real
-        timeout or we get data or an error. This will allow the UI to stay active
-        while gdb is "blocked" talking to the target.
-        - Martin M. Hunt  <hunt@cygnus.com>
-        (wait_for): Do reset current_timeout
-        because it is only used to keep track of what the
-        current timeout for the scb is.
+	(hardwire_readchar): Poll the serial port for Cygwin32. We timeout
+ 	every second, update the UI, and loop around doing this until we
+ 	have hit the real timeout or we get data or an error. This will
+ 	allow the UI to stay active while gdb is "blocked" talking to the
+ 	target.
+       	- Martin M. Hunt  <hunt@cygnus.com>
+	(wait_for): Do reset current_timeout because it is only used to
+ 	keep track of what the current timeout for the scb is.
 
         * top.c
         - Martin M. Hunt  <hunt@cygnus.com>
@@ -878,7 +878,7 @@ Wed Mar  4 01:39:08 1998  Ron Unrau  <runrau@cygnus.com>
 
 Tue Mar  3 17:19:08 1998  John Metzler  <jmetzler@cygnus.com>
 
-	* config/mips/tm-vr4xxx.h:  implements vr4111 as saparate from 4300
+	* config/mips/tm-vr4xxx.h:  implements vr4111 as separate from 4300
 	* config/mips/vr4xxx.tm:    implements vr4111 as separate from 4300
 	* configure.tgt:  Recognise mips64vr4111-*-elf as vr4xxx
 	* dwarfread.c (read_tag_pointer_type): Pointer sizes now come from
