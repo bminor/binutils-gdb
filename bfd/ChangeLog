@@ -1,3 +1,8 @@
+2002-11-04  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* vms.c (vms_object_p): Restore the start address when returning
+	NULL.
+
 2002-11-04  Alan Modra  <amodra@bigpond.net.au>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
