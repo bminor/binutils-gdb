@@ -275,8 +275,6 @@ typedef unsigned short INSN_WORD;
 #define ADDR_BITS_REMOVE(addr) ((addr) & 0xffffff)
 
 #define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
-#define DONT_USE_REMOTE
-
 
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
 
