@@ -20,9 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "dis-asm.h"
 
-/* m68k instructions are never longer than this many bytes.  */
-#define MAXLEN 22
-
 /* Print the m68k instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
 
@@ -31,16 +28,9 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  unsigned char buffer[MAXLEN];
-  register int i;
-  register unsigned char *p;
-  register char *d;
-  register int bestmask;
-  int best;
   disassemble_info info;
 
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
 
-  read_memory (memaddr, (char *) buffer, MAXLEN);
-  return print_insn_m68k (memaddr, buffer, &info);
+  return print_insn_m68k (memaddr, &info);
 }

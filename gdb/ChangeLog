@@ -1,3 +1,9 @@
+Wed Mar 31 12:52:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* core.c (dis_asm_{read_memory,memory_error}): New functions.
+	m68k-pinsn.c, h8500-tdep.c, i386-pinsn.c, mips-pinsn.c, z8k-tdep.c:
+	Use read_memory_func interface to disassembler.
+
 Tue Mar 30 15:46:14 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	Teach sparc solaris to next over shared library functions.

@@ -62,7 +62,7 @@ DEP = mkdep
 TARGETLIB = libopcodes.a
 
 
-DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o
+DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o dis-buf.o
 
 OFILES = $(DIS_LIBS) sparc-opc.o m68881-ext.o
 #### host and target dependent Makefile fragments come in here.
@@ -95,11 +95,12 @@ all: $(TARGETLIB)
 
 .NOEXPORT:
 
-check:
+installcheck check:
 
 info:
 clean-info:
 install-info:
+dvi:
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 

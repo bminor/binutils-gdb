@@ -1,3 +1,7 @@
+Wed Mar 31 10:25:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* objdump.c (disassemble_data): Use new read_memory_func stuff.
+
 Thu Mar 25 10:38:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* objdump.c (fprintf): Declaration of variadic function had better

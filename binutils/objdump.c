@@ -440,8 +440,12 @@ disassemble_data (abfd)
 
 	  bfd_get_section_contents (abfd, section, data, 0, bfd_get_section_size_before_reloc (section));
 
+	  disasm_info.buffer = data;
+	  disasm_info.buffer_vma = section->vma;
+	  disasm_info.buffer_length =
+	    bfd_get_section_size_before_reloc (section);
 	  i = 0;
-	  while (i < bfd_get_section_size_before_reloc (section))
+	  while (i < disasm_info.buffer_length)
 	    {
 	      if (data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 0 &&
 		  data[i + 3] == 0)
@@ -489,9 +493,13 @@ disassemble_data (abfd)
 		  printf (" ");
 
 		  if (disassemble) /* New style */
-		    i += (*disassemble)(section->vma + i,
-					data + i,
-					&disasm_info);
+		    {
+		      int bytes = (*disassemble)(section->vma + i,
+						 &disasm_info);
+		      if (bytes < 0)
+			break;
+		      i += bytes;
+		    }
 		  else /* Old style */
 		    i += print (section->vma + i,
 				data + i,

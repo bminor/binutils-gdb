@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "dis-asm.h"
 
 extern char registers[];
 
@@ -158,6 +159,27 @@ read_memory (memaddr, myaddr, len)
   status = target_read_memory (memaddr, myaddr, len);
   if (status != 0)
     memory_error (status, memaddr);
+}
+
+/* Like target_read_memory, but slightly different parameters.  */
+int
+dis_asm_read_memory (memaddr, myaddr, len, info)
+     bfd_vma memaddr;
+     bfd_byte *myaddr;
+     int len;
+     disassemble_info *info;
+{
+  return target_read_memory (memaddr, myaddr, len);
+}
+
+/* Like memory_error with slightly different parameters.  */
+void
+dis_asm_memory_error (status, memaddr, info)
+     int status;
+     bfd_vma memaddr;
+     disassemble_info *info;
+{
+  memory_error (status, memaddr);
 }
 
 /* Same as target_write_memory, but report an error if can't write.  */

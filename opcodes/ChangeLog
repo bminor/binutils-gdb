@@ -1,3 +1,19 @@
+Wed Mar 31 10:07:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dis-buf.c: New file, for new read_memory_func interface.
+	Makefile.in (OFILES): Include it.
+	m68k-dis.c, i386-dis.c, h8500-dis.c, mips-dis.c, z8k-dis.c:
+	Use new read_memory_func interface.
+
+Mon Mar 29 14:02:17 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* h8500-dis.c (print_insn_h8500): Get sign of fp offsets right.
+	* h8500-opc.h: Fix couple of opcodes.
+
+Wed Mar 24 02:03:36 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: add dvi & installcheck targets
+
 Mon Mar 22 18:55:04 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in:  Update for h8500-dis.c.

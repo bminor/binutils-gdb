@@ -208,19 +208,17 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  char temp[20];
   disassemble_info info;
 
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
 
-  read_memory (memaddr, temp, 20);
   if (BIG)
     {
-      return print_insn_z8001 (memaddr, temp, &info);
+      return print_insn_z8001 (memaddr, &info);
     }
   else
     {
-      return print_insn_z8002 (memaddr, temp, &info);
+      return print_insn_z8002 (memaddr, &info);
     }
 }
 

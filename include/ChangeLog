@@ -1,3 +1,14 @@
+Tue Mar 30 19:09:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dis-asm.h (disassembler_info): Add read_memory_func,
+	memory_error_func, buffer, buffer_length, and buffer_vma.
+	({GDB_,}INIT_DISASSEMBLE_INFO): Set them.
+	print_insn_*: Remove second argument.
+
+Tue Mar 30 14:48:55 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.h: Update for lma field of section.
+
 Tue Mar 30 12:22:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* ansidecl.h: Use ANSI versions on AIX regardless of __STDC__.

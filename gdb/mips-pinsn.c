@@ -20,9 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "dis-asm.h"
 
-/* Mips instructions are never longer than this many bytes.  */
-#define MAXLEN 4
-
 /* Print the mips instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes, which
    is always 4.  */
@@ -32,16 +29,13 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  unsigned char buffer[MAXLEN];
   disassemble_info info;
 
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
 
-  read_memory (memaddr, buffer, MAXLEN);
-
   /* print_insn_mips is in opcodes/mips-dis.c.  */
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    print_insn_big_mips (memaddr, buffer, &info);
+    print_insn_big_mips (memaddr, &info);
   else
-    print_insn_little_mips (memaddr, buffer, &info);
+    print_insn_little_mips (memaddr, &info);
 }

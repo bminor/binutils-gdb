@@ -110,12 +110,9 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  /* Nothing is bigger than 8 bytes */
-  char data[8];
   disassemble_info info;
-  read_memory (memaddr, data, sizeof (data));
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
-  return print_insn_h8500 (memaddr, data, &info);
+  return print_insn_h8500 (memaddr, &info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
