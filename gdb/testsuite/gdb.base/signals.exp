@@ -1,7 +1,7 @@
-if $nosignals {
-	verbose "Skipping signals.exp because of nosignals."
-	continue
-	}
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping signals.exp because of nosignals."
+    continue
+}
 
 if $tracelevel then {
 	strace $tracelevel

@@ -379,7 +379,7 @@ proc test_stepping {} {
 
 	send_gdb "finish\n"
 	expect {
-	    -re "Run.*exit from.*marker1.*main.* at" { }
+	    -re "Run.*exit from.*marker1.* at" { }
 	    default { fail "finish from marker1" ; return }
 	}
 	expect {

@@ -267,6 +267,7 @@ proc runto { function } {
 	    return 0
 	}
     }
+    return 1
 }
 
 #
