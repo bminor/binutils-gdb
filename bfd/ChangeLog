@@ -1,3 +1,9 @@
+Tue Jul 13 12:03:00 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* coff-h8500.c (reloc_processing, rtype2howto): New relocation
+	type R_H8500_HIGH_16.
+	* coff-sh.c (r_imm32): Get the width of the reloc right.
+
 Tue Jul 13 16:48:56 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 
 	* configure.in: Add new target m68k-coffun to the dpx/2.
