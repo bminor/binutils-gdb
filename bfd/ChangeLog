@@ -1,3 +1,12 @@
+Mon Feb 27 12:58:25 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config.bfd: add a29k-*-vxworks configuration.
+
+Wed Feb 22 14:40:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libaout.h (NAME(aout,slurp_reloc_table)): Change declaration to
+	use reloc_howto_type rather than const struct reloc_howto_struct.
+
 Tue Feb 21 18:19:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bout.c (b_out_slurp_reloc_table): Don't return an error if asked
