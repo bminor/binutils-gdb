@@ -127,11 +127,13 @@ int parsing_defsym = 0;
 #define OPTION_SECTION_START		(OPTION_FINI + 1)
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
 #define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
+#define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
 
-struct ld_option {
+struct ld_option
+{
   /* The long option information.  */
   struct option opt;
   /* The short option with the same meaning ('\0' if none).  */
@@ -151,7 +153,8 @@ struct ld_option {
   } control;
 };
 
-static const struct ld_option ld_options[] = {
+static const struct ld_option ld_options[] =
+{
   { {NULL, required_argument, NULL, '\0'},
       'a', N_("KEYWORD"), N_("Shared library control for HP/UX compatibility"),
       ONE_DASH },
@@ -298,6 +301,8 @@ static const struct ld_option ld_options[] = {
       '\0', NULL, N_("Use less memory and more disk I/O"), TWO_DASHES },
   { {"no-undefined", no_argument, NULL, OPTION_NO_UNDEFINED},
      '\0', NULL, N_("Allow no undefined symbols"), TWO_DASHES },
+  { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
+     '\0', NULL, N_("Allow undefined symbols in shared objects"), TWO_DASHES },
   { {"no-warn-mismatch", no_argument, NULL, OPTION_NO_WARN_MISMATCH},
       '\0', NULL, N_("Don't warn about mismatched input files"), TWO_DASHES},
   { {"no-whole-archive", no_argument, NULL, OPTION_NO_WHOLE_ARCHIVE},
@@ -708,6 +713,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_NO_UNDEFINED:
 	  link_info.no_undefined = true;
+	  break;
+	case OPTION_ALLOW_SHLIB_UNDEFINED:
+	  link_info.allow_shlib_undefined = true;
 	  break;
 	case OPTION_NO_WARN_MISMATCH:
 	  command_line.warn_mismatch = false;

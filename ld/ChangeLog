@@ -1,3 +1,12 @@
+2000-11-18  Fred Fish  <fnf@be.com>
+
+	* lexsup.c (OPTION_ALLOW_SHLIB_UNDEFINED): Define.
+	(ld_options): Entry for --allow-shlib-undefined.
+	(parse_args): Handle OPTION_ALLOW_SHLIB_UNDEFINED.
+	* ldmain.c (main): Initialize link_info.allow_shlib_undefined
+	to false.
+	* ld.texinfo: Document new command line switch.
+	
 2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
 
 	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS):

@@ -5095,6 +5095,7 @@ elf_link_output_extsym (h, data)
      referenced by regular files, because we will already have issued
      warnings for them.  */
   if (! finfo->info->relocateable
+      && ! finfo->info->allow_shlib_undefined
       && ! (finfo->info->shared
 	    && !finfo->info->no_undefined)
       && h->root.type == bfd_link_hash_undefined

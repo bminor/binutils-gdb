@@ -939,6 +939,19 @@ Normally when creating a non-symbolic shared library, undefined symbols
 are allowed and left to be resolved by the runtime loader.  This option
 disallows such undefined symbols.
 
+@kindex --allow-shlib-undefined
+@item --allow-shlib-undefined
+Allow undefined symbols in shared objects even  when --no-undefined is
+set. The net result will be that undefined symbols in regular objects
+will still trigger an error, but undefined symbols in shared objects
+will be ignored.  The implementation of no_undefined makes the
+assumption that the runtime linker will choke on undefined symbols.
+However there is at least one system (BeOS) where undefined symbols in
+shared libraries is normal since the kernel patches them at load time to
+select which function is most appropriate for the current architecture.
+I.E. dynamically select an appropriate memset function.  Apparently it
+is also normal for HPPA shared libraries to have undefined symbols.
+
 @kindex --no-warn-mismatch
 @item --no-warn-mismatch
 Normally @code{ld} will give an error if you try to link together input

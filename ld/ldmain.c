@@ -223,6 +223,7 @@ main (argc, argv)
   link_info.traditional_format = false;
   link_info.optimize = false;
   link_info.no_undefined = false;
+  link_info.allow_shlib_undefined = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
   link_info.keep_memory = true;

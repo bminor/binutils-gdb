@@ -1,3 +1,8 @@
+2000-12-10  Fred Fish  <fnf@be.com>
+
+      * elflink.h (elf_link_output_extsym): Don't complain about undefined
+      symbols in shared objects if allow_shlib_undefined is true.
+
 2000-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-sh.c: Fix formattng.
