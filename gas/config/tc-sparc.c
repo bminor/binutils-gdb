@@ -217,7 +217,7 @@ static void output_insn
    and file formats.  */
 
 enum sparc_arch_types {v6, v7, v8, sparclet, sparclite, sparc86x, v8plus,
-		       v8plusa, v9, v9a, v9_64};
+		       v8plusa, v9, v9a, v9b, v9_64};
 
 static struct sparc_arch {
   char *name;
@@ -237,8 +237,10 @@ static struct sparc_arch {
   { "sparc86x", "sparclite", sparc86x, 32, 1 },
   { "v8plus", "v9", v9, 0, 1 },
   { "v8plusa", "v9a", v9, 0, 1 },
+  { "v8plusb", "v9b", v9, 0, 1 },
   { "v9", "v9", v9, 0, 1 },
   { "v9a", "v9a", v9, 0, 1 },
+  { "v9b", "v9b", v9, 0, 1 },
   /* This exists to allow configure.in/Makefile.in to pass one
      value to specify both the default machine and default word size.  */
   { "v9-64", "v9", v9, 64, 0 },
@@ -337,19 +339,20 @@ sparc_target_format ()
  *
  *	-Av6, -Av7, -Av8, -Asparclite, -Asparclet
  *		Standard 32 bit architectures.
- *	-Av9, -Av9a
+ *	-Av9, -Av9a, -Av9b
  *		Sparc64 in either a 32 or 64 bit world (-32/-64 says which).
  *		This used to only mean 64 bits, but properly specifying it
  *		complicated gcc's ASM_SPECs, so now opcode selection is
  *		specified orthogonally to word size (except when specifying
  *		the default, but that is an internal implementation detail).
- *	-Av8plus, -Av8plusa
- *		Same as -Av9{,a}.
- *	-xarch=v8plus, -xarch=v8plusa
- *		Same as -Av8plus{,a} -32, for compatibility with Sun's
+ *	-Av8plus, -Av8plusa, -Av8plusb
+ *		Same as -Av9{,a,b}.
+ *	-xarch=v8plus, -xarch=v8plusa, -xarch=v8plusb
+ *		Same as -Av8plus{,a,b} -32, for compatibility with Sun's
  *		assembler.
- *	-xarch=v9, -xarch=v9a
- *		Same as -Av9{,a} -64, for compatibility with Sun's assembler.
+ *	-xarch=v9, -xarch=v9a, -xarch=v9b
+ *		Same as -Av9{,a,b} -64, for compatibility with Sun's
+ *		assembler.
  *
  *		Select the architecture and possibly the file format.
  *		Instructions or features not supported by the selected
@@ -358,7 +361,7 @@ sparc_target_format ()
  *		The default is to start at v6, and bump the architecture up
  *		whenever an instruction is seen at a higher level.  In 32 bit
  *		environments, v9 is not bumped up to, the user must pass
- * 		-Av8plus{,a}.
+ * 		-Av8plus{,a,b}.
  *
  *		If -bump is specified, a warning is printing when bumping to
  *		higher levels.
@@ -745,6 +748,8 @@ struct priv_reg_entry priv_reg_table[] =
 struct priv_reg_entry v9a_asr_table[] =
 {
   {"tick_cmpr", 23},
+  {"sys_tick_cmpr", 25},
+  {"sys_tick", 24},
   {"softint", 22},
   {"set_softint", 20},
   {"pic", 17},
@@ -870,31 +875,28 @@ md_begin ()
 void
 sparc_md_end ()
 {
+  unsigned long mach = bfd_mach_sparc;
+
   if (sparc_arch_size == 64)
-    {
-      if (current_architecture == SPARC_OPCODE_ARCH_V9A)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
-      else
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
-    }
+    switch (current_architecture)
+      {
+      case SPARC_OPCODE_ARCH_V9A: mach = bfd_mach_sparc_v9a; break;
+      case SPARC_OPCODE_ARCH_V9B: mach = bfd_mach_sparc_v9b; break;
+      default: mach = bfd_mach_sparc_v9; break;
+      }
   else
-    {
-      if (current_architecture == SPARC_OPCODE_ARCH_V9)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
-      else if (current_architecture == SPARC_OPCODE_ARCH_V9A)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
-      else if (current_architecture == SPARC_OPCODE_ARCH_SPARCLET)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclet);
-      else if (default_arch_type == sparc86x && target_little_endian_data)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclite_le);
-      else
-	{
-	  /* The sparclite is treated like a normal sparc.  Perhaps it
-	     shouldn't be but for now it is (since that's the way it's
-	     always been treated).  */
-	  bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
-	}
-    }
+    switch (current_architecture)
+      {
+      case SPARC_OPCODE_ARCH_SPARCLET: mach = bfd_mach_sparc_sparclet; break;
+      case SPARC_OPCODE_ARCH_V9: mach = bfd_mach_sparc_v8plus; break;
+      case SPARC_OPCODE_ARCH_V9A: mach = bfd_mach_sparc_v8plusa; break;
+      case SPARC_OPCODE_ARCH_V9B: mach = bfd_mach_sparc_v8plusb; break;
+      /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
+	 be but for now it is (since that's the way it's always been
+	 treated).  */
+      default: break;
+      }
+  bfd_set_arch_mach (stdoutput, bfd_arch_sparc, mach);
 }
 
 /* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
@@ -1472,6 +1474,24 @@ sparc_ip (str, pinsn)
 		continue;
 	      }
 
+	    case '3':
+	      {
+		int smask = 0;
+
+		if (! parse_const_expr_arg (&s, &smask))
+		  {
+		    error_message = _(": invalid siam mode expression");
+		    goto error;
+		  }
+		if (smask < 0 || smask > 7)
+		  {
+		    error_message = _(": invalid siam mode number");
+		    goto error;
+		  }
+		opcode |= smask;
+		continue;
+	      }
+
 	    case '*':
 	      {
 		int fcn = 0;
@@ -1540,7 +1560,7 @@ sparc_ip (str, pinsn)
 
 	    case '_':
 	    case '/':
-	      /* Parse a v9a ancillary state register.  */
+	      /* Parse a v9a/v9b ancillary state register.  */
 	      if (*s == '%')
 		{
 		  struct priv_reg_entry *p = v9a_asr_table;
@@ -1558,12 +1578,20 @@ sparc_ip (str, pinsn)
 		    }
 		  if (p->name[0] != s[0])
 		    {
-		      error_message = _(": unrecognizable v9a ancillary state register");
+		      error_message = _(": unrecognizable v9a or v9b ancillary state register");
 		      goto error;
 		    }
 		  if (*args == '/' && (p->regnum == 20 || p->regnum == 21))
 		    {
 		      error_message = _(": rd on write only ancillary state register");
+		      goto error;
+		    }
+		  if (p->regnum >= 24
+		      && (insn->architecture
+			  & SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A)))
+		    {
+		      /* %sys_tick and %sys_tick_cmpr are v9bnotv9a */
+		      error_message = _(": unrecognizable v9a ancillary state register");
 		      goto error;
 		    }
 		  if (*args == '/')
@@ -1575,7 +1603,7 @@ sparc_ip (str, pinsn)
 		}
 	      else
 		{
-		  error_message = _(": unrecognizable v9a ancillary state register");
+		  error_message = _(": unrecognizable v9a or v9b ancillary state register");
 		  goto error;
 		}
 
@@ -2541,9 +2569,11 @@ sparc_ip (str, pinsn)
 
 	  if (v9_arg_p)
 	    {
-	      needed_arch_mask &= ~((1 << SPARC_OPCODE_ARCH_V9)
-				    | (1 << SPARC_OPCODE_ARCH_V9A));
-	      needed_arch_mask |= (1 << SPARC_OPCODE_ARCH_V9);
+	      needed_arch_mask &=
+		~(SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9) - 1);
+	      if (! needed_arch_mask)
+		needed_arch_mask =
+		  SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9);
 	    }
 
 	  if (needed_arch_mask
@@ -4124,6 +4154,8 @@ sparc_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_32PLUS;
   if (current_architecture == SPARC_OPCODE_ARCH_V9A)
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1;
+  else if (current_architecture == SPARC_OPCODE_ARCH_V9B)
+    elf_elfheader (stdoutput)->e_flags |= EF_SPARC_SUN_US1|EF_SPARC_SUN_US3;
 }
 #endif
 

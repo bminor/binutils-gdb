@@ -1,3 +1,11 @@
+2000-10-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* sparc-dis.c (v9a_asr_reg_names): Add v9b ASRs.
+	(compute_arch_mask): Add v8plusb and v9b machines.
+	(print_insn_sparc): siam mode decoding, accept ASRs up to 25.
+	* opcodes/sparc-opc.c: Support for Cheetah instruction set.
+	(prefetch_table): Add #invalidate.
+
 2000-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* mcore-dis.c (imsk): Change mask for OC to 0xFE00.

@@ -109,9 +109,12 @@ DESCRIPTION
 .#define bfd_mach_sparc_sparclite_le	6
 .#define bfd_mach_sparc_v9		7
 .#define bfd_mach_sparc_v9a		8 {* with ultrasparc add'ns *}
+.#define bfd_mach_sparc_v8plusb		9 {* with cheetah add'ns *}
+.#define bfd_mach_sparc_v9b		10 {* with cheetah add'ns *}
 .{* Nonzero if MACH has the v9 instruction set.  *}
 .#define bfd_mach_sparc_v9_p(mach) \
-.  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
+.  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9b \
+.   && (mach) != bfd_mach_sparc_sparclite_le)
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .#define bfd_mach_mips3000		3000
 .#define bfd_mach_mips3900		3900

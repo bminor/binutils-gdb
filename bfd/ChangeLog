@@ -1,3 +1,14 @@
+2000-10-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data,
+	elf32_sparc_object_p, elf32_sparc_final_write_processing):
+	Support v8plusb.
+	* elf64-sparc.c (sparc64_elf_merge_private_bfd_data,
+	sparc64_elf_object_p): Support v9b.
+	* archures.c: Declare v8plusb and v9b machines.
+	* bfd-in2.h: Ditto.
+	* cpu-sparc.c: Ditto.
+
 2000-10-16  Geoffrey Keating  <geoffk@shoggoth.cygnus.com>
 
 	* elf64-sparc.c (sparc64_elf_relocate_section): Clear the location

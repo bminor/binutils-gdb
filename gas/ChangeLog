@@ -1,3 +1,14 @@
+2000-10-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (sparc_ip): Fix a bug which caused v9_arg_p
+	instructions to loose any special insn->architecture mask.
+
+	* config/tc-sparc.c (v9a_asr_table): Add v9b ASRs.
+	(sparc_md_end, sparc_arch_types, sparc_arch,
+	sparc_elf_final_processing): Handle v8plusb and v9b architectures.
+	(sparc_ip): Handle siam mode operands. Support v9b ASRs (and
+	request v9b architecture if they are used).
+
 2000-10-18  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* config/tc-m68k.c: Fix the previous misapplied patch.

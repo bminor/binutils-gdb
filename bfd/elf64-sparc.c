@@ -2929,25 +2929,26 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
   else                                  /* Incompatible flags */
     {
       error = false;
-  
+
+#define EF_SPARC_ISA_EXTENSIONS \
+  (EF_SPARC_SUN_US1 | EF_SPARC_SUN_US3 | EF_SPARC_HAL_R1)
+
       if ((ibfd->flags & DYNAMIC) != 0)
 	{
 	  /* We don't want dynamic objects memory ordering and
 	     architecture to have any role. That's what dynamic linker
 	     should do.  */
-	  new_flags &= ~(EF_SPARCV9_MM | EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1);
+	  new_flags &= ~(EF_SPARCV9_MM | EF_SPARC_ISA_EXTENSIONS);
 	  new_flags |= (old_flags
-			& (EF_SPARCV9_MM
-			   | EF_SPARC_SUN_US1
-			   | EF_SPARC_HAL_R1));
+			& (EF_SPARCV9_MM | EF_SPARC_ISA_EXTENSIONS));
 	}
       else
 	{
 	  /* Choose the highest architecture requirements.  */
-	  old_flags |= (new_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1));
-	  new_flags |= (old_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1));
-	  if ((old_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1))
-	      == (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1))
+	  old_flags |= (new_flags & EF_SPARC_ISA_EXTENSIONS);
+	  new_flags |= (old_flags & EF_SPARC_ISA_EXTENSIONS);
+	  if ((old_flags & (EF_SPARC_SUN_US1 | EF_SPARC_SUN_US3))
+	      && (old_flags & EF_SPARC_HAL_R1))
 	    {
 	      error = true;
 	      (*_bfd_error_handler)
@@ -3020,8 +3021,10 @@ sparc64_elf_object_p (abfd)
      bfd *abfd;
 {
   unsigned long mach = bfd_mach_sparc_v9;
-  
-  if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US1)
+
+  if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US3)
+    mach = bfd_mach_sparc_v9b;
+  else if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US1)
     mach = bfd_mach_sparc_v9a;
   return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, mach);
 }
