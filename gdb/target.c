@@ -949,10 +949,10 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
       while (reg_len > 0)
 	{
 	  if (region->attrib.cache)
-	    res = dcache_xfer_memory(target_dcache, memaddr, myaddr,
+	    res = dcache_xfer_memory (target_dcache, memaddr, myaddr,
 				     reg_len, write);
 	  else
-	    res = do_xfer_memory(memaddr, myaddr, reg_len, write,
+	    res = do_xfer_memory (memaddr, myaddr, reg_len, write,
 				 &region->attrib);
 	      
 	  if (res <= 0)
@@ -2297,5 +2297,5 @@ result in significant performance improvement for remote targets.",
   add_com ("monitor", class_obscure, do_monitor_command,
 	   "Send a command to the remote monitor (remote targets only).");
 
-  target_dcache = dcache_init();
+  target_dcache = dcache_init ();
 }
