@@ -1,3 +1,8 @@
+2004-11-03  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf.c (assign_file_positions_for_segments): Set next_file_pos even
+	if there are no segments.
+
 2004-11-02  Daniel Jacobowitz  <dan@debian.org>
 
 	* config.bfd: Mark arm-*-oabi and thumb-*-oabi as obsolete.

@@ -3871,7 +3871,10 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
   elf_elfheader (abfd)->e_phnum = count;
 
   if (count == 0)
-    return TRUE;
+    {
+      elf_tdata (abfd)->next_file_pos = bed->s->sizeof_ehdr;
+      return TRUE;
+    }
 
   /* If we already counted the number of program segments, make sure
      that we allocated enough space.  This happens when SIZEOF_HEADERS
