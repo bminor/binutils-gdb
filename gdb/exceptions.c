@@ -515,36 +515,16 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
   return val;
 }
 
-struct captured_command_args
-  {
-    catch_command_errors_ftype *command;
-    char *arg;
-    int from_tty;
-  };
-
-static int
-do_captured_command (void *data)
-{
-  struct captured_command_args *context = data;
-  context->command (context->arg, context->from_tty);
-  /* FIXME: cagney/1999-11-07: Technically this do_cleanups() call
-     isn't needed.  Instead an assertion check could be made that
-     simply confirmed that the called function correctly cleaned up
-     after itself.  Unfortunately, old code (prior to 1999-11-04) in
-     main.c was calling SET_TOP_LEVEL(), calling the command function,
-     and then *always* calling do_cleanups().  For the moment we
-     remain ``bug compatible'' with that old code..  */
-  do_cleanups (ALL_CLEANUPS);
-  return 1;
-}
-
 int
 catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
-  struct captured_command_args args;
-  args.command = command;
-  args.arg = arg;
-  args.from_tty = from_tty;
-  return catch_errors (do_captured_command, &args, "", mask);
+  volatile struct exception e;
+  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &e, mask);
+  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
+    command (arg, from_tty);
+  print_any_exception (gdb_stderr, NULL, e);
+  if (e.reason < 0)
+    return 0;
+  return 1;
 }

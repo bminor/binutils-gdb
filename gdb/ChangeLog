@@ -1,5 +1,9 @@
 2005-01-15  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.c (do_captured_command)
+	(struct captured_command_args): Delete.
+	(catch_command_errors): Simplify by inlining call to catch_errors.
+
 	* exceptions.c (struct catcher): Delete field print_message.
 	(catcher_init): Delete print_message parameter.
 	(catch_exception, catch_exceptions_with_msg, catch_errors): Update.
