@@ -29,12 +29,12 @@ BISONFLAGS = -v
 SCRIPTS = ldgld68k.sc ldgld68kUr.sc ldgld68kr.sc \
 	ldgld.sc ldgldUr.sc ldgldr.sc ldlnk960.sc \
 	ldlnk960r.sc ldgld960.sc \
-	ldgldm88kbcs.sc ldgldm88kbcsUr.sc ldgldm88kbcsr.sc \
+	ldm88k.sc ldm88kUr.sc ldm88kr.sc \
 	ldglda29k.sc ldglda29kUr.sc ldglda29kr.sc
 
 PROCESSED_SCRIPTS = ldgld68k.x ldgld68kUr.x ldgld68kr.x ldgld.x \
 	ldgldUr.x ldgldr.x ldlnk960.x ldlnk960r.x ldgld960.x \
-	ldgldm88kbcs.x ldgldm88kbcsUr.x ldgldm88kbcsr.x \
+	ldm88k.x ldm88kUr.x ldm88kr.x \
 	ldglda29k.x ldglda29kUr.x ldglda29kr.x
 
 #### target and host dependent Makefile fragments come in here.
@@ -61,7 +61,7 @@ BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o \
-	ldgldm88kbcs.o ldglda29k.o \
+	ldm88k.o ldglda29k.o \
 	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h ldsym.h ldlang.h ldexp.h \
@@ -70,7 +70,7 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h ldsym.h ldlang.h l
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c ldgld.c ldgld68k.c \
-	ldgldm88kbcs.c ldgld29k.c \
+	ldm88k.c ldgld29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
 GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h 
