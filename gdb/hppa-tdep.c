@@ -359,7 +359,7 @@ read_unwind_info (objfile)
   /* Get hooks to all unwind sections.   Note there is no linker-stub unwind
      section in ELF at the moment.  */
   unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_START$");
-  elf_unwind_sec = bfd_get_section_by_name (objfile->obfd, ".hppa_unwind");
+  elf_unwind_sec = bfd_get_section_by_name (objfile->obfd, ".PARISC.unwind");
   stub_unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_END$");
 
   /* Get sizes and unwind counts for all sections.  */

@@ -1,3 +1,8 @@
+Mon Jul  4 19:28:56 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (read_unwind_info): ELF unwind information is in the
+	.PARISC.unwind section now.
+
 Mon Jul  4 17:06:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* breakpoint.c (mention): Always show breakpoint address if no
