@@ -1,3 +1,8 @@
+2004-06-21 Jan Beulich  <jbeulich@novell.com>
+
+	* gas/symbols.c: While discarding ordinary local absolute symbols
+	when --strip-local-absolute is in effect, retain file symbols.
+
 2004-06-20  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c (mri_chip): Replace current_chip, not augment.

@@ -1812,7 +1812,9 @@ S_IS_LOCAL (symbolS *s)
     return 1;
 
   if (flag_strip_local_absolute
-      && (flags & BSF_GLOBAL) == 0
+      /* Keep BSF_FILE symbols in order to allow debuggers to identify
+	 the source file even when the object file is stripped.  */
+      && (flags & (BSF_GLOBAL | BSF_FILE)) == 0
       && bfd_get_section (s->bsym) == absolute_section)
     return 1;
 
