@@ -1,3 +1,7 @@
+2000-04-05  Richard Henderson  <rth@cygnus.com>
+
+	* splay-tree.c (splay_tree_remove): New.
+
 Thu Mar 16 01:33:58 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (partition.o): Depend on config.h
