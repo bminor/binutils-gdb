@@ -68,10 +68,12 @@ ldver.h
 ldwrite.c
 ldwrite.h
 lexsup.c
+mac-ld.r
 mpw-config.in
 mpw-emipsidt.c
+mpw-eppcmacos.c
 mpw-esh.c
-mpw-make.in
+mpw-make.sed
 mri.c
 mri.h
 scripttempl
