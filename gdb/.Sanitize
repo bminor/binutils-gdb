@@ -195,6 +195,8 @@ remote-nindy.c
 remote-sim.c
 remote-st.c
 remote-udi.c
+remote-utils.c
+remote-utils.h
 remote-vx.c
 remote-z8k.c
 remote.c
