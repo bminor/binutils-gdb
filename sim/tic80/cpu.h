@@ -152,6 +152,7 @@ struct _sim_cpu {
 };
 
 #define GPR(N) ((CPU)->reg[N])
+#define GPR_SET(N, VAL) ((CPU)->reg[N] = (VAL))
 #define ACC(N) ((CPU)->acc[N])
 #define CR(N) ((CPU)->cr[tic80_index2cr ((N))])
 

@@ -92,6 +92,7 @@ tmp-igen: $(srcdir)/dc $(srcdir)/insns $(srcdir)/ic ../igen/igen
 		-F f \
 		-G direct-access \
 		-G delayed-branch \
+		-G zero-r0 \
 		-F short,emul \
 		-B 32 -H 31 \
 		-o $(srcdir)/dc \

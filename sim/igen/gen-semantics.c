@@ -173,6 +173,15 @@ print_semantic_body(lf *file,
     /* FIXME - need to log a conditional failure */
   }
   
+  /* Architecture expects r0 to be zero.  Instead of having to check
+     every read to see if it is refering to r0 just zap the r0
+     register */
+  if ((code & generate_with_semantic_delayed_branch))
+    {
+      lf_printf (file, "\n");
+      lf_printf (file, "GPR(0) = 0;\n");
+    }
+
   /* generate the code (or at least something */
   lf_printf(file, "\n");
   lf_printf(file, "/* semantics: */\n");

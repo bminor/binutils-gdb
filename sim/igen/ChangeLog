@@ -1,3 +1,10 @@
+Fri May 16 11:48:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Add code to clear r0.
+
+	* igen.c (main): Add new option zero-r0, which adds code to clear
+ 	GPR(0) each cycle.
+
 Wed May  7 12:31:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_itrace): Fix so line-nr is passed to trace

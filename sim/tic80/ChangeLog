@@ -1,3 +1,20 @@
+Fri May 16 11:57:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ic (compute): Drop check for REG == 0, now always forced to
+ 	zero.
+
+	* cpu.h (GPR_SET): New macro update the gpr.
+	* insns (do_add): Use GPR_SET to update the GPR register.
+
+	* sim-calls.c (sim_fetch_register): Pretend that r0 is zero.
+
+	* Makefile.in (tmp-igen): Specify zero-r0 so that every
+ 	instruction clears r0.
+
+	* interp.c (engine_run_until_stop): Igen now generates code to
+ 	clear r0.
+	(engine_step): Ditto.
+
 Thu May 15 11:45:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (do_shift): When rot==0 and zero/sign merge treat it as

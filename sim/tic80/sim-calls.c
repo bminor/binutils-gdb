@@ -177,7 +177,9 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 void
 sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf)
 {
-  if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
+  if (regnr == R0_REGNUM)
+    memset (buf, 0, sizeof (unsigned32));
+  else if (regnr > R0_REGNUM && regnr <= Rn_REGNUM)
     *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->reg[regnr - R0_REGNUM]);
   else if (regnr == PC_REGNUM)
     *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->cia.ip);

@@ -2,19 +2,25 @@ compute:Dest:Dest:
 compute:Dest:rDest:signed_word *:(&(CPU)->reg[Dest])
 #
 compute:Source1:Source1:
-compute:Source1:rSource1:signed_word:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
+compute:Source1:vSource1:signed_word:(GPR (Source1) + 0)
+#compute:Source1:vSource1:signed_word:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
 #
 compute:Source2:Source2:
-compute:Source2:rSource2:signed_word:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
+compute:Source2:vSource2:signed_word:(GPR (Source2) + 0)
+#compute:Source2:vSource2:signed_word:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
 #
 compute:Source:Source:
-compute:Source:rSource:signed_word:(Source == 0 ? 0 : (CPU)->reg[Source])
+compute:Source:vSource:signed_word:(GPR (Source) + 0)
+#compute:Source:vSource:signed_word:(Source == 0 ? 0 : (CPU)->reg[Source])
 #
 compute:IndOff:IndOff:
-compute:IndOff:rIndOff:signed_word:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
+compute:IndOff:rIndOff:signed_word:(GPR (IndOff) + 0)
+#compute:IndOff:rIndOff:signed_word:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
 #
 compute:Base:Base:
-compute:Base:rBase:signed_word:(Base == 0 ? 0 : (CPU)->reg[Base])
+compute:Base:vBase:signed_word:(GPR (Base) + 0)
+compute:Base:rBase:signed_word:(&GPR (Base))
+#compute:Base:vBase:signed_word:(Base == 0 ? 0 : (CPU)->reg[Base])
 #
 compute:Link:Link:
 compute:Link:rLink:signed_word:(&(CPU)->reg[Link])
@@ -40,4 +46,5 @@ compute:SignedOffset:vSignedOffset:signed_word:SEXT (SignedOffset, 14)
 #
 compute:UCRN:UCRN:
 compute:INDCR:INDCR:
-compute:INDCR:UCRN:unsigned32:(INDCR == 0 ? 0 : (CPU)->reg[INDCR])
+compute:INDCR:UCRN:unsigned32:(GPR (INDCR) + 0)
+#compute:INDCR:UCRN:unsigned32:(INDCR == 0 ? 0 : (CPU)->reg[INDCR])
