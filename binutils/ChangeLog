@@ -1,3 +1,15 @@
+Fri Jul 31 10:04:23 1998  Catherine Moore  <clm@cygnus.com>
+
+       * readelf.c (dump_relocations):  EM_ARM uses rela relocs.
+
+1998-07-30 16:25  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (get_dynamic_type): Don't used gettext on the names.
+	Add new DT_* values from Solaris.  Don't print nuemric value in
+	case of an unknown entry.
+	(process_dynamic_segment): Handle new DT_* entries.  Print numeric
+	values in decimal, not hex.
+
 Fri Jul 24 16:28:57 1998  Jeff Holcomb  <jeffh@cygnus.com>
 
 	* readelf.c (get_dynamic_type): Remove empty default from switch

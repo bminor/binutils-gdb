@@ -74,8 +74,8 @@ char *          	dynamic_strings;
 char *			string_table;
 Elf_Internal_Sym * 	dynamic_symbols;
 char            	program_interpreter [64];
-int             	dynamic_info [DT_JMPREL + 1];
-int             	version_info [16];
+int             	dynamic_info[DT_JMPREL + 1];
+int             	version_info[16];
 int             	loadaddr = 0;
 Elf_Internal_Ehdr       elf_header;
 Elf_Internal_Shdr *     section_headers;
@@ -313,7 +313,6 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_CYGNUS_D10V:
     case EM_MIPS:
     case EM_MIPS_RS4_BE:
-    case EM_ARM:
       {
 	Elf32_External_Rel * erels;
 
@@ -338,6 +337,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
       }
     break;
 
+    case EM_ARM:
     case EM_68K:
     case EM_SPARC:
     case EM_PPC:
@@ -574,37 +574,45 @@ get_dynamic_type (type)
 
   switch (type)
     {
-    case DT_NULL:	return _("NULL");
-    case DT_NEEDED:	return _("NEEDED");
-    case DT_PLTRELSZ:	return _("PLTRELSZ");
-    case DT_PLTGOT:	return _("PLTGOT");
-    case DT_HASH:	return _("HASH");
-    case DT_STRTAB:	return _("STRTAB");
-    case DT_SYMTAB:	return _("SYMTAB");
-    case DT_RELA:	return _("RELA");
-    case DT_RELASZ:	return _("RELASZ");
-    case DT_RELAENT:	return _("RELAENT");
-    case DT_STRSZ:	return _("STRSZ");
-    case DT_SYMENT:	return _("SYMENT");
-    case DT_INIT:	return _("INIT");
-    case DT_FINI:	return _("FINI");
-    case DT_SONAME:	return _("SONAME");
-    case DT_RPATH:	return _("RPATH");
-    case DT_SYMBOLIC:	return _("SYMBOLIC");
-    case DT_REL:	return _("REL");
-    case DT_RELSZ:	return _("RELSZ");
-    case DT_RELENT:	return _("RELENT");
-    case DT_PLTREL:	return _("PLTREL");
-    case DT_DEBUG:	return _("DEBUG");
-    case DT_TEXTREL:	return _("TEXTREL");
-    case DT_JMPREL:	return _("JMPREL");
-    case DT_VERDEF:	return _("VERDEF");
-    case DT_VERDEFNUM:	return _("VERDEFNUM");
-    case DT_VERNEED:	return _("VERNEED");
-    case DT_VERNEEDNUM:	return _("VERNEEDNUM");
-    case DT_VERSYM:	return _("VERSYN");
-    case DT_AUXILIARY:	return _("AUXILARY");
-    case DT_FILTER:	return _("FILTER");
+    case DT_NULL:	return "NULL";
+    case DT_NEEDED:	return "NEEDED";
+    case DT_PLTRELSZ:	return "PLTRELSZ";
+    case DT_PLTGOT:	return "PLTGOT";
+    case DT_HASH:	return "HASH";
+    case DT_STRTAB:	return "STRTAB";
+    case DT_SYMTAB:	return "SYMTAB";
+    case DT_RELA:	return "RELA";
+    case DT_RELASZ:	return "RELASZ";
+    case DT_RELAENT:	return "RELAENT";
+    case DT_STRSZ:	return "STRSZ";
+    case DT_SYMENT:	return "SYMENT";
+    case DT_INIT:	return "INIT";
+    case DT_FINI:	return "FINI";
+    case DT_SONAME:	return "SONAME";
+    case DT_RPATH:	return "RPATH";
+    case DT_SYMBOLIC:	return "SYMBOLIC";
+    case DT_REL:	return "REL";
+    case DT_RELSZ:	return "RELSZ";
+    case DT_RELENT:	return "RELENT";
+    case DT_PLTREL:	return "PLTREL";
+    case DT_DEBUG:	return "DEBUG";
+    case DT_TEXTREL:	return "TEXTREL";
+    case DT_JMPREL:	return "JMPREL";
+    case DT_VERDEF:	return "VERDEF";
+    case DT_VERDEFNUM:	return "VERDEFNUM";
+    case DT_VERNEED:	return "VERNEED";
+    case DT_VERNEEDNUM:	return "VERNEEDNUM";
+    case DT_VERSYM:	return "VERSYN";
+    case DT_AUXILIARY:	return "AUXILARY";
+    case DT_FILTER:	return "FILTER";
+    case DT_POSFLAG_1:	return "POSFLAG_1";
+    case DT_SYMINSZ:	return "SYMINSZ";
+    case DT_SYMINENT:	return "SYMINENT";
+    case DT_SYMINFO:	return "SYMINFO";
+    case DT_RELACOUNT:	return "RELACOUNT";
+    case DT_RELCOUNT:	return "RELCOUNT";
+    case DT_FLAGS_1:	return "FLAGS_1";
+    case DT_USED:	return "USED";
 
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
@@ -619,7 +627,7 @@ get_dynamic_type (type)
 
 	  if (result == NULL)
 	    {
-	      sprintf (buff, _("Processor Specific: (%x)"), type);
+	      sprintf (buff, _("Processor Specific"), type);
 	      result = buff;
 	    }
 	  return result;
@@ -1593,20 +1601,20 @@ process_relocs (file)
       rel_size   = 0;
       rel_offset = 0;
 
-      if (dynamic_info [DT_REL])
+      if (dynamic_info[DT_REL])
 	{
-	  rel_offset = dynamic_info [DT_REL];
-	  rel_size   = dynamic_info [DT_RELSZ];
+	  rel_offset = dynamic_info[DT_REL];
+	  rel_size   = dynamic_info[DT_RELSZ];
 	}
       else if (dynamic_info [DT_RELA])
 	{
-	  rel_offset = dynamic_info [DT_RELA];
-	  rel_size   = dynamic_info [DT_RELASZ];
+	  rel_offset = dynamic_info[DT_RELA];
+	  rel_size   = dynamic_info[DT_RELASZ];
 	}
-      else if (dynamic_info [DT_JMPREL])
+      else if (dynamic_info[DT_JMPREL])
 	{
-	  rel_offset = dynamic_info [DT_JMPREL];
-	  rel_size   = dynamic_info [DT_PLTRELSZ];
+	  rel_offset = dynamic_info[DT_JMPREL];
+	  rel_size   = dynamic_info[DT_PLTRELSZ];
 	}
 
       if (rel_size)
@@ -1771,7 +1779,7 @@ process_dynamic_segment (file)
 	  if (entry->d_tag != DT_SYMTAB)
 	    continue;
 
-	  dynamic_info [DT_SYMTAB] = entry->d_un.d_val;
+	  dynamic_info[DT_SYMTAB] = entry->d_un.d_val;
 
 	  /* Since we do not know how big the symbol table is,
 	     we default to reading in the entire file (!) and
@@ -1808,7 +1816,7 @@ process_dynamic_segment (file)
 	  if (entry->d_tag != DT_STRTAB)
 	    continue;
 
-	  dynamic_info [DT_STRTAB] = entry->d_un.d_val;
+	  dynamic_info[DT_STRTAB] = entry->d_un.d_val;
 
 	  /* Since we do not know how big the string table is,
 	     we default to reading in the entire file (!) and
@@ -1869,6 +1877,58 @@ process_dynamic_segment (file)
 	    }
 	  break;
 
+	case DT_POSFLAG_1:
+	  if (do_dynamic)
+	    {
+	      printf (_("Flags:"));
+	      if (entry->d_un.d_val == 0)
+		printf (_(" None\n"));
+	      else
+		{
+		  if (entry->d_un.d_val & DF_P1_LAZYLOAD)
+		    printf (" LAZYLOAD");
+		  if (entry->d_un.d_val & DF_P1_LAZYLOAD)
+		    printf (" GROUPPERM");
+		  puts ("");
+		}
+	    }
+	  break;
+
+	case DT_FLAGS_1:
+	  if (do_dynamic)
+	    {
+	      printf (_("Flags:"));
+	      if (entry->d_un.d_val == 0)
+		printf (_(" None\n"));
+	      else
+		{
+		  if (entry->d_un.d_val & DF_1_NOW)
+		    printf (" NOW");
+		  if (entry->d_un.d_val & DF_1_GLOBAL)
+		    printf (" GLOBAL");
+		  if (entry->d_un.d_val & DF_1_GROUP)
+		    printf (" GROUP");
+		  if (entry->d_un.d_val & DF_1_NODELETE)
+		    printf (" NODELETE");
+		  if (entry->d_un.d_val & DF_1_LOADFLTR)
+		    printf (" LOADFLTR");
+		  if (entry->d_un.d_val & DF_1_INITFIRST)
+		    printf (" INITFIRST");
+		  if (entry->d_un.d_val & DF_1_NOOPEN)
+		    printf (" NOOPEN");
+		  if (entry->d_un.d_val & DF_1_ORIGIN)
+		    printf (" ORIGIN");
+		  if (entry->d_un.d_val & DF_1_DIRECT)
+		    printf (" DIRECT");
+		  if (entry->d_un.d_val & DF_1_TRANS)
+		    printf (" TRANS");
+		  if (entry->d_un.d_val & DF_1_INTERPOSE)
+		    printf (" INTERPOSE");
+		  puts ("");
+		}
+	    }
+	  break;
+
 	case DT_NULL	:
 	case DT_NEEDED	:
 	case DT_PLTRELSZ:
@@ -1877,23 +1937,17 @@ process_dynamic_segment (file)
 	case DT_STRTAB	:
 	case DT_SYMTAB	:
 	case DT_RELA	:
-	case DT_RELASZ	:
-	case DT_RELAENT	:
-	case DT_STRSZ	:
-	case DT_SYMENT	:
 	case DT_INIT	:
 	case DT_FINI	:
 	case DT_SONAME	:
 	case DT_RPATH	:
 	case DT_SYMBOLIC:
 	case DT_REL	:
-	case DT_RELSZ	:
-	case DT_RELENT	:
 	case DT_PLTREL	:
 	case DT_DEBUG	:
 	case DT_TEXTREL	:
 	case DT_JMPREL	:
-	  dynamic_info [entry->d_tag] = entry->d_un.d_val;
+	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
 
 	  if (do_dynamic)
 	    {
@@ -1923,6 +1977,51 @@ process_dynamic_segment (file)
 
 		    case DT_RPATH:
 		      printf (_("Library rpath: [%s]\n"), name);
+		      break;
+
+		    default:
+		      printf ("%#lx\n", (long) entry->d_un.d_val);
+		    }
+		}
+	      else
+		printf ("%#lx\n", (long) entry->d_un.d_val);
+	    }
+	  break;
+
+	case DT_RELASZ	:
+	case DT_RELAENT	:
+	case DT_STRSZ	:
+	case DT_SYMENT	:
+	case DT_RELSZ	:
+	case DT_RELENT	:
+	case DT_VERDEFNUM:
+	case DT_VERNEEDNUM:
+	case DT_RELACOUNT:
+	case DT_RELCOUNT:
+	  printf ("%ld\n", entry->d_un.d_val);
+	  break;
+
+	case DT_SYMINSZ	:
+	case DT_SYMINENT:
+	case DT_SYMINFO	:
+	case DT_USED:
+	  if (do_dynamic)
+	    {
+	      char * name;
+
+	      if (dynamic_strings == NULL)
+		name = NULL;
+	      else
+		name = dynamic_strings + entry->d_un.d_val;
+
+
+
+	      if (name)
+		{
+		  switch (entry->d_tag)
+		    {
+		    case DT_USED:
+		      printf (_("Not needed object: [%s]\n"), name);
 		      break;
 
 		    default:
@@ -2578,7 +2677,7 @@ process_symbol_table (file)
   if (! do_syms)
     return 1;
 
-  if (dynamic_info [DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
+  if (dynamic_info[DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
     {
       char   nb [4];
       char   nc [4];
@@ -2589,7 +2688,7 @@ process_symbol_table (file)
       int    hn;
       int    si;
 
-      if (fseek (file, dynamic_info [DT_HASH] - loadaddr, SEEK_SET))
+      if (fseek (file, dynamic_info[DT_HASH] - loadaddr, SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information"));
 	  return 0;
@@ -3314,11 +3413,10 @@ process_file (file_name)
 
   /* Initialise per file variables.  */
   for (i = NUM_ELEM (version_info); i--;)
-    version_info [i] = 0;
+    version_info[i] = 0;
 
   for (i = NUM_ELEM (dynamic_info); i--;)
-    dynamic_info [i] = 0;
-
+    dynamic_info[i] = 0;
 
   /* Process the file.  */
   if (show_name)
