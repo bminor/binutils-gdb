@@ -492,16 +492,18 @@ m32r_upload_command (char *args, int from_tty)
       buf[0] = 0;
       gethostname (buf, sizeof (buf));
       if (buf[0] != 0)
-	hostent = gethostbyname (buf);
-      if (hostent != 0)
 	{
+	  hostent = gethostbyname (buf);
+	  if (hostent != 0)
+	    {
 #if 1
-	  memcpy (&inet_addr.s_addr, hostent->h_addr,
-		  sizeof (inet_addr.s_addr));
-	  server_addr = (char *) inet_ntoa (inet_addr);
+	      memcpy (&inet_addr.s_addr, hostent->h_addr,
+		      sizeof (inet_addr.s_addr));
+	      server_addr = (char *) inet_ntoa (inet_addr);
 #else
-	  server_addr = (char *) inet_ntoa (hostent->h_addr);
+	      server_addr = (char *) inet_ntoa (hostent->h_addr);
 #endif
+	    }
 	}
       if (server_addr == 0)	/* failed? */
 	error

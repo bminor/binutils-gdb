@@ -1,3 +1,16 @@
+2003-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that m32r is multi-arch.
+	From 2003-07-28 Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* configure.tgt: Recognize m32r-*-*.
+	* config/m32r/tm-m32r.h: Delete file.
+	* config/m32r/m32r.mt: New file.
+	* m32r-rom.c (m32r_upload_command): Use hostent only when 
+        gethostname succeeds, in order to avoid a compilation
+        warning.
+	* m32r-tdep.c (m32r_store_return_value): Add a cast to remove a
+	compiler warning.
+
 2003-08-01  Michael Snyder  <msnyder@redhat.com>
 
 	* sh-tdep.c (sh_frame_align): New gdbarch method.

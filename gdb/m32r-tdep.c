@@ -286,7 +286,7 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
 
   if (len > 4)
     {
-      regval = extract_unsigned_integer (valbuf + 4, len - 4);
+      regval = extract_unsigned_integer ((char *) valbuf + 4, len - 4);
       regcache_cooked_write_unsigned (regcache, RET1_REGNUM + 1, regval);
     }
 }
