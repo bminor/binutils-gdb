@@ -1127,16 +1127,12 @@ obj_elf_symver (ignore)
 
   if (symbol_get_obj (sym)->versioned_name == NULL)
     {
-      char *p, *rp;
-
       symbol_get_obj (sym)->versioned_name = xstrdup (name);
 
       *input_line_pointer = c;
 
-      p = strchr (symbol_get_obj (sym)->versioned_name, ELF_VER_CHR);
-      if (p)
-	rp = strrchr (p, ELF_VER_CHR);
-      if (!p || p [1] == '\0' || rp [1] == '\0')
+      if (strchr (symbol_get_obj (sym)->versioned_name,
+		  ELF_VER_CHR) == NULL)
 	{
 	  as_bad (_("missing version name in `%s' for symbol `%s'"),
 		  symbol_get_obj (sym)->versioned_name,

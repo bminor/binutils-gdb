@@ -1,3 +1,8 @@
+2000-11-16  H.J. Lu  <hjl@gnu.org>
+
+	* config/obj-elf.c (obj_elf_symver): Don't check the missing
+	version name.
+
 2000-11-15  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-tic30.c: Fix formatting.
