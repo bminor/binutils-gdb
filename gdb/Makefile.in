@@ -1181,7 +1181,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
-	sh-tdep.c solib.c sparc-nat.c \
+	sh-tdep.c solib.c solib-svr4.c solib-sunos.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
@@ -1961,9 +1961,11 @@ solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h gdb_regex.h $(symfile_h) $(target_h) $(gdb_string_h) \
 	solist.h $(completer_h)
 
-solib-svr4.o: solib-svr4.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gdb_regex.h $(symfile_h) $(target_h) $(gdb_string_h) \
-	solist.h solib-svr4.h $(regcache_h)
+solib-sunos.o: solib-sunos.c $(defs_h) $(symfile_h) objfiles.h $(gdbcore_h) \
+	$(inferior_h) solist.h
+
+solib-svr4.o: solib-svr4.c $(defs_h) $(gdbcore_h) $(inferior_h) objfiles.h \
+	$(symfile_h) $(target_h) solist.h solib-svr4.h
 
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) solib-svr4.h
 

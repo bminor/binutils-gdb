@@ -1,3 +1,23 @@
+2001-10-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Add solib-svr4.c and solib-sunos.c
+	to this list.
+	(solib-sunos.o): Add dependencies.
+	(solib-svr4.o): Revise dependencies.
+	* solib-svr4.c: Remove SunOS shared library support.
+	* solib-sunos.c: New file, created from solib-svr4.c, which still
+	contains SunOS shared library support, but no SVR4 support.
+
+	* config/i386/nbsd.mh (NATDEPFILES): Remove solib-svr4.o and
+	solib-legacy.o from this list.  Add solib-sunos.o.
+	* config/i386/sun386.mt (TDEPFILES): Likewise.
+	* config/m68k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/m68k/sun2os4.mt (TDEPFILES): Likewise.
+	* config/m68k/sun3os4.mt (TDEPFILES): Likewise.
+	* config/ns32k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/sparc/nbsd.mh (NATDEPFILES): Likewise.
+	* config/sparc/sun4os4.mt (TDEPFILES): Likewise.
+
 2001-10-01  Elena Zannoni <ezannoni@redhat.com>
 
         * Makefile.in (mipsread.o): Remove old dependency on partial-stab.h.
