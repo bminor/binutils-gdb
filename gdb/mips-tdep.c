@@ -2118,28 +2118,16 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
       /* Bitmasks; set if we have found a save for the register.  */
       unsigned long gen_save_found = 0;
       unsigned long float_save_found = 0;
-      int mips16;
 
-      /* If the address is odd, assume this is MIPS16 code.  */
       addr = PROC_LOW_ADDR (proc_desc);
-      mips16 = pc_is_mips16 (addr);
 
       /* Scan through this function's instructions preceding the
          current PC, and look for those that save registers.  */
       while (addr < frame_pc_unwind (next_frame))
 	{
-	  if (mips16)
-	    {
-	      mips16_decode_reg_save (mips16_fetch_instruction (addr),
-				      &gen_save_found);
-	      addr += MIPS16_INSTLEN;
-	    }
-	  else
-	    {
-	      mips32_decode_reg_save (mips32_fetch_instruction (addr),
-				      &gen_save_found, &float_save_found);
-	      addr += MIPS_INSTLEN;
-	    }
+          mips32_decode_reg_save (mips32_fetch_instruction (addr),
+                                  &gen_save_found, &float_save_found);
+          addr += MIPS_INSTLEN;
 	}
       gen_mask = gen_save_found;
       float_mask = float_save_found;
@@ -2159,48 +2147,20 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 	}
   }
 
-  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
-     order of that normally used by gcc.  Therefore, we have to fetch
-     the first instruction of the function, and if it's an entry
-     instruction that saves $s0 or $s1, correct their saved addresses.  */
-  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
-    {
-      ULONGEST inst = mips16_fetch_instruction (PROC_LOW_ADDR (proc_desc));
-      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
-	/* entry */
-	{
-	  int reg;
-	  int sreg_count = (inst >> 6) & 3;
-
-	  /* Check if the ra register was pushed on the stack.  */
-	  CORE_ADDR reg_position = (cache->base
-				    + PROC_REG_OFFSET (proc_desc));
-	  if (inst & 0x20)
-	    reg_position -= mips_abi_regsize (gdbarch);
-
-	  /* Check if the s0 and s1 registers were pushed on the
-	     stack.  */
-	  /* NOTE: cagney/2004-02-08: Huh?  This is doing no such
-             check.  */
-	  for (reg = 16; reg < sreg_count + 16; reg++)
-	    {
-	      cache->saved_regs[NUM_REGS + reg].addr = reg_position;
-	      reg_position -= mips_abi_regsize (gdbarch);
-	    }
-	}
-    }
-
   /* Fill in the offsets for the registers which float_mask says were
      saved.  */
   {
-    CORE_ADDR reg_position = (cache->base
-			      + PROC_FREG_OFFSET (proc_desc));
+    CORE_ADDR reg_position = (cache->base + PROC_FREG_OFFSET (proc_desc));
     int ireg;
+
     /* Fill in the offsets for the float registers which float_mask
        says were saved.  */
     for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
       if (float_mask & 0x80000000)
 	{
+          const int regno =
+            NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg;
+
 	  if (mips_abi_regsize (gdbarch) == 4
 	      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    {
@@ -2227,15 +2187,14 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 	         reg_position is decremented each time through the
 	         loop).  */
 	      if ((ireg & 1))
-		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
-		  .addr = reg_position - mips_abi_regsize (gdbarch);
+		cache->saved_regs[regno].addr =
+                  reg_position - mips_abi_regsize (gdbarch);
 	      else
-		cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
-		  .addr = reg_position + mips_abi_regsize (gdbarch);
+		cache->saved_regs[regno].addr =
+                 reg_position + mips_abi_regsize (gdbarch);
 	    }
 	  else
-	    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg]
-	      .addr = reg_position;
+	    cache->saved_regs[regno].addr = reg_position;
 	  reg_position -= mips_abi_regsize (gdbarch);
 	}
 
