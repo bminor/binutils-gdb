@@ -1,6 +1,6 @@
 # This file is a shell script fragment that supplies the information
 # necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
+# script approriate for this directory.  For more information, check
 # any existing configure script.
 
 srcname="GDB"
@@ -198,6 +198,7 @@ h8500-*-*)		gdb_target=h8500hms ;;
 sh-*-*)			gdb_target=sh ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
+hppa*-*-pro*)		gdb_target=hppapro ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-osf*)		gdb_target=hppaosf ;;
