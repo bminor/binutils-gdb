@@ -1071,6 +1071,7 @@ struct orphan_save {
   lang_output_section_statement_type *os;
   asection **section;
   lang_statement_union_type **stmt;
+  lang_statement_union_type **os_tail;
 };
 
 static boolean
@@ -1093,6 +1094,8 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   const char *secname;
   const char *ps = NULL;
   lang_output_section_statement_type *os;
+  lang_statement_union_type **os_tail;
+  etree_type *load_base;
   int isdyn = 0;
 
   secname = bfd_get_section_name (s->owner, s);
@@ -1227,16 +1230,26 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	}
     }
 
+  address = NULL;
   if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop ((bfd_vma) 0);
-  else
-    address = NULL;
 
+  load_base = NULL;
+  if (place != NULL && place->os->load_base != NULL)
+    {
+      etree_type *lma_from_vma;
+      lma_from_vma = exp_binop ('-', place->os->load_base,
+				exp_nameop (ADDR, place->os->name));
+      load_base = exp_binop ('+', lma_from_vma,
+			     exp_nameop (ADDR, secname));
+    }
+
+  os_tail = lang_output_section_statement.tail;
   os = lang_enter_output_section_statement (secname, address, 0,
 					    (bfd_vma) 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
-					    (etree_type *) NULL);
+					    load_base);
 
   lang_add_section (&os->children, s, os, file);
 
@@ -1311,11 +1324,15 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	 read/write section before or amongst the read-only ones.  */
       if (add.head != NULL)
 	{
+	  lang_statement_union_type *newly_added_os;
+
 	  if (place->stmt == NULL)
 	    {
 	      /* Put the new statement list right at the head.  */
 	      *add.tail = place->os->header.next;
 	      place->os->header.next = add.head;
+
+	      place->os_tail = &place->os->next;
 	    }
 	  else
 	    {
@@ -1331,6 +1348,21 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
 	  /* Save the end of this list.  */
 	  place->stmt = add.tail;
+
+	  /* Do the same for the list of output statements.  */
+	  newly_added_os = *os_tail;
+	  *os_tail = NULL;
+	  newly_added_os->output_section_statement.next = *place->os_tail;
+	  *place->os_tail = newly_added_os;
+	  place->os_tail = &newly_added_os->output_section_statement.next;
+
+	  /* Fixing the global list pointer here is a little different.
+	     We added to the list in lang_enter_output_section_statement,
+	     trimmed off the new output_section_statment above when
+	     assigning *os_tail = NULL, but possibly added it back in
+	     the same place when assigning *place->os_tail.  */
+	  if (*os_tail == NULL)
+	    lang_output_section_statement.tail = os_tail;
 	}
     }
 

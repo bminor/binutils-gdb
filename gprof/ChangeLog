@@ -1,3 +1,15 @@
+2002-12-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (LINGUAS): Add pt_BR.
+	* configure: Regenerate.
+	* po/pt_BR: New Brazillian Portugese translation.
+
+2002-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add da.
+	* configure: Regenerate.
+	* po/da.po: New Danish translation.
+
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* po/gprof.pot: Regenerated.

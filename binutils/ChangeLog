@@ -1,3 +1,7 @@
+2002-11-23  Nick Clifton  <nickc@redhat.com>
+
+	* size.c (usage): Fix typo describing switch for hex format.
+
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (LINGUAS): Add 'da'.

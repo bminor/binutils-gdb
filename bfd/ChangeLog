@@ -1,3 +1,33 @@
+2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-11-28  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	* elf32-sh.c (sh_elf_relocate_section): Don't complain about
+	unresolved debugging relocs in dynamic applications.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+
+2002-12-10  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* aoutx.h (set_section_contents): Allow an otherwise unrepresentable
+	read-only section that lies after .text and before .data to be
+	written into the output file and included in a_text.
+	(translate_to_native_sym_flags): If an otherwise unrepresentable
+	section was merged with .text, convert its symbols to N_TEXT
+	symbols.
+	* libaout.h (aout_section_merge_with_text_p): New macro.
+
+2002-12-04  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (struct elf_m68k_link_hash_table): Add sym_sec
+	member.
+	(elf_m68k_link_hash_table_create): Initialize it.
+	(elf_m68k_check_relocs): Handle symbols that are forced to be
+	local due to visibility changes.
+	(elf_m68k_adjust_dynamic_symbol): Likewise.
+	(elf_m68k_size_dynamic_sections): Likewise.
+	(elf_m68k_discard_copies): Likewise.
+	(elf_m68k_relocate_section): Likewise.
+
 2002-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (edit_opd): Correct typo.

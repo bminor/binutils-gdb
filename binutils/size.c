@@ -87,7 +87,7 @@ usage (stream, status)
   fprintf (stream, _(" If no input file(s) are specified, a.out is assumed\n"));
   fprintf (stream, _(" The options are:\n\
   -A|-B     --format={sysv|berkeley}  Select output style (default is %s)\n\
-  -o|-d|-h  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
+  -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
   -t        --totals                  Display the total sizes (Berkeley only)\n\
             --target=<bfdname>        Set the binary file format\n\
   -h        --help                    Display this information\n\

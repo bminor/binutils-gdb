@@ -279,6 +279,9 @@ struct elf_m68k_link_hash_entry
 struct elf_m68k_link_hash_table
 {
   struct elf_link_hash_table root;
+
+  /* Small local sym to section mapping cache.  */
+  struct sym_sec_cache sym_sec;
 };
 
 /* Declare this now that the above structures are defined.  */
@@ -350,6 +353,8 @@ elf_m68k_link_hash_table_create (abfd)
       free (ret);
       return NULL;
     }
+
+  ret->sym_sec.abfd = NULL;
 
   return &ret->root.root;
 }
@@ -518,7 +523,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	      if (h->got.refcount == 0)
 		{
 		  /* Make sure this symbol is output as a dynamic symbol.  */
-		  if (h->dynindx == -1)
+		  if (h->dynindx == -1
+		      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 		    {
 		      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
 			return false;
@@ -595,7 +601,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	    }
 
 	  /* Make sure this symbol is output as a dynamic symbol.  */
-	  if (h->dynindx == -1)
+	  if (h->dynindx == -1
+	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	    {
 	      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
 		return false;
@@ -622,6 +629,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& h != NULL
 		&& (!info->symbolic
+		    || h->root.type == bfd_link_hash_defweak
 		    || (h->elf_link_hash_flags
 			& ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
@@ -689,24 +697,41 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
 
-	      /* If we are linking with -Bsymbolic, we count the number of
-		 PC relative relocations we have entered for this symbol,
-		 so that we can discard them again if the symbol is later
-		 defined by a regular object.  Note that this function is
-		 only called if we are using an m68kelf linker hash table,
-		 which means that h is really a pointer to an
+	      /* We count the number of PC relative relocations we have
+		 entered for this symbol, so that we can discard them
+		 again if, in the -Bsymbolic case, the symbol is later
+		 defined by a regular object, or, in the normal shared
+		 case, the symbol is forced to be local.  Note that this
+		 function is only called if we are using an m68kelf linker
+		 hash table, which means that h is really a pointer to an
 		 elf_m68k_link_hash_entry.  */
-	      if ((ELF32_R_TYPE (rel->r_info) == R_68K_PC8
- 		   || ELF32_R_TYPE (rel->r_info) == R_68K_PC16
- 		   || ELF32_R_TYPE (rel->r_info) == R_68K_PC32)
-		  && info->symbolic)
+	      if (ELF32_R_TYPE (rel->r_info) == R_68K_PC8
+		  || ELF32_R_TYPE (rel->r_info) == R_68K_PC16
+		  || ELF32_R_TYPE (rel->r_info) == R_68K_PC32)
 		{
-		  struct elf_m68k_link_hash_entry *eh;
 		  struct elf_m68k_pcrel_relocs_copied *p;
+		  struct elf_m68k_pcrel_relocs_copied **head;
 
-		  eh = (struct elf_m68k_link_hash_entry *) h;
+		  if (h != NULL)
+		    {
+		      struct elf_m68k_link_hash_entry *eh
+			= (struct elf_m68k_link_hash_entry *) h;
+		      head = &eh->pcrel_relocs_copied;
+		    }
+		  else
+		    {
+		      asection *s;
+		      s = (bfd_section_from_r_symndx
+			   (abfd, &elf_m68k_hash_table (info)->sym_sec,
+			    sec, r_symndx));
+		      if (s == NULL)
+			return false;
 
-		  for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
+		      head = ((struct elf_m68k_pcrel_relocs_copied **)
+			      &elf_section_data (s)->local_dynrel);
+		    }
+
+		  for (p = *head; p != NULL; p = p->next)
 		    if (p->section == sreloc)
 		      break;
 
@@ -716,8 +741,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 			   bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
 		      if (p == NULL)
 			return false;
-		      p->next = eh->pcrel_relocs_copied;
-		      eh->pcrel_relocs_copied = p;
+		      p->next = *head;
+		      *head = p;
 		      p->section = sreloc;
 		      p->count = 0;
 		    }
@@ -952,7 +977,8 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 	}
 
       /* Make sure this symbol is output as a dynamic symbol.  */
-      if (h->dynindx == -1)
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	{
 	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
 	    return false;
@@ -1123,14 +1149,16 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	s->_raw_size = 0;
     }
 
-  /* If this is a -Bsymbolic shared link, then we need to discard all PC
-     relative relocs against symbols defined in a regular object.  We
-     allocated space for them in the check_relocs routine, but we will not
-     fill them in in the relocate_section routine.  */
-  if (info->shared && info->symbolic)
+  /* If this is a -Bsymbolic shared link, then we need to discard all
+     PC relative relocs against symbols defined in a regular object.
+     For the normal shared case we discard the PC relative relocs
+     against symbols that have become local due to visibility changes.
+     We allocated space for them in the check_relocs routine, but we
+     will not fill them in in the relocate_section routine.  */
+  if (info->shared)
     elf_m68k_link_hash_traverse (elf_m68k_hash_table (info),
 				 elf_m68k_discard_copies,
-				 (PTR) NULL);
+				 (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1257,23 +1285,28 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 }
 
 /* This function is called via elf_m68k_link_hash_traverse if we are
-   creating a shared object with -Bsymbolic.  It discards the space
-   allocated to copy PC relative relocs against symbols which are defined
-   in regular objects.  We allocated space for them in the check_relocs
-   routine, but we won't fill them in in the relocate_section routine.  */
+   creating a shared object.  In the -Bsymbolic case it discards the
+   space allocated to copy PC relative relocs against symbols which
+   are defined in regular objects.  For the normal shared case, if
+   discards space for pc-relative relocs that have become local due to
+   symbol visibility changes.  We allocated space for them in the
+   check_relocs routine, but we won't fill them in in the
+   relocate_section routine.  */
 
 static boolean
-elf_m68k_discard_copies (h, ignore)
+elf_m68k_discard_copies (h, inf)
      struct elf_m68k_link_hash_entry *h;
-     PTR ignore ATTRIBUTE_UNUSED;
+     PTR inf;
 {
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct elf_m68k_pcrel_relocs_copied *s;
 
   if (h->root.root.type == bfd_link_hash_warning)
     h = (struct elf_m68k_link_hash_entry *) h->root.root.u.i.link;
 
-  /* We only discard relocs for symbols defined in a regular object.  */
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+      || (!info->symbolic
+	  && (h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
     return true;
 
   for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
@@ -1594,7 +1627,9 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_68K_PC8:
 	case R_68K_PC16:
 	case R_68K_PC32:
-	  if (h == NULL)
+	  if (h == NULL
+	      || (info->shared
+		  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 	    break;
 	  /* Fall through.  */
 	case R_68K_8:

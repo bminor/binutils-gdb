@@ -1,3 +1,18 @@
+2002-12-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (struct orphan_save): Add os_tail field.
+	(gld${EMULATION_NAME}_place_orphan): Re-order output_section_statement
+	list too.
+
+2002-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Set
+	load_base for orphans that follow a section with load_base set.
+
+2002-12-01  H.J. Lu <hjl@gnu.org>
+
+	* ld.texinfo: Remove the extra `;' in sample version script.
+
 2002-11-27  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host: Fix generic FreeBSD configuration entry.

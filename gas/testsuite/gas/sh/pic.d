@@ -38,3 +38,6 @@ Disassembly of section \.text:
 0x00000040 00 00       	\.word 0x0000
 			40: R_SH_PLT32	foo
 0x00000042 00 14       	mov\.b	r1,@\(r0,r0\)
+0x00000044 00 00       	\.word 0x0000
+			44: R_SH_PLT32	foo
+0x00000046 00 1e       	mov\.l	@\(r0,r1\),r0

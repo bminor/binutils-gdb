@@ -1651,7 +1651,14 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 			     sections against symbols defined externally
 			     in shared libraries.  We can't do anything
 			     with them here.  */
-			  || (input_section->flags & SEC_DEBUGGING) != 0)))
+			  || (input_section->flags & SEC_DEBUGGING) != 0))
+		  /* Dynamic relocs are not propagated for SEC_DEBUGGING
+		     sections because such sections are not SEC_ALLOC and
+		     thus ld.so will not process them.  */
+		  || (sec->output_section == NULL
+		      && ((input_section->flags & SEC_DEBUGGING) != 0
+			  && (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_DYNAMIC) != 0)))
 		relocation = 0;
 	      else if (sec->output_section == NULL)
 		{
