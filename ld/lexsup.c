@@ -572,13 +572,10 @@ parse_args (argc, argv)
       switch (optc)
 	{
 	case '?':
-	  fprintf (stderr, _("%s: unrecognized option '%s'\n"),
-		   program_name, argv[errind]);
+	  einfo (_("%P: unrecognized option '%s'\n"), argv[errind]);
 	default:
-	  fprintf (stderr,
-		   _("%s: use the --help option for usage information\n"),
-		   program_name);
-	  xexit (1);
+	  einfo (_("%P%F: use the --help option for usage information\n"));
+
 	case 1:			/* File name.  */
 	  lang_add_input_file (optarg, lang_input_file_is_file_enum,
 			       (char *) NULL);
@@ -798,6 +795,17 @@ parse_args (argc, argv)
 	  break;
 	case 'i':
 	case 'r':
+	  if (optind == last_optind)
+	    /* This can happen if the user put "-rpath,a" on the command
+	       line.  (Or something similar.  The comma is important).
+	       Getopt becomes confused and thinks that this is a -r option
+	       but it cannot parse the text after the -r so it refuses to
+	       increment the optind counter.  Detect this case and issue
+	       an error message here.  We cannot just make this a warning,
+	       increment optind, and continue because getopt is too confused
+	       and will seg-fault the next time around.  */
+	    einfo(_("%P%F: bad -rpath option\n"));
+	     
 	  link_info.relocateable = true;
 	  config.build_constructors = false;
 	  config.magic_demand_paged = false;
@@ -839,6 +847,7 @@ parse_args (argc, argv)
 	      do
 		{
 		  size_t idx = 0;
+
 		  while (optarg[idx] != '\0' && optarg[idx] == cp[idx])
 		    ++idx;
 		  if (optarg[idx] == '\0'
@@ -925,23 +934,13 @@ parse_args (argc, argv)
 	    /* Check for <something>=<somthing>...  */
 	    optarg2 = strchr (optarg, '=');
 	    if (optarg2 == NULL)
-	      {
-		fprintf (stderr,
-			 _("%s: Invalid argument to option \"--section-start\"\n"),
-			 program_name);
-		xexit (1);
-	      }
+	      einfo (_("%P%F: invalid argument to option \"--section-start\"\n"));
 
 	    optarg2++;
 
 	    /* So far so good.  Are all the args present?  */
 	    if ((*optarg == '\0') || (*optarg2 == '\0'))
-	      {
-		fprintf (stderr,
-			 _("%s: Missing argument(s) to option \"--section-start\"\n"),
-			 program_name);
-		xexit (1);
-	      }
+	      einfo (_("%P%F: missing argument(s) to option \"--section-start\"\n"));
 
 	    /* We must copy the section name as set_section_start
 	       doesn't do it for us.  */
@@ -1090,41 +1089,31 @@ parse_args (argc, argv)
 	  break;
 	case '(':
 	  if (ingroup)
-	    {
-	      fprintf (stderr,
-		       _("%s: may not nest groups (--help for usage)\n"),
-		       program_name);
-	      xexit (1);
-	    }
+	    einfo (_("%P%F: may not nest groups (--help for usage)\n"));
+
 	  lang_enter_group ();
 	  ingroup = 1;
 	  break;
 	case ')':
 	  if (! ingroup)
-	    {
-	      fprintf (stderr,
-		       _("%s: group ended before it began (--help for usage)\n"),
-		       program_name);
-	      xexit (1);
-	    }
+	    einfo (_("%P%F: group ended before it began (--help for usage)\n"));
+
 	  lang_leave_group ();
 	  ingroup = 0;
 	  break;
 	case OPTION_MPC860C0:
-	  link_info.mpc860c0 = 20;      /* default value (in bytes) */
+	  /* Default value (in bytes).  */
+	  link_info.mpc860c0 = 20;
 	  if (optarg)
 	    {
 	      unsigned words;
 
 	      words = is_num (optarg, 1, 10, 0);
 	      if (words == 0)
-		{
-		  fprintf (stderr,
-			   _("%s: Invalid argument to option \"mpc860c0\"\n"),
-			   program_name);
-		  xexit (1);
-		}
-	      link_info.mpc860c0 = words * 4;	/* convert words to bytes */
+		einfo (_("%P%F: invalid argument to option \"mpc860c0\"\n"));
+
+	      /* Convert words to bytes.  */
+	      link_info.mpc860c0 = words * 4;
 	    }
 	  command_line.relax = true;
 	  break;

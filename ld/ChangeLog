@@ -1,3 +1,9 @@
+2001-10-31  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* lexsup.c (parse_args): Prevent infinite parsing loop when
+	"-rpath.a" is specified on the command line.
+	Replace calls to fprintf with calls to einfo.
+
 2001-10-31  John Marshall  <jmarshall@acm.org>
 
 	* ld.texinfo: A historical requirement that MEMORY and SECTIONS
