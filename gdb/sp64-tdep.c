@@ -286,15 +286,3 @@ sparc_print_register_hook (regno)
       dump_ccreg ("icc", ccr & 15);
     }
 }
-
-/* We try to support 32 bit and 64 bit pointers.
-   We are called when the Shade target is selected by shadeif.c.  */
-
-int target_ptr_bit = 64;	/* default */
-
-void
-set_target_ptr_bit(ptr_bit)
-     int ptr_bit;
-{
-  target_ptr_bit = ptr_bit;
-}
