@@ -3658,8 +3658,6 @@ x86_cons (exp, size)
 
 #ifdef TE_PE
 
-#define O_secrel (O_max + 1)
-
 void
 x86_pe_cons_fix_new (frag, off, len, exp)
      fragS *frag;
@@ -6360,3 +6358,16 @@ i386_elf_section_type (const char *str, size_t len)
 
   return -1;
 }
+
+#ifdef TE_PE
+void
+tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
+{
+  expressionS expr;
+
+  expr.X_op = O_secrel;
+  expr.X_add_symbol = symbol;
+  expr.X_add_number = 0;
+  emit_expr (&expr, size);
+}
+#endif

@@ -1,3 +1,10 @@
+2004-10-18  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* config/tc-i386.c (O_secrel): Delete.
+	(tc_pe_dwarf2_emit_offset): New function.
+	* config/tc-i386.h (O_secrel): Define as O_md1.
+	(TC_DWARF2_EMIT_OFFSET): Define.
+
 2004-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-xstormy16.c (xstormy16_cons_fix_new): Accept and
