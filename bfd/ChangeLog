@@ -1,3 +1,9 @@
+2002-02-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-sh64.c (sh_elf64_relocate_section): Fix a typo from my
+	last patch.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2002-02-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* osf-core.c (osf_core_vec):  OSF/1 (Digital Unix) core files are
