@@ -1,4 +1,12 @@
+Wed Oct  4 14:03:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_frob_symbol): Don't create an aux entry for
+	an absolute symbol.
+
 Tue Oct  3 12:18:19 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (isbyte): Accept all values from -65536 to
+	+65535,	so ~VAL will not be rejected.
 
 	* cond.c (s_endif): Call demand_empty_rest_of_line.  In MRI mode,
 	skip characters after the pseudo-op.

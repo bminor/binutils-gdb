@@ -29,6 +29,10 @@
 #include "elf/ppc.h"
 #endif
 
+#ifdef TE_PE
+#include "coff/pe.h"
+#endif
+
 /* This is the assembler for the PowerPC or POWER (RS/6000) chips.  */
 
 /* Tell the main code what the endianness is.  */
@@ -320,49 +324,6 @@ reg_name_search (name)
   return -1;
 }
 
-static void insert_reg PARAMS ( (char *regname, int regnum) );
-
-static void
-insert_reg (regname, regnum)
-     char *regname;
-     int regnum;
-{
-  char buf[100];
-  int i;
-
-  symbol_table_insert (
-		       symbol_new (regname, 
-				   reg_section, 
-				   regnum,
-				   &zero_address_frag)
-		       );
-
-  for (i = 0; regname[i]; i++)
-    {
-      buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
-    }
-
-  buf[i] = '\0';
-
-  symbol_table_insert (
-		       symbol_new (buf, 
-				   reg_section, 
-				   regnum,
-				   &zero_address_frag)
-		       );
-}
-
-static void
-init_regtable ()
-{
-  unsigned int i;
-
-  for (i = 0; i < REG_NAME_CNT && pre_defined_registers[i].name ; ++i)
-    {
-      insert_reg (pre_defined_registers[i].name, 
-		  pre_defined_registers[i].value);
-    }
-}
 #endif
 
 
@@ -734,13 +695,6 @@ md_begin ()
 
 #ifdef TE_PE
 
-#ifndef NO_SYMBOL_NAMES
-  /* FIXME: currently, if you enable the names, you cannot have variables
-            with the same names as the symbolic register names.
-  */
-  init_regtable ();
-#endif
-
   ppc_current_section = text_section;
   ppc_previous_section = 0;  
 
@@ -960,6 +914,55 @@ ppc_elf_validate_fix (fixp, seg)
 }
 
 #endif /* OBJ_ELF */
+
+#ifdef TE_PE
+/*
+ * Summary of register_name().
+ *
+ * in:	Input_line_pointer points to 1st char of operand.
+ *
+ * out:	A expressionS.
+ *      The operand may have been a register: in this case, X_op == O_register,
+ *      X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in its
+ *      original state.
+ */
+
+static int
+register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char c;
+
+  /* Find the spelling of the operand */
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  reg_number = reg_name_search (name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+      
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;   /* put back the delimiting char */
+      return 1;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = name; /* reset input_line pointer */
+      return 0;
+    }
+}
+#endif
+
 
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
@@ -1182,7 +1185,10 @@ md_assemble (str)
 	}
       else
 	{
-	  expression (&ex);
+	  if (!register_name(&ex))
+	    {
+	      expression (&ex);
+	    }
 	}
 
       str = input_line_pointer;
@@ -2371,50 +2377,10 @@ ppc_tc (ignore)
 }
 
 #ifdef TE_PE
+
 /* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format */
 
-/*
- * Section characteristics
- */
-
-#define IMAGE_SCN_TYPE_NO_PAD                0x00000008  /* Reserved. */
-
-#define IMAGE_SCN_CNT_CODE                   0x00000020  /* Section contains code. */
-#define IMAGE_SCN_CNT_INITIALIZED_DATA       0x00000040  /* Section contains initialized data. */
-#define IMAGE_SCN_CNT_UNINITIALIZED_DATA     0x00000080  /* Section contains uninitialized data. */
-
-#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved.  */
-#define IMAGE_SCN_LNK_INFO                   0x00000200  /* Section contains comments or some other type of information. */
-#define IMAGE_SCN_LNK_REMOVE                 0x00000800  /* Section contents will not become part of image. */
-#define IMAGE_SCN_LNK_COMDAT                 0x00001000  /* Section contents comdat. */
-
-#define IMAGE_SCN_MEM_FARDATA                0x00008000
-
-#define IMAGE_SCN_MEM_PURGEABLE              0x00020000
-#define IMAGE_SCN_MEM_16BIT                  0x00020000
-#define IMAGE_SCN_MEM_LOCKED                 0x00040000
-#define IMAGE_SCN_MEM_PRELOAD                0x00080000
-
-#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
-#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
-#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
-#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
-#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
-#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
-#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
-
-
-#define IMAGE_SCN_LNK_NRELOC_OVFL            0x01000000  /* Section contains extended relocations. */
-#define IMAGE_SCN_MEM_DISCARDABLE            0x02000000  /* Section can be discarded.              */
-#define IMAGE_SCN_MEM_NOT_CACHED             0x04000000  /* Section is not cachable.               */
-#define IMAGE_SCN_MEM_NOT_PAGED              0x08000000  /* Section is not pageable.               */
-#define IMAGE_SCN_MEM_SHARED                 0x10000000  /* Section is shareable.                  */
-#define IMAGE_SCN_MEM_EXECUTE                0x20000000  /* Section is executable.                 */
-#define IMAGE_SCN_MEM_READ                   0x40000000  /* Section is readable.                   */
-#define IMAGE_SCN_MEM_WRITE                  0x80000000  /* Section is writeable.                  */
-
 /* Set the current section.  */
-
 static void
 ppc_set_current_section (new)
      segT new;
@@ -2758,6 +2724,11 @@ ppc_pe_comm(lcomm)
  * additions/changes for the moto-pas assembler support. There are three
  * categories:
  *
+ * FIXME: I just noticed this. This doesn't work at all really. It it 
+ *        setting bits that bfd probably neither understands or uses. The
+ *        correct approach (?) will have to incorporate extra fields attached
+ *        to the section to hold the system specific stuff. (krk)
+ *
  * Section Contents:
  * 'a' - unknown - referred to in documentation, but no definition supplied
  * 'c' - section has code
@@ -2852,15 +2823,8 @@ ppc_pe_section (ignore)
 		case 'R': /* Remove section at link time */
 		  flags |= SEC_NEVER_LOAD;
 		  break;
+
 		  /* Section Protection */
-
-#if 0
-#define IMAGE_SCN_MEM_SHARED                 0x10000000  /* Section is shareable. */
-#define IMAGE_SCN_MEM_EXECUTE                0x20000000  /* Section is executable. */
-#define IMAGE_SCN_MEM_READ                   0x40000000  /* Section is readable. */
-#define IMAGE_SCN_MEM_WRITE                  0x80000000  /* Section is writeable. */
-#endif
-
 		case 'r': /* section is readable */
 		  flags |= IMAGE_SCN_MEM_READ;
 		  break;
@@ -2875,16 +2839,6 @@ ppc_pe_section (ignore)
 		  break;
 
 		  /* Section Alignment */
-#if 0
-#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
-#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
-#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
-#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
-#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
-#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
-#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
-#endif
-
 		case '0': /* align to byte boundary */
 		  flags |= IMAGE_SCN_ALIGN_1BYTES;
 		  align = 0;
@@ -2937,18 +2891,6 @@ ppc_pe_section (ignore)
 		 bfd_section_name (stdoutput, sec),
 		 bfd_errmsg (bfd_get_error ()));
     }
-
-
-  /* FIXME: Make sure the winnt alignment bits get set */
-#if 0
-#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
-#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
-#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
-#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
-#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
-#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
-#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
-#endif
 
   bfd_set_section_alignment(stdoutput, sec, align);
 
@@ -3217,8 +3159,9 @@ ppc_frob_symbol (sym)
       && S_GET_SEGMENT (sym) != ppc_coff_debug_section)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
 
-  if (S_GET_STORAGE_CLASS (sym) == C_EXT
-      || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
+  if ((S_GET_STORAGE_CLASS (sym) == C_EXT
+       || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
+      && S_GET_SEGMENT (sym) != absolute_section)
     {
       int i;
       union internal_auxent *a;
