@@ -1,3 +1,8 @@
+Wed Jan  3 18:22:10 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* readline.c, display.c, complete.c: Add _MSC_VER to list of
+	things which can't do most things.
+
 Thu Nov 16 15:39:05 1995  Geoffrey Noer <noer@cygnus.com>
 
 	* complete.c: Change WIN32 to __WIN32__, added #else return NULL
