@@ -1216,11 +1216,6 @@ target_info (char *args, int from_tty)
   if (symfile_objfile != NULL)
     printf_unfiltered ("Symbols from \"%s\".\n", symfile_objfile->name);
 
-#ifdef FILES_INFO_HOOK
-  if (FILES_INFO_HOOK ())
-    return;
-#endif
-
   for (t = target_stack; t != NULL; t = t->beneath)
     {
       if (!t->to_has_memory)

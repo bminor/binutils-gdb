@@ -4352,10 +4352,6 @@ Define this if the native-dependent code will provide its own routines
 @file{infptrace.c} is included in this configuration, the default
 routines in @file{infptrace.c} are used for these functions.
 
-@item FILES_INFO_HOOK
-@findex FILES_INFO_HOOK
-(Only defined for Convex.)
-
 @item FP0_REGNUM
 @findex FP0_REGNUM
 This macro is normally defined to be the number of the first floating
