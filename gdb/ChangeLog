@@ -1,3 +1,15 @@
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (Target Instruction Set Architectures): Rename
+	Target/Architectures.  Replace vax-dec-vms5.5 with vax-netbsd.
+	Replace s390-linux with s390-linux-gnu.  Remove i386-aout,
+	mcore-pe, mips64-elf, sparc64-elf.  Remove i586-pc-msdosdjgpp,
+	already listed under Host/Native.
+
+	* configure.tgt: Combine i[3456]86-*-coff*, i[3456]86-*-elf*,
+	i[3456]86-*-pe*, and i[3456]86-*-aout* into i[3456]86-*-*.  Add
+	mips*-*-*.
+
 2002-08-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/ia64/ia64.mt: New file.
@@ -602,7 +614,7 @@
 
 2002-08-05  Theodore A. Roth  <troth@verinet.com>
 
-	* gdb/avr-tdep.c(avr_skip_prologue): Fix to return the correct pc.
+	* avr-tdep.c (avr_skip_prologue): Fix to return the correct pc.
 
 2002-08-05  Andrew Cagney  <ac131313@redhat.com>
 

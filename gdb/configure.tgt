@@ -88,9 +88,6 @@ i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
 i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
-i[3456]86-*-aout*)	gdb_target=embed ;;
-i[3456]86-*-coff*)	gdb_target=embed ;;
-i[3456]86-*-elf*)	gdb_target=embed ;;
 # OBSOLETE i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
@@ -119,8 +116,8 @@ i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
-i[3456]86-*-pe*)	gdb_target=embed  ;;
 i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
+i[3456]86-*-*)		gdb_target=embed ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-nindy-coff*)	gdb_target=nindy960 ;;
@@ -210,6 +207,7 @@ mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
+mips*-*-*)		gdb_target=embed ;;
 
 mn10200-*-*)		gdb_target=mn10200 ;;
 mn10300-*-*)		gdb_target=mn10300 ;;

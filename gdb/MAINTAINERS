@@ -47,7 +47,7 @@ fix, since such a change without discussion will result in
 instantaneous and loud complaints.
 
 
-Target/Architecture:
+Target Instruction Set Architectures:
 
 Generic ISA (Instruction Set Architecture) issues, API variants, CPU
 variants.  *-tdep.c. The Target/Architecture maintainer works with the
@@ -78,9 +78,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	d30v		(--target=d30v-elf OBSOLETE)
 
-	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
-			(See native and host)
-
 	fr30		(--target=fr30-elf OBSOLETE)
 
 	h8300		--target=h8300hms -Werror
@@ -91,7 +88,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 			Not multi-arch, work in progress
 
-	i386		--target=i386-elf,i386-aout ,-Werror
+	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
 
 	i960		--target=i960-coff ,-Werror
@@ -114,10 +111,10 @@ maintainer works with the native maintainer when resolving API issues.
 
 	m88k		(--target=m88k OBSOLETE)
 
-	mcore		--target=mcore-elf,mcore-pe ,-Werror
+	mcore		--target=mcore-elf ,-Werror
 			Maintenance only
 
-	mips		--target=mips-elf,mips64-elf ,-Werror
+	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
 	mn10200		--target=mn10200-elf ,-Werror
@@ -143,7 +140,7 @@ maintainer works with the native maintainer when resolving API issues.
 	sh		--target=sh-elf ,-Werror
 			Elena Zannoni		ezannoni@redhat.com
 
-	sparc		--target=sparc-elf,sparc64-elf ,-Werror
+	sparc		--target=sparc-elf ,-Werror
 			Maintenance only
 
 	tic80		Deleted.
@@ -151,7 +148,7 @@ maintainer works with the native maintainer when resolving API issues.
 	v850		--target=v850-elf ,-Werror
 			Maintenance only
 
-	vax		--target=vax-dec-vms5.5 ,-Werror
+	vax		--target=vax-netbsd ,-Werror
 			Maintenance only
 
 	w65		Deleted.
