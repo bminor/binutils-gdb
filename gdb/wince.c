@@ -55,6 +55,7 @@
 #include <sys/param.h>
 #include "wince-stub.h"
 #include "dcache.h"
+#include <time.h>
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) PARAMS ((int signo));
@@ -147,7 +148,6 @@ typedef struct thread_info_struct
     int suspend_count;
     int stepped;		/* True if stepped. */
     CORE_ADDR step_pc;
-    unsigned long step_instr;
     unsigned long step_prev;
     CONTEXT context;
   }
@@ -155,6 +155,7 @@ thread_info;
 
 static thread_info thread_head =
 {NULL};
+static thread_info * thread_rec (DWORD id, int get_context);
 
 /* The process and thread handles for the above context. */
 
@@ -374,24 +375,21 @@ static const int mappings[NUM_REGS + 1] =
   -1
 };
 
-/* This vector maps the target's idea of an exception (extracted
-   from the DEBUG_EVENT structure) to GDB's idea. */
-
-struct xlate_exception
-  {
-    int them;
-    enum target_signal us;
-  };
-
-static const struct xlate_exception
-  xlate[] =
+/* Return a pointer into a CONTEXT field indexed by gdb register number.
+   Return a pointer to an address pointing to zero if there is no
+   corresponding CONTEXT field for the given register number.
+ */
+static ULONG *
+regptr (LPCONTEXT c, int r)
 {
-  {EXCEPTION_ACCESS_VIOLATION, TARGET_SIGNAL_SEGV},
-  {STATUS_STACK_OVERFLOW, TARGET_SIGNAL_SEGV},
-  {EXCEPTION_BREAKPOINT, TARGET_SIGNAL_TRAP},
-  {DBG_CONTROL_C, TARGET_SIGNAL_INT},
-  {EXCEPTION_SINGLE_STEP, TARGET_SIGNAL_TRAP},
-  {-1, -1}};
+  static ULONG zero = 0;
+  ULONG *p;
+  if (mappings[r] < 0)
+    p = &zero;
+  else
+    p = (ULONG *) (((char *) c) + mappings[r]);
+  return p;
+}
 
 /******************** Beginning of stub interface ********************/
 
@@ -629,6 +627,7 @@ towide (const char *s, gdb_wince_len * out_len)
   typedef in wince-stub.h and change the putlen/getlen macros in this file and in
   the stub.
 */
+
 static int
 create_process (LPSTR exec_file, LPSTR args, DWORD flags, PROCESS_INFORMATION * pi)
 {
@@ -798,6 +797,227 @@ stop_stub ()
 /******************** End of emulation routines. ********************/
 /******************** End of stub interface ********************/
 
+#define check_for_step(a, x) (x)
+
+#ifdef MIPS
+static void
+undoSStep (thread_info * th)
+{
+  if (th->stepped)
+    {
+      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      th->stepped = 0;
+    }
+}
+
+void
+wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+{
+  unsigned long pc;
+  thread_info *th = current_thread;	/* Info on currently selected thread */
+  CORE_ADDR mips_next_pc (CORE_ADDR pc);
+
+  if (!insert_breakpoints_p)
+    {
+      undoSStep (th);
+      return;
+    }
+
+  th->stepped = 1;
+  pc = read_register (PC_REGNUM);
+  th->step_pc = mips_next_pc (pc);
+  th->step_prev = 0;
+  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  return;
+}
+#elif SHx
+/* Hitachi SH architecture instruction encoding masks */
+
+#define COND_BR_MASK   0xff00
+#define UCOND_DBR_MASK 0xe000
+#define UCOND_RBR_MASK 0xf0df
+#define TRAPA_MASK     0xff00
+
+#define COND_DISP      0x00ff
+#define UCOND_DISP     0x0fff
+#define UCOND_REG      0x0f00
+
+/* Hitachi SH instruction opcodes */
+
+#define BF_INSTR       0x8b00
+#define BT_INSTR       0x8900
+#define BRA_INSTR      0xa000
+#define BSR_INSTR      0xb000
+#define JMP_INSTR      0x402b
+#define JSR_INSTR      0x400b
+#define RTS_INSTR      0x000b
+#define RTE_INSTR      0x002b
+#define TRAPA_INSTR    0xc300
+#define SSTEP_INSTR    0xc3ff
+
+
+#define T_BIT_MASK     0x0001
+
+static CORE_ADDR
+sh_get_next_pc (CONTEXT *c)
+{
+  short *instrMem;
+  int displacement;
+  int reg;
+  unsigned short opcode;
+
+  instrMem = (short *) c->Fir;
+
+  opcode = read_memory_integer ((CORE_ADDR) c->Fir, sizeof (opcode));
+
+  if ((opcode & COND_BR_MASK) == BT_INSTR)
+    {
+      if (c->Psr & T_BIT_MASK)
+	{
+	  displacement = (opcode & COND_DISP) << 1;
+	  if (displacement & 0x80)
+	    displacement |= 0xffffff00;
+	  /*
+	     * Remember PC points to second instr.
+	     * after PC of branch ... so add 4
+	   */
+	  instrMem = (short *) (c->Fir + displacement + 4);
+	}
+      else
+	instrMem += 1;
+    }
+  else if ((opcode & COND_BR_MASK) == BF_INSTR)
+    {
+      if (c->Psr & T_BIT_MASK)
+	instrMem += 1;
+      else
+	{
+	  displacement = (opcode & COND_DISP) << 1;
+	  if (displacement & 0x80)
+	    displacement |= 0xffffff00;
+	  /*
+	     * Remember PC points to second instr.
+	     * after PC of branch ... so add 4
+	   */
+	  instrMem = (short *) (c->Fir + displacement + 4);
+	}
+    }
+  else if ((opcode & UCOND_DBR_MASK) == BRA_INSTR)
+    {
+      displacement = (opcode & UCOND_DISP) << 1;
+      if (displacement & 0x0800)
+	displacement |= 0xfffff000;
+
+      /*
+	 * Remember PC points to second instr.
+	 * after PC of branch ... so add 4
+       */
+      instrMem = (short *) (c->Fir + displacement + 4);
+    }
+  else if ((opcode & UCOND_RBR_MASK) == JSR_INSTR)
+    {
+      reg = (char) ((opcode & UCOND_REG) >> 8);
+
+      instrMem = (short *) *regptr (c, reg);
+    }
+  else if (opcode == RTS_INSTR)
+    instrMem = (short *) c->PR;
+  else if (opcode == RTE_INSTR)
+    instrMem = (short *) *regptr (c, 15);
+  else if ((opcode & TRAPA_MASK) == TRAPA_INSTR)
+    instrMem = (short *) ((opcode & ~TRAPA_MASK) << 2);
+  else
+    instrMem += 1;
+
+  return (CORE_ADDR) instrMem;
+}
+/* Single step (in a painstaking fashion) by inspecting the current
+   instruction and setting a breakpoint on the "next" instruction
+   which would be executed.  This code hails from sh-stub.c.
+ */
+static void
+undoSStep (thread_info * th)
+{
+  if (th->stepped)
+    {
+      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      th->stepped = 0;
+    }
+  return;
+}
+
+/* Single step (in a painstaking fashion) by inspecting the current
+   instruction and setting a breakpoint on the "next" instruction
+   which would be executed.  This code hails from sh-stub.c.
+ */
+void
+wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+{
+  thread_info *th = current_thread;	/* Info on currently selected thread */
+
+  if (!insert_breakpoints_p)
+    {
+      undoSStep (th);
+      return;
+    }
+
+  th->stepped = 1;
+  th->step_pc = sh_get_next_pc (&th->context);
+  th->step_prev = 0;
+  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  return;
+}
+#elif defined (ARM)
+#undef check_for_step
+
+static enum target_signal
+check_for_step (DEBUG_EVENT *ev, enum target_signal x)
+{
+  thread_info *th = thread_rec (ev->dwThreadId, 1);
+
+  if (th->stepped &&
+      th->step_pc == (CORE_ADDR) ev->u.Exception.ExceptionRecord.ExceptionAddress)
+    return TARGET_SIGNAL_TRAP;
+  else
+    return x;
+}
+
+/* Single step (in a painstaking fashion) by inspecting the current
+   instruction and setting a breakpoint on the "next" instruction
+   which would be executed.  This code hails from sh-stub.c.
+ */
+static void
+undoSStep (thread_info * th)
+{
+  if (th->stepped)
+    {
+      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
+      th->stepped = 0;
+    }
+}
+
+void
+wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
+{
+  unsigned long pc;
+  thread_info *th = current_thread;	/* Info on currently selected thread */
+  CORE_ADDR mips_next_pc (CORE_ADDR pc);
+
+  if (!insert_breakpoints_p)
+    {
+      undoSStep (th);
+      return;
+    }
+
+  th->stepped = 1;
+  pc = read_register (PC_REGNUM);
+  th->step_pc = arm_get_next_pc (pc);
+  th->step_prev = 0;
+  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
+  return;
+}
+#endif
+
 /* Find a thread record given a thread id.
    If get_context then also retrieve the context for this
    thread. */
@@ -893,22 +1113,6 @@ check (BOOL ok, const char *file, int line)
     printf_filtered ("error return %s:%d was %d\n", file, line, GetLastError ());
 }
 
-/* Return a pointer into a CONTEXT field indexed by gdb register number.
-   Return a pointer to an address pointing to zero if there is no
-   corresponding CONTEXT field for the given register number.
- */
-static ULONG *
-regptr (LPCONTEXT c, int r)
-{
-  static ULONG zero = 0;
-  ULONG *p;
-  if (mappings[r] < 0)
-    p = &zero;
-  else
-    p = (ULONG *) (((char *) c) + mappings[r]);
-  return p;
-}
-
 static void
 do_child_fetch_inferior_registers (int r)
 {
@@ -991,7 +1195,9 @@ handle_load_dll (PTR dummy)
 out:
   if (!len)
     return 1;
+#if 0
   dll_buf[len] = '\0';
+#endif
   dll_name = alloca (len);
 
   if (!dll_name)
@@ -1021,22 +1227,12 @@ out:
      FIXME: Is this the real reason that we need the 0x1000 ? */
 
   printf_unfiltered ("%x:%s", event->lpBaseOfDll, dll_name);
-#if 0				/* FIXME:  Need to use RAPI stuff to read the file someday. */
-  {
-    struct section_addr_info section_addrs;
-    memset (&section_addrs, 0, sizeof (section_addrs));
-    section_addrs.text_addr = (int) event->lpBaseOfDll + 0x1000;
-    symbol_file_add (dll_name, 0, &section_addrs, 0, OBJF_SHARED);
-  }
-#endif
   printf_unfiltered ("\n");
 
   return 1;
 }
 
-/* Handle DEBUG_STRING output from child process.
-   Cygwin prepends its messages with a "cygwin:".  Interpret this as
-   a Cygwin signal.  Otherwise just print the string as a warning. */
+/* Handle DEBUG_STRING output from child process. */
 static void
 handle_output_debug_string (struct target_waitstatus *ourstatus)
 {
@@ -1068,6 +1264,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
     }
 
   warning (s);
+
   return;
 }
 
@@ -1075,15 +1272,12 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 static int
 handle_exception (struct target_waitstatus *ourstatus)
 {
-  thread_info *th;
-
+#if 0
   if (current_event.u.Exception.dwFirstChance)
     return 0;
+#endif
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
-
-  /* Record the context of the current thread */
-  th = thread_rec (current_event.dwThreadId, -1);
 
   switch (current_event.u.Exception.ExceptionRecord.ExceptionCode)
     {
@@ -1114,10 +1308,15 @@ handle_exception (struct target_waitstatus *ourstatus)
 		     (unsigned) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
+    case EXCEPTION_ILLEGAL_INSTRUCTION:
+      DEBUG_EXCEPT (("gdb: Target exception SINGLE_ILL at 0x%08x\n",
+	       current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = check_for_step (&current_event, TARGET_SIGNAL_ILL);
+      break;
     default:
       /* This may be a structured exception handling exception.  In
-         that case, we want to let the program try to handle it, and
-         only break if we see the exception a second time.  */
+	 that case, we want to let the program try to handle it, and
+	 only break if we see the exception a second time.  */
 
       printf_unfiltered ("gdb: unknown target exception 0x%08x at 0x%08x\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
@@ -1159,23 +1358,29 @@ child_continue (DWORD continue_status, int id)
    handling by WFI (or whatever).
  */
 static int
-get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * event_code, int *retval)
+get_child_debug_event (int pid, struct target_waitstatus *ourstatus,
+		       DWORD target_event_code, int *retval)
 {
+  int breakout = 0;
   BOOL debug_event;
-  DWORD continue_status;
-  int breakout = 1;
+  DWORD continue_status, event_code;
+  thread_info *th = NULL;
+  static thread_info dummy_thread_info;
 
   if (!(debug_event = wait_for_debug_event (&current_event, 1000)))
     {
-      breakout = *retval = *event_code = 0;
+      *retval = 0;
       goto out;
     }
 
-  this_thread = thread_rec (current_event.dwThreadId, FALSE);
   event_count++;
   continue_status = DBG_CONTINUE;
   *retval = 0;
-  switch (*event_code = current_event.dwDebugEventCode)
+
+  event_code = current_event.dwDebugEventCode;
+  breakout = event_code == target_event_code;
+
+  switch (event_code)
     {
     case CREATE_THREAD_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%x code=%s)\n",
@@ -1183,8 +1388,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_THREAD_DEBUG_EVENT"));
       /* Record the existence of this thread */
-      child_add_thread (current_event.dwThreadId,
-			current_event.u.CreateThread.hThread);
+      th = child_add_thread (current_event.dwThreadId,
+			     current_event.u.CreateThread.hThread);
       if (info_verbose)
 	printf_unfiltered ("[New %s]\n",
 			   target_pid_to_str (current_event.dwThreadId));
@@ -1196,6 +1401,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
       child_delete_thread (current_event.dwThreadId);
+      th = &dummy_thread_info;
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1207,8 +1413,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
 
       main_thread_id = inferior_pid = current_event.dwThreadId;
       /* Add the main thread */
-      current_thread = child_add_thread (inferior_pid,
-				 current_event.u.CreateProcessInfo.hThread);
+      th = child_add_thread (inferior_pid,
+			     current_event.u.CreateProcessInfo.hThread);
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
@@ -1220,7 +1426,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       close_handle (current_process_handle);
       *retval = current_event.dwProcessId;
-      goto out;
+      breakout = 1;
+      break;
 
     case LOAD_DLL_DEBUG_EVENT:
       DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
@@ -1244,14 +1451,12 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
 		     (unsigned) current_event.dwThreadId,
 		     "EXCEPTION_DEBUG_EVENT"));
       if (handle_exception (ourstatus))
+	*retval = current_event.dwThreadId;
+      else
 	{
-	  char buf[32];
-	  *retval = current_event.dwThreadId;
-	  remote_read_bytes (read_pc (), buf, sizeof (buf));
-	  dcache_xfer_memory (remote_dcache, read_pc (), buf, sizeof (buf), 0);
-	  goto out;
+	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	  breakout = 0;
 	}
-      continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* message from the kernel */
@@ -1259,7 +1464,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
-      handle_output_debug_string (ourstatus);
+      handle_output_debug_string ( ourstatus);
       break;
     default:
       printf_unfiltered ("gdb: kernel event for pid=%d tid=%d\n",
@@ -1270,8 +1475,10 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus, DWORD * eve
       break;
     }
 
-  breakout = 0;
-  CHECK (child_continue (continue_status, -1));
+  if (breakout)
+    this_thread = current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+  else
+    CHECK (child_continue (continue_status, -1));
 
 out:
   return breakout;
@@ -1291,7 +1498,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
      isn't necessarily what you think it is. */
 
   while (1)
-    if (get_child_debug_event (pid, ourstatus, &event_code, &retval))
+    if (get_child_debug_event (pid, ourstatus, EXCEPTION_DEBUG_EVENT, &retval))
       return retval;
     else
       {
@@ -1351,14 +1558,15 @@ char *
 upload_to_device (const char *to, const char *from)
 {
   HANDLE h;
-  const char *dir = remote_directory ? : "\\gdb";
+  const char *dir = remote_directory ?: "\\gdb";
   int len;
   static char *remotefile = NULL;
   LPWSTR wstr;
   char *p;
   DWORD err;
   const char *in_to = to;
-  FILETIME ctime, atime, wtime;
+  FILETIME crtime, actime, wrtime;
+  time_t utime;
   struct stat st;
   int fd;
 
@@ -1397,15 +1605,25 @@ upload_to_device (const char *to, const char *from)
 
   /* Some kind of problem? */
   err = CeGetLastError ();
-  if (h == NULL)
-    error ("error creating file to \"%s\".  Windows error %d.",
+  if (h == NULL || h == INVALID_HANDLE_VALUE)
+    error ("error opening file \"%s\".  Windows error %d.",
 	   remotefile, err);
 
+  CeGetFileTime (h, &crtime, &actime, &wrtime);
+  utime = to_time_t (&wrtime);
+#if 0
+  if (utime < st.st_mtime)
+    {
+      char buf[80];
+      strcpy (buf, ctime(&utime));
+      printf ("%s < %s\n", buf, ctime(&st.st_mtime));
+    }
+#endif
   /* See if we need to upload the file. */
   if (upload_when == UPLOAD_ALWAYS ||
       err != ERROR_ALREADY_EXISTS ||
-      !CeGetFileTime (h, &ctime, &atime, &wtime) ||
-      to_time_t (&wtime) < st.st_mtime)
+      !CeGetFileTime (h, &crtime, &actime, &wrtime) ||
+      to_time_t (&wrtime) < st.st_mtime)
     {
       DWORD nbytes;
       char buf[4096];
@@ -1419,7 +1637,8 @@ upload_to_device (const char *to, const char *from)
     }
 
   close (fd);
-  CeCloseHandle (h);
+  if (!CeCloseHandle (h))
+    error ("error closing remote file - %d.", CeGetLastError ());
 
   return remotefile;
 }
@@ -1555,11 +1774,10 @@ child_create_inferior (char *exec_file, char *args, char **env)
   target_terminal_init ();
   target_terminal_inferior ();
 
-
   /* Run until process and threads are loaded */
-  do
-    get_child_debug_event (inferior_pid, &dummy, &event_code, &ret);
-  while (event_code != CREATE_PROCESS_DEBUG_EVENT);
+  while (!get_child_debug_event (inferior_pid, &dummy,
+				 CREATE_PROCESS_DEBUG_EVENT, &ret))
+    continue;
 
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
@@ -1606,213 +1824,6 @@ child_kill_inferior (void)
   close_handle (current_thread->h);
   target_mourn_inferior ();	/* or just child_mourn_inferior? */
 }
-
-#ifdef MIPS
-static void
-undoSStep (thread_info * th)
-{
-  if (th->stepped)
-    {
-      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
-      th->stepped = 0;
-    }
-}
-
-void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
-{
-  unsigned long pc;
-  thread_info *th = current_thread;	/* Info on currently selected thread */
-  CORE_ADDR mips_next_pc (CORE_ADDR pc);
-
-  if (!insert_breakpoints_p)
-    {
-      undoSStep (th);
-      return;
-    }
-
-  th->stepped = 1;
-  pc = read_register (PC_REGNUM);
-  th->step_pc = mips_next_pc (pc);
-  th->step_prev = 0;
-  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
-}
-#elif SHx
-/* Hitachi SH architecture instruction encoding masks */
-
-#define COND_BR_MASK   0xff00
-#define UCOND_DBR_MASK 0xe000
-#define UCOND_RBR_MASK 0xf0df
-#define TRAPA_MASK     0xff00
-
-#define COND_DISP      0x00ff
-#define UCOND_DISP     0x0fff
-#define UCOND_REG      0x0f00
-
-/* Hitachi SH instruction opcodes */
-
-#define BF_INSTR       0x8b00
-#define BT_INSTR       0x8900
-#define BRA_INSTR      0xa000
-#define BSR_INSTR      0xb000
-#define JMP_INSTR      0x402b
-#define JSR_INSTR      0x400b
-#define RTS_INSTR      0x000b
-#define RTE_INSTR      0x002b
-#define TRAPA_INSTR    0xc300
-#define SSTEP_INSTR    0xc3ff
-
-
-#define T_BIT_MASK     0x0001
-
-/* Undo the effect of a previous doSStep.  If we single stepped,
-   restore the old instruction. */
-
-static void
-undoSStep (thread_info * th)
-{
-  if (th->stepped)
-    {
-      gdb_wince_len done;
-      write_process_memory (current_process_handle, (LPVOID) th->step_pc,
-			  (LPVOID) & th->step_instr, sizeof (short), &done);
-      if (done != sizeof (short))
-	  error ("error unsetting single step.");
-      th->stepped = 0;
-    }
-}
-
-/* Single step (in a painstaking fashion) by inspecting the current
-   instruction and setting a breakpoint on the "next" instruction
-   which would be executed.  This code hails from sh-stub.c.
- */
-void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
-{
-  thread_info *th = current_thread;	/* Info on currently selected thread */
-
-  if (!insert_breakpoints_p)
-    undoSStep (th);
-  else
-    {
-      short *instrMem;
-      int displacement;
-      int reg;
-      unsigned short opcode;
-      gdb_wince_len done;
-      LPCONTEXT c = &th->context;
-
-      instrMem = (short *) c->Fir;
-
-      read_process_memory (current_process_handle, (LPCVOID) c->Fir, &opcode,
-			   sizeof (opcode), &done);
-      if (done != sizeof (opcode))
-	error ("couldn't retrieve opcode");
-      th->stepped = 1;
-
-      if ((opcode & COND_BR_MASK) == BT_INSTR)
-	{
-	  if (c->Psr & T_BIT_MASK)
-	    {
-	      displacement = (opcode & COND_DISP) << 1;
-	      if (displacement & 0x80)
-		displacement |= 0xffffff00;
-	      /*
-	         * Remember PC points to second instr.
-	         * after PC of branch ... so add 4
-	       */
-	      instrMem = (short *) (c->Fir + displacement + 4);
-	    }
-	  else
-	    instrMem += 1;
-	}
-      else if ((opcode & COND_BR_MASK) == BF_INSTR)
-	{
-	  if (c->Psr & T_BIT_MASK)
-	    instrMem += 1;
-	  else
-	    {
-	      displacement = (opcode & COND_DISP) << 1;
-	      if (displacement & 0x80)
-		displacement |= 0xffffff00;
-	      /*
-	         * Remember PC points to second instr.
-	         * after PC of branch ... so add 4
-	       */
-	      instrMem = (short *) (c->Fir + displacement + 4);
-	    }
-	}
-      else if ((opcode & UCOND_DBR_MASK) == BRA_INSTR)
-	{
-	  displacement = (opcode & UCOND_DISP) << 1;
-	  if (displacement & 0x0800)
-	    displacement |= 0xfffff000;
-
-	  /*
-	     * Remember PC points to second instr.
-	     * after PC of branch ... so add 4
-	   */
-	  instrMem = (short *) (c->Fir + displacement + 4);
-	}
-      else if ((opcode & UCOND_RBR_MASK) == JSR_INSTR)
-	{
-	  reg = (char) ((opcode & UCOND_REG) >> 8);
-
-	  instrMem = (short *) *regptr (c, reg);
-	}
-      else if (opcode == RTS_INSTR)
-	instrMem = (short *) c->PR;
-      else if (opcode == RTE_INSTR)
-	instrMem = (short *) *regptr (c, 15);
-      else if ((opcode & TRAPA_MASK) == TRAPA_INSTR)
-	instrMem = (short *) ((opcode & ~TRAPA_MASK) << 2);
-      else
-	instrMem += 1;
-
-      th->step_pc = (CORE_ADDR) instrMem;
-
-      read_process_memory (current_process_handle, (LPVOID) instrMem,
-			   (LPVOID) & th->step_instr, sizeof (short), &done);
-      opcode = SSTEP_INSTR;
-      write_process_memory (current_process_handle, (LPVOID) instrMem,
-			    (LPVOID) & opcode, sizeof (short), &done);
-    }
-}
-#elif defined (ARM)
-/* Single step (in a painstaking fashion) by inspecting the current
-   instruction and setting a breakpoint on the "next" instruction
-   which would be executed.  This code hails from sh-stub.c.
- */
-static void
-undoSStep (thread_info * th)
-{
-  if (th->stepped)
-    {
-      memory_remove_breakpoint (th->step_pc, (void *) &th->step_prev);
-      th->stepped = 0;
-    }
-}
-
-void
-wince_software_single_step (unsigned int ignore, int insert_breakpoints_p)
-{
-  unsigned long pc;
-  thread_info *th = current_thread;	/* Info on currently selected thread */
-  CORE_ADDR mips_next_pc (CORE_ADDR pc);
-
-  if (!insert_breakpoints_p)
-    {
-      undoSStep (th);
-      return;
-    }
-
-  th->stepped = 1;
-  pc = read_register (PC_REGNUM);
-  th->step_pc = arm_get_next_pc (pc);
-  th->step_prev = 0;
-  memory_insert_breakpoint (th->step_pc, (void *) &th->step_prev);
-}
-#endif
 
 /* Resume the child after an exception. */
 void
@@ -1917,8 +1928,8 @@ init_child_ops (void)
 /* Handle 'set remoteupload' parameter. */
 
 #define replace_upload(what) \
-      upload_when = UPLOAD_NEWER; \
-      remote_upload = realloc (remote_upload, strlen (upload_options[upload_when].name)); \
+      upload_when = what; \
+      remote_upload = realloc (remote_upload, strlen (upload_options[upload_when].name) + 1); \
       strcpy (remote_upload, upload_options[upload_when].name);
 
 static void
@@ -1940,8 +1951,7 @@ set_upload_type (char *ignore, int from_tty)
     if (len >= upload_options[i].abbrev &&
 	strncasecmp (remote_upload, upload_options[i].name, len) == 0)
       {
-	remote_upload = (char *) upload_options[i].name;
-	upload_when = i;
+	replace_upload (i);
 	return;
       }
 

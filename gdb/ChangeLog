@@ -1,5 +1,29 @@
 2000-04-20  Christopher Faylor  <cgf@cygnus.com>
 
+	* wince-stub.c (FREE): New macro.
+	(mempool): Just free any buffer prior to reuse.  Don't bother with
+	realloc.
+	(flag_single_step): New function.
+	(skip_message): Detect "helpful" Windows CE messages and skip sending
+	them to the host.
+	(wait_for_debug_event): Use skip_message to avoid sending debug
+	messages to the host.
+	(dispatch): Prelimary implementation of single step detection.
+	* wince.c: Rework SH single stepping code to be more consistent with
+	other wince targets.
+	(handle_output_debug_string): Allow first chance exceptions to come
+	through since they seem to be all that we get on some versions of
+	Windows CE.
+	(check_for_step): New function, conditionally compiled based on target.
+	(regptr): Delete obsolete function.
+	(handle_exception): Detect illegal instructions.
+	(get_child_debug_event): Return success only if event code matches
+	target.
+	(child_create_inferior): Reflect change to get_child_debug_event
+	arguments.
+
+2000-04-20  Christopher Faylor  <cgf@cygnus.com>
+
 	* win32-nat.c (thread_rec): Be more defensive about suspending already
 	suspended threads.
 	(safe_symbol_file_add_stub): New function.
