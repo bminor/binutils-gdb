@@ -1,5 +1,8 @@
 2004-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-tdep.c (amd64_return_value): Implement
+	RETURN_VALUE_ABI_RETURNS_ADDRESS.
+
 	* m68k-tdep.c (m68k_convert_register_p, m68k_register_to_value)
 	(m68k_value_to_register): New functions.
 	(m68k_gdbarch_init): Set convert_register_p, register_to_value and

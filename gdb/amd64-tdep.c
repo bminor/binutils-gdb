@@ -422,11 +422,28 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
   amd64_classify (type, class);
 
   /* 2. If the type has class MEMORY, then the caller provides space
-        for the return value and passes the address of this storage in
-        %rdi as if it were the first argument to the function. In
-        effect, this address becomes a hidden first argument.  */
+     for the return value and passes the address of this storage in
+     %rdi as if it were the first argument to the function. In effect,
+     this address becomes a hidden first argument.
+
+     On return %rax will contain the address that has been passed in
+     by the caller in %rdi.  */
   if (class[0] == AMD64_MEMORY)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      /* As indicated by the comment above, the ABI guarantees that we
+         can always find the return value just after the function has
+         returned.  */
+
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   gdb_assert (class[1] != AMD64_MEMORY);
   gdb_assert (len <= 16);
