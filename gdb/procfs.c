@@ -4839,12 +4839,9 @@ procfs_init_inferior (int pid)
      the actual process ID plus the lwp ID. */
   inferior_ptid = MERGEPID (pi->pid, proc_get_current_thread (pi));
 
-#ifdef START_INFERIOR_TRAPS_EXPECTED
+  /* Typically two, one trap to exec the shell, one to exec the
+     program being debugged.  Defined by "inferior.h".  */
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
-#else
-  /* One trap to exec the shell, one to exec the program being debugged.  */
-  startup_inferior (2);
-#endif /* START_INFERIOR_TRAPS_EXPECTED */
 }
 
 /*

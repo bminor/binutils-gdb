@@ -697,10 +697,10 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_OBJC_MSGCALL:
       {				/* Objective C message (method) call.  */
 
-	static unsigned long responds_selector = 0;
-	static unsigned long method_selector = 0;
+	static CORE_ADDR responds_selector = 0;
+	static CORE_ADDR method_selector = 0;
 
-	unsigned long selector = 0;
+	CORE_ADDR selector = 0;
 
 	int using_gcc = 0;
 	int struct_return = 0;
@@ -750,8 +750,19 @@ evaluate_subexp_standard (struct type *expect_type,
 	   only).  */
 	if (gnu_runtime)
 	  {
+	    struct type *type;
+	    type = lookup_pointer_type (builtin_type_void);
+	    type = lookup_function_type (type);
+	    type = lookup_pointer_type (type);
+	    type = lookup_function_type (type);
+	    type = lookup_pointer_type (type);
+
 	    msg_send = find_function_in_inferior ("objc_msg_lookup");
 	    msg_send_stret = find_function_in_inferior ("objc_msg_lookup");
+
+	    msg_send = value_from_pointer (type, value_as_address (msg_send));
+	    msg_send_stret = value_from_pointer (type, 
+					value_as_address (msg_send_stret));
 	  }
 	else
 	  {
@@ -936,14 +947,13 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	if (gnu_runtime && (method != NULL))
 	  {
-	    ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 	    /* Function objc_msg_lookup returns a pointer.  */
-	    argvec[0] = ret;
-	    ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+	    VALUE_TYPE (argvec[0]) = lookup_function_type 
+			    (lookup_pointer_type (VALUE_TYPE (argvec[0])));
+	    argvec[0] = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 	  }
-	else
-	  ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 
+	ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 	return ret;
       }
       break;

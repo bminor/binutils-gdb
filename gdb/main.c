@@ -163,8 +163,6 @@ captured_main (void *data)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  START_PROGRESS (argv[0], 0);
-
   /* This needs to happen before the first use of malloc.  */
   init_malloc (NULL);
 
@@ -749,8 +747,6 @@ extern int gdbtk_test (char *);
 #ifdef BEFORE_MAIN_LOOP_HOOK
   BEFORE_MAIN_LOOP_HOOK;
 #endif
-
-  END_PROGRESS (argv[0]);
 
   /* Show time and/or space usage.  */
 

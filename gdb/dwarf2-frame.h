@@ -71,6 +71,13 @@ struct dwarf2_frame_state_reg
   enum dwarf2_frame_reg_rule how;
 };
 
+/* Set the architecture-specific register state initialization
+   function for GDBARCH to INIT_REG.  */
+
+extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
+				       void (*init_reg) (struct gdbarch *, int,
+					     struct dwarf2_frame_state_reg *));
+
 /* Return the frame unwind methods for the function that contains PC,
    or NULL if it can't be handled by DWARF CFI frame unwinder.  */
 

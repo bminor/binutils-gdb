@@ -1,5 +1,5 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,6 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "inferior.h"
-#include "symfile.h"		/* for entry_point_address */
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "regcache.h"
@@ -34,6 +33,7 @@
 #include "sim-regno.h"
 #include "gdb/sim-frv.h"
 #include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
+#include "symtab.h"
 
 extern void _initialize_frv_tdep (void);
 
@@ -43,7 +43,6 @@ static gdbarch_register_name_ftype frv_register_name;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
-static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 
 /* Register numbers.  The order in which these appear define the
    remote protocol, so take care in changing them.  */
@@ -414,62 +413,6 @@ is_argument_reg (int reg)
 {
   return (8 <= reg && reg <= 13);
 }
-
-/* Given PC at the function's start address, attempt to find the
-   prologue end using SAL information.  Return zero if the skip fails.
-
-   A non-optimized prologue traditionally has one SAL for the function
-   and a second for the function body.  A single line function has
-   them both pointing at the same line.
-
-   An optimized prologue is similar but the prologue may contain
-   instructions (SALs) from the instruction body.  Need to skip those
-   while not getting into the function body.
-
-   The functions end point and an increasing SAL line are used as
-   indicators of the prologue's endpoint.
-
-   This code is based on the function refine_prologue_limit (versions
-   found in both ia64 and ppc).  */
-
-static CORE_ADDR
-skip_prologue_using_sal (CORE_ADDR func_addr)
-{
-  struct symtab_and_line prologue_sal;
-  CORE_ADDR start_pc;
-  CORE_ADDR end_pc;
-
-  /* Get an initial range for the function.  */
-  find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
-  start_pc += FUNCTION_START_OFFSET;
-
-  prologue_sal = find_pc_line (start_pc, 0);
-  if (prologue_sal.line != 0)
-    {
-      while (prologue_sal.end < end_pc)
-	{
-	  struct symtab_and_line sal;
-
-	  sal = find_pc_line (prologue_sal.end, 0);
-	  if (sal.line == 0)
-	    break;
-	  /* Assume that a consecutive SAL for the same (or larger)
-             line mark the prologue -> body transition.  */
-	  if (sal.line >= prologue_sal.line)
-	    break;
-	  /* The case in which compiler's optimizer/scheduler has
-	     moved instructions into the prologue.  We look ahead in
-	     the function looking for address ranges whose
-	     corresponding line number is less the first one that we
-	     found for the function.  This is more conservative then
-	     refine_prologue_limit which scans a large number of SALs
-	     looking for any in the prologue */
-	  prologue_sal = sal;
-	}
-    }
-  return prologue_sal.end;
-}
-
 
 /* Scan an FR-V prologue, starting at PC, until frame->PC.
    If FRAME is non-zero, fill in its saved_regs with appropriate addresses.
@@ -1031,7 +974,7 @@ frv_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static int
 frv_frameless_function_invocation (struct frame_info *frame)
 {
-  return frameless_look_for_prologue (frame);
+  return legacy_frameless_look_for_prologue (frame);
 }
 
 static CORE_ADDR
@@ -1392,7 +1335,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
 
-  set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);

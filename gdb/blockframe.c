@@ -25,7 +25,6 @@
 #include "defs.h"
 #include "symtab.h"
 #include "bfd.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "frame.h"
 #include "gdbcore.h"
@@ -186,12 +185,12 @@ legacy_inside_entry_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.entry_func_highpc > pc);
 }
 
-/* Return nonzero if the function for this frame lacks a prologue.  Many
-   machines can define FRAMELESS_FUNCTION_INVOCATION to just call this
-   function.  */
+/* Return nonzero if the function for this frame lacks a prologue.
+   Many machines can define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
+   to just call this function.  */
 
 int
-frameless_look_for_prologue (struct frame_info *frame)
+legacy_frameless_look_for_prologue (struct frame_info *frame)
 {
   CORE_ADDR func_start;
 
@@ -599,8 +598,6 @@ deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 					    CORE_ADDR frame_address)
 {
   CORE_ADDR addr = entry_point_address ();
-  if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
-    addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
   return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
 }
 

@@ -1,6 +1,7 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +22,6 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "symfile.h"		/* for entry_point_address */
 #include "gdbcore.h"
 #include "arch-utils.h"
 #include "floatformat.h"
@@ -38,6 +38,7 @@
 #include "elf-bfd.h"
 #include "elf.h"                /* for PT_IA64_UNWIND value */
 #include "dis-asm.h"
+#include "ia64-tdep.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
 #include "libunwind-frame.h"
@@ -89,11 +90,6 @@ typedef enum instruction_type
 /* Length in bytes of an instruction bundle */
 
 #define BUNDLE_LEN 16
-
-/* FIXME: These extern declarations should go in ia64-tdep.h.  */
-extern CORE_ADDR ia64_linux_sigcontext_register_address (CORE_ADDR, int);
-extern CORE_ADDR ia64_aix_sigcontext_register_address (CORE_ADDR, int);
-extern unsigned long ia64_linux_getunwind_table (void *, size_t);
 
 static gdbarch_init_ftype ia64_gdbarch_init;
 
@@ -930,6 +926,9 @@ static int max_skip_non_prologue_insns = 40;
    which will be set to indicate whether the returned limit may be
    used with no further scanning in the event that the function is
    frameless.  */
+
+/* FIXME: cagney/2004-02-14: This function and logic have largely been
+   superseded by skip_prologue_using_sal.  */
 
 static CORE_ADDR
 refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)

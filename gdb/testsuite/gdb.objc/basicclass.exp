@@ -174,7 +174,7 @@ gdb_test continue \
 # Test calling Objective-C methods
 #
 gdb_test "print \[self printHi\]" \
-    "Hi.*\\$\[0-9\] = -?\[0-9\]+" \
+    "Hi.*\\$\[0-9\] = \\(.*objc_object \\*\\) 0x\[0-9a-f\]+" \
     "Call an Objective-C method with no arguments"
 
 gdb_test "print \[self printNumber: 42\]" \

@@ -43,6 +43,7 @@ x86_64-*-freebsd*)	gdb_target=fbsd64 ;;
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-netbsd*)	gdb_target=nbsd ;;
+alpha*-*-openbsd*)	gdb_target=nbsd ;;
 alpha*-*-*)		gdb_target=alpha ;;
 
 arm*-wince-pe)		gdb_target=wince ;;
@@ -147,8 +148,6 @@ mips*-*-*)		gdb_target=embed ;;
 
 mn10300-*-*)		gdb_target=mn10300 ;;
 
-none-*-*)		gdb_target=none ;;
-
 ns32k-*-netbsd*)	gdb_target=nbsdaout ;;
 
 powerpc-*-netbsd*)	gdb_target=nbsd ;;
@@ -168,10 +167,7 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
-s390-*-*)		gdb_target=s390
-			build_gdbserver=yes
-			;;
-s390x-*-*)		gdb_target=s390x
+s390*-*-*)		gdb_target=s390
 			build_gdbserver=yes
 			;;
 
@@ -220,6 +216,7 @@ x86_64-*-linux*)	gdb_target=x86-64linux
 			build_gdbserver=yes
 			;;
 x86_64-*-netbsd*)	gdb_target=nbsd64 ;;
+x86_64-*-openbsd*)	gdb_target=obsd64 ;;
 
 esac
 

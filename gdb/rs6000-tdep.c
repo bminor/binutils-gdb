@@ -28,7 +28,6 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"
@@ -426,6 +425,10 @@ static int max_skip_non_prologue_insns = 10;
    the line data in the symbol table.  If successful, a better guess
    on where the prologue ends is returned, otherwise the previous
    value of lim_pc is returned.  */
+
+/* FIXME: cagney/2004-02-14: This function and logic have largely been
+   superseded by skip_prologue_using_sal.  */
+
 static CORE_ADDR
 refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc)
 {
@@ -1777,7 +1780,8 @@ rs6000_frame_chain (struct frame_info *thisframe)
 			   wordsize);
   else if (get_next_frame (thisframe) != NULL
 	   && (get_frame_type (get_next_frame (thisframe)) == SIGTRAMP_FRAME)
-	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
+	   && (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
+	       && DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (thisframe)))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
     fp = get_frame_base (thisframe);
@@ -2904,8 +2908,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_use_struct_convention (gdbarch,
 				       rs6000_use_struct_convention);
 
-  set_gdbarch_frameless_function_invocation (gdbarch,
-                                         rs6000_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 

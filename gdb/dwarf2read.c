@@ -31,7 +31,6 @@
 #include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "elf/dwarf2.h"
 #include "buildsym.h"
@@ -1563,8 +1562,8 @@ add_partial_symbol (struct partial_die_info *pdi,
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_DOMAIN, LOC_CONST,
 			   cu->language == language_cplus
-			   ? &objfile->static_psymbols
-			   : &objfile->global_psymbols,
+			   ? &objfile->global_psymbols
+			   : &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     default:

@@ -63,8 +63,6 @@
 
 #include "libiberty.h"
 
-#include "progress.h"
-
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
@@ -201,7 +199,6 @@ extern void quit (void);
 #define QUIT { \
   if (quit_flag) quit (); \
   if (interactive_hook) interactive_hook (); \
-  PROGRESS (1); \
 }
 #endif
 

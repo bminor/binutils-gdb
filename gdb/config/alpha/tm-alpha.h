@@ -1,7 +1,7 @@
 /* Definitions to make GDB run on an Alpha box under OSF1.  This is
    also used by the Alpha/Netware and Alpha GNU/Linux targets.
 
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002 Free
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002, 2004 Free
    Software Foundation, Inc.
 
    This file is part of GDB.
@@ -30,11 +30,6 @@
 
 struct frame_info;
 struct symbol;
-
-/* Number of traps that happen between exec'ing the shell
-   to run an inferior, and when we finally get to
-   the inferior code.  This is 2 on most implementations.  */
-#define START_INFERIOR_TRAPS_EXPECTED 3
 
 /* Special symbol found in blocks associated with routines.  We can hang
    alpha_extra_func_info_t's off of this.  */

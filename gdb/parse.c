@@ -1293,11 +1293,10 @@ _initialize_parse (void)
   /* FIXME - For the moment, handle types by swapping them in and out.
      Should be using the per-architecture data-pointer and a large
      struct. */
-  register_gdbarch_swap (&msym_text_symbol_type, sizeof (msym_text_symbol_type), NULL);
-  register_gdbarch_swap (&msym_data_symbol_type, sizeof (msym_data_symbol_type), NULL);
-  register_gdbarch_swap (&msym_unknown_symbol_type, sizeof (msym_unknown_symbol_type), NULL);
-
-  register_gdbarch_swap (NULL, 0, build_parse);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_text_symbol_type);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_data_symbol_type);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_unknown_symbol_type);
+  deprecated_register_gdbarch_swap (NULL, 0, build_parse);
 
   add_show_from_set (
 	    add_set_cmd ("expression", class_maintenance, var_zinteger,

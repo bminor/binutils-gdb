@@ -141,9 +141,10 @@ vax_sigtramp_saved_pc (struct frame_info *frame)
     sigcontext_addr = read_memory_typed_address
       (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
 
-  /* Don't cause a memory_error when accessing sigcontext in case the stack
+  /* Offset to saved PC in sigcontext, from <sys/signal.h>.  Don't
+     cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
-  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
+  target_read_memory (sigcontext_addr + 12, buf, ptrbytes);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 
@@ -362,8 +363,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, vax_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, vax_frame_num_args);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-				   generic_frameless_function_invocation_not);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, vax_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);

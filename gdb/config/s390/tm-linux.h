@@ -1,6 +1,6 @@
 /* Target definitions for GDB for a s390 running GNU/Linux.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -25,18 +25,6 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-#undef  TARGET_ELF64
-#define TARGET_ELF64 (gdbarch_tdep (current_gdbarch)->intreg_size==8)
-
 #include "config/tm-linux.h"
-
-/* Zap several macros defined in the above header so that multi-arch
-   can safely re-define them.  The ``correct fix'' involves
-   eliminating either the above include or even this file.  */
-#undef SKIP_TRAMPOLINE_CODE
-
-#include "s390/tm-s390.h"
-
-
 
 #endif /* TM_LINUX_H */

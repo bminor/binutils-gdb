@@ -942,7 +942,8 @@ frame_info (char *addr_exp, int from_tty)
 
   {
     int frameless;
-    frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
+    frameless = (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
+		 && DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (fi));
     if (frameless)
       printf_filtered (" (FRAMELESS),");
   }

@@ -1,5 +1,6 @@
 /* Target-dependent definitions for NetBSD/Alpha.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,11 +24,5 @@
 
 #include "alpha/tm-alpha.h"
 #include "solib.h"
-
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  The
-   default is right for NetBSD.  */
-
-#undef START_INFERIOR_TRAPS_EXPECTED
 
 #endif /* TM_NBSD_H */

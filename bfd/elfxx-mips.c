@@ -3261,12 +3261,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     {
     case R_MIPS_GOT_PAGE:
     case R_MIPS_GOT_OFST:
-      /* If this symbol got a global GOT entry, we have to decay
-	 GOT_PAGE/GOT_OFST to GOT_DISP/addend.  */
-      local_p = local_p || ! h
-	|| (h->root.dynindx
-	    < mips_elf_get_global_gotsym_index (elf_hash_table (info)
-						->dynobj));
+      /* We need to decay to GOT_DISP/addend if the symbol doesn't
+	 bind locally.  */
+      local_p = local_p || _bfd_elf_symbol_refs_local_p (&h->root, info, 1);
       if (local_p || r_type == R_MIPS_GOT_OFST)
 	break;
       /* Fall through.  */
@@ -5384,25 +5381,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		hmips = (struct mips_elf_link_hash_entry *)
 		  hmips->root.root.u.i.link;
 
-	      if ((hmips->root.root.type == bfd_link_hash_defined
-		   || hmips->root.root.type == bfd_link_hash_defweak)
-		  && hmips->root.root.u.def.section
+	      if ((hmips->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		  && ! (info->shared && ! info->symbolic
 			&& ! (hmips->root.elf_link_hash_flags
-			      & ELF_LINK_FORCED_LOCAL))
-		  /* If we've encountered any other relocation
-		     referencing the symbol, we'll have marked it as
-		     dynamic, and, even though we might be able to get
-		     rid of the GOT entry should we know for sure all
-		     previous relocations were GOT_PAGE ones, at this
-		     point we can't tell, so just keep using the
-		     symbol as dynamic.  This is very important in the
-		     multi-got case, since we don't decide whether to
-		     decay GOT_PAGE to GOT_DISP on a per-GOT basis: if
-		     the symbol is dynamic, we'll need a GOT entry for
-		     every GOT in which the symbol is referenced with
-		     a GOT_PAGE relocation.  */
-		  && hmips->root.dynindx == -1)
+			      & ELF_LINK_FORCED_LOCAL)))
 		break;
 	    }
 	  /* Fall through.  */

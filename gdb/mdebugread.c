@@ -47,7 +47,6 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "gdb_obstack.h"
 #include "buildsym.h"

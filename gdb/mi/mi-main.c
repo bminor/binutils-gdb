@@ -1,5 +1,8 @@
 /* MI Command Set.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -537,7 +540,8 @@ get_register (int regnum, int format)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+      && DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
       DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
 				   register_type (current_gdbarch, regnum),
@@ -1485,6 +1489,6 @@ mi_setup_architecture_data (void)
 void
 _initialize_mi_main (void)
 {
-  register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-  register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (old_regs);
+  deprecated_register_gdbarch_swap (NULL, 0, mi_setup_architecture_data);
 }

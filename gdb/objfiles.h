@@ -532,6 +532,10 @@ extern struct objfile *object_files;
 
 extern struct objfile *allocate_objfile (bfd *, int);
 
+extern void init_entry_point_info (struct objfile *);
+
+extern CORE_ADDR entry_point_address (void);
+
 extern int build_objfile_section_table (struct objfile *);
 
 extern void terminate_minimal_symbol_table (struct objfile *objfile);

@@ -1,6 +1,6 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +30,6 @@
 #include "frame-unwind.h"
 #include "dwarf2-frame.h"
 #include "symtab.h"
-#include "symfile.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
@@ -73,27 +72,6 @@ struct sh_frame_cache
   CORE_ADDR saved_regs[SH_NUM_REGS];
   CORE_ADDR saved_sp;
 };
-
-static const char *
-sh_generic_register_name (int reg_nr)
-{
-  static char *register_names[] = {
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
-    "fpul", "fpscr",
-    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
-    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "ssr", "spc",
-    "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
-    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
-  };
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
-  return register_names[reg_nr];
-}
 
 static const char *
 sh_sh_register_name (int reg_nr)
@@ -333,6 +311,9 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 #define GET_SOURCE_REG(x)  	(((x) >> 4) & 0xf)
 #define GET_TARGET_REG(x)  	(((x) >> 8) & 0xf)
 
+/* JSR @Rm         0100mmmm00001011 */
+#define IS_JSR(x)		(((x) & 0xf0ff) == 0x400b)
+
 /* STS.L PR,@-r15  0100111100100010
    r15-4-->r15, PR-->(r15) */
 #define IS_STS(x)  		((x) == 0x4f22)
@@ -501,8 +482,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (IS_MOV_SP_FP (inst))
 	{
-	  if (!cache->uses_fp)
-	    cache->uses_fp = 1;
+	  cache->uses_fp = 1;
 	  /* At this point, only allow argument register moves to other
 	     registers or argument register moves to @(X,fp) which are
 	     moving the register arguments onto the stack area allocated
@@ -530,6 +510,20 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	      else
 		break;
 	    }
+	  break;
+	}
+      else if (IS_JSR (inst))
+	{
+	  /* We have found a jsr that has been scheduled into the prologue.
+	     If we continue the scan and return a pc someplace after this,
+	     then setting a breakpoint on this function will cause it to
+	     appear to be called after the function it is calling via the
+	     jsr, which will be very confusing.  Most likely the next
+	     instruction is going to be IS_MOV_SP_FP in the delay slot.  If
+	     so, note that before returning the current pc. */
+	  inst = read_memory_integer (pc + 2, 2);
+	  if (IS_MOV_SP_FP (inst))
+	    cache->uses_fp = 1;
 	  break;
 	}
 #if 0				/* This used to just stop when it found an instruction that
@@ -1541,8 +1535,8 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
    because they are stored as 4 individual FP elements. */
 
 static void
-sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
-				    char *from, char *to)
+sh_register_convert_to_virtual (int regnum, struct type *type,
+				char *from, char *to)
 {
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
@@ -1557,8 +1551,8 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
 }
 
 static void
-sh_sh4_register_convert_to_raw (struct type *type, int regnum,
-				const void *from, void *to)
+sh_register_convert_to_raw (struct type *type, int regnum,
+			    const void *from, void *to)
 {
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
@@ -1609,10 +1603,9 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + register_size (gdbarch,
 					     base_regnum) * portion));
       /* We must pay attention to the endiannes. */
-      sh_sh4_register_convert_to_virtual (reg_nr,
-					  gdbarch_register_type (gdbarch,
-								 reg_nr),
-					  temp_buffer, buffer);
+      sh_register_convert_to_virtual (reg_nr,
+				      gdbarch_register_type (gdbarch, reg_nr),
+				      temp_buffer, buffer);
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
@@ -1639,8 +1632,8 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = dr_reg_base_num (reg_nr);
 
       /* We must pay attention to the endiannes. */
-      sh_sh4_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
-				      reg_nr, buffer, temp_buffer);
+      sh_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+				  reg_nr, buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
@@ -1896,8 +1889,8 @@ sh_dsp_register_sim_regno (int nr)
     return SIM_SH_RS_REGNUM;
   if (nr == RE_REGNUM)
     return SIM_SH_RE_REGNUM;
-  if (nr >= R0_BANK_REGNUM && nr <= R7_BANK_REGNUM)
-    return nr - R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
+  if (nr >= DSP_R0_BANK_REGNUM && nr <= DSP_R7_BANK_REGNUM)
+    return nr - DSP_R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
   return nr;
 }
 
@@ -2246,8 +2239,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
 
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     frameless_look_for_prologue);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, legacy_frameless_look_for_prologue);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_frame_align (gdbarch, sh_frame_align);
@@ -2333,7 +2325,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     default:
-      set_gdbarch_register_name (gdbarch, sh_generic_register_name);
+      set_gdbarch_register_name (gdbarch, sh_sh_register_name);
       break;
     }
 

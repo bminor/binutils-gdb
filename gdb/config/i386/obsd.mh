@@ -1,10 +1,9 @@
-# Host: Intel 386 running OpenBSD
+# Host: OpenBSD/i386 ELF
 
 XM_FILE= xm-i386.h
 
 NAT_FILE= nm-obsd.h
-NATDEPFILES= fork-child.o infptrace.o inftarg.o i386bsd-nat.o i386obsd-nat.o \
-	solib.o solib-sunos.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o i386bsd-nat.o i386obsd-nat.o
 
 # The OpenBSD yacc generates yyname and yyrule tables that conflict at
 # link time if we define YYDEBUG to a non-zero value.

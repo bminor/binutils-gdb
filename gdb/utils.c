@@ -979,12 +979,8 @@ request_quit (int signo)
      about USG defines and stuff like that.  */
   signal (signo, request_quit);
 
-#ifdef REQUEST_QUIT
-  REQUEST_QUIT;
-#else
   if (immediate_quit)
     quit ();
-#endif
 }
 
 /* Memory management stuff (malloc friends).  */

@@ -35,8 +35,6 @@
 
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
-
-#include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
 #include "gdb-stabs.h"

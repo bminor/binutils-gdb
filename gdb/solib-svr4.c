@@ -1,7 +1,8 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1507,6 +1508,77 @@ init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 {
   return legacy_fetch_link_map_offsets;
 }
+
+/* Most OS'es that have SVR4-style ELF dynamic libraries define a
+   `struct r_debug' and a `struct link_map' that are binary compatible
+   with the origional SVR4 implementation.  */
+
+/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
+   for an ILP32 SVR4 system.  */
+  
+struct link_map_offsets *
+svr4_ilp32_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    {
+      lmp = &lmo;
+
+      /* Everything we need is in the first 8 bytes.  */
+      lmo.r_debug_size = 8;
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      /* Everything we need is in the first 20 bytes.  */
+      lmo.link_map_size = 20;
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+  return lmp;
+}
+
+/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
+   for an LP64 SVR4 system.  */
+  
+struct link_map_offsets *
+svr4_lp64_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    {
+      lmp = &lmo;
+
+      /* Everything we need is in the first 16 bytes.  */
+      lmo.r_debug_size = 16;
+      lmo.r_map_offset = 8;
+      lmo.r_map_size   = 8;
+
+      /* Everything we need is in the first 40 bytes.  */
+      lmo.link_map_size = 40;
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 8;
+      lmo.l_name_offset = 8;
+      lmo.l_name_size   = 8;
+      lmo.l_next_offset = 24;
+      lmo.l_next_size   = 8;
+      lmo.l_prev_offset = 32;
+      lmo.l_prev_size   = 8;
+    }
+
+  return lmp;
+}
+
 
 static struct target_so_ops svr4_so_ops;
 

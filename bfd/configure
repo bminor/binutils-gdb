@@ -930,7 +930,7 @@ fi
 
 PACKAGE=bfd
 
-VERSION=2.14.90
+VERSION=2.15.90
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }

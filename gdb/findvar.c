@@ -284,7 +284,8 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+      && DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
       DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
 					      raw_buffer, VALUE_CONTENTS_RAW (reg_val));
@@ -617,7 +618,30 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct value *v = allocate_value (type);
   CHECK_TYPEDEF (type);
 
-  if (CONVERT_REGISTER_P (regnum, type))
+  if (TYPE_LENGTH (type) == 0)
+    {
+      /* It doesn't matter much what we return for this: since the
+         length is zero, it could be anything.  But if allowed to see
+         a zero-length type, the register-finding loop below will set
+         neither mem_stor nor reg_stor, and then report an internal
+         error.  
+
+         Zero-length types can legitimately arise from declarations
+         like 'struct {}' (a GCC extension, not valid ISO C).  GDB may
+         also create them when it finds bogus debugging information;
+         for example, in GCC 2.95.4 and binutils 2.11.93.0.2, the
+         STABS BINCL->EXCL compression process can create bad type
+         numbers.  GDB reads these as TYPE_CODE_UNDEF types, with zero
+         length.  (That bug is actually the only known way to get a
+         zero-length value allocated to a register --- which is what
+         it takes to make it here.)
+
+         We'll just attribute the value to the original register.  */
+      VALUE_LVAL (v) = lval_register;
+      VALUE_ADDRESS (v) = regnum;
+      VALUE_REGNO (v) = regnum;
+    }
+  else if (CONVERT_REGISTER_P (regnum, type))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to

@@ -27,7 +27,7 @@
 
 #include <asm/ptrace.h>
 
-#define s390_num_regs 67
+#define s390_num_regs 51
 
 static int s390_regmap[] = {
   PT_PSWMASK, PT_PSWADDR,
@@ -42,15 +42,9 @@ static int s390_regmap[] = {
   PT_ACR8, PT_ACR9, PT_ACR10, PT_ACR11,
   PT_ACR12, PT_ACR13, PT_ACR14, PT_ACR15,
 
-  -1, -1, -1, -1,
-  -1, -1, -1, -1,
-  -1, PT_CR_9, PT_CR_10, PT_CR_11,
-  -1, -1, -1, -1,
-  
   PT_FPC,
 
-/* <asm/ptrace.h> defines GPR_SIZE.  */
-#if GPR_SIZE == 4
+#ifndef __s390x__
   PT_FPR0_HI, PT_FPR1_HI, PT_FPR2_HI, PT_FPR3_HI,
   PT_FPR4_HI, PT_FPR5_HI, PT_FPR6_HI, PT_FPR7_HI,
   PT_FPR8_HI, PT_FPR9_HI, PT_FPR10_HI, PT_FPR11_HI,

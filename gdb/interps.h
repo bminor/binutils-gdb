@@ -71,5 +71,6 @@ extern void clear_interpreter_hooks (void);
 #define INTERP_MI2             "mi2"
 #define INTERP_MI3             "mi3"
 #define INTERP_MI		"mi"
+#define INTERP_TUI		"tui"
 
 #endif

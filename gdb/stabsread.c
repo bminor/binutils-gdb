@@ -1446,11 +1446,21 @@ read_type (char **pp, struct objfile *objfile)
       if (read_type_number (pp, typenums) != 0)
 	return error_type (pp, objfile);
 
-      /* Type is not being defined here.  Either it already exists,
-         or this is a forward reference to it.  dbx_alloc_type handles
-         both cases.  */
       if (**pp != '=')
-	return dbx_alloc_type (typenums, objfile);
+        {
+          /* Type is not being defined here.  Either it already
+             exists, or this is a forward reference to it.
+             dbx_alloc_type handles both cases.  */
+          type = dbx_alloc_type (typenums, objfile);
+
+          /* If this is a forward reference, arrange to complain if it
+             doesn't get patched up by the time we're done
+             reading.  */
+          if (TYPE_CODE (type) == TYPE_CODE_UNDEF)
+            add_undefined_type (type);
+
+          return type;
+        }
 
       /* Type is being defined here.  */
       /* Skip the '='.
@@ -4197,7 +4207,8 @@ cleanup_undefined_types (void)
 	default:
 	  {
 	    complaint (&symfile_complaints,
-		       "GDB internal error.  cleanup_undefined_types with bad type %d.",
+		       "forward-referenced types left unresolved, "
+                       "type code %d.",
 		       TYPE_CODE (*type));
 	  }
 	  break;

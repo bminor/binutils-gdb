@@ -85,12 +85,6 @@ legacy_register_sim_regno (int regnum)
 }
 
 int
-generic_frameless_function_invocation_not (struct frame_info *fi)
-{
-  return 0;
-}
-
-int
 generic_return_value_on_stack_not (struct type *type)
 {
   return 0;
@@ -194,13 +188,6 @@ default_double_format (struct gdbarch *gdbarch)
 }
 
 /* Misc helper functions for targets. */
-
-int
-deprecated_register_convertible_not (int num)
-{
-  return 0;
-}
-  
 
 CORE_ADDR
 core_addr_identity (CORE_ADDR addr)
@@ -324,7 +311,8 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 int
 legacy_convert_register_p (int regnum, struct type *type)
 {
-  return DEPRECATED_REGISTER_CONVERTIBLE (regnum);
+  return (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+	  && DEPRECATED_REGISTER_CONVERTIBLE (regnum));
 }
 
 void

@@ -70,7 +70,7 @@ i386nbsd_aout_supply_regset (const struct regset *regset,
   i387_supply_fsave (regcache, regnum, (char *) regs + tdep->sizeof_gregset);
 }
 
-const struct regset *
+static const struct regset *
 i386nbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 					const char *sect_name,
 					size_t sect_size)

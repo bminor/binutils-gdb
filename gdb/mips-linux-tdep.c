@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -778,10 +778,11 @@ mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 /* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c,
    and glibc_skip_solib_resolver in glibc-tdep.c.  The normal glibc
    implementation of this triggers at "fixup" from the same objfile as
-   "_dl_runtime_resolve"; MIPS/Linux can trigger at "__dl_runtime_resolve"
-   directly.  An unresolved PLT entry will point to _dl_runtime_resolve,
-   which will first call __dl_runtime_resolve, and then pass control to
-   the resolved function.  */
+   "_dl_runtime_resolve"; MIPS GNU/Linux can trigger at
+   "__dl_runtime_resolve" directly.  An unresolved PLT entry will
+   point to _dl_runtime_resolve, which will first call
+   __dl_runtime_resolve, and then pass control to the resolved
+   function.  */
 
 static CORE_ADDR
 mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -832,8 +833,8 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
 
-  /* This overrides the MIPS16 stub support from mips-tdep.  But no one uses
-     MIPS16 on Linux yet, so this isn't much of a loss.  */
+  /* This overrides the MIPS16 stub support from mips-tdep.  But no
+     one uses MIPS16 on GNU/Linux yet, so this isn't much of a loss.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, mips_linux_in_dynsym_stub);
 }
 

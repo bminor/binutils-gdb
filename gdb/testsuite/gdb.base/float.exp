@@ -63,6 +63,8 @@ if { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "f0.*f1.*f127.*" "info float"
 } elseif [istarget "m68k-*-*"] then {
     gdb_test "info float" "fp0.*fp1.*fp7.*" "info float"
+} elseif [istarget "s390*-*-*"] then {
+    gdb_test "info float" "fpc.*f0.*f1.*f15.*" "info float"
 } elseif [istarget "sh*-*"] then {
     # SH may or may not have an FPU
     gdb_test_multiple "info float" "info float" {

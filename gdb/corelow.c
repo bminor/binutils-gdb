@@ -1,7 +1,8 @@
 /* Core dump and executable file functions below target vector, for GDB.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -537,7 +538,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	  /* When the aux vector is stored in core file, BFD
 	     represents this with a fake section called ".auxv".  */
 
-	  sec_ptr section;
+	  struct bfd_section *section;
 	  bfd_size_type size;
 	  char *contents;
 

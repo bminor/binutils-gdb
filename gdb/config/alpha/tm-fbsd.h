@@ -1,5 +1,6 @@
 /* Target-dependent definitions for FreeBSD/Alpha.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,11 +23,5 @@
 #define TM_FBSD_H
 
 #include "alpha/tm-alpha.h"
-
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  The
-   default is right for FreeBSD.  */
-
-#undef START_INFERIOR_TRAPS_EXPECTED
 
 #endif /* TM_FBSD_H */

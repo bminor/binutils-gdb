@@ -32,9 +32,6 @@ struct gdbarch_info;
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
-/* Fallback for register convertible. */
-extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
-
 /* Implementation of extract return value that grubs around in the
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
@@ -45,9 +42,6 @@ extern gdbarch_store_return_value_ftype legacy_store_return_value;
 /* To return any structure or union type by value, store it at the
    address passed as an invisible first argument to the function.  */
 extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
-
-/* Frameless functions not identifable. */
-extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 
 /* Only structures, unions, and arrays are returned using the struct
    convention.  Note that arrays are never passed by value in the C

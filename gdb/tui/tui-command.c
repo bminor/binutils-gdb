@@ -30,6 +30,7 @@
 #include "tui/tui-io.h"
 
 #include "gdb_curses.h"
+#include "gdb_string.h"
 
 
 /*****************************************

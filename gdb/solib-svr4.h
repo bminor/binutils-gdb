@@ -1,5 +1,6 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
-   Copyright 2000
+
+   Copyright 2000, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -82,3 +83,8 @@ extern CORE_ADDR svr4_fetch_objfile_link_map (struct objfile *objfile);
    which is used to fetch link map offsets.  It will only be set
    by solib-legacy.c, if at all. */
 extern struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook)(void);
+
+/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
+   for ILP32 and LP64 SVR4 systems.  */
+extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
+extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);

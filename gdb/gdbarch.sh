@@ -527,7 +527,6 @@ F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
 v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-F::DEPRECATED_CALL_DUMMY_ADDRESS:CORE_ADDR:deprecated_call_dummy_address:void
 # DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted.
 v::DEPRECATED_CALL_DUMMY_START_OFFSET:CORE_ADDR:deprecated_call_dummy_start_offset
 # DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET can be deleted.
@@ -538,8 +537,6 @@ v::DEPRECATED_CALL_DUMMY_LENGTH:int:deprecated_call_dummy_length
 v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_SIZEOF_CALL_DUMMY_WORDS.
 v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
-# Implement PUSH_DUMMY_CALL, then delete DEPRECATED_CALL_DUMMY_STACK_ADJUST.
-V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust
 # DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
 # PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK.
 F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
@@ -547,9 +544,6 @@ F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_AD
 M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_PUSH_DUMMY_FRAME.
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-
-# Implement PUSH_DUMMY_CALL, then delete
-# DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED.
-v:2:DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED:int:deprecated_extra_stack_alignment_needed::::0:0::0:::
 
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
@@ -578,7 +572,7 @@ F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_b
 #
 # For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
 # For raw <-> cooked register conversions, replaced by pseudo registers.
-f:2:DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr:::deprecated_register_convertible_not::0
+F::DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr
 # For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
 # For raw <-> cooked register conversions, replaced by pseudo registers.
 f:2:DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL:void:deprecated_register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
@@ -651,7 +645,10 @@ v:2:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:::0
 m::REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v::FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:::0
-f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not::0
+# DEPRECATED_FRAMELESS_FUNCTION_INVOCATION is not needed.  The new
+# frame code works regardless of the type of frame - frameless,
+# stackless, or normal.
+F::DEPRECATED_FRAMELESS_FUNCTION_INVOCATION:int:deprecated_frameless_function_invocation:struct frame_info *fi:fi
 F:2:DEPRECATED_FRAME_CHAIN:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame
 F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe
 # DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
@@ -1244,8 +1241,8 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
    New code should use register_gdbarch_data(). */
 
 typedef void (gdbarch_swap_ftype) (void);
-extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
-#define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
+extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
+#define DEPRECATED_REGISTER_GDBARCH_SWAP(VAR) deprecated_register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
 
 
@@ -1294,7 +1291,6 @@ cat <<EOF
 #include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
-#include "symfile.h"		/* For entry_point_address.  */
 #include "gdb_obstack.h"
 
 /* Static function declarations */
@@ -1931,9 +1927,9 @@ struct gdbarch_swap_registry gdbarch_swap_registry =
 };
 
 void
-register_gdbarch_swap (void *data,
-		       unsigned long sizeof_data,
-		       gdbarch_swap_ftype *init)
+deprecated_register_gdbarch_swap (void *data,
+		                  unsigned long sizeof_data,
+		                  gdbarch_swap_ftype *init)
 {
   struct gdbarch_swap_registration **rego;
   for (rego = &gdbarch_swap_registry.registrations;

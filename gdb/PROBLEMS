@@ -51,3 +51,9 @@ gcc 3.x generates these multiple object code functions in order to
 implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
+
+gdb/1560: Control-C does not always interrupt GDB.
+When GDB is busy processing a command which takes a long time to
+complete, hitting Control-C does not have the expected effect.
+The command execution is not aborted, and the "QUIT" message confirming
+the abortion is displayed only after the command has been completed.

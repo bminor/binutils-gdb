@@ -1,3 +1,24 @@
+2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (powerpc_opcodes): Move mfmcsrr0 before mfdc_dat.
+
+2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
+
+2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+ 
+        * ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
+        mtivor32, mtivor33, mtivor34.
+
+2004-02-19  Aldy Hernandez  <aldyh@redhat.com>
+ 
+        * ppc-opc.c (powerpc_opcodes): Add mfmcar.
+
+2004-02-10  Petko Manolov  <petkan@nucleusys.com>
+
+	* arm-opc.h Maverick accumulator register opcode fixes.
+
 2004-02-13  Ben Elliston  <bje@wasabisystems.com>
 
 	* m32r-dis.c: Regenerate.

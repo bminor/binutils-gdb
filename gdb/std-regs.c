@@ -142,7 +142,7 @@ _initialize_frame_reg (void)
      can't be initialized using _initialize*() or gdbarch.  Due mainly
      to non-multi-arch targets, GDB initializes things piece meal and,
      as a consequence can leave these types NULL.  */
-  REGISTER_GDBARCH_SWAP (builtin_type_frame_reg);
+  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_frame_reg);
 
   /* Frame based $fp, $pc, $sp and $ps.  These only come into play
      when the target does not define its own version of these

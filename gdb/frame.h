@@ -222,13 +222,6 @@ extern void select_frame (struct frame_info *);
 extern struct frame_info *get_prev_frame (struct frame_info *);
 extern struct frame_info *get_next_frame (struct frame_info *);
 
-/* Given a FRAME, return the true next (more inner, younger) frame.
-   This one exposes the sentinel frame and, hence, never returns NULL.
-   It is here strictly to help old targets in their migration path to
-   the new frame code - the new code requires the NEXT, and not THIS
-   frame.  */
-extern struct frame_info *deprecated_get_next_frame_hack (struct frame_info *);
-
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
@@ -551,7 +544,7 @@ extern struct symbol *get_frame_function (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
-extern int frameless_look_for_prologue (struct frame_info *);
+extern int legacy_frameless_look_for_prologue (struct frame_info *);
 
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 

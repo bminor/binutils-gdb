@@ -1,7 +1,9 @@
 /* S390 native-dependent code for GDB, the GNU debugger.
-   Copyright 2001 Free Software Foundation, Inc
+   Copyright 2001, 2003 Free Software Foundation, Inc
+
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
@@ -22,101 +24,274 @@
 #include "defs.h"
 #include "tm.h"
 #include "regcache.h"
+#include "inferior.h"
+
+#include "s390-tdep.h"
+
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
-#include <asm/processor.h>
 #include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/user.h>
-#include <value.h>
 #include <sys/ucontext.h>
-#ifndef offsetof
-#define offsetof(type,member) ((size_t) &((type *)0)->member)
-#endif
 
 
-int
-s390_register_u_addr (int blockend, int regnum)
-{
-  int retval;
+/* Map registers to gregset/ptrace offsets.
+   These arrays are defined in s390-tdep.c.  */
 
-  if (regnum >= S390_GP0_REGNUM && regnum <= S390_GP_LAST_REGNUM)
-    retval = PT_GPR0 + ((regnum - S390_GP0_REGNUM) * S390_GPR_SIZE);
-  else if (regnum >= S390_PSWM_REGNUM && regnum <= S390_PC_REGNUM)
-    retval = PT_PSWMASK + ((regnum - S390_PSWM_REGNUM) * S390_PSW_MASK_SIZE);
-  else if (regnum == S390_FPC_REGNUM)
-    retval = PT_FPC;
-  else if (regnum >= S390_FP0_REGNUM && regnum <= S390_FPLAST_REGNUM)
-    retval =
-#if CONFIG_ARCH_S390X
-      PT_FPR0
+#ifdef __s390x__
+#define regmap_gregset s390x_regmap_gregset
 #else
-      PT_FPR0_HI
+#define regmap_gregset s390_regmap_gregset
 #endif
-      + ((regnum - S390_FP0_REGNUM) * S390_FPR_SIZE);
-  else if (regnum >= S390_FIRST_ACR && regnum <= S390_LAST_ACR)
-    retval = PT_ACR0 + ((regnum - S390_FIRST_ACR) * S390_ACR_SIZE);
-  else if (regnum >= (S390_FIRST_CR + 9) && regnum <= (S390_FIRST_CR + 11))
-    retval = PT_CR_9 + ((regnum - (S390_FIRST_CR + 9)) * S390_CR_SIZE);
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-                      "s390_register_u_addr invalid regnum regnum=%d",
-                      regnum);
-      retval = 0;
-    }
-  return retval + blockend;
+
+#define regmap_fpregset s390_regmap_fpregset
+
+/* When debugging a 32-bit executable running under a 64-bit kernel,
+   we have to fix up the 64-bit registers we get from the kernel
+   to make them look like 32-bit registers.  */
+#ifdef __s390x__
+#define SUBOFF(i) \
+	((TARGET_PTR_BIT == 32 \
+	  && ((i) == S390_PSWA_REGNUM \
+	      || ((i) >= S390_R0_REGNUM && (i) <= S390_R15_REGNUM)))? 4 : 0)
+#else
+#define SUBOFF(i) 0
+#endif
+
+
+/* Fill GDB's register array with the general-purpose register values
+   in *REGP.  */
+void
+supply_gregset (gregset_t *regp)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_gregset[i] != -1)
+      regcache_raw_supply (current_regcache, i, 
+			   (char *)regp + regmap_gregset[i] + SUBOFF (i));
 }
 
-/* watch_areas are required if you put 2 or more watchpoints on the same 
-   address or overlapping areas gdb will call us to delete the watchpoint 
-   more than once when we try to delete them.
-   attempted reference counting to reduce the number of areas unfortunately
-   they didn't shrink when areas had to be split overlapping occurs. */
-struct watch_area;
-typedef struct watch_area watch_area;
+/* Fill register REGNO (if it is a general-purpose register) in
+   *REGP with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+void
+fill_gregset (gregset_t *regp, int regno)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_gregset[i] != -1)
+      if (regno == -1 || regno == i)
+	regcache_raw_collect (current_regcache, i, 
+			      (char *)regp + regmap_gregset[i] + SUBOFF (i));
+}
+
+/* Fill GDB's register array with the floating-point register values
+   in *REGP.  */
+void
+supply_fpregset (fpregset_t *regp)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_fpregset[i] != -1)
+      regcache_raw_supply (current_regcache, i,
+			   ((char *)regp) + regmap_fpregset[i]);
+}
+
+/* Fill register REGNO (if it is a general-purpose register) in
+   *REGP with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+void
+fill_fpregset (fpregset_t *regp, int regno)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_fpregset[i] != -1)
+      if (regno == -1 || regno == i)
+        regcache_raw_collect (current_regcache, i, 
+			      ((char *)regp) + regmap_fpregset[i]);
+}
+
+/* Find the TID for the current inferior thread to use with ptrace.  */
+static int
+s390_inferior_tid (void)
+{
+  /* GNU/Linux LWP ID's are process ID's.  */
+  int tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  return tid;
+}
+
+/* Fetch all general-purpose registers from process/thread TID and
+   store their values in GDB's register cache.  */
+static void
+fetch_regs (int tid)
+{
+  gregset_t regs;
+  ptrace_area parea;
+
+  parea.len = sizeof (regs);
+  parea.process_addr = (addr_t) &regs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, psw);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  supply_gregset (&regs);
+}
+
+/* Store all valid general-purpose registers in GDB's register cache
+   into the process/thread specified by TID.  */
+static void
+store_regs (int tid, int regnum)
+{
+  gregset_t regs;
+  ptrace_area parea;
+
+  parea.len = sizeof (regs);
+  parea.process_addr = (addr_t) &regs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, psw);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  fill_gregset (&regs, regnum);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't write registers");
+}
+
+/* Fetch all floating-point registers from process/thread TID and store
+   their values in GDB's register cache.  */
+static void
+fetch_fpregs (int tid)
+{
+  fpregset_t fpregs;
+  ptrace_area parea;
+
+  parea.len = sizeof (fpregs);
+  parea.process_addr = (addr_t) &fpregs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  supply_fpregset (&fpregs);
+}
+
+/* Store all valid floating-point registers in GDB's register cache
+   into the process/thread specified by TID.  */
+static void
+store_fpregs (int tid, int regnum)
+{
+  fpregset_t fpregs;
+  ptrace_area parea;
+
+  parea.len = sizeof (fpregs);
+  parea.process_addr = (addr_t) &fpregs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  fill_fpregset (&fpregs, regnum);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't write floating point status");
+}
+
+/* Fetch register REGNUM from the child process.  If REGNUM is -1, do
+   this for all registers.  */
+void
+fetch_inferior_registers (int regnum)
+{
+  int tid = s390_inferior_tid ();
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_gregset[regnum] != -1))
+    fetch_regs (tid);
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
+    fetch_fpregs (tid);
+}
+
+/* Store register REGNUM back into the child process.  If REGNUM is
+   -1, do this for all registers.  */
+void
+store_inferior_registers (int regnum)
+{
+  int tid = s390_inferior_tid ();
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_gregset[regnum] != -1))
+    store_regs (tid, regnum);
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
+    store_fpregs (tid, regnum);
+}
+
+
+/* Hardware-assisted watchpoint handling.  */
+
+/* We maintain a list of all currently active watchpoints in order
+   to properly handle watchpoint removal.
+
+   The only thing we actually need is the total address space area
+   spanned by the watchpoints.  */
+
 struct watch_area
 {
-  watch_area *next;
+  struct watch_area *next;
   CORE_ADDR lo_addr;
   CORE_ADDR hi_addr;
 };
 
-static watch_area *watch_base = NULL;
-int watch_area_cnt = 0;
-static CORE_ADDR watch_lo_addr = 0, watch_hi_addr = 0;
+static struct watch_area *watch_base = NULL;
 
-
-
-CORE_ADDR
-s390_stopped_by_watchpoint (int pid)
+int
+s390_stopped_by_watchpoint (void)
 {
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
 
+  /* Speed up common case.  */
+  if (!watch_base)
+    return 0;
+
   parea.len = sizeof (per_lowcore);
   parea.process_addr = (addr_t) & per_lowcore;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info.lowcore);
-  ptrace (PTRACE_PEEKUSR_AREA, pid, &parea);
-  return ((per_lowcore.perc_storage_alteration == 1) &&
-	  (per_lowcore.perc_store_real_address == 0));
+  if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea) < 0)
+    perror_with_name ("Couldn't retrieve watchpoint status");
+
+  return per_lowcore.perc_storage_alteration == 1
+	 && per_lowcore.perc_store_real_address == 0;
 }
 
-
-void
-s390_fix_watch_points (int pid)
+static void
+s390_fix_watch_points (void)
 {
+  int tid = s390_inferior_tid ();
+
   per_struct per_info;
   ptrace_area parea;
 
+  CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
+  struct watch_area *area;
+
+  for (area = watch_base; area; area = area->next)
+    {
+      watch_lo_addr = min (watch_lo_addr, area->lo_addr);
+      watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+    }
+
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
-  parea.kernel_addr = PT_CR_9;
-  ptrace (PTRACE_PEEKUSR_AREA, pid, &parea);
-  /* The kernel automatically sets the psw for per depending */
-  /* on whether the per control registers are set for event recording */
-  /* & sets cr9 & cr10 appropriately also */
-  if (watch_area_cnt)
+  parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea) < 0)
+    perror_with_name ("Couldn't retrieve watchpoint status");
+
+  if (watch_base)
     {
       per_info.control_regs.bits.em_storage_alteration = 1;
       per_info.control_regs.bits.storage_alt_space_ctl = 1;
@@ -128,103 +303,53 @@ s390_fix_watch_points (int pid)
     }
   per_info.starting_addr = watch_lo_addr;
   per_info.ending_addr = watch_hi_addr;
-  ptrace (PTRACE_POKEUSR_AREA, pid, &parea);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea) < 0)
+    perror_with_name ("Couldn't modify watchpoint status");
 }
 
 int
-s390_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
+s390_insert_watchpoint (CORE_ADDR addr, int len)
 {
-  CORE_ADDR hi_addr = addr + len - 1;
-  watch_area *newarea = (watch_area *) xmalloc (sizeof (watch_area));
+  struct watch_area *area = xmalloc (sizeof (struct watch_area));
+  if (!area)
+    return -1; 
 
+  area->lo_addr = addr;
+  area->hi_addr = addr + len - 1;
+ 
+  area->next = watch_base;
+  watch_base = area;
 
-  if (newarea)
-    {
-      newarea->next = watch_base;
-      watch_base = newarea;
-      watch_lo_addr = min (watch_lo_addr, addr);
-      watch_hi_addr = max (watch_hi_addr, hi_addr);
-      newarea->lo_addr = addr;
-      newarea->hi_addr = hi_addr;
-      if (watch_area_cnt == 0)
-	{
-	  watch_lo_addr = newarea->lo_addr;
-	  watch_hi_addr = newarea->hi_addr;
-	}
-      watch_area_cnt++;
-      s390_fix_watch_points (pid);
-    }
-  return newarea ? 0 : -1;
+  s390_fix_watch_points ();
+  return 0;
 }
 
-
 int
-s390_remove_watchpoint (int pid, CORE_ADDR addr, int len)
+s390_remove_watchpoint (CORE_ADDR addr, int len)
 {
-  watch_area *curr = watch_base, *prev, *matchCurr;
-  CORE_ADDR hi_addr = addr + len - 1;
-  CORE_ADDR watch_second_lo_addr = 0xffffffffUL, watch_second_hi_addr = 0;
-  int lo_addr_ref_cnt, hi_addr_ref_cnt;
-  prev = matchCurr = NULL;
-  lo_addr_ref_cnt = (addr == watch_lo_addr);
-  hi_addr_ref_cnt = (addr == watch_hi_addr);
-  while (curr)
-    {
-      if (matchCurr == NULL)
-	{
-	  if (curr->lo_addr == addr && curr->hi_addr == hi_addr)
-	    {
-	      matchCurr = curr;
-	      if (prev)
-		prev->next = curr->next;
-	      else
-		watch_base = curr->next;
-	    }
-	  prev = curr;
-	}
-      if (lo_addr_ref_cnt)
-	{
-	  if (watch_lo_addr == curr->lo_addr)
-	    lo_addr_ref_cnt++;
-	  if (curr->lo_addr > watch_lo_addr &&
-	      curr->lo_addr < watch_second_lo_addr)
-	    watch_second_lo_addr = curr->lo_addr;
-	}
-      if (hi_addr_ref_cnt)
-	{
-	  if (watch_hi_addr == curr->hi_addr)
-	    hi_addr_ref_cnt++;
-	  if (curr->hi_addr < watch_hi_addr &&
-	      curr->hi_addr > watch_second_hi_addr)
-	    watch_second_hi_addr = curr->hi_addr;
-	}
-      curr = curr->next;
-    }
-  if (matchCurr)
-    {
-      xfree (matchCurr);
-      watch_area_cnt--;
-      if (watch_area_cnt)
-	{
-	  if (lo_addr_ref_cnt == 2)
-	    watch_lo_addr = watch_second_lo_addr;
-	  if (hi_addr_ref_cnt == 2)
-	    watch_hi_addr = watch_second_hi_addr;
-	}
-      else
-	{
-	  watch_lo_addr = watch_hi_addr = 0;
-	}
-      s390_fix_watch_points (pid);
-      return 0;
-    }
-  else
+  struct watch_area *area, **parea;
+
+  for (parea = &watch_base; *parea; parea = &(*parea)->next)
+    if ((*parea)->lo_addr == addr
+	&& (*parea)->hi_addr == addr + len - 1)
+      break;
+
+  if (!*parea)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "Attempt to remove nonexistent watchpoint in s390_remove_watchpoint\n");
+			  "Attempt to remove nonexistent watchpoint.\n");
       return -1;
     }
+
+  area = *parea;
+  *parea = area->next;
+  xfree (area);
+
+  s390_fix_watch_points ();
+  return 0;
 }
+
 
 int
 kernel_u_size (void)
@@ -232,127 +357,3 @@ kernel_u_size (void)
   return sizeof (struct user);
 }
 
-
-#if  (defined (S390_FP0_REGNUM) && defined (HAVE_FPREGSET_T) && defined(HAVE_SYS_PROCFS_H) && defined (HAVE_GREGSET_T))
-void
-supply_gregset (gregset_t * gregsetp)
-{
-  int regi;
-  greg_t *gregp = (greg_t *) gregsetp;
-
-  supply_register (S390_PSWM_REGNUM, (char *) &gregp[S390_PSWM_REGNUM]);
-  supply_register (S390_PC_REGNUM, (char *) &gregp[S390_PC_REGNUM]);
-  for (regi = 0; regi < S390_NUM_GPRS; regi++)
-    supply_register (S390_GP0_REGNUM + regi,
-		     (char *) &gregp[S390_GP0_REGNUM + regi]);
-
-#if defined (CONFIG_ARCH_S390X)
-  /* On the s390x, each element of gregset_t is 8 bytes long, but
-     each access register is still only 32 bits long.  So they're
-     packed two per element.  It's apparently traditional that
-     gregset_t must be an array, so when the registers it provides
-     have different sizes, something has to get strange
-     somewhere.  */
-  {
-    unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-
-    for (regi = 0; regi < S390_NUM_ACRS; regi++)
-      supply_register (S390_FIRST_ACR + regi, (char *) &acrs[regi]);
-  }
-#else
-  for (regi = 0; regi < S390_NUM_ACRS; regi++)
-    supply_register (S390_FIRST_ACR + regi,
-                     (char *) &gregp[S390_FIRST_ACR + regi]);
-#endif
-
-  /* unfortunately this isn't in gregsetp */
-  for (regi = 0; regi < S390_NUM_CRS; regi++)
-    supply_register (S390_FIRST_CR + regi, NULL);
-}
-
-
-void
-supply_fpregset (fpregset_t * fpregsetp)
-{
-  int regi;
-
-  supply_register (S390_FPC_REGNUM, (char *) &fpregsetp->fpc);
-  for (regi = 0; regi < S390_NUM_FPRS; regi++)
-    supply_register (S390_FP0_REGNUM + regi, (char *) &fpregsetp->fprs[regi]);
-
-}
-
-void
-fill_gregset (gregset_t * gregsetp, int regno)
-{
-  int regi;
-  greg_t *gregp = (greg_t *) gregsetp;
-
-  if (regno < 0) 
-    {
-      regcache_collect (S390_PSWM_REGNUM, &gregp[S390_PSWM_REGNUM]);
-      regcache_collect (S390_PC_REGNUM, &gregp[S390_PC_REGNUM]);
-      for (regi = 0; regi < S390_NUM_GPRS; regi++)
-        regcache_collect (S390_GP0_REGNUM + regi,
-			  &gregp[S390_GP0_REGNUM + regi]);
-#if defined (CONFIG_ARCH_S390X)
-      /* See the comments about the access registers in
-         supply_gregset, above.  */
-      {
-        unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-        
-        for (regi = 0; regi < S390_NUM_ACRS; regi++)
-          regcache_collect (S390_FIRST_ACR + regi, &acrs[regi]);
-      }
-#else
-      for (regi = 0; regi < S390_NUM_ACRS; regi++)
-        regcache_collect (S390_FIRST_ACR + regi,
-			  &gregp[S390_FIRST_ACR + regi]);
-#endif
-    }
-  else if (regno >= S390_PSWM_REGNUM && regno < S390_FIRST_ACR)
-    regcache_collect (regno, &gregp[regno]);
-  else if (regno >= S390_FIRST_ACR && regno <= S390_LAST_ACR)
-    {
-#if defined (CONFIG_ARCH_S390X)
-      /* See the comments about the access registers in
-         supply_gregset, above.  */
-      unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-        
-      regcache_collect (regno, &acrs[regno - S390_FIRST_ACR]);
-#else
-      regcache_collect (regno, &gregp[regno]);
-#endif
-    }
-}
-
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), update the register specified by REGNO from gdb's idea
-   of the current floating point register set.  If REGNO is -1, update
-   them all. */
-
-void
-fill_fpregset (fpregset_t * fpregsetp, int regno)
-{
-  int regi;
-
-  if (regno < 0) 
-    {
-      regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
-      for (regi = 0; regi < S390_NUM_FPRS; regi++)
-        regcache_collect (S390_FP0_REGNUM + regi, &fpregsetp->fprs[regi]);
-    }
-  else if (regno == S390_FPC_REGNUM)
-    regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
-  else if (regno >= S390_FP0_REGNUM && regno <= S390_FPLAST_REGNUM)
-    regcache_collect (regno, &fpregsetp->fprs[regno - S390_FP0_REGNUM]);
-}
-
-
-#else
-#error "There are a few possibilities here"
-#error "1) You aren't compiling for linux & don't need a core dumps to work."
-#error "2) The header files sys/elf.h sys/user.h sys/ptrace.h & sys/procfs.h"
-#error "libc files are inconsistent with linux/include/asm-s390/"
-#error "3) you didn't do a completely clean build & delete config.cache."
-#endif

@@ -133,7 +133,7 @@ lookup_objc_class (char *classname)
 							   1, &classval));
 }
 
-int
+CORE_ADDR
 lookup_child_selector (char *selname)
 {
   struct value * function, *selstring;
@@ -754,7 +754,7 @@ end_msglist(void)
   int val = msglist_len;
   struct selname *sel = selname_chain;
   char *p = msglist_sel;
-  int selid;
+  CORE_ADDR selid;
 
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;

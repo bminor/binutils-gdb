@@ -1,7 +1,8 @@
 /* Parameters for target execution on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
+
    Contributed by IBM Corporation.
 
    This file is part of GDB.
@@ -41,11 +42,6 @@ extern int rs6000_in_solib_return_trampoline (CORE_ADDR, char *);
 
 #define	SKIP_TRAMPOLINE_CODE(pc)	rs6000_skip_trampoline_code (pc)
 extern CORE_ADDR rs6000_skip_trampoline_code (CORE_ADDR);
-
-/* Number of trap signals we need to skip over, once the inferior process
-   starts running. */
-
-#define	START_INFERIOR_TRAPS_EXPECTED	2
 
 /* AIX has a couple of strange returns from wait().  */
 
