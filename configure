@@ -141,7 +141,7 @@ do
 		;;
 # These options have mandatory values.  Since we didn't find an = sign,
 # the value must be in the next argument
-	--b* | --cache* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-*)
+	--bu* | --cache* | --ex* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm* | --x-* | --bi* | --sb* | --li* | --da* | --sy* | --sh* | --lo* | --in* | --ol* | --ma*)
 		optarg=$1
 		shift
 		arguments="$arguments $option=$optarg"
@@ -157,7 +157,7 @@ do
 # Now, process the options
 	case $option in
 
-	--build* | --b*)
+	--build* | --bu*)
 		case "$build_alias" in
 		"") build_alias=$optarg ;;
 		*) echo '***' Can only configure for one build machine at a time.  1>&2
@@ -284,6 +284,9 @@ do
 		withoptions="$withoptions --with-x"
 		;;
 	--x-i* | --x-l*) other_options="$other_options $orig_option"
+		;;
+	--bi* | --sb* | --li* | --da* | --sy* | --sh* | --lo* | --in* | --ol* | --ma*)
+		# These options were added to autoconf for emacs.
 		;;
 	--*)
 		echo "configure: Unrecognized option: \"$orig_option\"; use --help for usage." >&2
@@ -796,6 +799,18 @@ fi
 export CC
 export CXX
 
+case "$host" in
+	*go32*)
+	    enable_gdbtk=no ;;
+esac
+
+# Determine whether gdb needs tk/tcl or not.
+if [ "$enable_gdbtk" != "no" ]; then
+	GDB_TK="all-tcl all-tk"
+else
+	GDB_TK=""
+fi
+
 for subdir in . ${subdirs} ; do
 
     # ${subdir} is relative path from . to the directory we're currently
@@ -1060,6 +1075,7 @@ EOF
 			s%^CXX[ 	]*=.*$%CXX = ${CXX}%
 			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
+		    -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" \
                     -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \

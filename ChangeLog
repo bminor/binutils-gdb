@@ -1,3 +1,9 @@
+Sat Jan  6 07:23:33 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* Makefile.in (all-gdb): Depend on $(GDB_TK).
+	* configure (GDB_TK): Set GDB_TK to either "all-tcl all-tk" or
+	nothing depending on whether gdbtk is being built.
+
 Wed Jan  3 17:54:41 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (newlib.tar.gz): Delete building of newlib's info files.
