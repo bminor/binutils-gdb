@@ -1574,7 +1574,8 @@ elf_link_add_object_symbols (abfd, info)
 			(hi->elf_link_hash_flags
 			 & (ELF_LINK_HASH_REF_DYNAMIC
 			    | ELF_LINK_HASH_REF_REGULAR
-			    | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+			    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+			    | ELF_LINK_NON_GOT_REF));
 
 		      /* Copy over the global and procedure linkage table
 			 offset entries.  These may have been already set
@@ -1683,7 +1684,8 @@ elf_link_add_object_symbols (abfd, info)
 			    (hi->elf_link_hash_flags
 			     & (ELF_LINK_HASH_REF_DYNAMIC
 				| ELF_LINK_HASH_REF_REGULAR
-				| ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+				| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+				| ELF_LINK_NON_GOT_REF));
 
 			  /* Copy over the global and procedure linkage
                              table offset entries.  These may have been
