@@ -263,6 +263,7 @@ osfsolib.c
 parse.c
 parser-defs.h
 partial-stab.h
+ppc-bug.c
 printcmd.c
 procfs.c
 ptx4-nat.c
