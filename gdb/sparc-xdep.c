@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	STACK_REGS	2
 #define	FP_REGS		4
 
-int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
+/* The variable deferred_stores itself is defined in sparc-tdep.c.  */
 
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,

@@ -32,13 +32,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #else  /* not emacs */
 
-#ifdef USG
-#ifndef BSTRING
 #define bcopy(s,d,n)	memcpy((d),(s),(n))
 #define bcmp(s1,s2,n)	memcmp((s1),(s2),(n))
 #define bzero(s,n)	memset((s),0,(n))
-#endif
-#endif
 
 /* Make alloca work the best possible way.  */
 #ifdef __GNUC__

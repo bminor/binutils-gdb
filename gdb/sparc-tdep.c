@@ -35,6 +35,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* From infrun.c */
 extern int stop_after_trap;
 
+/* We don't store all registers immediately when requested, since they
+   get sent over in large chunks anyway.  Instead, we accumulate most
+   of the changes and send them over once.  "deferred_stores" keeps
+   track of which sets of registers we have locally-changed copies of,
+   so we only need send the groups that have changed.  */
+
+int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
+
 typedef enum
 {
   Error, not_branch, bicc, bicca, ba, baa, ticc, ta
@@ -227,7 +235,7 @@ static int save_insn_opcodes[] = {
 /* Neither do_save_insn or do_restore_insn save stack configuration
    (current_frame, etc),
    since the stack is in an indeterminate state through the call to
-   each of them.  That responsibility of the routine which calls them.  */
+   each of them.  That is the responsibility of the routine which calls them.  */
 
 static void
 do_save_insn (size)
@@ -464,7 +472,7 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
   if (!fid)
     fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
 
-  (void) memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
+  memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
 
   /* Old test.
   if (fi->pc >= frame - CALL_DUMMY_LENGTH - 0x140
@@ -692,13 +700,13 @@ void
 supply_gregset (gregsetp)
 prgregset_t *gregsetp;
 {
-  register int regno;
+  register int regi;
   register prgreg_t *regp = (prgreg_t *) gregsetp;
 
   /* GDB register numbers for Gn, On, Ln, In all match /proc reg numbers.  */
-  for (regno = G0_REGNUM ; regno <= I7_REGNUM ; regno++)
+  for (regi = G0_REGNUM ; regi <= I7_REGNUM ; regi++)
     {
-      supply_register (regno, (char *) (regp + regno));
+      supply_register (regi, (char *) (regp + regi));
     }
 
   /* These require a bit more care.  */
@@ -721,7 +729,7 @@ int regno;
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  *(regp + regno) = *(int *) &registers[REGISTER_BYTE (regi)];
+	  *(regp + regi) = *(int *) &registers[REGISTER_BYTE (regi)];
 	}
     }
   if ((regno == -1) || (regno == PS_REGNUM))
@@ -784,7 +792,7 @@ int regno;
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
 	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi-FP0_REGNUM];
-	  bcopy (from, to, REGISTER_RAW_SIZE (regno));
+	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
   if ((regno == -1) || (regno == FPS_REGNUM))

@@ -30,7 +30,7 @@ domain program.
 
 extern  char  **environ;
 
-char  *index();
+char  *strchr();
 char  *malloc();
 
 /****************************************************************/
@@ -74,7 +74,7 @@ putenv( entry )
 
   /*  Find the length of the "NAME="  */
 
-  temp = index(entry,'=');
+  temp = strchr(entry,'=');
   if ( temp == 0 )
     return( -1 );
 
