@@ -1,3 +1,9 @@
+2004-07-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Add testcase for PR backtrace/1718.
+	* gdb.arch/i386-prologue.c (gdb1718): New prototype and function.
+	(main): Call new function.
+
 2004-07-22  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Test for PR exp/1715.

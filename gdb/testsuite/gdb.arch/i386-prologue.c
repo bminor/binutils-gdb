@@ -26,6 +26,7 @@
 #endif
 
 void gdb1253 (void);
+void gdb1718 (void);
 void gdb1338 (void);
 void jump_at_beginning (void);
 
@@ -33,6 +34,7 @@ int
 main (void)
 {
   gdb1253 ();
+  gdb1718 ();
   gdb1338 ();
   jump_at_beginning ();
   return 0;
@@ -47,6 +49,21 @@ asm(".text\n"
     "    xorl  %ecx, %ecx\n"
     "    movl  %esp, %ebp\n"
     "    pushl %edi\n"
+    "    int   $0x03\n"
+    "    leave\n"
+    "    ret\n");
+
+/* Relevant part of the prologue from backtrace/1718.  */
+
+asm(".text\n"
+    "    .align 8\n"
+    SYMBOL (gdb1718) ":\n"
+    "    pushl %ebp\n"
+    "    movl  $0x11111111, %eax\n"
+    "    movl  %esp, %ebp\n"
+    "    pushl %esi\n"
+    "    movl  $0x22222222, %esi\n"
+    "    pushl %ebx\n"
     "    int   $0x03\n"
     "    leave\n"
     "    ret\n");
