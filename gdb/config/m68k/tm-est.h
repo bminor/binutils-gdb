@@ -28,6 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* We have more complex, useful breakpoints on the target.  */
 #define	DECR_PC_AFTER_BREAK	0
 
+#define NUM_REGS 18
+
 #include "m68k/tm-m68k.h"
 
 #undef FRAME_CHAIN

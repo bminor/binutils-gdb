@@ -56,57 +56,84 @@ struct rom_cmd_data {
    ignored if TERM is NULL.
 */
 
-struct cmd_resp {
-  char *cmd;			/* Command to send */
+struct memrw_cmd
+{
+  char *cmdb;			/* Command to send for byte read/write */
+  char *cmdw;			/* Command for word (16 bit) read/write */
+  char *cmdl;			/* Command for long (32 bit) read/write */
+  char *cmdll;			/* Command for long long (64 bit) read/write */
   char *resp_delim;		/* String just prior to the desired value */
   char *term;			/* Terminating string to search for */
   char *term_cmd;		/* String to get out of sub-mode (if necessary) */
 };
 
-struct monitor_ops {
-  int	type;			/* 1 is ascii, 0 is GDB remote protocol */
-  char  *init;			/* initialize to the monitor */
-  char	*execute;		/* execute or usually GO command */
-  char	*resume;		/* continue command */
-  char	*step;			/* single step */
-  char	*set_break;		/* set a breakpoint */
-  char	*clr_break;		/* clear a breakpoint */
-  int	clr_type;		/* number or address for clearing */
-  struct cmd_resp setmem;	/* set memory to a value */
-  struct cmd_resp getmem;	/* display memory */
-  struct cmd_resp setreg;	/* set a register */
-  struct cmd_resp getreg;	/* get a register */
+struct regrw_cmd
+{
+  char *cmd;			/* Command to send for reg read/write */
+  char *resp_delim;		/* String just prior to the desired value */
+  char *term;			/* Terminating string to search for */
+  char *term_cmd;		/* String to get out of sub-mode (if necessary) */
+};
+
+struct monitor_ops
+{
+  int flags;			/* See below */
+  char **init;			/* List of init commands.  NULL terminated. */
+  char *cont;			/* continue command */
+  char *step;			/* single step */
+  char *set_break;		/* set a breakpoint */
+  char *clr_break;		/* clear a breakpoint */
+  char *clr_all_break;		/* Clear all breakpoints */
+  char *fill;			/* Memory fill cmd (addr len val) */
+  struct memrw_cmd setmem;	/* set memory to a value */
+  struct memrw_cmd getmem;	/* display memory */
+  struct regrw_cmd setreg;	/* set a register */
+  struct regrw_cmd getreg;	/* get a register */
 				/* Some commands can dump a bunch of registers
 				   at once.  This comes as a set of REG=VAL
 				   pairs.  This should be called for each pair
 				   of registers that we can parse to supply
 				   GDB with the value of a register.  */
+  char *dump_registers;		/* Command to dump all regs at once */
   char *register_pattern;	/* Pattern that picks out register from reg dump */
-  void	(*supply_register) PARAMS ((char *name, int namelen, char *val, int vallen));
-  char	*load;			/* load command */
-  char	*prompt;		/* monitor command prompt */
-  char	*cmd_delim;		/* end-of-command delimitor */
-  char	*cmd_end;		/* optional command terminator */
+  void (*supply_register) PARAMS ((char *name, int namelen, char *val, int vallen));
+  char *load;			/* load command */
+  char *loadresp;		/* Response to load command */
+  char *prompt;			/* monitor command prompt */
+  char *cmd_delim;		/* end-of-command delimitor */
+  char *cmd_end;		/* optional command terminator */
   struct target_ops *target;	/* target operations */
-  char	**loadtypes;		/* the load types that are supported */
-  char	**loadprotos;		/* the load protocols that are supported */
-  char	*baudrates;		/* supported baud rates */
-  int	stopbits;		/* number of stop bits */
-  char  **regnames;		/* array of register names in ascii */
+  char **loadtypes;		/* the load types that are supported */
+  char **loadprotos;		/* the load protocols that are supported */
+  char *baudrates;		/* supported baud rates */
+  int stopbits;			/* number of stop bits */
+  char **regnames;		/* array of register names in ascii */
+  int magic;			/* Check value */
 };
+
+#define MONITOR_OPS_MAGIC 600925
+
+/* Flag defintions */
+
+#define MO_CLR_BREAK_USES_ADDR 0x1 /* If set, then clear breakpoint command
+				      uses address, otherwise it uses an index
+				      returned by the monitor.  */
+#define MO_FILL_USES_ADDR 0x2	/* If set, then memory fill command uses
+				   STARTADDR, ENDADDR+1, VALUE as args, else it
+				   uses STARTADDR, LENGTH, VALUE as args. */
+#define MO_NEED_REGDUMP_AFTER_CONT 0x4 /* If set, then monitor doesn't auto-
+					  matically supply register dump when
+					  coming back after a continue.  */
 
 extern struct monitor_ops        *current_monitor;
 
-#define PROTO_TYPE		(current_monitor->type)
 #define LOADTYPES		(current_monitor->loadtypes)
 #define LOADPROTOS		(current_monitor->loadprotos)
 #define INIT_CMD 		(current_monitor->init)
-#define GO_CMD 			(current_monitor->execute)
-#define CONT_CMD		(current_monitor->resume)
+#define CONT_CMD		(current_monitor->cont)
 #define STEP_CMD		(current_monitor->step)
 #define SET_BREAK_CMD		(current_monitor->set_break)
 #define CLR_BREAK_CMD		(current_monitor->clr_break)
-#define CLR_BREAK_ADDR		(current_monitor->clr_type)
 #define SET_MEM			(current_monitor->setmem)
 #define GET_MEM			(current_monitor->getmem)
 #define LOAD_CMD		(current_monitor->load)
@@ -127,7 +154,6 @@ extern struct monitor_ops        *current_monitor;
 #define push_monitor(x)		current_monitor = x;
 
 #define SREC_SIZE 160
-#define GDBPROTO		((current_monitor->type) ? 0: 1)
 
 /*
  * FIXME: These are to temporarily maintain compatability with the

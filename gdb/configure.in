@@ -269,6 +269,7 @@ m68*-tandem-*)		gdb_target=st2000 ;;
 m68*-rom68k-*)          gdb_target=monitor ;;
 m68*-*bug-*)            gdb_target=monitor ;;
 m68*-monitor-*)         gdb_target=monitor ;;
+m68*-est-*)		gdb_target=est ;;
 m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
@@ -279,7 +280,6 @@ m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
-m68*-*-est*)		gdb_target=est ;;
 
 m88*-harris-cxux*)	gdb_target=cxux ;;
 m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
