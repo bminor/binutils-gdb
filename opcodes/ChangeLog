@@ -1,3 +1,14 @@
+2001-08-27  David Edelsohn  <dje@watson.ibm.com>
+	    Torbjorn Granlund  <tege@swox.com>
+
+	* ppc-opc.c (DS): Add PPC_OPERAND_DS flag.
+	(LS): Define.
+	(insert_ds): Complain if not a multiple of 4.
+	(XSYNC): Define.
+	(XSYNC_MASK): Define.
+	(powerpc_opcodes): Add "slbmte", "lwsync", "ptesync", "slbmfev",
+	"slbmfee".  Modify "sync" to use XSYNC_MASK and LS.
+
 2001-08-26  Andreas Jaeger  <aj@suse.de>
 
 	* h8500-opc.h: Add default initializers to h8500_table to shut up

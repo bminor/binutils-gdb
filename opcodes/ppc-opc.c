@@ -1,5 +1,5 @@
 /* ppc-opc.c -- PowerPC opcode list
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
@@ -198,7 +198,8 @@ const struct powerpc_operand powerpc_operands[] =
   /* The DS field in a DS form instruction.  This is like D, but the
      lower two bits are forced to zero.  */
 #define DS D + 1
-  { 16, 0, insert_ds, extract_ds, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_ds, extract_ds,
+      PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
 
   /* The E field in a wrteei instruction.  */
 #define E DS + 1
@@ -260,8 +261,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define LIA LI + 1
   { 26, 0, insert_li, extract_li, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
+  /* The LS field in an X (sync) form instruction.  */
+#define LS LIA + 1
+  { 2, 21, 0, 0, PPC_OPERAND_OPTIONAL },
+
   /* The MB field in an M form instruction.  */
-#define MB LIA + 1
+#define MB LS + 1
 #define MB_MASK (0x1f << 6)
   { 5, 6, 0, 0, 0 },
 
@@ -401,23 +406,23 @@ const struct powerpc_operand powerpc_operands[] =
   /* The VA field in a VA, VX or VXR form instruction. */
 #define VA UI + 1
 #define VA_MASK	(0x1f << 16)
-  {5, 16, 0, 0, PPC_OPERAND_VR},
+  { 5, 16, 0, 0, PPC_OPERAND_VR },
 
   /* The VB field in a VA, VX or VXR form instruction. */
 #define VB VA + 1
 #define VB_MASK (0x1f << 11)
-  {5, 11, 0, 0, PPC_OPERAND_VR}, 
+  { 5, 11, 0, 0, PPC_OPERAND_VR },
 
   /* The VC field in a VA form instruction. */
 #define VC VB + 1
 #define VC_MASK (0x1f << 6)
-  {5, 6, 0, 0, PPC_OPERAND_VR},
+  { 5, 6, 0, 0, PPC_OPERAND_VR },
 
   /* The VD or VS field in a VA, VX, VXR or X form instruction. */
 #define VD VC + 1
 #define VS VD
 #define VD_MASK (0x1f << 21)
-  {5, 21, 0, 0, PPC_OPERAND_VR},
+  { 5, 21, 0, 0, PPC_OPERAND_VR },
 
   /* The SIMM field in a VX form instruction. */
 #define SIMM VD + 1
@@ -679,6 +684,8 @@ insert_ds (insn, value, errmsg)
      long value;
      const char **errmsg ATTRIBUTE_UNUSED;
 {
+  if ((value & 3) != 0 && errmsg != NULL)
+    *errmsg = _("offset not a multiple of 4");
   return insn | (value & 0xfffc);
 }
 
@@ -1198,6 +1205,12 @@ extract_tbr (insn, invalid)
 /* An X form tlb instruction with the SH field specified.  */
 #define XTLB(op, xop, sh) (X ((op), (xop)) | ((((unsigned long)(sh)) & 0x1f) << 11))
 #define XTLB_MASK (X_MASK | SH_MASK)
+
+/* An X form sync instruction.  */
+#define XSYNC(op, xop, l) (X ((op), (xop)) | ((((unsigned long)(l)) & 3) << 21))
+
+/* An X form sync instruction with everything filled in except the LS field.  */
+#define XSYNC_MASK (0xff9fffff)
 
 /* An XFL form instruction.  */
 #define XFL(op, xop, rc) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1) | (((unsigned long)(rc)) & 1))
@@ -2846,6 +2859,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lhaux",   X(31,375),	X_MASK,		COM,		{ RT, RAL, RB } },
 
+{ "slbmte",  X(31,402), XRA_MASK,	PPC64,		{ RS, RB } },
+
 { "sthx",    X(31,407),	X_MASK,		COM,		{ RS, RA, RB } },
 
 { "lfqx",    X(31,791),	X_MASK,		POWER2,		{ FRT, RA, RB } },
@@ -3084,7 +3099,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lswi",    X(31,597),	X_MASK,		PPCCOM,		{ RT, RA, NB } },
 { "lsi",     X(31,597),	X_MASK,		PWRCOM,		{ RT, RA, NB } },
 
-{ "sync",    X(31,598), 0xffffffff,	PPCCOM,		{ 0 } },
+{ "lwsync",  XSYNC(31,598,1), 0xffffffff, PPCONLY,	{ 0 } },
+{ "ptesync", XSYNC(31,598,2), 0xffffffff, PPC64,	{ 0 } },
+{ "sync",    X(31,598), XSYNC_MASK,	PPCCOM,		{ LS } },
 { "dcs",     X(31,598), 0xffffffff,	PWRCOM,		{ 0 } },
 
 { "lfdx",    X(31,599), X_MASK,		COM,		{ FRT, RA, RB } },
@@ -3151,10 +3168,14 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "srawi.",  XRC(31,824,1), X_MASK,	PPCCOM,		{ RA, RS, SH } },
 { "srai.",   XRC(31,824,1), X_MASK,	PWRCOM,		{ RA, RS, SH } },
 
+{ "slbmfev", X(31,851), XRA_MASK,	PPC64,		{ RT, RB } },
+
 { "eieio",   X(31,854),	0xffffffff,	PPC,		{ 0 } },
 
 { "tlbsx",   XRC(31,914,0), X_MASK, PPC403,	{ RT, RA, RB } },
 { "tlbsx.",  XRC(31,914,1), X_MASK, PPC403,	{ RT, RA, RB } },
+
+{ "slbmfee", X(31,915), XRA_MASK,	PPC64,		{ RT, RB } },
 
 { "sthbrx",  X(31,918),	X_MASK,		COM,		{ RS, RA, RB } },
 
