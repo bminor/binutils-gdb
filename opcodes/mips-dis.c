@@ -165,7 +165,7 @@ print_insn_arg (d, l, pc, info)
       if (reg == ((l >> OP_SH_RT) & OP_MASK_RT))
         (*info->fprintf_func) (info->stream, "$%s",
                                reg_names[reg]);
-      else                        
+      else
         {
           /* If one is zero use the other. */
           if (reg == 0)
@@ -264,7 +264,7 @@ print_insn_arg (d, l, pc, info)
       break;
 
     case 'H':
-      (*info->fprintf_func) (info->stream, "%d", 
+      (*info->fprintf_func) (info->stream, "%d",
 			     (l >> OP_SH_SEL) & OP_MASK_SEL);
       break;
 
@@ -431,9 +431,9 @@ _print_insn_mips (memaddr, word, info)
      FIXME: Where does mips_target_info come from?  */
   target_processor = mips_target_info.processor;
   mips_isa = mips_target_info.isa;
-#else  
+#else
   set_mips_isa_type (info->mach, &mips_isa, &target_processor);
-#endif  
+#endif
 
   info->bytes_per_chunk = 4;
   info->display_endian = info->endian;
@@ -490,7 +490,7 @@ print_insn_big_mips (memaddr, info)
   /* Only a few tools will work this way.  */
   if (memaddr & 0x01)
     return print_insn_mips16 (memaddr, info);
-#endif  
+#endif
 
 #if SYMTAB_AVAILABLE
   if (info->mach == 16
@@ -499,7 +499,7 @@ print_insn_big_mips (memaddr, info)
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
-#endif  
+#endif
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
@@ -524,7 +524,7 @@ print_insn_little_mips (memaddr, info)
 #if 1
   if (memaddr & 0x01)
     return print_insn_mips16 (memaddr, info);
-#endif  
+#endif
 
 #if SYMTAB_AVAILABLE
   if (info->mach == 16
@@ -533,7 +533,7 @@ print_insn_little_mips (memaddr, info)
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
-#endif  
+#endif
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
