@@ -1,5 +1,33 @@
 2003-07-28  Andrew Cagney  <cagney@redhat.com>
 
+	* annotate.c (annotate_breakpoints_headers): Restrict annotation
+	to level 2.
+	(annotate_breakpoints_table, annotate_record): Ditto.
+	(annotate_breakpoints_table_end, annotate_field_begin): Ditto.
+	(annotate_field_name_end, annotate_field_value): Ditto.
+	(annotate_field_end, annotate_frame_source_begin): Ditto.
+	(annotate_frame_source_file, annotate_frame_source_file_end): Ditto.
+	(annotate_frame_source_line, annotate_frame_source_end): Ditto.
+	(annotate_frame_begin, annotate_frame_function_name): Ditto.
+	(annotate_frame_address_end, annotate_frame_address): Ditto.
+	(annotate_frame_args, annotate_frame_end): Ditto.
+	(annotate_frame_where, annotate_arg_begin): Ditto.
+	(annotate_arg_name_end, annotate_arg_value): Ditto.
+	(annotate_arg_end, annotate_signal_handler_caller): Ditto.
+	(annotate_function_call, annotate_signal_name): Ditto.
+	(annotate_signal_string, annotate_signal_name_end): Ditto.
+	(annotate_signal_string_end, annotate_value_history_begin): Ditto.
+	(annotate_value_begin, annotate_value_history_value): Ditto.
+	(annotate_value_history_end, annotate_value_end): Ditto.
+	(annotate_display_begin, annotate_display_number_end): Ditto.
+	(annotate_display_format, annotate_display_expression): Ditto.
+	(annotate_display_expression_end, annotate_display_value): Ditto.
+	(annotate_display_end, annotate_array_section_begin): Ditto.
+	(annotate_elt_rep, annotate_elt_rep_end): Ditto.
+	(annotate_elt, annotate_array_section_end): Ditto.
+
+2003-07-28  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (print_gp_register_row): Print the GPR's register
 	MOD NUM_REGS.
 
