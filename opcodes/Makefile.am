@@ -195,7 +195,7 @@ CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm \
 	cgen-opc.in cgen-asm.in cgen-dis.in
 # The CGEN_MAINT conditional is put here so it ends up in Makefile.in
-# properly sanitized.
+# properly sanitised.
 if CGEN_MAINT
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
@@ -210,7 +210,7 @@ ENDSAN = end-sanitize-cygnus
 
 # start-sanitize-cygnus
 run-cgen:
-	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) $(CGENDIR) $(CGENFLAGS) $(arch) $(prefix)
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) $(CGENDIR) $(CGENFLAGS) $(arch) $(prefix) $(options)
 	touch stamp-${prefix}
 .PHONY: run-cgen
 
@@ -218,19 +218,19 @@ run-cgen:
 m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
-	$(MAKE) run-cgen arch=m32r prefix=m32r
+	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst
 
 fr30-opc.h fr30-opc.c fr30-asm.c fr30-dis.c: $(FR30_DEPS)
 	@true
 stamp-fr30: $(CGENFILES) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
-	$(MAKE) run-cgen arch=fr30 prefix=fr30
+	$(MAKE) run-cgen arch=fr30 prefix=fr30 options=
 
 # Use a prefix of i960c, so that the existing i960-dis.c can remain for now.
 # When the cgen i960 disassembler support is complete, this `c' can go away.
 i960c-opc.h i960c-opc.c i960c-asm.c i960c-dis.c: $(I960_DEPS)
 	@true
 stamp-i960: $(CGENFILES) $(CGENDIR)/i960.cpu $(CGENDIR)/i960.opc
-	$(MAKE) run-cgen arch=i960 prefix=i960c
+	$(MAKE) run-cgen arch=i960 prefix=i960c options=
 # end-sanitize-cygnus
 
 # start-sanitize-tic80
