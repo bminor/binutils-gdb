@@ -70,7 +70,8 @@ sparc*-*-linux-gnu*)	targ_emul=elf32_sparc
 			tdir_sun4=sparc-sun-sunos4
 			;;
 sparc*-*-lynxos*)	targ_emul=sparclynx ;;
-sparc64-*-netbsd*)	targ_emul=elf64_sparc
+sparc64-*-netbsd* | sparc64-*-openbsd*)
+			targ_emul=elf64_sparc
 			targ_extra_emuls="elf32_sparc"
 			;;
 sparc*-*-netbsd*elf*)	targ_emul=elf32_sparc ;;
@@ -348,6 +349,7 @@ hppa*-*-linux-gnu*)	targ_emul=hppalinux ;;
 hppa*-*-*elf*)		targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-netbsd*)	targ_emul=hppanbsd ;;
+hppa*-*-openbsd*)	targ_emul=hppaobsd ;;
 hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 vax-*-netbsdelf*)	targ_emul=elf32vax
@@ -413,6 +415,7 @@ alpha*-*-osf*)		targ_emul=alpha ;;
 alpha*-*-gnu*)		targ_emul=elf64alpha ;;
 alpha*-*-netware*)	targ_emul=alpha ;;
 alpha*-*-netbsd*)	targ_emul=elf64alpha_nbsd ;;
+alpha*-*-openbsd*)	targ_emul=elf64alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-*-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
@@ -451,7 +454,7 @@ powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
 		targ_extra_emuls="elf32ppcsim" ;;
 	esac ;;
 powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
-  | powerpc*-*-netbsd* | powerpc*-*-vxworks*)
+  | powerpc*-*-netbsd* | powerpc-*-openbsd* | powerpc*-*-vxworks*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64ppc
 		targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"

@@ -309,6 +309,7 @@ ALL_EMULATIONS = \
 	ehppaelf.o \
 	ehppalinux.o \
 	ehppanbsd.o \
+	ehppaobsd.o \
 	ei386aout.o \
 	ei386beos.o \
 	ei386bsd.o \
@@ -1491,6 +1492,10 @@ ehppanbsd.c: $(srcdir)/emulparams/hppanbsd.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/hppaelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppanbsd "$(tdir_hppanbsd)"
+ehppaobsd.c: $(srcdir)/emulparams/hppaobsd.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/hppaelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} hppaobsd "$(tdir_hppaobsd)"
 ehppa64linux.c: $(srcdir)/emulparams/hppa64linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hppa64linux "$(tdir_hppa64linux)"
