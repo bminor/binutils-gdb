@@ -6,10 +6,6 @@
 
 2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
 
-	* gdb.base/setvar.exp: Add copyright years.
-
-2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
-
 	* gdb.cp/exception.exp: Fix typo in doco.
 
 2004-01-09  Mark Kettenis  <kettenis@gnu.org>
