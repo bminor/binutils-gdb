@@ -1,3 +1,12 @@
+2000-12-05  Kazu Hirata  <kazu@hxi.com>
+
+	* elf32-fr30.c: Fix formatting.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i860.c: Likewise.
+	* elf32-i960.c: Likewise.
+
 2000-12-03  Kazu Hirata  <kazu@hxi.com>
 
 	* elf32-arm.h: Fix formatting.

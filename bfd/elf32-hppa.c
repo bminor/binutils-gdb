@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-hppa.h"
 #include "elf32-hppa.h"
 
-
 /* In order to gain some understanding of code in this file without
    knowing all the intricate details of the linker, note the
    following:
@@ -46,7 +45,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    from external routines.  eg. elf32_hppa_check_relocs is called
    early in the link process, elf32_hppa_finish_dynamic_sections is
    one of the last functions.  */
-
 
 /* We use two hash tables to hold information for linking PA ELF objects.
 
@@ -156,7 +154,6 @@ static const bfd_byte plt_stub[] =
 #define RELATIVE_DYNAMIC_RELOCS 0
 #endif
 
-
 enum elf32_hppa_stub_type {
   hppa_stub_long_branch,
   hppa_stub_long_branch_shared,
@@ -165,7 +162,6 @@ enum elf32_hppa_stub_type {
   hppa_stub_export,
   hppa_stub_none
 };
-
 
 struct elf32_hppa_stub_hash_entry {
 
@@ -197,7 +193,6 @@ struct elf32_hppa_stub_hash_entry {
      stub sections, the first input section in the group.  */
   asection *id_sec;
 };
-
 
 struct elf32_hppa_link_hash_entry {
 
@@ -239,7 +234,6 @@ struct elf32_hppa_link_hash_entry {
      use an absolute reloc.  */
   unsigned int plt_abs:1;
 };
-
 
 struct elf32_hppa_link_hash_table {
 
@@ -290,7 +284,6 @@ struct elf32_hppa_link_hash_table {
   unsigned int need_plt_stub:1;
 };
 
-
 /* Various hash macros and functions.  */
 #define hppa_link_hash_table(p) \
   ((struct elf32_hppa_link_hash_table *) ((p)->hash))
@@ -307,7 +300,6 @@ static struct bfd_hash_entry *hppa_link_hash_newfunc
 
 static struct bfd_link_hash_table *elf32_hppa_link_hash_table_create
   PARAMS ((bfd *));
-
 
 /* Stub handling functions.  */
 static char *hppa_stub_name
@@ -333,7 +325,6 @@ static boolean hppa_build_one_stub
 
 static boolean hppa_size_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
-
 
 /* BFD and elf backend functions.  */
 static boolean elf32_hppa_object_p PARAMS ((bfd *));
@@ -397,7 +388,6 @@ static boolean elf32_hppa_finish_dynamic_sections
 static int elf32_hppa_elf_get_symbol_type
   PARAMS ((Elf_Internal_Sym *, int));
 
-
 /* Assorted hash table functions.  */
 
 /* Initialize an entry in the stub hash table.  */
@@ -445,7 +435,6 @@ stub_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
-
 /* Initialize an entry in the link hash table.  */
 
 static struct bfd_hash_entry *
@@ -492,7 +481,6 @@ hppa_link_hash_newfunc (entry, table, string)
   return (struct bfd_hash_entry *) ret;
 }
 
-
 /* Create the derived linker hash table.  The PA ELF port uses the derived
    hash table to keep information specific to the PA ELF linker (without
    using static variables).  */
@@ -535,7 +523,6 @@ elf32_hppa_link_hash_table_create (abfd)
   return &ret->root.root;
 }
 
-
 /* Build a name for an entry in the stub hash table.  */
 
 static char *
@@ -575,7 +562,6 @@ hppa_stub_name (input_section, sym_sec, hash, rel)
     }
   return stub_name;
 }
-
 
 /* Look up an entry in the stub hash.  Stub entries are cached because
    creating the stub name takes a bit of time.  */
@@ -635,7 +621,6 @@ hppa_get_stub_entry (input_section, sym_sec, hash, rel, hplink)
   return stub_entry;
 }
 
-
 /* Add a new stub entry to the stub hash.  Not all fields of the new
    stub entry are initialised.  */
 
@@ -693,7 +678,6 @@ hppa_add_stub (stub_name, section, hplink)
   stub_entry->id_sec = link_sec;
   return stub_entry;
 }
-
 
 /* Determine the type of stub needed, if any, for a call.  */
 
@@ -770,7 +754,6 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
     }
   return hppa_stub_none;
 }
-
 
 /* Build one linker stub as defined by the stub hash table entry GEN_ENTRY.
    IN_ARG contains the link info pointer.  */
@@ -1082,7 +1065,6 @@ hppa_build_one_stub (gen_entry, in_arg)
 #undef LDSID_RP_R1
 #undef BE_SR0_RP
 
-
 /* As above, but don't actually build the stub.  Just bump offset so
    we know stub section sizes.  */
 
@@ -1123,7 +1105,6 @@ hppa_size_one_stub (gen_entry, in_arg)
   return true;
 }
 
-
 /* Return nonzero if ABFD represents an HPPA ELF32 file.
    Additionally we set the default architecture and machine.  */
 
@@ -1147,7 +1128,6 @@ elf32_hppa_object_p (abfd)
   return true;
 }
 
-
 /* Undo the generic ELF code's subtraction of section->vma from the
    value of each external symbol.  */
 
@@ -1164,7 +1144,6 @@ elf32_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   *valp += (*secp)->vma;
   return true;
 }
-
 
 /* Create the .plt and .got sections, and set up our hash table
    short-cuts to various dynamic sections.  */
@@ -1206,7 +1185,6 @@ elf32_hppa_create_dynamic_sections (abfd, info)
 
   return true;
 }
-
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
@@ -1696,7 +1674,6 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
-
 /* Return the section that should be marked against garbage collection
    for a given relocation.  */
 
@@ -1744,7 +1721,6 @@ elf32_hppa_gc_mark_hook (abfd, info, rel, h, sym)
 
   return NULL;
 }
-
 
 /* Update the got and plt entry reference counts for the section being
    removed.  */
@@ -1855,7 +1831,6 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   return true;
 }
 
-
 /* Our own version of hide_symbol, so that we can keep plt entries for
    plabels.  */
 
@@ -1871,7 +1846,6 @@ elf32_hppa_hide_symbol (info, h)
       h->plt.offset = (bfd_vma) -1;
     }
 }
-
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -2041,7 +2015,6 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
   return true;
 }
 
-
 /* Called via elf_link_hash_traverse to create .plt entries for an
    application that uses statically linked PIC functions.  Similar to
    the first part of elf32_hppa_adjust_dynamic_symbol.  */
@@ -2080,7 +2053,6 @@ hppa_handle_PIC_calls (h, inf)
 
   return true;
 }
-
 
 #if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
      || RELATIVE_DYNAMIC_RELOCS)
@@ -2132,7 +2104,6 @@ hppa_discard_copies (h, inf)
 }
 #endif
 
-
 /* This function is called via elf_link_hash_traverse to force
    millicode symbols local so they do not end up as globals in the
    dynamic symbol table.  We ought to be able to do this in
@@ -2151,7 +2122,6 @@ clobber_millicode_symbols (h, info)
     elf32_hppa_hide_symbol(info, h);
   return true;
 }
-
 
 /* Set the sizes of the dynamic sections.  */
 
@@ -2198,7 +2168,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	    {
 	      struct elf_link_hash_entry *h;
 
-	      h = elf_link_hash_lookup (&hplink->root, 
+	      h = elf_link_hash_lookup (&hplink->root,
 					funcname,
 					false, false, false);
 	      if (h != NULL
@@ -2436,7 +2406,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
   return true;
 }
-
 
 /* External entry points for sizing and building linker stubs.  */
 
@@ -3068,7 +3037,6 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
   return ret;
 }
 
-
 /* For a final link, this function is called after we have sized the
    stubs to provide a value for __gp.  */
 
@@ -3138,7 +3106,6 @@ elf32_hppa_set_gp (abfd, info)
   return true;
 }
 
-
 /* Build all the stubs associated with the current output file.  The
    stubs are kept in a hash table attached to the main linker hash
    table.  We also set up the .plt entries for statically linked PIC
@@ -3176,7 +3143,6 @@ elf32_hppa_build_stubs (info)
 
   return true;
 }
-
 
 /* Perform a relocation as part of a final link.  */
 
@@ -3429,7 +3395,6 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
   bfd_put_32 (input_bfd, (bfd_vma) insn, hit_data);
   return bfd_reloc_ok;
 }
-
 
 /* Relocate an HPPA ELF section.  */
 
@@ -3762,7 +3727,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && (is_absolute_reloc (r_type)
 		  || ((!info->symbolic
 		       || (h != NULL
-			   && ((h->elf.elf_link_hash_flags 
+			   && ((h->elf.elf_link_hash_flags
 				& ELF_LINK_HASH_DEF_REGULAR) == 0
 			       || h->elf.root.type == bfd_link_hash_defweak)))
 		      && (h == NULL || h->elf.dynindx != -1)))
@@ -3906,7 +3871,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
   return true;
 }
-
 
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
@@ -4083,7 +4047,6 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
   return true;
 }
 
-
 /* Finish up the dynamic sections.  */
 
 static boolean
@@ -4146,7 +4109,7 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 	      {
 		struct elf_link_hash_entry *h;
 		const char *funcname;
- 
+
 		if (dyn.d_tag == DT_INIT)
 		  funcname = info->init_function;
 		else
@@ -4216,7 +4179,6 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-
 /* Called when writing out an object file to decide the type of a
    symbol.  */
 static int
@@ -4229,7 +4191,6 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
   else
     return type;
 }
-
 
 /* Misc BFD support code.  */
 #define bfd_elf32_bfd_is_local_label_name    elf_hppa_is_local_label_name

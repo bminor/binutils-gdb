@@ -129,7 +129,7 @@ elf32_i960_relocate (abfd,
     {
       reloc_entry->addend -= symbol->value;
     }
-  /* This is more dubious. */
+  /* This is more dubious.  */
   else if (output_bfd != (bfd *) NULL
 	   && (symbol->flags & BSF_SECTION_SYM) != 0)
     {

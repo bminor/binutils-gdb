@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i860.h"
 
-
 /* Prototypes.  */
 static reloc_howto_type *lookup_howto
   PARAMS ((unsigned int));
@@ -33,7 +32,7 @@ static reloc_howto_type *lookup_howto
 static reloc_howto_type *elf32_i860_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
-static void elf32_i860_info_to_howto_rela 
+static void elf32_i860_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 
 static bfd_reloc_status_type elf32_i860_relocate_splitn
@@ -48,7 +47,7 @@ static bfd_reloc_status_type elf32_i860_relocate_pc26
 static bfd_reloc_status_type elf32_i860_relocate_highadj
   PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 
-static boolean elf32_i860_relocate_section 
+static boolean elf32_i860_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
@@ -58,8 +57,6 @@ static bfd_reloc_status_type i860_final_link_relocate
 
 static boolean elf32_i860_is_local_label_name
   PARAMS ((bfd *, const char *));
-
-
 
 /* This howto table is preliminary.  */
 static reloc_howto_type elf32_i860_howto_table [] =
@@ -573,7 +570,6 @@ lookup_howto (rtype)
   return elf32_i860_howto_table + i;
 }
 
-
 /* Given a BFD reloc, return the matching HOWTO structure.  */
 static reloc_howto_type *
 elf32_i860_reloc_type_lookup (abfd, code)
@@ -594,7 +590,7 @@ elf32_i860_reloc_type_lookup (abfd, code)
       rtype = R_860_COPY;
       break;
     case BFD_RELOC_860_GLOB_DAT:
-      rtype = R_860_GLOB_DAT; 
+      rtype = R_860_GLOB_DAT;
       break;
     case BFD_RELOC_860_JUMP_SLOT:
       rtype = R_860_JUMP_SLOT;
@@ -693,7 +689,6 @@ elf32_i860_reloc_type_lookup (abfd, code)
   return lookup_howto (rtype);
 }
 
-
 /* Given a ELF reloc, return the matching HOWTO structure.  */
 static void
 elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
@@ -703,7 +698,6 @@ elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
 {
   bfd_reloc->howto = lookup_howto (ELF32_R_TYPE (elf_reloc->r_info));
 }
-
 
 
 /* Specialized relocation handler for R_860_SPLITn.  These relocations
@@ -730,7 +724,6 @@ elf32_i860_relocate_splitn (input_bfd, rello, contents, value)
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
   return bfd_reloc_ok;
 }
-
 
 /* Specialized relocation handler for R_860_PC16.  This relocation
    involves a 16-bit, PC-relative field that is split into two contiguous
@@ -765,7 +758,6 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
 
 }
 
-
 /* Specialized relocation handler for R_860_PC26.  This relocation
    involves a 26-bit, PC-relative field which must be adjusted by 4.  */
 static bfd_reloc_status_type
@@ -790,14 +782,13 @@ elf32_i860_relocate_pc26 (input_bfd, input_section, rello, contents, value)
   value += rello->r_addend;
 
   /* Adjust value by 4 and insert the field.  */
-  value = ((value - 4) >> howto->rightshift) & howto->dst_mask; 
+  value = ((value - 4) >> howto->rightshift) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
   bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
   return bfd_reloc_ok;
 
 }
-
 
 /* Specialized relocation handler for R_860_HIGHADJ.  */
 static bfd_reloc_status_type
@@ -821,7 +812,6 @@ elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
   return bfd_reloc_ok;
 }
 
-
 /* Perform a single relocation.  By default we use the standard BFD
    routines. However, we handle some specially.  */
 static bfd_reloc_status_type
@@ -837,7 +827,6 @@ i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 				   contents, rel->r_offset, relocation,
 				   rel->r_addend);
 }
-
 
 /* Relocate an i860 ELF section.
 
@@ -905,15 +894,15 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type        r;
       const char *                 name = NULL;
       int                          r_type;
-      
+
       r_type = ELF32_R_TYPE (rel->r_info);
-     
+
 #if 0
       if (   r_type == R_860_GNU_VTINHERIT
 	  || r_type == R_860_GNU_VTENTRY)
 	continue;
 #endif
-      
+
       r_symndx = ELF32_R_SYM (rel->r_info);
 
       if (info->relocateable)
@@ -925,7 +914,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (r_symndx < symtab_hdr->sh_info)
 	    {
 	      sym = local_syms + r_symndx;
-	      
+
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  sec = local_sections [r_symndx];
@@ -941,7 +930,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
-      
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -949,7 +938,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-	  
+
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
@@ -957,13 +946,13 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
-	  
+
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  name = h->root.root.string;
-	  
+
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -985,7 +974,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	      relocation = 0;
 	    }
 	}
-   
+
       switch (r_type)
 	{
 	default:
@@ -1039,7 +1028,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_860_HIGOTOFF:
 	  r = bfd_reloc_notsupported;
 	  break;
-	} 
+	}
 
       if (r != bfd_reloc_ok)
 	{
@@ -1052,12 +1041,12 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 		(info, name, howto->name, (bfd_vma) 0,
 		 input_bfd, input_section, rel->r_offset);
 	      break;
-	      
+
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
 		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
-	      
+
 	    case bfd_reloc_outofrange:
 	      msg = _("internal error: out of range error");
 	      break;
@@ -1087,7 +1076,6 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-
 /* Return whether a symbol name implies a local label.  SVR4/860 compilers
    generate labels of the form ".ep.function_name" to denote the end of a
    function prolog. These should be local.
@@ -1103,7 +1091,6 @@ elf32_i860_is_local_label_name (abfd, name)
 
   return _bfd_elf_is_local_label_name (abfd, name);
 }
-
 
 
 #define TARGET_BIG_SYM		bfd_elf32_i860_vec

@@ -150,7 +150,6 @@ static reloc_howto_type elf_howto_table[]=
 
 };
 
-
 #ifdef DEBUG_GEN_RELOC
 #define TRACE(str) fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
 #else
@@ -1254,7 +1253,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
    space allocated to copy PC relative relocs against symbols which
    are defined in regular objects.  For the normal non-symbolic case,
    we also discard space for relocs that have become local due to
-   symbol visibility changes.  We allocated space for them in the 
+   symbol visibility changes.  We allocated space for them in the
    check_relocs routine, but we won't fill them in in the
    relocate_section routine.  */
 
