@@ -1,3 +1,9 @@
+Thu Mar  7 09:19:15 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (SUBSEG_MILLI): Define.
+	(pa_def_subspaces): Add $MILLICODE$.
+	(pa_spaces_begin): Set section flags for $MILLICODE$.
+
 Wed Mar  6 14:11:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_section): Only SEC_LOAD if the type is
