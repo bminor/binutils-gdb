@@ -1,3 +1,13 @@
+Wed Sep 13 13:20:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (prune_system_crud): Define if not defined.
+	* binutils-all/objcopy.exp: Call prune_system_crud on cmp output.
+
+Sat Aug 19 17:38:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add xfail for i*86-*-aout* for simple
+	copy test.
+
 Wed Aug 16 16:52:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils-all/nm.exp: Add setup_xfail for mips*-sony-bsd* for

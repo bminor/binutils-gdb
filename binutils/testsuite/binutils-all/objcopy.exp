@@ -41,6 +41,7 @@ if ![string match "" $got] then {
     send_log "cmp tmpdir/bintest.o tmpdir/copy.o\n"
     verbose "cmp tmpdir/bintest.o tmpdir/copy.o"
     catch "exec cmp tmpdir/bintest.o tmpdir/copy.o" exec_output
+    set exec_output [prune_system_crud $host_triplet $exec_output]
 
     # On some systems the result of objcopy will not be identical.
     # Usually this is just because gas isn't using bfd to write the files
@@ -51,7 +52,7 @@ if ![string match "" $got] then {
     setup_xfail "arm-*-pe" 
     setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
     setup_xfail "m68*-ericsson-ose"
-    setup_xfail "i*86-*-linuxaout*"
+    setup_xfail "i*86-*-linuxaout*" "i*86-*-aout*"
     setup_xfail "a29k-*-udi" "a29k-*-coff" "a29k-*-vxworks*"
     setup_xfail "i960-*-vxworks*" "i960-*-coff"
     setup_xfail "h8300-*-hms" "h8300-*-coff"
