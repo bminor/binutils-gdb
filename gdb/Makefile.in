@@ -292,8 +292,6 @@ NONSRC = Makefile.in depend alldeps.mak createtags munch configure.in \
 	${srcdir}/nindy-share/README ${srcdir}/vx-share/README \
 	${srcdir}/config/convex/Convex.notes
 
-	 
-
 # All source files that lint should look at
 LINTFILES = $(SFILES) $(YYFILES) init.c
 
@@ -344,7 +342,7 @@ SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
 TARFILES = ${SFILES} ${HFILES} ${NONSRC} ${ALLDEPFILES} $(ALLCONFIG) \
-	$(ALLPARAM) $(INFOFILES) ${POSSLIBS} ${REMOTE_EXAMPLES} \
+	$(ALLPARAM) $(INFOFILES) ${POSSLIBS} ${REMOTE_EXAMPLES}
 
 OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
