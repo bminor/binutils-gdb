@@ -1,3 +1,7 @@
+Wed Aug 16 21:54:39 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/pa/tm-hppa.h (PROLOGUE_FIRSTLINE_OVERLAP): Define.
+
 Tue Aug 15 07:51:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* remote.c (remote_write_bytes): Chop up large transfers.

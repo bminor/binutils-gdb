@@ -19,7 +19,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Target system byte order. */
 
@@ -176,6 +176,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PC_REGNUM PCOQ_HEAD_REGNUM
 #define NPC_REGNUM PCOQ_TAIL_REGNUM
 
+/*
+ * Processor Status Word Masks
+ */
+
+#define PSW_T   0x01000000      /* Taken Branch Trap Enable */
+#define PSW_H   0x00800000      /* Higher-Privilege Transfer Trap Enable */
+#define PSW_L   0x00400000      /* Lower-Privilege Transfer Trap Enable */
+#define PSW_N   0x00200000      /* PC Queue Front Instruction Nullified */
+#define PSW_X   0x00100000      /* Data Memory Break Disable */
+#define PSW_B   0x00080000      /* Taken Branch in Previous Cycle */
+#define PSW_C   0x00040000      /* Code Address Translation Enable */
+#define PSW_V   0x00020000      /* Divide Step Correction */
+#define PSW_M   0x00010000      /* High-Priority Machine Check Disable */
+#define PSW_CB  0x0000ff00      /* Carry/Borrow Bits */
+#define PSW_R   0x00000010      /* Recovery Counter Enable */
+#define PSW_Q   0x00000008      /* Interruption State Collection Enable */
+#define PSW_P   0x00000004      /* Protection ID Validation Enable */
+#define PSW_D   0x00000002      /* Data Address Translation Enable */
+#define PSW_I   0x00000001      /* External, Power Failure, Low-Priority */
+                                /* Machine Check Interruption Enable */
+
 /* When fetching register values from an inferior or a core file,
    clean them up using this macro.  BUF is a char pointer to
    the raw value of the register in the registers[] array.  */
@@ -192,7 +213,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
 
 /* PA specific macro to see if the current instruction is nullified. */
+#ifndef INSTRUCTION_NULLIFIED
 #define INSTRUCTION_NULLIFIED ((int)read_register (IPSW_REGNUM) & 0x00200000)
+#endif
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the PA-RISC, all regs are 4 bytes, including
@@ -263,7 +286,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)((REGBUF) + 28))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (*(int *)((REGBUF) + REGISTER_BYTE (28)))
 
 /*
  * This macro defines the register numbers (from REGISTER_NAMES) that
@@ -382,7 +406,7 @@ call_dummy
 	ble,n 0(sr0, r22)
 text_space				; Otherwise, go through _sr4export,
 	ble (sr4, r1)			; which will return back here.
-	stw 31,-24(r30)
+	stw r31,-24(r30)
 	break 4, 8
 	mtsp r21, sr0
 	ble,n 0(sr0, r22)
@@ -446,9 +470,12 @@ call_dummy
 	ldw -48(%sp), %arg3
 	ldil 0, %r31			; FUNC_LDIL_OFFSET must point here
 	ldo 0(%r31), %r31		; FUNC_LDO_OFFSET must point here
-	ble 0(0,%r31)
+	ble 0(%sr0, %r31)
 	copy %r31, %r2
 	break 4, 8 
+	nop				; restore_pc_queue expects these
+	bv,n 0(%r22)			; instructions to be here...
+	nop
 */
 
 /* Define offsets into the call dummy for the target function address */
@@ -457,9 +484,9 @@ call_dummy
 
 #define CALL_DUMMY {0x4bda3fb9, 0x4bd93fb1, 0x4bd83fa9, 0x4bd73fa1,\
 		    0x23e00000, 0x37ff0000, 0xe7e00000, 0x081f0242,\
-		    0x00010004}
+		    0x00010004, 0x08000240, 0xeac0c002, 0x08000240}
 
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 9)
+#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 12)
 
 #endif
 
@@ -593,3 +620,10 @@ extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
 extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
+
+/* When prologues are scheduled, the first line of the function may
+   overlap with prologue instructions.  We want to avoid "skipping"
+   to the start of the next source line in such situations (might
+   skip over a conditional branch when trying to set a breakpoint at
+   the start of a function.  */
+#define PROLOGUE_FIRSTLINE_OVERLAP
