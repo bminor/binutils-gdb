@@ -567,7 +567,10 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache->pc = frame_func_unwind (next_frame);
   if (cache->pc != 0)
-    sparc32_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    {
+      CORE_ADDR addr_in_block = frame_unwind_address_in_block (next_frame);
+      sparc32_analyze_prologue (cache->pc, addr_in_block, cache);
+    }
 
   if (cache->frameless_p)
     {

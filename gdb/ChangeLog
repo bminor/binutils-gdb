@@ -1,5 +1,10 @@
 2003-12-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc32_frame_cache): Use
+	frame_unwind_address_in_block to obtain the current PC for use in
+	call to sparc32_analyze_prologue.
+	* sparc64-tdep.c (sparc64_frame_cache): Likewise.
+
 	* sparc-sol2-nat.c: Add 64-bit support.
 	(supply_gregset): Call sparc_supply_gregset
 	instead of sparc32_supply_gregset.
