@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define _bfd_m68kcoff_howto_table _bfd_m68klynx_howto_table	
 #define _bfd_m68kcoff_rtype2howto _bfd_m68klynx_rtype2howto	
 #define _bfd_m68kcoff_howto2rtype _bfd_m68klynx_howto2rtype	
+#define _bfd_m68kcoff_reloc_type_lookup _bfd_m68klynx_reloc_type_lookup
 
 #define LYNX_SPECIAL_FN _bfd_m68klynx_special_fn
 
