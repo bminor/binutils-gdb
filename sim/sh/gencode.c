@@ -2106,7 +2106,7 @@ filltable (p)
     }
 }
 
-/* Table already contais all the switch case tags for 16-bit opcode double
+/* Table already contains all the switch case tags for 16-bit opcode double
    data transfer (ddt) insns, and the switch case tag for processing parallel
    processing insns (ppi) for code 0xf800 (ppi nopx nopy).  Copy the
    latter tag to represent all combinations of ppi with ddt.  */

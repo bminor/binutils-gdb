@@ -1,3 +1,7 @@
+2003-07-24  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: Fix typo in comment.
+
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c: A few more fix-ups of refs and defs.
