@@ -1,3 +1,45 @@
+start-sanitize-arc
+Wed Apr 12 08:15:27 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-tdep.c: #include "gdbcmd.h".
+	(codestream_seek): Pass CORE_ADDR.
+	(arc_cpu_type, tmp_arc_cpu_type, arc_cpu_type_table): New globals.
+	(debug_pipeline_p): Likewise.
+	(X_...): Instruction field access macros.
+	(BUILD_INSN): Define.
+	(codestream_tell): Allow for stream elements > 1 byte.
+	(codestream_fill): Likewise.
+	(setup_prologue_scan): New function.
+	(arc_get_frame_setup): Call it.  Update to current spec
+	regarding prologues.  Use BUILD_INSN.
+	(skip_prologue): New argument `frameless_p'.  Use BUILD_INSN.
+	(arc_frame_saved_pc): New function.
+	(frame_find_saved_regs): Use BUILD_INSN.
+	(get_insn_type, single_step): New functions.
+	(one_stepped): New global.
+	(arc_set_cpu_type_command, arc_show_cpu_type_command): New functions.
+	(arc_set_cpu_type): New function.
+	(_initialize_arc_tdep): Define new `set' commands `cpu',
+	`displaypipeline', and `debugpipeline'.
+	* remote-arc.c (break_insn): Add bi-endian support.
+	(arc_insert_breakpoint): Likewise.
+	(arc_remove_breakpoint): Likewise.
+	(switch_command): Delete.
+	* arc/tm-arc.h (TARGET_BYTE_ORDER): Delete.
+	(TARGET_BYTE_ORDER_SELECTABLE): Define.
+	(DEFAULT_ARC_CPU_TYPE): Define.
+	(SKIP_PROLOGUE_FRAMELESS_P): Define.
+	(BREAKPOINT): Delete.
+	(BIG_BREAKPOINT, LITTLE_BREAKPOINT): Define.
+	(DECR_PC_AFTER_BREAK): Change to 8.
+	(NO_SINGLE_STEP): Define.
+	(ARC_PC_TO_REAL_ADDRESS): Define.
+	(SAVED_PC_AFTER_CALL): Use it.
+	(NUM_REGS, REGISTER_BYTES): Fix.
+	(FRAME_SAVED_PC): Call arc_frame_saved_pc.
+	(FRAME_LOCALS_ADDRESS): Fix.
+end-sanitize-arc
+
 Tue Apr 11 16:42:37 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* top.c, utils.c, defs.h: Remove error_hook.  It is currently
