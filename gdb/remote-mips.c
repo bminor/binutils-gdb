@@ -1,0 +1,1246 @@
+/* Remote debugging interface for MIPS remote debugging protocol.
+   Copyright 1993 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.  Written by Ian Lance Taylor
+   <ian@cygnus.com>.
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include "defs.h"
+#include "inferior.h"
+#include "bfd.h"
+#include "wait.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "serial.h"
+#include "target.h"
+
+#include <signal.h>
+
+/* Prototypes for local functions.  */
+
+static int
+mips_readchar PARAMS ((int timeout));
+
+static int
+mips_receive_header PARAMS ((unsigned char *hdr, int *pgarbage, int ch,
+			     int timeout));
+
+static int
+mips_receive_trailer PARAMS ((unsigned char *trlr, int *pgarbage, int *pch,
+			      int timeout));
+
+static int mips_cksum PARAMS ((const unsigned char *hdr,
+			       const unsigned char *data,
+			       int len));
+
+static void
+mips_send_packet PARAMS ((const char *s));
+
+static int
+mips_receive_packet PARAMS ((char *buff));
+
+static int
+mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
+		      int *perr));
+
+static void
+mips_open PARAMS ((char *name, int from_tty));
+
+static void
+mips_close PARAMS ((int quitting));
+
+static void
+mips_detach PARAMS ((char *args, int from_tty));
+
+static void
+mips_resume PARAMS ((int step, int siggnal));
+
+static int
+mips_wait PARAMS ((WAITTYPE *status));
+
+static int
+mips_map_regno PARAMS ((int regno));
+
+static void
+mips_fetch_registers PARAMS ((int regno));
+
+static void
+mips_prepare_to_store PARAMS ((void));
+
+static void
+mips_store_registers PARAMS ((int regno));
+
+static int
+mips_fetch_word PARAMS ((CORE_ADDR addr));
+
+static void
+mips_store_word PARAMS ((CORE_ADDR addr, int value));
+
+static int
+mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
+			  int write, struct target_ops *ignore));
+
+static void
+mips_files_info PARAMS ((struct target_ops *ignore));
+
+static void
+mips_load PARAMS ((char *args, int from_tty));
+
+static void
+mips_create_inferior PARAMS ((char *execfile, char *args, char **env));
+
+static void
+mips_mourn_inferior PARAMS ((void));
+
+/* A forward declaration.  */
+extern struct target_ops mips_ops;
+
+/* The MIPS remote debugging interface is built on top of a simple
+   packet protocol.  Each packet is organized as follows:
+
+   SYN	The first character is always a SYN (ASCII 026, or ^V).  SYN
+	may not appear anywhere else in the packet.  Any time a SYN is
+	seen, a new packet should be assumed to have begun.
+
+   TYPE_LEN
+	This byte contains the upper five bits of the logical length
+	of the data section, plus a single bit indicating whether this
+	is a data packet or an acknowledgement.  The documentation
+	indicates that this bit is 1 for a data packet, but the actual
+	board uses 1 for an acknowledgement.  The value of the byte is
+		0x40 + (ack ? 0x20 : 0) + (len >> 6)
+	(we always have 0 <= len < 1024).  Acknowledgement packets do
+	not carry data, and must have a data length of 0.
+
+   LEN1 This byte contains the lower six bits of the logical length of
+	the data section.  The value is
+	 	0x40 + (len & 0x3f)
+
+   SEQ	This byte contains the six bit sequence number of the packet.
+	The value is
+		0x40 + seq
+	An acknowlegment packet contains the sequence number of the
+	packet being acknowledged plus 1 module 64.  Data packets are
+	transmitted in sequence.  There may only be one outstanding
+	unacknowledged data packet at a time.  The sequence numbers
+	are independent in each direction.  If an acknowledgement for
+	the previous packet is received (i.e., an acknowledgement with
+	the sequence number of the packet just sent) the packet just
+	sent should be retransmitted.  If no acknowledgement is
+	received within a timeout period, the packet should be
+	retransmitted.  This has an unfortunate failure condition on a
+	high-latency line, as a delayed acknowledgement may lead to an
+	endless series of duplicate packets.
+
+   DATA	The actual data bytes follow.  The following characters are
+	escaped inline with DLE (ASCII 020, or ^P):
+		SYN (026)	DLE S
+		DLE (020)	DLE D
+		^C  (003)	DLE C
+		^S  (023)	DLE s
+		^Q  (021)	DLE q
+	The additional DLE characters are not counted in the logical
+	length stored in the TYPE_LEN and LEN1 bytes.
+
+   CSUM1
+   CSUM2
+   CSUM3
+	These bytes contain an 18 bit checksum of the complete
+	contents of the packet excluding the SEQ byte and the
+	CSUM[123] bytes.  The checksum is simply the twos complement
+	addition of all the bytes treated as unsigned characters.  The
+	values of the checksum bytes are:
+		CSUM1: 0x40 + ((cksum >> 12) & 0x3f)
+		CSUM2: 0x40 + ((cksum >> 6) & 0x3f)
+		CSUM3: 0x40 + (cksum & 0x3f)
+
+   It happens that the MIPS remote debugging protocol always
+   communicates with ASCII strings.  Because of this, this
+   implementation doesn't bother to handle the DLE quoting mechanism,
+   since it will never be required.  */
+
+/* The SYN character which starts each packet.  */
+#define SYN '\026'
+
+/* The 0x40 used to offset each packet (this value ensures that all of
+   the header and trailer bytes, other than SYN, are printable ASCII
+   characters).  */
+#define HDR_OFFSET 0x40
+
+/* The indices of the bytes in the packet header.  */
+#define HDR_INDX_SYN 0
+#define HDR_INDX_TYPE_LEN 1
+#define HDR_INDX_LEN1 2
+#define HDR_INDX_SEQ 3
+#define HDR_LENGTH 4
+
+/* The data/ack bit in the TYPE_LEN header byte.  */
+#define TYPE_LEN_DA_BIT 0x20
+#define TYPE_LEN_DATA 0
+#define TYPE_LEN_ACK TYPE_LEN_DA_BIT
+
+/* How to compute the header bytes.  */
+#define HDR_SET_SYN(data, len, seq) (SYN)
+#define HDR_SET_TYPE_LEN(data, len, seq) \
+  (HDR_OFFSET \
+   + ((data) ? TYPE_LEN_DATA : TYPE_LEN_ACK) \
+   + (((len) >> 6) & 0x1f))
+#define HDR_SET_LEN1(data, len, seq) (HDR_OFFSET + ((len) & 0x3f))
+#define HDR_SET_SEQ(data, len, seq) (HDR_OFFSET + (seq))
+
+/* Check that a header byte is reasonable.  */
+#define HDR_CHECK(ch) (((ch) & HDR_OFFSET) == HDR_OFFSET)
+
+/* Get data from the header.  These macros evaluate their argument
+   multiple times.  */
+#define HDR_IS_DATA(hdr) \
+  (((hdr)[HDR_INDX_TYPE_LEN] & TYPE_LEN_DA_BIT) == TYPE_LEN_DATA)
+#define HDR_GET_LEN(hdr) \
+  ((((hdr)[HDR_INDX_TYPE_LEN] & 0x1f) << 6) + (((hdr)[HDR_INDX_LEN1] & 0x3f)))
+#define HDR_GET_SEQ(hdr) ((hdr)[HDR_INDX_SEQ] & 0x3f)
+
+/* The maximum data length.  */
+#define DATA_MAXLEN 1023
+
+/* The trailer offset.  */
+#define TRLR_OFFSET HDR_OFFSET
+
+/* The indices of the bytes in the packet trailer.  */
+#define TRLR_INDX_CSUM1 0
+#define TRLR_INDX_CSUM2 1
+#define TRLR_INDX_CSUM3 2
+#define TRLR_LENGTH 3
+
+/* How to compute the trailer bytes.  */
+#define TRLR_SET_CSUM1(cksum) (TRLR_OFFSET + (((cksum) >> 12) & 0x3f))
+#define TRLR_SET_CSUM2(cksum) (TRLR_OFFSET + (((cksum) >>  6) & 0x3f))
+#define TRLR_SET_CSUM3(cksum) (TRLR_OFFSET + (((cksum)      ) & 0x3f))
+
+/* Check that a trailer byte is reasonable.  */
+#define TRLR_CHECK(ch) (((ch) & TRLR_OFFSET) == TRLR_OFFSET)
+
+/* Get data from the trailer.  This evaluates its argument multiple
+   times.  */
+#define TRLR_GET_CKSUM(trlr) \
+  ((((trlr)[TRLR_INDX_CSUM1] & 0x3f) << 12) \
+   + (((trlr)[TRLR_INDX_CSUM2] & 0x3f) <<  6) \
+   + ((trlr)[TRLR_INDX_CSUM3] & 0x3f))
+
+/* The sequence number modulos.  */
+#define SEQ_MODULOS (64)
+
+/* Set to 1 if the target is open.  */
+static int mips_is_open;
+
+/* The next sequence number to send.  */
+static int mips_send_seq;
+
+/* The next sequence number we expect to receive.  */
+static int mips_receive_seq;
+
+/* The time to wait before retransmitting a packet, in seconds.  */
+static int mips_retransmit_wait = 3;
+
+/* The number of times to try retransmitting a packet before giving up.  */
+static int mips_send_retries = 10;
+
+/* The number of garbage characters to accept when looking for an
+   SYN for the next packet.  */
+static int mips_syn_garbage = 1050;
+
+/* The time to wait for a packet, in seconds.  */
+static int mips_receive_wait = 30;
+
+/* Set if we have sent a packet to the board but have not yet received
+   a reply.  */
+static int mips_need_reply = 0;
+
+/* This can be set to get debugging with ``set remotedebug''.  */
+static int mips_debug = 0;
+
+/* Read a character from the remote, aborting on error.  Returns -2 on
+   timeout (since that's what serial_readchar returns).  */
+
+static int
+mips_readchar (timeout)
+     int timeout;
+{
+  int ch;
+
+  ch = serial_readchar (timeout);
+  if (ch == EOF)
+    error ("End of file from remote");
+  if (ch == -3)
+    error ("Error reading from remote: %s", safe_strerror (errno));
+  if (mips_debug > 1)
+    {
+      if (ch != -2)
+	printf_filtered ("Read '%c' %d 0x%x\n", ch, ch, ch);
+      else
+	printf_filtered ("Timed out in read\n");
+    }
+  return ch;
+}
+
+/* Get a packet header, putting the data in the supplied buffer.
+   PGARBAGE is a pointer to the number of garbage characters received
+   so far.  CH is the last character received.  Returns 0 for success,
+   or -1 for timeout.  */
+
+static int
+mips_receive_header (hdr, pgarbage, ch, timeout)
+     unsigned char *hdr;
+     int *pgarbage;
+     int ch;
+     int timeout;
+{
+  int i;
+
+  while (1)
+    {
+      /* Wait for a SYN.  mips_syn_garbage is intended to prevent
+	 sitting here indefinitely if the board sends us one garbage
+	 character per second.  ch may already have a value from the
+	 last time through the loop.  */
+      while (ch != SYN)
+	{
+	  ch = mips_readchar (timeout);
+	  if (ch == -2)
+	    return -1;
+	  if (ch != SYN)
+	    {
+	      /* Printing the character here lets the user of gdb see
+		 what the program is outputting, if the debugging is
+		 being done on the console port.  FIXME: Perhaps this
+		 should be filtered?  */
+	      putchar (ch);
+
+	      ++*pgarbage;
+	      if (*pgarbage > mips_syn_garbage)
+		error ("Remote debugging protocol failure");
+	    }
+	}
+
+      /* Get the packet header following the SYN.  */
+      for (i = 1; i < HDR_LENGTH; i++)
+	{
+	  ch = mips_readchar (timeout);
+	  if (ch == -2)
+	    return -1;
+
+	  /* Make sure this is a header byte.  */
+	  if (ch == SYN || ! HDR_CHECK (ch))
+	    break;
+
+	  hdr[i] = ch;
+	}
+
+      /* If we got the complete header, we can return.  Otherwise we
+	 loop around and keep looking for SYN.  */
+      if (i >= HDR_LENGTH)
+	return 0;
+    }
+}
+
+/* Get a packet header, putting the data in the supplied buffer.
+   PGARBAGE is a pointer to the number of garbage characters received
+   so far.  The last character read is returned in *PCH.  Returns 0
+   for success, -1 for timeout, -2 for error.  */
+
+static int
+mips_receive_trailer (trlr, pgarbage, pch, timeout)
+     unsigned char *trlr;
+     int *pgarbage;
+     int *pch;
+     int timeout;
+{
+  int i;
+  int ch;
+
+  for (i = 0; i < TRLR_LENGTH; i++)
+    {
+      ch = mips_readchar (timeout);
+      *pch = ch;
+      if (ch == -2)
+	return -1;
+      if (! TRLR_CHECK (ch))
+	return -2;
+      trlr[i] = ch;
+    }
+  return 0;
+}
+
+/* Get the checksum of a packet.  HDR points to the packet header.
+   DATA points to the packet data.  LEN is the length of DATA.  */
+
+static int
+mips_cksum (hdr, data, len)
+     const unsigned char *hdr;
+     const unsigned char *data;
+     int len;
+{
+  register const unsigned char *p;
+  register int c;
+  register int cksum;
+
+  cksum = 0;
+
+  /* The initial SYN is not included in the checksum.  */
+  c = HDR_LENGTH - 1;
+  p = hdr + 1;
+  while (c-- != 0)
+    cksum += *p++;
+  
+  c = len;
+  p = data;
+  while (c-- != 0)
+    cksum += *p++;
+
+  return cksum;
+}
+
+/* Send a packet containing the given ASCII string.  */
+
+static void
+mips_send_packet (s)
+     const char *s;
+{
+  unsigned int len;
+  unsigned char *packet;
+  register int cksum;
+  int try;
+
+  len = strlen (s);
+  if (len > DATA_MAXLEN)
+    error ("MIPS protocol data packet too long: %s", s);
+
+  packet = (unsigned char *) alloca (HDR_LENGTH + len + TRLR_LENGTH + 1);
+
+  packet[HDR_INDX_SYN] = HDR_SET_SYN (1, len, mips_send_seq);
+  packet[HDR_INDX_TYPE_LEN] = HDR_SET_TYPE_LEN (1, len, mips_send_seq);
+  packet[HDR_INDX_LEN1] = HDR_SET_LEN1 (1, len, mips_send_seq);
+  packet[HDR_INDX_SEQ] = HDR_SET_SEQ (1, len, mips_send_seq);
+
+  memcpy (packet + HDR_LENGTH, s, len);
+
+  cksum = mips_cksum (packet, packet + HDR_LENGTH, len);
+  packet[HDR_LENGTH + len + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
+  packet[HDR_LENGTH + len + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
+  packet[HDR_LENGTH + len + TRLR_INDX_CSUM3] = TRLR_SET_CSUM3 (cksum);
+
+  /* Increment the sequence number.  This will set mips_send_seq to
+     the sequence number we expect in the acknowledgement.  */
+  mips_send_seq = (mips_send_seq + 1) % SEQ_MODULOS;
+
+  /* We can only have one outstanding data packet, so we just wait for
+     the acknowledgement here.  Keep retransmitting the packet until
+     we get one, or until we've tried too many times.  */
+  for (try = 0; try < mips_send_retries; try++)
+    {
+      int garbage;
+      int ch;
+
+      if (mips_debug > 0)
+	{
+	  packet[HDR_LENGTH + len + TRLR_LENGTH] = '\0';
+	  printf_filtered ("Writing \"%s\"\n", packet + 1);
+	}
+
+      if (serial_write (packet, HDR_LENGTH + len + TRLR_LENGTH) == 0)
+	error ("write to target failed: %s", safe_strerror (errno));
+
+      garbage = 0;
+      ch = 0;
+      while (1)
+	{
+	  unsigned char hdr[HDR_LENGTH + 1];
+	  unsigned char trlr[TRLR_LENGTH + 1];
+	  int err;
+	  int seq;
+
+	  /* Get the packet header.  If we time out, resend the data
+	     packet.  */
+	  err = mips_receive_header (hdr, &garbage, ch, mips_retransmit_wait);
+	  if (err != 0)
+	    break;
+
+	  ch = 0;
+
+	  /* If we get a data packet, assume it is a duplicate and
+	     ignore it.  FIXME: If the acknowledgement is lost, this
+	     data packet may be the packet the remote sends after the
+	     acknowledgement.  */
+	  if (HDR_IS_DATA (hdr))
+	    continue;
+
+	  /* If the length is not 0, this is a garbled packet.  */
+	  if (HDR_GET_LEN (hdr) != 0)
+	    continue;
+
+	  /* Get the packet trailer.  */
+	  err = mips_receive_trailer (trlr, &garbage, &ch,
+				      mips_retransmit_wait);
+
+	  /* If we timed out, resend the data packet.  */
+	  if (err == -1)
+	    break;
+
+	  /* If we got a bad character, reread the header.  */
+	  if (err != 0)
+	    continue;
+
+	  /* If the checksum does not match the trailer checksum, this
+	     is a bad packet; ignore it.  */
+	  if (mips_cksum (hdr, (unsigned char *) NULL, 0)
+	      != TRLR_GET_CKSUM (trlr))
+	    continue;
+
+	  if (mips_debug > 0)
+	    {
+	      hdr[HDR_LENGTH] = '\0';
+	      trlr[TRLR_LENGTH] = '\0';
+	      printf_filtered ("Got ack %d \"%s%s\"\n",
+			       HDR_GET_SEQ (hdr), hdr, trlr);
+	    }
+
+	  /* If this ack is for the current packet, we're done.  */
+	  seq = HDR_GET_SEQ (hdr);
+	  if (seq == mips_send_seq)
+	    return;
+
+	  /* If this ack is for the last packet, resend the current
+	     packet.  */
+	  if ((seq + 1) % SEQ_MODULOS == mips_send_seq)
+	    break;
+
+	  /* Otherwise this is a bad ack; ignore it.  Increment the
+	     garbage count to ensure that we do not stay in this loop
+	     forever.  */
+	  ++garbage;
+	}
+    }
+
+  error ("Remote did not acknowledge packet");
+}
+
+/* Receive and acknowledge a packet, returning the data in BUFF (which
+   should be DATA_MAXLEN + 1 bytes).  The protocol documentation
+   implies that only the sender retransmits packets, so this code just
+   waits silently for a packet.  It returns the length of the received
+   packet.  */
+
+static int
+mips_receive_packet (buff)
+     char *buff;
+{
+  int ch;
+  int garbage;
+  int len;
+  unsigned char ack[HDR_LENGTH + TRLR_LENGTH + 1];
+  int cksum;
+
+  ch = 0;
+  garbage = 0;
+  while (1)
+    {
+      unsigned char hdr[HDR_LENGTH];
+      unsigned char trlr[TRLR_LENGTH];
+      int i;
+      int err;
+
+      if (mips_receive_header (hdr, &garbage, ch, mips_receive_wait) != 0)
+	error ("Timed out waiting for remote packet");
+
+      ch = 0;
+
+      /* An acknowledgement is probably a duplicate; ignore it.  */
+      if (! HDR_IS_DATA (hdr))
+	{
+	  if (mips_debug > 0)
+	    printf_filtered ("Ignoring unexpected ACK\n");
+	  continue;
+	}
+
+      /* If this is the wrong sequence number, ignore it.  */
+      if (HDR_GET_SEQ (hdr) != mips_receive_seq)
+	{
+	  if (mips_debug > 0)
+	    printf_filtered ("Ignoring sequence number %d (want %d)\n",
+			     HDR_GET_SEQ (hdr), mips_receive_seq);
+	  continue;
+	}
+
+      len = HDR_GET_LEN (hdr);
+
+      for (i = 0; i < len; i++)
+	{
+	  int rch;
+
+	  rch = mips_readchar (mips_receive_wait);
+	  if (rch == SYN)
+	    {
+	      ch = SYN;
+	      break;
+	    }
+	  if (rch == -2)
+	    error ("Timed out waiting for remote packet");
+	  buff[i] = rch;
+	}
+
+      if (i < len)
+	{
+	  if (mips_debug > 0)
+	    printf_filtered ("Got new SYN after %d chars (wanted %d)\n",
+			     i, len);
+	  continue;
+	}
+
+      err = mips_receive_trailer (trlr, &garbage, &ch, mips_receive_wait);
+      if (err == -1)
+	error ("Timed out waiting for packet");
+      if (err == -2)
+	{
+	  if (mips_debug > 0)
+	    printf_filtered ("Got SYN when wanted trailer\n");
+	  continue;
+	}
+
+      if (mips_cksum (hdr, buff, len) == TRLR_GET_CKSUM (trlr))
+	break;
+
+      if (mips_debug > 0)
+	printf_filtered ("Bad checksum; data %d, trailer %d\n",
+			 mips_cksum (hdr, buff, len),
+			 TRLR_GET_CKSUM (trlr));
+
+      /* The checksum failed.  Send an acknowledgement for the
+	 previous packet to tell the remote to resend the packet.  */
+      ack[HDR_INDX_SYN] = HDR_SET_SYN (0, 0, mips_receive_seq);
+      ack[HDR_INDX_TYPE_LEN] = HDR_SET_TYPE_LEN (0, 0, mips_receive_seq);
+      ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
+      ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
+
+      cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+
+      ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
+      ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
+      ack[HDR_LENGTH + TRLR_INDX_CSUM3] = TRLR_SET_CSUM3 (cksum);
+
+      if (mips_debug > 0)
+	{
+	  ack[HDR_LENGTH + TRLR_LENGTH] = '\0';
+	  printf_filtered ("Writing ack %d \"%s\"\n", mips_receive_seq,
+			   ack + 1);
+	}
+
+      if (serial_write (ack, HDR_LENGTH + TRLR_LENGTH) == 0)
+	error ("write to target failed: %s", safe_strerror (errno));
+    }
+
+  if (mips_debug > 0)
+    {
+      buff[len] = '\0';
+      printf_filtered ("Got packet \"%s\"\n", buff);
+    }
+
+  /* We got the packet.  Send an acknowledgement.  */
+  mips_receive_seq = (mips_receive_seq + 1) % SEQ_MODULOS;
+
+  ack[HDR_INDX_SYN] = HDR_SET_SYN (0, 0, mips_receive_seq);
+  ack[HDR_INDX_TYPE_LEN] = HDR_SET_TYPE_LEN (0, 0, mips_receive_seq);
+  ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
+  ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
+
+  cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+
+  ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
+  ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
+  ack[HDR_LENGTH + TRLR_INDX_CSUM3] = TRLR_SET_CSUM3 (cksum);
+
+  if (mips_debug > 0)
+    {
+      ack[HDR_LENGTH + TRLR_LENGTH] = '\0';
+      printf_filtered ("Writing ack %d \"%s\"\n", mips_receive_seq,
+		       ack + 1);
+    }
+
+  if (serial_write (ack, HDR_LENGTH + TRLR_LENGTH) == 0)
+    error ("write to target failed: %s", safe_strerror (errno));
+
+  return len;
+}
+
+/* Optionally send a request to the remote system and optionally wait
+   for the reply.  This implements the remote debugging protocol,
+   which is built on top of the packet protocol defined above.  Each
+   request has an ADDR argument and a DATA argument.  The following
+   requests are defined:
+
+   \0	don't send a request; just wait for a reply
+   i	read word from instruction space at ADDR
+   d	read word from data space at ADDR
+   I	write DATA to instruction space at ADDR
+   D	write DATA to data space at ADDR
+   r	read register number ADDR
+   R	set register number ADDR to value DATA
+   c	continue execution (if ADDR != 1, set pc to ADDR)
+   s	single step (if ADDR != 1, set pc to ADDR)
+
+   The read requests return the value requested.  The write requests
+   return the previous value in the changed location.  The execution
+   requests return a UNIX wait value (the approximate signal which
+   caused execution to stop is in the upper eight bits).
+
+   If PERR is not NULL, this function waits for a reply.  If an error
+   occurs, it sets *PERR to 1 and sets errno according to what the
+   target board reports.  */
+
+static int
+mips_request (cmd, addr, data, perr)
+     char cmd;
+     unsigned int addr;
+     unsigned int data;
+     int *perr;
+{
+  char buff[DATA_MAXLEN + 1];
+  int len;
+  int rpid;
+  char rcmd;
+  int rerrflg;
+  int rresponse;
+  
+  if (cmd != '\0')
+    {
+      if (mips_need_reply)
+	fatal ("mips_request: Trying to send command before reply");
+      sprintf (buff, "0x0 %c 0x%x 0x%x", cmd, addr, data);
+      mips_send_packet (buff);
+      mips_need_reply = 1;
+    }
+
+  if (perr == (int *) NULL)
+    return 0;
+
+  if (! mips_need_reply)
+    fatal ("mips_request: Trying to get reply before command");
+
+  mips_need_reply = 0;
+
+  len = mips_receive_packet (buff);
+  buff[len] = '\0';
+
+  if (sscanf (buff, "0x%x %c 0x%x 0x%x",
+	      &rpid, &rcmd, &rerrflg, &rresponse) != 4
+      || rpid != 0
+      || (cmd != '\0' && rcmd != cmd))
+    error ("Bad response from remote board");
+
+  if (rerrflg != 0)
+    {
+      *perr = 1;
+
+      /* FIXME: This will returns MIPS errno numbers, which may or may
+	 not be the same as errno values used on other systems.  If
+	 they stick to common errno values, they will be the same, but
+	 if they don't, they must be translated.  */
+      errno = rresponse;
+
+      return 0;
+    }
+
+  *perr = 0;
+  return rresponse;
+}
+
+/* Open a connection to the remote board.  */
+
+static void
+mips_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  int err;
+  char cr;
+  char buff[DATA_MAXLEN + 1];
+
+  if (name == 0)
+    error (
+"To open a MIPS remote debugging connection, you need to specify what serial\n\
+device is attached to the target board (e.g., /dev/ttya).");
+
+  target_preopen (from_tty);
+
+  if (mips_is_open)
+    mips_close (0);
+
+  if (serial_open (name) == 0)
+    perror_with_name (name);
+
+  mips_is_open = 1;
+
+  /* The board seems to want to send us a packet.  I don't know what
+     it means.  */
+  cr = '\r';
+  serial_write (&cr, 1);
+  mips_receive_packet (buff);
+
+  /* If this doesn't call error, we have connected; we don't care if
+     the request itself succeeds or fails.  */
+  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err);
+
+  if (from_tty)
+    printf ("Remote MIPS debugging using %s\n", name);
+  push_target (&mips_ops);	/* Switch to using remote target now */
+
+  start_remote ();		/* Initialize gdb process mechanisms */
+}
+
+/* Close a connection to the remote board.  */
+
+static void
+mips_close (quitting)
+     int quitting;
+{
+  if (mips_is_open)
+    {
+      /* Get the board out of remote debugging mode.  */
+      mips_request ('x', (unsigned int) 0, (unsigned int) 0,
+		    (int *) NULL);
+      serial_close ();
+      mips_is_open = 0;
+    }
+}
+
+/* Detach from the remote board.  */
+
+static void
+mips_detach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (args)
+    error ("Argument given to \"detach\" when remotely debugging.");
+
+  pop_target ();
+  if (from_tty)
+    printf ("Ending remote MIPS debugging.\n");
+}
+
+/* Tell the target board to resume.  This does not wait for a reply
+   from the board.  */
+
+static void
+mips_resume (step, siggnal)
+     int step, siggnal;
+{
+  if (siggnal)
+    error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
+	   siggnal);
+
+  mips_request (step ? 's' : 'c',
+		(unsigned int) read_register (PC_REGNUM),
+		(unsigned int) 0,
+		(int *) NULL);
+}
+
+/* Wait until the remote stops, and return a wait status.  */
+
+static int
+mips_wait (status)
+     WAITTYPE *status;
+{
+  int rstatus;
+  int err;
+
+  /* If we have not sent a single step or continue command, then the
+     board is waiting for us to do something.  Return a status
+     indicating that it is stopped.  */
+  if (! mips_need_reply)
+    {
+      WSETSTOP (*status, SIGTRAP);
+      return 0;
+    }
+
+  rstatus = mips_request ('\0', (unsigned int) 0, (unsigned int) 0, &err);
+  if (err)
+    error ("Remote failure: %s", safe_strerror (errno));
+
+  /* FIXME: The target board uses numeric signal values which are
+     those used on MIPS systems.  If the host uses different signal
+     values, we need to translate here.  I believe all Unix systems
+     use the same values for the signals the board can return, which
+     are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
+
+  /* FIXME: The target board uses a standard Unix wait status int.  If
+     the host system does not, we must translate here.  */
+
+  *status = rstatus;
+
+  return 0;
+}
+
+/* We have to map between the register numbers used by gdb and the
+   register numbers used by the debugging protocol.  This function
+   assumes that we are using tm-mips.h.  */
+
+#define REGNO_OFFSET 96
+
+static int
+mips_map_regno (regno)
+     int regno;
+{
+  if (regno < 32)
+    return regno;
+  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+    return regno - FP0_REGNUM + 32;
+  switch (regno)
+    {
+    case PC_REGNUM:
+      return REGNO_OFFSET + 0;
+    case CAUSE_REGNUM:
+      return REGNO_OFFSET + 1;
+    case HI_REGNUM:
+      return REGNO_OFFSET + 2;
+    case LO_REGNUM:
+      return REGNO_OFFSET + 3;
+    case FCRCS_REGNUM:
+      return REGNO_OFFSET + 4;
+    case FCRIR_REGNUM:
+      return REGNO_OFFSET + 5;
+    default:
+      /* FIXME: Is there a way to get the status register?  */
+      return 0;
+    }
+}
+
+/* Fetch the remote registers.  */
+
+static void
+mips_fetch_registers (regno)
+     int regno;
+{
+  REGISTER_TYPE val;
+  int err;
+
+  if (regno == -1)
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	mips_fetch_registers (regno);
+      return;
+    }
+
+  val = mips_request ('r', (unsigned int) mips_map_regno (regno),
+		      (unsigned int) 0, &err);
+  if (err)
+    error ("Can't read register %d: %s", regno, safe_strerror (errno));
+
+  /* We got the number the register holds, but gdb expects to see a
+     value in the target byte ordering.  */
+  SWAP_TARGET_AND_HOST (val, sizeof (REGISTER_TYPE));
+  supply_register (regno, (char *) &val);
+}
+
+/* Prepare to store registers.  The MIPS protocol can store individual
+   registers, so this function doesn't have to do anything.  */
+
+static void
+mips_prepare_to_store ()
+{
+}
+
+/* Store remote register(s).  */
+
+static void
+mips_store_registers (regno)
+     int regno;
+{
+  int err;
+
+  if (regno == -1)
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	mips_store_registers (regno);
+      return;
+    }
+
+  mips_request ('R', (unsigned int) mips_map_regno (regno),
+		(unsigned int) read_register (regno),
+		&err);
+  if (err)
+    error ("Can't write register %d: %s", regno, safe_strerror (errno));
+}
+
+/* Fetch a word from the target board.  */
+
+static int 
+mips_fetch_word (addr)
+     CORE_ADDR addr;
+{
+  int val;
+  int err;
+
+  val = mips_request ('d', (unsigned int) addr, (unsigned int) 0, &err);
+  if (err)
+    {
+      /* Data space failed; try instruction space.  */
+      val = mips_request ('i', (unsigned int) addr, (unsigned int) 0, &err);
+      if (err)
+	error ("Can't read address 0x%x: %s", addr, safe_strerror (errno));
+    }
+  return val;
+}
+
+/* Store a word to the target board.  */
+
+static void
+mips_store_word (addr, val)
+     CORE_ADDR addr;
+     int val;
+{
+  int err;
+
+  mips_request ('D', (unsigned int) addr, (unsigned int) val, &err);
+  if (err)
+    {
+      /* Data space failed; try instruction space.  */
+      mips_request ('I', (unsigned int) addr, (unsigned int) val, &err);
+      if (err)
+	error ("Can't write address 0x%x: %s", addr, safe_strerror (errno));
+    }
+}
+
+/* Read or write LEN bytes from inferior memory at MEMADDR,
+   transferring to or from debugger address MYADDR.  Write to inferior
+   if SHOULD_WRITE is nonzero.  Returns length of data written or
+   read; 0 for error.  Note that protocol gives us the correct value
+   for a longword, since it transfers values in ASCII.  We want the
+   byte values, so we have to swap the longword values.  */
+
+static int
+mips_xfer_memory (memaddr, myaddr, len, write, ignore)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int write;
+     struct target_ops *ignore;
+{
+  register int i;
+  /* Round starting address down to longword boundary.  */
+  register CORE_ADDR addr = memaddr &~ 3;
+  /* Round ending address up; get number of longwords that makes.  */
+  register int count = (((memaddr + len) - addr) + 3) / 4;
+  /* Allocate buffer of that many longwords.  */
+  register unsigned int *buffer = (unsigned int *) alloca (count * 4);
+
+  if (write)
+    {
+      /* Fill start and end extra bytes of buffer with existing data.  */
+      if (addr != memaddr || len < 4)
+	{
+	  /* Need part of initial word -- fetch it.  */
+	  buffer[0] = mips_fetch_word (addr);
+	  SWAP_TARGET_AND_HOST (buffer, 4);
+	}
+
+      if (count > 1)		/* FIXME, avoid if even boundary */
+	{
+	  buffer[count - 1] = mips_fetch_word (addr + (count - 1) * 4);
+	  SWAP_TARGET_AND_HOST (buffer + (count - 1) * 4, 4);
+	}
+
+      /* Copy data to be written over corresponding part of buffer */
+
+      memcpy ((char *) buffer + (memaddr & 3), myaddr, len);
+
+      /* Write the entire buffer.  */
+
+      for (i = 0; i < count; i++, addr += 4)
+	{
+	  SWAP_TARGET_AND_HOST (buffer + i, 4);
+	  mips_store_word (addr, buffer[i]);
+	}
+    }
+  else
+    {
+      /* Read all the longwords */
+      for (i = 0; i < count; i++, addr += 4)
+	{
+	  buffer[i] = mips_fetch_word (addr);
+	  SWAP_TARGET_AND_HOST (buffer + i, 4);
+	  QUIT;
+	}
+
+      /* Copy appropriate bytes out of the buffer.  */
+      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
+    }
+  return len;
+}
+
+/* Print info on this target.  */
+
+static void
+mips_files_info (ignore)
+     struct target_ops *ignore;
+{
+  printf ("Debugging a MIPS board over a serial line.\n");
+}
+
+/* Load an executable onto the board.  */
+
+static void
+mips_load (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  bfd *abfd;
+  asection *s;
+  int err;
+
+  abfd = bfd_openr (args, 0);
+  if (abfd == (bfd *) NULL)
+    error ("Unable to open file %s", args);
+
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    error ("%s: Not an object file", args);
+
+  for (s = abfd->sections; s != (asection *) NULL; s = s->next)
+    {
+      if ((s->flags & SEC_LOAD) != 0)
+	{
+	  bfd_size_type size;
+
+	  size = bfd_get_section_size_before_reloc (s);
+	  if (size > 0)
+	    {
+	      char *buffer;
+	      struct cleanup *old_chain;
+	      bfd_vma vma;
+
+	      buffer = xmalloc (size);
+	      old_chain = make_cleanup (free, buffer);
+
+	      vma = bfd_get_section_vma (abfd, s);
+	      printf_filtered ("Loading section %s, size 0x%x vma 0x%x\n",
+			       bfd_get_section_name (abfd, s), size, vma);
+	      bfd_get_section_contents (abfd, s, buffer, 0, size);
+	      mips_xfer_memory (vma, buffer, size, 1, &mips_ops);
+
+	      do_cleanups (old_chain);
+	    }
+	}
+    }
+
+  mips_request ('R', (unsigned int) mips_map_regno (PC_REGNUM),
+		(unsigned int) abfd->start_address,
+		&err);
+  if (err)
+    error ("Can't write PC register: %s", safe_strerror (errno));
+
+  bfd_close (abfd);
+
+  /* FIXME: Should we call symbol_file_add here?  */
+}
+
+/* Start running on the target board.  */
+
+static void
+mips_create_inferior (execfile, args, env)
+     char *execfile;
+     char *args;
+     char **env;
+{
+  CORE_ADDR entry_pt;
+
+  /* FIXME: Actually, we probably could pass arguments.  */
+  if (args && *args)
+    error ("Can't pass arguments to remote MIPS board.");
+
+  if (execfile == 0 || exec_bfd == 0)
+    error ("No exec file specified");
+
+  entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
+
+  init_wait_for_inferior ();
+
+  proceed (entry_pt, -1, 0);
+}
+
+/* Clean up after a process.  Actually nothing to do.  */
+
+static void
+mips_mourn_inferior ()
+{
+  generic_mourn_inferior ();
+}
+
+/* The target vector.  */
+
+struct target_ops mips_ops =
+{
+  "mips",			/* to_shortname */
+  "Remote MIPS debugging over serial line",	/* to_longname */
+  "Debug a board using the MIPS remote debugging protocol over a serial line.\n\
+Specify the serial device it is connected to (e.g., /dev/ttya).",  /* to_doc */
+  mips_open,			/* to_open */
+  mips_close,			/* to_close */
+  NULL,				/* to_attach */
+  mips_detach,			/* to_detach */
+  mips_resume,			/* to_resume */
+  mips_wait,			/* to_wait */
+  mips_fetch_registers,		/* to_fetch_registers */
+  mips_store_registers,		/* to_store_registers */
+  mips_prepare_to_store,	/* to_prepare_to_store */
+  mips_xfer_memory,		/* to_xfer_memory */
+  mips_files_info,		/* to_files_info */
+  NULL,				/* to_insert_breakpoint */
+  NULL,				/* to_remove_breakpoint */
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  NULL,				/* to_kill */
+  mips_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
+  mips_create_inferior,		/* to_create_inferior */
+  mips_mourn_inferior,		/* to_mourn_inferior */
+  NULL,				/* to_can_run */
+  NULL,				/* to_notice_signals */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
+};
+
+void
+_initialize_remote_mips ()
+{
+  add_target (&mips_ops);
+
+  add_show_from_set (
+    add_set_cmd ("remotedebug", no_class, var_zinteger, (char *) &mips_debug,
+		   "Set debugging of remote MIPS serial I/O.\n\
+When non-zero, each packet sent or received with the remote target\n\
+is displayed.  Higher numbers produce more debugging.", &setlist),
+	&showlist);
+}
