@@ -43,7 +43,7 @@ case "${target}" in
   a29k-*-aout)		bfd_target=a29k-aout ;;
   a29k-*-coff)		bfd_target=a29k-coff ;;
   a29k-*-sym1)		bfd_target=a29k-coff ;;
-  h8300-*-*)		bfd_target=h8300-coff ;;
+  h8300*-*-*)		bfd_target=h8300-coff ;;
   h8500-*-*)		bfd_target=h8500-coff ;;
   sh-*-*)		bfd_target=sh-coff ;;
   hppa*-*-bsd*)		bfd_target=hppabsd ;;
