@@ -199,9 +199,9 @@ static int call_gdb_type_print PARAMS ((value_ptr));
 
 static int call_gdb_val_print PARAMS ((value_ptr, int));
 
-static void variable_fputs PARAMS ((const char *, FILE *));
+static void variable_fputs PARAMS ((const char *, GDB_FILE *));
 
-static void null_fputs PARAMS ((const char *, FILE *));
+static void null_fputs PARAMS ((const char *, GDB_FILE *));
 
 static int my_value_equal PARAMS ((gdb_variable *, value_ptr));
 
@@ -528,7 +528,7 @@ create_variable (name, real_name, pc)
   value_ptr mark;
   struct frame_info *fi, *old_fi;
   struct block *block;
-  void (*old_fputs) PARAMS ((const char *, FILE *));
+  void (*old_fputs) PARAMS ((const char *, GDB_FILE *));
   gdb_result r;
 
   var  = (gdb_variable *) xmalloc (sizeof (gdb_variable));
@@ -1446,7 +1446,7 @@ static int
 call_gdb_type_print (val)
      value_ptr val;
 {
-  void (*old_hook) PARAMS ((const char *, FILE *));
+  void (*old_hook) PARAMS ((const char *, GDB_FILE *));
   int result;
 
   /* Save the old hook and install new hook */
@@ -1474,7 +1474,7 @@ call_gdb_val_print (val, format)
      value_ptr val;
      int format;
 {
-  void (*old_hook) PARAMS ((const char *, FILE *));
+  void (*old_hook) PARAMS ((const char *, GDB_FILE *));
   gdb_result r;
   int result;
 
@@ -1512,7 +1512,7 @@ call_gdb_val_print (val, format)
 static void
 variable_fputs (text, stream)
      const char *text;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   /* Just append everything to the fputs_obj... Issues with stderr/stdout? */
   Tcl_AppendToObj (fputs_obj, (char *) text, -1);
@@ -1523,7 +1523,7 @@ variable_fputs (text, stream)
 static void
 null_fputs (text, stream)
      const char *text;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   return;
 }

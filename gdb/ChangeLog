@@ -1,7 +1,5 @@
 1999-01-27  James Ingham  <jingham@cygnus.com>
 
-	Merging changes in from gdbtk-980810-branch:
-
 	* typeprint.c (whatis_exp): Remove static declaration.
 
 Wed Jan 27 16:50:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>

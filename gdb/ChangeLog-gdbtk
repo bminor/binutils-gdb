@@ -1,4 +1,9 @@
-M1999-01-27  James Ingham  <jingham@cygnus.com>
+1999-01-27  James Ingham  <jingham@cygnus.com>
+
+	* gdbtk-wrapper.c: Missed a couple of places where FILE->GDB_FILE
+	in the fputs_unfiltered_hook needed to propagate.
+
+1999-01-27  James Ingham  <jingham@cygnus.com>
 
 	Merging in changes from gdbtk-980810 - the Itcl3
 	gdb branch.
