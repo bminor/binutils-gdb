@@ -1,3 +1,8 @@
+2002-12-23  Adam Fedor  <fedor@gnu.org>
+
+	* objc-lang.c (lookup_objc_class, lookup_child_selector): Remove 
+	last argument from complaint function call.
+
 2002-12-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* exec.c (print_section_info): Add FIXME comments regarding format
