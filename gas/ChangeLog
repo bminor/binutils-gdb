@@ -1,3 +1,8 @@
+Fri Feb 21 01:08:48 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in, doc: use the doc.  Build it, install
+	  it, clean it, etc.
+
 Tue Feb 18 02:21:25 1992  K. Richard Pixley  (rich at cygnus.com)
 
 	* read.c: white space and comments only.
