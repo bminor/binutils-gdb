@@ -20,12 +20,47 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+enum {
+  E_D0_REGNUM = 0,
+  E_D1_REGNUM = 1,
+  E_D2_REGNUM = 2,
+  E_D3_REGNUM = 3,
+  E_A0_REGNUM = 4,
+  E_A1_REGNUM = 5,
+  E_A2_REGNUM = 6,
+  E_A3_REGNUM = 7,
+  E_SP_REGNUM = 8,
+  E_PC_REGNUM = 9,
+  E_MDR_REGNUM = 10,
+  E_PSW_REGNUM = 11,
+  E_LIR_REGNUM = 12,
+  E_LAR_REGNUM = 13,
+  E_MDRQ_REGNUM = 14,
+  E_E0_REGNUM = 15,
+  E_E1_REGNUM = 16,
+  E_E2_REGNUM = 17,
+  E_E3_REGNUM = 18,
+  E_E4_REGNUM = 19,
+  E_E5_REGNUM = 20,
+  E_E6_REGNUM = 21,
+  E_E7_REGNUM = 22,
+  E_MCRH_REGNUM = 26,
+  E_MCRL_REGNUM = 27,
+  E_MCVF_REGNUM = 28,
+  E_NUM_REGS = 32
+};
+
 /* mn10300 private data */
 struct gdbarch_tdep
 {
   int am33_mode;
-#define AM33_MODE (gdbarch_tdep (current_gdbarch)->am33_mode)
 };
 
-extern CORE_ADDR mn10300_analyze_prologue (struct frame_info *, void **, CORE_ADDR);
-extern struct trad_frame_cache *mn10300_frame_unwind_cache (struct frame_info *, void **);
+#define AM33_MODE (gdbarch_tdep (current_gdbarch)->am33_mode)
+
+extern CORE_ADDR mn10300_analyze_prologue (struct frame_info *, 
+					   void **, CORE_ADDR);
+
+extern struct trad_frame_cache *mn10300_frame_unwind_cache (struct frame_info*,
+							    void **);
+

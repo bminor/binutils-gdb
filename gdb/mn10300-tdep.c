@@ -65,29 +65,6 @@
 
 #include "mn10300-tdep.h"
 
-enum {
-  E_D0_REGNUM = 0,
-  E_D1_REGNUM = 1,
-  E_D2_REGNUM = 2,
-  E_D3_REGNUM = 3,
-  E_A0_REGNUM = 4,
-  E_A1_REGNUM = 5,
-  E_A2_REGNUM = 6,
-  E_A3_REGNUM = 7,
-  E_SP_REGNUM = 8,
-  E_PC_REGNUM = 9,
-  E_MDR_REGNUM = 10,
-  E_PSW_REGNUM = 11,
-  E_LIR_REGNUM = 12,
-  E_LAR_REGNUM = 13,
-  E_MDRQ_REGNUM = 14,
-  E_E0_REGNUM = 15,
-  E_MCRH_REGNUM = 26,
-  E_MCRL_REGNUM = 27,
-  E_MCVF_REGNUM = 28,
-  E_NUM_REGS = 32
-};
-
 
 /* Compute the alignment required by a type.  */
 
@@ -327,23 +304,18 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 			    void **this_prologue_cache)
 {
   struct trad_frame_cache *cache;
+  CORE_ADDR pc;
 
   if (*this_prologue_cache)
     return (*this_prologue_cache);
 
   cache = trad_frame_cache_zalloc (next_frame);
-  trad_frame_set_id (cache, 
-		     frame_id_build (gdbarch_unwind_sp (current_gdbarch,
-							next_frame),
-				     gdbarch_unwind_pc (current_gdbarch,
-							next_frame)));
+  pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
+  mn10300_analyze_prologue (next_frame, &cache, pc);
 
-  /* FIXME: The SP isn't the frame base, so this is 0th approximation.  */
-  /* FIXME: The A3 reg isn't always the frame register either, so this
-     is 1st approximation.  */
-  trad_frame_set_this_base (cache, 
-			    frame_unwind_register_signed (next_frame, 
-							  E_A3_REGNUM));
+  trad_frame_set_id (cache, 
+		     frame_id_build (trad_frame_get_this_base (cache), pc));
+
   (*this_prologue_cache) = cache;
   return cache;
 }

@@ -1,5 +1,13 @@
 2005-03-04  Michael Snyder  <msnyder@redhat.com>
 
+	* mn10300-prologue.c: New file.  Prologue analysis.
+	* mn10300-tdep.c: Move REGNUM values to mn10300-tdep.h.
+	(mn10300_frame_unwind_cache): Don't call trad_frame_set_id
+	until after analyze_prologue, and don't call trad_frame_set_base
+	at all (let analyze_prologue do it).
+
+2005-03-04  Michael Snyder  <msnyder@redhat.com>
+
 	* trad-frame.c (trad_frame_set_reg_value): New function.
 	* trad-frame.h (trad_frame_set_reg_value): Export.
 
