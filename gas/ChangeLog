@@ -1,4 +1,5 @@
 2004-11-12  Bob Wilson  <bob.wilson@acm.org>
+	    Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (finish_vinsn): Clear pending instruction if
 	there is a conflict.
