@@ -1,3 +1,8 @@
+Wed May 28 16:16:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-i386.c (coff_i386_reloc): Don't just exit if we see an
+	R_IMAGEBASE reloc.
+
 Wed May 28 09:48:43 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-arm.c (compatible): Add test for supersets of ARM
