@@ -34,7 +34,7 @@ cfg-paper.texi
 clib
 config
 config.sub
-configdos.bat
+configure.bat
 configure
 configure.in
 configure.man
