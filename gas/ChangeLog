@@ -1,3 +1,9 @@
+Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* tc-i386.c (i386_displacement): Fix handling of
+	BFD_RELOC_X86_64_GOTPCREL.
+	(i386_validate_fix): Likewise.
+
 2001-02-12  Philip Blundell  <pb@futuretv.com>
 
 	* config/tc-arm.c (do_ldst): Improve warnings for unpredictable

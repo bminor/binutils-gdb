@@ -3436,7 +3436,10 @@ i386_displacement (disp_start, disp_end)
       assert (exp->X_op == O_symbol);
       exp->X_op = O_subtract;
       exp->X_op_symbol = GOT_symbol;
-      i.disp_reloc[this_operand] = BFD_RELOC_32;
+      if (i.disp_reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+        i.disp_reloc[this_operand] = BFD_RELOC_32_PCREL;
+      else
+        i.disp_reloc[this_operand] = BFD_RELOC_32;
     }
 #endif
 
@@ -4600,9 +4603,18 @@ i386_validate_fix (fixp)
   if (fixp->fx_subsy && fixp->fx_subsy == GOT_symbol)
     {
       /* GOTOFF relocation are nonsense in 64bit mode.  */
-      if (flag_code == CODE_64BIT)
-	abort ();
-      fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+      if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
+	{
+	  if (flag_code != CODE_64BIT)
+	    abort ();
+	  fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
+	}
+      else
+	{
+	  if (flag_code == CODE_64BIT)
+	    abort ();
+	  fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+	}
       fixp->fx_subsy = 0;
     }
 }
