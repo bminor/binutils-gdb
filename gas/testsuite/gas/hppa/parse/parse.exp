@@ -204,5 +204,9 @@ if [istarget hppa*-*-*] then {
 
     # Make sure we grok # line directives.
     gas_test "appbug.s" "" "" "Test acceptance of #line directives"
+
+    # Make sure we give errors if a floating point format is specified
+    # for an xmpyu instruction (integer multiple)
+    gas_test_error "xmpyubug.s" "" "Check for error on bogus argument to .block"
 }
 

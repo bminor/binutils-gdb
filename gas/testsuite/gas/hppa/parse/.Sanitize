@@ -50,6 +50,7 @@ stdreg.s
 stringer.s
 undefbug.s
 versionbug.s
+xmpyubug.s
 
 Things-to-lose:
 

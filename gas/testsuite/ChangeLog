@@ -1,3 +1,8 @@
+Fri Feb  4 23:42:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/xmpyubug.s: New test.
+	* gas/hppa/more.parse/parse.exp: Run it.
+
 Fri Feb  4 17:13:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* lib/gas-defs.exp (regexp_diff): New procedure, vaguely based on
