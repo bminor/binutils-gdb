@@ -1000,6 +1000,26 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 					     method_name,
 					     TYPE_FN_FIELD_STATIC_P (f, j),
 					     stream);
+
+		  /* If the method is const or volatile, this will show up as
+		     a qualifier on the first argument.  Handle a missing or
+		     corrupt THIS pointer gracefully, since we shouldn't crash
+		     on corrupt debug information (if we're going to complain
+		     about this it should be in the debug readers, not this
+		     late).  */
+		  if (!TYPE_FN_FIELD_STATIC_P (f, j)
+		      && TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)) > 0)
+		    {
+		      struct type *method_type, *this_ptr_type, *this_type;
+		      method_type = TYPE_FN_FIELD_TYPE (f, j);
+		      this_ptr_type = TYPE_FIELDS (method_type)[0].type;
+		      if (TYPE_CODE (this_ptr_type) == TYPE_CODE_PTR)
+			{
+			  this_type = TYPE_TARGET_TYPE (this_ptr_type);
+			  c_type_print_modifier (this_type, stream, 1, 0);
+			}
+		    }
+
 		  fprintf_filtered (stream, ";\n");
 		}
 	    }
