@@ -115,6 +115,8 @@ tc-sh.c
 tc-sh.h
 tc-sparc.c
 tc-sparc.h
+tc-sparc64.c
+tc-sparc64.h
 tc-tahoe.c
 tc-tahoe.h
 tc-vax.c
@@ -143,7 +145,7 @@ Things-to-lose:
 Do-last:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 stuff in tc-sparc.c.
+	echo Keeping tc-sparc64 and v9 stuff in tc-sparc.c.
 else
 	echo Cleaning tc-sparc.c...
 	sed '/start\-sanitize/,/end-sanitize/d' < tc-sparc.c > new
@@ -151,6 +153,8 @@ else
 		cp tc-sparc.c .Recover
 	fi
 	mv new tc-sparc.c
+	echo Deleting tc-sparc64 files.
+	rm -f tc-sparc64.c tc-sparc64.h
 fi
 
 # End of file.
