@@ -1,3 +1,7 @@
+Mon Feb 23 20:45:57 1998  Mark Alexander  <marka@cygnus.com>
+
+	* nltvals.def: Regenerate with MN10300 additions.
+
 Tue Feb 24 13:18:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.h (TRACE_ALU_RESULT2): Define.
