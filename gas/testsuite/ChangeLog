@@ -1,3 +1,10 @@
+Fri Feb  4 17:13:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* lib/gas-defs.exp (regexp_diff): New procedure, vaguely based on
+	"simple_diff" from linker test suite.
+	* gas/sun4/addend.exp: Use it.
+	* gas/sun4/addend.d: New file.
+
 Sun Jan 30 23:34:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* gas/all/gas.exp: Adjust regexp for x930509.s for current listing
