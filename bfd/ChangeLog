@@ -1,3 +1,13 @@
+Mon Sep 12 21:56:20 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_reloc_skip): Correct off-by-one error for 4-byte
+	R_NO_RELOCATION fixups.
+	(bfd_section_from_som_symbol): Return the absolute section if the
+	symbol isn't contained in any section in the output file.
+	(som_slurp_symbol_table): ST_PRI_PROG and ST_SEC_PROG symbols are
+	not function symbols (they are magic code labels which *can* be the
+	targets of cross space branches).  $START$ is not a section symbol.
+
 Mon Sep 12 11:43:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coff-alpha.c (ecoffalpha_little_vec): Add SEC_CODE and SEC_DATA

@@ -1187,8 +1187,8 @@ som_reloc_skip (abfd, skip, p, subspace_reloc_sizep, queue)
   else if (skip > 0)
     {
       bfd_put_8 (abfd, R_NO_RELOCATION + 31, p);
-      bfd_put_8 (abfd, skip >> 16, p + 1);
-      bfd_put_16 (abfd, skip, p + 2);
+      bfd_put_8 (abfd, (skip - 1) >> 16, p + 1);
+      bfd_put_16 (abfd, skip - 1, p + 2);
       p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 4, queue);
     }
   return p;
@@ -3664,8 +3664,10 @@ bfd_section_from_som_symbol (abfd, symbol)
 	if (section->target_index == index)
 	  return section;
 
-      /* Should never happen.  */
-      abort();
+      /* Could be a symbol from an external library (such as an OMOS
+	 shared library).  Don't abort.  */
+      return &bfd_abs_section;
+
     }
   else
     {
@@ -3680,8 +3682,10 @@ bfd_section_from_som_symbol (abfd, symbol)
 	    return section;
 	}
 
-      /* Should never happen.  */
-      abort ();
+      /* Could be a symbol from an external library (such as an OMOS
+	 shared library).  Don't abort.  */
+      return &bfd_abs_section;
+
     }
 }
 
@@ -3774,8 +3778,6 @@ som_slurp_symbol_table (abfd)
       switch (bufp->symbol_type)
 	{
 	case ST_ENTRY:
-	case ST_PRI_PROG:
-	case ST_SEC_PROG:
 	case ST_MILLICODE:
 	  sym->symbol.flags |= BSF_FUNCTION;
 	  sym->symbol.value &= ~0x3;
@@ -3783,6 +3785,8 @@ som_slurp_symbol_table (abfd)
 
 	case ST_STUB:
 	case ST_CODE:
+	case ST_PRI_PROG:
+	case ST_SEC_PROG:
 	  sym->symbol.value &= ~0x3;
 	  /* If the symbol's scope is ST_UNSAT, then these are
 	     undefined function symbols.  */
@@ -3832,9 +3836,11 @@ som_slurp_symbol_table (abfd)
 	  break;
 	}
 
-      /* Mark section symbols and symbols used by the debugger.  */
+      /* Mark section symbols and symbols used by the debugger.
+	 Note $START$ is a magic code symbol, NOT a section symbol.  */
       if (sym->symbol.name[0] == '$'
-	  && sym->symbol.name[strlen (sym->symbol.name) - 1] == '$')
+	  && sym->symbol.name[strlen (sym->symbol.name) - 1] == '$'
+	  && strcmp (sym->symbol.name, "$START$"))
 	sym->symbol.flags |= BSF_SECTION_SYM;
       else if (!strncmp (sym->symbol.name, "L$0\002", 4))
 	{
