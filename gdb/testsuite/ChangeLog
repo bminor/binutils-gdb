@@ -1,3 +1,10 @@
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.exp: Move the tests of until command from here...
+	* gdb.base/until.exp: ... to here. New file. Add other tests.
+	* gdb.base/advance.c: New file.
+	* gdb.base/advance.exp: New file.
+
 2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.base/args.c: New file.
