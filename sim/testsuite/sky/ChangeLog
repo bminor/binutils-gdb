@@ -1,3 +1,11 @@
+Mon Apr 13 16:51:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* Makefile.in (*): Added .vuout/.vuexpect/.vuok test targets
+	for confirming VU instruction trace.
+	(t-cop2): Test COP2 sim using above facility.
+
+	* t-cop2.vuexpect: New file.
+
 Thu Apr  9 16:26:17 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-pke3.trc: Additional test for MASK=0 MODE=2 UNPACK.

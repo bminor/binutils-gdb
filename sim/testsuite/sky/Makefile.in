@@ -88,9 +88,9 @@ GCC_FOR_TARGET = `\
 C_GEN = perl $(srcdir)/c_gen.pl
 
 .SUFFIXES: .trc .c .run .ok \
-           .vif0out .vif0ok \
-	   .vif0expect 	    \
+           .vif0out .vif0ok .vif0expect \
 	   .vif1out .vif1ok .vif1expect \
+	   .vuout .vuok .vuexpect \
 	   .uu	\
 	   .dvpasm .vuasm 
 
@@ -109,7 +109,7 @@ TESTS = \
 	tsv408_0.ok tsv408_1.ok \
 	tsv416_0.ok tsv416_1.ok \
 	tsv432_0.ok tsv432_1.ok \
-	t-cop2.ok
+	t-cop2.vuok
 
 #SCE_TESTS := $(patsubst %.dvpasm, %.ok, $(wildcard sce*.dvpasm))
 SCE_TESTS = \
@@ -206,6 +206,9 @@ sce%.ok: sce%.exe
 .vif1out.vif1ok:
 	diff $(srcdir)/$*.vif1expect $<
 	touch $@
+.vuout.vuok:
+	diff $(srcdir)/$*.vuexpect $<
+
 
 #------------------------------------
 # Rules for building the TESTS
@@ -223,6 +226,9 @@ sce%.ok: sce%.exe
 .run.vif1out:
 	rm -f $@
 	-env VIF1_TRACE_FILE=$@ $(RUN_FOR_TARGET) $<
+.run.vuout:
+	rm -f $@
+	-env SKY_DEBUG=inst_trace $(RUN_FOR_TARGET) $< > $@
 .s.run:
 	rm -f $@
 	$(AS_FOR_TARGET) -mcpu=r5900 -o $@ $<
