@@ -51,6 +51,7 @@ ho-hpux.h
 ho-i386.h
 ho-i386aix.h
 ho-irix.h
+ho-mach3.h
 ho-mipsbsd.h
 ho-rs6000.h
 ho-sun3.h
