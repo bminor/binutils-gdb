@@ -1,3 +1,9 @@
+Thu Jun  3 00:23:53 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config/go32.mh: define EXTRALIBES to -lm (for binutils), also
+	remove defines of __MSDOS__ and __GO32__ (these are in the
+	compiler now).
+
 Wed Jun  2 17:57:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	From Utah:
