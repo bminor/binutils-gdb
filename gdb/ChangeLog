@@ -1,3 +1,21 @@
+Fri Jan 30 15:11:38 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	Changes by <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+	* infrun.c (IN_SOLIB_DYNSYM_RESOLVE_CODE): new macro for detecting
+ 	whether we are in the dynamic symbol resolution code 
+	(wait_for_inferior): invoke it.
+	* solib.c (in_svr4_dynsym_resolve_code): new function
+	(enable_break): record start and end of the dynamic linker
+	text and plt sections for use in in_svr4_dynsym_resolve_code.
+	* solib.h (IN_SOLIB_DYNSYM_RESOLVE_CODE): add svr4 definition;
+	(in_svr4_dynsym_resolve_code): declare it.
+	* config/nm-gnu.h (solib.h): move inclusion to after definition
+	of SVR4_SHARED_LIBS.
+	* config/nm-sysv4.h (solib.h): ditto.
+	* config/i386/nm-i386sco5.h (solib.h): ditto.
+	* config/i386/nm-linux.h (solib.h): ditto.
+	* config/mips/nm-irix5.h (IN_SOLIB_DYNSYM_RESOLVE_CODE): undefine.
+
 Thu Jan 29 19:39:31 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* coffread.c (coff_symtab_read) [SEM]: Remove code, macro can
