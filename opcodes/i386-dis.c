@@ -1,5 +1,5 @@
 /* Print i386 instructions for GDB, the GNU debugger.
-   Copyright (C) 1988, 89, 91, 93, 94, 95, 96, 1997
+   Copyright (C) 1988, 89, 91, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -418,9 +418,9 @@ static struct dis386 dis386[] = {
   { "movS",	Ev, Gv },
   { "movb",	Gb, Eb },
   { "movS",	Gv, Ev },
-  { "movw",	Ew, Sw },
+  { "movS",	Ev, Sw },
   { "leaS",	Gv, M },
-  { "movw",	Sw, Ew },
+  { "movS",	Sw, Ev },
   { "popS",	Ev },
   /* 90 */
   { "nop" },
@@ -809,7 +809,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,1,1,1,0,1,0,0,1,1,1,0,1,1,0,1, /* df */
+  /* d0 */ 0,1,1,1,0,1,0,0,1,1,0,1,1,1,0,1, /* df */
   /* e0 */ 0,1,1,0,0,1,0,0,1,1,0,1,1,1,0,1, /* ef */
   /* f0 */ 0,1,1,1,0,1,0,0,1,1,1,0,1,1,1,0  /* ff */
 };
@@ -1164,6 +1164,8 @@ int
 print_insn_x86 (pc, info, aflag, dflag)
      bfd_vma pc;
      disassemble_info *info;
+     int aflag;
+     int dflag;
 {
   struct dis386 *dp;
   int i;
@@ -1753,8 +1755,8 @@ OP_E (bytemode, aflag, dflag)
       int havesib;
       int havebase;
       int base;
-      int index;
-      int scale;
+      int index = 0;
+      int scale = 0;
 
       havesib = 0;
       havebase = 1;
@@ -1781,7 +1783,9 @@ OP_E (bytemode, aflag, dflag)
 	  break;
 	case 1:
 	  FETCH_DATA (the_info, codep + 1);
-	  disp = *(char *)codep++;
+	  disp = *codep++;
+	  if ((disp & 0x80) != 0)
+	    disp -= 0x100;
 	  break;
 	case 2:
 	  disp = get32 ();
@@ -1818,14 +1822,22 @@ OP_E (bytemode, aflag, dflag)
 	{
 	case 0:
 	  if (rm == 6)
-	    disp = (short) get16 ();
+	    {
+	      disp = get16 ();
+	      if ((disp & 0x8000) != 0)
+		disp -= 0x10000;
+	    }
 	  break;
 	case 1:
 	  FETCH_DATA (the_info, codep + 1);
-	  disp = *(char *)codep++;
+	  disp = *codep++;
+	  if ((disp & 0x80) != 0)
+	    disp -= 0x100;
 	  break;
 	case 2:
-	  disp = (short) get16 ();
+	  disp = get16 ();
+	  if ((disp & 0x8000) != 0)
+	    disp -= 0x10000;
 	  break;
 	}
 
@@ -1989,16 +2001,24 @@ OP_sI (bytemode, aflag, dflag)
     {
     case b_mode:
       FETCH_DATA (the_info, codep + 1);
-      op = *(char *)codep++;
+      op = *codep++;
+      if ((op & 0x80) != 0)
+	op -= 0x100;
       break;
     case v_mode:
       if (dflag)
 	op = get32 ();
       else
-	op = (short)get16();
+	{
+	  op = get16();
+	  if ((op & 0x8000) != 0)
+	    op -= 0x10000;
+	}
       break;
     case w_mode:
-      op = (short)get16 ();
+      op = get16 ();
+      if ((op & 0x8000) != 0)
+	op -= 0x10000;
       break;
     default:
       oappend ("<internal disassembler error>");
@@ -2022,14 +2042,18 @@ OP_J (bytemode, aflag, dflag)
     {
     case b_mode:
       FETCH_DATA (the_info, codep + 1);
-      disp = *(char *)codep++;
+      disp = *codep++;
+      if ((disp & 0x80) != 0)
+	disp -= 0x100;
       break;
     case v_mode:
       if (dflag)
 	disp = get32 ();
       else
 	{
-	  disp = (short)get16 ();
+	  disp = get16 ();
+	  if ((disp & 0x8000) != 0)
+	    disp -= 0x10000;
 	  /* for some reason, a data16 prefix on a jump instruction
 	     means that the pc is masked to 16 bits after the
 	     displacement is added!  */
@@ -2090,7 +2114,11 @@ OP_DIR (size, aflag, dflag)
       if (aflag)
 	offset = get32 ();
       else
-	offset = (short)get16 ();
+	{
+	  offset = get16 ();
+	  if ((offset & 0x8000) != 0)
+	    offset -= 0x10000;
+	}
       
       offset = start_pc + codep - start_codep + offset;
       set_op (offset);
@@ -2145,7 +2173,16 @@ OP_DSSI (dummy, aflag, dflag)
      int aflag;
      int dflag;
 {
-  oappend ("%ds:(");
+  if ((prefixes
+       & (PREFIX_CS
+	  | PREFIX_DS
+	  | PREFIX_SS
+	  | PREFIX_ES
+	  | PREFIX_FS
+	  | PREFIX_GS)) == 0)
+    prefixes |= PREFIX_DS;
+  append_prefix ();
+  oappend ("(");
   oappend (aflag ? "%esi" : "%si");
   oappend (")");
   return (0);

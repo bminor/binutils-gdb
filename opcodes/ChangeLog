@@ -1,3 +1,7 @@
+Fri Apr 24 16:07:57 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (OP_DSSI): Print segment override.
+
 start-sanitize-r5900
 Thu Apr 23 12:32:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
