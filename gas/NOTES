@@ -60,9 +60,14 @@ Finish conversion to using BFD for all object file writing.  (This is the
 BFD_ASSEMBLER code, not BFD or BFD_HEADERS.)  VMS might be the tough one here,
 since there's no BFD support for it at all yet.  Eliminate the old code.
 
+Fix lots of uses of empty strings to use null pointers.  Will improve
+efficiency, and should make code clearer too.
+
 Clean up comments; lots of 'em are one previous maintainer griping about
 another previous maintainer, unrelated to the code.  (And with no names,
 they're not so fun to read. :-)
+
+Lots of documentation.
 
 Get Steve to document H8/500 stuff.
 
