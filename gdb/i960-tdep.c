@@ -122,6 +122,24 @@ check_host (void)
     }
 }
 
+/* Is this register part of the register window system?  A yes answer
+   implies that 1) The name of this register will not be the same in
+   other frames, and 2) This register is automatically "saved" upon
+   subroutine calls and thus there is no need to search more than one
+   stack frame for it.
+
+   On the i960, in fact, the name of this register in another frame is
+   "mud" -- there is no overlap between the windows.  Each window is
+   simply saved into the stack (true for our purposes, after having been
+   flushed; normally they reside on-chip and are restored from on-chip
+   without ever going to memory).  */
+
+static int
+register_in_window_p (int regnum)
+{
+  return regnum <= R15_REGNUM;
+}
+
 /* i960_find_saved_register ()
 
    Return the address in which frame FRAME's value of register REGNUM
@@ -154,7 +172,7 @@ i960_find_saved_register (struct frame_info *frame, int regnum)
      stack pointer saved for *this* frame; this is returned from the
      next frame.  */
 
-  if (REGISTER_IN_WINDOW_P (regnum))
+  if (register_in_window_p (regnum))
     {
       frame1 = get_next_frame (frame);
       if (!frame1)

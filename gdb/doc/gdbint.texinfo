@@ -3044,11 +3044,6 @@ pointer.  It examines the current state of the machine as needed.
 Define this if you need to supply your own definition for the function
 @code{get_saved_register}.
 
-@item REGISTER_IN_WINDOW_P (@var{regnum})
-@findex REGISTER_IN_WINDOW_P
-Define this to be an expression that is 1 if the given register is in
-the window.
-
 @item IBM6000_TARGET
 @findex IBM6000_TARGET
 Shows that we are configured for an IBM RS/6000 target.  This

@@ -1,5 +1,10 @@
 2002-04-24  David S. Miller  <davem@redhat.com>
 
+	* i960-tdep.c (register_in_window_p): New function.
+	(i960_find_saved_register): Use it instead of
+	REGISTER_IN_WINDOW_P.
+	* config/i960/tm-i960.h (REGISTER_IN_WINDOW): Delete.
+
 	* symtab.h (find_stab_function_addr): Kill extern.
 	* minsyms.c (find_stab_function_addr): Remove from here...
 	* dbxread.c: ... to here, and mark it static.

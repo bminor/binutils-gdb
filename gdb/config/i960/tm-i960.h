@@ -127,21 +127,6 @@ extern void i960_get_saved_register (char *raw_buffer,
   i960_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
 
 
-
-/* Is this register part of the register window system?  A yes answer
-   implies that 1) The name of this register will not be the same in
-   other frames, and 2) This register is automatically "saved" upon
-   subroutine calls and thus there is no need to search more than one
-   stack frame for it.
-
-   On the i960, in fact, the name of this register in another frame is
-   "mud" -- there is no overlap between the windows.  Each window is
-   simply saved into the stack (true for our purposes, after having been
-   flushed; normally they reside on-chip and are restored from on-chip
-   without ever going to memory).  */
-
-#define REGISTER_IN_WINDOW_P(regnum)	((regnum) <= R15_REGNUM)
-
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the i960, all regs are 4 bytes except for floating
    point, which are 10.  NINDY only sends us 8 byte values for these,

@@ -1,3 +1,7 @@
+2002-04-24  David S. Miller  <davem@redhat.com>
+
+	* gdbint.texinfo (REGISTER_IN_WINDOW): Delete definition.
+
 2002-04-21  David S. Miller  <davem@redhat.com>
 
 	* gdbint.texinfo (SKIP_PROLOGUE_FRAMELESS_P): Delete definition.
