@@ -273,7 +273,8 @@ value_cast (type, arg2)
 	      /* With HP aCC, pointers to data members have a bias */
 	    case TYPE_CODE_MEMBER:
 	      retvalp = value_from_longest (type, value_as_long (arg2));
-	      ptr = (unsigned int *) VALUE_CONTENTS (retvalp);	/* force evaluation */
+	      /* force evaluation */
+	      ptr = (unsigned int *) VALUE_CONTENTS (retvalp);	
 	      *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
 	      return retvalp;
 
@@ -286,7 +287,8 @@ value_cast (type, arg2)
 	    }
 	}
       longest = value_as_long (arg2);
-      return value_from_longest (type, convert_to_boolean ? (LONGEST) (longest ? 1 : 0) : longest);
+      return value_from_longest (type, convert_to_boolean ? 
+				 (LONGEST) (longest ? 1 : 0) : longest);
     }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {

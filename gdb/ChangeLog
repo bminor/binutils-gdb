@@ -1,3 +1,7 @@
+2000-06-15  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* valops.c (value_cast): Break up long lines.
+
 2000-06-14  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (dump_die): Use the proper printf format for
