@@ -328,7 +328,7 @@ else
 	done
 fi
 
-d30v_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
+d30v_files="ChangeLog ChangeLog-9697 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
 		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
@@ -356,7 +356,7 @@ else
 	done
 fi
 
-v850_files="ChangeLog Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h elf32-v850.c cpu-v850.c"
+v850_files="ChangeLog ChangeLog-9697 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h elf32-v850.c cpu-v850.c"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -384,7 +384,7 @@ else
 	done
 fi
 
-r5900_files="ChangeLog config.bfd archures.c bfd-in2.h cpu-mips.c elf32-mips.c libbfd.h reloc.c"
+r5900_files="ChangeLog ChangeLog-9697 config.bfd archures.c bfd-in2.h cpu-mips.c elf32-mips.c libbfd.h reloc.c"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
@@ -468,7 +468,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog Makefile.in Makefile.am archures.c bfd-in2.h config.bfd configure configure.in targets.c coffcode.h coffswap.h"
+tic80_files="ChangeLog ChangeLog-9697 Makefile.in Makefile.am archures.c bfd-in2.h config.bfd configure configure.in targets.c coffcode.h coffswap.h"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
@@ -496,35 +496,7 @@ else
 	done
 fi
 
-gm_files="ChangeLog ChangeLog.2 config.bfd"
-if ( echo $* | grep keep\-gm > /dev/null ) ; then
-	for i in $gm_files ; do
-		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping gm stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $gm_files ; do
-		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"gm\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-gm/,/end-\sanitize\-gm/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-vr5400_files="ChangeLog archures.c bfd-in2.h bfd-in.h cpu-mips.c elf32-mips.c"
+vr5400_files="ChangeLog ChangeLog-9697 archures.c bfd-in2.h bfd-in.h cpu-mips.c elf32-mips.c"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
 		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
@@ -580,7 +552,7 @@ else
 	done
 fi
 
-m32rx_files="ChangeLog archures.c bfd-in2.h elf32-m32r.c cpu-m32r.c"
+m32rx_files="ChangeLog ChangeLog-9697 archures.c bfd-in2.h elf32-m32r.c cpu-m32r.c"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
 	for i in $m32rx_files ; do
 		if test -r $i && (grep sanitize-m32rx $i > /dev/null) ; then
