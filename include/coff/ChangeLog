@@ -1,3 +1,7 @@
+Mon Feb  5 18:35:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i960.h (F_I960HX): Define.
+
 Wed Jan 31 13:11:54 1996  Richard Henderson  <rth@tamu.edu>
 
 	* aux.h: New file.
