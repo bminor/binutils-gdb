@@ -178,6 +178,14 @@ static int inhibit_gdbinit = 0;
 
 extern char *version;
 
+/* Canonical host name as a string. */
+
+extern char *host_canonical;
+
+/* Canonical target name as a string. */
+
+extern char *target_canonical;
+
 /* Message to be printed before the error message, when an error occurs.  */
 
 extern char *error_pre_print;
@@ -291,7 +299,6 @@ static char dirbuf[1024];
 
 void (*window_hook) PARAMS ((FILE *, char *));
 
-extern int frame_file_full_name;
 extern int mapped_symbol_files;
 extern int readnow_symbol_files;
 
@@ -1894,8 +1901,14 @@ print_gdb_version (stream)
   FILE *stream;
 {
   fprintf_filtered (stream, "\
-GDB %s, Copyright 1993 Free Software Foundation, Inc.",
-	  version);
+GDB %s (%s", version, host_canonical);
+
+  if (strcmp(host_canonical, target_canonical))
+    fprintf_filtered (stream, " --target %s", target_canonical);
+
+  fprintf_filtered (stream, "), ");
+  wrap_here("");
+  fprintf_filtered (stream, "Copyright 1993 Free Software Foundation, Inc.");
 }
 
 /* ARGSUSED */

@@ -1,3 +1,8 @@
+Fri Jun 11 15:19:59 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* main.c (main): back to two periods for elipse.
+	  (print_gdb_version): revised format for configuration info.
+
 Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* dbxread.c (process_one_symbol): Rather than having
