@@ -654,29 +654,33 @@ do
 	    -e '3,$ s,#,  ,' \
 	    -e '$ s,$, */,'
     fi
-    if class_is_predicate_p && ! class_is_multiarch_p
+    if class_is_multiarch_p
     then
-	printf "\n"
-	printf "#if defined (${macro})\n"
-	printf "/* Legacy for systems yet to multi-arch ${macro} */\n"
-	#printf "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
-	printf "#define ${macro}_P() (1)\n"
-	printf "#endif\n"
-	printf "\n"
-	printf "/* Default predicate for non- multi-arch targets. */\n"
-	printf "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)\n"
-	printf "#define ${macro}_P() (0)\n"
-	printf "#endif\n"
-	printf "\n"
-	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
-	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
-	printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
-	printf "#endif\n"
-    fi
-    if class_is_predicate_p && class_is_multiarch_p
-    then
-	printf "\n"
-	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	if class_is_predicate_p
+	then
+	    printf "\n"
+	    printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	fi
+    else
+	if class_is_predicate_p
+	then
+	    printf "\n"
+	    printf "#if defined (${macro})\n"
+	    printf "/* Legacy for systems yet to multi-arch ${macro} */\n"
+	    #printf "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	    printf "#define ${macro}_P() (1)\n"
+	    printf "#endif\n"
+	    printf "\n"
+	    printf "/* Default predicate for non- multi-arch targets. */\n"
+	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)\n"
+	    printf "#define ${macro}_P() (0)\n"
+	    printf "#endif\n"
+	    printf "\n"
+	    printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
+	    printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
+	    printf "#endif\n"
+	fi
     fi
     if class_is_variable_p
     then
@@ -700,7 +704,8 @@ do
     fi
     if class_is_function_p
     then
-	if ( fallback_default_p || class_is_predicate_p ) && ! class_is_multiarch_p
+	if class_is_multiarch_p ; then :
+	elif fallback_default_p || class_is_predicate_p
 	then
 	    printf "\n"
 	    printf "/* Default (function) for non- multi-arch platforms. */\n"
@@ -732,8 +737,8 @@ do
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});\n"
 	fi
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
-	if ! class_is_multiarch_p
-	then
+	if class_is_multiarch_p ; then :
+	else
 	    printf "#if GDB_MULTI_ARCH\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	    if [ "${actual}" = "" ]
