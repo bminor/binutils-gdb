@@ -24,69 +24,8 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 
-static reloc_howto_type *elf_i386_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void elf_i386_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-static bfd_boolean elf_i386_is_local_label_name
-  PARAMS ((bfd *, const char *));
-static bfd_boolean elf_i386_grok_prstatus
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-static bfd_boolean elf_i386_grok_psinfo
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-static struct bfd_hash_entry *link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static struct bfd_link_hash_table *elf_i386_link_hash_table_create
-  PARAMS ((bfd *));
-static bfd_boolean create_got_section
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean elf_i386_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static void elf_i386_copy_indirect_symbol
-  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
-	   struct elf_link_hash_entry *));
-static int elf_i386_tls_transition
-  PARAMS ((struct bfd_link_info *, int, int));
-
-static bfd_boolean elf_i386_mkobject
-  PARAMS ((bfd *));
-static bfd_boolean elf_i386_object_p
-  PARAMS ((bfd *));
-static bfd_boolean elf_i386_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static asection *elf_i386_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static bfd_boolean elf_i386_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static bfd_boolean elf_i386_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean allocate_dynrelocs
-  PARAMS ((struct elf_link_hash_entry *, PTR));
-static bfd_boolean readonly_dynrelocs
-  PARAMS ((struct elf_link_hash_entry *, PTR));
-static bfd_boolean elf_i386_fake_sections
-  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
-static bfd_boolean elf_i386_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_vma dtpoff_base
-  PARAMS ((struct bfd_link_info *));
-static bfd_vma tpoff
-  PARAMS ((struct bfd_link_info *, bfd_vma));
-static bfd_boolean elf_i386_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-static bfd_boolean elf_i386_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	   Elf_Internal_Sym *));
-static enum elf_reloc_type_class elf_i386_reloc_type_class
-  PARAMS ((const Elf_Internal_Rela *));
-static bfd_boolean elf_i386_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-
-#define USE_REL	1		/* 386 uses REL relocations instead of RELA.  */
+/* 386 uses REL relocations instead of RELA.  */
+#define USE_REL	1
 
 #include "elf/i386.h"
 
@@ -130,8 +69,8 @@ static reloc_howto_type elf_howto_table[]=
      R_386_standard counts the number up to this point, and
      R_386_ext_offset is the value to subtract from a reloc type of
      R_386_16 thru R_386_PC8 to form an index into this table.  */
-#define R_386_standard ((unsigned int) R_386_GOTPC + 1)
-#define R_386_ext_offset ((unsigned int) R_386_TLS_TPOFF - R_386_standard)
+#define R_386_standard (R_386_GOTPC + 1)
+#define R_386_ext_offset (R_386_TLS_TPOFF - R_386_standard)
 
   /* These relocs are a GNU extension.  */
   HOWTO(R_386_TLS_TPOFF, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
@@ -165,8 +104,8 @@ static reloc_howto_type elf_howto_table[]=
 	bfd_elf_generic_reloc, "R_386_PC8",
 	TRUE, 0xff, 0xff, TRUE),
 
-#define R_386_ext ((unsigned int) R_386_PC8 + 1 - R_386_ext_offset)
-#define R_386_tls_offset ((unsigned int) R_386_TLS_LDO_32 - R_386_ext)
+#define R_386_ext (R_386_PC8 + 1 - R_386_ext_offset)
+#define R_386_tls_offset (R_386_TLS_LDO_32 - R_386_ext)
   /* These are common with Solaris TLS implementation.  */
   HOWTO(R_386_TLS_LDO_32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_TLS_LDO_32",
@@ -188,8 +127,8 @@ static reloc_howto_type elf_howto_table[]=
 	TRUE, 0xffffffff, 0xffffffff, FALSE),
 
   /* Another gap.  */
-#define R_386_tls ((unsigned int) R_386_TLS_TPOFF32 + 1 - R_386_tls_offset)
-#define R_386_vt_offset ((unsigned int) R_386_GNU_VTINHERIT - R_386_tls)
+#define R_386_tls (R_386_TLS_TPOFF32 + 1 - R_386_tls_offset)
+#define R_386_vt_offset (R_386_GNU_VTINHERIT - R_386_tls)
 
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_386_GNU_VTINHERIT,	/* type */
@@ -221,146 +160,144 @@ static reloc_howto_type elf_howto_table[]=
 	 0,			/* dst_mask */
 	 FALSE)			/* pcrel_offset */
 
-#define R_386_vt ((unsigned int) R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
+#define R_386_vt (R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
 
 };
 
 #ifdef DEBUG_GEN_RELOC
-#define TRACE(str) fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
+#define TRACE(str) \
+  fprintf (stderr, "i386 bfd reloc lookup %d (%s)\n", code, str)
 #else
 #define TRACE(str)
 #endif
 
 static reloc_howto_type *
-elf_i386_reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+elf_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    bfd_reloc_code_real_type code)
 {
   switch (code)
     {
     case BFD_RELOC_NONE:
       TRACE ("BFD_RELOC_NONE");
-      return &elf_howto_table[(unsigned int) R_386_NONE ];
+      return &elf_howto_table[R_386_NONE];
 
     case BFD_RELOC_32:
       TRACE ("BFD_RELOC_32");
-      return &elf_howto_table[(unsigned int) R_386_32 ];
+      return &elf_howto_table[R_386_32];
 
     case BFD_RELOC_CTOR:
       TRACE ("BFD_RELOC_CTOR");
-      return &elf_howto_table[(unsigned int) R_386_32 ];
+      return &elf_howto_table[R_386_32];
 
     case BFD_RELOC_32_PCREL:
       TRACE ("BFD_RELOC_PC32");
-      return &elf_howto_table[(unsigned int) R_386_PC32 ];
+      return &elf_howto_table[R_386_PC32];
 
     case BFD_RELOC_386_GOT32:
       TRACE ("BFD_RELOC_386_GOT32");
-      return &elf_howto_table[(unsigned int) R_386_GOT32 ];
+      return &elf_howto_table[R_386_GOT32];
 
     case BFD_RELOC_386_PLT32:
       TRACE ("BFD_RELOC_386_PLT32");
-      return &elf_howto_table[(unsigned int) R_386_PLT32 ];
+      return &elf_howto_table[R_386_PLT32];
 
     case BFD_RELOC_386_COPY:
       TRACE ("BFD_RELOC_386_COPY");
-      return &elf_howto_table[(unsigned int) R_386_COPY ];
+      return &elf_howto_table[R_386_COPY];
 
     case BFD_RELOC_386_GLOB_DAT:
       TRACE ("BFD_RELOC_386_GLOB_DAT");
-      return &elf_howto_table[(unsigned int) R_386_GLOB_DAT ];
+      return &elf_howto_table[R_386_GLOB_DAT];
 
     case BFD_RELOC_386_JUMP_SLOT:
       TRACE ("BFD_RELOC_386_JUMP_SLOT");
-      return &elf_howto_table[(unsigned int) R_386_JUMP_SLOT ];
+      return &elf_howto_table[R_386_JUMP_SLOT];
 
     case BFD_RELOC_386_RELATIVE:
       TRACE ("BFD_RELOC_386_RELATIVE");
-      return &elf_howto_table[(unsigned int) R_386_RELATIVE ];
+      return &elf_howto_table[R_386_RELATIVE];
 
     case BFD_RELOC_386_GOTOFF:
       TRACE ("BFD_RELOC_386_GOTOFF");
-      return &elf_howto_table[(unsigned int) R_386_GOTOFF ];
+      return &elf_howto_table[R_386_GOTOFF];
 
     case BFD_RELOC_386_GOTPC:
       TRACE ("BFD_RELOC_386_GOTPC");
-      return &elf_howto_table[(unsigned int) R_386_GOTPC ];
+      return &elf_howto_table[R_386_GOTPC];
 
       /* These relocs are a GNU extension.  */
     case BFD_RELOC_386_TLS_TPOFF:
       TRACE ("BFD_RELOC_386_TLS_TPOFF");
-      return &elf_howto_table[(unsigned int) R_386_TLS_TPOFF - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_TPOFF - R_386_ext_offset];
 
     case BFD_RELOC_386_TLS_IE:
       TRACE ("BFD_RELOC_386_TLS_IE");
-      return &elf_howto_table[(unsigned int) R_386_TLS_IE - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_IE - R_386_ext_offset];
 
     case BFD_RELOC_386_TLS_GOTIE:
       TRACE ("BFD_RELOC_386_TLS_GOTIE");
-      return &elf_howto_table[(unsigned int) R_386_TLS_GOTIE - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_GOTIE - R_386_ext_offset];
 
     case BFD_RELOC_386_TLS_LE:
       TRACE ("BFD_RELOC_386_TLS_LE");
-      return &elf_howto_table[(unsigned int) R_386_TLS_LE - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_LE - R_386_ext_offset];
 
     case BFD_RELOC_386_TLS_GD:
       TRACE ("BFD_RELOC_386_TLS_GD");
-      return &elf_howto_table[(unsigned int) R_386_TLS_GD - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_GD - R_386_ext_offset];
 
     case BFD_RELOC_386_TLS_LDM:
       TRACE ("BFD_RELOC_386_TLS_LDM");
-      return &elf_howto_table[(unsigned int) R_386_TLS_LDM - R_386_ext_offset];
+      return &elf_howto_table[R_386_TLS_LDM - R_386_ext_offset];
 
     case BFD_RELOC_16:
       TRACE ("BFD_RELOC_16");
-      return &elf_howto_table[(unsigned int) R_386_16 - R_386_ext_offset];
+      return &elf_howto_table[R_386_16 - R_386_ext_offset];
 
     case BFD_RELOC_16_PCREL:
       TRACE ("BFD_RELOC_16_PCREL");
-      return &elf_howto_table[(unsigned int) R_386_PC16 - R_386_ext_offset];
+      return &elf_howto_table[R_386_PC16 - R_386_ext_offset];
 
     case BFD_RELOC_8:
       TRACE ("BFD_RELOC_8");
-      return &elf_howto_table[(unsigned int) R_386_8 - R_386_ext_offset];
+      return &elf_howto_table[R_386_8 - R_386_ext_offset];
 
     case BFD_RELOC_8_PCREL:
       TRACE ("BFD_RELOC_8_PCREL");
-      return &elf_howto_table[(unsigned int) R_386_PC8 - R_386_ext_offset];
+      return &elf_howto_table[R_386_PC8 - R_386_ext_offset];
 
     /* Common with Sun TLS implementation.  */
     case BFD_RELOC_386_TLS_LDO_32:
       TRACE ("BFD_RELOC_386_TLS_LDO_32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_LDO_32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_LDO_32 - R_386_tls_offset];
 
     case BFD_RELOC_386_TLS_IE_32:
       TRACE ("BFD_RELOC_386_TLS_IE_32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_IE_32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_IE_32 - R_386_tls_offset];
 
     case BFD_RELOC_386_TLS_LE_32:
       TRACE ("BFD_RELOC_386_TLS_LE_32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_LE_32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_LE_32 - R_386_tls_offset];
 
     case BFD_RELOC_386_TLS_DTPMOD32:
       TRACE ("BFD_RELOC_386_TLS_DTPMOD32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_DTPMOD32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_DTPMOD32 - R_386_tls_offset];
 
     case BFD_RELOC_386_TLS_DTPOFF32:
       TRACE ("BFD_RELOC_386_TLS_DTPOFF32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_DTPOFF32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_DTPOFF32 - R_386_tls_offset];
 
     case BFD_RELOC_386_TLS_TPOFF32:
       TRACE ("BFD_RELOC_386_TLS_TPOFF32");
-      return &elf_howto_table[(unsigned int) R_386_TLS_TPOFF32 - R_386_tls_offset];
+      return &elf_howto_table[R_386_TLS_TPOFF32 - R_386_tls_offset];
 
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
-      return &elf_howto_table[(unsigned int) R_386_GNU_VTINHERIT
-			     - R_386_vt_offset];
+      return &elf_howto_table[R_386_GNU_VTINHERIT - R_386_vt_offset];
 
     case BFD_RELOC_VTABLE_ENTRY:
       TRACE ("BFD_RELOC_VTABLE_ENTRY");
-      return &elf_howto_table[(unsigned int) R_386_GNU_VTENTRY
-			     - R_386_vt_offset];
+      return &elf_howto_table[R_386_GNU_VTENTRY - R_386_vt_offset];
 
     default:
       break;
@@ -371,10 +308,9 @@ elf_i386_reloc_type_lookup (abfd, code)
 }
 
 static void
-elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+			    arelent *cache_ptr,
+			    Elf_Internal_Rela *dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
   unsigned int indx;
@@ -389,7 +325,7 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
     {
       (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
 			     bfd_archive_filename (abfd), (int) r_type);
-      indx = (unsigned int) R_386_NONE;
+      indx = R_386_NONE;
     }
   cache_ptr->howto = &elf_howto_table[indx];
 }
@@ -401,9 +337,7 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
    _bfd_elf_is_local_label_name.  */
 
 static bfd_boolean
-elf_i386_is_local_label_name (abfd, name)
-     bfd *abfd;
-     const char *name;
+elf_i386_is_local_label_name (bfd *abfd, const char *name)
 {
   if (name[0] == '.' && name[1] == 'X')
     return TRUE;
@@ -413,9 +347,7 @@ elf_i386_is_local_label_name (abfd, name)
 
 /* Support for core dump NOTE sections.  */
 static bfd_boolean
-elf_i386_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t raw_size;
@@ -445,9 +377,7 @@ elf_i386_grok_prstatus (abfd, note)
 }
 
 static bfd_boolean
-elf_i386_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {
@@ -456,9 +386,9 @@ elf_i386_grok_psinfo (abfd, note)
 
       case 124:		/* Linux/i386 elf_prpsinfo */
 	elf_tdata (abfd)->core_program
-	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
 	elf_tdata (abfd)->core_command
-	 = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
     }
 
   /* Note that for some reason, a spurious space is tacked
@@ -607,8 +537,7 @@ struct elf_i386_obj_tdata
   (elf_i386_tdata (abfd)->local_got_tls_type)
 
 static bfd_boolean
-elf_i386_mkobject (abfd)
-     bfd *abfd;
+elf_i386_mkobject (bfd *abfd)
 {
   bfd_size_type amt = sizeof (struct elf_i386_obj_tdata);
   abfd->tdata.any = bfd_zalloc (abfd, amt);
@@ -618,8 +547,7 @@ elf_i386_mkobject (abfd)
 }
 
 static bfd_boolean
-elf_i386_object_p (abfd)
-  bfd *abfd;
+elf_i386_object_p (bfd *abfd)
 {
   /* Allocate our special target data.  */
   struct elf_i386_obj_tdata *new_tdata;
@@ -664,10 +592,9 @@ struct elf_i386_link_hash_table
 /* Create an entry in an i386 ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+link_hash_newfunc (struct bfd_hash_entry *entry,
+		   struct bfd_hash_table *table,
+		   const char *string)
 {
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
@@ -696,13 +623,12 @@ link_hash_newfunc (entry, table, string)
 /* Create an i386 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf_i386_link_hash_table_create (abfd)
-     bfd *abfd;
+elf_i386_link_hash_table_create (bfd *abfd)
 {
   struct elf_i386_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
 
-  ret = (struct elf_i386_link_hash_table *) bfd_malloc (amt);
+  ret = bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -729,9 +655,7 @@ elf_i386_link_hash_table_create (abfd)
    shortcuts to them in our hash table.  */
 
 static bfd_boolean
-create_got_section (dynobj, info)
-     bfd *dynobj;
-     struct bfd_link_info *info;
+create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
 
@@ -760,9 +684,7 @@ create_got_section (dynobj, info)
    hash table.  */
 
 static bfd_boolean
-elf_i386_create_dynamic_sections (dynobj, info)
-     bfd *dynobj;
-     struct bfd_link_info *info;
+elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
 
@@ -789,9 +711,9 @@ elf_i386_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf_i386_copy_indirect_symbol (bed, dir, ind)
-     struct elf_backend_data *bed;
-     struct elf_link_hash_entry *dir, *ind;
+elf_i386_copy_indirect_symbol (struct elf_backend_data *bed,
+			       struct elf_link_hash_entry *dir,
+			       struct elf_link_hash_entry *ind)
 {
   struct elf_i386_link_hash_entry *edir, *eind;
 
@@ -854,10 +776,7 @@ elf_i386_copy_indirect_symbol (bed, dir, ind)
 }
 
 static int
-elf_i386_tls_transition (info, r_type, is_local)
-     struct bfd_link_info *info;
-     int r_type;
-     int is_local;
+elf_i386_tls_transition (struct bfd_link_info *info, int r_type, int is_local)
 {
   if (info->shared)
     return r_type;
@@ -886,11 +805,10 @@ elf_i386_tls_transition (info, r_type, is_local)
    table, and dynamic reloc sections.  */
 
 static bfd_boolean
-elf_i386_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf_i386_check_relocs (bfd *abfd,
+		       struct bfd_link_info *info,
+		       asection *sec,
+		       const Elf_Internal_Rela *relocs)
 {
   struct elf_i386_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
@@ -1004,8 +922,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 		    size = symtab_hdr->sh_info;
 		    size *= (sizeof (bfd_signed_vma) + sizeof(char));
-		    local_got_refcounts = ((bfd_signed_vma *)
-					   bfd_zalloc (abfd, size));
+		    local_got_refcounts = bfd_zalloc (abfd, size);
 		    if (local_got_refcounts == NULL)
 		      return FALSE;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -1029,7 +946,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		else
 		  {
 		    (*_bfd_error_handler)
-		      (_("%s: `%s' accessed both as normal and thread local symbol"),
+		      (_("%s: `%s' accessed both as normal and "
+			 "thread local symbol"),
 		       bfd_archive_filename (abfd),
 		       h ? h->root.root.string : "<local>");
 		    return FALSE;
@@ -1195,8 +1113,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
-		  p = ((struct elf_i386_dyn_relocs *)
-		       bfd_alloc (htab->elf.dynobj, amt));
+		  p = bfd_alloc (htab->elf.dynobj, amt);
 		  if (p == NULL)
 		    return FALSE;
 		  p->next = *head;
@@ -1238,12 +1155,11 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_i386_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf_i386_gc_mark_hook (asection *sec,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		       Elf_Internal_Rela *rel,
+		       struct elf_link_hash_entry *h,
+		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
     {
@@ -1277,11 +1193,10 @@ elf_i386_gc_mark_hook (sec, info, rel, h, sym)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf_i386_gc_sweep_hook (bfd *abfd,
+			struct bfd_link_info *info,
+			asection *sec,
+			const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1375,9 +1290,8 @@ elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
    understand.  */
 
 static bfd_boolean
-elf_i386_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
+elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
+				struct elf_link_hash_entry *h)
 {
   struct elf_i386_link_hash_table *htab;
   asection *s;
@@ -1534,9 +1448,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (h, inf)
-     struct elf_link_hash_entry *h;
-     PTR inf;
+allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_i386_link_hash_table *htab;
@@ -1748,9 +1660,7 @@ allocate_dynrelocs (h, inf)
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (h, inf)
-     struct elf_link_hash_entry *h;
-     PTR inf;
+readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct elf_i386_link_hash_entry *eh;
   struct elf_i386_dyn_relocs *p;
@@ -1779,9 +1689,8 @@ readonly_dynrelocs (h, inf)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-elf_i386_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
+elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
   bfd *dynobj;
@@ -1948,7 +1857,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	 section's contents are written out.  This should not happen,
 	 but this way if it does, we get a R_386_NONE reloc instead
 	 of garbage.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
+      s->contents = bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL)
 	return FALSE;
     }
@@ -1961,7 +1870,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  bfd_elf32_add_dynamic_entry (info, (TAG), (VAL))
 
       if (info->executable)
 	{
@@ -2007,10 +1916,9 @@ elf_i386_size_dynamic_sections (output_bfd, info)
    section name, which is a hack, but ought to work.  */
 
 static bfd_boolean
-elf_i386_fake_sections (abfd, hdr, sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     Elf_Internal_Shdr *hdr;
-     asection *sec;
+elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
+			Elf_Internal_Shdr *hdr,
+			asection *sec)
 {
   register const char *name;
 
@@ -2043,8 +1951,7 @@ elf_i386_fake_sections (abfd, hdr, sec)
    This is PT_TLS segment p_vaddr.  */
 
 static bfd_vma
-dtpoff_base (info)
-     struct bfd_link_info *info;
+dtpoff_base (struct bfd_link_info *info)
 {
   /* If tls_segment is NULL, we should have signalled an error already.  */
   if (elf_hash_table (info)->tls_segment == NULL)
@@ -2056,9 +1963,7 @@ dtpoff_base (info)
    if STT_TLS virtual address is ADDRESS.  */
 
 static bfd_vma
-tpoff (info, address)
-     struct bfd_link_info *info;
-     bfd_vma address;
+tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_tls_segment *tls_segment
     = elf_hash_table (info)->tls_segment;
@@ -2073,16 +1978,14 @@ tpoff (info, address)
 /* Relocate an i386 ELF section.  */
 
 static bfd_boolean
-elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+elf_i386_relocate_section (bfd *output_bfd,
+			   struct bfd_link_info *info,
+			   bfd *input_bfd,
+			   asection *input_section,
+			   bfd_byte *contents,
+			   Elf_Internal_Rela *relocs,
+			   Elf_Internal_Sym *local_syms,
+			   asection **local_sections)
 {
   struct elf_i386_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
@@ -2114,11 +2017,11 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       int tls_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type == (int) R_386_GNU_VTINHERIT
-	  || r_type == (int) R_386_GNU_VTENTRY)
+      if (r_type == R_386_GNU_VTINHERIT
+	  || r_type == R_386_GNU_VTENTRY)
 	continue;
 
-      if ((indx = (unsigned) r_type) >= R_386_standard
+      if ((indx = r_type) >= R_386_standard
 	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
 	      >= R_386_ext - R_386_standard)
 	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
@@ -2633,12 +2536,14 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
-		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 1);
+		      bfd_put_8 (output_bfd, 0xb8,
+				 contents + rel->r_offset - 1);
 		    }
 		  else
 		    {
 		      BFD_ASSERT (rel->r_offset >= 2);
-		      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
+		      type = bfd_get_8 (input_bfd,
+					contents + rel->r_offset - 2);
 		      switch (type)
 			{
 			case 0x8b:
@@ -3010,7 +2915,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
-				    relocation, (bfd_vma) 0);
+				    relocation, 0);
 
       if (r != bfd_reloc_ok)
 	{
@@ -3032,7 +2937,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (r == bfd_reloc_overflow)
 	    {
 	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, (bfd_vma) 0,
+		     (info, name, howto->name, 0,
 		      input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	    }
@@ -3055,11 +2960,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
    dynamic sections here.  */
 
 static bfd_boolean
-elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf_i386_finish_dynamic_symbol (bfd *output_bfd,
+				struct bfd_link_info *info,
+				struct elf_link_hash_entry *h,
+				Elf_Internal_Sym *sym)
 {
   struct elf_i386_link_hash_table *htab;
 
@@ -3218,10 +3122,9 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
    dynamic linker, before writing them out.  */
 
 static enum elf_reloc_type_class
-elf_i386_reloc_type_class (rela)
-     const Elf_Internal_Rela *rela;
+elf_i386_reloc_type_class (const Elf_Internal_Rela *rela)
 {
-  switch ((int) ELF32_R_TYPE (rela->r_info))
+  switch (ELF32_R_TYPE (rela->r_info))
     {
     case R_386_RELATIVE:
       return reloc_class_relative;
@@ -3237,9 +3140,8 @@ elf_i386_reloc_type_class (rela)
 /* Finish up the dynamic sections.  */
 
 static bfd_boolean
-elf_i386_finish_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf_i386_finish_dynamic_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
   bfd *dynobj;
@@ -3348,11 +3250,11 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
       if (htab->sgotplt->_raw_size > 0)
 	{
 	  bfd_put_32 (output_bfd,
-		      (sdyn == NULL ? (bfd_vma) 0
+		      (sdyn == NULL ? 0
 		       : sdyn->output_section->vma + sdyn->output_offset),
 		      htab->sgotplt->contents);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 8);
+	  bfd_put_32 (output_bfd, 0, htab->sgotplt->contents + 4);
+	  bfd_put_32 (output_bfd, 0, htab->sgotplt->contents + 8);
 	}
 
       elf_section_data (htab->sgotplt->output_section)->this_hdr.sh_entsize = 4;
@@ -3413,13 +3315,9 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
    "FreeBSD" label in the ELF header.  So we put this label on all
    executables and (for simplicity) also all other object files.  */
 
-static void elf_i386_post_process_headers
-  PARAMS ((bfd *, struct bfd_link_info *));
-
 static void
-elf_i386_post_process_headers (abfd, link_info)
-     bfd *abfd;
-     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+elf_i386_post_process_headers (bfd *abfd,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr *i_ehdrp;
 

@@ -1,3 +1,12 @@
+2003-06-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c: Convert to C90 function definitions, remove unnecessary
+	prototypes and casts.  Replace PTR with void *.  Formatting.
+	* elf32-ppc.c: Likewise.  Break long strings too.
+	(ppc_elf_relax_section): Use enum elf_ppc_reloc_type for r_type.
+	(ppc_elf_unhandled_reloc): Internationalize error message.
+	* elf32-ppc.h: Remove PARAMS.
+
 2003-06-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_begin_write_processing): Use bytes to count
