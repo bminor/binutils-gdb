@@ -1,3 +1,16 @@
+2004-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_process): Call bfd_merge_sections later, and
+	only when not a relocatable link.
+	(print_input_section): Handle SEC_EXCLUDE sections.
+	(size_input_section): Don't update dot on SEC_EXCLUDE sections.
+	(lang_do_assignments_1): Likewise.
+	* ldwrite.c (build_link_order): Ignore SEC_EXCLUDE input sections.
+	* emultempl/armelf.em (arm_elf_set_bfd_for_interworking): Likewise.
+	* emultempl/hppaelf.em (build_section_lists): Likewise.
+	* emultempl/ppc64elf.em (build_toc_list): Likewise.
+	(build_section_lists): Likewise.
+
 2004-05-23  Andreas Schwab  <schwab@suse.de>
 
 	* ld.texinfo (Options): Fix typo in last change.

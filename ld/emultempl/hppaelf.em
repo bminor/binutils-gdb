@@ -239,6 +239,7 @@ build_section_lists (lang_statement_union_type *statement)
 {
   if (statement->header.type == lang_input_section_enum
       && !statement->input_section.ifile->just_syms_flag
+      && (statement->input_section.section->flags & SEC_EXCLUDE) == 0
       && statement->input_section.section->output_section != NULL
       && statement->input_section.section->output_section->owner == output_bfd)
     {

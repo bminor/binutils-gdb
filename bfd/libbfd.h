@@ -525,15 +525,15 @@ extern bfd_boolean _bfd_write_stab_strings
 extern bfd_vma _bfd_stab_section_offset
   (bfd *, void **, asection *, void **, bfd_vma);
 
-/* Attempt to merge a SEC_MERGE section.  */
+/* Register a SEC_MERGE section as a candidate for merging.  */
 
-extern bfd_boolean _bfd_merge_section
+extern bfd_boolean _bfd_add_merge_section
   (bfd *, void **, asection *, void **);
 
 /* Attempt to merge SEC_MERGE sections.  */
 
 extern bfd_boolean _bfd_merge_sections
-  (bfd *, void *, void (*) (bfd *, asection *));
+  (bfd *, struct bfd_link_info *, void *, void (*) (bfd *, asection *));
 
 /* Write out a merged section.  */
 

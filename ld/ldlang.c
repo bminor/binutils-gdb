@@ -2472,54 +2472,59 @@ print_input_section (lang_input_section_type *in)
   init_opb ();
   if (size != 0)
     {
-      print_space ();
+      int len;
+      bfd_vma addr;
 
+      print_space ();
       minfo ("%s", i->name);
 
-      if (i->output_section != NULL)
+      len = 1 + strlen (i->name);
+      if (len >= SECTION_NAME_MAP_LENGTH - 1)
 	{
-	  int len;
+	  print_nl ();
+	  len = 0;
+	}
+      while (len < SECTION_NAME_MAP_LENGTH)
+	{
+	  print_space ();
+	  ++len;
+	}
 
-	  len = 1 + strlen (i->name);
-	  if (len >= SECTION_NAME_MAP_LENGTH - 1)
-	    {
-	      print_nl ();
-	      len = 0;
-	    }
-	  while (len < SECTION_NAME_MAP_LENGTH)
+      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+	addr = i->output_section->vma + i->output_offset;
+      else
+	{
+	  addr = print_dot;
+	  size = 0;
+	}
+
+      minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
+
+      if (size != i->_raw_size)
+	{
+	  len = SECTION_NAME_MAP_LENGTH + 3;
+#ifdef BFD64
+	  len += 16;
+#else
+	  len += 8;
+#endif
+	  while (len > 0)
 	    {
 	      print_space ();
-	      ++len;
+	      --len;
 	    }
 
-	  minfo ("0x%V %W %B\n",
-		 i->output_section->vma + i->output_offset, TO_ADDR (size),
-		 i->owner);
+	  minfo (_("%W (size before relaxing)\n"), i->_raw_size);
+	}
 
-	  if (i->_cooked_size != 0 && i->_cooked_size != i->_raw_size)
-	    {
-	      len = SECTION_NAME_MAP_LENGTH + 3;
-#ifdef BFD64
-	      len += 16;
-#else
-	      len += 8;
-#endif
-	      while (len > 0)
-		{
-		  print_space ();
-		  --len;
-		}
-
-	      minfo (_("%W (size before relaxing)\n"), i->_raw_size);
-	    }
-
+      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+	{
 	  if (command_line.reduce_memory_overheads)
 	    bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
 	  else
 	    print_all_symbols (i);
 
-	  print_dot = (i->output_section->vma + i->output_offset
-		       + TO_ADDR (size));
+	  print_dot = addr + TO_ADDR (size);
 	}
     }
 }
@@ -2892,7 +2897,7 @@ size_input_section (lang_statement_union_type **this_ptr,
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
 
-  if (!is->ifile->just_syms_flag)
+  if (!is->ifile->just_syms_flag && (i->flags & SEC_EXCLUDE) == 0)
     {
       unsigned int alignment_needed;
       asection *o;
@@ -3622,10 +3627,13 @@ lang_do_assignments_1
 	  {
 	    asection *in = s->input_section.section;
 
-	    if (in->_cooked_size != 0)
-	      dot += TO_ADDR (in->_cooked_size);
-	    else
-	      dot += TO_ADDR (in->_raw_size);
+	    if ((in->flags & SEC_EXCLUDE) == 0)
+	      {
+		if (in->_cooked_size != 0)
+		  dot += TO_ADDR (in->_cooked_size);
+		else
+		  dot += TO_ADDR (in->_raw_size);
+	      }
 	  }
 	  break;
 
@@ -4384,12 +4392,6 @@ lang_process (void)
   if (command_line.gc_sections)
     lang_gc_sections ();
 
-  /* If there were any SEC_MERGE sections, finish their merging, so that
-     section sizes can be computed.  This has to be done after GC of sections,
-     so that GCed sections are not merged, but before assigning output
-     sections, since removing whole input sections is hard then.  */
-  bfd_merge_sections (output_bfd, &link_info);
-
   /* Size up the common data.  */
   lang_common ();
 
@@ -4402,8 +4404,16 @@ lang_process (void)
 
   if (! link_info.relocatable)
     {
+      asection *found;
+
+      /* Merge SEC_MERGE sections.  This has to be done after GC of
+	 sections, so that GCed sections are not merged, but before
+	 assigning dynamic symbols, since removing whole input sections
+	 is hard then.  */
+      bfd_merge_sections (output_bfd, &link_info);
+
       /* Look for a text section and set the readonly attribute in it.  */
-      asection *found = bfd_get_section_by_name (output_bfd, ".text");
+      found = bfd_get_section_by_name (output_bfd, ".text");
 
       if (found != NULL)
 	{

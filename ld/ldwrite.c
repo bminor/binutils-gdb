@@ -220,7 +220,8 @@ build_link_order (lang_statement_union_type *statement)
     case lang_input_section_enum:
       /* Create a new link_order in the output section with this
 	 attached */
-      if (!statement->input_section.ifile->just_syms_flag)
+      if (!statement->input_section.ifile->just_syms_flag
+	  && (statement->input_section.section->flags & SEC_EXCLUDE) == 0)
 	{
 	  asection *i = statement->input_section.section;
 	  asection *output_section = i->output_section;

@@ -1,3 +1,22 @@
+2004-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Don't set up merge
+	section data here..
+	* elf.c (_bfd_elf_merge_sections): .. Do it here instead.
+	* merge.c: Formatting.  Remove unnecessary casts.  Expand
+	bfd_get_section_alignment macro.
+	(struct sec_merge_sec_info): Rename "first" to "first_str".  Update
+	use throughout file.
+	(_bfd_add_merge_section): Rename from _bfd_merge_section.  Update
+	comment.  Abort on dynamic or non-SEC_MERGE input.  Don't test
+	section name to determine sinfo group, instead test output section
+	and alignment.
+	(_bfd_merge_sections): Add struct bfd_link_info param.  Call
+	_bfd_strip_section_from_output rather than just twiddling flags.
+	* libbfd-in.h (_bfd_add_merge_section): Rename, update comment.
+	(_bfd_merge_sections): Update prototype.
+	* libbfd.h: Regenerate.
+
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c: Correctly indent section that sets architecture

@@ -901,10 +901,31 @@ merge_sections_remove_hook (bfd *abfd ATTRIBUTE_UNUSED,
 bfd_boolean
 _bfd_elf_merge_sections (bfd *abfd, struct bfd_link_info *info)
 {
+  bfd *ibfd;
+  asection *sec;
+
   if (!is_elf_hash_table (info->hash))
     return FALSE;
-  if (elf_hash_table (info)->merge_info)
-    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info,
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    if ((ibfd->flags & DYNAMIC) == 0)
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	if ((sec->flags & SEC_MERGE) != 0
+	    && !bfd_is_abs_section (sec->output_section))
+	  {
+	    struct bfd_elf_section_data *secdata;
+
+	    secdata = elf_section_data (sec);
+	    if (! _bfd_add_merge_section (abfd,
+					  &elf_hash_table (info)->merge_info,
+					  sec, &secdata->sec_info))
+	      return FALSE;
+	    else if (secdata->sec_info)
+	      sec->sec_info_type = ELF_INFO_TYPE_MERGE;
+	  }
+
+  if (elf_hash_table (info)->merge_info != NULL)
+    _bfd_merge_sections (abfd, info, elf_hash_table (info)->merge_info,
 			 merge_sections_remove_hook);
   return TRUE;
 }

@@ -4127,28 +4127,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (! info->relocatable
-      && ! dynamic
-      && is_elf_hash_table (hash_table))
-    {
-      asection *s;
-
-      for (s = abfd->sections; s != NULL; s = s->next)
-	if ((s->flags & SEC_MERGE) != 0
-	    && !bfd_is_abs_section (s->output_section))
-	  {
-	    struct bfd_elf_section_data *secdata;
-
-	    secdata = elf_section_data (s);
-	    if (! _bfd_merge_section (abfd,
-				      & hash_table->merge_info,
-				      s, &secdata->sec_info))
-	      goto error_return;
-	    else if (secdata->sec_info)
-	      s->sec_info_type = ELF_INFO_TYPE_MERGE;
-	  }
-    }
-
   if (is_elf_hash_table (hash_table))
     {
       /* Add this bfd to the loaded list.  */
