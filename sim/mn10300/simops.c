@@ -2154,7 +2154,7 @@ void OP_F2A0 (insn, extension)
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
 
-/* lsr dm, dn */
+/* lsr imm8, dn */
 void OP_F8C400 (insn, extension)
      unsigned long insn, extension;
 {
@@ -2162,8 +2162,8 @@ void OP_F8C400 (insn, extension)
 
   c = State.regs[REG_D0 + REG0_8 (insn)] & 1;
   State.regs[REG_D0 + REG0_8 (insn)] >>=  (insn & 0xff);
-  z = (State.regs[REG_D0 + (REG0 (insn) >> 8)] == 0);
-  n = (State.regs[REG_D0 + (REG0 (insn) >> 8)] & 0x80000000) != 0;
+  z = (State.regs[REG_D0 + REG0_8 (insn)] == 0);
+  n = (State.regs[REG_D0 + REG0_8 (insn)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
 }
