@@ -1,3 +1,8 @@
+2003-03-06  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* stabs.c (BYTES_IN_WORD): Remove definition.
+	* wrstabs.c (BYTES_IN_WORD): Likewise.
+
 2003-03-04  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c (main): Print a warning message if --size-sort and

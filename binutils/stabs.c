@@ -35,10 +35,6 @@
 #include "debug.h"
 #include "budbg.h"
 #include "filenames.h"
-
-/* Meaningless definition needs by aout64.h.  FIXME.  */
-#define BYTES_IN_WORD 4
-
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 
@@ -269,7 +265,6 @@ parse_number (pp, poverflow)
 
   /* Note that even though strtoul overflowed, it should have set *pp
      to the end of the number, which is where we want it.  */
-
   if (sizeof (bfd_vma) > sizeof (unsigned long))
     {
       const char *p;
@@ -280,7 +275,6 @@ parse_number (pp, poverflow)
       bfd_vma v;
 
       /* Our own version of strtoul, for a bfd_vma.  */
-
       p = orig;
 
       neg = FALSE;
@@ -346,7 +340,6 @@ parse_number (pp, poverflow)
 
   /* If we get here, the number is too large to represent in a
      bfd_vma.  */
-
   if (poverflow != NULL)
     *poverflow = TRUE;
   else
@@ -965,7 +958,6 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 	 address on a big endian machine if it is smaller than an int.
 	 We have no way to do that, since we don't really know much
 	 about the target.  */
-
       break;
 
     case 'P':
@@ -1006,11 +998,10 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 
       /* FIXME: At this point gdb checks to combine pairs of 'p' and
 	 'r' stabs into a single 'P' stab.  */
-
       break;
 
     case 'S':
-      /* Static symbol at top level of file */
+      /* Static symbol at top level of file.  */
       dtype = parse_stab_type (dhandle, info, (const char *) NULL, &p,
 			       (debug_type **) NULL);
       if (dtype == DEBUG_TYPE_NULL)
@@ -1207,11 +1198,9 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	return DEBUG_TYPE_NULL;
 
       if (**pp != '=')
-	{
-	  /* Type is not being defined here.  Either it already
-	     exists, or this is a forward reference to it.  */
-	  return stab_find_type (dhandle, info, typenums);
-	}
+	/* Type is not being defined here.  Either it already
+	   exists, or this is a forward reference to it.  */
+	return stab_find_type (dhandle, info, typenums);
 
       /* Only set the slot if the type is being defined.  This means
          that the mapping from type numbers to types will only record
@@ -1239,10 +1228,8 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	  const char *attr;
 
 	  if (ISDIGIT (*p) || *p == '(' || *p == '-')
-	    {
-	      /* Member type.  */
-	      break;
-	    }
+	    /* Member type.  */
+	    break;
 
 	  /* Type attributes.  */
 	  attr = p;
@@ -1289,7 +1276,6 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	const char *q1, *q2, *p;
 
 	/* A cross reference to another type.  */
-
 	switch (**pp)
 	  {
 	  case 's':
@@ -1370,7 +1356,6 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	int xtypenums[2];
 
 	/* This type is defined as another type.  */
-
 	(*pp)--;
 	hold = *pp;
 
@@ -1753,8 +1738,8 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
     {
       /* gcc will emit range stabs for long long types.  Handle this
          as a special case.  FIXME: This needs to be more general.  */
-#define LLLOW  "01000000000000000000000;"
-#define LLHIGH "0777777777777777777777;"
+#define LLLOW   "01000000000000000000000;"
+#define LLHIGH   "0777777777777777777777;"
 #define ULLHIGH "01777777777777777777777;"
       if (index_type == DEBUG_TYPE_NULL)
 	{
