@@ -1,3 +1,8 @@
+Tue Aug 30 21:56:54 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somread.c (som_symfile_read): Force unwinds to be re-read after
+	reading in a new partial symbol table.
+
 Tue Aug 30 13:14:16 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/h8500/tm-8500.h (DONT_USE_REMOTE): Remove definition,
