@@ -1,3 +1,11 @@
+Mon Sep 13 12:53:09 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* defs.h: Don't define NORETURN (see comment).
+
+Sat Sep 11 10:46:09 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* m88k-nat.c (fill_gregset): Set r31 and sfip.
+
 Thu Sep  9 10:18:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c (udi_wait, case UDIStdinNeeded): Use a loop calling

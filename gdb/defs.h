@@ -163,7 +163,7 @@ extern char *
 safe_strsignal PARAMS ((int));
 
 extern void
-init_malloc PARAMS ((PTR));
+init_malloc PARAMS ((void *));
 
 extern void
 request_quit PARAMS ((int));
@@ -415,6 +415,18 @@ enum val_prettyprint
 #endif /* STDC */
 #endif /* volatile */
 
+#if 1
+#define NORETURN /*nothing*/
+#else /* not 1 */
+/* FIXME: This is bogus.  Having "volatile void" mean a function doesn't
+   return is a gcc extension and should be based on #ifdef __GNUC__.
+   Also, as of Sep 93 I'm told gcc is changing the syntax for ansi
+   reasons (so declaring exit here as "volatile void" and as "void" in
+   a system header loses).  Using the new "__attributes__ ((noreturn));"
+   syntax would lose for old versions of gcc; using
+     typedef void exit_fn_type PARAMS ((int));
+     volatile exit_fn_type exit;
+   would win.  */
 /* Some compilers (many AT&T SVR4 compilers for instance), do not accept
    declarations of functions that never return (exit for instance) as
    "volatile void".  For such compilers "NORETURN" can be defined away
@@ -427,6 +439,7 @@ enum val_prettyprint
 #   define NORETURN volatile
 # endif
 #endif
+#endif /* not 1 */
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
 
@@ -811,7 +824,10 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #endif /* Little endian.  */
 #endif /* BITS_BIG_ENDIAN not defined.  */
 
-/* Swap LEN bytes at BUFFER between target and host byte-order.  */
+/* Swap LEN bytes at BUFFER between target and host byte-order.  This is
+   the wrong way to do byte-swapping because it assumes that you have a way
+   to have a host variable of exactly the right size.
+   extract_* are the right way.  */
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
 #define SWAP_TARGET_AND_HOST(buffer,len)
 #else /* Target and host byte order differ.  */
@@ -829,12 +845,24 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
   }
 #endif /* Target and host byte order differ.  */
 
+/* In findvar.c.  */
+LONGEST extract_signed_integer PARAMS ((void *, int));
+unsigned LONGEST extract_unsigned_integer PARAMS ((void *, int));
+CORE_ADDR extract_address PARAMS ((void *, int));
+
+void store_signed_integer PARAMS ((void *, int, LONGEST));
+void store_unsigned_integer PARAMS ((void *, int, unsigned LONGEST));
+void store_address PARAMS ((void *, int, CORE_ADDR));
+
 /* On some machines there are bits in addresses which are not really
    part of the address, but are used by the kernel, the hardware, etc.
    for special purposes.  ADDR_BITS_REMOVE takes out any such bits
    so we get a "real" address such as one would find in a symbol
    table.  ADDR_BITS_SET sets those bits the way the system wants
-   them.  */
+   them.  This is used only for addresses of instructions, and even then
+   I'm not sure it's used in all contexts.  It exists to deal with there
+   being a few stray bits in the PC which would mislead us, not as some sort
+   of generic thing to handle alignment or segmentation.  */
 #if !defined (ADDR_BITS_REMOVE)
 #define ADDR_BITS_REMOVE(addr) (addr)
 #define ADDR_BITS_SET(addr) (addr)
