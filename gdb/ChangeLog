@@ -1,3 +1,8 @@
+Tue Oct 13 00:51:48 1998  Felix Lee  <flee@cygnus.com>
+
+	* sol-thread.c (ps_pstop, etc): different solaris versions have
+ 	slightly different prototypes in proc_service.h; compensate.
+
 1998-10-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Check for sys/debugreg.h, asm/debugreg.h.

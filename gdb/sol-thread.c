@@ -956,37 +956,59 @@ sol_thread_stop ()
 /* These routines implement the lower half of the thread_db interface.  Ie: the
    ps_* routines.  */
 
+/* Old versions of proc_service.h (1.3 94/10/27) have
+   prototypes that look like
+     (const struct ps_prochandle *, ...)
+   while newer versions use
+     (struct ps_prochandle *, ...)
+   and other such minor variations.
+
+   Someday, we might need to discover this in configure.in,
+   but the #ifdef below seems to be sufficient for now. */
+
+#ifdef PS_OBJ_EXEC
+typedef struct ps_prochandle* gdb_ps_prochandle_t;
+typedef void* gdb_ps_read_buf_t;
+typedef const void* gdb_ps_write_buf_t;
+typedef size_t gdb_ps_size_t;
+#else
+typedef const struct ps_prochandle* gdb_ps_prochandle_t;
+typedef char* gdb_ps_read_buf_t;
+typedef char* gdb_ps_write_buf_t;
+typedef int gdb_ps_size_t;
+#endif
+
 /* The next four routines are called by thread_db to tell us to stop and stop
    a particular process or lwp.  Since GDB ensures that these are all stopped
    by the time we call anything in thread_db, these routines need to do
    nothing.  */
 
 ps_err_e
-ps_pstop (const struct ps_prochandle *ph)
+ps_pstop (gdb_ps_prochandle_t ph)
 {
   return PS_OK;
 }
 
 ps_err_e
-ps_pcontinue (const struct ps_prochandle *ph)
+ps_pcontinue (gdb_ps_prochandle_t ph)
 {
   return PS_OK;
 }
 
 ps_err_e
-ps_lstop (const struct ps_prochandle *ph, lwpid_t lwpid)
+ps_lstop (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
 
 ps_err_e
-ps_lcontinue (const struct ps_prochandle *ph, lwpid_t lwpid)
+ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 {
   return PS_OK;
 }
 
 ps_err_e
-ps_pglobal_lookup (const struct ps_prochandle *ph, const char *ld_object_name,
+ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 		   const char *ld_symbol_name, paddr_t *ld_symbol_addr)
 {
   struct minimal_symbol *ms;
@@ -1046,33 +1068,37 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
 }
 
 ps_err_e
-ps_pdread (const struct ps_prochandle *ph, paddr_t addr, char *buf, int size)
+ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
+	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
 }
 
 ps_err_e
-ps_pdwrite (const struct ps_prochandle *ph, paddr_t addr, char *buf, int size)
+ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return rw_common (1, ph, addr, buf, size);
+  return rw_common (1, ph, addr, (char*) buf, size);
 }
 
 ps_err_e
-ps_ptread (const struct ps_prochandle *ph, paddr_t addr, char *buf, int size)
+ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
+	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
 }
 
 ps_err_e
-ps_ptwrite (const struct ps_prochandle *ph, paddr_t addr, char *buf, int size)
+ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return rw_common (1, ph, addr, buf, size);
+  return rw_common (1, ph, addr, (char*) buf, size);
 }
 
 /* Get integer regs */
 
 ps_err_e
-ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
+ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	     prgregset_t gregset)
 {
   struct cleanup *old_chain;
@@ -1095,7 +1121,7 @@ ps_lgetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 /* Set integer regs */
 
 ps_err_e
-ps_lsetregs (const struct ps_prochandle *ph, lwpid_t lwpid,
+ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
   struct cleanup *old_chain;
@@ -1128,7 +1154,7 @@ ps_plog (const char *fmt, ...)
 /* Get size of extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
+ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
 {
 #if 0
   int lwp_fd;
@@ -1156,7 +1182,7 @@ ps_lgetxregsize (const struct ps_prochandle *ph, lwpid_t lwpid, int *xregsize)
 /* Get extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
+ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 {
 #if 0
   int lwp_fd;
@@ -1179,7 +1205,7 @@ ps_lgetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 /* Set extra register set.  Currently a noop.  */
 
 ps_err_e
-ps_lsetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
+ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 {
 #if 0
   int lwp_fd;
@@ -1202,7 +1228,7 @@ ps_lsetxregs (const struct ps_prochandle *ph, lwpid_t lwpid, caddr_t xregset)
 /* Get floating-point regs.  */
 
 ps_err_e
-ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
+ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
   struct cleanup *old_chain;
@@ -1225,7 +1251,7 @@ ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 /* Set floating-point regs.  */
 
 ps_err_e
-ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
+ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       const prfpregset_t *fpregset)
 {
   struct cleanup *old_chain;
@@ -1257,8 +1283,8 @@ static int nldt_allocated = 0;
 static struct ssd *ldt_bufp = NULL;
 
 ps_err_e
-ps_lgetLDT (const struct ps_prochandle *ph, lwpid_t lwpid,
-	     struct ssd *pldt)
+ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
+	    struct ssd *pldt)
 {
   gregset_t gregset;
   int lwp_fd;
