@@ -1049,8 +1049,9 @@ One additional directive, @code{LOCAL}, is available.  @xref{Macros,,
 Defining your own directives}, for an explanation of how to use
 @code{LOCAL}.
 
+@need 2000
 @item String delimiters
-You can write strings delimited in two other ways besides
+You can write strings delimited in these other ways besides
 @code{"@var{string}"}:
 
 @table @code
@@ -1059,13 +1060,13 @@ You can delimit strings with single-quote charaters.
 
 @item <@var{string}>
 You can delimit strings with matching angle brackets.
+@end table
 
 @item single-character string escape
 To include any single character literally in a string (even if the
 character would otherwise have some special meaning), you can prefix the
 character with @samp{!} (an exclamation mark).  For example, you can
 write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
-@end table
 
 @item Expression results as strings
 You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
