@@ -1,3 +1,14 @@
+Sat Dec 26 20:51:41 1992  Fred Fish  (fnf@cygnus.com)
+
+	* solib.c (BKPT_AT_MAIN):  Change to BKPT_AT_SYMBOL.
+	* solib.c (bkpt_names):  New array of symbol names to try to
+	use for the "mapping complete" breakpoint.  Configurable
+	define SOLIB_BKPT_NAME is first one to try.
+	* solib.c (find_solib):  Test debug_base for nonzero rather
+	than just greater than zero.
+	* solib.c (enable_break):  Use bkpt_names to look up address
+	at which to set "mapping complete" breakpoint.
+
 Tue Dec 22 20:33:38 1992  Fred Fish  (fnf@cygnus.com)
 
 	* defs.h (STRCMP, STREQ, STREQN):  New macros.
