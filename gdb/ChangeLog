@@ -1,3 +1,10 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	Suggested by Stewart Brown <sb24@avaya.com>:
+	* c-typeprint.c (c_type_print_varspec_prefix): Pass value of show
+	in recursive calls.  Handle TYPE_CODE_TYPEDEF.
+	(c_type_print_varspec_suffix): Likewise.
+
 2003-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Don't set and AC_SUBST SUBDIRS.
