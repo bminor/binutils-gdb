@@ -15,7 +15,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
-# DejaGnu@cygnus.com
+# bug-dejagnu@prep.ai.mit.edu
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
@@ -91,37 +91,49 @@ proc gdb_load { arg } {
     set loadpath [file dirname $arg]
     send "file $arg\n"
     expect {
-	-re "Reading symbols from.*done.*$prompt $"\
-	    { if $verbose>1 then {
+	-re "Reading symbols from.*done.*$prompt $" {
+	    if $verbose>1 then {
 		send_user "\t\tLoaded $arg into the $GDB\n"
 	    }
 	    }
 	-re "has no symbol-table.*$prompt $" {
-	    error "$arg wasn't compiled with \"-g\"\n"
+	    error "$arg wasn't compiled with \"-g\""
 	    return -1
 	}
-	-re "A program is being debugged already..*Kill it\? \(y or n\) $"\
-	    { send "y\n"
+	-re "A program is being debugged already..*Kill it\? \(y or n\) $" {
+	    send "y\n"
 		if $verbose>1 then {
 		    send_user "\t\tKilling previous program being debugged\n"
 		}
 	    continue -expect
 	}
-	-re "Load new symbol table from.*\? \(y or n\) $"\
-	  { send "y\n"
+	-re "Load new symbol table from.*\? \(y or n\) $" {
+	    send "y\n"
 	    expect {
-		-re "Reading symbols from.*done.*$prompt $"
-		{ if $verbose>1 then {
+		-re "Reading symbols from.*done.*$prompt $" {
+		    if $verbose>1 then {
 		    send_user "\t\tLoaded $arg with new symbol table into $GDB\n"
 		}
+		    return 0
 		}
-		timeout		{ error "(timeout) Couldn't load $arg, other program already loaded."; return -1 }
+		timeout	{
+		    error "(timeout) Couldn't load $arg, other program already loaded."
+		    return -1
+		}
 	    }
+		}
+	-re ".*No such file or directory.*$prompt $" {
+	    error "($arg) No such file or directory\n"
+	    return -1
 	}
-	-re ".*No such file or directory.*$prompt $"\
-	    { error "($arg) No such file or directory\n"; return -1 }
-	-re "$prompt $" { error "couldn't load $arg into $GDB."; return -1 }
-	timeout		{ error "couldn't load $arg into $GDB (timed out)."; return -1 }
+	-re "$prompt $" {
+	    error "couldn't load $arg into $GDB."
+	    return -1
+	    }
+	timeout	{
+	    error "couldn't load $arg into $GDB (timed out)."
+	    return -1
+	}
     }
 }
 
@@ -138,10 +150,11 @@ proc gdb_exit {} {
 	send_user "Quitting $GDB $GDBFLAGS\n"
     }    
     catch "send \"quit\n\"" result
-    if [string match "write\(spawn_id=\[0-9\]+\): Bad file number" $result] then {
+    if [string match "write\(spawn_id=\[0-9\]+\):" $result] then {
 	catch "close"
-	return 0
+	return -1
     }
+    catch {
     expect {
 	eof                 { 
 	    if $verbose>1 then {
@@ -154,13 +167,14 @@ proc gdb_exit {} {
 	    }
 	    close
 	}
-	-re "The program is running.  Quit anyway? (y or n) $"\
-	    { send "y\n"
+	    -re "The program is running.  Quit anyway? (y or n) $" {
+		send "y\n"
 		if $verbose>1 then {
 		    send_user "\t\tKilling program being debugged\n"
 		}
 	        close
 	    }
+    }
     }
     catch "close"
 
@@ -189,33 +203,65 @@ proc gdb_start {} {
     if [ llength $GDBFLAGS ] then {
 	spawn $GDB $GDBFLAGS
     } else {
+	if {[which $GDB] != 0} then {
 	spawn $GDB
+	} else {
+	    error "Can't find $GDB"
+	}
     }
     expect {
-	-re ".*$prompt $"	{ if $verbose>1 then {
-	    send_user "GDB initialized for native mode\n" }
+	-re ".*$prompt $"	{
+	    if $verbose>1 then {
+		send_user "GDB initialized for native mode\n"
 	}
-	-re "$prompt $"	{ error "GDB never initialized."; return -1 }
-	timeout		{ error "(timeout) GDB never initialized."; return -1 }
+    }
+	-re "$prompt $"	{
+	    error "GDB never initialized."
+	    return -1
+	}
+	timeout		{
+	    error "(timeout) GDB never initialized."
+	    return -1
+	}
     }
     set timeout $oldtimeout
     # force the height to "unlimited", so no pagers get used
     send "set height 0\n"
-    expect -re ".*$prompt $" {}
+    expect {
+	-re ".*$prompt $" { 
+	    if $verbose>2 then {
+		send_user "Seting height to 0.\n"
+	    }
+	}
+	timeout {
+	    warning "Couldn't set the height to 0."
+	}
+    }
     # force the width to "unlimited", so no wraparound occurs
     send "set width 0\n"
-    expect -re ".*$prompt $" {}
+    expect {
+	-re ".*$prompt $" {
+	    if $verbose>2 then {
+		send_user "Seting width to 0.\n"
+}
+	}
+	timeout {
+	    warning "Couldn't set the width to 0."
+}
+    }
 }
 
-expect_after {
-    "<return>"		   { send "\n"; error "Window too small." }
-    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
-    buffer_full		   { error "internal buffer is full." }
-    eof			   { error "eof -- pty is hosed." }
-    timeout			   { error "timeout." }
-    "virtual memory exhausted" { error "virtual memory exhausted." }
-    "Undefined command"	   { error "send string probably wrong." }
-}
+# These only need to be uncommented for debugging test cases. They exist
+# mainly to catch programming errors
+#expect_after {
+#    "<return>"		   { send "\n"; error "Window too small." }
+#    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
+#    buffer_full		   { error "internal buffer is full." }
+#    eof			   { error "eof -- there is no child process" ; alldone}
+#    timeout			   { error "timeout." }
+#    "virtual memory exhausted" { error "virtual memory exhausted." }
+#    "Undefined command"	   { error "send string probably wrong." }
+#}
 
 load_lib gdb.exp
 
@@ -223,4 +269,10 @@ set binpath /s1/users/rob/vxworks/bin/somewhere-bogus-that-needs-configuring
 set bin $GDB
 
 gdb_start
+
+
+
+
+
+
 
