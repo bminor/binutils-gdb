@@ -1501,10 +1501,10 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 }
 
 static char *
-partial_die_full_name (struct partial_die_info *pdi, int allocate,
+partial_die_full_name (struct partial_die_info *pdi,
 		       struct dwarf2_cu *cu)
 {
-  char *full_name, *parent_name;
+  char *parent_name;
   struct partial_die_info *real_parent;
 
   /* Note: this code could be micro-optimized.  We could avoid redoing
@@ -1524,13 +1524,7 @@ partial_die_full_name (struct partial_die_info *pdi, int allocate,
   if (parent_name == NULL)
     parent_name = real_parent->name;
 
-  if (allocate)
-    full_name = obconcat (&cu->partial_die_obstack,
-			  parent_name, "::", pdi->name);
-  else
-    full_name = concat (parent_name, "::", pdi->name, NULL);
-
-  return full_name;
+  return concat (parent_name, "::", pdi->name, NULL);
 }
 
 static void
@@ -1541,33 +1535,27 @@ add_partial_symbol (struct partial_die_info *pdi,
   CORE_ADDR addr = 0;
   char *actual_name;
   const char *my_prefix;
-  const struct partial_symbol *psym = NULL;
+  const struct partial_symbol *psym = NULL, *psym2 = NULL;
   CORE_ADDR baseaddr;
-  int free_actual_name = 0;
+  int built_actual_name = 0;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
+  actual_name = NULL;
   if (pdi_needs_namespace (pdi->tag) && pdi->full_name == NULL)
     {
-      if (pdi->tag == DW_TAG_namespace
-	  || pdi->tag == DW_TAG_class_type
-	  || pdi->tag == DW_TAG_structure_type
-	  || pdi->tag == DW_TAG_union_type)
-	{
-	  pdi->full_name = partial_die_full_name (pdi, 1, cu);
-	  actual_name = pdi->full_name;
-	}
+      actual_name = partial_die_full_name (pdi, cu);
+      if (actual_name)
+	built_actual_name = 1;
+    }
+
+  if (actual_name == NULL)
+    {
+      if (pdi->full_name != NULL)
+	actual_name = pdi->full_name;
       else
-	{
-	  actual_name = partial_die_full_name (pdi, 0, cu);
-	  if (actual_name)
-	    free_actual_name = 1;
-	}
-      if (actual_name == NULL)
 	actual_name = pdi->name;
     }
-  else
-    actual_name = pdi->name;
 
   switch (pdi->tag)
     {
@@ -1636,16 +1624,16 @@ add_partial_symbol (struct partial_die_info *pdi,
     case DW_TAG_typedef:
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
-			   VAR_DOMAIN, LOC_TYPEDEF,
-			   &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+      psym2 = add_psymbol_to_list (actual_name, strlen (actual_name),
+				   VAR_DOMAIN, LOC_TYPEDEF,
+				   &objfile->static_psymbols,
+				   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     case DW_TAG_namespace:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
-			   VAR_DOMAIN, LOC_TYPEDEF,
-			   &objfile->global_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+      psym2 = add_psymbol_to_list (actual_name, strlen (actual_name),
+				   VAR_DOMAIN, LOC_TYPEDEF,
+				   &objfile->global_psymbols,
+				   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
@@ -1657,12 +1645,12 @@ add_partial_symbol (struct partial_die_info *pdi,
 	 static vs. global.  */
       if (pdi->has_children == 0)
 	return;
-      add_psymbol_to_list (actual_name, strlen (actual_name),
-			   STRUCT_DOMAIN, LOC_TYPEDEF,
-			   cu->language == language_cplus
-			   ? &objfile->global_psymbols
-			   : &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+      psym2 = add_psymbol_to_list (actual_name, strlen (actual_name),
+				   STRUCT_DOMAIN, LOC_TYPEDEF,
+				   cu->language == language_cplus
+				   ? &objfile->global_psymbols
+				   : &objfile->static_psymbols,
+				   0, (CORE_ADDR) 0, cu->language, objfile);
 
       if (cu->language == language_cplus)
 	{
@@ -1674,12 +1662,12 @@ add_partial_symbol (struct partial_die_info *pdi,
 	}
       break;
     case DW_TAG_enumerator:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
-			   VAR_DOMAIN, LOC_CONST,
-			   cu->language == language_cplus
-			   ? &objfile->global_psymbols
-			   : &objfile->static_psymbols,
-			   0, (CORE_ADDR) 0, cu->language, objfile);
+      psym2 = add_psymbol_to_list (actual_name, strlen (actual_name),
+				   VAR_DOMAIN, LOC_CONST,
+				   cu->language == language_cplus
+				   ? &objfile->global_psymbols
+				   : &objfile->static_psymbols,
+				   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     default:
       break;
@@ -1691,6 +1679,8 @@ add_partial_symbol (struct partial_die_info *pdi,
      (otherwise we'll have psym == NULL), and if we actually had a
      mangled name to begin with.  */
 
+  /* FIXME drow/2004-02-22: Why don't we do this for classes?  */
+
   if (cu->language == language_cplus
       && have_namespace_info == 0
       && psym != NULL
@@ -1698,8 +1688,14 @@ add_partial_symbol (struct partial_die_info *pdi,
     cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
 					 objfile);
 
-  if (free_actual_name)
-    xfree (actual_name);
+  if (built_actual_name)
+    {
+      /* psym2 should always be set in the built_actual_name case,
+	 because the same set are used in pdi_needs_namespace.  See
+	 FIXME above.  */
+      pdi->full_name = SYMBOL_LINKAGE_NAME (psym2);
+      xfree (actual_name);
+    }
 }
 
 /* Determine whether a die of type TAG living in a C++ class or

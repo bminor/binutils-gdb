@@ -1,3 +1,9 @@
+2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (partial_die_full_name): Remove allocate argument,
+	always use concat.
+	(add_partial_symbol): Copy the name from the psymbol.
+
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (struct partial_die_info): Add full_name.
