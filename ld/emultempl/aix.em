@@ -191,6 +191,10 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       optind = prevoptind;
       return 0;
 
+    case 0:
+      /* Long option which just sets a flag.  */
+      break;
+
     case 'D':
       val = strtol (optarg, &end, 0);
       if (*end != '\0')
