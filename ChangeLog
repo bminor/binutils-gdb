@@ -1,3 +1,8 @@
+Mon Jul 15 11:53:00 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config.guess (HP 9000/811): Recognize this as a PA1.1
+	machine.
+
 Fri Jul 12 23:21:17 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (do-tar-gz): New target, split out from tail end of
