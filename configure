@@ -54,8 +54,8 @@ fatal=
 hostsubdir=
 Makefile=Makefile
 Makefile_in=Makefile.in
-norecurse=
-recursing=
+norecursion=
+recurring=
 removing=
 srcdir=
 srctrigger=
@@ -90,13 +90,13 @@ do
 	-nfp | +nf*)
 		nfp=yes
 		;;
-	-norecurse | +no*)
-		norecurse=true
+	-norecursion | +no*)
+		norecursion=true
 		;;
-	-recursing)
-		recursing=true
+	-recurring | +recurring | +recurrin | +recurri | +recurr | +recur | +recu | +rec | +re)
+		recurring=true
 		;;
-	-rm | +r*)
+	-rm | +rm)
 		removing=${arg}
 		;;
 #	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
@@ -162,7 +162,7 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo " +help		print this message. [normal config]" ;
 	echo " +gas		configure the compilers for use with gas. [native as]" ;
 	echo " +nfp		configure the compilers default to soft floating point. [hard float]" ;
-	echo " +norecurse	configure this directory only. [recurse]" ;
+	echo " +norecursion	configure this directory only. [recurse]" ;
 	echo " +rm		remove this configuration. [build a configuration]" ;
 	echo " +target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
 	echo " +template=TEM	rebuild configure using TEM. [normal config]" ;
@@ -184,7 +184,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb make grep diff rcs prms "
+configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb emacs make grep diff rcs gdbm cvs prms"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -268,8 +268,8 @@ if [ -n "${template}" ] ; then
 		fi
 	fi
 
-	if [ -z "${norecurse}" ] ; then
-		# If template is relative path, make it absolute for recursing.
+	if [ -z "${norecursion}" ] ; then
+		# If template is relative path, make it absolute for recurring.
 		if echo "${template}" | grep -s '^/' ; then
 		   true
 		else
@@ -328,6 +328,12 @@ for host in ${hosts} ; do
 
 #### configure.in per-host parts come in here.
 
+# XXX - FIXME there needs to be a case for hmake-dgux
+
+case "${host_os}" in
+sysv* | irix*) host_makefile_frag=config/hmake-sysv ;;
+esac
+
 ## end of per-host part.
 
 	for target in ${targets} ; do
@@ -340,6 +346,8 @@ for host in ${hosts} ; do
 		target_makefile_frag=config/tmake-${target}
 
 #### configure.in per-target parts come in here.
+
+# XXX - FIXME there needs to be a case for tmake-a29k
 
 #
 # Local Variables:
@@ -540,7 +548,7 @@ for host in ${hosts} ; do
 				andusing=${using}
 			fi
 
-			if [ -n "${verbose}" -o -z "${recursing}" ] ; then
+			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
 				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
 			fi
 
@@ -563,7 +571,7 @@ for host in ${hosts} ; do
 		fi
 
 		# If there are subdirectories, then recurse. 
-		if [ -z "${norecurse}" -a -n "${configdirs}" ] ; then 
+		if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
 			for configdir in ${configdirs} ; do
 				if [ -n "${verbose}" ] ; then
 					echo Configuring ${configdir}...
@@ -571,7 +579,7 @@ for host in ${hosts} ; do
 
 				if [ -d ${configdir} ] ; then
 					(cd ${configdir} ;
-						./configure -recursing ${host} +target=${target} \
+						./configure +recurring ${host_alias} +target=${target_alias} \
 							${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 						| sed 's/^/	/'
 				else
@@ -604,7 +612,22 @@ exit 0
 
 #
 # $Log$
-# Revision 1.34  1991/08/25 23:40:23  rich
+# Revision 1.39  1991/10/01 02:38:26  rich
+# Reword recurr.
+#
+# Revision 1.38  1991/09/20  01:03:38  grossman
+# configure +template to bring in irix stuff.
+#
+# Revision 1.37  1991/09/12  00:33:18  rich
+# Add gdbm.
+#
+# Revision 1.36  1991/08/31  03:54:36  rich
+# Welcome emacs to the mess.
+#
+# Revision 1.35  1991/08/26  04:29:31  rich
+# Welcome cvs to the big time.
+#
+# Revision 1.34  1991/08/25  23:40:23  rich
 # rcs enters the soup.
 #
 # Revision 1.33  1991/08/25  21:48:38  rich
