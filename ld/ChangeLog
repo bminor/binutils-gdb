@@ -1,3 +1,9 @@
+2005-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/614
+	* ldmisc.c (vfinfo): Alter output to conform to the GNU Coding
+	Standard's specification for parsable error messages. 
+
 2005-01-04  Paul Brook  <paul@codesourcery.com>
 
 	* Makefile.am: Correct dependency for earmsymbian.c.

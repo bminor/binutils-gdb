@@ -298,17 +298,26 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 		      }
 		  }
 
-		lfinfo (fp, "%B(%A+0x%v)", abfd, section, offset);
+		/* The GNU Coding Standard requires that error messages be of the form:
+		   
+		     source-file-name:lineno: message
 
+		   We do not always have a line number available so if we cannot find
+		   them we print out the section name and offset instread.  */
 		discard_last = TRUE;
 		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
 					   &filename, &functionname,
 					   &linenumber))
 		  {
-		    bfd_boolean need_colon = TRUE;
-
 		    if (functionname != NULL && fmt[-1] == 'C')
 		      {
+			/* Detect the case where we are printing out a message
+			   for the same function as the last call to vinfo ("%C").
+			   In this situation do not print out the ABFD filename
+			   or the function name again.  Note - we do still print
+			   out the source filename, as this will allow programs
+			   that parse the linker's output (eg emacs) to correctly
+			   locate multiple errors in the same source file.  */
 			if (last_bfd == NULL
 			    || last_file == NULL
 			    || last_function == NULL
@@ -317,9 +326,8 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 				&& strcmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    lfinfo (fp, _(": In function `%T':\n"),
-				    functionname);
-			    need_colon = FALSE;
+			    lfinfo (fp, _("%B: In function `%T':\n"),
+				    abfd, functionname);
 
 			    last_bfd = abfd;
 			    if (last_file != NULL)
@@ -333,19 +341,24 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 			  }
 			discard_last = FALSE;
 		      }
+		    else
+		      lfinfo (fp, "%B:", abfd);
 
 		    if (filename != NULL)
-		      {
-			if (need_colon)
-			  putc (':', fp);
-			fputs (filename, fp);
-		      }
+		      fprintf (fp, "%s:", filename);
 
 		    if (functionname != NULL && fmt[-1] == 'G')
-		      lfinfo (fp, ":%T", functionname);
-		    else if (filename != NULL && linenumber != 0)
-		      fprintf (fp, ":%u", linenumber);
+		      lfinfo (fp, "%T", functionname);
+		    else if (filename != NULL)
+		      {
+			if (linenumber != 0)
+			  fprintf (fp, "%u", linenumber);
+			else
+			  lfinfo (fp, "(%A+0x%v)", section, offset);
+		      }
 		  }
+		else
+		  lfinfo (fp, "%B:(%A+0x%v)", abfd, section, offset);
 
 		if (asymbols != NULL && entry == NULL)
 		  free (asymbols);
