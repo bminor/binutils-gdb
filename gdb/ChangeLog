@@ -1,3 +1,14 @@
+2002-08-19  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (select_frame_command): Send selected-frame-level-changed
+	event notification, but only if the level actually changed.
+	(up_silently_base): Add selected-frame-level-changed event
+	notification.
+	(down_silently_base): Likewise.
+	(frame_command): Revert 2002-07-25 changes.
+	(up_command): Likewise.
+	(down_command): Likewise.
+
 2002-08-13  Keith Seitz  <keiths@redhat.com>
 
 	* interps.c (_initialize_interpreter): Remove ability to set

@@ -1622,8 +1622,8 @@ select_frame_command_wrapper (char *level_exp, int from_tty)
 static void
 select_frame_command (char *level_exp, int from_tty)
 {
-  register struct frame_info *frame, *frame1;
-  unsigned int level = 0;
+  register struct frame_info *frame;
+  int level = frame_relative_level (selected_frame);
 
   if (!target_has_stack)
     error ("No stack.");
@@ -1631,6 +1631,8 @@ select_frame_command (char *level_exp, int from_tty)
   frame = parse_frame_specification (level_exp);
 
   select_frame (frame);
+  if (level != frame_relative_level (selected_frame))
+    selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1640,12 +1642,9 @@ select_frame_command (char *level_exp, int from_tty)
 void
 frame_command (char *level_exp, int from_tty)
 {
-  int current_level = frame_relative_level (selected_frame);
   select_frame_command (level_exp, from_tty);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
-  if (current_level != frame_relative_level (selected_frame))
-    selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1679,6 +1678,7 @@ up_silently_base (char *count_exp)
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 static void
@@ -1693,7 +1693,6 @@ up_command (char *count_exp, int from_tty)
   up_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
-  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1725,6 +1724,7 @@ down_silently_base (char *count_exp)
     }
 
   select_frame (frame);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* ARGSUSED */
@@ -1740,7 +1740,6 @@ down_command (char *count_exp, int from_tty)
   down_silently_base (count_exp);
   show_and_print_stack_frame (selected_frame,
 			      frame_relative_level (selected_frame), 1);
-  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 void
