@@ -43,6 +43,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "m68k/tm-m68k.h"
 
+/* Disable alternate breakpoint mechanism needed by 68k stub. */
+#undef REMOTE_BREAKPOINT
+
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
    documented in a comment in <machine/setjmp.h>! */
 

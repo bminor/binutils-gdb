@@ -1,3 +1,8 @@
+Fri Nov 12 16:23:08 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* config/m68k/tm-sun3.h:  Disable use of alternate breakpoint insn
+	when doing remote stuff.
+
 Fri Nov 12 16:22:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-exp.y (yylex): Call lookup_symtab not lookup_partial_symtab.
