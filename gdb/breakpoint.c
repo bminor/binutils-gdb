@@ -625,7 +625,7 @@ int
 read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 {
   int status;
-  struct breakpoint *b;
+  struct bp_location *b;
   CORE_ADDR bp_addr = 0;
   int bp_size = 0;
 
@@ -633,20 +633,15 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
     /* No breakpoints on this machine. */
     return target_read_memory (memaddr, myaddr, len);
 
-  ALL_BREAKPOINTS (b)
+  ALL_BP_LOCATIONS (b)
   {
-    if (b->type == bp_none)
-      warning ("reading through apparently deleted breakpoint #%d?", 
-	       b->number);
+    if (b->owner->type == bp_none)
+      warning ("reading through apparently deleted breakpoint #%d?",
+              b->owner->number);
 
-    /* memory breakpoint? */
-    if (b->type == bp_watchpoint
-	|| b->type == bp_hardware_watchpoint
-	|| b->type == bp_read_watchpoint
-	|| b->type == bp_access_watchpoint)
+    if (b->loc_type != bp_loc_software_breakpoint)
       continue;
-    /* bp in memory? */
-    if (!b->loc->inserted)
+    if (!b->inserted)
       continue;
     /* Addresses and length of the part of the breakpoint that
        we need to copy.  */
@@ -654,7 +649,7 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
        breakpoint values.  BREAKPOINT_FROM_PC still manages to
        correctly determine the breakpoints memory address and size
        for these targets. */
-    bp_addr = b->loc->address;
+    bp_addr = b->address;
     bp_size = 0;
     if (BREAKPOINT_FROM_PC (&bp_addr, &bp_size) == NULL)
       continue;
@@ -690,7 +685,7 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 	}
 
       memcpy (myaddr + bp_addr - memaddr,
-	      b->loc->shadow_contents + bptoffset, bp_size);
+	      b->shadow_contents + bptoffset, bp_size);
 
       if (bp_addr > memaddr)
 	{

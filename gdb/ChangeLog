@@ -1,5 +1,10 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (read_memory_nobpt): Use ALL_BP_LOCATIONS
+	instead of ALL_BREAKPOINTS.  Check for software breakpoints only.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (allocate_bp_location): Take bpt and bp_type
 	arguments.  Initialize owner and type for the new breakpoint
 	location item.
