@@ -29,11 +29,9 @@ case "${canon}" in
   i[34]86-*-sysv4*)	bfd_name=i386-elf ;;
   i[34]86-*-solaris2*)	bfd_name=i386-elf ;;
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
-  i[34]86-*-isc*)	bfd_name=i386-sco ;; # gets core dump reading right
-  i[34]86-*-sco*)	bfd_name=i386-sco ;;
+  i[34]86-*-isc*)	bfd_name=i386-coff ;;
+  i[34]86-*-sco*)	bfd_name=i386-coff ;;
   i[34]86-*-bsd*)	bfd_name=i386-bsd ;;
-  i[34]86-*-netbsd)	bfd_name=i386-netbsd ;;	# CYGNUS LOCAL
-  i[34]86-*-lynxos*)	bfd_name=i386-lynx ;;
   i[34]86-*-coff)	bfd_name=i386-coff ;;
   i[34]86-*-aix*)	bfd_name=i386-coff ;;
   i[34]86-*-elf)	bfd_name=i386-elf ;;

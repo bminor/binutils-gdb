@@ -188,9 +188,6 @@ typedef enum bfd_symclass {
 	    } symclass;
 
 
-typedef int symtype;		/* Who knows, yet? */
-
-
 /* general purpose part of a symbol;
    target specific parts will be found in libcoff.h, liba.out.h etc */
 
@@ -405,6 +402,27 @@ CAT(NAME,_bfd_make_debug_symbol)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
+
+/* Byte swapping routines.  */
+
+bfd_vma		bfd_getb64	   PARAMS ((unsigned char *));
+bfd_vma 	bfd_getl64	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_64 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_64 PARAMS ((unsigned char *));
+bfd_vma		bfd_getb32	   PARAMS ((unsigned char *));
+bfd_vma		bfd_getl32	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_32 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_32 PARAMS ((unsigned char *));
+bfd_vma		bfd_getb16	   PARAMS ((unsigned char *));
+bfd_vma		bfd_getl16	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_16 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_16 PARAMS ((unsigned char *));
+void		bfd_putb64	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl64	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
 
 /* And more from the source.  */
 void 
@@ -1539,6 +1557,7 @@ struct _bfd
       struct hppa_data_struct *hppa_data;
       struct hpux_core_struct *hpux_core_data;
       struct sgi_core_struct *sgi_core_data;
+      struct lynx_core_struct *lynx_core_data;
       PTR any;
       } tdata;
   

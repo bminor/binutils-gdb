@@ -1,35 +1,32 @@
-/* Intel 386 running any BSD Unix */
+/* Intel 386 running Lynx OS */
 
-#ifndef	hosts_i386bsd_H
+#ifndef hosts_i386lynx_h
+#define hosts_i386lynx_h
+
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <ctype.h>
 #include <string.h>
+
+#include <sys/conf.h>
+#include <sys/kernel.h>
+#include <sys/mem.h>
+#include <sys/signal.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/itimer.h>
 #include <sys/file.h>
-
-#ifndef	O_ACCMODE
-#define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
-#endif
-
-#define SEEK_SET 0
-#define SEEK_CUR 1
+#include <sys/proc.h>
 
 #define	HOST_PAGE_SIZE		NBPG
 #define	HOST_MACHINE_ARCH	bfd_arch_i386
-#define	HOST_TEXT_START_ADDR		USRTEXT
+#define	HOST_TEXT_START_ADDR	USRTEXT
 
-#define u_comm u_kproc.kp_proc.p_comm
+#define HOST_LYNX
 
 #include "fopen-same.h"
-#define hosts_i386bsd_H
 #undef I386			/* Lynx defines this for some reason */
-#endif
 
-/* From ANSI C <stddef.h>, which we can't depend upon the existence of */
-#ifndef	offsetof
-#define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
-#endif
+#endif		/* hosts_i386lynx_h */
