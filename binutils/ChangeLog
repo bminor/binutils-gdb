@@ -1,3 +1,8 @@
+Fri May  8 10:33:13 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ar.c (usage): Extend information provided about command line
+	options. 
+
 Wed May  6 15:28:51 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Run dec c with /nodebug.  Pass CC value when
