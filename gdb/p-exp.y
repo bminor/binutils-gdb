@@ -331,6 +331,7 @@ exp	:	exp '('
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
+			  write_exp_elt_block (expression_context_block);
 			  write_exp_elt_opcode (OP_FUNCALL); 
 			  pop_current_type (); }
 	;

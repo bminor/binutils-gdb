@@ -1625,6 +1625,13 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 	 can figure out if this structure lives in a namespace.  Look
 	 for a member function; its demangled name will contain
 	 namespace info, if there is any.  */
+
+      /* NOTE: carlton/2003-01-13: Getting the info this way changes
+	 what template types look like, because the demangler
+	 frequently doesn't give the same name as the debug info.  We
+	 could fix this by only using the demangled name to get the
+	 prefix (but see comment in read_structure_scope).  */
+
       char *next_child = info_ptr;
 
       while (1)
@@ -2811,6 +2818,14 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 		  /* FIXME: carlton/2003-01-10: The excessive
 		     demangling here is a bit wasteful, as is the
 		     memory usage for names.  */
+
+		  /* NOTE: carlton/2003-01-13: As commented in
+		     add_partial_structure, the demangler sometimes
+		     prints the type info in a different form from the
+		     debug info.  We could solve this by using the
+		     demangled name to get the prefix; if doing so,
+		     however, we'd need to be careful when reading a
+		     class that's nested inside a template class.  */
 		  char *actual_class_name
 		    = class_name_from_physname (dwarf2_linkage_name
 						(child_die));

@@ -825,6 +825,10 @@ length_of_subexp (register struct expression *expr, register int endpos)
       break;
 
     case OP_FUNCALL:
+      oplen = 4;
+      args = 1 + longest_to_int (expr->elts[endpos - 3].longconst);
+      break;
+
     case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
@@ -970,6 +974,10 @@ prefixify_subexp (register struct expression *inexpr,
       break;
 
     case OP_FUNCALL:
+      oplen = 4;
+      args = 1 + longest_to_int (inexpr->elts[inend - 3].longconst);
+      break;
+
     case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);

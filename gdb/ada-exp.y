@@ -233,6 +233,7 @@ simple_exp :	simple_exp '(' arglist ')'
 			{
 			  write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ($3);
+			  write_exp_elt_block (expression_context_block);
 			  write_exp_elt_opcode (OP_FUNCALL);
 		        }
 	;
@@ -902,6 +903,7 @@ write_object_renaming (orig_left_context, renaming)
 	  { 
 	    write_exp_elt_opcode (OP_FUNCALL);
 	    write_exp_elt_longcst ((LONGEST) 1);
+	    write_exp_elt_block (expression_context_block);
 	    write_exp_elt_opcode (OP_FUNCALL);
 	  }
 	else if (slice_state == LOWER_BOUND)

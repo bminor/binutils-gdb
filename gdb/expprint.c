@@ -144,7 +144,7 @@ print_subexp (register struct expression *exp, register int *pos,
       return;
 
     case OP_FUNCALL:
-      (*pos) += 2;
+      (*pos) += 3;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (" (", stream);
@@ -933,7 +933,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 	nargs = longest_to_int (exp->elts[elt].longconst);
 
 	fprintf_filtered (stream, "Number of args: %d", nargs);
-	elt += 2;
+	elt += 3;
 
 	for (i = 1; i <= nargs + 1; i++)
 	  elt = dump_subexp (exp, stream, elt);

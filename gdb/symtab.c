@@ -1183,11 +1183,12 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
    appropriate namespaces scope for BLOCK, and searches for NAME in
    each of the namespaces that are in scope.  */
 
-static struct symbol *lookup_symbol_aux_using (const char *name,
-					       const char *linkage_name,
-					       const struct block *block,
-					       const namespace_enum namespace,
-					       struct symtab **symtab)
+static struct symbol *
+lookup_symbol_aux_using (const char *name,
+			 const char *linkage_name,
+			 const struct block *block,
+			 const namespace_enum namespace,
+			 struct symtab **symtab)
 {
   const char *scope = block_scope (block);
 
@@ -1196,14 +1197,14 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
 				       scope, 0);
 }
 
-static struct
-symbol *lookup_symbol_aux_using_loop (const char *name,
-				      const char *linkage_name,
-				      const struct block *block,
-				      namespace_enum namespace,
-				      struct symtab **symtab,
-				      const char *scope,
-				      int scope_len)
+static struct symbol *
+lookup_symbol_aux_using_loop (const char *name,
+			      const char *linkage_name,
+			      const struct block *block,
+			      namespace_enum namespace,
+			      struct symtab **symtab,
+			      const char *scope,
+			      int scope_len)
 {
   if (scope[scope_len] != '\0')
     {
@@ -1517,6 +1518,10 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
    wrong one.  Something to keep in mind when we have iterators,
    though.  */
 
+/* NOTE: carlton/2003-01-13: Callers for this should have the full
+   name of the type in question, so this doesn't have to get any
+   smarter about namespace stuff.  */
+
 struct type *
 lookup_transparent_type (const char *name)
 {
@@ -1666,6 +1671,11 @@ find_main_psymtab (void)
    doesn't have a demangled name and where the symbol's name is such
    that strcmp and strcmp_iw don't match on it (which seems unlikely
    to me).  */
+
+/* NOTE: carlton/2003-01-14: No, there are situations where this is
+   more generous: it ignores whitespace on demangled names, too.  This
+   is good: e.g. it makes recognizing templated types more generous.
+   See PR gdb/33.  */
 
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
@@ -2780,6 +2790,10 @@ sort_search_symbols (struct symbol_search *prevtail, int nfound)
    The results are sorted locally; each symtab's global and static blocks are
    separately alphabetized.
  */
+
+/* NOTE: carlton/2003-01-14: I don't think this needs any namespace
+   tweaking.  */
+
 void
 search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		struct symbol_search **matches)

@@ -174,11 +174,12 @@ enum exp_opcode
     OP_INTERNALVAR,
 
     /* OP_FUNCALL is followed by an integer in the next exp_element.
-       The integer is the number of args to the function call.
-       That many plus one values from following subexpressions
-       are used, the first one being the function.
-       The integer is followed by a repeat of OP_FUNCALL,
-       making three exp_elements.  */
+       The integer is the number of args to the function call.  That
+       many plus one values from following subexpressions are used,
+       the first one being the function.  Next comes the current
+       block: this is used when doing operator overloading in C++.
+       Finally, there is a repeat of OP_FUNCALL, making four
+       exp_elements.  */
     OP_FUNCALL,
 
     /* OP_OBJC_MSGCALL is followed by a string in the next exp_element and then an
@@ -192,6 +193,9 @@ enum exp_opcode
        and function calls are  all exactly the same syntactically. They may 
        only be dismabiguated at runtime.  Thus this operator, which 
        indicates that we have found something of the form <name> ( <stuff> ) */
+
+    /* NOTE: carlton/2003-01-20: Now that I've added a block to
+       OP_FUNCALL, it's no longer exactly like OP_FUNCALL.  */
     OP_F77_UNDETERMINED_ARGLIST,
 
     /* The following OP is a special one, it introduces a F77 complex

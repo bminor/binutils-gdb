@@ -1,3 +1,36 @@
+2003-01-20  David Carlton  <carlton@math.stanford.edu>
+
+	* p-exp.y: Add block to OP_FUNCALL.
+	* objc-exp.y: Add block to OP_FUNCALL.
+	* m2-exp.y: Add block to OP_FUNCALL.
+	* c-exp.y: Add block to OP_FUNCALL.
+	* ada-exp.y: Add block to OP_FUNCALL.
+	(write_object_renaming): Ditto.
+	* parse.c (length_of_subexp): Split off OP_FUNCALL.
+	(prefixify_subexp): Ditto.
+	* expprint.c (print_subexp): Change offset for OP_FUNCALL.
+	(dump_subexp): Ditto.
+	* eval.c (evaluate_subexp_standard): Change offset for
+	OP_FUNCALL.
+	* ada-lang.c (ada_resolve_subexp): Add comment on OP_FUNCALL.
+	(replace_operator_with_call): Add block to OP_FUNCALL.
+	(ada_evaluate_subexp): Change offset for OP_FUNCALL.
+	* expression.h (exp_opcode): Change comments before OP_FUNCALL and
+	OP_F77_UNDETERMINED_ARGLIST.
+
+2003-01-14  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (search_symbols): Add comment.
+	(lookup_symbol_aux_using): Function name should start line.
+	(lookup_symbol_aux_using_loop): Ditto.
+	(lookup_block_symbol): Add comment.
+
+2003-01-13  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (read_structure_scope): Add comment.
+	(add_partial_structure): Ditto.
+	* symtab.c (lookup_transparent_type): Add comment.
+
 2003-01-10  David Carlton  <carlton@math.stanford.edu>
 
 	* objfiles.c (allocate_objfile): Always set name.

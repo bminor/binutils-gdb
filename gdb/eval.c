@@ -664,7 +664,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
     case OP_FUNCALL:
-      (*pos) += 2;
+      (*pos) += 3;
       op = exp->elts[*pos].opcode;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       /* Allocate arg vector, including space for the function to be
