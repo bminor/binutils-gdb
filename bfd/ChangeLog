@@ -1,3 +1,24 @@
+start-sanitize-v850
+Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+	
+	* Makefile.in (ALL_MACHINES): Add cpu-v850.o.
+	(BFD32_BACKENDS) Add elf32-v850.o.
+	* archures.c: Add bfd_v850_arch.
+	* bfd-in2.h: Add bfd_v850_arch.
+	* config.bfd (v850-*-*): New target.
+	* configure: (bfd_elf32_v850_vec) New vector.
+	* configure.in: (bfd_elf32_v850_vec) New vector.
+	* cpu-v850.c: New file.
+	* elf.c (prep_headers): Added case bfd_arch_v850.
+	* elf32-v850.c: New file.
+	* targets.c (bfd_elf32_v850_vec): New vector.
+	
+end-sanitize-v850
+Fri Aug 16 16:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): Create and define
+ 	a function code symbol for an XMC_XO symbol.
+
 Thu Aug 15 12:33:29 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Update editing of autoconf vars to reflect
