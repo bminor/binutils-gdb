@@ -117,7 +117,7 @@ case ${target_cpu} in
   mips*)	cpu_type=mips ;;
   powerpc*)	cpu_type=ppc ;;
   rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
+  sparc64)	cpu_type=sparc obj_format=elf extra_def=sparcv9 ;;
   sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
@@ -229,7 +229,6 @@ case ${generic_target} in
   sparc*-fujitsu-none)	obj_format=aout bfd_gas=yes ;;
   sparc*-*-elf | sparc*-*-solaris*)
 			obj_format=elf ;;
-  sparc64-*-aout*)	obj_format=aout bfd_gas=yes ;; # v9
 
   vax-*-bsd* | vax-*-ultrix*)
 			obj_format=aout ;;
@@ -330,7 +329,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 # post-target:
 
 case ${bfd_gas} in
-  yes)	extra_def="BFD_ASSEMBLER" need_bfd=yes		;;
+  yes)	extra_def="$extra_def BFD_ASSEMBLER" need_bfd=yes ;;
 esac
 
 case ${need_bfd} in
