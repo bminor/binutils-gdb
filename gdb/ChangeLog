@@ -1,5 +1,13 @@
 2001-06-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh: Generate an error when conflicting macro
+	definitions.  Generate an error when both pure multi-arch and
+	"tm.h".
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* defs.h (GDB_MULTI_ARCH_TM): Rewrite definition.
+	
+2001-06-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/sparc/tm-sun4sol2.h (GDB_MULTI_ARCH): Down grade to
 	GDB_MULTI_ARCH_PARTIAL from two.
 

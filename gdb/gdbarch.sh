@@ -653,6 +653,10 @@ extern struct gdbarch *current_gdbarch;
 #error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
 #endif
 #endif
+
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PURE) && defined (GDB_TM_FILE)
+#error "GDB_TM_FILE: Pure multi-arch targets do not have a tm.h file."
+#endif
 EOF
 
 # function typedef's
@@ -666,6 +670,9 @@ do
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	printf "#error \"Non multi-arch definition of ${macro}\"\n"
+	printf "#endif\n"
 	printf "#if GDB_MULTI_ARCH\n"
 	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
@@ -712,6 +719,9 @@ do
 	    printf "#endif\n"
 	    printf "\n"
 	    printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro}_P)\n"
+	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
+	    printf "#endif\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
 	    printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
 	    printf "#endif\n"
@@ -731,6 +741,9 @@ do
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	printf "#error \"Non multi-arch definition of ${macro}\"\n"
+	printf "#endif\n"
 	printf "#if GDB_MULTI_ARCH\n"
 	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
@@ -774,6 +787,9 @@ do
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
 	if class_is_multiarch_p ; then :
 	else
+	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
+	    printf "#endif\n"
 	    printf "#if GDB_MULTI_ARCH\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	    if [ "x${actual}" = "x" ]

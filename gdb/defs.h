@@ -73,9 +73,12 @@
 
 #define GDB_MULTI_ARCH_PARTIAL 1
 
-/* The target is multi-arched.  The MULTI-ARCH vector provides all
-   definitions.  "tm.h" is included and may provide definitions of
-   non- multi-arch macros..  */
+/* The target is partially multi-arched. Both the multi-arch vector
+   and "tm.h" provide definitions. "tm.h" cannot override a definition
+   provided by the multi-arch vector.  It is detected as a compilation
+   error.
+
+   This setting is only useful during a multi-arch conversion. */
 
 #define GDB_MULTI_ARCH_TM 2
 
