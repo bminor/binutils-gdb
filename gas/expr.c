@@ -989,7 +989,9 @@ operand (expressionP)
       break;
 
     case '(':
+#ifndef NEED_INDEX_OPERATOR
     case '[':
+#endif
       /* didn't begin with digit & not a name */
       segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
@@ -1415,7 +1417,13 @@ static const operatorT op_encoding[256] =
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
-  __, __, __, __, __, __, O_bit_exclusive_or, __,
+  __, __, __,
+#ifdef NEED_INDEX_OPERATOR
+  O_index,
+#else
+  __,
+#endif
+  __, __, O_bit_exclusive_or, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
@@ -1453,28 +1461,29 @@ static operator_rankT op_rank[] =
   0,	/* O_symbol_rva */
   0,	/* O_register */
   0,	/* O_bit */
-  8,	/* O_uminus */
-  8,	/* O_bit_not */
-  8,	/* O_logical_not */
-  7,	/* O_multiply */
-  7,	/* O_divide */
-  7,	/* O_modulus */
-  7,	/* O_left_shift */
-  7,	/* O_right_shift */
-  6,	/* O_bit_inclusive_or */
-  6,	/* O_bit_or_not */
-  6,	/* O_bit_exclusive_or */
-  6,	/* O_bit_and */
-  4,	/* O_add */
-  4,	/* O_subtract */
-  3,	/* O_eq */
-  3,	/* O_ne */
-  3,	/* O_lt */
-  3,	/* O_le */
-  3,	/* O_ge */
-  3,	/* O_gt */
-  2,	/* O_logical_and */
-  1	/* O_logical_or */
+  9,	/* O_uminus */
+  9,	/* O_bit_not */
+  9,	/* O_logical_not */
+  8,	/* O_multiply */
+  8,	/* O_divide */
+  8,	/* O_modulus */
+  8,	/* O_left_shift */
+  8,	/* O_right_shift */
+  7,	/* O_bit_inclusive_or */
+  7,	/* O_bit_or_not */
+  7,	/* O_bit_exclusive_or */
+  7,	/* O_bit_and */
+  5,	/* O_add */
+  5,	/* O_subtract */
+  4,	/* O_eq */
+  4,	/* O_ne */
+  4,	/* O_lt */
+  4,	/* O_le */
+  4,	/* O_ge */
+  4,	/* O_gt */
+  3,	/* O_logical_and */
+  2,	/* O_logical_or */
+  1,	/* O_index */
 };
 
 /* Unfortunately, in MRI mode for the m68k, multiplication and
@@ -1640,6 +1649,17 @@ expr (rank, resultP)
 	}
 
       know (*input_line_pointer != ' ');
+
+      if (op_left == O_index)
+	{
+	  if (*input_line_pointer != ']')
+	    as_bad ("missing right bracket");
+	  else
+	    {
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	    }
+	}
 
       if (retval == undefined_section)
 	{

@@ -102,6 +102,8 @@ typedef enum
   O_logical_and,
   /* (X_add_symbol || X_op_symbol) + X_add_number.  */
   O_logical_or,
+  /* X_op_symbol [ X_add_symbol ] */
+  O_index,
   /* this must be the largest value */
   O_max
 } operatorT;
