@@ -161,8 +161,6 @@ rs6000-tdep.c
 rs6000-xdep.c
 saber.suppress
 signals.h
-signame.c
-signame.h
 solib.c
 solib.h
 source.c
