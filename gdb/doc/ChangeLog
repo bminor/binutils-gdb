@@ -1,3 +1,8 @@
+2001-07-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Host Definition): Remove description of
+	NEED_POSIX_SETPGID.
+
 2001-07-23  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.tex (DJGPP Native): New node, with descriptions of

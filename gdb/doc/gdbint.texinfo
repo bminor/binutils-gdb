@@ -2142,11 +2142,6 @@ When using HAVE_MMAP, the first mapping should go at this address.
 @item MMAP_INCREMENT
 when using HAVE_MMAP, this is the increment between mappings.
 
-@item NEED_POSIX_SETPGID
-@findex setpgid
-Define this to use the POSIX version of @code{setpgid} to determine
-whether job control is available.
-
 @item NORETURN
 If defined, this should be one or more tokens, such as @code{volatile},
 that can be used in both the declaration and definition of functions to
