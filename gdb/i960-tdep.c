@@ -774,7 +774,7 @@ mem (unsigned long memaddr, unsigned long word1, unsigned long word2,
     {
       return len;
     }
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /* Read the i960 instruction at 'memaddr' and return the address of 

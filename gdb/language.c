@@ -571,7 +571,7 @@ binop_result_type (value_ptr v1, value_ptr v2)
     case language_chill:
       error ("Missing Chill support in function binop_result_check.");	/*FIXME */
     }
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
   return (struct type *) 0;	/* For lint */
 }
 
@@ -1384,7 +1384,7 @@ add_language (const struct language_defn *lang)
     {
       fprintf_unfiltered (gdb_stderr, "Magic number of %s language struct wrong\n",
 			  lang->la_name);
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
   if (!languages)

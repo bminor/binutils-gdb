@@ -249,7 +249,7 @@ decode_format (char **string_ptr, int oformat, int osize)
 	  val.size = osize ? 'h' : osize;
 	else
 	  /* Bad value for TARGET_PTR_BIT */
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -456,7 +456,7 @@ print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
       break;
 
     case 0:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
     case 't':
       /* Binary; 't' stands for "two".  */

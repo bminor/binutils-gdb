@@ -836,7 +836,7 @@ sparclite_download (char *filename, int from_tty)
     download (remote_target_name, filename, from_tty, sparclite_udp_write,
 	      sparclite_udp_start);
 #else
-    abort ();			/* sparclite_open should prevent this! */
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");			/* sparclite_open should prevent this! */
 #endif
   else
     download (remote_target_name, filename, from_tty, sparclite_serial_write,

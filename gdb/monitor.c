@@ -335,7 +335,7 @@ monitor_printf_noecho (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   if (monitor_debug_p)
     {
@@ -363,7 +363,7 @@ monitor_printf (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   if (monitor_debug_p)
     {
@@ -1286,7 +1286,7 @@ monitor_dump_regs (void)
       parse_register_dump (buf, resp_len);
     }
   else
-    abort ();			/* Need some way to read registers */
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");			/* Need some way to read registers */
 }
 
 static void

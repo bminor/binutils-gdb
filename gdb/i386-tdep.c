@@ -947,7 +947,7 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
     return print_insn_i386_intel (memaddr, info);
   /* Never reached - disassembly_flavour is always either att_flavor
      or intel_flavor */
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /* If the disassembly mode is intel, we have to also switch the

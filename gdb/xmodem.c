@@ -185,7 +185,7 @@ xmodem_send_packet (serial_t desc, unsigned char *packet, int len, int hashmark)
       datasize = XMODEM_1KDATASIZE;
     }
   else
-    abort ();			/* Packet way too large */
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");			/* Packet way too large */
 
   /* Add ^Z padding if packet < 128 (or 1024) bytes */
 

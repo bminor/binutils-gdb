@@ -346,7 +346,7 @@ port_chain_insert (port_chain_t list, mach_port_t name, int type)
 	}
     }
   else
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   new = (port_chain_t) obstack_alloc (port_chain_obstack,
 				      sizeof (struct port_chain));
@@ -602,17 +602,17 @@ m3_trace_me (void)
   ret = task_get_bootstrap_port (mach_task_self (),
 				 &original_server_port_name);
   if (ret != KERN_SUCCESS)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
   ret = mach_port_deallocate (mach_task_self (),
 			      original_server_port_name);
   if (ret != KERN_SUCCESS)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   /* Suspend this task to let the parent change my ports.
      Resumed by the debugger */
   ret = task_suspend (mach_task_self ());
   if (ret != KERN_SUCCESS)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /*

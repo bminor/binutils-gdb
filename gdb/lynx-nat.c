@@ -410,7 +410,7 @@ store_inferior_registers (int regno)
       if (regno == -1 || regno == SP_REGNUM)
 	{
 	  if (!register_valid[L0_REGNUM + 5])
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + FRAME_SAVED_I0,
 			      &registers[REGISTER_BYTE (I0_REGNUM)],
 			      8 * REGISTER_RAW_SIZE (I0_REGNUM));
@@ -422,7 +422,7 @@ store_inferior_registers (int regno)
       else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
 	{
 	  if (!register_valid[regno])
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  if (regno >= L0_REGNUM && regno <= L0_REGNUM + 7)
 	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM)
 	      + FRAME_SAVED_L0;

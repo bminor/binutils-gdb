@@ -122,7 +122,7 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   { \
     if (TYPE_LENGTH (TYPE) > 8) \
-      abort (); \
+      internal_error (__FILE__, __LINE__, "failed internal consistency check"); \
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
 	memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), 2); \
@@ -145,7 +145,7 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   { \
     if (TYPE_LENGTH (TYPE) > 8) \
-      abort (); \
+      internal_error (__FILE__, __LINE__, "failed internal consistency check"); \
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
 	write_register_bytes (REGISTER_BYTE (0), VALBUF, 2); \

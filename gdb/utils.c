@@ -688,7 +688,7 @@ internal_verror (const char *file, int line,
     case 1:
       dejavu = 2;
       fputs_unfiltered (msg, gdb_stderr);
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     default:
       dejavu = 3;
       write (STDERR_FILENO, msg, sizeof (msg));
@@ -717,13 +717,13 @@ Create a core file containing the current state of GDB? ");
       if (dump_core_p)
 	{
 	  if (fork () == 0)
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	}
     }
   else
     {
       if (dump_core_p)
-	abort ();
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");
       else
 	exit (1);
     }
@@ -955,7 +955,7 @@ static void
 malloc_botch (void)
 {
   fprintf_unfiltered (gdb_stderr, "Memory corruption\n");
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /* Attempt to install hooks in mmalloc/mrealloc/mfree for the heap specified
@@ -1692,7 +1692,7 @@ wrap_here (char *indent)
 {
   /* This should have been allocated, but be paranoid anyway. */
   if (!wrap_buffer)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   if (wrap_buffer[0])
     {
@@ -2802,7 +2802,7 @@ decimal2str (char *paddr_str, char *sign, ULONGEST addr)
 	       sign, temp[2], temp[1], temp[0]);
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 }
 

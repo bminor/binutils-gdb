@@ -257,7 +257,7 @@ print_decimal (struct ui_file *stream, char *sign, int use_local,
 			sign, temp[2], temp[1], temp[0]);
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
   return;
 }
@@ -360,7 +360,7 @@ print_longest (struct ui_file *stream, int format, int use_local,
       fprintf_filtered (stream, local_hex_format_custom ("016ll"), val_long);
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 #else /* !CC_HAS_LONG_LONG || !PRINTF_HAS_LONG_LONG */
   /* In the following it is important to coerce (val_long) to a long. It does
@@ -407,7 +407,7 @@ print_longest (struct ui_file *stream, int format, int use_local,
 			(unsigned long) val_long);
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 #endif /* CC_HAS_LONG_LONG || PRINTF_HAS_LONG_LONG */
 }
@@ -467,7 +467,7 @@ strcat_longest (int format, int use_local, LONGEST val_long, char *buf,
       sprintf (buf, local_hex_format_custom ("016ll"), val_long);
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 #else /* !PRINTF_HAS_LONG_LONG */
   /* In the following it is important to coerce (val_long) to a long. It does
@@ -508,7 +508,7 @@ strcat_longest (int format, int use_local, LONGEST val_long, char *buf,
 	       ((long) val_long));
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
 #endif /* !PRINTF_HAS_LONG_LONG */

@@ -272,7 +272,7 @@ child_resume (int pid, int step, enum target_signal signal)
   if (step)
     {
       if (SOFTWARE_SINGLE_STEP_P)
-	abort ();		/* Make sure this doesn't happen. */
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");		/* Make sure this doesn't happen. */
       else
 	ptrace (PT_STEP, pid, (PTRACE_ARG3_TYPE) 1,
 		target_signal_to_host (signal));

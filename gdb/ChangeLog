@@ -1,3 +1,52 @@
+2001-02-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* buildsym.c (push_subfile, pop_subfile): Replace call to abort()
+	with call to internal_error().
+	* dbxread.c (process_one_symbol): Likewise.
+	* exec.c (build_section_table, xfer_memory): Likewise.
+	* h8500-tdep.c (h8500_register_size, h8500_register_virtual_type):
+	Likewise.
+	* hpread.c (hpread_type_translate, hpread_read_array_type)
+	(hpread_type_lookup): Likewise.
+	* i386-tdep.c (gdb_print_insn_i386): Likewise.
+	* i960-tdep.c (mem): Likewise
+	* inflow.c (set_sigio_trap, clear_sigio_trap): Likewise.
+	* infptrace.c (child_resume): Likewise.
+	* infttrace.c (_initialize_infttrace): Likewise.
+	* language.c (binop_result_type, add_language): Likewise.
+	* lynx-nat.c (store_inferior_registers): Likewise.
+	* m3-nat.c (port_chain_insert, m3_trace_me): Likewise.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+	* monitor.c (monitor_printf_noecho, monitor_printf)
+	(monitor_dump_regs): Likewise.
+	* ocd.c (stu_put_packet): Likewise.
+	* printcmd.c (decode_format, print_scalar_formatted): Likewise.
+	* remote-bug.c (bug_open): Likewise.
+	* remote-e7000.c (fetch_regs_from_dump, e7000_wait): Likewise.
+	* remote-es.c (es1800_read_bytes): Likewise.
+	* remote-mips.c (common_breakpoint): Likewise.
+	* remote-rdp.c (send_rdp): Likewise.
+	* remote-sds.c (putmessage): Likewise.
+	* sparc-nat.c (fetch_inferior_registers, store_inferior_registers):
+	Likewise.
+	* sparcl-tdep.c (sparclite_download): Likewise.
+	* symtab.c (lookup_partial_symbol): Likewise.
+	* target.c (push_target, pop_target, initialize_targets): Likewise.
+	* utils.c (internal_verror, malloc_botch, wrap_here, decimal2str):
+	Likewise.
+	* valprint.c (print_decimal, print_longest, print_longest)
+	(strcat_longest): Likewise.
+	* w65-tdep.c (init_frame_pc, w65_push_dummy_frame): Likewise.
+	* xmodem.c (xmodem_send_packet): Likewise.
+	* z8k-tdep.c (init_frame_pc, z8k_push_dummy_frame): Likewise.
+	* config/h8500/tm-h8500.h (STORE_STRUCT_RETURN): Likewise.
+	* config/mn10200/tm-mn10200.h (EXTRACT_RETURN_VALUE)
+	(STORE_RETURN_VALUE): Likewise.
+	* config/ns32k/nm-umax.h (REGISTER_U_ADDR): Likewise.
+	* config/ns32k/xm-merlin.h (REGISTER_U_ADDR): Likewise.
+	* config/z8k/tm-z8k.h (STORE_STRUCT_RETURN, STORE_RETURN_VALUE):
+	Likewise.
+
 2001-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* CONTRIBUTE: Document how to cite a problem report.

@@ -1031,7 +1031,7 @@ es1800_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 
   if (len > PBUFSIZ / 2 - 1)
     {
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
   if (len == 1)			/* The emulator does not like expressions like:  */

@@ -641,7 +641,7 @@ push_target (struct target_ops *t)
       fprintf_unfiltered (gdb_stderr,
 			  "Magic number of %s target struct wrong\n",
 			  t->to_shortname);
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
   /* Find the proper stratum to install this target in. */
@@ -737,7 +737,7 @@ pop_target (void)
   fprintf_unfiltered (gdb_stderr,
 		      "pop_target couldn't find target %s\n",
 		      current_target.to_shortname);
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 #undef	MIN
@@ -2993,5 +2993,5 @@ When non-zero, target debugging is enabled.", &setdebuglist),
   target_dcache = dcache_init();
 
   if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }

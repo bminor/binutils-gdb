@@ -887,7 +887,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 		}
 
 	      else
-		abort ();
+		internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	    }
 	  store_signed_integer (buf,
 				REGISTER_RAW_SIZE (regno),
@@ -2117,7 +2117,7 @@ e7000_wait (int pid, struct target_waitstatus *status)
       break;
     default:
       /* Get the user's attention - this should never happen. */
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
   return 0;

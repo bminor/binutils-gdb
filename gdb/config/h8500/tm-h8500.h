@@ -159,7 +159,7 @@ extern struct type *h8500_register_virtual_type (int regno);
    subroutine will return.  This is called from call_function. */
 
 /*#define STORE_STRUCT_RETURN(ADDR, SP) \
-   { write_register (0, (ADDR)); abort(); } */
+   { write_register (0, (ADDR)); internal_error (__FILE__, __LINE__, "failed internal consistency check"); } */
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

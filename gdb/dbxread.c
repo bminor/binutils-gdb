@@ -2202,7 +2202,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  case N_ROSYM:
 	    goto case_N_ROSYM;
 	  default:
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  }
       }
 

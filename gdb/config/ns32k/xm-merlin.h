@@ -61,6 +61,6 @@
   	addr = 76 + (regno - LP0_REGNUM) * sizeof (double); break;	\
   default:								\
   	printf ("bad argument to REGISTER_U_ADDR %d\n", regno);		\
-	abort ();							\
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");							\
   }									\
 }

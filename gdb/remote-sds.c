@@ -746,7 +746,7 @@ putmessage (unsigned char *buf, int len)
      and giving it a checksum.  */
 
   if (len > 170)		/* Prosanity check */
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   if (remote_debug)
     {

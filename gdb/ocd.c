@@ -880,7 +880,7 @@ stu_put_packet (unsigned char *buf, int len)
   unsigned char c;
 
   if (len == 0 || len > 256)
-    abort ();			/* Can't represent 0 length packet */
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");			/* Can't represent 0 length packet */
 
   reset_packet ();
 

@@ -251,7 +251,7 @@ h8500_register_size (int regno)
     case PC_REGNUM:
       return 4;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 }
 
@@ -286,7 +286,7 @@ h8500_register_virtual_type (int regno)
     case PC_REGNUM:
       return builtin_type_unsigned_long;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 }
 

@@ -226,7 +226,7 @@ bug_open (char *args, int from_tty)
       target_is_m88110 = 1;
       break;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 }
 

@@ -59,7 +59,7 @@ fetch_inferior_registers (int regno)
   /* We should never be called with deferred stores, because a prerequisite
      for writing regs is to have fetched them all (PREPARE_TO_STORE), sigh.  */
   if (deferred_stores)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   DO_DEFERRED_STORES;
 
@@ -195,7 +195,7 @@ store_inferior_registers (int regno)
       if (regno < 0 || regno == SP_REGNUM)
 	{
 	  if (!register_valid[L0_REGNUM + 5])
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp,
 			       &registers[REGISTER_BYTE (L0_REGNUM)],
 			       16 * REGISTER_RAW_SIZE (L0_REGNUM));
@@ -203,7 +203,7 @@ store_inferior_registers (int regno)
       else
 	{
 	  if (!register_valid[regno])
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM),
 			       &registers[REGISTER_BYTE (regno)],
 			       REGISTER_RAW_SIZE (regno));
@@ -214,7 +214,7 @@ store_inferior_registers (int regno)
   if (wanna_store & INT_REGS)
     {
       if (!register_valid[G1_REGNUM])
-	abort ();
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
       memcpy (&inferior_registers.r_g1, &registers[REGISTER_BYTE (G1_REGNUM)],
 	      15 * REGISTER_RAW_SIZE (G1_REGNUM));
@@ -236,7 +236,7 @@ store_inferior_registers (int regno)
   if (wanna_store & FP_REGS)
     {
       if (!register_valid[FP0_REGNUM + 9])
-	abort ();
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");
       memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      sizeof inferior_fp_registers.fpu_fr);
       memcpy (&inferior_fp_registers.Fpu_fsr,

@@ -171,7 +171,7 @@ z8k_frame_chain (struct frame_info *thisframe)
 void
 init_frame_pc (void)
 {
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /* Put here the code to store, into a struct frame_saved_regs,
@@ -197,7 +197,7 @@ z8k_frame_init_saved_regs (struct frame_info *frame_info)
 void
 z8k_push_dummy_frame (void)
 {
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 int

@@ -54,13 +54,13 @@ read_memory_pointer (CORE_ADDR x)
 
 init_frame_pc (void)
 {
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 void
 w65_push_dummy_frame (void)
 {
-  abort ();
+  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 /* Put here the code to store, into a struct frame_saved_regs,

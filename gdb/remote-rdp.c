@@ -471,13 +471,13 @@ send_rdp (char *template,...)
 	  *pi = get_byte ();
 	  break;
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	}
     }
   va_end (alist);
 
   if (dst != buf)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 

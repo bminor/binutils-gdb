@@ -5775,7 +5775,7 @@ _initialize_infttrace (void)
   /* We do a lot of casts from pointers to TTRACE_ARG_TYPE; make sure
      this is okay.  */
   if (sizeof (TTRACE_ARG_TYPE) < sizeof (void *))
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   if (errno || (memory_page_dictionary.page_size <= 0))
     perror_with_name ("sysconf");

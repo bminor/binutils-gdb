@@ -998,7 +998,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	{
 	  center = bottom + (top - bottom) / 2;
 	  if (!(center < top))
-	    abort ();
+	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  if (!do_linear_search
 	      && (SYMBOL_LANGUAGE (*center) == language_java))
 	    {
@@ -1014,7 +1014,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    }
 	}
       if (!(top == bottom))
-	abort ();
+	internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
       /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
 	 we don't have to force a linear search on C++. Probably holds true

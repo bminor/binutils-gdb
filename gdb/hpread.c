@@ -1074,7 +1074,7 @@ static int
 hpread_type_translate (dnttpointer typep)
 {
   if (!typep.dntti.immediate)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
   switch (typep.dntti.type)
     {
@@ -1136,7 +1136,7 @@ hpread_type_translate (dnttpointer typep)
     case HP_TYPE_FTN_STRING_VAX_COMPAT:
       return FT_STRING;
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 }
 
@@ -1501,7 +1501,7 @@ hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   /* values are not normalized.  */
   if (!((dn_bufp->darray.arrayisbytes && dn_bufp->darray.elemisbytes)
 	|| (!dn_bufp->darray.arrayisbytes && !dn_bufp->darray.elemisbytes)))
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
   else if (dn_bufp->darray.arraylength == 0x7fffffff)
     {
       /* The HP debug format represents char foo[]; as an array with
@@ -1618,7 +1618,7 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	if (dn_bufp->dtype.type.dnttp.index < LNTT_SYMCOUNT (objfile))
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtype.type.dnttp.index, objfile);
 	else
-	  abort ();
+	  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
 	if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
 	  prefix = "struct ";

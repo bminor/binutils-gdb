@@ -679,14 +679,14 @@ void
 set_sigio_trap (void)
 {
   if (target_activity_function)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 void
 clear_sigio_trap (void)
 {
   if (target_activity_function)
-    abort ();
+    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 #endif /* No SIGIO.  */
 

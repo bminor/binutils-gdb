@@ -2729,7 +2729,7 @@ common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	      flags = "f";
 	      break;
 	    default:
-	      abort ();
+	      internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	    }
 
 	  cmd = 'B';
