@@ -32,6 +32,7 @@ aout
 bfd.h
 bout.h
 coff
+demangle.h
 elf
 fopen-bin.h
 fopen-same.h
@@ -51,7 +52,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.24  1991/12/14 01:32:54  wilson
+# Revision 1.25  1992/08/31 00:57:03  bothner
+# 	* demangle.h:  New file, moved from ../gdb.  Made independent
+# 	of gdb.  Allow demangling style option to be passed as a
+# 	parameter to cplus_demangle(), but using the
+# 	current_demangling_style global as the default.
+#
+# Revision 1.24  1991/12/14  01:32:54  wilson
 # Keep fopen-bin.h and fopen-same.h.
 #
 # Revision 1.23  1991/12/01  04:56:32  sac
