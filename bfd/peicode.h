@@ -1355,8 +1355,8 @@ pe_print_idata(abfd, vfile)
       bfd_vma forward_chain;
       bfd_vma dll_name;
       bfd_vma first_thunk;
-      int idx;
-      int j;
+      int idx = 0;
+      bfd_size_type j;
       char *dll;
 
       fprintf (file,
@@ -1438,12 +1438,8 @@ pe_print_idata(abfd, vfile)
 	    {
 	      int ordinal;
 	      char *member_name;
-	      bfd_vma hint_member;
+	      bfd_vma hint_member = 0;
 	      bfd_vma iat_member;
-
-	      if (time_stamp != 0)
-		{
-		}
 
 	      if (hint_addr != 0)
 		hint_member = bfd_get_32 (abfd, data + idx + j);
@@ -1517,8 +1513,8 @@ pe_print_edata (abfd, vfile)
       short minor_ver;
       bfd_vma name;                  /* rva - relative to image base */
       long base;                     /* ordinal base */
-      long num_functions;        /* Number in the export address table */
-      long num_names;            /* Number in the name pointer table */
+      unsigned long num_functions;   /* Number in the export address table */
+      unsigned long num_names;       /* Number in the name pointer table */
       bfd_vma eat_addr;    /* rva to the export address table */
       bfd_vma npt_addr;        /* rva to the Export Name Pointer Table */
       bfd_vma ot_addr; /* rva to the Ordinal Table */
@@ -1608,10 +1604,10 @@ pe_print_edata (abfd, vfile)
 
   fprintf(file,
 	  "\tExport Address Table \t\t%lx\n",
-	  (unsigned long) edt.num_functions);
+	  edt.num_functions);
 
   fprintf(file,
-	  "\t[Name Pointer/Ordinal] Table\t%ld\n", edt.num_names);
+	  "\t[Name Pointer/Ordinal] Table\t%lu\n", edt.num_names);
 
   fprintf(file,
 	  "Table Addresses\n");
@@ -1981,7 +1977,7 @@ pe_print_private_bfd_data (abfd, vfile)
     {
       fputc ('\n', file);
   
-      return pe_saved_bfd_print_private_bfd_data (abfd, vfile);
+      return pe_saved_coff_bfd_print_private_bfd_data (abfd, vfile);
     }
 
   return true;
@@ -2046,7 +2042,7 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 #endif
 
 #ifdef ARM 
-  if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
+  if (! _bfd_coff_arm_set_private_flags (abfd, internal_f->f_flags))
     coff_data (abfd) ->flags = 0;
 #endif
   

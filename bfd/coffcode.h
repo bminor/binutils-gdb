@@ -863,7 +863,8 @@ dependent COFF routines:
 .       struct bfd_link_hash_entry **hashp));
 .
 . boolean (*_bfd_coff_link_output_has_begun) PARAMS ((
-.	bfd * abfd ));
+.	bfd * abfd,
+.       struct coff_final_link_info * pfinfo));
 . boolean (*_bfd_coff_final_link_postscript) PARAMS ((
 .	bfd * abfd,
 .	struct coff_final_link_info * pfinfo));
@@ -982,8 +983,8 @@ dependent COFF routines:
 .        ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
 .         (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 .
-.#define bfd_coff_link_output_has_begun(a) \
-.        ((coff_backend_info (a)->_bfd_coff_link_output_has_begun) (a))
+.#define bfd_coff_link_output_has_begun(a,p) \
+.        ((coff_backend_info (a)->_bfd_coff_link_output_has_begun) (a,p))
 .#define bfd_coff_final_link_postscript(a,p) \
 .        ((coff_backend_info (a)->_bfd_coff_final_link_postscript) (a,p))
 .
@@ -1028,6 +1029,8 @@ coff_new_section_hook (abfd, section)
      bfd * abfd;
      asection * section;
 {
+  combined_entry_type *native;
+
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
 #ifdef RS6000COFF_C
@@ -1044,9 +1047,21 @@ coff_new_section_hook (abfd, section)
 
      @@ The 10 is a guess at a plausible maximum number of aux entries
      (but shouldn't be a constant).  */
-  coffsymbol (section->symbol)->native =
-    (combined_entry_type *) bfd_zalloc (abfd,
-					sizeof (combined_entry_type) * 10);
+  native = ((combined_entry_type *)
+	    bfd_zalloc (abfd, sizeof (combined_entry_type) * 10));
+  if (native == NULL)
+    return false;
+
+  /* We don't need to set up n_name, n_value, or n_scnum in the native
+     symbol information, since they'll be overriden by the BFD symbol
+     anyhow.  However, we do need to set the type and storage class,
+     in case this symbol winds up getting written out.  The value 0
+     for n_numaux is already correct.  */
+
+  native->u.syment.n_type = T_NULL;
+  native->u.syment.n_sclass = C_STAT;
+
+  coffsymbol (section->symbol)->native = native;
 
   /* The .stab section must be aligned to 2**2 at most, because
      otherwise there may be gaps in the section which gdb will not
@@ -1329,7 +1344,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
 
 #ifdef ARM 
   /* Set the flags field from the COFF header read in */
-  if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
+  if (! _bfd_coff_arm_set_private_flags (abfd, internal_f->f_flags))
     coff->flags = 0;
 #endif
   
@@ -2198,11 +2213,10 @@ coff_compute_section_file_positions (abfd)
   asection *previous = (asection *) NULL;
   file_ptr sofar = FILHSZ;
   boolean align_adjust;
-
-#ifndef I960
+  unsigned int count;
+#ifdef ALIGN_SECTIONS_IN_FILE
   file_ptr old_sofar;
 #endif
-  unsigned int count;
 
 #ifdef RS6000COFF_C
   /* On XCOFF, if we have symbols, set up the .debug section.  */
@@ -2741,13 +2755,22 @@ coff_write_object_contents (abfd)
 	{
 	  unsigned int i, count;
 	  asymbol **psym;
-	  coff_symbol_type *csym;
+	  coff_symbol_type *csym = NULL;
+	  asymbol **psymsec;
 
+	  psymsec = NULL;
 	  count = bfd_get_symcount (abfd);
 	  for (i = 0, psym = abfd->outsymbols; i < count; i++, psym++)
 	    {
-	      /* Here *PSYM is the section symbol for CURRENT.  */
+	      if ((*psym)->section != current)
+		continue;
 
+	      /* Remember the location of the first symbol in this
+                 section.  */
+	      if (psymsec == NULL)
+		psymsec = psym;
+
+	      /* See if this is the section symbol.  */
 	      if (strcmp ((*psym)->name, current->name) == 0)
 		{
 		  csym = coff_symbol_from (abfd, *psym);
@@ -2757,6 +2780,9 @@ coff_write_object_contents (abfd)
 		      || csym->native->u.syment.n_sclass != C_STAT
 		      || csym->native->u.syment.n_type != T_NULL)
 		    continue;
+
+		  /* Here *PSYM is the section symbol for CURRENT.  */
+
 		  break;
 		}
 	    }
@@ -2792,6 +2818,24 @@ coff_write_object_contents (abfd)
 		  aux->u.auxent.x_scn.x_comdat =
 		    IMAGE_COMDAT_SELECT_EXACT_MATCH;
 		  break;
+		}
+
+	      /* The COMDAT symbol must be the first symbol from this
+                 section in the symbol table.  In order to make this
+                 work, we move the COMDAT symbol before the first
+                 symbol we found in the search above.  It's OK to
+                 rearrange the symbol table at this point, because
+                 coff_renumber_symbols is going to rearrange it
+                 further and fix up all the aux entries.  */
+	      if (psym != psymsec)
+		{
+		  asymbol *hold;
+		  asymbol **pcopy;
+
+		  hold = *psym;
+		  for (pcopy = psym; pcopy > psymsec; pcopy--)
+		    pcopy[0] = pcopy[-1];
+		  *psymsec = hold;
 		}
 	    }
 	}
@@ -3353,7 +3397,8 @@ coff_slurp_line_table (abfd, asect)
 
 	      warned = false;
 	      symndx = dst.l_addr.l_symndx;
-	      if (symndx < 0 || symndx >= obj_raw_syment_count (abfd))
+	      if (symndx < 0
+		  || (unsigned long) symndx >= obj_raw_syment_count (abfd))
 		{
 		  (*_bfd_error_handler)
 		    ("%s: warning: illegal symbol index %ld in line numbers",
@@ -4098,8 +4143,9 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #ifndef coff_link_output_has_begun
 #define coff_link_output_has_begun _coff_link_output_has_begun
 static boolean
-_coff_link_output_has_begun (abfd)
+_coff_link_output_has_begun (abfd, info)
      bfd * abfd;
+     struct bfd_link_info * info;
 {
   return abfd->output_has_begun;
 }

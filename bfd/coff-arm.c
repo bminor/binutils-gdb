@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "libcoff.h"
 
+/* Macros for manipulation the bits in the flags field of the coff data
+   structure.  */
 #define APCS_26_FLAG(       abfd )	(coff_data (abfd)->flags & F_APCS_26)
 #define APCS_FLOAT_FLAG(    abfd )	(coff_data (abfd)->flags & F_APCS_FLOAT)
 #define PIC_FLAG(           abfd )	(coff_data (abfd)->flags & F_PIC)
@@ -366,15 +368,17 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	0x07ff07ff, 
 	PCRELOFFSET),
 };
+
 #ifdef COFF_WITH_PE
 /* Return true if this relocation should
    appear in the output .reloc section. */
 
-static boolean in_reloc_p (abfd, howto)
+static boolean
+in_reloc_p (abfd, howto)
      bfd * abfd;
-     reloc_howto_type *howto;
+     reloc_howto_type * howto;
 {
-  return !howto->pc_relative && howto->type != 11;
+  return !howto->pc_relative && howto->type != ARM_RVA32;
 }     
 #endif
 
@@ -689,8 +693,8 @@ coff_thumb_pcrel_9 (abfd, reloc_entry, symbol, data, input_section,
 
 
 static CONST struct reloc_howto_struct *
-arm_reloc_type_lookup(abfd,code)
-      bfd *abfd;
+coff_arm_reloc_type_lookup (abfd, code)
+      bfd * abfd;
       bfd_reloc_code_real_type code;
 {
 #define ASTD(i,j)       case i: return &aoutarm_std_reloc_howto[j]
@@ -720,9 +724,6 @@ arm_reloc_type_lookup(abfd,code)
     }
 }
 
-
-#define coff_bfd_reloc_type_lookup arm_reloc_type_lookup
-
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 #define COFF_PAGE_SIZE 0x1000
 /* Turn a howto into a reloc  nunmber */
@@ -731,29 +732,54 @@ arm_reloc_type_lookup(abfd,code)
 #define BADMAG(x) ARMBADMAG(x)
 #define ARM 1			/* Customize coffcode.h */
 
-/* The set of global variables that mark the total size of each kind
-   of glue required, plus a BFD to hang the glue sections onto.
-   Note:  These variable should not be made static, since in a *-pe
-   build there are two versions of this file compiled, one for pe
-   objects and one for pei objects, and they want to share these
-   variables.  */
-#if defined COFF_IMAGE_WITH_PE
-extern long int global_thumb_glue_size;
-#else
-long int global_thumb_glue_size = 0;
-#endif
+/* Extend the coff_link_hash_table structure with a few ARM specific fields.
+   This allows us to store global data here without actually creating any
+   global variables, which is a no-no in the BFD world.  */
+struct coff_arm_link_hash_table
+{
+  /* The original coff_link_hash_table structure.  MUST be first field.  */
+  struct coff_link_hash_table	root;
+  
+  /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
+  long int 			thumb_glue_size;
+  
+  /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
+  long int 			arm_glue_size;
 
-#if defined COFF_IMAGE_WITH_PE
-extern long int global_arm_glue_size;
-#else
-long int global_arm_glue_size = 0;
-#endif
+  /* An arbitary input BFD chosen to hold the glue sections.  */
+  bfd *				bfd_of_glue_owner;
+};
 
-#if defined COFF_IMAGE_WITH_PE 
-extern bfd * bfd_of_glue_owner;
-#else
-bfd * bfd_of_glue_owner = NULL;
-#endif
+/* Get the ARM coff linker hash table from a link_info structure.  */
+#define coff_arm_hash_table(info) \
+  ((struct coff_arm_link_hash_table *) ((info)->hash))
+
+/* Create an ARM coff linker hash table.  */
+
+static struct bfd_link_hash_table *
+coff_arm_link_hash_table_create (abfd)
+     bfd * abfd;
+{
+  struct coff_arm_link_hash_table * ret;
+
+  ret = ((struct coff_arm_link_hash_table *)
+	 bfd_alloc (abfd, sizeof (struct coff_arm_link_hash_table)));
+  if (ret == (struct coff_arm_link_hash_table *) NULL)
+    return NULL;
+
+  if (! _bfd_coff_link_hash_table_init
+      (& ret->root, abfd, _bfd_coff_link_hash_newfunc))
+    {
+      bfd_release (abfd, ret);
+      return (struct bfd_link_hash_table *) NULL;
+    }
+
+  ret->thumb_glue_size   = 0;
+  ret->arm_glue_size     = 0;
+  ret->bfd_of_glue_owner = NULL;
+
+  return & ret->root.root;
+}
 
 /* some typedefs for holding instructions */
 typedef unsigned long int insn32;
@@ -804,7 +830,7 @@ insert_thumb_branch (br_insn, rel_off)
 
   rel_off >>= 1;                              /* half word aligned address */
   low_bits = rel_off & 0x000007FF;            /* the bottom 11 bits */
-  high_bits = ( rel_off >> 11 ) & 0x000007FF; /* the top 11 bits */
+  high_bits = (rel_off >> 11) & 0x000007FF;   /* the top 11 bits */
 
   if ((br_insn & LOW_HI_ORDER) == LOW_HI_ORDER)
     br_insn = LOW_HI_ORDER | (low_bits << 16) | high_bits;
@@ -825,8 +851,8 @@ find_thumb_glue (info, name, input_bfd)
      char *                 name;
      bfd *                  input_bfd;
 {
-  char * tmp_name = 0;
-  struct coff_link_hash_entry * myh = 0;
+  char *                        tmp_name;
+  struct coff_link_hash_entry * myh;
 
   tmp_name = ((char *)
 	 bfd_malloc (strlen (name) + strlen (THUMB2ARM_GLUE_ENTRY_NAME)));
@@ -835,14 +861,12 @@ find_thumb_glue (info, name, input_bfd)
 
   sprintf (tmp_name, THUMB2ARM_GLUE_ENTRY_NAME, name);
   
-  myh = coff_link_hash_lookup (coff_hash_table (info),
-			       tmp_name,
-			       false, false, true);
+  myh = coff_link_hash_lookup
+    (coff_hash_table (info), tmp_name, false, false, true);
+  
   if (myh == NULL)
-    {
-      _bfd_error_handler ("%s: unable to find THUMB glue '%s' for `%s'",
-			  bfd_get_filename (input_bfd), tmp_name, name);
-    }
+    _bfd_error_handler ("%s: unable to find THUMB glue '%s' for `%s'",
+			bfd_get_filename (input_bfd), tmp_name, name);
   
   free (tmp_name);
 
@@ -855,8 +879,8 @@ find_arm_glue (info, name, input_bfd)
      char *                 name;
      bfd *                  input_bfd;
 {
-  char *tmp_name = 0;
-  struct coff_link_hash_entry *myh = 0;
+  char *                        tmp_name;
+  struct coff_link_hash_entry * myh;
 
   tmp_name = ((char *)
 	      bfd_malloc (strlen (name) + strlen (ARM2THUMB_GLUE_ENTRY_NAME)));
@@ -865,15 +889,12 @@ find_arm_glue (info, name, input_bfd)
 
   sprintf (tmp_name, ARM2THUMB_GLUE_ENTRY_NAME, name);
   
-  myh = coff_link_hash_lookup (coff_hash_table (info),
-			       tmp_name,
-			       false, false, true);
+  myh = coff_link_hash_lookup
+    (coff_hash_table (info), tmp_name, false, false, true);
 
   if (myh == NULL)
-    {
-      _bfd_error_handler ("%s: unable to find ARM glue '%s' for `%s'",
-			  bfd_get_filename (input_bfd), tmp_name, name);
-    }
+    _bfd_error_handler ("%s: unable to find ARM glue '%s' for `%s'",
+			bfd_get_filename (input_bfd), tmp_name, name);
   
   free (tmp_name);
 
@@ -898,8 +919,8 @@ find_arm_glue (info, name, input_bfd)
 
 #define ARM2THUMB_GLUE_SIZE 12
 static const insn32 
-        a2t1_ldr_insn = 0xe59fc000,
-	a2t2_bx_r12_insn = 0xe12fff1c,
+        a2t1_ldr_insn       = 0xe59fc000,
+	a2t2_bx_r12_insn    = 0xe12fff1c,
 	a2t3_func_addr_insn = 0x00000001;
 
 /*
@@ -1094,22 +1115,29 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || h->class == C_THUMBEXTFUNC)
 		    {
 		      /* Arm code calling a Thumb function */
-		      unsigned long int              tmp;
-		      long int                       my_offset;
-		      asection *                     s = 0;
-		      long int                       ret_offset;
-		      struct coff_link_hash_entry *  myh; 
-
+		      unsigned long int                 tmp;
+		      long int                          my_offset;
+		      asection *                        s;
+		      long int                          ret_offset;
+		      struct coff_link_hash_entry *     myh; 
+		      struct coff_arm_link_hash_table * globals;
+		      
 		      myh = find_arm_glue (info, name, input_bfd);
 		      if (myh == NULL)
 			return false;
 
-		      my_offset = myh->root.u.def.value;
+		      globals = coff_arm_hash_table (info);
 
-		      s = bfd_get_section_by_name (bfd_of_glue_owner, 
+		      BFD_ASSERT (globals != NULL);
+		      BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+			
+		      my_offset = myh->root.u.def.value;
+		      
+		      s = bfd_get_section_by_name (globals->bfd_of_glue_owner, 
 						  ARM2THUMB_GLUE_SECTION_NAME);
 		      BFD_ASSERT (s != NULL);
 		      BFD_ASSERT (s->contents != NULL);
+		      BFD_ASSERT (s->output_section != NULL);
 
 		      if ((my_offset & 0x01) == 0x01)
 			{
@@ -1128,20 +1156,24 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			  --my_offset;
 			  myh->root.u.def.value = my_offset;
 
-			  bfd_put_32 (output_bfd, a2t1_ldr_insn, s->contents + my_offset);
+			  bfd_put_32 (output_bfd, a2t1_ldr_insn,
+				      s->contents + my_offset);
 			  
-			  bfd_put_32 (output_bfd, a2t2_bx_r12_insn, s->contents + my_offset + 4);
+			  bfd_put_32 (output_bfd, a2t2_bx_r12_insn,
+				      s->contents + my_offset + 4);
 			  
 			  /* It's a thumb address.  Add the low order bit.  */
-			  bfd_put_32 (output_bfd, h_val | a2t3_func_addr_insn, s->contents + my_offset + 8);
+			  bfd_put_32 (output_bfd, h_val | a2t3_func_addr_insn,
+				      s->contents + my_offset + 8);
 			}
 
-		      BFD_ASSERT (my_offset <= global_arm_glue_size);
+		      BFD_ASSERT (my_offset <= globals->arm_glue_size);
 
-		      tmp = bfd_get_32 (input_bfd, contents + rel->r_vaddr - input_section->vma);
+		      tmp = bfd_get_32 (input_bfd, contents + rel->r_vaddr
+					- input_section->vma);
 		      
 		      tmp = tmp & 0xFF000000;
-		      
+
 		      /* Somehow these are both 4 too far, so subtract 8. */
 		      ret_offset =
 			s->output_offset
@@ -1154,7 +1186,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		      tmp = tmp | ((ret_offset >> 2) & 0x00FFFFFF);
 		      
-		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr - input_section->vma);
+		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr
+				  - input_section->vma);
 		      
 		      done = 1;
 		    }
@@ -1168,23 +1201,30 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || h->class == C_LABEL)
 		    {
 		      /* Thumb code calling an ARM function */
-		      asection *                     s = 0;
-		      long int                       my_offset;
-		      unsigned long int              tmp;
-		      long int                       ret_offset;
-		      struct coff_link_hash_entry *  myh;
+		      asection *                         s = 0;
+		      long int                           my_offset;
+		      unsigned long int                  tmp;
+		      long int                           ret_offset;
+		      struct coff_link_hash_entry *      myh;
+		      struct coff_arm_link_hash_table *  globals;
 
 		      myh = find_thumb_glue (info, name, input_bfd);
 		      if (myh == NULL)
 			return false;
 
+		      globals = coff_arm_hash_table (info);
+		      
+		      BFD_ASSERT (globals != NULL);
+		      BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+		      
 		      my_offset = myh->root.u.def.value;
 		      
-		      s = bfd_get_section_by_name (bfd_of_glue_owner, 
+		      s = bfd_get_section_by_name (globals->bfd_of_glue_owner, 
 						   THUMB2ARM_GLUE_SECTION_NAME);
 		      
 		      BFD_ASSERT (s != NULL);
 		      BFD_ASSERT (s->contents != NULL);
+		      BFD_ASSERT (s->output_section != NULL);
 		      
 		      if ((my_offset & 0x01) == 0x01)
 			{
@@ -1222,9 +1262,10 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      s->contents + my_offset + 4);
 			}
 
-		      BFD_ASSERT (my_offset <= global_thumb_glue_size);
+		      BFD_ASSERT (my_offset <= globals->thumb_glue_size);
 
-		      /* Now go back and fix up the original bl insn to point here.  */
+		      /* Now go back and fix up the original BL insn to point
+			 to here.  */
 		      ret_offset =
 			s->output_offset
 			+ my_offset
@@ -1232,11 +1273,13 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			   + rel->r_vaddr)
 			-4;
 		      
-		      tmp = bfd_get_32 (input_bfd, contents + rel->r_vaddr - input_section->vma);
+		      tmp = bfd_get_32 (input_bfd, contents + rel->r_vaddr
+					- input_section->vma);
 
 		      bfd_put_32 (output_bfd,
 				  insert_thumb_branch (tmp, ret_offset),
-				  contents + rel->r_vaddr - input_section->vma);
+				  contents + rel->r_vaddr
+				  - input_section->vma);
 		      
 		      done = 1;
                     }
@@ -1308,7 +1351,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           bfd_vma address = rel->r_vaddr - input_section->vma;
 	  
           if (address > input_section->_raw_size)
-            rstat = bfd_reloc_outofrange;
+	    rstat = bfd_reloc_outofrange;
           else
             {
               bfd_vma         relocation       = val + addend;
@@ -1492,48 +1535,57 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#if defined COFF_IMAGE_WITH_PE || ! defined COFF_WITH_PE
+#ifndef COFF_WITH_PE
 boolean
-arm_allocate_interworking_sections (info) 
-     struct bfd_link_info *info;
+bfd_arm_allocate_interworking_sections (info) 
+     struct bfd_link_info * info;
 {
-  asection * s;
-  bfd_byte * foo;
+  asection *                        s;
+  bfd_byte *                        foo;
+  struct coff_arm_link_hash_table * globals;
 #if 0
-  static char test_char = '1';
+  static char                       test_char = '1';
 #endif
 
-  if (global_arm_glue_size != 0)
+  globals = coff_arm_hash_table (info);
+  
+  BFD_ASSERT (globals != NULL);
+
+  if (globals->arm_glue_size != 0)
     {
-      BFD_ASSERT (bfd_of_glue_owner != NULL);
+      BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
       
-      s = bfd_get_section_by_name (bfd_of_glue_owner, ARM2THUMB_GLUE_SECTION_NAME);
+      s = bfd_get_section_by_name
+	(globals->bfd_of_glue_owner, ARM2THUMB_GLUE_SECTION_NAME);
 
       BFD_ASSERT (s != NULL);
       
-      foo = (bfd_byte *) bfd_alloc (bfd_of_glue_owner, global_arm_glue_size);
+      foo = (bfd_byte *) bfd_alloc
+	(globals->bfd_of_glue_owner, globals->arm_glue_size);
 #if 0
-      memset (foo, test_char, global_arm_glue_size);
+      memset (foo, test_char, globals->arm_glue_size);
 #endif
       
-      s->_raw_size = s->_cooked_size = global_arm_glue_size;
+      s->_raw_size = s->_cooked_size = globals->arm_glue_size;
       s->contents = foo;
     }
 
-  if (global_thumb_glue_size != 0)
+  if (globals->thumb_glue_size != 0)
     {
-      BFD_ASSERT (bfd_of_glue_owner != NULL);
+      BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
       
-      s = bfd_get_section_by_name (bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
+      s = bfd_get_section_by_name
+	(globals->bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
 
       BFD_ASSERT (s != NULL);
       
-      foo = (bfd_byte *) bfd_alloc (bfd_of_glue_owner, global_thumb_glue_size);
+      foo = (bfd_byte *) bfd_alloc
+	(globals->bfd_of_glue_owner, globals->thumb_glue_size);
 #if 0
-      memset (foo, test_char, global_thumb_glue_size);
+      memset (foo, test_char, globals->thumb_glue_size);
 #endif
       
-      s->_raw_size = s->_cooked_size = global_thumb_glue_size;
+      s->_raw_size = s->_cooked_size = globals->thumb_glue_size;
       s->contents = foo;
     }
 
@@ -1545,16 +1597,19 @@ record_arm_to_thumb_glue (info, h)
      struct bfd_link_info *        info;
      struct coff_link_hash_entry * h;
 {
-  const char *                   name = h->root.root.string;
-  register asection *            s;
-  char *                         tmp_name;
-  struct coff_link_hash_entry *  myh;
+  const char *                      name = h->root.root.string;
+  register asection *               s;
+  char *                            tmp_name;
+  struct coff_link_hash_entry *     myh;
+  struct coff_arm_link_hash_table * globals;
 
+  globals = coff_arm_hash_table (info);
 
-  BFD_ASSERT (bfd_of_glue_owner != NULL);
+  BFD_ASSERT (globals != NULL);
+  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name (bfd_of_glue_owner, 
-			       ARM2THUMB_GLUE_SECTION_NAME);
+  s = bfd_get_section_by_name
+    (globals->bfd_of_glue_owner, ARM2THUMB_GLUE_SECTION_NAME);
 
   BFD_ASSERT (s != NULL);
 
@@ -1565,9 +1620,8 @@ record_arm_to_thumb_glue (info, h)
 
   sprintf (tmp_name, ARM2THUMB_GLUE_ENTRY_NAME, name);
   
-  myh = coff_link_hash_lookup (coff_hash_table (info),
-			       tmp_name,
-			       false, false, true);
+  myh = coff_link_hash_lookup
+    (coff_hash_table (info), tmp_name, false, false, true);
   
   if (myh != NULL)
     {
@@ -1575,18 +1629,17 @@ record_arm_to_thumb_glue (info, h)
       return; /* we've already seen this guy */
     }
 
-
-  /* The only trick here is using global_arm_glue_size as the value. Even
+  /* The only trick here is using globals->arm_glue_size as the value. Even
      though the section isn't allocated yet, this is where we will be putting
      it.  */
 
-  bfd_coff_link_add_one_symbol (info, bfd_of_glue_owner, tmp_name,
+  bfd_coff_link_add_one_symbol (info, globals->bfd_of_glue_owner, tmp_name,
 				BSF_EXPORT | BSF_GLOBAL, 
-				s, global_arm_glue_size + 1,
+				s, globals->arm_glue_size + 1,
 				NULL, true, false, 
 				(struct bfd_link_hash_entry **) & myh);
   
-  global_arm_glue_size += ARM2THUMB_GLUE_SIZE;
+  globals->arm_glue_size += ARM2THUMB_GLUE_SIZE;
 
   free (tmp_name);
 
@@ -1598,14 +1651,20 @@ record_thumb_to_arm_glue (info, h)
      struct bfd_link_info *        info;
      struct coff_link_hash_entry * h;
 {
-  const char *                   name = h->root.root.string;
-  register asection *            s;
-  char *                         tmp_name;
-  struct coff_link_hash_entry *  myh;
+  const char *                       name = h->root.root.string;
+  register asection *                s;
+  char *                             tmp_name;
+  struct coff_link_hash_entry *      myh;
+  struct coff_arm_link_hash_table *  globals;
 
-  BFD_ASSERT (bfd_of_glue_owner != NULL);
+  
+  globals = coff_arm_hash_table (info);
+  
+  BFD_ASSERT (globals != NULL);
+  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name (bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
+  s = bfd_get_section_by_name
+    (globals->bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
 
   BFD_ASSERT (s != NULL);
 
@@ -1615,9 +1674,8 @@ record_thumb_to_arm_glue (info, h)
 
   sprintf (tmp_name, THUMB2ARM_GLUE_ENTRY_NAME, name);
 
-  myh = coff_link_hash_lookup (coff_hash_table (info),
-			       tmp_name,
-			       false, false, true);
+  myh = coff_link_hash_lookup
+    (coff_hash_table (info), tmp_name, false, false, true);
   
   if (myh != NULL)
     {
@@ -1625,8 +1683,8 @@ record_thumb_to_arm_glue (info, h)
       return; /* we've already seen this guy */
     }
 
-  bfd_coff_link_add_one_symbol (info, bfd_of_glue_owner, tmp_name,
-				BSF_LOCAL, s, global_thumb_glue_size + 1,
+  bfd_coff_link_add_one_symbol (info, globals->bfd_of_glue_owner, tmp_name,
+				BSF_LOCAL, s, globals->thumb_glue_size + 1,
 				NULL, true, false, 
 				(struct bfd_link_hash_entry **) & myh);
   
@@ -1647,24 +1705,83 @@ record_thumb_to_arm_glue (info, h)
   myh = NULL;
 
   /* Now allocate another symbol to switch back to arm mode.  */
-  bfd_coff_link_add_one_symbol (info, bfd_of_glue_owner, tmp_name,
-				BSF_LOCAL, s, global_thumb_glue_size + 4,
+  bfd_coff_link_add_one_symbol (info, globals->bfd_of_glue_owner, tmp_name,
+				BSF_LOCAL, s, globals->thumb_glue_size + 4,
 				NULL, true, false, 
 				(struct bfd_link_hash_entry **) & myh);
 
   free (tmp_name);  
 
-  global_thumb_glue_size += THUMB2ARM_GLUE_SIZE;
+  globals->thumb_glue_size += THUMB2ARM_GLUE_SIZE;
 
   return;
 }
 
+/* Select a BFD to be used to hold the sections used by the glue code.
+   This function is called from the linker scripts in ld/emultempl/
+   {armcoff/pe}.em  */
 boolean
-arm_process_before_allocation (abfd, info)
+bfd_arm_get_bfd_for_interworking (abfd, info)
+     bfd * 		    abfd;
+     struct bfd_link_info * info;
+{
+  struct coff_arm_link_hash_table * globals;
+  flagword   			    flags;
+  asection * 			    sec;
+    
+  /* If we are only performing a partial link do not bother
+     getting a bfd to hold the glue.  */
+  if (info->relocateable)
+    return true;
+  
+  globals = coff_arm_hash_table (info);
+  
+  BFD_ASSERT (globals != NULL);
+
+  if (globals->bfd_of_glue_owner != NULL)
+    return true;
+  
+  sec = bfd_get_section_by_name (abfd, ARM2THUMB_GLUE_SECTION_NAME);
+  
+  if (sec == NULL) 
+    {
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      
+      sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
+      
+      if (sec == NULL
+	  || ! bfd_set_section_flags (abfd, sec, flags)
+	  || ! bfd_set_section_alignment (abfd, sec, 2))
+	return false;
+    }
+
+  sec = bfd_get_section_by_name (abfd, THUMB2ARM_GLUE_SECTION_NAME);
+
+  if (sec == NULL) 
+    {
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      
+      sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
+      
+      if (sec == NULL
+	  || ! bfd_set_section_flags (abfd, sec, flags)
+	  || ! bfd_set_section_alignment (abfd, sec, 2))
+	return false;
+    }
+  
+  /* Save the bfd for later use.  */
+  globals->bfd_of_glue_owner = abfd;
+  
+  return true;
+}
+
+boolean
+bfd_arm_process_before_allocation (abfd, info)
      bfd *                   abfd;
      struct bfd_link_info *  info;
 {
   asection * sec;
+  struct coff_arm_link_hash_table * globals;
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
@@ -1676,7 +1793,10 @@ arm_process_before_allocation (abfd, info)
 
   _bfd_coff_get_external_symbols (abfd);
 
-  BFD_ASSERT (bfd_of_glue_owner != NULL);
+  globals = coff_arm_hash_table (info);
+  
+  BFD_ASSERT (globals != NULL);
+  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
   
   /* Rummage around all the relocs and map the glue vectors.  */
   sec = abfd->sections;
@@ -1707,7 +1827,7 @@ arm_process_before_allocation (abfd, info)
 
 	  symndx = rel->r_symndx;
 
-	  /* If the relocation is not against a symbol it cannot concern us.  */
+	  /* If the relocation is not against a symbol it cannot concern us. */
 	  if (symndx == -1)
 	    continue;
 
@@ -1758,9 +1878,20 @@ arm_process_before_allocation (abfd, info)
 
   return true;
 }
-#endif /* COFF_IMAGE_WITH_PE or not COFF_WITH_PE */
+#endif /* ! COFF_WITH_PE */
 
-#define coff_relocate_section coff_arm_relocate_section
+#define coff_bfd_reloc_type_lookup 		coff_arm_reloc_type_lookup
+#define coff_relocate_section 			coff_arm_relocate_section
+#define coff_bfd_is_local_label_name 		coff_arm_is_local_label_name
+#define coff_adjust_symndx			coff_arm_adjust_symndx
+#define coff_link_output_has_begun 		coff_arm_link_output_has_begun
+#define coff_final_link_postscript		coff_arm_final_link_postscript
+#define coff_bfd_merge_private_bfd_data		coff_arm_merge_private_bfd_data
+#define coff_bfd_print_private_bfd_data		coff_arm_print_private_bfd_data
+#define coff_bfd_set_private_flags              _bfd_coff_arm_set_private_flags
+#define coff_bfd_copy_private_bfd_data          coff_arm_copy_private_bfd_data
+#define coff_bfd_link_hash_table_create		coff_arm_link_hash_table_create
+
 
 /* When doing a relocateable link, we want to convert ARM26 relocs
    into ARM26D relocs.  */
@@ -1789,14 +1920,13 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
   return true;
 }
 
-#if defined COFF_IMAGE_WITH_PE || ! defined COFF_WITH_PE
 /* Called when merging the private data areas of two BFDs.
    This is important as it allows us to detect if we are
    attempting to merge binaries compiled for different ARM
    targets, eg different CPUs or differents APCS's.     */
 
-boolean
-coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
+static boolean
+coff_arm_merge_private_bfd_data (ibfd, obfd)
      bfd *   ibfd;
      bfd *   obfd;
 {
@@ -1892,8 +2022,8 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
 
 /* Display the flags field.  */
 
-boolean
-coff_arm_bfd_print_private_bfd_data (abfd, ptr)
+static boolean
+coff_arm_print_private_bfd_data (abfd, ptr)
      bfd *   abfd;
      PTR     ptr;
 {
@@ -1925,10 +2055,12 @@ coff_arm_bfd_print_private_bfd_data (abfd, ptr)
 /* Copies the given flags into the coff_tdata.flags field.
    Typically these flags come from the f_flags[] field of
    the COFF filehdr structure, which contains important,
-   target specific information.  */
+   target specific information.
+   Note: Although this function is static, it is explicitly
+   called from both coffcode.h and peicode.h.  */
 
-boolean
-coff_arm_bfd_set_private_flags (abfd, flags)
+static boolean
+_bfd_coff_arm_set_private_flags (abfd, flags)
 	bfd *	   abfd;
 	flagword   flags;
 {
@@ -1965,8 +2097,8 @@ coff_arm_bfd_set_private_flags (abfd, flags)
 /* Copy the important parts of the target specific data
    from one instance of a BFD to another.  */
 
-boolean
-coff_arm_bfd_copy_private_bfd_data (src, dest)
+static boolean
+coff_arm_copy_private_bfd_data (src, dest)
      bfd *  src;
      bfd *  dest;
 {
@@ -2020,7 +2152,7 @@ coff_arm_bfd_copy_private_bfd_data (src, dest)
 #define LOCAL_LABEL_PREFIX "."
 #define USER_LABEL_PREFIX "_"
 
-boolean
+static boolean
 coff_arm_is_local_label_name (abfd, name)
      bfd *        abfd;
      const char * name;
@@ -2052,27 +2184,7 @@ coff_arm_is_local_label_name (abfd, name)
     default:  return false;     /* Cannot make our minds up - default to false so that it will not be stripped by accident.  */ 
     }
 }
-#endif /* COFF_IMAGE_WITH_PE or not COFF_WITH_PE */
 
-#define coff_bfd_is_local_label_name 		coff_arm_is_local_label_name
-#define coff_adjust_symndx			coff_arm_adjust_symndx
-
-#define coff_link_output_has_begun 		coff_arm_link_output_has_begun
-#define coff_final_link_postscript		coff_arm_final_link_postscript
-#define coff_bfd_merge_private_bfd_data		coff_arm_bfd_merge_private_bfd_data
-#define coff_bfd_print_private_bfd_data		coff_arm_bfd_print_private_bfd_data
-#define coff_bfd_set_private_flags              coff_arm_bfd_set_private_flags
-#define coff_bfd_copy_private_bfd_data          coff_arm_bfd_copy_private_bfd_data
-
-extern boolean coff_arm_bfd_set_private_flags ();
-extern boolean coff_arm_bfd_merge_private_bfd_data ();
-extern boolean coff_arm_bfd_copy_private_bfd_data ();
-extern boolean coff_arm_bfd_print_private_bfd_data ();
-extern boolean coff_arm_final_link_postscript ();
-extern boolean coff_arm_link_output_has_begun ();
-extern boolean coff_arm_is_local_label_name ();
-
-#if defined COFF_IMAGE_WITH_PE || ! defined COFF_WITH_PE
 /* This piece of machinery exists only to guarantee that the bfd that holds
    the glue section is written last. 
 
@@ -2081,28 +2193,35 @@ extern boolean coff_arm_is_local_label_name ();
 
    krk@cygnus.com  */
 
-boolean
-coff_arm_link_output_has_begun (sub)
+static boolean
+coff_arm_link_output_has_begun (sub, info)
      bfd * sub;
+     struct coff_final_link_info * info;
 {
-  return (sub->output_has_begun || sub == bfd_of_glue_owner);
+  return (sub->output_has_begun || sub == coff_arm_hash_table (info->info)->bfd_of_glue_owner);
 }
 
-boolean
+static boolean
 coff_arm_final_link_postscript (abfd, pfinfo)
      bfd * abfd;
      struct coff_final_link_info * pfinfo;
 {
-  if (bfd_of_glue_owner != NULL)
+  struct coff_arm_link_hash_table * globals = coff_arm_hash_table (pfinfo->info);
+  
+  BFD_ASSERT (globals != NULL);
+  
+  if (globals->bfd_of_glue_owner != NULL)
     {
-      if (! _bfd_coff_link_input_bfd (pfinfo, bfd_of_glue_owner))
+      if (! _bfd_coff_link_input_bfd (pfinfo, globals->bfd_of_glue_owner))
 	return false;
-      bfd_of_glue_owner->output_has_begun = true;
+      
+      globals->bfd_of_glue_owner->output_has_begun = true;
     }
+  
   return true;
 }
-#endif /* COFF_IMAGE_WITH_PE or not COFF_WITH_PE */
 
+#if 0
 #define coff_SWAP_sym_in  arm_bfd_coff_swap_sym_in
 
 static void coff_swap_sym_in PARAMS ((bfd *, PTR, PTR));
@@ -2164,6 +2283,7 @@ arm_bfd_coff_swap_sym_in (abfd, ext1, in1)
   
   return;
 }
+#endif
 
 #include "coffcode.h"
 

@@ -244,6 +244,9 @@ coff_link_check_ar_symbols (abfd, info, pneeded)
       bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &sym);
 
       if ((sym.n_sclass == C_EXT
+#ifdef C_SYSTEM
+	   || sym.n_sclass == C_SYSTEM
+#endif
 	   || (sym_is_global && (*sym_is_global) (abfd, &sym)))
 	  && (sym.n_scnum != 0 || sym.n_value != 0))
 	{
@@ -334,6 +337,9 @@ coff_link_add_symbols (abfd, info)
       bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &sym);
 
       if (sym.n_sclass == C_EXT
+#ifdef C_SYSTEM
+	  || sym.n_sclass == C_SYSTEM
+#endif
 	  || (sym_is_global && (*sym_is_global) (abfd, &sym)))
 	{
 	  const char *name;
@@ -762,7 +768,7 @@ _bfd_coff_final_link (abfd, info)
 		  == bfd_target_coff_flavour))
 	    {
 	      sub = p->u.indirect.section->owner;
-	      if (! sub->output_has_begun)
+	      if (! bfd_coff_link_output_has_begun (sub, & finfo))
 		{
 		  if (! _bfd_coff_link_input_bfd (&finfo, sub))
 		    goto error_return;
@@ -783,6 +789,9 @@ _bfd_coff_final_link (abfd, info)
 	}
     }
 
+  if (! bfd_coff_final_link_postscript (abfd, & finfo))
+    goto error_return;
+  
   /* Free up the buffers used by _bfd_coff_link_input_bfd.  */
 
   coff_debug_merge_hash_table_free (&finfo.debug_merge);
@@ -1298,8 +1307,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	    *secpp = bfd_com_section_ptr;
 	}
 
-      /* Extract the flag indicating if this symbol is used by a relocation */
-      if ((   finfo->info->strip   != strip_none
+      /* Extract the flag indicating if this symbol is used by a
+         relocation.  */
+      if ((finfo->info->strip != strip_none
 	   || finfo->info->discard != discard_none)
 	  && finfo->info->relocateable)
 	dont_skip_symbol = *indexp;
@@ -1319,6 +1329,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
       if (! skip)
 	{
 	  if (isym.n_sclass == C_EXT
+#ifdef C_SYSTEM
+	      || isym.n_sclass == C_SYSTEM
+#endif
 	      || (sym_is_global && (*sym_is_global) (input_bfd, &isym)))
 	    {
 	      /* This is a global symbol.  Global symbols come at the
@@ -1339,11 +1352,23 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	}
 
       /* If we stripping debugging symbols, and this is a debugging
-         symbol, then skip it.  */
+         symbol, then skip it.  FIXME: gas sets the section to N_ABS
+         for some types of debugging symbols; I don't know if this is
+         a bug or not.  In any case, we handle it here.  */
       if (! skip
 	  && finfo->info->strip == strip_debugger
 	  && ! dont_skip_symbol
-	  && isym.n_scnum == N_DEBUG)
+	  && (isym.n_scnum == N_DEBUG
+	      || (isym.n_scnum == N_ABS
+		  && (isym.n_sclass == C_AUTO
+		      || isym.n_sclass == C_REG
+		      || isym.n_sclass == C_MOS
+		      || isym.n_sclass == C_MOE
+		      || isym.n_sclass == C_MOU
+		      || isym.n_sclass == C_ARG
+		      || isym.n_sclass == C_REGPARM
+		      || isym.n_sclass == C_FIELD
+		      || isym.n_sclass == C_EOS))))
 	skip = true;
 
       /* If some symbols are stripped based on the name, work out the
@@ -2373,6 +2398,7 @@ _bfd_coff_write_task_globals (h, data)
 {
   struct coff_final_link_info *finfo = (struct coff_final_link_info *) data;
   boolean rtnval = true;
+  boolean save_global_to_static;
 
   if (h->indx < 0)
     {
@@ -2380,9 +2406,12 @@ _bfd_coff_write_task_globals (h, data)
 	{
 	case bfd_link_hash_defined:
 	case bfd_link_hash_defweak:
+	  save_global_to_static = finfo->global_to_static;
 	  finfo->global_to_static = true;
 	  rtnval = _bfd_coff_write_global_sym (h, data);
-	  finfo->global_to_static = false;
+	  finfo->global_to_static = save_global_to_static;
+	  break;
+	default:
 	  break;
 	}
     }

@@ -1,3 +1,21 @@
+Tue Apr 21 10:00:12 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* libcoff.h: Add extra parameter to
+	bfd_coff_link_output_has_begun overrideable function.
+	* cofflink.c: Pass extra parameter to
+	bfd_coff_link_output_has_begun function.
+	* bfd-in.h: Add prototypes for exported ARM interworking
+	functions. 
+	* peicode.h: ARM specific code reorganised to conform to BFD
+	coding conventions. 
+	* coffcode.h: ARM specific code reorganised to conform to BFD
+	coding conventions. 
+	* coff-arm.c: Code reorganised to conform to the BFD coding
+	conventions.  Global variables have been moved into an ARM
+	specific hash table structure and a new function:
+	bfd_arm_get_bfd_for_interworking() has been created which is
+	called from the linker scripts.
+
 Tue Apr 21 00:11:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* archive.c (_bfd_generic_read_ar_hdr_mag): Simplify end-of-name test.
