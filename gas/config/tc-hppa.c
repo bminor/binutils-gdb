@@ -4390,7 +4390,7 @@ md_undefined_symbol (name)
   return 0;
 }
 
-#if defined (SOM) || defined (ELF_ARG_RELOC)
+#if defined (OBJ_SOM) || defined (ELF_ARG_RELOC)
 #define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
 #else
@@ -6715,7 +6715,7 @@ pa_type_args (symbolP, is_export)
 	  name = input_line_pointer;
 	  c = get_symbol_end ();
 	  arg_reloc = pa_align_arg_reloc (temp, pa_build_arg_reloc (name));
-#if defined (SOM) || defined (ELF_ARG_RELOC)
+#if defined (OBJ_SOM) || defined (ELF_ARG_RELOC)
 	  symbol_arg_reloc_info (symbolP) |= arg_reloc;
 #endif
 	  *input_line_pointer = c;
@@ -6729,7 +6729,7 @@ pa_type_args (symbolP, is_export)
 	  name = input_line_pointer;
 	  c = get_symbol_end ();
 	  arg_reloc = pa_build_arg_reloc (name);
-#if defined (SOM) || defined (ELF_ARG_RELOC)
+#if defined (OBJ_SOM) || defined (ELF_ARG_RELOC)
 	  symbol_arg_reloc_info (symbolP) |= arg_reloc;
 #endif
 	  *input_line_pointer = c;
@@ -8373,19 +8373,20 @@ hppa_fix_adjustable (fixp)
      eg. Suppose we have
      .		ldil	LR%foo+0,%r21
      .		ldw	RR%foo+0(%r21),%r26
-     .		ldw	RR%foo+10(%r21),%r25
+     .		ldw	RR%foo+4(%r21),%r25
 
-     If foo is at address 4090 (decimal) in section `sect', then after
-     reducing to the section symbol, we get
-     .			LR%sect+4090 == L%sect+0
-     .			RR%sect+4090 == R%sect+4090
-     .			RR%sect+4100 == R%sect-4092 (4100 - 8192)
-     and the last address loses.
+     If foo is at address 4092 (decimal) in section `sect', then after
+     reducing to the section symbol we get
+     .			LR%sect+4092 == (L%sect)+0
+     .			RR%sect+4092 == (R%sect)+4092
+     .			RR%sect+4096 == (R%sect)-4096
+     and the last address loses because rounding the addend to 8k
+     mutiples takes us up to 8192 with an offset of -4096.
 
-     Obviously, in cases where the LR% expression is identical to the
-     RR% one we will never have a problem, but is so happens that gcc
-     rounds addends involved in LR% field selectors to work around a
-     HP linker bug.  ie. We often have addresses like the last case
+     In cases where the LR% expression is identical to the RR% one we
+     will never have a problem, but is so happens that gcc rounds
+     addends involved in LR% field selectors to work around a HP
+     linker bug.  ie. We often have addresses like the last case
      above where the LR% expression is offset from the RR% one.  */
 
   if (hppa_fix->fx_r_field == e_lrsel

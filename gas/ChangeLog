@@ -1,3 +1,9 @@
+2000-07-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Correct LR%/RR% comment.
+	(arg_reloc_stub_needed): #ifdef OBJ_SOM, not #ifdef SOM.
+	(pa_type_args): Same here.
+
 2000-07-17  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/obj-coff.c (obj_frob_symbol): Don't merge labels. Don't
