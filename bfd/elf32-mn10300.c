@@ -40,8 +40,6 @@ enum reloc_type
   R_MN10300_32,
   R_MN10300_16,
   R_MN10300_8,
-  R_MN10300_32B,
-  R_MN10300_16B,
   R_MN10300_PCREL32_1BYTE,
   R_MN10300_PCREL16_1BYTE,
   R_MN10300_PCREL8_1BYTE,
@@ -107,34 +105,6 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 false,
 	 0xff,
 	 0xff,
-	 false),
-  /* Standard 32 bit reloc, except it explicitly writes big-endian format.  */
-  HOWTO (R_MN10300_32B,
-	 0,
-	 2,
-	 32,
-	 false,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_32B",
-	 false,
-	 0xffffffff,
-	 0xffffffff,
-	 false),
-  /* Standard 16 bit reloc, except it explicitly writes big-endian format.  */
-  HOWTO (R_MN10300_16B,
-	 0,
-	 1,
-	 16,
-	 false,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_16B",
-	 false,
-	 0xffff,
-	 0xffff,
 	 false),
   /* Simple 32bit pc-relative reloc with a 1 byte adjustment
      to get the pc-relative offset correct.  */
@@ -225,8 +195,6 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_32, R_MN10300_32, },
   { BFD_RELOC_16, R_MN10300_16, },
   { BFD_RELOC_8, R_MN10300_8, },
-  { BFD_RELOC_MN10300_32B, R_MN10300_32B, },
-  { BFD_RELOC_MN10300_16B, R_MN10300_16B, },
   { BFD_RELOC_32_PCREL, R_MN10300_PCREL32_1BYTE, },
   { BFD_RELOC_16_PCREL, R_MN10300_PCREL16_1BYTE, },
   { BFD_RELOC_8_PCREL, R_MN10300_PCREL8_1BYTE, },
@@ -352,10 +320,11 @@ bfd_elf32_mn10300_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	  if (relocation > 0x7fff || relocation < -0x8000)
 	    return bfd_reloc_overflow;
 
-	  bfd_putb16 (relocation & 0xffff, (bfd_byte *)data + reloc->address);
+	  bfd_put_16 (abfd, relocation & 0xffff,
+		      (bfd_byte *)data + reloc->address);
  	}
       else if (reloc->howto->size == 2)
-	bfd_putb32 (relocation, (bfd_byte *)data + reloc->address);
+	bfd_put_32 (abfd, relocation, (bfd_byte *)data + reloc->address);
       return bfd_reloc_ok;
     }
 
