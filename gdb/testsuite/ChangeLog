@@ -1,3 +1,12 @@
+2004-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	Fix PR i18n/1570.
+	* gdb.base/charset.c: Update copyright notice.
+	(main, init_string): Remove the escape character '\e' tests.
+	* gdb.base/printcmds.exp (test_print_all_chars): Ditto.
+	* gdb.base/charset.exp (valid_host_charset): Ditto.
+	* gdb.base/setvar.exp: Ditto.
+
 2004-02-24  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/corefile.exp: Use gdb_test_multiple, make "accessing

@@ -518,9 +518,9 @@ identity_either_char_to_other (void *baton, int either_char, int *other_char)
 /* Default non-trivial conversion functions.  */
 
 
-static char backslashable[] = "abefnrtv";
-static char *backslashed[] = {"a", "b", "e", "f", "n", "r", "t", "v", "0"};
-static char represented[] = "\a\b\e\f\n\r\t\v";
+static char backslashable[] = "abfnrtv";
+static char *backslashed[] = {"a", "b", "f", "n", "r", "t", "v", "0"};
+static char represented[] = "\a\b\f\n\r\t\v";
 
 
 /* Translate TARGET_CHAR into the host character set, and see if it

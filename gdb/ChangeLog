@@ -1,3 +1,9 @@
+2004-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	Fix PR i18n/1570.
+	* charset.c (backslashable, backslashed, represented): Remove 'e'
+	from list of escaped characters, not part of ISO-C.
+
 2004-02-25  J. Brobecker  <brobecker@gnat.com>
 
 	From Peter Schauer <schauer@pdf.de>:
