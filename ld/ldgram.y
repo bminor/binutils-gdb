@@ -133,7 +133,7 @@ struct sec *section;
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
-%token MEMORY  
+%token MEMORY  DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
@@ -152,7 +152,8 @@ struct sec *section;
 %type <name>  filename
 
 
-%token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD FORMAT
+%token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
+%token FORMAT PUBLIC DEFSYMEND BASE ALIAS
 
 %{
 ld_config_type config;
@@ -269,11 +270,11 @@ command_line_option:
 			  lang_add_target($2);
        		   }
 	| 	OPTION_Texp 
-		{ 
+		{ ldlex_expression();
 			hex_mode  = 16; 
 		} 
 		INT
-		{ 
+		{  ldlex_popstate();
 			lang_section_start($1,exp_intop($3));
 			hex_mode = 0; 
 		}
@@ -320,10 +321,9 @@ END {  ldlex_command();}
 				lang_input_file_is_symbols_only_enum,
 				(char *)NULL);
 			}
-	|	OPTION_defsym  { ldlex_expression();
-  
-			}
-		NAME 	 '=' mustbe_exp  { ldlex_popstate();
+
+	|	OPTION_defsym  { ldlex_defsym(); }
+		NAME 	 '=' exp  DEFSYMEND { ldlex_popstate();
 			lang_add_assignment(exp_assop($4,$3,$5));
 			}	
 	| '-' NAME
@@ -361,6 +361,12 @@ mri_script_command:
 			}
         |       ORDER ordernamelist
 	|       ENDWORD 
+        |       PUBLIC NAME '=' exp 
+ 			{ mri_public($2, $4); }
+        |       PUBLIC NAME ',' exp 
+ 			{ mri_public($2, $4); }
+        |       PUBLIC NAME  exp 
+ 			{ mri_public($2, $3); }
 	| 	FORMAT NAME
 			{ mri_format($2); }
 	|	SECT NAME ',' exp 
@@ -373,6 +379,12 @@ mri_script_command:
 	|	LOAD	 mri_load_name_list
 	|       NAMEWORD NAME 
 			{ mri_name($2); }   
+	|	ALIAS NAME ',' NAME
+			{ mri_alias($2,$4,0);}
+	|	ALIAS NAME ',' INT
+			{ mri_alias($2,0,$4);}
+	|	BASE     exp
+			{ mri_base($2); }
         |
 	;
 
@@ -750,10 +762,12 @@ section:	NAME 		{ ldlex_expression(); }
 		{
 		lang_enter_output_section_statement($1,$3,$5,$6);
 		}
-	       statement 	'}' 	fill_opt memspec_opt
+	       statement 	'}' {ldlex_expression();} fill_opt memspec_opt
 		{
-		  lang_leave_output_section_statement($13, $14);
+		  ldlex_popstate();
+		  lang_leave_output_section_statement($14, $15);
 		}
+opt_comma
 
 	;
 

@@ -6,6 +6,9 @@ Fri May  1 18:17:52 1992  K. Richard Pixley  (rich@cygnus.com)
 
 Fri May  1 13:03:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* ldgram.y, ldlex.c, mri.c: added more compatible words; BASE, ALIAS and
+	PUBLIC.
+	* Makefile.in: now use flex, not lex
 	* ldlex.l, ldlang.c, ldctor.c: lint
 
 Wed Apr 22 12:48:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)

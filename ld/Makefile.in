@@ -50,7 +50,7 @@ SHELL = /bin/sh
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-
+FLEX=flex
 AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
@@ -169,7 +169,8 @@ ldemul.o: ldemul-list.h
 
 ldlex.c: ldlex.l
 #	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
-	$(LEX) -Cem -t $(VPATH)/ldlex.l >ldlex.c
+
+	$(FLEX) -I -Cem -t $(VPATH)/ldlex.l >ldlex.c
 #	cp ldlex.q ldlex.c
 
 
