@@ -6,6 +6,9 @@ Wed Jan 28 12:19:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 end-sanitize-sky
 Wed Jan 28 14:10:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.texinfo (Options): Add a brief description of the types of
+	information included in a link map.
+
 	* ld.texinfo (Options): Mention LDEMULATION in description of -m.
 	(Environment): Mention LDEMULATION.
 
