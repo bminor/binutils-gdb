@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Wed Apr 15 10:30:07 1998   Frank Ch. Eigler  <fche@cygnus.com>
+
+	* vu0.h: Specs changed for VCALLMSR bit pattern.
+	* mips-dis.c: (print_insn_arg) Matching change.
+
+end-sanitize-r5900
 Mon Apr 13 16:59:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Add "_all" extension to 'C'

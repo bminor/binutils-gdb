@@ -183,14 +183,14 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_FS) & OP_MASK_FS);
       break;
 
-    /* start-sanitize-r5900
+    /* start-sanitize-r5900 */
     case '0':
       (*info->fprintf_func) (info->stream, "0x%x",
                              (l >> 6) & 0x1f);
       break;
 
     case '9':
-      (*info->fprintf_func) (info->stream, "vi19");
+      (*info->fprintf_func) (info->stream, "vi27");
       break;
 
     case '1':
@@ -655,7 +655,7 @@ print_insn_mips16 (memaddr, info)
   int length;
   int insn;
   boolean use_extend;
-  int extend;
+  int extend = 0;
   const struct mips_opcode *op, *opend;
 
   info->bytes_per_chunk = 2;
