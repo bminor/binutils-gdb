@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2000
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,6 +24,9 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>		/* needed for F_OK and friends */
+#endif
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"
