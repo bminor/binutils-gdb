@@ -1,3 +1,7 @@
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (armeb-*-netbsdelf*): New target.
+
 2002-05-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_build_one_stub): Point undefined function syms

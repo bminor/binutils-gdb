@@ -1,3 +1,13 @@
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add earmelfb_nbsd.o.
+	(earmelfb_nbsd.c): New rule.
+	* Makefile.in: Regenerate. 
+	* configure.tgt (armeb-*-netbsdelf*): New target.
+	(arm-*-netbsdelf*): Add armelfb_nbsd to targ_extra_emuls. 
+	(arm-*-netbsd*): Likewise.
+	* emulparams/armelfb_nbsd.sh: New file.
+
 2002-05-18  Tom Rix  <trix@redhat.com>
 
 	* emultempl/aix.em (gld*_parse_args): Add -bnortl and -bnortllib 
