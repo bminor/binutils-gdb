@@ -1,5 +1,8 @@
 Wed Aug  3 12:05:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* breakpoint.c (breakpoint_1): Improve pluralization in display
+	of breakpoint hit counts.
+
 	* language.h (struct language_defn): Remove unused field
 	la_longest_float.
 	(longest_float): Remove, no longer used.
