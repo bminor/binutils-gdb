@@ -1,5 +1,16 @@
 2001-06-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-out.c (struct ui_out_data): Replace field first_header with
+	suppress_output.
+	(mi_begin, mi_end): Check suppress_header.
+	(mi_field_int, mi_field_skip): Ditto.
+	(mi_field_string, mi_field_fmt): Ditto.
+	(mi_table_begin): When nr_rows is zero, set suppress_header else,
+	output the start of the header.
+	(mi_table_body): Clear suppress header.
+
+2001-06-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-out.c (mi_open): For lists, when mi_version > 0, use ``[''.
 	(mi_close): Ditto for ``]''.
 

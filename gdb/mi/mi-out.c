@@ -32,7 +32,7 @@
 struct ui_out_data
   {
     int suppress_field_separator;
-    int first_header;
+    int suppress_output;
     int mi_version;
     struct ui_file *buffer;
   };
@@ -111,7 +111,12 @@ mi_table_begin (struct ui_out *uiout, int nbrofcols,
 {
   struct ui_out_data *data = ui_out_data (uiout);
   mi_open (uiout, tblid, ui_out_type_tuple);
-  data->first_header = 0;
+  if (nr_rows == 0)
+    {
+      data->suppress_output = 1;
+      return;
+    }
+  mi_open (uiout, "hdr", ui_out_type_tuple);
 }
 
 /* Mark beginning of a table body */
@@ -121,8 +126,9 @@ mi_table_body (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   /* close the table header line if there were any headers */
-  if (data->first_header)
-    mi_close (uiout, ui_out_type_tuple);
+  if (data->suppress_output)
+    return;
+  mi_close (uiout, ui_out_type_tuple);
 }
 
 /* Mark end of a table */
@@ -131,6 +137,7 @@ void
 mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  data->suppress_output = 0;
   mi_close (uiout, ui_out_type_tuple);
 }
 
@@ -142,10 +149,8 @@ mi_table_header (struct ui_out *uiout, int width, int alignment,
 		 const char *colhdr)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  if (!data->first_header++)
-    {
-      mi_open (uiout, "hdr", ui_out_type_tuple);
-    }
+  if (data->suppress_output)
+    return;
   mi_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
 
@@ -158,6 +163,8 @@ mi_begin (struct ui_out *uiout,
 	  const char *id)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   mi_open (uiout, id, type);
 }
 
@@ -169,6 +176,8 @@ mi_end (struct ui_out *uiout,
 	int level)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   mi_close (uiout, type);
 }
 
@@ -179,6 +188,9 @@ mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
 	      const char *fldname, int value)
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
 
   sprintf (buffer, "%d", value);
   mi_field_string (uiout, fldno, width, alignment, fldname, buffer);
@@ -190,6 +202,9 @@ void
 mi_field_skip (struct ui_out *uiout, int fldno, int width, int alignment,
 	       const char *fldname)
 {
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   mi_field_string (uiout, fldno, width, alignment, fldname, "");
 }
 
@@ -205,6 +220,8 @@ mi_field_string (struct ui_out *uiout,
 		 const char *string)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   field_separator (uiout);
   if (fldname)
     fprintf_unfiltered (data->buffer, "%s=", fldname);
@@ -224,6 +241,8 @@ mi_field_fmt (struct ui_out *uiout, int fldno,
 	      va_list args)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  if (data->suppress_output)
+    return;
   field_separator (uiout);
   if (fldname)
     fprintf_unfiltered (data->buffer, "%s=\"", fldname);
