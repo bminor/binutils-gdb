@@ -1,5 +1,11 @@
 2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	Pointed out by Anton Blanchard <anton@samba.org>.
+	* ppc-linux-tdep.c (insn_is_sigreturn): New function.
+	(ppc_linux_at_sigtramp_return_path): Use it.
+
+2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* defs.h (streq): Add prototype.
 	* utils.c (streq): New function.
 
