@@ -1,3 +1,48 @@
+Fri May 13 08:10:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	gcc -Wall lint:
+	* breakpoint.c (watchpoint_check): Remove unused variable b.
+	* stack.c (print_frame_info): Move sp and buf inside #if.
+	* eval.c (evaluate_subexp): Remove unused variables pp,
+	mangle_ptr, ptr, and mangle_tstr.
+	* valarith.c (value_x_binop): Remove unused variables mangle_tstr
+	and mangle_ptr.
+	* symtab.c (lookup_symtab): Put variable copy inside #if.
+	(decode_line_1): Put variable q1 inside #if 0.
+	* target.h: Declare target_link.
+	* infrun.c (wait_for_inferior): Remove unused variables signame.
+	* remote.c (remote_resume): Remove unused variable name.
+	* c-exp.y (parse_number): Parenthesize operand of shift.
+	* dbxread.c (record_minimal_symbol): Parenthesize operand of &&
+	(this is a semantic change, the warning seems to have detected a bug).
+	* dbxread.c (end_psymtab): Move variable p1 inside #if.
+	* coffread.c: Move variable temptype inside #if.
+	* ch-typeprint.c (chill_type_print_base): Remove unused variable
+	name.
+	* ch-valprint.c: #include typeprint.h and ch-lang.h.
+	(chill_val_print): Remove unused variable in_range.
+	(chill_val_print): Remove statement "length > TYPE_LENGTH (type);".
+	(chill_val_print): Add default case for switch.
+	* stabsread.h: Declare stabsect_build_psymtabs.
+	* os9kread.c (read_minimal_symbols): Make this return void.
+	(os9k_symfile_read): Remove unused variables stb_exist and val.
+	(os9k_symfile_init): Remove unused variable val.
+	(fill_sym): Remove unused variable id.
+	(read_os9k_psymtab): Put variable back_to inside #if 0.  Remove
+	unused variable nsl.
+	Remove unused variable symfile_bfd.
+	#if 0 unused variables lbrac_unmatched_complaint and
+	lbrac_mismatch_complaint.
+	Remove declaration for non-existent function os9k_next_symbol_text.
+
+	* annotate.c, annotate.h: New files, containing a function for
+	each annotation which outputs it.
+	* Move breakpoints_changed from breakpoint.c to annotate.c.
+	* breakpoint.c, blockframe.c, infrun.c, cp-valprint.c, main.c,
+	printcmd.c, source.c, stack.c, utils.c, valprint.c:
+	Use annotate.c functions to output annotations.
+	* Makefile.in (OBS): Add annotate.o.
+
 Thu May 12 10:46:27 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (read_unwind_info): Make sure elf_unwind_size and

@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "language.h"
 #include "demangle.h"
+#include "annotate.h"
 
 #include <errno.h>
 
@@ -314,8 +315,10 @@ val_print_type_code_int (type, valaddr, stream)
    printf() that supports "ll" in the format string.  We handle these by seeing
    if the number is actually a long, and if not we just bail out and print the
    number in hex.  The format chars b,h,w,g are from
-   print_scalar_formatted().  USE_LOCAL says whether or not to call the
-   local formatting routine to get the format.  */
+   print_scalar_formatted().  If USE_LOCAL, format it according to the current
+   language (this should be used for most integers which GDB prints, the
+   exception is things like protocols where the format of the integer is
+   a protocol thing, not a user-visible thing).  */
 
 void
 print_longest (stream, format, use_local, val_long)
@@ -600,7 +603,9 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (elttype);
   len = TYPE_LENGTH (type) / eltlen;
-	      
+
+  annotate_array_section_begin (i, elttype);
+
   for (; i < len && things_printed < print_max; i++)
     {
       if (i != 0)
@@ -616,7 +621,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 	    }
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
-      
+
       rep1 = i + 1;
       reps = 1;
       while ((rep1 < len) && 
@@ -626,18 +631,14 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 	  ++rep1;
 	}
 
-      if (annotation_level > 1)
-	{
-	  printf_filtered ("\n\032\032array-element-begin %d ", i);
-	  print_value_flags (elttype);
-	  printf_filtered ("\n");
-	}
-
       if (reps > repeat_count_threshold)
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
 		     deref_ref, recurse + 1, pretty);
+	  annotate_elt_rep (reps);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  annotate_elt_rep_end ();
+
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
 	}
@@ -645,11 +646,11 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
 		     deref_ref, recurse + 1, pretty);
+	  annotate_elt ();
 	  things_printed++;
 	}
-      if (annotation_level > 1)
-	printf_filtered ("\n\032\032array-element-end\n");
     }
+  annotate_array_section_end ();
   if (i < len)
     {
       fprintf_filtered (stream, "...");
@@ -862,13 +863,13 @@ val_print_string (addr, len, stream)
       if (errcode == EIO)
 	{
 	  fprintf_filtered (stream, " <Address ");
-	  print_address_numeric (addr, stream);
+	  print_address_numeric (addr, 1, stream);
 	  fprintf_filtered (stream, " out of bounds>");
 	}
       else
 	{
 	  fprintf_filtered (stream, " <Error reading address ");
-	  print_address_numeric (addr, stream);
+	  print_address_numeric (addr, 1, stream);
 	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
 	}
     }

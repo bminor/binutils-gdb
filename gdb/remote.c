@@ -280,15 +280,18 @@ remote_close (quitting)
 static void
 get_offsets ()
 {
-  unsigned char buf [PBUFSIZ];
+  unsigned char buf[PBUFSIZ];
   int nvals;
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
 
   putpkt ("qOffsets");
 
-  getpkt (buf, 1);
+  getpkt (buf, 0);
 
+  if (buf[0] == '\000')
+    return;			/* Return silently.  Stub doesn't support this
+				   command. */
   if (buf[0] == 'E')
     {
       warning ("Remote failure reply: %s", buf);
@@ -471,7 +474,6 @@ remote_resume (pid, step, siggnal)
 
   if (siggnal)
     {
-      char *name;
       target_terminal_ours_for_output ();
       printf_filtered
 	("Can't send signals to a remote system.  %s not sent.\n",

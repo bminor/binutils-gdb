@@ -74,7 +74,6 @@ chill_type_print_base (type, stream, show, level)
      int show;
      int level;
 {
-  char *name;
   register int len;
   register int i;
   struct type *index_type;

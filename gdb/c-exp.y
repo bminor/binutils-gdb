@@ -1056,7 +1056,8 @@ parse_number (p, len, parsed_float, putithere)
 		  << 16);
       if (high_bit == 0)
 	/* A long long does not fit in a LONGEST.  */
-	high_bit = (unsigned LONGEST)1 << sizeof (LONGEST) * HOST_CHAR_BIT - 1;
+	high_bit =
+	  (unsigned LONGEST)1 << (sizeof (LONGEST) * HOST_CHAR_BIT - 1);
       unsigned_type = builtin_type_unsigned_long_long;
       signed_type = builtin_type_long_long;
     }

@@ -28,6 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "demangle.h"
 #include "c-lang.h" /* For c_val_print */
+#include "typeprint.h"
+#include "ch-lang.h"
 
 static void
 chill_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
@@ -201,7 +203,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	int i;
 	int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
 	int need_comma = 0;
-	int in_range = 0;
 
 	if (is_bitstring)
 	  fputs_filtered ("B'", stream);
@@ -253,10 +254,11 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  fprintf_filtered (stream,
 				    "<dynamic length %d > static length %d>",
 				    length, TYPE_LENGTH (type));
-		  length > TYPE_LENGTH (type);
 		}
 	      LA_PRINT_STRING (stream, data_addr, length, 0);
 	      return length;
+	    default:
+	      break;
 	    }
 	}
       chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,

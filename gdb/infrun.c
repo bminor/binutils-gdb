@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "target.h"
 #include "thread.h"
+#include "annotate.h"
 
 #include <signal.h>
 
@@ -326,6 +327,8 @@ The same program may be running in another process.");
   else if (!signal_program[stop_signal])
     stop_signal = TARGET_SIGNAL_0;
 
+  annotate_starting ();
+
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
 
@@ -434,11 +437,11 @@ wait_for_inferior ()
 
   while (1)
     {
+      pid = target_wait (-1, &w);
+
       /* Clean up saved state that will become invalid.  */
       flush_cached_frames ();
       registers_changed ();
-
-      pid = target_wait (-1, &w);
 
       switch (w.kind)
 	{
@@ -458,6 +461,7 @@ wait_for_inferior ()
 
 	case TARGET_WAITKIND_EXITED:
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
+	  annotate_exited (w.value.integer);
 	  if (w.value.integer)
 	    printf_filtered ("\nProgram exited with code 0%o.\n", 
 			     (unsigned int)w.value.integer);
@@ -476,10 +480,17 @@ wait_for_inferior ()
 	  stop_print_frame = 0;
 	  stop_signal = w.value.sig;
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
+	  annotate_signalled ();
 	  target_kill ();		/* kill mourns as well */
-	  printf_filtered ("\nProgram terminated with signal %s, %s.\n",
-			   target_signal_to_name (stop_signal),
-			   target_signal_to_string (stop_signal));
+	  printf_filtered ("\nProgram terminated with signal ");
+	  annotate_signal_name ();
+	  printf_filtered ("%s", target_signal_to_name (stop_signal));
+	  annotate_signal_name_end ();
+	  printf_filtered (", ");
+	  annotate_signal_string ();
+	  printf_filtered ("%s", target_signal_to_string (stop_signal));
+	  annotate_signal_string_end ();
+	  printf_filtered (".\n");
 
 	  printf_filtered ("The program no longer exists.\n");
 	  gdb_flush (gdb_stdout);
@@ -561,8 +572,6 @@ wait_for_inferior ()
 	    {
 	      if (signal_print[stop_signal])
 		{
-		  char *signame;
-
 		  printed = 1;
 		  target_terminal_ours_for_output ();
 		  printf_filtered ("\nProgram received signal %s, %s.\n",
@@ -657,7 +666,16 @@ switch_thread:
 	{
 	  remove_breakpoints ();
 	  resume (1, 0);
+
+	  /* FIXME: This is bogus.  You can't interact with the
+	     inferior except when it is stopped.  It apparently
+	     happens to work on Irix4, but it depends on /proc
+	     allowing us to muck with the memory of a running process,
+	     and the kernel deciding to run one instruction of the
+	     inferior before it executes our insert_breakpoints code,
+	     which seems like an awfully dubious assumption.  */
 	  insert_breakpoints ();
+
 	  continue;
 	}
 #endif
@@ -781,12 +799,18 @@ switch_thread:
 	  
 	  if (signal_print[stop_signal])
 	    {
-	      char *signame;
 	      printed = 1;
 	      target_terminal_ours_for_output ();
-	      printf_filtered ("\nProgram received signal %s, %s.\n",
-			       target_signal_to_name (stop_signal),
-			       target_signal_to_string (stop_signal));
+	      annotate_signal ();
+	      printf_filtered ("\nProgram received signal ");
+	      annotate_signal_name ();
+	      printf_filtered ("%s", target_signal_to_name (stop_signal));
+	      annotate_signal_name_end ();
+	      printf_filtered (", ");
+	      annotate_signal_string ();
+	      printf_filtered ("%s", target_signal_to_string (stop_signal));
+	      annotate_signal_string_end ();
+	      printf_filtered (".\n");
 	      gdb_flush (gdb_stdout);
 	    }
 	  if (signal_stop[stop_signal])
@@ -1410,7 +1434,7 @@ Further execution is probably impossible.\n");
     disable_current_display ();
 
   if (step_multi && stop_step)
-    return;
+    goto done;
 
   target_terminal_ours ();
 
@@ -1423,7 +1447,7 @@ Further execution is probably impossible.\n");
     }
 
   if (!target_has_stack)
-    return;
+    goto done;
 
   /* Select innermost stack frame except on return from a stack dummy routine,
      or if the program has exited.  Print it without a level number if
@@ -1465,6 +1489,8 @@ Further execution is probably impossible.\n");
       stop_pc = read_pc();
       select_frame (get_current_frame (), 0);
     }
+ done:
+  annotate_stopped ();
 }
 
 static int

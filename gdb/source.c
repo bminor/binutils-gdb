@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "regex.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "annotate.h"
 
 #ifndef DIRNAME_SEPARATOR
 #define DIRNAME_SEPARATOR ':'
@@ -813,12 +814,9 @@ identify_source_line (s, line, mid_statement, pc)
   if (line > s->nlines)
     /* Don't index off the end of the line_charpos array.  */
     return 0;
-  /* FIXME-32x64: Need a version of print_address_numeric which does
-     not pass use_local to print_longest.  */
-  printf_unfiltered ("\032\032%s:%d:%d:%s:0x%lx\n", s->fullname,
-	  line, s->line_charpos[line - 1],
-	  mid_statement ? "middle" : "beg",
-	  (unsigned long) pc);
+  annotate_source (s->fullname, line, s->line_charpos[line - 1],
+		   mid_statement, pc);
+
   current_source_line = line;
   first_line_listed = line;
   last_line_listed = line;
@@ -1042,14 +1040,14 @@ list_command (arg, from_tty)
       sym = find_pc_function (sal.pc);
       if (sym)
 	{
-	  print_address_numeric (sal.pc, gdb_stdout);
+	  print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is in ");
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else
 	{
-	  print_address_numeric (sal.pc, gdb_stdout);
+	  print_address_numeric (sal.pc, 1, gdb_stdout);
 	  printf_filtered (" is at %s:%d.\n",
 			   sal.symtab->filename, sal.line);
 	}
@@ -1172,7 +1170,7 @@ line_info (arg, from_tty)
 
 	  /* If this is the only line, show the source code.  If it could
 	     not find the file, don't do anything special.  */
-	  if (frame_file_full_name && sals.nelts == 1)
+	  if (annotation_level && sals.nelts == 1)
 	    identify_source_line (sal.symtab, sal.line, 0, start_pc);
 	}
       else

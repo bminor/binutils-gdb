@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "demangle.h"
 #include "valprint.h"
+#include "annotate.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -826,34 +827,26 @@ print_command_1 (exp, inspect, voidprint)
     {
       int histindex = record_latest_value (val);
 
-      if (annotation_level > 1)
-	{
-	  if (histindex >= 0)
-	    printf_filtered ("\n\032\032value-history-begin %d ", histindex);
-	  else
-	    printf_filtered ("\n\032\032value-begin ");
-	  print_value_flags (VALUE_TYPE (val));
-	  printf_filtered ("\n");
-	}
+      if (histindex >= 0)
+	annotate_value_history_begin (histindex, VALUE_TYPE (val));
+      else
+	annotate_value_begin (VALUE_TYPE (val));
 
       if (inspect)
 	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
       else
 	if (histindex >= 0) printf_filtered ("$%d = ", histindex);
 
-      if (annotation_level > 1 && histindex >= 0)
-	printf_filtered ("\n\032\032value-history-value\n");
+      if (histindex >= 0)
+	annotate_value_history_value ();
 
       print_formatted (val, format, fmt.size);
       printf_filtered ("\n");
 
-      if (annotation_level > 1)
-	{
-	  if (histindex >= 0)
-	    printf_filtered ("\n\032\032value-history-end\n");
-	  else
-	    printf_filtered ("\n\032\032value-end\n");
-	}
+      if (histindex >= 0)
+	annotate_value_history_end ();
+      else
+	annotate_value_end ();
 
       if (inspect)
 	printf_unfiltered("\") )\030");
@@ -920,17 +913,11 @@ output_command (exp, from_tty)
 
   val = evaluate_expression (expr);
 
-  if (annotation_level > 1)
-    {
-      printf_filtered ("\n\032\032value-begin ");
-      print_value_flags (VALUE_TYPE (val));
-      printf_filtered ("\n");
-    }
+  annotate_value_begin (VALUE_TYPE (val));
 
   print_formatted (val, format, fmt.size);
 
-  if (annotation_level > 1)
-    printf_filtered ("\n\032\032value-end\n");
+  annotate_value_end ();
 
   do_cleanups (old_chain);
 }
@@ -1313,11 +1300,16 @@ do_one_display (d)
 
   current_display_number = d->number;
 
-  printf_filtered ("%d: ", d->number);
+  annotate_display_begin ();
+  printf_filtered ("%d", d->number);
+  annotate_display_number_end ();
+  printf_filtered (": ");
   if (d->format.size)
     {
       CORE_ADDR addr;
-      
+
+      annotate_display_format ();
+
       printf_filtered ("x/");
       if (d->format.count != 1)
 	printf_filtered ("%d", d->format.count);
@@ -1325,7 +1317,12 @@ do_one_display (d)
       if (d->format.format != 'i' && d->format.format != 's')
 	printf_filtered ("%c", d->format.size);
       printf_filtered (" ");
+
+      annotate_display_expression ();
+
       print_expression (d->exp, gdb_stdout);
+      annotate_display_expression_end ();
+
       if (d->format.count != 1)
 	printf_filtered ("\n");
       else
@@ -1334,19 +1331,33 @@ do_one_display (d)
       addr = value_as_pointer (evaluate_expression (d->exp));
       if (d->format.format == 'i')
 	addr = ADDR_BITS_REMOVE (addr);
-      
+
+      annotate_display_value ();
+
       do_examine (d->format, addr);
     }
   else
     {
+      annotate_display_format ();
+
       if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
+
+      annotate_display_expression ();
+
       print_expression (d->exp, gdb_stdout);
+      annotate_display_expression_end ();
+
       printf_filtered (" = ");
+
+      annotate_display_expression ();
+
       print_formatted (evaluate_expression (d->exp),
 		       d->format.format, d->format.size);
       printf_filtered ("\n");
     }
+
+  annotate_display_end ();
 
   gdb_flush (gdb_stdout);
   current_display_number = -1;
@@ -1646,13 +1657,11 @@ print_frame_args (func, fi, num, stream)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
 
-      if (annotation_level > 1)
-	printf_filtered ("\n\032\032arg-begin\n");
+      annotate_arg_begin ();
 
       fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
 			       SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
-      if (annotation_level > 1)
-	printf_filtered ("\n\032\032arg-name-end\n");
+      annotate_arg_name_end ();
       fputs_filtered ("=", stream);
 
       /* Avoid value_print because it will deref ref parameters.  We just
@@ -1662,12 +1671,7 @@ print_frame_args (func, fi, num, stream)
 	 2 for each recurse.  */
       val = read_var_value (sym, FRAME_INFO_ID (fi));
 
-      if (annotation_level > 1)
-	{
-	  printf_filtered ("\n\032\032arg-value ");
-	  print_value_flags (val == NULL ? NULL : VALUE_TYPE (val));
-	  printf_filtered ("\n");
-	}
+      annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
 
       if (val)
         val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
@@ -1675,8 +1679,7 @@ print_frame_args (func, fi, num, stream)
       else
 	fputs_filtered ("???", stream);
 
-      if (annotation_level > 1)
-	printf_filtered ("\n\032\032arg-end\n");
+      annotate_arg_end ();
 
       first = 0;
     }

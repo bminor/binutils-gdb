@@ -198,6 +198,13 @@ extern void coffstab_build_psymtabs
 	   file_ptr stabstroffset,
 	   unsigned int stabstrsize));
 
+extern void stabsect_build_psymtabs
+  PARAMS ((struct objfile *objfile,
+	   struct section_offsets *section_offsets,
+	   int mainline,
+	   char *stab_name,
+	   char *stabstr_name));
+
 extern void elfstab_offset_sections PARAMS ((struct objfile *,
 					     struct partial_symtab *));
 

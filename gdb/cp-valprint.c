@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "gdbcmd.h"
 #include "demangle.h"
+#include "annotate.h"
 
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
@@ -283,21 +284,14 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    }
 	  else
 	    {
-	      if (annotation_level > 1)
-		{
-		  printf_filtered ("\n\032\032field-begin ");
-		  print_value_flags (TYPE_FIELD_TYPE (type, i));
-		  printf_filtered ("\n");
-		}
+	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
 				       DMGL_PARAMS | DMGL_ANSI);
-	      if (annotation_level > 1)
-		printf_filtered ("\n\032\032field-name-end\n");
+	      annotate_field_name_end ();
 	      fputs_filtered (" = ", stream);
-	      if (annotation_level > 1)
-		printf_filtered ("\n\032\032field-value\n");
+	      annotate_field_value ();
 	    }
 
 	  if (TYPE_FIELD_PACKED (type, i))
@@ -332,8 +326,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 			      0, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
-	  if (annotation_level > 1)
-	    printf_filtered ("\n\032\032field-end\n");
+	  annotate_field_end ();
 	}
 
       if (pretty)

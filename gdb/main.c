@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h"
 #include "language.h"
 #include "terminal.h" /* For job_control.  */
+#include "annotate.h"
 
 #include "getopt.h"
 
@@ -387,10 +388,10 @@ return_to_top_level (reason)
     switch (reason)
       {
       case RETURN_QUIT:
-	printf_unfiltered ("\n\032\032quit\n");
+	annotate_quit ();
 	break;
       case RETURN_ERROR:
-	printf_unfiltered ("\n\032\032error\n");
+	annotate_error ();
 	break;
       }
 

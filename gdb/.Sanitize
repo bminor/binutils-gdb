@@ -76,6 +76,8 @@ a68v-nat.c
 alpha-nat.c
 alpha-tdep.c
 altos-xdep.c
+annotate.c
+annotate.h
 arm-convert.s
 arm-pinsn.c
 arm-tdep.c

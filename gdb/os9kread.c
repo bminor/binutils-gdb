@@ -105,9 +105,6 @@ extern int info_verbose;
 
 extern int previous_stab_code;
 
-/* The BFD for this file -- implicit parameter to next_symbol_text.  */
-static bfd *symfile_bfd;
-
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
 static char *last_function_name;
@@ -125,12 +122,13 @@ extern struct complaint repeated_header_complaint;
 
 extern struct complaint repeated_header_name_complaint;
 
+#if 0
 static struct complaint lbrac_unmatched_complaint =
   {"unmatched Increment Block Entry before symtab pos %d", 0, 0};
 
 static struct complaint lbrac_mismatch_complaint =
   {"IBE/IDE symbol mismatch at symtab pos %d", 0, 0};
-
+#endif
 
 /* Local function prototypes */
 static void
@@ -148,9 +146,6 @@ read_os9k_psymtab PARAMS ((struct section_offsets *, struct objfile *,
 
 static void
 init_psymbol_list PARAMS ((struct objfile *));
-
-static char *
-os9k_next_symbol_text PARAMS ((void));
 
 static int
 fill_sym PARAMS ((FILE *, bfd *));
@@ -265,7 +260,7 @@ struct stbsymbol {
 };
 #define STBSYMSIZE 10
 
-static int 
+static void
 read_minimal_symbols(objfile, section_offsets)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
@@ -320,7 +315,7 @@ char buf[64], buf1[128];
     off += STBSYMSIZE;
   };
   install_minimal_symbols (objfile);
-  return 1;
+  return;
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -340,8 +335,6 @@ os9k_symfile_read (objfile, section_offsets, mainline)
      int mainline;	/* FIXME comments above */
 {
   bfd *sym_bfd;
-  int val;
-  int stb_exist;
   struct cleanup *back_to;
 
   sym_bfd = objfile->obfd;
@@ -401,7 +394,6 @@ static void
 os9k_symfile_init (objfile)
      struct objfile *objfile;
 {
-  int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   char dbgname[512], stbname[512];
@@ -502,7 +494,6 @@ fill_sym (dbg_file, abfd)
      FILE *dbg_file;
      bfd *abfd;
 {
-short id;
 short si, nmask;
 long li;
 int ii;
@@ -606,10 +597,11 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 {
   register struct internal_symstruct *bufp = 0;	/* =0 avoids gcc -Wall glitch*/
   register char *namestring;
-  int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_o_file_start = 0;
+#if 0
   struct cleanup *back_to;
+#endif
   bfd *abfd;
   FILE *fp;
 

@@ -381,8 +381,8 @@ inferior_h =	inferior.h $(breakpoint_h)
 # right, it is probably easiest just to list .h files here directly.
 
 HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
-	$(gdbcmd_h) \
-	$(gdbcore_h) gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
+	$(gdbcmd_h) gdbcore.h \
+	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
@@ -400,9 +400,9 @@ HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
 	dcache.h remote-utils.h remote-sim.h
 
-# Header files that already have srcdir in them.
+# Header files that already have srcdir in them, or which are in objdir.
 
-HFILES_WITH_SRCDIR = $(udiheaders)
+HFILES_WITH_SRCDIR = $(udiheaders) ../bfd/bfd.h
 
 
 # GDB "info" files, which should be included in their entirety
@@ -445,7 +445,7 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o os9kread.o
+	serial.o mdebugread.o os9kread.o annotate.o
 
 TSOBS = inflow.o
 
@@ -615,9 +615,6 @@ xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
 
 kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
-	rm -f init.c
-	$(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(NTSOBS) > init.c
-	$(CC) $(INTERNAL_LDFLAGS) -c init.c $(CLIBS) 
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
 
@@ -889,7 +886,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	lynx-nat.c m3-nat.c \
 	m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
-	mips-tdep.c mipsm3-nat.c news-xdep.c \
+	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
@@ -942,7 +939,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/nm-sun2.h \
 	config/m68k/nm-sun3.h config/m68k/tm-3b1.h config/m68k/tm-altos.h \
 	config/m68k/tm-apollo68b.h \
-	config/m68k/tm-amix.h config/m68k/tm-delta68.h \
+	config/m68k/tm-amix.h \
+	config/m68k/tm-cisco.h config/m68k/tm-delta68.h \
 	config/m68k/tm-dpx2.h config/m68k/tm-es1800.h \
 	config/m68k/tm-hp300bsd.h config/m68k/tm-hp300hpux.h \
 	config/m68k/tm-isi.h config/m68k/tm-m68klynx.h \
@@ -971,11 +969,11 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/mips/tm-idt64.h config/mips/tm-idtl64.h \
 	config/mips/tm-irix3.h config/mips/tm-irix5.h \
 	config/mips/tm-mips.h config/mips/tm-mips64.h \
-	config/mips/tm-mipsm3.h \
+	config/mips/tm-mipsm3.h config/mips/tm-mipsv4.h \
 	config/mips/xm-irix3.h \
 	config/mips/xm-irix4.h config/mips/xm-irix5.h \
 	config/mips/xm-makeva.h config/mips/xm-mips.h \
-	config/mips/xm-mipsm3.h \
+	config/mips/xm-mipsm3.h config/mips/xm-mipsv4.h \
 	config/mips/xm-riscos.h config/mips/xm-news-mips.h \
 	config/nm-lynx.h config/nm-sysv4.h \
 	config/none/nm-none.h config/none/tm-none.h config/none/xm-none.h \
@@ -1026,7 +1024,8 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/m68k/3b1.mt config/m68k/altos.mh config/m68k/altos.mt \
 	config/m68k/amix.mh config/m68k/amix.mt config/m68k/apollo68b.mh \
 	config/m68k/apollo68b.mt \
-	config/m68k/apollo68v.mh config/m68k/delta68.mh \
+	config/m68k/apollo68v.mh \
+	config/m68k/cisco.mt config/m68k/delta68.mh \
 	config/m68k/delta68.mt config/m68k/dpx2.mh config/m68k/dpx2.mt \
 	config/m68k/es1800.mt config/m68k/hp300bsd.mh \
 	config/m68k/hp300bsd.mt config/m68k/hp300hpux.mh \
@@ -1049,6 +1048,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/mips/littlemips.mh config/mips/littlemips.mt \
 	config/mips/mipsel64.mt \
 	config/mips/mipsm3.mh config/mips/mipsm3.mt \
+	config/mips/mipsv4.mh config/mips/mipsv4.mt \
 	config/mips/news-mips.mh config/mips/riscos.mh \
 	config/none/none.mh config/none/none.mt config/ns32k/merlin.mh \
 	config/ns32k/merlin.mt config/ns32k/ns32km3.mh config/ns32k/ns32km3.mt \
@@ -1297,6 +1297,8 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
 	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+
+mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 news-xdep.o: news-xdep.c
 

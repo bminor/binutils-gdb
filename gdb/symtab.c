@@ -111,8 +111,8 @@ void
 cplusplus_hint (name)
      char *name;
 {
-  printf_unfiltered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_unfiltered ("(Note leading single quote.)\n");
+  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
+  printf_filtered ("(Note leading single quote.)\n");
 }
 
 /* Check for a symtab of a specific name; first in symtabs, then in
@@ -188,7 +188,9 @@ lookup_symtab (name)
      char *name;
 {
   register struct symtab *s;
+#if 0
   register char *copy;
+#endif
 
   s = lookup_symtab_1 (name);
   if (s) return s;
@@ -1811,7 +1813,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   struct symtab_and_line val;
 #endif
   register char *p, *p1;
-  char *q, *q1, *pp;
+  char *q, *pp;
+#if 0
+  char *q1;
+#endif
   register struct symtab *s;
 
   register struct symbol *sym;
@@ -1927,7 +1932,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		  if (opname == NULL)
 		    {
 		      error_begin ();
-		      printf_unfiltered ("no mangling for \"%s\"\n", tmp);
+		      printf_filtered ("no mangling for \"%s\"\n", tmp);
 		      cplusplus_hint (saved_arg);
 		      return_to_top_level (RETURN_ERROR);
 		    }
@@ -2021,11 +2026,11 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		    tmp = copy;
 		  error_begin ();
 		  if (tmp[0] == '~')
-		    printf_unfiltered
+		    printf_filtered
 		      ("the class `%s' does not have destructor defined\n",
 		       SYMBOL_SOURCE_NAME(sym_class));
 		  else
-		    printf_unfiltered
+		    printf_filtered
 		      ("the class %s does not have any method named %s\n",
 		       SYMBOL_SOURCE_NAME(sym_class), tmp);
 		  cplusplus_hint (saved_arg);
@@ -2036,7 +2041,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	    {
 	      error_begin ();
 	      /* The quotes are important if copy is empty.  */
-	      printf_unfiltered
+	      printf_filtered
 		("can't find class, struct, or union named \"%s\"\n", copy);
 	      cplusplus_hint (saved_arg);
 	      return_to_top_level (RETURN_ERROR);

@@ -143,8 +143,6 @@ static struct symbol *opaque_type_chain[HASHSIZE];
 struct type *in_function_type;
 #endif
 
-struct pending_block *pending_blocks;
-
 /* Complaints about various problems in the file being read  */
 
 struct complaint ef_complaint = 
@@ -900,29 +898,32 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	      break;
 	    /* fall in for static symbols that don't start with '.' */
 	  case C_EXT:
-	    /* Record external symbols in minsyms if we don't have debug
-	       info for them.  FIXME, this is probably the wrong thing
-	       to do.  Why don't we record them even if we do have
-	       debug symbol info?  What really belongs in the minsyms
-	       anyway?  Fred!??  */
-	    if (!SDB_TYPE (cs->c_type)) {
-		/* FIXME: This is BOGUS Will Robinson! 
-	 	Coff should provide the SEC_CODE flag for executable sections,
-	 	then if we could look up sections by section number we
-  	 	could see if the flags indicate SEC_CODE.  If so, then
-	 	record this symbol as a function in the minimal symbol table.
-		But why are absolute syms recorded as functions, anyway?  */
-		    if (cs->c_secnum <= text_bfd_scnum+1) {/* text or abs */
-			    record_minimal_symbol (cs->c_name, cs->c_value,
-						   mst_text, objfile);
-			    break;
-		    } else {
-			    record_minimal_symbol (cs->c_name, cs->c_value,
-						   mst_data, objfile);
-			    break;
-		    }
-	    }
-	    process_coff_symbol (cs, &main_aux, objfile);
+	    /* Record it in the minimal symbols regardless of SDB_TYPE.
+	       This parallels what we do for other debug formats, and
+	       probably is needed to make print_address_symbolic work right
+	       without the "set fast-symbolic-addr off" kludge.  */
+
+	    /* FIXME: This bogusly assumes the sections are in a certain
+	       order, text (SEC_CODE) sections are before data sections,
+	       etc.  */
+	    if (cs->c_secnum <= text_bfd_scnum+1)
+	      {
+		/* text or absolute.  (FIXME, should use mst_abs if
+		   absolute).  */
+		record_minimal_symbol
+		  (cs->c_name, cs->c_value,
+		   cs->c_sclass == C_STAT ? mst_file_text : mst_text,
+		   objfile);
+	      }
+	    else
+	      {
+		record_minimal_symbol
+		  (cs->c_name, cs->c_value,
+		   cs->c_sclass == C_STAT ? mst_file_data : mst_data,
+		   objfile);
+	      }
+	    if (SDB_TYPE (cs->c_type))
+	      process_coff_symbol (cs, &main_aux, objfile);
 	    break;
 
 	  case C_FCN:
@@ -1412,7 +1413,6 @@ process_coff_symbol (cs, aux, objfile)
     = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 				       sizeof (struct symbol));
   char *name;
-  struct type *temptype;
 
   memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
@@ -1502,16 +1502,19 @@ process_coff_symbol (cs, aux, objfile)
 #endif
 	    add_symbol_to_list (sym, &local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION) && (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	    /* If PCC says a parameter is a short or a char,
-	       aligned on an int boundary, realign it to the "little end"
-	       of the int.  */
-	    temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
-	    if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
-		&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
-		&& 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (temptype))
+	    {
+	      /* If PCC says a parameter is a short or a char,
+		 aligned on an int boundary, realign it to the "little end"
+		 of the int.  */
+	      struct type *temptype;
+	      temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
+	      if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
+		  && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
+		  && 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (temptype))
 		{
-		    SYMBOL_VALUE (sym) += TYPE_LENGTH (temptype)
-				        - TYPE_LENGTH (SYMBOL_TYPE (sym));
+		  SYMBOL_VALUE (sym) +=
+		    TYPE_LENGTH (temptype)
+		      - TYPE_LENGTH (SYMBOL_TYPE (sym));
 		}
 #endif
 	    break;
@@ -1523,17 +1526,21 @@ process_coff_symbol (cs, aux, objfile)
 #if !defined (BELIEVE_PCC_PROMOTION)
 	/* FIXME:  This should retain the current type, since it's just
 	   a register value.  gnu@adobe, 26Feb93 */
-	    /* If PCC says a parameter is a short or a char,
-	       it is really an int.  */
-	    temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
-	    if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
-		&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
-		{
-		    SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))
-			? lookup_fundamental_type (current_objfile,
-						   FT_UNSIGNED_INTEGER)
-			    : temptype;
-		}
+	      {
+		/* If PCC says a parameter is a short or a char,
+		   it is really an int.  */
+		struct type *temptype;
+		temptype =
+		  lookup_fundamental_type (current_objfile, FT_INTEGER);
+		if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
+		    && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
+		  {
+		    SYMBOL_TYPE (sym) =
+		      (TYPE_UNSIGNED (SYMBOL_TYPE (sym))
+		       ? lookup_fundamental_type (current_objfile,
+						  FT_UNSIGNED_INTEGER)
+		       : temptype);
+		  }
 #endif
 	    break;
 	    
@@ -1543,7 +1550,34 @@ process_coff_symbol (cs, aux, objfile)
 
 	    /* If type has no name, give it one */
 	    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	      TYPE_NAME (SYMBOL_TYPE (sym)) = concat (SYMBOL_NAME (sym), NULL);
+	      {
+		if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+		    || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
+		  {
+		    /* If we are giving a name to a type such as "pointer to
+		       foo" or "function returning foo", we better not set
+		       the TYPE_NAME.  If the program contains "typedef char
+		       *caddr_t;", we don't want all variables of type char
+		       * to print as caddr_t.  This is not just a
+		       consequence of GDB's type management; CC and GCC (at
+		       least through version 2.4) both output variables of
+		       either type char * or caddr_t with the type
+		       refering to the C_TPDEF symbol for caddr_t.  If a future
+		       compiler cleans this up it GDB is not ready for it
+		       yet, but if it becomes ready we somehow need to
+		       disable this check (without breaking the PCC/GCC2.4
+		       case).
+
+		       Sigh.
+
+		       Fortunately, this check seems not to be necessary
+		       for anything except pointers or functions.  */
+		    ;
+		  }
+		else
+		  TYPE_NAME (SYMBOL_TYPE (sym)) =
+		    concat (SYMBOL_NAME (sym), NULL);
+	      }
 
 	    /* Keep track of any type which points to empty structured type,
 		so it can be filled from a definition from another file.  A
@@ -2017,16 +2051,6 @@ coff_read_enum_type (index, length, lastsym)
 	break;
     }
 
-#if 0
-  /* This screws up perfectly good C programs with enums.  FIXME.  */
-  /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
-  if(TYPE_NFIELDS(type) == 2 &&
-     ((STREQ(TYPE_FIELD_NAME(type,0),"TRUE") &&
-       STREQ(TYPE_FIELD_NAME(type,1),"FALSE")) ||
-      (STREQ(TYPE_FIELD_NAME(type,1),"TRUE") &&
-       STREQ(TYPE_FIELD_NAME(type,0),"FALSE"))))
-     TYPE_CODE(type) = TYPE_CODE_BOOL;
-#endif
   return type;
 }
 

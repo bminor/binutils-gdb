@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 #include "expression.h"
 #include "language.h"
+#include "annotate.h"
 
 #include "readline.h"
 
@@ -262,8 +263,7 @@ error_begin ()
   wrap_here ("");			/* Force out any buffered output */
   gdb_flush (gdb_stdout);
 
-  if (annotation_level > 1)
-    fprintf_filtered (gdb_stderr, "\n\032\032error-begin\n");
+  annotate_error_begin ();
 
   if (error_pre_print)
     fprintf_filtered (gdb_stderr, error_pre_print);
@@ -453,8 +453,7 @@ quit ()
   SERIAL_FLUSH_OUTPUT (gdb_stdout_serial);
   SERIAL_UN_FDOPEN (gdb_stdout_serial);
 
-  if (annotation_level > 1)
-    fprintf_filtered (gdb_stderr, "\n\032\032error-begin\n");
+  annotate_error_begin ();
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
   if (error_pre_print)

@@ -99,6 +99,7 @@ enum target_signal {
   /* Used some places (e.g. stop_signal) to record the concept that
      there is no signal.  */
   TARGET_SIGNAL_0 = 0,
+  TARGET_SIGNAL_FIRST = 0,
   TARGET_SIGNAL_HUP = 1,
   TARGET_SIGNAL_INT = 2,
   TARGET_SIGNAL_QUIT = 3,
@@ -532,6 +533,8 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define	target_has_execution	\
 	(current_target->to_has_execution)
 
+extern void target_link PARAMS ((char *, CORE_ADDR *));
+
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */
@@ -580,10 +583,7 @@ struct section_table {
   CORE_ADDR addr;		/* Lowest address in section */
   CORE_ADDR endaddr;		/* 1+highest address in section */
 
-  /* For the ptx compiler, we can't use the sec_ptr typedef when the field's
-     name is sec_ptr.  We really should rename the field (or better yet,
-     the typedef should be bfd_sec_ptr).  */
-  struct sec *sec_ptr;		/* BFD section pointer */
+  sec_ptr the_bfd_section;
 
   bfd	   *bfd;		/* BFD file pointer */
 };
