@@ -2389,7 +2389,7 @@ install-gdbtk:
 		$(DESTDIR)$(GDBTK_LIBRARY)/help/images \
 		$(DESTDIR)$(GDBTK_LIBRARY)/help/trace ; \
 	cd $(srcdir)/gdbtk/library ; \
-	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif help/images/*.png; \
 	  do \
 		$(INSTALL_DATA) $$i $(DESTDIR)$(GDBTK_LIBRARY)/$$i ; \
 	  done ;

@@ -1,3 +1,7 @@
+2003-01-21  Martin M. Hunt  <hunt@redhat.com>
+
+	* Makefile.in (install-gdbtk): Install PNG images too.
+
 2003-01-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* exec.c (text_start): Delete global variable.
