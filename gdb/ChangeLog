@@ -1,3 +1,8 @@
+Fri Feb 18 08:26:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stack.c (print_frame_info): In "pathological" case, don't
+	distrust the line number information.
+
 Fri Feb 18 16:51:14 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* mips-tdep.c (mips_print_register): handle 64 bits register.
