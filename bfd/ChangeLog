@@ -1,3 +1,8 @@
+Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* syms.c (_bfd_stab_section_find_nearest_line): Clear the
+ 	cached_stab field if the offset prevents us from using the cache.
+
 start-sanitize-v850e
 Mon Aug 25 10:04:35 1997  Nick Clifton  <nickc@cygnus.com>
 
