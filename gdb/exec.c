@@ -35,12 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "gdbcore.h"
 
-#ifdef STILL_NEEDED_FOR_DECSTATION
-#include <sys/dir.h>		/* For DECstations */
-#include <sys/user.h>		/* After a.out.h  */
-#include <sys/file.h>
-#endif
-
 #include <ctype.h>
 #include <sys/stat.h>
 
