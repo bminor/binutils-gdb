@@ -1,3 +1,13 @@
+2003-10-31  Dave Brolley  <brolley@redhat.com>
+
+	* frv-sim.h (REGNUM_LR): Removed.
+	(REGNUM_SPR_MIN,REGNUM_SPR_MAX): New macros.
+	* frv.c (frvbf_fetch_register): Fetch SPR registers based on
+	REGNUM_SPR_MIN and REGNUM_SPR_MAX. Check whether SPRs are implemented.
+	Return 0 for an unimplemented register. Return the length of the data
+	for an implemented register.
+	(frvbf_store_register): Ditto.
+
 2003-10-30  Andrew Cagney  <cagney@redhat.com>
 
 	* traps.c: Replace "struct symbol_cache_entry" with "struct

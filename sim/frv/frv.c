@@ -44,12 +44,22 @@ frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
     SETTSI (buf, GET_H_FR (rn - GR_REGNUM_MAX - 1));
   else if (rn == PC_REGNUM)
     SETTSI (buf, GET_H_PC ());
-  else if (rn == LR_REGNUM)
-    SETTSI (buf, GET_H_SPR (H_SPR_LR));
+  else if (rn >= SPR_REGNUM_MIN && rn <= SPR_REGNUM_MAX)
+    {
+      /* Make sure the register is implemented.  */
+      FRV_REGISTER_CONTROL *control = CPU_REGISTER_CONTROL (current_cpu);
+      int spr = rn - SPR_REGNUM_MIN;
+      if (! control->spr[spr].implemented)
+	return 0;
+      SETTSI (buf, GET_H_SPR (spr));
+    }
   else
-    SETTSI (buf, 0xdeadbeef);
+    {
+      SETTSI (buf, 0xdeadbeef);
+      return 0;
+    }
 
-  return -1;
+  return len;
 }
 
 /* The contents of BUF are in target byte order.  */
@@ -63,10 +73,19 @@ frvbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
     SET_H_FR (rn - GR_REGNUM_MAX - 1, GETTSI (buf));
   else if (rn == PC_REGNUM)
     SET_H_PC (GETTSI (buf));
-  else if (rn == LR_REGNUM)
-    SET_H_SPR (H_SPR_LR, GETTSI (buf));
+  else if (rn >= SPR_REGNUM_MIN && rn <= SPR_REGNUM_MAX)
+    {
+      /* Make sure the register is implemented.  */
+      FRV_REGISTER_CONTROL *control = CPU_REGISTER_CONTROL (current_cpu);
+      int spr = rn - SPR_REGNUM_MIN;
+      if (! control->spr[spr].implemented)
+	return 0;
+      SET_H_SPR (spr, GETTSI (buf));
+    }
+  else
+    return 0;
 
-  return -1;
+  return len;
 }
 
 /* Cover fns to access the general registers.  */

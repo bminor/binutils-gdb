@@ -33,7 +33,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GR_REGNUM_MAX	63
 #define FR_REGNUM_MAX  127
 #define PC_REGNUM      128
-#define LR_REGNUM      145
+#define SPR_REGNUM_MIN 129
+#define SPR_REGNUM_MAX (SPR_REGNUM_MIN + 4096 - 1)
 
 /* Initialization of the frv cpu.  */
 void frv_initialize (SIM_CPU *, SIM_DESC);
