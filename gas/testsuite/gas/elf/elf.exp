@@ -33,6 +33,8 @@ proc run_list_test { name suffix opts readelf_pipe } {
 # We're testing bits in obj-elf -- don't run on anything else.
 if { ([istarget "*-*-elf*"]		
       || [istarget "*-*-linux*"]
+      || [istarget "m6811-*"]
+      || [istarget "m6812-*"]
       || [istarget "sparc*-*-solaris*"]
       || [istarget "mips*-*-irix6*"])
      && ![istarget *-*-linux*aout*]

@@ -1,3 +1,9 @@
+2004-08-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/m68hc11.exp: Fix tests for 2.15
+	* gas/elf/elf.exp: Test obj-elf for m6811-* and m6812-*
+	* gas/symver/symver.exp: Likewise for symver tests.
+
 2004-07-30  Michal Ludvig  <mludvig@suse.cz>
 
 	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for
