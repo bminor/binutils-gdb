@@ -105,6 +105,15 @@ if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
+# On FreeBSD, crt1.o the final link will fail because of unresolved
+# symbols.  It turns out that libc.so references symbols that are
+# normally provided by crt1.o, which isn't linked in since we specify
+# -nostartfiles.  Using -nostdlib doesn't help since target_compile
+# automatically adds -lm.  Linking statically avoids this mess.
+if [istarget "*-*-freebsd*"] then {
+    set link-flags "-static"
+}
+
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
 # switches according to compiler syntax.  If we pass these options straight
 # to the assembler, they won't always make sense.  If we don't pass them to
