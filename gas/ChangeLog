@@ -1,3 +1,9 @@
+2002-03-05  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* config/tc-hppa.c (md_apply_fix3): Add cast.
+	(hppa_fix_adjustable): Adjust list of selectors using e_lrsel and
+	e_rrsel.
+
 2002-03-05  Paul Koning  <pkoning@equallogic.com>
 
 	* tc-pdp11.c: Use VAX float format support for PDP-11 target.
