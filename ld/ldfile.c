@@ -220,6 +220,7 @@ ldfile_try_open_bfd (attempt, entry)
 		        }
 		      token = yylex ();
 		    }
+		  ldlex_popstate ();
 		  ldfile_assumed_script = FALSE;
 		  fclose (yyin);
 		  yyin = NULL;
