@@ -7,5 +7,5 @@ TM_FILE= tm-i386v4.h
 # in the Annotated C++ Reference Manual, section 7.2.1c, which is what is
 # used by the Lucid C++ compiler for most things.  But there are places
 # where Lucid varies from the ARM, so select the Lucid specific code also.
-DEMANGLE_OPTS=-Dnounderscore -DARM_DEMANGLING -DLUCID_DEMANGLING
+DEMANGLE_OPTS=-DARM_DEMANGLING -DLUCID_DEMANGLING
 
