@@ -1,3 +1,8 @@
+2000-10-18  H.J. Lu <hjl@gnu.org>
+
+	* gas/i386/intel.d: Fix the support for 64bit BFD in the last
+	change.
+
 2000-10-15  Diego Novillo  <dnovillo@cygnus.com>
 
 	* intel.s, intel.d: Add new tests for naked registers using intel

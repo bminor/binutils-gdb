@@ -573,12 +573,12 @@ Disassembly of section .text:
  9c0:	66 0f be 90 90 90 90 90 [ 	]*movsbw 0x90909090\(%eax\),%dx
  9c8:	66 0f c1 90 90 90 90 90 [ 	]*xadd   %dx,0x90909090\(%eax\)
 
-000009d0 <gs_foo>:
+0+9d0 <gs_foo>:
  9d0:	c3 [ 	]*ret    
 
-000009d1 <short_foo>:
+0+9d1 <short_foo>:
  9d1:	c3 [ 	]*ret    
 
-000009d2 <bar>:
+0+9d2 <bar>:
  9d2:	e8 f9 ff ff ff [ 	]*call   9d0 <gs_foo>
  9d7:	e8 f5 ff ff ff [ 	]*call   9d1 <short_foo>
