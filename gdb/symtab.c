@@ -1,6 +1,6 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -468,6 +468,16 @@ find_pc_psymbol (psymtab, pc)
    *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero. 
    BLOCK_FOUND is set to the block in which NAME is found (in the case of
    a field of `this', value_of_this sets BLOCK_FOUND to the proper value.) */
+
+/* This function has a bunch of loops in it and it would seem to be
+   attractive to put in some QUIT's (though I'm not really sure
+   whether it can run long enough to be really important).  But there
+   are a few calls for which it would appear to be bad news to quit
+   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c, and
+   nindy_frame_chain_valid in nindy-tdep.c.  (Note that there is C++
+   code below which can error(), but that probably doesn't affect
+   these calls since they are looking for a known variable and thus
+   can probably assume it will never hit the C++ code).  */
 
 struct symbol *
 lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
@@ -1031,10 +1041,12 @@ find_pc_symtab (pc)
    for a given address value.  Slow but complete.  */
 
 struct symbol *
-find_addr_symbol (addr)
+find_addr_symbol (addr, symtabp, symaddrp)
      CORE_ADDR addr;
+     struct symtab **symtabp;
+     CORE_ADDR *symaddrp;
 {
-  struct symtab *symtab;
+  struct symtab *symtab, *best_symtab;
   struct objfile *objfile;
   register int bot, top;
   register struct symbol *sym;
@@ -1080,14 +1092,21 @@ find_addr_symbol (addr)
 		  if (sym_addr > best_sym_addr)
 		    {
 		      /* Quit if we found an exact match.  */
-		      if (sym_addr == addr)
-			return sym;
 		      best_sym = sym;
 		      best_sym_addr = sym_addr;
+		      best_symtab = symtab;
+		      if (sym_addr == addr)
+			goto done;
 		    }
 	    }
 	}
     }
+
+ done:
+  if (symtabp)
+    *symtabp = best_symtab;
+  if (symaddrp)
+    *symaddrp = best_sym_addr;
   return best_sym;
 }
 
