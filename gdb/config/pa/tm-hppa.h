@@ -121,7 +121,10 @@ extern int hppa_instruction_nullified (void);
    told the callee to put it, rather than have the callee tell us.  */
 struct value *hppa_value_returned_from_stack (struct type *valtype,
 					      CORE_ADDR addr);
-#define VALUE_RETURNED_FROM_STACK(valtype,addr) \
+/* FIXME: cagney/2003-09-27: This method should now be redundant.
+   Instead, when "struct return convention", the inferior function
+   call code always saves and uses the struct return's stack address.  */
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
 extern void hppa_frame_init_saved_regs (struct frame_info *);

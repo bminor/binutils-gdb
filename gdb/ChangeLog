@@ -1,3 +1,10 @@
+2003-09-28  Andrew Cagney  <cagney@redhat.com>
+
+	* config/pa/tm-hppa.h (DEPRECATED_VALUE_RETURNED_FROM_STACK):
+	Rename VALUE_RETURNED_FROM_STACK.
+	* infcmd.c (print_return_value): Update.
+	* infcall.c (call_function_by_hand): Update.
+
 2003-09-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (i387_supply_fsave, i387_supply_fxsave): Add

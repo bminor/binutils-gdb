@@ -1076,7 +1076,7 @@ the function call).", name);
      address of the returned structure. Usually this will be
      overwritten by the callee.  I don't know about other
      architectures, so I defined this macro */
-#ifdef VALUE_RETURNED_FROM_STACK
+#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
   if (struct_return)
     {
       do_cleanups (retbuf_cleanup);

@@ -1084,7 +1084,7 @@ print_return_value (int structure_return, struct type *value_type)
       /* We cannot determine the contents of the structure because
 	 it is on the stack, and we don't know where, since we did not
 	 initiate the call, as opposed to the call_function_by_hand case */
-#ifdef VALUE_RETURNED_FROM_STACK
+#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
       value = 0;
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
