@@ -23,7 +23,7 @@ load_lib util-defs.exp
 
 global NM
 if ![info exists NM] then {
-    set NM [findfile $base_dir/../nm.new]
+    set NM [findfile $base_dir/../nm.new $base_dir/../nm.new [transform nm]]
 }
 global NMFLAGS
 if ![info exists NMFLAGS] then {

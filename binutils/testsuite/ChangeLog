@@ -1,3 +1,8 @@
+Fri Sep  2 12:53:10 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/unix.exp: If nm.new does not exist, use [transform nm].
+	* config/default.exp: Likewise.
+
 Wed Aug 24 12:41:37 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in, binutils.all/configure.in: Change i386 to
