@@ -1,3 +1,9 @@
+2003-06-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/attach.exp: When trying to attach to a nonexistent
+	process, make it possible to specify the PID based on the target,
+	and do so for *-*-freebsd*.
+
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
 	* gdb.base/float.exp: Add expected regexp for alpha-*-*.

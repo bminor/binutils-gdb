@@ -106,32 +106,41 @@ proc do_attach_tests {} {
    }
 
    # Verify that we cannot attach to what appears to be a valid
-   # process ID, but is a process that doesn't exist.  (I don't
-   # believe any process is ever assigned #0, at least on HPUX.)
+   # process ID, but is a process that doesn't exist.  Traditionally,
+   # most systems didn't have a process with ID 0, so we take that as
+   # the default.  However, there are a few exceptions.
    #
-   send_gdb "attach 0\n"
+   set boguspid 0
+   if { [istarget "*-*-freebsd*"] } {
+       # In FreeBSD 5.0, PID 0 is used for "swapper".  Use -1 instead
+       # (which should have the desired effect on any version of FreeBSD).
+       set boguspid -1
+   }
+   send_gdb "attach $boguspid\n"
    gdb_expect {
-      -re "Attaching to.*, process 0.*No such process.*$gdb_prompt $"\
-                      {
-                        # Response expected on HP-UX 10.20 (i.e., ptrace-based).
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "Attaching to.*, process 0 failed.*Hint.*$gdb_prompt $"\
-                      {
-                        # Response expected on HP-UX 11.0 (i.e., ttrace-based).
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "Attaching to.*, process 0.*denied.*$gdb_prompt $"\
-                      {pass "attach to nonexistent process is prohibited"}
-      -re "Attaching to.*, process 0.*Operation not permitted.*$gdb_prompt $"\
-                      {pass "attach to nonexistent process is prohibited"}
-      -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
-                      {
-                        # Response expected from /proc-based systems.
-                        pass "attach to nonexistent process is prohibited"
-                      }
-      -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
-      timeout         {fail "(timeout) attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process $boguspid.*No such process.*$gdb_prompt $"\
+	       {
+	   # Response expected on ptrace-based systems (i.e. HP-UX 10.20).
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "Attaching to.*, process $boguspid failed.*Hint.*$gdb_prompt $"\
+	       {
+	   # Response expected on ttrace-based systems (i.e. HP-UX 11.0).
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "Attaching to.*, process $boguspid.*denied.*$gdb_prompt $"\
+	       {pass "attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process $boguspid.*not permitted.*$gdb_prompt $"\
+	       {pass "attach to nonexistent process is prohibited"}
+       -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
+	       {
+	   # Response expected from /proc-based systems.
+	   pass "attach to nonexistent process is prohibited"
+       }
+       -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
+       timeout {
+	   fail "(timeout) attach to nonexistent process is prohibited"
+       }
    }
 
    # Verify that we can attach to the process by first giving its
