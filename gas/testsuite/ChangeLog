@@ -1,3 +1,8 @@
+2000-06-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/i386/prefix.s: Modify so we have at least one x86 test that
+	checks the line separator.
+
 Sun May 21 10:08:08 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/elf/elf.exp: Exclude *-*-linux*coff* as non-elf.
