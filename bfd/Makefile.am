@@ -728,9 +728,9 @@ cpu-i386.lo: cpu-i386.c $(INCDIR)/filenames.h
 cpu-i860.lo: cpu-i860.c $(INCDIR)/filenames.h
 cpu-i960.lo: cpu-i960.c $(INCDIR)/filenames.h
 cpu-m32r.lo: cpu-m32r.c $(INCDIR)/filenames.h
-cpu-m68k.lo: cpu-m68k.c $(INCDIR)/filenames.h
 cpu-m68hc11.lo: cpu-m68hc11.c $(INCDIR)/filenames.h
 cpu-m68hc12.lo: cpu-m68hc12.c $(INCDIR)/filenames.h
+cpu-m68k.lo: cpu-m68k.c $(INCDIR)/filenames.h
 cpu-m88k.lo: cpu-m88k.c $(INCDIR)/filenames.h
 cpu-m10200.lo: cpu-m10200.c $(INCDIR)/filenames.h
 cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
@@ -923,10 +923,6 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h
-elf32-m68hc11.lo: elf32-m68hc11.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/m68hc11.h elf32-target.h
-elf32-m68hc12.lo: elf32-m68hc12.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/m68hc11.h elf32-target.h
 elf32-hppa.lo: elf32-hppa.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
@@ -953,6 +949,14 @@ elf32-m68k.lo: elf32-m68k.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-m68hc11.lo: elf32-m68hc11.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/m68hc11.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+elf32-m68hc12.lo: elf32-m68hc12.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/m68hc11.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-m88k.lo: elf32-m88k.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h

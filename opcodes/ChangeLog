@@ -1,3 +1,8 @@
+2000-06-20  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am: Rebuild dependency.
+	* Makefile.in: Rebuild.
+
 2000-06-16  Nick Duffek  <nsd@redhat.com>
 
 	* disassemble.c (disassembler): Refer to the PowerPC 620 using

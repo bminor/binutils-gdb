@@ -306,7 +306,7 @@ arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h $(INCDIR)/opcode/avr.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -391,10 +391,10 @@ m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 m32r-opinst.lo: m32r-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h
-m68hc11-dis.lo: m68hc11-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h \
+m68hc11-dis.lo: m68hc11-dis.c $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/m68hc11.h $(INCDIR)/dis-asm.h $(BFD_H)
+m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/m68hc11.h
-m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m68hc11.h
 m68k-dis.lo: m68k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/floatformat.h \
   opintl.h $(INCDIR)/opcode/m68k.h
@@ -444,10 +444,11 @@ sparc-opc.lo: sparc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h
 tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic30.h
-tic54x-dis.lo: tic54x-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic54x.h $(INCDIR)/coff/tic54x.h \
-  $(INCDIR)/coff/ti.h
-tic54x-opc.lo: tic54x-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic54x.h
+tic54x-dis.lo: tic54x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic54x.h \
+  $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/ti.h
+tic54x-opc.lo: tic54x-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/tic54x.h
 tic80-dis.lo: tic80-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/tic80.h $(INCDIR)/dis-asm.h $(BFD_H)
 tic80-opc.lo: tic80-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
