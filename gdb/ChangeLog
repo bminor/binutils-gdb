@@ -1,5 +1,16 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (mark_breakpoints_out): Use ALL_BP_LOCATIONS.
+	(beakpoint_init_inferior): Likewise.
+	(breakpoint_here_p): Likewise.  Only check addresses for software
+	or hardware breakpoints.
+	(breakpoint_inserted_here_p): Likewise.
+	(breakpoint_thread_match): Likewise.  Correct comment.
+	(bpstat_have_active_hw_watchpoints): Likewise.
+	(check_duplicates): Likewise.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoints.c (insert_bp_location): New function, broken out
 	from insert_breakpoints.  Work on an bp_location instead of a
 	breakpoint.

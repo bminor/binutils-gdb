@@ -1574,10 +1574,10 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 void
 mark_breakpoints_out (void)
 {
-  struct breakpoint *b;
+  struct bp_location *bpt;
 
-  ALL_BREAKPOINTS (b)
-    b->loc->inserted = 0;
+  ALL_BP_LOCATIONS (bpt)
+    bpt->inserted = 0;
 }
 
 /* Clear the "inserted" flag in all breakpoints and delete any
@@ -1596,12 +1596,14 @@ void
 breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *temp;
+  struct bp_location *bpt;
   static int warning_needed = 0;
+
+  ALL_BP_LOCATIONS (bpt)
+    bpt->inserted = 0;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    b->loc->inserted = 0;
-
     switch (b->type)
       {
       case bp_call_dummy:
@@ -1670,23 +1672,29 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (CORE_ADDR pc)
 {
-  struct breakpoint *b;
+  struct bp_location *bpt;
   int any_breakpoint_here = 0;
 
-  ALL_BREAKPOINTS (b)
-    if ((b->enable_state == bp_enabled
-	 || b->enable_state == bp_permanent)
-	&& b->loc->address == pc)	/* bp is enabled and matches pc */
-      {
-	if (overlay_debugging 
-	    && section_is_overlay (b->loc->section) 
-	    && !section_is_mapped (b->loc->section))
-	  continue;		/* unmapped overlay -- can't be a match */
-	else if (b->enable_state == bp_permanent)
-	  return permanent_breakpoint_here;
-	else
-	  any_breakpoint_here = 1;
-      }
+  ALL_BP_LOCATIONS (bpt)
+    {
+      if (bpt->loc_type != bp_loc_software_breakpoint
+	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if ((bpt->owner->enable_state == bp_enabled
+	   || bpt->owner->enable_state == bp_permanent)
+	  && bpt->address == pc)	/* bp is enabled and matches pc */
+	{
+	  if (overlay_debugging 
+	      && section_is_overlay (bpt->section) 
+	      && !section_is_mapped (bpt->section))
+	    continue;		/* unmapped overlay -- can't be a match */
+	  else if (bpt->owner->enable_state == bp_permanent)
+	    return permanent_breakpoint_here;
+	  else
+	    any_breakpoint_here = 1;
+	}
+    }
 
   return any_breakpoint_here ? ordinary_breakpoint_here : 0;
 }
@@ -1699,18 +1707,24 @@ breakpoint_here_p (CORE_ADDR pc)
 int
 breakpoint_inserted_here_p (CORE_ADDR pc)
 {
-  struct breakpoint *b;
+  struct bp_location *bpt;
 
-  ALL_BREAKPOINTS (b)
-    if (b->loc->inserted
-	&& b->loc->address == pc)	/* bp is inserted and matches pc */
+  ALL_BP_LOCATIONS (bpt)
     {
-      if (overlay_debugging 
-	  && section_is_overlay (b->loc->section) 
-	  && !section_is_mapped (b->loc->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
+      if (bpt->loc_type != bp_loc_software_breakpoint
+	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if (bpt->inserted
+	  && bpt->address == pc)	/* bp is inserted and matches pc */
+	{
+	  if (overlay_debugging 
+	      && section_is_overlay (bpt->section) 
+	      && !section_is_mapped (bpt->section))
+	    continue;		/* unmapped overlay -- can't be a match */
+	  else
+	    return 1;
+	}
     }
 
   return 0;
@@ -1747,30 +1761,35 @@ deprecated_frame_in_dummy (struct frame_info *frame)
   return 0;
 }
 
-/* breakpoint_thread_match (PC, PID) returns true if the breakpoint at
-   PC is valid for process/thread PID.  */
+/* breakpoint_thread_match (PC, PTID) returns true if the breakpoint at
+   PC is valid for process/thread PTID.  */
 
 int
 breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 {
-  struct breakpoint *b;
+  struct bp_location *bpt;
   int thread;
 
   thread = pid_to_thread_id (ptid);
 
-  ALL_BREAKPOINTS (b)
-    if (b->enable_state != bp_disabled
-	&& b->enable_state != bp_shlib_disabled
-	&& b->enable_state != bp_call_disabled
-	&& b->loc->address == pc
-	&& (b->thread == -1 || b->thread == thread))
+  ALL_BP_LOCATIONS (bpt)
     {
-      if (overlay_debugging 
-	  && section_is_overlay (b->loc->section) 
-	  && !section_is_mapped (b->loc->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
+      if (bpt->loc_type != bp_loc_software_breakpoint
+	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+	continue;
+
+      if ((bpt->owner->enable_state == bp_enabled
+	   || bpt->owner->enable_state == bp_permanent)
+	  && bpt->address == pc
+	  && (bpt->owner->thread == -1 || bpt->owner->thread == thread))
+	{
+	  if (overlay_debugging 
+	      && section_is_overlay (bpt->section) 
+	      && !section_is_mapped (bpt->section))
+	    continue;		/* unmapped overlay -- can't be a match */
+	  else
+	    return 1;
+	}
     }
 
   return 0;
@@ -3175,13 +3194,11 @@ bpstat_should_step (void)
 int
 bpstat_have_active_hw_watchpoints (void)
 {
-  struct breakpoint *b;
-  ALL_BREAKPOINTS (b)
-    if ((b->enable_state == bp_enabled) &&
-	(b->loc->inserted) &&
-	((b->type == bp_hardware_watchpoint) ||
-	 (b->type == bp_read_watchpoint) ||
-	 (b->type == bp_access_watchpoint)))
+  struct bp_location *bpt;
+  ALL_BP_LOCATIONS (bpt)
+    if ((bpt->owner->enable_state == bp_enabled)
+	&& bpt->inserted
+	&& bpt->loc_type == bp_loc_hardware_watchpoint)
       return 1;
   return 0;
 }
@@ -3817,32 +3834,32 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 static void
 check_duplicates (struct breakpoint *bpt)
 {
-  struct breakpoint *b;
+  struct bp_location *b;
   int count = 0;
-  struct breakpoint *perm_bp = 0;
+  struct bp_location *perm_bp = 0;
   CORE_ADDR address = bpt->loc->address;
   asection *section = bpt->loc->section;
 
   if (! breakpoint_address_is_meaningful (bpt))
     return;
 
-  ALL_BREAKPOINTS (b)
-    if (b->enable_state != bp_disabled
-	&& b->enable_state != bp_shlib_disabled
-	&& b->enable_state != bp_call_disabled
-	&& b->loc->address == address	/* address / overlay match */
-	&& (!overlay_debugging || b->loc->section == section)
-	&& breakpoint_address_is_meaningful (b))
+  ALL_BP_LOCATIONS (b)
+    if (b->owner->enable_state != bp_disabled
+	&& b->owner->enable_state != bp_shlib_disabled
+	&& b->owner->enable_state != bp_call_disabled
+	&& b->address == address	/* address / overlay match */
+	&& (!overlay_debugging || b->section == section)
+	&& breakpoint_address_is_meaningful (b->owner))
     {
       /* Have we found a permanent breakpoint?  */
-      if (b->enable_state == bp_permanent)
+      if (b->owner->enable_state == bp_permanent)
 	{
 	  perm_bp = b;
 	  break;
 	}
 	
       count++;
-      b->loc->duplicate = count > 1;
+      b->duplicate = count > 1;
     }
 
   /* If we found a permanent breakpoint at this address, go over the
@@ -3850,29 +3867,31 @@ check_duplicates (struct breakpoint *bpt)
      duplicates.  */
   if (perm_bp)
     {
-      perm_bp->loc->duplicate = 0;
+      perm_bp->duplicate = 0;
 
       /* Permanent breakpoint should always be inserted.  */
-      if (! perm_bp->loc->inserted)
+      if (! perm_bp->inserted)
 	internal_error (__FILE__, __LINE__,
 			"allegedly permanent breakpoint is not "
 			"actually inserted");
 
-      ALL_BREAKPOINTS (b)
+      ALL_BP_LOCATIONS (b)
 	if (b != perm_bp)
 	  {
-	    if (b->loc->inserted)
-	      internal_error (__FILE__, __LINE__,
-			      "another breakpoint was inserted on top of "
-			      "a permanent breakpoint");
+	    if (b->owner->enable_state != bp_disabled
+		&& b->owner->enable_state != bp_shlib_disabled
+		&& b->owner->enable_state != bp_call_disabled
+		&& b->address == address	/* address / overlay match */
+		&& (!overlay_debugging || b->section == section)
+		&& breakpoint_address_is_meaningful (b->owner))
+	      {
+		if (b->inserted)
+		  internal_error (__FILE__, __LINE__,
+				  "another breakpoint was inserted on top of "
+				  "a permanent breakpoint");
 
-	    if (b->enable_state != bp_disabled
-		&& b->enable_state != bp_shlib_disabled
-		&& b->enable_state != bp_call_disabled
-		&& b->loc->address == address	/* address / overlay match */
-		&& (!overlay_debugging || b->loc->section == section)
-		&& breakpoint_address_is_meaningful (b))
-	      b->loc->duplicate = 1;
+		b->duplicate = 1;
+	      }
 	  }
     }
 }
