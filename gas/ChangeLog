@@ -1,3 +1,8 @@
+1999-08-17  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-ppc.c (md_assemble): Trim @ha constant to 16 bits, to
+	handle 0xffffNNNN constants correctly.
+
 1999-08-16  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (do_ldst): Look for register conflicts on stores

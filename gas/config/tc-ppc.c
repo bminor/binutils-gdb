@@ -1885,8 +1885,9 @@ md_assemble (str)
 		break;
 
 	      case BFD_RELOC_HI16_S:
-		ex.X_add_number = (((ex.X_add_number >> 16) & 0xffff)
-				   + ((ex.X_add_number >> 15) & 1));
+		ex.X_add_number = ((((ex.X_add_number >> 16) & 0xffff)
+				    + ((ex.X_add_number >> 15) & 1))
+				   & 0xffff);
 		break;
 	      }
 #endif
