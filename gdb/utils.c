@@ -1,5 +1,5 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 89, 90, 91, 92, 95, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,11 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#if !defined(__GO32__) && !defined(__WIN32__) && !defined(MPW)
-#include <sys/ioctl.h>
-#include <sys/param.h>
-#include <pwd.h>
-#endif
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -399,8 +394,10 @@ fatal_dump_core (va_alist)
   fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
 
+#ifndef _WIN32
   signal (SIGQUIT, SIG_DFL);
   kill (getpid (), SIGQUIT);
+#endif
   /* We should never get here, but just in case...  */
   exit (1);
 }
@@ -536,7 +533,7 @@ quit ()
 }
 
 
-#if defined(__GO32__)||defined(WINGDB)
+#if defined(__GO32__) || defined(_WIN32)
 
 /* In the absence of signals, poll keyboard for a quit.
    Called from #define QUIT pollquit() in xm-go32.h. */
@@ -546,6 +543,7 @@ pollquit()
 {
   if (kbhit ())
     {
+#ifndef _WIN32
       int k = getkey ();
       if (k == 1) {
 	quit_flag = 1;
@@ -560,16 +558,20 @@ pollquit()
 	  /* We just ignore it */
 	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
+#else
+      abort ();
+#endif
     }
 }
 
 
 #endif
-#if defined(__GO32__)||defined(WINGDB)
+#if defined(__GO32__) || defined(_WIN32)
 void notice_quit()
 {
   if (kbhit ())
     {
+#ifndef _WIN32
       int k = getkey ();
       if (k == 1) {
 	quit_flag = 1;
@@ -582,6 +584,9 @@ void notice_quit()
 	{
 	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
+#else
+      abort ();
+#endif
     }
 }
 #else
@@ -619,19 +624,15 @@ request_quit (signo)
 
 /* Memory management stuff (malloc friends).  */
 
-#if defined (NO_MMALLOC)
-
 /* Make a substitute size_t for non-ANSI compilers. */
 
-#ifdef _AIX
-#include <stddef.h>
-#else /* Not AIX */
-#ifndef __STDC__
+#ifndef HAVE_STDDEF_H
 #ifndef size_t
 #define size_t unsigned int
 #endif
 #endif
-#endif /* Not AIX */
+
+#if defined (NO_MMALLOC)
 
 PTR
 mmalloc (md, size)
@@ -788,7 +789,7 @@ xmrealloc (md, ptr, size)
 
 PTR
 xmalloc (size)
-     long size;
+     size_t size;
 {
   return (xmmalloc ((PTR) NULL, size));
 }
@@ -798,7 +799,7 @@ xmalloc (size)
 PTR
 xrealloc (ptr, size)
      PTR ptr;
-     long size;
+     size_t size;
 {
   return (xmrealloc ((PTR) NULL, ptr, size));
 }
@@ -1876,14 +1877,14 @@ initialize_utils ()
   
   /* These defaults will be used if we are unable to get the correct
      values from termcap.  */
-#if defined(__GO32__) || defined(__WIN32__)
+#if defined(__GO32__)
   lines_per_page = ScreenRows();
   chars_per_line = ScreenCols();
 #else  
   lines_per_page = 24;
   chars_per_line = 80;
 
-#ifndef MPW
+#if !defined MPW && !defined _WIN32
   /* No termcap under MPW, although might be cool to do something
      by looking at worksheet or console window sizes. */
   /* Initialize the screen height and width from termcap.  */

@@ -1,3 +1,9 @@
+Tue Oct 15 18:19:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* utils.c: Always ensure that size_t is defined.  Check
+	HAVE_STDDEF_H rather than __STDC__
+	(xmalloc, xrealloc): Use size_t rather than long.
+
 Tue Oct 15 14:24:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/powerpc/tm-ppc-eabi.h: Undefine NO_SINGLE_STEP so targets
