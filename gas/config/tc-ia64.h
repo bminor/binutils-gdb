@@ -1,5 +1,5 @@
 /* tc-ia64.h -- Header file for tc-ia64.c.
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -82,6 +82,7 @@ extern void ia64_cons_fix_new PARAMS ((fragS *f, int where, int nbytes,
 extern void ia64_validate_fix PARAMS ((struct fix *fix));
 extern char * ia64_canonicalize_symbol_name PARAMS ((char *));
 extern flagword ia64_elf_section_flags PARAMS ((flagword, int, int));
+extern int ia64_elf_section_type PARAMS ((const char *, size_t len));
 extern long ia64_pcrel_from_section PARAMS ((struct fix *fix, segT sec));
 extern void ia64_md_do_align PARAMS ((int, const char *, int, int));
 extern void ia64_handle_align PARAMS ((fragS *f));
@@ -111,6 +112,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 #define MD_PCREL_FROM_SECTION(fix,sec)	ia64_pcrel_from_section (fix, sec)
 #define md_do_align(n,f,l,m,j)		ia64_md_do_align (n,f,l,m)
 #define HANDLE_ALIGN(f)			ia64_handle_align (f)
+#define md_elf_section_type(str,len)	ia64_elf_section_type (str, len)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 
@@ -121,9 +123,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 
 #define ELF_TC_SPECIAL_SECTIONS						   \
 { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT }, \
-{ ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT }, \
-{ ".IA_64.unwind",	SHT_IA_64_UNWIND,	SHF_ALLOC }, \
-{ ".IA_64.unwind_info",	SHT_PROGBITS,		SHF_ALLOC },
+{ ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 1	/* so slot-multipliers can be 1 */
 
