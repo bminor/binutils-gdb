@@ -1262,8 +1262,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   /* This value is almost never non-zero... */
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  /* OK to default this value to 'unknown'. */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   /*
    * Call Dummies

@@ -398,7 +398,13 @@ print_args_stub (void *args)
   int numargs;
   struct print_args_args *p = (struct print_args_args *) args;
 
-  numargs = FRAME_NUM_ARGS (p->fi);
+  if (FRAME_NUM_ARGS_P ())
+    {
+      numargs = FRAME_NUM_ARGS (p->fi);
+      gdb_assert (numargs >= 0);
+    }
+  else
+    numargs = -1;
   print_frame_args (p->func, p->fi, numargs, p->stream);
   return 0;
 }
@@ -982,15 +988,22 @@ frame_info (char *addr_exp, int from_tty)
 	print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
-	numargs = FRAME_NUM_ARGS (fi);
-	if (numargs < 0)
-	  puts_filtered (" args: ");
-	else if (numargs == 0)
-	  puts_filtered (" no args.");
-	else if (numargs == 1)
-	  puts_filtered (" 1 arg: ");
+	if (!FRAME_NUM_ARGS_P ())
+	  {
+	    numargs = -1;
+	    puts_filtered (" args: ");
+	  }
 	else
-	  printf_filtered (" %d args: ", numargs);
+	  {
+	    numargs = FRAME_NUM_ARGS (fi);
+	    gdb_assert (numargs >= 0);
+	    if (numargs == 0)
+	      puts_filtered (" no args.");
+	    else if (numargs == 1)
+	      puts_filtered (" 1 arg: ");
+	    else
+	      printf_filtered (" %d args: ", numargs);
+	  }
 	print_frame_args (func, fi, numargs, gdb_stdout);
 	puts_filtered ("\n");
       }

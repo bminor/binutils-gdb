@@ -2331,6 +2331,31 @@ extern void set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch,
 #define DEPRECATED_SAVED_PC_AFTER_CALL(frame) (gdbarch_deprecated_saved_pc_after_call (current_gdbarch, frame))
 #endif
 
+#if defined (FRAME_NUM_ARGS)
+/* Legacy for systems yet to multi-arch FRAME_NUM_ARGS */
+#if !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (0)
+#endif
+
+extern int gdbarch_frame_num_args_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_NUM_ARGS_P)
+#error "Non multi-arch definition of FRAME_NUM_ARGS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (gdbarch_frame_num_args_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_NUM_ARGS)
+#define FRAME_NUM_ARGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_NUM_ARGS"), 0)
+#endif
+
 typedef int (gdbarch_frame_num_args_ftype) (struct frame_info *frame);
 extern int gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_num_args_ftype *frame_num_args);

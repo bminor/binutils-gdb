@@ -3002,10 +3002,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Helpers for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
-  /* We can't tell how many args there are
-     now that the C compiler delays popping them.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 

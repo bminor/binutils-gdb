@@ -1213,7 +1213,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, avr_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					  avr_convert_from_func_ptr_addr);

@@ -5971,7 +5971,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, mips_get_saved_register);

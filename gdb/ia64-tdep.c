@@ -2264,7 +2264,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, ia64_skip_prologue);
 
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch, ia64_frameless_function_invocation);
 
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, ia64_saved_pc_after_call);

@@ -929,8 +929,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);
-  /* OK to default this value to 'unknown'. */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);

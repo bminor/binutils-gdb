@@ -1069,7 +1069,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
 
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 

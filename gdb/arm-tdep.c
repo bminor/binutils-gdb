@@ -320,14 +320,6 @@ arm_frame_locals_address (struct frame_info *fi)
   return get_frame_base (fi);
 }
 
-/* The number of arguments being passed in the frame.  */
-static int
-arm_frame_num_args (struct frame_info *fi)
-{
-  /* We have no way of knowing.  */
-  return -1;
-}
-
 /* A typical Thumb prologue looks like this:
    push    {r7, lr}
    add     sp, sp, #-28
@@ -2946,7 +2938,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, arm_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_deprecated_pop_frame (gdbarch, arm_pop_frame);

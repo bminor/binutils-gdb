@@ -1537,7 +1537,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_alpha);
 
   /* Call info.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                     generic_frameless_function_invocation_not);
 

@@ -1820,8 +1820,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
-  /* We can't do this */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_store_struct_return (gdbarch, s390_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, s390_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, s390_store_return_value);

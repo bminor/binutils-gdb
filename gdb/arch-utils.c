@@ -232,13 +232,6 @@ default_double_format (struct gdbarch *gdbarch)
 /* Misc helper functions for targets. */
 
 int
-frame_num_args_unknown (struct frame_info *fi)
-{
-  return -1;
-}
-
-
-int
 generic_register_convertible_not (int num)
 {
   return 0;

@@ -1395,7 +1395,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 

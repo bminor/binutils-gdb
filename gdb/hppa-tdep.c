@@ -4886,14 +4886,6 @@ hppa_frame_locals_address (struct frame_info *fi)
   return get_frame_base (fi);
 }
 
-int
-hppa_frame_num_args (struct frame_info *frame)
-{
-  /* We can't tell how many args there are now that the C compiler delays
-     popping them.  */
-  return -1;
-}
-
 CORE_ADDR
 hppa_smash_text_address (CORE_ADDR addr)
 {
@@ -4982,7 +4974,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);

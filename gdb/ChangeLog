@@ -1,5 +1,40 @@
 2003-06-09  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (FRAME_NUM_ARGS): Change to function with predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.h (frame_num_args_unknown): Delete both declarations.
+	* arch-utils.c (frame_num_args_unknown): Delete function.
+	* stack.c (print_args_stub): Use FRAME_NUM_ARGS_P.
+	(frame_info): Use FRAME_NUM_ARGS_P.
+	* arm-tdep.c (arm_frame_num_args): Delete function.
+	(arm_gdbarch_init): Do not set frame_num_args.
+	* config/pa/tm-hppa64.h (FRAME_NUM_ARGS): Delete.
+	* hppa-tdep.c (hppa_frame_num_args): Delete function.
+	(hppa_gdbarch_init): Do not set frame_num_args.
+	* config/sparc/tm-sparc.h (FRAME_NUM_ARGS): Delete.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	frame_num_args to default frame_num_args_unknown.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+
+2003-06-09  Andrew Cagney  <cagney@redhat.com>
+
 	* printcmd.c (print_frame_nameless_args): Moved to "stack.c".
 	(print_frame_args): Moved to "stack.c".
 	* stack.c: Include "gdb_assert.h".

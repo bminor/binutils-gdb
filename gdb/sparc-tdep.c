@@ -3306,7 +3306,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
   set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);

@@ -727,9 +727,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_args_address, invalid_p == 0 */
   /* Skip verify of frame_locals_address, invalid_p == 0 */
   /* Skip verify of deprecated_saved_pc_after_call, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_num_args == 0))
-    fprintf_unfiltered (log, "\n\tframe_num_args");
+  /* Skip verify of frame_num_args, has predicate */
   /* Skip verify of stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
   /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
@@ -1765,6 +1763,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_LOCALS_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->frame_locals_address
                         /*FRAME_LOCALS_ADDRESS ()*/);
+#endif
+#ifdef FRAME_NUM_ARGS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_NUM_ARGS_P()",
+                      XSTRING (FRAME_NUM_ARGS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_NUM_ARGS_P() = %d\n",
+                      FRAME_NUM_ARGS_P ());
 #endif
 #ifdef FRAME_NUM_ARGS
   fprintf_unfiltered (file,
@@ -5069,6 +5076,13 @@ set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch,
                                             gdbarch_deprecated_saved_pc_after_call_ftype deprecated_saved_pc_after_call)
 {
   gdbarch->deprecated_saved_pc_after_call = deprecated_saved_pc_after_call;
+}
+
+int
+gdbarch_frame_num_args_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_num_args != 0;
 }
 
 int
