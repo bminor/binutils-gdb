@@ -1,3 +1,7 @@
+2001-03-25  Jim Blandy  <jimb@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Tweak indentation.
+
 2001-03-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From  Andrew Cagney  <ac131313@redhat.com>
