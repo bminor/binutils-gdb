@@ -59,6 +59,7 @@ Mitsubishi D30V					d30v-*-*
 OS/9000						i[34]86-*-os9k
 Fujitsu FR30					fr30-*-elf*
 Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
+Argonaut Risc Chip (ARC)			arc-*-*
 
 * OBSOLETE languages
 

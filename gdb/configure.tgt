@@ -43,7 +43,7 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-freebsd*)	gdb_target=fbsd ;;
 alpha*-*-netbsd*)	gdb_target=nbsd ;;
 
-arc-*-*)		gdb_target=arc ;;
+# OBSOLETE arc-*-*)		gdb_target=arc ;;
 
 arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux

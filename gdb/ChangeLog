@@ -1,3 +1,12 @@
+2002-08-06  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.tgt: Make arc-*-* obsolete.
+	* NEWS: Mention that arc-*-* has been identifed as obsolete.
+	* MAINTAINERS: Make arc-elf obsolete.
+	* arc-tdep.c: Make file obsolete.
+	* config/arc/arc.mt: Ditto.
+	* config/arc/tm-arc.h: Ditto.
+
 2002-08-05  Theodore A. Roth  <troth@verinet.com>
 
 	* gdb/avr-tdep.c(avr_skip_prologue): Fix to return the correct pc.
