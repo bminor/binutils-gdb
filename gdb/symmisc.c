@@ -175,7 +175,7 @@ dump_objfile (objfile)
 	{
 	  printf_filtered ("%s at ",
 			   psymtab -> filename);
-	  gdb_print_address (psymtab);
+	  gdb_print_address (psymtab, gdb_stdout);
 	  printf_filtered (", ");
 	  if (psymtab -> objfile != objfile)
 	    {
@@ -194,7 +194,7 @@ dump_objfile (objfile)
 	   symtab = symtab->next)
 	{
 	  printf_filtered ("%s at ", symtab -> filename);
-	  gdb_print_address (symtab);
+	  gdb_print_address (symtab, gdb_stdout);
 	  printf_filtered (", ");
 	  if (symtab -> objfile != objfile)
 	    {
@@ -403,7 +403,7 @@ dump_symtab (objfile, symtab, outfile)
 	}
       if (BLOCK_GCC_COMPILED(b))
 	fprintf_filtered (outfile, " gcc%d compiled", BLOCK_GCC_COMPILED(b));
-      fputc_filtered ('\n', outfile);
+      fprintf_filtered ('\n', outfile);
       blen = BLOCK_NSYMS (b);
       for (j = 0; j < blen; j++)
 	{

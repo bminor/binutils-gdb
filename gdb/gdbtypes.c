@@ -1224,7 +1224,8 @@ dump_fn_fieldlists (type, spaces)
 	  printfi_filtered (spaces + 4, "[%d] physname '%s' (",
 			    overload_idx,
 			    TYPE_FN_FIELD_PHYSNAME (f, overload_idx));
-	  gdb_print_address (TYPE_FN_FIELD_PHYSNAME (f, overload_idx));
+	  gdb_print_address (TYPE_FN_FIELD_PHYSNAME (f, overload_idx),
+			     gdb_stdout);
 	  printf_filtered (")\n");
 	  printfi_filtered (spaces + 8, "type ");
 	  gdb_print_address (TYPE_FN_FIELD_TYPE (f, overload_idx), gdb_stdout);
@@ -1427,12 +1428,12 @@ recursive_dump_type (type, spaces)
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", TYPE_NFIELDS (type));
-  gdb_print_address (TYPE_FIELDS (type));
+  gdb_print_address (TYPE_FIELDS (type), gdb_stdout);
   puts_filtered ("\n");
   for (idx = 0; idx < TYPE_NFIELDS (type); idx++)
     {
       printfi_filtered (spaces + 2,
-			"[%d] bitpos %d bitsize %d type "
+			"[%d] bitpos %d bitsize %d type ",
 			idx, TYPE_FIELD_BITPOS (type, idx),
 			TYPE_FIELD_BITSIZE (type, idx));
       gdb_print_address (TYPE_FIELD_TYPE (type, idx), gdb_stdout);
@@ -1440,7 +1441,7 @@ recursive_dump_type (type, spaces)
 		       TYPE_FIELD_NAME (type, idx) != NULL
 		       ? TYPE_FIELD_NAME (type, idx)
 		       : "<NULL>");
-      gdb_print_address (TYPE_FIELD_NAME (type, idx));
+      gdb_print_address (TYPE_FIELD_NAME (type, idx), gdb_stdout);
       printf_filtered (")\n");
       if (TYPE_FIELD_TYPE (type, idx) != NULL)
 	{
@@ -1460,14 +1461,14 @@ recursive_dump_type (type, spaces)
       case TYPE_CODE_METHOD:
       case TYPE_CODE_FUNC:
 	printfi_filtered (spaces, "arg_types ");
-	gdb_print_address (TYPE_ARG_TYPES (type));
+	gdb_print_address (TYPE_ARG_TYPES (type), gdb_stdout);
 	puts_filtered ("\n");
 	print_arg_types (TYPE_ARG_TYPES (type), spaces);
 	break;
 
       case TYPE_CODE_STRUCT:
 	printfi_filtered (spaces, "cplus_stuff ");
-	gdb_print_address (TYPE_CPLUS_SPECIFIC (type));
+	gdb_print_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);
 	puts_filtered ("\n");
 	print_cplus_stuff (type, spaces);
 	break;
@@ -1477,7 +1478,7 @@ recursive_dump_type (type, spaces)
 	   the value.  Pick cplus_struct_type, even though we know it isn't
 	   any particular one. */
 	printfi_filtered (spaces, "type_specific ");
-	gdb_print_address (TYPE_CPLUS_SPECIFIC (type));
+	gdb_print_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);
 	if (TYPE_CPLUS_SPECIFIC (type) != NULL)
 	  {
 	    printf_filtered (" (unknown data form)");

@@ -287,7 +287,7 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  {
-	    print_address_numeric (fi->pc);
+	    print_address_numeric (fi->pc, gdb_stdout);
 	    printf_filtered (" in ");
 	  }
       fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
@@ -497,8 +497,7 @@ frame_info (addr_exp, from_tty)
 
   if (!addr_exp && selected_frame_level >= 0)
     {
-      printf_filtered ("Stack level %d, frame at "
-		       selected_frame_level);
+      printf_filtered ("Stack level %d, frame at ", selected_frame_level);
       print_address_numeric (FRAME_FP(frame), gdb_stdout);
       printf_filtered (":\n");
     }

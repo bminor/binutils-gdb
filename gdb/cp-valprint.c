@@ -353,6 +353,8 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
 
   for (i = 0; i < n_baseclasses; i++)
     {
+      /* FIXME-32x64--assumes that a target pointer can fit in a char *.
+	 Fix it by nuking baseclass_addr.  */
       char *baddr;
       int err;
       char *basename;
@@ -394,7 +396,7 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       if (err != 0)
 	{
 	  fprintf_filtered (stream, "<invalid address ");
-	  print_address_numeric (baddr, stream);
+	  print_address_numeric ((CORE_ADDR) baddr, stream);
 	  fprintf_filtered (stream, ">");
 	}
       else
