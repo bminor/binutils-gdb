@@ -773,6 +773,29 @@ structured_type(type)
 }
 #endif
 
+struct type *
+lang_bool_type ()
+{
+  struct symbol *sym;
+  struct type *type;
+  switch(current_language->la_language)
+    {
+    case language_chill:
+      return builtin_type_chill_bool;
+    case language_cplus:
+      sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);
+      if (sym)
+	{
+	  struct type *type = SYMBOL_TYPE (sym);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	    return type;
+	}
+      /* ... else fall through ... */
+    default:
+      return builtin_type_int;
+    }
+}
+
 /* This page contains functions that return info about
    (struct value) values used in GDB. */
 

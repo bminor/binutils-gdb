@@ -1258,7 +1258,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (tem ? EVAL_SKIP : noside));
-	  return value_from_longest (builtin_type_int,
+	  return value_from_longest (LA_BOOL_TYPE,
 				  (LONGEST) (!tem && !value_logical_not (arg2)));
 	}
 
@@ -1284,7 +1284,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (!tem ? EVAL_SKIP : noside));
-	  return value_from_longest (builtin_type_int,
+	  return value_from_longest (LA_BOOL_TYPE,
 				  (LONGEST) (!tem || !value_logical_not (arg2)));
 	}
 
@@ -1300,7 +1300,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	{
 	  tem = value_equal (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
 	}
 
     case BINOP_NOTEQUAL:
@@ -1315,7 +1315,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	{
 	  tem = value_equal (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) ! tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) ! tem);
 	}
 
     case BINOP_LESS:
@@ -1330,7 +1330,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	{
 	  tem = value_less (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
 	}
 
     case BINOP_GTR:
@@ -1345,7 +1345,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	{
 	  tem = value_less (arg2, arg1);
-	  return value_from_longest (builtin_type_int, (LONGEST) tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
 	}
 
     case BINOP_GEQ:
@@ -1360,7 +1360,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else
 	{
 	  tem = value_less (arg2, arg1) || value_equal (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
 	}
 
     case BINOP_LEQ:
@@ -1375,7 +1375,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       else 
 	{
 	  tem = value_less (arg1, arg2) || value_equal (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) tem);
+	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
 	}
 
     case BINOP_REPEAT:

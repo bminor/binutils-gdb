@@ -407,6 +407,11 @@ range_error PARAMS ((char *, ...))
 extern int
 value_true PARAMS ((struct value *));
 
+extern struct type * lang_bool_type PARAMS ((void));
+
+/* The type used for Boolean values in teh current language. */
+#define LA_BOOL_TYPE lang_bool_type ()
+
 /* Misc:  The string representing a particular enum language.  */
 
 extern const struct language_defn *

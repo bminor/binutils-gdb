@@ -1,5 +1,11 @@
 Thu Nov 30 23:54:17 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* language.c (lang_bool_type), language.h:  New function.
+	* language.h (LA_BOOL_TYPE):  New macro.
+	* eval.c (evaluate_subexp_standard)  Use LA_BOOL_TYPE instead
+	of builtin_type_int where appropriate,
+	* valarith.c (value_subscript):  Likewise.
+
 	* valops.c (value_slice):  Implement (value) bitstring slices.
 	* valprint.c (val_print):  If TYPE_LENGTH is zero, don't automatically
 	print "<incomplete type>" - Chill has zero-length (string) types.
