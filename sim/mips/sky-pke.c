@@ -468,7 +468,7 @@ pke_io_write_buffer(device *me_,
       fqw = & me->fifo[me->fifo_num_elements];
       memcpy((void*) fqw->data, me->fifo_qw_in_progress, sizeof(quadword));
       sim_read(CPU_STATE(cpu),
-	       (SIM_ADDR) (me->pke_number == 0 ? DMA_D0_SRCADDR : DMA_D1_SRCADDR),
+	       (SIM_ADDR) (me->pke_number == 0 ? DMA_D0_MADR : DMA_D1_MADR),
 	       (void*) & fqw->source_address,
 	       sizeof(address_word));
       sim_read(CPU_STATE(cpu),
