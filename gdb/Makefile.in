@@ -156,6 +156,10 @@ OPCODES = ./../opcodes${subdir}/libopcodes.a
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
+# If you have the Cygnus libraries installed,
+# you can use 'CLIBS=${INSTALLED_LIBS}' 'CDEPS='
+INSTALLED_LIBS=-lbfd -lreadline ${TERMCAP} -lopcodes -lmmalloc \
+	-liberty ${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
 CLIBS = ${BFD_LIB} ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} \
 	${LIBIBERTY} ${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
