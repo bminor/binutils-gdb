@@ -1,3 +1,7 @@
+Wed Mar  4 16:50:18 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gdbtk.c (gdb_listfiles): Fix thinko in last change.
+
 Wed Mar  4 15:34:49 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* gdbtk.c (gdb_listfiles): Allocate space for 'files' dynamically.

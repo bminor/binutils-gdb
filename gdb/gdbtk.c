@@ -1223,7 +1223,7 @@ gdb_listfiles (clientData, interp, objc, objv)
   Tcl_Obj *mylist;
   
   files_size = 1000;
-  files = (char **) xmalloc (sizeof (char **) * files_size);
+  files = (char **) xmalloc (sizeof (char *) * files_size);
 
   if (objc > 2)
     {
@@ -1240,7 +1240,7 @@ gdb_listfiles (clientData, interp, objc, objv)
       if (numfiles == files_size)
         {
            files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char **) * files_size);
+           files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
       if (len == 0)
 	{
@@ -1258,7 +1258,7 @@ gdb_listfiles (clientData, interp, objc, objv)
       if (numfiles == files_size)
         {
            files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char **) * files_size);
+           files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
       if (len == 0)
 	{
