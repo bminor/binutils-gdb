@@ -1,3 +1,7 @@
+Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
+
+	* doc/gdbint.texinfo:  Improve doc of GDB config macros.
+
 Wed Sep  9 16:52:06 1992  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Remove Bothner's changes for C++ nested types.
