@@ -1,3 +1,7 @@
+Mon Sep 22 11:46:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Specify NONSTRICT_ALIGNMENT as the default.
