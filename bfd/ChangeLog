@@ -1,5 +1,13 @@
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* bout.c (b_out_write_object_contents): Don't use sizeof on host
+	structs to size on-disk structures.
+	(b_out_set_section_contents): Size the external struct, not the
+	internal one for on-disk size.
+	(b_out_sizeof_headers): Likewise.
+
+2005-03-01  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_size_stubs): Override defined dot-sym
 	entry points with the func descriptor as well as undefweak.
 

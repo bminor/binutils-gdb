@@ -297,12 +297,10 @@ b_out_write_object_contents (abfd)
   exec_hdr (abfd)->a_text = obj_textsec (abfd)->size;
   exec_hdr (abfd)->a_data = obj_datasec (abfd)->size;
   exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->size;
-  exec_hdr (abfd)->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
+  exec_hdr (abfd)->a_syms = bfd_get_symcount (abfd) * 12;
   exec_hdr (abfd)->a_entry = bfd_get_start_address (abfd);
-  exec_hdr (abfd)->a_trsize = ((obj_textsec (abfd)->reloc_count) *
-                               sizeof (struct relocation_info));
-  exec_hdr (abfd)->a_drsize = ((obj_datasec (abfd)->reloc_count) *
-                               sizeof (struct relocation_info));
+  exec_hdr (abfd)->a_trsize = (obj_textsec (abfd)->reloc_count) * 8;
+  exec_hdr (abfd)->a_drsize = (obj_datasec (abfd)->reloc_count) * 8;
 
   exec_hdr (abfd)->a_talign = obj_textsec (abfd)->alignment_power;
   exec_hdr (abfd)->a_dalign = obj_datasec (abfd)->alignment_power;
@@ -993,7 +991,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
       if (! aout_32_make_sections (abfd))
 	return FALSE;
 
-      obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
+      obj_textsec (abfd)->filepos = sizeof (struct external_exec);
       obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos
 	+  obj_textsec (abfd)->size;
     }
@@ -1044,7 +1042,7 @@ b_out_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      bfd_boolean ignore ATTRIBUTE_UNUSED;
 {
-  return sizeof (struct internal_exec);
+  return sizeof (struct external_exec);
 }
 
 
