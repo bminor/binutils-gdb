@@ -627,7 +627,8 @@ handle_exception (frame)
 {
   int addr, length;
   char *ptr;
-  static int killed = 0;
+  static int thread_killed = 0;
+  static int thread_started = 0;
   static struct DBG_LoadDefinitionStructure *ldinfo = 0;
   static unsigned char first_insn[BREAKPOINT_SIZE]; /* The first instruction in the program.  */
 
@@ -661,8 +662,12 @@ handle_exception (frame)
       flush_i_cache ();
       return RETURN_TO_PROGRAM;
 
+    case START_THREAD_EVENT:
+      thread_started = 1;
+      return RETURN_TO_PROGRAM;
+
     case TERMINATE_NLM_EVENT:
-      if (!killed) 
+      if (!thread_killed) 
 	{
 	  /* NetWare processes don't have an exit status so we
              generate our own  */
@@ -729,6 +734,14 @@ handle_exception (frame)
       /* Random mem fault, report it */
       do_status (remcomOutBuffer, frame);
       break;
+    }
+
+  /* We point the PC at _exit() and continue to kill the NLM, but that
+     won't work until it's thread has been started. */
+  if (thread_started && thread_killed) 
+    {
+      frame->ExceptionPC = &_exit;
+      return RETURN_TO_PROGRAM;
     }
 
   /* FIXME: How do we know that this exception has anything to do with
@@ -850,8 +863,9 @@ handle_exception (frame)
              at the start of _exit() and continue, while noting that
              we've killed the process.  */
 
-	  killed = 1;
-	  frame->ExceptionPC = &_exit;
+	  thread_killed = 1;
+	  if (thread_started)
+	    frame->ExceptionPC = &_exit;
 	  return RETURN_TO_PROGRAM;
 
 	case 'q':		/* Query message */
