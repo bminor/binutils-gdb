@@ -32,6 +32,7 @@ static int itanium = 0;
 static void
 gld${EMULATION_NAME}_after_parse (void)
 {
+  link_info.need_relax_finalize = TRUE;
   bfd_elf${ELFSIZE}_ia64_after_parse (itanium);
 }
 

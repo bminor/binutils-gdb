@@ -1,3 +1,10 @@
+2003-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Use the
+	need_relax_finalize field in link_info instead of
+	relax_finalizing to check if the relax finalize pass is being
+	done.
+
 2003-12-04  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* coff-arm.c (coff_arm_relocate_section, bfd_arm_process_before_allocation):

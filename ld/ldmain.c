@@ -321,7 +321,7 @@ main (int argc, char **argv)
   link_info.spare_dynamic_tags = 5;
   link_info.flags = 0;
   link_info.flags_1 = 0;
-  link_info.relax_finalizing = FALSE;
+  link_info.need_relax_finalize = FALSE;
 
   ldfile_add_arch ("");
 

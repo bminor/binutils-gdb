@@ -4262,9 +4262,9 @@ lang_process (void)
 
 	  /* If the normal relax is done and the relax finalize pass
 	     is not performed yet, we perform another relax pass.  */
-	  if (!relax_again && !link_info.relax_finalizing)
+	  if (!relax_again && link_info.need_relax_finalize)
 	    {
-	      link_info.relax_finalizing = TRUE;
+	      link_info.need_relax_finalize = FALSE;
 	      relax_again = TRUE;
 	    }
 	}

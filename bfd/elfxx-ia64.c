@@ -714,7 +714,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
      the relax finalize pass.  */
   if ((sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
-      || (link_info->relax_finalizing
+      || (!link_info->need_relax_finalize
 	  && sec->need_finalize_relax == 0))
     return TRUE;
 
@@ -765,14 +765,14 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	case R_IA64_PCREL21BI:
 	case R_IA64_PCREL21M:
 	case R_IA64_PCREL21F:
-	  if (link_info->relax_finalizing)
+	  if (!link_info->need_relax_finalize)
 	    continue;
 	  is_branch = TRUE;
 	  break;
 
 	case R_IA64_LTOFF22X:
 	case R_IA64_LDXMOV:
-	  if (!link_info->relax_finalizing)
+	  if (link_info->need_relax_finalize)
 	    {
 	      sec->need_finalize_relax = 1;
 	      continue;
@@ -1073,7 +1073,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       /* ??? Resize .rela.got too.  */
     }
 
-  if (link_info->relax_finalizing)
+  if (!link_info->need_relax_finalize)
     sec->need_finalize_relax = 0;
 
   *again = changed_contents || changed_relocs;

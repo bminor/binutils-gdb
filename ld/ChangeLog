@@ -1,3 +1,12 @@
+2003-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse): Set
+	link_info.need_relax_finalize to TRUE.
+
+	* ldlang.c (lang_process): Use link_info.need_relax_finalize
+	instead of link_info.relax_finalizing.
+	* ldmain.c (main): Likewise.
+	
 2003-12-04  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* armpe.sh (RELOCATEABLE_OUTPUT_FORMAT): Define.
