@@ -1,3 +1,7 @@
+Wed Jun 26 13:21:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c: Add 68ec060 as a synonym for 68060.
+
 Wed Jun 26 16:23:08 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c: Added cop_interlocks, to avoid NOP insertion
