@@ -921,6 +921,12 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+
+                case 'J':
+                  fput_const (extract_14 (insn), info);
+                  break;
+
+
 		case '#':
 		  {
 		    int sign = GET_FIELD (insn, 31, 31);
@@ -936,6 +942,7 @@ print_insn_hppa (memaddr, info)
 		    fput_const (disp, info);
 		    break;
 		  }
+                case 'K':
 		case 'd':
 		  {
 		    int sign = GET_FIELD (insn, 31, 31);
