@@ -5223,8 +5223,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_P2)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_P;
+	    /* Ignore invalid operands; they generate errors elsewhere.  */
 	    if (regno >= 64)
-	      abort ();
+	      return 0;
 	    this_group->p_reg_set[regno] = 1;
 	  }
     }
@@ -5239,8 +5240,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_R3)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_GR;
+	    /* Ignore invalid operands; they generate errors elsewhere.  */
 	    if (regno >= 128)
-	      abort ();
+	      return 0;
 	    if (strncmp (idesc->name, "add", 3) != 0
 		&& strncmp (idesc->name, "sub", 3) != 0
 		&& strncmp (idesc->name, "shladd", 6) != 0
@@ -5270,8 +5272,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	  || idesc->operands[i] == IA64_OPND_MR3)
 	{
 	  int regno = slot->opnd[i].X_add_number - REG_GR;
+	  /* Ignore invalid operands; they generate errors elsewhere.  */
 	  if (regno >= 128)
-	    abort ();
+	    return 0;
 	  if (idesc->operands[i] == IA64_OPND_R3)
 	    {
 	      if (strcmp (idesc->name, "fc") != 0
