@@ -88,7 +88,7 @@ static int regmap[] =
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
 #define GETREGS_SUPPLIES(regno) \
-  (0 <= (regno) && (regno) <= 15)
+  ((0 <= (regno) && (regno) <= 15) || (regno) == I386_LINUX_ORIG_EAX_REGNUM)
 #define GETFPREGS_SUPPLIES(regno) \
   (FP0_REGNUM <= (regno) && (regno) <= LAST_FPU_CTRL_REGNUM)
 #define GETFPXREGS_SUPPLIES(regno) \
@@ -306,6 +306,8 @@ supply_gregset (elf_gregset_t *gregsetp)
 
   for (i = 0; i < NUM_GREGS; i++)
     supply_register (i, (char *) (regp + regmap[i]));
+
+  supply_register (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -321,6 +323,9 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   for (i = 0; i < NUM_GREGS; i++)
     if ((regno == -1 || regno == i))
       *(regp + regmap[i]) = *(elf_greg_t *) &registers[REGISTER_BYTE (i)];
+
+  if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
+    read_register_gen (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
 }
 
 #ifdef HAVE_PTRACE_GETREGS

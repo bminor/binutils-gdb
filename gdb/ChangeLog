@@ -1,5 +1,8 @@
 2001-11-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c (GETREGS_SUPPLIES, supply_gregset,
+	fill_gregset): Add support for "orig_eax" register.
+
 	Add support for "orig_eax" pseudo register on Linux/x86.
 	* i386-linux-tdep.c: Include "inferior.h".
 	(i386_linux_register_name, i386_linux_register_byte,
