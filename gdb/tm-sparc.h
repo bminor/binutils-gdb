@@ -295,10 +295,6 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* If you're not compiling this on a sun, you'll have to get a copy
-   of <sun4/reg.h> (also known as <machine/reg.h>).  */
-#include <sun4/reg.h>
-
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer. */
 

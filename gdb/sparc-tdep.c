@@ -1,7 +1,5 @@
-/* Machine-dependent code which would otherwise be in inflow.c and core.c,
-   for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
-   This code is for the sparc cpu.
+/* Target-dependent code for the SPARC for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,9 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "obstack.h"
@@ -38,7 +34,7 @@ extern int stop_after_trap;
 
 typedef enum
 {
-  Error, not_branch, bicc, bicca, ba, baa, ticc, ta,
+  Error, not_branch, bicc, bicca, ba, baa, ticc, ta
 } branch_type;
 
 /* Simulate single-step ptrace call for sun4.  Code written by Gary
@@ -67,7 +63,8 @@ int one_stepped;
    set up a simulated single-step, we undo our damage.  */
 
 void
-single_step ()
+single_step (pid)
+     int pid; /* ignored */
 {
   branch_type br, isannulled();
   CORE_ADDR pc;
@@ -122,18 +119,23 @@ single_step ()
     }
 }
 
+#define	FRAME_SAVED_L0	0		/* Byte offset from SP */
+#define	FRAME_SAVED_I0	32		/* Byte offset from SP */
+
 CORE_ADDR
 sparc_frame_chain (thisframe)
      FRAME thisframe;
 {
   CORE_ADDR retval;
   int err;
-  err = target_read_memory
-	      ((CORE_ADDR)&(((struct rwindow *)(thisframe->frame))->rw_in[6]),
-	       &retval,
-	       sizeof (CORE_ADDR));
+  CORE_ADDR addr;
+
+  addr = thisframe->frame + FRAME_SAVED_I0 +
+	 REGISTER_RAW_SIZE(FP_REGNUM) * (FP_REGNUM - I0_REGNUM);
+  err = target_read_memory (addr, (char *) &retval, sizeof (CORE_ADDR));
   if (err)
     return 0;
+  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
   return retval;
 }
 
@@ -141,33 +143,30 @@ CORE_ADDR
 sparc_extract_struct_value_address (regbuf)
      char regbuf[REGISTER_BYTES];
 {
-  CORE_ADDR retval;
-  read_memory (((int *)(regbuf))[SP_REGNUM]+(16*4),
-	       &retval,
-	       sizeof (CORE_ADDR));
-  return retval;
+  /* FIXME, handle byte swapping */
+  return read_memory_integer (((int *)(regbuf))[SP_REGNUM]+(16*4), 
+	       		      sizeof (CORE_ADDR));
 }
 
-/*
- * Find the pc saved in frame FRAME.  
- */
+/* Find the pc saved in frame FRAME.  */
+
 CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
   CORE_ADDR prev_pc;
 
-  /* If it's at the bottom, the return value's stored in i7/rp */
-  if (get_current_frame () == frame)
-    read_memory ((CORE_ADDR)&((struct rwindow *)
-			      (read_register (SP_REGNUM)))->rw_in[7],
-		 &prev_pc, sizeof (CORE_ADDR));
-  else
-    /* Wouldn't this always work?  */
-    read_memory ((CORE_ADDR)&((struct rwindow *)(frame->bottom))->rw_in[7],
-		 &prev_pc,
-		 sizeof (CORE_ADDR));
-  
+  if (get_current_frame () == frame)  /* FIXME, debug check. Remove >=gdb-4.6 */
+    {
+      if (read_register (SP_REGNUM) != frame->bottom) abort();
+    }
+
+  read_memory ((CORE_ADDR) (frame->bottom + FRAME_SAVED_I0 +
+		    REGISTER_RAW_SIZE(I7_REGNUM) * (I7_REGNUM - I0_REGNUM)),
+	       (char *) &prev_pc,
+	       sizeof (CORE_ADDR));
+
+  SWAP_TARGET_AND_HOST (&prev_pc, sizeof (prev_pc));
   return PC_ADJUST (prev_pc);
 }
 
@@ -638,7 +637,30 @@ sparc_pc_adjust(pc)
    This information is not currently used by GDB, since no current SPARC
    implementations support extended float.  */
 
-const struct ext_format ext_format_sparc[] = {
+const struct ext_format ext_format_sparc = {
 /* tot sbyte smask expbyte manbyte */
- { 16, 0,    0x80, 0,1,	   4,8	},		/* sparc */
+   16, 0,    0x80, 0,1,	   4,8,		/* sparc */
 };
+
+/* Figure out where the longjmp will land.  We expect that we have just entered
+   longjmp and haven't yet setup the stack frame, so the args are still in the
+   output regs.  %o0 (O0_REGNUM) points at the jmp_buf structure from which we
+   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR jb_addr;
+
+  jb_addr = read_register(O0_REGNUM);
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
+}

@@ -22,9 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (LANGUAGE_H)
 #define LANGUAGE_H 1
 
-#ifdef __STDC__		/* Forward defs for prototypes */
+#ifdef __STDC__		/* Forward decls for prototypes */
 struct value;
-enum exp_opcode;
+/* enum exp_opcode;	ANSI's `wisdom' didn't include forward enum decls. */
 #endif
 
 /* This used to be included to configure GDB for one or more specific
