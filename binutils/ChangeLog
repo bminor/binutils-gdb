@@ -1,3 +1,7 @@
+2002-12-04  Aldy Hernandez  <aldyh@redhat.com>
+
+	* MAINTAINERS: Add self.
+
 2002-11-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* addr2line.c, ar.c, arsup.c, binemul.c, binemul.h, bucomm.c, bucomm.h,
