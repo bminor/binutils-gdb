@@ -1,3 +1,7 @@
+Tue Aug 25 15:11:08 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* z8k.c, z8k.h, z8k.mt: z8000 support stuff
+
 Mon Aug 24 12:45:12 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-m68k.c: use TARGET_CPU to choose default cpu type.

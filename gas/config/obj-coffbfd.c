@@ -1619,7 +1619,8 @@ static void DEFUN_VOID(remove_subsegs)
     }
 }
 
-
+int machine;
+int coff_flags;
 extern void DEFUN_VOID(write_object_file)
 {
     int i;
@@ -1638,7 +1639,7 @@ extern void DEFUN_VOID(write_object_file)
 	    exit(42);
 	}
     bfd_set_format(abfd, bfd_object);
-    bfd_set_arch_mach(abfd, BFD_ARCH, 0);
+    bfd_set_arch_mach(abfd, BFD_ARCH, machine);
 
 
 
@@ -1724,7 +1725,7 @@ extern void DEFUN_VOID(write_object_file)
 
     filehdr.f_magic = COFF_MAGIC;
     filehdr.f_timdat = time(0);
-    filehdr.f_flags = COFF_FLAGS ;
+    filehdr.f_flags = COFF_FLAGS | coff_flags;
     
     if (!had_lineno) 
     {

@@ -33,8 +33,10 @@
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
 #undef internal_lineno
-
-#if defined(TC_H8300)
+#if defined(TC_Z8K)
+#include "coff/z8k.h"
+#define TARGET_FORMAT "coff-z8k"
+#elif defined(TC_H8300)
 #include "coff/h8300.h"
 #define TARGET_FORMAT "coff-h8300"
 #elif defined(TC_A29K)

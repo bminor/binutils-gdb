@@ -108,6 +108,8 @@ tc-sparc.c
 tc-sparc.h
 tc-vax.c
 tc-vax.h
+tc-z8k.c
+tc-z8k.h
 te-dpx2.h
 te-generic.h
 te-i386aix.h
@@ -117,6 +119,10 @@ te-sun3.h
 te-sysv32.h
 vax-inst.h
 vms
+<<<<<<< .Sanitize
+z8k.mt
+=======
+>>>>>>> 1.23
 
 
 
@@ -138,7 +144,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.23  1992/07/23 18:23:44  gumby
+# Revision 1.24  1992/08/25 22:12:38  sac
+# Support for the Z8k
+#
+# Revision 1.23  1992/07/23  18:23:44  gumby
 # Keep OSE support
 #
 # Revision 1.22  1992/05/07  00:24:39  sac
