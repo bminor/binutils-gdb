@@ -1,3 +1,8 @@
+2004-08-10  David Carlton  <carlton@bactrian.org>
+
+	* MAINTAINERS: Remove David Carlton from c++ testsuite
+	maintainers.
+
 2004-08-10  Jerome Guitton  <guitton@gnat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Make sure to
