@@ -349,7 +349,7 @@ tuiShowFrameInfo (struct frame_info *fi)
       int sourceAlreadyDisplayed;
       struct symtab_and_line sal;
 
-      find_frame_sap (fi, &sal);
+      find_frame_sal (fi, &sal);
 
       sourceAlreadyDisplayed = sal.symtab != 0
         && tuiSourceIsDisplayed (sal.symtab->filename);
