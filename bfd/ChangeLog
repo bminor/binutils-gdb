@@ -1,5 +1,7 @@
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 	
+	* config.bfd (mips-dec-netbsd*): Delete alias for mips*el-*-netbsd*.
+
 	* config.bfd (arm-*-netbsdelf*): Add target.
 	* configure.in: Include netbsd-core.lo for native arm-*-netbsd*.
 	* configure: Regenerate.
