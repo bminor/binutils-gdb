@@ -36,8 +36,6 @@
 #include "demangle.h"
 #include "bucomm.h"
 
-extern char *program_version;
-
 static boolean with_functions;	/* -f, show function names.  */
 static boolean do_demangle;	/* -C, demangle names.  */
 static boolean base_names;	/* -s, strip directory names.  */

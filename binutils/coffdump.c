@@ -30,8 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coffgrok.h"
 #include "bucomm.h"
 
-#define PROGRAM_VERSION "1.0"
-
 static int atnl;
 
 static void tab PARAMS ((int));
@@ -512,7 +510,7 @@ main (ac, av)
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'V':
-	  printf (_("GNU %s version %s\n"), program_name, PROGRAM_VERSION);
+	  print_version ("coffdump");
 	  exit (0);
 	  /*NOTREACHED*/
 	case 0:

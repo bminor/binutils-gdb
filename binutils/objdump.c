@@ -2733,7 +2733,7 @@ display_target_tables ()
 static void
 display_info ()
 {
-  printf (_("BFD header file version %s\n"), BFD_VERSION);
+  printf (_("BFD header file version %s\n"), BFD_VERSION_STRING);
   display_target_list ();
   display_target_tables ();
 }

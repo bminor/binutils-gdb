@@ -36,7 +36,6 @@
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 
-#define PROGRAM_VERSION "1.5"
 /*#define FOOP1 1 */
 
 static int addrsize;
@@ -1993,7 +1992,7 @@ main (ac, av)
 	  show_help ();
 	  /*NOTREACHED */
 	case 'V':
-	  printf (_("GNU %s version %s\n"), program_name, PROGRAM_VERSION);
+	  print_version ("srconv");
 	  exit (0);
 	  /*NOTREACHED */
 	case 0:

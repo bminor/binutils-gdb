@@ -33,8 +33,6 @@
 #include <getopt.h>
 #include "sysroff.h"
 
-#define PROGRAM_VERSION "1.0"
-
 static int dump = 1;
 static int segmented_p;
 static int code;
@@ -778,7 +776,7 @@ main (ac, av)
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'V':
-	  printf (_("GNU %s version %s\n"), program_name, PROGRAM_VERSION);
+	  print_version ("sysdump");
 	  exit (0);
 	  /*NOTREACHED*/
 	case 0:
