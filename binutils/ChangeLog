@@ -1,3 +1,27 @@
+Thu Jun 10 17:29:21 1993  Per Bothner  (bothner@cygnus.com)
+
+	* objcopy.c (copy_object):  Fix bad size passed to xmalloc().
+
+Mon Jun  7 12:41:12 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (INCLUDES):  Add -I../bfd for sysdep.h and bfd.h.
+	* configure.in:  No longer need to configure to get sysdep.h.
+	* objcopy.c (copy_object):  Fix symbol table handling.
+
+Fri Jun  4 17:20:03 1993  Per Bothner  (bothner@cygnus.com)
+
+	* objcopy.c (filter_symbols):  Cannot filter the symbols
+	in place, because that confuses the relocs, so take separate
+	parameter for output array.
+	* objcopy.c (sympp):  Make two variables: isympp and osympp.
+	* objcopy.c (copy_object):  Allocate separate array (osympp)
+	for filtered symbols.
+
+Fri Jun  4 10:51:44 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: change recursion test to presence of a configured
+	testsuite directory
+
 Thu Jun  3 14:05:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (underscore.c): Hack the backquoted command so it
