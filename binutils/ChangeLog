@@ -1,3 +1,13 @@
+Thu Dec  8 14:45:50 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* objcopy.c (add_strip_symbol): Cast return value of xmalloc.
+
+Wed Nov 30 11:05:43 1994  Ian Lance Taylor  <ian@rtl.cygnus.com>
+
+	* ar.c (replace_members): Pass current->filename to normalize when
+	checking for duplicates, because the filename of a newly added
+	file will not have been normalized yet.
+
 Thu Nov 17 15:00:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ar.c (main): Don't call do_quick_append if any of the archive

@@ -28,6 +28,10 @@ static void setup_section PARAMS ((bfd *, asection *, PTR));
 static void copy_section PARAMS ((bfd *, asection *, PTR));
 static void get_sections PARAMS ((bfd *, asection *, PTR));
 static int compare_section_vma PARAMS ((const PTR, const PTR));
+static void add_strip_symbol PARAMS ((const char *));
+static int is_strip_symbol PARAMS ((const char *));
+static unsigned int filter_symbols
+  PARAMS ((bfd *, asymbol **, asymbol **, long));
 static void mark_symbols_used_in_relocations PARAMS ((bfd *, asection *, PTR));
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
@@ -116,6 +120,7 @@ static struct option strip_options[] =
   {"remove-section", required_argument, 0, 'R'},
   {"strip-all", no_argument, 0, 's'},
   {"strip-debug", no_argument, 0, 'S'},
+  {"strip-symbol", required_argument, 0, 'N'},
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
@@ -158,6 +163,7 @@ static struct option copy_options[] =
   {"set-start", required_argument, 0, OPTION_SET_START},
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
+  {"strip-symbol", required_argument, 0, 'N'},
   {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, 'V'},
@@ -188,6 +194,7 @@ Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [--set-start=val] [--adjust-start=incr] [--adjust-vma=incr]\n\
        [--adjust-section-vma=section{=,+,-}val] [--adjust-warnings]\n\
        [--no-adjust-warnings] [--verbose] [--version] [--help]\n\
+       [--strip-symbol symbol] [-N symbol]\n\
        in-file [out-file]\n",
 	   program_name);
   exit (status);
@@ -202,6 +209,7 @@ strip_usage (stream, status)
 Usage: %s [-vVsSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
+       [--strip-symbol symbol] [-N symbol]\n\
        [--remove-section=section] [--verbose] [--version] [--help] file...\n",
 	   program_name);
   exit (status);
@@ -256,6 +264,44 @@ make_tempname (filename)
   return tmpname;
 }
 
+/* Make a list of symbols to explicitly strip out. A linked list is 
+   good enough for a small number from the command line, but this will
+   slow things down a lot if many symbols are being deleted. */
+
+struct symlist
+{
+  const char *name;
+  struct symlist *next;
+};
+
+static struct symlist *strip_specific_list = NULL;
+
+static void 
+add_strip_symbol (name)
+     const char *name;
+{
+  struct symlist *tmp_list;
+
+  tmp_list = (struct symlist *) xmalloc (sizeof (struct symlist));
+  tmp_list->name = name;
+  tmp_list->next = strip_specific_list;
+  strip_specific_list = tmp_list;
+}
+
+static int
+is_strip_symbol (name)
+     const char *name;
+{
+  struct symlist *tmp_list;
+
+  for (tmp_list = strip_specific_list; tmp_list; tmp_list = tmp_list->next)
+    {
+      if (strcmp (name, tmp_list->name) == 0)
+	return 1;
+    }
+  return 0;
+}
+
 /* Choose which symbol entries to copy; put the result in OSYMS.
    We don't copy in place, because that confuses the relocs.
    Return the number of symbols to print.  */
@@ -286,6 +332,10 @@ filter_symbols (abfd, osyms, isyms, symcount)
 	keep = discard_locals != locals_all
 	  && (discard_locals != locals_start_L ||
 	      ! bfd_is_local_label (abfd, sym));
+
+      if (keep && is_strip_symbol (bfd_asymbol_name (sym)))
+	keep = 0;
+
       if (keep)
 	to[dst_count++] = sym;
     }
@@ -475,7 +525,9 @@ copy_object (ibfd, obfd)
 	  nonfatal (bfd_get_filename (ibfd));
 	}
 
-      if (strip_symbols == strip_debug || discard_locals != locals_undef)
+      if (strip_symbols == strip_debug 
+	  || discard_locals != locals_undef
+	  || strip_specific_list)
 	{
 	  /* Mark symbols used in output relocations so that they
 	     are kept, even if they are local labels or static symbols.
@@ -1121,7 +1173,7 @@ strip_main (argc, argv)
   boolean show_version = false;
   int c, i;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:R:sSgxXVv",
+  while ((c = getopt_long (argc, argv, "I:O:F:R:sSgxXVvN:",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1153,6 +1205,9 @@ strip_main (argc, argv)
 	case 'g':
 	  strip_symbols = strip_debug;
 	  break;
+	case 'N':
+	  add_strip_symbol (optarg);
+	  break;
 	case 'x':
 	  discard_locals = locals_all;
 	  break;
@@ -1181,7 +1236,9 @@ strip_main (argc, argv)
     }
 
   /* Default is to strip all symbols.  */
-  if (strip_symbols == strip_undef && discard_locals == locals_undef)
+  if (strip_symbols == strip_undef
+      && discard_locals == locals_undef
+      && strip_specific_list == NULL)
     strip_symbols = strip_all;
 
   if (output_target == (char *) NULL)
@@ -1223,7 +1280,7 @@ copy_main (argc, argv)
   int c;
   struct section_list *p;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:R:SgxXVv",
+  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:R:SgxXVvN:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1269,6 +1326,9 @@ copy_main (argc, argv)
 	  break;
 	case 'g':
 	  strip_symbols = strip_debug;
+	  break;
+	case 'N':
+	  add_strip_symbol (optarg);
 	  break;
 	case 'x':
 	  discard_locals = locals_all;
