@@ -58,6 +58,10 @@ Set Exit 0
 
 Set target_canonical "{targetalias}"
 
+Set target_cpu "`echo {target_canonical} | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`"
+Set target_vendor "`echo {target_canonical} | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`"
+Set target_os "`echo {target_canonical} | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`"
+
 Set configdirs ""
 
 If "{srcroot}" =~ /--------/
@@ -86,9 +90,18 @@ If "`Exists "{srcdir}"mpw-make.in`" != ""
 	Echo "srcdir = " {srcdir} >> "{objdir}"Makefile.tem
 	Echo "mpw_prefix = " {prefix} >> "{objdir}"Makefile.tem
 	Echo "target_canonical = " {target_canonical} >> "{objdir}"Makefile.tem
-	Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
-	Echo "EMUL = " {emulname} >> "{objdir}"Makefile.tem
+	# gcc definitions.
+	If "{mdname}" != ""
+		Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
+	End If
+	If "{maybe_target_default}" != ""
+		Echo "MAYBE_TARGET_DEFAULT = " {maybe_target_default} >> "{objdir}"Makefile.tem
+	End If
+	# binutils definitions.
 	Echo "ARCHDEFS = -d" {archname} >> "{objdir}"Makefile.tem
+	# ld definitions.
+	Echo "EMUL = " {emulname} >> "{objdir}"Makefile.tem
+	# gdb definitions.
 	If "{tdepfiles}" != ""
 		Echo "TDEPFILES = " {tdepfiles} >> "{objdir}"Makefile.tem
 	End If
@@ -101,14 +114,25 @@ If "`Exists "{srcdir}"mpw-make.in`" != ""
 	If "{xm_file}" != ""
 		Echo "XM_FILE = " {xm_file} >> "{objdir}"Makefile.tem
 	End If
+	If "{natdepfiles}" != ""
+		Echo "NATDEPFILES = " {nat_file} >> "{objdir}"Makefile.tem
+	End If
 	If "{nat_file}" != ""
 		Echo "NAT_FILE = " {nat_file} >> "{objdir}"Makefile.tem
 	End If
 	Echo "host_makefile_frag = " >> "{objdir}"Makefile.tem
 	Echo "target_makefile_frag = " >> "{objdir}"Makefile.tem
-	mpw-7to8 "{srcroot}"config:mpw-mh-mpw >>"{objdir}"Makefile.tem
+	If "`Exists "{srcroot}"config:mpw-mh-mpw`" != ""
+		mpw-7to8 "{srcroot}"config:mpw-mh-mpw >>"{objdir}"Makefile.tem
+	Else If "`Exists "{srcroot}":config:mpw-mh-mpw`" != ""
+		mpw-7to8 "{srcroot}":config:mpw-mh-mpw >>"{objdir}"Makefile.tem
+	Else
+		Echo "can't find a host config file!"
+		Exit 0
+	End If
 	mpw-7to8 "{srcdir}"mpw-make.in >>"{objdir}"Makefile.tem
 	mpw-edit-prefix "{objdir}"Makefile.tem >"{objdir}"Makefile.tem2
+	Delete -i -y "{objdir}"Makefile.tem
 	MoveIfChange "{objdir}"Makefile.tem2 "{objdir}"Makefile
 	If {verify} == 1
 		Echo Created Makefile in "`Directory`"
