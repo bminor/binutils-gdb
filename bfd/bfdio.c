@@ -1,6 +1,8 @@
 /* Low-level I/O routines for BFDs.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -35,6 +37,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef S_IXOTH
 #define S_IXOTH 0001    /* Execute by others.  */
 #endif
+
+file_ptr
+real_ftell (FILE *file)
+{
+#if defined (HAVE_FTELLO64)
+  return ftello64 (file);
+#elif defined (HAVE_FTELLO)
+  return ftello (file);
+#else
+  return ftell (file);
+#endif
+}
+
+int
+real_fseek (FILE *file, file_ptr offset, int whence)
+{
+#if defined (HAVE_FTELLO64)
+  return fseeko64 (file, offset, whence);
+#elif defined (HAVE_FTELLO)
+  return fseeko (file, offset, whence);
+#else
+  return fseek (file, offset, whence);
+#endif
+}
 
 /* Note that archive entries don't have streams; they share their parent's.
    This allows someone to play with the iostream behind BFD's back.
@@ -162,7 +188,7 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
   return nwrote;
 }
 
-bfd_vma
+file_ptr
 bfd_tell (bfd *abfd)
 {
   file_ptr ptr;
@@ -170,7 +196,7 @@ bfd_tell (bfd *abfd)
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     return abfd->where;
 
-  ptr = ftell (bfd_cache_lookup (abfd));
+  ptr = real_ftell (bfd_cache_lookup (abfd));
 
   if (abfd->my_archive)
     ptr -= abfd->origin;
@@ -217,7 +243,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 {
   int result;
   FILE *f;
-  long file_position;
+  file_ptr file_position;
   /* For the time being, a BFD may not seek to it's end.  The problem
      is that we don't easily have a way to recognize the end of an
      element in an archive.  */
@@ -278,7 +304,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 	 tripping the abort, we can probably safely disable this code,
 	 so that the real optimizations happen.  */
       file_ptr where_am_i_now;
-      where_am_i_now = ftell (bfd_cache_lookup (abfd));
+      where_am_i_now = real_ftell (bfd_cache_lookup (abfd));
       if (abfd->my_archive)
 	where_am_i_now -= abfd->origin;
       if (where_am_i_now != abfd->where)
@@ -307,7 +333,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
   if (direction == SEEK_SET && abfd->my_archive != NULL)
     file_position += abfd->origin;
 
-  result = fseek (f, file_position, direction);
+  result = real_fseek (f, file_position, direction);
   if (result != 0)
     {
       int hold_errno = errno;

@@ -1,3 +1,8 @@
+2004-01-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/bigcore.exp: New file.
+	* gdb.base/bigcore.c: New file.
+
 2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
 
 	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Test for

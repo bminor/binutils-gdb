@@ -1,3 +1,28 @@
+2004-01-21  Andrew Cagney  <cagney@redhat.com>
+
+	* bfdio.c: Update copyright.  Include "bfdio.h".
+	(real_ftell, real_fseek): New functions.
+	(bfd_tell): Use real_ftell, change return-type to file_ptr.
+	(bfd_seek): Use real_ftell and real_fseek.  Change type of
+	file_position to a file_ptr.
+	* cache.c: Update copyright.  Include "bfdio.h".
+	(close_one): Use real_ftell.
+	(bfd_cache_lookup_worker): Use real_fseek, use ufile_ptr in cast.
+	* bfd-in.h: Update copyright.
+	(file_ptr, ufile_ptr): Specify type using @BFD_FILE_PTR@.
+	(bfd_tell): Make return-type "file_ptr".
+	* bfd-in2.h: Re-generate.
+	* configure.in (AC_CHECK_FUNCS): Check for ftello, ftello64,
+	fseeko and fseeko64.
+	* config.in, configure: Re-generate.
+	* libbfd-in.h: Update copyright.
+	(real_ftell, real_fseek): Declare.
+	* libbfd.h: Re-generate.
+	* elf.c (offset_vma_page_alignment): New function.
+	(assign_file_positions_for_segments): Replace broken modulo code
+	with offset_vma_page_alignment.
+	(assign_file_positions_except_relocs): Ditto.
+
 2004-01-21  Tom Rix  <tcrix@worldnet.att.net>
 
 	* reloc.c: New 5 bit reloc, BFD_RELOC_M68HC12_5B, for m68hc12 movb/movw.

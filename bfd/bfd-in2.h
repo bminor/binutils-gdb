@@ -8,7 +8,7 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -167,16 +167,10 @@ typedef unsigned long bfd_size_type;
 
 #endif /* not BFD64  */
 
-/* A pointer to a position in a file.  */
-/* FIXME:  This should be using off_t from <sys/types.h>.
-   For now, try to avoid breaking stuff by not including <sys/types.h> here.
-   This will break on systems with 64-bit file offsets (e.g. 4.4BSD).
-   Probably the best long-term answer is to avoid using file_ptr AND off_t
-   in this header file, and to handle this in the BFD implementation
-   rather than in its interface.  */
-/* typedef off_t	file_ptr; */
-typedef bfd_signed_vma file_ptr;
-typedef bfd_vma ufile_ptr;
+/* An offset into a file.  BFD always uses the largest possible offset
+   based on the build time availability of fseek, fseeko, or fseeko64.  */
+typedef @bfd_file_ptr@ file_ptr;
+typedef unsigned @bfd_file_ptr@ ufile_ptr;
 
 extern void bfd_sprintf_vma (bfd *, char *, bfd_vma);
 extern void bfd_fprintf_vma (bfd *, void *, bfd_vma);
@@ -463,7 +457,7 @@ extern void bfd_hash_traverse
 extern bfd_size_type bfd_bread (void *, bfd_size_type, bfd *);
 extern bfd_size_type bfd_bwrite (const void *, bfd_size_type, bfd *);
 extern int bfd_seek (bfd *, file_ptr, int);
-extern ufile_ptr bfd_tell (bfd *);
+extern file_ptr bfd_tell (bfd *);
 extern int bfd_flush (bfd *);
 extern int bfd_stat (bfd *, struct stat *);
 

@@ -61,6 +61,18 @@
 /* Define if you have the fdopen function.  */
 #undef HAVE_FDOPEN
 
+/* Define if you have the fseeko function.  */
+#undef HAVE_FSEEKO
+
+/* Define if you have the fseeko64 function.  */
+#undef HAVE_FSEEKO64
+
+/* Define if you have the ftello function.  */
+#undef HAVE_FTELLO
+
+/* Define if you have the ftello64 function.  */
+#undef HAVE_FTELLO64
+
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
@@ -190,6 +202,12 @@
 /* Define as 1 if you have gettext and don't want to use GNU gettext. */
 #undef HAVE_GETTEXT
 
+/* The number of bytes in type long long */
+#undef SIZEOF_LONG_LONG
+
+/* The number of bytes in type long */
+#undef SIZEOF_LONG
+
 /* Use b modifier when opening binary files? */
 #undef USE_BINARY_FOPEN
 
@@ -261,6 +279,9 @@
 
 /* Name of host specific header file to include in trad-core.c. */
 #undef TRAD_HEADER
+
+/* The number of bytes in type off_t */
+#undef SIZEOF_OFF_T
 
 /* Use mmap if it's available? */
 #undef USE_MMAP

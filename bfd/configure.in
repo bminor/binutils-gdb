@@ -917,6 +917,31 @@ AC_SUBST(bfd_backends)
 AC_SUBST(bfd_machines)
 AC_SUBST(bfd_default_target_size)
 
+# Determine the host dependant file_ptr a.k.a. off_t type.  In order
+# prefer: off64_t - if ftello64 and fseeko64, off_t - if ftello and
+# fseeko, long.  This assumes that sizeof off_t is .ge. sizeof long.
+# Hopefully a reasonable assumption since fseeko et.al. should be
+# upward compatible.
+AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64)
+AC_MSG_CHECKING([file_ptr type])
+bfd_file_ptr="long"
+bfd_ufile_ptr="unsigned long"
+if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
+    AC_COMPILE_CHECK_SIZEOF(off_t)
+    if test "x${ac_cv_sizeof_off_t}" = "x8"; then
+	bfd_file_ptr=BFD_HOST_64_BIT
+	bfd_ufile_ptr=BFD_HOST_U_64_BIT
+    fi
+fi
+if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes; then
+    bfd_file_ptr=BFD_HOST_64_BIT
+    bfd_ufile_ptr=BFD_HOST_U_64_BIT
+fi
+AC_MSG_RESULT($bfd_file_ptr)
+AC_SUBST(bfd_file_ptr)
+AC_SUBST(bfd_ufile_ptr)
+
+
 tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
