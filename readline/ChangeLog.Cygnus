@@ -1,3 +1,7 @@
+2001-07-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* support/config.sub: Update using ../config.sub.
+
 2001-06-15  Elena Zannoni  <ezannoni@redhat.com>
 
         * configure.in: Add -fsigned-char to LOCAL_CFLAGS for Linux
