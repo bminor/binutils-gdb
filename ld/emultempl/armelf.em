@@ -104,6 +104,9 @@ arm_elf_finish ()
 {
   struct bfd_link_hash_entry * h;
 
+  /* Call the elf32.em routine.  */
+  gld${EMULATION_NAME}_finish ();
+
   if (thumb_entry_symbol == NULL)
     return;
   

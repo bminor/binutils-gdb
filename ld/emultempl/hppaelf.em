@@ -31,8 +31,8 @@ static void hppaelf_after_parse PARAMS((void));
 static void hppaelf_create_output_section_statements PARAMS ((void));
 static asection *hppaelf_add_stub_section
   PARAMS ((const char *, asection *));
-static void hppaelf_layaout_sections_again PARAMS ((void));
-static void hppaelf_finish PARAMS ((void));
+static void hppaelf_layout_sections_again PARAMS ((void));
+static void gld${EMULATION_NAME}_finish PARAMS ((void));
 
 
 /* Fake input file for stubs.  */
@@ -42,6 +42,9 @@ static lang_input_statement_type *stub_file;
    we can build smaller import stubs and there is no need for export
    stubs.  */
 static int multi_subspace = 0;
+
+/* Whether we need to call hppa_layout_sections_again.  */
+static int need_laying_out = 0;
 
 /* Maximum size of a group of input sections that can be handled by
    one stub section.  A value of +/-1 indicates the bfd back-end
@@ -216,11 +219,12 @@ hppaelf_add_stub_section (stub_sec_name, input_section)
 /* Another call-back for elf32_hppa_size_stubs.  */
 
 static void
-hppaelf_layaout_sections_again ()
+hppaelf_layout_sections_again ()
 {
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
+  need_laying_out = 0;
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
@@ -239,12 +243,19 @@ hppaelf_layaout_sections_again ()
    to build linker stubs.  */
 
 static void
-hppaelf_finish ()
+gld${EMULATION_NAME}_finish ()
 {
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (link_info.relocateable)
     return;
+
+  /* bfd_elf32_discard_info just plays with debugging sections,
+     ie. doesn't affect any code, so we can delay resizing the
+     sections.  It's likely we'll resize everything in the process of
+     adding stubs.  */
+  if (bfd_elf${ELFSIZE}_discard_info (&link_info))
+    need_laying_out = 1;
 
   /* Call into the BFD backend to do the real work.  */
   if (! elf32_hppa_size_stubs (output_bfd,
@@ -253,11 +264,14 @@ hppaelf_finish ()
 			       multi_subspace,
 			       group_size,
 			       &hppaelf_add_stub_section,
-			       &hppaelf_layaout_sections_again))
+			       &hppaelf_layout_sections_again))
     {
       einfo ("%X%P: can not size stub section: %E\n");
       return;
     }
+
+  if (need_laying_out)
+    hppaelf_layout_sections_again ();
 
   /* Set the global data pointer.  */
   if (! elf32_hppa_set_gp (output_bfd, &link_info))
@@ -323,17 +337,17 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --multi-subspace    Generate import and export stubs to support\n\
-                        multiple sub-space shared libraries\n"
+  --multi-subspace      Generate import and export stubs to support\n\
+                          multiple sub-space shared libraries\n"
 		   ));
   fprintf (file, _("\
-  --stub-group-size=N Maximum size of a group of input sections that can be\n\
-                        handled by one stub section.  A negative value\n\
-                        locates all stubs before their branches (with a\n\
-                        group size of -N), while a positive value allows\n\
-                        two groups of input sections, one before, and one\n\
-                        after each stub section.  Values of +/-1 indicate\n\
-                        the linker should choose suitable defaults."
+  --stub-group-size=N   Maximum size of a group of input sections that can be\n\
+                          handled by one stub section.  A negative value\n\
+                          locates all stubs before their branches (with a\n\
+                          group size of -N), while a positive value allows\n\
+                          two groups of input sections, one before, and one\n\
+                          after each stub section.  Values of +/-1 indicate\n\
+                          the linker should choose suitable defaults.\n"
 		   ));
 '
 
@@ -355,5 +369,5 @@ PARSE_AND_LIST_ARGS_CASES='
 # Put these extra hppaelf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_PARSE=hppaelf_after_parse
-LDEMUL_FINISH=hppaelf_finish
+LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=hppaelf_create_output_section_statements

@@ -1320,12 +1320,15 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   return true;
 }
+EOF
+fi
+
+if test x"$LDEMUL_FINISH" != xgld"$EMULATION_NAME"_finish; then
+cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
 gld${EMULATION_NAME}_finish ()
 {
-  ${LDEMUL_FINISH+${LDEMUL_FINISH} ();}
-
   if (bfd_elf${ELFSIZE}_discard_info (&link_info))
     {
       /* Resize the sections.  */
@@ -1639,7 +1642,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  gld${EMULATION_NAME}_finish,
+  ${LDEMUL_FINISH-gld${EMULATION_NAME}_finish},
   ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},

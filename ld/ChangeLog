@@ -1,3 +1,19 @@
+2001-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Only emit this
+	function when LDEMUL_FINISH isn't set to the same name.  Don't
+	call ${LDEMUL_FINISH}.
+	(ld_${EMULATION_NAME}_emulation): Call $LDEMUL_FINISH if defined.
+	* emultempl/armelf.em (arm_elf_finish): Call
+	gld${EMULATION_NAME}_finish.
+	* emultempl/hppaelf.em (hppaelf_finish): Rename to
+	gld${EMULATION_NAME}_finish.  Call bfd_elf32_discard_info and
+	hppaelf_layout_sections_again if necessary.
+	(need_laying_out): New var.
+	(hppaelf_layaout_sections_again): Rename to
+	hppaelf_layout_sections_again.  Clear need_laying_out.
+	(PARSE_AND_LIST_OPTIONS): Format text.
+
 2001-11-14  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/armelf.em (arm_elf_finish): Renamed from
