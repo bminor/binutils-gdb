@@ -1,3 +1,14 @@
+2004-09-17  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-target1-{abs,rel}.d}: New files.
+	* ld-arm/arm-target1.s: New file.
+	* ld-arm/arm-target2-{,got-}rel.d: New files.
+	* ld-arm/arm-target2.s: New file.
+	* ld-arm/arm-rel31.d: New files.
+	* ld-arm/arm-rel31.s: New files.
+	* ld-arm/arm.ld: New file.
+	* ld-arm/arm-elf.exp: Add new tests.
+
 2004-09-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/hiddef1.d, ld-cris/hiddef1.s, ld-cris/hidrefgotplt1.s:

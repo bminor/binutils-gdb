@@ -4877,7 +4877,7 @@ point to the function trampoline.
 @end ifset
 
 @node ARM
-@section @command{ld}'s Support for Interworking Between ARM and Thumb Code
+@section @command{ld} and the ARM family
 
 @cindex ARM interworking support
 @kindex --support-old-code
@@ -4906,6 +4906,26 @@ executing in Thumb mode straight away.
 The @samp{--be8} switch instructs @command{ld} to generate BE8 format
 executables.  This option is only valid when linking big-endian objects.
 The resulting image will contain big-endian data and little-endian code.
+
+@cindex TARGET1
+@kindex --target1-rel
+@kindex --target1-abs
+The @samp{R_ARM_TARGET1} relocation is typically used for entries in the
+@samp{.init_array} section.  It is interpreted as either @samp{R_ARM_REL32}
+or @samp{R_ARM_ABS32}, depending on the target.  The @samp{--target1-rel}
+and @samp{--target1-abs} switches override the default.
+
+@cindex TARGET2
+@kindex --target2=@var{type}
+The @samp{--target2=type} switch overrides the default definition of the
+@samp{R_ARM_TARGET2} relocation.  Valid values for @samp{type}, their
+meanings, and target defaults are as follows:
+@table @samp
+@item rel
+@samp{R_ARM_REL32} (arm*-*-symbianelf, arm*-*-elf, arm*-*-eabi)
+@item got-rel
+@samp{R_ARM_GOT_PREL} (arm*-*-linux, arm*-*-*bsd)
+@end table
 
 @ifclear GENERIC
 @lowersections

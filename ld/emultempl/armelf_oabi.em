@@ -69,7 +69,7 @@ gld${EMULATION_NAME}_before_allocation (void)
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
 	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, &link_info,
-						      0, 0, 0))
+						      0, 0))
 	  {
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);

@@ -1,3 +1,20 @@
+2004-09-17  Paul Brook  <paul@codesourcery.com>
+
+	* ld.texinfo: Rename arm-specific section.  Document --target*
+	* emulparams/armelf_fbsd.sh: Set TARGET2_TYPE.
+	* emulparams/armelf_linux.sh: Ditto.
+	* emulparams/armelf_nbsd.sh: Ditto.
+	* emultempl/armelf.em: Set default for TARGET2_TYPE.
+	(target2_type): New variable.
+	(arm_elf_before_allocation): Don't pass target1_type.
+	(arm_elf_create_output_section_statements): New function.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_TARGET2.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add --target=.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_TARGET2.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Set.
+	* emultempl/armelf_oabi.em (_before_allocation): Remove extra
+	argument to bfd_elf32_arm_process_before_allocation.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name): Update u.undef.next refs.
