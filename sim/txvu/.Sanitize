@@ -48,13 +48,11 @@ gpuif.c
 device.h
 dma.c
 vu0.h
-pke0.h
+pke.h
 vu1.h
-pke1.h
 vu1.c
 vu0.c
-pke0.c
-pke1.c
+pke.c
 hardware.c
 hardware.h
 

@@ -37,8 +37,7 @@ SIM_OBJS = \
 	dma.o \
 	vu0.o \
 	vu1.o \
-	pke0.o \
-	pke1.o \
+	pke.o \
 	sim-hload.o \
 	sim-engine.o \
 	sim-stop.o \

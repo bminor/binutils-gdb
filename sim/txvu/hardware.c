@@ -4,8 +4,7 @@
 
 #include "gpuif.h"
 #include "dma.h"
-#include "pke0.h"
-#include "pke1.h"
+#include "pke.h"
 #include "vu0.h"
 #include "vu1.h"
 
