@@ -152,7 +152,9 @@ if { $sizeof_double == 8 } {
 # but a hybrid.  They are in little endian format with the two words
 # swapped in big endian format.
 
-    if { [istarget "arm*-*-*"] || [istarget "xscale*-*-*"] } then {
+    if { [istarget "arm*-*-*"] || \
+	    [istarget "xscale*-*-*"] \
+	    [istarget "strongarm*-*-*"] } then {
 	# assume the long long represents a floating point double in ARM format
 	gdb_test "p/f oct" ".*2.1386676354387559e\\+265.*"
     } else {
