@@ -1,3 +1,12 @@
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-mips.c (md_apply_fix): Don't adjust common
+	extern/weak symbols for ELF.
+	(md_estimate_size_before_relax): Treat weak like extern for
+	ELF.
+	(mips_fix_adjustable): Don't adjust extern/weak symbols for
+	ELF.
+
 2001-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: 'som' is not wrongly spelled 'some'.

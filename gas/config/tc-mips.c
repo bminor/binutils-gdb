@@ -9538,7 +9538,9 @@ md_apply_fix (fixP, valueP)
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
       if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
-	  || S_IS_WEAK (fixP->fx_addsy)
+	  || ((S_IS_WEAK (fixP->fx_addsy)
+	       || S_IS_EXTERN (fixP->fx_addsy))
+	      && !S_IS_COMMON (fixP->fx_addsy))
 	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
 	      && (((bfd_get_section_flags (stdoutput,
 					   S_GET_SEGMENT (fixP->fx_addsy))
@@ -11024,8 +11026,8 @@ md_estimate_size_before_relax (fragp, segtype)
 		&& ! bfd_is_com_section (symsec)
 		&& !linkonce
 #ifdef OBJ_ELF
-		/* A weak symbol is treated as external.  */
-		&& ! S_IS_WEAK (sym)
+		/* A global or weak symbol is treated as external.  */
+		&& ! (S_IS_EXTERN (sym) || S_IS_WEAK (sym))
 #endif
 		);
     }
@@ -11063,6 +11065,11 @@ int
 mips_fix_adjustable (fixp)
      fixS *fixp;
 {
+#ifdef OBJ_ELF
+  /* Prevent all adjustments to global symbols.  */
+  if (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
+    return 0;
+#endif
   if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
     return 0;
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
