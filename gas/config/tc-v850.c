@@ -206,6 +206,13 @@ v850_offset (int ignore)
   demand_empty_rest_of_line ();
 }
 
+void
+set_machine (int number)
+{
+  machine = number;
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
+}
+
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -221,6 +228,13 @@ const pseudo_typeS md_pseudo_table[] =
   {"offset",  v850_offset,  0},
   {"section", v850_section, 0},
   {"word",    cons,         4},
+  {"v850",    set_machine,  0},
+/* start-sanitize-v850e */
+  {"v850e",   set_machine,  bfd_mach_v850e},
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+  {"v850eq",  set_machine,  bfd_mach_v850eq},
+/* end-sanitize-v850eq */
   { NULL,     NULL,         0}
 };
 

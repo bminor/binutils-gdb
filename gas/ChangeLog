@@ -1,3 +1,15 @@
+Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (set_machine): New function.
+	* config/tc-v850.c (.v850): New pseudo op.
+start-sanitize-v850e
+	* config/tc-v850.c (.v850e): New pseudo op.
+end-sanitize-v850e
+start-sanitize-v850eq
+	* config/tc-v850.c (.v850eq): New pseudo op.
+end-sanitize-v850eq
+	
+
 Mon Sep  8 23:08:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Support -alh and -ald for DWARF 1:
