@@ -1032,7 +1032,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
 
   /* Frame PC initialization is handled by using CFI.  */
-  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, x86_64_init_frame_pc);
 
   /* Cons up virtual frame pointer for trace.  */
   set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);

@@ -109,8 +109,8 @@ struct value;
 extern void m32r_init_extra_frame_info (struct frame_info *fi);
 /* mvs_check  INIT_EXTRA_FRAME_INFO */
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) m32r_init_extra_frame_info (fi)
-/* mvs_no_check  INIT_FRAME_PC */
-#define INIT_FRAME_PC		/* Not necessary */
+/* mvs_no_check  DEPRECATED_INIT_FRAME_PC */
+#define DEPRECATED_INIT_FRAME_PC		init_frame_pc_noop
 
 extern void
 m32r_frame_find_saved_regs (struct frame_info *fi,

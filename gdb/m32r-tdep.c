@@ -470,11 +470,11 @@ m32r_find_callers_reg (struct frame_info *fi, int regnum)
   return read_register (regnum);
 }
 
-/* Function: frame_chain
-   Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-   For m32r, we save the frame size when we initialize the frame_info.  */
+/* Function: frame_chain Given a GDB frame, determine the address of
+   the calling function's frame.  This will be used to create a new
+   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and
+   DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
+   m32r, we save the frame size when we initialize the frame_info.  */
 
 CORE_ADDR
 m32r_frame_chain (struct frame_info *fi)

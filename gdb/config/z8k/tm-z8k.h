@@ -108,7 +108,7 @@ extern int z8k_saved_pc_after_call (struct frame_info *frame);
 #define REGISTER_VIRTUAL_TYPE(N) \
  (REGISTER_VIRTUAL_SIZE(N) == 2? builtin_type_unsigned_int : builtin_type_long)
 
-#define INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
+#define DEPRECATED_INIT_FRAME_PC(x,y) (init_frame_pc_noop (x, y))
 #define INIT_FRAME_PC_FIRST(x,y) (init_frame_pc_noop (x, y))
 
 #define REGISTER_NAMES  \

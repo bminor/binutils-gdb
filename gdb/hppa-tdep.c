@@ -1080,9 +1080,10 @@ init_extra_frame_info (int fromleaf, struct frame_info *frame)
     frame->frame = read_register (SP_REGNUM) - framesize;
 }
 
-/* Given a GDB frame, determine the address of the calling function's frame.
-   This will be used to create a new GDB frame struct, and then
-   INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
+/* Given a GDB frame, determine the address of the calling function's
+   frame.  This will be used to create a new GDB frame struct, and
+   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
+   called for the new frame.
 
    This may involve searching through prologues for several functions
    at boundaries where GCC calls HP C code, or where code which has

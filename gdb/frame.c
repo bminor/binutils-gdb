@@ -972,25 +972,25 @@ get_prev_frame (struct frame_info *next_frame)
   prev->type = NORMAL_FRAME;
 
   /* This change should not be needed, FIXME!  We should determine
-     whether any targets *need* INIT_FRAME_PC to happen after
-     INIT_EXTRA_FRAME_INFO and come up with a simple way to express
-     what goes on here.
+     whether any targets *need* DEPRECATED_INIT_FRAME_PC to happen
+     after INIT_EXTRA_FRAME_INFO and come up with a simple way to
+     express what goes on here.
 
      INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
      (where the PC is already set up) and here (where it isn't).
-     INIT_FRAME_PC is only called from here, always after
+     DEPRECATED_INIT_FRAME_PC is only called from here, always after
      INIT_EXTRA_FRAME_INFO.
 
      The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the
      PC value (which hasn't been set yet).  Some other machines appear
      to require INIT_EXTRA_FRAME_INFO before they can do
-     INIT_FRAME_PC.  Phoo.
+     DEPRECATED_INIT_FRAME_PC.  Phoo.
 
      We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
      complication to an already overcomplicated part of GDB.
      gnu@cygnus.com, 15Sep92.
 
-     Assuming that some machines need INIT_FRAME_PC after
+     Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
      INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
@@ -1002,17 +1002,17 @@ get_prev_frame (struct frame_info *next_frame)
      SETUP_ARBITRARY_FRAME would have to do that.
 
      INIT_PREV_FRAME(fromleaf, prev) Replace INIT_EXTRA_FRAME_INFO and
-     INIT_FRAME_PC.  This should also return a flag saying whether to
-     keep the new frame, or whether to discard it, because on some
-     machines (e.g.  mips) it is really awkward to have
+     DEPRECATED_INIT_FRAME_PC.  This should also return a flag saying
+     whether to keep the new frame, or whether to discard it, because
+     on some machines (e.g.  mips) it is really awkward to have
      FRAME_CHAIN_VALID called *before* INIT_EXTRA_FRAME_INFO (there is
      no good way to get information deduced in FRAME_CHAIN_VALID into
      the extra fields of the new frame).  std_frame_pc(fromleaf, prev)
 
      This is the default setting for INIT_PREV_FRAME.  It just does
-     what the default INIT_FRAME_PC does.  Some machines will call it
-     from INIT_PREV_FRAME (either at the beginning, the end, or in the
-     middle).  Some machines won't use it.
+     what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
+     will call it from INIT_PREV_FRAME (either at the beginning, the
+     end, or in the middle).  Some machines won't use it.
 
      kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
 
@@ -1050,7 +1050,8 @@ get_prev_frame (struct frame_info *next_frame)
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value (see
      tm-sparc.h).  We want the pc saved in the inferior frame. */
-  prev->pc = (INIT_FRAME_PC (fromleaf, prev));
+  if (DEPRECATED_INIT_FRAME_PC_P ())
+    prev->pc = DEPRECATED_INIT_FRAME_PC (fromleaf, prev);
 
   /* If ->frame and ->pc are unchanged, we are in the process of
      getting ourselves into an infinite backtrace.  Some architectures

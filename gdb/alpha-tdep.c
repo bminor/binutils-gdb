@@ -1895,7 +1895,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
-  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -1,3 +1,39 @@
+2002-12-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC): Rename INIT_FRAME_PC.
+	Change to a function with predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.c (get_prev_frame): Update.  Test
+	DEPRECATED_INIT_FRAME_PC_P.
+	* config/sparc/tm-sparc.h (DEPRECATED_INIT_FRAME_PC): Update.
+	* config/rs6000/tm-rs6000.h (DEPRECATED_INIT_FRAME_PC): Update.
+	* config/mn10200/tm-mn10200.h (DEPRECATED_INIT_FRAME_PC): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* i386-interix-tdep.c (i386_interix_init_abi): Update.
+	* arm-tdep.c: Update comments.
+	* h8300-tdep.c (h8300_gdbarch_init): Explicitly set init_frame_pc.
+	* config/m32r/tm-m32r.h (DEPRECATED_INIT_FRAME_PC): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* x86-64-tdep.c (x86_64_init_abi): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* config/z8k/tm-z8k.h (INIT_FRAME_PC_FIRST): Delete macro.
+	(DEPRECATED_INIT_FRAME_PC): Rename INIT_FRAME_PC.
+
 2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/pa/nm-hppah.h (CHILD_POST_FOLLOW_VFORK): Change to
