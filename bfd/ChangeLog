@@ -7,6 +7,13 @@ Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
 
 Mon Jan 29 13:06:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_relocate_section): If -Bsymbolic, when
+	copying relocs into a shared object, treat a defined global symbol
+	as a local symbol.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 	* elflink.h (elf_link_add_object_symbols): Only set weakdef to a
 	real defined symbol, not to a weak defined symbol.
 

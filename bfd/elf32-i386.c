@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -916,6 +916,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
+		      && (! info->symbolic
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (r_type == R_386_32
 			  || r_type == R_386_PC32)
 		      && (input_section->flags & SEC_ALLOC) != 0))
@@ -1100,9 +1103,14 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_386_PC32:
 	  if (info->shared
 	      && (input_section->flags & SEC_ALLOC) != 0
-	      && (r_type != R_386_PC32 || h != NULL))
+	      && (r_type != R_386_PC32
+		  || (h != NULL
+		      && (! info->symbolic
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      Elf_Internal_Rel outrel;
+	      boolean relocate;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -1134,15 +1142,23 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (r_type == R_386_PC32)
 		{
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
+		  relocate = false;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_PC32);
 		}
 	      else
 		{
-		  if (h == NULL)
-		    outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+		  if (h == NULL
+		      || (info->symbolic
+			  && (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) != 0))
+		    {
+		      relocate = true;
+		      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+		    }
 		  else
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
+		      relocate = false;
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_32);
 		    }
 		}
@@ -1157,7 +1173,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		 not want to fiddle with the addend.  Otherwise, we
 		 need to include the symbol value so that it becomes
 		 an addend for the dynamic reloc.  */
-	      if (h != NULL)
+	      if (! relocate)
 		continue;
 	    }
 

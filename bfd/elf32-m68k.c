@@ -1,5 +1,5 @@
 /* Motorola 68k series support for 32-bit ELF
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -898,6 +898,9 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		  || (info->shared
+		      && (! info->symbolic
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (input_section->flags & SEC_ALLOC) != 0
 		      && (r_type == R_68K_8
 			  || r_type == R_68K_16
@@ -1142,7 +1145,10 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (rel->r_offset
 				 + input_section->output_section->vma
 				 + input_section->output_offset);
-	      if (h != NULL)
+	      if (h != NULL
+		  && (! info->symbolic
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
 		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -1159,11 +1165,15 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      long indx;
 
-		      sym = local_syms + r_symndx;
-
-		      BFD_ASSERT (ELF_ST_TYPE (sym->st_info) == STT_SECTION);
-
-		      sec = local_sections[r_symndx];
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
 		      if (sec != NULL && bfd_is_abs_section (sec))
 			indx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
