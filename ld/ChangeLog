@@ -1,5 +1,9 @@
 Wed Apr  2 11:55:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* mpw-idtmips.c: Rename from mpw-emipsidt.c.
+	* mpw-elfmips.c: Rename from mpw-emipself.c.
+	* mpw-config.in: Update accordingly.
+
 	* ldlang.c (lang_process): Call lang_check immediately after
 	opening the input files, rather than at the end of the link.
 

@@ -71,8 +71,8 @@ ldwrite.h
 lexsup.c
 mac-ld.r
 mpw-config.in
-mpw-emipself.c
-mpw-emipsidt.c
+mpw-elfmips.c
+mpw-idtmips.c
 mpw-eppcmac.c
 mpw-esh.c
 mpw-make.sed
