@@ -1,5 +1,5 @@
 /* tc-openrisc.c -- Assembler for the OpenRISC family.
-   Copyright (C) 2001 Free Software Foundation.
+   Copyright (C) 2001, 2002 Free Software Foundation.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
    This file is part of GAS, the GNU Assembler.
@@ -370,12 +370,12 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
   switch (operand->type)
     {
-    case OPENRISC_OPERAND_ABS_26:  
-      fixP->fx_pcrel = 0; 
+    case OPENRISC_OPERAND_ABS_26:
+      fixP->fx_pcrel = 0;
       type = BFD_RELOC_OPENRISC_ABS_26;
       goto emit;
-    case OPENRISC_OPERAND_DISP_26: 
-      fixP->fx_pcrel = 1; 
+    case OPENRISC_OPERAND_DISP_26:
+      fixP->fx_pcrel = 1;
       type = BFD_RELOC_OPENRISC_REL_26;
       goto emit;
 
@@ -493,7 +493,7 @@ openrisc_fix_adjustable (fixP)
   /* We need the symbol name for the VTABLE entries */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 0;        
+    return 0;
 
   return 1;
 }

@@ -1,3 +1,19 @@
+2002-05-11  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/obj-coff.h: Fix formatting.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-openrisc.c: Likewise.
+	* config/tc-or32.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-xstormy16.h: Likewise.
+
 2002-05-09  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* config/obj-coff.c: Fix formatting.

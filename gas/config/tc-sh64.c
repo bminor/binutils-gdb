@@ -230,12 +230,12 @@ shmedia_md_end ()
 		      copy_symbol_attributes (symp, mainsym);
 
 		      /* Unset the BranchTarget mark that can be set at
-			 attribute-copying. */
+			 attribute-copying.  */
 		      S_SET_OTHER (symp,
-				   S_GET_OTHER (symp) & ~STO_SH5_ISA32); 
+				   S_GET_OTHER (symp) & ~STO_SH5_ISA32);
 
 		      /* The GLOBAL and WEAK attributes are not copied
-			 over by copy_symbol_attributes.  Do it here. */
+			 over by copy_symbol_attributes.  Do it here.  */
 		      if (S_IS_WEAK (mainsym))
 			S_SET_WEAK (symp);
 		      else if (S_IS_EXTERNAL (mainsym))
@@ -471,7 +471,7 @@ sh64_adjust_symtab ()
       if (main_symbol)
 	{
 	  char *sym_name = (char *) S_GET_NAME (symp);
-	  
+
 	  /* All datalabels not used in relocs should be gone by now.
 
 	     We change those remaining to have the name of the main
@@ -1095,7 +1095,7 @@ shmedia_md_convert_frag (output_bfd, seg, fragP, final)
       reloctype = BFD_RELOC_32_GOTOFF;
       reloc_needed = 1;
       /* Fall through.  */
-      
+
     case C (MOVI_IMM_64, UNDEF_MOVI):
     case C (MOVI_IMM_64, MOVI_64):
       {
@@ -1155,7 +1155,7 @@ shmedia_md_convert_frag (output_bfd, seg, fragP, final)
       reloctype = BFD_RELOC_32_GOTOFF;
       reloc_needed = 1;
       /* Fall through.  */
-      
+
     case C (MOVI_IMM_32, UNDEF_MOVI):
     case C (MOVI_IMM_32, MOVI_32):
       {
@@ -1329,7 +1329,7 @@ shmedia_md_convert_frag (output_bfd, seg, fragP, final)
     movi_imm_64_pcrel_reloc_needed:
       reloc_needed = 1;
       /* Fall through.  */
- 
+
     case C (MOVI_IMM_32_PCREL, MOVI_64):
     case C (MOVI_IMM_64_PCREL, MOVI_64):
       {
@@ -2202,7 +2202,7 @@ shmedia_md_estimate_size_before_relax (fragP, segment_type)
     case C (MOVI_IMM_64_PCREL, MOVI_GOTPC):
       fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
       break;
-      
+
     default:
       abort ();
     }
@@ -2628,7 +2628,7 @@ shmedia_build_Mytes (opcode, operands)
 	    opjp->reloctype = BFD_RELOC_SH_GOT_LOW16;
 	  else if (opjp->reloctype == BFD_RELOC_SH_GOTPLT32)
 	    opjp->reloctype = BFD_RELOC_SH_GOTPLT_LOW16;
-	    
+
 	  if ((opjp->reloctype == BFD_RELOC_NONE
 	       || opjp->reloctype == BFD_RELOC_32_GOTOFF
 	       || opjp->reloctype == BFD_RELOC_32_PLT_PCREL
@@ -2717,7 +2717,7 @@ shmedia_build_Mytes (opcode, operands)
 					    opjp->reloctype == BFD_RELOC_NONE
 					    ? BFD_RELOC_SH_PT_16
 					    : opjp->reloctype);
-	      
+
 	    j++;
 	    break;
 	  }
@@ -2757,7 +2757,7 @@ shmedia_build_Mytes (opcode, operands)
 					    opjp->reloctype == BFD_RELOC_NONE
 					    ? SHMEDIA_BFD_RELOC_PT
 					    : opjp->reloctype);
-	      
+
 	    j++;
 	    break;
 	  }
@@ -3098,7 +3098,7 @@ sh64_emit_crange (startsym, endsym, cr_type)
   exp.X_op_symbol = startsym;
   emit_expr (&exp, 4);
 
-  /* Emit the cr_size part. */
+  /* Emit the cr_size part.  */
   exp.X_op = O_constant;
   exp.X_add_number = cr_type;
   exp.X_add_symbol = NULL;
@@ -3299,11 +3299,11 @@ sh64_consume_datalabel (name, exp, cp, operandf)
 	      exp->X_add_symbol = dl_symp;
 
 	      /* Unset the BranchTarget mark that can be set at symbol
-		 creation or attributes copying. */
+		 creation or attributes copying.  */
 	      S_SET_OTHER (dl_symp, S_GET_OTHER (dl_symp) & ~STO_SH5_ISA32);
 
 	      /* The GLOBAL and WEAK attributes are not copied over by
-		 copy_symbol_attributes.  Do it here. */
+		 copy_symbol_attributes.  Do it here.  */
 	      if (S_IS_WEAK (symp))
 		S_SET_WEAK (dl_symp);
 	      else if (S_IS_EXTERNAL (symp))
@@ -3470,7 +3470,7 @@ sh64_flag_output ()
 }
 
 /* Vtables don't need "datalabel" but we allow it by simply deleting
-   any we find. */
+   any we find.  */
 
 static char *
 strip_datalabels ()

@@ -1806,7 +1806,7 @@ tc_gen_reloc (seg, fixp)
 	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
 						    BFD_RELOC_8_PCREL);
 	      return reloc;
-	      
+
 	    case BFD_RELOC_16:
 	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
 						    BFD_RELOC_16_PCREL);
@@ -1846,7 +1846,7 @@ tc_gen_reloc (seg, fixp)
 	    case BFD_RELOC_8:
 	      md_number_to_chars (fixpos, reloc->addend, 1);
 	      break;
-	      
+
 	    case BFD_RELOC_16:
 	      md_number_to_chars (fixpos, reloc->addend, 2);
 	      break;

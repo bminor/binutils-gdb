@@ -921,7 +921,7 @@ md_parse_option (c, arg)
       /* -mbooke64 means enable 64-bit BookE support.  */
       else if (strcmp (arg, "booke64") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | 
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE |
 		    PPC_OPCODE_BOOKE64 | PPC_OPCODE_64;
 	  ppc_size = PPC_OPCODE_64;
 	}
@@ -3214,7 +3214,7 @@ ppc_function (ignore)
 /* The .bf pseudo-op.  This is just like a COFF C_FCN symbol named
    ".bf".  If the pseudo op .bi was seen before .bf, patch the .bi sym
    with the correct line number */
- 
+
 static symbolS *saved_bi_sym = 0;
 
 static void
@@ -3235,12 +3235,12 @@ ppc_bf (ignore)
   SA_SET_SYM_LNNO (sym, coff_line_base);
 
   /* Line number for bi.  */
-  if (saved_bi_sym) 
+  if (saved_bi_sym)
     {
       S_SET_VALUE (saved_bi_sym, coff_n_line_nos);
       saved_bi_sym = 0;
     }
-  
+
 
   symbol_get_tc (sym)->output = 1;
 
@@ -3307,7 +3307,7 @@ ppc_biei (ei)
   symbol_get_tc (sym)->output = 1;
 
   /* Save bi.  */
-  if (ei) 
+  if (ei)
     saved_bi_sym = 0;
   else
     saved_bi_sym = sym;

@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "as.h"
-#include "subsegs.h"     
+#include "subsegs.h"
 #include "symcat.h"
 #include "opcodes/xstormy16-desc.h"
 #include "opcodes/xstormy16-opc.h"
@@ -78,7 +78,7 @@ md_show_usage (stream)
   FILE * stream;
 {
   fprintf (stream, _(" XSTORMY16 specific command line options:\n"));
-} 
+}
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
@@ -92,7 +92,7 @@ void
 md_begin ()
 {
   /* Initialize the `cgen' interface.  */
-  
+
   /* Set the machine number and endian.  */
   gas_cgen_cpu_desc = xstormy16_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, 0,
 					  CGEN_CPU_OPEN_ENDIAN,
@@ -116,7 +116,7 @@ md_assemble (str)
 
   insn.insn = xstormy16_cgen_assemble_insn
     (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, & errmsg);
-  
+
   if (!insn.insn)
     {
       as_bad (errmsg);
@@ -128,7 +128,7 @@ md_assemble (str)
 			CGEN_FIELDS_BITSIZE (& insn.fields), 0, NULL);
 }
 
-void 
+void
 md_operand (e)
      expressionS * e;
 {
@@ -204,7 +204,7 @@ xstormy16_cons_fix_new (f, where, nbytes, exp)
   fix = fix_new_exp (f, where, nbytes, exp, 0, code);
 }
 
-/* Called while parsing an instruction to create a fixup. 
+/* Called while parsing an instruction to create a fixup.
    Create BFD_RELOC_XSTORMY16_FPTR16 relocations.  */
 
 fixS *
@@ -219,7 +219,7 @@ xstormy16_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp
 {
   fixS *fixP;
   operatorT op = exp->X_op;
-  
+
   if (op == O_fptr_symbol)
     exp->X_op = O_symbol;
 
@@ -274,7 +274,7 @@ md_estimate_size_before_relax (fragP, segment)
 {
   /* No assembler relaxation is defined (or necessary) for this port.  */
   abort ();
-} 
+}
 
 /* *fragP has been relaxed to its final size, and now needs to have
    the bytes inside it modified to conform to the new size.
@@ -334,11 +334,11 @@ md_cgen_lookup_reloc (insn, operand, fixP)
     case XSTORMY16_OPERAND_IMM12:
     case XSTORMY16_OPERAND_HMEM8:
       return BFD_RELOC_NONE;
-      
+
     case XSTORMY16_OPERAND_IMM8:
     case XSTORMY16_OPERAND_LMEM8:
       return fixP->fx_pcrel ? BFD_RELOC_8_PCREL : BFD_RELOC_8;
-      
+
     case XSTORMY16_OPERAND_IMM16:
       fixP->fx_where += 2;
       return fixP->fx_pcrel ? BFD_RELOC_16_PCREL : BFD_RELOC_16;
@@ -353,7 +353,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
     case XSTORMY16_OPERAND_REL12:
       fixP->fx_where += 2;
-      /* Fall through... */
+      /* Fall through...  */
     case XSTORMY16_OPERAND_REL12A:
       fixP->fx_pcrel = 1;
       return BFD_RELOC_XSTORMY16_REL_12;
@@ -392,14 +392,14 @@ xstormy16_fix_adjustable (fixP)
 {
   if (fixP->fx_addsy == NULL)
     return 1;
-  
-  /* Prevent all adjustments to global symbols. */
+
+  /* Prevent all adjustments to global symbols.  */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
-  
+
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
-  
+
   /* We need the symbol name for the VTABLE entries.  */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
@@ -446,7 +446,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
       default:
 	break;
       }
-  
+
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
      doing this relocation the code in write.c is going to call
@@ -571,9 +571,9 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
   /* This is a RELA port.  Thus, it does not need to store a
      value if it is going to make a reloc.  What's more, when
      assembling a line like
-     
+
      .byte global-0x7f00
-     
+
      we'll get a spurious error message if we try to stuff 0x7f00 into
      the byte.  */
   if (! fixP->fx_done)
@@ -648,6 +648,6 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-     
+
   return 0;
 }

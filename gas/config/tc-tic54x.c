@@ -1712,7 +1712,7 @@ tic54x_float_cons (type)
 
 /* The argument is capitalized if it should be zero-terminated
    's' is normal string with upper 8-bits zero-filled, 'p' is packed.
-   Code copied from stringer, and slightly modified so that strings are packed 
+   Code copied from stringer, and slightly modified so that strings are packed
    and encoded into the correct octets.  */
 
 static void
@@ -3325,7 +3325,7 @@ md_begin ()
 		  tm->name, hash_err);
     }
   parop_hash = hash_new ();
-  for (tm = (template *) tic54x_paroptab; tm->name; tm++) 
+  for (tm = (template *) tic54x_paroptab; tm->name; tm++)
     {
       if (hash_find (parop_hash, tm->name))
 	continue;

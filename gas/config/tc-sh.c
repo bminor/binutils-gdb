@@ -433,7 +433,7 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   { SH64PCREL16_F, SH64PCREL16_M, SH64PCREL16_LENGTH, C (SH64PCREL16PT_64, SH64PCREL32) },
   /* C (SH64PCREL16PT_64, SH64PCREL32) */
   { SH64PCREL32_F,
-    SH64PCREL32_M, 
+    SH64PCREL32_M,
     SH64PCREL32_LENGTH,
     C (SH64PCREL16PT_64, SH64PCREL48) },
   /* C (SH64PCREL16PT_64, SH64PCREL48) */
@@ -554,12 +554,12 @@ sh_check_fixup (main_exp, r_type_p)
      plus/minus a symbol.  However, gas' parser gives us:
 
 	O_subtract (O_add (f@PLT, .), .LPCS#+2)
-       
+
      so we attempt to transform this into:
 
         O_subtract (f@PLT, O_subtract (.LPCS#+2, .))
 
-     which we can handle simply below.  */	
+     which we can handle simply below.  */
   if (exp->X_op == O_subtract)
     {
       if (sh_PIC_related_p (exp->X_op_symbol))
@@ -620,7 +620,7 @@ sh_check_fixup (main_exp, r_type_p)
 	    case BFD_RELOC_UNUSED:
 	      *r_type_p = BFD_RELOC_SH_GOTPC;
 	      break;
-	      
+
 	    default:
 	      abort ();
 	    }
@@ -654,15 +654,15 @@ sh_check_fixup (main_exp, r_type_p)
 	    case BFD_RELOC_32_GOTOFF:
 	      *r_type_p = BFD_RELOC_SH_GOTOFF_LOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_SH_GOTPLT32:
 	      *r_type_p = BFD_RELOC_SH_GOTPLT_LOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_GOT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_GOT_LOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_PLT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_PLT_LOW16;
 	      break;
@@ -678,15 +678,15 @@ sh_check_fixup (main_exp, r_type_p)
 	    case BFD_RELOC_32_GOTOFF:
 	      *r_type_p = BFD_RELOC_SH_GOTOFF_MEDLOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_SH_GOTPLT32:
 	      *r_type_p = BFD_RELOC_SH_GOTPLT_MEDLOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_GOT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_GOT_MEDLOW16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_PLT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_PLT_MEDLOW16;
 	      break;
@@ -702,15 +702,15 @@ sh_check_fixup (main_exp, r_type_p)
 	    case BFD_RELOC_32_GOTOFF:
 	      *r_type_p = BFD_RELOC_SH_GOTOFF_MEDHI16;
 	      break;
-	      
+
 	    case BFD_RELOC_SH_GOTPLT32:
 	      *r_type_p = BFD_RELOC_SH_GOTPLT_MEDHI16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_GOT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_GOT_MEDHI16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_PLT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_PLT_MEDHI16;
 	      break;
@@ -726,15 +726,15 @@ sh_check_fixup (main_exp, r_type_p)
 	    case BFD_RELOC_32_GOTOFF:
 	      *r_type_p = BFD_RELOC_SH_GOTOFF_HI16;
 	      break;
-	      
+
 	    case BFD_RELOC_SH_GOTPLT32:
 	      *r_type_p = BFD_RELOC_SH_GOTPLT_HI16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_GOT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_GOT_HI16;
 	      break;
-	      
+
 	    case BFD_RELOC_32_PLT_PCREL:
 	      *r_type_p = BFD_RELOC_SH_PLT_HI16;
 	      break;
@@ -808,7 +808,7 @@ sh_cons_fix_new (frag, off, size, exp)
       as_bad (_("unsupported BFD relocation size %u"), size);
       r_type = BFD_RELOC_UNUSED;
     }
-    
+
   fix_new_exp (frag, off, size, exp, 0, r_type);
 }
 
@@ -1582,7 +1582,7 @@ get_specific (opcode, operands)
 		{
 		  if (nLastDestReg == user->reg)
 		    as_warn (_("destination register is same for parallel insns"));
-		  
+
 		  bIsPPI = false;
 		}
 	    }
@@ -3956,7 +3956,7 @@ sh_end_of_match (cont, what)
     return cont + len;
 
   return NULL;
-}  
+}
 
 int
 sh_parse_name (name, exprP, nextcharP)
@@ -4003,7 +4003,7 @@ sh_parse_name (name, exprP, nextcharP)
     }
 
   exprP->X_add_symbol = symbol_find_or_make (name);
-  
+
   if (*nextcharP != '@')
     goto no_suffix;
   else if ((next_end = sh_end_of_match (next + 1, "GOTOFF")))

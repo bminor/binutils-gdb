@@ -28,7 +28,7 @@
 #include "opcode/or32.h"
 
 #ifdef BFD_ASSEMBLER
-#include "elf/or32.h" 
+#include "elf/or32.h"
 #endif
 
 #define DEBUG 0
@@ -64,7 +64,7 @@ const pseudo_typeS md_pseudo_table[] =
   {
     {"align",   s_align_bytes,  4 },
     {"space",   s_space,        0 },
-    {"cputype", s_ignore,       0 }, 
+    {"cputype", s_ignore,       0 },
     {"reg",     s_lsym,         0 },  /* Register equate, same as equ.  */
     {"sect",    s_ignore,       0 },  /* Creation of coff sections.  */
     {"proc",    s_ignore,       0 },  /* Start of a function.  */
@@ -122,9 +122,9 @@ static char * parse_operand PARAMS ((char *, expressionS *, int));
 #endif
 
 /* Set bits in machine opcode according to insn->encoding
-   description and passed operand.  */ 
+   description and passed operand.  */
 
-static void 
+static void
 encode (insn, opcode, param_val, param_ch)
      const struct machine_opcode *insn;
      unsigned long *opcode;
@@ -152,7 +152,7 @@ encode (insn, opcode, param_val, param_ch)
 
   for (enc = insn->encoding; *enc != '\0';)
     {
-      if ((*enc == '0') && (*(enc + 1) == 'x')) 
+      if ((*enc == '0') && (*(enc + 1) == 'x'))
 	{
 	  int tmp = strtol (enc, NULL, 16);
 
@@ -160,25 +160,25 @@ encode (insn, opcode, param_val, param_ch)
 	  *opcode |= tmp << opc_pos;
 	  enc += 3;
 	}
-      else if ((*enc == '0') || (*enc == '-')) 
+      else if ((*enc == '0') || (*enc == '-'))
 	{
 	  opc_pos--;
 	  enc++;
 	}
-      else if (*enc == '1') 
+      else if (*enc == '1')
 	{
 	  opc_pos--;
 	  *opcode |= 1 << opc_pos;
 	  enc++;
 	}
-      else if (*enc == param_ch) 
+      else if (*enc == param_ch)
 	{
 	  opc_pos--;
 	  param_pos--;
 	  *opcode |= ((param_val >> param_pos) & 0x1) << opc_pos;
 	  enc++;
 	}
-      else if (ISALPHA (*enc)) 
+      else if (ISALPHA (*enc))
 	{
 	  opc_pos--;
 	  enc++;
@@ -186,7 +186,7 @@ encode (insn, opcode, param_val, param_ch)
       else
 	enc++;
     }
-      
+
 #if DEBUG
   printf ("    opcode=%.8lx\n", *opcode);
 #endif
@@ -318,14 +318,14 @@ parse_operand (s, operandp, opt)
   if ((*s == '(') && (*(s+1) == 'r'))
     s++;
 
-  if ((*s == 'r') && ISDIGIT (*(s + 1))) 
+  if ((*s == 'r') && ISDIGIT (*(s + 1)))
     {
       operandp->X_add_number = strtol (s + 1, NULL, 10);
       operandp->X_op = O_register;
       for (; (*s != ',') && (*s != '\0');)
-        s++;  
+        s++;
       input_line_pointer = save;
-      return s; 
+      return s;
     }
 
   expression (operandp);
@@ -340,10 +340,10 @@ parse_operand (s, operandp, opt)
           operandp->X_op = O_constant;
         }
     }
-    
+
   new = input_line_pointer;
   input_line_pointer = save;
- 
+
 #if DEBUG
   printf ("  %s=parse_operand(%s): operandp->X_op = %u\n", new, s, operandp->X_op);
 #endif
@@ -396,11 +396,11 @@ parse_operand (s, operandp, opt)
           operandp->X_op = O_constant;
         }
     }
-    
+
   new = input_line_pointer;
   input_line_pointer = save;
-  
-  if ((operandp->X_op == O_symbol) && (*s != '_')) 
+
+  if ((operandp->X_op == O_symbol) && (*s != '_'))
     {
 #if DEBUG
       printf ("symbol: '%s'\n", save);
@@ -410,7 +410,7 @@ parse_operand (s, operandp, opt)
         if ((*s == REGISTER_PREFIX) && (*(s + 1) == 'r')) /* Register prefix.  */
           s++;
 
-        if ((*s == 'r') && ISDIGIT (*(s + 1))) 
+        if ((*s == 'r') && ISDIGIT (*(s + 1)))
           {
             operandp->X_add_number = strtol (s + 1, NULL, 10);
             operandp->X_op = O_register;
@@ -483,7 +483,7 @@ machine_ip (str)
 
   /* Build the opcode, checking as we go to make sure that the
      operands match.
-   
+
      If an operand matches, we modify the_insn or opcode appropriately,
      and do a "continue".  If an operand fails to match, we "break".  */
   if (insn->args[0] != '\0')
@@ -509,7 +509,7 @@ machine_ip (str)
               /* We are truly done.  */
               the_insn.opcode = opcode;
               if (check_invalid_opcode (opcode))
-                as_bad (_("instruction not allowed: %s"), str); 
+                as_bad (_("instruction not allowed: %s"), str);
               return;
             }
           as_bad (_("too many operands: %s"), s);
@@ -525,7 +525,7 @@ machine_ip (str)
 #if DEBUG
 	      printf ("    ',' case: operand->X_add_number = %d, *args = %s, *s = %s\n",
 		      operand->X_add_number, args, s);
-#endif    
+#endif
               continue;
             }
           break;
@@ -533,7 +533,7 @@ machine_ip (str)
         case '(':   /* Must match a (.  */
           s = parse_operand (s, operand, args[1] == 'I');
           continue;
-    
+
         case ')':   /* Must match a ).  */
           continue;
 
@@ -542,7 +542,7 @@ machine_ip (str)
 
           if (operand->X_op != O_register)
             break;    /* Only registers.  */
- 
+
           know (operand->X_add_symbol == 0);
           know (operand->X_op_symbol == 0);
           regno = operand->X_add_number;
@@ -555,7 +555,7 @@ machine_ip (str)
         default:
           /* if (! ISALPHA (*args))
                break;  */   /* Only immediate values.  */
-               
+
           if (mask_or_shift)
 	    {
 #if DEBUG
@@ -564,23 +564,23 @@ machine_ip (str)
 	      reloc = mask_or_shift;
 	    }
           mask_or_shift = 0;
-          
-          if (strncasecmp (args, "LO(", 3) == 0) 
+
+          if (strncasecmp (args, "LO(", 3) == 0)
             {
 #if DEBUG
               printf ("reloc_const\n");
 #endif
               reloc = BFD_RELOC_LO16;
             }
-          else if (strncasecmp (args, "HI(", 3) == 0) 
+          else if (strncasecmp (args, "HI(", 3) == 0)
             {
 #if DEBUG
               printf ("reloc_consth\n");
 #endif
               reloc = BFD_RELOC_HI16;
             }
-          
-          if (*s == '(') 
+
+          if (*s == '(')
             {
               operand->X_op = O_constant;
 #if 0
@@ -611,7 +611,7 @@ machine_ip (str)
               the_insn.pcrel = 0;
               encode (insn, &opcode, operand->X_add_number, *args);
  /*             the_insn.reloc = BFD_RELOC_NONE; */
-              continue; 
+              continue;
             }
 
           if (reloc == BFD_RELOC_NONE)
@@ -625,7 +625,7 @@ machine_ip (str)
           printf ("    BFD_RELOC_NONE=%d\n", BFD_RELOC_NONE);
 #endif
           the_insn.exp = *operand;
-  
+
           /*  the_insn.reloc_offset = 1;  */
           the_insn.pcrel = 1; /* Assume PC-relative jump.  */
 
@@ -637,7 +637,7 @@ machine_ip (str)
           encode (insn, &opcode, operand->X_add_number, *args);
           continue;
         }
-  
+
       /* Types or values of args don't match.  */
       as_bad (_("invalid operands"));
       return;
@@ -698,11 +698,11 @@ machine_ip (str)
 
   /* Build the opcode, checking as we go to make sure that the
      operands match.
-   
+
      If an operand matches, we modify the_insn or opcode appropriately,
      and do a "continue".  If an operand fails to match, we "break".  */
   if (insn->args[0] != '\0')
-    /* Prime the pump.  */      
+    /* Prime the pump.  */
     s = parse_operand (s, operand,
 		       insn->args[0] == 'I'
 		       || strcmp (insn->name, "l.nop") == 0);
@@ -724,7 +724,7 @@ machine_ip (str)
               /* We are truly done.  */
               the_insn.opcode = opcode;
               if (check_invalid_opcode (opcode))
-                as_bad (_("instruction not allowed: %s"), str); 
+                as_bad (_("instruction not allowed: %s"), str);
               return;
             }
           as_bad (_("too many operands: %s"), s);
@@ -740,7 +740,7 @@ machine_ip (str)
 #if DEBUG
 	      printf ("    ',' case: operand->X_add_number = %d, *args = %s, *s = %s\n",
 		      operand->X_add_number, args, s);
-#endif    
+#endif
               continue;
             }
           break;
@@ -748,7 +748,7 @@ machine_ip (str)
         case '(':   /* Must match a (.  */
           s = parse_operand (s, operand, args[1] == 'I');
           continue;
-    
+
         case ')':   /* Must match a ).  */
           continue;
 
@@ -757,7 +757,7 @@ machine_ip (str)
 
           if (operand->X_op != O_register)
             break;    /* Only registers.  */
- 
+
           know (operand->X_add_symbol == 0);
           know (operand->X_op_symbol == 0);
           regno = operand->X_add_number;
@@ -770,7 +770,7 @@ machine_ip (str)
         default:
           /* if (! ISALPHA (*args))
                break;  */   /* Only immediate values.  */
-               
+
           if (mask_or_shift)
 	    {
 #if DEBUG
@@ -779,23 +779,23 @@ machine_ip (str)
 	      reloc = mask_or_shift;
 	    }
           mask_or_shift = 0;
-          
-          if (strncasecmp (args, "LO(", 3) == 0) 
+
+          if (strncasecmp (args, "LO(", 3) == 0)
             {
 #if DEBUG
               printf ("reloc_const\n");
 #endif
               reloc = RELOC_CONST;
             }
-          else if (strncasecmp (args, "HI(", 3) == 0) 
+          else if (strncasecmp (args, "HI(", 3) == 0)
             {
 #if DEBUG
               printf ("reloc_consth\n");
 #endif
               reloc = RELOC_CONSTH;
             }
-          
-          if (*s == '(') 
+
+          if (*s == '(')
             {
               operand->X_op = O_constant;
 #if 0
@@ -827,7 +827,7 @@ machine_ip (str)
               the_insn.pcrel = 0;
               encode (insn, &opcode, operand->X_add_number, *args);
 	      /* the_insn.reloc = NO_RELOC; */
-              continue; 
+              continue;
             }
 
           if (reloc == NO_RELOC)
@@ -839,7 +839,7 @@ machine_ip (str)
           printf ("    NO_RELOC=%d\n", NO_RELOC);
 #endif
           the_insn.exp = *operand;
-  
+
           /*  the_insn.reloc_offset = 1;  */
           the_insn.pcrel = 1; /* Assume PC-relative jump.  */
 
@@ -851,7 +851,7 @@ machine_ip (str)
           encode (insn, &opcode, operand->X_add_number, *args);
           continue;
         }
-  
+
       /* Types or values of args don't match.  */
       as_bad (_("invalid operands"));
       return;
@@ -1250,7 +1250,7 @@ md_convert_frag (headers, seg, fragP)
      fragS * fragP   ATTRIBUTE_UNUSED;
 {
   as_fatal ("or32_convert_frag\n");
-} 
+}
 #endif
 
 /* Should never be called for or32.  */
@@ -1296,7 +1296,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 
 #if DEBUG
   printf ("tc_aout_fix_to_chars\n");
-#endif  
+#endif
 
   know (fixP->fx_r_type < BFD_RELOC_NONE);
   know (fixP->fx_addsy != NULL);
@@ -1404,8 +1404,8 @@ tc_aout_pre_write_hook ()
 #if DEBUG
   printf ("In tc_aout_pre_write_hook()\n");
 #endif
-} 
-*/                                                                                      
+}
+*/
 #endif
 
 /* Default the values of symbols known that should be "predefined".  We
@@ -1425,8 +1425,8 @@ md_undefined_symbol (name)
 #endif
 
   /* Register name.  */
-  if (name[0] == 'r' || name[0] == 'R' || name[0] == 'a' || name[0] == 'b') 
-    { 
+  if (name[0] == 'r' || name[0] == 'R' || name[0] == 'a' || name[0] == 'b')
+    {
       long maxreg;
 
       /* Parse the number, make sure it has no extra zeroes or
@@ -1489,7 +1489,7 @@ md_operand (expressionP)
       long lab;
       char *name;
       symbolS *sym;
-      
+
       /* This is a local label.  */
       ++input_line_pointer;
       lab = (long) get_absolute_expression ();
@@ -1541,7 +1541,7 @@ md_operand (expressionP)
           type = 'x';
           fieldlimit = 4;
         }
-      else 
+      else
 	return;
 
       if (ISDIGIT (*s))
@@ -1570,7 +1570,7 @@ md_operand (expressionP)
       SKIP_WHITESPACE ();
 
       input_line_pointer = s;
-      expressionP->X_op = O_constant; 
+      expressionP->X_op = O_constant;
       expressionP->X_unsigned = 1;
       expressionP->X_add_number = ((floatbuf[fieldnum * 2]
                                     << LITTLENUM_NUMBER_OF_BITS)

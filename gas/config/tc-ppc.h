@@ -1,5 +1,5 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -245,7 +245,7 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 
 #if BFD_DEFAULT_TARGET_SIZE == 64
-/* Extra sections for 64-bit ELF PPC. */
+/* Extra sections for 64-bit ELF PPC.  */
 #define ELF_TC_SPECIAL_SECTIONS \
   { ".toc",		SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE}, \
   { ".tocbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE},

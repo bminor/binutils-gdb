@@ -368,7 +368,7 @@ parse_expression (char *str, struct pdp11_code *operand)
 #if 0
   /* FIXME: what follows is broken badly.  You can't deal with differences
      in radix conventions this way, because of symbolic constants, constant
-     expressions made up of pieces of differing radix, etc.  The only 
+     expressions made up of pieces of differing radix, etc.  The only
      choices are to change ../expr.c to know about pdp11 conventions, or
      to accept the fact that gas will use consistent conventions that differ
      from those of traditional pdp11 assemblers.  For now, I've
@@ -446,7 +446,7 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
               operand->error = "Error in expression";
               break;
             }
-          /* it's a floating literal... */
+          /* it's a floating literal...  */
           know (operand->reloc.exp.X_add_number < 0);
           flonum_gen2vax ('f', &generic_floating_point_number, literal_float);
           operand->word = literal_float[0];
@@ -579,7 +579,7 @@ parse_op (char *str, struct pdp11_code *operand)
       operand->error = "Float AC not legal as integer operand";
       return str;
     }
-  
+
   return parse_op_noreg (str, operand);
 }
 

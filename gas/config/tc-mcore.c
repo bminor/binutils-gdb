@@ -1,5 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -124,9 +124,9 @@ const relax_typeS md_relax_table[] = {
   {    0,     0, C32_LEN, 0 },			  /* UNDEF_WORD_DISP */
 
   /* UNCD_JUMP */
-  {    0,     0, 0,	  0 },			  /* UNDEF_DISP */     
-  { 2048, -2046, U12_LEN, C(UNCD_JUMP, DISP32) }, /* DISP12 */         
-  {    0,     0, U32_LEN, 0 },			  /* DISP32 */         
+  {    0,     0, 0,	  0 },			  /* UNDEF_DISP */
+  { 2048, -2046, U12_LEN, C(UNCD_JUMP, DISP32) }, /* DISP12 */
+  {    0,     0, U32_LEN, 0 },			  /* DISP32 */
   {    0,     0, U32_LEN, 0 }			  /* UNDEF_WORD_DISP */
 
 };
