@@ -1,3 +1,12 @@
+start-sanitize-cygnus
+Fri Apr 24 09:28:15 1998  Ben Elliston  <bje@cygnus.com>
+
+	* Makefile.in: Added standard targets for `flexlm'.
+	Added intermodule dependency for `all-snavigator'.
+	
+	* configure.in: Include `flexlm' as a host library.
+
+end-sanitize-cygnus
 Thu Apr 23 12:26:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig: Update cygwin32 support.
