@@ -1,3 +1,11 @@
+2003-02-20  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in (TARGET_SYSTEM_ROOT): Set default to
+	${exec_prefix}/${target_alias}/sys-root.  Match explicit
+	'${exec_prefix}' (in addition to the expansion thereof) as
+	relocatable.
+	* configure: Rebuilt.
+
 2003-02-20  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (search_symbols): Revert the search_symbols part of my
