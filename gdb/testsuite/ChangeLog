@@ -1,3 +1,12 @@
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gdb.base/remote.c (RANDOM_DATA_SIZE): New define, defaults to 48K 
+	and defined to 1K for m68hc11.
+	(random_data): Reduce table to 1K for embedded platforms (68hc11).
+	* gdb.base/remote.exp (get_sizeof): New function from sizeof.exp.
+	(sizeof_random_data): New variable to tell the size of the data table;
+	don't test past this size; always run to main.
+
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gdb.base/return2.exp: return of long long and double fails for

@@ -1,4 +1,4 @@
-#   Copyright 1999 Free Software Foundation, Inc.
+#   Copyright 1999, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ set bug_id 0
 if {! [is_remote target]} {
     return
 }
-
 
 set testfile "remote"
 set srcfile ${testfile}.c
@@ -138,10 +137,37 @@ gdb_load_timed $binfile 0 "fixed" 16385
 # fall back to the default
 gdb_load_timed $binfile 0 "limit" 0
 
+# Get size of data uploaded
+
+#
+# Query GDB for the size of various types
+#
+
+proc get_sizeof { type default } {
+    global gdb_prompt
+    send_gdb "print/d sizeof (${type})\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = (\[0-9\]*).*$gdb_prompt $" {
+	    set size $expect_out(1,string)
+	    pass "get sizeof ${type} ($size)"
+	}
+	timeout {
+	    set size ${default}
+	    fail "get sizeof ${type} (timeout)"
+	}
+    }
+    return ${size}
+}
+
+# Get the size of random_data table (defaults to 48K).
+set sizeof_random_data [get_sizeof "random_data" 48*1024]
 
 #
 # Part THREE: Check the upload behavour
 #
+if ![runto_main] then {
+    fail "Cannot run to main"
+}
 
 # Carefully check memory around each of the most common packet edge
 # conditions
@@ -152,9 +178,10 @@ gdb_test "x/8ub random_data" \
 gdb_test "x/8ub random_data + 400 - 4" \
 	"<random_data\\+396>:\[ \t\]+185\[ \t\]+255\[ \t\]+50\[ \t\]+140\[ \t\]+237\[ \t\]+172\[ \t\]+143\[ \t\]+93"
 
-gdb_test "x/8ub random_data + 16384 - 4" \
+if {$sizeof_random_data > 16380 } then {
+    gdb_test "x/8ub random_data + 16384 - 4" \
 	"<random_data\\+16380>:\[ \t\]+178\[ \t\]+180\[ \t\]+135\[ \t\]+93\[ \t\]+70\[ \t\]+62\[ \t\]+205\[ \t\]+76"
-
+}
 
 # Read a chunk just larger than the packet size (reduce the packet
 # size to make life easier)

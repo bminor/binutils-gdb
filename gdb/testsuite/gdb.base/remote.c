@@ -23,12 +23,21 @@ BEGIN {
 
 */
 
+#ifdef mc68hc11
+# define RANDOM_DATA_SIZE (1024)
+#endif
+
 /* Use a character buffer to avoid byte order problems. 48k is
    chosen so that the buffer required at least 3 16k packets but
    targets often have no more than 64k of data. */
 /* If you change this data, you will also have to change the checks
    for the data in remote.c */
-unsigned char random_data[3 * 2048 * 8] = {
+#ifndef RANDOM_DATA_SIZE
+# define RANDOM_DATA_SIZE (3 * 2048 * 8)
+# define BIG_RANDOM_DATA
+#endif
+
+unsigned char random_data[RANDOM_DATA_SIZE] = {
   60,  74, 216,  38, 149,  49, 207,  44,
  124,  38,  93, 125, 232,  67, 228,  56,
  161, 146,  85,  26, 128, 145, 218,  10,
@@ -157,6 +166,7 @@ unsigned char random_data[3 * 2048 * 8] = {
  196,  13, 161, 122, 145, 141, 102, 233,
  227, 112, 121,  67, 111, 148, 160,  32,
  199, 117, 223, 105, 184, 131, 119, 182,
+#ifdef BIG_RANDOM_DATA
   60,  26, 169, 194, 173, 164, 249, 135,
  178,  57,  50,  44,  12, 159, 167, 240,
  249, 188,  86, 192,  73,  47,  74,  77,
@@ -6173,6 +6183,7 @@ unsigned char random_data[3 * 2048 * 8] = {
   97, 106, 152,  12, 243, 240,  41, 251,
   35, 249, 105, 228,  53,  94,  43, 119,
   61, 162, 192,  78,  58,  46,  84, 110,
+#endif
 };
 
 int
