@@ -51,7 +51,7 @@
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add ia64-*-aix* mapping.
 	* emulparams/elf64_aix.sh: Add settings for elf64 on aix5.
-	* testsuite/ld-bootstrap/boostrap.exp: Exclude ia64 flavor from
+	* testsuite/ld-bootstrap/bootstrap.exp: Exclude ia64 flavor from
 	AIX-specific test. 
 	
 2001-02-20  H.J. Lu  <hjl@gnu.org>
@@ -740,7 +740,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* scripttempl/elf.sc: Add .gnu.linkonce.wi.* to .debug_info
 	sections.
-	* scripttempl/elf32var.sc: Ditto.
+	* scripttempl/elf32avr.sc: Ditto.
 	* scripttempl/elfd10v.sc: Ditto.
 	* scripttempl/elfd30v.sc: Ditto.
 	* scripttempl/elfi370.sc: Ditto.
@@ -937,8 +937,8 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
-	* ld/lexsup.c: Add optional style to demangle switch
-	* ld/ld.texinfo: Document optional style to demangle switch.
+	* lexsup.c: Add optional style to demangle switch
+	* ld.texinfo: Document optional style to demangle switch.
 
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -994,7 +994,7 @@ Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 2000-07-16  Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* src/ld/emultempl/pe.em (gld_*_open_dynamic_archive): New search
+	* emultempl/pe.em (gld_*_open_dynamic_archive): New search
 	order for dynamic library '-lfoo' on pei386: libfoo.dll.a,
 	foo.dll.a, libfoo.a, libfoo.dll, foo.dll. This fixes compatibility
 	errors introduced by the old dynamic lib search order.
@@ -1326,7 +1326,7 @@ Thu May 18 10:47:57 2000  Jeffrey A Law  (law@cygnus.com)
 
 2000-05-16  Charles Wilson <cwilson@ece.gatech.edu>
 
-	* ld/emultempl/pe.em (_open_dynamic_archive): New function: Search
+	* emultempl/pe.em (_open_dynamic_archive): New function: Search
 	the library path for "foo.dll" and "libfoo.dll" dynamic libraries
 	before searching for 'libfoo.a' in response to a '-Bdynamic -lfoo'
 	link options.
@@ -1633,7 +1633,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(gld_X_find_potential_libraries): New function.  Search for
 	libraries called "*.lib".
 
-	* scriptempl/pe.sc: Add .pdata section.
+	* scripttempl/pe.sc: Add .pdata section.
 
 2000-02-23  Richard Henderson  <rth@cygnus.com>
 
@@ -1694,9 +1694,9 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-02-03  Timothy Wall <twall@redhat.com>
 
-	* ld/ldexp.c (fold_name): Make SIZEOF operator return byte count, not
+	* ldexp.c (fold_name): Make SIZEOF operator return byte count, not
 	octet count.
-	* ld/ldlang.c (print_input_section, print_data_statement,
+	* ldlang.c (print_input_section, print_data_statement,
 	print_reloc_statement, print_padding_statement): Print target
 	address values and section sizes as bytes, not octets.
 	(insert_pad) Calculate padding size in octets, and adjust "dot"

@@ -1,6 +1,6 @@
 %{
 
-/* Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+/* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.

@@ -1,5 +1,6 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -2675,7 +2676,6 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 #define IGNORE_SECTION(bfd, s) \
   (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD)) != (SEC_ALLOC | SEC_LOAD)) \
    || bfd_section_size (bfd, s) == 0)
-
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen when the linker script specifically specifies
    the output section addresses of the two sections.  */
@@ -2685,6 +2685,7 @@ lang_check_section_addresses ()
 {
   asection *s;
   unsigned opb = bfd_octets_per_byte (output_bfd);
+
 
   /* Scan all sections in the output list.  */
   for (s = output_bfd->sections; s != NULL; s = s->next)

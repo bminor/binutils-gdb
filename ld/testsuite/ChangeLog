@@ -178,7 +178,7 @@
 
 Fri Apr 21 15:16:07 2000  Richard Henderson  <rth@cygnus.com>
 
-	* testsuite/ld-scripts/phdrs.exp: IA-64 is 64-bit ELF too.
+	* ld-scripts/phdrs.exp: IA-64 is 64-bit ELF too.
 
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
@@ -878,7 +878,7 @@ Mon Jul 10 11:13:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Jul  3 14:26:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
-	* ld/testsuite/versados/(t1,t2).ld: End in newlines.
+	* versados/(t1,t2).ld: End in newlines.
 
 Mon May 22 20:19:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -1018,25 +1018,25 @@ Fri Jan 28 13:25:41 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	different numbers of lines.  Don't muck with $differences to avoid
 	indicating a pass, just return.
 
-	* testsuite/ld.cdtest/{cdtest-foo.h,cdtest-foo.cc,cdtest-main.cc}:
+	* ld.cdtest/{cdtest-foo.h,cdtest-foo.cc,cdtest-main.cc}:
 	Fix test case to be valid ANSI C++.  Don't require use of header
 	files, so "../gcc/xgcc -B../gcc/" can be used for CXX.
-	* testsuite/ld.cdtest/cdtest.exp: Combine "rm" lines.  Add some
+	* ld.cdtest/cdtest.exp: Combine "rm" lines.  Add some
 	commentary on things that are still broken with this test case.
 
 Fri Sep 10 09:58:23 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
-	* testsuite/ld.cdtest/cdtest.exp: Added CXXFLAGS to compile stage.
+	* ld.cdtest/cdtest.exp: Added CXXFLAGS to compile stage.
 
 Thu Aug 12 16:05:37 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
-	* testsuite/lib/ld.exp: add compiler and linker support
-	* testsuite/config/unix-ld.exp: add compiler and linker support
-	* testsuite/ld.bootstrap/bootstrap.exp: fixed to do partial links
-	* testsuite/ld.cdtest/cdtest.exp: constructor/destructor testscase
+	* lib/ld.exp: add compiler and linker support
+	* config/unix-ld.exp: add compiler and linker support
+	* ld.bootstrap/bootstrap.exp: fixed to do partial links
+	* ld.cdtest/cdtest.exp: constructor/destructor testscase
 
 Wed Aug  4 21:00:18 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
-	* testsuite/lib/ld.exp: new file
-	* testsuite/config/unix-ld.exp: new file
-	* testsuite/ld.bootstrap/bootstrap.exp: new file
+	* lib/ld.exp: new file
+	* config/unix-ld.exp: new file
+	* ld.bootstrap/bootstrap.exp: new file
