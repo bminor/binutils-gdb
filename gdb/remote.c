@@ -413,9 +413,9 @@ get_memory_packet_size (struct memory_packet_config *config)
 #ifndef MAX_REMOTE_PACKET_SIZE
 #define MAX_REMOTE_PACKET_SIZE 16384
 #endif
-  /* NOTE: 16 is just chosen at random.  */
+  /* NOTE: 20 ensures we can write at least one byte.  */
 #ifndef MIN_REMOTE_PACKET_SIZE
-#define MIN_REMOTE_PACKET_SIZE 16
+#define MIN_REMOTE_PACKET_SIZE 20
 #endif
   long what_they_get;
   if (config->fixed_p)
@@ -3332,6 +3332,7 @@ remote_fetch_registers (int regnum)
      in the buffer is not a hex character, assume that has happened
      and try to fetch another packet to read.  */
   while ((buf[0] < '0' || buf[0] > '9')
+	 && (buf[0] < 'A' || buf[0] > 'F')
 	 && (buf[0] < 'a' || buf[0] > 'f')
 	 && buf[0] != 'x')	/* New: unavailable register value.  */
     {
@@ -3659,16 +3660,18 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
   /* Verify that the target can support a binary download.  */
   check_binary_download (memaddr);
 
+  payload_size = get_memory_write_packet_size ();
+  
   /* Compute the size, and then allocate space for the largest
-     possible packet.  Include space for an extra trailing NULL.  */
-  sizeof_buf = get_memory_write_packet_size () + 1;
+     possible packet.  Include space for an extra trailing NUL.  */
+  sizeof_buf = payload_size + 1;
   buf = alloca (sizeof_buf);
 
   /* Compute the size of the actual payload by subtracting out the
-     packet header and footer overhead: "$M<memaddr>,<len>:...#nn".  */
-  payload_size = (get_memory_write_packet_size () - (strlen ("$M,:#NN")
-						     + hexnumlen (memaddr)
-						     + hexnumlen (len)));
+     packet header and footer overhead: "$M<memaddr>,<len>:...#nn".
+     */
+  payload_size -= strlen ("$M,:#NN");
+  payload_size -= hexnumlen (memaddr);
 
   /* Construct the packet header: "[MX]<memaddr>,<len>:".   */
 
@@ -3681,11 +3684,15 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       *p++ = 'X';
       /* Best guess at number of bytes that will fit.  */
       todo = min (len, payload_size);
+      payload_size -= hexnumlen (todo);
+      todo = min (todo, payload_size);
       break;
     case PACKET_DISABLE:
       *p++ = 'M';
       /* Num bytes that will fit.  */
       todo = min (len, payload_size / 2);
+      payload_size -= hexnumlen (todo);
+      todo = min (todo, payload_size / 2);
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
@@ -3693,6 +3700,9 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+  if (todo <= 0)
+    internal_error (__FILE__, __LINE__,
+		    _("minumum packet size too small to write data"));
 
   /* Append "<memaddr>".  */
   memaddr = remote_address_masked (memaddr);

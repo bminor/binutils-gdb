@@ -1,5 +1,11 @@
 2005-03-08  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* remote.c (MIN_REMOTE_PACKET_SIZE): Set to 20.
+	(remote_fetch_registers): Allow uppercase hex when resyncing.
+	(remote_write_bytes): Only call get_memory_write_packet_size once.
+	Robustify packet size calculation for very small packets. Check
+	that at least one byte will be written.
+
 	* tracepoint.c (target_is_remote): Allow extended-remote.
 	(struct collection_list): Allow 256 registers, like the comment
 	said.
