@@ -1,3 +1,8 @@
+2003-06-12  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.tgt (mips*-sgi-irix6*): Add the o32 and n64 emulations
+	to $targ_extra_libpath.
+
 2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
