@@ -1,5 +1,9 @@
 2000-04-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* gdb-stabs.h (SECT_OFF_MAX): Increase to 40.
+
+2000-04-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* win32-nat.c  (handle_load_dll): Don't treat .text as a special
  	section anymore.
 	* somread.c (som_symfile_offsets): Ditto.
