@@ -2,6 +2,8 @@ Thu Feb 24 04:29:19 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* exec.c (print_section_info):  Print entry point for exec_bfd only.
 	* ser-unix.c (wait_for):  Fix typo in HAVE_TERMIO case.
+	* dwarfread.c:  Remove second inclusion of <sys/types.h>, which
+	causes problems if <sys/types.h> has no multiple inclusion protection.
 
 Wed Feb 23 16:28:55 1994  Jeffrey A. Law  (law@cygnus.com)
 

@@ -56,7 +56,6 @@ other things to work on, if you get bored. :-)
 
 #include <fcntl.h>
 #include <string.h>
-#include <sys/types.h>
 
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
