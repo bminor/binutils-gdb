@@ -1,3 +1,16 @@
+2002-04-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* valops.c (hand_function_call): Call
+	generic_save_call_dummy_addr.
+	* frame.h (generic_save_call_dummy_addr): Declare.
+	* blockframe.c (struct dummy_frame): Add fields call_lo and
+	call_hi.
+	(generic_find_dummy_frame): Check for PC in range call_lo to
+	call_hi instead of entry_point_address.
+	(generic_pc_in_call_dummy): Search the dummy frames for a PC in
+	the call_lo to call_hi range.  Allow for DECR_PC_AFTER_BREAK.
+	(generic_save_call_dummy_addr): New function.
+
 2002-04-24  David S. Miller  <davem@redhat.com>
 
 	* sparc-tdep.c (sparc_gdbarch_skip_prologue): Kill, duplicates

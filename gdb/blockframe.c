@@ -1070,42 +1070,59 @@ struct dummy_frame
   CORE_ADDR sp;
   CORE_ADDR top;
   char *registers;
+
+  /* Address range of the call dummy code.  Look for PC in the range
+     [LO..HI) (after allowing for DECR_PC_AFTER_BREAK).  */
+  CORE_ADDR call_lo;
+  CORE_ADDR call_hi;
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
 
 /* Function: find_dummy_frame(pc, fp, sp)
-   Search the stack of dummy frames for one matching the given PC, FP and SP.
-   This is the work-horse for pc_in_call_dummy and read_register_dummy     */
+
+   Search the stack of dummy frames for one matching the given PC, FP
+   and SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
+   to call this function after the PC has been adjusted.  */
 
 char *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
 
-  if (pc != entry_point_address ())
-    return 0;
-
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
-    if (fp == dummyframe->fp
-	|| fp == dummyframe->sp
-	|| fp == dummyframe->top)
+    if ((pc >= dummyframe->call_lo && pc < dummyframe->call_hi)
+	&& (fp == dummyframe->fp
+	    || fp == dummyframe->sp
+	    || fp == dummyframe->top))
       /* The frame in question lies between the saved fp and sp, inclusive */
       return dummyframe->registers;
 
   return 0;
 }
 
-/* Function: pc_in_call_dummy (pc, fp)
-   Return true if this is a dummy frame created by gdb for an inferior call */
+/* Function: pc_in_call_dummy (pc, sp, fp)
+
+   Return true if the PC falls in a dummy frame created by gdb for an
+   inferior call.  The code below which allows DECR_PC_AFTER_BREAK is
+   for infrun.c, which may give the function a PC without that
+   subtracted out.  */
 
 int
 generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 {
-  /* if find_dummy_frame succeeds, then PC is in a call dummy */
-  /* Note: SP and not FP is passed on. */
-  return (generic_find_dummy_frame (pc, sp) != 0);
+  struct dummy_frame *dummyframe;
+  for (dummyframe = dummy_frame_stack;
+       dummyframe != NULL;
+       dummyframe = dummyframe->next)
+    {
+      if ((pc >= dummyframe->call_lo)
+	  && (pc < dummyframe->call_hi + DECR_PC_AFTER_BREAK))
+	return 1;
+    }
+  return 0;
 }
 
 /* Function: read_register_dummy 
@@ -1168,6 +1185,15 @@ void
 generic_save_dummy_frame_tos (CORE_ADDR sp)
 {
   dummy_frame_stack->top = sp;
+}
+
+/* Record the upper/lower bounds on the address of the call dummy.  */
+
+void
+generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
+{
+  dummy_frame_stack->call_lo = lo;
+  dummy_frame_stack->call_hi = hi;
 }
 
 /* Restore the machine state from either the saved dummy stack or a
