@@ -1,3 +1,9 @@
+2002-12-09  Aldy Hernandez  <aldyh@redhat.com>
+
+	* gas/ppc/booke.d: Fix msync and mbar to reflect reality.
+
+	* gas/ppc/e500.d: Fix m[tf]pmr to reflect reality.
+
 2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gas/m68hc11/m68hc11.exp (gas_m68hc11_error): New function;

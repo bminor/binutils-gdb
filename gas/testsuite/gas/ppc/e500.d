@@ -13,8 +13,8 @@ Disassembly of section \.text:
    c:	7d 4b 61 0c 	dcbtstls	10,r11,r12
   10:	7d ae 7b cc 	icbtls	13,r14,r15
   14:	7e 11 91 cc 	icblc	16,r17,r18
-  18:	7c 89 43 9c 	mtpmr	r41,r4
-  1c:	7c ab 52 9c 	mfpmr	r5,r43
+  18:	7c 89 33 9c 	mtpmr	201,r4
+  1c:	7c ab 32 9c 	mfpmr	r5,203
   20:	7c 00 04 0c 	bblels
   24:	7c 00 04 4c 	bbelr
   28:	7d 00 83 a6 	mtspefscr	r8

@@ -134,7 +134,7 @@ Disassembly of section \.text:
  1a0:	7c aa 3a 86 	mfdcr	r5,234
  1a4:	7c e6 03 06 	mtdcrx	r6,r7
  1a8:	7d 10 6b 86 	mtdcr	432,r8
- 1ac:	7c 00 04 ac 	sync	
+ 1ac:	7c 00 04 ac 	msync
  1b0:	7c 09 55 ec 	dcba	r9,r10
- 1b4:	7c 00 06 ac 	eieio
+ 1b4:	7c 00 06 ac 	mbar	0
 Disassembly of section \.data:
