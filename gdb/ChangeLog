@@ -1,5 +1,11 @@
 2001-03-06  J.T. Conklin  <jtc@redback.com>
 
+	* Makefile.in (LINTFLAGS): Update to contain all of the macros
+	which define include paths used when compiling.
+
+	* util.c (savestring, msavestring): Change type of length argument.
+	* defs.h (savestring, msavestring): Update to match.
+
 	* symtab.h (decode_line_1): Removed declaration.
 
 	* symfile.c (#include <assert.h>): Removed.
