@@ -1,5 +1,5 @@
 /* ELF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -95,6 +95,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
   bfd_boolean dt_needed;
+  bfd_boolean add_needed;
   struct elf_link_hash_table * hash_table;
   bfd_size_type amt;
 
@@ -201,6 +202,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 
   dt_needed = FALSE;
+  add_needed = FALSE;
   if (! dynamic)
     {
       /* If we are creating a shared library, create all the dynamic
@@ -222,7 +224,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   else
     {
       asection *s;
-      bfd_boolean add_needed;
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
@@ -778,7 +779,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    case bfd_link_hash_defweak:
 	      old_bfd = h->root.u.def.section->owner;
 	      break;
-	    
+
 	    case bfd_link_hash_common:
 	      old_bfd = h->root.u.c.p->section->owner;
 	      old_alignment = h->root.u.c.p->alignment_power;
@@ -1050,7 +1051,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		break;
 	      }
 
-	  if (dt_needed && definition
+	  if (dt_needed && !add_needed && definition
 	      && (h->elf_link_hash_flags
 		  & ELF_LINK_HASH_REF_REGULAR) != 0)
 	    {
@@ -1061,7 +1062,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		 the regular object to create a dynamic executable. We
 		 have to make sure there is a DT_NEEDED entry for it.  */
 
-	      dt_needed = FALSE;
+	      add_needed = TRUE;
 	      oldsize = _bfd_elf_strtab_size (hash_table->dynstr);
 	      strindex = _bfd_elf_strtab_add (hash_table->dynstr,
 					      elf_dt_soname (abfd), FALSE);
@@ -1357,7 +1358,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
-      
+
       stabstr = bfd_get_section_by_name (abfd, ".stabstr");
       if (stabstr != NULL)
 	{
@@ -1372,7 +1373,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		&& !bfd_is_abs_section (stab->output_section))
 	      {
 		struct bfd_elf_section_data *secdata;
-		
+
 		secdata = elf_section_data (stab);
 		if (! _bfd_link_section_stabs (abfd,
 					       & hash_table->stab_info,
