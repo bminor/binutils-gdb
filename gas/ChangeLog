@@ -1,3 +1,11 @@
+Mon Oct 19 20:20:42 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-sh.h (obj_fix_adjustable):  Define.
+        * config/tc-sh.c (sh_force_relocation):  Handle VT relocs.
+        (md_apply_fix):  Likewise.
+        (tc_gen_reloc):  Likewise.
+        (sh_fix_adjustable):  New.
+
 Mon Oct 19 12:35:43 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c (gas_cgen_finish_insn): Update handling of CGEN_INT_INSN_P.

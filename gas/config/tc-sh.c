@@ -1842,6 +1842,11 @@ int
 sh_force_relocation (fix)
      fixS *fix;
 {
+
+  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
   if (! sh_relax)
     return 0;
 
@@ -1852,6 +1857,27 @@ sh_force_relocation (fix)
 	  || fix->fx_r_type == BFD_RELOC_SH_CODE
 	  || fix->fx_r_type == BFD_RELOC_SH_DATA
 	  || fix->fx_r_type == BFD_RELOC_SH_LABEL);
+}
+boolean
+sh_fix_adjustable (fixP)
+   fixS *fixP;
+{
+
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+
+  /* We need the symbol name for the VTABLE entries */
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
 }
 
 /* Apply a fixup to the object file.  */
@@ -2029,6 +2055,11 @@ md_apply_fix (fixP, val)
     case BFD_RELOC_SH_LABEL:
       /* Nothing to do here.  */
       break;
+
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixP->fx_done = 0;
+      return 1;
 
     default:
       abort ();
@@ -2371,6 +2402,9 @@ tc_gen_reloc (section, fixp)
   else if (r_type == BFD_RELOC_SH_COUNT)
     rel->addend = fixp->fx_offset;
   else if (r_type == BFD_RELOC_SH_ALIGN)
+    rel->addend = fixp->fx_offset;
+  else if (r_type == BFD_RELOC_VTABLE_INHERIT
+           || r_type == BFD_RELOC_VTABLE_ENTRY)
     rel->addend = fixp->fx_offset;
   else if (fixp->fx_pcrel)
     rel->addend = fixp->fx_addnumber;
