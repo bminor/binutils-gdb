@@ -1,3 +1,10 @@
+Mon May  3 23:34:09 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* nindy-share/Onindy.c, nindy-share/nindy.c: convert malloc calls
+	  to xmalloc.  Include defs.h.  Rename local macro from
+	  REGISTER_BYTES to NINDY_REGISTER_BYTES to avoid conflict with
+	  defs.h.
+
 Mon May  3 22:51:05 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (NONSRC):  Remove ${srcdir}/putenv.c.
