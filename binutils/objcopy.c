@@ -360,8 +360,8 @@ copy_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, _("Usage: %s <switches> in-file [out-file]\n"), program_name);
-  fprintf (stream, _(" The switches are:\n"));
+  fprintf (stream, _("Usage: %s <options> in-file [out-file]\n"), program_name);
+  fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
   -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
   -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
@@ -429,8 +429,8 @@ strip_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, _("Usage: %s <switches> in-file(s)\n"), program_name);
-  fprintf (stream, _(" The switches are:\n"));
+  fprintf (stream, _("Usage: %s <options> in-file(s)\n"), program_name);
+  fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
   -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
   -O --output-target <bfdname>     Create an output file in format <bfdname>\n\

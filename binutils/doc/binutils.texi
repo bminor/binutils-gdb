@@ -2732,14 +2732,14 @@ when @option{--export-all-symbols} is used.
 Specifies the path, including the filename, of the assembler to be used
 to create the exports file.
 
-@item -f @var{switches}
-@itemx --as-flags @var{switches}
-Specifies any specific command line switches to be passed to the
+@item -f @var{options}
+@itemx --as-flags @var{options}
+Specifies any specific command line options to be passed to the
 assembler when building the exports file.  This option will work even if
 the @option{-S} option is not used.  This option only takes one argument,
 and if it occurs more than once on the command line, then later
 occurrences will override earlier occurrences.  So if it is necessary to
-pass multiple switches to the assembler they should be enclosed in
+pass multiple options to the assembler they should be enclosed in
 double quotes.
 
 @item -D @var{name}
