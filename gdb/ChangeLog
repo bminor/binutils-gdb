@@ -1,3 +1,18 @@
+Wed Sep  9 11:39:05 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* blockframe.c(find_pc_sect_partial_function): look for min syms in
+	  the same section when trying to guess the end of a function.
+	* symfile.c(list_overlays_command): use print_address_numeric
+	* remote-sim.c: export simulator_command
+start-sanitize-r5900
+	* tm-r5900.h: add COP0 registers
+end-sanitize-r5900
+start-sanitize-sky
+	* txvu-tdep.c: printvector and printvector-order commands
+	* tm-txvu.h: add COP0 registers
+	* mips-tdep.c: use NUM_CORE_REGS
+end-sanitize-sky
+	
 1998-09-08  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* breakpoint.c (bpstat_stop_status):  Declare a bp match if the

@@ -87,8 +87,10 @@ CORE_ADDR pc;
       mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
       if (mainsym && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
         {
-          symfile_objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
-          symfile_objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
+          symfile_objfile->ei.main_func_lowpc = 
+	    BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
+          symfile_objfile->ei.main_func_highpc = 
+	    BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
         }
     }
   return (symfile_objfile -> ei.main_func_lowpc  <= pc &&
@@ -535,27 +537,32 @@ get_frame_function (frame)
   return block_function (bl);
 }
 
+
 /* Return the blockvector immediately containing the innermost lexical block
-   containing the specified pc value, or 0 if there is none.
+   containing the specified pc value and section, or 0 if there is none.
    PINDEX is a pointer to the index value of the block.  If PINDEX
    is NULL, we don't pass this information back to the caller.  */
 
 struct blockvector *
-blockvector_for_pc (pc, pindex)
+blockvector_for_pc_sect (pc, section, pindex, symtab)
      register CORE_ADDR pc;
+     struct sec *section;
      int *pindex;
+     struct symtab *symtab;
+     
 {
   register struct block *b;
   register int bot, top, half;
-  register struct symtab *s;
   struct blockvector *bl;
 
-  /* First search all symtabs for one whose file contains our pc */
-  s = find_pc_symtab (pc);
-  if (s == 0)
-    return 0;
+  if (symtab == 0)	/* if no symtab specified by caller */
+    {
+      /* First search all symtabs for one whose file contains our pc */
+      if ((symtab = find_pc_sect_symtab (pc, section)) == 0)
+	return 0;
+    }
 
-  bl = BLOCKVECTOR (s);
+  bl = BLOCKVECTOR (symtab);
   b = BLOCKVECTOR_BLOCK (bl, 0);
 
   /* Then search that symtab for the smallest block that wins.  */
@@ -587,45 +594,80 @@ blockvector_for_pc (pc, pindex)
 	}
       bot--;
     }
-
   return 0;
 }
 
-/* Return the innermost lexical block containing the specified pc value,
-   or 0 if there is none.  */
+/* Return the blockvector immediately containing the innermost lexical block
+   containing the specified pc value, or 0 if there is none.
+   Backward compatibility, no section.  */
+
+struct blockvector *
+blockvector_for_pc (pc, pindex)
+     register CORE_ADDR pc;
+     int *pindex;
+{
+  return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
+				  pindex, NULL);
+}
+
+/* Return the innermost lexical block containing the specified pc value
+   in the specified section, or 0 if there is none.  */
 
 struct block *
-block_for_pc (pc)
+block_for_pc_sect (pc, section)
      register CORE_ADDR pc;
+     struct sec *section;
 {
   register struct blockvector *bl;
   int index;
 
-  bl = blockvector_for_pc (pc, &index);
+  bl = blockvector_for_pc_sect (pc, section, &index, NULL);
   if (bl)
     return BLOCKVECTOR_BLOCK (bl, index);
   return 0;
 }
 
-/* Return the function containing pc value PC.
+/* Return the innermost lexical block containing the specified pc value,
+   or 0 if there is none.  Backward compatibility, no section.  */
+
+struct block *
+block_for_pc (pc)
+     register CORE_ADDR pc;
+{
+  return block_for_pc_sect (pc, find_pc_mapped_section (pc));
+}
+
+/* Return the function containing pc value PC in section SECTION.
    Returns 0 if function is not known.  */
 
 struct symbol *
-find_pc_function (pc)
+find_pc_sect_function (pc, section)
      CORE_ADDR pc;
+     struct sec *section;
 {
-  register struct block *b = block_for_pc (pc);
+  register struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
     return 0;
   return block_function (b);
 }
 
+/* Return the function containing pc value PC.
+   Returns 0 if function is not known.  Backward compatibility, no section */
+
+struct symbol *
+find_pc_function (pc)
+     CORE_ADDR pc;
+{
+  return find_pc_sect_function (pc, find_pc_mapped_section (pc));
+}
+
 /* These variables are used to cache the most recent result
  * of find_pc_partial_function. */
 
-static CORE_ADDR cache_pc_function_low = 0;
-static CORE_ADDR cache_pc_function_high = 0;
-static char *cache_pc_function_name = 0;
+static CORE_ADDR   cache_pc_function_low     = 0;
+static CORE_ADDR   cache_pc_function_high    = 0;
+static char       *cache_pc_function_name    = 0;
+static struct sec *cache_pc_function_section = NULL;
 
 /* Clear cache, e.g. when symbol table is discarded. */
 
@@ -635,50 +677,58 @@ clear_pc_function_cache()
   cache_pc_function_low = 0;
   cache_pc_function_high = 0;
   cache_pc_function_name = (char *)0;
+  cache_pc_function_section = NULL;
 }
 
 /* Finds the "function" (text symbol) that is smaller than PC but
-   greatest of all of the potential text symbols.  Sets *NAME and/or
-   *ADDRESS conditionally if that pointer is non-null.  If ENDADDR is
-   non-null, then set *ENDADDR to be the end of the function
-   (exclusive), but passing ENDADDR as non-null means that the
-   function might cause symbols to be read.  This function either
+   greatest of all of the potential text symbols in SECTION.  Sets
+   *NAME and/or *ADDRESS conditionally if that pointer is non-null.
+   If ENDADDR is non-null, then set *ENDADDR to be the end of the
+   function (exclusive), but passing ENDADDR as non-null means that
+   the function might cause symbols to be read.  This function either
    succeeds or fails (not halfway succeeds).  If it succeeds, it sets
    *NAME, *ADDRESS, and *ENDADDR to real information and returns 1.
-   If it fails, it sets *NAME, *ADDRESS, and *ENDADDR to zero
-   and returns 0.  */
+   If it fails, it sets *NAME, *ADDRESS, and *ENDADDR to zero and
+   returns 0.  */
 
 int
-find_pc_partial_function (pc, name, address, endaddr)
-     CORE_ADDR pc;
-     char **name;
+find_pc_sect_partial_function (pc, section, name, address, endaddr)
+     CORE_ADDR  pc;
+     asection  *section;
+     char     **name;
      CORE_ADDR *address;
      CORE_ADDR *endaddr;
 {
   struct partial_symtab *pst;
-  struct symbol *f;
+  struct symbol         *f;
   struct minimal_symbol *msymbol;
   struct partial_symbol *psb;
-  struct obj_section *sec;
+  struct obj_section    *osect;
+  int i;
+  CORE_ADDR mapped_pc;
 
-  if (pc >= cache_pc_function_low && pc < cache_pc_function_high)
+  mapped_pc = overlay_mapped_address (pc, section);
+
+  if (mapped_pc >= cache_pc_function_low && 
+      mapped_pc < cache_pc_function_high &&
+      section == cache_pc_function_section)
     goto return_cached_value;
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
 #if defined SIGTRAMP_START
-  if (IN_SIGTRAMP (pc, (char *)NULL))
+  if (IN_SIGTRAMP (mapped_pc, (char *)NULL))
     {
-      cache_pc_function_low = SIGTRAMP_START (pc);
-      cache_pc_function_high = SIGTRAMP_END (pc);
-      cache_pc_function_name = "<sigtramp>";
-
+      cache_pc_function_low     = SIGTRAMP_START (mapped_pc);
+      cache_pc_function_high    = SIGTRAMP_END (mapped_pc);
+      cache_pc_function_name    = "<sigtramp>";
+      cache_pc_function_section = section;
       goto return_cached_value;
     }
 #endif
 
-  msymbol = lookup_minimal_symbol_by_pc (pc);
-  pst = find_pc_psymtab (pc);
+  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
+  pst = find_pc_sect_psymtab (mapped_pc, section);
   if (pst)
     {
       /* Need to read the symbols to get a good value for the end address.  */
@@ -694,15 +744,16 @@ find_pc_partial_function (pc, name, address, endaddr)
 	{
 	  /* Checking whether the msymbol has a larger value is for the
 	     "pathological" case mentioned in print_frame_info.  */
-	  f = find_pc_function (pc);
+	  f = find_pc_sect_function (mapped_pc, section);
 	  if (f != NULL
 	      && (msymbol == NULL
 		  || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
 		      >= SYMBOL_VALUE_ADDRESS (msymbol))))
 	    {
-	      cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_name = SYMBOL_NAME (f);
+	      cache_pc_function_low     = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
+	      cache_pc_function_high    = BLOCK_END   (SYMBOL_BLOCK_VALUE (f));
+	      cache_pc_function_name    = SYMBOL_NAME (f);
+	      cache_pc_function_section = section;
 	      goto return_cached_value;
 	    }
 	}
@@ -711,7 +762,7 @@ find_pc_partial_function (pc, name, address, endaddr)
 	  /* Now that static symbols go in the minimal symbol table, perhaps
 	     we could just ignore the partial symbols.  But at least for now
 	     we use the partial or minimal symbol, whichever is larger.  */
-	  psb = find_pc_psymbol (pst, pc);
+	  psb = find_pc_sect_psymbol (pst, mapped_pc, section);
 
 	  if (psb
 	      && (msymbol == NULL ||
@@ -734,9 +785,9 @@ find_pc_partial_function (pc, name, address, endaddr)
      of the text seg doesn't appear to be part of the last function in the
      text segment.  */
 
-  sec = find_pc_section (pc);
+  osect = find_pc_sect_section (mapped_pc, section);
 
-  if (!sec)
+  if (!osect)
     msymbol = NULL;
 
   /* Must be in the minimal symbol table.  */
@@ -752,28 +803,68 @@ find_pc_partial_function (pc, name, address, endaddr)
       return 0;
     }
 
-  cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = SYMBOL_NAME (msymbol);
+  cache_pc_function_low     = SYMBOL_VALUE_ADDRESS (msymbol);
+  cache_pc_function_name    = SYMBOL_NAME (msymbol);
+  cache_pc_function_section = section;
 
-  /* Use the lesser of the next minimal symbol, or the end of the section, as
-     the end of the function.  */
+  /* Use the lesser of the next minimal symbol in the same section, or the end
+     of the section, as the end of the function. Step over other symbols at 
+     this same address to find the next one.  */
 
-  if (SYMBOL_NAME (msymbol + 1) != NULL
-      && SYMBOL_VALUE_ADDRESS (msymbol + 1) < sec->endaddr)
-    cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + 1);
+  for (i=1; SYMBOL_NAME (msymbol+i) != NULL 
+	 && (SYMBOL_VALUE_ADDRESS(msymbol+i) == SYMBOL_VALUE_ADDRESS (msymbol)
+	 || SYMBOL_BFD_SECTION(msymbol+i) != section);
+       i++) /* empty */;
+
+  if (SYMBOL_NAME (msymbol + i) != NULL
+      && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+    cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
   else
     /* We got the start address from the last msymbol in the objfile.
        So the end address is the end of the section.  */
-    cache_pc_function_high = sec->endaddr;
+    cache_pc_function_high = osect->endaddr;
 
  return_cached_value:
+
   if (address)
-    *address = cache_pc_function_low;
+    if (pc_in_unmapped_range (pc, section))
+      *address = overlay_unmapped_address (cache_pc_function_low, section);
+    else
+      *address = cache_pc_function_low;
+    
   if (name)
     *name = cache_pc_function_name;
+
   if (endaddr)
-    *endaddr = cache_pc_function_high;
+    if (pc_in_unmapped_range (pc, section))
+      {
+	/* Because the high address is actually beyond the end of
+	   the function (and therefore possibly beyond the end of
+	   the overlay), we must actually convert (high - 1)
+	   and then add one to that. */
+
+	*endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1, 
+						 section);
+      }
+    else
+      *endaddr = cache_pc_function_high;
+
   return 1;
+}
+
+/* Backward compatibility, no section argument */
+
+int
+find_pc_partial_function (pc, name, address, endaddr)
+     CORE_ADDR  pc;
+     char     **name;
+     CORE_ADDR *address;
+     CORE_ADDR *endaddr;
+{
+  asection     *section;
+
+  section = find_pc_overlay (pc);
+  return find_pc_sect_partial_function (pc, section, name, address, endaddr);
 }
 
 /* Return the innermost stack frame executing inside of BLOCK,
@@ -967,6 +1058,21 @@ generic_push_dummy_frame ()
   dummy_frame_stack = dummy_frame;
 }
 
+/* Function: pop_frame
+   Restore the machine state from either the saved dummy stack or a
+   real stack frame. */
+
+void
+generic_pop_current_frame (pop)
+  void (*pop) PARAMS ((struct frame_info *frame));
+{
+  struct frame_info *frame = get_current_frame ();
+  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+    generic_pop_dummy_frame ();
+  else
+    pop (frame);
+}
+
 /* Function: pop_dummy_frame
    Restore the machine state from a saved dummy stack frame. */
 
@@ -982,6 +1088,7 @@ generic_pop_dummy_frame ()
     error ("Can't pop dummy frame!");
   dummy_frame_stack = dummy_frame->next;
   write_register_bytes (0, dummy_frame->regs, REGISTER_BYTES);
+  flush_cached_frames ();
   free (dummy_frame);
 }
 
@@ -998,7 +1105,7 @@ generic_frame_chain_valid (fp, fi)
     return 1;   /* don't prune CALL_DUMMY frames */
   else          /* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && fi->frame INNER_THAN fp
+	    && (fi->frame INNER_THAN fp || fi->frame == fp)
 	    && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
  
@@ -1035,7 +1142,6 @@ generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      int regnum;
      enum lval_type *lval;
 {
-  CORE_ADDR addr;
   struct frame_saved_regs fsr;
 
   if (!target_has_registers)

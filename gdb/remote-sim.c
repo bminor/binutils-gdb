@@ -97,7 +97,7 @@ static void gdbsim_mourn_inferior PARAMS ((void));
 
 static void gdbsim_stop PARAMS ((void));
 
-static void simulator_command PARAMS ((char *args, int from_tty));
+void simulator_command PARAMS ((char *args, int from_tty));
 
 /* Naming convention:
 
@@ -889,7 +889,7 @@ gdbsim_remove_breakpoint (addr, contents_cache)
 /* Pass the command argument through to the simulator verbatim.  The
    simulator must do any command interpretation work.  */
 
-static void
+void
 simulator_command (args, from_tty)
      char *args;
      int from_tty;
