@@ -983,7 +983,7 @@ build_bytes (opcode, operand)
 		int p;
 		switch (immediate_inpage) {
 		case 'p':
-		  p = R_H8500_LOW16;
+		  p = R_H8500_HIGH16;
 		  break;
 		case 'h':		
 		  p = R_H8500_HIGH16;
@@ -1124,7 +1124,7 @@ DEFUN (md_assemble, (str),
       return;
     }
 
-  input_line_pointer = get_operands (opcode, op_end, operand);
+  get_operands (opcode, op_end, operand);
   prev_opcode = opcode;
 
   opcode = get_specific (opcode, operand);
@@ -1378,7 +1378,7 @@ md_convert_frag (headers, fragP)
     case C (SCB_F, UNDEF_WORD_DISP):
     case C (SCB_TST, UNDEF_WORD_DISP):
       /* This tried to be relaxed, but didn't manage it, it now needs a
-       fix */
+	 fix */
       wordify_scb (buffer, &disp_size, &inst_size);
 
       /* Make a reloc */
@@ -1409,7 +1409,6 @@ md_convert_frag (headers, fragP)
       fragP->fr_fix += disp_size + inst_size;
       fragP->fr_var = 0;
     }
-
 }
 
 valueT
@@ -1639,4 +1638,13 @@ start_label (ptr)
   return 1;
 }
 
+
+int
+tc_coff_sizemachdep (frag)
+     fragS *frag;
+{
+  return md_relax_table[frag->fr_subtype].rlx_length;
+}
+
 /* end of tc-h8500.c */
+

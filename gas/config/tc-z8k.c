@@ -21,9 +21,9 @@
   Written By Steve Chamberlain
   sac@cygnus.com
   */
-
-#include <stdio.h>
 #define DEFINE_TABLE
+#include <stdio.h>
+
 #include "../opcodes/z8k-opc.h"
 
 #include "as.h"
@@ -34,7 +34,8 @@ const char comment_chars[] =
 {'!', 0};
 const char line_separator_chars[] =
 {';', 0};
-const char line_comment_chars[] = { '#', 0};
+const char line_comment_chars[] =
+{'#', 0};
 
 extern int machine;
 extern int coff_flags;
@@ -66,70 +67,81 @@ s_unseg ()
   coff_flags = F_Z8002;
 }
 
-static 
-void even()
+static
+void
+even ()
 {
   frag_align (1, 0);
-  record_alignment(now_seg,1);
+  record_alignment (now_seg, 1);
 }
-void obj_coff_section();
 
-int tohex(c)
-int c;
+void obj_coff_section ();
+
+int
+tohex (c)
+     int c;
 {
-if (isdigit(c)) return c - '0';
-if (islower(c)) return c - 'a' + 10;
-return c - 'A' + 10;
+  if (isdigit (c))
+    return c - '0';
+  if (islower (c))
+    return c - 'a' + 10;
+  return c - 'A' + 10;
 }
-void sval()
+
+void
+sval ()
 {
 
-  SKIP_WHITESPACE();
-  if (*input_line_pointer == '\'') {
-    int c;
-    input_line_pointer++;
-    c = *input_line_pointer++;
-    while (c != '\'') {
-      if (c== '%') {
-	c = (tohex(input_line_pointer[0])  << 4)
-	 | tohex(input_line_pointer[1]);
-	input_line_pointer+=2;
-      }
-      FRAG_APPEND_1_CHAR(c);
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '\'')
+    {
+      int c;
+      input_line_pointer++;
       c = *input_line_pointer++;
+      while (c != '\'')
+	{
+	  if (c == '%')
+	    {
+	      c = (tohex (input_line_pointer[0]) << 4)
+		| tohex (input_line_pointer[1]);
+	      input_line_pointer += 2;
+	    }
+	  FRAG_APPEND_1_CHAR (c);
+	  c = *input_line_pointer++;
+	}
+      demand_empty_rest_of_line ();
     }
-    demand_empty_rest_of_line();
-  }
 
 }
 const pseudo_typeS md_pseudo_table[] =
 {
- {"int", cons, 2},
- {"data.b", cons, 1},
- {"data.w", cons, 2},
- {"data.l", cons, 4},
- {"form", listing_psize, 0},
- {"heading", listing_title, 0},
- {"import", s_ignore, 0},
- {"page", listing_eject, 0},
- {"program", s_ignore, 0},
- {"z8001", s_segm, 0},
- {"z8002", s_unseg, 0},
+  {"int", cons, 2},
+  {"data.b", cons, 1},
+  {"data.w", cons, 2},
+  {"data.l", cons, 4},
+  {"form", listing_psize, 0},
+  {"heading", listing_title, 0},
+  {"import", s_ignore, 0},
+  {"page", listing_eject, 0},
+  {"program", s_ignore, 0},
+  {"z8001", s_segm, 0},
+  {"z8002", s_unseg, 0},
 
 
- {"segm", s_segm, 0},
- {"unsegm", s_unseg, 0},
- {"name", s_app_file, 0},
- {"global",s_globl,0},
- {"wval",cons,2},
- {"lval",cons,4},
- {"bval",cons,1},
- {"sval",sval,0},
- {"rsect",obj_coff_section,0},
- {"sect",obj_coff_section,0},
- {"block",s_space,0},
- {"even",even,0},
- {0, 0, 0}
+  {"segm", s_segm, 0},
+  {"unsegm", s_unseg, 0},
+  {"unseg", s_unseg, 0},
+  {"name", s_app_file, 0},
+  {"global", s_globl, 0},
+  {"wval", cons, 2},
+  {"lval", cons, 4},
+  {"bval", cons, 1},
+  {"sval", sval, 0},
+  {"rsect", obj_coff_section, 0},
+  {"sect", obj_coff_section, 0},
+  {"block", s_space, 0},
+  {"even", even, 0},
+  {0, 0, 0}
 };
 
 const char EXP_CHARS[] = "eE";
@@ -170,17 +182,17 @@ md_begin ()
   s_unseg ();
 
   /* insert the pseudo ops too */
-  for (idx = 0; md_pseudo_table[idx].poc_name; idx++) 
-  {
-    opcode_entry_type *fake_opcode;
-    fake_opcode = (opcode_entry_type*)malloc(sizeof(opcode_entry_type));
-    fake_opcode->name = md_pseudo_table[idx].poc_name,
-    fake_opcode->func = (void *)(md_pseudo_table+idx);
-    fake_opcode->opcode = 250;
+  for (idx = 0; md_pseudo_table[idx].poc_name; idx++)
+    {
+      opcode_entry_type *fake_opcode;
+      fake_opcode = (opcode_entry_type *) malloc (sizeof (opcode_entry_type));
+      fake_opcode->name = md_pseudo_table[idx].poc_name,
+	fake_opcode->func = (void *) (md_pseudo_table + idx);
+      fake_opcode->opcode = 250;
 
-    hash_insert(opcode_hash_control,fake_opcode->name,fake_opcode);
-    
-  }
+      hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode);
+
+    }
 }
 
 struct z8k_exp
@@ -250,47 +262,49 @@ DEFUN (parse_reg, (src, mode, reg),
 {
   char *res = 0;
 
-  if (src[0] == 's' && src[1]=='p') {
-    if (segmented_mode) {
-      *mode = CLASS_REG_LONG;
-      *reg = 14;
-    }
-    else 
+  if (src[0] == 's' && src[1] == 'p')
     {
-      *mode = CLASS_REG_WORD;
-      *reg = 15;
+      if (segmented_mode)
+	{
+	  *mode = CLASS_REG_LONG;
+	  *reg = 14;
+	}
+      else
+	{
+	  *mode = CLASS_REG_WORD;
+	  *reg = 15;
+	}
+      return src + 2;
     }
-    return src+2;
-  }
   if (src[0] == 'r')
-  {
-    if (src[1] == 'r')
     {
-      *mode = CLASS_REG_LONG;
-      res = whatreg (reg, src + 2);
+      if (src[1] == 'r')
+	{
+	  *mode = CLASS_REG_LONG;
+	  res = whatreg (reg, src + 2);
+	}
+      else if (src[1] == 'h')
+	{
+	  *mode = CLASS_REG_BYTE;
+	  res = whatreg (reg, src + 2);
+	}
+      else if (src[1] == 'l')
+	{
+	  *mode = CLASS_REG_BYTE;
+	  res = whatreg (reg, src + 2);
+	  *reg += 8;
+	}
+      else if (src[1] == 'q')
+	{
+	  *mode = CLASS_REG_QUAD;
+	  res = whatreg (reg, src + 2);
+	}
+      else
+	{
+	  *mode = CLASS_REG_WORD;
+	  res = whatreg (reg, src + 1);
+	}
     }
-    else if (src[1] == 'h' )
-    {
-      *mode = CLASS_REG_BYTE;
-      res = whatreg (reg, src + 2) ;
-    }
-    else if (src[1] == 'l'  )
-    {
-      *mode = CLASS_REG_BYTE;
-      res = whatreg (reg, src + 2);
-      *reg += 8;
-    }
-    else if (src[1] == 'q')
-    {
-      *mode = CLASS_REG_QUAD;
-      res = whatreg (reg, src + 2);
-    }
-    else
-    {
-      *mode = CLASS_REG_WORD;
-      res = whatreg (reg, src + 1);
-    }
-  }
   return res;
 
 }
@@ -302,29 +316,14 @@ DEFUN (parse_exp, (s, op),
 {
   char *save = input_line_pointer;
   char *new;
-  segT seg;
 
   input_line_pointer = s;
-  seg = expr (0, op);
+  expression (op);
+  if (op->X_op == O_absent)
+    as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
-  if (SEG_NORMAL (seg))
-    return new;
-  switch (seg)
-    {
-    case SEG_ABSOLUTE:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_REGISTER:
-      return new;
-    case SEG_ABSENT:
-      as_bad ("Missing operand");
-      return new;
-    default:
-      as_bad ("Don't understand operand of type %s", segment_name (seg));
-      return new;
-    }
+  return new;
 }
 
 /* The many forms of operand:
@@ -456,10 +455,10 @@ DEFUN (get_cc_operand, (ptr, mode, dst),
 }
 
 static void
-DEFUN (get_operand, (ptr, mode, dst),
-       char **ptr AND
-       struct z8k_op *mode AND
-       unsigned int dst)
+get_operand (ptr, mode, dst)
+     char **ptr;
+     struct z8k_op *mode;
+     unsigned int dst;
 {
   char *src = *ptr;
   char *end;
@@ -514,7 +513,7 @@ DEFUN (get_operand, (ptr, mode, dst),
 		    }
 
 		  regaddr (mode->mode, "ra(rb) ra");
-		  regword (mode->mode, "ra(rb) rb");
+/*		  regword (mode->mode, "ra(rb) rb");*/
 		  mode->mode = CLASS_BX;
 		  mode->reg = regn;
 		  mode->x_reg = nr;
@@ -569,10 +568,10 @@ DEFUN (get_operand, (ptr, mode, dst),
 
 static
 char *
-DEFUN (get_operands, (opcode, op_end, operand),
-       opcode_entry_type * opcode AND
-       char *op_end AND
-       op_type * operand)
+get_operands (opcode, op_end, operand)
+     opcode_entry_type *opcode;
+     char *op_end;
+     op_type *operand;
 {
   char *ptr = op_end;
 
@@ -608,8 +607,8 @@ DEFUN (get_operands, (opcode, op_end, operand),
 
 	  get_operand (&ptr, operand + 0, 0);
 	}
-      if(ptr == 0) 
-       return;
+      if (ptr == 0)
+	return;
       if (*ptr == ',')
 	ptr++;
       get_operand (&ptr, operand + 1, 1);
@@ -690,6 +689,19 @@ DEFUN (get_specific, (opcode, operands),
 	     something that's ok */
 		  goto fail;
 		}
+	      else if (this_try->arg_info[i] & CLASS_PR)
+		{
+		  if (mode == CLASS_REG_LONG && segmented_mode)
+		    {
+		      /* ok */
+		    }
+		  else if (mode == CLASS_REG_WORD && !segmented_mode)
+		    {
+		      /* ok */
+		    }
+		  else
+		    goto fail;
+		}
 	      else
 		goto fail;
 	    }
@@ -729,7 +741,7 @@ DEFUN (check_operand, (operand, width, string),
        char *string)
 {
   if (operand->exp.X_add_symbol == 0
-      && operand->exp.X_subtract_symbol == 0)
+      && operand->exp.X_op_symbol == 0)
     {
 
       /* No symbol involved, let's look at offset, it's dangerous if any of
@@ -753,17 +765,15 @@ DEFUN (newfix, (ptr, type, operand),
        expressionS * operand)
 {
   if (operand->X_add_symbol
-      || operand->X_subtract_symbol
+      || operand->X_op_symbol
       || operand->X_add_number)
     {
-      fix_new (frag_now,
-	       ptr,
-	       1,
-	       operand->X_add_symbol,
-	       operand->X_subtract_symbol,
-	       operand->X_add_number,
-	       0,
-	       type);
+      fix_new_exp (frag_now,
+		   ptr,
+		   1,
+		   operand,
+		   0,
+		   type);
     }
 }
 
@@ -804,9 +814,9 @@ DEFUN (apply_fix, (ptr, type, operand, size),
  */
 #define INSERT(x,y) *x++ = y>>24; *x++ = y>> 16; *x++=y>>8; *x++ =y;
 static void
-DEFUN (build_bytes, (this_try, operand),
-       opcode_entry_type * this_try AND
-       struct z8k_op *operand)
+build_bytes (this_try, operand)
+     opcode_entry_type * this_try;
+     struct z8k_op *operand;
 {
   unsigned int i;
 
@@ -818,7 +828,7 @@ DEFUN (build_bytes, (this_try, operand),
   char high;
   int nib;
   int nibble;
-  unsigned short *class_ptr;
+  unsigned int *class_ptr;
 
   frag_wane (frag_now);
   frag_new (0);
@@ -852,25 +862,39 @@ top:;
 	  /* pc rel 8 bit */
 	  output_ptr = apply_fix (output_ptr, R_JR, da_operand, 2);
 	  da_operand = 0;
-
 	  break;
+
+	case CLASS_0DISP7:
+	  /* pc rel 7 bit */
+	  *output_ptr = 0;
+	  output_ptr = apply_fix (output_ptr, R_DISP7, da_operand, 2);
+	  da_operand = 0;
+	  break;
+
+	case CLASS_1DISP7:
+	  /* pc rel 7 bit */
+	  *output_ptr = 0x80;
+	  output_ptr = apply_fix (output_ptr, R_DISP7, da_operand, 2);
+	  da_operand = 0;
+	  break;
+
 	case CLASS_BIT_1OR2:
 	  *output_ptr = c & 0xf;
-	  if (imm_operand)  
-	  {
-	    if (imm_operand->X_add_number==2)
+	  if (imm_operand)
 	    {
-	      *output_ptr |= 2;
+	      if (imm_operand->X_add_number == 2)
+		{
+		  *output_ptr |= 2;
+		}
+	      else if (imm_operand->X_add_number != 1)
+		{
+		  as_bad ("immediate must be 1 or 2");
+		}
 	    }
-	    else if (imm_operand->X_add_number != 1)
+	  else
 	    {
-	      as_bad("immediate must be 1 or 2");
+	      as_bad ("immediate 1 or 2 expected");
 	    }
-	  }
-	  else 
-	  {
-	    as_bad("immediate 1 or 2 expected");
-	  }
 	  output_ptr++;
 	  break;
 	case CLASS_CC:
@@ -897,7 +921,7 @@ top:;
 	  output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
 	  da_operand = 0;
 	  break;
-	  
+
 	case CLASS_IMM:
 	  {
 	    nib = 0;
@@ -973,21 +997,21 @@ DEFUN (md_assemble, (str),
 
   /* Drop leading whitespace */
   while (*str == ' ')
-   str++;
+    str++;
 
   /* find the op code end */
   for (op_start = op_end = str;
        *op_end != 0 && *op_end != ' ';
        op_end++)
-  {
-  }
+    {
+    }
 
   ;
 
   if (op_end == op_start)
-  {
-    as_bad ("can't find opcode ");
-  }
+    {
+      as_bad ("can't find opcode ");
+    }
   c = *op_end;
 
   *op_end = 0;
@@ -997,56 +1021,56 @@ DEFUN (md_assemble, (str),
 
 
   if (opcode == NULL)
-  {
-    as_bad ("unknown opcode");
-    return;
-  }
-
-  if (opcode->opcode == 250) 
-  {
-    /* was really a pseudo op */
-
-    pseudo_typeS *p ;
-    char oc;
-
-    char *old = input_line_pointer;
-    *op_end = c;
-
-     
-    input_line_pointer = op_end;
-
-    oc = *old;
-    *old = '\n';
-    while (*input_line_pointer == ' ')
-     input_line_pointer++;
-    p = (pseudo_typeS *)(opcode->func);
-
-    (p->poc_handler)(p->poc_val);
-    input_line_pointer = old;
-    *old = oc;
-  }
-  else {
-    input_line_pointer = get_operands (opcode, op_end,
-				       operand);
-    *op_end = c;
-    prev_opcode = opcode;
-
-    opcode = get_specific (opcode, operand);
-
-    if (opcode == 0)
     {
-      /* Couldn't find an opcode which matched the operands */
-      char *where = frag_more (2);
-
-      where[0] = 0x0;
-      where[1] = 0x0;
-
-      as_bad ("Can't find opcode to match operands");
+      as_bad ("unknown opcode");
       return;
     }
 
-    build_bytes (opcode, operand);
-  }
+  if (opcode->opcode == 250)
+    {
+      /* was really a pseudo op */
+
+      pseudo_typeS *p;
+      char oc;
+
+      char *old = input_line_pointer;
+      *op_end = c;
+
+
+      input_line_pointer = op_end;
+
+      oc = *old;
+      *old = '\n';
+      while (*input_line_pointer == ' ')
+	input_line_pointer++;
+      p = (pseudo_typeS *) (opcode->func);
+
+      (p->poc_handler) (p->poc_val);
+      input_line_pointer = old;
+      *old = oc;
+    }
+  else
+    {
+      input_line_pointer = get_operands (opcode, op_end,
+					 operand);
+      prev_opcode = opcode;
+
+      opcode = get_specific (opcode, operand);
+
+      if (opcode == 0)
+	{
+	  /* Couldn't find an opcode which matched the operands */
+	  char *where = frag_more (2);
+
+	  where[0] = 0x0;
+	  where[1] = 0x0;
+
+	  as_bad ("Can't find opcode to match operands");
+	  return;
+	}
+
+      build_bytes (opcode, operand);
+    }
 }
 
 void
@@ -1135,7 +1159,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return 0;
 }
 
 int
@@ -1145,13 +1169,16 @@ md_parse_option (argP, cntP, vecP)
      char ***vecP;
 
 {
-  if (!strcmp(*argP,"z8001")) {
-    s_segm();
-  }
-  else if (!strcmp(*argP,"z8002")) {
-    s_unseg();
-  }
-  else return 0;
+  if (!strcmp (*argP, "z8001"))
+    {
+      s_segm ();
+    }
+  else if (!strcmp (*argP, "z8002"))
+    {
+      s_unseg ();
+    }
+  else
+    return 0;
   **argP = 0;
   return 1;
 }
@@ -1224,10 +1251,16 @@ md_apply_fix (fixP, val)
       /*    if (val != 0) abort();*/
       break;
 
+    case R_DISP7:
+
+      *buf++ += val;
+      /*    if (val != 0) abort();*/
+      break;
+
     case R_IMM8:
       buf[0] += val;
       break;
-     case R_IMM16:
+    case R_IMM16:
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
@@ -1316,38 +1349,38 @@ tc_reloc_mangle (fix_ptr, intr, base)
   /* If this relocation is attached to a symbol then it's ok
      to output it */
   if (fix_ptr->fx_r_type == 0)
-  {
-    /* cons likes to create reloc32's whatever the size of the reloc..
-     */
-    switch (fix_ptr->fx_size)
     {
+      /* cons likes to create reloc32's whatever the size of the reloc..
+     */
+      switch (fix_ptr->fx_size)
+	{
 
-     case 2:
-      intr->r_type = R_IMM16;
-      break;
-     case 1:
-      intr->r_type = R_IMM8;
-      break;
-     case 4:
-      intr->r_type = R_IMM32;
-      break;
-     default:
-      abort ();
+	case 2:
+	  intr->r_type = R_IMM16;
+	  break;
+	case 1:
+	  intr->r_type = R_IMM8;
+	  break;
+	case 4:
+	  intr->r_type = R_IMM32;
+	  break;
+	default:
+	  abort ();
+
+	}
 
     }
-
-  }
   else
-  {
-    intr->r_type = fix_ptr->fx_r_type;
-  }
+    {
+      intr->r_type = fix_ptr->fx_r_type;
+    }
 
   intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
   intr->r_offset = fix_ptr->fx_offset;
 
   if (symbol_ptr)
-   intr->r_symndx = symbol_ptr->sy_number;
+    intr->r_symndx = symbol_ptr->sy_number;
   else
-   intr->r_symndx = -1;
+    intr->r_symndx = -1;
 
 }

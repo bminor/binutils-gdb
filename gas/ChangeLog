@@ -1,3 +1,11 @@
+Sat Dec 11 11:23:12 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/tc-h8500.c (build_bytes): Get reloc type right for a
+	%page operation. (md_assemble): Don't modify input_line_pointer.
+	(mdcoff_sizemachdep): New function.
+	* config/tc-h8500.h (TC_COFF_SIZEMACHDEP): New macro.
+	* config/tc-z8k.c (get_operand): Delete bogus check.
+
 Wed Dec  8 16:31:51 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* write.c (number_to_chars_*): Delete bogus range check.
