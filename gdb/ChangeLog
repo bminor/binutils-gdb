@@ -1,5 +1,13 @@
 2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
 
+	* minsyms.c (msymbol_hash): Use better hash function.
+	(msymbol_hash_iw): Likewise.  Terminate loop at '(' properly.
+
+	* objfiles.h: Increase MINIMAL_SYMBOL_HASH_SIZE to match modern
+	binaries.
+
+2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
+
 	* printcmd.c (print_frame_args):  Move symbol iteration explicitly
 	inside the func != NULL block.
 

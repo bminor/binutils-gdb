@@ -96,8 +96,10 @@ msymbol_hash_iw (const char *string)
       while (isspace (*string))
 	++string;
       if (*string && *string != '(')
-	hash = (31 * hash) + *string;
-      ++string;
+	{
+	  hash = hash * 67 + *string - 113;
+	  ++string;
+	}
     }
   return hash % MINIMAL_SYMBOL_HASH_SIZE;
 }
@@ -109,7 +111,7 @@ msymbol_hash (const char *string)
 {
   unsigned int hash = 0;
   for (; *string; ++string)
-    hash = (31 * hash) + *string;
+    hash = hash * 67 + *string - 113;
   return hash % MINIMAL_SYMBOL_HASH_SIZE;
 }
 

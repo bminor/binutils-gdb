@@ -202,7 +202,7 @@ extern void print_objfile_statistics (void);
 extern void print_symbol_bcache_statistics (void);
 
 /* Number of entries in the minimal symbol hash table.  */
-#define MINIMAL_SYMBOL_HASH_SIZE 349
+#define MINIMAL_SYMBOL_HASH_SIZE 2039
 
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
