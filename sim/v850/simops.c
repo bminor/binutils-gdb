@@ -414,8 +414,11 @@ Multiply64 (boolean sign, unsigned long op0)
 	RdLo += 1;
     }
   
-  State.regs[ OP[1]       ] = RdLo;
-  State.regs[ OP[2] >> 11 ] = RdHi;
+  /* Don't store into register 0.  */
+  if (OP[1])
+    State.regs[ OP[1]       ] = RdLo;
+  if (OP[2] >> 11)
+    State.regs[ OP[2] >> 11 ] = RdHi;
 
   return;
 }
