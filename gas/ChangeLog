@@ -1,4 +1,16 @@
+Thu Jan 23 17:30:08 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* symbols.c(colon): if a symbol is being multiply defined as exactly
+	the same value, then don't cause a fatal error. This fixes
+	P00000616 - where a def _foo= . followed by foo: is seen.
+
 Wed Jan  8 11:26:40 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* config/obj-coffbfd.c: lint
+	* config/tc-h8300.c, config/tc-h8300.h: Too Many bug fixes
+	* config/tc-m68k.h, config/tc-sparc.h: Override default
+	listing options to give better effect.
+
         Added support for listings
 	* Makefile.in: include listing.[co]
 	* as.c: parse -l

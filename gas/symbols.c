@@ -205,7 +205,7 @@ fragS *frag;			/* Associated fragment */
 	obj_symbol_new_hook(symbolP);
 	
 #ifdef DEBUG
-	verify_symbol_chain(symbol_rootP, symbol_lastP);
+/*	verify_symbol_chain(symbol_rootP, symbol_lastP); */
 #endif /* DEBUG */
 
 	return(symbolP);
@@ -367,8 +367,13 @@ void colon(sym_name)		/* just seen "x:" - rattle symbols & frags */
 #endif /* OBJ_COFF */
 			  }
 		  } /* if the undefined symbol has no value */
-	  } else {
-		  as_fatal("Symbol %s already defined.", sym_name);
+	  } else 
+	  {
+	    /* Don't blow up if the definition is the same */
+	    if (!(frag_now == symbolP->sy_frag
+		  && S_GET_VALUE(symbolP) == obstack_next_free(&frags) - frag_now->fr_literal
+		  && S_GET_SEGMENT(symbolP) == now_seg) )
+	     as_fatal("Symbol %s already defined.", sym_name);
 	  } /* if this symbol is not yet defined */
 
   } else {
@@ -515,7 +520,7 @@ symbolS **lastPP;
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 
 #ifdef DEBUG
-	verify_symbol_chain(*rootPP, *lastPP);
+/*	verify_symbol_chain(*rootPP, *lastPP); */
 #endif /* DEBUG */
 
 	return;
