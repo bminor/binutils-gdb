@@ -6,7 +6,7 @@ Thu Aug  7 19:40:52 1997  Geoffrey Noer  <noer@cygnus.com>
 	add (temporary) logging commands to help debugging,
 	(ocd_open): if "target ocd wiggler lpt" then use special
 	ser-ocd.c serial interface which communicates with Wigglers.dll,
-	otherwise do as we did before
+	otherwise ("target ocd <foo>") do as we did before
 	(ocd_get_packet): add OCD_LOG_FILE and OCD_SET_CONNECTION to
 	switch of known commands of len 0
 	* ocd.h: add OCD_LOG_FILE
@@ -32,7 +32,7 @@ Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 Thu Aug  7 13:09:17 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	Nomenclature change.  BDM is a specific type of OCD
-	(On chip debugging).  Wiggler is the parallel port box controlled
+	(On Chip Debugging).  Wiggler is the parallel port box controlled
 	by Wigglers.dll.  The faster target box from Macraigor Systems
 	is not a wiggler.  
 	* ocd.c:
