@@ -1,3 +1,8 @@
+2000-07-01  Frank Ch. Eigler  <fche@redhat.com>
+
+	* binutils-all/objdump.exp (cpus_expected, cpus_regex): Reorganize
+	syntax to display more tcl nature.
+
 2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* binutils-all/objdump.exp (cpus_expected): Recognize m68hc11 and
