@@ -1831,8 +1831,10 @@ read_dbx_symtab (symfile_name, addr,
 
 	  /* We need to be able to deal with both N_FN or N_TEXT,
 	     because we have no way of knowing whether the sys-supplied ld
-	     or GNU ld was used to make the executable.  */
+	     or GNU ld was used to make the executable.  Sequents throw
+	     in another wrinkle -- they renumbered N_FN.  */
 	case N_FN:
+	case N_FN_SEQ:
 	case N_TEXT:
 	  bufp->n_value += addr;		/* Relocate */
 	  SET_NAMESTRING();
@@ -3151,6 +3153,7 @@ process_one_symbol (type, desc, valu, name)
       break;
 
     case N_FN:
+    case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.  */
       break;
 
