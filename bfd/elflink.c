@@ -7253,7 +7253,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 
   if (seen_other && seen_linkorder)
     {
-      (*_bfd_error_handler) ("%s: has both ordered and unordered sections",
+      (*_bfd_error_handler) (_("%s: has both ordered and unordered sections"),
 			     o->name);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
