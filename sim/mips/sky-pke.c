@@ -1157,8 +1157,7 @@ pke_begin_interrupt_stall(struct pke_device* me)
 {
   /* set PIS */
   PKE_REG_MASK_SET(me, STAT, PIS, 1);
-  
-  /* XXX: send interrupt to 5900? */
+  sky_signal_interrupt();
 }
 
 

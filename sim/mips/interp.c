@@ -289,7 +289,7 @@ static const OPTION mips_options[] =
 
 int interrupt_pending;
 
-static void
+void
 interrupt_event (SIM_DESC sd, void *data)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
@@ -3233,6 +3233,12 @@ decode_coproc (SIM_DESC sd,
 		/* ignore */
 		break;
 		/* 3 = Config              R3900                  */
+
+	      case 7:
+		/* ignore */
+		break;
+		/* 3 = Cache               R3900                  */
+
 #endif /* SUBTARGET_R3900 */
 	      case 12:
 		if (code == 0x00)

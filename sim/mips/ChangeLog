@@ -1,3 +1,23 @@
+Wed Jun 10 13:22:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): For TX39, add stub COP0 register #7,
+ 	to allay warnings.
+	(interrupt_event): Made non-static.
+start-sanitize-tx3904
+	
+	* dv-tx3904tmr.c (deliver_tx3904tmr_tick): Correct accidental
+ 	interchange of configuration values for external vs. internal
+ 	clock dividers.
+end-sanitize-tx3904
+start-sanitize-sky
+
+	* sky-device.c (sky_signal_interrupt): New function to generate
+	interrupt event.
+	* sky-device.h: Declare it.
+	* sky-dma.c (check_int1): Call it.
+	* sky-pke.c (pke_begin_interrupt_stall): Call it.
+end-sanitize-sky
+	
 Tue Jun  9 12:46:24 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* mips.igen (BREAK): Moved code to here for 
