@@ -1,3 +1,12 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-06-08 Daniel Jacobowitz <djacobowitz@mvista.com>:
+	* defs.h (enum target_signal): Add TARGET_SIGNAL_REALTIME_65
+	to TARGET_SIGNAL_REALTIME_127.
+	* target.c (struct signals): Add SIG63 to SIG127.
+	(target_signal_from_host): Handle up to 127 signals.
+	(do_target_signal_to_host): Likewise.
+	
 2001-06-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-sds.c (sds_start_remote): Change type of ``c'' to int

@@ -1487,6 +1487,69 @@ static struct {
   {"SIGCANCEL", "LWP internal signal"},
   {"SIG32", "Real-time event 32"},
   {"SIG64", "Real-time event 64"},
+  {"SIG65", "Real-time event 65"},
+  {"SIG66", "Real-time event 66"},
+  {"SIG67", "Real-time event 67"},
+  {"SIG68", "Real-time event 68"},
+  {"SIG69", "Real-time event 69"},
+  {"SIG70", "Real-time event 70"},
+  {"SIG71", "Real-time event 71"},
+  {"SIG72", "Real-time event 72"},
+  {"SIG73", "Real-time event 73"},
+  {"SIG74", "Real-time event 74"},
+  {"SIG75", "Real-time event 75"},
+  {"SIG76", "Real-time event 76"},
+  {"SIG77", "Real-time event 77"},
+  {"SIG78", "Real-time event 78"},
+  {"SIG79", "Real-time event 79"},
+  {"SIG80", "Real-time event 80"},
+  {"SIG81", "Real-time event 81"},
+  {"SIG82", "Real-time event 82"},
+  {"SIG83", "Real-time event 83"},
+  {"SIG84", "Real-time event 84"},
+  {"SIG85", "Real-time event 85"},
+  {"SIG86", "Real-time event 86"},
+  {"SIG87", "Real-time event 87"},
+  {"SIG88", "Real-time event 88"},
+  {"SIG89", "Real-time event 89"},
+  {"SIG90", "Real-time event 90"},
+  {"SIG91", "Real-time event 91"},
+  {"SIG92", "Real-time event 92"},
+  {"SIG93", "Real-time event 93"},
+  {"SIG94", "Real-time event 94"},
+  {"SIG95", "Real-time event 95"},
+  {"SIG96", "Real-time event 96"},
+  {"SIG97", "Real-time event 97"},
+  {"SIG98", "Real-time event 98"},
+  {"SIG99", "Real-time event 99"},
+  {"SIG100", "Real-time event 100"},
+  {"SIG101", "Real-time event 101"},
+  {"SIG102", "Real-time event 102"},
+  {"SIG103", "Real-time event 103"},
+  {"SIG104", "Real-time event 104"},
+  {"SIG105", "Real-time event 105"},
+  {"SIG106", "Real-time event 106"},
+  {"SIG107", "Real-time event 107"},
+  {"SIG108", "Real-time event 108"},
+  {"SIG109", "Real-time event 109"},
+  {"SIG110", "Real-time event 110"},
+  {"SIG111", "Real-time event 111"},
+  {"SIG112", "Real-time event 112"},
+  {"SIG113", "Real-time event 113"},
+  {"SIG114", "Real-time event 114"},
+  {"SIG115", "Real-time event 115"},
+  {"SIG116", "Real-time event 116"},
+  {"SIG117", "Real-time event 117"},
+  {"SIG118", "Real-time event 118"},
+  {"SIG119", "Real-time event 119"},
+  {"SIG120", "Real-time event 120"},
+  {"SIG121", "Real-time event 121"},
+  {"SIG122", "Real-time event 122"},
+  {"SIG123", "Real-time event 123"},
+  {"SIG124", "Real-time event 124"},
+  {"SIG125", "Real-time event 125"},
+  {"SIG126", "Real-time event 126"},
+  {"SIG127", "Real-time event 127"},
 
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
@@ -1789,6 +1852,9 @@ target_signal_from_host (int hostsig)
 	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
       else if (hostsig == 32)
 	return TARGET_SIGNAL_REALTIME_32;
+      else if (64 <= hostsig && hostsig <= 127)
+	return (enum target_signal)
+	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
       else
 	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
@@ -2060,6 +2126,19 @@ do_target_signal_to_host (enum target_signal oursig,
              TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
 	  return 32;
 	}
+#endif
+#if (REALTIME_HI > 64)
+      if (oursig >= TARGET_SIGNAL_REALTIME_64
+	  && oursig <= TARGET_SIGNAL_REALTIME_127)
+	{
+	  /* This block of signals is continuous, and
+             TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
+	  int retsig =
+	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
+	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
+	    return retsig;
+	}
+      
 #endif
 #endif
 
