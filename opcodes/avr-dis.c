@@ -29,7 +29,7 @@ typedef unsigned long u32;
 #define IFMASK(a,b)     ((opcode & (a)) == (b))
 
 static char* SREG_flags = "CZNVSHTI";
-static char* sect94[] = {"COM","NEG","SWAP","INC","NULL","ASR","LSR","ROR",
+static char* sect94[] = {"COM","NEG","SWAP","INC",0,"ASR","LSR","ROR",
 			 0,0,"DEC",0,0,0,0,0};
 static char* sect98[] = {"CBI","SBIC","SBI","SBIS"};
 static char* branchs[] = {
@@ -112,6 +112,72 @@ reg20w (opcode, dest)
 {
   opcode = (opcode & 0x30) >> 4;
   sprintf(dest, "R%d", 24 + opcode * 2);
+}
+
+
+static void reg_fmul_d PARAMS ((u16, char *));
+
+static void
+reg_fmul_d (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 16 + ((opcode >> 4) & 7));
+}
+
+
+static void reg_fmul_r PARAMS ((u16, char *));
+
+static void
+reg_fmul_r (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 16 + (opcode & 7));
+}
+
+
+static void reg_muls_d PARAMS ((u16, char *));
+
+static void
+reg_muls_d (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 16 + ((opcode >> 4) & 0xf));
+}
+
+
+static void reg_muls_r PARAMS ((u16, char *));
+
+static void
+reg_muls_r (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 16 + (opcode & 0xf));
+}
+
+
+static void reg_movw_d PARAMS ((u16, char *));
+
+static void
+reg_movw_d (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 2 * ((opcode >> 4) & 0xf));
+}
+
+
+static void reg_movw_r PARAMS ((u16, char *));
+
+static void
+reg_movw_r (opcode, dest)
+     u16 opcode;
+     char *dest;
+{
+  sprintf(dest, "R%d", 2 * (opcode & 0xf));
 }
 
 
@@ -223,7 +289,33 @@ print_insn_avr(addr, info)
 	    switch (opcode & 0x0c00)
 	      {
 	      case 0x0000:
-		(*prin) (stream, "    NOP");
+		switch (opcode & 0x0300)
+		  {
+		  case 0x0000:
+		    (*prin) (stream, "    NOP");
+		    break;
+		  case 0x0100:
+		    reg_movw_d(opcode, rd);
+		    reg_movw_r(opcode, rr);
+		    (*prin) (stream, "    MOVW    %s,%s", rd, rr);
+		    break;
+		  case 0x0200:
+		    reg_muls_d(opcode, rd);
+		    reg_muls_r(opcode, rr);
+		    (*prin) (stream, "    MULS    %s,%s", rd, rr);
+		    break;
+		  case 0x0300:
+		    reg_fmul_d(opcode, rd);
+		    reg_fmul_r(opcode, rr);
+		    if (IFMASK(0x88, 0))
+		      (*prin) (stream, "    MULSU   %s,%s", rd, rr);
+		    else if (IFMASK(0x88, 8))
+		      (*prin) (stream, "    FMUL    %s,%s", rd, rr);
+		    else if (IFMASK(0x88, 0x80))
+		      (*prin) (stream, "    FMULS   %s,%s", rd, rr);
+		    else
+		      (*prin) (stream, "    FMULSU  %s,%s", rd, rr);
+		  }
 		break;
 	      case 0x0400:
 		(*prin) (stream, "    CPC     %s,%s", rd, rr);
@@ -336,6 +428,18 @@ print_insn_avr(addr, info)
 		    case 0x2:
 		      (*prin) (stream, "    LD      %s,-Z", rd);
 		      break;
+		    case 0x4:
+		      (*prin) (stream, "    LPM     %s,Z", rd);
+		      break;
+		    case 0x5:
+		      (*prin) (stream, "    LPM     %s,Z+", rd);
+		      break;
+		    case 0x6:
+		      (*prin) (stream, "    ELPM    %s,Z", rd);
+		      break;
+		    case 0x7:
+		      (*prin) (stream, "    ELPM    %s,Z+", rd);
+		      break;
 		    case 0x9:
 		      (*prin) (stream, "    LD      %s,Y+", rd);
 		      break;
@@ -422,12 +526,19 @@ print_insn_avr(addr, info)
 		      else
 			(*prin) (stream, "    SE%c", SREG_flags[sf]);
 		    }
-		  else if (IFMASK(0x000f, 0x0009))
+		  else if (IFMASK(0x001f, 0x0009))
 		    {
 		      if (opcode & 0x0100)
 			(*prin) (stream, "    ICALL");
 		      else
 			(*prin) (stream, "    IJMP");
+		    }
+		  else if (IFMASK(0x001f, 0x0019))
+		    {
+		      if (opcode & 0x0100)
+			(*prin) (stream, "    EICALL");
+		      else
+			(*prin) (stream, "    EIJMP");
 		    }
 		  else if (IFMASK(0x010f, 0x0108))
 		    {
@@ -443,6 +554,10 @@ print_insn_avr(addr, info)
 			(*prin) (stream, "    LPM");
 		      else if (IFMASK(0x00f0, 0x00d0))
 			(*prin) (stream, "    ELPM");
+		      else if (IFMASK(0x00f0, 0x00e0))
+			(*prin) (stream, "    SPM");
+		      else if (IFMASK(0x00f0, 0x00f0))
+			(*prin) (stream, "    ESPM");
 		      else
 			(*prin) (stream, "    ????");
 		    }

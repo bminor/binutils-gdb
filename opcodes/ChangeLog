@@ -1,3 +1,15 @@
+Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* avr-dis.c (reg_fmul_d): New. Extract destination register from
+	FMUL instruction.
+	(reg_fmul_r): New. Extract source register from FMUL instruction.
+	(reg_muls_d): New. Extract destination register from MULS instruction.
+	(reg_muls_r): New. Extract source register from MULS instruction.
+	(reg_movw_d): New. Extract destination register from MOVW instruction.
+	(reg_movw_r): New. Extract source register from MOVW instruction.
+	(print_insn_avr): Handle MOVW, MULS, MULSU, FMUL, FMULS, FMULSU,
+	EICALL, EIJMP, LPM r,Z, ELPM r,Z, SPM, ESPM instructions.
+
 Mon Apr 24 15:21:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* configure.in: Add bfd_powerpc_64_arch.
