@@ -1,5 +1,9 @@
 Thu Aug 22 10:54:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host (HLDENV): New variable to set.  Set it for
+	*-*-sysv4*, since those linkers may not support -R but they always
+	support LD_RUN_PATH.
+
 	* libieee.h (NSECTIONS): Don't define.
 	(ieee_data_struct): Change section_table to asection **.  Add
 	section_table_size.
