@@ -2117,6 +2117,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
       if (phdr_map == (file_ptr) -1)
 	return false;
       BFD_ASSERT ((bfd_size_type) phdr_map <= (bfd_size_type) phdr_off + phdr_size);
+
+      free (sorted_hdrs);
     }
 
   /* Place the section headers.  */
@@ -2153,7 +2155,7 @@ elf_sort_hdrs (arg1, arg2)
     }
   else
     {
-      if ((hdr1->sh_flags & SHF_ALLOC) != 0)
+      if ((hdr2->sh_flags & SHF_ALLOC) != 0)
 	return 1;
       return 0;
     }
