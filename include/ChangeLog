@@ -1,3 +1,17 @@
+Thu Jul  8 09:05:26 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* opcode/h8300.h: Lots of little fixes for the h8/300h.
+
+Fri Jul  2 10:31:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ansidecl.h: Use ANSI macros if __mips and _SYSTYPE_SVR4 are
+	defined, since RISC/OS cc handles ANSI declarations in SVR4 mode
+	but does not define __STDC__.
+
+Sun Jun 20 18:27:52 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* dis-asm.h: Don't need to include ansidecl.h any more.
+
 Fri Jun 18 03:22:10 1993  John Gilmore  (gnu@cygnus.com)
 
 	* oasys.h:  Eliminate "int8_type", "int16_type", "int32_type", and
