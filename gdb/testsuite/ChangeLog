@@ -1,3 +1,9 @@
+2000-10-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/gdbserver.exp:  Rewritten from the ground up, to make it
+	compatible with the current dejagnu tree, and to make it work with
+	the new "gdbserver" in libremote.
+
 2000-10-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/sizeof.exp (check_sizeof): Skip if no printf support.
