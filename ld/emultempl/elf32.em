@@ -114,7 +114,6 @@ static void
 gld${EMULATION_NAME}_before_allocation ()
 {
   asection *sinterp;
-  lang_input_statement_type *is;
 
   /* If we are going to make any variable assignments, we need to let
      the ELF backend know about them in case the variables are
