@@ -1,3 +1,9 @@
+2002-07-14  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-07-11 Momchil Velikov <velco@fadata.bg>:
+	* Make-common.in (installdirs): Make $(libdir) too, needed when
+	installing libsim.a.
+
 2002-07-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gennltvals.sh (dir): Mark d30v as obsolete.
