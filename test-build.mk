@@ -34,10 +34,12 @@ include $(TREE)/release-info
 
 
 TIME 		:= time
-GCC 		:= gcc -O
+GCC 		:= $(host)-gcc -O
 GNUC		:= CC="$(GCC)"
 CFLAGS		:= -g
+CXXFLAGS	:= -g -O
 GNU_MAKE 	:= /usr/latest/bin/make -w 
+MAKEINFOFLAGS	:=
 
 override MAKE 		:= make
 override MFLAGS 	:=
@@ -45,7 +47,15 @@ override MFLAGS 	:=
 
 SHELL := /bin/sh
 
-ifdef build
+ifndef build
+build := $(host)
+endif
+
+ifndef target
+target := $(host)
+endif
+
+ifneq ($(build),$(host))
 
 # We are building on a machine other than the host.  We rely upon
 # previously built cross-compilers from the build machine to the host
@@ -84,10 +94,12 @@ FLAGS_TO_PASS := \
 	"CXX=$(CXX)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"GCC=$(GCC)" \
 	"HOST_PREFIX=$(HOST_PREFIX)" \
 	"HOST_PREFIX_1=$(HOST_PREFIX_1)" \
 	"MAKEINFO=$(MAKEINFO)" \
+	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
 	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM=$(NM)" \
@@ -110,7 +122,9 @@ else
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"TIME=$(TIME)" \
+	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
 	"host=$(host)" \
 	"RELEASE_TAG=$(RELEASE_TAG)"
@@ -139,7 +153,7 @@ INPLACEDIR 	:= $(host)-in-place
 # Arrange to find the needed programs.  If we are building on a
 # machine other than the host, we must find the cross-compilers.
 
-ifdef build
+ifneq ($(build),$(host))
 
 holesys		:= $(build)
 HOLESSTAMP	:= $(holesys)-stamp-holes $(build)-x-$(host)-stamp-holes $(build)-x-$(target)-stamp-holes
@@ -164,7 +178,7 @@ SET_LATEST_PATH  := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export P
 endif
 
 .PHONY: all
-ifdef target
+ifneq ($(target),$(host))
 ##
 ## This is a cross compilation
 ##
@@ -172,7 +186,7 @@ arch 		= $(host)-x-$(target)
 config  	= -host=$(host) -target=$(target)
 FLAGS_TO_PASS	:= $(FLAGS_TO_PASS) "target=$(target)"
 
-ifdef build
+ifneq ($(build),$(host))
 all:	do-cygnus do-latest
 build-all: build-cygnus build-latest
 else
@@ -181,7 +195,13 @@ build-all: build-native build-latest
 endif
 
 ifeq ($(target),mips-idt-ecoff)
-configargs	:= $(configargs) -with-gnu-as
+configargs	:= $(configargs) -with-gnu-as -with-stabs
+endif
+
+ifeq ($(host),i386-go32)
+ifeq ($(subst mips-idt-ecoff,sparclite-aout,$(target)),sparclite-aout)
+configargs	:= $(configargs) -with-gnu-ld
+endif
 endif
 
 else
@@ -190,7 +210,7 @@ else
 ##
 arch		= $(host)
 config  	= -host=$(host)
-ifdef build
+ifneq ($(build),$(host))
 all:	do-cygnus do-latest
 else
 all:	$(host)-stamp-3stage-done
@@ -198,10 +218,15 @@ endif
 #all:	in-place do1 do2 do3 comparison
 
 ifeq ($(subst mips-sgi-irix4,mips-dec-ultrix,$(host)),mips-dec-ultrix)
-configargs	:= $(configargs) -with-gnu-as
+configargs	:= $(configargs) -with-gnu-as -with-stabs
 endif
 
 endif
+
+ifeq ($(target),m68k-hp-hpux)
+configargs	:= $(configargs) -with-gnu-as
+endif
+
 
 NATIVEDIR	:= $(arch)-native-objdir
 CYGNUSDIR	:= $(arch)-cygnus-objdir
@@ -247,10 +272,12 @@ do-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus
 build-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-checked
 config-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-configured
 
+vault-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-built
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install 
+	
+
 $(arch)-stamp-cygnus: 
-ifndef build
-	[ -f $(relbindir)/gcc ] || (echo "must have gcc available"; exit 1)
-endif
+	[ -f $(relbindir)/$(host)-gcc ] || (echo "must have gcc available"; exit 1)
 	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-cygnus-installed  $(FLAGS_TO_PASS)
 	if [ -f CLEAN_ALL ] ; then rm -rf $(CYGNUSDIR) ; else true ; fi
 	touch $(arch)-stamp-cygnus
@@ -350,6 +377,13 @@ do1:	    $(HOLESSTAMP) $(host)-stamp-stage1
 do1-config: $(HOLESSTAMP) $(host)-stamp-stage1-configured
 do1-build:  $(HOLESSTAMP) $(host)-stamp-stage1-checked
 
+do1-vault: $(HOLESSTAMP) $(host)-stamp-stage1-built
+	if [ -d $(WORKING_DIR).1 ] ; then \
+	  $(SET_NATIVE_HOLES) cd $(WORKING_DIR).1 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	else \
+	  $(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	fi
+
 $(host)-stamp-stage1:
 	if [ -d $(STAGE1DIR) ] ; then \
 		mv $(STAGE1DIR) $(WORKING_DIR) ; \
@@ -390,6 +424,15 @@ $(host)-stamp-stage1-configured:
 .PHONY: do2
 do2:	$(HOLESDIR) $(host)-stamp-stage2
 
+do2-vault: $(HOLESSTAMP) $(host)-stamp-stage2-built
+	if [ -d $(WORKING_DIR).2 ] ; then \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).2 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	else \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	fi
+
+
+
 $(host)-stamp-stage2:
 	if [ -d $(STAGE2DIR) ] ; then \
 		mv $(STAGE2DIR) $(WORKING_DIR) ; \
@@ -423,6 +466,13 @@ $(host)-stamp-stage2-configured:
 
 .PHONY: do3
 do3:	$(HOLESDIR) $(host)-stamp-stage3
+
+do3-vault: $(HOLESSTAMP) $(host)-stamp-stage3-built
+	if [ -d $(WORKING_DIR).3 ] ; then \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).3 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	else \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	fi
 
 $(host)-stamp-stage3:
 	if [ -d $(STAGE3DIR) ] ; then \
@@ -466,11 +516,14 @@ HOLES := \
 	cat \
 	cc \
 	chmod \
+	chgrp \
+	chown \
 	cmp \
 	cp \
 	cpio \
 	date \
 	diff \
+	dirname \
 	echo \
 	egrep \
 	ex \
@@ -503,6 +556,7 @@ HOLES := \
 	tr \
 	true \
 	uname \
+	uniq \
 	uudecode \
 	wc \
 	whoami
@@ -600,12 +654,13 @@ BUILD_HOST_HOLES := \
 	$(NM) \
 	$(RANLIB)
 
-BUILD_HOLES_DIRS := $(PARTIAL_HOLE_DIRS)
+BUILD_HOLES_DIRS := $(release_root)/H-$(build)/bin $(PARTIAL_HOLE_DIRS)
 
 ifdef BUILD_HOST_HOLES_DIR
 $(BUILD_HOST_HOLES_DIR): $(build)-x-$(host)-stamp-holes
 endif
 
+ifneq ($(build),$(host))
 $(build)-x-$(host)-stamp-holes:
 	-rm -rf $(BUILD_HOST_HOLES_DIR)
 	-mkdir $(BUILD_HOST_HOLES_DIR)
@@ -625,6 +680,7 @@ $(build)-x-$(host)-stamp-holes:
 		esac ; \
 	done
 	touch $@
+endif
 
 # Get the cross tools for build cross target when not building on the host.
 
@@ -644,6 +700,7 @@ ifdef BUILD_TARGET_HOLES_DIR
 $(BUILD_TARGET_HOLES_DIR): $(build)-x-$(target)-stamp-holes
 endif
 
+ifneq ($(build),$(target))
 $(build)-x-$(target)-stamp-holes:
 	-rm -rf $(BUILD_TARGET_HOLES_DIR)
 	-mkdir $(BUILD_TARGET_HOLES_DIR)
@@ -663,6 +720,7 @@ $(build)-x-$(target)-stamp-holes:
 		esac ; \
 	done
 	touch $@
+endif
 
 .PHONY: comparison
 comparison: $(host)-stamp-3stage-compared
