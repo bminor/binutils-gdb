@@ -258,7 +258,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
+   into VALBUF. 
+
+   FIXME: Not sure what to do for soft float here.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   { \
@@ -274,10 +276,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   }
 
 /* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
+   of type TYPE, given in virtual format.
+
+   For software floating point the return value goes into the integer
+   registers.  But we don't have any flag to key this on, so we always
+   store the value into the integer registers, and if it's a float value,
+   then we put it in the float registers too.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes ((TYPE_LENGTH(TYPE) > 4 \
+  write_register_bytes (REGISTER_BYTE (28),(VALBUF), TYPE_LENGTH (TYPE)) ; \
+  write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_FLT \
 			 ? REGISTER_BYTE (FP4_REGNUM) \
 			 : REGISTER_BYTE (28)),		\
 			(VALBUF), TYPE_LENGTH (TYPE))
