@@ -454,8 +454,13 @@ COMMON int linkrelax;
 /* TRUE if we should produce a listing.  */
 extern int listing;
 
-/* Type of debugging information we should generate.  We currently
-   support stabs, ECOFF, and DWARF2.  */
+/* Type of debugging information we should generate.  We currently support
+   stabs, ECOFF, and DWARF2.
+
+   NOTE!  This means debug information about the assembly source code itself
+   and _not_ about possible debug information from a high-level language.
+   This is especially relevant to DWARF2, since the compiler may emit line
+   number directives that the assembler resolves.  */
 
 enum debug_info_type {
   DEBUG_UNSPECIFIED,

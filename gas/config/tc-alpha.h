@@ -146,3 +146,5 @@ do {									\
 	     (long)fixP->tc_fix_data.next_lituse);			\
 } while (0)
 #endif
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 4

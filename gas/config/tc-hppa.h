@@ -173,8 +173,7 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #define elf_tc_final_processing	elf_hppa_final_processing
 void elf_hppa_final_processing PARAMS ((void));
 
-#define md_end() pa_end_of_source ()
-void pa_end_of_source PARAMS ((void));
+#define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */
 
 #define md_operand(x)

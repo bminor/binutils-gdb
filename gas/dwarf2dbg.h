@@ -65,6 +65,6 @@ extern void dwarf2_gen_line_info PARAMS ((addressT addr,
    .debug_line section.  */
 extern void dwarf2_finish PARAMS ((void));
 
-extern void dwarf2_generate_asm_lineno PARAMS ((int));
+extern void dwarf2_emit_insn PARAMS ((int));
 
 #endif /* AS_DWARF2DBG_H */

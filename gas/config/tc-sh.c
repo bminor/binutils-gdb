@@ -1929,8 +1929,7 @@ md_assemble (str)
 	}
     }
 
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (size);
+  dwarf2_emit_insn (size);
 }
 
 /* This routine is called each time a label definition is seen.  It
@@ -3324,10 +3323,3 @@ tc_gen_reloc (section, fixp)
 }
 
 #endif /* BFD_ASSEMBLER */
-
-void
-sh_finalize ()
-{
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
-}

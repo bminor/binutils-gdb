@@ -58,6 +58,7 @@
 
 #ifdef OBJ_ELF
 #include "elf/alpha.h"
+#include "dwarf2dbg.h"
 #endif
 
 #include <ctype.h>
@@ -245,6 +246,8 @@ static void s_alpha_end PARAMS ((int));
 static void s_alpha_mask PARAMS ((int));
 static void s_alpha_frame PARAMS ((int));
 static void s_alpha_prologue PARAMS ((int));
+static void s_alpha_file PARAMS ((int));
+static void s_alpha_loc PARAMS ((int));
 static void s_alpha_coff_wrapper PARAMS ((int));
 #endif
 #ifdef OBJ_EVAX
@@ -393,8 +396,8 @@ static offsetT alpha_lit4_literal;
 static offsetT alpha_lit8_literal;
 #endif
 
-/* The active .ent symbol.  */
 #ifdef OBJ_ELF
+/* The active .ent symbol.  */
 static symbolS *alpha_cur_ent_sym;
 #endif
 
@@ -1671,9 +1674,9 @@ alpha_adjust_symtab ()
 
 static void
 alpha_adjust_symtab_relocs (abfd, sec, ptr)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
-     PTR ptr;
+     PTR ptr ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS **prevP;
@@ -2465,6 +2468,10 @@ emit_insn (insn)
   /* Write out the instruction.  */
   f = frag_more (4);
   md_number_to_chars (f, insn->insn, 4);
+
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (4);
+#endif
 
   /* Apply the fixups in order */
   for (i = 0; i < insn->nfixups; ++i)
@@ -3287,8 +3294,8 @@ emit_lda (tok, ntok, opname)
 	      || tok[2].X_op != O_pregister
 	      || !is_ir_num(tok[2].X_add_number))
 	    {
-	      as_bad (_("bad instruction format for lda !%s!%d"), r->name,
-		      reloc->X_add_number);
+	      as_bad (_("bad instruction format for lda !%s!%ld"), r->name,
+		      (long) reloc->X_add_number);
 
 	      reloc = (const expressionS *)0;
 	      ntok--;
@@ -4572,6 +4579,26 @@ s_alpha_prologue (ignore)
 }
 
 static void
+s_alpha_file (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_directive_file (0);
+  else
+    dwarf2_directive_file (0);
+}
+
+static void
+s_alpha_loc (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_directive_loc (0);
+  else
+    dwarf2_directive_loc (0);
+}
+
+static void
 s_alpha_coff_wrapper (which)
      int which;
 {
@@ -4581,11 +4608,9 @@ s_alpha_coff_wrapper (which)
     ecoff_directive_def,
     ecoff_directive_dim,
     ecoff_directive_endef,
-    ecoff_directive_file,
     ecoff_directive_scl,
     ecoff_directive_tag,
     ecoff_directive_val,
-    ecoff_directive_loc,
   };
 
   assert (which >= 0 && which < (int)(sizeof(fns)/sizeof(*fns)));
@@ -5447,17 +5472,17 @@ const pseudo_typeS md_pseudo_table[] =
   {"fmask", s_alpha_mask, 1},
   {"frame", s_alpha_frame, 0},
   {"prologue", s_alpha_prologue, 0},
+  {"file", s_alpha_file, 5},
+  {"loc", s_alpha_loc, 9},
   /* COFF debugging related pseudos.  */
   {"begin", s_alpha_coff_wrapper, 0},
   {"bend", s_alpha_coff_wrapper, 1},
   {"def", s_alpha_coff_wrapper, 2},
   {"dim", s_alpha_coff_wrapper, 3},
   {"endef", s_alpha_coff_wrapper, 4},
-  {"file", s_alpha_coff_wrapper, 5},
-  {"scl", s_alpha_coff_wrapper, 6},
-  {"tag", s_alpha_coff_wrapper, 7},
-  {"val", s_alpha_coff_wrapper, 8},
-  {"loc", s_alpha_coff_wrapper, 9},
+  {"scl", s_alpha_coff_wrapper, 5},
+  {"tag", s_alpha_coff_wrapper, 6},
+  {"val", s_alpha_coff_wrapper, 7},
 #else
   {"prologue", s_ignore, 0},
 #endif

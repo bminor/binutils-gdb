@@ -1371,9 +1371,7 @@ m68hc11_new_insn (size)
 
   f = frag_more (size);
 
-  /* Emit line number information in dwarf2 debug sections.  */
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (size);
+  dwarf2_emit_insn (size);
 
   return f;
 }
@@ -2768,39 +2766,4 @@ int
 m68hc11_cleanup ()
 {
   return 1;
-}
-
-void
-m68hc11_end_of_source ()
-{
-  segT saved_seg;
-  subsegT saved_subseg;
-  segT debug_info;
-  char *p;
-  long total_size = 0;
-
-  if (debug_type != DEBUG_DWARF2)
-    return;
-
-  dwarf2_finish ();
-
-  saved_seg = now_seg;
-  saved_subseg = now_subseg;
-
-  debug_info = subseg_new (".debug_info", 0);
-  bfd_set_section_flags (stdoutput, debug_info, SEC_READONLY);
-  subseg_set (debug_info, 0);
-  p = frag_more (10);
-  total_size = 12;
-
-# define STUFF(val,size)	md_number_to_chars (p, val, size); p += size;
-  STUFF (total_size, 4); /* Length of compilation unit.  */
-  STUFF (2, 2); /* Dwarf version */
-  STUFF (0, 4);
-  STUFF (2, 1); /* Pointer size */
-  STUFF (1, 1); /* Compile unit */
-  STUFF (0, 4);
-
-  now_subseg = saved_subseg;
-  now_seg = saved_seg;
 }

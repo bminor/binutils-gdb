@@ -206,6 +206,3 @@ extern void sh_elf_final_processing PARAMS ((void));
 	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
 #endif /* OBJ_ELF */
-
-#define md_end() sh_finalize ()
-void sh_finalize PARAMS ((void));

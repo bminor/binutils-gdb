@@ -68,7 +68,7 @@ static char *listing_filename = NULL;
 
 /* Type of debugging to generate.  */
 
-enum debug_info_type debug_type = DEBUG_NONE;
+enum debug_info_type debug_type = DEBUG_UNSPECIFIED;
 
 /* Maximum level of macro nesting.  */
 int max_macro_nest = 100;

@@ -4982,22 +4982,11 @@ generate_file_debug ()
 void
 generate_lineno_debug ()
 {
-#ifdef ECOFF_DEBUGGING
-  /* ECOFF assemblers automatically generate debugging information.
-     FIXME: This should probably be handled elsewhere.  */
-  if (debug_type == DEBUG_UNSPECIFIED)
-    {
-      if (ECOFF_DEBUGGING && ecoff_no_current_file ())
-	debug_type = DEBUG_ECOFF;
-      else
-	debug_type = DEBUG_NONE;
-    }
-#endif
-
   switch (debug_type)
     {
     case DEBUG_UNSPECIFIED:
     case DEBUG_NONE:
+    case DEBUG_DWARF:
       break;
     case DEBUG_STABS:
       stabs_generate_asm_lineno ();
@@ -5005,16 +4994,11 @@ generate_lineno_debug ()
     case DEBUG_ECOFF:
       ecoff_generate_asm_lineno ();
       break;
-    case DEBUG_DWARF:
     case DEBUG_DWARF2:
-      /* This cannot safely be done in a generic manner.  A single
-	 binary instruction word may span mutliple lines of assembler
-	 source and may occupy a variable number of bytes.  Instead,
-	 if a port wishes to support DWARF2 line number generation by
-	 the assembler, it should add a call to dwarf2_generate_asm_lineno
-	 inside md_assemble() at whatever point is appropriate.  Note,
-	 such a port should also define md_end and make sure that
-	 dwarf2_finish is called, to emit the accumulated line information.  */
+      /* ??? We could here indicate to dwarf2dbg.c that something
+	 has changed.  However, since there is additional backend
+	 support that is required (calling dwarf2_emit_insn), we
+	 let dwarf2dbg.c call as_where on its own.  */
       break;
     }
 }

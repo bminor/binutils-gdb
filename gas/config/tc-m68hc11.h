@@ -79,9 +79,6 @@ extern void m68hc11_init_after_args PARAMS ((void));
 extern int m68hc11_parse_long_option PARAMS ((char *));
 #define md_parse_long_option m68hc11_parse_long_option
 
-extern void m68hc11_end_of_source PARAMS ((void));
-#define md_end() m68hc11_end_of_source ()
-
 #define DWARF2_LINE_MIN_INSN_LENGTH 1
 
 /* We don't need to handle .word strangely.  */

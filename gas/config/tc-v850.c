@@ -2275,8 +2275,7 @@ md_assemble (str)
 
   input_line_pointer = saved_input_line_pointer;
 
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (total_insn_size);
+  dwarf2_emit_insn (total_insn_size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created
@@ -2533,11 +2532,4 @@ v850_force_relocation (fixP)
     return 1;
 
   return 0;
-}
-
-void
-v850_finalize ()
-{
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
 }

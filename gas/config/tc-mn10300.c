@@ -1789,8 +1789,7 @@ keep_going:
 	}
     }
 
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (real_size);
+  dwarf2_emit_insn (real_size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created
@@ -2134,11 +2133,4 @@ set_arch_mach (mach)
     as_warn (_("could not set architecture and machine"));
 
   current_machine = mach;
-}
-
-void
-mn10300_finalize ()
-{
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
 }

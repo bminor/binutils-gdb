@@ -1,3 +1,59 @@
+2000-11-17  Richard Henderson  <rth@redhat.com>
+
+	* as.c (debug_type): Init to DEBUG_UNSPECIFIED.
+	* as.h (debug_type): Clarify documentation of the meaning
+	of this variable.
+	* dwarf2dbg.c (DWARF2_LINE_MIN_INSN_LENGTH): Default to 1.
+	(print_stats): Fix parenthesis problem.
+	(now_subseg_size): New.
+	(dwarf2_finish): Use it.  If DEBUG_DWARF2, emit bits for .debug_info.
+	(dwarf2_directive_file): Don't set debug_type.
+	(dwarf2_where): Honor DEBUG_DWARF2 first.
+	(dwarf2_emit_insn): Renamed from dwarf2_generate_asm_lineno;
+	do nothing if not emitting dwarf2 debug info, or no work.
+	* dwarf2dbg.h (dwarf2_emit_insn): Update.
+	* ecoff.c (add_file): Turn on DEBUG_ECOFF only if DEBUG_UNSPECIFIED.
+	(ecoff_new_file): Likewise.
+	* read.c (generate_lineno_debug): Kill ecoff hackery.  Update
+	commentary wrt dwarf2.
+
+	* config/tc-alpha.c (alpha_adjust_symtab_relocs): Add
+	ATTRIBUTE_UNUSED as needed.
+	(emit_insn): Call dwarf2_emit_insn.
+	(s_alpha_file): New.
+	(s_alpha_loc): New.
+	(s_alpha_coff_wrapper): Don't handle them.
+	(md_pseudo_table): Update for .file and .loc.
+	* config/tc-alpha.h (DWARF2_LINE_MIN_INSN_LENGTH): New.
+
+	* config/tc-arm.c (output_inst): Update for dwarf2_emit_insn;
+	don't protect with debug_type.
+	* config/tc-hppa.c (md_assemble): Likewise.
+	* config/tc-m68hc11.c (m68hc11_new_insn): Likewise.
+	* config/tc-mn10300.c (md_assemble): Likewise.
+	* config/tc-sh.c (md_assemble): Likewise.
+	* config/tc-v850.c (md_assemble): Likewise.
+
+	* config/tc-arm.c (arm_end_of_source): Remove.
+	* config/tc-hppa.c (pa_end_of_source): Remove.
+	* config/tc-m68hc11.c (m68hc11_end_of_source): Remove.
+	* config/tc-mn10300.c (mn10300_finalize): Remove.
+	* config/tc-sh.c (sh_finalize): Remove.
+	* config/tc-v850.c (sh_finalize): Remove.
+
+	* config/tc-arm.h (md_end): Remove.
+	* config/tc-hppa.h (md_end): Remove.
+	(DWARF2_LINE_MIN_INSN_LENGTH): New.
+	* config/tc-m68hc11.h (md_end): Remove.
+	* config/tc-mn10300.h (md_end): Remove.
+	* config/tc-sh.h (md_end): Remove.
+	* config/tc-v850.h (md_end): Remove.
+
+	* config/tc-ia64.c (emit_one_bundle): Don't protect
+	dwarf2 bits with debug_type.
+	(md_assemble): Likewise.
+	(ia64_end_of_source): Don't call dwarf2_finish.
+
 2000-11-16  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (errata_nop_necessary_p): Abort if general regno

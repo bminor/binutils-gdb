@@ -2216,9 +2216,11 @@ add_file (file_name, indx, fake)
          this if we see a .file directive with a string, since that
          implies that some sort of debugging information is being
          provided.  */
-      if (! symbol_table_frozen && debug_type == DEBUG_NONE)
+      if (! symbol_table_frozen && debug_type == DEBUG_UNSPECIFIED)
 	debug_type = DEBUG_ECOFF;
     }
+  else
+    debug_type = DEBUG_NONE;
 
 #ifndef NO_LISTING
   if (listing)
@@ -2335,7 +2337,7 @@ ecoff_new_file (name)
 
   /* This is a hand coded assembler file, so automatically turn on
      debugging information.  */
-  if (debug_type == DEBUG_NONE)
+  if (debug_type == DEBUG_UNSPECIFIED)
     debug_type = DEBUG_ECOFF;
 }
 

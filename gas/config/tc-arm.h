@@ -212,8 +212,5 @@ void armelf_frob_symbol PARAMS ((symbolS *, int *));
 #endif
 
 #ifdef OBJ_ELF
-#define md_end() arm_end_of_source ()
- extern void arm_end_of_source PARAMS ((void));
-
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 #endif

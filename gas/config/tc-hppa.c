@@ -1491,8 +1491,7 @@ md_assemble (str)
 		  the_insn.format, the_insn.arg_reloc, NULL);
 
 #ifdef OBJ_ELF
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (4);
+  dwarf2_emit_insn (4);
 #endif
 }
 
@@ -8538,13 +8537,6 @@ elf_hppa_final_processing ()
 	S_GET_VALUE (call_info_pointer->end_symbol)
 	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;
     }
-}
-
-void
-pa_end_of_source ()
-{
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
 }
 
 static void

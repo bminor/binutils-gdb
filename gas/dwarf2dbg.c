@@ -63,7 +63,7 @@
 #ifndef DWARF2_LINE_MIN_INSN_LENGTH
   /* Define the architecture-dependent minimum instruction length (in
      bytes).  This value should be rather too small than too big.  */
-# define DWARF2_LINE_MIN_INSN_LENGTH	4
+# define DWARF2_LINE_MIN_INSN_LENGTH	1
 #endif
 
 /* Flag that indicates the initial value of the is_stmt_start flag.
@@ -178,6 +178,7 @@ static int get_filenum PARAMS ((int, char *));
 static void gen_dir_list PARAMS ((void));
 static void gen_file_list PARAMS ((void));
 static void print_stats PARAMS ((unsigned long));
+static addressT now_subseg_size PARAMS ((void));
 
 #define out_byte(byte)	FRAG_APPEND_1_CHAR(byte)
 #define out_opcode(opc)	(out_byte ((opc)), ++ls.opcode_hist[(opc) & 0xff])
@@ -643,11 +644,27 @@ print_stats (total_size)
       j = SPECIAL_LINE (i);
       if (j == DWARF2_LINE_BASE)
 	fprintf (stderr, "\n%4u: ",
-		 ((unsigned int)
-		  DWARF2_LINE_MIN_INSN_LENGTH * SPECIAL_ADDR (i)));
+		 (unsigned int) (DWARF2_LINE_MIN_INSN_LENGTH
+				 * SPECIAL_ADDR (i)));
       fprintf (stderr, " %2u", ls.opcode_hist[i]);
     }
   fprintf (stderr, "\n");
+}
+
+/* Compute the size of the current subsegment, taking all fragments
+   into account.  Note that we don't generate variant frags, so the
+   fixed portion is all we need to consider.  */
+
+static addressT
+now_subseg_size ()
+{
+  struct frag *f;
+  addressT size = 0;
+
+  for (f = frchain_now->frch_root; f ; f = f->fr_next)
+    size += f->fr_fix;
+
+  return size + frag_now_fix_octets ();
 }
 
 void
@@ -667,23 +684,29 @@ dwarf2_finish ()
 
   if (!ls.sm.empty_sequence)
     out_end_sequence ();
-  total_size = body_size = frag_now_fix ();
+  subseg_set (ls.line_seg, DL_BODY);
+  total_size = body_size = now_subseg_size ();
 
   /* Now generate the directory and file lists.  */
   subseg_set (ls.line_seg, DL_FILES);
   gen_dir_list ();
   gen_file_list ();
-  total_size += frag_now_fix ();
+  total_size += now_subseg_size ();
 
   /* And now the header ("statement program prolog", in DWARF2 lingo...).  */
   subseg_set (ls.line_seg, DL_PROLOG);
 
   cp = frag_more (15 + DWARF2_LINE_OPCODE_BASE - 1);
 
-  total_size += frag_now_fix ();
+  total_size += now_subseg_size ();
   prolog_size = total_size - body_size - 10;
 
-# define STUFF(val,size)	md_number_to_chars (cp, val, size); cp += size;
+#define STUFF(val,size)				\
+      do {					\
+	md_number_to_chars (cp, val, size);	\
+	cp += size;				\
+      } while (0)
+
   STUFF (total_size - 4, 4);	/* length */
   STUFF (2, 2);			/* version */
   STUFF (prolog_size, 4);	/* prologue_length */
@@ -703,6 +726,47 @@ dwarf2_finish ()
   STUFF (0, 1);			/* DW_LNS_set_basic_block */
   STUFF (0, 1);			/* DW_LNS_const_add_pc */
   STUFF (1, 1);			/* DW_LNS_fixed_advance_pc */
+
+#undef STUFF
+
+  /* If this is assembler generated line info, add a .debug_info
+     section as well.  */
+  if (debug_type == DEBUG_DWARF2)
+    {
+      segT info_seg = subseg_new (".debug_info", 0);
+      segT abbrev_seg = subseg_new (".debug_abbrev", 0);
+      char *len;
+
+#ifdef BFD_ASSEMBLER
+      bfd_set_section_flags (stdoutput, info_seg, SEC_READONLY);
+      bfd_set_section_flags (stdoutput, abbrev_seg, SEC_READONLY);
+#endif
+
+      subseg_set (info_seg, 0);
+      len = frag_more (4);
+
+#define STUFF(val, size)			\
+      do {					\
+	cp = frag_more (size);			\
+	md_number_to_chars (cp, (val), (size));	\
+      } while(0)
+
+      STUFF (2, 2);             /* Dwarf version */
+      STUFF (0, 4);		/* Offset into (final!) .debug_abbrev.  */
+
+      /* Pointer size.  */
+#ifdef BFD_ASSEMBLER
+      STUFF (bfd_arch_bits_per_address (stdoutput) / 8, 1);
+#else
+      STUFF (4, 1);
+#endif
+
+      /* FIXME: Add a DW_TAG_compile_unit DIE.  The line info cannot
+	 even be seen without it.  */
+
+      /* Set size of debug_info.  */
+      md_number_to_chars (len, now_subseg_size () - 4, 4);
+    }
 
   subseg_set (saved_seg, saved_subseg);
 
@@ -725,11 +789,6 @@ dwarf2_directive_file (dummy)
     }
 
   ls.any_dwarf2_directives = 1;
-
-  if (debug_type == DEBUG_NONE)
-    /* Automatically turn on DWARF2 debug info unless something else
-       has been selected.  */
-    debug_type = DEBUG_DWARF2;
 
   ls.current.filenum = get_absolute_expression ();
   ls.current.filename = demand_copy_C_string (&len);
@@ -762,33 +821,42 @@ void
 dwarf2_where (line)
      struct dwarf2_line_info *line;
 {
-  if (ls.any_dwarf2_directives)
-    *line = ls.current;
-  else
+  if (debug_type == DEBUG_DWARF2)
     {
       as_where (&line->filename, &line->line);
       line->filenum = 0;
       line->column = 0;
       line->flags = DWARF2_FLAG_BEGIN_STMT;
     }
+  else
+    *line = ls.current;
 }
 
-/* Generate a DWARF2 line statement for an
-   instruction of SIZE bytes in length.  */
+/* Called for each machine instruction, or relatively atomic group of
+   machine instructions (ie built-in macro).  The instruction or group
+   is SIZE bytes in length.  If dwarf2 line number generation is called
+   for, emit a line statement appropriately.  */
 
 void
-dwarf2_generate_asm_lineno (size)
+dwarf2_emit_insn (size)
      int size;
 {
   addressT addr;
-  static struct dwarf2_line_info debug_line;
+  struct dwarf2_line_info debug_line;
 
+  if (debug_type != DEBUG_DWARF2 && ! ls.any_dwarf2_directives)
+    return;
+
+  /* Reset any_dwarf2_directives so that we won't waste time 
+     determining that no information has changed between insns.  */
+  ls.any_dwarf2_directives = 0;
+     
   /* First update the notion of the current source line.  */
   dwarf2_where (&debug_line);
 
   /* We want the offset of the start of this
      instruction within the the current frag.  */
-  addr = frag_now->fr_address + frag_now_fix () - size;
+  addr = frag_now_fix () - size;
 
   /* And record the information.  */
   dwarf2_gen_line_info (addr, &debug_line);

@@ -5649,7 +5649,6 @@ emit_one_bundle ()
 	  continue;		/* try next slot */
 	}
 
-      if (debug_type == DEBUG_DWARF2)
 	{
 	  bfd_vma addr;
 
@@ -6196,9 +6195,6 @@ ia64_end_of_source ()
   ia64_flush_insns ();
 
   bfd_set_private_flags (stdoutput, md.flags);
-
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
 
   md.mem_offset.hint = 0;
 }
@@ -9088,8 +9084,7 @@ md_assemble (str)
   CURR_SLOT.qp_regno = qp_regno;
   CURR_SLOT.idesc = idesc;
   as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_where (&CURR_SLOT.debug_line);
+  dwarf2_where (&CURR_SLOT.debug_line);
 
   /* Add unwind entry, if there is one.  */
   if (unwind.current_entry)

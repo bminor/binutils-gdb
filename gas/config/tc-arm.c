@@ -6374,11 +6374,10 @@ output_inst PARAMS ((void))
     fix_new_arm (frag_now, to - frag_now->fr_literal,
 		 inst.size, & inst.reloc.exp, inst.reloc.pc_rel,
 		 inst.reloc.type);
+
 #ifdef OBJ_ELF
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_generate_asm_lineno (inst.size);
+  dwarf2_emit_insn (inst.size);
 #endif
-  return;
 }
 
 void
@@ -7503,15 +7502,6 @@ s_arm_elf_cons (nbytes)
   /* Put terminator back into stream.  */
   input_line_pointer --;
   demand_empty_rest_of_line ();
-}
-
-/* Stuff to do after assembling all of the source file.  */
-
-void
-arm_end_of_source ()
-{
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_finish ();
 }
 
 #endif /* OBJ_ELF */
