@@ -1,5 +1,11 @@
 1999-07-23  Donn Terry  <donn@interix.com>
 
+	* libcoff-in.h (coff_link_hash_entry): Add coff_link_hash_flags
+	field, and define COFF_LINK_HASH_PE_SECTION_SYMBOL.
+	* cofflink.c (coff_link_add_symbols): If PE, handle section
+	symbols specially.
+	* libcoff.h: Rebuild.
+
 	* config.bfd (i[3456]86-*-interix*): New target.
 
 1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>

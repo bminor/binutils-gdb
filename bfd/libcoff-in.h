@@ -249,6 +249,11 @@ struct coff_link_hash_entry
 
   /* Pointer to array of auxiliary entries, if any.  */
   union internal_auxent *aux;
+
+  /* Flag word; legal values follow.  */
+  unsigned short coff_link_hash_flags;
+  /* Symbol is a PE section symbol.  */
+#define COFF_LINK_HASH_PE_SECTION_SYMBOL (01)
 };
 
 /* COFF linker hash table.  */

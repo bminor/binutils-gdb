@@ -351,6 +351,7 @@ coff_link_add_symbols (abfd, info)
 	  flagword flags;
 	  asection *section;
 	  bfd_vma value;
+	  boolean addit;
 
 	  /* This symbol is externally visible.  */
 
@@ -392,11 +393,41 @@ coff_link_add_symbols (abfd, info)
 	      || (obj_pe (abfd) && sym.n_sclass == C_NT_WEAK))
 	    flags = BSF_WEAK;
 
-	  if (! (bfd_coff_link_add_one_symbol
-		 (info, abfd, name, flags, section, value,
-		  (const char *) NULL, copy, false,
-		  (struct bfd_link_hash_entry **) sym_hash)))
-	    goto error_return;
+	  addit = true;
+
+	  /* In the PE format, section symbols actually refer to the
+             start of the output section.  We handle them specially
+             here.  */
+	  if (obj_pe (abfd) && (flags & BSF_SECTION_SYM) != 0)
+	    {
+	      *sym_hash = coff_link_hash_lookup (coff_hash_table (info),
+						 name, false, copy, false);
+	      if (*sym_hash != NULL)
+		{
+		  if (((*sym_hash)->coff_link_hash_flags
+		       & COFF_LINK_HASH_PE_SECTION_SYMBOL) == 0
+		      && (*sym_hash)->root.type != bfd_link_hash_undefined
+		      && (*sym_hash)->root.type != bfd_link_hash_undefweak)
+		    (*_bfd_error_handler)
+		      ("Warning: symbol `%s' is both section and non-section",
+		       name);
+
+		  addit = false;
+		}
+	    }
+
+	  if (addit)
+	    {
+	      if (! (bfd_coff_link_add_one_symbol
+		     (info, abfd, name, flags, section, value,
+		      (const char *) NULL, copy, false,
+		      (struct bfd_link_hash_entry **) sym_hash)))
+		goto error_return;
+	    }
+
+	  if (obj_pe (abfd) && (flags & BSF_SECTION_SYM) != 0)
+	    (*sym_hash)->coff_link_hash_flags |=
+	      COFF_LINK_HASH_PE_SECTION_SYMBOL;
 
 	  if (section == bfd_com_section_ptr
 	      && (*sym_hash)->root.type == bfd_link_hash_common
