@@ -1,3 +1,13 @@
+Fri Jan 26 13:48:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/sparc/xm-sparc.h (NEW_SUN_CORE): Remove, never used.
+	* config/i386/xm-sun386.h: Ditto.
+	* config/m68k/xm-sun2.h, config/m68k/xm-sun3.h: Ditto.
+
+Thu Jan 25 16:05:53 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (INSTALLED_LIBS, CLIBS): Include @LIBS@.
+
 Thu Jan 25 09:22:15 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	From Greg McGary  <gkm@gnu.ai.mit.edu>:
@@ -116,7 +126,7 @@ Tue Jan 23 13:08:26 1996  Jeffrey A Law  (law@cygnus.com)
 	* infrun.c (wait_for_inferior): Handle CHECK_SHLIBS bpstat.
 	(normal_stop): Inform the user when the inferior stoped due
 	to a shared library event.
-	(_initialize_infrun): Add new set/show variable "stop_on-solib-events"
+	(_initialize_infrun): Add new set/show variable "stop-on-solib-events"
 	to control whether or not gdb continues the inferior or stops it when
 	a shared library event occurs.
 	* minsyms.c (lookup_minimal_symbol_solib_trampoline): New function.

@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sun, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,10 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
-
-/* Enable use of alternate code for Sun's format of core dump file.  */
-
-#define NEW_SUN_CORE
 
 /* We have to grab the regs since we store all regs at once.  */
 

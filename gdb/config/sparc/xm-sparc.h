@@ -1,5 +1,6 @@
-/* Parameters for execution on a Sun 4, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+/* Host definitions for a Sun 4, for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1996
+   Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com).
 
 This file is part of GDB.
@@ -19,10 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
-
-/* Enable use of alternate code for Sun's format of core dump file.  */
-
-#define NEW_SUN_CORE
 
 /* Before storing, we need to read all the registers.  */
 

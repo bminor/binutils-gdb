@@ -1,5 +1,5 @@
 /* Host support for Sun 386i, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,11 +18,5 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
-
-/* Get rid of any system-imposed stack limit if possible.  */
-
-/* Enable use of alternate code for Sun's format of core dump file.  */
-
-#define NEW_SUN_CORE
 
 #define PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
