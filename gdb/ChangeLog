@@ -1,3 +1,8 @@
+Wed Mar 31 21:23:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* core.c (dis_asm_read_memory): drop fourth arg which conflicts
+	  with prototype in ../include/dis-asm.h.
+
 Wed Mar 31 12:52:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* core.c (dis_asm_{read_memory,memory_error}): New functions.

@@ -161,13 +161,15 @@ read_memory (memaddr, myaddr, len)
     memory_error (status, memaddr);
 }
 
-/* Like target_read_memory, but slightly different parameters.  */
+/* Like target_read_memory, but slightly different parameters. 
+
+   FIXME: not according to it's prototype.  930331 krp. */
+
 int
-dis_asm_read_memory (memaddr, myaddr, len, info)
+dis_asm_read_memory (memaddr, myaddr, len)
      bfd_vma memaddr;
      bfd_byte *myaddr;
      int len;
-     disassemble_info *info;
 {
   return target_read_memory (memaddr, myaddr, len);
 }
