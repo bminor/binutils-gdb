@@ -1,5 +1,7 @@
 2002-05-08  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.mi/mi-var-child.exp: Accept (void) as well as ().
+	* gdb.mi/mi0-var-child.exp: Accept (void) as well as ().
 	* gdb.base/default.exp: Merge clauses for arm, strongarm, xscale.
 	* gdb.base/long_long.exp: Merge clauses for arm and xscale.
 	Add iftarget clause for strongarm.
