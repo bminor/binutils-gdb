@@ -10404,17 +10404,21 @@ static int
 mips_need_elf_addend_fixup (fixP)
      fixS *fixP;
 {
-  return (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
-	  || ((S_IS_WEAK (fixP->fx_addsy)
-	       || S_IS_EXTERN (fixP->fx_addsy))
-	      && !S_IS_COMMON (fixP->fx_addsy))
-	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
-	      && (((bfd_get_section_flags (stdoutput,
-					   S_GET_SEGMENT (fixP->fx_addsy))
-		    & SEC_LINK_ONCE) != 0)
-		  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-			       ".gnu.linkonce",
-			       sizeof (".gnu.linkonce") - 1))));
+  if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
+    return 1;
+  if ((S_IS_WEAK (fixP->fx_addsy)
+       || S_IS_EXTERN (fixP->fx_addsy))
+      && !S_IS_COMMON (fixP->fx_addsy))
+    return 1;
+  if (symbol_used_in_reloc_p (fixP->fx_addsy)
+      && (((bfd_get_section_flags (stdoutput,
+				   S_GET_SEGMENT (fixP->fx_addsy))
+	    & SEC_LINK_ONCE) != 0)
+	  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+		       ".gnu.linkonce",
+		       sizeof (".gnu.linkonce") - 1)))
+    return 1;
+  return 0;
 }
 #endif
 

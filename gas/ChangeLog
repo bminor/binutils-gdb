@@ -1,3 +1,9 @@
+2002-02-13  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Restructure into
+	a sequence of indpendent 'if' statements for easier debugging
+	and future modification.
+
 2002-02-13  Matt Fredette  <fredette@netbsd.org>
 
 	* config/tc-m68k.c (md_show_usage): No longer display a
