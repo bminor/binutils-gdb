@@ -2,22 +2,22 @@
 #define OBJ_FORMAT_H
 /* coff object file format
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
+   This file is part of GAS.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
@@ -44,10 +44,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else
 help me
 #endif
-
+    
 #if 0
-/* Define some processor dependent values according to the processor we are
-   on. */
+    /* Define some processor dependent values according to the processor we are
+       on. */
 #if defined(TC_H8300)
 #define BYTE_ORDERING          0
 #define FILE_HEADER_MAGIC      H8300MAGIC
@@ -82,15 +82,15 @@ help me
 #else
 you lose
 #endif 
-
+    
 #endif
-
+    
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
-
-
-extern const segT  N_TYPE_seg[];
+    
+    
+    extern const segT  N_TYPE_seg[];
 
 /* Magic number of paged executable. */
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	0x8300
@@ -98,7 +98,7 @@ extern const segT  N_TYPE_seg[];
 
 /* SYMBOL TABLE */
 
- /* targets may also set this */
+/* targets may also set this */
 #ifndef SYMBOLS_NEED_BACKPOINTERS
 #define SYMBOLS_NEED_BACKPOINTERS 1
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
@@ -107,10 +107,10 @@ extern const segT  N_TYPE_seg[];
 
 typedef struct 
 {
-  struct internal_syment  ost_entry; /* Basic symbol */
-  union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES]; /* Auxiliary entry. */
-
-  unsigned int ost_flags; /* obj_coff internal use only flags */
+	struct internal_syment  ost_entry; /* Basic symbol */
+	union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES]; /* Auxiliary entry. */
+	
+	unsigned int ost_flags; /* obj_coff internal use only flags */
 } obj_symbol_type;
 
 #ifndef DO_NOT_STRIP
@@ -140,8 +140,8 @@ typedef struct
 /* True if the symbol is external */
 #define S_IS_EXTERNAL(s)        ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION)
 /* True if symbol has been defined, ie :
-  section > 0 (DATA, TEXT or BSS)
-  section == 0 and value > 0 (external bss symbol) */
+   section > 0 (DATA, TEXT or BSS)
+   section == 0 and value > 0 (external bss symbol) */
 #define S_IS_DEFINED(s)         ((s)->sy_symbol.ost_entry.n_scnum > C_UNDEF_SECTION || \
 				 ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION && \
 				  (s)->sy_symbol.ost_entry.n_value > 0))
@@ -277,7 +277,7 @@ typedef struct
 #define SF_TAG		(0x00080000)	     /* Is a tag */
 #define SF_DEBUG	(0x00100000)	     /* Is in debug or abs section */
 #define SF_GET_SEGMENT	(0x00200000)	     /* Get the section of the forward symbol. */
- /* All other bits are unused. */
+/* All other bits are unused. */
 
 /* Accessors */
 #define SF_GET(s)		((s)->sy_symbol.ost_flags)
@@ -424,22 +424,22 @@ typedef struct
 #define H_SET_STRING_SIZE(h,v)          ((h)->string_table_size = (v))
 #define H_SET_LINENO_SIZE(h,v)          ((h)->lineno_size = (v))
 
- /* Segment flipping */
+/* Segment flipping */
 #define segment_name(v)	(seg_name[(int) (v)])
 
 typedef struct {
 #ifdef BFD_HEADERS
-    struct internal_aouthdr	   aouthdr;             /* a.out header */
-    struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
+	struct internal_aouthdr	   aouthdr;             /* a.out header */
+	struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
 #else
-    AOUTHDR	   aouthdr;             /* a.out header */
-    FILHDR	   filehdr;		/* File header, not machine dep. */
+	AOUTHDR	   aouthdr;             /* a.out header */
+	FILHDR	   filehdr;		/* File header, not machine dep. */
 #endif
-    long       string_table_size;   /* names + '\0' + sizeof(int) */
-    long	   relocation_size;	/* Cumulated size of relocation
+	long       string_table_size;   /* names + '\0' + sizeof(int) */
+	long	   relocation_size;	/* Cumulated size of relocation
 					   information for all sections in
 					   bytes. */
-    long	   lineno_size;		/* Size of the line number information
+	long	   lineno_size;		/* Size of the line number information
 					   table in bytes */
 } object_headers;
 
@@ -447,22 +447,22 @@ typedef struct {
 
 struct lineno_list
 {
-  
-  struct bfd_internal_lineno line;
-  char* frag;			/* Frag to which the line number is related */
-  struct lineno_list* next;	/* Forward chain pointer */
+	
+	struct bfd_internal_lineno line;
+	char* frag;			/* Frag to which the line number is related */
+	struct lineno_list* next;	/* Forward chain pointer */
 } ;
 
 
 
 
- /* stack stuff */
+/* stack stuff */
 typedef struct {
-    unsigned long chunk_size;
-    unsigned long element_size;
-    unsigned long size;
-    char*	  data;
-    unsigned long pointer;
+	unsigned long chunk_size;
+	unsigned long element_size;
+	unsigned long size;
+	char*	  data;
+	unsigned long pointer;
 } stack;
 
 
@@ -478,20 +478,20 @@ void EXFUN(stack_delete,(stack *st));
 
 
 void EXFUN(c_section_header,(
+			     
+			     struct internal_scnhdr *header,
+			     char *name,
+			     long core_address,
+			     long size,
+			     long data_ptr,
+			     long reloc_ptr,
+			     long lineno_ptr,
+			     long reloc_number,
+			     long lineno_number,
+			     long alignment));
 
-		      struct internal_scnhdr *header,
-		      char *name,
-		      long core_address,
-		      long size,
-		      long data_ptr,
-		      long reloc_ptr,
-		      long lineno_ptr,
-		      long reloc_number,
-		      long lineno_number,
-		      long alignment));
 
-
- /* sanity check */
+/* sanity check */
 
 #ifdef TC_I960
 #ifndef C_LEAFSTAT
@@ -499,12 +499,14 @@ hey!  Where is the C_LEAFSTAT definition?  i960-coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
 #ifdef BFD_HEADERS
-extern struct internal_scnhdr data_section_header;
+    extern struct internal_scnhdr data_section_header;
 extern struct internal_scnhdr text_section_header;
 #else
 extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
+#endif
+
 /*
  * Local Variables:
  * comment-column: 0
@@ -513,4 +515,3 @@ extern SCNHDR text_section_header;
  */
 
 /* end of obj-coff.h */
-#endif

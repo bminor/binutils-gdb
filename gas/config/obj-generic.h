@@ -3,10 +3,10 @@
  * object format specific header files. 
  */
 
- /* define an obj specific macro off which target cpu back ends may key. */
+/* define an obj specific macro off which target cpu back ends may key. */
 #define OBJ_GENERIC 1
 
- /* include whatever target cpu is appropriate. */
+/* include whatever target cpu is appropriate. */
 #include "targ-cpu.h"
 
 /*
@@ -21,29 +21,29 @@
  * facilities are available, and they are macros.
  */
 
- /* #define SYMBOLS_NEED_PACKPOINTERS */
+/* #define SYMBOLS_NEED_PACKPOINTERS */
 
- /*  */
+/*  */
 typedef struct {
 	void *nothing;
 } obj_symbol_type; /* should be the format's symbol structure */
 
 typedef void *object_headers;
 
- /* symbols have names */
+/* symbols have names */
 #define S_GET_NAME(s)		("foo") /* get the name of a symbolP */
 #define S_SET_NAME(s,v)		;
- /* symbols have segments */
+    /* symbols have segments */
 #define S_GET_SEGMENT(s)	(SEG_UNKNOWN)
 #define S_SET_SEGMENT(s,v)	;
- /* symbols have a value */
+    /* symbols have a value */
 #define S_GET_VALUE(s)		(0)
 #define S_SET_VALUE(s,v)	;
- /* symbols may be external */
+    /* symbols may be external */
 #define S_IS_EXTERNAL(s)	(0)
 #define S_SET_EXTERNAL(s)	;
-
- /* symbols may or may not be defined */
+    
+    /* symbols may or may not be defined */
 #define S_IS_DEFINED(s)		(0)
 
 

@@ -1,3 +1,22 @@
+/* coff.gnu.h
+   Copyright (C) 1987 Free Software Foundation, Inc.
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*** coff information for 80960.  Origins: Intel, AMD, etc., natch. */
 
 /*
@@ -110,7 +129,7 @@ typedef struct {
 #define REGMAGIC	(0414) /* (?) a PAGEMAGIC2 alias? */
 #define PAGEMAGIC3	(0415) /* (?) like ZMAGIC, but address zero mapped. */
 #define A_MAGIC5	(0437) /* (?) "system overlay, separated I&D" */
- /* intended for non-unix cross development */
+/* intended for non-unix cross development */
 #define SASMAGIC	(010000) /* Single Address Space */    
 #define MASMAGIC	(020000) /* (?) "Multiple (separate I & D) Address Spaces" */
 
@@ -127,7 +146,7 @@ typedef	struct aouthdr {
 	unsigned long	entry;	/* entry pt.				*/
 	unsigned long	text_start;	/* base of text used for this file */
 	unsigned long	data_start;	/* base of data used for this file */
- /* CAREFUL: some formats omit the tagentries member. */
+	/* CAREFUL: some formats omit the tagentries member. */
 	unsigned long	tagentries;	/* number of tag entries to
 					   follow (always zero for i960) */
 } AOUTHDR;
@@ -187,9 +206,9 @@ typedef	struct aouthdr {
 				   used to avoid name conflicts. */
 
 #ifdef TC_I960
-	/* New storage classes for 80960 */
+/* New storage classes for 80960 */
 #define C_SCALL		107	/* Procedure reachable via system call	*/
- /* C_LEAFPROC is obsolete.  Use C_LEAFEXT or C_LEAFSTAT */
+/* C_LEAFPROC is obsolete.  Use C_LEAFEXT or C_LEAFSTAT */
 #define C_LEAFPROC	108	/* Leaf procedure, "call" via BAL */
 #define C_LEAFEXT       108
 #define C_OPTVAR	109	/* Optimized variable */
@@ -216,7 +235,7 @@ struct scnhdr {
 	unsigned short	s_nreloc;	/* number of relocation entries	*/
 	unsigned short	s_nlnno;	/* number of line number entries */
 	long		s_flags;	/* flags */
-
+	
 #ifdef TC_I960
 	unsigned long	s_align;	/* section alignment */
 #endif /* TC_I960 */
@@ -288,7 +307,7 @@ struct lineno {
 	} l_addr;
 	unsigned short	l_lnno;	/* line number */
 #ifdef TC_I960
- /* not used on a29k */
+	/* not used on a29k */
 	char padding[2];	/* force alignment */
 #endif /* TC_I960 */
 };
@@ -299,40 +318,40 @@ struct lineno {
 
 /********************** SYMBOLS **********************/
 
-#define SYMNMLEN	8	/* # characters in a symbol name	*/
-#define FILNMLEN	14	/* # characters in a file name		*/
+#define SYMNMLEN	8	/* # characters in a symbol name */
+#define FILNMLEN	14	/* # characters in a file name */
 #define DIMNUM		4	/* # array dimensions in auxiliary entry */
 
 struct syment {
 	union {
-		char	_n_name[SYMNMLEN];	/* old COFF version	*/
+		char	_n_name[SYMNMLEN];	/* old COFF version */
 		struct {
-			long	_n_zeroes;	/* new == 0		*/
+			long	_n_zeroes;	/* new == 0 */
 			long	_n_offset;	/* offset into string table */
 		} _n_n;
-		char	*_n_nptr[2];	/* allows for overlaying	*/
+		char	*_n_nptr[2];	/* allows for overlaying */
 	} _n;
-	long		n_value;	/* value of symbol		*/
-	short		n_scnum;	/* section number		*/
-
+	long		n_value;	/* value of symbol */
+	short		n_scnum;	/* section number */
+	
 #ifdef TC_I960
- /* This isn't yet used on the i960.  In some formats this
-    is two bytes of padding.  In others, it is missing entirely. */
-	unsigned short	n_flags;	/* copy of flags from filhdr	*/
+	/* This isn't yet used on the i960.  In some formats this
+	   is two bytes of padding.  In others, it is missing entirely. */
+	unsigned short	n_flags;	/* copy of flags from filhdr */
 #endif /* TC_I960 */
-
+	
 #ifdef TC_A29K
-	unsigned short	n_type;		/* type and derived type	*/
+	unsigned short	n_type;		/* type and derived type */
 #else /* TC_A29K */
- /* at least i960 uses long */
-	unsigned long	n_type;		/* type and derived type	*/
+	/* at least i960 uses long */
+	unsigned long	n_type;		/* type and derived type */
 #endif /* TC_A29K */
-
-	char		n_sclass;	/* storage class		*/
-	char		n_numaux;	/* number of aux. entries	*/
-
+	
+	char		n_sclass;	/* storage class */
+	char		n_numaux;	/* number of aux. entries */
+	
 #ifndef TC_A29K
-	char		pad2[2];	/* force alignment		*/
+	char		pad2[2];	/* force alignment */
 #endif /* TC_A29K */
 };
 
@@ -343,12 +362,12 @@ struct syment {
 #define n_ptr		_n._n_nptr[1]
 #define n_zeroes	_n._n_n._n_zeroes
 #define n_offset	_n._n_n._n_offset
-
-/*
- * Relocatable symbols have number of the section in which they are defined,
- * or one of the following:
- */
-
+    
+    /*
+     * Relocatable symbols have number of the section in which they are defined,
+     * or one of the following:
+     */
+    
 #define N_SCNUM	((short) 1-65535) /* section num where symbol defined */
 #define N_UNDEF	((short)0)  /* undefined symbol */
 #define N_ABS	((short)-1) /* value of symbol is absolute */
@@ -360,8 +379,7 @@ struct syment {
  * Type of a symbol, in low 4 bits of the word
  */
 #define T_NULL		0 /* type not assigned */
-#define T_VOID		1 /* function argument (only used by compiler) (but now
-			     real void). */
+#define T_VOID		1 /* function argument (only used by compiler) (but now real void). */
 #define T_CHAR		2 /* character */
 #define T_SHORT		3 /* short integer */
 #define T_INT		4 /* integer */
@@ -418,24 +436,24 @@ union auxent {
 		long x_tagndx;	/* str, un, or enum tag indx */
 		union {
 			struct {
-			    unsigned short x_lnno; /* declaration line number */
-			    unsigned short x_size; /* str/union/array size */
+				unsigned short x_lnno; /* declaration line number */
+				unsigned short x_size; /* str/union/array size */
 			} x_lnsz;
 			long x_fsize;	/* size of function */
 		} x_misc;
 		union {
 			struct {		/* if ISFCN, tag, or .bb */
-			    long x_lnnoptr;	/* ptr to fcn line # */
-			    long x_endndx;	/* entry ndx past block end */
+				long x_lnnoptr;	/* ptr to fcn line # */
+				long x_endndx;	/* entry ndx past block end */
 			} x_fcn;
 			struct {		/* if ISARY, up to 4 dimen. */
-			    unsigned short x_dimen[DIMNUM];
+				unsigned short x_dimen[DIMNUM];
 			} x_ary;
 		} x_fcnary;
 		unsigned short x_tvndx;		/* tv index */
 	} x_sym;
-
- /* This was just a struct x_file with x_fname only in a29k.  xoxorich. */
+	
+	/* This was just a struct x_file with x_fname only in a29k.  xoxorich. */
 	union {
 		char x_fname[FILNMLEN];
 		struct {
@@ -443,40 +461,40 @@ union auxent {
 			long x_offset;
 		} x_n;
 	} x_file;
-
+	
 	struct {
 		long x_scnlen;			/* section length */
 		unsigned short x_nreloc;	/* # relocation entries */
 		unsigned short x_nlinno;	/* # line numbers */
 	} x_scn;
-
+	
 	struct {
 		long		x_tvfill;	/* tv fill value */
 		unsigned short	x_tvlen;	/* length of .tv */
-
- /* This field was typo'd x_tvrna on a29k. xoxorich. */
+		
+		/* This field was typo'd x_tvrna on a29k. xoxorich. */
 		unsigned short	x_tvran[2];	/* tv range */
 	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
-
+	
 #ifdef TC_I960
 	/******************************************
 	 *  I960-specific *2nd* aux. entry formats
 	 ******************************************/
 	struct {
- /* This is a very old typo that keeps getting propogated. */
+		/* This is a very old typo that keeps getting propogated. */
 #define x_stdindx x_stindx
 		long x_stindx;	/* sys. table entry */
 	} x_sc;	/* system call entry */
-
+	
 	struct {
 		unsigned long x_balntry; /* BAL entry point */
 	} x_bal; /* BAL-callable function */
-
+	
 	struct {
 		unsigned long	x_timestamp;	        /* time stamp */
 		char 	x_idstring[20];	        /* producer identity string */
 	} x_ident;	                        /* Producer ident info */
-
+	
 	char a[sizeof(struct syment)];	/* force auxent/syment sizes to match */
 #endif /* TC_I960 */
 };
@@ -497,7 +515,7 @@ struct reloc {
 	long r_symndx;		/* Index into symbol table */
 	unsigned short r_type;	/* Relocation type */
 #ifdef TC_I960
- /* not used for a29k */
+	/* not used for a29k */
 	char pad[2];		/* Unused */
 #endif /* TC_I960 */
 };
@@ -555,9 +573,8 @@ struct reloc {
 #define DEFAULT_DATA_SECTION_ALIGNMENT 4
 #define DEFAULT_BSS_SECTION_ALIGNMENT 4
 #define DEFAULT_TEXT_SECTION_ALIGNMENT 16
-/* For new sections we havn't heard of before */
+/* For new sections we haven't heard of before */
 #define DEFAULT_SECTION_ALIGNMENT 4
-
 
 /*
  * Local Variables:

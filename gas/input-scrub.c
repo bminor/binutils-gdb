@@ -1,23 +1,21 @@
 /* input_scrub.c - Break up input buffers into whole numbers of lines.
    Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
-
-/* static const char rcsid[] = "$Id$"; */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include <errno.h>	/* Need this to make errno declaration right */
 #include "as.h"
@@ -58,48 +56,38 @@ static char *	buffer_start;	/*->1st char of full buffer area. */
 static char *	partial_where;	/*->after last full line in buffer. */
 static int partial_size;	/* >=0. Number of chars in partial line in buffer. */
 static char save_source [AFTER_SIZE];
-				/* Because we need AFTER_STRING just after last */
-				/* full line, it clobbers 1st part of partial */
-				/* line. So we preserve 1st part of partial */
-				/* line here. */
+/* Because we need AFTER_STRING just after last */
+/* full line, it clobbers 1st part of partial */
+/* line. So we preserve 1st part of partial */
+/* line here. */
 static int buffer_length;	/* What is the largest size buffer that */
-				/* input_file_give_next_buffer() could */
-				/* return to us? */
+/* input_file_give_next_buffer() could */
+/* return to us? */
 
-/* Saved information about the file that .include'd this one.  When we
-   hit EOF, we automatically pop to that file. */
+/* Saved information about the file that .include'd this one.  When we hit EOF,
+   we automatically pop to that file. */
 
 static char *next_saved_file;
 
-/*
-We can have more than one source file open at once, though the info for
-all but the latest one are saved off in a struct input_save.  These
-files remain open, so we are limited by the number of open files allowed
-by the underlying OS.
-We may also sequentially read more than one source file in an assembly.
- */
+/* We can have more than one source file open at once, though the info for all
+   but the latest one are saved off in a struct input_save.  These files remain
+   open, so we are limited by the number of open files allowed by the
+   underlying OS. We may also sequentially read more than one source file in an
+   assembly. */
 
+/* We must track the physical file and line number for error messages. We also
+   track a "logical" file and line number corresponding to (C?)  compiler
+   source line numbers.  Whenever we open a file we must fill in
+   physical_input_file. So if it is NULL we have not opened any files yet. */
 
-/*
-We must track the physical file and line number for error messages.
-We also track a "logical" file and line number corresponding to (C?)
-compiler source line numbers.
-Whenever we open a file we must fill in physical_input_file. So if it is NULL
-we have not opened any files yet.
- */
+char *physical_input_file;
+char *logical_input_file;
 
-static
-char *		physical_input_file,
-     *		logical_input_file;
+typedef unsigned int line_numberT; /* 1-origin line number in a source file. */
+/* A line ends in '\n' or eof. */
 
-
-
-typedef unsigned int line_numberT;	/* 1-origin line number in a source file. */
-				/* A line ends in '\n' or eof. */
-
-static
-line_numberT	physical_input_line,
-		logical_input_line;
+line_numberT physical_input_line;
+line_numberT logical_input_line;
 
 /* Struct used to save the state of the input handler during include files */
 struct input_save {
@@ -126,14 +114,13 @@ static void as_1_char();
 /* Push the state of input reading and scrubbing so that we can #include.
    The return value is a 'void *' (fudged for old compilers) to a save
    area, which can be restored by passing it to input_scrub_pop(). */
-char *
-input_scrub_push(saved_position)
-	char *saved_position;
+char *input_scrub_push(saved_position)
+char *saved_position;
 {
 	register struct input_save *saved;
-
+	
 	saved = (struct input_save *) xmalloc(sizeof *saved);
-
+	
 	saved->saved_position		= saved_position;
 	saved->buffer_start		= buffer_start;
 	saved->partial_where		= partial_where;
@@ -143,26 +130,26 @@ input_scrub_push(saved_position)
 	saved->logical_input_file	= logical_input_file;
 	saved->physical_input_line	= physical_input_line;
 	saved->logical_input_line	= logical_input_line;
-	bcopy (saved->save_source,	  save_source, sizeof (save_source));
+	bcopy(saved->save_source, save_source, sizeof(save_source));
 	saved->next_saved_file		= next_saved_file;
-	saved->input_file_save		= input_file_push ();
-
-	input_scrub_begin ();		/* Reinitialize! */
-
-	return (char *)saved;
-}
+	saved->input_file_save		= input_file_push();
+	
+	input_scrub_begin();		/* Reinitialize! */
+	
+	return((char *) saved);
+} /* input_scrub_push() */
 
 char *
-input_scrub_pop (arg)
-	char *arg;
+    input_scrub_pop (arg)
+char *arg;
 {
 	register struct input_save *saved;
 	char *saved_position;
-
+	
 	input_scrub_end ();	/* Finish off old buffer */
-
+	
 	saved = (struct input_save *)arg;
-
+	
 	input_file_pop 		 (saved->input_file_save);
 	saved_position		= saved->saved_position;
 	buffer_start		= saved->buffer_start;
@@ -175,57 +162,56 @@ input_scrub_pop (arg)
 	partial_size		= saved->partial_size;
 	next_saved_file		= saved->next_saved_file;
 	bcopy (save_source,	  saved->save_source, sizeof (save_source));
-
+	
 	free(arg);
 	return saved_position;
 }
 
 
 void
-input_scrub_begin ()
+    input_scrub_begin ()
 {
-  know(strlen(BEFORE_STRING) == BEFORE_SIZE);
-  know(strlen(AFTER_STRING) ==  AFTER_SIZE
-	|| (AFTER_STRING[0] == '\0' && AFTER_SIZE == 1));
-
-  input_file_begin ();
-
-  buffer_length = input_file_buffer_size ();
-
-  buffer_start = xmalloc((long)(BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
-  bcopy (BEFORE_STRING, buffer_start, (int)BEFORE_SIZE);
-
-  /* Line number things. */
-  logical_input_line = 0;
-  logical_input_file = (char *)NULL;
-  physical_input_file = NULL;	/* No file read yet. */
-  next_saved_file = NULL;	/* At EOF, don't pop to any other file */
-  do_scrub_begin();
+	know(strlen(BEFORE_STRING) == BEFORE_SIZE);
+	know(strlen(AFTER_STRING) ==  AFTER_SIZE || (AFTER_STRING[0] == '\0' && AFTER_SIZE == 1));
+	
+	input_file_begin ();
+	
+	buffer_length = input_file_buffer_size ();
+	
+	buffer_start = xmalloc((long)(BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
+	bcopy (BEFORE_STRING, buffer_start, (int)BEFORE_SIZE);
+	
+	/* Line number things. */
+	logical_input_line = 0;
+	logical_input_file = (char *)NULL;
+	physical_input_file = NULL;	/* No file read yet. */
+	next_saved_file = NULL;	/* At EOF, don't pop to any other file */
+	do_scrub_begin();
 }
 
 void
-input_scrub_end ()
+    input_scrub_end ()
 {
-  if (buffer_start)
-    {
-      free (buffer_start);
-      buffer_start = 0;
-      input_file_end ();
-    }
+	if (buffer_start)
+	    {
+		    free (buffer_start);
+		    buffer_start = 0;
+		    input_file_end ();
+	    }
 }
 
 /* Start reading input from a new file. */
 
 char *				/* Return start of caller's part of buffer. */
-input_scrub_new_file (filename)
-     char *	filename;
+    input_scrub_new_file (filename)
+char *	filename;
 {
-  input_file_open (filename, !flagseen['f']);
-  physical_input_file = filename[0] ? filename : "{standard input}";
-  physical_input_line = 0;
-
-  partial_size = 0;
-  return (buffer_start + BEFORE_SIZE);
+	input_file_open (filename, !flagseen['f']);
+	physical_input_file = filename[0] ? filename : "{standard input}";
+	physical_input_line = 0;
+	
+	partial_size = 0;
+	return (buffer_start + BEFORE_SIZE);
 }
 
 
@@ -234,102 +220,102 @@ input_scrub_new_file (filename)
    input_scrub_new_file. */
 
 char *
-input_scrub_include_file (filename, position)
-     char *filename;
-     char *position;
+    input_scrub_include_file (filename, position)
+char *filename;
+char *position;
 {
-   next_saved_file = input_scrub_push (position);
-   return input_scrub_new_file (filename);
+	next_saved_file = input_scrub_push(position);
+	return input_scrub_new_file (filename);
 }
 
 void
-input_scrub_close ()
+    input_scrub_close ()
 {
-  input_file_close ();
+	input_file_close ();
 }
 char *
-input_scrub_next_buffer (bufp)
+    input_scrub_next_buffer (bufp)
 char **bufp;
 {
-  register char *	limit;	/*->just after last char of buffer. */
-
-  *bufp = buffer_start + BEFORE_SIZE;
-
+	register char *	limit;	/*->just after last char of buffer. */
+	
+	*bufp = buffer_start + BEFORE_SIZE;
+	
 #ifdef DONTDEF
-  if(preprocess) {
-    if(save_buffer) {
-      *bufp = save_buffer;
-      save_buffer = 0;
-    }
-    limit = input_file_give_next_buffer(buffer_start+BEFORE_SIZE);
-    if (!limit) {
-      partial_where = 0;
-      if(partial_size)
-        as_warn("Partial line at end of file ignored");
-      return partial_where;
-    }
-
-    if(partial_size)
-      bcopy(save_source, partial_where,(int)AFTER_SIZE);
-    do_scrub(partial_where,partial_size,buffer_start+BEFORE_SIZE,limit-(buffer_start+BEFORE_SIZE),&out_string,&out_length);
-    limit=out_string + out_length;
-    for(p=limit;*--p!='\n';)
-      ;
-    p++;
-    if(p<=buffer_start+BEFORE_SIZE)
-      as_fatal("Source line too long.  Please change file '%s' and re-make the assembler.", __FILE__);
-
-    partial_where = p;
-    partial_size = limit-p;
-    bcopy(partial_where, save_source,(int)AFTER_SIZE);
-    bcopy(AFTER_STRING, partial_where, (int)AFTER_SIZE);
-
-    save_buffer = *bufp;
-    *bufp = out_string;
-
-    return partial_where;
-  }
-
-  /* We're not preprocessing.  Do the right thing */
+	if(preprocess) {
+		if(save_buffer) {
+			*bufp = save_buffer;
+			save_buffer = 0;
+		}
+		limit = input_file_give_next_buffer(buffer_start+BEFORE_SIZE);
+		if (!limit) {
+			partial_where = 0;
+			if(partial_size)
+			    as_warn("Partial line at end of file ignored");
+			return partial_where;
+		}
+		
+		if(partial_size)
+		    bcopy(save_source, partial_where,(int)AFTER_SIZE);
+		do_scrub(partial_where,partial_size,buffer_start+BEFORE_SIZE,limit-(buffer_start+BEFORE_SIZE),&out_string,&out_length);
+		limit=out_string + out_length;
+		for(p=limit;*--p!='\n';)
+		    ;
+		p++;
+		if(p<=buffer_start+BEFORE_SIZE)
+		    as_fatal("Source line too long.  Please change file '%s' and re-make the assembler.", __FILE__);
+		
+		partial_where = p;
+		partial_size = limit-p;
+		bcopy(partial_where, save_source,(int)AFTER_SIZE);
+		bcopy(AFTER_STRING, partial_where, (int)AFTER_SIZE);
+		
+		save_buffer = *bufp;
+		*bufp = out_string;
+		
+		return partial_where;
+	}
+	
+	/* We're not preprocessing.  Do the right thing */
 #endif
-  if (partial_size)
-    {
-      bcopy (partial_where, buffer_start + BEFORE_SIZE, (int)partial_size);
-      bcopy (save_source, buffer_start + BEFORE_SIZE, (int)AFTER_SIZE);
-    }
-  limit = input_file_give_next_buffer (buffer_start + BEFORE_SIZE + partial_size);
-  if (limit)
-    {
-      register char *	p;	/* Find last newline. */
-
-      for (p = limit;   * -- p != '\n';)
-	{
-	}
-      ++ p;
-      if (p <= buffer_start + BEFORE_SIZE)
-	{
-	  as_fatal("Source line too long. Please change file %s then rebuild assembler.", __FILE__);
-	}
-      partial_where = p;
-      partial_size = limit - p;
-      bcopy (partial_where, save_source,  (int)AFTER_SIZE);
-      bcopy (AFTER_STRING, partial_where, (int)AFTER_SIZE);
-    }
-  else
-    {
-      partial_where = 0;
-      if (partial_size > 0)
-	{
-	  as_warn("Partial line at end of file ignored");
-	}
-      /* If we should pop to another file at EOF, do it. */
-      if (next_saved_file)
-	{
-	  *bufp = input_scrub_pop (next_saved_file);	/* Pop state */
-	  /* partial_where is now correct to return, since we popped it. */
-	}
-    }
-  return (partial_where);
+	if (partial_size)
+	    {
+		    bcopy (partial_where, buffer_start + BEFORE_SIZE, (int)partial_size);
+		    bcopy (save_source, buffer_start + BEFORE_SIZE, (int)AFTER_SIZE);
+	    }
+	limit = input_file_give_next_buffer (buffer_start + BEFORE_SIZE + partial_size);
+	if (limit)
+	    {
+		    register char *	p;	/* Find last newline. */
+		    
+		    for (p = limit;   * -- p != '\n';)
+			{
+			}
+		    ++ p;
+		    if (p <= buffer_start + BEFORE_SIZE)
+			{
+				as_fatal("Source line too long. Please change file %s then rebuild assembler.", __FILE__);
+			}
+		    partial_where = p;
+		    partial_size = limit - p;
+		    bcopy (partial_where, save_source,  (int)AFTER_SIZE);
+		    bcopy (AFTER_STRING, partial_where, (int)AFTER_SIZE);
+	    }
+	else
+	    {
+		    partial_where = 0;
+		    if (partial_size > 0)
+			{
+				as_warn("Partial line at end of file ignored");
+			}
+		    /* If we should pop to another file at EOF, do it. */
+		    if (next_saved_file)
+			{
+				*bufp = input_scrub_pop (next_saved_file);	/* Pop state */
+				/* partial_where is now correct to return, since we popped it. */
+			}
+	    }
+	return (partial_where);
 }
 
 /*
@@ -339,16 +325,16 @@ char **bufp;
 
 
 int
-seen_at_least_1_file ()		/* TRUE if we opened any file. */
+    seen_at_least_1_file ()		/* TRUE if we opened any file. */
 {
-  return (physical_input_file != NULL);
+	return (physical_input_file != NULL);
 }
 
 void
-bump_line_counters ()
+    bump_line_counters ()
 {
-  ++ physical_input_line;
-  ++ logical_input_line;
+	++ physical_input_line;
+	/*  ++ logical_input_line; FIXME-now remove this. */
 }
 
 /*
@@ -359,8 +345,8 @@ bump_line_counters ()
  * If the fname is NULL, we don't change the current logical file name.
  */
 void new_logical_line(fname, line_number)
-     char *fname;		/* DON'T destroy it! We point to it! */
-     int line_number;
+char *fname;		/* DON'T destroy it! We point to it! */
+int line_number;
 {
 	if (fname) {
 		logical_input_file = fname;
@@ -378,49 +364,40 @@ void new_logical_line(fname, line_number)
  * input source files.
  * As a sop to the debugger of AS, pretty-print the offending line.
  */
-void
-as_where()
-{
-  char *p;
-  line_numberT line;
-
-  if (physical_input_file)
-    {				/* we tried to read SOME source */
-      if (input_file_is_open())
-	{			/* we can still read lines from source */
+void as_where() {
+	char *p;
+	line_numberT line;
+	
+	if (logical_input_file && (logical_input_line > 0)) {
+		p = logical_input_file;
+		line = logical_input_line;
+	} else {
+		p = physical_input_file;
+		line = physical_input_line;
+	} /* line number should match file name */
+	
+	fprintf(stderr, "%s:%u: ", p, line);
+	
 #ifdef DONTDEF
-	  fprintf (stderr," @ physical line %ld., file \"%s\"",
-		   (long) physical_input_line, physical_input_file);
-	  fprintf (stderr," @ logical line %ld., file \"%s\"\n",
-		   (long) logical_input_line, logical_input_file);
-	  (void)putc(' ', stderr);
-	  as_howmuch (stderr);
-	  (void)putc('\n', stderr);
-#else
-		p = logical_input_file ? logical_input_file : physical_input_file;
-		line = logical_input_line ? logical_input_line : physical_input_line;
-		fprintf(stderr,"%s:%u: ", p, line);
-#endif
-	}
-      else
-	{
-#ifdef DONTDEF
-	  fprintf (stderr," After reading source.\n");
-#else
-	p = logical_input_file ? logical_input_file : physical_input_file;
-	line = logical_input_line ? logical_input_line : physical_input_line;
-	fprintf(stderr, "%s:%d:", p, (int) line);
-#endif
-	}
-    }
-  else
-    {
-#ifdef DONTDEF
-      fprintf (stderr," Before reading source.\n");
-#else
-#endif
-    }
-}
+	if (physical_input_file) {
+		if (input_file_is_open()) { /* we can still read lines from source */
+			fprintf (stderr," @ physical line %ld., file \"%s\"",
+				 (long) physical_input_line, physical_input_file);
+			fprintf (stderr," @ logical line %ld., file \"%s\"\n",
+				 (long) logical_input_line, logical_input_file);
+			(void)putc(' ', stderr);
+			as_howmuch (stderr);
+			(void)putc('\n', stderr);
+		} else {
+			fprintf(stderr, " After reading source.\n");
+		} /* input file is still open */
+	} else {
+		fprintf(stderr, " Before reading source.\n");
+	} /* we tried to read SOME source */
+#endif /* DONTDEF */
+	
+	return;
+} /* as_where() */
 
 
 
@@ -433,39 +410,39 @@ as_where()
  * No free '\n' at end of line.
  */
 void
-as_howmuch (stream)
-     FILE * stream;		/* Opened for write please. */
+    as_howmuch (stream)
+FILE * stream;		/* Opened for write please. */
 {
-  register char *	p;	/* Scan input line. */
-  /* register char c; JF unused */
-
-  for (p = input_line_pointer - 1;   * p != '\n';   --p)
-    {
-    }
-  ++ p;				/* p->1st char of line. */
-  for (;  p <= input_line_pointer;  p++)
-    {
-      /* Assume ASCII. EBCDIC & other micro-computer char sets ignored. */
-      /* c = *p & 0xFF; JF unused */
-      as_1_char(*p, stream);
-    }
+	register char *	p;	/* Scan input line. */
+	/* register char c; JF unused */
+	
+	for (p = input_line_pointer - 1;   * p != '\n';   --p)
+	    {
+	    }
+	++ p;				/* p->1st char of line. */
+	for (;  p <= input_line_pointer;  p++)
+	    {
+		    /* Assume ASCII. EBCDIC & other micro-computer char sets ignored. */
+		    /* c = *p & 0xFF; JF unused */
+		    as_1_char(*p, stream);
+	    }
 }
 
 static void as_1_char (c,stream)
 unsigned int c;
 FILE *stream;
 {
-  if (c > 127)
-    {
-      (void)putc('%', stream);
-      c -= 128;
-    }
-  if (c < 32)
-    {
-      (void)putc('^', stream);
-      c += '@';
-    }
-  (void)putc(c, stream);
+	if (c > 127)
+	    {
+		    (void)putc('%', stream);
+		    c -= 128;
+	    }
+	if (c < 32)
+	    {
+		    (void)putc('^', stream);
+		    c += '@';
+	    }
+	(void)putc(c, stream);
 }
 
 /*

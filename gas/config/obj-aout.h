@@ -1,21 +1,21 @@
 /* a.out object file format
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2,
-or (at your option) any later version.
-
-GAS is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public
-License along with GAS; see the file COPYING.  If not, write
-to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2,
+   or (at your option) any later version.
+   
+   GAS is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+   the GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public
+   License along with GAS; see the file COPYING.  If not, write
+   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 /* $Id$ */
 
@@ -30,23 +30,9 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "a_out.h"
 #endif
 
-struct reloc_info_generic
-{
-    unsigned long r_address;
-/*
- * Using bit fields here is a bad idea because the order is not portable. :-(
- */
-    unsigned int r_index;
-#define r_symbolnum	r_index
-    unsigned r_extern   : 1;
-    unsigned r_pcrel:1;
-    unsigned r_length:2;	/* 0=>byte 1=>short 2=>long 3=>8byte */
-    unsigned r_bsr:1;		/* NS32K */
-    unsigned r_disp:1;		/* NS32k */
-    unsigned r_callj:1;		/* i960 */
-    enum reloc_type r_type;
-    long r_addend;
-};
+#ifndef AOUT_MACHTYPE
+#define AOUT_MACHTYPE 0
+#endif /* AOUT_MACHTYPE */
 
 extern const short seg_N_TYPE[];
 extern const segT  N_TYPE_seg[];
@@ -59,12 +45,6 @@ extern const segT  N_TYPE_seg[];
 /* Symbol table entry data type */
 
 typedef struct nlist obj_symbol_type; /* Symbol table entry */
-
-/* If compiler generate leading underscores, remove them. */
-
-#ifndef STRIP_UNDERSCORE
-#define STRIP_UNDERSCORE 0
-#endif /* STRIP_UNDERSCORE */
 
 /* Symbol table macros and constants */
 
@@ -116,7 +96,7 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 /* Set the value of the symbol */
 #define S_SET_VALUE(s,v)	((s)->sy_symbol.n_value = (unsigned long) (v))
 /* Assume that a symbol cannot be simultaneously in more than on segment */
- /* set segment */
+/* set segment */
 #define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type|=SEGMENT_TO_SYMBOL_TYPE(seg))
 /* The symbol is external */
 #define S_SET_EXTERNAL(s)	((s)->sy_symbol.n_type |= N_EXT)
@@ -148,18 +128,34 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define H_GET_TEXT_RELOCATION_SIZE(h)	((h)->header.a_trsize)
 #define H_GET_DATA_RELOCATION_SIZE(h)	((h)->header.a_drsize)
 #define H_GET_SYMBOL_TABLE_SIZE(h)	((h)->header.a_syms)
-#define H_GET_MAGIC_NUMBER(h)		((h)->header.a_info)
 #define H_GET_ENTRY_POINT(h)		((h)->header.a_entry)
 #define H_GET_STRING_SIZE(h)		((h)->string_table_size)
 #define H_GET_LINENO_SIZE(h)		(0)
 
-#ifdef EXEC_MACHINE_TYPE
-#define H_GET_MACHINE_TYPE(h)		((h)->header.a_machtype)
-#endif /* EXEC_MACHINE_TYPE */
+#define H_GET_DYNAMIC(h)		((h)->header.a_info >> 31)
+#define H_GET_VERSION(h)		(((h)->header.a_info >> 24) & 0x7f)
+#define H_GET_MACHTYPE(h)		(((h)->header.a_info >> 16) & 0xff)
+#define H_GET_MAGIC_NUMBER(h)		((h)->header.a_info & 0xffff)
 
-#ifdef EXEC_VERSION
-#define H_GET_VERSION(h)		((h)->header.a_version)
-#endif /* EXEC_VERSION */
+#define H_SET_DYNAMIC(h,v)		((h)->header.a_info = (((v) << 31) \
+							       | (H_GET_VERSION(h) << 24) \
+							       | (H_GET_MACHTYPE(h) << 16) \
+							       | (H_GET_MAGIC_NUMBER(h))))
+
+#define H_SET_VERSION(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
+							       | ((v) << 24) \
+							       | (H_GET_MACHTYPE(h) << 16) \
+							       | (H_GET_MAGIC_NUMBER(h))))
+
+#define H_SET_MACHTYPE(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
+							       | (H_GET_VERSION(h) << 24) \
+							       | ((v) << 16) \
+							       | (H_GET_MAGIC_NUMBER(h))))
+
+#define H_SET_MAGIC_NUMBER(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
+							       | (H_GET_VERSION(h) << 24) \
+							       | (H_GET_MACHTYPE(h) << 16) \
+							       | ((v))))
 
 #define H_SET_TEXT_SIZE(h,v)		((h)->header.a_text = md_section_align(SEG_TEXT, (v)))
 #define H_SET_DATA_SIZE(h,v)		((h)->header.a_data = md_section_align(SEG_DATA, (v)))
@@ -173,16 +169,8 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 #define H_SET_SYMBOL_TABLE_SIZE(h,v)	((h)->header.a_syms = (v) * \
 					 sizeof(struct nlist))
 
-#define H_SET_MAGIC_NUMBER(h,v)		((h)->header.a_info = (v))
-
 #define H_SET_ENTRY_POINT(h,v)		((h)->header.a_entry = (v))
 #define H_SET_STRING_SIZE(h,v)		((h)->string_table_size = (v))
-#ifdef EXEC_MACHINE_TYPE
-#define H_SET_MACHINE_TYPE(h,v)		((h)->header.a_machtype = (v))
-#endif /* EXEC_MACHINE_TYPE */
-#ifdef EXEC_VERSION
-#define H_SET_VERSION(h,v)		((h)->header.a_version = (v))
-#endif /* EXEC_VERSION */
 
 /* 
  * Current means for getting the name of a segment.
@@ -192,13 +180,21 @@ typedef struct nlist obj_symbol_type; /* Symbol table entry */
 extern char *const seg_name[];
 
 typedef struct {
-    struct exec	header;			/* a.out header */
-    long	string_table_size;	/* names + '\0' + sizeof(int) */
+	struct exec	header;			/* a.out header */
+	long	string_table_size;	/* names + '\0' + sizeof(int) */
 } object_headers;
 
 /* line numbering stuff. */
-#define OBJ_EMIT_LINENO(a, b, c)	;
-#define obj_pre_write_hook(a)		;
+#define OBJ_EMIT_LINENO(a, b, c)	{;}
+
+#define obj_symbol_new_hook(s)	{;}
+
+#ifdef __STDC__
+struct fix;
+void tc_aout_fix_to_chars(char *where, struct fix *fixP, relax_addressT segment_address);
+#else
+void tc_aout_fix_to_chars();
+#endif /* __STDC__ */
 
 /*
  * Local Variables:

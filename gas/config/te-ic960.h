@@ -7,15 +7,15 @@
 
 #define TE_IC960 1
 
- /* intel uses host byte order for headers */
+/* intel uses host byte order for headers */
 #ifdef CROSS_COMPILE
 #undef CROSS_COMPILE
 #endif /* CROSS_COMPILE */
 
 #define OBJ_COFF_OMIT_OPTIONAL_HEADER
 #define LOCAL_LABEL(name) ( (name[0] =='L') \
-			  || (name[0] =='.' \
-			     && (name[1]=='C' || name[1]=='I' || name[1]=='.')))
+			   || (name[0] =='.' \
+			       && (name[1]=='C' || name[1]=='I' || name[1]=='.')))
 #include "obj-format.h"
 
 /*

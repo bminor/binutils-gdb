@@ -1,18 +1,18 @@
 /* messages.c - error reporter -
    Copyright (C) 1987, 1991 Free Software Foundation, Inc.
-
+   
    This file is part of GAS, the GNU Assembler.
-
+   
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
-
+   
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
@@ -72,10 +72,10 @@
 
 /*
   ERRORS
-
+  
   JF: this is now bogus.  We now print more standard error messages
   that try to look like everyone else's.
-
+  
   We print the error message 1st, beginning in column 1.
   All ancillary info starts in column 2 on lines after the
   key error text.
@@ -83,16 +83,16 @@
   just after the main error text.
   Caller then prints any appendices after that, begining all
   lines with at least 1 space.
-
+  
   Optionally, we may die.
   There is no need for a trailing '\n' in your error text format
   because we supply one.
-
+  
   as_warn(fmt,args)  Like fprintf(stderr,fmt,args) but also call errwhere().
-
+  
   as_fatal(fmt,args) Like as_warn() but exit with a fatal status.
-
- */
+  
+  */
 
 static int warning_count = 0; /* Count of number of warnings issued */
 
@@ -121,10 +121,10 @@ char *filename;
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
-
+	
 	as_where();
 	fprintf(stderr,gripe,filename);
-
+	
 	if (errno > sys_nerr)
 	    fprintf(stderr, "Unknown error #%d.\n", errno);
 	else
@@ -203,12 +203,18 @@ void as_warn(Format)
 const char *Format;
 {
 	va_list args;
+	char buffer[200];
 	
 	if(!flagseen['W']) {
 		++warning_count;
 		as_where();
 		va_start(args, Format);
-		vfprintf(stderr, Format, args);
+		fprintf(stderr,"Warning: ");
+		vsprintf(buffer, Format, args);
+		fprintf(stderr, buffer);
+#ifndef NO_LISTING
+		listing_warning(buffer);
+#endif
 		va_end(args);
 		(void) putc('\n', stderr);
 	}
@@ -220,12 +226,18 @@ char *Format;
 va_dcl
 {
 	va_list args;
+	char buffer[200];
 	
 	if(!flagseen['W']) {
 		++warning_count;
 		as_where();
 		va_start(args);
-		vfprintf(stderr, Format, args);
+		fprintf(stderr,"Warning: ");
+		vsprintf(buffer, Format, args);
+		fprintf(stderr,buffer);
+#ifndef NO_LISTING
+		listing_warning(buffer);
+#endif		
 		va_end(args);
 		(void) putc('\n', stderr);
 	}
@@ -274,11 +286,18 @@ void as_bad(Format)
 const char *Format;
 {
 	va_list args;
-
+	char buffer[200];
+	
 	++error_count;
 	as_where();
 	va_start(args, Format);
-	vfprintf(stderr, Format, args);
+	fprintf(stderr,"Error: ");
+	
+	vsprintf(buffer, Format, args);
+	fprintf(stderr,buffer);
+#ifndef NO_LISTING
+	listing_error(buffer);
+#endif
 	va_end(args);
 	(void) putc('\n', stderr);
 } /* as_bad() */
@@ -289,21 +308,29 @@ char *Format;
 va_dcl
 {
 	va_list args;
-
+	char buffer[200];
+	
 	++error_count;
 	as_where();
 	va_start(args);
-	vfprintf(stderr, Format, args);
+	vsprintf(buffer, Format, args);
+	fprintf(stderr,buffer);
+#ifndef NO_LISTING
+	listing_error(buffer);
+#endif
+	
 	va_end(args);
 	(void) putc('\n', stderr);
-} /* as_bad() */
+}				/* as_bad() */
 #else
 /*VARARGS1 */
 as_bad(Format,args)
 char *Format;
 {
 	++error_count;
+	
 	as_where();
+	fprintf(stderr,"Error: ");
 	_doprnt (Format, &args, stderr);
 	(void)putc ('\n', stderr);
 	/* as_where(); */
@@ -336,14 +363,14 @@ void as_fatal(Format)
 const char *Format;
 {
 	va_list args;
-
+	
 	as_where();
 	va_start(args, Format);
 	fprintf (stderr, "FATAL:");
 	vfprintf(stderr, Format, args);
 	(void) putc('\n', stderr);
 	va_end(args);
-	exit(42);
+	exit(33);
 } /* as_fatal() */
 #else
 #ifndef NO_VARARGS
@@ -352,14 +379,14 @@ char *Format;
 va_dcl
 {
 	va_list args;
-
+	
 	as_where();
 	va_start(args);
 	fprintf (stderr, "FATAL:");
 	vfprintf(stderr, Format, args);
 	(void) putc('\n', stderr);
 	va_end(args);
-	exit(42);
+	exit(33);
 } /* as_fatal() */
 #else
 /*VARARGS1 */
@@ -371,7 +398,7 @@ char *Format;
 	_doprnt (Format, &args, stderr);
 	(void)putc ('\n', stderr);
 	/* as_where(); */
-	exit(42);			/* What is a good exit status? */
+	exit(33);		/* What is a good exit status? */
 } /* as_fatal() */
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
@@ -384,7 +411,7 @@ char *Format;
 	fprintf (stderr, "FATAL:");
 	fprintf(stderr, Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an);
 	(void) putc('\n', stderr);
-	exit(42);
+	exit(33);
 } /* as_fatal() */
 #endif
 

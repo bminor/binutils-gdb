@@ -1,39 +1,39 @@
 /* struct_symbol.h - Internal symbol structure
    Copyright (C) 1987 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   oYou should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 struct symbol			/* our version of an nlist node */
 {
-  obj_symbol_type sy_symbol;	/* what we write in .o file (if permitted) */
-  unsigned long sy_name_offset;	/* 4-origin position of sy_name in symbols */
-				/* part of object file. */
-				/* 0 for (nameless) .stabd symbols. */
-				/* Not used until write_object_file() time. */
-  long	sy_number;	/* 24 bit symbol number. */
-				/* Symbol numbers start at 0 and are */
-				/* unsigned. */
-  struct symbol *sy_next;	/* forward chain, or NULL */
+	obj_symbol_type sy_symbol;	/* what we write in .o file (if permitted) */
+	unsigned long sy_name_offset;	/* 4-origin position of sy_name in symbols */
+	/* part of object file. */
+	/* 0 for (nameless) .stabd symbols. */
+	/* Not used until write_object_file() time. */
+	long	sy_number;	/* 24 bit symbol number. */
+	/* Symbol numbers start at 0 and are */
+	/* unsigned. */
+	struct symbol *sy_next;	/* forward chain, or NULL */
 #ifdef SYMBOLS_NEED_BACKPOINTERS
-  struct symbol *sy_previous;	/* backward chain, or NULL */
+	struct symbol *sy_previous;	/* backward chain, or NULL */
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
-  struct frag *sy_frag;	/* NULL or -> frag this symbol attaches to. */
-  struct symbol *sy_forward;	/* value is really that of this other symbol */
-/* We will probably want to add a sy_segment here soon. */
+	struct frag *sy_frag;	/* NULL or -> frag this symbol attaches to. */
+	struct symbol *sy_forward;	/* value is really that of this other symbol */
+	/* We will probably want to add a sy_segment here soon. */
 };
 
 typedef struct symbol symbolS;
@@ -50,8 +50,8 @@ struct broken_word {
 	symbolS	*sub;		/* - symbol_y */
 	long	addnum;		/* + addnum */
 	int	added;		/* nasty thing happend yet? */
-				/* 1: added and has a long-jump */
-				/* 2: added but uses someone elses long-jump */
+	/* 1: added and has a long-jump */
+	/* 2: added but uses someone elses long-jump */
 	struct broken_word *use_jump; /* points to broken_word with a similar
 					 long-jump */
 };

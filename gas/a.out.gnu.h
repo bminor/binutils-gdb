@@ -12,14 +12,14 @@
    will lay out the same sizes or alignments.  */
 
 struct exec_bytes {
-  unsigned char a_info[4];
-  unsigned char a_text[4];
-  unsigned char a_data[4];
-  unsigned char a_bss[4];
-  unsigned char a_syms[4];
-  unsigned char a_entry[4];
-  unsigned char a_trsize[4];
-  unsigned char a_drsize[4];
+	unsigned char a_info[4];
+	unsigned char a_text[4];
+	unsigned char a_data[4];
+	unsigned char a_bss[4];
+	unsigned char a_syms[4];
+	unsigned char a_entry[4];
+	unsigned char a_trsize[4];
+	unsigned char a_drsize[4];
 };
 
 /* How big the "struct exec" is on disk */
@@ -29,14 +29,14 @@ struct exec_bytes {
 
 struct exec
 {
-  unsigned long a_info;		/* Use macros N_MAGIC, etc for access */
-  unsigned a_text;		/* length of text, in bytes */
-  unsigned a_data;		/* length of data, in bytes */
-  unsigned a_bss;		/* length of uninitialized data area for file, in bytes */
-  unsigned a_syms;		/* length of symbol table data in file, in bytes */
-  unsigned a_entry;		/* start address */
-  unsigned a_trsize;		/* length of relocation info for text, in bytes */
-  unsigned a_drsize;		/* length of relocation info for data, in bytes */
+	unsigned long a_info;		/* Use macros N_MAGIC, etc for access */
+	unsigned a_text;		/* length of text, in bytes */
+	unsigned a_data;		/* length of data, in bytes */
+	unsigned a_bss;		/* length of uninitialized data area for file, in bytes */
+	unsigned a_syms;		/* length of symbol table data in file, in bytes */
+	unsigned a_entry;		/* start address */
+	unsigned a_trsize;		/* length of relocation info for text, in bytes */
+	unsigned a_drsize;		/* length of relocation info for data, in bytes */
 };
 
 #endif /* __STRUCT_EXEC_OVERRIDE__ */
@@ -48,37 +48,37 @@ struct exec
 #undef M_68020
 #undef M_SPARC
 enum machine_type {
-  M_UNKNOWN = 0,
-  M_68010 = 1,
-  M_68020 = 2,
-  M_SPARC = 3,
-  /* skip a bunch so we don't run into any of sun's numbers */
-  M_386 = 100,
-  M_29K = 101,
-  M_RS6000 = 102,	/* IBM RS/6000 */
-  /* HP/BSD formats */
-  M_HP200 = 200,	/* hp200 (68010) BSD binary */
-  M_HP300 = 300,	/* hp300 (68020+68881) BSD binary */
-  M_HPUX23 = 0x020C,	/* hp200/300 HPUX binary */
+	M_UNKNOWN = 0,
+	M_68010 = 1,
+	M_68020 = 2,
+	M_SPARC = 3,
+	/* skip a bunch so we don't run into any of sun's numbers */
+	M_386 = 100,
+	M_29K = 101,
+	M_RS6000 = 102,	/* IBM RS/6000 */
+	/* HP/BSD formats */
+	M_HP200 = 200,	/* hp200 (68010) BSD binary */
+	M_HP300 = 300,	/* hp300 (68020+68881) BSD binary */
+	M_HPUX23 = 0x020C,	/* hp200/300 HPUX binary */
 };
 
 #define N_MAGIC(exec) ((exec).a_info & 0xffff)
 #define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
 #define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
 #define N_SET_INFO(exec, magic, type, flags) \
-	((exec).a_info = ((magic) & 0xffff) \
-	 | (((int)(type) & 0xff) << 16) \
-	 | (((flags) & 0xff) << 24))
+    ((exec).a_info = ((magic) & 0xffff) \
+     | (((int)(type) & 0xff) << 16) \
+     | (((flags) & 0xff) << 24))
 #define N_SET_MAGIC(exec, magic) \
-	((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
+    ((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
 
 #define N_SET_MACHTYPE(exec, machtype) \
-	((exec).a_info = \
-	 ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
+    ((exec).a_info = \
+     ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
 
 #define N_SET_FLAGS(exec, flags) \
-	((exec).a_info = \
-	 ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
+    ((exec).a_info = \
+     ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
 /* Code indicating object file or impure executable.  */
 #define OMAGIC 0407
@@ -97,8 +97,8 @@ enum machine_type {
 
 #ifndef N_BADMAG
 #define N_BADMAG(x)	  (N_MAGIC(x) != OMAGIC		\
-			&& N_MAGIC(x) != NMAGIC		\
-  			&& N_MAGIC(x) != ZMAGIC)
+			   && N_MAGIC(x) != NMAGIC		\
+			   && N_MAGIC(x) != ZMAGIC)
 #endif
 
 /* By default, segment size is constant.  But on some machines, it can
@@ -106,16 +106,16 @@ enum machine_type {
 #ifndef	N_SEGSIZE
 #define	N_SEGSIZE(x)	SEGMENT_SIZE
 #endif
-
-/* This complexity is for encapsulated COFF support */
+    
+    /* This complexity is for encapsulated COFF support */
 #ifndef _N_HDROFF
 #define _N_HDROFF(x)	(N_SEGSIZE(x) - sizeof (struct exec))
 #endif
 
 #ifndef N_TXTOFF
 #define N_TXTOFF(x)	(N_MAGIC(x) == ZMAGIC ?	\
-				_N_HDROFF((x)) + sizeof (struct exec) :	\
-				sizeof (struct exec))
+			 _N_HDROFF((x)) + sizeof (struct exec) :	\
+			 sizeof (struct exec))
 #endif
 
 
@@ -143,7 +143,7 @@ enum machine_type {
 #ifndef N_TXTADDR
 #define	N_TXTADDR(x)	0
 #endif
-
+    
 #ifndef N_DATADDR
 #define N_DATADDR(x) \
     (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) \
@@ -154,15 +154,15 @@ enum machine_type {
 #define N_BSSADDR(x) (N_DATADDR(x) + (x).a_data)
 
 struct nlist {
-  union {
-    char *n_name;
-    struct nlist *n_next;
-    long n_strx;
-  } n_un;
-  unsigned char n_type;
-  char n_other;
-  short n_desc;
-  unsigned long n_value;
+	union {
+		char *n_name;
+		struct nlist *n_next;
+		long n_strx;
+	} n_un;
+	unsigned char n_type;
+	char n_other;
+	short n_desc;
+	unsigned long n_value;
 };
 
 #define N_UNDF 0
@@ -183,7 +183,7 @@ struct nlist {
 /* The following type indicates the definition of a symbol as being
    an indirect reference to another symbol.  The other symbol
    appears as an undefined reference, immediately following this symbol.
-
+   
    Indirection is asymmetrical.  The other symbol's value will be used
    to satisfy requests for the indirect symbol, but not vice versa.
    If the other symbol does not have a definition, libraries will
@@ -196,7 +196,7 @@ struct nlist {
    Space is allocated for the set in the text section, and each set
    element's value is stored into one word of the space.
    The first word of the space is the length of the set (number of elements).
-
+   
    The address of the set is made into an N_SETV symbol
    whose name is the same as the name of the set.
    This symbol acts like a N_DATA global symbol
@@ -225,15 +225,15 @@ struct nlist {
 /* The following enum and struct were borrowed from SunOS's
    /usr/include/sun4/a.out.h  and extended to handle
    other machines.  It is currently used on SPARC and AMD 29000.
-
+   
    reloc_ext_bytes is how it looks on disk.  reloc_info_extended is
    how we might process it on a native host.  */
 
 struct reloc_ext_bytes {
-  unsigned char	r_address[4];
-  unsigned char r_index[3];
-  unsigned char r_bits[1];
-  unsigned char r_addend[4];
+	unsigned char	r_address[4];
+	unsigned char r_index[3];
+	unsigned char r_bits[1];
+	unsigned char r_addend[4];
 };
 
 #define	RELOC_EXT_BITS_EXTERN_BIG	0x80
@@ -248,23 +248,23 @@ struct reloc_ext_bytes {
 
 struct reloc_info_extended
 {
-  unsigned long r_address;
-  unsigned int  r_index:24;
+	unsigned long r_address;
+	unsigned int  r_index:24;
 # define	r_symbolnum  r_index
-  unsigned	r_extern:1;
-  unsigned	:2;
-/*  RS/6000 compiler does not support enum bitfield 
-  enum reloc_type r_type:5; */
-  enum reloc_type r_type;
-  long int	r_addend;
+	unsigned	r_extern:1;
+	unsigned	:2;
+	/*  RS/6000 compiler does not support enum bitfield 
+	    enum reloc_type r_type:5; */
+	enum reloc_type r_type;
+	long int	r_addend;
 };
 
 /* The standard, old-fashioned, Berkeley compatible relocation struct */
 
 struct reloc_std_bytes {
-  unsigned char	r_address[4];
-  unsigned char r_index[3];
-  unsigned char r_bits[1];
+	unsigned char	r_address[4];
+	unsigned char r_index[3];
+	unsigned char r_bits[1];
 };
 
 #define	RELOC_STD_BITS_PCREL_BIG	0x80
@@ -292,38 +292,40 @@ struct reloc_std_bytes {
 #ifndef CUSTOM_RELOC_FORMAT
 struct relocation_info
 {
-  /* Address (within segment) to be relocated.  */
-  int r_address;
-  /* The meaning of r_symbolnum depends on r_extern.  */
-  unsigned int r_symbolnum:24;
-  /* Nonzero means value is a pc-relative offset
-     and it should be relocated for changes in its own address
-     as well as for changes in the symbol or section specified.  */
-  unsigned int r_pcrel:1;
-  /* Length (as exponent of 2) of the field to be relocated.
-     Thus, a value of 2 indicates 1<<2 bytes.  */
-  unsigned int r_length:2;
-  /* 1 => relocate with value of symbol.
-          r_symbolnum is the index of the symbol
-	  in file's the symbol table.
-     0 => relocate with the address of a segment.
-          r_symbolnum is N_TEXT, N_DATA, N_BSS or N_ABS
-	  (the N_EXT bit may be set also, but signifies nothing).  */
-  unsigned int r_extern:1;
-  /* The next three bits are for SunOS shared libraries, and seem to
-     be undocumented.  */
-  unsigned int r_baserel:1;	/* Linkage table relative */
-  unsigned int r_jmptable:1;	/* pc-relative to jump table */
-
+	/* Address (within segment) to be relocated.  */
+	int r_address;
+	/* The meaning of r_symbolnum depends on r_extern.  */
+	unsigned int r_symbolnum:24;
+	/* Nonzero means value is a pc-relative offset
+	   and it should be relocated for changes in its own address
+	   as well as for changes in the symbol or section specified.  */
+	unsigned int r_pcrel:1;
+	/* Length (as exponent of 2) of the field to be relocated.
+	   Thus, a value of 2 indicates 1<<2 bytes.  */
+	unsigned int r_length:2;
+	/* 1 => relocate with value of symbol.
+	   r_symbolnum is the index of the symbol
+	   in file's the symbol table.
+	   0 => relocate with the address of a segment.
+	   r_symbolnum is N_TEXT, N_DATA, N_BSS or N_ABS
+	   (the N_EXT bit may be set also, but signifies nothing).  */
+	unsigned int r_extern:1;
+	/* The next three bits are for SunOS shared libraries, and seem to
+	   be undocumented.  */
+	unsigned int r_baserel:1;	/* Linkage table relative */
+	unsigned int r_jmptable:1;	/* pc-relative to jump table */
+	
 #ifdef TC_NS32K
 #define r_bsr	r_baserel
 #define r_disp	r_jmptable
 #endif /* TC_NS32K */
-
-  unsigned int r_relative:1;	/* "relative relocation" */
-  /* unused */
-  unsigned int r_pad:1;		/* Padding -- set to zero */
+	
+	unsigned int r_relative:1;	/* "relative relocation" */
+	/* unused */
+	unsigned int r_pad:1;		/* Padding -- set to zero */
 };
 #endif /* CUSTOM_RELOC_FORMAT */
 
 #endif /* __A_OUT_GNU_H__ */
+
+/* end of a.out.gnu.h */

@@ -1,31 +1,31 @@
 /* symbols.h -
    Copyright (C) 1987, 1990 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
 extern struct obstack	notes; /* eg FixS live here. */
 
 extern struct obstack cond_obstack; /* this is where we track .ifdef/.endif
-				     (if we do that at all).  */
+				       (if we do that at all).  */
 
 extern unsigned int local_bss_counter; /* Zeroed before a pass. */
-				/* Only used by .lcomm directive. */
+/* Only used by .lcomm directive. */
 
 extern symbolS * symbol_rootP;	/* all the symbol nodes */
 extern symbolS * symbol_lastP;	/* last struct symbol we made, or NULL */
@@ -38,6 +38,7 @@ extern symbolS*		dot_bss_symbol;
 
 #ifdef __STDC__
 
+char *decode_local_label_name(char *s);
 char *local_label_name(int n, int augend);
 symbolS *symbol_find(char *name);
 symbolS *symbol_find_base(char *name, int strip_underscore);
@@ -52,6 +53,7 @@ void verify_symbol_chain(symbolS *rootP, symbolS *lastP);
 
 #else
 
+char *decode_local_label_name();
 char *local_label_name();
 symbolS *symbol_find();
 symbolS *symbol_find_base();

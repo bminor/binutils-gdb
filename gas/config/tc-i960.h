@@ -1,23 +1,24 @@
 /* tc-i960.h - Basic 80960 instruction formats.
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2,
+   or (at your option) any later version.
+   
+   GAS is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+   the GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public
+   License along with GAS; see the file COPYING.  If not, write
+   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 1,
-or (at your option) any later version.
-
-GAS is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public
-License along with GAS; see the file COPYING.  If not, write
-to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
-
-/* $Id$ */
+#ifndef TC_I960
+#define TC_I960 1
 
 /*
  * The 'COJ' instructions are actually COBR instructions with the 'b' in
@@ -38,18 +39,16 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
  * appropriate.
  */ 
 
-#define TC_I960 1
-
- /* tailor gas */
+/* tailor gas */
 #define SYMBOLS_NEED_BACKPOINTERS
 #define LOCAL_LABELS_FB
 #define WANT_BITFIELDS
 
- /* tailor the coff format */
+/* tailor the coff format */
 #define OBJ_COFF_SECTION_HEADER_HAS_ALIGNMENT
 #define OBJ_COFF_MAX_AUXENTRIES	(2)
 
- /* other */
+/* other */
 #define CTRL	0
 #define COBR	1
 #define COJ	2
@@ -144,7 +143,7 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #define LIT_OK(od)	(od & LIT)	/* TRUE if literal operand allowed */
 #define FP_OK(od)	(od & FP)	/* TRUE if floating-point op allowed */
 #define REG_ALIGN(od,n)	((od & 0x3 & n) == 0)
-					/* TRUE if reg #n is properly aligned */
+/* TRUE if reg #n is properly aligned */
 #define MEMOP(od)	(od == M)	/* TRUE if operand is a memory operand*/
 
 /* Classes of 960 intructions:
@@ -193,33 +192,33 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #define	N_BALNAME	(-2)
 
 
- /* i960 uses a custom relocation record. */
+/* i960 uses a custom relocation record. */
 
- /* let obj-aout.h know */
+/* let obj-aout.h know */
 #define CUSTOM_RELOC_FORMAT 1
- /* let a.out.gnu.h know */
+/* let a.out.gnu.h know */
 #define N_RELOCATION_INFO_DECLARED 1
 struct relocation_info {
 	int	 r_address;	/* File address of item to be relocated	*/
 	unsigned
-		r_index:24,/* Index of symbol on which relocation is based*/
-		r_pcrel:1,	/* 1 => relocate PC-relative; else absolute
-				 *	On i960, pc-relative implies 24-bit
-				 *	address, absolute implies 32-bit.
-				 */
-		r_length:2,	/* Number of bytes to relocate:
-				 *	0 => 1 byte
-				 *	1 => 2 bytes
-				 *	2 => 4 bytes -- only value used for i960
-				 */
-		r_extern:1,
-		r_bsr:1,	/* Something for the GNU NS32K assembler */
-		r_disp:1,	/* Something for the GNU NS32K assembler */
-		r_callj:1,	/* 1 if relocation target is an i960 'callj' */
-		nuthin:1;	/* Unused				*/
+    r_index:24,/* Index of symbol on which relocation is based*/
+    r_pcrel:1,	/* 1 => relocate PC-relative; else absolute
+		 *	On i960, pc-relative implies 24-bit
+		 *	address, absolute implies 32-bit.
+		 */
+    r_length:2,	/* Number of bytes to relocate:
+		 *	0 => 1 byte
+		 *	1 => 2 bytes
+		 *	2 => 4 bytes -- only value used for i960
+		 */
+    r_extern:1,
+    r_bsr:1,	/* Something for the GNU NS32K assembler */
+    r_disp:1,	/* Something for the GNU NS32K assembler */
+    r_callj:1,	/* 1 if relocation target is an i960 'callj' */
+    nuthin:1;	/* Unused				*/
 };
 
- /* hacks for tracking callj's */
+/* hacks for tracking callj's */
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
 
 #define TC_S_IS_SYSPROC(s)	((1<=S_GET_OTHER(s)) && (S_GET_OTHER(s)<=32))
@@ -251,10 +250,10 @@ struct relocation_info {
 #else /* switch on OBJ */
 you lose
 #endif /* witch on OBJ */
-
+    
 #ifdef __STDC__
-
-void brtab_emit(void);
+    
+    void brtab_emit(void);
 void reloc_callj(); /* this is really reloc_callj(fixS *fixP) but I don't want to change header inclusion order. */
 void tc_set_bal_of_call(); /* this is really tc_set_bal_of_call(symbolS *callP, symbolS *balP) */
 
@@ -277,3 +276,4 @@ char *_tc_get_bal_of_call(); /* this is really symbolS *tc_get_bal_of_call(symbo
  */
 
 /* end of tp-i960.h */
+#endif

@@ -1,22 +1,22 @@
 /* b.out object file format
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2,
-or (at your option) any later version.
-
-GAS is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public
-License along with GAS; see the file COPYING.  If not, write
-to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
-02139, USA. */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as
+   published by the Free Software Foundation; either version 2,
+   or (at your option) any later version.
+   
+   GAS is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+   the GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public
+   License along with GAS; see the file COPYING.  If not, write
+   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
+   02139, USA. */
 
 /* $Id$ */
 
@@ -59,12 +59,12 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
 
 #include "targ-cpu.h"
 
- /* bout uses host byte order for headers */
+/* bout uses host byte order for headers */
 #ifdef CROSS_COMPILE
 #undef CROSS_COMPILE
 #endif /* CROSS_COMPILE */
 
- /* We want \v. */
+/* We want \v. */
 #define BACKSLASH_V 1
 
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME	"b.out"
@@ -100,7 +100,7 @@ struct exec {
 	unsigned long a_entry;	/* Runtime start address		*/
 	unsigned long a_trsize;	/* Length of text relocation info	*/
 	unsigned long a_drsize;	/* Length of data relocation info	*/
-
+	
 	/* Added for i960 */
 	unsigned long a_tload;	/* Text runtime load address		*/
 	unsigned long a_dload;	/* Data runtime load address		*/
@@ -151,21 +151,21 @@ typedef struct nlist obj_symbol_type;
 struct relocation_info {
 	int	 r_address;	/* File address of item to be relocated	*/
 	unsigned
-		r_index:24,/* Index of symbol on which relocation is based*/
-		r_pcrel:1,	/* 1 => relocate PC-relative; else absolute
-				 *	On i960, pc-relative implies 24-bit
-				 *	address, absolute implies 32-bit.
-				 */
-		r_length:2,	/* Number of bytes to relocate:
-				 *	0 => 1 byte
-				 *	1 => 2 bytes
-				 *	2 => 4 bytes -- only value used for i960
-				 */
-		r_extern:1,
-		r_bsr:1,	/* Something for the GNU NS32K assembler */
-		r_disp:1,	/* Something for the GNU NS32K assembler */
-		r_callj:1,	/* 1 if relocation target is an i960 'callj' */
-		nuthin:1;	/* Unused				*/
+    r_index:24,/* Index of symbol on which relocation is based*/
+    r_pcrel:1,	/* 1 => relocate PC-relative; else absolute
+		 *	On i960, pc-relative implies 24-bit
+		 *	address, absolute implies 32-bit.
+		 */
+    r_length:2,	/* Number of bytes to relocate:
+		 *	0 => 1 byte
+		 *	1 => 2 bytes
+		 *	2 => 4 bytes -- only value used for i960
+		 */
+    r_extern:1,
+    r_bsr:1,	/* Something for the GNU NS32K assembler */
+    r_disp:1,	/* Something for the GNU NS32K assembler */
+    r_callj:1,	/* 1 if relocation target is an i960 'callj' */
+    nuthin:1;	/* Unused				*/
 };
 #endif /* CUSTOM_RELOC_FORMAT */
 
@@ -217,7 +217,7 @@ struct relocation_info {
 /* Set the value of the symbol */
 #define S_SET_VALUE(s,v)	((s)->sy_symbol.n_value = (unsigned long) (v))
 /* Assume that a symbol cannot be simultaneously in more than on segment */
- /* set segment */
+/* set segment */
 #define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type|=SEGMENT_TO_SYMBOL_TYPE(seg))
 /* The symbol is external */
 #define S_SET_EXTERNAL(s)	((s)->sy_symbol.n_type |= N_EXT)
@@ -291,8 +291,8 @@ struct relocation_info {
 extern char *const seg_name[];
 
 typedef struct {
-    struct exec	header;			/* a.out header */
-    long	string_table_size;	/* names + '\0' + sizeof(int) */
+	struct exec	header;			/* a.out header */
+	long	string_table_size;	/* names + '\0' + sizeof(int) */
 } object_headers;
 
 /* unused hooks. */

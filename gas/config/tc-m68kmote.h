@@ -12,11 +12,11 @@
 
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE (2<<16|OMAGIC);	/* Magic byte for file header */
 #endif /* TE_SUN3 */
-
+    
 #define AOUT_MACHTYPE 0x2
 #define REVERSE_SORT_RELOCS /* FIXME-NOW: this line can be removed. */
 #define LOCAL_LABELS_FB
-
+    
 #define tc_crawl_symbol_chain(a)	{;} /* not used */
 #define tc_headers_hook(a)		{;} /* not used */
 #define tc_aout_pre_write_hook(x)	{;} /* not used */
@@ -29,9 +29,9 @@
 
 /* Copied from write.c */
 #define M68K_AIM_KLUDGE(aim, this_state,this_type) \
-				if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
+    if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
 					aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
-			}
+				    }
 
 /*
  * Local Variables:

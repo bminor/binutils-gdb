@@ -1,26 +1,24 @@
 /* as.h - global header file
    Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* static const char rcsid[] = "$Id$"; */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GAS 1
-
+#include <ansidecl.h>
 #include "host.h"
 #include "flonum.h"
 
@@ -67,15 +65,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <assert.h>
-
+#include "listing.h"
 #define obstack_chunk_alloc	xmalloc
 #define obstack_chunk_free	xfree
 
-#define BAD_CASE(value)							\
-{									\
-  as_fatal("Case value %d unexpected at line %d of file \"%s\"\n",	\
-	   value, __LINE__, __FILE__);					\
-}
+#define xfree free
+
+#define BAD_CASE(value) \
+{ \
+      as_fatal("Case value %d unexpected at line %d of file \"%s\"\n", \
+	       value, __LINE__, __FILE__); \
+	   }
 
 
 /* These are assembler-wide concepts */
@@ -88,7 +88,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define COMMON extern		/* our commons live elswhere */
 #endif
 #endif
-				/* COMMON now defined */
+/* COMMON now defined */
 #define DEBUG /* temporary */
 
 #ifdef DEBUG
@@ -99,9 +99,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else
 #define know(p)			/* know() checks are no-op.ed */
 #endif
-
-
-#define xfree free
 
 /* input_scrub.c */
 
@@ -163,8 +160,8 @@ typedef enum _segT {
 	SEG_ABSENT,		/* Mythical Segment (absent): NO expression seen. */
 	SEG_PASS1,		/* Mythical Segment: Need another pass. */
 	SEG_GOOF,		/* Only happens if AS has a logic error. */
-				/* Invented so we don't crash printing */
-				/* error message involving weird segment. */
+	/* Invented so we don't crash printing */
+	/* error message involving weird segment. */
 	SEG_BIG,		/* Bigger than 32 bits constant. */
 	SEG_DIFFERENCE,		/* Mythical Segment: absolute difference. */
 	SEG_DEBUG,		/* Debug segment */
@@ -178,12 +175,12 @@ typedef enum _segT {
 typedef int subsegT;
 
 COMMON subsegT			now_subseg;
-				/* What subseg we are accreting now? */
+/* What subseg we are accreting now? */
 
 
 COMMON segT			now_seg;
-				/* Segment our instructions emit to. */
-				/* Only OK values are SEG_TEXT or SEG_DATA. */
+/* Segment our instructions emit to. */
+/* Only OK values are SEG_TEXT or SEG_DATA. */
 
 
 extern char *const seg_name[];
@@ -199,12 +196,12 @@ typedef enum _relax_state {
 	
 	rs_align, /* Align: Fr_offset: power of 2. 1 variable char: fill
 		     character. */
-
+	
 	rs_org,	/* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
 		   character. */
 	
 	rs_machine_dependent,
-
+	
 #ifndef WORKING_DOT_WORD
 	rs_broken_word,		/* JF: gunpoint */
 #endif
@@ -216,7 +213,7 @@ typedef enum _relax_state {
 typedef unsigned long relax_substateT;
 
 typedef unsigned long relax_addressT;/* Enough bits for address. */
-				/* Still an integer type. */
+/* Still an integer type. */
 
 
 /* frags.c */
@@ -232,41 +229,44 @@ typedef unsigned long relax_addressT;/* Enough bits for address. */
  * of the 1st char of a frag is generally not known until after relax().
  * Many things at assembly time describe an address by {object-file-address
  * of a particular frag}+offset.
-
+ 
  BUG: it may be smarter to have a single pointer off to various different
-notes for different frag kinds. See how code pans 
+ notes for different frag kinds. See how code pans 
  */
 struct frag			/* a code fragment */
 {
 	unsigned long fr_address; /* Object file address. */
 	struct frag *fr_next;	/* Chain forward; ascending address order. */
-				/* Rooted in frch_root. */
-
+	/* Rooted in frch_root. */
+	
 	long fr_fix;	/* (Fixed) number of chars we know we have. */
-				/* May be 0. */
+	/* May be 0. */
 	long fr_var;	/* (Variable) number of chars after above. */
-				/* May be 0. */
+	/* May be 0. */
 	struct symbol *fr_symbol; /* For variable-length tail. */
 	long fr_offset;	/* For variable-length tail. */
 	char	*fr_opcode;	/*->opcode low addr byte,for relax()ation*/
 	relax_stateT fr_type;   /* What state is my tail in? */
 	relax_substateT	fr_subtype;
-		/* These are needed only on the NS32K machines */
+	/* These are needed only on the NS32K machines */
 	char	fr_pcrel_adjust;
 	char	fr_bsr;
+#ifndef NO_LISTING
+	struct list_info_struct *line;
+#endif
 	char	fr_literal [1];	/* Chars begin here. */
-				/* One day we will compile fr_literal[0]. */
+	/* One day we will compile fr_literal[0]. */
 };
 #define SIZEOF_STRUCT_FRAG \
- ((int)zero_address_frag.fr_literal-(int)&zero_address_frag)
-				/* We want to say fr_literal[0] above. */
+((int)zero_address_frag.fr_literal-(int)&zero_address_frag)
+/* We want to say fr_literal[0] above. */
 
 typedef struct frag fragS;
 
 COMMON fragS *	frag_now;	/* -> current frag we are building. */
-				/* This frag is incomplete. */
-				/* It is, however, included in frchain_now. */
-				/* Frag_now->fr_fix is bogus. Use: */
+/* This frag is incomplete. */
+/* It is, however, included in frchain_now. */
+/* Frag_now->fr_fix is bogus. Use: */
 /* Virtual frag_now->fr_fix==obstack_next_free(&frags)-frag_now->fr_literal.*/
 
 COMMON fragS zero_address_frag;	/* For foreign-segment symbol fixups. */
@@ -275,17 +275,17 @@ COMMON fragS  bss_address_frag;	/* For local common (N_BSS segment) fixups. */
 /* main program "as.c" (command arguments etc) */
 
 COMMON char
-flagseen[128];			/* ['x'] TRUE if "-x" seen. */
+    flagseen[128];			/* ['x'] TRUE if "-x" seen. */
 
 COMMON char *
-out_file_name;			/* name of emitted object file */
+    out_file_name;			/* name of emitted object file */
 
 COMMON int	need_pass_2;	/* TRUE if we need a second pass. */
 
 typedef struct {
-  char *	poc_name;	/* assembler mnemonic, lower case, no '.' */
-  void		(*poc_handler)();	/* Do the work */
-  int		poc_val;	/* Value to pass to handler */
+	char *	poc_name;	/* assembler mnemonic, lower case, no '.' */
+	void		(*poc_handler)();	/* Do the work */
+	int		poc_val;	/* Value to pass to handler */
 } pseudo_typeS;
 
 #if defined(__STDC__) & !defined(NO_STDARG)
@@ -384,12 +384,12 @@ void subsegs_begin();
 
 #endif /* __STDC__ */
 
- /* this one starts the chain of target dependant headers */
+/* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
- /* these define types needed by the interfaces */
+/* these define types needed by the interfaces */
 #include "struc-symbol.h"
-#include "reloc.h"
+#include "aout/reloc.h"
 #include "write.h"
 #include "expr.h"
 #include "frags.h"
@@ -407,5 +407,4 @@ void subsegs_begin();
  * End:
  */
 
-/* end: as.h */
-
+/* end of as.h */

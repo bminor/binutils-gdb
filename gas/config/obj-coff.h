@@ -1,21 +1,21 @@
 /* coff object file format
    Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   
+   This file is part of GAS.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
@@ -28,33 +28,33 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef BFD_HEADERS
 #ifdef TC_A29K
 #include "bfd.h"
-#include "coff-a29k.h"
+#include "coff/a29k.h"
 
 /* This internal_lineno crap is to stop namespace pollution from the bfd internal 
    coff headerfile. */
 
 
 #define internal_lineno bfd_internal_lineno
-#include "internalcoff.h"
+#include "coff/internal.h"
 #undef internal_lineno
 /*
-#undef RELOC
-#undef SYMENT
-#undef AUXENT
-#undef LINENO
-#undef FILHDR
-#undef SCNHDR
-#define RELOC struct internal_reloc
-#define SYMENT struct internal_syment
-#define AUXENT union internal_auxent
-#define SCNHDR struct internal_scnhdr
-#define LINENO struct bfd_internal_lineno 
-#define AOUTHDR struct internal_aouthdr
-#define FILHDR struct internal_filehdr
-#define AOUTHDRSZ sizeof(struct external_aouthdr)
-*/
+  #undef RELOC
+  #undef SYMENT
+  #undef AUXENT
+  #undef LINENO
+  #undef FILHDR
+  #undef SCNHDR
+  #define RELOC struct internal_reloc
+  #define SYMENT struct internal_syment
+  #define AUXENT union internal_auxent
+  #define SCNHDR struct internal_scnhdr
+  #define LINENO struct bfd_internal_lineno 
+  #define AOUTHDR struct internal_aouthdr
+  #define FILHDR struct internal_filehdr
+  #define AOUTHDRSZ sizeof(struct external_aouthdr)
+  */
 /*#define x_endndx x_endndx.l
-#define x_tagndx x_tagndx.l*/
+  #define x_tagndx x_tagndx.l*/
 #define TARGET_FORMAT "coff-a29k-big"
 extern bfd *stdoutput;
 #else
@@ -63,7 +63,7 @@ help me
 #else
 #include "coff.gnu.h"
 #endif
-
+    
 #ifdef USE_NATIVE_HEADERS
 #include <filehdr.h>
 #include <aouthdr.h>
@@ -74,16 +74,16 @@ help me
 #include <reloc.h>
 #include <sys/types.h>
 #endif /* USE_NATIVE_HEADERS */
-
-/* Define some processor dependent values according to the processor we are
-   on. */
+    
+    /* Define some processor dependent values according to the processor we are
+       on. */
 #ifdef TC_M68K
-
+    
 #define BYTE_ORDERING		F_AR32W    /* See filehdr.h for more info. */
 #ifndef FILE_HEADER_MAGIC
 #define FILE_HEADER_MAGIC	MC68MAGIC  /* ... */
 #endif /* FILE_HEADER_MAGIC */
-
+    
 #elif defined(TC_I386)
 
 #define BYTE_ORDERING		F_AR32WR   /* See filehdr.h for more info. */
@@ -108,12 +108,12 @@ help me
 #else
 you lose
 #endif 
-
+    
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
-
-extern const short seg_N_TYPE[];
+    
+    extern const short seg_N_TYPE[];
 extern const segT  N_TYPE_seg[];
 
 /* Magic number of paged executable. */
@@ -129,7 +129,7 @@ extern const segT  N_TYPE_seg[];
 
 /* SYMBOL TABLE */
 
- /* targets may also set this */
+/* targets may also set this */
 #ifndef SYMBOLS_NEED_BACKPOINTERS
 #define SYMBOLS_NEED_BACKPOINTERS 1
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
@@ -147,11 +147,6 @@ typedef struct {
 	unsigned int ost_flags; /* obj_coff internal use only flags */
 } obj_symbol_type;
 
-/* If compiler generate leading underscores, remove them. */
-
-#ifndef STRIP_UNDERSCORE
-#define STRIP_UNDERSCORE 0
-#endif /* STRIP_UNDERSCORE */
 #define DO_NOT_STRIP	0
 #define DO_STRIP	1
 
@@ -181,8 +176,8 @@ typedef struct {
 /* True if the symbol is external */
 #define S_IS_EXTERNAL(s)        ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION)
 /* True if symbol has been defined, ie :
-  section > 0 (DATA, TEXT or BSS)
-  section == 0 and value > 0 (external bss symbol) */
+   section > 0 (DATA, TEXT or BSS)
+   section == 0 and value > 0 (external bss symbol) */
 #define S_IS_DEFINED(s)         ((s)->sy_symbol.ost_entry.n_scnum > C_UNDEF_SECTION || \
 				 ((s)->sy_symbol.ost_entry.n_scnum == C_UNDEF_SECTION && \
 				  (s)->sy_symbol.ost_entry.n_value > 0))
@@ -318,7 +313,7 @@ typedef struct {
 #define SF_TAG		(0x00080000)	     /* Is a tag */
 #define SF_DEBUG	(0x00100000)	     /* Is in debug or abs section */
 #define SF_GET_SEGMENT	(0x00200000)	     /* Get the section of the forward symbol. */
- /* All other bits are unused. */
+/* All other bits are unused. */
 
 /* Accessors */
 #define SF_GET(s)		((s)->sy_symbol.ost_flags)
@@ -465,22 +460,22 @@ typedef struct {
 #define H_SET_STRING_SIZE(h,v)          ((h)->string_table_size = (v))
 #define H_SET_LINENO_SIZE(h,v)          ((h)->lineno_size = (v))
 
- /* Segment flipping */
+/* Segment flipping */
 #define segment_name(v)	(seg_name[(int) (v)])
 
 typedef struct {
 #ifdef BFD_HEADERS
-    struct internal_aouthdr	   aouthdr;             /* a.out header */
-    struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
+	struct internal_aouthdr	   aouthdr;             /* a.out header */
+	struct internal_filehdr	   filehdr;		/* File header, not machine dep. */
 #else
-    AOUTHDR	   aouthdr;             /* a.out header */
-    FILHDR	   filehdr;		/* File header, not machine dep. */
+	AOUTHDR	   aouthdr;             /* a.out header */
+	FILHDR	   filehdr;		/* File header, not machine dep. */
 #endif
-    long       string_table_size;   /* names + '\0' + sizeof(int) */
-    long	   relocation_size;	/* Cumulated size of relocation
+	long       string_table_size;   /* names + '\0' + sizeof(int) */
+	long	   relocation_size;	/* Cumulated size of relocation
 					   information for all sections in
 					   bytes. */
-    long	   lineno_size;		/* Size of the line number information
+	long	   lineno_size;		/* Size of the line number information
 					   table in bytes */
 } object_headers;
 
@@ -491,12 +486,12 @@ extern int		text_lineno_number;
 
 typedef struct internal_lineno {
 #ifdef BFD_HEADERS
-  struct bfd_internal_lineno line;
+	struct bfd_internal_lineno line;
 #else
-    LINENO line;			/* The lineno structure itself */
+	LINENO line;			/* The lineno structure itself */
 #endif
-    char* frag;				/* Frag to which the line number is related */
-    struct internal_lineno* next;	/* Forward chain pointer */
+	char* frag;				/* Frag to which the line number is related */
+	struct internal_lineno* next;	/* Forward chain pointer */
 } lineno;
 
 extern lineno *lineno_lastP;
@@ -509,13 +504,13 @@ void obj_emit_lineno(char **where, lineno *line, char *file_start);
 void obj_emit_lineno();
 #endif /* __STDC__ */
 
- /* stack stuff */
+/* stack stuff */
 typedef struct {
-    unsigned long chunk_size;
-    unsigned long element_size;
-    unsigned long size;
-    char*	  data;
-    unsigned long pointer;
+	unsigned long chunk_size;
+	unsigned long element_size;
+	unsigned long size;
+	char*	  data;
+	unsigned long pointer;
 } stack;
 
 #ifdef __STDC__
@@ -542,7 +537,7 @@ void c_section_header(
 #else
 		      SCNHDR *header,
 #endif
-
+		      
 		      char *name,
 		      long core_address,
 		      long size,
@@ -569,7 +564,7 @@ void tc_coff_symbol_emit_hook();
 #endif /* __STDC__ */
 
 
- /* sanity check */
+/* sanity check */
 
 #ifdef TC_I960
 #ifndef C_LEAFSTAT
@@ -577,12 +572,13 @@ hey!  Where is the C_LEAFSTAT definition?  i960-coff support is depending on it.
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
 #ifdef BFD_HEADERS
-extern struct internal_scnhdr data_section_header;
+    extern struct internal_scnhdr data_section_header;
 extern struct internal_scnhdr text_section_header;
 #else
 extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
+
 /*
  * Local Variables:
  * comment-column: 0

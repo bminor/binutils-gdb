@@ -1,25 +1,23 @@
 /* obj.h - defines the object dependent hooks for all object
    format backends.
-
+   
    Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* static const char rcsid[] = "$Id$"; */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef __STDC__
 
@@ -30,7 +28,11 @@ void obj_emit_strings(char **where);
 void obj_emit_symbols(char **where, symbolS *symbol_rootP);
 void obj_header_append(char **where, object_headers *headers);
 void obj_read_begin_hook(void);
+
+#ifndef obj_symbol_new_hook
 void obj_symbol_new_hook(symbolS *symbolP);
+#endif /* obj_symbol_new_hook */
+
 void obj_symbol_to_chars(char **where, symbolS *symbolP);
 
 #ifndef obj_pre_write_hook
@@ -46,7 +48,11 @@ void obj_emit_strings();
 void obj_emit_symbols();
 void obj_header_append();
 void obj_read_begin_hook();
+
+#ifndef obj_symbol_new_hook
 void obj_symbol_new_hook();
+#endif /* obj_symbol_new_hook */
+
 void obj_symbol_to_chars();
 
 #ifndef obj_pre_write_hook

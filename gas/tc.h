@@ -1,24 +1,22 @@
 /* tc.h -target cpu dependent- */
 
 /* Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-
-This file is part of GAS, the GNU Assembler.
-
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
-
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* static const char rcsid[] = "$Id$"; */
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* In theory (mine, at least!) the machine dependent part of the assembler
    should only have to include one file.  This one.  -- JF */
@@ -34,7 +32,7 @@ typedef struct
 	long	rlx_backward;	/* Backward reach. Signed number. < 0. */
 	unsigned char rlx_length;	/* Bytes length of this address. */
 	relax_substateT rlx_more;	/* Next longer relax-state. */
-				/* 0 means there is no 'next' relax-state. */
+	/* 0 means there is no 'next' relax-state. */
 }
 relax_typeS;
 
@@ -47,7 +45,7 @@ extern void (*md_emit_relocations)();
 #ifdef __STDC__
 
 char *md_atof(int what_statement_type, char *literalP, int *sizeP);
-int md_estimate_size_before_relax(fragS *fragP, segT segtype);
+int md_estimate_size_before_relax(fragS *fragP, segT segment);
 int md_parse_option(char **argP, int *cntP, char ***vecP);
 long md_pcrel_from(fixS *fixP);
 long md_section_align(segT seg, long align);
@@ -56,13 +54,12 @@ symbolS *md_undefined_symbol(char *name);
 void md_apply_fix(fixS *fixP, long val);
 void md_assemble(char *str);
 void md_begin(void);
-void md_convert_frag(fragS *fragP);
+void md_convert_frag(object_headers *headers, fragS *fragP);
 void md_create_long_jump(char *ptr, long from_addr, long to_addr, fragS *frag, symbolS *to_symbol);
 void md_create_short_jump(char *ptr, long from_addr, long to_addr, fragS *frag, symbolS *to_symbol);
 void md_end(void);
 void md_number_to_chars(char *buf, long val, int n);
 void md_operand(expressionS *expressionP);
-void md_ri_to_chars(char *the_bytes, struct reloc_info_generic *ri);
 
 #ifndef tc_crawl_symbol_chain
 void tc_crawl_symbol_chain(object_headers *headers);
@@ -90,7 +87,6 @@ void md_create_short_jump();
 void md_end();
 void md_number_to_chars();
 void md_operand();
-void md_ri_to_chars();
 
 #ifndef tc_headers_hook
 void tc_headers_hook();

@@ -1,12 +1,19 @@
 /*
  * This file is te-generic.h and is intended to be a template for
  * target environment specific header files.
+ *
+ * It is my intent that this file will evolve into a file suitable for config,
+ * compile, and copying as an aid for testing and porting.  xoxorich.
  */
 
 #define TE_GENERIC 1
 
- /* these define interfaces */
+/* these define interfaces */
 #include "obj-format.h"
+
+/* define this if you want gas to ignore the first underscore character of
+   each symbol */
+/* #define STRIP_UNDERSCORE */
 
 /*
  * Local Variables:

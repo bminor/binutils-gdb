@@ -5,8 +5,8 @@
 #define __GNU_STAB__
 
 #define __define_stab(NAME, CODE, STRING) NAME=CODE,
-
-enum __stab_debug_code
+    
+    enum __stab_debug_code
 {
 #include "stab.def"
 };
