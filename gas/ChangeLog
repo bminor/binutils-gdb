@@ -1,3 +1,8 @@
+2002-04-17  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (tc_s390_fix_adjustable): Prevent adjustments to
+	symbols in merge sections.
+
 2002-04-16  Alan Modra  <alan@weed.local>
 
 	* as.c (main): Don't reference _bfd_chunksize.
