@@ -5551,7 +5551,7 @@ mips_elf_got16_entry (abfd, info, value)
       if ((address & 0xffff0000) == value)
 	{
 	  /* This entry has the right high-order 16 bits.  */
-	  index = MIPS_ELF_GOT_SIZE (abfd) * (entry - sgot->contents);
+	  index = entry - sgot->contents;
 	  break;
 	}
     }
@@ -5971,13 +5971,17 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS_GOT_LO16:
     case R_MIPS_CALL_LO16:
       /* Find the index into the GOT where this value is located.  */
-      if (h)
+      if (!local_p)
 	{
 	  BFD_ASSERT (addend == 0);
 	  g = mips_elf_global_got_index 
 	    (elf_hash_table (info)->dynobj,
 	     (struct elf_link_hash_entry*) h);
 	}
+      else if (r_type == R_MIPS_GOT16)
+	/* There's no need to create a local GOT entry here; the
+	   calculation for a local GOT16 entry does not involve G.  */
+	break;
       else
 	{
 	  g = mips_elf_local_got_index (abfd, info, symbol + addend);
@@ -6599,24 +6603,24 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* There's nothing to do for non-local relocations.  */
 	    continue;
 
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  sym = local_syms + r_symndx;
-	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-	    /* Adjust the addend appropriately.  */
-	    addend += local_sections[r_symndx]->output_offset;
-	  
 	  if (r_type == R_MIPS16_GPREL 
 	      || r_type == R_MIPS_GPREL16
 	      || r_type == R_MIPS_GPREL32)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
-	  else if (r_type == R_MIPS16_26 || r_type == R_MIPS16_26)
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
 	    /* The addend is stored without its two least
 	       significant bits (which are always zero.)  In a
 	       non-relocateable link, calculate_relocation will do
 	       this shift; here, we must do it ourselves.  */
 	    addend <<= 2;
 
+	  r_symndx = ELF32_R_SYM (rel->r_info);
+	  sym = local_syms + r_symndx;
+	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    /* Adjust the addend appropriately.  */
+	    addend += local_sections[r_symndx]->output_offset;
+	  
 	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
 	     then we only want to write out the high-order 16 bits.
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
