@@ -48,10 +48,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #include "gdb_string.h"
-#ifndef	NO_SYS_FILE
-#include <sys/file.h>
-#endif
-#include <sys/param.h>
 #include "gdb_stat.h"
 #include <ctype.h>
 
@@ -575,6 +571,7 @@ catch_errors (func, args, errstring, mask)
 
 /* Handler for SIGHUP.  */
 
+#ifndef _WIN32
 static void
 disconnect (signo)
 int signo;
@@ -584,6 +581,7 @@ int signo;
   signal (SIGHUP, SIG_DFL);
   kill (getpid (), SIGHUP);
 }
+#endif
 
 /* Just a little helper function for disconnect().  */
 
@@ -1895,9 +1893,11 @@ init_signals ()
      might be in memory, shared between the two).  Since we establish
      a handler for SIGQUIT, when we call exec it will set the signal
      to SIG_DFL for us.  */
+#ifndef _WIN32
   signal (SIGQUIT, do_nothing);
   if (signal (SIGHUP, do_nothing) != SIG_IGN)
     signal (SIGHUP, disconnect);
+#endif
   signal (SIGFPE, float_handler);
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
@@ -2987,8 +2987,11 @@ source_command (args, from_tty)
   old_cleanups = make_cleanup (free, file);
 
   stream = fopen (file, FOPEN_RT);
-  if (stream == 0)
-    perror_with_name (file);
+  if (!stream)
+    if (from_tty)
+      perror_with_name (file);
+    else
+      return;
 
   make_cleanup (fclose, stream);
 

@@ -88,7 +88,7 @@ maintenance_command (args, from_tty)
   help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
 }
 
-
+#ifndef _WIN32
 /* ARGSUSED */
 static void
 maintenance_dump_me (args, from_tty)
@@ -101,6 +101,7 @@ maintenance_dump_me (args, from_tty)
       kill (getpid (), SIGQUIT);
     }
 }
+#endif
 
 /*  Someday we should allow demangling for things other than just
     explicit strings.  For example, we might want to be able to
@@ -307,11 +308,13 @@ to test internal functions such as the C++ demangler, etc.",
 		  &maintenanceprintlist, "maintenance print ", 0,
 		  &maintenancelist);
 
+#ifndef _WIN32
   add_cmd ("dump-me", class_maintenance, maintenance_dump_me,
 	   "Get fatal error; make debugger dump its core.\n\
 GDB sets it's handling of SIGQUIT back to SIG_DFL and then sends\n\
 itself a SIGQUIT signal.",
 	   &maintenancelist);
+#endif
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle,
 	   "Demangle a C++ mangled name.\n\

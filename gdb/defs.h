@@ -985,7 +985,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_P
-#if defined(__GO32__)||defined(__WIN32__)
+#if defined(__GO32__)||defined(_WIN32)
 #define SLASH_P(X) ((X)=='\\')
 #else
 #define SLASH_P(X) ((X)=='/')
@@ -993,7 +993,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_CHAR
-#if defined(__GO32__)||defined(__WIN32__)
+#if defined(__GO32__)||defined(_WIN32)
 #define SLASH_CHAR '\\'
 #else
 #define SLASH_CHAR '/'
@@ -1001,7 +1001,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_STRING
-#if defined(__GO32__)||defined(__WIN32__)
+#if defined(__GO32__)||defined(_WIN32)
 #define SLASH_STRING "\\"
 #else
 #define SLASH_STRING "/"

@@ -40,10 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <sys/types.h>
 
-#ifndef	NO_SYS_FILE
-#include <sys/file.h>
-#endif
-
 /* .debug_info header for a compilation unit 
    Because of alignment constraints, this structure has padding and cannot
    be mapped directly onto the beginning of the .debug_info section.  */

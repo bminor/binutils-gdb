@@ -24,19 +24,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* If we're using autoconf, it will define HAVE_TERMIOS_H,
    HAVE_TERMIO_H and HAVE_SGTTY_H for us. One day we can rewrite
    ser-unix.c and inflow.c to inspect those names instead of
-   HAVE_TERMIOS, HAVE_TERMIO and the implicit HAVE_SGTYY (when neither
+   HAVE_TERMIOS, HAVE_TERMIO and the implicit HAVE_SGTTY (when neither
    HAVE_TERMIOS or HAVE_TERMIO is set).  Until then, make sure that
    nothing has already defined the one of the names, and do the right
    thing. */
 
 /* nothing works with go32, and the headers aren't complete */
-#if !defined (__GO32__)
+#if !defined (__GO32__) && !defined (_WIN32)
 #if !defined (HAVE_TERMIOS) && !defined(HAVE_TERMIO) && !defined(HAVE_SGTTY)
 #if defined(HAVE_TERMIOS_H)
 #define HAVE_TERMIOS
 #elif defined(HAVE_TERMIO_H)
 #define HAVE_TERMIO
-#elif defined(HAVE_SGTTY)
+#elif defined(HAVE_SGTTY_H)
 #define HAVE_SGTTY
 #endif
 #endif
@@ -46,8 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <termios.h>
 #endif
 
-
-#if !defined(__GO32__) && !defined(__WIN32__) && !defined (HAVE_TERMIOS)
+#if !defined(__GO32__) && !defined(_WIN32) && !defined (HAVE_TERMIOS)
 
 /* Define a common set of macros -- BSD based -- and redefine whatever
    the system offers to make it look like that.  FIXME: serial.h and

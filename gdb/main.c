@@ -32,12 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 
 #include "gdb_string.h"
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifndef	NO_SYS_FILE
-#include <sys/file.h>
-#endif
 
 /* Temporary variable for SET_TOP_LEVEL.  */
 
@@ -140,7 +134,6 @@ main (argc, argv)
   current_directory = gdb_dirbuf;
 
   /* Parse arguments and options.  */
-#ifndef WINGDB
   {
     int c;
     /* When var field is 0, use flag field to record the equivalent
@@ -340,7 +333,6 @@ main (argc, argv)
       quiet = 1;
   }
 
-#endif
   gdb_init ();
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -435,7 +427,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       strcat (homeinit, "/");
       strcat (homeinit, gdbinit);
 
-      if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
+      if (!inhibit_gdbinit)
 	{
 	  if (!SET_TOP_LEVEL ())
 	    source_command (homeinit, 0);
@@ -529,7 +521,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   
   if (!homedir
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
-    if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
+    if (!inhibit_gdbinit)
       {
 	if (!SET_TOP_LEVEL ())
 	  source_command (gdbinit, 0);
@@ -591,7 +583,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   /* The default command loop. 
      The WIN32 Gui calls this main to set up gdb's state, and 
      has its own command loop. */
-#if !defined (WINGDB)
+#ifndef _WIN32
   while (1)
     {
       if (!SET_TOP_LEVEL ())

@@ -42,10 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #include "obstack.h"
-#include <sys/param.h>
-#ifndef	NO_SYS_FILE
-#include <sys/file.h>
-#endif
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "symtab.h"

@@ -727,7 +727,7 @@ array_wait (pid, status)
 
   timeout = 0;		/* Don't time out -- user program is running. */
  
-#if !defined(__GO32__) && !defined(__MSDOS__) && !defined(__WIN32__)
+#if !defined(__GO32__) && !defined(__MSDOS__) && !defined(_WIN32)
   tty_desc = SERIAL_FDOPEN (0);
   ttystate = SERIAL_GET_TTY_STATE (tty_desc);
   SERIAL_RAW (tty_desc);

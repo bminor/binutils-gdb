@@ -1,3 +1,25 @@
+Wed Aug  7 17:18:37 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dwarf2read.c dwarfread.c exec.c infcmd.c infrun.c main.c
+	mdebugread.c os9kread.c source.c top.c utils.c:  Don't
+	include param.h or sys/file.h (or unistd.h in some cases).
+	* defs.h exec.c inflow.c remote-array.c remote-e7000.c
+	sparcl-tdep.c terminal.h utils.c:  Replace all occurances of
+	__WIN32__, WINGDB, WIN32, etc... with _WIN32.
+	* main.c:  Remove #ifndef WINGDB around option processing.  Fix
+	bug with passing argc==0 and argv==NULL to getopt.
+	* (main) Remove calls to access() before source_command.  Let
+	soure_command handle access errors.
+	* maint.c (maintenance_dump_me):  #ifdef out for _WIN32.
+	* symtab.c (operator_chars):  Make this global for wingdb.
+	* top.c (disconnect):  #ifdef out for _WIN32.
+	* (source_command):  If got an error and from_tty, then call print
+	error, else just return quietly.
+	* utils.c (fatal_dump_core):  Can't kill ourselves under windows.
+	Just exit.
+	* (pollquit notice_quit):  #ifdef out stuff that doesn't exist
+	under windows. 
+
 Wed Aug  7 09:59:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Tweak for
