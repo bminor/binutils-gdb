@@ -235,7 +235,6 @@ mem_info_command (char *args, int from_tty)
 
   for (m = mem_region_chain; m; m = m->next)
     {
-      CORE_ADDR hi;
       char *tmp;
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
@@ -246,13 +245,22 @@ mem_info_command (char *args, int from_tty)
 	tmp = local_hex_string_custom ((unsigned long) m->lo, "016l");
       
       printf_filtered ("%s ", tmp);
-      hi = (m->hi == 0 ? ~0 : m->hi);
 
       if (TARGET_ADDR_BIT <= 32)
-	tmp = local_hex_string_custom ((unsigned long) hi, "08l");
+	{
+	if (m->hi == 0)
+	  tmp = "0x100000000";
+	else
+	  tmp = local_hex_string_custom ((unsigned long) m->hi, "08l");
+	}
       else
-	tmp = local_hex_string_custom ((unsigned long) hi, "016l");
-      
+	{
+	if (m->hi == 0)
+	  tmp = "0x10000000000000000";
+	else
+	  tmp = local_hex_string_custom ((unsigned long) m->hi, "016l");
+	}
+
       printf_filtered ("%s ", tmp);
 
       /* Print a token for each attribute.

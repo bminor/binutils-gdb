@@ -1,3 +1,8 @@
+2002-08-09  Don Howard  <dhoward@redhat.com>
+
+	* memattr.c (mem_info_command): Print special case of upper bound
+	as max CORE_ADDR + 1.
+
 2002-08-08  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_n32n64_use_struct_convention): N32 only 
