@@ -1,3 +1,8 @@
+Fri Nov 28 11:15:05 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gennltvals.sh: Redo syscall support to allow sanitization.
+	* nltvals.def: Regenerated.
+
 Wed Nov 26 16:49:38 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* syscall.c (cb_syscall): If writing to stdout or stderr, flush
@@ -22,8 +27,10 @@ Tue Nov 25 20:12:46 1997  Michael Meissner  <meissner@cygnus.com>
 
 Tue Nov 25 00:12:38 1997  Doug Evans  <devans@seba.cygnus.com>
 
+start-sanitize-d30v
 	* gennltvals.sh: Generate syscall values for d30v.
-	Use libgloss/syscall.h for sparc.
+end-sanitize-d30v
+	* gennltvals.sh: Use libgloss/syscall.h for sparc.
 	* nltvals.def: Regenerate.
 
 	* callback.c (os_stat): Make 3rd arg a host struct stat ptr.
