@@ -1,5 +1,10 @@
 2005-03-08  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/xdata.[sd], gas/ia64/xdata-ilp32.d: New.
+	* gas/ia64/ia64.exp: Run new tests.
+
+2005-03-08  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/pcrel.d: Account for big endian target.
 	* gas/ia64/reloc-bad.s: Enforce 64-bit ABI.
 

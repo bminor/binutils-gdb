@@ -1,3 +1,14 @@
+2005-03-08  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (parse_section_name): Rename to...
+	(cross_section): In addition to separating the name from the rest of
+	the arguments, also carry out the operation.
+	(dot_xdata): Use cross_section.
+	(dot_float_cons): Likewise.
+	(dot_xstringer): Likewise.
+	(dot_xdata_ua): Likewise.
+	(dot_float_cons_ua): Likewise. Pass float_cons, not stmt_float_cons.
+
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/gas.pot: Regenerate.

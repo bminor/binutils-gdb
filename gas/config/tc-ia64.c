@@ -765,7 +765,7 @@ static void dot_byteorder PARAMS ((int));
 static void dot_psr PARAMS ((int));
 static void dot_alias PARAMS ((int));
 static void dot_ln PARAMS ((int));
-static char *parse_section_name PARAMS ((void));
+static void cross_section PARAMS ((int ref, void (*cons) PARAMS((int)), int ua));
 static void dot_xdata PARAMS ((int));
 static void stmt_float_cons PARAMS ((int));
 static void stmt_cons_ua PARAMS ((int));
@@ -4757,58 +4757,75 @@ dot_ln (dummy)
   demand_empty_rest_of_line ();
 }
 
-static char *
-parse_section_name ()
+static void
+cross_section (ref, cons, ua)
+     int ref;
+     void (*cons) PARAMS((int));
+     int ua;
 {
-  char *name;
-  int len;
+  char *start, *end;
+  int saved_auto_align;
+  unsigned int section_count;
 
   SKIP_WHITESPACE ();
-  if (*input_line_pointer == '"')
+  start = input_line_pointer;
+  if (*start == '"')
+    {
+      int len;
+      char *name;
+
       name = demand_copy_C_string (&len);
+      obstack_free(&notes, name);
+      if (!name)
+	{
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
   else
     {
-      char *start = input_line_pointer;
       char c = get_symbol_end ();
 
       if (input_line_pointer == start)
 	{
 	  as_bad ("Missing section name");
 	  ignore_rest_of_line ();
-	  return 0;
+	  return;
 	}
-      name = obstack_copy (&notes, start, input_line_pointer - start + 1);
       *input_line_pointer = c;
     }
-  if (!name)
-    {
-      ignore_rest_of_line ();
-      return 0;
-    }
+  end = input_line_pointer;
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       as_bad ("Comma expected after section name");
       ignore_rest_of_line ();
-      return 0;
+      return;
     }
-  ++input_line_pointer;		/* skip comma */
-  return name;
+  *end = '\0';
+  end = input_line_pointer + 1;		/* skip comma */
+  input_line_pointer = start;
+  md.keep_pending_output = 1;
+  section_count = bfd_count_sections(stdoutput);
+  obj_elf_section (0);
+  if (section_count != bfd_count_sections(stdoutput))
+    as_warn ("Creating sections with .xdataN/.xrealN/.xstringZ is deprecated.");
+  input_line_pointer = end;
+  saved_auto_align = md.auto_align;
+  if (ua)
+    md.auto_align = 0;
+  (*cons) (ref);
+  if (ua)
+    md.auto_align = saved_auto_align;
+  obj_elf_previous (0);
+  md.keep_pending_output = 0;
 }
 
 static void
 dot_xdata (size)
      int size;
 {
-  char *name = parse_section_name ();
-  if (!name)
-    return;
-
-  md.keep_pending_output = 1;
-  set_section (name);
-  cons (size);
-  obj_elf_previous (0);
-  md.keep_pending_output = 0;
+  cross_section (size, cons, 0);
 }
 
 /* Why doesn't float_cons() call md_cons_align() the way cons() does?  */
@@ -4854,66 +4871,28 @@ static void
 dot_xfloat_cons (kind)
      int kind;
 {
-  char *name = parse_section_name ();
-  if (!name)
-    return;
-
-  md.keep_pending_output = 1;
-  set_section (name);
-  stmt_float_cons (kind);
-  obj_elf_previous (0);
-  md.keep_pending_output = 0;
+  cross_section (kind, stmt_float_cons, 0);
 }
 
 static void
 dot_xstringer (zero)
      int zero;
 {
-  char *name = parse_section_name ();
-  if (!name)
-    return;
-
-  md.keep_pending_output = 1;
-  set_section (name);
-  stringer (zero);
-  obj_elf_previous (0);
-  md.keep_pending_output = 0;
+  cross_section (zero, stringer, 0);
 }
 
 static void
 dot_xdata_ua (size)
      int size;
 {
-  int saved_auto_align = md.auto_align;
-  char *name = parse_section_name ();
-  if (!name)
-    return;
-
-  md.keep_pending_output = 1;
-  set_section (name);
-  md.auto_align = 0;
-  cons (size);
-  md.auto_align = saved_auto_align;
-  obj_elf_previous (0);
-  md.keep_pending_output = 0;
+  cross_section (size, cons, 1);
 }
 
 static void
 dot_xfloat_cons_ua (kind)
      int kind;
 {
-  int saved_auto_align = md.auto_align;
-  char *name = parse_section_name ();
-  if (!name)
-    return;
-
-  md.keep_pending_output = 1;
-  set_section (name);
-  md.auto_align = 0;
-  stmt_float_cons (kind);
-  md.auto_align = saved_auto_align;
-  obj_elf_previous (0);
-  md.keep_pending_output = 0;
+  cross_section (kind, float_cons, 1);
 }
 
 /* .reg.val <regname>,value */
