@@ -1,5 +1,8 @@
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/stabs1.s: New file.
+	* ld-cris/undef2.d, ld-cris/undef3.d: New tests.
+
 	* ld-elf/start.s, ld-elf/symbolref.s, ld-elf/symbol1w.s,
 	ld-elf/warn1.d: New test.
 
