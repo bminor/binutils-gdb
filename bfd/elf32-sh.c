@@ -3500,6 +3500,9 @@ struct elf_sh_dyn_relocs
 
   /* Number of pc-relative relocs copied for the input section.  */
   bfd_size_type pc_count;
+
+  /* If TRUE, R_SH_TLS_TPOFF32 relocation is generated.  */
+  bfd_boolean tls_tpoff32;
 };
 
 /* sh ELF linker hash entry.  */
@@ -3524,9 +3527,6 @@ struct elf_sh_link_hash_entry
   enum {
     GOT_UNKNOWN = 0, GOT_NORMAL, GOT_TLS_GD, GOT_TLS_IE
   } tls_type;
-
-  /* If TRUE, R_SH_TLS_TPOFF32 relocation is generated.  */
-  bfd_boolean tls_tpoff32;
 };
 
 #define sh_elf_hash_entry(ent) ((struct elf_sh_link_hash_entry *)(ent))
@@ -3630,7 +3630,6 @@ sh_elf_link_hash_newfunc (entry, table, string)
       ret->datalabel_got.refcount = ret->root.got.refcount;
 #endif
       ret->tls_type = GOT_UNKNOWN;
-      ret->tls_tpoff32 = FALSE;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -4207,8 +4206,9 @@ allocate_dynrelocs (h, inf)
     }
   else
     {
-      if (sh_elf_hash_entry (h)->tls_tpoff32)
-	goto keep;
+      for (p = eh->dyn_relocs; p; p = p->next)
+	if (p->tls_tpoff32)
+	  goto keep;
 
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
@@ -5256,10 +5256,18 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      tls_type = sh_elf_hash_entry (h)->tls_type;
 	      if (! info->shared
 		  && (h->dynindx == -1
-		      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-		  && (tls_type == GOT_TLS_IE
-		      || sh_elf_hash_entry (h)->tls_tpoff32))
-		r_type = R_SH_TLS_LE_32;
+		      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		{
+		  struct elf_sh_dyn_relocs *p;
+
+		  /* If TPOFF32 relocation can be created, convert it.  */
+		  for (p = sh_elf_hash_entry (h)->dyn_relocs; p; p = p->next)
+		    if (p->sec == input_section && p->tls_tpoff32)
+		      {
+			r_type = R_SH_TLS_LE_32;
+			break;
+		      }
+		}
 	    }
 
 	  if (r_type == R_SH_TLS_GD_32 && tls_type == GOT_TLS_IE)
@@ -5368,7 +5376,13 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (sreloc != NULL);
 		}
 
-	      indx = (h && h->dynindx != -1) ? h->dynindx : 0;
+	      if (h == NULL
+		  || h->dynindx == -1
+		  || (! info->shared
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		indx = 0;
+	      else
+		indx = h->dynindx;
 	      outrel.r_offset = (input_section->output_section->vma
 				 + input_section->output_offset
 				 + rel->r_offset);
@@ -5415,7 +5429,13 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (sgot->output_section->vma
 				 + sgot->output_offset + off);
 
-	      indx = (h && h->dynindx != -1) ? h->dynindx : 0;
+	      if (h == NULL
+		  || h->dynindx == -1
+		  || (! info->shared
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		indx = 0;
+	      else
+		indx = h->dynindx;
 	      dr_type = (r_type == R_SH_TLS_GD_32 ? R_SH_TLS_DTPMOD32 :
 			 R_SH_TLS_TPOFF32);
 	      if (dr_type == R_SH_TLS_TPOFF32 && indx == 0)
@@ -6596,6 +6616,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
+		  p->tls_tpoff32 = FALSE;
 		}
 
 	      p->count += 1;
@@ -6693,11 +6714,11 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
+		  p->tls_tpoff32 = FALSE;
 		}
 
 	      p->count += 1;
-	      if (h)
-		sh_elf_hash_entry (h)->tls_tpoff32 = TRUE;
+	      p->tls_tpoff32 = TRUE;
 	    }
 	  break;
 

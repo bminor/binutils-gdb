@@ -1,3 +1,18 @@
+2003-02-10  Kaz kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (elf_sh_dyn_relocs): Add tls_tpoff32 field.
+	(elf_sh_link_hash_entry): Remove tls_tpoff32 field.
+	(sh_elf_link_hash_newfunc): Remove the initialization of
+	tls_tpoff32 field.
+	(allocate_dynrelocs): Keep dyn_relocs if it includes the entry
+	for which tls_tpoff32 flag is set.
+	(sh_elf_relocate_section): Covert to LE only if the dyn_relocs
+	of the symbol includes the entry matched with the input_section
+	and having tls_tpoff32 flag on.  When linking statically, set
+	symbol index of R_SH_TLS_TPOFF32 relocation to zero if the symbol
+	is defined in this executable.
+	(sh_elf_check_relocs): Set tls_tpoff32 flag appropriately.
+
 2003-02-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-s390.c (elf_s390_size_dynamic_sections): Set relocs to TRUE
