@@ -1,4 +1,12 @@
+Tue Sep 28 17:26:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t24 (demangle.exp): Accept "XXX const" as well as "const XXX".
+	Accept spaces various places.
+
 Tue Sep 21 17:28:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t07/watchpoint.exp: On sparc, clear xfail for calling function
+	with watchpoint enabled.
 
 	* Makefile.in: Remove definition of CC and remove the second
 	definition of CXX (the "CXX = gcc" one remains).  These definitions
