@@ -393,13 +393,6 @@ struct elf_backend_data
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
 };
 
-struct elf_sym_extra
-{
-  int elf_sym_num;		/* sym# after locals/globals are reordered */
-};
-
-typedef struct elf_sym_extra Elf_Sym_Extra;
-
 /* Information stored for each BFD section in an ELF file.  This
    structure is allocated by elf_new_section_hook.  */
 
@@ -440,7 +433,6 @@ struct elf_obj_tdata
   struct bfd_strtab_hash *strtab_ptr;
   int num_locals;
   int num_globals;
-  Elf_Sym_Extra *sym_extra;
   asymbol **section_syms;	/* STT_SECTION symbols for each section */
   Elf_Internal_Shdr symtab_hdr;
   Elf_Internal_Shdr shstrtab_hdr;
@@ -489,7 +481,6 @@ struct elf_obj_tdata
 #define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
-#define elf_sym_extra(bfd)	(elf_tdata(bfd) -> sym_extra)
 #define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
