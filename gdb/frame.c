@@ -1311,6 +1311,29 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 }
 
 void
+deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
+				      CORE_ADDR *saved_regs)
+{
+  frame->saved_regs = saved_regs;
+}
+
+void
+deprecated_set_frame_extra_info_hack (struct frame_info *frame,
+				      struct frame_extra_info *extra_info)
+{
+  frame->extra_info = extra_info;
+}
+
+struct frame_info *
+deprecated_frame_xmalloc (void)
+{
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (struct frame_info));
+  return frame;
+}
+
+
+void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);

@@ -1,3 +1,12 @@
+2003-01-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (deprecated_frame_xmalloc): New function.
+	(deprecated_set_frame_saved_regs_hack): New function.
+	(deprecated_set_frame_extra_info_hack): New function.
+	* frame.h (deprecated_frame_xmalloc): Declare.
+	(deprecated_set_frame_saved_regs_hack): Declare.
+	(deprecated_set_frame_extra_info_hack): Declare.
+
 2003-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Move code that provides the --enable-gdbtk option

@@ -674,4 +674,23 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
 
+/* FIXME: cagney/2003-01-04: Explicitly set the frame's saved_regs
+   and/or extra_info.  Target code is allocating a fake frame and than
+   initializing that to get around the problem of, when creating the
+   inner most frame, there is no where to cache information such as
+   the prologue analysis.  This is fixed by the new unwind mechanism -
+   even the inner most frame has somewhere to store things like the
+   prolog analysis (or at least will once the frame overhaul is
+   finished).  */
+extern void deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
+						  CORE_ADDR *saved_regs);
+extern void deprecated_set_frame_extra_info_hack (struct frame_info *frame,
+						  struct frame_extra_info *extra_info);
+
+/* FIXME: cagney/2003-01-04: Allocate a frame from the heap (rather
+   than the frame obstack).  Targets do this as a way of saving the
+   prologue analysis from the inner most frame before that frame has
+   been created.  By always creating a frame, this problem goes away.  */
+extern struct frame_info *deprecated_frame_xmalloc (void);
+
 #endif /* !defined (FRAME_H)  */
