@@ -3,7 +3,7 @@
 	* arch-utils.c (gdbarch_update_p): New function.
 	* gdbarch.sh (gdbarch_update_p): Delete function.
  	(find_arch_by_info, gdbarch_find_by_info): New functions.
-	(deprecated_current_gdbarch_set_hack): New function.
+	(deprecated_current_gdbarch_select_hack): New function.
 	* gdbarch.c: Re-generate.
 
 	* gdbarch.sh (clear_gdbarch_swap): Delete function.
