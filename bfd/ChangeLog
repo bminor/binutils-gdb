@@ -1,5 +1,8 @@
 Thu Oct  3 16:57:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cofflink.c (coff_link_add_symbols): Set obj_coff_keep_syms
+	during this function.
+
 	* elflink.c (_bfd_elf_create_linker_section): Only use an existing
 	section if the flags are compatible.
 
