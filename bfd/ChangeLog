@@ -1,3 +1,8 @@
+Thu Sep 28 17:06:23 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* binary.c (binary_get_symtab): Return an empty string on error.
+	* opncls.c (bfd_fdpenr): Change WIN32 restriction to WINGDB.
+
 Thu Sep 28 15:30:44 1995  Kim Knuttila  <krk@nellie>
 
 	* coff-ppc.c: Reformatted according to gnu conventions
