@@ -42,6 +42,7 @@ alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-freebsd*)	gdb_target=fbsd ;;
 alpha*-*-netbsd*)	gdb_target=nbsd ;;
+alpha*-*-*)		gdb_target=alpha ;;
 
 # OBSOLETE arc-*-*)		gdb_target=arc ;;
 
@@ -133,6 +134,7 @@ ia64-*-aix*)		gdb_target=aix ;;
 ia64-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
+ia64*-*-*)		gdb_target=ia64 ;;
 
 m32r-*-elf*)		gdb_target=m32r ;;
 

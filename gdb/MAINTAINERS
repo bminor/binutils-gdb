@@ -56,7 +56,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	a29k		Deleted.
 
-	alpha		--target=alpha-dec-osf4.0a -Werror
+	alpha		--target=alpha-elf -Werror
 			Maintenance only
 
 	arc		(--target=arc-elf OBSOLETE)
@@ -98,7 +98,8 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 			OBSOLETE candidate, not multi-arch
 
-	ia64		--target=ia64-linux ,-Werror
+	ia64		--target=ia64-linux-gnu ,-Werror
+			(--target=ia64-elf broken)
 			Kevin Buettner		kevinb@redhat.com
 
 	m32r		(--target=m32r-elf broken)
