@@ -104,6 +104,8 @@ SECTIONS
   .got1 ${RELOCATING-0} :  { *(.got1) }
   ${RELOCATING+_GOT1_END_ = .;}
 
+  .dynamic     ${RELOCATING-0} : { *(.dynamic) }
+
   /* Put .ctors and .dtors next to the .got2 section, so that the pointers
      get relocated with -mrelocatable. Also put in the .fixup pointers.  */
 
@@ -125,10 +127,8 @@ SECTIONS
 
   ${RELOCATING+_GOT_START_ = .;}
   ${RELOCATING+_GLOBAL_OFFSET_TABLE_ = . + 32768;}
-  ${RELOCATING+_SDA_BASE_ = .;}
+  ${RELOCATING+_SDA_BASE_ = . + 32768;}
   .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
-  ${RELOCATING+_GOT_END_ = .;}
-  .dynamic     ${RELOCATING-0} : { *(.dynamic) }
   ${DATA_PLT+${PLT}}
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
@@ -137,8 +137,9 @@ SECTIONS
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
-  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  ${RELOCATING+_GOT_END_ = .;}
+  ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
