@@ -1,3 +1,14 @@
+start-sanitize-v850
+Tue Oct 29 12:19:10 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850.h (V850_OPERAND_RELAX): New operand flag.
+
+end-sanitize-v850
+Thu Oct 10 14:29:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (FMT_*): Move operand format definitions
+	here.
+
 Tue Oct  8 14:48:07 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.h (MN10300_OPERAND_PAREN): Define.
