@@ -462,6 +462,10 @@ Add a command for searching memory, a la adb.  It specifies size,
 mask, value, start address.  ADB searches until it finds it or hits
 an error (or is interrupted).
 
+The GDB_TARGET_IS_HPPA kludges in partial-stab.h should be zapped sometime
+after GCC-2.7 has been released (whenever we decide corner case debugging
+problems with GCC-2.6 compiled code are not important).
+
 # Local Variables:
 # mode: text
 # End:

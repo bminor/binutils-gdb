@@ -1,5 +1,10 @@
 Sun Nov  6 12:54:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* partial-stab.h (N_TEXT): Put back GDB_TARGET_IS_HPPA kludge,
+	it is still needed for GCC-2.6 compiled code.
+	* TODO (GDB_TARGET_IS_HPPA): Note this kludge can be nuked
+	sometime after GCC-2.7 has been released.
+
 	* hppa-tdep.c (frame_saved_pc): Mask off low two bits when
 	retrieving the PC from a signal handler caller.  Fix thinko
 	in Stan's last change ("frame", should have been "frame->next").

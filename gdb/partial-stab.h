@@ -79,14 +79,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring [nsl - 2] == '.')
+#ifdef GDB_TARGET_IS_HPPA
+              /* This braindamage is necessary for versions of GCC 2.6 and
+		 earlier; it will not be necessary for GCC 2.7.
+
+		 In a nutshell, we need a way to determine when we've hit
+		 the end of a file with debug symbols.  Most ports do this
+		 with a N_SO record with a NULL symbol name (as will GCC 2.7
+		 on the PA).  GCC 2.6 (and earlier) on the PA instead creates
+		 an N_TEXT symbol with the name "end_file."  */
+              || (namestring[0] == 'e' && STREQ (namestring, "end_file."))
+#endif
 	      )
 	    {
+#ifndef GDB_TARGET_IS_HPPA
 	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
 		  objfile -> ei.entry_point >= last_o_file_start)
 		{
 		  objfile -> ei.entry_file_lowpc = last_o_file_start;
 		  objfile -> ei.entry_file_highpc = CUR_SYMBOL_VALUE;
 		}
+#endif
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */
