@@ -1,3 +1,10 @@
+Wed Jan 14 17:49:22 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/uppercase.d: Fix white space matching.
+	* gas/m32r/relax-1.d: Fix white space matching.
+	* gas/m32r/m32rx.d: Add expected results.
+	* gas/m32r/m32rx.s: Correct typos in test cases.
+
 Wed Jan 14 15:44:32 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mips/div.d: Update for recent assembler changes.
