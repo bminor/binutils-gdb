@@ -1,3 +1,8 @@
+2001-05-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/annota1.exp (info break): Match four or more spaces
+	after "Address".
+
 2001-05-31  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.c++/cplusfuncs.cc (dm_type_char_star): Remove superfluous cast.
