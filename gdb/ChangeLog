@@ -1,3 +1,7 @@
+2001-05-01  Michael Snyder  <msnyder@redhat.com>
+
+	* Makefile.in: Add rules for thread-db.o, lin-lwp.o, proc-service.o.
+
 2001-05-01  Nicholas Duffek  <nsd@redhat.com>
 
 	* config/rs6000/tm-rs6000.h (IN_SOLIB_RETURN_TRAMPOLINE): Define.

@@ -1759,6 +1759,16 @@ sol-thread.o: sol-thread.c $(defs_h) gdbthread.h target.h $(inferior_h) \
 linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) gdb_wait.h \
 	gdbthread.h $(gdbcore_h) $(inferior_h) target.h $(defs_h)
 
+thread-db.o: thread-db.c $(defs_h) gdb_assert.h gdb_proc_service.h \
+	gdb_thread_db.h $(bfd_h) gdbthread.h $(inferior_h) $(symfile_h) \
+	objfiles.h $(target_h) $(regcache_h)
+
+lin-lwp.o: lin-lwp.c $(defs_h) gdb_assert.h gdb_wait.h gdbthread.h \
+	$(inferior_h) $(target_h) $(gdbcmd_h) $(regcache_h)
+
+proc-service.o: proc-service.c $(defs_h) $(inferior_h) gdb_proc_service.h \
+	$(symtab_h) $(target_h) gregset.h
+
 gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 
 remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
