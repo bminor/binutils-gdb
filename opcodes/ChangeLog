@@ -1,3 +1,13 @@
+start-sanitize-v850e
+Thu Aug 21 11:09:09 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-opc.c (v850_opcodes[]): Move divh opcodes next to each other.
+end-sanitize-v850e
+
+Tue Aug 19 10:59:59 1997  Richard Henderson  <rth@cygnus.com>
+
+	* alpha-opc.c (alpha_opcodes): Fix hw_rei_stall mungage.
+
 Mon Aug 18 11:10:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (v850_opcodes[]): Remove use of flag field.
