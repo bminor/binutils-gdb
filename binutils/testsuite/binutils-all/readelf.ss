@@ -13,4 +13,4 @@ Symbol table '.symtab' contains .* entries:
 .*   .: 00000000     0 NOTYPE  GLOBAL DEFAULT    1 text_symbol
      .: 00000000     0 NOTYPE  GLOBAL DEFAULT  UND external_symbol
     ..: 00000000     0 NOTYPE  GLOBAL DEFAULT    3 data_symbol
-    ..: 00000004     4 OBJECT  GLOBAL DEFAULT  COM common_symbol
+    ..: 00000004     4 OBJECT  GLOBAL DEFAULT ( COM|ANSI_COM) common_symbol

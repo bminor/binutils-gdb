@@ -1194,6 +1194,10 @@ dump_relocations (FILE *file,
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
 			sec_name = "COMMON";
+		      else if (elf_header.e_machine == EM_IA_64
+			       && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
+			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
+			sec_name = "ANSI_COM";
 		      else
 			{
 			  sprintf (name_buf, "<section 0x%x>",
@@ -5550,7 +5554,11 @@ get_symbol_index_type (unsigned int type)
     case SHN_ABS:	return "ABS";
     case SHN_COMMON:	return "COM";
     default:
-      if (type >= SHN_LOPROC && type <= SHN_HIPROC)
+      if (type == SHN_IA_64_ANSI_COMMON
+	  && elf_header.e_machine == EM_IA_64
+	  && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX)
+	return "ANSI_COM";
+      else if (type >= SHN_LOPROC && type <= SHN_HIPROC)
 	sprintf (buff, "PRC[0x%04x]", type);
       else if (type >= SHN_LOOS && type <= SHN_HIOS)
 	sprintf (buff, "OS [0x%04x]", type);

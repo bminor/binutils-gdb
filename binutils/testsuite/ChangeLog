@@ -1,3 +1,14 @@
+2003-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/readelf.exp: Use is_elf_format.
+
+	* binutils-all/readelf.h: Support IA64/ILP32.
+	* binutils-all/readelf.s: Likewise.
+	* binutils-all/readelf.ss: Likewise.
+
+	* lib/utils-lib.exp (proc is_elf_format): Copy from ld
+	testsuite. Add ia64-*-hpux*.
+
 2003-06-29  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* binutils-all/objcopy.exp: Initialise $test_prog to
