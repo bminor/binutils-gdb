@@ -639,7 +639,7 @@ gld_${EMULATION_NAME}_after_open ()
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
+	if (bfd_arm_pe_get_bfd_for_interworking (is->the_bfd, & link_info))
 	  break;
       }
   }
@@ -740,7 +740,7 @@ gld_${EMULATION_NAME}_before_allocation()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (! bfd_arm_process_before_allocation
+	if (! bfd_arm_pe_process_before_allocation
 	    (is->the_bfd, & link_info, support_old_code))
 	  {
 	    /* xgettext:c-format */
@@ -751,7 +751,7 @@ gld_${EMULATION_NAME}_before_allocation()
   }
 
   /* We have seen it all. Allocate it, and carry on */
-  bfd_arm_allocate_interworking_sections (& link_info);
+  bfd_arm_pe_allocate_interworking_sections (& link_info);
 #endif /* TARGET_IS_armpe */
 }
 
