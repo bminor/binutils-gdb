@@ -1,3 +1,12 @@
+Mon Mar 23 11:30:21 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* ltconfig: Update after libtool/ltconfig.in change for
+	hpux11.
+
+Fri Mar 20 18:51:43 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: Update to libtool 1.2.
+
 Wed Mar 18 09:24:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in: Add Thumb-pe target.
