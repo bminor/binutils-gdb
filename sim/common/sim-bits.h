@@ -458,6 +458,8 @@ INLINE_SIM_BITS(unsigned_word) MSINSERTED (unsigned_word val, int start, int sto
 
 /* Sign extend the quantity to the targets natural word size */
 
+#define EXTEND4(X)  (LSSEXT ((X), 3))
+#define EXTEND5(X)  (LSSEXT ((X), 4))
 #define EXTEND8(X)  ((signed_word)(signed8)(X))
 #define EXTEND16(X) ((signed_word)(signed16)(X))
 #define EXTEND32(X) ((signed_word)(signed32)(X))
