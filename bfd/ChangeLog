@@ -1,3 +1,14 @@
+Tue Oct 11 13:57:56 1994  Eric Youngdale  (eric@andante.aib.com)
+
+	* elf32-i386.c (elf_i386_check_relocs): Make sure that a symbol
+	with a global offset table entry or a procedure linkage table
+	entry is added to the dynamic symbol table.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): If a symbol has
+	already gotten a procedure linkage table entry, change the
+	definition to the PLT entry.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+
 Tue Oct 11 17:12:00 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* lynx-core.c (lynx_core_file_p): SPARC Lynx appears to start
