@@ -110,10 +110,10 @@ STAGESTUFF = *.x *.x[ru] *.sc[ru] $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(OF
 
 all: Makefile $(LD_PROG)
 
-ldgram.c:ldgram.y
+ldgram.h ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
 
-ldlex.c:ldlex.l
+ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c
 
 
