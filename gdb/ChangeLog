@@ -1,8 +1,8 @@
 2002-02-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-01-18 Greg McGary <greg@mcgary.org>:
-	* (create_mem_region): Disallow useless empty region.  Regions are
-	half-open intervals, so allow [A..B) [B..C) as non-overlapping.
+	* memattr.c (create_mem_region): Disallow useless empty region.  Regions
+	are half-open intervals, so allow [A..B) [B..C) as non-overlapping.
 
 2002-02-13  Michael Chastain <mec@shout.net>
 
