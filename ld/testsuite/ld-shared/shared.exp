@@ -1,5 +1,5 @@
 # Expect script for ld-shared tests
-#   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation
+#   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ if { ![istarget i386-*-sysv4*] \
      && ![istarget i586-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-irix5*] \
+     && ![istarget powerpc-*-elf*] \
+     && ![istarget powerpc-*-linux*] \
+     && ![istarget powerpc-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
      && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-sunos4*] \
@@ -93,7 +96,7 @@ if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 }
 
 # The test procedure.
-proc shared_test { progname testname main sh1 sh2 dat } {
+proc shared_test { progname testname main sh1 sh2 dat args } {
     global ld
     global srcdir
     global subdir
@@ -101,13 +104,15 @@ proc shared_test { progname testname main sh1 sh2 dat } {
     global host_triplet
     global tmpdir
 
+    if [llength $args] { set shldflags [lindex $args 0] } else { set shldflags "" }
+
     # Build the shared library.
     # On AIX, we need to use an export file.
     set shared -shared
     if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	set shared "-bM:SRE -bE:$tmpdir/xcoff.exp"
     }
-    if {![ld_simple_link $ld $tmpdir/$progname.so "$shared $tmpdir/$sh1 $tmpdir/$sh2"]} {
+    if {![ld_simple_link $ld $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
         fail "$testname"
     	return
     }
@@ -195,11 +200,15 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# SunOS non PIC shared libraries don't permit some cases of
 	# overriding.
 	setup_xfail "*-*-sunos4*"
-	# On Linux/m68k this fails because non-pic references to symbols
-	# in the same section may be resolved by the assembler if they
-	# are pc-relative.
-	setup_xfail "m68k-*-linux*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
+
+	# Test ELF shared library relocations with a non-zero load
+	# address for the library.  Near as I can tell, the R_*_RELATIVE
+	# relocations for various targets are broken in the case where
+	# the load address is not zero (which is the default).
+	setup_xfail "*-*-sunos4*"
+	shared_test shnp "shared (non PIC, load offset)" \
+		mainnp.o sh1np.o sh2np.o shared "$srcdir/$subdir/elf-offset.ld"
     } }
 
     # Now compile the code using -fpic.
@@ -231,10 +240,6 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    # SunOS non PIC shared libraries don't permit some cases of
 	    # overriding.
 	    setup_xfail "*-*-sunos4*"
-	    # On Linux/m68k this fails because non-pic references to symbols
-	    # in the same section may be resolved by the assembler if they
-	    # are pc-relative.
-	    setup_xfail "m68k-*-linux*"
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
 	}
     } else {

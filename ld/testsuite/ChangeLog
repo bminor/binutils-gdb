@@ -1,3 +1,21 @@
+1999-01-03  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/default.exp (get_link_files, get_target_emul): New procs;
+	run shell commands to extract information from configure.host and
+	configure.tgt in the source tree.
+	(top level): Use them to get information needed to run tests, if
+	not otherwise provided.
+
+	* ld-shared/elf-offset.ld: New file.  Builds a shared library, but
+	gives non-zero addresses for memory region.
+	* ld-shared/shared.exp: Run the non-PIC non-AIX test again using
+	the new linker script.
+
+Tue Dec  8 22:56:05 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* ld-srec/srec.exp: Delete xfails for PPC Linux targets,
+	newer glibc lets link succeed.
+
 Sun Dec  6 12:59:37 1998  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvers/vers1.c: Add missing return types and values.
