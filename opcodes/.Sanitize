@@ -68,11 +68,8 @@ arc-opc.c
 arm-dis.c
 arm-opc.h
 a29k-dis.c
-cgen.sh
 cgen-asm.c
-cgen-asm.in
 cgen-dis.c
-cgen-dis.in
 cgen-opc.c
 config.in
 configure
