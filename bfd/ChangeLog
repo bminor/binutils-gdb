@@ -1,3 +1,8 @@
+2001-10-31  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_output_extsym): Don't clear the visibility
+	field for relocateable.
+
 2001-11-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Don't count

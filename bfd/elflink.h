@@ -5696,7 +5696,8 @@ elf_link_output_extsym (h, data)
 
   /* If a symbol is not defined locally, we clear the visibility
      field.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+  if (! finfo->info->relocateable
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     sym.st_other ^= ELF_ST_VISIBILITY (sym.st_other);
 
   /* If this symbol should be put in the .dynsym section, then put it
