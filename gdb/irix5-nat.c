@@ -32,6 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
+static void
+fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+
 /* Size of elements in jmpbuf */
 
 #define JB_ELEMENT_SIZE 4

@@ -37,8 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <varargs.h>
 #endif
 
-extern char *mips_read_processor_type PARAMS ((void));
-
 extern void mips_set_processor_type_command PARAMS ((char *, int));
 
 

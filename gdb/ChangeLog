@@ -1,3 +1,11 @@
+Tue Aug 13 23:04:36 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/mips/nm-mips.h (get_longjmp_target): Add prototype.
+	* config/mips/nm-irix3.h (get_longjmp_target): Add prototype.
+	* remote-mips.c (mips_read_processor_type): Remove prototype.
+	* mips-tdep.c (gdb_print_insn_mips): Add prototype and make static.
+	* irix5-nat.c (fetch_core_registers): Add prototype.
+
 Mon Aug 12 21:23:44 1996  Fred Fish  <fnf@cygnus.com>
 
 	* remote-pa.c (boot_board): Add dummy params to make type compatible
