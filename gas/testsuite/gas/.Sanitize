@@ -27,8 +27,11 @@ Do-first:
 Things-to-keep:
 
 gas.exp
+p2389.s
 p2425.s
 p2430.s
+sol-cc.s
+sol-gcc.s
 t1.s
 
 Do-last:

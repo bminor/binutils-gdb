@@ -7,12 +7,7 @@
 #	just checks that exit status is zero
 #
 
-set testdir $srcdir/gas
-
-#
-# Test empty file, and version number
-#
-#gas_test_stdout "" "GNU assembler version .* (.*)"
+gas_init
 
 #
 # Target-independent tests
@@ -25,14 +20,33 @@ gas_test "-al $testdir/p2425.s" "pcrel values in assignment, with listing"
 #
 # Some m68k-coff tests
 #
-if [istarget m68k-*-coff] then {
-    #
-    # Local branch in non-text section
-    #
+if [istarget m68*-*-coff] then {
     gas_test "$testdir/p2430.s" "local branch not in text section"
 
-    #
-    # Multiple (implicit) .file directives
-    #
     gas_test "$testdir/t1.s" "multiple .file directives"
+
+    gas_test "$testdir/p2389.s" "bss fill"
+}
+
+#
+# Some generic m68k tests
+#
+if [string match m68* $target_cpu] then {
+    #
+    # Operand size dependent on offset computed using operand size
+    #
+    if [file exists "$testdir/p2425a.s"] then {
+	gas_test "$testdir/p2425a.s" "PR 2425"
+    }
+}
+
+#
+# Solaris-2 on SPARC tests
+#
+# The two compilers, cc and gcc, generate quite different debugging
+# records.  Verify that we can accept both.
+#
+if [istarget sparc-*-solaris2*] then {
+    gas_test "sol-cc.s" "SPARC Solaris cc -g"
+    gas_test "sol-gcc.s" "SPARC Solaris gcc -g"
 }
