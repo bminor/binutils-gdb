@@ -4,6 +4,7 @@ cat << 'EOF'
 $! Set the def dir to proper place for use in batch. Works for interactive to.
 $flnm = f$enviroment("PROCEDURE")     ! get current procedure name
 $set default 'f$parse(flnm,,,"DEVICE")''f$parse(flnm,,,"DIRECTORY")'
+$v = 'f$verify(0)'
 $!
 $!	Command file to build a GNU assembler on VMS
 $!
@@ -32,10 +33,11 @@ $ !write sys$output "psect attributes."
 $!
 $ C_DEFS :="""VMS"""
 $! C_DEFS :="""VMS""","""const="""
-$ C_INCLUDES :=/include=([],[.config],[-.include],[-.include.aout])
-$ C_FLAGS := /debug 'c_includes'
+$ C_INCLUDES	= "/Include=([],[.config],[-.include],[-.include.aout])"
+$ C_FLAGS	= "/noVerbose/Debug" + c_includes
 $!
 $!
+$ on error then  goto bail
 $ if "''p1'" .eqs. "LINK" then goto Link
 $!
 $!  This helps gcc 1.nn find the aout/* files.
@@ -50,6 +52,8 @@ $ opcode_dir = aout_dev+f$parse(flnm,,,"DIRECTORY")' -
 	- "GAS]" + "INCLUDE.OPCODE.]" - "]["
 $assign 'opcode_dir' opcode/tran=conc
 $!
+$ set verify
+$!
 EOF
 
 cfiles="`echo $* | sed -e 's/\.o/.c/g' -e 's!../\([^ /]*\)/\([^ /]*\.c\)![-.\1]\2!g'`"
@@ -58,17 +62,19 @@ for cfile in $cfiles ; do
   case $cfile in
     "[-."*)
 	base=`echo $cfile | sed -e 's/\[.*\]//' -e 's/\.c$//'`
-	echo "\$ gcc 'c_flags'/define=('C_DEFS')/object=[]$base.obj $cfile"
+	echo "\$ gcc 'c_flags'/Define=('C_DEFS')/Object=[]$base.obj $cfile"
 	;;
     *)
-	echo "\$ gcc 'c_flags'/define=('C_DEFS') $cfile"
+	echo "\$ gcc 'c_flags'/Define=('C_DEFS') $cfile"
 	;;
   esac
 done
 
 cat << 'EOF'
 $link:
-$ link/nomap/exec=gcc-as version.opt/opt+sys$input:/opt
+$!'f$verify(0)'
+$ set verify=(Proc,noImag)
+$ link/noMap/Exec=gcc-as version.opt/Opt+sys$input:/Opt
 !
 !	Linker options file for GNU assembler
 !
@@ -80,7 +86,9 @@ for obj in $* ; do
 done
 
 cat << 'EOF'
-gnu_cc:[000000]gcclib/lib,sys$share:vaxcrtl/lib
+gnu_cc:[000000]gcclib.olb/Lib,sys$library:vaxcrtl.olb/Lib
 ! Tell linker exactly what psect attributes we want -- match VAXCRTL.
 psect_attr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt
+$!
+$bail: exit $status + 0*f$verify(v)	!'f$verify(0)'
 EOF
