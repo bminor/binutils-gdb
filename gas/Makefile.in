@@ -255,8 +255,8 @@ $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
 	listing.h bignum.h
 
-gasp.new: $(GASPOBJS)
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) $(LIBS) $(LOADLIBES)
+gasp.new: $(GASPOBJS) ../libiberty/libiberty.a
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
 
 installcheck:
 	@echo No installcheck target is available yet for the GNU assembler.
@@ -413,14 +413,7 @@ install:
 	   || $(INSTALL_PROGRAM) as.new $(tooldir)/bin/as; \
 	else true; fi
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	$(INSTALL_XFORM) gasp.new $(bindir)/gasp; \
-	n=`echo gasp | sed '$(program_transform_name)' `; \
-	if [ -d $(tooldir) ]; then \
-	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	  rm -f $(tooldir)/bin/gasp; \
-	  ln $(bindir)/$$n $(tooldir)/bin/gasp >/dev/null 2>/dev/null \
-	   || $(INSTALL_PROGRAM) gasp.new $(tooldir)/bin/gasp; \
-	else true; fi
+	$(INSTALL_XFORM) gasp.new $(bindir)/gasp
 
 # Cancel installation by deleting the installed files.
 uninstall:

@@ -1,5 +1,7 @@
 Fri Sep  8 00:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (install): Don't install gasp in $(tooldir).
+
 	* config/tc-mips.c (macro): Handle a non zero base register for
 	M_U{L,S}{D,W,H}_A.
 
