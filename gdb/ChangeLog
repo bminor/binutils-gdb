@@ -1,3 +1,29 @@
+Wed Dec  7 14:50:54 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* gdbserver/remote-utils.c (write_ok): Write "OK", not "Ok", to
+	match stubs and protocol spec.
+	* gdbserver/remote-utils.c (remote_open): Cast to struct sockaddr
+	when passing to function which expects that.
+
+	The following changes aren't quite enough to make things work with
+	LynxOS (apprently kernel problems).
+	* infrun.c (wait_for_inferior): When resuming new thread, pass pid
+	not -1 for remote case.
+	* thread.c (info_threads_command): Give error if !target_has_stack. 
+	* infrun.c (start_remote): Call init_thread_list.
+	* thread.c (info_threads_command): Don't call kill for remote
+	debugging target.
+	* target.c (normal_pid_to_str): Print "thread" not "process" for
+	remote.
+	* remote.c, gdbserver/*: Add 'H', 'S', and 'C' requests, 'X'
+	response, and `thread' part of 'T' response.
+	* gdbserver/*: If program exits, send packet to GDB before
+	exiting.  Handle termination with a signal the same as exiting
+	with an exitstatus.
+	* remote.c: Don't try to kill program after getting an 'X'
+	response.
+	* infrun.c (wait_for_inferior): Add comment about kill versus mourn.
+
 Thu Dec  8 12:37:38 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* config/pa/tm-pro.h tm-hppap.h, hppapro.mt: Rename tm-hppap.h to

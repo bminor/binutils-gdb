@@ -111,19 +111,19 @@ mywait (status)
   if (WIFEXITED (w))
     {
       fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
-      *status = 'E';
+      *status = 'W';
       return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
       fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-      *status = 'T';
+      *status = 'X';
       return ((unsigned char) WTERMSIG (w));
     }
 
   fetch_inferior_registers (0);
 
-  *status = 'S';
+  *status = 'T';
   return ((unsigned char) WSTOPSIG (w));
 }
 

@@ -108,33 +108,57 @@ mywait (status)
   int pid;
   union wait w;
 
-  enable_async_io();
+  while (1)
+    {
+      enable_async_io();
 
-  pid = wait (&w);
+      pid = wait (&w);
 
-  disable_async_io();
+      disable_async_io();
 
-  if (pid != PIDGET(inferior_pid))
-    perror_with_name ("wait");
+      if (pid != PIDGET(inferior_pid))
+	perror_with_name ("wait");
 
-  inferior_pid = BUILDPID (inferior_pid, w.w_tid);
+      thread_from_wait = w.w_tid;
+      inferior_pid = BUILDPID (inferior_pid, w.w_tid);
+      printf ("mywait: pid=0x%x, thread=0x%x, inferior_pid=0x%x\n",
+	      pid, w.w_tid, inferior_pid);
+
+      if (WIFSTOPPED(w)
+	  && WSTOPSIG(w) == SIGTRAP)
+	{
+	  int realsig;
+
+	  realsig = ptrace (PTRACE_GETTRACESIG, inferior_pid,
+			    (PTRACE_ARG3_TYPE)0, 0);
+
+	  if (realsig == SIGNEWTHREAD)
+	    {
+	      /* Simply ignore new thread notification, as we can't do anything
+		 useful with such threads.  All ptrace calls at this point just
+		 fail for no apparent reason.  The thread will eventually get a
+		 real signal when it becomes real.  */
+	      myresume (0, 0);
+	      continue;
+	    }
+	}
+      break;
+    }
 
   if (WIFEXITED (w))
     {
-      fprintf (stderr, "\nChild exited with status %d\n", WEXITSTATUS (w));
-      fprintf (stderr, "GDBserver exiting\n");
-      exit (0);
+      *status = 'W';
+      return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
-      fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-      *status = 'T';
+      *status = 'X';
       return ((unsigned char) WTERMSIG (w));
     }
 
   fetch_inferior_registers (0);
 
-  *status = 'S';
+  *status = 'T';
   return ((unsigned char) WSTOPSIG (w));
 }
 
@@ -148,7 +172,9 @@ myresume (step, signal)
      int signal;
 {
   errno = 0;
-  ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, inferior_pid, 1, signal);
+  ptrace (step ? PTRACE_SINGLESTEP_ONE : PTRACE_CONT,
+	  BUILDPID (inferior_pid, cont_thread == -1 ? 0 : cont_thread),
+	  1, signal);
   if (errno)
     perror_with_name ("ptrace");
 }
@@ -334,7 +360,9 @@ fetch_inferior_registers (regno)
       int i;
 
       errno = 0;
-      retval = ptrace (PTRACE_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &ec,
+      retval = ptrace (PTRACE_GETREGS,
+		       BUILDPID (inferior_pid, general_thread),
+		       (PTRACE_ARG3_TYPE) &ec,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -387,7 +415,7 @@ fetch_inferior_registers (regno)
       int i;
 
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -446,7 +474,7 @@ store_inferior_registers (regno)
 	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
 
       errno = 0;
-      retval = ptrace (PTRACE_SETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &ec,
+      retval = ptrace (PTRACE_SETREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &ec,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -493,7 +521,7 @@ store_inferior_registers (regno)
 
 /* We read fcontext first so that we can get good values for fq_t... */
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -504,7 +532,7 @@ store_inferior_registers (regno)
       fc.fsr = read_register (FPS_REGNUM);
 
       errno = 0;
-      retval = ptrace (PTRACE_SETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_SETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -526,12 +554,12 @@ lynx_registers_addr()
   CORE_ADDR ecp;
 
   errno = 0;
-  stblock = (CORE_ADDR) ptrace (PTRACE_THREADUSER, inferior_pid,
+  stblock = (CORE_ADDR) ptrace (PTRACE_THREADUSER, BUILDPID (inferior_pid, general_thread),
 				(PTRACE_ARG3_TYPE)0, 0);
   if (errno)
     perror_with_name ("PTRACE_THREADUSER");
 
-  ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, inferior_pid,
+  ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, BUILDPID (inferior_pid, general_thread),
 			    (PTRACE_ARG3_TYPE)ecpoff, 0);
   if (errno)
     perror_with_name ("lynx_registers_addr(PTRACE_PEEKTHREAD)");
@@ -562,7 +590,7 @@ fetch_inferior_registers (ignored)
 #endif
 
       errno = 0;
-      reg = ptrace (ptrace_fun, inferior_pid,
+      reg = ptrace (ptrace_fun, BUILDPID (inferior_pid, general_thread),
 		    (PTRACE_ARG3_TYPE) (ecp + regmap[regno]), 0);
       if (errno)
 	perror_with_name ("fetch_inferior_registers(PTRACE_PEEKTHREAD)");
@@ -596,7 +624,7 @@ store_inferior_registers (ignored)
       reg = *(unsigned long *)&registers[REGISTER_BYTE (regno)];
 
       errno = 0;
-      ptrace (ptrace_fun, inferior_pid,
+      ptrace (ptrace_fun, BUILDPID (inferior_pid, general_thread),
 	      (PTRACE_ARG3_TYPE) (ecp + regmap[regno]), reg);
       if (errno)
 	perror_with_name ("PTRACE_POKEUSER");
@@ -632,7 +660,7 @@ read_inferior_memory (memaddr, myaddr, len)
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
-      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
+      buffer[i] = ptrace (PTRACE_PEEKTEXT, BUILDPID (inferior_pid, general_thread), addr, 0);
     }
 
   /* Copy appropriate bytes out of the buffer.  */
@@ -662,12 +690,12 @@ write_inferior_memory (memaddr, myaddr, len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
-  buffer[0] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
+  buffer[0] = ptrace (PTRACE_PEEKTEXT, BUILDPID (inferior_pid, general_thread), addr, 0);
 
   if (count > 1)
     {
       buffer[count - 1]
-	= ptrace (PTRACE_PEEKTEXT, inferior_pid,
+	= ptrace (PTRACE_PEEKTEXT, BUILDPID (inferior_pid, general_thread),
 		  addr + (count - 1) * sizeof (int), 0);
     }
 
@@ -682,10 +710,13 @@ write_inferior_memory (memaddr, myaddr, len)
       while (1)
 	{
 	  errno = 0;
-	  ptrace (PTRACE_POKETEXT, inferior_pid, addr, buffer[i]);
+	  ptrace (PTRACE_POKETEXT, BUILDPID (inferior_pid, general_thread), addr, buffer[i]);
 	  if (errno)
 	    {
-	      fprintf(stderr, "ptrace (PTRACE_POKETEXT): errno=%d, inferior_pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n", errno, inferior_pid, addr, buffer[i]);
+	      fprintf(stderr, "\
+ptrace (PTRACE_POKETEXT): errno=%d, pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n",
+		      errno, BUILDPID (inferior_pid, general_thread),
+		      addr, buffer[i]);
 	      fprintf(stderr, "Sleeping for 1 second\n");
 	      sleep(1);
 	    }

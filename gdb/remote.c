@@ -38,9 +38,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	-	- if CSUM is incorrect
 
    <data> is as follows:
-   All values are encoded in ascii hex digits.
+   Most values are encoded in ascii hex digits.  Signal numbers are according
+   to the numbering in target.h.
 
 	Request		Packet
+
+	set thread	Hct...		Set thread for subsequent operations.
+					c = 'c' for thread used in step and 
+					continue; t... can be -1 for all
+					threads.
+					c = 'g' for thread used in other
+					operations.  If zero, pick a thread,
+					any thread.
+	reply		OK		for success
+			ENN		for an error.
 
 	read registers  g
 	reply		XX....X		Each byte of register data
@@ -78,13 +89,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					where only part of the data was
 					written).
 
-	cont		cAA..AA		AA..AA is address to resume
+	continue	cAA..AA		AA..AA is address to resume
 					If AA..AA is omitted,
 					resume at same address.
 
 	step		sAA..AA		AA..AA is address to resume
 					If AA..AA is omitted,
 					resume at same address.
+
+	continue with	Csig;AA		Continue with signal sig (hex signal
+	signal				number).
+
+	step with	Ssig;AA		Like 'C' but step not continue.
+	signal
 
 	last signal     ?               Reply the current reason for stopping.
                                         This is the same reply as is generated
@@ -93,16 +110,31 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	There is no immediate reply to step or cont.
 	The reply comes when the machine stops.
-	It is		SAA		AA is the "signal number"
+	It is		SAA		AA is the signal number.
 
-	or...		TAAn...:r...;n:r...;n...:r...;
+	or...		TAAn...:r...;n...:r...;n...:r...;
 					AA = signal number
-					n... = register number
-					r... = register contents
+					n... = register number (hex)
+					  r... = register contents
+					n... = `thread'
+					  r... = thread process ID.  This is
+						 a hex integer.
+					n... = other string not starting 
+					    with valid hex digit.
+					  gdb should ignore this n,r pair
+					  and go on to the next.  This way
+					  we can extend the protocol.
 	or...		WAA		The process exited, and AA is
 					the exit status.  This is only
 					applicable for certains sorts of
 					targets.
+	or...		XAA		The process terminated with signal
+					AA.
+	or...         	Otext		Send text to stdout.  This can happen
+					at any time while the program is
+					running and the debugger should
+					continue to wait for 'W', 'T', etc.
+
 	kill request	k
 
 	toggle debug	d		toggle debug flag (see 386 & 68k stubs)
@@ -122,8 +154,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	general set	QXXXX=yyyy	Set value of XXXX to yyyy.
 	query sect offs	qOffsets	Get section offsets.  Reply is
 					Text=xxx;Data=yyy;Bss=zzz
-	console output	Otext		Send text to stdout.  Only comes from
-					remote target.
 
 	Responses can be run-length encoded to save space.  A '*' means that
 	the next character is an ASCII encoding giving a repeat count which
@@ -196,7 +226,7 @@ remote_store_registers PARAMS ((int regno));
 static void
 getpkt PARAMS ((char *buf, int forever));
 
-static void
+static int
 putpkt PARAMS ((char *buf));
 
 static void
@@ -266,6 +296,39 @@ serial_t remote_desc = NULL;
    doesn't support 'P', the only consequence is some unnecessary traffic.  */
 static int stub_supports_P = 1;
 
+
+/* These are the threads which we last sent to the remote system.  -1 for all
+   or -2 for not sent yet.  */
+int general_thread;
+int cont_thread;
+
+static void
+set_thread (th, gen)
+     int th;
+     int gen;
+{
+  char buf[PBUFSIZ];
+  int state = gen ? general_thread : cont_thread;
+  if (state == th)
+    return;
+  buf[0] = 'H';
+  buf[1] = gen ? 'g' : 'c';
+  if (th == 42000)
+    {
+      buf[2] = '0';
+      buf[3] = '\0';
+    }
+  else if (th < 0)
+    sprintf (&buf[2], "-%x", -th);
+  else
+    sprintf (&buf[2], "%x", th);
+  putpkt (buf);
+  getpkt (buf, 0);
+  if (gen)
+    general_thread = th;
+  else
+    cont_thread = th;
+}
 
 /* Clean up connection to a remote debugger.  */
 
@@ -348,6 +411,9 @@ remote_start_remote (dummy)
 
   SERIAL_WRITE (remote_desc, "+", 1);
 
+  /* Let the stub know that we want it to return the thread.  */
+  set_thread (-1, 0);
+
   get_offsets ();		/* Get text, data & bss offsets */
 
   putpkt ("?");			/* initiate a query from remote machine */
@@ -410,6 +476,9 @@ device is attached to the remote system (e.g. /dev/ttya).");
      time that we open a new target so that if the user switches from one
      stub to another, we can (if the target is closed and reopened) cope.  */
   stub_supports_P = 1;
+
+  general_thread = -2;
+  cont_thread = -2;
 
   /* Without this, some commands which require an active target (such as kill)
      won't work.  This variable serves (at least) double duty as both the pid
@@ -477,6 +546,9 @@ tohex (nib)
 
 /* Tell the remote machine to resume.  */
 
+static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
+int last_sent_step;
+
 static void
 remote_resume (pid, step, siggnal)
      int pid, step;
@@ -484,18 +556,25 @@ remote_resume (pid, step, siggnal)
 {
   char buf[PBUFSIZ];
 
-  if (siggnal)
-    {
-      target_terminal_ours_for_output ();
-      printf_filtered
-	("Can't send signals to a remote system.  %s not sent.\n",
-	 target_signal_to_name (siggnal));
-      target_terminal_inferior ();
-    }
+  if (pid == -1)
+    set_thread (inferior_pid, 0);
+  else
+    set_thread (pid, 0);
 
   dcache_flush (remote_dcache);
 
-  strcpy (buf, step ? "s": "c");
+  last_sent_signal = siggnal;
+  last_sent_step = step;
+
+  if (siggnal != TARGET_SIGNAL_0)
+    {
+      buf[0] = step ? 'S' : 'C';
+      buf[1] = tohex (((int)siggnal >> 4) & 0xf);
+      buf[2] = tohex ((int)siggnal & 0xf);
+      buf[3] = '\0';
+    }
+  else
+    strcpy (buf, step ? "s": "c");
 
   putpkt (buf);
 }
@@ -547,6 +626,9 @@ Give up (and stop debugging it)? "))
   target_terminal_inferior ();
 }
 
+/* If nonzero, ignore the next kill.  */
+int kill_kludge;
+
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.
    Returns "pid" (though it's not clear what, if anything, that
@@ -558,6 +640,7 @@ remote_wait (pid, status)
      struct target_waitstatus *status;
 {
   unsigned char buf[PBUFSIZ];
+  int thread_num = -1;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -597,31 +680,44 @@ remote_wait (pid, status)
 		regno = strtol (p, &p1, 16); /* Read the register number */
 
 		if (p1 == p)
-		  warning ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
-			   p1, buf);
-
-		p = p1;
-
-		if (*p++ != ':')
-		  warning ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
-			   p, buf);
-
-		if (regno >= NUM_REGS)
-		  warning ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
-			   regno, p, buf);
-
-		for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
 		  {
-		    if (p[0] == 0 || p[1] == 0)
-		      warning ("Remote reply is too short: %s", buf);
-		    regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-		    p += 2;
+		    p1 = (unsigned char *) strchr (p, ':');
+		    if (p1 == NULL)
+		      warning ("Malformed packet (missing colon): %s\n\
+Packet: '%s'\n",
+			       p, buf);
+		    if (strncmp (p, "thread", p1 - p) == 0)
+		      {
+			char *p2;
+			thread_num = strtol (++p1, &p, 16);
+		      }
+		  }
+		else
+		  {
+		    p = p1;
+
+		    if (*p++ != ':')
+		      warning ("Malformed packet (missing colon): %s\n\
+Packet: '%s'\n",
+			       p, buf);
+
+		    if (regno >= NUM_REGS)
+		      warning ("Remote sent bad register number %d: %s\n\
+Packet: '%s'\n",
+			       regno, p, buf);
+
+		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		      {
+			if (p[0] == 0 || p[1] == 0)
+			  warning ("Remote reply is too short: %s", buf);
+			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			p += 2;
+		      }
+		    supply_register (regno, regs);
 		  }
 
 		if (*p++ != ';')
 		  warning ("Remote register badly formatted: %s", buf);
-
-		supply_register (regno, regs);
 	      }
 	  }
 	  /* fall through */
@@ -630,22 +726,60 @@ remote_wait (pid, status)
 	  status->value.sig = (enum target_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
 
-	  return inferior_pid;
+	  goto got_status;
 	case 'W':		/* Target exited */
 	  {
 	    /* The remote process exited.  */
 	    status->kind = TARGET_WAITKIND_EXITED;
 	    status->value.integer = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
-	    return inferior_pid;
+	    goto got_status;
 	  }
+	case 'X':
+	  status->kind = TARGET_WAITKIND_SIGNALLED;
+	  status->value.sig = (enum target_signal)
+	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	  kill_kludge = 1;
+
+	  goto got_status;
 	case 'O':		/* Console output */
 	  fputs_filtered ((char *)(buf + 1), gdb_stdout);
 	  continue;
+	case '\0':
+	  if (last_sent_signal != TARGET_SIGNAL_0)
+	    {
+	      /* Zero length reply means that we tried 'S' or 'C' and
+		 the remote system doesn't support it.  */
+	      target_terminal_ours_for_output ();
+	      printf_filtered
+		("Can't send signals to this remote system.  %s not sent.\n",
+		 target_signal_to_name (last_sent_signal));
+	      last_sent_signal = TARGET_SIGNAL_0;
+	      target_terminal_inferior ();
+
+	      strcpy (buf, last_sent_step ? 's' : 'c');
+	      putpkt (buf);
+	      continue;
+	    }
+	  /* else fallthrough */
 	default:
 	  warning ("Invalid remote reply: %s", buf);
 	  continue;
 	}
     }
+ got_status:
+  if (thread_num != -1)
+    {
+      /* Initial thread value can only be acquired via wait, so deal with
+	 this marker which is used before the first thread value is
+	 acquired.  */
+      if (inferior_pid == 42000)
+	{
+	  inferior_pid = thread_num;
+	  add_thread (inferior_pid);
+	}
+      return thread_num;
+    }
+  return inferior_pid;
 }
 
 /* Number of bytes of registers this stub implements.  */
@@ -662,6 +796,8 @@ remote_fetch_registers (regno)
   int i;
   char *p;
   char regs[REGISTER_BYTES];
+
+  set_thread (inferior_pid, 1);
 
   sprintf (buf, "g");
   remote_send (buf);
@@ -735,6 +871,8 @@ remote_store_registers (regno)
   char buf[PBUFSIZ];
   int i;
   char *p;
+
+  set_thread (inferior_pid, 1);
 
   if (regno >= 0 && stub_supports_P)
     {
@@ -944,6 +1082,8 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
   int bytes_xferred;
   int total_xferred = 0;
 
+  set_thread (inferior_pid, 1);
+
   while (len > 0)
     {
       if (len > MAXBUFBYTES)
@@ -1096,7 +1236,7 @@ remote_send (buf)
 /* Send a packet to the remote machine, with error checking.
    The data of the packet is in BUF.  */
 
-static void
+static int
 putpkt (buf)
      char *buf;
 {
@@ -1165,7 +1305,7 @@ putpkt (buf)
 	    case '+':
 	      if (remote_debug)
 		printf_unfiltered("Ack\n");
-	      return;
+	      return 1;
 	    case SERIAL_TIMEOUT:
 	      break;		/* Retransmit buffer */
 	    case '$':
@@ -1367,7 +1507,19 @@ retry:
 static void
 remote_kill ()
 {
-  putpkt ("k");
+  /* For some mysterious reason, wait_for_inferior calls kill instead of
+     mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
+  if (kill_kludge)
+    {
+      kill_kludge = 0;
+      target_mourn_inferior ();
+      return;
+    }
+
+  /* Use catch_errors so the user can quit from gdb even when we aren't on
+     speaking terms with the remote system.  */
+  catch_errors (putpkt, "k", "", RETURN_MASK_ERROR);
+
   /* Don't wait for it to die.  I'm not really sure it matters whether
      we do or not.  For the existing stubs, kill is a noop.  */
   target_mourn_inferior ();

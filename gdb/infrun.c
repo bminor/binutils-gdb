@@ -43,26 +43,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-static void
-signals_info PARAMS ((char *, int));
+static void signals_info PARAMS ((char *, int));
 
-static void
-handle_command PARAMS ((char *, int));
+static void handle_command PARAMS ((char *, int));
 
 static void sig_print_info PARAMS ((enum target_signal));
 
-static void
-sig_print_header PARAMS ((void));
+static void sig_print_header PARAMS ((void));
 
-static void
-resume_cleanups PARAMS ((int));
+static void resume_cleanups PARAMS ((int));
 
-static int
-hook_stop_stub PARAMS ((char *));
+static int hook_stop_stub PARAMS ((char *));
 
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
    from it.  The return value is non-zero on success, zero otherwise. */
+
 #ifndef GET_LONGJMP_TARGET
 #define GET_LONGJMP_TARGET(PC_ADDR) 0
 #endif
@@ -71,15 +67,24 @@ hook_stop_stub PARAMS ((char *));
 /* Some machines have trampoline code that sits between function callers
    and the actual functions themselves.  If this machine doesn't have
    such things, disable their processing.  */
+
 #ifndef SKIP_TRAMPOLINE_CODE
 #define	SKIP_TRAMPOLINE_CODE(pc)	0
 #endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
-   trampoline code in the ".plt" section.  IN_SOLIB_TRAMPOLINE evaluates
+   trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
    to nonzero if we are current stopped in one of these. */
-#ifndef IN_SOLIB_TRAMPOLINE
-#define IN_SOLIB_TRAMPOLINE(pc,name)	0
+
+#ifndef IN_SOLIB_CALL_TRAMPOLINE
+#define IN_SOLIB_CALL_TRAMPOLINE(pc,name)	0
+#endif
+
+/* In some shared library schemes, the return path from a shared library
+   call may need to go through a trampoline too.  */
+
+#ifndef IN_SOLIB_RETURN_TRAMPOLINE
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc,name)	0
 #endif
 
 /* On some systems, the PC may be left pointing at an instruction that  won't
@@ -371,6 +376,7 @@ static char *prev_func_name;
 void
 start_remote ()
 {
+  init_thread_list ();
   init_wait_for_inferior ();
   clear_proceed_status ();
   stop_soon_quietly = 1;
@@ -522,7 +528,14 @@ wait_for_inferior ()
 	  stop_signal = w.value.sig;
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
 	  annotate_signalled ();
+
+	  /* This looks pretty bogus to me.  Doesn't TARGET_WAITKIND_SIGNALLED
+	     mean it is already dead?  This has been here since GDB 2.8, so
+	     perhaps it means rms didn't understand unix waitstatuses?
+	     For the moment I'm just kludging around this in remote.c
+	     rather than trying to change it here --kingdon, 5 Dec 1994.  */
 	  target_kill ();		/* kill mourns as well */
+
 	  printf_filtered ("\nProgram terminated with signal ");
 	  annotate_signal_name ();
 	  printf_filtered ("%s", target_signal_to_name (stop_signal));
@@ -1142,7 +1155,7 @@ wait_for_inferior ()
 		 call.  I'm not completely sure this is necessary now that we
 		 have the above checks with stop_func_start (and now that
 		 find_pc_partial_function is pickier).  */
-	      || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name)
+	      || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, stop_func_name)
 
 	      /* If none of the above apply, it is a jump within a function,
 		 or a return from a subroutine.  The other case is longjmp,
@@ -1280,6 +1293,38 @@ step_into_function:
 	  break;
 	}
 
+      /* If we're in the return path from a shared library trampoline,
+	 we want to proceed through the trampoline when stepping.  */
+      if (IN_SOLIB_RETURN_TRAMPOLINE(stop_pc, stop_func_name))
+	{
+	  CORE_ADDR tmp;
+
+	  /* Determine where this trampoline returns.  */
+	  tmp = SKIP_TRAMPOLINE_CODE (stop_pc);
+
+	  /* Only proceed through if we know where it's going.  */
+	  if (tmp)
+	    {
+	      /* And put the step-breakpoint there and go until there. */
+	      struct symtab_and_line sr_sal;
+
+	      sr_sal.pc = tmp;
+	      sr_sal.symtab = NULL;
+	      sr_sal.line = 0;
+	      /* Do not specify what the fp should be when we stop
+		 since on some machines the prologue
+		 is where the new fp value is established.  */
+	      step_resume_breakpoint =
+		set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
+	      if (breakpoints_inserted)
+		insert_breakpoints ();
+
+	      /* Restart without fiddling with the step ranges or
+		 other state.  */
+	      goto keep_going;
+	    }
+	}
+	 
       if (sal.line == 0)
 	{
 	  /* We have no line number information.  That means to stop
@@ -1885,7 +1930,7 @@ save_inferior_status (inf_status, restore_stack_info)
 }
 
 struct restore_selected_frame_args {
-  FRAME_ADDR frame_address;
+  CORE_ADDR frame_address;
   int level;
 };
 
@@ -1895,27 +1940,28 @@ static int restore_selected_frame PARAMS ((char *));
    restore_selected_frame_args * (declared as char * for catch_errors)
    telling us what frame to restore.  Returns 1 for success, or 0 for
    failure.  An error message will have been printed on error.  */
+
 static int
 restore_selected_frame (args)
      char *args;
 {
   struct restore_selected_frame_args *fr =
     (struct restore_selected_frame_args *) args;
-  FRAME fid;
+  struct frame_info *frame;
   int level = fr->level;
 
-  fid = find_relative_frame (get_current_frame (), &level);
+  frame = find_relative_frame (get_current_frame (), &level);
 
   /* If inf_status->selected_frame_address is NULL, there was no
      previously selected frame.  */
-  if (fid == 0 ||
-      FRAME_FP (fid) != fr->frame_address ||
+  if (frame == NULL ||
+      FRAME_FP (frame) != fr->frame_address ||
       level != 0)
     {
       warning ("Unable to restore previously selected frame.\n");
       return 0;
     }
-  select_frame (fid, fr->level);
+  select_frame (frame, fr->level);
   return(1);
 }
 
