@@ -1,6 +1,11 @@
 Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* archive.c (_bfd_write_archive_contents): Revert June 1 change.
+	* archive.c (_bfd_construct_extended_name_table): If
+	BFD_TRADITIONAL_FORMAT is set, limit the length of all file names
+	to ar_max_namelen.
+	(bfd_dont_truncate_arname): If BFD_TRADITIONAL_FORMAT is set, call
+	bfd_bsd_truncate_arname.
+	(_bfd_write_archive_contents): Revert June 1 change.
 
 	* elfcode.h (NAME(bfd_elf,record_link_assignment)): Add provide
 	argument.

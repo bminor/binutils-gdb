@@ -1240,6 +1240,11 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
 	return false;
 
       thislen = strlen (normal);
+
+      if (thislen > maxname
+	  && (bfd_get_file_flags (abfd) & BFD_TRADITIONAL_FORMAT) != 0)
+	thislen = maxname;
+
       if (thislen > maxname)
 	{
 	  /* Add one to leave room for \n.  */
@@ -1449,6 +1454,12 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
   const char *filename;
   int maxlen = ar_maxnamelen (abfd);
 
+  if ((bfd_get_file_flags (abfd) & BFD_TRADITIONAL_FORMAT) != 0)
+    {
+      bfd_bsd_truncate_arname (abfd, pathname, arhdr);
+      return;
+    }
+
   filename = normalize (abfd, pathname);
   if (filename == NULL)
     {
@@ -1592,14 +1603,6 @@ _bfd_write_archive_contents (arch)
 	}
     }
 
-  /* @@ This leads to archives that are incompatible with the native
-     AR on many systems, such as HP/UX and SunOS.  [Cygnus PR
-     binutils/6888] It's a nice extension, but unless it can be made
-     optional, we shouldn't use it.  This is a lame fix, but I don't
-     have time to fix it right just now.  KR 1995/06/01 */
-  /* Turning it off is a disaster for the many people who rely upon
-     it.  We should make it optional, but since that is evidently not
-     happening soon it needs to be used by default.  ILT 1995/07/04.  */
   if (!BFD_SEND (arch, _bfd_construct_extended_name_table,
 		 (arch, &etable, &elength, &ename)))
     return false;
