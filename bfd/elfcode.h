@@ -656,7 +656,8 @@ elf_object_p (abfd)
 
       /* If the section is loaded, but not page aligned, clear
          D_PAGED.  */
-      if ((i_shdrp[shindex].sh_flags & SHF_ALLOC) != 0
+      if (i_shdrp[shindex].sh_size != 0
+	  && (i_shdrp[shindex].sh_flags & SHF_ALLOC) != 0
 	  && i_shdrp[shindex].sh_type != SHT_NOBITS
 	  && (((i_shdrp[shindex].sh_addr - i_shdrp[shindex].sh_offset)
 	       % ebd->maxpagesize)

@@ -1,3 +1,8 @@
+2001-10-19  H.J. Lu <hjl@gnu.org>
+
+	* elfcode.h (elf_object_p): Don't clear D_PAGED if the section
+	size is empty.
+
 2001-10-18  H.J. Lu <hjl@gnu.org>
 
 	* elf32-i370.c (i370_elf_relocate_section): Ignore R_XXX_NONE.
