@@ -1,3 +1,10 @@
+2001-12-18  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+ 
+	* elf32-s390 (elf_s390_check_relocs): Pass addend to
+	gc_record_vtentry.
+	* elf64-s390 (elf_s390_check_relocs): Likewise.
+	Fix by Andreas Jaeger <aj@suse.de>.
+
 2001-12-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.host: Correctly match all NetBSD/mips

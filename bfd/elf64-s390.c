@@ -839,7 +839,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
         case R_390_GNU_VTENTRY:
-          if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+          if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
           break;
 
