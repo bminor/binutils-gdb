@@ -6,7 +6,8 @@
 /^host_makefile_frag@$/d
 /^target_makefile_frag@$/d
 
-/@ENABLE_CFLAGS@/s/@ENABLE_CFLAGS@//g
+/@ENABLE_CFLAGS@/s/@ENABLE_CFLAGS@/{ENABLE_CFLAGS}/g
+/^ENABLE_CFLAGS=/s/^/#/
 
 # Edit all the symbolic definitions pointing to various libraries and such.
 
@@ -132,6 +133,16 @@ readline_headers =\
 	{MAKEPEF} gdb{PROG_EXT} -o gdb {MAKEPEF_TOOL_FLAGS} {MAKEPEF_FLAGS}\
 	{REZ} "{s}"mac-gdb.r -o gdb -append -d PROG_NAME='"'gdb'"' -d VERSION_STRING='"'{version}'"'\
 
+/^install \\Option-f /,/^$/c\
+install \\Option-f all install-only\
+\
+install-only \\Option-f \
+	Duplicate -y gdb "{bindir}"gdb\
+	If "`Exists SiowGDB`" != ""\
+		Duplicate -y SiowGDB "{bindir}"SiowGDB\
+	End If\
+
+
 # Don't do any recursive subdir stuff.
 / subdir_do/s/{MAKE}/null-command/
 
@@ -145,6 +156,3 @@ SIOWgdb \\Option-f {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o\
 	{MAKEPEF} SIOWgdb{PROG_EXT} -o SIOWgdb -ft 'APPL' -fc 'gdb ' {MAKEPEF_FLAGS} \
 	{REZ} -o SIOWgdb {RIncludes}siow.r -append -d __kPrefSize=5000 -d __kMinSize=2000 -d APPNAME='"'SIOWgdb'"' \
 	{REZ} "{s}"mac-gdb.r -o SIOWgdb -append -d VERSION_STRING='"'{version}'"'\
-
-
-

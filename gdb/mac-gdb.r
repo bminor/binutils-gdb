@@ -5,12 +5,44 @@
 
 #include "mac-defs.h"
 
+/* Version resources. */
+
 resource 'vers' (1) {
-	0x02, 0x00, release, 0x00,
+	0,
+	0,
+	0,
+	0,
 	verUS,
-	"4.12.3",
-	"4.12.3, Copyright \251 1994 Free Software Foundation, Inc."
+	VERSION_STRING,
+	VERSION_STRING  " (C) 1986-95 FSF, Inc."
 };
+
+resource 'vers' (2, purgeable)  {
+	0,
+	0,
+	0,
+	0,
+	verUs,
+	VERSION_STRING,
+	"GDB " VERSION_STRING " for MPW"
+};
+
+#ifdef WANT_CFRG
+
+#include "CodeFragmentTypes.r"
+
+resource 'cfrg' (0) {
+	{
+		kPowerPC,
+		kFullLib,
+		kNoVersionNum, kNoVersionNum,
+		0, 0,
+		kIsApp, kOnDiskFlat, kZeroOffset, kWholeFork,
+		PROG_NAME
+	}
+};
+
+#endif /* WANT_CFRG */
 
 #ifdef Macgdb /* Exclude the following from SIOWgdb which uses SIOW.r.  */
 

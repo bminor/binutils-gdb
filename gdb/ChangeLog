@@ -1,3 +1,25 @@
+Mon Dec 11 18:19:16 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (powerpc-*-macos*): New target configuration.
+	* configure: Update.
+	* config/powerpc/macos.mh, config/powerpc/macos.mt,
+ 	config/powerpc/nm-macos.h, config/powerpc/tm-macos.h, mac-nat.c:
+ 	New files, native PowerMac debugging support.
+	* Makefile.in (mac-nat.o): Add build rule.
+	* mpw-config.in (enable_cflags): Add support.
+	(m68k-apple-macos, powerpc-apple-macos): Fix natdepfiles to
+	list object file instead of source file.
+	* mpw-make.sed (@ENABLE_CFLAGS@): Don't edit out, replace with
+	value of variable.
+	(install, install-only): Edit MPW-specific installation into
+	place of Unix shell code.
+	* mac-gdb.r: Fix version resources to use symbolic version strings.
+	(cfrg): New resource, code fragment for PowerMac.
+
+start-sanitize-gm
+	mpw-config.in (mips-gm-magic): New configuration.
+end-sanitize-gm
+
 Mon Dec 11 14:13:03 1995  Fred Fish  <fnf@amigalib.com>
 
 	* dbxread.c (process_one_symbol): When looking at the next

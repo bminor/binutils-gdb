@@ -469,6 +469,7 @@ ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 
 pn-*-*)			gdb_target=pn ;;
+powerpc-*-macos*)	gdb_target=macos ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
