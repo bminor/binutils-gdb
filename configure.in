@@ -115,7 +115,6 @@ case "${host}" in
   i[345]86-*-solaris2*)   host_makefile_frag=config/mh-sysv4 ;;
   i[345]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[345]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
-  i[345]86-*-win32)	  host_makefile_frag=config/mh-i386win32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
   m68k-sun-sunos*)	  host_makefile_frag=config/mh-sun3 ;;
@@ -342,7 +341,7 @@ done
 # Configure extra directories which are host specific
 
 case "${host}" in
-  i[345]86-*-win32* | i[345]86-*-go32*)
+	i[345]86-*-go32*)
 	  configdirs="$configdirs dosrel" ;;
 esac
 
@@ -359,11 +358,11 @@ case "${host}" in
   i[345]86-*-go32)
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
 	;;
-  i[345]86-*-win32)
-     noconfigdirs="patch diff flex make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
+  *-*-cygwin32)
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff flex make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
+     noconfigdirs="patch diff  make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
     ;;
 esac
 
@@ -416,13 +415,20 @@ case "${target}" in
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
-  i[345]86-*-win32)
-    # Can't build gdb for win32 if not native.
+  *-*-cygwin32)
+
     # make/glob's configure uses some AC_TRY_RUN type tests
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk expect make"
+    noconfigdirs="$noconfigdirs tcl tk expect make"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
+
+    # Can't build gdb for cygwin32 if not native.
+    case "${host}" in
+      *-*-cygwin32) ;; # keep gdb
+      *) noconfigdirs="$noconfigdirs gdb"
+    esac
+
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"

@@ -1,3 +1,7 @@
+Thu Feb  1 10:22:38 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in, config.sub: Recognize cygwin32.
+
 Wed Jan 31 14:17:10 1996  Richard Henderson  <rth@tamu.edu>
 
 	* config.guess, config.sub: Recognize A/UX.
