@@ -59,20 +59,6 @@ extern void write_inferior_status_register (struct inferior_status
 #define ARCH_NUM_REGS NUM_REGS
 #endif
 
-/* This function is called when the value of a pseudo-register needs
-   to be updated.  Typically it will be defined on a per-architecture
-   basis.  FIXME: move into gdbarch.[ch].  */
-#ifndef ARCH_FETCH_PSEUDO_REGISTERS
-#define ARCH_FETCH_PSEUDO_REGISTERS(REGNUM) /* no-op */
-#endif
-
-/* This function is called when the value of a pseudo-register needs
-   to be set or stored.  Typically it will be defined on a per-architecture
-   basis.  FIXME: move into gdbarch.[ch].  */
-#ifndef ARCH_STORE_PSEUDO_REGISTERS
-#define ARCH_STORE_PSEUDO_REGISTERS(REGNUM) /* no-op */
-#endif
-
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);

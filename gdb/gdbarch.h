@@ -604,6 +604,34 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (FETCH_PSEUDO_REGISTER)
+#define FETCH_PSEUDO_REGISTER(regnum) (internal_error ("FETCH_PSEUDO_REGISTER"), 0)
+#endif
+
+typedef void (gdbarch_fetch_pseudo_register_ftype) (int regnum);
+extern void gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, int regnum);
+extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_fetch_pseudo_register_ftype *fetch_pseudo_register);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (FETCH_PSEUDO_REGISTER)
+#define FETCH_PSEUDO_REGISTER(regnum) (gdbarch_fetch_pseudo_register (current_gdbarch, regnum))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (STORE_PSEUDO_REGISTER)
+#define STORE_PSEUDO_REGISTER(regnum) (internal_error ("STORE_PSEUDO_REGISTER"), 0)
+#endif
+
+typedef void (gdbarch_store_pseudo_register_ftype) (int regnum);
+extern void gdbarch_store_pseudo_register (struct gdbarch *gdbarch, int regnum);
+extern void set_gdbarch_store_pseudo_register (struct gdbarch *gdbarch, gdbarch_store_pseudo_register_ftype *store_pseudo_register);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (STORE_PSEUDO_REGISTER)
+#define STORE_PSEUDO_REGISTER(regnum) (gdbarch_store_pseudo_register (current_gdbarch, regnum))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
 #if (GDB_MULTI_ARCH == 0) && !defined (POINTER_TO_ADDRESS)
 #define POINTER_TO_ADDRESS(type, buf) (unsigned_pointer_to_address (type, buf))
 #endif

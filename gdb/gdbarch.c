@@ -182,6 +182,8 @@ struct gdbarch
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
   gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
+  gdbarch_fetch_pseudo_register_ftype *fetch_pseudo_register;
+  gdbarch_store_pseudo_register_ftype *store_pseudo_register;
   gdbarch_pointer_to_address_ftype *pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
@@ -295,6 +297,8 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
+  0,
   0,
   0,
   0,
@@ -564,6 +568,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
+  /* Skip verify of fetch_pseudo_register, invalid_p == 0 */
+  /* Skip verify of store_pseudo_register, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
@@ -979,6 +985,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_CONVERT_TO_RAW(type, regnum, from, to)",
                       XSTRING (REGISTER_CONVERT_TO_RAW (type, regnum, from, to)));
+#endif
+#if defined (FETCH_PSEUDO_REGISTER) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FETCH_PSEUDO_REGISTER(regnum)",
+                      XSTRING (FETCH_PSEUDO_REGISTER (regnum)));
+#endif
+#if defined (STORE_PSEUDO_REGISTER) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STORE_PSEUDO_REGISTER(regnum)",
+                      XSTRING (STORE_PSEUDO_REGISTER (regnum)));
 #endif
 #ifdef POINTER_TO_ADDRESS
   fprintf_unfiltered (file,
@@ -1568,6 +1588,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_CONVERT_TO_RAW = 0x%08lx\n",
                         (long) current_gdbarch->register_convert_to_raw
                         /*REGISTER_CONVERT_TO_RAW ()*/);
+#endif
+#ifdef FETCH_PSEUDO_REGISTER
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FETCH_PSEUDO_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->fetch_pseudo_register
+                        /*FETCH_PSEUDO_REGISTER ()*/);
+#endif
+#ifdef STORE_PSEUDO_REGISTER
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: STORE_PSEUDO_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->store_pseudo_register
+                        /*STORE_PSEUDO_REGISTER ()*/);
 #endif
 #ifdef POINTER_TO_ADDRESS
   if (GDB_MULTI_ARCH)
@@ -2798,6 +2832,40 @@ set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
                                      gdbarch_register_convert_to_raw_ftype register_convert_to_raw)
 {
   gdbarch->register_convert_to_raw = register_convert_to_raw;
+}
+
+void
+gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, int regnum)
+{
+  if (gdbarch->fetch_pseudo_register == 0)
+    internal_error ("gdbarch: gdbarch_fetch_pseudo_register invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fetch_pseudo_register called\n");
+  gdbarch->fetch_pseudo_register (regnum);
+}
+
+void
+set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch,
+                                   gdbarch_fetch_pseudo_register_ftype fetch_pseudo_register)
+{
+  gdbarch->fetch_pseudo_register = fetch_pseudo_register;
+}
+
+void
+gdbarch_store_pseudo_register (struct gdbarch *gdbarch, int regnum)
+{
+  if (gdbarch->store_pseudo_register == 0)
+    internal_error ("gdbarch: gdbarch_store_pseudo_register invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_store_pseudo_register called\n");
+  gdbarch->store_pseudo_register (regnum);
+}
+
+void
+set_gdbarch_store_pseudo_register (struct gdbarch *gdbarch,
+                                   gdbarch_store_pseudo_register_ftype store_pseudo_register)
+{
+  gdbarch->store_pseudo_register = store_pseudo_register;
 }
 
 CORE_ADDR

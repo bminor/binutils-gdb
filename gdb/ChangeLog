@@ -1,5 +1,18 @@
 2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+         * gdbarch.sh: Add FETCH_PSEUDO_REGISTER and STORE_PSEUDO_REGISTER
+         to the gdbarch structure.
+         * gdbarch.c: Regenerate.
+         * gdbarch.h: Regenerate.
+         * inferior.h (FETCH_PSEUDO_REGISTER, STORE_PSEUDO_REGISTER):
+         Delete macros.
+         * regcache.c (write_register, read_register, write_register_bytes,
+         write_register_gen, read_register_bytes, read_register_gen):
+         Rename ARCH_FECTH_PSEUDO_REGISTERS to FETCH_PSEUDO_REGISTERS and
+         ARCH_STORE_PSEUDO_REGISTER to STORE_PSEUDO_REGISTER.
+
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* gdbarch.sh: Add NUM_PSEUDO_REGS to the gdbarch structure.
 	* gdbarch.c: Regenerate. 
 	* gdbarch.h: Regenerate.
