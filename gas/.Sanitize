@@ -547,7 +547,7 @@ done
 # Check each file we removed from gas/config, and make sure it is not
 # mentioned in Makefiles or configure files.
 for lost in .. $gas_config_files; do
-  if test $lost != ..; then
+  if test $lost != .. && test $lost != CVS; then
     if test -f config/$lost; then
       :
     else
