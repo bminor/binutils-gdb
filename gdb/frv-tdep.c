@@ -1009,7 +1009,7 @@ frv_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (deprecated_inside_entry_file (func))
+  if (inside_entry_func (func))
     return;
 
   /* Check if the stack is empty.  */

@@ -1,3 +1,8 @@
+2003-10-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_frame_this_id): Call inside_entry_func()
+	instead of deprecated_inside_entry_file().
+
 2003-10-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c: Fix copy/paste hangover in comment.
