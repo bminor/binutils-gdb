@@ -1838,38 +1838,9 @@ xtensa_elf_dynamic_symbol_p (info, h)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
 {
-  if (h == NULL)
-    return FALSE;
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_DEFAULT:
-      break;
-    case STV_HIDDEN:
-    case STV_INTERNAL:
-      return FALSE;
-    case STV_PROTECTED:
-      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
-        return FALSE;
-      break;
-    }
-
-  if ((info->shared && !info->symbolic)
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return TRUE;
-
-  return FALSE;
+  /* ??? What, if anything, needs to happen wrt STV_PROTECTED and PLT
+     entries?  For now assume the worst.  */
+  return _bfd_elf_dynamic_symbol_p (h, info, 1);
 }
 
 

@@ -211,23 +211,12 @@ struct elf_link_hash_entry
    function symbols not defined in an app are set to their .plt entry,
    it's necessary for shared libs to also reference the .plt even
    though the symbol is really local to the shared lib.  */
-#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
-  (((INFO)->executable							\
-    || (INFO)->symbolic							\
-    || (H)->dynindx == -1						\
-    || ELF_ST_VISIBILITY ((H)->other) == STV_INTERNAL			\
-    || ELF_ST_VISIBILITY ((H)->other) == STV_HIDDEN			\
-    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
-   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+#define SYMBOL_REFERENCES_LOCAL(INFO, H) \
+  _bfd_elf_dynamic_symbol_p (H, INFO, 1)
 
 /* Will _calls_ to this symbol always call the version in this object?  */
-#define SYMBOL_CALLS_LOCAL(INFO, H)					\
-  (((INFO)->executable							\
-    || (INFO)->symbolic							\
-    || (H)->dynindx == -1						\
-    || ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT			\
-    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
-   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+#define SYMBOL_CALLS_LOCAL(INFO, H) \
+  _bfd_elf_dynamic_symbol_p (H, INFO, 0)
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 
@@ -1505,6 +1494,9 @@ extern bfd_boolean _bfd_elf_adjust_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_link_sec_merge_syms
   PARAMS ((struct elf_link_hash_entry *, PTR));
+
+extern bfd_boolean _bfd_elf_dynamic_symbol_p
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean));
 
 extern const bfd_target *bfd_elf32_object_p
   PARAMS ((bfd *));

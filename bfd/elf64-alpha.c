@@ -47,7 +47,7 @@
 #define ECOFF_64
 #include "ecoffswap.h"
 
-static int alpha_elf_dynamic_symbol_p
+static bfd_boolean alpha_elf_dynamic_symbol_p
   PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf64_alpha_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
@@ -269,49 +269,17 @@ struct alpha_elf_link_hash_table
 #define alpha_elf_sym_hashes(abfd) \
   ((struct alpha_elf_link_hash_entry **)elf_sym_hashes(abfd))
 
-/* Should we do dynamic things to this symbol?  */
+/* Should we do dynamic things to this symbol?  This differs from the 
+   generic version in that we never need to consider function pointer
+   equality wrt PLT entries -- we don't create a PLT entry if a symbol's
+   address is ever taken.  */
 
-static int
+static inline bfd_boolean
 alpha_elf_dynamic_symbol_p (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
-  if (h == NULL)
-    return FALSE;
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_DEFAULT:
-      break;
-    case STV_HIDDEN:
-    case STV_INTERNAL:
-      return FALSE;
-    case STV_PROTECTED:
-      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
-        return FALSE;
-      break;
-    }
-
-  if ((info->shared && !info->symbolic)
-      || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC
-	      | ELF_LINK_HASH_DEF_REGULAR
-	      | ELF_LINK_HASH_REF_REGULAR))
-	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
-    return TRUE;
-
-  return FALSE;
+  return _bfd_elf_dynamic_symbol_p (h, info, 0);
 }
 
 /* Create an entry in a Alpha ELF linker hash table.  */

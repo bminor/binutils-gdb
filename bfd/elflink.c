@@ -2474,3 +2474,63 @@ _bfd_elf_link_sec_merge_syms (h, data)
 
   return TRUE;
 }
+
+/* Returns false if the symbol referred to by H should be considered
+   to resolve local to the current module, and true if it should be
+   considered to bind dynamically.  */
+
+bfd_boolean
+_bfd_elf_dynamic_symbol_p (h, info, ignore_protected)
+     struct elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+     bfd_boolean ignore_protected;
+{
+  bfd_boolean binding_stays_local_p;
+
+  if (h == NULL)
+    return FALSE;
+
+  while (h->root.type == bfd_link_hash_indirect
+	 || h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  /* If it was forced local, then clearly it's not dynamic.  */
+  if (h->dynindx == -1)
+    return FALSE;
+  if (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL)
+    return FALSE;
+
+  /* Identify the cases where name binding rules say that a
+     visible symbol resolves locally.  */
+  binding_stays_local_p = info->executable || info->symbolic;
+
+  switch (ELF_ST_VISIBILITY (h->other))
+    {
+    case STV_INTERNAL:
+    case STV_HIDDEN:
+      return FALSE;
+
+    case STV_PROTECTED:
+      /* Proper resolution for function pointer equality may require
+	 that these symbols perhaps be resolved dynamically, even though
+	 we should be resolving them to the current module.  */
+      if (!ignore_protected)
+	binding_stays_local_p = TRUE;
+      break;
+
+    default:
+      /* With STV_DEFAULT, weak symbols do not bind locally.  */
+      if (h->root.type == bfd_link_hash_undefweak
+          || h->root.type == bfd_link_hash_defweak)
+	return TRUE;
+      break;
+    }
+
+  /* If it isn't defined locally, then clearly it's dynamic.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    return TRUE;
+
+  /* Otherwise, the symbol is dynamic if binding rules don't tell
+     us that it remains local.  */
+  return !binding_stays_local_p;
+}

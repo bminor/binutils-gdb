@@ -956,30 +956,19 @@ elf64_hppa_dynamic_symbol_p (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
-  if (h == NULL)
+  /* ??? What, if anything, needs to happen wrt STV_PROTECTED symbols
+     and relocations that retrieve a function descriptor?  Assume the
+     worst for now.  */
+  if (_bfd_elf_dynamic_symbol_p (h, info, 1))
+    {
+      /* ??? Why is this here and not elsewhere is_local_label_name.  */
+      if (h->root.root.string[0] == '$' && h->root.root.string[1] == '$')
+	return FALSE;
+
+      return TRUE;
+    }
+  else
     return FALSE;
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  if (h->root.root.string[0] == '$' && h->root.root.string[1] == '$')
-    return FALSE;
-
-  if ((info->shared && (!info->symbolic || info->allow_shlib_undefined))
-      || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
-	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
-    return TRUE;
-
-  return FALSE;
 }
 
 /* Mark all funtions exported by this file so that we can later allocate

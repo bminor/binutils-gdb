@@ -1,3 +1,14 @@
+2003-07-18  Richard Henderson  <rth@redhat.com>
+
+	* elflink.c (_bfd_elf_dynamic_symbol_p): New.
+	* elf-bfd.h (_bfd_elf_dynamic_symbol_p): Declare it.
+	(SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Use it.
+	* elf32-xtensa.c (xtensa_elf_dynamic_symbol_p): Likewise.
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Likewise.
+	* elf64-hppa.c (elf64_hppa_dynamic_symbol_p): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_dynamic_symbol_p): Likewise.
+	Update all callers to provide the relocation being resolved.
+
 2003-07-17  Shaun Jackman <sjackman@pathwayconnect.com>
 
 	* config.bfd (arm-wince-pe): Add -DARM_COFF_BUGFIX to

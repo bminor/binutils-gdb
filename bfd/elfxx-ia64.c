@@ -200,7 +200,7 @@ static bfd_boolean elfNN_ia64_modify_segment_map
 static bfd_boolean elfNN_ia64_is_local_label_name
   PARAMS ((bfd *abfd, const char *name));
 static bfd_boolean elfNN_ia64_dynamic_symbol_p
-  PARAMS ((struct elf_link_hash_entry *h, struct bfd_link_info *info));
+  PARAMS ((struct elf_link_hash_entry *h, struct bfd_link_info *info, int));
 static bfd_boolean elfNN_ia64_local_hash_table_init
   PARAMS ((struct elfNN_ia64_local_hash_table *ht, bfd *abfd,
 	   new_hash_entry_func new));
@@ -831,7 +831,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 
 	  /* Can't do anything else with dynamic symbols.  */
-	  else if (elfNN_ia64_dynamic_symbol_p (h, link_info))
+	  else if (elfNN_ia64_dynamic_symbol_p (h, link_info, r_type))
 	    continue;
 
 	  else
@@ -1508,38 +1508,16 @@ elfNN_ia64_is_local_label_name (abfd, name)
 /* Should we do dynamic things to this symbol?  */
 
 static bfd_boolean
-elfNN_ia64_dynamic_symbol_p (h, info)
+elfNN_ia64_dynamic_symbol_p (h, info, r_type)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
+     int r_type;
 {
-  if (h == NULL)
-    return FALSE;
+  bfd_boolean ignore_protected
+    = ((r_type & 0xf8) == 0x40		/* FPTR relocs */
+       || (r_type & 0xf8) == 0x50);	/* LTOFF_FPTR relocs */
 
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_INTERNAL:
-    case STV_HIDDEN:
-      return FALSE;
-    default:
-      break;
-    }
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  /* If it isn't defined locally, then clearly it's dynamic.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return TRUE;
-
-  /* Identify the cases where name binding rules say it resolves local.  */
-  return !(info->executable || info->symbolic);
+  return _bfd_elf_dynamic_symbol_p (h, info, ignore_protected);
 }
 
 static bfd_boolean
@@ -2415,7 +2393,7 @@ allocate_global_data_got (dyn_i, data)
 
   if ((dyn_i->want_got || dyn_i->want_gotx)
       && ! dyn_i->want_fptr
-      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, 0))
      {
        dyn_i->got_offset = x->ofs;
        x->ofs += 8;
@@ -2427,7 +2405,7 @@ allocate_global_data_got (dyn_i, data)
     }
   if (dyn_i->want_dtpmod)
     {
-      if (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      if (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, 0))
 	{
 	  dyn_i->dtpmod_offset = x->ofs;
 	  x->ofs += 8;
@@ -2464,7 +2442,7 @@ allocate_global_fptr_got (dyn_i, data)
 
   if (dyn_i->want_got
       && dyn_i->want_fptr
-      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, R_IA64_FPTR64LSB))
     {
       dyn_i->got_offset = x->ofs;
       x->ofs += 8;
@@ -2482,7 +2460,7 @@ allocate_local_got (dyn_i, data)
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
   if ((dyn_i->want_got || dyn_i->want_gotx)
-      && !elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+      && !elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, 0))
     {
       dyn_i->got_offset = x->ofs;
       x->ofs += 8;
@@ -2576,7 +2554,7 @@ allocate_plt_entries (dyn_i, data)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
       /* ??? Versioned symbols seem to lose ELF_LINK_HASH_NEEDS_PLT.  */
-      if (elfNN_ia64_dynamic_symbol_p (h, x->info))
+      if (elfNN_ia64_dynamic_symbol_p (h, x->info, 0))
 	{
 	  bfd_size_type offset = x->ofs;
 	  if (offset == 0)
@@ -2654,7 +2632,10 @@ allocate_dynrel_entries (dyn_i, data)
   bfd_boolean dynamic_symbol, shared, resolved_zero;
 
   ia64_info = elfNN_ia64_hash_table (x->info);
-  dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info);
+
+  /* Note that this can't be used in relation to FPTR relocs below.  */
+  dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, 0);
+
   shared = x->info->shared;
   resolved_zero = (dyn_i->h
 		   && ELF_ST_VISIBILITY (dyn_i->h->other)
@@ -3342,7 +3323,7 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
 		|| ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
 		|| dyn_i->h->root.type != bfd_link_hash_undefweak)
 	    && dyn_r_type != R_IA64_DTPREL64LSB)
-           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
+           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info, dyn_r_type)
 	   || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
 	  && (!dyn_i->want_ltoff_fptr
 	      || !info->pie
@@ -3807,7 +3788,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sym_sec;
       bfd_byte *hit_addr;
       bfd_boolean dynamic_symbol_p;
-      bfd_boolean local_symbol_p;
       bfd_boolean undef_weak_ref;
 
       r_type = ELFNN_R_TYPE (rel->r_info);
@@ -3918,12 +3898,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
       hit_addr = contents + rel->r_offset;
       value += rel->r_addend;
-      dynamic_symbol_p = elfNN_ia64_dynamic_symbol_p (h, info);
-      /* Is this symbol locally defined? A protected symbol is locallly
-	 defined. But its function descriptor may not. Use it with
-	 caution.  */
-      local_symbol_p = (! dynamic_symbol_p
-			|| ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
+      dynamic_symbol_p = elfNN_ia64_dynamic_symbol_p (h, info, r_type);
 
       switch (r_type)
 	{
@@ -3952,7 +3927,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* If we don't need dynamic symbol lookup, find a
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
-	      if (! local_symbol_p)
+	      if (dynamic_symbol_p)
 		{
 		  dynindx = h->dynindx;
 		  addend = rel->r_addend;
@@ -4300,7 +4275,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If we don't need dynamic symbol lookup, install two
 		 RELATIVE relocations.  */
-	      if (local_symbol_p)
+	      if (!dynamic_symbol_p)
 		{
 		  unsigned int dyn_r_type;
 
