@@ -439,10 +439,6 @@ lin_lwp_resume (int pid, int step, enum target_signal signo)
     {
       pid = GET_LWP (lp->pid);
 
-      /* Mark LWP as not stopped to prevent it from being continued by
-	 resume_callback.  */
-      lp->stopped = 0;
-
       /* Remember if we're stepping.  */
       lp->step = step;
 
@@ -455,6 +451,10 @@ lin_lwp_resume (int pid, int step, enum target_signal signo)
 	  gdb_assert (signo == TARGET_SIGNAL_0);
 	  return;
 	}
+
+      /* Mark LWP as not stopped to prevent it from being continued by
+	 resume_callback.  */
+      lp->stopped = 0;
     }
 
   if (resume_all)

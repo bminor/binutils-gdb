@@ -1,5 +1,8 @@
 2001-03-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* lin-lwp.c (lin_lwp_resume): Don't mark LWP as not stopped until
+	we're absolutely sure we're going to resume it.
+
 	* thread-db.c (check_event): Don't report an error if we encounter
 	a thread creation event for a thread that's already in the thread
 	list, since that may legitemately happen.  Instead only call
