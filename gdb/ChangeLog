@@ -1,8 +1,15 @@
+<<<<<<< ChangeLog
+Fri Jul 30 08:58:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* paread.c (pa_symtab_read): Put file-local symbols in minimal symbols.
+
+=======
 Fri Jul 30 00:18:40 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* Makefile.in (ALLDEPFILES):  Add delta68-nat.c
 	* Makefile.in (delta68-nat.o):  Add dependency.
 
+>>>>>>> 1.1564
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* value.h (COERCE_ENUM): Use COERCE_REF to coerce refs; value_ind
