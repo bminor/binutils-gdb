@@ -1,3 +1,8 @@
+Wed Oct 18 16:50:54 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* coffgen.c (coff_find_nearest_line): Cast used_by_bfd value
+	before assigning to sec_data.
+
 Wed Oct 18 13:25:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (_bfd_ecoff_find_nearest_line): The offset argument is
