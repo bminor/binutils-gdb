@@ -925,7 +925,7 @@ md_apply_fix (fixP, val)
       md_number_to_chars (dest, (valueT) val, 4);
       break;
     case R_MPPCR:
-      overflow = (val < 0) ? !(val & 0x8000) : (val & 0x8000); 
+      overflow = (val < -65536) || (val > 65532);
       if (overflow)
 	{
 	  as_bad_where (fixP -> fx_file, fixP -> fx_line, "PC relative target out of range");
