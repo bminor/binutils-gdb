@@ -2,6 +2,7 @@ Mon Mar 11 09:53:25 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* compile.c: #include "wait.h".
  	(sim_resume, sleep insn): Check program exit status in r0.
+	(sim_resume, shift insns): Fix setting of overflow flag for shal.
 	* run.c: #include <signal.h>.
 	(main): Abort if program got SIGILL.
 	Print error message if argument is invalid.

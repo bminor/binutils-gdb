@@ -1171,32 +1171,38 @@ sim_resume (step, siggnal)
 	  printf ("%c", cpu.regs[2]);
 	  goto next;
 
-	  OSHIFTS (O_NOT, rd = ~rd);
-	  OSHIFTS (O_SHLL, c = rd & hm;
+	  OSHIFTS (O_NOT, rd = ~rd; v = 0;);
+	  OSHIFTS (O_SHLL, c = rd & hm; v = 0;
 		   rd <<= 1);
-	  OSHIFTS (O_SHLR, c = rd & 1;
+	  OSHIFTS (O_SHLR, c = rd & 1; v = 0;
 		   rd = (unsigned int) rd >> 1);
 	  OSHIFTS (O_SHAL, c = rd & hm;
+		   v = (rd & hm) != ((rd & (hm >> 1)) << 1);
 		   rd <<= 1);
 	  OSHIFTS (O_SHAR, t = rd & hm;
 		   c = rd & 1;
+		   v = 0;
 		   rd >>= 1;
 		   rd |= t;
 		   );
 	  OSHIFTS (O_ROTL, c = rd & hm;
+		   v = 0;
 		   rd <<= 1;
 		   rd |= C);
 	  OSHIFTS (O_ROTR, c = rd & 1;
+		   v = 0;
 		   rd = (unsigned int) rd >> 1;
 		   if (c) rd |= hm;);
 	  OSHIFTS (O_ROTXL, t = rd & hm;
 		   rd <<= 1;
 		   rd |= C;
 		   c = t;
+		   v = 0;
 		   );
 	  OSHIFTS (O_ROTXR, t = rd & 1;
 		   rd = (unsigned int) rd >> 1;
-		   if (C) rd |= hm; c = t;);
+		   if (C) rd |= hm; c = t;
+		   v = 0;);
 
 	case O (O_JMP, SB):
 	  {
@@ -1433,27 +1439,22 @@ sim_resume (step, siggnal)
 
 
     shift8:
-      /* Set flags after an 8 bit shift op, carry set in insn */
+      /* Set flags after an 8 bit shift op, carry,overflow set in insn */
       n = (rd & 0x80);
-      v = 0;
       nz = rd & 0xff;
       SET_B_REG (code->src.reg, rd);
       goto next;
 
-
     shift16:
-      /* Set flags after an 16 bit shift op, carry set in insn */
+      /* Set flags after an 16 bit shift op, carry,overflow set in insn */
       n = (rd & 0x8000);
-      v = 0;
       nz = rd & 0xffff;
-
       SET_W_REG (code->src.reg, rd);
       goto next;
 
     shift32:
-      /* Set flags after an 32 bit shift op, carry set in insn */
+      /* Set flags after an 32 bit shift op, carry,overflow set in insn */
       n = (rd & 0x80000000);
-      v = 0;
       nz = rd & 0xffffffff;
       SET_L_REG (code->src.reg, rd);
       goto next;
