@@ -191,6 +191,11 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # END CYGNUS LOCAL
+# start-sanitize-tic80
+	tic80)				# CYGNUS LOCAL fnf/TIc80
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-tic80
 # start-sanitize-v850
 	v850)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
@@ -241,6 +246,10 @@ case $basic_machine in
 		;;
 	mips16-*) # CYGNUS LOCAL krk/mips16
 		;;
+# start-sanitize-tic80
+	tic80-*)						# CYGNUS LOCAL fnf/TIc80
+		;;
+# end-sanitize-tic80
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 	386bsd)						# CYGNUS LOCAL
