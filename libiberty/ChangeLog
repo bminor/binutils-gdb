@@ -1,3 +1,22 @@
+2002-06-05  Geoffrey Keating  <geoffk@redhat.com>
+
+	* hashtab.c (htab_create): New stub function for backward
+	compatibility.
+	(htab_try_create): Likewise.
+
+2002-06-03  Geoffrey Keating  <geoffk@redhat.com>
+
+	* hashtab.c (htab_create): Delete.
+	(htab_try_create): Delete.
+	(htab_create_alloc): New.
+	(htab_delete): Support user-specified memory allocation.
+	(htab_expand): Likewise.
+
+2002-05-22  Roman Lechtchinsky  <rl@cs.tu-berlin.de>
+
+	* configure.in: Fix typo in the code checking for sys_errlist.
+	* configure: Regenerated.
+
 2002-05-13  Andreas Schwab  <schwab@suse.de>
 
 	* config.table: Use mh-x86pic also for x86-64.
@@ -30,7 +49,7 @@
 
 2002-03-30  Bryce McKinlay  <bryce@waitaki.otago.ac.nz>
 
-	* cp-demangle.c (java_demangle_v3): Don't try to release "demangled"
+	* cp-demangle.c (java_demangle_v3): Don't try to release "demangled" 
 	if it is NULL.
 
 2002-03-27  DJ Delorie  <dj@redhat.com>
@@ -89,7 +108,7 @@
 
 	* xmalloc.c (xmalloc_fail): Clarify error message.
 
-2002-02-21  Jim Blandy  <jimb@redhat.com>
+2002-02-22  Jim Blandy  <jimb@redhat.com>
 
 	* splay-tree.c (splay_tree_xmalloc_allocate,
 	splay_tree_xmalloc_deallocate): New functions.
