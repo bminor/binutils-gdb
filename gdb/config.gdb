@@ -170,6 +170,7 @@ case ${srcdir} in
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
 
+rm -f Makefile
 make "srcdir=${srcdir}" \
   "M_MAKEFILE=$srcdir/tconfig/$target $srcdir/xconfig/$host" \
   -f $srcdir/Makefile.dist Makefile

@@ -26,7 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ptrdiff_t int
 #define __ONEFILE
 
-#include <stdlib.h>
+/* We can't declare malloc and realloc here because we don't know
+   if they are char * or void *, and the compiler will give an error
+   if we get it wrong and they happen to be defined in some header
+   file e.g. <stdio.h>.  We can't include <stdlib.h> here because
+   it has some incompatability with our own includes, e.g. size_t or 
+   whatever.  So we just punt.  This causes malloc and realloc to
+   default to returning "int", which works for most cases we care
+   about.  FIXME-somehow.  */
+/* #include <stdlib.h> */
 #include "gmalloc.h"
 
 extern char *getenv();
@@ -71,7 +79,7 @@ DEFUN(tr_mallochook, (size), size_t size)
   PTR hdr;
 
   __malloc_hook = old_malloc_hook;
-  hdr = malloc(size);
+  hdr = (PTR) malloc(size);
   __malloc_hook = tr_mallochook;
 
   /* We could be printing a NULL here; that's OK */
@@ -94,7 +102,7 @@ DEFUN(tr_reallochook, (ptr, size), PTR ptr AND size_t size)
   __free_hook = old_free_hook;
   __malloc_hook = old_malloc_hook;
   __realloc_hook = old_realloc_hook;
-  hdr = realloc(ptr, size);
+  hdr = (PTR) realloc(ptr, size);
   __free_hook = tr_freehook;
   __malloc_hook = tr_mallochook;
   __realloc_hook = tr_reallochook;
