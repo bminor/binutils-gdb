@@ -394,10 +394,10 @@ operation and reopen the bfd again, to get a fresh copy of the data structures.
 All of bfd lives in one directory.
 @page
 @node aout backends, coff backends, What to Put Where, BFD back end
-@include  aoutx.h.texi
+@include  aoutx.texi
 @page
 @node coff backends, oasys backends, aout backends, BFD back end
-@include  coffcode.h.texi
+@include  coffcode.texi
 @page
 @node Index,  , BFD, Top
 @unnumbered Function Index
