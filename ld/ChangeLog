@@ -1,5 +1,8 @@
 Sun Feb  6 20:31:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* ldmain.c (main): Call xatexit, not atexit.
+	Call xmalloc_set_program_name.
+
 	* ldlang.c (lang_size_sections): Check if bfd_relax_section set
 	bfd_errno. 
 
