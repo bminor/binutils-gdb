@@ -1,5 +1,9 @@
 2002-07-18  Joel Brobecker  <brobecker@gnat.com>
 
+	* infrun.c: Re-indent using gdb_indent.sh.
+
+2002-07-18  Joel Brobecker  <brobecker@gnat.com>
+
 	* infrun.c (handle_inferior_event): Remove unneeded extra brace.
 	Leave the indentation temporarily untouched, to minimize the diffs.
 
