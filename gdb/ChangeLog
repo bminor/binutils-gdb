@@ -1,3 +1,13 @@
+Tue Jan 11 00:53:46 1994  John Gilmore  (gnu@cygnus.com)
+
+	* a29k-tdep.c (init_frame_info):  Cast null arg to examine_tag.
+	(pop_frame):  Restore PC2 and LR0 from dummy frames.
+	(push_dummy_frame):  Save PC2 and LR0 into dummy frames.
+	(setup_arbitrary_frame):  Handle 3 args and set up real frames.
+	* config/a29k/tm-a29k.h (FRAME_NUM_ARGS):  Update comments.
+	(DUMMY_FRAME_RSIZE):  Add 2 longwords for PC2 and LR0.
+	(SETUP_ARBITRARY_FRAME):  Define.
+
 Tue Jan 11 06:59:10 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* infrun.c, config/mips/tm-irix5.h: Remove #if 0'd AT_FUNCTION_START.

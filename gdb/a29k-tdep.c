@@ -437,14 +437,14 @@ init_frame_info (innermost_frame, fci)
 	   after the trace-back tag.  */
 	p += 4;
     }
+
   /* We've found the start of the function.  
-   * Try looking for a tag word that indicates whether there is a
-   * memory frame pointer and what the memory stack allocation is.
-   * If one doesn't exist, try using a more exhaustive search of
-   * the prologue.  For now we don't care about the argcount or
-   * whether or not the routine is transparent.
-   */
-  if (examine_tag(p-4,&trans,NULL,&msize,&mfp_used)) /* Found a good tag */
+     Try looking for a tag word that indicates whether there is a
+     memory frame pointer and what the memory stack allocation is.
+     If one doesn't exist, try using a more exhaustive search of
+     the prologue.  */
+
+  if (examine_tag(p-4,&trans,(int *)NULL,&msize,&mfp_used)) /* Found good tag */
       examine_prologue (p, &rsize, 0, 0);
   else 						/* No tag try prologue */
       examine_prologue (p, &rsize, &msize, &mfp_used);
@@ -730,6 +730,8 @@ pop_frame ()
   CORE_ADDR rfb = read_register (RFB_REGNUM);				      
   CORE_ADDR gr1 = fi->frame + fi->rsize;
   CORE_ADDR lr1;							      
+  CORE_ADDR original_lr0;
+  int must_fix_lr0 = 0;
   int i;
 
   /* If popping a dummy frame, need to restore registers.  */
@@ -744,15 +746,23 @@ pop_frame ()
 	write_register (SR_REGNUM(i+160), read_register (lrnum++));
       for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
 	write_register (RETURN_REGNUM + i, read_register (lrnum++));
-      /* Restore the PCs.  */
+      /* Restore the PCs and prepare to restore LR0.  */
       write_register(PC_REGNUM, read_register (lrnum++));
-      write_register(NPC_REGNUM, read_register (lrnum));
+      write_register(NPC_REGNUM, read_register (lrnum++));
+      write_register(PC2_REGNUM, read_register (lrnum++));
+      original_lr0 = read_register (lrnum++);
+      must_fix_lr0 = 1;
     }
 
   /* Restore the memory stack pointer.  */
   write_register (MSP_REGNUM, fi->saved_msp);				      
   /* Restore the register stack pointer.  */				      
   write_register (GR1_REGNUM, gr1);
+
+  /* If we popped a dummy frame, restore lr0 now that gr1 has been restored. */
+  if (must_fix_lr0) 
+    write_register (LR0_REGNUM, original_lr0);
+
   /* Check whether we need to fill registers.  */			      
   lr1 = read_register (LR0_REGNUM + 1);				      
   if (lr1 > rfb)							      
@@ -782,8 +792,13 @@ push_dummy_frame ()
   long w;
   CORE_ADDR rab, gr1;
   CORE_ADDR msp = read_register (MSP_REGNUM);
-  int lrnum,  i, saved_lr0;
-  
+  int lrnum, i;
+  CORE_ADDR original_lr0;
+      
+  /* Read original lr0 before changing gr1.  This order isn't really needed
+     since GDB happens to have a snapshot of all the regs and doesn't toss
+     it when gr1 is changed.  But it's The Right Thing To Do.  */
+  original_lr0 = read_register (LR0_REGNUM);
 
   /* Allocate the new frame. */ 
   gr1 = read_register (GR1_REGNUM) - DUMMY_FRAME_RSIZE;
@@ -826,10 +841,53 @@ push_dummy_frame ()
     write_register (lrnum++, read_register (SR_REGNUM (i + 160)));
   for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
     write_register (lrnum++, read_register (RETURN_REGNUM + i));
-  /* Save the PCs.  */
+  /* Save the PCs and LR0.  */
   write_register (lrnum++, read_register (PC_REGNUM));
-  write_register (lrnum, read_register (NPC_REGNUM));
+  write_register (lrnum++, read_register (NPC_REGNUM));
+  write_register (lrnum++, read_register (PC2_REGNUM));
+  write_register (lrnum++, original_lr0);
 }
+
+
+
+/*
+   This routine takes three arguments and makes the cached frames look
+   as if these arguments defined a frame on the cache.  This allows the
+   rest of `info frame' to extract the important arguments without much
+   difficulty.  Since an individual frame on the 29K is determined by
+   three values (FP, PC, and MSP), we really need all three to do a
+   good job.  */
+
+FRAME
+setup_arbitrary_frame (argc, argv)
+     int argc;
+     FRAME_ADDR *argv;
+{
+  FRAME fid;
+
+  if (argc != 3)
+    error ("AMD 29k frame specifications require three arguments: rsp pc msp");
+
+  fid = create_new_frame (argv[0], argv[1]);
+
+  if (!fid)
+    fatal ("internal: create_new_frame returned invalid frame id");
+  
+  /* Creating a new frame munges the `frame' value from the current
+     GR1, so we restore it again here.  FIXME, untangle all this
+     29K frame stuff...  */
+  fid->frame = argv[0];
+
+  /* Our MSP is in argv[2].  It'd be intelligent if we could just
+     save this value in the FRAME.  But the way it's set up (FIXME),
+     we must save our caller's MSP.  We compute that by adding our
+     memory stack frame size to our MSP.  */
+  fid->saved_msp = argv[2] + fid->msize;
+
+  return fid;
+}
+
+
 
 enum a29k_processor_types processor_type = a29k_unknown;
 
