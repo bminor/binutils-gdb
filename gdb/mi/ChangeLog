@@ -1,3 +1,8 @@
+2001-08-17  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmd-var.c (varobj_update_one): Update call to
+	varobj_update to reflect recent api change.
+
 2001-07-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c: Include "gdb.h".

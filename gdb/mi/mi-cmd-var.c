@@ -461,7 +461,7 @@ varobj_update_one (struct varobj *var)
   struct varobj **cc;
   int nc;
 
-  nc = varobj_update (var, &changelist);
+  nc = varobj_update (&var, &changelist);
 
   /* nc == 0 means that nothing has changed.
      nc == -1 means that an error occured in updating the variable.
