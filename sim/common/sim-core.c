@@ -33,6 +33,13 @@
 static MODULE_INIT_FN sim_core_init;
 static MODULE_UNINSTALL_FN sim_core_uninstall;
 
+#if (WITH_DEVICES)
+/* TODO: create sim/common/device.h */
+void device_error (device *me, char* message, ...);
+int device_io_read_buffer(device *me, void *dest, int space, address_word addr, unsigned nr_bytes, sim_cpu *processor, sim_cia cia);
+int device_io_write_buffer(device *me, const void *source, int space, address_word addr, unsigned nr_bytes, sim_cpu *processor, sim_cia cia);
+#endif
+
 EXTERN_SIM_CORE\
 (SIM_RC)
 sim_core_install (SIM_DESC sd)
@@ -103,7 +110,7 @@ sim_core_signal (SIM_DESC sd,
   switch (sig)
     {
     case sim_core_unmapped_signal:
-      sim_io_eprintf (sd, "core: %d byte %s to unmaped address 0x%lx at 0x%lx\n",
+      sim_io_eprintf (sd, "core: %d byte %s to unmapped address 0x%lx at 0x%lx\n",
 		      nr_bytes, copy, (unsigned long) addr, (unsigned long) ip);
       sim_engine_halt (sd, cpu, NULL, cia, sim_stopped, SIM_SIGSEGV);
       break;
@@ -524,7 +531,9 @@ sim_core_read_buffer (SIM_DESC sd,
 				(unsigned_1*)buffer + count,
 				mapping->space,
 				raddr,
-				nr_bytes) != nr_bytes)
+				nr_bytes, 
+				cpu, 
+				CIA_GET(cpu)) != nr_bytes)
 	break;
       count += nr_bytes;
     }
@@ -570,7 +579,9 @@ sim_core_write_buffer (SIM_DESC sd,
 				 (unsigned_1*)buffer + count,
 				 mapping->space,
 				 raddr,
-				 nr_bytes) != nr_bytes)
+				 nr_bytes,
+				 cpu, 
+				 CIA_GET(cpu)) != nr_bytes)
 	break;
       count += nr_bytes;
     }
