@@ -471,7 +471,7 @@ struct _sim_cpu {
   if ((HIACCESS != 0) || (LOACCESS != 0)) \
     sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
 }
-  /* end-sanitize-r5900 */
+  /* start-sanitize-r5900 */
 #undef CHECKHILO
 #define CHECKHILO(s) {\
   if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\

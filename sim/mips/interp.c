@@ -3735,10 +3735,12 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
        HIACCESS--;
       if (LOACCESS > 0)
        LOACCESS--;
+      /* start-sanitize-r5900 */
       if (HI1ACCESS > 0)
        HI1ACCESS--;
       if (LO1ACCESS > 0)
        LO1ACCESS--;
+      /* end-sanitize-r5900 */
 #endif /* WARN_LOHI */
 
       /* For certain MIPS architectures, GPR[0] is hardwired to zero. We
