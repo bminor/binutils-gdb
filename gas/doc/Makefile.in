@@ -1,6 +1,5 @@
 # Makefile for GNU Assembler documentation
-#  - see pretex.m4 for discussion of preprocessor definitions
-#   Copyright (C) 1987-1992 Free Software Foundation, Inc.
+#   Copyright (C) 1987-1993 Free Software Foundation, Inc.
 
 #This file is part of GNU GAS.
 
@@ -59,18 +58,11 @@ AR = ar
 AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
-TEXI2DVI = texi2dvi
+TEXI2DVI = TEXINPUTS=$$TEXINPUTS:$(TEXIDIR) texi2dvi
 RANLIB = ranlib
 
-# What version of the manual you want (see *.m4); "all" includes everything
+# What version of the manual you want; "all" includes everything
 CONFIG=all
-
-# Sun/Berkeley m4 doesn't have all the things we need; use GNU or sV
-M4=m4
-#M4=/usr/5bin/m4
-
-# Directory for gas source
-srcdir=..
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../../texinfo
@@ -89,8 +81,13 @@ install:
 info: as.info
 dvi: as.dvi
 
-as.info: as-${CONFIG}.texinfo
-	$(MAKEINFO) -o as.info $(srcdir)/as-${CONFIG}.texinfo
+asdoc-config.texi: $(CONFIG).texi
+	ln -s $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
+	ln $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
+	cp $(srcdir)/$(CONFIG).texi ./asdoc-config.texi
+
+as.info: as.texinfo asdoc-config.texi
+	$(MAKEINFO) -o as.info as.texinfo
 
 install-info: as.info
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
@@ -100,12 +97,10 @@ install-info: as.info
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
+dvi: as.dvi
+
 as.dvi:	as-${CONFIG}.texinfo
-	if [ -f $(srcdir)/as-$(CONFIG).texinfo ] ; then \
-	  $(TEXI2DVI) $(srcdir)/as-$(CONFIG).texinfo ; \
-	else \
-	  $(TEXI2DVI) as-$(CONFIG).texinfo ; \
-	fi
+	$(TEXI2DVI) as-${CONFIG}.texinfo
 	mv as-${CONFIG}.dvi as.dvi
 
 # ROFF doc targets as.ms, as.mm, as.me
@@ -138,44 +133,6 @@ as.me: as-${CONFIG}.texinfo
 		as-${CONFIG}.texinfo | \
 	texi2roff -me >as.me 
 
-
-
-as-all.texinfo: as.texinfo pretex.m4 none.m4 all.m4
-	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 $(srcdir)/as.texinfo >as-all.texinfo
-
-as-a29k.texinfo: as.texinfo pretex.m4 none.m4 a29k.m4
-	${M4} pretex.m4 none.m4 a29k.m4 as.texinfo >as-a29k.texinfo
-
-as-a29k-coff.texinfo: as.texinfo pretex.m4 none.m4 a29k-coff.m4
-	${M4} pretex.m4 none.m4 a29k-coff.m4 as.texinfo >as-a29k-coff.texinfo
-
-as-gen.texinfo: as.texinfo pretex.m4 none.m4 gen.m4
-	${M4} pretex.m4 none.m4 gen.m4 as.texinfo >as-gen.texinfo
-
-as-h8.texinfo: as.texinfo pretex.m4 none.m4 h8.m4
-	${M4} pretex.m4 none.m4 h8.m4 as.texinfo >as-h8.texinfo
-
-as-z8000.texinfo: as.texinfo pretex.m4 none.m4 z8000.m4
-	${M4} pretex.m4 none.m4 z8000.m4 as.texinfo >as-z8000.texinfo
-
-as-i80386.texinfo: as.texinfo pretex.m4 none.m4 i80386.m4
-	${M4} pretex.m4 none.m4 i80386.m4 as.texinfo >as-i80386.texinfo
-
-as-i960.texinfo: as.texinfo pretex.m4 none.m4 i960.m4
-	${M4} pretex.m4 none.m4 i960.m4 as.texinfo >as-i960.texinfo
-
-as-m680x0.texinfo: as.texinfo pretex.m4 none.m4 m680x0.m4
-	${M4} pretex.m4 none.m4 m680x0.m4 as.texinfo >as-m680x0.texinfo
-
-as-sparc.texinfo: as.texinfo pretex.m4 none.m4 sparc.m4
-	${M4} pretex.m4 none.m4 sparc.m4 as.texinfo >as-sparc.texinfo
-
-as-vax.texinfo: as.texinfo pretex.m4 none.m4 vax.m4
-	${M4} pretex.m4 none.m4 vax.m4 as.texinfo >as-vax.texinfo
-
-as-vintage.texinfo: as.texinfo pretex.m4 none.m4 vintage.m4
-	${M4} pretex.m4 none.m4 vintage.m4 as.texinfo >as-vintage.texinfo
-
 clean-info:
 	rm -f as-${CONFIG}.* as.dvi as.info*
 
@@ -183,4 +140,3 @@ force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
-

@@ -27,25 +27,14 @@
 # appropriate for this directory.  For more information, check any
 # existing configure script.
 
-srctrigger=all.m4
+srctrigger=as.texinfo
 srcname="gas doc"
 
 # per-host:
 
 # per-target:
 
-# Make this link, so the Makefile's as-${CONFIG} references can all work,
-# while we only keep as-all.texinfo in the source tree.
-
-cfgs="all a29k a29k-coff gen h8 z8000 i80386 m680x0 sparc vax vintage"
 files=""
-if [ $srcdir != "." ] && [ `cd $srcdir ; pwd` != `pwd` ]; then
-  for cfg in $cfgs ; do
-    if [ -r $srcdir/as-$cfg.texinfo ]; then
-      files="$files as-$cfg.texinfo"
-    fi
-  done
-fi
-links="$files"
+links=""
 
 # end of gas/doc/configure.in

@@ -27,23 +27,9 @@ Things-to-keep:
 
 Makefile.in
 configure.in
-a29k-coff.m4
-a29k.m4
-all.m4
-as-all.texinfo
+all.texi
 as.1
 as.texinfo
-gen.m4
-h8.m4
-i80386.m4
-i960.m4
-m680x0.m4
-none.m4
-pretex.m4
-sparc.m4
-vax.m4
-vintage.m4
-z8000.m4
 
 Do-last:
 
@@ -51,7 +37,12 @@ Do-last:
 #
 #
 # $Log$
-# Revision 1.8  1993/03/02 17:57:05  raeburn
+# Revision 1.9  1993/04/08 03:12:53  pesch
+# Converted to Texinfo conditionals; no longer need M4.
+# Checked makeinfo output for "all" config; other old M4 configs now sanitized
+# out, will be replaced by .texi configs as each config is tested.
+#
+# Revision 1.8  1993/03/02  17:57:05  raeburn
 # ChangeLog is gone
 #
 # Revision 1.7  1993/02/13  10:12:26  zoo
