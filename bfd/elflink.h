@@ -272,6 +272,38 @@ elf_link_add_object_symbols (abfd, info)
 	      char *msg;
 	      bfd_size_type sz;
 
+	      name += sizeof ".gnu.warning." - 1;
+
+	      /* If this is a shared object, then look up the symbol
+		 in the hash table.  If it is there, and it is already
+		 been defined, then we will not be using the entry
+		 from this shared object, so we don't need to warn.
+		 FIXME: If we see the definition in a regular object
+		 later on, we will warn, but we shouldn't.  The only
+		 fix is to keep track of what warnings we are supposed
+		 to emit, and then handle them all at the end of the
+		 link.  */
+	      if ((abfd->flags & DYNAMIC) != 0
+		  && abfd->xvec == info->hash->creator)
+		{
+		  struct elf_link_hash_entry *h;
+
+		  h = elf_link_hash_lookup (elf_hash_table (info), name,
+					    false, false, true);
+
+		  /* FIXME: What about bfd_link_hash_common?  */
+		  if (h != NULL
+		      && (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak))
+		    {
+		      /* We don't want to issue this warning.  Clobber
+                         the section size so that the warning does not
+                         get copied into the output file.  */
+		      s->_raw_size = 0;
+		      continue;
+		    }
+		}
+
 	      sz = bfd_section_size (abfd, s);
 	      msg = (char *) bfd_alloc (abfd, sz);
 	      if (msg == NULL)
@@ -281,10 +313,8 @@ elf_link_add_object_symbols (abfd, info)
 		goto error_return;
 
 	      if (! (_bfd_generic_link_add_one_symbol
-		     (info, abfd,
-		      name + sizeof ".gnu.warning." - 1,
-		      BSF_WARNING, s, (bfd_vma) 0, msg, false, collect,
-		      (struct bfd_link_hash_entry **) NULL)))
+		     (info, abfd, name, BSF_WARNING, s, (bfd_vma) 0, msg,
+		      false, collect, (struct bfd_link_hash_entry **) NULL)))
 		goto error_return;
 
 	      if (! info->relocateable)

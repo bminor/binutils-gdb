@@ -1,8 +1,40 @@
+Fri Feb 14 19:08:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Don't issue a warning
+	about a symbol defined in a dynamic object if it has already been
+	defined in a regular object.
+
 Thu Feb 13 20:53:22 1997  Klaus Kaempf  (kkaempf@progis.de)
 
 	* makefile.vms: Add gcc flags to allow compiling with current gcc
 	snapshot
 	(targmatch.h): New dependency.
+
+	* reloc.c (BFD_RELOC_ALPHA_CODEADDR): New relocation for
+	openVMS/Alpha.
+	* evax.h (ALPHA_R_CODEADDR): New relocation.
+	* evax-alpha.c (ALPHA_R_CODEADDR): 64 bit procedure relocation for
+	openVMS/Alpha.
+	* evax-etir.c (ALPHA_R_CODEADDR): Output object code for this
+	relocation.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
+	Restrict symbol length to 64 bytes, case preserving:
+	* evax-emh.c (_bfd_evax_write_emh): Remove case hacking.
+	* evax-misc.c (_bfd_evax_case_hack_symbol): Remove.
+	(_bfd_evax_length_hash_symbol): Added.
+	* evax-etir.c (_bfd_evax_write_etir): Call
+	_bfd_evax_length_hash_symbol before output of symbol.
+	* evax-egsd.c (_bfd_evax_write_egsd): Likewise.
+	* evax.h (flag_hash_long_names, flag_show_after_trunc): Remove.
+
+	* evax-emh.c: Output filename to object file without path.
+
+	* evax-egsd.c: New sections for local and global commons.
+
+	* evax-alpha.c, evax-emh.c, evax-egsd.c, evax-etir.c,
+	evax-misc.c, evax.h: Remove 8 bit characters from copyright
+	notices.  Replace AXP with Alpha.
 
 Wed Feb 12 18:10:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
