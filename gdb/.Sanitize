@@ -42,7 +42,6 @@ altos-xdep.c
 am29k-opcode.h
 am29k-pinsn.c
 am29k-tdep.c
-ansidecl.h
 arm-convert.s
 arm-pinsn.c
 arm-tdep.c

@@ -1,3 +1,12 @@
+Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
+
+	* ansidecl.h:  Removed, is duplicate of ../include/ansidecl.h
+
+Mon Jan 20 19:06:28 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* main.c (main):  Make option_index local to keep new getopt happy.
+	main.c, solib.c, Makefile.in:  Update copyright notices.
+
 Mon Jan 20 08:54:00 1992  Michael Tiemann  (tiemann at cygnus.com)
 
 	* cplus-dem.c (cplus_demangle): Correctly demangle destructors.
