@@ -4,8 +4,8 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "objdump",
-				"nm", "size", "strip", and "ranlib".
+* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "copy",
+				"objdump", "nm", "size", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -36,8 +36,8 @@ into another language, under the above conditions for modified versions.
 
 @synindex ky cp
 @c
-@c This file documents the GNU binary utilities "ar", "ld", "objdump", "nm", 
-@c "size", "strip", and "ranlib".
+@c This file documents the GNU binary utilities "ar", "ld", "copy", "objdump",
+@c  "nm", "size", "strip", and "ranlib".
 @c
 @c Copyright (C) 1991 Free Software Foundation, Inc.
 @c 
@@ -94,6 +94,9 @@ utilities (collectively version 1.97):
 @item ar
 Create, modify, and extract from archives
 
+@item copy
+Copy and translate object files
+
 @item nm
 List symbols from object files
 
@@ -113,6 +116,7 @@ Discard symbols
 
 @menu
 * ar::                          Create, modify, and extract from archives
+* copy::			Copy and translate object files
 * ld:(ld)Overview.              Combine object and archive files
 * nm::                          List symbols from object files
 * objdump::                     Display information from object files
@@ -122,7 +126,7 @@ Discard symbols
 * Index::                       
 @end menu
 
-@node ar, nm, Top, Top
+@node ar, copy, Top, Top
 @chapter ar
 
 @kindex ar
@@ -156,7 +160,7 @@ are most often used as @dfn{libraries} holding commonly needed
 subroutines.
 
 @cindex symbol index
-@code{ar} will create an index to the symbols defined in relocatable
+@code{ar} creates an index to the symbols defined in relocatable
 object modules in the archive when you specify the modifier @samp{s}.
 Once created, this index is updated in the archive whenever @code{ar}
 makes a change to its contents (save for the @samp{q} update operation).
@@ -216,7 +220,7 @@ any of the following, but you must specify only one of them:
 be deleted as @var{files}; the archive is untouched if you
 specify no files to delete.
 
-If you specify the @samp{v} modifier, @code{ar} will list each module
+If you specify the @samp{v} modifier, @code{ar} lists each module
 as it is deleted.
 
 @item m
@@ -287,7 +291,7 @@ are listed.
 @cindex repeated names in archive
 @cindex name duplication in archive
 If there is more than one file with the same name (say, @samp{fie}) in
-an archive (say @samp{b.a}), @samp{ar t b.a fie} will list only the
+an archive (say @samp{b.a}), @samp{ar t b.a fie} lists only the
 first instance; to see them all, you must ask for a complete
 listing---in our example, @samp{ar t b.a}.
 @c WRS only; per Gumby, this is implementation-dependent, and in a more
@@ -343,7 +347,7 @@ This modifier is accepted but not used.
 @cindex dates in archive
 Preserve the @emph{original} dates of members when extracting them.  If
 you do not specify this modifier, files extracted from the archive
-will be stamped with the time of extraction.
+are stamped with the time of extraction.
 
 @item s
 @cindex writing archive index
@@ -379,11 +383,11 @@ ar -M [ <@var{script} ]
 @cindex scripts, @code{ar}
 If you use the single command-line option @samp{-M} with @code{ar}, you
 can control its operation with a rudimentary command language.  This
-form of @code{ar} will operate interactively if standard input is coming
+form of @code{ar} operates interactively if standard input is coming
 directly from a terminal.  During interactive use, @code{ar} prompts for
 input (the prompt is @samp{AR >}), and continues executing even after
 errors.  If you redirect standard input to a script file, no prompts are
-issued, and @code{ar} will abandon execution (with a nonzero exit code)
+issued, and @code{ar} abandons execution (with a nonzero exit code)
 on any error.
 
 The @code{ar} command language is @emph{not} designed to be equivalent
@@ -531,6 +535,53 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 
 @end table
 
+@node copy, nm, ar, Top
+
+@chapter copy
+
+@smallexample
+copy [-S] [-s srcfmt] [-d dtfmt] [-b bothfmts] infile [outfile] [-vV]
+@end smallexample
+
+The Gnu @code{copy} utility copies the contents of object files.  @code{copy} 
+uses the Gnu BFD Library to read and write the object files.  It
+can write the destination object file in a format different from that
+of the source object file.  The exact behavior of @code{copy} is controlled
+by command-line options.
+
+@code{copy} creates temporary files to do its translations and
+deletes them afterward.  If no destination file is specified, a
+temporary file is created and the result is destructively renamed with
+the name of the input file.  @code{copy} uses BFD to do all its
+translation work; it knows about all the formats BFD knows about, and
+thus is able to recognize most formats without being told explicitly.
+@xref{BFD,,BFD,ld.info,Using LD, the GNU linker}.
+
+@table @code
+@item -S
+@cindex calls @samp{strip}
+Causes @code{copy} to strip relocation and symbol information from the
+source file as the file is copied.
+
+@item -s @var{format}	
+Explicitly specifies the object format of the source file.
+
+@item -d @var{format}
+Explicitly specifies the object format of the desired output file.
+
+@item -b @var{format}
+Explicitly specifies that the object format of the output should be the
+same as the input, i.e. a simple data transfer from source to
+destination with no translation involved.
+
+@item -v
+Show version number.
+
+@item -V
+Requests verbose output.
+
+@end table
+
 @iftex
 @node ld
 @chapter ld
@@ -540,7 +591,7 @@ The GNU linker @code{ld} is now described in a separate manual.
 @xref{Top,, Overview,, Using LD: the GNU linker}.
 @end iftex
 
-@node nm, objdump, ar, Top
+@node nm, objdump, copy, Top
 @chapter nm
 @cindex symbols
 @kindex nm
@@ -554,7 +605,7 @@ The GNU linker @code{ld} is now described in a separate manual.
       [ @var{objfiles}@dots{} ]
 @end smallexample
 
-GNU @code{nm} will list the symbols from object files @var{objfiles}.
+GNU @code{nm} lists the symbols from object files @var{objfiles}.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
@@ -885,7 +936,7 @@ Display version number information on @code{size} itself.
   strip [ -v ] @var{objfiles}@dots{}
 @end smallexample
 
-GNU @code{strip} will discard all symbols from object files
+GNU @code{strip} discards all symbols from object files
 @var{objfiles}.  The list of object files may include archives.
 
 @code{strip} will not execute unless at least one object file is listed.
@@ -898,7 +949,7 @@ rather than writing modified copies under different names.
 @table @code
 @item -v
 Verbose operation: list all object files modified.  In the case of
-archives, @samp{strip -v} will list all members of the archive.
+archives, @samp{strip -v} lists all members of the archive.
 @end table
 
 @node Index,  , strip, Top
