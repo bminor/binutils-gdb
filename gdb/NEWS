@@ -10,6 +10,8 @@ Windows 95, Windows NT				i[345]86-*-win32
 * New targets
 
 ARM via RDP protocol				arm-*-*
+PowerPC via PPCBUG monitor			powerpc{,le}-*-eabi*
+PowerPC simulator				powerpc{,le}-*-eabi if building with GCC
 
 *** Changes in GDB-4.15:
 
