@@ -11,7 +11,7 @@ Fri Jan  3 12:09:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (yank_symbols): If tc_frob_coff_symbol is
 	defined, call it.
-	* config/tc-m68k.c (tc_frob_symbol): Check whether text label is
+	* config/tc-m68k.h (tc_frob_symbol): Check whether text label is
 	aligned to odd boundary.
 	(tc_frob_coff_symbol): Define.
 
