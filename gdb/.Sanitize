@@ -449,7 +449,7 @@ else
 	done
 fi
 
-arc_files="configure.in configure ChangeLog"
+arc_files="configure.in configure ChangeLog-95"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
