@@ -1,5 +1,5 @@
 /* Remote target communications for the Macraigor Systems BDM Wiggler
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,92 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
-
 #include "dcache.h"
-
-#ifdef USG
 #include <sys/types.h>
-#endif
-
 #include <signal.h>
 #include "serial.h"
-
-/* Wiggler serial protocol definitions */
-
-#define DLE 020			/* Quote char */
-#define SYN 026			/* Start of packet */
-#define RAW_SYN ((026 << 8) | 026) /* get_quoted_char found a naked SYN */
-
-/* Status flags */
-
-#define WIGGLER_FLAG_RESET 0x01 /* Target is being reset */
-#define WIGGLER_FLAG_STOPPED 0x02 /* Target is halted */
-#define WIGGLER_FLAG_BDM 0x04	/* Target is in BDM */
-#define WIGGLER_FLAG_PWF 0x08	/* Power failed */
-#define WIGGLER_FLAG_CABLE_DISC 0x10 /* BDM cable disconnected */
-
-#define WIGGLER_AYT 0x0		/* Are you there? */
-#define WIGGLER_GET_VERSION 0x1	/* Get Version */
-#define WIGGLER_SET_BAUD_RATE 0x2 /* Set Baud Rate */
-#define WIGGLER_INIT 0x10	/* Initialize Wiggler */
-#define WIGGLER_SET_SPEED 0x11	/* Set Speed */
-#define WIGGLER_GET_STATUS_MASK 0x12 /* Get Status Mask */
-#define WIGGLER_GET_CTRS 0x13	/* Get Error Counters */
-#define WIGGLER_SET_FUNC_CODE 0x14 /* Set Function Code */
-#define WIGGLER_SET_CTL_FLAGS 0x15 /* Set Control Flags */
-#define WIGGLER_SET_BUF_ADDR 0x16 /* Set Register Buffer Address */
-#define WIGGLER_RUN 0x20	/* Run Target from PC */
-#define WIGGLER_RUN_ADDR 0x21	/* Run Target from Specified Address */
-#define WIGGLER_STOP 0x22	/* Stop Target */
-#define WIGGLER_RESET_RUN 0x23	/* Reset Target and Run */
-#define WIGGLER_RESET 0x24	/* Reset Target and Halt */
-#define WIGGLER_STEP 0x25	/* Single step */
-#define WIGGLER_READ_REGS 0x30	/* Read Registers */
-#define WIGGLER_WRITE_REGS 0x31	/* Write Registers */
-#define WIGGLER_READ_MEM 0x32	/* Read Memory */
-#define WIGGLER_WRITE_MEM 0x33	/* Write Memory */
-#define WIGGLER_FILL_MEM 0x34	/* Fill Memory */
-#define WIGGLER_MOVE_MEM 0x35	/* Move Memory */
-
-#define WIGGLER_READ_INT_MEM 0x80 /* Read Internal Memory */
-#define WIGGLER_WRITE_INT_MEM 0x81 /* Write Internal Memory */
-#define WIGGLER_JUMP 0x82	/* Jump to Subroutine */
-
-#define WIGGLER_ERASE_FLASH 0x90 /* Erase flash memory */
-#define WIGGLER_PROGRAM_FLASH 0x91 /* Write flash memory */
-#define WIGGLER_EXIT_MON 0x93	/* Exit the flash programming monitor  */
-#define WIGGLER_ENTER_MON 0x94	/* Enter the flash programming monitor  */
-
-#define WIGGLER_SET_STATUS 0x0a	/* Set status */
-#define   WIGGLER_FLAG_STOP 0x0 /* Stop the target, enter BDM */
-#define   WIGGLER_FLAG_START 0x01 /* Start the target at PC */
-#define   WIGGLER_FLAG_RETURN_STATUS 0x04 /* Return async status */
-
-/* Stuff that should be in tm-xxx files. */
-#if 1
-#define BDM_NUM_REGS 24
-#define BDM_REGMAP   0,  1,  2,  3,  4,  5,  6,  7, /* d0 -> d7 */ \
-		     8,  9, 10, 11, 12, 13, 14, 15, /* a0 -> a7 */ \
-		    18, 16,			    /* ps, pc */ \
-		    -1, -1, -1, -1, -1, -1, -1, -1, /* fp0 -> fp7 */ \
-		    -1, -1, -1, -1, -1 /* fpcontrol, fpstatus, fpiaddr, fpcode, fpflags */
-#define BDM_BREAKPOINT 0x4a, 0xfa /* BGND insn */
-#else
-#define BDM_NUM_REGS 24
-#define BDM_REGMAP   8,  9, 10, 11, 12, 13, 14, 15, /* d0 -> d7 */ \
-		    16, 17, 18, 19, 20, 21, 22, 23, /* a0 -> a7 */ \
-		     4,  0,			    /* ps, pc */ \
-		    -1, -1, -1, -1, -1, -1, -1, -1, /* fp0 -> fp7 */ \
-		    -1, -1, -1, -1, -1 /* fpcontrol, fpstatus, fpiaddr, fpcode, fpflags */
-#define WIGGLER_POLL
-#endif
+#include "ocd.h"
 
 /* Prototypes for local functions */
-
-static void wiggler_stop PARAMS ((void));
-
-static void put_packet PARAMS ((unsigned char *packet, int pktlen));
-static unsigned char * get_packet PARAMS ((int cmd, int *pktlen, int timeout));
 
 static int wiggler_write_bytes PARAMS ((CORE_ADDR memaddr,
 				       char *myaddr, int len));
@@ -123,28 +44,7 @@ static int wiggler_write_bytes PARAMS ((CORE_ADDR memaddr,
 static int wiggler_read_bytes PARAMS ((CORE_ADDR memaddr,
 				      char *myaddr, int len));
 
-static void wiggler_files_info PARAMS ((struct target_ops *ignore));
-
-static int wiggler_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				       int len, int should_write,
-				       struct target_ops *target));
-
-static void wiggler_prepare_to_store PARAMS ((void));
-
-static void wiggler_fetch_registers PARAMS ((int regno));
-
-static void wiggler_resume PARAMS ((int pid, int step,
-				   enum target_signal siggnal));
-
 static int wiggler_start_remote PARAMS ((char *dummy));
-
-static void wiggler_open PARAMS ((char *name, int from_tty));
-
-static void wiggler_close PARAMS ((int quitting));
-
-static void wiggler_store_registers PARAMS ((int regno));
-
-static void wiggler_mourn PARAMS ((void));
 
 static int readchar PARAMS ((int timeout));
 
@@ -156,12 +56,6 @@ static int get_quoted_char PARAMS ((int timeout));
 
 static void put_quoted_char PARAMS ((int c));
 
-static int wiggler_wait PARAMS ((int pid, struct target_waitstatus *status));
-
-static void wiggler_kill PARAMS ((void));
-
-static void wiggler_detach PARAMS ((char *args, int from_tty));
-
 static void wiggler_interrupt PARAMS ((int signo));
 
 static void wiggler_interrupt_twice PARAMS ((int signo));
@@ -170,11 +64,11 @@ static void interrupt_query PARAMS ((void));
 
 static unsigned char * do_command PARAMS ((int cmd, int *statusp, int *lenp));
 
-static unsigned char * read_bdm_registers PARAMS ((int first_bdm_regno,
-						   int last_bdm_regno,
-						   int *numregs));
+static void wiggler_put_packet PARAMS ((unsigned char *packet, int pktlen));
 
-extern struct target_ops wiggler_ops;	/* Forward decl */
+static unsigned char * wiggler_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
+
+static struct target_ops *current_ops = NULL;
 
 static int last_run_status;
 
@@ -190,9 +84,9 @@ extern int remote_timeout;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    wiggler_open knows that we don't have a file open when the program
    starts.  */
-serial_t wiggler_desc = NULL;
+static serial_t wiggler_desc = NULL;
 
-static void
+void
 wiggler_error (s, error_code)
      char *s;
      int error_code;
@@ -228,7 +122,7 @@ wiggler_error (s, error_code)
 
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
-static int
+int
 wiggler_thread_alive (th)
      int th;
 {
@@ -238,7 +132,7 @@ wiggler_thread_alive (th)
 /* Clean up connection to a remote debugger.  */
 
 /* ARGSUSED */
-static void
+void
 wiggler_close (quitting)
      int quitting;
 {
@@ -258,6 +152,9 @@ wiggler_start_remote (dummy)
   int status;
   int error_code;
   int speed;
+  enum wiggler_target_type target_type;
+
+  target_type = (enum wiggler_target_type)dummy;
 
   immediate_quit = 1;		/* Allow user to interrupt it */
 
@@ -276,9 +173,9 @@ wiggler_start_remote (dummy)
   buf[0] = WIGGLER_INIT;
   buf[1] = speed >> 8;
   buf[2] = speed & 0xff;
-  buf[3] = 0;			/* CPU32 for now */
-  put_packet (buf, 4);		/* Init Wiggler params */
-  p = get_packet (buf[0], &pktlen, remote_timeout);
+  buf[3] = target_type;
+  wiggler_put_packet (buf, 4);	/* Init Wiggler params */
+  p = wiggler_get_packet (buf[0], &pktlen, remote_timeout);
 
   if (pktlen < 2)
     error ("Truncated response packet from Wiggler");
@@ -306,9 +203,9 @@ wiggler_start_remote (dummy)
   buf[0] = WIGGLER_SET_CTL_FLAGS;
   buf[1] = 0;
   buf[2] = 1;		/* Asynchronously return status when target stops */
-  put_packet (buf, 3);
+  wiggler_put_packet (buf, 3);
 
-  p = get_packet (buf[0], &pktlen, remote_timeout);
+  p = wiggler_get_packet (buf[0], &pktlen, remote_timeout);
 
   if (pktlen < 2)
     error ("Truncated response packet from Wiggler");
@@ -342,10 +239,12 @@ wiggler_start_remote (dummy)
 
 static DCACHE *wiggler_dcache;
 
-static void
-wiggler_open (name, from_tty)
+void
+wiggler_open (name, from_tty, target_type, ops)
      char *name;
      int from_tty;
+     enum wiggler_target_type target_type;
+     struct target_ops *ops;
 {
   if (name == 0)
     error ("To open a Wiggler connection, you need to specify what serial\n\
@@ -353,7 +252,9 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
 
   target_preopen (from_tty);
 
-  unpush_target (&wiggler_ops);
+  current_ops = ops;
+
+  unpush_target (current_ops);
 
   wiggler_dcache = dcache_init (wiggler_read_bytes, wiggler_write_bytes);
 
@@ -382,7 +283,7 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
       puts_filtered (name);
       puts_filtered ("\n");
     }
-  push_target (&wiggler_ops);	/* Switch to using remote target now */
+  push_target (current_ops);	/* Switch to using remote target now */
 
   /* Without this, some commands which require an active target (such as kill)
      won't work.  This variable serves (at least) double duty as both the pid
@@ -395,7 +296,7 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (wiggler_start_remote, (char *)0, 
+  if (!catch_errors (wiggler_start_remote, (char *)target_type,
 		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
 }
@@ -405,7 +306,7 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
    better not have left any breakpoints in the target program or it'll
    die when it hits one.  */
 
-static void
+void
 wiggler_detach (args, from_tty)
      char *args;
      int from_tty;
@@ -420,7 +321,7 @@ wiggler_detach (args, from_tty)
 
 /* Tell the remote machine to resume.  */
 
-static void
+void
 wiggler_resume (pid, step, siggnal)
      int pid, step;
      enum target_signal siggnal;
@@ -435,7 +336,7 @@ wiggler_resume (pid, step, siggnal)
     do_command (WIGGLER_RUN, &last_run_status, &pktlen);
 }
 
-static void
+void
 wiggler_stop ()
 {
   int status;
@@ -467,7 +368,7 @@ wiggler_interrupt (signo)
 
     wiggler_stop ();
     buf[0] = WIGGLER_AYT;
-    put_packet (buf, 1);
+    wiggler_put_packet (buf, 1);
     wiggler_interrupt_flag = 1;
   }
 }
@@ -511,10 +412,8 @@ static int kill_kludge;
    Returns "pid" (though it's not clear what, if anything, that
    means in the case of this target).  */
 
-static int
-wiggler_wait (pid, target_status)
-     int pid;
-     struct target_waitstatus *target_status;
+int
+wiggler_wait ()
 {
   unsigned char *p;
   int error_code, status;
@@ -522,16 +421,13 @@ wiggler_wait (pid, target_status)
 
   wiggler_interrupt_flag = 0;
 
-  target_status->kind = TARGET_WAITKIND_STOPPED;
-  target_status->value.sig = TARGET_SIGNAL_TRAP;
-
   /* Target may already be stopped by the time we get here. */
 
   if (!(last_run_status & WIGGLER_FLAG_BDM))
     {
       ofunc = (void (*)()) signal (SIGINT, wiggler_interrupt);
 
-      p = get_packet (WIGGLER_AYT, &pktlen, -1);
+      p = wiggler_get_packet (WIGGLER_AYT, &pktlen, -1);
 
       signal (SIGINT, ofunc);
 
@@ -551,46 +447,23 @@ wiggler_wait (pid, target_status)
 
       if (!(status & WIGGLER_FLAG_BDM))
 	error ("Wiggler woke up, but wasn't stopped: 0x%x", status);
-
-      if (wiggler_interrupt_flag)
-	target_status->value.sig = TARGET_SIGNAL_INT;
     }
 
-  /* This test figures out if we just executed a BGND insn, and if it's one of
-     our breakpoints.  If so, then we back up PC.  N.B. When a BGND insn is
-     executed, the PC points at the loc just after the insn (ie: it's always
-     two bytes *after* the BGND).  So, it's not sufficient to just see if PC-2
-     is a BGND insn because we could have gotten there via a jump.  We dis-
-     ambiguate this case by examining the ATEMP register (which is only
-     accessible from BDM).  This will tell us if we entered BDM because we
-     executed a BGND insn.  */
-
-  if (breakpoint_inserted_here_p (read_pc () - 2)) /* One of our breakpoints? */
-    {				/* Yes, see if we actually executed it */
-#if 0	/* Temporarily disabled until atemp reading is fixed. */
-      int atemp;
-      int numregs;
-
-      p = read_bdm_registers (23, 23, &numregs);
-      atemp = extract_unsigned_integer (p, 4);
-
-      if (atemp == 1)		/* And, did we hit a breakpoint insn? */
-#endif
-	write_pc (read_pc () - 2); /* Yes, then back up PC */
-    }
-
-  return inferior_pid;
+  if (wiggler_interrupt_flag)
+    return 1;
+  else
+    return 0;
 }
 
-/* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regno.  */
-/* ARGSUSED */
+/* Read registers from the Wiggler.  Specify the starting and ending register
+   number.  Return the number of regs actually read in *NUMREGS.  Returns a
+   pointer to a static array containing the register contents.  */
 
-static unsigned char *
-read_bdm_registers (first_bdm_regno, last_bdm_regno, numregs)
+unsigned char *
+wiggler_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
      int first_bdm_regno;
      int last_bdm_regno;
-     int *numregs;
+     int *reglen;
 {
   unsigned char buf[10];
   int i;
@@ -605,11 +478,8 @@ read_bdm_registers (first_bdm_regno, last_bdm_regno, numregs)
   buf[3] = last_bdm_regno >> 8;
   buf[4] = last_bdm_regno & 0xff;
 
-  put_packet (buf, 5);
-  p = get_packet (WIGGLER_READ_REGS, &pktlen, remote_timeout);
-
-  if (pktlen < 5)
-    error ("Truncated response packet from Wiggler");
+  wiggler_put_packet (buf, 5);
+  p = wiggler_get_packet (WIGGLER_READ_REGS, &pktlen, remote_timeout);
 
   status = p[1];
   error_code = p[2];
@@ -625,184 +495,76 @@ read_bdm_registers (first_bdm_regno, last_bdm_regno, numregs)
       || ((i & 3) != 0))
     error ("Register block size bad:  %d", i);
 
-  *numregs = i / 4;
+  *reglen = i;
 
   regs = p + 4;
 
   return regs;
 }
 
-static void
-dump_all_bdm_regs ()
+/* Read register BDM_REGNO and returns its value ala read_register() */
+
+CORE_ADDR
+wiggler_read_bdm_register (bdm_regno)
+     int bdm_regno;
 {
-  unsigned char *regs;
-  int numregs;
-  int i;
+  int reglen;
+  unsigned char *p;
+  CORE_ADDR regval;
 
-  regs = read_bdm_registers (0, BDM_NUM_REGS - 1, &numregs);
+  p = wiggler_read_bdm_registers (bdm_regno, bdm_regno, &reglen);
+  regval = extract_unsigned_integer (p, reglen);
 
-  printf_unfiltered ("rpc = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("usp = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("ssp = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("vbr = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("sr = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("sfc = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("dfc = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("atemp = 0x%x ",
-		     (int)extract_unsigned_integer (regs, 4));
-  regs += 4;
-  printf_unfiltered ("\n");
-
-  for (i = 0; i <= 7; i++)
-    printf_unfiltered ("d%i = 0x%x ", i,
-		       (int)extract_unsigned_integer (regs + i * 4, 4));
-  regs += 8 * 4;
-  printf_unfiltered ("\n");
-
-  for (i = 0; i <= 7; i++)
-    printf_unfiltered ("a%i = 0x%x ", i,
-		       (int)extract_unsigned_integer (regs + i * 4, 4));
-  printf_unfiltered ("\n");
+  return regval;
 }
 
-static int bdm_regmap[] = {BDM_REGMAP};
-
-/* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regno.  */
-/* ARGSUSED */
-static void
-wiggler_fetch_registers (regno)
-     int regno;
+void
+wiggler_write_bdm_registers (first_bdm_regno, regptr, reglen)
+     int first_bdm_regno;
+     unsigned char *regptr;
+     int reglen;
 {
-  int i;
-  unsigned char *regs;
-  int first_regno, last_regno;
-  int first_bdm_regno, last_bdm_regno;
-  int numregs;
-
-  if (regno == -1)
-    {
-      first_regno = 0;
-      last_regno = NUM_REGS - 1;
-
-      first_bdm_regno = 0;
-      last_bdm_regno = BDM_NUM_REGS - 1;
-    }
-  else
-    {
-      first_regno = regno;
-      last_regno = regno;
-
-      first_bdm_regno = bdm_regmap [regno];
-      last_bdm_regno = bdm_regmap [regno];
-    }
-
-  if (first_bdm_regno == -1)
-    {
-      supply_register (first_regno, NULL);
-      return;			/* Unsupported register */
-    }
-
-  regs = read_bdm_registers (first_bdm_regno, last_bdm_regno, &numregs);
-
-  for (i = first_regno; i <= last_regno; i++)
-    {
-      int bdm_regno, regoffset;
-
-      bdm_regno = bdm_regmap [i];
-      if (bdm_regno != -1)
-	{
-	  regoffset = bdm_regno - first_bdm_regno;
-
-	  if (regoffset >= numregs)
-	    continue;
-
-	  supply_register (i, regs + 4 * regoffset);
-	}
-      else
-	supply_register (i, NULL); /* Unsupported register */
-    }
-}
-
-static void 
-wiggler_prepare_to_store ()
-{
-}
-
-/* Store register REGNO, or all registers if REGNO == -1, from the contents
-   of REGISTERS.  FIXME: ignores errors.  */
-
-static void
-wiggler_store_registers (regno)
-     int regno;
-{
-  unsigned char buf[10 + 256];
-  int i;
+  unsigned char *buf;
   unsigned char *p;
   int error_code, status;
   int pktlen;
-  int first_regno, last_regno;
-  int first_bdm_regno, last_bdm_regno;
 
-  if (regno == -1)
-    {
-      first_regno = 0;
-      last_regno = NUM_REGS - 1;
-
-      first_bdm_regno = 0;
-      last_bdm_regno = BDM_NUM_REGS - 1;
-    }
-  else
-    {
-      first_regno = regno;
-      last_regno = regno;
-
-      first_bdm_regno = bdm_regmap [regno];
-      last_bdm_regno = bdm_regmap [regno];
-    }
-
-  if (first_bdm_regno == -1)
-    return;			/* Unsupported register */
+  buf = alloca (4 + reglen);
 
   buf[0] = WIGGLER_WRITE_REGS;
-  buf[3] = 4;
+  buf[1] = first_bdm_regno >> 8;
+  buf[2] = first_bdm_regno & 0xff;
+  buf[3] = reglen;
+  memcpy (buf + 4, regptr, reglen);
 
-  for (i = first_regno; i <= last_regno; i++)
-    {
-      int bdm_regno;
+  wiggler_put_packet (buf, 4 + reglen);
+  p = wiggler_get_packet (WIGGLER_WRITE_REGS, &pktlen, remote_timeout);
 
-      bdm_regno = bdm_regmap [i];
+  if (pktlen < 3)
+    error ("Truncated response packet from Wiggler");
 
-      buf[1] = bdm_regno >> 8;
-      buf[2] = bdm_regno & 0xff;
+  status = p[1];
+  error_code = p[2];
 
-      memcpy (&buf[4], &registers[REGISTER_BYTE (i)], 4);
-      put_packet (buf, 4 + 4);
-      p = get_packet (WIGGLER_WRITE_REGS, &pktlen, remote_timeout);
+  if (error_code != 0)
+    wiggler_error ("wiggler_write_bdm_registers:", error_code);
+}
 
-      if (pktlen < 3)
-	error ("Truncated response packet from Wiggler");
+void
+wiggler_write_bdm_register (bdm_regno, reg)
+     int bdm_regno;
+     CORE_ADDR reg;
+{
+  unsigned char buf[4];
 
-      status = p[1];
-      error_code = p[2];
+  store_unsigned_integer (buf, 4, reg);
 
-      if (error_code != 0)
-	wiggler_error ("wiggler_store_registers:", error_code);
-    }
+  wiggler_write_bdm_registers (bdm_regno, buf, 4);
+}
+
+void 
+wiggler_prepare_to_store ()
+{
 }
 
 /* Write memory data directly to the remote machine.
@@ -812,6 +574,8 @@ wiggler_store_registers (regno)
    LEN is the number of bytes.
 
    Returns number of bytes transferred, or 0 for error.  */
+
+static int write_mem_command = WIGGLER_WRITE_MEM;
 
 static int
 wiggler_write_bytes (memaddr, myaddr, len)
@@ -825,7 +589,7 @@ wiggler_write_bytes (memaddr, myaddr, len)
 
   origlen = len;
 
-  buf[0] = WIGGLER_WRITE_MEM;
+  buf[0] = write_mem_command;
   buf[5] = 1;			/* Write as bytes */
   buf[6] = 0;			/* Don't verify */
 
@@ -845,8 +609,8 @@ wiggler_write_bytes (memaddr, myaddr, len)
       buf[7] = numbytes;
 
       memcpy (&buf[8], myaddr, numbytes);
-      put_packet (buf, 8 + numbytes);
-      p = get_packet (WIGGLER_WRITE_MEM, &pktlen, remote_timeout);
+      wiggler_put_packet (buf, 8 + numbytes);
+      p = wiggler_get_packet (WIGGLER_WRITE_MEM, &pktlen, remote_timeout);
       if (pktlen < 3)
 	error ("Truncated response packet from Wiggler");
 
@@ -918,8 +682,8 @@ wiggler_read_bytes (memaddr, myaddr, len)
 
       buf[6] = numbytes;
 
-      put_packet (buf, 7);
-      p = get_packet (WIGGLER_READ_MEM, &pktlen, remote_timeout);
+      wiggler_put_packet (buf, 7);
+      p = wiggler_get_packet (WIGGLER_READ_MEM, &pktlen, remote_timeout);
       if (pktlen < 4)
 	error ("Truncated response packet from Wiggler");
 
@@ -960,7 +724,7 @@ wiggler_read_bytes (memaddr, myaddr, len)
    nonzero.  Returns length of data written or read; 0 for error.  */
 
 /* ARGSUSED */
-static int
+int
 wiggler_xfer_memory (memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -971,7 +735,7 @@ wiggler_xfer_memory (memaddr, myaddr, len, should_write, target)
   return dcache_xfer_memory (wiggler_dcache, memaddr, myaddr, len, should_write);
 }
 
-static void
+void
 wiggler_files_info (ignore)
      struct target_ops *ignore;
 {
@@ -1123,7 +887,7 @@ stu_put_packet (buf, len)
  */
 
 static void
-put_packet (buf, len)
+wiggler_put_packet (buf, len)
      unsigned char *buf;
      int len;
 {
@@ -1225,7 +989,7 @@ stu_get_packet (cmd, lenp, timeout)
 */
 
 static unsigned char *
-get_packet (cmd, lenp, timeout)
+wiggler_get_packet (cmd, lenp, timeout)
      int cmd;
      int *lenp;
 {
@@ -1241,7 +1005,7 @@ get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("get_packet (readchar): %d", ch);
+    error ("wiggler_get_packet (readchar): %d", ch);
 
   if (ch != 0x55)
     goto find_packet;
@@ -1256,7 +1020,7 @@ get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("get_packet (readchar): %d", ch);
+    error ("wiggler_get_packet (readchar): %d", ch);
 
   *packet_ptr++ = ch;
   checksum += ch;
@@ -1266,7 +1030,7 @@ get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("get_packet (readchar): %d", ch);
+    error ("wiggler_get_packet (readchar): %d", ch);
   *packet_ptr++ = ch;
   checksum += ch;
 
@@ -1275,7 +1039,7 @@ get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("get_packet (readchar): %d", ch);
+    error ("wiggler_get_packet (readchar): %d", ch);
   *packet_ptr++ = ch;
   checksum += ch;
 
@@ -1291,6 +1055,7 @@ get_packet (cmd, lenp, timeout)
       break;
     default:			/* Error w/no params */
       len = 0;
+      break;
     case 0x0:			/* Normal result */
       switch (packet[0])
 	{
@@ -1320,7 +1085,7 @@ get_packet (cmd, lenp, timeout)
 	  len = 0;
 	  break;
 	case WIGGLER_GET_VERSION: /* Get Version */
-	  len = 4;
+	  len = 10;
 	  break;
 	case WIGGLER_GET_STATUS_MASK: /* Get Status Mask */
 	  len = 1;
@@ -1342,7 +1107,7 @@ get_packet (cmd, lenp, timeout)
       ch = readchar (timeout);
 
       if (ch < 0)
-	error ("get_packet (readchar): %d", ch);
+	error ("wiggler_get_packet (readchar): %d", ch);
       *packet_ptr++ = ch;
       checksum += ch;
       len = ch;
@@ -1355,7 +1120,7 @@ get_packet (cmd, lenp, timeout)
       ch = readchar (timeout);
 
       if (ch < 0)
-	error ("get_packet (readchar): %d", ch);
+	error ("wiggler_get_packet (readchar): %d", ch);
       *packet_ptr++ = ch;
       checksum += ch;
     }
@@ -1385,8 +1150,8 @@ do_command (cmd, statusp, lenp)
   char errbuf[100];
 
   buf[0] = cmd;
-  put_packet (buf, 1);		/* Send command */
-  p = get_packet (*buf, lenp, remote_timeout);
+  wiggler_put_packet (buf, 1);		/* Send command */
+  p = wiggler_get_packet (*buf, lenp, remote_timeout);
 
   if (*lenp < 3)
     error ("Truncated response packet from Wiggler");
@@ -1410,7 +1175,7 @@ do_command (cmd, statusp, lenp)
   return p + 3;
 }
 
-static void
+void
 wiggler_kill ()
 {
   /* For some mysterious reason, wait_for_inferior calls kill instead of
@@ -1427,17 +1192,17 @@ wiggler_kill ()
   target_mourn_inferior ();
 }
 
-static void
+void
 wiggler_mourn ()
 {
-  unpush_target (&wiggler_ops);
+  unpush_target (current_ops);
   generic_mourn_inferior ();
 }
 
 /* All we actually do is set the PC to the start address of exec_bfd, and start
    the program at that point.  */
 
-static void
+void
 wiggler_create_inferior (exec_file, args, env)
      char *exec_file;
      char *args;
@@ -1450,7 +1215,7 @@ wiggler_create_inferior (exec_file, args, env)
   proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
 }
 
-static void
+void
 wiggler_load (args, from_tty)
      char *args;
      int from_tty;
@@ -1526,58 +1291,13 @@ bdm_restart_command (args, from_tty)
   normal_stop ();
 }
 
-static int
-flash_xfer_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
-     struct target_ops *target;			/* ignored */
+/* Temporary replacement for target_store_registers().  This prevents
+   generic_load from trying to set the PC.  */
+
+static void
+noop_store_registers (regno)
+     int regno;
 {
-  char buf[256 + 10];
-  unsigned char *p;
-  int origlen;
-
-  if (!should_write)
-    abort ();
-
-  origlen = len;
-
-  buf[0] = WIGGLER_PROGRAM_FLASH;
-
-  while (len > 0)
-    {
-      int numbytes;
-      int pktlen;
-      int status, error_code;
-
-      numbytes = min (len, 256 - 6);
-
-      buf[1] = memaddr >> 24;
-      buf[2] = memaddr >> 16;
-      buf[3] = memaddr >> 8;
-      buf[4] = memaddr;
-
-      buf[5] = numbytes;
-
-      memcpy (&buf[6], myaddr, numbytes);
-      put_packet (buf, 6 + numbytes);
-      p = get_packet (WIGGLER_PROGRAM_FLASH, &pktlen, remote_timeout);
-      if (pktlen < 3)
-	error ("Truncated response packet from Wiggler");
-
-      status = p[1];
-      error_code = p[2];
-
-      if (error_code != 0)	
-	wiggler_error ("flash_xfer_memory:", error_code);
-
-      len -= numbytes;
-      memaddr += numbytes;
-      myaddr += numbytes;
-    }
-
-  return origlen - len;
 }
 
 static void
@@ -1587,6 +1307,7 @@ bdm_update_flash_command (args, from_tty)
 {
   int status, pktlen;
   struct cleanup *old_chain;
+  void (*store_registers_tmp) PARAMS ((int));
 
   if (!wiggler_desc)
     error ("Not connected to wiggler.");
@@ -1600,69 +1321,40 @@ bdm_update_flash_command (args, from_tty)
 
   do_command (WIGGLER_ERASE_FLASH, &status, &pktlen);
 
-  wiggler_ops.to_xfer_memory = flash_xfer_memory;
+  write_mem_command = WIGGLER_PROGRAM_FLASH;
+  store_registers_tmp = current_target.to_store_registers;
+  current_target.to_store_registers = noop_store_registers;
 
   generic_load (args, from_tty);
 
-  wiggler_ops.to_xfer_memory = wiggler_xfer_memory;
+  current_target.to_store_registers = store_registers_tmp;
+  write_mem_command = WIGGLER_WRITE_MEM;
 
   do_command (WIGGLER_EXIT_MON, &status, &pktlen);
 
 /*  discard_cleanups (old_chain);*/
 }
+
+static void
+bdm_read_register_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  /* XXX repeat should go on to the next register */
+
+  if (!wiggler_desc)
+    error ("Not connected to wiggler.");
+
+  if (!args)
+    error ("Must specify BDM register number.");
+
+}
 
-/* Define the target subroutine names */
-
-struct target_ops wiggler_ops = {
-  "wiggler",			/* to_shortname */
-  "",				/* to_longname */
-  "",				/* to_doc */
-  wiggler_open,			/* to_open */
-  wiggler_close,		/* to_close */
-  NULL,				/* to_attach */
-  wiggler_detach,		/* to_detach */
-  wiggler_resume,		/* to_resume */
-  wiggler_wait,			/* to_wait */
-  wiggler_fetch_registers,	/* to_fetch_registers */
-  wiggler_store_registers,	/* to_store_registers */
-  wiggler_prepare_to_store,	/* to_prepare_to_store */
-  wiggler_xfer_memory,		/* to_xfer_memory */
-  wiggler_files_info,		/* to_files_info */
-  wiggler_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  wiggler_kill,			/* to_kill */
-  wiggler_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  wiggler_create_inferior,	/* to_create_inferior */
-  wiggler_mourn,		/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  wiggler_thread_alive,		/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
-
 void
 _initialize_remote_wiggler ()
 {
   extern struct cmd_list_element *cmdlist;
   static struct cmd_list_element *bdm_cmd_list = NULL;
-
-  add_target (&wiggler_ops);
 
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
 				  var_integer, (char *)&remote_timeout,
@@ -1675,4 +1367,5 @@ _initialize_remote_wiggler ()
   add_cmd ("reset", class_obscure, bdm_reset_command, "", &bdm_cmd_list);
   add_cmd ("restart", class_obscure, bdm_restart_command, "", &bdm_cmd_list);
   add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &bdm_cmd_list);
+  /*  add_cmd ("read-register", class_obscure, bdm_read_register_command, "", &bdm_cmd_list);*/
 }

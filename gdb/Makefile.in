@@ -51,6 +51,7 @@ AR = @AR@
 AR_FLAGS = qv
 RANLIB = @RANLIB@
 AWK = @AWK@
+DLLTOOL = @DLLTOOL@
 
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
@@ -137,7 +138,7 @@ TCL_CFLAGS = @TCLHDIR@
 
 # Where is the TK library?  Typically in ../tk.
 TK = @TK_BUILD_LIB_SPEC@
-TK_CFLAGS = @TKHDIR@
+TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
 
 # Where is Itcl?  Typically in ../itcl.
 ITCL_CFLAGS = @ITCLHDIR@
@@ -150,6 +151,9 @@ TIX = @TIXLIB@
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
 X11_LIBS =
+
+WIN32LDAPP = @WIN32LDAPP@
+WIN32LIBS = @WIN32LIBS@
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
 ENABLE_IDE= @ENABLE_IDE@
@@ -228,7 +232,7 @@ INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
 	-lmmalloc -liberty
 CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
-	$(MMALLOC) $(LIBIBERTY)
+	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
@@ -282,6 +286,7 @@ FLAGS_TO_PASS = \
 	"CHILL_LIB=$(CHILL_LIB)" \
 	"CXX=$(CXX)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
+	"DLLTOOL=$(DLLTOOL)" \
 	"RANLIB=$(RANLIB)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
@@ -642,7 +647,7 @@ init.c: $(OBS) $(TSOBS)
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) -o gdb \
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
@@ -753,7 +758,7 @@ tags: TAGS
 
 clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f *.o $(ADD_FILES) *~ init.c-tmp
+	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c
 	rm -f gdb core make.log libgdb-files
 	rm -f gdb[0-9]
@@ -955,7 +960,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
-	ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
+	ser-go32.c ser-ocd.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
 	tahoe-tdep.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
@@ -1381,6 +1386,10 @@ parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
 	gdb_string.h
 
+ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) gdb_string.h $(frame_h) \
+	$(inferior_h) $(bfd_h) symfile.h target.h $(wait_h) $(gdbcmd_h) \
+	objfiles.h gdb-stabs.h serial.h ocd.h
+
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
@@ -1459,8 +1468,9 @@ remote-vx29k.o: remote-vx29k.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
         vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
         vx-share/xdr_rdb.h gdb_string.h
 
-remote-wiggler.o: remote-wiggler.c $(wait_h) complaints.h $(defs_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(inferior_h) target.h
+ocd.o: ocd.c ocd.h $(gdbcore_h) gdb_string.h $(frame_h) $(inferior_h) \
+	$(bfd_h) symfile.h target.h $(wait_h) $(gdbcmd_h) objfiles.h \
+	gdb-stabs.h $(dcache_h) serial.h
 
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h) gdb_string.h
@@ -1492,6 +1502,8 @@ scm-valprint.o: $(defs_h) $(value_h) parser-defs.h language.h  \
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
 
 ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
+
+ser-ocd.o: ser-ocd.c $(defs_h) serial.h signals.h gdb_string.h
 
 ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h
 

@@ -1,3 +1,72 @@
+Wed Aug  6 16:15:31 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: add DLLTOOL = @DLLTOOL@, pass on DLLTOOL to
+	sub makes, change clean rule to also remove *.a to remove
+	libwigglers.a, in dependencies: add ppc-bdm.o ocd.o ser-ocd.o and
+	remove remote-wiggler.o
+	* configure.in: add DLLTOOL support
+	* configure: regenerate
+	* wigglers.def: new file for imports for wigglers.dll
+	* ser-ocd.c: new file which is layer between ocd.c and either the
+	wigglers.dll or the target box, only stub so far
+	* config/powerpc/ppc-eabi.mt: add ppc-bdm.o to TDEPFILES
+	* config/powerpc/ppc-sim.mt: add ppc-bdm.o to TDEPFILES
+	* config/i386/cygwin32.mh: add ocd.o ser-ocd.o libwigglers.a
+	to XDEPFILES, add rules to build libwigglers.a
+
+	checking in changes of Stu Grossman  <grossman@cygnus.com>:
+	* remote-wiggler.c: delete
+	* ocd.c: new, was remote-wiggler.c
+	always include sys/types.h, include ocd.h, move WIGGLER
+	commands and many wiggler prototypes to ocd.h, make wiggler_desc
+	static, stop making local wiggler functions static,
+	define write_mem_command for wiggler_write_bytes
+	(wiggler_start_remote): stop hardcoding the target type,
+	instead set and use a target_type variable.
+	(wiggler_open): add new target_type and ops args
+	(wiggler_wait): now no longer takes pid and target_status as args,
+	stop trying to set target_status struct, remove BGND insn
+	checks
+	(read_bdm_registers): renamed to wiggler_read_bdm_registers	
+	(wiggler_read_bdm_registers): numregs arg changed to reglen arg,
+	remove pktlen check, set reglen instead of numregs 
+	(dump_all_bdm_regs): delete
+	(wiggler_fetch_registers): delete
+	(wiggler_prepare_to_store): now just an empty function
+	(wiggler_store_registers): delete
+	(wiggler_read_bdm_register): new
+	(wiggler_write_bdm_registers): new
+	(wiggler_write_bdm_register): new
+	(wiggler_write_bytes): use write_mem_command variable instead of
+	WIGGLER_WRITE_MEM
+	(get_packet): renamed to wiggler_get_packet, change refs throughout
+	(put_packet): renamed to wiggler_put_packet, change refs throughout
+	(wiggler_get_packet): add break to default case of switch,
+	change length of WIGGLER_GET_VERSION len to 10 from 4 to match
+	specs
+	(wiggler_mourn): unpush_target with current_ops, not &wiggler_ops
+	(flash_xfer_memory): delete
+	(noop_store_registers): new placeholder replacement for
+	target_store_registers() which prevents generic_load from trying to
+	set up the PC.
+	(bdm_update_flash_command): add store_registers_tmp variable,
+	make handling of wiggler_ops more generic -- define wiggler_ops
+	in a target-specific file instead (such as ppc-bdm.c in the case
+	of the ppc), use current_target to deal with registers again
+	making this file less target-specific.
+	(bdm_read_register_command): new
+	(_initialize_remote_wiggler): stop doing add_target (&wiggler_ops),
+	comment out add_cmd ("read-register", ...)
+	* ocd.h: new, contains common wiggler prototypes, command definitions
+	* ppc-bdm.c: file for ppc-specific OCD code, including target_ops
+	structure for ppc bdm
+	(bdm_ppc_open): new
+	(bdm_ppc_wait): new
+	(bdm_ppc_fetch_registers): new
+	(bdm_ppc_store_registers_: new
+	(_initialize_bdm_ppc): new
+	* config/powerpc/tm-ppc-eabi.h: add necessary CPU32 BDM defines
+
 start-sanitize-tic80
 Tue Aug  5 23:56:14 1997  Mark Alexander  <marka@cygnus.com>
 
