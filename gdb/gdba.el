@@ -920,7 +920,7 @@ buffer."
 ;; annotation rule binding of whatever gdb sends to tell us this command
 ;; might have changed it's output.
 ;;
-;; NAME is the fucntion name.  DEMAND-PREDICATE tests if output is really needed.
+;; NAME is the function name.  DEMAND-PREDICATE tests if output is really needed.
 ;; GDB-COMMAND is a string of such.  OUTPUT-HANDLER is the function bound to the
 ;; input in the input queue (see comment about ``gdb communications'' above).
 (defmacro def-gdb-auto-update-trigger (name demand-predicate gdb-command output-handler)
