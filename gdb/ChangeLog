@@ -1,6 +1,6 @@
 Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
-	* (REGISTER_TYPES): Adjust for h8/300h.
+	* config/h8300/tm-h8300.h: (REGISTER_TYPES): Adjust for h8/300h.
 	(REGISTER_RAW_SIZE): Ditto.
 	(REGISTER_VIRTUAL_TYPE): Use builtin_type_unsigned_long for regs
 	on the h8/300h (ints may still be 16 bits).
