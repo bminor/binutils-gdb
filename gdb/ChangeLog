@@ -1,5 +1,9 @@
 2004-06-11  Randolph Chung  <tausq@debian.org>
 
+	* somread.c (som_symtab_read): Exclude gcc local symbols.
+
+2004-06-11  Randolph Chung  <tausq@debian.org>
+
 	* infrun.c (handle_inferior_event): Handle the case when a trampoline
 	ends up in the runtime resolver, and if the trampoline has no name.
 	Rearrange the code so that all the trampoline processing happens before

@@ -219,6 +219,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      if ((symname[0] == 'L' && symname[1] == '$')
 	      || (symname[0] == '$' && symname[strlen (symname) - 1] == '$')
 		  || (symname[0] == 'D' && symname[1] == '$')
+		  || (strncmp (symname, "L0\001", 3) == 0)
 		  || (strncmp (symname, "$PIC", 4) == 0))
 		continue;
 	      break;
