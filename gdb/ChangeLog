@@ -1,3 +1,11 @@
+Thu Feb 17 17:25:47 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* configure.in: add mips64-*-elf, mips64-*-ecoff, mips64el-*-elf,
+	mips64el-*-ecoff and mips64-big-*.
+	* defs.h: get rid of FORCE_LONG_LONG.
+	* mips-tdep.c (mips_find_saved_regs): add sd and sdc1 instruction
+	parsing. Change register size to be MIPS_REGSIZE.
+
 Thu Feb 17 09:30:22 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* corelow.c, exec.c, irix5-nat.c, mipsread.c, objfiles.c, 

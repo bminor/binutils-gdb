@@ -516,7 +516,7 @@ enum val_prettyprint
 
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
 
-#define LONGEST BFD_HOST_64_TYPE
+#define LONGEST BFD_HOST_64_BIT
 
 #else /* No BFD64 */
 
@@ -533,7 +533,7 @@ enum val_prettyprint
    will select "long long" use for testing purposes.  -fnf */
 
 #ifndef CC_HAS_LONG_LONG
-#  if defined (__GNUC__) && defined (FORCE_LONG_LONG) /* See FIXME above */
+#  if defined (__GNUC__) /*&& defined (FORCE_LONG_LONG)*/ /* See FIXME above */
 #    define CC_HAS_LONG_LONG 1
 #  endif
 #endif
