@@ -1,3 +1,10 @@
+2003-09-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (macro_build_ldst_constoffset): Don't silently
+	truncate values which won't fit im 32 bits.
+	(load_register): Likewise.
+	(macro): Likewise.
+
 2003-09-17  Dmitry Diky <diwil@mail.ru>
 
 	* config/tc-msp430.c (MAX_OP_LEN): Set to 256.

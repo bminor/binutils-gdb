@@ -3229,8 +3229,14 @@ macro_build_ldst_constoffset (char *place, int *counter, expressionS *ep,
 
   /* Sign-extending 32-bit constants makes their handling easier.  */
   if (! dbl)
+    {
+      if (ep->X_add_number & ~((bfd_vma) 0xffffffff)
+	  && ~(ep->X_add_number | 0xffffffff))
+	as_bad (_("too large constant specified"));
+
     ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
 			- 0x80000000);
+    }
 
   /* Right now, this routine can only handle signed 32-bit contants.  */
   if (! IS_SEXT_32BIT_NUM(ep->X_add_number))
@@ -3387,8 +3393,14 @@ load_register (int *counter, int reg, expressionS *ep, int dbl)
 
       /* Sign-extending 32-bit constants makes their handling easier.  */
       if (! dbl)
+	{
+	  if (ep->X_add_number & ~((bfd_vma) 0xffffffff)
+	      && ~(ep->X_add_number | 0xffffffff))
+	    as_bad (_("too large constant specified"));
+
 	ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
 			    - 0x80000000);
+	}
 
       if (IS_SEXT_16BIT_NUM (ep->X_add_number))
 	{
@@ -5793,8 +5805,14 @@ macro (struct mips_cl_insn *ip)
       if ((! HAVE_64BIT_ADDRESSES
 	   && (! HAVE_64BIT_GPRS && offset_expr.X_op == O_constant))
           && (offset_expr.X_op == O_constant))
+	{
+	  if (offset_expr.X_add_number & ~((bfd_vma) 0xffffffff)
+	      && ~(offset_expr.X_add_number | 0xffffffff))
+	    as_bad (_("too large constant specified"));
+
 	offset_expr.X_add_number = (((offset_expr.X_add_number & 0xffffffff)
 				     ^ 0x80000000) - 0x80000000);
+	}
 
       /* For embedded PIC, we allow loads where the offset is calculated
          by subtracting a symbol in the current segment from an unknown
