@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/* Modified by Allen Wirfs-Brock, Instantiations Inc 2/90 */
+/* Modified by Allen Wirfs-Brock, Instantiations Inc 2/90.  */
 /* App, the assembler pre-processor.  This pre-processor strips out excess
    spaces, turns single-quoted characters into a decimal constant, and turns
    # <number> <filename> <garbage> into a .line <number>\n.file <filename>
@@ -115,7 +115,7 @@ do_scrub_begin (m68k_mri)
       lex['"'] = LEX_IS_STRINGQUOTE;
 
 #if ! defined (TC_HPPA) && ! defined (TC_I370)
-      /* I370 uses single-quotes to delimit integer, float constants */
+      /* I370 uses single-quotes to delimit integer, float constants.  */
       lex['\''] = LEX_IS_ONECHAR_QUOTE;
 #endif
 
@@ -130,9 +130,7 @@ do_scrub_begin (m68k_mri)
   /* Note that these override the previous defaults, e.g. if ';' is a
      comment char, then it isn't a line separator.  */
   for (p = symbol_chars; *p; ++p)
-    {
-      lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
-    }				/* declare symbol characters */
+    lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
 
   for (c = 128; c < 256; ++c)
     lex[c] = LEX_IS_SYMBOL_COMPONENT;
@@ -152,35 +150,25 @@ do_scrub_begin (m68k_mri)
 #define tc_comment_chars comment_chars
 #endif
   for (p = tc_comment_chars; *p; p++)
-    {
-      lex[(unsigned char) *p] = LEX_IS_COMMENT_START;
-    }				/* declare comment chars */
+    lex[(unsigned char) *p] = LEX_IS_COMMENT_START;
 
   for (p = line_comment_chars; *p; p++)
-    {
-      lex[(unsigned char) *p] = LEX_IS_LINE_COMMENT_START;
-    }				/* declare line comment chars */
+    lex[(unsigned char) *p] = LEX_IS_LINE_COMMENT_START;
 
   for (p = line_separator_chars; *p; p++)
-    {
-      lex[(unsigned char) *p] = LEX_IS_LINE_SEPARATOR;
-    }				/* declare line separators */
+    lex[(unsigned char) *p] = LEX_IS_LINE_SEPARATOR;
 
 #ifdef tc_parallel_separator_chars
   /* This macro permits the processor to specify all characters which
      separate parallel insns on the same line.  */
   for (p = tc_parallel_separator_chars; *p; p++)
-    {
-      lex[(unsigned char) *p] = LEX_IS_PARALLEL_SEPARATOR;
-    }				/* declare parallel separators */
+    lex[(unsigned char) *p] = LEX_IS_PARALLEL_SEPARATOR;
 #endif
 
   /* Only allow slash-star comments if slash is not in use.
      FIXME: This isn't right.  We should always permit them.  */
   if (lex['/'] == 0)
-    {
-      lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
-    }
+    lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
 
 #ifdef TC_M68K
   if (m68k_mri)
@@ -201,12 +189,12 @@ do_scrub_begin (m68k_mri)
   lex['|'] = LEX_IS_DOUBLEBAR_1ST;
 #endif
 #ifdef TC_D30V
-  /* must do this is we want VLIW instruction with "->" or "<-" */
+  /* Must do this is we want VLIW instruction with "->" or "<-".  */
   lex['-'] = LEX_IS_SYMBOL_COMPONENT;
 #endif
-}				/* do_scrub_begin() */
+}
 
-/* Saved state of the scrubber */
+/* Saved state of the scrubber.  */
 static int state;
 static int old_state;
 static char *out_string;
@@ -223,7 +211,8 @@ static char mri_last_ch;
    state at the time .include is interpreted is completely unrelated.
    That's why we have to save it all.  */
 
-struct app_save {
+struct app_save
+{
   int          state;
   int          old_state;
   char *       out_string;
@@ -309,10 +298,11 @@ app_pop (arg)
 #endif
 
   free (arg);
-}				/* app_pop() */
+}
 
 /* @@ This assumes that \n &c are the same on host and target.  This is not
    necessarily true.  */
+
 static int
 process_escape (ch)
      int ch;
@@ -588,8 +578,7 @@ do_scrub_chars (get, tostart, tolen)
 	  else if (scrub_m68k_mri && ch == '\n')
 	    {
 	      /* Just quietly terminate the string.  This permits lines like
-		   bne	label	loop if we haven't reach end yet
-		 */
+		   bne	label	loop if we haven't reach end yet.  */
 	      state = old_state;
 	      UNGET (ch);
 	      PUT ('\'');
@@ -680,7 +669,7 @@ do_scrub_chars (get, tostart, tolen)
 #endif
 	}
 
-      /* OK, we are somewhere in states 0 through 4 or 9 through 11 */
+      /* OK, we are somewhere in states 0 through 4 or 9 through 11.  */
 
       /* flushchar: */
       ch = GET ();
@@ -965,7 +954,7 @@ do_scrub_chars (get, tostart, tolen)
 	case LEX_IS_STRINGQUOTE:
 	  if (state == 10)
 	    {
-	      /* Preserve the whitespace in foo "bar" */
+	      /* Preserve the whitespace in foo "bar".  */
 	      UNGET (ch);
 	      state = 3;
 	      PUT (' ');
@@ -987,7 +976,7 @@ do_scrub_chars (get, tostart, tolen)
 	case LEX_IS_ONECHAR_QUOTE:
 	  if (state == 10)
 	    {
-	      /* Preserve the whitespace in foo 'b' */
+	      /* Preserve the whitespace in foo 'b'.  */
 	      UNGET (ch);
 	      state = 3;
 	      PUT (' ');
@@ -1082,10 +1071,10 @@ do_scrub_chars (get, tostart, tolen)
 	      ch = GET ();
 	    }
 	  while (ch != EOF && ch != '\n');
+
 	  if (ch == EOF)
-	    {
-	      as_warn (_("end of file in comment; newline inserted"));
-	    }
+	    as_warn (_("end of file in comment; newline inserted"));
+
 	  state = 0;
 	  PUT ('\n');
 	  break;
@@ -1095,9 +1084,8 @@ do_scrub_chars (get, tostart, tolen)
 	  ch2 = GET ();
 	  UNGET (ch2);
 	  if (ch2 != '|')
-	    {
-	      goto de_fault;
-	    }
+	    goto de_fault;
+
 	  /* Handle '||' in two states as invoking PUT twice might
 	     result in the first one jumping out of this loop.  We'd
 	     then lose track of the state and one '|' char.  */
@@ -1123,7 +1111,7 @@ do_scrub_chars (get, tostart, tolen)
 		{
 		  UNGET (ch2);
 		}
-	    } /* bad hack */
+	    }
 
 	  if (state == 0 || state == 1)	/* Only comment at start of line.  */
 	    {
@@ -1136,12 +1124,14 @@ do_scrub_chars (get, tostart, tolen)
 		  ch = GET ();
 		}
 	      while (ch != EOF && IS_WHITESPACE (ch));
+
 	      if (ch == EOF)
 		{
 		  as_warn (_("end of file in comment; newline inserted"));
 		  PUT ('\n');
 		  break;
 		}
+
 	      if (ch < '0' || ch > '9' || state != 0 || startch != '#')
 		{
 		  /* Not a cpp line.  */
@@ -1255,15 +1245,17 @@ do_scrub_chars (get, tostart, tolen)
 		      && type != LEX_IS_SYMBOL_COMPONENT)
 		    break;
 		}
+
 	      if (s > from)
-		{
-		  /* Handle the last character normally, for
-		     simplicity.  */
-		  --s;
-		}
+		/* Handle the last character normally, for
+		   simplicity.  */
+		--s;
+
 	      len = s - from;
+
 	      if (len > (toend - to) - 1)
 		len = (toend - to) - 1;
+
 	      if (len > 0)
 		{
 		  PUT (ch);
@@ -1298,11 +1290,12 @@ do_scrub_chars (get, tostart, tolen)
 	  if (state == 0)
 	    {
 	      if (IS_SYMBOL_COMPONENT (ch))
-		state = 11;	/* Now seeing label definition */
+		state = 11;	/* Now seeing label definition.  */
 	    }
 	  else if (state == 1)
 	    {
-	      state = 2;	/* Ditto */
+	      if (IS_SYMBOL_COMPONENT (ch))
+		state = 2;	/* Ditto.  */
 	    }
 	  else if (state == 9)
 	    {
@@ -1355,4 +1348,3 @@ do_scrub_chars (get, tostart, tolen)
   return to - tostart;
 }
 
-/* end of app.c */

@@ -1,3 +1,8 @@
+2003-04-23  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/opc-i.s: Add testcases for valid label.
+	* gas/ia64/opc-i.d: Updated.
+
 2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mips/elf-rel-got-n32.d, gas/mips/elf-rel-got-n32.s,

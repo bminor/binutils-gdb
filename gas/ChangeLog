@@ -1,3 +1,7 @@
+2003-04-23  H.J. Lu <hjl@gnu.org>
+
+	* app.c (do_scrub_chars): More checks for valid labels.
+
 2003-04-22  H.J. Lu <hjl@gnu.org>
 
 	* app.c (do_scrub_chars): Check for valid label.

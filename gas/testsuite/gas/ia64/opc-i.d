@@ -246,6 +246,18 @@ Disassembly of section \.text:
  a70:	00 00 00 80 01 00 	\[MII\]       hint\.m 0x0
  a76:	00 00 00 03 00 00 	            hint\.i 0x0
  a7c:	00 00 06 00       	            hint\.i 0x0
- a80:	0d 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
- a86:	00 00 00 02 00 e0 	            nop\.f 0x0
- a8c:	ff ff 07 08       	            hint\.i 0x1fffff;;
+ a80:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
+ a86:	f0 ff ff 03 84 03 	            hint\.i 0x1fffff
+ a8c:	00 00 06 00       	      \(p07\) hint\.i 0x0
+ a90:	00 00 00 00 01 c0 	\[MII\]       nop\.m 0x0
+ a96:	01 00 00 03 80 03 	      \(p07\) hint\.i 0x0
+ a9c:	00 00 06 00       	      \(p07\) hint\.i 0x0
+ aa0:	00 00 00 00 01 c0 	\[MII\]       nop\.m 0x0
+ aa6:	f1 ff ff 03 84 03 	      \(p07\) hint\.i 0x1fffff
+ aac:	00 00 06 00       	      \(p07\) hint\.i 0x0
+ ab0:	00 00 00 00 01 c0 	\[MII\]       nop\.m 0x0
+ ab6:	01 00 00 03 80 03 	      \(p07\) hint\.i 0x0
+ abc:	00 00 06 00       	      \(p07\) hint\.i 0x0
+ ac0:	0d 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
+ ac6:	00 00 00 02 80 e3 	            nop\.f 0x0
+ acc:	ff ff 07 08       	      \(p07\) hint\.i 0x1fffff;;
