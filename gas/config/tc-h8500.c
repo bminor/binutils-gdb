@@ -102,6 +102,7 @@ md_begin ()
   h8500_opcode_info *opcode;
   char prev_buffer[100];
   int idx = 0;
+  register relax_typeS *table;
 
   opcode_hash_control = hash_new ();
   prev_buffer[0] = 0;
@@ -116,36 +117,38 @@ md_begin ()
 	}
     }
 
-  /* Initialize the relax table */
-  md_relax_table[C (BRANCH, BYTE_DISP)].rlx_forward = BYTE_F;
-  md_relax_table[C (BRANCH, BYTE_DISP)].rlx_backward = BYTE_B;
-  md_relax_table[C (BRANCH, BYTE_DISP)].rlx_length = 2;
-  md_relax_table[C (BRANCH, BYTE_DISP)].rlx_more = C (BRANCH, WORD_DISP);
+  /* Initialize the relax table.  We use a local variable to avoid
+     warnings about modifying a supposedly const data structure.  */
+  table = (relax_typeS *) md_relax_table;
+  table[C (BRANCH, BYTE_DISP)].rlx_forward = BYTE_F;
+  table[C (BRANCH, BYTE_DISP)].rlx_backward = BYTE_B;
+  table[C (BRANCH, BYTE_DISP)].rlx_length = 2;
+  table[C (BRANCH, BYTE_DISP)].rlx_more = C (BRANCH, WORD_DISP);
 
-  md_relax_table[C (BRANCH, WORD_DISP)].rlx_forward = WORD_F;
-  md_relax_table[C (BRANCH, WORD_DISP)].rlx_backward = WORD_B;
-  md_relax_table[C (BRANCH, WORD_DISP)].rlx_length = 3;
-  md_relax_table[C (BRANCH, WORD_DISP)].rlx_more = 0;
+  table[C (BRANCH, WORD_DISP)].rlx_forward = WORD_F;
+  table[C (BRANCH, WORD_DISP)].rlx_backward = WORD_B;
+  table[C (BRANCH, WORD_DISP)].rlx_length = 3;
+  table[C (BRANCH, WORD_DISP)].rlx_more = 0;
 
-  md_relax_table[C (SCB_F, BYTE_DISP)].rlx_forward = BYTE_F;
-  md_relax_table[C (SCB_F, BYTE_DISP)].rlx_backward = BYTE_B;
-  md_relax_table[C (SCB_F, BYTE_DISP)].rlx_length = 3;
-  md_relax_table[C (SCB_F, BYTE_DISP)].rlx_more = C (SCB_F, WORD_DISP);
+  table[C (SCB_F, BYTE_DISP)].rlx_forward = BYTE_F;
+  table[C (SCB_F, BYTE_DISP)].rlx_backward = BYTE_B;
+  table[C (SCB_F, BYTE_DISP)].rlx_length = 3;
+  table[C (SCB_F, BYTE_DISP)].rlx_more = C (SCB_F, WORD_DISP);
 
-  md_relax_table[C (SCB_F, WORD_DISP)].rlx_forward = WORD_F;
-  md_relax_table[C (SCB_F, WORD_DISP)].rlx_backward = WORD_B;
-  md_relax_table[C (SCB_F, WORD_DISP)].rlx_length = 8;
-  md_relax_table[C (SCB_F, WORD_DISP)].rlx_more = 0;
+  table[C (SCB_F, WORD_DISP)].rlx_forward = WORD_F;
+  table[C (SCB_F, WORD_DISP)].rlx_backward = WORD_B;
+  table[C (SCB_F, WORD_DISP)].rlx_length = 8;
+  table[C (SCB_F, WORD_DISP)].rlx_more = 0;
 
-  md_relax_table[C (SCB_TST, BYTE_DISP)].rlx_forward = BYTE_F;
-  md_relax_table[C (SCB_TST, BYTE_DISP)].rlx_backward = BYTE_B;
-  md_relax_table[C (SCB_TST, BYTE_DISP)].rlx_length = 3;
-  md_relax_table[C (SCB_TST, BYTE_DISP)].rlx_more = C (SCB_TST, WORD_DISP);
+  table[C (SCB_TST, BYTE_DISP)].rlx_forward = BYTE_F;
+  table[C (SCB_TST, BYTE_DISP)].rlx_backward = BYTE_B;
+  table[C (SCB_TST, BYTE_DISP)].rlx_length = 3;
+  table[C (SCB_TST, BYTE_DISP)].rlx_more = C (SCB_TST, WORD_DISP);
 
-  md_relax_table[C (SCB_TST, WORD_DISP)].rlx_forward = WORD_F;
-  md_relax_table[C (SCB_TST, WORD_DISP)].rlx_backward = WORD_B;
-  md_relax_table[C (SCB_TST, WORD_DISP)].rlx_length = 10;
-  md_relax_table[C (SCB_TST, WORD_DISP)].rlx_more = 0;
+  table[C (SCB_TST, WORD_DISP)].rlx_forward = WORD_F;
+  table[C (SCB_TST, WORD_DISP)].rlx_backward = WORD_B;
+  table[C (SCB_TST, WORD_DISP)].rlx_length = 10;
+  table[C (SCB_TST, WORD_DISP)].rlx_more = 0;
 
 }
 
@@ -876,7 +879,7 @@ insert (output, index, exp, reloc, pcrel)
   fix_new_exp (frag_now,
 	       output - frag_now->fr_literal + index,
 	       4,	       	/* always say size is 4, but we know better */
-	       &exp,
+	       exp,
 	       pcrel,
 	       reloc);
 }

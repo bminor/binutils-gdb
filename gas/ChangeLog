@@ -1,3 +1,9 @@
+Thu Jul 22 12:09:41 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-h8500.c (md_begin): Use a local variable when
+	initializing md_relax_table to avoid warnings about modifying a
+	supposedly const data structure.
+
 Thu Jul 22 10:58:51 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* config/obj-aout.c: Only include aout/aout64.h if BFD_ASSEMBLER
