@@ -35,9 +35,9 @@
 #include "value.h"
 #include "parser-defs.h"
 
-#include "bfd/libbfd.h"		/* for bfd_default_set_arch_mach */
+#include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
-#include "bfd/libcoff.h"	/* for xcoff_data */
+#include "libcoff.h"		/* for xcoff_data */
 
 #include "elf-bfd.h"
 
