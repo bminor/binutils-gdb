@@ -1,7 +1,7 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
 
@@ -417,14 +417,8 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  int saved_frame_level = frame_relative_level (get_selected_frame ());
-  int counter;
+  struct frame_id saved_frame_id = get_frame_id (get_selected_frame ());
   char *extra_info;
-
-  /* Check that there really is a frame.  This happens when a simulator
-     is connected but not loaded or running, for instance.  */
-  if (legacy_frame_p (current_gdbarch) && saved_frame_level < 0)
-    error ("No frame.");
 
   prune_threads ();
   target_find_new_threads ();
@@ -453,27 +447,23 @@ info_threads_command (char *arg, int from_tty)
 
   switch_to_thread (current_ptid);
 
-  /* Code below copied from "up_silently_base" in "stack.c".
-   * It restores the frame set by the user before the "info threads"
-   * command.  We have finished the info-threads display by switching
-   * back to the current thread.  That switch has put us at the top
-   * of the stack (leaf frame).
-   */
-  counter = saved_frame_level;
-  cur_frame = find_relative_frame (get_selected_frame (), &counter);
-  if (counter != 0)
+  /* Restores the frame set by the user before the "info threads"
+     command.  We have finished the info-threads display by switching
+     back to the current thread.  That switch has put us at the top of
+     the stack (leaf frame).  */
+  cur_frame = frame_find_by_id (saved_frame_id);
+  if (cur_frame == NULL)
     {
-      /* Ooops, can't restore, tell user where we are. */
+      /* Ooops, can't restore, tell user where we are.  */
       warning ("Couldn't restore frame in current thread, at frame 0");
       print_stack_frame (get_selected_frame (), 0, LOCATION);
     }
   else
     {
       select_frame (cur_frame);
+      /* re-show current frame. */
+      show_stack_frame (cur_frame);
     }
-
-  /* re-show current frame. */
-  show_stack_frame (cur_frame);
 }
 
 /* Switch from one thread to another. */

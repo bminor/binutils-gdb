@@ -910,18 +910,17 @@ insert_bp_location (struct bp_location *bpt,
 	 must watch.  As soon as a many-to-one mapping is available I'll
 	 convert this.  */
 
-      struct frame_info *saved_frame;
-      int saved_level, within_current_scope;
+      int within_current_scope;
       struct value *mark = value_mark ();
       struct value *v;
+      struct frame_id saved_frame_id;
 
-      /* Save the current frame and level so we can restore it after
+      /* Save the current frame's ID so we can restore it after
 	 evaluating the watchpoint expression on its own frame.  */
       /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
 	 took a frame parameter, so that we didn't have to change the
 	 selected frame.  */
-      saved_frame = deprecated_selected_frame;
-      saved_level = frame_relative_level (deprecated_selected_frame);
+      saved_frame_id = get_frame_id (deprecated_selected_frame);
 
       /* Determine if the watchpoint is within scope.  */
       if (bpt->owner->exp_valid_block == NULL)
@@ -1018,10 +1017,8 @@ insert_bp_location (struct bp_location *bpt,
 	  bpt->owner->disposition = disp_del_at_next_stop;
 	}
 
-      /* Restore the frame and level.  */
-      if (saved_frame != deprecated_selected_frame
-	  || saved_level != frame_relative_level (deprecated_selected_frame))
-	select_frame (saved_frame);
+      /* Restore the selected frame.  */
+      select_frame (frame_find_by_id (saved_frame_id));
 
       return val;
     }
@@ -7564,8 +7561,6 @@ disable_command (char *args, int from_tty)
 static void
 do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 {
-  struct frame_info *save_selected_frame = NULL;
-  int save_selected_frame_level = -1;
   int target_resources_ok, other_type_used;
   struct value *mark;
 
@@ -7612,6 +7607,9 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	  bpt->type == bp_read_watchpoint || 
 	  bpt->type == bp_access_watchpoint)
 	{
+	  struct frame_id saved_frame_id;
+
+	  saved_frame_id = get_frame_id (get_selected_frame ());
 	  if (bpt->exp_valid_block != NULL)
 	    {
 	      struct frame_info *fr =
@@ -7624,9 +7622,6 @@ is valid is not currently in scope.\n", bpt->number);
 		  bpt->enable_state = bp_disabled;
 		  return;
 		}
-	      
-	      save_selected_frame = deprecated_selected_frame;
-	      save_selected_frame_level = frame_relative_level (deprecated_selected_frame);
 	      select_frame (fr);
 	    }
 	  
@@ -7661,8 +7656,7 @@ have been allocated for other watchpoints.\n", bpt->number);
 		}
 	    }
 	  
-	  if (save_selected_frame_level >= 0)
-	    select_frame (save_selected_frame);
+	  select_frame (frame_find_by_id (saved_frame_id));
 	  value_free_to_mark (mark);
 	}
     }

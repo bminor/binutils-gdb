@@ -1,5 +1,11 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.c (insert_bp_location): Use get_frame_id, and
+	frame_find_by_id instead of frame_relative_level.
+	(do_enable_breakpoint): Ditto.
+	* thread.c: Update copyright.
+	(info_threads_command): Ditto, simplify.
+
 	* frame.c (deprecated_generic_get_saved_register): Delete
 	function, moved to "xstormy16-tdep.c".
 	* xstormy16-tdep.c (xstormy16_get_saved_register): Inline
