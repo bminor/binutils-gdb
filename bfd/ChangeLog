@@ -1,3 +1,34 @@
+2002-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.h (t2a1_push_insn, t2a2_ldr_insn, t2a3_mov_insn,
+	t2a4_bx_insn, t2a5_pop_insn, t2a6_bx_insn): Remove.
+
+2002-11-05  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am: Remove entries for elf32-qnx.[ch].
+	* Makefile.in: Regenerate.
+	* config.bfd: Change arm-nto to use bfd_elf32_{big|little}arm_vec,
+	ppc-nto to use bfd_elf32_powerpc{le}_vec, sh-nto to use
+	bfd_elf32_sh{l}_vec, and i386-nto to use bfd_elf32_i386_vec.
+	* configure.in: Remove support for bfd_elf32_sh{l}qnx_vec,
+	bfd_elf32_powerpc{le}qnx_vec, bfd_elf32_{big|little}armqnx_vec,
+	and bfd_elf32_i386qnx_vec, and removed elf32-qnx.lo from other targets.
+	bfd_elf32_sh{l}_vec, and i386-nto to use bfd_elf32_i386_vec.
+	* configure: Regenerate.
+	* elf32-qnx.c: Remove.
+	* elf32-qnx.h: Remove.
+	* elf.c: Remove calls to QNX specific set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
+	* elf32-i386.c: Remove QNX extended bfd support.
+	* elf32-ppc.c: Remove QNX extended bfd support.
+	* elf32-sh.c: Remove QNX extended bfd support.
+	* elfarm-nabi.c: Remove QNX extended bfd support.
+	* targets.c: Remove qnx vectors.
+	* elfxx-target.h (elf_backend_set_nonloadable_filepos): Remove
+	(elf_backend_is_contained_by_filepos): Remove.
+	(elf_backend_copy_private_bfd_data_p): Remove.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2002-11-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 	    Alan Modra  <amodra@bigpond.net.au>
 
