@@ -348,6 +348,8 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 
 AC_CONFIG_SUBDIRS(testsuite)
 
+GAS_GDBINIT
+
 dnl This must come last.
 dnl Apparently symlinks are checked for in the directory containing
 dnl  the last Makefile.  Thus the order used here...

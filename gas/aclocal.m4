@@ -74,3 +74,17 @@ assert (a == b
 AC_MSG_RESULT($gas_cv_assert_ok)
 test $gas_cv_assert_ok = yes || AC_DEFINE(BROKEN_ASSERT)
 ])dnl
+dnl
+dnl GAS_GDBINIT
+dnl Generates a .gdbinit file in the build directory pointing gdb to
+dnl srcdir, if srcdir != PWD.
+AC_DEFUN(GAS_GDBINIT,
+[if test `cd $srcdir;pwd` = `pwd` ; then
+  rm -f .gdbinit
+  cat > .gdbinit << EOF
+dir $srcdir
+dir .
+source $srcdir/.gdbinit
+EOF
+fi
+])dnl
