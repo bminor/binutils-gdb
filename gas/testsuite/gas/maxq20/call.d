@@ -24,14 +24,14 @@ Disassembly of section .text:
 
 0+01c <LoopTop>:
   1c:	00 3d [ 	]*CALL  #00h
-  1e:	ff 5d [ 	]*DJNZ LC\[1\], #ffh
+  1e:	ff 5d [ 	]*DJNZ  LC\[1\], #ffh
   20:	10 7d [ 	]*MOVE  LC\[1\], #10h
 
 0+022 <LoopTop1>:
   22:	00 3d [ 	]*CALL  #00h
 	...
  424:	00 0b [ 	]*MOVE  PFX\[0\], #00h
- 426:	1c 5d [ 	]*DJNZ LC\[1\], #1ch
+ 426:	1c 5d [ 	]*DJNZ  LC\[1\], #1ch
 
 0+428 <LongCall>:
  428:	8d 8c [ 	]*RETI 

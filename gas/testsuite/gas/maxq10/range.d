@@ -46,4 +46,4 @@ Disassembly of section .text:
   4c:	81 4a [ 	]*ADD  #81h
   4e:	ff 0b [ 	]*MOVE  PFX\[0\], #ffh
   50:	7f 4a [ 	]*ADD  #7fh
-
+	...

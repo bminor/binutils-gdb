@@ -1,3 +1,10 @@
+2004-11-18  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+
+	* gas/maxq10/call.d: Fix expected results now that bfd assembler
+	support is enabled by default.
+	* gas/maxq10/range.d: Likewise.
+	* gas/maxq20/call.d: Likewise.
+
 2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/mapping.d: Expect F markers for Thumb code.
