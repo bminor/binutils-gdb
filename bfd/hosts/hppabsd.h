@@ -10,8 +10,8 @@
 #include <string.h>
 #include <sys/file.h>
 
-extern PTR  EXFUN(malloc,(unsigned));
-extern void EXFUN(free, (PTR));
+extern PTR  malloc PARAMS ((unsigned));
+extern void free   PARAMS ((PTR));
 
 #define HOST_HPPABSD
 
