@@ -1,5 +1,15 @@
 2003-11-03  Andrew Cagney  <cagney@redhat.com>
 
+	* bcache.c: Include "gdb_assert.h".
+	(struct bcache): Add fields "expand_count" and
+	"expand_hash_count".
+	(expand_hash_table): Update the expand counts.
+	(print_bcache_statistics): Use XCALLOC, not alloca.  Print stats
+	on object sizes and hashes.
+	* Makefile.in (bcache.o): Update dependencies.
+
+2003-11-03  Andrew Cagney  <cagney@redhat.com>
+
 	* exec.c (xfer_memory): Eliminate xfer_fn.
 
 2003-10-31  Kevin Buettner  <kevinb@redhat.com>

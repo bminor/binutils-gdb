@@ -1606,7 +1606,8 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 	$(target_h) $(ax_h) $(ax_gdb_h) $(gdb_string_h) $(block_h) \
 	$(regcache_h)
 ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h) $(gdb_string_h)
-bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
+bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) \
+	$(gdb_string_h) $(gdb_assert_h)
 bfd-target.o: bfd-target.c $(defs_h) $(target_h) $(bfd_target_h) \
 	$(gdb_assert_h) $(gdb_string_h)
 block.o: block.c $(defs_h) $(block_h) $(symtab_h) $(symfile_h) \
