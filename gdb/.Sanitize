@@ -398,6 +398,7 @@ sparc-tdep.c
 sparcl-stub.c
 sparcl-tdep.c
 sparclet-rom.c
+sparclet-stub.c
 srec.h
 stabsread.c
 stabsread.h
