@@ -287,12 +287,23 @@ value_cast (struct type *type, register value_ptr arg2)
 				      code2 == TYPE_CODE_ENUM ||
 				      code2 == TYPE_CODE_RANGE))
     {
-      int ptr_bit = HOST_CHAR_BIT * TYPE_LENGTH (type);
+      /* TYPE_LENGTH (type) is the length of a pointer, but we really
+	 want the length of an address! -- we are really dealing with
+	 addresses (i.e., gdb representations) not pointers (i.e.,
+	 target representations) here.
+
+	 This allows things like "print *(int *)0x01000234" to work
+	 without printing a misleading message -- which would
+	 otherwise occur when dealing with a target having two byte
+	 pointers and four byte addresses.  */
+
+      int addr_bit = TARGET_ADDR_BIT;
+
       LONGEST longest = value_as_long (arg2);
-      if (ptr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
+      if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
 	{
-	  if (longest >= ((LONGEST) 1 << ptr_bit)
-	      || longest <= -((LONGEST) 1 << ptr_bit))
+	  if (longest >= ((LONGEST) 1 << addr_bit)
+	      || longest <= -((LONGEST) 1 << addr_bit))
 	    warning ("value truncated");
 	}
       return value_from_longest (type, longest);

@@ -1,3 +1,14 @@
+Tue Feb  6 11:58:57 2001  David Taylor  <taylor@redhat.com>
+
+	* valops.c (value_cast): If casting a scalar to a pointer, do not
+ 	issue a message about truncation unless it exceeds the length of
+ 	an address, not the length of a pointer.  This is because what the
+ 	user gives us is an address, not a pointer, and we will ultimately
+ 	convert it (via ADDRESS_TO_POINTER) to a pointer, not truncate it
+ 	to a pointer.  This allows things like "print *(int *)0x01000234"
+ 	to work without generating a misleading message on a target having
+ 	two byte pointers and four byte addresses.
+
 2001-02-05  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c: Change PTR to void * throughout.
