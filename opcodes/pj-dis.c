@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include <stdio.h>
 #include "sysdep.h"
 #include "opcode/pj.h"
@@ -24,7 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern const pj_opc_info_t pj_opc_info[512];
 
-static int get_int (memaddr, iptr, info)
+static int
+get_int (memaddr, iptr, info)
      bfd_vma memaddr;
      int *iptr;
      struct disassemble_info *info;
@@ -84,7 +84,7 @@ print_insn_pj (addr, info)
 	  if ((status = get_int (addr, &val, info)))
 	    goto fail;
 
-	  fprintf_fn (stream," default: ");
+	  fprintf_fn (stream, " default: ");
 	  (*info->print_address_func) (val + insn_start, info);
 	  addr += 4;
 
@@ -96,15 +96,16 @@ print_insn_pj (addr, info)
 	    goto fail;
 	  addr += 4;
 
-	  while (lowval <= highval) {
-	    if ((status = get_int (addr, &val, info)))
-	      goto fail;
-	    fprintf_fn (stream," %d:[", lowval);
-	    (*info->print_address_func) (val + insn_start, info);
-	    fprintf_fn (stream," ]");
-	    addr += 4;
-	    lowval++;
-	  }
+	  while (lowval <= highval)
+	    {
+	      if ((status = get_int (addr, &val, info)))
+		goto fail;
+	      fprintf_fn (stream, " %d:[", lowval);
+	      (*info->print_address_func) (val + insn_start, info);
+	      fprintf_fn (stream, " ]");
+	      addr += 4;
+	      lowval++;
+	    }
 	  return addr - insn_start;
 	}
 
@@ -122,26 +123,27 @@ print_insn_pj (addr, info)
 	    goto fail;
 	  addr += 4;
 
-	  fprintf_fn (stream," default: ");
+	  fprintf_fn (stream, " default: ");
 	  (*info->print_address_func) (val + insn_start, info);
 
 	  if ((status = get_int (addr, &count, info)))
 	    goto fail;
 	  addr += 4;
 
-	  while (count--) {
-	    if ((status = get_int (addr, &val, info)))
-	      goto fail;
-	    addr += 4;
-	    fprintf_fn (stream," %d:[", val);
+	  while (count--)
+	    {
+	      if ((status = get_int (addr, &val, info)))
+		goto fail;
+	      addr += 4;
+	      fprintf_fn (stream, " %d:[", val);
 
-	    if ((status = get_int (addr, &val, info)))
-	      goto fail;
-	    addr += 4;
+	      if ((status = get_int (addr, &val, info)))
+		goto fail;
+	      addr += 4;
 
-	    (*info->print_address_func) (val + insn_start, info);
-	    fprintf_fn (stream," ]");
-	  }
+	      (*info->print_address_func) (val + insn_start, info);
+	      fprintf_fn (stream, " ]");
+	    }
 	  return addr - insn_start;
 	}
       for (a = 0; op->arg[a]; a++)

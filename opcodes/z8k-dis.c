@@ -26,8 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <setjmp.h>
 
-typedef struct
-{
+typedef struct {
   /* These are all indexed by nibble number (i.e only every other entry
      of bytes is used, and every 4th entry of words).  */
   unsigned char nibbles[24];
@@ -49,14 +48,13 @@ typedef struct
   unsigned long ctrl_code;
   unsigned long flags;
   unsigned long interrupts;
-}
-instr_data_s;
+} instr_data_s;
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns 1 for success, longjmps
    on error.  */
 #define FETCH_DATA(info, nibble) \
-  ((nibble) < ((instr_data_s *)(info->private_data))->max_fetched \
+  ((nibble) < ((instr_data_s *) (info->private_data))->max_fetched \
    ? 1 : fetch_data ((info), (nibble)))
 
 static int
@@ -105,8 +103,7 @@ fetch_data (info, nibble)
   return 1;
 }
 
-static char *codes[16] =
-{
+static char *codes[16] = {
   "f",
   "lt",
   "le",
@@ -125,8 +122,7 @@ static char *codes[16] =
   "nc/uge"
 };
 
-static char *ctrl_names[8] =
-{
+static char *ctrl_names[8] = {
   "<invld>",
   "flags",
   "fcw",
@@ -325,8 +321,8 @@ unpack_instr (instr_data, is_segmented, info)
     {
       FETCH_DATA (info, nibl_count + 4 - (nibl_count % 4));
       instr_nibl = instr_data->nibbles[nibl_count];
-      instr_byte = instr_data->bytes[nibl_count&~1];
-      instr_word = instr_data->words[nibl_count&~3];
+      instr_byte = instr_data->bytes[nibl_count & ~1];
+      instr_word = instr_data->words[nibl_count & ~3];
 
       tabl_datum = z8k_table[instr_data->tabl_index].byte_info[loop];
       datum_class = tabl_datum & CLASS_MASK;
@@ -339,16 +335,20 @@ unpack_instr (instr_data, is_segmented, info)
 	    {
 	    case ARG_DISP16:
               instr_data->displacement = instr_data->insn_start + 4 +
-                (signed short)(instr_word & 0xffff);
+                (signed short) (instr_word & 0xffff);
 	      nibl_count += 3;
 	      break;
 	    case ARG_DISP12:
-              if (instr_word & 0x800) {  /* neg. 12 bit displacement */
-                instr_data->displacement = instr_data->insn_start + 2 -
-                  (signed short)((instr_word & 0xfff) | 0xf000) * 2;
-              }
-              else {
-                instr_data->displacement = instr_data->insn_start + 2 - (instr_word & 0x0fff) * 2;
+              if (instr_word & 0x800)
+		{
+		  /* neg. 12 bit displacement */
+		  instr_data->displacement = instr_data->insn_start + 2
+		    - (signed short) ((instr_word & 0xfff) | 0xf000) * 2;
+		}
+              else
+		{
+		  instr_data->displacement = instr_data->insn_start + 2
+		    - (instr_word & 0x0fff) * 2;
               }
 	      nibl_count += 2;
 	      break;
@@ -474,7 +474,7 @@ unpack_instr (instr_data, is_segmented, info)
 }
 
 static void
-unparse_instr (instr_data,is_segmented)
+unparse_instr (instr_data, is_segmented)
      instr_data_s *instr_data;
      int is_segmented;
 {

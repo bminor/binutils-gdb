@@ -1,6 +1,9 @@
 2001-07-23  Kazu Hirata  <kazu@hxi.com>
 
-	* s390-dis.c: Fix formatting.
+	* m68k-dis.c: Fix formatting.
+	* pj-dis.c: Likewise.
+	* s390-dis.c: Likewise.
+	* z8k-dis.c: Likewise.
 
 2001-07-21  Chris Demetriou  <cgd@broadcom.com>
 
