@@ -30,6 +30,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+a4rc.sed
 all-cfg.texi
 configure.in
 gdb.texinfo
@@ -52,7 +53,6 @@ stabs.texinfo
 
 Things-to-lose:
 
-a4rc.sed
 config
 cyglogo.eps
 cygref.tex
