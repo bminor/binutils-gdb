@@ -1206,10 +1206,13 @@ monitor_fetch_register (regno)
      int regno;
 {
   char *name;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
-  {0};
-  char regbuf[MAX_REGISTER_RAW_SIZE * 2 + 1];
+  char *zerobuf;
+  char *regbuf;
   int i;
+
+  regbuf  = alloca (MAX_REGISTER_RAW_SIZE * 2 + 1);
+  zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
 
   name = current_monitor->regnames[regno];
   monitor_debug ("MON fetchreg %d '%s'\n", regno, name ? name : "(null name)");

@@ -1,3 +1,9 @@
+2000-05-03  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* monitor.c (monitor_fetch_register): MAX_REGISTER_RAW_SIZE
+	is not static in the MULTI_ARCH world, so don't use it in a
+	static array declaration.
+
 2000-05-03  Elena Zannoni  <ezannoni@makita.cygnus.com>
 
 	* symtab.c (in_prologue): From Jim Blandy. Rewrite, more
