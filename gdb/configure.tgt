@@ -203,6 +203,7 @@ sh-*-nto*)		gdb_target=nto ;;
 sh*)			gdb_target=embed ;;
 
 sparc-*-linux*)		gdb_target=linux ;;
+sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sol2 ;;
 sparc-*-*)		gdb_target=sparc ;;
 sparc64-*-linux*)	gdb_target=linux64 ;;

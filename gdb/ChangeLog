@@ -1,5 +1,32 @@
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c: Don't include "target.h", "value.h" and
+	"sparcnbsd-tdep.h".
+	(REG32_OFFSET_PSR, REG32_OFFSET_PC, REG32_OFFSET_NPC,
+	REG32_OFFSET_Y, REG32_OFFSET_GLOBAL, REG32_OFFSET_OUT,
+	REG64_OFFSET_TSTATE, REG64_OFFSET_PC, REG64_OFFSET_NPC,
+	REG64_OFFSET_Y, REG64_OFFSET_GLOBAL, REG64_OFFSET_OUT): Remove.
+	(sparcnbsd_supply_reg32, sparcnbsd_supply_reg64,
+	sparcnbsd_fill_reg32, sparcnbsd_fill_reg64,
+	sparcnbsd_supply_fpreg32, sparcnbsd_supply_fpreg64,
+	sparcnbsd_fill_reg32, sparcnbsd_fill_reg64): Remove.
+	(sparcnbsd_gregset): New variable.
+	(fetch_core_registers): Rewrite to call sparc32_supply_gregset and
+	sparc32_supply_fpregset.
+	(sparcnbsd_get_longjmp_target_32,
+	sparcnbsd_get_longjmp_target_64): Remove.
+	(sparcnbsd_init_abi_common, sparcnbsd_init_aout,
+	sparcnbsd_init_elf): Remove.
+	(sparcnbsd_init_abi, sparcnbsd_aout_init_abi,
+	sparcnbsd_elf_init_abi): New functions.
+	(_initialize_sparcnbsd_tdep): New prototype.
+	(_initialize_sparnbsd_tdep): Update.
+	* Makefile.in (ALLDEPFILES): Add sparcnbsd-tdep.c.
+	(sparcnbsd-tdep.o): New dependency.
+	* configure.tgt: Add sparc-*-netbsd*.
+	* config/sparc/tm-nbsd.h: Rewrite.
+	* config/sparc/nbsd.mt: Reformat.
+
 	* sparc-tdep.c: Fix typos in comments.
 
 	* sparc-linux-tdep.c (sparc32_linux_init_abi): Set long_double_bit

@@ -1295,6 +1295,7 @@ ALLDEPFILES = \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	solib.c solib-irix.c solib-svr4.c solib-sunos.c \
 	sparc-tdep.c sparc-linux-tdep.c sparc-sol2-tdep.c \
+	sparcnbsd-tdep.c \
 	sparc-nat.c sparc-sol2-nat.c sparcbsd-nat.c \
 	sparc64-tdep.c sparc64-sol2-tdep.c sparc64-linux-tdep.c \
 	sparc64fbsd-tdep.c \
@@ -2322,6 +2323,9 @@ sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(gdb_string_h) $(sparc_tdep_h)
 sparcbsd-nat.o: sparcbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(sparc64_tdep_h) $(sparcbsd_nat_h)
+sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
+	$(regcache_h) $(solib_svr4_h) $(gdb_string_h) \
+	$(sparc_tdep_h) $(nbsd_tdep_h)
 sparc64-nat.o: sparc-nat.c $(defs_h) $(gdbarch_h) \
 	$(sparc64_tdep_h) $(sparc_nat_h)
 sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(floatformat_h) \

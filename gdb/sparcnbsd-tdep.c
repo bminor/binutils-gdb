@@ -1,4 +1,5 @@
-/* Target-dependent code for SPARC systems running NetBSD.
+/* Target-dependent code for NetBSD/sparc.
+
    Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
@@ -21,393 +22,51 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include "regcache.h"
-#include "target.h"
-#include "value.h"
 #include "osabi.h"
+#include "regcache.h"
+#include "solib-svr4.h"
 
 #include "gdb_string.h"
 
 #include "sparc-tdep.h"
-#include "sparcnbsd-tdep.h"
 #include "nbsd-tdep.h"
 
-#include "solib-svr4.h"
-
-#define REG32_OFFSET_PSR	(0 * 4)
-#define REG32_OFFSET_PC		(1 * 4)
-#define REG32_OFFSET_NPC	(2 * 4)
-#define REG32_OFFSET_Y		(3 * 4)
-#define REG32_OFFSET_GLOBAL	(4 * 4)
-#define REG32_OFFSET_OUT	(12 * 4)
-
-#define REG64_OFFSET_TSTATE	(0 * 8)
-#define REG64_OFFSET_PC		(1 * 8)
-#define REG64_OFFSET_NPC	(2 * 8)
-#define REG64_OFFSET_Y		(3 * 8)
-#define REG64_OFFSET_GLOBAL	(4 * 8)
-#define REG64_OFFSET_OUT	(12 * 8)
-
-void
-sparcnbsd_supply_reg32 (char *regs, int regno)
+const struct sparc_gregset sparcnbsd_gregset =
 {
-  int i;
+  0 * 4,			/* %psr */
+  1 * 4,			/* %pc */
+  2 * 4,			/* %npc */
+  3 * 4,			/* %y */
+  -1,				/* %wim */
+  -1,				/* %tbr */
+  5 * 4,			/* %g1 */
+  -1				/* %l0 */
+};
 
-  if (regno == PS_REGNUM || regno == -1)
-    supply_register (PS_REGNUM, regs + REG32_OFFSET_PSR);
+/* Unlike other NetBSD implementations, the SPARC port historically
+   used .reg and .reg2 (see bfd/netbsd-core.c), and as such, we can
+   share one routine for a.out and ELF core files.  */
 
-  if (regno == PC_REGNUM || regno == -1)
-    supply_register (PC_REGNUM, regs + REG32_OFFSET_PC);
-
-  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
-    supply_register (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
-
-  if (regno == Y_REGNUM || regno == -1)
-    supply_register (Y_REGNUM, regs + REG32_OFFSET_Y);
-
-  if ((regno >= G0_REGNUM && regno <= G7_REGNUM) || regno == -1)
-    {
-      if (regno == G0_REGNUM || regno == -1)
-	supply_register (G0_REGNUM, NULL);	/* %g0 is always zero */
-      for (i = G1_REGNUM; i <= G7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    supply_register (i, regs + REG32_OFFSET_GLOBAL +
-	                     ((i - G0_REGNUM) * 4));
-	}
-    }
-
-  if ((regno >= O0_REGNUM && regno <= O7_REGNUM) || regno == -1)
-    {
-      for (i = O0_REGNUM; i <= O7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    supply_register (i, regs + REG32_OFFSET_OUT +
-			     ((i - O0_REGNUM) * 4));
-        }
-    }
-
-  /* Inputs and Locals are stored onto the stack by by the kernel.  */
-  if ((regno >= L0_REGNUM && regno <= I7_REGNUM) || regno == -1)
-    {
-      CORE_ADDR sp = read_register (SP_REGNUM);
-      char buf[4];
-
-      for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    {
-              target_read_memory (sp + ((i - L0_REGNUM) * 4),
-                                  buf, sizeof (buf));
-	      supply_register (i, buf);
-	    }
-	}
-    }
-
-  /* FIXME: If we don't set these valid, read_register_bytes() rereads
-     all the regs every time it is called!  */
-  if (regno == WIM_REGNUM || regno == -1)
-    supply_register (WIM_REGNUM, NULL);
-  if (regno == TBR_REGNUM || regno == -1)
-    supply_register (TBR_REGNUM, NULL);
-  if (regno == CPS_REGNUM || regno == -1)
-    supply_register (CPS_REGNUM, NULL);
-}
-
-void
-sparcnbsd_supply_reg64 (char *regs, int regno)
-{
-  int i;
-  char buf[8];
-
-  if (regno == TSTATE_REGNUM || regno == -1)
-    supply_register (PS_REGNUM, regs + REG64_OFFSET_TSTATE);
-
-  if (regno == PC_REGNUM || regno == -1)
-    supply_register (PC_REGNUM, regs + REG64_OFFSET_PC);
-
-  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
-    supply_register (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
-
-  if (regno == Y_REGNUM || regno == -1)
-    {
-      memset (buf, 0, sizeof (buf));
-      memcpy (&buf[4], regs + REG64_OFFSET_Y, 4);
-      supply_register (Y_REGNUM, buf);
-    }
-
-  if ((regno >= G0_REGNUM && regno <= G7_REGNUM) || regno == -1)
-    {
-      if (regno == G0_REGNUM || regno == -1)
-	supply_register (G0_REGNUM, NULL);	/* %g0 is always zero */
-      for (i = G1_REGNUM; i <= G7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    supply_register (i, regs + REG64_OFFSET_GLOBAL +
-	                     ((i - G0_REGNUM) * 8));
-	}
-    }
-
-  if ((regno >= O0_REGNUM && regno <= O7_REGNUM) || regno == -1)
-    {
-      for (i = O0_REGNUM; i <= O7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    supply_register (i, regs + REG64_OFFSET_OUT +
-			     ((i - O0_REGNUM) * 8));
-        }
-    }
-
-  /* Inputs and Locals are stored onto the stack by by the kernel.  */
-  if ((regno >= L0_REGNUM && regno <= I7_REGNUM) || regno == -1)
-    {
-      CORE_ADDR sp = read_register (SP_REGNUM);
-      char buf[8];
-
-      if (sp & 1)
-	{
-	  /* Registers are 64-bit.  */
-	  sp += 2047;
-
-	  for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-	    {
-	      if (regno == i || regno == -1)
-	        {
-                  target_read_memory (sp + ((i - L0_REGNUM) * 8),
-                                      buf, sizeof (buf));
-	          supply_register (i, buf);
-		}
-	    }
-	}
-      else
-	{
-	  /* Registers are 32-bit.  Toss any sign-extension of the stack
-	     pointer, clear out the top half of the temporary buffer, and
-	     put the register value in the bottom half.  */
-
-	  sp &= 0xffffffffUL;
-	  memset (buf, 0, sizeof (buf));
-	  for (i = L0_REGNUM; i <= I7_REGNUM; i++)
-	    {
-	      if (regno == i || regno == -1)
-		{
-		  target_read_memory (sp + ((i - L0_REGNUM) * 4),
-				      &buf[4], sizeof (buf));
-                  supply_register (i, buf);
-		}
-	    }
-	}
-    }
-
-  /* FIXME: If we don't set these valid, read_register_bytes() rereads
-     all the regs every time it is called!  */
-  if (regno == WIM_REGNUM || regno == -1)
-    supply_register (WIM_REGNUM, NULL);
-  if (regno == TBR_REGNUM || regno == -1)
-    supply_register (TBR_REGNUM, NULL);
-  if (regno == CPS_REGNUM || regno == -1)
-    supply_register (CPS_REGNUM, NULL);
-}
-
-void
-sparcnbsd_fill_reg32 (char *regs, int regno)
-{
-  int i;
-
-  if (regno == PS_REGNUM || regno == -1)
-    regcache_collect (PS_REGNUM, regs + REG32_OFFSET_PSR);
-
-  if (regno == PC_REGNUM || regno == -1)
-    regcache_collect (PC_REGNUM, regs + REG32_OFFSET_PC);
-
-  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
-    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
-
-  if (regno == Y_REGNUM || regno == -1)
-    regcache_collect (Y_REGNUM, regs + REG32_OFFSET_Y);
-
-  if ((regno >= G0_REGNUM && regno <= G7_REGNUM) || regno == -1)
-    {
-      /* %g0 is always zero */
-      for (i = G1_REGNUM; i <= G7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    regcache_collect (i, regs + REG32_OFFSET_GLOBAL +
-	                      ((i - G0_REGNUM) * 4));
-	}
-    }
-
-  if ((regno >= O0_REGNUM && regno <= O7_REGNUM) || regno == -1)
-    {
-      for (i = O0_REGNUM; i <= O7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    regcache_collect (i, regs + REG32_OFFSET_OUT +
-			      ((i - O0_REGNUM) * 4));
-        }
-    }
-
-  /* Responsibility for the stack regs is pushed off onto the caller.  */
-}
-
-void
-sparcnbsd_fill_reg64 (char *regs, int regno)
-{
-  int i;
-
-  if (regno == TSTATE_REGNUM || regno == -1)
-    regcache_collect (TSTATE_REGNUM, regs + REG64_OFFSET_TSTATE);
-
-  if (regno == PC_REGNUM || regno == -1)
-    regcache_collect (PC_REGNUM, regs + REG64_OFFSET_PC);
-
-  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
-    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
-
-  if (regno == Y_REGNUM || regno == -1)
-    regcache_collect (Y_REGNUM, regs + REG64_OFFSET_Y);
-
-  if ((regno >= G0_REGNUM && regno <= G7_REGNUM) || regno == -1)
-    {
-      /* %g0 is always zero */
-      for (i = G1_REGNUM; i <= G7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    regcache_collect (i, regs + REG64_OFFSET_GLOBAL +
-	                      ((i - G0_REGNUM) * 4));
-	}
-    }
-
-  if ((regno >= O0_REGNUM && regno <= O7_REGNUM) || regno == -1)
-    {
-      for (i = O0_REGNUM; i <= O7_REGNUM; i++)
-	{
-	  if (regno == i || regno == -1)
-	    regcache_collect (i, regs + REG64_OFFSET_OUT +
-			      ((i - O0_REGNUM) * 4));
-        }
-    }
-
-  /* Responsibility for the stack regs is pushed off onto the caller.  */
-}
-
-void
-sparcnbsd_supply_fpreg32 (char *fpregs, int regno)
-{
-  int i;
-
-  for (i = 0; i <= 31; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	supply_register (FP0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  if (regno == FPS_REGNUM || regno == -1)
-    supply_register (FPS_REGNUM, fpregs + (32 * 4));
-}
-
-void
-sparcnbsd_supply_fpreg64 (char *fpregs, int regno)
-{
-  int i;
-
-  for (i = 0; i <= 31; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	supply_register (FP0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  for (; i <= 47; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	supply_register (FP0_REGNUM + i, fpregs + (32 * 4) + (i * 8));
-    }
-
-  if (regno == FPS_REGNUM || regno == -1)
-    supply_register (FPS_REGNUM, fpregs + (32 * 4) + (16 * 8));
-
-  /* XXX %gsr */
-}
-
-void
-sparcnbsd_fill_fpreg32 (char *fpregs, int regno)
-{
-  int i;
-
-  for (i = 0; i <= 31; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	regcache_collect (FP0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  if (regno == FPS_REGNUM || regno == -1)
-    regcache_collect (FPS_REGNUM, fpregs + (32 * 4));
-}
-
-void
-sparcnbsd_fill_fpreg64 (char *fpregs, int regno)
-{
-  int i;
-
-  for (i = 0; i <= 31; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	regcache_collect (FP0_REGNUM + i, fpregs + (i * 4));
-    }
-
-  for (; i <= 47; i++)
-    {
-      if (regno == (FP0_REGNUM + i) || regno == -1)
-	regcache_collect (FP0_REGNUM + i, fpregs + (32 * 4) + (i * 8));
-    }
-
-  if (regno == FPS_REGNUM || regno == -1)
-    regcache_collect (FPS_REGNUM, fpregs + (32 * 4) + (16 * 8));
-
-  /* XXX %gsr */
-}
-
-/* Unlike other NetBSD implementations, the SPARC port historically used
-   .reg and .reg2 (see bfd/netbsd-core.c), and as such, we can share one
-   routine for a.out and ELF core files.  */
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
                       CORE_ADDR ignore)
 {
-  int reg_size, fpreg_size;
-
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
-    {
-      reg_size = (20 * 4);
-      fpreg_size = (33 * 4);
-    }
-  else
-    {
-      reg_size = (20 * 8);
-      fpreg_size = (64 * 4)
-        + 8  /* fsr */
-        + 4  /* gsr */
-        + 4; /* pad */
-    }
+  int reg_size = 20 * 4;
+  int fpreg_size = 33 * 4;
 
   switch (which)
     {
-    case 0:  /* Integer registers */
+    case 0:  /* Integer registers.  */
       if (core_reg_size != reg_size)
 	warning ("Wrong size register set in core file.");
-      else if (gdbarch_ptr_bit (current_gdbarch) == 32)
-	sparcnbsd_supply_reg32 (core_reg_sect, -1);
-      else
-	sparcnbsd_supply_reg64 (core_reg_sect, -1);
+      sparc32_supply_gregset (&sparcnbsd_gregset, current_regcache,
+			      -1, core_reg_sect);
       break;
 
-    case 2:  /* Floating pointer registers */
+    case 2:  /* Floating pointer registers.  */
       if (core_reg_size != fpreg_size)
 	warning ("Wrong size FP register set in core file.");
-      else if (gdbarch_ptr_bit (current_gdbarch) == 32)
-	sparcnbsd_supply_fpreg32 (core_reg_sect, -1);
-      else
-	sparcnbsd_supply_fpreg64 (core_reg_sect, -1);
+      sparc32_supply_fpregset (current_regcache, -1, core_reg_sect);
       break;
 
     default:
@@ -434,81 +93,39 @@ static struct core_fns sparcnbsd_elfcore_fns =
   NULL
 };
 
-/* FIXME: Need PC_IN_SIGTRAMP() support, but NetBSD/sparc signal trampolines
-   aren't easily identified.  */
-
-static int
-sparcnbsd_get_longjmp_target_32 (CORE_ADDR *pc)
-{
-  CORE_ADDR jb_addr;
-  char buf[4];
-
-  jb_addr = read_register (O0_REGNUM);
-
-  if (target_read_memory (jb_addr + 12, buf, sizeof (buf)))
-    return 0;
-
-  *pc = extract_unsigned_integer (buf, sizeof (buf));
-
-  return 1;
-}
-
-static int
-sparcnbsd_get_longjmp_target_64 (CORE_ADDR *pc)
-{
-  CORE_ADDR jb_addr;
-  char buf[8];
-
-  jb_addr = read_register (O0_REGNUM);
-
-  if (target_read_memory (jb_addr + 16, buf, sizeof (buf)))
-    return 0;
-
-  *pc = extract_unsigned_integer (buf, sizeof (buf));
-
-  return 1;
-}
+/* Return non-zero if we are in a shared library trampoline code stub.  */
 
 static int
 sparcnbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
-  if (strcmp (name, "_DYNAMIC") == 0)
-    return 1;
-
-  return 0;
+  return (name && !strcmp (name, "_DYNAMIC"));
 }
 
 static void
-sparcnbsd_init_abi_common (struct gdbarch_info info,
-                           struct gdbarch *gdbarch)
+sparcnbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  set_gdbarch_get_longjmp_target (gdbarch, gdbarch_ptr_bit (gdbarch) == 32 ?
-	                                   sparcnbsd_get_longjmp_target_32 :
-	                                   sparcnbsd_get_longjmp_target_64);
+  /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
+  set_gdbarch_long_double_bit (gdbarch, 64);
 }
 
 static void
-sparcnbsd_init_abi_aout (struct gdbarch_info info,
-                         struct gdbarch *gdbarch)
+sparcnbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparcnbsd_init_abi_common (info, gdbarch);
+  sparcnbsd_init_abi (info, gdbarch);
 
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-                                     sparcnbsd_aout_in_solib_call_trampoline);
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, sparcnbsd_aout_in_solib_call_trampoline);
 }
 
 static void
-sparcnbsd_init_abi_elf (struct gdbarch_info info,
-                        struct gdbarch *gdbarch)
+sparcnbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparcnbsd_init_abi_common (info, gdbarch);
+  sparcnbsd_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-				         gdbarch_ptr_bit (gdbarch) == 32 ?
-                                nbsd_ilp32_solib_svr4_fetch_link_map_offsets :
-				nbsd_lp64_solib_svr4_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }
 
 static enum gdb_osabi
@@ -520,6 +137,10 @@ sparcnbsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_sparcnbsd_tdep (void);
+
 void
 _initialize_sparnbsd_tdep (void)
 {
@@ -527,9 +148,9 @@ _initialize_sparnbsd_tdep (void)
 				  sparcnbsd_aout_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
-			  sparcnbsd_init_abi_aout);
+			  sparcnbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
-			  sparcnbsd_init_abi_elf);
+			  sparcnbsd_elf_init_abi);
 
   add_core_fns (&sparcnbsd_core_fns);
   add_core_fns (&sparcnbsd_elfcore_fns);
