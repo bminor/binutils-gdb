@@ -1,5 +1,25 @@
+Tue May 20 08:58:49 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/a2-run.exp: Change "gdb,noargs" to just "noargs".
+	* gdb.base/commands.exp: Likewise.
+	* gdb.base/setshow.exp: Likewise.
+
+Mon May 19 15:37:50 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp(gdb_start): Look for gdb_prompt target
+	feature.
+
+	* config/i960.exp: New file.
+
+Thu May  1 18:01:50 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/funcargs.exp: Check for gdb,short_int target
+	feature instead of looking for explicit target triplets.
+
 Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* gdb.base/printcmds.exp: add a couple more tests a la 
+	"p 123DEADBEEF", to check parse_number.
 	* top.c: change "to enable to enable" to "to enable" in a couple
 	of help strings.
 
