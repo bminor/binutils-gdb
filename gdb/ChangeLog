@@ -1,5 +1,8 @@
 Mon Jan 30 17:34:24 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* gdbtk.tcl (create_file_win):  Disable old popup menu for source
+	window.
+
 	* sparcl-tdep.c:  Add `sparclite' target for doing serial and udp
 	downloads to SPARClite demo boards.
 

@@ -972,7 +972,7 @@ proc create_file_win {filename debug_file} {
 		$win tag add margin $i.0 $i.8
 		}
 
-	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
+#	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
 	$win tag bind source <1> {
 		%W mark set anchor "@%x,%y wordstart"
 		set last [%W index "@%x,%y wordend"]
