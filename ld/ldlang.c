@@ -496,7 +496,9 @@ DEFUN(init_os,(s),
     (section_userdata_type *)
       ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
 
-  s->bfd_section = bfd_make_section(output_bfd, s->name);
+  s->bfd_section = bfd_get_section_by_name(output_bfd, s->name);
+  if (s->bfd_section == (asection *)NULL)
+    s->bfd_section = bfd_make_section(output_bfd, s->name);
   if (s->bfd_section == (asection *)NULL) {
     info("%P%F output format %s cannot represent section called %s\n",
 	 output_bfd->xvec->name,
@@ -698,6 +700,14 @@ DEFUN(ldlang_open_output,(statement),
       case  lang_output_statement_enum:
 	output_bfd = open_output(statement->output_statement.name);
 	ldemul_set_output_arch();
+	if (config.magic_demand_paged && !config.relocateable_output)
+	  output_bfd->flags |=  ~D_PAGED;
+	else
+	  output_bfd->flags &=  ~D_PAGED;
+	if (config.text_read_only)
+	  output_bfd->flags |= WP_TEXT;
+	else
+	  output_bfd->flags &= ~WP_TEXT;
 	break;
 
       case lang_target_statement_enum:
@@ -2333,8 +2343,6 @@ DEFUN(lang_abs_symbol_at_beginning_of,(section, name),
       CONST char *name)
 {
   if (ldsym_undefined(name)) {
-    extern bfd *output_bfd;
-    extern asymbol *create_symbol();
     asection *s = bfd_get_section_by_name(output_bfd, section);
     asymbol *def = create_symbol(name,
 				 BSF_GLOBAL | BSF_EXPORT |
@@ -2361,8 +2369,6 @@ DEFUN(lang_abs_symbol_at_end_of,(section, name),
       CONST char *name)
 {
   if (ldsym_undefined(name)){
-    extern bfd *output_bfd;
-    extern asymbol *create_symbol();
     asection *s = bfd_get_section_by_name(output_bfd, section);
     /* Add a symbol called _end */
     asymbol *def = create_symbol(name,

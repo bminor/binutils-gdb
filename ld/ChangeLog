@@ -1,3 +1,14 @@
+Sun Nov  3 15:00:03 1991  Per Bothner  (bothner at cygnus.com)
+
+	* configure.in:  Fixed typo.  Also, a fix for hp300bsd.
+	* ldlang.c (init_os):  Compensate for BFD change,
+	where bfd_make_section now returns NULL for a duplicate
+	section request, instead of the old section.
+
+Thu Oct 17 15:27:13 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldver.c: Bump to version 1.91 (consistent with binutils).
+
 Wed Oct 16 12:27:08 1991  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in, config.h, ld.h, ldemul.c, ldexp.c, ldexp.h,

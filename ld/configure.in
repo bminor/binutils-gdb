@@ -97,9 +97,8 @@ if [ ! -f ${files} ] ; then
 	echo '***' ${srcname} does not support host ${host}
 	exit 1
 fi
-
 host_makefile_frag=
-if [ -f config/h-${my_host} ] ; then
+if [ -f config/mh-${my_host} ] ; then
 	host_makefile_frag=config/mh-${my_host}
 fi
 
@@ -125,6 +124,7 @@ sun)
 	m68k)	
 		case ${target_vendor} in
 		sony)	my_target=news;;
+		hp)	my_target=hp300bsd;;
 		*)
 			echo "Unknown m68k target vendor:" ${target_vendor}
 			exit 1
