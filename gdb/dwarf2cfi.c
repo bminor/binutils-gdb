@@ -318,11 +318,25 @@ static void
 context_cpy (struct context *dst, struct context *src)
 {
   int regs_size = sizeof (struct context_reg) * NUM_REGS;
+  struct context_reg *dreg;
 
+  /* Structure dst contains a pointer to an array of
+   * registers of a given frame as well as src does. This
+   * array was already allocated before dst was passed to
+   * context_cpy but the pointer to it was overriden by
+   * '*dst = *src' and the array was lost. This led to the
+   * situation, that we've had a copy of src placed in dst,
+   * but both of them pointed to the same regs array and
+   * thus we've sometimes blindly rewritten it.  Now we save
+   * the pointer before copying src to dst, return it back
+   * after that and copy the registers into their new place
+   * finally.   ---   mludvig@suse.cz  */
+  dreg = dst->reg;
   *dst = *src;
+  dst->reg = dreg;
+  
   memcpy (dst->reg, src->reg, regs_size);
 }
-
 
 static unsigned int
 read_1u (bfd *abfd, char **p)
@@ -1301,7 +1315,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	      orig_context->reg[fs->regs.reg[i].loc.reg].loc.addr;
 	  default:
 	    internal_error (__FILE__, __LINE__,
-			    "cfi_update_context: unknown register rule");
+			    "%s: unknown register rule", __func__);
 	  }
 	break;
       case REG_SAVED_EXP:
@@ -1319,8 +1333,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	break;
       default:
 	internal_error (__FILE__, __LINE__,
-			"cfi_update_context: unknown register rule");
-
+			"%s: unknown register rule", __func__);
       }
   get_reg ((char *) &context->ra, context, fs->retaddr_column);
   unwind_tmp_obstack_free ();
@@ -1578,6 +1591,7 @@ cfi_frame_chain (struct frame_info *fi)
 
   cfa = context->cfa;
   unwind_tmp_obstack_free ();
+  
   return cfa;
 }
 

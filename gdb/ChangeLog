@@ -1,3 +1,8 @@
+2002-05-14  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (context_cpy): Copy registers correctly.
+	(update_context): Use __func__ in warnings.
+	
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ser-tcp.c: Include <netinet/udp.h>.  Rename tcp_open
