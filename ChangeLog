@@ -1,3 +1,8 @@
+1998-04-30  Paul Eggert  <eggert@twinsun.com>
+
+        * Makefile.in (EXTRA_GCC_FLAGS): Remove backslash at end;
+        Solaris `make' causes it to continue to next definition. 
+
 Wed Apr 29 17:07:10 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* Makefile.in: Added dependencies to all-target-boehm-gc and
