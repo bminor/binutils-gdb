@@ -1,3 +1,9 @@
+2002-01-08  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/gcore.exp: New test for generate-core-file command.
+	* gdb.base/gcore.c: Testcase for above.
+	* gdb.threads/gcore-thread.exp: New test for gcore (threaded).
+
 2002-01-08  Jason Merrill  <jason@redhat.com>
 
 	* gdb.c++/userdef.cc: Use <iostream> instead of <iostream.h>.
