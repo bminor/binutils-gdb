@@ -1,3 +1,7 @@
+Wed Mar 24 13:52:29 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: recurse through SUBDIRS for dvi target too
+
 Tue Mar 23 00:10:53 1993  John Gilmore  (gnu@cygnus.com)
 
 	* symtab.h (struct linetable_entry):  Remove confusing comment.

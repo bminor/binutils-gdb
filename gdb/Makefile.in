@@ -419,8 +419,8 @@ all: gdb
 installcheck:
 check: force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=check DODIRS=testsuite subdir_do
-info: force
-	$(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
+info dvi: force
+	$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 install-info: force
 	$(MAKE) $(FLAGS_TO_PASS) DO=install-info "DODIRS=$(SUBDIRS)" subdir_do
 clean-info: force
