@@ -16,6 +16,7 @@ dnl In default case we need to link with some file so use common.inc.
 archinc=common.inc
 case ${target} in
 d10v-*-*) archinc=d10v.inc ;;
+s390-*-*) archinc=s390.inc ;;
 i[[3456]]86*) archinc=i386.inc ;;
 m32r*-*) archinc=m32r.inc ;;
 sparc-*-*) archinc=sparc.inc ;;

@@ -38,6 +38,9 @@ set link-flags ""
 if [istarget "d10v-*-*"] then {
     set asm-arch d10v
 }
+if [istarget "s390-*-*"] then {
+    set asm-arch s390
+}
 if [istarget "i\[3456\]86-*-*"] then {
     set asm-arch i386
 }

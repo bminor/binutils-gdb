@@ -1,3 +1,11 @@
+2001-11-30  Jim Blandy  <jimb@redhat.com>
+
+	Add assembly-source tests for s390-ibm-linux.
+	* gdb.asm/s390.inc: New file.
+	* gdb.asm/configure.in, gdb.asm/asm-source.exp: Add clauses for
+	the S/390 architecture.
+        * gdb.asm/configure: Regenerated.
+
 2001-11-26  Fernando Nasser  <fnasser@redhat.com>
 
 	From 2001-11-12 Jackie Smith Cashion  <jsmith@redhat.com>:
