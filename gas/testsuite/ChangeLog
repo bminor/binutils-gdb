@@ -1,3 +1,10 @@
+Wed Nov  6 13:50:07 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/*.s: Tweak constants in 32bit insns for
+	better testing coverage.
+	* gas/mn10300/basic.exp: Test insertion of most 32bit
+	operands.
+
 Tue Nov  5 13:33:12 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/basic.exp: Check bit patterns for indexed mov,

@@ -5,12 +5,12 @@
 	inc4 a3
 	jmp a2
 	jmp 256
-	jmp 65536
+	jmp 131071
 	call 256,5,9
-	call 65536,0,0
+	call 131071,0,0
 	calls a2
 	calls 256
-	calls 65536
+	calls 131071
 	ret 15,7
 	retf 9,5
 	rets
