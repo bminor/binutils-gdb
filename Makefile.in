@@ -96,7 +96,7 @@ install-info: install-info-dirs force
 install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
-# clib prms
+# clib send_pr
 #	all-gnulib
 all.normal: all-texinfo all-bison all-byacc all-flex all-ld \
 	all-gas all-gcc all-binutils \
