@@ -1,3 +1,12 @@
+Wed Aug  7 14:34:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* std-config.h (REGPARM): Only define REGPARM attributes if using
+	GNU C.  Test for __i686__ in case GCC ever defines it.  If not on
+	a x86 platform, define REGPARM as nothing.
+
+	* sim-endian.h (WITH_HOST_BYTE_ORDER): Test for i686 and __i686__
+	also.
+
 Tue Aug  6 09:28:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (--enable-sim-{hardware,packages}): Fix typos.
