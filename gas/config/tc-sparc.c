@@ -23,7 +23,6 @@
 #include <ctype.h>
 
 #include "as.h"
-#include "read.h"
 
 /* careful, this file includes data *declarations* */
 #include "opcode/sparc.h"
@@ -33,7 +32,6 @@ void md_end ();
 void md_number_to_chars ();
 void md_assemble ();
 char *md_atof ();
-void md_convert_frag ();
 void md_create_short_jump ();
 void md_create_long_jump ();
 int md_estimate_size_before_relax ();
@@ -42,12 +40,10 @@ symbolS *md_undefined_symbol ();
 static void sparc_ip ();
 
 static enum sparc_architecture current_architecture = v6;
-static int architecture_requested = 0;
-static int warn_on_bump = 0;
+static int architecture_requested;
+static int warn_on_bump;
 
-const relax_typeS md_relax_table[] =
-{
-  0};
+const relax_typeS md_relax_table[1];
 
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash = NULL;
@@ -55,6 +51,26 @@ static struct hash_control *op_hash = NULL;
 static void s_seg (), s_proc (), s_data1 (), s_reserve (), s_common ();
 extern void s_globl (), s_long (), s_short (), s_space (), cons ();
 extern void s_align_bytes (), s_ignore ();
+/* start-sanitize-v9 */
+#ifndef NO_V9
+static void s_xword ();
+#endif
+/* end-sanitize-v9 */
+
+/* Ugly hack to keep non-BFD version working.  */
+#ifndef BFD_ASSEMBLER
+#define BFD_RELOC_NONE		NO_RELOC
+#define BFD_RELOC_32		RELOC_32
+#define BFD_RELOC_HI22		RELOC_HI22
+#define BFD_RELOC_LO10		RELOC_LO10
+#define BFD_RELOC_SPARC_WDISP22	RELOC_WDISP22
+#define BFD_RELOC_32_PCREL_S2	RELOC_WDISP30
+#define BFD_RELOC_SPARC22	RELOC_22
+#define BFD_RELOC_SPARC_BASE13	RELOC_BASE13
+#define BFD_RELOC_SPARC13	RELOC_13
+#define BFD_RELOC_SPARC_BASE22	RELOC_BASE22
+#define subseg_set		subseg_new
+#endif
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -68,6 +84,11 @@ const pseudo_typeS md_pseudo_table[] =
   {"seg", s_seg, 0},
   {"skip", s_space, 0},
   {"word", cons, 4},
+/* start-sanitize-v9 */
+#ifndef NO_V9
+  {"xword", s_xword, 0},
+#endif
+/* end-sanitize-v9 */
   {NULL, 0, 0},
 };
 
@@ -115,20 +136,19 @@ struct sparc_it
     struct nlist *nlistp;
     expressionS exp;
     int pcrel;
+#ifdef BFD_ASSEMBLER
+    bfd_reloc_code_real_type reloc;
+#else
     enum reloc_type reloc;
-  } the_insn, set_insn;
+#endif
+  };
 
-#if __STDC__ == 1
+struct sparc_it the_insn, set_insn;
+
 #if 0
-static void print_insn (struct sparc_it *insn);
+static void print_insn PARAMS ((struct sparc_it *insn));
 #endif
-static int getExpression (char *str);
-#else /* not __STDC__ */
-#if 0
-static void print_insn ();
-#endif
-static int getExpression ();
-#endif /* not __STDC__ */
+static int getExpression PARAMS ((char *str));
 
 static char *expr_end;
 static int special_case;
@@ -149,6 +169,9 @@ static int max_alignment = 15;
 static void
 s_reserve ()
 {
+#ifndef OBJ_AOUT
+  as_fatal ("s_reserve only defined for a.out");
+#else
   char *name;
   char *p;
   char c;
@@ -214,12 +237,8 @@ s_reserve ()
 	  align = 0;
 	  as_warn ("Alignment negative. 0 assumed.");
 	}
-#ifdef MANY_SEGMENTS
-#define SEG_BSS SEG_E2
-      record_alignment (SEG_E2, align);
-#else
-      record_alignment (SEG_BSS, align);
-#endif
+
+      record_alignment (bss_section, align);
 
       /* convert to a power of 2 alignment */
       for (temp = 0; (align & 1) == 0; align >>= 1, ++temp);;
@@ -232,32 +251,48 @@ s_reserve ()
 	}			/* not a power of two */
 
       align = temp;
-
-      /* Align */
-      align = ~((~0) << align);	/* Convert to a mask */
-      local_bss_counter = (local_bss_counter + align) & (~align);
     }				/* if has optional alignment */
+  else
+    align = 0;
 
   if (S_GET_OTHER (symbolP) == 0
       && S_GET_DESC (symbolP) == 0
-      && ((S_GET_SEGMENT (symbolP) == SEG_BSS
-	   && S_GET_VALUE (symbolP) == local_bss_counter)
+      && (S_GET_SEGMENT (symbolP) == bss_section
 	  || !S_IS_DEFINED (symbolP)))
     {
-      S_SET_VALUE (symbolP, local_bss_counter);
-      S_SET_SEGMENT (symbolP, SEG_BSS);
-      symbolP->sy_frag = &bss_address_frag;
-      local_bss_counter += size;
+      if (! need_pass_2)
+	{
+	  char *p;
+	  segT current_seg = now_seg;
+	  subsegT current_subseg = now_subseg;
+
+	  subseg_set (bss_section, 1); /* switch to bss */
+
+	  if (align)
+	    frag_align (align, 0); /* do alignment */
+
+	  /* detach from old frag */
+	  if (S_GET_SEGMENT(symbolP) == bss_section)
+	    symbolP->sy_frag->fr_symbol = NULL;
+
+	  symbolP->sy_frag = frag_now;
+	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+			size, (char *)0);
+	  *p = 0;
+
+	  S_SET_SEGMENT (symbolP, bss_section);
+
+	  subseg_set (current_seg, current_subseg);
+	}
     }
   else
     {
-      as_warn ("Ignoring attempt to re-define symbol from %d. to %d.",
-	       S_GET_VALUE (symbolP), local_bss_counter);
+      as_warn("Ignoring attempt to re-define symbol %s.", name);
     }				/* if not redefining */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* s_reserve() */
+#endif
+}
 
 static void
 s_common ()
@@ -308,8 +343,34 @@ s_common ()
     {
       S_SET_VALUE (symbolP, temp);
       S_SET_EXTERNAL (symbolP);
+#ifdef OBJ_ELF
+      /* But not for a.out ... find some sensible way to characterize
+	 this.  */
+      S_SET_SEGMENT (symbolP, now_seg);
+#endif
     }
   know (symbolP->sy_frag == &zero_address_frag);
+#ifdef OBJ_ELF
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected command (and alignment) after common length");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  temp = get_absolute_expression ();
+  if (temp > max_alignment)
+    {
+      temp = max_alignment;
+      as_warn ("Common alignment too large: %d. assumed", temp);
+    }
+  else if (temp < 0)
+    {
+      temp = 0;
+      as_warn ("Common alignment negative; 0 assumed");
+    }
+  record_alignment (S_GET_SEGMENT (symbolP), temp);
+#else
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\"data\"", 7) != 0)
     {
@@ -323,6 +384,7 @@ s_common ()
       return;
     }
   input_line_pointer += 6 + (input_line_pointer[2] == 'd');	/* Skip either */
+#endif
   demand_empty_rest_of_line ();
   return;
 }				/* s_common() */
@@ -353,9 +415,9 @@ s_seg ()
     {
       input_line_pointer += 5;
       /* We only support 2 segments -- text and data -- for now, so
-		   things in the "bss segment" will have to go into data for now.
-		   You can still allocate SEG_BSS stuff with .lcomm or .reserve. */
-      subseg_new (SEG_DATA, 255);	/* FIXME-SOMEDAY */
+	 things in the "bss segment" will have to go into data for now.
+	 You can still allocate SEG_BSS stuff with .lcomm or .reserve. */
+      subseg_set (data_section, 255);	/* FIXME-SOMEDAY */
       return;
     }
   as_bad ("Unknown segment type");
@@ -366,7 +428,7 @@ s_seg ()
 static void
 s_data1 ()
 {
-  subseg_new (SEG_DATA, 1);
+  subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
   return;
 }				/* s_data1() */
@@ -386,11 +448,19 @@ s_proc ()
 
 /* start-sanitize-v9 */
 #ifndef NO_V9
+static void
+s_xword ()
+{
+  md_number_to_chars (frag_more (4), 0, 4);
+  cons (4);
+}
+
 struct priv_reg_entry
   {
     char *name;
     int regnum;
   };
+
 struct priv_reg_entry priv_reg_table[] =
 {
   {"tpc", 0},
@@ -497,7 +567,8 @@ md_assemble (str)
   sparc_ip (str);
 
   /* See if "set" operand is absolute and small; skip sethi if so. */
-  if (special_case == SPECIAL_CASE_SET && the_insn.exp.X_seg == SEG_ABSOLUTE)
+  if (special_case == SPECIAL_CASE_SET
+      && the_insn.exp.X_seg == absolute_section)
     {
       if (the_insn.exp.X_add_number >= -(1 << 12)
 	  && the_insn.exp.X_add_number < (1 << 12))
@@ -506,7 +577,7 @@ md_assemble (str)
 	    | (the_insn.opcode & 0x3E000000)	/* dest reg */
 	    | (the_insn.exp.X_add_number & 0x1FFF);	/* imm */
 	  special_case = 0;	/* No longer special */
-	  the_insn.reloc = NO_RELOC;	/* No longer relocated */
+	  the_insn.reloc = BFD_RELOC_NONE;	/* No longer relocated */
 	}
     }
 
@@ -515,7 +586,7 @@ md_assemble (str)
   md_number_to_chars (toP, the_insn.opcode, 4);
 
   /* put out the symbol-dependent stuff */
-  if (the_insn.reloc != NO_RELOC)
+  if (the_insn.reloc != BFD_RELOC_NONE)
     {
       fix_new (frag_now,	/* which frag */
 	       (toP - frag_now->fr_literal),	/* where */
@@ -526,14 +597,14 @@ md_assemble (str)
 	       the_insn.pcrel,
 	       the_insn.reloc);
     }
+
   switch (special_case)
     {
-
     case SPECIAL_CASE_SET:
       special_case = 0;
-      assert (the_insn.reloc == RELOC_HI22);
+      assert (the_insn.reloc == BFD_RELOC_HI22);
       /* See if "set" operand has no low-order bits; skip OR if so. */
-      if (the_insn.exp.X_seg == SEG_ABSOLUTE
+      if (the_insn.exp.X_seg == absolute_section
 	  && ((the_insn.exp.X_add_number & 0x3FF) == 0))
 	return;
       toP = frag_more (4);
@@ -547,7 +618,8 @@ md_assemble (str)
 	       the_insn.exp.X_subtract_symbol,
 	       the_insn.exp.X_add_number,
 	       the_insn.pcrel,
-	       RELOC_LO10);
+	       BFD_RELOC_LO10
+	       );
       return;
 
     case SPECIAL_CASE_FDIV:
@@ -557,7 +629,7 @@ md_assemble (str)
 	 itself just after the instruction.  This was true on machines
 	 with Weitek 1165 float chips, such as the Sun-4/260 and /280. */
       special_case = 0;
-      assert (the_insn.reloc == NO_RELOC);
+      assert (the_insn.reloc == BFD_RELOC_NONE);
       toP = frag_more (4);
       rsd = (the_insn.opcode >> 25) & 0x1f;
       the_insn.opcode = 0x81A00020 | (rsd << 25) | rsd;	/* fmovs dest,dest */
@@ -623,7 +695,7 @@ sparc_ip (str)
     {
       opcode = insn->match;
       memset (&the_insn, '\0', sizeof (the_insn));
-      the_insn.reloc = NO_RELOC;
+      the_insn.reloc = BFD_RELOC_NONE;
 
       /*
        * Build the opcode, checking as we go to make
@@ -780,22 +852,39 @@ sparc_ip (str)
 	      /* start-sanitize-v9 */
 #ifndef NO_V9
 	    case 'I':
+#ifdef BFD_ASSEMBLER
+	      /* BFD doesn't have support for this reloc type written yet.  */
+	      abort ();
+#else
 	      the_insn.reloc = RELOC_11;
+#endif
 	      immediate_max = 0x03FF;
 	      goto immediate;
 
 	    case 'j':
+#ifdef BFD_ASSEMBLER
+	      abort ();
+#else
 	      the_insn.reloc = RELOC_10;
+#endif
 	      immediate_max = 0x01FF;
 	      goto immediate;
 
 	    case 'k':
+#ifdef BFD_ASSEMBLER
+	      abort ();
+#else
 	      the_insn.reloc = RELOC_WDISP2_14;
+#endif
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
 	    case 'G':
+#ifdef BFD_ASSEMBLER
+	      abort ();
+#else
 	      the_insn.reloc = RELOC_WDISP19;
+#endif
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
@@ -1248,25 +1337,26 @@ sparc_ip (str)
 	      break;
 
 	    case 'h':		/* high 22 bits */
-	      the_insn.reloc = RELOC_HI22;
+	      the_insn.reloc = BFD_RELOC_HI22;
 	      goto immediate;
 
 	    case 'l':		/* 22 bit PC relative immediate */
-	      the_insn.reloc = RELOC_WDISP22;
+	      the_insn.reloc = BFD_RELOC_SPARC_WDISP22;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
 	    case 'L':		/* 30 bit immediate */
-	      the_insn.reloc = RELOC_WDISP30;
+	      the_insn.reloc = BFD_RELOC_32_PCREL_S2;
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
 	    case 'n':		/* 22 bit immediate */
-	      the_insn.reloc = RELOC_22;
+	      the_insn.reloc = BFD_RELOC_SPARC22;
 	      goto immediate;
 
 	    case 'i':		/* 13 bit immediate */
-	      the_insn.reloc = RELOC_BASE13;
+	      /* What's the difference between base13 and 13?  */
+	      the_insn.reloc = BFD_RELOC_SPARC_BASE13;
 	      immediate_max = 0x0FFF;
 
 	      /*FALLTHROUGH */
@@ -1278,12 +1368,12 @@ sparc_ip (str)
 		{
 		  if ((c = s[1]) == 'h' && s[2] == 'i')
 		    {
-		      the_insn.reloc = RELOC_HI22;
+		      the_insn.reloc = BFD_RELOC_HI22;
 		      s += 3;
 		    }
 		  else if (c == 'l' && s[2] == 'o')
 		    {
-		      the_insn.reloc = RELOC_LO10;
+		      the_insn.reloc = BFD_RELOC_LO10;
 		      s += 3;
 		      /* start-sanitize-v9 */
 #ifndef NO_V9
@@ -1292,7 +1382,15 @@ sparc_ip (str)
 			   && s[2] == 'h'
 			   && s[3] == 'i')
 		    {
+#ifdef ENV64
+#ifdef BFD_ASSEMBLER
+		      abort ();
+#else
 		      the_insn.reloc = RELOC_HHI22;
+#endif /* ! BFD_ASSEMBLER */
+#else /* ENV64 */
+		      the_insn.reloc = BFD_RELOC_NONE;
+#endif
 		      s += 4;
 
 		    }
@@ -1300,7 +1398,15 @@ sparc_ip (str)
 			   && s[2] == 'l'
 			   && s[3] == 'o')
 		    {
+#ifdef ENV64
+#ifdef BFD_ASSEMBLER
+		      abort ();
+#else
 		      the_insn.reloc = RELOC_HLO10;
+#endif /* ! BFD_ASSEMBLER */
+#else
+		      the_insn.reloc = BFD_RELOC_NONE;
+#endif
 		      s += 4;
 #endif /* NO_V9 */
 		      /* end-sanitize-v9 */
@@ -1354,17 +1460,19 @@ sparc_ip (str)
 		 since these truncate the constant to
 		 fit.  */
 	      if (immediate_max != 0
-		  && the_insn.reloc != RELOC_LO10
-		  && the_insn.reloc != RELOC_HI22
+		  && the_insn.reloc != BFD_RELOC_LO10
+		  && the_insn.reloc != BFD_RELOC_HI22
 	      /* start-sanitize-v9 */
 #ifndef NO_V9
+#ifndef BFD_ASSEMBLER /* the bfd backend doesn't support these relocs yet */
 		  && the_insn.reloc != RELOC_HLO10
 		  && the_insn.reloc != RELOC_HHI22
+#endif
 #endif
 	      /* end-sanitize-v9 */
 		  && the_insn.exp.X_add_symbol == 0
 		  && the_insn.exp.X_subtract_symbol == 0
-		  && the_insn.exp.X_seg == SEG_ABSOLUTE
+		  && the_insn.exp.X_seg == absolute_section
 		  && (the_insn.exp.X_add_number > immediate_max
 		      || the_insn.exp.X_add_number < ~immediate_max))
 		as_bad ("constant value must be between %ld and %ld",
@@ -1389,7 +1497,7 @@ sparc_ip (str)
 
 		input_line_pointer = s;
 
-		if (expression (&e) == SEG_ABSOLUTE)
+		if (expression (&e) == absolute_section)
 		  {
 		    opcode |= e.X_add_number << 5;
 		    s = input_line_pointer;
@@ -1554,20 +1662,18 @@ getExpression (str)
 
   save_in = input_line_pointer;
   input_line_pointer = str;
-  switch (seg = expression (&the_insn.exp))
+  seg = expression (&the_insn.exp);
+  if (seg == absolute_section
+      || seg == text_section
+      || seg == data_section
+      || seg == bss_section
+      || seg == undefined_section
+      || seg == diff_section
+      || seg == big_section
+      || seg == absent_section)
+    /* ok */;
+  else
     {
-
-    case SEG_ABSOLUTE:
-    case SEG_TEXT:
-    case SEG_DATA:
-    case SEG_BSS:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_ABSENT:
-      break;
-
-    default:
       the_insn.error = "bad segment";
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
@@ -1677,23 +1783,42 @@ md_number_to_chars (buf, val, n)
 /* Apply a fixS to the frags, now that we know the value it ought to
    hold. */
 
+#ifdef BFD_ASSEMBLER
+int
+#else
 void
-md_apply_fix (fixP, val)
+#endif
+md_apply_fix (fixP, value)
      fixS *fixP;
-     long val;
+#ifdef BFD_ASSEMBLER
+     long *value;
+#else
+     long value;
+#endif
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+  long val;
+
+#ifdef BFD_ASSEMBLER
+  val = *value;
+#else
+  val = value;
+#endif
 
   assert (fixP->fx_size == 4);
+#ifdef BFD_ASSEMBLER
+  assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
+#else
   assert (fixP->fx_r_type < NO_RELOC);
+#endif
 
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
 
   /*
-	 * This is a hack.  There should be a better way to
-	 * handle this.
-	 */
-  if (fixP->fx_r_type == RELOC_WDISP30 && fixP->fx_addsy)
+   * This is a hack.  There should be a better way to
+   * handle this.
+   */
+  if (fixP->fx_r_type == BFD_RELOC_32_PCREL_S2 && fixP->fx_addsy)
     {
       val += fixP->fx_where + fixP->fx_frag->fr_address;
     }
@@ -1701,21 +1826,14 @@ md_apply_fix (fixP, val)
   switch (fixP->fx_r_type)
     {
 
-    case RELOC_32:
+    case BFD_RELOC_32:
       buf[0] = 0;		/* val >> 24; */
       buf[1] = 0;		/* val >> 16; */
       buf[2] = 0;		/* val >> 8; */
       buf[3] = 0;		/* val; */
       break;
 
-#if 0
-    case RELOC_8:		/* These don't seem to ever be needed. */
-    case RELOC_16:
-    case RELOC_DISP8:
-    case RELOC_DISP16:
-    case RELOC_DISP32:
-#endif
-    case RELOC_WDISP30:
+    case BFD_RELOC_32_PCREL_S2:
       val = (val >>= 2) + 1;
       buf[0] |= (val >> 24) & 0x3f;
       buf[1] = (val >> 16);
@@ -1725,6 +1843,7 @@ md_apply_fix (fixP, val)
 
       /* start-sanitize-v9 */
 #ifndef NO_V9
+#ifndef BFD_ASSEMBLER /* bfd assembler doesn't handle these yet */
     case RELOC_11:
       if (((val > 0) && (val & ~0x7ff))
 	  || ((val < 0) && (~(val - 1) & ~0x7ff)))
@@ -1776,10 +1895,11 @@ md_apply_fix (fixP, val)
     case RELOC_HHI22:
       val >>= 32;
       /* intentional fallthrough */
+#endif /* BFD_ASSEMBLER */
 #endif /* NO_V9 */
       /* end-sanitize-v9 */
 
-    case RELOC_HI22:
+    case BFD_RELOC_HI22:
       if (!fixP->fx_addsy)
 	{
 	  buf[1] |= (val >> 26) & 0x3f;
@@ -1793,7 +1913,7 @@ md_apply_fix (fixP, val)
 	}
       break;
 
-    case RELOC_22:
+    case BFD_RELOC_SPARC22:
       if (val & ~0x003fffff)
 	{
 	  as_bad ("relocation overflow");
@@ -1803,7 +1923,7 @@ md_apply_fix (fixP, val)
       buf[3] = val & 0xff;
       break;
 
-    case RELOC_13:
+    case BFD_RELOC_SPARC13:
       if (val & ~0x00001fff)
 	{
 	  as_bad ("relocation overflow");
@@ -1814,13 +1934,15 @@ md_apply_fix (fixP, val)
 
       /* start-sanitize-v9 */
 #ifndef NO_V9
+#ifndef BFD_ASSEMBLER
     case RELOC_HLO10:
       val >>= 32;
       /* intentional fallthrough */
+#endif
 #endif /* NO_V9 */
       /* end-sanitize-v9 */
 
-    case RELOC_LO10:
+    case BFD_RELOC_LO10:
       if (!fixP->fx_addsy)
 	{
 	  buf[2] |= (val >> 8) & 0x03;
@@ -1829,12 +1951,7 @@ md_apply_fix (fixP, val)
       else
 	buf[3] = 0;
       break;
-#if 0
-    case RELOC_SFA_BASE:
-    case RELOC_SFA_OFF13:
-    case RELOC_BASE10:
-#endif
-    case RELOC_BASE13:
+    case BFD_RELOC_SPARC_BASE13:
       if (((val > 0) && (val & ~0x00001fff))
 	  || ((val < 0) && (~(val - 1) & ~0x00001fff)))
 	{
@@ -1844,31 +1961,25 @@ md_apply_fix (fixP, val)
       buf[3] = val;
       break;
 
-    case RELOC_WDISP22:
+    case BFD_RELOC_SPARC_WDISP22:
       val = (val >>= 2) + 1;
       /* FALLTHROUGH */
-    case RELOC_BASE22:
+    case BFD_RELOC_SPARC_BASE22:
       buf[1] |= (val >> 16) & 0x3f;
       buf[2] = val >> 8;
       buf[3] = val;
       break;
 
-#if 0
-    case RELOC_PC10:
-    case RELOC_PC22:
-    case RELOC_JMP_TBL:
-    case RELOC_SEGOFF16:
-    case RELOC_GLOB_DAT:
-    case RELOC_JMP_SLOT:
-    case RELOC_RELATIVE:
-#endif
-
-    case NO_RELOC:
+    case BFD_RELOC_NONE:
     default:
-      as_bad ("bad relocation type: 0x%02x", fixP->fx_r_type);
+      as_bad ("bad or unhandled relocation type: 0x%02x", fixP->fx_r_type);
       break;
     }
-}				/* md_apply_fix() */
+
+#ifdef BFD_ASSEMBLER
+  return 1;
+#endif
+}
 
 /* should never be called for sparc */
 void
@@ -1880,7 +1991,62 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      symbolS *to_symbol;
 {
   as_fatal ("sparc_create_short_jmp\n");
-}				/* md_create_short_jump() */
+}
+
+#ifdef BFD_ASSEMBLER
+
+/* Translate internal representation of relocation info to BFD target
+   format.  */
+arelent *
+tc_gen_reloc (section, fixp)
+     asection *section;
+     fixS *fixp;
+{
+  arelent *reloc;
+  bfd_reloc_code_real_type code;
+
+  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  assert (reloc != 0);
+
+  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  if (fixp->fx_pcrel == 0)
+    reloc->addend = fixp->fx_addnumber;
+  else
+#ifdef OBJ_ELF
+    reloc->addend = 0;
+#else
+    reloc->addend = - reloc->address;
+#endif
+
+#if 0
+  printf ("addr %04x addend=%08x fx_pcrel=%d fx_addnumber=%08x\n",
+	  reloc->address, reloc->addend, fixp->fx_pcrel, fixp->fx_addnumber);
+  if (fixp->fx_addsy->sy_frag)
+    printf ("\tsy_frag->fr_address=%08x sym=`%s'\n",
+	    fixp->fx_addsy->sy_frag->fr_address,
+	    fixp->fx_addsy->bsym->name);
+
+#endif
+  switch (fixp->fx_r_type)
+    {
+    case BFD_RELOC_32:
+    case BFD_RELOC_HI22:
+    case BFD_RELOC_LO10:
+    case BFD_RELOC_32_PCREL_S2:
+    case BFD_RELOC_SPARC_BASE13:
+      code = fixp->fx_r_type;
+      break;
+    default:
+      abort ();
+    }
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+  assert (reloc->howto != 0);
+
+  return reloc;
+}
+
+#else
 
 /* Translate internal representation of relocation info to target format.
 
@@ -1943,15 +2109,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 
   return;
 }				/* tc_aout_fix_to_chars() */
-
-/* should never be called for sparc */
-void
-md_convert_frag (headers, fragP)
-     object_headers *headers;
-     register fragS *fragP;
-{
-  as_fatal ("sparc_convert_frag\n");
-}				/* md_convert_frag() */
+#endif
 
 /* should never be called for sparc */
 void
@@ -2035,76 +2193,6 @@ print_insn (insn)
 }				/* print_insn() */
 
 #endif
-
-/* Set the hook... */
-
-/* void emit_sparc_reloc();
-   void (*md_emit_relocations)() = emit_sparc_reloc; */
-
-#ifdef comment
-
-/*
- * Sparc/AM29K relocations are completely different, so it needs
- * this machine dependent routine to emit them.
- */
-#if defined(OBJ_AOUT) || defined(OBJ_BOUT)
-void 
-emit_sparc_reloc (fixP, segment_address_in_file)
-     register fixS *fixP;
-     relax_addressT segment_address_in_file;
-{
-  struct reloc_info_generic ri;
-  register symbolS *symbolP;
-  extern char *next_object_file_charP;
-  /*    long add_number; */
-
-  memset ((char *) &ri, '\0', sizeof (ri));
-  for (; fixP; fixP = fixP->fx_next)
-    {
-
-      if (fixP->fx_r_type >= NO_RELOC)
-	{
-	  as_fatal ("fixP->fx_r_type = %d\n", fixP->fx_r_type);
-	}
-
-      if ((symbolP = fixP->fx_addsy) != NULL)
-	{
-	  ri.r_address = fixP->fx_frag->fr_address +
-	    fixP->fx_where - segment_address_in_file;
-	  if ((S_GET_TYPE (symbolP)) == N_UNDF)
-	    {
-	      ri.r_extern = 1;
-	      ri.r_index = symbolP->sy_number;
-	    }
-	  else
-	    {
-	      ri.r_extern = 0;
-	      ri.r_index = S_GET_TYPE (symbolP);
-	    }
-	  if (symbolP && symbolP->sy_frag)
-	    {
-	      ri.r_addend = symbolP->sy_frag->fr_address;
-	    }
-	  ri.r_type = fixP->fx_r_type;
-	  if (fixP->fx_pcrel)
-	    {
-	      /*		ri.r_addend -= fixP->fx_where; */
-	      ri.r_addend -= ri.r_address;
-	    }
-	  else
-	    {
-	      ri.r_addend = fixP->fx_addnumber;
-	    }
-
-	  md_ri_to_chars (next_object_file_charP, &ri);
-	  next_object_file_charP += md_reloc_size;
-	}
-    }
-  return;
-}				/* emit_sparc_reloc() */
-
-#endif /* aout or bout */
-#endif /* comment */
 
 /*
  * md_parse_option
@@ -2205,7 +2293,7 @@ void
 md_operand (expressionP)
      expressionS *expressionP;
 {
-}				/* md_operand() */
+}
 
 /* Round up a section size to the appropriate boundary. */
 long 
@@ -2213,8 +2301,9 @@ md_section_align (segment, size)
      segT segment;
      long size;
 {
-  return (size + 7) & ~7;	/* Round all sects to multiple of 8 */
-}				/* md_section_align() */
+  /* Round all sects to multiple of 8 */
+  return (size + 7) & ~7;
+}
 
 /* Exactly what point is a PC-relative offset relative TO?
    On the sparc, they're relative to the address of the offset, plus
@@ -2225,14 +2314,15 @@ md_pcrel_from (fixP)
      fixS *fixP;
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
-}				/* md_pcrel_from() */
+}
 
+#ifndef BFD_ASSEMBLER
 void 
 tc_aout_pre_write_hook (headers)
      object_headers *headers;
 {
   H_SET_VERSION (headers, 1);
-  return;
-}				/* tc_aout_pre_write_hook() */
+}
+#endif
 
 /* end of tc-sparc.c */
