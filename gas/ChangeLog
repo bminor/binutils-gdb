@@ -3,7 +3,7 @@
 	* config/tc-sparc.c (md_assemble): Fix up setx, support setsw.
 	Optimize set if sizeof(bfd_vma) == 64.
 	(sparc_ip): Fix sethi - without %hi() it should generate
-	R_SPARC_32 reloc, not R_SPARC_HI22.
+	R_SPARC_22 reloc, not R_SPARC_HI22.
 	(tc_gen_reloc): Handle BFD_RELOC_SPARC22.
 
 1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
