@@ -1,3 +1,8 @@
+2003-10-07  Roland McGrath  <roland@redhat.com>
+
+	* elf.c (_bfd_elf_make_section_from_phdr): Set alignment_power of
+	new section from p_align header field.
+
 2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-xtensa.c (xtensa_read_table_entries): The external size
