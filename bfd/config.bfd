@@ -719,8 +719,8 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
   mips*-dec-bsd*)
-    targ_defvec=aout_mips_little_vec
-    targ_underscore=yes
+    echo "This target is obsolete and has been removed." 
+    exit 1
     ;;
   mips*-dec-mach3*)
     targ_defvec=aout_mips_little_vec
@@ -757,9 +757,8 @@ case "${targ}" in
     targ_cflags=-DSTAT_FOR_EXEC
     ;;
   mips*-*-pe*)
-    targ_defvec=mipslpe_vec
-    targ_selvecs="mipslpei_vec mipslpei_vec ecoff_little_vec ecoff_big_vec"
-    targ_underscore=yes
+    echo "This target is obsolete and has been removed." 
+    exit 1
     ;;
   mips*-*-sysv4*)
     targ_defvec=bfd_elf32_tradbigmips_vec
