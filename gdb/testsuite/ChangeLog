@@ -1,5 +1,8 @@
 Sat Jan 14 11:25:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.base/sigall.exp (test_one_sig): Attempt to recover if
+	"get signal $thissig" test fails.
+
 	* gdb.base/setvar.exp: Check for and reject crazy expected type hacks.
 
 Thu Jan 12 01:14:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>

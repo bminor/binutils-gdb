@@ -43,15 +43,30 @@ proc test_one_sig {nextsig} {
 	"SIG$thissig\[ \t\]*Yes\[ \t\]*Yes\[ \t\]*Yes"
     gdb_test "b handle_$thissig" "Breakpoint \[0-9\]"
     gdb_test "b gen_$nextsig" "Breakpoint \[0-9\]"
+
+    set need_another_continue 1
     if $this_sig_supported then {
-	gdb_test "continue" \
-	    "Continuing.*Program received signal SIG$thissig" \
-	    "get signal $thissig"
+	send "continue\n"
+	expect {
+	    -re "Continuing.*Program received signal SIG$thissig.*$prompt $" {
+		pass "get signal $thissig"
+	    }
+	    -re ".*$prompt $" {
+		fail "get signal $thissig"
+		set need_another_continue 0
+	    }
+	    default {
+		fail "get signal $thissig (eof or timeout)"
+	    }
+	}
     }
 
-    gdb_test "continue" "Breakpoint.*handle_$thissig" "send signal $thissig"
+    if $need_another_continue then {
+	gdb_test "continue" \
+	    "Breakpoint.*handle_$thissig" "send signal $thissig"
+    }
 
-    send "continue\n"
+    send "signal 0\n"
     expect {
 	-re "Breakpoint.*gen_$nextsig.*kill.*$prompt $" {
 	    pass "advance to $nextsig"
