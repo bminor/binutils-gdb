@@ -7978,7 +7978,8 @@ display_debug_info (section, start, file)
 	  Elf_Internal_Sym *sym;
 
 	  if (relsec->sh_type != SHT_RELA
-	      || SECTION_HEADER (relsec->sh_info) != section)
+	      || SECTION_HEADER (relsec->sh_info) != section
+	      || relsec->sh_size == 0)
 	    continue;
 
 	  if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
@@ -7999,7 +8000,8 @@ display_debug_info (section, start, file)
 		{
 		  sym = symtab + ELF32_R_SYM (rp->r_info);
 
-		  if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
+		  if (ELF32_R_SYM (rp->r_info) != 0
+		      && ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
 		    {
 		      warn (_("Skipping unexpected symbol type %u\n"),
 			    ELF32_ST_TYPE (sym->st_info));
@@ -8010,7 +8012,8 @@ display_debug_info (section, start, file)
 		{
 		  sym = symtab + ELF64_R_SYM (rp->r_info);
 
-		  if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
+		  if (ELF64_R_SYM (rp->r_info) != 0
+		      && ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
 		    {
 		      warn (_("Skipping unexpected symbol type %u\n"),
 			    ELF64_ST_TYPE (sym->st_info));
@@ -8018,7 +8021,7 @@ display_debug_info (section, start, file)
 		    }
 		}
 
-	      compunit.cu_abbrev_offset += rp->r_addend;
+	      compunit.cu_abbrev_offset = rp->r_addend;
 	      break;
 	    }
 

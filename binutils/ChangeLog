@@ -1,3 +1,10 @@
+2002-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* readelf.c (display_debug_info): Ignore empty .rela.debug_info
+	sections.  Allow relocations against the absolute symbol.  Don't
+	use the value in compunit.cu_abbrev_offset if we found a RELA
+	relocation.   
+
 2002-10-07  Gordon Chaffee <chaffee@netvmg.com>
 
 	* addr2line.c (slurp_symtab): Read in dynamic symbols if no
