@@ -416,7 +416,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 # target is run by the taz target in ../Makefile.in.
 LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 
-DISTCLEANFILES = tdirs site.exp site.bak
+DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
@@ -458,7 +458,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)

@@ -1,3 +1,12 @@
+2000-11-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* ldlex.l (yy_create_string_buffer): Init yy_is_our_buffer,
+	yy_is_interactive, yy_at_bol, and yy_fill_buffer.
+
+	* Makefile.am (DISTCLEANFILES): Add stringify.sed.
+	Move 2000-11-02 Makefile.in changes to this file.
+	* Makefile.in: Regenerate.
+
 2000-11-03  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/h8300.sc: Use ${CONSTRUCTING...} to enclose
