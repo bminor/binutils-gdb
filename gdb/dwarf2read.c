@@ -443,8 +443,6 @@ static struct pending **list_in_scope = &file_symbols;
    none of the flags are set, the object lives at the address returned
    by decode_locdesc.  */
 
-static int optimized_out;	/* No ops in location in expression,
-				   so object was optimized out.  */
 static int isreg;		/* Object lives in register.
 				   decode_locdesc's return value is
 				   the register number.  */
@@ -454,12 +452,6 @@ static int offreg;		/* Object's address is the sum of the
 static int basereg;		/* See `offreg'.  */
 static int isderef;		/* Value described by flags above is
 				   the address of a pointer to the object.  */
-static int islocal;		/* Variable is at the returned offset
-				   from the frame start, but there's
-				   no identified frame pointer for
-				   this function, so we can't say
-				   which register it's relative to;
-				   use LOC_LOCAL.  */
 
 /* DW_AT_frame_base values for the current function.
    frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
@@ -6891,8 +6883,10 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid)
    FIXME: Implement more operations as necessary.
 
    A location description containing no operations indicates that the
-   object is optimized out. The global optimized_out flag is set for
-   those, the return value is meaningless.
+   object is optimized out.  The return value is meaningless for that case.
+   FIXME drow/2003-11-16: No callers check for this case any more; soon all
+   callers will only want a very basic result and this can become a
+   complaint.
 
    When the result is a register number, the global isreg flag is set,
    otherwise it is cleared.
@@ -6901,9 +6895,7 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid)
    and the register number is returned in basereg, otherwise it is cleared.
 
    When the DW_OP_fbreg operation is encountered without a corresponding
-   DW_AT_frame_base attribute, the global islocal flag is set.
-   Hopefully the machine dependent code knows how to set up a virtual
-   frame pointer for the local references.
+   DW_AT_frame_base attribute, we complain.
 
    Note that stack[0] is unused except as a default error return.
    Note that stack overflow is not yet handled.  */
@@ -6927,12 +6919,9 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
   isreg = 0;
   offreg = 0;
   isderef = 0;
-  islocal = 0;
-  optimized_out = 1;
 
   while (i < size)
     {
-      optimized_out = 0;
       op = data[i++];
       switch (op)
 	{
@@ -7073,7 +7062,6 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	    {
 	      complaint (&symfile_complaints,
 			 "DW_AT_frame_base missing for DW_OP_fbreg");
-	      islocal = 1;
 	    }
 	  break;
 

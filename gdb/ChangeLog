@@ -1,3 +1,9 @@
+2003-11-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (optimized_out, islocal): Remove.
+	(decode_locdesc): Update comments.  Don't set optimized_out
+	or islocal.
+
 2003-11-17  Jeff Johnston  <jjohnstn@redhat.com>
             David Mosberger  <davidm@hpl.hp.com>
 
