@@ -1,3 +1,8 @@
+Sun Jun 27 16:28:26 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* elfcode.h (elf_slurp_symbol_table): Don't use obj_raw_syms as
+	lvalue; it contains a cast.
+
 Fri Jun 25 17:09:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aoutx.h (hash, compare, struct stringtab_entry, add_to_stringtab):
