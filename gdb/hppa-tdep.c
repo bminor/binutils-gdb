@@ -1622,9 +1622,10 @@ skip_trampoline_code (pc, name)
 	    }
 	}
 
-      /* Does it look like bl X,rp?  Another way to do a branch from the
-	 stub to the actual function.  */
-      else if ((curr_inst & 0xffe0e000) == 0xe8400000)
+      /* Does it look like bl X,%rp or bl X,%r0?  Another way to do a
+	 branch from the stub to the actual function.  */
+      else if ((curr_inst & 0xffe0e000) == 0xe8400000
+	       || (curr_inst & 0xffe0e000) == 0xe8000000)
 	return (loc + extract_17 (curr_inst) + 8) & ~0x3;
 
       /* Does it look like bv (rp)?   Note this depends on the

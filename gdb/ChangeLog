@@ -1,3 +1,9 @@
+Thu May 12 10:46:27 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (skip_trampoline_code): Handle argument relocation
+	stubs which return directly to the caller rather than to the stub
+	itself.
+
 Wed May 11 20:11:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* c-exp.y (yyerror): Display a more informative error message.
