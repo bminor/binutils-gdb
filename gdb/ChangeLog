@@ -1,3 +1,24 @@
+Fri Sep  8 12:57:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* solib.c (solib_map_sections): Copy full path name into so_list
+	structure so that symbol_file_add can find it.
+
+Tue Sep  5 17:47:53 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/sparc/tm-sp64.h (REGISTER_RAW_SIZE): Lower 32 fp regs
+	have size 4.
+	(REGISTER_VIRTUAL_SIZE): Likewise.
+	(REGISTER_VIRTUAL_TYPE): Lower 32 fp regs have type float.
+	Upper 32 fp regs have type double.
+	* sparc-tdep.c (NUM_SPARC_FPREGS): Replace with
+	(FP_REGISTER_BYTES): this, and update all uses.
+	(FP_MAX_REGNUM): Define if not already.
+	(get_saved_register): Handle new sparc64 fp regs.
+	(sparc_frame_find_saved_regs): Likewise.
+	(sparc_print_register_hook): Only print fp regs < 32 as doubles.
+	Add code to handle long doubles when gdb does.
+	(_initialize_sparc_tdep): Use print_insn_sparc64 if sparc64.
+
 Sat Sep  2 06:41:26 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in:  Explicitly `exit 0' for broken shells.

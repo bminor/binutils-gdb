@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 #include "defs.h"
@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "gdbcmd.h"
 
-#define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
+#define MAX_PATH_SIZE 512		/* FIXME: Should be dynamic */
 
 /* On SVR4 systems, for the initial implementation, use some runtime startup
    symbol as the "startup mapping complete" breakpoint address.  The models
@@ -261,6 +261,12 @@ solib_map_sections (so)
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so -> abfd = abfd;
   abfd -> cacheable = true;
+
+  /* copy full path name into so_name, so that later symbol_file_add can find
+     it */
+  if (strlen (scratch_pathname) >= MAX_PATH_SIZE)
+    error ("Full path name length of shared library exceeds MAX_PATH_SIZE in so_list structure.");
+  strcpy (so->so_name, scratch_pathname);
 
   if (!bfd_check_format (abfd, bfd_object))
     {
@@ -942,15 +948,15 @@ symbol_add_stub (arg)
 static int match_main (soname)
     char *soname;
 {
-char **mainp;
+  char **mainp;
 
-for (mainp = main_name_list; *mainp != NULL; mainp++)
-  {
-    if (strcmp (soname, *mainp) == 0)
+  for (mainp = main_name_list; *mainp != NULL; mainp++)
+    {
+      if (strcmp (soname, *mainp) == 0)
 	return (1);
-  }
+    }
 
-return (0);
+  return (0);
 }
 
 /*
