@@ -1,5 +1,7 @@
 Wed Sep 27 12:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (S_IS_LOCAL): All symbols in reg_section are local.
+
 	* config/tc-ppc.h (OBJ_XCOFF): Define if OBJ_COFF and not TE_PE.
 	Change OBJ_COFF checks to check OBJ_XCOFF instead.
 	(TARGET_FORMAT): Fully parenthesize.

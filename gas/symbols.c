@@ -165,7 +165,7 @@ symbol_create (name, segment, valu, frag)
  */
 symbolS *
 colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
-     register char *sym_name;	/* symbol name, as a cannonical string */
+     const char *sym_name;	/* symbol name, as a cannonical string */
      /* We copy this string: OK to alter later. */
 {
   register symbolS *symbolP;	/* symbol we are working with */
@@ -1270,6 +1270,9 @@ S_IS_LOCAL (s)
   /* sanity check */
   if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
     abort ();
+
+  if (bfd_get_section (s->bsym) == reg_section)
+    return 1;
 
   name = S_GET_NAME (s);
   return (name != NULL
