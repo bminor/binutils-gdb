@@ -1,3 +1,8 @@
+2002-09-30  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-loop.c (start_event_loop): Rename variable 'result' to
+	'gdb_result', to avoid conflicts with upcoming intepreters changes.
+
 2002-09-30  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh (selected_thread_changed): New event.
@@ -10,17 +15,18 @@
 
 2002-09-30  Fernando Nasser  <fnasser@redhat.com>
 
-	* disasm.c: New file.
-	* disasm.h: New file.
+	* disasm.c: New file.  
+	* disasm.h: New file.  
 	* mi/mi-cmd-disas.c (gdb_dis_asm_read_memory): Moved to disasm.c.
 	(compare_lines): Ditto.
 	(dump_insns): Ditto.
-	(do_mixed_source_and_assembly): Moved to disasm.c. Added uiout argument.
+	(do_mixed_source_and_assembly): Moved to disasm.c. Added uiout
+	argument.
 	(do_assembly_only): Ditto.
-	(do_disassembly): Renamed to gdb_disassembly and moved to disasm.c.
-	Sdded uiout argument.
-	* Makefile.in: Add new files.  Reorder SFILES list. Update dependencies.
-	Include libgdb.a later in the insight executable. 
+	(do_disassembly): Renamed to gdb_disassembly and moved to
+	disasm.c.  Sdded uiout argument.
+	* Makefile.in: Add new files.  Reorder SFILES list. Update
+	dependencies.  Include libgdb.a later in the insight executable.
 
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 

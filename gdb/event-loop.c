@@ -392,10 +392,12 @@ start_event_loop (void)
      longer any event sources registered. */
   while (1)
     {
-      int result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
-      if (result < 0)
+      int gdb_result;
+
+      gdb_result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
+      if (gdb_result < 0)
 	break;
-      if (result == 0)
+      if (gdb_result == 0)
 	{
 	  /* FIXME: this should really be a call to a hook that is
 	     interface specific, because interfaces can display the
