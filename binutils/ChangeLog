@@ -1,3 +1,7 @@
+Mon Feb 26 18:11:37 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Update to handle shared library support.
+
 Sat Feb 24 11:21:49 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>:
 
 	* Makefile.in ($(OBJDUMP_PROG)): Search $(BFDLIB) before

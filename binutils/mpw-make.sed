@@ -18,6 +18,13 @@
 
 /UNDERSCORE/s/@UNDERSCORE@/{UNDERSCORE}/
 
+# Don't need this.
+/@HLDFLAGS@/s/@HLDFLAGS@//
+
+# Point at the libraries directly.
+/@BFDLIB@/s/@BFDLIB@/::bfd:libbfd.o/
+/@OPCODES@/s/@OPCODES@/::opcodes:libopcodes.o/
+
 # Whack out target makefile fragment.
 /target_makefile_fragment/s/target_makefile_fragment@//
 
