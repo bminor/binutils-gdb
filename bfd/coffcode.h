@@ -300,7 +300,7 @@ $ } coff_symbol_type;
 #ifndef GET_LINENO_LNNO
 #define GET_LINENO_LNNO(abfd, ext) bfd_h_get_16(abfd, (bfd_byte *) (ext->l_lnno));
 #endif
-#ifndef PUT_LINNO_LNNO
+#ifndef PUT_LINENO_LNNO
 #define PUT_LINENO_LNNO(abfd,val, ext) bfd_h_put_16(abfd,val,  (bfd_byte *) (ext->l_lnno));
 #endif
 
@@ -326,6 +326,10 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
 	return((long)STYP_DATA);
     } else if (!strcmp(sec_name, _BSS)) {
 	return((long)STYP_BSS);
+#ifdef _COMMENT
+    } else if (!strcmp(sec_name, _COMMENT)) {
+        return((long)STYP_INFO);
+#endif /* _COMMENT */
     }
 
 /* Try and figure out what it should be */
@@ -1916,7 +1920,7 @@ DEFUN(coff_compute_section_file_positions,(abfd),
 	      padding the previous section up if necessary */
 
 	   old_sofar= sofar;
-	   sofar = ALIGN(sofar, 1 << current->alignment_power);
+	   sofar = BFD_ALIGN(sofar, 1 << current->alignment_power);
 	   if (previous != (asection *)NULL) {
 	       previous->size += sofar - old_sofar;
 	   }
@@ -1932,7 +1936,7 @@ DEFUN(coff_compute_section_file_positions,(abfd),
 
 	/* make sure that this section is of the right size too */
 	old_sofar =  sofar += current->size;
-	sofar = ALIGN(sofar, 1 << current->alignment_power);
+	sofar = BFD_ALIGN(sofar, 1 << current->alignment_power);
 	current->size += sofar - old_sofar ;
 
 	previous = current;

@@ -1,7 +1,6 @@
-
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -23,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
-#define ALIGN(this, boundary) \
+#define BFD_ALIGN(this, boundary) \
   ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
 
 /* If you want to read and write large blocks, you might want to do it
@@ -194,6 +193,8 @@ extern bfd *bfd_last_cache;
 /*:libbfd.c*/
 
 /*:cache.c*/
+
+/*:ctor.c*/
 
 /*:reloc.c*/
 

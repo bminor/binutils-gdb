@@ -76,14 +76,76 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "elf-internal.h"
 #include "elf-external.h"
 
+#ifdef HAVE_PROCFS	/* Some core file support requires host /proc files */
+#include <sys/procfs.h>
+#else
+#define bfd_prstatus(abfd, descdata, descsz, filepos)	/* Define away */
+#define bfd_fpregset(abfd, descdata, descsz, filepos)	/* Define away */
+#define bfd_prpsinfo(abfd, descdata, descsz, filepos)	/* Define away */
+#endif
+
 /* Forward data declarations */
+
 extern bfd_target elf_little_vec, elf_big_vec;
+
+/* Currently the elf_symbol_type struct just contains the generic bfd
+   symbol structure. */
+
+typedef struct
+{
+  asymbol symbol;
+} elf_symbol_type;
+
+/* Some private data is stashed away for future use using the tdata pointer
+   in the bfd structure.  This information is different for ELF core files
+   and other ELF files. */
+
+typedef struct
+{
+  void *prstatus;		/* The raw /proc prstatus structure */
+  void *prpsinfo;		/* The raw /proc prpsinfo structure */
+} elf_core_tdata;
+
+#define core_prpsinfo(bfd) (((elf_core_tdata *)((bfd)->tdata))->prpsinfo)
+#define core_prstatus(bfd) (((elf_core_tdata *)((bfd)->tdata))->prstatus)
+
+typedef struct
+{
+  file_ptr symtab_filepos;	/* Offset to start of ELF symtab section */
+  long symtab_filesz;		/* Size of ELF symtab section */
+  file_ptr strtab_filepos;	/* Offset to start of ELF string tbl section */
+  long strtab_filesz;		/* Size of ELF string tbl section */
+} elf_obj_tdata;
+
+#define elf_tdata(bfd)		((elf_obj_tdata *) ((bfd) -> tdata))
+#define elf_symtab_filepos(bfd)	(elf_tdata(bfd) -> symtab_filepos)
+#define elf_symtab_filesz(bfd)	(elf_tdata(bfd) -> symtab_filesz)
+#define elf_strtab_filepos(bfd)	(elf_tdata(bfd) -> strtab_filepos)
+#define elf_strtab_filesz(bfd)	(elf_tdata(bfd) -> strtab_filesz)
+
+/* Translate an ELF symbol in external format into an ELF symbol in internal
+   format. */
+
+static void
+DEFUN(elf_swap_symbol_in,(abfd, src, dst),
+      bfd               *abfd AND
+      Elf_External_Sym *src AND
+      Elf_Internal_Sym *dst)
+{
+  dst -> st_name = bfd_h_get_32 (abfd, (bfd_byte *) src -> st_name);
+  dst -> st_value = bfd_h_get_32 (abfd, (bfd_byte *) src -> st_value);
+  dst -> st_size = bfd_h_get_32 (abfd, (bfd_byte *) src -> st_size);
+  dst -> st_info = bfd_h_get_8 (abfd, (bfd_byte *) src -> st_info);
+  dst -> st_other = bfd_h_get_8 (abfd, (bfd_byte *) src -> st_other);
+  dst -> st_shndx = bfd_h_get_16 (abfd, (bfd_byte *) src -> st_shndx);
+}
+
 
 /* Translate an ELF header in external format into an ELF header in internal
    format. */
 
 static void
-DEFUN(bfd_swap_ehdr_in,(abfd, src, dst),
+DEFUN(elf_swap_ehdr_in,(abfd, src, dst),
       bfd               *abfd AND
       Elf_External_Ehdr *src AND
       Elf_Internal_Ehdr *dst)
@@ -109,7 +171,7 @@ DEFUN(bfd_swap_ehdr_in,(abfd, src, dst),
    ELF section header table entry in internal format. */
 
 static void
-DEFUN(bfd_swap_shdr_in,(abfd, src, dst),
+DEFUN(elf_swap_shdr_in,(abfd, src, dst),
       bfd               *abfd AND
       Elf_External_Shdr *src AND
       Elf_Internal_Shdr *dst)
@@ -131,7 +193,7 @@ DEFUN(bfd_swap_shdr_in,(abfd, src, dst),
    ELF program header table entry in internal format. */
 
 static void
-DEFUN(bfd_swap_phdr_in,(abfd, src, dst),
+DEFUN(elf_swap_phdr_in,(abfd, src, dst),
       bfd               *abfd AND
       Elf_External_Phdr *src AND
       Elf_Internal_Phdr *dst)
@@ -276,6 +338,265 @@ DEFUN(bfd_section_from_phdr, (abfd, hdr, index),
   return (true);
 }
 
+#ifdef HAVE_PROCFS
+
+static void
+DEFUN(bfd_prstatus,(abfd, descdata, descsz, filepos),
+      bfd	*abfd AND
+      char	*descdata AND
+      int	 descsz AND
+      long	 filepos)
+{
+  asection *newsect;
+
+  if (descsz == sizeof (prstatus_t))
+    {
+      newsect = bfd_make_section (abfd, ".reg");
+      newsect -> size = sizeof (gregset_t);
+      newsect -> filepos = filepos + (long) (((prstatus_t *)0) -> pr_reg);
+      newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+      newsect -> alignment_power = 2;
+      if ((core_prstatus (abfd) = bfd_alloc (abfd, descsz)) != NULL)
+	{
+	  bcopy (descdata, core_prstatus (abfd), descsz);
+	}
+    }
+}
+
+/* Stash a copy of the prpsinfo structure away for future use. */
+
+static void
+DEFUN(bfd_prpsinfo,(abfd, descdata, descsz, filepos),
+      bfd	*abfd AND
+      char	*descdata AND
+      int	 descsz AND
+      long	 filepos)
+{
+  asection *newsect;
+
+  if (descsz == sizeof (prpsinfo_t))
+    {
+      if ((core_prpsinfo (abfd) = bfd_alloc (abfd, descsz)) != NULL)
+	{
+	  bcopy (descdata, core_prpsinfo (abfd), descsz);
+	}
+    }
+}
+
+static void
+DEFUN(bfd_fpregset,(abfd, descdata, descsz, filepos),
+      bfd	*abfd AND
+      char	*descdata AND
+      int	 descsz AND
+      long	 filepos)
+{
+  asection *newsect;
+
+  if (descsz == sizeof (fpregset_t))
+    {
+      newsect = bfd_make_section (abfd, ".reg2");
+      newsect -> size = sizeof (fpregset_t);
+      newsect -> filepos = filepos;
+      newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+      newsect -> alignment_power = 2;
+    }
+}
+
+#endif	/* HAVE_PROCFS */
+
+/* Return a pointer to the args (including the command name) that were
+   seen by the program that generated the core dump.  Note that for
+   some reason, a spurious space is tacked onto the end of the args
+   in some (at least one anyway) implementations, so strip it off if
+   it exists. */
+
+char *
+DEFUN(elf_core_file_failing_command, (abfd),
+     bfd *abfd)
+{
+#if HAVE_PROCFS
+  if (core_prpsinfo (abfd))
+    {
+      prpsinfo_t *p = core_prpsinfo (abfd);
+      char *scan = p -> pr_psargs;
+      while (*scan++) {;}
+      scan -= 2;
+      if ((scan > p -> pr_psargs) && (*scan == ' '))
+	{
+	  *scan = '\000';
+	}
+      return (p -> pr_psargs);
+    }
+#endif
+  return (NULL);
+}
+
+/* Return the number of the signal that caused the core dump.  Presumably,
+   since we have a core file, we got a signal of some kind, so don't bother
+   checking the other process status fields, just return the signal number.
+   */
+
+static int
+DEFUN(elf_core_file_failing_signal, (abfd),
+      bfd *abfd)
+{
+#if HAVE_PROCFS
+  if (core_prstatus (abfd))
+    {
+      return (((prstatus_t *)(core_prstatus (abfd))) -> pr_cursig);
+    }
+#endif
+  return (-1);
+}
+
+/* Check to see if the core file could reasonably be expected to have
+   come for the current executable file.  Note that by default we return
+   true unless we find something that indicates that there might be a
+   problem.
+   */
+
+static boolean
+DEFUN(elf_core_file_matches_executable_p, (core_bfd, exec_bfd),
+      bfd *core_bfd AND
+      bfd *exec_bfd)
+{
+  char *corename;
+  char *execname;
+
+  /* First, xvecs must match since both are ELF files for the same target. */
+
+  if (core_bfd->xvec != exec_bfd->xvec)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+
+#if HAVE_PROCFS
+
+  /* If no prpsinfo, just return true.  Otherwise, grab the last component
+     of the exec'd pathname from the prpsinfo. */
+
+  if (core_prpsinfo (core_bfd))
+    {
+      corename = (((struct prpsinfo *) core_prpsinfo (core_bfd)) -> pr_fname);
+    }  
+  else
+    {
+      return (true);
+    }
+
+  /* Find the last component of the executable pathname. */
+
+  if ((execname = strrchr (exec_bfd -> filename, '/')) != NULL)
+    {
+      execname++;
+    }
+  else
+    {
+      execname = (char *) exec_bfd -> filename;
+    }
+
+  /* See if they match */
+
+  return (strcmp (execname, corename) ? false : true);
+
+#else
+
+  return (true);
+
+#endif	/* HAVE_PROCFS */
+}
+
+/* ELF core files contain a segment of type PT_NOTE, that holds much of
+   the information that would normally be available from the /proc interface
+   for the process, at the time the process dumped core.  Currently this
+   includes copies of the prstatus, prpsinfo, and fpregset structures.
+
+   Since these structures are potentially machine dependent in size and
+   ordering, bfd provides two levels of support for them.  The first level,
+   available on all machines since it does not require that the host
+   have /proc support or the relevant include files, is to create a bfd
+   section for each of the prstatus, prpsinfo, and fpregset structures,
+   without any interpretation of their contents.  With just this support,
+   the bfd client will have to interpret the structures itself.  Even with
+   /proc support, it might want these full structures for it's own reasons.
+
+   In the second level of support, where HAVE_PROCFS is defined, bfd will
+   pick apart the structures to gather some additional information that
+   clients may want, such as the general register set, the name of the
+   exec'ed file and its arguments, the signal (if any) that caused the
+   core dump, etc.
+
+   */
+
+static boolean
+DEFUN(elf_corefile_note, (abfd, hdr),
+      bfd               *abfd AND
+      Elf_Internal_Phdr *hdr)
+{
+  Elf_External_Note *x_note_p;	/* Elf note, external form */
+  Elf_Internal_Note i_note;	/* Elf note, internal form */
+  char *buf = NULL;		/* Entire note segment contents */
+  char *namedata;		/* Name portion of the note */
+  char *descdata;		/* Descriptor portion of the note */
+  char *sectname;		/* Name to use for new section */
+  long filepos;			/* File offset to descriptor data */
+  asection *newsect;
+
+  if (hdr -> p_filesz > 0
+      && (buf = malloc (hdr -> p_filesz)) != NULL
+      && bfd_seek (abfd, hdr -> p_offset, SEEK_SET) != -1L
+      && bfd_read ((PTR) buf, hdr -> p_filesz, 1, abfd) == hdr -> p_filesz)
+    {
+      x_note_p = (Elf_External_Note *) buf;
+      while ((char *) x_note_p < (buf + hdr -> p_filesz))
+	{
+	  i_note.namesz = bfd_h_get_32 (abfd, (bfd_byte *) x_note_p -> namesz);
+	  i_note.descsz = bfd_h_get_32 (abfd, (bfd_byte *) x_note_p -> descsz);
+	  i_note.type = bfd_h_get_32 (abfd, (bfd_byte *) x_note_p -> type);
+	  namedata = x_note_p -> name;
+	  descdata = namedata + BFD_ALIGN (i_note.namesz, 4);
+	  filepos = hdr -> p_offset + (descdata - buf);
+	  switch (i_note.type) {
+	    case NT_PRSTATUS:
+	      /* process descdata as prstatus info */
+	      bfd_prstatus (abfd, descdata, i_note.descsz, filepos);
+	      sectname = ".prstatus";
+	      break;
+	    case NT_FPREGSET:
+	      /* process descdata as fpregset info */
+	      bfd_fpregset (abfd, descdata, i_note.descsz, filepos);
+	      sectname = ".fpregset";
+	      break;
+	    case NT_PRPSINFO:
+	      /* process descdata as prpsinfo */
+	      bfd_prpsinfo (abfd, descdata, i_note.descsz, filepos);
+	      sectname = ".prpsinfo";
+	      break;
+	    default:
+	      /* Unknown descriptor, just ignore it. */
+	      sectname = NULL;
+	      break;
+	  }
+	  if (sectname != NULL)
+	    {
+	      newsect = bfd_make_section (abfd, sectname);
+	      newsect -> size = i_note.descsz;
+	      newsect -> filepos = filepos;
+	      newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
+	      newsect -> alignment_power = 2;
+	    }
+	  x_note_p = (Elf_External_Note *)
+			(descdata + BFD_ALIGN (i_note.descsz, 4));
+	}
+    }
+  if (buf != NULL)
+    {
+      free (buf);
+    }
+}
+
+
 /* Begin processing a given object.
 
    First we validate the file by reading in the ELF header and checking
@@ -343,8 +664,17 @@ wrong:
     goto wrong;
   }
   
+  /* Allocate an instance of the elf_obj_tdata structure and hook it up to
+     the tdata pointer in the bfd. */
+
+  if ((abfd -> tdata = bfd_zalloc (abfd, sizeof (elf_obj_tdata))) == NULL)
+    {
+      bfd_error = no_memory;
+      return (NULL);
+    }
+
   /* Now that we know the byte order, swap in the rest of the header */
-  bfd_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
+  elf_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
 
   /* If there is no section header table, we're hosed. */
   if (i_ehdr.e_shoff == 0)
@@ -388,7 +718,7 @@ wrong:
 	  bfd_error = system_call_error;
 	  return (NULL);
 	}
-      bfd_swap_shdr_in (abfd, x_shdr + shindex, i_shdr + shindex);
+      elf_swap_shdr_in (abfd, x_shdr + shindex, i_shdr + shindex);
     }
 
   /* Read in the string table containing the names of the sections.  We
@@ -413,11 +743,23 @@ wrong:
   
   /* Once all of the section headers have been read and converted, we
      can start processing them.  Note that the first section header is
-     a dummy placeholder entry, so we ignore it. */
+     a dummy placeholder entry, so we ignore it.
+
+     We also watch for the symbol table section and remember the file
+     offset and section size for both the symbol table section and the
+     associated string table section. */
 
   for (shindex = 1; shindex < i_ehdr.e_shnum; shindex++)
     {
-      bfd_section_from_shdr (abfd, i_shdr + shindex, shstrtab);
+      Elf_Internal_Shdr *hdr = i_shdr + shindex;
+      bfd_section_from_shdr (abfd, hdr, shstrtab);
+      if (hdr -> sh_type == SHT_SYMTAB)
+	{
+	  elf_symtab_filepos(abfd) = hdr -> sh_offset;
+	  elf_symtab_filesz(abfd) = hdr -> sh_size;
+	  elf_strtab_filepos(abfd) = (i_shdr + hdr -> sh_link) -> sh_offset;
+	  elf_strtab_filesz(abfd) = (i_shdr + hdr -> sh_link) -> sh_size;
+	}
     }
 
   return (abfd->xvec);
@@ -427,6 +769,13 @@ wrong:
     the file using the execution view of the file (program header table)
     rather than the linking view.  In fact, there is no section header
     table in a core file.
+
+    The process status information (including the contents of the general
+    register set) and the floating point register set are stored in a
+    segment of type PT_NOTE.  We handcraft a couple of extra bfd sections
+    that allow standard bfd access to the general registers (.reg) and the
+    floating point registers (.reg2).
+
  */
 
 static bfd_target *
@@ -488,12 +837,21 @@ wrong:
   }
   
   /* Now that we know the byte order, swap in the rest of the header */
-  bfd_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
+  elf_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
 
   /* If there is no program header, or the type is not a core file, then
      we are hosed. */
   if (i_ehdr.e_phoff == 0 || i_ehdr.e_type != ET_CORE)
     goto wrong;
+
+  /* Allocate an instance of the elf_core_tdata structure and hook it up to
+     the tdata pointer in the bfd. */
+
+  if ((abfd -> tdata = bfd_zalloc (abfd, sizeof (elf_core_tdata))) == NULL)
+    {
+      bfd_error = no_memory;
+      return (NULL);
+    }
 
   /* Allocate space for copies of the program header table in external
      and internal form, seek to the program header table in the file,
@@ -528,7 +886,7 @@ wrong:
 	  bfd_error = system_call_error;
 	  return (NULL);
 	}
-      bfd_swap_phdr_in (abfd, x_phdr + phindex, i_phdr + phindex);
+      elf_swap_phdr_in (abfd, x_phdr + phindex, i_phdr + phindex);
     }
 
   /* Once all of the program headers have been read and converted, we
@@ -537,6 +895,10 @@ wrong:
   for (phindex = 0; phindex < i_ehdr.e_phnum; phindex++)
     {
       bfd_section_from_phdr (abfd, i_phdr + phindex, phindex);
+      if ((i_phdr + phindex) -> p_type == PT_NOTE)
+	{
+	  elf_corefile_note (abfd, i_phdr + phindex);
+	}
     }
 
   return (abfd->xvec);
@@ -560,14 +922,156 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
   return (false);
 }
 
-static unsigned int
-elf_get_symtab_upper_bound(abfd)
-bfd *abfd;
+/* Given an index of a section, retrieve a pointer to it.  Note
+   that for our purposes, sections are indexed by {1, 2, ...} with
+   0 being an illegal index. */
+
+static struct sec *
+DEFUN (section_from_bfd_index, (abfd, index),
+       bfd            *abfd AND
+       int             index)
 {
-  fprintf (stderr, "elf_get_symtab_upper_bound unimplemented\n");
-  fflush (stderr);
-  abort ();
-  return (0);
+  if (index > 0)
+    {
+      struct sec *answer = abfd -> sections;
+      while (--index > 0)
+	{
+	  answer = answer -> next;
+	}
+      return (answer);
+    }
+  return (NULL);
+}
+
+static boolean
+DEFUN (elf_slurp_symbol_table, (abfd), bfd *abfd)
+{
+  int symcount;		/* Number of external ELF symbols */
+  char *strtab;		/* Buffer for raw ELF string table section */
+  asymbol *sym;		/* Pointer to current bfd symbol */
+  asymbol *symbase;	/* Buffer for generated bfd symbols */
+  asymbol **vec;	/* Pointer to current bfd symbol pointer */
+  Elf_Internal_Sym i_sym;
+  Elf_External_Sym x_sym;
+
+  if (bfd_get_outsymbols (abfd) != NULL)
+    {
+      return (true);
+    }
+
+  /* Slurp in the string table.  We will keep it around permanently, as
+     long as the bfd is in use, since we will end up setting up pointers
+     into it for the names of all the symbols. */
+
+  if (bfd_seek (abfd, elf_strtab_filepos (abfd), SEEK_SET) == -1)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  if ((strtab = bfd_alloc (abfd, elf_strtab_filesz (abfd))) == NULL)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  if (bfd_read ((PTR) strtab, elf_strtab_filesz (abfd), 1, abfd) !=
+      elf_strtab_filesz (abfd))
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+
+  /* Read each raw ELF symbol, converting from external ELF form to
+     internal ELF form, and then using the information to create a
+     canonical bfd symbol table entry.
+
+     Note that be allocate the initial bfd canonical symbol buffer
+     based on a one-to-one mapping of the ELF symbols to canonical
+     symbols.  However, it is likely that not all the ELF symbols will
+     be used, so there will be some space leftover at the end.  Once
+     we know how many symbols we actual generate, we realloc the buffer
+     to the correct size and then build the pointer vector. */
+
+  if (bfd_seek (abfd, elf_symtab_filepos (abfd), SEEK_SET) == -1)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+
+  symcount = elf_symtab_filesz(abfd) / sizeof (Elf_External_Sym);
+  sym = symbase = (asymbol *) bfd_zalloc (abfd, symcount * sizeof (asymbol));
+
+  while (symcount-- > 0)
+    {
+      if (bfd_read ((PTR) &x_sym, sizeof (x_sym), 1, abfd) != sizeof (x_sym))
+	{
+	  bfd_error = system_call_error;
+	  return (false);
+	}
+      elf_swap_symbol_in (abfd, &x_sym, &i_sym);
+      if (i_sym.st_name > 0)
+	{
+	  sym -> the_bfd = abfd;
+	  sym -> name = strtab + i_sym.st_name;
+	  sym -> value = i_sym.st_value;
+	  if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
+	    {
+	      /* Note:  This code depends upon there being an ordered
+		 one-for-one mapping of ELF sections to bfd sections. */
+	      sym -> section = section_from_bfd_index (abfd, i_sym.st_shndx);
+	    }
+	  else if (i_sym.st_shndx == SHN_ABS)
+	    {
+	      sym -> flags |= BSF_ABSOLUTE;
+	    }
+	  else if (i_sym.st_shndx == SHN_COMMON)
+	    {
+	      sym -> flags |= BSF_FORT_COMM;
+	    }
+	  switch (ELF_ST_BIND (i_sym.st_info))
+	    {
+	      case STB_LOCAL:
+		sym -> flags |= BSF_LOCAL;
+	        break;
+	      case STB_GLOBAL:
+	        sym -> flags |= (BSF_GLOBAL | BSF_EXPORT);
+	        break;
+	      case STB_WEAK:
+		sym -> flags |= BSF_WEAK;
+	        break;
+	    }
+	  sym++;
+	}
+    }
+
+  bfd_get_symcount(abfd) = symcount = sym - symbase;
+  sym = symbase = (asymbol *)
+    bfd_realloc (abfd, symbase, symcount * sizeof (asymbol));
+  bfd_get_outsymbols(abfd) = vec = (asymbol **)
+    bfd_alloc (abfd, symcount * sizeof (asymbol *));
+
+  while (symcount-- > 0)
+    {
+      *vec++ = sym++;
+    }
+
+  return (true);
+}
+
+/* Return the number of bytes required to hold the symtab vector.
+
+   Note that we base it on the count plus 1, since we will null terminate
+   the vector allocated based on this size. */
+
+static unsigned int
+DEFUN (elf_get_symtab_upper_bound, (abfd), bfd *abfd)
+{
+  unsigned int symtab_size = 0;
+
+  if (elf_slurp_symbol_table (abfd))
+    {
+      symtab_size = (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol));
+    }
+  return (symtab_size);
 }
 
 static unsigned int
@@ -595,14 +1099,28 @@ asymbol       **symbols;
 }
 
 static unsigned int
-elf_get_symtab (abfd, alocation)
-bfd            *abfd;
-asymbol       **alocation;
+DEFUN (elf_get_symtab, (abfd, alocation),
+       bfd            *abfd AND
+       asymbol       **alocation)
 {
-  fprintf (stderr, "elf_get_symtab unimplemented\n");
-  fflush (stderr);
-  abort ();
-  return (0);
+  unsigned int symcount;
+  asymbol **vec;
+
+  if (!elf_slurp_symbol_table (abfd))
+    {
+      return (0);
+    }
+  else
+    {
+      symcount = bfd_get_symcount (abfd);
+      vec = bfd_get_outsymbols (abfd);
+      while (symcount-- > 0)
+	{
+	  *alocation++ = *vec++;
+	}
+      *alocation++ = NULL;
+      return (bfd_get_symcount (abfd));
+    }
 }
 
 static asymbol *
@@ -690,10 +1208,6 @@ DEFUN (elf_sizeof_headers, (abfd, reloc),
 
    There are two such structures here:  one for big-endian machines and
    one for little-endian machines.   */
-
-#define elf_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define elf_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define elf_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
 
 /* Archives are generic or unimplemented.  */
 #define elf_slurp_armap			bfd_false

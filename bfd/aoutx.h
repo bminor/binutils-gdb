@@ -619,7 +619,8 @@ boolean
 	      if (abfd->flags & (D_PAGED|WP_TEXT))
 		{
 		  bfd_size_type text_pad =
-		      ALIGN(text_size, adata(abfd)->segment_size) - text_size;
+		      BFD_ALIGN(text_size, adata(abfd)->segment_size)
+			 - text_size;
 	          text_end += text_pad;
 		  obj_textsec(abfd)->size += text_pad;
 		}
