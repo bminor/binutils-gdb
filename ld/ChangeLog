@@ -1,4 +1,11 @@
+Sun Jun 30 11:16:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-eppcmac.c: Update to reflect May 23 change to aix.em.
+
 Thu Jun 27 14:03:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Put the .sa
+	file just before the .so file, rather than just after.
 
 	* configure.host: Use -print-file-name=FILE rather than piping
 	-print-libgcc-file-name through sed.
