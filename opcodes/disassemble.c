@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef ARCH_all
 #define ARCH_a29k
 #define ARCH_alpha
+/* start-sanitize-arc */
+#define ARCH_arc
+/* end-sanitize-arc */
 #define ARCH_arm
 #define ARCH_h8300
 #define ARCH_h8500
@@ -35,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ARCH_rs6000
 #define ARCH_sh
 #define ARCH_sparc
+#define ARCH_w65
 #define ARCH_z8k
 #endif
 
@@ -60,6 +64,15 @@ disassembler (abfd)
       disassemble = print_insn_alpha;
       break;
 #endif
+/* start-sanitize-arc */
+#ifdef ARCH_arc
+    case bfd_arch_arc:
+      {
+	disassemble = arc_disassembler (abfd);
+	break;
+      }
+#endif
+/* end-sanitize-arc */
 #ifdef ARCH_arm
     case bfd_arch_arm:
       disassemble = print_insn_arm;
@@ -140,6 +153,11 @@ disassembler (abfd)
 #ifdef ARCH_sparc
     case bfd_arch_sparc:
       disassemble = print_insn_sparc;
+      break;
+#endif
+#ifdef ARCH_w65
+    case bfd_arch_w65:
+      disassemble = print_insn_w65;
       break;
 #endif
 #ifdef ARCH_z8k

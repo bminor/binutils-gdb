@@ -16,6 +16,8 @@ Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
 	(ss, sc, mh, ml): New suffixes.
 	(arc_opcode_supported, arc_opval_supported): New functions.
 	(insert_multshift, extract_multshift): Deleted.
+	* disassemble.c (disassembler, case bfd_arch_arc): Call
+	arc_disassembler to get disassembler routine.
 end-sanitize-arc
 
 Thu Feb  9 12:28:13 1995  Stan Shebs  <shebs@andros.cygnus.com>
