@@ -147,4 +147,19 @@ extern const struct d10v_operand d10v_operands[];
 /* predecrement mode '@-sp'  */
 #define OPERAND_ATMINUS	(0x2000)
 
+/* Structure to hold information about predefined registers.  */
+struct pd_reg
+{
+  char *name;		/* name to recognize */
+  char *pname;		/* name to print for this register */
+  int value;
+};
+
+extern const struct pd_reg pre_defined_registers[];
+int reg_name_cnt();
+
+/* an expressionS only has one register type, so we fake it */
+/* by setting high bits to indicate type */
+#define REGISTER_MASK	0xFF
+
 #endif /* D10V_H */
