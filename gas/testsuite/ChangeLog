@@ -1,24 +1,58 @@
+2001-05-28  Jeff Sturm  <jsturm@one-point.com>
+
+	* gas/sparc/unalign.s: New test.  Check unaligned relocs.
+	* gas/sparc/unalign.d: New expected test results.
+	* gas/sparc/sparc.exp: Run new test.
+
 2001-05-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/addi.d: Tweak for 64-bit BFD.
-	* gas/cris/binop-cmpmove.d, gas/cris/binop-cmpmovx.d,
-	gas/cris/binop-extx.d, gas/cris/binop.d, gas/cris/bork.d,
-	gas/cris/branch.d, gas/cris/break.d, gas/cris/brokw-1.d,
-	gas/cris/brokw-2.d, gas/cris/brokw-3.d, gas/cris/ccr.d,
-	gas/cris/clear.d, gas/cris/continue.d, gas/cris/fragtest.d,
-	gas/cris/jump-type.d, gas/cris/labfloat.d, gas/cris/macroat.d,
-	gas/cris/movem-to-reg.d, gas/cris/nosep.d, gas/cris/oneop-type.d,
-	gas/cris/prefix.d, gas/cris/pushpop-byte-sreg.d,
-	gas/cris/pushpop-dword-sreg.d, gas/cris/pushpop-word-sreg.d,
-	gas/cris/pushpop.d, gas/cris/quick-s6.d, gas/cris/quick-u5.d,
-	gas/cris/quick-u6.d, gas/cris/range-err-1.s, gas/cris/rd-pic-1.d,
-	gas/cris/rd-regprefix-1.d, gas/cris/rd-regprefix-1b.d,
-	gas/cris/reg-to-mem.d, gas/cris/regreg.d, gas/cris/return.d,
-	gas/cris/scc.d, gas/cris/separator.d, gas/cris/shexpr-1.d,
-	gas/cris/sreg-to-x.d, gas/cris/test.d, gas/cris/unimplemented.d,
-	gas/cris/unop-mem.d, gas/cris/x-to-byte-sreg.d,
-	gas/cris/x-to-dcr1-sreg.d, gas/cris/x-to-dword-sreg.d,
-	gas/cris/x-to-word-sreg.d: Ditto.
+	* gas/cris/binop-cmpmove.d: Ditto.
+	* gas/cris/binop-cmpmovx.d: Ditto.
+	* gas/cris/binop-extx.d: Ditto.
+	* gas/cris/binop.d: Ditto.
+	* gas/cris/bork.d: Ditto.
+	* gas/cris/branch.d: Ditto.
+	* gas/cris/break.d: Ditto.
+	* gas/cris/brokw-1.d: Ditto.
+	* gas/cris/brokw-2.d: Ditto.
+	* gas/cris/brokw-3.d: Ditto.
+	* gas/cris/ccr.d: Ditto.
+	* gas/cris/clear.d: Ditto.
+	* gas/cris/continue.d: Ditto.
+	* gas/cris/fragtest.d: Ditto.
+	* gas/cris/jump-type.d: Ditto.
+	* gas/cris/labfloat.d: Ditto.
+	* gas/cris/macroat.d: Ditto.
+	* gas/cris/movem-to-reg.d: Ditto.
+	* gas/cris/nosep.d: Ditto.
+	* gas/cris/oneop-type.d: Ditto.
+	* gas/cris/prefix.d: Ditto.
+	* gas/cris/pushpop-byte-sreg.d: Ditto.
+	* gas/cris/pushpop-dword-sreg.d: Ditto.
+	* gas/cris/pushpop-word-sreg.d: Ditto.
+	* gas/cris/pushpop.d: Ditto.
+	* gas/cris/quick-s6.d: Ditto.
+	* gas/cris/quick-u5.d: Ditto.
+	* gas/cris/quick-u6.d: Ditto.
+	* gas/cris/range-err-1.s: Ditto.
+	* gas/cris/rd-pic-1.d: Ditto.
+	* gas/cris/rd-regprefix-1.d: Ditto.
+	* gas/cris/rd-regprefix-1b.d: Ditto.
+	* gas/cris/reg-to-mem.d: Ditto.
+	* gas/cris/regreg.d: Ditto.
+	* gas/cris/return.d: Ditto.
+	* gas/cris/scc.d: Ditto.
+	* gas/cris/separator.d: Ditto.
+	* gas/cris/shexpr-1.d: Ditto.
+	* gas/cris/sreg-to-x.d: Ditto.
+	* gas/cris/test.d: Ditto.
+	* gas/cris/unimplemented.d: Ditto.
+	* gas/cris/unop-mem.d: Ditto.
+	* gas/cris/x-to-byte-sreg.d: Ditto.
+	* gas/cris/x-to-dcr1-sreg.d: Ditto.
+	* gas/cris/x-to-dword-sreg.d: Ditto.
+	* gas/cris/x-to-word-sreg.d: Ditto.
 	* gas/cris/shexpr-1.d: Ditto.  Correct format.
 
 2001-05-25  H.J. Lu  <hjl@gnu.org>
