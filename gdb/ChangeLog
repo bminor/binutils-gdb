@@ -1,5 +1,11 @@
 2003-09-11  David Carlton  <carlton@kealia.com>
 
+	* buildsym.c (finish_block): Use allocate_block to allocate the
+	block.
+	* mdebugread.c (new_block): Add FIXME.
+
+2003-09-11  David Carlton  <carlton@kealia.com>
+
 	* gdbtypes.h: Add TYPE_CODE_NAMESPACE.
 	* gdbtypes.c (init_type): Handle TYPE_CODE_NAMESPACE.
 	(recursive_dump_type): Ditto.

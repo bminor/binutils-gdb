@@ -4696,6 +4696,9 @@ new_bvect (int nblocks)
 static struct block *
 new_block (enum block_type type)
 {
+  /* FIXME: carlton/2003-09-11: This should use allocate_block to
+     allocate the block.  Which, in turn, suggests that the block
+     should be allocated on an obstack.  */
   struct block *retval = xzalloc (sizeof (struct block));
 
   if (type == FUNCTION_BLOCK)

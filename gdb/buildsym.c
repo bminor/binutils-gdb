@@ -231,19 +231,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   register struct pending_block *pblock;
   struct pending_block *opblock;
 
-  /* Initialize the block's dictionary.  */
+  block = allocate_block (&objfile->symbol_obstack);
 
   if (symbol)
     {
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
 					       *listhead);
     }
   else
     {
-      block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
       BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
 					       *listhead);
     }
