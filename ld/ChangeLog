@@ -1,3 +1,12 @@
+2004-09-18  Filip Navara  <navaraf@reactos.com>
+
+	* emulparams/arm_epoc_pe.sh, emulparams/armpe.sh, emulparams/i386pe.sh,
+	emulparams/i386pe_posix.sh, emulparams/mcorepe.sh,
+	emulparams/mipspe.sh, emulparams/ppcpe.sh, scripttempl/pe.sc: Define
+	TARGET_PAGE_SIZE.
+	* scripttempl/pe.sc: Make the virtual address and file offset synced if
+	the alignment is lower than the target page size.
+
 2004-09-27  Filip Navara  <navaraf@reactos.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_unrecognized_file): Allow
