@@ -1,3 +1,18 @@
+2000-10-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/m68k/linux.mh: Remove solib.c, solib-svr4.c from NATDEPFILES.
+	* config/powerpc/linux.mh: ditto.
+	* config/ia64/linux.mh: ditto.
+	* config/i386/linux.mh: ditto.
+	* config/alpha/alpha-linux.mh: ditto.
+	* config/arm/linux.mh: ditto.
+	* config/m68k/linux.mt: Add solib.c, solib-svr4.c to TDEPFILES.
+	* config/powerpc/linux.mt: ditto.
+	* config/ia64/linux.mt: ditto.
+	* config/i386/linux.mt: ditto.
+	* config/alpha/alpha-linux.mt: ditto.
+	* config/arm/linux.mt: ditto.
+
 2000-10-30  J.T. Conklin  <jtc@redback.com>
 
 	* gdbarch.sh, hp-psymtab-read.c, hpread.c, m3-nat.c, mcore-tdep.c, 
