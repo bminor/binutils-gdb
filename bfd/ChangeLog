@@ -1,4 +1,4 @@
-Fri Jan 21 14:11:16 1994  Sean Fagan (sef@cygnus.com)
+Fri Jan 21 14:11:16 1994  Sean Fagan  (sef@cygnus.com)
 
 	* nlmcode.h, liblnm.h, nlm32-alpha.c nlm32-i386.c nlm32-sparc.c:
 	The sparc (and possibly other?) NLM format requires a different
