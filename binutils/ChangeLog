@@ -1,3 +1,8 @@
+2003-04-09  Bernd Jendrissek <berndj@prism.co.za>
+
+	* configure.in: Recognize canonical form of i[3-6]86-pe*.
+	* configure: Regenerate.
+
 2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (display_debug_info): Apply RELA relocations on the
