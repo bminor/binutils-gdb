@@ -3906,15 +3906,31 @@ md_apply_fix3 (fixP, valp, seg)
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
 
-  if (fixP->fx_r_type == BFD_RELOC_32 && fixP->fx_pcrel)
-     fixP->fx_r_type = BFD_RELOC_32_PCREL;
+  if (fixP->fx_pcrel)
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+	case BFD_RELOC_16:
+	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  break;
+	case BFD_RELOC_8:
+	  fixP->fx_r_type = BFD_RELOC_8_PCREL;
+	  break;
+	}
+    }
 
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   /*
    * This is a hack.  There should be a better way to
    * handle this.
    */
-  if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
+  if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
+       || fixP->fx_r_type == BFD_RELOC_16_PCREL
+       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
+      && fixP->fx_addsy)
     {
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
@@ -4014,9 +4030,9 @@ md_apply_fix3 (fixP, valp, seg)
     default:
       break;
     }
-#endif
-
-#endif
+#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) */
+  *valp = value;
+#endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach) */
   md_number_to_chars (p, value, fixP->fx_size);
 
   return 1;
@@ -4315,9 +4331,6 @@ i386_validate_fix (fixp)
     }
 }
 
-#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
-#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
-
 arelent *
 tc_gen_reloc (section, fixp)
      asection *section;
@@ -4338,27 +4351,35 @@ tc_gen_reloc (section, fixp)
       code = fixp->fx_r_type;
       break;
     default:
-      switch (F (fixp->fx_size, fixp->fx_pcrel))
+      if (fixp->fx_pcrel)
 	{
-	  MAP (1, 0, BFD_RELOC_8);
-	  MAP (2, 0, BFD_RELOC_16);
-	  MAP (4, 0, BFD_RELOC_32);
-	  MAP (1, 1, BFD_RELOC_8_PCREL);
-	  MAP (2, 1, BFD_RELOC_16_PCREL);
-	  MAP (4, 1, BFD_RELOC_32_PCREL);
-	default:
-	  if (fixp->fx_pcrel)
-	    as_bad (_("Can not do %d byte pc-relative relocation"),
-		    fixp->fx_size);
-	  else
-	    as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
-	  code = BFD_RELOC_32;
-	  break;
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte pc-relative relocation"),
+		      fixp->fx_size);
+	      code = BFD_RELOC_32_PCREL;
+	      break;
+	    case 1: code = BFD_RELOC_8_PCREL;  break;
+	    case 2: code = BFD_RELOC_16_PCREL; break;
+	    case 4: code = BFD_RELOC_32_PCREL; break;
+	    }
+	}
+      else
+	{
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
+	      code = BFD_RELOC_32;
+	      break;
+	    case 1: code = BFD_RELOC_8;  break;
+	    case 2: code = BFD_RELOC_16; break;
+	    case 4: code = BFD_RELOC_32; break;
+	    }
 	}
       break;
     }
-#undef MAP
-#undef F
 
   if (code == BFD_RELOC_32
       && GOT_symbol
@@ -4461,6 +4482,6 @@ tc_coff_sizemachdep (frag)
 
 #endif /* I386COFF */
 
-#endif /* BFD_ASSEMBLER? */
+#endif /* ! BFD_ASSEMBLER */
 
 /* end of tc-i386.c */
