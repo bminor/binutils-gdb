@@ -1,3 +1,19 @@
+Thu Oct 27 17:30:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ld-shared: New directory, with new files to test generating ELF
+	shared libraries.
+
+	* lib/ld.exp (default_ld_compile): If the compilation worked, but
+	no object file was created, check to see if the compiler foolishly
+	ignored the -o switch when compiling, and move the resulting
+	object if it did.
+
+Thu Sep 29 12:36:51 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* VMS does not permits `.' in directory names.  Renamed
+	ld.bootstrap to ld-bootstrap, ld.cdtest to ld-cdtest, and
+	ld.scripts to ld-scripts.
+
 Wed Sep 28 12:18:54 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/default.exp: Set variables as and nm.  Create tmpdir if
