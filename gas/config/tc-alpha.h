@@ -47,9 +47,7 @@ extern valueT alpha_gp_value;
 #define md_create_short_jump(p,f,t,fr,s) as_fatal("alpha_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
 			(as_fatal("estimate_size_before_relax called"),1)
-#define md_operand(x)			0
-
-extern unsigned long md_section_align PARAMS ((segT, unsigned long));
+#define md_operand(x)			((void) (0))
 
 #define md_undefined_symbol(name)	(0)
 
@@ -57,8 +55,11 @@ extern unsigned long md_section_align PARAMS ((segT, unsigned long));
 
 #define md_number_to_chars		number_to_chars_littleendian
 
-extern int alpha_do_align ();
-#define md_do_align(n,fill,l)	if (alpha_do_align(n,fill)) goto l
+extern int tc_get_register PARAMS ((int frame));
+extern void alpha_frob_ecoff_data PARAMS ((void));
 
-extern void alpha_frob_file ();
-#define tc_frob_file		alpha_frob_file
+#define tc_frob_label(sym) alpha_define_label (sym)
+extern void alpha_define_label PARAMS ((struct symbol *));
+
+#define md_flush_pending_output alpha_flush_pending_output
+extern void alpha_flush_pending_output PARAMS ((void));

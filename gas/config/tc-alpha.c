@@ -65,7 +65,6 @@
 
 /* These are exported to relaxing code, even though we don't do any
    relaxing on this processor currently.  */
-const relax_typeS md_relax_table[1];
 int md_short_jump_size = 4;
 int md_long_jump_size = 4;
 
@@ -85,7 +84,7 @@ static symbolS *gp;
 
 /* We'll probably be using this relocation frequently, and we
    will want to compare for it.  */
-static const reloc_howto_type *gpdisp_hi16_howto;
+static reloc_howto_type *gpdisp_hi16_howto;
 
 /* These are exported to ECOFF code.  */
 unsigned long alpha_gprmask, alpha_fprmask;
@@ -99,6 +98,17 @@ static expressionS lituse_basereg, lituse_byteoff, lituse_jsr;
    Some other systems may want this option too.  */
 static int addr32;
 
+/* Symbol labelling the current insn.  When the Alpha gas sees
+     foo:
+       .quad 0
+   and the section happens to not be on an eight byte boundary, it
+   will align both the symbol and the .quad to an eight byte boundary.  */
+static symbolS *insn_label;
+
+/* Whether we should automatically align data generation pseudo-ops.
+   .align 0 will turn this off.  */
+static int auto_align = 1;
+
 /* Imported functions -- they should be defined in header files somewhere.  */
 extern segT subseg_get ();
 extern PTR bfd_alloc_by_size_t ();
@@ -108,6 +118,11 @@ extern void s_globl (), s_long (), s_short (), s_space (), cons (), s_text (),
 /* Static functions, needing forward declarations.  */
 static void s_base (), s_proc (), s_alpha_set ();
 static void s_gprel32 (), s_rdata (), s_sdata (), s_alpha_comm ();
+static void s_alpha_text PARAMS ((int));
+static void s_alpha_data PARAMS ((int));
+static void s_alpha_align PARAMS ((int));
+static void s_alpha_cons PARAMS ((int));
+static void s_alpha_float_cons PARAMS ((int));
 static int alpha_ip ();
 
 static void emit_unaligned_io PARAMS ((char *, int, valueT, int));
@@ -127,19 +142,22 @@ static void emit_addq_r PARAMS ((int, int, int));
 static void emit_lda_n PARAMS ((int, bfd_vma, int));
 static void emit_add64 PARAMS ((int, int, bfd_vma));
 static int in_range_signed PARAMS ((bfd_vma, int));
+static void alpha_align PARAMS ((int, int, symbolS *));
 
 const pseudo_typeS md_pseudo_table[] =
 {
   {"common", s_comm, 0},	/* is this used? */
   {"comm", s_alpha_comm, 0},	/* osf1 compiler does this */
+  {"text", s_alpha_text, 0},
+  {"data", s_alpha_data, 0},
   {"rdata", s_rdata, 0},
   {"sdata", s_sdata, 0},
   {"gprel32", s_gprel32, 0},
-  {"t_floating", float_cons, 'd'},
-  {"s_floating", float_cons, 'f'},
-  {"f_floating", float_cons, 'F'},
-  {"g_floating", float_cons, 'G'},
-  {"d_floating", float_cons, 'D'},
+  {"t_floating", s_alpha_float_cons, 'd'},
+  {"s_floating", s_alpha_float_cons, 'f'},
+  {"f_floating", s_alpha_float_cons, 'F'},
+  {"g_floating", s_alpha_float_cons, 'G'},
+  {"d_floating", s_alpha_float_cons, 'D'},
 
   {"proc", s_proc, 0},
   {"aproc", s_proc, 1},
@@ -152,6 +170,19 @@ const pseudo_typeS md_pseudo_table[] =
   {"prologue", s_ignore, 0},
   {"aent", s_ignore, 0},
   {"ugen", s_ignore, 0},
+
+  {"align", s_alpha_align, 0},
+  {"byte", s_alpha_cons, 0},
+  {"hword", s_alpha_cons, 1},
+  {"int", s_alpha_cons, 2},
+  {"long", s_alpha_cons, 2},
+  {"octa", s_alpha_cons, 4},
+  {"quad", s_alpha_cons, 3},
+  {"short", s_alpha_cons, 1},
+  {"word", s_alpha_cons, 1},
+  {"double", s_alpha_float_cons, 'd'},
+  {"float", s_alpha_float_cons, 'f'},
+  {"single", s_alpha_float_cons, 'f'},
 
 /* We don't do any optimizing, so we can safely ignore these.  */
   {"noalias", s_ignore, 0},
@@ -265,6 +296,30 @@ tc_get_register (frame)
   return framereg;
 }
 
+/* Handle the .text pseudo-op.  This is like the usual one, but it
+   clears insn_label and restores auto alignment.  */
+
+static void
+s_alpha_text (i)
+     int i;
+{
+  s_text (i);
+  insn_label = NULL;
+  auto_align = 1;
+}  
+
+/* Handle the .data pseudo-op.  This is like the usual one, but it
+   clears insn_label and restores auto alignment.  */
+
+static void
+s_alpha_data (i)
+     int i;
+{
+  s_data (i);
+  insn_label = NULL;
+  auto_align = 1;
+}  
+
 static void
 s_rdata (ignore)
      int ignore;
@@ -280,6 +335,8 @@ s_rdata (ignore)
   rdata = subseg_new (".rdata", 0);
 #endif
   demand_empty_rest_of_line ();
+  insn_label = NULL;
+  auto_align = 1;
 }
 
 static void
@@ -297,6 +354,8 @@ s_sdata (ignore)
   sdata = subseg_new (".sdata", 0);
 #endif
   demand_empty_rest_of_line ();
+  insn_label = NULL;
+  auto_align = 1;
 }
 
 static void
@@ -439,7 +498,7 @@ static int in_range_signed (val, nbits)
 
   mask = (one << nbits) - 1;
   stored_value = val & mask;
-  top_bit = stored_value & (one << nbits - 1);
+  top_bit = stored_value & (one << (nbits - 1));
   missing_bits = val & ~mask;
   /* will sign-extend */
   if (top_bit)
@@ -495,10 +554,13 @@ s_gprel32 ()
     default:
       abort ();
     }
+  if (auto_align)
+    alpha_align (2, 0, insn_label);
   p = frag_more (4);
   memset (p, 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &e, 0,
 	       BFD_RELOC_GPREL32);
+  insn_label = NULL;
 }
 
 static void
@@ -592,7 +654,7 @@ md_begin ()
 	  char *q2 = p;
 
 	  for (; *q; q++)
-	    if (*q /= '/')
+	    if (*q != '/')
 	      *q2++ = *q;
 
 	  *q2++ = 0;
@@ -658,14 +720,16 @@ emit_insn (insn)
 	    }
 	  f = fix_new_exp (frag_now, (toP - frag_now->fr_literal), 4,
 			   &r->exp, r->pcrel, r->code);
-	}
-      if (r->code == BFD_RELOC_ALPHA_GPDISP_LO16)
-	{
-	  static bit_fixS cookie;
-	  /* @@ This'll make the range checking in write.c shut up.  */
-	  f->fx_bit_fixP = &cookie;
+	  if (r->code == BFD_RELOC_ALPHA_GPDISP_LO16)
+	    {
+	      static bit_fixS cookie;
+	      /* @@ This'll make the range checking in write.c shut up.  */
+	      f->fx_bit_fixP = &cookie;
+	    }
 	}
     }
+
+  insn_label = NULL;
 }
 
 void
@@ -1185,11 +1249,11 @@ alpha_ip (str, insns)
   struct alpha_opcode *pattern;
   char *argsStart;
   unsigned int opcode;
-  unsigned int mask;
+  unsigned int mask = 0;
   int match = 0, num_gen = 1;
   int comma = 0;
-  int do_add64, add64_in, add64_out;
-  bfd_vma add64_addend;
+  int do_add64, add64_in = 0, add64_out = 0;
+  bfd_vma add64_addend = 0;
 
   for (s = str;
        islower (*s) || *s == '_' || *s == '/' || *s == '4' || *s == '8';
@@ -1644,7 +1708,7 @@ alpha_ip (str, insns)
 	      else if (insns[0].reloc[0].exp.X_op == O_symbol)
 		{
 		  unsigned long old_opcode = opcode;
-		  int tmp_reg;
+		  int tmp_reg = -1;
 
 		  if (!macro_ok)
 		    as_bad ("insn requires expansion but `nomacro' specified");
@@ -1816,10 +1880,10 @@ alpha_ip (str, insns)
 		     manipulation, with t9 and t10 as temporaries.  */
 		  {
 		    /* Characteristics of access.  */
-		    int is_load, is_unsigned = 0, is_unaligned = 0;
+		    int is_load = 99, is_unsigned = 0, is_unaligned = 0;
 		    int mode_size, mode;
 		    /* Register operand.  */
-		    int reg;
+		    int reg = -1;
 		    /* Addend for loads and stores.  */
 		    valueT addend;
 		    /* Which register do we use for the address?  */
@@ -1937,7 +2001,7 @@ alpha_ip (str, insns)
 
 		    if (is_load)
 		      {
-			int reg2, reg3;
+			int reg2, reg3 = -1;
 
 			if (is_unaligned)
 			  reg2 = T9, reg3 = T10;
@@ -2328,21 +2392,143 @@ md_pcrel_from (fixP)
     }
 }
 
-int
-alpha_do_align (n, fill)
-     int n;
-     const char *fill;
+/* Handle the .align pseudo-op.  This aligns to a power of two.  It
+   also adjusts any current instruction label.  We treat this the same
+   way the MIPS port does: .align 0 turns off auto alignment.  */
+
+static void
+s_alpha_align (ignore)
+     int ignore;
 {
-  if (!fill
+  register int temp;
+  register long temp_fill;
+  long max_alignment = 15;
+
+  temp = get_absolute_expression ();
+  if (temp > max_alignment)
+    as_bad ("Alignment too large: %d. assumed.", temp = max_alignment);
+  else if (temp < 0)
+    {
+      as_warn ("Alignment negative: 0 assumed.");
+      temp = 0;
+    }
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      temp_fill = get_absolute_expression ();
+    }
+  else
+    temp_fill = 0;
+  if (temp)
+    {
+      auto_align = 1;
+      alpha_align (temp, (int) temp_fill, insn_label);
+    }
+  else
+    {
+      auto_align = 0;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+alpha_align (n, fill, label)
+     int n;
+     int fill;
+     symbolS *label;
+{
+  if (fill == 0
       && (now_seg == text_section
 	  || !strcmp (now_seg->name, ".init")
 	  || !strcmp (now_seg->name, ".fini")))
     {
       static const unsigned char nop_pattern[] = { 0x1f, 0x04, 0xff, 0x47 };
       frag_align_pattern (n, nop_pattern, sizeof (nop_pattern));
-      return 1;
     }
-  return 0;
+  else
+    frag_align (n, fill);
+
+  if (label != NULL)
+    {
+      assert (S_GET_SEGMENT (label) == now_seg);
+      label->sy_frag = frag_now;
+      S_SET_VALUE (label, (valueT) frag_now_fix ());
+    }
+}
+
+/* This function is called just before the generic pseudo-ops output
+   something.  It just clears insn_label.  */
+
+void
+alpha_flush_pending_output ()
+{
+  insn_label = NULL;
+}
+
+/* Handle data allocation pseudo-ops.  This is like the generic
+   version, but it makes sure the current label, if any, is correctly
+   aligned.  */
+
+static void
+s_alpha_cons (log_size)
+     int log_size;
+{
+  if (log_size > 0 && auto_align)
+    alpha_align (log_size, 0, insn_label);
+  insn_label = NULL;
+  cons (1 << log_size);
+}
+
+/* Handle floating point allocation pseudo-ops.  This is like the
+   generic vresion, but it makes sure the current label, if any, is
+   correctly aligned.  */
+
+static void
+s_alpha_float_cons (type)
+     int type;
+{
+  if (auto_align)
+    {
+      int log_size;
+
+      switch (type)
+	{
+	default:
+	case 'f':
+	case 'F':
+	  log_size = 2;
+	  break;
+
+	case 'd':
+	case 'D':
+	case 'G':
+	  log_size = 3;
+	  break;
+
+	case 'x':
+	case 'X':
+	case 'p':
+	case 'P':
+	  log_size = 4;
+	  break;
+	}
+
+      alpha_align (log_size, 0, insn_label);
+    }
+
+  insn_label = NULL;
+  float_cons (type);
+}
+
+/* This function is called whenever a label is defined.  It is used to
+   adjust the label when an automatic alignment occurs.  */
+
+void
+alpha_define_label (sym)
+     symbolS *sym;
+{
+  insn_label = sym;
 }
 
 int

@@ -1,3 +1,28 @@
+Thu Jul  6 12:54:27 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.h (alpha_do_align): Don't declare.
+	(md_do_align): Don't define.
+	(tc_frob_label): Define.
+	(alpha_define_label): Declare.
+	(md_flush_pending_output): Define.
+	(alpha_flush_pending_output): Declare.
+	* config/tc-alpha.c (insn_label): New static variable.
+	(auto_align): New static variable.
+	(md_pseudo_table): Add cases for .text, .data, .align, .byte,
+	.hword, .int, .long, .octa, .quad, .short, .word, .double, .float,
+	and .single.  Change .t_floating, .s_floating, .f_floating,
+	.g_floating, and .d_floating to use s_alpha_float_cons rather than
+	float_cons.
+	(s_alpha_text, s_alpha_data): New static functions.
+	(s_rdata, s_sdata): Clear insn_label and set auto_align.
+	(s_gprel32): If auto_align, align.  Clear insn_label.
+	(emit_insn): Clear insn_label.
+	(s_alpha_align): New static function.
+	(alpha_align): Make static.  Take label argument.
+	(alpha_flush_pending_output): New static function.
+	(s_alpha_cons, s_alpha_float_cons): New static functions.
+	(alpha_define_label): New function.
+
 Wed Jul  5 22:49:31 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* conf.in: Regenerate with autoreconf.
