@@ -209,12 +209,20 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   int fprs_saved[S390_NUM_FPRS];
   int regidx, instrlen;
   int const_pool_state;
-  int frame_pointer_found, varargs_state;
+  int varargs_state;
   int loop_cnt, gdb_gpr_store, gdb_fpr_store;
-  int frame_pointer_regidx = 0xf;
   int offset, expected_offset;
   int err = 0;
   disassemble_info info;
+
+  /* Have we seen an instruction initializing the frame pointer yet?
+     If we've seen an `lr %r11, %r15', then frame_pointer_found is
+     non-zero, and frame_pointer_regidx == 11.  Otherwise,
+     frame_pointer_found is zero and frame_pointer_regidx is 15,
+     indicating that we're using the stack pointer as our frame
+     pointer.  */
+  int frame_pointer_found = 0;
+  int frame_pointer_regidx = 0xf;
 
   /* What we've seen so far regarding saving the back chain link:
      0 -- nothing yet; sp still has the same value it had at the entry
@@ -236,7 +244,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
      4 -- The frame and link are now fully initialized.  We've
           reserved space for the new stack frame, and stored the old
           stack pointer captured in the back chain pointer field.  */
-  int save_link_state;
+  int save_link_state = 0;
   int save_link_regidx, subtract_sp_regidx;
 
   /* What we've seen so far regarding r12 --- the GOT (Global Offset
@@ -250,11 +258,11 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
      When got_state is 1, then got_load_addr is the address of the
      load instruction, and got_load_len is the length of that
      instruction.  */
-  int got_state;
+  int got_state= 0;
   CORE_ADDR got_load_addr = 0, got_load_len = 0;
 
-  const_pool_state = save_link_state = got_state = varargs_state = 0;
-  frame_pointer_found = 0;
+  const_pool_state = varargs_state = 0;
+
   memset (gprs_saved, 0, sizeof (gprs_saved));
   memset (fprs_saved, 0, sizeof (fprs_saved));
   info.read_memory_func = dis_asm_read_memory;

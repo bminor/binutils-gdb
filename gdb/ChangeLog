@@ -1,5 +1,7 @@
 2001-12-04  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_get_frame_info): More doc fixes.
+
 	* s390-tdep.c (s390_get_frame_info): Doc fixes.
 
 2001-12-04  Orjan Friberg  <orjanf@axis.com>
