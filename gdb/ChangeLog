@@ -9,6 +9,9 @@
 	config/powerpc/nm-linux.h, config/powerpc/tm-linux.h: New files.
 	* config/powerpc/xm-linux.h: Substantially revised for native
 	port.
+	* config/powerpc/linux.mh (NAT_FILE): Redefine to be nm-linux.h.
+	(NATDEPFILES): Update list to reflect the fact that we can
+	now debug natively.
 
 	* rs6000-tdep.c, config/rs6000/tm-rs6000.h
 	(rs6000_frameless_function_invocation, rs6000_frame_saved_pc):
