@@ -4128,8 +4128,8 @@ parse_register (reg_string, end_op)
   return r;
 }
 
-#ifdef OBJ_ELF
-CONST char *md_shortopts = "kmVQ:";
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+CONST char *md_shortopts = "kmVQ:sq";
 #else
 CONST char *md_shortopts = "m";
 #endif
@@ -4163,6 +4163,16 @@ md_parse_option (c, arg)
 	 should be emitted or not.  FIXME: Not implemented.  */
     case 'Q':
       break;
+
+    case 's':
+      /* -s: On i386 Solaris, this tells the native assembler to use
+         .stab instead of .stab.excl.  We always use .stab anyhow.  */
+      break;
+
+    case 'q':
+      /* -q: On i386 Solaris, this tells the native assembler does
+         fewer checks.  */
+      break;
 #endif
 
     default:
@@ -4176,7 +4186,15 @@ md_show_usage (stream)
      FILE *stream;
 {
   fprintf (stream, _("\
--m			do long jump\n"));
+  -m			  do long jump\n"));
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  fprintf (stream, _("\
+  -V			  print assembler version number\n\
+  -k			  ignored\n\
+  -Qy, -Qn		  ignored\n\
+  -q			  ignored\n\
+  -s			  ignored\n"));
+#endif
 }
 
 #ifdef BFD_ASSEMBLER

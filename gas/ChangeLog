@@ -1,3 +1,10 @@
+1999-09-19  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* config/tc-i386.c (md_shortopts): Check OBJ_MAYBE_ELF as well as
+	OBJ_ELF.  If ELF, add "sq".
+	(md_parse_option): If ELF, ignore -s and -q.
+	(md_show_usage): Mention ELF options.
+
 Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Handle 'J', 'K' and 'cc' 
