@@ -52,6 +52,10 @@ Test printing complex types, including functions, pointers to arrays
 of pointers of functions, functions which return pointers to
 functions, etc.
 
+Test GDB expressions--test all operators (and overloaded operators for
+C++).  Test integer constants which are signed or unsigned int, long,
+or long long.  Test detection of overflow of an integer constant.
+
 Test that printing const-qualified versions of various types works.
 In particular, on the sparc and probably other machines, "double" is
 handled differently from most types because it requires more alignment
