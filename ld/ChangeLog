@@ -1,3 +1,8 @@
+2001-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.host: Move alpha*-*-linux-gnu* entry to generic
+	entries, and match *-*-linux*.
+
 2001-10-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldgram.y (mri_script_command): Surround processing of INCLUDE
