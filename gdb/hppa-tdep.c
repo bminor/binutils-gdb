@@ -1532,6 +1532,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   CORE_ADDR this_sp;
   long frame_size;
   struct unwind_table_entry *u;
+  CORE_ADDR prologue_end;
   int i;
 
   if (hppa_debug)
@@ -1590,27 +1591,36 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
      GCC code.  */
   {
     int final_iteration = 0;
-    CORE_ADDR pc;
-    CORE_ADDR end_pc;
+    CORE_ADDR pc, end_pc;
     int looking_for_sp = u->Save_SP;
     int looking_for_rp = u->Save_RP;
     int fp_loc = -1;
-    end_pc = skip_prologue_using_sal (frame_func_unwind (next_frame));
-    if (end_pc == 0)
-      end_pc = frame_pc_unwind (next_frame);
+
+    /* We have to use hppa_skip_prologue instead of just 
+       skip_prologue_using_sal, in case we stepped into a function without
+       symbol information.  hppa_skip_prologue also bounds the returned
+       pc by the passed in pc, so it will not return a pc in the next
+       function.  */
+    prologue_end = hppa_skip_prologue (frame_func_unwind (next_frame));
+    end_pc = frame_pc_unwind (next_frame);
+
+    if (prologue_end != 0 && end_pc > prologue_end)
+      end_pc = prologue_end;
+
     frame_size = 0;
+
     for (pc = frame_func_unwind (next_frame);
 	 ((saved_gr_mask || saved_fr_mask
 	   || looking_for_sp || looking_for_rp
 	   || frame_size < (u->Total_frame_size << 3))
-	  && pc <= end_pc);
+	  && pc < end_pc);
 	 pc += 4)
       {
 	int reg;
 	char buf4[4];
 	long status = target_read_memory (pc, buf4, sizeof buf4);
 	long inst = extract_unsigned_integer (buf4, sizeof buf4);
-	
+
 	/* Note the interesting effects of this instruction.  */
 	frame_size += prologue_inst_adjust_sp (inst);
 	
@@ -1720,26 +1730,74 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
        the current function (and is thus equivalent to the "saved"
        stack pointer.  */
     CORE_ADDR this_sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
-    /* FIXME: cagney/2004-02-22: This assumes that the frame has been
-       created.  If it hasn't everything will be out-of-wack.  */
-    if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
-      /* Both we're expecting the SP to be saved and the SP has been
-	 saved.  The entry SP value is saved at this frame's SP
-	 address.  */
-      cache->base = read_memory_integer (this_sp, TARGET_PTR_BIT / 8);
+
+    if (hppa_debug)
+      fprintf_unfiltered (gdb_stdlog, " (this_sp=0x%s, pc=0x%s, "
+		          "prologue_end=0x%s) ",
+		          paddr_nz (this_sp),
+			  paddr_nz (frame_pc_unwind (next_frame)),
+			  paddr_nz (prologue_end));
+
+    if (frame_pc_unwind (next_frame) >= prologue_end)
+      {
+        if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
+          {
+            /* Both we're expecting the SP to be saved and the SP has been
+	       saved.  The entry SP value is saved at this frame's SP
+	       address.  */
+            cache->base = read_memory_integer (this_sp, TARGET_PTR_BIT / 8);
+
+	    if (hppa_debug)
+	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved] }",
+			          paddr_nz (cache->base));
+          }
+        else
+          {
+            /* The prologue has been slowly allocating stack space.  Adjust
+	     the SP back.  */
+            cache->base = this_sp - frame_size;
+	    if (hppa_debug)
+	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust] } ",
+			          paddr_nz (cache->base));
+
+          }
+      }
     else
-      /* The prologue has been slowly allocating stack space.  Adjust
-	 the SP back.  */
-      cache->base = this_sp - frame_size;
+      {
+	/* This frame has not yet been created. */
+        cache->base = this_sp;
+
+	if (hppa_debug)
+	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [before prologue] } ",
+			      paddr_nz (cache->base));
+
+      }
+
     trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
   }
 
   /* The PC is found in the "return register", "Millicode" uses "r31"
      as the return register while normal code uses "rp".  */
   if (u->Millicode)
-    cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
+    {
+      if (trad_frame_addr_p (cache->saved_regs, RP_REGNUM))
+        cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
+      else
+	{
+	  ULONGEST r31 = frame_unwind_register_unsigned (next_frame, 31);
+	  trad_frame_set_value (cache->saved_regs, PCOQ_HEAD_REGNUM, r31);
+        }
+    }
   else
-    cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[RP_REGNUM];
+    {
+      if (trad_frame_addr_p (cache->saved_regs, RP_REGNUM))
+        cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[RP_REGNUM];
+      else
+	{
+	  ULONGEST rp = frame_unwind_register_unsigned (next_frame, RP_REGNUM);
+	  trad_frame_set_value (cache->saved_regs, PCOQ_HEAD_REGNUM, rp);
+	}
+    }
 
   {
     /* Convert all the offsets into addresses.  */

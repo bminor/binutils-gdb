@@ -1,3 +1,8 @@
+2004-04-23  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_cache): Handle the case when frame unwind
+	starts at a pc before the frame is created.
+
 2004-04-23  Joel Brobecker  <brobecker@gnat.com>
 
 	* ChangeLog-2002: Fix year in one of the ChangeLog entries.
