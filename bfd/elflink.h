@@ -4948,18 +4948,24 @@ elf_bfd_final_link (abfd, info)
   merged = FALSE;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
+      struct bfd_elf_section_data *esdo = elf_section_data (o);
       o->reloc_count = 0;
 
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
+	  unsigned int reloc_count = 0;
+	  struct bfd_elf_section_data *esdi = NULL;
+	  unsigned int *rel_count1;
+
 	  if (p->type == bfd_section_reloc_link_order
 	      || p->type == bfd_symbol_reloc_link_order)
-	    ++o->reloc_count;
+	    reloc_count = 1;
 	  else if (p->type == bfd_indirect_link_order)
 	    {
 	      asection *sec;
 
 	      sec = p->u.indirect.section;
+	      esdi = elf_section_data (sec);
 
 	      /* Mark all sections which are to be included in the
 		 link.  This will normally be every section.  We need
@@ -4971,7 +4977,7 @@ elf_bfd_final_link (abfd, info)
 		merged = TRUE;
 
 	      if (info->relocateable || info->emitrelocations)
-		o->reloc_count += sec->reloc_count;
+		reloc_count = sec->reloc_count;
 	      else if (bed->elf_backend_count_relocs)
 		{
 		  Elf_Internal_Rela * relocs;
@@ -4980,8 +4986,7 @@ elf_bfd_final_link (abfd, info)
 			    (abfd, sec, (PTR) NULL,
 			     (Elf_Internal_Rela *) NULL, info->keep_memory));
 
-		  o->reloc_count
-		    += (*bed->elf_backend_count_relocs) (sec, relocs);
+		  reloc_count = (*bed->elf_backend_count_relocs) (sec, relocs);
 
 		  if (elf_section_data (o)->relocs != relocs)
 		    free (relocs);
@@ -5024,6 +5029,56 @@ elf_bfd_final_link (abfd, info)
 		    }
 		}
 	    }
+
+	  if (reloc_count == 0)
+	    continue;
+
+	  o->reloc_count += reloc_count;
+
+	  /* MIPS may have a mix of REL and RELA relocs on sections.
+	     To support this curious ABI we keep reloc counts in
+	     elf_section_data too.  We must be careful to add the
+	     relocations from the input section to the right output
+	     count.  FIXME: Get rid of one count.  We have
+	     o->reloc_count == esdo->rel_count + esdo->rel_count2.  */
+	  rel_count1 = &esdo->rel_count;
+	  if (esdi != NULL)
+	    {
+	      bfd_boolean same_size;
+	      bfd_size_type entsize1;
+
+	      entsize1 = esdi->rel_hdr.sh_entsize;
+	      BFD_ASSERT (entsize1 == sizeof (Elf_External_Rel)
+			  || entsize1 == sizeof (Elf_External_Rela));
+	      same_size = (!o->use_rela_p
+			   == (entsize1 == sizeof (Elf_External_Rel)));
+
+	      if (!same_size)
+		rel_count1 = &esdo->rel_count2;
+
+	      if (esdi->rel_hdr2 != NULL)
+		{
+		  bfd_size_type entsize2 = esdi->rel_hdr2->sh_entsize;
+		  unsigned int alt_count;
+		  unsigned int *rel_count2;
+
+		  BFD_ASSERT (entsize2 != entsize1
+			      && (entsize2 == sizeof (Elf_External_Rel)
+				  || entsize2 == sizeof (Elf_External_Rela)));
+
+		  rel_count2 = &esdo->rel_count2;
+		  if (!same_size)
+		    rel_count2 = &esdo->rel_count;
+
+		  /* The following is probably too simplistic if the
+		     backend counts output relocs unusually.  */
+		  BFD_ASSERT (bed->elf_backend_count_relocs == NULL);
+		  alt_count = NUM_SHDR_ENTRIES (esdi->rel_hdr2);
+		  *rel_count2 += alt_count;
+		  reloc_count -= alt_count;
+		}
+	    }
+	  *rel_count1 += reloc_count;
 	}
 
       if (o->reloc_count > 0)
@@ -5056,63 +5111,6 @@ elf_bfd_final_link (abfd, info)
   BFD_ASSERT (! abfd->output_has_begun);
   if (! _bfd_elf_compute_section_file_positions (abfd, info))
     goto error_return;
-
-  /* Figure out how many relocations we will have in each section.
-     Just using RELOC_COUNT isn't good enough since that doesn't
-     maintain a separate value for REL vs. RELA relocations.  */
-  if (emit_relocs)
-    for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
-      for (o = sub->sections; o != NULL; o = o->next)
-	{
-	  asection *output_section;
-
-	  if (! o->linker_mark)
-	    {
-	      /* This section was omitted from the link.  */
-	      continue;
-	    }
-
-	  output_section = o->output_section;
-
-	  if (output_section != NULL
-	      && (o->flags & SEC_RELOC) != 0)
-	    {
-	      struct bfd_elf_section_data *esdi
-		= elf_section_data (o);
-	      struct bfd_elf_section_data *esdo
-		= elf_section_data (output_section);
-	      unsigned int *rel_count;
-	      unsigned int *rel_count2;
-	      bfd_size_type entsize;
-	      bfd_size_type entsize2;
-
-	      /* We must be careful to add the relocations from the
-		 input section to the right output count.  */
-	      entsize = esdi->rel_hdr.sh_entsize;
-	      entsize2 = esdi->rel_hdr2 ? esdi->rel_hdr2->sh_entsize : 0;
-	      BFD_ASSERT ((entsize == sizeof (Elf_External_Rel)
-			   || entsize == sizeof (Elf_External_Rela))
-			  && entsize2 != entsize
-			  && (entsize2 == 0
-			      || entsize2 == sizeof (Elf_External_Rel)
-			      || entsize2 == sizeof (Elf_External_Rela)));
-	      if (entsize == esdo->rel_hdr.sh_entsize)
-		{
-		  rel_count = &esdo->rel_count;
-		  rel_count2 = &esdo->rel_count2;
-		}
-	      else
-		{
-		  rel_count = &esdo->rel_count2;
-		  rel_count2 = &esdo->rel_count;
-		}
-
-	      *rel_count += NUM_SHDR_ENTRIES (& esdi->rel_hdr);
-	      if (esdi->rel_hdr2)
-		*rel_count2 += NUM_SHDR_ENTRIES (esdi->rel_hdr2);
-	      output_section->flags |= SEC_RELOC;
-	    }
-	}
 
   /* That created the reloc sections.  Set their sizes, and assign
      them file positions, and allocate some buffers.  */

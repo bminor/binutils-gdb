@@ -1,5 +1,9 @@
 2003-02-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_bfd_final_link): Apportion reloc counts to rel_hdr
+	and rel_hdr2 when initially counting input relocs rather than after
+	creating output reloc sections.
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 
@@ -144,7 +148,7 @@
 
 2003-02-17  Nick Clifton  <nickc@redhat.com>
 
-        * elflink.h (elf_link_output_extsym): Only check
+	* elflink.h (elf_link_output_extsym): Only check
 	allow_shlib_undefined for shared libraries.
 	* elf32-i386.c (elf_i386_relocate_section): Remove bogus check
 	of allow_shlib_undefined.
@@ -169,7 +173,7 @@
 
 	* elf.c (SEGMENT_AFTER_SEGMENT): Add third parameter - the
 	address field to use in the comparison.
-        (SEGMENT_OVERLAPS): Check that LMAs overlap as well.
+	(SEGMENT_OVERLAPS): Check that LMAs overlap as well.
 
 2003-02-14  Bob Wilson  <bob.wilson@acm.org>
 
