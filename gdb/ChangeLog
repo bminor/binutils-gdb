@@ -1,3 +1,8 @@
+2002-09-17  Tom Tromey  <tromey@redhat.com>
+
+	* c-lang.c (c_emit_char): Don't treat \0 specially unless quoter
+	is "'".
+
 2002-09-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Remove "non multi-arched" text from h8300.

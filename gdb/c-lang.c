@@ -78,9 +78,12 @@ c_emit_char (register int c, struct ui_file *stream, int quoter)
 	case '\007':
 	  fputs_filtered ("\\a", stream);
 	  break;
-        case '\0':
-          fputs_filtered ("\\0", stream);
-          break;
+	case '\0':
+	  if (quoter == '\'')
+	    fputs_filtered ("\\0", stream);
+	  else
+	    fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	  break;
 	default:
 	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
 	  break;
