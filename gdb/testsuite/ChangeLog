@@ -1,3 +1,23 @@
+Wed May 15 08:47:42 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/break.exp: Ignore compiler warnings when compiling
+	break.c.
+	* gdb.base/callfuncs.exp: Don't run these tests on the h8300.
+	* gdb.base/default.exp: Add h8300 xfails.  Handle messages
+	from remote-sim.
+	* gdb.base/exprs.exp: Add h8300 xfails.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/nodebug.exp: Likewise.
+	* gdb.base/printcmds.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+	* gdb.base/setvar.exp: Handle sizeof (int) != 4 for h8300.  Add
+	h8300 xfails.
+	* gdb.base/return.exp: Handle float/double precision problems 
+	on the h8300.
+	* gdb.base/funcargs.c: Explicitly make last constant argument to
+	call_after_alloca_subr an unsigned long type.
+	* gdb.base/return.c: Include stdio.h.
+
 Tue May  7 22:01:12 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* config/abug.exp: New file for the older Motorola Bug monitor
