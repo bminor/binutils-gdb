@@ -66,6 +66,7 @@ configure
 configure.in
 gencode.c
 interp.c
+sim-main.c
 sim-main.h
 tconfig.in
 mips.igen
@@ -73,6 +74,7 @@ m16.igen
 m16.dc
 m16run.c
 mips.dc
+tx.igen
 
 Things-to-lose:
 
