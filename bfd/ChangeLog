@@ -1,5 +1,25 @@
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Better indirect and warning symbol handling inspired by Stuart
+	Quick <stuck@cs.man.ac.uk>.
+	* linker.c (enum link_action): Add REF, MIND, CWARN, REFC.
+	(link_action): Change UNDEF_ROW/def and UNDEFW_ROW/def from NOACT
+	to REF.  Change UNDEF_ROW/indr and UNDEFW_ROW/indr from CYCLE to
+	REFC.  Change DEF_ROW/indr and COMMON_ROW/indr from CYCLE to MDEF.
+	Change DEFW_ROW/indr from CYCLE to NOACT.  Change INDR_ROW/indr
+	from MDEF to MIND.  Change INDR_ROW/warn from WARNC to CYCLE.
+	Change WARN_ROW/def and WARN_ROW/indr from MWARN to CWARN.  Change
+	WARN_ROW/com from MWARN to WARN.  Change WARN_ROW/warn from NOACT
+	to CYCLE.  Change SET_ROW/warn from WARNC to CYCLE>
+	(_bfd_generic_link_add_one_symbol): Handle REF, MIND, CWARN and
+	REFC.  If a new indirect symbol has been referenced, push the
+	reference down to the symbol it points to.  FIx handling of WARN.
+	* aoutx.h (translate_from_native_sym_flags): If N_WARNING, don't
+	clobber e_type of next symbol.
+	(translate_to_native_sym_flags): Likewise.
+	(aout_link_write_symbols): Loop on bfd_link_hash_warning as well
+	as bfd_link_hash_indirect.
+
 	* libaout.h (struct aout_link_hash_entry): New field written.
 	* aoutx.h (NAME(aout,link_hash_newfunc)): Initialize written.
 	(aout_link_write_symbols): Use written, not root.written.

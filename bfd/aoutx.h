@@ -1288,9 +1288,6 @@ translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
 	     pick one arbitrarily.  */
 	  cache_ptr->symbol.section = &bfd_abs_section;
 
-	  /* We furgle with the next symbol in place.
-	     We don't want it to be undefined, we'll trample the type */
-	  (sym_pointer + 1)->e_type[0] = 0xff;
 	  break;
 	}
       if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT))
@@ -1453,7 +1450,6 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr, abfd)
 
   if (cache_ptr->flags & (BSF_WARNING)) {
     sym_pointer->e_type[0] = N_WARNING;
-    (sym_pointer+1)->e_type[0] = 1;
   }
 
   if (cache_ptr->flags & BSF_DEBUGGING) {
@@ -3720,7 +3716,8 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 		  || h->root.type == bfd_link_hash_warning))
 	    {
 	      hresolve = (struct aout_link_hash_entry *) h->root.u.i.link;
-	      while (hresolve->root.type == bfd_link_hash_indirect)
+	      while (hresolve->root.type == bfd_link_hash_indirect
+		     || hresolve->root.type == bfd_link_hash_warning)
 		hresolve = ((struct aout_link_hash_entry *)
 			    hresolve->root.u.i.link);
 	      *sym_hash = hresolve;
