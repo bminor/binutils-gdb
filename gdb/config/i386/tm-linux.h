@@ -26,6 +26,7 @@
 #define I386_GNULINUX_TARGET
 #define HAVE_I387_REGS
 #ifdef HAVE_PTRACE_GETFPXREGS
+#define FILL_FPXREGSET
 #define HAVE_SSE_REGS
 #endif
 

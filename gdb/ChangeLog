@@ -1,3 +1,11 @@
+2002-04-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/i386/tm-linux.h: Define FILL_FPXREGSET.
+	* gregset.h: If FILL_FPXREGSET is defined, provide
+	gdb_fpxregset_t, supply_fpxregset, and fill_fpxregset.
+	* linux-proc.c (linux_do_thread_registers): If FILL_FPXREGSET
+	is defined, call fill_fpxregset.
+
 2002-04-24  Roland McGrath  <roland@frob.com>
 
 	* config/i386/i386gnu.mh (NATDEPFILES): Add core-regset.o here.
