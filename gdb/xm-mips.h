@@ -27,7 +27,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SET_STACK_LIMIT_HUGE
 
-#define KERNEL_U_ADDR 0 /* Not needed. */
+#ifdef ultrix
+/* Needed for DECstation core files.  */
+#include <machine/param.h>
+#define KERNEL_U_ADDR UADDR
+#endif
 
 #ifdef ultrix
 extern char *strdup();
@@ -39,11 +43,23 @@ extern void *memcpy();
 extern void *memset();
 #define	MEM_FNS_DECLARED
 
-/* Only used for core files on DECstations. */
+#if !defined (offsetof)
+# define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+#endif
+
+/* Only used for core files on DECstations.
+   First four registers at u.u_ar0 are saved arguments, and
+   there is no r0 saved.   Float registers are saved
+   in u_pcb.pcb_fpregs, not relative to u.u_ar0.  */
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
-	if (regno < 38) addr = (NBPG*UPAGES) + (regno - 38)*sizeof(int);\
-	else addr = 0; /* ..somewhere in the pcb */
+	{ \
+	  if (regno < FP0_REGNUM) \
+	    addr = blockend + sizeof(int) * (4 + regno - 1); \
+	  else \
+	    addr = offsetof (struct user, u_pcb.pcb_fpregs[0]) + \
+		   sizeof (int) * (regno - FP0_REGNUM); \
+	}
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS

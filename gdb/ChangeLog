@@ -1,3 +1,16 @@
+Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
+
+	* mips-xdep.c (REGISTER_PTRACE_ADDR, fetch_inferior_registers,
+	store_inferior_registers):  Replace unexplained numbers
+	with manifest constants from a DECstation header file.
+	* xm-mips.h (KERNEL_U_ADDR):  Get from <machine/param.h>.
+	(REGISTER_U_ADDR):  Fix up for Ultrix 4.2.
+
+	* tm-tahoe.h, xm-tahoe.h (KERNEL_U_ADDR):  Move macro to xm-tahoe.h.
+
+	* stack.c (_initialize_stack):  "dow" should be a valid abbreviation
+	for "down".  Suggested by Richard Stallman.
+
 Thu Sep 10 15:26:07 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* remote-vx.c: Rename realloc for inclusion of rpc/rpc.h, to avoid

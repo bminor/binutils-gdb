@@ -1,5 +1,5 @@
 /* Definitions to make GDB hosted on a tahoe running 4.3-Reno
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by the State University of New York at Buffalo, by the
    Distributed Computer Systems Lab, Department of Computer Science, 1991.
 
@@ -31,6 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Get rid of any system-imposed stack limit if possible.  */
 
 #define SET_STACK_LIMIT_HUGE
+
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
+
+#define KERNEL_U_ADDR (0xc0000000 - (TARGET_UPAGES * TARGET_NBPG))
 
 #define REGISTER_U_ADDR(addr, blockend, regno)		\
 { addr = blockend - 100 + regno * 4;			\

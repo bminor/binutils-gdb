@@ -624,7 +624,7 @@ backtrace_command (count_exp, from_tty)
 	  fi = get_frame_info (frame);
 	  ps = find_pc_psymtab (fi->pc);
 	  if (ps)
-	    (void) PSYMTAB_TO_SYMTAB (ps);	/* Force syms to come in */
+	    PSYMTAB_TO_SYMTAB (ps);	/* Force syms to come in */
 	}
     }
 
@@ -779,7 +779,7 @@ print_frame_label_vars (frame, this_level_only, stream)
 
   bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
   blocks_printed = (char *) alloca (BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-  (void) memset (blocks_printed, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
+  memset (blocks_printed, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
 
   while (block != 0)
     {
@@ -1144,7 +1144,7 @@ return_command (retval_exp, from_tty)
   if (retval_exp)
     {
       return_value = parse_and_eval (retval_exp);
-      (void) (VALUE_CONTENTS (return_value));
+      VALUE_CONTENTS (return_value);
     }
 
   /* If interactive, require confirmation.  */
@@ -1239,6 +1239,7 @@ This is useful in command scripts.");
 	   "Select and print stack frame called by this one.\n\
 An argument says how many frames down to go.");
   add_com_alias ("do", "down", class_stack, 1);
+  add_com_alias ("dow", "down", class_stack, 1);
   add_com ("down-silently", class_support, down_silently_command,
 	   "Same as the `down' command, but does not print anything.\n\
 This is useful in command scripts.");
