@@ -1337,8 +1337,8 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP6 */
   {
-    { "sldt",	Ew, XX, XX },
-    { "str",	Ew, XX, XX },
+    { "sldtQ",	Ev, XX, XX },
+    { "strQ",	Ev, XX, XX },
     { "lldt",	Ew, XX, XX },
     { "ltr",	Ew, XX, XX },
     { "verr",	Ew, XX, XX },
@@ -1352,7 +1352,7 @@ static const struct dis386 grps[][8] = {
     { "sidtQ",	 M, XX, XX },
     { "lgdtQ",	 M, XX, XX },
     { "lidtQ",	 M, XX, XX },
-    { "smsw",	Ew, XX, XX },
+    { "smswQ",	Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "lmsw",	Ew, XX, XX },
     { "invlpg",	Ew, XX, XX },

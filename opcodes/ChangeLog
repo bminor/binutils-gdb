@@ -1,3 +1,9 @@
+2001-11-13  Zack Weinberg <zack@codesourcery.com>
+
+	* i386-dis.c (grps): Change "sldt", "str", and "smsw" entries
+	to "sldtQ", "strQ", "smswQ" respectively; all with Ev operand
+	category instead of Ew.
+
 2001-11-12  Niraj Gupta <ngupta@zumanetworks.com>
 
 	* m68k-opc.c: Fix definitions of wddata[bwl].
