@@ -1,4 +1,11 @@
 Wed Apr  8 14:03:13 1998  Jillian Ye (jillian@cygnus.com>
+
+        * sce_test40.dvpasm, sce_test41.dvpasm, sce_test42.dvpasm, sce_test43.dvpasm:
+          Update the testcase to use correct include files.
+          ../include/macros.s -> ./sce_macros.s
+          test.vu             -> sce_test*.vuasm
+
+Wed Apr  8 14:03:13 1998  Jillian Ye (jillian@cygnus.com>
         * Makefile.in : 
             Remove sce_testcase from make "check" target until they are more stable.
             Added make "check_sce" target to drive the sce_testcase.
