@@ -11,7 +11,7 @@
 
 2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
-	* Makefile.am (FLEX, LEX): Get them from configure.
+	* Makefile.am (YACC, LEX): Get them from configure.
 
 	* as.h (SEEK_SET): Define if undefined.
 
