@@ -1,5 +1,7 @@
 Sat Mar 29 11:19:46 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.c++/virtfunc.exp: Restart gdb in a sane fashion.
+
 	* gdb.base/scope.exp: It's now init0(), not init().
 
 	* gdb.base/scope0.c: For now, change init() to be init0().
