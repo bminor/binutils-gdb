@@ -1,3 +1,10 @@
+Tue Aug  9 19:43:45 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Recognize ppc-*-netware.
+	* config/te-ppcnw.h:  New file to support Power-PC/Netware
+	configurations.  Currently, it just enables the use of backslash
+	escapes in string directives.
+
 Tue Aug  9 11:12:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-ppc.c (ppc_stabx): Call expression directly, rather
