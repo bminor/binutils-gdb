@@ -1,3 +1,8 @@
+Mon Sep  8 12:33:40 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_insert_operand): Add
+	-mwarn_unsigned_overflow. 
+
 Mon Sep  8 11:20:46 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.h: Don't declare alloca if it is a macro.

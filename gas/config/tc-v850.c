@@ -32,6 +32,7 @@ static bfd_reloc_code_real_type hold_cons_reloc;
 
 /* Set to TRUE if we want to be pedantic about signed overflows.  */
 static boolean warn_signed_overflows = FALSE;
+static boolean warn_unsigned_overflows = FALSE;
 
 
 /* Structure to hold information about predefined registers.  */
@@ -773,6 +774,12 @@ md_parse_option (c, arg)
   if (c == 'w' && strcmp (arg, "signed_overflow") == 0)
     {
       warn_signed_overflows = TRUE;
+      return 1;
+    }
+
+  if (c == 'w' && strcmp (arg, "unsigned_overflow") == 0)
+    {
+      warn_unsigned_overflows = TRUE;
       return 1;
     }
 
@@ -1646,7 +1653,11 @@ v850_insert_operand (insn, operand, val, file, line)
       else
         {
           max = (1 << operand->bits) - 1;
-          min = 0;
+	  
+	  if (! warn_unsigned_overflows)
+	    min = - (1 << (operand->bits - 1));
+	  else
+	    min = 0;
         }
 
       test = val;
