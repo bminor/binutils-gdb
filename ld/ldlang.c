@@ -3802,7 +3802,8 @@ lang_finish (void)
 	}
     }
 
-  bfd_hash_table_free (&lang_definedness_table);
+  /* Don't bfd_hash_table_free (&lang_definedness_table);
+     map file output may result in a call of lang_track_definedness.  */
 }
 
 /* This is a small function used when we want to ignore errors from

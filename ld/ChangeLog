@@ -1,3 +1,8 @@
+2004-06-14  Alan Modra  <amodra@bigpond.net.au>
+
+	From Richard Wirth <r.wirth@wirthware.de>
+	* ldlang.c (lang_finish): Don't free lang_definedness_table.
+
 2004-05-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (gc_section_callback): Move SEC_EXCLUDE twiddles..
