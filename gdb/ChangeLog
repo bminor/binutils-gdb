@@ -1,3 +1,8 @@
+Wed Jun 16 16:08:18 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remote-vx.c (_initialize_vx): rename user settable option from
+	rpcTimeout to vxworks-timeout.
+
 Wed Jun 16 12:21:49 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (depend):  More makefile diddling.

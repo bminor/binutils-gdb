@@ -1312,7 +1312,7 @@ _initialize_vx ()
 {
   
  add_show_from_set
-    (add_set_cmd ("rpcTimeout", class_support, var_uinteger,
+    (add_set_cmd ("vxworks-timeout", class_support, var_uinteger,
 		  (char *) &rpcTimeout.tv_sec,
 		  "Set seconds to wait for rpc calls to return.\n\
 Set the number of seconds to wait for rpc calls to return.", &setlist),
