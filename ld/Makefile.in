@@ -106,6 +106,13 @@ C++ = g++ -fgnu-linker
 
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
+# The .cc suffix is used by `make check'.
+
+.SUFFIXES: .y $(SUFFIXES) .cc
+
+.cc.o:
+	$(C++) -c -I$(srcdir) $(CFLAGS) $<
+
 .c.o:
 	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS) $<
 

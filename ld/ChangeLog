@@ -1,3 +1,8 @@
+Thu Jun 17 14:33:09 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (.cc.o): Restore .SUFFIXES entry for .cc
+	and .cc.o rule.
+
 Wed Jun 16 11:45:32 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldfile.c (ldfile_open_command): Don't try .ld extension.
