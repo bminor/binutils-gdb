@@ -19,7 +19,6 @@ all:
 	$(CD) [-.binutils]
 	gmake "CC=$(CC)"
 	$(CD) [-.gas]
-	$$ @conf-a-gas
 	gmake "CC=$(CC)"
 	$(CD) [-]
 
