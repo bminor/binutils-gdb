@@ -204,7 +204,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "br",		BOP(0x5),		BOP_MASK,	IF3, 2 },
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3, 2 },
 
-{ "jmp",	one(0x0060),		one(0xffe0),	R1, 2 },
+{ "jmp",	one(0x0060),		one(0xffe0),	{ R1}, 2 },
 { "jarl",	one(0x0780),		one(0xf83f),	{ D22, R2 }, 4 }, 
 { "jr",		one(0x0780),		one(0xffe0),	{ D22 }, 4 },
 
