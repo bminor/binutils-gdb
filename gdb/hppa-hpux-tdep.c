@@ -45,6 +45,9 @@
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
 
+#define IS_32BIT_TARGET(_gdbarch) \
+	((gdbarch_tdep (_gdbarch))->bytes_per_address == 4)
+
 /* Forward declarations.  */
 extern void _initialize_hppa_hpux_tdep (void);
 extern initialize_file_ftype _initialize_hppa_hpux_tdep;
@@ -56,6 +59,20 @@ typedef struct
     CORE_ADDR return_val;
   }
 args_for_find_stub;
+
+static int
+in_opd_section (CORE_ADDR pc)
+{
+  struct obj_section *s;
+  int retval = 0;
+
+  s = find_pc_section (pc);
+
+  retval = (s != NULL
+	    && s->the_bfd_section->name != NULL
+	    && strcmp (s->the_bfd_section->name, ".opd") == 0);
+  return (retval);
+}
 
 /* Return one if PC is in the call path of a trampoline, else return zero.
 
@@ -1229,7 +1246,7 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 }
 
 static CORE_ADDR
-hppa_hpux_som_find_global_pointer (struct value *function)
+hppa32_hpux_find_global_pointer (struct value *function)
 {
   CORE_ADDR faddr;
   
@@ -1252,169 +1269,484 @@ hppa_hpux_som_find_global_pointer (struct value *function)
 }
 
 static CORE_ADDR
+hppa64_hpux_find_global_pointer (struct value *function)
+{
+  CORE_ADDR faddr;
+  char buf[32];
+
+  faddr = value_as_address (function);
+
+  if (in_opd_section (faddr))
+    {
+      target_read_memory (faddr, buf, sizeof (buf));
+      return extract_unsigned_integer (&buf[24], 8);
+    }
+  else
+    {
+      return gdbarch_tdep (current_gdbarch)->solib_get_got_by_pc (faddr);
+    }
+}
+
+static unsigned int ldsid_pattern[] = {
+  0x000010a0, /* ldsid (rX),rY */
+  0x00001820, /* mtsp rY,sr0 */
+  0xe0000000  /* be,n (sr0,rX) */
+};
+
+static CORE_ADDR
+hppa_hpux_search_pattern (CORE_ADDR start, CORE_ADDR end, 
+			  unsigned int *patterns, int count)
+{
+  unsigned int *buf;
+  int offset, i;
+  int region, insns;
+
+  region = end - start + 4;
+  insns = region / 4;
+  buf = (unsigned int *) alloca (region);
+
+  read_memory (start, (char *) buf, region);
+
+  for (i = 0; i < insns; i++)
+    buf[i] = extract_unsigned_integer (&buf[i], 4);
+
+  for (offset = 0; offset <= insns - count; offset++)
+    {
+      for (i = 0; i < count; i++)
+        {
+	  if ((buf[offset + i] & patterns[i]) != patterns[i])
+	    break;
+	}
+      if (i == count)
+        break;
+    }
+    
+  if (offset <= insns - count)
+    return start + offset * 4;
+  else
+    return 0;
+}
+
+static CORE_ADDR
+hppa32_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
+					int *argreg)
+{
+  struct objfile *obj;
+  struct obj_section *sec;
+  struct hppa_objfile_private *priv;
+  struct frame_info *frame;
+  struct unwind_table_entry *u;
+  CORE_ADDR addr, rp;
+  char buf[4];
+  unsigned int insn;
+
+  sec = find_pc_section (pc);
+  obj = sec->objfile;
+  priv = objfile_data (obj, hppa_objfile_priv_data);
+
+  if (!priv)
+    priv = hppa_init_objfile_priv_data (obj);
+  if (!priv)
+    error ("Internal error creating objfile private data.\n");
+
+  /* Use the cached value if we have one.  */
+  if (priv->dummy_call_sequence_addr != 0)
+    {
+      *argreg = priv->dummy_call_sequence_reg;
+      return priv->dummy_call_sequence_addr;
+    }
+
+  /* First try a heuristic; if we are in a shared library call, our return
+     pointer is likely to point at an export stub.  */
+  frame = get_current_frame ();
+  rp = frame_unwind_register_unsigned (frame, 2);
+  u = find_unwind_entry (rp);
+  if (u && u->stub_unwind.stub_type == EXPORT)
+    {
+      addr = hppa_hpux_search_pattern (u->region_start, u->region_end, 
+				       ldsid_pattern, 
+				       ARRAY_SIZE (ldsid_pattern));
+      if (addr)
+	goto found_pattern;
+    }
+
+  /* Next thing to try is to look for an export stub.  */
+  if (priv->unwind_info)
+    {
+      int i;
+
+      for (i = 0; i < priv->unwind_info->last; i++)
+        {
+	  struct unwind_table_entry *u;
+	  u = &priv->unwind_info->table[i];
+	  if (u->stub_unwind.stub_type == EXPORT)
+	    {
+	      addr = hppa_hpux_search_pattern (u->region_start, u->region_end, 
+					       ldsid_pattern, 
+					       ARRAY_SIZE (ldsid_pattern));
+	      if (addr)
+	        {
+		  goto found_pattern;
+		}
+	    }
+	}
+    }
+
+  /* Finally, if this is the main executable, try to locate a sequence 
+     from noshlibs */
+  addr = hppa_symbol_address ("noshlibs");
+  sec = find_pc_section (addr);
+
+  if (sec && sec->objfile == obj)
+    {
+      CORE_ADDR start, end;
+
+      find_pc_partial_function (addr, NULL, &start, &end);
+      if (start != 0 && end != 0)
+        {
+	  addr = hppa_hpux_search_pattern (start, end, ldsid_pattern,
+					   ARRAY_SIZE (ldsid_pattern));
+	  if (addr)
+	    goto found_pattern;
+        }
+    }
+
+  /* Can't find a suitable sequence.  */
+  return 0;
+
+found_pattern:
+  target_read_memory (addr, buf, sizeof (buf));
+  insn = extract_unsigned_integer (buf, sizeof (buf));
+  priv->dummy_call_sequence_addr = addr;
+  priv->dummy_call_sequence_reg = (insn >> 21) & 0x1f;
+
+  *argreg = priv->dummy_call_sequence_reg;
+  return priv->dummy_call_sequence_addr;
+}
+
+static CORE_ADDR
+hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
+					int *argreg)
+{
+  struct objfile *obj;
+  struct obj_section *sec;
+  struct hppa_objfile_private *priv;
+  CORE_ADDR addr;
+  struct minimal_symbol *msym;
+  int i;
+
+  sec = find_pc_section (pc);
+  obj = sec->objfile;
+  priv = objfile_data (obj, hppa_objfile_priv_data);
+
+  if (!priv)
+    priv = hppa_init_objfile_priv_data (obj);
+  if (!priv)
+    error ("Internal error creating objfile private data.\n");
+
+  /* Use the cached value if we have one.  */
+  if (priv->dummy_call_sequence_addr != 0)
+    {
+      *argreg = priv->dummy_call_sequence_reg;
+      return priv->dummy_call_sequence_addr;
+    }
+
+  /* FIXME: Without stub unwind information, locating a suitable sequence is
+     fairly difficult.  For now, we implement a very naive and inefficient
+     scheme; try to read in blocks of code, and look for a "bve,n (rp)" 
+     instruction.  These are likely to occur at the end of functions, so
+     we only look at the last two instructions of each function.  */
+  for (i = 0, msym = obj->msymbols; i < obj->minimal_symbol_count; i++, msym++)
+    {
+      CORE_ADDR begin, end;
+      char *name;
+      unsigned int insns[2];
+      int offset;
+
+      find_pc_partial_function (SYMBOL_VALUE_ADDRESS (msym), &name,
+      				&begin, &end);
+
+      if (*name == 0 || begin == 0 || end == 0)
+        continue;
+
+      if (target_read_memory (end - sizeof (insns), (char *)insns, sizeof (insns)) == 0)
+        {
+	  for (offset = 0; offset < ARRAY_SIZE (insns); offset++)
+	    {
+	      unsigned int insn;
+
+	      insn = extract_unsigned_integer (&insns[offset], 4);
+	      if (insn == 0xe840d002) /* bve,n (rp) */
+	        {
+		  addr = (end - sizeof (insns)) + (offset * 4);
+		  goto found_pattern;
+		}
+	    }
+	}
+    }
+
+  /* Can't find a suitable sequence.  */
+  return 0;
+
+found_pattern:
+  priv->dummy_call_sequence_addr = addr;
+  /* Right now we only look for a "bve,l (rp)" sequence, so the register is 
+     always HPPA_RP_REGNUM.  */
+  priv->dummy_call_sequence_reg = HPPA_RP_REGNUM;
+
+  *argreg = priv->dummy_call_sequence_reg;
+  return priv->dummy_call_sequence_addr;
+}
+
+static CORE_ADDR
+hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
+{
+  struct objfile *objfile;
+  struct minimal_symbol *funsym, *stubsym;
+  CORE_ADDR stubaddr;
+
+  funsym = lookup_minimal_symbol_by_pc (funcaddr);
+  stubaddr = 0;
+
+  ALL_OBJFILES (objfile)
+    {
+      stubsym = lookup_minimal_symbol_solib_trampoline
+	(SYMBOL_LINKAGE_NAME (funsym), objfile);
+
+      if (stubsym)
+	{
+	  struct unwind_table_entry *u;
+
+	  u = find_unwind_entry (SYMBOL_VALUE (stubsym));
+	  if (u == NULL 
+	      || (u->stub_unwind.stub_type != IMPORT
+		  && u->stub_unwind.stub_type != IMPORT_SHLIB))
+	    continue;
+
+          stubaddr = SYMBOL_VALUE (stubsym);
+
+	  /* If we found an IMPORT stub, then we can stop searching;
+	     if we found an IMPORT_SHLIB, we want to continue the search
+	     in the hopes that we will find an IMPORT stub.  */
+	  if (u->stub_unwind.stub_type == IMPORT)
+	    break;
+	}
+    }
+
+  return stubaddr;
+}
+
+static int
+hppa_hpux_sr_for_addr (CORE_ADDR addr)
+{
+  int sr;
+  /* The space register to use is encoded in the top 2 bits of the address.  */
+  sr = addr >> (gdbarch_tdep (current_gdbarch)->bytes_per_address * 8 - 2);
+  return sr + 4;
+}
+
+static CORE_ADDR
+hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
+{
+  /* In order for us to restore the space register to its starting state, 
+     we need the dummy trampoline to return to the an instruction address in 
+     the same space as where we started the call.  We used to place the 
+     breakpoint near the current pc, however, this breaks nested dummy calls 
+     as the nested call will hit the breakpoint address and terminate 
+     prematurely.  Instead, we try to look for an address in the same space to 
+     put the breakpoint.  
+     
+     This is similar in spirit to putting the breakpoint at the "entry point"
+     of an executable.  */
+
+  struct obj_section *sec;
+  struct unwind_table_entry *u;
+  struct minimal_symbol *msym;
+  CORE_ADDR func;
+  int i;
+
+  sec = find_pc_section (addr);
+  if (sec)
+    {
+      /* First try the lowest address in the section; we can use it as long
+         as it is "regular" code (i.e. not a stub) */
+      u = find_unwind_entry (sec->addr);
+      if (!u || u->stub_unwind.stub_type == 0)
+        return sec->addr;
+
+      /* Otherwise, we need to find a symbol for a regular function.  We
+         do this by walking the list of msymbols in the objfile.  The symbol
+	 we find should not be the same as the function that was passed in.  */
+
+      /* FIXME: this is broken, because we can find a function that will be
+         called by the dummy call target function, which will still not 
+	 work.  */
+
+      find_pc_partial_function (addr, NULL, &func, NULL);
+      for (i = 0, msym = sec->objfile->msymbols;
+      	   i < sec->objfile->minimal_symbol_count;
+	   i++, msym++)
+	{
+	  u = find_unwind_entry (SYMBOL_VALUE_ADDRESS (msym));
+	  if (func != SYMBOL_VALUE_ADDRESS (msym) 
+	      && (!u || u->stub_unwind.stub_type == 0))
+	    return SYMBOL_VALUE_ADDRESS (msym);
+	}
+    }
+
+  warning ("Cannot find suitable address to place dummy breakpoint; nested "
+	   "calls may fail.\n");
+  return addr - 4;
+}
+
+static CORE_ADDR
 hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 			   CORE_ADDR funcaddr, int using_gcc,
 			   struct value **args, int nargs,
 			   struct type *value_type,
 			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
 {
-  /* FIXME: tausq/2004-06-09: This needs much more testing.  It is broken
-     for pa64, but we should be able to get it to work with a little bit
-     of work. gdb-6.1 has a lot of code to handle various cases; I've tried to
-     simplify it and avoid compile-time conditionals.  */
+  CORE_ADDR pc, stubaddr;
+  int argreg;
 
-  /* On HPUX, functions in the main executable and in libraries can be located
-     in different spaces.  In order for us to be able to select the right 
-     space for the function call, we need to go through an instruction seqeunce
-     to select the right space for the target function, call it, and then
-     restore the space on return.
+  pc = read_pc ();
 
-     There are two helper routines that can be used for this task -- if
-     an application is linked with gcc, it will contain a __gcc_plt_call
-     helper function.  __gcc_plt_call, when passed the entry point of an
-     import stub, will do the necessary space setting/restoration for the
-     target function.
+  /* Note: we don't want to pass a function descriptor here; push_dummy_call
+     fills in the PIC register for us.  */
+  funcaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funcaddr, NULL);
 
-     For programs that are compiled/linked with the HP compiler, a similar
-     function called __d_plt_call exists; __d_plt_call expects a PLABEL instead
-     of an import stub as an argument.
-
-     // *INDENT-OFF*
-     To summarize, the call flow is:
-       current function -> dummy frame -> __gcc_plt_call (import stub) 
-                        -> target function
-     or
-       current function -> dummy frame -> __d_plt_call (plabel)
-                        -> target function
-     // *INDENT-ON*
-
-     In general the "funcaddr" argument passed to push_dummy_code is the actual
-     entry point of the target function.  For __gcc_plt_call, we need to 
-     locate the import stub for the corresponding function.  Failing that,
-     we construct a dummy "import stub" on the stack to pass as an argument.
-     For __d_plt_call, we similarly synthesize a PLABEL on the stack to
-     pass to the helper function.
-
-     An additional twist is that, in order for us to restore the space register
-     to its starting state, we need __gcc_plt_call/__d_plt_call to return
-     to the instruction where we started the call.  However, if we put
-     the breakpoint there, gdb will complain because it will find two 
-     frames on the stack with the same (sp, pc) (with the dummy frame in 
-     between).  Currently, we set the return pointer to (pc - 4) of the 
-     current function.  FIXME: This is not an ideal solution; possibly if the 
-     current pc is at the beginning of a page, this will cause a page fault. 
-     Need to understand this better and figure out a better way to fix it.  */
-
-  struct minimal_symbol *sym;
-
-  /* Nonzero if we will use GCC's PLT call routine.  This routine must be
-     passed an import stub, not a PLABEL.  It is also necessary to get %r19
-     before performing the call.  (This is done by push_dummy_call.)  */
-  int use_gcc_plt_call = 1;
-
-  /* See if __gcc_plt_call is available; if not we will use the HP version
-     instead.  */
-  sym = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
-  if (sym == NULL)
-    use_gcc_plt_call = 0;
-
-  /* If using __gcc_plt_call, we need to make sure we pass in an import
-     stub.  funcaddr can be pointing to an export stub or a real function,
-     so we try to resolve it to the import stub.  */
-  if (use_gcc_plt_call)
+  /* The simple case is where we call a function in the same space that we are
+     currently in; in that case we don't really need to do anything.  */
+  if (hppa_hpux_sr_for_addr (pc) == hppa_hpux_sr_for_addr (funcaddr))
     {
-      struct objfile *objfile;
-      struct minimal_symbol *funsym, *stubsym;
-      CORE_ADDR stubaddr = 0;
+      /* Intraspace call.  */
+      *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);
+      *real_pc = funcaddr;
+      regcache_cooked_write_unsigned (current_regcache, HPPA_RP_REGNUM, *bp_addr);
 
-      funsym = lookup_minimal_symbol_by_pc (funcaddr);
-      if (!funsym)
-        error ("Unable to find symbol for target function.\n");
+      return sp;
+    }
 
-      ALL_OBJFILES (objfile)
-        {
-	  stubsym = lookup_minimal_symbol_solib_trampoline
-	    (SYMBOL_LINKAGE_NAME (funsym), objfile);
+  /* In order to make an interspace call, we need to go through a stub.
+     gcc supplies an appropriate stub called "__gcc_plt_call", however, if
+     an application is compiled with HP compilers then this stub is not
+     available.  We used to fallback to "__d_plt_call", however that stub
+     is not entirely useful for us because it doesn't do an interspace
+     return back to the caller.  Also, on hppa64-hpux, there is no 
+     __gcc_plt_call available.  In order to keep the code uniform, we
+     instead don't use either of these stubs, but instead write our own
+     onto the stack.
 
-          if (stubsym)
-	    {
-	      struct unwind_table_entry *u;
+     A problem arises since the stack is located in a different space than
+     code, so in order to branch to a stack stub, we will need to do an
+     interspace branch.  Previous versions of gdb did this by modifying code
+     at the current pc and doing single-stepping to set the pcsq.  Since this
+     is highly undesirable, we use a different scheme:
 
-	      u = find_unwind_entry (SYMBOL_VALUE (stubsym));
-	      if (u == NULL 
-	          || (u->stub_unwind.stub_type != IMPORT
-		      && u->stub_unwind.stub_type != IMPORT_SHLIB))
-	        continue;
+     All we really need to do the branch to the stub is a short instruction
+     sequence like this:
+      
+     PA1.1:
+      		ldsid (rX),r1
+		mtsp r1,sr0
+		be,n (sr0,rX)
 
-              stubaddr = SYMBOL_VALUE (stubsym);
+     PA2.0:
+      		bve,n (sr0,rX)
 
-	      /* If we found an IMPORT stub, then we can stop searching;
-	         if we found an IMPORT_SHLIB, we want to continue the search
-		 in the hopes that we will find an IMPORT stub.  */
-	      if (u->stub_unwind.stub_type == IMPORT)
-	        break;
-	    }
-	}
+     Instead of writing these sequences ourselves, we can find it in
+     the instruction stream that belongs to the current space.  While this
+     seems difficult at first, we are actually guaranteed to find the sequences
+     in several places:
 
-      if (stubaddr != 0)
-        {
-          /* Argument to __gcc_plt_call is passed in r22.  */
-          regcache_cooked_write_unsigned (current_regcache, 22, stubaddr);
-        }
-      else
-        {
-	  /* No import stub found; let's synthesize one.  */
+     For 32-bit code:
+     - in export stubs for shared libraries
+     - in the "noshlibs" routine in the main module
 
-	  /* ldsid %r21, %r1 */
-	  write_memory_unsigned_integer (sp, 4, 0x02a010a1);
-	  /* mtsp %r1,%sr0 */
-	  write_memory_unsigned_integer (sp + 4, 4, 0x00011820);
-	  /* be 0(%sr0, %r21) */
-	  write_memory_unsigned_integer (sp + 8, 4, 0xe2a00000);
-          /* nop */
-          write_memory_unsigned_integer (sp + 12, 4, 0x08000240);
+     For 64-bit code:
+     - at the end of each "regular" function
 
-          regcache_cooked_write_unsigned (current_regcache, 21, funcaddr);
-          regcache_cooked_write_unsigned (current_regcache, 22, sp);
-	}
+     We cache the address of these sequences in the objfile's private data
+     since these operations can potentially be quite expensive.
 
-      /* We set the breakpoint address and r31 to (close to) where the current
-         pc is; when __gcc_plt_call returns, it will restore pcsqh to the
-	 current value based on this.  The -4 is needed for frame unwinding
-	 to work properly -- we need to land in a different function than
-	 the current function.  */
-      *bp_addr = (read_register (HPPA_PCOQ_HEAD_REGNUM) & ~3) - 4;
+     So, what we do is:
+     - write a stack trampoline
+     - look for a suitable instruction sequence in the current space
+     - point the sequence at the trampoline
+     - set the return address of the trampoline to the current space 
+       (see hppa_hpux_find_dummy_call_bpaddr)
+     - set the continuing address of the "dummy code" as the sequence.
+
+*/
+
+  if (IS_32BIT_TARGET (gdbarch))
+    {
+      static unsigned int hppa32_tramp[] = {
+        0x0fdf1291, /* stw r31,-8(,sp) */
+        0x02c010a1, /* ldsid (,r22),r1 */
+        0x00011820, /* mtsp r1,sr0 */
+        0xe6c00000, /* be,l 0(sr0,r22),%sr0,%r31 */
+        0x081f0242, /* copy r31,rp */
+        0x0fd11082, /* ldw -8(,sp),rp */
+        0x004010a1, /* ldsid (,rp),r1 */
+        0x00011820, /* mtsp r1,sr0 */
+        0xe0400000, /* be 0(sr0,rp) */
+        0x08000240  /* nop */
+      };
+
+      /* for hppa32, we must call the function through a stub so that on
+         return it can return to the space of our trampoline.  */
+      stubaddr = hppa_hpux_find_import_stub_for_addr (funcaddr);
+      if (stubaddr == 0)
+        error ("Cannot call external function not referenced by application "
+	       "(no import stub).\n");
+      regcache_cooked_write_unsigned (current_regcache, 22, stubaddr);
+
+      write_memory (sp, (char *)&hppa32_tramp, sizeof (hppa32_tramp));
+
+      *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);
       regcache_cooked_write_unsigned (current_regcache, 31, *bp_addr);
 
-      /* Continue from __gcc_plt_call.  */
-      *real_pc = SYMBOL_VALUE (sym);
+      *real_pc = hppa32_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
+      if (*real_pc == 0)
+        error ("Cannot make interspace call from here.\n");
+
+      regcache_cooked_write_unsigned (current_regcache, argreg, sp);
+
+      sp += sizeof (hppa32_tramp);
     }
   else
     {
-      ULONGEST gp;
+      static unsigned int hppa64_tramp[] = {
+        0xeac0f000, /* bve,l (r22),%r2 */
+        0x0fdf12d1, /* std r31,-8(,sp) */
+        0x0fd110c2, /* ldd -8(,sp),rp */
+        0xe840d002, /* bve,n (rp) */
+        0x08000240  /* nop */
+      };
 
-      /* Use __d_plt_call as a fallback; __d_plt_call expects to be called 
-         with a plabel, so we need to build one.  */
+      /* for hppa64, we don't need to call through a stub; all functions
+         return via a bve.  */
+      regcache_cooked_write_unsigned (current_regcache, 22, funcaddr);
+      write_memory (sp, (char *)&hppa64_tramp, sizeof (hppa64_tramp));
 
-      sym = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
-      if (sym == NULL)
-        error("Can't find an address for __d_plt_call or __gcc_plt_call "
-	      "trampoline\nSuggest linking executable with -g or compiling "
-	      "with gcc.");
+      *bp_addr = pc - 4;
+      regcache_cooked_write_unsigned (current_regcache, 31, *bp_addr);
 
-      gp = gdbarch_tdep (gdbarch)->find_global_pointer (funcaddr);
-      write_memory_unsigned_integer (sp, 4, funcaddr);
-      write_memory_unsigned_integer (sp + 4, 4, gp);
+      *real_pc = hppa64_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
+      if (*real_pc == 0)
+        error ("Cannot make interspace call from here.\n");
 
-      /* plabel is passed in r22 */
-      regcache_cooked_write_unsigned (current_regcache, 22, sp);
+      regcache_cooked_write_unsigned (current_regcache, argreg, sp);
+
+      sp += sizeof (hppa64_tramp);
     }
 
-  /* Pushed one stack frame, which has to be 64-byte aligned.  */
-  sp += 64;
+  sp = gdbarch_frame_align (gdbarch, sp);
 
   return sp;
 }
+
 
 
 /* Bit in the `ss_flag' member of `struct save_state' that indicates
@@ -1656,7 +1988,7 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (tdep->bytes_per_address == 4)
+  if (IS_32BIT_TARGET (gdbarch))
     tdep->in_solib_call_trampoline = hppa32_hpux_in_solib_call_trampoline;
   else
     tdep->in_solib_call_trampoline = hppa64_hpux_in_solib_call_trampoline;
@@ -1689,7 +2021,8 @@ hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->is_elf = 0;
 
-  tdep->find_global_pointer = hppa_hpux_som_find_global_pointer;
+  tdep->find_global_pointer = hppa32_hpux_find_global_pointer;
+
   hppa_hpux_init_abi (info, gdbarch);
   som_solib_select (tdep);
 }
@@ -1700,6 +2033,8 @@ hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->is_elf = 1;
+  tdep->find_global_pointer = hppa64_hpux_find_global_pointer;
+
   hppa_hpux_init_abi (info, gdbarch);
   pa64_solib_select (tdep);
 }

@@ -204,6 +204,9 @@ struct hppa_objfile_private
     struct hppa_unwind_info *unwind_info;	/* a pointer */
     struct so_list *so_info;	/* a pointer  */
     CORE_ADDR dp;
+
+    int dummy_call_sequence_reg;
+    CORE_ADDR dummy_call_sequence_addr;
   };
 
 extern const struct objfile_data *hppa_objfile_priv_data;
@@ -234,5 +237,8 @@ extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
 extern struct minimal_symbol *
   hppa_lookup_stub_minimal_symbol (const char *name,
                                    enum unwind_stub_types stub_type);
+
+extern struct hppa_objfile_private *
+hppa_init_objfile_priv_data (struct objfile *objfile);
 
 #endif  /* HPPA_TDEP_H */

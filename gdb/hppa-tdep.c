@@ -273,6 +273,20 @@ hppa_symbol_address(const char *sym)
   else
     return (CORE_ADDR)-1;
 }
+
+struct hppa_objfile_private *
+hppa_init_objfile_priv_data (struct objfile *objfile)
+{
+  struct hppa_objfile_private *priv;
+
+  priv = (struct hppa_objfile_private *)
+  	 obstack_alloc (&objfile->objfile_obstack,
+	 		sizeof (struct hppa_objfile_private));
+  set_objfile_data (objfile, hppa_objfile_priv_data, priv);
+  memset (priv, 0, sizeof (*priv));
+
+  return priv;
+}
 
 
 /* Compare the start address for two unwind entries returning 1 if 
@@ -529,15 +543,8 @@ read_unwind_info (struct objfile *objfile)
   obj_private = (struct hppa_objfile_private *) 
 	        objfile_data (objfile, hppa_objfile_priv_data);
   if (obj_private == NULL)
-    {
-      obj_private = (struct hppa_objfile_private *)
-	obstack_alloc (&objfile->objfile_obstack, 
-                       sizeof (struct hppa_objfile_private));
-      set_objfile_data (objfile, hppa_objfile_priv_data, obj_private);
-      obj_private->unwind_info = NULL;
-      obj_private->so_info = NULL;
-      obj_private->dp = 0;
-    }
+    obj_private = hppa_init_objfile_priv_data (objfile);
+
   obj_private->unwind_info = ui;
 }
 
@@ -912,7 +919,8 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     write_register (19, gp);
 
   /* Set the return address.  */
-  regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
+  if (!gdbarch_push_dummy_code_p (gdbarch))
+    regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
 
   /* Update the Stack Pointer.  */
   regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, param_end);
@@ -951,6 +959,10 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The inner most end of the stack after all the parameters have
      been pushed.  */
   CORE_ADDR new_sp = 0;
+
+  /* Global pointer (r27) of the function we are trying to call.  */
+  CORE_ADDR gp;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Two passes.  First pass computes the location of everything,
      second pass writes the bytes out.  */
@@ -1033,8 +1045,14 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     write_register (28, struct_addr);
 
+  gp = tdep->find_global_pointer (function);
+
+  if (gp != 0)
+    write_register (27, gp);
+
   /* Set the return address.  */
-  regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
+  if (!gdbarch_push_dummy_code_p (gdbarch))
+    regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
 
   /* Update the Stack Pointer.  */
   regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, param_end + 64);

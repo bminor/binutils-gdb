@@ -1,3 +1,32 @@
+2004-12-17  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (IS_32BIT_TARGET): New.
+	(in_opd_section): New.
+	(hppa32_hpux_find_global_pointer): Rename from 
+	hppa_hpux_som_find_global_pointer.
+	(hppa64_hpux_find_global_pointer): New.
+	(ldsid_pattern): New.
+	(hppa_hpux_search_pattern): New.
+	(hppa32_hpux_search_dummy_call_sequence): New.
+	(hppa64_hpux_search_dummy_call_sequence): New.
+	(hppa_hpux_find_import_stub_for_addr): New.
+	(hppa_hpux_sr_for_addr): New.
+	(hppa_hpux_find_dummy_bpaddr): New.
+	(hppa_hpux_init_abi): Use IS_32BIT_TARGET predicate.
+	(hppa_hpux_som_init_abi): Set find_global_pointer method to
+	hppa32_hpux_find_global_pointer instead of
+	hppa_hpux_som_find_global_pointer.
+	(hppa_hpux_elf_init_abi): Set find_global_pointer method.
+	* hppa-tdep.c (hppa_init_objfile_priv_data): New.
+	(read_unwind_info): Use function to initialize objfile-private data.
+	(hppa32_push_dummy_call): Don't automatically set the RP if there is
+	a push_dummy_code method.
+	(hppa64_push_dummy_call): Retrieve and set the global pointer.
+	Don't automatically set the RP if there is a push_dummy_code method.
+	* hppa-tdep.h (hppa_objfile_private): Add dummy_call_sequence_reg and
+	dummy_call_sequence_addr members.
+	(hppa_init_objfile_priv_data): New prototype.
+
 2004-12-17  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (hppa_lookup_stub_minimal_symbol): New function.
