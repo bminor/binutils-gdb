@@ -1,3 +1,10 @@
+Fri Jan 27 16:27:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): For
+	a MIPS target, clobber the size of all but the first input
+	.reginfo section to be 0, so that lang_size_sections sets the
+	correct size for the output .reginfo section.
+
 Thu Jan 26 19:53:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
