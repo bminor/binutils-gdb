@@ -32,44 +32,101 @@
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
 
-
 /* Register numbers of various important registers.  */
 #define RAX_REGNUM 0
-#define RDX_REGNUM 1
+#define RDX_REGNUM 3
 #define RDI_REGNUM 5
 #define EFLAGS_REGNUM 17
-#define XMM1_REGNUM  35
+#define XMM1_REGNUM  39
+
+struct register_info
+{
+  int size;
+  char *name;
+  struct type **type;
+};
 
 /* x86_64_register_raw_size_table[i] is the number of bytes of storage in
    GDB's register array occupied by register i.  */
-int x86_64_register_raw_size_table[X86_64_NUM_REGS] = {
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 4,
-  10, 10, 10, 10,
-  10, 10, 10, 10,
-  4, 4, 4, 4,
-  4, 4, 4, 4,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  4
+static struct register_info x86_64_register_info_table[] = {
+  {8, "rax", &builtin_type_int64},
+  {8, "rbx", &builtin_type_int64},
+  {8, "rcx", &builtin_type_int64},
+  {8, "rdx", &builtin_type_int64},
+  {8, "rsi", &builtin_type_int64},
+  {8, "rdi", &builtin_type_int64},
+  {8, "rbp", &builtin_type_void_func_ptr},
+  {8, "rsp", &builtin_type_void_func_ptr},
+  {8, "r8", &builtin_type_int64},
+  {8, "r9", &builtin_type_int64},
+  {8, "r10", &builtin_type_int64},
+  {8, "r11", &builtin_type_int64},
+  {8, "r12", &builtin_type_int64},
+  {8, "r13", &builtin_type_int64},
+  {8, "r14", &builtin_type_int64},
+  {8, "r15", &builtin_type_int64},
+  {8, "rip", &builtin_type_void_func_ptr},
+  {4, "eflags", &builtin_type_int32},
+  {4, "ds", &builtin_type_int32},
+  {4, "es", &builtin_type_int32},
+  {4, "fs", &builtin_type_int32},
+  {4, "gs", &builtin_type_int32},
+  {10, "st0", &builtin_type_i387_ext},
+  {10, "st1", &builtin_type_i387_ext},
+  {10, "st2", &builtin_type_i387_ext},
+  {10, "st3", &builtin_type_i387_ext},
+  {10, "st4", &builtin_type_i387_ext},
+  {10, "st5", &builtin_type_i387_ext},
+  {10, "st6", &builtin_type_i387_ext},
+  {10, "st7", &builtin_type_i387_ext},
+  {4, "fctrl", &builtin_type_int32},
+  {4, "fstat", &builtin_type_int32},
+  {4, "ftag", &builtin_type_int32},
+  {4, "fiseg", &builtin_type_int32},
+  {4, "fioff", &builtin_type_int32},
+  {4, "foseg", &builtin_type_int32},
+  {4, "fooff", &builtin_type_int32},
+  {4, "fop", &builtin_type_int32},
+  {16, "xmm0", &builtin_type_v4sf},
+  {16, "xmm1", &builtin_type_v4sf},
+  {16, "xmm2", &builtin_type_v4sf},
+  {16, "xmm3", &builtin_type_v4sf},
+  {16, "xmm4", &builtin_type_v4sf},
+  {16, "xmm5", &builtin_type_v4sf},
+  {16, "xmm6", &builtin_type_v4sf},
+  {16, "xmm7", &builtin_type_v4sf},
+  {16, "xmm8", &builtin_type_v4sf},
+  {16, "xmm9", &builtin_type_v4sf},
+  {16, "xmm10", &builtin_type_v4sf},
+  {16, "xmm11", &builtin_type_v4sf},
+  {16, "xmm12", &builtin_type_v4sf},
+  {16, "xmm13", &builtin_type_v4sf},
+  {16, "xmm14", &builtin_type_v4sf},
+  {16, "xmm15", &builtin_type_v4sf},
+  {4, "mxcsr", &builtin_type_int32}
 };
+
+/* Number of all registers */
+#define X86_64_NUM_REGS (sizeof (x86_64_register_info_table) / \
+  sizeof (x86_64_register_info_table[0]))
+
+/* Number of general registers.  */
+#define X86_64_NUM_GREGS (22)
+
+int x86_64_num_regs = X86_64_NUM_REGS;
+int x86_64_num_gregs = X86_64_NUM_GREGS;
 
 /* Number of bytes of storage in the actual machine representation for
    register REGNO.  */
 int
 x86_64_register_raw_size (int regno)
 {
-  return x86_64_register_raw_size_table[regno];
+  return x86_64_register_info_table[regno].size;
 }
 
 /* x86_64_register_byte_table[i] is the offset into the register file of the
    start of register number i.  We initialize this from
-   x86_64_register_raw_size_table.  */
+   x86_64_register_info_table.  */
 int x86_64_register_byte_table[X86_64_NUM_REGS];
 
 /* Index within `registers' of the first byte of the space for register REGNO.  */
@@ -84,16 +141,7 @@ x86_64_register_byte (int regno)
 static struct type *
 x86_64_register_virtual_type (int regno)
 {
-  if (regno == PC_REGNUM || regno == SP_REGNUM)
-    return builtin_type_void_func_ptr;
-  if (IS_FP_REGNUM (regno))
-    return builtin_type_i387_ext;
-  if (IS_SSE_REGNUM (regno))
-    return builtin_type_v4sf;
-  if (IS_FPU_CTRL_REGNUM (regno) || regno == MXCSR_REGNUM
-      || regno == EFLAGS_REGNUM)
-    return builtin_type_int32;
-  return builtin_type_int64;
+  return *x86_64_register_info_table[regno].type;
 }
 
 /* x86_64_register_convertible is true if register N's virtual format is
@@ -556,16 +604,16 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int ssereg = 0;
   int i;
   static int int_parameter_registers[INT_REGS] = {
-    5 /*RDI*/, 4 /*RSI*/,
-    1 /*RDX*/, 2 /*RCX*/,
-    8 /*R8 */ , 9		/*R9 */
+    5 /* RDI */ , 4 /* RSI */ ,
+    3 /* RDX */ , 2 /* RCX */ ,
+    8 /* R8  */ , 9 /* R9  */
   };
   /* XMM0 - XMM15  */
   static int sse_parameter_registers[SSE_REGS] = {
-    34, 35, 36, 37,
-    38, 39, 40, 41,
-    42, 43, 44, 45,
-    46, 47, 48, 49
+    XMM1_REGNUM - 1, XMM1_REGNUM, XMM1_REGNUM + 1, XMM1_REGNUM + 2,
+    XMM1_REGNUM + 3, XMM1_REGNUM + 4, XMM1_REGNUM + 5, XMM1_REGNUM + 6,
+    XMM1_REGNUM + 7, XMM1_REGNUM + 8, XMM1_REGNUM + 9, XMM1_REGNUM + 10,
+    XMM1_REGNUM + 11, XMM1_REGNUM + 12, XMM1_REGNUM + 13, XMM1_REGNUM + 14
   };
   int stack_values_count = 0;
   int *stack_values;
@@ -704,27 +752,9 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 static char *
 x86_64_register_name (int reg_nr)
 {
-  static char *register_names[] = {
-    "rax", "rdx", "rcx", "rbx",
-    "rsi", "rdi", "rbp", "rsp",
-    "r8", "r9", "r10", "r11",
-    "r12", "r13", "r14", "r15",
-    "rip", "eflags",
-    "st0", "st1", "st2", "st3",
-    "st4", "st5", "st6", "st7",
-    "fctrl", "fstat", "ftag", "fiseg",
-    "fioff", "foseg", "fooff", "fop",
-    "xmm0", "xmm1", "xmm2", "xmm3",
-    "xmm4", "xmm5", "xmm6", "xmm7",
-    "xmm8", "xmm9", "xmm10", "xmm11",
-    "xmm12", "xmm13", "xmm14", "xmm15",
-    "mxcsr"
-  };
-  if (reg_nr < 0)
+  if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
     return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
-  return register_names[reg_nr];
+  return x86_64_register_info_table[reg_nr].name;
 }
 
 
@@ -814,7 +844,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 
 /* Sequence of bytes for breakpoint instruction.  */
 static unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
+x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
@@ -826,6 +856,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  int i, sum;
 
   /* Find a candidate among the list of pre-declared architectures. */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -904,10 +935,12 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
+
   /* Total amount of space needed to store our copies of the machine's register
      (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
-  set_gdbarch_register_bytes (gdbarch,
-			      (18 * 8) + (8 * 10) + (8 * 4) + (16 * 16 + 4));
+  for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
+    sum += x86_64_register_info_table[i].size;
+  set_gdbarch_register_bytes (gdbarch, sum);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
@@ -924,7 +957,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp_regnum (gdbarch, 6);	/* (rbp) */
   set_gdbarch_pc_regnum (gdbarch, 16);	/* (rip) Contains program counter.  */
 
-  set_gdbarch_fp0_regnum (gdbarch, 18);	/* First FPU floating-point register.  */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS);	/* First FPU floating-point register.  */
 
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
   set_gdbarch_write_fp (gdbarch, cfi_write_fp);
@@ -1042,7 +1075,7 @@ _initialize_x86_64_tdep (void)
     for (i = 0; i < X86_64_NUM_REGS; i++)
       {
 	x86_64_register_byte_table[i] = offset;
-	offset += x86_64_register_raw_size_table[i];
+	offset += x86_64_register_info_table[i].size;
       }
   }
 

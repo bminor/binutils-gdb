@@ -25,11 +25,8 @@
 
 #include "i386-tdep.h"
 
-/* Number of all registers */
-#define X86_64_NUM_REGS (51)
-
-/* Number of general registers.  */
-#define X86_64_NUM_GREGS (18)
+extern int x86_64_num_regs;
+extern int x86_64_num_gregs;
 
 gdbarch_frame_saved_pc_ftype x86_64_linux_frame_saved_pc;
 gdbarch_saved_pc_after_call_ftype x86_64_linux_saved_pc_after_call;

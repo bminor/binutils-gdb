@@ -39,11 +39,12 @@
    format and GDB's register array layout.  */
 
 static int x86_64_regmap[] = {
-  RAX, RDX, RCX, RBX,
+  RAX, RBX, RCX, RDX,
   RSI, RDI, RBP, RSP,
   R8, R9, R10, R11,
   R12, R13, R14, R15,
-  RIP, EFLAGS
+  RIP, EFLAGS, 
+  DS, ES, FS, GS
 };
 
 static unsigned long
@@ -125,7 +126,7 @@ x86_64_linux_dr_get_status (void)
    the register sets used by `ptrace'.  */
 
 #define GETREGS_SUPPLIES(regno) \
-  (0 <= (regno) && (regno) <= 17)
+  (0 <= (regno) && (regno) < x86_64_num_gregs)
 #define GETFPREGS_SUPPLIES(regno) \
   (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
 
@@ -144,7 +145,7 @@ supply_gregset (elf_gregset_t * gregsetp)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
+  for (i = 0; i < x86_64_num_gregs; i++)
     supply_register (i, (char *) (regp + x86_64_regmap[i]));
 }
 
@@ -158,7 +159,7 @@ fill_gregset (elf_gregset_t * gregsetp, int regno)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
+  for (i = 0; i < x86_64_num_gregs; i++)
     if ((regno == -1 || regno == i))
       read_register_gen (i, regp + x86_64_regmap[i]);
 }

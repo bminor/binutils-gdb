@@ -28,12 +28,15 @@
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 
-static int regmap[] = {
-  RAX, RDX, RCX, RBX,
+#define	X86_64_NUM_GREGS 22
+
+static int regmap[X86_64_NUM_GREGS] = {
+  RAX, RBX, RCX, RDX,
   RSI, RDI, RBP, RSP,
   R8, R9, R10, R11,
   R12, R13, R14, R15,
-  RIP, EFLAGS
+  RIP, EFLAGS,
+  DS, ES, FS, GS
 };
 
 static void
@@ -41,7 +44,7 @@ x86_64_fill_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < 18; i++)
+  for (i = 0; i < X86_64_NUM_GREGS; i++)
     collect_register (i, ((char *) buf) + regmap[i]);
 }
 
@@ -50,7 +53,7 @@ x86_64_store_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < 18; i++)
+  for (i = 0; i < X86_64_NUM_GREGS; i++)
     supply_register (i, ((char *) buf) + regmap[i]);
 }
 
