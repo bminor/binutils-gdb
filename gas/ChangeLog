@@ -1,3 +1,10 @@
+2002-02-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (set_at): Fix handling of 64bit register loads.
+	(macro): Likewise. Fix la/dla address expansions for EMBEDDED_PIC
+	and NO_PIC cases. Code cleanup.
+	(macro2): Fix handling of 64bit register loads.
+
 2002-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/c-ppc.texi (PowerPC-Opts): Add -mpower4, -maltivec and -m7400.
