@@ -659,14 +659,30 @@ obj_coff_endef (ignore)
 	S_SET_SEGMENT (def_symbol_in_progress, text_section);
 
 	name = S_GET_NAME (def_symbol_in_progress);
-	if (name[1] == 'b' && name[2] == 'f')
-	  {
-	    if (! in_function ())
-	      as_warn (_("`%s' symbol without preceding function"), name);
-/*	    SA_SET_SYM_LNNO (def_symbol_in_progress, 12345);*/
-	    /* Will need relocating */
-	    SF_SET_PROCESS (def_symbol_in_progress);
-	    clear_function ();
+	if (name[0] == '.' && name[2] == 'f' && name[3] == '\0')
+  	  {
+	    switch (name[1])
+	      {
+	      case 'b':  
+		/* .bf */
+		if (! in_function ())
+		  as_warn (_("`%s' symbol without preceding function"), name);
+		/* Will need relocating.  */
+		SF_SET_PROCESS (def_symbol_in_progress);
+		clear_function ();
+		break;
+#ifdef TE_PE
+	      case 'e':  
+		/* .ef */
+		/* The MS compilers output the actual endline, not the
+		   function-relative one... we want to match without
+		   changing the assembler input.  */
+		SA_SET_SYM_LNNO (def_symbol_in_progress, 
+				 (SA_GET_SYM_LNNO (def_symbol_in_progress)
+				  + coff_line_base));
+		break;
+#endif
+	      }
 	  }
       }
       break;
@@ -856,7 +872,7 @@ obj_coff_line (ignore)
     coff_line_base = this_base;
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
-  SA_SET_SYM_LNNO (def_symbol_in_progress, coff_line_base);
+  SA_SET_SYM_LNNO (def_symbol_in_progress, this_base);
 
   demand_empty_rest_of_line ();
 
@@ -866,7 +882,7 @@ obj_coff_line (ignore)
       extern int listing;
 
       if (listing)
-	listing_source_line ((unsigned int) coff_line_base);
+	listing_source_line ((unsigned int) this_base);
     }
 #endif
 }
