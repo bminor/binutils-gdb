@@ -1,5 +1,10 @@
 2004-07-13  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/sizeof.exp: Skip test when no inferior I/O.
+	(check_sizeof, check_valueof): Do not include the output in the
+	test name.  Use gdb_test.
+	(get_valueof): Use gdb_test_multiple.
+
 	* gdb.base/step-test.exp: Update copyright.  Use
 	gdb_test_multiple.  Ensure that test names do not include
 	architecture dependent output.
