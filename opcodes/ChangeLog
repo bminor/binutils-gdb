@@ -1,3 +1,8 @@
+Wed Sep 30 16:09:20 1992  Michael Werner  (mtw@cygnus.com)
+
+	* z8k-dis.c (unparse_instr): fix bug where opcode returned was
+	*always* the wrong one.
+
 Wed Sep 30 07:42:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* z8kgen.c: added copyright info
