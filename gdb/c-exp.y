@@ -899,13 +899,22 @@ parse_number (p, len, parsed_float, putithere)
      int parsed_float;
      YYSTYPE *putithere;
 {
+  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
+     here, and we do kind of silly things like cast to unsigned.  */
   register LONGEST n = 0;
   register LONGEST prevn = 0;
+
   register int i = 0;
   register int c;
   register int base = input_radix;
   int unsigned_p = 0;
+
+  /* Number of "L" suffixes encountered.  */
   int long_p = 0;
+
+  /* We have found a "L" or "U" suffix.  */
+  int found_suffix = 0;
+
   unsigned LONGEST high_bit;
   struct type *signed_type;
   struct type *unsigned_type;
@@ -956,15 +965,29 @@ parse_number (p, len, parsed_float, putithere)
       if (c != 'l' && c != 'u')
 	n *= base;
       if (c >= '0' && c <= '9')
-	n += i = c - '0';
+	{
+	  if (found_suffix)
+	    return ERROR;
+	  n += i = c - '0';
+	}
       else
 	{
 	  if (base > 10 && c >= 'a' && c <= 'f')
-	    n += i = c - 'a' + 10;
-	  else if (len == 0 && c == 'l') 
-            long_p = 1;
-	  else if (len == 0 && c == 'u')
-	    unsigned_p = 1;
+	    {
+	      if (found_suffix)
+		return ERROR;
+	      n += i = c - 'a' + 10;
+	    }
+	  else if (c == 'l')
+	    {
+	      ++long_p;
+	      found_suffix = 1;
+	    }
+	  else if (c == 'u')
+	    {
+	      unsigned_p = 1;
+	      found_suffix = 1;
+	    }
 	  else
 	    return ERROR;	/* Char not a digit */
 	}
@@ -972,44 +995,61 @@ parse_number (p, len, parsed_float, putithere)
 	return ERROR;		/* Invalid digit in this base */
 
       /* Portably test for overflow (only works for nonzero values, so make
-	 a second check for zero).  */
-      if((prevn >= n) && n != 0)
-	 unsigned_p=1;		/* Try something unsigned */
-      /* If range checking enabled, portably test for unsigned overflow.  */
-      if(RANGE_CHECK && n!=0)
-      {	
-	 if((unsigned_p && (unsigned)prevn >= (unsigned)n))
-	    range_error("Overflow on numeric constant.");	 
-      }
-      prevn=n;
+	 a second check for zero).  FIXME: Can't we just make n and prevn
+	 unsigned and avoid this?  */
+      if (c != 'l' && c != 'u' && (prevn >= n) && n != 0)
+	unsigned_p = 1;		/* Try something unsigned */
+
+      /* Portably test for unsigned overflow.
+	 FIXME: This check is wrong; for example it doesn't find overflow
+	 on 0x123456789 when LONGEST is 32 bits.  */
+      if (c != 'l' && c != 'u' && n != 0)
+	{	
+	  if ((unsigned_p && (unsigned LONGEST) prevn >= (unsigned LONGEST) n))
+	    error ("Numeric constant too large.");
+	}
+      prevn = n;
     }
- 
-     /* If the number is too big to be an int, or it's got an l suffix
-	then it's a long.  Work out if this has to be a long by
-	shifting right and and seeing if anything remains, and the
-	target int size is different to the target long size.
 
-	In the expression below, we could have tested
-        	(n >> TARGET_INT_BIT)
-	to see if it was zero,
-	but too many compilers warn about that, when ints and longs
-	are the same size.  So we shift it twice, with fewer bits
-	each time, for the same result.  */
+  /* An integer constant is an int, a long, or a long long.  An L
+     suffix forces it to be long; an LL suffix forces it to be long
+     long.  If not forced to a larger size, it gets the first type of
+     the above that it fits in.  To figure out whether it fits, we
+     shift it right and see whether anything remains.  Note that we
+     can't shift sizeof (LONGEST) * HOST_CHAR_BIT bits or more in one
+     operation, because many compilers will warn about such a shift
+     (which always produces a zero result).  Sometimes TARGET_INT_BIT
+     or TARGET_LONG_BIT will be that big, sometimes not.  To deal with
+     the case where it is we just always shift the value more than
+     once, with fewer bits each time.  */
 
-    if (   (TARGET_INT_BIT != TARGET_LONG_BIT 
-            && ((n >> 2) >> (TARGET_INT_BIT-2)))   /* Avoid shift warning */
-        || long_p)
-      {
-         high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_BIT-1);
-	 unsigned_type = builtin_type_unsigned_long;
-	 signed_type = builtin_type_long;
-      }
-    else 
-      {
-	 high_bit = ((unsigned LONGEST)1) << (TARGET_INT_BIT-1);
-	 unsigned_type = builtin_type_unsigned_int;
-	 signed_type = builtin_type_int;
-      }    
+  if (long_p == 0
+      && (((unsigned LONGEST)n >> 2) >> (TARGET_INT_BIT - 2)) == 0)
+    {
+      high_bit = ((unsigned LONGEST)1) << (TARGET_INT_BIT-1);
+
+      /* A large decimal (not hex or octal) constant (between INT_MAX
+	 and UINT_MAX) is a long or unsigned long, according to ANSI,
+	 never an unsigned int, but this code treats it as unsigned
+	 int.  This probably should be fixed.  GCC gives a warning on
+	 such constants.  */
+
+      unsigned_type = builtin_type_unsigned_int;
+      signed_type = builtin_type_int;
+    }
+  else if (long_p <= 1
+	   && (((unsigned LONGEST)n >> 2) >> (TARGET_LONG_BIT - 2)) == 0)
+    {
+      high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_BIT-1);
+      unsigned_type = builtin_type_unsigned_long;
+      signed_type = builtin_type_long;
+    }
+  else
+    {
+      high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_LONG_BIT - 1);
+      unsigned_type = builtin_type_unsigned_long_long;
+      signed_type = builtin_type_long_long;
+    }
 
    putithere->typed_val.val = n;
 
@@ -1018,11 +1058,11 @@ parse_number (p, len, parsed_float, putithere)
 
    if (unsigned_p || (n & high_bit)) 
      {
-        putithere->typed_val.type = unsigned_type;
+       putithere->typed_val.type = unsigned_type;
      }
    else 
      {
-        putithere->typed_val.type = signed_type;
+       putithere->typed_val.type = signed_type;
      }
 
    return INT;
