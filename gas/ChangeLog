@@ -1,3 +1,8 @@
+2001-06-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* as.c (show_usage): Remove L from listing options.  It is not a
+	generic option.
+
 2001-06-06  Tracy Kuhrt <Tracy.Kuhrt@microchip.com>
 
 	* as.c (parse_args): Correct option name "listing-lhs-width2".
