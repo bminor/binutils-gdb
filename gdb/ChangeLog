@@ -1,3 +1,16 @@
+2002-07-04  Grace Sainsbury  <graces@redhat.com>
+
+	* config/mcore/tm-mcore.h (GDB_MULTI_ARCH): Set to 2.
+	(PR_REGNUM, FIRST_ARGREG, LAST_ARGREG,RETVAL_REGNUM): Move to
+	mcore-tdep.
+	(REG_STRUCT_HAS_ADDR, USE_STRUCT_CONVENTION, GET_SAVED_REGISTER)
+	(TARGET_VIRTUAL_FRAME_POINTER, BELIEVE_PCC_PROMOTION): Remove.
+	* mcore-tdep.c (PR_REGNUM, FIRST_ARGREG, LAST_ARGREG)
+	(RETVAL_REGNUM): Move macros from tm-mcore.h
+	(mcore_reg_struct_has_addr): New function.
+	(mcore_gdbarch_init): Added initializations for the macros removed
+	from tm-mcore.h.
+
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c (generic_elf_osabi_sniffer): Add check for FreeBSD 3.x's

@@ -82,6 +82,12 @@ int mcore_debug = 0;
 #define MCORE_REG_SIZE 4
 #define MCORE_NUM_REGS 65
 
+/* Some useful register numbers.  */
+#define PR_REGNUM 15
+#define FIRST_ARGREG 2
+#define LAST_ARGREG 7
+#define RETVAL_REGNUM 2
+
   
 /* Additional info that we use for managing frames */
 struct frame_extra_info
@@ -263,6 +269,13 @@ mcore_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
 
 }
+
+static int
+mcore_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;
+}
+
 
 /* Helper function for several routines below.  This funtion simply
    sets up a fake, aka dummy, frame (not a _call_ dummy frame) that
@@ -1085,6 +1098,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 0);
   set_gdbarch_fp_regnum (gdbarch, 0);
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
 
   /* Call Dummies:  */
 
@@ -1108,12 +1122,13 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
 
   /* Frames:  */
 
   set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_store_return_value (gdbarch, mcore_store_return_value);
@@ -1128,11 +1143,17 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pop_frame (gdbarch, mcore_pop_frame);
+  set_gdbarch_virtual_frame_pointer (gdbarch, mcore_virtual_frame_pointer);
 
   /* Misc.:  */
 
   /* Stack grows down.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_use_struct_convention (gdbarch, mcore_use_struct_convention);
+  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+  /* MCore will never pass a sturcture by reference. It will always be split
+     between registers and stack.  */
+  set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
 
   return gdbarch;
 }

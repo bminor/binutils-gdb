@@ -23,7 +23,7 @@
 #include "symtab.h"		/* For namespace_enum.  */
 #include "symfile.h"		/* For entry_point_address().  */
 
-#define GDB_MULTI_ARCH 0
+#define GDB_MULTI_ARCH 2
 
 #if !GDB_MULTI_ARCH
 /* All registers are 32 bits */
@@ -60,10 +60,6 @@ extern char *mcore_register_names[];
 #define SP_REGNUM 0
 #define FP_REGNUM (SP_REGNUM)
 #endif
-#define PR_REGNUM 15
-#define FIRST_ARGREG 2
-#define LAST_ARGREG 7
-#define RETVAL_REGNUM 2
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -81,11 +77,11 @@ extern const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR *pcptr,
 #define INNER_THAN(LHS,RHS) ((LHS) < (RHS))
 
 #define SAVED_PC_AFTER_CALL(FRAME)  read_register (PR_REGNUM)
-#endif
 
 struct frame_info;
 struct type;
 struct value;
+#endif
 
 #if !GDB_MULTI_ARCH
 extern void mcore_init_extra_frame_info (struct frame_info *fi);
@@ -153,7 +149,6 @@ extern CORE_ADDR mcore_push_arguments (int, struct value **, CORE_ADDR,
 
 #if !GDB_MULTI_ARCH
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
-#endif
 
 /* MCore will never pass a sturcture by reference. It will always be split
    between registers and stack. */
@@ -175,3 +170,4 @@ extern void mcore_virtual_frame_pointer (CORE_ADDR, int *, LONGEST *);
 /* For PE, gcc will tell us what th real type of
    arguments are when it promotes arguments. */
 #define BELIEVE_PCC_PROMOTION 1
+#endif
