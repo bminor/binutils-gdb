@@ -409,7 +409,7 @@ udi_resume (ptid_t ptid, int step, enum target_signal sig)
    storing status in STATUS just as `wait' would.  */
 
 static ptid_t
-udi_wait (int ptid_t, struct target_waitstatus *status)
+udi_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   UDIInt32 MaxTime;
   UDIPId PId;

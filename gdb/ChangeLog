@@ -1,3 +1,8 @@
+2001-07-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote-udi.c (udi_wait): Make type, instead of name, of first
+	parameter a ptid_t.
+
 2001-07-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* ser-mac.c: Make obsolete.
