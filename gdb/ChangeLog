@@ -1,4 +1,12 @@
+Sun Jul 25 23:41:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.{c,h} (struct breakpoint): Replace symtab field with
+	source_file field.
+
 Fri Jul 23 09:57:25 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* remote.c: Don't error() on errors xferring memory.
+	* target.h: Clean up comments about *xfer_memory.
 
 	* exec.c, corelow.c (target_ops struct): Don't allow
 	{insert,remove}_breakpoints to be defaulted to

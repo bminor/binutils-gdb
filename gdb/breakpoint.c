@@ -1394,7 +1394,7 @@ breakpoint_1 (bnum, allflag)
 	      printf_filtered ("%s ", local_hex_string_custom(b->address, "08"));
 
 	    last_addr = b->address;
-	    if (b->symtab)
+	    if (b->source_file)
 	      {
 		sym = find_pc_function (b->address);
 		if (sym)
@@ -1404,7 +1404,7 @@ breakpoint_1 (bnum, allflag)
 		    wrap_here (wrap_indent);
 		    fputs_filtered (" at ", stdout);
 		  }
-		fputs_filtered (b->symtab->filename, stdout);
+		fputs_filtered (b->source_file, stdout);
 		printf_filtered (":%d", b->line_number);
 	      }
 	    else
@@ -1561,7 +1561,11 @@ set_raw_breakpoint (sal)
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
   b->address = sal.pc;
-  b->symtab = sal.symtab;
+  if (sal.symtab == NULL)
+    b->source_file = NULL;
+  else
+    b->source_file = savestring (sal.symtab->filename,
+				 strlen (sal.symtab->filename));
   b->line_number = sal.line;
   b->enable = enabled;
   b->next = 0;
@@ -1731,9 +1735,9 @@ mention (b)
     case bp_breakpoint:
       printf_filtered ("Breakpoint %d at %s", b->number,
 		       local_hex_string(b->address));
-      if (b->symtab)
+      if (b->source_file)
 	printf_filtered (": file %s, line %d.",
-			 b->symtab->filename, b->line_number);
+			 b->source_file, b->line_number);
       break;
     case bp_until:
     case bp_finish:
@@ -1802,6 +1806,9 @@ break_command_1 (arg, tempflag, from_tty)
      of the address part.  */
   char *addr_start = NULL;
   char *addr_end;
+  struct cleanup *old_chain;
+  struct cleanup *canonical_strings_chain;
+  char **canonical = (char **)NULL;
   
   int i;
 
@@ -1841,15 +1848,29 @@ break_command_1 (arg, tempflag, from_tty)
 	  && (!current_source_symtab
 	      || (arg && (*arg == '+' || *arg == '-'))))
 	sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			      default_breakpoint_line);
+			      default_breakpoint_line, &canonical);
       else
-	sals = decode_line_1 (&arg, 1, (struct symtab *)NULL, 0);
+	sals = decode_line_1 (&arg, 1, (struct symtab *)NULL, 0, &canonical);
 
       addr_end = arg;
     }
   
   if (! sals.nelts) 
     return;
+
+  /* Make sure that all storage allocated in decode_line_1 gets freed in case
+     the following `for' loop errors out.  */
+  old_chain = make_cleanup (free, sals.sals);
+  if (canonical != (char **)NULL)
+    {
+      make_cleanup (free, canonical);
+      canonical_strings_chain = make_cleanup (null_cleanup, 0);
+      for (i = 0; i < sals.nelts; i++)
+	{
+	  if (canonical[i] != NULL)
+	    make_cleanup (free, canonical[i]);
+	}
+    }
 
   /* Resolve all line numbers to PC's, and verify that conditions
      can be parsed, before setting any breakpoints.  */
@@ -1872,6 +1893,10 @@ break_command_1 (arg, tempflag, from_tty)
 	}
     }
 
+  /* Remove the canonical strings from the cleanup, they are needed below.  */
+  if (canonical != (char **)NULL)
+    discard_cleanups (canonical_strings_chain);
+
   /* Now set all the breakpoints.  */
   for (i = 0; i < sals.nelts; i++)
     {
@@ -1886,11 +1911,11 @@ break_command_1 (arg, tempflag, from_tty)
       b->type = bp_breakpoint;
       b->cond = cond;
 
-      /* FIXME: We should add the filename if this is a static function
-	 and probably if it is a line number (the line numbers could
-	 have changed when we re-read symbols; possibly better to disable
-	 the breakpoint in that case).  */
-      if (addr_start)
+      /* If a canonical line spec is needed use that instead of the
+	 command string.  */
+      if (canonical != (char **)NULL && canonical[i] != NULL)
+	b->addr_string = canonical[i];
+      else if (addr_start)
 	b->addr_string = savestring (addr_start, addr_end - addr_start);
       if (cond_start)
 	b->cond_string = savestring (cond_start, cond_end - cond_start);
@@ -1906,7 +1931,7 @@ break_command_1 (arg, tempflag, from_tty)
       printf ("Multiple breakpoints were set.\n");
       printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
-  free ((PTR)sals.sals);
+  do_cleanups (old_chain);
 }
 
 /* Helper function for break_command_1 and disassemble_command.  */
@@ -2006,9 +2031,9 @@ until_break_command (arg, from_tty)
   
   if (default_breakpoint_valid)
     sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			  default_breakpoint_line);
+			  default_breakpoint_line, (char ***)NULL);
   else
-    sals = decode_line_1 (&arg, 1, (struct symtab *)NULL, 0);
+    sals = decode_line_1 (&arg, 1, (struct symtab *)NULL, 0, (char ***)NULL);
   
   if (sals.nelts != 1)
     error ("Couldn't get information on specified line.");
@@ -2326,10 +2351,7 @@ catch_command_1 (arg, tempflag, from_tty)
       b->enable = enabled;
       b->disposition = tempflag ? delete : donttouch;
 
-      printf ("Breakpoint %d at %s", b->number, local_hex_string(b->address));
-      if (b->symtab)
-	printf (": file %s, line %d.", b->symtab->filename, b->line_number);
-      printf ("\n");
+      mention (b);
     }
 
   if (sals.nelts > 1)
@@ -2410,8 +2432,12 @@ clear_command (arg, from_tty)
       sal = sals.sals[i];
       found = (struct breakpoint *) 0;
       while (breakpoint_chain
-	     && (sal.pc ? breakpoint_chain->address == sal.pc
-		 : (breakpoint_chain->symtab == sal.symtab
+	     && (sal.pc
+		 ? breakpoint_chain->address == sal.pc
+		 : (breakpoint_chain->source_file != NULL
+		    && sal.symtab != NULL
+		    && STREQ (breakpoint_chain->source_file,
+			      sal.symtab->filename)
 		    && breakpoint_chain->line_number == sal.line)))
 	{
 	  b1 = breakpoint_chain;
@@ -2423,8 +2449,11 @@ clear_command (arg, from_tty)
       ALL_BREAKPOINTS (b)
 	while (b->next
 	       && b->next->type != bp_watchpoint
-	       && (sal.pc ? b->next->address == sal.pc
-		   : (b->next->symtab == sal.symtab
+	       && (sal.pc
+		   ? b->next->address == sal.pc
+		   : (b->next->source_file != NULL
+		      && sal.symtab != NULL
+		      && STREQ (b->next->source_file, sal.symtab->filename)
 		      && b->next->line_number == sal.line)))
 	  {
 	    b1 = b->next;
@@ -2511,13 +2540,15 @@ delete_breakpoint (bpt)
 
   free_command_lines (&bpt->commands);
   if (bpt->cond)
-    free ((PTR)bpt->cond);
+    free (bpt->cond);
   if (bpt->cond_string != NULL)
-    free ((PTR)bpt->cond_string);
+    free (bpt->cond_string);
   if (bpt->addr_string != NULL)
-    free ((PTR)bpt->addr_string);
+    free (bpt->addr_string);
   if (bpt->exp_string != NULL)
-    free ((PTR)bpt->exp_string);
+    free (bpt->exp_string);
+  if (bpt->source_file != NULL)
+    free (bpt->source_file);
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
     printf ("breakpoint #%d deleted\n", bpt->number);
@@ -2580,15 +2611,25 @@ breakpoint_re_set_one (bint)
       b->enable = disabled;
 
       s = b->addr_string;
-      sals = decode_line_1 (&s, 1, (struct symtab *)NULL, 0);
+      sals = decode_line_1 (&s, 1, (struct symtab *)NULL, 0, (char ***)NULL);
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
-	  if (b->symtab != sals.sals[i].symtab
-	      || b->line_number != sals.sals[i].line
-	      || b->address != sals.sals[i].pc)
+	  if (b->address != sals.sals[i].pc
+	      || (b->source_file != NULL
+		  && sals.sals[i].symtab != NULL
+		  && (!STREQ (b->source_file, sals.sals[i].symtab->filename)
+		      || b->line_number != sals.sals[i].line)
+		  ))
 	    {
-	      b->symtab = sals.sals[i].symtab;
+	      if (b->source_file != NULL)
+		free (b->source_file);
+	      if (sals.sals[i].symtab == NULL)
+		b->source_file = NULL;
+	      else
+		b->source_file =
+		  savestring (sals.sals[i].symtab->filename,
+			      strlen (sals.sals[i].symtab->filename));
 	      b->line_number = sals.sals[i].line;
 	      b->address = sals.sals[i].pc;
 
@@ -2927,9 +2968,11 @@ decode_line_spec_1 (string, funfirstline)
     error ("Empty line specification.");
   if (default_breakpoint_valid)
     sals = decode_line_1 (&string, funfirstline,
-			  default_breakpoint_symtab, default_breakpoint_line);
+			  default_breakpoint_symtab, default_breakpoint_line,
+			  (char ***)NULL);
   else
-    sals = decode_line_1 (&string, funfirstline, (struct symtab *)NULL, 0);
+    sals = decode_line_1 (&string, funfirstline,
+			  (struct symtab *)NULL, 0, (char ***)NULL);
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;
