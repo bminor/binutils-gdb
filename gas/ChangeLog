@@ -1,3 +1,8 @@
+Tue Jul 30 15:51:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.c (md_pseudo_table): Add 2byte, 4byte, and 8byte
+	pseudo-ops.
+
 start-sanitize-d10v
 Fri Jul 26 11:43:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
