@@ -1869,6 +1869,11 @@ ENUMDOC
   SPARC64 relocations
 
 ENUM
+  BFD_RELOC_SPARC_32LE
+ENUMDOC
+  SPARC little endian relocation
+
+ENUM
   BFD_RELOC_ALPHA_GPDISP_HI16
 ENUMDOC
   Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
@@ -2477,6 +2482,29 @@ ENUMDOC
   significant 8 bits of a 24 bit word are placed into the least
   significant 8 bits of the opcode.
 
+ENUM
+  BFD_RELOC_VTABLE_INHERIT
+ENUMX
+  BFD_RELOC_VTABLE_ENTRY
+ENUMDOC
+  These two relocations are used by the linker to determine which of 
+  the entries in a C++ virtual function table are actually used.  When
+  the --gc-sections option is given, the linker will zero out the entries
+  that are not used, so that the code for those functions need not be
+  included in the output.
+
+  VTABLE_INHERIT is a zero-space relocation used to describe to the
+  linker the inheritence tree of a C++ virtual function table.  The
+  relocation's symbol should be the parent class' vtable, and the
+  relocation should be located at the child vtable.
+
+  VTABLE_ENTRY is a zero-space relocation that describes the use of a
+  virtual function table entry.  The reloc's symbol should refer to the
+  table of the class mentioned in the code.  Off of that base, an offset
+  describes the entry that is being used.  For Rela hosts, this offset 
+  is stored in the reloc's addend.  For Rel hosts, we are forced to put
+  this offset in the reloc's section offset.
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT
@@ -2600,6 +2628,28 @@ bfd_generic_relax_section (abfd, section, link_info, again)
      boolean *again;
 {
   *again = false;
+  return true;
+}
+
+/*
+INTERNAL_FUNCTION
+	bfd_generic_gc_sections
+
+SYNOPSIS
+	boolean bfd_generic_gc_sections
+	 (bfd *, struct bfd_link_info *);
+
+DESCRIPTION
+	Provides default handling for relaxing for back ends which
+	don't do section gc -- i.e., does nothing.
+*/
+
+/*ARGSUSED*/
+boolean
+bfd_generic_gc_sections (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info;
+{
   return true;
 }
 

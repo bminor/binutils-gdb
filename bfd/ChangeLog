@@ -1,3 +1,69 @@
+Thu Jun 25 18:31:41 1998  Richard Henderson  <rth@cygnus.com>
+
+	ELF Section-level Garbage Collection:
+	* bfd.c (bfd_gc_sections): New.
+	* aout-adobe.c: Hook to default implementation.
+	* aout-target.h, aout-tic30.c, binary.c, bout.c: Likewise.
+	* coff-alpha.c, coff-mips.c, coff-rs6000.c, coffcode.h: Likewise.
+	* evax-alpha.c, i386msdos.c, i386os9k.c, ieee.c: Likewise.
+	* ihex.c, nlm-target.h, oasys.c, ppcboot.c, srec.c: Likewise.
+	* tekhex.c, versados.c: Likewise.
+	* libbfd-in.h (_bfd_nolink_bfd_gc_sections): New.
+	* targets.c (BFD_JUMP_TABLE_LINK): Add _bfd_gc_sections.
+
+	* reloc.c (BFD_RELOC_VTABLE_INHERIT, BFD_RELOC_VTABLE_ENTRY): New.
+	(bfd_generic_gc_sections): New.
+	* section.c (SEC_KEEP): New.
+	(asection): Add gc_mark member.
+
+	* elfcode.h (elf_gc*): New name remappings.
+	* elflink.h (elf_link_input_bfd): Don't set contents on stabs
+	sections to be excluded.
+	(elf_gc_mark, elf_gc_sweep, elf_gc_sweep_symbol): New.
+	(elf_gc_propogate_vtable_entries_used): New.
+	(elf_gc_smash_unused_vtentry_relocs): New.
+	(elf_gc_sections, elf_gc_record_vtinherit, elf_gc_record_vtentry): New.
+	(elf_gc_common_finalize_got_offsets): New.
+	(elf_gc_allocate_got_offsets, elf_gc_common_final_link): New.
+	* elfxx-target.h: Add and default gc hooks.
+
+	* elf-bfd.h (struct elf_link_hash_entry): Swap got_offset/plt_offset
+	for unions. 
+	(struct elf_obj_tdata): Likewise for local_got_offsets.
+	* elf.c, elf-i386.c, elf32-m68k.c, elf32-mips.c: Update all uses.
+	* elf32-ppc.c, elf32-sparc.c, elf64-alpha.c: Likewise.
+	* elf64-sparc.c, elflink.h: Likewise.
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add vtable members.
+	(ELF_LINK_HASH_MARK): Define.
+	(struct elf_backend_data): Add GC hooks.
+	* elf.c (_bfd_elf_link_hash_newfunc): Zero vtable members.
+
+	* elf-m10300.c (mn10300_elf_check_relocs): New.
+	(mn10300_elf_gc_mark_hook): New.
+	(R_MN10300_GNU_VTINHERIT, R_MN10300_GNU_VTENTRY): New.
+	(elf_mn10300_howto, mn10300_reloc_map): Handle them.
+	(mn10300_elf_final_link_relocate): Likewise.
+	(mn10300_elf_relocate_section): Likewise.
+	(elf_backend_can_gc_sections): Define.
+	* elf32-mips.c (R_MIPS_GNU_VTINHERIT, R_MIPS_GNU_VTENTRY): New.
+	(elf_mips_gnu_vtinherit_howto, elf_mips_gnu_vtentry_howto): New.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle them.
+	(mips_info_to_howto_rel): Likewise.
+	(mips_elf_relocate_section): Likewise.
+	(mips_elf_check_relocs): Likewise.
+	(mips_elf_gc_mark_hook, mips_elf_gc_sweep_hook): New.
+	(elf_backend_can_gc_sections): Define.
+	* elf32-ppc.c (R_PPC_GNU_VTINHERIT, R_PPC_GNU_VTENTRY): New.
+	(ppc_elf_howto_raw): Handle them.
+	(ppc_elf_reloc_type_lookup): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_check_relocs): Reference count .got and .plt entires.
+	Handle new vtable relocs.
+	(ppc_elf_adjust_dynamic_symbol): Recognize unused .plt entries.
+	(ppc_elf_gc_mark_hook, ppc_elf_gc_sweep_hook): New.
+	(elf_backend_can_gc_sections): Define.
+
 Fri Jun 26 10:48:23 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* archures.c (bfd_mach_mn10300): Define.

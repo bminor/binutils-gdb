@@ -1,5 +1,6 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -412,7 +413,8 @@ The general target vector.
 .CAT(NAME,_bfd_link_hash_table_create),\
 .CAT(NAME,_bfd_link_add_symbols),\
 .CAT(NAME,_bfd_final_link),\
-.CAT(NAME,_bfd_link_split_section)
+.CAT(NAME,_bfd_link_split_section),\
+.CAT(NAME,_bfd_gc_sections)
 .  int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
 .  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
 .                    struct bfd_link_info *, struct bfd_link_order *,
@@ -436,7 +438,10 @@ The general target vector.
 .  {* Should this section be split up into smaller pieces during linking.  *}
 .  boolean (*_bfd_link_split_section) PARAMS ((bfd *, struct sec *));
 .
-. {* Routines to handle dynamic symbols and relocs.  *}
+.  {* Remove sections that are not referenced from the output.  *}
+.  boolean (*_bfd_gc_sections) PARAMS ((bfd *, struct bfd_link_info *));
+.
+.  {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME)\
 .CAT(NAME,_get_dynamic_symtab_upper_bound),\
 .CAT(NAME,_canonicalize_dynamic_symtab),\
@@ -588,6 +593,7 @@ extern const bfd_target tic30_coff_vec;
 /* start-sanitize-tic80 */
 extern const bfd_target tic80coff_vec;
 /* end-sanitize-tic80 */
+extern const bfd_target vaxnetbsd_vec;
 extern const bfd_target versados_vec;
 extern const bfd_target we32kcoff_vec;
 extern const bfd_target w65_vec;
@@ -674,6 +680,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_powerpc_vec,
+	&bfd_elf32_powerpcle_vec,
 	&bfd_elf32_v850_vec,
 #ifdef BFD64			/* No one seems to use this.  */
 	&bfd_elf64_big_generic_vec,
@@ -803,8 +810,9 @@ const bfd_target * const bfd_target_vector[] = {
 /* start-sanitize-tic80 */
 	&tic80coff_vec,
 /* end-sanitize-tic80 */
-	&we32kcoff_vec,
+	&vaxnetbsd_vec,
 	&versados_vec,
+	&we32kcoff_vec,
 	&z8kcoff_vec,
 
 #endif /* not SELECT_VECS */
@@ -832,6 +840,9 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 #ifdef IRIX_CORE
 	&irix_core_vec,
+#endif
+#ifdef NETBSD_CORE
+	&netbsd_core_vec,
 #endif
 #ifdef OSF_CORE
 	&osf_core_vec,

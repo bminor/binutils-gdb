@@ -1,5 +1,6 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -214,7 +215,7 @@ CODE_FRAGMENT
 .           standard data. *}
 .#define SEC_CONSTRUCTOR 0x100
 .
-.        {* The section is a constuctor, and should be placed at the
+.        {* The section is a constructor, and should be placed at the
 .          end of the text, data, or bss section(?). *}
 .#define SEC_CONSTRUCTOR_TEXT 0x1100
 .#define SEC_CONSTRUCTOR_DATA 0x2100
@@ -303,6 +304,9 @@ CODE_FRAGMENT
 .	   else up the line will take care of it later.  *}
 .#define SEC_LINKER_CREATED 0x800000
 .
+.	{* This section should not be subject to garbage collection.  *}
+.#define SEC_KEEP 0x1000000
+.
 .	{*  End of section flags.  *}
 .
 .	{* Some internal packed boolean fields.  *}
@@ -315,6 +319,9 @@ CODE_FRAGMENT
 .
 .	{* A mark flag used by some of the linker backends.  *}
 .	unsigned int linker_mark : 1;
+.
+.	{* A mark flag used by some linker backends for garbage collection.  *}
+.	unsigned int gc_mark : 1;
 .
 .	{* End of internal packed boolean fields.  *}
 .
@@ -558,7 +565,7 @@ DESCRIPTION
 	o <<bfd_error_invalid_operation>> -
 	If output has already started for this BFD.
 	o <<bfd_error_no_memory>> -
-	If obstack alloc fails.
+	If memory allocation fails.
 
 */
 
@@ -590,7 +597,7 @@ DESCRIPTION
 
    Return <<NULL>> and set <<bfd_error>> on error; possible errors are:
    o <<bfd_error_invalid_operation>> - If output has already started for @var{abfd}.
-   o <<bfd_error_no_memory>> - If obstack alloc fails.
+   o <<bfd_error_no_memory>> - If memory allocation fails.
 */
 
 sec_ptr

@@ -23,31 +23,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifdef ENABLE_NLS
-#include <libintl.h>
-/*  FIXME: We might want to use dgettext instead, in some cases.
-    This is still under investigation.  */
-#define _(String) gettext (String)
-#ifdef gettext_noop
-#define N_(String) gettext_noop (String)
-#else
-#define N_(String) (String)
-#endif
-#else
-/* Stubs that do something close enough.  */
-#define textdomain(String) (String)
-#define gettext(String) (String)
-#define dgettext(Domain,Message) (Message)
-#define dcgettext(Domain,Message,Type) (Message)
-#define bindtextdomain(Domain,Directory) (Domain)
-#define _(String) (String)
-#define N_(String) (String)
-/* In this case we don't care about the value.  */
-#ifndef LC_MESSAGES
-#define LC_MESSAGES 0
-#endif
-#endif
-
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  Take care never
    to wrap around if the address is within boundary-1 of the end of the
@@ -341,6 +316,10 @@ extern boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_relax_section \
   ((boolean (*) \
     PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *))) \
+   bfd_false)
+#define _bfd_nolink_bfd_gc_sections \
+  ((boolean (*) \
+    PARAMS ((struct bfd_link_info *))) \
    bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
@@ -670,6 +649,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SPARC_M44",
   "BFD_RELOC_SPARC_L44",
   "BFD_RELOC_SPARC_REGISTER",
+  "BFD_RELOC_SPARC_32LE",
   "BFD_RELOC_ALPHA_GPDISP_HI16",
   "BFD_RELOC_ALPHA_GPDISP_LO16",
   "BFD_RELOC_ALPHA_GPDISP",
@@ -842,6 +822,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MN10300_32_PCREL",
   "BFD_RELOC_MN10300_16_PCREL",
   "BFD_RELOC_TIC30_LDP",
+  "BFD_RELOC_VTABLE_INHERIT",
+  "BFD_RELOC_VTABLE_ENTRY",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
@@ -856,6 +838,10 @@ bfd_generic_relax_section
     asection *section,
     struct bfd_link_info *,
     boolean *));
+
+boolean 
+bfd_generic_gc_sections
+ PARAMS ((bfd *, struct bfd_link_info *));
 
 bfd_byte *
 

@@ -3401,7 +3401,7 @@ coff_slurp_line_table (abfd, asect)
 		  || (unsigned long) symndx >= obj_raw_syment_count (abfd))
 		{
 		  (*_bfd_error_handler)
-		    ("%s: warning: illegal symbol index %ld in line numbers",
+		    (_("%s: warning: illegal symbol index %ld in line numbers"),
 		     bfd_get_filename (abfd), dst.l_addr.l_symndx);
 		  symndx = 0;
 		  warned = true;
@@ -3415,7 +3415,7 @@ coff_slurp_line_table (abfd, asect)
 	      if (sym->lineno != NULL && ! warned)
 		{
 		  (*_bfd_error_handler)
-		    ("%s: warning: duplicate line number information for `%s'",
+		    (_("%s: warning: duplicate line number information for `%s'"),
 		     bfd_get_filename (abfd),
 		     bfd_asymbol_name (&sym->symbol));
 		}
@@ -3519,7 +3519,7 @@ coff_slurp_symbol_table (abfd)
 #ifdef COFF_WITH_PE
             /* PE uses storage class 0x68 to denote a section symbol */
             case C_SECTION:
-	    /* PE uses storage class 0x67 for a weak external symbol.  */
+	    /* PE uses storage class 0x69 for a weak external symbol.  */
 	    case C_NT_WEAK:
 #endif
 	      if ((src->u.syment.n_scnum) == 0)
@@ -3738,7 +3738,7 @@ coff_slurp_symbol_table (abfd)
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:
 	      (*_bfd_error_handler)
-		("%s: Unrecognized storage class %d for %s symbol `%s'",
+		(_("%s: Unrecognized storage class %d for %s symbol `%s'"),
 		 bfd_get_filename (abfd), src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      dst->symbol.flags = BSF_DEBUGGING;
@@ -3922,7 +3922,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	  if (dst.r_symndx < 0 || dst.r_symndx >= obj_conv_table_size (abfd))
 	    {
 	      (*_bfd_error_handler)
-		("%s: warning: illegal symbol index %ld in relocs",
+		(_("%s: warning: illegal symbol index %ld in relocs"),
 		 bfd_get_filename (abfd), dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
@@ -3960,7 +3960,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
       if (cache_ptr->howto == NULL)
 	{
 	  (*_bfd_error_handler)
-	    ("%s: illegal relocation type %d at address 0x%lx",
+	    (_("%s: illegal relocation type %d at address 0x%lx"),
 	     bfd_get_filename (abfd), dst.r_type, (long) dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -4298,4 +4298,8 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 
 #ifndef coff_bfd_relax_section
 #define coff_bfd_relax_section		    bfd_generic_relax_section
+#endif
+
+#ifndef coff_bfd_gc_sections
+#define coff_bfd_gc_sections		    bfd_generic_gc_sections
 #endif

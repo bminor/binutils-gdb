@@ -840,10 +840,12 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->dynindx = -1;
       ret->dynstr_index = 0;
       ret->weakdef = NULL;
-      ret->got_offset = (bfd_vma) -1;
-      ret->plt_offset = (bfd_vma) -1;
+      ret->got.offset = (bfd_vma) -1;
+      ret->plt.offset = (bfd_vma) -1;
       ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
       ret->verinfo.verdef = NULL;
+      ret->vtable_entries_used = NULL;
+      ret->vtable_parent = NULL;
       ret->type = STT_NOTYPE;
       ret->other = 0;
       /* Assume that we have been called by a non-ELF symbol reader.
@@ -2178,6 +2180,7 @@ map_sections_to_segments (abfd)
       if (phdr_size == 0)
 	phdr_size = get_elf_backend_data (abfd)->s->sizeof_phdr;
       if ((abfd->flags & D_PAGED) == 0
+	  || sections[0]->lma < phdr_size
 	  || sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
 	phdr_in_section = false;
     }

@@ -317,12 +317,15 @@ enum reloc_type
   R_MIPS_max,
   /* These relocs are used for the mips16.  */
   R_MIPS16_26 = 100,
-  R_MIPS16_GPREL = 101
+  R_MIPS16_GPREL = 101,
 /* start-sanitize-sky */
   /* These relocs are for the dvp.  */
-  , R_MIPS_DVP_11_PCREL = 120,
-  R_MIPS_DVP_27_S4 = 121
+  R_MIPS_DVP_11_PCREL = 120,
+  R_MIPS_DVP_27_S4 = 121,
 /* end-sanitize-sky */
+  /* These are GNU extensions to enable C++ vtable garbage collection.  */
+  R_MIPS_GNU_VTINHERIT = 253,
+  R_MIPS_GNU_VTENTRY = 254
 };
 
 static reloc_howto_type elf_mips_howto_table[] =
@@ -813,6 +816,38 @@ static reloc_howto_type elf_mips_dvp_27_s4_howto =
 	 0x7ffffff0,		/* dst_mask */
 	 false);		/* pcrel_offset */
 /* end-sanitize-sky */
+
+/* GNU extension to record C++ vtable hierarchy */
+static reloc_howto_type elf_mips_gnu_vtinherit_howto =
+  HOWTO (R_MIPS_GNU_VTINHERIT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_MIPS_GNU_VTINHERIT", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false);		/* pcrel_offset */
+
+/* GNU extension to record C++ vtable member usage */
+static reloc_howto_type elf_mips_gnu_vtentry_howto =
+  HOWTO (R_MIPS_GNU_VTENTRY,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_MIPS_GNU_VTENTRY",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false);		/* pcrel_offset */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
    with a R_MIPS_LO16 reloc, because there is a carry from the LO16 to
@@ -1662,30 +1697,32 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 	return &elf_mips_howto_table[(int) mips_reloc_map[i].elf_reloc_val];
     }
 
-  /* We need to handle BFD_RELOC_CTOR specially.
-
-     Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
-     size of addresses on this architecture.  */
-  if (code == BFD_RELOC_CTOR)
+  switch (code)
     {
+    case BFD_RELOC_CTOR:
+      /* We need to handle BFD_RELOC_CTOR specially.
+	 Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
+	 size of addresses on this architecture.  */
       if (bfd_arch_bits_per_address (abfd) == 32)
 	return &elf_mips_howto_table[(int) R_MIPS_32];
       else
 	return &elf_mips_ctor64_howto;
-    }
 
-  /* Special handling for the MIPS16 relocs, since they are made up
-     reloc types with a large value.  */
-  if (code == BFD_RELOC_MIPS16_JMP)
-    return &elf_mips16_jump_howto;
-  else if (code == BFD_RELOC_MIPS16_GPREL)
-    return &elf_mips16_gprel_howto;
+    case BFD_RELOC_MIPS16_JMP:
+      return &elf_mips16_jump_howto;
+    case BFD_RELOC_MIPS16_GPREL:
+      return &elf_mips16_gprel_howto;
 /* start-sanitize-sky */
-  else if (code == BFD_RELOC_MIPS_DVP_11_PCREL)
-    return &elf_mips_dvp_11_pcrel_howto;
-  else if (code == BFD_RELOC_MIPS_DVP_27_S4)
-    return &elf_mips_dvp_27_s4_howto;
+    case BFD_RELOC_MIPS_DVP_11_PCREL:
+      return &elf_mips_dvp_11_pcrel_howto;
+    case BFD_RELOC_MIPS_DVP_27_S4:
+      return &elf_mips_dvp_27_s4_howto;
 /* end-sanitize-sky */
+    case BFD_RELOC_VTABLE_INHERIT:
+      return &elf_mips_gnu_vtinherit_howto;
+    case BFD_RELOC_VTABLE_ENTRY:
+      return &elf_mips_gnu_vtentry_howto;
+    }
 
   return NULL;
 }
@@ -1701,20 +1738,33 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  if (r_type == R_MIPS16_26)
-    cache_ptr->howto = &elf_mips16_jump_howto;
-  else if (r_type == R_MIPS16_GPREL)
-    cache_ptr->howto = &elf_mips16_gprel_howto;
-/* start-sanitize-sky */
-  else if (r_type == R_MIPS_DVP_11_PCREL)
-    cache_ptr->howto = &elf_mips_dvp_11_pcrel_howto;
-  else if (r_type == R_MIPS_DVP_27_S4)
-    cache_ptr->howto = &elf_mips_dvp_27_s4_howto;
-/* end-sanitize-sky */
-  else
+  switch (r_type)
     {
+    case R_MIPS16_26:
+      cache_ptr->howto = &elf_mips16_jump_howto;
+      break;
+    case R_MIPS16_GPREL:
+      cache_ptr->howto = &elf_mips16_gprel_howto;
+      break;
+/* start-sanitize-sky */
+    case R_MIPS_DVP_11_PCREL:
+      cache_ptr->howto = &elf_mips_dvp_11_pcrel_howto;
+      break;
+    case R_MIPS_DVP_27_S4:
+      cache_ptr->howto = &elf_mips_dvp_27_s4_howto;
+      break;
+/* end-sanitize-sky */
+    case R_MIPS_GNU_VTINHERIT:
+      cache_ptr->howto = &elf_mips_gnu_vtinherit_howto;
+      break;
+    case R_MIPS_GNU_VTENTRY:
+      cache_ptr->howto = &elf_mips_gnu_vtentry_howto;
+      break;
+
+    default:
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
       cache_ptr->howto = &elf_mips_howto_table[r_type];
+      break;
     }
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
@@ -2558,7 +2608,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, SHNAME_DVP_OVERLAY_TABLE) == 0)
     {
       hdr->sh_type = SHT_DVP_OVERLAY_TABLE;
-      hdr->sh_entsize = sizeof (Elf64_Dvp_External_Overlay);
+      hdr->sh_entsize = sizeof (Elf32_Dvp_External_Overlay);
       /* The sh_link field is set in final_write_processing.  */
     }
   else if (strcmp (name, SHNAME_DVP_OVERLAY_STRTAB) == 0)
@@ -3792,7 +3842,7 @@ mips_elf_output_extsym (h, data)
 	{
 	  output_section = sec->output_section;
 	  if (output_section != NULL)
-	    h->esym.asym.value = (h->root.plt_offset
+	    h->esym.asym.value = (h->root.plt.offset
 				  + sec->output_offset
 				  + output_section->vma);
 	  else
@@ -4815,6 +4865,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
 
       r_type = ELF32_R_TYPE (rel->r_info);
+      if (r_type == R_MIPS_GNU_VTINHERIT
+	  || r_type == R_MIPS_GNU_VTENTRY)
+	continue;
       if ((r_type < 0 || r_type >= (int) R_MIPS_max)
 /* start-sanitize-sky */
 	  && r_type != R_MIPS_DVP_11_PCREL
@@ -5239,7 +5292,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* This symbol must be registered as a global symbol
 		 having the corresponding got entry.  */
-	      BFD_ASSERT (h->got_offset != (bfd_vma) -1);
+	      BFD_ASSERT (h->got.offset != (bfd_vma) -1);
 
 	      offset = (h->dynindx - g->global_gotsym + g->local_gotno) * 4;
 	      BFD_ASSERT (g->local_gotno <= offset
@@ -5259,7 +5312,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* This must be a global symbol with a got entry.  The
                  next reloc must be the corresponding LO16 reloc.  */
-	      BFD_ASSERT (h != NULL && h->got_offset != (bfd_vma) -1);
+	      BFD_ASSERT (h != NULL && h->got.offset != (bfd_vma) -1);
 	      BFD_ASSERT ((rel + 1) < relend);
 	      BFD_ASSERT ((int) ELF32_R_TYPE ((rel + 1)->r_info)
 			  == (r_type == R_MIPS_CALL_HI16
@@ -6210,7 +6263,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 		return false;
 	    }
 
-	  if (h->got_offset != (bfd_vma) -1)
+	  if (h->got.offset != (bfd_vma) -1)
 	    {
 	      /* We have already allocated space in the .got.  */
 	      break;
@@ -6222,7 +6275,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	    g->global_gotsym = h->dynindx;
 
 	  /* Make this symbol to have the corresponding got entry.  */
-	  h->got_offset = 0;
+	  h->got.offset = 0;
 
 	  /* We need a stub, not a plt entry for the undefined
 	     function.  But we record it as if it needs plt.  See
@@ -6246,7 +6299,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 		    return false;
 		}
 
-	      if (h->got_offset != (bfd_vma) -1)
+	      if (h->got.offset != (bfd_vma) -1)
 		{
 		  /* We have already allocated space in the .got.  */
 		  break;
@@ -6258,7 +6311,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 		g->global_gotsym = h->dynindx;
 
 	      /* Make this symbol to be the global got symbol.  */
-	      h->got_offset = 0;
+	      h->got.offset = 0;
 	    }
 
 	  break;
@@ -6329,6 +6382,20 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	      sizeof (Elf32_External_crinfo);
 	  break;
 
+	  /* This relocation describes the C++ object vtable hierarchy.
+	     Reconstruct it for later use during GC.  */
+	case R_MIPS_GNU_VTINHERIT:
+	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return false;
+	  break;
+
+	  /* This relocation describes which C++ vtable entries are actually
+	     used.  Record for later use during GC.  */
+	case R_MIPS_GNU_VTENTRY:
+	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+	    return false;
+	  break;
+
 	default:
 	  break;
 	}
@@ -6354,6 +6421,98 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 
   return true;
 }
+
+/* Return the section that should be marked against GC for a given
+   relocation.  */
+
+static asection *
+mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
+{
+  /* ??? Do mips16 stub sections need to be handled special?  */
+
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_MIPS_GNU_VTINHERIT:
+	case R_MIPS_GNU_VTENTRY:
+	  break;
+
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+	    }
+	}
+    }
+  else
+    {
+      if (!(elf_bad_symtab (abfd)
+	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+		&& sym->st_shndx != SHN_COMMON))
+	{
+	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
+	}
+    }
+
+  return NULL;
+}
+
+/* Update the got entry reference counts for the section being removed.  */
+
+static boolean
+mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+#if 0
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  bfd_signed_vma *local_got_refcounts;
+  const Elf_Internal_Rela *rel, *relend;
+  unsigned long r_symndx;
+  struct elf_link_hash_entry *h;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  local_got_refcounts = elf_local_got_refcounts (abfd);
+
+  relend = relocs + sec->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_MIPS_GOT16:
+      case R_MIPS_CALL16:
+      case R_MIPS_CALL_HI16:
+      case R_MIPS_CALL_LO16:
+      case R_MIPS_GOT_HI16:
+      case R_MIPS_GOT_LO16:
+	/* ??? It would seem that the existing MIPS code does no sort
+	   of reference counting or whatnot on its GOT and PLT entries,
+	   so it is not possible to garbage collect them at this time.  */
+        break;
+
+      default:
+	break;
+      }
+#endif
+
+  return true;
+}
+
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -6424,7 +6583,7 @@ mips_elf_adjust_dynamic_symbol (info, h)
 	  h->root.u.def.value = s->_raw_size;
 
 	  /* XXX Write this stub address somewhere.  */
-	  h->plt_offset = s->_raw_size;
+	  h->plt.offset = s->_raw_size;
 
 	  /* Make room for this stub code.  */
 	  s->_raw_size += MIPS_FUNCTION_STUB_SIZE;
@@ -6608,7 +6767,18 @@ mips_elf_size_dynamic_sections (output_bfd, info)
       if (strncmp (name, ".rel", 4) == 0)
 	{
 	  if (s->_raw_size == 0)
-	    strip = true;
+	    {
+	      /* We only strip the section if the output section name
+                 has the same name.  Otherwise, there might be several
+                 input sections for this output section.  FIXME: This
+                 code is probably not needed these days anyhow, since
+                 the linker now does not create empty output sections.  */
+	      if (s->output_section != NULL
+		  && strcmp (name,
+			     bfd_get_section_name (s->output_section->owner,
+						   s->output_section)) == 0)
+		strip = true;
+	    }
 	  else
 	    {
 	      const char *outname;
@@ -6917,7 +7087,7 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   dynobj = elf_hash_table (info)->dynobj;
   gval = sym->st_value;
 
-  if (h->plt_offset != (bfd_vma) -1)
+  if (h->plt.offset != (bfd_vma) -1)
     {
       asection *s;
       bfd_byte *p;
@@ -6945,17 +7115,17 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       p += 4;
       bfd_put_32 (output_bfd, STUB_LI16 + h->dynindx, p);
 
-      BFD_ASSERT (h->plt_offset <= s->_raw_size);
-      memcpy (s->contents + h->plt_offset, stub, MIPS_FUNCTION_STUB_SIZE);
+      BFD_ASSERT (h->plt.offset <= s->_raw_size);
+      memcpy (s->contents + h->plt.offset, stub, MIPS_FUNCTION_STUB_SIZE);
 
-      /* Mark the symbol as undefined.  plt_offset != -1 occurs
+      /* Mark the symbol as undefined.  plt.offset != -1 occurs
 	 only for the referenced symbol.  */
       sym->st_shndx = SHN_UNDEF;
 
       /* The run-time linker uses the st_value field of the symbol
 	 to reset the global offset table entry for this external
 	 to its stub address when unlinking a shared object.  */
-      gval = s->output_section->vma + s->output_offset + h->plt_offset;
+      gval = s->output_section->vma + s->output_offset + h->plt.offset;
       sym->st_value = gval;
     }
 
@@ -6973,7 +7143,7 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the global offset table.  Set its
 	 value to the corresponding got entry, if needed.  */
-      if (h->got_offset == (bfd_vma) -1)
+      if (h->got.offset == (bfd_vma) -1)
 	{
 	  offset = (h->dynindx - g->global_gotsym + g->local_gotno) * 4;
 	  BFD_ASSERT (g->local_gotno * 4 <= offset
@@ -7612,6 +7782,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 
 #define elf_backend_collect		true
 #define elf_backend_type_change_ok	true
+#define elf_backend_can_gc_sections	true
 #define elf_info_to_howto		0
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global
@@ -7658,5 +7829,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 					mips_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					mips_elf_finish_dynamic_sections
+#define elf_backend_gc_mark_hook	mips_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook	mips_elf_gc_sweep_hook
 
 #include "elf32-target.h"

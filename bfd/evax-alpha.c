@@ -105,6 +105,8 @@ static bfd_byte *evax_bfd_get_relocated_section_contents
 static boolean evax_bfd_relax_section
   PARAMS ((bfd *abfd, asection *section, struct bfd_link_info *link_info,
 	   boolean *again));
+static boolean evax_bfd_gc_sections
+  PARAMS ((bfd *abfd, struct bfd_link_info *link_info));
 static struct bfd_link_hash_table *evax_bfd_link_hash_table_create
   PARAMS ((bfd *abfd));
 static boolean evax_bfd_link_add_symbols
@@ -1653,6 +1655,18 @@ evax_bfd_relax_section (abfd, section, link_info, again)
 #if EVAX_DEBUG
   evax_debug (1, "evax_bfd_relax_section(%p, %s, %p, <ret>)\n",
 					abfd, section->name, link_info);
+#endif
+  return true;
+}
+
+static boolean
+evax_bfd_gc_sections (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info;
+     const char *entry;
+{
+#if EVAX_DEBUG
+  evax_debug (1, "evax_bfd_gc_sections(%p, %p)\n", abfd, link_info);
 #endif
   return true;
 }

@@ -965,6 +965,9 @@ typedef struct sec
           else up the line will take care of it later.  */
 #define SEC_LINKER_CREATED 0x800000
 
+        /* This section should not be subject to garbage collection.  */
+#define SEC_KEEP 0x1000000
+
         /*  End of section flags.  */
 
         /* Some internal packed boolean fields.  */
@@ -977,6 +980,9 @@ typedef struct sec
 
         /* A mark flag used by some of the linker backends.  */
        unsigned int linker_mark : 1;
+
+        /* A mark flag used by some linker backends for garbage collection.  */
+       unsigned int gc_mark : 1;
 
         /* End of internal packed boolean fields.  */
 
@@ -2129,6 +2135,26 @@ instruction. */
 significant 8 bits of a 24 bit word are placed into the least
 significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
+
+/* These two relocations are used by the linker to determine which of 
+the entries in a C++ virtual function table are actually used.  When
+the --gc-sections option is given, the linker will zero out the entries
+that are not used, so that the code for those functions need not be
+included in the output.
+
+VTABLE_INHERIT is a zero-space relocation used to describe to the
+linker the inheritence tree of a C++ virtual function table.  The
+relocation's symbol should be the parent class' vtable, and the
+relocation should be located at the child vtable.
+
+VTABLE_ENTRY is a zero-space relocation that describes the use of a
+virtual function table entry.  The reloc's symbol should refer to the
+table of the class mentioned in the code.  Off of that base, an offset
+describes the entry that is being used.  For Rela hosts, this offset 
+is stored in the reloc's addend.  For Rel hosts, we are forced to put
+this offset in the reloc's section offset. */
+  BFD_RELOC_VTABLE_INHERIT,
+  BFD_RELOC_VTABLE_ENTRY,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
@@ -2577,6 +2603,9 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_relax_section(abfd, section, link_info, again) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 
+#define bfd_gc_sections(abfd, link_info) \
+       BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
+
 #define bfd_link_hash_table_create(abfd) \
        BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 
@@ -2871,7 +2900,8 @@ CAT(NAME,_bfd_relax_section),\
 CAT(NAME,_bfd_link_hash_table_create),\
 CAT(NAME,_bfd_link_add_symbols),\
 CAT(NAME,_bfd_final_link),\
-CAT(NAME,_bfd_link_split_section)
+CAT(NAME,_bfd_link_split_section),\
+CAT(NAME,_bfd_gc_sections)
   int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
   bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
                     struct bfd_link_info *, struct bfd_link_order *,
@@ -2895,7 +2925,10 @@ CAT(NAME,_bfd_link_split_section)
    /* Should this section be split up into smaller pieces during linking.  */
   boolean (*_bfd_link_split_section) PARAMS ((bfd *, struct sec *));
 
-  /* Routines to handle dynamic symbols and relocs.  */
+   /* Remove sections that are not referenced from the output.  */
+  boolean (*_bfd_gc_sections) PARAMS ((bfd *, struct bfd_link_info *));
+
+   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME)\
 CAT(NAME,_get_dynamic_symtab_upper_bound),\
 CAT(NAME,_canonicalize_dynamic_symtab),\

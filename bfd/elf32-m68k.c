@@ -1,5 +1,5 @@
 /* Motorola 68k series support for 32-bit ELF
-   Copyright 1993, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -38,6 +38,8 @@ static boolean elf_m68k_check_relocs
 	   const Elf_Internal_Rela *));
 static boolean elf_m68k_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static boolean elf_m68k_adjust_dynindx
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_m68k_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_m68k_relocate_section
@@ -414,12 +416,12 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got_offset != (bfd_vma) -1)
+	      if (h->got.offset != (bfd_vma) -1)
 		{
 		  /* We have already allocated space in the .got.  */
 		  break;
 		}
-	      h->got_offset = sgot->_raw_size;
+	      h->got.offset = sgot->_raw_size;
 
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (h->dynindx == -1)
@@ -699,7 +701,7 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 	  h->root.u.def.value = s->_raw_size;
 	}
 
-      h->plt_offset = s->_raw_size;
+      h->plt.offset = s->_raw_size;
 
       /* Make room for this entry.  */
       s->_raw_size += PLT_ENTRY_SIZE;
@@ -911,7 +913,8 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 						  s->output_section);
 		  target = bfd_get_section_by_name (output_bfd, outname + 5);
 		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0)
+		      && (target->flags & SEC_READONLY) != 0
+		      && (target->flags & SEC_ALLOC) != 0)
 		    reltext = true;
 		}
 
@@ -984,6 +987,51 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 	}
     }
 
+  /* If we are generating a shared library, we generate a section
+     symbol for each output section for which we might need to copy
+     relocs.  These are local symbols, which means that they must come
+     first in the dynamic symbol table.  That means we must increment
+     the dynamic symbol index of every other dynamic symbol.  */
+  if (info->shared)
+    {
+      int c;
+
+      c = 0;
+      for (s = output_bfd->sections; s != NULL; s = s->next)
+	{
+	  if ((s->flags & SEC_LINKER_CREATED) != 0
+	      || (s->flags & SEC_ALLOC) == 0)
+	    continue;
+
+	  elf_section_data (s)->dynindx = c + 1;
+
+	  /* These symbols will have no names, so we don't need to
+             fiddle with dynstr_index.  */
+
+	  ++c;
+	}
+
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_m68k_adjust_dynindx,
+			      (PTR) &c);
+      elf_hash_table (info)->dynsymcount += c;
+    }
+
+  return true;
+}
+
+/* Increment the index of a dynamic symbol by a given amount.  Called
+   via elf_link_hash_traverse.  */
+
+static boolean
+elf_m68k_adjust_dynindx (h, cparg)
+     struct elf_link_hash_entry *h;
+     PTR cparg;
+{
+  int *cp = (int *) cparg;
+
+  if (h->dynindx != -1)
+    h->dynindx += *cp;
   return true;
 }
 
@@ -1114,7 +1162,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		    || r_type == R_68K_PLT8O
 		    || r_type == R_68K_PLT16O
 		    || r_type == R_68K_PLT32O)
-		   && h->plt_offset != (bfd_vma) -1)
+		   && h->plt.offset != (bfd_vma) -1)
 		  || ((r_type == R_68K_GOT8O
 		       || r_type == R_68K_GOT16O
 		       || r_type == R_68K_GOT32O
@@ -1192,7 +1240,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    if (h != NULL)
 	      {
-		off = h->got_offset;
+		off = h->got.offset;
 		BFD_ASSERT (off != (bfd_vma) -1);
 
 		if (!elf_hash_table (info)->dynamic_sections_created
@@ -1218,7 +1266,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		      {
 			bfd_put_32 (output_bfd, relocation,
 				    sgot->contents + off);
-			h->got_offset |= 1;
+			h->got.offset |= 1;
 		      }
 		  }
 	      }
@@ -1286,7 +1334,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h == NULL)
 	    break;
 
-	  if (h->plt_offset == (bfd_vma) -1)
+	  if (h->plt.offset == (bfd_vma) -1)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
@@ -1302,7 +1350,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation = (splt->output_section->vma
 			+ splt->output_offset
-			+ h->plt_offset);
+			+ h->plt.offset);
 	  break;
 
 	case R_68K_PLT8O:
@@ -1310,7 +1358,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_68K_PLT32O:
 	  /* Relocation is the offset of the entry for this symbol in
 	     the procedure linkage table.  */
-	  BFD_ASSERT (h != NULL && h->plt_offset == (bfd_vma) -1);
+	  BFD_ASSERT (h != NULL && h->plt.offset != (bfd_vma) -1);
 
 	  if (splt == NULL)
 	    {
@@ -1318,7 +1366,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	      BFD_ASSERT (splt != NULL);
 	    }
 
-	  relocation = h->plt_offset;
+	  relocation = h->plt.offset;
 
 	  /* This relocation does not use the addend.  */
 	  rel->r_addend = 0;
@@ -1442,8 +1490,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 			  osec = sec->output_section;
 			  indx = elf_section_data (osec)->dynindx;
-			  if (indx == 0)
-			    abort ();
+			  BFD_ASSERT (indx > 0);
 			}
 
 		      relocate = false;
@@ -1526,7 +1573,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   dynobj = elf_hash_table (info)->dynobj;
 
-  if (h->plt_offset != (bfd_vma) -1)
+  if (h->plt.offset != (bfd_vma) -1)
     {
       asection *splt;
       asection *sgot;
@@ -1549,7 +1596,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 corresponds to this symbol.  This is the index of this symbol
 	 in all the symbols for which we are making plt entries.  The
 	 first entry in the procedure linkage table is reserved.  */
-      plt_index = h->plt_offset / PLT_ENTRY_SIZE - 1;
+      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
 
       /* Get the offset into the .got table of the entry that
 	 corresponds to this function.  Each .got entry is 4 bytes.
@@ -1557,7 +1604,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
       got_offset = (plt_index + 3) * 4;
 
       /* Fill in the entry in the procedure linkage table.  */
-      memcpy (splt->contents + h->plt_offset, elf_m68k_plt_entry,
+      memcpy (splt->contents + h->plt.offset, elf_m68k_plt_entry,
 	      PLT_ENTRY_SIZE);
       /* The offset is relative to the first extension word.  */
       bfd_put_32 (output_bfd,
@@ -1565,19 +1612,19 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 		   + sgot->output_offset
 		   + got_offset
 		   - (splt->output_section->vma
-		      + h->plt_offset + 2)),
-		  splt->contents + h->plt_offset + 4);
+		      + h->plt.offset + 2)),
+		  splt->contents + h->plt.offset + 4);
 
       bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rela),
-		  splt->contents + h->plt_offset + 10);
-      bfd_put_32 (output_bfd, - (h->plt_offset + 16),
-		  splt->contents + h->plt_offset + 16);
+		  splt->contents + h->plt.offset + 10);
+      bfd_put_32 (output_bfd, - (h->plt.offset + 16),
+		  splt->contents + h->plt.offset + 16);
 
       /* Fill in the entry in the global offset table.  */
       bfd_put_32 (output_bfd,
 		  (splt->output_section->vma
 		   + splt->output_offset
-		   + h->plt_offset
+		   + h->plt.offset
 		   + 8),
 		  sgot->contents + got_offset);
 
@@ -1599,7 +1646,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
-  if (h->got_offset != (bfd_vma) -1)
+  if (h->got.offset != (bfd_vma) -1)
     {
       asection *sgot;
       asection *srela;
@@ -1614,7 +1661,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got_offset &~ 1));
+		       + (h->got.offset &~ 1));
 
       /* If this is a -Bsymbolic link, and the symbol is defined
 	 locally, we just want to emit a RELATIVE reloc.  Likewise if
@@ -1628,12 +1675,12 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
 					     (sgot->contents
-					      + (h->got_offset & ~1)));
+					      + (h->got.offset & ~1)));
 	}
       else
 	{
 	  bfd_put_32 (output_bfd, (bfd_vma) 0,
-		      sgot->contents + (h->got_offset & ~1));
+		      sgot->contents + (h->got.offset & ~1));
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_68K_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
@@ -1795,6 +1842,50 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
     }
 
   elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+
+  if (info->shared)
+    {
+      asection *sdynsym;
+      asection *s;
+      Elf_Internal_Sym sym;
+      int c;
+
+      /* Set up the section symbols for the output sections.  */
+
+      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
+      BFD_ASSERT (sdynsym != NULL);
+
+      sym.st_size = 0;
+      sym.st_name = 0;
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+      sym.st_other = 0;
+
+      c = 0;
+      for (s = output_bfd->sections; s != NULL; s = s->next)
+	{
+	  int indx;
+
+	  if (elf_section_data (s)->dynindx == 0)
+	    continue;
+
+	  sym.st_value = s->vma;
+
+	  indx = elf_section_data (s)->this_idx;
+	  BFD_ASSERT (indx > 0);
+	  sym.st_shndx = indx;
+
+	  bfd_elf32_swap_symbol_out (output_bfd, &sym,
+				     (PTR) (((Elf32_External_Sym *)
+					     sdynsym->contents)
+					    + elf_section_data (s)->dynindx));
+
+	  ++c;
+	}
+
+      /* Set the sh_info field of the output .dynsym section to the
+         index of the first global symbol.  */
+      elf_section_data (sdynsym->output_section)->this_hdr.sh_info = c + 1;
+    }
 
   return true;
 }

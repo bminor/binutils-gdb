@@ -92,6 +92,12 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void mn10300_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static boolean mn10300_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static asection *mn10300_elf_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *info, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean mn10300_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 static boolean mn10300_elf_symbol_address_p
@@ -115,6 +121,11 @@ enum reloc_type
   R_MN10300_PCREL32,
   R_MN10300_PCREL16,
   R_MN10300_PCREL8,
+
+  /* These are GNU extensions to enable C++ vtable garbage collection.  */
+  R_MN10300_GNU_VTINHERIT,
+  R_MN10300_GNU_VTENTRY,
+
   R_MN10300_MAX
 };
 
@@ -218,6 +229,36 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xff,
 	 0xff,
 	 true),
+
+  /* GNU extension to record C++ vtable hierarchy */
+  HOWTO (R_MN10300_GNU_VTINHERIT, /* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_MN10300_GNU_VTINHERIT", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* GNU extension to record C++ vtable member usage */
+  HOWTO (R_MN10300_GNU_VTENTRY,	/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_MN10300_GNU_VTENTRY", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 struct mn10300_reloc_map
@@ -235,6 +276,8 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_32_PCREL, R_MN10300_PCREL32, },
   { BFD_RELOC_16_PCREL, R_MN10300_PCREL16, },
   { BFD_RELOC_8_PCREL, R_MN10300_PCREL8, },
+  { BFD_RELOC_VTABLE_INHERIT, R_MN10300_GNU_VTINHERIT },
+  { BFD_RELOC_VTABLE_ENTRY, R_MN10300_GNU_VTENTRY },
 };
 
 static reloc_howto_type *
@@ -270,6 +313,109 @@ mn10300_info_to_howto (abfd, cache_ptr, dst)
   cache_ptr->howto = &elf_mn10300_howto_table[r_type];
 }
 
+/* Look through the relocs for a section during the first phase.
+   Since we don't do .gots or .plts, we just need to consider the
+   virtual table relocs for gc.  */
+
+static boolean
+mn10300_elf_check_relocs (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+
+  if (info->relocateable)
+    return true;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  if (!elf_bad_symtab (abfd))
+    sym_hashes_end -= symtab_hdr->sh_info;
+
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      struct elf_link_hash_entry *h;
+      unsigned long r_symndx;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+	h = NULL;
+      else
+	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	/* This relocation describes the C++ object vtable hierarchy.
+	   Reconstruct it for later use during GC.  */
+	case R_MN10300_GNU_VTINHERIT:
+	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return false;
+	  break;
+
+	/* This relocation describes which C++ vtable entries are actually
+	   used.  Record for later use during GC.  */
+	case R_MN10300_GNU_VTENTRY:
+	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return false;
+	  break;
+	}
+    }
+
+  return true;
+}
+
+/* Return the section that should be marked against GC for a given
+   relocation.  */
+
+static asection *
+mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
+{
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_MN10300_GNU_VTINHERIT:
+	case R_MN10300_GNU_VTENTRY:
+	  break;
+
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+	    }
+	}
+    }
+  else
+    {
+      if (!(elf_bad_symtab (abfd)
+	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+		&& sym->st_shndx != SHN_COMMON))
+	{
+	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
+	}
+    }
+
+  return NULL;
+}
+
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
 mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
@@ -292,7 +438,6 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 
   switch (r_type)
     {
-
     case R_MN10300_NONE:
       return bfd_reloc_ok;
 
@@ -352,6 +497,10 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
+    case R_MN10300_GNU_VTINHERIT:
+    case R_MN10300_GNU_VTENTRY:
+      return bfd_reloc_ok;
+
     default:
       return bfd_reloc_notsupported;
     }
@@ -395,6 +544,11 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
       howto = elf_mn10300_howto_table + r_type;
+
+      /* Just skip the vtable gc relocs.  */
+      if (r_type == R_MN10300_GNU_VTINHERIT
+	  || r_type == R_MN10300_GNU_VTENTRY)
+	continue;
 
       if (info->relocateable)
 	{
@@ -2556,9 +2710,12 @@ _bfd_mn10300_elf_object_p (abfd)
 #define ELF_MACHINE_CODE	EM_CYGNUS_MN10300
 #define ELF_MAXPAGESIZE		0x1000
 
-#define elf_info_to_howto	mn10300_info_to_howto
-#define elf_info_to_howto_rel	0
-#define elf_backend_relocate_section mn10300_elf_relocate_section
+#define elf_info_to_howto		mn10300_info_to_howto
+#define elf_info_to_howto_rel		0
+#define elf_backend_can_gc_sections	1
+#define elf_backend_check_relocs	mn10300_elf_check_relocs
+#define elf_backend_gc_mark_hook	mn10300_elf_gc_mark_hook
+#define elf_backend_relocate_section	mn10300_elf_relocate_section
 #define bfd_elf32_bfd_relax_section	mn10300_elf_relax_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 				mn10300_elf_get_relocated_section_contents

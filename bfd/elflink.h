@@ -1459,12 +1459,12 @@ elf_link_add_object_symbols (abfd, info)
 		      /* Copy over the global table offset entry.
 			 This may have been already set up by a
 			 check_relocs routine.  */
-		      if (ht->got_offset == (bfd_vma) -1)
+		      if (ht->got.offset == (bfd_vma) -1)
 			{
-			  ht->got_offset = hi->got_offset;
-			  hi->got_offset = (bfd_vma) -1;
+			  ht->got.offset = hi->got.offset;
+			  hi->got.offset = (bfd_vma) -1;
 			}
-		      BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
+		      BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
 
 		      if (ht->dynindx == -1)
 			{
@@ -1560,12 +1560,12 @@ elf_link_add_object_symbols (abfd, info)
 			  /* Copy over the global table offset entry.
                              This may have been already set up by a
                              check_relocs routine.  */
-			  if (h->got_offset == (bfd_vma) -1)
+			  if (h->got.offset == (bfd_vma) -1)
 			    {
-			      h->got_offset = hi->got_offset;
-			      hi->got_offset = (bfd_vma) -1;
+			      h->got.offset = hi->got.offset;
+			      hi->got.offset = (bfd_vma) -1;
 			    }
-			  BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
+			  BFD_ASSERT (hi->got.offset == (bfd_vma) -1);
 
 			  if (h->dynindx == -1)
 			    {
@@ -4884,7 +4884,8 @@ elf_link_input_bfd (finfo, input_bfd)
       /* Write out the modified section contents.  */
       if (elf_section_data (o)->stab_info == NULL)
 	{
-	  if (! bfd_set_section_contents (output_bfd, o->output_section,
+	  if (! (o->flags & SEC_EXCLUDE) &&
+	      ! bfd_set_section_contents (output_bfd, o->output_section,
 					  contents, o->output_offset,
 					  (o->_cooked_size != 0
 					   ? o->_cooked_size
@@ -5297,4 +5298,547 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
   /* Subtract out the addend, because it will get added back in by the normal
      processing.  */
   return relocation - linker_section_ptr->addend;
+}
+
+/* Garbage collect unused sections.  */
+
+static boolean elf_gc_mark 
+  PARAMS ((struct bfd_link_info *info, asection *sec,
+	   asection * (*gc_mark_hook)
+	     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+		      struct elf_link_hash_entry *, Elf_Internal_Sym *))));
+
+static boolean elf_gc_sweep
+  PARAMS ((struct bfd_link_info *info,
+	   boolean (*gc_sweep_hook)
+	     PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *o,
+		      const Elf_Internal_Rela *relocs))));
+
+static boolean elf_gc_sweep_symbol
+  PARAMS ((struct elf_link_hash_entry *h, PTR idxptr));
+
+static boolean elf_gc_allocate_got_offsets
+  PARAMS ((struct elf_link_hash_entry *h, PTR offarg));
+
+static boolean elf_gc_propogate_vtable_entries_used
+  PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
+
+static boolean elf_gc_smash_unused_vtentry_relocs
+  PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
+
+/* The mark phase of garbage collection.  For a given section, mark
+   it, and all the sections which define symbols to which it refers.  */
+
+static boolean
+elf_gc_mark (info, sec, gc_mark_hook)
+     struct bfd_link_info *info;
+     asection *sec;
+     asection * (*gc_mark_hook)
+       PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+		struct elf_link_hash_entry *, Elf_Internal_Sym *));
+{
+  boolean ret = true;
+  
+  sec->gc_mark = 1;
+
+  /* Look through the section relocs.  */
+
+  if ((sec->flags & SEC_RELOC) != 0 && sec->reloc_count > 0)
+    {
+      Elf_Internal_Rela *relstart, *rel, *relend;
+      Elf_Internal_Shdr *symtab_hdr;
+      struct elf_link_hash_entry **sym_hashes;
+      size_t nlocsyms;
+      size_t extsymoff;
+      Elf_External_Sym *locsyms, *freesyms = NULL;
+      bfd *input_bfd = sec->owner;
+
+      /* GCFIXME: how to arrange so that relocs and symbols are not
+	 reread continually?  */
+
+      symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+      sym_hashes = elf_sym_hashes (input_bfd);
+
+      /* Read the local symbols.  */
+      if (elf_bad_symtab (input_bfd))
+	{
+	  nlocsyms = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+          extsymoff = 0;
+	}
+      else
+	extsymoff = nlocsyms = symtab_hdr->sh_info;
+      if (symtab_hdr->contents)
+	locsyms = (Elf_External_Sym *) symtab_hdr->contents;
+      else if (nlocsyms == 0)
+	locsyms = NULL;
+      else
+	{
+	  locsyms = freesyms =
+	    bfd_malloc (nlocsyms * sizeof (Elf_External_Sym));
+	  if (freesyms == NULL
+	      || bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_read (locsyms, sizeof (Elf_External_Sym),
+			    nlocsyms, input_bfd)
+		  != nlocsyms * sizeof (Elf_External_Sym)))
+	    {
+	      ret = false;
+	      goto out1;
+	    }
+	}
+
+      /* Read the relocations.  */
+      relstart = (NAME(_bfd_elf,link_read_relocs)
+		  (sec->owner, sec, NULL, (Elf_Internal_Rela *) NULL,
+		   info->keep_memory));
+      if (relstart == NULL)
+	{
+	  ret = false;
+	  goto out1;
+	}
+      relend = relstart + sec->reloc_count;
+
+      for (rel = relstart; rel < relend; rel++)
+	{
+	  unsigned long r_symndx;
+	  asection *rsec;
+	  struct elf_link_hash_entry *h;
+	  Elf_Internal_Sym s;
+
+	  r_symndx = ELF_R_SYM (rel->r_info);
+	  if (r_symndx == 0)
+	    continue;
+
+	  if (elf_bad_symtab (sec->owner))
+	    {
+	      elf_swap_symbol_in (input_bfd, &locsyms[r_symndx], &s);
+	      if (ELF_ST_BIND (s.st_info) == STB_LOCAL)
+	        rsec = (*gc_mark_hook)(sec->owner, info, rel, NULL, &s);
+	      else
+		{
+	          h = sym_hashes[r_symndx - extsymoff];
+	          rsec = (*gc_mark_hook)(sec->owner, info, rel, h, NULL);
+		}
+	    }
+	  else if (r_symndx >= nlocsyms)
+	    {
+	      h = sym_hashes[r_symndx - extsymoff];
+	      rsec = (*gc_mark_hook)(sec->owner, info, rel, h, NULL);
+	    }
+	  else
+	    {
+	      elf_swap_symbol_in (input_bfd, &locsyms[r_symndx], &s);
+	      rsec = (*gc_mark_hook)(sec->owner, info, rel, NULL, &s);
+	    }
+
+	  if (rsec && !rsec->gc_mark)
+	    if (!elf_gc_mark (info, rsec, gc_mark_hook))
+	      {
+		ret = false;
+		goto out2;
+	      }
+	}
+
+    out2:
+      if (!info->keep_memory)
+	free (relstart);
+    out1:
+      if (freesyms)
+	free (freesyms);
+    }
+
+  return ret;
+}
+
+/* The sweep phase of garbage collection.  Remove all garbage sections.  */
+
+static boolean
+elf_gc_sweep (info, gc_sweep_hook)
+     struct bfd_link_info *info;
+     boolean (*gc_sweep_hook)
+       PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *o,
+		const Elf_Internal_Rela *relocs));
+{
+  bfd *sub;
+
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      asection *o;
+
+      for (o = sub->sections; o != NULL; o = o->next)
+	{
+	  /* Keep special sections.  Keep .debug sections.  */
+	  if ((o->flags & SEC_LINKER_CREATED)
+	      || (o->flags & SEC_DEBUGGING))
+	    o->gc_mark = 1;
+
+	  if (o->gc_mark)
+	    continue;
+
+	  /* Skip sweeping sections already excluded.  */
+	  if (o->flags & SEC_EXCLUDE)
+	    continue;
+
+	  /* Since this is early in the link process, it is simple
+	     to remove a section from the output.  */
+	  o->flags |= SEC_EXCLUDE;
+
+	  /* But we also have to update some of the relocation
+	     info we collected before.  */
+	  if (gc_sweep_hook
+	      && (o->flags & SEC_RELOC) && o->reloc_count > 0)
+	    {
+	      Elf_Internal_Rela *internal_relocs;
+	      boolean r;
+
+	      internal_relocs = (NAME(_bfd_elf,link_read_relocs)
+				 (o->owner, o, NULL, NULL, info->keep_memory));
+	      if (internal_relocs == NULL)
+		return false;
+
+	      r = (*gc_sweep_hook)(o->owner, info, o, internal_relocs);
+
+	      if (!info->keep_memory)
+		free (internal_relocs);
+
+	      if (!r)
+		return false;
+	    }
+	}
+    }
+
+  /* Remove the symbols that were in the swept sections from the dynamic
+     symbol table.  GCFIXME: Anyone know how to get them out of the
+     static symbol table as well?  */
+  {
+    int i = 0;
+
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_gc_sweep_symbol,
+			    (PTR) &i);
+
+    elf_hash_table (info)->dynsymcount = i;
+  }
+}
+
+/* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
+
+static boolean
+elf_gc_sweep_symbol (h, idxptr)
+     struct elf_link_hash_entry *h;
+     PTR idxptr;
+{
+  int *idx = (int *) idxptr;
+
+  if (h->dynindx != -1
+      && ((h->root.type != bfd_link_hash_defined
+	   && h->root.type != bfd_link_hash_defweak)
+	  || h->root.u.def.section->gc_mark))
+    h->dynindx = (*idx)++;
+
+  return true;
+}
+
+/* Propogate collected vtable information.  This is called through
+   elf_link_hash_traverse.  */
+
+static boolean
+elf_gc_propogate_vtable_entries_used (h, okp)
+     struct elf_link_hash_entry *h;
+     PTR okp;
+{
+  /* Those that are not vtables. */
+  if (h->vtable_parent == NULL)
+    return true;
+
+  /* Those vtables that do not have parents, we cannot merge.  */
+  if (h->vtable_parent == (struct elf_link_hash_entry *) -1)
+    return true;
+
+  /* If we've already been done, exit.  */
+  if (h->vtable_entries_used && h->vtable_entries_used[-1])
+    return true;
+
+  /* Make sure the parent's table is up to date.  */
+  elf_gc_propogate_vtable_entries_used (h->vtable_parent, okp);
+
+  if (h->vtable_entries_used == NULL)
+    {
+      /* None of this table's entries were referenced.  Re-use the
+	 parent's table.  */
+      h->vtable_entries_used = h->vtable_parent->vtable_entries_used;
+    }
+  else
+    {
+      size_t n;
+      boolean *cu, *pu;
+
+      /* Or the parent's entries into ours.  */
+      cu = h->vtable_entries_used;
+      cu[-1] = true;
+      pu = h->vtable_parent->vtable_entries_used;
+      if (pu != NULL)
+	{
+	  n = h->vtable_parent->size / FILE_ALIGN;
+	  while (--n != 0)
+	    {
+	      if (*pu) *cu = true;
+	      pu++, cu++;
+	    }
+	}
+    }
+
+  return true;
+}
+
+static boolean
+elf_gc_smash_unused_vtentry_relocs (h, okp)
+     struct elf_link_hash_entry *h;
+     PTR okp;
+{
+  asection *sec;
+  bfd_vma hstart, hend;
+  Elf_Internal_Rela *relstart, *relend, *rel;
+
+  /* Take care of both those symbols that do not describe vtables as
+     well as those that are not loaded.  */
+  if (h->vtable_parent == NULL)
+    return true;
+
+  BFD_ASSERT (h->root.type == bfd_link_hash_defined 
+	      || h->root.type == bfd_link_hash_defweak);
+
+  sec = h->root.u.def.section;
+  hstart = h->root.u.def.value;
+  hend = hstart + h->size;
+
+  relstart = (NAME(_bfd_elf,link_read_relocs)
+	      (sec->owner, sec, NULL, (Elf_Internal_Rela *) NULL, true));
+  if (!relstart)
+    return *(boolean *)okp = false;
+  relend = relstart + sec->reloc_count;
+
+  for (rel = relstart; rel < relend; ++rel)
+    if (rel->r_offset >= hstart && rel->r_offset < hend)
+      {
+	/* If the entry is in use, do nothing.  */
+	if (h->vtable_entries_used)
+	  {
+	    bfd_vma entry = (rel->r_offset - hstart) / FILE_ALIGN;
+	    if (h->vtable_entries_used[entry])
+	      continue;
+	  }
+	/* Otherwise, kill it.  */
+	rel->r_offset = rel->r_info = rel->r_addend = 0;
+      }
+
+  return true;
+}
+
+/* Do mark and sweep of unused sections.  */
+
+boolean
+elf_gc_sections (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  boolean ok = true;
+  bfd *sub;
+  asection * (*gc_mark_hook)
+    PARAMS ((bfd *abfd, struct bfd_link_info *, Elf_Internal_Rela *,
+             struct elf_link_hash_entry *h, Elf_Internal_Sym *));
+
+  if (!get_elf_backend_data (abfd)->can_gc_sections
+      || info->relocateable)
+    return true;
+
+  /* Apply transitive closure to the vtable entry usage info.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_gc_propogate_vtable_entries_used,
+			  (PTR) &ok);
+  if (!ok)
+    return false;
+
+  /* Kill the vtable relocations that were not used.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_gc_smash_unused_vtentry_relocs,
+			  (PTR) &ok);
+  if (!ok)
+    return false;
+
+  /* Grovel through relocs to find out who stays ...  */
+
+  gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      asection *o;
+      for (o = sub->sections; o != NULL; o = o->next)
+	{
+	  if (o->flags & SEC_KEEP)
+  	    if (!elf_gc_mark (info, o, gc_mark_hook))
+	      return false;
+	}
+    }
+
+  /* ... and mark SEC_EXCLUDE for those that go.  */
+  if (!elf_gc_sweep(info, get_elf_backend_data (abfd)->gc_sweep_hook))
+    return false;
+
+  return true;
+}
+
+/* Called from check_relocs to record the existance of a VTINHERIT reloc.  */
+
+boolean
+elf_gc_record_vtinherit (abfd, sec, h, offset)
+     bfd *abfd;
+     asection *sec;
+     struct elf_link_hash_entry *h;
+     bfd_vma offset;
+{
+  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  struct elf_link_hash_entry **search, *child;
+  bfd_size_type extsymcount;
+
+  /* The sh_info field of the symtab header tells us where the
+     external symbols start.  We don't care about the local symbols at
+     this point.  */
+  extsymcount = elf_tdata (abfd)->symtab_hdr.sh_size/sizeof (Elf_External_Sym);
+  if (!elf_bad_symtab (abfd))
+    extsymcount -= elf_tdata (abfd)->symtab_hdr.sh_info;
+
+  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes_end = sym_hashes + extsymcount;
+
+  /* Hunt down the child symbol, which is in this section at the same
+     offset as the relocation.  */
+  for (search = sym_hashes; search != sym_hashes_end; ++search)
+    {
+      if ((child = *search) != NULL
+	  && (child->root.type == bfd_link_hash_defined
+	      || child->root.type == bfd_link_hash_defweak)
+	  && child->root.u.def.section == sec
+	  && child->root.u.def.value == offset)
+	goto win;
+    }
+
+  (*_bfd_error_handler) ("%s: %s+%lu: No symbol found for INHERIT",
+			 bfd_get_filename (abfd), sec->name,
+			 (unsigned long)offset);
+  bfd_set_error (bfd_error_invalid_operation);
+  return false;
+
+win:
+  if (!h)
+    {
+      /* This *should* only be the absolute section.  It could potentially
+	 be that someone has defined a non-global vtable though, which
+	 would be bad.  It isn't worth paging in the local symbols to be
+	 sure though; that case should simply be handled by the assembler.  */
+
+      child->vtable_parent = (struct elf_link_hash_entry *) -1;
+    }
+  else
+    child->vtable_parent = h;
+
+  return true;
+}
+
+/* Called from check_relocs to record the existance of a VTENTRY reloc.  */
+
+boolean
+elf_gc_record_vtentry (abfd, sec, h, addend)
+     bfd *abfd;
+     asection *sec;
+     struct elf_link_hash_entry *h;
+     bfd_vma addend;
+{
+  if (h->vtable_entries_used == NULL)
+    {
+      /* Allocate one extra entry for use as a "done" flag for the
+	 consolidation pass.  */
+      size_t size = (h->size / FILE_ALIGN + 1) * sizeof(boolean);
+      h->vtable_entries_used = (boolean *) bfd_alloc (abfd, size);
+      if (h->vtable_entries_used == NULL)
+	return false;
+
+      /* And arrange for that done flag to be at index -1.  */
+      memset (h->vtable_entries_used++, 0, size);
+    }
+  h->vtable_entries_used[addend / FILE_ALIGN] = true;
+
+  return true;
+}
+
+/* And an accompanying bit to work out final got entry offsets once 
+   we're done.  Should be called from final_link.  */
+
+boolean
+elf_gc_common_finalize_got_offsets (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      bfd *i;
+      bfd_vma off[2], gotoff = 0;
+
+      /* Do the local .got entries first.  */
+      for (i = info->input_bfds; i; i = i->link_next)
+	{
+	  bfd_signed_vma *local_got = elf_local_got_refcounts (i);
+	  bfd_size_type j, locsymcount;
+	  Elf_Internal_Shdr *symtab_hdr;
+
+	  if (!local_got)
+	    continue;
+
+	  symtab_hdr = &elf_tdata (i)->symtab_hdr;
+	  if (elf_bad_symtab (i))
+	    locsymcount = symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+	  else
+	    locsymcount = symtab_hdr->sh_info;
+
+	  for (j = 0; j < locsymcount; ++j)
+	    local_got[j] = (local_got[j] > 0 ? gotoff++ : (bfd_vma) - 1);
+	}
+
+      /* Then the global .got and .plt entries.  */
+      off[0] = gotoff;
+      off[1] = 0;
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_gc_allocate_got_offsets,
+			      (PTR) off);
+    }
+
+  return true;
+}
+
+/* We need a special top-level link routine to convert got reference counts
+   to real got offsets.  */
+
+static boolean
+elf_gc_allocate_got_offsets (h, offarg)
+     struct elf_link_hash_entry *h;
+     PTR offarg;
+{
+  bfd_vma *off = (bfd_vma *) offarg;
+
+  h->got.offset = (h->got.refcount > 0 ? off[0]++ : (bfd_vma) - 1);
+
+  return true;
+}
+
+/* Many folk need no more in the way of final link than this, once
+   got entry reference counting is enabled.  */
+
+boolean
+elf_gc_common_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  if (!elf_gc_common_finalize_got_offsets (abfd, info))
+    return false;
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  return elf_bfd_final_link (abfd, info);
 }
