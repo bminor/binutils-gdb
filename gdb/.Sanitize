@@ -450,6 +450,7 @@ z8k-tdep.c
 Things-to-lose:
 
 HOW_TO_RELEASE
+gdbcfgxref
 
 Do-last:
 
