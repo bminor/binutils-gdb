@@ -1,3 +1,7 @@
+2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (tui-interp.o): Update dependencies.
+
 2003-08-04  David Carlton  <carlton@kealia.com>
 
 	* charset.c (cached_iconv_convert): Add __FILE__ and __LINE__ args
