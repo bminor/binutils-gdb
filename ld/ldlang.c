@@ -2185,7 +2185,7 @@ lang_common ()
     {
       unsigned int power;
 
-      for (power = 1; power <= 16; power <<= 1)
+      for (power = 1; power < 4; power++)
 	bfd_link_hash_traverse (link_info.hash, lang_one_common,
 				(PTR) &power);
     }
@@ -2200,49 +2200,24 @@ lang_one_common (h, info)
 {
   unsigned int power_of_two;
   bfd_vma size;
-  size_t align;
   asection *section;
 
   if (h->type != bfd_link_hash_common)
     return true;
 
   size = h->u.c.size;
-  switch (size)
-    {
-    case 0:
-    case 1:
-      power_of_two = 0;
-      align = 1;
-      break;
-    case 2:
-      power_of_two = 1;
-      align = 2;
-      break;
-    case 3:
-    case 4:
-      power_of_two = 2;
-      align = 4;
-      break;
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-      power_of_two = 3;
-      align = 8;
-      break;
-    default:
-      power_of_two = 4;
-      align = 16;
-      break;
-    }
-	      
-  if (config.sort_common && align != *(unsigned int *) info)
+  power_of_two = h->u.c.alignment_power;
+
+  if (config.sort_common
+      && power_of_two < *(unsigned int *) info
+      && *(unsigned int *) info < 4)
     return true;
 
   section = h->u.c.section;
 
   /* Increase the size of the section.  */
-  section->_raw_size = ALIGN_N (section->_raw_size, align);
+  section->_raw_size = ALIGN_N (section->_raw_size,
+				(bfd_size_type) (1 << power_of_two));
 
   /* Adjust the alignment if necessary.  */
   if (power_of_two > section->alignment_power)

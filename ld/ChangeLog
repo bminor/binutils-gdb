@@ -1,5 +1,10 @@
 Fri Jul 22 12:15:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ldlang.c (lang_common): Pass desired alignment to
+        lang_one_common as power of two.
+	(lang_one_common): Get common symbol alignment from linker hash
+	table entry.  Treat desired alignment as a power of two.
+
 	* ldlang.c (wild_section): Attach all section with the given name,
 	not just the first one.  If there is no name, attach all sections
 	even if the SEC_IS_COMMON flag is set.
