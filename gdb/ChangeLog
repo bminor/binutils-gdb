@@ -1,5 +1,7 @@
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* alloca.c: removed.  alloca is now in libiberty.
+
 	* config/m88k/delta88.mh, config/ns32k/merlin.mh (M_UNINSTALL):
 	new macro to undo what M_INSTALL does.
 
