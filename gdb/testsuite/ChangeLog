@@ -1,3 +1,8 @@
+Thu Apr 24 14:38:18 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/callfuncs.exp: Mark some tests as expected to fail
+	on the mn10300.
+ 
 Mon Apr 21 15:05:42 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/a2-run.exp: Add arm-*-coff setup_xfails for cases
