@@ -1,3 +1,10 @@
+Thu Jul 15 02:56:15 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type, case R_HPPA): Handle
+	64bit format.
+	(_bfd_elf_hppa_gen_reloc_type, case R_GOTOFF): Use base reloc type
+	to derive final type instead of hardwiring a selection.
+
 1999-07-14  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_obtain_contents): Swap 16-bit halves of
