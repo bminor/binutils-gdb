@@ -140,20 +140,11 @@ _bfd_ecoff_new_section_hook (abfd, section)
      bfd *abfd;
      asection *section;
 {
-  /* For the .pdata section, which has a special meaning on the Alpha,
-     we set the alignment power to 3.  We correct this later in
-     ecoff_compute_section_file_positions.  We do this hackery because
-     we need to know the exact unaligned size of the .pdata section in
-     order to set the lnnoptr field correctly.  For every other
-     section we use an alignment power of 4; this could be made target
-     dependent by adding a field to ecoff_backend_data, but 4 appears
-     to be correct for both the MIPS and the Alpha.  */
-  if (strcmp (section->name, _PDATA) == 0)
-    section->alignment_power = 3;
-  else
-    section->alignment_power = 4;
+  section->alignment_power = 4;
 
-  if (strcmp (section->name, _TEXT) == 0)
+  if (strcmp (section->name, _TEXT) == 0
+      || strcmp (section->name, _INIT) == 0
+      || strcmp (section->name, _FINI) == 0)
     section->flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
   else if (strcmp (section->name, _DATA) == 0
 	   || strcmp (section->name, _SDATA) == 0)
@@ -161,7 +152,8 @@ _bfd_ecoff_new_section_hook (abfd, section)
   else if (strcmp (section->name, _RDATA) == 0
 	   || strcmp (section->name, _LIT8) == 0
 	   || strcmp (section->name, _LIT4) == 0
-	   || strcmp (section->name, _RCONST) == 0)
+	   || strcmp (section->name, _RCONST) == 0
+	   || strcmp (section->name, _PDATA) == 0)
     section->flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
@@ -842,6 +834,10 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 	case N_SETD:
 	case N_SETB:
 	  {
+	    /* This code is no longer needed.  It used to be used to
+	       make the linker handle set symbols, but they are now
+	       handled in the add_symbols routine instead.  */
+#if 0
 	    const char *name;
 	    asection *section;
 	    arelent_chain *reloc_chain;
@@ -900,6 +896,8 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 	    reloc_chain->next = section->constructor_chain;
 	    section->constructor_chain = reloc_chain;
 	    section->_raw_size += bitsize / 8;
+
+#endif /* 0 */
 
 	    /* Mark the symbol as a constructor.  */
 	    asym->flags |= BSF_CONSTRUCTOR;
@@ -2077,13 +2075,10 @@ ecoff_compute_section_file_positions (abfd)
 	 supposed to indicate the number of .pdata entries that are
 	 really in the section.  Each entry is 8 bytes.  We store this
 	 away in line_filepos before increasing the section size.  */
-      if (strcmp (current->name, _PDATA) != 0)
-	alignment_power = current->alignment_power;
-      else
-	{
-	  current->line_filepos = current->_raw_size / 8;
-	  alignment_power = 4;
-	}
+      if (strcmp (current->name, _PDATA) == 0)
+	current->line_filepos = current->_raw_size / 8;
+
+      alignment_power = current->alignment_power;
 
       /* On Ultrix, the data sections in an executable file must be
 	 aligned to a page boundary within the file.  This does not
@@ -2921,6 +2916,8 @@ ecoff_armap_hash (s, rehash, size, hlog)
 {
   unsigned int hash;
 
+  if (hlog == 0)
+    return 0;
   hash = *s++;
   while (*s != '\0')
     hash = ((hash >> 27) | (hash << 5)) + *s++;
@@ -3265,14 +3262,22 @@ const bfd_target *
 _bfd_ecoff_archive_p (abfd)
      bfd *abfd;
 {
+  struct artdata *tdata_hold;
   char armag[SARMAG + 1];
 
-  if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG
-      || strncmp (armag, ARMAG, SARMAG) != 0)
+  tdata_hold = abfd->tdata.aout_ar_data;
+
+  if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
       return (const bfd_target *) NULL;
+    }
+
+  if (strncmp (armag, ARMAG, SARMAG) != 0)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return NULL;
     }
 
   /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
@@ -3282,7 +3287,10 @@ _bfd_ecoff_archive_p (abfd)
     (struct artdata *) bfd_zalloc (abfd, sizeof (struct artdata));
 
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
-    return (const bfd_target *) NULL;
+    {
+      abfd->tdata.aout_ar_data = tdata_hold;
+      return (const bfd_target *) NULL;
+    }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
   bfd_ardata (abfd)->cache = NULL;
@@ -3295,10 +3303,43 @@ _bfd_ecoff_archive_p (abfd)
       || _bfd_ecoff_slurp_extended_name_table (abfd) == false)
     {
       bfd_release (abfd, bfd_ardata (abfd));
-      abfd->tdata.aout_ar_data = (struct artdata *) NULL;
+      abfd->tdata.aout_ar_data = tdata_hold;
       return (const bfd_target *) NULL;
     }
   
+  if (bfd_has_map (abfd))
+    {
+      bfd *first;
+
+      /* This archive has a map, so we may presume that the contents
+	 are object files.  Make sure that if the first file in the
+	 archive can be recognized as an object file, it is for this
+	 target.  If not, assume that this is the wrong format.  If
+	 the first file is not an object file, somebody is doing
+	 something weird, and we permit it so that ar -t will work.  */
+
+      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
+      if (first != NULL)
+	{
+	  boolean fail;
+
+	  first->target_defaulted = false;
+	  fail = false;
+	  if (bfd_check_format (first, bfd_object)
+	      && first->xvec != abfd->xvec)
+	    {
+	      (void) bfd_close (first);
+	      bfd_release (abfd, bfd_ardata (abfd));
+	      abfd->tdata.aout_ar_data = tdata_hold;
+	      bfd_set_error (bfd_error_wrong_format);
+	      return NULL;
+	    }
+
+	  /* We ought to close first here, but we can't, because we
+             have no way to remove it from the archive cache.  FIXME.  */
+	}
+    }
+
   return abfd->xvec;
 }
 

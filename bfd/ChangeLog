@@ -1,3 +1,8 @@
+Wed Jul 10 12:42:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_new_section_hook): Set SEC_CODE for _INIT
+	and _FINI sections.
+
 Wed Jul 10 11:18:21 1996  Richard Henderson  <rth@tamu.edu>
 
 	* coffcode.h (coff_set_section_contents): A/UX does not require
