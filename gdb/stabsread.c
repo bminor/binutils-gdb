@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1616,18 +1616,47 @@ define_symbol (valu, string, desc, type, objfile)
       /* fall into process_prototype_types */
 
     process_prototype_types:
-      /* Sun acc puts declared types of arguments here.  We don't care
-	 about their actual types (FIXME -- we should remember the whole
-	 function prototype), but the list may define some new types
-	 that we have to remember, so we must scan it now.  */
+      /* Sun acc puts declared types of arguments here.  */
       if (*p == ';')
 	{
-	  TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
+	  struct type *ftype = SYMBOL_TYPE (sym);
+	  int nsemi = 0;
+	  int nparams = 0;
+	  char *p1 = p;
 
-	  while (*p == ';') {
-	    p++;
-	    read_type (&p, objfile);
-	  }
+	  /* Obtain a worst case guess for the number of arguments
+	     by counting the semicolons.  */
+	  while (*p1)
+	    {
+	      if (*p1++ == ';')
+		nsemi++;
+	    }
+
+	  /* Allocate parameter information fields and fill them in. */
+	  TYPE_FIELDS (ftype) = (struct field *)
+	    TYPE_ALLOC (ftype, nsemi * sizeof (struct field));
+	  while (*p++ == ';')
+	    {
+	      struct type *ptype;
+
+	      /* A type number of zero indicates the start of varargs.
+         	 FIXME: GDB currently ignores vararg functions.  */
+	      if (p[0] == '0' && p[1] == '\0')
+		break;
+	      ptype = read_type (&p, objfile);
+
+	      /* The Sun compilers mark integer arguments, which should
+		 be promoted to the width of the calling conventions, with
+		 a type which references itself. This type is turned into
+		 a TYPE_CODE_VOID type by read_type, and we have to turn
+		 it back into builtin_type_int here.
+		 FIXME: Do we need a new builtin_type_promoted_int_arg ?  */
+	      if (TYPE_CODE (ptype) == TYPE_CODE_VOID)
+		ptype = builtin_type_int;
+	      TYPE_FIELD_TYPE (ftype, nparams++) = ptype;
+	    }
+	  TYPE_NFIELDS (ftype) = nparams;
+	  TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 	}
       break;
 

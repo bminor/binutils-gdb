@@ -1,3 +1,11 @@
+Fri May  1 09:29:56 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* breakpoint.c (delete_command):  Skip internal breakpoints when
+	all breakpoints are requested.
+
+	* stabsread.c (define_symbol):  Record parameter types from Sunpro
+	function stabs in the TYPE_FIELDS of the function type.
+
 Thu Apr 30 15:59:54 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* Makefile.in (config-check-targets, config-check-hosts): Removed.
