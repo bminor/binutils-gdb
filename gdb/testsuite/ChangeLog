@@ -1,6 +1,10 @@
 2003-03-03  Michael Chastain  <mec@shout.net>
 
-	* Makefile.in: update copyright years.
+	* configure.in: Update copyright years.
+
+2003-03-03  Michael Chastain  <mec@shout.net>
+
+	* Makefile.in: Update copyright years.
 
 2003-02-28  David Carlton  <carlton@math.stanford.edu>
 
