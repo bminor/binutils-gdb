@@ -1,3 +1,14 @@
+Wed Jul 16 10:38:03 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* sol-thread.c (sol_thread_[store, fetch]_registers): if 
+	inferior_pid is an LWP rather than a Solaris thread, let
+	procfs handle the request.
+	(rw_common, sol_thread_xfer_memory): procfs_xfer_memory will
+	only work if inferior_pid points to an LWP (rather than a 
+	Solaris thread).  Use procfs_first_available to find a good LWP.
+	(info_solthreads): added a maintenance command to list all 
+	known Solaris threads and their attributes.
+
 Mon Jul 14 18:02:53 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* procfs.c (wait_fd): Handle an fd that has "hung up" or 

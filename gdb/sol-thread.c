@@ -67,6 +67,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dlfcn.h>
+#include "gdbcmd.h"
 
 extern struct target_ops sol_thread_ops; /* Forward declaration */
 
@@ -601,7 +602,13 @@ sol_thread_fetch_registers (regno)
   caddr_t xregset;
 #endif
 
-  /* Convert inferior_pid into a td_thrhandle_t */
+  if (!is_thread (inferior_pid))
+    { /* LWP: pass the request on to procfs.c */
+      procfs_ops.to_fetch_registers (regno);
+      return;
+    }
+
+  /* Solaris thread: convert inferior_pid into a td_thrhandle_t */
 
   thread = GET_THREAD (inferior_pid);
 
@@ -671,7 +678,13 @@ sol_thread_store_registers (regno)
   caddr_t xregset;
 #endif
 
-  /* Convert inferior_pid into a td_thrhandle_t */
+  if (!is_thread (inferior_pid))
+    { /* LWP: pass the request on to procfs.c */
+      procfs_ops.to_store_registers (regno);
+      return;
+    }
+
+  /* Solaris thread: convert inferior_pid into a td_thrhandle_t */
 
   thread = GET_THREAD (inferior_pid);
 
@@ -758,8 +771,10 @@ sol_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
 
   old_chain = save_inferior_pid ();
 
-  if (is_thread (inferior_pid))
-    inferior_pid = main_ph.pid;	/* It's a thread.  Convert to lwp */
+  if (is_thread (inferior_pid) ||		/* A thread */
+      !target_thread_alive (inferior_pid))	/* An lwp, but not alive */
+    inferior_pid = procfs_first_available ();	/* Find any live lwp.  */
+  /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
   retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
 
@@ -971,8 +986,10 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
 
   old_chain = save_inferior_pid ();
 
-  if (is_thread (inferior_pid))
-    inferior_pid = main_ph.pid;	/* It's a thread.  Convert to lwp */
+  if (is_thread (inferior_pid) ||		/* A thread */
+      !target_thread_alive (inferior_pid))	/* An lwp, but not alive */
+    inferior_pid = procfs_first_available ();	/* Find any live lwp.  */
+  /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
   while (size > 0)
     {
@@ -1221,6 +1238,74 @@ solaris_pid_to_str (pid)
   return buf;
 }
 
+
+#ifdef MAINTENANCE_CMDS
+/* Worker bee for info sol-thread command.  This is a callback function that
+   gets called once for each Solaris thread (ie. not kernel thread) in the 
+   inferior.  Print anything interesting that we can think of.  */
+
+static int 
+info_cb (th, s)
+     const td_thrhandle_t *th;
+     void *s;
+{
+  td_err_e ret;
+  td_thrinfo_t ti;
+  struct minimal_symbol *msym;
+
+  if ((ret = p_td_thr_get_info (th, &ti)) == TD_OK)
+    {
+      printf_filtered ("%s thread #%d, lwp %d, ", 
+		       ti.ti_type == TD_THR_SYSTEM ? "system" : "user  ", 
+		       ti.ti_tid, ti.ti_lid);
+      switch (ti.ti_state) {
+	default:
+	case TD_THR_UNKNOWN: printf_filtered ("<unknown state>");	break;
+	case TD_THR_STOPPED: printf_filtered ("(stopped)");	break;
+	case TD_THR_RUN:     printf_filtered ("(run)    ");	break;
+	case TD_THR_ACTIVE:  printf_filtered ("(active) ");	break;
+	case TD_THR_ZOMBIE:  printf_filtered ("(zombie) ");	break;
+	case TD_THR_SLEEP:   printf_filtered ("(asleep) ");	break;
+	case TD_THR_STOPPED_ASLEEP: 
+	  printf_filtered ("(stopped asleep)");			break;
+      }
+      /* Print thr_create start function: */
+      if (ti.ti_startfunc != 0)
+	if (msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc))
+	  printf_filtered ("   startfunc: %s\n", SYMBOL_NAME (msym));
+	else
+	  printf_filtered ("   startfunc: 0x%08x\n", ti.ti_startfunc);
+
+      /* If thread is asleep, print function that went to sleep: */
+      if (ti.ti_state == TD_THR_SLEEP)
+	if (msym = lookup_minimal_symbol_by_pc (ti.ti_pc))
+	  printf_filtered (" - Sleep func: %s\n", SYMBOL_NAME (msym));
+	else
+	  printf_filtered (" - Sleep func: 0x%08x\n", ti.ti_startfunc);
+
+      /* Wrap up line, if necessary */
+      if (ti.ti_state != TD_THR_SLEEP && ti.ti_startfunc == 0)
+	printf_filtered ("\n");	/* don't you hate counting newlines? */
+    }
+  else
+    warning ("info sol-thread: failed to get info for thread.");
+
+  return 0;    
+}
+
+/* List some state about each Solaris user thread in the inferior.  */
+
+static void
+info_solthreads (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  p_td_ta_thr_iter (main_ta, info_cb, args, 
+		    TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
+		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
+}
+#endif /* MAINTENANCE_CMDS */
+
 struct target_ops sol_thread_ops = {
   "solaris-threads",		/* to_shortname */
   "Solaris threads and pthread.", /* to_longname */
@@ -1304,6 +1389,11 @@ _initialize_sol_thread ()
   add_target (&sol_thread_ops);
 
   procfs_suppress_run = 1;
+
+#ifdef MAINTENANCE_CMDS
+  add_cmd ("sol-threads", class_maintenance, info_solthreads, 
+	    "Show info on Solaris user threads.\n", &maintenanceinfolist);
+#endif /* MAINTENANCE_CMDS */
 
   return;
 
