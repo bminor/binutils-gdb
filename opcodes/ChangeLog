@@ -1,5 +1,9 @@
 Sat Aug 28 00:27:24 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* hppa-dis.c (signed_unsigned_names,mix_half_names,
+	saturation_names):  New.
+	(print_insn_hppa): Add completer codes 'a', 'ch', 'cH', 'cS', and 'c*'.
+
 	* hppa-dis.c (print_insn_hppa): Place completers behind prefix 'c'. 
 
 	* hppa-dis.c (print_insn_hppa): Add cases for '.', '~'. '$'. and '!'

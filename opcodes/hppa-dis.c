@@ -125,6 +125,10 @@ static const char float_comp_names[][8] =
   ",!?<=", ",>", ",?>", ",!<=", ",!?<", ",>=", ",?>=", ",!<",
   ",!?=", ",<>", ",!=", ",!=t", ",!?", ",<=>", ",true?", ",true"
 };
+static const char *const signed_unsigned_names[][3] = {",u", ",s"};
+static const char *const mix_half_names[][3] = {",l", ",r"};
+static const char *const saturation_names[][3] = {",us", ",ss", 0, ""};
+
 
 /* For a bunch of different instructions form an index into a 
    completer name table. */
@@ -346,6 +350,7 @@ print_insn_hppa (memaddr, info)
 		  else
 		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
+		case 'a':
 		case 'b':
 		  fput_reg (GET_FIELD (insn, 6, 10), info);
 		  break;
@@ -440,6 +445,33 @@ print_insn_hppa (memaddr, info)
 			(*info->fprintf_func) (info->stream, ",m ");
 		      else
 			(*info->fprintf_func) (info->stream, " ");
+		      break;
+		    case 'S':
+		      /* EXTRD/W has a following condition.  */
+		      if (*(s + 1) == '?')
+			(*info->fprintf_func)
+			  (info->stream, "%s", signed_unsigned_names[GET_FIELD
+								    (insn, 21, 21)]);
+		      else
+			(*info->fprintf_func)
+			  (info->stream, "%s ", signed_unsigned_names[GET_FIELD
+								     (insn, 21, 21)]);
+		      break;
+		    case 'h':
+		      (*info->fprintf_func)
+			  (info->stream, "%s", mix_half_names[GET_FIELD
+							     (insn, 17, 17)]);
+		      break;
+		    case 'H':
+		      (*info->fprintf_func)
+			  (info->stream, "%s", saturation_names[GET_FIELD
+							       (insn, 24, 25)]);
+		      break;
+		    case '*':
+		      (*info->fprintf_func)
+			  (info->stream, ",%d%d%d%d ",
+			   GET_FIELD (insn, 17, 18), GET_FIELD (insn, 20, 21),
+			   GET_FIELD (insn, 22, 23), GET_FIELD (insn, 24, 25));
 		      break;
 		    }
 		  break;
