@@ -1,3 +1,26 @@
+Mon Jan 24 19:18:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_frob_symbol): New function.  Put undefined
+	symbols of known size in the undefined section.  Put small common
+	symbols in a .scommon section.
+	* ecoff.h (ecoff_frob_symbol): Declare.
+	* config/obj-ecoff.h (obj_frob_symbol): Define.
+	* config/obj-elf.c (obj_elf_write_symbol_p, obj_elf_write_symbol,
+	obj_elf_frob_symbol): Removed unused functions.
+	* config/obj-elf.h (obj_frob_symbol, obj_write_symbol): Removed
+	unused macros.
+	(obj_elf_frob_symbol, obj_elf_write_symbol): Removed declarations
+	of unused functions.
+	(obj_frob_symbol): Define if ECOFF_DEBUGGING.
+
+	* tc-mips.c (g_switch_seen): New static variable.
+	(md_parse_option): Set g_switch_seen for -G option.
+	(s_option): If creating PIC code, force the GP size to be 0.  Warn
+	if -G switch used with a non-zero value.
+
+	* symbols.c (S_IS_COMMON): Use bfd_is_com_section rather than
+	comparing against bfd_com_section.
+
 Mon Jan 24 14:12:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* read.c (s_lcomm): Treat Alpha like MIPS in handling of .sbss
