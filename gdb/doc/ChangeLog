@@ -1,3 +1,8 @@
+Thu Feb  4 01:49:04 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (refcard.ps, lrefcard.ps):  Remove psref.tex
+	intermediate file.
+
 Tue Feb  2 12:18:06 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, gdbinv-s.texi: miscellaneous stylistic cleanups

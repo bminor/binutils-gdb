@@ -140,14 +140,14 @@ refcard.ps : $(srcdir)/refcard.tex $(srcdir)/psrc.sed
 	sed -f $(srcdir)/psrc.sed $(srcdir)/refcard.tex >psref.tex
 	$(SET_TEXINPUTS) $(TEX) psref.tex
 	dvips -t landscape psref -o; mv psref.ps refcard.ps
-	rm -f psref.dvi psref.log
+	rm -f psref.dvi psref.log psref.tex
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts w/long names)
 lrefcard.ps : $(srcdir)/refcard.tex $(srcdir)/lpsrc.sed
 	sed -f $(srcdir)/lpsrc.sed $(srcdir)/refcard.tex >psref.tex
 	$(SET_TEXINPUTS) $(TEX) psref.tex
 	dvips -t landscape psref -o; mv psref.ps lrefcard.ps
-	rm -f psref.dvi psref.log
+	rm -f psref.dvi psref.log psref.tex
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 GDBvn.texi : ${gdbdir}/Makefile.in
