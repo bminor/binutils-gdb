@@ -1,3 +1,11 @@
+Fri May 22 15:56:51 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/allinsn.d: Handle 64 bit bfd_vma.
+	* gas/m32r/uppercase.d: Likewise.
+start-sanitize-m32rx
+	* gas/m32r/m32rx.d: Likewise.
+end-sanitize-m32rx
+
 start-sanitize-sky
 Thu May 21 15:14:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
