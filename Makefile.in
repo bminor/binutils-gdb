@@ -210,7 +210,7 @@ $(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
-$(start-sanitize-chill)\
+$(end-sanitize-chill)\
 	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
