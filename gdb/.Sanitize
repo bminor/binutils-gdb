@@ -150,6 +150,7 @@ mips-nat.c
 mips-pinsn.c
 mips-tdep.c
 mipsread.c
+monitor.h
 munch
 news-xdep.c
 nindy-share
@@ -177,6 +178,7 @@ remote-es1800.c
 remote-hms.c
 remote-mips.c
 remote-mm.c
+remote-monitor.c
 remote-nindy.c
 remote-sim.c
 remote-st2000.c

@@ -1,3 +1,12 @@
+Fri Apr 30 17:45:32 1993  Stu Grossman  (grossman@cygnus.com)
+
+        * The following patches are from Jeffrey Law <law@cs.utah.edu>.
+	* config/pa/hppabsd.mh:  Add more files to NATDEPFILES.
+	* config/pa/xm-hppa[bh].h: Define FIVE_ARG_PTRACE.
+	* hppab-nat.c: Delete WANT_NATIVE_TARGET ifdefs.
+	ptrace needs 5 arguments, #define ptrace to always
+	pass zero as the 5th argument.
+
 Fri Apr 30 15:54:13 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* configure.in: Match z8k-*-sim for z8000.
@@ -17,8 +26,7 @@ Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 	* config/sparc/sun4sol2.mh (XM_CLIBS): add -lsocket which is
 	  required target ports which use sockets (like a29k-udi).
 
-	* remove-udi.c (udi_wait): ifdef around SIGLOST usage.  Eg,
-	  Solaris doesn't have SIGLOST so use SIGURG as a backup.
+	* remote-udi.c (udi_wait): Use SIGURG, as Solaris doesn't have SIGLOST.
 
 Fri Apr 30 11:05:42 1993  Jim Kingdon  (kingdon@cygnus.com)
 

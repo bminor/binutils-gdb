@@ -27,9 +27,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include <sys/ptrace.h>
 
+#ifdef FIVE_ARG_PTRACE
+
+/* Deal with HPUX 8.0 braindamage.  */
+#define ptrace(a,b,c,d) ptrace(a,b,c,d,0)
+
+#endif
+
 #ifndef PT_ATTACH
 #define PT_ATTACH PTRACE_ATTACH
 #endif
+
 #ifndef PT_DETACH
 #define PT_DETACH PTRACE_DETACH
 #endif
@@ -37,7 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This function simply calls ptrace with the given arguments.  
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
-#ifdef WANT_NATIVE_TARGET
+
 int
 call_ptrace (request, pid, addr, data)
      int request, pid;
@@ -46,7 +54,6 @@ call_ptrace (request, pid, addr, data)
 {
   return ptrace (request, pid, addr, data);
 }
-#endif /* WANT_NATIVE_TARGET */
 
 #ifdef DEBUG_PTRACE
 /* For the rest of the file, use an extra level of indirection */
