@@ -1,3 +1,7 @@
+2004-11-18  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (ebb_propose_action): Fix argument order.
+
 2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (PLT_THUMB_STUB_SIZE): Define.

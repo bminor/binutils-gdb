@@ -5599,8 +5599,8 @@ insn_block_decodable_len (bfd_byte *contents,
 
 static void
 ebb_propose_action (ebb_constraint *c,
-		    bfd_vma alignment_pow,
 		    enum ebb_target_enum align_type,
+		    bfd_vma alignment_pow,
 		    text_action_t action,
 		    bfd_vma offset,
 		    int removed_bytes,
