@@ -1,3 +1,13 @@
+Mon Oct  4 18:25:49 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/error.exp: New testcase driver.
+	* gas/m32r/m32rx.exp: New testcase driver.
+	* gas/m32r/fslotx.[sd]: New testcase.
+	* gas/m32r/m32rx.[sd]: New testcase.
+	* gas/m32r/relax-s.[sd]: New testcase.
+	* gas/m32r/interfere.s: New testcase.
+	* gas/m32r/wrongsize.s: New testcase.
+
 1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/i386.exp: Enable reloc and white tests for COFF.
