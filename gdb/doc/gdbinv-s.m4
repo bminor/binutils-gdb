@@ -1,13 +1,17 @@
 _dnl__								-*- Texinfo -*-
 _dnl__ Copyright (c) 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT $Id$
 @c This text diverted to "Remote Debugging" section in general case;
 @c however, if we're doing a manual specifically for one of these, it
 @c belongs up front (in "Getting In and Out" chapter).
-_fi__(_GENERIC__)
 _if__(_I960__)
+_if__(!_GENERIC__)
 @node i960-Nindy Remote, EB29K Remote, Mode Options, Starting _GDBN__
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
+@node i960-Nindy Remote, EB29K Remote, Remote, Remote
+_fi__(_GENERIC__)
 @subsection _GDBN__ with a Remote i960 (Nindy)
 
 @cindex Nindy
@@ -95,8 +99,8 @@ requires; it only works with a few boards.
 The standard @samp{-b} option controls the line speed used on the serial
 port. 
 
-@group
 @node Nindy reset,  , Nindy Options, i960-Nindy Remote
+@c @group
 @subsubsection Nindy Reset Command
 @table @code
 @item reset
@@ -106,11 +110,16 @@ system; this is only useful if the target has been equipped with a
 circuit to perform a hard reset (or some other interesting action) when
 a break is detected.
 @end table
-@end group
+@c @end group
 _fi__(_I960__)
 
 _if__(_AMD29K__)
+_if__(!_GENERIC__)
 @node EB29K Remote, VxWorks Remote, i960-Nindy Remote, Starting _GDBN__
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
+@node EB29K Remote, VxWorks Remote, i960-Nindy Remote, Remote
+_fi__(_GENERIC__)
 @subsection _GDBN__ with a Remote EB29K
 
 @cindex EB29K board
@@ -124,7 +133,7 @@ you've hooked the cable between the PC's @file{COM1} port and
 
 @menu
 * Comms (EB29K)::		Communications Setup
-* _GDBP__-EB29K::		EB29K cross-debugging
+* _GDBP__-EB29K::			EB29K cross-debugging
 * Remote Log::			Remote Log
 @end menu
 
@@ -282,7 +291,12 @@ unexpected events on the PC side of the connection.
 _fi__(_AMD29K__)
 
 _if__(_VXWORKS__)
+_if__(!_GENERIC__)
 @node VxWorks Remote,  , EB29K Remote, Starting _GDBN__
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
+@node VxWorks Remote,  , EB29K Remote, Remote
+_fi__(_GENERIC__)
 @subsection _GDBN__ and VxWorks
 @cindex VxWorks
 _GDBN__ enables developers to spawn and debug tasks running on networked
@@ -296,7 +310,7 @@ on the VxWorks target.  These routines are included in the VxWorks library
 @file{rdb.a} and are incorporated into the system image when source-level
 debugging is enabled in the VxWorks configuration.
 
-@kindex{INCLUDE_RDB}
+@kindex INCLUDE_RDB
 Defining @code{INCLUDE_RDB} in the VxWorks configuration file
 @file{configAll.h} includes the RDB interface routines and spawns the
 source debugging task @code{tRdbTask} when VxWorks is booted.  For more
