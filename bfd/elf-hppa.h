@@ -545,3 +545,29 @@ elf_hppa_reloc_type_lookup (abfd, code)
     }
   return NULL;
 }
+
+static void
+elf_hppa_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker;
+{
+  int mach = bfd_get_mach (abfd);
+
+  elf_elfheader (abfd)->e_flags &= ~(EF_PARISC_ARCH | EF_PARISC_TRAPNIL
+				     | EF_PARISC_EXT | EF_PARISC_LSB
+				     | EF_PARISC_WIDE | EF_PARISC_NO_KABP
+				     | EF_PARISC_LAZYSWAP);
+
+  if (mach == 10)
+    elf_elfheader (abfd)->e_flags |= EFA_PARISC_1_0;
+  else if (mach == 11)
+    elf_elfheader (abfd)->e_flags |= EFA_PARISC_1_1;
+  else if (mach == 20)
+    {
+      elf_elfheader (abfd)->e_flags |= EFA_PARISC_2_0;
+#if ARCH_SIZE == 64
+      elf_elfheader (abfd)->e_flags |= EF_PARISC_WIDE;
+#endif
+    }
+
+}
