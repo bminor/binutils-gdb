@@ -1,3 +1,12 @@
+2000-12-15  Ben Elliston  <bje@redhat.com>
+
+	* sim-fpu.h (sim_fpu_printn_fpu): Declare.
+	* sim-fpu.c (print_bits): Add digits parameter. Print only as many
+	trailing digits as specified (-1 to print all digits).
+	(sim_fpu_print_fpu): New wrapper around sim_fpu_printn_fpu.
+	(sim_fpu_printn_fpu): Rename from sim_fpu_print_fpu; update calls
+	to print_bits ().
+
 2000-12-13  Ben Elliston  <bje@redhat.com>
 
 	* cgen.sh: Set prefix/PREFIX (append ISA if applicable). Factor

@@ -51,25 +51,30 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sim-assert.h"
 
 
-/* Debugging support. */
+/* Debugging support. 
+   If digits is -1, then print all digits.  */
 
 static void
 print_bits (unsigned64 x,
 	    int msbit,
+	    int digits,
 	    sim_fpu_print_func print,
 	    void *arg)
 {
   unsigned64 bit = LSBIT64 (msbit);
   int i = 4;
-  while (bit)
+  while (bit && digits)
     {
       if (i == 0)
 	print (arg, ",");
+
       if ((x & bit))
 	print (arg, "1");
       else
 	print (arg, "0");
       bit >>= 1;
+
+      if (digits > 0) digits--;
       i = (i + 1) % 4;
     }
 }
@@ -1375,14 +1380,6 @@ sim_fpu_mul (sim_fpu *f,
     ASSERT (high >= LSBIT64 ((NR_FRAC_GUARD * 2) - 64));
     ASSERT (LSBIT64 (((NR_FRAC_GUARD + 1) * 2) - 64) < IMPLICIT_1);
 
-#if 0
-    printf ("\n");
-    print_bits (high, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf (";");
-    print_bits (low, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf ("\n");
-#endif
-
     /* normalize */
     do
       {
@@ -1393,13 +1390,6 @@ sim_fpu_mul (sim_fpu *f,
 	low <<= 1;
       }
     while (high < IMPLICIT_1);
-
-#if 0
-    print_bits (high, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf (";");
-    print_bits (low, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf ("\n");
-#endif
 
     ASSERT (high >= IMPLICIT_1 && high < IMPLICIT_2);
     if (low != 0)
@@ -1529,16 +1519,6 @@ sim_fpu_div (sim_fpu *f,
 	bit >>= 1;
 	numerator <<= 1;
       }
-
-#if 0
-    printf ("\n");
-    print_bits (quotient, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf ("\n");
-    print_bits (numerator, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf ("\n");
-    print_bits (denominator, 63, (sim_fpu_print_func*)fprintf, stdout);
-    printf ("\n");
-#endif
 
     /* discard (but save) the extra bits */
     if ((quotient & LSMASK64 (NR_SPARE -1, 0)))
@@ -2477,17 +2457,26 @@ sim_fpu_print_fpu (const sim_fpu *f,
 		   sim_fpu_print_func *print,
 		   void *arg)
 {
+  sim_fpu_printn_fpu (f, print, -1, arg);
+}
+
+INLINE_SIM_FPU (void)
+sim_fpu_printn_fpu (const sim_fpu *f,
+		   sim_fpu_print_func *print,
+		   int digits,
+		   void *arg)
+{
   print (arg, "%s", f->sign ? "-" : "+");
   switch (f->class)
     {
     case sim_fpu_class_qnan:
       print (arg, "0.");
-      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, digits, print, arg);
       print (arg, "*QuietNaN");
       break;
     case sim_fpu_class_snan:
       print (arg, "0.");
-      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, digits, print, arg);
       print (arg, "*SignalNaN");
       break;
     case sim_fpu_class_zero:
@@ -2499,8 +2488,8 @@ sim_fpu_print_fpu (const sim_fpu *f,
     case sim_fpu_class_number:
     case sim_fpu_class_denorm:
       print (arg, "1.");
-      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
-      print (arg, "*2^%+-5d", f->normal_exp);
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, digits, print, arg);
+      print (arg, "*2^%+d", f->normal_exp);
       ASSERT (f->fraction >= IMPLICIT_1);
       ASSERT (f->fraction < IMPLICIT_2);
     }

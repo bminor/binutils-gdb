@@ -402,9 +402,16 @@ extern const sim_fpu sim_fpu_max64;
 
 typedef void sim_fpu_print_func (void *, char *, ...);
 
+/* Print a sim_fpu with full precision.  */
 INLINE_SIM_FPU (void) sim_fpu_print_fpu (const sim_fpu *f,
 					 sim_fpu_print_func *print,
 					 void *arg);
+
+/* Print a sim_fpu with `n' trailing digits.  */
+INLINE_SIM_FPU (void) sim_fpu_printn_fpu (const sim_fpu *f,
+					  sim_fpu_print_func *print,
+					  int digits,
+					  void *arg);
 
 INLINE_SIM_FPU (void) sim_fpu_print_status (int status,
 					    sim_fpu_print_func *print,
