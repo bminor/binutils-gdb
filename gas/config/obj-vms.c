@@ -3681,7 +3681,9 @@ VMS_Initialized_Data_Size (sp, End_Of_Data)
      register struct symbol *sp;
      int End_Of_Data;
 {
-  register struct symbol *sp1, *Next_Symbol;
+  struct symbol *sp1, *Next_Symbol;
+  /* Cache values to avoid extra lookups.  */
+  valueT sp_val = S_GET_VALUE (sp), sp1_val, next_val;
 
   /*
    *	Find the next symbol
@@ -3695,10 +3697,13 @@ VMS_Initialized_Data_Size (sp, End_Of_Data)
        */
       if (S_GET_TYPE (sp1) != N_DATA)
 	continue;
+
+      sp1_val = S_GET_VALUE (sp1);
+
       /*
        *	The symbol must be AFTER this symbol
        */
-      if (S_GET_VALUE (sp1) <= S_GET_VALUE (sp))
+      if (sp1_val <= sp_val)
 	continue;
       /*
        *	We ignore THIS symbol
@@ -3715,29 +3720,19 @@ VMS_Initialized_Data_Size (sp, End_Of_Data)
 	   *	We are a better candidate if we are "closer"
 	   *	to the symbol
 	   */
-	  if (S_GET_VALUE (sp1) >
-	      S_GET_VALUE (Next_Symbol))
+	  if (sp1_val > next_val)
 	    continue;
-	  /*
-	   *	Win:  Make this the candidate
-	   */
-	  Next_Symbol = sp1;
 	}
-      else
-	{
-	  /*
-	   *	This is the 1st candidate
-	   */
-	  Next_Symbol = sp1;
-	}
+      /*
+       * Make this the candidate
+       */
+      Next_Symbol = sp1;
+      next_val = sp1_val;
     }
   /*
    *	Calculate its size
    */
-  return (Next_Symbol ?
-	  (S_GET_VALUE (Next_Symbol) -
-	   S_GET_VALUE (sp)) :
-	  (End_Of_Data - S_GET_VALUE (sp)));
+  return Next_Symbol ? (next_val - sp_val) : (End_Of_Data - sp_val);
 }
 
 /*
@@ -4545,6 +4540,9 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	if (strncmp (S_GET_NAME (sp),"__vt.",5) == 0)
 	  {
 	    S_GET_RAW_TYPE (sp) = N_UNDF | N_EXT;
+	    S_GET_OTHER (sp) = 1;
+	    /* Is this warning still needed?  It sounds like it describes
+	       a compiler bug.  Does it?  If not, let's dump it.  */
 	    as_warn("g++ wrote an extern reference to %s as a routine.",
 		    S_GET_NAME (sp));
 	    as_warn("I will fix it, but I hope that it was not really a routine");
@@ -4729,6 +4727,18 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	     *	Get the entry mask
 	     */
 	    fragP = sp->sy_frag;
+
+	    /* If first frag doesn't contain the data, what do we do?
+	       If it's possibly smaller than two bytes, that would
+	       imply that the entry mask is not stored where we're
+	       expecting it.
+
+	       If you can find a test case that triggers this, report
+	       it (and tell me what the entry mask field ought to be),
+	       and I'll try to fix it.  KR */
+	    if (fragP->fr_fix < 2)
+	      abort ();
+
 	    Entry_Mask = (fragP->fr_literal[0] & 0xff) +
 	      ((fragP->fr_literal[1] & 0xff)
 	       << 8);
