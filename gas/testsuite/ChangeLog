@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+Mon Feb  9 17:19:05 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s: Add tests for DIVH and new versions of RAC and
+	RACH instructions.  Rename MACHL1 ro MACLH1.
+end-sanitize-m32rx
 Wed Feb  4 15:27:44 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/arm/arm7t.d: Update to match latest assembler output.
