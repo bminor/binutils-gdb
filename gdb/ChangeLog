@@ -1,3 +1,10 @@
+Mon Jun 22 17:19:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Don't test for SIGEMT
+	(which is not a Posix signal) if it isn't defined.
+	* tm-linux.h, xm-linux.h, config/linux.m[ht], configure.in:
+	New port to Linux (a free Unix clone for 386 machines).
+
 Sat Jun 20 19:19:52 1992  John Gilmore  (gnu at cygnus.com)
 
 	COFF changes for dealing better with EPI 29K C compiler output.

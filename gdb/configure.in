@@ -108,6 +108,7 @@ i386)
 		sysv*)	gdb_host=i386v ;;
 		scosysv*) gdb_host=i386sco ;;
 		mach)	gdb_host=i386mach ;;
+		linux)	gdb_host=linux ;;
 		esac
 		;;
 	esac
@@ -316,6 +317,7 @@ i386)
 		mach)	gdb_target=i386mach ;;
 		coff)	gdb_target=i386v ;;
 		aout)	gdb_target=i386aout ;;
+		linux)	gdb_target=linux ;;
 		esac
 	esac
 	;;
