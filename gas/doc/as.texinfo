@@ -1395,7 +1395,7 @@ On the HPPA local labels begin with @samp{L$}.
 @end ifset
 
 @node listing
-@section Configuringh listing output: @code{--listing}
+@section Configuring listing output: @code{--listing}
 
 The listing feature of the assembler can be enabled via the command line switch
 @samp{-a} (@pxref{a}).  This feature combines the input source file(s) with a

@@ -1,5 +1,7 @@
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* doc/as.texinfo (listing): Fix typo.
+
 	* as.c (print_version_id): Use BFD_VERSION_STRING in place of
 	BFD_VERSION.
 	* Makefile.am (Makefile): Depend on bfd/configure.in.
