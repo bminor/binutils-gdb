@@ -39,3 +39,4 @@ import
 	strcpy
 	strlen
 	strnicmp
+	strtol

@@ -31,7 +31,6 @@ alpha.c
 alpha.h
 altdebug.h
 configure.in
-fake_aio.c
 gdbserve.c
 gdbserve.def
 i386.c

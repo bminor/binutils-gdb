@@ -1,7 +1,10 @@
 Fri Nov 18 10:38:12 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
 
-	* Makefile.in (LD_FOR_TARGET, NLMCONV_FOR_TARGET): Removed.
+	* nlm/alpha.c (strtol): Removed, it is provided by NetWare C library.
+	* nlm/gdbserve.def (strtol): Added to import list.
+	* nlm/fake_aio.c: Removed file, no longer used.
 
+	* Makefile.in (LD_FOR_TARGET, NLMCONV_FOR_TARGET): Removed.
 	* nlm/Makefile.in (gdbserve.O): Link with ${CC_FOR_TARGET}.
 	  (LD_FOR_TARGET): Removed.
 
