@@ -1,3 +1,13 @@
+2000-11-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c: Include dwarf2dbg.h.
+ 	(md_pseudo_table): Add .file and .loc.
+	(md_assemble): Call dwarf2_emit_insn if generating ELF.
+	(s_cris_file, s_cris_loc): New.
+	* config/tc-cris.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 2000-11-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* expr.c (STANDARD_MUL_PRECEDENCE): Correct value.

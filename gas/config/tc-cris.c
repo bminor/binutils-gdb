@@ -27,6 +27,7 @@
 #include "as.h"
 #include "subsegs.h"
 #include "opcode/cris.h"
+#include "dwarf2dbg.h"
 
 /* Conventions used here:
    Generally speaking, pointers to binutils types such as "fragS" and
@@ -125,6 +126,8 @@ static void cris_number_to_imm PARAMS ((char *, long, int, fixS *));
 static void cris_create_short_jump PARAMS ((char *, addressT, addressT,
 					    fragS *, symbolS *));
 static void s_syntax PARAMS ((int));
+static void s_cris_file PARAMS ((int));
+static void s_cris_loc PARAMS ((int));
 
 /* All the .syntax functions.  */
 static void cris_force_reg_prefix PARAMS ((void));
@@ -145,6 +148,8 @@ const pseudo_typeS md_pseudo_table[] =
 {
   {"dword", cons, 4},
   {"syntax", s_syntax, 0},
+  {"file", s_cris_file, 0},
+  {"loc", s_cris_loc, 0},
   {NULL, 0, 0}
 };
 
@@ -689,6 +694,7 @@ md_assemble (str)
   struct cris_prefix prefix;
   char *opcodep;
   char *p;
+  int insn_size = 0;
 
   know (str);
 
@@ -711,6 +717,7 @@ md_assemble (str)
     case PREFIX_BDAP:
     case PREFIX_BIAP:
     case PREFIX_DIP:
+      insn_size += 2;
       opcodep = frag_more (2);
 
       /* Output the prefix opcode.  */
@@ -721,6 +728,7 @@ md_assemble (str)
       if (prefix.reloc != BFD_RELOC_NONE)
 	{
 	  /* Output an absolute mode address.  */
+	  insn_size += 4;
 	  p = frag_more (4);
 	  fix_new_exp (frag_now, (p - frag_now->fr_literal), 4,
 		       &prefix.expr, 0, prefix.reloc);
@@ -728,6 +736,7 @@ md_assemble (str)
       break;
 
     case PREFIX_PUSH:
+      insn_size += 2;
       opcodep = frag_more (2);
 
       /* Output the prefix opcode.  Being a "push", we add the negative
@@ -754,6 +763,7 @@ md_assemble (str)
     return;
 
   /* Done with the prefix.  Continue with the main instruction.  */
+  insn_size += 2;
   opcodep = frag_more (2);
 
   /* Output the instruction opcode.  */
@@ -793,6 +803,7 @@ md_assemble (str)
 	     This means it is a branch to a known symbol in another
 	     section.  Code in data?  Weird but valid.	Emit a 32-bit
 	     branch.  */
+	  insn_size += 10;
 	  gen_cond_branch_32 (opcodep, frag_more (10), frag_now,
 			      output_instruction.expr.X_add_symbol,
 			      (symbolS *) NULL,
@@ -824,6 +835,7 @@ md_assemble (str)
 	      BAD_CASE (output_instruction.imm_oprnd_size);
 	    }
 
+	  insn_size += output_instruction.imm_oprnd_size;
 	  p = frag_more (output_instruction.imm_oprnd_size);
 	  fix_new_exp (frag_now, (p - frag_now->fr_literal),
 		       output_instruction.imm_oprnd_size,
@@ -843,6 +855,9 @@ md_assemble (str)
 		       output_instruction.reloc);
 	}
     }
+
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    dwarf2_emit_insn (insn_size);
 }
 
 /* Low level text-to-bits assembly.  */
@@ -2853,6 +2868,32 @@ s_syntax (ignore)
     }
 
   as_bad (_("Unknown .syntax operand"));
+}
+
+/* Wrapper for dwarf2_directive_file to emit error if this is seen when
+   not emitting ELF.  */
+
+static void
+s_cris_file (dummy)
+     int dummy;
+{
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    as_bad ("Pseudodirective .file is only valid when generating ELF");
+  else
+    dwarf2_directive_file (dummy);
+}
+
+/* Wrapper for dwarf2_directive_loc to emit error if this is seen when not
+   emitting ELF.  */
+
+static void
+s_cris_loc (dummy)
+     int dummy;
+{
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    as_bad ("Pseudodirective .loc is only valid when generating ELF");
+  else
+    dwarf2_directive_loc (dummy);
 }
 
 /*

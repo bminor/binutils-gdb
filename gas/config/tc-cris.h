@@ -126,6 +126,10 @@ extern void tc_cris_check_adjusted_broken_word PARAMS ((offsetT,
 /* We don't want any implicit alignment, so we do nothing.  */
 #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR)
 
+/* CRIS instructions, with operands and prefixes included, are a multiple
+   of two bytes long.  */
+#define DWARF2_LINE_MIN_INSN_LENGTH 2
+
 #endif /* TC_CRIS */
 /*
  * Local variables:
