@@ -1,5 +1,8 @@
 Mon Nov 20 14:54:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_compute_section_file_positions): If
+	RS6000COFF_C, set up the .debug section.
+
 	* xcofflink.c (xcoff_link_input_bfd): Adjust the TOC anchor value
 	if it is not large enough to accomodate the entire TOC area with
 	signed 16 bit offsets.

@@ -1438,7 +1438,10 @@ coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
 {
   /* Return true if we don't want to pointerize this aux entry, which
      is the case for the lastfirst aux entry for a C_LEAFPROC symbol.  */
-  return indaux == 1 && symbol->u.syment.n_sclass == C_LEAFPROC;
+  return (indaux == 1
+	  && (symbol->u.syment.n_sclass == C_LEAFPROC
+	      || symbol->u.syment.n_sclass == C_LEAFSTAT
+	      || symbol->u.syment.n_sclass == C_LEAFEXT));
 }
 
 #else /* ! I960 */
@@ -1840,6 +1843,44 @@ coff_compute_section_file_positions (abfd)
 #endif
   unsigned int count;
 
+#ifdef RS6000COFF_C
+  /* On XCOFF, if we have symbols, set up the .debug section.  */
+  if (bfd_get_symcount (abfd) > 0)
+    {
+      bfd_size_type sz;
+      bfd_size_type i, symcount;
+      asymbol **symp;
+
+      sz = 0;
+      symcount = bfd_get_symcount (abfd);
+      for (symp = abfd->outsymbols, i = 0; i < symcount; symp++, i++)
+	{
+	  coff_symbol_type *cf;
+
+	  cf = coff_symbol_from (abfd, *symp);
+	  if (cf != NULL
+	      && cf->native != NULL
+	      && SYMNAME_IN_DEBUG (&cf->native->u.syment))
+	    {
+	      size_t len;
+
+	      len = strlen (bfd_asymbol_name (*symp));
+	      if (len > SYMNMLEN)
+		sz += len + 3;
+	    }
+	}
+      if (sz > 0)
+	{
+	  asection *dsec;
+
+	  dsec = bfd_make_section_old_way (abfd, ".debug");
+	  if (dsec == NULL)
+	    abort ();
+	  dsec->_raw_size = sz;
+	  dsec->flags |= SEC_HAS_CONTENTS;
+	}
+    }
+#endif
 
 #ifdef COFF_IMAGE_WITH_PE
   int page_size;
@@ -1849,8 +1890,10 @@ coff_compute_section_file_positions (abfd)
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
-#elif defined (COFF_PAGE_SIZE)
+#else
+#ifdef COFF_PAGE_SIZE
   int page_size = COFF_PAGE_SIZE;
+#endif
 #endif
 
   if (bfd_get_start_address (abfd))
@@ -2431,6 +2474,23 @@ coff_write_object_contents (abfd)
       if (! coff_write_relocs (abfd, firstundef))
 	return false;
     }
+#ifdef COFF_IMAGE_WITH_PE
+#ifdef PPC
+  else if ((abfd->flags & EXEC_P) != 0)
+    {
+      bfd_byte b;
+
+      /* PowerPC PE appears to require that all executable files be
+         rounded up to the page size.  */
+      b = 0;
+      if (bfd_seek (abfd,
+		    BFD_ALIGN (sym_base, COFF_PAGE_SIZE) - 1,
+		    SEEK_SET) != 0
+	  || bfd_write (&b, 1, 1, abfd) != 1)
+	return false;
+    }
+#endif
+#endif
 
   /* If bfd_get_symcount (abfd) != 0, then we are not using the COFF
      backend linker, and obj_raw_syment_count is not valid until after
@@ -2833,6 +2893,8 @@ coff_slurp_symbol_table (abfd)
 #ifdef COFF_WITH_PE
             /* PE uses storage class 0x68 to denote a section symbol */
             case C_SECTION:
+	    /* PE uses storage class 0x67 for a weak external symbol.  */
+	    case C_NT_WEAK:
 #endif
 	      if ((src->u.syment.n_scnum) == 0)
 		{
@@ -2871,6 +2933,11 @@ coff_slurp_symbol_table (abfd)
 	      /* A symbol with a csect entry should not go at the end.  */
 	      if (src->u.syment.n_numaux > 0)
 		dst->symbol.flags |= BSF_NOT_AT_END;
+#endif
+
+#ifdef COFF_WITH_PE
+	      if (src->u.syment.n_sclass == C_NT_WEAK)
+		dst->symbol.flags = BSF_WEAK;
 #endif
 
 	      break;
@@ -3000,8 +3067,9 @@ coff_slurp_symbol_table (abfd)
             /* C_LINE in regular coff is 0x68.  NT has taken over this storage
                class to represent a section symbol */
 	    case C_LINE:	/* line # reformatted as symbol table entry */
-#endif
+	      /* NT uses 0x67 for a weak symbol, not C_ALIAS.  */
 	    case C_ALIAS:	/* duplicate tag		 */
+#endif
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:
 	      (*_bfd_error_handler)
