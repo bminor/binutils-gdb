@@ -1,3 +1,7 @@
+2002-10-14  Momchil Velikov  <velco@fadata.bg>
+
+	* config/tc-v850.c (CHECK_): Remove token pasting operator.
+
 2002-10-11  David O'Brien  <obrien@FreeBSD.org>
 
 	* gas/gasp.texi: Fix typo in noting that gasp is now deprecated.
