@@ -12,6 +12,8 @@
 #include "sym_ids.h"
 #include "utils.h"
 
+#define UNITS_TO_CODE (offset_to_code / sizeof(UNIT))
+
 static void scale_and_align_entries PARAMS ((void));
 
 /* declarations of automatically generated functions to output blurbs: */

@@ -1,32 +1,27 @@
 ## Process this file with automake to generate Makefile.in
 
-## We should have cygnus in AUTOMAKE_OPTIONS, but it doesn't work yet.
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = cygnus
 
 SUFFIXES = .m
 
-INCLUDES = -D_GNU_SOURCE -DDEBUG -DTARGET_$(MY_TARGET) -DMACHINE_H=\"$(MY_TARGET).h\" -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
-
-MY_TARGET = @MY_TARGET@
+INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
 
 bin_PROGRAMS = gprof
 
 gprof_SOURCES = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c core.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
-	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
-gprof_DEPENDENCIES = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
-gprof_LDADD = $(MY_TARGET).o ../bfd/libbfd.la ../libiberty/libiberty.a
+	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c \
+	i386.c alpha.c vax.c tahoe.c sparc.c
+gprof_DEPENDENCIES = ../bfd/libbfd.la ../libiberty/libiberty.a
+gprof_LDADD = ../bfd/libbfd.la ../libiberty/libiberty.a
 
 noinst_HEADERS = \
-	alpha.h i386.h ns532.h sparc.h tahoe.h vax.h dummy.h \
 	basic_blocks.h call_graph.h cg_arcs.h cg_dfn.h cg_print.h \
 	core.h gmon.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
-	search_list.h source.h sparc.h sym_ids.h symtab.h utils.h
+	search_list.h source.h sym_ids.h symtab.h utils.h
 
-EXTRA_DIST = \
-	alpha.c i386.c ns532.c sparc.c tahoe.c vax.c dummy.c \
-	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c \
+EXTRA_DIST = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
 BUILT_SOURCES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
@@ -43,8 +38,7 @@ $(OBJECTS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h \
 	core.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h \
 	$(srcdir)/../include/libiberty.h $(srcdir)/../bfd/sysdep.h \
-	gconfig.h ../bfd/config.h $(MY_TARGET).h
-$(MY_TARGET).o: $(MY_TARGET).c
+	gconfig.h ../bfd/config.h
 basic_blocks.o: basic_blocks.c
 bsd_call_bl.o: bsd_call_bl.c
 call_graph.o: call_graph.c
@@ -63,3 +57,8 @@ source.o: source.c
 symtab.o: symtab.c
 sym_ids.o: sym_ids.c
 utils.o: utils.c
+i386.o: i386.c
+alpha.o: alpha.c
+vax.o: vax.c
+tahoe.o: tahoe.c
+sparc.o: sparc.c

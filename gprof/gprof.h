@@ -43,27 +43,6 @@
 /* AIX defines hz as a macro.  */
 #undef hz
 
-#ifdef MACHINE_H
-#include MACHINE_H
-#else
-#if vax
-#include "vax.h"
-#endif
-#if sun
-#include "sun.h"
-#endif
-#if tahoe
-#include "tahoe.h"
-#endif
-#endif
-
-#ifndef FOPEN_RB
-#define FOPEN_RB "r"
-#endif
-#ifndef FOPEN_WB
-#define FOPEN_WB "w"
-#endif
-
 #ifndef PATH_MAX
 #define PATH_MAX	1024
 #endif

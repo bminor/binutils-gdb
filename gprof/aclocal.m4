@@ -100,19 +100,26 @@ AC_REQUIRE([AM_PROG_LD])
 AC_REQUIRE([AC_PROG_LN_S])
 
 # Always use our own libtool.
-LIBTOOL='$(top_builddir)/libtool'
+LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 AC_SUBST(LIBTOOL)
 
+dnl CYGNUS LOCAL arguments to enable-shared
 dnl Allow the --disable-shared flag to stop us from building shared libs.
 AC_ARG_ENABLE(shared,
 [  --enable-shared         build shared libraries [default=yes]],
-[if test "$enableval" = no; then
-  enable_shared=no
-else
-  enable_shared=yes
-fi])
+[p=${PACKAGE-bogus-package-name}
+ case "$enableval" in
+  yes) enable_shared=yes ;;
+  no) enable_shared=no ;;
+  # The value of $p (aka $PACKAGE) is assumed to come from AM_INIT_AUTOMAKE.
+  # If it didn't, it'll be `bogus-package-name', thus making this condition
+  #  not be used.
+  *$p*) enable_shared=yes ;;
+  *) shared=no ;;
+esac])
 libtool_shared=
 test "$enable_shared" = no && libtool_shared=" --disable-shared"
+dnl END CYGNUS LOCAL
 
 dnl Allow the --disable-static flag to stop us from building static libs.
 AC_ARG_ENABLE(static,
@@ -267,7 +274,7 @@ AC_DEFUN(AM_MAINTAINER_MODE,
 dnl AM_CYGWIN32()
 AC_DEFUN(AM_CYGWIN32,
 [AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
-[AC_TRY_COMPILE(,[int main () { return __CYGWIN32__; }],
+[AC_TRY_COMPILE(,[return __CYGWIN32__;],
 am_cv_cygwin32=yes, am_cv_cygwin32=no)
 rm -f conftest*])
 CYGWIN32=
@@ -283,9 +290,10 @@ dnl environment. But if we're not, then it compiles a test program
 dnl to see if there is a suffix for executables.
 AC_DEFUN(AM_EXEEXT,
 [AC_REQUIRE([AM_CYGWIN32])
+AC_REQUIRE([AM_MINGW32])
 AC_MSG_CHECKING([for executable suffix])
-AC_CACHE_VAL(am_cv_exeext,
-[if test "$CYGWIN32" = yes; then
+AC_CACHE_VAL(am_cv_exeext,[
+if test "$CYGWIN32" = yes -o "$MINGW32" = yes; then
 am_cv_exeext=.exe
 else
 cat > am_c_test.c << 'EOF'
@@ -302,4 +310,17 @@ EXEEXT=""
 test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
 AC_MSG_RESULT(${am_cv_exeext})
 AC_SUBST(EXEEXT)])
+
+# Check to see if we're running under Mingw, without using
+# AC_CANONICAL_*.  If so, set output variable MINGW32 to "yes".
+# Otherwise set it to "no".
+
+dnl AM_MINGW32()
+AC_DEFUN(AM_MINGW32,
+[AC_CACHE_CHECK(for Mingw32 environment, am_cv_mingw32,
+[AC_TRY_COMPILE(,[return __MINGW32__;],
+am_cv_mingw32=yes, am_cv_mingw32=no)
+rm -f conftest*])
+MINGW32=
+test "$am_cv_mingw32" = yes && MINGW32=yes])
 

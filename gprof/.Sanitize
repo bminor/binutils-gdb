@@ -35,7 +35,6 @@ TODO
 acconfig.h
 aclocal.m4
 alpha.c
-alpha.h
 basic_blocks.c
 basic_blocks.h
 bsd_callg_bl.m
@@ -52,8 +51,6 @@ configure.bat
 configure.in
 core.c
 core.h
-dummy.c
-dummy.h
 flat_bl.m
 fsf_callg_bl.m
 gconfig.in
@@ -71,26 +68,20 @@ hertz.h
 hist.c
 hist.h
 i386.c
-i386.h
-ns532.c
-ns532.h
 search_list.c
 search_list.h
 source.c
 source.h
 sparc.c
-sparc.h
 stamp-h.in
 sym_ids.c
 sym_ids.h
 symtab.c
 symtab.h
 tahoe.c
-tahoe.h
 utils.c
 utils.h
 vax.c
-vax.h
 
 Things-to-lose:
 

@@ -19,20 +19,6 @@ AM_PROG_INSTALL
 
 AC_ISC_POSIX
 
-case "${target}" in
-alpha-*-*)	MY_TARGET=alpha ;;
-changequote(,)dnl
-i[3456]86-*-*)	MY_TARGET=i386 ;;
-changequote([,])dnl
-sparc-*-*)	MY_TARGET=sparc ;;
-tahoe-*-*)	MY_TARGET=tahoe ;;
-vax-*-*)	MY_TARGET=vax ;;
-ns32k-*-*)	MY_TARGET=ns532;;
-*-*-*)		MY_TARGET=dummy ;;
-esac
-
-AC_SUBST(MY_TARGET)
-
 dnl We need to set BSD44_FORMAT on a host which uses the additional
 dnl header fields.  This is an attempt to do that.  I can't think of a
 dnl good feature test for this.

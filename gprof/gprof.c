@@ -67,7 +67,8 @@ bfd *abfd;
  */
 static char *default_excluded_list[] =
 {
-  "_gprof_mcount", "mcount", "_mcount", "__mcount", "__mcleanup",
+  "_gprof_mcount", "mcount", "_mcount", "__mcount", "__mcount_internal",
+  "__mcleanup",
   "<locore>", "<hicore>",
   0
 };
