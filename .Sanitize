@@ -70,6 +70,7 @@ gprof
 grep
 groff
 include
+install.sh
 ispell
 ld
 libg++
