@@ -1,3 +1,7 @@
+2003-12-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* MAINTAINERS: Rename CONFIGURE to BUILD SYSTEM and add myself.
+
 2003-12-29  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (debug_line_pointer_size): Replace with an array

@@ -59,7 +59,8 @@ responsibility among the other maintainers.
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
-  CONFIGURE	   Ben Elliston <bje@wasabisystems.com>
+  BUILD SYSTEM	   Ben Elliston <bje@wasabisystems.com>
+  BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
