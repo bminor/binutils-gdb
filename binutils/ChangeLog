@@ -1,3 +1,8 @@
+2001-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c: Add missing prototypes.
+	* objdump.c: Likewise.  Format existing prototypes.
+
 2001-08-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (display_debug_info): Add to abbrev_offset the addend

@@ -108,113 +108,53 @@ static long dynsymcount = 0;
 
 /* Static declarations.  */
 
-static void
-usage PARAMS ((FILE *, int));
-
-static void
-nonfatal PARAMS ((const char *));
-
-static void
-display_file PARAMS ((char *filename, char *target));
-
-static void
-dump_section_header PARAMS ((bfd *, asection *, PTR));
-
-static void
-dump_headers PARAMS ((bfd *));
-
-static void
-dump_data PARAMS ((bfd *abfd));
-
-static void
-dump_relocs PARAMS ((bfd *abfd));
-
-static void
-dump_dynamic_relocs PARAMS ((bfd * abfd));
-
-static void
-dump_reloc_set PARAMS ((bfd *, asection *, arelent **, long));
-
-static void
-dump_symbols PARAMS ((bfd *abfd, boolean dynamic));
-
-static void
-dump_bfd_header PARAMS ((bfd *));
-
-static void
-dump_bfd_private_header PARAMS ((bfd *));
-
-static void
-display_bfd PARAMS ((bfd *abfd));
-
-static void
-display_target_list PARAMS ((void));
-
-static void
-display_info_table PARAMS ((int, int));
-
-static void
-display_target_tables PARAMS ((void));
-
-static void
-display_info PARAMS ((void));
-
-static void
-objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *, boolean));
-
-static void
-objdump_print_symname PARAMS ((bfd *, struct disassemble_info *, asymbol *));
-
-static asymbol *
-find_symbol_for_address PARAMS ((bfd *, asection *, bfd_vma, boolean, long *));
-
-static void
-objdump_print_addr_with_sym PARAMS ((bfd *, asection *, asymbol *, bfd_vma,
-				     struct disassemble_info *, boolean));
-
-static void
-objdump_print_addr PARAMS ((bfd_vma, struct disassemble_info *, boolean));
-
-static void
-objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
-
-static void
-show_line PARAMS ((bfd *, asection *, bfd_vma));
-
-static void
-disassemble_bytes PARAMS ((struct disassemble_info *, disassembler_ftype,
-			   boolean, bfd_byte *, bfd_vma, bfd_vma,
-			   arelent ***, arelent **));
-
-static void
-disassemble_data PARAMS ((bfd *));
-
-static const char *
-endian_string PARAMS ((enum bfd_endian));
-
-static asymbol **
-slurp_symtab PARAMS ((bfd *));
-
-static asymbol **
-slurp_dynamic_symtab PARAMS ((bfd *));
-
-static long
-remove_useless_symbols PARAMS ((asymbol **, long));
-
-static int
-compare_symbols PARAMS ((const PTR, const PTR));
-
-static int
-compare_relocs PARAMS ((const PTR, const PTR));
-
-static void
-dump_stabs PARAMS ((bfd *));
-
-static boolean
-read_section_stabs PARAMS ((bfd *, const char *, const char *));
-
-static void
-print_section_stabs PARAMS ((bfd *, const char *, const char *));
+static void usage PARAMS ((FILE *, int));
+static void nonfatal PARAMS ((const char *));
+static void display_file PARAMS ((char *filename, char *target));
+static void dump_section_header PARAMS ((bfd *, asection *, PTR));
+static void dump_headers PARAMS ((bfd *));
+static void dump_data PARAMS ((bfd *abfd));
+static void dump_relocs PARAMS ((bfd *abfd));
+static void dump_dynamic_relocs PARAMS ((bfd * abfd));
+static void dump_reloc_set PARAMS ((bfd *, asection *, arelent **, long));
+static void dump_symbols PARAMS ((bfd *abfd, boolean dynamic));
+static void dump_bfd_header PARAMS ((bfd *));
+static void dump_bfd_private_header PARAMS ((bfd *));
+static void dump_bfd PARAMS ((bfd *));
+static void display_bfd PARAMS ((bfd *abfd));
+static void display_target_list PARAMS ((void));
+static void display_info_table PARAMS ((int, int));
+static void display_target_tables PARAMS ((void));
+static void display_info PARAMS ((void));
+static void objdump_print_value
+  PARAMS ((bfd_vma, struct disassemble_info *, boolean));
+static void objdump_print_symname
+  PARAMS ((bfd *, struct disassemble_info *, asymbol *));
+static asymbol *find_symbol_for_address
+  PARAMS ((bfd *, asection *, bfd_vma, boolean, long *));
+static void objdump_print_addr_with_sym
+  PARAMS ((bfd *, asection *, asymbol *, bfd_vma,
+	   struct disassemble_info *, boolean));
+static void objdump_print_addr
+  PARAMS ((bfd_vma, struct disassemble_info *, boolean));
+static void objdump_print_address
+  PARAMS ((bfd_vma, struct disassemble_info *));
+static int objdump_symbol_at_address
+  PARAMS ((bfd_vma, struct disassemble_info *));
+static void show_line PARAMS ((bfd *, asection *, bfd_vma));
+static void disassemble_bytes
+  PARAMS ((struct disassemble_info *, disassembler_ftype, boolean,
+	   bfd_byte *, bfd_vma, bfd_vma, arelent ***, arelent **));
+static void disassemble_data PARAMS ((bfd *));
+static const char *endian_string PARAMS ((enum bfd_endian));
+static asymbol ** slurp_symtab PARAMS ((bfd *));
+static asymbol ** slurp_dynamic_symtab PARAMS ((bfd *));
+static long remove_useless_symbols PARAMS ((asymbol **, long));
+static int compare_symbols PARAMS ((const PTR, const PTR));
+static int compare_relocs PARAMS ((const PTR, const PTR));
+static void dump_stabs PARAMS ((bfd *));
+static boolean read_section_stabs PARAMS ((bfd *, const char *, const char *));
+static void print_section_stabs PARAMS ((bfd *, const char *, const char *));
 
 static void
 usage (stream, status)

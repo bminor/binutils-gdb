@@ -184,7 +184,10 @@ static void               dynamic_segment_mips_val    PARAMS ((Elf_Internal_Dyn 
 static void               dynamic_segment_parisc_val  PARAMS ((Elf_Internal_Dyn *));
 static int                process_dynamic_segment     PARAMS ((FILE *));
 static int                process_symbol_table        PARAMS ((FILE *));
+static int                process_syminfo             PARAMS ((FILE *));
 static int                process_section_contents    PARAMS ((FILE *));
+static void               process_mips_fpe_exception  PARAMS ((int));
+static int                process_mips_specific       PARAMS ((FILE *));
 static int                process_file                PARAMS ((char *));
 static int                process_relocs              PARAMS ((FILE *));
 static int                process_version_sections    PARAMS ((FILE *));
@@ -207,7 +210,9 @@ static int	          dump_section                PARAMS ((Elf32_Internal_Shdr *,
 static int	          display_debug_section       PARAMS ((Elf32_Internal_Shdr *, FILE *));
 static int                display_debug_info          PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_not_supported PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                prescan_debug_info          PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_lines         PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_pubnames      PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_frames        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
@@ -235,6 +240,7 @@ static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
 static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma));
 static int		  process_corefile_note_segments PARAMS ((FILE *));
 static int		  process_corefile_contents	 PARAMS ((FILE *));
+static int		  process_arch_specific		 PARAMS ((FILE *));
 
 typedef int Elf32_Word;
 
@@ -7300,6 +7306,10 @@ Frame_Chunk;
 /* A marker for a col_type that means this column was never referenced
    in the frame info.  */
 #define DW_CFA_unreferenced (-1)
+
+static void frame_need_space PARAMS ((Frame_Chunk *, int));
+static void frame_display_row PARAMS ((Frame_Chunk *, int *, int *));
+static int size_of_encoded_value PARAMS ((int));
 
 static void
 frame_need_space (fc, reg)
