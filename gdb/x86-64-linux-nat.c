@@ -32,7 +32,17 @@
 #include <sys/debugreg.h>
 #include <sys/syscall.h>
 #include <sys/procfs.h>
+#include <asm/prctl.h>
+/* FIXME ezannoni-2003-07-09: we need <sys/reg.h> to be included after
+   <asm/ptrace.h> because the latter redefines FS and GS for no apparent
+   reason, and those definitions don't match the ones that libpthread_db
+   uses, which come from <sys/reg.h>.  */
+/* ezannoni-2003-07-09: I think this is fixed. The extraneous defs have
+   been removed from ptrace.h in the kernel.  However, better safe than
+   sorry.  */
+#include <asm/ptrace.h>
 #include <sys/reg.h>
+#include "gdb_proc_service.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -306,3 +316,34 @@ x86_64_linux_dr_get_status (void)
 {
   return x86_64_linux_dr_get (DR_STATUS);
 }
+
+extern ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+
+/* This definition comes from prctl.h, but some kernels may not have it.  */
+#ifndef PTRACE_ARCH_PRCTL
+#define PTRACE_ARCH_PRCTL      30
+#endif
+
+  /* FIXME: ezannoni-2003-07-09 see comment above about include file order.
+     We could be getting bogus values for these two.  */
+  gdb_assert (FS < ELF_NGREG);
+  gdb_assert (GS < ELF_NGREG);
+  switch (idx)
+    {
+    case FS:
+      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
+       return PS_OK;
+      break;
+    case GS:
+      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
+       return PS_OK;
+      break;
+    default:                   /* Should not happen.  */
+      return PS_BADADDR;
+    }
+  return PS_ERR;               /* ptrace failed.  */
+}
+
