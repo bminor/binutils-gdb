@@ -1,3 +1,8 @@
+2001-11-01  Fred Fish  <fnf@redhat.com>
+
+	* gdbint.texinfo (SOLIB_ADD): Document additional new
+	"readsyms" arg.
+
 2001-10-30  Don Howard  <dhoward@redhat.com>
 
 	* gdb.texinfo: (Command Files) Added documentation for the

@@ -25,10 +25,10 @@ struct section_offsets;
 
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 
-#define SOLIB_ADD(filename, from_tty, targ) \
-    pa64_solib_add (filename, from_tty, targ)
+#define SOLIB_ADD(filename, from_tty, targ, readsyms) \
+    pa64_solib_add (filename, from_tty, targ, readsyms)
 
-extern void pa64_solib_add (char *, int, struct target_ops *);
+extern void pa64_solib_add (char *, int, struct target_ops *, int);
 
 extern CORE_ADDR pa64_solib_get_got_by_pc (CORE_ADDR);
 

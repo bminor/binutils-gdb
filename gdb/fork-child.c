@@ -388,8 +388,6 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 void
 clone_and_follow_inferior (int child_pid, int *followed_child)
 {
-  extern int auto_solib_add;
-
   int debugger_pid;
   int status;
   char pid_spelling[100];	/* Arbitrary but sufficient length. */

@@ -862,14 +862,14 @@ symbol_add_stub (void *arg)
    SYNOPSIS
 
    void solib_add (char *arg_string, int from_tty,
-   struct target_ops *target)
+   struct target_ops *target, int readsyms)
 
    DESCRIPTION
 
  */
 
 void
-solib_add (char *arg_string, int from_tty, struct target_ops *target)
+solib_add (char *arg_string, int from_tty, struct target_ops *target, int readsyms)
 {
   register struct so_list *so = NULL;	/* link map state variable */
 
@@ -879,6 +879,9 @@ solib_add (char *arg_string, int from_tty, struct target_ops *target)
   char *re_err;
   int count;
   int old;
+
+  if (!readsyms)
+    return;
 
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
     {
@@ -1252,8 +1255,7 @@ solib_create_inferior_hook (void)
      and will put out an annoying warning.
      Delaying the resetting of stop_soon_quietly until after symbol loading
      suppresses the warning.  */
-  if (auto_solib_add)
-    solib_add ((char *) 0, 0, (struct target_ops *) 0);
+  solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
   stop_soon_quietly = 0;
 }
 
@@ -1275,7 +1277,7 @@ static void
 sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
-  solib_add (args, from_tty, (struct target_ops *) 0);
+  solib_add (args, from_tty, (struct target_ops *) 0, 1);
 }
 
 void

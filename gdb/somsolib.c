@@ -406,7 +406,7 @@ som_solib_load_symbols (struct so_list *so, char *name, int from_tty,
    be exceeded.  */
 
 void
-som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
+som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int readsyms)
 {
   struct minimal_symbol *msymbol;
   struct so_list *so_list_tail;
@@ -777,7 +777,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
       st_size = som_solib_sizeof_symbol_table (name);
       som_solib_st_size_threshold_exceeded =
 	!from_tty &&
-	auto_solib_add &&
+	readsyms &&
 	((st_size + som_solib_total_st_size) > (auto_solib_limit * (LONGEST) (1024 * 1024)));
 
       if (som_solib_st_size_threshold_exceeded)
@@ -1470,7 +1470,7 @@ static void
 som_solib_sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
-  som_solib_add (args, from_tty, (struct target_ops *) 0);
+  som_solib_add (args, from_tty, (struct target_ops *) 0, 1);
 }
 
 

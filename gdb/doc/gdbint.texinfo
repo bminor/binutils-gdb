@@ -4000,10 +4000,12 @@ inferior.
 If defined, this is the name of the shell to use to run the inferior.
 Defaults to @code{"/bin/sh"}.
 
-@item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ})
+@item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ}, @var{readsyms})
 @findex SOLIB_ADD
 Define this to expand into an expression that will cause the symbols in
-@var{filename} to be added to @value{GDBN}'s symbol table.
+@var{filename} to be added to @value{GDBN}'s symbol table. If
+@var{readsyms} is zero symbols are not read but any necessary low level
+processing for @var{filename} is still done.
 
 @item SOLIB_CREATE_INFERIOR_HOOK
 @findex SOLIB_CREATE_INFERIOR_HOOK

@@ -31,10 +31,10 @@ extern void clear_solib (void);
 
 /* Called to add symbols from a shared library to gdb's symbol table. */
 
-#define SOLIB_ADD(filename, from_tty, targ) \
-    solib_add (filename, from_tty, targ)
+#define SOLIB_ADD(filename, from_tty, targ, readsyms) \
+    solib_add (filename, from_tty, targ, readsyms)
 
-extern void solib_add (char *, int, struct target_ops *);
+extern void solib_add (char *, int, struct target_ops *, int);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to

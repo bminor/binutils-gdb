@@ -1,3 +1,75 @@
+2001-11-01  Fred Fish  <fnf@redhat.com>
+
+	* coff-solib.c (coff_solib_add): Add new readsyms arg.
+	* irix5-nat.c (solib_add): Ditto.
+	* osfsolib.c (solib_add): Ditto.
+	* pa64solib.c (pa64_solib_add): Ditto.
+	* pa64solib.c (add_to_solist): Ditto.
+	* pa64solib.c (read_dld_descriptor): Ditto.
+	* solib.c (solib_add): Ditto.
+	* somsolib.c (som_solib_add): Ditto.
+	* win32-nat.c (child_solib_add): Ditto.
+	* xcoffsolib.c (solib_add): Ditto.
+
+	* coff-solib.h (coff_solib_add): Add new readsyms arg to prototype.
+	* pa64solib.c (add_to_solist): Ditto.
+	* pa64solib.c (read_dld_descriptor): Ditto.
+	* pa64solib.h (pa64_solib_add): Ditto.
+	* solib.h (solib_add): Ditto.
+	* somsolib.h (som_solib_add): Ditto.
+	* config/i386/tm-cygwin.h (child_solib_add): Ditto.
+
+	* coff-solib.c (coff_solib_add):  If readsyms is zero don't read
+	symbols but do any other needed work for shared libs.
+	* irix5-nat.c: Ditto.
+	* osfsolib.c (solib_add): Ditto.
+	* solib.c (solib_add): Ditto.
+	* win32-nat.c (child_solib_add): Ditto.
+	* xcoffsolib.c (solib_add): Ditto.
+
+	* irix5-nat.c (sharedlibrary_command): Pass 1 as readsyms to
+	solib_add to force reading of shared library symbols.
+	* osfsolib.c (sharedlibrary_command;): Ditto.
+	* pa64solib.c (pa64_solib_sharedlibrary_command): Ditto.
+	* solib.c (sharedlibrary_command): Ditto.
+	* somsolib.c (som_solib_sharedlibrary_command): Ditto.
+	* xcoffsolib.c (sharedlibrary_command): Ditto.
+
+	* coff-solib.c (coff_solib_create_inferior_hook): Call solib_add
+	unconditionally with auto_solib_add.
+	* irix5-nat.c (solib_create_inferior_hook): Ditto.
+	* osfsolib.c (solib_create_inferior_hook): Ditto.
+	* solib.c (solib_create_inferior_hook): Ditto.
+	* solib-osf.c (osf_solib_create_inferior_hook): Ditto.
+	* solib-svr4.c (enable_break): Ditto.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Ditto.
+
+	* corelow.c (solib_add_stub): Add auto_solib_add to args passed
+	via SOLIB_ADD.
+	* sol-thread.c (sol_thread_attach): Ditto.
+	* config/rs6000/nm-rs6000.h (SOLIB_ADD): Ditto.
+
+	* infcmd.c (attach_command): Remove auto_solib_add decl.
+	Call SOLIB_ADD directly with auto_solib_add.
+	* infrun.c (handle_inferior_event): Ditto.
+
+	* coff-solib.h (SOLIB_ADD): Add readsyms arg.
+	* pa64solib.h (SOLIB_ADD): Ditto.
+	* solib.h (SOLIB_ADD): Ditto.
+	* somsolib.h (SOLIB_ADD): Ditto.
+	* config/i386/tm-cygwin.h (SOLIB_ADD): Ditto.
+
+	* fork-child.c (clone_and_follow_inferior): Remove unused
+	auto_solib_add decl.
+
+	* pa64solib.c (pa64_solib_add): Call add_to_solist with readsyms.
+	(read_dld_descriptor): Ditto.
+	(pa64_solib_add): Call read_dld_descriptor with	readsyms.
+	(pa64_solib_in_dynamic_linker): Ditto.
+
+	* corelow.c (symfile.h): Need this for auto_solib_add declaration.
+	* sol-thread.c (symfile.h): Ditto.
+
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>
 
 	* s390-nat.c (s390_remove_watchpoint): Use xfree.

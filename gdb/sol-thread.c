@@ -60,6 +60,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "symfile.h"
 
 extern struct target_ops sol_thread_ops;	/* Forward declaration */
 extern struct target_ops sol_core_ops;	/* Forward declaration */
@@ -415,7 +416,7 @@ sol_thread_attach (char *args, int from_tty)
   procfs_ops.to_attach (args, from_tty);
 
   /* Must get symbols from solibs before libthread_db can run! */
-  SOLIB_ADD ((char *) 0, from_tty, (struct target_ops *) 0);
+  SOLIB_ADD ((char *) 0, from_tty, (struct target_ops *) 0, auto_solib_add);
 
   if (sol_thread_active)
     {

@@ -1707,8 +1707,10 @@ out:
 }
 
 void
-child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_ops *target)
+child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_ops *target, int readsyms)
 {
+  if (!readsyms)
+    return;
   if (core_bfd)
     {
       child_clear_solibs ();

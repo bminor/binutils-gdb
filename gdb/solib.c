@@ -493,7 +493,8 @@ update_solib_list (int from_tty, struct target_ops *target)
 
    SYNOPSIS
 
-   void solib_add (char *pattern, int from_tty, struct target_ops *TARGET)
+   void solib_add (char *pattern, int from_tty, struct target_ops
+   *TARGET, int readsyms)
 
    DESCRIPTION
 
@@ -501,10 +502,13 @@ update_solib_list (int from_tty, struct target_ops *target)
    match PATTERN.  (If we've already read a shared object's symbol
    info, leave it alone.)  If PATTERN is zero, read them all.
 
+   If READSYMS is 0, defer reading symbolic information until later
+   but still do any needed low level processing.
+
    FROM_TTY and TARGET are as described for update_solib_list, above.  */
 
 void
-solib_add (char *pattern, int from_tty, struct target_ops *target)
+solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
 {
   struct so_list *gdb;
 
@@ -536,7 +540,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 		printf_unfiltered ("Symbols already loaded for %s\n",
 				   gdb->so_name);
 	    }
-	  else
+	  else if (readsyms)
 	    {
 	      if (catch_errors
 		  (symbol_add_stub, gdb,
@@ -806,7 +810,7 @@ static void
 sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
-  solib_add (args, from_tty, (struct target_ops *) 0);
+  solib_add (args, from_tty, (struct target_ops *) 0, 1);
 }
 
 /* LOCAL FUNCTION

@@ -1633,10 +1633,6 @@ nofp_registers_info (char *addr_exp, int from_tty)
 void
 attach_command (char *args, int from_tty)
 {
-#ifdef SOLIB_ADD
-  extern int auto_solib_add;
-#endif
-
   char *exec_file;
   char *full_exec_path = NULL;
 
@@ -1698,12 +1694,9 @@ attach_command (char *args, int from_tty)
     }
 
 #ifdef SOLIB_ADD
-  if (auto_solib_add)
-    {
-      /* Add shared library symbols from the newly attached process, if any.  */
-      SOLIB_ADD ((char *) 0, from_tty, &current_target);
-      re_enable_breakpoints_in_shlibs ();
-    }
+  /* Add shared library symbols from the newly attached process, if any.  */
+  SOLIB_ADD ((char *) 0, from_tty, &current_target, auto_solib_add);
+  re_enable_breakpoints_in_shlibs ();
 #endif
 
   /* Take any necessary post-attaching actions for this platform.

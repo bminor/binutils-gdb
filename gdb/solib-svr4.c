@@ -909,7 +909,7 @@ enable_break (void)
       if (inferior_sos)
 	{
 	  /* Connected to a running target.  Update our shared library table. */
-	  solib_add (NULL, 0, NULL);
+	  solib_add (NULL, 0, NULL, auto_solib_add);
 	}
       while (inferior_sos)
 	{

@@ -1518,15 +1518,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      remove_breakpoints ();
 
 	    /* Check for any newly added shared libraries if we're
-	       supposed to be adding them automatically.  */
-	    if (auto_solib_add)
-	      {
-		/* Switch terminal for any messages produced by
-		   breakpoint_re_set.  */
-		target_terminal_ours_for_output ();
-		SOLIB_ADD (NULL, 0, NULL);
-		target_terminal_inferior ();
-	      }
+	       supposed to be adding them automatically.  Switch
+	       terminal for any messages produced by
+	       breakpoint_re_set.  */
+	    target_terminal_ours_for_output ();
+	    SOLIB_ADD (NULL, 0, NULL, auto_solib_add);
+	    target_terminal_inferior ();
 
 	    /* Reinsert breakpoints and continue.  */
 	    if (breakpoints_inserted)
@@ -2446,15 +2443,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    breakpoints_inserted = 0;
 
 	    /* Check for any newly added shared libraries if we're
-	       supposed to be adding them automatically.  */
-	    if (auto_solib_add)
-	      {
-		/* Switch terminal for any messages produced by
-		   breakpoint_re_set.  */
-		target_terminal_ours_for_output ();
-		SOLIB_ADD (NULL, 0, NULL);
-		target_terminal_inferior ();
-	      }
+	       supposed to be adding them automatically.  Switch
+	       terminal for any messages produced by
+	       breakpoint_re_set.  */
+	    target_terminal_ours_for_output ();
+	    SOLIB_ADD (NULL, 0, NULL, auto_solib_add);
+	    target_terminal_inferior ();
 
 	    /* Try to reenable shared library breakpoints, additional
 	       code segments in shared libraries might be mapped in now. */

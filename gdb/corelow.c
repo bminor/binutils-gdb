@@ -37,6 +37,7 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "regcache.h"
+#include "symfile.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -222,7 +223,7 @@ core_close_cleanup (void *ignore)
 static int
 solib_add_stub (PTR from_ttyp)
 {
-  SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target);
+  SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target, auto_solib_add);
   re_enable_breakpoints_in_shlibs ();
   return 0;
 }

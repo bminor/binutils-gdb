@@ -127,11 +127,11 @@ static void pa64_solib_sharedlibrary_command (char *, int);
 
 static void *pa64_target_read_memory (void *, CORE_ADDR, size_t, int);
 
-static boolean read_dld_descriptor (struct target_ops *);
+static boolean read_dld_descriptor (struct target_ops *, int readsyms);
 
 static boolean read_dynamic_info (asection *, dld_cache_t *);
 
-static void add_to_solist (boolean, char *, struct load_module_desc *,
+static void add_to_solist (boolean, char *, int, struct load_module_desc *,
 			   CORE_ADDR, struct target_ops *);
 
 /* When examining the shared library for debugging information we have to
@@ -372,7 +372,7 @@ pa64_solib_load_symbols (struct so_list *so, char *name, int from_tty,
    be exceeded.  */
 
 void
-pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target)
+pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target, int readsyms)
 {
   struct minimal_symbol *msymbol;
   CORE_ADDR addr;
@@ -415,7 +415,7 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target)
 
   /* Read in the load map pointer if we have not done so already.  */
   if (! dld_cache.have_read_dld_descriptor)
-    if (! read_dld_descriptor (target))
+    if (! read_dld_descriptor (target, readsyms))
       return;
 
   /* If the libraries were not mapped private, warn the user.  */
@@ -439,7 +439,7 @@ pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target)
       if (!dll_path)
 	error ("pa64_solib_add, unable to read shared library path.");
 
-      add_to_solist (from_tty, dll_path, &dll_desc, 0, target);
+      add_to_solist (from_tty, dll_path, readsyms, &dll_desc, 0, target);
     }
 }
 
@@ -700,7 +700,7 @@ pa64_solib_in_dynamic_linker (int pid, CORE_ADDR pc)
     return 0;
 
   if (!dld_cache.have_read_dld_descriptor)
-    if (!read_dld_descriptor (&current_target))
+    if (!read_dld_descriptor (&current_target, auto_solib_add))
       return 0;
 
   return (pc >= dld_cache.dld_desc.text_base
@@ -818,7 +818,7 @@ static void
 pa64_solib_sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
-  pa64_solib_add (args, from_tty, (struct target_ops *) 0);
+  pa64_solib_add (args, from_tty, (struct target_ops *) 0, 1);
 }
 
 /* Return the name of the shared library containing ADDR or NULL if ADDR
@@ -936,7 +936,7 @@ so_lib_thread_start_addr (struct so_list *so)
    return nonzero.  */
 
 static boolean
-read_dld_descriptor (struct target_ops *target)
+read_dld_descriptor (struct target_ops *target, int readsyms)
 {
   char *dll_path;
   asection *dyninfo_sect;
@@ -995,7 +995,7 @@ read_dld_descriptor (struct target_ops *target)
 			pa64_target_read_memory, 
 			0, 
 			dld_cache.load_map);
-  add_to_solist(0, dll_path,  &dld_cache.dld_desc, 0, target);
+  add_to_solist(0, dll_path, readsyms, &dld_cache.dld_desc, 0, target);
   
   return 1;
 }
@@ -1102,7 +1102,7 @@ pa64_target_read_memory (void *buffer, CORE_ADDR ptr, size_t bufsiz, int ident)
    be read from the inferior process at the address load_module_desc_addr.  */
 
 static void
-add_to_solist (boolean from_tty, char *dll_path,
+add_to_solist (boolean from_tty, char *dll_path, int readsyms,
 	       struct load_module_desc *load_module_desc_p,
 	       CORE_ADDR load_module_desc_addr, struct target_ops *target)
 {
@@ -1166,7 +1166,7 @@ add_to_solist (boolean from_tty, char *dll_path,
   st_size = pa64_solib_sizeof_symbol_table (dll_path);
   pa64_solib_st_size_threshhold_exceeded =
        !from_tty 
-    && auto_solib_add
+    && readsyms
     && (  (st_size + pa64_solib_total_st_size) 
 	> (auto_solib_limit * (LONGEST) (1024 * 1024)));
   if (pa64_solib_st_size_threshhold_exceeded)

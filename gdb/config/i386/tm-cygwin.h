@@ -32,14 +32,14 @@ extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
 #endif
 
 #define ATTACH_NO_WAIT
-#define SOLIB_ADD(filename, from_tty, targ) child_solib_add(filename, from_tty, targ)
+#define SOLIB_ADD(filename, from_tty, targ, readsyms) child_solib_add(filename, from_tty, targ, readsyms)
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) child_solib_loaded_library_pathname(pid)
 #define CLEAR_SOLIB child_clear_solibs
 #define ADD_SHARED_SYMBOL_FILES dll_symbol_command
 
 struct target_ops;
 char *cygwin_pid_to_str (ptid_t ptid);
-void child_solib_add (char *, int, struct target_ops *);
+void child_solib_add (char *, int, struct target_ops *, int);
 char *child_solib_loaded_library_pathname(int);
 void child_clear_solibs (void);
 void dll_symbol_command (char *, int);
