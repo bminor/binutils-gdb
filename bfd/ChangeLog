@@ -1,3 +1,8 @@
+Sun Nov  7 20:21:38 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* libbfd.c (bfd_put_8): Add parens around reference to "val"
+	argument.
+
 Fri Nov  5 21:45:09 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* hosts/i386mach3.h (HOST_SEGMENT_SIZE),
