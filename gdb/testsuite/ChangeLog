@@ -4,6 +4,7 @@ Tue May 25 13:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	just changed.
 	gdb.t00/default.exp: Update "info frame" test for new message.
 	* gdb.stabs/wierd.exp: Check for eof, directly or via gdb_test.
+	Remove some xfails
 
 Mon May 24 00:24:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
