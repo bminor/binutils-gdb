@@ -1,5 +1,9 @@
 Tue Apr 15 11:50:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (install): Depend upon installdirs.  Use
+	mkinstalldirs to build $(oldincludedir).
+	(installdirs): New target.
+
 	* elflink.h (elf_link_add_object_symbols): Don't call check_relocs
 	if this is a debugging section which we are stripping.
 

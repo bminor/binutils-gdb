@@ -533,7 +533,7 @@ stamp-ofiles: Makefile
 	  esac ; \
 	done ; \
 	echo $$f > tofiles
-	$(srcdir)/../move-if-change tofiles ofiles
+	$(SHELL) $(srcdir)/../move-if-change tofiles ofiles
 	touch stamp-ofiles
 
 ofiles: stamp-ofiles ; @true
@@ -551,7 +551,7 @@ stamp-piclist: ofiles
 	else \
 	  cp ofiles tpiclist; \
 	fi
-	$(srcdir)/../move-if-change tpiclist piclist
+	$(SHELL) $(srcdir)/../move-if-change tpiclist piclist
 	touch stamp-piclist
 
 piclist: stamp-piclist ; @true
@@ -713,7 +713,8 @@ roll:
 #
 force:
 
-install: $(ALLLIBS)
+.PHONY: install installdirs
+install: $(ALLLIBS) installdirs
 	for f in $(ALLLIBS); do \
 	  if [ "$$f" = "stamp-tshlink" ]; then \
 	    continue; \
@@ -738,12 +739,15 @@ install: $(ALLLIBS)
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
 	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(includedir)/bfdlink.h
 	-if test -z "$(oldincludedir)"; then true; else \
-	test -d $(oldincludedir) || mkdir $(oldincludedir); \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(oldincludedir); \
 	$(INSTALL_DATA) $(BFD_H) $(oldincludedir)/bfd.h; \
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h; \
 	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(oldincludedir)/bfdlink.h; \
 	fi
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+
+installdirs: $(srcdir)/../mkinstalldirs
+	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir) $(includedir)
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
@@ -773,7 +777,7 @@ config.status: configure configure.host config.bfd VERSION
 	$(DEP) -f .dep2a $(ALL_CFLAGS) $?
 	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
 	rm -f .dep2a
-	$(srcdir)/../move-if-change .dep2 .dep1
+	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -784,12 +788,12 @@ dep.sed: dep-in.sed config.status
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
 	cat .dep >> tmp-Makefile
-	$(srcdir)/../move-if-change tmp-Makefile Makefile
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
 dep-in: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
 	cat .dep >> tmp-Makefile.in
-	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
 host-aout.o: Makefile
 
@@ -807,7 +811,7 @@ $(BFD_H): stmp-bfd.h ; @true
 stmp-bfd.h: bfd-in3.h
 	rm -f bfd-tmp.h
 	cp bfd-in3.h bfd-tmp.h
-	$(srcdir)/../move-if-change bfd-tmp.h $(BFD_H)
+	$(SHELL) $(srcdir)/../move-if-change bfd-tmp.h $(BFD_H)
 	rm -f bfd-tmp.h
 	touch stmp-bfd.h
 
@@ -818,26 +822,26 @@ bfd-in3.h: bfd-in2.h config.status
 headers:
 	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
 	cp $(docdir)/bfd.h bfd-in2.h-new
-	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
+	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 	cp $(docdir)/libbfd.h libbfd.h-new
-	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 	cp $(docdir)/libcoff.h libcoff.h-new
-	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
 # The rules for the generated header files are here so that people can
 # type `make bfd-in2.h' if they remove it.  They are not run by default.
 $(srcdir)/bfd-in2.h:
 	(cd $(docdir); $(MAKE) bfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/bfd.h bfd-in2.h-new
-	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
+	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 $(srcdir)/libbfd.h:
 	(cd $(docdir); $(MAKE) libbfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libbfd.h libbfd.h-new
-	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 $(srcdir)/libcoff.h:
 	(cd $(docdir); $(MAKE) libcoff.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libcoff.h libcoff.h-new
-	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
 bfd.info:
 	(cd $(docdir); $(MAKE) bfd.info $(FLAGS_TO_PASS))
