@@ -3,7 +3,7 @@
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
-   Programming Support Tools". Sufficient support for gdb.
+   Programming Support Tools".  Sufficient support for gdb.
 
    Rewritten by Mark Eichin @ Cygnus Support, from information
    published in "System V Application Binary Interface", chapters 4
@@ -323,7 +323,7 @@ DEFUN(elf_swap_reloca_out,(abfd, src, dst),
 static char *EXFUN(elf_read, (bfd *, long, int));
 static struct sec * EXFUN(section_from_elf_index, (bfd *, int));
 static int EXFUN(elf_section_from_bfd_section, (bfd *, struct sec *));
-static boolean EXFUN(elf_slurp_symbol_table, (bfd *, Elf_Internal_Shdr*));
+static boolean EXFUN(elf_slurp_symbol_table, (bfd *, asymbol **));
 static void EXFUN(elf_info_to_howto, (bfd *, arelent *, Elf_Internal_Rela *));
 static char *EXFUN(elf_get_str_section, (bfd *, unsigned int));
      
@@ -419,10 +419,13 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
     elf_string_from_elf_strtab (abfd, hdr->sh_name) : "unnamed";
 
   switch(hdr->sh_type) {
+
   case SHT_NULL:
     /* inactive section. Throw it away. */
     return true;
+
   case SHT_PROGBITS:
+  case SHT_BEPROGBITS:
   case SHT_NOBITS:
     /* Bits that get saved. This one is real. */
     if (! hdr->rawdata ) 
@@ -452,28 +455,16 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
       }
     return true;
     break;
-  case SHT_SYMTAB:
-    /* we may be getting called by reference. Bring'em in... */
-    if (! hdr->rawdata) {
-      /* fetch our corresponding string table. */
-      bfd_section_from_shdr (abfd, hdr->sh_link);
 
-      /* start turning our elf symbols into bfd symbols. */
-      BFD_ASSERT (hdr->sh_entsize == sizeof (Elf_External_Sym));
-      elf_slurp_symbol_table (abfd, hdr);
-      abfd->flags |= HAS_SYMS;
-      
-    }
+  case SHT_SYMTAB:			/* A symbol table */
+    BFD_ASSERT (hdr->sh_entsize == sizeof (Elf_External_Sym));
+    elf_onesymtab (abfd) = shindex;
+    abfd->flags |= HAS_SYMS;
     return true;
-  case SHT_STRTAB:
-    /* we may be getting called by reference. Bring'em in... */
-    if (! hdr->rawdata)
-      {
-	/* we don't need to do anything, just make the data available. */
-	if (elf_get_str_section (abfd, shindex) == NULL)
-	  return false;
-      }
+
+  case SHT_STRTAB:			/* A string table */
     return true;
+
   case SHT_REL:
   case SHT_RELA:
     /* *these* do a lot of work -- but build no sections! */
@@ -491,7 +482,9 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
       bfd_section_from_shdr (abfd, hdr->sh_link); /* symbol table */
       bfd_section_from_shdr (abfd, hdr->sh_info); /* target */
       target_sect = section_from_elf_index (abfd, hdr->sh_info);
-      
+      if (target_sect == NULL)
+	  return false;
+
 #if 0
       /* FIXME:  We are only prepared to read one symbol table, so
 	 do NOT read the dynamic symbol table since it is only a
@@ -504,14 +497,10 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
       target_sect->flags |= SEC_RELOC;
       target_sect->relocation = 0;
       target_sect->rel_filepos = hdr->sh_offset;
-#if 0
-      fprintf(stderr, "ELF>> section %s reading %d relocs\n",
-	      target_sect->name, target_sect->reloc_count);
-#endif
       return true;
-
     }
     break;
+
   case SHT_HASH:
   case SHT_DYNAMIC:
   case SHT_DYNSYM:		/* could treat this like symtab... */
@@ -520,12 +509,14 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
     abort ();
 #endif
     break;
+
   case SHT_NOTE:
 #if 0
     fprintf(stderr, "Note Sections not yet supported.\n");
     abort ();
 #endif
     break;
+
   case SHT_SHLIB:
 #if 0
     fprintf(stderr, "SHLIB Sections not supported (and non conforming.)\n");
@@ -539,7 +530,7 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
   return (true);
 }
 
-      
+
 
 
 struct strtab {
@@ -1459,8 +1450,6 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 	  rela_hdr->sh_entsize = sizeof (Elf_External_Rela);
 	  /* orelocation has the data, reloc_count has the count... */
 	  rela_hdr->sh_size = rela_hdr->sh_entsize * asect->reloc_count;
-	  fprintf(stderr,"ELF>> sending out %d relocs to %s\n",
-		  asect->reloc_count, asect->name);
 	  outbound_relocs = (Elf_External_Rela *)
 	    bfd_alloc(abfd, asect->reloc_count * sizeof(Elf_External_Rela));
 	  for (idx = 0; idx < asect->reloc_count; idx++)
@@ -1737,7 +1726,6 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
     symtab_hdr->sh_link = symstrtab_section;
     symstrtab_hdr->sh_type = SHT_STRTAB;
 
-    fprintf(stderr,"ELF>> sending out %d syms\n",symcount);
     outbound_syms = (Elf_External_Sym*)
       bfd_alloc(abfd, (1+symcount) * sizeof(Elf_External_Sym));
     /* now generate the data (for "contents") */
@@ -1753,6 +1741,10 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
 	  sym.st_info = ELF_ST_INFO(STB_LOCAL, STT_OBJECT);
 	else if (syms[idx]->flags & BSF_GLOBAL)
 	  sym.st_info = ELF_ST_INFO(STB_GLOBAL, STT_OBJECT);
+	else if (syms[idx]->flags & BSF_SECTION_SYM)
+	  sym.st_info = ELF_ST_INFO(STB_LOCAL, STT_SECTION);
+	else if (syms[idx]->flags & BSF_FILE)
+	  sym.st_info = ELF_ST_INFO(STB_LOCAL, STT_FILE);
 
 	sym.st_other = 0;
 	if (syms[idx]->section) 
@@ -1818,7 +1810,6 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
       return (false);
     }
 
-  fprintf(stderr, "ELF>> total sections: %d\n", i_ehdrp->e_shnum);
   for (count = 0; count < i_ehdrp->e_shnum; count ++)
     {
       elf_swap_shdr_out (abfd, i_shdrp+count, x_shdrp+count);
@@ -1832,8 +1823,6 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
     {
       if(i_shdrp[count].contents)
 	{
-	  fprintf(stderr, "found some userdata: count %d, pos 0x%x\n",
-		  count, i_shdrp[count].sh_offset);
 	  bfd_seek (abfd, i_shdrp[count].sh_offset, SEEK_SET);
 	  bfd_write (i_shdrp[count].contents, i_shdrp[count].sh_size, 1, abfd);
 	}
@@ -1872,6 +1861,7 @@ DEFUN (section_from_elf_index, (abfd, index),
     {
       /* ELF sections that map to BFD sections */
     case SHT_PROGBITS:
+    case SHT_BEPROGBITS:
     case SHT_NOBITS:
       if (! hdr->rawdata)
 	bfd_section_from_shdr (abfd, index);
@@ -1899,6 +1889,7 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
       {
 	/* ELF sections that map to BFD sections */
       case SHT_PROGBITS:
+      case SHT_BEPROGBITS:
       case SHT_NOBITS:
 	if (hdr->rawdata) 
 	  {
@@ -1914,19 +1905,19 @@ DEFUN (elf_section_from_bfd_section, (abfd, asect),
 }
 
 static boolean
-DEFUN (elf_slurp_symbol_table, (abfd, hdr),
+DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
        bfd		*abfd AND
-       Elf_Internal_Shdr *hdr)
+       asymbol		**symptrs)	/* Buffer for generated bfd symbols */
 {
+  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
+  Elf_Internal_Shdr *hdr = i_shdrp + elf_onesymtab (abfd);
   int symcount;		/* Number of external ELF symbols */
+  int i;
   char *strtab;		/* Buffer for raw ELF string table section */
   asymbol *sym;		/* Pointer to current bfd symbol */
   asymbol *symbase;	/* Buffer for generated bfd symbols */
-  asymbol **vec;	/* Pointer to current bfd symbol pointer */
   Elf_Internal_Sym i_sym;
-  Elf_External_Sym x_sym;
   Elf_External_Sym *x_symp;
-  unsigned int *table_ptr;	/* bfd symbol translation table */
 
   /* this is only valid because there is only one symtab... */
   /* FIXME:  This is incorrect, there may also be a dynamic symbol
@@ -1945,10 +1936,9 @@ DEFUN (elf_slurp_symbol_table, (abfd, hdr),
 
      Note that we allocate the initial bfd canonical symbol buffer
      based on a one-to-one mapping of the ELF symbols to canonical
-     symbols.  However, it is likely that not all the ELF symbols will
-     be used, so there will be some space leftover at the end.  Once
-     we know how many symbols we actual generate, we realloc the buffer
-     to the correct size and then build the pointer vector. */
+     symbols.  We actually use all the ELF symbols, so there will be no
+     space left over at the end.  When we have all the symbols, we
+     build the caller's pointer vector. */
 
   if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
     {
@@ -1957,111 +1947,94 @@ DEFUN (elf_slurp_symbol_table, (abfd, hdr),
     }
 
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-  sym = symbase = (asymbol *) bfd_zalloc (abfd, symcount * sizeof (asymbol));
-  x_symp = (Elf_External_Sym *)
-    bfd_zalloc (abfd, symcount * sizeof (Elf_External_Sym));
+  symbase = (asymbol *) bfd_zalloc (abfd, symcount * sizeof (asymbol));
+  sym = symbase;
+
+  /* Temporarily allocate room for the raw ELF symbols.  */
+  x_symp = (Elf_External_Sym *) malloc (symcount * sizeof (Elf_External_Sym));
 
   if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd) 
       != symcount * sizeof (Elf_External_Sym))
     {
+      free ((PTR)x_symp);
       bfd_error = system_call_error;
       return (false);
     }
-  while (symcount-- > 0)
+  /* Skip first symbol, which is a null dummy.  */
+  for (i = 1; i < symcount; i++)
     {
-      elf_swap_symbol_in (abfd, x_symp + symcount, &i_sym);
+      elf_swap_symbol_in (abfd, x_symp + i, &i_sym);
+      sym -> the_bfd = abfd;
       if (i_sym.st_name > 0)
-	{
-	  sym -> the_bfd = abfd;
-	  sym -> name = elf_string_from_elf_section(abfd, hdr->sh_link,
-						    i_sym.st_name);
-	  sym -> value = i_sym.st_value;
+	sym -> name = elf_string_from_elf_section(abfd, hdr->sh_link,
+						i_sym.st_name);
+      else
+	sym -> name = "unnamed"; /* perhaps should include the number? */
+      sym -> value = i_sym.st_value;
 /* FIXME -- this is almost certainly bogus.  It's from Pace Willisson's
-   hasty Solaris support, to pass the sizes of object files or functions
-   down into GDB via the back door, to circumvent some other kludge in
-   how Sun hacked stabs.  */
-	  sym -> udata = (PTR)i_sym.st_size;
+hasty Solaris support, to pass the sizes of object files or functions
+down into GDB via the back door, to circumvent some other kludge in
+how Sun hacked stabs.   -- gnu@cygnus.com  */
+      sym -> udata = (PTR)i_sym.st_size;
 /* FIXME -- end of bogosity.  */
-	  if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
-	    {
-	      sym -> section = section_from_elf_index (abfd, i_sym.st_shndx);
-	    }
-	  else if (i_sym.st_shndx == SHN_ABS)
-	    {
-	      sym -> section = &bfd_abs_section;
-	    }
-	  else if (i_sym.st_shndx == SHN_COMMON)
-	    {
-	      sym -> section = &bfd_com_section;
-	    }
-	  else if (i_sym.st_shndx == SHN_UNDEF)
-	    {
-	      sym -> section = &bfd_und_section;
-	    }
-	  
-	  switch (ELF_ST_BIND (i_sym.st_info))
-	    {
-	      case STB_LOCAL:
-		sym -> flags |= BSF_LOCAL;
-	        break;
-	      case STB_GLOBAL:
-	        sym -> flags |= (BSF_GLOBAL | BSF_EXPORT);
-	        break;
-	      case STB_WEAK:
-		sym -> flags |= BSF_WEAK;
-	        break;
-	    }
-	  sym++;
-	}
-      else 
+      if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
 	{
-	  /* let's try *not* punting unnamed symbols... */
-	  sym -> the_bfd = abfd;
-	  sym -> name = "unnamed"; /* perhaps should include the number? */
-	  sym -> value = i_sym.st_value;
-	  if (i_sym.st_shndx > 0 && i_sym.st_shndx < SHN_LORESERV)
-	    {
-	      sym -> section = section_from_elf_index (abfd, i_sym.st_shndx);
-	    }
-	  else if (i_sym.st_shndx == SHN_ABS)
-	    {
-	      sym -> section = &bfd_abs_section;
-	    }
-	  else if (i_sym.st_shndx == SHN_COMMON)
-	    {
-	      sym -> section = &bfd_com_section;
-	    }
-	  else if (i_sym.st_shndx == SHN_UNDEF)
-	    {
-	      sym -> section = &bfd_und_section;
-	    }
-	  
-	  switch (ELF_ST_BIND (i_sym.st_info))
-	    {
-	      case STB_LOCAL:
-		sym -> flags |= BSF_LOCAL;
-	        break;
-	      case STB_GLOBAL:
-	        sym -> flags |= (BSF_GLOBAL | BSF_EXPORT);
-	        break;
-	      case STB_WEAK:
-		sym -> flags |= BSF_WEAK;
-	        break;
-	    }
-	  sym++;
-
+	  sym -> section = section_from_elf_index (abfd, i_sym.st_shndx);
 	}
+      else if (i_sym.st_shndx == SHN_ABS)
+	{
+	  sym -> section = &bfd_abs_section;
+	}
+      else if (i_sym.st_shndx == SHN_COMMON)
+	{
+	  sym -> section = &bfd_com_section;
+	}
+      else if (i_sym.st_shndx == SHN_UNDEF)
+	{
+	  sym -> section = &bfd_und_section;
+	}
+      
+      switch (ELF_ST_BIND (i_sym.st_info))
+	{
+	  case STB_LOCAL:
+	    sym -> flags |= BSF_LOCAL;
+	    break;
+	  case STB_GLOBAL:
+	    sym -> flags |= (BSF_GLOBAL | BSF_EXPORT);
+	    break;
+	  case STB_WEAK:
+	    sym -> flags |= BSF_WEAK;
+	    break;
+	}
+
+      switch (ELF_ST_TYPE (i_sym.st_info))
+	{
+	  case STT_SECTION:
+	    sym->flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
+	    break;
+	  case STT_FILE:
+	    sym->flags |= BSF_FILE | BSF_DEBUGGING;
+	    break;
+	}
+      sym++;
     }
 
-  bfd_get_symcount(abfd) = symcount = sym - symbase;
-  sym = symbase = (asymbol *)
-    bfd_realloc (abfd, symbase, symcount * sizeof (asymbol));
-  bfd_get_outsymbols(abfd) = vec = (asymbol **)
-    bfd_alloc (abfd, symcount * sizeof (asymbol *));
+  /* We rely on the zalloc to clear out the final symbol entry.  */
 
-  while (symcount-- > 0)
+  /* We're now done with the raw symbols.  */
+  free ((PTR)x_symp);
+
+  bfd_get_symcount(abfd) = symcount = sym - symbase;
+  
+  /* Fill in the user's symbol pointer vector if needed.  */
+  if (symptrs)
     {
-      *vec++ = sym++;
+      sym = symbase;
+      while (symcount-- > 0)
+	{
+	  *symptrs++ = sym++;
+	}
+      *symptrs = 0;			/* Final null pointer */
     }
 
   return (true);
@@ -2070,17 +2043,19 @@ DEFUN (elf_slurp_symbol_table, (abfd, hdr),
 /* Return the number of bytes required to hold the symtab vector.
 
    Note that we base it on the count plus 1, since we will null terminate
-   the vector allocated based on this size. */
+   the vector allocated based on this size.  However, the ELF symbol table
+   always has a dummy entry as symbol #0, so it ends up even.  */
 
 static unsigned int
 DEFUN (elf_get_symtab_upper_bound, (abfd), bfd *abfd)
 {
-  unsigned int symtab_size = 0;
+  unsigned int symcount;
+  unsigned int symtab_size;
+  Elf_Internal_Shdr *i_shdrp = elf_elfsections (abfd);
+  Elf_Internal_Shdr *hdr = i_shdrp + elf_onesymtab (abfd);
 
-  /* if (elf_slurp_symbol_table (abfd, FIXME...)) */
-    {
-      symtab_size = (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol));
-    }
+  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol));
   return (symtab_size);
 }
 
@@ -2202,14 +2177,10 @@ DEFUN(elf_slurp_reloca_table,(abfd, asect, symbols),
     return true;
   if (asect->flags & SEC_CONSTRUCTOR)
     return true;
-  /* if (!elf_slurp_symbol_table(abfd))
-    return false; -- should be done by now */
 
   bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
   native_relocs = (Elf_External_Rela *)
     bfd_alloc(abfd, asect->reloc_count * sizeof(Elf_External_Rela));
-  fprintf(stderr, "ELF>> really reading %d relocs for section %s\n",
-	  asect->reloc_count, asect->name);
   bfd_read ((PTR) native_relocs,
 	    sizeof(Elf_External_Rela), asect->reloc_count, abfd);
   
@@ -2302,19 +2273,10 @@ DEFUN (elf_get_symtab, (abfd, alocation),
   unsigned int symcount;
   asymbol **vec;
 
-/*  if (!elf_slurp_symbol_table (abfd))
+  if (!elf_slurp_symbol_table (abfd, alocation))
     return (0);
-  else */
-    {
-      symcount = bfd_get_symcount (abfd);
-      vec = bfd_get_outsymbols (abfd);
-      while (symcount-- > 0)
-	{
-	  *alocation++ = *vec++;
-	}
-      *alocation++ = NULL;
-      return (bfd_get_symcount (abfd));
-    }
+  else
+    return (bfd_get_symcount (abfd));
 }
 
 static asymbol *
@@ -2360,9 +2322,8 @@ DEFUN (elf_print_symbol,(ignore_abfd, filep, symbol, how),
 	CONST char *section_name;
 	section_name = symbol->section? symbol->section->name : "(*none*)";
 	bfd_print_symbol_vandf((PTR) file, symbol);
-	fprintf(file, " %-5s %s %s %s",
+	fprintf(file, " %s\t%s",
 		section_name,
-		" ", " ",
 		symbol->name);
       }
       break;

@@ -1,3 +1,12 @@
+Sat Aug  1 13:49:59 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config/stratus.mt (CC):  Remove definition.
+	* elf.c (bfd_section_from_shdr, elf_section_from_bfd_section,
+	section_from_elf_index):  Add SHT_BEPROGBITS case for i860 in
+	big endian mode.
+	* elf.c (bfd_section_from_shdr):  Test for the possibility that
+	section_from_elf_index returns NULL and don't dereference it.
+
 Mon Jul 20 02:46:09 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* add hppa_data to bfd tdata (indirectly via sef).
@@ -49,6 +58,17 @@ Tue Jul 14 14:06:28 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* rs6000-core.c (rs6000coff_core_p):  Greatly simplify expression,
 	and add appropriate casts to keep (picayune) aix-cc happy.
+
+Mon Jul 13 05:06:51 1992  John Gilmore  (gnu at cygnus.com)
+
+	* elf.c (elf_slurp_symbol_table):  Now 2nd arg is where to write
+	symbol pointers.  Punt expensive & useless bfd_realloc.  Use
+	malloc for raw symbols, and free it before returning.
+	(bfd_section_from_shdr):  Do not slurp symbol table until politely
+	asked. 	Do not even slurp string tables.
+	(elf_get_symtab_upper_bound):  Count 'em without reading them.	
+	(elf_get_symtab):  This is how to politely ask.  Schlurp!
+	This should probably just *become* elf_slurp_symbol_table, FIXME.
 
 Wed Jul  8 16:24:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
