@@ -1,3 +1,8 @@
+2003-02-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* elfcore.h (elf_core_file_p): Compare alternate machine codes for ELF
+	backends when checking if the generic ELF target should be used.
+
 2003-02-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Init tls_get_addr.
