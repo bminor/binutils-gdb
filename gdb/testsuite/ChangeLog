@@ -1,5 +1,10 @@
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.mi/mi-break.exp: Use gdb_get_line_number.
+	* gdb.mi/mi2-break.exp: Likewise.
+
+2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.gdb/selftest.exp: Revert removal of call to init_malloc.
 
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
