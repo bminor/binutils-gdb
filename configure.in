@@ -41,7 +41,10 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl tix libgui libide"
+host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl tix libgui"
+# start-sanitize-ide
+host_libs="${host_libs} libide"
+# end-sanitize-ide
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
@@ -232,9 +235,9 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-	skipdirs="${skipdirs} tk libgui libide gash"
+	skipdirs="${skipdirs} tk libgui gash"
 # start-sanitize-ide
-	skipdirs="${skipdirs} vmake jstools"
+	skipdirs="${skipdirs} libide vmake jstools"
 # end-sanitize-ide
 	;;
   *)
@@ -387,13 +390,13 @@ case "${host}" in
   i[3456]86-*-vsta)
     noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
-    noconfigdirs="$noconfigdirs vmake jstools"
+    noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     ;;
   i[3456]86-*-go32* | i[3456]86-*-msdosdjgpp*)
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
-    noconfigdirs="$noconfigdirs vmake jstools"
+    noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
 	;;
   *-*-cygwin32)
@@ -408,7 +411,7 @@ case "${host}" in
   ppc*-*-pe)
      noconfigdirs="patch diff make tk tcl expect dejagnu cvssrc autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
-     noconfigdirs="$noconfigdirs vmake jstools"
+     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     ;;
 esac
@@ -458,7 +461,7 @@ case "${target}" in
 # start-sanitize-d30v
   d30v-*-*)
 # start-sanitize-ide
-    noconfigdirs="$noconfigdirs vmake jstools"
+    noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     ;;
 # end-sanitize-d30v
@@ -495,7 +498,7 @@ case "${target}" in
       *-*-cygwin32) ;; # keep gdb tcl tk expect etc.
       *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db sn gnuserv"
 # start-sanitize-ide
-         noconfigdirs="$noconfigdirs vmake jstools"
+         noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
          ;;
     esac
@@ -542,7 +545,7 @@ case "${target}" in
     target_configdirs="$target_configdirs target-winsup"
     noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl tix db sn gnuserv"
 # start-sanitize-ide
-    noconfigdirs="$noconfigdirs vmake jstools"
+    noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
@@ -551,7 +554,7 @@ case "${target}" in
   powerpcle-*-solaris*)
     noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl tix db sn gnuserv"
 # start-sanitize-ide
-    noconfigdirs="$noconfigdirs vmake jstools"
+    noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     ;;
   rs6000-*-lynxos*)

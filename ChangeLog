@@ -32,6 +32,7 @@ Tue Dec  2 10:08:31 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config.sub (maybe_os): Add support for Thumb target.
 
+start-sanitize-ide
 Tue Dec  2 06:51:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* configure (GDB_TK): add all-libide to dependency list
@@ -45,8 +46,7 @@ Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* Makefile.in (all-vmake): remove double dependency on all-libide
 
-	* modules/modules: add libide to gdb's checkout list
-
+end-sanitize-ide
 Sun Nov 30 16:12:27 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* Makefile.in: Add rules for cygmon.
@@ -78,7 +78,6 @@ Sat Nov  8 14:42:59 1997  Michael Meissner  <meissner@cygnus.com>
 	* configure.in (d30v-*-*): Configure target-libgloss on the D30V.
 
 end-sanitize-d30v
-
 Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
 
         * include/libiberty.h: Add extern "C" { so it can be used with C++
@@ -112,13 +111,12 @@ Wed Oct 29 16:52:43 1997  Gavin Koch  <gavin@cygnus.com>
 	* config.sub: Add tx49 configury.
 
 end-sanitize-tx49
-
 start-sanitize-ide
 Tue Oct 28 16:44:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
         * Makefile.in (install-foundry): New target.
+
 end-sanitize-ide
-	
 Mon Oct 27 13:17:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in: Remove a "second pass" of tweaking noconfigdirs,
@@ -144,7 +142,6 @@ Sat Oct 11 13:52:40 1997  Tom Tromey  <tromey@cygnus.com>
         * Makefile.in (all-jstools): Depend on all-tix.
 
 end-sanitize-ide
-
 Tue Oct  7 23:58:57 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Add mips-tx39-elf to marketing names.
@@ -218,10 +215,12 @@ Fri Sep  5 16:11:28 1997  Joel Sherrill  (joel@OARcorp.com)
 
         * configure.in (*-*-rtems*): Do not build libgloss for rtems.
 
+start-sanitize-ide
 Wed Sep  3 19:38:01 1997  Ian Lance Taylor  <ian@cygnus.com>
 
         * Makefile.in (GDB_TK): Add all-libide.
 
+end-sanitize-ide
 Wed Sep  3 12:15:24 1997  Chris Provenzano  <proven@cygnus.com>
 
 	* ltconfig: Set CONFIG_SHELL in libtool.
@@ -286,7 +285,6 @@ start-sanitize-ide
         * Makefile.in (all-vmake): Depend upon all-tix.
 
 end-sanitize-ide
-
 Tue Aug 12 20:09:48 1997  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in (BISON): bison, not byacc or bison -y.

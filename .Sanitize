@@ -53,7 +53,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	gas gawk gcc gdb gdbm gdbtest glob gperf gprof grep grez groff
 	guile gzip
 	include inet install-sh ispell
-	ld less libg++ libgcc libgloss libiberty libgui libide libio
+	ld less libg++ libgcc libgloss libiberty libio
 	librx libstdc++
 	m4 make mkinstalldirs mmalloc move-if-change newlib ncurses opcodes
 	pagas patch perl prms
@@ -73,7 +73,7 @@ else
 	lose_these_too="${lose_these_too} ${cygnus_files}"
 fi
 
-gdbtk_files="tcl tk itcl tix"
+gdbtk_files="tcl tk itcl tix libgui"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null) ; then
 	lose_these_too="${lose_these_too} ${gdbtk_files}"
@@ -108,7 +108,7 @@ else
 	keep_these_too="${keep_these_too} ${inet_files}"
 fi
 
-ide_files="vmake"
+ide_files="libide vmake jstools"
 
 if (echo $* | grep keep\-ide > /dev/null); then
 	keep_these_too="${keep_these_too} ${ide_files}"

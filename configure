@@ -988,7 +988,10 @@ esac
 # FIXME: This should be in configure.in, not configure
 # Determine whether gdb needs tk/tcl or not.
 if [ "$enable_gdbtk" != "no" ]; then
+	GDB_TK="all-tcl all-tk all-itcl all-tix all-libgui"
+	# start-sanitize-ide
 	GDB_TK="all-tcl all-tk all-itcl all-tix all-libgui all-libide"
+	# end-sanitize-ide
 else
 	GDB_TK=""
 fi
