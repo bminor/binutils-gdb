@@ -5868,7 +5868,14 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MIPS_CALL_LO16:
 	  /* This symbol requires a global offset table entry.  */
 
-	  BFD_ASSERT (h != NULL);
+	  if (h == NULL)
+	    {
+	      (*_bfd_error_handler)
+		("%s: CALL16 reloc at 0x%lx not against global symbol",
+		 bfd_get_filename (abfd), (unsigned long) rel->r_offset);
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
 
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (h->dynindx == -1)

@@ -1,5 +1,8 @@
 Fri Mar 14 16:43:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (mips_elf_check_relocs): Give an error if CALL16 is
+ 	seen with a local symbol, rather than crashing.
+
 	* elfcode.h (elf_slurp_symbol_table): Don't try to read the
 	version symbols if there aren't any.
 
