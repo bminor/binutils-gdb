@@ -1,6 +1,11 @@
 1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
 
-        * sparc-opc.c: Add aliases Solaris as supports.
+	* sparc-opc.c: Fix up set, setsw, setuw operand kinds.
+	Support signx %reg, clruw %reg.
+
+1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* sparc-opc.c: Add aliases Solaris as supports.
 
 Mon Jun  7 12:04:52 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
