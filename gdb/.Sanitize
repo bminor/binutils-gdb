@@ -386,7 +386,8 @@ else
 	done
 	echo Thawing the \"chill\" out of Makefile.in...
 	cp Makefile.in new
-	sed -e 's/\$\{srcdir\}/ch-exp.y//g' \
+	sed -e 's/$(srcdir)\/ch-exp.y//g' \
+	    -e 's/${srcdir}\/ch-exp.y//g' \
 	    -e 's/ch-exp.y//g' \
 	    -e 's/ch-exp.tab.c//g' \
 	    -e 's/ch-exp.tab.o//g' \
