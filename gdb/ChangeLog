@@ -1,3 +1,7 @@
+2004-08-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/powerpc/aix.mh: Add comment.
+
 2004-08-31  Paul GIlliam  <pgilliam@us.ibm.com>
 
 	* MAINTAINERS: Add self to Write-After-Approval.
