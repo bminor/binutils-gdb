@@ -266,7 +266,7 @@ DEFUN(bfd_seek,(abfd, position, direction),
   if (direction == SEEK_SET && position == 0)
     return 0;
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
-  if (x > 0 && direction == SEEK_SET && position == abfd->where)
+  if (direction == SEEK_SET && position == abfd->where)
     return 0;
 #endif
 
