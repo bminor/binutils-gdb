@@ -54,7 +54,8 @@ extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 
 /* GDB--Like target_read_memory, but slightly different parameters.  */
 extern int
-dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr, int len));
+dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr, int len,
+			     disassemble_info *info));
 
 /* GDB--Like memory_error with slightly different parameters.  */
 extern void

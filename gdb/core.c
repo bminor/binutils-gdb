@@ -166,10 +166,11 @@ read_memory (memaddr, myaddr, len)
    FIXME: not according to it's prototype.  930331 krp. */
 
 int
-dis_asm_read_memory (memaddr, myaddr, len)
+dis_asm_read_memory (memaddr, myaddr, len, info)
      bfd_vma memaddr;
      bfd_byte *myaddr;
      int len;
+     disassemble_info *info;
 {
   return target_read_memory (memaddr, myaddr, len);
 }

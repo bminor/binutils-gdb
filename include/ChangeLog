@@ -1,3 +1,7 @@
+Thu Apr  1 09:00:10 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* dis-asm.h (dis_asm_read_memory): Fix prototype.
+
 Wed Mar 31 17:40:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dis-asm.h: Add print_insn_sparc.

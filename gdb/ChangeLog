@@ -1,3 +1,8 @@
+Thu Apr  1 09:01:38 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* core.c (dis_asm_read_memory): Reinstate 4th arg.  The prototype
+	has been fixed.
+
 Thu Apr  1 09:34:43 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c (bpstat_print, bpstat_stop_status): Change to walk the

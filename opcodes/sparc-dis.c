@@ -460,7 +460,7 @@ print_insn_sparc (memaddr, info)
 	      errcode =
 		(*info->read_memory_func)
 		  (memaddr - 4,
-		   (char *)&prev_insn, sizeof (prev_insn));
+		   (char *)&prev_insn, sizeof (prev_insn), info);
 
 	      if (errcode == 0)
 		{
@@ -475,7 +475,8 @@ print_insn_sparc (memaddr, info)
 
 		  if (is_delayed_branch (prev_insn))
 		    errcode = (*info->read_memory_func)
-		      (memaddr - 8, (char *)&prev_insn, sizeof (prev_insn));
+		      (memaddr - 8, (char *)&prev_insn, sizeof (prev_insn),
+		       info);
 		}
 
 	      /* If there was a problem reading memory, then assume
