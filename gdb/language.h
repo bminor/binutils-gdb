@@ -106,6 +106,8 @@ struct language_defn {
   enum type_check  la_type_check;	/* Default type checking */
   int            (*la_parser) PARAMS((void));	/* Parser function */
   void           (*la_error) PARAMS ((char *)); /* Parser error function */
+  void		 (*la_printchar) PARAMS ((int, FILE *));
+  void		 (*la_printstr) PARAMS ((FILE *, char *, unsigned int, int));
   struct type	 **la_longest_int;	/* Longest signed integral type */
   struct type	 **la_longest_unsigned_int; /* Longest uns integral type */
   struct type	 **la_longest_float;	/* Longest floating point type */
@@ -214,6 +216,11 @@ set_language PARAMS ((enum language));
   (current_language->la_hex_format.la_format_specifier)
 #define local_hex_format_suffix() \
   (current_language->la_hex_format.la_format_suffix)
+
+#define local_printchar(ch, stream) \
+  (current_language->la_printchar(ch, stream))
+#define local_printstr(stream, string, length, force_ellipses) \
+  (current_language->la_printstr(stream, string, length, force_ellipses))
 
 /* Return a format string for printf that will print a number in one of
    the local (language-specific) formats.  Result is static and is

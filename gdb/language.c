@@ -1098,6 +1098,24 @@ unk_lang_error (msg)
   error ("Attempted to parse an expression with unknown language");
 }
 
+static void
+unk_lang_printchar (c, stream)
+     register int c;
+     FILE *stream;
+{
+  error ("internal error - unimplemented function unk_lang_printchar called.");
+}
+
+static void
+unk_lang_printstr (stream, string, length, force_ellipses)
+     FILE *stream;
+     char *string;
+     unsigned int length;
+     int force_ellipses;
+{
+  error ("internal error - unimplemented function unk_lang_printstr called.");
+}
+
 static struct type ** const (unknown_builtin_types[]) = { 0 };
 static const struct op_print unk_op_print_tab[] = { 0 };
 
@@ -1109,6 +1127,8 @@ const struct language_defn unknown_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  unk_lang_printchar,		/* Print character constant */
+  unk_lang_printstr,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1129,6 +1149,8 @@ const struct language_defn auto_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  unk_lang_printchar,		/* Print character constant */
+  unk_lang_printstr,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1148,6 +1170,8 @@ const struct language_defn local_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  unk_lang_printchar,		/* Print character constant */
+  unk_lang_printstr,
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */

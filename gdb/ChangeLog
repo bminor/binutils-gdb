@@ -1,3 +1,53 @@
+Fri Nov 20 21:35:57 1992  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (sevenbit_strings):  Add declaration.
+	* defs.h (printchar):  Replace with gdb_printchar.
+	* language.h (language_defn):  Add new function pointers
+	la_printchar and la_printstr, to do language dependent
+	printing of characters and strings.
+	* language.h (local_printchar, local_printstr):  New macros
+	to call language dependent functions pointed to by la_printchar
+	and la_printstr respectively.
+	* c-exp.y (emit_char, c_printchar, c_printstr):  New language
+	dependent functions for printing characters and strings.
+	* c-exp.y (c_language_defn, cplus_language_defn):  Add
+	c_printchar and c_printstr.
+	* command.c (do_setshow_command):  Rename printchar use to
+	gdb_printchar.
+	* expprint.c (print_subexp):  Replace C style string output
+	with call to local_printstr.
+	* language.c (unk_lang_printchar, unk_lang_printstr):
+	New stubs, currently errors.
+	* language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn):  Add unk_lang_printchar and
+	unk_lang_printstr.
+	* m2-exp.y (emit_char, m2_printchar, m2_printstr):  New
+	language dependent functions to print characters and strings.
+	* m2-exp.y (m2_language_defn):  Add m2_printchar and m2_printstr.
+	* utils.c (printchar):  Renamed to gdb_printchar.
+	* valprint.c (print_string):  Remove prototype, function moved
+	to c-exp.y, where it becomes c_printstr.
+	* valprint.c (print_max):  Made global for reference from the
+	language dependent printing routines in *-exp.y.
+	* valprint.c (repeat_count_threshold):  New variable with function
+	of old REPEAT_COUNT_THREHOLD define, but now settable by user.
+	Change all references to old macro to references to new variable.
+	* valprint.c (value_print, val_print):  Replace calls to
+	print_string with calls to local_printstr.
+	* valprint.c (val_print):  Replace C style character printing
+	with call to local_printchar.
+	* valprint.c (val_print):  Add case for TYPE_CODE_CHAR.
+	* valprint.c (_initialize_valprint):  Add add_show_from_set
+	call for setting up repeat_count_threshold as print variable.
+	**** start-sanitize-chill ****
+	* ch-exp.y (decode_integer_value):  New function.
+	* ch-exp.y (decode_integer_literal):  Use decode_integer_value.
+	* ch-exp.y (chill_printchar, chill_printstr):  New language
+	dependent functions for printing characters and strings.
+	* ch-exp.y (chill_language_defn):  Add chill_printchar and
+	chill_printstr.
+	**** end-sanitize-chill ****
+
 Wed Nov 18 15:05:45 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-vx.c (vx_kill): just warn if we can't contact the board,
@@ -27,6 +77,8 @@ Wed Nov 18 14:27:47 1992  Fred Fish  (fnf@cygnus.com)
 	* c-exp.y (c_language_defn):  Update for new format handling.
 	* m2-exp.y (m2_language_defn):  Update for new format handling.
 	* dbxread.c (language.h):  Include for partial-stab.h use.
+	* mipsread.c (expression.h, language.h):  Include for
+	partial-stab.h use.
 	* defs.h (local_hex_format, local_hex_format_custom,
 	local_hex_string, local_hex_string_custom):  Move to language.h.
 	* language.c (local_hex_format_custom, local_hex_string,
@@ -39,7 +91,8 @@ Wed Nov 18 14:27:47 1992  Fred Fish  (fnf@cygnus.com)
 	**** start-sanitize-chill ****
 	* c-exp.y (chill_language_defn):  Update for new format handling.
 	* ch-exp.y (CHARACTER_LITERAL):  Add support to yylex.
-	* ch-exp.y (match_integer_literal):  Add function.
+	* ch-exp.y (decode_integer_literal):  Add function
+	* ch-exp.y (match_integer_literal):  Use decode_integer_literal.
 	* ch-exp.y (builtin_type_chill_char):  Add definition.
 	* gdbtypes.h (builtin_type_chill_char):  Add declaration.
 	**** end-sanitize-chill ****

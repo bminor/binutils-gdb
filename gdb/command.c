@@ -1081,7 +1081,7 @@ do_setshow_command (arg, from_tty, c)
 	  unsigned char *p;
 	  fputs_filtered ("\"", stdout);
 	  for (p = *(unsigned char **) c->var; *p != '\0'; p++)
-	    printchar (*p, stdout, '"');
+	    gdb_printchar (*p, stdout, '"');
 	  fputs_filtered ("\"", stdout);
 	}
 	break;

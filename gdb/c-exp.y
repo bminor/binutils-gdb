@@ -1471,6 +1471,163 @@ yyerror (msg)
   error (msg ? msg : "Invalid syntax in expression.");
 }
 
+/* Print the character C on STREAM as part of the contents of a literal
+   string whose delimiter is QUOTER.  Note that that format for printing
+   characters and strings is language specific. */
+
+static void
+emit_char (c, stream, quoter)
+     register int c;
+     FILE *stream;
+     int quoter;
+{
+
+  c &= 0xFF;			/* Avoid sign bit follies */
+
+  if (              c < 0x20  ||		/* Low control chars */	
+      (c >= 0x7F && c < 0xA0) ||		/* DEL, High controls */
+      (sevenbit_strings && c >= 0x80)) {	/* high order bit set */
+    switch (c)
+      {
+      case '\n':
+	fputs_filtered ("\\n", stream);
+	break;
+      case '\b':
+	fputs_filtered ("\\b", stream);
+	break;
+      case '\t':
+	fputs_filtered ("\\t", stream);
+	break;
+      case '\f':
+	fputs_filtered ("\\f", stream);
+	break;
+      case '\r':
+	fputs_filtered ("\\r", stream);
+	break;
+      case '\033':
+	fputs_filtered ("\\e", stream);
+	break;
+      case '\007':
+	fputs_filtered ("\\a", stream);
+	break;
+      default:
+	fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
+	break;
+      }
+  } else {
+    if (c == '\\' || c == quoter)
+      {
+	fputs_filtered ("\\", stream);
+      }
+    fprintf_filtered (stream, "%c", c);
+  }
+}
+
+static void
+c_printchar (c, stream)
+     int c;
+     FILE *stream;
+{
+  fputs_filtered ("'", stream);
+  emit_char (c, stream, '\'');
+  fputs_filtered ("'", stream);
+}
+
+/* Print the character string STRING, printing at most LENGTH characters.
+   Printing stops early if the number hits print_max; repeat counts
+   are printed as appropriate.  Print ellipses at the end if we
+   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
+
+static void
+c_printstr (stream, string, length, force_ellipses)
+     FILE *stream;
+     char *string;
+     unsigned int length;
+     int force_ellipses;
+{
+  register unsigned int i;
+  unsigned int things_printed = 0;
+  int in_quotes = 0;
+  int need_comma = 0;
+  extern int inspect_it;
+  extern int repeat_count_threshold;
+  extern int print_max;
+
+  if (length == 0)
+    {
+      fputs_filtered ("\"\"", stdout);
+      return;
+    }
+
+  for (i = 0; i < length && things_printed < print_max; ++i)
+    {
+      /* Position of the character we are examining
+	 to see whether it is repeated.  */
+      unsigned int rep1;
+      /* Number of repetitions we have detected so far.  */
+      unsigned int reps;
+
+      QUIT;
+
+      if (need_comma)
+	{
+	  fputs_filtered (", ", stream);
+	  need_comma = 0;
+	}
+
+      rep1 = i + 1;
+      reps = 1;
+      while (rep1 < length && string[rep1] == string[i])
+	{
+	  ++rep1;
+	  ++reps;
+	}
+
+      if (reps > repeat_count_threshold)
+	{
+	  if (in_quotes)
+	    {
+	      if (inspect_it)
+		fputs_filtered ("\\\", ", stream);
+	      else
+		fputs_filtered ("\", ", stream);
+	      in_quotes = 0;
+	    }
+	  c_printchar (string[i], stream);
+	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  i = rep1 - 1;
+	  things_printed += repeat_count_threshold;
+	  need_comma = 1;
+	}
+      else
+	{
+	  if (!in_quotes)
+	    {
+	      if (inspect_it)
+		fputs_filtered ("\\\"", stream);
+	      else
+		fputs_filtered ("\"", stream);
+	      in_quotes = 1;
+	    }
+	  emit_char (string[i], stream, '"');
+	  ++things_printed;
+	}
+    }
+
+  /* Terminate the quotes if necessary.  */
+  if (in_quotes)
+    {
+      if (inspect_it)
+	fputs_filtered ("\\\"", stream);
+      else
+	fputs_filtered ("\"", stream);
+    }
+
+  if (force_ellipses || i < length)
+    fputs_filtered ("...", stream);
+}
+
+
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 
@@ -1561,6 +1718,8 @@ const struct language_defn c_language_defn = {
   type_check_off,
   c_parse,
   c_error,
+  c_printchar,			/* Print a character constant */
+  c_printstr,			/* Function to print string constant */
   &BUILTIN_TYPE_LONGEST,	 /* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/
@@ -1580,6 +1739,8 @@ const struct language_defn cplus_language_defn = {
   type_check_off,
   c_parse,
   c_error,
+  c_printchar,			/* Print a character constant */
+  c_printstr,			/* Function to print string constant */
   &BUILTIN_TYPE_LONGEST,	 /* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/

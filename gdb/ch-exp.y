@@ -765,10 +765,75 @@ buffer_location 	:	FIXME { $$ = 0; }
 
 %%
 
+/* Start looking for a value composed of valid digits as set by the base
+   in use.  Note that '_' characters are valid anywhere, in any quantity,
+   and are simply ignored.  Since we must find at least one valid digit,
+   or reject this token as an integer literal, we keep track of how many
+   digits we have encountered. */
+  
+static int
+decode_integer_value (base, tokptrptr, ivalptr)
+  int base;
+  char **tokptrptr;
+  int *ivalptr;
+{
+  char *tokptr = *tokptrptr;
+  int temp;
+  int digits = 0;
+
+  while (*tokptr != '\0')
+    {
+      temp = tolower (*tokptr);
+      tokptr++;
+      switch (temp)
+	{
+	case '_':
+	  continue;
+	case '0':  case '1':  case '2':  case '3':  case '4':
+	case '5':  case '6':  case '7':  case '8':  case '9':
+	  temp -= '0';
+	  break;
+	case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
+	  temp -= 'a';
+	  temp += 10;
+	  break;
+	default:
+	  temp = base;
+	  break;
+	}
+      if (temp < base)
+	{
+	  digits++;
+	  *ivalptr *= base;
+	  *ivalptr += temp;
+	}
+      else
+	{
+	  /* Found something not in domain for current base. */
+	  tokptr--;	/* Unconsume what gave us indigestion. */
+	  break;
+	}
+    }
+  
+  /* If we didn't find any digits, then we don't have a valid integer
+     value, so reject the entire token.  Otherwise, update the lexical
+     scan pointer, and return non-zero for success. */
+  
+  if (digits == 0)
+    {
+      return (0);
+    }
+  else
+    {
+      *tokptrptr = tokptr;
+      return (1);
+    }
+}
+
 static int
 decode_integer_literal (valptr, tokptrptr)
-int *valptr;
-char **tokptrptr;
+  int *valptr;
+  char **tokptrptr;
 {
   char *tokptr = *tokptrptr;
   int base = 0;
@@ -818,54 +883,15 @@ char **tokptrptr;
       return (0);
     }
   
-  /* Start looking for a value composed of valid digits as set by the base
-     in use.  Note that '_' characters are valid anywhere, in any quantity,
-     and are simply ignored.  Since we must find at least one valid digit,
-     or reject this token as an integer literal, we keep track of how many
-     digits we have encountered. */
-  
-  while (*tokptr != '\0')
-    {
-      temp = tolower (*tokptr);
-      tokptr++;
-      switch (temp)
-	{
-	case '_':
-	  continue;
-	case '0':  case '1':  case '2':  case '3':  case '4':
-	case '5':  case '6':  case '7':  case '8':  case '9':
-	  temp -= '0';
-	  break;
-	case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
-	  temp -= 'a';
-	  temp += 10;
-	  break;
-	default:
-	  temp = base;
-	  break;
-	}
-      if (temp < base)
-	{
-	  digits++;
-	  ival *= base;
-	  ival += temp;
-	}
-      else
-	{
-	  /* Found something not in domain for current base. */
-	  tokptr--;	/* Unconsume what gave us indigestion. */
-	  break;
-	}
-    }
-  
-  /* If we didn't find any digits, then we don't have a valid integer
-     literal, so reject the entire token.  Also, if we have an explicit
+  /* Attempt to decode whatever follows as an integer value in the
+     indicated base, updating the token pointer in the process and
+     computing the value into ival.  Also, if we have an explicit
      base, then the next character must not be a single quote, or we
-     have a bitstring literal, so reject the entire token in this case
-     as well.  Otherwise, update the lexical scan pointer, and return
-     non-zero for success. */
-  
-  if (digits == 0)
+     have a bitstring literal, so reject the entire token in this case.
+     Otherwise, update the lexical scan pointer, and return non-zero
+     for success. */
+
+  if (!decode_integer_value (base, &tokptr, &ival))
     {
       return (0);
     }
@@ -888,6 +914,9 @@ char **tokptrptr;
 
    EX:  'a'  '^(7)'  '^(7,8)'
 
+   As a GNU chill extension, the syntax C'xx' is also recognized as a 
+   character literal, where xx is a hex value for the character.
+
    Returns CHARACTER_LITERAL if a match is found.
    */
 
@@ -897,43 +926,51 @@ match_character_literal ()
   char *tokptr = lexptr;
   int ival = 0;
   
-  /* All character literals must start with a single quote.  If we don't
-     find it, don't bother looking any further. */
-
-  if (*tokptr++ != '\'')
+  if ((tolower (*tokptr) == 'c') && (*(tokptr + 1) == '\''))
     {
-      return (0);
-    }
-
-  /* Determine which form we have, either a control sequence or the
-     single character form. */
-
-  if ((*tokptr == '^') && (*(tokptr + 1) == '('))
-    {
-      /* Match and decode a control sequence.  Return zero if we don't
-	 find a valid integer literal, or if the next unconsumed character
-	 after the integer literal is not the trailing ')'.
-	 FIXME:  We currently don't handle the multiple integer literal
-	 form. */
+      /* We have a GNU chill extension form, so skip the leading "C'",
+	 decode the hex value, and then ensure that we have a trailing
+	 single quote character. */
       tokptr += 2;
-      if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
+      if (!decode_integer_value (16, &tokptr, &ival) || (*tokptr != '\''))
+	{
+	  return (0);
+	}
+      tokptr++;
+    }
+  else if (*tokptr == '\'')
+    {
+      tokptr++;
+
+      /* Determine which form we have, either a control sequence or the
+	 single character form. */
+      
+      if ((*tokptr == '^') && (*(tokptr + 1) == '('))
+	{
+	  /* Match and decode a control sequence.  Return zero if we don't
+	     find a valid integer literal, or if the next unconsumed character
+	     after the integer literal is not the trailing ')'.
+	     FIXME:  We currently don't handle the multiple integer literal
+	     form. */
+	  tokptr += 2;
+	  if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
+	    {
+	      return (0);
+	    }
+	}
+      else
+	{
+	  ival = *tokptr++;
+	}
+      
+      /* The trailing quote has not yet been consumed.  If we don't find
+	 it, then we have no match. */
+      
+      if (*tokptr++ != '\'')
 	{
 	  return (0);
 	}
     }
-  else
-    {
-      ival = *tokptr++;
-    }
-
-  /* The trailing quote has not yet been consumed.  If we don't find
-     it, then we have no match. */
-
-  if (*tokptr++ != '\'')
-    {
-      return (0);
-    }
-  
   yylval.typed_val.val = ival;
   yylval.typed_val.type = builtin_type_chill_char;
   lexptr = tokptr;
@@ -1084,6 +1121,8 @@ yylex ()
        token, such as a character literal. */
     switch (*lexptr)
       {
+        case 'C':
+        case 'c':
 	case '\'':
 	  token = match_character_literal ();
 	  if (token != 0)
@@ -1175,6 +1214,42 @@ yyerror (msg)
 }
 
 
+static void
+chill_printchar (c, stream)
+     register int c;
+     FILE *stream;
+{
+  c &= 0xFF;			/* Avoid sign bit follies */
+
+  if (              c < 0x20  ||		/* Low control chars */	
+      (c >= 0x7F && c < 0xA0) ||		/* DEL, High controls */
+      (sevenbit_strings && c >= 0x80))		/* high order bit set */
+    {
+      fprintf_filtered (stream, "C'%.2x'", (unsigned int) c);
+    }
+  else
+    {
+      fprintf_filtered (stream, "'%c'", c);
+    }
+}
+
+/* Print the character string STRING, printing at most LENGTH characters.
+   Printing stops early if the number hits print_max; repeat counts
+   are printed as appropriate.  Print ellipses at the end if we
+   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
+  */
+
+static void
+chill_printstr (stream, string, length, force_ellipses)
+     FILE *stream;
+     char *string;
+     unsigned int length;
+     int force_ellipses;
+{
+  error ("internal error - unimplemented function chill_printstr called.");
+}
+
+
 /* Table of operators and their precedences for printing expressions.  */
 
 const static struct op_print chill_op_print_tab[] = {
@@ -1224,6 +1299,8 @@ const struct language_defn chill_language_defn = {
   type_check_on,
   chill_parse,			/* parser */
   chill_error,			/* parser error function */
+  chill_printchar,		/* print a character constant */
+  chill_printstr,		/* function to print a string constant */
   &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */

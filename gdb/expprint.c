@@ -74,9 +74,12 @@ print_subexp (exp, pos, stream, prec)
     /* Common ops */
 
     case OP_SCOPE:
+      myprec = PREC_PREFIX;
+      assoc = 0;
       (*pos) += 2;
-      type_print (exp->elts[pc + 1].type, "", stream, 0);
-      fputs_filtered ("::", stream);
+      print_subexp (exp, pos, stream,
+		    (enum precedence) ((int) myprec + assoc));
+      fputs_filtered (" :: ", stream);
       nargs = strlen (&exp->elts[pc + 2].string);
       (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
 
@@ -114,6 +117,13 @@ print_subexp (exp, pos, stream, prec)
 	       reg_names[longest_to_int (exp->elts[pc + 1].longconst)]);
       return;
 
+    case OP_BOOL:
+      (*pos) += 2;
+      fprintf_filtered (stream, "%s",
+			longest_to_int (exp->elts[pc + 1].longconst)
+			? "TRUE" : "FALSE");
+      return;
+
     case OP_INTERNALVAR:
       (*pos) += 2;
       fprintf_filtered (stream, "$%s",
@@ -137,10 +147,10 @@ print_subexp (exp, pos, stream, prec)
     case OP_STRING:
       nargs = strlen (&exp->elts[pc + 1].string);
       (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
-      fputs_filtered ("\"", stream);
-      for (tem = 0; tem < nargs; tem++)
-	printchar ((&exp->elts[pc + 1].string)[tem], stream, '"');
-      fputs_filtered ("\"", stream);
+      /* local_printstr will print using the current repeat count threshold.
+	 If necessary, we can temporarily set it to zero, or pass it as an
+	 additional parameter to local_printstr.  -fnf */
+      local_printstr (stream, &exp->elts[pc + 1].string, nargs, 0);
       return;
 
     case TERNOP_COND:
@@ -160,30 +170,20 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 1].string);
+      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (".", stream);
-      if (exp->elts[pc + 1].type)
-	{
-	  type_print (exp->elts[pc + 1].type, "", stream, 0);
-          fputs_filtered ("::", stream);
-	}
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
+      fputs_filtered (&exp->elts[pc + 1].string, stream);
       return;
 
     /* Will not occur for Modula-2 */
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = strlen (&exp->elts[pc + 1].string);
+      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("->", stream);
-      if (exp->elts[pc + 1].type)
-	{
-	  type_print (exp->elts[pc + 1].type, "", stream, 0);
-          fputs_filtered ("::", stream);
-	}
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
+      fputs_filtered (&exp->elts[pc + 1].string, stream);
       return;
 
     case BINOP_SUBSCRIPT:
