@@ -1,5 +1,8 @@
 2003-11-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/xm-sun4sol2.h: Remove.
+	* config/sparc/xm-linux.h: Remove.
+
 	* sparc-tdep.h (sparc32nbsd_gregset): Add extern declaration.
 	* sparcnbsd-nat.c: Rewrite.
 	* sparcnbsd-tdep.c (sparc32nbsd_gregset): Rename from
