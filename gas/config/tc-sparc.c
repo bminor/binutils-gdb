@@ -1,6 +1,6 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003
+   1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -2146,6 +2146,12 @@ sparc_ip (str, pinsn)
 		      {
 			if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
 			  {
+			    if (*args == 'e' || *args == 'f' || *args == 'g')
+			      {
+				error_message
+				  = _(": There are only 32 single precision f registers; [0-31]");
+				goto error;
+			      }
 			    v9_arg_p = 1;
 			    mask -= 31;	/* wrap high bit */
 			  }

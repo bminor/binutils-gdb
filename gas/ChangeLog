@@ -1,3 +1,8 @@
+2004-01-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (sparc_ip): Disallow %f32-%f63 for single
+	precision operands.
+
 2004-01-14  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (append_insn): Properly detect variant frags
