@@ -1,3 +1,8 @@
+Tue Jun 14 16:20:18 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* result.ch, result.exp, Makefile.in:  New test case.
+	* pr-4975.ch, pr-4975-grt.ch, pr-4975.exp, Makefile.in:  Ditto.
+
 Thu Jun  9 15:20:43 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* pr-5022.ch, pr-5022.exp:  New testcase.
