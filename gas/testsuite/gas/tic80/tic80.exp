@@ -10,4 +10,7 @@ if [istarget tic80*-*-*] then {
     run_dump_test "ccode"
     run_dump_test "add"
     run_dump_test "relocs1"
+    run_dump_test "relocs1b"
+    run_dump_test "relocs2"
+    run_dump_test "relocs2b"
 }

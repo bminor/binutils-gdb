@@ -1,4 +1,20 @@
+start-sanitize-tic80
+Mon Feb 24 10:40:28 1997  Fred Fish  <fnf@cygnus.com>
 
+	* gas/tic80/{add.d, bitnum.d, ccode.d, cregops.d, endmask.d,
+	regops.d, relocs1.d, 
+	(relocs1.c): Add file for reference.
+	(relocs1b.d): Split reloc table contents test to different test file.
+	(relocs2.c): Add test that uses various types (char, short, int, ...) of
+	static and global variables with data shuffling to generate lots of ld/st
+	instructions for the different types.
+	(relocs2.d): New file, expected code for relocs2 test.
+	(relocs2.lst): New file, TI assembler listing for reference.
+	(relocs2.s): New file, assembly source for relocs2 test.
+	(relocs2b.d): New file, expected reloc table contents for relocs2 test.
+	(tic80.exp): Run the relocs1b, relocs2, and relocs2b tests.
+
+end-sanitize-tic80
 Sun Feb 23 17:54:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* gas/all/itbl-test.c(main): Update function calls.

@@ -1,4 +1,4 @@
-#objdump: -dr
+#objdump: -d
 #name: TIc80 coverage of symbolic BITNUM values
 
 .*: +file format .*tic80.*
@@ -6,77 +6,77 @@
 Disassembly of section .text:
 
 00000000 <.text>:
-   0:	0a 40 39 fa 	bbo       r10,r8,eq\.b
-   4:	0a 40 39 f2 	bbo       r10,r8,ne\.b
-   8:	0a 40 39 ea 	bbo       r10,r8,gt\.b
-   c:	0a 40 39 e2 	bbo       r10,r8,le\.b
-  10:	0a 40 39 da 	bbo       r10,r8,lt\.b
-  14:	0a 40 39 d2 	bbo       r10,r8,ge\.b
-  18:	0a 40 39 ca 	bbo       r10,r8,hi\.b
-  1c:	0a 40 39 c2 	bbo       r10,r8,ls\.b
-  20:	0a 40 39 ba 	bbo       r10,r8,lo\.b
-  24:	0a 40 39 b2 	bbo       r10,r8,hs\.b
-  28:	0a 40 39 aa 	bbo       r10,r8,eq\.h
-  2c:	0a 40 39 a2 	bbo       r10,r8,ne\.h
-  30:	0a 40 39 9a 	bbo       r10,r8,gt\.h
-  34:	0a 40 39 92 	bbo       r10,r8,le\.h
-  38:	0a 40 39 8a 	bbo       r10,r8,lt\.h
-  3c:	0a 40 39 82 	bbo       r10,r8,ge\.h
-  40:	0a 40 39 7a 	bbo       r10,r8,hi\.h
-  44:	0a 40 39 72 	bbo       r10,r8,ls\.h
-  48:	0a 40 39 6a 	bbo       r10,r8,lo\.h
-  4c:	0a 40 39 62 	bbo       r10,r8,hs\.h
-  50:	0a 40 39 5a 	bbo       r10,r8,eq\.f
-  54:	0a 40 39 52 	bbo       r10,r8,ne\.f
-  58:	0a 40 39 4a 	bbo       r10,r8,gt\.f
-  5c:	0a 40 39 42 	bbo       r10,r8,le\.f
-  60:	0a 40 39 3a 	bbo       r10,r8,lt\.f
-  64:	0a 40 39 32 	bbo       r10,r8,ge\.f
-  68:	0a 40 39 2a 	bbo       r10,r8,hi\.w
-  6c:	0a 40 39 22 	bbo       r10,r8,in\.f
-  70:	0a 40 39 1a 	bbo       r10,r8,ib\.f
-  74:	0a 40 39 12 	bbo       r10,r8,hs\.w
-  78:	0a 40 39 5a 	bbo       r10,r8,eq\.f
-  7c:	0a 40 39 52 	bbo       r10,r8,ne\.f
-  80:	0a 40 39 4a 	bbo       r10,r8,gt\.f
-  84:	0a 40 39 42 	bbo       r10,r8,le\.f
-  88:	0a 40 39 3a 	bbo       r10,r8,lt\.f
-  8c:	0a 40 39 32 	bbo       r10,r8,ge\.f
-  90:	0a 40 39 2a 	bbo       r10,r8,hi\.w
-  94:	0a 40 39 22 	bbo       r10,r8,in\.f
-  98:	0a 40 39 1a 	bbo       r10,r8,ib\.f
-  9c:	0a 40 39 12 	bbo       r10,r8,hs\.w
-  a0:	0a 40 39 0a 	bbo       r10,r8,uo\.f
-  a4:	0a 40 39 02 	bbo       r10,r8,or\.f
-  a8:	0a 40 39 fa 	bbo       r10,r8,eq\.b
-  ac:	0a 40 39 f2 	bbo       r10,r8,ne\.b
-  b0:	0a 40 39 ea 	bbo       r10,r8,gt\.b
-  b4:	0a 40 39 e2 	bbo       r10,r8,le\.b
-  b8:	0a 40 39 da 	bbo       r10,r8,lt\.b
-  bc:	0a 40 39 d2 	bbo       r10,r8,ge\.b
-  c0:	0a 40 39 ca 	bbo       r10,r8,hi\.b
-  c4:	0a 40 39 c2 	bbo       r10,r8,ls\.b
-  c8:	0a 40 39 ba 	bbo       r10,r8,lo\.b
-  cc:	0a 40 39 b2 	bbo       r10,r8,hs\.b
-  d0:	0a 40 39 aa 	bbo       r10,r8,eq\.h
-  d4:	0a 40 39 a2 	bbo       r10,r8,ne\.h
-  d8:	0a 40 39 9a 	bbo       r10,r8,gt\.h
-  dc:	0a 40 39 92 	bbo       r10,r8,le\.h
-  e0:	0a 40 39 8a 	bbo       r10,r8,lt\.h
-  e4:	0a 40 39 82 	bbo       r10,r8,ge\.h
-  e8:	0a 40 39 7a 	bbo       r10,r8,hi\.h
-  ec:	0a 40 39 72 	bbo       r10,r8,ls\.h
-  f0:	0a 40 39 6a 	bbo       r10,r8,lo\.h
-  f4:	0a 40 39 62 	bbo       r10,r8,hs\.h
-  f8:	0a 40 39 5a 	bbo       r10,r8,eq\.f
-  fc:	0a 40 39 52 	bbo       r10,r8,ne\.f
- 100:	0a 40 39 4a 	bbo       r10,r8,gt\.f
- 104:	0a 40 39 42 	bbo       r10,r8,le\.f
- 108:	0a 40 39 3a 	bbo       r10,r8,lt\.f
- 10c:	0a 40 39 32 	bbo       r10,r8,ge\.f
- 110:	0a 40 39 2a 	bbo       r10,r8,hi\.w
- 114:	0a 40 39 22 	bbo       r10,r8,in\.f
- 118:	0a 40 39 1a 	bbo       r10,r8,ib\.f
- 11c:	0a 40 39 12 	bbo       r10,r8,hs\.w
- 120:	0a 40 39 0a 	bbo       r10,r8,uo\.f
- 124:	0a 40 39 02 	bbo       r10,r8,or\.f
+   0:	0a 40 39 fa.*
+   4:	0a 40 39 f2.*
+   8:	0a 40 39 ea.*
+   c:	0a 40 39 e2.*
+  10:	0a 40 39 da.*
+  14:	0a 40 39 d2.*
+  18:	0a 40 39 ca.*
+  1c:	0a 40 39 c2.*
+  20:	0a 40 39 ba.*
+  24:	0a 40 39 b2.*
+  28:	0a 40 39 aa.*
+  2c:	0a 40 39 a2.*
+  30:	0a 40 39 9a.*
+  34:	0a 40 39 92.*
+  38:	0a 40 39 8a.*
+  3c:	0a 40 39 82.*
+  40:	0a 40 39 7a.*
+  44:	0a 40 39 72.*
+  48:	0a 40 39 6a.*
+  4c:	0a 40 39 62.*
+  50:	0a 40 39 5a.*
+  54:	0a 40 39 52.*
+  58:	0a 40 39 4a.*
+  5c:	0a 40 39 42.*
+  60:	0a 40 39 3a.*
+  64:	0a 40 39 32.*
+  68:	0a 40 39 2a.*
+  6c:	0a 40 39 22.*
+  70:	0a 40 39 1a.*
+  74:	0a 40 39 12.*
+  78:	0a 40 39 5a.*
+  7c:	0a 40 39 52.*
+  80:	0a 40 39 4a.*
+  84:	0a 40 39 42.*
+  88:	0a 40 39 3a.*
+  8c:	0a 40 39 32.*
+  90:	0a 40 39 2a.*
+  94:	0a 40 39 22.*
+  98:	0a 40 39 1a.*
+  9c:	0a 40 39 12.*
+  a0:	0a 40 39 0a.*
+  a4:	0a 40 39 02.*
+  a8:	0a 40 39 fa.*
+  ac:	0a 40 39 f2.*
+  b0:	0a 40 39 ea.*
+  b4:	0a 40 39 e2.*
+  b8:	0a 40 39 da.*
+  bc:	0a 40 39 d2.*
+  c0:	0a 40 39 ca.*
+  c4:	0a 40 39 c2.*
+  c8:	0a 40 39 ba.*
+  cc:	0a 40 39 b2.*
+  d0:	0a 40 39 aa.*
+  d4:	0a 40 39 a2.*
+  d8:	0a 40 39 9a.*
+  dc:	0a 40 39 92.*
+  e0:	0a 40 39 8a.*
+  e4:	0a 40 39 82.*
+  e8:	0a 40 39 7a.*
+  ec:	0a 40 39 72.*
+  f0:	0a 40 39 6a.*
+  f4:	0a 40 39 62.*
+  f8:	0a 40 39 5a.*
+  fc:	0a 40 39 52.*
+ 100:	0a 40 39 4a.*
+ 104:	0a 40 39 42.*
+ 108:	0a 40 39 3a.*
+ 10c:	0a 40 39 32.*
+ 110:	0a 40 39 2a.*
+ 114:	0a 40 39 22.*
+ 118:	0a 40 39 1a.*
+ 11c:	0a 40 39 12.*
+ 120:	0a 40 39 0a.*
+ 124:	0a 40 39 02.*
