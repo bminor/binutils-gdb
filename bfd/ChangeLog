@@ -1,3 +1,7 @@
+Mon Mar 22 23:18:10 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: added installcheck target
+
 Mon Mar 22 14:57:18 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_set_symbol_info): Relocate encapsulated stabs

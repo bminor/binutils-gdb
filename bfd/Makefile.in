@@ -135,6 +135,7 @@ all: Makefile $(TARGETLIB)
 MAKEOVERRIDES=
 
 check:
+installcheck:
 
 info dvi : force
 	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
