@@ -1,3 +1,8 @@
+2004-06-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.arch/i386-sse.exp, gdb.arch/i386-sse.c: New tests.
+	* gdb.arch/i386-cpuid.h: New helper file.
+
 2004-06-07  Randolph Chung  <tausq@debian.org>
 
 	* gdb.base/shlib-call.exp: Allow breakpoint to be added after inferior
