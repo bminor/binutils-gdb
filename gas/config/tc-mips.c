@@ -5849,7 +5849,7 @@ macro (ip)
 	   */
 	  if ((offset_expr.X_op != O_constant && HAVE_64BIT_ADDRESSES)
 	      || (offset_expr.X_op == O_constant
-		  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number)
+		  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)
 		  && HAVE_64BIT_ADDRESS_CONSTANTS))
 	    {
 	      p = NULL;
@@ -5898,6 +5898,7 @@ macro (ip)
 	      return;
 	    }
 	  else if (offset_expr.X_op == O_constant
+		   && !HAVE_64BIT_ADDRESS_CONSTANTS
 		   && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
 	    as_bad (_("load/store address overflow (max 32 bits)"));
 

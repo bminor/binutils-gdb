@@ -1,3 +1,10 @@
+2003-04-09  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (macro): Put back `+ 0x8000' in test for 64-bit
+	constant address that Alexandre took out by accident.  Reject
+	64-bit addresses that are not sign extensions of 32 bits only if
+	we don't support 64-bit address constants.
+
 2003-04-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_apply_fix3): Generate ADDR16 relocs.
