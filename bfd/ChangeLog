@@ -1,5 +1,10 @@
 2000-02-18  Geoff Keating  <geoffk@cygnus.com>
 
+	* coffcode.h (coff_set_arch_mach_hook): Use free(), because there
+	is no bfd_free().  Revert bfd_free part of previous change.
+
+2000-02-18  Geoff Keating  <geoffk@cygnus.com>
+
 	* coffcode.h (coff_set_arch_mach_hook): Don't use variable-size
 	arrays.
 	(coff_compute_section_file_positions): Use bfd_free to pair

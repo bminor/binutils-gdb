@@ -1888,7 +1888,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 		    || (bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) 
 			!= bfd_coff_symesz (abfd)))
 		  {
-		    bfd_free (buf);
+		    free (buf);
 		    return false;
 		  }
 		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
@@ -1896,7 +1896,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 		  cputype = sym.n_type & 0xff;
 		else
 		  cputype = 0;
-		bfd_free (buf);
+		free (buf);
 	      }
 	  }
 
@@ -2768,7 +2768,7 @@ coff_compute_section_file_positions (abfd)
 	  current->target_index = target_index++;
       }
 
-    bfd_free (section_list);
+    free (section_list);
   }
 #else /* ! COFF_IMAGE_WITH_PE */
   {
@@ -3702,7 +3702,7 @@ coff_write_object_contents (abfd)
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
     amount = bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd);
     
-    bfd_free (buff);
+    free (buff);
     
     if (amount != bfd_coff_filhsz (abfd))
       return false;
@@ -3722,7 +3722,7 @@ coff_write_object_contents (abfd)
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) buff);
       amount = bfd_write ((PTR) buff, 1, bfd_coff_aoutsz (abfd), abfd);
       
-      bfd_free (buff);
+      free (buff);
       
       if (amount != bfd_coff_aoutsz (abfd))
 	return false;
