@@ -1,3 +1,11 @@
+2003-11-07  Mark Kettenis  <kettenis@gnu.org>
+
+	From Peter Schauer  <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>:
+	* sparc-tdep.c (sparc32_register_names): Fix typo.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Set pc_in_sigtramp.
+	* config/sparc/sol2.mh (NATDEPFILES): Add gcore.o.
+	* config/sparc/sol64.mh (NATDEPFILES): Add gcore.o.
+
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.host: Add sparc64-*-solaris2* and sparcv9-*-solaris2*.

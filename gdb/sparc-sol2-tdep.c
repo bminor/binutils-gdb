@@ -164,6 +164,7 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Solaris has kernel-assisted single-stepping support.  */
   set_gdbarch_software_single_step (gdbarch, NULL);
 
+  set_gdbarch_pc_in_sigtramp (gdbarch, sparc_sol2_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32_sol2_sigtramp_frame_sniffer);
 }
 
