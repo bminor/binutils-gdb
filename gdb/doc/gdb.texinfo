@@ -4767,7 +4767,7 @@ Show whether or not addresses are to be printed.
 @item set print array
 @itemx set print array on
 @kindex set print array
-@value{GDBN} will pretty print arrays.  This format is more convenient to read,
+@value{GDBN} will pretty-print arrays.  This format is more convenient to read,
 but uses more space.  The default is off.
 
 @item set print array off
@@ -4884,6 +4884,19 @@ and with @code{set print union off} in effect it would print
 @smallexample
 $1 = @{it = Tree, form = @{...@}@}
 @end smallexample
+
+@item set print max-symbolic-offset @var{maxoff}
+@kindex set print max-symbolic-offset
+Tell @value{GDBN} to only display the symbolic form of an address if the
+offset between the closest earlier symbol and the address is less than
+@var{maxoff}.  The default is 0, which means to always print the
+symbolic form of an address, if any symbol precedes it.
+
+@item show print max-symbolic-offset
+@kindex show print max-symbolic-offset
+Ask how large the maximum offset is that @value{GDBN} will print in a
+symbolic address.
+
 @end table
 
 @noindent
