@@ -1,6 +1,11 @@
+Thu Sep 14 12:39:35 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* coffread.c (coff_symtab_read):  Complain about unmatched .ef and
+	.eb symbols instead of segfaulting.
+
 Wed Sep 13 13:33:58 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
-	* stbsread.c (read_one_struct_field): Use subfile language instead of
+	* stabsread.c (read_one_struct_field): Use subfile language instead of
 	global language. Improve efficiency.
 
 Wed Sep 13 08:45:02 1995  Jeff Law  (law@fast.cs.utah.edu)
