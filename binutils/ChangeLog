@@ -1,3 +1,10 @@
+2002-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c: Include elf/i370.h.
+	(dump_relocations): Handle EM_S370.
+	(dynamic_segment_parisc_val): Print \n.
+	(process_dynamic_segment <DT_BIND_NOW>): Here too.
+
 2002-08-14  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c (usage): Change 'gnu-new-abi' to 'gnu-v3'.

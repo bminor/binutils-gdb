@@ -62,6 +62,7 @@
 #include "elf/h8.h"
 #include "elf/hppa.h"
 #include "elf/i386.h"
+#include "elf/i370.h"
 #include "elf/i860.h"
 #include "elf/i960.h"
 #include "elf/ia64.h"
@@ -1116,6 +1117,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_X86_64:
 	  rtype = elf_x86_64_reloc_type (type);
+	  break;
+
+	case EM_S370:
+	  rtype = i370_reloc_type (type);
 	  break;
 
 	case EM_S390_OLD:
@@ -4294,6 +4299,7 @@ dynamic_segment_parisc_val (entry)
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       break;
     }
+  putchar ('\n');
 }
 
 static int
@@ -4906,6 +4912,8 @@ process_dynamic_segment (file)
 
 	case DT_BIND_NOW:
 	  /* The value of this entry is ignored.  */
+	  if (do_dynamic)
+	    putchar ('\n');
 	  break;
 
 	case DT_GNU_PRELINKED:
