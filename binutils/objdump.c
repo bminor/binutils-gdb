@@ -1735,8 +1735,11 @@ disassemble_data (abfd)
 	    nextsym = NULL;
 	  else
 	    {
+	      /* Search forward for the next appropriate symbol in
+                 SECTION.  Note that all the symbols are sorted
+                 together into one big array, and that some sections
+                 may have overlapping addresses.  */
 	      while (place < sorted_symcount
-		     /* ??? Why the test for != section?  */
 		     && (sorted_syms[place]->section != section
 			 || (bfd_asymbol_value (sorted_syms[place])
 			     <= bfd_asymbol_value (sym))))
