@@ -1,3 +1,8 @@
+Wed Nov  9 18:46:24 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* findvar.c (find_saved_register): Fix a frame variable name.
+	* infcmd.c (finish_command): Ditto.
+
 Tue Nov  8 13:20:14 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Remove "Watchpoints seem not entirely reliable, though
