@@ -10,6 +10,7 @@ Thu Mar  5 23:56:01 1992  John Gilmore  (gnu at cygnus.com)
 	(putpkt):  Add further debugging of packet acks.
 	* mipsread.c (fixup_symtab):  Also swap RFD's.
 	(parse_partial_symbols):  Avoid bug on unknown symbol types.
+	* Makefile.in (VERSION):  Roll to 4.4.5.
 
 Thu Mar  5 12:32:09 1992  Stu Grossman  (grossman at cygnus.com)
 
