@@ -628,7 +628,8 @@ symbol.
 Turning a common symbol into a reference, because there is already a
 definition for the symbol.
 @smallexample
-@var{file}(@var{section}): warning: common of `@var{symbol}' overridden by definition
+@var{file}(@var{section}): warning: common of `@var{symbol}'
+   overridden by definition
 @var{file}(@var{section}): warning: defined here
 @end smallexample
 
@@ -637,22 +638,24 @@ Turning a common symbol into a reference, because a later definition for
 the symbol is encountered.  This is the same as the previous case,
 except that the symbols are encountered in a different order.
 @smallexample
-@var{file}(@var{section}): warning: definition of `@var{symbol}' overriding common
+@var{file}(@var{section}): warning: definition of `@var{symbol}'
+   overriding common
 @var{file}(@var{section}): warning: common is here
 @end smallexample
 
 @item
 Merging a common symbol with a previous same-sized common symbol.
 @smallexample
-@var{file}(@var{section}): warning: multiple common of `@var{symbol}'
+@var{file}(@var{section}): warning: multiple common
+   of `@var{symbol}'
 @var{file}(@var{section}): warning: previous common is here
 @end smallexample
 
 @item
 Merging a common symbol with a previous larger common symbol.
 @smallexample
-@var{file}(@var{section}): warning: common of `@var{symbol}' overridden 
-   by larger common
+@var{file}(@var{section}): warning: common of `@var{symbol}'
+   overridden by larger common
 @var{file}(@var{section}): warning: larger common is here
 @end smallexample
 
@@ -661,8 +664,8 @@ Merging a common symbol with a previous smaller common symbol.  This is
 the same as the previous case, except that the symbols are
 encountered in a different order.
 @smallexample
-@var{file}(@var{section}): warning: common of `@var{symbol}' overriding
-   smaller common
+@var{file}(@var{section}): warning: common of `@var{symbol}'
+   overriding smaller common
 @var{file}(@var{section}): warning: smaller common is here
 @end smallexample
 @end enumerate
@@ -704,7 +707,7 @@ variable @code{GNUTARGET}.
 use @samp{-b} (or its synonym @samp{-format}).  Its value should be one
 of the BFD names for an input format (@pxref{BFD}).  If there is no
 @code{GNUTARGET} in the environment, @code{ld} uses the natural format
-of the host. If @code{GNUTARGET} is set to @code{default} then BFD attempts to discover the
+of the target. If @code{GNUTARGET} is set to @code{default} then BFD attempts to discover the
 input format by examining binary input files; this method often
 succeeds, but there are potential ambiguities, since there is no method
 of ensuring that the magic number used to specify object-file formats is
@@ -1312,12 +1315,11 @@ describe the placement of a named output section, and which input
 sections go into it.
 @end itemize
 
-The first two operations---defining the entry point and defining
-symbols---can also be done outside the @code{SECTIONS} command:
-@pxref{Entry Point}, and @pxref{Assignment}.  They are permitted here as
-well for your convenience in reading the script, so that symbols and the
-entry point can be defined at meaningful points in your output-file
-layout.
+You can also use the first two operations---defining the entry point and
+defining symbols---outside the @code{SECTIONS} command: @pxref{Entry
+Point}, and @pxref{Assignment}.  They are permitted here as well for
+your convenience in reading the script, so that symbols and the entry
+point can be defined at meaningful points in your output-file layout.
 
 When no @code{SECTIONS} command is given, the linker places each input
 section into an identically named output section in the order that the
