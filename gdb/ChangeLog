@@ -1,3 +1,9 @@
+Tue Jul 18 17:13:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Richard Henderson <rth@cygnus.com>:
+	* dwarf2read.c (dwarf2_empty_hash_tables): Renamed from
+	dwarf2_empty_die_ref_table; zero dwarf2_cached_types as well.
+	Update all callers.
 
 2000-07-17  Daniel Berlin  <dberlin@redhat.com>
 

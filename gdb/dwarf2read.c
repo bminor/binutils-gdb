@@ -729,7 +729,7 @@ void dump_die_list (struct die_info *);
 
 void store_in_ref_table (unsigned int, struct die_info *);
 
-static void dwarf2_empty_die_ref_table (void);
+static void dwarf2_empty_hash_tables (void);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
 
@@ -2892,8 +2892,9 @@ read_comp_unit (info_ptr, abfd)
   char *cur_ptr;
   int nesting_level;
 
-  /* Reset die reference table, we are building a new one now. */
-  dwarf2_empty_die_ref_table ();
+  /* Reset die reference table and cached types table; we are
+     building new ones now.  */
+  dwarf2_empty_hash_tables ();
 
   cur_ptr = info_ptr;
   nesting_level = 0;
@@ -5549,9 +5550,10 @@ store_in_ref_table (offset, die)
 
 
 static void
-dwarf2_empty_die_ref_table ()
+dwarf2_empty_hash_tables ()
 {
   memset (die_ref_table, 0, sizeof (die_ref_table));
+  memset (dwarf2_cached_types, 0, sizeof(dwarf2_cached_types));
 }
 
 static unsigned int
