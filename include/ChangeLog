@@ -1,3 +1,13 @@
+Fri Nov  1 11:13:53 1991  John Gilmore  (gnu at cygnus.com)
+
+	* internalcoff.h:  Add x_csect defines.
+
+Fri Oct 25 03:18:20 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Rename COFF-related files in `coff-ARCH.h' form.
+	coff-a29k.h, coff-i386.h, coff-i960.h, coff-m68k.h, coff-m88k.h,
+	coff-mips.h, coff-rs6000.h to be exact.
+
 Thu Oct 24 22:11:11 1991  John Gilmore  (gnu at cygnus.com)
 
 	RS/6000 support, by Metin G. Ozisik, Mimi Phûông-Thåo Võ, and

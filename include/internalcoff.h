@@ -340,6 +340,38 @@ union internal_auxent
     unsigned short  x_snstab;       /* sect num with dbx stab */
   } x_csect; /* csect definition information */
 
+/* x_smtyp values:  */
+
+#define	SMTYP_ALIGN(x)	((x) >> 3)	/* log2 of alignment */
+#define	SMTYP_SMTYP(x)	((x) & 0x7)	/* symbol type */
+/* Symbol type values:  */
+#define	XTY_ER	0	/* External reference */
+#define	XTY_SD	1	/* Csect definition */
+#define	XTY_LD	2	/* Label definition */
+#define XTY_CM	3	/* .BSS */
+#define	XTY_EM	4	/* Error message */
+#define	XTY_US	5	/* "Reserved for internal use" */
+
+/* x_smclas values:  */
+
+#define	XMC_PR	0	/* Read-only program code */
+#define	XMC_RO	1	/* Read-only constant */
+#define	XMC_DB	2	/* Read-only debug dictionary table */
+#define	XMC_TC	3	/* Read-write general TOC entry */
+#define	XMC_UA	4	/* Read-write unclassified */
+#define	XMC_RW	5	/* Read-write data */
+#define	XMC_GL	6	/* Read-only global linkage */
+#define	XMC_XO	7	/* Read-only extended operation (simulated insn) */
+#define	XMC_SV	8	/* Read-only supervisor call */
+#define	XMC_BS	9	/* Read-write BSS */
+#define	XMC_DS	10	/* Read-write descriptor csect */
+#define	XMC_UC	11	/* Read-write unnamed Fortran common */
+#define	XMC_TI	12	/* Read-only traceback index csect */
+#define	XMC_TB	13	/* Read-only traceback table csect */
+/* 		14	??? */
+#define	XMC_TC0	15	/* Read-write TOC anchor for TOC addressability */
+
+
   /******************************************
    *  I960-specific *2nd* aux. entry formats
    ******************************************/
