@@ -48,8 +48,8 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-BISON=bison
-BISONFLAGS=-y
+BISON=bison -y
+BISONFLAGS=
 YACC=$(BISON) $(BISONFLAGS)
 # YACC=yacc
 SHELL=/bin/sh
@@ -283,7 +283,7 @@ init.c: $(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(TSOBS)
 
 gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
 	${CC-LD} $(LDFLAGS) -o gdb init.o $(OBS) $(TSOBS) $(ADD_FILES) \
-	  $(CLIBS)
+	  $(CLIBS) $(LOADLIBES)
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
@@ -526,7 +526,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +destdir=$(destdir) \
 		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
 		$(host) +target=$(target))
 
 force:
