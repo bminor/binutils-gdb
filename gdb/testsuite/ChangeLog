@@ -1,5 +1,8 @@
 2002-12-22  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.trace/tfind.exp: Pass '-O1' flag via the 'optimize' option,
+	rather than as part of the output file name.
+
 	* gdb.base/attach.exp: There's no need to copy the test program to
 	/tmp; that was only ever necessary on HP/UX, and this test is
 	entirely disabled there anyway.
