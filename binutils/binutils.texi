@@ -868,7 +868,7 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @item -v
 @itemx -V
 Show the version number of @code{ranlib}.
-@end @table
+@end table
 
 @node size, strip, ranlib, Top
 @chapter size
