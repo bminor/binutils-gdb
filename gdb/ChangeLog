@@ -1,3 +1,14 @@
+2003-11-09  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_return_value): New function.
+	(d10v_use_struct_convention): Delete function.
+	(d10v_store_return_value): Delete function.
+	(d10v_extract_struct_value_address): Delete function.
+	(d10v_gdbarch_init): Set "return_value" instead of
+	"extract_return_value", "store_return_value",
+	"extract_struct_value_address", and "use_struct_convention".
+	(RET1_REGNUM): Delete const.
+
 2003-11-09  Mark Kettenis  <kettenis@gnu.org>
 
 	From David S. Miller  <davem@redhat.com>:

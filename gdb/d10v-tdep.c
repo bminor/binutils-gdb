@@ -82,8 +82,7 @@ enum
     TS3_NUM_REGS = 42,
     /* d10v calling convention.  */
     ARG1_REGNUM = R0_REGNUM,
-    ARGN_REGNUM = R3_REGNUM,
-    RET1_REGNUM = R0_REGNUM,
+    ARGN_REGNUM = R3_REGNUM
   };
 
 static int
@@ -113,44 +112,6 @@ d10v_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
      pushed onto the stack.  */
   return sp & ~3;
 }
-
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).
-
-   The d10v returns anything less than 8 bytes in size in
-   registers.  */
-
-static int
-d10v_use_struct_convention (int gcc_p, struct type *type)
-{
-  long alignment;
-  int i;
-  /* The d10v only passes a struct in a register when that structure
-     has an alignment that matches the size of a register.  */
-  /* If the structure doesn't fit in 4 registers, put it on the
-     stack.  */
-  if (TYPE_LENGTH (type) > 8)
-    return 1;
-  /* If the struct contains only one field, don't put it on the stack
-     - gcc can fit it in one or more registers.  */
-  if (TYPE_NFIELDS (type) == 1)
-    return 0;
-  alignment = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0));
-  for (i = 1; i < TYPE_NFIELDS (type); i++)
-    {
-      /* If the alignment changes, just assume it goes on the
-         stack.  */
-      if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, i)) != alignment)
-	return 1;
-    }
-  /* If the alignment is suitable for the d10v's 16 bit registers,
-     don't put it on the stack.  */
-  if (alignment == 2 || alignment == 4)
-    return 0;
-  return 1;
-}
-
 
 static const unsigned char *
 d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -413,54 +374,88 @@ d10v_integer_to_address (struct type *type, void *buf)
   return val;
 }
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  
+/* Handle the d10v's return_value convention.  */
 
-   Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
-
-static void
-d10v_store_return_value (struct type *type, struct regcache *regcache,
-			 const void *valbuf)
+static enum return_value_convention
+d10v_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		   struct regcache *regcache, const void *writebuf,
+		   void *readbuf)
 {
-  /* Only char return values need to be shifted right within the first
-     regnum.  */
-  if (TYPE_LENGTH (type) == 1
-      && TYPE_CODE (type) == TYPE_CODE_INT)
+  if (TYPE_LENGTH (valtype) > 8)
+    /* Anything larger than 8 bytes (4 registers) goes on the stack.  */
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (TYPE_LENGTH (valtype) == 5
+      || TYPE_LENGTH (valtype) == 6)
+    /* Anything 5 or 6 bytes in size goes in memory.  Contents don't
+       appear to matter.  Note that 7 and 8 byte objects do end up in
+       registers!  */
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (TYPE_LENGTH (valtype) == 1)
     {
-      bfd_byte tmp[2];
-      tmp[1] = *(bfd_byte *)valbuf;
-      regcache_cooked_write (regcache, RET1_REGNUM, tmp);
+      /* All single byte values go in a register stored right-aligned.
+         Note: 2 byte integer values are handled further down.  */
+      if (readbuf)
+	{
+	  /* Since TYPE is smaller than the register, there isn't a
+             sign extension problem.  Let the extraction truncate the
+             register value.  */
+	  ULONGEST regval;
+	  regcache_cooked_read_unsigned (regcache, R0_REGNUM,
+					 &regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), regval);
+
+	}
+      if (writebuf)
+	{
+	  ULONGEST regval;
+	  if (TYPE_CODE (valtype) == TYPE_CODE_INT)
+	    /* Some sort of integer value stored in R0.  Use
+	       unpack_long since that should handle any required sign
+	       extension.  */
+	    regval = unpack_long (valtype, writebuf);
+	  else
+	    /* Some other type.  Don't sign-extend the value when
+               storing it in the register.  */
+	    regval = extract_unsigned_integer (writebuf, 1);
+	  regcache_cooked_write_unsigned (regcache, R0_REGNUM, regval);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  else
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && TYPE_NFIELDS (valtype) > 1
+      && TYPE_FIELD_BITPOS (valtype, 1) == 8)
+    /* If a composite is 8 bit aligned (determined by looking at the
+       start address of the second field), put it in memory.  */
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  /* Assume it is in registers.  */
+  if (writebuf || readbuf)
     {
       int reg;
-      /* A structure is never more than 8 bytes long.  See
-         use_struct_convention().  */
-      gdb_assert (TYPE_LENGTH (type) <= 8);
-      /* Write out most registers, stop loop before trying to write
-         out any dangling byte at the end of the buffer.  */
-      for (reg = 0; (reg * 2) + 1 < TYPE_LENGTH (type); reg++)
+      /* Per above, the value is never more than 8 bytes long.  */
+      gdb_assert (TYPE_LENGTH (valtype) <= 8);
+      /* Xfer 2 bytes at a time.  */
+      for (reg = 0; (reg * 2) + 1 < TYPE_LENGTH (valtype); reg++)
 	{
-	  regcache_cooked_write (regcache, RET1_REGNUM + reg,
-				 (bfd_byte *) valbuf + reg * 2);
+	  if (readbuf)
+	    regcache_cooked_read (regcache, R0_REGNUM + reg,
+				  (bfd_byte *) readbuf + reg * 2);
+	  if (writebuf)
+	    regcache_cooked_write (regcache, R0_REGNUM + reg,
+				   (bfd_byte *) writebuf + reg * 2);
 	}
-      /* Write out any dangling byte at the end of the buffer.  */
-      if ((reg * 2) + 1 == TYPE_LENGTH (type))
-	regcache_cooked_write_part (regcache, reg, 0, 1,
-				    (bfd_byte *) valbuf + reg * 2);
+      /* Any trailing byte ends up _left_ aligned.  */
+      if ((reg * 2) < TYPE_LENGTH (valtype))
+	{
+	  if (readbuf)
+	    regcache_cooked_read_part (regcache, R0_REGNUM + reg,
+				       0, 1, (bfd_byte *) readbuf + reg * 2);
+	  if (writebuf)
+	    regcache_cooked_write_part (regcache, R0_REGNUM + reg,
+					0, 1, (bfd_byte *) writebuf + reg * 2);
+	}
     }
-}
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-static CORE_ADDR
-d10v_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-  regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &addr);
-  return (addr | DMEM_START);
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 static int
@@ -1043,46 +1038,6 @@ d10v_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp;
 }
 
-
-/* Given a return value in `regbuf' with a type `valtype', 
-   extract and copy its value into `valbuf'.  */
-
-static void
-d10v_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *valbuf)
-{
-  int len;
-  if (TYPE_LENGTH (type) == 1)
-    {
-      ULONGEST c;
-      regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &c);
-      store_unsigned_integer (valbuf, 1, c);
-    }
-  else
-    {
-      /* For return values of odd size, the first byte is in the
-	 least significant part of the first register.  The
-	 remaining bytes in remaining registers. Interestingly, when
-	 such values are passed in, the last byte is in the most
-	 significant byte of that same register - wierd.  */
-      int reg = RET1_REGNUM;
-      int off = 0;
-      if (TYPE_LENGTH (type) & 1)
-	{
-	  regcache_cooked_read_part (regcache, RET1_REGNUM, 1, 1,
-				     (bfd_byte *)valbuf + off);
-	  off++;
-	  reg++;
-	}
-      /* Transfer the remaining registers.  */
-      for (; off < TYPE_LENGTH (type); reg++, off += 2)
-	{
-	  regcache_cooked_read (regcache, RET1_REGNUM + reg,
-				(bfd_byte *) valbuf + off);
-	}
-    }
-}
-
 /* Translate a GDB virtual ADDR/LEN into a format the remote target
    understands.  Returns number of bytes that can be transfered
    starting at TARG_ADDR.  Return ZERO if no bytes can be transfered
@@ -1554,13 +1509,9 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "d10v_gdbarch_init: bad byte order for float format");
     }
 
-  set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
+  set_gdbarch_return_value (gdbarch, d10v_return_value);
   set_gdbarch_push_dummy_code (gdbarch, d10v_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
-  set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, 
-					    d10v_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, d10v_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
