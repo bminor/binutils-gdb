@@ -986,7 +986,7 @@ recur.  You must usually set this in the per-invocation section of
 @file{configure.in}.
 If @file{Makefile.in} contains a line starting with @code{SUBDIRS =},
 then it will be replaced with an assignment to @code{SUBDIRS} using
-the value of @code{configdirs} (if #code{subdirs} is empty).  This can
+the value of @code{configdirs} (if @code{subdirs} is empty).  This can
 be used to determine which directories to configure and build depending
 on the host and target configurations.
 @c Most other matching makefile/config vars use the same name.  Why not
