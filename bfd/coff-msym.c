@@ -356,3 +356,20 @@ ecoff_swap_rndx_in (bigend, ext_copy, intern)
     abort();
 #endif
 }
+
+/* Swap in a relative file descriptor.  */
+
+void
+ecoff_swap_rfd_in (abfd, ext, intern)
+     bfd *abfd;
+     struct rfd_ext *ext;
+     RFDT *intern;
+{
+  
+  *intern = bfd_h_get_32 (abfd, (bfd_byte *)&ext->rfd);
+
+#ifdef TEST
+  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
+    abort();
+#endif
+}
