@@ -40,9 +40,6 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define as the size of a pointer in the target profile file format.  */
-#undef GMON_PTR_SIZE
-
 /* Define if you have the __argz_count function.  */
 #undef HAVE___ARGZ_COUNT
 
