@@ -1,3 +1,11 @@
+Tue Jan 20 01:42:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+start-sanitize-m32rx
+	* Makefile.in: Add m32rx objs, and rules to build them.
+	* cpux.h, decodex.h, decodex.c, readx.c, semx.c, modelx.c: New files.
+	* m32rx.c, mloopx.in: New files.
+end-sanitize-m32rx
+
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

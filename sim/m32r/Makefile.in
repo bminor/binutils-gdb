@@ -22,7 +22,7 @@
 
 M32R_OBJS = m32r.o decode.o extract.o sem.o model.o mloop.o
 # start-sanitize-m32rx
-M32RX_OBJS = m32rx.o decodex.o modelx.o mloopx.o
+M32RX_OBJS = m32rx.o decodex.o semx.o modelx.o mloopx.o
 # end-sanitize-m32rx
 
 SIM_OBJS = \
@@ -30,6 +30,9 @@ SIM_OBJS = \
 	sim-hload.o sim-hrw.o sim-engine.o sim-model.o sim-reason.o \
 	cgen-utils.o cgen-trace.o cgen-scache.o \
 	sim-if.o arch.o \
+	$(start-sanitize-m32rx) \
+	$(M32RX_OBJS) \
+	$(end-sanitize-m32rx) \
 	$(M32R_OBJS)
 
 # Extra headers included by sim-main.h.
@@ -93,7 +96,7 @@ sem-cache.o: sem.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
 mloopx.c: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
 	rm -f mloopx.c
 	$(SHELL) $(srcdir)/../common/genmloop.sh $(SHELL) -mono -no-scache -no-fast -parallel m32r $(srcdir)/mloopx.in | sed -e 's/@cpu@/m32rx/' -e 's/@CPU@/M32RX/' >mloopx.c
-mloopx.o: mloopx.c readx.c semx-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
+mloopx.o: mloopx.c readx.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
 
 decodex.o: decodex.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h cpux.h
 extractx.o: extractx.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
@@ -140,9 +143,9 @@ decode.h decode.c: @MAINT@ stamp-decode
 
 # start-sanitize-m32rx
 stamp-xcpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-cpu cpu=m32rx mach=m32rx SUFFIX=x FLAGS="" EXTRAFILES="$(CGEN_CPU_READ) $(CGEN_CPU_SEMSW)"
+	$(MAKE) cgen-cpu cpu=m32rx mach=m32rx SUFFIX=x FLAGS="" EXTRAFILES="$(CGEN_CPU_READ) $(CGEN_CPU_SEM)"
 	touch stamp-xcpu
-cpux.h readx.c semx-switch.c modelx.c: @MAINT@ stamp-xcpu
+cpux.h readx.c semx.c modelx.c: @MAINT@ stamp-xcpu
 	@true
 
 stamp-xdecode: $(CGEN_MAIN_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
