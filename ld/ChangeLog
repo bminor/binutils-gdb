@@ -1,3 +1,10 @@
+2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	Suggested by Manfred Hollstein <manfred.h@gmx.net>:
+	* Makefile.am (ld.1): Depend on configdoc.texi
+	and ldver.texi.
+	* Makefile.in: Regenerated.
+
 2002-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (longopts): Duplicate entry for --compact-implib
