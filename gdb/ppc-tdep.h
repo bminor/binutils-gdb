@@ -1,6 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -62,8 +63,12 @@ CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
-void ppc_linux_supply_gregset (char *buf);
-void ppc_linux_supply_fpregset (char *buf);
+void ppc_linux_supply_gregset (struct regcache *regcache,
+			       int regnum, const void *gregs, size_t size,
+			       int wordsize);
+void ppc_linux_supply_fpregset (const struct regset *regset,
+				struct regcache *regcache,
+				int regnum, const void *gregs, size_t size);
 
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *valtype,

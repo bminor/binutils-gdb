@@ -32,7 +32,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "osabi.h"
-
+#include "regset.h"
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
@@ -959,80 +959,113 @@ enum {
 };
 
 enum {
-  ELF_GREGSET_SIZE = (ELF_NGREG * 4),
   ELF_FPREGSET_SIZE = (ELF_NFPREG * 8)
 };
 
-void
-ppc_linux_supply_gregset (char *buf)
+static void
+right_supply_register (struct regcache *regcache, int wordsize, int regnum,
+		       const bfd_byte *buf)
 {
-  int regi;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  for (regi = 0; regi < 32; regi++)
-    supply_register (regi, buf + 4 * regi);
-
-  supply_register (PC_REGNUM, buf + 4 * PPC_LINUX_PT_NIP);
-  supply_register (tdep->ppc_lr_regnum, buf + 4 * PPC_LINUX_PT_LNK);
-  supply_register (tdep->ppc_cr_regnum, buf + 4 * PPC_LINUX_PT_CCR);
-  supply_register (tdep->ppc_xer_regnum, buf + 4 * PPC_LINUX_PT_XER);
-  supply_register (tdep->ppc_ctr_regnum, buf + 4 * PPC_LINUX_PT_CTR);
-  if (tdep->ppc_mq_regnum != -1)
-    supply_register (tdep->ppc_mq_regnum, buf + 4 * PPC_LINUX_PT_MQ);
-  supply_register (tdep->ppc_ps_regnum, buf + 4 * PPC_LINUX_PT_MSR);
+  regcache_raw_supply (regcache, regnum,
+		       (buf + wordsize
+			- register_size (current_gdbarch, regnum)));
 }
 
+/* Extract the register values found in the WORDSIZED ABI GREGSET,
+   storing their values in REGCACHE.  Note that some are left-aligned,
+   while others are right aligned.  */
+
 void
-ppc_linux_supply_fpregset (char *buf)
+ppc_linux_supply_gregset (struct regcache *regcache,
+			  int regnum, const void *gregs, size_t size,
+			  int wordsize)
 {
   int regi;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
+  struct gdbarch *regcache_arch = get_regcache_arch (regcache); 
+  struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
+  const bfd_byte *buf = gregs;
 
   for (regi = 0; regi < 32; regi++)
-    supply_register (FP0_REGNUM + regi, buf + 8 * regi);
+    right_supply_register (regcache, wordsize, regi, buf + wordsize * regi);
+
+  right_supply_register (regcache, wordsize, gdbarch_pc_regnum (regcache_arch),
+			 buf + wordsize * PPC_LINUX_PT_NIP);
+  right_supply_register (regcache, wordsize, regcache_tdep->ppc_lr_regnum,
+			 buf + wordsize * PPC_LINUX_PT_LNK);
+  regcache_raw_supply (regcache, regcache_tdep->ppc_cr_regnum,
+		       buf + wordsize * PPC_LINUX_PT_CCR);
+  regcache_raw_supply (regcache, regcache_tdep->ppc_xer_regnum,
+		       buf + wordsize * PPC_LINUX_PT_XER);
+  regcache_raw_supply (regcache, regcache_tdep->ppc_ctr_regnum,
+		       buf + wordsize * PPC_LINUX_PT_CTR);
+  if (regcache_tdep->ppc_mq_regnum != -1)
+    right_supply_register (regcache, wordsize, regcache_tdep->ppc_mq_regnum,
+			   buf + wordsize * PPC_LINUX_PT_MQ);
+  right_supply_register (regcache, wordsize, regcache_tdep->ppc_ps_regnum,
+			 buf + wordsize * PPC_LINUX_PT_MSR);
+}
+
+static void
+ppc32_linux_supply_gregset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *gregs, size_t size)
+{
+  ppc_linux_supply_gregset (regcache, regnum, gregs, size, 4);
+}
+
+static struct regset ppc32_linux_gregset = {
+  NULL, ppc32_linux_supply_gregset
+};
+
+static void
+ppc64_linux_supply_gregset (const struct regset *regset,
+			    struct regcache * regcache,
+			    int regnum, const void *gregs, size_t size)
+{
+  ppc_linux_supply_gregset (regcache, regnum, gregs, size, 8);
+}
+
+static struct regset ppc64_linux_gregset = {
+  NULL, ppc64_linux_supply_gregset
+};
+
+void
+ppc_linux_supply_fpregset (const struct regset *regset,
+			   struct regcache * regcache,
+			   int regnum, const void *fpset, size_t size)
+{
+  int regi;
+  struct gdbarch *regcache_arch = get_regcache_arch (regcache); 
+  struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
+  const bfd_byte *buf = fpset;
+
+  for (regi = 0; regi < 32; regi++)
+    regcache_raw_supply (regcache, FP0_REGNUM + regi, buf + 8 * regi);
 
   /* The FPSCR is stored in the low order word of the last doubleword in the
      fpregset.  */
-  supply_register (tdep->ppc_fpscr_regnum, buf + 8 * 32 + 4);
+  regcache_raw_supply (regcache, regcache_tdep->ppc_fpscr_regnum,
+		       buf + 8 * 32 + 4);
 }
 
-/*
-  Use a local version of this function to get the correct types for regsets.
-*/
+static struct regset ppc_linux_fpregset = { NULL, ppc_linux_supply_fpregset };
 
-static void
-fetch_core_registers (char *core_reg_sect,
-		      unsigned core_reg_size,
-		      int which,
-		      CORE_ADDR reg_addr)
+static const struct regset *
+ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
+				    const char *sect_name, size_t sect_size)
 {
-  if (which == 0)
+  struct gdbarch_tdep *tdep = gdbarch_tdep (core_arch);
+  if (strcmp (sect_name, ".reg") == 0)
     {
-      if (core_reg_size == ELF_GREGSET_SIZE)
-	ppc_linux_supply_gregset (core_reg_sect);
+      if (tdep->wordsize == 4)
+	return &ppc32_linux_gregset;
       else
-	warning ("wrong size gregset struct in core file");
+	return &ppc64_linux_gregset;
     }
-  else if (which == 2)
-    {
-      if (core_reg_size == ELF_FPREGSET_SIZE)
-	ppc_linux_supply_fpregset (core_reg_sect);
-      else
-	warning ("wrong size fpregset struct in core file");
-    }
+  if (strcmp (sect_name, ".reg2") == 0)
+    return &ppc_linux_fpregset;
+  return NULL;
 }
-
-/* Register that we are able to handle ELF file formats using standard
-   procfs "regset" structures.  */
-
-static struct core_fns ppc_linux_regset_core_fns =
-{
-  bfd_target_elf_flavour,	/* core_flavour */
-  default_check_format,		/* check_format */
-  default_core_sniffer,		/* core_sniffer */
-  fetch_core_registers,		/* core_read_registers */
-  NULL				/* next */
-};
 
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
@@ -1086,6 +1119,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* PPC64 malloc's entry-point is called ".malloc".  */
       set_gdbarch_name_of_malloc (gdbarch, ".malloc");
     }
+  set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
 }
 
 void
@@ -1099,5 +1133,4 @@ _initialize_ppc_linux_tdep (void)
                          ppc_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);
-  add_core_fns (&ppc_linux_regset_core_fns);
 }

@@ -1,5 +1,28 @@
 2004-03-15  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-tdep.h: Update copyright.
+	(ppc_linux_supply_gregset, ppc_linux_supply_fpregset): Change
+	function signatures to match "regsets.h".
+	* ppc-linux-tdep.c: Include "regset.h".
+	(ELF_GREGSET_SIZE): Delete.
+	(right_supply_register): New function.
+	(ppc_linux_supply_fpregset, ppc_linux_supply_gregset): Rewrite
+	using right_supply_register.
+	(ppc32_linux_supply_gregset, ppc64_linux_supply_gregset): New
+	functions.
+	(ppc64_linux_gregset, ppc32_linux_gregset): Define.
+	(ppc_linux_init_abi): Register ppc_linux_regset_from_core_section.
+	(_initialize_ppc_linux_tdep): Do not register
+	ppc_linux_regset_core_fns.
+	(ppc_linux_regset_from_core_section): Replace
+	fetch_core_registers.
+	(ppc_linux_regset_core_fns): Delete.
+	* ppc-linux-nat.c: (right_fill_reg): New function.
+	(supply_gregset): Update call to ppc_linux_supply_gregset.
+	(fill_gregset): Clear the register set, use right_fill_reg.
+	(supply_fpregset): Update call to ppc_linux_supply_fpregset.
+	(fill_fpregset): Use right_fill_reg, correctly compute FP offsets.
+
 	* rs6000-tdep.c (rs6000_register_virtual_type): Make registers
 	unsigned.
 
