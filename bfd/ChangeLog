@@ -1,3 +1,8 @@
+Fri Mar 14 16:43:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_slurp_symbol_table): Don't try to read the
+	version symbols if there aren't any.
+
 start-sanitize-tic80
 Thu Mar 13 16:38:30 1997  Fred Fish  <fnf@cygnus.com>
 

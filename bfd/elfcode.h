@@ -949,7 +949,10 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
   else
     {
       hdr = &elf_tdata (abfd)->dynsymtab_hdr;
-      verhdr = &elf_tdata (abfd)->dynversym_hdr;
+      if (elf_dynversym (abfd) == 0)
+	verhdr = NULL;
+      else
+	verhdr = &elf_tdata (abfd)->dynversym_hdr;
       if ((elf_tdata (abfd)->dynverdef_section != 0
 	   && elf_tdata (abfd)->verdef == NULL)
 	  || (elf_tdata (abfd)->dynverref_section != 0
@@ -992,8 +995,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 
       /* Read the raw ELF version symbol information.  */
 
-      if (elf_dynversym (abfd) != 0
-	  && verhdr != NULL
+      if (verhdr != NULL
 	  && verhdr->sh_size / sizeof (Elf_External_Versym) != symcount)
 	{
 	  (*_bfd_error_handler)
@@ -1013,7 +1015,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	    goto error_return;
 
 	  x_versymp = (Elf_External_Versym *) bfd_malloc (verhdr->sh_size);
-	  if (x_versymp == NULL && symcount != 0)
+	  if (x_versymp == NULL && verhdr->sh_size != 0)
 	    goto error_return;
 
 	  if (bfd_read ((PTR) x_versymp, 1, verhdr->sh_size, abfd)
