@@ -1,3 +1,7 @@
+2000-08-10  Kazu Hirata  <kazu@hxi.com>
+
+	* symbols.c: Fix formatting.
+
 2000-08-09  Alan Modra  <alan@linuxcare.com.au>
 
 	From  Rodney Brown  <RodneyBrown@mynd.com>
