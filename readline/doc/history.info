@@ -1,4 +1,4 @@
-This is Info file history.info, produced by Makeinfo version 1.67 from
+This is Info file history.info, produced by Makeinfo version 1.68 from
 the input file /usr/homes/chet/src/bash/readline-src/doc/hist.texinfo.
 
 INFO-DIR-SECTION Libraries
@@ -141,6 +141,22 @@ be omitted if the word designator begins with a `^', `$', `*', `-', or
 word being denoted by 0 (zero).  Words are inserted into the current
 line separated by single spaces.
 
+   For example,
+
+`!!'
+     designates the preceding command.  When you type this, the
+     preceding command is repeated in toto.
+
+`!!:$'
+     designates the last argument of the preceding command.  This may be
+     shortened to `!$'.
+
+`!fi:2'
+     designates the second argument of the most recent command starting
+     with the letters `fi'.
+
+   Here are the word designators:
+
 `0 (zero)'
      The `0'th word.  For many applications, this is the command word.
 
@@ -260,6 +276,13 @@ the history substitution provided by `csh'.
    If the programmer desires, he can use the Readline library, which
 includes some history manipulation by default, and has the added
 advantage of command line editing.
+
+   Before declaring any functions using any functionality the History
+library provides in other code, an application writer should include
+the file `<readline/history.h>' in any file that uses the History
+library's features.  It supplies extern declarations for all of the
+library's public functions and variables, and declares all of the
+public data structures.
 
 
 File: history.info,  Node: History Storage,  Next: History Functions,  Prev: Introduction to History,  Up: Programming with GNU History
@@ -527,8 +550,8 @@ History Expansion
           if there was an error in expansion;
 
     `2'
-          if the returned line should only be displayed, but not
-          executed, as with the `:p' modifier (*note Modifiers::.).
+          if the returned line should be displayed, but not executed,
+          as with the `:p' modifier (*note Modifiers::.).
 
      If an error ocurred in expansion, then OUTPUT contains a
      descriptive error message.
@@ -768,21 +791,21 @@ Node: Using History Interactively1742
 Node: History Interaction2250
 Node: Event Designators3669
 Node: Word Designators4596
-Node: Modifiers5845
-Node: Programming with GNU History6983
-Node: Introduction to History7709
-Node: History Storage9030
-Node: History Functions10123
-Node: Initializing History and State Management11094
-Node: History List Management11886
-Node: Information About the History List13407
-Node: Moving Around the History List14713
-Node: Searching the History List15598
-Node: Managing the History File17430
-Node: History Expansion18936
-Node: History Variables20780
-Node: History Programming Example23098
-Node: Concept Index25702
-Node: Function and Variable Index26188
+Node: Modifiers6225
+Node: Programming with GNU History7363
+Node: Introduction to History8089
+Node: History Storage9774
+Node: History Functions10867
+Node: Initializing History and State Management11838
+Node: History List Management12630
+Node: Information About the History List14151
+Node: Moving Around the History List15457
+Node: Searching the History List16342
+Node: Managing the History File18174
+Node: History Expansion19680
+Node: History Variables21519
+Node: History Programming Example23837
+Node: Concept Index26441
+Node: Function and Variable Index26927
 
 End Tag Table

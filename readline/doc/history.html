@@ -1,14 +1,14 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.52
-     from /usr/homes/chet/src/bash/readline-src/doc/hist.texinfo on 31 December 1998 -->
+     from /usr/homes/chet/src/bash/readline-src/doc/hist.texinfo on 19 January 2000 -->
 
 <TITLE>GNU History Library</TITLE>
 </HEAD>
 <BODY>
 <H1>GNU History Library</H1>
-<H2>Edition 4.0, for <CODE>History Library</CODE> Version 4.0.</H2>
-<H2>December 1998</H2>
+<H2>Edition 4.1, for <CODE>History Library</CODE> Version 4.1.</H2>
+<H2>January 2000</H2>
 <ADDRESS>Brian Fox, Free Software Foundation</ADDRESS>
 <ADDRESS>Chet Ramey, Case Western Reserve University</ADDRESS>
 <P>
@@ -54,8 +54,8 @@ typed input.
 </P>
 <P>
 Published by the Free Software Foundation <BR>
-675 Massachusetts Avenue, <BR>
-Cambridge, MA 02139 USA
+59 Temple Place, Suite 330, <BR>
+Boston, MA 02111 USA
 
 </P>
 <P>
@@ -208,6 +208,31 @@ of the line, with the first word being denoted by 0 (zero).  Words are
 inserted into the current line separated by single spaces.
 
 </P>
+<P>
+For example,
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>!!</CODE>
+<DD>
+designates the preceding command.  When you type this, the preceding
+command is repeated in toto.
+
+<DT><CODE>!!:$</CODE>
+<DD>
+designates the last argument of the preceding command.  This may be
+shortened to <CODE>!$</CODE>.
+
+<DT><CODE>!fi:2</CODE>
+<DD>
+designates the second argument of the most recent command starting with
+the letters <CODE>fi</CODE>.
+</DL>
+
+<P>
+Here are the word designators:
+ 
 <DL COMPACT>
 
 <DT><CODE>0 (zero)</CODE>
@@ -362,6 +387,15 @@ the history substitution provided by <CODE>csh</CODE>.
 If the programmer desires, he can use the Readline library, which
 includes some history manipulation by default, and has the added
 advantage of command line editing.
+
+</P>
+<P>
+Before declaring any functions using any functionality the History
+library provides in other code, an application writer should include
+the file <CODE>&#60;readline/history.h&#62;</CODE> in any file that uses the
+History library's features.  It supplies extern declarations for all
+of the library's public functions and variables, and declares all of
+the public data structures.
 
 </P>
 
@@ -783,7 +817,7 @@ if expansions did take place;
 if there was an error in expansion;
 <DT><CODE>2</CODE>
 <DD>
-if the returned line should only be displayed, but not executed,
+if the returned line should be displayed, but not executed,
 as with the <CODE>:p</CODE> modifier (see section <A HREF="history.html#SEC5">Modifiers</A>).
 </DL>
 
@@ -1029,21 +1063,21 @@ main ()
 <H1><A NAME="SEC19" HREF="history.html#TOC19">Concept Index</A></H1>
 <P>
 Jump to:
-<A HREF="#a">a</A>
+<A HREF="#cindex_a">a</A>
 -
-<A HREF="#e">e</A>
+<A HREF="#cindex_e">e</A>
 -
-<A HREF="#h">h</A>
+<A HREF="#cindex_h">h</A>
 <P>
-<H2><A NAME="a">a</A></H2>
+<H2><A NAME="cindex_a">a</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX23">anchored search</A>
 </DIR>
-<H2><A NAME="e">e</A></H2>
+<H2><A NAME="cindex_e">e</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX2">event designators</A>
 </DIR>
-<H2><A NAME="h">h</A></H2>
+<H2><A NAME="cindex_h">h</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX3">history events</A>
 <LI><A HREF="history.html#IDX1">history expansion</A>
@@ -1056,43 +1090,43 @@ Jump to:
 <H1><A NAME="SEC20" HREF="history.html#TOC20">Function and Variable Index</A></H1>
 <P>
 Jump to:
-<A HREF="#a">a</A>
+<A HREF="#vindex_a">a</A>
 -
-<A HREF="#c">c</A>
+<A HREF="#vindex_c">c</A>
 -
-<A HREF="#g">g</A>
+<A HREF="#vindex_g">g</A>
 -
-<A HREF="#h">h</A>
+<A HREF="#vindex_h">h</A>
 -
-<A HREF="#m">m</A>
+<A HREF="#vindex_m">m</A>
 -
-<A HREF="#n">n</A>
+<A HREF="#vindex_n">n</A>
 -
-<A HREF="#p">p</A>
+<A HREF="#vindex_p">p</A>
 -
-<A HREF="#r">r</A>
+<A HREF="#vindex_r">r</A>
 -
-<A HREF="#s">s</A>
+<A HREF="#vindex_s">s</A>
 -
-<A HREF="#u">u</A>
+<A HREF="#vindex_u">u</A>
 -
-<A HREF="#w">w</A>
+<A HREF="#vindex_w">w</A>
 <P>
-<H2><A NAME="a">a</A></H2>
+<H2><A NAME="vindex_a">a</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX7">add_history</A>
 <LI><A HREF="history.html#IDX30">append_history</A>
 </DIR>
-<H2><A NAME="c">c</A></H2>
+<H2><A NAME="vindex_c">c</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX10">clear_history</A>
 <LI><A HREF="history.html#IDX16">current_history</A>
 </DIR>
-<H2><A NAME="g">g</A></H2>
+<H2><A NAME="vindex_g">g</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX34">get_history_event</A>
 </DIR>
-<H2><A NAME="h">h</A></H2>
+<H2><A NAME="vindex_h">h</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX33">history_arg_extract</A>
 <LI><A HREF="history.html#IDX36">history_base</A>
@@ -1118,35 +1152,35 @@ Jump to:
 <LI><A HREF="history.html#IDX18">history_total_bytes</A>
 <LI><A HREF="history.html#IDX31">history_truncate_file</A>
 </DIR>
-<H2><A NAME="m">m</A></H2>
+<H2><A NAME="vindex_m">m</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX38">max_input_history</A>
 </DIR>
-<H2><A NAME="n">n</A></H2>
+<H2><A NAME="vindex_n">n</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX21">next_history</A>
 </DIR>
-<H2><A NAME="p">p</A></H2>
+<H2><A NAME="vindex_p">p</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX20">previous_history</A>
 </DIR>
-<H2><A NAME="r">r</A></H2>
+<H2><A NAME="vindex_r">r</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX27">read_history</A>
 <LI><A HREF="history.html#IDX28">read_history_range</A>
 <LI><A HREF="history.html#IDX8">remove_history</A>
 <LI><A HREF="history.html#IDX9">replace_history_entry</A>
 </DIR>
-<H2><A NAME="s">s</A></H2>
+<H2><A NAME="vindex_s">s</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX11">stifle_history</A>
 </DIR>
-<H2><A NAME="u">u</A></H2>
+<H2><A NAME="vindex_u">u</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX12">unstifle_history</A>
 <LI><A HREF="history.html#IDX4">using_history</A>
 </DIR>
-<H2><A NAME="w">w</A></H2>
+<H2><A NAME="vindex_w">w</A></H2>
 <DIR>
 <LI><A HREF="history.html#IDX15">where_history</A>
 <LI><A HREF="history.html#IDX29">write_history</A>
@@ -1154,7 +1188,7 @@ Jump to:
 
 </P>
 <P><HR><P>
-This document was generated on 31 December 1998 using the
+This document was generated on 19 January 2000 using the
 <A HREF="http://wwwinfo.cern.ch/dis/texi2html/">texi2html</A>
 translator version 1.52.</P>
 </BODY>
