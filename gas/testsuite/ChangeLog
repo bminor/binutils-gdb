@@ -1,3 +1,9 @@
+2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/mips/elf-rel23.d, gas/mips/elf-rel23a.d: Accept little-endian.
+	* gas/mips/tmipsel16-e.d, gas/mips/tmipsel16-f.d: Accept section
+	symbol names.
+
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/macros/repeat.[ds]: New.

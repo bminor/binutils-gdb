@@ -3,7 +3,7 @@
 #objdump: -dr -Mgpr-names=numeric
 #name: MIPS ELF reloc 23 -mabi=64 -mno-shared
 
-.*: * file format elf64-tradbigmips
+.*: * file format elf64-.*mips.*
 
 Disassembly of section \.text:
 
