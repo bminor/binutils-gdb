@@ -5728,11 +5728,17 @@ parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
   /* Look ahead for AND or OR or end of line.  */
   for (s = input_line_pointer; *s != '\0'; ++s)
     {
-      if ((strncasecmp (s, "AND", 3) == 0
-	   && (s[3] == '.' || ! is_part_of_name (s[3])))
-	  || (strncasecmp (s, "OR", 2) == 0
-	      && (s[2] == '.' || ! is_part_of_name (s[2]))))
-	break;
+      /* We must make sure we don't misinterpret AND/OR at the end of labels!
+         if d0 <eq> #FOOAND and d1 <ne> #BAROR then
+                        ^^^                 ^^ */
+      if (    (    s == input_line_pointer
+                || *(s-1) == ' '
+                || *(s-1) == '\t')
+           && (    (    strncasecmp (s, "AND", 3) == 0
+                     && (s[3] == '.' || ! is_part_of_name (s[3])))
+                || (    strncasecmp (s, "OR", 2) == 0
+                     && (s[2] == '.' || ! is_part_of_name (s[2])))))
+	      break;
     }
 
   *rightstart = input_line_pointer;
@@ -5759,7 +5765,11 @@ swap_mri_condition (cc)
     {
     case MCC ('h', 'i'): return MCC ('c', 's');
     case MCC ('l', 's'): return MCC ('c', 'c');
+    /* <HS> is an alias for <CC> */
+    case MCC ('h', 's'):
     case MCC ('c', 'c'): return MCC ('l', 's');
+    /* <LO> is an alias for <CS> */
+    case MCC ('l', 'o'):
     case MCC ('c', 's'): return MCC ('h', 'i');
     case MCC ('p', 'l'): return MCC ('m', 'i');
     case MCC ('m', 'i'): return MCC ('p', 'l');
@@ -5767,6 +5777,15 @@ swap_mri_condition (cc)
     case MCC ('l', 't'): return MCC ('g', 't');
     case MCC ('g', 't'): return MCC ('l', 't');
     case MCC ('l', 'e'): return MCC ('g', 'e');
+    /* issue a warning for conditions we can not swap */
+    case MCC ('n', 'e'): return MCC ('n', 'e'); // no problem here
+    case MCC ('e', 'q'): return MCC ('e', 'q'); // also no problem
+    case MCC ('v', 'c'):
+    case MCC ('v', 's'):
+    default :
+	   as_warn (_("Condition <%c%c> in structured control directive can not be encoded correctly"),
+		         (char) (cc >> 8), (char) (cc));
+      break;
     }
   return cc;
 }
@@ -5781,7 +5800,11 @@ reverse_mri_condition (cc)
     {
     case MCC ('h', 'i'): return MCC ('l', 's');
     case MCC ('l', 's'): return MCC ('h', 'i');
+    /* <HS> is an alias for <CC> */
+    case MCC ('h', 's'): return MCC ('l', 'o');
     case MCC ('c', 'c'): return MCC ('c', 's');
+    /* <LO> is an alias for <CS> */
+    case MCC ('l', 'o'): return MCC ('h', 's');
     case MCC ('c', 's'): return MCC ('c', 'c');
     case MCC ('n', 'e'): return MCC ('e', 'q');
     case MCC ('e', 'q'): return MCC ('n', 'e');
@@ -5848,13 +5871,28 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
 	{
 	  char *temp;
 
-	  cc = swap_mri_condition (cc);
+     /* Correct conditional handling:
+        if #1 <lt> d0 then  ;means if (1 < d0)
+           ...
+        endi
+
+        should assemble to:
+
+         cmp #1,d0        if we do *not* swap the operands
+         bgt true         we need the swapped condition!
+         ble false
+        true:
+         ...
+        false:
+     */
 	  temp = leftstart;
 	  leftstart = rightstart;
 	  rightstart = temp;
 	  temp = leftstop;
 	  leftstop = rightstop;
 	  rightstop = temp;
+	} else {
+	  cc = swap_mri_condition (cc);
 	}
     }
 
@@ -5874,7 +5912,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       *s++ = 'm';
       *s++ = 'p';
       if (qual != '\0')
-	*s++ = qual;
+	*s++ = tolower(qual);
       *s++ = ' ';
       memcpy (s, leftstart, leftstop - leftstart);
       s += leftstop - leftstart;
@@ -5892,7 +5930,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
   *s++ = cc >> 8;
   *s++ = cc & 0xff;
   if (extent != '\0')
-    *s++ = extent;
+    *s++ = tolower(extent);
   *s++ = ' ';
   strcpy (s, truelab);
   mri_assemble (buf);
@@ -6027,8 +6065,17 @@ s_mri_if (qual)
   /* A structured control directive must end with THEN with an
      optional qualifier.  */
   s = input_line_pointer;
-  while (! is_end_of_line[(unsigned char) *s]
-	 && (! flag_mri || *s != '*'))
+  /* We only accept '*' as introduction of comments if preceded by white space
+     or at first column of a line (I think this can't actually happen here?)
+     This is important when assembling:
+       if d0 <ne> 12(a0,d0*2) then
+       if d0 <ne> #CONST*20   then */
+  while ( ! (    is_end_of_line[(unsigned char) *s]
+              || (     flag_mri
+                   && *s == '*'
+                   && (    s == input_line_pointer
+                        || *(s-1) == ' '
+                        || *(s-1) == '\t'))))
     ++s;
   --s;
   while (s > input_line_pointer && (*s == ' ' || *s == '\t'))
@@ -6133,7 +6180,7 @@ s_mri_else (qual)
   mri_control_stack->else_seen = 1;
 
   buf = (char *) xmalloc (20 + strlen (mri_control_stack->bottom));
-  q[0] = qual;
+  q[0] = tolower(qual);
   q[1] = '\0';
   sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
   mri_assemble (buf);
@@ -6206,7 +6253,7 @@ s_mri_break (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->bottom));
-  ex[0] = extent;
+  ex[0] = tolower(extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->bottom);
   mri_assemble (buf);
@@ -6245,7 +6292,7 @@ s_mri_next (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->next));
-  ex[0] = extent;
+  ex[0] = tolower(extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->next);
   mri_assemble (buf);
@@ -6429,7 +6476,7 @@ s_mri_for (qual)
   *s++ = 'v';
   *s++ = 'e';
   if (qual != '\0')
-    *s++ = qual;
+    *s++ = tolower(qual);
   *s++ = ' ';
   memcpy (s, initstart, initstop - initstart);
   s += initstop - initstart;
@@ -6447,7 +6494,7 @@ s_mri_for (qual)
   *s++ = 'm';
   *s++ = 'p';
   if (qual != '\0')
-    *s++ = qual;
+    *s++ = tolower(qual);
   *s++ = ' ';
   memcpy (s, endstart, endstop - endstart);
   s += endstop - endstart;
@@ -6458,7 +6505,7 @@ s_mri_for (qual)
   mri_assemble (buf);
 
   /* bcc bottom */
-  ex[0] = extent;
+  ex[0] = tolower(extent);
   ex[1] = '\0';
   if (up)
     sprintf (buf, "blt%s %s", ex, n->bottom);
@@ -6474,7 +6521,7 @@ s_mri_for (qual)
     strcpy (s, "sub");
   s += 3;
   if (qual != '\0')
-    *s++ = qual;
+    *s++ = tolower(qual);
   *s++ = ' ';
   memcpy (s, bystart, bystop - bystart);
   s += bystop - bystart;
@@ -6597,8 +6644,17 @@ s_mri_while (qual)
   struct mri_control_info *n;
 
   s = input_line_pointer;
-  while (! is_end_of_line[(unsigned char) *s]
-	 && (! flag_mri || *s != '*'))
+  /* We only accept '*' as introduction of comments if preceded by white space
+     or at first column of a line (I think this can't actually happen here?)
+     This is important when assembling:
+       while d0 <ne> 12(a0,d0*2) do
+       while d0 <ne> #CONST*20   do */
+  while ( ! (    is_end_of_line[(unsigned char) *s]
+              || (     flag_mri
+                   && *s == '*'
+                   && (    s == input_line_pointer
+                        || *(s-1) == ' '
+                        || *(s-1) == '\t'))))
     s++;
   --s;
   while (*s == ' ' || *s == '\t')

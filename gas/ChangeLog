@@ -1,3 +1,22 @@
+2001-06-12  Peter Jakubek <pjak@snafu.de>
+
+	* gas/config/tc-m68k.c (parse_mri_control_operand): Fix handling
+        of AND/OR.
+        (swap_mri_condition): Add HS (alias fo CC) and LO (alias for CS).
+        (reverse_mri_condition): Likewise.
+        (swap_mri_condition): Issue warning for conditions that can not be
+        swapped.
+        (build_mri_control_operand): Fix order of operands (swapped).
+        (build_mri_control_operand): Allow upper case extension in structured
+        control directives.
+        (s_mri_else): Likewise.
+        (s_mri_next): Likewise.
+        (s_mri_for): Likewise.
+        (s_mri_if): Fix handling comment ('*') in mri mode.
+        (s_mri_while): Likewise.
+        * gas/macro.c (macro_expand): Allow macro invocation with empty
+        extension.
+
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c: Fix test for overlow of literal pool.

@@ -1,3 +1,10 @@
+2001-06-06  Peter Jakubek <pjak@snafu.de>
+
+	* gas/mri/for.d: Correct for swapped operands.
+        * gas/mri/if.d: Likewise.
+        * gas/mri/repeat.d: Likewise.
+        * gas/mri/while.d: Likewise.
+
 2001-06-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/x86_64.d: Update for 2001-06-11 disassembler change.

@@ -935,21 +935,29 @@ macro_expand (idx, in, m, out, comment_char)
       /* The macro may be called with an optional qualifier, which may
          be referred to in the macro body as \0.  */
       if (idx < in->len && in->ptr[idx] == '.')
-	{
-	  formal_entry *n;
+        {
+          /* The Microtec assembler ignores this if followed by a white space.
+    		   (Macro invocation with empty extension) */
+          idx++;
+          if (    idx < in->len
+	            && in->ptr[idx] != ' '
+               && in->ptr[idx] != '\t')
+            {
+              formal_entry *n;
 
-	  n = (formal_entry *) xmalloc (sizeof (formal_entry));
-	  sb_new (&n->name);
-	  sb_new (&n->def);
-	  sb_new (&n->actual);
-	  n->index = QUAL_INDEX;
+              n = (formal_entry *) xmalloc (sizeof (formal_entry));
+              sb_new (&n->name);
+              sb_new (&n->def);
+              sb_new (&n->actual);
+              n->index = QUAL_INDEX;
 
-	  n->next = m->formals;
-	  m->formals = n;
+              n->next = m->formals;
+              m->formals = n;
 
-	  idx = get_any_string (idx + 1, in, &n->actual, 1, 0);
-	}
-    }
+              idx = get_any_string (idx, in, &n->actual, 1, 0);
+            }
+        }
+  }
 
   /* Peel off the actuals and store them away in the hash tables' actuals.  */
   idx = sb_skip_white (idx, in);
