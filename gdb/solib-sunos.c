@@ -829,7 +829,7 @@ sunos_solib_create_inferior_hook (void)
      out what we need to know about them. */
 
   clear_proceed_status ();
-  stop_soon_quietly = 1;
+  stop_soon_quietly = STOP_QUIETLY;
   stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -837,7 +837,7 @@ sunos_solib_create_inferior_hook (void)
       wait_for_inferior ();
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
-  stop_soon_quietly = 0;
+  stop_soon_quietly = NO_STOP_QUIETLY;
 
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust

@@ -390,12 +390,37 @@ extern enum step_over_calls_kind step_over_calls;
 
 extern int step_multi;
 
-/* Nonzero means expecting a trap and caller will handle it themselves.
-   It is used after attach, due to attaching to a process;
-   when running in the shell before the child program has been exec'd;
-   and when running some kinds of remote stuff (FIXME?).  */
+/* Nonzero means expecting a trap and caller will handle it
+   themselves.  It is used when running in the shell before the child
+   program has been exec'd; and when running some kinds of remote
+   stuff (FIXME?).  */
 
-extern int stop_soon_quietly;
+/* It is also used after attach, due to attaching to a process. This
+   is a bit trickier.  When doing an attach, the kernel stops the
+   debuggee with a SIGSTOP.  On newer GNU/Linux kernels (>= 2.5.61)
+   the handling of SIGSTOP for a ptraced process has changed. Earlier
+   versions of the kernel would ignore these SIGSTOPs, while now
+   SIGSTOP is treated like any other signal, i.e. it is not muffled.
+   
+   If the gdb user does a 'continue' after the 'attach', gdb passes
+   the global variable stop_signal (which stores the signal from the
+   attach, SIGSTOP) to the ptrace(PTRACE_CONT,...)  call.  This is
+   problematic, because the kernel doesn't ignore such SIGSTOP
+   now. I.e. it is reported back to gdb, which in turn presents it
+   back to the user.
+ 
+   To avoid the problem, we use STOP_QUIETLY_NO_SIGSTOP, which allows
+   gdb to clear the value of stop_signal after the attach, so that it
+   is not passed back down to the kernel.  */
+
+enum stop_kind
+  {
+    NO_STOP_QUIETLY = 0,
+    STOP_QUIETLY,
+    STOP_QUIETLY_NO_SIGSTOP
+  };
+
+extern enum stop_kind stop_soon_quietly;
 
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */

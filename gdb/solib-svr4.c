@@ -1290,7 +1290,7 @@ svr4_solib_create_inferior_hook (void)
      out what we need to know about them. */
 
   clear_proceed_status ();
-  stop_soon_quietly = 1;
+  stop_soon_quietly = STOP_QUIETLY;
   stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -1298,7 +1298,7 @@ svr4_solib_create_inferior_hook (void)
       wait_for_inferior ();
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
-  stop_soon_quietly = 0;
+  stop_soon_quietly = NO_STOP_QUIETLY;
 #endif /* defined(_SCO_DS) */
 }
 

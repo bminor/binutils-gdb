@@ -321,7 +321,7 @@ osf_solib_create_inferior_hook (void)
      out what we need to know about them. */
 
   clear_proceed_status ();
-  stop_soon_quietly = 1;
+  stop_soon_quietly = STOP_QUIETLY;
   stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -337,7 +337,7 @@ osf_solib_create_inferior_hook (void)
      Delaying the resetting of stop_soon_quietly until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  stop_soon_quietly = 0;
+  stop_soon_quietly = NO_STOP_QUIETLY;
 
   /* Enable breakpoints disabled (unnecessarily) by clear_solib().  */
   re_enable_breakpoints_in_shlibs ();
