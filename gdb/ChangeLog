@@ -1,3 +1,8 @@
+Tue Nov 14 17:16:46 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/arm/tm-arm.h (ADDITIONAL_REGISTER_NAMES): Fix r5.
+	(FRAME_SAVED_PC): Minor clean up.
+
 Tue Nov 14 14:51:05 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* monitor.c (monitor_load_srec monitor_make_srec):  Move all
@@ -19,11 +24,11 @@ Tue Nov 14 14:51:05 1995  Stu Grossman  (grossman@cygnus.com)
 
 Tue Nov 14 15:57:36 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* remote-ppcbug.c: New file to support the Motorola PPCBUG monitor
+	* ppcbug-rom.c: New file to support the Motorola PPCBUG monitor
 	for PowerPC's.
 
 	* config/powerpc/ppc{,le}-{eabi,sim}.mt (TDEPFILES): Include
-	remote-ppcbug.c.
+	ppcbug-rom.o, monitor.o, and srec.o
 
 	* config/i386/linux.mt (XDEPFILES): Include ser-tcp.o.
 
