@@ -144,6 +144,10 @@ static int mips_4100 = -1;
    require nops to be inserted.  */
 static int interlocks = -1;
 
+/* As with "interlocks" this is used by hardware that has FP
+   (co-processor) interlocks.  */
+static int cop_interlocks = -1;
+
 /* MIPS PIC level.  */
 
 enum mips_pic_level
@@ -688,10 +692,15 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = 0;
 
-  if (mips_4650 || mips_4010 || mips_4100)
+  if (mips_4650 || mips_4010 || mips_4100 || mips_cpu == 4300)
     interlocks = 1;
   else
     interlocks = 0;
+
+  if (mips_cpu == 4300)
+    cop_interlocks = 1;
+  else
+    cop_interlocks = 0;
 
   if (mips_isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
@@ -999,6 +1008,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	 the contents of the current insn.  */
       if (mips_isa < 4
 	  && ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
+              && ! cop_interlocks
 	      || (mips_isa < 2
 		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
 	{
@@ -1016,6 +1026,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	}
       else if (mips_isa < 4
 	       && ((prev_pinfo & INSN_COPROC_MOVE_DELAY)
+                   && ! cop_interlocks
 		   || (mips_isa < 2
 		       && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))))
 	{
@@ -1068,7 +1079,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    }
 	}
       else if (mips_isa < 4
-	       && (prev_pinfo & INSN_WRITE_COND_CODE))
+	       && (prev_pinfo & INSN_WRITE_COND_CODE)
+               && ! cop_interlocks)
 	{
 	  /* The previous instruction sets the coprocessor condition
 	     codes, but does not require a general coprocessor delay
@@ -1083,7 +1095,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  The R4650 and VR4100 have interlocks.  */
+	     insert two NOPS.  The R4650, VR4100 and VR4300 have
+	     interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
@@ -1093,7 +1106,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
-	     insert a NOP.  The R4650 and VR4100 have interlocks.  */
+	     insert a NOP.  The R4650, VR4100 and VR4300 have
+	     interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
@@ -1105,15 +1119,16 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	 coprocessor instruction which requires a general coprocessor
 	 delay and then reading the condition codes 2) reading the HI
 	 or LO register and then writing to it (except on the R4650,
-	 and VR4100 which have interlocks).  If we are not already
-	 emitting a NOP instruction, we must check for these cases
-	 compared to the instruction previous to the previous
+	 VR4100, and VR4300 which have interlocks).  If we are not
+	 already emitting a NOP instruction, we must check for these
+	 cases compared to the instruction previous to the previous
 	 instruction.  */
       if (nops == 0
 	  && ((mips_isa < 4
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	       && (pinfo & INSN_READ_COND_CODE))
+	       && (pinfo & INSN_READ_COND_CODE)
+               && ! cop_interlocks)
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 		  && (pinfo & INSN_WRITE_LO)
 		  && ! interlocks)
@@ -1427,6 +1442,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
+printf("DBG: append_insn: inserting a NOP (INSN_COND_BRANCH_LIKELY)\n");
 	  /* We don't yet optimize a branch likely.  What we should do
 	     is look at the target, copy the instruction found there
 	     into the delay slot, and increment the branch to jump to
@@ -1492,10 +1508,11 @@ mips_emit_delays ()
 
       nop = 0;
       if ((mips_isa < 4
-	   && (prev_insn.insn_mo->pinfo
-	       & (INSN_LOAD_COPROC_DELAY
-		  | INSN_COPROC_MOVE_DELAY
-		  | INSN_WRITE_COND_CODE)))
+	   && (! cop_interlocks
+               && (prev_insn.insn_mo->pinfo
+                   & (INSN_LOAD_COPROC_DELAY
+                      | INSN_COPROC_MOVE_DELAY
+                      | INSN_WRITE_COND_CODE))))
 	  || (! interlocks
 	      && (prev_insn.insn_mo->pinfo
 		  & (INSN_READ_LO
@@ -1507,14 +1524,16 @@ mips_emit_delays ()
 	{
 	  nop = 1;
 	  if ((mips_isa < 4
-	       && (prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
+	       && (! cop_interlocks
+                   && prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
 	      || (! interlocks
 		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	    emit_nop ();
 	}
       else if ((mips_isa < 4
-		&& (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
+		&& (! cop_interlocks
+                    && prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
 	       || (! interlocks
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
@@ -5577,7 +5596,7 @@ mips_ip (str, ip)
 	    case 'j':		/* 16 bit signed immediate */
 	      imm_reloc = BFD_RELOC_LO16;
 	      c = my_getSmallExpression (&imm_expr, s);
-	      if (c)
+	      if (c != '\0')
 		{
 		  if (c != 'l')
 		    {
@@ -5595,7 +5614,7 @@ mips_ip (str, ip)
 		}
 	      if (*args == 'i')
 		{
-		  if (imm_expr.X_op != O_constant
+		  if ((c == '\0' && imm_expr.X_op != O_constant)
 		      || imm_expr.X_add_number < 0
 		      || imm_expr.X_add_number >= 0x10000)
 		    {
@@ -5629,7 +5648,7 @@ mips_ip (str, ip)
 		    max = 0x8000;
 		  else
 		    max = 0x10000;
-		  if (imm_expr.X_op != O_constant
+		  if ((c == '\0' && imm_expr.X_op != O_constant)
 		      || imm_expr.X_add_number < -0x8000
 		      || imm_expr.X_add_number >= max
 		      || (more
