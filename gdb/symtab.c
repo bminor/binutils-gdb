@@ -659,6 +659,14 @@ symbol_demangled_name (struct general_symbol_info *gsymbol)
     return NULL;
 }
 
+/* Return the search name of a symbol---generally the demangled or
+   linkage name of the symbol, depending on how it will be searched for.
+   If there is no distinct demangled name, then returns the same value 
+   (same pointer) as SYMBOL_LINKAGE_NAME. */
+char *symbol_search_name (const struct general_symbol_info *gsymbol) {
+  return symbol_natural_name (gsymbol);
+}
+
 /* Initialize the structure fields to zero values.  */
 void
 init_sal (struct symtab_and_line *sal)
@@ -1467,7 +1475,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*center), name) >= 0)
+	  if (strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1482,7 +1490,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
       while (top <= real_top
 	     && (linkage_name != NULL
 		 ? strcmp (SYMBOL_LINKAGE_NAME (*top), linkage_name) == 0
-		 : SYMBOL_MATCHES_NATURAL_NAME (*top,name)))
+		 : SYMBOL_MATCHES_SEARCH_NAME (*top,name)))
 	{
 	  if (SYMBOL_DOMAIN (*top) == domain)
 	    {
@@ -1503,7 +1511,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      if (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (*psym), linkage_name) == 0
-		  : SYMBOL_MATCHES_NATURAL_NAME (*psym, name))
+		  : SYMBOL_MATCHES_SEARCH_NAME (*psym, name))
 		{
 		  return (*psym);
 		}

@@ -1,3 +1,24 @@
+2004-05-20  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* symtab.h (SYMBOL_SEARCH_NAME): New definition.
+	(SYMBOL_MATCHES_SEARCH_NAME): New definition.
+	(symbol_search_name): Declare.
+	
+	* dictionary.c (iter_name_first_hashed): Match on SYMBOL_SEARCH_NAME.
+	(iter_name_next_hashed): Ditto.
+	(iter_name_next_linear): Ditto.
+	(insert_symbol_hashed): Hash on SYMBOL_SEARCH_NAME.
+
+	* symtab.c (lookup_partial_symbol): Assume symbols ordered by 
+	search name, using SYMBOL_SEARCH_NAME and SYMBOL_MATCHES_SEARCH_NAME.
+	(symbol_search_name): New function.
+	
+	* symfile.c (compare_psymbols): Order by SYMBOL_SEARCH_NAME.
+	
+	* minsyms.c (build_minimal_symbol_hash_tables): Change
+	test for adding to demangled hash table to check for difference
+	between SYMBOL_SEARCH_NAME and SYMBOL_LINKAGE_NAME.
+	
 2004-05-19  Jim Blandy  <jimb@redhat.com>
 
 	Use a constructor function to create regset structures.

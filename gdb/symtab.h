@@ -258,6 +258,20 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 #define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
   (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
 
+/* Macro that returns the name to be used when sorting and searching symbols. 
+   In  C++, Chill, and Java, we search for the demangled form of a name,
+   and so sort symbols accordingly.  In Ada, however, we search by mangled
+   name.  If there is no distinct demangled name, then SYMBOL_SEARCH_NAME
+   returns the same value (same pointer) as SYMBOL_LINKAGE_NAME. */
+#define SYMBOL_SEARCH_NAME(symbol)					 \
+   (symbol_search_name (&(symbol)->ginfo))
+extern char *symbol_search_name (const struct general_symbol_info *);
+
+/* Analogous to SYMBOL_MATCHES_NATURAL_NAME, but uses the search
+   name.  */
+#define SYMBOL_MATCHES_SEARCH_NAME(symbol, name)			\
+  (strcmp_iw (SYMBOL_SEARCH_NAME (symbol), (name)) == 0)
+
 /* Classification types for a minimal symbol.  These should be taken as
    "advisory only", since if gdb can't easily figure out a
    classification it simply selects mst_unknown.  It may also have to

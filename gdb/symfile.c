@@ -207,8 +207,8 @@ compare_psymbols (const void *s1p, const void *s2p)
   struct partial_symbol *const *s1 = s1p;
   struct partial_symbol *const *s2 = s2p;
 
-  return strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*s1),
-			    SYMBOL_NATURAL_NAME (*s2));
+  return strcmp_iw_ordered (SYMBOL_SEARCH_NAME (*s1),
+			    SYMBOL_SEARCH_NAME (*s2));
 }
 
 void
