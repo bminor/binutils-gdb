@@ -1213,6 +1213,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    {
 	      ptrace (PTRACE_DETACH, ourstatus->value.related_pid, 0, 0);
 	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      ptrace (PTRACE_CONT, pid, 0, 0);
 	      pid = -1;
 	      save_errno = EINTR;
 	    }

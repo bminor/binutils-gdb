@@ -1,3 +1,8 @@
+2004-08-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* lin-lwp.c (child_wait): Continue inferior after processing
+	PTRACE_EVENT_CLONE event.
+
 2004-08-05  Nathanael Nerode  <neroden@gcc.gnu.org>
 
 	* MAINTAINERS: Add self to Write-After-Approval.
