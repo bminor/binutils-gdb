@@ -1,6 +1,7 @@
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
 	* as.c (debug_type): Init to DEBUG_UNSPECIFIED.
+	(main): Call dwarf2_finish.
 	* as.h (debug_type): Clarify documentation of the meaning
 	of this variable.
 	* dwarf2dbg.c (DWARF2_LINE_MIN_INSN_LENGTH): Default to 1.

@@ -885,6 +885,10 @@ main (argc, argv)
   md_end ();
 #endif
 
+  /* If we've been collecting dwarf2 .debug_line info, either for 
+     assembly debugging or on behalf of the compiler, emit it now.  */
+  dwarf2_finish ();
+
   if (seen_at_least_1_file ()
       && (flag_always_generate_output || had_errors () == 0))
     keep_it = 1;
