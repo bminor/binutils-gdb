@@ -36,6 +36,14 @@
 
 #include "dwarf2dbg.h"
 
+typedef struct
+  {
+    sh_arg_type type;
+    int reg;
+    expressionS immediate;
+  }
+sh_operand_info;
+
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
@@ -45,11 +53,26 @@ static void s_uses PARAMS ((int));
 static void sh_count_relocs PARAMS ((bfd *, segT, PTR));
 static void sh_frob_section PARAMS ((bfd *, segT, PTR));
 
-void cons ();
-void s_align_bytes ();
 static void s_uacons PARAMS ((int));
 static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
 static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
+static void little PARAMS ((int));
+static bfd_reloc_code_real_type sh_elf_suffix
+  PARAMS ((char **str_p, expressionS *, expressionS *new_exp_p));
+static int parse_reg PARAMS ((char *, int *, int *));
+static symbolS *dot PARAMS ((void));
+static char *parse_exp PARAMS ((char *, sh_operand_info *));
+static char *parse_at PARAMS ((char *, sh_operand_info *));
+static void get_operand PARAMS ((char **, sh_operand_info *));
+static char *get_operands
+  PARAMS ((sh_opcode_info *, char *, sh_operand_info *));
+static sh_opcode_info *get_specific
+  PARAMS ((sh_opcode_info *, sh_operand_info *));
+static void insert PARAMS ((char *, int, int, sh_operand_info *));
+static void build_relax PARAMS ((sh_opcode_info *, sh_operand_info *));
+static char *insert_loop_bounds PARAMS ((char *, sh_operand_info *));
+static unsigned int build_Mytes
+  PARAMS ((sh_opcode_info *, sh_operand_info *));
 
 #ifdef OBJ_ELF
 static void sh_elf_cons PARAMS ((int));
@@ -455,14 +478,6 @@ static int reg_n;
 static int reg_x, reg_y;
 static int reg_efg;
 static int reg_b;
-
-typedef struct
-  {
-    sh_arg_type type;
-    int reg;
-    expressionS immediate;
-  }
-sh_operand_info;
 
 #define IDENT_CHAR(c) (isalnum (c) || (c) == '_')
 
@@ -1381,21 +1396,6 @@ get_specific (opcode, operands)
   return 0;
 }
 
-int
-check (operand, low, high)
-     expressionS *operand;
-     int low;
-     int high;
-{
-  if (operand->X_op != O_constant
-      || operand->X_add_number < low
-      || operand->X_add_number > high)
-    {
-      as_bad (_("operand must be absolute in range %d..%d"), low, high);
-    }
-  return operand->X_add_number;
-}
-
 static void
 insert (where, how, pcrel, op)
      char *where;
@@ -1501,7 +1501,6 @@ static unsigned int
 build_Mytes (opcode, operand)
      sh_opcode_info *opcode;
      sh_operand_info *operand;
-
 {
   int index;
   char nbuf[4];
@@ -2185,13 +2184,6 @@ SH options:\n\
 -dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
 }
 
-void
-tc_Nout_fix_to_chars ()
-{
-  printf (_("call to tc_Nout_fix_to_chars \n"));
-  abort ();
-}
-
 /* This struct is used to pass arguments to sh_count_relocs through
    bfd_map_over_sections.  */
 

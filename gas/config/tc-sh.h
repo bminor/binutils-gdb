@@ -58,7 +58,13 @@ extern void sh_handle_align PARAMS ((fragS *));
 
 /* We need to force out some relocations when relaxing.  */
 #define TC_FORCE_RELOCATION(fix) sh_force_relocation (fix)
-extern int sh_force_relocation ();
+
+/* The type fixS is defined (to struct fix) in write.h, but write.h uses
+   definitions from this file.  To avoid problems with including write.h
+   after the "right" definitions, don't; just forward-declare struct fix
+   here.  */
+struct fix;
+extern int sh_force_relocation PARAMS ((struct fix *));
 
 #ifdef OBJ_ELF
 #define obj_fix_adjustable(fixP) sh_fix_adjustable(fixP)

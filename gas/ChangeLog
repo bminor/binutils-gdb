@@ -1,3 +1,15 @@
+2001-09-15  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-sh.h (sh_force_relocation): Prototype.
+	(struct fix): Forward declare.
+	* config/tc-sh.c (type sh_operand_info): Move to top of file.
+	(cons, s_align_bytes): Remove old-type declarations.
+	(sh_elf_suffix, parse_reg, dot, parse_exp, parse_at, get_operand,
+	get_operands, get_specific, insert, build_relax,
+	insert_loop_bounds, build_Mytes): Prototype.
+	(little): Make static.  Prototype.
+	(check, tc_Nout_fix_to_chars): Delete unused functions.
+
 2001-09-14  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (md_parse_option): Remove setting mips_64 via
