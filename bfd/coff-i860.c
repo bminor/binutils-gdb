@@ -462,6 +462,9 @@ static reloc_howto_type howto_table[] =
    FIXME: This macro refers to symbols and asect; these are from the
    calling function, not the macro arguments.  */
 
+/* FIXME: This was copied from the i386 version originally but
+   appears to be wrong for i860.  For now we'll do nothing.  */
+#if 0
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)		\
   {								\
     coff_symbol_type *coffsym = (coff_symbol_type *) NULL;	\
@@ -481,6 +484,9 @@ static reloc_howto_type howto_table[] =
     if (ptr && howto_table[reloc.r_type].pc_relative)		\
       cache_ptr->addend += asect->vma;				\
   }
+#else
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)
+#endif
 
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section

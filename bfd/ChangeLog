@@ -1,5 +1,9 @@
 2003-08-24  Jason Eckhardt  <jle@rice.edu>
 
+	* coff-i860.c (CALC_ADDEND): Define to be a no-op. 
+
+2003-08-24  Jason Eckhardt  <jle@rice.edu>
+
 	* elf32-i860.c (elf32_i860_relocate_pc16): Subtract 4 and
 	shift by 2 before storing the relocated value.
 
