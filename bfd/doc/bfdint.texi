@@ -908,7 +908,7 @@ target vector is named @samp{_bfd_canonicalize_dynamic_reloc}.
 BFD contains several automatically generated files.  This section
 describes them.  Some files are created at configure time, when you
 configure BFD.  Some files are created at make time, when you build
-time.  Some files are automatically rebuilt at make time, but only if
+BFD.  Some files are automatically rebuilt at make time, but only if
 you configure with the @samp{--enable-maintainer-mode} option.  Some
 files live in the object directory---the directory from which you run
 configure---and some live in the source directory.  All files that live
