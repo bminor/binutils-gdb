@@ -1,3 +1,10 @@
+2003-04-22  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): Use new variable "bp_addr" to
+	compute the breakpoint address.  Only call FIX_CALL_DUMMY when
+	ON_STACK.  Eliminate the variable "addr".  Do not pass "real_pc"
+	to DEPRECATED_PUSH_RETURN_ADDRESS.
+
 2003-04-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Invoke DWARF2_REG_TO_REGNUM

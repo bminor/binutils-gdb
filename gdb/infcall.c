@@ -272,6 +272,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct type *param_type = NULL;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
   int n_method_args = 0;
+  CORE_ADDR bp_addr;
 
   dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
   sizeof_dummy1 = REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS / sizeof (ULONGEST);
@@ -413,23 +414,33 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 			    REGISTER_SIZE,
 			    (ULONGEST) dummy[i]);
 
-#ifdef GDB_TARGET_IS_HPPA
-  real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-			    value_type, using_gcc);
-#else
-  if (FIX_CALL_DUMMY_P ())
-    {
-      /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
-      FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
-		      using_gcc);
-    }
-  real_pc = start_sp;
-#endif
-
   switch (CALL_DUMMY_LOCATION)
     {
     case ON_STACK:
+      /* NOTE: cagney/2003-04-22: This computation of REAL_PC, BP_ADDR
+         and DUMMY_ADDR is pretty messed up.  It comes from constant
+         tinkering with the values.  Instead a FIX_CALL_DUMMY
+         replacement (PUSH_DUMMY_BREAKPOINT?) should just do
+         everything.  */
+#ifdef GDB_TARGET_IS_HPPA
+      real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
+				value_type, using_gcc);
+#else
+      if (FIX_CALL_DUMMY_P ())
+	{
+	  /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
+	  FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args, value_type,
+			  using_gcc);
+	}
+      real_pc = start_sp;
+#endif
       dummy_addr = start_sp;
+      /* Yes, the offset is applied to the real_pc and not the dummy
+         addr.  Ulgh!  Blame the HP/UX target.  */
+      bp_addr = real_pc + CALL_DUMMY_BREAKPOINT_OFFSET;
+      /* Yes, the offset is applied to the real_pc and not the
+         dummy_addr.  Ulgh!  Blame the HP/UX target.  */
+      real_pc += CALL_DUMMY_START_OFFSET;
       write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
       if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
@@ -437,6 +448,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     case AT_ENTRY_POINT:
       real_pc = funaddr;
       dummy_addr = CALL_DUMMY_ADDRESS ();
+      /* A call dummy always consists of just a single breakpoint, so
+         it's address is the same as the address of the dummy.  */
+      bp_addr = dummy_addr;
       if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	/* NOTE: cagney/2002-04-13: The entry point is going to be
            modified with a single breakpoint.  */
@@ -649,7 +663,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        return-address register as appropriate.  Formerly this has been
        done in PUSH_ARGUMENTS, but that's overloading its
        functionality a bit, so I'm making it explicit to do it here.  */
-    sp = DEPRECATED_PUSH_RETURN_ADDRESS (real_pc, sp);
+    /* NOTE: cagney/2003-04-22: The first parameter ("real_pc") has
+       been replaced with zero, it turns out that no implementation
+       used that parameter.  This occured because the value being
+       supplied - the address of the called function's entry point
+       instead of the address of the breakpoint that the called
+       function should return to - wasn't useful.  */
+    sp = DEPRECATED_PUSH_RETURN_ADDRESS (0, sp);
 
   /* NOTE: cagney/2003-03-23: Diable this code when there is a
      push_dummy_call() method.  Since that method will have already
@@ -745,7 +765,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	 eventually be popped when we do hit the dummy end
 	 breakpoint).  */
 
-      CORE_ADDR addr = real_pc + CALL_DUMMY_START_OFFSET;
       struct regcache *buffer = retbuf;
       struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
       int saved_async = 0;
@@ -756,22 +775,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       clear_proceed_status ();
 
       init_sal (&sal);		/* initialize to zeroes */
-      if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-	{
-	  sal.pc = CALL_DUMMY_ADDRESS ();
-	}
-      else
-	{
-	  /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need
-	     to put a breakpoint instruction.  If not, the call dummy
-	     already has the breakpoint instruction in it.
-
-	     ADDR IS THE ADDRESS of the call dummy plus the
-	     CALL_DUMMY_START_OFFSET, so we need to subtract the
-	     CALL_DUMMY_START_OFFSET.  */
-	  sal.pc = (addr - (CALL_DUMMY_START_OFFSET
-			    + CALL_DUMMY_BREAKPOINT_OFFSET));
-	}
+      sal.pc = bp_addr;
       sal.section = find_pc_overlay (sal.pc);
   
       {
@@ -797,7 +801,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       if (target_can_async_p ())
 	saved_async = target_async_mask (0);
 
-      proceed (addr, TARGET_SIGNAL_0, 0);
+      proceed (real_pc, TARGET_SIGNAL_0, 0);
 
       if (saved_async)
 	target_async_mask (saved_async);
