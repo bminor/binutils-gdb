@@ -1,3 +1,13 @@
+Sat Feb 22 00:56:39 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c, infcmd.c, breakpoint.c, main.c, symfile.c,
+	breakpoint.h, tm-sun4os4.h, tm-sparc.h, sparc-tdep.c, tm-mips.h,
+	mips-tdep.h, tm-sun3.h, tm-68k.h, m68k-tdep.h:  Add support for
+	stepping (and nexting) through longjmp().  Also, cleanup
+	breakpoint handling quite a bit by creating explicit breakpoint
+	types instead of using magic breakpoint numbers.
+	Makefile.in:  Update version to 4.4.3
+
 Sat Feb 22 00:08:50 1992  John Gilmore  (gnu at cygnus.com)
 
 	* xm-sun3os4.h, xm-sun4os4.h:  Enable HAVE_MMAP.

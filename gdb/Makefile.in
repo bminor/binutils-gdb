@@ -1,4 +1,4 @@
-##Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+#Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -48,9 +48,6 @@ RANLIB = ranlib
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = -ltermcap
-
-#### Host, target, and site specific Makefile fragments come in here.
-###
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -161,7 +158,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.5
+VERSION = 4.4.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -173,12 +170,13 @@ LINTFLAGS= -I${BFD_DIR}
 SFILES_MAINDIR = \
 	 blockframe.c breakpoint.c command.c core.c \
 	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
-	 main.c printcmd.c \
+	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
-	 ieee-float.c language.c parse.c buildsym.c
+	 ieee-float.c language.c parse.c buildsym.c state.c objfiles.c \
+	 minsyms.c mmap-alloc.c mmap-sbrk.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -221,9 +219,9 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/* Makefile fragments go here.
 HFILES=	breakpoint.h buildsym.h command.h defs.h environ.h \
-	expression.h frame.h gdbcmd.h gdbcore.h \
+	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h minimon.h partial-stab.h \
-	signals.h signame.h symfile.h symtab.h \
+	signals.h signame.h symfile.h symtab.h state.h solib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h
 
@@ -263,10 +261,10 @@ TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
 OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
-    command.o utils.o expprint.o environ.o version.o \
+    command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-    buildsym.o \
+    buildsym.o state.o objfiles.o minsyms.o mmap-alloc.o mmap-sbrk.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o # mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)

@@ -579,4 +579,3 @@ extern void single_step ();
       print_floating (doublereg, builtin_type_double, stdout);	\
     }					\
   }
-

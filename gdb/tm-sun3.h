@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sun, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -37,3 +37,32 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define STACK_END_ADDR USRSTACK
 
 #include "tm-68k.h"
+
+/* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
+   documented in a comment in <machine/setjmp.h>! */
+
+#define JB_ELEMENT_SIZE 4
+
+#define JB_ONSSTACK 0
+#define JB_SIGMASK 1
+#define JB_SP 2
+#define JB_PC 3
+#define JB_PSL 4
+#define JB_D2 5
+#define JB_D3 6
+#define JB_D4 7
+#define JB_D5 8
+#define JB_D6 9
+#define JB_D7 10
+#define JB_A2 11
+#define JB_A3 12
+#define JB_A4 13
+#define JB_A5 14
+#define JB_A6 15
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

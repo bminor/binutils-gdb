@@ -535,10 +535,12 @@ extern const struct ext_format ext_format_68881;
 
 extern void m68k_push_dummy_frame PARAMS ((void));
 
+extern void m68k_pop_frame PARAMS ((void));
+
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME		{ m68k_pop_frame (); }
 
-extern void m68k_pop_frame PARAMS ((void));
+/* Offset from SP to first arg on stack at first instruction of a function */
 
-
+#define SP_ARG0 (1 * 4)

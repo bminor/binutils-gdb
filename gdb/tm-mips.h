@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on a mips box under 4.3bsd.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Per Bothner (bothner@cs.wisc.edu) at U.Wisconsin
    and by Alessandro Forin (af@cs.cmu.edu) at CMU.
 
@@ -121,6 +121,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    but do serve to get the desired values when passed to read_register.  */
 
 #define ZERO_REGNUM 0		/* read-only register, always 0 */
+#define A0_REGNUM 4		/* Lo of first arg during a subr call */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
@@ -346,3 +347,16 @@ typedef struct mips_extra_func_info {
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
 
 #define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
+
+/* Size of elements in jmpbuf */
+
+#define JB_ELEMENT_SIZE 4
+
+/* Figure out where the longjmp will land.  We expect that we have just entered
+   longjmp and haven't yet setup the stack frame, so the args are still in the
+   argument regs.  a0 (CALL_ARG0) points at the jmp_buf structure from which we
+   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+/* Note that caller must #include <setjmp.h> in order to get def of JB_* */
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
