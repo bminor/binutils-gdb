@@ -1,3 +1,8 @@
+2005-01-03  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (hw_com.o, hw_eeprom.o): Depend on
+	$(DEVICE_TABLE_H).
+
 2004-11-16  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (defines.h): Depend on tmp-defines.
