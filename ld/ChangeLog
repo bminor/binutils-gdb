@@ -1,3 +1,8 @@
+2001-02-17  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.host: Add a generic FreeBSD configuration entry such that
+	all [modern] FreeBSD systems on all platforms will look the same.
+
 2001-02-14  H.J. Lu  <hjl@gnu.org>
 
 	* configure.tgt: Remove mention of earmelf_linux26.
