@@ -15,6 +15,12 @@ Wed Dec  2 15:11:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* ax.h (struct agent_expr): add new field for tracepoint address.
 	* ax-gdb.h: change prototypes to match above changes.
 
+	* m32r-tdep.c (decode_prologue): If no branch or push fp is found,
+	but there's a stack adjust, then use that as the end of prologue.
+	(m32r_skip_prologue): don't skip past the first line if there is 
+	line info.  (m32r_virtual_frame_pointer): new function.
+	(m32r_fix_call_dummy): no return value needed.
+	
 Tue Dec  1 10:59:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ocd.c (remote_timeout), (BDM_BREAKPOINT), monitor.c (readchar),
