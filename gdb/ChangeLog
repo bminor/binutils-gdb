@@ -1,3 +1,8 @@
+2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
+
+	* findvar.c (read_var_value): Temporarily disable TLS code, until
+	complete TLS support is added.
+
 2002-10-21  Jim Blandy  <jimb@redhat.com>
 	    Elena Zannoni  <ezannoni@redhat.com>
 
