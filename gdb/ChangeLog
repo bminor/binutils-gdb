@@ -1,3 +1,16 @@
+Tue Jun  1 21:22:39 1993  Fred Fish  (fnf@cygnus.com)
+
+	* target.c (target_read_memory_partial):  Like target_read_memory,
+	but does partial reads, such as reads that bump into the end of
+	the address space.
+	* target.h (target_read_memory_partial):  Add prototype.
+	* valprint.c (PRINT_MAX_DEFAULT):  New define, initial value 200.
+	* valprint.c (val_print_string):  Complete rewrite to fix bug with
+	bumping into end of memory, avoiding unnecessarily long reads, and
+	fixing bug when print_max is set to 0 (unlimited print length).
+	* valprint.c (_initialize_valprint):  Use PRINT_MAX_DEFAULT to
+	initialize print_max.
+
 Tue Jun  1 18:11:35 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
 	* configure.in: Add support for rom68k and bug boot monitors.
