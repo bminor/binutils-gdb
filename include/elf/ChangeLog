@@ -1,9 +1,13 @@
+Sun Nov 15 09:34:02 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarf.h (AT_src_coords):  Whitespace change only.
+	* dwarf.h (AT_body_begin, AT_body_end, LANG_MODULA2):
+	Add from latest gcc.
+	* dwarf.h (LANG_CHILL):  Add as GNU extension.
+
 Sat Aug  1 13:46:53 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarf.h:  Replace with current version from gcc distribution.
-	* common.h (SHT_BEPROGBITS):  Add section type for i860 operating
-	in big endian mode, where code is in a separate section.  The
-	SHT_PROGBITS section is used for data.  From pfieland@stratus.com.
 
 Fri Jun 19 19:05:09 1992  John Gilmore  (gnu at cygnus.com)
 
