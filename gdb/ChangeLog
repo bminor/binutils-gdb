@@ -1,5 +1,7 @@
 Thu Feb 18 04:10:06 1993  John Gilmore  (gnu@cygnus.com)
 
+	* c-lang.c (c_printstr):  Bugfix for length==0 case.
+
 	* c-lang.c (c_printstr):  If a C string ends in a null, don't
 	print the null.
 

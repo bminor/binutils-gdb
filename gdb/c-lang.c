@@ -111,7 +111,7 @@ c_printstr (stream, string, length, force_ellipses)
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
      style.  */
-  if ((!force_ellipses) && string[length-1] == '\0')
+  if ((!force_ellipses) && length > 0 && string[length-1] == '\0')
     length--;
 
   if (length == 0)
