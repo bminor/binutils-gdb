@@ -1,3 +1,11 @@
+2000-11-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* coff-h8300.c (special): Adjust reloc address.
+
+	From mainline 2000-04-03  Kazu Hirata  <kazu@hxi.com>
+	* coff-h8300.c (h8300_reloc16_extra_cases): Add bsr:16 -> bsr:8 to
+	the R_PCRWORD_B case.
+
 2000-11-05  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Always permit
