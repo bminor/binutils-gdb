@@ -420,11 +420,11 @@ wildcard_spec:
 
 
 exclude_name_list:
-		exclude_name_list ',' wildcard_name
+		exclude_name_list wildcard_name
 			{
 			  struct name_list *tmp;
 			  tmp = (struct name_list *) xmalloc (sizeof *tmp);
-			  tmp->name = $3;
+			  tmp->name = $2;
 			  tmp->next = $1;
 			  $$ = tmp;	
 			}
