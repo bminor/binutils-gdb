@@ -156,10 +156,6 @@ operate on characters while meta keystrokes operate on words.
 @node Readline Killing Commands, Readline Arguments, Readline Movement Commands, Readline Interaction
 @subsection Readline Killing Commands
 
-The act of @dfn{cutting} text means to delete the text from the line, and
-to save away the deleted text for later use, just as if you had cut the
-text out of the line with a pair of scissors.  There is a
-
 @dfn{Killing} text means to delete the text from the line, but to save
 it away for later use, usually by @dfn{yanking} it back into the line.
 If the description for a command says that it `kills' text, then you can
@@ -316,7 +312,7 @@ Clear the screen leaving the current line at the top of the screen.
 @table @code
 @item accept-line (Newline, Return)
 Accept the line regardless of where the cursor is.  If this line is
-non-empty, add it too the history list.  If this line was a history
+non-empty, add it to the history list.  If this line was a history
 line, then restore the history line to its original state.
 
 @item previous-history (C-p)
