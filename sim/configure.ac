@@ -68,6 +68,11 @@ if test "${enable_sim}" != no; then
 	   testsuite=yes
 	   common=yes
 	   ;;
+       iq2000-*-*)
+           AC_CONFIG_SUBDIRS(iq2000)
+	   testsuite=yes
+	   common=yes
+	   ;;
        m32r-*-*)
            AC_CONFIG_SUBDIRS(m32r)
 	   testsuite=yes
