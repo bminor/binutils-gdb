@@ -1,12 +1,11 @@
 # Host: Sun 4 or Sparcstation, running Solaris 2
-XDEPFILES= 
+
 XM_FILE= xm-sun4sol2.h
+XDEPFILES= 
 XM_CLIBS= -lsocket -lnsl
+
 NAT_FILE= nm-sysv4.h
 NATDEPFILES= corelow.o core-sol2.o exec.o solib.o procfs.o fork-child.o
-SYSV_DEFINE=-DSYSV
-REGEX=regex.o
-REGEX1=regex.o
 
 # SVR4 comes standard with terminfo, and in some implementations, the
 # old termcap descriptions are incomplete.  So ensure that we use the

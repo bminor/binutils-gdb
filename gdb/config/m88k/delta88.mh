@@ -6,6 +6,3 @@ XDEPFILES=
 NAT_FILE= nm-m88k.h
 NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o m88k-nat.o \
 	corelow.o coredep.o
-
-REGEX=regex.o
-REGEX1=regex.o

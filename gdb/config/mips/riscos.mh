@@ -1,10 +1,12 @@
-NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o mips-nat.o
-NAT_FILE= nm-riscos.h
+# Host: MIPS running RISC/os
+
 XM_FILE= xm-riscos.h
-REGEX= regex.o
-REGEX1= regex.o
-MUNCH_DEFINE=-B
+
+NAT_FILE= nm-riscos.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o mips-nat.o
+
 MH_CFLAGS=-Wf,-XNh10000
+
 # ptrace(2) apparently has problems in the BSD environment.  No workaround is
 # known except to select the sysv environment.  Could we use /proc instead?
 # These "sysv environments" and "bsd environments" often end up being a pain.

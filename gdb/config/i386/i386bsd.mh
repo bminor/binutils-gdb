@@ -1,7 +1,7 @@
 # Host: Intel 386 running 386BSD
-XDEPFILES= 
-NATDEPFILES= exec.o fork-child.o infptrace.o inftarg.o corelow.o coredep.o i386b-nat.o
+
 XM_FILE= xm-i386bsd.h
+XDEPFILES= 
+
 NAT_FILE= nm-i386bsd.h
-REGEX=regex.o
-REGEX1=regex.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o coredep.o i386b-nat.o
