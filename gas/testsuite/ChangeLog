@@ -6,6 +6,8 @@
 	gas/cris/rd-dw2-10.d, gas/cris/rd-dw2-11.d, gas/cris/rd-dw2-12.d,
 	gas/cris/rd-dw2-13.d, gas/cris/rd-dw2-14.d, gas/cris/rd-dw2-15.d:
 	New tests.
+	* gas/cris/brokw-2.s: Correct broken-word expansion visualization
+	in comment.
 
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
