@@ -445,10 +445,10 @@ nearly innumerable bug fixes and cleanups throughout @value{GDBN}.
 The following people at the Hewlett-Packard Company contributed
 support for the PA-RISC 2.0 architecture, HP-UX 10.20, 10.30, and 11.0
 (narrow mode), HP's implementation of kernel threads, HP's aC@t{++}
-compiler, and the terminal user interface: Ben Krepp, Richard Title,
-John Bishop, Susan Macchia, Kathy Mann, Satish Pai, India Paul, Steve
-Rehrauer, and Elena Zannoni.  Kim Haase provided HP-specific
-information in this manual.
+compiler, and the Text User Interface (nee Terminal User Interface):
+Ben Krepp, Richard Title, John Bishop, Susan Macchia, Kathy Mann,
+Satish Pai, India Paul, Steve Rehrauer, and Elena Zannoni.  Kim Haase
+provided HP-specific information in this manual.
 
 DJ Delorie ported @value{GDBN} to MS-DOS, for the DJGPP project.
 Robert Hoehne made significant contributions to the DJGPP port.
@@ -1112,12 +1112,13 @@ Run using @var{device} for your program's standard input and output.
 @c resolve the situation of these eventually
 @item -tui
 @cindex @code{--tui}
-Activate the Terminal User Interface when starting.
-The Terminal User Interface manages several text windows on the terminal,
-showing source, assembly, registers and @value{GDBN} command outputs
-(@pxref{TUI, ,@value{GDBN} Text User Interface}).
-Do not use this option if you run @value{GDBN} from Emacs
-(@pxref{Emacs, ,Using @value{GDBN} under @sc{gnu} Emacs}).
+Activate the @dfn{Text User Interface} when starting.  The Text User
+Interface manages several text windows on the terminal, showing
+source, assembly, registers and @value{GDBN} command outputs
+(@pxref{TUI, ,@value{GDBN} Text User Interface}).  Alternatively, the
+Text User Interface can be enabled by invoking the program
+@samp{gdbtui}.  Do not use this option if you run @value{GDBN} from
+Emacs (@pxref{Emacs, ,Using @value{GDBN} under @sc{gnu} Emacs}).
 
 @c @item -xdb
 @c @cindex @code{--xdb}
@@ -13888,6 +13889,7 @@ interpreter-exec mi "-data-list-register-names"
 @node TUI
 @chapter @value{GDBN} Text User Interface
 @cindex TUI
+@cindex Text User Interface
 
 @menu
 * TUI Overview::                TUI overview
@@ -13897,12 +13899,14 @@ interpreter-exec mi "-data-list-register-names"
 * TUI Configuration::           TUI configuration variables
 @end menu
 
-The @value{GDBN} Text User Interface, TUI in short,
-is a terminal interface which uses the @code{curses} library
-to show the source file, the assembly output, the program registers
-and @value{GDBN} commands in separate text windows.
-The TUI is available only when @value{GDBN} is configured
-with the @code{--enable-tui} configure option (@pxref{Configure Options}).
+The @value{GDBN} Text User Interface, TUI in short, is a terminal
+interface which uses the @code{curses} library to show the source
+file, the assembly output, the program registers and @value{GDBN}
+commands in separate text windows.
+
+The TUI is enabled by invoking @value{GDBN} using either
+@pindex gdbtui
+@samp{gdbtui} or @samp{gdb -tui}.
 
 @node TUI Overview
 @section TUI overview
