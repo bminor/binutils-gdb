@@ -981,6 +981,10 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     {
       section->alignment_power = 1;
     }
+  else if (strcmp (section->name, ".reloc") == 0)
+    {
+      section->alignment_power = 1;
+    }
 #endif
 }
 #undef ALIGN_SET

@@ -1617,6 +1617,97 @@ pe_print_pdata(abfd, vfile)
   free (data);
 }
 
+static const char *tbl[6] =
+{
+"ABSOLUTE",
+"HIGH",
+"LOW",
+"HIGHLOW",
+"HIGHADJ",
+"unknown"
+};
+
+static boolean
+pe_print_reloc(abfd, vfile)
+     bfd*abfd;
+     void *vfile;
+{
+  FILE *file = vfile;
+  bfd_byte *data = 0;
+  asection *section = bfd_get_section_by_name (abfd, ".reloc");
+  bfd_size_type datasize = 0;
+  bfd_size_type i;
+  bfd_size_type start, stop;
+  int onaline = 20;
+  bfd_vma addr_value;
+
+  if (section == 0)
+    return true;
+
+  if (bfd_section_size (abfd, section) == 0)
+    return true;
+
+  fprintf(file,
+	  "\n\nPE File Base Relocations (interpreted .reloc"
+	  " section contents)\n");
+
+  data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, section));
+  datasize = bfd_section_size (abfd, section);
+  if (data == NULL && datasize != 0)
+    return false;
+
+  bfd_get_section_contents (abfd, 
+			    section, 
+			    (PTR) data, 0, 
+			    bfd_section_size (abfd, section));
+
+  start = 0;
+
+  stop = bfd_section_size (abfd, section);
+
+  for (i = start; i < stop;)
+    {
+      int j;
+      bfd_vma virtual_address;
+      long number, size;
+
+      /* The .reloc section is a sequence of blocks, with a header consisting
+	 of two 32 bit quantities, followed by a number of 16 bit entries */
+
+      virtual_address = bfd_get_32(abfd, data+i);
+      size = bfd_get_32(abfd, data+i+4);
+      number = (size - 8) / 2;
+
+      if (size == 0) 
+	{
+	  break;
+	}
+
+      fprintf (file,
+	       "\nVirtual Address: %08lx Chunk size %d (0x%x) "
+	       "Number of fixups %d\n", 
+	       virtual_address, size, size, number);
+
+      for (j = 0; j < number; ++j)
+	{
+	  unsigned short e = bfd_get_16(abfd, data + i + 8 + j*2);
+	  int t =   (e & 0xF000) >> 12;
+	  int off = e & 0x0FFF;
+
+	  if (t > 5) 
+	    abort();
+
+	  fprintf(file,
+		  "\treloc %4d offset %4x [%4x] %s\n", 
+		  j, off, off+virtual_address, tbl[t]);
+	  
+	}
+      i += size;
+    }
+
+  free (data);
+}
+
 static boolean
 pe_print_private_bfd_data (abfd, vfile)
      bfd *abfd;
@@ -1668,6 +1759,7 @@ pe_print_private_bfd_data (abfd, vfile)
   pe_print_idata(abfd, vfile);
   pe_print_edata(abfd, vfile);
   pe_print_pdata(abfd, vfile);
+  pe_print_reloc(abfd, vfile);
 
   return true;
 }

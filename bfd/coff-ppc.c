@@ -1132,8 +1132,17 @@ static boolean in_reloc_p(abfd, howto)
 {
   return 
     (! howto->pc_relative) 
+      && (howto->type != IMAGE_REL_PPC_ADDR32NB)
       && (howto->type != IMAGE_REL_PPC_TOCREL16)
-      && (howto->type != IMAGE_REL_PPC_IMGLUE);
+      && (howto->type != IMAGE_REL_PPC_IMGLUE)
+      && (howto->type != IMAGE_REL_PPC_IFGLUE) 
+      && (howto->type != IMAGE_REL_PPC_SECREL)
+      && (howto->type != IMAGE_REL_PPC_SECTION)
+      && (howto->type != IMAGE_REL_PPC_SECREL16)
+      && (howto->type != IMAGE_REL_PPC_REFHI)
+      && (howto->type != IMAGE_REL_PPC_REFLO)
+      && (howto->type != IMAGE_REL_PPC_PAIR)
+      && (howto->type != IMAGE_REL_PPC_TOCREL16_DEFN) ;
 }     
 
 /* this function is in charge of performing all the ppc PE relocations */
@@ -1519,11 +1528,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		bfd_vma addr =  toc_section->output_section->vma
 		  + toc_section->output_offset + our_toc_offset;
 		    
-		fprintf(stderr,
-			"  Toc Section reloc candidate\n");
-		    
 		if (coff_data(output_bfd)->pe)
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
+
+		fprintf(stderr,
+			"  Toc Section .reloc candidate addr = %x\n", addr);
+		    
 		fwrite (&addr, 1,4, (FILE *) info->base_file);
 	      }
 
@@ -1722,11 +1732,14 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		+ input_section->output_offset 
 		  + input_section->output_section->vma;
 
+	      DUMP_RELOC2(howto->name, rel);
+
 	      if (coff_data(output_bfd)->pe)
 		{
+		  bfd_vma before_addr = addr;
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
 		  fprintf(stderr,
-			  " adjusted down to %d", addr);
+			  " adjusted down from %x to %x", before_addr, addr);
 		}
 	      fprintf(stderr, "\n");
 
