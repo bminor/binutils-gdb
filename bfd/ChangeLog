@@ -1,3 +1,7 @@
+Tue Apr  7 15:44:47 1998  Gavin Romig-Koch <gavin@cygnus.com>
+
+	* dwarf2.c (parse_comp_unit): Drop use of unit->name when it is null.
+
 Tue Apr  7 12:35:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archures.c (bfd_default_scan): Add m68k cases back to default
