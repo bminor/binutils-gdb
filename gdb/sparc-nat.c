@@ -98,9 +98,9 @@ fetch_inferior_registers (regno)
 	    perror("ptrace_getfpregs");
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	      sizeof inferior_fp_registers.fpu_fr);
-      /* memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)],
+      memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)],
 	     &inferior_fp_registers.Fpu_fsr,
-	     sizeof (FPU_FSR_TYPE));  FIXME???  -- gnu@cyg */
+	     sizeof (FPU_FSR_TYPE));
       for (i = FP0_REGNUM; i <= FP0_REGNUM+31; i++)
 	register_valid[i] = 1;
       register_valid[FPS_REGNUM] = 1;
@@ -223,17 +223,19 @@ store_inferior_registers (regno)
     {
       if (!register_valid[FP0_REGNUM+9]) abort();
       /* Initialize inferior_fp_registers members that gdb doesn't set
-	 by reading them from the inferior.  */
+	 by reading them from the inferior.  This may not be needed
+	 any more, now that we set Fpu_fsr.  */
       if (0 !=
 	 ptrace (PTRACE_GETFPREGS, inferior_pid,
 		 (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0))
 	 perror("ptrace_getfpregs");
+
       memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      sizeof inferior_fp_registers.fpu_fr);
 
-/*    memcpy (&inferior_fp_registers.Fpu_fsr, 
+      memcpy (&inferior_fp_registers.Fpu_fsr, 
 	      &registers[REGISTER_BYTE (FPS_REGNUM)], sizeof (FPU_FSR_TYPE));
-****/
+
       if (0 !=
 	 ptrace (PTRACE_SETFPREGS, inferior_pid,
 		 (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0))
