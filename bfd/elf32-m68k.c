@@ -2207,6 +2207,18 @@ elf32_m68k_reloc_type_class (rela)
     }
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+elf_m68k_plt_sym_val (bfd_vma i, const asection *plt,
+		      const arelent *rel ATTRIBUTE_UNUSED)
+{
+  if (CPU32_FLAG (plt->owner))
+    return plt->vma + (i + 1) * PLT_CPU32_ENTRY_SIZE;
+  return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
+}
+
 #define TARGET_BIG_SYM			bfd_elf32_m68k_vec
 #define TARGET_BIG_NAME			"elf32-m68k"
 #define ELF_MACHINE_CODE		EM_68K
@@ -2236,6 +2248,7 @@ elf32_m68k_reloc_type_class (rela)
 #define bfd_elf32_bfd_print_private_bfd_data \
                                         elf32_m68k_print_private_bfd_data
 #define elf_backend_reloc_type_class	elf32_m68k_reloc_type_class
+#define elf_backend_plt_sym_val		elf_m68k_plt_sym_val
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1

@@ -1,3 +1,8 @@
+2004-10-20  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+
 2004-10-19  Danny Smith  <dannysmith@users.sourceforege.net>
 
 	* config.bfd: Set targ_underscore=yes for PE COFF targets
