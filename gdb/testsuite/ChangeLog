@@ -1,3 +1,7 @@
+2004-06-08  Martin Hunt  <hunt@redhat.com>
+
+	* gdb.base/float.exp: Add pattern for mips targets.
+
 2004-06-08  Randolph Chung  <tausq@debian.org>
 
 	* gdb.base/float.exp: Add pattern for hppa*-* target; make the failure
