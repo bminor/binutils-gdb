@@ -213,6 +213,7 @@ m68k)
 		esac
 		;;
 	wrs)	gdb_target=vxworks68 ;;
+	netx)	gdb_target=vxworks68 ;;
 	isi)	gdb_target=isi ;;
 	sony)	gdb_target=news ;;
 	esac

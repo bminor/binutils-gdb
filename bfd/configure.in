@@ -159,12 +159,18 @@ h8300-hitachi-*		) bfd_target=h8300-coff ;;
 
 i960-wrs-*		) bfd_target=i960-bout ;;
 m68k-wrs-*		) bfd_target=m68k-aout ;;
+m68k-netx-*		) bfd_target=m68k-aout ;;
 m680[01234]0-wrs-*	) bfd_target=m68k-aout ;;
+m680[01234]0-netx-*	) bfd_target=m68k-aout ;;
+m683?2-wrs-*		) bfd_target=m68k-aout ;;
+m683?2-netx-*		) bfd_target=m68k-aout ;;
+sparc-wrs-*		) bfd_target=sparc-aout ;;
 
 m68*-ericsson-*		) bfd_target=m68k-aout ;;
 
 m68k-sun-*		) bfd_target=m68k-aout ;;
 m680[01234]0-sun-*	) bfd_target=m68k-aout ;;
+m683?2-sun-*		) bfd_target=m68k-aout ;;
 sparc-sun-sysv4		) bfd_target=sparc-elf ;;
 sparc-sun-solaris2*	) bfd_target=sparc-elf ;;
 sparc-sun-*		) bfd_target=sparc-aout ;;
@@ -174,8 +180,10 @@ vax-dec-*		) bfd_target=vax ;;
 
 m68k-hp-hpux		) bfd_target=hp9000 ;;
 m680[01234]0-hp-hpux	) bfd_target=hp9000 ;;
+m683?2-hp-hpux		) bfd_target=hp9000 ;;
 m68k-hp-bsd		) bfd_target=hp300bsd ;;
 m60[01234]0-hp-bsd	) bfd_target=hp300bsd ;;
+m683?2-hp-bsd		) bfd_target=hp300bsd ;;
 
 mips-sgi-*		) bfd_target=irix3 ;;
 mips-big-*		) bfd_target=irix3 ;;
@@ -184,7 +192,11 @@ mips-big-*		) bfd_target=irix3 ;;
 
 m68k-none-os68k		) bfd_target=m68k-aout ;;
 m680[01234]0-none-os68k	) bfd_target=m68k-aout ;;
+m683?2-none-os68k	) bfd_target=m68k-aout ;;
 i386-sco-*		) bfd_target=i386-coff ;;
+
+m68*-*-aout		) bfd_target=m68k-aout ;;
+m68*-*-coff		) bfd_target=m68k-coff ;;
 
 a29k-none-aout		) bfd_target=a29k-aout ;;
 a29k-none-coff		) bfd_target=a29k-coff ;;
