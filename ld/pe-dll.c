@@ -398,7 +398,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
     libname = lbasename (abfd->my_archive->filename);
 
   /* We should not re-export imported stuff.  */
-  if (strncmp (n, "_imp__", 6) == 0)
+  if (strncmp (n, "_imp_", 5) == 0)
     return 0;
 
   for (i = 0; i < d->num_exports; i++)

@@ -1,3 +1,8 @@
+2004-07-13  Danny Smith  <dannysmith@usesr.sourceforge.net>
+
+	* pe-dll.c (auto_export):  Filter on just the import prefix,
+	"_imp_", not "_imp__".
+
 2004-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt: Change sh-sybmian-elf to sh-*-symbianelf.
