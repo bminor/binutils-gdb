@@ -36,14 +36,35 @@ java_value_print (val, stream, format, pretty)
      enum val_prettyprint pretty;
 {
   struct type *type = VALUE_TYPE (val);
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  CORE_ADDR address = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
+  if (is_object_type (type))
     {
-      fprintf_filtered (stream, "(");
-      type_print (TYPE_TARGET_TYPE (type), "", stream, -1);
-      fprintf_filtered (stream, ") ");
+      CORE_ADDR obj_addr = unpack_pointer (type, VALUE_CONTENTS (val));
+      if (obj_addr != 0)
+	{
+	  value_ptr obj_val
+	    = value_at (TYPE_TARGET_TYPE (type), obj_addr, NULL);
+	  type = type_from_class (java_class_from_object (obj_val));
+	  type = lookup_pointer_type (type);
+	}
     }
-  return (val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-		     VALUE_ADDRESS (val) + VALUE_OFFSET (val),
+  if (TYPE_CODE (type) == TYPE_CODE_PTR && ! value_logical_not (val))
+    {
+      type_print (TYPE_TARGET_TYPE (type), "", stream, -1);
+    }
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && TYPE_TAG_NAME (type) != NULL
+      && TYPE_TAG_NAME (type)[0] == '[')
+    {
+      value_ptr len = value_at (java_int_type, address + JAVA_OBJECT_SIZE, 0);
+      long length = value_as_long (len);
+      fprintf_filtered (stream, "{");
+      fprintf_filtered (stream, "length = %ld", length);
+      fprintf_filtered (stream, "}");
+      return 0;
+    }
+
+  return (val_print (type, VALUE_CONTENTS (val), address,
 		     stream, format, 1, 0, pretty));
 }
 
@@ -59,20 +80,57 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      int recurse;
      enum val_prettyprint pretty;
 {
+  register unsigned int i = 0;		/* Number of characters printed */
+  struct type *elttype;
+  CORE_ADDR addr;
+
   CHECK_TYPEDEF (type);
-  if (is_object_type (type))
-    {
-      CORE_ADDR obj_addr = unpack_pointer (type, valaddr);
-      if (obj_addr != 0)
-	{
-	  value_ptr obj_val
-	    = value_at (TYPE_TARGET_TYPE (type), obj_addr, NULL);
-	  type = type_from_class (java_class_from_object (obj_val));
-	  type = lookup_pointer_type (type);
-	}
-    }
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_PTR:
+      if (format && format != 's')
+	{
+	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  break;
+	}
+#if 0
+      if (vtblprint && cp_is_vtbl_ptr_type(type))
+	{
+          /* Print the unmangled name if desired.  */
+	  /* Print vtable entry - we only get here if we ARE using
+	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
+	  print_address_demangle(extract_address (valaddr, TYPE_LENGTH (type)),
+				 stream, demangle);
+	  break;
+	}
+#endif
+      addr = unpack_pointer (type, valaddr);
+      if (addr == 0)
+	{
+	  fputs_filtered ("null", stream);
+	  return i;
+	}
+      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	{
+	print_unpacked_pointer:
+          elttype = check_typedef (TYPE_TARGET_TYPE (type));
+
+	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+	    {
+	      /* Try to print what function it points to.  */
+	      print_address_demangle (addr, stream, demangle);
+	      /* Return value is irrelevant except for string pointers.  */
+	      return (0);
+	    }
+
+	  if (addressprint && format != 's')
+	    {
+	      fputs_filtered ("@", stream);
+	      print_longest (stream, 'x', 0, (ULONGEST) addr);
+	    }
+	  return i;
+	}
+      break;
     default:
       return c_val_print (type, valaddr, address, stream, format,
 			  deref_ref, recurse, pretty);

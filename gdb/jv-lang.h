@@ -64,3 +64,5 @@ extern int is_object_type PARAMS ((struct type*));
 
 extern void			/* Defined in jv-typeprint.c */
 java_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
+
+extern char * java_demangle_type_signature PARAMS ((char *));

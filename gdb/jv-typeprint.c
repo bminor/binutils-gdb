@@ -103,8 +103,20 @@ java_type_print_base (type, stream, show, level)
 
   switch (TYPE_CODE (type))
     {
+    case TYPE_CODE_PTR:
+      java_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      break;
+
     case TYPE_CODE_STRUCT:
-      fprintf_filtered (stream, "class ");
+      if (TYPE_TAG_NAME (type) != NULL && TYPE_TAG_NAME (type)[0] == '[')
+	{ /* array type */
+	  char *name = java_demangle_type_signature (TYPE_TAG_NAME (type));
+	  fputs (name, stream);
+	  free (name);
+	  break;
+	}
+      if (show >= 0)
+	fprintf_filtered (stream, "class ");
       if (TYPE_TAG_NAME (type) != NULL)
 	{
 	  fputs_filtered (TYPE_TAG_NAME (type), stream);
@@ -143,8 +155,9 @@ java_type_print_base (type, stream, show, level)
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
-	      /* If this is a C++ class we can print the various C++ section
-		 labels. */
+	      /* Don't print the dummy field "class". */
+	      if (STREQN (TYPE_FIELD_NAME (type, i), "class", 5))
+		continue;
 
 	      print_spaces_filtered (level + 4, stream);
 	      if (HAVE_CPLUS_STRUCT (type))

@@ -109,7 +109,8 @@ void
 yyerror PARAMS ((char *));
 
 static struct type * java_type_from_name PARAMS ((struct stoken));
-static void push_variable PARAMS ((struct stoken));
+static void push_expression_name PARAMS ((struct stoken));
+static void push_fieldnames PARAMS ((struct stoken));
 
 %}
 
@@ -424,9 +425,7 @@ Dims_opt:
 
 FieldAccess:
 	Primary '.' SimpleName
-		{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-		  write_exp_string ($3);
-		  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+		{ push_fieldnames ($3); }
 /*|	SUPER '.' SimpleName { FIXME } */
 ;
 
@@ -441,15 +440,18 @@ MethodInvocation:
 
 ArrayAccess:
 	Name '[' Expression ']'
-		{ error ("ArrayAccess"); } /* FIXME - NASTY */
+		/* FIXME - This is nasty - need to shuffle expr stack. */
+		{ error ("`Name[Expr]' not implemented yet - try `(Name)[Expr]'"); }
 |	PrimaryNoNewArray '[' Expression ']'
-		{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+		{ 
+		warning("array subscripts not implemented for Java");
+		write_exp_elt_opcode (BINOP_SUBSCRIPT); }
 ;
 
 PostfixExpression:
 	Primary
 |	Name
-		{ push_variable ($1); }
+		{ push_expression_name ($1); }
 |	VARIABLE
 		/* Already written by write_dollar_variable. */
 |	PostIncrementExpression
@@ -608,7 +610,7 @@ Assignment:
 
 LeftHandSide:
 	ForcedName
-		{ push_variable ($1); }
+		{ push_expression_name ($1); }
 |	VARIABLE
 		/* Already written by write_dollar_variable. */
 |	FieldAccess
@@ -735,15 +737,12 @@ parse_number (p, len, parsed_float, putithere)
       c = *p++;
       if (c >= '0' && c <= '9')
 	c -= '0';
+      else if (c >= 'A' && c <= 'Z')
+	c -= 'A' - 10;
+      else if (c >= 'a' && c <= 'z')
+	c -= 'a' - 10;
       else
-	{
-	  if (c >= 'A' && c <= 'Z')
-	    c += 'a' - 'A';
-	  if (c >= 'a' && c - 'a' + 10 < base)
-	    c -= 'a' + 10;
-	  else
-	    return ERROR;	/* Char not a digit */
-	}
+	return ERROR;	/* Char not a digit */
       if (c >= base)
 	return ERROR;
       if (n > limit_div_base
@@ -1163,7 +1162,10 @@ java_type_from_name (name)
   return typ;
 }
 
-static void
+/* If NAME is a valid variable name in this scope, push it and return 1.
+   Otherwise, return 0. */
+
+static int
 push_variable (name)
      struct stoken name;
  
@@ -1171,10 +1173,9 @@ push_variable (name)
   char *tmp = copy_name (name);
   int is_a_field_of_this = 0;
   struct symbol *sym;
-  struct type *typ;
   sym = lookup_symbol (tmp, expression_context_block, VAR_NAMESPACE,
 		       &is_a_field_of_this, (struct symtab **) NULL);
-  if (sym)
+  if (sym && SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
       if (symbol_read_needs_frame (sym))
 	{
@@ -1189,7 +1190,7 @@ push_variable (name)
       write_exp_elt_block (NULL);
       write_exp_elt_sym (sym);
       write_exp_elt_opcode (OP_VAR_VALUE);
-      return;
+      return 1;
     }
   if (is_a_field_of_this)
     {
@@ -1203,9 +1204,132 @@ push_variable (name)
       write_exp_elt_opcode (STRUCTOP_PTR);
       write_exp_string (name);
       write_exp_elt_opcode (STRUCTOP_PTR);
+      return 1;
+    }
+  return 0;
+}
+
+/* Assuming a reference expression has been pushed, emit the
+   STRUCTOP_STRUCT ops to access the field named NAME.  If NAME is a
+   qualified name (has '.'), generate a field access for each part. */
+
+static void
+push_fieldnames (name)
+     struct stoken name;
+{
+  int i;
+  struct stoken token;
+  token.ptr = name.ptr;
+  for (i = 0;  ;  i++)
+    {
+      if (i == name.length || name.ptr[i] == '.')
+	{
+	  /* token.ptr is start of current field name. */
+	  token.length = &name.ptr[i] - token.ptr;
+	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+	  write_exp_string (token);
+	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+	  token.ptr += token.length + 1;
+	}
+      if (i >= name.length)
+	break;
+    }
+}
+
+/* Helper routine for push_expression_name.
+   Handle a qualified name, where DOT_INDEX is the index of the first '.' */
+
+static void
+push_qualified_expression_name (name, dot_index)
+     struct stoken name;
+     int dot_index;
+{
+  struct stoken token;
+  char *tmp;
+  struct type *typ;
+
+  token.ptr = name.ptr;
+  token.length = dot_index;
+
+  if (push_variable (token))
+    {
+      token.ptr = name.ptr + dot_index + 1;
+      token.length = name.length - dot_index - 1;
+      push_fieldnames (token);
       return;
     }
 
+  token.ptr = name.ptr;
+  for (;;)
+    {
+      token.length = dot_index;
+      tmp = copy_name (token);
+      typ = java_lookup_class (tmp);
+      if (typ != NULL)
+	{
+	  if (dot_index == name.length)
+	    {
+	      write_exp_elt_opcode(OP_TYPE);
+	      write_exp_elt_type(typ);
+	      write_exp_elt_opcode(OP_TYPE);
+	      return;
+	    }
+	  dot_index++;  /* Skip '.' */
+	  name.ptr += dot_index;
+	  name.length -= dot_index;
+	  while (dot_index < name.length && name.ptr[dot_index] != '.') 
+	    dot_index++;
+	  token.ptr = name.ptr;
+	  token.length = dot_index;
+	  write_exp_elt_opcode (OP_SCOPE);
+	  write_exp_elt_type (typ);
+	  write_exp_string (token);
+	  write_exp_elt_opcode (OP_SCOPE); 
+	  if (dot_index < name.length)
+	    {
+	      dot_index++;
+	      name.ptr += dot_index;
+	      name.length -= dot_index;
+	      push_fieldnames (name);
+	    }
+	  return;
+	}
+      else if (dot_index >= name.length)
+	break;
+      dot_index++;  /* Skip '.' */
+      while (dot_index < name.length && name.ptr[dot_index] != '.')
+	dot_index++;
+    }
+  error ("unknown type `%.*s'", name.length, name.ptr);
+}
+
+/* Handle Name in an expression (or LHS).
+   Handle VAR, TYPE, TYPE.FIELD1....FIELDN and VAR.FIELD1....FIELDN. */
+
+static void
+push_expression_name (name)
+     struct stoken name;
+{
+  char *tmp;
+  struct type *typ;
+  char *ptr;
+  int i;
+
+  for (i = 0;  i < name.length;  i++)
+    {
+      if (name.ptr[i] == '.')
+	{
+	  /* It's a Qualified Expression Name. */
+	  push_qualified_expression_name (name, i);
+	  return;
+	}
+    }
+
+  /* It's a Simple Expression Name. */
+  
+  if (push_variable (name))
+    return;
+  tmp = copy_name (name);
   typ = java_lookup_class (tmp);
   if (typ != NULL)
     {

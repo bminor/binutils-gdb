@@ -1,3 +1,21 @@
+Tue Sep 16 20:00:05 1997  Per Bothner  <bothner@cygnus.com>
+
+	* jv-exp.y (push_fieldnames):  New, to handle EXP.FIELD1....FIELDN.
+	(push_expression_name):  New, to handle expression names.
+	(push_qualified_expression_name):  New, for qualified expression names.
+	(parse_number):  Fix bugs in parsing of non-decimal integers.
+	* jv-lang.h, jv-lang.c (java_demangle_type_signature):  New.
+	* jv-lang.c (type_from_class):  Just use name with java_lookup_class.
+	(java_link_class_type):  Add dummy "class" field.
+	(java_lookup_type):  New.
+	(evaluate_subexp_java case STRUCTOP_STRUCT):  Force to address.
+	* jv-typeprint.c (java_type_print_base):  Don't print "class" field.
+	Use java_demangle_type_signature to print array class types.
+	* jv-valprint.c (java_value_print):  Preliminary array support.
+	Print pointer as TYPE@HEXADDR, instead of (TYPE)0xHEXADDR.
+	(java_val_print):  Move check for object type to java_value_print.
+	Check for null.  Print pointer as @HEXADDR, not 0xHEXADDR.
+	
 Tue Sep 16 19:56:23 1997  Per Bothner  <bothner@cygnus.com>
 
 	* util.c (run_cleanup_chain, make_run_cleanup, do_run_cleanups):

@@ -236,7 +236,7 @@ type_from_class (clas)
   struct type *type;
   char *name;
   value_ptr temp;
-  struct objfile *objfile = get_dynamics_objfile();
+  struct objfile *objfile;
   value_ptr utf8_name;
   char *nptr;
   CORE_ADDR addr;
@@ -253,6 +253,7 @@ type_from_class (clas)
     }
   addr = VALUE_ADDRESS (clas) + VALUE_OFFSET (clas);
 
+#if 0
   get_java_class_symtab ();
   bl = BLOCKVECTOR_BLOCK (BLOCKVECTOR (class_symtab), GLOBAL_BLOCK);
   for (i = BLOCK_NSYMS (bl);  --i >= 0; )
@@ -261,7 +262,9 @@ type_from_class (clas)
       if (SYMBOL_VALUE_ADDRESS (sym) == addr)
 	return SYMBOL_TYPE (sym);
     }
+#endif
 
+  objfile = get_dynamics_objfile();
   if (java_class_is_primitive (clas))
     {
       value_ptr sig;
@@ -275,6 +278,15 @@ type_from_class (clas)
   temp = clas;
   utf8_name = value_struct_elt (&temp, NULL, "name", NULL, "structure");
   name = get_java_utf8_name (&objfile->type_obstack, utf8_name);
+  for (nptr = name;  *nptr != 0;  nptr++)
+    {
+      if (*nptr == '/')
+	*nptr = '.';
+    }
+
+  type = java_lookup_class (name);
+  if (type != NULL)
+    return type;
 
   type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
@@ -288,11 +300,6 @@ type_from_class (clas)
       temp = value_struct_elt (&temp, NULL, "methods", NULL, "structure");
       VALUE_TYPE (temp) = lookup_pointer_type (VALUE_TYPE (clas));
       TYPE_TARGET_TYPE (type) = type_from_class (temp);
-    }
-  for (nptr = name;  *nptr != 0;  nptr++)
-    {
-      if (*nptr == '/')
-	*nptr = '.';
     }
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
@@ -347,6 +354,7 @@ java_link_class_type (type, clas)
   temp = clas;
   nfields = value_as_long (value_struct_elt (&temp, NULL, "nfields", NULL, "structure"));
   nfields += TYPE_N_BASECLASSES (type);
+  nfields++;  /* Add one for dummy "class" field. */
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ALLOC (type, sizeof (struct field) * nfields);
@@ -382,6 +390,13 @@ java_link_class_type (type, clas)
   TYPE_LENGTH (type) = value_as_long (temp);
 
   fields = NULL;
+  nfields--;  /* First set up dummy "class" field. */
+  SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields),
+		      VALUE_ADDRESS (clas) + VALUE_OFFSET (clas));
+  TYPE_FIELD_NAME (type, nfields) = "super";
+  TYPE_FIELD_TYPE (type, nfields) = VALUE_TYPE (clas);
+  SET_TYPE_FIELD_PRIVATE (type, nfields);
+  
   for (i = TYPE_N_BASECLASSES (type);  i < nfields;  i++)
     {
       int accflags;
@@ -574,6 +589,68 @@ java_primitive_type (signature)
   error ("unknown signature '%c' for primitive type", (char) signature);
 }
 
+/* Return the demangled name of the Java type signature string SIGNATURE,
+   as a freshly allocated copy. */
+
+char *
+java_demangle_type_signature (signature)
+     char *signature;
+{
+  int array = 0;
+  char *result;
+  char *ptr;
+  int i;
+  while (*signature == '[')
+    {
+      array++;
+      signature++;
+    }
+  switch (signature[0])
+    {
+    case 'L':
+      /* Substract 2 for 'L' and ';', but add 1 for final nul. */
+      result = xmalloc (strlen (signature) - 1 + 2 * array);
+      signature++;
+      ptr = result;
+      for ( ; *signature != ';' && *signature != '\0'; signature++)
+	{
+	  if (*signature == '/')
+	    *ptr++ = '.';
+	  else
+	    *ptr++ = *signature;
+	}
+      break;
+    default:
+      ptr = TYPE_NAME (java_primitive_type (signature[0]));
+      i = strlen (ptr);
+      result = xmalloc (i + 1 + 2 * array);
+      strcpy (result, ptr);
+      ptr = result + i;
+      break;
+    }
+  while (--array >= 0)
+    {
+      *ptr++ = '[';
+      *ptr++ = ']';
+    }
+  *ptr = '\0';
+  return result;
+}
+
+struct type *
+java_lookup_type (signature)
+     char *signature;
+{
+  switch (signature[0])
+    {
+    case 'L':
+    case '[':
+      error ("java_lookup_type not fully inmplemented");
+    default:
+      return java_primitive_type (signature[0]);
+    }
+}
+
 /* Return the type of TYPE followed by DIMS pairs of [ ].
    If DIMS == 0, TYPE is returned. */
 
@@ -630,6 +707,12 @@ evaluate_subexp_java (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return java_value_string (&exp->elts[pc + 2].string, i);
+    case STRUCTOP_STRUCT:
+      arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+      /* Convert object field (such as .class) to reference. */
+      if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRUCT)
+	arg1 = value_addr (arg1);
+      return arg1;
     default:
       break;
     }
@@ -742,8 +825,9 @@ _initialize_jave_language ()
   add_language (&java_language_defn);
 }
 
-/* Cleanup code that should be urn on every "run".
-   We need some hook to have this actually be called ... FIXME */
+/* Cleanup code that should be run on every "run".
+   We should use make_run_cleanup to have this be called.
+   But will that mess up values in value histry?  FIXME */
 
 void java_rerun_cleanup ()
 {
