@@ -1,3 +1,28 @@
+2003-02-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	Fix PR gdb/742 gdb/743
+	* disasm.c (dump_insns): Use make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Use
+	make_cleanup_ui_out_tuple_begin_end and
+	make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Ditto.
+	* thread.c (do_captured_list_thread_ids): Ditto.
+	* ui-out.h (ui_out_table_begin, ui_out_list_begin,
+	ui_out_tuple_begin, ui_out_table_end, ui_out_list_end,
+	ui_out_tuple_end): Delete prototypes.
+	* ui-out.c (ui_out_list_begin, ui_out_tuple_begin,
+	ui_out_list_end, ui_out_tuple_end): Delete.
+
+	From Kevin Buettner  <kevinb@redhat.com>:
+	* ui-out.h (make_cleanup_ui_out_table_begin_end): New function.
+        * ui-out.c (make_cleanup_ui_out_table_begin_end)
+        (do_cleanup_table_end):  New functions.
+        * breakpoint.c (print_it_typical, print_one_breakpoint, mention):
+        Use cleanups to invoke_ui_out_tuple_end().
+        (breakpoint_1): Use cleanup to invoke ui_out_table_end().
+	* cli/cli-setshow.c (cmd_show_list): Use
+	make_cleanup_ui_out_tuple_begin_end.
+	
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (frame_unwind_register): New function.
