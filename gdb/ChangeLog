@@ -11,10 +11,7 @@
 	* config/s390/s390.mh: Likewise.
 	* config/s390/s390.mt: Likewise.
 	* config/s390/tm-s390.h: Likewise.
-        * config.in Added definitions for S/390 31 & 64 bit target.
-	* configure.host: Likewise.
-	* configure.in: Likewise.
-	* configure.tgt: Likewise.
+	* configure.host: Added definitions for S/390 31 & 64 bit target.
 
         * gdbarch.sh: Fixed CALL_DUMMY_BREAKPOINT_OFFSET to check
 	CALL_DUMMY_BREAKPOINT_OFFSET_P.
