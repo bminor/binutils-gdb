@@ -1,3 +1,7 @@
+Mon Feb 23 10:34:58 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-dis.c (print_insn_arg): Do not prefix 'P' arguments with '$'.
+
 start-sanitize-sky
 Fri Feb 20 18:02:20 1998  Doug Evans  <devans@canuck.cygnus.com>
 

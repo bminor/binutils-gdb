@@ -216,7 +216,7 @@ print_insn_arg (d, l, pc, info)
       break;
 
     case 'P':
-      (*info->fprintf_func) (info->stream, "$%d",
+      (*info->fprintf_func) (info->stream, "%d",
 			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
       break;
 
@@ -400,7 +400,7 @@ _print_insn_mips (memaddr, word, info)
 		  /* start-sanitize-vr5400 */
 		  && (target_processor == 5400
 		      && op->membership & INSN_5400) == 0
-		  /* end-santiize-vr5400 */
+		  /* end-sanitize-vr5400 */
 		  /* start-sanitize-r5900 */
 		  && (target_processor == 5900
 		      && op->membership & INSN_5900) == 0
