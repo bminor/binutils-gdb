@@ -30,6 +30,7 @@ fi
 Things-to-keep:
 ChangeLog
 Makefile.in
+NEWS
 README
 TODO
 a29k.sc-sh

@@ -1,3 +1,16 @@
+Mon May 17 12:44:31 1993  Per Bothner  (bothner@cygnus.com)
+
+	* NEWS:  New file.
+
+Fri May 14 11:26:24 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.sc-sh: Don't define BSS_VAR unless relocating.
+
+Wed May 12 13:33:29 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (mkscript.o, mkscript): Build mkscript via
+	mkscript.o, rather than directly from mkscript.c.
+
 Tue May  4 21:58:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in: Look for ${target_makefile_frag} relative to
@@ -7,6 +20,7 @@ Tue May  4 21:58:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	* configure.in: Recognize hppa*-hp-osf.
 	* Makefile.in (ALL_EMULATIONS): Include hppaosf emulation.
 	(em_hppaosf.c): Build it.
+	* config/hppaosf.mh, hppaosf.mt: New files.
 
 	* ld.h (ALIGN_N): Renamed from ALIGN, because that conflicted with
 	some system header files.  All uses changed.
