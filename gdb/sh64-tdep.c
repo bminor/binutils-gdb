@@ -740,8 +740,7 @@ sh64_frame_chain (struct frame_info *frame)
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
     return get_frame_base (frame);    /* dummy frame same as caller's frame */
-  if (get_frame_pc (frame)
-      && !deprecated_inside_entry_file (get_frame_pc (frame)))
+  if (get_frame_pc (frame))
     {
       int media_mode = pc_is_isa32 (get_frame_pc (frame));
       int size;

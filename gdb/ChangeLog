@@ -1,3 +1,14 @@
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (deprecated_inside_entry_file): Delete declaration.
+	* blockframe.c (deprecated_inside_entry_file): Delete function.
+	(legacy_frame_chain_valid): Delete call.
+	* sh64-tdep.c (sh64_frame_chain): Delete call.
+	* objfiles.h: Update comments.
+	* i386-interix-tdep.c (i386_interix_frame_chain_valid): Delete
+	call.
+	* frame.c (get_prev_frame): Delete call, update comments.
+
 2004-04-30  Brian Ford  <ford@vss.fsi.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.

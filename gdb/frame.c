@@ -1954,13 +1954,12 @@ get_prev_frame (struct frame_info *this_frame)
      be allowed to unwind.  */
   /* NOTE: cagney/2003-02-25: Don't enable until someone has found
      hard evidence that this is needed.  */
-  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func() - wasn't
-     checking for "main" in the minimal symbols.  With that fixed
-     asm-source tests now stop in "main" instead of halting the
+  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func() -
+     wasn't checking for "main" in the minimal symbols.  With that
+     fixed asm-source tests now stop in "main" instead of halting the
      backtrace in weird and wonderful ways somewhere inside the entry
-     file.  Suspect that deprecated_inside_entry_file() and
-     inside_entry_func() tests were added to work around that (now
-     fixed) case.  */
+     file.  Suspect that tests for inside the entry file/func were
+     added to work around that (now fixed) case.  */
   /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
      suggested having the inside_entry_func test use the
      inside_main_func() msymbol trick (along with entry_point_address()
@@ -1978,35 +1977,6 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
-      return NULL;
-    }
-
-  /* If we're inside the entry file, it isn't valid.  Don't apply this
-     test to a dummy frame - dummy frame PCs typically land in the
-     entry file.  Don't apply this test to the sentinel frame.
-     Sentinel frames should always be allowed to unwind.  */
-  /* NOTE: drow/2002-12-25: should there be a way to disable this
-     check?  It assumes a single small entry file, and the way some
-     debug readers (e.g. dbxread) figure out which object is the
-     entry file is somewhat hokey.  */
-  /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
-     then it should probably be moved to before the ->prev_p test,
-     above.  */
-  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call
-     to deprecated_inside_entry_file() destroys a meaningful backtrace
-     under some conditions, e.g. the backtrace tests in the
-     asm-source testcase are broken for some targets.  In this test
-     the functions are all implemented as part of one file and the
-     testcase is not necessarily linked with a start file (depending
-     on the target).  What happens is that the first frame is printed
-     normally and following frames are treated as being inside the
-     entry file then.  This way, only the #0 frame is printed in the
-     backtrace output.  */
-  if (0
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && deprecated_inside_entry_file (get_frame_pc (this_frame)))
-    {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry file");
       return NULL;
     }
 

@@ -57,7 +57,7 @@ struct objfile_data;
 
    NOTE: cagney/2003-09-09: It turns out that this "traditional"
    method doesn't work.  Corinna writes: ``It turns out that the call
-   to deprecated_inside_entry_file destroys a meaningful backtrace
+   to test for "inside entry file" destroys a meaningful backtrace
    under some conditions.  E. g. the backtrace tests in the asm-source
    testcase are broken for some targets.  In this test the functions
    are all implemented as part of one file and the testcase is not

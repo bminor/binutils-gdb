@@ -126,10 +126,7 @@ i386_interix_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      be a signal handler caller).  If we're dealing with a signal
      handler caller, this will return valid, which is fine.  If not,
      it'll make the correct test.  */
-  return ((get_frame_type (thisframe) == SIGTRAMP_FRAME)
-          || (chain != 0
-              && !deprecated_inside_entry_file (read_memory_integer
-						(thisframe->frame + 4, 4))));
+  return ((get_frame_type (thisframe) == SIGTRAMP_FRAME) || chain != 0);
 }
 
 /* We want to find the previous frame, which on Interix is tricky when

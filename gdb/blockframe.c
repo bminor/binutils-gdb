@@ -43,34 +43,6 @@
 
 void _initialize_blockframe (void);
 
-/* Is ADDR inside the startup file?  Note that if your machine has a
-   way to detect the bottom of the stack, there is no need to call
-   this function from DEPRECATED_FRAME_CHAIN_VALID; the reason for
-   doing so is that some machines have no way of detecting bottom of
-   stack.
-
-   A PC of zero is always considered to be the bottom of the stack. */
-
-int
-deprecated_inside_entry_file (CORE_ADDR addr)
-{
-  if (addr == 0)
-    return 1;
-  if (symfile_objfile == 0)
-    return 0;
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-      || CALL_DUMMY_LOCATION == AT_SYMBOL)
-    {
-      /* Do not stop backtracing if the pc is in the call dummy
-         at the entry point.  */
-      /* FIXME: Won't always work with zeros for the last two arguments */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
-	return 0;
-    }
-  return (addr >= symfile_objfile->ei.deprecated_entry_file_lowpc &&
-	  addr < symfile_objfile->ei.deprecated_entry_file_highpc);
-}
-
 /* Test whether PC is in the range of addresses that corresponds to
    the "main" function.  */
 
@@ -621,13 +593,6 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
      isn't valid.  */
   if (legacy_inside_entry_func (get_frame_pc (fi)))
     return 0;
-
-  /* If we're inside the entry file, it isn't valid.  */
-  /* NOTE/drow 2002-12-25: should there be a way to disable this check?  It
-     assumes a single small entry file, and the way some debug readers (e.g.
-     dbxread) figure out which object is the entry file is somewhat hokey.  */
-  if (deprecated_inside_entry_file (frame_pc_unwind (fi)))
-      return 0;
 
   return 1;
 }

@@ -327,8 +327,6 @@ struct frame_info;
 
 extern int inside_entry_func (struct frame_info *this_frame);
 
-extern int deprecated_inside_entry_file (CORE_ADDR addr);
-
 extern int inside_main_func (CORE_ADDR pc);
 
 /* From utils.c */
