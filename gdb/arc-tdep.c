@@ -571,7 +571,9 @@ arc_software_single_step (enum target_signal ignore,	/* sig but we don't need it
     }
 }
 
-#ifdef GET_LONGJMP_TARGET
+/* Because of Multi-arch, GET_LONGJMP_TARGET is always defined.  So test
+   for a definition of JB_PC.  */
+#ifdef JB_PC
 /* Figure out where the longjmp will land.  Slurp the args out of the stack.
    We expect the first arg to be a pointer to the jmp_buf structure from which
    we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.

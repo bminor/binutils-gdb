@@ -1686,8 +1686,9 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 
 #endif /* USE_PROC_FS */
 
-
-#ifdef GET_LONGJMP_TARGET
+/* Because of Multi-arch, GET_LONGJMP_TARGET is always defined.  So test
+   for a definition of JB_PC.  */
+#ifdef JB_PC
 
 /* Figure out where the longjmp will land.  We expect that we have just entered
    longjmp and haven't yet setup the stack frame, so the args are still in the

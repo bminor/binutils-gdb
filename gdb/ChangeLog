@@ -1,5 +1,11 @@
 2002-02-20  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arc-tdep.c (get_longjmp_target): Only compile this function if JB_PC
+	is defined.
+	* sparc-tdep.c (get_longjmp_target): Likewise.
+
+2002-02-20  Richard Earnshaw  <rearnsha@arm.com>
+
 	* News: Add news about ARM and Multi-arch.  Mention the new target
 	arm*-*-netbsd*.
 
