@@ -1,3 +1,7 @@
+2004-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (install-info): Prepend $(DESTDIR) to $(infodir).
+
 2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdbint.texinfo: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE,
