@@ -49,7 +49,7 @@
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 #include "inferior.h"
 #include "environ.h"
 #include "language.h"

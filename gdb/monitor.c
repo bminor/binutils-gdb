@@ -50,7 +50,7 @@
 #include "monitor.h"
 #include "gdbcmd.h"
 #include "inferior.h"
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 #include "dcache.h"
 #include "srec.h"
 

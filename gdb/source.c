@@ -33,7 +33,7 @@
 #include "gdb_stat.h"
 #include <fcntl.h>
 #include "gdbcore.h"
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"

@@ -503,6 +503,36 @@ if test x$want_mmalloc = xtrue; then
    MMALLOC='../mmalloc/libmmalloc.a'
 fi
 
+AC_ARG_WITH(included-regex,
+[  --with-included-regex          Use included regex],
+[case "${withval}" in
+  yes)  want_included_regex=true ;;
+  no)   want_included_regex=false;;
+  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-included-regex option) ;;
+esac],[want_included_regex=true])dnl
+
+REGEX="gnu-regex.o"
+REGEX_CFLAGS="-DUSE_INCLUDED_REGEX"
+if test $want_included_regex = false; then
+  AC_MSG_CHECKING(for GNU regex)
+  AC_CACHE_VAL(gdb_cv_have_gnu_regex,
+[AC_TRY_COMPILE([#include <gnu-versions.h>
+#include <sys/types.h>
+#include <regex.h>],
+[#if !defined _GNU_REGEX_INTERFACE_VERSION || !defined __GLIBC__ || __GLIBC__ < 2
+#error No valid GNU regex.
+#endif
+],
+		[gdb_cv_have_gnu_regex=yes],
+		[gdb_cv_have_gnu_regex=no])])
+  AC_MSG_RESULT($gdb_cv_have_gnu_regex)
+  if test $gdb_cv_have_gnu_regex = yes; then
+    REGEX=
+    REGEX_CFLAGS=
+  fi
+fi
+AC_SUBST(REGEX)
+AC_SUBST(REGEX_CFLAGS)
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,

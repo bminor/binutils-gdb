@@ -36,7 +36,7 @@
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 #include "inferior.h"
 #include "language.h"
 #include "gdbcmd.h"

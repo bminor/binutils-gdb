@@ -1,3 +1,26 @@
+2000-04-03  H.J. Lu  <hjl@gnu.org>
+
+	* gdb_regex.h: New. Include "regex.h" if USE_INCLUDED_REGEX
+	is defined and <regex.h> otherwise.
+
+        * irix5-nat.c: Include "gdb_regex.h" instead of "gnu-regex.h".
+	* monitor.c: Likewise.
+	* osfsolib.c: Likewise.
+	* solib.c: Likewise.
+	* source.c: Likewise.
+	* symtab.c: Likewise.
+
+	* Makefile.in (REGEX): Changed to @REGEX@.
+	(REGEX_CFLAGS): New.
+	(REGEX1): Removed.
+	(ADD_DEPS): Use $(REGEX) instead of $(REGEX1).
+	(INTERNAL_WARN_CFLAGS): Add $(REGEX_CFLAGS).
+
+	* configure.in (--with-included-regex): New switch.
+	(REGEX): New. Subsstitue @REGEX@ in Makefile.in.
+	(REGEX_CFLAGS): New. Subsstitue @REGEX_CFLAGS@ in Makefile.in.
+	* configure: Regenerated.
+
 2000-04-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (powerpc-*-linux*): Mention.

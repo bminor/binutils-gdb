@@ -114,6 +114,11 @@ LIBIBERTY = ../libiberty/libiberty.a
 MMALLOC = @MMALLOC@
 MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 
+# We are using our own version of REGEX now to be consistent across
+# machines.
+REGEX = @REGEX@
+REGEX_CFLAGS = @REGEX_CFLAGS@
+
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
 BFD = $(BFD_DIR)/libbfd.a
@@ -271,7 +276,8 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) $(GDB_WARN_CFLAGS)
+	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) \
+	$(REGEX_CFLAGS) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
@@ -282,11 +288,6 @@ INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 # and have it work; that's why CFLAGS is here.
 INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
 HLDENV = @HLDENV@
-
-# We are using our own version of REGEX now to be consistent across
-# machines.
-REGEX = gnu-regex.o
-REGEX1 = gnu-regex.o
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
@@ -308,7 +309,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
-ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
+ADD_DEPS = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
 VERSION = 20000204
 DIST=gdb

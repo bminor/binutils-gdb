@@ -30,7 +30,7 @@
 #include "objfiles.h"
 #include "gdbcmd.h"
 #include "call-cmds.h"
-#include "gnu-regex.h"
+#include "gdb_regex.h"
 #include "expression.h"
 #include "language.h"
 #include "demangle.h"
