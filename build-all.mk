@@ -3,8 +3,35 @@
 #  This file is going to be ugly.  It will be VERY specific to the
 #  Cygnus environment and build-process.
 #
+# Useful targets (rt = recursion target):
+# (please correct or expand on this)
+# FIXME: Might some of these be superfluous?
 #
-
+# all-emacs
+# all-cygnus	- set up install directories, build 3stage native and all
+#		supported cross targets, then check 3stage'd native
+#		(rt = $(canonhost)-stamp-3stage-done, do-cygnus for cross)
+# native	- set up install directories, build 3stage native
+#		(rt = $(canonhost)-stamp-3stage-1)
+# build-cygnus	- build 3stage native and all supported cross targets
+#		(rt = $(canonhost)-stamp-3stage-done, build-cygnus for cross)
+# build-latest	- build native and all supported cross targets
+#		(rt = build-latest)
+# all-native	- set up install directories, build native
+#		(rt = do-native)
+# all-cross	- set up install directories, build all targets
+#		(rt = do-cygnus)
+# config	- configure native and all supported cross targets
+#		(rt = do1-config, do-native-config for cross)
+# build		- build native and all supported cross targets
+#		(rt = do1-build, build-native for cross)
+# 3build	- build 3stage native and all supported cross targets
+#		(rt = all, build-cygnus for cross)
+# build-all-latest - build 3stage native and all supported cross targets
+#		(rt = $(canonhost)-stamp-3stage-done, build-latest for cross)
+#
+# To configure/build for fewer targets, specify TARGETS="native cross1 ...".
+  
 TREE	= devo
 include $(TREE)/release-info
 
@@ -35,10 +62,16 @@ canonhost := $(shell $(TREE)/config.sub $(host))
 ifeq ($(canonhost),sparc-sun-solaris2.1)
 canonhost := sparc-sun-solaris2
 endif
+ifeq ($(canonhost),sparc-sun-solaris2.3)
+canonhost := sparc-sun-solaris2
+endif
 ifeq ($(canonhost),mips-dec-ultrix4.2)
 canonhost := mips-dec-ultrix
 endif
 ifeq ($(canonhost),mips-sgi-irix4.0.1)
+canonhost := mips-sgi-irix4
+endif
+ifeq ($(canonhost),mips-sgi-irix4.0.5H)
 canonhost := mips-sgi-irix4
 endif
 ifeq ($(canonhost),rs6000-ibm-aix3.2)

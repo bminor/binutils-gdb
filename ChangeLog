@@ -1,3 +1,9 @@
+Mon Apr  4 17:41:44 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* build-all.mk: Document all useful targets.
+	If canonhost is sparc-sun-solaris2.3, change it to sparc-sun-solaris2.
+	If canonhost is mips-sgi-irix4.0.5H, change it to mips-sgi-irix4.
+
 Thu Mar 31 04:55:57 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure: Support --silent, --quiet.
