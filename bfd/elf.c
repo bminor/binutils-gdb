@@ -3375,13 +3375,11 @@ assign_file_positions_for_segments (abfd)
 		{
 		  if (i == 0)
 		    {
-		      (* _bfd_error_handler)
-			(_("Error: First section in segment (%s) starts at 0x%x"),
-			 bfd_section_name (abfd, sec), sec->lma);
-		      (* _bfd_error_handler)
-			(_("       whereas segment starts at 0x%x"),
-			 p->p_paddr);
-
+		      (* _bfd_error_handler) (_("\
+Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"),
+					      bfd_section_name (abfd, sec),
+					      sec->lma,
+					      p->p_paddr);
 		      return false;
 		    }
 		  p->p_memsz += adjust;
