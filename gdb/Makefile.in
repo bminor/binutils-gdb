@@ -1238,11 +1238,11 @@ a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
 
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
-	$(regcache_h)
+	$(regcache_h) alpha-tdep.h
 
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symtab_h) $(dis_asm_h) $(gdb_string_h) $(linespec_h) \
-	$(regcache_h) $(doublest_h)
+	$(regcache_h) $(doublest_h) $(BFD_SRC)/elf-bfd.h alpha-tdep.h
 
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 

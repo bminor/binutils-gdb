@@ -33,6 +33,48 @@
 #include "linespec.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "arch-utils.h"
+
+#include "elf-bfd.h"
+
+#include "alpha-tdep.h"
+
+static gdbarch_init_ftype alpha_gdbarch_init;
+
+static gdbarch_register_name_ftype alpha_register_name;
+static gdbarch_register_raw_size_ftype alpha_register_raw_size;
+static gdbarch_register_virtual_size_ftype alpha_register_virtual_size;
+static gdbarch_register_virtual_type_ftype alpha_register_virtual_type;
+static gdbarch_register_byte_ftype alpha_register_byte;
+static gdbarch_cannot_fetch_register_ftype alpha_cannot_fetch_register;
+static gdbarch_cannot_store_register_ftype alpha_cannot_store_register;
+static gdbarch_register_convertible_ftype alpha_register_convertible;
+static gdbarch_register_convert_to_virtual_ftype
+    alpha_register_convert_to_virtual;
+static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
+static gdbarch_store_struct_return_ftype alpha_store_struct_return;
+static gdbarch_extract_return_value_ftype alpha_extract_return_value;
+static gdbarch_store_return_value_ftype alpha_store_return_value;
+static gdbarch_extract_struct_value_address_ftype
+    alpha_extract_struct_value_address;
+static gdbarch_use_struct_convention_ftype alpha_use_struct_convention;
+
+static gdbarch_frame_args_address_ftype alpha_frame_args_address;
+static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
+
+static gdbarch_skip_prologue_ftype alpha_skip_prologue;
+static gdbarch_get_saved_register_ftype alpha_get_saved_register;
+static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
+static gdbarch_frame_chain_ftype alpha_frame_chain;
+static gdbarch_frame_saved_pc_ftype alpha_frame_saved_pc;
+static gdbarch_frame_init_saved_regs_ftype alpha_frame_init_saved_regs;
+
+static gdbarch_push_arguments_ftype alpha_push_arguments;
+static gdbarch_push_dummy_frame_ftype alpha_push_dummy_frame;
+static gdbarch_pop_frame_ftype alpha_pop_frame;
+static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
+static gdbarch_init_frame_pc_first_ftype alpha_init_frame_pc_first;
+static gdbarch_init_extra_frame_info_ftype alpha_init_extra_frame_info;
 
 struct frame_extra_info
   {
@@ -275,7 +317,7 @@ push_sigtramp_desc (CORE_ADDR low_addr)
 }
 
 
-char *
+static char *
 alpha_register_name (int regno)
 {
   static char *register_names[] =
@@ -298,44 +340,44 @@ alpha_register_name (int regno)
   return (register_names[regno]);
 }
 
-int
+static int
 alpha_cannot_fetch_register (int regno)
 {
-  return (regno == FP_REGNUM || regno == ZERO_REGNUM);
+  return (regno == FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
 }
 
-int
+static int
 alpha_cannot_store_register (int regno)
 {
-  return (regno == FP_REGNUM || regno == ZERO_REGNUM);
+  return (regno == FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
 }
 
-int
+static int
 alpha_register_convertible (int regno)
 {
   return (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31);
 }
 
-struct type *
+static struct type *
 alpha_register_virtual_type (int regno)
 {
   return ((regno >= FP0_REGNUM && regno < (FP0_REGNUM+31))
 	  ? builtin_type_double : builtin_type_long);
 }
 
-int
+static int
 alpha_register_byte (int regno)
 {
   return (regno * 8);
 }
 
-int
+static int
 alpha_register_raw_size (int regno)
 {
   return 8;
 }
 
-int
+static int
 alpha_register_virtual_size (int regno)
 {
   return 8;
@@ -433,7 +475,7 @@ alpha_find_saved_regs (struct frame_info *frame)
   frame->saved_regs[PC_REGNUM] = frame->saved_regs[returnreg];
 }
 
-void
+static void
 alpha_frame_init_saved_regs (struct frame_info *fi)
 {
   if (fi->saved_regs == NULL)
@@ -441,7 +483,7 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
   fi->saved_regs[SP_REGNUM] = fi->frame;
 }
 
-void
+static void
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
@@ -468,7 +510,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   return read_register (regno);
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_frame_saved_pc (struct frame_info *frame)
 {
   alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
@@ -483,7 +525,55 @@ alpha_frame_saved_pc (struct frame_info *frame)
   return read_next_frame_reg (frame, pcreg);
 }
 
-CORE_ADDR
+static void
+alpha_get_saved_register (char *raw_buffer,
+			  int *optimized,
+			  CORE_ADDR *addrp,
+			  struct frame_info *frame,
+			  int regnum,
+			  enum lval_type *lval)
+{
+  CORE_ADDR addr;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+  addr = find_saved_register (frame, regnum);
+  if (addr != 0)
+    {
+      if (lval != NULL)
+	*lval = lval_memory;
+      if (regnum == SP_REGNUM)
+	{
+	  if (raw_buffer != NULL)
+	    {
+	      /* Put it back in target format.  */
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			     (LONGEST) addr);
+	    }
+	  if (addrp != NULL)
+	    *addrp = 0;
+	  return;
+	}
+      if (raw_buffer != NULL)
+	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    {
+      if (lval != NULL)
+	*lval = lval_register;
+      addr = REGISTER_BYTE (regnum);
+      if (raw_buffer != NULL)
+	read_register_gen (regnum, raw_buffer);
+    }
+  if (addrp != NULL)
+    *addrp = addr;
+}
+
+static CORE_ADDR
 alpha_saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR pc = frame->pc;
@@ -497,7 +587,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
     pc = tmp;
 
   proc_desc = find_proc_desc (pc, frame->next);
-  pcreg = proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM;
+  pcreg = proc_desc ? PROC_PC_REG (proc_desc) : ALPHA_RA_REGNUM;
 
   if (frame->signal_handler_caller)
     return alpha_frame_saved_pc (frame);
@@ -507,7 +597,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
 
 
 static struct alpha_extra_func_info temp_proc_desc;
-static CORE_ADDR temp_saved_regs[NUM_REGS];
+static CORE_ADDR temp_saved_regs[ALPHA_NUM_REGS];
 
 /* Nonzero if instruction at PC is a return instruction.  "ret
    $zero,($ra),1" on alpha. */
@@ -646,7 +736,8 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	     e.g. via the minimal symbol table, might obviate this hack.  */
 	  if (pcreg == -1
 	      && cur_pc < (start_pc + 80)
-	      && (reg == T7_REGNUM || reg == T9_REGNUM || reg == RA_REGNUM))
+	      && (reg == ALPHA_T7_REGNUM || reg == ALPHA_T9_REGNUM
+	          || reg == ALPHA_RA_REGNUM))
 	    pcreg = reg;
 	}
       else if ((word & 0xffe0ffff) == 0x6be08001)	/* ret zero,reg,1 */
@@ -672,7 +763,8 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	      && (word & 0xffff0000) != 0xb7fe0000)	/* reg != $zero */
 	    {
 	      int reg = (word & 0x03e00000) >> 21;
-	      if (reg == T7_REGNUM || reg == T9_REGNUM || reg == RA_REGNUM)
+	      if (reg == ALPHA_T7_REGNUM || reg == ALPHA_T9_REGNUM
+	          || reg == ALPHA_RA_REGNUM)
 		{
 		  pcreg = reg;
 		  break;
@@ -687,12 +779,12 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     }
 
   if (has_frame_reg)
-    PROC_FRAME_REG (&temp_proc_desc) = GCC_FP_REGNUM;
+    PROC_FRAME_REG (&temp_proc_desc) = ALPHA_GCC_FP_REGNUM;
   else
     PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
   PROC_FRAME_OFFSET (&temp_proc_desc) = frame_size;
   PROC_REG_MASK (&temp_proc_desc) = reg_mask;
-  PROC_PC_REG (&temp_proc_desc) = (pcreg == -1) ? RA_REGNUM : pcreg;
+  PROC_PC_REG (&temp_proc_desc) = (pcreg == -1) ? ALPHA_RA_REGNUM : pcreg;
   PROC_LOCALOFF (&temp_proc_desc) = 0;	/* XXX - bogus */
   return &temp_proc_desc;
 }
@@ -874,7 +966,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 
 alpha_extra_func_info_t cached_proc_desc;
 
-CORE_ADDR
+static CORE_ADDR
 alpha_frame_chain (struct frame_info *frame)
 {
   alpha_extra_func_info_t proc_desc;
@@ -920,7 +1012,7 @@ alpha_print_extra_frame_info (struct frame_info *fi)
 		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
 }
 
-void
+static void
 alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
@@ -932,7 +1024,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
   frame->saved_regs = NULL;
   frame->extra_info->localoff = 0;
-  frame->extra_info->pc_reg = RA_REGNUM;
+  frame->extra_info->pc_reg = ALPHA_RA_REGNUM;
   frame->extra_info->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
@@ -975,19 +1067,19 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	      memcpy (frame->saved_regs, temp_saved_regs,
 	              SIZEOF_FRAME_SAVED_REGS);
 	      frame->saved_regs[PC_REGNUM]
-		= frame->saved_regs[RA_REGNUM];
+		= frame->saved_regs[ALPHA_RA_REGNUM];
 	    }
 	}
     }
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_frame_locals_address (struct frame_info *fi)
 {
   return (fi->frame - fi->extra_info->localoff);
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_frame_args_address (struct frame_info *fi)
 {
   return (fi->frame - (ALPHA_NUM_ARG_REGS * 8));
@@ -1027,7 +1119,7 @@ alpha_setup_arbitrary_frame (int argc, CORE_ADDR *argv)
    If the called function is returning a structure, the address of the
    structure to be returned is passed as a hidden first argument.  */
 
-CORE_ADDR
+static CORE_ADDR
 alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
@@ -1102,14 +1194,14 @@ alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       LONGEST val;
 
       val = read_memory_integer (sp + i * 8, 8);
-      write_register (A0_REGNUM + i, val);
-      write_register (FPA0_REGNUM + i, val);
+      write_register (ALPHA_A0_REGNUM + i, val);
+      write_register (ALPHA_FPA0_REGNUM + i, val);
     }
 
   return sp + arg_regs_size;
 }
 
-void
+static void
 alpha_push_dummy_frame (void)
 {
   int ireg;
@@ -1117,7 +1209,7 @@ alpha_push_dummy_frame (void)
   alpha_extra_func_info_t proc_desc;
   CORE_ADDR sp = read_register (SP_REGNUM);
   CORE_ADDR save_address;
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
   unsigned long mask;
 
   link = (struct linked_proc_info *) xmalloc (sizeof (struct linked_proc_info));
@@ -1172,14 +1264,14 @@ alpha_push_dummy_frame (void)
      registers follow in ascending order.
      The PC is saved immediately below the SP.  */
   save_address = sp + PROC_REG_OFFSET (proc_desc);
-  store_address (raw_buffer, 8, read_register (RA_REGNUM));
+  store_address (raw_buffer, 8, read_register (ALPHA_RA_REGNUM));
   write_memory (save_address, raw_buffer, 8);
   save_address += 8;
   mask = PROC_REG_MASK (proc_desc) & 0xffffffffL;
   for (ireg = 0; mask; ireg++, mask >>= 1)
     if (mask & 1)
       {
-	if (ireg == RA_REGNUM)
+	if (ireg == ALPHA_RA_REGNUM)
 	  continue;
 	store_address (raw_buffer, 8, read_register (ireg));
 	write_memory (save_address, raw_buffer, 8);
@@ -1222,10 +1314,10 @@ alpha_push_dummy_frame (void)
   PROC_HIGH_ADDR (proc_desc) = PROC_LOW_ADDR (proc_desc) + 4;
 
   SET_PROC_DESC_IS_DUMMY (proc_desc);
-  PROC_PC_REG (proc_desc) = RA_REGNUM;
+  PROC_PC_REG (proc_desc) = ALPHA_RA_REGNUM;
 }
 
-void
+static void
 alpha_pop_frame (void)
 {
   register int regnum;
@@ -1368,7 +1460,7 @@ alpha_skip_prologue_internal (CORE_ADDR pc, int lenient)
   return pc + offset;
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_skip_prologue (CORE_ADDR addr)
 {
   return (alpha_skip_prologue_internal (addr, 0));
@@ -1392,7 +1484,7 @@ alpha_in_lenient_prologue (CORE_ADDR startaddr, CORE_ADDR pc)
    or
    memory format is an integer with 4 bytes or less, as the representation
    of integers in floating point registers is different. */
-void
+static void
 alpha_register_convert_to_virtual (int regnum, struct type *valtype,
 				   char *raw_buffer, char *virtual_buffer)
 {
@@ -1418,7 +1510,7 @@ alpha_register_convert_to_virtual (int regnum, struct type *valtype,
     error ("Cannot retrieve value from floating point register");
 }
 
-void
+static void
 alpha_register_convert_to_raw (struct type *valtype, int regnum,
 			       char *virtual_buffer, char *raw_buffer)
 {
@@ -1450,7 +1542,7 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
 
-void
+static void
 alpha_extract_return_value (struct type *valtype,
 			    char regbuf[REGISTER_BYTES], char *valbuf)
 {
@@ -1459,17 +1551,18 @@ alpha_extract_return_value (struct type *valtype,
 				       regbuf + REGISTER_BYTE (FP0_REGNUM),
 				       valbuf);
   else
-    memcpy (valbuf, regbuf + REGISTER_BYTE (V0_REGNUM), TYPE_LENGTH (valtype));
+    memcpy (valbuf, regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
+            TYPE_LENGTH (valtype));
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
    write its value into the appropriate register.  */
 
-void
+static void
 alpha_store_return_value (struct type *valtype, char *valbuf)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  int regnum = V0_REGNUM;
+  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
+  int regnum = ALPHA_V0_REGNUM;
   int length = TYPE_LENGTH (valtype);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
@@ -1517,7 +1610,7 @@ alpha_call_dummy_address (void)
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
 }
 
-void
+static void
 alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
                       struct value **args, struct type *type, int gcc_p)
 {
@@ -1525,8 +1618,8 @@ alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 
   if (bp_address == 0)
     error ("no place to put call");
-  write_register (RA_REGNUM, bp_address);
-  write_register (T12_REGNUM, fun);
+  write_register (ALPHA_RA_REGNUM, bp_address);
+  write_register (ALPHA_T12_REGNUM, fun);
 }
 
 /* On the Alpha, the call dummy code is nevery copied to user space
@@ -1534,25 +1627,25 @@ alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
    matter.  */
 LONGEST alpha_call_dummy_words[] = { 0 };
 
-int
+static int
 alpha_use_struct_convention (int gcc_p, struct type *type)
 {
   /* Structures are returned by ref in extra arg0.  */
   return 1;
 }
 
-void
+static void
 alpha_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* Store the address of the place in which to copy the structure the
      subroutine will return.  Handled by alpha_push_arguments.  */
 }
 
-CORE_ADDR
+static CORE_ADDR
 alpha_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address (regbuf + REGISTER_BYTE (V0_REGNUM),
-			   REGISTER_RAW_SIZE (V0_REGNUM)));
+  return (extract_address (regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
+			   REGISTER_RAW_SIZE (ALPHA_V0_REGNUM)));
 }
 
 /* alpha_software_single_step() is called just before we want to resume
@@ -1664,10 +1757,330 @@ alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     }
 }
 
+
+/* This table matches the indices assigned to enum alpha_abi.  Keep
+   them in sync.  */
+static const char * const alpha_abi_names[] =
+{
+  "<unknown>",
+  "OSF/1",
+  "GNU/Linux",
+  "FreeBSD",
+  "NetBSD",
+  NULL
+};
+
+static void
+process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+{
+  enum alpha_abi *os_ident_ptr = obj;
+  const char *name;
+  unsigned int sectsize;
+
+  name = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+
+  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, data_length, note_type;
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we are
+	 looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+				(file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      data_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 4 && data_length == 16 && note_type == 1
+	  && strcmp (note + 12, "GNU") == 0)
+	{
+	  int os_number = bfd_h_get_32 (abfd, note + 16);
+
+	  /* The case numbers are from abi-tags in glibc.  */
+	  switch (os_number)
+	    {
+	    case 0 :
+	      *os_ident_ptr = ALPHA_ABI_LINUX;
+	      break;
+
+	    case 1 :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: Hurd objects not supported");
+	      break;
+
+	    case 2 :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: Solaris objects not supported");
+	      break;
+
+	    default :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: unknown OS number %d",
+		 os_number);
+	      break;
+	    }
+	}
+    }
+  /* NetBSD uses a similar trick.  */
+  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, desc_length, note_type;
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we are
+         looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+				 (file_ptr) 0, (bfd_size_type) sectsize);
+      
+      name_length = bfd_h_get_32 (abfd, note);
+      desc_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 7 && desc_length == 4 && note_type == 1
+	  && strcmp (note + 12, "NetBSD") == 0)
+	/* XXX Should we check the version here?
+	   Probably not necessary yet.  */
+	*os_ident_ptr = ALPHA_ABI_NETBSD;
+    }
+}
+
+static int
+get_elfosabi (bfd *abfd)
+{
+  int elfosabi;
+  enum alpha_abi alpha_abi = ALPHA_ABI_UNKNOWN;
+
+  elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
+
+  /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
+     what we're on a SYSV system.  However, GNU/Linux uses a note section
+     to record OS/ABI info, but leaves e_ident[EI_OSABI] zero.  So we
+     have to check the note sections too.  */
+  if (elfosabi == 0)
+    {
+      bfd_map_over_sections (abfd,
+			     process_note_abi_tag_sections,
+			     &alpha_abi);
+    }
+
+  if (alpha_abi != ALPHA_ABI_UNKNOWN)
+    return alpha_abi;
+
+  switch (elfosabi)
+    {
+    case ELFOSABI_NONE:
+      /* Leave it as unknown.  */
+      break;
+
+    case ELFOSABI_NETBSD:
+      return ALPHA_ABI_NETBSD;
+
+    case ELFOSABI_FREEBSD:
+      return ALPHA_ABI_FREEBSD;
+
+    case ELFOSABI_LINUX:
+      return ALPHA_ABI_LINUX;
+    }
+
+  return ALPHA_ABI_UNKNOWN;
+}
+
+/* Initialize the current architecture based on INFO.  If possible, re-use an
+   architecture from ARCHES, which is a list of architectures already created
+   during this debugging session.
+
+   Called e.g. at program startup, when reading a core file, and when reading
+   a binary file.  */
+
+static struct gdbarch *
+alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep;
+  struct gdbarch *gdbarch;
+  enum alpha_abi alpha_abi = ALPHA_ABI_UNKNOWN;
+
+  /* Try to determine the ABI of the object we are loading.  */
+
+  if (info.abfd != NULL)
+    {
+      switch (bfd_get_flavour (info.abfd))
+	{
+	case bfd_target_elf_flavour:
+	  alpha_abi = get_elfosabi (info.abfd);
+	  break;
+
+	case bfd_target_ecoff_flavour:
+	  /* Assume it's OSF/1.  */
+	  alpha_abi = ALPHA_ABI_OSF1;
+          break;
+
+	default:
+	  /* Not sure what to do here, leave the ABI as unknown.  */
+	  break;
+	}
+    }
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->alpha_abi == alpha_abi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->alpha_abi = alpha_abi;
+  if (alpha_abi < ALPHA_ABI_INVALID)
+    tdep->abi_name = alpha_abi_names[alpha_abi];
+  else
+    {
+      internal_error (__FILE__, __LINE__, "Invalid setting of alpha_abi %d",
+		      (int) alpha_abi);
+      tdep->abi_name = "<invalid>";
+    }
+
+  /* Type sizes */
+  set_gdbarch_short_bit (gdbarch, 16);
+  set_gdbarch_int_bit (gdbarch, 32);
+  set_gdbarch_long_bit (gdbarch, 64);
+  set_gdbarch_long_long_bit (gdbarch, 64);
+  set_gdbarch_float_bit (gdbarch, 32);
+  set_gdbarch_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_ptr_bit (gdbarch, 64);
+
+  /* Register info */
+  set_gdbarch_num_regs (gdbarch, ALPHA_NUM_REGS);
+  set_gdbarch_sp_regnum (gdbarch, ALPHA_SP_REGNUM);
+  set_gdbarch_fp_regnum (gdbarch, ALPHA_FP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, ALPHA_PC_REGNUM);
+  set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
+
+  set_gdbarch_register_name (gdbarch, alpha_register_name);
+  set_gdbarch_register_size (gdbarch, ALPHA_REGISTER_SIZE);
+  set_gdbarch_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
+  set_gdbarch_register_byte (gdbarch, alpha_register_byte);
+  set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, ALPHA_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
+  set_gdbarch_max_register_virtual_size (gdbarch,
+                                         ALPHA_MAX_REGISTER_VIRTUAL_SIZE);
+  set_gdbarch_register_virtual_type (gdbarch, alpha_register_virtual_type);
+
+  set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);
+  set_gdbarch_cannot_store_register (gdbarch, alpha_cannot_store_register);
+
+  set_gdbarch_register_convertible (gdbarch, alpha_register_convertible);
+  set_gdbarch_register_convert_to_virtual (gdbarch,
+                                           alpha_register_convert_to_virtual);
+  set_gdbarch_register_convert_to_raw (gdbarch, alpha_register_convert_to_raw);
+
+  set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
+
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                    generic_frameless_function_invocation_not);
+
+  set_gdbarch_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
+
+  set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
+
+  set_gdbarch_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
+  set_gdbarch_get_saved_register (gdbarch, alpha_get_saved_register);
+
+  set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
+  set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
+
+  set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
+  set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    alpha_extract_struct_value_address);
+
+  /* Settings for calling functions in the inferior.  */
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
+  set_gdbarch_pop_frame (gdbarch, alpha_pop_frame);
+
+  /* On the Alpha, the call dummy code is never copied to user space,
+     stopping the user call is achieved via a bp_call_dummy breakpoint.
+     But we need a fake CALL_DUMMY definition to enable the proper
+     call_function_by_hand and to avoid zero length array warnings.  */
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, alpha_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_frame_args_address (gdbarch, alpha_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, alpha_frame_locals_address);
+  set_gdbarch_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
+
+  /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
+     no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
+     argument handling and bp_call_dummy takes care of stopping the dummy.  */
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
+  set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
+  set_gdbarch_init_frame_pc (gdbarch, init_frame_pc_noop);
+  set_gdbarch_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);
+
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  set_gdbarch_decr_pc_after_break (gdbarch, 4);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+
+  return gdbarch;
+}
+
+static void
+alpha_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  if (tdep->abi_name != NULL)
+    fprintf_unfiltered (file, "alpha_dump_tdep: ABI = %s\n", tdep->abi_name);
+  else
+    internal_error (__FILE__, __LINE__,
+		    "alpha_dump_tdep: illegal setting of tdep->alpha_abi (%d)",
+		    (int) tdep->alpha_abi);
+}
+
 void
 _initialize_alpha_tdep (void)
 {
   struct cmd_list_element *c;
+
+  gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, alpha_dump_tdep);
 
   tm_print_insn = print_insn_alpha;
 

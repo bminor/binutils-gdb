@@ -1,3 +1,25 @@
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.h: New file.  Includes several Alpha target constants
+	taken from...
+	* config/alpha/tm-alpha.h: ...here.  Remove macros that we now
+	let gdbarch deal with.
+	(GDB_MULTI_ARCH): Define as GDB_MULTI_ARCH_PARTIAL.
+	* Makefile.in (alpha-nat.o): Add alpha-tdep.h and $(BFD_SRC)/elf-bfd
+	to dependency list.
+	* alpha-nat.c: Include alpha-tdep.h.  Update for adjusted
+	Alpha target register names.
+	* alphabsd-nat.c: Likewise.
+	* alpha-tdep.c: Include alpha-tdep.h.  Update for adjusted
+	Alpha target register names.  Make serveral routines static.
+	(alpha_get_saved_register): New function.
+	(alpha_abi_names): New.
+	(process_note_abi_tag_sections): New function.
+	(get_elfosabi): New function.
+	(alpha_gdbarch_init): New function.
+	(alpha_dump_tdep): New function.
+	(_initialize_alpha_tdep): Register alpha_gdbarch_init.
+
 2002-04-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (find_saved_register): Delete #ifdef

@@ -24,6 +24,9 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "regcache.h"
+
+#include "alpha-tdep.h"
+
 #include <sys/ptrace.h>
 #ifdef __linux__
 #include <asm/reg.h>
@@ -62,7 +65,7 @@ get_longjmp_target (CORE_ADDR *pc)
   CORE_ADDR jb_addr;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
 
-  jb_addr = read_register (A0_REGNUM);
+  jb_addr = read_register (ALPHA_A0_REGNUM);
 
   if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, raw_buffer,
 			  sizeof (CORE_ADDR)))
@@ -171,10 +174,11 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
   else
     {
       /* The General Registers.  */
-      memcpy (&registers[REGISTER_BYTE (V0_REGNUM)], core_reg_sect, 31 * 8);
+      memcpy (&registers[REGISTER_BYTE (ALPHA_V0_REGNUM)], core_reg_sect,
+              31 * 8);
       memcpy (&registers[REGISTER_BYTE (PC_REGNUM)], core_reg_sect + 31 * 8, 8);
-      memset (&registers[REGISTER_BYTE (ZERO_REGNUM)], 0, 8);
-      memset (&register_valid[V0_REGNUM], 1, 32);
+      memset (&registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
+      memset (&register_valid[ALPHA_V0_REGNUM], 1, 32);
       register_valid[PC_REGNUM] = 1;
     }
 }
@@ -227,7 +231,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
   supply_register (PC_REGNUM, (char *) (regp + 31));
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (ZERO_REGNUM, zerobuf);
+  supply_register (ALPHA_ZERO_REGNUM, zerobuf);
   supply_register (FP_REGNUM, zerobuf);
 }
 
