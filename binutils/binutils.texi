@@ -899,6 +899,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --set-section-flags @var{section}=@var{flags} ]
         [ --add-section @var{sectionname}=@var{filename} ]
         [ --change-leading-char ] [ --remove-leading-char ]
+        [ --srec-len=@var{ival} ] [ --srec-forceS3 ]
         [ --redefine-sym @var{old}=@var{new} ] [ --weaken ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
@@ -1153,6 +1154,15 @@ different conventions for symbol names.  This is different from
 @code{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
 file.
+
+@item --srec-len=@var{ival}
+Meaningful only for srec output.  Set the maximum length of the Srecords
+being produced to @var{ival}.  This length covers both address, data and
+crc fields.
+
+@item --srec-forceS3
+Meaningful only for srec output.  Avoid generation of S1/S2 records, 
+creating S3-only record format.
 
 @item --redefine-sym @var{old}=@var{new}
 Change the name of a symbol @var{old}, to @var{new}.  This can be useful

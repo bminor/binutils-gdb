@@ -215,6 +215,8 @@ static boolean weaken = false;
 #define OPTION_STRIP_UNNEEDED (OPTION_SET_START + 1)
 #define OPTION_WEAKEN (OPTION_STRIP_UNNEEDED + 1)
 #define OPTION_REDEFINE_SYM (OPTION_WEAKEN + 1)
+#define OPTION_SREC_LEN (OPTION_REDEFINE_SYM + 1)
+#define OPTION_SREC_FORCES3 (OPTION_SREC_LEN + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -290,6 +292,8 @@ static struct option copy_options[] =
   {"weaken", no_argument, 0, OPTION_WEAKEN},
   {"weaken-symbol", required_argument, 0, 'W'},
   {"redefine-sym", required_argument, 0, OPTION_REDEFINE_SYM},
+  {"srec-len", required_argument, 0, OPTION_SREC_LEN},
+  {"srec-forceS3", no_argument, 0, OPTION_SREC_FORCES3},
   {0, no_argument, 0, 0}
 };
 
@@ -301,6 +305,14 @@ extern char *program_name;
    -1 means if we should use argv[0] to decide. */
 extern int is_strip;
 
+/* The maximum length of an S record.  This variable is declared in srec.c
+   and can be modified by the --srec-len parameter.  */
+extern unsigned int Chunk;
+
+/* Restrict the generation of Srecords to type S3 only.
+   This variable is declare in bfd/srec.c and can be toggled
+   on by the --srec-forceS3 command line switch.  */
+extern boolean S3Forced;
 
 static void
 copy_usage (stream, exit_status)
@@ -350,6 +362,8 @@ copy_usage (stream, exit_status)
      --change-leading-char         Force output format's leading character style\n\
      --remove-leading-char         Remove leading character from global symbols\n\
      --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n\
+     --srec-len <number>           Restrict the length of generated Srecords\n\
+     --srec-forceS3                Restrict the type of generated Srecords to S3\n\
   -v --verbose                     List all object files modified\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
@@ -2128,6 +2142,14 @@ copy_main (argc, argv)
 	  set_start = parse_vma (optarg, "--set-start");
 	  set_start_set = true;
 	  break;
+
+        case OPTION_SREC_LEN:
+          Chunk = parse_vma (optarg, "--srec-len");
+          break;
+
+        case OPTION_SREC_FORCES3:
+	  S3Forced = true;
+          break;
 
 	case 0:
 	  break;		/* we've been given a long option */

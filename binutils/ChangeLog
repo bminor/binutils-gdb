@@ -1,3 +1,10 @@
+2000-10-06  Luciano Gemme <ishitawa@yahoo.com>
+
+	* objcopy.c (--srec-len=nn): New parameter to set the
+	maximum length of generated Srecords.
+	(--srec-forceS3): New parameter that restricts the generation of
+	Srecords to type S3 only.
+
 2000-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jim Wilson as the maintainer for the IA64

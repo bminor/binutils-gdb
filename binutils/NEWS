@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --srec-len and --srec-forceS3 command line switch to objcopy.  By Luciano
+  Gemme.
+  
 * Support for the MIPS32, by Anders Norlander.
 
 * Support for the i860, by Jason Eckhardt.

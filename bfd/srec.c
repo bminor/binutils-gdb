@@ -170,8 +170,19 @@ srec_init ()
 
 /* The maximum number of bytes on a line is FF.  */
 #define MAXCHUNK 0xff
-/* The number of bytes we fit onto a line on output.  */
-#define CHUNK 16
+
+/* Default size for a CHUNK.  */
+#define DEFAULT_CHUNK 16
+
+/* The number of bytes we actually fit onto a line on output.
+   This variable can be modified by objcopy's --srec-len parameter.
+   For a 0x75 byte record you should set --srec-len=0x70.  */
+unsigned int Chunk = DEFAULT_CHUNK;
+
+/* The type of srec output (free or forced to S3).
+   This variable can be modified by objcopy's --srec-forceS3
+   parameter.  */
+boolean S3Forced = 0;
 
 /* When writing an S-record file, the S-records can not be output as
    they are seen.  This structure is used to hold them in memory.  */
@@ -867,19 +878,17 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
 	return false;
       memcpy ((PTR) data, location, (size_t) bytes_to_do);
 
-      if ((section->lma + offset + bytes_to_do - 1) <= 0xffff)
-	{
-
-	}
+      /* Ff S3Forced is true then always select S3 records,
+	 regardless of the siez of the addresses.  */
+      if (S3Forced)
+	tdata->type = 3;
+      else if ((section->lma + offset + bytes_to_do - 1) <= 0xffff) 
+	;  /* The default, S1, is OK.  */
       else if ((section->lma + offset + bytes_to_do - 1) <= 0xffffff
 	       && tdata->type <= 2)
-	{
-	  tdata->type = 2;
-	}
+	tdata->type = 2;
       else
-	{
-	  tdata->type = 3;
-	}
+	tdata->type = 3;
 
       entry->data = data;
       entry->where = section->lma + offset;
@@ -1006,8 +1015,8 @@ srec_write_section (abfd, tdata, list)
       bfd_vma address;
       unsigned int octets_this_chunk = list->size - octets_written;
 
-      if (octets_this_chunk > CHUNK)
-	octets_this_chunk = CHUNK;
+      if (octets_this_chunk > Chunk)
+	octets_this_chunk = Chunk;
 
       address = list->where + octets_written / bfd_octets_per_byte (abfd);
 

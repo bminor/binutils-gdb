@@ -1,3 +1,14 @@
+2000-11-02  Luciano Gemme <ishitawa@yahoo.com> 
+
+	* srec.c (CHUNK): Rename to DEFAULT_CHUNK.
+	(Chunk): New global variable set by a parameter in objcopy.c.
+	(S3Forced): New global variable set by a parameter in
+	objcopy.c.
+	(srec_set_section_contents): If S3Forced is true, always generate
+	S3 records.
+	(srec_write_section): Use 'Chunk' to limit maximum length of S
+	records.
+
 2000-11-02  Per Lundberg  <plundis@chaosdev.org>
 
 	* config.bfd: Add support for i[3456]86-chaosdev-storm-chaos.

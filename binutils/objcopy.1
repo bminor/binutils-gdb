@@ -47,6 +47,8 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-add\-section\ \fIsectionname=filename\fR "\|]"
 .RB "[\|" \-\-change\-leading\-char\fR "\|]"
 .RB "[\|" \-\-remove\-leading\-char\fR "\|]"
+.RB "[\|" \-\-srec\-len=\fIval\fR "\|]"
+.RB "[\|" \-\-srec\-forceS3\fR "\|]"
 .RB "[\|" \-\-redefine\-sym\ \fIold=new\fR "\|]"
 .RB "[\|" \-\-weaken\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
@@ -281,6 +283,14 @@ useful if you want to link together objects of different file formats
 with different conventions for symbol names.  This is different from
 \fB\-\-change\-leading\-char\fP because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
+.TP
+.B \fB\-\-srec\-len=\fIval
+Meaningful only for srec output.  Set the length of the Srecords to \fIval\fP.
+This length covers both the address, data and crc fields.
+.TP
+.B \fB\-\-srec\-forceS3
+Meaningful only for srec output.  Avoid generation of S1/S2 records, creating
+S3-only record format.
 .TP
 .B \-\-redefine\-sym\ \fIold=new
 Change the name of symbol \fIold\fR to \fInew\fR.  This can be useful
