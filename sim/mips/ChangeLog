@@ -1,4 +1,30 @@
+1998-12-24  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* m16.igen (DADDIU5): Correct type-o.
+
+Mon Dec 21 10:34:48 1998  Andrew Cagney  <cagney@chook>
+
+	* mips.igen (do_ddiv, do_ddivu): Pacify GCC. Update hi/lo via tmp
+ 	variables.
+
 start-sanitize-vr4xxx
+1998-12-17  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* vr4run.c (sim_engine_run): Enable the 4111.
+
+end-sanitize-vr4xxx
+Wed Dec 16 18:20:28 1998  Andrew Cagney  <cagney@chook>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): No longer need to add .../newlib
+ 	to include path.
+	(interp.o): Add dependency on itable.h
+	(oengine.c, gencode): Delete remaining references.
+	(BUILT_SRC_FROM_GEN): Clean up.
+start-sanitize-vr4xxx
+	(SIM_HACK_ALL): Define.
+	(hack, libhack.a): Do not build.
+end-sanitize-vr4xxx
+	
 1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
 	
 	* vr4run.c: New.
