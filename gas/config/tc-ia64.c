@@ -4701,6 +4701,15 @@ const pseudo_typeS md_pseudo_table[] =
     { "explicit", dot_dv_mode, 'e' },
     { "default", dot_dv_mode, 'd' },
 
+    /* ??? These are needed to make gas/testsuite/gas/elf/ehopt.s work.
+       IA-64 aligns data allocation pseudo-ops by default, so we have to
+       tell it that these ones are supposed to be unaligned.  Long term,
+       should rewrite so that only IA-64 specific data allocation pseudo-ops
+       are aligned by default.  */
+    {"2byte", stmt_cons_ua, 2},
+    {"4byte", stmt_cons_ua, 4},
+    {"8byte", stmt_cons_ua, 8},
+
     { NULL, 0, 0 }
   };
 

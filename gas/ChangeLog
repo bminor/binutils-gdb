@@ -1,5 +1,7 @@
 2001-07-04  Jim Wilson  <wilson@redhat.com>
 
+	* config/tc-ia64.c (md_pseudo_table): Add 2byte, 4byte, and 8byte.
+
 	* config/tc-ia64.c (is_conditional_branch): Rewrite to exclude mod
 	sched branches.
 
