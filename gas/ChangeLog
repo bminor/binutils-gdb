@@ -1,3 +1,7 @@
+2000-06-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (md_shortopts): Remove 'm', add 'q' to non-elf.
+
 2000-06-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* expr.c (operand): Test is_end_of_line outside switch to catch
@@ -2246,7 +2250,7 @@ Tue Aug 10 12:58:31 1999  Jeffrey A Law  (law@cygnus.com)
 	Always Use subsegment zero for the unwinders.
 	(pa_level): Handle "2.0w".
 
-Mon Aug  9 20:02:22 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+Mon Aug  9 20:02:22 1999  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* config/tc-d30v.c (write_2_short): Don't group repeat instructions
 	with the following instruction unless this was specified.

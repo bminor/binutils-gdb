@@ -4259,9 +4259,9 @@ parse_register (reg_string, end_op)
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-CONST char *md_shortopts = "kmVQ:sq";
+const char *md_shortopts = "kVQ:sq";
 #else
-CONST char *md_shortopts = "m";
+const char *md_shortopts = "q";
 #endif
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
