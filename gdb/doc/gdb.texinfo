@@ -80,7 +80,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Richard Stallman, Roland Pesch, Stan Shebs, et.al.
+@author Richard Stallman, Roland Pesch, Stan Shebs, et al.
 @page
 @tex
 {\parskip=0pt
