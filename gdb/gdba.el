@@ -844,7 +844,7 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 
 (defun gud-display-frames-buffer (instance)
   (interactive (list (gdb-needed-default-instance)))
-  (display-buffer
+  (gud-display-buffer
    (gdb-get-create-instance-buffer instance
 				    'gdb-frames-buffer)))
 
@@ -859,7 +859,7 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 
 (defun gud-display-breakpoints-buffer (instance)
   (interactive (list (gdb-needed-default-instance)))
-  (display-buffer
+  (gud-display-buffer
    (gdb-get-create-instance-buffer instance
 				    'gdb-breakpoints-buffer)))
 
@@ -875,13 +875,56 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 
 (defun gud-display-registers-buffer (instance)
   (interactive (list (gdb-needed-default-instance)))
-  (display-buffer
+  (gud-display-buffer
    (gdb-get-create-instance-buffer instance
 				    'gdb-registers-buffer)))
 
+
+;;; FIXME: This should only return true for buffers in the current instance
+(defun gud-protected-buffer-p (buffer)
+  "Is BUFFER a buffer which we want to leave displayed?"
+  (save-excursion
+    (set-buffer buffer)
+    (or (eq gdb-buffer-type 'gdb-registers-buffer)
+	(eq gdb-buffer-type 'gdb-breakpoints-buffer)
+	(eq gdb-buffer-type 'gdb-frames-buffer)
+	(eq gdb-buffer-type 'gud))))
+;;;
+;;; The way we abuse the dedicated-p flag is pretty gross, but seems
+;;; to do the right thing.  Seeing as there is no way for Lisp code to
+;;; get at the use_time field of a window, I'm not sure there exists a
+;;; more elegant solution without writing C code.
 
-
-
+(defun gud-display-buffer (buf)
+  (let ((must-split nil))
+    (unwind-protect
+	(progn
+	  (walk-windows
+	   '(lambda (win)
+	      (if (gud-protected-buffer-p (window-buffer win))
+		  (set-window-dedicated-p win t)
+		)))
+	  ;; This is more or less just the same as display-buffer; the
+	  ;; big difference is that we split the largest window rather
+	  ;; than the lru window.  Various settings and hair which
+	  ;; display-buffer has are omitted, for simplicity.
+	  (if (not (get-buffer-window buf nil))
+	      (let ((window (get-lru-window nil)))
+		(if window
+		    (set-window-buffer window buf)
+		  (setq must-split t)
+		  )))
+	)
+    (walk-windows
+     '(lambda (win)
+	(if (gud-protected-buffer-p (window-buffer win))
+	    (set-window-dedicated-p win nil)
+	  )))
+    )
+    (if must-split
+	(set-window-buffer (split-window (get-largest-window)) buf))
+    ))
+
 (defun gud-gdb-find-file (f)
   (find-file-noselect f))
 
@@ -1525,7 +1568,7 @@ Obeying it means displaying in another window the specified file and line."
 
 (defun gud-display-line (true-file line)
   (let* ((buffer (gud-find-file true-file))
-	 (window (display-buffer buffer))
+	 (window (gud-display-buffer buffer))
 	 (pos))
 ;;;    (if (equal buffer (current-buffer))
 ;;;	nil
