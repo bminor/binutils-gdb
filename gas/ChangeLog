@@ -1,3 +1,16 @@
+start-sanitize-sh3e
+Mon Aug  7 02:54:20 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-sh.c (parse_reg): Handle new FP registers.
+	(get_specific): Handle new operand types.
+
+end-sanitize-sh3e
+Fri Aug  4 12:29:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (op_encoding): Make non-const.  Don't set '"' to
+        O_bit_not.
+	(expr_begin): Set op_encoding['"'] in MRI mode.
+
 Wed Aug  2 18:39:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c: Remove BREAK_UP_BIG_DECL stuff.

@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
 
-   Copyright (C) 1993 Free Software Foundation.
+   Copyright (C) 1993, 1994, 1995 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*
    Written By Steve Chamberlain
@@ -34,6 +35,8 @@ const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
 
+static void s_uses PARAMS ((int));
+
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
    pseudo-op name without dot
@@ -46,7 +49,9 @@ void s_align_bytes ();
 
 int shl = 0;
 
-static void little()
+static void
+little (ignore)
+     int ignore;
 {
   shl = 1;
 }
@@ -56,17 +61,18 @@ const pseudo_typeS md_pseudo_table[] =
   {"int", cons, 4},
   {"word", cons, 2},
   {"form", listing_psize, 0},
-  {"little", little,0},
+  {"little", little, 0},
   {"heading", listing_title, 0},
   {"import", s_ignore, 0},
   {"page", listing_eject, 0},
   {"program", s_ignore, 0},
+  {"uses", s_uses, 0},
   {0, 0, 0}
 };
 
 /*int md_reloc_size; */
 
-static int relax;		/* set if -relax seen */
+int sh_relax;		/* set if -relax seen */
 
 const char EXP_CHARS[] = "eE";
 
@@ -97,28 +103,33 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define UNCOND12 1
 #define UNCOND32 2
 
-#define COND8_F 254
-#define COND8_M -256
+/* Branch displacements are from the address of the branch plus
+   four, thus all minimum and maximum values have 4 added to them.  */
+#define COND8_F 258
+#define COND8_M -252
 #define COND8_LENGTH 2
-#define COND12_F (4094 - 4)	/* -4 since there are two extra */
-/* instructions needed */
-#define COND12_M -4096
+
+/* There is one extra instruction before the branch, so we must add
+   two more bytes to account for it.  */
+#define COND12_F 4100
+#define COND12_M -4090
 #define COND12_LENGTH 6
+
+/* ??? The minimum and maximum values are wrong, but this does not matter
+   since this relocation type is not supported yet.  */
 #define COND32_F (1<<30)
 #define COND32_M -(1<<30)
 #define COND32_LENGTH 14
 
-#define COND8_RANGE(x) ((x) > COND8_M && (x) < COND8_F)
-#define COND12_RANGE(x) ((x) > COND12_M && (x) < COND12_F)
-
-#define UNCOND12_F 4094
-#define UNCOND12_M -4096
+#define UNCOND12_F 4098
+#define UNCOND12_M -4092
 #define UNCOND12_LENGTH 2
 
+/* ??? The minimum and maximum values are wrong, but this does not matter
+   since this relocation type is not supported yet.  */
 #define UNCOND32_F (1<<30)
 #define UNCOND32_M -(1<<30)
 #define UNCOND32_LENGTH 14
-
 
 const relax_typeS md_relax_table[C (END, 0)] = {
   { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
@@ -260,6 +271,38 @@ parse_reg (src, mode, reg)
 	  return 4;
 	}
     }
+/* start-sanitize-sh3e */
+  if (src[0] == 'f' && src[1] == 'r')
+    {
+      if (src[2] == '1')
+	{
+	  if (src[3] >= '0' && src[3] <= '5')
+	    {
+	      *mode = F_REG_N;
+	      *reg = 10 + src[3] - '0';
+	      return 4;
+	    }
+	}
+      if (src[2] >= '0' && src[2] <= '9')
+	{
+	  *mode = F_REG_N;
+	  *reg = (src[2] - '0');
+	  return 3;
+	}
+    }
+  if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l')
+    {
+      *mode = FPUL_N;
+      return 4;
+    }
+
+  if (src[0] == 'f' && src[1] == 'p'
+      && src[2] == 's' && src[3] == 'c' && src[4] == 'r')
+    {
+      *mode = FPSCR_N;
+      return 5;
+    }
+/* end-sanitize-sh3e */
 
   return 0;
 }
@@ -567,6 +610,11 @@ get_specific (opcode, operands)
 	    case A_IND_N:
 	    case A_IND_R0_REG_N:
 	    case A_DISP_REG_N:
+/* start-sanitize-sh3e */
+	    case F_REG_N:
+	    case FPUL_N:
+	    case FPSCR_N:
+/* end-sanitize-sh3e */
 	      /* Opcode needs rn */
 	      if (user->type != arg)
 		goto fail;
@@ -590,6 +638,18 @@ get_specific (opcode, operands)
 		goto fail;
 	      reg_m = user->reg;
 	      break;
+
+/* start-sanitize-sh3e */
+	    case F_REG_M:
+	    case FPUL_M:
+	    case FPSCR_M:
+	      /* Opcode needs rn */
+	      if (user->type != arg - F_REG_M + F_REG_N)
+		goto fail;
+	      reg_m = user->reg;
+	      break;
+/* end-sanitize-sh3e */
+	
 	    default:
 	      printf ("unhandled %d\n", arg);
 	      goto fail;
@@ -628,18 +688,16 @@ insert (where, how, pcrel)
 {
   fix_new_exp (frag_now,
 	       where - frag_now->fr_literal,
-	       4,
+	       2,
 	       &immediate,
 	       pcrel,
 	       how);
-
 }
 
 static void
 build_relax (opcode)
      sh_opcode_info *opcode;
 {
-  int len;
   int high_byte = shl ? 1 : 0 ;
   char *p;
 
@@ -647,7 +705,7 @@ build_relax (opcode)
     {
       p = frag_var (rs_machine_dependent,
 		    md_relax_table[C (COND_JUMP, COND32)].rlx_length,
-		    len = md_relax_table[C (COND_JUMP, COND8)].rlx_length,
+		    md_relax_table[C (COND_JUMP, COND8)].rlx_length,
 		    C (COND_JUMP, 0),
 		    immediate.X_add_symbol,
 		    immediate.X_add_number,
@@ -658,7 +716,7 @@ build_relax (opcode)
     {
       p = frag_var (rs_machine_dependent,
 		    md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length,
-		    len = md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length,
+		    md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length,
 		    C (UNCOND_JUMP, 0),
 		    immediate.X_add_symbol,
 		    immediate.X_add_number,
@@ -899,7 +957,33 @@ md_atof (type, litP, sizeP)
   return NULL;
 }
 
+/* Handle the .uses pseudo-op.  This pseudo-op is used just before a
+   call instruction.  It refers to a label of the instruction which
+   loads the register which the call uses.  We use it to generate a
+   special reloc for the linker.  */
 
+static void
+s_uses (ignore)
+     int ignore;
+{
+  expressionS ex;
+
+  if (! sh_relax)
+    as_warn (".uses pseudo-op seen when not relaxing");
+
+  expression (&ex);
+
+  if (ex.X_op != O_symbol || ex.X_add_number != 0)
+    {
+      as_bad ("bad .uses format");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  fix_new_exp (frag_now, frag_now_fix (), 2, &ex, 1, R_SH_USES);
+
+  demand_empty_rest_of_line ();
+}
 
 CONST char *md_shortopts = "";
 struct option md_longopts[] = {
@@ -921,7 +1005,7 @@ md_parse_option (c, arg)
   switch (c)
     {
     case OPTION_RELAX:
-      relax = 1;
+      sh_relax = 1;
       break;
     case OPTION_LITTLE:
       shl = 1;
@@ -940,6 +1024,7 @@ md_show_usage (stream)
 {
   fprintf(stream, "\
 SH options:\n\
+-little			generate little endian code\n\
 -relax			alter jump instructions for long displacements\n");
 }
 
@@ -973,116 +1058,231 @@ md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
   as_fatal ("failed sanity check.");
 }
 
-/*
-   called after relaxing, change the frags so they know how big they are
- */
-void
-md_convert_frag (headers, fragP)
-     object_headers *headers;
-     fragS *fragP;
+/* This is function is called after the symbol table has been
+   completed, but before md_convert_frag has been called.  If we have
+   seen any .uses pseudo-ops, they point to an instruction which loads
+   a register with the address of a function.  We look through the
+   fixups to find where the function address is being loaded from.  We
+   then generate a COUNT reloc giving the number of times that
+   function address is referred to.  The linker uses this information
+   when doing relaxing, to decide when it can eliminate the stored
+   function address entirely.  */
 
+void
+sh_coff_frob_file ()
 {
-  unsigned char *buffer = (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+  int iseg;
+
+  if (! sh_relax)
+    return;
+
+  for (iseg = SEG_E0; iseg < SEG_UNKNOWN; iseg++)
+    {
+      fixS *fix;
+
+      for (fix = segment_info[iseg].fix_root; fix != NULL; fix = fix->fx_next)
+	{
+	  symbolS *sym;
+	  bfd_vma val;
+	  bfd_vma paddr;
+	  fixS *fscan;
+	  int iscan;
+	  int count;
+
+	  if (fix->fx_r_type != R_SH_USES)
+	    continue;
+
+	  /* The R_SH_USES reloc should refer to a defined local
+             symbol in the same section.  */
+	  sym = fix->fx_addsy;
+	  if (sym == NULL
+	      || fix->fx_subsy != NULL
+	      || fix->fx_addnumber != 0
+	      || S_GET_SEGMENT (sym) != iseg
+	      || S_GET_STORAGE_CLASS (sym) == C_EXT)
+	    {
+	      as_warn_where (fix->fx_file, fix->fx_line,
+			     ".uses does not refer to a local symbol in the same section");
+	      continue;
+	    }
+
+	  /* Look through the fixups again, this time looking for one
+             at the same location as sym.  */
+	  val = S_GET_VALUE (sym);
+	  paddr = segment_info[iseg].scnhdr.s_paddr;
+	  for (fscan = segment_info[iseg].fix_root;
+	       fscan != NULL;
+	       fscan = fscan->fx_next)
+	    if (val == paddr + fscan->fx_frag->fr_address + fscan->fx_where)
+	      break;
+	  if (fscan == NULL)
+	    {
+	      as_warn_where (fix->fx_file, fix->fx_line,
+			     "can't find fixup pointed to by .uses");
+	      continue;
+	    }
+
+	  if (fscan->fx_tcbit)
+	    {
+	      /* We've already done this one.  */
+	      continue;
+	    }
+
+	  /* fscan should also be a fixup to a local symbol in the same
+             section.  */
+	  sym = fscan->fx_addsy;
+	  if (sym == NULL
+	      || fscan->fx_subsy != NULL
+	      || fscan->fx_addnumber != 0
+	      || S_GET_SEGMENT (sym) != iseg
+	      || S_GET_STORAGE_CLASS (sym) == C_EXT)
+	    {
+	      as_warn_where (fix->fx_file, fix->fx_line,
+			     ".uses target does not refer to a local symbol in the same section");
+	      continue;
+	    }
+
+	  /* Now we look through all the fixups of all the sections,
+	     counting the number of times we find a reference to sym.  */
+	  count = 0;
+	  for (iscan = SEG_E0; iscan < SEG_UNKNOWN; iscan++)
+	    {
+	      paddr = segment_info[iscan].scnhdr.s_paddr;
+	      for (fscan = segment_info[iscan].fix_root;
+		   fscan != NULL;
+		   fscan = fscan->fx_next)
+		{
+		  if (fscan->fx_addsy == sym)
+		    {
+		      ++count;
+		      fscan->fx_tcbit = 1;
+		    }
+		}
+	    }
+
+	  if (count < 1)
+	    abort ();
+
+	  /* Generate a R_SH_COUNT fixup at the location of sym.  We
+             have already adjusted the value of sym to include the
+             fragment address, so we undo that adjustment here.  */
+	  subseg_change (iseg, 0);
+	  fix_new (sym->sy_frag, S_GET_VALUE (sym) - sym->sy_frag->fr_address,
+		   4, &abs_symbol, count, 0, R_SH_COUNT);
+	}
+    }
+}
+
+/* Called after relaxing.  Set the correct sizes of the fragments, and
+   create relocs so that md_apply_fix will fill in the correct values.  */
+
+void
+md_convert_frag (headers, seg, fragP)
+     object_headers *headers;
+     segT seg;
+     fragS *fragP;
+{
   int donerelax = 0;
-  int highbyte = shl ? 1 : 0;
-  int lowbyte = shl ? 0 : 1;
-  int targ_addr = ((fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0) + fragP->fr_offset);
+
   switch (fragP->fr_subtype)
     {
     case C (COND_JUMP, COND8):
-      {
-	/* Get the address of the end of the instruction */
-	int next_inst = fragP->fr_fix + fragP->fr_address + 2;
-
-	int disp = targ_addr - next_inst - 2;
-	disp /= 2;
-	
-	md_number_to_chars (buffer + lowbyte, disp & 0xff, 1);
-	fragP->fr_fix += 2;
-	fragP->fr_var = 0;
-      }
+      subseg_change (seg, 0);
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, R_SH_PCDISP8BY2);
+      fragP->fr_fix += 2;
+      fragP->fr_var = 0;
       break;
 
     case C (UNCOND_JUMP, UNCOND12):
-      {
-	/* Get the address of the end of the instruction */
-	int next_inst = fragP->fr_fix + fragP->fr_address + 2;
-
-	int t;
-	int disp = targ_addr - next_inst - 2;
-
-	disp /= 2;
-	t = buffer[highbyte] & 0xf0;
-	md_number_to_chars (buffer, disp & 0xfff, 2);
-	buffer[highbyte] = (buffer[highbyte] & 0xf) | t;
-	fragP->fr_fix += 2;
-	fragP->fr_var = 0;
-      }
+      subseg_change (seg, 0);
+      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
+	       1, R_SH_PCDISP);
+      fragP->fr_fix += 2;
+      fragP->fr_var = 0;
       break;
 
     case C (UNCOND_JUMP, UNCOND32):
     case C (UNCOND_JUMP, UNDEF_WORD_DISP):
-      {
-	/* A jump wont fit in 12 bits, make code which looks like
-	   bra foo
-	   mov.w @(0, PC), r14
-	   .long disp
-	   foo: bra @r14
+      if (fragP->fr_symbol == NULL)
+	as_bad ("at 0x%lx, displacement overflows 12-bit field",
+		(unsigned long) fragP->fr_address);
+      else
+	as_bad ("at 0x%lx, displacement to %sdefined symbol %s overflows 12-bit field",
+		(unsigned long) fragP->fr_address,		
+		S_IS_DEFINED (fragP->fr_symbol) ? "" : "un",
+		S_GET_NAME (fragP->fr_symbol));
+
+#if 0				/* This code works, but generates poor code and the compiler
+				   should never produce a sequence that requires it to be used.  */
+
+      /* A jump wont fit in 12 bits, make code which looks like
+	 bra foo
+	 mov.w @(0, PC), r14
+	 .long disp
+	 foo: bra @r14
 	 */
+      int t = buffer[0] & 0x10;
 
-	int next_inst =
-	fragP->fr_fix + fragP->fr_address + UNCOND32_LENGTH;
+      buffer[highbyte] = 0xa0;	/* branch over move and disp */
+      buffer[lowbyte] = 3;
+      buffer[highbyte+2] = 0xd0 | JREG;	/* Build mov insn */
+      buffer[lowbyte+2] = 0x00;
 
-	int disp = targ_addr - next_inst;
-	int t = buffer[0] & 0x10;
+      buffer[highbyte+4] = 0;	/* space for 32 bit jump disp */
+      buffer[lowbyte+4] = 0;
+      buffer[highbyte+6] = 0;
+      buffer[lowbyte+6] = 0;
 
-	disp /= 2;
-abort();
-	buffer[highbyte] = 0xa0;	/* branch over move and disp */
-	buffer[lowbyte] = 3;
-	buffer[highbyte+2] = 0xd0 | JREG;	/* Build mov insn */
-	buffer[lowbyte+2] = 0x00;
+      buffer[highbyte+8] = 0x40 | JREG;	/* Build jmp @JREG */
+      buffer[lowbyte+8] = t ? 0xb : 0x2b;
 
-	buffer[highbyte+4] = 0;		/* space for 32 bit jump disp */
-	buffer[lowbyte+4] = 0;
-	buffer[highbyte+6] = 0;
-	buffer[lowbyte+6] = 0;
+      buffer[highbyte+10] = 0x20; /* build nop */
+      buffer[lowbyte+10] = 0x0b;
 
-	buffer[highbyte+8] = 0x40 | JREG;	/* Build jmp @JREG */
-	buffer[lowbyte+8] = t ? 0xb : 0x2b;
+      /* Make reloc for the long disp */
+      fix_new (fragP,
+	       fragP->fr_fix + 4,
+	       4,
+	       fragP->fr_symbol,
+	       fragP->fr_offset,
+	       0,
+	       R_SH_IMM32);
+      fragP->fr_fix += UNCOND32_LENGTH;
+      fragP->fr_var = 0;
+      donerelax = 1;
+#endif
 
-	buffer[highbyte+10] = 0x20;	/* build nop */
-	buffer[lowbyte+10] = 0x0b;
-
-	/* Make reloc for the long disp */
-	fix_new (fragP,
-		 fragP->fr_fix + 4,
-		 4,
-		 fragP->fr_symbol,
-		 fragP->fr_offset,
-		 0,
-		 R_SH_IMM32);
-	fragP->fr_fix += UNCOND32_LENGTH;
-	fragP->fr_var = 0;
-	donerelax = 1;
-
-      }
       break;
 
     case C (COND_JUMP, COND12):
+      /* A bcond won't fit, so turn it into a b!cond; bra disp; nop */
       {
-	/* A bcond won't fit, so turn it into a b!cond; bra disp; nop */
-	int next_inst =
-	fragP->fr_fix + fragP->fr_address + 6;
+	unsigned char *buffer =
+	  (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+	int highbyte = shl ? 1 : 0;
+	int lowbyte = shl ? 0 : 1;
 
-	int disp = targ_addr - next_inst;
-	disp /= 2;
-	md_number_to_chars (buffer + 2, disp & 0xfff, 2);
-	buffer[highbyte] ^= 0x2;	/* Toggle T/F bit */
-	buffer[lowbyte] = 1;		/* branch over jump and nop */
-	buffer[highbyte+2] = (buffer[highbyte+2] & 0xf) | 0xa0;	/* Build jump insn */
-	buffer[lowbyte+5] = 0x20;	/* Build nop */
-	buffer[lowbyte+5] = 0x0b;
+	/* Toggle the true/false bit of the bcond.  */
+	buffer[highbyte] ^= 0x2;
+
+	/* Build a relocation to six bytes farther on.  */
+	subseg_change (seg, 0);
+	fix_new (fragP, fragP->fr_fix, 2,
+		 segment_info[seg].dot,
+		 fragP->fr_address + fragP->fr_fix + 6,
+		 1, R_SH_PCDISP8BY2);
+
+	/* Set up a jump instruction.  */
+	buffer[highbyte + 2] = 0xa0;
+	buffer[lowbyte + 2] = 0;
+	fix_new (fragP, fragP->fr_fix + 2, 2, fragP->fr_symbol,
+		 fragP->fr_offset, 1, R_SH_PCDISP);
+
+	/* Fill in a NOP instruction.  */
+	buffer[highbyte + 4] = 0x0;
+	buffer[lowbyte + 4] = 0x9;
+
 	fragP->fr_fix += 6;
 	fragP->fr_var = 0;
 	donerelax = 1;
@@ -1091,64 +1291,67 @@ abort();
 
     case C (COND_JUMP, COND32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
-      {
-	/* A bcond won't fit and it won't go into a 12 bit
-	   displacement either, the code sequence looks like:
-	   b!cond foop
-	   mov.w @(n, PC), r14
-	   jmp  @r14
-	   nop
-	   .long where
-	   foop:
+      if (fragP->fr_symbol == NULL)
+	as_bad ("at %0xlx, displacement overflows 8-bit field", 
+		(unsigned long) fragP->fr_address);
+      else  
+	as_bad ("at 0x%lx, displacement to %sdefined symbol %s overflows 8-bit field ",
+		(unsigned long) fragP->fr_address,		
+		S_IS_DEFINED (fragP->fr_symbol) ? "" : "un",
+		S_GET_NAME (fragP->fr_symbol));
+
+#if 0				/* This code works, but generates poor code, and the compiler
+				   should never produce a sequence that requires it to be used.  */
+
+      /* A bcond won't fit and it won't go into a 12 bit
+	 displacement either, the code sequence looks like:
+	 b!cond foop
+	 mov.w @(n, PC), r14
+	 jmp  @r14
+	 nop
+	 .long where
+	 foop:
 	 */
 
-	int next_inst =
-	fragP->fr_fix + fragP->fr_address + COND32_LENGTH;
-
-	int disp = targ_addr - next_inst;
-	disp /= 2;
-abort();
-	buffer[0] ^= 0x2;	/* Toggle T/F bit */
+      buffer[0] ^= 0x2;		/* Toggle T/F bit */
 #define JREG 14
-	buffer[1] = 5;		/* branch over mov, jump, nop and ptr */
-	buffer[2] = 0xd0 | JREG;	/* Build mov insn */
-	buffer[3] = 0x2;
-	buffer[4] = 0x40 | JREG;	/* Build jmp @JREG */
-	buffer[5] = 0x0b;
-	buffer[6] = 0x20;	/* build nop */
-	buffer[7] = 0x0b;
-	buffer[8] = 0;		/* space for 32 bit jump disp */
-	buffer[9] = 0;
-	buffer[10] = 0;
-	buffer[11] = 0;
-	buffer[12] = 0;
-	buffer[13] = 0;
-	/* Make reloc for the long disp */
-	fix_new (fragP,
-		 fragP->fr_fix + 8,
-		 4,
-		 fragP->fr_symbol,
-		 fragP->fr_offset,
-		 0,
-		 R_SH_IMM32);
-	fragP->fr_fix += COND32_LENGTH;
-	fragP->fr_var = 0;
-	donerelax = 1;
-      }
+      buffer[1] = 5;		/* branch over mov, jump, nop and ptr */
+      buffer[2] = 0xd0 | JREG;	/* Build mov insn */
+      buffer[3] = 0x2;
+      buffer[4] = 0x40 | JREG;	/* Build jmp @JREG */
+      buffer[5] = 0x0b;
+      buffer[6] = 0x20;		/* build nop */
+      buffer[7] = 0x0b;
+      buffer[8] = 0;		/* space for 32 bit jump disp */
+      buffer[9] = 0;
+      buffer[10] = 0;
+      buffer[11] = 0;
+      buffer[12] = 0;
+      buffer[13] = 0;
+      /* Make reloc for the long disp */
+      fix_new (fragP,
+	       fragP->fr_fix + 8,
+	       4,
+	       fragP->fr_symbol,
+	       fragP->fr_offset,
+	       0,
+	       R_SH_IMM32);
+      fragP->fr_fix += COND32_LENGTH;
+      fragP->fr_var = 0;
+      donerelax = 1;
+#endif
+
       break;
 
     default:
       abort ();
     }
 
-  if (donerelax && !relax)
-    {
-      as_warn ("Offset doesn't fit at 0x%lx, trying to get to %s+0x%x",
-	       (unsigned long) fragP->fr_address,
-	       fragP->fr_symbol  ?    S_GET_NAME(fragP->fr_symbol): "",
-	       targ_addr);
-    }
-
+  if (donerelax && !sh_relax)
+    as_warn ("Offset doesn't fit at 0x%lx, trying to get to %s+0x%lx",
+	     (unsigned long) fragP->fr_address,
+	     fragP->fr_symbol ? S_GET_NAME(fragP->fr_symbol): "",
+	     (unsigned long) fragP->fr_offset);
 }
 
 valueT
@@ -1161,25 +1364,79 @@ DEFUN (md_section_align, (seg, size),
 
 }
 
+/* When relaxing, we need to output a reloc for any .align directive
+   that requests alignment to a four byte boundary or larger.  */
+
+void
+sh_handle_align (frag)
+     fragS *frag;
+{
+  if (sh_relax
+      && frag->fr_type == rs_align
+      && frag->fr_address + frag->fr_fix > 0
+      && frag->fr_offset > 1)
+    fix_new (frag, frag->fr_fix, 2, &abs_symbol, frag->fr_offset, 0,
+	     R_SH_ALIGN);
+}
+
+/* This macro decides whether a particular reloc is an entry in a
+   switch table.  It is used when relaxing, because the linker needs
+   to know about all such entries so that it can adjust them if
+   necessary.  */
+
+#define SWITCH_TABLE(fix)				\
+  ((fix)->fx_addsy != NULL				\
+   && (fix)->fx_subsy != NULL				\
+   && S_GET_SEGMENT ((fix)->fx_addsy) == text_section	\
+   && S_GET_SEGMENT ((fix)->fx_subsy) == text_section	\
+   && ((fix)->fx_r_type == R_SH_IMM32			\
+       || (fix)->fx_r_type == R_SH_IMM16		\
+       || ((fix)->fx_r_type == 0			\
+	   && ((fix)->fx_size == 2			\
+	       || (fix)->fx_size == 4))))
+
+/* See whether we need to force a relocation into the output file.
+   This is used to force out switch and PC relative relocations when
+   relaxing.  */
+
+int
+sh_force_relocation (fix)
+     fixS *fix;
+{
+  if (! sh_relax)
+    return 0;
+
+  return (fix->fx_pcrel
+	  || SWITCH_TABLE (fix)
+	  || fix->fx_r_type == R_SH_COUNT
+	  || fix->fx_r_type == R_SH_ALIGN);
+}
+
+/* Apply a fixup to the object file.  */
+
 void
 md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  int addr = fixP->fx_frag->fr_address + fixP->fx_where;
   int lowbyte = shl ? 0 : 1;
+  int highbyte = shl ? 1 : 0;
+
   if (fixP->fx_r_type == 0)
     {
       if (fixP->fx_size == 2)
 	fixP->fx_r_type = R_SH_IMM16;
-      else
+      else if (fixP->fx_size == 4)
 	fixP->fx_r_type = R_SH_IMM32;
+      else if (fixP->fx_size == 1)
+	fixP->fx_r_type = R_SH_IMM8;
+      else
+	abort ();
     }
 
   switch (fixP->fx_r_type)
     {
-
     case R_SH_IMM4:
       *buf = (*buf & 0xf0) | (val & 0xf);
       break;
@@ -1205,33 +1462,45 @@ md_apply_fix (fixP, val)
       break;
 
     case R_SH_PCRELIMM8BY4:
-      addr &= ~1;
-#if 0
-      if (val & 0x3)
-	as_warn ("non aligned displacement at %x\n", addr);
-#endif
-      /*      val -= (addr + 4); */
-      if (shl||1)
-	val += 1;
-      else
-	val += 3;
-      val /= 4;
+      /* The lower two bits of the PC are cleared before the
+         displacement is added in.  We can assume that the destination
+         is on a 4 byte bounday.  If this instruction is also on a 4
+         byte boundary, then we want
+	   (target - here) / 4
+	 and target - here is a multiple of 4.
+	 Otherwise, we are on a 2 byte boundary, and we want
+	   (target - (here - 2)) / 4
+	 and target - here is not a multiple of 4.  Computing
+	   (target - (here - 2)) / 4 == (target - here + 2) / 4
+	 works for both cases, since in the first case the addition of
+	 2 will be removed by the division.  target - here is in the
+	 variable val.  */
+      val = (val + 2) / 4;
       if (val & ~0xff)
 	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
     case R_SH_PCRELIMM8BY2:
-      addr &= ~1;
-      /*      if ((val & 0x1) != shl)
-	      as_bad ("odd displacement at %x\n", addr);*/
-      /*      val -= (addr + 4); */
-/*      if (!shl)
-	val++;*/
       val /= 2;
       if (val & ~0xff)
 	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
+      break;
+
+    case R_SH_PCDISP8BY2:
+      val /= 2;
+      if (val < -0x80 || val > 0x7f)
+	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+      buf[lowbyte] = val;
+      break;
+
+    case R_SH_PCDISP:
+      val /= 2;
+      if (val < -0x800 || val >= 0x7ff)
+	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+      buf[lowbyte] = val & 0xff;
+      buf[highbyte] |= (val >> 8) & 0xf;
       break;
 
     case R_SH_IMM32:
@@ -1264,22 +1533,26 @@ md_apply_fix (fixP, val)
 	}
       break;
 
+    case R_SH_USES:
+      /* Pass the value into sh_coff_reloc_mangle.  */
+      fixP->fx_addnumber = val;
+      break;
+
+    case R_SH_COUNT:
+    case R_SH_ALIGN:
+      /* Nothing to do here.  */
+      break;
+
     default:
       abort ();
     }
 }
 
-void
-DEFUN (md_operand, (expressionP), expressionS * expressionP)
-{
-}
-
 int md_long_jump_size;
 
-/*
-   called just before address relaxation, return the length
-   by which a fragment must grow to reach it's destination
- */
+/* Called just before address relaxation.  Return the length
+   by which a fragment must grow to reach it's destination.  */
+
 int
 md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
@@ -1356,31 +1629,7 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  int gap = fixP->fx_size + fixP->fx_where +  fixP->fx_frag->fr_address - 1 ;
-  return gap;
-}
-
-short
-tc_coff_fix2rtype (fix_ptr)
-     fixS *fix_ptr;
-{
-  if (fix_ptr->fx_r_type == RELOC_32)
-    {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-       */
-      switch (fix_ptr->fx_size)
-	{
-	case 2:
-	  return R_SH_IMM16;
-	  break;
-	case 1:
-	  return R_SH_IMM8;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  return R_SH_IMM32;
+  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address + 2;
 }
 
 int
@@ -1389,3 +1638,100 @@ tc_coff_sizemachdep (frag)
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
 }
+
+#ifdef OBJ_COFF
+
+/* Adjust a reloc for the SH.  This is similar to the generic code,
+   but does some minor tweaking.  */
+
+void
+sh_coff_reloc_mangle (seg, fix, intr, paddr)
+     segment_info_type *seg;
+     fixS *fix;
+     struct internal_reloc *intr;
+     unsigned int paddr;
+{
+  symbolS *symbol_ptr = fix->fx_addsy;
+  symbolS *dot;
+
+  intr->r_vaddr = paddr + fix->fx_frag->fr_address + fix->fx_where;
+
+  if (! SWITCH_TABLE (fix))
+    {
+      intr->r_type = fix->fx_r_type;
+      intr->r_offset = 0;
+    }
+  else
+    {
+      know (sh_relax);
+
+      if (fix->fx_r_type == R_SH_IMM16)
+	intr->r_type = R_SH_SWITCH16;
+      else if (fix->fx_r_type == R_SH_IMM32)
+	intr->r_type = R_SH_SWITCH32;
+      else
+	abort ();
+
+      /* For a switch reloc, we set r_offset to the difference between
+         the reloc address and the subtrahend.  When the linker is
+         doing relaxing, it can use the determine the starting and
+         ending points of the switch difference expression.  */
+      intr->r_offset = intr->r_vaddr - S_GET_VALUE (fix->fx_subsy);
+    }
+
+  /* PC relative relocs are always against the current section.  */
+  if (symbol_ptr == NULL)
+    {
+      switch (fix->fx_r_type)
+	{
+	case R_SH_PCRELIMM8BY2:
+	case R_SH_PCRELIMM8BY4:
+	case R_SH_PCDISP8BY2:
+	case R_SH_PCDISP:
+	case R_SH_USES:
+	  symbol_ptr = seg->dot;
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  if (fix->fx_r_type == R_SH_USES)
+    {
+      /* We can't store the offset in the object file, since this
+	 reloc does not take up any space, so we store it in r_offset.
+	 The fx_addnumber field was set in md_apply_fix.  */
+      intr->r_offset = fix->fx_addnumber;
+    }
+  else if (fix->fx_r_type == R_SH_COUNT)
+    {
+      /* We can't store the count in the object file, since this reloc
+         does not take up any space, so we store it in r_offset.  The
+         fx_offset field was set when the fixup was created in
+         sh_coff_frob_file.  */
+      intr->r_offset = fix->fx_offset;
+      /* This reloc is always absolute.  */
+      symbol_ptr = NULL;
+    }
+  else if (fix->fx_r_type == R_SH_ALIGN)
+    {
+      /* Store the alignment in the r_offset field.  */
+      intr->r_offset = fix->fx_offset;
+      /* This reloc is always absolute.  */
+      symbol_ptr = NULL;
+    }
+
+  /* Turn the segment of the symbol into an offset.  */
+  if (symbol_ptr != NULL)
+    {
+      dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
+      if (dot != NULL)
+	intr->r_symndx = dot->sy_number;
+      else
+	intr->r_symndx = symbol_ptr->sy_number;
+    }
+  else
+    intr->r_symndx = -1;
+}
+
+#endif
