@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -73,7 +73,7 @@ cgen_asm_init_parse ()
 
 /* Queue a fixup.  */
 
-void
+static void
 cgen_queue_fixup (opindex, opinfo, expP)
      int           opindex;
      expressionS * expP;
@@ -85,6 +85,62 @@ cgen_queue_fixup (opindex, opinfo, expP)
   fixups[num_fixups].opindex = opindex;
   fixups[num_fixups].opinfo  = opinfo;
   ++ num_fixups;
+}
+
+/* The following three functions allow a backup of the fixup chain to be made,
+   and to have this backup be swapped with the current chain.  This allows
+   certain ports, eg the m32r, to swap two instructions and swap their fixups
+   at the same time.  */
+static struct fixup saved_fixups [MAX_FIXUPS];
+static int          saved_num_fixups;
+
+void
+cgen_save_fixups ()
+{
+  saved_num_fixups = num_fixups;
+  
+  memcpy (saved_fixups, fixups, sizeof (fixups[0]) * num_fixups);
+
+  num_fixups = 0;
+}
+
+void
+cgen_restore_fixups ()
+{
+  num_fixups = saved_num_fixups;
+  
+  memcpy (fixups, saved_fixups, sizeof (fixups[0]) * num_fixups);
+
+  saved_num_fixups = 0;
+}
+
+void
+cgen_swap_fixups ()
+{
+  int          tmp;
+  struct fixup tmp_fixup;
+
+  if (num_fixups == 0)
+    {
+      cgen_restore_fixups ();
+    }
+  else if (saved_num_fixups == 0)
+    {
+      cgen_save_fixups ();
+    }
+  else
+    {
+      tmp = saved_num_fixups;
+      saved_num_fixups = num_fixups;
+      num_fixups = tmp;
+      
+      for (tmp = MAX_FIXUPS; tmp--;)
+	{
+	  tmp_fixup          = saved_fixups [tmp];
+	  saved_fixups [tmp] = fixups [tmp];
+	  fixups [tmp]       = tmp_fixup;
+	}
+    }
 }
 
 /* Default routine to record a fixup.
@@ -264,9 +320,11 @@ cgen_md_operand (expressionP)
 
 /* Finish assembling instruction INSN.
    BUF contains what we've built up so far.
-   LENGTH is the size of the insn in bits.  */
+   LENGTH is the size of the insn in bits.
+   Returns the address of the buffer containing the assembled instruction,
+   in case the caller needs to modify it for some reason. */
 
-void
+char *
 cgen_asm_finish_insn (insn, buf, length)
      const CGEN_INSN * insn;
      cgen_insn_t *     buf;
@@ -280,7 +338,7 @@ cgen_asm_finish_insn (insn, buf, length)
   /* ??? Target foo issues various warnings here, so one might want to provide
      a hook here.  However, our caller is defined in tc-foo.c so there
      shouldn't be a need for a hook.  */
-
+  
   /* Write out the instruction.
      It is important to fetch enough space in one call to `frag_more'.
      We use (f - frag_now->fr_literal) to compute where we are and we
@@ -330,7 +388,7 @@ cgen_asm_finish_insn (insn, buf, length)
       
       /* Create a relaxable fragment for this instruction.  */
       old_frag = frag_now;
-      
+
       frag_var (rs_machine_dependent,
 		max_len - byte_len /* max chars */,
 		0 /* variable part already allocated */,
@@ -395,6 +453,8 @@ cgen_asm_finish_insn (insn, buf, length)
 				fixups[i].opinfo,
 				& fixups[i].exp);
     }
+
+  return f;
 }
 
 /* Apply a fixup to the object code.  This is called for all the
