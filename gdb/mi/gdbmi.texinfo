@@ -104,7 +104,7 @@ Elena Zannoni.
 
 @menu
 * GDB/MI Command Syntax::
-* GDB/MI and CLI::
+* GDB/MI Compatibility with CLI::
 * GDB/MI Output Records::
 * GDB/MI Command Description Format::
 * GDB/MI Breakpoint Table Commands::
@@ -117,6 +117,7 @@ Elena Zannoni.
 * GDB/MI Thread Commands::
 * GDB/MI Tracepoint Commands::
 * GDB/MI Variable Objects::
+* GDB/MI Draft Changes to Output Syntax::
 @end menu
 
 @c When these are implemented, they should be moved to be between Misc and
@@ -340,6 +341,9 @@ the log output is prefixed by @samp{&}.
 @xref{GDB/MI Stream Records, , @sc{gdb/mi} Stream Records}, for more
 details about the various output records.
 
+@xref{GDB/MI Draft Changes to Output Syntax, , @sc{gdb/mi} Draft Changes
+to Output Syntax}, for proposed revisions to the current output syntax.
+
 @node GDB/MI Simple Examples
 @subsection Simple Examples of @sc{gdb/mi} Interaction
 @cindex @sc{gdb/mi}, simple examples
@@ -396,7 +400,7 @@ Here's what happens if you pass a non-existent command:
 @end example
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI and CLI
+@node GDB/MI Compatibility with CLI
 @section @sc{gdb/mi} Compatibility with CLI
 
 @cindex compatibility, @sc{gdb/mi} and CLI
@@ -3732,12 +3736,31 @@ Update the value of the variable object @var{name} by evaluating its
 expression after fetching all the new values from memory or registers.
 A @samp{*} causes all existing variable objects to be updated.
 
-@ignore
-@c%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@appendix Proposed v2.0 Output Syntax
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Draft Changes to Output Syntax
+@section  @sc{gdb/mi} Draft Changes to Output Syntax
 
-This appendix is not part of the MI specification.  It is provided as a
-discussion point.
+@cindex draft changes to output syntax of @sc{gdb/mi}
+@cindex @sc{gdb/mi}, draft changes to output syntax
+
+One problem identified in the existing @sc{gdb/mi} output syntax was the
+difficulty in differentiating between a tuple such as:
+
+@example
+@{number="1",type="breakpoint",disp="keep",enabled="y"@}
+@end example
+
+where each value has a unique label, and a list such as:
+
+@example
+@{"1","2","4"@}
+@{bp="1",bp="2",bp="4"@}
+@end example
+
+where values are un-labeled or the label is duplicated.
+
+What follows is a draft revision to the output specification that
+addresses this problem.
 
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
 optionally followed by a single result record.  The result record being
@@ -3870,9 +3893,6 @@ instance messages that should be displayed as part of an error log.  All
 the log output is prefixed by the prefix ``&''.
 
 @end itemize
-
-@end ignore
-
 
 @c Local variables:
 @c change-log-default-name: "ChangeLog-mi"
