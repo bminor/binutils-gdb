@@ -2662,18 +2662,13 @@ void
 obj_coff_init_stab_section (seg)
      segT seg;
 {
-  extern char *logical_input_file, *physical_input_file;
+  char *file;
   char *p;
-  const char *file;
   unsigned int stroff;
 
   /* Make space for this first symbol. */
   p = frag_more (12);
-  file = logical_input_file;
-  if (file == NULL)
-    file = physical_input_file;
-  if (file == NULL)
-    file = "UNKNOWN";
+  as_where (&file, (unsigned int *) NULL);
   stroff = get_stab_string_offset (file, segment_info[seg].scnhdr.s_name);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);

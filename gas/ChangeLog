@@ -1,3 +1,32 @@
+Fri Oct 22 14:45:49 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* input-scrub.c (physical_input_file, logical_input_file,
+	physical_input_line, logical_input_line): Made static.
+	(as_where): Return current file name and line number, don't print
+	them out.
+	* messages.c (as_show_where): New static function.  Other
+	functions use it instead of as_where.
+	(as_bad_internal): New static function.
+	(as_bad): Use as_bad_internal.
+	(as_bad_where): New function, like as_bad but taking a file name
+	and line number.
+	* as.h (as_bad_where): Declare.
+	(as_where): Change prototype for new arguments.
+	* write.h (fixS): Added fields fx_file and fx_line.
+	* write.c (fix_new_internal): Save file and line number in fix.
+	(fixup_segment): Use as_bad_where, not as_bad.
+	* input-file.c (f_in, file_name): Made static.
+	* cond.c (struct file_line): Just use file and line fields.
+	(s_else): Use as_where and as_bad_where, not get_file_line and
+	set_file_line.
+	(get_file_line, set_file_line): Removed.
+	* listing.c (listing_newline): Use as_where.
+	* config/obj-coffbfd.c (obj_coff_init_stab_section): Use as_where.
+	* config/obj-ecoff.c (add_file): Use as_where.
+	* config/obj-elf.c (obj_elf_init_stab_section): Use as_where.
+	* config/tc-m68k.c (md_apply_fix_2): Use as_bad_where.
+	* config/tc-mips.c (tc_gen_reloc): Use as_bad_where, not assert.
+
 Thu Oct 21 12:52:01 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/tc-m68k.h: Don't define REGISTER_PREFIX or
