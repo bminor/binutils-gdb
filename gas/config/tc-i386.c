@@ -1408,8 +1408,8 @@ md_assemble (line)
 	/* Select between byte and word/dword operations. */
 	if (i.tm.opcode_modifier & W)
 	  i.tm.base_opcode |= W;
-	/* Now select between word & dword operations via the
-				   operand size prefix. */
+	/* Now select between word & dword operations via the operand
+	   size prefix. */
 	if ((i.suffix == WORD_OPCODE_SUFFIX) ^ flag_16bit_code)
 	  {
 	    if (! check_prefix (WORD_PREFIX_OPCODE))
