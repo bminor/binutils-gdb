@@ -248,10 +248,9 @@ extern boolean bfd_xcoff_link_record_set
 	   bfd_size_type));
 extern boolean bfd_xcoff_import_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
-	   bfd_vma, const char *, const char *, const char *));
+	   bfd_vma, const char *, const char *, const char *, unsigned int));
 extern boolean bfd_xcoff_export_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
-	   boolean));
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *));
 extern boolean bfd_xcoff_link_count_reloc
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_xcoff_record_link_assignment

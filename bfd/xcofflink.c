@@ -2514,7 +2514,7 @@ bfd_xcoff_link_record_set (output_bfd, info, harg, size)
 
 boolean
 bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
-			 impmember)
+			 impmember, syscall_flag)
      bfd *output_bfd;
      struct bfd_link_info *info;
      struct bfd_link_hash_entry *harg;
@@ -2522,6 +2522,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
      const char *imppath;
      const char *impfile;
      const char *impmember;
+     unsigned int syscall_flag;
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 
@@ -2564,7 +2565,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 	h = hds;
     }
 
-  h->flags |= XCOFF_IMPORT;
+  h->flags |= (XCOFF_IMPORT | syscall_flag);
 
   if (val != (bfd_vma) -1)
     {
@@ -2631,11 +2632,10 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 /* Export a symbol.  */
 
 boolean
-bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
+bfd_xcoff_export_symbol (output_bfd, info, harg)
      bfd *output_bfd;
      struct bfd_link_info *info;
      struct bfd_link_hash_entry *harg;
-     boolean syscall ATTRIBUTE_UNUSED;
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 
@@ -5334,7 +5334,10 @@ xcoff_write_global_symbol (h, p)
     if (((h->flags & XCOFF_DEF_REGULAR) == 0 && 
 	 (h->flags & XCOFF_DEF_DYNAMIC) != 0) || 
 	(h->flags & XCOFF_IMPORT) != 0) {
-      ldsym->l_smtype |= L_IMPORT;
+      /* Clear l_smtype 
+	 Import symbols are defined so the check above will make the l_smtype
+	 XTY_SD.  But this is not correct, it should be cleared. */
+      ldsym->l_smtype = L_IMPORT;
     }
 
     if (((h->flags & XCOFF_DEF_REGULAR) != 0 && 
@@ -5353,6 +5356,29 @@ xcoff_write_global_symbol (h, p)
 
     ldsym->l_smclas = h->smclas;
 
+    if (ldsym->l_smtype & L_IMPORT)
+      {
+	if ((h->root.type == bfd_link_hash_defined ||
+	     h->root.type == bfd_link_hash_defweak) &&
+	    (h->root.u.def.value != 0))
+	  {
+	    ldsym->l_smclas = XMC_XO;
+	  }
+	else if ((h->flags & (XCOFF_SYSCALL32 | XCOFF_SYSCALL64)) ==
+		 (XCOFF_SYSCALL32 | XCOFF_SYSCALL64))
+	  {
+	    ldsym->l_smclas = XMC_SV3264;
+	  }
+	else if (h->flags & XCOFF_SYSCALL32) 
+	  {
+	    ldsym->l_smclas = XMC_SV;
+	  }
+	else if (h->flags & XCOFF_SYSCALL64) 
+	  {
+	    ldsym->l_smclas = XMC_SV64;
+	  }
+      }
+       
     if (ldsym->l_ifile == (bfd_size_type) -1) {
       ldsym->l_ifile = 0;
 

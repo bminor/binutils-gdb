@@ -108,7 +108,6 @@ struct export_symbol_list
 {
   struct export_symbol_list *next;
   const char *name;
-  boolean syscall;
 };
 
 static struct export_symbol_list *export_symbols;
@@ -642,7 +641,7 @@ gld${EMULATION_NAME}_before_allocation ()
       h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
       if (h == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
-      if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h, el->syscall))
+      if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h))
 	einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
     }
 
@@ -842,8 +841,7 @@ static int change_symbol_mode (char *input)
   return 0;
 }
 
-
-static int is_syscall (char *input)
+static int is_syscall(char *input, unsigned int *flag)
 {
   /*
    * 1 : yes
@@ -852,44 +850,43 @@ static int is_syscall (char *input)
    */
   unsigned int bit;
   char *string;
-
-  char *syscall_string[] = {
-    "svc",	     /* 0x01 */
-    "svc32",	     /* 0x02 */
-    "svc3264",	     /* 0x04 */
-    "svc64",	     /* 0x08 */
-    "syscall",	     /* 0x10 */
-    "syscall32",     /* 0x20 */
-    "syscall3264",   /* 0x40 */
-    "syscall64",     /* 0x80 */
-    NULL
+  
+  struct sc {
+    char *syscall_string;
+    unsigned int flag;
+  } s [] = {
+    { "svc"	    /* 0x01 */, XCOFF_SYSCALL32 },
+    { "svc32"	    /* 0x02 */, XCOFF_SYSCALL32 },
+    { "svc3264"     /* 0x04 */, XCOFF_SYSCALL32 | XCOFF_SYSCALL64 },
+    { "svc64"	    /* 0x08 */, XCOFF_SYSCALL64 },
+    { "syscall"     /* 0x10 */, XCOFF_SYSCALL32 },
+    { "syscall32"   /* 0x20 */, XCOFF_SYSCALL32 },
+    { "syscall3264" /* 0x40 */, XCOFF_SYSCALL32 | XCOFF_SYSCALL64 },
+    { "syscall64"   /* 0x80 */, XCOFF_SYSCALL64 },
+    { NULL, 0 },
   };
 
-  for (bit = 0; ;bit++)
-    {
+  *flag = 0;
 
-      string = syscall_string[bit];
-      if (NULL == string)
-	{
-	  return -1;
-	}
-
-      if (0 == strcmp (input, string))
-	{
-	  if (1 << bit & ${SYSCALL_MASK})
-	    {
-	      return 1;
-	    }
-	  else
-	    {
-	      return 0;
-	    }
-	}
+  for (bit = 0; ;bit++) {
+    
+    string = s[bit].syscall_string;
+    if (NULL == string) {
+      return -1;
     }
+
+    if (0 == strcmp(input, string)) {
+      if (1 << bit & ${SYSCALL_MASK}) {
+	*flag = s[bit].flag;
+	return 1;
+      } else {
+	return 0;
+      }
+    }
+  }
   /* should not be here */
   return -1;
 }
-
 
 /* Read an import or export file.  For an import file, this is called
    by the before_allocation emulation routine.  For an export file,
@@ -939,7 +936,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
     {
       char *s;
       char *symname;
-      boolean syscall;
+      unsigned int syscall_flag = 0;
       bfd_vma address;
       struct bfd_link_hash_entry *h;
 
@@ -1042,7 +1039,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	{
 	  /* This is a symbol to be imported or exported.  */
 	  symname = s;
-	  syscall = false;
+	  syscall_flag = 0;
 	  address = (bfd_vma) -1;
 
 	  while (! isspace ((unsigned char) *s) && *s != '\0')
@@ -1074,29 +1071,21 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		  int status;
 		  char *end;
 
-		  status = is_syscall (s);
+		  status = is_syscall(s, &syscall_flag);
+	      
+		  if (0 > status) {
+		    /* not a system call, check for address */
+		    address = strtoul (s, &end, 0);
 
-		  switch (status)
-		    {
-		    case 1:
-		      /* this is a system call */
-		      syscall = true;
-		      break;
-
-		    case 0:
-		      /* ignore this system call */
-		      break;
-
-		    default:
-		      /* not a system call, check for address */
-		      address = strtoul (s, &end, 0);
-		      if (*end != '\0')
-			{
-			  einfo ("%s:%d: warning: syntax error in import/export file\n",
-				 filename, lineno);
-
-			}
-		    }
+		    /* not a system call, check for address */
+		    address = strtoul (s, &end, 0);
+		    if (*end != '\0')
+		      {
+			einfo ("%s:%d: warning: syntax error in import/export file\n",
+			       filename, lineno);
+			
+		      }
+		  }
 		}
 	    }
 
@@ -1109,7 +1098,6 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		   xmalloc (sizeof (struct export_symbol_list)));
 	      n->next = export_symbols;
 	      n->name = xstrdup (symname);
-	      n->syscall = syscall;
 	      export_symbols = n;
 	    }
 	  else
@@ -1125,7 +1113,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		{
 		  if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h,
 						 address, imppath, impfile,
-						 impmember))
+						 impmember, syscall_flag))
 		    einfo ("%X%s:%d: failed to import symbol %s: %E\n",
 			   filename, lineno, symname);
 		}

@@ -1,3 +1,14 @@
+2001-09-05  Tom Rix <trix@redhat.com> 
+
+	* xcofflink.c (bfd_xcoff_import_symbol): Handle import file XMC_XO 
+	and syscall symbols.
+	(write_global_symbol) : Same.	
+	(bfd_xcoff_export_symbol): Remove unused syscall param.
+	* libxcoff.h: Change prototype of bfd_xcoff_export symbol and 
+	bfd_xcoff_import_symbol.
+	* bfd-in.h: Same.
+	* bfd-in2.h : Regenerate.
+
 2001-09-04  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (SKIP_HOWTO): New.
