@@ -1,3 +1,14 @@
+Thu Mar 20 19:49:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Change DW to W for cmpxchg and xadd, since they don't
+	take a direction bit.
+
+start-sanitize-coldfire
+Wed Mar 19 06:24:58 1997  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k.h (mcfmac, mcfdiv): New macros.
+
+end-sanitize-coldfire
 Sat Mar 15 19:03:29 1997  H.J. Lu  <hjl@lucon.org>
 
 	* sparc.h (sparc_opcode_lookup_arch): Use full prototype.
