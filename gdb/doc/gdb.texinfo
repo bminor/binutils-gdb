@@ -12846,6 +12846,32 @@ Arguments of type @code{float} will be passed directly to unprototyped
 functions.
 @end table
 
+@kindex set cp-abi
+@kindex show cp-abi
+@value{GDBN} needs to know the ABI used for your program's C@t{++}
+objects.  The correct C@t{++} ABI depends on which C@t{++} compiler was
+used to build your application.  @value{GDBN} only fully supports
+programs with a single C@t{++} ABI; if your program contains code using
+multiple C@t{++} ABI's or if @value{GDBN} can not identify your
+program's ABI correctly, you can tell @value{GDBN} which ABI to use.
+Currently supported ABI's include ``gnu-v2'', for @code{g++} versions
+before 3.0, ``gnu-v3'', for @code{g++} versions 3.0 and later, and
+``hpaCC'' for the HP ANSI C@t{++} compiler.  Other C@t{++} compilers may
+use the ``gnu-v2'' or ``gnu-v3'' ABI's as well.  The default setting is
+``auto''.
+
+@table @code
+@item show cp-abi
+Show the C@t{++} ABI currently in use.
+
+@item set cp-abi
+With no argument, show the list of supported C@t{++} ABI's.
+
+@item set cp-abi @var{abi}
+@itemx set cp-abi auto
+Set the current C@t{++} ABI to @var{abi}, or return to automatic detection.
+@end table
+
 @node Messages/Warnings
 @section Optional warnings and messages
 
