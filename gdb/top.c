@@ -3502,7 +3502,7 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   add_info ("set", show_command, "Show all GDB settings.");
 
   add_cmd ("commands", no_class, show_commands,
-	   "Show the the history of commands you typed.\n\
+	   "Show the history of commands you typed.\n\
 You can supply a command number to start with, or a `+' to start after\n\
 the previous command number shown.",
 	   &showlist);
@@ -3512,15 +3512,15 @@ the previous command number shown.",
 
   add_com ("while", class_support, while_command,
 "Execute nested commands WHILE the conditional expression is non zero.\n\
-The conditional expression must follow the word `while' and must in turn be\
-followed by a new line.  The nested commands must be entered one per line,\
+The conditional expression must follow the word `while' and must in turn be\n\
+followed by a new line.  The nested commands must be entered one per line,\n\
 and should be terminated by the word `end'.");
 
   add_com ("if", class_support, if_command,
 "Execute nested commands once IF the conditional expression is non zero.\n\
-The conditional expression must follow the word `if' and must in turn be\
-followed by a new line.  The nested commands must be entered one per line,\
-and should be terminated by the word 'else' or `end'.  If an else clause\
+The conditional expression must follow the word `if' and must in turn be\n\
+followed by a new line.  The nested commands must be entered one per line,\n\
+and should be terminated by the word 'else' or `end'.  If an else clause\n\
 is used, the same rules apply to its nested commands as to the first ones.");
 
   /* If target is open when baud changes, it doesn't take effect until the

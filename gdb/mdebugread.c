@@ -687,9 +687,12 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
   switch (sh->sc)
     {
     case scText:
-      /* The value of a stEnd symbol is the displacement from the
-	 corresponding start symbol value, do not relocate it.  */
-      if (sh->st != stEnd)
+      /* Do not relocate relative values.
+	 The value of a stEnd symbol is the displacement from the
+	 corresponding start symbol value.
+	 The value of a stBlock symbol is the displacement from the
+	 procedure address.  */
+      if (sh->st != stEnd && sh->st != stBlock)
 	sh->value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
       break;
     case scData:
@@ -3216,8 +3219,6 @@ psymtab_to_symtab_1 (pst, filename)
   else
     {
       /* This symbol table contains ordinary ecoff entries.  */
-
-      /* FIXME:  doesn't use pst->section_offsets.  */
 
       int f_max;
       int maxlines;

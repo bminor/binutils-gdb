@@ -1,3 +1,10 @@
+Mon May 15 23:50:51 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol):  Do not relocate stBlock/scText
+	symbols, their value is the displacement from the procedure address.
+	* top.c (init_main):  Add missing newlines to help strings for
+	`if' and `while' commands, fix help string for `show commands'.
+
 Mon May 15 18:37:56 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* breakpoint.c:  Move defaults of watchpoint related macros into
