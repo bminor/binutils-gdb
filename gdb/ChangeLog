@@ -1,3 +1,10 @@
+2002-09-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_use_struct_convention): Use definition according to ABI.
+	(sh_push_arguments): Store in register with correct endianess.
+	(sh_default_store_return_value): Ditto.
+	(sh_gdbarch_init): Set sizeof long double to 8.
+
 2002-09-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* defs.h: Move inclusion of "ansidecl.h" before "gdb_locale.h".
