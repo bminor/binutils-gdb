@@ -1,6 +1,7 @@
 Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* scripttempl/elf.sc: Add the remaining DWARF sections.
+	* scripttempl/{elfd10v.sc,elfmips.sc,elfppc.sc,v850.sc}: Likewise.
 
 Tue Nov 26 16:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
