@@ -1,3 +1,7 @@
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe.g: Update for 2003-02-14 elf64-ppc.c change.
+
 2003-02-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-shared/shared.exp: Run on s390*-*-linux* and x86_64-*-linux* too.
