@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 
 /* Current CPU, set with the "set cpu" command.  */
+static int arc_bfd_mach_type;
 char *arc_cpu_type;
 char *tmp_arc_cpu_type;
 
@@ -53,7 +54,8 @@ int debug_pipeline_p;
 
 #define OPMASK	0xf8000000
 
-/* Instruction field accessor macros.  */
+/* Instruction field accessor macros.
+   See the Programmer's Reference Manual.  */
 #define X_OP(i) (((i) >> 27) & 0x1f)
 #define X_A(i) (((i) >> 21) & 0x3f)
 #define X_B(i) (((i) >> 15) & 0x3f)
@@ -108,14 +110,25 @@ codestream_fill (peek_flag)
   codestream_next_addr += CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]);
   codestream_off = 0;
   codestream_cnt = CODESTREAM_BUFSIZ;
-  /* FIXME: need to handle byte order differences.  */
   read_memory (codestream_addr, (char *) codestream_buf,
 	       CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]));
+  /* FIXME: check return code?  */
+
+  /* Handle byte order differences.  */
+  if (HOST_BYTE_ORDER != TARGET_BYTE_ORDER)
+    {
+      register unsigned int i, j, n = sizeof (codestream_buf[0]);
+      register char tmp, *p;
+      for (i = 0, p = (char *) codestream_buf; i < CODESTREAM_BUFSIZ;
+	   ++i, p += n)
+	for (j = 0; j < n / 2; ++j)
+	  tmp = p[j], p[j] = p[n - 1 - j], p[n - 1 - j] = tmp;
+    }
   
   if (peek_flag)
-    return (codestream_peek());
+    return codestream_peek ();
   else
-    return (codestream_get());
+    return codestream_get ();
 }
 
 static void
@@ -126,9 +139,11 @@ codestream_seek (place)
   codestream_next_addr *= CODESTREAM_BUFSIZ;
   codestream_cnt = 0;
   codestream_fill (1);
-  while (codestream_tell() != place)
+  while (codestream_tell () != place)
     codestream_get ();
 }
+
+/* This function is currently unused but leave in for now.  */
 
 static void
 codestream_read (buf, count)
@@ -142,8 +157,7 @@ codestream_read (buf, count)
     *p++ = codestream_get ();
 }
 
-/* Set up prologue scanning and return the first insn,
-   not including the "sub sp,sp,32" of a stdarg function.  */
+/* Set up prologue scanning and return the first insn.  */
 
 static unsigned int
 setup_prologue_scan (pc)
@@ -153,12 +167,6 @@ setup_prologue_scan (pc)
 
   codestream_seek (pc);
   insn = codestream_get ();
-
-  /* The authority for what appears here is the home-grown ABI.  */
-
-  /* First insn may be "sub sp,sp,32" if stdarg fn.  */
-  if (insn == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, SHIMM_REGNUM, 32))
-    insn = codestream_get ();
 
   return insn;
 }
@@ -176,9 +184,22 @@ arc_get_frame_setup (pc)
 {
   unsigned int insn;
   /* Size of frame or -1 if unrecognizable prologue.  */
-  int n = -1;
+  int frame_size = -1;
+  /* An initial "sub sp,sp,N" may or may not be for a stdarg fn.  */
+  int maybe_stdarg_decr = -1;
 
   insn = setup_prologue_scan (pc);
+
+  /* The authority for what appears here is the home-grown ABI.
+     The most recent version is 1.2.  */
+
+  /* First insn may be "sub sp,sp,N" if stdarg fn.  */
+  if ((insn & BUILD_INSN (-1, -1, -1, -1, 0))
+      == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, SHIMM_REGNUM, 0))
+    {
+      maybe_stdarg_decr = X_D (insn);
+      insn = codestream_get ();
+    }
 
   if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))	/* st blink,[sp,4] */
       == BUILD_INSN (2, 0, SP_REGNUM, BLINK_REGNUM, 4))
@@ -186,7 +207,7 @@ arc_get_frame_setup (pc)
       insn = codestream_get ();
       /* Frame may not be necessary, even though blink is saved.
 	 At least this is something we recognize.  */
-      n = 0;
+      frame_size = 0;
     }
 
   if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))		/* st fp,[sp] */
@@ -197,18 +218,18 @@ arc_get_frame_setup (pc)
 	       != BUILD_INSN (12, FP_REGNUM, SP_REGNUM, SP_REGNUM, 0))
 	return -1;
 
-      /* Check for stack adjustment sub sp,sp,nnn.  */
+      /* Check for stack adjustment sub sp,sp,N.  */
       insn = codestream_peek ();
       if ((insn & BUILD_INSN (-1, -1, -1, 0, 0))
 	  == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, 0, 0))
 	{
 	  if (LIMM_P (X_C (insn)))
-	    n = codestream_get ();
+	    frame_size = codestream_get ();
 	  else if (SHIMM_P (X_C (insn)))
-	    n = X_D (insn);
+	    frame_size = X_D (insn);
 	  else
 	    return -1;
-	  if (n < 0)
+	  if (frame_size < 0)
 	    return -1;
 
           codestream_get ();
@@ -222,11 +243,20 @@ arc_get_frame_setup (pc)
       /* Frameless fn.  */
       else
 	{
-	  n = 0;
+	  frame_size = 0;
 	}
     }
 
-  return n;
+  /* If we found a "sub sp,sp,N" and nothing else, it may or may not be a
+     stdarg fn.  The stdarg decrement is not treated as part of the frame size,
+     so we have a dilemma: what do we return?  For now, if we get a
+     "sub sp,sp,N" and nothing else assume this isn't a stdarg fn.  One way
+     to fix this completely would be to add a bit to the function descriptor
+     that says the function is a stdarg function.  */
+
+  if (frame_size < 0 && maybe_stdarg_decr > 0)
+    return maybe_stdarg_decr;
+  return frame_size;
 }
 
 /* Given a pc value, skip it forward past the function prologue by
@@ -283,12 +313,20 @@ arc_frame_saved_pc (frame)
       return ARC_PC_TO_REAL_ADDRESS (read_memory_integer (FRAME_FP (frame) + 4, 4));
     }
 
-  /* If the first insn is "st blink,[sp,4]" we can get blink from there.
+  /* The authority for what appears here is the home-grown ABI.
+     The most recent version is 1.2.  */
+
+  insn = setup_prologue_scan (func_start);
+
+  /* First insn may be "sub sp,sp,N" if stdarg fn.  */
+  if ((insn & BUILD_INSN (-1, -1, -1, -1, 0))
+      == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, SHIMM_REGNUM, 0))
+    insn = codestream_get ();
+
+  /* If the next insn is "st blink,[sp,4]" we can get blink from there.
      Otherwise this is a leaf function and we can use blink.  Note that
      this still allows for the case where a leaf function saves/clobbers/
      restores blink.  */
-
-  insn = setup_prologue_scan (func_start);
 
   if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))	/* st blink,[sp,4] */
       != BUILD_INSN (2, 0, SP_REGNUM, BLINK_REGNUM, 4))
@@ -574,6 +612,30 @@ get_longjmp_target(pc)
 }
 #endif /* GET_LONGJMP_TARGET */
 
+/* Disassemble one instruction.  */
+
+static int
+arc_print_insn (vma, info)
+     bfd_vma vma;
+     disassemble_info *info;
+{
+  static int current_mach;
+  static int current_endian;
+  static disassembler_ftype current_disasm;
+
+  if (current_disasm == NULL
+      || arc_bfd_mach_type != current_mach
+      || TARGET_BYTE_ORDER != current_endian)
+    {
+      current_mach = arc_bfd_mach_type;
+      current_endian = TARGET_BYTE_ORDER;
+      current_disasm = arc_get_disassembler (current_mach,
+					     current_endian == BIG_ENDIAN);
+    }
+
+  return (*current_disasm) (vma, info);
+}
+
 /* Command to set cpu type.  */
 
 void
@@ -627,8 +689,7 @@ arc_set_cpu_type (str)
       if (strcasecmp (str, arc_cpu_type_table[i].name) == 0)
 	{
 	  arc_cpu_type = str;
-	  tm_print_insn = arc_get_disassembler (arc_cpu_type_table[i].value,
-						TARGET_BYTE_ORDER == BIG_ENDIAN);
+	  arc_bfd_mach_type = arc_cpu_type_table[i].value;
 	  return 1;
 	}
     }
@@ -680,6 +741,5 @@ A negative value disables the timer.",
 		   &setlist);
   c = add_show_from_set (c, &showlist);
 
-  /* FIXME: must be done after for now.  */
-  tm_print_insn = arc_get_disassembler (bfd_mach_arc_base, 1 /*FIXME*/);
+  tm_print_insn = arc_print_insn;
 }

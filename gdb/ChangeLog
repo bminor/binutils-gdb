@@ -1,3 +1,16 @@
+start-sanitize-arc
+Fri Jun  2 11:17:23 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-tdep.c (arc_bfd_mach_type): New static global.
+	(codestream_fill): Handle byte order differences.
+	(setup_prologue_scan): Don't read stdarg function's "sub sp,sp,N".
+	(arc_get_frame_setup): Read it here.
+	(arc_frame_saved_pc): And here.
+	(arc_print_insn): New function.
+	(arc_set_cpu_type): Set arc_bfd_mach_type.  Don't set tm_print_insn.
+	(_initialize_arc_tdep): Set tm_print_insn to arc_print_insn.
+end-sanitize-arc
+
 Wed May 31 12:04:01 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* nlm/{configure.in, Makefile.in}: Converted to use autoconf.
