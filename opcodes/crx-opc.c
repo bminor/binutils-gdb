@@ -28,11 +28,11 @@ const inst crx_instruction[] =
 {
 /* Create an arithmetic instruction - INST[bw].  */
 #define  ARITH_BYTE_INST(NAME, OPC) \
-  /* opc8 cst4 r */							   \
-  {NAME, 1, OPC,  24, ARITH_BYTE_INS, {{cst4,20}, {regr,16}}},		   \
-  /* opc8 i16 r */							   \
-  {NAME, 2, (OPC<<4)+0xE, 20, ARITH_BYTE_INS, {{i16,0},	{regr,16}}},	   \
-  /* opc8 r r */							   \
+  /* opc8 cst4 r */								\
+  {NAME, 1, OPC,  24, ARITH_BYTE_INS | CST4MAP, {{cst4,20}, {regr,16}}},	\
+  /* opc8 i16 r */								\
+  {NAME, 2, (OPC<<4)+0xE, 20, ARITH_BYTE_INS | CST4MAP, {{i16,0}, {regr,16}}},  \
+  /* opc8 r r */								\
   {NAME, 1, OPC+0x40, 24, ARITH_BYTE_INS, {{regr,20}, {regr,16}}}
 
   ARITH_BYTE_INST ("addub", 0x0),
@@ -61,13 +61,13 @@ const inst crx_instruction[] =
 
 /* Create an arithmetic instruction - INST[d].  */
 #define  ARITH_INST(NAME, OPC) \
-  /* opc8 cst4 r */						      \
-  {NAME, 1, OPC,  24, ARITH_INS, {{cst4,20}, {regr,16}}},	      \
-  /* opc8 i16 r */						      \
-  {NAME, 2, (OPC<<4)+0xE, 20, ARITH_INS, {{i16,0},   {regr,16}}},     \
-  /* opc8 i32 r */						      \
-  {NAME, 3, (OPC<<4)+0xF, 20, ARITH_INS, {{i32,0},   {regr,16}}},     \
-  /* opc8 r r */						      \
+  /* opc8 cst4 r */							    \
+  {NAME, 1, OPC,  24, ARITH_INS | CST4MAP, {{cst4,20}, {regr,16}}},	    \
+  /* opc8 i16 r */							    \
+  {NAME, 2, (OPC<<4)+0xE, 20, ARITH_INS | CST4MAP, {{i16,0},  {regr,16}}},  \
+  /* opc8 i32 r */							    \
+  {NAME, 3, (OPC<<4)+0xF, 20, ARITH_INS, {{i32,0},  {regr,16}}},	    \
+  /* opc8 r r */							    \
   {NAME, 1, OPC+0x40, 24, ARITH_INS, {{regr,20}, {regr,16}}}
 
   ARITH_INST ("addud", 0x20),
@@ -84,33 +84,33 @@ const inst crx_instruction[] =
 
 /* Create a shift instruction.  */
 #define  SHIFT_INST(NAME, OPRD, OPC1, SHIFT1, OPC2) \
-  /* OPRD=us3 -->> opc9 us3 r */				      \
-  /* OPRD=us4 -->> opc8 us4 r */				      \
-  /* OPRD=us5 -->> opc7 us5 r */				      \
-  {NAME, 1, OPC1, SHIFT1, SHIFT_INS, {{OPRD,20}, {regr,16}}},	      \
-  /* opc8 r r */						      \
+  /* OPRD=ui3 -->> opc9 ui3 r */			      \
+  /* OPRD=ui4 -->> opc8 ui4 r */			      \
+  /* OPRD=ui5 -->> opc7 ui5 r */			      \
+  {NAME, 1, OPC1, SHIFT1, SHIFT_INS, {{OPRD,20}, {regr,16}}}, \
+  /* opc8 r r */					      \
   {NAME, 1, OPC2, 24, SHIFT_INS, {{regr,20}, {regr,16}}}
 
-  SHIFT_INST ("sllb", us3, 0x1F8, 23, 0x4D),
-  SHIFT_INST ("srlb", us3, 0x1F9, 23, 0x4E),
-  SHIFT_INST ("srab", us3, 0x1FA, 23, 0x4F),
+  SHIFT_INST ("sllb", ui3, 0x1F8, 23, 0x4D),
+  SHIFT_INST ("srlb", ui3, 0x1F9, 23, 0x4E),
+  SHIFT_INST ("srab", ui3, 0x1FA, 23, 0x4F),
 
-  SHIFT_INST ("sllw", us4, 0xB6,  24, 0x5D),
-  SHIFT_INST ("srlw", us4, 0xB7,  24, 0x5E),
-  SHIFT_INST ("sraw", us4, 0xB8,  24, 0x5F),
+  SHIFT_INST ("sllw", ui4, 0xB6,  24, 0x5D),
+  SHIFT_INST ("srlw", ui4, 0xB7,  24, 0x5E),
+  SHIFT_INST ("sraw", ui4, 0xB8,  24, 0x5F),
 
-  SHIFT_INST ("slld", us5, 0x78,  25, 0x6D),
-  SHIFT_INST ("srld", us5, 0x79,  25, 0x6E),
-  SHIFT_INST ("srad", us5, 0x7A,  25, 0x6F),
+  SHIFT_INST ("slld", ui5, 0x78,  25, 0x6D),
+  SHIFT_INST ("srld", ui5, 0x79,  25, 0x6E),
+  SHIFT_INST ("srad", ui5, 0x7A,  25, 0x6F),
 
 /* Create a conditional branch instruction.  */
 #define  BRANCH_INST(NAME, OPC) \
-  /* opc4 c4 dispe9 */						    \
-  {NAME,  1, OPC, 24, BRANCH_INS | RELAXABLE, {{d9,16}}},	    \
-  /* opc4 c4 disps17 */						    \
-  {NAME,  2, (OPC<<8)+0x7E, 16,	BRANCH_INS | RELAXABLE, {{d17,0}}}, \
-  /* opc4 c4 disps33 */						    \
-  {NAME,  3, (OPC<<8)+0x7F, 16,	BRANCH_INS | RELAXABLE, {{d33,0}}}
+  /* opc4 c4 dispe9 */							\
+  {NAME,  1, OPC, 24, BRANCH_INS | RELAXABLE, {{dispe9,16}}},		\
+  /* opc4 c4 disps17 */							\
+  {NAME,  2, (OPC<<8)+0x7E, 16,	BRANCH_INS | RELAXABLE, {{disps17,0}}}, \
+  /* opc4 c4 disps32 */							\
+  {NAME,  3, (OPC<<8)+0x7F, 16,	BRANCH_INS | RELAXABLE, {{disps32,0}}}
 
   BRANCH_INST ("beq", 0x70),
   BRANCH_INST ("bne", 0x71),
@@ -131,7 +131,7 @@ const inst crx_instruction[] =
 /* Create a 'Branch if Equal to 0' instruction.  */
 #define  BRANCH_NEQ_INST(NAME, OPC) \
   /* opc8 dispu5 r */						\
-  {NAME,  1, OPC, 24, BRANCH_NEQ_INS, {{regr,16}, {d5,20}}}
+  {NAME,  1, OPC, 24, BRANCH_NEQ_INS, {{regr,16}, {dispu5,20}}}
 
   BRANCH_NEQ_INST ("beq0b",  0xB0),
   BRANCH_NEQ_INST ("bne0b",  0xB1),
@@ -142,7 +142,7 @@ const inst crx_instruction[] =
 
 /* Create instruction with no operands.  */
 #define  NO_OP_INST(NAME, OPC) \
-  /* opc16 */				\
+  /* opc16 */			    \
   {NAME,  1, OPC, 16, 0, {{0, 0}}}
 
   NO_OP_INST ("nop",	0x3002),
@@ -154,14 +154,18 @@ const inst crx_instruction[] =
 
 /* Create a 'Compare & Branch' instruction.  */
 #define  CMPBR_INST(NAME, OPC1, OPC2, C4) \
-  /* opc12 r r c4 disps9 */										\
-  {NAME, 2, ((0x300+OPC1)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, {{regr,16}, {regr,12}, {d9,0}}},  \
-  /* opc12 r r c4 disps25 */										\
-  {NAME, 3, ((0x310+OPC1)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, {{regr,16}, {regr,12}, {d25,0}}}, \
-  /* opc12 i4cst4 r c4 disps9 */									\
-  {NAME, 2, ((0x300+OPC2)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, {{cst4,16}, {regr,12}, {d9,0}}},  \
-  /* opc12 i4cst4 r c4 disps25 */									\
-  {NAME, 3, ((0x310+OPC2)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, {{cst4,16}, {regr,12}, {d25,0}}}
+  /* opc12 r r c4 disps9 */					      \
+  {NAME, 2, ((0x300+OPC1)<<12)+C4,  8, CMPBR_INS | FMT_3| RELAXABLE,  \
+      {{regr,16}, {regr,12}, {disps9,0}}},			      \
+  /* opc12 r r c4 disps25 */					      \
+  {NAME, 3, ((0x310+OPC1)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, \
+      {{regr,16}, {regr,12}, {disps25,0}}},			      \
+  /* opc12 i4cst4 r c4 disps9 */				      \
+  {NAME, 2, ((0x300+OPC2)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, \
+      {{cst4,16}, {regr,12}, {disps9,0}}},			      \
+  /* opc12 i4cst4 r c4 disps25 */				      \
+  {NAME, 3, ((0x310+OPC2)<<12)+C4,  8, CMPBR_INS | FMT_3 | RELAXABLE, \
+      {{cst4,16}, {regr,12}, {disps25,0}}}
 
   CMPBR_INST ("cmpbeqb", 0x8, 0xC, 0x0),
   CMPBR_INST ("cmpbneb", 0x8, 0xC, 0x1),
@@ -198,8 +202,13 @@ const inst crx_instruction[] =
 
 /* Create an instruction using a single register operand.  */
 #define  REG1_INST(NAME, OPC) \
-  /* opc8 c4 r */			  \
-  {NAME,  1, OPC, 20, 0, {{regr,16}}}
+  /* opc8 c4 r */				\
+  {NAME,  1, OPC, 20, NO_TYPE_INS, {{regr,16}}}
+
+/* Same as REG1_INST, with additional FLAGS.  */
+#define  REG1_FLAG_INST(NAME, OPC, FLAGS) \
+  /* opc8 c4 r */					\
+  {NAME,  1, OPC, 20, NO_TYPE_INS | FLAGS, {{regr,16}}}
 
   /* JCond instructions	*/
   REG1_INST ("jeq",  0xBA0),
@@ -236,8 +245,8 @@ const inst crx_instruction[] =
 
 /* Create an instruction using two register operands.  */
 #define  REG2_INST(NAME, OPC) \
-  /* opc24 r r  OR  opc20 c4 r r */			      \
-  {NAME,  2, 0x300800+OPC,  8, 0, {{regr,4}, {regr,0}}}
+  /* opc24 r r  OR  opc20 c4 r r */			\
+  {NAME,  2, 0x300800+OPC,  8, NO_TYPE_INS, {{regr,4}, {regr,0}}}
 
   /* MULTIPLY INSTRUCTIONS */
   REG2_INST ("macsb",  0x40),
@@ -336,26 +345,30 @@ const inst crx_instruction[] =
 
 /* Load instructions (from memory to register).  */
 #define  LD_REG_INST(NAME, OPC1, OPC2, DISP) \
-  /* opc12 r abs16 */									 \
-  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS | REVERSE_MATCH, {{abs16,0}, {regr,16}}},	 \
-  /* opc12 r abs32 */									 \
-  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS | REVERSE_MATCH, {{abs32,0}, {regr,16}}},	 \
-  /* opc4 r c4 rbase */									 \
-  {NAME,  1, ((0x8+OPC2)<<8),  20, LD_STOR_INS | DISP | FMT_1 | REVERSE_MATCH, {{rbase,20}, {regr,24}}},\
-  /* opc4 r rbase dispu[bwd]4 */							 \
-  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP | REVERSE_MATCH, {{rbase_cst4,16}, {regr,24}}},		 \
-  /* opc4 r rbase disps16 */								 \
-  {NAME,  2, ((0x8+OPC2)<<8)+0xE,  20, LD_STOR_INS | DISP | FMT_1 | REVERSE_MATCH, {{rbase_dispu16,16}, {regr,24}}}, \
-  /* opc4 r rbase disps32 */								 \
-  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1 | REVERSE_MATCH, {{rbase_dispu32,16}, {regr,24}}}, \
-  /* opc12 r rbase */									 \
-  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC | REVERSE_MATCH, {{rbase,12}, {regr,16}}},		 \
-  /* opc12 r rbase disps12 */								 \
-  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC | REVERSE_MATCH, {{rbase_dispu12,12}, {regr,16}}},	 \
-  /* opc12 r rbase ridx scl2 disps6 */							 \
-  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH, {{rbase_ridx_scl2_dispu6,0}, {regr,16}}},	 \
-  /* opc12 r rbase ridx scl2 disps22 */							 \
-  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH, {{rbase_ridx_scl2_dispu22,0}, {regr,16}}}
+  /* opc12 r abs16 */								  \
+  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
+      {{abs16,0}, {regr,16}}},							  \
+  /* opc12 r abs32 */								  \
+  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
+      {{abs32,0}, {regr,16}}},							  \
+  /* opc4 r rbase dispu[bwd]4 */						  \
+  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP | REVERSE_MATCH,			  \
+      {{rbase_cst4,16}, {regr,24}}},						  \
+  /* opc4 r rbase disps16 */							  \
+  {NAME,  2, ((0x8+OPC2)<<8)+0xE, 20, LD_STOR_INS | DISP | FMT_1 | REVERSE_MATCH, \
+      {{rbase_disps16,16}, {regr,24}}},						  \
+  /* opc4 r rbase disps32 */							  \
+  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1 | REVERSE_MATCH,	  \
+      {{rbase_disps32,16}, {regr,24}}},						  \
+  /* opc12 r rbase ridx scl2 disps6 */						  \
+  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
+      {{rindex_disps6,0}, {regr,16}}},						  \
+  /* opc12 r rbase ridx scl2 disps22 */						  \
+  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS | REVERSE_MATCH,			  \
+      {{rindex_disps22,0}, {regr,16}}},						  \
+  /* opc12 r rbase disps12 */							  \
+  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC | REVERSE_MATCH,			  \
+      {{rbase_disps12,12}, {regr,16}}}
 
   LD_REG_INST ("loadb", 0x0, 0x0, DISPUB4),
   LD_REG_INST ("loadw", 0x1, 0x1, DISPUW4),
@@ -363,47 +376,41 @@ const inst crx_instruction[] =
 
 /* Store instructions (from Register to Memory).  */
 #define  ST_REG_INST(NAME, OPC1, OPC2, DISP) \
-  /* opc12 r abs16 */									 \
-  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs16,0}}},			 \
-  /* opc12 r abs32 */									 \
-  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs32,0}}},			 \
-  /* opc4 r c4 rbase */									 \
-  {NAME,  1, ((0x8+OPC2)<<8),  20, LD_STOR_INS | DISP | FMT_1, {{regr,24}, {rbase,20}}},\
-  /* opc4 r rbase dispu[bwd]4 */							 \
-  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP, {{regr,24}, {rbase_cst4,16}}},		 \
-  /* opc4 r rbase disps16 */								 \
-  {NAME,  2, ((0x8+OPC2)<<8)+0xE,  20, LD_STOR_INS | DISP | FMT_1, {{regr,24}, {rbase_dispu16,16}}}, \
-  /* opc4 r rbase disps32 */								 \
-  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1, {{regr,24}, {rbase_dispu32,16}}}, \
-  /* opc12 r rbase */									 \
-  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC, {{regr,16}, {rbase,12}}},		 \
-  /* opc12 r rbase disps12 */								 \
-  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC, {{regr,16}, {rbase_dispu12,12}}},	 \
-  /* opc12 r rbase ridx scl2 disps6 */							 \
-  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rbase_ridx_scl2_dispu6,0}}},	 \
-  /* opc12 r rbase ridx scl2 disps22 */							 \
-  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rbase_ridx_scl2_dispu22,0}}}
+  /* opc12 r abs16 */								  \
+  {NAME,  2, 0x320+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs16,0}}},		  \
+  /* opc12 r abs32 */								  \
+  {NAME,  3, 0x330+OPC1,  20, LD_STOR_INS, {{regr,16}, {abs32,0}}},		  \
+  /* opc4 r rbase dispu[bwd]4 */						  \
+  {NAME,  1, 0x8+OPC2,  28, LD_STOR_INS | DISP, {{regr,24}, {rbase_cst4,16}}},	  \
+  /* opc4 r rbase disps16 */							  \
+  {NAME,  2, ((0x8+OPC2)<<8)+0xE,  20, LD_STOR_INS | DISP | FMT_1,		  \
+      {{regr,24}, {rbase_disps16,16}}},						  \
+  /* opc4 r rbase disps32 */							  \
+  {NAME,  3, ((0x8+OPC2)<<8)+0xF,  20, LD_STOR_INS | FMT_1,			  \
+      {{regr,24}, {rbase_disps32,16}}},						  \
+  /* opc12 r rbase ridx scl2 disps6 */						  \
+  {NAME,  2, 0x32C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rindex_disps6,0}}},	  \
+  /* opc12 r rbase ridx scl2 disps22 */						  \
+  {NAME,  3, 0x33C+OPC1,  20, LD_STOR_INS, {{regr,16}, {rindex_disps22,0}}},	  \
+  /* opc12 r rbase disps12 */							  \
+  {NAME,  2, 0x328+OPC1,  20, LD_STOR_INS_INC, {{regr,16}, {rbase_disps12,12}}}
 
 /* Store instructions (Immediate to Memory).  */
 #define  ST_I_INST(NAME, OPC) \
-  /* opc12 us4 abs16 */								 	\
-  {NAME,  2, 0x360+OPC,	20, STOR_IMM_INS, {{us4,16}, {abs16,0}}},		 	\
-  /* opc12 us4 abs32 */								 	\
-  {NAME,  3, 0x370+OPC,	20, STOR_IMM_INS, {{us4,16}, {abs32,0}}},		 	\
-  /* opc12 us4 c4 rbase */							 	\
-  {NAME,  1, 0x368+OPC,	20, LD_STOR_INS_INC, {{us4,16}, {rbase,12}}},		 	\
-  /* opc12 us4 rbase disps12 */							 	\
-  {NAME,  2, 0x368+OPC,	20, LD_STOR_INS_INC, {{us4,16}, {rbase_dispu12,12}}},	 	\
-  /* opc4 us4 c4 rbase */							 	\
-  {NAME,  1, 0x364+OPC,	20, STOR_IMM_INS, {{us4,16}, {rbase,12}}},		 	\
-  /* opc12 us4 rbase disps12 */							 	\
-  {NAME,  2, 0x364+OPC,	20, STOR_IMM_INS, {{us4,16}, {rbase_dispu12,12}}},	 	\
-  /* opc12 us4 rbase disps28 */							 	\
-  {NAME,  3, 0x374+OPC,	20, STOR_IMM_INS, {{us4,16}, {rbase_dispu28,12}}},	 	\
-  /* opc12 us4 rbase ridx scl2 disps6 */					 	\
-  {NAME,  2, 0x36C+OPC,	20, STOR_IMM_INS, {{us4,16}, {rbase_ridx_scl2_dispu6,0}}},	\
-  /* opc12 us4 rbase ridx scl2 disps22 */					 	\
-  {NAME,  3, 0x37C+OPC,	20, STOR_IMM_INS, {{us4,16}, {rbase_ridx_scl2_dispu22,0}}}
+  /* opc12 ui4 rbase disps12 */						      \
+  {NAME,  2, 0x368+OPC,	20, LD_STOR_INS_INC, {{ui4,16}, {rbase_disps12,12}}}, \
+  /* opc12 ui4 abs16 */							      \
+  {NAME,  2, 0x360+OPC,	20, STOR_IMM_INS, {{ui4,16}, {abs16,0}}},	      \
+  /* opc12 ui4 abs32 */							      \
+  {NAME,  3, 0x370+OPC,	20, STOR_IMM_INS, {{ui4,16}, {abs32,0}}},	      \
+  /* opc12 ui4 rbase disps12 */						      \
+  {NAME,  2, 0x364+OPC,	20, STOR_IMM_INS, {{ui4,16}, {rbase_disps12,12}}},    \
+  /* opc12 ui4 rbase disps28 */						      \
+  {NAME,  3, 0x374+OPC,	20, STOR_IMM_INS, {{ui4,16}, {rbase_disps28,12}}},    \
+  /* opc12 ui4 rbase ridx scl2 disps6 */				      \
+  {NAME,  2, 0x36C+OPC,	20, STOR_IMM_INS, {{ui4,16}, {rindex_disps6,0}}},     \
+  /* opc12 ui4 rbase ridx scl2 disps22 */				      \
+  {NAME,  3, 0x37C+OPC,	20, STOR_IMM_INS, {{ui4,16}, {rindex_disps22,0}}}
 
   ST_REG_INST ("storb", 0x20, 0x4, DISPUB4),
   ST_I_INST ("storb",  0x0),
@@ -416,76 +423,76 @@ const inst crx_instruction[] =
 
 /* Create a bit instruction.  */
 #define  CSTBIT_INST(NAME, OP, OPC1, DIFF, SHIFT, OPC2) \
-  /* OP=us3 -->> opc13 us3 */								  \
-  /* OP=us4 -->> opc12 us4 */								  \
-  /* OP=us5 -->> opc11 us5 */								  \
-											  \
-  /* opcNN iN abs16 */									  \
-  {NAME,  2, OPC1+0*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {abs16,0}}},			  \
-  /* opcNN iN abs32 */									  \
-  {NAME,  3, OPC1+1*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {abs32,0}}},			  \
-  /* opcNN iN rbase */									  \
-  {NAME,  1, OPC2,  SHIFT+4,  CSTBIT_INS, {{OP,20}, {rbase,16}}},			  \
-  /* opcNN iN rbase disps12 */								  \
-  {NAME,  2, OPC1+2*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_dispu12,12}}},		  \
-  /* opcNN iN rbase disps28 */								  \
-  {NAME,  3, OPC1+3*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_dispu28,12}}},		  \
-  /* opcNN iN rbase ridx scl2 disps6 */							  \
-  {NAME,  2, OPC1+4*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_ridx_scl2_dispu6,0}}},	  \
-  /* opcNN iN rbase ridx scl2 disps22 */						  \
-  {NAME,  3, OPC1+5*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_ridx_scl2_dispu22,0}}}
+  /* OP=ui3 -->> opc13 ui3 */						      \
+  /* OP=ui4 -->> opc12 ui4 */						      \
+  /* OP=ui5 -->> opc11 ui5 */						      \
+									      \
+  /* opcNN iN abs16 */							      \
+  {NAME,  2, OPC1+0*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {abs16,0}}},	      \
+  /* opcNN iN abs32 */							      \
+  {NAME,  3, OPC1+1*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {abs32,0}}},	      \
+  /* opcNN iN rbase */							      \
+  {NAME,  1, OPC2,  SHIFT+4,  CSTBIT_INS, {{OP,20}, {rbase,16}}},	      \
+  /* opcNN iN rbase disps12 */						      \
+  {NAME,  2, OPC1+2*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_disps12,12}}},  \
+  /* opcNN iN rbase disps28 */						      \
+  {NAME,  3, OPC1+3*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rbase_disps28,12}}},  \
+  /* opcNN iN rbase ridx scl2 disps6 */					      \
+  {NAME,  2, OPC1+4*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rindex_disps6,0}}},   \
+  /* opcNN iN rbase ridx scl2 disps22 */				      \
+  {NAME,  3, OPC1+5*DIFF, SHIFT, CSTBIT_INS, {{OP,16}, {rindex_disps22,0}}}
 
-  CSTBIT_INST ("cbitb", us3, 0x700, 0x20, 19, 0x1FC),
-  CSTBIT_INST ("cbitw", us4, 0x382, 0x10, 20, 0xBD),
-  CSTBIT_INST ("cbitd", us5, 0x1C3, 0x8,  21, 0x7B),
+  CSTBIT_INST ("cbitb", ui3, 0x700, 0x20, 19, 0x1FC),
+  CSTBIT_INST ("cbitw", ui4, 0x382, 0x10, 20, 0xBD),
+  CSTBIT_INST ("cbitd", ui5, 0x1C3, 0x8,  21, 0x7B),
   {"cbitd",   2, 0x300838,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"cbitd",   2, 0x18047B,  9, CSTBIT_INS, {{us5,4}, {regr,0}}},
+  {"cbitd",   2, 0x18047B,  9, CSTBIT_INS, {{ui5,4}, {regr,0}}},
 
-  CSTBIT_INST ("sbitb", us3, 0x701, 0x20, 19, 0x1FD),
-  CSTBIT_INST ("sbitw", us4, 0x383, 0x10, 20, 0xBE),
-  CSTBIT_INST ("sbitd", us5, 0x1C4, 0x8,  21, 0x7C),
+  CSTBIT_INST ("sbitb", ui3, 0x701, 0x20, 19, 0x1FD),
+  CSTBIT_INST ("sbitw", ui4, 0x383, 0x10, 20, 0xBE),
+  CSTBIT_INST ("sbitd", ui5, 0x1C4, 0x8,  21, 0x7C),
   {"sbitd",   2, 0x300839,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"sbitd",   2, 0x18047C,  9, CSTBIT_INS, {{us5,4}, {regr,0}}},
+  {"sbitd",   2, 0x18047C,  9, CSTBIT_INS, {{ui5,4}, {regr,0}}},
 
-  CSTBIT_INST ("tbitb", us3, 0x702, 0x20, 19, 0x1FE),
-  CSTBIT_INST ("tbitw", us4, 0x384, 0x10, 20, 0xBF),
-  CSTBIT_INST ("tbitd", us5, 0x1C5, 0x8,  21, 0x7D),
+  CSTBIT_INST ("tbitb", ui3, 0x702, 0x20, 19, 0x1FE),
+  CSTBIT_INST ("tbitw", ui4, 0x384, 0x10, 20, 0xBF),
+  CSTBIT_INST ("tbitd", ui5, 0x1C5, 0x8,  21, 0x7D),
   {"tbitd",   2, 0x30083A,  8, CSTBIT_INS, {{regr,4}, {regr,0}}},
-  {"tbitd",   2, 0x18047D,  9, CSTBIT_INS, {{us5,4}, {regr,0}}},
+  {"tbitd",   2, 0x18047D,  9, CSTBIT_INS, {{ui5,4}, {regr,0}}},
 
 /* Instructions including a register list (opcode is represented as a mask).  */
-#define  REGLIST_INST(NAME, OPC) \
-  /* opc12 r mask16 */					  \
-  {NAME,  2, OPC, 20, REG_LIST, {{regr,16}, {us16,0}}}
+#define  REGLIST_INST(NAME, OPC, FLAG) \
+  /* opc12 r mask16 */							    \
+  {NAME,  2, OPC, 20, NO_TYPE_INS | REG_LIST | FLAG, {{regr,16}, {ui16,0}}}
 
   REG1_INST ("getrfid",	0xFF9),
   REG1_INST ("setrfid",	0xFFA),
 
-  REGLIST_INST ("push",	 0x346),
-  REG1_INST ("push",	 0xFFB),
-  REGLIST_INST ("pushx", 0x347),
+  REGLIST_INST ("push",	 0x346,	 NO_RPTR),
+  REG1_FLAG_INST ("push", 0xFFB, NO_SP),
+  REGLIST_INST ("pushx", 0x347,	 NO_RPTR),
 
-  REGLIST_INST ("pop",	 0x324),
-  REG1_INST ("pop",	 0xFFC),
-  REGLIST_INST ("popx",	 0x327),
+  REGLIST_INST ("pop",	 0x324,	 NO_RPTR),
+  REG1_FLAG_INST ("pop", 0xFFC,	 NO_SP),
+  REGLIST_INST ("popx",	 0x327,	 NO_RPTR),
 
-  REGLIST_INST ("popret", 0x326),
-  REG1_INST ("popret",    0xFFD),
+  REGLIST_INST ("popret", 0x326, NO_RPTR),
+  REG1_FLAG_INST ("popret",0xFFD,NO_SP),
 
-  REGLIST_INST ("loadm",  0x324),
-  REGLIST_INST ("loadma", 0x325),
+  REGLIST_INST ("loadm",  0x324, NO_RPTR),
+  REGLIST_INST ("loadma", 0x325, USER_REG),
 
-  REGLIST_INST ("storm",  0x344),
-  REGLIST_INST ("storma", 0x345),
+  REGLIST_INST ("storm",  0x344, NO_RPTR),
+  REGLIST_INST ("storma", 0x345, USER_REG),
 
 /* Create a branch instruction.  */
 #define  BR_INST(NAME, OPC1, OPC2, INS_TYPE) \
-  /* opc12 r disps17 */						      \
-  {NAME,  2, OPC1,  20, INS_TYPE | RELAXABLE, {{regr,16}, {d17,0}}},  \
-  /* opc12 r disps33 */						      \
-  {NAME,  3, OPC2,  20, INS_TYPE | RELAXABLE, {{regr,16}, {d33,0}}}
+  /* opc12 r disps17 */							  \
+  {NAME,  2, OPC1,  20, INS_TYPE | RELAXABLE, {{regr,16}, {disps17,0}}},  \
+  /* opc12 r disps32 */							  \
+  {NAME,  3, OPC2,  20, INS_TYPE | RELAXABLE, {{regr,16}, {disps32,0}}}
 
-  BR_INST ("bal",   0x307, 0x317, 0),
+  BR_INST ("bal",   0x307, 0x317, NO_TYPE_INS),
 
   /* Decrement and Branch instructions.  */
   BR_INST ("dbnzb", 0x304, 0x314, DCR_BRANCH_INS),
@@ -498,9 +505,14 @@ const inst crx_instruction[] =
   REG2_INST ("jalid",  0x33),
 
 /* Create a CO-processor instruction.  */
+  /* esc12 c4 ui16 */
+  {"cpi",  2, 0x301,  20, COP_REG_INS, {{ui4,16}, {ui16,0}}},
+  /* esc12 c4 ui16 ui16 */
+  {"cpi",  3, 0x311,  20, COP_REG_INS, {{ui4,16}, {ui16,0}, {ui16,16}}},
+
 #define  COP_INST(NAME, OPC, TYPE, REG1, REG2) \
-  /* opc12 c4 opc8 REG1 REG2 */		       \
-  {NAME,  2, 0x301030+OPC,  8, TYPE | FMT_2, {{us4,16}, {REG1,4}, {REG2,0}}}
+  /* opc12 c4 opc8 REG1 REG2 */						      \
+  {NAME,  2, 0x301030+OPC,  8, TYPE | FMT_2, {{ui4,16}, {REG1,4}, {REG2,0}}}
 
   COP_INST ("mtcr",   0, COP_REG_INS,	regr,	  copregr),
   COP_INST ("mfcr",   1, COP_REG_INS,	copregr,  regr),
@@ -513,8 +525,9 @@ const inst crx_instruction[] =
 
 /* Create a memory-related CO-processor instruction.  */
 #define  COPMEM_INST(NAME, OPC, TYPE) \
-  /* opc12 c4 opc12 r mask16 */	      \
-  {NAME,  3, 0x3110300+OPC,  4, TYPE | REG_LIST | FMT_5, {{us4,16}, {regr,0}, {us16,0}}}
+  /* opc12 c4 opc12 r mask16 */				  \
+  {NAME,  3, 0x3110300+OPC,  4, TYPE | REG_LIST | FMT_5,  \
+      {{ui4,16}, {regr,0}, {ui16,16}}}
 
   COPMEM_INST("loadmcr",  0,  COP_REG_INS),
   COPMEM_INST("stormcr",  1,  COP_REG_INS),
@@ -522,35 +535,39 @@ const inst crx_instruction[] =
   COPMEM_INST("stormcsr", 3,  COPS_REG_INS),
 
   /* CO-processor extensions.  */
-  /* opc12 c4 opc4 us4 disps9 */
-  {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4, {{us4,16}, {us4,8}, {d9,0}}},
-  /* opc12 c4 opc4 us4 disps25 */
-  {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4, {{us4,16}, {us4,8}, {d25,0}}},
+  /* opc12 c4 opc4 ui4 disps9 */
+  {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4, 
+      {{ui4,16}, {ui4,8}, {disps9,0}}},
+  /* opc12 c4 opc4 ui4 disps25 */
+  {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4, 
+      {{ui4,16}, {ui4,8}, {disps25,0}}},
   /* opc12 c4 opc4 cpdo r r */
-  {"cpdop",   2, 0x3010B, 12, COP_REG_INS | FMT_4, {{us4,16}, {us4,8}, {regr,4}, {regr,0}}},
+  {"cpdop",   2, 0x3010B, 12, COP_REG_INS | FMT_4, 
+      {{ui4,16}, {ui4,8}, {regr,4}, {regr,0}}},
   /* opc12 c4 opc4 cpdo r r cpdo16 */
-  {"cpdop",   3, 0x3110B, 12, COP_REG_INS | FMT_4, {{us4,16}, {us4,8}, {regr,4}, {regr,0}, {us16,0}}},
+  {"cpdop",   3, 0x3110B, 12, COP_REG_INS | FMT_4, 
+      {{ui4,16}, {ui4,8}, {regr,4}, {regr,0}, {ui16,16}}},
   /* esc16 r procreg */
-  {"mtpr",    2, 0x3009,  16, 0, {{regr8,8}, {regr8,0}}},
+  {"mtpr",    2, 0x3009,  16, NO_TYPE_INS, {{regr8,8}, {regr8,0}}},
   /* esc16 procreg r */
-  {"mfpr",    2, 0x300A,  16, 0, {{regr8,8}, {regr8,0}}},
+  {"mfpr",    2, 0x300A,  16, NO_TYPE_INS, {{regr8,8}, {regr8,0}}},
 
   /* Miscellaneous.  */
-  /* opc12 us4 */
-  {"excp",    1, 0xFFF,	20, 0, {{us4,16}}},
-  /* opc28 us4 */
-  {"cinv",    2, 0x3010000, 4,	0, {{us4,0}}},
+  /* opc12 ui4 */
+  {"excp",    1, 0xFFF,	20, NO_TYPE_INS, {{ui4,16}}},
+  /* opc28 ui4 */
+  {"cinv",    2, 0x3010000, 4,	NO_TYPE_INS, {{ui4,0}}},
 
-  /* opc9 us5 us5 us5 r r */
-  {"ram",     2, 0x7C,	23, 0, {{us5,18}, {us5,13}, {us5,8}, {regr,4}, {regr,0}}},
-  {"rim",     2, 0x7D,	23, 0, {{us5,18}, {us5,13}, {us5,8}, {regr,4}, {regr,0}}},
+  /* opc9 ui5 ui5 ui5 r r */
+  {"ram", 2, 0x7C,  23, NO_TYPE_INS, {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
+  {"rim", 2, 0x7D,  23, NO_TYPE_INS, {{ui5,18}, {ui5,13}, {ui5,8}, {regr,4}, {regr,0}}},
 
-  /* opc9 us3 r */
-  {"rotb",    1, 0x1FB,	23, 0, {{us3,20}, {regr,16}}},
-  /* opc8 us4 r */
-  {"rotw",    1, 0xB9,	24, 0, {{us4,20}, {regr,16}}},
-  /* opc23 us5 r */
-  {"rotd",    2, 0x180478,  9, 0, {{us5,4}, {regr,0}}},
+  /* opc9 ui3 r */
+  {"rotb",    1, 0x1FB,	23, NO_TYPE_INS, {{ui3,20}, {regr,16}}},
+  /* opc8 ui4 r */
+  {"rotw",    1, 0xB9,	24, NO_TYPE_INS, {{ui4,20}, {regr,16}}},
+  /* opc23 ui5 r */
+  {"rotd",    2, 0x180478,  9, NO_TYPE_INS, {{ui5,4}, {regr,0}}},
 
   {NULL,      0, 0, 0,	0, {{0, 0}}}
 };
@@ -589,26 +606,16 @@ const reg_entry crx_regtab[] =
 /* Build a configuration register.  */
 #define REG_CFG(NAME, N)    REG(NAME, N, CRX_CFG_REGTYPE)
 
-  REG_CFG(hi,    0x10),
-  REG_CFG(lo,    0x11),
-  REG_CFG(uhi,   0x90),
-  REG_CFG(ulo,   0x91),
-  REG_CFG(psr,   0x12),
-  REG_CFG(cfg,   0x15),
-  REG_CFG(cpcfg, 0x16),
-  REG_CFG(ccfg,	 0x1b),
-
-/* Build a mptr register.  */
-#define REG_MPTR(NAME, N)    REG(NAME, N, CRX_MTPR_REGTYPE)
-
-  REG_MPTR(intbase, 0x13),
-  REG_MPTR(isp,     0x14),
-  REG_MPTR(cen,     0x17),
-
-/* Build a pc register.  */
-#define REG_PC(NAME, N)    REG(NAME, N, CRX_PC_REGTYPE)
-
-  REG_PC(pc,  0x0)
+  REG_CFG(hi,	    0x10),
+  REG_CFG(lo,	    0x11),
+  REG_CFG(uhi,	    0x90),
+  REG_CFG(ulo,	    0x91),
+  REG_CFG(psr,	    0x12),
+  REG_CFG(intbase,  0x13),
+  REG_CFG(isp,	    0x14),
+  REG_CFG(cfg,	    0x15),
+  REG_CFG(cpcfg,    0x16),
+  REG_CFG(cen,	    0x17)
 };
 
 const int crx_num_regs = ARRAY_SIZE (crx_regtab);
@@ -638,36 +645,34 @@ const int crx_num_copregs = ARRAY_SIZE (crx_copregtab);
 const operand_entry crx_optab[] =
 {
   /* Index 0 is dummy, so we can count the instruction's operands.  */
-  {0,	nullargs},  /* dummy */
-  {4,	arg_ic},    /* cst4 */
-  {8,	arg_c},	    /* disps9 */
-  {16,	arg_ic},    /* i16 */
-  {32,	arg_ic},    /* i32 */
-  {3,	arg_ic},    /* us3 */
-  {4,	arg_ic},    /* us4 */
-  {5,	arg_ic},    /* us5 */
-  {16,	arg_ic},    /* us16 */
-  {4,	arg_c},	    /* d5 */
-  {8,	arg_c},	    /* d9 */
-  {16,	arg_c},	    /* d17 */
-  {24,	arg_c},	    /* d25 */
-  {32,	arg_c},	    /* d33 */
-  {16,	arg_c},	    /* abs16 */
-  {32,	arg_c},	    /* abs32 */
-  {4,	arg_rbase}, /* rbase */
-  {4,	arg_cr},    /* rbase_cst4 */
-  {8,	arg_cr},    /* rbase_dispu8 */
-  {12,	arg_cr},    /* rbase_dispu12 */
-  {16,	arg_cr},    /* rbase_dispu16 */
-  {28,	arg_cr},    /* rbase_dispu28 */
-  {32,	arg_cr},    /* rbase_dispu32 */
-  {6,	arg_icr},   /* rbase_ridx_scl2_dispu6 */
-  {22,  arg_icr},   /* rbase_ridx_scl2_dispu22 */
-  {4,	arg_r},	    /* regr */
-  {8,	arg_r},	    /* regr8 */
-  {4,	arg_copr},  /* copregr */
-  {8,	arg_copr},  /* copregr8 */
-  {4,	arg_copsr}  /* copsregr */
+  {0,	nullargs,   0},				      /* dummy */
+  {4,	arg_ic,	    OPERAND_CST4},		      /* cst4 */
+  {16,	arg_ic,	    OPERAND_SIGNED},		      /* i16 */
+  {32,	arg_ic,	    OPERAND_SIGNED},		      /* i32 */
+  {3,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui3 */
+  {4,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui4 */
+  {5,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui5 */
+  {16,	arg_ic,	    OPERAND_UNSIGNED},		      /* ui16 */
+  {8,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps9 */
+  {16,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps17 */
+  {24,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps25 */
+  {32,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT},      /* disps32 */
+  {4,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT_DEC},  /* dispu5 */
+  {8,	arg_c,	    OPERAND_EVEN|OPERAND_SHIFT|OPERAND_ESC}, /* dispe9 */
+  {16,	arg_c,	    0},				      /* abs16 */
+  {32,	arg_c,	    0},				      /* abs32 */
+  {4,	arg_rbase,  0},				      /* rbase */
+  {4,	arg_cr,	    OPERAND_CST4},		      /* rbase_cst4 */
+  {12,	arg_cr,	    0},				      /* rbase_disps12 */
+  {16,	arg_cr,	    0},				      /* rbase_disps16 */
+  {28,	arg_cr,	    0},				      /* rbase_disps28 */
+  {32,	arg_cr,	    0},				      /* rbase_disps32 */
+  {6,	arg_icr,    0},				      /* rindex_disps6 */
+  {22,  arg_icr,    0},				      /* rindex_disps22 */
+  {4,	arg_r,	    0},				      /* regr */
+  {8,	arg_r,	    0},				      /* regr8 */
+  {4,	arg_copr,   0},				      /* copregr */
+  {4,	arg_copsr,  0}				      /* copsregr */
 };
 
 /* CRX traps/interrupts.  */
