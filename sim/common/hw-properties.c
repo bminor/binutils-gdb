@@ -42,6 +42,17 @@ struct hw_property_data {
   unsigned sizeof_init_array;
 };
 
+void
+create_hw_property_data (struct hw *me)
+{
+}
+
+void
+delete_hw_property_data (struct hw *me)
+{
+}
+
+
 /* Device Properties: */
 
 static struct hw_property_data *

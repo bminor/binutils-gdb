@@ -150,6 +150,14 @@ extern void delete_hw_port_data
 (struct hw *hw);
 
 
+/* PROPERTIES */
+
+extern void create_hw_property_data
+(struct hw *hw);
+extern void delete_hw_property_data
+(struct hw *hw);
+
+
 /* EVENTS */
 
 extern void create_hw_event_data

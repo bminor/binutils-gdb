@@ -418,6 +418,7 @@ hw_create (struct sim_state *sd,
 
   /* Attach dummy ports */
   create_hw_alloc_data (hw);
+  create_hw_property_data (hw);
   create_hw_port_data (hw);
   create_hw_event_data (hw);
   
@@ -473,6 +474,7 @@ hw_delete (struct hw *me)
 
   delete_hw_event_data (me);
   delete_hw_port_data (me);
+  delete_hw_property_data (me);
 
   /* now unlink us from the tree */
   if (hw_parent (me))
