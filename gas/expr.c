@@ -37,6 +37,8 @@ static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void mri_char_constant PARAMS ((expressionS *));
 static void current_location PARAMS ((expressionS *));
 static void clean_up_expression PARAMS ((expressionS * expressionP));
+static segT operand PARAMS ((expressionS *));
+static operatorT operator PARAMS ((void));
 
 extern const char EXP_CHARS[], FLT_CHARS[];
 
@@ -69,8 +71,6 @@ make_expr_symbol (expressionP)
       && expressionP->X_add_number == 0)
     return expressionP->X_add_symbol;
 
-  /* FIXME: This should be something which decode_local_label_name
-     will handle.  */
   fake = FAKE_LABEL_NAME;
 
   /* Putting constant symbols in absolute_section rather than
@@ -85,7 +85,7 @@ make_expr_symbol (expressionP)
   symbolP->sy_value = *expressionP;
 
   if (expressionP->X_op == O_constant)
-    resolve_symbol_value (symbolP);
+    resolve_symbol_value (symbolP, 1);
 
   n = (struct expr_symbol_line *) xmalloc (sizeof *n);
   n->sym = symbolP;
@@ -298,6 +298,8 @@ integer_constant (radix, expressionP)
       leader = generic_bignum;
       generic_bignum[0] = 0;
       generic_bignum[1] = 0;
+      generic_bignum[2] = 0;
+      generic_bignum[3] = 0;
       input_line_pointer = start;	/*->1st digit. */
       c = *input_line_pointer++;
       for (;
@@ -332,8 +334,24 @@ integer_constant (radix, expressionP)
 	  number =
 	    ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
 	    | (generic_bignum[0] & LITTLENUM_MASK);
+	  number &= 0xffffffff
 	  small = 1;
 	}
+#ifdef BFD64
+      else if (leader < generic_bignum + 4)
+	{
+	  /* Will fit into 64 bits.  */
+	  number = 
+	    ((((((((valueT) generic_bignum[3] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+		 | ((valueT) generic_bignum[2] & LITTLENUM_MASK))
+		<< LITTLENUM_NUMBER_OF_BITS)
+	       | ((valueT) generic_bignum[1] & LITTLENUM_MASK))
+	      << LITTLENUM_NUMBER_OF_BITS)
+	     | ((valueT) generic_bignum[0] & LITTLENUM_MASK));
+	  small = 1;
+	}
+#endif
       else
 	{
 	  number = leader - generic_bignum + 1;	/* number of littlenums in the bignum. */
@@ -1328,6 +1346,13 @@ operator ()
       ++input_line_pointer;
       return ret;
 
+    case '=':
+      if (input_line_pointer[1] != '=')
+	return op_encoding[c];
+
+      ++input_line_pointer;
+      return O_eq;
+
     case '>':
       switch (input_line_pointer[1])
 	{
@@ -1469,7 +1494,7 @@ expr (rank, resultP)
 	       && SEG_NORMAL (S_GET_SEGMENT (right.X_add_symbol)))
 
 	{
-	  resultP->X_add_number += right.X_add_number;
+	  resultP->X_add_number -= right.X_add_number;
 	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
 				    - S_GET_VALUE (right.X_add_symbol));
 	  resultP->X_op = O_constant;

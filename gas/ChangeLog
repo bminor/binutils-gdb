@@ -1,3 +1,8 @@
+Wed Dec 17 21:23:07 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* expr.c (integer_constant 32bit bignum): Mask off bits outside
+	the range we care about.
+
 start-sanitize-d30v
 Wed Dec 17 15:29:03 1997  Michael Meissner  <meissner@cygnus.com>
 
