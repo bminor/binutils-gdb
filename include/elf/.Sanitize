@@ -34,6 +34,8 @@ internal.h
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 v9dirty="common.h"

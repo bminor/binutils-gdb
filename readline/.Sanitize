@@ -53,6 +53,8 @@ vi_mode.c
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 # End of file.

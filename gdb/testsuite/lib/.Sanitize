@@ -27,6 +27,8 @@ gdb.exp
 
 Things-to-lose:
 
+.Sanitize
+
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
 # done.

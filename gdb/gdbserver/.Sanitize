@@ -33,6 +33,8 @@ remote-utils.c
 
 Things-to-lose:
 
+.Sanitize
+
 remote-inflow-sparc.c
 server.h
 

@@ -53,6 +53,8 @@ alpha-dis.c
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 if ( echo $* | egrep verbose > /dev/null ) ; then

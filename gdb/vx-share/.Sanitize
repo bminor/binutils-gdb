@@ -39,6 +39,8 @@ xdr_rdb.h
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 # End of file.

@@ -163,6 +163,8 @@ trad-core.c
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 v9files="configure.in elfcode.h reloc.c bfd-in2.h"

@@ -57,6 +57,7 @@ lib
 
 Things-to-lose:
 
+.Sanitize
 gdb.all
 
 # The lines between the "Do-last:" line and the end of the file

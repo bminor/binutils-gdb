@@ -49,6 +49,8 @@ vax.h
 
 Things-to-lose:
 
+.Sanitize
+
 Do-last:
 
 v9dirty="sparc.h"

@@ -54,6 +54,7 @@ sbrk-sup.c
 
 Things-to-lose:
 
+.Sanitize
 fsf.shar
 test1.c
 
