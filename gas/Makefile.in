@@ -60,7 +60,7 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.c itbl-lex.c
+DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
 
 AR = ar
 AR_FLAGS = qv
