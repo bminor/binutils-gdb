@@ -142,7 +142,7 @@ inf_ptrace_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     piod.piod_addr = myaddr;
     piod.piod_len = len;
 
-    if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) & piod, 0) == -1)
+    if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) &piod, 0) == -1)
       {
 	/* If the PT_IO request is somehow not supported, fallback on
 	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
