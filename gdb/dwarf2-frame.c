@@ -550,9 +550,21 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 	cache->reg[regnum] = fs->regs.reg[reg];
     }
 
-  /* Stored the location of the return addess.  */
-  if (fs->retaddr_column < fs->regs.num_regs)
+  /* Store the location of the return addess.  If the return address
+     column (adjusted) is not the same as gdb's PC_REGNUM, then this
+     implies a copy from the ra column register.  */
+  if (fs->retaddr_column < fs->regs.num_regs
+      && fs->regs.reg[fs->retaddr_column].how != REG_UNSAVED)
     cache->reg[PC_REGNUM] = fs->regs.reg[fs->retaddr_column];
+  else
+    {
+      reg = DWARF2_REG_TO_REGNUM (fs->retaddr_column);
+      if (reg != PC_REGNUM)
+	{
+	  cache->reg[PC_REGNUM].loc.reg = reg;
+	  cache->reg[PC_REGNUM].how = REG_SAVED_REG;
+	}
+    }
 
   do_cleanups (old_chain);
 

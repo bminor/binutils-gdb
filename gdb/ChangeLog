@@ -1,5 +1,10 @@
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
+        * dwarf2-frame.c (dwarf2_frame_cache): Handle retaddr_column
+        not overlapping PC_REGNUM.
+
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
         * alpha-tdep.c (alpha_push_dummy_call): Transmography from
         alpha_push_arguments.  Don't dump argument register data to
         the target stack.  Fix float and 128-bit long double semantics.
