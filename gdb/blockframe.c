@@ -660,35 +660,6 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
     }
 }
 
-#ifdef SIGCONTEXT_PC_OFFSET
-/* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
-
-CORE_ADDR
-sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR sigcontext_addr;
-  char *buf;
-  int ptrbytes = TYPE_LENGTH (builtin_type_void_func_ptr);
-  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
-
-  buf = alloca (ptrbytes);
-  /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
-    sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
-       builtin_type_void_data_ptr);
-  else
-    sigcontext_addr = read_memory_typed_address
-      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
-
-  /* Don't cause a memory_error when accessing sigcontext in case the stack
-     layout has changed or the stack is corrupt.  */
-  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
-}
-#endif /* SIGCONTEXT_PC_OFFSET */
-
-
 /* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */

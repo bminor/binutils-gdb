@@ -1,3 +1,12 @@
+2002-11-15  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (sigtramp_saved_pc): Delete declaration.
+	* blockframe.c (sigtramp_saved_pc): Delete function.
+	* ns32k-tdep.c (ns32k_sigtramp_saved_pc): New function.
+	(ns32k_frame_saved_pc): Call ns32k_sigtramp_saved_pc.
+	* vax-tdep.c (vax_sigtramp_saved_pc): New function.
+	(vax_frame_saved_pc): Call vax_sigtramp_saved_pc.
+
 2002-11-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (frame_pc_unwind): New function.
