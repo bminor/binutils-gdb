@@ -1,3 +1,8 @@
+2002-09-19  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.h (elf_fix_symbol_flags): When examining weak symbols,
+	follow indirect links.
+
 2002-09-19  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
 	* ecoffswap.h (ecoff_swap_pdr_in) <isym, iline>: Update to
