@@ -1,4 +1,16 @@
+Mon Sep 13 12:28:43 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: grab mt-hppa for HPPA targets; use 'gas ' instead
+	of 'gas' in sed commands, since 'gash' is now in the tree as well.
+
 Fri Sep 10 11:23:52 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure: grab values for $(CC) and $(CXX) from the
+	environment, so that someone can do "CC=gcc configure; make" and
+	have it work right (matching the way that autoconf works now)
+
+	* configure.in, Makefile.in: add support for gash, the tcl
+	interface to Galaxy
 
 	* config.guess: add NetBSD variants (hp300, x86)
 

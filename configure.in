@@ -113,6 +113,10 @@ esac
 
 # per-target:
 
+case "${target}" in
+  hppa*-hp-hpux)	  target_makefile_frag=config/mt-hppa ;;
+esac
+
 # some tools are so dependent upon X11 that if we're not building with X, 
 # it's not even worth trying to configure, much less build, that tool.
 
@@ -169,7 +173,7 @@ esac
 
 case "${target}" in
   alpha-dec-osf1)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //'`
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
     configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//;s/libio//'`
     ;;	
@@ -189,14 +193,14 @@ case "${target}" in
     # Do configure ld/binutils/gas for this case.
     ;;
   hppa*-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas /pagas /;s/shellutils//'`
     ;;
   i[34]86-*-go32)
     # add the go32 support tools to the list
     configdirs=`echo go32 ${configdirs}`
     ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/gprof//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //;s/gprof//'`
     ;;
   mips-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
@@ -208,10 +212,10 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
     ;;
   *-*-solaris2*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas //'`
     ;;
   *-*-sysv4*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //'`
     ;;
   *-*-vms)
     configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
