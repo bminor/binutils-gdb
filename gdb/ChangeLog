@@ -1,3 +1,7 @@
+Mon Feb 28 18:24:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Transfer d30v maintainership to David Taylor.
+
 2000-02-28  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c: Remove unneeded header.
