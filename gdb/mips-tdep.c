@@ -1256,7 +1256,16 @@ mips_next_pc (CORE_ADDR pc)
 }
 
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
-   NULL).  */
+   NULL).
+
+   Note: kevinb/2002-08-09: The only caller of this function is (and
+   should remain) mips_frame_init_saved_regs().  In fact,
+   aside from calling mips_find_saved_regs(), mips_frame_init_saved_regs()
+   does nothing more than set frame->saved_regs[SP_REGNUM].  These two
+   functions should really be combined and now that there is only one
+   caller, it should be straightforward.  (Watch out for multiple returns
+   though.)
+*/
 
 static void
 mips_find_saved_regs (struct frame_info *fci)
@@ -1465,7 +1474,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
       else
 	{
 	  if (fi->saved_regs == NULL)
-	    mips_find_saved_regs (fi);
+	    FRAME_INIT_SAVED_REGS (fi);
 	  if (fi->saved_regs[regno])
 	    return read_memory_integer (ADDR_BITS_REMOVE (fi->saved_regs[regno]), MIPS_SAVED_REGSIZE);
 	}
@@ -2342,6 +2351,12 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	      memcpy (fci->saved_regs, temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
 	      fci->saved_regs[PC_REGNUM]
 		= fci->saved_regs[RA_REGNUM];
+	      /* Set value of previous frame's stack pointer.  Remember that
+	         saved_regs[SP_REGNUM] is special in that it contains the
+		 value of the stack pointer register.  The other saved_regs
+		 values are addresses (in the inferior) at which a given
+		 register's value may be found.  */
+	      fci->saved_regs[SP_REGNUM] = fci->frame;
 	    }
 	}
 
@@ -2890,7 +2905,7 @@ mips_pop_frame (void)
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
   if (frame->saved_regs == NULL)
-    mips_find_saved_regs (frame);
+    FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       if (regnum != SP_REGNUM && regnum != PC_REGNUM
