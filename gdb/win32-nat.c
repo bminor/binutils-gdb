@@ -847,8 +847,8 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 
       section_addrs = alloc_section_addr_info (1);
       my_cleanups = make_cleanup (xfree, section_addrs);
-      section_addrs.other[0].name = ".text";
-      section_addrs.other[0].addr = load_addr;
+      section_addrs->other[0].name = ".text";
+      section_addrs->other[0].addr = load_addr;
 
       result = safe_symbol_file_add (name, from_tty, &section_addrs,
 				     0, OBJF_SHARED);

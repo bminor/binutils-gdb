@@ -1,3 +1,7 @@
+2003-06-11  J. Brobecker  <brobecker@gnat.com>
+
+	* win32-nat.c (solib_symbols_add): Fix a small compilation error.
+
 2003-06-11  David Carlton  <carlton@bactrian.org>
 
 	* block.h (BLOCK_SHOULD_SORT): Delete.
