@@ -6,6 +6,7 @@
 #endif
 #include "mn10300_sim.h"
 #include "simops.h"
+#include "sim-types.h"
 #include "sys/syscall.h"
 #include "bfd.h"
 #include <errno.h>

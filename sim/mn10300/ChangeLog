@@ -1,3 +1,12 @@
+Sun Feb 22 16:02:24 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Include sim-types.h.
+
+Wed Feb 18 13:07:08 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (multiply instructions): Cast input operands to a
+	signed64/unsigned64 type as appropriate.
+
 Tue Feb 17 12:47:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_store_register, sim_fetch_register): Pass in
