@@ -88,7 +88,7 @@ fetch_register (int regno)
 
   if (ret < 0)
     {
-      warning ("unable to fetch general register");
+      warning (_("unable to fetch general register"));
       return;
     }
 
@@ -139,7 +139,7 @@ fetch_regs (void)
 
   if (ret < 0)
     {
-      warning ("unable to fetch general registers");
+      warning (_("unable to fetch general registers"));
       return;
     }
 
@@ -157,7 +157,7 @@ fetch_fp_register (int regno)
 
   if (ret < 0)
     {
-      warning ("unable to fetch floating-point register");
+      warning (_("unable to fetch floating-point register"));
       return;
     }
 
@@ -187,7 +187,7 @@ fetch_fp_regs (void)
 
   if (ret < 0)
     {
-      warning ("unable to fetch general registers");
+      warning (_("unable to fetch general registers"));
       return;
     }
 
@@ -223,7 +223,7 @@ store_register (int regno)
 
   if (ret < 0)
     {
-      warning ("unable to fetch general registers");
+      warning (_("unable to fetch general registers"));
       return;
     }
 
@@ -284,7 +284,7 @@ store_register (int regno)
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
-    warning ("unable to write register %d to inferior", regno);
+    warning (_("unable to write register %d to inferior"), regno);
 }
 
 static void
@@ -331,7 +331,7 @@ store_regs (void)
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
-    warning ("unable to store general registers");
+    warning (_("unable to store general registers"));
 }
 
 static void
@@ -345,7 +345,7 @@ store_fp_register (int regno)
 
   if (ret < 0)
     {
-      warning ("unable to fetch floating-point registers");
+      warning (_("unable to fetch floating-point registers"));
       return;
     }
 
@@ -366,7 +366,7 @@ store_fp_register (int regno)
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
-    warning ("unable to write register %d to inferior", regno);
+    warning (_("unable to write register %d to inferior"), regno);
 }
 
 static void
@@ -388,7 +388,7 @@ store_fp_regs (void)
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
-    warning ("unable to store floating-point registers");
+    warning (_("unable to store floating-point registers"));
 }
 
 void
@@ -437,7 +437,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
     {
     case 0:	/* Integer registers.  */
       if (core_reg_size != sizeof (struct reg))
-	warning ("wrong size of register set in core file");
+	warning (_("wrong size of register set in core file"));
       else
 	{
 	  /* The memcpy may be unnecessary, but we can't really be sure
@@ -449,7 +449,7 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
 
     case 2:
       if (core_reg_size != sizeof (struct fpreg))
-	warning ("wrong size of FPA register set in core file");
+	warning (_("wrong size of FPA register set in core file"));
       else
 	{
 	  /* The memcpy may be unnecessary, but we can't really be sure

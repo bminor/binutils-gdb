@@ -121,7 +121,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
   if (bad_reg >= 0)
     {
-      error ("Register %s not found in core file.", REGISTER_NAME (bad_reg));
+      error (_("Register %s not found in core file."), REGISTER_NAME (bad_reg));
     }
 }
 
@@ -131,7 +131,7 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
 {
   if (core_reg_size < 32 * 8)
     {
-      error ("Core file register section too small (%u bytes).", core_reg_size);
+      error (_("Core file register section too small (%u bytes)."), core_reg_size);
       return;
     }
 

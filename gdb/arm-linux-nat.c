@@ -236,7 +236,7 @@ fetch_fpregister (int regno)
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to fetch floating point register.");
+      warning (_("Unable to fetch floating point register."));
       return;
     }
 
@@ -285,7 +285,7 @@ fetch_fpregs (void)
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to fetch the floating point registers.");
+      warning (_("Unable to fetch the floating point registers."));
       return;
     }
 
@@ -333,7 +333,7 @@ store_fpregister (int regno)
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to fetch the floating point registers.");
+      warning (_("Unable to fetch the floating point registers."));
       return;
     }
 
@@ -350,7 +350,7 @@ store_fpregister (int regno)
   ret = ptrace (PTRACE_SETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to store floating point register.");
+      warning (_("Unable to store floating point register."));
       return;
     }
 }
@@ -371,7 +371,7 @@ store_fpregs (void)
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to fetch the floating point registers.");
+      warning (_("Unable to fetch the floating point registers."));
       return;
     }
 
@@ -388,7 +388,7 @@ store_fpregs (void)
   ret = ptrace (PTRACE_SETFPREGS, tid, 0, &fp);
   if (ret < 0)
     {
-      warning ("Unable to store floating point registers.");
+      warning (_("Unable to store floating point registers."));
       return;
     }
 }
@@ -408,7 +408,7 @@ fetch_register (int regno)
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
     {
-      warning ("Unable to fetch general register.");
+      warning (_("Unable to fetch general register."));
       return;
     }
 
@@ -448,7 +448,7 @@ fetch_regs (void)
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
     {
-      warning ("Unable to fetch general registers.");
+      warning (_("Unable to fetch general registers."));
       return;
     }
 
@@ -486,7 +486,7 @@ store_register (int regno)
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
     {
-      warning ("Unable to fetch general registers.");
+      warning (_("Unable to fetch general registers."));
       return;
     }
 
@@ -496,7 +496,7 @@ store_register (int regno)
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
   if (ret < 0)
     {
-      warning ("Unable to store general register.");
+      warning (_("Unable to store general register."));
       return;
     }
 }
@@ -514,7 +514,7 @@ store_regs (void)
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
     {
-      warning ("Unable to fetch general registers.");
+      warning (_("Unable to fetch general registers."));
       return;
     }
 
@@ -528,7 +528,7 @@ store_regs (void)
 
   if (ret < 0)
     {
-      warning ("Unable to store general registers.");
+      warning (_("Unable to store general registers."));
       return;
     }
 }
@@ -691,7 +691,7 @@ get_linux_version (unsigned int *vmajor,
 
   if (-1 == uname (&info))
     {
-      warning ("Unable to determine GNU/Linux version.");
+      warning (_("Unable to determine GNU/Linux version."));
       return -1;
     }
 

@@ -588,7 +588,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 
       if (num_pushes > AVR_MAX_PUSHES)
         {
-          fprintf_unfiltered (gdb_stderr, "Num pushes too large: %d\n",
+          fprintf_unfiltered (gdb_stderr, _("Num pushes too large: %d\n"),
                               num_pushes);
           num_pushes = 0;
         }
@@ -667,7 +667,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 
   if (vpc >= AVR_MAX_PROLOGUE_SIZE)
      fprintf_unfiltered (gdb_stderr,
-                         "Hit end of prologue while scanning pushes\n");
+                         _("Hit end of prologue while scanning pushes\n"));
 
   /* Second stage of the prologue scanning.
      Scan:
@@ -1337,8 +1337,8 @@ avr_io_reg_read_command (char *args, int from_tty)
   if (bufsiz < 0)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "ERR: info io_registers NOT supported by current "
-                          "target\n");
+			  _("ERR: info io_registers NOT supported "
+			    "by current target\n"));
       return;
     }
   if (bufsiz > sizeof (buf))
@@ -1352,20 +1352,20 @@ avr_io_reg_read_command (char *args, int from_tty)
   if (strncmp (buf, "", bufsiz) == 0)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "info io_registers NOT supported by target\n");
+			  _("info io_registers NOT supported by target\n"));
       return;
     }
 
   if (sscanf (buf, "%x", &nreg) != 1)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "Error fetching number of io registers\n");
+			  _("Error fetching number of io registers\n"));
       return;
     }
 
   reinitialize_more_filter ();
 
-  printf_unfiltered ("Target has %u io registers:\n\n", nreg);
+  printf_unfiltered (_("Target has %u io registers:\n\n"), nreg);
 
   /* only fetch up to 8 registers at a time to keep the buffer small */
   step = 8;
@@ -1412,5 +1412,5 @@ _initialize_avr_tdep (void)
      io_registers' to signify it is not available on other platforms. */
 
   add_cmd ("io_registers", class_info, avr_io_reg_read_command,
-	   "query remote avr target for io space register values", &infolist);
+	   _("query remote avr target for io space register values"), &infolist);
 }

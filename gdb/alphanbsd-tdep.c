@@ -64,7 +64,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 
   if (core_reg_size < (SIZEOF_TRAPFRAME + SIZEOF_STRUCT_FPREG))
     {
-      warning ("Wrong size register set in core file.");
+      warning (_("Wrong size register set in core file."));
       return;
     }
 
@@ -86,14 +86,14 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     {
     case 0:  /* Integer registers.  */
       if (core_reg_size != SIZEOF_STRUCT_REG)
-	warning ("Wrong size register set in core file.");
+	warning (_("Wrong size register set in core file."));
       else
 	alphabsd_supply_reg (core_reg_sect, -1);
       break;
 
     case 2:  /* Floating point registers.  */
       if (core_reg_size != SIZEOF_STRUCT_FPREG)
-	warning ("Wrong size FP register set in core file.");
+	warning (_("Wrong size FP register set in core file."));
       else
 	alphabsd_supply_fpreg (core_reg_sect, -1);
       break;

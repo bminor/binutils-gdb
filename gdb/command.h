@@ -234,7 +234,9 @@ extern void add_setshow_enum_cmd (char *name,
 				  cmd_sfunc_ftype *set_func,
 				  cmd_sfunc_ftype *show_func,
 				  struct cmd_list_element **set_list,
-				  struct cmd_list_element **show_list);
+				  struct cmd_list_element **show_list,
+				  struct cmd_list_element **set_result,
+				  struct cmd_list_element **show_result);
 
 extern void add_setshow_auto_boolean_cmd (char *name,
 					  enum command_class class,

@@ -162,7 +162,7 @@ fetch_inferior_registers (int regnum)
       elf_gregset_t regs;
 
       if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
-	perror_with_name ("Couldn't get registers");
+	perror_with_name (_("Couldn't get registers"));
 
       amd64_supply_native_gregset (current_regcache, &regs, -1);
       if (regnum != -1)
@@ -174,7 +174,7 @@ fetch_inferior_registers (int regnum)
       elf_fpregset_t fpregs;
 
       if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name ("Couldn't get floating point status");
+	perror_with_name (_("Couldn't get floating point status"));
 
       amd64_supply_fxsave (current_regcache, -1, &fpregs);
     }
@@ -199,12 +199,12 @@ store_inferior_registers (int regnum)
       elf_gregset_t regs;
 
       if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
-	perror_with_name ("Couldn't get registers");
+	perror_with_name (_("Couldn't get registers"));
 
       amd64_collect_native_gregset (current_regcache, &regs, regnum);
 
       if (ptrace (PTRACE_SETREGS, tid, 0, (long) &regs) < 0)
-	perror_with_name ("Couldn't write registers");
+	perror_with_name (_("Couldn't write registers"));
 
       if (regnum != -1)
 	return;
@@ -215,12 +215,12 @@ store_inferior_registers (int regnum)
       elf_fpregset_t fpregs;
 
       if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name ("Couldn't get floating point status");
+	perror_with_name (_("Couldn't get floating point status"));
 
       amd64_collect_fxsave (current_regcache, regnum, &fpregs);
 
       if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name ("Couldn't write floating point status");
+	perror_with_name (_("Couldn't write floating point status"));
 
       return;
     }
@@ -248,7 +248,7 @@ amd64_linux_dr_get (int regnum)
 		  offsetof (struct user, u_debugreg[regnum]), 0);
   if (errno != 0)
 #if 0
-    perror_with_name ("Couldn't read debug register");
+    perror_with_name (_("Couldn't read debug register"));
 #else
     return 0;
 #endif
@@ -269,7 +269,7 @@ amd64_linux_dr_set (int regnum, unsigned long value)
   errno = 0;
   ptrace (PT_WRITE_U, tid, offsetof (struct user, u_debugreg[regnum]), value);
   if (errno != 0)
-    perror_with_name ("Couldn't write debug register");
+    perror_with_name (_("Couldn't write debug register"));
 }
 
 void

@@ -204,7 +204,7 @@ amd64_dwarf_reg_to_regnum (int reg)
     regnum = amd64_dwarf_regmap[reg];
 
   if (regnum == -1)
-    warning ("Unmapped DWARF Register #%d encountered\n", reg);
+    warning (_("Unmapped DWARF Register #%d encountered\n"), reg);
 
   return regnum;
 }

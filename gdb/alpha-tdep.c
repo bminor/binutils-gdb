@@ -1582,16 +1582,20 @@ _initialize_alpha_tdep (void)
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger
      because the user can always use "999999" or some such for unlimited.  */
-  c = add_set_cmd ("heuristic-fence-post", class_support, var_zinteger,
-		   (char *) &heuristic_fence_post,
-		   _("\
-Set the distance searched for the start of a function.\n\
+  /* We need to throw away the frame cache when we set this, since it
+     might change our ability to get backtraces.  */
+  add_setshow_zinteger_cmd ("heuristic-fence-post", class_support,
+			    &heuristic_fence_post,
+			    _("\
+Set the distance searched for the start of a function."),
+			    _("\
+Show the distance searched for the start of a function."),
+			    _("\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
 search.  The only need to set it is when debugging a stripped executable."),
-		   &setlist);
-  /* We need to throw away the frame cache when we set this, since it
-     might change our ability to get backtraces.  */
-  set_cmd_sfunc (c, reinit_frame_cache_sfunc);
-  deprecated_add_show_from_set (c, &showlist);
+			    _("\
+The distance searched for the start of a function is \"%d\"."),
+			    reinit_frame_cache_sfunc, NULL,
+			    &setlist, &showlist);
 }

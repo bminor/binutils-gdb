@@ -180,7 +180,7 @@ default_float_format (struct gdbarch *gdbarch)
       return &floatformat_ieee_single_little;
     default:
       internal_error (__FILE__, __LINE__,
-		      "default_float_format: bad byte order");
+		      _("default_float_format: bad byte order"));
     }
 }
 
@@ -197,7 +197,7 @@ default_double_format (struct gdbarch *gdbarch)
       return &floatformat_ieee_double_little;
     default:
       internal_error (__FILE__, __LINE__,
-		      "default_double_format: bad byte order");
+		      _("default_double_format: bad byte order"));
     }
 }
 
@@ -261,7 +261,7 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
   else
     /* Should this be an internal error?  I guess so, it is reflecting
        an architectural limitation in the current design.  */
-    internal_error (__FILE__, __LINE__, "No virtual frame pointer available");
+    internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
   *frame_offset = 0;
 }
 
@@ -372,11 +372,17 @@ static void
 show_endian (char *args, int from_tty)
 {
   if (target_byte_order_auto)
-    printf_unfiltered ("The target endianness is set automatically (currently %s endian)\n",
-		       (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little"));
+    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      printf_unfiltered (_("The target endianness is set automatically "
+			   "(currently big endian)\n"));
+    else
+      printf_unfiltered (_("The target endianness is set automatically "
+			   "(currently little endian)\n"));
   else
-    printf_unfiltered ("The target is assumed to be %s endian\n",
-		       (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little"));
+    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      printf_unfiltered ("The target is assumed to be big endian\n");
+  else
+      printf_unfiltered ("The target is assumed to be little endian\n");
 }
 
 static void
@@ -393,7 +399,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
       gdbarch_info_init (&info);
       info.byte_order = BFD_ENDIAN_LITTLE;
       if (! gdbarch_update_p (info))
-	printf_unfiltered ("Little endian target not supported by GDB\n");
+	printf_unfiltered (_("Little endian target not supported by GDB\n"));
     }
   else if (set_endian_string == endian_big)
     {
@@ -402,11 +408,11 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
       gdbarch_info_init (&info);
       info.byte_order = BFD_ENDIAN_BIG;
       if (! gdbarch_update_p (info))
-	printf_unfiltered ("Big endian target not supported by GDB\n");
+	printf_unfiltered (_("Big endian target not supported by GDB\n"));
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "set_endian: bad value");
+		    _("set_endian: bad value"));
   show_endian (NULL, from_tty);
 }
 
@@ -436,9 +442,9 @@ show_architecture (char *args, int from_tty)
   const char *arch;
   arch = TARGET_ARCHITECTURE->printable_name;
   if (target_architecture_auto)
-    printf_filtered ("The target architecture is set automatically (currently %s)\n", arch);
+    printf_filtered (_("The target architecture is set automatically (currently %s)\n"), arch);
   else
-    printf_filtered ("The target architecture is assumed to be %s\n", arch);
+    printf_filtered (_("The target architecture is assumed to be %s\n"), arch);
 }
 
 
@@ -459,11 +465,11 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
 	internal_error (__FILE__, __LINE__,
-			"set_architecture: bfd_scan_arch failed");
+			_("set_architecture: bfd_scan_arch failed"));
       if (gdbarch_update_p (info))
 	target_architecture_auto = 0;
       else
-	printf_unfiltered ("Architecture `%s' not recognized.\n",
+	printf_unfiltered (_("Architecture `%s' not recognized.\n"),
 			   set_architecture_string);
     }
   show_architecture (NULL, from_tty);
@@ -533,7 +539,7 @@ set_gdbarch_from_file (bfd *abfd)
 
   gdbarch = gdbarch_from_bfd (abfd);
   if (gdbarch == NULL)
-    error ("Architecture of file not recognized.\n");
+    error (_("Architecture of file not recognized.\n"));
   deprecated_current_gdbarch_select_hack (gdbarch);
 }
 
@@ -581,11 +587,11 @@ initialize_current_architecture (void)
 	}
       if (chosen == NULL)
 	internal_error (__FILE__, __LINE__,
-			"initialize_current_architecture: No arch");
+			_("initialize_current_architecture: No arch"));
       info.bfd_arch_info = bfd_scan_arch (chosen);
       if (info.bfd_arch_info == NULL)
 	internal_error (__FILE__, __LINE__,
-			"initialize_current_architecture: Arch not found");
+			_("initialize_current_architecture: Arch not found"));
     }
 
   /* Take several guesses at a byte order.  */
@@ -623,7 +629,8 @@ initialize_current_architecture (void)
 
   if (! gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
-		    "initialize_current_architecture: Selection of initial architecture failed");
+		    _("initialize_current_architecture: Selection of "
+		      "initial architecture failed"));
 
   /* Create the ``set architecture'' command appending ``auto'' to the
      list of architectures. */
@@ -640,14 +647,14 @@ initialize_current_architecture (void)
        safe. */
     c = add_set_enum_cmd ("architecture", class_support,
 			  arches, &set_architecture_string,
-			  "Set architecture of target.",
+			  _("Set architecture of target."),
 			  &setlist);
     set_cmd_sfunc (c, set_architecture);
     add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
     /* Don't use set_from_show - need to print both auto/manual and
        current setting. */
     add_cmd ("architecture", class_support, show_architecture,
-	     "Show the current target architecture", &showlist);
+	     _("Show the current target architecture"), &showlist);
   }
 }
 
@@ -724,11 +731,11 @@ _initialize_gdbarch_utils (void)
   struct cmd_list_element *c;
   c = add_set_enum_cmd ("endian", class_support,
 			endian_enum, &set_endian_string,
-			"Set endianness of target.",
+			_("Set endianness of target."),
 			&setlist);
   set_cmd_sfunc (c, set_endian);
   /* Don't use set_from_show - need to print both auto/manual and
      current setting. */
   add_cmd ("endian", class_support, show_endian,
-	   "Show the current byte-order", &showlist);
+	   _("Show the current byte-order"), &showlist);
 }

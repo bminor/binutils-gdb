@@ -240,7 +240,7 @@ ptrace_check (int req, int id, int ret)
 	}
       break;
     }
-  error ("aix-thread: ptrace (%d, %d) returned %d (errno = %d %s)",
+  error (_("aix-thread: ptrace (%d, %d) returned %d (errno = %d %s)"),
 	 req, id, ret, errno, safe_strerror (errno));
   return 0;  /* Not reached.  */
 }
@@ -550,12 +550,24 @@ state2str (pthdb_state_t state)
 {
   switch (state)
     {
-    case PST_IDLE:	return "idle";		/* being created */
-    case PST_RUN:	return "running";	/* running */
-    case PST_SLEEP:	return "sleeping";	/* awaiting an event */
-    case PST_READY:	return "ready";		/* runnable */
-    case PST_TERM:	return "finished";	/* awaiting a join/detach */
-    default:		return "unknown";
+    case PST_IDLE:
+      /* i18n: Like "Thread-Id %d, [state] idle" */
+      return _("idle");      /* being created */
+    case PST_RUN:
+      /* i18n: Like "Thread-Id %d, [state] running" */
+      return _("running");   /* running */
+    case PST_SLEEP:
+      /* i18n: Like "Thread-Id %d, [state] sleeping" */
+      return _("sleeping");  /* awaiting an event */
+    case PST_READY:
+      /* i18n: Like "Thread-Id %d, [state] ready" */
+      return _("ready");     /* runnable */
+    case PST_TERM:
+      /* i18n: Like "Thread-Id %d, [state] finished" */
+      return _("finished");  /* awaiting a join/detach */
+    default:
+      /* i18n: Like "Thread-Id %d, [state] unknown" */
+      return _("unknown");
     }
 }
 
@@ -970,12 +982,12 @@ aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
     {
       thread = find_thread_pid (ptid);
       if (!thread)
-	error ("aix-thread resume: unknown pthread %ld", 
+	error (_("aix-thread resume: unknown pthread %ld"),
 	       TIDGET (ptid));
 
       tid[0] = thread->private->tid;
       if (tid[0] == PTHDB_INVALID_TID)
-	error ("aix-thread resume: no tid for pthread %ld", 
+	error (_("aix-thread resume: no tid for pthread %ld"),
 	       TIDGET (ptid));
       tid[1] = 0;
 
@@ -1131,7 +1143,7 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
 			"fetch_regs_user_thread %lx\n", (long) pdtid);
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    error ("aix-thread: fetch_registers: pthdb_pthread_context returned %s",
+    error (_("aix-thread: fetch_registers: pthdb_pthread_context returned %s"),
            pd_status2str (status));
 
   /* General-purpose registers.  */
@@ -1412,7 +1424,7 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
      values.  */
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    error ("aix-thread: store_registers: pthdb_pthread_context returned %s",
+    error (_("aix-thread: store_registers: pthdb_pthread_context returned %s"),
            pd_status2str (status));
 
   /* Collect general-purpose register values from the regcache.  */
@@ -1473,7 +1485,7 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    error ("aix-thread: store_registers: pthdb_pthread_setcontext returned %s",
+    error (_("aix-thread: store_registers: pthdb_pthread_setcontext returned %s"),
            pd_status2str (status));
 }
 
@@ -1660,7 +1672,7 @@ aix_thread_pid_to_str (ptid_t ptid)
      xstrprintf().  */
   xfree (ret);
 
-  ret = xstrprintf ("Thread %ld", ptid_get_tid (ptid));
+  ret = xstrprintf (_("Thread %ld"), ptid_get_tid (ptid));
   return ret;
 }
 
@@ -1690,7 +1702,8 @@ aix_thread_extra_thread_info (struct thread_info *thread)
   tid = thread->private->tid;
 
   if (tid != PTHDB_INVALID_TID)
-    fprintf_unfiltered (buf, "tid %d", tid);
+    /* i18n: Like "thread-identifier %d, [state] running, suspended" */
+    fprintf_unfiltered (buf, _("tid %d"), tid);
 
   status = pthdb_pthread_state (pd_session, pdtid, &state);
   if (status != PTHDB_SUCCESS)
@@ -1700,16 +1713,19 @@ aix_thread_extra_thread_info (struct thread_info *thread)
   status = pthdb_pthread_suspendstate (pd_session, pdtid, 
 				       &suspendstate);
   if (status == PTHDB_SUCCESS && suspendstate == PSS_SUSPENDED)
-    fprintf_unfiltered (buf, ", suspended");
+    /* i18n: Like "Thread-Id %d, [state] running, suspended" */
+    fprintf_unfiltered (buf, _(", suspended"));
 
   status = pthdb_pthread_detachstate (pd_session, pdtid, 
 				      &detachstate);
   if (status == PTHDB_SUCCESS && detachstate == PDS_DETACHED)
-    fprintf_unfiltered (buf, ", detached");
+    /* i18n: Like "Thread-Id %d, [state] running, detached" */
+    fprintf_unfiltered (buf, _(", detached"));
 
   pthdb_pthread_cancelpend (pd_session, pdtid, &cancelpend);
   if (status == PTHDB_SUCCESS && cancelpend)
-    fprintf_unfiltered (buf, ", cancel pending");
+    /* i18n: Like "Thread-Id %d, [state] running, cancel pending" */
+    fprintf_unfiltered (buf, _(", cancel pending"));
 
   ui_file_write (buf, "", 1);
 
@@ -1727,8 +1743,8 @@ static void
 init_aix_thread_ops (void)
 {
   aix_thread_ops.to_shortname          = "aix-threads";
-  aix_thread_ops.to_longname           = "AIX pthread support";
-  aix_thread_ops.to_doc                = "AIX pthread support";
+  aix_thread_ops.to_longname           = _("AIX pthread support");
+  aix_thread_ops.to_doc                = _("AIX pthread support");
 
   aix_thread_ops.to_attach             = aix_thread_attach;
   aix_thread_ops.to_detach             = aix_thread_detach;
@@ -1761,11 +1777,10 @@ _initialize_aix_thread (void)
   target_new_objfile_chain = deprecated_target_new_objfile_hook;
   deprecated_target_new_objfile_hook = new_objfile;
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("aix-thread", no_class, var_zinteger,
-		  (char *) &debug_aix_thread, 
-		  "Set debugging of AIX thread module.\n"
-		  "Enables printf debugging output.\n",
-		  &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("aix-thread", no_class, (char *) &debug_aix_thread,
+			    _("Set debugging of AIX thread module."),
+			    _("Show debugging of AIX thread module."),
+			    _("Enables debugging output (used to debug GDB)."),
+			    _("Debugging of AIX thread module is \"%d\"."),
+			    NULL, NULL, &setdebuglist, &showdebuglist);
 }

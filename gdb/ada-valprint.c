@@ -206,7 +206,7 @@ val_print_packed_array_elements (struct type *type, char *valaddr,
 	  val_print (elttype, VALUE_CONTENTS (v0), 0, 0, stream, format,
 		     0, recurse + 1, pretty);
 	  annotate_elt_rep (i - i0);
-	  fprintf_filtered (stream, " <repeats %u times>", i - i0);
+	  fprintf_filtered (stream, _(" <repeats %u times>"), i - i0);
 	  annotate_elt_rep_end ();
 
 	}
@@ -421,11 +421,11 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_METHOD:
     case TYPE_CODE_REF:
-      warning ("internal error: unhandled type in ada_print_scalar");
+      warning (_("internal error: unhandled type in ada_print_scalar"));
       break;
 
     default:
-      error ("Invalid type code in symbol table.");
+      error (_("Invalid type code in symbol table."));
     }
   gdb_flush (stream);
 }
@@ -492,7 +492,7 @@ printstr (struct ui_file *stream, char *string, unsigned int length,
 	  ada_emit_char (char_at (string, i, type_len), stream, '\'',
 			 type_len);
 	  fputs_filtered ("'", stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  fprintf_filtered (stream, _(" <repeats %u times>"), reps);
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
 	  need_comma = 1;
@@ -1068,7 +1068,7 @@ print_field_values (struct type *type, char *valaddr, struct ui_file *stream,
 	  if (TYPE_CPLUS_SPECIFIC (type) != NULL
 	      && TYPE_FIELD_IGNORE (type, i))
 	    {
-	      fputs_filtered ("<optimized out or zero length>", stream);
+	      fputs_filtered (_("<optimized out or zero length>"), stream);
 	    }
 	  else
 	    {

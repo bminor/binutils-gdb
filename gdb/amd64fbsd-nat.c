@@ -178,9 +178,9 @@ _initialize_amd64fbsd_nat (void)
 
   if (SC_RIP_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_rip) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.", 
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_RIP_OFFSET);
     }
 
@@ -191,9 +191,9 @@ Please report this to <bug-gdb@gnu.org>.",
 
   if (SC_RSP_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_rsp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_RSP_OFFSET);
     }
 
@@ -204,9 +204,9 @@ Please report this to <bug-gdb@gnu.org>.",
 
   if (SC_RBP_OFFSET != offset)
     {
-      warning ("\
+      warning (_("\
 offsetof (struct sigcontext, sc_rbp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_RBP_OFFSET);
     }
 

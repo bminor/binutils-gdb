@@ -1322,12 +1322,15 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   int type;
 
   type = (status >> 24) & 127;
-  printf ("%s FPU type %d\n",
-	  (status & (1 << 31)) ? "Hardware" : "Software",
-	  type);
-  fputs ("mask: ", stdout);
+  if (status & (1 << 31))
+    printf (_("Hardware FPU type %d\n"), type);
+  else
+    printf (_("Software FPU type %d\n"), type);
+  /* i18n: [floating point unit] mask */
+  fputs (_("mask: "), stdout);
   print_fpu_flags (status >> 16);
-  fputs ("flags: ", stdout);
+  /* i18n: [floating point unit] flags */
+  fputs (_("flags: "), stdout);
   print_fpu_flags (status);
 }
 
@@ -1384,7 +1387,7 @@ arm_register_sim_regno (int regnum)
     return SIM_ARM_FPS_REGNUM + reg;
   reg -= NUM_SREGS;
 
-  internal_error (__FILE__, __LINE__, "Bad REGNUM %d", regnum);
+  internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
 }
 
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
@@ -1549,7 +1552,7 @@ thumb_get_next_pc (CORE_ADDR pc)
       nextpc = (CORE_ADDR) read_memory_integer (sp + offset, 4);
       nextpc = ADDR_BITS_REMOVE (nextpc);
       if (nextpc == pc)
-	error ("Infinite loop detected");
+	error (_("Infinite loop detected"));
     }
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
     {
@@ -1580,7 +1583,7 @@ thumb_get_next_pc (CORE_ADDR pc)
 
       nextpc = ADDR_BITS_REMOVE (nextpc);
       if (nextpc == pc)
-	error ("Infinite loop detected");
+	error (_("Infinite loop detected"));
     }
 
   return nextpc;
@@ -1620,7 +1623,7 @@ arm_get_next_pc (CORE_ADDR pc)
 
 	    if (bits (this_instr, 22, 25) == 0
 		&& bits (this_instr, 4, 7) == 9)	/* multiply */
-	      error ("Illegal update to pc in instruction");
+	      error (_("Invalid update to pc in instruction"));
 
 	    /* BX <reg>, BLX <reg> */
 	    if (bits (this_instr, 4, 28) == 0x12fff1
@@ -1631,7 +1634,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
 
 		if (nextpc == pc)
-		  error ("Infinite loop detected");
+		  error (_("Infinite loop detected"));
 
 		return nextpc;
 	      }
@@ -1712,7 +1715,7 @@ arm_get_next_pc (CORE_ADDR pc)
 	    nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
 
 	    if (nextpc == pc)
-	      error ("Infinite loop detected");
+	      error (_("Infinite loop detected"));
 	    break;
 	  }
 
@@ -1730,7 +1733,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		  unsigned long base;
 
 		  if (bit (this_instr, 22))
-		    error ("Illegal update to pc in instruction");
+		    error (_("Invalid update to pc in instruction"));
 
 		  /* byte write to PC */
 		  rn = bits (this_instr, 16, 19);
@@ -1755,7 +1758,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		  nextpc = ADDR_BITS_REMOVE (nextpc);
 
 		  if (nextpc == pc)
-		    error ("Infinite loop detected");
+		    error (_("Infinite loop detected"));
 		}
 	    }
 	  break;
@@ -1791,7 +1794,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		  }
 		  nextpc = ADDR_BITS_REMOVE (nextpc);
 		  if (nextpc == pc)
-		    error ("Infinite loop detected");
+		    error (_("Infinite loop detected"));
 		}
 	    }
 	  break;
@@ -1807,7 +1810,7 @@ arm_get_next_pc (CORE_ADDR pc)
 
 	    nextpc = ADDR_BITS_REMOVE (nextpc);
 	    if (nextpc == pc)
-	      error ("Infinite loop detected");
+	      error (_("Infinite loop detected"));
 	    break;
 	  }
 
@@ -1818,7 +1821,7 @@ arm_get_next_pc (CORE_ADDR pc)
 	  break;
 
 	default:
-	  fprintf_filtered (gdb_stderr, "Bad bit-field extraction\n");
+	  fprintf_filtered (gdb_stderr, _("Bad bit-field extraction\n"));
 	  return (pc);
 	}
     }
@@ -2012,7 +2015,7 @@ arm_extract_return_value (struct type *type,
 	default:
 	  internal_error
 	    (__FILE__, __LINE__,
-	     "arm_extract_return_value: Floating point model not supported");
+	     _("arm_extract_return_value: Floating point model not supported"));
 	  break;
 	}
     }
@@ -2202,7 +2205,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	default:
 	  internal_error
 	    (__FILE__, __LINE__,
-	     "arm_store_return_value: Floating point model not supported");
+	     _("arm_store_return_value: Floating point model not supported"));
 	  break;
 	}
     }
@@ -2329,7 +2332,8 @@ arm_skip_stub (CORE_ADDR pc)
 static void
 set_arm_command (char *args, int from_tty)
 {
-  printf_unfiltered ("\"set arm\" must be followed by an apporpriate subcommand.\n");
+  printf_unfiltered (_("\
+\"set arm\" must be followed by an apporpriate subcommand.\n"));
   help_list (setarmcmdlist, "set arm ", all_commands, gdb_stdout);
 }
 
@@ -2383,7 +2387,7 @@ set_fp_model_sfunc (char *args, int from_tty,
       }
 
   if (fp_model == ARM_FLOAT_LAST)
-    internal_error (__FILE__, __LINE__, "Invalid fp model accepted: %s.",
+    internal_error (__FILE__, __LINE__, _("Invalid fp model accepted: %s."),
 		    current_fp_model);
 
   if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
@@ -2398,7 +2402,8 @@ show_fp_model (char *args, int from_tty,
 
   if (arm_fp_model == ARM_FLOAT_AUTO 
       && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
-    printf_filtered ("  - the default for the current ABI is \"%s\".\n",
+    /* i18n: "the default [floating point model] for the current ABI..." */
+    printf_filtered (_("  - the default for the current ABI is \"%s\".\n"),
 		     fp_model_strings[tdep->fp_model]);
 }
 
@@ -2561,8 +2566,9 @@ arm_elf_osabi_sniffer (bfd *abfd)
 
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "arm_elf_osabi_sniffer: Unknown ARM EABI "
-			      "version 0x%x", eflags);
+			      _("\
+arm_elf_osabi_sniffer: Unknown ARM EABI version 0x%x"),
+			      eflags);
 	    }
 	}
       break;
@@ -2667,7 +2673,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     default:
       internal_error (__FILE__, __LINE__,
-		      "arm_gdbarch_init: bad byte order for float format");
+		      _("arm_gdbarch_init: bad byte order for float format"));
     }
 
   /* On ARM targets char defaults to unsigned.  */
@@ -2768,7 +2774,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     default:
       internal_error (__FILE__, __LINE__,
-		      "arm_gdbarch_init: bad byte order for float format");
+		      _("arm_gdbarch_init: bad byte order for float format"));
     }
 
   return gdbarch;
@@ -2782,7 +2788,7 @@ arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, "arm_dump_tdep: Lowest pc = 0x%lx",
+  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx"),
 		      (unsigned long) tdep->lowest_pc);
 }
 
@@ -2820,6 +2826,8 @@ _initialize_arm_tdep (void)
   const char **regnames;
   int numregs, i, j;
   static char *helptext;
+  char regdesc[1024], *rdptr = regdesc;
+  size_t rest = sizeof (regdesc);
 
   gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
 
@@ -2841,20 +2849,15 @@ _initialize_arm_tdep (void)
 
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
   add_prefix_cmd ("arm", no_class, set_arm_command,
-		  "Various ARM-specific commands.",
+		  _("Various ARM-specific commands."),
 		  &setarmcmdlist, "set arm ", 0, &setlist);
 
   add_prefix_cmd ("arm", no_class, show_arm_command,
-		  "Various ARM-specific commands.",
+		  _("Various ARM-specific commands."),
 		  &showarmcmdlist, "show arm ", 0, &showlist);
 
   /* Sync the opcode insn printer with our register viewer.  */
   parse_arm_disassembler_option ("reg-names-std");
-
-  /* Begin creating the help text.  */
-  stb = mem_fileopen ();
-  fprintf_unfiltered (stb, "Set the disassembly style.\n"
-		      "The valid values are:\n");
 
   /* Initialize the array that will be passed to add_set_enum_cmd().  */
   valid_disassembly_styles
@@ -2863,8 +2866,9 @@ _initialize_arm_tdep (void)
     {
       numregs = get_arm_regnames (i, &setname, &setdesc, &regnames);
       valid_disassembly_styles[i] = setname;
-      fprintf_unfiltered (stb, "%s - %s\n", setname,
-			  setdesc);
+      length = snprintf (rdptr, rest, "%s - %s\n", setname, setdesc);
+      rdptr += length;
+      rest -= length;
       /* Copy the default names (if found) and synchronize disassembler.  */
       if (!strcmp (setname, "std"))
 	{
@@ -2878,64 +2882,70 @@ _initialize_arm_tdep (void)
   /* Mark the end of valid options.  */
   valid_disassembly_styles[num_disassembly_options] = NULL;
 
-  /* Finish the creation of the help text.  */
-  fprintf_unfiltered (stb, "The default is \"std\".");
+  /* Create the help text.  */
+  stb = mem_fileopen ();
+  fprintf_unfiltered (stb, "%s%s%s",
+		      _("The valid values are:\n"),
+		      regdesc,
+		      _("The default is \"std\"."));
   helptext = ui_file_xstrdup (stb, &length);
   ui_file_delete (stb);
 
   /* Add the deprecated disassembly-flavor command.  */
-  new_set = add_set_enum_cmd ("disassembly-flavor", no_class,
-			      valid_disassembly_styles,
-			      &disassembly_style,
-			      helptext,
-			      &setlist);
-  set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
+  add_setshow_enum_cmd("disassembly-flavor", no_class,
+		       valid_disassembly_styles,
+		       &disassembly_style,
+		       _("Set the disassembly style."),
+		       _("Show the disassembly style."),
+		       helptext,
+		       _("The disassembly style is \"%s\"."),
+		       set_disassembly_style_sfunc, NULL,
+		       &setlist, &showlist, &new_set, &new_show);
   deprecate_cmd (new_set, "set arm disassembly");
-  deprecate_cmd (deprecated_add_show_from_set (new_set, &showlist),
-		 "show arm disassembly");
+  deprecate_cmd (new_show, "show arm disassembly");
 
   /* And now add the new interface.  */
-  new_set = add_set_enum_cmd ("disassembler", no_class,
-			      valid_disassembly_styles, &disassembly_style,
-			      helptext, &setarmcmdlist);
+  add_setshow_enum_cmd("disassembler", no_class,
+		       valid_disassembly_styles, &disassembly_style,
+		       _("Set the disassembly style."),
+		       _("Show the disassembly style."),
+		       helptext,
+		       _("The disassembly style is \"%s\"."),
+		       set_disassembly_style_sfunc, NULL,
+		       &setarmcmdlist, &showarmcmdlist, NULL, NULL);
 
-  set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
-  deprecated_add_show_from_set (new_set, &showarmcmdlist);
-
-  add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32, "\
-Set usage of ARM 32-bit mode.", "\
-Show usage of ARM 32-bit mode.", "\
-When off, a 26-bit PC will be used.\n\
-When off, a 26-bit PC will be used.", "\
-Usage of ARM 32-bit mode is %s.",
+  add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32,
+			   _("Set usage of ARM 32-bit mode."),
+			   _("Show usage of ARM 32-bit mode."),
+			   _("When off, a 26-bit PC will be used."),
+			   _("Usage of ARM 32-bit mode is %s."),
 			   NULL, NULL,
 			   &setarmcmdlist, &showarmcmdlist);
 
   /* Add a command to allow the user to force the FPU model.  */
-  new_set = add_set_enum_cmd
-    ("fpu", no_class, fp_model_strings, &current_fp_model,
-     "Set the floating point type.\n"
-     "auto - Determine the FP typefrom the OS-ABI.\n"
-     "softfpa - Software FP, mixed-endian doubles on little-endian ARMs.\n"
-     "fpa - FPA co-processor (GCC compiled).\n"
-     "softvfp - Software FP with pure-endian doubles.\n"
-     "vfp - VFP co-processor.",
-     &setarmcmdlist);
-  set_cmd_sfunc (new_set, set_fp_model_sfunc);
-  set_cmd_sfunc (deprecated_add_show_from_set (new_set, &showarmcmdlist),
-		 show_fp_model);
+  add_setshow_enum_cmd ("fpu", no_class, fp_model_strings, &current_fp_model,
+			_("Set the floating point type."),
+			_("Show the floating point type."),
+			_("auto - Determine the FP typefrom the OS-ABI.\n\
+softfpa - Software FP, mixed-endian doubles on little-endian ARMs.\n\
+fpa - FPA co-processor (GCC compiled).\n\
+softvfp - Software FP with pure-endian doubles.\n\
+vfp - VFP co-processor."),
+			_("The floating point type is \"%s\"."),
+			set_fp_model_sfunc, show_fp_model,
+			&setarmcmdlist, &showarmcmdlist, NULL, NULL);
 
   /* Add the deprecated "othernames" command.  */
   deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,
-			  "Switch to the next set of register names."),
+			  _("Switch to the next set of register names.")),
 		 "set arm disassembly");
 
   /* Debugging flag.  */
-  add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug, "\
-Set ARM debugging.", "\
-Show ARM debugging.", "\
-When on, arm-specific debugging is enabled.", "\
-ARM debugging is %s.",
+  add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug,
+			   _("Set ARM debugging."),
+			   _("Show ARM debugging."),
+			   _("When on, arm-specific debugging is enabled."),
+			   _("ARM debugging is %s."),
 			   NULL, NULL,
 			   &setdebuglist, &showdebuglist);
 }
