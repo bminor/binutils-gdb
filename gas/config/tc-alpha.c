@@ -442,7 +442,13 @@ tc_gen_reloc (sec, fixp)
     }
   else
     reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  assert (reloc->howto != 0);
+  if (reloc->howto == NULL)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    "cannot represent `%s' relocation in object file",
+		    bfd_get_reloc_code_name (fixp->fx_r_type));
+      return NULL;
+    }
   if (!fixp->fx_pcrel != !reloc->howto->pc_relative)
     {
       as_fatal ("internal error? cannot generate `%s' relocation",
