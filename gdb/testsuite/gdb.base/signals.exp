@@ -300,16 +300,11 @@ gdb_start
 # This will need to be updated as the exact list of signals changes,
 # but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
 # TARGET_SIGNAL_UNKNOWN are skipped.
-# Increase timeout and expect input buffer for large output from gdb.
+# Increase expect input buffer for large output from gdb.
 # Allow blank or TAB as whitespace characters and test individually for
 # each specific signal.
 
 proc test_handle_all_print {} {
-    global timeout
-
-    set oldtimeout $timeout
-    set timeout [expr "$timeout + 15"]
-    verbose "Timeout is now $timeout seconds" 2
     match_max 10000
     gdb_test "handle all print" \
 	 "Signal\[ \t\]+Stop\[ \t\]+Print\[ \t\]+Pass to program\[ \t\]+Description\r\n.*" \
@@ -551,8 +546,6 @@ proc test_handle_all_print {} {
     gdb_test "handle all print" \
 	 ".*EXC_BREAKPOINT\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Breakpoint.*" \
 	 "handle all print - Breakpoint"
-    set timeout $oldtimeout
-    verbose "Timeout restored to $timeout seconds" 2
 }
 test_handle_all_print
 
