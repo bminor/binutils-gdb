@@ -1,3 +1,8 @@
+2000-05-23  Philip Blundell  <pb@futuretv.com>
+
+	* configure.in: Set version to 2.10.
+	* configure: Regenerate.
+
 2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* arlex.l: Add directives to increase lex buffer size.
