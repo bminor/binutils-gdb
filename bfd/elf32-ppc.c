@@ -2294,8 +2294,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ret = false;
 	      continue;
 	    }
-	  relocation = (sdata->sym_hash->root.u.def.value
-			+ sdata->sym_hash->root.u.def.section->output_section->vma
+	  relocation = (sdata2->sym_hash->root.u.def.value
+			+ sdata2->sym_hash->root.u.def.section->output_section->vma
 			- relocation);
 	  break;
 
@@ -2311,8 +2311,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
 	      {
 		reg = 13;
-		relocation = (sdata2->sym_hash->root.u.def.value
-			      + sdata2->sym_hash->root.u.def.section->output_section->vma
+		relocation = (sdata->sym_hash->root.u.def.value
+			      + sdata->sym_hash->root.u.def.section->output_section->vma
 			      - relocation);
 	      }
 
