@@ -23,14 +23,6 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
-d10v_files="cpu-d10v.c elf32-d10v.c"
-
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-	keep_these_too="${d10v_files} ${keep_these_too}"
-else
-	lose_these_too="${d10v_files} ${lose_these_too}"
-fi
-
 d30v_files="cpu-d30v.c elf32-d30v.c"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -144,6 +136,7 @@ corefile.c
 cpu-a29k.c
 cpu-alpha.c
 cpu-arm.c
+cpu-d10v.c
 cpu-h8300.c
 cpu-h8500.c
 cpu-hppa.c
@@ -172,6 +165,7 @@ ecofflink.c
 ecoffswap.h
 elf-bfd.h
 elf.c
+elf32-d10v.c
 elf32-gen.c
 elf32-hppa.c
 elf32-hppa.h

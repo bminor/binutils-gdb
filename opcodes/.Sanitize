@@ -23,14 +23,6 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
-d10v_files="d10v-dis.c d10v-opc.c"
-
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-	keep_these_too="${d10v_files} ${keep_these_too}"
-else
-	lose_these_too="${d10v_files} ${lose_these_too}"
-fi
-
 d30v_files="d30v-dis.c d30v-opc.c"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -76,6 +68,8 @@ config.in
 configure
 configure.bat
 configure.in
+d10v-dis.c
+d10v-opc.c
 dis-buf.c
 disassemble.c
 h8300-dis.c
