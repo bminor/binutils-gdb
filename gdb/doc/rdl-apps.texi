@@ -1,2 +1,0 @@
-@include ./../../readline/doc/rluser.texinfo
-@include ./../../readline/doc/inc-hist.texi

@@ -1,7 +1,0 @@
-YACC=yacc -tvd
-#CC=gcc -Wall -ansi
-#stuff for self hosting
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else echo $(libdir)/libgcc.a; fi`  -lc
-HOSTING_EMU=LDEMULATION=sun4; export LDEMULATION
-

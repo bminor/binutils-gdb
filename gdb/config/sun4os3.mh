@@ -1,3 +1,0 @@
-# Host: Sun 4 or Sparcstation, running SunOS 3
-XDEPFILES= infptrace.o sparc-xdep.o
-XM_FILE= xm-sparc.h

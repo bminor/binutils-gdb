@@ -1,5 +1,0 @@
-# Target: AMD 29000 on EB29K board over a serial line.
-TDEPFILES= exec.o am29k-pinsn.o remote-eb.o am29k-tdep.o
-TM_FILE= tm-29k.h
-# The following is for ../include/a.out.encap.h
-TM_CFLAGS = -DCOFF_ENCAPSULATE -DTARGET=TARGET_AM29K

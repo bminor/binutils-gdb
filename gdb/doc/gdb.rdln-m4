@@ -1,7 +1,0 @@
-_dnl__								-*- Texinfo -*-
-_dnl__ Copyright (c) 1991 Free Software Foundation, Inc.
-_dnl__ This file is part of the source for the GDB manual.
-@c M4 FRAGMENT: $Id$
-@iftex
-@include rdl-apps.texinfo
-@end iftex

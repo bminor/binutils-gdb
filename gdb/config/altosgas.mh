@@ -1,9 +1,0 @@
-# Host: Altos 3068 (68k, System V release 2), using COFF encapsulation
-#msg Use of the coff encapsulation features require the GNU binutils utilities
-#msg To be ahead of their System V counterparts in your path.
-
-XDEPFILES= infptrace.o altos-xdep.o
-XM_FILE= xm-altos.h
-REGEX=regex.o
-REGEX1=regex.o
-SYSV_DEFINE=-DSYSV

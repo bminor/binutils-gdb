@@ -1,4 +1,0 @@
-# Target: H8300 with HDS monitor 
-TDEPFILES= exec.o h8300-tdep.o  hds-tdep.o
-TM_FILE= tm-h8300.h
-TM_CFLAGS=
