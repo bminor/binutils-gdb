@@ -1,3 +1,7 @@
+2003-10-20  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1056.exp: New test script.
+
 2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/killed.exp: Use gdb_run_cmd.
