@@ -64,9 +64,10 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
 #define EF_SIZE			180
 
 /* Figure out where the longjmp will land.
-   We expect the first arg to be a pointer to the jmp_buf structure from
-   which we extract the pc (MIPS_LINUX_JB_PC) that we will land at.  The pc
-   is copied into PC.  This routine returns 1 on success.  */
+   We expect the first arg to be a pointer to the jmp_buf structure
+   from which we extract the pc (MIPS_LINUX_JB_PC) that we will land
+   at.  The pc is copied into PC.  This routine returns 1 on
+   success.  */
 
 #define MIPS_LINUX_JB_ELEMENT_SIZE 4
 #define MIPS_LINUX_JB_PC 0
@@ -131,7 +132,9 @@ supply_gregset (elf_gregset_t *gregsetp)
 
   /* Fill inaccessible registers with zero.  */
   regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = MIPS_FIRST_EMBED_REGNUM; regi < MIPS_LAST_EMBED_REGNUM; regi++)
+  for (regi = MIPS_FIRST_EMBED_REGNUM;
+       regi < MIPS_LAST_EMBED_REGNUM;
+       regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 
@@ -206,7 +209,7 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 		       mips_regnum (current_gdbarch)->fp_control_status,
 		       (char *)(*fpregsetp + 32));
 
-  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
+  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us.  */
   regcache_raw_supply (current_regcache,
 		       mips_regnum (current_gdbarch)->fp_implementation_revision,
 		       zerobuf);
@@ -236,7 +239,8 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
       for (regi = 0; regi < 32; regi++)
 	fill_fpregset (fpregsetp, FP0_REGNUM + regi);
-      fill_fpregset(fpregsetp, mips_regnum (current_gdbarch)->fp_control_status);
+      fill_fpregset (fpregsetp,
+		     mips_regnum (current_gdbarch)->fp_control_status);
     }
 }
 
@@ -278,20 +282,22 @@ mips_linux_register_addr (int regno, CORE_ADDR blockend)
 
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux MIPS targets using the struct offsets
-   defined in link.h (but without actual reference to that file).
+   structure for native GNU/Linux MIPS targets using the struct
+   offsets defined in link.h (but without actual reference to that
+   file).
 
-   This makes it possible to access GNU/Linux MIPS shared libraries from a
-   GDB that was built on a different host platform (for cross debugging).  */
+   This makes it possible to access GNU/Linux MIPS shared libraries
+   from a GDB that was built on a different host platform (for cross
+   debugging).  */
 
 static struct link_map_offsets *
 mips_linux_svr4_fetch_link_map_offsets (void)
-{ 
+{
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
 
   if (lmp == NULL)
-    { 
+    {
       lmp = &lmo;
 
       lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
@@ -351,9 +357,10 @@ typedef mips64_elf_fpreg_t mips64_elf_fpregset_t[MIPS64_ELF_NFPREG];
 #define MIPS64_EF_SIZE			304
 
 /* Figure out where the longjmp will land.
-   We expect the first arg to be a pointer to the jmp_buf structure from
-   which we extract the pc (MIPS_LINUX_JB_PC) that we will land at.  The pc
-   is copied into PC.  This routine returns 1 on success.  */
+   We expect the first arg to be a pointer to the jmp_buf structure
+   from which we extract the pc (MIPS_LINUX_JB_PC) that we will land
+   at.  The pc is copied into PC.  This routine returns 1 on
+   success.  */
 
 /* Details about jmp_buf.  */
 
@@ -392,23 +399,30 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
     regcache_raw_supply (current_regcache, (regi - MIPS64_EF_REG0),
 			 (char *)(regp + regi));
 
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->lo,
-		       (char *)(regp + MIPS64_EF_LO));
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->hi,
-		       (char *)(regp + MIPS64_EF_HI));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->lo,
+		       (char *) (regp + MIPS64_EF_LO));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->hi,
+		       (char *) (regp + MIPS64_EF_HI));
 
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->pc,
-		       (char *)(regp + MIPS64_EF_CP0_EPC));
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->badvaddr,
-		       (char *)(regp + MIPS64_EF_CP0_BADVADDR));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->pc,
+		       (char *) (regp + MIPS64_EF_CP0_EPC));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->badvaddr,
+		       (char *) (regp + MIPS64_EF_CP0_BADVADDR));
   regcache_raw_supply (current_regcache, MIPS_PS_REGNUM,
-		       (char *)(regp + MIPS64_EF_CP0_STATUS));
-  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->cause,
-		       (char *)(regp + MIPS64_EF_CP0_CAUSE));
+		       (char *) (regp + MIPS64_EF_CP0_STATUS));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->cause,
+		       (char *) (regp + MIPS64_EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
   regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = MIPS_FIRST_EMBED_REGNUM; regi < MIPS_LAST_EMBED_REGNUM; regi++)
+  for (regi = MIPS_FIRST_EMBED_REGNUM;
+       regi < MIPS_LAST_EMBED_REGNUM;
+       regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 
@@ -429,9 +443,11 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->lo);
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
       mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
+      mips64_fill_gregset (gregsetp,
+			   mips_regnum (current_gdbarch)->badvaddr);
       mips64_fill_gregset (gregsetp, MIPS_PS_REGNUM);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
+      mips64_fill_gregset (gregsetp,
+			   mips_regnum (current_gdbarch)->cause);
 
       return;
    }
@@ -483,7 +499,7 @@ mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
 		       mips_regnum (current_gdbarch)->fp_control_status,
 		       (char *)(*fpregsetp + 32));
 
-  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
+  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us.  */
   regcache_raw_supply (current_regcache,
 		       mips_regnum (current_gdbarch)->fp_implementation_revision,
 		       zerobuf);
@@ -593,7 +609,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	}
       else if (core_reg_size == sizeof (fpregset64))
 	{
-	  memcpy ((char *) &fpregset64, core_reg_sect, sizeof (fpregset64));
+	  memcpy ((char *) &fpregset64, core_reg_sect,
+		  sizeof (fpregset64));
 	  mips64_supply_fpregset (&fpregset64);
 	}
       else
@@ -616,20 +633,22 @@ static struct core_fns regset_core_fns =
 };
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux MIPS targets using the struct offsets
-   defined in link.h (but without actual reference to that file).
+   structure for native GNU/Linux MIPS targets using the struct
+   offsets defined in link.h (but without actual reference to that
+   file).
 
-   This makes it possible to access GNU/Linux MIPS shared libraries from a
-   GDB that was built on a different host platform (for cross debugging).  */
+   This makes it possible to access GNU/Linux MIPS shared libraries
+   from a GDB that was built on a different host platform (for cross
+   debugging).  */
 
 static struct link_map_offsets *
 mips64_linux_svr4_fetch_link_map_offsets (void)
-{ 
+{
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
 
   if (lmp == NULL)
-    { 
+    {
       lmp = &lmo;
 
       lmo.r_debug_size = 16;	/* The actual size is 40 bytes, but
@@ -655,8 +674,8 @@ mips64_linux_svr4_fetch_link_map_offsets (void)
   return lmp;
 }
 
-/* Handle for obtaining pointer to the current register_addr() function
-   for a given architecture.  */
+/* Handle for obtaining pointer to the current register_addr()
+   function for a given architecture.  */
 static struct gdbarch_data *register_addr_data;
 
 CORE_ADDR
@@ -672,9 +691,11 @@ register_addr (int regno, CORE_ADDR blockend)
 
 static void
 set_mips_linux_register_addr (struct gdbarch *gdbarch,
-                              CORE_ADDR (*register_addr_ptr) (int, CORE_ADDR))
+                              CORE_ADDR (*register_addr_ptr) (int,
+							      CORE_ADDR))
 {
-  deprecated_set_gdbarch_data (gdbarch, register_addr_data, register_addr_ptr);
+  deprecated_set_gdbarch_data (gdbarch, register_addr_data,
+			       register_addr_ptr);
 }
 
 static void *
@@ -683,17 +704,17 @@ init_register_addr_data (struct gdbarch *gdbarch)
   return 0;
 }
 
-/* Check the code at PC for a dynamic linker lazy resolution stub.  Because
-   they aren't in the .plt section, we pattern-match on the code generated
-   by GNU ld.  They look like this:
+/* Check the code at PC for a dynamic linker lazy resolution stub.
+   Because they aren't in the .plt section, we pattern-match on the
+   code generated by GNU ld.  They look like this:
 
    lw t9,0x8010(gp)
    addu t7,ra
    jalr t9,ra
    addiu t8,zero,INDEX
 
-   (with the appropriate doubleword instructions for N64).  Also return the
-   dynamic symbol index used in the last instruction.  */
+   (with the appropriate doubleword instructions for N64).  Also
+   return the dynamic symbol index used in the last instruction.  */
 
 static int
 mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
@@ -739,7 +760,7 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
       if (insn != 0x03e07821)
 	return 0;
     }
-  
+
   insn = extract_unsigned_integer (p + 8, 4);
   /* jalr t9,ra */
   if (insn != 0x0320f809)
@@ -762,19 +783,19 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
   return (insn & 0xffff);
 }
 
-/* Return non-zero iff PC belongs to the dynamic linker resolution code
-   or to a stub.  */
+/* Return non-zero iff PC belongs to the dynamic linker resolution
+   code or to a stub.  */
 
 int
 mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  /* Check whether PC is in the dynamic linker.  This also checks whether
-     it is in the .plt section, which MIPS does not use.  */
+  /* Check whether PC is in the dynamic linker.  This also checks
+     whether it is in the .plt section, which MIPS does not use.  */
   if (in_solib_dynsym_resolve_code (pc))
     return 1;
 
-  /* Pattern match for the stub.  It would be nice if there were a more
-     efficient way to avoid this check.  */
+  /* Pattern match for the stub.  It would be nice if there were a
+     more efficient way to avoid this check.  */
   if (mips_linux_in_dynsym_stub (pc, NULL))
     return 1;
 
@@ -798,10 +819,10 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
   if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
-    return frame_pc_unwind (get_current_frame ()); 
+    return frame_pc_unwind (get_current_frame ());
 
   return 0;
-}      
+}
 
 /* Signal trampoline support.  There are four supported layouts for a
    signal frame: o32 sigframe, o32 rt_sigframe, n32 rt_sigframe, and
@@ -868,7 +889,9 @@ static const struct tramp_frame mips_linux_n32_rt_sigframe = {
 static const struct tramp_frame mips_linux_n64_rt_sigframe = {
   SIGTRAMP_FRAME,
   4,
-  { MIPS_INST_LI_V0_N64_RT_SIGRETURN, MIPS_INST_SYSCALL, TRAMP_SENTINEL_INSN },
+  { MIPS_INST_LI_V0_N64_RT_SIGRETURN,
+    MIPS_INST_SYSCALL,
+    TRAMP_SENTINEL_INSN },
   mips_linux_n32n64_sigframe_init
 };
 
@@ -958,11 +981,11 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
     sigcontext_base += SIGFRAME_SIGCONTEXT_OFFSET;
   else
     sigcontext_base += RTSIGFRAME_SIGCONTEXT_OFFSET;
-    
-  /* I'm not proud of this hack.  Eventually we will have the infrastructure
-     to indicate the size of saved registers on a per-frame basis, but
-     right now we don't; the kernel saves eight bytes but we only want
-     four.  */
+
+  /* I'm not proud of this hack.  Eventually we will have the
+     infrastructure to indicate the size of saved registers on a
+     per-frame basis, but right now we don't; the kernel saves eight
+     bytes but we only want four.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     sigcontext_base += 4;
 
@@ -972,7 +995,8 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 #endif
 
   for (ireg = 1; ireg < 32; ireg++)
-    trad_frame_set_reg_addr (this_cache, ireg + MIPS_ZERO_REGNUM + NUM_REGS,
+    trad_frame_set_reg_addr (this_cache,
+			     ireg + MIPS_ZERO_REGNUM + NUM_REGS,
 			     sigcontext_base + SIGCONTEXT_REGS
 			     + ireg * SIGCONTEXT_REG_SIZE);
 
@@ -984,7 +1008,8 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, regs->pc + NUM_REGS,
 			   sigcontext_base + SIGCONTEXT_PC);
 
-  trad_frame_set_reg_addr (this_cache, regs->fp_control_status + NUM_REGS,
+  trad_frame_set_reg_addr (this_cache,
+			   regs->fp_control_status + NUM_REGS,
 			   sigcontext_base + SIGCONTEXT_FPCSR);
   trad_frame_set_reg_addr (this_cache, regs->hi + NUM_REGS,
 			   sigcontext_base + SIGCONTEXT_HI);
@@ -997,7 +1022,8 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
   trad_frame_set_id (this_cache,
-		     frame_id_build (func - SIGFRAME_CODE_OFFSET, func));
+		     frame_id_build (func - SIGFRAME_CODE_OFFSET,
+				     func));
 }
 
 /* *INDENT-OFF* */
@@ -1017,7 +1043,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
     struct sigcontext   uc_mcontext;
     sigset_t            uc_sigmask;   [ mask last for extensibility ]
   };
-                                
+
   struct rt_sigframe_n32 {
     u32 rs_ass[4];                  [ argument save space for o32 ]
     u32 rs_code[2];                 [ signal trampoline ]
@@ -1072,7 +1098,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 #define N64_SIGCONTEXT_BADVADDR (67 * 8 + 5 * 4)
 
 #define N64_SIGCONTEXT_REG_SIZE 8
-  
+
 static void
 mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 				 struct frame_info *next_frame,
@@ -1087,14 +1113,15 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
     sigcontext_base += N32_SIGFRAME_SIGCONTEXT_OFFSET;
   else
     sigcontext_base += N64_SIGFRAME_SIGCONTEXT_OFFSET;
-    
+
 #if 0
   trad_frame_set_reg_addr (this_cache, ORIG_ZERO_REGNUM + NUM_REGS,
 			   sigcontext_base + N64_SIGCONTEXT_REGS);
 #endif
 
   for (ireg = 1; ireg < 32; ireg++)
-    trad_frame_set_reg_addr (this_cache, ireg + MIPS_ZERO_REGNUM + NUM_REGS,
+    trad_frame_set_reg_addr (this_cache,
+			     ireg + MIPS_ZERO_REGNUM + NUM_REGS,
 			     sigcontext_base + N64_SIGCONTEXT_REGS
 			     + ireg * N64_SIGCONTEXT_REG_SIZE);
 
@@ -1106,7 +1133,8 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, regs->pc + NUM_REGS,
 			   sigcontext_base + N64_SIGCONTEXT_PC);
 
-  trad_frame_set_reg_addr (this_cache, regs->fp_control_status + NUM_REGS,
+  trad_frame_set_reg_addr (this_cache,
+			   regs->fp_control_status + NUM_REGS,
 			   sigcontext_base + N64_SIGCONTEXT_FPCSR);
   trad_frame_set_reg_addr (this_cache, regs->hi + NUM_REGS,
 			   sigcontext_base + N64_SIGCONTEXT_HI);
@@ -1119,13 +1147,15 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
   trad_frame_set_id (this_cache,
-		     frame_id_build (func - SIGFRAME_CODE_OFFSET, func));
+		     frame_id_build (func - SIGFRAME_CODE_OFFSET,
+				     func));
 }
 
 /* Initialize one of the GNU/Linux OS ABIs.  */
 
 static void
-mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+mips_linux_init_abi (struct gdbarch_info info,
+		     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
@@ -1179,7 +1209,8 @@ _initialize_mips_linux_tdep (void)
        arch_info != NULL;
        arch_info = arch_info->next)
     {
-      gdbarch_register_osabi (bfd_arch_mips, arch_info->mach, GDB_OSABI_LINUX,
+      gdbarch_register_osabi (bfd_arch_mips, arch_info->mach,
+			      GDB_OSABI_LINUX,
 			      mips_linux_init_abi);
     }
 

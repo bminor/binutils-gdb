@@ -1,3 +1,7 @@
+2005-01-17  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-linux-tdep.c: Whitespace tweaks.
+
 2005-01-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* infcmd.c (attach_command): Call CLEAR_SOLIB if available.
