@@ -1,5 +1,5 @@
 /* frv simulator support code
-   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -1049,14 +1049,17 @@ do_media_average (SIM_CPU *current_cpu, HI arg1, HI arg2)
   SIM_DESC sd = CPU_STATE (current_cpu);
   SI sum = (arg1 + arg2);
   HI result = sum >> 1;
+  int rounding_value;
 
   /* On fr400, check the rounding mode.  On other machines rounding is always
      toward negative infinity and the result is already correctly rounded.  */
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
+  switch (STATE_ARCHITECTURE (sd)->mach)
     {
+      /* Need to check rounding mode. */
+    case bfd_mach_fr400:
       /* Check whether rounding will be required.  Rounding will be required
 	 if the sum is an odd number.  */
-      int rounding_value = sum & 1;
+      rounding_value = sum & 1;
       if (rounding_value)
 	{
 	  USI msr0 = GET_MSR (0);
@@ -1098,6 +1101,9 @@ do_media_average (SIM_CPU *current_cpu, HI arg1, HI arg2)
 		++result;
 	    }
 	}
+      break;
+    default:
+      break;
     }
 
   return result;
