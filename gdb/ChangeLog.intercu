@@ -1,5 +1,17 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in (hashtab_h): Add.
+	(dwarf2read.o): Update dependencies.
+	* dwarf2read.c: Include "hashtab.h".
+	(struct dwarf2_cu): Change partial_dies to an htab_t.
+	(hash_obstack_allocate, partial_die_hash, partial_die_eq): New
+	functions.
+	(dwarf2_build_psymtabs_hard): Call htab_create_alloc_ex.
+	(load_partial_dies): Call htab_find_slot_with_hash.
+	(find_partial_die): Call htab_find_with_hash.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct partial_die_info): Use bitfields and
 	rearrange members for packing.  Replace spec_attr with spec_offset.
 	(load_partial_dies): Only follow structures for C++.

@@ -45,6 +45,7 @@
 #include "dwarf2loc.h"
 #include "cp-support.h"
 #include "splay-tree.h"
+#include "hashtab.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -260,7 +261,7 @@ struct dwarf2_cu
      fundamental types gdb knows how to construct.  */
   struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
 
-  splay_tree partial_dies;
+  htab_t partial_dies;
   struct obstack partial_die_obstack;
 };
 
@@ -954,6 +955,30 @@ splay_tree_obstack_deallocate (void *object, void *data)
   return;
 }
 
+static void *
+hash_obstack_allocate (void *data, size_t size, size_t count)
+{
+  unsigned int total = size * count;
+  void *ptr = obstack_alloc ((struct obstack *) data, total);
+  memset (ptr, 0, total);
+  return ptr;
+}
+
+static hashval_t
+partial_die_hash (const void *item)
+{
+  const struct partial_die_info *part_die = item;
+  return part_die->offset;
+}
+
+static int
+partial_die_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct partial_die_info *part_die_lhs = item_lhs;
+  const struct partial_die_info *part_die_rhs = item_rhs;
+  return part_die_lhs->offset == part_die_rhs->offset;
+}
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
@@ -1318,10 +1343,12 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  obstack_init (&cu.partial_die_obstack);
 	  cu.partial_dies
-	    = splay_tree_new_with_allocator (splay_tree_compare_ints, NULL,
-					     NULL, splay_tree_obstack_allocate,
-					     splay_tree_obstack_deallocate,
-					     &cu.partial_die_obstack);
+	    = htab_create_alloc_ex (29, partial_die_hash,
+				    partial_die_eq,
+				    NULL,
+				    &cu.partial_die_obstack,
+				    hash_obstack_allocate,
+				    splay_tree_obstack_deallocate);
 
 	  load_partial_dies (abfd, info_ptr, &cu);
 
@@ -4501,6 +4528,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
   struct partial_die_info *parent_die, *last_die;
   struct abbrev_info *abbrev;
   unsigned int bytes_read;
+  void **slot;
 
   /* FIXME: Obviously we need a nesting level passed in for incremental use.  */
   int nesting_level = 1;
@@ -4559,8 +4587,10 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       last_die = part_die;
 
       //      fprintf_unfiltered (gdb_stderr, "Inserting DIE %x\n", part_die->offset);
-      splay_tree_insert (cu->partial_dies, part_die->offset,
-			 (splay_tree_value) part_die);
+      slot = htab_find_slot_with_hash (cu->partial_dies, part_die,
+				       part_die->offset, INSERT);
+      // gdb_assert (*slot == NULL);
+      *slot = part_die;
 
       part_die = obstack_alloc (&cu->partial_die_obstack,
 				sizeof (struct partial_die_info));
@@ -4714,14 +4744,16 @@ static struct partial_die_info *
 find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
 {
   struct partial_die_info *lookup_die = NULL;
-  splay_tree_node node;
+  struct partial_die_info part_die;
 
-  node = splay_tree_lookup (cu->partial_dies, offset);
-  if (node == NULL)
+  part_die.offset = offset;
+  lookup_die = htab_find_with_hash (cu->partial_dies, &part_die, offset);
+  
+  if (lookup_die == NULL)
     internal_error (__FILE__, __LINE__,
 		    "could not find partial DIE in cache\n");
 
-  return (struct partial_die_info *) node->value;
+  return lookup_die;
 }
 
 static void
