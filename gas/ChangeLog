@@ -1,3 +1,7 @@
+2000-06-15  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* config/tc-mips.h: Remove definition of ONLY_STANDARD_ESCAPES.
+
 2000-06-13  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* macro.c (getstring): Make it possible to escape the quote

@@ -37,7 +37,6 @@ struct expressionS;
 
 #define TARGET_ARCH bfd_arch_mips
 
-#define ONLY_STANDARD_ESCAPES
 #define WORKING_DOT_WORD	1
 #define OLD_FLOAT_READS
 #define REPEAT_CONS_EXPRESSIONS
