@@ -47,6 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* NewsOS 3 apparently dies on large alloca's -- roland@ai.mit.edu.  */
 #define	BROKEN_LARGE_ALLOCA
 
+/* NewsOS 3.3 does not define errno in <errno.h>.  */
+extern int errno;
 
 /* Interface definitions for kernel debugger KDB.  */
 

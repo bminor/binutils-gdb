@@ -1,3 +1,7 @@
+Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* config/m68k/xm-news.h: add "extern int errno".
+
 Tue Jun  8 13:45:07 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remove-vx.c (vx_read_register, vx_write_register): collapse
