@@ -1,3 +1,10 @@
+2000-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (find_debug_info): New function: Locate a section
+	containing dwarf2 debug information.
+	(bfd_dwarf2_find_nearest_line): Find all sections containing
+	debug information and include them in the stash.
+
 2000-09-01  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (R_SH_GOT32, R_SH_PLT32, R_SH_COPY, R_SH_GLOB_DAT,
