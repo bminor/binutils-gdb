@@ -1,5 +1,9 @@
 Sat Mar 19 08:51:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/m68k/{cisco.mt,tm-cisco.h}: New files.
+	* Makefile.in (ALLPARAM, ALLCONFIG): Add them.
+	* configure.in: Recognize m68*-cisco*-*.
+
 	* Makefile.in (TAGS): Use variables directly, rather than using
 	find, to locate TM_FILE, XM_FILE, and NAT_FILE.  This is faster
 	and means that these filenames no longer need be unique across all

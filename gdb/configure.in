@@ -235,6 +235,7 @@ m68*-hp-hpux*)		gdb_target=hp300hpux ;;
 m68*-altos-*)		gdb_target=altos ;;
 m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-att-*)		gdb_target=3b1 ;;
+m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;
 m68*-isi-*)		gdb_target=isi ;;
 m68*-motorola-*)	gdb_target=delta68 ;;

@@ -30,6 +30,7 @@ amix.mt
 apollo68b.mh
 apollo68b.mt
 apollo68v.mh
+cisco.mt
 delta68.mh
 delta68.mt
 dpx2.mh
@@ -69,6 +70,7 @@ sun3os4.mh
 sun3os4.mt
 tm-3b1.h
 tm-apollo68b.h
+tm-cisco.h
 tm-delta68.h
 tm-m68k.h
 tm-m68klynx.h
