@@ -27,7 +27,7 @@ _fi__(0)
 @c
 @syncodeindex ky cp
 @c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
-@c Tue Feb 26 01:47:07 1991  Cygnus John Gilmore  (cygnus at yuba)
+@c Sun May 19 05:36:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
 This file documents the GNU debugger _GDBN__.
@@ -39,7 +39,7 @@ this manual provided the copyright notice and this permission notice
 are preserved on all copies.
 
 @ignore
-Permission is granted to process this file through Tex and print the
+Permission is granted to process this file through TeX and print the
 results, provided the printed document carries copying permission
 notice identical to this one except for the removal of this paragraph
 (this paragraph not being relevant to the printed manual).
@@ -55,8 +55,8 @@ one.
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
 @end ifinfo
 @smallbook
 @setchapternewpage odd
@@ -111,8 +111,8 @@ one.
 Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
+included in a translation approved by the Free Software Foundation
+instead of in the original English.
 @end titlepage
 @page
 
@@ -144,7 +144,6 @@ This file describes version 4.0 of GDB, the GNU symbolic debugger.
 * Installing _GDBN__::		Installing _GDBN__
 * Copying::			GNU GENERAL PUBLIC LICENSE
 * Index::			Index
-
 @end menu
 
 @node Summary, New Features, Top, Top
@@ -195,6 +194,7 @@ Fundamentally, the General Public License is a license which says that
 you have these freedoms and that you can't take these freedoms away
 from anyone else.
 
+@c FIXME: (passim) go through all xrefs, expanding to use text headings
 For full details, @pxref{Copying}.
 @node Contributors,  , Free Software, Summary
 @unnumberedsec Contributors to GDB
@@ -264,22 +264,22 @@ Brian Fox is the author of the readline libraries providing
 command-line editing and command history.
 
 @node New Features, Sample Session, Summary, Top
-@unnumbered New Features in _GDBN__ version 4.0
+@unnumbered New Features since _GDBN__ version 3.5
 
 @table @emph
 @item Targets
-Using the new command @code{target}, you can select at runtime
-whether you are debugging local files, local processes, standalone
-systems over the serial port, realtime systems over a TCP/IP
-connection, etc.  _GDBN__ now uses a function vector to mediate access to
-all the different possible targets, making it much easier to add
-support for new remote protocols.
+Using the new command @code{target}, you can select at runtime whether
+you are debugging local files, local processes, standalone systems over
+a serial port, realtime systems over a TCP/IP connection, etc.
+Internally, _GDBN__ now uses a function vector to mediate access to
+different targets; if you need to add your own support for a remote
+protocol, this makes it much easier.
 
 @item Watchpoints
-_GDBN__ now sports watchpoints as well as breakpoints.  You can
-use a watchpoint to stop execution whenever the value of an expression
-changes, without having to predict a particular place in the inferior
-process where this may happen. 
+_GDBN__ now sports watchpoints as well as breakpoints.  You can use a
+watchpoint to stop execution whenever the value of an expression
+changes, without having to predict a particular place in your program
+where this may happen.
 
 @item Object Code Formats
 _GDBN__ uses a new scheme called Binary File Descriptors (BFD) to permit
@@ -291,26 +291,22 @@ that other programs may take advantage of it, and the other GNU binary
 utilities are being converted to use it.
 
 @item Configuration
-You must still choose a particular machine architecture and operating
-system for _GDBN__'s host and target systems when _GDBN__ is built.  The
-script @code{config.gdb} now handles specification of separate host and
-target configurations.
+Compile-time configuration (to select a particular architecture and
+operating system) is much easier.  The script @code{config.gdb} now
+handles specification of separate host and target configurations.
 
 @item Interaction
-_GDBN__ now uses the GNU readline interface to read its input; this
-provides inline editing of commands, using the familiar Emacs or
-@code{vi} keymaps, and command-history support. The user interface to
-_GDBN__'s control variables has been simplified and consolidated in two
-commands, @code{set} and @code{show}.  Output lines are now broken at
-readable places, rather than overflowing onto the next line.
+The user interface to _GDBN__'s control variables has been simplified
+and consolidated in two commands, @code{set} and @code{show}.  Output
+lines are now broken at readable places, rather than overflowing onto
+the next line.  You can suppress output of machine-level addresses,
+displaying only source language information.
+
 
 @item Source Language
-_GDBN__ now understands C++ source as well as C. Multiple inheritance is
-supported when used with G++ 2.0. There is also limited support for C++
-exception handling: _GDBN__ can break when an exception is raised,
-before the stack is peeled back to the exception handler's context.  You
-can suppress output of machine-level addresses, displaying only source
-language information.
+_GDBN__ now has limited support for C++ exception handling: _GDBN__ can
+break when an exception is raised, before the stack is peeled back to
+the exception handler's context.  
 
 @item Command Rationalization
 Many _GDBN__ commands have been renamed to make them easier to remember
@@ -709,7 +705,7 @@ messages are also suppressed in batch mode, or if an executable file name is
 specified on the _GDBN__ command line.
 
 @item -batch
-Run in batch mode.  Exit with code @code{0} after processing all the command
+Run in batch mode.  Exit with status @code{0} after processing all the command
 files specified with @samp{-x} (and @file{_GDBINIT__}, if not inhibited).
 Exit with nonzero status if an error occurs in executing the _GDBN__
 commands in the command files.  
@@ -740,11 +736,12 @@ Emacs-to-_GDBN__ interface program uses the two @samp{\032} characters as
 a signal to display the source code for the frame.
 
 @item -b @var{bps}
-Set the line speed (baud rate or bps) of any serial interface used by
-_GDBN__ for remote debugging.
+Set the line speed (baud rate or bits per second) of any serial
+interface used by _GDBN__ for remote debugging.
 
 @item -tty @var{device}
 Run using @var{device} for your program's standard input and output.
+@c FIXME: kingdon thinks there's more to -tty.  Investigate.
 @end table
 
 _if__(_GENERIC__)
@@ -765,13 +762,16 @@ tell _GDBN__ how to connect to the 960 in several ways:
 
 @itemize @bullet
 @item
-Through command line options specifying device, baud rate, and protocol;
+Through command line options specifying serial port, version of the
+Nindy protocol, and communications speed;
 
 @item
 By responding to a prompt on startup;
 
 @item
-By using the @code{target} command at any point during your _GDBN__ session.
+By using the @code{target} command at any point during your _GDBN__
+session.  @xref{Target Commands}.
+
 @end itemize
 
 @menu
@@ -783,16 +783,18 @@ By using the @code{target} command at any point during your _GDBN__ session.
 @node Nindy Startup, Nindy Options, i960-Nindy Remote, i960-Nindy Remote
 @subsubsection Startup with Nindy
 
-The command-line options for Nindy are detailed below.  If you simply
-start @code{_GDBN__} without using options to specify a serial port, you are
-prompted for it, @emph{before} you reach the ordinary _GDBN__ prompt:
+If you simply start @code{_GDBN__} without using any command-line
+options, you are prompted for what serial port to use, @emph{before} you
+reach the ordinary _GDBN__ prompt:
 @example
 Attach /dev/ttyNN -- specify NN, or "quit" to quit:  
 @end example
 @noindent
-You can, if you choose, simply start up with no Nindy connection by
-responding to the prompt with an empty line.  If you do this, and later
-wish to attach to Nindy, use @code{target} (@pxref{Target Commands}). 
+Respond to the prompt with whatever suffix (after @samp{/dev/tty})
+identifies the serial port you want to use.  You can, if you choose,
+simply start up with no Nindy connection by responding to the prompt
+with an empty line.  If you do this, and later wish to attach to Nindy,
+use @code{target} (@pxref{Target Commands}).
 
 @node Nindy Options, Nindy reset, Nindy Startup, i960-Nindy Remote
 @subsubsection Options for Nindy
@@ -5831,12 +5833,11 @@ things without first using the debugger to find the facts.
 @end itemize
 
 @iftex
-@include readline/inc-readline.texinfo
-@include readline/inc-history.texinfo
+@include rdl-apps.texinfo
 @end iftex
 
 @node Renamed Commands, Installing _GDBN__, _GDBN__ Bugs, Top
-@appendix _GDBN__ 4.0 Renamed Commands
+@appendix Commands Renamed in 4.0
 
 The following commands were renamed in _GDBN__ 4.0, in order to make the
 command set as a whole more consistent and easier to use and remember:
@@ -5999,6 +6000,13 @@ Display a list of supported target environments for _GDBN__.
 @end table
 
 @node Copying, Index, Installing _GDBN__, Top
+@appendix Copying GDB
+@c this is an attempt to kluge around what may be a bug in texinfo;
+@c @xrefs to this node came out pointing several pages further down when
+@c the @node was immediately followed by @unnumbered.
+@c While we're at it, might as well give an Appendix heading that
+@c matches RMS' preferred nodename "Copying".
+
 @unnumbered GNU GENERAL PUBLIC LICENSE
 @center Version 1, February 1989
 
