@@ -42,6 +42,8 @@ README-quirks
 README-vms
 README.coff
 README.rich
+acconfig.h
+aclocal.m4
 app.c
 as.c
 as.h
@@ -50,8 +52,10 @@ bignum-copy.c
 bignum.h
 bit_fix.h
 cond.c
+conf.in
 config
 config-gas.com
+configure
 configure.bat
 configure.in
 debug.c
