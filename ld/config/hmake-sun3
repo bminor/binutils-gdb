@@ -1,0 +1,4 @@
+CDEFINES=-DHOST_SYS=SUN3_SYS
+CC=cc
+YACC=yacc -d
+
