@@ -1,5 +1,12 @@
 start-sanitize-gdbtk	
-Fri Aug  8 15:19:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (gdbtk_cleanup): New static function.
+	(gdbtk_init): Add gdbtk_cleanup as a final cleanup.  Uncomment
+	call to ide_initialize_paths.  If we can't initialize the event
+	system, set GDBTK_IDE to 0 in the Tcl interpreter.  Create the
+	ide_window_register and the ide_window commands.  Initialize tk,
+	itcl, and tix after initializing the IDE.
 
 	* configure.in (tixdir): Update for cygwin32 case for Tcl 8.0.
 	* configure: Rebuild.

@@ -1303,6 +1303,17 @@ tk_command_loop ()
   Tk_MainLoop ();
 }
 
+/* gdbtk_init installs this function as a final cleanup.  */
+
+static void
+gdbtk_cleanup (dummy)
+     PTR dummy;
+{
+  Tcl_Finalize ();
+}
+
+/* Initialize gdbtk.  */
+
 static void
 gdbtk_init ( argv0 )
      char *argv0;
@@ -1339,20 +1350,13 @@ gdbtk_init ( argv0 )
   if (Tcl_Init(interp) != TCL_OK)
     error ("Tcl_Init failed: %s", interp->result);
 
-  if (Tk_Init(interp) != TCL_OK)
-    error ("Tk_Init failed: %s", interp->result);
-
-  if (Itcl_Init(interp) == TCL_ERROR) 
-    error ("Itcl_Init failed: %s", interp->result);
-
-  if (Tix_Init(interp) != TCL_OK)
-    error ("Tix_Init failed: %s", interp->result);
+  make_final_cleanup (gdbtk_cleanup, NULL);
 
 #ifdef IDE
-  /* Initialize the Paths variable.  
+  /* Initialize the Paths variable.  */
   if (ide_initialize_paths (interp, "gdb") != TCL_OK)
-    return (TCL_ERROR);
-    */
+    error ("ide_initialize_paths failed: %s", interp->result);
+
   /* Find the directory where we expect to find idemanager.  We ignore
      errors since it doesn't really matter if this fails.  */
   libexecdir = Tcl_GetVar2 (interp, "Paths", "libexecdir", TCL_GLOBAL_ONLY);
@@ -1365,6 +1369,8 @@ gdbtk_init ( argv0 )
       Tcl_AppendResult (interp, "can't initialize event system: ", errmsg,
 			(char *) NULL);
       fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", interp->result);
+
+      Tcl_SetVar (interp, "GDBTK_IDE", "0", 0);
     }
   else 
     {
@@ -1376,15 +1382,36 @@ gdbtk_init ( argv0 )
       if (ide_create_property_command (interp, h) != TCL_OK)
 	error ("ide_create_property_command failed: %s", interp->result);
       
+      if (ide_create_window_register_command (interp, h) != TCL_OK)
+	error ("ide_create_window_register_command failed: %s",
+	       interp->result);
+
+      if (ide_create_window_command (interp, h) != TCL_OK)
+	error ("ide_create_window_command failed: %s", interp->result);
+
       /*
 	if (ide_initialize (interp, "gdb") != TCL_OK)
 	error ("ide_initialize failed: %s", interp->result);
       */
+
+      Tcl_SetVar (interp, "GDBTK_IDE", "1", 0);
     }
-  Tcl_SetVar (interp, "GDBTK_IDE", "1", 0);
 #else
   Tcl_SetVar (interp, "GDBTK_IDE", "0", 0);
 #endif /* IDE */
+
+  /* We don't want to open the X connection until we've done all the
+     IDE initialization.  Otherwise, goofy looking unfinished windows
+     pop up when ILU drops into the TCL event loop.  */
+
+  if (Tk_Init(interp) != TCL_OK)
+    error ("Tk_Init failed: %s", interp->result);
+
+  if (Itcl_Init(interp) == TCL_ERROR) 
+    error ("Itcl_Init failed: %s", interp->result);
+
+  if (Tix_Init(interp) != TCL_OK)
+    error ("Tix_Init failed: %s", interp->result);
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
