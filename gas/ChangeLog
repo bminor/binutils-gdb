@@ -1,5 +1,8 @@
 Tue Nov 26 10:33:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (ppc_elf_lcomm): Don't give an error if no
+	alignment is specified.
+
 	Add support for mips16 (16 bit MIPS implementation):
 	* config/tc-mips.c: Extensive additions for mips16 support, not
 	listed here.
