@@ -244,7 +244,7 @@ sparc-*-coff)		gdb_target=sparc-em ;;
 sparc-*-elf)		gdb_target=sparc-em ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
-sparc-*-vxworks*)	gdb_target=sparc-em ;;
+sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
 

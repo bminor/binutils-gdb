@@ -33,6 +33,8 @@ tm-sparclite.h
 tm-spc-em.h
 tm-sun4os4.h
 tm-sun4sol2.h
+tm-vxsparc.h
+vxsparc.mt
 xm-sparc.h
 xm-sun4os4.h
 xm-sun4sol2.h
