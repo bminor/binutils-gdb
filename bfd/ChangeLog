@@ -1,3 +1,10 @@
+Sun Jul 20 20:05:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_create_dynamic_sections): Set SEC_LINKER_CREATED
+	flag for newly created sections.
+	(sunos_add_dynamic_symbols): Don't discard newly created sections
+	if shared library is dynobj.
+
 Mon Jul 14 15:33:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (map_sections_to_segments): When checking whether
