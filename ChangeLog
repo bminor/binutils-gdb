@@ -1,3 +1,12 @@
+Mon Mar 30 22:20:23 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: add send_pr.  remove "force" from .stmp-gprof rule.
+	  Supress echoing of all the "if [ -d ... $(MAKE)" lines.
+
+Wed Mar 25 15:20:04 1992  Stu Grossman  (grossman@cygnus.com)
+
+	* config.sub:  fix iris/iris3.
+
 Wed Mar 25 10:34:19 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* configure: re-add -rm.

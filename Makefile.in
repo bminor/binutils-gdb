@@ -109,14 +109,12 @@ install-info: install-info-dirs force
 install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
-# clib send_pr
-#	all-libgcc
 all.normal: .stmp-libiberty .stmp-mmalloc .stmp-texinfo .stmp-bison \
 	.stmp-byacc .stmp-bfd .stmp-ld .stmp-gas .stmp-gcc \
 	.stmp-binutils .stmp-libg++ .stmp-readline .stmp-gdb \
 	.stmp-make .stmp-rcs .stmp-cvs .stmp-diff .stmp-grep \
 	.stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
-	.stmp-newlib .stmp-gprof
+	.stmp-newlib .stmp-gprof .stmp-send_pr
 all.cross: .stmp-libiberty .stmp-mmalloc .stmp-gas .stmp-bison .stmp-ld \
 	.stmp-bfd .stmp-libgcc .stmp-readline .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
@@ -127,7 +125,7 @@ clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
 	clean-cvs clean-patch clean-emacs clean-ispell clean-fileutils \
-	clean-libg++ clean-gprof
+	clean-libg++ clean-gprof clean-send_pr
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 clean-stamps:
@@ -142,7 +140,8 @@ install.all: install-dirs install-libiberty install-mmalloc install-texinfo \
 	install-ld install-gas install-gcc install-gprof \
 	install-libgcc install-readline install-glob install-gdb \
 	install-make install-cvs install-patch install-emacs \
-	install-ispell install-fileutils install-libg++ install-newlib
+	install-ispell install-fileutils install-libg++ install-newlib \
+	install-send_pr
 
 install.cross: install-dirs install-libiberty install-mmalloc install-binutils \
 	install-bison install-byacc install-ld install-gas install-libgcc \
@@ -151,7 +150,7 @@ install.cross: install-dirs install-libiberty install-mmalloc install-binutils \
 ### libiberty
 all-libiberty: .stmp-libiberty
 .stmp-libiberty:
-	if [ -d ./libiberty ] ; then \
+	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
@@ -171,7 +170,7 @@ all-libiberty: .stmp-libiberty
 	touch .stmp-libiberty
 
 clean-libiberty: force
-	if [ -d ./libiberty ] ; then \
+	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
@@ -190,7 +189,7 @@ clean-libiberty: force
 	fi
 
 install-libiberty: force
-	if [ -d ./libiberty ] ; then \
+	@if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
 		$(MAKE) \
@@ -211,7 +210,7 @@ install-libiberty: force
 ### mmalloc
 all-mmalloc: .stmp-mmalloc
 .stmp-mmalloc:
-	if [ -d ./mmalloc ] ; then \
+	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
@@ -231,7 +230,7 @@ all-mmalloc: .stmp-mmalloc
 	touch .stmp-mmalloc
 
 clean-mmalloc: force
-	if [ -d ./mmalloc ] ; then \
+	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
@@ -250,7 +249,7 @@ clean-mmalloc: force
 	fi
 
 install-mmalloc: force
-	if [ -d ./mmalloc ] ; then \
+	@if [ -d ./mmalloc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./mmalloc; \
 		$(MAKE) \
@@ -271,7 +270,7 @@ install-mmalloc: force
 ### texinfo
 all-texinfo: .stmp-libiberty .stmp-texinfo
 .stmp-texinfo:
-	if [ -d ./texinfo ] ; then \
+	@if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
@@ -292,7 +291,7 @@ all-texinfo: .stmp-libiberty .stmp-texinfo
 	touch .stmp-texinfo
 
 clean-texinfo: force
-	if [ -d ./texinfo ] ; then \
+	@if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) \
@@ -311,7 +310,7 @@ clean-texinfo: force
 	fi
 
 install-texinfo: force
-	if [ -d ./texinfo ] ; then \
+	@if [ -d ./texinfo ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) \
@@ -332,7 +331,7 @@ install-texinfo: force
 ### bfd
 all-bfd: .stmp-bfd
 .stmp-bfd:
-	if [ -d ./bfd ] ; then \
+	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
@@ -352,7 +351,7 @@ all-bfd: .stmp-bfd
 	touch .stmp-bfd
 
 clean-bfd: force
-	if [ -d ./bfd ] ; then \
+	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
@@ -371,7 +370,7 @@ clean-bfd: force
 	fi
 
 install-bfd: force
-	if [ -d ./bfd ] ; then \
+	@if [ -d ./bfd ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bfd; \
 		$(MAKE) \
@@ -392,7 +391,7 @@ install-bfd: force
 ### binutils
 all-binutils: .stmp-libiberty .stmp-bfd .stmp-binutils
 .stmp-binutils:
-	if [ -d ./binutils ] ; then \
+	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
 		$(MAKE) \
@@ -412,7 +411,7 @@ all-binutils: .stmp-libiberty .stmp-bfd .stmp-binutils
 	touch .stmp-binutils
 
 clean-binutils: force
-	if [ -d ./binutils ] ; then \
+	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
 		$(MAKE) \
@@ -431,7 +430,7 @@ clean-binutils: force
 	fi
 
 install-binutils: force
-	if [ -d ./binutils ] ; then \
+	@if [ -d ./binutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \
 		$(MAKE) \
@@ -452,7 +451,7 @@ install-binutils: force
 ### newlib
 all-newlib: .stmp-newlib
 .stmp-newlib:
-	if [ -d ./newlib ] ; then \
+	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
@@ -472,7 +471,7 @@ all-newlib: .stmp-newlib
 	touch .stmp-newlib
 
 clean-newlib: force
-	if [ -d ./newlib ] ; then \
+	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
@@ -491,7 +490,7 @@ clean-newlib: force
 	fi
 
 install-newlib: force
-	if [ -d ./newlib ] ; then \
+	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
 		$(MAKE) \
@@ -512,8 +511,8 @@ install-newlib: force
 ### gprof
 .PHONY: all-gprof just-gprof
 all-gprof: .stmp-gprof
-.stmp-gprof: .stmp-libiberty .stmp-bfd force
-	if [ -d ./gprof ] ; then \
+.stmp-gprof: .stmp-libiberty .stmp-bfd
+	@if [ -d ./gprof ] ; then \
 		(cd ./gprof; \
 		$(MAKE) \
 			"against=$(against)" \
@@ -532,7 +531,7 @@ all-gprof: .stmp-gprof
 	touch .stmp-gprof
 
 clean-gprof: force
-	if [ -d $(unsubdir)/gprof ] ; then \
+	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -550,7 +549,7 @@ clean-gprof: force
 	fi
 
 install-gprof: force
-	if [ -d $(unsubdir)/gprof ] ; then \
+	@if [ -d $(unsubdir)/gprof ] ; then \
 		(cd $(unsubdir)/gprof$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -570,7 +569,7 @@ install-gprof: force
 ### byacc
 all-byacc: .stmp-byacc
 .stmp-byacc:
-	if [ -d ./byacc ] ; then \
+	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
@@ -590,7 +589,7 @@ all-byacc: .stmp-byacc
 	touch .stmp-byacc
 
 clean-byacc: force
-	if [ -d ./byacc ] ; then \
+	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
@@ -609,7 +608,7 @@ clean-byacc: force
 	fi
 
 install-byacc: force
-	if [ -d ./byacc ] ; then \
+	@if [ -d ./byacc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./byacc; \
 		$(MAKE) \
@@ -630,7 +629,7 @@ install-byacc: force
 ### bison
 all-bison: .stmp-libiberty .stmp-bison
 .stmp-bison:
-	if [ -d ./bison ] ; then \
+	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
 		$(MAKE) \
@@ -651,7 +650,7 @@ all-bison: .stmp-libiberty .stmp-bison
 	touch .stmp-bison
 
 clean-bison: force
-	if [ -d ./bison ] ; then \
+	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
 		$(MAKE) \
@@ -671,7 +670,7 @@ clean-bison: force
 	fi
 
 install-bison: force
-	if [ -d ./bison ] ; then \
+	@if [ -d ./bison ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./bison; \
 		$(MAKE) \
@@ -693,7 +692,7 @@ install-bison: force
 ### gcc
 all-gcc: .stmp-libiberty .stmp-bison .stmp-gas .stmp-gcc
 .stmp-gcc:
-	if [ -d ./gcc ] ; then \
+	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
@@ -713,7 +712,7 @@ all-gcc: .stmp-libiberty .stmp-bison .stmp-gas .stmp-gcc
 	touch .stmp-gcc
 
 clean-gcc: force
-	if [ -d ./gcc ] ; then \
+	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
@@ -732,7 +731,7 @@ clean-gcc: force
 	fi
 
 install-gcc:
-	if [ -d ./gcc ] ; then \
+	@if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
 		$(MAKE) \
@@ -753,7 +752,7 @@ install-gcc:
 ### readline
 all-readline: .stmp-readline
 .stmp-readline:
-	if [ -d ./readline ] ; then \
+	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
@@ -773,7 +772,7 @@ all-readline: .stmp-readline
 	touch .stmp-readline
 
 clean-readline: force
-	if [ -d ./readline ] ; then \
+	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
@@ -792,7 +791,7 @@ clean-readline: force
 	fi
 
 install-readline: force
-	if [ -d ./readline ] ; then \
+	@if [ -d ./readline ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./readline; \
 		$(MAKE) \
@@ -813,7 +812,7 @@ install-readline: force
 ### glob
 all-glob: .stmp-glob
 .stmp-glob:
-	if [ -d ./glob ] ; then \
+	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
@@ -833,7 +832,7 @@ all-glob: .stmp-glob
 	touch .stmp-glob
 
 clean-glob: force
-	if [ -d ./glob ] ; then \
+	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
@@ -852,7 +851,7 @@ clean-glob: force
 	fi
 
 install-glob: force
-	if [ -d ./glob ] ; then \
+	@if [ -d ./glob ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./glob; \
 		$(MAKE) \
@@ -873,7 +872,7 @@ install-glob: force
 ### gas
 all-gas: .stmp-libiberty .stmp-bfd .stmp-gas
 .stmp-gas:
-	if [ -d ./gas ] ; then \
+	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
@@ -893,7 +892,7 @@ all-gas: .stmp-libiberty .stmp-bfd .stmp-gas
 	touch .stmp-gas
 
 clean-gas: force
-	if [ -d ./gas ] ; then \
+	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
@@ -912,7 +911,7 @@ clean-gas: force
 	fi
 
 install-gas: force
-	if [ -d ./gas ] ; then \
+	@if [ -d ./gas ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gas; \
 		$(MAKE) \
@@ -933,7 +932,7 @@ install-gas: force
 ### ld
 all-ld: .stmp-libiberty .stmp-bfd .stmp-bison .stmp-ld
 .stmp-ld: 
-	if [ -d ./ld ] ; then \
+	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
@@ -953,7 +952,7 @@ all-ld: .stmp-libiberty .stmp-bfd .stmp-bison .stmp-ld
 	touch .stmp-ld
 
 clean-ld: force
-	if [ -d ./ld ] ; then \
+	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
@@ -972,7 +971,7 @@ clean-ld: force
 	fi
 
 install-ld: force
-	if [ -d ./ld ] ; then \
+	@if [ -d ./ld ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
 		$(MAKE) \
@@ -993,7 +992,7 @@ install-ld: force
 ### libgcc (and libgcc1)
 all-libgcc1: all-gas all-binutils .stmp-libgcc1
 .stmp-libgcc1:
-	if [ -d ./libgcc ] ; then \
+	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
@@ -1013,7 +1012,7 @@ all-libgcc1: all-gas all-binutils .stmp-libgcc1
 	touch .stmp-libgcc1
 
 clean-libgcc1: force
-	if [ -d ./libgcc ] ; then \
+	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
@@ -1037,7 +1036,7 @@ install-libgcc1: force
 all-libgcc: all-gas all-gcc all-binutils .stmp-libgcc
 .stmp-libgcc:
 	true
-	if [ -d ./libgcc ] ; then \
+	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
@@ -1057,7 +1056,7 @@ all-libgcc: all-gas all-gcc all-binutils .stmp-libgcc
 	touch .stmp-libgcc
 
 clean-libgcc: force
-	if [ -d ./libgcc ] ; then \
+	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
@@ -1076,7 +1075,7 @@ clean-libgcc: force
 	fi
 
 install-libgcc: force
-	if [ -d ./libgcc ] ; then \
+	@if [ -d ./libgcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libgcc; \
 		$(MAKE) \
@@ -1098,7 +1097,7 @@ install-libgcc: force
 all-gdb: .stmp-bfd .stmp-libiberty .stmp-mmalloc .stmp-readline .stmp-glob \
 	.stmp-bison .stmp-gdb
 .stmp-gdb: 
-	if [ -d ./gdb ] ; then \
+	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
@@ -1118,7 +1117,7 @@ all-gdb: .stmp-bfd .stmp-libiberty .stmp-mmalloc .stmp-readline .stmp-glob \
 	touch .stmp-gdb
 
 clean-gdb: force
-	if [ -d ./gdb ] ; then \
+	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
@@ -1137,7 +1136,7 @@ clean-gdb: force
 	fi
 
 install-gdb: force
-	if [ -d ./gdb ] ; then \
+	@if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdb; \
 		$(MAKE) \
@@ -1158,7 +1157,7 @@ install-gdb: force
 ### make
 all-make: all-libiberty .stmp-make
 .stmp-make:
-	if [ -d ./make ] ; then \
+	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
@@ -1178,7 +1177,7 @@ all-make: all-libiberty .stmp-make
 	touch .stmp-make
 
 clean-make: force
-	if [ -d ./make ] ; then \
+	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
@@ -1197,7 +1196,7 @@ clean-make: force
 	fi
 
 install-make: force
-	if [ -d ./make ] ; then \
+	@if [ -d ./make ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./make; \
 		$(MAKE) \
@@ -1218,7 +1217,7 @@ install-make: force
 ### diff
 all-diff: .stmp-diff
 .stmp-diff:
-	if [ -d ./diff ] ; then \
+	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
 		$(MAKE) \
@@ -1238,7 +1237,7 @@ all-diff: .stmp-diff
 	touch .stmp-diff
 
 clean-diff: force
-	if [ -d ./diff ] ; then \
+	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
 		$(MAKE) \
@@ -1257,7 +1256,7 @@ clean-diff: force
 	fi
 
 install-diff: force
-	if [ -d ./diff ] ; then \
+	@if [ -d ./diff ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff/; \
 		$(MAKE) \
@@ -1278,7 +1277,7 @@ install-diff: force
 ### grep
 all-grep: .stmp-grep
 .stmp-grep:
-	if [ -d ./grep ] ; then \
+	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
@@ -1298,7 +1297,7 @@ all-grep: .stmp-grep
 	touch .stmp-grep
 
 clean-grep: force
-	if [ -d ./grep ] ; then \
+	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
@@ -1317,7 +1316,7 @@ clean-grep: force
 	fi
 
 install-grep: force
-	if [ -d ./grep ] ; then \
+	@if [ -d ./grep ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./grep; \
 		$(MAKE) \
@@ -1338,7 +1337,7 @@ install-grep: force
 ### rcs
 all-rcs: .stmp-diff .stmp-grep .stmp-rcs
 .stmp-rcs:
-	if [ -d ./rcs ] ; then \
+	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
@@ -1358,7 +1357,7 @@ all-rcs: .stmp-diff .stmp-grep .stmp-rcs
 	touch .stmp-rcs
 
 clean-rcs: force
-	if [ -d ./rcs ] ; then \
+	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
@@ -1377,7 +1376,7 @@ clean-rcs: force
 	fi
 
 install-rcs: install-grep install-diff force
-	if [ -d ./rcs ] ; then \
+	@if [ -d ./rcs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./rcs; \
 		$(MAKE) \
@@ -1398,7 +1397,7 @@ install-rcs: install-grep install-diff force
 ### gdbm
 all-gdbm: .stmp-gdbm
 .stmp-gdbm:
-	if [ -d ./gdbm ] ; then \
+	@if [ -d ./gdbm ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdbm; \
 		$(MAKE) \
@@ -1418,7 +1417,7 @@ all-gdbm: .stmp-gdbm
 	touch .stmp-gdbm
 
 clean-gdbm: force
-	if [ -d ./gdbm ] ; then \
+	@if [ -d ./gdbm ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdbm; \
 		$(MAKE) \
@@ -1437,7 +1436,7 @@ clean-gdbm: force
 	fi
 
 install-gdbm: force
-	if [ -d ./gdbm ] ; then \
+	@if [ -d ./gdbm ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gdbm; \
 		$(MAKE) \
@@ -1459,7 +1458,7 @@ install-gdbm: force
 
 all-cvs: .stmp-cvs .stmp-rcs .stmp-grep .stmp-diff
 .stmp-cvs: .stmp-gdbm
-	if [ -d ./cvs ] ; then \
+	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
@@ -1479,7 +1478,7 @@ all-cvs: .stmp-cvs .stmp-rcs .stmp-grep .stmp-diff
 	touch .stmp-cvs
 
 clean-cvs: clean-gdbm
-	if [ -d ./cvs ] ; then \
+	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
@@ -1498,7 +1497,7 @@ clean-cvs: clean-gdbm
 	fi
 
 install-cvs: install-rcs install-gdbm
-	if [ -d ./cvs ] ; then \
+	@if [ -d ./cvs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./cvs; \
 		$(MAKE) \
@@ -1519,7 +1518,7 @@ install-cvs: install-rcs install-gdbm
 ### patch
 all-patch: .stmp-patch
 .stmp-patch:
-	if [ -d ./patch ] ; then \
+	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
 		$(MAKE) \
@@ -1539,7 +1538,7 @@ all-patch: .stmp-patch
 	touch .stmp-patch
 
 clean-patch:
-	if [ -d ./patch ] ; then \
+	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
 		$(MAKE) \
@@ -1558,7 +1557,7 @@ clean-patch:
 	fi
 
 install-patch:
-	if [ -d ./patch ] ; then \
+	@if [ -d ./patch ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./patch; \
 		$(MAKE) \
@@ -1580,7 +1579,7 @@ install-patch:
 ### emacs
 all-emacs: .stmp-emacs
 .stmp-emacs:
-	if [ -d ./emacs ] ; then \
+	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
@@ -1600,7 +1599,7 @@ all-emacs: .stmp-emacs
 	touch .stmp-emacs
 
 clean-emacs:
-	if [ -d ./emacs ] ; then \
+	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
@@ -1619,7 +1618,7 @@ clean-emacs:
 	fi
 
 install-emacs: install-rcs install-gdbm
-	if [ -d ./emacs ] ; then \
+	@if [ -d ./emacs ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
 		$(MAKE) \
@@ -1640,7 +1639,7 @@ install-emacs: install-rcs install-gdbm
 ### ispell
 all-ispell: .stmp-emacs .stmp-ispell
 .stmp-ispell:
-	if [ -d ./ispell ] ; then \
+	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
@@ -1660,7 +1659,7 @@ all-ispell: .stmp-emacs .stmp-ispell
 	touch .stmp-ispell
 
 clean-ispell:
-	if [ -d ./ispell ] ; then \
+	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
@@ -1679,7 +1678,7 @@ clean-ispell:
 	fi
 
 install-ispell: install-rcs install-gdbm
-	if [ -d ./ispell ] ; then \
+	@if [ -d ./ispell ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
 		$(MAKE) \
@@ -1700,7 +1699,7 @@ install-ispell: install-rcs install-gdbm
 ### fileutils
 all-fileutils: .stmp-fileutils
 .stmp-fileutils:
-	if [ -d ./fileutils ] ; then \
+	@if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
 		$(MAKE) \
@@ -1723,7 +1722,7 @@ all-fileutils: .stmp-fileutils
 	touch .stmp-fileutils
 
 clean-fileutils:
-	if [ -d ./fileutils ] ; then \
+	@if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
 		$(MAKE) \
@@ -1745,9 +1744,78 @@ clean-fileutils:
 	fi
 
 install-fileutils:
-	if [ -d ./fileutils ] ; then \
+	@if [ -d ./fileutils ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./fileutils; \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### send_pr
+all-send_pr: .stmp-send_pr
+.stmp-send_pr:
+	@if [ -d ./send_pr ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./send_pr; \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+	touch .stmp-send_pr
+
+clean-send_pr:
+	@if [ -d ./send_pr ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./send_pr; \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-send_pr:
+	@if [ -d ./send_pr ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./send_pr; \
 		$(MAKE) \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
@@ -1777,7 +1845,7 @@ XTRAFLAGS = `if [ -d $${rootme}/gcc ] ; \
 
 all-libg++: .stmp-gas .stmp-ld .stmp-gcc .stmp-libg++
 .stmp-libg++: .stmp-gcc
-	if [ -d ./libg++ ] ; then \
+	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
@@ -1801,7 +1869,7 @@ all-libg++: .stmp-gas .stmp-ld .stmp-gcc .stmp-libg++
 	touch .stmp-libg++
 
 clean-libg++:
-	if [ -d ./libg++ ] ; then \
+	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
@@ -1823,7 +1891,7 @@ clean-libg++:
 	fi
 
 install-libg++:
-	if [ -d ./libg++ ] ; then \
+	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
 		$(MAKE) \
