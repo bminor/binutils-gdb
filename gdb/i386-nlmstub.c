@@ -243,9 +243,6 @@ struct LoadDefinitionStructure
 /* The main thread ID.  */
 static int mainthread;
 
-/* The debug server thread ID.  */
-static int debugthread;
-
 /* The LoadDefinitionStructure of the NLM being debugged.  */
 static struct LoadDefinitionStructure *handle;
 
@@ -720,12 +717,17 @@ handle_exception (T_StackFrame *old_frame)
   if (frame->ExceptionNumber == START_NLM_EVENT
       && handle == NULL)
     {
-      debugthread = GetThreadID ();
       handle = (struct LoadDefinitionStructure *) frame->ExceptionErrorCode;
       first_insn = *(char *) handle->LDInitializationProcedure;
       *(unsigned char *) handle->LDInitializationProcedure = 0xcc;
       return RETURN_TO_PROGRAM;
     }
+
+  /* Pass some events on to the next debugger, in case it will handle
+     them.  */
+  if (frame->ExceptionNumber == ENTER_DEBUGGER_EVENT
+      || frame->ExceptionNumber == KEYBOARD_BREAK_EVENT)
+    return RETURN_TO_NEXT_DEBUGGER;
 
   /* At the moment, we don't care about most of the unusual NetWare
      exceptions.  */
@@ -1040,12 +1042,12 @@ main (argc, argv)
       exit (1);
     }
 
-  /* By the time we reach this point in the code the debugger thread
-     should have received a START_NLM_EVENT and gone to sleep.  */
+  /* Wait for the debugger to wake us up.  */
   if (remote_debug > 0)
-    ConsolePrintf ("Resuming %d, suspending %d\r\n", debugthread, mainthread);
-  ResumeThread (debugthread);
+    ConsolePrintf ("Suspending main thread (%d)\r\n", mainthread);
   SuspendThread (mainthread);
+  if (remote_debug > 0)
+    ConsolePrintf ("Resuming main thread (%d)\r\n", mainthread);
 
   /* If we are woken up, print an optional error message, deregister
      ourselves and exit.  */
