@@ -1194,6 +1194,7 @@ enum bfd_architecture
  /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
   ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
+  bfd_arch_mips,       /* MIPS Rxxxx */
   /* start-sanitize-tx19 */
 #define bfd_mach_mips1900              1900
   /* end-sanitize-tx19 */
@@ -1220,7 +1221,14 @@ enum bfd_architecture
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000
 #define bfd_mach_mips16                16
-  bfd_arch_mips,       /* MIPS Rxxxx */
+  /* start-sanitize-sky */
+  /* The DVP is a machine within the mips architecture.  */
+#define bfd_mach_dvp_dma               42000
+#define bfd_mach_dvp_pke               42001
+#define bfd_mach_dvp_vu                42002
+#define bfd_mach_dvp_gpuif             42003
+#define bfd_mach_dvp_p(mach) ((mach) >= 42000 && (mach) <= 42003)
+  /* end-sanitize-sky */
   bfd_arch_i386,       /* Intel 386 */
 #define bfd_mach_i386_i386 0
 #define bfd_mach_i386_i8086 1
@@ -1267,10 +1275,6 @@ enum bfd_architecture
   /* start-sanitize-tic80 */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   /* end-sanitize-tic80 */
-  /* start-sanitize-sky */
-  bfd_arch_txvu,      /* TX VU */
-#define bfd_mach_txvu 0
-  /* end-sanitize-sky */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
   /* start-sanitize-v850e */
@@ -1784,6 +1788,14 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_LO16,
   BFD_RELOC_MIPS_CALL_HI16,
   BFD_RELOC_MIPS_CALL_LO16,
+/* start-sanitize-sky */
+
+/* MIPS DVP Relocations.
+This is an 11-bit pc relative reloc.  The recorded address is for the
+lower instruction word, and the value is in 128 bit units. */
+  BFD_RELOC_MIPS_DVP_11_PCREL,
+/* end-sanitize-sky */
+
 
 /* i386/elf relocations */
   BFD_RELOC_386_GOT32,
@@ -2071,14 +2083,6 @@ instruction. */
 /* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction. */
   BFD_RELOC_MN10300_16_PCREL,
-/* start-sanitize-sky */
-
-/* SKY TXVU Relocations.
-This is an 11-bit pc relative reloc.  The recorded address is for the
-lower instruction word. */
-  BFD_RELOC_TXVU_11_PCREL,
-/* end-sanitize-sky */
-
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

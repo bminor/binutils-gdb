@@ -665,6 +665,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MIPS_GOT_LO16",
   "BFD_RELOC_MIPS_CALL_HI16",
   "BFD_RELOC_MIPS_CALL_LO16",
+/* start-sanitize-sky */
+  "BFD_RELOC_MIPS_DVP_11_PCREL",
+/* end-sanitize-sky */
+
   "BFD_RELOC_386_GOT32",
   "BFD_RELOC_386_PLT32",
   "BFD_RELOC_386_COPY",
@@ -804,10 +808,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 
   "BFD_RELOC_MN10300_32_PCREL",
   "BFD_RELOC_MN10300_16_PCREL",
-/* start-sanitize-sky */
-  "BFD_RELOC_TXVU_11_PCREL",
-/* end-sanitize-sky */
-
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

@@ -1,3 +1,13 @@
+start-sanitize-sky
+Mon Dec 22 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config.bfd, configure.in: Add dvp support.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* archures.c, reloc.c, cpu-mips.c: Add dvp support.
+	* bfd-in2.h, libbfd.h, libcoff.h: Regenerate.
+
+end-sanitize-sky
 Wed Jan 28 13:41:26 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_close_and_cleanup): Only check the strtab if we
@@ -77,16 +87,6 @@ Wed Jan 21 21:16:06 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 	* coff-m88k.c (GET_SCNDHR_NRELOC): Fix typo in macro name.
 	(GET_SCNDHR_NLNNO): Likewise.
 
-start-sanitize-sky
-Tue Jan 20 15:08:44 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* reloc.c (BFD_RELOC_TXVU_11_PCREL): New reloc.
-	* bfd-in2.h: Regenerate.
-	* libbfd.h: Regenerate.
-	* elf32-txvu.c (txvu_elf_howto_table): Add entry for it.
-	(txvu_reloc_map): Likewise.
-
-end-sanitize-sky
 Mon Jan 19 12:49:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cpu-sh.c (arch_info_struct): Correct next field of sh3e.
@@ -144,19 +144,6 @@ Tue Dec 23 17:01:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 	shared.  Set stab* sections to be shared and read.  Set .rsrc
 	section to be read and shared.
 
-start-sanitize-sky
-Mon Dec 22 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
-
-	* Makefile.am (ALL_MACHINES,BFD32_BACKENDS): Add txvu support.
-	(cpu-txvu.lo,elf32-txvu.lo): Add rules for.
-	* Makefile.in: Rebuild.
-	* config.bfd, configure.in: Add txvu support.
-	* configure: Regenerate.
-	* archures.c, elf.c, targets.c: Add txvu support.
-	* bfd-in2.h: Regenerate.
-	* cpu-txvu.c, elf32-txvu.c: New files.
-
-end-sanitize-sky
 Mon Dec 22 13:20:57 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Rebuild dependencies.

@@ -1,5 +1,5 @@
 /* bfd back-end for mips support
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91-96, 1998 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -80,6 +80,15 @@ static const bfd_arch_info_type arch_info_struct[] =
 #define D 1
   N (64, 64, bfd_mach_mips5900, "mips:5900", false, &arch_info_struct[13+A+B+C+D]),
   /* end-sanitize-r5900 */
+  /* start-sanitize-sky */
+#undef E
+#define E (A+B+C+D)
+  N (32, 32, bfd_mach_dvp_dma,   "dvp:dma",   false, &arch_info_struct[13+E+1]),
+  N (32, 32, bfd_mach_dvp_pke,   "dvp:pke",   false, &arch_info_struct[13+E+2]),
+  N (32, 32, bfd_mach_dvp_vu,    "dvp:vu",    false, &arch_info_struct[13+E+3]),
+  N (32, 32, bfd_mach_dvp_gpuif, "dvp:gpuif", false, &arch_info_struct[13+E+4]),
+  /* end-sanitize-sky */
+
   N (64, 64, bfd_mach_mips16,   "mips:16",   false, 0),
 };
 

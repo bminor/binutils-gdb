@@ -508,9 +508,6 @@ extern const bfd_target bfd_elf32_powerpcle_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shl_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
-/* start-sanitize-sky */
-extern const bfd_target bfd_elf32_txvu_vec;
-/* end-sanitize-sky */
 extern const bfd_target bfd_elf32_v850_vec;
 extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
@@ -675,9 +672,6 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_powerpc_vec,
-/* start-sanitize-sky */
-	&bfd_elf32_txvu_vec,
-/* end-sanitize-sky */
 	&bfd_elf32_v850_vec,
 #ifdef BFD64			/* No one seems to use this.  */
 	&bfd_elf64_big_generic_vec,

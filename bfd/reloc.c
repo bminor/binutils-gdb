@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997, 1998
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -2010,6 +2010,17 @@ ENUMX
 ENUMDOC
   MIPS ELF relocations.
 
+COMMENT
+{* start-sanitize-sky *}
+ENUM
+  BFD_RELOC_MIPS_DVP_11_PCREL
+ENUMDOC
+  MIPS DVP Relocations.
+  This is an 11-bit pc relative reloc.  The recorded address is for the
+  lower instruction word, and the value is in 128 bit units.
+COMMENT
+{* end-sanitize-sky *}
+
 ENUM
   BFD_RELOC_386_GOT32
 ENUMX
@@ -2445,17 +2456,6 @@ ENUM
 ENUMDOC
   This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
   instruction.
-
-COMMENT
-{* start-sanitize-sky *}
-ENUM
-  BFD_RELOC_TXVU_11_PCREL
-ENUMDOC
-  SKY TXVU Relocations.
-  This is an 11-bit pc relative reloc.  The recorded address is for the
-  lower instruction word.
-COMMENT
-{* end-sanitize-sky *}
 
 ENDSENUM
   BFD_RELOC_UNUSED

@@ -559,8 +559,9 @@ case "${targ}" in
 # end-sanitize-tic80
 # start-sanitize-sky
 
-  txvu-*-*)
-    targ_defvec=bfd_elf32_txvu_vec
+  dvp-*-*)
+    targ_defvec=bfd_elf32_littlemips_vec
+    targ_selvecs=bfd_elf64_littlemips_vec
     ;;
 
 # end-sanitize-sky

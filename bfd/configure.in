@@ -366,6 +366,11 @@ for i in $selvecs ; do
 done
 selvecs="$f"
 
+# start-sanitize-sky
+# dvp is really mips, but we need to distinguish it from mips for opcodes
+selarchs=`echo $selarchs | sed -e s/dvp/mips/g`
+# end-sanitize-sky
+
 # uniq the architectures in all the configured targets.
 f=""
 for i in $selarchs ; do
@@ -431,9 +436,6 @@ do
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
-# start-sanitize-sky
-    bfd_elf32_txvu_vec)		tb="$tb elf32-txvu.lo elf32.lo $elf" ;;
-# end-sanitize-sky
     bfd_elf32_v850_vec)		tb="$tb elf32-v850.lo elf32.lo $elf" ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.lo elf64.lo $elf"
 				target64=true ;;
