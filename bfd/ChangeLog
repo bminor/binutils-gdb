@@ -1,3 +1,13 @@
+Wed Jul 15 07:57:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* section.c (STD_SECTION): add some casts to the initializers for
+	dumb compilers
+
+Tue Jul 14 14:06:28 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* rs6000-core.c (rs6000coff_core_p):  Greatly simplify expression,
+	and add appropriate casts to keep (picayune) aix-cc happy.
+
 Wed Jul  8 16:24:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* archive.c (bsd_write_armap): write the timestamp of the
@@ -717,7 +727,6 @@ Fri Jan 24 14:40:17 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* everything: now modified to use smaller reloc type. Self hosts
 	on sun3 & sun4.
 
->>>>>>> 1.247
 Sat Jan 18 17:00:16 1992  Fred Fish  (fnf at cygnus.com)
 
 	* config/mh-stratus, config/mt-i860-elf, hosts/h-stratus:
