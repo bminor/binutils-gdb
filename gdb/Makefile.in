@@ -1230,6 +1230,7 @@ hppa-tdep.o: hppa-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h
 
 hppab-nat.o: hppab-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
+
 hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 
 i386gnu-nat.o: gnu-nat.h
@@ -1419,8 +1420,6 @@ gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdb_string.h
 
-remote-arc.o: remote-arc.c gdb_string.h
-
 remote-array.o: remote-array.c $(wait_h) $(defs_h) $(gdbcore_h) target.h \
       gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h)
 
@@ -1457,6 +1456,9 @@ remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) $(wait_h) \
 	$(command_h) monitor.h $(remote_utils_h) $(symtab_h) symfile.h \
 	objfiles.h gdb-stabs.h gdb_string.h
+
+remote-sds.o: remote-sds.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
+	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdb_string.h
@@ -1557,6 +1559,7 @@ stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h target.h gdb_string.h
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
 sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
@@ -1564,7 +1567,8 @@ symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 	language.h objfiles.h symfile.h $(symtab_h) target.h \
 	gdb_string.h
 
-symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)	
+symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
 symm-nat.o: symm-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
@@ -1597,7 +1601,9 @@ typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(value_h) gdb_string.h
 
 ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
 ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
 umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
