@@ -1,3 +1,17 @@
+Tue Mar 28 15:14:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (generic_link_add_symbol_list): Skip constructor
+	symbols which the main linker code did not do anything with.
+	(_bfd_generic_link_output_symbols): Use udata.p if it is set,
+	rather than looking the symbol up in the hash table.  Just pass
+	through constructor symbols for which udata.p is not set.  If the
+	linker defined the symbol, clear the constructor flag.
+
+Mon Mar 20 22:39:10 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_slurp_symbol_table): Tighten test to determine
+	what symbols are section symbols.
+
 Sat Mar 18 01:54:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (elf_bfd_link_add_symbols): An empty archive is OK.
