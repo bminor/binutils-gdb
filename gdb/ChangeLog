@@ -1,3 +1,7 @@
+2001-07-12  Keith Seitz  <keiths@redhat.com>
+
+	* remote-rdp.c: Include "serial.h"
+
 2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/remote-utils.c (remote_open):  Set VMIN to 1

@@ -49,6 +49,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "serial.h"
 
 #ifdef HAVE_TIME_H
 #include <time.h>
