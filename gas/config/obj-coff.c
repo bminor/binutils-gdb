@@ -1247,7 +1247,7 @@ obj_coff_section (ignore)
 		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
 		case 'n': flags &=~ SEC_LOAD; break;
 		case 'd':
-		case 'w': flags &=~ SEC_READONLY; break;
+		case 'w': flags |= SEC_DATA; flags &=~ SEC_READONLY; break;
 		case 'x': flags |= SEC_CODE; break;
 		case 'r': flags |= SEC_READONLY; break;
 
