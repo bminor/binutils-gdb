@@ -436,15 +436,7 @@ md_assemble (str)
 	  /* Non operand chars must match exactly.  */
 	  if (*syn != '%' || *++syn == '%')
 	    {
-	      /* Handle '+' specially as we want to allow "ld r0,[sp-4]".  */
-	      /* ??? The syntax has changed to [sp,-4].  */
-	      if (0 && *syn == '+' && *str == '-')
-		{
-		  /* Skip over syn's +, but leave str's - alone.
-		     That makes the case identical to "ld r0,[sp+-4]".  */
-		  ++syn;
-		}
-	      else if (*str == *syn)
+	     if (*str == *syn)
 		{
 		  if (*syn == ' ')
 		    past_opcode_p = 1;
