@@ -3,7 +3,7 @@
 	* ldfile.c (ldfile_open_file): Set entry->search_dirs_flag to
 	false if we found the file.
 
-001-02-18  David O'Brien  <obrien@FreeBSD.org>
+2001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.tgt: Add FreeBSD/Alpha, FreeBSD/x86-64, FreeBSD/ia64,
 	FreeBSD/PowerPC, FreeBSD/arm, and FreeBSD/sparc64 entries.
