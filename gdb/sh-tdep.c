@@ -277,8 +277,8 @@ sh_sh4_register_name (int reg_nr)
     "ssr",  "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
-    "dr0",  "dr1",  "dr2",  "dr3",  "dr4",  "dr5",  "dr6",  "dr7",
-    "fv0",  "fv1",  "fv2",  "fv3",
+    "dr0",  "dr2",  "dr4",  "dr6",  "dr8",  "dr10", "dr12", "dr14",
+    "fv0",  "fv4",  "fv8",  "fv12",
   };
   if (reg_nr < 0)
     return NULL;
@@ -1440,10 +1440,10 @@ sh_sh4_register_byte (reg_nr)
      int reg_nr;
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
     return (dr_reg_base_num (reg_nr) * 4);
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
     return (fv_reg_base_num (reg_nr) * 4);
   else
     return (reg_nr * 4);
@@ -1463,10 +1463,10 @@ sh_sh4_register_raw_size (reg_nr)
      int reg_nr;
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
     return 8;
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
     return 16;
   else
     return 4;
@@ -1505,10 +1505,10 @@ sh_sh4_register_virtual_type (reg_nr)
       || (reg_nr == gdbarch_tdep (current_gdbarch)->FPUL_REGNUM))
     return builtin_type_float;
   else if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
     return builtin_type_double;
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
     return sh_sh4_build_float_register_type (3);
   else
     return builtin_type_int;
@@ -1538,7 +1538,7 @@ sh_fetch_pseudo_register (int reg_nr)
   if (!register_cached (reg_nr))
     {
       if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-	  && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+	  && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
         {
 	  base_regnum = dr_reg_base_num (reg_nr);
 
@@ -1548,7 +1548,7 @@ sh_fetch_pseudo_register (int reg_nr)
               target_fetch_registers (base_regnum + portion);
         }
       else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	       && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	       && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
         {
 	  base_regnum = fv_reg_base_num (reg_nr);
 
@@ -1568,7 +1568,7 @@ sh_store_pseudo_register (int reg_nr)
   int base_regnum, portion;
 
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
@@ -1580,7 +1580,7 @@ sh_store_pseudo_register (int reg_nr)
 	}
     }
   else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
     {
       base_regnum = fv_reg_base_num (reg_nr);
 
@@ -1645,7 +1645,7 @@ sh_do_pseudo_register (int regnum)
 	   regnum < gdbarch_tdep (current_gdbarch)->FV0_REGNUM)
     do_dr_register_info (regnum);
   else if (regnum >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM &&
-	   regnum <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+	   regnum <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
     do_fv_register_info (regnum);
 }
 
@@ -1824,17 +1824,17 @@ sh_gdbarch_init (info, arches)
   tdep->SSR_REGNUM = -1;
   tdep->SPC_REGNUM = -1;
   tdep->DR0_REGNUM = -1;
-  tdep->DR1_REGNUM = -1;
   tdep->DR2_REGNUM = -1;
-  tdep->DR3_REGNUM = -1;
   tdep->DR4_REGNUM = -1;
-  tdep->DR5_REGNUM = -1;
   tdep->DR6_REGNUM = -1;
-  tdep->DR7_REGNUM = -1;
+  tdep->DR8_REGNUM = -1;
+  tdep->DR10_REGNUM = -1;
+  tdep->DR12_REGNUM = -1;
+  tdep->DR14_REGNUM = -1;
   tdep->FV0_REGNUM = -1;
-  tdep->FV1_REGNUM = -1;
-  tdep->FV2_REGNUM = -1;
-  tdep->FV3_REGNUM = -1;
+  tdep->FV4_REGNUM = -1;
+  tdep->FV8_REGNUM = -1;
+  tdep->FV12_REGNUM = -1;
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_max_register_raw_size (gdbarch, 4);
@@ -1959,17 +1959,17 @@ sh_gdbarch_init (info, arches)
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       tdep->DR0_REGNUM = 59;
-      tdep->DR1_REGNUM = 60;
-      tdep->DR2_REGNUM = 61;
-      tdep->DR3_REGNUM = 62;
-      tdep->DR4_REGNUM = 63;
-      tdep->DR5_REGNUM = 64;
-      tdep->DR6_REGNUM = 65;
-      tdep->DR7_REGNUM = 66;
+      tdep->DR2_REGNUM = 60;
+      tdep->DR4_REGNUM = 61;
+      tdep->DR6_REGNUM = 62;
+      tdep->DR8_REGNUM = 63;
+      tdep->DR10_REGNUM = 64;
+      tdep->DR12_REGNUM = 65;
+      tdep->DR14_REGNUM = 66;
       tdep->FV0_REGNUM = 67;
-      tdep->FV1_REGNUM = 68;
-      tdep->FV2_REGNUM = 69;
-      tdep->FV3_REGNUM = 70;
+      tdep->FV4_REGNUM = 68;
+      tdep->FV8_REGNUM = 69;
+      tdep->FV12_REGNUM = 70;
       break;
     default:
       sh_register_name = sh_generic_register_name;

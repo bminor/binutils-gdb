@@ -1,3 +1,14 @@
+2000-07-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_sh4_register_name, sh_sh4_register_byte,
+ 	sh_sh4_register_raw_size, sh_sh4_register_virtual_type,
+ 	sh_fetch_pseudo_register, sh_store_pseudo_register,
+ 	sh_do_pseudo_register, sh_gdbarch_init): Fix names for pseudoregs,
+ 	they should be numbered as drx fvy where x and y are multiples of
+ 	2 and 4 respectively.
+	
+	* config/sh/tm-sh.h: Fix names of pseudo regs.
+
 2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Add sh4 specific
