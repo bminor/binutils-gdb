@@ -424,7 +424,7 @@ _bfd_xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   switch (class)
     {
     case C_FILE:
-      if (ext->x_file.x_n.x_zeroes == 0)
+      if (in->x_file.x_n.x_zeroes == 0)
 	{
 	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_zeroes);
 	  H_PUT_32 (abfd, in->x_file.x_n.x_offset, ext->x_file.x_n.x_offset);

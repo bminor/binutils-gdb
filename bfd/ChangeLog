@@ -1,3 +1,7 @@
+2002-05-18  Tom Rix  <trix@redhat.com>
+
+	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_out):  Fix C_FILE auxent.
+
 2002-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_info_to_howto): Formatting.
