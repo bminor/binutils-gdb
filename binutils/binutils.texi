@@ -1633,7 +1633,7 @@ listed later.
 
 The commands to list valid values only list the values for which the
 programs you are running were configured.  If they were configured with
-@samp{--with-targets=all}, the commands list most of the available
+@samp{--enable-targets=all}, the commands list most of the available
 values, but a few are left out; not all targets can be configured in at
 once because some of them can only be configured @dfn{native} (on hosts
 with the same type as the target system).
