@@ -9,9 +9,9 @@
 #
 # if [ "${srcdir}" = "." ] ; then
 #   if [ "${with_target_subdir}" != "." ] ; then
-#     . ${srcdir}/${with_multisrctop}../../config-ml.in
+#     . ${with_multisrctop}../../config-ml.in
 #   else
-#     . ${srcdir}/${with_multisrctop}../config-ml.in
+#     . ${with_multisrctop}../config-ml.in
 #   fi
 # else
 #   . ${srcdir}/../config-ml.in
@@ -44,6 +44,10 @@
 # inter-library references also work in the source tree because symlink trees
 # are built when srcdir=.
 #
+# Unfortunately, trying to access the libraries in the build tree requires
+# the user to manually choose which library to use as GCC won't be able to
+# find the right one.  This is viewed as the lesser of two evils.
+#
 # Configure variables:
 # ${with_target_subdir} = "." for native, or ${target_alias} for cross.
 # Set by top level Makefile.
@@ -54,7 +58,8 @@
 #
 # Makefile variables:
 # MULTISRCTOP = number of multilib levels in source tree (+1 if cross)
-# MULITBUILDTOP = number of multilib levels in build tree
+# (FIXME: note that this is different than ${with_multisrctop}.  Check out.).
+# MULTIBUILDTOP = number of multilib levels in build tree
 # MULTIDIRS = list of multilib subdirs (eg: m68000 m68020 ...)
 # (only defined in each library's main Makefile).
 # MULTISUBDIR = installed subdirectory name with leading '/' (eg: /m68000)
@@ -65,19 +70,31 @@
 # libraries as desired.
 
 # We have to handle being invoked by both Cygnus configure and Autoconf.
-# We except both to define `srcdir' and `target' (we *could* figure them
-# out, but we'd have to do work that they're already done to figure them out).
-# We expect Cygnus configure to define `arguments' and Autoconf to define
-# `ac_configure_args'.
+#
+# Cygnus configure incoming variables:
+# srcdir, subdir, target, arguments
+#
+# Autoconf incoming variables:
+# srcdir, target, ac_configure_args
+#
+# We *could* figure srcdir and target out, but we'd have to do work that
+# our caller has already done to figure them out and requiring these two
+# seems reasonable.
 
 if [ -n "${ac_configure_args}" ]; then
   Makefile=${ac_file-Makefile}
   ml_config_shell=${CONFIG_SHELL-/bin/sh}
   ml_arguments="${ac_configure_args}"
+  ml_realsrcdir=${srcdir}
 else
   Makefile=${Makefile-Makefile}
   ml_config_shell=${config_shell-/bin/sh}
   ml_arguments="${arguments}"
+  if [ -n "${subdir}" -a "${subdir}" != "." ] ; then
+    ml_realsrcdir=${srcdir}/${subdir}
+  else
+    ml_realsrcdir=${srcdir}
+  fi
 fi
 
 # Scan all the arguments and set all the ones we need.
@@ -144,18 +161,20 @@ if [ "${enable_multilib}" = yes ]; then
 ml_toplevel_p=no
 if [ -z "${with_multisubdir}" ]; then
   if [ "${srcdir}" = "." ]; then
+    # Use ${ml_realsrcdir} instead of ${srcdir} here to account for ${subdir}.
     # ${with_target_subdir} = "." for native, otherwise target alias.
     if [ "${with_target_subdir}" = "." ]; then
-      if [ -f ../config-ml.in ]; then
+      if [ -f ${ml_realsrcdir}/../config-ml.in ]; then
 	ml_toplevel_p=yes
       fi
     else
-      if [ -f ../../config-ml.in ]; then
+      if [ -f ${ml_realsrcdir}/../../config-ml.in ]; then
 	ml_toplevel_p=yes
       fi
     fi
   else
-    if [ -f ${srcdir}/../config-ml.in ]; then
+    # Use ${ml_realsrcdir} instead of ${srcdir} here to account for ${subdir}.
+    if [ -f ${ml_realsrcdir}/../config-ml.in ]; then
       ml_toplevel_p=yes
     fi
   fi
@@ -416,7 +435,7 @@ mv Makefile.tem ${Makefile}
 fi # ${ml_toplevel_p} = yes
 
 if [ "${ml_verbose}" = --verbose ]; then
-  echo "Adding multilib support to Makefile in `pwd`"
+  echo "Adding multilib support to Makefile in ${ml_realsrcdir}"
   if [ "${ml_toplevel_p}" = yes ]; then
     echo "multidirs=${multidirs}"
   fi
