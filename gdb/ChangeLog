@@ -1,3 +1,11 @@
+2002-10-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/778
+	* gdbtypes.c (fill_in_vptr_fieldno): Call check_typedef
+	before recursing.
+	* gnu-v3-abi.c (gnuv3_virtual_fn_field): Check return value
+	of fill_in_vptr_fieldno.
+
 2002-10-01  Alexandre Oliva  <aoliva@redhat.com>
 
 	* mips-tdep.c (mips_find_abi_section): .mdebug.abi64 is the name
