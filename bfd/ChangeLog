@@ -1,3 +1,9 @@
+Sat Sep  5 20:40:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd-in.h (_bfd_nolink_bfd_gc_sections): Correct definition to
+	match definition of _bfd_gc_sections field.
+	* libbfd.h: Rebuild.
+
 Fri Sep  4 13:54:23 1998  David Miller  <davem@dm.cobaltmicro.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Properly adjust
