@@ -1,5 +1,11 @@
 2002-06-12  Andrew Cagney  <ac131313@redhat.com>
 
+	* arm-tdep.c (arm_push_arguments): Rewrite using a two-pass loop.
+	(arm_debug): New static variable.
+	(_initialize_arm_tdep): Add ``set debug arm'' command.
+
+2002-06-12  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (sim_arm_h): Define.
 	(arm-tdep.o): Add $(sim_arm_h) and $(gdb_assert_h).
 	* arm-tdep.c: Include "gdb/sim-arm.h" and "gdb_assert.h".
