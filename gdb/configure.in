@@ -319,18 +319,14 @@ fi
 # documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
 # HP-UX 10.10 and 10.20.
 
-case $host_os in
-  osf5.*)
-    # ncurses does not work on native alphaev68-dec-osf5.1
-    # -- chastain 2004-04-24
-    AC_SEARCH_LIBS(initscr, [curses], [],
-      [AC_MSG_WARN([no curses library found])])
-    ;;
-  *)
-    AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
-      [AC_MSG_WARN([no curses library found])])
-    ;;
-esac
+# FIXME: ncurses does not work on native alphaev68-dec-osf5.1,
+# and probably other platforms.  AC_SEARCH_LIBS finds the library
+# in a place such as /usr/local/lib/libncurses.a, but does not
+# do anything to look for the matching include files.
+# -- chastain 2004-05-01
+
+AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
+  [AC_MSG_WARN([no curses library found])])
 
 # Check whether the wborder function is provided by the curses
 # library detected above.  In certain implementations such as

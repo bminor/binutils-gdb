@@ -1,3 +1,9 @@
+2004-05-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Unfix PR gdb/1626.
+	* configure.in: Revert special case for osf5.*.
+	* configure: Regenerate.
+
 2004-05-02  Jim Blandy  <jimb@redhat.com>
 
 	Move the symbol-file-from-memory functions into their own file.
