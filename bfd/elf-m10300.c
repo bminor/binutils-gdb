@@ -52,19 +52,6 @@ bfd_boolean _bfd_mn10300_elf_merge_private_bfd_data
    linking with -Bsymbolic.  We store the information in a field
    extending the regular ELF linker hash table.  */
 
-/* This structure keeps track of the number of PC relative relocs we
-   have copied for a given symbol.  */
-
-struct elf_mn10300_pcrel_relocs_copied
-{
-  /* Next section.  */
-  struct elf_mn10300_pcrel_relocs_copied * next;
-  /* A section in dynobj.  */
-  asection * section;
-  /* Number of relocs copied in this section.  */
-  bfd_size_type count;
-};
-
 struct elf32_mn10300_link_hash_entry {
   /* The basic elf link hash table entry.  */
   struct elf_link_hash_entry root;
@@ -89,9 +76,6 @@ struct elf32_mn10300_link_hash_entry {
      by the movm instruction.  This is redundant with movm_args, but we
      add it to the hash table to avoid computing it over and over.  */
   unsigned char movm_stack_size;
-
-  /* Number of PC relative relocs copied for this symbol.  */
-  struct elf_mn10300_pcrel_relocs_copied * pcrel_relocs_copied;
 
 /* When set, convert all "call" instructions to this target into "calls"
    instructions.  */
@@ -166,9 +150,6 @@ static bfd_boolean _bfd_mn10300_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean _bfd_mn10300_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean _bfd_mn10300_elf_discard_copies
-  PARAMS ((struct elf32_mn10300_link_hash_entry *,
-	   struct bfd_link_info *));
 static bfd_boolean _bfd_mn10300_elf_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean _bfd_mn10300_elf_finish_dynamic_symbol
@@ -887,7 +868,6 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 
 	  break;
 
-	case R_MN10300_32:
 	case R_MN10300_24:
 	case R_MN10300_16:
 	case R_MN10300_8:
@@ -896,28 +876,16 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MN10300_PCREL8:
 	  if (h != NULL)
 	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+	  break;
 
-	  /* If we are creating a shared library, and this is a reloc
-	     against a global symbol, or a non PC relative reloc
-	     against a local symbol, then we need to copy the reloc
-	     into the shared library.  However, if we are linking with
-	     -Bsymbolic, we do not need to copy a reloc against a
-	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).  At
-	     this point we have not seen all the input files, so it is
-	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  We account for that
-	     possibility below by storing information in the
-	     pcrel_relocs_copied field of the hash table entry.  */
+	case R_MN10300_32:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
+	  /* If we are creating a shared library, then we need to copy
+	     the reloc into the shared library.  */
 	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0
-	      && (! (elf_mn10300_howto_table[ELF32_R_TYPE (rel->r_info)]
-		     .pc_relative)
-		  || (h != NULL
-		      && (! info->symbolic
-			  || h->root.type == bfd_link_hash_defweak
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
@@ -955,43 +923,6 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 		}
 
 	      sreloc->size += sizeof (Elf32_External_Rela);
-
-	      /* If we are linking with -Bsymbolic, and this is a
-		 global symbol, we count the number of PC relative
-		 relocations we have entered for this symbol, so that
-		 we can discard them again if the symbol is later
-		 defined by a regular object.  Note that this function
-		 is only called if we are using an elf_sh linker
-		 hash table, which means that h is really a pointer to
-		 an elf32_mn10300_link_hash_entry.  */
-	      if (h != NULL
-		  && (elf_mn10300_howto_table[ELF32_R_TYPE (rel->r_info)]
-		      .pc_relative))
-		{
-		  struct elf32_mn10300_link_hash_entry *eh;
-		  struct elf_mn10300_pcrel_relocs_copied *p;
-
-		  eh = (struct elf32_mn10300_link_hash_entry *) h;
-
-		  for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
-		    if (p->section == sreloc)
-		      break;
-
-		  if (p == NULL)
-		    {
-		      p = ((struct elf_mn10300_pcrel_relocs_copied *)
-			   bfd_alloc (dynobj, sizeof *p));
-		      if (p == NULL)
-			return FALSE;
-
-		      p->next = eh->pcrel_relocs_copied;
-		      eh->pcrel_relocs_copied = p;
-		      p->section = sreloc;
-		      p->count = 0;
-		    }
-
-		  ++p->count;
-		}
 	    }
 
 	  break;
@@ -1077,6 +1008,24 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 
   switch (r_type)
     {
+    case R_MN10300_24:
+    case R_MN10300_16:
+    case R_MN10300_8:
+    case R_MN10300_PCREL8:
+    case R_MN10300_PCREL16:
+    case R_MN10300_PCREL32:
+    case R_MN10300_GOTOFF32:
+    case R_MN10300_GOTOFF24:
+    case R_MN10300_GOTOFF16:
+      if (info->shared
+	  && (input_section->flags & SEC_ALLOC) != 0
+	  && h != NULL
+	  && ! _bfd_elf_symbol_refs_local_p (h, info, 1))
+	return bfd_reloc_dangerous;
+    }
+
+  switch (r_type)
+    {
     case R_MN10300_NONE:
       return bfd_reloc_ok;
 
@@ -1130,9 +1079,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	      /* h->dynindx may be -1 if this symbol was marked to
 		 become local.  */
 	      if (h == NULL
-		  || ((info->symbolic || h->dynindx == -1)
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) != 0))
+		  || _bfd_elf_symbol_refs_local_p (h, info, 1))
 		{
 		  relocate = TRUE;
 		  outrel.r_info = ELF32_R_INFO (0, R_MN10300_RELATIVE);
@@ -1217,68 +1164,6 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_MN10300_PCREL32:
-      if (info->shared
-	  && (input_section->flags & SEC_ALLOC) != 0
-	  && h != NULL
-	  && h->dynindx != -1
-	  && (! info->symbolic
-	      || (h->elf_link_hash_flags
-		  & ELF_LINK_HASH_DEF_REGULAR) == 0))
-	{
-	  Elf_Internal_Rela outrel;
-	  bfd_boolean skip;
-
-	  /* When generating a shared object, these relocations
-	     are copied into the output file to be resolved at run
-	     time.  */
-
-	  if (sreloc == NULL)
-	    {
-	      const char * name;
-
-	      name = (bfd_elf_string_from_elf_section
-		      (input_bfd,
-		       elf_elfheader (input_bfd)->e_shstrndx,
-		       elf_section_data (input_section)->rel_hdr.sh_name));
-	      if (name == NULL)
-		return FALSE;
-
-	      BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			  && strcmp (bfd_get_section_name (input_bfd,
-							   input_section),
-				     name + 5) == 0);
-
-	      sreloc = bfd_get_section_by_name (dynobj, name);
-	      BFD_ASSERT (sreloc != NULL);
-	    }
-
-	  skip = FALSE;
-	  outrel.r_offset = _bfd_elf_section_offset (input_bfd, info,
-						     input_section, offset);
-	  if (outrel.r_offset == (bfd_vma) -1)
-	    skip = TRUE;
-
-	  outrel.r_offset += (input_section->output_section->vma
-			      + input_section->output_offset);
-
-	  if (skip)
-	    memset (&outrel, 0, sizeof outrel);
-	  else
-	    {
-	      BFD_ASSERT (h != NULL && h->dynindx != -1);
-	      outrel.r_info = ELF32_R_INFO (h->dynindx, R_MN10300_PCREL32);
-	      outrel.r_addend = addend;
-	    }
-
-	  bfd_elf32_swap_reloca_out (output_bfd, &outrel,
-				     (bfd_byte *) (((Elf32_External_Rela *)
-						    sreloc->contents)
-						   + sreloc->reloc_count));
-	  ++sreloc->reloc_count;
-
-	  return bfd_reloc_ok;
-	}
-
       value -= (input_section->output_section->vma
 		+ input_section->output_offset);
       value -= offset;
@@ -1417,9 +1302,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 
 	      if (! elf_hash_table (info)->dynamic_sections_created
-		  || (info->shared
-		      && (info->symbolic || h->dynindx == -1)
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		  || _bfd_elf_symbol_refs_local_p (h, info, 1))
 		/* This is actually a static link, or it is a
 		   -Bsymbolic link and the symbol is defined
 		   locally, or the symbol was forced to be local
@@ -1578,16 +1461,9 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_MN10300_GOT24
 		       || r_type == R_MN10300_GOT16)
 		      && elf_hash_table (info)->dynamic_sections_created
-		      && (! info->shared
-			  || (! info->symbolic && h->root.dynindx != -1)
-			  || (h->root.elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
-		  || (info->shared
-		      && ((! info->symbolic && h->root.dynindx != -1)
-			  || (h->root.elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (   r_type == R_MN10300_32
-			  || r_type == R_MN10300_PCREL32)
+		      && !_bfd_elf_symbol_refs_local_p (h, info, 1))
+		  || (r_type == R_MN10300_32
+		      && !_bfd_elf_symbol_refs_local_p (h, info, 1)
 		      && ((input_section->flags & SEC_ALLOC) != 0
 			  /* DWARF will emit R_MN10300_32 relocations
 			     in its sections against symbols defined
@@ -3816,7 +3692,6 @@ elf32_mn10300_link_hash_newfunc (entry, table, string)
       ret->stack_size = 0;
       ret->movm_args = 0;
       ret->movm_stack_size = 0;
-      ret->pcrel_relocs_copied = NULL;
       ret->flags = 0;
     }
 
@@ -4300,34 +4175,6 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
-/* This function is called via elf32_mn10300_link_hash_traverse if we are
-   creating a shared object with -Bsymbolic.  It discards the space
-   allocated to copy PC relative relocs against symbols which are
-   defined in regular objects.  We allocated space for them in the
-   check_relocs routine, but we won't fill them in in the
-   relocate_section routine.  */
-
-static bfd_boolean
-_bfd_mn10300_elf_discard_copies (h, info)
-     struct elf32_mn10300_link_hash_entry *h;
-     struct bfd_link_info *info;
-{
-  struct elf_mn10300_pcrel_relocs_copied *s;
-
-  /* If a symbol has been forced local or we have found a regular
-     definition for the symbolic link case, then we won't be needing
-     any relocs.  */
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-      && ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	  || info->symbolic))
-    {
-      for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-	s->section->size -= s->count * sizeof (Elf32_External_Rel);
-    }
-
-  return TRUE;
-}
-
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -4366,15 +4213,6 @@ _bfd_mn10300_elf_size_dynamic_sections (output_bfd, info)
       if (s != NULL)
 	s->size = 0;
     }
-
-  /* If this is a -Bsymbolic shared link, then we need to discard all
-     PC relative relocs against symbols defined in a regular object.
-     We allocated space for them in the check_relocs routine, but we
-     will not fill them in in the relocate_section routine.  */
-  if (info->shared && info->symbolic)
-    elf32_mn10300_link_hash_traverse (elf32_mn10300_hash_table (info),
-				      _bfd_mn10300_elf_discard_copies,
-				      info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate

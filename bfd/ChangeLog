@@ -1,3 +1,21 @@
+2004-06-26  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (struct elf_mn10300_pcrel_relocs_copied): Delete.
+	(struct elf32_mn10300_link_hash_entry): Remove
+	pcrel_relocs_copied.
+	(mn10300_elf_check_relocs): Only reserve dynamic relocations for
+	R_MN10300_32.  Don't adjust pcrel_relocs_copied.
+	(mn10300_elf_final_link_relocate): Fail for direct, pc-relative
+	and gotoff relocations if the symbol doesn't bind locally.  Use
+	_bfd_elf_symbol_refs_local_p to test.  Don't create dynamic
+	relocation for PCREL32.
+	(mn10300_elf_relocate_section): Use _bfd_elf_symbol_refs_local_p
+	to test whether a symbol binds locally.
+	(elf32_mn10300_link_hash_newfunc): Don't initialize
+	pcrel_relocs_copied.
+	(_bfd_mn10300_elf_discard_copies): Delete.
+	(_bfd_mn10300_elf_size_dynamic_sections): Don't call it.
+
 2004-06-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* config.bfd: Replace m88k-*-openbsd* with m88*-*-openbsd*.
