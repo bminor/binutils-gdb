@@ -1,7 +1,9 @@
 2001-04-30  Michael Snyder  <msnyder@redhat.com>
 
 	* thread-db.c: Revert 2001-04-26 change for debugging output.
-	* lin-lwp.c:   Ditto.
+	* lin-lwp.c: Ditto.
+	* lin-lwp.c: Add set/show debug lin-lwp command.  Use this
+	command to turn extra debugging output on / off.
 
 2001-04-27  Andrew Cagney  <ac131313@redhat.com>
 
