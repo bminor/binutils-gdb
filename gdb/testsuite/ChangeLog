@@ -1,4 +1,4 @@
-2002-08-15  Mark Kettenis  <kettenis@elgar.kettenis.dyndns.org>
+2002-08-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.java/jv-print.exp: Fix p '' and p ''' tests to deal with
 	2002-07-24 change that removes final dots from error messages.
