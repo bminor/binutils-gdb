@@ -555,7 +555,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-r5900 */
 {"movn",    "d,v,t",	0x0000000b, 0xfc0007ff,	WR_d|RD_s|RD_t,	T5	},
   /* end-sanitize-r5900 */
-{"ffc",     "d,v",	0x0000000b, 0xfc0007ff,	WR_d|RD_s,L1	},
+{"ffc",     "d,v",	0x0000000b, 0xfc1f07ff,	WR_d|RD_s,L1	},
 {"movn.d",  "D,S,t",	0x46200013, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,	I4	},
 {"movn.s",  "D,S,t",	0x46000013, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,	I4	},
 {"movt",    "d,s,N",	0x00010001, 0xfc0307ff, WR_d|RD_s|RD_CC,	I4	},
@@ -565,7 +565,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
   /* start-sanitize-r5900 */
 {"movz",    "d,v,t",	0x0000000a, 0xfc0007ff,	WR_d|RD_s|RD_t,	T5	},
   /* end-sanitize-r5900 */
-{"ffs",     "d,v",	0x0000000a, 0xfc0007ff,	WR_d|RD_s,L1	},
+{"ffs",     "d,v",	0x0000000a, 0xfc1f07ff,	WR_d|RD_s,L1	},
 {"movz.d",  "D,S,t",	0x46200012, 0xffe0003f, WR_D|RD_S|RD_t|FP_D,	I4	},
 {"movz.s",  "D,S,t",	0x46000012, 0xffe0003f, WR_D|RD_S|RD_t|FP_S,	I4	},
   /* start-sanitize-vr5400 */
