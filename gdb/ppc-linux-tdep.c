@@ -759,7 +759,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 int
 ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-  unsigned char *bp;
+  const unsigned char *bp;
   int val;
   int bplen;
   char old_contents[BREAKPOINT_MAX];

@@ -3712,7 +3712,7 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
    (if necessary) to point to the actual memory location where the
    breakpoint should be inserted.  */
 
-unsigned char *
+const unsigned char *
 mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)

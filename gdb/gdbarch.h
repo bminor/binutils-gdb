@@ -1690,8 +1690,8 @@ extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (legacy_breakpoint_from_pc (pcptr, lenptr))
 #endif
 
-typedef unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
-extern unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
+typedef const unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
+extern const unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (BREAKPOINT_FROM_PC)
 #error "Non multi-arch definition of BREAKPOINT_FROM_PC"

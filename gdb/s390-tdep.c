@@ -1700,7 +1700,7 @@ s390_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 
 
 
-static unsigned char *
+const static unsigned char *
 s390_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x0, 0x1 };

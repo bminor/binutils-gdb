@@ -384,7 +384,6 @@ struct type;
 typedef int (use_struct_convention_fn) (int gcc_p, struct type * value_type);
 extern use_struct_convention_fn generic_use_struct_convention;
 
-typedef unsigned char *(breakpoint_from_pc_fn) (CORE_ADDR * pcptr, int *lenptr);
 
 /* Annotation stuff.  */
 

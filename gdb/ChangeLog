@@ -1,3 +1,34 @@
+2002-04-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (BREAKPOINT_FROM_PC): Return a const buffer.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
+	* defs.h (breakpoint_from_pc_fn): Delete type definition.
+	* target.h (memory_breakpoint_from_pc): Update declaration.
+	* config/mcore/tm-mcore.h (mcore_breakpoint_from_p): Ditto.
+
+	* arch-utils.c (legacy_breakpoint_from_pc): Update return type.
+	* mcore-tdep.c (mcore_breakpoint_from_pc): Ditto.
+	* mem-break.c (memory_breakpoint_from_pc): Ditto.
+	* rs6000-tdep.c (rs6000_breakpoint_from_pc): Ditto.
+	* s390-tdep.c (s390_breakpoint_from_pc): Ditto
+	* xstormy16-tdep.c (xstormy16_breakpoint_from_pc): Ditto.
+	* mn10300-tdep.c (mn10300_breakpoint_from_pc): Ditto.
+	* mips-tdep.c (mips_breakpoint_from_pc): Ditto.
+	* m68hc11-tdep.c (m68hc11_breakpoint_from_pc): Ditto.
+	* ia64-tdep.c (ia64_breakpoint_from_pc): Ditto.
+	* d10v-tdep.c (d10v_breakpoint_from_pc): Ditto.
+	* arch-utils.c (legacy_breakpoint_from_pc): Ditto..
+
+	* mem-break.c (default_memory_insert_breakpoint): Make `bp' a
+	const pointer.
+	* monitor.c (monitor_insert_breakpoint): Ditto.
+	* rs6000-tdep.c (rs6000_software_single_step): Ditto for `breakp'.
+
+	* config/mcore/tm-mcore.h: Update copyright.
+	* mem-break.c: Ditto.
+	* xstormy16-tdep.c: Ditto.
+
 2002-04-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y: Add precedence rule for '^' token.

@@ -62,7 +62,7 @@ CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
 
 CORE_ADDR mcore_frame_chain (struct frame_info *fi);
 
-unsigned char *mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size);
+const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size);
 
 int mcore_use_struct_convention (int gcc_p, struct type *type);
 
@@ -182,7 +182,7 @@ mcore_dump_insn (char *commnt, CORE_ADDR pc, int insn)
    instructions are 16 bits, this is all we need, regardless of
    address. bpkt = 0x0000 */
 
-unsigned char *
+const unsigned char *
 mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size)
 {
   static char breakpoint[] =

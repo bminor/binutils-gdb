@@ -2078,7 +2078,7 @@ static int
 monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
-  unsigned char *bp;
+  const unsigned char *bp;
   int bplen;
 
   monitor_debug ("MON inst bkpt %s\n", paddr (addr));

@@ -270,7 +270,7 @@ m68hc11_register_name (int reg_nr)
   return m68hc11_register_names[reg_nr];
 }
 
-static unsigned char *
+static const unsigned char *
 m68hc11_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = {0x0};

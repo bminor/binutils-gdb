@@ -150,7 +150,7 @@ d10v_use_struct_convention (int gcc_p, struct type *type)
 }
 
 
-static unsigned char *
+static const unsigned char *
 d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =

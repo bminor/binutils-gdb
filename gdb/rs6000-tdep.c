@@ -280,7 +280,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 #define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
 #define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
 
-static unsigned char *
+const static unsigned char *
 rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
   static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
@@ -301,7 +301,7 @@ rs6000_software_single_step (enum target_signal signal,
 {
   CORE_ADDR dummy;
   int breakp_sz;
-  char *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
+  const char *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];

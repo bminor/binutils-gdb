@@ -3840,7 +3840,7 @@ set_gdbarch_inner_than (struct gdbarch *gdbarch,
   gdbarch->inner_than = inner_than;
 }
 
-unsigned char *
+const unsigned char *
 gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   if (gdbarch->breakpoint_from_pc == 0)

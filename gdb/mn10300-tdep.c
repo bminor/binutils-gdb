@@ -188,7 +188,7 @@ mn10300_use_struct_convention (int gcc_p, struct type *type)
    so we need a single byte breakpoint.  Matsushita hasn't defined
    one, so we defined it ourselves.  */
 
-static unsigned char *
+const static unsigned char *
 mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
   static char breakpoint[] =

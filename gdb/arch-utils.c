@@ -1,5 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -55,7 +57,7 @@
    and optionally adjust the pc to point to the correct memory location
    for inserting the breakpoint.  */
 
-unsigned char *
+const unsigned char *
 legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
   /* {BIG_,LITTLE_}BREAKPOINT is the sequence of bytes we insert for a

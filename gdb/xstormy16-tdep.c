@@ -1,5 +1,6 @@
 /* Target-dependent code for the Sanyo Xstormy16a (LC590000) processor.
-   Copyright 2001, Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -857,7 +858,7 @@ xstormy16_saved_pc_after_call (struct frame_info *ignore)
   return pc;
 }
 
-static unsigned char *
+const static unsigned char *
 xstormy16_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x06, 0x0 };
