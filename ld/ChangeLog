@@ -1,3 +1,8 @@
+2002-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Set
+	load_base for orphans that follow a section with load_base set.
+
 2002-12-01  H.J. Lu <hjl@gnu.org>
 
 	* ld.texinfo: Remove the extra `;' in sample version script.

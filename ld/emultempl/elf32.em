@@ -1093,6 +1093,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   const char *secname;
   const char *ps = NULL;
   lang_output_section_statement_type *os;
+  etree_type *load_base;
   int isdyn = 0;
 
   secname = bfd_get_section_name (s->owner, s);
@@ -1227,16 +1228,25 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	}
     }
 
+  address = NULL;
   if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop ((bfd_vma) 0);
-  else
-    address = NULL;
+
+  load_base = NULL;
+  if (place != NULL && place->os->load_base != NULL)
+    {
+      etree_type *lma_from_vma;
+      lma_from_vma = exp_binop ('-', place->os->load_base,
+				exp_nameop (ADDR, place->os->name));
+      load_base = exp_binop ('+', lma_from_vma,
+			     exp_nameop (ADDR, secname));
+    }
 
   os = lang_enter_output_section_statement (secname, address, 0,
 					    (bfd_vma) 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
-					    (etree_type *) NULL);
+					    load_base);
 
   lang_add_section (&os->children, s, os, file);
 
