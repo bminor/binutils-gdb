@@ -898,17 +898,17 @@ Using this option has a significant performance cost.  It is best to use
 it only when there are unavoidable circular references between two or
 more archives.
 
-@kindex --accept-unknown-input-format
-@kindex --no-accept-unknown-input-format
-@item --accept-unknown-input-format
-@itemx --no-accept-unknown-input-format
-Tells the linker to accept input files whoes format cannot be
+@kindex --accept-unknown-input-arch
+@kindex --no-accept-unknown-input-arch
+@item --accept-unknown-input-arch
+@itemx --no-accept-unknown-input-arch
+Tells the linker to accept input files whose architecture cannot be
 recognised.  The assumption is that the user knows what they are doing
-and deliberately wants to link in these unknown format input files.
-This was the default behaviour of the linker, before release 2.14.
-The default behaviour from release 2.14 onwards is to reject such
-input files, and so the @samp{--accept-unknown-input-format} option
-has been added to restore the old behaviour.
+and deliberately wants to link in these unknown input files.  This was
+the default behaviour of the linker, before release 2.14.  The default
+behaviour from release 2.14 onwards is to reject such input files, and
+so the @samp{--accept-unknown-input-arch} option has been added to
+restore the old behaviour.
 
 @kindex -assert @var{keyword}
 @item -assert @var{keyword}
@@ -3975,7 +3975,7 @@ specifies what data to write in the gaps (@pxref{Output Section Fill}).
 @cindex dot inside sections
 Note: @code{.} actually refers to the byte offset from the start of the
 current containing object.  Normally this is the @code{SECTIONS}
-statement, whoes start address is 0, hence @code{.} can be used as an
+statement, whose start address is 0, hence @code{.} can be used as an
 absolute address.  If @code{.} is used inside a section description
 however, it refers to the byte offset from the start of that section,
 not an absolute address.  Thus in a script like this:
@@ -4453,52 +4453,110 @@ This section describes some of the win32 specific @command{ld} issues.
 @table @emph
 @cindex import libraries 
 @item import libraries 
-The standard Windows linker creates and uses so called import
+The standard Windows linker creates and uses so-called import
 libraries, which contains information for linking to dll's.  They are
-regular static archives and could be handled as any other static
-archive.  The cygwin and mingw ports of @command{ld} has specific
+regular static archives and are handled as any other static
+archive.  The cygwin and mingw ports of @command{ld} have specific
 support for creating such libraries provided with the
 @samp{--out-implib} command line option.
 
 @cindex automatic data imports
 @item automatic data imports
 The standard Windows dll format supports data imports from dlls only
-by adding special decorations (dllimport/dllexport), which lets the
+by adding special decorations (dllimport/dllexport), which let the
 compiler produce specific assembler instructions to deal with this
-issue.  This increase the needed porting efforts, especially for big
+issue.  This increases the effort necessary to port existing Un*x 
+code to these platforms, especially for large
 c++ libraries and applications.  The auto-import feature, which was
-initially provided by Paul Sokolovsky, allows this decoration to be
-skipped, archiving a behavior more like @command{ld} on other
-platforms.  This feature is enabled with the @samp{--enable-auto-import} 
-command line option.
+initially provided by Paul Sokolovsky, allows one to omit the 
+decorations to archieve a behavior that conforms to that on POSIX/Un*x
+platforms. This feature is enabled with the @samp{--enable-auto-import} 
+command-line option, although it is enabled by default on cygwin/mingw.
+The @samp{--enable-auto-import} option itself now serves mainly to
+suppress any warnings that are ordinarily emitted when linked objects
+trigger the feature's use.
+
+auto-import of variables does not always work flawlessly without 
+additional assistance.  Sometimes, you will see this message
+
+"variable '<var>' can't be auto-imported. Please read the 
+documentation for ld's @code{--enable-auto-import} for details."
+
+The @samp{--enable-auto-import} documentation explains why this error 
+occurs, and several methods that can be used to overcome this difficulty.  
+One of these methods is the @emph{runtime pseudo-relocs} feature, described 
+below.
+
+@cindex runtime pseudo-relocation
+For complex variables imported from DLLs (such as structs or classes), 
+object files typically contain a base address for the variable and an 
+offset (@emph{addend}) within the variable--to specify a particular 
+field or public member, for instance.  Unfortunately, the runtime loader used 
+in win32 environments is incapable of fixing these references at runtime 
+without the additional information supplied by dllimport/dllexport decorations.
+The standard auto-import feature described above is unable to resolve these 
+references.
+
+The @samp{--enable-runtime-pseudo-relocs} switch allows these references to 
+be resolved without error, while leaving the task of adjusting the references 
+themselves (with their non-zero addends) to specialized code provided by the 
+runtime environment.  Recent versions of the cygwin and mingw environments and 
+compilers provide this runtime support; older versions do not.  However, the 
+support is only necessary on the developer's platform; the compiled result will 
+run without error on an older system.
+
+@samp{--enable-runtime-pseudo-relocs} is not the default; it must be explicitly 
+enabled as needed. 
 
 @cindex direct linking to a dll
 @item direct linking to a dll
 The cygwin/mingw ports of @command{ld} support the direct linking,
 including data symbols, to a dll without the usage of any import
-libraries.  Using this feature can save a lot of linking time and
-memory, especially in case of bigger libraries or applications.  This
-is because bigger libraries can have very large import libraries.  (The
-author has seen import libraries about 10 MB size).
+libraries.  This is much faster and uses much less memory than does the
+traditional import library method, expecially when linking large
+libraries or applications.  When @command{ld} creates an import lib, each 
+function or variable exported from the dll is stored in its own bfd, even 
+though a single bfd could contain many exports.  The overhead involved in 
+storing, loading, and processing so many bfd's is quite large, and explains the
+tremendous time, memory, and storage needed to link against particularly 
+large or complex libraries when using import libs.
 
-Linking directly to a dll can done with the standard command line
-options @samp{-L} and @samp{-l}.  This is because @command{ld} has
-built in support for several dll names, as shown below.  In this list
-@samp{xxx} means the basic library name like "png" for the png
-library:
+Linking directly to a dll uses no extra command-line switches other than 
+@samp{-L} and @samp{-l}, because @command{ld} already searches for a number
+of names to match each library.  All that is needed from the developer's 
+perspective is an understanding of this search, in order to force ld to
+select the dll instead of an import library.
+
+
+For instance, when ld is called with the argument @samp{-lxxx} it will attempt
+to find, in the first directory of its search path,
 
 @example
 libxxx.dll.a 
 xxx.dll.a 
 libxxx.a 
-cygxxx.dll 
+cygxxx.dll (*)
 libxxx.dll 
 xxx.dll 
 @end example
 
+before moving on to the next directory in the search path.
+
+(*) Actually, this is not @samp{cygxxx.dll} but in fact is @samp{<prefix>xxx.dll}, 
+where @samp{<prefix>} is set by the @command{ld} option 
+@samp{--dll-search-prefix=<prefix>}. In the case of cygwin, the standard gcc spec 
+file includes @samp{--dll-search-prefix=cyg}, so in effect we actually search for 
+@samp{cygxxx.dll}.
+
+Other win32-based unix environments, such as mingw or pw32, may use other 
+@samp{<prefix>}es, although at present only cygwin makes use of this feature.  It 
+was originally intended to help avoid name conflicts among dll's built for the
+various win32/un*x environments, so that (for example) two versions of a zlib dll
+could coexist on the same machine.
+
 The generic cygwin/mingw path layout uses a @samp{bin} directory for
 applications and dll's and a @samp{lib} directory for the import
-libraries.
+libraries (using cygwin nomenclature):
 
 @example
 bin/
@@ -4508,12 +4566,18 @@ lib/
 	libxxx.a       (in case of static archive) 
 @end example
 
-Linking to a dll can be done by two ways: 
+Linking directly to a dll without using the import library can be 
+done two ways: 
 
 1. Use the dll directly by adding the @samp{bin} path to the link line
 @example
 gcc -Wl,-verbose  -o a.exe -L../bin/ -lxxx
 @end example 
+
+However, as the dll's often have version numbers appended to their names
+(@samp{cygncurses-5.dll}) this will often fail, unless one specifies
+@samp{-L../bin -lncurses-5} to include the version.  Import libs are generally
+not versioned, and do not have this difficulty.
 
 2. Create a symbolic link from the dll to a file in the @samp{lib}
 directory according to the above mentioned search pattern.  This
@@ -4529,6 +4593,46 @@ Then you can link without any make environment changes.
 @example
 gcc -Wl,-verbose  -o a.exe -L../lib/ -lxxx
 @end example 
+
+This technique also avoids the version number problems, because the following is
+perfectly legal
+
+@example
+bin/
+	cygxxx-5.dll
+lib/
+	libxxx.dll.a -> ../bin/cygxxx-5.dll 
+@end example
+
+Linking directly to a dll without using an import lib will work 
+even when auto-import features are exercised, and even when
+@samp{--enable-runtime-pseudo-relocs} is used.
+
+Given the improvements in speed and memory usage, one might justifiably
+wonder why import libraries are used at all.  There are three reasons:
+
+1. Until recently, the link-directly-to-dll functionality did @emph{not}
+work with auto-imported data.
+
+2. Sometimes, it is useful to rename exports.  For instance, the cygwin
+kernel does this regularly: a symbol @samp{_foo} will be exported as 
+@samp{_foo}, but also as @samp{foo} by using special directives in the
+DEF file when creating the import library.  This ability is not
+present without import libs.
+
+3. Also, it's sometimes necessary to include pure static objects 
+within the import library (which otherwise contains only bfd's for
+indirection symbols that point to the exports of a dll).  Again, 
+the import lib for the cygwin kernel makes use of this ability, and
+it is not possible to do this without an import lib.
+
+So, import libs are not going away.  But the ability to replace
+true import libs with a simple symbolic link to (or a copy of) 
+a dll, in most cases, is a useful addition to the suite of tools 
+binutils makes available to the win32 developer.  Given the 
+massive improvements in memory requirements during linking, storage
+requirements, and linking speed, we expect that many developers
+will soon begin to use this feature whenever possible.
 @end table
 
 @ifclear GENERIC

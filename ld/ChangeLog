@@ -1,3 +1,8 @@
+2002-12-19  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld.texinfo: Clarify and extend the documentation
+	in the Machine Dependent, WIN32 section.
+
 2002-12-18  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* ld.texinfo: Add win32 machine depending section.
