@@ -64,6 +64,7 @@ enum mips_abi
     MIPS_ABI_UNKNOWN = 0,
     MIPS_ABI_N32,
     MIPS_ABI_O32,
+    MIPS_ABI_N64,
     MIPS_ABI_O64,
     MIPS_ABI_EABI32,
     MIPS_ABI_EABI64,
@@ -76,6 +77,7 @@ static const char *mips_abi_strings[] = {
   "auto",
   "n32",
   "o32",
+  "n64",
   "o64",
   "eabi32",
   "eabi64",
@@ -4352,7 +4354,11 @@ mips_gdbarch_init (struct gdbarch_info info,
 	  break;
 	case bfd_mach_mips8000:
 	case bfd_mach_mips10000:
-	  mips_abi = MIPS_ABI_N32;
+	  if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
+	      && elf_elfheader (info.abfd)->e_ident[EI_CLASS] == ELFCLASS64)
+	    mips_abi = MIPS_ABI_N64;
+	  else
+	    mips_abi = MIPS_ABI_N32;
 	  break;
 	}
     }
@@ -4481,6 +4487,30 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+
+      /* Set up the disassembler info, so that we get the right
+	 register names from libopcodes.  */
+      tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      tm_print_insn_info.arch = bfd_arch_mips;
+      if (info.bfd_arch_info != NULL
+	  && info.bfd_arch_info->arch == bfd_arch_mips
+	  && info.bfd_arch_info->mach)
+	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+      else
+	tm_print_insn_info.mach = bfd_mach_mips8000;
+      break;
+    case MIPS_ABI_N64:
+      tdep->mips_default_saved_regsize = 8;
+      tdep->mips_default_stack_argsize = 8;
+      tdep->mips_fp_register_double = 1;
+      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
+      tdep->mips_regs_have_home_p = 0;
+      tdep->gdb_target_is_mips64 = 1;
+      tdep->default_mask_address_p = 0;
+      set_gdbarch_long_bit (gdbarch, 64);
+      set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
 
       /* Set up the disassembler info, so that we get the right

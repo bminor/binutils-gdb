@@ -1,5 +1,11 @@
 2002-07-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (enum mips_abi): Add MIPS_ABI_N64.
+	(mips_abi_strings): Add "n64".
+	(mips_gdbarch_init): Add test for n64 abi.  Add MIPS_ABI_N64 case.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* config/mips/tm-irix6.h (MIPS_REGSIZE): Define to be 8.
 	(REGISTER_VIRTUAL_TYPE): Some registers are now 64 bits wide.
 
