@@ -1,3 +1,8 @@
+2005-03-18  Mark Kettenis  <kettenis@elgar.sibelius.xs4all.nl>
+
+	From Ralf Corsepius <ralf.corsepius@rtems.org>
+	* configure.tgt: Add m68*-*-rtems*.
+
 2005-03-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* defs.h (xsnprintf): New prototype.
