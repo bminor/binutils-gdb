@@ -34,6 +34,9 @@ struct sec_merge_hash_entry
   struct bfd_hash_entry root;
   /* Length of this entry.  */
   unsigned int len;
+  /* Start of this string needs to be aligned to
+     alignment octets (not 1 << align).  */
+  unsigned int alignment;
   /* Index within the merged section.  */
   bfd_size_type index;
   /* Which section is it in.  */
@@ -55,9 +58,6 @@ struct sec_merge_hash
   struct sec_merge_hash_entry *last;
   /* Entity size.  */
   unsigned int entsize;
-  /* Start of each string needs to be aligned to 1 << alignment_power
-     octets.  */
-  unsigned int alignment_power;
   /* Are entries fixed size or zero terminated strings?  */
   boolean strings;
 };
@@ -85,13 +85,13 @@ struct sec_merge_sec_info
 static struct bfd_hash_entry *sec_merge_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct sec_merge_hash_entry *sec_merge_hash_lookup
-  PARAMS ((struct sec_merge_hash *, const char *, boolean));
+  PARAMS ((struct sec_merge_hash *, const char *, unsigned int, boolean));
 static struct sec_merge_hash *sec_merge_init
-  PARAMS ((unsigned int, unsigned int, boolean));
+  PARAMS ((unsigned int, boolean));
 static struct sec_merge_hash_entry *sec_merge_add
-  PARAMS ((struct sec_merge_hash *, const char *));
+  PARAMS ((struct sec_merge_hash *, const char *, unsigned int));
 static boolean sec_merge_emit
-  PARAMS ((bfd *, struct sec_merge_hash *, struct sec_merge_hash_entry *));
+  PARAMS ((bfd *, struct sec_merge_hash_entry *));
 
 /* Routine to create an entry in a section merge hashtab.  */
 
@@ -119,6 +119,7 @@ sec_merge_hash_newfunc (entry, table, string)
     {
       /* Initialize the local fields.  */
       ret->index = (bfd_size_type) -1;
+      ret->alignment = 0;
       ret->sec = NULL;
       ret->next = NULL;
     }
@@ -129,9 +130,10 @@ sec_merge_hash_newfunc (entry, table, string)
 /* Look up an entry in a section merge hash table.  */
 
 static struct sec_merge_hash_entry *
-sec_merge_hash_lookup (table, string, create)
+sec_merge_hash_lookup (table, string, alignment, create)
      struct sec_merge_hash *table;
      const char *string;
+     unsigned int alignment;
      boolean create;
 {
   register const unsigned char *s;
@@ -193,12 +195,20 @@ sec_merge_hash_lookup (table, string, create)
   index = hash % table->table.size;
   for (hashp = (struct sec_merge_hash_entry *) table->table.table[index];
        hashp != (struct sec_merge_hash_entry *) NULL;
-       hashp = (struct sec_merge_hash_entry *) hashp->next)
+       hashp = (struct sec_merge_hash_entry *) hashp->root.next)
     {
       if (hashp->root.hash == hash
 	  && len == hashp->len
 	  && memcmp (hashp->root.string, string, len) == 0)
-	return hashp;
+	{
+	  /* If the string we found does not have at least the required
+	     alignment, we need to insert another copy.
+	     FIXME: The old copy could be removed and the space allocated
+	     for it filled by some new string (similarly with padding).  */
+	  if (hashp->alignment < alignment)
+	    break;
+	  return hashp;
+	}
     }
 
   if (! create)
@@ -212,6 +222,7 @@ sec_merge_hash_lookup (table, string, create)
   hashp->root.string = string;
   hashp->root.hash = hash;
   hashp->len = len;
+  hashp->alignment = alignment;
   hashp->root.next = table->table.table[index];
   table->table.table[index] = (struct bfd_hash_entry *) hashp;
 
@@ -221,8 +232,8 @@ sec_merge_hash_lookup (table, string, create)
 /* Create a new hash table.  */
 
 static struct sec_merge_hash *
-sec_merge_init (alignment_power, entsize, strings)
-     unsigned int alignment_power, entsize;
+sec_merge_init (entsize, strings)
+     unsigned int entsize;
      boolean strings;
 {
   struct sec_merge_hash *table;
@@ -241,7 +252,6 @@ sec_merge_init (alignment_power, entsize, strings)
   table->size = 0;
   table->first = NULL;
   table->last = NULL;
-  table->alignment_power = alignment_power;
   table->entsize = entsize;
   table->strings = strings;
 
@@ -252,21 +262,22 @@ sec_merge_init (alignment_power, entsize, strings)
    already present.  */
 
 static struct sec_merge_hash_entry *
-sec_merge_add (tab, str)
+sec_merge_add (tab, str, alignment)
      struct sec_merge_hash *tab;
      const char *str;
+     unsigned int alignment;
 {
   register struct sec_merge_hash_entry *entry;
 
-  entry = sec_merge_hash_lookup (tab, str, true);
+  entry = sec_merge_hash_lookup (tab, str, alignment, true);
   if (entry == NULL)
     return NULL;
 
   if (entry->index == (bfd_size_type) -1)
     {
+      tab->size = (tab->size + alignment - 1) & ~((bfd_vma) alignment - 1);
       entry->index = tab->size;
       tab->size += entry->len;
-      tab->size = align_power (tab->size, tab->alignment_power);
       if (tab->first == NULL)
 	tab->first = entry;
       else
@@ -278,21 +289,31 @@ sec_merge_add (tab, str)
 }
 
 static boolean
-sec_merge_emit (abfd, tab, entry)
+sec_merge_emit (abfd, entry)
      register bfd *abfd;
-     struct sec_merge_hash *tab;
      struct sec_merge_hash_entry *entry;
 {
   asection *sec = entry->sec;
   char *pad = "";
+  bfd_size_type off = 0;
+  int alignment_power = bfd_get_section_alignment (abfd, sec->output_section);
 
-  if (tab->alignment_power)
-    pad = bfd_zmalloc (1 << tab->alignment_power);
+  if (alignment_power)
+    pad = bfd_zmalloc (1 << alignment_power);
 
   for (; entry != NULL && entry->sec == sec; entry = entry->next)
     {
       register const char *str;
       register size_t len;
+
+      len = off & (entry->alignment - 1);
+      if (len)
+	{
+	  len = entry->alignment - len;
+	  if (bfd_write ((PTR) pad, 1, len, abfd) != len)
+	    break;
+	  off += len;
+	}
 
       str = entry->root.string;
       len = entry->len;
@@ -300,17 +321,10 @@ sec_merge_emit (abfd, tab, entry)
       if (bfd_write ((PTR) str, 1, len, abfd) != len)
 	break;
 
-      if (tab->alignment_power)
-	{
-	  len &= (1 << tab->alignment_power) - 1;
-	  if (len && bfd_write ((PTR) pad, 1,
-				(1 << tab->alignment_power) - len,
-				abfd) != (1 << tab->alignment_power) - len)
-	    break;
-	}
+      off += len;
     }
 
-  if (tab->alignment_power)
+  if (alignment_power)
     free (pad);
 
   return entry == NULL || entry->sec != sec;
@@ -330,7 +344,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
   struct sec_merge_info *sinfo;
   struct sec_merge_sec_info *secinfo;
   unsigned char *p, *end;
-  bfd_vma mask;
+  bfd_vma mask, eltalign;
   unsigned int align;
   unsigned int i;
 
@@ -354,16 +368,18 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
     }
 
   align = bfd_get_section_alignment (abfd, sec);
-  if ((sec->flags & SEC_STRINGS)
-      && ((sec->entsize < (unsigned int)(1 << align)
-	   && (sec->entsize & (sec->entsize - 1)))
-	  || (sec->entsize > (unsigned int)(1 << align)
-	      && (sec->entsize & ((1 << align) - 1)))))
+  if ((sec->entsize < (unsigned int)(1 << align)
+       && ((sec->entsize & (sec->entsize - 1))
+	   || !(sec->flags & SEC_STRINGS)))
+      || (sec->entsize > (unsigned int)(1 << align)
+	  && (sec->entsize & ((1 << align) - 1))))
     {
       /* Sanity check.  If string character size is smaller than
 	 alignment, then we require character size to be a power
 	 of 2, otherwise character size must be integer multiple
-	 of alignment.  */
+	 of alignment.  For non-string constants, alignment must
+	 be smaller than or equal to entity size and entity size
+	 must be integer multiple of alignment.  */
       return true;
     }
 
@@ -372,8 +388,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
   for (sinfo = (struct sec_merge_info *) *psinfo; sinfo; sinfo = sinfo->next)
     if (! ((sinfo->last->flags ^ sec->flags) & (SEC_MERGE | SEC_STRINGS))
 	&& sinfo->last->entsize == sec->entsize
-	&& ! strcmp (sinfo->last->name, sec->name)
-	&& bfd_get_section_alignment (abfd, sinfo->last) == align)
+	&& ! strcmp (sinfo->last->name, sec->name))
       break;
 
   if (sinfo == NULL)
@@ -387,8 +402,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
       sinfo->next = (struct sec_merge_info *) *psinfo;
       *psinfo = (PTR) sinfo;
       sinfo->htab =
-	sec_merge_init ((sec->flags & SEC_STRINGS) ? align : 0,
-			sec->entsize, (sec->flags & SEC_STRINGS));
+	sec_merge_init (sec->entsize, (sec->flags & SEC_STRINGS));
       if (sinfo->htab == NULL)
 	goto error_return;
     }
@@ -411,14 +425,18 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
 
   end = secinfo->contents + sec->_raw_size;
   nul = false;
-  mask = ((bfd_vma)1 << sinfo->htab->alignment_power) - 1;
+  mask = ((bfd_vma)1 << align) - 1;
   if (sec->flags & SEC_STRINGS)
     {
       for (p = secinfo->contents; p < end;)
 	{
 	  struct sec_merge_hash_entry *entry;
 
-	  entry = sec_merge_add (sinfo->htab, p);
+	  eltalign = p - secinfo->contents;
+	  eltalign = ((eltalign ^ (eltalign - 1)) + 1) >> 1;
+	  if (!eltalign || eltalign > mask)
+	    eltalign = mask + 1;
+	  entry = sec_merge_add (sinfo->htab, p, eltalign);
 	  if (entry->sec == NULL)
 	    {
 	      if (secinfo->first == NULL)
@@ -433,7 +451,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
 		  if (!nul && !((p - secinfo->contents) & mask))
 		    {
 		      nul = true;
-		      entry = sec_merge_add (sinfo->htab, "");
+		      entry = sec_merge_add (sinfo->htab, "", mask + 1);
 		      if (entry->sec == NULL)
 		        {
 			  if (secinfo->first == NULL)
@@ -456,7 +474,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
 		  if (!nul && !((p - secinfo->contents) & mask))
 		    {
 		      nul = true;
-		      entry = sec_merge_add (sinfo->htab, p);
+		      entry = sec_merge_add (sinfo->htab, p, mask + 1);
 		      if (entry->sec == NULL)
 			{
 			  if (secinfo->first == NULL)
@@ -475,7 +493,7 @@ _bfd_merge_section (abfd, psinfo, sec, psecinfo)
 	{
 	  struct sec_merge_hash_entry *entry;
 
-	  entry = sec_merge_add (sinfo->htab, p);
+	  entry = sec_merge_add (sinfo->htab, p, 1);
 	  if (entry->sec == NULL)
 	    {
 	      if (secinfo->first == NULL)
@@ -518,7 +536,7 @@ _bfd_write_merged_section (output_bfd, sec, psecinfo)
 		SEEK_SET) != 0)
     return false;
 
-  if (! sec_merge_emit (output_bfd, secinfo->htab, secinfo->first))
+  if (! sec_merge_emit (output_bfd, secinfo->first))
     return false;
 
   return true;
@@ -584,7 +602,7 @@ _bfd_merged_section_offset (output_bfd, psec, psecinfo, offset, addend)
       p = secinfo->contents
 	  + ((offset + addend) / sec->entsize) * sec->entsize;
     }
-  entry = sec_merge_hash_lookup (secinfo->htab, p, false);
+  entry = sec_merge_hash_lookup (secinfo->htab, p, 0, false);
   if (!entry)
     {
       if (! secinfo->htab->strings)

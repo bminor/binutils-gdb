@@ -1,3 +1,20 @@
+2001-04-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* merge.c (struct sec_merge_hash_entry): Add alignment field.
+	(struct sec_merge_hash): Remove alignment_power.
+	(sec_merge_hash_newfunc): Clear alignment.
+	(sec_merge_hash_lookup): Pass alignment as argument.
+	Use hashp->root.next, not hashp->next to walk the hash chain.
+	If a string already in the hashtable does not have required
+	alignment, create a new hashtable entry.
+	(sec_merge_init): Remove alignment_power argument.
+	(sec_merge_add): Add alignment argument.
+	(sec_merge_emit): Alignment is now a per-entity thing, not per
+	section.
+	(_bfd_merge_section): Sanity check even non-SEC_STRINGS sections
+	for proper alignment.
+	Pass alignment information to sec_merge_add.
+
 2001-04-24  Christian Groessler  <cpg@aladdin.de>
 
 	* coff-z8k.c (extra_case): added handler for R_DISP7, R_CALLR
