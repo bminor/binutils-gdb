@@ -1,3 +1,11 @@
+Tue Jul  6 12:24:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (Break Commands): Remove stuff about flushing terminal
+	input when evaluating breakpoint conditions; the bug has been fixed.
+
+	* gdb.texinfo (Continuing and Stepping): Argument to "continue"
+	sets the ignore count to N-1, not to N.
+
 Thu Jul  1 14:57:42 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* refcard.tex (\hoffset): correct longstanding error to match

@@ -2496,6 +2496,19 @@ end
 @end example
 
 @cindex lost output
+@c Do we need to mention this at all?  I am sort of tempted to mention
+@c it in case people are used to seeing this section of the manual.  But
+@c for new users it is an annoyance--it documents something which isn't
+@c there.  -kingdon, 6 Jul 93
+Previous versions of @value{GDBN} (4.9 and earlier) would flush pending
+input when executing breakpoint commands, if your program used raw mode
+for the terminal.  This is no longer true.
+
+@ignore
+@c I don't think this is true any longer, now that only readline
+@c switches to or from raw mode.  In any event, it is a (relatively
+@c easily fixable) GDB bug if it switches to or from raw mode except
+@c when it has to in order to read input from the terminal.  kingdon -6 Jul 93.
 One deficiency in the operation of automatically continuing breakpoints
 under Unix appears when your program uses raw mode for the terminal.
 @value{GDBN} switches back to its own terminal modes (not raw) before executing
@@ -2519,6 +2532,7 @@ program will not stop.  No input is lost here, because @value{GDBN} evaluates
 break conditions without changing the terminal modes.  When you want
 to have nontrivial conditions for performing the side effects, the
 operators @samp{&&}, @samp{||} and @samp{?@dots{}:} may be useful.
+@end ignore
 
 @ifclear CONLY
 @node Breakpoint Menus
@@ -2623,19 +2637,21 @@ a breakpoint or to a signal.  (If due to a signal, you may want to use
 @end ifclear
 
 @table @code
-@item continue @r{[}@var{ignore-count}@r{]}
+@item continue @r{[}@var{count}@r{]}
 @itemx c @r{[}@var{count}@r{]}
 @itemx fg @r{[}@var{count}@r{]}
 @kindex continue
 @kindex c
 @kindex fg
-Resume program execution, at the address where your program last stopped;
-any breakpoints set at that address are bypassed.  The optional argument
-@var{ignore-count} allows you to specify a further number of times to
-ignore a breakpoint at this location; its effect is like that of
-@code{ignore} (@pxref{Conditions, ,Break conditions}).
+Resume program execution, at the address where your program last
+stopped; any breakpoints set at that address are bypassed.  The optional
+argument @var{count} means to set the ignore count of a breakpoint which
+you are stopped at to @var{count} @minus{} 1, just like the @code{ignore}
+command (@pxref{Conditions, ,Break conditions}).  This means that the
+program does not stop at that breakpoint until the @var{count}th time
+it is hit.
 
-The argument @var{ignore-count} is meaningful only when your program
+The argument @var{count} is meaningful only when your program
 stopped due to a breakpoint.  At other times, the argument to
 @code{continue} is ignored.
 
