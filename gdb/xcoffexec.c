@@ -706,7 +706,7 @@ retry:
 
 	  /* The filenames are not always sufficient to match on. */
 
-	  if ((name[0] == "/" && !STREQ(name, vp->name))
+	  if ((name[0] == '/' && !STREQ(name, vp->name))
 	      	|| (memb[0] && !STREQ(memb, vp->member)))
 	    continue;
 

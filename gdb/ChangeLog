@@ -1,3 +1,19 @@
+Fri Feb 26 18:33:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* xcoffexec.c (vmap_ldinfo):  Fix "/" for '/' typo, reported
+	by Josef Leherbauer, joe@takeFive.co.at.
+
+Wed Feb 24 19:17:11 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* symfile.c (syms_from_objfile), tm-29k.h, tm-3b1.h, tm-68k-un.h,
+	tm-altos.h, tm-arm.h, tm-convex.h, tm-es1800.h, tm-h8300.h,
+	tm-hp300bsd.h, tm-hp300hpux.h, tm-hppa.h, tm-i386bsd.h,
+	tm-i386v.h, tm-i960.h, tm-irix3.h, tm-isi.h, tm-linux.h,
+	tm-m88k.h, tm-merlin.h, tm-mips.h, tm-news.h, tm-np1.h, tm-pn.h,
+	tm-pyr.h, tm-rs6000.h, tm-spc-un.h, tm-sun386.h, tm-sunos.h,
+	tm-symmetry.h, tm-sysv4.h, tm-tahoe.h, tm-umax.h, tm-vax.h,
+	tm-vx68.h, tm-z8k.h:  Remove remnants of NAMES_HAVE_UNDERSCORE.
+
 Wed Feb 24 07:41:15 1993  Fred Fish  (fnf@cygnus.com)
 
 	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME):  Initialize contents
