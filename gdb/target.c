@@ -220,7 +220,8 @@ void
 add_target (struct target_ops *t)
 {
   /* Provide default values for all "must have" methods.  */
-  t->to_xfer_partial = default_xfer_partial;
+  if (t->to_xfer_partial == NULL)
+    t->to_xfer_partial = default_xfer_partial;
 
   if (!target_structs)
     {
@@ -1644,6 +1645,7 @@ init_dummy_target (void)
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
+  dummy_target.to_xfer_partial = default_xfer_partial;
   dummy_target.to_magic = OPS_MAGIC;
 }
 

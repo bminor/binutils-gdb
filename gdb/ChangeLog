@@ -1,4 +1,10 @@
 2003-11-06  Andrew Cagney  <cagney@redhat.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+	* target.c (add_target): Only set "to_xfer_partial" when NULL.
+	(init_dummy_target): Set "to_xfer_partial".
+
+2003-11-06  Andrew Cagney  <cagney@redhat.com>
 
 	* stack.c (return_command): Warn when STRUCT_CONVENTION, and not
 	REGISTER_CONVENTION.
