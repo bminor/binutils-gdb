@@ -1,5 +1,6 @@
 /* Macro definitions for GDB on an Intel i386 running Solaris 2.
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,8 +21,6 @@
 
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
-
-#include "i386/tm-i386.h"
 
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */

@@ -1,5 +1,7 @@
 /* Target-dependent definitions for Intel x86 running DJGPP.
-   Copyright 1995, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1995, 1996, 1997, 1999, 2000, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +24,5 @@
 #define TM_GO32_H
 
 #undef HAVE_SSE_REGS	/* FIXME! go32-nat.c needs to support XMMi registers */
-
-#include "i386/tm-i386.h"
 
 #endif /* TM_GO32_H */

@@ -1,3 +1,19 @@
+2004-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* config/i386/tm-i386.h: Delete file.
+	* config/i386/tm-vxworks.h: Update copyright, do not include
+	"tm-i386.h".
+	* config/i386/tm-nto.h, config/i386/tm-linux.h: Ditto.
+	* config/i386/tm-i386sol2.h, config/i386/tm-i386lynx.h: Ditto.
+	* config/i386/tm-go32.h, config/i386/tm-cygwin.h: Ditto.
+	* config/i386/ncr3000.mt (TM_FILE): Delete.
+	* config/i386/interix.mt (TM_FILE): Delete.
+	* config/i386/i386v.mt (TM_FILE): Delete.
+	* config/i386/i386nw.mt (TM_FILE): Delete.
+	* config/i386/i386gnu.mt (TM_FILE): Delete.
+	* config/i386/i386aout.mt (TM_FILE): Delete.
+	* config/i386/embed.mt (TM_FILE): Delete.
+
 2004-04-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.h (fsr0_regnum, acc0_regnum, acc7_regnum, accg0123_regnum)

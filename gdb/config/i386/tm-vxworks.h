@@ -1,6 +1,7 @@
-/* Target machine description for VxWorks on the 80[3456]86,
-   for GDB, the GNU debugger.
-   Copyright 1999 Free Software Foundation, Inc.
+/* Target machine description for VxWorks on the 80[3456]86, for GDB,
+   the GNU debugger.
+
+   Copyright 1999, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,7 +23,6 @@
 #ifndef TM_VXWORKS_H
 #define TM_VXWORKS_H
 
-#include "i386/tm-i386.h"
 #include "config/tm-vxworks.h"
 
 #endif /* ifndef TM_VXWORKS_H */
