@@ -650,24 +650,6 @@ init_child_ops (void)
   child_ops.to_magic = OPS_MAGIC;
 }
 
-/* Take over the 'find_mapped_memory' vector from inftarg.c. */
-extern void
-inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR,
-						       unsigned long,
-						       int, int, int,
-						       void *),
-					      void *))
-{
-  child_ops.to_find_memory_regions = func;
-}
-
-/* Take over the 'make_corefile_notes' vector from inftarg.c. */
-extern void
-inftarg_set_make_corefile_notes (char * (*func) (bfd *, int *))
-{
-  child_ops.to_make_corefile_notes = func;
-}
-
 void
 _initialize_inftarg (void)
 {

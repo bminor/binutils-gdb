@@ -1,5 +1,9 @@
 2004-09-29  Andrew Cagney  <cagney@gnu.org>
 
+	* inftarg.c (inftarg_set_find_memory_regions) 
+	(inftarg_set_make_corefile_notes): Delete functions.
+	(_initialize_linux_nat): Inline calls.
+
 	* target.h (child_ops): Declare.
 	* inftarg.c (child_ops): Move from here ...
 	* target.c (child_ops): ... to here.

@@ -3011,11 +3011,9 @@ _initialize_linux_nat (void)
 {
   struct sigaction action;
   extern void thread_db_init (struct target_ops *);
-  extern void inftarg_set_find_memory_regions ();
-  extern void inftarg_set_make_corefile_notes ();
 
-  inftarg_set_find_memory_regions (linux_nat_find_memory_regions);
-  inftarg_set_make_corefile_notes (linux_nat_make_corefile_notes);
+  child_ops.to_find_memory_regions = linux_nat_find_memory_regions;
+  child_ops.to_make_corefile_notes = linux_nat_make_corefile_notes;
 
   add_info ("proc", linux_nat_info_proc_cmd,
 	    "Show /proc process information about any running process.\n\
