@@ -39,7 +39,7 @@ SECTION
 #include "elf-bfd.h"
 
 static INLINE struct elf_segment_map *make_mapping
-  PARAMS ((bfd *, asection **, unsigned int, unsigned int));
+  PARAMS ((bfd *, asection **, unsigned int, unsigned int, boolean));
 static int elf_sort_sections PARAMS ((const PTR, const PTR));
 static boolean assign_file_positions_for_segments PARAMS ((bfd *));
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *));
@@ -1592,11 +1592,12 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
 /* Create a mapping from a set of sections to a program segment.  */
 
 static INLINE struct elf_segment_map *
-make_mapping (abfd, sections, from, to)
+make_mapping (abfd, sections, from, to, phdr)
      bfd *abfd;
      asection **sections;
      unsigned int from;
      unsigned int to;
+     boolean phdr;
 {
   struct elf_segment_map *m;
   unsigned int i;
@@ -1614,7 +1615,7 @@ make_mapping (abfd, sections, from, to)
     m->sections[i - from] = *hdrpp;
   m->count = to - from;
 
-  if (from == 0)
+  if (from == 0 && phdr)
     {
       /* Include the headers in the first PT_LOAD segment.  */
       m->includes_filehdr = 1;
@@ -1641,6 +1642,9 @@ map_sections_to_segments (abfd)
   unsigned int phdr_index;
   bfd_vma maxpagesize;
   asection **hdrpp;
+  boolean phdr_in_section = true;
+  boolean writable;
+  asection *dynsec;
 
   if (elf_tdata (abfd)->segment_map != NULL)
     return true;
@@ -1713,6 +1717,19 @@ map_sections_to_segments (abfd)
   last_hdr = NULL;
   phdr_index = 0;
   maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
+  writable = false;
+  dynsec = bfd_get_section_by_name (abfd, ".dynamic");
+  if (dynsec != NULL
+      && (dynsec->flags & SEC_LOAD) == 0)
+    dynsec = NULL;
+
+  /* Deal with -Ttext or something similar such that the
+     first section is not adjacent to the program headers.  */
+  if (count
+      && ((sections[0]->lma % maxpagesize) <
+	  (elf_tdata (abfd)->program_header_size % maxpagesize)))
+    phdr_in_section = false;
+
   for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
     {
       asection *hdr;
@@ -1720,12 +1737,20 @@ map_sections_to_segments (abfd)
       hdr = *hdrpp;
 
       /* See if this section and the last one will fit in the same
-         segment.  */
+         segment.  Don't put a loadable section after a non-loadable
+         section.  If we are building a dynamic executable, don't put
+         a writable section in a read only segment (we don't do this
+         for a non-dynamic executable because some people prefer to
+         have only one program segment; anybody can use PHDRS in their
+         linker script to control what happens anyhow).  */
       if (last_hdr == NULL
 	  || ((BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
 	       >= hdr->lma)
 	      && ((last_hdr->flags & SEC_LOAD) != 0
-		  || (hdr->flags & SEC_LOAD) == 0)))
+		  || (hdr->flags & SEC_LOAD) == 0)
+	      && (dynsec == NULL
+		  || writable
+		  || (hdr->flags & SEC_READONLY) != 0)))
 	{
 	  last_hdr = hdr;
 	  continue;
@@ -1735,21 +1760,25 @@ map_sections_to_segments (abfd)
          create a new program header holding all the sections from
          phdr_index until hdr.  */
 
-      m = make_mapping (abfd, sections, phdr_index, i);
+      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_section);
       if (m == NULL)
 	goto error_return;
 
       *pm = m;
       pm = &m->next;
 
+      if ((hdr->flags & SEC_READONLY) == 0)
+	writable = true;
+
       last_hdr = hdr;
       phdr_index = i;
+      phdr_in_section = false;
     }
 
   /* Create a final PT_LOAD program segment.  */
   if (last_hdr != NULL)
     {
-      m = make_mapping (abfd, sections, phdr_index, i);
+      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_section);
       if (m == NULL)
 	goto error_return;
 
@@ -1758,8 +1787,7 @@ map_sections_to_segments (abfd)
     }
 
   /* If there is a .dynamic section, throw in a PT_DYNAMIC segment.  */
-  s = bfd_get_section_by_name (abfd, ".dynamic");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0)
+  if (dynsec != NULL)
     {
       m = ((struct elf_segment_map *)
 	   bfd_zalloc (abfd, sizeof (struct elf_segment_map)));
@@ -1768,7 +1796,7 @@ map_sections_to_segments (abfd)
       m->next = NULL;
       m->p_type = PT_DYNAMIC;
       m->count = 1;
-      m->sections[0] = s;
+      m->sections[0] = dynsec;
 
       *pm = m;
       pm = &m->next;

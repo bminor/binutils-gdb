@@ -1,5 +1,9 @@
 Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (map_sections_to_segments): If we have a .dynamic section,
+	then start a new segment rather than put a writable section in a
+	readonly segment.
+
 	* configure.host: Set RPATH_ENVVAR.
 
 	* Makefile.in: Rebuild dependencies.
