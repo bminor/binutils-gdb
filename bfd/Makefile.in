@@ -321,8 +321,7 @@ diststuff: info headers
 # BFD_BACKENDS	Routines the configured targets need.
 # BFD_MACHINES	Architecture-specific routines the configured targets need.
 # COREFILE	Core file routines for a native configuration
-# TDEPFILES	Routines the target needs, regardless of host.
-OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@ $(TDEPFILES)
+OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@
 
 ofiles : Makefile
 	rm -f ofiles

@@ -1,5 +1,9 @@
 Fri Sep  1 18:06:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (OFILES): Remove $(TDEPFILES).
+	* config/apollo.mt (TDEPFILES): Remove.
+	* config/README: Update.
+
 	* configure.in: For a native configuration, set COREFILE and
 	COREFLAG based on the canonical host name.
 	* configure: Rebuild.
