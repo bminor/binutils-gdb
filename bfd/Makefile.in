@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -335,6 +335,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	efi-app-ia32.lo \
 	elf.lo \
+	elf32-am33lin.lo \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
@@ -500,7 +501,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	efi-app-ia32.c \
 	elf.c \
-	elf32-am33lin.lo \
+	elf32-am33lin.c \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
@@ -810,7 +811,7 @@ configure.in version.h
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(libbfd_a_SOURCES) $(libbfd_la_SOURCES)
 OBJECTS = $(libbfd_a_OBJECTS) $(libbfd_la_OBJECTS)
@@ -1657,10 +1658,10 @@ efi-app-ia32.lo: efi-app-ia32.c $(INCDIR)/filenames.h \
 elf.lo: elf.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h
-elf32-am33lin.lo: elf32-am33lin.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h elf-m10300.c
+elf32-am33lin.lo: elf32-am33lin.c elf-m10300.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mn10300.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-arc.lo: elf32-arc.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
