@@ -2,6 +2,9 @@
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Check
 	h->root.other not h->other.
+	* elf32-mips.c (mips_elf_calculate_relocation): Likewise.
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Fix a typo.
 
 2000-05-23  H.J. Lu  <hjl@gnu.org>
 

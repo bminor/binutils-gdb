@@ -3104,7 +3104,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 							 rel->r_offset,
 							 (!info->shared
 							  || info->no_undefined
-							  ELF_ST_VISIBILITY (h->other))))
+							  || ELF_ST_VISIBILITY (h->other))))
 		return false;
 	      relocation = 0;
 	    }
