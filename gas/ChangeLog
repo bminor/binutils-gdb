@@ -1,3 +1,20 @@
+Thu Apr 14 13:34:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.h (DIFF_EXPR_OK): Define.
+	* config/tc-mips.c (macro_build): Permit BFD_RELOC_PCREL_LO16 for
+	certain cases of 'i', 'j' and 'o'.  Change 'u' to take an
+	argument, the reloc type.
+	(load_register): Pass reloc type to macro_build for 'u'.
+	(macro): Likewise.  For M_LA_AB permit a difference expression
+	when generating embedded PIC code between an arbitrary symbol and
+	a symbol in the .text section.
+	(mips_force_relocation): Force BFD_RELOC_PCREL_HI16_S and
+	BFD_RELOC_PCREL_LO16 to be emitted.
+	(md_apply_fix): Check that most relocs are not PC relative.
+	Handle BFD_RELOC_PCREL_HI16_S and BFD_RELOC_PCREL_LO16.
+	(tc_gen_reloc): Change #error to as_fatal.  Handle
+	BFD_RELOC_PCREL_LO16 and BFD_RELOC_PCREL_HI16_S.
+
 Tue Apr 12 18:25:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* subsegs.c (subsegs_begin): Call memset with args in the correct
