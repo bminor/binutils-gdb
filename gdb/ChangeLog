@@ -1,3 +1,7 @@
+2003-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interps.c (interp_set): Check for a NULL "old_interp".
+
 2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (FLAGS_TO_PASS): Add DESTDIR.

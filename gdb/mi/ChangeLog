@@ -1,3 +1,10 @@
+2003-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (captured_mi_execute_command): Add "mi2" and "mi3" to
+	interpreters that hack around CLI.
+	* mi-interp.c (mi3_command_loop): New function.
+	(mi_interpreter_resume): Check for "mi3", default to "mi2".
+
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-interp.c (_initialize_mi_interp): Register "mi2" and "mi3".
