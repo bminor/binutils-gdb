@@ -2882,26 +2882,18 @@ static void
 read_typedef (struct die_info *die, struct objfile *objfile,
 	      const struct comp_unit_head *cu_header)
 {
-  struct type *type;
+  struct attribute *attr;
+  char *name = NULL;
 
   if (!die->type)
     {
-      struct attribute *attr;
-      struct type *xtype;
-
-      xtype = die_type (die, objfile, cu_header);
-
-      type = alloc_type (objfile);
-      TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
-      TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
-      TYPE_TARGET_TYPE (type) = xtype;
       attr = dwarf_attr (die, DW_AT_name);
       if (attr && DW_STRING (attr))
-	TYPE_NAME (type) = obsavestring (DW_STRING (attr),
-					 strlen (DW_STRING (attr)),
-					 &objfile->type_obstack);
-
-      die->type = type;
+	{
+	  name = DW_STRING (attr);
+	}
+      die->type = init_type (TYPE_CODE_TYPEDEF, 0, TYPE_FLAG_TARGET_STUB, name, objfile);
+      TYPE_TARGET_TYPE (die->type) = die_type (die, objfile, cu_header);
     }
 }
 
