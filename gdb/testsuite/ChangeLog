@@ -1,3 +1,9 @@
+2001-08-15  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (gdbtk_start): Don't set environment
+	variables for TCL_LIBRARY and friends. Insight will
+	now figure these out for itself.
+
 2001-08-02  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/completion.exp: Remove the symbol "a64l" from

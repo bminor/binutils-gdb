@@ -1665,15 +1665,9 @@ proc gdbtk_start {test} {
   # Find absolute path to test
   set test [to_tcl_path -abs $test]
 
-  # Set environment variables for tcl libraries and such
+  # Set some environment variables
   cd $srcdir
   set abs_srcdir [pwd]
-  set env(GDBTK_LIBRARY) [to_tcl_path -abs [file join $abs_srcdir .. gdbtk library]]
-  set env(TCL_LIBRARY) [to_tcl_path -abs [file join $abs_srcdir .. .. tcl library]]
-  set env(TK_LIBRARY) [to_tcl_path -abs [file join $abs_srcdir .. .. tk library]]
-  set env(TIX_LIBRARY) [to_tcl_path -abs [file join $abs_srcdir .. .. tix library]]
-  set env(ITCL_LIBRARY) [to_tcl_path -abs [file join $abs_srcdir .. .. itcl itcl library]]
-  set env(CYGNUS_GUI_LIBRARY) [to_tcl_path -abs [file join .. $abs_srcdir .. .. libgui library]]
   set env(DEFS) [to_tcl_path -abs [file join $abs_srcdir $subdir defs]]
 
   cd $wd
