@@ -1342,17 +1342,7 @@ mn10200_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       test = val;
 
       if (test < (offsetT) min || test > (offsetT) max)
-        {
-          const char *err =
-            _("operand out of range (%s not between %ld and %ld)");
-          char buf[100];
-
-          sprint_value (buf, test);
-          if (file == (char *) NULL)
-            as_warn (err, buf, min, max);
-          else
-            as_warn_where (file, line, err, buf, min, max);
-        }
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
     }
 
   if ((operand->flags & MN10200_OPERAND_EXTENDED) == 0)

@@ -1,3 +1,21 @@
+2004-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* messages (as_internal_value_out_of_range): Print a message about
+	a value being out of range.  Be consistent about whether the
+	values are printed in decimal or hexadecimal.
+	(as_warn_value_out_of_range): Generate a warning message about an
+	out of range value.
+	(as_bad_value_out_of_range): Generate an error message about an
+	out of range value.
+	* as.h: Prototype the new functions.
+	* config/tc-alpha.c (insert_operand): Use new function.
+	* config/tc-arc.c (arc_insert_operand): Likewise.
+	* config/tc-mn10200.c (mn10200_insert_operand): Likewise.
+	* config/tc-mn10300.c (mn10300_insert_operand): Likewise.
+	* config/tc-ppc.c (ppc_insert_operand): Likewise.
+	* config/tc-s390.c (s390_insert_operand): Likewise.
+	* config/tc-v850.c (v850_insert_operand): Likewise.
+
 2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in: Set em=linux for frv-*-*linux*.

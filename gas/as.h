@@ -562,6 +562,9 @@ void sprint_value (char *buf, addressT value);
 int had_errors (void);
 int had_warnings (void);
 
+void as_warn_value_out_of_range (char *, offsetT, offsetT, offsetT, char *, unsigned);
+void as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT, char *, unsigned);
+
 void print_version_id (void);
 char *app_push (void);
 char *atof_ieee (char *str, int what_kind, LITTLENUM_TYPE * words);

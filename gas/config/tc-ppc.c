@@ -1457,14 +1457,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 	test = val;
 
       if (test < (offsetT) min || test > (offsetT) max)
-	{
-	  const char *err =
-	    _("operand out of range (%s not between %ld and %ld)");
-	  char buf[100];
-
-	  sprint_value (buf, test);
-	  as_bad_where (file, line, err, buf, min, max);
-	}
+	as_bad_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
     }
 
   if (operand->insert)

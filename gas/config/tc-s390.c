@@ -601,21 +601,15 @@ s390_insert_operand (insn, operand, val, file, line)
       /* Check for underflow / overflow.  */
       if (uval < min || uval > max)
 	{
-	  const char *err =
-	    "operand out of range (%s not between %ld and %ld)";
-	  char buf[100];
-
 	  if (operand->flags & S390_OPERAND_LENGTH)
 	    {
 	      uval++;
 	      min++;
 	      max++;
 	    }
-	  sprint_value (buf, uval);
-	  if (file == (char *) NULL)
-	    as_bad (err, buf, (int) min, (int) max);
-	  else
-	    as_bad_where (file, line, err, buf, (int) min, (int) max);
+
+	  as_bad_value_out_of_range (_("operand"), uval, (offsetT) min, (offsetT) max, file, line);
+
 	  return;
 	}
     }

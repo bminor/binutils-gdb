@@ -328,17 +328,7 @@ arc_insert_operand (insn, operand, mods, reg, val, file, line)
 	test = val;
 
       if (test < (offsetT) min || test > (offsetT) max)
-	{
-	  const char *err =
-	    "operand out of range (%s not between %ld and %ld)";
-	  char buf[100];
-
-	  sprint_value (buf, test);
-	  if (file == (char *) NULL)
-	    as_warn (err, buf, min, max);
-	  else
-	    as_warn_where (file, line, err, buf, min, max);
-	}
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
     }
 
   if (operand->insert)

@@ -503,3 +503,84 @@ sprint_value (char *buf, valueT val)
 #endif
   abort ();
 }
+
+#define HEX_MAX_THRESHOLD	1024
+#define HEX_MIN_THRESHOLD	-(HEX_MAX_THRESHOLD)
+
+static void
+as_internal_value_out_of_range (char *    prefix,
+				offsetT   val,
+				offsetT   min,
+				offsetT   max,
+				char *    file,
+				unsigned  line,
+				int       bad)
+{
+  const char * err;
+
+  if (prefix == NULL)
+    prefix = "";
+
+#ifdef BFD_ASSEMBLER
+  if (   val < HEX_MAX_THRESHOLD
+      && min < HEX_MAX_THRESHOLD
+      && max < HEX_MAX_THRESHOLD
+      && val > HEX_MIN_THRESHOLD
+      && min > HEX_MIN_THRESHOLD
+      && max > HEX_MIN_THRESHOLD)
+#endif
+    {
+      /* xgettext:c-format  */
+      err = _("%s out of range (%d is not between %d and %d)");
+
+      if (bad)
+	as_bad_where (file, line, err, prefix, val, min, max);
+      else
+	as_warn_where (file, line, err, prefix, val, min, max);
+    }
+#ifdef BFD_ASSEMBLER
+  else
+    {
+      char val_buf [sizeof (val) * 3 + 2];
+      char min_buf [sizeof (val) * 3 + 2];
+      char max_buf [sizeof (val) * 3 + 2];
+
+      if (sizeof (val) > sizeof (bfd_vma))
+	abort ();
+
+      sprintf_vma (val_buf, val);
+      sprintf_vma (min_buf, min);
+      sprintf_vma (max_buf, max);
+
+      /* xgettext:c-format.  */
+      err = _("%s out of range (0x%s is not between 0x%s and 0x%s)");
+
+      if (bad)
+	as_bad_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+      else
+	as_warn_where (file, line, err, prefix, val_buf, min_buf, max_buf);
+    }
+#endif
+}
+
+void
+as_warn_value_out_of_range (char *   prefix,
+			   offsetT  value,
+			   offsetT  min,
+			   offsetT  max,
+			   char *   file,
+			   unsigned line)
+{
+  as_internal_value_out_of_range (prefix, value, min, max, file, line, 0);
+}
+
+void
+as_bad_value_out_of_range (char *   prefix,
+			   offsetT  value,
+			   offsetT  min,
+			   offsetT  max,
+			   char *   file,
+			   unsigned line)
+{
+  as_internal_value_out_of_range (prefix, value, min, max, file, line, 1);
+}

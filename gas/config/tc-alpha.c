@@ -2373,17 +2373,7 @@ insert_operand (insn, operand, val, file, line)
 	}
 
       if (val < min || val > max)
-	{
-	  const char *err =
-	    _("operand out of range (%s not between %d and %d)");
-	  char buf[sizeof (val) * 3 + 2];
-
-	  sprint_value (buf, val);
-	  if (file)
-	    as_warn_where (file, line, err, buf, min, max);
-	  else
-	    as_warn (err, buf, min, max);
-	}
+	as_warn_value_out_of_range (_("operand"), val, min, max, file, line);
     }
 
   if (operand->insert)
