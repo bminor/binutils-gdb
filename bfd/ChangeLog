@@ -1,3 +1,9 @@
+Tue Sep  1 13:38:40 1992  Per Bothner  (bothner@cygnus.com)
+
+	* targets.c (target_vector):  Take out oasys (unless that is
+	the default):  Because there is no magic number in archives,
+	there can be annoying target mis-matches.
+
 Mon Aug 31 10:11:37 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* sparc-opc.c: Rigorously updated to match architecture manual.
