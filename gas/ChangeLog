@@ -1,3 +1,9 @@
+start-sanitize-armelf
+Thu Aug 20 14:45:08 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (arm_fix_adjustable): Do not adjust relocations
+	against Thumb function names, as the linker needs this information.
+end-sanitize-armelf
 1998-08-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* expr.c (operand): Check also that there is no advance in operand

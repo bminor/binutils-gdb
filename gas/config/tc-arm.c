@@ -6407,12 +6407,34 @@ arm_canonicalize_symbol_name (name)
   return name;
 }
 /* start-sanitize-armelf */
+#ifdef OBJ_ELF
+/* Relocations against Thumb function names must be left unadjusted,
+   so that the linker can use this information to correctly set the
+   bottom bit of their addresses.  The MIPS version of this function
+   also prevents relocations that are mips-16 specific, but I do not
+   know why it does this.
+
+   FIXME:
+   There is one other problem that ought to be addressed here, but
+   which currently is not:  Taking the address of a label (rather
+   than a function) and then later jumping to that address.  Such
+   address also ought to have their bottom bit set (assuming that
+   they reside in Thumb code), but at the moment they will not.  */
+   
 boolean
-arm_fix_adjustable(fixP)
-  fixS *fixP;
+arm_fix_adjustable (fixP)
+   fixS *fixP;
 {
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+  if (THUMB_IS_FUNC (fixP->fx_addsy)
+      && fixP->fx_subsy == NULL)
+    return 0;
+  
   return 1;
 }
+#endif /* OBJ_ELF */
 /* end-sanitize-armelf */
 
 boolean
