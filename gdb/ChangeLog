@@ -1,3 +1,37 @@
+2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf2_objfile_data_key): New.
+	(struct dwarf2_per_objfile, dwarf2_per_objfile): New.
+	(dwarf_info_size, dwarf_abbrev_size, dwarf_line_size)
+	(dwarf_pubnames_size, dwarf_aranges_size, dwarf_loc_size)
+	(dwarf_macinfo_size, dwarf_str_size, dwarf_ranges_size)
+	(dwarf_frame_size, dwarf_eh_frame_size, dwarf_info_buffer)
+	(dwarf_abbrev_buffer, dwarf_line_buffer, dwarf_str_buffer)
+	(dwarf_macinfo_buffer, dwarf_ranges_buffer, dwarf_loc_buffer):
+	Remove variables.
+	(struct dwarf2_pinfo): Remove per-objfile members.  Update comments.
+	(DWARF_ABBREV_SIZE, DWARF_LINE_SIZE)
+	(DWARF_LOC_SIZE, DWARF_MACINFO_SIZE, DWARF_STR_SIZE)
+	(DWARF_RANGES_SIZE, DWARF_INFO_BUFFER)
+	(DWARF_ABBREV_BUFFER, DWARF_LINE_BUFFER, DWARF_STR_BUFFER)
+	(DWARF_MACINFO_BUFFER, DWARF_RANGES_BUFFER, DWARF_LOC_BUFFER):
+	Remove macros.
+	(dwarf2_has_info): Take an objfile argument.  Allocate per-objfile
+	data.
+	(dwarf2_locate_sections, dwarf2_build_psymtabs)
+	(dwarf2_build_psymtabs_easy, dwarf2_build_psymtabs_hard)
+	(skip_one_die, dwarf2_get_pc_bounds, dwarf2_read_abbrevs)
+	(read_partial_die, read_full_die, read_indirect_string)
+	(dwarf_decode_line_header, dwarf_decode_macros)
+	(dwarf2_symbol_mark_computed): Remove use of removed macros.
+	Update uses of removed variables.
+	(psymtab_to_symtab_1): Restore per-objfile data pointer.  Remove use
+	of removed macros.
+	(_initialize_dwarf2_read): New function.
+	* symfile.h (dwarf2_has_info): Update prototype.
+	* coffread.c (coff_symfile_read): Update call to dwarf2_has_info.
+	* elfread.c (elf_symfile_read): Likewise.
+
 2004-04-01  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_dwarf2_stab_reg_to_regnum): New, unified
