@@ -1,3 +1,13 @@
+2004-03-31  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (frame_unwind_id): Declare.
+	* frame.c (frame_unwind_id): New function.
+	(get_prev_frame_1): New function.
+	(frame_debug_got_null_frame): New function.
+	(get_prev_frame): Use frame_debug_got_null_frame.  Move unwind
+	code proper to prev_frame, update description.
+	* infrun.c (step_over_function): Use frame_unwind_id.
+
 2004-04-31  J. Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (hppa32_push_dummy_call): Set the Stack Pointer.
