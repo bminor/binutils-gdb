@@ -1,3 +1,47 @@
+Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* nec4102rom.c : New file implements rom monitor adapter for
+        nec-vr4102 board. This board hosts the vr4111 chip. This file
+        required extenstions to the monitor_ops structure, hooks for wiat
+        filter, new flags. This version does not support more than one
+        breakpoint and resuming after a breakpoint in 16 bit mode is
+        completely disfunctional.  * monitor.h : Defined additional hooks
+        for dmpregs, confinuer_hooks and wait_filter. These additions
+        require that all rom monitor interfaces be recoded to to
+        initializa monitor ops using assignments rather than static
+        structure initialization.  Added new bits to flags
+        MO_EXACT_DUMPADDR, MO_HAS_BLOCKWRITES
+        * monitor.c (RDEBUG): Conditional tracing throughout the file.
+        (fromhex): Now recognized upper cse hex digits
+        (monitor_printf_noecho):
+        (monitor_readchar): Tracing interferes with input timing.
+        (monitor_open): Register different memory write functions with
+        dcache_init if MO_HAS_BLOCKWRITES.
+        (flush_monior_dcache): Added as an additional utilty.
+        (monitor-resume): Call continue hook if one has been supplied.
+        (monitor_wait_filter): New function Factored out of monitor wait
+        and used if alternate wait-filter has not been provided.
+        (monitor_wait): call alternate wait filter if provided.  Call
+        monitor_dump_regs, a new function factored out from inline code.
+        (monitor_dump_block): A new function used as a utility when
+        monitors must dump several blocks of registers using different
+        commands.
+        (monitor_dump_regs): Call alternate function if provided. Uses new
+        hook in monitor.h.
+        (monitor_write_memory): Engage previouly added hook
+        MO_FILL_USES_ADDR.
+        (monitor_write_even_block): new function supports writing long
+        blocks of 4byte words.
+        (longlongendswap): new internal function
+        (monitor_write_memory_longlongs): new function writes large blocks
+        using command to enter a long long.
+        (monitor_write-memory_block): new Function figures out which block
+        mod to use.
+        (monitor_read_memory): Can now handle dump formats in which the bytes 
+        preceeding the requested data is not printed.
+	* monitor.h: Added new fields to the structure
+
+
 Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* Makefile.in (GDBTKLIBS): New macro.
