@@ -244,19 +244,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(pr_sigaction64_t)
   BFD_HAVE_SYS_PROCFS_TYPE(pr_siginfo64_t)
 
-  dnl Check for struct link_map32 type, which allows a 64-bit Solaris
-  dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.
-
-  AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
-    [AC_TRY_COMPILE([#define _SYSCALL32
-#include <sys/link.h>], [struct link_map32 l;],
-     gdb_cv_have_struct_link_map32=yes,
-     gdb_cv_have_struct_link_map32=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
-  if test $gdb_cv_have_struct_link_map32 = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
-  fi
 
   dnl Check for broken prfpregset_t type
 
@@ -299,6 +286,68 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   AC_MSG_RESULT($gdb_cv_have_procfs_piocset)
   if test $gdb_cv_have_procfs_piocset = yes; then
     AC_DEFINE(HAVE_PROCFS_PIOCSET)
+  fi
+fi
+
+dnl For native ports (host == target), check to see what kind of
+dnl legacy link.h support is needed.  (See solib-legacy.c.)
+if test ${host} = ${target} ; then
+  dnl Check for struct link_map with l_ members which are indicative
+  dnl of SVR4-like shared libraries
+
+  AC_MSG_CHECKING(for member l_addr in struct link_map)
+  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_l_members,
+    [AC_TRY_COMPILE([#include <link.h>],
+                    [struct link_map lm; (void) lm.l_addr;],
+                    gdb_cv_have_struct_link_map_with_l_members=yes,
+                    gdb_cv_have_struct_link_map_with_l_members=no)])
+  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_l_members)
+  if test $gdb_cv_have_struct_link_map_with_l_members = yes; then
+    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS)
+  fi
+
+  dnl Check for struct link_map with lm_ members which are indicative
+  dnl of SunOS-like shared libraries
+
+  AC_MSG_CHECKING(for member lm_addr in struct link_map)
+  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_lm_members,
+    [AC_TRY_COMPILE([#include <sys/types.h>
+#include <link.h>],
+                    [struct link_map lm; (void) lm.lm_addr;],
+                    gdb_cv_have_struct_link_map_with_lm_members=yes,
+                    gdb_cv_have_struct_link_map_with_lm_members=no)])
+  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_lm_members)
+  if test $gdb_cv_have_struct_link_map_with_lm_members = yes; then
+    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS)
+  fi
+
+  dnl Check for struct so_map with som_ members which are found on 
+  dnl some *BSD systems.
+
+  AC_MSG_CHECKING(for member som_addr in struct so_map)
+  AC_CACHE_VAL(gdb_cv_have_struct_so_map_with_som_members,
+    [AC_TRY_COMPILE([#include <sys/types.h>
+#include <link.h>],
+                    [struct so_map lm; (void) lm.som_addr;],
+                    gdb_cv_have_struct_so_map_with_som_members=yes,
+                    gdb_cv_have_struct_so_map_with_som_members=no)])
+  AC_MSG_RESULT($gdb_cv_have_struct_so_map_with_som_members)
+  if test $gdb_cv_have_struct_so_map_with_som_members = yes; then
+    AC_DEFINE(HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS)
+  fi
+
+  dnl Check for struct link_map32 type, which allows a 64-bit Solaris
+  dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.
+
+  AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
+  AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
+    [AC_TRY_COMPILE([#define _SYSCALL32
+#include <sys/link.h>], [struct link_map32 l;],
+     gdb_cv_have_struct_link_map32=yes,
+     gdb_cv_have_struct_link_map32=no)])
+  AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
+  if test $gdb_cv_have_struct_link_map32 = yes; then
+    AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
   fi
 fi
 

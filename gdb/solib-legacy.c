@@ -49,7 +49,7 @@ legacy_svr4_fetch_link_map_offsets (void)
     {
       lmp = &lmo;
 
-#ifdef SVR4_SHARED_LIBS
+#ifdef HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS
       lmo.r_debug_size = sizeof (struct r_debug);
 
       lmo.r_map_offset = offsetof (struct r_debug, r_map);
@@ -68,7 +68,8 @@ legacy_svr4_fetch_link_map_offsets (void)
 
       lmo.l_name_offset = offsetof (struct link_map, l_name);
       lmo.l_name_size = fieldsize (struct link_map, l_name);
-#else /* !SVR4_SHARED_LIBS */
+#else /* !defined(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS) */
+#ifdef HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS
       lmo.link_map_size = sizeof (struct link_map);
 
       lmo.l_addr_offset = offsetof (struct link_map, lm_addr);
@@ -79,7 +80,21 @@ legacy_svr4_fetch_link_map_offsets (void)
 
       lmo.l_name_offset = offsetof (struct link_map, lm_name);
       lmo.l_name_size = fieldsize (struct link_map, lm_name);
-#endif /* SVR4_SHARED_LIBS */
+#else /* !defined(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS) */
+#if HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS
+      lmo.link_map_size = sizeof (struct so_map);
+
+      lmo.l_addr_offset = offsetof (struct so_map, som_addr);
+      lmo.l_addr_size = fieldsize (struct so_map, som_addr);
+
+      lmo.l_next_offset = offsetof (struct so_map, som_next);
+      lmo.l_next_size = fieldsize (struct so_map, som_next);
+
+      lmo.l_name_offset = offsetof (struct so_map, som_path);
+      lmo.l_name_size = fieldsize (struct so_map, som_path);
+#endif /* HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS */
+#endif /* HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS */
+#endif /* HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS */
     }
 
 #if defined (HAVE_STRUCT_LINK_MAP32)
