@@ -1,6 +1,5 @@
-/* Rudimentary ECOFF support on MIPS machines. 
-   This lacks symbol information, normally provided on MIPS Unix systems
-   in the files <sym.h> and <symconst.h>.  */
+/* ECOFF support on MIPS machines.
+   coff/ecoff.h must be included before this file.  */
 
 /********************** FILE HEADER **********************/
 
@@ -14,18 +13,14 @@ struct external_filehdr {
   unsigned char f_flags[2];	/* flags			*/
 };
 
-
-/* Mips magic numbers used in filehdr.  MIPS_MAGIC_LITTLE is used on
-   little endian machines.  MIPS_MAGIC_BIG is used on big endian
-   machines.  Where is MIPS_MAGIC_1 from?  */
-#define MIPS_MAGIC_1 0x0180
-#define MIPS_MAGIC_LITTLE 0x0162
-#define MIPS_MAGIC_BIG 0x0160
-
-#define ECOFFBADMAG(x) (((x).f_magic!=MIPS_MAGIC_1) && \
-			((x).f_magic!=MIPS_MAGIC_LITTLE) &&\
-			((x).f_magic!=MIPS_MAGIC_BIG))
-
+/* Magic numbers are defined in coff/ecoff.h.  */
+#define MIPS_ECOFF_BADMAG(x) (((x).f_magic!=MIPS_MAGIC_1) && \
+			      ((x).f_magic!=MIPS_MAGIC_LITTLE) &&\
+			      ((x).f_magic!=MIPS_MAGIC_BIG) && \
+			      ((x).f_magic!=MIPS_MAGIC_LITTLE2) && \
+			      ((x).f_magic!=MIPS_MAGIC_BIG2) && \
+			      ((x).f_magic!=MIPS_MAGIC_LITTLE3) && \
+			      ((x).f_magic!=MIPS_MAGIC_BIG3))
 
 #define	FILHDR	struct external_filehdr
 #define	FILHSZ	20
@@ -53,9 +48,6 @@ typedef struct external_aouthdr
 
 #define AOUTSZ (sizeof(AOUTHDR))
 
-#define OMAGIC		0407	/* not demand paged (ld -N).  */
-#define ZMAGIC          0413    /* demand load format, eg normal ld output */
-
 /********************** SECTION HEADER **********************/
 
 struct external_scnhdr {
@@ -73,35 +65,6 @@ struct external_scnhdr {
 
 #define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
-
-/*
- * names of "special" sections
- */
-#define _TEXT   ".text"
-#define _DATA   ".data"
-#define _BSS    ".bss"
-#define _RDATA	".rdata"
-#define _SDATA	".sdata"
-#define _SBSS	".sbss"
-#define _LIT4	".lit4"
-#define _LIT8	".lit8"
-#define _LIB	".lib"
-
-#define DEFAULT_DATA_SECTION_ALIGNMENT 4
-#define DEFAULT_BSS_SECTION_ALIGNMENT 4
-#define DEFAULT_TEXT_SECTION_ALIGNMENT 16
-/* For new sections we havn't heard of before */
-#define DEFAULT_SECTION_ALIGNMENT 4
-
-/* MIPS ECOFF uses some additional section types.  */
-#define STYP_RDATA 0x100
-#define STYP_SDATA 0x200
-#define STYP_SBSS 0x400
-#define STYP_LIT8 0x8000000
-#define STYP_LIT4 0x10000000
-
-/* I don't know when this is used.  */
-#define STYP_OTHER_LOAD 0x80000000
 
 /********************** RELOCATION DIRECTIVES **********************/
 
@@ -133,54 +96,249 @@ struct external_reloc {
 #define RELOC_BITS3_EXTERN_BIG			0x01
 #define RELOC_BITS3_EXTERN_LITTLE		0x80
 
-/* We store the extern field in the r_offset field of a struct
-   internal_reloc.  FIXME: Do this more sensibly.  */
-#define r_extern r_offset
+/* The r_type field in a reloc is one of the following values.  I
+   don't know if any other values can appear.  These seem to be all
+   that occur in the Ultrix 4.2 libraries.  */
+#define MIPS_R_IGNORE	0
+#define MIPS_R_REFHALF	1
+#define MIPS_R_REFWORD	2
+#define MIPS_R_JMPADDR	3
+#define MIPS_R_REFHI	4
+#define MIPS_R_REFLO	5
+#define MIPS_R_GPREL	6
+#define MIPS_R_LITERAL	7
 
-/* If the extern bit is 1, then r_symndx is an index into the external
-   symbol table.  If the extern bit is 0, then r_symndx indicates a
-   section, and is one of the following values.  */
-#define RELOC_SECTION_TEXT	1
-#define RELOC_SECTION_RDATA	2
-#define RELOC_SECTION_DATA	3
-#define RELOC_SECTION_SDATA	4
-#define RELOC_SECTION_SBSS	5
-#define RELOC_SECTION_BSS	6
-#define RELOC_SECTION_INIT	7
-#define RELOC_SECTION_LIT8	8
-#define RELOC_SECTION_LIT4	9
+/* This reloc type is a Cygnus extension used when generating position
+   independent code for embedded systems.  */
+#define MIPS_R_PCREL16	8
 
-/* The r_type field is one of the following values.  I don't know if
-   any other values can appear.  These seem to be all that occur in
-   the Ultrix 4.2 libraries.  */
-#define ECOFF_R_IGNORE	0
-#define ECOFF_R_REFHALF	1
-#define ECOFF_R_REFWORD	2
-#define ECOFF_R_JMPADDR	3
-#define ECOFF_R_REFHI	4
-#define ECOFF_R_REFLO	5
-#define ECOFF_R_GPREL	6
-#define ECOFF_R_LITERAL	7
+/* This reloc type is a Cygnus extension used when generating position
+   independent code for embedded systems.  It is used for an entry in
+   a switch table, which looks like this:
+     .switch $L3-$LS12
+   The object file will contain the correct difference, and does not
+   require adjustment.  However, when the linker is relaxing PC
+   relative calls, it is possible for $L3 to move farther away.  This
+   reloc always appears in the .text section, and is always against
+   the .text section.  However, the symbol index is not
+   RELOC_SECTION_TEXT.  It is, instead, the distance between this
+   switch table entry and $LS12.  Thus, the original value of $L12 is
+     vaddr - symndx
+   and the original value of $L3 is
+     vaddr - symndx + addend
+   where addend is the value in the object file.  Knowing this, the
+   linker can know whether the addend in the object file must be
+   adjusted.  */
+#define MIPS_R_SWITCH	9
 
 /********************** STABS **********************/
 
-/* gcc uses mips-tfile to output type information in special stabs
-   entries.  These must match the corresponding definition in
-   gcc/config/mips.h.  At some point, these should probably go into a
-   shared include file, but currently gcc and gdb do not share any
-   directories. */
-#define CODE_MASK 0x8F300
-#define MIPS_IS_STAB(sym) (((sym)->index & 0xFFF00) == CODE_MASK)
-#define MIPS_MARK_STAB(code) ((code)+CODE_MASK)
-#define MIPS_UNMARK_STAB(code) ((code)-CODE_MASK)
-#define STABS_SYMBOL "@stabs"
+#define MIPS_IS_STAB ECOFF_IS_STAB
+#define MIPS_MARK_STAB ECOFF_MARK_STAB
+#define MIPS_UNMARK_STAB ECOFF_UNMARK_STAB
 
-/********************** COFF **********************/
+#define DEFAULT_DATA_SECTION_ALIGNMENT 4
+#define DEFAULT_BSS_SECTION_ALIGNMENT 4
+#define DEFAULT_TEXT_SECTION_ALIGNMENT 16
+/* For new sections we havn't heard of before */
+#define DEFAULT_SECTION_ALIGNMENT 4
 
-/* gcc also uses mips-tfile to output COFF debugging information.
-   These are the values it uses when outputting the .type directive.
-   These should also be in a shared include file.  */
-#define N_BTMASK	(017)
-#define N_TMASK		(060)
-#define N_BTSHFT	(4)
-#define N_TSHIFT	(2)
+/********************** SYMBOLIC INFORMATION **********************/
+
+/* Written by John Gilmore.  */
+
+/* ECOFF uses COFF-like section structures, but its own symbol format.
+   This file defines the symbol format in fields whose size and alignment
+   will not vary on different host systems.  */
+
+/* File header as a set of bytes */
+
+struct hdr_ext {
+	unsigned char 	h_magic[2];
+	unsigned char	h_vstamp[2];
+	unsigned char	h_ilineMax[4];
+	unsigned char	h_cbLine[4];
+	unsigned char	h_cbLineOffset[4];
+	unsigned char	h_idnMax[4];
+	unsigned char	h_cbDnOffset[4];
+	unsigned char	h_ipdMax[4];
+	unsigned char	h_cbPdOffset[4];
+	unsigned char	h_isymMax[4];
+	unsigned char	h_cbSymOffset[4];
+	unsigned char	h_ioptMax[4];
+	unsigned char	h_cbOptOffset[4];
+	unsigned char	h_iauxMax[4];
+	unsigned char	h_cbAuxOffset[4];
+	unsigned char	h_issMax[4];
+	unsigned char	h_cbSsOffset[4];
+	unsigned char	h_issExtMax[4];
+	unsigned char	h_cbSsExtOffset[4];
+	unsigned char	h_ifdMax[4];
+	unsigned char	h_cbFdOffset[4];
+	unsigned char	h_crfd[4];
+	unsigned char	h_cbRfdOffset[4];
+	unsigned char	h_iextMax[4];
+	unsigned char	h_cbExtOffset[4];
+};
+
+/* File descriptor external record */
+
+struct fdr_ext {
+	unsigned char	f_adr[4];
+	unsigned char	f_rss[4];
+	unsigned char	f_issBase[4];
+	unsigned char	f_cbSs[4];
+	unsigned char	f_isymBase[4];
+	unsigned char	f_csym[4];
+	unsigned char	f_ilineBase[4];
+	unsigned char	f_cline[4];
+	unsigned char	f_ioptBase[4];
+	unsigned char	f_copt[4];
+	unsigned char	f_ipdFirst[2];
+	unsigned char	f_cpd[2];
+	unsigned char	f_iauxBase[4];
+	unsigned char	f_caux[4];
+	unsigned char	f_rfdBase[4];
+	unsigned char	f_crfd[4];
+	unsigned char	f_bits1[1];
+	unsigned char	f_bits2[3];
+	unsigned char	f_cbLineOffset[4];
+	unsigned char	f_cbLine[4];
+};
+
+#define	FDR_BITS1_LANG_BIG		0xF8
+#define	FDR_BITS1_LANG_SH_BIG		3
+#define	FDR_BITS1_LANG_LITTLE		0x1F
+#define	FDR_BITS1_LANG_SH_LITTLE	0
+
+#define	FDR_BITS1_FMERGE_BIG		0x04
+#define	FDR_BITS1_FMERGE_LITTLE		0x20
+
+#define	FDR_BITS1_FREADIN_BIG		0x02
+#define	FDR_BITS1_FREADIN_LITTLE	0x40
+
+#define	FDR_BITS1_FBIGENDIAN_BIG	0x01
+#define	FDR_BITS1_FBIGENDIAN_LITTLE	0x80
+
+#define	FDR_BITS2_GLEVEL_BIG		0xC0
+#define	FDR_BITS2_GLEVEL_SH_BIG		6
+#define	FDR_BITS2_GLEVEL_LITTLE		0x03
+#define	FDR_BITS2_GLEVEL_SH_LITTLE	0
+
+/* We ignore the `reserved' field in bits2. */
+
+/* Procedure descriptor external record */
+
+struct pdr_ext {
+	unsigned char	p_adr[4];
+	unsigned char	p_isym[4];
+	unsigned char	p_iline[4];
+	unsigned char	p_regmask[4];
+	unsigned char	p_regoffset[4];
+	unsigned char	p_iopt[4];
+	unsigned char	p_fregmask[4];
+	unsigned char	p_fregoffset[4];
+	unsigned char	p_frameoffset[4];
+	unsigned char	p_framereg[2];
+	unsigned char	p_pcreg[2];
+	unsigned char	p_lnLow[4];
+	unsigned char	p_lnHigh[4];
+	unsigned char	p_cbLineOffset[4];
+};
+
+/* Line numbers */
+
+struct line_ext {
+	unsigned char	l_line[4];
+};
+
+/* Symbol external record */
+
+struct sym_ext {
+	unsigned char	s_iss[4];
+	unsigned char	s_value[4];
+	unsigned char	s_bits1[1];
+	unsigned char	s_bits2[1];
+	unsigned char	s_bits3[1];
+	unsigned char	s_bits4[1];
+};
+
+#define	SYM_BITS1_ST_BIG		0xFC
+#define	SYM_BITS1_ST_SH_BIG		2
+#define	SYM_BITS1_ST_LITTLE		0x3F
+#define	SYM_BITS1_ST_SH_LITTLE		0
+
+#define	SYM_BITS1_SC_BIG		0x03
+#define	SYM_BITS1_SC_SH_LEFT_BIG	3
+#define	SYM_BITS1_SC_LITTLE		0xC0
+#define	SYM_BITS1_SC_SH_LITTLE		6
+
+#define	SYM_BITS2_SC_BIG		0xE0
+#define	SYM_BITS2_SC_SH_BIG		5
+#define	SYM_BITS2_SC_LITTLE		0x07
+#define	SYM_BITS2_SC_SH_LEFT_LITTLE	2
+
+#define	SYM_BITS2_RESERVED_BIG		0x10
+#define	SYM_BITS2_RESERVED_LITTLE	0x08
+
+#define	SYM_BITS2_INDEX_BIG		0x0F
+#define	SYM_BITS2_INDEX_SH_LEFT_BIG	16
+#define	SYM_BITS2_INDEX_LITTLE		0xF0
+#define	SYM_BITS2_INDEX_SH_LITTLE	4
+
+#define	SYM_BITS3_INDEX_SH_LEFT_BIG	8
+#define	SYM_BITS3_INDEX_SH_LEFT_LITTLE	4
+
+#define	SYM_BITS4_INDEX_SH_LEFT_BIG	0
+#define	SYM_BITS4_INDEX_SH_LEFT_LITTLE	12
+
+/* External symbol external record */
+
+struct ext_ext {
+	unsigned char	es_bits1[1];
+	unsigned char	es_bits2[1];
+	unsigned char	es_ifd[2];
+	struct	sym_ext es_asym;
+};
+
+#define	EXT_BITS1_JMPTBL_BIG		0x80
+#define	EXT_BITS1_JMPTBL_LITTLE		0x01
+
+#define	EXT_BITS1_COBOL_MAIN_BIG	0x40
+#define	EXT_BITS1_COBOL_MAIN_LITTLE	0x02
+
+#define	EXT_BITS1_WEAKEXT_BIG		0x20
+#define	EXT_BITS1_WEAKEXT_LITTLE	0x04
+
+/* Dense numbers external record */
+
+struct dnr_ext {
+	unsigned char	d_rfd[4];
+	unsigned char	d_index[4];
+};
+
+/* Relative file descriptor */
+
+struct rfd_ext {
+  unsigned char	rfd[4];
+};
+
+/* Optimizer symbol external record */
+
+struct opt_ext {
+  unsigned char o_bits1[1];
+  unsigned char o_bits2[1];
+  unsigned char o_bits3[1];
+  unsigned char o_bits4[1];
+  struct rndx_ext o_rndx;
+  unsigned char o_offset[4];
+};
+
+#define OPT_BITS2_VALUE_SH_LEFT_BIG	16
+#define OPT_BITS2_VALUE_SH_LEFT_LITTLE	0
+
+#define OPT_BITS3_VALUE_SH_LEFT_BIG	8
+#define OPT_BITS3_VALUE_SH_LEFT_LITTLE	8
+
+#define OPT_BITS4_VALUE_SH_LEFT_BIG	0
+#define OPT_BITS4_VALUE_SH_LEFT_LITTLE	16

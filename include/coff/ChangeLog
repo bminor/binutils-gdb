@@ -1,3 +1,7 @@
+Thu Apr  7 14:19:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (MIPS_R_SWITCH): Define.
+
 Thu Mar 31 19:28:33 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* internal.h (internal_aouthdr): Added comments for Apollo fields.
