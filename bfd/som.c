@@ -1523,7 +1523,12 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
             bfd_set_error (bfd_error_no_memory);
             return NULL;
           }
-	  *final_types[0] = R_FSEL;
+	  if (field == e_fsel)
+	    *final_types[0] = R_FSEL;
+	  else if (field == e_rsel)
+	    *final_types[0] = R_RSEL;
+	  else if (field == e_lsel)
+	    *final_types[0] = R_LSEL;
 	  *final_types[1] = R_COMP2;
 	  *final_types[2] = R_COMP2;
 	  *final_types[3] = R_COMP1;
@@ -1576,7 +1581,12 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff)
             bfd_set_error (bfd_error_no_memory);
             return NULL;
           }
-	  *final_types[1] = R_FSEL;
+	  if (field == e_fsel)
+	    *final_types[0] = R_FSEL;
+	  else if (field == e_rsel)
+	    *final_types[0] = R_RSEL;
+	  else if (field == e_lsel)
+	    *final_types[0] = R_LSEL;
 	  *final_types[1] = R_COMP2;
 	  *final_types[2] = R_COMP2;
 	  *final_types[3] = R_COMP1;
@@ -4605,8 +4615,8 @@ som_get_reloc_upper_bound (abfd, asect)
   if (asect->flags & SEC_RELOC)
     {
       if (! som_slurp_reloc_table (abfd, asect, NULL, true))
-	return false;
-      return (asect->reloc_count + 1) * sizeof (arelent);
+	return -1;
+      return (asect->reloc_count + 1) * sizeof (arelent *);
     }
   /* There are no relocations.  */
   return 0;
@@ -4998,7 +5008,9 @@ som_decode_symclass (symbol)
   if (!(symbol->flags & (BSF_GLOBAL|BSF_LOCAL)))
     return '?';
 
-  if (bfd_is_abs_section (symbol->section))
+  if (bfd_is_abs_section (symbol->section)
+      || (som_symbol_data (symbol) != NULL
+	  && som_symbol_data (symbol)->som_type == SYMBOL_TYPE_ABSOLUTE))
     c = 'a';
   else if (symbol->section)
     c = som_section_type (symbol->section->name);

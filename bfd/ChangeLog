@@ -1,3 +1,21 @@
+Mon Aug  7 14:51:08 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_decode_symclass): Handle absolute symbols by checking
+	the SOM type (since they will rarely if ever be in the absolute
+	section).
+
+Wed Aug  6 09:12:50 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* archures.c (bfd_mach_sparc, bfd_mach_sparc64): Define.
+	* bfd-in2.h: Regenerated.
+	* cpu-sparc.c (sparc_arch_info): Renamed from arch_info_struct.
+	(sparc64_arch_info): New static variable.
+	(bfd_sparc_arch): Link in sparc64_arch_info.
+	* elf64-sparc.c (sparc64_elf_xxx): Renamed from elf64_xxx.
+	(sparc64_elf_object_p): New static function.
+	(elf_backend_object_p): Define.
+	* config/sparc64-elf.mt (SELECT_VECS): Add bfd_elf32_sparc_vec.
+
 Sat Aug  5 00:04:08 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som (som_get_reloc_upper_bound): Return -1 on error.  Compute
