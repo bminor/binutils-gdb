@@ -28,8 +28,8 @@ extern int remque();
 /* The data cache records all the data read from the remote machine
    since the last time it stopped.
 
-   Each cache block holds line_size bytes of data
-   starting at a multiple-of-line_size address.  */
+   Each cache block holds LINE_SIZE bytes of data
+   starting at a multiple-of-LINE_SIZE address.  */
 
 #define LINE_SIZE_MASK ((LINE_SIZE - 1))	/* eg 7*2+1= 111*/
 #define XFORM(x)  (((x) & LINE_SIZE_MASK) >> 2)
@@ -88,8 +88,9 @@ dcache_value (db, addr)
    and return its address.  The caller should store into the block
    the address and data that it describes, then remque it from the
    free list and insert it into the valid list.  This procedure
-   prevents errors from creeping in if a ninMemGet is interrupted
-   (which used to put garbage blocks in the valid list...).  */
+   prevents errors from creeping in if a memory retrieval is
+   interrupted (which used to put garbage blocks in the valid
+   list...).  */
 struct dcache_block *
 dcache_alloc (dcache)
      DCACHE *dcache;
