@@ -1,5 +1,9 @@
 2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.threads/killed.exp: Use gdb_run_cmd.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/gcore.exp: Issue an UNSUPPORTED and exit if we can't
 	create a core file.
 	* gdb.threads/gcore-thread.exp: Likewise.
