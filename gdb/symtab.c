@@ -1684,7 +1684,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   struct symtab_and_line val;
 #endif
   register char *p, *p1;
-  char *q, *q1;
+  char *q, *q1, *pp;
   register struct symtab *s;
 
   register struct symbol *sym;
@@ -1696,7 +1696,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   char *copy;
   struct symbol *sym_class;
   int i1;
-  int is_quoted;
+  int is_quoted, has_parens;
   struct symbol **sym_arr;
   struct type *t;
   char *saved_arg = *argptr;
@@ -1731,19 +1731,31 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
 
   s = NULL;
-  is_quoted = (strchr (gdb_completer_quote_characters, **argptr) != NULL);
+  is_quoted = (strchr(gdb_completer_quote_characters, **argptr) != NULL);
+  has_parens = (( pp = strchr(*argptr, '(')) != NULL  &&
+		 (pp = strchr(pp, ')')) != NULL);
 
   for (p = *argptr; *p; p++)
     {
+      if (p[0] == '<') 
+	{
+	  while(!++p && *p != '>');
+	  if (!p)
+	    {
+	      warning("non-matching '<' and '>' in command");
+	      return_to_top_level (RETURN_ERROR);
+	    }
+	}
       if (p[0] == ':' || p[0] == ' ' || p[0] == '\t')
 	break;
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
 
-  if ((p[0] == ':') && !is_quoted)
+  if ((p[0] == ':') && !has_parens)
     {
 
       /*  C++  */
+      if (is_quoted) *argptr = *argptr+1;
       if (p[1] ==':')
 	{
 	  /* Extract the class name.  */
@@ -1985,9 +1997,16 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
 
-  p = skip_quoted (*argptr);
-  if (is_quoted && p[-1] != '\'')
-    error ("Unmatched single quote.");
+  if (is_quoted)
+    {
+      p = skip_quoted (*argptr);
+      if (p[-1] != '\'')
+        error ("Unmatched single quote.");
+    }
+  else if (has_parens)
+    {
+      p = pp+1;
+    }
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';

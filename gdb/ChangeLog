@@ -1,3 +1,9 @@
+Fri Nov 19 11:00:33 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* symtab.c(decode_line_1): fix the inconsistency of setting
+	breakpoint with '' or without them. The '' is needed when you
+	want name completion.
+
 Thu Nov 18 08:25:50 1993  Fred Fish  (fnf@cygnus.com)
 
 	* valprint.c (val_print_string):  When looking for a null
