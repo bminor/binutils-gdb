@@ -1137,15 +1137,6 @@ extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int beli
 #define BELIEVE_PCC_PROMOTION (gdbarch_believe_pcc_promotion (current_gdbarch))
 #endif
 
-extern int gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch);
-extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int believe_pcc_promotion_type);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (BELIEVE_PCC_PROMOTION_TYPE)
-#error "Non multi-arch definition of BELIEVE_PCC_PROMOTION_TYPE"
-#endif
-#if !defined (BELIEVE_PCC_PROMOTION_TYPE)
-#define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
-#endif
-
 #if defined (DEPRECATED_GET_SAVED_REGISTER)
 /* Legacy for systems yet to multi-arch DEPRECATED_GET_SAVED_REGISTER */
 #if !defined (DEPRECATED_GET_SAVED_REGISTER_P)

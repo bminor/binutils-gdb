@@ -564,7 +564,6 @@ F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, COR
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
-v::BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
 F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 # For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.

@@ -1,5 +1,12 @@
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (BELIEVE_PCC_PROMOTION_TYPE): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* stabsread.c (define_symbol): Delete BELIEVE_PCC_PROMOTION_TYPE
+	code.
+
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb-events.sh (selected_thread_changed)
 	(selected_frame_level_changed, target_changed): Delete.
 	* gdb-events.h, gdb-events.c: Re-generate.

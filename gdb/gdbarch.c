@@ -182,7 +182,6 @@ struct gdbarch
   gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
-  int believe_pcc_promotion_type;
   gdbarch_deprecated_get_saved_register_ftype *deprecated_get_saved_register;
   gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible;
   gdbarch_deprecated_register_convert_to_virtual_ftype *deprecated_register_convert_to_virtual;
@@ -347,7 +346,6 @@ struct gdbarch startup_gdbarch =
   deprecated_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
   0,  /* deprecated_init_frame_pc */
   0,  /* believe_pcc_promotion */
-  0,  /* believe_pcc_promotion_type */
   0,  /* deprecated_get_saved_register */
   0,  /* deprecated_register_convertible */
   0,  /* deprecated_register_convert_to_virtual */
@@ -861,14 +859,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: BELIEVE_PCC_PROMOTION = %d\n",
                       BELIEVE_PCC_PROMOTION);
-#endif
-#ifdef BELIEVE_PCC_PROMOTION_TYPE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: BELIEVE_PCC_PROMOTION_TYPE # %s\n",
-                      XSTRING (BELIEVE_PCC_PROMOTION_TYPE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: BELIEVE_PCC_PROMOTION_TYPE = %d\n",
-                      BELIEVE_PCC_PROMOTION_TYPE);
 #endif
 #ifdef BREAKPOINT_FROM_PC
   fprintf_unfiltered (file,
@@ -3787,22 +3777,6 @@ set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch,
                                    int believe_pcc_promotion)
 {
   gdbarch->believe_pcc_promotion = believe_pcc_promotion;
-}
-
-int
-gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_believe_pcc_promotion_type called\n");
-  return gdbarch->believe_pcc_promotion_type;
-}
-
-void
-set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
-                                        int believe_pcc_promotion_type)
-{
-  gdbarch->believe_pcc_promotion_type = believe_pcc_promotion_type;
 }
 
 int
