@@ -1,3 +1,8 @@
+2004-01-28  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (add_partial_structure): Use demangled name if
+	namespace equals "".
+
 2004-01-27  Jim Blandy  <jimb@redhat.com>
 
 	Clean up misapplied patch:

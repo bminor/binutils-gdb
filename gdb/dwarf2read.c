@@ -1661,12 +1661,12 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
   char *actual_class_name = NULL;
 
   if (cu->language == language_cplus
-      && namespace == NULL
+      && (namespace == NULL || namespace[0] == '\0')
       && struct_pdi->name != NULL
       && struct_pdi->has_children)
     {
-      /* We don't have namespace debugging information, so see if we
-	 can figure out if this structure lives in a namespace.  Look
+      /* See if we can figure out if the class lives in a namespace
+	 (or is nested within another class.)  We do this by looking
 	 for a member function; its demangled name will contain
 	 namespace info, if there is any.  */
 
@@ -1675,6 +1675,21 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 	 frequently doesn't give the same name as the debug info.  We
 	 could fix this by only using the demangled name to get the
 	 prefix (but see comment in read_structure_scope).  */
+
+      /* FIXME: carlton/2004-01-23: If NAMESPACE equals "", we have
+	 the appropriate debug information, so it would be nice to be
+	 able to avoid this hack.  But NAMESPACE may not be the
+	 namespace where this class was defined: NAMESPACE reflects
+	 where STRUCT_PDI occurs in the tree of dies, but because of
+	 DW_AT_specification, that may not actually tell us where the
+	 class is defined.  (See the comment in read_func_scope for an
+	 example of how this could occur.)
+
+         Unfortunately, our current partial symtab data structures are
+         completely unable to deal with DW_AT_specification.  So, for
+         now, the best thing to do is to get nesting information from
+         places other than the tree structure of dies if there's any
+         chance that a DW_AT_specification is involved. :-( */
 
       char *next_child = info_ptr;
 
