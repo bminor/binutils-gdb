@@ -1433,6 +1433,12 @@ void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
 
+asection *bfd_get_section_by_name_if
+   (bfd *abfd,
+    const char *name,
+    bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+    void *obj);
+
 char *bfd_get_unique_section_name
    (bfd *abfd, const char *templat, int *count);
 

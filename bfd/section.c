@@ -801,6 +801,57 @@ bfd_get_section_by_name (bfd *abfd, const char *name)
 
 /*
 FUNCTION
+	bfd_get_section_by_name_if
+
+SYNOPSIS
+	asection *bfd_get_section_by_name_if
+	  (bfd *abfd,
+	   const char *name,
+	   bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+	   void *obj);
+
+DESCRIPTION
+	Call the provided function @var{func} for each section
+	attached to the BFD @var{abfd} whose name matches @var{name},
+	passing @var{obj} as an argument. The function will be called
+	as if by
+
+|	func (abfd, the_section, obj);
+
+	It returns the first section for which @var{func} returns true,
+	otherwise <<NULL>>.
+
+*/
+
+asection *
+bfd_get_section_by_name_if (bfd *abfd, const char *name,
+			    bfd_boolean (*operation) (bfd *,
+						      asection *,
+						      void *),
+			    void *user_storage)
+{
+  struct section_hash_entry *sh;
+  unsigned long hash;
+
+  sh = section_hash_lookup (&abfd->section_htab, name, FALSE, FALSE);
+  if (sh == NULL)
+    return NULL;
+
+  hash = sh->root.hash;
+  do
+    {
+      if ((*operation) (abfd, &sh->section, user_storage))
+	return &sh->section;
+      sh = (struct section_hash_entry *) sh->root.next;
+    }
+  while (sh != NULL && sh->root.hash == hash
+	 && strcmp (sh->root.string, name) == 0);
+
+  return NULL;
+}
+
+/*
+FUNCTION
 	bfd_get_unique_section_name
 
 SYNOPSIS
