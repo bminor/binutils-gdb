@@ -118,6 +118,7 @@ cgen_keyword_add (kt, ke)
      CGEN_KEYWORD_ENTRY *ke;
 {
   unsigned int hash;
+  size_t i;
 
   if (kt->name_hash_table == NULL)
     build_keyword_hash_tables (kt);
@@ -132,6 +133,21 @@ cgen_keyword_add (kt, ke)
 
   if (ke->name[0] == 0)
     kt->null_entry = ke;
+
+  for (i = 0; i < strlen (ke->name); i++)
+    if (! isalnum ((unsigned char) ke->name[i])
+	&& ! strchr (kt->nonalpha_chars, ke->name[i]))
+      {
+	size_t idx = strlen (kt->nonalpha_chars);
+	
+	/* If you hit this limit, please don't just
+	   increase the size of the field, instead
+	   look for a better algorithm.  */
+	if (idx >= sizeof (kt->nonalpha_chars) - 1)
+	  abort ();
+	kt->nonalpha_chars[idx] = ke->name[i];
+	kt->nonalpha_chars[idx+1] = 0;
+      }
 }
 
 /* FIXME: Need function to return count of keywords.  */

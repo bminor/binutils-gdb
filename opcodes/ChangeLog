@@ -1,3 +1,11 @@
+2001-06-14  Geoffrey Keating  <geoffk@redhat.com>
+
+	* cgen-asm.c (cgen_parse_keyword): When looking for the
+	boundaries of a keyword, allow any special characters
+	that are actually in one of the allowed keyword.
+	* cgen-opc.c (cgen_keyword_add): Add any special characters
+	to the nonalpha_chars field.
+
 2001-06-12  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* s390-opc.c: Add lgh instruction.

@@ -207,17 +207,16 @@ cgen_parse_keyword (cd, strp, keyword_table, valuep)
   char buf[256];
   const char *p,*start;
 
+  if (keyword_table->name_hash_table == NULL)
+    (void) cgen_keyword_search_init (keyword_table, NULL);
+
   p = start = *strp;
 
-  /* Allow any first character.
-     Note that this allows recognizing ",a" for the annul flag in sparc
-     even though "," is subsequently not a valid keyword char.  */
-  if (*p)
-    ++p;
-
-  /* Now allow letters, digits, and _.  */
+  /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
-	 && (isalnum ((unsigned char) *p) || *p == '_'))
+	 && *p
+	 && (isalnum ((unsigned char) *p) 
+	     || strchr (keyword_table->nonalpha_chars, *p)))
     ++p;
 
   if (p - start >= (int) sizeof (buf))
