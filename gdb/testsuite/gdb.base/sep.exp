@@ -40,7 +40,7 @@ gdb_test "list sep.c:1" ".*" "dummy command to set the current source file"
 get_debug_format
 
 # We need to restart the debugger, because the method used to compute
-# the debug format used (above) affects this testcase.
+# the debug format (above) affects this testcase.
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir

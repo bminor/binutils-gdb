@@ -1,5 +1,9 @@
 2004-04-12  J. Brobecker  <brobecker@gnat.com>
 
+	* gdb.base/sep.exp: Fix typo in comment.
+
+2004-04-12  J. Brobecker  <brobecker@gnat.com>
+
 	* gdb.base/sep.c: New file.
 	* gdb.base/sep-proc.c: New file.
 	* gdb.base/sep.exp: New testcase.
