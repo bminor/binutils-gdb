@@ -190,7 +190,6 @@ main(argc, argv)
   int		 show_version;
 
   bfd_init();
-  verbose = 1;
   show_version = 0;
 #ifdef GNU960
   check_v960( argc, argv );
