@@ -28,6 +28,7 @@ README
 a29k.sc
 aout.sc
 ebmon29k.sc
+elf.sc
 h8300.sc
 h8500.sc
 hppaosf.sc
@@ -50,4 +51,3 @@ Things-to-lose:
 # done.
 
 Do-last:
-
