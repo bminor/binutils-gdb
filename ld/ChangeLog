@@ -1,3 +1,7 @@
+1999-07-02  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldlang.c: Revert change of 1999-06-23.
+
 1999-06-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32bmipn32.o.
