@@ -1,5 +1,9 @@
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* configure.tgt (mips*-dec-netbsd*): Delete alias for
+	mips*el-*-netbsd*.
+	(sparc64-*-netbsd*): Add elf32_sparc to targ_extra_emuls.
+
 	* configure.tgt (arm-*-netbsdelf*): Add target.
 	(arm-*-netbsd*): Add armelf and armelf_nbsd to targ_extra_emuls.
 	* emulparams/armelf_nbsd.sh: Added.
