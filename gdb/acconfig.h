@@ -156,12 +156,6 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
-/* BFD's default architecture. */
-#undef DEFAULT_BFD_ARCH
-
-/* BFD's default target vector. */
-#undef DEFAULT_BFD_VEC
-
 /* Multi-arch enabled. */
 #undef GDB_MULTI_ARCH
 

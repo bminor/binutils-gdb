@@ -169,12 +169,6 @@
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
 
-/* BFD's default architecture. */
-#undef DEFAULT_BFD_ARCH
-
-/* BFD's default target vector. */
-#undef DEFAULT_BFD_VEC
-
 /* Multi-arch enabled. */
 #undef GDB_MULTI_ARCH
 
@@ -420,6 +414,12 @@
 
 /* Name of this package.  */
 #undef PACKAGE
+
+/* Define to BFD's default architecture.  */
+#undef DEFAULT_BFD_ARCH
+
+/* Define to BFD's default target vector.  */
+#undef DEFAULT_BFD_VEC
 
 /* Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
    Solaris 2.[78] when using GCC.  */

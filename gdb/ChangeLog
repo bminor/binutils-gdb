@@ -1,3 +1,10 @@
+2003-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* acconfig.h (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Remove.
+	* configure.in: Cleanup section that sources GDB and BFD configure
+	subscripts.  Remove evil changequotes here.
+	* config.in, configure: Regenerated.
+
 2003-01-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c: Use get_frame_pc and deprecated_update_frame_pc_hack
