@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989, 93-98, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93-98, 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -1293,6 +1293,10 @@ md_apply_fix (fixP, valueP)
       abort ();
 #endif
 
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      return 1;
+
     default:
       {
 	const struct alpha_operand *operand;
@@ -1462,6 +1466,8 @@ alpha_force_relocation (f)
     case BFD_RELOC_ALPHA_USER_GPRELHIGH:
     case BFD_RELOC_ALPHA_USER_GPRELLOW:
 #endif
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
       return 1;
 
     case BFD_RELOC_23_PCREL_S2:
@@ -1521,6 +1527,8 @@ alpha_fix_adjustable (f)
     case BFD_RELOC_ALPHA_USER_GPRELHIGH:
     case BFD_RELOC_ALPHA_USER_GPRELLOW:
 #endif
+    case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_VTABLE_INHERIT:
       return 0;
 
     case BFD_RELOC_GPREL32:

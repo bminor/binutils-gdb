@@ -1,3 +1,10 @@
+2001-01-03  Philip Blundell  <pb@futuretv.com>
+
+	* config/tc-alpha.c (alpha_force_relocation): Handle vtable
+	relocs.
+	(alpha_fix_adjustable): Likewise.
+	(md_apply_fix): Likewise.
+
 2000-12-31  H.J. Lu  <hjl@gnu.org>
 
 	* listing.c (listing_message): Allocate string only if it is
