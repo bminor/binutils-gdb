@@ -1,3 +1,7 @@
+Tue Sep  9 11:20:35 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* nltvals.def: Regenerate.
+
 Tue Sep  9 02:10:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (DP_FRACHIGH2): Define LL using SIGNED64.
