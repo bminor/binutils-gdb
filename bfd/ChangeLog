@@ -1,3 +1,8 @@
+2000-06-30  DJ Delorie  <dj@cygnus.com>
+	
+	* peicode.h (coff_swap_filehdr_in): can't use e_magic because we
+ 	can't assume the PE header is at 0x80.
+
 2000-06-29  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Use IS_ABSOLUTE_PATH.
