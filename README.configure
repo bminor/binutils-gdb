@@ -3,7 +3,7 @@
 			K. Richard Pixley
 			Cygnus Support
 
-		 Last Mod Fri Aug 23 14:44:19 PDT 1991, by rich@cygint.cygnus.com
+		 Last Mod Tue Oct 1 21:20:21 PDT 1991, by rich@cygnus.com
 
 INTRO
 -----
@@ -524,11 +524,11 @@ directory.
   existed, it will be overwritten.
 
 * "./configure +subdirs hostname +target=targetname" creates a
-  subdirectories Host-hostname and Host-hostname/Target-targetname and
-  configures Host-hostname/Target-targetname.  For now, makes should
-  be done from Host-hostname/Target-targetname.  "./configure +sub name"
-  works as expected.  That is, it creates Host-name and
-  Host-name/Target-name and configures the latter.
+  subdirectories H-hostname and H-hostname/T-targetname and
+  configures H-hostname/T-targetname.  For now, makes should
+  be done from H-hostname/T-targetname.  "./configure +sub name"
+  works as expected.  That is, it creates H-name and
+  H-name/T-name and configures the latter.
 
 
 Hacking configurations:
