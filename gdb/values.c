@@ -233,10 +233,11 @@ record_latest_value (val)
 
   /* Check error now if about to store an invalid float.  We return -1
      to the caller, but allow them to continue, e.g. to print it as "Nan". */
-  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FLT) {
-    (void) unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &i);
-    if (i) return -1;		/* Indicate value not saved in history */
-  }
+  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FLT)
+    {
+      unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &i);
+      if (i) return -1;		/* Indicate value not saved in history */
+    }
 
   /* Here we treat value_history_count as origin-zero
      and applying to the value being stored now.  */
@@ -247,7 +248,7 @@ record_latest_value (val)
       register struct value_history_chunk *new
 	= (struct value_history_chunk *)
 	  xmalloc (sizeof (struct value_history_chunk));
-      (void) memset (new->values, 0, sizeof new->values);
+      memset (new->values, 0, sizeof new->values);
       new->next = value_history_chain;
       value_history_chain = new;
     }
@@ -437,8 +438,7 @@ set_internalvar_component (var, offset, bitpos, bitsize, newval)
     modify_field (addr, (int) value_as_long (newval),
 		  bitpos, bitsize);
   else
-    (void) memcpy (addr, VALUE_CONTENTS (newval),
-		   TYPE_LENGTH (VALUE_TYPE (newval)));
+    memcpy (addr, VALUE_CONTENTS (newval), TYPE_LENGTH (VALUE_TYPE (newval)));
 }
 
 void
@@ -587,7 +587,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (float))
 	{
 	  float retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -595,7 +595,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (double))
 	{
 	  double retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -616,7 +616,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (short))
 	{
 	  unsigned short retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -624,7 +624,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (int))
 	{
 	  unsigned int retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -632,7 +632,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	{
 	  unsigned long retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -640,7 +640,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long long))
 	{
 	  unsigned long long retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -655,7 +655,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (char))
 	{
 	  SIGNED char retval;	/* plain chars might be unsigned on host */
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -663,7 +663,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (short))
 	{
 	  short retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -671,7 +671,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (int))
 	{
 	  int retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -679,7 +679,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long))
 	{
 	  long retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -688,7 +688,7 @@ unpack_long (type, valaddr)
       if (len == sizeof (long long))
 	{
 	  long long retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -706,14 +706,14 @@ unpack_long (type, valaddr)
       if (len == sizeof(long))
       {
 	unsigned long retval;
-	(void) memcpy (&retval, valaddr, sizeof(retval));
+	memcpy (&retval, valaddr, sizeof(retval));
 	SWAP_TARGET_AND_HOST (&retval, sizeof(retval));
 	return retval;
       }
       else if (len == sizeof(short))
       {
 	unsigned short retval;
-	(void) memcpy (&retval, valaddr, len);
+	memcpy (&retval, valaddr, len);
 	SWAP_TARGET_AND_HOST (&retval, len);
 	return retval;
       }
@@ -755,7 +755,7 @@ unpack_double (type, valaddr, invp)
       if (len == sizeof (float))
 	{
 	  float retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -763,7 +763,7 @@ unpack_double (type, valaddr, invp)
       if (len == sizeof (double))
 	{
 	  double retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -816,7 +816,7 @@ unpack_pointer (type, valaddr)
       if (len == sizeof (CORE_ADDR))
 	{
 	  CORE_ADDR retval;
-	  (void) memcpy (&retval, valaddr, sizeof (retval));
+	  memcpy (&retval, valaddr, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
@@ -872,8 +872,8 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
-	(void) memcpy (VALUE_CONTENTS_RAW (v),
-		       VALUE_CONTENTS_RAW (arg1) + offset, TYPE_LENGTH (type));
+	memcpy (VALUE_CONTENTS_RAW (v), VALUE_CONTENTS_RAW (arg1) + offset,
+		TYPE_LENGTH (type));
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
@@ -1031,7 +1031,7 @@ value_headof (arg, btype, dtype)
 	 know that we aren't happy, but don't throw an error.
 	 FIXME: there has to be a better way to do this.  */
       struct type *error_type = (struct type *)xmalloc (sizeof (struct type));
-      (void) memcpy (error_type, VALUE_TYPE (arg), sizeof (struct type));
+      memcpy (error_type, VALUE_TYPE (arg), sizeof (struct type));
       TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
       VALUE_TYPE (arg) = error_type;
       return arg;
@@ -1218,7 +1218,7 @@ unpack_field_as_long (type, valaddr, fieldno)
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   int lsbcount;
 
-  (void) memcpy (&val, valaddr + bitpos / 8, sizeof (val));
+  memcpy (&val, valaddr + bitpos / 8, sizeof (val));
   SWAP_TARGET_AND_HOST (&val, sizeof (val));
 
   /* Extract bits.  See comment above. */
@@ -1267,7 +1267,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
       && 0 != (fieldval & ~((1<<bitsize)-1)))
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
   
-  (void) memcpy (&oword, addr, sizeof oword);
+  memcpy (&oword, addr, sizeof oword);
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To host format */
 
   /* Shifting for bit field depends on endianness of the target machine.  */
@@ -1283,7 +1283,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
   oword |= fieldval << bitpos;
 
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To target format */
-  (void) memcpy (addr, &oword, sizeof oword);
+  memcpy (addr, &oword, sizeof oword);
 }
 
 /* Convert C numbers into newly allocated values */

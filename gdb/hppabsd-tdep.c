@@ -251,7 +251,7 @@ vtophys(space, addr)
 	}
 #ifdef MACHKERNELDEBUG
 	else if (kerneltype == OS_MACH) {
-		(void) mach_vtophys(space, addr, &phys);
+	  mach_vtophys(space, addr, &phys);
 	}
 #endif
 #if 0
@@ -439,7 +439,7 @@ setup_kernel_debugging()
 			panicstr = kvread(ksym_lookup("panicstr"));
 			if (panicstr == ~0)
 				return;
-			(void) kernel_core_file_hook(panicstr, buf, sizeof(buf));
+			kernel_core_file_hook(panicstr, buf, sizeof(buf));
 			for (cp = buf; cp < &buf[sizeof(buf)] && *cp; cp++)
 				if (!isascii(*cp) || (!isprint(*cp) && !isspace(*cp)))
 					*cp = '?';

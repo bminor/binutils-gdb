@@ -343,7 +343,7 @@ cplus_demangle (mangled, options)
 
   if ((mangled != NULL) && (*mangled != '\0'))
     {
-      (void) memset ((char *) work, 0, sizeof (work));
+      memset ((char *) work, 0, sizeof (work));
       work -> options = options;
       
       string_init (&decl);

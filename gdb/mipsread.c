@@ -386,7 +386,7 @@ xzalloc(size)
 {
   PTR p = xmalloc (size);
 
-  (void) memset (p, 0, size);
+  memset (p, 0, size);
   return p;
 }
 
@@ -1280,7 +1280,7 @@ data:		/* Common code for symbols describing data */
 			   is the displacement from the procedure`s start
 			   address of the end of this block. */
 			BLOCK_END(top_stack->cur_block) = sh->value + top_stack->procadr;
-			(void) shrink_block(top_stack->cur_block, top_stack->cur_st);
+			shrink_block(top_stack->cur_block, top_stack->cur_st);
 		} else complain (&stEnd_complaint, (char *)sh->sc);
 
 		pop_parse_stack();	/* restore previous lexical context */

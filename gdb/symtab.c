@@ -1494,7 +1494,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	  p1 = p;
 	  while (p != *argptr && p[-1] == ' ') --p;
 	  copy = (char *) alloca (p - *argptr + 1);
-	  (void) memcpy (copy, *argptr, p - *argptr);
+	  memcpy (copy, *argptr, p - *argptr);
 	  copy[p - *argptr] = 0;
 
 	  /* Discard the class name from the arg.  */
@@ -1535,7 +1535,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	      else
 		{
 		  copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
-		  (void) memcpy (copy, *argptr, p - *argptr);
+		  memcpy (copy, *argptr, p - *argptr);
 		  copy[p - *argptr] = '\0';
 		}
 
@@ -1630,7 +1630,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       p1 = p;
       while (p != *argptr && p[-1] == ' ') --p;
       copy = (char *) alloca (p - *argptr + 1);
-      (void) memcpy (copy, *argptr, p - *argptr);
+      memcpy (copy, *argptr, p - *argptr);
       copy[p - *argptr] = 0;
 
       /* Find that file's data.  */
@@ -1717,7 +1717,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 
   p = skip_quoted (*argptr);
   copy = (char *) alloca (p - *argptr + 1);
-  (void) memcpy (copy, *argptr, p - *argptr);
+  memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';
   if ((copy[0] == copy [p - *argptr - 1])
       && strchr (gdb_completer_quote_characters, copy[0]) != NULL)
@@ -1784,7 +1784,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	  values.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 	  values.nelts = 1;
-	  (void) memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
 	  values.sals[0].symtab = sym_symtab;
 	  values.sals[0].line = SYMBOL_LINE (sym);
 	  return values;
@@ -1899,8 +1899,8 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 	error ("cancelled");
       else if (num == 1)
 	{
-	  (void) memcpy (return_values.sals, values.sals,
-			 (nelts * sizeof(struct symtab_and_line)));
+	  memcpy (return_values.sals, values.sals,
+		  (nelts * sizeof(struct symtab_and_line)));
 	  return_values.nelts = nelts;
 	  return return_values;
 	}
@@ -2159,7 +2159,7 @@ list_symbols (regexp, class, bpt)
 		      || (class == 2 && SYMBOL_CLASS (psym) == LOC_TYPEDEF)
 		      || (class == 3 && SYMBOL_CLASS (psym) == LOC_BLOCK)))
 		{
-		  (void) PSYMTAB_TO_SYMTAB(ps);
+		  PSYMTAB_TO_SYMTAB(ps);
 		  keep_going = 0;
 		}
 	    }

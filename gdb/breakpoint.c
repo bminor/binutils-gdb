@@ -391,8 +391,8 @@ read_memory_nobpt (memaddr, myaddr, len)
 	      bptlen -= (membpt + bptlen) - (memaddr + len);
 	    }
 
-	  (void) memcpy (myaddr + membpt - memaddr, 
-			 b->shadow_contents + bptoffset, bptlen);
+	  memcpy (myaddr + membpt - memaddr, 
+		  b->shadow_contents + bptoffset, bptlen);
 
 	  if (membpt > memaddr)
 	    {
@@ -577,7 +577,7 @@ bpstat_copy (bs)
   for (; bs != NULL; bs = bs->next)
     {
       tmp = (bpstat) xmalloc (sizeof (*tmp));
-      (void) memcpy (tmp, bs, sizeof (*tmp));
+      memcpy (tmp, bs, sizeof (*tmp));
       if (p == NULL)
 	/* This is the first thing in the chain.  */
 	retval = tmp;
@@ -1209,7 +1209,7 @@ set_raw_breakpoint (sal)
   register struct breakpoint *b, *b1;
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
-  (void) memset (b, 0, sizeof (*b));
+  memset (b, 0, sizeof (*b));
   b->address = sal.pc;
   b->symtab = sal.symtab;
   b->line_number = sal.line;
@@ -1802,7 +1802,7 @@ get_catch_sals (this_level_only)
 
   bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
   blocks_searched = (char *) alloca (BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-  (void) memset (blocks_searched, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
+  memset (blocks_searched, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
 
   while (block != 0)
     {
@@ -2250,7 +2250,7 @@ breakpoint_re_set ()
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
       sprintf (message, message1, b->number);	/* Format possible error msg */
-      (void) catch_errors (breakpoint_re_set_one, (char *) b, message);
+      catch_errors (breakpoint_re_set_one, (char *) b, message);
     }
 
   create_longjmp_breakpoint("longjmp");

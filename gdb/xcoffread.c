@@ -1569,7 +1569,7 @@ function_entry_point:
       break;
 
     default		:
-      (void) process_xcoff_symbol (cs, objfile);
+      process_xcoff_symbol (cs, objfile);
       break;
     }
 

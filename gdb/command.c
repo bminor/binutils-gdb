@@ -235,7 +235,7 @@ add_show_from_set (setcmd, list)
   struct cmd_list_element *showcmd =
     (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
 
-  (void) memcpy (showcmd, setcmd, sizeof (struct cmd_list_element));
+  memcpy (showcmd, setcmd, sizeof (struct cmd_list_element));
   delete_cmd (showcmd->name, list);
   showcmd->type = show_cmd;
   

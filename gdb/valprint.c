@@ -236,7 +236,7 @@ print_floating (valaddr, type, stream)
     if (len == sizeof (float))
       {
 	/* It's single precision. */
-	(void) memcpy ((char *) &low, valaddr, sizeof (low));
+	memcpy ((char *) &low, valaddr, sizeof (low));
 	/* target -> host.  */
 	SWAP_TARGET_AND_HOST (&low, sizeof (float));
 	nonnegative = low >= 0;
@@ -250,19 +250,19 @@ print_floating (valaddr, type, stream)
 	/* It's double precision.  Get the high and low words.  */
 
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
-	(void) memcpy (&low, valaddr+4,  sizeof (low));
-	(void) memcpy (&high, valaddr+0, sizeof (high));
+	memcpy (&low, valaddr+4,  sizeof (low));
+	memcpy (&high, valaddr+0, sizeof (high));
 #else
-	(void) memcpy (&low, valaddr+0,  sizeof (low));
-	(void) memcpy (&high, valaddr+4, sizeof (high));
+	memcpy (&low, valaddr+0,  sizeof (low));
+	memcpy (&high, valaddr+4, sizeof (high));
 #endif
-	  SWAP_TARGET_AND_HOST (&low, sizeof (low));
-	  SWAP_TARGET_AND_HOST (&high, sizeof (high));
-	  nonnegative = high >= 0;
-	  is_nan = (((high >> 20) & 0x7ff) == 0x7ff
-		    && ! ((((high & 0xfffff) == 0)) && (low == 0)));
-	  high &= 0xfffff;
-	}
+	SWAP_TARGET_AND_HOST (&low, sizeof (low));
+	SWAP_TARGET_AND_HOST (&high, sizeof (high));
+	nonnegative = high >= 0;
+	is_nan = (((high >> 20) & 0x7ff) == 0x7ff
+		  && ! ((((high & 0xfffff) == 0)) && (low == 0)));
+	high &= 0xfffff;
+      }
 
     if (is_nan)
       {

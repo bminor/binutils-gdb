@@ -100,7 +100,7 @@ putenv( entry )
   if ( new_environ == (char **) NULL )
     return( -1 );
 
-  (void) memcpy ((char *) new_environ, (char *) environ, size*PSIZE );
+  memcpy ((char *) new_environ, (char *) environ, size*PSIZE );
 
   new_environ[size]   = entry;
   new_environ[size+1] = NULL;

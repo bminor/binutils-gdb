@@ -219,7 +219,7 @@ write_exp_string (str)
 	xrealloc ((char *) expout, (sizeof (struct expression)
 			   + (expout_size * sizeof (union exp_element))));
     }
-  (void) memcpy ((char *) &expout->elts[expout_ptr - lenelt], str.ptr, len);
+  memcpy ((char *) &expout->elts[expout_ptr - lenelt], str.ptr, len);
   ((char *) &expout->elts[expout_ptr - lenelt])[len] = 0;
   write_exp_elt_longcst ((LONGEST) len);
 }
@@ -231,7 +231,7 @@ char *
 copy_name (token)
      struct stoken token;
 {
-  (void) memcpy (namecopy, token.ptr, token.length);
+  memcpy (namecopy, token.ptr, token.length);
   namecopy[token.length] = 0;
   return namecopy;
 }
@@ -251,7 +251,7 @@ prefixify_expression (expr)
   temp = (struct expression *) alloca (len);
 
   /* Copy the original expression into temp.  */
-  (void) memcpy (temp, expr, len);
+  memcpy (temp, expr, len);
 
   prefixify_subexp (temp, expr, inpos, outpos);
 }
@@ -481,7 +481,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
   /* Copy the final operator itself, from the end of the input
      to the beginning of the output.  */
   inend -= oplen;
-  (void) memcpy (&outexpr->elts[outbeg], &inexpr->elts[inend],
+  memcpy (&outexpr->elts[outbeg], &inexpr->elts[inend],
 		 oplen * sizeof (union exp_element));
   outbeg += oplen;
 

@@ -95,7 +95,7 @@ allocate_objfile (abfd, mapped)
       if (((mapto = map_to_address ()) == 0) ||
 	  ((md = mmalloc_attach (fd, (void *) mapto)) == NULL))
 	{
-	  (void) close (fd);
+	  close (fd);
 	}
       else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
 	{
@@ -121,7 +121,7 @@ allocate_objfile (abfd, mapped)
 	     the first malloc.  See comments in init_malloc() and mmcheck(). */
 	  init_malloc (md);
 	  objfile = (struct objfile *) xmmalloc (md, sizeof (struct objfile));
-	  (void) memset (objfile, 0, sizeof (struct objfile));
+	  memset (objfile, 0, sizeof (struct objfile));
 	  objfile -> md = md;
 	  objfile -> mmfd = fd;
 	  objfile -> flags |= OBJF_MAPPED;
@@ -166,7 +166,7 @@ allocate_objfile (abfd, mapped)
   if (objfile == NULL)
     {
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
-      (void) memset (objfile, 0, sizeof (struct objfile));
+      memset (objfile, 0, sizeof (struct objfile));
       objfile -> md = NULL;
       obstack_full_begin (&objfile -> psymbol_obstack, 0, 0, xmalloc, free,
 			  (void *) 0, 0);
@@ -302,7 +302,7 @@ free_objfile (objfile)
       mmfd = objfile -> mmfd;
       mmalloc_detach (objfile -> md);
       objfile = NULL;
-      (void) close (mmfd);
+      close (mmfd);
     }
 
 #endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */

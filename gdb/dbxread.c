@@ -424,7 +424,7 @@ add_new_header_file (name, instance)
   header_files[i].length = 10;
   header_files[i].vector
     = (struct type **) xmalloc (10 * sizeof (struct type *));
-  (void) memset (header_files[i].vector, 0, 10 * sizeof (struct type *));
+  memset (header_files[i].vector, 0, 10 * sizeof (struct type *));
 
   add_this_object_header_file (i);
 }
@@ -1813,7 +1813,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 		}
 	      break;		/* Ignore repeated SOs */
 	    }
-	  (void) end_symtab (valu, 0, 0, objfile);
+	  end_symtab (valu, 0, 0, objfile);
 	}
       start_symtab (name, NULL, valu);
       break;
@@ -1872,7 +1872,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 	int i;
 	struct symbol *sym =
 	  (struct symbol *) xmmalloc (objfile -> md, sizeof (struct symbol));
-	(void) memset (sym, 0, sizeof *sym);
+	memset (sym, 0, sizeof *sym);
 	SYMBOL_NAME (sym) = savestring (name, strlen (name));
 	SYMBOL_CLASS (sym) = LOC_BLOCK;
 	SYMBOL_NAMESPACE (sym) = (enum namespace)((long)

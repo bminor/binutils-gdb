@@ -222,13 +222,13 @@ extern CORE_ADDR sparc_pc_adjust();
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ (void) memcpy ((TO), (FROM), 4); }
+{ memcpy ((TO), (FROM), 4); }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ (void) memcpy ((TO), (FROM), 4); }
+{ memcpy ((TO), (FROM), 4); }
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -256,15 +256,13 @@ extern CORE_ADDR sparc_pc_adjust();
   {      	       	       	       	       	       	       	           \
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)		       		   \
       {							       		   \
-	(void) memcpy ((VALBUF),					   \
-		       ((int *)(REGBUF))+FP0_REGNUM,	       		   \
-		       TYPE_LENGTH(TYPE));		       		   \
+	memcpy ((VALBUF), ((int *)(REGBUF))+FP0_REGNUM, TYPE_LENGTH(TYPE));\
       }							       		   \
     else						       		   \
-      (void) memcpy ((VALBUF),						   \
-		     (char *)(REGBUF) + 4 * 8 +				   \
-		     (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)), \
-		     TYPE_LENGTH(TYPE));				   \
+      memcpy ((VALBUF),						   	   \
+	      (char *)(REGBUF) + 4 * 8 +				   \
+	      (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	   \
+	      TYPE_LENGTH(TYPE));					   \
   }
 
 /* Write into appropriate registers a function return value

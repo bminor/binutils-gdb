@@ -350,7 +350,7 @@ elf_symfile_read (objfile, addr, mainline)
   /* Now process debugging information, which is contained in
      special ELF sections.  We first have to find them... */
 
-  (void) memset ((char *) &ei, 0, sizeof (ei));
+  memset ((char *) &ei, 0, sizeof (ei));
   bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
   if (ei.dboffset && ei.lnoffset)
     {

@@ -508,7 +508,7 @@ init_malloc (md)
       warning ("internal error: failed to install memory consistency checks");
     }
 
-  (void) mmtrace ();
+  mmtrace ();
 }
 
 #endif /* Have mmalloc and want corruption checking  */
@@ -634,7 +634,7 @@ savestring (ptr, size)
      int size;
 {
   register char *p = (char *) xmalloc (size + 1);
-  (void) memcpy (p, ptr, size);
+  memcpy (p, ptr, size);
   p[size] = 0;
   return p;
 }
@@ -646,7 +646,7 @@ msavestring (md, ptr, size)
      int size;
 {
   register char *p = (char *) xmmalloc (md, size + 1);
-  (void) memcpy (p, ptr, size);
+  memcpy (p, ptr, size);
   p[size] = 0;
   return p;
 }
@@ -1205,7 +1205,7 @@ vfprintf_filtered (stream, format, args)
 
   /* This won't blow up if the restrictions described above are
      followed.   */
-  (void) vsprintf (linebuffer, format, args);
+  vsprintf (linebuffer, format, args);
 
   fputs_filtered (linebuffer, stream);
 }

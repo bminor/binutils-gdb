@@ -596,7 +596,7 @@ read_lexical_block_scope (dip, thisdie, enddie, objfile)
 {
   register struct context_stack *new;
 
-  (void) push_context (0, dip -> at_low_pc);
+  push_context (0, dip -> at_low_pc);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
   new = pop_context ();
   if (local_symbols != NULL)
@@ -694,7 +694,7 @@ alloc_utype (die_ref, utypep)
 	  utypep = (struct type *)
 	    obstack_alloc (&current_objfile -> type_obstack,
 			   sizeof (struct type));
-	  (void) memset (utypep, 0, sizeof (struct type));
+	  memset (utypep, 0, sizeof (struct type));
 	  TYPE_OBJFILE (utypep) = current_objfile;
 	}
       *typep = utypep;
@@ -1112,7 +1112,7 @@ decode_subscr_data (scan, end)
 	      typep = (struct type *)
 		obstack_alloc (&current_objfile -> type_obstack,
 			       sizeof (struct type));
-	      (void) memset (typep, 0, sizeof (struct type));
+	      memset (typep, 0, sizeof (struct type));
 	      TYPE_OBJFILE (typep) = current_objfile;
 	      TYPE_CODE (typep) = TYPE_CODE_ARRAY;
 	      TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
@@ -1191,7 +1191,7 @@ dwarf_read_array_type (dip)
 	{
 	  if ((utype = lookup_utype (dip -> die_ref)) == NULL)
 	    {
-	      (void) alloc_utype (dip -> die_ref, type);
+	      alloc_utype (dip -> die_ref, type);
 	    }
 	  else
 	    {
@@ -1230,7 +1230,7 @@ read_tag_pointer_type (dip)
   if ((utype = lookup_utype (dip -> die_ref)) == NULL)
     {
       utype = lookup_pointer_type (type);
-      (void) alloc_utype (dip -> die_ref, utype);
+      alloc_utype (dip -> die_ref, utype);
     }
   else
     {
@@ -1294,7 +1294,7 @@ read_subroutine_type (dip, thisdie, enddie)
       /* This is the first reference to one of these types.  Make
 	 a new one and place it in the user defined types. */
       ftype = lookup_function_type (type);
-      (void) alloc_utype (dip -> die_ref, ftype);
+      alloc_utype (dip -> die_ref, ftype);
     }
   else
     {
@@ -1449,7 +1449,7 @@ enum_type (dip, objfile)
 	  /* Handcraft a new symbol for this enum member. */
 	  sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 						 sizeof (struct symbol));
-	  (void) memset (sym, 0, sizeof (struct symbol));
+	  memset (sym, 0, sizeof (struct symbol));
 	  SYMBOL_NAME (sym) = create_name (list -> field.name,
 					   &objfile->symbol_obstack);
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1576,7 +1576,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   numutypes = (enddie - thisdie) / 4;
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));
   back_to = make_cleanup (free, utypes);
-  (void) memset (utypes, 0, numutypes * sizeof (struct type *));
+  memset (utypes, 0, numutypes * sizeof (struct type *));
   start_symtab (dip -> at_name, NULL, dip -> at_low_pc);
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
@@ -1679,7 +1679,7 @@ process_dies (thisdie, enddie, objfile)
 	      read_tag_pointer_type (&di);
 	      break;
 	    default:
-	      (void) new_symbol (&di, objfile);
+	      new_symbol (&di, objfile);
 	      break;
 	    }
 	}
@@ -2516,7 +2516,7 @@ new_symbol (dip, objfile)
     {
       sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack,
 					     sizeof (struct symbol));
-      (void) memset (sym, 0, sizeof (struct symbol));
+      memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = create_name (dip -> at_name, &objfile->symbol_obstack);
       /* default assumptions */
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -2974,7 +2974,7 @@ create_name (name, obstackp)
 
   length = strlen (name) + 1;
   newname = (char *) obstack_alloc (obstackp, length);
-  (void) strcpy (newname, name);
+  strcpy (newname, name);
   return (newname);
 }
 
@@ -3033,7 +3033,7 @@ basicdieinfo (dip, diep, objfile)
      struct objfile *objfile;
 {
   curdie = dip;
-  (void) memset (dip, 0, sizeof (struct dieinfo));
+  memset (dip, 0, sizeof (struct dieinfo));
   dip -> die = diep;
   dip -> die_ref = dbroff + (diep - dbbase);
   dip -> die_length = target_to_host (diep, SIZEOF_DIE_LENGTH, GET_UNSIGNED,

@@ -180,7 +180,7 @@ core_open (filename, from_tty)
 
     /* Add symbols and section mappings for any shared libraries */
 #ifdef SOLIB_ADD
-    (void) catch_errors (solib_add_stub, (char *)from_tty, (char *)0);
+    catch_errors (solib_add_stub, (char *)from_tty, (char *)0);
 #endif
 
     /* Now, set up the frame cache, and print the top of stack */

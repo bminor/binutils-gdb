@@ -514,7 +514,7 @@ lookupname (transp, val, prefix)
 	  free (locbuf);
 	}
       locbuf = xmalloc (strlen (prefix) + 16);
-      (void) sprintf (locbuf, "%s %u", prefix, val);
+      sprintf (locbuf, "%s %u", prefix, val);
       name = locbuf;
     }
   return (name);
@@ -539,7 +539,7 @@ sigcodename (sip)
     }
   if (name == NULL)
     {
-      (void) sprintf (locbuf, "sigcode %u", sip -> si_signo);
+      sprintf (locbuf, "sigcode %u", sip -> si_signo);
       name = locbuf;
     }
   return (name);
@@ -597,7 +597,7 @@ syscallname (syscallnum)
     }
   else
     {
-      (void) sprintf (locbuf, "syscall %u", syscallnum);
+      sprintf (locbuf, "syscall %u", syscallnum);
       rtnval = locbuf;
     }
   return (rtnval);
@@ -1123,7 +1123,7 @@ unconditionally_kill_inferior ()
   int signo;
   
   signo = SIGKILL;
-  (void) ioctl (pi.fd, PIOCKILL, &signo);
+  ioctl (pi.fd, PIOCKILL, &signo);
   close_proc_file (&pi);
   wait ((int *) 0);
 }
@@ -1228,10 +1228,10 @@ store_inferior_registers (regno)
 {
   if (regno != -1)
     {
-      (void) ioctl (pi.fd, PIOCGREG, &pi.gregset);
+      ioctl (pi.fd, PIOCGREG, &pi.gregset);
     }
   fill_gregset (&pi.gregset, regno);
-  (void) ioctl (pi.fd, PIOCSREG, &pi.gregset);
+  ioctl (pi.fd, PIOCSREG, &pi.gregset);
 
 #if defined (FP0_REGNUM)
 
@@ -1241,10 +1241,10 @@ store_inferior_registers (regno)
 
   if (regno != -1)
     {
-      (void) ioctl (pi.fd, PIOCGFPREG, &pi.fpregset);
+      ioctl (pi.fd, PIOCGFPREG, &pi.fpregset);
     }
   fill_fpregset (&pi.fpregset, regno);
-  (void) ioctl (pi.fd, PIOCSFPREG, &pi.fpregset);
+  ioctl (pi.fd, PIOCSFPREG, &pi.fpregset);
 
 #endif	/* FP0_REGNUM */
 
@@ -1285,7 +1285,7 @@ inferior_proc_init (pid)
     }
   else
     {
-      (void) memset ((char *) &pi.prrun, 0, sizeof (pi.prrun));
+      memset ((char *) &pi.prrun, 0, sizeof (pi.prrun));
       prfillset (&pi.prrun.pr_trace);
       proc_signal_handling_change ();
       prfillset (&pi.prrun.pr_fault);
@@ -1391,7 +1391,7 @@ proc_set_exec_trap ()
   auto char procname[32];
   int fd;
   
-  (void) sprintf (procname, PROC_NAME_FMT, getpid ());
+  sprintf (procname, PROC_NAME_FMT, getpid ());
   if ((fd = open (procname, O_RDWR)) < 0)
     {
       perror (procname);
@@ -1429,11 +1429,11 @@ proc_set_exec_trap ()
   {
       long pr_flags;
       pr_flags = PR_FORK;
-      (void) ioctl (fd, PIOCRESET, &pr_flags);
+      ioctl (fd, PIOCRESET, &pr_flags);
   }
 #else
 #if defined (PIOCRFORK)	/* Original method */
-  (void) ioctl (fd, PIOCRFORK, NULL);
+  ioctl (fd, PIOCRFORK, NULL);
 #endif
 #endif
 }
@@ -1651,15 +1651,15 @@ attach (pid)
   /*  Remember some things about the inferior that we will, or might, change
       so that we can restore them when we detach. */
   
-  (void) ioctl (pi.fd, PIOCGTRACE, &pi.saved_trace);
-  (void) ioctl (pi.fd, PIOCGHOLD, &pi.saved_sighold);
-  (void) ioctl (pi.fd, PIOCGFAULT, &pi.saved_fltset);
-  (void) ioctl (pi.fd, PIOCGENTRY, &pi.saved_entryset);
-  (void) ioctl (pi.fd, PIOCGEXIT, &pi.saved_exitset);
+  ioctl (pi.fd, PIOCGTRACE, &pi.saved_trace);
+  ioctl (pi.fd, PIOCGHOLD, &pi.saved_sighold);
+  ioctl (pi.fd, PIOCGFAULT, &pi.saved_fltset);
+  ioctl (pi.fd, PIOCGENTRY, &pi.saved_entryset);
+  ioctl (pi.fd, PIOCGEXIT, &pi.saved_exitset);
   
   /* Set up trace and fault sets, as gdb expects them. */
   
-  (void) memset (&pi.prrun, 0, sizeof (pi.prrun));
+  memset (&pi.prrun, 0, sizeof (pi.prrun));
   prfillset (&pi.prrun.pr_trace);
   proc_signal_handling_change ();
   prfillset (&pi.prrun.pr_fault);
@@ -1750,7 +1750,7 @@ detach (signal)
 	  if (signal || !pi.was_stopped ||
 	      query ("Was stopped when attached, make it runnable again? "))
 	    {
-	      (void) memset (&pi.prrun, 0, sizeof (pi.prrun));
+	      memset (&pi.prrun, 0, sizeof (pi.prrun));
 	      pi.prrun.pr_flags = PRCFAULT;
 	      if (ioctl (pi.fd, PIOCRUN, &pi.prrun))
 		{
@@ -1980,7 +1980,7 @@ set_proc_siginfo (pip, signo)
 	}
       else
 	{
-	  (void) memset ((char *) &newsiginfo, 0, sizeof (newsiginfo));
+	  memset ((char *) &newsiginfo, 0, sizeof (newsiginfo));
 	  sip = &newsiginfo;
 	  sip -> si_signo = signo;
 	  sip -> si_code = 0;
@@ -2144,8 +2144,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	}
       else
 	{
-	  (void) memcpy ((char *) &pi.gregset, core_reg_sect,
-			 sizeof (pi.gregset));
+	  memcpy ((char *) &pi.gregset, core_reg_sect, sizeof (pi.gregset));
 	  supply_gregset (&pi.gregset);
 	}
     }
@@ -2157,8 +2156,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	}
       else
 	{
-	  (void) memcpy ((char *) &pi.fpregset, core_reg_sect,
-			 sizeof (pi.fpregset));
+	  memcpy ((char *) &pi.fpregset, core_reg_sect, sizeof (pi.fpregset));
 #if defined (FP0_REGNUM)
 	  supply_fpregset (&pi.fpregset);
 #endif
@@ -2189,7 +2187,7 @@ proc_init_failed (why)
      char *why;
 {
   print_sys_errmsg (pi.pathname, errno);
-  (void) kill (pi.pid, SIGKILL);
+  kill (pi.pid, SIGKILL);
   close_proc_file (&pi);
   error (why);
   /* NOTREACHED */
@@ -2221,7 +2219,7 @@ close_proc_file (pip)
   pip -> pid = 0;
   if (pip -> valid)
     {
-      (void) close (pip -> fd);
+      close (pip -> fd);
     }
   pip -> fd = -1;
   if (pip -> pathname)
@@ -2263,7 +2261,7 @@ open_proc_file (pid, pip)
   pip -> valid = 0;
   if (pip -> valid)
     {
-      (void) close (pip -> fd);
+      close (pip -> fd);
     }
   if (pip -> pathname == NULL)
     {
@@ -2844,7 +2842,7 @@ info_proc (args, from_tty)
 	    {
 	      pid = pii.pid;
 	      pip = &pii;
-	      (void) memset (&pii, 0, sizeof (pii));
+	      memset (&pii, 0, sizeof (pii));
 	      if (!open_proc_file (pid, pip))
 		{
 		  perror_with_name (pip -> pathname);

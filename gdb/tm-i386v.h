@@ -180,13 +180,13 @@ i386_skip_prologue PARAMS ((int));
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-  {(void) memcpy ((TO), (FROM), 4);}
+  {memcpy ((TO), (FROM), 4);}
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
-  {(void) memcpy ((TO), (FROM), 4);}
+  {memcpy ((TO), (FROM), 4);}
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -208,7 +208,7 @@ i386_skip_prologue PARAMS ((int));
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  (void) memcpy ((VALBUF), (REGBUF), TYPE_LENGTH (TYPE))
+  memcpy ((VALBUF), (REGBUF), TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */

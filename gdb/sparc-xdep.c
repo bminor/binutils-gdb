@@ -76,7 +76,8 @@ fetch_inferior_registers (regno)
 	perror("ptrace_getregs");
       
       registers[REGISTER_BYTE (0)] = 0;
-      (void) memcpy (&registers[REGISTER_BYTE (1)], &inferior_registers.r_g1, 15 * REGISTER_RAW_SIZE (G0_REGNUM));
+      memcpy (&registers[REGISTER_BYTE (1)], &inferior_registers.r_g1,
+	      15 * REGISTER_RAW_SIZE (G0_REGNUM));
       *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps; 
       *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
       *(int *)&registers[REGISTER_BYTE (NPC_REGNUM)] = inferior_registers.r_npc;
@@ -103,9 +104,8 @@ fetch_inferior_registers (regno)
 		       (PTRACE_ARG3_TYPE) &inferior_fp_registers,
 		       0))
 	    perror("ptrace_getfpregs");
-      (void) memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-		     &inferior_fp_registers,
-		     sizeof inferior_fp_registers.fpu_fr);
+      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+	      sizeof inferior_fp_registers.fpu_fr);
       /* bcopy (&inferior_fp_registers.Fpu_fsr,
 	     &registers[REGISTER_BYTE (FPS_REGNUM)],
 	     sizeof (FPU_FSR_TYPE));  FIXME???  -- gnu@cyg */
@@ -210,9 +210,8 @@ store_inferior_registers (regno)
     {
       if (!register_valid[G1_REGNUM]) abort();
 
-      (void) memcpy (&inferior_registers.r_g1, 
-		     &registers[REGISTER_BYTE (G1_REGNUM)],
-		     15 * REGISTER_RAW_SIZE (G1_REGNUM));
+      memcpy (&inferior_registers.r_g1, &registers[REGISTER_BYTE (G1_REGNUM)],
+	      15 * REGISTER_RAW_SIZE (G1_REGNUM));
 
       inferior_registers.r_ps =
 	*(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
@@ -231,13 +230,11 @@ store_inferior_registers (regno)
   if (wanna_store & FP_REGS)
     {
       if (!register_valid[FP0_REGNUM+9]) abort();
-      (void) memcpy (&inferior_fp_registers,
-		     &registers[REGISTER_BYTE (FP0_REGNUM)],
-		     sizeof inferior_fp_registers.fpu_fr);
+      memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	      sizeof inferior_fp_registers.fpu_fr);
 
-/*      (void) memcpy (&inferior_fp_registers.Fpu_fsr,
-		       &registers[REGISTER_BYTE (FPS_REGNUM)],
-		       sizeof (FPU_FSR_TYPE));
+/*    memcpy (&inferior_fp_registers.Fpu_fsr, 
+	      &registers[REGISTER_BYTE (FPS_REGNUM)], sizeof (FPU_FSR_TYPE));
 ****/
       if (0 !=
 	 ptrace (PTRACE_SETFPREGS, inferior_pid,
@@ -263,9 +260,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
     *(int *)&registers[REGISTER_BYTE (0)] = 0;
 
     /* The globals and output registers.  */
-    (void) memcpy (&registers[REGISTER_BYTE (G1_REGNUM)],
-		   &gregs->r_g1, 
-		   15 * REGISTER_RAW_SIZE (G1_REGNUM));
+    memcpy (&registers[REGISTER_BYTE (G1_REGNUM)], &gregs->r_g1, 
+	    15 * REGISTER_RAW_SIZE (G1_REGNUM));
     *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = gregs->r_ps;
     *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = gregs->r_pc;
     *(int *)&registers[REGISTER_BYTE (NPC_REGNUM)] = gregs->r_npc;
@@ -295,12 +291,10 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
 #define fpuregs  ((struct fpu *) core_reg_sect)
     if (core_reg_size >= sizeof (struct fpu))
       {
-	(void) memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-		       fpuregs->fpu_regs,
-		       sizeof (fpuregs->fpu_regs));
-	(void) memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)],
-		       &fpuregs->fpu_fsr,
-		       sizeof (FPU_FSR_TYPE));
+	memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], fpuregs->fpu_regs,
+		sizeof (fpuregs->fpu_regs));
+	memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)], &fpuregs->fpu_fsr,
+		sizeof (FPU_FSR_TYPE));
       }
     else
       fprintf (stderr, "Couldn't read float regs from core file\n");

@@ -70,7 +70,7 @@ symfile_bfd_open PARAMS ((char *));
 static void
 find_sym_fns PARAMS ((struct objfile *));
 
-static void
+void
 clear_symtab_users_once PARAMS ((void));
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
@@ -545,7 +545,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	   psymtab != NULL;
 	   psymtab = psymtab -> next)
 	{
-	  (void) psymtab_to_symtab (psymtab);
+	  psymtab_to_symtab (psymtab);
 	}
     }
 
@@ -625,8 +625,7 @@ symbol_file_command (args, from_tty)
 	  /* Getting new symbols may change our opinion about what is
 	     frameless.  */
 	  reinit_frame_cache ();
-	  (void) symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
-				     mapped, readnow);
+	  symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
 	}
       do_cleanups (cleanups);
     }
@@ -804,7 +803,7 @@ add_symbol_file_command (args, from_tty)
 
   reinit_frame_cache ();
 
-  (void) symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
+  symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
 }
 
 /* Re-read symbols if a symbol-file has changed.  */
@@ -992,7 +991,7 @@ allocate_symtab (filename, objfile)
 
   symtab = (struct symtab *)
     obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symtab));
-  (void) memset (symtab, 0, sizeof (*symtab));
+  memset (symtab, 0, sizeof (*symtab));
   symtab -> filename = obsavestring (filename, strlen (filename),
 				     &objfile -> symbol_obstack);
   symtab -> fullname = NULL;
@@ -1028,7 +1027,7 @@ allocate_psymtab (filename, objfile)
       obstack_alloc (&objfile -> psymbol_obstack,
 		     sizeof (struct partial_symtab));
 
-  (void) memset (psymtab, 0, sizeof (struct partial_symtab));
+  memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab -> filename = obsavestring (filename, strlen (filename),
 				      &objfile -> psymbol_obstack);
   psymtab -> symtab = NULL;
@@ -1071,7 +1070,7 @@ allocate_psymtab (filename, objfile)
 static int clear_symtab_users_queued;
 static int clear_symtab_users_done;
 
-static void
+void
 clear_symtab_users_once ()
 {
   /* Enforce once-per-`do_cleanups'-semantics */

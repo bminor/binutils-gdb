@@ -1,3 +1,17 @@
+Fri Jul  3 20:18:26 1992  Fred Fish  (fnf@cygnus.com)
+
+	* breakpoint.c, buildsym.c, c-exp.y, coffread.c, command.c,
+	core.c, cplus-dem.c, dbxread.c, dwarfread.c, elfread.c, environ.c,
+	eval.c, findvar.c, gdbtypes.c, hppabsd-tdep.c, hppahpux-tdep.c,
+	i386-tdep.c, ieee-float.c, infcmd.c, inflow.c, infptrace.c,
+	infrun.c, m2-exp.y, mipsread.c, objfiles.c, parse.c, procfs.c,
+	putenv.c, remote-mm.c, remote-vx.c, solib.c, sparc-tdep.c,
+	sparc-xdep.c, stack.c, symfile.c, symtab.c, symtab.h, target.c,
+	tm-i386v.h, tm-sparc.h, utils.c, valarith.c, valops.c, valprint.c,
+	values.c, xcoffread.c:
+	Remove "(void)" casts from function calls where the return value
+	is ignored, in accordance with GNU coding standards.
+
 Fri Jul  3 00:00:49 1992  John Gilmore  (gnu at cygnus.com)
 
 	* dbxread.c (process_one_symbol):  Ignore N_MAIN, N_ENDM for Solaris.

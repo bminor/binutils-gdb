@@ -35,7 +35,7 @@ extern struct objfile *current_objfile;
 #define B_TST(a,x) ((a)[(x)>>3] & (1 << ((x)&7)))
 #define B_TYPE		unsigned char
 #define	B_BYTES(x)	( 1 + ((x)>>3) )
-#define	B_CLRALL(a,x) (void) memset ((a), 0, B_BYTES(x))
+#define	B_CLRALL(a,x) memset ((a), 0, B_BYTES(x))
 
 
 /* Define a simple structure used to hold some very basic information about

@@ -220,7 +220,7 @@ dbx_lookup_type (typenums)
 	  type_vector = (struct type **)
 	    xrealloc ((char *) type_vector,
 		      (type_vector_length * sizeof (struct type *)));
-	  (void) memset (&type_vector[old_len], 0,
+	  memset (&type_vector[old_len], 0,
 		     (type_vector_length - old_len) * sizeof (struct type *));
 	}
       return &type_vector[index];
@@ -243,7 +243,7 @@ dbx_lookup_type (typenums)
 	    f->length *= 2;
 	  f->vector = (struct type **)
 	    xrealloc ((char *) f->vector, f->length * sizeof (struct type *));
-	  (void) memset (&f->vector[f_orig_length], 0,
+	  memset (&f->vector[f_orig_length], 0,
 			 (f->length - f_orig_length) * sizeof (struct type *));
 	}
       return &f->vector[index];
@@ -968,7 +968,7 @@ void
 buildsym_new_init ()
 {
   /* Empty the hash table of global syms looking for values.  */
-  (void) memset (global_sym_chain, 0, sizeof global_sym_chain);
+  memset (global_sym_chain, 0, sizeof global_sym_chain);
 
   buildsym_init ();
 }
@@ -2842,7 +2842,7 @@ read_array_type (pp, type, objfile)
     /* Create range type.  */
     range_type = (struct type *)
       obstack_alloc (&objfile -> type_obstack, sizeof (struct type));
-    (void) memset (range_type, 0, sizeof (struct type));
+    memset (range_type, 0, sizeof (struct type));
     TYPE_OBJFILE (range_type) = objfile;
     TYPE_CODE (range_type) = TYPE_CODE_RANGE;
     TYPE_TARGET_TYPE (range_type) = index_type;
@@ -2922,7 +2922,7 @@ read_enum_type (pp, type, objfile)
       n = read_number (pp, ',');
 
       sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
-      (void) memset (sym, 0, sizeof (struct symbol));
+      memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = name;
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -3282,7 +3282,7 @@ read_range_type (pp, typenums, objfile)
 	  result_type = (struct type *)
 	    obstack_alloc (&objfile -> type_obstack,
 			   sizeof (struct type));
-	  (void) memset (result_type, 0, sizeof (struct type));
+	  memset (result_type, 0, sizeof (struct type));
 	  TYPE_OBJFILE (result_type) = objfile;
 	  TYPE_LENGTH (result_type) = nbits / TARGET_CHAR_BIT;
 	  TYPE_CODE (result_type) = TYPE_CODE_INT;
@@ -3394,7 +3394,7 @@ read_range_type (pp, typenums, objfile)
 
   result_type = (struct type *)
     obstack_alloc (&objfile -> type_obstack, sizeof (struct type));
-  (void) memset (result_type, 0, sizeof (struct type));
+  memset (result_type, 0, sizeof (struct type));
   TYPE_OBJFILE (result_type) = objfile;
 
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
@@ -3409,7 +3409,7 @@ read_range_type (pp, typenums, objfile)
   TYPE_FIELDS (result_type) =
     (struct field *) obstack_alloc (&objfile -> type_obstack,
 				    2 * sizeof (struct field));
-  (void) memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
+  memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = n2;
   TYPE_FIELD_BITPOS (result_type, 1) = n3;
 
@@ -3497,7 +3497,7 @@ read_args (pp, end, objfile)
   else if (TYPE_CODE (types[n-1]) != TYPE_CODE_VOID)
     {
       rval = (struct type **) xmalloc ((n + 1) * sizeof (struct type *));
-      (void) memset (rval + n, 0, sizeof (struct type *));
+      memset (rval + n, 0, sizeof (struct type *));
     }
   else
     {

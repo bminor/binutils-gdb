@@ -52,7 +52,7 @@ alloc_type (objfile)
       type  = (struct type *) obstack_alloc (&objfile -> type_obstack,
 					     sizeof (struct type));
     }
-  (void) memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *)type, 0, sizeof (struct type));
 
   /* Initialize the fields that might not be zero. */
 
@@ -362,7 +362,7 @@ smash_to_member_type (type, domain, to_type)
 
   objfile = TYPE_OBJFILE (type);
 
-  (void) memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *)type, 0, sizeof (struct type));
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -388,7 +388,7 @@ smash_to_method_type (type, domain, to_type, args)
 
   objfile = TYPE_OBJFILE (type);
 
-  (void) memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *)type, 0, sizeof (struct type));
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -930,7 +930,7 @@ lookup_fundamental_type (objfile, typeid)
 	  nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
 	  objfile -> fundamental_types = (struct type **)
 	    obstack_alloc (&objfile -> type_obstack, nbytes);
-	  (void) memset ((char *)objfile -> fundamental_types, 0, nbytes);
+	  memset ((char *)objfile -> fundamental_types, 0, nbytes);
 	}
       typep = objfile -> fundamental_types + typeid;
       if ((type = *typep) == NULL)

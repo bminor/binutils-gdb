@@ -130,7 +130,7 @@ value_zero (type, lv)
 {
   register value val = allocate_value (type);
 
-  (void) memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (type));
+  memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (type));
   VALUE_LVAL (val) = lv;
 
   return val;
@@ -333,10 +333,10 @@ value_assign (toval, fromval)
 			(int) value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	else if (use_buffer)
-	  (void) memcpy (buffer + byte_offset, raw_buffer, use_buffer);
+	  memcpy (buffer + byte_offset, raw_buffer, use_buffer);
 	else
-	  (void) memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
-			 TYPE_LENGTH (type));
+	  memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+		  TYPE_LENGTH (type));
 
 	/* Copy it back.  */
 	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
@@ -379,9 +379,9 @@ value_assign (toval, fromval)
     }
 
   val = allocate_value (type);
-  (void) memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
-  (void) memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
-		 TYPE_LENGTH (type));
+  memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
+  memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
+	  TYPE_LENGTH (type));
   VALUE_TYPE (val) = type;
   
   return val;
@@ -742,7 +742,7 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  (void) memcpy (dummy1, dummy, sizeof dummy);
+  memcpy (dummy1, dummy, sizeof dummy);
   for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
     SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
   FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
