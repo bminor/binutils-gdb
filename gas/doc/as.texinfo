@@ -1023,8 +1023,9 @@ changes the syntax and pseudo-op handling of @code{@value{AS}} to make it
 compatible with the @code{ASM68K} or the @code{ASM960} (depending upon the
 configured target) assembler from Microtec Research.  The exact nature of the
 MRI syntax will not be documented here; see the MRI manuals for more
-information.  The purpose of this option is to permit assembling existing MRI
-assembler code using @code{@value{AS}}.
+information.  Note in particular that the handling of macros and macro
+arguments is somewhat different.  The purpose of this option is to permit
+assembling existing MRI assembler code using @code{@value{AS}}.
 
 The MRI compatibility is not complete.  Certain operations of the MRI assembler
 depend upon its object file format, and can not be supported using other object
