@@ -16,6 +16,21 @@ Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Thu Aug 12 08:30:05 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* libecoff.h (ecoff_backend_data): Added constructor_reloc and
+	finish_reloc fields.
+	* ecoff.c: Move MIPS reloc support from here...
+	* coff-mips.c: to here.
+	* ecoff.c (ecoff_set_symbol_info): Get constructor reloc howto
+	from backend.
+	(ecoff_slurp_reloc_table): Removed MIPS specific stuff.  Call
+	finish_reloc backend function.
+	(ecoff_write_object_contents): Removed MIPS specific assertions.
+	* coff-mips.c (mips_finish_reloc): New function.
+	(mips_ecoff_backend_data): Fill in new fields.
+	* coff-alpha.c (alpha_ecoff_backend_data): Use NULL for new
+	fields.
+	* targets.c: Added extern for ecoffalpha_little_vec.
+
 	* bfd.c (_bfd_host_big_endian): Removed.
 	* bfd-in.h (HOST_BYTE_ORDER_BIG_P, bfd_header_twiddle_required):
 	Removed.
