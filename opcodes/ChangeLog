@@ -1,3 +1,9 @@
+start-sanitize-fr30
+1998-12-14  Dave Brolley  <brolley@cygnus.com>
+
+	* fr30-opc.c,fr30-opc.h: Regenerated.
+
+end-sanitize-fr30
 start-sanitize-vr4xxx
 1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
 
