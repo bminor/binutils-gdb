@@ -747,11 +747,11 @@ insert_catchpoint (struct ui_out *uo, void *args)
 
    NOTE drow/2003-09-09: This routine could be broken down to an object-style
    method for each breakpoint or catchpoint type.  */
-int
+static int
 insert_bp_location (struct bp_location *bpt,
-			struct ui_file *tmp_error_stream,
-			int *disabled_breaks, int *process_warning,
-			int *hw_breakpoint_error)
+		    struct ui_file *tmp_error_stream,
+		    int *disabled_breaks, int *process_warning,
+		    int *hw_breakpoint_error)
 {
   int val = 0;
 
@@ -3936,7 +3936,7 @@ adjust_breakpoint_address (CORE_ADDR bpaddr)
 
 /* Allocate a struct bp_location.  */
 
-struct bp_location *
+static struct bp_location *
 allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
 {
   struct bp_location *loc, *loc_p;

@@ -1,5 +1,10 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (insert_bp_location, allocate_bp_location): Make
+	static.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (remove_breakpoint): Take an bp_location
 	instead of a breakpoint argument.  Check the bp_location's type.
 	Fix a reversed condition for hardware breakpoints.
