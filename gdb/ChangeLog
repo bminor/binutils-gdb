@@ -1,5 +1,20 @@
 2004-04-03  Andrew Cagney  <cagney@redhat.com>
 
+	* config/pa/tm-hppah.h (FRAME_SAVED_PC_IN_SIGTRAMP)
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP)
+	(hppa32_hpux_frame_find_saved_regs_in_sigtramp)
+	(FRAME_BASE_BEFORE_SIGTRAMP)
+	(hppa32_hpux_frame_base_before_sigtramp)
+	(hppa32_hpux_frame_saved_pc_in_sigtramp): Delete.
+	* config/pa/tm-hppa64.h (hppa64_hpux_frame_saved_pc_in_sigtramp)
+	(hppa64_hpux_frame_find_saved_regs_in_sigtramp)
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP)
+	(FRAME_BASE_BEFORE_SIGTRAMP)
+	(hppa64_hpux_frame_base_before_sigtramp)
+	(FRAME_SAVED_PC_IN_SIGTRAMP): Delete.
+
+2004-04-03  Andrew Cagney  <cagney@redhat.com>
+
 	* PROBLEMS: Mention that GDB doesn't build on HP/UX 11.00.
 
 2004-04-02  Andrew Cagney  <cagney@redhat.com>

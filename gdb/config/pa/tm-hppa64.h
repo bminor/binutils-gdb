@@ -70,22 +70,4 @@ extern int hpread_adjust_stack_address (CORE_ADDR);
 #undef SR4EXPORT_LDIL_OFFSET
 #undef SR4EXPORT_LDO_OFFSET
 
-#undef FRAME_SAVED_PC_IN_SIGTRAMP
-extern void hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *tmp);
-#define FRAME_SAVED_PC_IN_SIGTRAMP(FRAME, TMP) \
-  hppa64_hpux_frame_saved_pc_in_sigtramp (FRAME, TMP)
-
-#undef FRAME_BASE_BEFORE_SIGTRAMP
-extern void hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
-                                                    CORE_ADDR *tmp);
-#define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
-  hppa64_hpux_frame_base_before_sigtramp (FRAME, TMP)
-
-#undef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
-extern void hppa64_hpux_frame_find_saved_regs_in_sigtramp
-              (struct frame_info *fi, CORE_ADDR *fsr);
-#define FRAME_FIND_SAVED_REGS_IN_SIGTRAMP(FRAME, FSR) \
-  hppa64_hpux_frame_find_saved_regs_in_sigtramp (FRAME, FSR)
-
 /* jimb: omitted purify call support */
