@@ -1,3 +1,8 @@
+2000-04-24  Nick Clifton  <nickc@cygnus.com>
+
+	* ld.texinfo (Output Section Data): Add note that section data
+	commands cannot appear outside of section directives.
+
 2000-04-2  Matthew Green  <mrg@cygnus.com>
 
 	* configure.tgt: Add NetBSD/sparc ELF, and NetBSD/sparc64 support.

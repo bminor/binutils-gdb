@@ -2486,6 +2486,16 @@ When the object file format does not have an explicit endianness, as is
 true of, for example, S-records, the value will be stored in the
 endianness of the first input object file.
 
+Note - these commands only work inside a section description and not
+between them, so the following will produce an error from the linker:
+@smallexample
+SECTIONS @{@ .text : @{@ *(.text) @}@ LONG(1) .data : @{@ *(.data) @}@ @}@
+@end smallexample
+whereas this will work:
+@smallexample
+SECTIONS @{@ .text : @{@ *(.text) ; LONG(1) @}@ .data : @{@ *(.data) @}@ @}@
+@end smallexample
+
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
