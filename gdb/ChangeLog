@@ -3,6 +3,9 @@ Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* mdebugread.c (parse_partial_symbols):  Reset includes_used
 	and dependencies_used after finishing the partial symbol table.
 
+	* rs6000-tdep.c (push_dummy_frame):  Handle lr_offset of zero
+	correctly.
+
 	* rs6000-nat.c (xcoff_relocate_core):  Don't relocate data
 	addresses for the main objfile if DONT_RELOCATE_SYMFILE_OBJFILE
 	is defined.

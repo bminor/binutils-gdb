@@ -489,7 +489,8 @@ push_dummy_frame ()
   flush_cached_frames ();
 
   /* save program counter in link register's space. */
-  write_memory (sp+fdata.lr_offset, pc_targ, 4);
+  write_memory (sp + (fdata.lr_offset ? fdata.lr_offset : DEFAULT_LR_SAVE),
+	        pc_targ, 4);
 
   /* save all floating point and general purpose registers here. */
 
