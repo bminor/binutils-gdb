@@ -1,3 +1,8 @@
+2002-02-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cpu-arm.c (processors): Replace 'arch' field with 'mach'.
+	(scan): Test against 'mach' field in info structure.
+
 2002-02-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_fake_sections): Use SHT_NOBITS when SEC_NEVER_LOAD.
