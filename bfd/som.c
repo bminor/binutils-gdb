@@ -634,8 +634,8 @@ static const struct fixup_format som_fixup_formats[256] =
   4,    "Ve=",	        /* 0xcd */
   /* R_TRANSLATED */
   0,    "",	        /* 0xce */
-  /* R_RESERVED */
-  0,    "",	        /* 0xcf */
+  /* R_AUX_UNWIND */
+  0,    "Sd=Vf=Ef=",    /* 0xcf */
   /* R_COMP1 */
   0,    "Ob=",	        /* 0xd0 */
   /* R_COMP2 */
@@ -654,13 +654,13 @@ static const struct fixup_format som_fixup_formats[256] =
   /* R_N1SEL */
   0,	"",		/* 0xd9 */
   /* R_LINETAB */
-  0,	"",		/* 0xda */
+  0,	"Eb=Sd=Ve=",	/* 0xda */
   /* R_LINETAB_ESC */
-  0,	"",		/* 0xdb */
+  0,	"Eb=Mb=",	/* 0xdb */
   /* R_LTP_OVERRIDE */
   0,	"",		/* 0xdc */
   /* R_COMMENT */
-  0,	"",		/* 0xdd */
+  0,    "Ob=Ve=",	/* 0xdd */
   /* R_RESERVED */
   0,	"",		/* 0xde */
   0,	"",		/* 0xdf */
