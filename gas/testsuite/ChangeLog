@@ -1,3 +1,17 @@
+Wed Dec 29 11:32:39 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/labelbug.s: Add more colonless label tests.
+
+Wed Dec 15 08:24:31 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* Makefile.in (site.exp): Don't set ASFLAGS.  Quote value of
+	OBJDUMPFLAGS in case it's empty.  Use temporary names until the
+	end; make creating site.exp the final step.
+	(check): Pass in ASFLAGS.
+
+	* gas/all/gas.exp: Use all_ones proc.  Change regexp for matching
+	C comments to avoid bugs in latest expect code.
+
 Wed Dec  8 14:30:14 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/m68k/disperr.s: New test.
