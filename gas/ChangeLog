@@ -3,6 +3,11 @@ Mon Aug  4 11:28:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* ecoff.c (ecoff_build_symbols): Set fMerge to 0 for an FDR which
 	has an associated external symbol.
 
+Sun Aug  3 23:23:59 1997  Richard Henderson  <rth@cygnus.com>
+ 
+        * config/tc-alpha.c (s_alpha_ucons): New function.
+        (md_pseudo_table): Add unaligned data pseudos for DWARF.
+
 start-sanitize-v850
 Thu Jul 31 15:13:43 1997  Jeffrey A Law  (law@cygnus.com)
 
