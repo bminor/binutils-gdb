@@ -1,3 +1,11 @@
+2003-10-03  Corinna Vinschen  <vinschen@redhat.com>
+
+	* dwarf2-frame.c (struct comp_unit): Add tbase member to store
+	base for DW_EH_PE_textrel encodings.
+	(read_encoded_value): Add a DW_EH_PE_textrel case.
+	(dwarf2_build_frame_info): Set unit.tbase to beginning of text
+	section.
+
 2003-10-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_build_frame_info): Fix comment.
