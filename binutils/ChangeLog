@@ -1,3 +1,7 @@
+2005-03-28  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* objdump.c (disassemble_bytes): Remove cast.
+
 2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* BRANCHES: Add binutils-csl-arm-2005q1-branch and

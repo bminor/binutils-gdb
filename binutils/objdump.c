@@ -1376,7 +1376,7 @@ disassemble_bytes (struct disassemble_info * info,
 	    {
 	      sfile.pos = 0;
 	      info->fprintf_func = (fprintf_ftype) objdump_sprintf;
-	      info->stream = (FILE *) &sfile;
+	      info->stream = &sfile;
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
 	      info->flags = 0;
