@@ -1,4 +1,4 @@
-2002-08-13  Stephen Clarke <stephen.clarke@superh.com>
+2002-08-16  Stephen Clarke <stephen.clarke@superh.com>
 
 	* gas/sh/sh64/datal32-3.d: Formatting change to match the current
 	output of objdump.
