@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
  * For every sub-segment the user mentions in the ASsembler program,
@@ -37,6 +37,8 @@
  * represent code fragments, for that sub-segment, forward chained.
  */
 
+#include "obstack.h"
+
 struct frchain			/* control building of a frag chain */
 {				/* FRCH = FRagment CHain control */
   struct frag *frch_root;	/* 1st struct frag in chain, or NULL */
@@ -49,6 +51,7 @@ struct frchain			/* control building of a frag chain */
   fixS *fix_tail;		/* Last fixup for this subsegment.  */
 #endif
   struct obstack frch_obstack;	/* for objects in this frag chain */
+  fragS *frch_frag_now;		/* frag_now for this subsegment */
 };
 
 typedef struct frchain frchainS;
@@ -56,7 +59,7 @@ typedef struct frchain frchainS;
 /* All subsegments' chains hang off here.  NULL means no frchains yet.  */
 extern frchainS *frchain_root;
 
-/* Frchain we are assembling into now That is, the current segment's
+/* Frchain we are assembling into now.  That is, the current segment's
    frag chain, even if it contains no (complete) frags. */
 extern frchainS *frchain_now;
 
@@ -64,14 +67,14 @@ extern frchainS *frchain_now;
 typedef struct
 {
   frchainS *frchainP;
-  int hadone : 1;
+  unsigned int hadone : 1;
 
   /* This field is set if this is a .bss section which does not really
      have any contents.  Once upon a time a .bss section did not have
      any frags, but that is no longer true.  This field prevent the
      SEC_HAS_CONTENTS flag from being set for the section even if
      there are frags.  */
-  int bss : 1;
+  unsigned int bss : 1;
 
   int user_stuff;
 
@@ -82,7 +85,10 @@ typedef struct
 
 #if defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
   struct internal_scnhdr scnhdr;
+  enum linkonce_type linkonce;
+  const char *name;
 #endif
+
   symbolS *dot;
 
   struct lineno_list *lineno_list_head;
@@ -130,6 +136,15 @@ extern segment_info_type segment_info[];
    frchain.  (Which is pointed to by the last text-segment frchain.) */
 extern frchainS *data0_frchainP;
 extern frchainS *bss0_frchainP;
+
+/* Dummy so stuff can compile.  Should never be used.  */
+struct seg_info_trash {
+  struct {
+    unsigned stab_string_size : 1;
+  } stabu;
+  unsigned hadone : 1;
+};
+#define seg_info(S)	(abort (), (struct seg_info_trash *) 0)
 
 #endif
 

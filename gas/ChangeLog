@@ -1,5 +1,20 @@
 Wed May  1 13:38:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* subsegs.h (segment_info_type): If MANY_SEGMENTS and not
+	BFD_ASSEMBLER, add name field.
+	* config/obj-coff.c (coff_header_append): Handle long section
+	names.
+	(crawl_symbols): Just use the name field for the symbol name,
+	without worrying about null byte termination.
+	(w_strings): Handle long section names.
+	(write_object_file): Likewise.  Also, use the name field, rather
+	than scnhdr.s_name.
+	(obj_coff_add_segment): Permit long section names.
+	(obj_coff_init_stab_section): Use the name field, rather than
+	scnhdr.s_name.
+	(adjust_stab_section): Likewise.
+	* config/te-pe.h (COFF_LONG_SECTION_NAMES): Define.
+
 	* config/tc-i960.c (brtab_emit): Don't set fx_im_disp field.
 	(mem_fmt): Likewise.
 	(md_apply_fix): Don't check fx_im_disp field.

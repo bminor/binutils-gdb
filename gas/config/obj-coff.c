@@ -1922,12 +1922,29 @@ coff_header_append (abfd, h)
 
   for (i = SEG_E0; i < SEG_LAST; i++)
     {
+#ifdef COFF_LONG_SECTION_NAMES
+      unsigned long string_size = 4;
+#endif
+
       if (segment_info[i].scnhdr.s_name[0])
 	{
-	  unsigned int size =
-	  bfd_coff_swap_scnhdr_out (abfd,
-				    &(segment_info[i].scnhdr),
-				    buffer);
+	  unsigned int size;
+
+#ifdef COFF_LONG_SECTION_NAMES
+	  /* Support long section names as found in PE.  This code
+             must coordinate with that in write_object_file and
+             w_strings.  */
+	  if (strlen (segment_info[i].name) > SCNNMLEN)
+	    {
+	      memset (segment_info[i].scnhdr.s_name, 0, SCNNMLEN);
+	      sprintf (segment_info[i].scnhdr.s_name, "/%d", string_size);
+	      string_size += strlen (segment_info[i].scnhdr.name) + 1;
+	    }
+#endif
+
+	  size = bfd_coff_swap_scnhdr_out (abfd,
+					   &(segment_info[i].scnhdr),
+					   buffer);
 	  if (size == 0)
 	    as_bad ("bfd_coff_swap_scnhdr_out failed");
 	  bfd_write (buffer, size, 1, abfd);
@@ -2891,17 +2908,9 @@ crawl_symbols (h, abfd)
 
 
   for (i = SEG_E0; i < SEG_LAST; i++)
-    {
-      if (segment_info[i].scnhdr.s_name[0])
-	{
-	  char name[9];
-
-	  strncpy (name, segment_info[i].scnhdr.s_name, 8);
-	  name[8] = '\0';
-	  segment_info[i].dot = c_section_symbol (name, i - SEG_E0 + 1);
-	}
-    }
-
+    if (segment_info[i].scnhdr.s_name[0])
+      segment_info[i].dot = c_section_symbol (segment_info[i].name,
+					      i - SEG_E0 + 1);
 
   /* Take all the externals out and put them into another chain */
   H_SET_SYMBOL_TABLE_SIZE (h, yank_symbols ());
@@ -2934,6 +2943,24 @@ w_strings (where)
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
   md_number_to_chars (where, (valueT) string_byte_count, 4);
   where += 4;
+
+#ifdef COFF_LONG_SECTION_NAMES
+  /* Support long section names as found in PE.  This code must
+     coordinate with that in coff_header_append and write_object_file.  */
+  for (i = SEG_E0; i < SEG_LAST; i++)
+    {
+      if (segment_info[i].scnhdr.s_name[0]
+	  && strlen (segment_info[i].name) > SCNNMLEN)
+	{
+	  unsigned int size;
+
+	  size = strlen (segment_info[i].name) + 1;
+	  memcpy (where, segment_info[i].name, size);
+	  where += size;
+	}
+    }
+#endif /* COFF_LONG_SECTION_NAMES */
+
   for (symbolP = symbol_rootP;
        symbolP;
        symbolP = symbol_next (symbolP))
@@ -3120,6 +3147,19 @@ write_object_file ()
 	{
 	  H_SET_NUMBER_OF_SECTIONS (&headers,
 				    H_GET_NUMBER_OF_SECTIONS (&headers) + 1);
+
+#ifdef COFF_LONG_SECTION_NAMES
+	  /* Support long section names as found in PE.  This code
+	     must coordinate with that in coff_header_append and
+	     w_strings.  */
+	  {
+	    unsigned int len;
+
+	    len = strlen (segment_info[i].name);
+	    if (len > SCNNMLEN)
+	      string_byte_count += len + 1;
+	  }
+#endif /* COFF_LONG_SECTION_NAMES */
 	}
 
       size = size_section (abfd, (unsigned int) i);
@@ -3159,7 +3199,7 @@ write_object_file ()
      correctly. */
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
-      name = segment_info[i].scnhdr.s_name;
+      name = segment_info[i].name;
 
       if (name != NULL
 	  && strncmp (".stab", name, 5) == 0
@@ -3240,16 +3280,16 @@ obj_coff_add_segment (name)
   unsigned int len;
   unsigned int i;
 
-  /* Find out if we've already got a section of this name.  */
-  len = strlen (name);
-  if (len < sizeof (segment_info[i].scnhdr.s_name))
-    ++len;
-  else
-    len = sizeof (segment_info[i].scnhdr.s_name);
+#ifndef COFF_LONG_SECTION_NAMES
+  char buf[SCNNMLEN + 1];
+
+  strncpy (buf, name, SCNNMLEN);
+  buf[SCNNMLEN] = '\0';
+  name = buf;
+#endif
+
   for (i = SEG_E0; i < SEG_LAST && segment_info[i].scnhdr.s_name[0]; i++)
-    if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0
-	&& (len == sizeof (segment_info[i].scnhdr.s_name)
-	    || segment_info[i].scnhdr.s_name[len] == '\0'))
+    if (strcmp (name, segment_info[i].name) == 0)
       return (segT) i;
 
   if (i == SEG_LAST)
@@ -3262,6 +3302,7 @@ obj_coff_add_segment (name)
   strncpy (segment_info[i].scnhdr.s_name, name,
 	   sizeof (segment_info[i].scnhdr.s_name));
   segment_info[i].scnhdr.s_flags = STYP_REG;
+  segment_info[i].name = xstrdup (name);
 
   return (segT) i;
 }
@@ -4081,8 +4122,8 @@ obj_coff_init_stab_section (seg)
   /* Zero it out. */
   memset (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
-  stabstr_name = (char *) alloca (strlen (segment_info[seg].scnhdr.s_name) + 4);
-  strcpy (stabstr_name, segment_info[seg].scnhdr.s_name);
+  stabstr_name = (char *) alloca (strlen (segment_info[seg].name) + 4);
+  strcpy (stabstr_name, segment_info[seg].name);
   strcat (stabstr_name, "str");
   stroff = get_stab_string_offset (file, stabstr_name);
   know (stroff == 1);
@@ -4104,14 +4145,14 @@ adjust_stab_section(abfd, seg)
 
   /* Look for the associated string table section. */
 
-  secname = segment_info[seg].scnhdr.s_name;
+  secname = segment_info[seg].name;
   name = (char *) alloca (strlen (secname) + 4);
   strcpy (name, secname);
   strcat (name, "str");
 
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
-      name2 = segment_info[i].scnhdr.s_name;
+      name2 = segment_info[i].name;
       if (name2 != NULL && strncmp(name2, name, 8) == 0)
 	{
 	  stabstrseg = i;
