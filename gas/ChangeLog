@@ -1,3 +1,8 @@
+1998-03-17  Ken Raeburn  <raeburn@cygnus.com>
+
+	* itbl-lex.l (yywrap): Don't define if already defined as a
+	macro.
+
 start-sanitize-sky
 Tue Mar 17 10:40:54 1998  Doug Evans  <devans@canuck.cygnus.com>
 
