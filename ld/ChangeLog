@@ -1,3 +1,8 @@
+Thu Aug 20 19:55:22 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* ldsym.c (write_file_locals): Reorder check for common or
+	undefined symbols so that it works.
+
 Tue Aug 18 13:41:36 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in: accept all m68K family members.

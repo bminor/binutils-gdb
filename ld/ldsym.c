@@ -374,7 +374,19 @@ asymbol **output_buffer;
 	}
       }
       else {
-	if (flag_is_ordinary_local(p->flags)) 
+	if (flag_is_debugger(p->flags)) 
+	{
+	  /* Only keep the debugger symbols if no stripping required */
+	  if (strip_symbols == STRIP_NONE) {
+	    *output_buffer++ = p;
+	  }
+	}
+	else if (p->section == &bfd_und_section
+		 || p->section == &bfd_com_section)
+	{
+	  /* These must be global.  */
+	}
+	else if (flag_is_ordinary_local(p->flags))
 	{
 	  if (discard_locals == DISCARD_ALL)
 	  {  }
@@ -386,19 +398,6 @@ asymbol **output_buffer;
 	  else 
 	  { *output_buffer++ = p; }
 	}
-	else if (flag_is_debugger(p->flags)) 
-	{
-	  /* Only keep the debugger symbols if no stripping required */
-	  if (strip_symbols == STRIP_NONE) {
-	    *output_buffer++ = p;
-	  }
-	}
-	else if (p->section == &bfd_und_section)
-	{			/* This must be global */
-	}
-	else if (p->section == &bfd_com_section) {
-	  /* And so must this */
-	} 
 	else if (p->flags & BSF_CTOR) {
 	  /* Throw it away */
 	}
