@@ -38,7 +38,7 @@ proc do_tests {} {
 
     send "set language chill\n" ; expect -re "$prompt $"
 
-    runto tuples.ch:31
+    runto tuples.ch:40
 
     gdb_test_exact "print v_arri" {= [(1): -1, (2): -2, (3): -3, (4): -4, (5): -5]}
     send "set v_arri := \[ 33, 44, 55, 66, 77 \]\n" ;  expect -re "$prompt $"
@@ -98,6 +98,10 @@ proc do_tests {} {
    expect -re "$prompt $"
    gdb_test_exact "print v_arrbool" {= [(1): FALSE, (2:4): TRUE, (5): FALSE]} "v_arrbool after slice assignment 2"
 
+   send "set vstr := \[ .a: 2+3, .b: 12, .ch1: 'x' \]\n"
+   expect -re "$prompt $"
+   gdb_test_exact "print vstr.a" {= 5} "vstr.a after assignment"
+   gdb_test_exact "print vstr.ch1" {= 'x'} "vstr.ch1 after assignment"
 
 #   These tests are from Cygnus PR chill/5024:
     send "break printdow\n" ; expect -re "$prompt $"

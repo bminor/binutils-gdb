@@ -28,6 +28,15 @@ DCL j r1 := 4;
 
 DCL i INT;
 
+newmode vstruct = struct (a, b long, 
+			  case b of 
+			   (42): ch8 chars(20),
+			   (52): i long
+			   else  ch1 char
+                         esac);
+
+DCL vstr vstruct := [ .a: 10, .b: 52, .i: 100 ];
+
 i := 0;
 
 END x;
