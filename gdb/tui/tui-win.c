@@ -615,7 +615,7 @@ tuiRefreshAll (void)
 	    }
 	}
     }
-  tuiShowLocatorContent ();
+  tui_show_locator_content ();
 }
 
 
@@ -1410,7 +1410,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
       if (m_hasLocator (winInfo))
 	{
 	  m_beVisible (locatorWinInfoPtr ());
-	  tuiShowLocatorContent ();
+	  tui_show_locator_content ();
 	}
       break;
     case DATA_WIN:

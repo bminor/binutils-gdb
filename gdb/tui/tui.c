@@ -1,7 +1,7 @@
 /* General functions for the WDB TUI.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -299,7 +299,7 @@ tui_set_key_mode (enum tui_key_mode mode)
   tui_current_key_mode = mode;
   rl_set_keymap (mode == tui_single_key_mode
                  ? tui_keymap : tui_readline_standard_keymap);
-  tuiShowLocatorContent ();
+  tui_show_locator_content ();
 }
 
 /* Initialize readline and configure the keymap for the switching
@@ -388,7 +388,7 @@ tui_enable (void)
       setTermWidthTo (COLS);
       def_prog_mode ();
 
-      tuiShowFrameInfo (0);
+      tui_show_frame_info (0);
       tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
@@ -413,7 +413,7 @@ tui_enable (void)
 
   tui_active = 1;
   if (deprecated_selected_frame)
-     tuiShowFrameInfo (deprecated_selected_frame);
+     tui_show_frame_info (deprecated_selected_frame);
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
@@ -566,7 +566,7 @@ tui_show_source (const char *file, int line)
   tui_add_win_to_layout (SRC_WIN);
 
   tuiUpdateSourceWindowsWithLine (cursal.symtab, line);
-  tuiUpdateLocatorFilename (file);
+  tui_update_locator_filename (file);
 }
 
 void

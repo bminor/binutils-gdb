@@ -842,7 +842,7 @@ _showSourceDisassemCommand (void)
 	      srcWin->detail.sourceInfo.hasLocator = FALSE;
 	      disassemWin->detail.sourceInfo.hasLocator = TRUE;
 	      m_beVisible (locator);
-	      tuiShowLocatorContent ();
+	      tui_show_locator_content ();
 	      tuiShowSourceContent (disassemWin);
 
 	      if (m_winPtrIsNull (cmdWin))
@@ -933,7 +933,7 @@ _showData (TuiLayoutType newLayout)
     }
   winList[winType]->detail.sourceInfo.hasLocator = TRUE;
   m_beVisible (locator);
-  tuiShowLocatorContent ();
+  tui_show_locator_content ();
   addToSourceWindows (winList[winType]);
   setCurrentLayoutTo (newLayout);
 
@@ -1113,7 +1113,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 	{
 	  (*winInfoPtr)->detail.sourceInfo.hasLocator = TRUE;
 	  m_beVisible (locator);
-	  tuiShowLocatorContent ();
+	  tui_show_locator_content ();
 	  tuiShowSourceContent (*winInfoPtr);
 
 	  if (m_winPtrIsNull (cmdWin))

@@ -1,7 +1,7 @@
 /* TUI display locator.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -244,11 +244,9 @@ tui_get_function_from_frame (struct frame_info *fi)
   return name;
 }
 
-/*
-   ** tuiShowLocatorContent()
- */
+/* tuiShowLocatorContent().   */
 void
-tuiShowLocatorContent (void)
+tui_show_locator_content (void)
 {
   char *string;
   TuiGenWinInfoPtr locator;
@@ -318,15 +316,15 @@ tui_set_locator_info (const char *filename, const char *procname, int lineno,
 
 /* Update only the filename portion of the locator.  */
 void
-tuiUpdateLocatorFilename (const char *filename)
+tui_update_locator_filename (const char *filename)
 {
   tui_set_locator_filename (filename);
-  tuiShowLocatorContent ();
+  tui_show_locator_content ();
 }
 
 /* Function to print the frame information for the TUI.  */
 void
-tuiShowFrameInfo (struct frame_info *fi)
+tui_show_frame_info (struct frame_info *fi)
 {
   TuiWinInfoPtr winInfo;
   register int i;
@@ -347,7 +345,7 @@ tuiShowFrameInfo (struct frame_info *fi)
                             tui_get_function_from_frame (fi),
                             sal.line,
                             get_frame_pc (fi));
-      tuiShowLocatorContent ();
+      tui_show_locator_content ();
       startLine = 0;
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
@@ -405,7 +403,7 @@ tuiShowFrameInfo (struct frame_info *fi)
   else
     {
       tui_set_locator_info (NULL, NULL, 0, (CORE_ADDR) 0);
-      tuiShowLocatorContent ();
+      tui_show_locator_content ();
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
 	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];

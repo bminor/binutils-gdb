@@ -1,3 +1,18 @@
+2004-01-28  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-stack.h: Update copyright.
+	(struct frame_info): Add opaque declaration.
+	(tui_update_locator_filename): Rename tuiUpdateLocatorFilename.
+	(tui_show_locator_content): Rename tuiShowLocatorContent.
+	(tui_show_frame_info): Rename tuiShowFrameInfo.
+	* tui/tui-stack.c: Update copyright.  Update references.
+	* tui/tui-winsource.c: Update references.
+	* tui/tui-win.c: Update references.
+	* tui/tui-layout.c: Update references.
+	* tui/tui-hooks.c: Update copyright, update references.
+	* tui/tui.c: Update copyright, update references.
+	* tui/tui-disasm.c: Update references.
+
 2004-01-28  David Carlton  <carlton@kealia.com>
 
 	* dwarf2read.c (add_partial_structure): Use demangled name if

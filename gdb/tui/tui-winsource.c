@@ -63,9 +63,9 @@ tui_display_main (void)
 	  tuiUpdateSourceWindowsWithAddr (addr);
 	  sal = find_pc_line (addr, 0);
           if (sal.symtab)
-             tuiUpdateLocatorFilename (sal.symtab->filename);
+             tui_update_locator_filename (sal.symtab->filename);
           else
-             tuiUpdateLocatorFilename ("??");
+             tui_update_locator_filename ("??");
 	}
     }
 }

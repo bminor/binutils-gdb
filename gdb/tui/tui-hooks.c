@@ -1,6 +1,6 @@
 /* GDB hooks for TUI.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -250,7 +250,7 @@ tui_selected_frame_level_changed_hook (int level)
         select_source_symtab (s);
 
       /* Display the frame position (even if there is no symbols).  */
-      tuiShowFrameInfo (fi);
+      tui_show_frame_info (fi);
 
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN))
@@ -268,7 +268,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
                                    int stopline, int noerror)
 {
   select_source_symtab (s);
-  tuiShowFrameInfo (deprecated_selected_frame);
+  tui_show_frame_info (deprecated_selected_frame);
 }
 
 /* Called when the target process died or is detached.
@@ -276,7 +276,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
 static void
 tui_detach_hook (void)
 {
-  tuiShowFrameInfo (0);
+  tui_show_frame_info (0);
   tui_display_main ();
 }
 

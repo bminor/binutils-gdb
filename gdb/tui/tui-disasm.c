@@ -313,10 +313,10 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
       if (sal.symtab)
 	{
 	  set_current_source_symtab_and_line (&sal);
-	  tuiUpdateLocatorFilename (sal.symtab->filename);
+	  tui_update_locator_filename (sal.symtab->filename);
 	}
       else
-	tuiUpdateLocatorFilename ("?");
+	tui_update_locator_filename ("?");
     }
 
   return;
