@@ -1,3 +1,8 @@
+Wed Mar 29 09:11:51 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* defs.h (atof): Don't provide an external declaration if atof is
+	a macro.
+
 Wed Mar 29 00:01:07 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* rs6000-tdep.c (skip_prologue):  Skip saving of LR and CR in
