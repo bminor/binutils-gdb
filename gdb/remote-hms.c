@@ -51,7 +51,7 @@ static void hms_drain ();
 static void add_commands ();
 static void remove_commands ();
 
-static int quiet = 1;
+static int quiet = 1;  /* FIXME - can be removed after Dec '94 */
 
 
 serial_t desc;
@@ -275,7 +275,7 @@ readchar ()
       error ("Serial port error!");
     }
 
-  if (!quiet)
+  if (!quiet || remote_debug)
     printf_unfiltered ("%c", buf);
 
   return buf & 0x7f;
@@ -299,7 +299,7 @@ readchar_nofail ()
   buf = SERIAL_READCHAR (desc, timeout);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
-  if (!quiet)
+  if (!quiet || remote_debug)
     printf_unfiltered ("%c", buf);
 
   return buf & 0x7f;
@@ -899,7 +899,7 @@ hms_write (a, l)
 
   SERIAL_WRITE (desc, a, l);
 
-  if (!quiet)
+  if (!quiet || remote_debug)
     {
       printf_unfiltered ("<");
       for (i = 0; i < l; i++)
@@ -1527,7 +1527,7 @@ by a serial line.",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-hms_quiet ()
+hms_quiet ()      /* FIXME - this routine can be removed after Dec '94 */
 {
   quiet = !quiet;
   if (quiet)
@@ -1535,6 +1535,7 @@ hms_quiet ()
   else
     printf_filtered ("Snoop enabled\n");
 
+  printf_filtered("`snoop' is obsolete, please use `set remotedebug'.\n");
 }
 
 hms_device (s)
@@ -1615,8 +1616,10 @@ _initialize_remote_hms ()
 
   add_com ("hms <command>", class_obscure, hms_com,
 	   "Send a command to the HMS monitor.");
+
+ /* FIXME - hms_quiet and `snoop' can be removed after Dec '94 */ 
   add_com ("snoop", class_obscure, hms_quiet,
-	   "Show what commands are going to the monitor");
+	   "Show what commands are going to the monitor (OBSOLETE - see 'set remotedebug')");
 
   add_com ("device", class_obscure, hms_device,
 	   "Set the terminal line for HMS communications");

@@ -1,3 +1,8 @@
+Wed Sep 14 18:27:42 1994  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+        * remote-hms.c: use remote_debug instead of hms_silent toggle.
+        Add warnings about depreciation of `snoop' cmd.
+
 Wed Sep 14 18:18:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* remote-hms.c (hms_read_inferior_memory):  Cope when
