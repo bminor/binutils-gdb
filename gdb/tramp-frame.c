@@ -146,8 +146,8 @@ tramp_frame_sniffer (const struct frame_unwind *self,
 }
 
 void
-tramp_frame_append (struct gdbarch *gdbarch,
-		    const struct tramp_frame *tramp_frame)
+tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
+			      const struct tramp_frame *tramp_frame)
 {
   struct frame_data *data;
   struct frame_unwind *unwinder;
@@ -171,5 +171,5 @@ tramp_frame_append (struct gdbarch *gdbarch,
   unwinder->sniffer = tramp_frame_sniffer;
   unwinder->this_id = tramp_frame_this_id;
   unwinder->prev_register = tramp_frame_prev_register;
-  frame_unwind_register_unwinder (gdbarch, unwinder);
+  frame_unwind_prepend_unwinder (gdbarch, unwinder);
 }

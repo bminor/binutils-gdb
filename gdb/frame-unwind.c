@@ -37,8 +37,9 @@ struct frame_unwind_table_entry
 
 struct frame_unwind_table
 {
-  struct frame_unwind_table_entry *head;
-  struct frame_unwind_table_entry **tail;
+  struct frame_unwind_table_entry *list;
+  /* The head of the OSABI part of the search list.  */
+  struct frame_unwind_table_entry **osabi_head;
 };
 
 static void *
@@ -46,9 +47,12 @@ frame_unwind_init (struct obstack *obstack)
 {
   struct frame_unwind_table *table
     = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
-  table->head = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
-  table->head->sniffer = dummy_frame_sniffer;
-  table->tail = &table->head->next;
+  /* Start the table out with a few default sniffers.  OSABI code
+     can't override this.  */
+  table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  table->list->sniffer = dummy_frame_sniffer;
+  /* The insertion point for OSABI sniffers.  */
+  table->osabi_head = &table->list->next;
   return table;
 }
 
@@ -57,20 +61,26 @@ frame_unwind_append_sniffer (struct gdbarch *gdbarch,
 			     frame_unwind_sniffer_ftype *sniffer)
 {
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
-  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
-  (*table->tail)->sniffer = sniffer;
-  table->tail = &((*table->tail)->next);
+  struct frame_unwind_table_entry **ip;
+
+  /* Find the end of the list and insert the new entry there.  */
+  for (ip = table->osabi_head; (*ip) != NULL; ip = &(*ip)->next);
+  (*ip) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
+  (*ip)->sniffer = sniffer;
 }
 
 void
-frame_unwind_register_unwinder (struct gdbarch *gdbarch,
+frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 				const struct frame_unwind *unwinder)
 {
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
-  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch,
-					   struct frame_unwind_table_entry);
-  (*table->tail)->unwinder = unwinder;
-  table->tail = &((*table->tail)->next);
+  struct frame_unwind_table_entry *entry;
+
+  /* Insert the new entry at the start of the list.  */
+  entry = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
+  entry->unwinder = unwinder;
+  entry->next = (*table->osabi_head);
+  (*table->osabi_head) = entry;
 }
 
 const struct frame_unwind *
@@ -80,7 +90,7 @@ frame_unwind_find_by_frame (struct frame_info *next_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
   struct frame_unwind_table_entry *entry;
-  for (entry = table->head; entry != NULL; entry = entry->next)
+  for (entry = table->list; entry != NULL; entry = entry->next)
     {
       if (entry->sniffer != NULL)
 	{

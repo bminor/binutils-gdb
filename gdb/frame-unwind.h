@@ -131,11 +131,14 @@ struct frame_unwind
   frame_sniffer_ftype *sniffer;
 };
 
-/* Register a frame unwinder, _appending_ it to the end of the search
-   list.  */
-extern void frame_unwind_register_unwinder (struct gdbarch *gdbarch,
-					    const struct frame_unwind *unwinder);
-
+/* Register a frame unwinder, _prepending_ it to the front of the
+   search list (so it is sniffed before previously registered
+   unwinders).  By using a prepend, later calls can install unwinders
+   that override earlier calls.  This allows, for instance, an OSABI
+   to install a a more specific sigtramp unwinder that overrides the
+   traditional brute-force unwinder.  */
+extern void frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
+					   const struct frame_unwind *unwinder);
 
 /* Given the NEXT frame, take a wiff of THIS frame's registers (namely
    the PC and attributes) and if it is the applicable unwinder return

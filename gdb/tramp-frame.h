@@ -63,7 +63,7 @@ struct tramp_frame
 		CORE_ADDR func);
 };
 
-void tramp_frame_append (struct gdbarch *gdbarch,
-			 const struct tramp_frame *tramp);
+void tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
+				   const struct tramp_frame *tramp);
 
 #endif

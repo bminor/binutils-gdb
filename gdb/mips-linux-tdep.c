@@ -1119,8 +1119,8 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, mips_linux_svr4_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips_linux_register_addr);
-	tramp_frame_append (gdbarch, &mips_linux_o32_sigframe);
-	tramp_frame_append (gdbarch, &mips_linux_o32_rt_sigframe);
+	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
+	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
 	break;
       case MIPS_ABI_N32:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1128,7 +1128,7 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, mips_linux_svr4_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
-	tramp_frame_append (gdbarch, &mips_linux_n32_rt_sigframe);
+	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	break;
       case MIPS_ABI_N64:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1136,7 +1136,7 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, mips64_linux_svr4_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
-	tramp_frame_append (gdbarch, &mips_linux_n64_rt_sigframe);
+	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	break;
       default:
 	internal_error (__FILE__, __LINE__, "can't handle ABI");

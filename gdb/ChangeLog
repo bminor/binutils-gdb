@@ -1,3 +1,20 @@
+2004-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* frame-unwind.c (struct frame_unwind_table, frame_unwind_init)
+	(frame_unwind_prepend_unwinder, frame_unwind_append_sniffer)
+	(frame_unwind_find_by_frame): Re-implement the unwind code so
+	that it can both prepend and append sniffers.  Replace
+	frame_unwind_register_unwinder with frame_unwind_prepend_unwinder.
+	* tramp-frame.c (tramp_frame_append): Use
+	frame_unwind_prepend_unwinder.
+	* frame-unwind.h (frame_unwind_prepend_unwinder): Replace
+	frame_unwind_register_unwinder.
+	* tramp-frame.h (tramp_frame_prepend_unwinder): Rename
+	tramp_frame_append.
+	* tramp-frame.c (tramp_frame_prepend_unwinder): Update.
+	* mips-linux-tdep.c (mips_linux_init_abi, mips_linux_init_abi) 
+	(mips_linux_init_abi): Update.
+
 2004-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-tdep.c (ELF_NREG, ELF_NFPREG, ELF_NVRREG)
