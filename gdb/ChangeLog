@@ -1,3 +1,20 @@
+Fri May  6 11:56:54 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* gdbserver/Makefile.in: Remove irrelevant definitions and
+	comments inherited from the gdb Makefile.
+	(BFD_DIR, BFD, BFD_SRC, BFD_CFLAGS): Add from gdb Makefile.
+	(VERSION): Update to 4.12.3.
+	(gdbserver): Remove any existing executable first.
+	(distclean, realclean): Remove nm.h.
+	* gdbserver/low-lynx.c: Add Sparc Lynx support.
+	* gdbserver/low-sparc.c, gdbserver/low-sun3.c (sys/wait.h):
+	Don't use absolute pathname.
+
+Thu May  5 12:00:22 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* rs6000-nat.c (vmap_ldinfo): Don't fail if fstat returns an
+	error.
+
 Wed May  4 06:56:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (proceed, normal_stop, wait_for_inferior), breakpoint.c
