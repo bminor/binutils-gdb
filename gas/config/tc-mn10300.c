@@ -846,15 +846,16 @@ keep_going:
 		  || ((insn >> 16) & 0xffff) == 0xfe02))
 	    size -= 1;
 	
-	  /* Determine offset from start of this insn to insert the
-	     reloc.  Except for a few exceptions we insert the reloc
-	     at the tail of the instruction.  */
 	  offset = size - reloc_size / 8;
 
 	  /* Choose a proper BFD relocation type.  */
 	  if (pcrel)
 	    {
-	      if (reloc_size == 32)
+	      if (size == 6)
+		reloc = BFD_RELOC_MN10300_32_PCREL;
+	      else if (size == 4)
+		reloc = BFD_RELOC_MN10300_16_PCREL;
+	      else if (reloc_size == 32)
 		reloc = BFD_RELOC_32_PCREL;
 	      else if (reloc_size == 16)
 		reloc = BFD_RELOC_16_PCREL;
@@ -866,9 +867,9 @@ keep_going:
 	  else
 	    {
 	      if (reloc_size == 32)
-		reloc = BFD_RELOC_32;
+		reloc = BFD_RELOC_MN10300_32B;
 	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_16;
+		reloc = BFD_RELOC_MN10300_16B;
 	      else if (reloc_size == 8)
 		reloc = BFD_RELOC_8;
 	      else
@@ -928,12 +929,15 @@ long
 md_pcrel_from (fixp)
      fixS *fixp;
 {
+  return fixp->fx_frag->fr_address;
+#if 0
   if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;
     }
   return fixp->fx_frag->fr_address + fixp->fx_where;
+#endif
 }
 
 int
