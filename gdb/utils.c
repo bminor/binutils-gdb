@@ -54,6 +54,8 @@
 
 #include "inferior.h" /* for signed_pointer_to_address */
 
+#include <sys/param.h>		/* For MAXPATHLEN */
+
 #include <readline/readline.h>
 
 #ifdef USE_MMALLOC
@@ -2538,7 +2540,13 @@ char *
 gdb_realpath (const char *filename)
 {
 #ifdef HAVE_REALPATH
+#if defined (PATH_MAX)
   char buf[PATH_MAX];
+#elif defined (MAXPATHLEN)
+  char buf[MAXPATHLEN];
+#else
+#error "Neither PATH_MAX nor MAXPATHLEN defined"
+#endif
   char *rp = realpath (filename, buf);
   return xstrdup (rp ? rp : filename);
 #else

@@ -1,3 +1,8 @@
+2002-01-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* utils.c: Include <sys/param.h> for MAXPATHLEN.
+	(gdb_realpath): Use MAXPATHLEN when PATH_MAX is not defined.
+
 2002-01-19  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-tdep.c (alpha_call_dummy_words): New.
