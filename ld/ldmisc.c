@@ -188,7 +188,10 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 	      /* filename from a bfd */
 	      {
 		bfd *abfd = va_arg (arg, bfd *);
-		if (abfd->my_archive)
+
+		if (abfd == NULL)
+		  fprintf (fp, "<none>");
+		else if (abfd->my_archive)
 		  fprintf (fp, "%s(%s)", abfd->my_archive->filename,
 			   abfd->filename);
 		else

@@ -1,3 +1,8 @@
+2004-12-16  Martin Kögler  <mkoegler@auto.tuwien.ac.at>
+
+	* ldmisc.c (vfinfo): Handle the case where %B is passed a NULL
+	BFD.
+
 2004-12-07  Ben Elliston  <bje@gnu.org>
 
 	* ldemul.h: Forward declare struct option.
