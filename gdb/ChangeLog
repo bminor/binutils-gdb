@@ -1,3 +1,7 @@
+2000-09-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* MAINTAINERS: Add myself as threads co-maintainer.
+
 2000-09-01  David Anderson  <davea@sgi.com>
 
 	* arch-utils.c arch-utils.h blockframe.c fork-child.c:

@@ -159,6 +159,7 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
 tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
+			Mark Kettenis		kettenis@gnu.org
 breakpoints		Michael Snyder		msnyder@cygnus.com
 			Jim Blandy		jimb@cygnus.com
 language support	David Taylor		taylor@cygnus.com
