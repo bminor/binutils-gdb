@@ -6976,8 +6976,7 @@ updated the 68k machine description so that Motorola's opcodes always produced
 fixed-size instructions (e.g. @code{jsr}), while synthetic instructions
 remained shrinkable (@code{jbsr}).  John fixed many bugs, including true tested
 cross-compilation support, and one bug in relaxation that took a week and
-required the apocryphal one-bit fix.
-@c FIXME ``apocryphal'' surely wrong.  What's meant?
+required the proverbial one-bit fix.
 
 Ian Lance Taylor of Cygnus Support merged the Motorola and MIT syntax for the
 68k, completed support for some COFF targets (68k, i386 SVR3, and SCO Unix),
