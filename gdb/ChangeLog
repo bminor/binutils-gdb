@@ -1,3 +1,26 @@
+Wed Sep 16 14:57:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* stabsread.c (resolve_symbol_reference):  Return 1 on success, 0 on
+	failure.
+	* (define_symbol):  Check return value from resolve_symbol_reference,
+	and drop symbol if it fails.
+
+Tue Sep 15 15:24:16 1998  Stu Grossman  <grossman@fencer.cygnus.com>
+
+	* stabsread.c:  Make all complaints static.
+	* Fix formatting of live range splitting code.
+	* (resolve_symbol_reference define_symbol resolve_live_range):  Change
+	errors to complaints so that bad live range symbols won't abort the
+	entire symbol table.  Handle errors by aborting just the current
+	symbol.
+	* (ref_init):  Goes away.  Folded into ref_add().
+	* (REF_MAP_SIZE):  Put parens around parameter so that args like
+	`1 + 2' get handled correctly (yes, this was a real bug).
+	* (ref_add):  Remove check for allocation failures.  Not necessary
+	when using xrealloc().  Fix pointer arithmetic problem when clearing
+	memory.  This and the previous patch prevent random SEGV's when there
+	are lots of live range symbols.
+	
 Tue Sep 15 14:02:01 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* remote-rdi.c: Prevent multiple attempts to close the remote

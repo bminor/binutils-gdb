@@ -1044,7 +1044,7 @@ resolve_cfront_continuation (objfile, sym, p)
 
 
 /* This routine fixes up symbol references/aliases to point to the original
-   symbol definition.  */
+   symbol definition.  Returns 0 on failure, non-zero on success.  */
 
 static int
 resolve_symbol_reference (objfile, sym, p)
@@ -1133,8 +1133,8 @@ resolve_symbol_reference (objfile, sym, p)
 
       /* Get to the end of the list.  */
       for (temp = SYMBOL_ALIASES (ref_sym);
-	   temp->next; 
-	   temp = temp->next);
+	   temp->next;
+	   temp = temp->next)
 	;
       temp->next = alias;
     }
@@ -1146,7 +1146,7 @@ resolve_symbol_reference (objfile, sym, p)
    SYMBOL_NAME (sym) = SYMBOL_NAME (ref_sym);
 
   /* Done!  */
-  return 0;  
+  return 1;
 }
 
 /* Structure for storing pointers to reference definitions for fast lookup 
@@ -1392,7 +1392,8 @@ define_symbol (valu, string, desc, type, objfile)
       if (refnum >= 0)
 	  ref_add (refnum, sym, string, SYMBOL_VALUE (sym));
       else
-	resolve_symbol_reference (objfile, sym, string);
+	if (!resolve_symbol_reference (objfile, sym, string))
+	  return NULL;
 
       /* S..P contains the name of the symbol.  We need to store
 	 the correct name into SYMBOL_NAME.  */
