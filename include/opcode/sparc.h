@@ -1701,7 +1701,7 @@ condfc("fbule",	"cb013", 0xe),
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"i+1", F_DELAYED, v6 }, /* jmpl i+rs1,%g0 */
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,	"i", F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
 
-{ "nop",	F2(0, 4), F2(~0, ~4), "", 0, v6 }, /* sethi 0, %g0 */
+{ "nop",	F2(0, 4), F2(~0, ~4)|RD_G0, "", 0, v6 }, /* sethi 0, %g0 */
 
 { "set",	F2(0x0, 0x4), F2(~0x0, ~0x4), "Sh,d", F_ALIAS, v6 },
 

@@ -1,0 +1,19 @@
+Sun Dec 22 12:18:18 1991  Michael Tiemann  (tiemann at cygnus.com)
+
+	* sparc.h (nop): Add RD_GO to `lose' so that only %g0 in dest is
+	disassembled as a nop.
+
+Tue Dec 10 00:22:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* sparc.h: fix a typo.
+
+Sat Nov 30 20:40:51 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* a29k.h, arm.h, h8300.h,  i386.h,  i860.h, i960.h , m68k.h, 
+	m88k.h, mips.h , np1.h, ns32k.h, pn.h, pyr.h, sparc.h, tahoe.h,
+	vax.h, ChangeLog: renamed from ../<foo>-opcode.h
+
+
+	
+
+
