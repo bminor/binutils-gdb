@@ -3483,6 +3483,11 @@ method like @code{INTEGER_TO_ADDRESS} certainly makes it possible for
 @xref{Target Architecture Definition, , Pointers Are Not Always
 Addresses}.
 
+@item NEED_TEXT_START_END
+@findex NEED_TEXT_START_END
+Define this if @value{GDBN} should determine the start and end addresses of the
+text section.  (Seems dubious.)
+
 @item NO_HIF_SUPPORT
 @findex NO_HIF_SUPPORT
 (Specific to the a29k.)

@@ -1,8 +1,3 @@
-2003-09-19  Andrew Cagney  <cagney@redhat.com>
-
-	* gdbint.texinfo (Target Architecture Definition): Delete
-	documentation for NEED_TEXT_START_END.
-
 2003-09-18  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
