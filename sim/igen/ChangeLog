@@ -1,7 +1,23 @@
+Fri Dec  4 15:14:09 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-engine.c (print_run_body): Prefix instruction_address.
+
+Wed Oct 28 18:12:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_WARNINGS): Update to match ../common/aclocal.m4
+ 	changes.
+
+Wed Aug 12 10:55:28 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gen-icache.c (print_icache_extraction): #undef a generated
+ 	symbol before #define'ing it, to remove conflict with system
+ 	macros.
+
 Wed Jul 29 10:07:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* gen.c (gen_entry_expand_opcode): Extract the field value from an
- 	opcode using the correct location bits.
+	* gen.c (gen_entry_expand_opcode): For conditional, fields.  Fix
+ 	the extraction of the value from its source - both table and bit
+ 	cases were wrong.
 
 Tue Jul 28 11:19:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
