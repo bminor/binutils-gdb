@@ -40,7 +40,7 @@ if test "$RELOCATING"; then
   # because bash 2.x will lose the doublequotes.
   cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
-	  	           "${LITTLE_OUTPUT_FORMAT}")}
+	  	           "${LITTLE_OUTPUT_FORMAT}")
 EOF
 fi
 
