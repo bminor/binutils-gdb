@@ -91,79 +91,43 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++
 #
 # -- chastain 2004-01-01
 
-# compatibility kludges
-set kk0 ""
-set kk1 ""
-set kk2 ""
-set kk3 ""
-set kk4 ""
-set kk5 ""
-
-proc kk_debug { } {
-    global kk0
-    global kk1
-    global kk2
-    global kk3
-    global kk4
-    global kk5
-    set kk0 " (0)"
-    set kk1 " (1)"
-    set kk2 " (2)"
-    set kk3 " (3)"
-    set kk4 " (4)"
-    set kk5 " (5)"
-}
-
 proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fields re_access_methods re_methods re_synth_gcc_2 re_synth_gcc_3 re_star } {
     global gdb_prompt
     global wsopt
     global ws
     global nl
 
-    global kk0
-    global kk1
-    global kk2
-    global kk3
-    global kk4
-    global kk5
-
     gdb_test_multiple "$command" "$testname" {
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 2.95.3, dwarf-2, no vbptr
 	    # gcc 3.X, abi 1, dwarf-2
 	    # gcc 3.X, abi 2, dwarf-2
-	    pass "$testname$kk0"
+	    pass "$testname"
 	}
 	-re "type = $re_class${wsopt}$re_vbptr${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 2.95.3, dwarf-2, vbptr
 	    # TODO: drow says the vbptr is a bug
-	    pass "$testname$kk1"
+	    pass "$testname"
 	}
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_2${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 2.95.3, stabs+, no vbptr
-	    pass "$testname$kk2"
+	    pass "$testname"
 	}
 	-re "type = $re_class${wsopt}$re_vbptr${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_2${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 2.95.3, stabs+, vbptr
 	    # TODO: drow says the vbptr is a bug
-	    pass "$testname$kk3"
+	    pass "$testname"
 	}
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_synth_gcc_3${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 3.X, abi 1, stabs+
-	    pass "$testname$kk4"
+	    pass "$testname"
 	}
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods${wsopt}$re_synth_gcc_3$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 3.X, abi 2, stabs+
-	    pass "$testname$kk5"
+	    pass "$testname"
 	}
     }
 
-    set kk0 ""
-    set kk1 ""
-    set kk2 ""
-    set kk3 ""
-    set kk4 ""
-    set kk5 ""
 }
 
 proc test_ptype_of_classes {} {
@@ -171,16 +135,8 @@ proc test_ptype_of_classes {} {
     global ws
     global nl
 
-    global kk0
-    global kk1
-    global kk2
-    global kk3
-    global kk4
-    global kk5
-
     # class VA
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype VA" "ptype VA" \
 	"((struct|class) VA \{${ws}public:|struct VA \{)" \
 	"" \
@@ -192,7 +148,6 @@ proc test_ptype_of_classes {} {
 
     # class VB
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype VB" "ptype VB" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \
@@ -204,7 +159,6 @@ proc test_ptype_of_classes {} {
 
     # class V
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype V" "ptype V" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -216,8 +170,6 @@ proc test_ptype_of_classes {} {
 
     # class A
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype A" "ptype A" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -229,7 +181,6 @@ proc test_ptype_of_classes {} {
 
     # class B
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype B" "ptype B" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -241,8 +192,6 @@ proc test_ptype_of_classes {} {
 
     # class C
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype C" "ptype C" \
 	"class C : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -254,7 +203,6 @@ proc test_ptype_of_classes {} {
 
     # class AD
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype AD" "ptype AD" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -266,8 +214,6 @@ proc test_ptype_of_classes {} {
 
     # class D
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype D" "ptype D" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -280,7 +226,6 @@ proc test_ptype_of_classes {} {
     # class E
     # TODO: E does not show a vbptr for V.  That seems strange.
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype E" "ptype E" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -292,8 +237,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of D
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype dd" "ptype dd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -305,8 +248,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of D *
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype ppd" "ptype ppd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -319,7 +260,6 @@ proc test_ptype_of_classes {} {
     # An instance of AD *
     # TODO: this should be named pADd, not pAd.
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pAd" "ptype pAd" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -331,8 +271,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of A
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype a" "ptype a" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -344,7 +282,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of B
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype b" "ptype b" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -356,8 +293,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of C
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype c" "ptype c" \
 	"class C : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -369,8 +304,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of D
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype d" "ptype d" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -382,7 +315,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of E
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype e" "ptype e" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -394,7 +326,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of V
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype v" "ptype v" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -406,7 +337,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of VB
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype vb" "ptype vb" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \
@@ -418,8 +348,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of A *
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pAa" "ptype pAa" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -431,8 +359,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of A *
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pAe" "ptype pAe" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -444,7 +370,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of B *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pBe" "ptype pBe" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -456,8 +381,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of D *
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pDd" "ptype pDd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -469,8 +392,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of D *
 
-    set kk0 " (aCC)"
-    set kk1 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pDe" "ptype pDe" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -482,7 +403,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of V *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVa" "ptype pVa" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -494,7 +414,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of V *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVv" "ptype pVv" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -506,7 +425,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of V *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVe" "ptype pVe" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -518,7 +436,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of V *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVd" "ptype pVd" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -530,7 +447,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of AD *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pADe" "ptype pADe" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -542,7 +458,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of E *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pEe" "ptype pEe" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -554,7 +469,6 @@ proc test_ptype_of_classes {} {
 
     # An instance of VB *
 
-    set kk0 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVB" "ptype pVB" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \
@@ -588,38 +502,6 @@ proc test_virtual_calls {} {
     gdb_test "print pDe->vvb()" "\\$\[0-9\]+ = 411"
     gdb_test "print pEe->vd()"  "\\$\[0-9\]+ = 282"
     gdb_test "print pEe->fvb()" "\\$\[0-9\]+ = 311"
-
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=2.95.3, goption=-gdwarf-2.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=2.95.3, goption=-gstabs+.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=3.0.3, goption=-gdwarf-2.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=3.0.3, goption=-gstabs+.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=3.0.4-20020215, goption=-gdwarf-2.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=3.0.4-20020215, goption=-gstabs+.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=gcc-3_0-branch%2002-02-16, goption=-gdwarf-2.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=gcc-3_0-branch%2002-02-16, goption=-gstabs+.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=HEAD%2002-02-16, goption=-gdwarf-2.
-    #
-    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
-    # gdb=HEAD%2002-02-16, gcc=HEAD%2002-02-16, goption=-gstabs+.
-    #
-    # -- chastain 2002-02-20
 
     # more recent results:
     # wrong value "202"
