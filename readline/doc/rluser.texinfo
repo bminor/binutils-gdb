@@ -73,8 +73,8 @@ as you type it in, allowing you to just fix your typo, and not forcing
 you to retype the majority of the line.  Using these editing commands,
 you move the cursor to the place that needs correction, and delete or
 insert the text of the corrections.  Then, when you are satisfied with
-the line, you simply press @key{RETURN}.  You do not have to be at the
-end of the line to press @key{RETURN}; the entire line is accepted
+the line, you simply press @key{RET}.  You do not have to be at the
+end of the line to press @key{RET}; the entire line is accepted
 regardless of the location of the cursor within the line.
 
 @menu
@@ -176,8 +176,7 @@ Kill from the cursor to the previous whitespace.  This is different than
 
 @end table
 
-And, here is how to @dfn{yank} the text back into the line.  Yanking
-is
+And, here is how to @dfn{yank} the text back into the line.  
 
 @table @key
 @item C-y
@@ -216,7 +215,7 @@ the @key{C-d} command an argument of 10, you could type @key{M-1 0 C-d}.
 @node Readline Init File
 @section Readline Init File
 
-Although the Readline library comes with a set of Emacs-like
+Although the Readline library comes with a set of @sc{gnu} Emacs-like
 keybindings, it is possible that you would like to use a different set
 of keybindings.  You can customize programs that use Readline by putting
 commands in an @dfn{init} file in your home directory.  The name of this
@@ -230,7 +229,7 @@ incorporating any changes that you might have made to it.
 
 @menu
 * Readline Init Syntax::	Syntax for the commands in @file{~/.inputrc}.
-* Readline Vi Mode::		Switching to @code{vi} mode in Readline.
+* Readline vi Mode::		Switching to @code{vi} mode in Readline.
 @end menu
 
 @node Readline Init Syntax
@@ -243,7 +242,7 @@ file:
 @item Variable Settings
 You can change the state of a few variables in Readline.  You do this by
 using the @code{set} command within the init file.  Here is how you
-would specify that you wish to use Vi line editing commands:
+would specify that you wish to use @code{vi} line editing commands:
 
 @example
 set editing-mode vi
@@ -257,7 +256,7 @@ fact, that we just iterate them here:
 @item editing-mode
 @vindex editing-mode
 The @code{editing-mode} variable controls which editing mode you are
-using.  By default, GNU Readline starts up in Emacs editing mode, where
+using.  By default, @sc{gnu} Readline starts up in Emacs editing mode, where
 the keystrokes are most similar to Emacs.  This variable can either be
 set to @code{emacs} or @code{vi}.
 
@@ -312,7 +311,7 @@ expressed on the right hand side (that is, to insert the text
 @item @w{"@var{keyseq}": @var{function-name} or @var{macro}}
 @var{keyseq} differs from @var{keyname} above in that strings denoting
 an entire key sequence can be specified.  Simply place the key sequence
-in double quotes.  GNU Emacs style key escapes can be used, as in the
+in double quotes.  @sc{gnu} Emacs style key escapes can be used, as in the
 following example:
 
 @example
@@ -387,7 +386,7 @@ Move `down' through the history list.
 Move to the first line in the history.
 
 @item end-of-history (@key{M->})
-Move to the end of the input history, i.e., the line you are entering!
+Move to the end of the input history, i.e., the line you are entering.
 
 @item reverse-search-history (@key{C-r})
 Search backward starting at the current line and moving `up' through
@@ -410,7 +409,7 @@ beginning of the line, and there are no characters in the line, and
 the last character typed was not @key{C-d}, then return EOF.
 
 @item backward-delete-char (Rubout)
-Delete the character behind the cursor.  A numeric arg says to kill
+Delete the character behind the cursor.  A numeric argument says to kill
 the characters instead of deleting them.
 
 @item quoted-insert (@key{C-q}, @key{C-v})
@@ -426,7 +425,7 @@ Insert yourself.
 @item transpose-chars (@key{C-t})
 Drag the character before point forward over the character at point.
 Point moves forward as well.  If point is at the end of the line, then
-transpose the two characters before point.  Negative args don't work.
+transpose the two characters before point.  Negative arguments don't work.
 
 @item transpose-words (@key{M-t})
 Drag the word behind the cursor past the word in front of the cursor
@@ -465,13 +464,13 @@ words, to the end of the next word.
 Kill the word behind the cursor.
 
 @item unix-line-discard (@key{C-u})
-Do what @key{C-u} used to do in Unix line input.  We save the killed text on
-the kill-ring, though.
+Kill the whole line the way @key{C-u} used to in Unix line input.  
+The killed text is saved on the kill-ring.
 
 @item unix-word-rubout (@key{C-w})
-Do what @key{C-w} used to do in Unix line input.  The killed text is saved
-on the kill-ring.  This is different than backward-kill-word because
-the word boundaries differ.
+Kill the word the way @key{C-w} used to in Unix line input.  
+The killed text is saved on the kill-ring.  This is different than 
+backward-kill-word because the word boundaries differ.
 
 @item yank (@key{C-y})
 Yank the top of the kill ring into the buffer at point.
@@ -492,7 +491,7 @@ Add this digit to the argument already accumulating, or start a new
 argument.  @key{M--} starts a negative argument.
 
 @item universal-argument ()
-Do what @key{C-u} does in emacs.  By default, this is not bound.
+Do what @key{C-u} does in @sc{gnu} Emacs.  By default, this is not bound.
 @end ftable
 
 
@@ -507,7 +506,7 @@ implementation defined.  Generally, if you are typing a filename
 argument, you can do filename completion; if you are typing a command,
 you can do command completion, if you are typing in a symbol to GDB, you
 can do symbol name completion, if you are typing in a variable to Bash,
-you can do variable name completion...
+you can do variable name completion.
 
 @item possible-completions (M-?)
 List the possible completions of the text before point.
@@ -548,20 +547,20 @@ command enough times to get back to the beginning.
 @end ftable
 
 @need 2000
-@node Readline Vi Mode
-@subsection Readline Vi Mode
+@node Readline vi Mode
+@subsection Readline @code{vi} Mode
 
 @cindex @code{vi} style command editing
 @kindex toggle-editing-mode
-While the Readline library does not have a full set of Vi editing
+While the Readline library does not have a full set of @code{vi} editing
 functions, it does contain enough to allow simple editing of the line.
 
-In order to switch interactively between Emacs and Vi editing modes, use
-the command @key{M-C-j} (toggle-editing-mode).
+In order to switch interactively between @sc{gnu} Emacs and @code{vi} 
+editing modes, use the command @key{M-C-j} (toggle-editing-mode).
 
-When you enter a line in Vi mode, you are already placed in `insertion'
+When you enter a line in @code{vi} mode, you are already placed in `insertion'
 mode, as if you had typed an `i'.  Pressing @key{ESC} switches you into
 `edit' mode, where you can edit the text of the line with the standard
-Vi movement keys, move to previous history lines with `k', and following
+@code{vi} movement keys, move to previous history lines with `k', and following
 lines with `j', and so forth.
 
