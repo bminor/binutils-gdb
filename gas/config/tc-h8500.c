@@ -1230,7 +1230,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return 0;
 }
 
 int

@@ -1,4 +1,16 @@
-	Mon Oct 11 16:46:31 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+Tue Oct 12 03:33:26 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-i960.c (md_begin): Use null pointer, not empty string,
+	as initial "return" value in case hashing isn't needed.
+
+	* config/tc-a29k.c (md_atof): Return null, not empty string, on
+	success.
+	* config/tc-h8300.c (md_atof), config/tc-h8500.c (md_atof),
+	config/tc-hppa.c (md_atof), config/tc-i860.c (md_atof),
+	config/tc-i960.c (md_atof), config/tc-m88k.c (md_atof),
+	config/tc-ns32k.c (md_atof), config/tc-sh.c (md_atof): Ditto.
+
+Mon Oct 11 16:46:31 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	fix for pr 3571
 	* config/tc-h8300.c (get_specific): Special action if 8 bit
