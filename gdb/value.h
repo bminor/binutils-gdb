@@ -492,7 +492,11 @@ extern void supply_register (int regnum, char *val);
 
 extern int register_cached (int regnum);
 
+extern void set_register_cached (int regnum, int state);
+
 extern void register_changed (int regnum);
+
+extern char *register_buffer (int regnum);
 
 extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,

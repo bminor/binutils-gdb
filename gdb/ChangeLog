@@ -1,5 +1,31 @@
 2001-01-08  Nicholas Duffek  <nsd@redhat.com>
 
+	* regcache.c (set_register_cached, register_buffer,
+	real_register, pseudo_register fetch_register, store_register):
+	New functions.
+	(register_changed, read_relative_register_raw_bytes_for_frame,
+	registers_changed, registers_fetched, read_register_bytes,
+	read_register_gen, write_register_gen, read_register,
+	read_signed_register, write_register, supply_register): Replace
+	register_valid[] with register_cached() and
+	set_register_cached().
+	(read_register_bytes, read_register_gen, write_register_gen,
+	read_register, read_signed_register, write_register,
+	supply_register): Replace registers[] with register_buffer().
+	(read_register_bytes, read_register_gen, read_register,
+	read_signed_register): Call fetch_register().
+	(write_register_gen, write_register): Call real_register() and
+	store_register().
+	(write_register_bytes): Call store_register().
+	* value.h (set_register_cached, register_buffer): Prototype.
+	* remote.c (remote_fetch_registers): Allocate regs[] with a
+	run-time size.  Replace register_valid[] with
+	set_register_cached().
+	(store_register_using_P, remote_store_registers): Replace
+	registers[] with register_buffer().
+
+2001-01-08  Nicholas Duffek  <nsd@redhat.com>
+
 	* regcache.c: Change "write-back" comment to "write-through".
 	Change "regno" to "regnum".
 	(read_register, read_signed_register): Remove "raw" from return

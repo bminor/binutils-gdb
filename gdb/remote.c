@@ -3025,7 +3025,7 @@ remote_fetch_registers (int regno)
   char *buf = alloca (PBUFSIZ);
   int i;
   char *p;
-  char regs[REGISTER_BYTES];
+  char *regs = alloca (REGISTER_BYTES);
 
   set_thread (inferior_pid, 1);
 
@@ -3090,7 +3090,7 @@ supply_them:
     {
       supply_register (i, &regs[REGISTER_BYTE (i)]);
       if (buf[REGISTER_BYTE (i) * 2] == 'x')
-	register_valid[i] = -1;	/* register value not available */
+	set_register_cached (i, -1);
     }
 }
 
@@ -3127,7 +3127,7 @@ store_register_using_P (int regno)
 
   sprintf (buf, "P%x=", regno);
   p = buf + strlen (buf);
-  regp = &registers[REGISTER_BYTE (regno)];
+  regp = register_buffer (regno);
   for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
     {
       *p++ = tohex ((regp[i] >> 4) & 0xf);
@@ -3141,7 +3141,7 @@ store_register_using_P (int regno)
 
 
 /* Store register REGNO, or all registers if REGNO == -1, from the contents
-   of REGISTERS.  FIXME: ignores errors.  */
+   of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
 remote_store_registers (int regno)
@@ -3149,6 +3149,7 @@ remote_store_registers (int regno)
   char *buf = alloca (PBUFSIZ);
   int i;
   char *p;
+  char *regs;
 
   set_thread (inferior_pid, 1);
 
@@ -3186,12 +3187,13 @@ remote_store_registers (int regno)
   /* Command describes registers byte by byte,
      each byte encoded as two hex characters.  */
 
+  regs = register_buffer (-1);
   p = buf + 1;
   /* remote_prepare_to_store insures that register_bytes_found gets set.  */
   for (i = 0; i < register_bytes_found; i++)
     {
-      *p++ = tohex ((registers[i] >> 4) & 0xf);
-      *p++ = tohex (registers[i] & 0xf);
+      *p++ = tohex ((regs[i] >> 4) & 0xf);
+      *p++ = tohex (regs[i] & 0xf);
     }
   *p = '\0';
 

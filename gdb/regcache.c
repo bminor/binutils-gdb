@@ -69,13 +69,72 @@ register_cached (int regnum)
   return register_valid[regnum];
 }
 
+/* Record that REGNUM's value is cached if STATE is >0, uncached but
+   fetchable if STATE is 0, and uncached and unfetchable if STATE is <0.  */
+
+void
+set_register_cached (int regnum, int state)
+{
+  register_valid[regnum] = state;
+}
+
 /* REGISTER_CHANGED
 
    invalidate a single register REGNUM in the cache */
 void
 register_changed (int regnum)
 {
-  register_valid[regnum] = 0;
+  set_register_cached (regnum, 0);
+}
+
+/* If REGNUM >= 0, return a pointer to register REGNUM's cache buffer area,
+   else return a pointer to the start of the cache buffer.  */
+
+char *
+register_buffer (int regnum)
+{
+  if (regnum < 0)
+    return registers;
+  else
+    return &registers[REGISTER_BYTE (regnum)];
+}
+
+/* Return whether register REGNUM is a real register.  */
+
+static int
+real_register (int regnum)
+{
+  return regnum >= 0 && regnum < NUM_REGS;
+}
+
+/* Return whether register REGNUM is a pseudo register.  */
+
+static int
+pseudo_register (int regnum)
+{
+  return regnum >= NUM_REGS && regnum < NUM_REGS + NUM_PSEUDO_REGS;
+}
+
+/* Fetch register REGNUM into the cache.  */
+
+static void
+fetch_register (int regnum)
+{
+  if (real_register (regnum))
+    target_fetch_registers (regnum);
+  else if (pseudo_register (regnum))
+    FETCH_PSEUDO_REGISTER (regnum);
+}
+
+/* Write register REGNUM cached value to the target.  */
+
+static void
+store_register (int regnum)
+{
+  if (real_register (regnum))
+    target_store_registers (regnum);
+  else if (pseudo_register (regnum))
+    STORE_PSEUDO_REGISTER (regnum);
 }
 
 /* FIND_SAVED_REGISTER ()
@@ -255,7 +314,7 @@ read_relative_register_raw_bytes_for_frame (int regnum,
   get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, frame,
 		      regnum, (enum lval_type *) NULL);
 
-  if (register_valid[regnum] < 0)
+  if (register_cached (regnum) < 0)
     return 1;			/* register value not available */
 
   return optim;
@@ -303,12 +362,12 @@ registers_changed (void)
   alloca (0);
 
   for (i = 0; i < ARCH_NUM_REGS; i++)
-    register_valid[i] = 0;
+    set_register_cached (i, 0);
 
   /* Assume that if all the hardware regs have changed, 
      then so have the pseudo-registers.  */
   for (i = NUM_REGS; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    register_valid[i] = 0;
+    set_register_cached (i, 0);
 
   if (registers_changed_hook)
     registers_changed_hook ();
@@ -325,7 +384,7 @@ registers_fetched (void)
   int i;
 
   for (i = 0; i < ARCH_NUM_REGS; i++)
-    register_valid[i] = 1;
+    set_register_cached (i, 1);
   /* Do not assume that the pseudo-regs have also been fetched.
      Fetching all real regs might not account for all pseudo-regs.  */
 }
@@ -370,7 +429,7 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
     {
       int regstart, regend;
 
-      if (register_valid[regnum])
+      if (register_cached (regnum))
 	continue;
 
       if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
@@ -385,25 +444,21 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
 
       /* We've found an uncached register where at least one byte will be read.
          Update it from the target.  */
-      if (regnum < NUM_REGS)
-	target_fetch_registers (regnum);
-      else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-	FETCH_PSEUDO_REGISTER (regnum);
+      fetch_register (regnum);
 
-      if (!register_valid[regnum])
+      if (!register_cached (regnum))
 	{
 	  /* Sometimes pseudoregs are never marked valid, so that they 
 	     will be fetched every time (it can be complicated to know
 	     if a pseudoreg is valid, while "fetching" them can be cheap). 
 	     */
 	  if (regnum < NUM_REGS)
-	    error ("read_register_bytes:  Couldn't update register %d.",
-		   regnum);
+ 	    error ("read_register_bytes:  Couldn't update register %d.", regnum);
 	}
     }
 
   if (myaddr != NULL)
-    memcpy (myaddr, &registers[inregbyte], inlen);
+    memcpy (myaddr, register_buffer (-1) + inregbyte, inlen);
 }
 
 /* Read register REGNUM into memory at MYADDR, which must be large
@@ -420,14 +475,10 @@ read_register_gen (int regnum, char *myaddr)
       registers_pid = inferior_pid;
     }
 
-  if (!register_valid[regnum])
-    {
-      if (regnum < NUM_REGS)
-	target_fetch_registers (regnum);
-      else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-	FETCH_PSEUDO_REGISTER (regnum);
-    }
-  memcpy (myaddr, &registers[REGISTER_BYTE (regnum)],
+  if (!register_cached (regnum))
+    fetch_register (regnum);
+
+  memcpy (myaddr, register_buffer (regnum),
 	  REGISTER_RAW_SIZE (regnum));
 }
 
@@ -460,21 +511,17 @@ write_register_gen (int regnum, char *myaddr)
   /* If we have a valid copy of the register, and new value == old value,
      then don't bother doing the actual store. */
 
-  if (register_valid[regnum]
-      && memcmp (&registers[REGISTER_BYTE (regnum)], myaddr, size) == 0)
+  if (register_cached (regnum)
+      && memcmp (register_buffer (regnum), myaddr, size) == 0)
     return;
 
-  if (regnum < NUM_REGS)
+  if (real_register (regnum))
     target_prepare_to_store ();
 
-  memcpy (&registers[REGISTER_BYTE (regnum)], myaddr, size);
+  memcpy (register_buffer (regnum), myaddr, size);
 
-  register_valid[regnum] = 1;
-
-  if (regnum < NUM_REGS)
-    target_store_registers (regnum);
-  else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-    STORE_PSEUDO_REGISTER (regnum);
+  set_register_cached (regnum, 1);
+  store_register (regnum);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR
@@ -525,10 +572,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 		  myaddr + (overlapstart - myregstart),
 		  overlapend - overlapstart);
 
-	  if (regnum < NUM_REGS)
-	    target_store_registers (regnum);
-	  else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-	    STORE_PSEUDO_REGISTER (regnum);
+	  store_register (regnum);
 	}
     }
 }
@@ -545,15 +589,10 @@ read_register (int regnum)
       registers_pid = inferior_pid;
     }
 
-  if (!register_valid[regnum])
-    {
-      if (regnum < NUM_REGS)
-	target_fetch_registers (regnum);
-      else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-	FETCH_PSEUDO_REGISTER (regnum);
-    }
+  if (!register_cached (regnum))
+    fetch_register (regnum);
 
-  return (extract_unsigned_integer (&registers[REGISTER_BYTE (regnum)],
+  return (extract_unsigned_integer (register_buffer (regnum),
 				    REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -588,10 +627,10 @@ read_signed_register (int regnum)
       registers_pid = inferior_pid;
     }
 
-  if (!register_valid[regnum])
-    target_fetch_registers (regnum);
+  if (!register_cached (regnum))
+    fetch_register (regnum);
 
-  return (extract_signed_integer (&registers[REGISTER_BYTE (regnum)],
+  return (extract_signed_integer (register_buffer (regnum),
 				  REGISTER_RAW_SIZE (regnum)));
 }
 
@@ -641,21 +680,17 @@ write_register (int regnum, LONGEST val)
   /* If we have a valid copy of the register, and new value == old value,
      then don't bother doing the actual store. */
 
-  if (register_valid[regnum]
-      && memcmp (&registers[REGISTER_BYTE (regnum)], buf, size) == 0)
+  if (register_cached (regnum)
+      && memcmp (register_buffer (regnum), buf, size) == 0)
     return;
 
-  if (regnum < NUM_REGS)
+  if (real_register (regnum))
     target_prepare_to_store ();
 
-  memcpy (&registers[REGISTER_BYTE (regnum)], buf, size);
+  memcpy (register_buffer (regnum), buf, size);
 
-  register_valid[regnum] = 1;
-
-  if (regnum < NUM_REGS)
-    target_store_registers (regnum);
-  else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-    STORE_PSEUDO_REGISTER (regnum);
+  set_register_cached (regnum, 1);
+  store_register (regnum);
 }
 
 void
@@ -699,19 +734,19 @@ supply_register (int regnum, char *val)
     }
 #endif
 
-  register_valid[regnum] = 1;
+  set_register_cached (regnum, 1);
   if (val)
-    memcpy (&registers[REGISTER_BYTE (regnum)], val, 
+    memcpy (register_buffer (regnum), val, 
 	    REGISTER_RAW_SIZE (regnum));
   else
-    memset (&registers[REGISTER_BYTE (regnum)], '\000', 
+    memset (register_buffer (regnum), '\000', 
 	    REGISTER_RAW_SIZE (regnum));
 
   /* On some architectures, e.g. HPPA, there are a few stray bits in
      some registers, that the rest of the code would like to ignore.  */
 
 #ifdef CLEAN_UP_REGISTER_VALUE
-  CLEAN_UP_REGISTER_VALUE (regnum, &registers[REGISTER_BYTE (regnum)]);
+  CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));
 #endif
 }
 
