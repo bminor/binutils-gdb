@@ -23,9 +23,21 @@
 #define  NO_RELOC 0
 #include "as.h"
 
+/* need TARGET_CPU */
+#include "config.h"
+
 #include "obstack.h"
 
-/* note that this file includes real declarations and thus can only be included by one source file per executable. */
+/* The opcode table is too big for gcc, which (currently) requires
+   exponential space at compile time for initialized arrays.  */
+#ifdef __GNUC__
+#define DO_BREAK_UP_BIG_DECL
+#define BREAK_UP_BIG_DECL	}; struct m68k_opcode m68k_opcodes_2[] = {
+#define AND_OTHER_PART		sizeof (m68k_opcodes_2)
+#endif
+
+/* Note that this file includes real declarations and thus can only be
+   included by one source file per executable.  */
 #include "opcode/m68k.h"
 
 #ifdef TE_SUN
@@ -560,7 +572,7 @@ const pseudo_typeS mote_pseudo_table[] =
 #define issword(x)	((x)>=-32768 && (x)<=32767)
 #define isuword(x)	((x)>=0 && (x)<=65535)
 
-#define isbyte(x)	((x)>=-128 && (x)<=255)
+#define isbyte(x)	((x)>= -255 && (x)<=255)
 #define isword(x)	((x)>=-32768 && (x)<=65535)
 #define islong(x)	(1)
 
@@ -2032,7 +2044,7 @@ m68k_ip (instring)
 		      m68020, "68020",
 		      m68030, "68030",
 		      m68040, "68040",
-		      cpu32, "cpu32",
+		      cpu32,  "cpu32",
 		      m68881, "68881",
 		      m68851, "68851",
 		    };
@@ -3495,10 +3507,8 @@ md_assemble (str)
 	{
 	  int cpu_type;
 
-#ifndef TARGET_CPU
-	  cpu_type = m68020;
-#else
-	  if (strcmp (TARGET_CPU, "m68000") == 0)
+	  if (strcmp (TARGET_CPU, "m68000") == 0
+	      || strcmp (TARGET_CPU, "m68302") == 0)
 	    cpu_type = m68000;
 	  else if (strcmp (TARGET_CPU, "m68010") == 0)
 	    cpu_type = m68010;
@@ -3509,11 +3519,14 @@ md_assemble (str)
 	    cpu_type = m68030;
 	  else if (strcmp (TARGET_CPU, "m68040") == 0)
 	    cpu_type = m68040;
-	  else if (strcmp (TARGET_CPU, "cpu32") == 0)
+	  else if (strcmp (TARGET_CPU, "cpu32") == 0
+		   || strcmp (TARGET_CPU, "m68331") == 0
+		   || strcmp (TARGET_CPU, "m68332") == 0
+		   || strcmp (TARGET_CPU, "m68333") == 0
+		   || strcmp (TARGET_CPU, "m68340") == 0)
 	    cpu_type = cpu32;
 	  else
 	    cpu_type = m68020;
-#endif
 
 	  current_architecture |= cpu_type;
 	}
@@ -3550,7 +3563,7 @@ md_assemble (str)
       done_first_time = 1;
     }
 
-  memset ((char *) (&the_ins), '\0', sizeof (the_ins));	/* JF for paranoia sake */
+  memset ((char *) (&the_ins), '\0', sizeof (the_ins));
   m68k_ip (str);
   er = the_ins.error;
   if (!er)
@@ -3693,21 +3706,32 @@ md_assemble (str)
     }
 }
 
-
+/* See BREAK_UP_BIG_DECL definition, above.  */
+static struct m68k_opcode *
+opcode_ptr (i)
+     int i;
+{
+#ifdef DO_BREAK_UP_BIG_DECL
+  int lim1 = sizeof (m68k_opcodes) / sizeof (m68k_opcodes[0]);
+  if (i >= lim1)
+    return m68k_opcodes_2 + (i - lim1);
+#endif
+  return m68k_opcodes + i;
+}
 
 void
 md_begin ()
 {
   /*
-	 * md_begin -- set up hash tables with 68000 instructions.
-	 * similar to what the vax assembler does.  ---phr
-	 */
+   * md_begin -- set up hash tables with 68000 instructions.
+   * similar to what the vax assembler does.  ---phr
+   */
   /* RMS claims the thing to do is take the m68k-opcode.h table, and make
-	   a copy of it at runtime, adding in the information we want but isn't
-	   there.  I think it'd be better to have an awk script hack the table
-	   at compile time.  Or even just xstr the table and use it as-is.  But
-	   my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
-	   names.  */
+     a copy of it at runtime, adding in the information we want but isn't
+     there.  I think it'd be better to have an awk script hack the table
+     at compile time.  Or even just xstr the table and use it as-is.  But
+     my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
+     names.  */
 
   register const struct m68k_opcode *ins;
   register struct m68k_incant *hack, *slak;
@@ -3719,24 +3743,25 @@ md_begin ()
     as_fatal ("Virtual memory exhausted");
 
   obstack_begin (&robyn, 4000);
-  for (ins = m68k_opcodes; ins < endop; ins++)
+  for (i = 0; i < numopcodes; i++)
     {
       hack = slak = (struct m68k_incant *) obstack_alloc (&robyn, sizeof (struct m68k_incant));
       do
 	{
-	  /* we *could* ignore insns that don't match our
-			   arch here but just leaving them out of the
-			   hash. */
+	  ins = opcode_ptr (i);
+	  /* We *could* ignore insns that don't match our arch here
+	     but just leaving them out of the hash. */
 	  slak->m_operands = ins->args;
 	  slak->m_opnum = strlen (slak->m_operands) / 2;
 	  slak->m_arch = ins->arch;
 	  slak->m_opcode = ins->opcode;
 	  /* This is kludgey */
 	  slak->m_codenum = ((ins->match) & 0xffffL) ? 2 : 1;
-	  if ((ins + 1) != endop && !strcmp (ins->name, (ins + 1)->name))
+	  if (i + 1 != numopcodes
+	      && !strcmp (ins->name, opcode_ptr (i + 1)->name))
 	    {
 	      slak->m_next = (struct m68k_incant *) obstack_alloc (&robyn, sizeof (struct m68k_incant));
-	      ins++;
+	      i++;
 	    }
 	  else
 	    slak->m_next = 0;
@@ -3912,7 +3937,7 @@ md_apply_fix (fixP, val)
 {
 #ifdef IBM_COMPILER_SUX
   /* This is unnecessary but it convinces the native rs6000
-	   compiler to generate the code we want. */
+     compiler to generate the code we want. */
   char *buf = fixP->fx_frag->fr_literal;
   buf += fixP->fx_where;
 #else /* IBM_COMPILER_SUX */
@@ -3957,7 +3982,7 @@ md_convert_frag (headers, fragP)
 
 #ifdef IBM_COMPILER_SUX
   /* This is wrong but it convinces the native rs6000 compiler to
-	   generate the code we want. */
+     generate the code we want. */
   register char *buffer_address = fragP->fr_literal;
   buffer_address += fragP->fr_fix;
 #else /* IBM_COMPILER_SUX */
@@ -4768,10 +4793,11 @@ md_parse_option (argP, cntP, vecP)
   switch (**argP)
     {
     case 'l':			/* -l means keep external to 2 bit offset
-			   rather than 16 bit one */
+				   rather than 16 bit one */
       break;
 
-    case 'S':			/* -S means that jbsr's always turn into jsr's.  */
+    case 'S':			/* -S means that jbsr's always turn into
+				   jsr's.  */
       break;
 
     case 'A':
@@ -4786,7 +4812,8 @@ md_parse_option (argP, cntP, vecP)
 	}			/* allow an optional "c" */
 
       if (!strcmp (*argP, "68000")
-	  || !strcmp (*argP, "68008"))
+	  || !strcmp (*argP, "68008")
+	  || !strcmp (*argP, "68302"))
 	{
 	  current_architecture |= m68000;
 	}
@@ -4808,8 +4835,8 @@ md_parse_option (argP, cntP, vecP)
       else if (!strcmp (*argP, "68040"))
 	{
 	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
-#ifndef NO_68881
 	}
+#ifndef NO_68881
       else if (!strcmp (*argP, "68881"))
 	{
 	  current_architecture |= m68881;
@@ -4817,28 +4844,32 @@ md_parse_option (argP, cntP, vecP)
       else if (!strcmp (*argP, "68882"))
 	{
 	  current_architecture |= m68882;
-#endif /* NO_68881 */
-	  /* Even if we aren't configured to support the processor,
-	     it should still be possible to assert that the user
-	     doesn't have it...  */
 	}
+#endif /* NO_68881 */
+      /* Even if we aren't configured to support the processor,
+	 it should still be possible to assert that the user
+	 doesn't have it...  */
       else if (!strcmp (*argP, "no-68881")
 	       || !strcmp (*argP, "no-68882"))
 	{
 	  no_68881 = 1;
-#ifndef NO_68851
 	}
+#ifndef NO_68851
       else if (!strcmp (*argP, "68851"))
 	{
 	  current_architecture |= m68851;
-#endif /* NO_68851 */
 	}
+#endif /* NO_68851 */
       else if (!strcmp (*argP, "no-68851"))
 	{
 	  no_68851 = 1;
 	}
-      else if (!strcmp (*argP, "pu32"))
-	{			/* "-mcpu32" */
+      else if (!strcmp (*argP, "pu32") /* "cpu32" minus 'c' */
+	       || !strcmp (*argP, "68331")
+	       || !strcmp (*argP, "68332")
+	       || !strcmp (*argP, "68333")
+	       || !strcmp (*argP, "68340"))
+	{
 	  current_architecture |= cpu32;
 	}
       else
@@ -4859,7 +4890,7 @@ md_parse_option (argP, cntP, vecP)
 	}
       else
 	{
-	  return (0);
+	  return 0;
 	}			/* pic or not */
 
     default:
