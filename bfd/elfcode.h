@@ -4035,7 +4035,7 @@ elf_link_add_archive_symbols (abfd, info)
       /* An empty archive is a special case.  */
       if (bfd_openr_next_archived_file (abfd, (bfd *) NULL) == NULL)
 	return true;
-      bfd_set_error (bfd_error_no_symbols);
+      bfd_set_error (bfd_error_no_armap);
       return false;
     }
 

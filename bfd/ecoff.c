@@ -123,6 +123,8 @@ _bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
       ecoff->fprmask = internal_a->fprmask;
       if (internal_a->magic == ECOFF_AOUT_ZMAGIC)
 	abfd->flags |= D_PAGED;
+      else
+	abfd->flags &=~ D_PAGED;
     }
 
   /* It turns out that no special action is required by the MIPS or
@@ -406,201 +408,6 @@ _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
     }
 
   return sec_flags;
-}
-
-/* Routines to swap auxiliary information in and out.  I am assuming
-   that the auxiliary information format is always going to be target
-   independent.  */
-
-/* Swap in a type information record.
-   BIGEND says whether AUX symbols are big-endian or little-endian; this
-   info comes from the file header record (fh-fBigendian).  */
-
-void
-_bfd_ecoff_swap_tir_in (bigend, ext_copy, intern)
-     int bigend;
-     const struct tir_ext *ext_copy;
-     TIR *intern;
-{
-  struct tir_ext ext[1];
-
-  *ext = *ext_copy;		/* Make it reasonable to do in-place.  */
-  
-  /* now the fun stuff... */
-  if (bigend) {
-    intern->fBitfield   = 0 != (ext->t_bits1[0] & TIR_BITS1_FBITFIELD_BIG);
-    intern->continued   = 0 != (ext->t_bits1[0] & TIR_BITS1_CONTINUED_BIG);
-    intern->bt          = (ext->t_bits1[0] & TIR_BITS1_BT_BIG)
-			>>		    TIR_BITS1_BT_SH_BIG;
-    intern->tq4         = (ext->t_tq45[0] & TIR_BITS_TQ4_BIG)
-			>>		    TIR_BITS_TQ4_SH_BIG;
-    intern->tq5         = (ext->t_tq45[0] & TIR_BITS_TQ5_BIG)
-			>>		    TIR_BITS_TQ5_SH_BIG;
-    intern->tq0         = (ext->t_tq01[0] & TIR_BITS_TQ0_BIG)
-			>>		    TIR_BITS_TQ0_SH_BIG;
-    intern->tq1         = (ext->t_tq01[0] & TIR_BITS_TQ1_BIG)
-			>>		    TIR_BITS_TQ1_SH_BIG;
-    intern->tq2         = (ext->t_tq23[0] & TIR_BITS_TQ2_BIG)
-			>>		    TIR_BITS_TQ2_SH_BIG;
-    intern->tq3         = (ext->t_tq23[0] & TIR_BITS_TQ3_BIG)
-			>>		    TIR_BITS_TQ3_SH_BIG;
-  } else {
-    intern->fBitfield   = 0 != (ext->t_bits1[0] & TIR_BITS1_FBITFIELD_LITTLE);
-    intern->continued   = 0 != (ext->t_bits1[0] & TIR_BITS1_CONTINUED_LITTLE);
-    intern->bt          = (ext->t_bits1[0] & TIR_BITS1_BT_LITTLE)
-			>>		    TIR_BITS1_BT_SH_LITTLE;
-    intern->tq4         = (ext->t_tq45[0] & TIR_BITS_TQ4_LITTLE)
-			>>		    TIR_BITS_TQ4_SH_LITTLE;
-    intern->tq5         = (ext->t_tq45[0] & TIR_BITS_TQ5_LITTLE)
-			>>		    TIR_BITS_TQ5_SH_LITTLE;
-    intern->tq0         = (ext->t_tq01[0] & TIR_BITS_TQ0_LITTLE)
-			>>		    TIR_BITS_TQ0_SH_LITTLE;
-    intern->tq1         = (ext->t_tq01[0] & TIR_BITS_TQ1_LITTLE)
-			>>		    TIR_BITS_TQ1_SH_LITTLE;
-    intern->tq2         = (ext->t_tq23[0] & TIR_BITS_TQ2_LITTLE)
-			>>		    TIR_BITS_TQ2_SH_LITTLE;
-    intern->tq3         = (ext->t_tq23[0] & TIR_BITS_TQ3_LITTLE)
-			>>		    TIR_BITS_TQ3_SH_LITTLE;
-  }
-
-#ifdef TEST
-  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
-    abort();
-#endif
-}
-
-/* Swap out a type information record.
-   BIGEND says whether AUX symbols are big-endian or little-endian; this
-   info comes from the file header record (fh-fBigendian).  */
-
-void
-_bfd_ecoff_swap_tir_out (bigend, intern_copy, ext)
-     int bigend;
-     const TIR *intern_copy;
-     struct tir_ext *ext;
-{
-  TIR intern[1];
-
-  *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
-  
-  /* now the fun stuff... */
-  if (bigend) {
-    ext->t_bits1[0] = ((intern->fBitfield ? TIR_BITS1_FBITFIELD_BIG : 0)
-		       | (intern->continued ? TIR_BITS1_CONTINUED_BIG : 0)
-		       | ((intern->bt << TIR_BITS1_BT_SH_BIG)
-			  & TIR_BITS1_BT_BIG));
-    ext->t_tq45[0] = (((intern->tq4 << TIR_BITS_TQ4_SH_BIG)
-		       & TIR_BITS_TQ4_BIG)
-		      | ((intern->tq5 << TIR_BITS_TQ5_SH_BIG)
-			 & TIR_BITS_TQ5_BIG));
-    ext->t_tq01[0] = (((intern->tq0 << TIR_BITS_TQ0_SH_BIG)
-		       & TIR_BITS_TQ0_BIG)
-		      | ((intern->tq1 << TIR_BITS_TQ1_SH_BIG)
-			 & TIR_BITS_TQ1_BIG));
-    ext->t_tq23[0] = (((intern->tq2 << TIR_BITS_TQ2_SH_BIG)
-		       & TIR_BITS_TQ2_BIG)
-		      | ((intern->tq3 << TIR_BITS_TQ3_SH_BIG)
-			 & TIR_BITS_TQ3_BIG));
-  } else {
-    ext->t_bits1[0] = ((intern->fBitfield ? TIR_BITS1_FBITFIELD_LITTLE : 0)
-		       | (intern->continued ? TIR_BITS1_CONTINUED_LITTLE : 0)
-		       | ((intern->bt << TIR_BITS1_BT_SH_LITTLE)
-			  & TIR_BITS1_BT_LITTLE));
-    ext->t_tq45[0] = (((intern->tq4 << TIR_BITS_TQ4_SH_LITTLE)
-		       & TIR_BITS_TQ4_LITTLE)
-		      | ((intern->tq5 << TIR_BITS_TQ5_SH_LITTLE)
-			 & TIR_BITS_TQ5_LITTLE));
-    ext->t_tq01[0] = (((intern->tq0 << TIR_BITS_TQ0_SH_LITTLE)
-		       & TIR_BITS_TQ0_LITTLE)
-		      | ((intern->tq1 << TIR_BITS_TQ1_SH_LITTLE)
-			 & TIR_BITS_TQ1_LITTLE));
-    ext->t_tq23[0] = (((intern->tq2 << TIR_BITS_TQ2_SH_LITTLE)
-		       & TIR_BITS_TQ2_LITTLE)
-		      | ((intern->tq3 << TIR_BITS_TQ3_SH_LITTLE)
-			 & TIR_BITS_TQ3_LITTLE));
-  }
-
-#ifdef TEST
-  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
-    abort();
-#endif
-}
-
-/* Swap in a relative symbol record.  BIGEND says whether it is in
-   big-endian or little-endian format.*/
-
-void
-_bfd_ecoff_swap_rndx_in (bigend, ext_copy, intern)
-     int bigend;
-     const struct rndx_ext *ext_copy;
-     RNDXR *intern;
-{
-  struct rndx_ext ext[1];
-
-  *ext = *ext_copy;		/* Make it reasonable to do in-place.  */
-  
-  /* now the fun stuff... */
-  if (bigend) {
-    intern->rfd   = (ext->r_bits[0] << RNDX_BITS0_RFD_SH_LEFT_BIG)
-		  | ((ext->r_bits[1] & RNDX_BITS1_RFD_BIG)
-		    		    >> RNDX_BITS1_RFD_SH_BIG);
-    intern->index = ((ext->r_bits[1] & RNDX_BITS1_INDEX_BIG)
-		    		    << RNDX_BITS1_INDEX_SH_LEFT_BIG)
-		  | (ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_BIG)
-		  | (ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_BIG);
-  } else {
-    intern->rfd   = (ext->r_bits[0] << RNDX_BITS0_RFD_SH_LEFT_LITTLE)
-		  | ((ext->r_bits[1] & RNDX_BITS1_RFD_LITTLE)
-		    		    << RNDX_BITS1_RFD_SH_LEFT_LITTLE);
-    intern->index = ((ext->r_bits[1] & RNDX_BITS1_INDEX_LITTLE)
-		    		    >> RNDX_BITS1_INDEX_SH_LITTLE)
-		  | (ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_LITTLE)
-		  | ((unsigned int) ext->r_bits[3]
-		     << RNDX_BITS3_INDEX_SH_LEFT_LITTLE);
-  }
-
-#ifdef TEST
-  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
-    abort();
-#endif
-}
-
-/* Swap out a relative symbol record.  BIGEND says whether it is in
-   big-endian or little-endian format.*/
-
-void
-_bfd_ecoff_swap_rndx_out (bigend, intern_copy, ext)
-     int bigend;
-     const RNDXR *intern_copy;
-     struct rndx_ext *ext;
-{
-  RNDXR intern[1];
-
-  *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
-  
-  /* now the fun stuff... */
-  if (bigend) {
-    ext->r_bits[0] = intern->rfd >> RNDX_BITS0_RFD_SH_LEFT_BIG;
-    ext->r_bits[1] = (((intern->rfd << RNDX_BITS1_RFD_SH_BIG)
-		       & RNDX_BITS1_RFD_BIG)
-		      | ((intern->index >> RNDX_BITS1_INDEX_SH_LEFT_BIG)
-			 & RNDX_BITS1_INDEX_BIG));
-    ext->r_bits[2] = intern->index >> RNDX_BITS2_INDEX_SH_LEFT_BIG;
-    ext->r_bits[3] = intern->index >> RNDX_BITS3_INDEX_SH_LEFT_BIG;
-  } else {
-    ext->r_bits[0] = intern->rfd >> RNDX_BITS0_RFD_SH_LEFT_LITTLE;
-    ext->r_bits[1] = (((intern->rfd >> RNDX_BITS1_RFD_SH_LEFT_LITTLE)
-		       & RNDX_BITS1_RFD_LITTLE)
-		      | ((intern->index << RNDX_BITS1_INDEX_SH_LITTLE)
-			 & RNDX_BITS1_INDEX_LITTLE));
-    ext->r_bits[2] = intern->index >> RNDX_BITS2_INDEX_SH_LEFT_LITTLE;
-    ext->r_bits[3] = intern->index >> RNDX_BITS3_INDEX_SH_LEFT_LITTLE;
-  }
-
-#ifdef TEST
-  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
-    abort();
-#endif
 }
 
 /* Read in the symbolic header for an ECOFF object file.  */
@@ -2002,164 +1809,6 @@ _bfd_ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-
-static int
-cmp_fdrtab_entry (leftp, rightp)
-     const void *leftp, *rightp;
-{
-  const struct ecoff_fdrtab_entry *lp = leftp;
-  const struct ecoff_fdrtab_entry *rp = rightp;
-
-  if (lp->base_addr < rp->base_addr)
-    return -1;
-  if (lp->base_addr > rp->base_addr)
-    return  1;
-  return 0;
-}
-
-/* Each file descriptor (FDR) has a memory address, to simplify
-   looking up an FDR by address, we build a table covering all FDRs
-   that have a least one procedure descriptor in them.  The final
-   table will be sorted by address so we can look it up via binary
-   search.  */
-static boolean
-mk_fdrtab (abfd)
-     bfd *abfd;
-{
-  struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
-  const struct ecoff_debug_swap * const debug_swap
-    = &ecoff_backend (abfd)->debug_swap;
-  struct ecoff_fdrtab_entry *tab;
-  FDR *fdr_ptr;
-  FDR *fdr_start;
-  FDR *fdr_end;
-  boolean stabs;
-  long len;
-
-  /* Make sure we have the FDR's.  */
-  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL, debug_info)
-      || bfd_get_symcount (abfd) == 0)
-    return false;
-
-  fdr_start = debug_info->fdr;
-  fdr_end = fdr_start + debug_info->symbolic_header.ifdMax;
-
-  /* First, let's see how long the table needs to be: */
-  for (len = 0, fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
-    {
-      if (fdr_ptr->cpd == 0)	/* skip FDRs that have no PDRs */
-	continue;
-      ++len;
-    }
-
-  /* Now, create and fill in the table: */
-
-  ecoff_data (abfd)->fdrtab = (struct ecoff_fdrtab_entry*)
-    bfd_zalloc (abfd,len * sizeof (struct ecoff_fdrtab_entry));
-  if (ecoff_data (abfd)->fdrtab == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-  ecoff_data (abfd)->fdrtab_len = len;
-
-  tab = ecoff_data (abfd)->fdrtab;
-  for (fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
-    {
-      if (fdr_ptr->cpd == 0)
-	continue;
-
-      /* Check whether this file has stabs debugging information.  In
-	 a file with stabs debugging information, the second local
-	 symbol is named @stabs.  */
-      stabs = false;
-      if (fdr_ptr->csym >= 2)
-	{
-	  char *sym_ptr;
-	  SYMR sym;
-
-	  sym_ptr = ((char *) debug_info->external_sym
-		     + (fdr_ptr->isymBase + 1)*debug_swap->external_sym_size);
-	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
-	  if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
-		      STABS_SYMBOL) == 0)
-	    stabs = true;
-	}
-
-      if (!stabs)
-	{
-	  bfd_size_type external_pdr_size;
-	  char *pdr_ptr;
-	  PDR pdr;
-
-	  external_pdr_size = debug_swap->external_pdr_size;
-
-	  pdr_ptr = ((char *) debug_info->external_pdr
-		     + fdr_ptr->ipdFirst * external_pdr_size);
-	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-	  /* The address of the first PDR is the offset of that
-	     procedure relative to the beginning of file FDR.  */
-	  tab->base_addr = fdr_ptr->adr - pdr.adr;
-	}
-      else
-	{
-	  /* XXX I don't know about stabs, so this is a guess
-	     (davidm@cs.arizona.edu): */
-	  tab->base_addr = fdr_ptr->adr;
-	}
-      tab->fdr = fdr_ptr;
-      ++tab;
-    }
-  /* Finally, the table is sorted in increasing memory-address order.
-     The table is mostly sorted already, but there are cases (e.g.,
-     static functions in include files), where this does not hold.
-     Use "odump -PFv" to verify...  */
-  qsort((char*) ecoff_data (abfd)->fdrtab, len,
-	sizeof(struct ecoff_fdrtab_entry), cmp_fdrtab_entry);
-
-  return true;
-}
-
-/* Return index of first FDR that covers to OFFSET.  */
-static long
-lookup (abfd, offset)
-     bfd *abfd;
-     bfd_vma offset;
-{
-  long low, high, len;
-  long mid = -1;
-  struct ecoff_fdrtab_entry *tab;
-
-  len = ecoff_data(abfd)->fdrtab_len;
-  if (!len)
-    return -1;
-
-  tab = ecoff_data(abfd)->fdrtab;
-  for (low = 0, high = len - 1 ; low != high ;)
-    {
-      mid = (high + low) / 2;
-      if (offset >= tab[mid].base_addr && offset < tab[mid + 1].base_addr)
-	goto find_min;
-
-      if (tab[mid].base_addr > offset)
-	high = mid;
-      else
-	low = mid + 1;
-    }
-  ++mid;
-
-  /* last entry is catch-all for all higher addresses: */
-  if (offset < tab[mid].base_addr)
-    return -1;
-
- find_min:
-
-  while (mid > 0 && tab[mid - 1].base_addr == tab[mid].base_addr)
-    --mid;
-
-  return mid;
-}
-
 /* Provided a BFD, a section and an offset into the section, calculate
    and return the name of the source file and the line nearest to the
    wanted location.  */
@@ -2179,395 +1828,37 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (abfd)->debug_swap;
   struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
-  struct ecoff_fdrtab_entry *tab;
-  boolean stabs;
-  FDR *fdr_ptr;
-  int i;
+  struct ecoff_find_line *line_info;
 
-  offset += section->vma;
   /* If we're not in the .text section, we don't have any line
      numbers.  */
   if (strcmp (section->name, _TEXT) != 0
       || offset < ecoff_data (abfd)->text_start
       || offset >= ecoff_data (abfd)->text_end)
     return false;
-  /* Build FDR table (sorted by object file's base-address) if we
-     don't have it already.  */
-  if (!ecoff_data (abfd)->fdrtab && !mk_fdrtab (abfd))
+
+  /* Make sure we have the FDR's.  */
+  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL, debug_info)
+      || bfd_get_symcount (abfd) == 0)
     return false;
-  tab = ecoff_data (abfd)->fdrtab;
 
-  i = lookup(abfd, offset);	/* find first FDR for address OFFSET */
-  if (i < 0)
-    return false;		/* no FDR, no fun... */
-  fdr_ptr = tab[i].fdr;
-
-  /* Check whether this file has stabs debugging information.  In a
-     file with stabs debugging information, the second local symbol is
-     named @stabs.  */
-  stabs = false;
-  if (fdr_ptr->csym >= 2)
+  if (ecoff_data (abfd)->find_line_info == NULL)
     {
-      char *sym_ptr;
-      SYMR sym;
-
-      sym_ptr = ((char *) debug_info->external_sym
-		 + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
-      (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
-      if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
-		  STABS_SYMBOL) == 0)
-	stabs = true;
-    }
-
-  if (!stabs)
-    {
-      bfd_size_type external_pdr_size;
-      char *pdr_ptr;
-      char *best_pdr = NULL;
-      FDR *best_fdr;
-      bfd_vma best_dist = ~0;
-      PDR pdr;
-      unsigned char *line_ptr;
-      unsigned char *line_end;
-      int lineno;
-      /* This file uses ECOFF debugging information.  Each FDR has a
-         list of procedure descriptors (PDR).  The address in the FDR
-         is the absolute address of the first procedure.  The address
-         in the first PDR gives the offset of that procedure relative
-         to the object file's base-address.  The addresses in
-         subsequent PDRs specify each procedure's address relative to
-         the object file's base-address.  To make things more juicy,
-         whenever the PROF bit in the PDR is set, the real entry point
-         of the procedure may be 16 bytes below what would normally be
-         the procedure's entry point.  Instead, DEC came up with a
-         wicked scheme to create profiled libraries "on the fly":
-         instead of shipping a regular and a profiled version of each
-         library, they insert 16 bytes of unused space in front of
-         each procedure and set the "prof" bit in the PDR to indicate
-         that there is a gap there (this is done automagically by "as"
-         when option "-pg" is specified).  Thus, normally, you link
-         against such a library and, except for lots of 16 byte gaps
-         between functions, things will behave as usual.  However,
-         when invoking "ld" with option "-pg", it will fill those gaps
-         with code that calls mcount().  It then moves the function's
-         entry point down by 16 bytes, and out pops a binary that has
-         all functions profiled.
-
-         NOTE: Neither FDRs nor PDRs are strictly sorted in memory
-               order.  For example, when including header-files that
-               define functions, the FDRs follow behind the including
-               file, even though their code may have been generated at
-               a lower address.  File coff-alpha.c from libbfd
-               illustrates this (use "odump -PFv" to look at a file's
-               FDR/PDR).  Similarly, PDRs are sometimes out of order
-               as well.  An example of this is OSF/1 v3.0 libc's
-               malloc.c.  I'm not sure why this happens, but it could
-               be due to optimizations that reorder a function's
-               position within an object-file.
-        
-         Strategy:
-         
-         On the first call to this function, we build a table of FDRs
-         that is sorted by the base-address of the object-file the FDR
-         is referring to.  Notice that each object-file may contain
-         code from multiple source files (e.g., due to code defined in
-         include files).  Thus, for any given base-address, there may
-         be multiple FDRs (but this case is, fortunately, uncommon).
-         lookup(addr) guarantees to return the first FDR that applies
-         to address ADDR.  Thus, after invoking lookup(), we have a
-         list of FDRs that may contain the PDR for ADDR.  Next, we
-         walk through the PDRs of these FDRs and locate the one that
-         is closest to ADDR (i.e., for which the difference between
-         ADDR and the PDR's entry point is positive and minimal).
-         Once, the right FDR and PDR are located, we simply walk
-         through the line-number table to lookup the line-number that
-         best matches ADDR.  Obviously, things could be sped up by
-         keeping a sorted list of PDRs instead of a sorted list of
-         FDRs.  However, this would increase space requirements
-         considerably, which is undesirable.  */
-      external_pdr_size = debug_swap->external_pdr_size;
-
-      /* Make offset relative to object file's start-address: */
-      offset -= tab[i].base_addr;
-      /* Search FDR list starting at tab[i] for the PDR that best matches
-         OFFSET.  Normally, the FDR list is only one entry long.  */
-      best_fdr = NULL;
-      do
+      ecoff_data (abfd)->find_line_info =
+	((struct ecoff_find_line *)
+	 bfd_alloc (abfd, sizeof (struct ecoff_find_line)));
+      if (ecoff_data (abfd)->find_line_info == NULL)
 	{
-	  bfd_vma dist, min_dist = 0;
-	  char *pdr_hold;
-	  char *pdr_end;
-	  
-	  fdr_ptr = tab[i].fdr;
-	  
-	  pdr_ptr = ((char *) debug_info->external_pdr
-		     + fdr_ptr->ipdFirst * external_pdr_size);
-	  pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
-	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-	  /* Find PDR that is closest to OFFSET.  If pdr.prof is set,
-	     the procedure entry-point *may* be 0x10 below pdr.adr.  We
-	     simply pretend that pdr.prof *implies* a lower entry-point.
-	     This is safe because it just means that may identify 4 NOPs
-	     in front of the function as belonging to the function.  */
-	  for (pdr_hold = NULL;
-	       pdr_ptr < pdr_end;
-	       (pdr_ptr += external_pdr_size,
-		(*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr)))
-	    {
-	      if (offset >= (pdr.adr - 0x10 * pdr.prof))
-		{
-		  dist = offset - (pdr.adr - 0x10 * pdr.prof);
-		  if (!pdr_hold || dist < min_dist)
-		    {
-		      min_dist = dist;
-		      pdr_hold = pdr_ptr;
-		    }
-		}
-	    }
-	  
-	  if (!best_pdr || min_dist < best_dist)
-	    {
-	      best_dist = min_dist;
-	      best_fdr = fdr_ptr;
-	      best_pdr = pdr_hold;
-	    }
-	  /* continue looping until base_addr of next entry is different: */
-	}
-      while (++i < ecoff_data (abfd)->fdrtab_len
-	     && tab[i].base_addr == tab[i - 1].base_addr);
-
-      if (!best_fdr || !best_pdr)
-	return false;			/* shouldn't happen... */
-
-      /* phew, finally we got something that we can hold onto: */
-      fdr_ptr = best_fdr;
-      pdr_ptr = best_pdr;
-      (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-      /* Now we can look for the actual line number.  The line numbers
-         are stored in a very funky format, which I won't try to
-         describe.  The search is bounded by the end of the FDRs line
-         number entries.  */
-      line_end = debug_info->line + fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
-
-      /* Make offset relative to procedure entry: */
-      offset -= pdr.adr - 0x10 * pdr.prof;
-      lineno = pdr.lnLow;
-      line_ptr = debug_info->line + fdr_ptr->cbLineOffset + pdr.cbLineOffset;
-      while (line_ptr < line_end)
-	{
-	  int delta;
-	  int count;
-
-	  delta = *line_ptr >> 4;
-	  if (delta >= 0x8)
-	    delta -= 0x10;
-	  count = (*line_ptr & 0xf) + 1;
-	  ++line_ptr;
-	  if (delta == -8)
-	    {
-	      delta = (((line_ptr[0]) & 0xff) << 8) + ((line_ptr[1]) & 0xff);
-	      if (delta >= 0x8000)
-		delta -= 0x10000;
-	      line_ptr += 2;
-	    }
-	  lineno += delta;
-	  if (offset < count * 4)
-	    break;
-	  offset -= count * 4;
-	}
-
-      /* If fdr_ptr->rss is -1, then this file does not have full
-         symbols, at least according to gdb/mipsread.c.  */
-      if (fdr_ptr->rss == -1)
-	{
-	  *filename_ptr = NULL;
-	  if (pdr.isym == -1)
-	    *functionname_ptr = NULL;
-	  else
-	    {
-	      EXTR proc_ext;
-
-	      (*debug_swap->swap_ext_in)
-		(abfd,
-		 ((char *) debug_info->external_ext
-		  + pdr.isym * debug_swap->external_ext_size),
-		 &proc_ext);
-	      *functionname_ptr = debug_info->ssext + proc_ext.asym.iss;
-	    }
-	}
-      else
-	{
-	  SYMR proc_sym;
-
-	  *filename_ptr = debug_info->ss + fdr_ptr->issBase + fdr_ptr->rss;
-	  (*debug_swap->swap_sym_in)
-	    (abfd,
-	     ((char *) debug_info->external_sym
-	      + (fdr_ptr->isymBase + pdr.isym) * debug_swap->external_sym_size),
-	     &proc_sym);
-	  *functionname_ptr = debug_info->ss + fdr_ptr->issBase + proc_sym.iss;
-	}
-      if (lineno == ilineNil)
-	lineno = 0;
-      *retline_ptr = lineno;
-    }
-  else
-    {
-      bfd_size_type external_sym_size;
-      const char *directory_name;
-      const char *main_file_name;
-      const char *current_file_name;
-      const char *function_name;
-      const char *line_file_name;
-      bfd_vma low_func_vma;
-      bfd_vma low_line_vma;
-      char *sym_ptr, *sym_ptr_end;
-      size_t len, funclen;
-      char *buffer = NULL;
-
-      /* This file uses stabs debugging information.  */
-
-      *filename_ptr = NULL;
-      *functionname_ptr = NULL;
-      *retline_ptr = 0;
-
-      directory_name = NULL;
-      main_file_name = NULL;
-      current_file_name = NULL;
-      function_name = NULL;
-      line_file_name = NULL;
-      low_func_vma = 0;
-      low_line_vma = 0;
-
-      external_sym_size = debug_swap->external_sym_size;
-
-      sym_ptr = ((char *) debug_info->external_sym
-		 + (fdr_ptr->isymBase + 2) * external_sym_size);
-      sym_ptr_end = sym_ptr + fdr_ptr->csym * external_sym_size;
-      for (; sym_ptr < sym_ptr_end; sym_ptr += external_sym_size)
-	{
-	  SYMR sym;
-
-	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
-
-	  if (ECOFF_IS_STAB (&sym))
-	    {
-	      switch (ECOFF_UNMARK_STAB (sym.index))
-		{
-		case N_SO:
-		  main_file_name = current_file_name =
-		    debug_info->ss + fdr_ptr->issBase + sym.iss;
-
-		  /* Check the next symbol to see if it is also an
-                     N_SO symbol.  */
-		  if (sym_ptr + external_sym_size < sym_ptr_end)
-		    {
-		      SYMR nextsym;
-
-		      (*debug_swap->swap_sym_in) (abfd,
-						  sym_ptr + external_sym_size,
-						  &nextsym);
-		      if (ECOFF_IS_STAB (&nextsym)
-			  && ECOFF_UNMARK_STAB (nextsym.index) == N_SO)
-			{
- 			  directory_name = current_file_name;
-			  main_file_name = current_file_name =
-			    debug_info->ss + fdr_ptr->issBase + sym.iss;
-			  sym_ptr += external_sym_size;
-			}
-		    }
-		  break;
-
-		case N_SOL:
-		  current_file_name =
-		    debug_info->ss + fdr_ptr->issBase + sym.iss;
-		  break;
-
-		case N_FUN:
-		  if (sym.value >= low_func_vma
-		      && sym.value <= offset + section->vma)
-		    {
-		      low_func_vma = sym.value;
-		      function_name =
-			debug_info->ss + fdr_ptr->issBase + sym.iss;
-		    }
-		  break;
-		}
-	    }
-	  else if (sym.st == stLabel && sym.index != indexNil)
-	    {
-	      if (sym.value > offset + section->vma)
-		{
-		  /* We have passed the location in the file we are
-		     looking for, so we can get out of the loop.  */
-		  break;
-		}
-
-	      if (sym.value >= low_line_vma)
-		{
-		  low_line_vma = sym.value;
-		  line_file_name = current_file_name;
-		  *retline_ptr = sym.index;
-		}
-	    }
-	}
-
-      if (*retline_ptr != 0)
-	main_file_name = line_file_name;
-
-      /* We need to remove the stuff after the colon in the function
-         name.  We also need to put the directory name and the file
-         name together.  */
-      if (function_name == NULL)
-	len = funclen = 0;
-      else
-	len = funclen = strlen (function_name) + 1;
-
-      if (main_file_name != NULL
-	  && directory_name != NULL
-	  && main_file_name[0] != '/')
-	len += strlen (directory_name) + strlen (main_file_name) + 1;
-
-      if (len != 0)
-	{
-	  if (ecoff_data (abfd)->find_buffer != NULL)
-	    free (ecoff_data (abfd)->find_buffer);
-	  buffer = (char *) malloc (len);
-	  if (buffer == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
-	  ecoff_data (abfd)->find_buffer = buffer;
-	}
-
-      if (function_name != NULL)
-	{
-	  char *colon;
-
-	  strcpy (buffer, function_name);
-	  colon = strchr (buffer, ':');
-	  if (colon != NULL)
-	    *colon = '\0';
-	  *functionname_ptr = buffer;
-	}
-
-      if (main_file_name != NULL)
-	{
-	  if (directory_name == NULL || main_file_name[0] == '/')
-	    *filename_ptr = main_file_name;
-	  else
-	    {
-	      sprintf (buffer + funclen, "%s%s", directory_name,
-		       main_file_name);
-	      *filename_ptr = buffer + funclen;
-	    }
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
 	}
     }
+  line_info = ecoff_data (abfd)->find_line_info;
 
-  return true;
+  return _bfd_ecoff_locate_line (abfd, section, offset, debug_info,
+				 debug_swap, line_info, filename_ptr,
+				 functionname_ptr, retline_ptr);
 }
-
 
 /* Copy private BFD data.  This is called by objcopy and strip.  We
    use it to copy the ECOFF debugging information from one BFD to the
@@ -3194,8 +2485,8 @@ _bfd_ecoff_write_object_contents (abfd)
       section.s_flags = ecoff_sec_to_styp_flags (current->name,
 						 current->flags);
 
-      bfd_coff_swap_scnhdr_out (abfd, (PTR) &section, buff);
-      if (bfd_write (buff, 1, scnhsz, abfd) != scnhsz)
+      if (bfd_coff_swap_scnhdr_out (abfd, (PTR) &section, buff) == 0
+	  || bfd_write (buff, 1, scnhsz, abfd) != scnhsz)
 	goto error_return;
 
       if ((section.s_flags & STYP_TEXT) != 0
@@ -4087,7 +3378,7 @@ ecoff_link_add_archive_symbols (abfd, info)
       /* An empty archive is a special case.  */
       if (bfd_openr_next_archived_file (abfd, (bfd *) NULL) == NULL)
 	return true;
-      bfd_set_error (bfd_error_no_symbols);
+      bfd_set_error (bfd_error_no_armap);
       return false;
     }
 
@@ -4605,10 +3896,11 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 	     on Ultrix 4.2 to handle the symbol cred in -lckrb.  */
 	  if (h->small
 	      && h->root.type == bfd_link_hash_common
-	      && strcmp (h->root.u.c.section->name, SCOMMON) != 0)
+	      && strcmp (h->root.u.c.p->section->name, SCOMMON) != 0)
 	    {
-	      h->root.u.c.section = bfd_make_section_old_way (abfd, SCOMMON);
-	      h->root.u.c.section->flags = SEC_ALLOC;
+	      h->root.u.c.p->section = bfd_make_section_old_way (abfd,
+								 SCOMMON);
+	      h->root.u.c.p->section->flags = SEC_ALLOC;
 	      if (h->esym.asym.sc == scCommon)
 		h->esym.asym.sc = scSCommon;
 	    }

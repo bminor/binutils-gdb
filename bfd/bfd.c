@@ -169,6 +169,7 @@ CODE_FRAGMENT
 .      struct lynx_core_struct *lynx_core_data;
 .      struct osf_core_struct *osf_core_data;
 .      struct cisco_core_struct *cisco_core_data;
+.      struct versados_data_struct *versados_data;
 .      PTR any;
 .      } tdata;
 .  
@@ -183,6 +184,13 @@ CODE_FRAGMENT
 
 #include "bfd.h"
 #include "sysdep.h"
+
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "coff/internal.h"
@@ -192,6 +200,16 @@ CODE_FRAGMENT
 #undef obj_symbols
 #include "libelf.h"
 
+
+/* provide storage for subsystem, stack and heap data which may have been
+   passed in on the command line.  Ld puts this data into a bfd_link_info
+   struct which ultimately gets passed in to the bfd.  When it arrives, copy
+   it to the following struct so that the data will be available in coffcode.h
+   where it is needed.  The typedef's used are defined in bfd.h */
+
+enum bfd_link_subsystem NT_subsystem;
+
+bfd_link_stack_heap NT_stack_heap;
 
 /*
 SECTION
@@ -224,6 +242,7 @@ CODE_FRAGMENT
 .  bfd_error_invalid_operation,
 .  bfd_error_no_memory,
 .  bfd_error_no_symbols,
+.  bfd_error_no_armap,
 .  bfd_error_no_more_archived_files,
 .  bfd_error_malformed_archive,
 .  bfd_error_file_not_recognized,
@@ -233,6 +252,7 @@ CODE_FRAGMENT
 .  bfd_error_no_debug_section,
 .  bfd_error_bad_value,
 .  bfd_error_file_truncated,
+.  bfd_error_file_too_big,
 .  bfd_error_invalid_error_code
 .} bfd_error_type;
 .
@@ -251,6 +271,7 @@ CONST char *CONST bfd_errmsgs[] = {
                         "Invalid operation",
                         "Memory exhausted",
                         "No symbols",
+			"Archive has no index; run ranlib to add one",
                         "No more archived files",
                         "Malformed archive",
                         "File format not recognized",
@@ -260,6 +281,7 @@ CONST char *CONST bfd_errmsgs[] = {
 			"Symbol needs debug section which does not exist",
 			"Bad value",
 			"File truncated",
+			"File too big",
                         "#<Invalid error code>"
                        };
 
@@ -356,6 +378,126 @@ bfd_perror (message)
   }
 }
 
+/*
+SUBSECTION
+	BFD error handler
+
+	Some BFD functions want to print messages describing the
+	problem.  They call a BFD error handler function.  This
+	function may be overriden by the program.
+
+	The BFD error handler acts like printf.
+
+CODE_FRAGMENT
+.
+.typedef void (*bfd_error_handler_type) PARAMS ((const char *, ...));
+.
+*/
+
+/* The program name used when printing BFD error messages.  */
+
+static const char *_bfd_error_program_name;
+
+/* This is the default routine to handle BFD error messages.  */
+
+#ifdef ANSI_PROTOTYPES
+
+static void _bfd_default_error_handler PARAMS ((const char *s, ...));
+
+static void
+_bfd_default_error_handler (const char *s, ...)
+{
+  va_list p;
+
+  if (_bfd_error_program_name != NULL)
+    fprintf (stderr, "%s: ", _bfd_error_program_name);
+
+  va_start (p, s);
+
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+}
+
+#else /* ! defined (ANSI_PROTOTYPES) */
+
+static void _bfd_default_error_handler ();
+
+static void
+_bfd_default_error_handler (va_alist)
+     va_dcl
+{
+  va_list p;
+  const char *s;
+
+  if (_bfd_error_program_name != NULL)
+    fprintf (stderr, "%s: ", _bfd_error_program_name);
+
+  va_start (p);
+
+  s = va_arg (p, const char *);
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+}
+
+#endif /* ! defined (ANSI_PROTOTYPES) */
+
+/* This is a function pointer to the routine which should handle BFD
+   error messages.  It is called when a BFD routine encounters an
+   error for which it wants to print a message.  Going through a
+   function pointer permits a program linked against BFD to intercept
+   the messages and deal with them itself.  */
+
+bfd_error_handler_type _bfd_error_handler = _bfd_default_error_handler;
+
+/*
+FUNCTION
+	bfd_set_error_handler
+
+SYNOPSIS
+	bfd_error_handler_type bfd_set_error_handler (bfd_error_handler_type);
+
+DESCRIPTION
+	Set the BFD error handler function.  Returns the previous
+	function.
+*/
+
+bfd_error_handler_type
+bfd_set_error_handler (pnew)
+     bfd_error_handler_type pnew;
+{
+  bfd_error_handler_type pold;
+
+  pold = _bfd_error_handler;
+  _bfd_error_handler = pnew;
+  return pold;
+}
+
+/*
+FUNCTION
+	bfd_set_error_program_name
+
+SYNOPSIS
+	void bfd_set_error_program_name (const char *);
+
+DESCRIPTION
+	Set the program name to use when printing a BFD error.  This
+	is printed before the error message followed by a colon and
+	space.  The string must not be changed after it is passed to
+	this function.
+*/
+
+void
+bfd_set_error_program_name (name)
+     const char *name;
+{
+  _bfd_error_program_name = name;
+}
 
 /*
 SECTION
@@ -696,7 +838,7 @@ bfd_scan_vma (string, end, base)
 
   /* Let the host do it if possible.  */
   if (sizeof(bfd_vma) <= sizeof(unsigned long))
-    return (bfd_vma) strtoul (string, end, base);
+    return (bfd_vma) strtoul (string, (char **) end, base);
 
   /* A negative base makes no sense, and we only need to go as high as hex.  */
   if ((base < 0) || (base > 16))
@@ -762,6 +904,48 @@ DESCRIPTION
 
 /*
 FUNCTION
+	bfd_merge_private_bfd_data
+
+SYNOPSIS
+	boolean bfd_merge_private_bfd_data(bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Merge private BFD information from the BFD @var{ibfd} to the 
+	the output file BFD @var{obfd} when linking.  Return <<true>>
+	on success, <<false>> on error.  Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_merge_private_bfd_data(ibfd, obfd) \
+.     BFD_SEND (ibfd, _bfd_merge_private_bfd_data, \
+.		(ibfd, obfd))
+
+*/
+
+/*
+FUNCTION
+	bfd_set_private_flags
+
+SYNOPSIS
+	boolean bfd_set_private_flags(bfd *abfd, flagword flags);
+
+DESCRIPTION
+	Set private BFD flag information in the BFD @var{abfd}.
+	Return <<true>> on success, <<false>> on error.  Possible error
+	returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_set_private_flags(abfd, flags) \
+.     BFD_SEND (abfd, _bfd_set_private_flags, \
+.		(abfd, flags))
+
+*/
+
+/*
+FUNCTION
 	stuff
 
 DESCRIPTION
@@ -793,10 +977,6 @@ DESCRIPTION
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
-.#define bfd_get_relocated_section_contents(abfd, link_info, link_order, data, relocateable, symbols) \
-.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
-.                 (abfd, link_info, link_order, data, relocateable, symbols))
-. 
 .#define bfd_relax_section(abfd, section, link_info, again) \
 .       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 .
@@ -824,5 +1004,38 @@ DESCRIPTION
 .#define bfd_canonicalize_dynamic_reloc(abfd, arels, asyms) \
 .	BFD_SEND (abfd, _bfd_canonicalize_dynamic_reloc, (abfd, arels, asyms))
 .
+.extern bfd_byte *bfd_get_relocated_section_contents
+.	PARAMS ((bfd *, struct bfd_link_info *,
+.		  struct bfd_link_order *, bfd_byte *,
+.		  boolean, asymbol **));
+.
 
 */
+
+bfd_byte *
+bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
+				    relocateable, symbols)
+     bfd *abfd;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
+     bfd_byte *data;
+     boolean relocateable;
+     asymbol **symbols;
+{
+  bfd *abfd2;
+  bfd_byte *(*fn) PARAMS ((bfd *, struct bfd_link_info *,
+			   struct bfd_link_order *, bfd_byte *, boolean,
+			   asymbol **));
+
+  if (link_order->type == bfd_indirect_link_order)
+    {
+      abfd2 = link_order->u.indirect.section->owner;
+      if (abfd2 == 0)
+	abfd2 = abfd;
+    }
+  else
+    abfd2 = abfd;
+  fn = abfd2->xvec->_bfd_get_relocated_section_contents;
+
+  return (*fn) (abfd, link_info, link_order, data, relocateable, symbols);
+}

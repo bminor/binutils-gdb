@@ -1919,6 +1919,7 @@ typedef enum bfd_error
   bfd_error_invalid_operation,
   bfd_error_no_memory,
   bfd_error_no_symbols,
+  bfd_error_no_armap,
   bfd_error_no_more_archived_files,
   bfd_error_malformed_archive,
   bfd_error_file_not_recognized,
@@ -2120,7 +2121,8 @@ enum bfd_flavour {
   bfd_target_srec_flavour,
   bfd_target_som_flavour,
   bfd_target_os9k_flavour,
-  bfd_target_versados_flavour
+  bfd_target_versados_flavour,
+  bfd_target_msdos_flavour
 };
 
  /* Forward declaration.  */
