@@ -325,3 +325,197 @@ ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
 
   return (TYPE_LENGTH (value_type) > 8);
 }   
+
+
+/* The 64 bit ABI retun value convention.
+
+   Return non-zero if the return-value is stored in a register, return
+   0 if the return-value is instead stored on the stack (a.k.a.,
+   struct return convention).
+
+   For a return-value stored in a register: when INVAL is non-NULL,
+   copy the buffer to the corresponding register return-value location
+   location; when OUTVAL is non-NULL, fill the buffer from the
+   corresponding register return-value location.  */
+
+/* Potential ways that a function can return a value of a given type.  */
+enum return_value_convention
+{
+  /* Where the return value has been squeezed into one or more
+     registers.  */
+  RETURN_VALUE_REGISTER_CONVENTION,
+  /* Commonly known as the "struct return convention".  The caller
+     passes an additional hidden first parameter to the caller.  That
+     parameter contains the address at which the value being returned
+     should be stored.  While typically, and historically, used for
+     large structs, this is convention is applied to values of many
+     different types.  */
+  RETURN_VALUE_STRUCT_CONVENTION
+};
+
+static enum return_value_convention
+ppc64_sysv_abi_return_value (struct type *valtype, struct regcache *regcache,
+			     const void *inval, void *outval)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  /* Floats and doubles in F1.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+      && TYPE_LENGTH (valtype) <= 8)
+    {
+      char regval[MAX_REGISTER_SIZE];
+      struct type *regtype = register_type (current_gdbarch, FP0_REGNUM);
+      if (inval != NULL)
+	{
+	  convert_typed_floating (inval, valtype, regval, regtype);
+	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
+	}
+      if (outval != NULL)
+	{
+	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
+	  convert_typed_floating (regval, regtype, outval, valtype);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  if (TYPE_CODE (valtype) == TYPE_CODE_INT
+      && TYPE_LENGTH (valtype) <= 8)
+    {
+      /* Integers in r3.  */
+      if (inval != NULL)
+	{
+	  /* Be careful to sign extend the value.  */
+	  regcache_cooked_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+					  unpack_long (valtype, inval));
+	}
+      if (outval != NULL)
+	{
+	  /* Extract the integer from r3.  Since this is truncating the
+	     value, there isn't a sign extension problem.  */
+	  ULONGEST regval;
+	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+					 &regval);
+	  store_unsigned_integer (outval, TYPE_LENGTH (valtype), regval);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* All pointers live in r3.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_PTR)
+    {
+      /* All pointers live in r3.  */
+      if (inval != NULL)
+	regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, inval);
+      if (outval != NULL)
+	regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, outval);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+      && TYPE_LENGTH (valtype) <= 8
+      && TYPE_CODE (TYPE_TARGET_TYPE (valtype)) == TYPE_CODE_INT
+      && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
+    {
+      /* Small character arrays are returned, right justified, in r3.  */
+      int offset = (register_size (current_gdbarch, tdep->ppc_gp0_regnum + 3)
+		    - TYPE_LENGTH (valtype));
+      if (inval != NULL)
+	regcache_cooked_write_part (regcache, tdep->ppc_gp0_regnum + 3,
+				    offset, TYPE_LENGTH (valtype), inval);
+      if (outval != NULL)
+	regcache_cooked_read_part (regcache, tdep->ppc_gp0_regnum + 3,
+				   offset, TYPE_LENGTH (valtype), outval);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* Big floating point values get stored in adjacent floating
+     point registers.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+      && (TYPE_LENGTH (valtype) == 16
+	  || TYPE_LENGTH (valtype) == 32))
+    {
+      if (inval || outval != NULL)
+	{
+	  int i;
+	  for (i = 0; i < TYPE_LENGTH (valtype) / 8; i++)
+	    {
+	      if (inval != NULL)
+		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
+				       (const bfd_byte *) inval + i * 8);
+	      if (outval != NULL)
+		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
+				      (bfd_byte *) outval + i * 8);
+	    }
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* Complex values get returned in f1:f2, need to convert.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_COMPLEX
+      && (TYPE_LENGTH (valtype) == 8 || TYPE_LENGTH (valtype) == 16))
+    {
+      if (regcache != NULL)
+	{
+	  int i;
+	  for (i = 0; i < 2; i++)
+	    {
+	      char regval[MAX_REGISTER_SIZE];
+	      struct type *regtype = register_type (current_gdbarch, FP0_REGNUM);
+	      if (inval != NULL)
+		{
+		  convert_typed_floating ((const bfd_byte *) inval + i * (TYPE_LENGTH (valtype) / 2),
+					  valtype, regval, regtype);
+		  regcache_cooked_write (regcache, FP0_REGNUM + 1 + i, regval);
+		}
+	      if (outval != NULL)
+		{
+		  regcache_cooked_read (regcache, FP0_REGNUM + 1 + i, regval);
+		  convert_typed_floating (regval, regtype,
+					  (bfd_byte *) outval + i * (TYPE_LENGTH (valtype) / 2),
+					  valtype);
+		}
+	    }
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* Big complex values get stored in f1:f4.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_COMPLEX
+      && TYPE_LENGTH (valtype) == 32)
+    {
+      if (regcache != NULL)
+	{
+	  int i;
+	  for (i = 0; i < 4; i++)
+	    {
+	      if (inval != NULL)
+		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
+				       (const bfd_byte *) inval + i * 8);
+	      if (outval != NULL)
+		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
+				      (bfd_byte *) outval + i * 8);
+	    }
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  return RETURN_VALUE_STRUCT_CONVENTION;
+}
+
+int
+ppc64_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  return (ppc64_sysv_abi_return_value (value_type, NULL, NULL, NULL)
+	  == RETURN_VALUE_STRUCT_CONVENTION);
+}
+
+void
+ppc64_sysv_abi_extract_return_value (struct type *valtype,
+				     struct regcache *regbuf,
+				     void *valbuf)
+{
+  if (ppc64_sysv_abi_return_value (valtype, regbuf, NULL, valbuf)
+      != RETURN_VALUE_REGISTER_CONVENTION)
+    error ("Function return value unknown");
+}
+
+void
+ppc64_sysv_abi_store_return_value (struct type *valtype,
+				   struct regcache *regbuf,
+				   const void *valbuf)
+{
+  if (!ppc64_sysv_abi_return_value (valtype, regbuf, valbuf, NULL))
+    error ("Function return value location unknown");
+}

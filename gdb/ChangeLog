@@ -1,5 +1,21 @@
 2003-10-03  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): When the 64 bit SysV ABI,
+	set extract_return_value, store_return_value and
+	use_struct_convention to ppc64_sysv_abi_extract_return_value,
+	ppc64_sysv_abi_store_return_value and
+	ppc64_sysv_abi_use_struct_convention.
+	* ppc-tdep.h (ppc64_sysv_abi_extract_return_value): Declare.
+	(ppc64_sysv_abi_store_return_value): Declare.
+	(ppc64_sysv_abi_use_struct_convention): Declare.
+	* ppc-sysv-tdep.c (enum return_value_convention): Define.
+	(ppc64_sysv_abi_extract_return_value): New function.
+	(ppc64_sysv_abi_store_return_value): New function.
+	(ppc64_sysv_abi_use_struct_convention): New function.
+	(ppc64_sysv_abi_return_value): New function.
+
+2003-10-03  Andrew Cagney  <cagney@redhat.com>
+
 	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): Only
 	convert a descriptor to a function when it's in the ".opd"
 	section.

@@ -47,6 +47,14 @@ struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (char *buf);
 void ppc_linux_supply_fpregset (char *buf);
 
+int ppc64_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type);
+void ppc64_sysv_abi_extract_return_value (struct type *valtype,
+					  struct regcache *regbuf,
+					  void *valbuf);
+void ppc64_sysv_abi_store_return_value (struct type *valtype,
+					struct regcache *regbuf,
+					const void *valbuf);
+
 
 /* From rs6000-tdep.c... */
 CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);

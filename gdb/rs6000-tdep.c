@@ -2830,9 +2830,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 1);
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       rs6000_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
+  if (sysv_abi && wordsize == 8)
+    {
+      set_gdbarch_extract_return_value (gdbarch, ppc64_sysv_abi_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, ppc64_sysv_abi_store_return_value);
+    }
+  else
+    {
+      set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
+    }
 
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
@@ -2967,9 +2974,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  if (sysv_abi)
+  if (sysv_abi && wordsize == 4)
     set_gdbarch_use_struct_convention (gdbarch,
     				       ppc_sysv_abi_use_struct_convention);
+  else if (sysv_abi && wordsize == 8)
+    set_gdbarch_use_struct_convention (gdbarch, ppc64_sysv_abi_use_struct_convention);
   else
     set_gdbarch_use_struct_convention (gdbarch,
 				       rs6000_use_struct_convention);
