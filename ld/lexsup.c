@@ -1047,6 +1047,7 @@ parse_args (argc, argv)
 	  ldversion (1);
 	  version_printed = TRUE;
 	  trace_file_tries = TRUE;
+	  overflow_cutoff_limit = -2;
 	  break;
 	case 'v':
 	  ldversion (0);

@@ -1,3 +1,11 @@
+2003-05-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldmain.h (overflow_cutoff_limit): Declare.
+	* ldmain.c (overflow_cutoff_limit): Define, initialized to 10.
+	(reloc_overflow): Limit error messages based on it.
+	* lexsup.c (parse_args) <OPTION_VERBOSE>: Set cutoff to
+	unlimited.
+
 2003-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlex.l: Accept C style comments in version scripts.

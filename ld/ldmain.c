@@ -1362,6 +1362,15 @@ undefined_symbol (info, name, abfd, section, address, fatal)
   return TRUE;
 }
 
+/* Counter to limit the number of relocation overflow error messages
+   to print.  Errors are printed as it is decremented.  When it's
+   called and the counter is zero, a final message is printed
+   indicating more relocations were omitted.  When it gets to -1, no
+   such errors are printed.  If it's initially set to a value less
+   than -1, all such errors will be printed (--verbose does this).  */
+
+int overflow_cutoff_limit = 10;
+
 /* This is called when a reloc overflows.  */
 
 static bfd_boolean
@@ -1374,10 +1383,21 @@ reloc_overflow (info, name, reloc_name, addend, abfd, section, address)
      asection *section;
      bfd_vma address;
 {
+  if (overflow_cutoff_limit == -1)
+    return TRUE;
+
   if (abfd == (bfd *) NULL)
     einfo (_("%P%X: generated"));
   else
     einfo ("%X%C:", abfd, section, address);
+
+  if (overflow_cutoff_limit >= 0
+      && overflow_cutoff_limit-- == 0)
+    {
+      einfo (_(" additional relocation overflows omitted from the output\n"));
+      return TRUE;
+    }
+
   einfo (_(" relocation truncated to fit: %s %T"), reloc_name, name);
   if (addend != 0)
     einfo ("+%v", addend);
