@@ -4724,6 +4724,7 @@ s_even (ignore)
   if (!need_pass_2)		/* Never make frag if expect extra pass. */
     frag_align (temp, (int) temp_fill);
   demand_empty_rest_of_line ();
+  record_alignment (now_seg, temp);
 }
 
 static void
