@@ -59,13 +59,14 @@ CCLIBFLAGS = -O
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
 
-version=`./gcc -dumpversion`
+version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
 
 # Directory where sources are, from where we are.
 srcdir = .
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start installation.
-prefix = /usr/local
+destdir = /usr/local
+prefix = $(destdir)
 # Directory in which to put the executable for the command `gcc'
 bindir = $(prefix)/bin
 # Directory in which to put the directories used by the compiler.
@@ -463,8 +464,8 @@ realclean: cleanconfig
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install:
-	$(INSTALL_PROGRAM) gas $(bindir)/as
+install: gas
+	$(INSTALL_PROGRAM) gas $(libsubdir)/as
 
 # Create the installation directory.
 install-dir:
@@ -595,5 +596,8 @@ force:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
-		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
+		./configure +destdir=$(destdir) \
+		+norecurse \
+		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
 
