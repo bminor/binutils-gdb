@@ -324,6 +324,7 @@ Index
 * common variable storage:               bss.
 * compare and jump expansions, i960:     Compare-and-branch-i960.
 * compare/branch instructions, i960:     Compare-and-branch-i960.
+* comparison expressions:                Infix Ops.
 * conditional assembly:                  If.
 * constant, single character:            Chars.
 * constants:                             Constants.
@@ -446,6 +447,7 @@ Index
 * expr (internal section):               As Sections.
 * expression arguments:                  Arguments.
 * expressions:                           Expressions.
+* expressions, comparison:               Infix Ops.
 * expressions, empty:                    Empty Exprs.
 * expressions, integer:                  Integer Exprs.
 * extAuxRegister directive, ARC:         ARC Directives.

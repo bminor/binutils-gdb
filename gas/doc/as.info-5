@@ -17,6 +17,49 @@ Software Foundation, Inc.
 section entitled "GNU Free Documentation License".
 
 
+File: as.info,  Node: HPPA-Dependent,  Next: ESA/390-Dependent,  Prev: H8/500-Dependent,  Up: Machine Dependencies
+
+HPPA Dependent Features
+=======================
+
+* Menu:
+
+* HPPA Notes::                Notes
+* HPPA Options::              Options
+* HPPA Syntax::               Syntax
+* HPPA Floating Point::       Floating Point
+* HPPA Directives::           HPPA Machine Directives
+* HPPA Opcodes::              Opcodes
+
+
+File: as.info,  Node: HPPA Notes,  Next: HPPA Options,  Up: HPPA-Dependent
+
+Notes
+-----
+
+   As a back end for GNU CC `as' has been throughly tested and should
+work extremely well.  We have tested it only minimally on hand written
+assembly code and no one has tested it much on the assembly output from
+the HP compilers.
+
+   The format of the debugging sections has changed since the original
+`as' port (version 1.3X) was released; therefore, you must rebuild all
+HPPA objects and libraries with the new assembler so that you can debug
+the final executable.
+
+   The HPPA `as' port generates a small subset of the relocations
+available in the SOM and ELF object file formats.  Additional relocation
+support will be added as it becomes necessary.
+
+
+File: as.info,  Node: HPPA Options,  Next: HPPA Syntax,  Prev: HPPA Notes,  Up: HPPA-Dependent
+
+Options
+-------
+
+   `as' has no machine-dependent command-line options for the HPPA.
+
+
 File: as.info,  Node: HPPA Syntax,  Next: HPPA Floating Point,  Prev: HPPA Options,  Up: HPPA-Dependent
 
 Syntax
