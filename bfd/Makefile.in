@@ -119,7 +119,7 @@ AUTOMAKE_OPTIONS = cygnus
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
-DEP = mkdep
+MKDEP = mkdep
 
 SUBDIRS = doc po
 
@@ -588,7 +588,7 @@ MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h .dep .dep1 libbfd.a stamp-lib \
+CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEP1 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -1062,25 +1062,25 @@ install-data-local: $(BFD_H)
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
 	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(includedir)/bfdlink.h
 
-# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
-.dep: dep.sed $(CFILES) $(HFILES) bfd.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed <.dep1 >.dep
+# Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
+DEP: dep.sed $(CFILES) $(HFILES) bfd.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed <DEP1 >DEP
 
 # This rule really wants a mkdep that runs "gcc -MM".
 # The NetBSD mkdep overwrites any existing file contents, and doesn't insert
 # the "DO NOT DELETE" line.
 # Other mkdep versions require a file that already exists, and do insert it.
 # Hence the weirdness....
-.dep1: $(CFILES)
-	rm -f .dep2 .dep2a
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	echo > .dep2a
-	$(DEP) -f .dep2a $(INCLUDES) $(CFLAGS) $?
-	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
-	rm -f .dep2a
-	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES)
+	rm -f DEP2 DEP2a
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	echo > DEP2a
+	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
+	rm -f DEP2a
+	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -1088,19 +1088,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@SRCDIR@!$(srcdir)!'
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 host-aout.lo: Makefile
