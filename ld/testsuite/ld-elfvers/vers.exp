@@ -919,3 +919,9 @@ if [istarget x86_64-*-linux*] {
 } else {
     build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
 }
+
+# Test versioned definition vs. hidden definition in different files.
+build_vers_lib_no_pic "vers27a" vers27a.c vers27a "" vers27a.map vers27a.ver vers27a.dsym ""
+build_vers_lib_no_pic "vers27b" vers27b.c vers27b "" "" vers27b.ver vers27b.dsym ""
+build_vers_lib_no_pic "vers27c1" vers27c.c vers27c1 "vers27b.o vers27a.so" "" vers27c.ver vers27c.dsym ""
+build_vers_lib_no_pic "vers27c2" vers27c.c vers27c2 "vers27a.so vers27b.o" "" vers27c.ver vers27c.dsym ""

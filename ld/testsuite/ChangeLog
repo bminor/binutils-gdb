@@ -1,3 +1,21 @@
+2003-05-03  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Add vers27a, vers27b, vers27c1 and
+	vers27c2 to test versioned definition vs. hidden definition in
+	different files.
+
+	* ld-elfvers/vers27a.c: New file.
+	* ld-elfvers/vers27a.dsym: Likewise.
+	* ld-elfvers/vers27a.map: Likewise.
+	* ld-elfvers/vers27a.ver: Likewise.
+	* ld-elfvers/vers27b.c: Likewise.
+
+	* ld-elfvers/vers27b.dsym: New empty file.
+	* ld-elfvers/vers27b.ver: Likwise.
+	* ld-elfvers/vers27c.c: Likwise.
+	* ld-elfvers/vers27c.dsym: Likwise.
+	* ld-elfvers/vers27c.ver: Likwise.
+
 2003-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* ld-xstormy16: New directory.
