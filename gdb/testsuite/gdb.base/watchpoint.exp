@@ -653,6 +653,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
+set prev_timeout $timeout
 set timeout 600	
 verbose "Timeout now 600 sec.\n"
 
@@ -798,3 +799,7 @@ if [initialize] then {
       }
     }
 }
+
+# Restore old timeout
+set timeout $prev_timeout
+verbose "Timeout now $timeout sec.\n"
