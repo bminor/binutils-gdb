@@ -1,5 +1,14 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/powerpc/xm-linux.h (KERNEL_U_ADDR): Move from here ...
+	* config/powerpc/nm-linux.h (KERNEL_U_ADDR): ... to here.
+	* config/m68k/xm-linux.h (KERNEL_U_ADDR): Move from here ...
+	* config/m68k/nm-linux.h (KERNEL_U_ADDR): ... to here.
+	* config/ia64/xm-linux.h (KERNEL_U_ADDR): Move from here ...
+	* config/ia64/nm-linux.h (KERNEL_U_ADDR): ... to here.
+	* config/arm/xm-linux.h (KERNEL_U_ADDR): Move from here ...
+	* config/arm/nm-linux.h (KERNEL_U_ADDR): ... to here.
+
 	* config/m68k/xm-m68k.h: Delete file.
 	* config/m68k/xm-linux.h: Do not include "m68k/xm-m68k.h".  Update
 	copyright.
