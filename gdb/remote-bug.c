@@ -24,16 +24,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"
+
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <errno.h>
+
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "serial.h"
+#include "gdbcmd.h"
+
+extern int sleep();
+extern int remque();
+extern int insque();
 
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
@@ -42,15 +49,71 @@ extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
-static void bug_fetch_registers ();
-static int bug_store_registers ();
 static void bug_close ();
 static int bug_clear_breakpoints ();
+static void bug_write_cr();
+
+#if __STDC__ == 1
+
+static int bug_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
+static int bug_write_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
+
+#else
+
+static int bug_read_inferior_memory ();
+static int bug_write_inferior_memory ();
+
+#endif /* not __STDC__ */
+
+/* To be silent, or to loudly echo all input and output to and from
+   the target.  */
 
 static int quiet = 1;
 
+/* This is the serial descriptor to our target.  */
 
-serial_t desc;
+static serial_t desc = NULL;
+
+/* This variable is somewhat arbitrary.  It's here so that it can be
+   set from within a running gdb.  */
+
+static int srec_max_retries = 3;
+
+/* Each S-record download to the target consists of an S0 header
+   record, some number of S3 data records, and one S7 termination
+   record.  I call this download a "frame".  Srec_frame says how many
+   bytes will be represented in each frame.  */
+
+static int srec_frame = 160;
+
+/* This variable determines how many bytes will be represented in each
+   S3 s-record.  */
+
+static int srec_bytes = 40;
+
+/* At one point it appeared to me as though the bug monitor could not
+   really be expected to receive two sequential characters at 9600
+   baud reliably.  Echo-pacing is an attempt to force data across the
+   line even in this condition.  Specifically, in echo-pace mode, each
+   character is sent one at a time and we look for the echo before
+   sending the next.  This is excruciatingly slow.  */
+
+static int srec_echo_pace = 0;
+
+/* How long to wait after an srec for a possible error message.
+   Similar to the above, I tried sleeping after sending each S3 record
+   in hopes that I might actually see error messages from the bug
+   monitor.  This might actually work if we were to use sleep
+   intervals smaller than 1 second.  */
+
+static int srec_sleep = 0;
+
+/* Every srec_noise records, flub the checksum.  This is a debugging
+   feature.  Set the variable to something other than 1 in order to
+   inject *deliberate* checksum errors.  One might do this if one
+   wanted to test error handling and recovery.  */
+
+static int srec_noise = 0;
 
 /***********************************************************************/
 /* Caching stuff stolen from remote-nindy.c  */
@@ -226,7 +289,9 @@ dcache_init ()
  * I/O stuff stolen from remote-eb.c
  ***********************************************************************/
 
-static int timeout = 2;
+/* with a timeout of 2, we time out waiting for the prompt after an
+   s-record dump. */
+static int timeout = 4;
 
 static const char *dev_name;
 
@@ -234,14 +299,16 @@ static const char *dev_name;
    bug_open knows that we don't have a file open when the program
    starts.  */
 
-int is_open = 0;
-int
+static int is_open = 0;
+static int
 check_open ()
 {
   if (!is_open)
     {
       error ("remote device not open");
     }
+
+  return(1);
 }
 
 #define ON	1
@@ -274,10 +341,30 @@ readchar_nofail ()
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
   if (!quiet)
-    printf ("%c", buf);
+    if (buf)
+      printf ("%c", buf);
+    else
+      printf ("<timeout>");
 
   return buf & 0x7f;
 
+}
+
+static int
+pollchar()
+{
+  int buf;
+
+  buf = SERIAL_READCHAR (desc, 0);
+  if (buf == SERIAL_TIMEOUT)
+    buf = 0;
+  if (!quiet)
+    if (buf)
+      printf ("%c", buf);
+    else
+      printf ("<empty poll>");
+
+  return buf & 0x7f;
 }
 
 /* Keep discarding input from the remote system, until STRING is found.
@@ -289,7 +376,7 @@ expect (string)
   char *p = string;
 
   immediate_quit = 1;
-  while (1)
+  for (;;)
     {
       if (readchar () == *p)
 	{
@@ -333,7 +420,7 @@ get_hex_digit (ignore_space)
 {
   int ch;
 
-  while (1)
+  for (;;)
     {
       ch = readchar ();
       if (ch >= '0' && ch <= '9')
@@ -342,9 +429,7 @@ get_hex_digit (ignore_space)
 	return ch - 'A' + 10;
       else if (ch >= 'a' && ch <= 'f')
 	return ch - 'a' + 10;
-      else if (ch == ' ' && ignore_space)
-	;
-      else
+      else if (ch != ' ' || !ignore_space)
 	{
 	  expect_prompt ();
 	  error ("Invalid hex digit from remote system.");
@@ -397,6 +482,7 @@ bug_kill (arg, from_tty)
 /*
  * Download a file specified in 'args', to the bug.
  */
+
 static void
 bug_load (args, fromtty)
      char *args;
@@ -404,7 +490,6 @@ bug_load (args, fromtty)
 {
   bfd *abfd;
   asection *s;
-  int n;
   char buffer[1024];
 
   check_open ();
@@ -431,19 +516,17 @@ bug_load (args, fromtty)
 	{
 	  int i;
 
-#define DELTA (1024)
-	  char *buffer = xmalloc (DELTA);
+	  char *buffer = xmalloc (srec_frame);
 
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
-	  for (i = 0; i < s->_raw_size; i += DELTA)
+	  fflush (stdout);
+	  for (i = 0; i < s->_raw_size; i += srec_frame)
 	    {
-	      int delta = DELTA;
+	      if (srec_frame > s->_raw_size - i)
+		srec_frame = s->_raw_size - i;
 
-	      if (delta > s->_raw_size - i)
-		delta = s->_raw_size - i;
-
-	      bfd_get_section_contents (abfd, s, buffer, i, delta);
-	      bug_write_inferior_memory (s->vma + i, buffer, delta);
+	      bfd_get_section_contents (abfd, s, buffer, i, srec_frame);
+	      bug_write_inferior_memory (s->vma + i, buffer, srec_frame);
 	      printf_filtered ("*");
 	      fflush (stdout);
 	    }
@@ -452,7 +535,7 @@ bug_load (args, fromtty)
 	}
       s = s->next;
     }
-  sprintf (buffer, "rs ip %x", abfd->start_address);
+  sprintf (buffer, "rs ip %lx", (unsigned long) abfd->start_address);
   bug_write_cr (buffer);
   expect_prompt ();
 }
@@ -466,7 +549,6 @@ bug_create_inferior (execfile, args, env)
      char **env;
 {
   int entry_pt;
-  char buffer[100];
 
   if (args && *args)
     error ("Can't pass arguments to remote bug process.");
@@ -485,20 +567,6 @@ bug_create_inferior (execfile, args, env)
 
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
   proceed (entry_pt, -1, 0);
-}
-
-/* Open a connection to a remote debugger.
-   NAME is the filename used for communication, then a space,
-   then the baud rate.
- */
-
-static char *
-find_end_of_word (s)
-     char *s;
-{
-  while (*s && !isspace (*s))
-    s++;
-  return s;
 }
 
 static char *
@@ -532,50 +600,11 @@ get_word (p)
 
 static int baudrate = 9600;
 
-#if 0
-static int
-is_baudrate_right ()
-{
-  int ok;
-
-  /* Put this port into NORMAL mode, send the 'normal' character */
-
-  bug_write ("\001", 1);	/* Control A */
-  bug_write ("\r", 1);		/* Cr */
-
-  while (1)
-    {
-      ok = SERIAL_READCHAR (desc, timeout);
-      if (ok < 0)
-	break;
-    }
-
-  bug_write ("r", 1);
-
-  if (readchar_nofail () == 'r')
-    return 1;
-
-  /* Not the right baudrate, or the board's not on */
-  return 0;
-}
-#endif /* not */
-
-static void
-set_rate ()
-{
-  if (!SERIAL_SETBAUDRATE (desc, baudrate))
-    error ("Can't set baudrate");
-}
-
-
 static void
 bug_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  unsigned int prl;
-  char *p;
-
   push_target (&bug_ops);
 
   if (name == 0)
@@ -639,8 +668,8 @@ bug_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-bug_resume (step, sig)
-     int step, sig;
+bug_resume (pid, step, sig)
+     int pid, step, sig;
 {
   dcache_flush ();
 
@@ -659,62 +688,17 @@ bug_resume (step, sig)
   return;
 }
 
-/* Wait until the remote machine stops, then return,
-   storing status in STATUS just as `wait' would.  */
-
-int
-not_bug_wait (status)
-     WAITTYPE *status;
-{
-  int old_timeout;
-  int old_quit;
-  int i;
-
-  expect("Effective address: ");
-  i = get_hex_word();
-  expect("\r");
-
-  WSETEXIT ((*status), 0);
-
-  old_timeout = timeout;
-  timeout = 99999;		/* while user program runs. */
-  old_quit = immediate_quit;
-  immediate_quit = 1; /* helps ability to quit. */
-
-  while (strchr("\n\r", i = readchar()) != NULL) ;;
-
-  immediate_quit = old_quit;
-  timeout = old_timeout;
-
-  if (i == 'A')
-    {
-/* At Breakpoint */
-      expect("t Breakpoint");
-      WSETSTOP ((*status), SIGTRAP);
-
-    }
-  else
-    {
-/* finished cleanly */
-      ;
-    }
-
-  expect_prompt();
-}
-
-int
-bug_wait (status)
-     WAITTYPE *status;
+static int
+double_scan (a, b)
+     char *a, *b;
 {
   /* Strings to look for.  '?' means match any single character.
      Note that with the algorithm we use, the initial character
      of the string cannot recur in the string, or we will not
      find some cases of the string in the input.  */
 
-  static char bpt[] = "At Breakpoint";
-  static char exitmsg[] = "????-Bug>";
-  char *bp = bpt;
-  char *ep = exitmsg;
+  char *pa = a;
+  char *pb = b;
 
   /* Large enough for either sizeof (bpt) or sizeof (exitmsg) chars.  */
   char swallowed[50];
@@ -722,51 +706,30 @@ bug_wait (status)
   /* Current position in swallowed.  */
   char *swallowed_p = swallowed;
 
-  int ch;
+  int ch = readchar();
   int ch_handled;
-  int old_timeout = timeout;
-  int old_immediate_quit = immediate_quit;
   int swallowed_cr = 0;
 
-  WSETEXIT ((*status), 0);
-
-  if (need_artificial_trap != 0)
+  for (;;)
     {
-      WSETSTOP ((*status), SIGTRAP);
-      need_artificial_trap--;
-      /* user output from the target can be discarded here. (?) */
-      expect_prompt();
-      return 0;
-    }
-
-  /* read off leftovers from resume */
-  expect("Effective address: ");
-  (void) get_hex_word();
-  while (strchr("\r\n", ch = readchar()) != NULL) ;;
-
-  timeout = 99999;		/* Don't time out -- user program is running. */
-  immediate_quit = 1;		/* Helps ability to QUIT */
-  while (1)
-    {
-      QUIT;			/* Let user quit and leave process running */
+      QUIT; /* Let user quit and leave process running */
       ch_handled = 0;
-      if (ch == *bp)
+      if (ch == *pa)
 	{
-	  bp++;
-	  if (*bp == '\0')
+	  pa++;
+	  if (*pa == '\0')
 	    break;
 	  ch_handled = 1;
 
 	  *swallowed_p++ = ch;
 	}
       else
+	pa = a;
+
+      if (ch == *pb || *pb == '?')
 	{
-	  bp = bpt;
-	}
-      if (ch == *ep || *ep == '?')
-	{
-	  ep++;
-	  if (*ep == '\0')
+	  pb++;
+	  if (*pb == '\0')
 	    break;
 
 	  if (!ch_handled)
@@ -774,9 +737,7 @@ bug_wait (status)
 	  ch_handled = 1;
 	}
       else
-	{
-	  ep = exitmsg;
-	}
+	pb = b;
 
       if (!ch_handled)
 	{
@@ -798,15 +759,48 @@ bug_wait (status)
 
       ch = readchar ();
     }
-  if (*bp == '\0')
+
+  return(*pa == '\0');
+}
+
+/* Wait until the remote machine stops, then return,
+   storing status in STATUS just as `wait' would.  */
+
+int
+bug_wait (status)
+     WAITTYPE *status;
+{
+  int old_timeout = timeout;
+  int old_immediate_quit = immediate_quit;
+
+  WSETEXIT ((*status), 0);
+
+  if (need_artificial_trap != 0)
     {
+      WSETSTOP ((*status), SIGTRAP);
+      need_artificial_trap--;
+      /* user output from the target can be discarded here. (?) */
+      expect_prompt();
+      return 0;
+    }
+
+  /* read off leftovers from resume */
+  expect("Effective address: ");
+  (void) get_hex_word();
+  expect ("\r\n");
+
+  timeout = -1;	/* Don't time out -- user program is running. */
+  immediate_quit = 1; /* Helps ability to QUIT */
+
+  if (double_scan("At Breakpoint", "8???-Bug>"))
+    {
+      /* breakpoint case */
       WSETSTOP ((*status), SIGTRAP);
       expect_prompt ();
     }
-  else
-    {
-      WSETEXIT ((*status), 0);
-    }
+  else /* exit case */
+    WSETEXIT ((*status), 0);
+
 
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
@@ -832,7 +826,8 @@ get_reg_name (regno)
     "cr01",  /* 32 = psr */
     "fcr62", /* 33 = fpsr*/
     "fcr63", /* 34 = fpcr */
-    "cr04",  /* 35 = sxip */
+    "ip",			/* this is something of a cheat. */
+  /* 35 = sxip */
     "cr05", /* 36 = snip */
     "cr06", /* 37 = sfip */
   };
@@ -841,59 +836,9 @@ get_reg_name (regno)
 }
 
 static int
-gethex (length, start, ok)
-     unsigned int length;
-     char *start;
-     int *ok;
-{
-  int result = 0;
-
-  while (length--)
-    {
-      result <<= 4;
-      if (*start >= 'a' && *start <= 'f')
-	{
-	  result += *start - 'a' + 10;
-	}
-      else if (*start >= 'A' && *start <= 'F')
-	{
-	  result += *start - 'A' + 10;
-	}
-      else if (*start >= '0' && *start <= '9')
-	{
-	  result += *start - '0';
-	}
-      else
-	*ok = 0;
-      start++;
-
-    }
-  return result;
-}
-static int
-timed_read (buf, n, timeout)
-     char *buf;
-
-{
-  int i;
-  char c;
-
-  i = 0;
-  while (i < n)
-    {
-      c = readchar ();
-
-      if (c == 0)
-	return i;
-      buf[i] = c;
-      i++;
-
-    }
-  return i;
-}
-
 bug_write (a, l)
      char *a;
+     int l;
 {
   int i;
 
@@ -904,13 +849,65 @@ bug_write (a, l)
       {
 	printf ("%c", a[i]);
       }
+
+  return(0);
 }
 
+static void
 bug_write_cr (s)
      char *s;
 {
   bug_write (s, strlen (s));
   bug_write ("\r", 1);
+  return;
+}
+
+/* Read from remote while the input matches STRING.  Return zero on
+   success, -1 on failure.  */
+
+static int
+bug_scan (s)
+     char *s;
+{
+  int c;
+
+  while (*s)
+    {
+      c = readchar();
+      if (c != *s++)
+	{
+	  fflush(stdout);
+	  printf("\nNext character is '%c' - %d and s is \"%s\".\n", c, c, --s);
+	  return(-1);
+	}
+    }
+
+  return(0);
+}
+
+static int
+bug_srec_write_cr (s)
+     char *s;
+{
+  char *p = s;
+
+  if (srec_echo_pace)
+    for (p = s; *p; ++p)
+      {
+	if (!quiet)
+	  printf ("%c", *p);
+
+	do
+	  SERIAL_WRITE(desc, p, 1);
+	while (readchar_nofail() != *p);
+      }
+  else
+    {  
+      bug_write_cr (s);
+/*       return(bug_scan (s) || bug_scan ("\n")); */
+    }
+
+  return(0);
 }
 
 /* Store register REGNO, or all if REGNO == -1. */
@@ -956,7 +953,6 @@ static void
 bug_store_register (regno)
      int regno;
 {
-  REGISTER_TYPE regval;
   char buffer[1024];
   check_open();
 
@@ -971,12 +967,7 @@ bug_store_register (regno)
     {
       char *regname;
 
-      /* get_reg_name thinks that the pc is in sxip.  This is only partially
-	 true.  When *assigning* it, we must assign to ip on m88k-bug. */
-
-      regname = ((regno == PC_REGNUM)
-		 ? "ip"
-		 : get_reg_name(regno));
+      regname = (get_reg_name(regno));
 
       sprintf(buffer, "rs %s %08x",
 	      regname,
@@ -999,15 +990,6 @@ void
 bug_prepare_to_store ()
 {
   /* Do nothing, since we can store individual regs */
-}
-
-static CORE_ADDR
-translate_addr (addr)
-     CORE_ADDR addr;
-{
-
-  return (addr);
-
 }
 
 /* Read a word from remote address ADDR and return it.
@@ -1110,60 +1092,150 @@ bug_xfer_inferior_memory (memaddr, myaddr, len, write, target)
   return len;
 }
 
-/* fixme: make this user settable */
-#define CHUNK_SIZE (30)
+static void
+start_load()
+{
+  char *command;
 
-int
+  command = (srec_echo_pace ? "lo 0 ;x" : "lo 0");
+
+  bug_write_cr (command);
+  expect (command);
+  expect ("\r\n");
+  bug_srec_write_cr ("S0030000FC");
+  return;
+}
+
+/* This is an extremely vulnerable and fragile function.  I've made
+   considerable attempts to make this deterministic, but I've
+   certainly forgotten something.  The trouble is that S-records are
+   only a partial file format, not a protocol.  Worse, apparently the
+   m88k bug monitor does not run in real time while receiving
+   S-records.  Hence, we must pay excruciating attention to when and
+   where error messages are returned, and what has actually been sent.
+
+   Each call represents a chunk of memory to be sent to the target.
+   We break that chunk into an S0 header record, some number of S3
+   data records each containing srec_bytes, and an S7 termination
+   record.  */
+
+static int
 bug_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      unsigned char *myaddr;
      int len;
 {
   int done;
-  int todo;
   int checksum;
-  char buffer[(CHUNK_SIZE + 8) << 1];
+  int x;
+  int retries;
+  char buffer[(srec_bytes + 8) << 1];
 
-  done = 0;
+  retries = 0;
 
-#define LOAD_COMMAND "lo 0"
-  bug_write_cr (LOAD_COMMAND);
-
-  while (done < len)
+  do
     {
-      int thisgo;
-      int idx;
-      char *buf = buffer;
-      CORE_ADDR address;
+      done = 0;
 
-      checksum = 0;
-      thisgo = len - done;
-      if (thisgo > CHUNK_SIZE)
-	thisgo = CHUNK_SIZE;
+      if (retries > srec_max_retries)
+	return(-1);
 
-      address = memaddr + done;
-      sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
-      buf += 12;
-
-      checksum += (thisgo + 4 + 1
-		   + (address & 0xff)
-		   + ((address >>  8) & 0xff)
-		   + ((address >> 16) & 0xff)
-		   + ((address >> 24) & 0xff));
-
-      for (idx = 0; idx < thisgo; idx++)
+      if (retries > 0)
 	{
-	  sprintf (buf, "%02X", myaddr[idx + done]);
-	  checksum += myaddr[idx + done];
-	  buf += 2;
-	}
-      sprintf(buf, "%02X", ~checksum & 0xff);
-      bug_write_cr (buffer);
-      done += thisgo;
-    }
+	  if (!quiet)
+	    printf("\n<retrying...>\n");
 
-  bug_write_cr("S7060000000000F9");
-  expect_prompt();
+	  /* This expect_prompt call is extremely important.  Without
+	     it, we will tend to resend our packet so fast that it
+	     will arrive before the bug monitor is ready to receive
+	     it.  This would lead to a very ugly resend loop.  */
+
+	  expect_prompt();
+	}
+
+      start_load();
+
+      while (done < len)
+	{
+	  int thisgo;
+	  int idx;
+	  char *buf = buffer;
+	  CORE_ADDR address;
+
+	  checksum = 0;
+	  thisgo = len - done;
+	  if (thisgo > srec_bytes)
+	    thisgo = srec_bytes;
+
+	  address = memaddr + done;
+	  sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
+	  buf += 12;
+
+	  checksum += (thisgo + 4 + 1
+		       + (address & 0xff)
+		       + ((address >>  8) & 0xff)
+		       + ((address >> 16) & 0xff)
+		       + ((address >> 24) & 0xff));
+
+	  for (idx = 0; idx < thisgo; idx++)
+	    {
+	      sprintf (buf, "%02X", myaddr[idx + done]);
+	      checksum += myaddr[idx + done];
+	      buf += 2;
+	    }
+
+	  if (srec_noise > 0)
+	    {
+	      /* FIXME-NOW: insert a deliberate error every now and then.
+		 This is intended for testing/debugging the error handling
+		 stuff.  */
+	      static int counter = 0;
+	      if (++counter > srec_noise)
+		{
+		  counter = 0;
+		  ++checksum;
+		}
+	    }
+
+	  sprintf(buf, "%02X", ~checksum & 0xff);
+	  bug_srec_write_cr (buffer);
+
+	  if (srec_sleep != 0)
+	    sleep(srec_sleep);
+
+	  /* This pollchar is probably redundant to the double_scan
+	     below.  Trouble is, we can't be sure when or where an
+	     error message will appear.  Apparently, when running at
+	     full speed from a typical sun4, error messages tend to
+	     appear to arrive only *after* the s7 record.   */
+
+	  if ((x = pollchar()) != 0)
+	    {
+	      if (!quiet)
+		printf("\n<retrying...>\n");
+
+	      ++retries;
+
+	      /* flush any remaining input and verify that we are back
+		 at the prompt level. */
+	      expect_prompt();
+	      /* start all over again. */
+	      start_load();
+	      done = 0;
+	      continue;
+	    }
+
+	  done += thisgo;
+	}
+
+      bug_srec_write_cr("S7060000000000F9");
+      ++retries;
+
+      /* Having finished the load, we need to figure out whether we
+	 had any errors.  */
+    } while (double_scan("S-RECORD", "8???-Bug>"));;
+
+  return(0);
 }
 
 void
@@ -1190,7 +1262,7 @@ bug_files_info ()
 
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns errno value.  */
-int
+static int
 bug_read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -1289,20 +1361,6 @@ bug_read_inferior_memory (memaddr, myaddr, len)
   return(0);
 }
 
-/* This routine is run as a hook, just before the main command loop is
-   entered.  If gdb is configured for the H8, but has not had its
-   target specified yet, this will loop prompting the user to do so.
-*/
-
-bug_before_main_loop ()
-{
-  char ttyname[100];
-  char *p, *p2;
-  extern FILE *instream;
-
-  push_target (&bug_ops);
-}
-
 #define MAX_BREAKS	16
 static int num_brkpts = 0;
 static int
@@ -1356,10 +1414,13 @@ bug_clear_breakpoints ()
   if (is_open)
     {
       bug_write_cr ("nobr");
+      expect("nobr");
       expect_prompt ();
     }
   num_brkpts = 0;
+  return(0);
 }
+
 static void
 bug_mourn ()
 {
@@ -1390,7 +1451,10 @@ bug_com (args, fromtty)
   expect_prompt ();
 }
 
-bug_quiet ()
+static void
+bug_quiet (args, fromtty)
+     char *args;
+     int fromtty;
 {
   quiet = !quiet;
   if (quiet)
@@ -1398,15 +1462,18 @@ bug_quiet ()
   else
     printf_filtered ("Snoop enabled\n");
 
+  return;
 }
 
-bug_device (s)
-     char *s;
+static void
+bug_device (args, fromtty)
+     char *args;
+     int fromtty;
 {
-  if (s)
-    {
-      dev_name = get_word (&s);
-    }
+  if (args)
+    dev_name = get_word (&args);
+
+  return;
 }
 
 #if 0
@@ -1480,6 +1547,62 @@ _initialize_remote_bug ()
   add_com ("speed", class_obscure, bug_speed,
 	   "Set the terminal line speed for BUG communications");
 #endif /* 0 */
+
+  add_show_from_set
+    (add_set_cmd ("srec-bytes", class_support, var_uinteger,
+		  (char *) &srec_bytes,
+		  "\
+Set the number of bytes represented in each S-record.\n\
+This affects the communication protocol with the remote target.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("srec-max-retries", class_support, var_uinteger,
+		  (char *) &srec_max_retries,
+		  "\
+Set the number of retries for shipping S-records.\n\
+This affects the communication protocol with the remote target.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("srec-frame", class_support, var_uinteger,
+		  (char *) &srec_frame,
+		  "\
+Set the number of bytes in an S-record frame.\n\
+This affects the communication protocol with the remote target.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("srec-noise", class_support, var_zinteger,
+		  (char *) &srec_noise,
+		  "\
+Set number of S-record to send before deliberately flubbing a checksum.\n\
+Zero means flub none at all.  This affects the communication protocol\n\
+with the remote target.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("srec-sleep", class_support, var_zinteger,
+		  (char *) &srec_sleep,
+		  "\
+Set number of seconds to sleep after an S-record for a possible error message to arrive.\n\
+This affects the communication protocol with the remote target.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("srec-echo-pace", class_support, var_boolean,
+		  (char *) &srec_echo_pace,
+		  "\
+Set echo-verification.\n\
+When on, use verification by echo when downloading S-records.  This is\n\
+much slower, but generally more reliable.", 
+		  &setlist),
+     &showlist);
 
   dev_name = NULL;
 }
