@@ -1870,6 +1870,9 @@ static arg sparclet_cpreg_table[] =
   { 1, "%ccfr" },
   { 2, "%cccrcr" },
   { 3, "%ccpr" },
+  { 4, "%ccsr2" },
+  { 5, "%cccrr" },
+  { 6, "%ccrstr" },
   { 0, 0 }
 };
 

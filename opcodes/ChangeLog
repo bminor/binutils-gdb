@@ -1,3 +1,7 @@
+Thu Sep 18 11:21:43 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparclet_cpreg_table): Add %ccsr2, %cccrr, %ccrstr.
+
 Tue Sep 16 15:18:20 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (v850_opcodes): Further rearrangements. 
