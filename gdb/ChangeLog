@@ -1,3 +1,10 @@
+Tue Oct 29 16:56:01 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* config/i386/xm-cygwin32.h:
+	* config/powerpc/xm-cygwin32.h:
+	add #define LSEEK_NOT_LINEAR so source lines aren't unexpectedly
+	truncated
+
 Tue Oct 29 18:36:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/tm-ppc-eabi.h (TARGET_BYTE_ORDER_SELECTABLE):
