@@ -166,6 +166,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define FCRCS_REGNUM 70         /* FP control/status */
 #define FCRIR_REGNUM 71         /* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
+#define	UNUSED_REGNUM 73	/* Never used, FIXME */
 #define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
 #define	PRID_REGNUM 89		/* Processor ID */
 #define	LAST_EMBED_REGNUM 89	/* Last one */

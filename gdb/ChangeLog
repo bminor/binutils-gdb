@@ -1,3 +1,9 @@
+Sat Sep 16 13:23:36 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/tm-mips.h (UNUSED_REGNUM):  Define.
+	* mipsv4-nat.c (supply_gregset):  Fill UNUSED_REGNUM register
+	with zero.
+
 Thu Sep 14 17:35:24 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-sim.c (gdbsim_create_inferior):  Back out change that

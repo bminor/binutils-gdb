@@ -57,6 +57,7 @@ supply_gregset (gregsetp)
   supply_register (PS_REGNUM, zerobuf);
   supply_register (BADVADDR_REGNUM, zerobuf);
   supply_register (FP_REGNUM, zerobuf);
+  supply_register (UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi <= LAST_EMBED_REGNUM; regi++)
     supply_register (regi, zerobuf);
 }
