@@ -1,5 +1,9 @@
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>
 
+	* varobj.c: Replace value_ptr with ``struct value *''.
+
+2001-10-31  Andrew Cagney  <ac131313@redhat.com>
+
 	* varobj.c: Re-indent.
 
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>

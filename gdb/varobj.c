@@ -91,7 +91,7 @@ struct varobj
   struct type *type;
 
   /* The value of this expression or subexpression.  This may be NULL. */
-  value_ptr value;
+  struct value *value;
 
   /* Did an error occur evaluating the expression or getting its value? */
   int error;
@@ -188,7 +188,7 @@ static struct type *get_target_type (struct type *);
 
 static enum varobj_display_formats variable_default_display (struct varobj *);
 
-static int my_value_equal (value_ptr, value_ptr, int *);
+static int my_value_equal (struct value *, struct value *, int *);
 
 static void vpush (struct vstack **pstack, struct varobj *var);
 
@@ -208,9 +208,9 @@ static char *name_of_variable (struct varobj *);
 
 static char *name_of_child (struct varobj *, int);
 
-static value_ptr value_of_root (struct varobj **var_handle, int *);
+static struct value *value_of_root (struct varobj **var_handle, int *);
 
-static value_ptr value_of_child (struct varobj *parent, int index);
+static struct value *value_of_child (struct varobj *parent, int index);
 
 static struct type *type_of_child (struct varobj *var);
 
@@ -228,9 +228,9 @@ static char *c_name_of_variable (struct varobj *parent);
 
 static char *c_name_of_child (struct varobj *parent, int index);
 
-static value_ptr c_value_of_root (struct varobj **var_handle);
+static struct value *c_value_of_root (struct varobj **var_handle);
 
-static value_ptr c_value_of_child (struct varobj *parent, int index);
+static struct value *c_value_of_child (struct varobj *parent, int index);
 
 static struct type *c_type_of_child (struct varobj *parent, int index);
 
@@ -248,9 +248,9 @@ static char *cplus_name_of_variable (struct varobj *parent);
 
 static char *cplus_name_of_child (struct varobj *parent, int index);
 
-static value_ptr cplus_value_of_root (struct varobj **var_handle);
+static struct value *cplus_value_of_root (struct varobj **var_handle);
 
-static value_ptr cplus_value_of_child (struct varobj *parent, int index);
+static struct value *cplus_value_of_child (struct varobj *parent, int index);
 
 static struct type *cplus_type_of_child (struct varobj *parent, int index);
 
@@ -266,9 +266,9 @@ static char *java_name_of_variable (struct varobj *parent);
 
 static char *java_name_of_child (struct varobj *parent, int index);
 
-static value_ptr java_value_of_root (struct varobj **var_handle);
+static struct value *java_value_of_root (struct varobj **var_handle);
 
-static value_ptr java_value_of_child (struct varobj *parent, int index);
+static struct value *java_value_of_child (struct varobj *parent, int index);
 
 static struct type *java_type_of_child (struct varobj *parent, int index);
 
@@ -293,11 +293,11 @@ struct language_specific
   /* The name of the INDEX'th child of PARENT. */
   char *(*name_of_child) (struct varobj * parent, int index);
 
-  /* The value_ptr of the root variable ROOT. */
-  value_ptr (*value_of_root) (struct varobj ** root_handle);
+  /* The ``struct value *'' of the root variable ROOT. */
+  struct value *(*value_of_root) (struct varobj ** root_handle);
 
-  /* The value_ptr of the INDEX'th child of PARENT. */
-  value_ptr (*value_of_child) (struct varobj * parent, int index);
+  /* The ``struct value *'' of the INDEX'th child of PARENT. */
+  struct value *(*value_of_child) (struct varobj * parent, int index);
 
   /* The type of the INDEX'th child of PARENT. */
   struct type *(*type_of_child) (struct varobj * parent, int index);
@@ -696,7 +696,7 @@ varobj_list_children (struct varobj *var, struct varobj ***childlist)
 char *
 varobj_get_type (struct varobj *var)
 {
-  value_ptr val;
+  struct value *val;
   struct cleanup *old_chain;
   struct ui_file *stb;
   char *thetype;
@@ -710,7 +710,7 @@ varobj_get_type (struct varobj *var)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  /* To print the type, we simply create a zero value_ptr and
+  /* To print the type, we simply create a zero ``struct value *'' and
      cast it to our type. We then typeprint this variable. */
   val = value_zero (var->type, not_lval);
   type_print (VALUE_TYPE (val), "", stb, -1);
@@ -751,21 +751,21 @@ varobj_get_value (struct varobj *var)
 int
 varobj_set_value (struct varobj *var, char *expression)
 {
-  value_ptr val;
+  struct value *val;
   int offset = 0;
 
   /* The argument "expression" contains the variable's new value.
      We need to first construct a legal expression for this -- ugh! */
   /* Does this cover all the bases? */
   struct expression *exp;
-  value_ptr value;
+  struct value *value;
   int saved_input_radix = input_radix;
 
   if (variable_editable (var) && !var->error)
     {
       char *s = expression;
       int i;
-      value_ptr temp;
+      struct value *temp;
 
       input_radix = 10;		/* ALWAYS reset to decimal temporarily */
       if (!gdb_parse_exp_1 (&s, 0, 0, &exp))
@@ -876,7 +876,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
   struct varobj *v;
   struct varobj **cv;
   struct varobj **templist = NULL;
-  value_ptr new;
+  struct value *new;
   struct vstack *stack = NULL;
   struct vstack *result = NULL;
   struct frame_info *old_fi;
@@ -1427,7 +1427,7 @@ variable_default_display (struct varobj *var)
    one is "safe" -- it NEVER longjmps. It determines if the VAR's
    value is the same as VAL2. */
 static int
-my_value_equal (value_ptr val1, value_ptr val2, int *error2)
+my_value_equal (struct value *val1, struct value *val2, int *error2)
 {
   int r, err1, err2;
 
@@ -1593,7 +1593,7 @@ name_of_child (struct varobj *var, int index)
   return (*var->root->lang->name_of_child) (var, index);
 }
 
-/* What is the value_ptr of the root variable VAR? 
+/* What is the ``struct value *'' of the root variable VAR? 
    TYPE_CHANGED controls what to do if the type of a
    use_selected_frame = 1 variable changes.  On input,
    TYPE_CHANGED = 1 means discard the old varobj, and replace
@@ -1603,7 +1603,7 @@ name_of_child (struct varobj *var, int index)
    old varobj pointer away somewhere before calling this.
    On return, TYPE_CHANGED will be 1 if the type has changed, and 
    0 otherwise. */
-static value_ptr
+static struct value *
 value_of_root (struct varobj **var_handle, int *type_changed)
 {
   struct varobj *var;
@@ -1662,11 +1662,11 @@ value_of_root (struct varobj **var_handle, int *type_changed)
   return (*var->root->lang->value_of_root) (var_handle);
 }
 
-/* What is the value_ptr for the INDEX'th child of PARENT? */
-static value_ptr
+/* What is the ``struct value *'' for the INDEX'th child of PARENT? */
+static struct value *
 value_of_child (struct varobj *parent, int index)
 {
-  value_ptr value;
+  struct value *value;
 
   value = (*parent->root->lang->value_of_child) (parent, index);
 
@@ -1858,10 +1858,10 @@ c_name_of_child (struct varobj *parent, int index)
   return name;
 }
 
-static value_ptr
+static struct value *
 c_value_of_root (struct varobj **var_handle)
 {
-  value_ptr new_val;
+  struct value *new_val;
   struct varobj *var = *var_handle;
   struct frame_info *fi;
   int within_scope;
@@ -1919,10 +1919,12 @@ c_value_of_root (struct varobj **var_handle)
   return NULL;
 }
 
-static value_ptr
+static struct value *
 c_value_of_child (struct varobj *parent, int index)
 {
-  value_ptr value, temp, indval;
+  struct value *value;
+  struct value *temp;
+  struct value *indval;
   struct type *type, *target;
   char *name;
 
@@ -2045,7 +2047,7 @@ static char *
 c_value_of_variable (struct varobj *var)
 {
   struct type *type;
-  value_ptr val;
+  struct value *val;
 
   if (var->value != NULL)
     val = var->value;
@@ -2269,17 +2271,17 @@ cplus_name_of_child (struct varobj *parent, int index)
   return name;
 }
 
-static value_ptr
+static struct value *
 cplus_value_of_root (struct varobj **var_handle)
 {
   return c_value_of_root (var_handle);
 }
 
-static value_ptr
+static struct value *
 cplus_value_of_child (struct varobj *parent, int index)
 {
   struct type *type;
-  value_ptr value;
+  struct value *value;
   char *name;
 
   if (CPLUS_FAKE_CHILD (parent))
@@ -2295,7 +2297,7 @@ cplus_value_of_child (struct varobj *parent, int index)
     {
       if (CPLUS_FAKE_CHILD (parent))
 	{
-	  value_ptr temp = parent->parent->value;
+	  struct value *temp = parent->parent->value;
 	  value = value_struct_elt (&temp, NULL, name,
 				    NULL, "cplus_structure");
 	  release_value (value);
@@ -2310,7 +2312,7 @@ cplus_value_of_child (struct varobj *parent, int index)
 	  /* Baseclass */
 	  if (parent->value != NULL)
 	    {
-	      value_ptr temp;
+	      struct value *temp;
 
 	      if (TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_PTR
 		  || TYPE_CODE (VALUE_TYPE (parent->value)) == TYPE_CODE_REF)
@@ -2434,13 +2436,13 @@ java_name_of_child (struct varobj *parent, int index)
   return name;
 }
 
-static value_ptr
+static struct value *
 java_value_of_root (struct varobj **var_handle)
 {
   return cplus_value_of_root (var_handle);
 }
 
-static value_ptr
+static struct value *
 java_value_of_child (struct varobj *parent, int index)
 {
   return cplus_value_of_child (parent, index);
