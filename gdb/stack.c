@@ -356,11 +356,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
      frame is a SIGTRAMP_FRAME or a DUMMY_FRAME, then the next frame
      was not entered as the result of a call, and we want to get the
      line containing fi->pc.  */
-  sal =
-    find_pc_line (fi->pc,
-		  fi->next != NULL
-		  && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
-		  && !(get_frame_type (fi->next) == DUMMY_FRAME));
+  find_frame_sal (fi, &sal);
 
   location_print = (source == LOCATION 
 		    || source == LOC_AND_ADDRESS
@@ -757,11 +753,10 @@ frame_info (char *addr_exp, int from_tty)
   if (fi == NULL)
     error ("Invalid frame specified.");
 
-  sal = find_pc_line (fi->pc,
-		      fi->next != NULL
-		      && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
-		      && !(get_frame_type (fi->next) == DUMMY_FRAME));
+  find_frame_sal (fi, &sal);
   func = get_frame_function (fi);
+  /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
+     the same value.  */
   s = find_pc_symtab (fi->pc);
   if (func)
     {
@@ -858,7 +853,8 @@ frame_info (char *addr_exp, int from_tty)
   if (fi->next || calling_frame_info)
     puts_filtered ("\n");
   if (s)
-    printf_filtered (" source language %s.\n", language_str (s->language));
+    printf_filtered (" source language %s.\n",
+		     language_str (s->language));
 
 #ifdef PRINT_EXTRA_FRAME_INFO
   PRINT_EXTRA_FRAME_INFO (fi);

@@ -23,6 +23,8 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+struct symtab_and_line;
+
 /* The frame object.  */
 
 struct frame_info;
@@ -98,6 +100,27 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
 /* The frame's `resume' address.  Where the program will resume in
    this frame.  */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
+
+/* Closely related to the resume address, various symbol table
+   attributes that are determined by the PC.  Note that for a normal
+   frame, the PC refers to the resume address after the return, and
+   not the call instruction.  In such a case, the address is adjusted
+   so that it (approximatly) identifies the call site (and not return
+   site).
+
+   NOTE: cagney/2002-11-28: The frame cache could be used to cache the
+   computed value.  Working on the assumption that the bottle-neck is
+   in the single step code, and that code causes the frame cache to be
+   constantly flushed, caching things in a frame is probably of little
+   benefit.  As they say `show us the numbers'.
+
+   NOTE: cagney/2002-11-28: Plenty more where this one came from:
+   find_frame_block(), find_frame_partial_function(),
+   find_frame_symtab(), find_frame_function().  Each will need to be
+   carefully considered to determine if the real intent was for it to
+   apply to the PC or the adjusted PC.  */
+extern void find_frame_sal (struct frame_info *frame,
+			    struct symtab_and_line *sal);
 
 /* Return the frame address from FI.  Except in the machine-dependent
    *FRAME* macros, a frame address has no defined meaning other than

@@ -1021,6 +1021,29 @@ get_frame_pc (struct frame_info *frame)
   return frame->pc;
 }
 
+static int
+pc_notcurrent (struct frame_info *frame)
+{
+  /* If FRAME is not the innermost frame, that normally means that
+     FRAME->pc points at the return instruction (which is *after* the
+     call instruction), and we want to get the line containing the
+     call (because the call is where the user thinks the program is).
+     However, if the next frame is either a SIGTRAMP_FRAME or a
+     DUMMY_FRAME, then the next frame will contain a saved interrupt
+     PC and such a PC indicates the current (rather than next)
+     instruction/line, consequently, for such cases, want to get the
+     line containing fi->pc.  */
+  struct frame_info *next = get_next_frame (frame);
+  int notcurrent = (next != NULL && get_frame_type (next) == NORMAL_FRAME);
+  return notcurrent;
+}
+
+void
+find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
+{
+  (*sal) = find_pc_line (frame->pc, pc_notcurrent (frame));
+}
+
 /* Per "frame.h", return the ``address'' of the frame.  Code should
    really be using get_frame_id().  */
 CORE_ADDR

@@ -1,3 +1,14 @@
+2002-11-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (pc_notcurrent): New function.
+	(find_frame_sal): New function.
+	* frame.h (find_frame_sal): Declare.
+	(struct symtab_and_line): Add opaque declaration.
+	* stack.c (print_frame_info_base): Use find_pc_line instead of
+	find_frame_sal.
+	(frame_info): Ditto.
+	* ada-lang.c (find_printable_frame): Ditto.
+
 2002-11-28  J. Brobecker  <brobecker@gnat.com>
 
 	* configure.in: Check that the pthdebug library is recent enough

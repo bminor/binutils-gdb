@@ -1,3 +1,8 @@
+2002-11-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use find_frame_sal instead of
+	find_pc_line.
+
 2002-11-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
