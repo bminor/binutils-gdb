@@ -814,4 +814,4 @@ build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
 # Test a weak versioned symbol.
 build_vers_lib "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
 build_vers_lib "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
-build_exec "vers19" vers19.c vers19 "-rpath .:$tmpdir" vers18.so vers19.ver vers19.dsym ""
+build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym ""

@@ -1,3 +1,13 @@
+2001-05-18  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Revert the last change.
+
+	* ld-elfvers/vers2.ver: Put back "tmpdir/" the version
+	references.
+	* ld-elfvers/vers3.ver: Likewise.
+	* ld-elfvers/vers6.ver: Likewise.
+	* ld-elfvers/vers18.ver: Likewise.
+
 2001-05-17  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp: Pass "-rpath .:$tmpdir" to "vers19".

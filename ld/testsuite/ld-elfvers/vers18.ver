@@ -7,6 +7,6 @@ Version definitions:
 	VERS_1.2 
 
 Version References:
-  required from vers17.so:
+  required from tmpdir/vers17.so:
     0x0a7922b0 0x00 05 VERS_2.0
 
