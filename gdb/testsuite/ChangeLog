@@ -1,3 +1,8 @@
+2001-10-04  Frank Ch. Eigler  <fche@redhat.com>
+
+	* lib/insight-support.exp (gdbtk_start): Don't exit dejagnu
+	if gdb child process crashes, just signal an error.
+
 2001-10-02  Jim Blandy  <jimb@redhat.com>
 
 	* lib/gdb.exp (test_xfail_format): Simplify.

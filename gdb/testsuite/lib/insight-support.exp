@@ -94,7 +94,7 @@ proc gdbtk_start {test} {
   set err [catch {exec $GDB -nx -q --tclcommand=$test} res]
   if { $err } {
     perror "Execing $GDB failed: $res"
-    exit 1;
+    append res "\nERROR gdb-crash"
   }
   return $res
 }
