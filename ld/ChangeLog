@@ -1,3 +1,9 @@
+Wed Feb  3 19:41:01 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldctor.c (ldctor_build_sets): Just set SEC_KEEP once.  Check for
+	an owner of a section before using it to look up a reloc type.
+	Don't set SEC_KEEP for the absolute section.
+
 Mon Feb  1 11:39:46 1999  Catherine Moore  <clm@cygnus.com>
 
         * Makefile.am (earmelf_oabi.o):  New.
