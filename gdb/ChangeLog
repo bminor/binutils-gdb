@@ -1,3 +1,8 @@
+Sat Nov 20 09:20:51 1993  Fred Fish  (fnf@rtl.cygnus.com)
+
+	* go32-xdep.c (re_comp, re_exec):  Remove stubs now that gdb
+	always uses it's own version of regex.
+
 Fri Nov 19 18:23:19 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* valops.c(value_struct_elt_for_reference): enhance  search operator in

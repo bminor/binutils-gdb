@@ -25,9 +25,6 @@ static void uerror(char *s)
   exit(1);
 }
 
-re_comp(){uerror("attempt to call re_comp()");}
-re_exec(){uerror("attempt to call re_exec()");}
-
 sigsetmask()
 {
 }
