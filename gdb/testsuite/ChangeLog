@@ -1,3 +1,8 @@
+Sat Nov  9 11:13:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/inherit.exp (test_ptype_vi): Log some passes that
+	weren't being noted.
+
 Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/corefile.exp:  Consume $prompt in mmap fail cases.
