@@ -130,6 +130,9 @@ static struct label_line *labels;
 
 static struct label_line *current_label;
 
+/* Pointer to list holding the opcodes sorted by name.  */
+static struct m68k_opcode const ** m68k_sorted_opcodes;
+
 /* Its an arbitrary name:  This means I don't approve of it.
    See flames below.  */
 static struct obstack robyn;
@@ -4113,24 +4116,43 @@ md_assemble (str)
     }
 }
 
-void
-md_begin ()
+/* Comparison function used by qsort to rank the opcode entries by name.  */
+
+static int
+m68k_compare_opcode (const void * v1, const void * v2)
 {
-  /*
-   * md_begin -- set up hash tables with 68000 instructions.
-   * similar to what the vax assembler does.  ---phr
-   */
+  struct m68k_opcode * op1, * op2;
+  int ret;
+
+  op1 = *(struct m68k_opcode **) v1;
+  op2 = *(struct m68k_opcode **) v2;
+
+  /* Compare the two names.  If different, return the comparison.
+     If the same, return the order they are in the opcode table.  */
+  ret = strcmp (op1->name, op2->name);
+  if (ret)
+    return ret;
+  if (op1 < op2)
+    return -1;
+  return 0;
+}
+
+void
+md_begin (void)
+{
+  const struct m68k_opcode *ins;
+  struct m68k_incant *hack, *slak;
+  const char *retval = 0;	/* Empty string, or error msg text.  */
+  int i;
+
+  /* Set up hash tables with 68000 instructions.
+     similar to what the vax assembler does.  */
   /* RMS claims the thing to do is take the m68k-opcode.h table, and make
      a copy of it at runtime, adding in the information we want but isn't
      there.  I think it'd be better to have an awk script hack the table
      at compile time.  Or even just xstr the table and use it as-is.  But
      my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
      names.  */
-
-  const struct m68k_opcode *ins;
-  struct m68k_incant *hack, *slak;
-  const char *retval = 0;	/* Empty string, or error msg text.  */
-  int i;
 
   if (flag_mri)
     {
@@ -4140,6 +4162,20 @@ md_begin ()
 	m68k_rel32 = 0;
     }
 
+  /* First sort the opcode table into alphabetical order to seperate
+     the order that the assembler wants to see the opcodes from the
+     order that the disassembler wants to see them.  */
+  m68k_sorted_opcodes = xmalloc (m68k_numopcodes * sizeof (* m68k_sorted_opcodes));
+  if (!m68k_sorted_opcodes)
+    as_fatal (_("Internal Error:  Can't allocate m68k_sorted_opcodes of size %d"),
+	      m68k_numopcodes * sizeof (* m68k_sorted_opcodes));
+
+  for (i = m68k_numopcodes; i--;)
+    m68k_sorted_opcodes[i] = m68k_opcodes + i;
+
+  qsort (m68k_sorted_opcodes, m68k_numopcodes,
+	 sizeof (m68k_sorted_opcodes[0]), m68k_compare_opcode);
+
   op_hash = hash_new ();
 
   obstack_begin (&robyn, 4000);
@@ -4148,9 +4184,10 @@ md_begin ()
       hack = slak = (struct m68k_incant *) obstack_alloc (&robyn, sizeof (struct m68k_incant));
       do
 	{
-	  ins = &m68k_opcodes[i];
-	  /* We *could* ignore insns that don't match our arch here
-	     but just leaving them out of the hash.  */
+	  ins = m68k_sorted_opcodes[i];
+
+	  /* We *could* ignore insns that don't match our
+	     arch here by just leaving them out of the hash.  */
 	  slak->m_operands = ins->args;
 	  slak->m_opnum = strlen (slak->m_operands) / 2;
 	  slak->m_arch = ins->arch;
@@ -4158,9 +4195,9 @@ md_begin ()
 	  /* This is kludgey.  */
 	  slak->m_codenum = ((ins->match) & 0xffffL) ? 2 : 1;
 	  if (i + 1 != m68k_numopcodes
-	      && !strcmp (ins->name, m68k_opcodes[i + 1].name))
+	      && !strcmp (ins->name, m68k_sorted_opcodes[i + 1]->name))
 	    {
-	      slak->m_next = (struct m68k_incant *) obstack_alloc (&robyn, sizeof (struct m68k_incant));
+	      slak->m_next = obstack_alloc (&robyn, sizeof (struct m68k_incant));
 	      i++;
 	    }
 	  else
@@ -4179,6 +4216,7 @@ md_begin ()
       const char *name = m68k_opcode_aliases[i].primary;
       const char *alias = m68k_opcode_aliases[i].alias;
       PTR val = hash_find (op_hash, name);
+
       if (!val)
 	as_fatal (_("Internal Error: Can't find %s in hash table"), name);
       retval = hash_insert (op_hash, alias, val);
@@ -4217,6 +4255,7 @@ md_begin ()
 	  const char *name = mri_aliases[i].primary;
 	  const char *alias = mri_aliases[i].alias;
 	  PTR val = hash_find (op_hash, name);
+
 	  if (!val)
 	    as_fatal (_("Internal Error: Can't find %s in hash table"), name);
 	  retval = hash_jam (op_hash, alias, val);
@@ -4230,6 +4269,7 @@ md_begin ()
       notend_table[i] = 0;
       alt_notend_table[i] = 0;
     }
+
   notend_table[','] = 1;
   notend_table['{'] = 1;
   notend_table['}'] = 1;
@@ -4246,18 +4286,15 @@ md_begin ()
 #endif
 
   /* We need to put '(' in alt_notend_table to handle
-       cas2 %d0:%d2,%d3:%d4,(%a0):(%a1)
-     */
+       cas2 %d0:%d2,%d3:%d4,(%a0):(%a1)  */
   alt_notend_table['('] = 1;
 
   /* We need to put '@' in alt_notend_table to handle
-       cas2 %d0:%d2,%d3:%d4,@(%d0):@(%d1)
-     */
+       cas2 %d0:%d2,%d3:%d4,@(%d0):@(%d1)  */
   alt_notend_table['@'] = 1;
 
   /* We need to put digits in alt_notend_table to handle
-       bfextu %d0{24:1},%d0
-     */
+       bfextu %d0{24:1},%d0  */
   alt_notend_table['0'] = 1;
   alt_notend_table['1'] = 1;
   alt_notend_table['2'] = 1;
@@ -4274,10 +4311,10 @@ md_begin ()
      gas expects pseudo ops to start with a dot.  */
   {
     int n = 0;
+
     while (mote_pseudo_table[n].poc_name)
       {
-	hack = (struct m68k_incant *)
-	  obstack_alloc (&robyn, sizeof (struct m68k_incant));
+	hack = obstack_alloc (&robyn, sizeof (struct m68k_incant));
 	hash_insert (op_hash,
 		     mote_pseudo_table[n].poc_name, (char *) hack);
 	hack->m_operands = 0;
@@ -4372,9 +4409,7 @@ m68k_init_after_args ()
   if (current_architecture & m68851)
     {
       if (current_architecture & m68040)
-	{
-	  as_warn (_("68040 and 68851 specified; mmu instructions may assemble incorrectly"));
-	}
+	as_warn (_("68040 and 68851 specified; mmu instructions may assemble incorrectly"));
     }
   /* What other incompatibilities could we check for?  */
 
@@ -4383,17 +4418,16 @@ m68k_init_after_args ()
       && (cpu_of_arch (current_architecture)
 	  /* Can CPU32 have a 68881 coprocessor??  */
 	  & (m68020 | m68030 | cpu32)))
-    {
-      current_architecture |= m68881;
-    }
+    current_architecture |= m68881;
+
   if (!no_68851
       && (cpu_of_arch (current_architecture) & m68020up) != 0
       && (cpu_of_arch (current_architecture) & m68040up) == 0)
-    {
-      current_architecture |= m68851;
-    }
+    current_architecture |= m68851;
+
   if (no_68881 && (current_architecture & m68881))
     as_bad (_("options for 68881 and no-68881 both given"));
+
   if (no_68851 && (current_architecture & m68851))
     as_bad (_("options for 68851 and no-68851 both given"));
 
