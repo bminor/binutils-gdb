@@ -1,5 +1,15 @@
 Thu Oct 31 18:20:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* stabs.c (struct stab_handle): Add bincl_list field.
+	(parse_stab): Pass value to push_bincl.  Call find_excl for
+	N_EXCL.
+	(struct bincl_file): Add hash, file and file_types fields.
+	(push_bincl): Add hash parameter.  Save it in the new hash field.
+	Save the file number in the new file field.
+	(pop_bincl): Put the bincl_file on bincl_list, rather than freeing
+	it.  Save the file types in the new file_types field.
+	(find_excl): New static function.
+
 	* ieee.c (ieee_lineno): Don't compare line number addresses to
 	info->highaddr (undo part of October 28 patch).
 
