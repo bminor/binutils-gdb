@@ -33,14 +33,6 @@ rename(from, to)
 }
 #endif
 
-/*
- * Might not need these. Leave them out for now.
- *
-#include <string.h>
-#define index(s,c)		strchr(s,c)
-#define rindex(s,c)		strrchr(s,c)
- */
-
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;

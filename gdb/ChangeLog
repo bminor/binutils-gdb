@@ -1,3 +1,11 @@
+Mon Apr 19 11:13:34 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* i387-tdep.c: Remove unused #includes.
+
+	* configure.in: Match i[34]86-*-sysv3.2 not i[34]86-*-sysv32.
+
+	* config/i386/nm-i386v.h: Define NO_PTRACE_H.
+
 Sun Apr 18 10:39:35 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c: Nuke NO_DEFINE_SYMBOL code.  There is no going back.

@@ -26,8 +26,6 @@
 #define bzero(s,n)		memset(s,0,n)
 
 #include <string.h>
-#define index(s,c)		strchr(s,c)
-#define rindex(s,c)		strrchr(s,c)
 
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));

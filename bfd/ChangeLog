@@ -1,5 +1,10 @@
 Mon Apr 19 06:09:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* bfd-in.h: Insert comment about SVR3 compiler warnings.
+
+	* hosts/{hp300,i386isc,i386v}.h: Remove unused #defines of {r,}index
+	(bfd uses strchr and the broken SVR3.2 cpp loses with the defines).
+
 	* libbfd.c: bfd_put*: Remove casts to bfd_vma.
 
 Fri Apr 16 17:49:27 1993  Jim Kingdon  (kingdon@cygnus.com)

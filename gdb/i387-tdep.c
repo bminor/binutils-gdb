@@ -24,21 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "ieee-float.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
-#include <sys/param.h>
-#include <signal.h>
-#include <sys/user.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#include <sys/file.h>
-#include <sys/stat.h>
-
-#include <sys/reg.h>
-
 struct ext_format ext_format_i387 = {
 /* tot sbyte smask expbyte	manbyte */
    10, 9,    0x80, 9,8,		4,0		/* i387 */
