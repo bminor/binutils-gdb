@@ -257,6 +257,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"bss", s_change_sec, 'b'},
   {"err", s_err, 0},
   {"half", s_cons, 1},
+  {"dword", s_cons, 3},
 
  /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */
@@ -3586,7 +3587,7 @@ my_getSmallExpression (ep, str)
 		    }
 		  else
 		    {
-		      ep->X_op = O_absent;
+		      ep->X_op = O_constant;
 		      expr_end = sp;
 		    }
 		  ep->X_add_symbol = NULL;
@@ -4446,7 +4447,12 @@ tc_gen_reloc (section, fixp)
     reloc->addend = -reloc->address;
 #endif
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  assert (reloc->howto != 0);
+  if (reloc->howto == NULL)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    "Can not represent relocation in this object file format");
+      return NULL;
+    }
 
   return reloc;
 }

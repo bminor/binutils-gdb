@@ -1,3 +1,7 @@
+Sun Oct 24 16:49:00 1993  Jim Wilson  (wilson@x1.cygnus.com)
+
+	* tc-mips.c (md_pseudo_table): Add dword pseudo op.
+
 Fri Oct 22 20:40:56 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* messages.c: replaced all variables called Format with 'format',
