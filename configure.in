@@ -81,6 +81,8 @@ srcname="gnu development package"
 
 # per-host:
 
+# Work in distributions that contain no compiler tools, like Autoconf.
+if [ -d ${srcdir}/config ]; then
 case "${host}" in
   m68k-hp-hpux*)	  host_makefile_frag=config/mh-hp300 ;;
   m68k-apollo-sysv*)      host_makefile_frag=config/mh-apollo68 ;;
@@ -112,6 +114,7 @@ case "${host}" in
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac
+fi
 
 # per-target:
 

@@ -1,3 +1,8 @@
+Thu Apr 28 15:03:05 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure.in: Only set host_makefile_frag if config
+	directory exists.
+
 Wed Apr 27 12:14:30 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* install.sh: If $dstdir exists, don't check whether each
