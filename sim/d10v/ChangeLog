@@ -1,3 +1,9 @@
+Thu Oct 31 19:13:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* interp.c (sim_fetch_register, sim_store_register): Fix bug where
+	updating the accumulators was overwriting other parts of the global
+	State variable.
+
 Wed Oct 30 17:35:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* interp.c (bfd.h) Don't include it here any more.

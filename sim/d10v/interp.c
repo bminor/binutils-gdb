@@ -829,7 +829,7 @@ sim_fetch_register (rn, memory)
     init_system();
 
   if (rn > 34)
-    WRITE_64 (memory, State.a[rn-32]);
+    WRITE_64 (memory, State.a[rn-35]);
   else if (rn == 32)
     WRITE_16 (memory, IMAP0);
   else if (rn == 33)
@@ -849,7 +849,7 @@ sim_store_register (rn, memory)
     init_system();
 
   if (rn > 34)
-    State.a[rn-32] =  READ_64 (memory) & MASK40;
+    State.a[rn-35] =  READ_64 (memory) & MASK40;
   else if (rn == 34)
     SET_DMAP( READ_16(memory) );
   else if (rn == 33)
