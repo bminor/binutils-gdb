@@ -1,3 +1,8 @@
+Tue Jun  7 08:30:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/Makefile.in (EXECUTABLES): Remove t10.
+	(t10): Add comment.
+
 Mon Jun  6 18:26:50 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Reorganization of the GDB Test Suite.
