@@ -1,10 +1,20 @@
+Sat Jun 26 12:03:57 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldver.c (help): New function.
+	* ldver.h: Declare it.
+	* ldlex.l, ldgram.y: Recognize new options --help and --version.
+
 Mon Jun 21 20:39:48 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* Makefile.in (INCLUDES): Don't need ../include any more.
 
 Mon Jun 21 16:38:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
-	* .Sanitize (Things-to-keep): Add emulparams, emultempl, scripttempl.
+	* ldlex.l, ldgram.y: Support new -oformat option.
+	Remove attempt at supporting script fragments on the command line.
+	* ldlang.c (lang_add_output_format): Take new arg, FROM_SCRIPT.
+	* mri.c (mri_format), ldgram.y: Change callers.
+	* ldlang.h: Change prototype.
 
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
 	

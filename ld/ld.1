@@ -53,6 +53,7 @@ ld \- the GNU linker
 .RB "[\|" \-G\c
 .I size\c
 \&\|]
+.RB "[\|" \-\-help "\|]"
 .RB "[\|" \-i "\|]"
 .RB "[\|" \-l\c
 .I ar\c
@@ -97,6 +98,7 @@ ld \- the GNU linker
 \&]
 .RB "[\|" \-V "\|]"
 .RB "[\|" \-v "\|]"
+.RB "[\|" \-\-version "\|]"
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
 .ad b
@@ -466,6 +468,15 @@ to
 under MIPS ECOFF.  Ignored for other object file formats.
 
 .TP
+.B \-\-help
+Print a summary of the command-line options on the standard output and exit.
+This option and
+.B \-\-version
+begin with two dashes instead of one
+for compatibility with other GNU programs.  The other options start with
+only one dash for compatibility with other linkers.
+
+.TP
 .B \-i
 Perform an incremental link (same as option \c
 .B \-r\c
@@ -741,6 +752,12 @@ Display the version number for \c
 .B ld\c
 \&.
 Print which input files can and can not be opened.
+
+.TP
+.B \-\-version
+Display the version number for \c
+.B ld
+and exit.
 
 .TP
 .B \-X 
