@@ -1265,7 +1265,7 @@ undefined symbols in the link.
 @kindex --sort-common
 This option tells @code{ld} to sort the common symbols by size when it
 places them in the appropriate output sections.  First come all the one
-byte symbols, then all the two bytes, then all the four bytes, and then
+byte symbols, then all the two byte, then all the four byte, and then
 everything else.  This is to prevent gaps between symbols due to
 alignment constraints.
 
@@ -2781,16 +2781,16 @@ You may use the @code{FILL} command to set the fill pattern for the
 current section.  It is followed by an expression in parentheses.  Any
 otherwise unspecified regions of memory within the section (for example,
 gaps left due to the required alignment of input sections) are filled
-with the two least significant bytes of the expression, repeated as
+with the four least significant bytes of the expression, repeated as
 necessary.  A @code{FILL} statement covers memory locations after the
 point at which it occurs in the section definition; by including more
 than one @code{FILL} statement, you can have different fill patterns in
 different parts of an output section.
 
 This example shows how to fill unspecified regions of memory with the
-value @samp{0x9090}:
+value @samp{0x90}:
 @smallexample
-FILL(0x9090)
+FILL(0x90909090)
 @end smallexample
 
 The @code{FILL} command is similar to the @samp{=@var{fillexp}} output
@@ -3076,7 +3076,7 @@ You can set the fill pattern for an entire section by using
 @samp{=@var{fillexp}}.  @var{fillexp} is an expression
 (@pxref{Expressions}).  Any otherwise unspecified regions of memory
 within the output section (for example, gaps left due to the required
-alignment of input sections) will be filled with the two least
+alignment of input sections) will be filled with the four least
 significant bytes of the value, repeated as necessary.
 
 You can also change the fill value with a @code{FILL} command in the
@@ -3085,7 +3085,7 @@ output section commands; see @ref{Output Section Data}.
 Here is a simple example:
 @smallexample
 @group
-SECTIONS @{ .text : @{ *(.text) @} =0x9090 @}
+SECTIONS @{ .text : @{ *(.text) @} =0x90909090 @}
 @end group
 @end smallexample
 
@@ -3728,7 +3728,7 @@ SECTIONS
       file2(.text)
       . += 1000;
       file3(.text)
-    @} = 0x1234;
+    @} = 0x12345678;
 @}
 @end smallexample
 @noindent
@@ -3736,7 +3736,7 @@ In the previous example, the @samp{.text} section from @file{file1} is
 located at the beginning of the output section @samp{output}.  It is
 followed by a 1000 byte gap.  Then the @samp{.text} section from
 @file{file2} appears, also with a 1000 byte gap following before the
-@samp{.text} section from @file{file3}.  The notation @samp{= 0x1234}
+@samp{.text} section from @file{file3}.  The notation @samp{= 0x12345678}
 specifies what data to write in the gaps (@pxref{Output Section Fill}).
 
 @cindex dot inside sections

@@ -1,6 +1,6 @@
 #
 # Unusual variables checked by this code:
-#	NOP - two byte opcode for no-op (defaults to 0)
+#	NOP - four byte opcode for no-op (defaults to 0)
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
 #	OTHER_READONLY_SECTIONS - other than .text .init .ctors .rodata ...
 #		(e.g., .PARISC.milli)

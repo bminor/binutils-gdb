@@ -19,7 +19,7 @@ EMBEDDED=yes
 # explicitly set first, and since the NOP code is only used as a
 # fill value between independantly viable peices of code, it should
 # not matter.
-NOP=0x0e0e
+NOP=0x0e0e0e0e
 
 OTHER_BSS_SYMBOLS="__bss_start__ = . ;"
 OTHER_BSS_END_SYMBOLS="__bss_end__ = . ;"

@@ -1,3 +1,25 @@
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo: Document that fill values now use the four least
+	significant bytes.
+	* emulparams/elf32fr30.sh (NOP): Update.
+	* emulparams/elf32mcore.sh: Likewise.
+	* emulparams/elf64_s390.sh: Likewise.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_s390.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/i386moss.sh: Likewise.
+	* emulparams/i386nw.sh: Likewise.
+	* emulparams/m68kelf.sh: Likewise.
+	* scripttempl/elf.sc: Update NOP comment.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+
 2001-08-15  Tom Rix <trix@redhat.com>
 
 	* ldgram.y (saved_script_handle): Initialize to NULL.
