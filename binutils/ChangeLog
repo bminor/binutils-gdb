@@ -1,3 +1,10 @@
+2001-08-25  H.J. Lu  <hjl@gnu.org>
+
+	* nm.c (print_width): New.
+	(display_rel_file): Set `print_width' according to
+	bfd_sprintf_vma.
+	(print_symbol_info_bsd): Check `print_width' instead of BFD64.
+
 2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* objcopy.c (use_alt_mach_code): New variable.

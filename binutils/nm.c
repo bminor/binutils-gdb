@@ -245,6 +245,11 @@ static char value_format[] = "%016lx";
 /* We don't use value_format for this case.  */
 #endif
 #endif
+#ifdef BFD64
+static int print_width = 16;
+#else
+static int print_width = 8;
+#endif
 static int print_radix = 16;
 /* Print formats for printing stab info.  */
 static char other_format[] = "%02x";
@@ -939,6 +944,7 @@ display_rel_file (abfd, archive_bfd)
   PTR minisyms;
   unsigned int size;
   struct size_sym *symsizes;
+  char buf[30];
 
   if (! dynamic)
     {
@@ -958,6 +964,9 @@ display_rel_file (abfd, archive_bfd)
       non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
+
+  bfd_sprintf_vma (abfd, buf, (bfd_vma) -1);
+  print_width = strlen (buf);
 
   /* Discard the symbols we don't want to print.
      It's OK to do this in place; we'll free the storage anyway
@@ -1475,9 +1484,8 @@ print_symbol_info_bsd (info, abfd)
 {
   if (bfd_is_undefined_symclass (info->type))
     {
-#ifdef BFD64
-      printf ("        ");
-#endif
+      if (print_width == 16)
+	printf ("        ");
       printf ("        ");
     }
   else
