@@ -2760,7 +2760,7 @@ check_absolute_expr (ip, ex)
   if (ex->X_op == O_big)
     as_bad ("unsupported large constant");
   else if (ex->X_op != O_constant)
-    as_warn ("Instruction %s requires absolute expression", ip->insn_mo->name);
+    as_bad ("Instruction %s requires absolute expression", ip->insn_mo->name);
 }
 
 /* Count the leading zeroes by performing a binary chop. This is a

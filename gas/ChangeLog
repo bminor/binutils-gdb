@@ -1,3 +1,8 @@
+Sun Jul 13 20:43:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (check_absolute_expr): Change warning to
+	error.
+
 Fri Jul 11 10:18:47 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mips.c (macro_build): Refine code to check if an
