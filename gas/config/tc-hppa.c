@@ -997,6 +997,7 @@ static const struct selector_entry selector_table[] =
   {"lr", e_lrsel},
   {"ls", e_lssel},
   {"lt", e_ltsel},
+  {"ltp", e_ltpsel},
   {"n", e_nsel},
   {"nl", e_nlsel},
   {"nlr", e_nlrsel},
@@ -1007,6 +1008,7 @@ static const struct selector_entry selector_table[] =
   {"rr", e_rrsel},
   {"rs", e_rssel},
   {"rt", e_rtsel},
+  {"rtp", e_rtpsel},
   {"t", e_tsel},
 };
 
@@ -3629,13 +3631,11 @@ pa_chk_field_selector (str)
     name[0] = tolower ((*str)[0]),
     name[1] = tolower ((*str)[1]),
     name[2] = 0;
-#ifdef OBJ_SOM
   else if ((*str)[3] == '\'' || (*str)[3] == '%')
     name[0] = tolower ((*str)[0]),
     name[1] = tolower ((*str)[1]),
     name[2] = tolower ((*str)[2]),
     name[3] = 0;
-#endif
   else
     return e_fsel;
 
