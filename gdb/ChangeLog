@@ -1,3 +1,7 @@
+Wed Apr 17 20:17:27 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arm-tdep.c (initialize_arm_tdep): Make apcs32 a `zinteger'.
+
 Tue Apr 16 17:38:23 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* corelow.c (add_to_thread_list):  Make sure reg_sect is non-null
