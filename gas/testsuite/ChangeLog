@@ -1,5 +1,8 @@
 Wed Aug 16 12:24:12 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* lib/gas-defs.exp (run_dump_test): If the program to run does not
+        exist, mark the test as untested.
+
 	* gas/mri/mri.exp: Add setup_xfail for i960 b.out targets for
 	common test.
 
