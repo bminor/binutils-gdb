@@ -1,3 +1,12 @@
+Wed Jun 16 10:11:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t00/teststrategy.exp:  Rework to provide more useful
+	description of each test, fix problem with systems that define
+	ALIGN_STACK_ON_STARTUP code, other misc cleanups.
+	* gdb.t06/break.exp (test_next_with_recursion):  Fix expected
+	results for "next over recursive call" so timeouts aren't taken
+	by error.
+
 Mon Jun 14 09:09:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.t12/scope.exp: Test printing of variables before run.
