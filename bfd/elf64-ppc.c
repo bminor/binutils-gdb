@@ -7011,7 +7011,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
-      r = bfd_reloc_other;
       sym = (Elf_Internal_Sym *) 0;
       sec = (asection *) 0;
       h = (struct elf_link_hash_entry *) 0;
@@ -8105,11 +8104,14 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r != bfd_reloc_ok)
 	{
-	  const char *name;
-
-	  if (h != NULL)
+	  if (sym_name == NULL)
+	    sym_name = "(null)";
+	  if (r == bfd_reloc_overflow)
 	    {
-	      if (h->root.type == bfd_link_hash_undefweak
+	      if (warned)
+		continue;
+	      if (h != NULL
+		  && h->root.type == bfd_link_hash_undefweak
 		  && ppc64_elf_howto_table[(int) r_type]->pc_relative)
 		{
 		  /* Assume this is a call protected by other code that
@@ -8121,21 +8123,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  continue;
 		}
 
-	      name = h->root.root.string;
-	    }
-	  else
-	    {
-	      name = bfd_elf_local_sym_name (input_bfd, sym);
-	      if (name == NULL)
-		continue;
-	    }
-
-	  if (r == bfd_reloc_overflow)
-	    {
-	      if (warned)
-		continue;
 	      if (!((*info->callbacks->reloc_overflow)
-		    (info, name, ppc64_elf_howto_table[(int) r_type]->name,
+		    (info, sym_name, ppc64_elf_howto_table[(int) r_type]->name,
 		     rel->r_addend, input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	    }
@@ -8145,7 +8134,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
 		 bfd_archive_filename (input_bfd),
 		 bfd_get_section_name (input_bfd, input_section),
-		 (long) rel->r_offset, name, (int) r);
+		 (long) rel->r_offset, sym_name, (int) r);
 	      ret = FALSE;
 	    }
 	}
