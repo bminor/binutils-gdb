@@ -1,3 +1,11 @@
+2001-05-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (mn10300_force_relocation): Don't
+	optimize differences between symbols in code sections to
+	constants.
+	(mn10300_fix_adjustable): Don't adjust to section+offset
+	relocations pointing at symbols in code sections.
+
 2001-05-16  Alan Modra  <amodra@one.net.au>
 
 	* config/tc-arc.c (md_assemble): Correct dwarf2_emit_insn param

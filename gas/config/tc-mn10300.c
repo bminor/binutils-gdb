@@ -1993,6 +1993,15 @@ mn10300_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
+  /* Do not adjust relocations involving symbols in code sections,
+     because it breaks linker relaxations.  This could be fixed in the
+     linker, but this fix is simpler, and it pretty much only affects
+     object size a little bit.  */
+  if ((S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
+      && fixp->fx_subsy
+      && S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy))
+    return 1;
+
   return 0;
 }
 
@@ -2009,6 +2018,13 @@ mn10300_fix_adjustable (fixp)
 
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  /* Do not adjust relocations involving symbols in code sections,
+     because it breaks linker relaxations.  This could be fixed in the
+     linker, but this fix is simpler, and it pretty much only affects
+     object size a little bit.  */
+  if (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
     return 0;
 
   return 1;
