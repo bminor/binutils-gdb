@@ -1,3 +1,9 @@
+Tue Jun  8 10:30:13 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_compute_section_file_positions,
+	ecoff_write_object_contents): Only round to page boundaries if
+	D_PAGED flag is set for the output BFD.
+
 Fri Jun  4 15:47:52 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* coffcode.h (get_index, coff_slurp_symbol_table): Fix pointer
@@ -5,6 +11,16 @@ Fri Jun  4 15:47:52 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	sizeof(char *).
         * coffgen.c (coff_get_normalized_symtab): Ditto.
 	* cpu-h8300.c coff-h8300.c: Support for H8/300-H.
+
+Fri Jun  4 15:24:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* coffgen.c (coff_write_symbols): For empty string table, write
+	out 4 in correct byte order.  (from minyard@bnr.ca)
+
+	* elf32-hppa.c: Don't include libhppa.h for now; define
+	BYTES_IN_WORD instead, until Utah sends a better fix.
+	(hppa_elf_build_arg_reloc_stub): Use xmalloc and xrealloc instead
+	of malloc and realloc.
 
 Fri Jun  4 07:49:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
