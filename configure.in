@@ -486,7 +486,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs emacs emacs19 target-libgloss"
     ;;
   mn10200-*-*)
-    noconfigdirs="$noconfigdirs gdb target-libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   mn10300-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"

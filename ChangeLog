@@ -1,3 +1,17 @@
+Thu Jan 23 01:44:27 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: build gdb for mn10200
+
+Fri Jan 17 15:32:15 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (all-target-winsup): Depend on all-target-libio.
+
+start-sanitize-tic80
+Mon Jan 13 22:46:54 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (tic80-*-*): Turn off most targets right now.
+
+end-sanitize-tic80
 Fri Jan  3 16:04:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (MAKEINFO): Check for the existence of the Makefile,
@@ -15,7 +29,7 @@ Fri Dec 27 23:04:33 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config.sub (case $basic_machine): Add tic80 entries.
 
-start-sanitize-tic80
+end-sanitize-tic80
 Fri Dec 27 12:07:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub, config.guess: Merge with latest FSF sources.
