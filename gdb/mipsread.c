@@ -2826,7 +2826,7 @@ mylookup_symbol (name, block, namespace, class)
       if (SYMBOL_NAME (sym)[0] == inc
 	  && SYMBOL_NAMESPACE (sym) == namespace
 	  && SYMBOL_CLASS (sym) == class
-	  && STREQ (SYMBOL_NAME (sym), name))
+	  && strcmp (SYMBOL_NAME (sym), name) == 0)
 	return sym;
       bot++;
     }
