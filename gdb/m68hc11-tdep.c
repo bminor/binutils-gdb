@@ -334,7 +334,7 @@ m68hc11_pop_frame (void)
                           read_memory_integer (frame->saved_regs[regnum], 2));
 
       write_register (HARD_PC_REGNUM, frame->extra_info->return_pc);
-      sp = fp + frame->extra_info->size;
+      sp = (fp + frame->extra_info->size + 2) & 0x0ffff;
       write_register (HARD_SP_REGNUM, sp);
     }
   flush_cached_frames ();
@@ -489,10 +489,12 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
                   v = read_memory_unsigned_integer (*pc + j + 1, 1);
                   if (buffer[j] & 1)
                     v |= 0xff00;
+                  *pc = *pc + 1;
                 }
               else if (buffer[j] == 0xf2)
                 {
                   v = read_memory_unsigned_integer (*pc + j + 1, 2);
+                  *pc = *pc + 2;
                 }
               cur_val = v;
               break;
@@ -587,7 +589,7 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
   func_end = pc + 128;
   found_frame_point = 0;
   *frame_offset = 0;
-  save_addr = fp;
+  save_addr = fp + STACK_CORRECTION;
   while (!done && pc + 2 < func_end)
     {
       struct insn_sequence *seq;

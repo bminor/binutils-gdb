@@ -1,3 +1,10 @@
+2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_pop_frame): Fix stack pointer computation.
+	(m68hc11_analyze_instruction): Update the pc correctly.
+	(m68hc11_guess_from_prologue): Take into account the stack correction
+	for the saving address.
+
 2001-05-07  Daniel Berlin  <dan@cgsoftware.com>
 
 	Changes by Jim Ingham:
