@@ -1698,7 +1698,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	case BIG:
 	  /* We have found a common definition for a symbol which
 	     already had a common definition.  Use the maximum of the
-	     two sizes.  */
+	     two sizes, and use the section required by the larger symbol.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
 		 (info, h->root.string,
@@ -1717,6 +1717,25 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      if (power > 4)
 		power = 4;
 	      h->u.c.p->alignment_power = power;
+
+	      /* Some systems have special treatment for small commons,
+		 hence we want to select the section used by the larger
+		 symbol.  This makes sure the symbol does not go in a
+		 small common section if it is now too large.  */
+	      if (section == bfd_com_section_ptr)
+		{
+		  h->u.c.p->section
+		    = bfd_make_section_old_way (abfd, "COMMON");
+		  h->u.c.p->section->flags = SEC_ALLOC;
+		}
+	      else if (section->owner != abfd)
+		{
+		  h->u.c.p->section
+		    = bfd_make_section_old_way (abfd, section->name);
+		  h->u.c.p->section->flags = SEC_ALLOC;
+		}
+	      else
+		h->u.c.p->section = section;
 	    }
 	  break;
 
