@@ -1,5 +1,14 @@
 2003-03-03  David Carlton  <carlton@math.stanford.edu>
 
+	* gdb.c++/classes.exp (test_enums): KFAIL "ptype obj_with_enum"
+	with respect to PR c++/57.
+	KFAIL "print (ClassWithEnum::PrivEnum) 42" with respect to PR
+	c++/826.
+	Create "print ('ClassWithEnum::PrivEnum') 42"; KFAIL it with
+	respect to PR c++/57.
+
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
 	* gdb.c++/templates.exp (do_tests): Convert the KFAILs with
 	respect to PR c++/33 into FAILs.
 

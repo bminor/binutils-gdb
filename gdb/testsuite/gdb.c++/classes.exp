@@ -657,22 +657,44 @@ proc test_enums {} {
     }
 
     # ptype on the object
-    # g++ is putting out the wrong debug info.  This works with aCC
-    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "ptype obj_with_enum\n"
     gdb_expect {
 	-re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
+	-re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)PrivEnum priv_enum;\r\n\[ \t\]*int x;.*\\}\r\n$gdb_prompt $"
+	{
+	    # NOTE: carlton/2003-02-28: One could certainly argue that
+	    # this output is acceptable: PrivEnum is a member of
+	    # ClassWithEnum, so there's no need to explicitly qualify
+	    # its name with "ClassWithEnum::".  The truth, though, is
+	    # that GDB is simply forgetting that PrivEnum is a member
+	    # of ClassWithEnum, so we do that output for a bad reason
+	    # instead of a good reason.  Under stabs, we probably
+	    # can't get this right; under DWARF-2, we can.
+	    kfail "gdb/57" "ptype obj_with_enum"
+	}
 	-re "$gdb_prompt $"                     { fail "ptype obj_with_enum" }
 	timeout                             { fail "(timeout) ptype obj_with_enum" }
     }
 
-    # g++ is putting out the wrong debug info.  This works with aCC
-    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
+    # We'll do this test twice, because of a parser bug: see
+    # PR gdb/826.
+
     send_gdb "print (ClassWithEnum::PrivEnum) 42\n"
     gdb_expect {
 	-re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }
+	-re "A parse error in expression, near `42'.\r\n$gdb_prompt $"
+	{ kfail "gdb/826" "print (ClassWithEnum::PrivEnum) 42" }
 	-re "$gdb_prompt $"                     { fail "print (ClassWithEnum::PrivEnum) 42" }
 	timeout                             { fail "(timeout) print (ClassWithEnum::PrivEnum) 42" }
+    }
+
+    send_gdb "print ('ClassWithEnum::PrivEnum') 42\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print ('ClassWithEnum::PrivEnum') 42" }
+	-re "No symbol \"ClassWithEnum::PrivEnum\" in current context.\r\n$gdb_prompt $"
+	{ kfail "gdb/57" "print ('ClassWithEnum::PrivEnum') 42" }
+	-re "$gdb_prompt $"                     { fail "print ('ClassWithEnum::PrivEnum') 42" }
+	timeout                             { fail "(timeout) print ('ClassWithEnum::PrivEnum') 42" }
     }
 }
 
