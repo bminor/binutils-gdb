@@ -1,3 +1,8 @@
+2000-06-17  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Explicitly write
+	GOT entries if we're doing a static link or -Bsymbolic link.
+
 2000-06-15  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elflink.h (elf_link_adjust_relocs): Check for and call backend

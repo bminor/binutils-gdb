@@ -6026,6 +6026,19 @@ mips_elf_calculate_relocation (abfd,
 	  g = mips_elf_global_got_index 
 	    (elf_hash_table (info)->dynobj,
 	     (struct elf_link_hash_entry*) h);
+	  if (! elf_hash_table(info)->dynamic_sections_created
+	      || (info->shared
+		  && (info->symbolic || h->root.dynindx == -1)
+		  && (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	    {
+	      /* This is a static link or a -Bsymbolic link.  The
+		 symbol is defined locally, or was forced to be local.
+		 We must initialize this entry in the GOT.  */
+	      asection *sgot = mips_elf_got_section(elf_hash_table
+						    (info)->dynobj);
+	      MIPS_ELF_PUT_WORD (elf_hash_table (info)->dynobj,
+				 symbol + addend, sgot->contents + g);
+	    }
 	}
       else if (r_type == R_MIPS_GOT16)
 	/* There's no need to create a local GOT entry here; the
