@@ -2,15 +2,20 @@
 
 CC = C -d MPW_C -d ALMOST_STDC
 
-#GCC = gC1
-
 CFLAGS = -d MPW -w -mc68020 -model far -b
 
 LDFLAGS =  -w -d -model far -c 'MPS ' -t MPST
 
+# It would appear that the math libraries are not
+# needed except to provide a definition for scalb,
+# which is called from ldexp, which is referenced
+# in the m68k opcodes library.
+
 EXTRALIBS = \Option-d
 	"{CLibraries}"StdClib.o \Option-d
+	"{CLibraries}"Math.o \Option-d
+	"{CLibraries}"CSANELib.o \Option-d
 	"{Libraries}"Stubs.o \Option-d
 	"{Libraries}"Runtime.o \Option-d
 	"{Libraries}"Interface.o \Option-d
-	#"{Libraries}"ToolLibs.o
+	"{Libraries}"ToolLibs.o
