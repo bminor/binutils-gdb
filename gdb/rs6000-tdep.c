@@ -339,9 +339,9 @@ skip_prologue (pc, fdata)
 
       /* store parameters in stack via frame pointer */
       } else if (framep &&
-		 (op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
+		 ((op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
 		 (op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
-		 (op & 0xfc1f0000) == 0xfc1f0000) {	/* frsp, fp?,NUM(r1) */
+		 (op & 0xfc1f0000) == 0xfc1f0000)) {	/* frsp, fp?,NUM(r1) */
 	continue;
 
       /* Set up frame pointer */

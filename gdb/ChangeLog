@@ -1,5 +1,9 @@
 Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
 
+	* rs6000-tdep.c (skip_prologue): Add missing parens around
+	operands of logical-or so that first operand does not bind
+	to previous logical-and.
+
 	* configure.in: Expand "long long" test to include code that triggers
 	known problem on HPUX with native compiler.
 	(configure): Regenerated.
