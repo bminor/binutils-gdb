@@ -1,3 +1,9 @@
+2001-10-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* ppc-tdep.h: Add #ifndef wrapper.  Replace value_ptr with
+	``struct value *''.
+	(struct frame_info, struct value): Add opaque declarations.
+	
 2001-10-31  Corinna Vinschen  <vinschen@redhat.com>
 
 	* arch-utils.c (generic_in_solib_call_trampoline): New function.
