@@ -1,3 +1,16 @@
+2003-12-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.c (breakpoint_enabled): New function to test whether
+	breakpoint is active and enabled.
+	(insert_bp_location, insert_breakpoints): Call new function to test
+	for enabled breakpoint.
+	(remove_breakpoint, breakpoint_here_p, breakpoint_thread_match)
+	(bpstat_should_step, bpstat_have_active_hw_watchpoints)
+	(disable_breakpoints_in_shlibs, hw_watchpoint_used_count)
+	(disable_watchpoints_before_interactive_call_start)
+	(breakpoint_re_set_one): Ditto.
+	(bpstat_stop_status): Use new function and simplify test.
+
 2003-12-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* observer.c (observer_test_first_observer)
