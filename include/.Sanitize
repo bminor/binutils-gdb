@@ -172,6 +172,34 @@ else
 	done
 fi
 
+tic80_files="ChangeLog dis-asm.h"
+if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
+	for i in $tic80_files ; do
+		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tic80 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $tic80_files ; do
+		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tic80\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tic80/,/end-\sanitize\-tic80/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
