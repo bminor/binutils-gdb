@@ -1,7 +1,20 @@
 2002-05-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* dlltool.c (process_def_file): Add missing prototype.
+	(new_directive, assemble_file, main): Likewise.
+	(process_def_file, new_directive): Make static.
+	(inform): Rewrite using VA_FIXEDARG.
+	* dllwrap.c (mybasename): Add missing prototype.
+	(strhash, main): Likewise.
+	(inform): Rewrite using VA_FIXEDARG.
+	(warn): Likewise.
+	(cleanup_and_exit): Use old style function definition.
+	(strhash): Likewise.
+	* windres.c (define_resource): Use one memset to clear all of
+	struct res_resource.
+
 	* rcparse.y: Remove newcmd rule.  Move rcparse_discard_strings
-	calls to rules that need no lookahead.  Check for no lookahead.
+	call to rules that need no lookahead.  Check for no lookahead.
 
 2002-05-06  Borut Razem  <borut.razem@siol.net>
 
