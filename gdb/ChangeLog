@@ -1,3 +1,52 @@
+2003-09-25  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (struct frame_extra_info): Remove.
+	(struct sh_frame_cache): New structure.
+	(GET_SOURCE_REG): New macro extracting source register of an opcode.
+	(GET_TARGET_REG): Ditto but target register.
+	(GET_PUSHED_REG): Remove.
+	(IS_MOV_ARG_TO_REG): New macro.
+	(IS_MOV_ARG_TO_IND_R14): New macro.
+	(IS_MOV_ARG_TO_IND_R14_WITH_DISP): New macro.
+	(IS_MOVW_PCREL_TO_REG): New macro.
+	(IS_MOVL_PCREL_TO_REG): New macro.
+	(IS_SUB_REG_FROM_SP): New macro.
+	(IS_ARG_MOV): Remove.
+	(IS_MOV_TO_R14): Remove.
+	(IS_RESTORE_FP): New macro.
+	(IS_RTS): New macro.
+	(IS_LDS): New macro.
+	(IS_MOV_FP_SP): New macro.
+	(IS_ADD_REG_TO_FP): New macro.
+	(IS_ADD_IMM_FP): New macro.
+	(sh_skip_prologue_hard_way): Remove.
+	(sh_saved_pc_after_call): Remove.
+	(sh_frame_chain): Remove.
+	(sh_find_callers_reg): Remove.
+	(sh_nofp_frame_init_saved_regs): Remove. 
+	(sh_fp_frame_init_saved_regs): Remove.
+	(sh_init_extra_frame_info): Remove.
+	(sh_analyze_prologue): New function.
+	(sh_skip_prologue): Remove deprecated code.  Rely on new function
+	sh_analyze_prologue when after_prologue fails.
+	(sh_frame_saved_pc): Remove.
+	(sh_alloc_frame_cache): New function.
+	(sh_frame_cache): Ditto.
+	(sh_frame_prev_register): Ditto.
+	(sh_frame_this_id): Ditto.
+	(sh_frame_unwind): New structure defining the heuristic frame
+	sniffer interface.
+	(sh_frame_sniffer): New function.
+	(sh_unwind_sp): Ditto.
+	(sh_unwind_pc): Ditto.
+	(sh_unwind_dummy_id): Ditto.
+	(sh_frame_base_address): Ditto.
+	(sh_frame_base): New structure defining new frame base code.
+	(sh_in_function_epilogue_p): New function.
+	(sh_gdbarch_init): Restructure and simplify to eliminate deprecated
+	code and to call all new code instead.  Initialize dwarf2 and
+	heuristic frame sniffer.
+
 2003-09-24  Paul N. Hilfinger  <hilfingr@nile.gnat.com>
 
 	* parser-defs.h (struct exp_descriptor): New definition, containing 

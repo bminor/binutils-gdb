@@ -26,6 +26,9 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
+#include "dwarf2-frame.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "gdbtypes.h"
@@ -35,6 +38,7 @@
 #include "dis-asm.h"
 #include "inferior.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include "arch-utils.h"
 #include "floatformat.h"
 #include "regcache.h"
@@ -55,15 +59,19 @@ static void (*sh_show_regs) (void);
 
 #define SH_NUM_REGS 59
 
-/* Define other aspects of the stack frame.
-   we keep a copy of the worked out return pc lying around, since it
-   is a useful bit of info */
-  
-struct frame_extra_info
+struct sh_frame_cache
 {
-  CORE_ADDR return_pc;
-  int leaf_function;
-  int f_offset;
+  /* Base address.  */
+  CORE_ADDR base;
+  LONGEST sp_offset;
+  CORE_ADDR pc;
+
+  /* Flag showing that a frame has been created in the prologue code. */
+  int uses_fp;
+
+  /* Saved registers.  */
+  CORE_ADDR saved_regs[SH_NUM_REGS];
+  CORE_ADDR saved_sp;
 };
 
 static const char *
@@ -283,28 +291,17 @@ sh_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 /* Prologue looks like
-   [mov.l       <regs>,@-r15]...
-   [sts.l       pr,@-r15]
-   [mov.l       r14,@-r15]
-   [mov         r15,r14]
+   mov.l	r14,@-r15
+   sts.l	pr,@-r15
+   mov.l	<regs>,@-r15
+   sub		<room_for_loca_vars>,r15
+   mov		r15,r14
 
-   Actually it can be more complicated than this.  For instance, with
-   newer gcc's:
-
-   mov.l   r14,@-r15
-   add     #-12,r15
-   mov     r15,r14
-   mov     r4,r1
-   mov     r5,r2
-   mov.l   r6,@(4,r14)
-   mov.l   r7,@(8,r14)
-   mov.b   r1,@r14
-   mov     r14,r1
-   mov     r14,r1
-   add     #2,r1
-   mov.w   r2,@r1
-
+   Actually it can be more complicated than this but that's it, basically.
  */
+
+#define GET_SOURCE_REG(x)  	(((x) >> 4) & 0xf)
+#define GET_TARGET_REG(x)  	(((x) >> 8) & 0xf)
 
 /* STS.L PR,@-r15  0100111100100010
    r15-4-->r15, PR-->(r15) */
@@ -314,15 +311,13 @@ sh_push_dummy_code (struct gdbarch *gdbarch,
    r15-4-->r15, Rm-->(R15) */
 #define IS_PUSH(x) 		(((x) & 0xff0f) == 0x2f06)
 
-#define GET_PUSHED_REG(x)  	(((x) >> 4) & 0xf)
-
 /* MOV r15,r14     0110111011110011
    r15-->r14  */
 #define IS_MOV_SP_FP(x)  	((x) == 0x6ef3)
 
 /* ADD #imm,r15    01111111iiiiiiii
    r15+imm-->r15 */
-#define IS_ADD_IMM_SP(x)	(((x) & 0xff00) == 0x7f00)
+#define IS_ADD_IMM_SP(x) 	(((x) & 0xff00) == 0x7f00)
 
 #define IS_MOV_R3(x) 		(((x) & 0xff00) == 0x1a00)
 #define IS_SHLL_R3(x)		((x) == 0x4300)
@@ -336,23 +331,187 @@ sh_push_dummy_code (struct gdbarch *gdbarch,
    FMOV XDm,@-Rn    Rn-8-->Rn, XDm-->(Rn)     1111nnnnmmm11011 */
 /* CV, 2003-08-28: Only suitable with Rn == SP, therefore name changed to
 		   make this entirely clear. */
-#define IS_FPUSH(x)		(((x) & 0xf00f) == 0xf00b)
+/* #define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b) */
+#define IS_FPUSH(x)		(((x) & 0xff0f) == 0xff0b)
 
-/* MOV Rm,Rn            Rm-->Rn          0110nnnnmmmm0011 
-   MOV.L Rm,@(disp,Rn)  Rm-->(dispx4+Rn) 0001nnnnmmmmdddd
-   MOV.L Rm,@Rn         Rm-->(Rn)        0010nnnnmmmm0010
-   where Rm is one of r4,r5,r6,r7 which are the argument registers. */
-#define IS_ARG_MOV(x) \
-(((((x) & 0xf00f) == 0x6003) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)) \
- || ((((x) & 0xf000) == 0x1000) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)) \
- || ((((x) & 0xf00f) == 0x2002) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070)))
+/* MOV Rm,Rn          Rm-->Rn        0110nnnnmmmm0011  4 <= m <= 7 */
+#define IS_MOV_ARG_TO_REG(x) \
+	(((x) & 0xf00f) == 0x6003 && \
+	 ((x) & 0x00f0) >= 0x0040 && \
+	 ((x) & 0x00f0) <= 0x0070)
+/* MOV.L Rm,@Rn               0010nnnnmmmm0010  n = 14, 4 <= m <= 7 */
+#define IS_MOV_ARG_TO_IND_R14(x) \
+	(((x) & 0xff0f) == 0x2e02 && \
+	 ((x) & 0x00f0) >= 0x0040 && \
+	 ((x) & 0x00f0) <= 0x0070)
+/* MOV.L Rm,@(disp*4,Rn)      00011110mmmmdddd  n = 14, 4 <= m <= 7 */
+#define IS_MOV_ARG_TO_IND_R14_WITH_DISP(x) \
+	(((x) & 0xff00) == 0x1e00 && \
+	 ((x) & 0x00f0) >= 0x0040 && \
+	 ((x) & 0x00f0) <= 0x0070)
 
-/* MOV.L Rm,@(disp,r14)  00011110mmmmdddd
-   Rm-->(dispx4+r14) where Rm is one of r4,r5,r6,r7 */
-#define IS_MOV_TO_R14(x) \
-     ((((x) & 0xff00) == 0x1e) && (((x) & 0x00f0) >= 0x0040 && ((x) & 0x00f0) <= 0x0070))
-                        
+/* MOV.W @(disp*2,PC),Rn      1001nnnndddddddd */
+#define IS_MOVW_PCREL_TO_REG(x)	(((x) & 0xf000) == 0x9000)
+/* MOV.L @(disp*4,PC),Rn      1101nnnndddddddd */
+#define IS_MOVL_PCREL_TO_REG(x)	(((x) & 0xf000) == 0xd000)
+/* SUB Rn,R15                 00111111nnnn1000 */
+#define IS_SUB_REG_FROM_SP(x)	(((x) & 0xff0f) == 0x3f08)
+
 #define FPSCR_SZ		(1 << 20)
+
+/* The following instructions are used for epilogue testing. */
+#define IS_RESTORE_FP(x)	((x) == 0x6ef6)
+#define IS_RTS(x)		((x) == 0x000b)
+#define IS_LDS(x)  		((x) == 0x4f26)
+#define IS_MOV_FP_SP(x)  	((x) == 0x6fe3)
+#define IS_ADD_REG_TO_FP(x)	(((x) & 0xff0f) == 0x3e0c)
+#define IS_ADD_IMM_FP(x) 	(((x) & 0xff00) == 0x7e00)
+
+/* Disassemble an instruction.  */
+static int
+gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
+{
+  info->endian = TARGET_BYTE_ORDER;
+  return print_insn_sh (memaddr, info);
+}
+
+static CORE_ADDR
+sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+		     struct sh_frame_cache *cache)
+{ 
+  ULONGEST inst;
+  CORE_ADDR opc;
+  int offset;
+  int sav_offset = 0;
+  int r3_val = 0;
+  int reg, sav_reg = -1;
+
+  if (pc >= current_pc)
+    return current_pc;
+
+  cache->uses_fp = 0;
+  for (opc = pc + (2 * 28); pc < opc; pc += 2)
+    {
+      inst = read_memory_unsigned_integer (pc, 2);
+      /* See where the registers will be saved to */
+      if (IS_PUSH (inst))
+	{
+	  cache->saved_regs[GET_SOURCE_REG (inst)] = cache->sp_offset;
+	  cache->sp_offset += 4;
+	}
+      else if (IS_STS (inst))
+	{
+	  cache->saved_regs[PR_REGNUM] = cache->sp_offset;
+	  cache->sp_offset += 4;
+	}
+      else if (IS_MOV_R3 (inst))
+	{
+	  r3_val = ((inst & 0xff) ^ 0x80) - 0x80;
+	}
+      else if (IS_SHLL_R3 (inst))
+	{
+	  r3_val <<= 1;
+	}
+      else if (IS_ADD_R3SP (inst))
+	{
+	  cache->sp_offset += -r3_val;
+	}
+      else if (IS_ADD_IMM_SP (inst))
+	{
+	  offset = ((inst & 0xff) ^ 0x80) - 0x80;
+	  cache->sp_offset -= offset;
+	}
+      else if (IS_MOVW_PCREL_TO_REG (inst))
+        {
+	  if (sav_reg < 0)
+	    {
+	      reg = GET_TARGET_REG (inst);
+	      if (reg < 14)
+		{
+		  sav_reg = reg;
+		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
+		  sav_offset =
+		  	read_memory_integer (((pc + 4) & ~3) + offset, 2);
+		}
+	    }
+	}
+      else if (IS_MOVL_PCREL_TO_REG (inst))
+        {
+	  if (sav_reg < 0)
+	    {
+	      reg = (inst & 0x0f00) >> 8;
+	      if (reg < 14)
+		{
+		  sav_reg = reg;
+		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
+		  sav_offset =
+		  	read_memory_integer (((pc + 4) & ~3) + offset, 4);
+		}
+	    }
+	}
+      else if (IS_SUB_REG_FROM_SP (inst))
+        {
+	  reg = GET_SOURCE_REG (inst);
+	  if (sav_reg > 0 && reg == sav_reg)
+	    {
+	      sav_reg = -1;
+	    }
+	  cache->sp_offset += sav_offset;
+	}
+      else if (IS_FPUSH (inst))
+	{
+	  if (read_register (FPSCR_REGNUM) & FPSCR_SZ)
+	    {
+	      cache->sp_offset += 8;
+	    }
+	  else
+	    {
+	      cache->sp_offset += 4;
+	    }
+	}
+      else if (IS_MOV_SP_FP (inst))
+        {
+	  if (!cache->uses_fp)
+	    cache->uses_fp = 1;
+	  /* At this point, only allow argument register moves to other
+	     registers or argument register moves to @(X,fp) which are
+	     moving the register arguments onto the stack area allocated
+	     by a former add somenumber to SP call.  Don't allow moving
+	     to an fp indirect address above fp + cache->sp_offset. */
+	  pc += 2;
+	  for (opc = pc + 12; pc < opc; pc += 2)
+	    {
+	      inst = read_memory_integer (pc, 2);
+	      if (IS_MOV_ARG_TO_IND_R14 (inst))
+	        {
+		  reg = GET_SOURCE_REG (inst);
+		  if (cache->sp_offset > 0)
+		  cache->saved_regs[reg] = cache->sp_offset;
+		}
+	      else if (IS_MOV_ARG_TO_IND_R14_WITH_DISP (inst))
+	        {
+		  reg = GET_SOURCE_REG (inst);
+		  offset = (inst & 0xf) * 4;
+		  if (cache->sp_offset > offset)
+		    cache->saved_regs[reg] = cache->sp_offset - offset;
+		}
+	      else if (IS_MOV_ARG_TO_REG (inst))
+	        continue;
+	      else
+		break;
+	    }
+	  break;
+	}
+#if 0 /* This used to just stop when it found an instruction that
+	 was not considered part of the prologue.  Now, we just
+	 keep going looking for likely instructions. */
+      else
+	break;
+#endif
+    }
+
+  return pc;
+}
 
 /* Skip any prologue before the guts of a function */
 
@@ -384,453 +543,38 @@ after_prologue (CORE_ADDR pc)
     return 0;
 }
 
-/* Here we look at each instruction in the function, and try to guess
-   where the prologue ends. Unfortunately this is not always 
-   accurate. */
 static CORE_ADDR
-sh_skip_prologue_hard_way (CORE_ADDR start_pc)
+sh_skip_prologue (CORE_ADDR start_pc)
 {
-  CORE_ADDR here, end;
-  int updated_fp = 0;
-
-  if (!start_pc)
-    return 0;
-
-  for (here = start_pc, end = start_pc + (2 * 28); here < end;)
-    {
-      int w = read_memory_integer (here, 2);
-      here += 2;
-      if (IS_FPUSH (w) || IS_PUSH (w) || IS_STS (w) || IS_MOV_R3 (w)
-	  || IS_ADD_R3SP (w) || IS_ADD_IMM_SP (w) || IS_SHLL_R3 (w) 
-	  || IS_ARG_MOV (w) || IS_MOV_TO_R14 (w))
-	{
-	  start_pc = here;
-	}
-      else if (IS_MOV_SP_FP (w))
-	{
-	  start_pc = here;
-	  updated_fp = 1;
-	}
-      else
-	/* Don't bail out yet, if we are before the copy of sp. */
-	if (updated_fp)
-	  break;
-    }
-
-  return start_pc;
-}
-
-static CORE_ADDR
-sh_skip_prologue (CORE_ADDR pc)
-{
-  CORE_ADDR post_prologue_pc;
+  CORE_ADDR pc;
+  struct sh_frame_cache cache;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-  post_prologue_pc = after_prologue (pc);
+  pc = after_prologue (start_pc);
 
   /* If after_prologue returned a useful address, then use it.  Else
      fall back on the instruction skipping code. */
-  if (post_prologue_pc != 0)
-    return max (pc, post_prologue_pc);
-  else
-    return sh_skip_prologue_hard_way (pc);
-}
+  if (pc)
+    return max (pc, start_pc);
 
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.
+  cache.sp_offset = -4;
+  pc = sh_analyze_prologue (start_pc, (CORE_ADDR) -1, &cache);
+  if (!cache.uses_fp)
+    return start_pc;
 
-   The return address is the value saved in the PR register + 4  */
-static CORE_ADDR
-sh_saved_pc_after_call (struct frame_info *frame)
-{
-  return (ADDR_BITS_REMOVE (read_register (PR_REGNUM)));
+  return pc;
 }
 
 /* Should call_function allocate stack space for a struct return?  */
 static int
 sh_use_struct_convention (int gcc_p, struct type *type)
 {
-#if 0
-  return (TYPE_LENGTH (type) > 1);
-#else
   int len = TYPE_LENGTH (type);
   int nelem = TYPE_NFIELDS (type);
   return ((len != 1 && len != 2 && len != 4 && len != 8) || nelem != 1) &&
 	  (len != 8 || TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) != 4);
-#endif
-}
-
-/* Disassemble an instruction.  */
-static int
-gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
-{
-  info->endian = TARGET_BYTE_ORDER;
-  return print_insn_sh (memaddr, info);
-}
-
-/* Given a GDB frame, determine the address of the calling function's
-   frame.  This will be used to create a new GDB frame struct, and
-   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
-   will be called for the new frame.
-
-   For us, the frame address is its stack pointer value, so we look up
-   the function prologue to determine the caller's sp value, and return it.  */
-static CORE_ADDR
-sh_frame_chain (struct frame_info *frame)
-{
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return get_frame_base (frame);	/* dummy frame same as caller's frame */
-  if (get_frame_pc (frame)
-      && !deprecated_inside_entry_file (get_frame_pc (frame)))
-    return read_memory_integer (get_frame_base (frame)
-				+ get_frame_extra_info (frame)->f_offset, 4);
-  else
-    return 0;
-}
-
-/* Find REGNUM on the stack.  Otherwise, it's in an active register.  One thing
-   we might want to do here is to check REGNUM against the clobber mask, and
-   somehow flag it as invalid if it isn't saved on the stack somewhere.  This
-   would provide a graceful failure mode when trying to get the value of
-   caller-saves registers for an inner frame.  */
-static CORE_ADDR
-sh_find_callers_reg (struct frame_info *fi, int regnum)
-{
-  for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
-      /* When the caller requests PR from the dummy frame, we return PC because
-         that's where the previous routine appears to have done a call from. */
-      return deprecated_read_register_dummy (get_frame_pc (fi),
-					     get_frame_base (fi), regnum);
-    else
-      {
-	DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
-	if (!get_frame_pc (fi))
-	  return 0;
-	if (get_frame_saved_regs (fi)[regnum] != 0)
-	  return read_memory_integer (get_frame_saved_regs (fi)[regnum],
-				      register_size (current_gdbarch, regnum));
-      }
-  return read_register (regnum);
-}
-
-/* Put here the code to store, into a struct frame_saved_regs, the
-   addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special: the address we
-   return for it IS the sp for the next frame. */
-static void
-sh_nofp_frame_init_saved_regs (struct frame_info *fi)
-{
-  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof(int));
-  int rn;
-  int have_fp = 0;
-  int depth;
-  int pc;
-  int opc;
-  int inst;
-  int r3_val = 0;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi),
-							  get_frame_base (fi));
-  
-  if (get_frame_saved_regs (fi) == NULL)
-    frame_saved_regs_zalloc (fi);
-  else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
-  
-  if (dummy_regs)
-    {
-      /* DANGER!  This is ONLY going to work if the char buffer format of
-         the saved registers is byte-for-byte identical to the 
-         CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
-      return;
-    }
-
-  get_frame_extra_info (fi)->leaf_function = 1;
-  get_frame_extra_info (fi)->f_offset = 0;
-
-  for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
-    where[rn] = -1;
-
-  depth = 0;
-
-  /* Loop around examining the prologue inst until we find something
-     that does not appear to be part of the prologue.  But give up
-     after 20 of them, since we're getting silly then. */
-
-  pc = get_frame_func (fi);
-  if (!pc)
-    {
-      deprecated_update_frame_pc_hack (fi, 0);
-      return;
-    }
-
-  for (opc = pc + (2 * 28); pc < opc; pc += 2)
-    {
-      inst = read_memory_integer (pc, 2);
-      /* See where the registers will be saved to */
-      if (IS_PUSH (inst))
-	{
-	  rn = GET_PUSHED_REG (inst);
-	  where[rn] = depth;
-	  depth += 4;
-	}
-      else if (IS_STS (inst))
-	{
-	  where[PR_REGNUM] = depth;
-	  /* If we're storing the pr then this isn't a leaf */
-	  get_frame_extra_info (fi)->leaf_function = 0;
-	  depth += 4;
-	}
-      else if (IS_MOV_R3 (inst))
-	{
-	  r3_val = ((inst & 0xff) ^ 0x80) - 0x80;
-	}
-      else if (IS_SHLL_R3 (inst))
-	{
-	  r3_val <<= 1;
-	}
-      else if (IS_ADD_R3SP (inst))
-	{
-	  depth += -r3_val;
-	}
-      else if (IS_ADD_IMM_SP (inst))
-	{
-	  depth -= ((inst & 0xff) ^ 0x80) - 0x80;
-	}
-      else if (IS_MOV_SP_FP (inst))
-	break;
-#if 0 /* This used to just stop when it found an instruction that
-	 was not considered part of the prologue.  Now, we just
-	 keep going looking for likely instructions. */
-      else
-	break;
-#endif
-    }
-
-  /* Now we know how deep things are, we can work out their addresses */
-
-  for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
-    {
-      if (where[rn] >= 0)
-	{
-	  if (rn == DEPRECATED_FP_REGNUM)
-	    have_fp = 1;
-
-	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
-	}
-      else
-	{
-	  get_frame_saved_regs (fi)[rn] = 0;
-	}
-    }
-
-  if (have_fp)
-    {
-      get_frame_saved_regs (fi)[SP_REGNUM] = read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4);
-    }
-  else
-    {
-      get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
-    }
-
-  get_frame_extra_info (fi)->f_offset = depth - where[DEPRECATED_FP_REGNUM] - 4;
-  /* Work out the return pc - either from the saved pr or the pr
-     value */
-}
-
-/* For vectors of 4 floating point registers. */
-static int
-fv_reg_base_num (int fv_regnum)
-{
-  int fp_regnum;
-
-  fp_regnum = FP0_REGNUM + 
-    (fv_regnum - FV0_REGNUM) * 4;
-  return fp_regnum;
-}
-
-/* For double precision floating point registers, i.e 2 fp regs.*/
-static int
-dr_reg_base_num (int dr_regnum)
-{
-  int fp_regnum;
-
-  fp_regnum = FP0_REGNUM + 
-    (dr_regnum - DR0_REGNUM) * 2;
-  return fp_regnum;
-}
-
-static void
-sh_fp_frame_init_saved_regs (struct frame_info *fi)
-{
-  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof (int));
-  int rn;
-  int have_fp = 0;
-  int depth;
-  int pc;
-  int opc;
-  int inst;
-  int r3_val = 0;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), get_frame_base (fi));
-  
-  if (get_frame_saved_regs (fi) == NULL)
-    frame_saved_regs_zalloc (fi);
-  else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
-  
-  if (dummy_regs)
-    {
-      /* DANGER!  This is ONLY going to work if the char buffer format of
-         the saved registers is byte-for-byte identical to the 
-         CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
-      return;
-    }
-
-  get_frame_extra_info (fi)->leaf_function = 1;
-  get_frame_extra_info (fi)->f_offset = 0;
-
-  for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
-    where[rn] = -1;
-
-  depth = 0;
-
-  /* Loop around examining the prologue inst until we find something
-     that does not appear to be part of the prologue.  But give up
-     after 20 of them, since we're getting silly then. */
-
-  pc = get_frame_func (fi);
-  if (!pc)
-    {
-      deprecated_update_frame_pc_hack (fi, 0);
-      return;
-    }
-
-  for (opc = pc + (2 * 28); pc < opc; pc += 2)
-    {
-      inst = read_memory_integer (pc, 2);
-      /* See where the registers will be saved to */
-      if (IS_PUSH (inst))
-	{
-	  rn = GET_PUSHED_REG (inst);
-	  where[rn] = depth;
-	  depth += 4;
-	}
-      else if (IS_STS (inst))
-	{
-	  where[PR_REGNUM] = depth;
-	  /* If we're storing the pr then this isn't a leaf */
-	  get_frame_extra_info (fi)->leaf_function = 0;
-	  depth += 4;
-	}
-      else if (IS_MOV_R3 (inst))
-	{
-	  r3_val = ((inst & 0xff) ^ 0x80) - 0x80;
-	}
-      else if (IS_SHLL_R3 (inst))
-	{
-	  r3_val <<= 1;
-	}
-      else if (IS_ADD_R3SP (inst))
-	{
-	  depth += -r3_val;
-	}
-      else if (IS_ADD_IMM_SP (inst))
-	{
-	  depth -= ((inst & 0xff) ^ 0x80) - 0x80;
-	}
-      else if (IS_FPUSH (inst))
-	{
-	  if (read_register (FPSCR_REGNUM) & FPSCR_SZ)
-	    {
-	      depth += 8;
-	    }
-	  else
-	    {
-	      depth += 4;
-	    }
-	}
-      else if (IS_MOV_SP_FP (inst))
-	break;
-#if 0 /* This used to just stop when it found an instruction that
-	 was not considered part of the prologue.  Now, we just
-	 keep going looking for likely instructions. */
-      else
-	break;
-#endif
-    }
-
-  /* Now we know how deep things are, we can work out their addresses */
-
-  for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
-    {
-      if (where[rn] >= 0)
-	{
-	  if (rn == DEPRECATED_FP_REGNUM)
-	    have_fp = 1;
-
-	  get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - where[rn] + depth - 4;
-	}
-      else
-	{
-	  get_frame_saved_regs (fi)[rn] = 0;
-	}
-    }
-
-  if (have_fp)
-    {
-      get_frame_saved_regs (fi)[SP_REGNUM] =
-	read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4);
-    }
-  else
-    {
-      get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
-    }
-
-  get_frame_extra_info (fi)->f_offset = depth - where[DEPRECATED_FP_REGNUM] - 4;
-  /* Work out the return pc - either from the saved pr or the pr
-     value */
-}
-
-/* Initialize the extra info saved in a FRAME */
-static void
-sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-
-  if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    {
-      /* We need to setup fi->frame here because call_function_by_hand
-         gets it wrong by assuming it's always FP.  */
-      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
-									     SP_REGNUM));
-      get_frame_extra_info (fi)->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
-								  get_frame_base (fi),
-								  PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
-      get_frame_extra_info (fi)->leaf_function = 0;
-      return;
-    }
-  else
-    {
-      DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
-      get_frame_extra_info (fi)->return_pc = 
-	sh_find_callers_reg (fi, PR_REGNUM);
-    }
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -840,44 +584,9 @@ static CORE_ADDR
 sh_extract_struct_value_address (struct regcache *regcache)
 {
   ULONGEST addr;
+
   regcache_cooked_read_unsigned (regcache, STRUCT_RETURN_REGNUM, &addr);
   return addr;
-}
-
-static CORE_ADDR
-sh_frame_saved_pc (struct frame_info *frame)
-{
-  return (get_frame_extra_info (frame)->return_pc);
-}
-
-/* Discard from the stack the innermost frame,
-   restoring all saved registers.  */
-static void
-sh_pop_frame (void)
-{
-  struct frame_info *frame = get_current_frame ();
-  CORE_ADDR fp;
-  int regnum;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    generic_pop_dummy_frame ();
-  else
-    {
-      fp = get_frame_base (frame);
-      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-
-      /* Copy regs from where they were saved in the frame */
-      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum])
-	  write_register (regnum,
-			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
-
-      write_register (PC_REGNUM, get_frame_extra_info (frame)->return_pc);
-      write_register (SP_REGNUM, fp + 4);
-    }
-  flush_cached_frames ();
 }
 
 static CORE_ADDR
@@ -960,11 +669,9 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
   /* first force sp to a 4-byte alignment */
   sp = sh_frame_align (gdbarch, sp);
 
-  /* The "struct return pointer" pseudo-argument has its own dedicated 
-     register */
   if (struct_return)
-    regcache_cooked_write_unsigned (regcache, 
-				    STRUCT_RETURN_REGNUM, 
+    regcache_cooked_write_unsigned (regcache,
+				    STRUCT_RETURN_REGNUM,
 				    struct_addr);
 
   /* Now make sure there's space on the stack */
@@ -1070,8 +777,6 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
   /* first force sp to a 4-byte alignment */
   sp = sh_frame_align (gdbarch, sp);
 
-  /* The "struct return pointer" pseudo-argument has its own dedicated 
-     register */
   if (struct_return)
     regcache_cooked_write_unsigned (regcache,
 				    STRUCT_RETURN_REGNUM,
@@ -1700,6 +1405,28 @@ sh_sh4_register_convert_to_raw (struct type *type, int regnum,
     error("sh_register_convert_to_raw called with non DR register number");
 }
 
+/* For vectors of 4 floating point registers. */
+static int
+fv_reg_base_num (int fv_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (fv_regnum - FV0_REGNUM) * 4;
+  return fp_regnum;
+}
+
+/* For double precision floating point registers, i.e 2 fp regs.*/
+static int
+dr_reg_base_num (int dr_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (dr_regnum - DR0_REGNUM) * 2;
+  return fp_regnum;
+}
+
 static void
 sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, void *buffer)
@@ -1845,7 +1572,7 @@ sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   fprintf_filtered (file, "\t(raw 0x");
   for (j = 0; j < register_size (gdbarch, regnum); j++)
     {
-      int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+      register int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	: register_size (gdbarch, regnum) - 1 - j;
       fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
     }
@@ -2008,7 +1735,263 @@ sh_dsp_register_sim_regno (int nr)
     return nr - R0_BANK_REGNUM + SIM_SH_R0_BANK_REGNUM;
   return nr;
 }
-
+
+static struct sh_frame_cache *
+sh_alloc_frame_cache (void)
+{
+  struct sh_frame_cache *cache;
+  int i;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct sh_frame_cache);
+
+  /* Base address.  */
+  cache->base = 0;
+  cache->saved_sp = 0;
+  cache->sp_offset = 0;
+  cache->pc = 0;
+
+  /* Frameless until proven otherwise.  */
+  cache->uses_fp = 0;
+    
+  /* Saved registers.  We initialize these to -1 since zero is a valid
+     offset (that's where fp is supposed to be stored).  */
+  for (i = 0; i < SH_NUM_REGS; i++)
+    {
+      cache->saved_regs[i] = -1;
+    }
+  
+  return cache;
+} 
+
+static struct sh_frame_cache *
+sh_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct sh_frame_cache *cache;
+  CORE_ADDR current_pc;
+  int i;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = sh_alloc_frame_cache ();
+  *this_cache = cache;
+
+  /* In principle, for normal frames, fp holds the frame pointer,
+     which holds the base address for the current stack frame.
+     However, for functions that don't need it, the frame pointer is
+     optional.  For these "frameless" functions the frame pointer is
+     actually the frame pointer of the calling frame. */
+  cache->base = frame_unwind_register_unsigned (next_frame, FP_REGNUM);
+  if (cache->base == 0)
+    return cache;
+
+  cache->pc = frame_func_unwind (next_frame);
+  current_pc = frame_pc_unwind (next_frame);
+  if (cache->pc != 0)
+    sh_analyze_prologue (cache->pc, current_pc, cache);
+    
+  if (!cache->uses_fp)
+    {
+      /* We didn't find a valid frame, which means that CACHE->base
+         currently holds the frame pointer for our calling frame.  If
+         we're at the start of a function, or somewhere half-way its
+         prologue, the function's frame probably hasn't been fully
+         setup yet.  Try to reconstruct the base address for the stack
+         frame by looking at the stack pointer.  For truly "frameless"
+         functions this might work too.  */
+      cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+    }
+
+  /* Now that we have the base address for the stack frame we can
+     calculate the value of sp in the calling frame.  */
+  cache->saved_sp = cache->base + cache->sp_offset;
+
+  /* Adjust all the saved registers such that they contain addresses
+     instead of offsets.  */
+  for (i = 0; i < SH_NUM_REGS; i++)
+    if (cache->saved_regs[i] != -1)
+      cache->saved_regs[i] = cache->saved_sp - cache->saved_regs[i] - 4;
+
+  return cache;
+}
+
+static void
+sh_frame_prev_register (struct frame_info *next_frame, void **this_cache,
+			int regnum, int *optimizedp,
+			enum lval_type *lvalp, CORE_ADDR *addrp,
+			int *realnump, void *valuep)
+{
+  struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
+
+  gdb_assert (regnum >= 0);
+
+  if (regnum == SP_REGNUM && cache->saved_sp)
+    {
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+        {
+          /* Store the value.  */
+          store_unsigned_integer (valuep, 4, cache->saved_sp);
+        }
+      return;
+    }
+
+  /* The PC of the previous frame is stored in the PR register of
+     the current frame.  Frob regnum so that we pull the value from
+     the correct place.  */
+  if (regnum == PC_REGNUM)
+    regnum = PR_REGNUM;
+
+  if (regnum < SH_NUM_REGS && cache->saved_regs[regnum] != -1)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = cache->saved_regs[regnum];
+      *realnump = -1;
+      if (valuep)
+        {
+          /* Read the value in from memory.  */
+          read_memory (*addrp, valuep,
+                       register_size (current_gdbarch, regnum));
+        }
+      return;
+    }
+
+  frame_register_unwind (next_frame, regnum,
+                         optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static void
+sh_frame_this_id (struct frame_info *next_frame, void **this_cache,
+                    struct frame_id *this_id)
+{ 
+  struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
+    return;
+
+  *this_id = frame_id_build (cache->saved_sp, cache->pc);
+} 
+
+static const struct frame_unwind sh_frame_unwind =
+{
+  NORMAL_FRAME,
+  sh_frame_this_id,
+  sh_frame_prev_register
+};
+
+static const struct frame_unwind *
+sh_frame_sniffer (struct frame_info *next_frame)
+{
+  return &sh_frame_unwind;
+}
+
+static CORE_ADDR
+sh_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+}
+
+static CORE_ADDR
+sh_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, PC_REGNUM);
+}
+
+static struct frame_id
+sh_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_id_build (sh_unwind_sp (gdbarch, next_frame),
+			 frame_pc_unwind (next_frame));
+}
+
+static CORE_ADDR
+sh_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{ 
+  struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
+  
+  return cache->base;
+}
+  
+static const struct frame_base sh_frame_base =
+{
+  &sh_frame_unwind,
+  sh_frame_base_address,
+  sh_frame_base_address,
+  sh_frame_base_address
+};  
+
+/* The epilogue is defined here as the area at the end of a function,
+   either on the `ret' instruction itself or after an instruction which
+   destroys the function's stack frame. */
+static int
+sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  CORE_ADDR func_addr = 0, func_end = 0;
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      ULONGEST inst;
+      /* The sh epilogue is max. 14 bytes long.  Give another 14 bytes
+         for a nop and some fixed data (e.g. big offsets) which are
+	 unfortunately also treated as part of the function (which
+	 means, they are below func_end. */
+      CORE_ADDR addr = func_end - 28;
+      if (addr < func_addr + 4)
+        addr = func_addr + 4;
+      if (pc < addr)
+	return 0;
+
+      /* First search forward until hitting an rts. */
+      while (addr < func_end
+             && !IS_RTS (read_memory_unsigned_integer (addr, 2)))
+	addr += 2;
+      if (addr >= func_end)
+        return 0;
+
+      /* At this point we should find a mov.l @r15+,r14 instruction,
+         either before or after the rts.  If not, then the function has
+	 probably no "normal" epilogue and we bail out here. */
+      inst = read_memory_unsigned_integer (addr - 2, 2);
+      if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2)))
+        addr -= 2;
+      else if (!IS_RESTORE_FP (read_memory_unsigned_integer (addr + 2, 2)))
+	return 0;
+
+      /* Step over possible lds.l @r15+,pr. */
+      inst = read_memory_unsigned_integer (addr - 2, 2);
+      if (IS_LDS (inst))
+        {
+	  addr -= 2;
+	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	}
+
+      /* Step over possible mov r14,r15. */
+      if (IS_MOV_FP_SP (inst))
+        {
+	  addr -= 2;
+	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	}
+
+      /* Now check for FP adjustments, using add #imm,r14 or add rX, r14
+         instructions. */
+      while (addr > func_addr + 4
+             && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
+	{
+	  addr -= 2;
+	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	}
+
+      if (pc >= addr)
+	return 1;
+    }
+  return 0;
+}
+
 static gdbarch_init_ftype sh_gdbarch_init;
 
 static struct gdbarch *
@@ -2020,32 +2003,32 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
       case bfd_mach_sh2e:
-        sh_show_regs = sh2e_show_regs;
-        break;
+	sh_show_regs = sh2e_show_regs;
+	break;
       case bfd_mach_sh_dsp:
-        sh_show_regs = sh_dsp_show_regs;
-        break;
+	sh_show_regs = sh_dsp_show_regs;
+	break;
 
       case bfd_mach_sh3:
-        sh_show_regs = sh3_show_regs;
-        break;
+	sh_show_regs = sh3_show_regs;
+	break;
 
       case bfd_mach_sh3e:
-        sh_show_regs = sh3e_show_regs;
-        break;
+	sh_show_regs = sh3e_show_regs;
+	break;
 
       case bfd_mach_sh3_dsp:
-        sh_show_regs = sh3_dsp_show_regs;
-        break;
+	sh_show_regs = sh3_dsp_show_regs;
+	break;
 
       case bfd_mach_sh4:
-        sh_show_regs = sh4_show_regs;
-        break;
+	sh_show_regs = sh4_show_regs;
+	break;
 
       case bfd_mach_sh5:
 	sh_show_regs = sh64_show_regs;
-        /* SH5 is handled entirely in sh64-tdep.c */
-        return sh64_gdbarch_init (info, arches);
+	/* SH5 is handled entirely in sh64-tdep.c */
+	return sh64_gdbarch_init (info, arches);
     }
 
   /* If there is already a candidate, use it.  */
@@ -2056,10 +2039,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* None found, create a new architecture from the information
      provided. */
   gdbarch = gdbarch_alloc (&info, NULL);
-
-  /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
-     ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -2072,10 +2051,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, SH_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, 15);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, 14);
   set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
+
+  set_gdbarch_register_type (gdbarch, sh_default_register_type);
+
+  set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
@@ -2085,124 +2067,84 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
+  set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
+  set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    sh_extract_struct_value_address);
+
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_function_start_offset (gdbarch, 0);
 
+  set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
+  set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
+
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+					     frameless_look_for_prologue);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  set_gdbarch_deprecated_frame_chain (gdbarch, sh_frame_chain);
-  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
-  set_gdbarch_deprecated_pop_frame (gdbarch, sh_pop_frame);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, sh_frame_saved_pc);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_align (gdbarch, sh_frame_align);
+  set_gdbarch_unwind_sp (gdbarch, sh_unwind_sp);
+  set_gdbarch_unwind_pc (gdbarch, sh_unwind_pc);
+  set_gdbarch_unwind_dummy_id (gdbarch, sh_unwind_dummy_id);
+  frame_base_set_default (gdbarch, &sh_frame_base);
+
+  set_gdbarch_in_function_epilogue_p (gdbarch,
+				      sh_in_function_epilogue_p);
 
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_sh:
       set_gdbarch_register_name (gdbarch, sh_sh_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh2:
       set_gdbarch_register_name (gdbarch, sh_sh_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;      
+
     case bfd_mach_sh2e:
       /* doubles on sh2e and sh3e are actually 4 byte. */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
       set_gdbarch_register_name (gdbarch, sh_sh2e_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh_dsp:
       set_gdbarch_register_name (gdbarch, sh_sh_dsp_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh3:
       set_gdbarch_register_name (gdbarch, sh_sh3_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh3e:
       /* doubles on sh2e and sh3e are actually 4 byte. */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
       set_gdbarch_register_name (gdbarch, sh_sh3e_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh3_dsp:
       set_gdbarch_register_name (gdbarch, sh_sh3_dsp_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
+
     case bfd_mach_sh4:
       set_gdbarch_register_name (gdbarch, sh_sh4_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
       set_gdbarch_register_type (gdbarch, sh_sh4_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
@@ -2210,24 +2152,18 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
-      set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       break;
+
     default:
       set_gdbarch_register_name (gdbarch, sh_generic_register_name);
-      set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
-      set_gdbarch_register_type (gdbarch, sh_default_register_type);
-      set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
-      set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
       break;
     }
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, sh_frame_sniffer);
 
   return gdbarch;
 }
