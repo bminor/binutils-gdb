@@ -628,7 +628,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 
          Zero-length types can legitimately arise from declarations
          like 'struct {}'.  GDB may also create them when it finds
-         bogus debugging information; for example, in GCC 2.94.4 and
+         bogus debugging information; for example, in GCC 2.95.4 and
          binutils 2.11.93.0.2, the STABS BINCL->EXCL compression
          process can create bad type numbers.  GDB reads these as
          TYPE_CODE_UNDEF types, with zero length.  (That bug is
