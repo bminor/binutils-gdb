@@ -674,8 +674,10 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
          at all, but rather as an ordinary `float' argument.  This
          argument will be stored in %f1, as required by the psABI.
          However, as a member of a structure the psABI requires it to
-         be stored in.  To appease GCC, if a structure has only a
-         single `float' member, we store its value in %f1 too.  */
+         be stored in %f0.  This bug is present in GCC 3.3.2, but
+         probably in older releases to.  To appease GCC, if a
+         structure has only a single `float' member, we store its
+         value in %f1 too (we already have stored in %f0).  */
       if (TYPE_NFIELDS (type) == 1)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, 0));

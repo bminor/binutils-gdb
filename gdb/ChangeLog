@@ -1,3 +1,9 @@
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.c (sparc64_store_floating_fields): Update comment
+	such that it mentions a specific version of GCC that exhibits this
+	bug.
+
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c (sparc64_store_floating_fields): If TYPE is a
