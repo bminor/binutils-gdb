@@ -775,7 +775,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 4;
       break;
 
-    /* A 16bit abolute relocation that was formerlly a 24/32bit
+    /* A 16bit absolute relocation that was formerly a 24/32bit
        absolute relocation.  */
     case R_MOVL2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);

@@ -921,13 +921,13 @@ struct coff_arm_link_hash_table
     /* The original coff_link_hash_table structure.  MUST be first field.  */
     struct coff_link_hash_table	root;
 
-    /* The size in bytes of the section containg the Thumb-to-ARM glue.  */
+    /* The size in bytes of the section containing the Thumb-to-ARM glue.  */
     bfd_size_type		thumb_glue_size;
 
-    /* The size in bytes of the section containg the ARM-to-Thumb glue.  */
+    /* The size in bytes of the section containing the ARM-to-Thumb glue.  */
     bfd_size_type		arm_glue_size;
 
-    /* An arbitary input BFD chosen to hold the glue sections.  */
+    /* An arbitrary input BFD chosen to hold the glue sections.  */
     bfd *			bfd_of_glue_owner;
 
     /* Support interworking with old, non-interworking aware ARM code.  */
@@ -991,7 +991,7 @@ arm_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
    instruction.
 
    It takes two thumb instructions to encode the target address. Each has
-   11 bits to invest. The upper 11 bits are stored in one (identifed by
+   11 bits to invest. The upper 11 bits are stored in one (identified by
    H-0.. see below), the lower 11 bits are stored in the other (identified
    by H-1).
 
@@ -1299,7 +1299,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
 	     VxWorks and EPOC-PE targets, but it is also known that it
-	     was supressed for other ARM targets.  This ought to be
+	     was suppressed for other ARM targets.  This ought to be
 	     sorted out one day.  */
 #ifdef ARM_COFF_BUGFIX
 	  /* We must not ignore the symbol value.  If the symbol is
@@ -2228,7 +2228,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 /* Called when merging the private data areas of two BFDs.
    This is important as it allows us to detect if we are
    attempting to merge binaries compiled for different ARM
-   targets, eg different CPUs or differents APCS's.     */
+   targets, eg different CPUs or different APCS's.     */
 
 static bfd_boolean
 coff_arm_merge_private_bfd_data (ibfd, obfd)
@@ -2361,7 +2361,7 @@ coff_arm_print_private_bfd_data (abfd, ptr)
 
   if (APCS_SET (abfd))
     {
-      /* xgettext: APCS is ARM Prodecure Call Standard, it should not be translated.  */
+      /* xgettext: APCS is ARM Procedure Call Standard, it should not be translated.  */
       fprintf (file, " [APCS-%d]", APCS_26_FLAG (abfd) ? 26 : 32);
 
       if (APCS_FLOAT_FLAG (abfd))

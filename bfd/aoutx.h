@@ -3254,7 +3254,7 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 	     and this object file from the archive includes:
 	         int a = 5;
 	     In such a case, whether to include this object is target
-             dependant for backward compatability.
+             dependant for backward compatibility.
 
 	     FIXME: The SunOS 4.1.3 linker will pull in the archive
 	     element if the symbol is defined in the .data section,

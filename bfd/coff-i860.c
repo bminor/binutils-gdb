@@ -524,7 +524,7 @@ coff_i860_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       BFD_ASSERT (h != NULL);
 
       /* I think we *do* want to bypass this.  If we don't, I have seen some data
-	 parameters get the wrong relcation address.  If I link two versions
+	 parameters get the wrong relocation address.  If I link two versions
 	 with and without this section bypassed and then do a binary comparison,
 	 the addresses which are different can be looked up in the map.  The
 	 case in which this section has been bypassed has addresses which correspond

@@ -197,7 +197,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	{
 	  bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
 						    input_section);
-	  /* Adresses are 23 bit, and the layout of those in a 32-bit
+	  /* Addresses are 23 bit, and the layout of those in a 32-bit
 	     value is as follows:
 	       1AAAAAAA xxxxxxxx AAAAAAAA AAAAAAAA
 	     (A - address bits,  x - ignore).  */

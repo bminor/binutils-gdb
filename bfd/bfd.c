@@ -396,7 +396,7 @@ SUBSECTION
 
 	Some BFD functions want to print messages describing the
 	problem.  They call a BFD error handler function.  This
-	function may be overriden by the program.
+	function may be overridden by the program.
 
 	The BFD error handler acts like printf.
 

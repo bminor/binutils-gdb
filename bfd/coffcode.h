@@ -1572,7 +1572,7 @@ coff_new_section_hook (abfd, section)
     return FALSE;
 
   /* We don't need to set up n_name, n_value, or n_scnum in the native
-     symbol information, since they'll be overriden by the BFD symbol
+     symbol information, since they'll be overridden by the BFD symbol
      anyhow.  However, we do need to set the type and storage class,
      in case this symbol winds up getting written out.  The value 0
      for n_numaux is already correct.  */
@@ -4681,7 +4681,7 @@ coff_slurp_symbol_table (abfd)
 #endif
 	    case C_REGPARM:	/* Register parameter.  */
 	    case C_REG:		/* register variable.  */
-              /* C_AUTOARG conflictes with TI COFF C_UEXT.  */
+              /* C_AUTOARG conflicts with TI COFF C_UEXT.  */
 #if !defined (TIC80COFF) && !defined (TICOFF)
 #ifdef C_AUTOARG
 	    case C_AUTOARG:	/* 960-specific storage class.  */
