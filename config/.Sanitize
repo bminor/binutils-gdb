@@ -39,6 +39,7 @@ mh-decstation
 mh-delta88
 mh-dgux
 mh-dgux386
+mh-elfalphapic
 mh-go32
 mh-hp300
 mh-hpux
@@ -67,6 +68,7 @@ mh-windows
 mh-x86pic
 mpw
 mpw-mh-mpw
+mt-elfalphapic
 mt-linux
 mt-m68kpic
 mt-netware
