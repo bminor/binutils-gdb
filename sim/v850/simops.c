@@ -1880,7 +1880,7 @@ OP_10007E0 ()
       ECR |= 0x40 + OP[0];
       /* Flag that we are now doing exception processing.  */
       PSW |= PSW_EP | PSW_ID;
-      PC = ((OP[0] < 0x10) ? 0x40 : 0x50) - 4;
+      PC = (OP[0] < 0x10) ? 0x40 : 0x50;
 
       return 0;
     }

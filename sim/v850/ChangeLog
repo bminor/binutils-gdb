@@ -1,3 +1,7 @@
+2002-09-26  Jim Wilson  <wilson@redhat.com>
+
+	* simops (OP_10007E0): Don't subtract 4 from PC.
+
 2002-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* interp.c (sim_open): Remove reference to v850ea.
