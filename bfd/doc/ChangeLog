@@ -1,3 +1,7 @@
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* chew.c: Use #include "" instead of <> for local header files.
+
 2002-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
