@@ -37,7 +37,9 @@
 
 #include <sys/procfs.h>
 
-/* Prototypes for supply_gregset etc. */
+/* We must not compile this code for 64-bit Solaris x86.  */
+#if !defined (PR_MODEL_NATIVE) || (PR_MODEL_NATIVE == PR_MODEL_ILP32)
+
 #include "gregset.h"
 
 /* The `/proc' interface divides the target machine's register set up
@@ -157,5 +159,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 }
 
 #endif /* HAVE_FPREGSET_T */
+
+#endif /* not 64-bit.  */
 
 #endif /* HAVE_SYS_PROCFS_H */

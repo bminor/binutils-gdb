@@ -72,7 +72,6 @@ fill_fpregset (prfpregset_t *fpregs, int regnum)
 
 #else
 
-/* 32-bit Solaris x86 is very similar to SVR4.  */
-#include "i386v4-nat.c"
+/* For 32-bit Solaris x86, we use the Unix SVR4 code in i386v4-nat.c.  */
 
 #endif
