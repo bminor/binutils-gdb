@@ -1690,7 +1690,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(language_h) $(symfile_h) $(gdb_string_h) \
-	$(ui_out_h) $(completer_h)
+	$(ui_out_h) $(completer_h) $(regcache_h)
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	$(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)

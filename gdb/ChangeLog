@@ -1,3 +1,37 @@
+2002-06-25  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (stop_registers): Change variable's type to ``struct
+	regcache'''.
+	(xmalloc_inferior_status): Delete function.
+	(free_inferior_status): Delete function.
+	(normal_stop): Use regcache_cpy.
+	(struct inferior_status): Change type of fields ``stop_registers''
+	and ``registers'' to ``struct regcache''.
+	(write_inferior_status_register): Use regcache_write.
+	(save_inferior_status): Instead of calling
+	xmalloc_inferior_status, allocate the inf_status buffer directly.
+	Use regcache_dup_no_passthrough and regcache_dup to save the
+	buffers.
+	(restore_inferior_status): Use regcache_xfree and regcache_cpy.
+	Replace the stop_registers regcache instead of overriding it.  Use
+	regcache_xfree.  Instead of calling free_inferior_status, xfree
+	the buffer directly.
+	(discard_inferior_status): Use regcache_xfree.  Instead of calling
+	free_inferior_status, xfree the buffer directly.
+	(build_infrun): Use regcache_xmalloc.
+	(_initialize_infrun): Delete redundant call to build_infrun.
+
+	* Makefile.in (infcmd.o): Add $(regcache_h).
+
+	* infcmd.c: Include "regcache.h".
+	(run_stack_dummy): Use deprecated_grub_regcache_for_registers to
+	obtain the address of `stop_registers' register buffer.
+	(print_return_value): Ditto.
+
+	* inferior.h (struct regcache): Add opaque declaration.
+	(stop_registers): Change variable's declared type to ``struct
+	regcache''.
+
 2002-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-decode.c (add_show_from_set): Fixed typo in comment.

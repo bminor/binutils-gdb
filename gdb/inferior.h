@@ -24,6 +24,7 @@
 #define INFERIOR_H 1
 
 struct gdbarch;
+struct regcache;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -396,7 +397,7 @@ extern int proceed_to_finish;
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
-extern char *stop_registers;
+extern struct regcache *stop_registers;
 
 /* Nonzero if the child process in inferior_ptid was attached rather
    than forked.  */
