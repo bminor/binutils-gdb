@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -112,7 +112,7 @@ get_stop_pc (void)
 }
 
 static void *
-add_process (int pid)
+add_process (unsigned long pid)
 {
   struct process_info *process;
 
@@ -168,13 +168,13 @@ linux_create_inferior (char *program, char **allargs)
 /* Attach to an inferior process.  */
 
 void
-linux_attach_lwp (int pid, int tid)
+linux_attach_lwp (unsigned long pid, unsigned long tid)
 {
   struct process_info *new_process;
 
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
-      fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
+      fprintf (stderr, "Cannot attach to process %ld: %s (%d)\n", pid,
 	       strerror (errno), errno);
       fflush (stderr);
 
@@ -202,7 +202,7 @@ linux_attach_lwp (int pid, int tid)
 }
 
 int
-linux_attach (int pid)
+linux_attach (unsigned long pid)
 {
   struct process_info *process;
 
@@ -277,7 +277,7 @@ linux_detach (void)
 
 /* Return nonzero if the given thread is still alive.  */
 static int
-linux_thread_alive (int tid)
+linux_thread_alive (unsigned long tid)
 {
   if (find_inferior_id (&all_threads, tid) != NULL)
     return 1;
@@ -441,7 +441,7 @@ linux_wait_for_event (struct thread_info *child)
       event_child = (struct process_info *)
 	find_inferior (&all_processes, status_pending_p, NULL);
       if (debug_threads && event_child)
-	fprintf (stderr, "Got a pending child %d\n", event_child->lwpid);
+	fprintf (stderr, "Got a pending child %ld\n", event_child->lwpid);
     }
   else
     {
@@ -456,7 +456,7 @@ linux_wait_for_event (struct thread_info *child)
       if (event_child->status_pending_p)
 	{
 	  if (debug_threads)
-	    fprintf (stderr, "Got an event from pending child %d (%04x)\n",
+	    fprintf (stderr, "Got an event from pending child %ld (%04x)\n",
 		     event_child->lwpid, event_child->status_pending);
 	  wstat = event_child->status_pending;
 	  event_child->status_pending_p = 0;
@@ -491,7 +491,7 @@ linux_wait_for_event (struct thread_info *child)
 	  if (! WIFSTOPPED (wstat))
 	    {
 	      if (debug_threads)
-		fprintf (stderr, "Thread %d (LWP %d) exiting\n",
+		fprintf (stderr, "Thread %ld (LWP %ld) exiting\n",
 			 event_child->tid, event_child->head.id);
 
 	      /* If the last thread is exiting, just return.  */
@@ -533,7 +533,7 @@ linux_wait_for_event (struct thread_info *child)
 		  || WSTOPSIG (wstat) == __SIGRTMIN + 1))
 	    {
 	      if (debug_threads)
-		fprintf (stderr, "Ignored signal %d for %d (LWP %d).\n",
+		fprintf (stderr, "Ignored signal %d for %ld (LWP %ld).\n",
 			 WSTOPSIG (wstat), event_child->tid,
 			 event_child->head.id);
 	      linux_resume_one_process (&event_child->head,
@@ -735,7 +735,7 @@ retry:
    thread groups are in use, we need to use tkill.  */
 
 static int
-kill_lwp (int lwpid, int signo)
+kill_lwp (unsigned long lwpid, int signo)
 {
   static int tkill_failed;
 
@@ -772,7 +772,7 @@ send_sigstop (struct inferior_list_entry *entry)
     }
 
   if (debug_threads)
-    fprintf (stderr, "Sending sigstop to process %d\n", process->head.id);
+    fprintf (stderr, "Sending sigstop to process %ld\n", process->head.id);
 
   kill_lwp (process->head.id, SIGSTOP);
   process->sigstop_sent = 1;
@@ -783,7 +783,8 @@ wait_for_sigstop (struct inferior_list_entry *entry)
 {
   struct process_info *process = (struct process_info *) entry;
   struct thread_info *saved_inferior, *thread;
-  int wstat, saved_tid;
+  int wstat;
+  unsigned long saved_tid;
 
   if (process->stopped)
     return;
@@ -863,7 +864,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
   current_inferior = get_process_thread (process);
 
   if (debug_threads)
-    fprintf (stderr, "Resuming process %d (%s, signal %d, stop %s)\n", inferior_pid,
+    fprintf (stderr, "Resuming process %ld (%s, signal %d, stop %s)\n", inferior_pid,
 	     step ? "step" : "continue", signal,
 	     process->stop_expected ? "expected" : "not expected");
 
@@ -1233,7 +1234,7 @@ regsets_fetch_inferior_registers ()
 	  else
 	    {
 	      char s[256];
-	      sprintf (s, "ptrace(regsets_fetch_inferior_registers) PID=%d",
+	      sprintf (s, "ptrace(regsets_fetch_inferior_registers) PID=%ld",
 		       inferior_pid);
 	      perror (s);
 	    }
@@ -1427,7 +1428,7 @@ linux_look_up_symbols (void)
 static void
 linux_send_signal (int signum)
 {
-  extern int signal_pid;
+  extern unsigned long signal_pid;
 
   if (cont_thread > 0)
     {
@@ -1449,7 +1450,7 @@ linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
   char filename[PATH_MAX];
   int fd, n;
 
-  snprintf (filename, sizeof filename, "/proc/%d/auxv", inferior_pid);
+  snprintf (filename, sizeof filename, "/proc/%ld/auxv", inferior_pid);
 
   fd = open (filename, O_RDONLY);
   if (fd < 0)

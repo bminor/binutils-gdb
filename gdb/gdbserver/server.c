@@ -1,5 +1,6 @@
 /* Main code for remote server for GDB.
-   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004
+   Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004,
+   2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -25,11 +26,11 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-int cont_thread;
-int general_thread;
-int step_thread;
-int thread_from_wait;
-int old_thread_from_wait;
+unsigned long cont_thread;
+unsigned long general_thread;
+unsigned long step_thread;
+unsigned long thread_from_wait;
+unsigned long old_thread_from_wait;
 int extended_protocol;
 int server_waiting;
 
@@ -40,7 +41,7 @@ jmp_buf toplevel;
    (user hitting Control-C in the client), and to wait for the child to exit
    when no longer debugging it.  */
 
-int signal_pid;
+unsigned long signal_pid;
 
 static unsigned char
 start_inferior (char *argv[], char *statusptr)
@@ -50,7 +51,7 @@ start_inferior (char *argv[], char *statusptr)
 
   signal_pid = create_inferior (argv[0], argv);
 
-  fprintf (stderr, "Process %s created; pid = %d\n", argv[0],
+  fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
 	   signal_pid);
 
   signal (SIGTTOU, SIG_IGN);
@@ -102,7 +103,7 @@ handle_query (char *own_buf)
   if (strcmp ("qfThreadInfo", own_buf) == 0)
     {
       thread_ptr = all_threads.head;
-      sprintf (own_buf, "m%x", thread_ptr->id);
+      sprintf (own_buf, "m%lx", thread_ptr->id);
       thread_ptr = thread_ptr->next;
       return;
     }
@@ -111,7 +112,7 @@ handle_query (char *own_buf)
     {
       if (thread_ptr != NULL)
 	{
-	  sprintf (own_buf, "m%x", thread_ptr->id);
+	  sprintf (own_buf, "m%lx", thread_ptr->id);
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
@@ -217,7 +218,7 @@ handle_v_cont (char *own_buf, char *status, unsigned char *signal)
 	}
       else if (p[0] == ':')
 	{
-	  resume_info[i].thread = strtol (p + 1, &q, 16);
+	  resume_info[i].thread = strtoul (p + 1, &q, 16);
 	  if (p == q)
 	    goto err;
 	  p = q;
@@ -432,16 +433,16 @@ main (int argc, char *argv[])
 	      switch (own_buf[1])
 		{
 		case 'g':
-		  general_thread = strtol (&own_buf[2], NULL, 16);
+		  general_thread = strtoul (&own_buf[2], NULL, 16);
 		  write_ok (own_buf);
 		  set_desired_inferior (1);
 		  break;
 		case 'c':
-		  cont_thread = strtol (&own_buf[2], NULL, 16);
+		  cont_thread = strtoul (&own_buf[2], NULL, 16);
 		  write_ok (own_buf);
 		  break;
 		case 's':
-		  step_thread = strtol (&own_buf[2], NULL, 16);
+		  step_thread = strtoul (&own_buf[2], NULL, 16);
 		  write_ok (own_buf);
 		  break;
 		default:
@@ -530,7 +531,7 @@ main (int argc, char *argv[])
 		  break;
 		}
 	    case 'T':
-	      if (mythread_alive (strtol (&own_buf[1], NULL, 16)))
+	      if (mythread_alive (strtoul (&own_buf[1], NULL, 16)))
 		write_ok (own_buf);
 	      else
 		write_enn (own_buf);

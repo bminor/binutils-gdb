@@ -1,5 +1,5 @@
 /* Common definitions for remote server for GDB.
-   Copyright 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004
+   Copyright 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -69,7 +69,7 @@ struct inferior_list
 };
 struct inferior_list_entry
 {
-  int id;
+  unsigned long id;
   struct inferior_list_entry *next;
 };
 
@@ -97,7 +97,7 @@ extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
 void remove_thread (struct thread_info *thread);
-void add_thread (int thread_id, void *target_data);
+void add_thread (unsigned long thread_id, void *target_data);
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,
@@ -105,21 +105,21 @@ struct inferior_list_entry *find_inferior
 		   void *),
       void *arg);
 struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
-					      int id);
+					      unsigned long id);
 void *inferior_target_data (struct thread_info *);
 void set_inferior_target_data (struct thread_info *, void *);
 void *inferior_regcache_data (struct thread_info *);
 void set_inferior_regcache_data (struct thread_info *, void *);
 void change_inferior_id (struct inferior_list *list,
-			 int new_id);
+			 unsigned long new_id);
 
 /* Public variables in server.c */
 
-extern int cont_thread;
-extern int general_thread;
-extern int step_thread;
-extern int thread_from_wait;
-extern int old_thread_from_wait;
+extern unsigned long cont_thread;
+extern unsigned long general_thread;
+extern unsigned long step_thread;
+extern unsigned long thread_from_wait;
+extern unsigned long old_thread_from_wait;
 extern int server_waiting;
 
 extern jmp_buf toplevel;

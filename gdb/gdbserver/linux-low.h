@@ -1,5 +1,5 @@
 /* Internal interfaces for the GNU/Linux specific target code for gdbserver.
-   Copyright 2002, 2004 Free Software Foundation, Inc.
+   Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -71,8 +71,8 @@ struct process_info
 {
   struct inferior_list_entry head;
   int thread_known;
-  int lwpid;
-  int tid;
+  unsigned long lwpid;
+  unsigned long tid;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the process will
      be immediately resumed).  */
@@ -115,6 +115,6 @@ struct process_info
 
 extern struct inferior_list all_processes;
 
-void linux_attach_lwp (int pid, int tid);
+void linux_attach_lwp (unsigned long pid, unsigned long tid);
 
 int thread_db_init (void);

@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright 2002, 2003, 2004
+   Copyright 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -31,7 +31,7 @@
 
 struct thread_resume
 {
-  int thread;
+  unsigned long thread;
 
   /* If non-zero, leave this thread stopped.  */
   int leave_stopped;
@@ -61,7 +61,7 @@ struct target_ops
      PID is the process ID to attach to, specified by the user
      or a higher layer.  */
 
-  int (*attach) (int pid);
+  int (*attach) (unsigned long pid);
 
   /* Kill all inferiors.  */
 
@@ -73,7 +73,7 @@ struct target_ops
 
   /* Return 1 iff the thread with process ID PID is alive.  */
 
-  int (*thread_alive) (int pid);
+  int (*thread_alive) (unsigned long pid);
 
   /* Resume the inferior process.  */
 

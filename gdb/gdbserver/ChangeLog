@@ -1,3 +1,28 @@
+2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* inferiors.c (change_inferior_id, add_thread, find_inferior_id):
+	Take unsigned long arguments for PIDs.
+	* linux-low.c (add_process, linux_attach_lwp, linux_attach)
+	(linux_thread_alive, linux_wait_for_event, kill_lwp, send_sigstop)
+	(wait_for_sigstop, linux_resume_one_process)
+	(regsets_fetch_inferior_registers, linux_send_signal)
+	(linux_read_auxv): Likewise.  Update the types of variables holding
+	PIDs.  Update format string specifiers.
+	* linux-low.h (struct process_info, linux_attach_lwp): Likewise.
+	* remote-utils.c (prepare_resume_reply): Likewise.
+	* server.c (cont_thread, general_thread, step_thread)
+	(thread_from_wait, old_thread_from_wait, signal_pid): Change type to
+	unsigned long.
+	(handle_query): Update format specifiers.
+	(handle_v_cont, main): Use strtoul for thread IDs.
+	* server.h (struct inferior_list_entry): Use unsigned long for ID.
+	(add_thread, find_inferior_id, change_inferior_id, cont_thread)
+	(general_thread, step_thread, thread_from_wait)
+	(old_thread_from_wait): Update.
+	* target.h (struct thread_resume): Use unsigned long for THREAD.
+	(struct target_ops): Use unsigned long for arguments to attach and
+	thread_alive.
+
 2005-02-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* acinclude.m4: Include bfd/bfd.m4 directly.
