@@ -1,5 +1,5 @@
 /* Remote debugging interface for Zilog Z8000 simulator
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992,1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Steve Chamberlain
    (sac@cygnus.com).
 
@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "../z8ksim/sim.h"
+#include "../../sim/sim.h"
 
 /* External data declarations */
 extern int stop_soon_quietly;           /* for wait_for_inferior */
@@ -61,7 +61,9 @@ int regno;
   if (regno  == -1) 
   {
     for (regno = 0; regno < 16; regno++)
-     store_register(regno);
+    {
+      store_register(regno);
+    }
   }
   else 
   {
@@ -285,17 +287,11 @@ sim_xfer_inferior_memory(memaddr, myaddr, len, write, target)
 void
 sim_files_info ()
 {
-char *file = "nothing";
-if (exec_bfd)
- file = bfd_get_filename(exec_bfd);
+  char *file = "nothing";
+  if (exec_bfd)
+   file = bfd_get_filename(exec_bfd);
 
-if (exec_bfd)
-#ifdef __GO32__
-   printf_filtered("\tAttached to DOS asynctsr and running program %s\n",file);
-#else
-  printf_filtered("\tAttached to %s at %d baud and running program %s\n",file);
-#endif
-  printf_filtered("\ton an H8/300 processor.\n");
+  printf_filtered("\tAttached to %s running on the z8k simulator\n",file);
 }
 
 /* This routine is run as a hook, just before the main command loop is
