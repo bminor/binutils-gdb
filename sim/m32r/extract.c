@@ -27,7 +27,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "cgen-ops.h"
-#include "cpu-sim.h"
 
 void
 EX_FN_NAME (m32rbf,fmt_add) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
