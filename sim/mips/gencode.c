@@ -2009,7 +2009,7 @@ build_instruction (doisa, features, mips16, insn)
 	      printf("     int byte;\n");
 	      printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));\n");
 	      printf("     byte = ((vaddr & mask) ^ bigend);\n");
-	      printf("     if (%sBigEndianMem)\n",((insn->flags & LEFT) ? "!" : ""));
+	      printf("     if (%s!ByteSwapMem)\n",((insn->flags & LEFT) ? "!" : ""));
 	      printf("      paddr &= ~mask;\n");
 
 	      if (isload) {
