@@ -26,8 +26,7 @@ program_prefix =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(libdir)
-
+tooldir = $(bindir)
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
@@ -84,6 +83,11 @@ TEXI2ROFF=texi2roff
 
 # Which roff program to use to generate index for texi2roff'd doc
 ROFF = groff
+
+#stuff for self hosting (can be overridden in config file).
+HOSTING_CRT0=/lib/crt0.o
+HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else echo $(libdir)/libgcc.a; fi`  -lc
+HOSTING_EMU=LDEMULATION=$(EMUL); export LDEMULATION
 
 ### Host, target, and site specific Makefile fragments come in here.
 ###
@@ -412,7 +416,7 @@ install: $(LD_PROG)
 	-rm -f $(bindir)/$(program_prefix)ld
 	$(INSTALL_PROGRAM) ld $(bindir)/$(program_prefix)ld
 	-rm -f $(tooldir)/ld
-	$(INSTALL_PROGRAM) ld $(tooldir)/ld
+	if [ -d $(tooldir) ]; then $(INSTALL_PROGRAM) ld $(tooldir)/ld; else true; fi
 	-rm -f $(man1dir)/$(program_prefix)ld.1
 	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld.1
 
