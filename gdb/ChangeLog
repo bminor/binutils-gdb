@@ -1,3 +1,16 @@
+Wed Apr 15 18:59:48 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparc-tdep.c (SPARC_HAS_FPU): Define.
+	(sparc_extract_return_value): New function, required to handle
+	machines without floating point.
+	(sparc_store_return_value): Ditto.
+	* config/sparc/tm-sparc.h (EXTRACT_RETURN_VALUE): Call
+	sparc_extract_return_value instead of using inline code.
+	(sparc_extract_return_value): Declare.
+	(STORE_RETURN_VALUE): Call sparc_store_return_value instead
+	of using inline code.
+	(sparc_store_return_value): Declare.
+
 Wed Apr 15 12:19:42 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* solib.c (enable_break): Only call warning once

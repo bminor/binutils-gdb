@@ -20,6 +20,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifdef __STDC__
+struct frame_info;
+struct type;
+struct value;
+#endif
+
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
 /* Floating point is IEEE compatible.  */
@@ -256,35 +262,16 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)	      \
-  {      	       	       	       	       	       	       	           \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)		       		   \
-      {							       		   \
-	memcpy ((VALBUF), ((int *)(REGBUF))+FP0_REGNUM, TYPE_LENGTH(TYPE));\
-      }							       		   \
-    else						       		   \
-      memcpy ((VALBUF),						   	   \
-	      (char *)(REGBUF) + REGISTER_RAW_SIZE (O0_REGNUM) * 8 +	   \
-	      (TYPE_LENGTH(TYPE) >= REGISTER_RAW_SIZE (O0_REGNUM)	   \
-	       ? 0 : REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH(TYPE)),   \
-	      TYPE_LENGTH(TYPE));					   \
-  }
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+  sparc_extract_return_value(TYPE, REGBUF, VALBUF)
+extern void
+sparc_extract_return_value PARAMS ((struct type *, char [], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
-/* On sparc, values are returned in register %o0.  */
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  {    	       	       	       	       	       	       	       	       	     \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				     \
-      /* Floating-point values are returned in the register pair */          \
-      /* formed by %f0 and %f1 (doubles are, anyway).  */                    \
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), (VALBUF),	     \
-			    TYPE_LENGTH (TYPE));			     \
-    else								     \
-      /* Other values are returned in register %o0.  */                      \
-      write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),	     \
-			    TYPE_LENGTH (TYPE));  \
-  }
+  sparc_store_return_value(TYPE, VALBUF)
+extern void sparc_store_return_value PARAMS ((struct type *, char *));
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -338,10 +325,6 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
    Since the prologue in a flat frame also tells us where fp and pc
    have been stashed (the frame is of variable size, so their location
    is not fixed), it's convenient to record them in the frame info.  */
-
-#ifdef __STDC__
-struct frame_info;
-#endif
 
 #define EXTRA_FRAME_INFO  \
   CORE_ADDR bottom;  \
@@ -651,10 +634,6 @@ extern int deferred_stores;
 
 /* Arguments smaller than an int must promoted to ints when synthesizing
    function calls.  */
-
-#ifdef __STDC__
-struct value;
-#endif
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = sparc_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
