@@ -165,8 +165,10 @@ Wed Nov 15 00:29:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	Move to linespec.c.
 	* linespec.c: New file. Routines that handle linespecs, formerly
 	in symtab.c.
-	* symtab.h: Export find_line_symtab and find_function_start_sal,
-	* Makefile.in: Add linespec.c.
+	* symtab.h: Export find_line_symtab and find_function_start_sal.
+	* Makefile.in (SFILES): Add linespec.c.
+	(COMMON_OBS): Add linespec.o.
+	(linespec.o): New target.
 
 2000-11-10  Christopher Faylor <cgf@cygnus.com>
 
