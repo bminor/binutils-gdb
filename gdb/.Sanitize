@@ -85,6 +85,8 @@ findvar.c
 frame.h
 gdbcmd.h
 gdbcore.h
+gdbtypes.c
+gdbtypes.h
 gmalloc.c
 gmalloc.h
 gould-pinsn.c
@@ -121,10 +123,13 @@ main.c
 mcheck.c
 mem-break.c
 minimon.h
+minsyms.c
 mips-pinsn.c
 mips-tdep.c
 mips-xdep.c
 mipsread.c
+mmap-alloc.c
+mmap-sbrk.c
 mtrace.awk
 mtrace.c
 munch
@@ -133,6 +138,7 @@ nindy-share
 nindy-tdep.c
 ns32k-opcode.h
 ns32k-pinsn.c
+objfiles.c
 os68k-xdep.c
 parse.c
 parser-defs.h
@@ -162,12 +168,15 @@ signals.h
 signame.c
 signame.h
 solib.c
+solib.h
 source.c
 sparc-pinsn.c
 sparc-tdep.c
 sparc-xdep.c
 stack.c
 standalone.c
+state.c
+state.h
 stuff.c
 sun3-xdep.c
 sun386-xdep.c
