@@ -46,8 +46,7 @@ static int machine = -1;
 static int processor_mask = -1;
 
 /* Structure to hold information about predefined registers.  */
-struct reg_name
-{
+struct reg_name {
   const char *name;
   int value;
 };
@@ -73,8 +72,7 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
-const relax_typeS md_relax_table[] =
-{
+const relax_typeS md_relax_table[] = {
   /* Conditional branches.  */
   {0xff,     -0x100,    2, 1},
   {0x1fffff, -0x200000, 6, 0},
@@ -99,8 +97,7 @@ static segT call_table_text_section = NULL;
 
 /* Fixups.  */
 #define MAX_INSN_FIXUPS (5)
-struct v850_fixup
-{
+struct v850_fixup {
   expressionS exp;
   int opindex;
   bfd_reloc_code_real_type reloc;
@@ -587,8 +584,7 @@ set_machine (int number)
 }
 
 /* The target specific pseudo-ops which we support.  */
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
   {"sdata",   v850_sdata,   0},
   {"tdata",   v850_tdata,   0},
   {"zdata",   v850_zdata,   0},
@@ -617,8 +613,7 @@ const pseudo_typeS md_pseudo_table[] =
 static struct hash_control *v850_hash;
 
 /* This table is sorted.  Suitable for searching by a binary search.  */
-static const struct reg_name pre_defined_registers[] =
-{
+static const struct reg_name pre_defined_registers[] = {
   { "ep",  30 },		/* ep - element ptr */
   { "gp",   4 },		/* gp - global ptr  */
   { "hp",   2 },		/* hp - handler stack ptr  */
@@ -663,8 +658,7 @@ static const struct reg_name pre_defined_registers[] =
 #define REG_NAME_CNT						\
   (sizeof (pre_defined_registers) / sizeof (struct reg_name))
 
-static const struct reg_name system_registers[] =
-{
+static const struct reg_name system_registers[] = {
   { "ctbp",  20 },
   { "ctpc",  16 },
   { "ctpsw", 17 },
@@ -681,8 +675,7 @@ static const struct reg_name system_registers[] =
 #define SYSREG_NAME_CNT						\
   (sizeof (system_registers) / sizeof (struct reg_name))
 
-static const struct reg_name system_list_registers[] =
-{
+static const struct reg_name system_list_registers[] = {
   {"PS",      5 },
   {"SR",      0 + 1}
 };
@@ -690,8 +683,7 @@ static const struct reg_name system_list_registers[] =
 #define SYSREGLIST_NAME_CNT					\
   (sizeof (system_list_registers) / sizeof (struct reg_name))
 
-static const struct reg_name cc_names[] =
-{
+static const struct reg_name cc_names[] = {
   { "c",  0x1 },
   { "e",  0x2 },
   { "ge", 0xe },
@@ -1193,8 +1185,7 @@ parse_register_list (insn, operand)
 
 CONST char *md_shortopts = "m:";
 
-struct option md_longopts[] =
-{
+struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
 
@@ -1319,9 +1310,9 @@ md_atof (type, litp, sizep)
 
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *abfd ATTRIBUTE_UNUSED;
-  asection *sec;
-  fragS *fragP;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+     fragS *fragP;
 {
   subseg_change (sec, 0);
 
@@ -1416,7 +1407,7 @@ md_begin ()
     as_bad (_("Unable to determine default target processor from string: %s"),
             TARGET_CPU);
 
-  v850_hash = hash_new();
+  v850_hash = hash_new ();
 
   /* Insert unique names into hash table.  The V850 instruction set
      has many identical opcode names that have different opcodes based

@@ -51,8 +51,8 @@ const char line_comment_chars[] = "!#";
 #define OP_BVS	0x70
 
 void s_longa ();
-const pseudo_typeS md_pseudo_table[] =
-{
+
+const pseudo_typeS md_pseudo_table[] = {
   {"int", cons, 2},
   {"word", cons, 2},
   {"longa", s_longa, 0},
@@ -71,12 +71,13 @@ static int relax;		/* set if -relax seen */
 
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
+/* Chars that mean this number is a floating point constant.  */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
+/* Opcode mnemonics */
+static struct hash_control *opcode_hash_control;
 
 int M;				/* M flag */
 int X;				/* X flag */

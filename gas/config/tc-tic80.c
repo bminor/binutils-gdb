@@ -58,8 +58,7 @@ const char FLT_CHARS[] = "fF";
 
 extern void obj_coff_section ();
 
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
   { "align",	s_align_bytes,		4 },	/* Do byte alignment, default is a 4 byte boundary  */
   { "word",	cons,			4 },	/* FIXME: Should this be machine independent?  */
   { "bss",	s_lcomm_bytes,		1 },

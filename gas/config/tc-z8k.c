@@ -187,15 +187,13 @@ md_begin ()
   linkrelax = 1;
 }
 
-struct z8k_exp
-{
+struct z8k_exp {
   char *e_beg;
   char *e_end;
   expressionS e_exp;
 };
 
-typedef struct z8k_op
-{
+typedef struct z8k_op {
   /* 'b','w','r','q'.  */
   char regsize;
 
@@ -209,9 +207,7 @@ typedef struct z8k_op
 
   /* Any expression.  */
   expressionS exp;
-}
-
-op_type;
+} op_type;
 
 static expressionS *da_operand;
 static expressionS *imm_operand;
@@ -402,8 +398,7 @@ regaddr (mode, string)
     }
 }
 
-struct ctrl_names
-{
+struct ctrl_names {
   int value;
   char *name;
 };
@@ -453,8 +448,7 @@ get_ctrl_operand (ptr, mode, dst)
   return;
 }
 
-struct flag_names
-{
+struct flag_names {
   int value;
   char *name;
 
@@ -507,15 +501,13 @@ get_flags_operand (ptr, mode, dst)
   return;
 }
 
-struct interrupt_names
-{
+struct interrupt_names {
   int value;
   char *name;
 
 };
 
-struct interrupt_names intr_table[] =
-{
+struct interrupt_names intr_table[] = {
   0x1, "nvi",
   0x2, "vi",
   0x3, "both",
@@ -556,8 +548,7 @@ get_interrupt_operand (ptr, mode, dst)
   return;
 }
 
-struct cc_names
-{
+struct cc_names {
   int value;
   char *name;
 
@@ -1002,6 +993,7 @@ apply_fix (ptr, type, operand, size)
 /* Now we know what sort of opcodes it is.  Let's build the bytes.  */
 
 #define INSERT(x,y) *x++ = y>>24; *x++ = y>> 16; *x++=y>>8; *x++ =y;
+
 static void
 build_bytes (this_try, operand)
      opcode_entry_type *this_try;

@@ -19,20 +19,20 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*
-   Texas Instruments TMS320C30 machine specific gas.
+/* Texas Instruments TMS320C30 machine specific gas.
    Written by Steven Haworth (steve@pm.cse.rmit.edu.au).
    Bugs & suggestions are completely welcome.  This is free software.
-   Please help us make it better.
- */
+   Please help us make it better.  */
 
 #include "as.h"
 #include "opcode/tic30.h"
 
-/* put here all non-digit non-letter charcters that may occur in an operand */
+/* Put here all non-digit non-letter charcters that may occur in an
+   operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>&^!:[@]";
-static char *ordinal_names[] =
-{"first", "second", "third", "fourth", "fifth"};
+static char *ordinal_names[] = {
+  "first", "second", "third", "fourth", "fifth"
+};
 
 const int md_reloc_size = 0;
 
@@ -41,19 +41,19 @@ const char line_comment_chars[] = "*";
 const char line_separator_chars[] = "";
 
 const char *md_shortopts = "";
-struct option md_longopts[] =
-{
+struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
 
 size_t md_longopts_size = sizeof (md_longopts);
 
-/* Chars that mean this number is a floating point constant */
+/* Chars that mean this number is a floating point constant.  */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
 const char FLT_CHARS[] = "fFdDxX";
 
-/* Chars that can be used to separate mant from exp in floating point nums */
+/* Chars that can be used to separate mant from exp in floating point
+   nums.  */
 const char EXP_CHARS[] = "eE";
 
 /* tables for lexical analysis */
@@ -72,8 +72,7 @@ static char digit_chars[256];
 #define is_identifier_char(x) (identifier_chars[(unsigned char) x])
 #define is_digit_char(x) (digit_chars[(unsigned char) x])
 
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
   {0, 0, 0}
 };
 
@@ -85,7 +84,7 @@ const pseudo_typeS md_pseudo_table[] =
 #include <stdarg.h>
 
 int
-debug (const char *string,...)
+debug (const char *string, ...)
 {
   if (flag_debug)
     {
@@ -230,42 +229,32 @@ md_begin ()
 #define PC_Register 0x00000000
 #define PC_Relative 0x02000000
 
-typedef struct
-{
+typedef struct {
   unsigned op_type;
-  struct
-    {
-      int resolved;
-      unsigned address;
-      char *label;
-      expressionS direct_expr;
-    }
-  direct;
-  struct
-    {
-      unsigned mod;
-      int ARnum;
-      unsigned char disp;
-    }
-  indirect;
-  struct
-    {
-      unsigned opcode;
-    }
-  reg;
-  struct
-    {
-      int resolved;
-      int decimal_found;
-      float f_number;
-      int s_number;
-      unsigned int u_number;
-      char *label;
-      expressionS imm_expr;
-    }
-  immediate;
-}
-operand;
+  struct {
+    int resolved;
+    unsigned address;
+    char *label;
+    expressionS direct_expr;
+  } direct;
+  struct {
+    unsigned mod;
+    int ARnum;
+    unsigned char disp;
+  } indirect;
+  struct {
+    unsigned opcode;
+  } reg;
+  struct {
+    int resolved;
+    int decimal_found;
+    float f_number;
+    int s_number;
+    unsigned int u_number;
+    char *label;
+    expressionS imm_expr;
+  } immediate;
+} operand;
 
 int tic30_parallel_insn PARAMS ((char *));
 operand *tic30_operand PARAMS ((char *));
@@ -273,15 +262,14 @@ char *tic30_find_parallel_insn PARAMS ((char *, char *));
 
 template *opcode;
 
-struct tic30_insn
-  {
-    template *tm;		/* Template of current instruction */
-    unsigned opcode;		/* Final opcode */
-    int operands;		/* Number of given operands */
-    /* Type of operand given in instruction */
-    operand *operand_type[MAX_OPERANDS];
-    unsigned addressing_mode;	/* Final addressing mode of instruction */
-  };
+struct tic30_insn {
+  template *tm;			/* Template of current instruction */
+  unsigned opcode;		/* Final opcode */
+  int operands;			/* Number of given operands */
+  /* Type of operand given in instruction */
+  operand *operand_type[MAX_OPERANDS];
+  unsigned addressing_mode;	/* Final addressing mode of instruction */
+};
 
 struct tic30_insn insn;
 static int found_parallel_insn;
@@ -813,8 +801,7 @@ md_assemble (line)
   debug ("\n");
 }
 
-struct tic30_par_insn
-{
+struct tic30_par_insn {
   partemplate *tm;		/* Template of current parallel instruction */
   int operands[2];		/* Number of given operands for each insn */
   /* Type of operand given in instruction */

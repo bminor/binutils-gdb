@@ -1,3 +1,12 @@
+2000-11-15  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-tic30.c: Fix formatting.
+	* config/tc-tic80.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 2000-11-14  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-v850.c: Support dwarf2.
