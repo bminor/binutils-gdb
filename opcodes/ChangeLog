@@ -1,3 +1,9 @@
+2001-10-13  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (MO): New macro for MO field of mbar instruction.
+	(powerpc_opcodes): Add rfci, wrtee, wrteei, mfdcrx, mfdcr,
+	mtdcrx, mtdcr, msync, dcba and mbar as BookE instructions.
+
 2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cgen-ibld.in: Include safe-ctype.h in preference to

@@ -118,3 +118,14 @@ branch_target_8:
 	stwue	3, 40(2)
 	stwuxe	1, 2, 3
 	stwxe	4, 5, 6
+
+	rfci
+	wrtee	3
+	wrteei	1
+	mfdcrx	4, 5
+	mfdcr	5, 234
+	mtdcrx	6, 7
+	mtdcr	432, 8
+	msync
+	dcba	9, 10
+	mbar	0
