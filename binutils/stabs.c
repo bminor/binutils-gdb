@@ -1,5 +1,6 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -33,20 +34,13 @@
 #include "demangle.h"
 #include "debug.h"
 #include "budbg.h"
+#include "filenames.h"
 
 /* Meaningless definition needs by aout64.h.  FIXME.  */
 #define BYTES_IN_WORD 4
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
-
-#ifndef DIR_SEPARATOR
-#ifdef _WIN32
-#define DIR_SEPARATOR '\\'
-#else
-#define DIR_SEPARATOR '/'
-#endif
-#endif
 
 /* The number of predefined XCOFF types.  */
 
@@ -568,12 +562,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 
 	  f = info->so_string;
 
-	  if (   (string[0] == '/')
-	      || (string[0] == DIR_SEPARATOR)
-	      || (   (DIR_SEPARATOR == '\\')
-		  && (string[1] == ':')
-		  && (   (string[2] == DIR_SEPARATOR)
-		      || (string[2] == '/'))))
+          if (IS_ABSOLUTE_PATH (string))
 	    info->so_string = xstrdup (string);
 	  else
 	    info->so_string = concat (info->so_string, string,
@@ -706,6 +695,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
     case N_OBJ:
     case N_ENDM:
     case N_MAIN:
+    case N_WARNING:
       break;
     }
 

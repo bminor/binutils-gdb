@@ -1,3 +1,8 @@
+2001-01-24  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* stabs.c: Update copyright. Include "filenames.h".
+	(parse_stab): Use IS_ABSOLUTE_PATH. Ignore N_WARNING stabs.
+
 2001-01-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (process_version_sections): Check if VERDEF or VERNEED
