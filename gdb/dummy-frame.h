@@ -24,6 +24,8 @@
 
 struct frame_info;
 struct regcache;
+struct frame_id;
+struct frame_unwind_cache;
 
 /* GENERIC DUMMY FRAMES
   
@@ -46,7 +48,7 @@ struct regcache;
    previous frame.  */
 
 extern void dummy_frame_register_unwind (struct frame_info *frame,
-					 void **unwind_cache,
+					 struct frame_unwind_cache **unwind_cache,
 					 int regnum,
 					 int *optimized,
 					 enum lval_type *lvalp,
@@ -58,13 +60,14 @@ extern void dummy_frame_register_unwind (struct frame_info *frame,
    previous frame.  */
 
 extern CORE_ADDR dummy_frame_pc_unwind (struct frame_info *frame,
-					void **unwind_cache);
+					struct frame_unwind_cache **unwind_cache);
 
 /* Assuming that FRAME is a dummy, return the ID of the calling frame
    (the frame that the dummy has the saved state of).  */
 
-extern struct frame_id dummy_frame_id_unwind (struct frame_info *frame,
-					      void **unwind_cache);
+extern void dummy_frame_id_unwind (struct frame_info *frame,
+				   struct frame_unwind_cache **unwind_cache,
+				   struct frame_id *id);
 
 /* Does the PC fall in a dummy frame?
 

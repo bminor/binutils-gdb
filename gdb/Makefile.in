@@ -521,7 +521,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	objfiles.c osabi.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	regcache.c reggroups.c remote.c \
-	scm-exp.c scm-lang.c scm-valprint.c serial.c ser-unix.c source.c \
+	scm-exp.c scm-lang.c scm-valprint.c sentinel-frame.c \
+	serial.c ser-unix.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
 	target.c thread.c top.c tracepoint.c typeprint.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
@@ -678,6 +679,7 @@ remote_utils_h = remote-utils.h $(target_h)
 remote_h = remote.h
 scm_lang_h = scm-lang.h $(scm_tags_h)
 scm_tags_h = scm-tags.h
+sentinel_frame_h = sentinel-frame.h
 ser_unix_h = ser-unix.h
 serial_h = serial.h
 sh_tdep_h = sh-tdep.h
@@ -831,6 +833,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	ui-file.o \
 	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
+	sentinel-frame.o \
 	reggroups.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
@@ -1679,7 +1682,7 @@ fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(builtin_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(gdbcore_h) $(annotate_h) \
-	$(language_h)
+	$(language_h) $(sentinel_frame_h) $(ui_out_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
@@ -2110,6 +2113,8 @@ scm-lang.o: scm-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 scm-valprint.o: scm-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(value_h) \
 	$(scm_lang_h) $(valprint_h) $(gdbcore_h)
+sentinel-frame.o: sentinel-frame.c $(defs_h) $(regcache_h) \
+	$(sentinel_frame_h) $(inferior_h)
 ser-e7kpc.o: ser-e7kpc.c $(defs_h) $(serial_h) $(gdb_string_h)
 ser-go32.o: ser-go32.c $(defs_h) $(gdbcmd_h) $(serial_h) $(gdb_string_h)
 ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_unix_h) $(gdb_vfork_h) \

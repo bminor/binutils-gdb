@@ -1,3 +1,60 @@
+2003-01-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* sentinel-frame.c (sentinel_frame_register_unwind): Correctly set
+	LVALP and ADDRP.
+
+	* frame.c: Include "ui-out.h".
+
+2003-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (frame_type_from_pc): New function.
+	(create_new_frame): Use.
+	(set_unwind_by_pc): Drop unused frame parameter.
+	(deprecated_get_prev_frame): Rename old get_prev_frame.
+	(get_prev_frame): Rewrite.  Unwind the PC first.  Use
+	frame_id_unwind.
+
+2003-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* dummy-frame.h (dummy_frame_id_unwind): Update.
+	(dummy_frame_pc_unwind): Update.
+	(dummy_frame_register_unwind): Update.
+	* dummy-frame.c: Update.
+
+	* frame.c (create_new_frame): Set next to a sentinal frame.
+	(create_sentinel_frame): New function.
+	(frame_id_unwind): Update id_unwind call.
+	(frame_saved_regs_register_unwind): Update cache parameter.
+	(frame_saved_regs_pc_unwind): Update cache parameter.
+	(frame_saved_regs_id_unwind): Update cache and id parameters.
+
+	* frame.h (frame_id_unwind_ftype): Return the frame ID using a
+	reference parameter.
+	(struct frame_unwind_cache): Declare.
+	(frame_id_unwind_ftype, frame_pc_unwind_ftype,
+	frame_register_unwind_ftype): Change the unwind cache_type to
+	`struct frame_unwind_cache'.
+	(struct frame_info): Change type of unwind_cache to `struct
+	frame_unwind_cache'.
+
+	* frame.c (get_next_frame): Don't go beyond the inner-most frame.
+	(frame_register_unwind): Assume that there is always a next frame.
+	(frame_register): Ditto.
+	(generic_unwind_get_saved_register): Ditto.
+
+	* frame.h (frame_type): Add SENTINEL_FRAME.
+
+	* Makefile.in (frame.o): Update dependencies.
+
+	* frame.h (FRAME_OBSTACK_ZALLOC): Define.
+
+	* Makefile.in (sentinel-frame.o): Specify dependencies.
+	(sentinel_frame_h): Define.
+	(SFILES): Add sentinel-frame.c.
+	(COMMON_OBS): Add sentinel-frame.o.
+	* sentinel-frame.c: New file.
+	* sentinel-frame.h: New file.
+
 2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lin-lwp.c (child_wait): Ignore exit statuses for processes other

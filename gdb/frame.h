@@ -29,6 +29,9 @@ struct symtab_and_line;
 
 struct frame_info;
 
+/* The frame unwind cache object.  */
+struct frame_unwind_cache;
+
 /* The frame object's ID.  This provides a per-frame unique identifier
    that can be used to relocate a `struct frame_info' after a target
    resume or a frame cache destruct.  It of course assumes that the
@@ -229,7 +232,10 @@ enum frame_type
   DUMMY_FRAME,
   /* In a signal handler, various OSs handle this in various ways.
      The main thing is that the frame may be far from normal.  */
-  SIGTRAMP_FRAME
+  SIGTRAMP_FRAME,
+  /* The sentinel frame.  Marks the inner-most end of the chain of
+     frames.  */
+  SENTINEL_FRAME
 };
 extern enum frame_type get_frame_type (struct frame_info *);
 
@@ -318,7 +324,7 @@ extern struct frame_id frame_id_unwind (struct frame_info *frame);
    in the register "i1" in this FRAME.  */
 
 typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
-					    void **unwind_cache,
+					    struct frame_unwind_cache **unwind_cache,
 					    int regnum,
 					    int *optimized,
 					    enum lval_type *lvalp,
@@ -330,13 +336,14 @@ typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
    calling frame would resume.  */
 
 typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
-					   void **unwind_cache);
+					   struct frame_unwind_cache **unwind_cache);
 
 /* Same as for registers above, but return the ID of the frame that
    called this one.  */
 
-typedef struct frame_id (frame_id_unwind_ftype) (struct frame_info *frame,
-						 void **unwind_cache);
+typedef void (frame_id_unwind_ftype) (struct frame_info *frame,
+				      struct frame_unwind_cache **unwind_cache,
+				      struct frame_id *id);
 
 /* Describe the saved registers of a frame.  */
 
@@ -423,7 +430,7 @@ struct frame_info
 
     /* Unwind cache shared between the unwind functions - they had
        better all agree as to the contents.  */
-    void *unwind_cache;
+    struct frame_unwind_cache *unwind_cache;
 
     /* See description above.  The previous frame's registers.  */
     frame_register_unwind_ftype *register_unwind;
@@ -477,6 +484,7 @@ enum print_what
    allocate memory using this method.  */
 
 extern void *frame_obstack_zalloc (unsigned long size);
+#define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
 /* If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.  */
