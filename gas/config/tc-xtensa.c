@@ -5711,6 +5711,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg)
 	}
       break;
 
+    case BFD_RELOC_XTENSA_PLT:
     case BFD_RELOC_XTENSA_ASM_EXPAND:
     case BFD_RELOC_XTENSA_SLOT0_ALT:
     case BFD_RELOC_XTENSA_SLOT1_ALT:
