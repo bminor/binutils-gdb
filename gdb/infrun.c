@@ -2930,6 +2930,7 @@ static void
 step_over_function (struct execution_control_state *ecs)
 {
   struct symtab_and_line sr_sal;
+  struct frame_id sr_id;
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
@@ -2973,13 +2974,29 @@ step_over_function (struct execution_control_state *ecs)
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   check_for_old_step_resume_breakpoint ();
-  step_resume_breakpoint =
-    set_momentary_breakpoint (sr_sal, get_frame_id (get_current_frame ()),
-			      bp_step_resume);
 
   if (frame_id_p (step_frame_id)
       && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-    step_resume_breakpoint->frame_id = step_frame_id;
+    /* NOTE: cagney/2004-02-27: Use the global state's idea of the
+       stepping frame ID.  I suspect this is done as it is lighter
+       weight than a call to get_prev_frame.  */
+    sr_id = step_frame_id;
+  else if (legacy_frame_p (current_gdbarch))
+    /* NOTE: cagney/2004-02-27: This is the way it was 'cos this is
+       the way it always was.  It should be using the unwound (or
+       caller's) ID, and not this (or the callee's) ID.  It appeared
+       to work because: legacy architectures used the wrong end of the
+       frame for the ID.stack (inner-most rather than outer-most) so
+       that the callee's id.stack (un adjusted) matched the caller's
+       id.stack giving the "correct" id; more often than not
+       !IN_SOLIB_DYNSYM_RESOLVE_CODE and hence the code above (it was
+       originally later in the function) fixed the ID by using global
+       state.  */
+    sr_id = get_frame_id (get_current_frame ());
+  else
+    sr_id = get_frame_id (get_prev_frame (get_current_frame ()));
+
+  step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
 
   if (breakpoints_inserted)
     insert_breakpoints ();
