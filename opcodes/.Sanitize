@@ -65,7 +65,7 @@ m88k-dis.c
 mips-dis.c
 mips-opc.c
 mpw-config.in
-mpw-make.in
+mpw-make.sed
 ns32k-dis.c
 ppc-dis.c
 ppc-opc.c
