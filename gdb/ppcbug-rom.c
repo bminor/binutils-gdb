@@ -40,7 +40,6 @@ ppcbug_supply_register (regname, regnamelen, val, vallen)
   if (regnamelen < 2 || regnamelen > 4)
     return;
 
-  fprintf_unfiltered(stderr, "ppcbug_supply_register, %.*s = %.*s\n", regnamelen, regname, vallen, val);
   switch (regname[0])
     {
     case 'R':
@@ -134,7 +133,9 @@ static char *ppcbug_inits[] = {"\r", NULL};
 
 static struct monitor_ops ppcbug_cmds =
 {
-  MO_CLR_BREAK_USES_ADDR,
+				/* use read single because PPCBUG insists on emiting
+				   the word in character notation after the hex.  */
+  MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE,
   ppcbug_inits,			/* Init strings */
   "g\r",			/* continue command */
   "t\r",			/* single step */
@@ -153,10 +154,10 @@ static struct monitor_ops ppcbug_cmds =
     NULL,			/* setreg.term_cmd */
   },
   {
-    "md %x:%x;b\r",		/* getmem.cmdb (addr, len) */
-    "md %x:%x;b\r",		/* getmem.cmdw (addr, len) */
-    "md %x:%x;b\r",		/* getmem.cmdl (addr, len) */
-    NULL,			/* getmem.cmdll (addr, len) */
+    "md %x;b\r",		/* getmem.cmdb addr */
+    "md %x;h\r",		/* getmem.cmdw addr */
+    "md %x;w\r",		/* getmem.cmdl addr */
+    "md %x:2;w\r",		/* getmem.cmdll addr */
     " ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
