@@ -1,3 +1,9 @@
+Thu Jul 15 08:34:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stack.c (print_frame_info): When checking PC_IN_CALL_DUMMY,
+	pass the sp relative to the frame in question, not the sp in the
+	innermost frame.
+
 Wed Jul 14 17:37:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mipsread.c (parse_procedure): Take as argument the symtab to look
