@@ -1,5 +1,10 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* interps.c (interpreter_completer): Initialize alloced.
+	(struct gdb_interpreter): Reformat.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* interps.h (struct gdb_interpreter_procs): Remove do_one_event_proc.
 	(interp_do_one_event_ftype): Delete.
 	* interps.c (gdb_new_interpreter): Remove setup of do_one_event

@@ -42,18 +42,24 @@
 
 struct gdb_interpreter
 {
-  char *name;			/* This is the name in "-i=" and set interpreter. */
-  struct gdb_interpreter *next;	/* Interpreters are stored in a linked list, 
-				   this is the next one... */
-  void *data;			/* This is a cookie that the instance of the 
-				   interpreter can use, for instance to call 
-				   itself in hook functions */
-  int inited;			/* Has the init_proc been run? */
-  struct ui_out *interpreter_out;	/* This is the ui_out used to collect 
-					   results for this interpreter.  It can 
-					   be a formatter for stdout, as is the 
-					   case for the console & mi outputs, or it 
-					   might be a result formatter. */
+  /* This is the name in "-i=" and set interpreter. */
+  char *name;
+
+  /* Interpreters are stored in a linked list, this is the next one... */
+  struct gdb_interpreter *next;
+
+  /* This is a cookie that the instance of the interpreter can use, for
+     instance to call itself in hook functions */
+  void *data;
+
+  /* Has the init_proc been run? */
+  int inited;
+
+  /* This is the ui_out used to collect results for this interpreter.
+     It can be a formatter for stdout, as is the case for the console
+     & mi outputs, or it might be a result formatter. */
+  struct ui_out *interpreter_out;      
+
   struct gdb_interpreter_procs procs;
   int quiet_p;
 };
@@ -556,7 +562,8 @@ interpreter_exec_cmd (char *args, int from_tty)
 static char **
 interpreter_completer (char *text, char *word)
 {
-  int alloced, textlen;
+  int alloced = 0;
+  int textlen;
   int num_matches;
   char **matches;
   struct gdb_interpreter *interp;
