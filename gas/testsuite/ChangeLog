@@ -1,3 +1,10 @@
+2001-07-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	Fix failures in MIPS testsuite:
+	* gas/mips/abs.d: Pass -march=4000 to gas.
+	* gas/mips/eld_rel2.d: Do not expect zeroes at end of dump.
+	* gas/mips/elf_e_flags1.d: Pass -march=4000 to gas.
+
 2001-07-08  Anders Norlander <anorland@synergenix.se>
 
 	* gas/all/gas.exp: Run incbin test.

@@ -1,6 +1,7 @@
 # name: ELF e_flags: nothing special
 # source: elf_e_flags.s
 # objdump: -fd
+# as: -march=4000
 
 .*:.*file format.*mips.*
 architecture: mips:.*, flags 0x00000011:
