@@ -5,6 +5,11 @@ Tue Jan 27 13:32:01 1998  Robert Lipe  <robertl@dgii.com>
 	(i386-*-sco3.2*): New target.
 	* configure: Rebuild.
 
+Tue Jan 27 11:06:52 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c: Fix PRs 14721, 14722, 14723, tidying error
+	message production.
+
 Tue Jan 27 12:24:32 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Add new variable newimm to hold
