@@ -711,6 +711,9 @@ do
     m68ksysvcoff_vec)		tb="$tb coff-svm68k.lo cofflink.lo" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.lo" ;;
     m88kmach3_vec)		tb="$tb m88kmach3.lo aout32.lo" ;;
+    mach_o_be_vec)              tb="$tb mach-o.lo" ;;
+    mach_o_le_vec)              tb="$tb mach-o.lo" ;;
+    mach_o_fat_vec)             tb="$tb mach-o.lo" ;;
     mcore_pe_big_vec)		tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pe_little_vec)	tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pei_big_vec)		tb="$tb pei-mcore.lo peigen.lo cofflink.lo" ;;
@@ -725,6 +728,8 @@ do
     or32coff_big_vec)		tb="$tb coff-or32.lo cofflink.lo" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.lo aout-ns32k.lo" ;;
     pc532netbsd_vec)		tb="$tb ns32knetbsd.lo aout-ns32k.lo" ;;
+    pef_vec)                    tb="$tb pef.lo" ;;
+    pef_xlib_vec)               tb="$tb pef.lo" ;;
     pdp11_aout_vec)		tb="$tb pdp11.lo" ;;
     pmac_xcoff_vec)		tb="$tb coff-rs6000.lo xcofflink.lo" ;;
     ppcboot_vec)		tb="$tb ppcboot.lo" ;;
@@ -745,6 +750,7 @@ do
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.lo lynx-core.lo" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.lo aout32.lo" ;;
     sunos_big_vec)		tb="$tb sunos.lo aout32.lo" ;;
+    sym_vec)                    tb="$tb xsym.lo" ;;
     tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
     tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
     tic4x_coff0_vec)            tb="$tb coff-tic4x.lo" ;;

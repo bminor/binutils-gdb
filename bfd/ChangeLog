@@ -1,5 +1,30 @@
 2002-11-18  Klee Dienes  <kdienes@apple.com>
 
+	* Makefile.am (BFD32_LIBS): Add bfdwin.lo, bfdio.lo.
+	(BFD32_LIBS_CFILES): Add bfdwin.c, bfdio.c.
+	(BFD_H_FILES): Add bfdwin.c, bfdio.c.
+	(LIBBFD_H_FILES): Add bfdwin.c, bfdio.c.
+	Add dependencies for bfdwin.c, bfdio.c.
+	* bfd.c: Remove bfd_get_mtime, bfd_get_size.
+	* libbfd.c: Remove real_read, bfd_bread, _bfd_window_internal,
+	bfd_init_window, bfd_free_window, bfd_get_file_window, bfd_bwrite,
+	bfd_tell, bfd_flush, bfd_stat, bfd_seek.
+	* bfdio.c: New file.  Contains real_read, bfd_bread, bfd_write,
+	bfd_tell, bfd_flush, bfd_stat, bfd_seek, bfd_ge_mtime,
+	bfd_get_size (moved from libbfd.c and bfd.c).
+	* bfdwin.c New file.  Contains _bfd_window_internal,
+	bfd_init_window, bfd_free_window, bfd_get_file_window (moved from
+	libbfd.c and bfd.c).
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* aclocal.m4: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
 	* bfd.c (bfd_preserve_save): Don't zero BFD_IN_MEMORY.
 
 2002-11-15  Kazu Hirata  <kazu@cs.umass.edu>

@@ -1,6 +1,6 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "libbfd-in.h", "init.c", "libbfd.c", "cache.c", 
-   "reloc.c", "archures.c" and "elf.c".
+   generated from "libbfd-in.h", "init.c", "libbfd.c", "bfdio.c", 
+   "bfdwin.c", "cache.c", "reloc.c", "archures.c" and "elf.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.
@@ -609,6 +609,15 @@ bfd_write_bigendian_4byte_int PARAMS ((bfd *, unsigned int));
 unsigned int
 bfd_log2 PARAMS ((bfd_vma x));
 
+/* Extracted from bfdio.c.  */
+/* Extracted from bfdwin.c.  */
+struct _bfd_window_internal {
+  struct _bfd_window_internal *next;
+  PTR data;
+  bfd_size_type size;
+  int refcount : 31;           /* should be enough...  */
+  unsigned mapped : 1;         /* 1 = mmap, 0 = malloc */
+};
 /* Extracted from cache.c.  */
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;

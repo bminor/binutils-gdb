@@ -1,7 +1,8 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
    generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
-   "section.c", "archures.c", "reloc.c", "syms.c", "bfd.c", "archive.c", 
-   "corefile.c", "targets.c", "format.c", "linker.c" and "simple.c".
+   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
+   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
+   "linker.c" and "simple.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -993,6 +994,14 @@ bfd_make_readable PARAMS ((bfd *abfd));
 #define H_GET_S8 bfd_h_get_signed_8
 
 
+/* Extracted from bfdio.c.  */
+long
+bfd_get_mtime PARAMS ((bfd *abfd));
+
+long
+bfd_get_size PARAMS ((bfd *abfd));
+
+/* Extracted from bfdwin.c.  */
 /* Extracted from section.c.  */
 /* This structure is used for a comdat section, as in PE.  A comdat
    section is associated with a particular symbol.  When the linker
@@ -3626,12 +3635,6 @@ bfd_get_sign_extend_vma PARAMS ((bfd *abfd));
 
 boolean
 bfd_set_start_address PARAMS ((bfd *abfd, bfd_vma vma));
-
-long
-bfd_get_mtime PARAMS ((bfd *abfd));
-
-long
-bfd_get_size PARAMS ((bfd *abfd));
 
 unsigned int
 bfd_get_gp_size PARAMS ((bfd *abfd));
