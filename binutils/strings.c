@@ -509,6 +509,6 @@ Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
 	   program_name);
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (stream, REPORT_BUGS_TO);
   exit (status);
 }

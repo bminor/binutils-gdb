@@ -80,7 +80,7 @@ Usage: %s [-CfsHV] [-b bfdname] [--target=bfdname]\n\
 	   program_name);
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (stream, REPORT_BUGS_TO);
   exit (status);
 }
 

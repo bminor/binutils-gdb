@@ -45,6 +45,8 @@
 # define N_(String) (String)
 #endif
 
+#include "bin-bugs.h"
+
 /* Look in this environment name for the linker to pretend to be */
 #define EMULATION_ENVIRON "LDEMULATION"
 /* If in there look for the strings: */

@@ -1162,6 +1162,6 @@ help ()
   printf (_("%s: emulation specific options:\n"), program_name);
   ldemul_list_emulation_options (stdout);
   printf ("\n");
-  
-  printf (_("\nReport bugs to bug-gnu-utils@gnu.org\n"));
+
+  printf (REPORT_BUGS_TO);
 }

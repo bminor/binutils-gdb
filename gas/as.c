@@ -322,7 +322,8 @@ Options:\n\
 
   md_show_usage (stream);
 
-  fprintf (stream, _("\nReport bugs to bug-gnu-utils@gnu.org\n"));
+  fputc ('\n', stream);
+  fprintf (stream, REPORT_BUGS_TO);
 }
 
 /*

@@ -255,6 +255,8 @@ static char *target = NULL;
 static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
+#define OPTION_TARGET 200
+
 static struct option long_options[] =
 {
   {"debug-syms", no_argument, &print_debug_syms, 1},
@@ -275,7 +277,7 @@ static struct option long_options[] =
   {"reverse-sort", no_argument, &reverse_sort, 1},
   {"size-sort", no_argument, &sort_by_size, 1},
   {"stats", no_argument, &show_stats, 1},
-  {"target", required_argument, 0, 200},
+  {"target", required_argument, 0, OPTION_TARGET},
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
   {"version", no_argument, &show_version, 1},
@@ -301,7 +303,7 @@ Usage: %s [-aABCDglnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n\
 	   program_name);
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (stream, REPORT_BUGS_TO);
   exit (status);
 }
 
@@ -448,7 +450,7 @@ main (argc, argv)
 	  show_version = 1;
 	  break;
 
-	case 200:		/* --target */
+	case OPTION_TARGET:	/* --target */
 	  target = optarg;
 	  break;
 

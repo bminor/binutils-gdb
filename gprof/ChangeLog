@@ -1,7 +1,12 @@
+2000-04-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* gprof.h: #include "bin-bugs.h".
+	* gprof.c (usage): Use REPORT_BUGS_TO.
+
 2000-03-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* symtab.c (symtab_finalize): Don't use post-increment on
-	structure copy to work around a ppc gcc bug.
+	structure copy, to work around a ppc gcc bug.
 
 1999-09-29  Mark Kettenis  <kettenis@gnu.org>
 

@@ -1700,7 +1700,7 @@ usage ()
   fprintf (stdout, _("  -I or --histogram         Display histogram of bucket list lengths\n"));
   fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
   fprintf (stdout, _("  -H or --help              Display this information\n"));
-  fprintf (stdout, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+  fprintf (stdout, REPORT_BUGS_TO);
 
   exit (0);
 }

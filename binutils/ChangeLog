@@ -1,3 +1,21 @@
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
+
+	* bucomm.h: #include "bin-bugs.h"
+	* addr2line.c (usage): Use REPORT_BUGS_TO.
+	* ar.c (usage): Likewise.
+	* nlmconv.c (show_usage): Likewise.
+	* nm.c (usage): Likewise.
+	(OPTION_TARGET): Define.
+	(long_options): Use OPTION_TARGET rather than 200.
+	(main): Likewise.
+
+	* objcopy.c (copy_usage): Likewise.
+	(strip_usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+
 2000-03-31  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* readelf.c: Include sys/types.h before sys/stat.h for ultrix.
@@ -7,7 +25,7 @@
 	* rddbg.c (read_section_stabs_debugging_info): Catch out of range
 	string offsets in corrupt stabs entries.
 
-2000-03-27  Alan Modra  <alan@linuxcare.com>
+2000-03-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* readelf.c: Include elf/avr.h
 	(dump_relocations): Add EM_AVR case.

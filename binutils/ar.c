@@ -283,7 +283,7 @@ usage (help)
   list_supported_targets (program_name, stderr);
 
   if (help)
-    fprintf (s, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (s, REPORT_BUGS_TO);
 
   xexit (help ? 0 : 1);
 }

@@ -50,6 +50,7 @@ suitable for gas to consume.
 */
 
 #include "config.h"
+#include "bin-bugs.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -3550,7 +3551,7 @@ Usage: %s \n\
   [-Ipath]                        add to include path list\n\
   [in-file]\n"));
   if (status == 0)
-    printf (_("\nReport bugs to bug-gnu-utils@gnu.org\n"));
+    printf (REPORT_BUGS_TO);
   exit (status);
 }
 
