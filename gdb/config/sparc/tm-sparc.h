@@ -657,7 +657,6 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 /* Call dummy method (eg. on stack, at entry point, etc.) */
 
 #define CALL_DUMMY_LOCATION ON_STACK
-#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 
 /* Method for detecting dummy frames.  */
 
