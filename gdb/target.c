@@ -73,14 +73,11 @@ static void nosupport_runtime (void);
 
 static void normal_target_post_startup_inferior (ptid_t ptid);
 
-static LONGEST default_read_partial (struct target_ops *ops,
+static LONGEST default_xfer_partial (struct target_ops *ops,
 				     enum target_object object,
-				     const char *annex, void *buf,
-				     ULONGEST offset, LONGEST len);
-static LONGEST default_write_partial (struct target_ops *ops,
-				      enum target_object object,
-				      const char *annex, const void *buf,
-				      ULONGEST offset, LONGEST len);
+				     const char *annex, const void *writebuf,
+				     void *readbuf, ULONGEST offset,
+				     LONGEST len);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -223,8 +220,7 @@ void
 add_target (struct target_ops *t)
 {
   /* Provide default values for all "must have" methods.  */
-  t->to_read_partial = default_read_partial;
-  t->to_write_partial = default_write_partial;
+  t->to_xfer_partial = default_xfer_partial;
 
   if (!target_structs)
     {
@@ -433,8 +429,7 @@ update_current_target (void)
       INHERIT (to_pid_to_str, t);
       INHERIT (to_extra_thread_info, t);
       INHERIT (to_stop, t);
-      /* Do not inherit to_read_partial.  */
-      /* Do not inherit to_write_partial.  */
+      /* Do not inherit to_xfer_partial.  */
       INHERIT (to_rcmd, t);
       INHERIT (to_enable_exception_callback, t);
       INHERIT (to_get_current_exception_event, t);
@@ -616,8 +611,7 @@ update_current_target (void)
   de_fault (to_stop, 
 	    (void (*) (void)) 
 	    target_ignore);
-  current_target.to_read_partial = default_read_partial;
-  current_target.to_write_partial = default_write_partial;
+  current_target.to_xfer_partial = default_xfer_partial;
   de_fault (to_rcmd, 
 	    (void (*) (char *, struct ui_file *)) 
 	    tcomplain);
@@ -1079,55 +1073,30 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 /* More generic transfers.  */
 
 static LONGEST
-default_read_partial (struct target_ops *ops,
+default_xfer_partial (struct target_ops *ops,
 		      enum target_object object,
-		      const char *annex, void *buf,
-		      ULONGEST offset, LONGEST len)
+		      const char *annex, const void *writebuf,
+		      void *readbuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->to_xfer_memory != NULL)
     /* If available, fall back to the target's "to_xfer_memory"
        method.  */
     {
-      int xfered;
+      int xfered = -1;
       errno = 0;
-      xfered = ops->to_xfer_memory (offset, buf, len, 0/*read*/, NULL, ops);
-      if (xfered > 0)
-	return xfered;
-      else if (xfered == 0 && errno == 0)
-	/* "to_xfer_memory" uses 0, cross checked against ERRNO as one
-           indication of an error.  */
-	return 0;
-      else
-	return -1;
-    }
-  else if (ops->beneath != NULL)
-    return target_read_partial (ops->beneath, object, annex, buf, offset, len);
-  else
-    return -1;
-}
-
-static LONGEST
-default_write_partial (struct target_ops *ops,
-		       enum target_object object,
-		       const char *annex, const void *buf,
-		       ULONGEST offset, LONGEST len)
-{
-  if (object == TARGET_OBJECT_MEMORY
-      && ops->to_xfer_memory != NULL)
-    /* If available, fall back to the target's "to_xfer_memory"
-       method.  */
-    {
-      int xfered;
-      errno = 0;
-      {
-	void *buffer = xmalloc (len);
-	struct cleanup *cleanup = make_cleanup (xfree, buffer);
-	memcpy (buffer, buf, len);
-	xfered = ops->to_xfer_memory (offset, buffer, len, 1/*write*/, NULL,
+      if (writebuf != NULL)
+	{
+	  void *buffer = xmalloc (len);
+	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
+	  memcpy (buffer, writebuf, len);
+	  xfered = ops->to_xfer_memory (offset, buffer, len, 1/*write*/, NULL,
+					ops);
+	  do_cleanups (cleanup);
+	}
+      if (readbuf != NULL)
+	xfered = ops->to_xfer_memory (offset, readbuf, len, 0/*read*/, NULL,
 				      ops);
-	do_cleanups (cleanup);
-      }
       if (xfered > 0)
 	return xfered;
       else if (xfered == 0 && errno == 0)
@@ -1138,8 +1107,8 @@ default_write_partial (struct target_ops *ops,
 	return -1;
     }
   else if (ops->beneath != NULL)
-    return target_write_partial (ops->beneath, object, annex, buf, offset,
-				 len);
+    return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					  writebuf, readbuf, offset, len);
   else
     return -1;
 }
@@ -1156,8 +1125,8 @@ target_read_partial (struct target_ops *ops,
 		     const char *annex, void *buf,
 		     ULONGEST offset, LONGEST len)
 {
-  gdb_assert (ops->to_read_partial != NULL);
-  return ops->to_read_partial (ops, object, annex, buf, offset, len);
+  gdb_assert (ops->to_xfer_partial != NULL);
+  return ops->to_xfer_partial (ops, object, annex, NULL, buf, offset, len);
 }
 
 LONGEST
@@ -1166,8 +1135,8 @@ target_write_partial (struct target_ops *ops,
 		      const char *annex, const void *buf,
 		      ULONGEST offset, LONGEST len)
 {
-  gdb_assert (ops->to_write_partial != NULL);
-  return ops->to_write_partial (ops, object, annex, buf, offset, len);
+  gdb_assert (ops->to_xfer_partial != NULL);
+  return ops->to_xfer_partial (ops, object, annex, buf, NULL, offset, len);
 }
 
 /* Wrappers to perform the full transfer.  */
@@ -2318,40 +2287,20 @@ debug_to_stop (void)
 }
 
 static LONGEST
-debug_to_read_partial (struct target_ops *ops,
+debug_to_xfer_partial (struct target_ops *ops,
 		       enum target_object object,
-		       const char *annex, void *buf,
-		       ULONGEST offset, LONGEST len)
+		       const char *annex, const void *writebuf,
+		       void *readbuf, ULONGEST offset, LONGEST len)
 {
   LONGEST retval;
 
-  retval = target_read_partial (&debug_target, object, annex, buf, offset,
-				len);
+  retval = debug_target.to_xfer_partial (&debug_target, object, annex,
+					 writebuf, readbuf, offset, len);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_read_partial (%d, %s, 0x%lx,  0x%s, %s) = %s\n",
+		      "target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  0x%s, %s) = %s\n",
 		      (int) object, (annex ? annex : "(null)"),
-		      (long) buf, paddr_nz (offset),
-		      paddr_d (len), paddr_d (retval));
-
-  return retval;
-}
-
-static LONGEST
-debug_to_write_partial (struct target_ops *ops,
-			enum target_object object,
-			const char *annex, const void *buf,
-			ULONGEST offset, LONGEST len)
-{
-  LONGEST retval;
-
-  retval = target_write_partial (&debug_target, object, annex, buf, offset,
-				len);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_write_partial (%d, %s, 0x%lx,  0x%s, %s) = %s\n",
-		      (int) object, (annex ? annex : "(null)"),
-		      (long) buf, paddr_nz (offset),
+		      (long) writebuf, (long) readbuf, paddr_nz (offset),
 		      paddr_d (len), paddr_d (retval));
 
   return retval;
@@ -2454,8 +2403,7 @@ setup_target_debug (void)
   current_target.to_thread_alive = debug_to_thread_alive;
   current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
-  current_target.to_read_partial = debug_to_read_partial;
-  current_target.to_write_partial = debug_to_write_partial;
+  current_target.to_xfer_partial = debug_to_xfer_partial;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;

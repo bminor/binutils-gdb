@@ -211,10 +211,10 @@ enum target_signal target_signal_from_name (char *);
    to locally take responsibility for something it didn't have to
    worry about.
 
-   NOTE: cagney/2003-10-17: For backward compatibility with the
-   "target_query" method that this replaced, when BUF, OFFSET and LEN
-   are NULL/zero, return the "minimum" buffer size.  See "remote.c"
-   for further information.  */
+   NOTE: cagney/2003-10-17: With a TARGET_OBJECT_KOD object, for
+   backward compatibility with the "target_query" method that this
+   replaced, when OFFSET and LEN are both zero, return the "minimum"
+   buffer size.  See "remote.c" for further information.  */
 
 enum target_object
 {
@@ -404,15 +404,13 @@ struct target_ops
 					      struct objfile *objfile,
 					      CORE_ADDR offset);
 
-    /* See above.  */
-    LONGEST (*to_read_partial) (struct target_ops *ops,
+    /* Perform partial transfers on OBJECT.  See target_read_partial
+       and target_write_partial for details of each variant.  One, and
+       only one, of readbuf or writebuf must be non-NULL.  */
+    LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object,
-				const char *annex, void *buf, 
-				ULONGEST offset, LONGEST len);
-    LONGEST (*to_write_partial) (struct target_ops *ops,
-				 enum target_object object,
-				 const char *annex, const void *buf,
-				 ULONGEST offset, LONGEST len);
+				const char *annex, const void *writebuf,
+				void *readbuf, ULONGEST offset, LONGEST len);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?

@@ -1,3 +1,20 @@
+2003-10-31  Andrew Cagney  <cagney@redhat.com>
+
+	* target.h (struct target_ops): Replace "to_read_partial" and
+	"to_write_partial" with "to_xfer_partial".  Update comments.
+	* target.c (debug_to_write_partial): Delete function.
+	(debug_to_xfer_partial): Replace debug_to_read_partial.
+	(add_target, update_current_target, setup_target_debug): Set
+	"to_xfer_partial" instead of "to_read_partial" and
+	"to_write_partial".
+	(default_xfer_partial): Replace "default_write_partial".
+	(default_read_partial): Delete.
+	(target_read_partial, target_write_partial): Call
+	"to_xfer_partial".
+	* remote.c (init_remote_ops): Set "to_xfer_partial".
+	(init_remote_async_ops): Ditto.
+	(remote_xfer_partial): Replace "remote_read_partial".
+
 2003-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_supply_fpregset): Support floating-point

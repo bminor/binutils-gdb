@@ -5102,8 +5102,8 @@ the loaded file\n");
 }
 
 static LONGEST
-remote_read_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, void *buf,
+remote_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, const void *writebuf, void *readbuf,
 		     ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
@@ -5111,6 +5111,10 @@ remote_read_partial (struct target_ops *ops, enum target_object object,
   char *buf2 = alloca (rs->remote_packet_size);
   char *p2 = &buf2[0];
   char query_type;
+
+  /* Only handle reads.  */
+  if (writebuf != NULL || readbuf == NULL)
+    return -1;
 
   /* Map pre-existing objects onto letters.  DO NOT do this for new
      objects!!!  Instead specify new query packets.  */
@@ -5126,9 +5130,9 @@ remote_read_partial (struct target_ops *ops, enum target_object object,
       return -1;
     }
 
-  /* Note: a zero BUF, OFFSET and LEN can be used to query the minimum
+  /* Note: a zero OFFSET and LEN can be used to query the minimum
      buffer size.  */
-  if (buf == NULL && offset == 0 && len == 0)
+  if (offset == 0 && len == 0)
     return (rs->remote_packet_size);
   /* Minimum outbuf size is (rs->remote_packet_size) - if bufsiz is
      not large enough let the caller.  */
@@ -5141,7 +5145,7 @@ remote_read_partial (struct target_ops *ops, enum target_object object,
     error ("remote query is only available after target open");
 
   gdb_assert (annex != NULL);
-  gdb_assert (buf != NULL);
+  gdb_assert (readbuf != NULL);
 
   *p2++ = 'q';
   *p2++ = query_type;
@@ -5165,9 +5169,9 @@ remote_read_partial (struct target_ops *ops, enum target_object object,
   if (i < 0)
     return i;
 
-  getpkt (buf, len, 0);
+  getpkt (readbuf, len, 0);
 
-  return strlen (buf);
+  return strlen (readbuf);
 }
 
 static void
@@ -5445,7 +5449,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_stop = remote_stop;
-  remote_ops.to_read_partial = remote_read_partial;
+  remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
@@ -5965,7 +5969,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_pid_to_str = remote_pid_to_str;
   remote_async_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_async_ops.to_stop = remote_stop;
-  remote_async_ops.to_read_partial = remote_read_partial;
+  remote_async_ops.to_xfer_partial = remote_xfer_partial;
   remote_async_ops.to_rcmd = remote_rcmd;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;
