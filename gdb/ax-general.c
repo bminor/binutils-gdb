@@ -62,6 +62,18 @@ free_agent_expr (x)
   free (x);
 }
 
+static void
+do_free_agent_expr_cleanup (void *x)
+{
+  free_agent_expr (x);
+}
+
+struct cleanup *
+make_cleanup_free_agent_expr (struct agent_expr *x)
+{
+  return make_cleanup (do_free_agent_expr_cleanup, x);
+}
+
 
 /* Make sure that X has room for at least N more bytes.  This doesn't
    affect the length, just the allocated size.  */

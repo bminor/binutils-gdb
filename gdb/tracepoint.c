@@ -999,7 +999,7 @@ validate_actionline (line, t)
 	  /* we have something to collect, make sure that the expr to
 	     bytecode translator can handle it and that it's not too long */
 	  aexpr = gen_trace_for_expr (t->address, exp);
-	  (void) make_cleanup ((make_cleanup_func) free_agent_expr, aexpr);
+	  make_cleanup_free_agent_expr (aexpr);
 
 	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
 	    error ("expression too complicated, try simplifying");
@@ -1617,8 +1617,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 		    default:	/* full-fledged expression */
 		      aexpr = gen_trace_for_expr (t->address, exp);
 
-		      old_chain1 = make_cleanup ((make_cleanup_func)
-						 free_agent_expr, aexpr);
+		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		      ax_reqs (aexpr, &areqs);
 		      if (areqs.flaw != agent_flaw_none)

@@ -1,3 +1,13 @@
+Mon May 15 16:05:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ax.h (make_cleanup_free_agent_expr): Add declaration.
+	* ax-general.c (do_free_agent_expr_cleanup): 
+	(make_cleanup_free_agent_expr): New functions.
+
+	* tracepoint.c (validate_actionline, encode_actions), ax-gdb.c
+ 	(expr_to_agent, gen_trace_for_expr, agent_command): Replace calls
+ 	to make_cleanup.
+
 Mon May 15 14:06:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* breakpoint.h (make_cleanup_delete_breakpoint,
