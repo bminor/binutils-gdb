@@ -53,7 +53,7 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=cygnus-2.3.1
+VERSION=cygnus-2.4.90
 
 SHELL = /bin/sh
 
@@ -240,6 +240,9 @@ VMS_OTHER_OBJS = \
 	../libiberty/obstack.o \
 	../libiberty/strdup.o \
 	../libiberty/strncasecmp.o \
+	../libiberty/concat.o \
+	../libiberty/getopt.o \
+	../libiberty/getopt1.o \
 	../libiberty/getruntime.o
 
 all: as.new gasp.new
