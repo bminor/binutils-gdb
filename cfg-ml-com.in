@@ -12,6 +12,26 @@
 # It is advisable to support a few --enable/--disable options to let the
 # user select which libraries s/he really wants.
 #
+# Subdirectories wishing to use multilib should put the following lines
+# in the initial ("common") section of configure.in:
+#
+#if [ -n "${with_multilib_top}" ]; then
+#	. ${with_multilib_top}/../cfg-ml-com.in
+#else
+#	. ${srcdir}/../cfg-ml-com.in
+#fi
+#
+# `with_multilib_top' exists to handle the case of configuring in the source
+# tree: ${srcdir} is not constant.
+#
+# The following should be added to the "post-target" section of configure.in:
+#
+#if [ -n "${with_multilib_top}" ]; then
+#	. ${with_multilib_top}/../cfg-ml-pos.in
+#else
+#	. ${srcdir}/../cfg-ml-pos.in
+#fi
+
 # FIXME: Multilib is currently disabled by default for everything other than
 # newlib.  It is up to each target to turn on multilib support for the other
 # libraries as desired.
@@ -67,7 +87,7 @@ arc-*-*)
 hppa*-*-*)
 	multidirs="soft-float"
 	;;
-m68*-*-*)
+m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-vxworks*)
 	multidirs="m68000 m68020 m68881 msoft-float m68000/m68881 m68000/msoft-float m68020/m68881 m68020/msoft-float"
 	;;
 i960-*-*)
@@ -371,6 +391,7 @@ EOF
        ${dotdot}tmpconfig ${dotdot} ". .. CVS tmpconfig ${multidirs}")
       rm -f tmpconfig
       srcdiroption=
+      multilib_top=${dotdot}
       ;;
     *)
       case "${srcdir}" in
@@ -382,6 +403,7 @@ EOF
         ;;
       esac
       srcdiroption="-srcdir=${newsrcdir}"
+      multilib_top=${newsrcdir}
       ;;
     esac
 
@@ -393,7 +415,7 @@ EOF
     POPDIR=${PWD=`pwd`}
     cd ${dir}
     if eval ${config_shell} ${recprog} ${verbose} \
-	--with-multisubdir=${dir} \
+	--with-multisubdir=${dir} --with-multilib-top=${multilib_top} \
 	${buildopt} --host=${host_alias} --target=${target_alias} \
         ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
         ${srcdiroption} ${program_prefixoption} ${program_suffixoption} \

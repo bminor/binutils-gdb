@@ -1,3 +1,9 @@
+Fri Sep 22 12:15:42 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* cfg-ml-com.in (m68*-*-*): Only build multilibs for
+	embedded m68k systems (-aout, -coff, -elf, -vxworks).
+	(--with-multilib-top): Pass to recursive invocations.
+
 Tue Sep 19 13:51:05 1995  J.T. Conklin  <jtc@blues.cygnus.com>
 
 	* configure.in (noconfigdirs): Disable libg++ and libstdc++ on
