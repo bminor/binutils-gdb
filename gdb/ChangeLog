@@ -1,3 +1,15 @@
+2002-05-04  Aidan Skinner <aidan@velvet.net>
+
+	* ada-exp.tab.c: New file
+	* ada-exp.y: New file
+	* ada-lang.c: New file
+	* ada-lang.h: New file
+	* ada-lex.c: New file
+	* ada-lex.l: New file
+	* ada-tasks.c: New file
+	* ada-typeprint.c: New file
+	* ada-valprint.c: New file
+	
 2002-06-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Don't set
