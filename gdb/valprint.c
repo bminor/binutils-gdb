@@ -29,7 +29,6 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
-#include "obstack.h"
 #include "language.h"
 #include "annotate.h"
 #include "valprint.h"

@@ -211,7 +211,9 @@ SUBDIR_TUI_UNINSTALL=
 # in INCLUDE_DIR.
 # Where is the "-lopcodes" library, with (some of) the opcode tables and
 # disassemblers?
-OPCODES = ../opcodes/libopcodes.a
+OPCODES_DIR = ../opcodes
+OPCODES_SRC = $(srcdir)/$(OPCODES_DIR)
+OPCODES = $(OPCODES_DIR)/libopcodes.a
 # Where are the other opcode tables which only have header file
 # versions?
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
@@ -570,11 +572,16 @@ floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
 callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
+elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
+elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
-sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
-sim_d10v_h =	$(INCLUDE_DIR)/gdb/sim-d10v.h
+opcode_m68hc11_h = $(INCLUDE_DIR)/opcode/m68hc11.h
+sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
+gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
+gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
+gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
 readline_headers = \
@@ -1403,11 +1410,10 @@ cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
 
-d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(obstack_h) $(symtab_h) \
-	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
-	$(inferior_h) $(dis-asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
-	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h) \
-	$(sim_regno_h)
+d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
+	$(dis_asm_h) $(symfile_h) $(objfiles_h) $(language_h) $(arch_utils_h) \
+	$(regcache_h) $(floatformat_h) $(sim_d10v_h) $(sim_regno_h)
 
 dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
 	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
@@ -1570,9 +1576,9 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/v850ice.c
 
-v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(obstack_h) \
-	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
-	$(symfile_h) $(arch_utils_h) $(regcache_h)
+v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
+	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
+	$(arch_utils_h) $(regcache_h) $(symtab_h)
 
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) $(target_h) \
@@ -1608,11 +1614,12 @@ gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 
 gnu-v3-abi.o: gnu-v2-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h)
  
-h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(regcache_h)
+h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(dis_asm_h) \
+	$(gdbcmd_h) $(gdbtypes_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
+	$(regcache_h)
 
-h8500-tdep.o: h8500-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h) \
-	$(expression_h) $(frame_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) \
-	$(value_h) $(regcache_h)
+h8500-tdep.o: h8500-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
+	$(gdbcmd_h) $(value_h) $(dis_asm_h) $(gdbcore_h) $(regcache_h)
 
 hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
@@ -1750,6 +1757,10 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 m3-nat.o: m3-nat.c $(defs_h) $(inferior_h) $(value_h) $(language_h) \
 	$(target_h) $(gdb_wait_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h)
 
+m32r-tdep.o: m32r-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
+	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
+	$(regcache_h)
+
 p-lang.o: p-lang.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(gdb_string_h)
 
@@ -1760,8 +1771,10 @@ p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
 p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(gdb_string_h)
 
-m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
-	$(gdbcore_h) $(gdb_string_h)
+m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
+	$(dis_asm_h) $(symfile_h) $(objfiles_h) $(arch_utils_h) $(regcache_h) \
+	$(target_h) $(opcode_m68hc11_h)
 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) $(gdb_string_h) $(regcache_h)
@@ -1839,9 +1852,13 @@ mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(value_h) osabi.h solib-svr4.h mipsnbsd-tdep.h
 
-mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
-	$(obstack_h) $(target_h) $(value_h) $(bfd_h) $(gdb_string_h) \
-	$(gdbcore_h) $(symfile_h) $(regcache_h) $(arch-utils.h)
+mn10200-tdep.o: mn10200-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
+	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
+	$(regcache_h)
+
+mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
+	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
+	$(regcache_h) $(arch_utils_h)
 
 monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(gdb_string_h) \
@@ -2076,10 +2093,11 @@ ser-unix.o: ser-unix.c $(defs_h) $(serial_h) $(ser_unix_h)
 
 serial.o: serial.c $(defs_h) $(serial_h) $(gdb_string_h)
 
-sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
-	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h) \
-	$(regcache_h) $(doublest_h) $(sh_tdep_h)
+sh-tdep.o: sh-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(symfile_h) \
+	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) \
+	$(inferior_h) $(gdb_string_h) $(arch_utils_h) $(floatformat_h) \
+	$(regcache_h) $(doublest_h) $(sh_tdep_h) $(elf_bfd_h) $(solib_svr4_h) \
+	$(elf_sh_h) $(gdb_sim_sh_h)
 
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(value_h) $(sh_tdep_h) solib-svr4.h shnbsd-tdep.h nbsd-tdep.h
@@ -2121,9 +2139,9 @@ sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h)
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(target_h) $(regcache_h)
 
-sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) \
-	$(arch_utils_h) $(regcache_h) osabi.h
+sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
+	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(regcache_h) \
+	$(osabi_h) $(gregset_h) $(gdbcore_h) $(symfile_h)
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(target_h) $(regcache_h)
 
@@ -2225,9 +2243,10 @@ valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(regcache_h) $(cp_abi_h) $(gdb_assert_h)
 
-valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) $(target_h) \
-	$(value_h) $(gdb_string_h) $(valprint_h) $(doublest_h)
+valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
+	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(obstack_h) \
+	$(language_h) $(annotate_h) $(valprint_h) $(floatformat_h) \
+	$(doublest_h)
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) $(target_h) $(value_h) \
@@ -2274,9 +2293,8 @@ xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) $(xcoffsolib_h) $(inferior_h) \
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.
 # cagney 1999-09-02.
-z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(gdbcore_h) $(value_h) \
-	$(regcache_h)
+z8k-tdep.o: z8k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcmd_h) \
+	$(gdbtypes_h) $(dis_asm_h) $(gdbcore_h) $(regcache_h)
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
 		$(srcdir)/z8k-tdep.c
 

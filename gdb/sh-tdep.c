@@ -26,7 +26,6 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "gdbtypes.h"

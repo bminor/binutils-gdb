@@ -1,3 +1,26 @@
+2002-07-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* z8k-tdep.c: Do not include "obstack.h".
+	* h8300-tdep.c, h8500-tdep.c: Ditto.
+	* m68hc11-tdep.c, sh-tdep.c: Ditto.
+	* valprint.c, v850-tdep.c: Ditto.
+	* d10v-tdep.c, mn10300-tdep.c: Ditto.
+	* mn10200-tdep.c: Ditto.
+
+	* Makefile.in (z8k-tdep.o): Update dependencies.
+	(m68hc11-tdep.o, valprint.o): Ditto.
+	(v850-tdep.o, d10v-tdep.o): Ditto.
+	(mn10300-tdep.o, sparc-tdep.o): Ditto.
+	(sh-tdep.o, h8500-tdep.o, h8300-tdep.o): Ditto.
+	(m32r-tdep.o, mn10200-tdep.o): Specify dependencies.
+	(sh_opc_h, gdb_sim_sh_h): Define.
+	(elf_sh_h, elf_bfd_h): Define.
+	(opcode_m68hc11_h): Define.
+	(OPCODES_SRC, OPCODES_DIR): define.
+	(OPCODES): Use $(OPCODES_DIR).
+	(gdb_sim_d10v_h): Rename sim_d10v_h.
+	(gdb_sim_arm_h): Rename sim_arm_h.
+
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* utils.c (host_pointer_to_address, address_to_host_pointer):
