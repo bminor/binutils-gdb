@@ -358,7 +358,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	  {
 	    /* Entire transfer is within this section.  */
 	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr, memaddr - p->addr, len);
-	    return (res != false)? len: 0;
+	    return (res != 0) ? len : 0;
 	  }
 	else if (p->endaddr <= memaddr)
 	  {
@@ -370,7 +370,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	    /* This section overlaps the transfer.  Just do half.  */
 	    len = p->endaddr - memaddr;
 	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr, memaddr - p->addr, len);
-	    return (res != false)? len: 0;
+	    return (res != 0) ? len : 0;
 	  }
       else if (p->addr < nextsectaddr)
 	nextsectaddr = p->addr;

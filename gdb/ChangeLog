@@ -1,3 +1,13 @@
+Fri Apr 15 11:53:46 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* source.c (DIRNAME_SEPARATOR): New macro, replaces all references
+	to : in search path processing.
+	* defs.h (qsort): Rename argument in prototype.
+	* symtab.h (SAYMBOL_VALUE): Rename value field, avoids bugs in
+	some compilers.
+	* breakpoint.c, exec.c, mdebugread.c, mipsread.c, xcoffexec.c
+	(false): Eliminate usages.
+
 Fri Apr 15 11:35:19 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* h8500-tdep.c (initialize_h8500_tdep, large_command):

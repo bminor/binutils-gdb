@@ -520,24 +520,24 @@ enum val_prettyprint
 
 #else /* No BFD64 */
 
-/* Default to support for "long long" if the host compiler being used is gcc.
-   Config files must define CC_HAS_LONG_LONG to use other host compilers
-   that are capable of supporting "long long", and to cause gdb to use that
-   support.  Not defining CC_HAS_LONG_LONG will suppress use of "long long"
-   regardless of what compiler is used.
+/* If all compilers for this host support "long long" and we want to
+   use it for LONGEST (the performance hit is about 10% on a testsuite
+   run based on one DECstation test), then the xm.h file can define
+   CC_HAS_LONG_LONG.
 
-   FIXME: For now, automatic selection of "long long" as the default when
-   gcc is used is disabled, pending further testing.  Concerns include the
-   impact on gdb performance and the universality of bugfree long long
-   support on platforms that do have gcc.  Compiling with FORCE_LONG_LONG
-   will select "long long" use for testing purposes.  -fnf */
+   Using GCC 1.39 on BSDI with long long causes about 700 new
+   testsuite failures.  Using long long for LONGEST on the DECstation
+   causes 3 new FAILs in the testsuite and many heuristic fencepost
+   warnings.  These are not investigated, but a first guess would be
+   that the BSDI problems are GCC bugs in long long support and the
+   latter are GDB bugs.  */
 
 #ifndef CC_HAS_LONG_LONG
-#  if defined (__GNUC__) /*&& defined (FORCE_LONG_LONG)*/ /* See FIXME above */
+#  if defined (__GNUC__) && defined (FORCE_LONG_LONG)
 #    define CC_HAS_LONG_LONG 1
 #  endif
 #endif
-	
+
 /* LONGEST should not be a typedef, because "unsigned LONGEST" needs to work.
    CC_HAS_LONG_LONG is defined if the host compiler supports "long long"
    variables and we wish to make use of that support.  */
@@ -739,7 +739,7 @@ free PARAMS ((void *));					/* 4.10.3.2 */
 extern void
 qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
-	       int (*comp)(const void *, const void *)));
+	       int (*compar)(const void *, const void *)));
 
 #ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
 extern PTR

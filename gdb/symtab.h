@@ -64,7 +64,7 @@ struct general_symbol_info
       /* The fact that this is a long not a LONGEST mainly limits the
 	 range of a LOC_CONST.  Since LOC_CONST_BYTES exists, I'm not
 	 sure that is a big deal.  */
-      long value;
+      long ivalue;
 
       struct block *block;
 
@@ -110,7 +110,7 @@ struct general_symbol_info
 };
 
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
-#define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.value
+#define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block

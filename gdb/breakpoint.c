@@ -2293,7 +2293,7 @@ can_use_hardware_watchpoint (b)
       if (!(v->lval == lval_memory)
 	  || v->lval == not_lval
 	  || (v->lval != not_lval
-	      && v->modifiable == false))
+	      && v->modifiable == 0))
 	return 0;
       else
 	if (v->lval == lval_memory)

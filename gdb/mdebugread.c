@@ -3767,8 +3767,8 @@ elfmdebug_build_psymtabs (objfile, swap, sec, section_offsets)
   struct ecoff_debug_info *info;
 
   buf = alloca (swap->external_hdr_size);
-  if (bfd_get_section_contents (abfd, sec, buf, (file_ptr) 0,
-				swap->external_hdr_size) == false)
+  if (!bfd_get_section_contents (abfd, sec, buf, (file_ptr) 0,
+				 swap->external_hdr_size))
     perror_with_name (bfd_get_filename (abfd));
 
   info = ((struct ecoff_debug_info *)
