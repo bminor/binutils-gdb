@@ -824,7 +824,7 @@ OP_C0 ()
 		| (sat ? PSW_SAT : 0));
 
   /* Handle saturated results.  */
-  if (sat && (op0 & 0x80000000))
+  if (sat && s)
     State.regs[OP[1]] = 0x80000000;
   else if (sat)
     State.regs[OP[1]] = 0x7fffffff;
@@ -861,7 +861,7 @@ OP_220 ()
 		| (sat ? PSW_SAT : 0));
 
   /* Handle saturated results.  */
-  if (sat && (op0 & 0x80000000))
+  if (sat && s)
     State.regs[OP[1]] = 0x80000000;
   else if (sat)
     State.regs[OP[1]] = 0x7fffffff;
@@ -894,7 +894,7 @@ OP_A0 ()
 		| (sat ? PSW_SAT : 0));
 
   /* Handle saturated results.  */
-  if (sat && (op1 & 0x80000000))
+  if (sat && s)
     State.regs[OP[1]] = 0x80000000;
   else if (sat)
     State.regs[OP[1]] = 0x7fffffff;
@@ -930,7 +930,7 @@ OP_660 ()
 		| (sat ? PSW_SAT : 0));
 
   /* Handle saturated results.  */
-  if (sat && (op1 & 0x80000000))
+  if (sat && s)
     State.regs[OP[1]] = 0x80000000;
   else if (sat)
     State.regs[OP[1]] = 0x7fffffff;
@@ -962,7 +962,7 @@ OP_80 ()
 		| (sat ? PSW_SAT : 0));
 
   /* Handle saturated results.  */
-  if (sat && (op0 & 0x80000000))
+  if (sat && s)
     State.regs[OP[1]] = 0x80000000;
   else if (sat)
     State.regs[OP[1]] = 0x7fffffff;
