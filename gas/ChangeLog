@@ -1,3 +1,8 @@
+Tue Jan  6 15:36:02 1998  Richard Henderson  <rth@cygnus.com>
+
+	* symbols.c (S_SET_SEGMENT): Don't set the segment for section syms.
+	(S_IS_EXTERNAL, S_IS_LOCAL): Correct parenthetication.
+
 start-sanitize-sky
 Tue Jan  6 13:10:20 1998  Doug Evans  <devans@seba.cygnus.com>
 
