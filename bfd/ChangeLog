@@ -1,3 +1,17 @@
+2003-10-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (get_is_linkonce_section): Delete.
+	(xtensa_is_property_section, xtensa_is_littable_section): Use
+	XTENSA_INSN_SEC_NAME and XTENSA_LIT_SEC_NAME macros.  Do not recognize
+	linkonce sections containing ".xt.insn" and ".xt.lit" substrings.
+	(xtensa_get_property_section_name): Check section name instead of
+	calling get_is_linkonce_section.  Remove unused bfd parameter.  Use
+	XTENSA_INSN_SEC_NAME and XTENSA_LIT_SEC_NAME macros.  Never generate
+	linkonce section names by appending ".xt.insn" or ".xt.lit".
+	(xtensa_read_table_entries): Remove bfd argument in call to
+	xtensa_get_property_section_name.  Free section name when done.
+	(elf_xtensa_combine_prop_entries): Free leaking table.
+
 2003-10-13  Richard Sandiford  <rsandifo@redht.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Don't add

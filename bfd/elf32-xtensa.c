@@ -212,10 +212,8 @@ static bfd_boolean is_literal_section
   PARAMS ((asection *));
 static int internal_reloc_compare
   PARAMS ((const PTR, const PTR));
-static bfd_boolean get_is_linkonce_section
-  PARAMS ((bfd *, asection *));
 extern char *xtensa_get_property_section_name
-  PARAMS ((bfd *, asection *, const char *));
+  PARAMS ((asection *, const char *));
 
 /* Other functions called directly by the linker.  */
 
@@ -504,8 +502,9 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
   Elf_Internal_Rela *internal_relocs;
 
   table_section_name = 
-    xtensa_get_property_section_name (abfd, section, sec_name);
+    xtensa_get_property_section_name (section, sec_name);
   table_section = bfd_get_section_by_name (abfd, table_section_name);
+  free (table_section_name);
   if (table_section != NULL)
     table_size = bfd_get_section_size_before_reloc (table_section);
   
@@ -2314,6 +2313,7 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
   memcpy (sgotloc->contents, contents, section_size);
 
   free (contents);
+  free (table);
   return num;
 }
 
@@ -5605,25 +5605,25 @@ pcrel_reloc_fits (opnd, self_address, dest_address)
 }
 
 
+static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
+static int insn_sec_len = sizeof (XTENSA_INSN_SEC_NAME) - 1;
+static int lit_sec_len = sizeof (XTENSA_LIT_SEC_NAME) - 1;
+
+
 static bfd_boolean 
 xtensa_is_property_section (sec)
      asection *sec;
 {
-  static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
-
-  if (strncmp (".xt.insn", sec->name, 8) == 0
-      || strncmp (".xt.lit", sec->name, 7) == 0)
+  if (strncmp (XTENSA_INSN_SEC_NAME, sec->name, insn_sec_len) == 0
+      || strncmp (XTENSA_LIT_SEC_NAME, sec->name, lit_sec_len) == 0)
     return TRUE;
 
-  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0)
-    {
-      if (strncmp ("x.", sec->name + linkonce_len, 2) == 0
-	  || strncmp ("p.", sec->name + linkonce_len, 2) == 0)
-	return TRUE;
-      if (strstr (sec->name + linkonce_len, ".xt.insn") != NULL
-	  || strstr (sec->name + linkonce_len, ".xt.lit") != NULL)
-	return TRUE;
-    }
+  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
+      && (sec->name[linkonce_len] == 'x'
+	  || sec->name[linkonce_len] == 'p')
+      && sec->name[linkonce_len + 1] == '.')
+    return TRUE;
+
   return FALSE;
 }
 
@@ -5632,18 +5632,14 @@ static bfd_boolean
 xtensa_is_littable_section (sec)
      asection *sec;
 {
-  static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
-
-  if (strncmp (".xt.lit", sec->name, 7) == 0)
+  if (strncmp (XTENSA_LIT_SEC_NAME, sec->name, lit_sec_len) == 0)
     return TRUE;
 
-  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0)
-    {
-      if (strncmp ("p.", sec->name + linkonce_len, 2) == 0)
-	return TRUE;
-      if (strstr (sec->name + linkonce_len, ".xt.lit") != NULL)
-	return TRUE;
-    }
+  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0
+      && sec->name[linkonce_len] == 'p'
+      && sec->name[linkonce_len + 1] == '.')
+    return TRUE;
+
   return FALSE;
 }
 
@@ -5671,78 +5667,42 @@ internal_reloc_compare (ap, bp)
 }
 
 
-static bfd_boolean
-get_is_linkonce_section (abfd, sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-{
-  flagword flags, link_once_flags;
-  bfd_boolean is_linkonce = FALSE;;
-
-  flags = bfd_get_section_flags (abfd, sec);
-  link_once_flags = (flags & SEC_LINK_ONCE);
-  if (link_once_flags != 0)
-    is_linkonce = TRUE;
-
-  /* In order for this to be useful to the assembler
-     before the linkonce flag is set we need to
-     check for the GNU extension name.  */
-  if (!is_linkonce &&
-      strncmp (sec->name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
-    is_linkonce = TRUE;
-  
-  return is_linkonce;
-}
-
-
 char *
-xtensa_get_property_section_name (abfd, sec, base_name)
-     bfd *abfd;
+xtensa_get_property_section_name (sec, base_name)
      asection *sec;
-     const char * base_name;
+     const char *base_name;
 {
-  char *table_sec_name = NULL;
-  bfd_boolean is_linkonce;
-
-  is_linkonce = get_is_linkonce_section (abfd, sec);
-
-  if (!is_linkonce)
+  if (strncmp (sec->name, ".gnu.linkonce.", linkonce_len) == 0)
     {
-      table_sec_name = strdup (base_name);
-    }
-  else
-    {
-      static size_t prefix_len = sizeof (".gnu.linkonce.t.") - 1;
-      size_t len = strlen (sec->name) + 1;
-      char repl_char = '\0';
-      const char *segname = sec->name;
+      char *prop_sec_name;
+      const char *suffix;
+      char linkonce_kind = 0;
 
-      if (strncmp (segname, ".gnu.linkonce.t.", prefix_len) == 0)
-	{
-	  if (strcmp (base_name, ".xt.insn") == 0) 
-	    repl_char = 'x';
-	  else if (strcmp (base_name, ".xt.lit") == 0) 
-	    repl_char = 'p';
-	}
-      
-      if (repl_char != '\0')
-	{
-	  char *name = (char *) bfd_malloc (len);
-	  memcpy (name, sec->name, len);
-	  name[prefix_len - 2] = repl_char;
-	  table_sec_name = name;
-	}
+      if (strcmp (base_name, XTENSA_INSN_SEC_NAME) == 0) 
+	linkonce_kind = 'x';
+      else if (strcmp (base_name, XTENSA_LIT_SEC_NAME) == 0) 
+	linkonce_kind = 'p';
       else
+	abort ();
+
+      prop_sec_name = (char *) bfd_malloc (strlen (sec->name) + 1);
+      memcpy (prop_sec_name, ".gnu.linkonce.", linkonce_len);
+      prop_sec_name[linkonce_len] = linkonce_kind;
+      prop_sec_name[linkonce_len + 1] = '.';
+
+      suffix = sec->name + linkonce_len;
+      while (*suffix)
 	{
-	  size_t base_len = strlen (base_name) + 1;
-	  char *name = (char *) bfd_malloc (len + base_len);
-	  memcpy (name, sec->name, len - 1);
-	  memcpy (name + len - 1, base_name, base_len);
-	  table_sec_name = name;
+	  suffix += 1;
+	  if (suffix[-1] == '.')
+	    break;
 	}
+      strcpy (prop_sec_name + linkonce_len + 2, suffix);
+
+      return prop_sec_name;
     }
 
-  return table_sec_name;
+  return strdup (base_name);
 }
 
 

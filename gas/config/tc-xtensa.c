@@ -677,7 +677,7 @@ static bfd_boolean get_frag_is_insn
 
 /* Import from elf32-xtensa.c in BFD library.  */
 extern char *xtensa_get_property_section_name
-  PARAMS ((bfd *, asection *, const char *));
+  PARAMS ((asection *, const char *));
 
 /* TInsn and IStack functions.  */
 static bfd_boolean tinsn_has_symbolic_operands
@@ -7916,12 +7916,11 @@ xtensa_create_property_segments (property_function, section_name_base,
       segT sec = *seclist;
       if (section_has_property (sec, property_function))
 	{
-	  char * property_section_name =
-	    xtensa_get_property_section_name (stdoutput, sec,
-					      section_name_base);
+	  char *property_section_name =
+	    xtensa_get_property_section_name (sec, section_name_base);
 	  segT insn_sec = retrieve_xtensa_section (property_section_name);
 	  segment_info_type *xt_seg_info = retrieve_segment_info (insn_sec);
-	  xtensa_block_info ** xt_blocks = 
+	  xtensa_block_info **xt_blocks = 
 	    &xt_seg_info->tc_segment_info_data.blocks[sec_type];
 	  /* Walk over all of the frchains here and add new sections.  */
 	  add_xt_block_frags (sec, insn_sec, xt_blocks, property_function);

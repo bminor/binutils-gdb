@@ -1,3 +1,8 @@
+2003-10-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_create_property_segments): Remove bfd
+	argument in call to xtensa_get_property_section_name.  Formatting.
+
 2003-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.h (sh_coff_reloc_mangle): Delete an extra
