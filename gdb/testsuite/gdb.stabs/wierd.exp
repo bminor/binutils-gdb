@@ -18,6 +18,8 @@ if ![file exists $binfile] then {
 	alldone
 	}
 
+# xcoffread.c wrongly bitches about the lack of a text section.
+setup_xfail "rs*-*-aix*"
 send "file $binfile\n"
 expect {
 	-re "^file $binfile\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
@@ -53,6 +55,23 @@ proc print_wierd_var { var } {
 			return 0
 		}
 		timeout { fail "variable $var not printed (timeout)" }
+	}
+
+	# Currently one of these symbols gives an error() in symbol
+	# reading, which causes any attempt to read (full, not
+	# partial) symbols for the file to lose.
+	setup_xfail "*-*-*"
+
+	# Make sure that the stabs did get loaded in a sensible way.
+	# If somehow the stabs got skipped, then the above test can
+	# pass because GDB assumes int for variables without a stab.
+
+	send "whatis $var\n"
+	expect {
+		-re "type = unsigned int.*$prompt $" {pass "whatis on $var"}
+		-re "type = inttype.*$prompt $" {pass "whatis on $var"}
+		-re "$prompt $" {fail "whatis on $var"}
+		timeout {fail "whatis on $var"}
 	}
 }
 
@@ -143,6 +162,20 @@ print_wierd_var attr123
 print_wierd_var attr124
 print_wierd_var attr125
 print_wierd_var attr126
+
+# Currently one of these symbols gives an error() in symbol
+# reading, which causes any attempt to read (full, not
+# partial) symbols for the file to lose.
+setup_xfail "*-*-*"
+
+# One last test, while we're at it.
+send "ptype inttype\n"
+expect {
+	-re "type = unsigned int.*$prompt $" {pass "ptype on inttype"}
+	-re "type = inttype.*$prompt $" {pass "ptype on inttype"}
+	-re "$prompt $" {fail "ptype on inttype"}
+	timeout {fail "ptype on inttype"}
+}
 
 #Prevent some failures in default.exp, which are probably GDB bugs
 # (but trivial ones).
