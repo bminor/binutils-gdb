@@ -1,3 +1,8 @@
+Wed Aug 23 16:55:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/ppc{,le}-eabi.mt (SIM_OBJS, SIM): Link in the
+	PowerPC simulator.
+
 Tue Aug 22 02:00:47 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* tm-hppa.h (EXTRACT_RETURN_VALUE): Fix for FP values.
