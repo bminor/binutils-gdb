@@ -47,7 +47,7 @@
 #define WORKING_DOT_WORD
 
 #ifdef OBJ_ELF
-#if BFD_ARCH_SIZE == 64
+#if TARGET_ARCH_SIZE == 64
 #include "bfd/elf64-hppa.h"
 #define TARGET_FORMAT "elf64-hppa"
 #else
@@ -69,18 +69,12 @@
 
 #define ASEC_NULL (asection *)0
 
-/* Labels are not required to have a colon for a suffix.  */
-#define LABELS_WITHOUT_COLONS 1
+/* pa_define_label gets used outside of tc-hppa.c via tc_frob_label.  */
+extern void pa_define_label PARAMS ((symbolS *));
 
-/* FIXME.  This should be static and declared in tc-hppa.c, but 
-   pa_define_label gets used outside of tc-hppa.c via tc_frob_label.
-   Should also be PARAMized, but symbolS isn't available here.  */
-extern void pa_define_label ();
-
-/* FIXME.  Types not available here, so they can't be PARAMized.  */
-extern void parse_cons_expression_hppa ();
-extern void cons_fix_new_hppa ();
-extern int hppa_force_relocation ();
+extern void parse_cons_expression_hppa PARAMS ((expressionS *));
+extern void cons_fix_new_hppa PARAMS ((fragS *, int, int, expressionS *));
+extern int hppa_force_relocation PARAMS ((struct fix *));
 
 /* This gets called before writing the object file to make sure
    things like entry/exit and proc/procend pairs match.  */
@@ -101,6 +95,7 @@ extern void pa_check_eof PARAMS ((void));
 #ifdef OBJ_ELF
 #define elf_tc_final_processing	elf_hppa_final_processing
 void elf_hppa_final_processing PARAMS ((void));
+void pa_end_of_source PARAMS ((void));
 #endif
 
 /* The PA needs to parse field selectors in .byte, etc.  */
@@ -120,6 +115,7 @@ void elf_hppa_final_processing PARAMS ((void));
    it will always follow a comma.  */
 #define TC_EOL_IN_INSN(PTR)	(*(PTR) == '!' && (PTR)[-1] == ',')
 
+int hppa_fix_adjustable PARAMS((struct fix *));
 #define tc_fix_adjustable hppa_fix_adjustable
 
 /* Because of the strange PA calling conventions, it is sometimes

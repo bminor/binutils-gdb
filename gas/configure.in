@@ -195,19 +195,22 @@ changequote([,])dnl
 
       fr30-*-*)		    fmt=elf bfd_gas=yes ;;
 
-      hppa-*-linux-gnu*)    fmt=elf em=linux ;;
+      hppa-*-linux-gnu*)    case ${cpu} in
+				hppa*64*)
+					fmt=elf em=hppalinux64;;
+				hppa*)
+					fmt=elf em=linux;;
+			    esac ;;
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
       hppa-*-osf*)          fmt=som em=hppa ;;
       hppa-*-rtems*)        fmt=elf em=hppa ;;
-      hppa-*-hpux11*)	    em=hppa
-			    case ${cpu} in
+      hppa-*-hpux11*)	    case ${cpu} in
 				hppa*64*)
-					fmt=elf;;
+					fmt=elf em=hppa64 ;;
 				hppa*)
-					fmt=som;;
-			    esac
-			    ;;
+					fmt=som em=hppa ;;
+			    esac ;;
       hppa-*-hpux*)         fmt=som em=hppa ;;
       hppa-*-mpeix*)        fmt=som em=hppa ;;
       hppa-*-bsd*)          fmt=som em=hppa ;;

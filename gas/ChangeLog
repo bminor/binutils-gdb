@@ -1,3 +1,81 @@
+2000-07-09  Alan Modra  <alan@linuxcare.com.au>
+
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* config/te-hppalinux64.h: Add a new emulation.
+	* configure.in (emulations): Add configure bits to support the
+	64-bit Linux/parisc target.
+	* configure: Regenerate.
+
+	* config/tc-hppa.c (md_parse_option): Support `-V' for ELF.
+	(md_shortopts): Add `V' for ELF.
+
+	* config/tc-hppa.c (arg_reloc_stub_needed): Define as zero except
+	when SOM or ELF_ARG_RELOC are defined.
+	(pa_type_args): Only set symbol_arg_reloc_info when SOM or
+	ELF_ARG_RELOC are defined.
+	(pa_stringer_aux): Don't pa_check_current_space_and_subspace here..
+	(pa_stringer): ..Do it here instead.  Fix comment typos.
+	(hppa_force_relocation): Cast enums to int before comparing with
+	ints.
+
+	From  Ryan Bradetich  <rbradetich@uswest.net>
+	* config/tc-hppa.c: Removed unneeded libbfd.h to fix macro
+	redifinition warning.
+	(md_apply_fix): Added cast from enum to int for fixP->fx_r_type.
+	(hppa_force_relocation): ditto
+	(pa_vtable_entry): ditto
+	(pa_vtable_inherit): ditto
+	(md_apply_fix): Added cast to buf to fix warnings.
+
+	* config/tc-hppa.h (pa_define_label, parse_cons_expression_hppa,
+	cons_fix_new_hppa, hppa_force_relocation): Prototype.
+
+	* config/tc-hppa.c (reloc_type): It's an enum for OBJ_ELF.
+	(R_N0SEL, R_N1SEL): Define only for OBJ_SOM.
+	(tc_gen_reloc): Make `code' a reloc_type and `codes' a
+	reloc_type** to avoid warnings in switch.
+	(md_apply_fix): Make insn, val signed.  Zap buf_wd and read insn a
+	little earlier instead.
+
+	* config/tc-hppa.c (symbol_arg_reloc_info): Define for both som
+	and elf.
+	(pa_type_args): Use symbol_arg_reloc_info.
+	(struct pa_it): Make arg_reloc unsigned int.
+	(struct hppa_fix_struct): Likewise for fx_arg_reloc.
+	(pa_text, pa_data, pa_comm): Don't compile for TE_LINUX.
+	(pa_code): Delete.  pa_text duplicates this function.
+	(md_pseudo_table): Call obj_elf_text for ".code" if TE_LINUX.
+	(fix_new_hppa): Argument offset is offsetT, arg_reloc is unsigned
+	int.
+	(cons_fix_new_hppa): Actually change selector to e_fsel when
+	warning about assuming so.
+	(tc_gen_reloc): More example elf arg reloc code.
+	(md_apply_fix): Use arg_reloc_stub_needed for elf too.
+	(hppa_force_relocation): Likewise.
+
+	* config/tc-hppa.h: Use TARGET_ARCH_SIZE to select target include
+	files.
+	(pa_end_of_source): Prototype.
+	(hppa_fix_adjustable): Prototype.
+	(LABELS_WITHOUT_COLONS): Move it..
+	* config/te-hppa.h: To here.
+
+	* config/te-hppa64.h: New file.
+
+	* config/tc-hppa.c: Use TARGET_ARCH_SIZE to select target reloc
+	type.
+	(md_apply_fix): Pass stdoutput to bfd_hppa_insn2fmt.  Handle
+	format -10, -16, 16 relocs.
+	(hppa_elf_mark_end_of_function): Test for null
+	last_call_info->start_symbol
+
+	* config/tc-hppa.c (pa_ip): In case 'V', pass `strict' to
+	CHECK_FIELD, not INSERT_FIELD_AND_CONTINUE.  Don't pass opcode to
+	re_assesmble_* functions.  Delete extraneous statements.  Fix
+	typos in comments.
+	(md_apply_fix): Compare against 1048575 in case 21.  Don't pass
+	insn to re_assemble_*.
+
 2000-07-08  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* doc/internals.texi (Expressions): Fix typo.
