@@ -215,49 +215,63 @@ elf_symtab_read (abfd, addr, objfile)
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   enum minimal_symbol_type ms_type;
-  /* If sectinfo is nonzero, it contains section info that should end up
+  /* If sectinfo is nonNULL, it contains section info that should end up
      filed in the objfile.  */
-  struct stab_section_info *sectinfo = 0;
+  struct stab_section_info *sectinfo = NULL;
   /* If filesym is nonzero, it points to a file symbol, but we haven't
      seen any section info for it yet.  */
   asymbol *filesym = 0;
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
 				 objfile->sym_private;
+  unsigned long size;
   
   storage_needed = get_symtab_upper_bound (abfd);
-
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
-  
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
-	  /* Bfd flags ELF symbol table STT_SECTION and STT_FILE symbols with
-	     BSF_DEBUGGING.  We don't want these in the minimal symbols, so
-	     skip over them. */
-	  if (sym -> flags & BSF_DEBUGGING)
+	  if (sym -> name == NULL || *sym -> name == '\0')
 	    {
+	      /* Skip names that don't exist (shouldn't happen), or names
+		 that are null strings (may happen). */
 	      continue;
 	    }
-	  /* Select global/local/weak symbols that are defined in a specific
-	     section.  Note that bfd puts abs symbols in their own section,
-	     so all symbols we are interested in will have a section. */
-	  if ((sym -> flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
-	      && (sym -> section != NULL))
+	  if (sym -> flags & BSF_FILE)
 	    {
+	      /* STT_FILE debugging symbol that helps stabs-in-elf debugging.
+		 Chain any old one onto the objfile; remember new sym.  */
+	      if (sectinfo != NULL)
+		{
+		  sectinfo -> next = dbx -> stab_section_info;
+		  dbx -> stab_section_info = sectinfo;
+		  sectinfo = NULL;
+		}
+	      filesym = sym;
+	    }
+	  else if (sym -> flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
+	    {
+	      /* Select global/local/weak symbols.  Note that bfd puts abs
+		 symbols in their own section, so all symbols we are
+		 interested in will have a section. */
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym -> value + sym -> section -> vma;
 	      /* Relocate all non-absolute symbols by base address.  */
 	      if (sym -> section != &bfd_abs_section)
-		symaddr += addr;
-
+		{
+		  symaddr += addr;
+		}
 	      /* For non-absolute symbols, use the type of the section
 		 they are relative to, to intuit text/data.  Bfd provides
 		 no way of figuring this out for absolute symbols. */
-	      if (sym -> section -> flags & SEC_CODE)
+	      if (sym -> section == &bfd_abs_section)
+		{
+		  ms_type = mst_abs;
+		}
+	      else if (sym -> section -> flags & SEC_CODE)
 		{
 		  if (sym -> flags & BSF_GLOBAL)
 		    {
@@ -281,8 +295,65 @@ elf_symtab_read (abfd, addr, objfile)
 			  ms_type = mst_bss;
 			}
 		    }
-		  else
+		  else if (sym -> flags & BSF_LOCAL)
 		    {
+		      /* Named Local variable in a Data section.  Check its
+			 name for stabs-in-elf.  The STREQ macro checks the
+			 first character inline, so we only actually do a
+			 strcmp function call on names that start with 'B'
+			 or 'D' */
+		      index = SECT_OFF_MAX;
+		      if (STREQ ("Bbss.bss", sym -> name))
+			{
+			  index = SECT_OFF_BSS;
+			}
+		      else if (STREQ ("Ddata.data", sym -> name))
+			{
+			  index = SECT_OFF_DATA;
+			}
+		      else if (STREQ ("Drodata.rodata", sym -> name))
+			{
+			  index = SECT_OFF_RODATA;
+			}
+		      if (index != SECT_OFF_MAX)
+			{
+			  /* Found a special local symbol.  Allocate a
+			     sectinfo, if needed, and fill it in.  */
+			  if (sectinfo == NULL)
+			    {
+			      sectinfo = (struct stab_section_info *)
+				xmmalloc (objfile -> md, sizeof (*sectinfo));
+			      memset ((PTR) sectinfo, 0, sizeof (*sectinfo));
+			      if (filesym == NULL)
+				{
+				  complain (&section_info_complaint,
+					    sym -> name);
+				}
+			      else
+				{
+				  sectinfo -> filename =
+				    (char *) filesym -> name;
+				}
+			    }
+			  if (sectinfo -> sections[index] != 0)
+			    {
+			      complain (&section_info_dup_complaint,
+					sectinfo -> filename);
+			    }
+			  /* Bfd symbols are section relative. */
+			  symaddr = sym -> value + sym -> section -> vma;
+			  /* Relocate non-absolute symbols by base address.  */
+			  if (sym -> section != &bfd_abs_section)
+			    {
+			      symaddr += addr;
+			    }
+			  sectinfo -> sections[index] = symaddr;
+			  /* The special local symbols don't go in the
+			     minimal symbol table, so ignore this one. */
+			  continue;
+			}
+		      /* Not a special stabs-in-elf symbol, do regular
+			 symbol processing. */
 		      if (sym -> section -> flags & SEC_HAS_CONTENTS)
 			{
 			  ms_type = mst_file_data;
@@ -291,6 +362,10 @@ elf_symtab_read (abfd, addr, objfile)
 			{
 			  ms_type = mst_file_bss;
 			}
+		    }
+		  else
+		    {
+		      ms_type = mst_unknown;
 		    }
 		}
 	      else
@@ -303,75 +378,9 @@ elf_symtab_read (abfd, addr, objfile)
 		  continue;		/* Skip this symbol. */
 		}
 	      /* Pass symbol size field in via BFD.  FIXME!!!  */
-	      {
-		elf32_symbol_type *esym = (elf32_symbol_type *) sym;
-		unsigned long size = esym->internal_elf_sym.st_size;
-		record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
-						ms_type, (PTR) size, objfile);
-	      }
-	    }
-
-	  /* See if this is a debugging symbol that helps Solaris
-	     stabs-in-elf debugging.  */
-
-	  else if (sym->flags & BSF_FILE)
-	    {
-	      /* Chain any old one onto the objfile; remember new sym.  */
-	      if (sectinfo)
-		{
-		    sectinfo->next = dbx->stab_section_info;
-		    dbx->stab_section_info = sectinfo;
-		    sectinfo = 0;
-		}
-	      filesym = sym;
-	    }
-	  else if ((sym->flags & BSF_LOCAL) &&
-		   (sym->section) &&
-		   (sym->section->flags & SEC_DATA) &&
-		   (sym->name))
-	    {
-	      /* Named Local variable in a Data section.  Check its name.  */
-	      index = -1;
-	      switch (sym->name[1])
-		{
-		  case 'b':
-			if (STREQ ("Bbss.bss", sym->name))
-			  index = SECT_OFF_BSS;
-			break;
-		  case 'd':
-			if (STREQ ("Ddata.data", sym->name))
-			  index = SECT_OFF_DATA;
-			break;
-		  case 'r':
-			if (STREQ ("Drodata.rodata", sym->name))
-			  index = SECT_OFF_RODATA;
-			break;
-		}
-	      if (index > 0)
-		{
-		  /* We have some new info.  Allocate a sectinfo, if
-		     needed, and fill it in.  */
-		  if (!sectinfo)
-		    {
-		      sectinfo = (struct stab_section_info *)
-				 xmmalloc (objfile -> md,
-					   sizeof (*sectinfo));
-		      memset ((PTR) sectinfo, 0, sizeof (*sectinfo));
-		      if (!filesym)
-			complain (&section_info_complaint, sym->name);
-		      else
-			sectinfo->filename = (char *)filesym->name;
-		    }
-		  if (sectinfo->sections[index])
-		    complain (&section_info_dup_complaint, sectinfo->filename);
-
-		  /* Bfd symbols are section relative. */
-		  symaddr = sym -> value + sym -> section -> vma;
-		  /* Relocate all non-absolute symbols by base address.  */
-		  if (sym -> section != &bfd_abs_section)
-		      symaddr += addr;
-		  sectinfo->sections[index] = symaddr;
-		}
+	      size = ((elf32_symbol_type *) sym) -> internal_elf_sym.st_size;
+	      record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
+					      ms_type, (PTR) size, objfile);
 	    }
 	}
       do_cleanups (back_to);
