@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -31,26 +31,19 @@
 
 #include "obstack.h"
 
-#if __STDC__ == 1
-static void clean_up_expression (expressionS * expressionP);
-#else /* __STDC__ */
-static void clean_up_expression ();	/* Internal. */
-#endif /* not __STDC__ */
-extern const char EXP_CHARS[];	/* JF hide MD floating pt stuff all the same place */
-extern const char FLT_CHARS[];
+static void clean_up_expression PARAMS ((expressionS * expressionP));
+extern const char EXP_CHARS[], FLT_CHARS[];
 
 /*
  * Build any floating-point literal here.
  * Also build any bignum literal here.
  */
 
-/* LITTLENUM_TYPE	generic_buffer [6]; *//* JF this is a hack */
 /* Seems atof_machine can backscan through generic_bignum and hit whatever
    happens to be loaded before it in memory.  And its way too complicated
    for me to fix right.  Thus a hack.  JF:  Just make generic_bignum bigger,
    and never write into the early words, thus they'll always be zero.
-   I hate Dean's floating-point code.  Bleh.
-   */
+   I hate Dean's floating-point code.  Bleh.  */
 LITTLENUM_TYPE generic_bignum[SIZE_OF_LARGE_NUMBER + 6];
 FLONUM_TYPE generic_floating_point_number =
 {
@@ -85,7 +78,7 @@ floating_constant (expressionP)
 	  as_bad ("bad floating-point constant: unknown error code=%d.", error_code);
 	}
     }
-  expressionP->X_seg = SEG_BIG;
+  expressionP->X_seg = big_section;
   /* input_line_pointer->just after constant, */
   /* which may point to whitespace. */
   expressionP->X_add_number = -1;
@@ -108,7 +101,7 @@ integer_constant (radix, expressionP)
   register symbolS *symbolP;	/* points to symbol */
 
   int small;			/* true if fits in 32 bits. */
-  extern char hex_value[];	/* in hex_value.c */
+  extern const char hex_value[]; /* in hex_value.c */
 
   /* may be bignum, or may fit in 32 bits. */
   /*
@@ -248,7 +241,7 @@ integer_constant (radix, expressionP)
 	    else
 	      {			/* either not seen or not defined. */
 		as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.", number);
-		expressionP->X_seg = SEG_ABSOLUTE;
+		expressionP->X_seg = absolute_section;
 	      }
 
 	    expressionP->X_add_number = 0;
@@ -271,10 +264,10 @@ integer_constant (radix, expressionP)
 #ifndef many_segments
 	    /* since "know" puts its arg into a "string", we
 	       can't have newlines in the argument.  */
-	    know (S_GET_SEGMENT (symbolP) == SEG_UNKNOWN || S_GET_SEGMENT (symbolP) == SEG_TEXT || S_GET_SEGMENT (symbolP) == SEG_DATA);
+	    know (S_GET_SEGMENT (symbolP) == undefined_section || S_GET_SEGMENT (symbolP) == text_section || S_GET_SEGMENT (symbolP) == data_section);
 #endif
 	    expressionP->X_add_symbol = symbolP;
-	    expressionP->X_seg = SEG_UNKNOWN;
+	    expressionP->X_seg = undefined_section;
 	    expressionP->X_subtract_symbol = NULL;
 	    expressionP->X_add_number = 0;
 
@@ -317,7 +310,7 @@ integer_constant (radix, expressionP)
 	default:
 	  {
 	    expressionP->X_add_number = number;
-	    expressionP->X_seg = SEG_ABSOLUTE;
+	    expressionP->X_seg = absolute_section;
 	    input_line_pointer--;	/* restore following character. */
 	    break;
 	  }			/* really just a number */
@@ -329,7 +322,7 @@ integer_constant (radix, expressionP)
   else
     {				/* not a small number */
       expressionP->X_add_number = number;
-      expressionP->X_seg = SEG_BIG;
+      expressionP->X_seg = big_section;
       input_line_pointer--;	/*->char following number. */
     }				/* if (small) */
 }				/* integer_constant() */
@@ -414,7 +407,7 @@ operand (expressionP)
 	      /* The string was only zero */
 	      expressionP->X_add_symbol = 0;
 	      expressionP->X_add_number = 0;
-	      expressionP->X_seg = SEG_ABSOLUTE;
+	      expressionP->X_seg = absolute_section;
 	    }
 
 	  break;
@@ -479,6 +472,7 @@ operand (expressionP)
 
 	  input_line_pointer++;
 	  floating_constant (expressionP);
+	  expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
 	  break;
 
 #ifdef LOCAL_LABELS_DOLLAR
@@ -509,18 +503,17 @@ operand (expressionP)
 	 permitted for a single quote. The next character, parity errors and
 	 all, is taken as the value of the operand. VERY KINKY.  */
       expressionP->X_add_number = *input_line_pointer++;
-      expressionP->X_seg = SEG_ABSOLUTE;
+      expressionP->X_seg = absolute_section;
       break;
 
     case '~':
     case '-':
     case '+':
-
       {
 	/* unary operator: hope for SEG_ABSOLUTE */
-	switch (operand (expressionP))
+	segT opseg = operand (expressionP);
+	if (opseg == absolute_section)
 	  {
-	  case SEG_ABSOLUTE:
 	    /* input_line_pointer -> char after operand */
 	    if (c == '-')
 	      {
@@ -532,29 +525,26 @@ operand (expressionP)
 	      {
 		expressionP->X_add_number = ~expressionP->X_add_number;
 	      }
-	    break;
-
-	  case SEG_TEXT:
-	  case SEG_DATA:
-	  case SEG_BSS:
-	  case SEG_PASS1:
-	  case SEG_UNKNOWN:
+	  }
+	else if (opseg == text_section
+		 || opseg == data_section
+		 || opseg == bss_section
+		 || opseg == pass1_section
+		 || opseg == undefined_section)
+	  {
 	    if (c == '-')
-	      {			/* JF I hope this hack works */
+	      {
 		expressionP->X_subtract_symbol = expressionP->X_add_symbol;
 		expressionP->X_add_symbol = 0;
-		expressionP->X_seg = SEG_DIFFERENCE;
-		break;
+		expressionP->X_seg = diff_section;
 	      }
-	  default:		/* unary on non-absolute is unsuported */
-	    as_warn ("Unary operator %c ignored because bad operand follows", c);
-	    break;
-	    /* Expression undisturbed from operand(). */
+	    else
+	      as_warn ("Unary operator %c ignored because bad operand follows",
+		       c);
 	  }
+	else
+	  as_warn ("Unary operator %c ignored because bad operand follows", c);
       }
-
-
-
       break;
 
     case '.':
@@ -589,9 +579,10 @@ operand (expressionP)
 	}
     case ',':
     case '\n':
+    case '\0':
     eol:
       /* can't imagine any other kind of operand */
-      expressionP->X_seg = SEG_ABSENT;
+      expressionP->X_seg = absent_section;
       input_line_pointer--;
       md_operand (expressionP);
       break;
@@ -612,14 +603,11 @@ operand (expressionP)
 	  /* If we have an absolute symbol or a reg, then we know its value
 	     now.  */
 	  expressionP->X_seg = S_GET_SEGMENT (symbolP);
-	  switch (expressionP->X_seg)
+	  if (expressionP->X_seg == absolute_section
+	      || expressionP->X_seg == reg_section)
+	    expressionP->X_add_number = S_GET_VALUE (symbolP);
+	  else
 	    {
-	    case SEG_ABSOLUTE:
-	    case SEG_REGISTER:
-	      expressionP->X_add_number = S_GET_VALUE (symbolP);
-	      break;
-
-	    default:
 	      expressionP->X_add_number = 0;
 	      expressionP->X_add_symbol = symbolP;
 	    }
@@ -630,17 +618,9 @@ operand (expressionP)
 	{
 	  as_bad ("Bad expression");
 	  expressionP->X_add_number = 0;
-	  expressionP->X_seg = SEG_ABSOLUTE;
-
+	  expressionP->X_seg = absolute_section;
 	}
-
     }
-
-
-
-
-
-
 
   /*
    * It is more 'efficient' to clean up the expressionS when they are created.
@@ -670,32 +650,30 @@ static void
 clean_up_expression (expressionP)
      register expressionS *expressionP;
 {
-  switch (expressionP->X_seg)
+  segT s = expressionP->X_seg;
+  if (s == absent_section
+      || s == pass1_section)
     {
-    case SEG_ABSENT:
-    case SEG_PASS1:
       expressionP->X_add_symbol = NULL;
       expressionP->X_subtract_symbol = NULL;
       expressionP->X_add_number = 0;
-      break;
-
-    case SEG_BIG:
-    case SEG_ABSOLUTE:
+    }
+  else if (s == big_section
+	   || s == absolute_section)
+    {
       expressionP->X_subtract_symbol = NULL;
       expressionP->X_add_symbol = NULL;
-      break;
-
-    case SEG_UNKNOWN:
-      expressionP->X_subtract_symbol = NULL;
-      break;
-
-    case SEG_DIFFERENCE:
+    }
+  else if (s == undefined_section)
+    expressionP->X_subtract_symbol = NULL;
+  else if (s == diff_section)
+    {
       /*
-	 * It does not hurt to 'cancel' NULL==NULL
-	 * when comparing symbols for 'eq'ness.
-	 * It is faster to re-cancel them to NULL
-	 * than to check for this special case.
-	 */
+       * It does not hurt to 'cancel' NULL==NULL
+       * when comparing symbols for 'eq'ness.
+       * It is faster to re-cancel them to NULL
+       * than to check for this special case.
+       */
       if (expressionP->X_subtract_symbol == expressionP->X_add_symbol
 	  || (expressionP->X_subtract_symbol
 	      && expressionP->X_add_symbol
@@ -704,16 +682,16 @@ clean_up_expression (expressionP)
 	{
 	  expressionP->X_subtract_symbol = NULL;
 	  expressionP->X_add_symbol = NULL;
-	  expressionP->X_seg = SEG_ABSOLUTE;
+	  expressionP->X_seg = absolute_section;
 	}
-      break;
-
-    case SEG_REGISTER:
+    }
+  else if (s == reg_section)
+    {
       expressionP->X_add_symbol = NULL;
       expressionP->X_subtract_symbol = NULL;
-      break;
-
-    default:
+    }
+  else
+    {
       if (SEG_NORMAL (expressionP->X_seg))
 	{
 	  expressionP->X_subtract_symbol = NULL;
@@ -722,9 +700,8 @@ clean_up_expression (expressionP)
 	{
 	  BAD_CASE (expressionP->X_seg);
 	}
-      break;
     }
-}				/* clean_up_expression() */
+}
 
 /*
  *			expr_part ()
@@ -744,8 +721,16 @@ expr_part (symbol_1_PP, symbol_2_P)
 {
   segT return_value;
 #ifndef MANY_SEGMENTS
-  know ((*symbol_1_PP) == NULL || (S_GET_SEGMENT (*symbol_1_PP) == SEG_TEXT) || (S_GET_SEGMENT (*symbol_1_PP) == SEG_DATA) || (S_GET_SEGMENT (*symbol_1_PP) == SEG_BSS) || (!S_IS_DEFINED (*symbol_1_PP)));
-  know (symbol_2_P == NULL || (S_GET_SEGMENT (symbol_2_P) == SEG_TEXT) || (S_GET_SEGMENT (symbol_2_P) == SEG_DATA) || (S_GET_SEGMENT (symbol_2_P) == SEG_BSS) || (!S_IS_DEFINED (symbol_2_P)));
+  assert ((*symbol_1_PP) == NULL \
+	  || (S_GET_SEGMENT (*symbol_1_PP) == text_section) \
+	  || (S_GET_SEGMENT (*symbol_1_PP) == data_section) \
+	  || (S_GET_SEGMENT (*symbol_1_PP) == bss_section) \
+	  || (!S_IS_DEFINED (*symbol_1_PP)));
+  assert (symbol_2_P == NULL \
+	  || (S_GET_SEGMENT (symbol_2_P) == text_section) \
+	  || (S_GET_SEGMENT (symbol_2_P) == data_section) \
+	  || (S_GET_SEGMENT (symbol_2_P) == bss_section) \
+	  || (!S_IS_DEFINED (symbol_2_P)));
 #endif
   if (*symbol_1_PP)
     {
@@ -753,13 +738,13 @@ expr_part (symbol_1_PP, symbol_2_P)
 	{
 	  if (symbol_2_P)
 	    {
-	      return_value = SEG_PASS1;
+	      return_value = pass1_section;
 	      *symbol_1_PP = NULL;
 	    }
 	  else
 	    {
 	      know (!S_IS_DEFINED (*symbol_1_PP));
-	      return_value = SEG_UNKNOWN;
+	      return_value = undefined_section;
 	    }
 	}
       else
@@ -769,7 +754,7 @@ expr_part (symbol_1_PP, symbol_2_P)
 	      if (!S_IS_DEFINED (symbol_2_P))
 		{
 		  *symbol_1_PP = NULL;
-		  return_value = SEG_PASS1;
+		  return_value = pass1_section;
 		}
 	      else
 		{
@@ -777,7 +762,7 @@ expr_part (symbol_1_PP, symbol_2_P)
 		  as_bad ("Expression too complex, 2 symbolS forgotten: \"%s\" \"%s\"",
 			S_GET_NAME (*symbol_1_PP), S_GET_NAME (symbol_2_P));
 		  *symbol_1_PP = NULL;
-		  return_value = SEG_ABSOLUTE;
+		  return_value = absolute_section;
 		}
 	    }
 	  else
@@ -796,15 +781,21 @@ expr_part (symbol_1_PP, symbol_2_P)
       else
 	{
 	  *symbol_1_PP = NULL;
-	  return_value = SEG_ABSOLUTE;
+	  return_value = absolute_section;
 	}
     }
 #ifndef MANY_SEGMENTS
-  know (return_value == SEG_ABSOLUTE || return_value == SEG_TEXT || return_value == SEG_DATA || return_value == SEG_BSS || return_value == SEG_UNKNOWN || return_value == SEG_PASS1);
+  assert (return_value == absolute_section \
+	  || return_value == text_section \
+	  || return_value == data_section \
+	  || return_value == bss_section \
+	  || return_value == undefined_section \
+	  || return_value == pass1_section);
 #endif
-  know ((*symbol_1_PP) == NULL || (S_GET_SEGMENT (*symbol_1_PP) == return_value));
+  know ((*symbol_1_PP) == NULL
+	|| (S_GET_SEGMENT (*symbol_1_PP) == return_value));
   return (return_value);
-}				/* expr_part() */
+}
 
 /* Expression parser. */
 
@@ -913,13 +904,13 @@ expr (rank, resultP)
 	{
 	  input_line_pointer++;
 	}			/*->after operator. */
-      if (SEG_ABSENT == expr (op_rank[(int) op_left], &right))
+      if (absent_section == expr (op_rank[(int) op_left], &right))
 	{
 	  as_warn ("Missing operand value assumed absolute 0.");
 	  resultP->X_add_number = 0;
 	  resultP->X_subtract_symbol = NULL;
 	  resultP->X_add_symbol = NULL;
-	  resultP->X_seg = SEG_ABSOLUTE;
+	  resultP->X_seg = absolute_section;
 	}
       know (*input_line_pointer != ' ');
       c_right = *input_line_pointer;
@@ -933,26 +924,26 @@ expr (rank, resultP)
       /* left-hand quantity in resultP */
       /* right-hand quantity in right. */
       /* operator in op_left. */
-      if (resultP->X_seg == SEG_PASS1 || right.X_seg == SEG_PASS1)
+      if (resultP->X_seg == pass1_section || right.X_seg == pass1_section)
 	{
-	  resultP->X_seg = SEG_PASS1;
+	  resultP->X_seg = pass1_section;
 	}
       else
 	{
-	  if (resultP->X_seg == SEG_BIG)
+	  if (resultP->X_seg == big_section)
 	    {
 	      as_warn ("Left operand of %c is a %s.  Integer 0 assumed.",
 		    c_left, resultP->X_add_number > 0 ? "bignum" : "float");
-	      resultP->X_seg = SEG_ABSOLUTE;
+	      resultP->X_seg = absolute_section;
 	      resultP->X_add_symbol = 0;
 	      resultP->X_subtract_symbol = 0;
 	      resultP->X_add_number = 0;
 	    }
-	  if (right.X_seg == SEG_BIG)
+	  if (right.X_seg == big_section)
 	    {
 	      as_warn ("Right operand of %c is a %s.  Integer 0 assumed.",
 		       c_left, right.X_add_number > 0 ? "bignum" : "float");
-	      right.X_seg = SEG_ABSOLUTE;
+	      right.X_seg = absolute_section;
 	      right.X_add_symbol = 0;
 	      right.X_subtract_symbol = 0;
 	      right.X_add_number = 0;
@@ -974,7 +965,7 @@ expr (rank, resultP)
 	      right.X_subtract_symbol = symbolP;
 	      if (symbolP)
 		{
-		  right.X_seg = SEG_DIFFERENCE;
+		  right.X_seg = diff_section;
 		}
 	      op_left = O_add;
 	    }
@@ -985,63 +976,63 @@ expr (rank, resultP)
 	      segT seg2;
 #ifndef MANY_SEGMENTS
 
-	      know (resultP->X_seg == SEG_DATA || resultP->X_seg == SEG_TEXT || resultP->X_seg == SEG_BSS || resultP->X_seg == SEG_UNKNOWN || resultP->X_seg == SEG_DIFFERENCE || resultP->X_seg == SEG_ABSOLUTE || resultP->X_seg == SEG_PASS1 || resultP->X_seg == SEG_REGISTER);
+	      know (resultP->X_seg == data_section || resultP->X_seg == text_section || resultP->X_seg == bss_section || resultP->X_seg == undefined_section || resultP->X_seg == diff_section || resultP->X_seg == absolute_section || resultP->X_seg == pass1_section || resultP->X_seg == reg_section);
 
-	      know (right.X_seg == SEG_DATA || right.X_seg == SEG_TEXT || right.X_seg == SEG_BSS || right.X_seg == SEG_UNKNOWN || right.X_seg == SEG_DIFFERENCE || right.X_seg == SEG_ABSOLUTE || right.X_seg == SEG_PASS1);
+	      know (right.X_seg == data_section || right.X_seg == text_section || right.X_seg == bss_section || right.X_seg == undefined_section || right.X_seg == diff_section || right.X_seg == absolute_section || right.X_seg == pass1_section);
 #endif
 	      clean_up_expression (&right);
 	      clean_up_expression (resultP);
 
 	      seg1 = expr_part (&resultP->X_add_symbol, right.X_add_symbol);
 	      seg2 = expr_part (&resultP->X_subtract_symbol, right.X_subtract_symbol);
-	      if (seg1 == SEG_PASS1 || seg2 == SEG_PASS1)
+	      if (seg1 == pass1_section || seg2 == pass1_section)
 		{
 		  need_pass_2 = 1;
-		  resultP->X_seg = SEG_PASS1;
+		  resultP->X_seg = pass1_section;
 		}
-	      else if (seg2 == SEG_ABSOLUTE)
+	      else if (seg2 == absolute_section)
 		resultP->X_seg = seg1;
-	      else if (seg1 != SEG_UNKNOWN
-		       && seg1 != SEG_ABSOLUTE
-		       && seg2 != SEG_UNKNOWN
+	      else if (seg1 != undefined_section
+		       && seg1 != absolute_section
+		       && seg2 != undefined_section
 		       && seg1 != seg2)
 		{
-		  know (seg2 != SEG_ABSOLUTE);
+		  know (seg2 != absolute_section);
 		  know (resultP->X_subtract_symbol);
 #ifndef MANY_SEGMENTS
-		  know (seg1 == SEG_TEXT || seg1 == SEG_DATA || seg1 == SEG_BSS);
-		  know (seg2 == SEG_TEXT || seg2 == SEG_DATA || seg2 == SEG_BSS);
+		  know (seg1 == text_section || seg1 == data_section || seg1 == bss_section);
+		  know (seg2 == text_section || seg2 == data_section || seg2 == bss_section);
 #endif
 		  know (resultP->X_add_symbol);
 		  know (resultP->X_subtract_symbol);
 		  as_bad ("Expression too complex: forgetting %s - %s",
 			  S_GET_NAME (resultP->X_add_symbol),
 			  S_GET_NAME (resultP->X_subtract_symbol));
-		  resultP->X_seg = SEG_ABSOLUTE;
+		  resultP->X_seg = absolute_section;
 		  /* Clean_up_expression() will do the rest. */
 		}
 	      else
-		resultP->X_seg = SEG_DIFFERENCE;
+		resultP->X_seg = diff_section;
 
 	      resultP->X_add_number += right.X_add_number;
 	      clean_up_expression (resultP);
 	    }
 	  else
 	    {			/* Not +. */
-	      if (resultP->X_seg == SEG_UNKNOWN || right.X_seg == SEG_UNKNOWN)
+	      if (resultP->X_seg == undefined_section || right.X_seg == undefined_section)
 		{
-		  resultP->X_seg = SEG_PASS1;
+		  resultP->X_seg = pass1_section;
 		  need_pass_2 = 1;
 		}
 	      else
 		{
 		  resultP->X_subtract_symbol = NULL;
 		  resultP->X_add_symbol = NULL;
-		  /* Will be SEG_ABSOLUTE. */
-		  if (resultP->X_seg != SEG_ABSOLUTE || right.X_seg != SEG_ABSOLUTE)
+		  /* Will be absolute_section. */
+		  if (resultP->X_seg != absolute_section || right.X_seg != absolute_section)
 		    {
 		      as_bad ("Relocation error. Absolute 0 assumed.");
-		      resultP->X_seg = SEG_ABSOLUTE;
+		      resultP->X_seg = absolute_section;
 		      resultP->X_add_number = 0;
 		    }
 		  else

@@ -1,3 +1,8 @@
+Fri Mar 12 12:00:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* expr.c, write.c: Ultrix native 4.2 cc requires assert condition
+	to be on a single line.
+
 Thu Mar 11 17:56:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (config.h): Create file, writing out definitions of

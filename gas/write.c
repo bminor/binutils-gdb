@@ -214,7 +214,13 @@ chain_frchains_together (abfd, section, xxx)
      segT section;
      char *xxx;			/* unused */
 {
-  chain_frchains_together_1 (section, seg_info (section)->frchainP);
+  segment_info_type *info;
+
+  /* BFD may have introduced its own sections without using
+     subseg_new, so it is possible that seg_info is NULL.  */
+  info = seg_info (section);
+  if (info != (segment_info_type *) NULL)
+    chain_frchains_together_1 (section, info->frchainP);
 }
 
 #endif
@@ -277,8 +283,8 @@ cvt_frag_to_fill (x, fragP)
       md_convert_frag (headers, fragP);
 #endif
 
-      assert (fragP->fr_next == NULL
-	      || (fragP->fr_next->fr_address - fragP->fr_address
+      assert (fragP->fr_next == NULL \
+	      || (fragP->fr_next->fr_address - fragP->fr_address \
 		  == fragP->fr_fix));
 
       /*
@@ -557,9 +563,9 @@ write_object_file ()
      @@ Is this really necessary??  */
 #ifndef SUB_SEGMENT_ALIGN
 #ifdef BFD_ASSEMBLER
-#define SUB_SEGMENT_ALIGN (0)
+#define SUB_SEGMENT_ALIGN(SEG) (0)
 #else
-#define SUB_SEGMENT_ALIGN (2)
+#define SUB_SEGMENT_ALIGN(SEG) (2)
 #endif
 #endif
   for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
@@ -569,7 +575,7 @@ write_object_file ()
 #else
       subseg_new (frchainP->frch_seg, frchainP->frch_subseg);
 #endif
-      frag_align (SUB_SEGMENT_ALIGN, NOP_OPCODE);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
       /* frag_align will have left a new frag.
 	 Use this last frag for an empty ".fill".
 
@@ -1003,9 +1009,6 @@ write_object_file ()
 			 text_frag_root, data_frag_root);
 #endif /* VMS */
 #else /* BFD_ASSEMBLER */
-#ifdef obj_frob_file
-  obj_frob_file ();
-#endif
 
   /* Set up symbol table, and write it out.  */
   if (symbol_rootP)
@@ -1104,6 +1107,10 @@ write_object_file ()
 	  assert (result == true);
 	}
     }
+
+#ifdef obj_frob_file
+  obj_frob_file ();
+#endif
 
   /* Now that all the sizes are known, and contents correct, we can
      start writing the file.  */
