@@ -1144,7 +1144,7 @@ _initialize_x86_64_tdep (void)
   }
 
   tm_print_insn = gdb_print_insn_x86_64;
-  tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 3)->mach;
+  tm_print_insn_info.mach = bfd_mach_x86_64;
 
   /* Add the variable that controls the disassembly flavour.  */
   {

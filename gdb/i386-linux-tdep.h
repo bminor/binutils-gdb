@@ -1,6 +1,6 @@
-/* Target-dependent code for Linux/x86.
-   Copyright 2002
-   Free Software Foundation, Inc.
+/* Target-dependent code for GNU/Linux x86.
+
+   Copyright 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

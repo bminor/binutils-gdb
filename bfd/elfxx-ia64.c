@@ -724,7 +724,9 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   irelend = internal_relocs + sec->reloc_count;
 
   for (irel = internal_relocs; irel < irelend; irel++)
-    if (ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21B)
+    if (ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21B
+	|| ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21M
+	|| ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21F)
       break;
 
   /* No branch-type relocations.  */
@@ -756,7 +758,9 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       struct one_fixup *f;
       bfd_size_type amt;
 
-      if (ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21B)
+      if (ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21B
+	  && ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21M
+	  && ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21F)
 	continue;
 
       /* Get the value of the symbol referred to by the reloc.  */

@@ -513,6 +513,14 @@ gdb_expect  {
         timeout         { fail "(timeout) help maint internal-error" }
         }
 
+send_gdb "help maint internal-warning\n"
+gdb_expect  {
+        -re "Give GDB an internal warning\\.\r\nCause GDB to behave as if an internal warning was reported\\..*$gdb_prompt $"\
+                        { pass "help maint internal-warning" }
+        -re ".*$gdb_prompt $"       { fail "help maint internal-warning" }
+        timeout         { fail "(timeout) help maint internal-warning" }
+        }
+
 send_gdb "help maint print statistics\n"
 gdb_expect  {
         -re "Print statistics about internal gdb state\\..*$gdb_prompt $"\

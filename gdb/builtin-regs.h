@@ -26,6 +26,8 @@
 
 extern int builtin_reg_map_name_to_regnum (const char *str, int len);
 
+extern const char *builtin_reg_map_regnum_to_name (int regnum);
+
 extern struct value *value_of_builtin_reg (int regnum,
 					   struct frame_info *frame);
 

@@ -93,12 +93,16 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 int i386bsd_sc_pc_offset = 20;
 int i386bsd_sc_sp_offset = 8;
 
-static void
+void
 i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386bsd_pc_in_sigtramp);
+
+  /* Allow the recognition of sigtramps as a function named <sigtramp>.  */
+  set_gdbarch_sigtramp_start (gdbarch, i386bsd_sigtramp_start);
+  set_gdbarch_sigtramp_end (gdbarch, i386bsd_sigtramp_end);
 
   /* Assume SunOS-style shared libraries.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch,
@@ -111,61 +115,6 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_pc_offset = i386bsd_sc_pc_offset;
   tdep->sc_sp_offset = i386bsd_sc_sp_offset;
-}
-
-/* NetBSD 1.0 or later.  */
-
-CORE_ADDR i386nbsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386nbsd_sigtramp_end = 0xbfbfdff0;
-
-/* From <machine/signal.h>.  */
-int i386nbsd_sc_pc_offset = 44;
-int i386nbsd_sc_sp_offset = 56;
-
-static void
-i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Obviously NetBSD is BSD-based.  */
-  i386bsd_init_abi (info, gdbarch);
-
-  /* NetBSD uses -freg-struct-return by default.  */
-  tdep->struct_return = reg_struct_return;
-
-  /* NetBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386nbsd_sigtramp_start;
-  tdep->sigtramp_end = i386nbsd_sigtramp_end;
-
-  /* NetBSD has a `struct sigcontext' that's different from the
-     origional 4.3 BSD.  */
-  tdep->sc_pc_offset = i386nbsd_sc_pc_offset;
-  tdep->sc_sp_offset = i386nbsd_sc_sp_offset;
-}
-
-/* NetBSD ELF.  */
-static void
-i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* It's still NetBSD.  */
-  i386nbsd_init_abi (info, gdbarch);
-
-  /* But ELF-based.  */
-  i386_elf_init_abi (info, gdbarch);
-
-  /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					generic_in_solib_call_trampoline);
-
-  /* NetBSD ELF uses -fpcc-struct-return by default.  */
-  tdep->struct_return = pcc_struct_return;
-
-  /* We support the SSE registers on NetBSD ELF.  */
-  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS
-			+ I386_NUM_XREGS);
 }
 
 /* FreeBSD 3.0-RELEASE or later.  */
@@ -246,10 +195,6 @@ _initialize_i386bsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_AOUT,
-			  i386nbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_ELF,
- 			  i386nbsdelf_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_FREEBSD_AOUT,
 			  i386fbsdaout_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_FREEBSD_ELF,

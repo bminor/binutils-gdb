@@ -884,7 +884,14 @@ sh_saved_pc_after_call (struct frame_info *frame)
 static int
 sh_use_struct_convention (int gcc_p, struct type *type)
 {
+#if 0
   return (TYPE_LENGTH (type) > 1);
+#else
+  int len = TYPE_LENGTH (type);
+  int nelem = TYPE_NFIELDS (type);
+  return ((len != 1 && len != 2 && len != 4 && len != 8) || nelem != 1) &&
+	  (len != 8 || TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) != 4);
+#endif
 }
 
 static int
@@ -986,7 +993,7 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
@@ -1008,7 +1015,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       /* When the caller requests PR from the dummy frame, we return PC because
          that's where the previous routine appears to have done a call from. */
-      return generic_read_register_dummy (fi->pc, fi->frame, pr_regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, pr_regnum);
     else
       {
 	FRAME_INIT_SAVED_REGS (fi);
@@ -1722,11 +1729,11 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
-					       SP_REGNUM);
-      fi->extra_info->return_pc = generic_read_register_dummy (fi->pc,
-							       fi->frame,
-							       PC_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
+      fi->extra_info->return_pc = deprecated_read_register_dummy (fi->pc,
+								  fi->frame,
+								  PC_REGNUM);
       fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
       fi->extra_info->leaf_function = 0;
       return;
@@ -1754,10 +1761,10 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
-					       SP_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
       fi->extra_info->return_pc = 
-	generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+	deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
       fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
       fi->extra_info->leaf_function = 0;
       return;
@@ -2045,8 +2052,11 @@ sh_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (len < 4)
 	{
 	  /* value gets right-justified in the register or stack word */
-	  memcpy (valbuf + (4 - len),
-		  (char *) VALUE_CONTENTS (args[argnum]), len);
+	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	    memcpy (valbuf + (4 - len),
+		    (char *) VALUE_CONTENTS (args[argnum]), len);
+	  else
+	    memcpy (valbuf, (char *) VALUE_CONTENTS (args[argnum]), len);
 	  val = valbuf;
 	}
       else
@@ -2457,8 +2467,11 @@ sh_default_store_return_value (struct type *type, char *valbuf)
     {
       /* Add leading zeros to the value. */
       memset (buf, 0, REGISTER_RAW_SIZE (R0_REGNUM));
-      memcpy (buf + REGISTER_RAW_SIZE (R0_REGNUM) - TYPE_LENGTH (type),
-	      valbuf, TYPE_LENGTH (type));
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	memcpy (buf + REGISTER_RAW_SIZE (R0_REGNUM) - TYPE_LENGTH (type),
+		valbuf, TYPE_LENGTH (type));
+      else
+	memcpy (buf, valbuf, TYPE_LENGTH (type));
       write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
 			    REGISTER_RAW_SIZE (R0_REGNUM));
     }
@@ -4544,7 +4557,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);/*??should be 8?*/
+  set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);

@@ -388,7 +388,7 @@ char *mips_r3041_reg_names[] = {
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
 	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  "fp",	"",
+	"fsr",  "fir",  "",/*"fp"*/	"",
 	"",	"",	"bus",	"ccfg",	"",	"",	"",	"",
 	"",	"",	"port",	"cmp",	"",	"",	"epc",	"prid",
 };
@@ -405,7 +405,7 @@ char *mips_r3051_reg_names[] = {
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
 	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  "fp",	"",
+	"fsr",  "fir",  ""/*"fp"*/,	"",
 	"inx",	"rand",	"elo",	"",	"ctxt",	"",	"",	"",
 	"",	"",	"ehi",	"",	"",	"",	"epc",	"prid",
 };
@@ -422,7 +422,7 @@ char *mips_r3081_reg_names[] = {
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
 	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  "fp",	"",
+	"fsr",  "fir",  ""/*"fp"*/,	"",
 	"inx",	"rand",	"elo",	"cfg",	"ctxt",	"",	"",	"",
 	"",	"",	"ehi",	"",	"",	"",	"epc",	"prid",
 };
@@ -1589,21 +1589,29 @@ mips_frame_init_saved_regs (struct frame_info *frame)
 static CORE_ADDR
 read_next_frame_reg (struct frame_info *fi, int regno)
 {
-  for (; fi; fi = fi->next)
+  int optimized;
+  CORE_ADDR addr;
+  int realnum;
+  enum lval_type lval;
+  void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
+			 raw_buffer);
+  /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
+     should have a pseudo register range that correspons to the ABI's,
+     rather than the ISA's, view of registers.  These registers would
+     then implicitly describe their size and hence could be used
+     without the below munging.  */
+  if (lval == lval_memory)
     {
-      /* We have to get the saved sp from the sigcontext
-         if it is a signal handler frame.  */
-      if (regno == SP_REGNUM && !fi->signal_handler_caller)
-	return fi->frame;
-      else
+      if (regno < 32)
 	{
-	  if (fi->saved_regs == NULL)
-	    FRAME_INIT_SAVED_REGS (fi);
-	  if (fi->saved_regs[regno])
-	    return read_memory_integer (ADDR_BITS_REMOVE (fi->saved_regs[regno]), MIPS_SAVED_REGSIZE);
+	  /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+	     saved. */
+	  return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
 	}
     }
-  return read_signed_register (regno);
+
+  return extract_signed_integer (raw_buffer, REGISTER_VIRTUAL_SIZE (regno));
 }
 
 /* mips_addr_bits_remove - remove useless address bits  */
@@ -2328,7 +2336,7 @@ static mips_extra_func_info_t
 find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 {
   mips_extra_func_info_t proc_desc;
-  CORE_ADDR startaddr;
+  CORE_ADDR startaddr = 0;
 
   proc_desc = non_heuristic_proc_desc (pc, &startaddr);
 
@@ -2575,6 +2583,14 @@ mips_type_needs_double_align (struct type *type)
 
 #define ROUND_DOWN(n,a) ((n) & ~((a)-1))
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
+
+/* Adjust the address downward (direction of stack growth) so that it
+   is correctly aligned for a new stack frame.  */
+static CORE_ADDR
+mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return ROUND_DOWN (addr, 16);
+}
 
 static CORE_ADDR
 mips_eabi_push_arguments (int nargs,
@@ -2954,10 +2970,6 @@ mips_n32n64_push_arguments (int nargs,
 			  (typecode == TYPE_CODE_INT ||
 			   typecode == TYPE_CODE_PTR ||
 			   typecode == TYPE_CODE_FLT) && len <= 4)
-			longword_offset = MIPS_STACK_ARGSIZE - len;
-		      else if ((typecode == TYPE_CODE_STRUCT ||
-				typecode == TYPE_CODE_UNION) &&
-			       TYPE_LENGTH (arg_type) < MIPS_STACK_ARGSIZE)
 			longword_offset = MIPS_STACK_ARGSIZE - len;
 		    }
 
@@ -3778,13 +3790,21 @@ mips_pop_frame (void)
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	  && frame->saved_regs[regnum])
-	write_register (regnum,
-			read_memory_integer (frame->saved_regs[regnum],
-					     MIPS_SAVED_REGSIZE));
-    }
+    if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	&& frame->saved_regs[regnum])
+      {
+	/* Floating point registers must not be sign extended, 
+	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
+
+	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
+	  write_register (regnum,
+			  read_memory_unsigned_integer (frame->saved_regs[regnum],
+							MIPS_SAVED_REGSIZE));
+	else
+	  write_register (regnum,
+			  read_memory_integer (frame->saved_regs[regnum],
+					       MIPS_SAVED_REGSIZE));
+      }
 
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
@@ -4906,12 +4926,15 @@ mips_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 }
 
 static CORE_ADDR
-mips_extract_struct_value_address (struct regcache *ignore)
+mips_extract_struct_value_address (struct regcache *regcache)
 {
   /* FIXME: This will only work at random.  The caller passes the
      struct_return address in V0, but it is not preserved.  It may
      still be there, or this may be a random value.  */
-  return read_register (V0_REGNUM);
+  LONGEST val;
+
+  regcache_cooked_read_signed (regcache, V0_REGNUM, &val);
+  return val;
 }
 
 /* Exported procedure: Is PC in the signal trampoline code */
@@ -5427,59 +5450,47 @@ mips_coerce_float_to_double (struct type *formal, struct type *actual)
 
 static void
 mips_get_saved_register (char *raw_buffer,
-			 int *optimized,
+			 int *optimizedp,
 			 CORE_ADDR *addrp,
 			 struct frame_info *frame,
 			 int regnum,
-			 enum lval_type *lval)
+			 enum lval_type *lvalp)
 {
-  CORE_ADDR addr;
+  CORE_ADDR addrx;
+  enum lval_type lvalx;
+  int optimizedx;
+  int realnum;
 
   if (!target_has_registers)
     error ("No registers.");
 
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
+  /* Make certain that all needed parameters are present.  */
+  if (addrp == NULL)
+    addrp = &addrx;
+  if (lvalp == NULL)
+    lvalp = &lvalx;
+  if (optimizedp == NULL)
+    optimizedp = &optimizedx;
+  frame_register_unwind (get_next_frame (frame), regnum, optimizedp, lvalp,
+			 addrp, &realnum, raw_buffer);
+  /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
+     have a pseudo register range that correspons to the ABI's, rather
+     than the ISA's, view of registers.  These registers would then
+     implicitly describe their size and hence could be used without
+     the below munging.  */
+  if ((*lvalp) == lval_memory)
     {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
       if (raw_buffer != NULL)
 	{
-	  LONGEST val;
 	  if (regnum < 32)
-	    /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
-               saved. */
-	    val = read_memory_integer (addr, MIPS_SAVED_REGSIZE);
-	  else
-	    val = read_memory_integer (addr, REGISTER_RAW_SIZE (regnum));
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	    {
+	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+		 saved. */
+	      LONGEST val = read_memory_integer ((*addrp), MIPS_SAVED_REGSIZE);
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	    }
 	}
     }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
 }
 
 /* Immediately after a function call, return the saved pc.
@@ -5920,7 +5931,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
+  set_gdbarch_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
@@ -5960,6 +5971,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);

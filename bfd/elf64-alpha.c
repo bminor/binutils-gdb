@@ -3403,7 +3403,7 @@ elf64_alpha_merge_ind_symbols (hi, dummy)
 	{
 	  rin = ri->next;
 	  for (rs = rsh; rs ; rs = rs->next)
-	    if (ri->rtype == rs->rtype)
+	    if (ri->rtype == rs->rtype && ri->srel == rs->srel)
 	      {
 		rs->count += ri->count;
 		goto found_reloc;
@@ -5480,7 +5480,7 @@ elf64_alpha_ecoff_debug_swap =
 
 /* Use a non-standard hash bucket size of 8.  */
 
-const struct elf_size_info alpha_elf_size_info =
+static const struct elf_size_info alpha_elf_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),
@@ -5509,11 +5509,13 @@ const struct elf_size_info alpha_elf_size_info =
   NULL
 };
 
+#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
 #define ELF_MACHINE_CODE	EM_ALPHA
 #define ELF_MAXPAGESIZE	0x10000
+#endif /* ELF_ARCH */
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create

@@ -398,7 +398,7 @@ tui_out_new (struct ui_file *stream)
   data->stream = stream;
   data->suppress_output = 0;
   data->line = -1;
-  data->start_of_line = 1;
+  data->start_of_line = 0;
   return ui_out_new (&tui_ui_out_impl, data, flags);
 }
 

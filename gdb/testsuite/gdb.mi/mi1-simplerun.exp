@@ -140,7 +140,7 @@ proc test_controlled_execution {} {
 
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.
-    mi_run_to "exec-step 3" "end-stepping-range" "callee4" "" \
+    mi_execute_to "exec-step 3" "end-stepping-range" "callee4" "" \
 	"basics.c" "8" "" "step to callee4"
 
     # FIXME: A string argument is not printed right; should be fixed and

@@ -1331,10 +1331,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       reloc->address += isection->output_offset;
       return bfd_reloc_ok;
     }
-#if 0
-  else if (obfd != NULL)
-    return bfd_reloc_continue;
-#endif
 
   /* Catch relocs involving undefined symbols.  */
   if (bfd_is_und_section (symbol->section)
@@ -1422,6 +1418,11 @@ v850_elf_is_local_label_name (abfd, name)
 	  || (name[0] == '_' &&  name[1] == '.' && name[2] == 'L' && name[3] == '_'));
 }
 
+/* We overload some of the bfd_reloc error codes for own purposes.  */
+#define bfd_reloc_gp_not_found		bfd_reloc_other
+#define bfd_reloc_ep_not_found		bfd_reloc_continue
+#define bfd_reloc_ctbp_not_found	(bfd_reloc_dangerous + 1)
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -1496,7 +1497,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__gp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return bfd_reloc_other;
+	  return bfd_reloc_gp_not_found;
 
 	gp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1521,8 +1522,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ep", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  /* Actually this indicates that __ep could not be found.  */
-	  return bfd_reloc_continue;
+	  return bfd_reloc_ep_not_found;
 
 	ep = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1541,8 +1541,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ctbp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  /* Actually this indicates that __ctbp could not be found.  */
-	  return bfd_reloc_dangerous + 1;
+	  return bfd_reloc_ctbp_not_found;
 
 	ctbp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1563,7 +1562,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ctbp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return (bfd_reloc_dangerous + 1);
+	  return bfd_reloc_ctbp_not_found;
 
 	ctbp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1762,15 +1761,15 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      msg = _("internal error: dangerous relocation");
 	      goto common_error;
 
-	    case bfd_reloc_other:
+	    case bfd_reloc_gp_not_found:
 	      msg = _("could not locate special linker symbol __gp");
 	      goto common_error;
 
-	    case bfd_reloc_continue:
+	    case bfd_reloc_ep_not_found:
 	      msg = _("could not locate special linker symbol __ep");
 	      goto common_error;
 
-	    case (bfd_reloc_dangerous + 1):
+	    case bfd_reloc_ctbp_not_found:
 	      msg = _("could not locate special linker symbol __ctbp");
 	      goto common_error;
 
@@ -1848,8 +1847,12 @@ v850_elf_object_p (abfd)
   switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
     {
     default:
-    case E_V850_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
-    case E_V850E_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
+    case E_V850_ARCH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850);
+      break;
+    case E_V850E_ARCH:
+      bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e);
+      break;
     }
   return true;
 }
@@ -1865,9 +1868,9 @@ v850_elf_final_write_processing (abfd, linker)
 
   switch (bfd_get_mach (abfd))
     {
-    default:
-    case 0: val = E_V850_ARCH; break;
-    case bfd_mach_v850e:  val = E_V850E_ARCH; break;
+    default:		 
+    case bfd_mach_v850:  val = E_V850_ARCH; break;
+    case bfd_mach_v850e: val = E_V850E_ARCH; break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
@@ -2481,20 +2484,16 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 {
   Elf_Internal_Shdr *	    symtab_hdr;
   Elf_Internal_Rela *	    internal_relocs;
-  Elf_Internal_Rela *	    free_relocs = NULL;
   Elf_Internal_Rela *	    irel;
   Elf_Internal_Rela *	    irelend;
   Elf_Internal_Rela *	    irelalign = NULL;
+  Elf_Internal_Sym *	    isymbuf = NULL;
   bfd_byte *		    contents = NULL;
-  bfd_byte *		    free_contents = NULL;
-  Elf32_External_Sym *	    extsyms = NULL;
-  Elf32_External_Sym *	    free_extsyms = NULL;
   bfd_vma 		    addr = 0;
   bfd_vma		    toaddr;
   int 			    align_pad_size = 0;
-  Elf_Internal_Shdr *       shndx_hdr = NULL;
-  Elf_External_Sym_Shndx *  shndx_buf = NULL;
-  
+  boolean                   result = true;
+
   * again = false;
 
   if (link_info->relocateable
@@ -2514,8 +2513,6 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
     goto error_return;
-  if (! link_info->keep_memory)
-    free_relocs = internal_relocs;
 
   irelend = internal_relocs + sec->reloc_count;
   
@@ -2599,49 +2596,22 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 		  if (contents == NULL)
 		    goto error_return;
 
-		  free_contents = contents;
-
 		  if (! bfd_get_section_contents (abfd, sec, contents,
 						  (file_ptr) 0, sec->_raw_size))
 		    goto error_return;
 		}
 	    }
 
-	  /* Read this BFD's symbols if we haven't done so already.  */
-	  if (extsyms == NULL)
+	  /* Read this BFD's local symbols if we haven't done so already.  */
+	  if (isymbuf == NULL && symtab_hdr->sh_info != 0)
 	    {
-	      /* Get cached copy if it exists.  */
-	      if (symtab_hdr->contents != NULL)
-		extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-	      else
-		{
-		  /* Go get them off disk.  */
-		  bfd_size_type amt;
-
-		  amt = symtab_hdr->sh_info;
-		  amt *= sizeof (Elf32_External_Sym);
-		  extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
-		  if (extsyms == NULL)
-		    goto error_return;
-		  free_extsyms = extsyms;
-		  if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-		      || bfd_bread ((PTR) extsyms, amt, abfd) != amt)
-		    goto error_return;
-		}
-
-	      if (shndx_hdr->sh_size != 0)
-		{
-		  bfd_size_type amt;
-
-		  amt = symtab_hdr->sh_info;
-		  amt *= sizeof (Elf_External_Sym_Shndx);
-		  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-		  if (shndx_buf == NULL)
-		    goto error_return;
-		  if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-		      || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
-		    goto error_return;
-		}
+	      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	      if (isymbuf == NULL)
+		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						symtab_hdr->sh_info, 0,
+						NULL, NULL, NULL);
+	      if (isymbuf == NULL)
+		goto error_return;
 	    }
 
 	  laddr = irel->r_offset;
@@ -2733,27 +2703,12 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	
 	      if (ELF32_R_SYM (irelcall->r_info) < symtab_hdr->sh_info)
 		{
-		  unsigned int		   r_index;
-		  Elf_Internal_Sym         isym;
-		  asection *               sym_sec;
-		  Elf32_External_Sym *     esym;
-		  Elf_External_Sym_Shndx * shndx;
+		  Elf_Internal_Sym *  isym;
 
 		  /* A local symbol.  */
-		  r_index = ELF32_R_SYM (irelcall->r_info);
-		  esym = extsyms + r_index;
-		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
-		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+		  isym = isymbuf + ELF32_R_SYM (irelcall->r_info);
 
-		  if (isym.st_shndx == SHN_UNDEF)
-		    sym_sec = bfd_und_section_ptr;
-		  else if (isym.st_shndx == SHN_ABS)
-		    sym_sec = bfd_abs_section_ptr;
-		  else if (isym.st_shndx == SHN_COMMON)
-		    sym_sec = bfd_com_section_ptr;
-		  else
-		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
-		  symval = isym.st_value;
+		  symval = isym->st_value;
 		}
 	      else
 		{
@@ -2787,27 +2742,21 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	      /* Get the value of the symbol referred to by the reloc.  */
 	      if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
 		{
-		  unsigned int		   r_index;
-		  Elf_Internal_Sym         isym;
-		  asection *               sym_sec;
-		  Elf32_External_Sym *     esym;
-		  Elf_External_Sym_Shndx * shndx;
+		  Elf_Internal_Sym * isym;
+		  asection *         sym_sec;
 
 		  /* A local symbol.  */
-		  r_index = ELF32_R_SYM (irel->r_info);
-		  esym = extsyms + r_index;
-		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
-		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
+		  isym = isymbuf + ELF32_R_SYM (hi_irelfn->r_info);
           
-		  if (isym.st_shndx == SHN_UNDEF)
+		  if (isym->st_shndx == SHN_UNDEF)
 		    sym_sec = bfd_und_section_ptr;
-		  else if (isym.st_shndx == SHN_ABS)
+		  else if (isym->st_shndx == SHN_ABS)
 		    sym_sec = bfd_abs_section_ptr;
-		  else if (isym.st_shndx == SHN_COMMON)
+		  else if (isym->st_shndx == SHN_COMMON)
 		    sym_sec = bfd_com_section_ptr;
 		  else
-		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
-		  symval = (isym.st_value
+		    sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  symval = (isym->st_value
 			    + sym_sec->output_section->vma
 			    + sym_sec->output_offset);
 		}
@@ -2817,7 +2766,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 		  struct elf_link_hash_entry * h;
 
 		  /* An external symbol.  */
-		  indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+		  indx = ELF32_R_SYM (hi_irelfn->r_info) - symtab_hdr->sh_info;
 		  h = elf_sym_hashes (abfd)[indx];
 		  BFD_ASSERT (h != NULL);
 
@@ -2861,13 +2810,8 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	         that would be more work, but would require less memory when
 	         the linker is run.  */
 	      elf_section_data (sec)->relocs = internal_relocs;
-	      free_relocs = NULL;
-
 	      elf_section_data (sec)->this_hdr.contents = contents;
-	      free_contents = NULL;
-
-	      symtab_hdr->contents = (bfd_byte *) extsyms;
-	      free_extsyms = NULL;
+	      symtab_hdr->contents = (bfd_byte *) isymbuf;
       
 	      /* Replace the long call with a jarl.  */
 	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (hi_irelfn->r_info), R_V850_22_PCREL);
@@ -2968,38 +2912,33 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	      /* Get the value of the symbol referred to by the reloc.  */
 	      if (ELF32_R_SYM (hi_irelfn->r_info) < symtab_hdr->sh_info)
 		{
-		  unsigned int		   r_index;
-		  Elf_Internal_Sym         isym;
-		  asection *               sym_sec;
-		  Elf32_External_Sym *     esym;
-		  Elf_External_Sym_Shndx * shndx;
+		  Elf_Internal_Sym *  isym;
+		  asection *          sym_sec;
 
 		  /* A local symbol.  */
-		  r_index = ELF32_R_SYM (irel->r_info);
-		  esym = extsyms + r_index;
-		  shndx = shndx_buf + (shndx_buf ? r_index : 0);
-		  bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
-	  
-		  if (isym.st_shndx == SHN_UNDEF)
+		  isym = isymbuf + ELF32_R_SYM (hi_irelfn->r_info);
+
+		  if (isym->st_shndx == SHN_UNDEF)
 		    sym_sec = bfd_und_section_ptr;
-		  else if (isym.st_shndx == SHN_ABS)
+		  else if (isym->st_shndx == SHN_ABS)
 		    sym_sec = bfd_abs_section_ptr;
-		  else if (isym.st_shndx == SHN_COMMON)
+		  else if (isym->st_shndx == SHN_COMMON)
 		    sym_sec = bfd_com_section_ptr;
 		  else
-		    sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
-		  symval = (isym.st_value
+		    sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  symval = (isym->st_value
 			    + sym_sec->output_section->vma
 			    + sym_sec->output_offset);
 #ifdef DEBUG_RELAX
 		  {
 		    char * name = bfd_elf_string_from_elf_section
-		      (abfd, symtab_hdr->sh_link, isym.st_name);
+		      (abfd, symtab_hdr->sh_link, isym->st_name);
 
 		    fprintf (stderr, "relax long jump local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
-			     sym_sec->name, name, isym.st_name,
-			     sym_sec->output_section->vma, sym_sec->output_offset,
-			     isym.st_value, irel->r_addend);
+			     sym_sec->name, name, isym->st_name,
+			     sym_sec->output_section->vma,
+			     sym_sec->output_offset,
+			     isym->st_value, irel->r_addend);
 		  }
 #endif
 		}
@@ -3058,13 +2997,8 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	         that would be more work, but would require less memory when
 	         the linker is run.  */
 	      elf_section_data (sec)->relocs = internal_relocs;
-	      free_relocs = NULL;
-
 	      elf_section_data (sec)->this_hdr.contents = contents;
-	      free_contents = NULL;
-
-	      symtab_hdr->contents = (bfd_byte *) extsyms;
-	      free_extsyms = NULL;
+	      symtab_hdr->contents = (bfd_byte *) isymbuf;
 
 	      if (foff < -0x100 || foff >= 0x100)
 		{
@@ -3162,19 +3096,24 @@ v850_elf_relax_section (abfd, sec, link_info, again)
       sec->_cooked_size -= align_pad_size;
     }
 
-  return true;
+ finish:
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != (unsigned char *) contents)
+    free (contents);
+
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (bfd_byte *) isymbuf)
+    free (isymbuf);
+
+  return result;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-
-  if (free_contents != NULL)
-    free (free_contents);
-
-  if (free_extsyms != NULL)
-    free (free_extsyms);
-
-  return false;
+  result = false;
+  goto finish;
 }
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec

@@ -45,18 +45,18 @@ proc get_mi_thread_list {name} {
   # ^done,thread-ids=[thread-id="1",thread-id="2",...],number-of-threads="N"
   # (gdb)
   mi_gdb_test "-thread-list-ids" \
-    {\^done,thread-ids=\[(thread-id="[0-9]+"(,)*)+\],number-of-threads="[0-9]+"} \
+    {\^done,thread-ids=\{(thread-id="[0-9]+"(,)*)+\},number-of-threads="[0-9]+"} \
     "-thread_list_ids ($name)"
 
   set thread_list {}
-  if {![regexp {thread-ids=\[(thread-id="[0-9]+"(,)?)*\]} $expect_out(buffer) threads]} {
+  if {![regexp {thread-ids=\{(thread-id="[0-9]+"(,)?)*\}} $expect_out(buffer) threads]} {
     fail "finding threads in MI output ($name)"
   } else {
     pass "finding threads in MI output ($name)"
 
     # Make list of console threads
-    set start [expr {[string first \[ $threads] + 1}]
-    set end   [expr {[string first \] $threads] - 1}]
+    set start [expr {[string first \{ $threads] + 1}]
+    set end   [expr {[string first \} $threads] - 1}]
     set threads [string range $threads $start $end]
     foreach thread [split $threads ,] {
       if {[scan $thread {thread-id="%d"} num]} {
@@ -74,7 +74,7 @@ proc check_mi_and_console_threads {name} {
   global expect_out
 
   mi_gdb_test "-thread-list-ids" \
-    {\^done,thread-ids=\[(thread-id="[0-9]+"(,)*)+\],number-of-threads="[0-9]+"} \
+    {\^done,thread-ids=\{(thread-id="[0-9]+"(,)*)+\},number-of-threads="[0-9]+"} \
     "-thread-list-ids ($name)"
   set mi_output $expect_out(buffer)
 

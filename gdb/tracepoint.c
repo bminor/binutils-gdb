@@ -2071,10 +2071,12 @@ trace_find_tracepoint_command (char *args, int from_tty)
   if (target_is_remote ())
     {
       if (args == 0 || *args == 0)
-	if (tracepoint_number == -1)
-	  error ("No current tracepoint -- please supply an argument.");
-	else
-	  tdp = tracepoint_number;	/* default is current TDP */
+	{
+	  if (tracepoint_number == -1)
+	    error ("No current tracepoint -- please supply an argument.");
+	  else
+	    tdp = tracepoint_number;	/* default is current TDP */
+	}
       else
 	tdp = parse_and_eval_long (args);
 

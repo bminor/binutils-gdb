@@ -102,6 +102,23 @@ extern void tui_enable (void);
 /* Leave the tui mode.  */
 extern void tui_disable (void);
 
+enum tui_key_mode
+{
+  /* Plain command mode to enter gdb commands.  */
+  tui_command_mode,
+
+  /* SingleKey mode with some keys bound to gdb commands.  */
+  tui_single_key_mode,
+
+  /* Read/edit one command and return to SingleKey after it's processed.  */
+  tui_one_command_mode
+};
+
+extern enum tui_key_mode tui_current_key_mode;
+
+/* Change the TUI key mode by installing the appropriate readline keymap.  */
+extern void tui_set_key_mode (enum tui_key_mode mode);
+
 extern void tui_initialize_io (void);
 
 extern void tui_initialize_readline (void);
@@ -115,21 +132,10 @@ extern void tui_show_source (const char *file, int line);
 
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
-/* tuiDataWin.c */
-extern void tui_vCheckDataValues (va_list);
-
-/* tuiIO.c */
-extern void tui_vStartNewLines (va_list);
-
 /* tuiLayout.c */
 extern TuiStatus tui_set_layout (const char *);
 
 /* tuiSourceWin.c */
 extern void tuiUpdateAllExecInfos (void);
-extern void tui_vAllSetHasBreakAt (va_list);
-extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 
-/* tuiStack.c */
-extern void tui_vShowFrameInfo (va_list);
-extern void tui_vUpdateLocatorFilename (va_list);
 #endif /* TUI_H */

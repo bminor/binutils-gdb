@@ -173,10 +173,6 @@ v850_processor_type_table[] =
   }
   ,
   {
-    v850e_reg_names, bfd_mach_v850ea
-  }
-  ,
-  {
     NULL, 0
   }
 };
@@ -805,7 +801,7 @@ v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->saved_regs[regnum] != 0)
       return read_memory_unsigned_integer (fi->saved_regs[regnum],
 					   v850_register_raw_size (regnum));
@@ -1014,7 +1010,7 @@ CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
   else
     return v850_find_callers_reg (fi, E_RP_REGNUM);
 }

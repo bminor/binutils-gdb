@@ -2014,6 +2014,12 @@ extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_alig
 #endif
 #endif
 
+extern int gdbarch_frame_align_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADDR address);
+extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
+extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (EXTRA_STACK_ALIGNMENT_NEEDED)
 #define EXTRA_STACK_ALIGNMENT_NEEDED (1)
@@ -2385,6 +2391,80 @@ extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_s
 #endif
 #endif
 
+#if defined (SIGTRAMP_START)
+/* Legacy for systems yet to multi-arch SIGTRAMP_START */
+#if !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (0)
+#endif
+
+extern int gdbarch_sigtramp_start_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START_P)
+#error "Non multi-arch definition of SIGTRAMP_START"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (gdbarch_sigtramp_start_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_START)
+#define SIGTRAMP_START(pc) (internal_error (__FILE__, __LINE__, "SIGTRAMP_START"), 0)
+#endif
+
+typedef CORE_ADDR (gdbarch_sigtramp_start_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_sigtramp_start (struct gdbarch *gdbarch, gdbarch_sigtramp_start_ftype *sigtramp_start);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START)
+#error "Non multi-arch definition of SIGTRAMP_START"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_START)
+#define SIGTRAMP_START(pc) (gdbarch_sigtramp_start (current_gdbarch, pc))
+#endif
+#endif
+
+#if defined (SIGTRAMP_END)
+/* Legacy for systems yet to multi-arch SIGTRAMP_END */
+#if !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (0)
+#endif
+
+extern int gdbarch_sigtramp_end_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END_P)
+#error "Non multi-arch definition of SIGTRAMP_END"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (gdbarch_sigtramp_end_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_END)
+#define SIGTRAMP_END(pc) (internal_error (__FILE__, __LINE__, "SIGTRAMP_END"), 0)
+#endif
+
+typedef CORE_ADDR (gdbarch_sigtramp_end_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_sigtramp_end (struct gdbarch *gdbarch, gdbarch_sigtramp_end_ftype *sigtramp_end);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END)
+#error "Non multi-arch definition of SIGTRAMP_END"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_END)
+#define SIGTRAMP_END(pc) (gdbarch_sigtramp_end (current_gdbarch, pc))
+#endif
+#endif
+
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
    as the first action in a funtion's epilogue.  in_function_epilogue_p()
@@ -2480,6 +2560,22 @@ extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdba
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COFF_MAKE_MSYMBOL_SPECIAL)
 #define COFF_MAKE_MSYMBOL_SPECIAL(val, msym) (gdbarch_coff_make_msymbol_special (current_gdbarch, val, msym))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (NAME_OF_MALLOC)
+#define NAME_OF_MALLOC ("malloc")
+#endif
+
+extern const char * gdbarch_name_of_malloc (struct gdbarch *gdbarch);
+extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * name_of_malloc);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (NAME_OF_MALLOC)
+#error "Non multi-arch definition of NAME_OF_MALLOC"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NAME_OF_MALLOC)
+#define NAME_OF_MALLOC (gdbarch_name_of_malloc (current_gdbarch))
 #endif
 #endif
 

@@ -64,9 +64,9 @@ hms_supply_register (char *regname, int regnamelen, char *val, int vallen)
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
 
-static char *hms_regnames[NUM_REGS] =
+static char *hms_regnames[] =
 {
-  "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "CCR", "PC"
+  "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "CCR", "PC", "", "", "", ""
 };
 
 /*

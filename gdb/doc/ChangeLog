@@ -8,6 +8,77 @@
 	* gdb.texinfo: Add chapter on interpreters. Refer the
 	command-line option "-i"/"--interpreter" to this chapter.
 
+2002-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gdb.texinfo (Packets): Fix typos "alligned".
+	Correct z3/Z3 description.  Correct z4/Z4 title.
+
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* all-cfg.texi: Use @sc for GDB and GCC.  Update copyright.
+
+2002-09-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo: Use GNU/Linux instead of Linux.
+
+2002-09-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Packets): Replace @samp{} with ``an empty string''.
+
+2002-09-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo: Replace @example with @smallexample.
+
+2002-09-20  Kevin Buettner  <kevinb@redhat.com>
+
+	From Eli Zaretskii  <eliz@is.elta.co.il>:
+	* gdb.texinfo (Character Sets): Use @smallexample instead of
+	@example.  Use GNU/Linux instead of Linux.
+
+2002-09-20  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo: Add character set documentation.
+
+2002-09-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Packets): Revise `z' and `Z' packet documentation.
+	(Packets): Add cross reference from `b' packet to `z' packets.
+
+2002-09-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document ``maint
+	internal-error'' and ``maint internal-warning''.
+
+	* gdbint.texinfo (Target Architecture Definition): Revise
+	description of STACK_ALIGN.  Add description of FRAME_ALIGN.
+
+2002-09-19  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Target Conditionals): Document the new
+	NAME_OF_MALLOC macro.
+
+2002-09-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Contributors): Mention 5.2 and 5.3 release
+	engineer.
+
+2002-09-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Overview): Document status line fields.
+
+2002-09-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Commands): Document info win command.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Overview): Document breakpoint markers.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Single Key Mode): Document new SingleKey mode.
+	(TUI Keys): Likewise.
+
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Examples): Use ``->'' for a packet send and ``<-''

@@ -29,6 +29,7 @@
 #include "c-lang.h"
 #include "scm-lang.h"
 #include "scm-tags.h"
+#include "source.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
 
@@ -133,9 +134,11 @@ scm_unpack (struct type *type, char *valaddr, enum type_code context)
 static int
 in_eval_c (void)
 {
-  if (current_source_symtab && current_source_symtab->filename)
+  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+  
+  if (cursal.symtab && cursal.symtab->filename)
     {
-      char *filename = current_source_symtab->filename;
+      char *filename = cursal.symtab->filename;
       int len = strlen (filename);
       if (len >= 6 && strcmp (filename + len - 6, "eval.c") == 0)
 	return 1;

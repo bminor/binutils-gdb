@@ -1672,7 +1672,7 @@ safe_parse_type (char *p, int length)
    which info used to be in the stab's but was removed to hack back
    the space required for them.  */
 
-void
+static void
 check_stub_method (struct type *type, int method_id, int signature_id)
 {
   struct fn_field *f;
@@ -1779,6 +1779,49 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     TYPE_FLAGS (mtype) |= TYPE_FLAG_VARARGS;
 
   xfree (demangled_name);
+}
+
+/* This is the external interface to check_stub_method, above.  This function
+   unstubs all of the signatures for TYPE's METHOD_ID method name.  After
+   calling this function TYPE_FN_FIELD_STUB will be cleared for each signature
+   and TYPE_FN_FIELDLIST_NAME will be correct.
+
+   This function unfortunately can not die until stabs do.  */
+
+void
+check_stub_method_group (struct type *type, int method_id)
+{
+  int len = TYPE_FN_FIELDLIST_LENGTH (type, method_id);
+  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, method_id);
+  int j, found_stub = 0;
+
+  for (j = 0; j < len; j++)
+    if (TYPE_FN_FIELD_STUB (f, j))
+      {
+	found_stub = 1;
+	check_stub_method (type, method_id, j);
+      }
+
+  /* GNU v3 methods with incorrect names were corrected when we read in
+     type information, because it was cheaper to do it then.  The only GNU v2
+     methods with incorrect method names are operators and destructors;
+     destructors were also corrected when we read in type information.
+
+     Therefore the only thing we need to handle here are v2 operator
+     names.  */
+  if (found_stub && strncmp (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z", 2) != 0)
+    {
+      int ret;
+      char dem_opname[256];
+
+      ret = cplus_demangle_opname (TYPE_FN_FIELDLIST_NAME (type, method_id),
+				   dem_opname, DMGL_ANSI);
+      if (!ret)
+	ret = cplus_demangle_opname (TYPE_FN_FIELDLIST_NAME (type, method_id),
+				     dem_opname, 0);
+      if (ret)
+	TYPE_FN_FIELDLIST_NAME (type, method_id) = xstrdup (dem_opname);
+    }
 }
 
 const struct cplus_struct_type cplus_struct_default;
@@ -3434,7 +3477,6 @@ build_gdbtypes (void)
 	       TYPE_FLAG_UNSIGNED,
 	       "__bfd_vma", (struct objfile *) NULL);
 }
-
 
 extern void _initialize_gdbtypes (void);
 void

@@ -37,6 +37,8 @@
 #include "event-loop.h"
 #include "ui-out.h"
 
+#include "main.h"
+
 /* If nonzero, display time usage both at startup and for each command.  */
 
 int display_time;
@@ -109,12 +111,6 @@ captured_command_loop (void *data)
   quit_command (NULL, instream == stdin);
   return 1;
 }
-
-struct captured_main_args
-  {
-    int argc;
-    char **argv;
-  };
 
 static int
 captured_main (void *data)
@@ -399,6 +395,7 @@ extern int gdbtk_test (char *);
 	      else
 		baud_rate = i;
 	    }
+            break;
 	  case 'l':
 	    {
 	      int i;
@@ -737,12 +734,10 @@ extern int gdbtk_test (char *);
 }
 
 int
-main (int argc, char **argv)
+gdb_main (struct captured_main_args *args)
 {
-  struct captured_main_args args;
-  args.argc = argc;
-  args.argv = argv;
-  catch_errors (captured_main, &args, "", RETURN_MASK_ALL);
+  use_windows = args->use_windows;
+  catch_errors (captured_main, args, "", RETURN_MASK_ALL);
   return 0;
 }
 

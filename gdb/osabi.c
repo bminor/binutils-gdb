@@ -45,6 +45,7 @@ static const char * const gdb_osabi_names[] =
   "NetWare",
   "Irix",
   "LynxOS",
+  "Interix",
 
   "ARM EABI v1",
   "ARM EABI v2",

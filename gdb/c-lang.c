@@ -29,6 +29,8 @@
 #include "valprint.h"
 #include "macroscope.h"
 #include "gdb_assert.h"
+#include "charset.h"
+#include "gdb_string.h"
 
 extern void _initialize_c_language (void);
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
@@ -40,52 +42,30 @@ static void c_emit_char (int c, struct ui_file * stream, int quoter);
 static void
 c_emit_char (register int c, struct ui_file *stream, int quoter)
 {
+  const char *escape;
+  int host_char;
+
   c &= 0xFF;			/* Avoid sign bit follies */
 
-  if (PRINT_LITERAL_FORM (c))
+  escape = c_target_char_has_backslash_escape (c);
+  if (escape)
     {
-      if (c == '\\' || c == quoter)
-	{
-	  fputs_filtered ("\\", stream);
-	}
-      fprintf_filtered (stream, "%c", c);
+      if (quoter == '"' && strcmp (escape, "0") == 0)
+	/* Print nulls embedded in double quoted strings as \000 to
+	   prevent ambiguity.  */
+	fprintf_filtered (stream, "\\000");
+      else
+	fprintf_filtered (stream, "\\%s", escape);
+    }
+  else if (target_char_to_host (c, &host_char)
+           && host_char_print_literally (host_char))
+    {
+      if (host_char == '\\' || host_char == quoter)
+        fputs_filtered ("\\", stream);
+      fprintf_filtered (stream, "%c", host_char);
     }
   else
-    {
-      switch (c)
-	{
-	case '\n':
-	  fputs_filtered ("\\n", stream);
-	  break;
-	case '\b':
-	  fputs_filtered ("\\b", stream);
-	  break;
-	case '\t':
-	  fputs_filtered ("\\t", stream);
-	  break;
-	case '\f':
-	  fputs_filtered ("\\f", stream);
-	  break;
-	case '\r':
-	  fputs_filtered ("\\r", stream);
-	  break;
-        case '\013':
-          fputs_filtered ("\\v", stream);
-          break;
-	case '\033':
-	  fputs_filtered ("\\e", stream);
-	  break;
-	case '\007':
-	  fputs_filtered ("\\a", stream);
-	  break;
-        case '\0':
-          fputs_filtered ("\\0", stream);
-          break;
-	default:
-	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
-	  break;
-	}
-    }
+    fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
 }
 
 void

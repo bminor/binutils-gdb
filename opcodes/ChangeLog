@@ -1,3 +1,109 @@
+2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
+            Ken Raeburn  <raeburn@cygnus.com>
+            Aldy Hernandez  <aldyh@redhat.com>
+            Eric Christopher  <echristo@redhat.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips-dis.c (print_insn_arg): Handle '[', ']', 'e' and '%'.
+	(mips_isa_type): Handle bfd_mach_mips4120, bfd_mach_mips5400
+	and bfd_mach_mips5500.
+	* mips-opc.c (V1): Include INSN_4111 and INSN_4120.
+	(N411, N412, N5, N54, N55): New convenience defines.
+	(mips_builtin_opcodes): Add vr4120, vr5400 and vr5500 opcodes.
+	Change dmadd16 and madd16 from V1 to N411.
+
+2002-09-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (print_insn_mips): Always allow disassembly of
+	32-bit jalx opcode.
+
+2002-09-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2002-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2002-09-20  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c (CRFD, CRFS): Add PPC_OPERAND_CR flag so that cr
+	register names are accepted.
+
+2002-09-17  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: Add function declarations and ATTRIBUTE_UNUSED.
+	Convert functions to K&R format.
+
+2002-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c (MFDEC2): Include Book-E.
+	(PPCCHLK64): New opcode mask.
+	(evsubw, evsubiw, evmr, evnot, isellt, iselgt, iseleq, mfpid,
+	mfcsrr0, mfcsrr1, mfdear, mfesr, mfivpr, mfusprg0, mftbl,
+	mftbu, mfpir, mfdbsr, mfdbcr0, mfdbcr1, mfdbcr2, mfiac1,
+	mfiac2, mfiac3, mfiac4, mfdac1, mfdac2, mfdvc1, mfdvc2, mftsr,
+	mftcr, mfivor0, mfivor1, mfivor2, mfivor3, mfivor4, mfivor5,
+	mfivor6, mfivor7, mfivor8, mfivor9, mfivor10, mfivor11,
+	mfivor12, mfivor13, mfivor14, mfivor15, mfbbear, mfmcsrr0,
+	mfmcsrr1, mfmcsr, mtpid, mtdecar, mtcsrr0, mtcsrr1, mtdear,
+	mtesr, mtivpr, mtusprg0, mtsprg4, mtsprg5, mtsprg6, mtsprg7,
+	mtdbsr, mtdbcr0, mtdbcr1, mtdbcr2, mtiac1, mtiac2, mtiac3,
+	mtiac4, mtdac1, mtdac2, mtdvc1, mtdvc2, mttsr, mttcr, mtivor0,
+	mtivor1, mtivor2, mtivor3, mtivor4, mtivor5, mtivor6, mtivor7,
+	mtivor8, mtivor9, mtivor10, mtivor11, mtivor12, mtivor13,
+	mtivor14, mtivor15, mtbbear, mtmcsrr0, mtmcsrr1, mtmcsr): New
+	Book-E instructions.
+	(evfsneg): Fix opcode value.
+	(dcbtstlse, dcbtlse, icblce, dcblce, icbtsle): Use PPCCHLK64
+	mask.
+	(mcrxr64, tlbivaxe, tlbsxe, tlbsxe.): Restrict to 64-bit
+	Book-E.
+	(extsw): Restrict to 64-bit PPC instruction sets.
+	(extsw.): Does not exist in 64-bit Book-E.
+	(powerpc_macro): Remove mftbl, mftbu and mftb Book-E macros as
+	they are no longer needed.
+
+2002-09-12  Gary Hade  <garyhade@us.ibm.com>
+
+	* ppc-dis.c (powerpc_dialect): Add missing PPC_OPCODE_CLASSIC.
+
+2002-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation file.
+
+2002-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c (extsw, extsw.): Do not allow for the BookE32.
+
+2002-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* disassemble.c (disassembler_usage): Add invocation of
+	print_ppc_disassembler_options.
+	* ppc-dis.c (print_ppc_disassembler_options): New function.
+
+2002-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c: The BookE implementations of the TLBWE and TLBRE
+	instructions do not take any arguments.
+
+2002-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* v850-opc.c: Remove redundant references to V850EA architecture.
+
+2002-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* arc-opc.c: Include bfd.h.
+	(arc_get_opcode_mach): Subtract off base bfd_mach value.
+
+2002-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* v850-dis.c (disassemble): Remove bfd_mach_v850ea case.
+
+	* mips-dis.c (_print_insn_mips): Don't use hard-coded mach constants.
+
 2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.in: Added bfd_tic4x_arch.
@@ -18,9 +124,9 @@
 	* z8kgen.c (opt): Fix definition of "in rd,imm16" opcode.
 	* z8k-opc.h: Regenerated with new z8kgen.c.
 
-2002-08-19  Elena Zannoni  <ezannoni@redhat.com> 
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
 
-        From  matthew green  <mrg@redhat.com>
+	From  matthew green  <mrg@redhat.com>
 
 	* ppc-dis.c (powerpc_dialect): Support `-m500', `-m500x2' and
 	`-mefs'. Turn off AltiVec for E500 and efs.
@@ -53,7 +159,7 @@
 	(efsabs, efsnabs, efsneg, efsadd, efssub, efsmul,
 	efsdiv, efscmpgt, efscmplt, efscmpeq, efststgt, efststlt,
 	efststeq, efscfui, efsctuiz, efscfsi, efscfuf, efscfsf,
-	efsctui, efsctsi, efsctsiz, efsctuf, efsctsf, 
+	efsctui, efsctsi, efsctsiz, efsctuf, efsctsf,
 	evaddw, evaddiw, evsubfw, evsubifw, evabs, evneg, evextsb,
 	evextsh, evrndw, evcntlzw, evcntlsw, brinc, evand, evandc, evor,
 	evorc, evxor, eveqv, evnand, evnor, evrlw, evrlwi, evslw, evslwi,
@@ -237,9 +343,9 @@
 
 	* mips-opc.c: Clean up a few whitespace issues, and sort a
 	few entries understanding that 'x' follows 'w' in the alphabet.
-	
+
 2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
-            Ed Satterthwaite  <ehs@broadcom.com>
+	    Ed Satterthwaite  <ehs@broadcom.com>
 
 	* mips-opc.c: Add support for SB-1 MDMX subset and extensions.
 
@@ -250,11 +356,11 @@
 	* po/POTFILES.in: Regenerate.
 
 2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
-            Ed Satterthwaite  <ehs@broadcom.com>
+	    Ed Satterthwaite  <ehs@broadcom.com>
 
 	* mips-dis.c (print_insn_arg): Add support for 'O', 'Q', 'X', 'Y',
 	and 'Z' formats, for MDMX.
-        (mips_isa_type): Add MDMX instructions to the ISA
+	(mips_isa_type): Add MDMX instructions to the ISA
 	bit mask for bfd_mach_mipsisa64.
 	* mips-opc.c: Add support for MDMX instructions.
 	(MX): New definition.
@@ -264,7 +370,7 @@
 2002-05-30  Diego Novillo  <dnovillo@redhat.com>
 
 	* d10v-opc.c (d10v_opcodes): `btsti' does not modify its
-        arguments.
+	arguments.
 
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
@@ -359,7 +465,7 @@
 
 2002-05-07  Graydon Hoare  <graydon@redhat.com>
 
-	* cgen-dis.in: (print_insn_@arch@): Cache list of opened CPUs rather 
+	* cgen-dis.in: (print_insn_@arch@): Cache list of opened CPUs rather
 	than just most-recently-opened.
 
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
@@ -444,7 +550,7 @@
 2002-03-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* Makefile.am: Tidy up sh64 rules.
-        * Makefile.in: Regenerate.
+	* Makefile.in: Regenerate.
 
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
@@ -562,9 +668,9 @@
 2002-02-12  Graydon Hoare  <graydon@redhat.com>
 
 	* cgen-asm.in (parse_insn_normal): Change call from
-	@arch@_cgen_parse_operand to cd->parse_operand, to 
+	@arch@_cgen_parse_operand to cd->parse_operand, to
 	facilitate CGEN_ASM_INIT_HOOK doing useful work.
-	
+
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* sparc-dis.c (print_insn_sparc): Make sure 0xFFFFFFFF is not
@@ -1053,7 +1159,7 @@
 	* cgen-asm.in: Include safe-ctype.h in preference to
 	ctype.h.  Fix formatting.  Use ISSPACE instead of isspace and
 	TOLOWER instead of tolower.
-        (@arch@_cgen_build_insn_regex): Remove duplication of syntax
+	(@arch@_cgen_build_insn_regex): Remove duplication of syntax
 	string elements in constructed regular expression.
 	* fr30-asm.c: Regenerate.
 	* fr30-desc.c: Regenerate.
@@ -1120,7 +1226,7 @@
 	* sh-opc.h: Fix encoding of least significant nibble of the
 	DSP single data transfer instructions.
 
-        * sh-dis.c (print_insn_shx): Fix decoding of As opcode in DSP
+	* sh-dis.c (print_insn_shx): Fix decoding of As opcode in DSP
 	instructions.
 
 2001-10-08  Nick Clifton  <nickc@cambridge.redhat.com>
@@ -1129,30 +1235,30 @@
 	C files.
 	* cgen-dis.in: The same.
 	* cgen-ibld.in: The same.
-        * fr30-asm.c: Regenerate.
-        * fr30-desc.c: Regenerate.
-        * fr30-dis.c: Regenerate.
-        * fr30-ibld.c: Regenerate.
-        * fr30-opc.c: Regenerate.
-        * m32r-asm.c: Regenerate.
-        * m32r-desc.c: Regenerate.
-        * m32r-dis.c: Regenerate.
-        * m32r-ibld.c: Regenerate.
-        * m32r-opc.c: Regenerate.
-        * m32r-opinst.c Regenerate.
-        * openrisc-asm.c: Regenerate.
-        * openrisc-desc.c: Regenerate.
-        * openrisc-dis.c: Regenerate.
-        * openrisc-ibld.c: Regenerate.
-        * openrisc-opc.c: Regenerate.
-        * openrisc-opc.h: Regenerate.
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* fr30-opc.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opinst.c Regenerate.
+	* openrisc-asm.c: Regenerate.
+	* openrisc-desc.c: Regenerate.
+	* openrisc-dis.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+	* openrisc-opc.c: Regenerate.
+	* openrisc-opc.h: Regenerate.
 	* Makefile.in: Regenerate.
 	* po/POTFILES.in: Regenerate.
 	* po/opcodes.pot: Regenerate.
 
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
 
-        * arm-opc.h (arm_opcodes): Add cirrus insns.
+	* arm-opc.h (arm_opcodes): Add cirrus insns.
 
 	* arm-dis.c (print_insn_arm): Add 'I' case.
 
@@ -1169,9 +1275,9 @@
 
 2001-09-30  John Healy  <jhealy@redhat.com>
 
-        * cgen-ibld.in (insert_1): Switched bfd_get_bits and bfd_set_bits
-        calls to cgen_get_insn_value and cgen_put_insn_value calls.
-        (extract_1): Switched bfd_get_bits call to cgen_get_insn_value call.
+	* cgen-ibld.in (insert_1): Switched bfd_get_bits and bfd_set_bits
+	calls to cgen_get_insn_value and cgen_put_insn_value calls.
+	(extract_1): Switched bfd_get_bits call to cgen_get_insn_value call.
 
 2001-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
@@ -1475,10 +1581,10 @@
 
 2001-07-12  Jeff Johnston  <jjohnstn@redhat.com>
 
-        * cgen-asm.in: Include "xregex.h" always to enable the libiberty
-        regex support.
-        (@arch@_cgen_build_insn_regex): New routine from Graydon.
-        (@arch@_cgen_assemble_insn): Add Graydon's code to use regex
+	* cgen-asm.in: Include "xregex.h" always to enable the libiberty
+	regex support.
+	(@arch@_cgen_build_insn_regex): New routine from Graydon.
+	(@arch@_cgen_assemble_insn): Add Graydon's code to use regex
 	to verify if it is worth parsing the insn as insn "x".  Also update
 	error message when insn is not a recognized format of the insn vs
 	when the insn is completely unrecognized.
@@ -1607,10 +1713,10 @@
 
 2001-06-06  Christian Groessler <cpg@aladdin.de>
 
-        * z8k-dis.c: Fix formatting.
-        (unpack_instr): Remove unused cases in switch statement. Add
-        safety abort() in default case.
-        (unparse_instr): Add safety abort() in default case.
+	* z8k-dis.c: Fix formatting.
+	(unpack_instr): Remove unused cases in switch statement. Add
+	safety abort() in default case.
+	(unparse_instr): Add safety abort() in default case.
 
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
@@ -1732,21 +1838,21 @@
 
 2001-04-27  Johan Rydberg  <jrydberg@opencores.org>
 
-        * Makefile.am: Add OpenRISC target.
-        * Makefile.in: Regenerated.
+	* Makefile.am: Add OpenRISC target.
+	* Makefile.in: Regenerated.
 
-        * disassemble.c (disassembler): Recognize the OpenRISC disassembly.
+	* disassemble.c (disassembler): Recognize the OpenRISC disassembly.
 
-        * configure.in (bfd_openrisc_arch): Add target.
-        * configure: Regenerated.
+	* configure.in (bfd_openrisc_arch): Add target.
+	* configure: Regenerated.
 
-        * openrisc-asm.c: New file.
-        * openrisc-desc.c: Likewise.
-        * openrisc-desc.h: Likewise.
-        * openrisc-dis.c: Likewise.
-        * openrisc-ibld.c: Likewise.
-        * openrisc-opc.c: Likewise.
-        * openrisc-opc.h: Likewise.
+	* openrisc-asm.c: New file.
+	* openrisc-desc.c: Likewise.
+	* openrisc-desc.h: Likewise.
+	* openrisc-dis.c: Likewise.
+	* openrisc-ibld.c: Likewise.
+	* openrisc-opc.c: Likewise.
+	* openrisc-opc.h: Likewise.
 
 2001-04-24  Christian Groessler  <cpg@aladdin.de>
 
@@ -1800,8 +1906,8 @@
 
 2001-03-20  Patrick Macdonald  <patrickm@redhat.com>
 
-        * cgen-dis.in (print_insn_@arch@): Add support for target machine
-        determination via CGEN_COMPUTE_MACH.
+	* cgen-dis.in (print_insn_@arch@): Add support for target machine
+	determination via CGEN_COMPUTE_MACH.
 	* fr30-desc.c: Regenerate.
 	* fr30-dis.c: Regenerate.
 	* fr30-opc.h: Regenerate.
@@ -1835,8 +1941,8 @@
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn_thumb): Compute destination address
-        of BLX(1) instruction by taking bit 1 from PC and not from bit
-        0 of the offset.
+	of BLX(1) instruction by taking bit 1 from PC and not from bit
+	0 of the offset.
 
 2001-03-06  Igor Shevlyakov  <igor@windriver.com>
 
@@ -1899,11 +2005,11 @@
 
 2001-02-18  lars brinkhoff  <lars@nocrew.org>
 
-        * Makefile.am: Add PDP-11 target.
-        * configure.in: Likewise.
-        * disassemble.c: Likewise.
-        * pdp11-dis.c: New file.
-        * pdp11-opc.c: New file.
+	* Makefile.am: Add PDP-11 target.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* pdp11-dis.c: New file.
+	* pdp11-opc.c: New file.
 
 2001-02-14  Jim Wilson  <wilson@redhat.com>
 
@@ -1918,7 +2024,7 @@
 
 2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
-        * mips-dis.c (print_insn_arg): Use top four bits of the address of
+	* mips-dis.c (print_insn_arg): Use top four bits of the address of
 	the following instruction not of the jump itself for the jump
 	target.
 	(print_mips16_insn_arg): Likewise.
@@ -2123,28 +2229,28 @@
 
 2000-12-03  Chris Demetriou   cgd@sibyte.com
 
-        * mips-opc.c (mips_builtin_opcodes): Use the WR_HILO, RD_HILO,
-        MOD_HILO, and MOD_LO macros.
+	* mips-opc.c (mips_builtin_opcodes): Use the WR_HILO, RD_HILO,
+	MOD_HILO, and MOD_LO macros.
 
-        * mips-opc.c (M1, M2): Delete.
-        (mips_builtin_opcodes): Remove all uses of M1.
+	* mips-opc.c (M1, M2): Delete.
+	(mips_builtin_opcodes): Remove all uses of M1.
 
-        * mips-opc.c (mips_builtin_opcodes): Make the dmfc2 and dmtc2
-        instructions take "G" format second operands and use the
-        correct flags.
-        There are mfc3 and mtc3 opcodes, so add dmfc3 and dmtc3 opcodes to
+	* mips-opc.c (mips_builtin_opcodes): Make the dmfc2 and dmtc2
+	instructions take "G" format second operands and use the
+	correct flags.
+	There are mfc3 and mtc3 opcodes, so add dmfc3 and dmtc3 opcodes to
 	match.
-        Delete "sel" code operands from mfc1 and mtc1.
-        Add MIPS64 opcode changes (dclo, dclz), and "sel" code variants
+	Delete "sel" code operands from mfc1 and mtc1.
+	Add MIPS64 opcode changes (dclo, dclz), and "sel" code variants
 	for dm[ft]c[023].
 
 2000-12-03  Ed Satterthwaite  ehs@sibyte.com  and
-            Chris Demetriou   cgd@sibyte.com
+	    Chris Demetriou   cgd@sibyte.com
 
-        * mips-opc.c (mips_builtin_opcodes): Finish additions
-        for MIPS32 support, and clean up existing entries for
-        aesthetics, consistency with the MIPS32 ISA, and
-        with consistency the rest of the table.
+	* mips-opc.c (mips_builtin_opcodes): Finish additions
+	for MIPS32 support, and clean up existing entries for
+	aesthetics, consistency with the MIPS32 ISA, and
+	with consistency the rest of the table.
 
 2000-12-01  Nick Clifton  <nickc@redhat.com>
 
@@ -2153,32 +2259,32 @@
 
 2000-12-01  Chris Demetriou <cgd@sibyte.com>
 
-        mips-dis.c (print_insn_arg): Handle new 'U' and 'J' argument
-        specifiers.  Update 'B' for new constant names, and remove
-        'm'.
-        mips-opc.c (mips_builtin_opcodes): Place "pref" and "ssnop"
-        near the top of the array, so they are disassembled properly.
-        Enable "ssnop" for MIPS32.  Add "break" variant with 20 bit
-        code for MIPS32.  Update "clo" and "clz" to use 'U' operand
-        specifier.  Add 'H' format specifier variants for "mfc1,"
-        "mfc2," "mfc3," "mtc1," "mtc2," and "mtc3" for MIPS32.  Update
-        MIPS32 "sdbbp" to use 'B' operand specifier.  Add MIPS32
-        "wait" variant which uses 'J' operand specifier.
+	mips-dis.c (print_insn_arg): Handle new 'U' and 'J' argument
+	specifiers.  Update 'B' for new constant names, and remove
+	'm'.
+	mips-opc.c (mips_builtin_opcodes): Place "pref" and "ssnop"
+	near the top of the array, so they are disassembled properly.
+	Enable "ssnop" for MIPS32.  Add "break" variant with 20 bit
+	code for MIPS32.  Update "clo" and "clz" to use 'U' operand
+	specifier.  Add 'H' format specifier variants for "mfc1,"
+	"mfc2," "mfc3," "mtc1," "mtc2," and "mtc3" for MIPS32.  Update
+	MIPS32 "sdbbp" to use 'B' operand specifier.  Add MIPS32
+	"wait" variant which uses 'J' operand specifier.
 
-        * mips-dis.c (set_mips_isa_type): Update to use
-        CPU_UNKNOWN and ISA_* constants.  Add bfd_mach_mips32 case.
-        Replace bfd_mach_mips4K with bfd_mach_mips32_4k case.
-        * mips-opc.c (I32): New constant for instructions added in
-        MIPS32.
-        (P4): Delete.
-        (mips_builtin_opcodes) Replace all uses of P4 with I32.
+	* mips-dis.c (set_mips_isa_type): Update to use
+	CPU_UNKNOWN and ISA_* constants.  Add bfd_mach_mips32 case.
+	Replace bfd_mach_mips4K with bfd_mach_mips32_4k case.
+	* mips-opc.c (I32): New constant for instructions added in
+	MIPS32.
+	(P4): Delete.
+	(mips_builtin_opcodes) Replace all uses of P4 with I32.
 
-        * mips-dis.c (set_mips_isa_type): Add cases for
-        bfd_mach_mips5 and bfd_mach_mips64.
-        * mips-opc.c (I64): New definitions.
+	* mips-dis.c (set_mips_isa_type): Add cases for
+	bfd_mach_mips5 and bfd_mach_mips64.
+	* mips-opc.c (I64): New definitions.
 
-        * mips-dis.c (set_mips_isa_type): Add case for
-        bfd_mach_mips_sb1.
+	* mips-dis.c (set_mips_isa_type): Add case for
+	bfd_mach_mips_sb1.
 
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
@@ -2292,8 +2398,8 @@
 
 2000-09-07  Catherine Moore  <clm@redhat.com>
 
-        * d30v-opc.c (d30v_format_tab): Use format Ra for
-        modinc and moddec.
+	* d30v-opc.c (d30v_format_tab): Use format Ra for
+	modinc and moddec.
 
 2000-09-06  Alexandre Oliva  <aoliva@redhat.com>
 

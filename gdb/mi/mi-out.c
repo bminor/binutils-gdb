@@ -428,6 +428,15 @@ mi_out_put (struct ui_out *uiout,
   ui_file_rewind (data->buffer);
 }
 
+/* Current MI version.  */
+
+int
+mi_version (struct ui_out *uiout)
+{
+  struct ui_out_data *data = ui_out_data (uiout);
+  return data->mi_version;
+}
+
 /* initalize private members at startup */
 
 struct ui_out *

@@ -44,6 +44,7 @@
 #include "terminal.h"
 #include "target.h"
 #include "event-loop.h"
+#include "event-top.h"
 #include "command.h"
 #include "top.h"
 #include "readline/readline.h"
@@ -79,24 +80,34 @@
    is as if TUI is not used.  Readline also uses its original getc()
    function with stdin.
 
-   Note: the current readline is not clean in its management of the output.
-   Even if we install a redisplay handler, it sometimes writes on a stdout
-   file.  It is important to redirect every output produced by readline,
-   otherwise the curses window will be garbled.  This is implemented with
-   a pipe that TUI reads and readline writes to.  A gdb input handler
+   Note SCz/2001-07-21: the current readline is not clean in its management of
+   the output.  Even if we install a redisplay handler, it sometimes writes on
+   a stdout file.  It is important to redirect every output produced by
+   readline, otherwise the curses window will be garbled.  This is implemented
+   with a pipe that TUI reads and readline writes to.  A gdb input handler
    is created so that reading the pipe is handled automatically.
    This will probably not work on non-Unix platforms.  The best fix is
-   to make readline clean enougth so that is never write on stdout.  */
+   to make readline clean enougth so that is never write on stdout.
+
+   Note SCz/2002-09-01: we now use more readline hooks and it seems that
+   with them we don't need the pipe anymore (verified by creating the pipe
+   and closing its end so that write causes a SIGPIPE).  The old pipe code
+   is still there and can be conditionally removed by
+   #undef TUI_USE_PIPE_FOR_READLINE.  */
+
+/* For gdb 5.3, prefer to continue the pipe hack as a backup wheel.  */
+#define TUI_USE_PIPE_FOR_READLINE
+/*#undef TUI_USE_PIPE_FOR_READLINE*/
 
 /* TUI output files.  */
 static struct ui_file *tui_stdout;
 static struct ui_file *tui_stderr;
-static struct ui_out *tui_out;
+struct ui_out *tui_out;
 
 /* GDB output files in non-curses mode.  */
 static struct ui_file *tui_old_stdout;
 static struct ui_file *tui_old_stderr;
-static struct ui_out *tui_old_uiout;
+struct ui_out *tui_old_uiout;
 
 /* Readline previous hooks.  */
 static Function *tui_old_rl_getc_function;
@@ -109,10 +120,21 @@ static int tui_old_readline_echoing_p;
    Should be removed when readline is clean.  */
 static FILE *tui_rl_outstream;
 static FILE *tui_old_rl_outstream;
+#ifdef TUI_USE_PIPE_FOR_READLINE
 static int tui_readline_pipe[2];
+#endif
 
 static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
+static void
+tui_putc (char c)
+{
+  char buf[2];
+
+  buf[0] = c;
+  buf[1] = 0;
+  tui_puts (buf);
+}
 
 /* Print the string in the curses command window.  */
 void
@@ -151,7 +173,7 @@ tui_puts (const char *string)
 /* Readline callback.
    Redisplay the command line with its prompt after readline has
    changed the edited text.  */
-static void
+void
 tui_redisplay_readline (void)
 {
   int prev_col;
@@ -163,8 +185,16 @@ tui_redisplay_readline (void)
   WINDOW *w;
   char *prompt;
   int start_line;
-  
-  prompt = get_prompt ();
+
+  /* Detect when we temporarily left SingleKey and now the readline
+     edit buffer is empty, automatically restore the SingleKey mode.  */
+  if (tui_current_key_mode == tui_one_command_mode && rl_end == 0)
+    tui_set_key_mode (tui_single_key_mode);
+
+  if (tui_current_key_mode == tui_single_key_mode)
+    prompt = "";
+  else
+    prompt = get_prompt ();
   
   c_pos = -1;
   c_line = -1;
@@ -239,6 +269,7 @@ tui_deprep_terminal (void)
 {
 }
 
+#ifdef TUI_USE_PIPE_FOR_READLINE
 /* Read readline output pipe and feed the command window with it.
    Should be removed when readline is clean.  */
 static void
@@ -252,6 +283,193 @@ tui_readline_output (int code, gdb_client_data data)
     {
       buf[size] = 0;
       tui_puts (buf);
+    }
+}
+#endif
+
+/* Return the portion of PATHNAME that should be output when listing
+   possible completions.  If we are hacking filename completion, we
+   are only interested in the basename, the portion following the
+   final slash.  Otherwise, we return what we were passed.
+
+   Comes from readline/complete.c  */
+static char *
+printable_part (pathname)
+     char *pathname;
+{
+  char *temp;
+
+  temp = rl_filename_completion_desired ? strrchr (pathname, '/') : (char *)NULL;
+#if defined (__MSDOS__)
+  if (rl_filename_completion_desired && temp == 0 && isalpha (pathname[0]) && pathname[1] == ':')
+    temp = pathname + 1;
+#endif
+  return (temp ? ++temp : pathname);
+}
+
+/* Output TO_PRINT to rl_outstream.  If VISIBLE_STATS is defined and we
+   are using it, check for and output a single character for `special'
+   filenames.  Return the number of characters we output. */
+
+#define PUTX(c) \
+    do { \
+      if (CTRL_CHAR (c)) \
+        { \
+          tui_puts ("^"); \
+          tui_putc (UNCTRL (c)); \
+          printed_len += 2; \
+        } \
+      else if (c == RUBOUT) \
+	{ \
+	  tui_puts ("^?"); \
+	  printed_len += 2; \
+	} \
+      else \
+	{ \
+	  tui_putc (c); \
+	  printed_len++; \
+	} \
+    } while (0)
+
+static int
+print_filename (to_print, full_pathname)
+     char *to_print, *full_pathname;
+{
+  int printed_len = 0;
+  char *s;
+
+  for (s = to_print; *s; s++)
+    {
+      PUTX (*s);
+    }
+  return printed_len;
+}
+
+/* The user must press "y" or "n".  Non-zero return means "y" pressed.
+   Comes from readline/complete.c  */
+static int
+get_y_or_n ()
+{
+  extern int _rl_abort_internal ();
+  int c;
+
+  for (;;)
+    {
+      c = rl_read_key ();
+      if (c == 'y' || c == 'Y' || c == ' ')
+	return (1);
+      if (c == 'n' || c == 'N' || c == RUBOUT)
+	return (0);
+      if (c == ABORT_CHAR)
+	_rl_abort_internal ();
+      beep ();
+    }
+}
+
+/* A convenience function for displaying a list of strings in
+   columnar format on readline's output stream.  MATCHES is the list
+   of strings, in argv format, LEN is the number of strings in MATCHES,
+   and MAX is the length of the longest string in MATCHES.
+
+   Comes from readline/complete.c and modified to write in
+   the TUI command window using tui_putc/tui_puts.  */
+static void
+tui_rl_display_match_list (matches, len, max)
+     char **matches;
+     int len, max;
+{
+  typedef int QSFUNC (const void *, const void *);
+  extern int _rl_qsort_string_compare (const void*, const void*);
+  extern int _rl_print_completions_horizontally;
+  
+  int count, limit, printed_len;
+  int i, j, k, l;
+  char *temp;
+
+  /* Screen dimension correspond to the TUI command window.  */
+  int screenwidth = cmdWin->generic.width;
+
+  /* If there are many items, then ask the user if she really wants to
+     see them all. */
+  if (len >= rl_completion_query_items)
+    {
+      char msg[256];
+
+      sprintf (msg, "\nDisplay all %d possibilities? (y or n)", len);
+      tui_puts (msg);
+      if (get_y_or_n () == 0)
+	{
+	  tui_puts ("\n");
+	  return;
+	}
+    }
+
+  /* How many items of MAX length can we fit in the screen window? */
+  max += 2;
+  limit = screenwidth / max;
+  if (limit != 1 && (limit * max == screenwidth))
+    limit--;
+
+  /* Avoid a possible floating exception.  If max > screenwidth,
+     limit will be 0 and a divide-by-zero fault will result. */
+  if (limit == 0)
+    limit = 1;
+
+  /* How many iterations of the printing loop? */
+  count = (len + (limit - 1)) / limit;
+
+  /* Watch out for special case.  If LEN is less than LIMIT, then
+     just do the inner printing loop.
+	   0 < len <= limit  implies  count = 1. */
+
+  /* Sort the items if they are not already sorted. */
+  if (rl_ignore_completion_duplicates == 0)
+    qsort (matches + 1, len, sizeof (char *),
+           (QSFUNC *)_rl_qsort_string_compare);
+
+  tui_putc ('\n');
+
+  if (_rl_print_completions_horizontally == 0)
+    {
+      /* Print the sorted items, up-and-down alphabetically, like ls. */
+      for (i = 1; i <= count; i++)
+	{
+	  for (j = 0, l = i; j < limit; j++)
+	    {
+	      if (l > len || matches[l] == 0)
+		break;
+	      else
+		{
+		  temp = printable_part (matches[l]);
+		  printed_len = print_filename (temp, matches[l]);
+
+		  if (j + 1 < limit)
+		    for (k = 0; k < max - printed_len; k++)
+		      tui_putc (' ');
+		}
+	      l += count;
+	    }
+	  tui_putc ('\n');
+	}
+    }
+  else
+    {
+      /* Print the sorted items, across alphabetically, like ls -x. */
+      for (i = 1; matches[i]; i++)
+	{
+	  temp = printable_part (matches[i]);
+	  printed_len = print_filename (temp, matches[i]);
+	  /* Have we reached the end of this line? */
+	  if (matches[i+1])
+	    {
+	      if (i && (limit > 1) && (i % limit) == 0)
+		tui_putc ('\n');
+	      else
+		for (k = 0; k < max - printed_len; k++)
+		  tui_putc (' ');
+	    }
+	}
+      tui_putc ('\n');
     }
 }
 
@@ -284,6 +502,8 @@ tui_setup_io (int mode)
       readline_echoing_p = 0;
       rl_outstream = tui_rl_outstream;
       rl_prompt = 0;
+      rl_completion_display_matches_hook = tui_rl_display_match_list;
+      rl_already_prompted = 0;
 
       /* Keep track of previous gdb output.  */
       tui_old_stdout = gdb_stdout;
@@ -315,7 +535,9 @@ tui_setup_io (int mode)
       rl_prep_term_function = tui_old_rl_prep_terminal;
       rl_getc_function = tui_old_rl_getc_function;
       rl_outstream = tui_old_rl_outstream;
+      rl_completion_display_matches_hook = 0;
       readline_echoing_p = tui_old_readline_echoing_p;
+      rl_already_prompted = 0;
 
       /* Save tty for SIGCONT.  */
       savetty ();
@@ -361,8 +583,9 @@ tui_initialize_io ()
 
   /* Create the default UI.  It is not created because we installed
      a init_ui_hook.  */
-  uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = uiout = cli_out_new (gdb_stdout);
 
+#ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout:
      redirect readline output in a pipe, read that pipe and
      output the content in the curses command window.  */
@@ -386,8 +609,10 @@ tui_initialize_io ()
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NDELAY);
 #endif
 #endif
-
   add_file_handler (tui_readline_pipe[0], tui_readline_output, 0);
+#else
+  tui_rl_outstream = stdout;
+#endif
 }
 
 /* Get a character from the command window.  This is called from the readline
@@ -400,9 +625,11 @@ tui_getc (FILE *fp)
 
   w = cmdWin->generic.handle;
 
+#ifdef TUI_USE_PIPE_FOR_READLINE
   /* Flush readline output.  */
   tui_readline_output (GDB_READABLE, 0);
-  
+#endif
+
   ch = wgetch (w);
   ch = _tuiHandleResizeDuringIO (ch);
 

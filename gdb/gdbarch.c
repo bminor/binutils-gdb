@@ -244,6 +244,7 @@ struct gdbarch
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
+  gdbarch_frame_align_ftype *frame_align;
   int extra_stack_alignment_needed;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
@@ -260,11 +261,14 @@ struct gdbarch
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
   gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp;
+  gdbarch_sigtramp_start_ftype *sigtramp_start;
+  gdbarch_sigtramp_end_ftype *sigtramp_end;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
+  const char * name_of_malloc;
 };
 
 
@@ -414,11 +418,15 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
+  0,
+  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
   0,
   0,
+  "malloc",
   /* startup_gdbarch() */
 };
 
@@ -549,6 +557,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   current_gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
+  current_gdbarch->name_of_malloc = "malloc";
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -768,6 +777,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_num_args == 0))
     fprintf_unfiltered (log, "\n\tframe_num_args");
   /* Skip verify of stack_align, has predicate */
+  /* Skip verify of frame_align, has predicate */
   /* Skip verify of extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
@@ -786,11 +796,14 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
+  /* Skip verify of sigtramp_start, has predicate */
+  /* Skip verify of sigtramp_end, has predicate */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of dwarf2_build_frame_info, has predicate */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
+  /* Skip verify of name_of_malloc, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -815,6 +828,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: frame_align = 0x%08lx\n",
+                        (long) current_gdbarch->frame_align);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
@@ -1479,6 +1496,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->memory_remove_breakpoint
                         /*MEMORY_REMOVE_BREAKPOINT ()*/);
 #endif
+#ifdef NAME_OF_MALLOC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NAME_OF_MALLOC # %s\n",
+                      XSTRING (NAME_OF_MALLOC));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NAME_OF_MALLOC = %ld\n",
+                      (long) NAME_OF_MALLOC);
+#endif
 #ifdef NPC_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: NPC_REGNUM # %s\n",
@@ -1861,6 +1886,28 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SDB_REG_TO_REGNUM = 0x%08lx\n",
                         (long) current_gdbarch->sdb_reg_to_regnum
                         /*SDB_REG_TO_REGNUM ()*/);
+#endif
+#ifdef SIGTRAMP_END
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_END(pc)",
+                      XSTRING (SIGTRAMP_END (pc)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SIGTRAMP_END = 0x%08lx\n",
+                        (long) current_gdbarch->sigtramp_end
+                        /*SIGTRAMP_END ()*/);
+#endif
+#ifdef SIGTRAMP_START
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_START(pc)",
+                      XSTRING (SIGTRAMP_START (pc)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SIGTRAMP_START = 0x%08lx\n",
+                        (long) current_gdbarch->sigtramp_start
+                        /*SIGTRAMP_START ()*/);
 #endif
 #ifdef SIZEOF_CALL_DUMMY_WORDS
   fprintf_unfiltered (file,
@@ -4470,6 +4517,32 @@ set_gdbarch_stack_align (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_frame_align_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_align != 0;
+}
+
+CORE_ADDR
+gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->frame_align == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_frame_align invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_align called\n");
+  return gdbarch->frame_align (gdbarch, address);
+}
+
+void
+set_gdbarch_frame_align (struct gdbarch *gdbarch,
+                         gdbarch_frame_align_ftype frame_align)
+{
+  gdbarch->frame_align = frame_align;
+}
+
+int
 gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -4781,6 +4854,58 @@ set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_sigtramp_start_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->sigtramp_start != 0;
+}
+
+CORE_ADDR
+gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->sigtramp_start == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_sigtramp_start invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_start called\n");
+  return gdbarch->sigtramp_start (pc);
+}
+
+void
+set_gdbarch_sigtramp_start (struct gdbarch *gdbarch,
+                            gdbarch_sigtramp_start_ftype sigtramp_start)
+{
+  gdbarch->sigtramp_start = sigtramp_start;
+}
+
+int
+gdbarch_sigtramp_end_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->sigtramp_end != 0;
+}
+
+CORE_ADDR
+gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->sigtramp_end == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_sigtramp_end invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_end called\n");
+  return gdbarch->sigtramp_end (pc);
+}
+
+void
+set_gdbarch_sigtramp_end (struct gdbarch *gdbarch,
+                          gdbarch_sigtramp_end_ftype sigtramp_end)
+{
+  gdbarch->sigtramp_end = sigtramp_end;
+}
+
+int
 gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   gdb_assert (gdbarch != NULL);
@@ -4880,6 +5005,23 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
                                        gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
 {
   gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
+}
+
+const char *
+gdbarch_name_of_malloc (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of name_of_malloc, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_name_of_malloc called\n");
+  return gdbarch->name_of_malloc;
+}
+
+void
+set_gdbarch_name_of_malloc (struct gdbarch *gdbarch,
+                            const char * name_of_malloc)
+{
+  gdbarch->name_of_malloc = name_of_malloc;
 }
 
 

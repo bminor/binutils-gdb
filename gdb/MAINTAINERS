@@ -82,7 +82,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	h8300		--target=h8300hms -Werror
 			Maintenance only
-			Not multi-arch, work in progress
 
 	h8500		--target=h8500hms -Werror
 			Maintenance only
@@ -223,7 +222,7 @@ AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@redhat.com
-MS Windows (NT, CE, '00, 9x, Me) host & native
+MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
@@ -367,16 +366,17 @@ Stephane Carrez					stcarrez@nerim.fr
 Michael Chastain				mec@shout.net
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
-Philippe De Muyter				phdm@macqel.be
-Chris G. Demetriou				cgd@broadcom.com
-Klee Dienes					kdienes@apple.com
 DJ Delorie					dj@redhat.com
+Chris G. Demetriou				cgd@broadcom.com
+Philippe De Muyter				phdm@macqel.be
+Klee Dienes					kdienes@apple.com
 Richard Earnshaw				rearnsha@arm.com
 Frank Ch. Eigler				fche@redhat.com
 Ben Elliston					bje@redhat.com
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
 Chris Faylor					cgf@redhat.com
+Adam Fedor					fedor@gnu.org
 Fred Fish					fnf@ninemoons.com
 Orjan Friberg					orjanf@axis.com
 Ben Harris					bjh21@netbsd.org
@@ -394,8 +394,8 @@ Andreas Jaeger					aj@suse.de
 Geoff Keating					geoffk@redhat.com
 Mark Kettenis					kettenis@gnu.org
 Jim Kingdon					jkingdon@engr.sgi.com  ++
-Jeff Law					law@redhat.com
 Jonathan Larmour				jlarmour@redhat.co.uk
+Jeff Law					law@redhat.com
 Robert Lipe					rjl@sco.com
 H.J. Lu						hjl@lucon.org
 Michal Ludvig                                   mludvig@suse.cz
@@ -403,9 +403,11 @@ Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Jason Merrill					jason@redhat.com
 David S. Miller					davem@redhat.com
+Alan Modra					amodra@bigpond.net.au
 Jason Molenda					jmolenda@apple.com
 Pierre Muller					muller@sources.redhat.com
 Fernando Nasser					fnasser@redhat.com
+Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
@@ -416,12 +418,12 @@ Mark Salter					msalter@redhat.com
 Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
+Stan Shebs					shebs@apple.com
 Aidan Skinner					aidan@velvet.net
 Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@home.com
 Jackie Smith Cashion				jsmith@redhat.com
-Stan Shebs					shebs@apple.com
 Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
 Gary Thomas					gthomas@redhat.com
@@ -429,6 +431,7 @@ Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
+Jim Wilson					wilson@redhat.com
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
 

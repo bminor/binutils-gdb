@@ -337,7 +337,7 @@ alent;
 /* Object and core file sections.  */
 
 #define	align_power(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
+  (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
 
 typedef struct sec *sec_ptr;
 
@@ -534,6 +534,8 @@ extern void warn_deprecated
 #define bfd_get_symcount(abfd) ((abfd)->symcount)
 #define bfd_get_outsymbols(abfd) ((abfd)->outsymbols)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
+
+#define bfd_get_dynamic_symcount(abfd) ((abfd)->dynsymcount)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
@@ -1522,11 +1524,14 @@ enum bfd_architecture
 #define bfd_mach_mips4010              4010
 #define bfd_mach_mips4100              4100
 #define bfd_mach_mips4111              4111
+#define bfd_mach_mips4120              4120
 #define bfd_mach_mips4300              4300
 #define bfd_mach_mips4400              4400
 #define bfd_mach_mips4600              4600
 #define bfd_mach_mips4650              4650
 #define bfd_mach_mips5000              5000
+#define bfd_mach_mips5400              5400
+#define bfd_mach_mips5500              5500
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000
@@ -1629,7 +1634,6 @@ enum bfd_architecture
   bfd_arch_v850,      /* NEC V850 */
 #define bfd_mach_v850          0
 #define bfd_mach_v850e         'E'
-#define bfd_mach_v850ea        'A'
   bfd_arch_arc,       /* ARC Cores */
 #define bfd_mach_arc_5         0
 #define bfd_mach_arc_6         1
@@ -2263,6 +2267,9 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_386_RELATIVE,
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
+  BFD_RELOC_386_TLS_TPOFF,
+  BFD_RELOC_386_TLS_IE,
+  BFD_RELOC_386_TLS_GOTIE,
   BFD_RELOC_386_TLS_LE,
   BFD_RELOC_386_TLS_GD,
   BFD_RELOC_386_TLS_LDM,
@@ -2282,6 +2289,14 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_X86_64_RELATIVE,
   BFD_RELOC_X86_64_GOTPCREL,
   BFD_RELOC_X86_64_32S,
+  BFD_RELOC_X86_64_DTPMOD64,
+  BFD_RELOC_X86_64_DTPOFF64,
+  BFD_RELOC_X86_64_TPOFF64,
+  BFD_RELOC_X86_64_TLSGD,
+  BFD_RELOC_X86_64_TLSLD,
+  BFD_RELOC_X86_64_DTPOFF32,
+  BFD_RELOC_X86_64_GOTTPOFF,
+  BFD_RELOC_X86_64_TPOFF32,
 
 /* ns32k relocations  */
   BFD_RELOC_NS32K_IMM_8,
@@ -3461,6 +3476,9 @@ struct _bfd
 
   /* Symbol table for output BFD (with symcount entries).  */
   struct symbol_cache_entry  **outsymbols;
+
+  /* Used for slurped dynamic symbol tables.  */
+  unsigned int dynsymcount;
 
   /* Pointer to structure which contains architecture information.  */
   const struct bfd_arch_info *arch_info;

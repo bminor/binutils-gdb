@@ -195,7 +195,7 @@ gdb_expect {
 	    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }
-	    -re ".*in __wrap_main ().*$gdb_prompt $" {
+	    -re ".*in __wrap__?main ().*$gdb_prompt $" {
 		pass "step out of main (status wrapper)"
 	    }
             -re ".*$gdb_prompt $" { fail "step out of main (at end 2)" }
@@ -233,6 +233,9 @@ gdb_expect {
 # every BSP's exit function behaves differently, so there's no single
 # way to tell whether we've exited gracefully or not.  So don't run
 # these tests when use_gdb_stub is set, or when we're running under Cygmon.
+set program_exited_normally 0
+set program_not_exited 0
+set program_in_exit 0
 if {! [target_info exists use_gdb_stub]
     && (! [target_info exists use_cygmon] || ! [target_info use_cygmon])} {
     global program_exited;
@@ -244,33 +247,57 @@ if {! [target_info exists use_gdb_stub]
 		# then we won't get the "Single-stepping until function
 		# exit" message.
 		pass "step to end of run"
+		set program_exited_normally 1
 	    }
-	    -re "Single.*EXIT code 0.*Program exited normally.*$gdb_prompt $" {
+	    -re "Single.*EXIT code 0\r\n.*Program exited normally.*$gdb_prompt $" {
+		pass "step to end of run (status wrapper)"
+		set program_exited_normally 1
+	    }
+	    -re "Single.*EXIT code 0\r\n.*$gdb_prompt $" {
 		pass "step to end of run (status wrapper)"
 	    }
 	    -re ".*Single.*Program exited.*$gdb_prompt $" {
 		pass "step to end of run"
+		set program_exited_normally 1
 	    }
 	    -re ".*Single.*in exit.*from.*dld.sl.*$gdb_prompt $" {
 		pass "step to end of run" 
-		gdb_test "c" ".*" "continue after exit"
+		set program_in_exit 1
 	    }
 	    -re ".*Single.*_int_reset.*$gdb_prompt $" {
 	        pass "step to end of run"
-		setup_xfail "xstormy16-*-*"
+		if {![istarget "xstormy16-*-*"]} {
+		    set program_exited_normally 1
+		}
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "step to end of run"
+		set program_not_exited 1
 	    }
 	    timeout { 
 		fail "(timeout) step to end of run" 
+		set program_not_exited 1
 	    }
 	}   
     }
 
+    if {$program_in_exit} {
+	if {[gdb_test "c" ".*" "continue after exit"] == 0} {
+	    set program_exited_normally 1
+	}
+    } else {
+	unsupported "continue after exit"
+    }
+
     set timeout $old_timeout
 
-    gdb_test "n" ".*The program is not being run.*" "don't step after run"
+    if {$program_exited_normally} {
+        gdb_test "n" ".*The program is not being run.*" "don't step after run"
+    } elseif {$program_not_exited} {
+	unresolved "don't step after run"
+    } else {
+	unsupported "don't step after run"
+    }
 
     set exec_output [remote_exec host "ls core"]
 

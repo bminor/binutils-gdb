@@ -71,7 +71,16 @@ esac
 case "${targ}" in
 # START OF targmatch.h
 #ifdef BFD64
-  alpha*-*-netbsd* | alpha*-*-freebsd* | alpha*-*-openbsd*)
+  alpha*-*-freebsd*)
+    targ_defvec=bfd_elf64_alpha_freebsd_vec
+    targ_selvecs=ecoffalpha_little_vec
+    # FreeBSD <= 4.0 supports only the old nonstandard way of ABI labelling.
+    case "${targ}" in
+      alpha*-*-freebsd3* | alpha*-*-freebsd4 | alpha*-*-freebsd4.0*)
+	targ_cflags=-DOLD_FREEBSD_ABI_LABEL ;;
+    esac
+    ;;
+  alpha*-*-netbsd* | alpha*-*-openbsd*)
     targ_defvec=bfd_elf64_alpha_vec
     targ_selvecs=ecoffalpha_little_vec
     ;;
@@ -368,7 +377,7 @@ case "${targ}" in
   i[3456]86-*-chorus*)
     targ_defvec=bfd_elf32_i386_vec
     ;;
-  i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32* | i[3456]86-go32-rtems* )
+  *-*-msdosdjgpp* | *-*-go32* | *-go32-rtems* )
     targ_defvec=go32coff_vec
     targ_selvecs="go32stubbedcoff_vec i386aout_vec"
     ;;
@@ -399,8 +408,13 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   i[3456]86-*-freebsd*)
-    targ_defvec=bfd_elf32_i386_vec
+    targ_defvec=bfd_elf32_i386_freebsd_vec
     targ_selvecs=i386coff_vec
+    # FreeBSD <= 4.0 supports only the old nonstandard way of ABI labelling.
+    case "${targ}" in
+      i[3456]86-*-freebsd3* | i[3456]86-*-freebsd4 | i[3456]86-*-freebsd4.0*)
+	targ_cflags=-DOLD_FREEBSD_ABI_LABEL ;;
+    esac
     ;;
   i[3456]86-*-netbsdelf*) 
     targ_defvec=bfd_elf32_i386_vec
@@ -701,8 +715,8 @@ case "${targ}" in
     ;;
 #ifdef BFD64
   mips*-*-irix6*)
-    targ_defvec=bfd_elf32_bigmips_vec
-    targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
+    targ_defvec=bfd_elf32_nbigmips_vec
+    targ_selvecs="bfd_elf32_nlittlemips_vec bfd_elf32_bigmips_vec bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
 #endif
   mips*-*-irix5*)

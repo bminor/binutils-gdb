@@ -53,6 +53,7 @@
 #include "frame.h"
 #include "cli/cli-cmds.h"
 #include "top.h"
+#include "source.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -928,7 +929,7 @@ _tuiAllWindowsInfo (char *arg, int fromTTY)
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
-    if (winList[type]->generic.isVisible)
+    if (winList[type] && winList[type]->generic.isVisible)
       {
 	if (winWithFocus == winList[type])
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
@@ -1364,6 +1365,8 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
       if (winInfo->generic.content != (OpaquePtr) NULL)
 	{
 	  TuiLineOrAddress lineOrAddr;
+	  struct symtab_and_line cursal
+	    = get_current_source_symtab_and_line ();
 
 	  if (winInfo->generic.type == SRC_WIN)
 	    lineOrAddr.lineNo =
@@ -1373,19 +1376,20 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	      winInfo->detail.sourceInfo.startLineOrAddr.addr;
 	  freeWinContent (&winInfo->generic);
 	  tuiUpdateSourceWindow (winInfo,
-				 current_source_symtab, lineOrAddr, TRUE);
+				 cursal.symtab, lineOrAddr, TRUE);
 	}
       else if (selected_frame != (struct frame_info *) NULL)
 	{
 	  TuiLineOrAddress line;
-	  extern int current_source_line;
+	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
 
 	  s = find_pc_symtab (selected_frame->pc);
 	  if (winInfo->generic.type == SRC_WIN)
-	    line.lineNo = current_source_line;
+	    line.lineNo = cursal.line;
 	  else
 	    {
-	      find_line_pc (s, current_source_line, &line.addr);
+	      find_line_pc (s, cursal.line, &line.addr);
 	    }
 	  tuiUpdateSourceWindow (winInfo, s, line, TRUE);
 	}
@@ -1446,7 +1450,7 @@ _newHeightOk (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	}
       else
 	{
-	  int curTotalHeight, totalHeight, minHeight;
+	  int curTotalHeight, totalHeight, minHeight = 0;
 	  TuiWinInfoPtr firstWin, secondWin;
 
 	  if (curLayout == SRC_DISASSEM_COMMAND)
@@ -1465,7 +1469,7 @@ _newHeightOk (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	     ** line that the first and second windows share, and add one
 	     ** for the locator.
 	   */
-	  curTotalHeight =
+	  totalHeight = curTotalHeight =
 	    (firstWin->generic.height + secondWin->generic.height - 1)
 	    + cmdWin->generic.height + 1 /*locator */ ;
 	  if (primaryWinInfo == cmdWin)

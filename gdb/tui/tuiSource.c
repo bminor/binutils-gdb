@@ -54,17 +54,7 @@
 #include "tuiSource.h"
 
 
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
-
-static struct breakpoint *_hasBreak (char *, int);
-
-
-/*
-   ** tuiSetSourceContent().
-   **    Function to display source in the source window.
- */
+/* Function to display source in the source window.  */
 TuiStatus
 tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 {
@@ -79,10 +69,8 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
       if ((ret = tuiAllocSourceBuffer (srcWin)) == TUI_SUCCESS)
 	{
 	  lineWidth = srcWin->generic.width - 1;
-	  /*
-	     ** Take hilite (window border) into account, when calculating
-	     ** the number of lines
-	   */
+	  /* Take hilite (window border) into account, when calculating
+	     the number of lines  */
 	  nlines = (lineNo + (srcWin->generic.height - 2)) - lineNo;
 	  desc = open_source_file (s);
 	  if (desc < 0)
@@ -141,7 +129,6 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 		    {
 		      TuiWinElementPtr element = (TuiWinElementPtr)
 		      srcWin->generic.content[curLine];
-		      struct breakpoint *bp;
 
 		      /* get the first character in the line */
 		      c = fgetc (stream);
@@ -163,10 +150,8 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 			}
 		      srcLine[curLen] = (char) 0;
 
-		      /*
-		         ** Set whether element is the execution point and
-		         ** whether there is a break point on it.
-		       */
+		      /* Set whether element is the execution point and
+		         whether there is a break point on it.  */
 		      element->whichElement.source.lineOrAddr.lineNo =
 			curLineNo;
 		      element->whichElement.source.isExecPoint =
@@ -175,11 +160,6 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 				 s->filename) == 0
 			 && curLineNo == ((TuiWinElementPtr)
 			 locator->content[0])->whichElement.locator.lineNo);
-		      bp = _hasBreak (s->filename, curLineNo);
-		      element->whichElement.source.hasBreak =
-			(bp != (struct breakpoint *) NULL &&
-			 (!element->whichElement.source.isExecPoint ||
-			  (bp->disposition != disp_del || bp->hit_count <= 0)));
 		      if (c != EOF)
 			{
 			  i = strlen (srcLine) - 1;
@@ -199,13 +179,11 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 				      srcLine[i] = '?';
 				    }
 				  else
-				    {	/*
-					   ** Store the charcter in the line
-					   ** buffer.  If it is a tab, then
-					   ** translate to the correct number of
-					   ** chars so we don't overwrite our
-					   ** buffer.
-					 */
+				    {	/* Store the charcter in the line
+					   buffer.  If it is a tab, then
+					   translate to the correct number of
+					   chars so we don't overwrite our
+					   buffer.  */
 				      if (c == '\t')
 					{
 					  int j, maxTabLen = tuiDefaultTabLen ();
@@ -224,10 +202,8 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 				  srcLine[i + 1] = 0;
 				}
 			      else
-				{	/*
-					   ** if we have not reached EOL, then eat
-					   ** chars until we do
-					 */
+				{	/* If we have not reached EOL, then eat
+                                           chars until we do  */
 				  while (c != EOF && c != '\n' && c != '\r')
 				    c = fgetc (stream);
 				}
@@ -257,7 +233,7 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 	}
     }
   return ret;
-}				/* tuiSetSourceContent */
+}
 
 
 /* elz: this function sets the contents of the source window to empty
@@ -328,44 +304,30 @@ tuiSetSourceContentNil (TuiWinInfoPtr winInfo, char *warning_string)
       curr_line++;
 
     }				/* end while */
-
-}				/*tuiSetSourceContentNil */
-
+}
 
 
-
-/*
-   ** tuiShowSource().
-   **        Function to display source in the source window.  This function
-   **        initializes the horizontal scroll to 0.
- */
+/* Function to display source in the source window.  This function
+   initializes the horizontal scroll to 0.  */
 void
 tuiShowSource (struct symtab *s, TuiLineOrAddress line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
   tuiUpdateSourceWindowAsIs(srcWin, s, line, noerror);
-
-  return;
-}				/* tuiShowSource */
+}
 
 
-/*
-   ** tuiSourceIsDisplayed().
-   **        Answer whether the source is currently displayed in the source window.
- */
+/* Answer whether the source is currently displayed in the source window.  */
 int
 tuiSourceIsDisplayed (char *fname)
 {
   return (srcWin->generic.contentInUse &&
 	  (strcmp (((TuiWinElementPtr) (locatorWinInfoPtr ())->
 		  content[0])->whichElement.locator.fileName, fname) == 0));
-}				/* tuiSourceIsDisplayed */
+}
 
 
-/*
-   ** tuiVerticalSourceScroll().
-   **      Scroll the source forward or backward vertically
- */
+/* Scroll the source forward or backward vertically.  */
 void
 tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
                          int numToScroll)
@@ -375,11 +337,12 @@ tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
       TuiLineOrAddress l;
       struct symtab *s;
       TuiWinContent content = (TuiWinContent) srcWin->generic.content;
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      if (current_source_symtab == (struct symtab *) NULL)
+      if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (selected_frame->pc);
       else
-	s = current_source_symtab;
+	s = cursal.symtab;
 
       if (scrollDirection == FORWARD_SCROLL)
 	{
@@ -397,39 +360,7 @@ tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
 	  if (l.lineNo <= 0)
 	    l.lineNo = 1;
 	}
-      if (identify_source_line (s, l.lineNo, 0, -1) == 1)
-        tuiUpdateSourceWindowAsIs (srcWin, s, l, FALSE);
+
+      print_source_lines (s, l.lineNo, l.lineNo + 1, 0);
     }
-
-  return;
-}				/* tuiVerticalSourceScroll */
-
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS                 **
-******************************************/
-
-/*
-   ** _hasBreak().
-   **        Answer whether there is a break point at the input line in
-   **        the source file indicated
- */
-static struct breakpoint *
-_hasBreak (char *sourceFileName, int lineNo)
-{
-  struct breakpoint *bpWithBreak = (struct breakpoint *) NULL;
-  struct breakpoint *bp;
-  extern struct breakpoint *breakpoint_chain;
-
-
-  for (bp = breakpoint_chain;
-       (bp != (struct breakpoint *) NULL &&
-	bpWithBreak == (struct breakpoint *) NULL);
-       bp = bp->next)
-    if (bp->source_file
-	&& (strcmp (sourceFileName, bp->source_file) == 0)
-	&& (lineNo == bp->line_number))
-      bpWithBreak = bp;
-
-  return bpWithBreak;
-}				/* _hasBreak */
+}

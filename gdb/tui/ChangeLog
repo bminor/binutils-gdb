@@ -1,3 +1,182 @@
+2002-09-29  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tui.c (tui_show_source): Don't access current_source_symtab, use
+	accessor function instead.  Include source.h and symtab.h
+	* tuiDisassem.c (tuiShowDisassemAndUpdateSource,
+	tuiVerticalDisassemScroll): Use accessor functions for current
+	source line and symtab.  Include source.h.
+	* tuiLayout.c (_extractDisplayStartAddr): Use accessor functions
+	for current source line and symtab.  Include source.h.
+	* tuiWin.c (_makeVisibleWithNewHeight): Ditto.
+	* tuiSourceWin.c (tuiUpdateSourceWindowAsIs,
+	tuiHorizontalSourceScroll): Ditto.
+	* tuiSource.c (tuiVerticalSourceScroll): Ditto.
+
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_rl_switch_mode): Remove unecessary TUI switch printfs.
+	(tui_initialize_readline): Allow to use space to leave SingleKey
+	to enter one gdb command.
+	(tui_enable): Restore the TUI keymap when we are back to TUI.
+	(tui_disable): Restore normal keymap when leaving TUI.
+	* tuiIO.c (tui_redisplay_readline): Restore the SingleKey mode
+	when the buffer becomes empty and we are in tui_one_command_mode.
+
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_setup_io): rl_already_prompted must be cleared
+	when leaving TUI mode so that gdb prompt is displayed.
+
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiStack.c (tui_make_status_line): Make sure the local buffer
+	is large enough to hold the complete line.
+
+2002-09-10  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_event_loop): New function.
+	(tui_command_loop): New function to override gdb loop and make sure
+	uiout is set according to TUI mode.
+	(tui_command_loop): Install the specific TUI command hook.
+	* tuiIO.c (tui_initialize_io): Initialize tui_old_uiout.
+	(tui_uiout, tui_old_uiout): Make public.
+	* tuiIO.h (tui_uiout, tui_old_uiout): Declare.
+
+2002-09-04  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_putc): New function to print one character.
+	(printable_part): New function from readline/complete.c.
+	(PUTX): New macro, likewise.
+	(print_filename): New function, likewise.
+	(get_y_or_n): New function, likewise and adapted for TUI.
+	(tui_rl_display_match_list): New function from readline/complete.c
+	and writes on TUI command window.
+	(tui_setup_io): Install or remove the readline hook
+	rl_completion_display_matches_hook so that completion is written
+	directly in TUI command window instead of in the TUI pipe.
+	(tui_initialize_io): Use #ifdef TUI_USE_PIPE_FOR_READLINE for the
+	TUI redirection pipe.
+	(tui_getc): Likewise for call to tui_readline_output.
+	(tui_readline_output): Likewise for function.
+	* tui.c (tui_rl_startup_hook): Always take care of gdb prompt.
+
+2002-09-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiWin.c (_newHeightOk): Fix compilation warnings.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiWin.c (_tuiAllWindowsInfo): Don't crash if the window
+	is not displayed.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-out.c (tui_out_new): Clear start_of_line.
+	* tuiSource.c (tuiVerticalSourceScroll): Use print_source_lines
+	to update the current source line.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-hooks.c (tui_detach_hook): New hook to know when a process dies.
+	(tui_install_hooks): Install it.
+	(tui_remove_hooks): Remove it.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiData.h (FILE_PREFIX): Don't define.
+	(blankStr, locationStr, breakStr): Don't declare.
+	(breakLocationStr, nullStr, historyLimit, setHistoryLimitTo): Likewise.
+	(displayableWinContentOf, displayableWinContentAt): Likewise.
+	(winElementHeight, winByName, freeAllWindows): Likewise.
+
+	* tuiData.c (blankStr, locationStr, breakStr): Remove.
+	(breakLocationStr, nullStr, historyLimit, setHistoryLimitTo): Remove.
+	(displayableWinContentOf, displayableWinContentAt): Remove.
+	(winElementHeight, winByName, freeAllWindows): Remove.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiStack.c (tui_make_status_line): New function to create the
+	status line.
+	(tuiShowLocatorContent): Use it instead of displayableWinContentAt.
+	* tuiData.h (PROC_PREFIX): Use "In:" to reduce length of prefix.
+	(PC_PREFIX): Use upper case.
+	(SINGLE_KEY, MIN_LINE_WIDTH, MIN_PROC_WIDTH): Define.
+	(MAX_TARGET_WIDTH, MAX_PID_WIDTH): Define.
+
+2002-08-31  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiSourceWin.h (tuiUpdateAllExecInfos): Don't declare.
+	(tuiClearAllExecInfosContent): Likewise.
+	(tuiEraseAllExecInfosContent): Ditto.
+	(tuiUpdateSourceWindowsFromLocator): Ditto.
+	* tuiSourceWin.c (tuiUpdateAllExecInfos): Remove.
+	* tui.h (tui_vCheckDataValues): Don't declare.
+	(tui_vStartNewLines, tui_vAllSetHasBreakAt): Likewise.
+	(tui_vUpdateLocatorFilename, tui_vUpdateSourceWindowsWithAddr): Ditto.
+	(tui_vShowFrameInfo): Ditto.
+
+2002-08-31  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_commands): Table of single key commands.
+	(tui_rl_command_key): New function to execute gdb command.
+	(tui_rl_command_mode): New function to temporarily leave SingleKey.
+	(tui_rl_next_keymap): New function to enter/leave the SingleKey mode.
+	(tui_rl_startup_hook): New function to avoid prompt display by
+	readline functions.
+	(tui_set_key_mode): New function to set the key mode and install
+	the readline keymap.
+	(tui_initialize_readline): Create TUI SingleKey readline map.
+	(tui_enable): Install rl_startup_hook.
+	(tui_disable): Remove it.
+	* tui.h (enum tui_key_mode): Declare.
+	(tui_set_key_mode, tui_current_key_mode): Declare.
+	* tuiIO.c (tui_redisplay_readline): Don't display the prompt in
+	SingleKey mode.
+	* tuiIO.h (tui_redisplay_readline): Declare.
+
+2002-08-31  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiSourceWin.c (tuiSetIsExecPointAt): Redraw the previous and
+	current line.
+
+2002-08-31  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiSource.c (tuiSetSourceContent): Remove old breakpoint code.
+	(_hasBreak): Remove.
+	(tuiShowSource): Fix comment indentation.
+	(tuiSourceIsDisplayed): Likewise.
+	(tuiVerticalSourceScroll): Likewise.
+
+2002-08-30  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiSourceWin.h (tui_update_all_breakpoint_info): Declare.
+	(tui_update_breakpoint_info): Declare.
+	(tuiSetHasBreakAt, tuiAllSetHasBreakAt): Remove.
+
+	* tuiSourceWin.c (tuiUpdateSourceWindowAsIs): Update breakpoint
+	information using tui_update_breakpoint_info.
+	(tui_update_all_breakpoint_info): New function to refresh all
+	execution windows.
+	(tui_update_breakpoint_info): New function to recompute the status
+	of exec info window from breakpoints.
+	(tuiSetHasBreakAt, tuiAllSetHasBreakAt): Remove.
+	(tuiSetExecInfoContent): Use the exec info flags computed by
+	tui_update_breakpoint_info to display a short status about breakpoints.
+
+	* tuiData.h (TuiExecInfoContent): New for exec info string.
+	(TuiWhichElement): Use it.
+	(TUI_BP_ENABLED, TUI_BP_DISABLED, TUI_BP_HIT): New defines.
+	(TUI_BP_CONDITIONAL, TUI_BP_HARDWARE): New defines.
+	(TUI_BP_HIT_POS, TUI_BP_BREAK_POS, TUI_EXEC_POS): Likewise.
+	(TUI_EXECINFO_SIZE): Likewise.
+	* tuiData.c (initContentElement): Clear exec info string.
+
+	* tui-hooks.c (get_breakpoint): Remove.
+	(tui_event_create_breakpoint): Call tui_update_all_breakpoint_info.
+	(tui_event_delete_breakpoint): Likewise.
+	(tui_event_modify_breakpoint): Likewise.
+
 2002-08-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui.c (tuiGetLowDisassemblyAddress): Moved from here.

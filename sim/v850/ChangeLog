@@ -1,3 +1,21 @@
+2002-09-27  Jim Wilson  <wilson@redhat.com>
+
+	* simops.c (OP_E6077E0): And op1 with 7 after reading register, not
+	before.
+	(BIT_CHANGE_OP): Likewise.
+
+2002-09-26  Jim Wilson  <wilson@redhat.com>
+
+	* simops (OP_10007E0): Don't subtract 4 from PC.
+
+2002-09-19  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (sim_open): Remove reference to v850ea.
+	(sim_create_inferior): Likewise.
+	* v850-dc: Likewise.
+	* v850.igen: Remove all references to v850ea, including v850ea
+	specific instructions.
+
 2002-08-29  Nick Clifton  <nickc@redhat.com>
 
 	From 2001-08-23  Catherine Moore  <clm@redhat.com>

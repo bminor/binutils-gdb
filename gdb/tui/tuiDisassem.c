@@ -44,6 +44,7 @@
 #include "breakpoint.h"
 #include "frame.h"
 #include "value.h"
+#include "source.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -337,7 +338,7 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
       tuiUpdateSourceWindow (srcWin, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
-	  current_source_symtab = sal.symtab;
+	  set_current_source_symtab_and_line (&sal);
 	  tuiUpdateLocatorFilename (sal.symtab->filename);
 	}
       else
@@ -415,12 +416,13 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
       struct symtab *s;
       TuiLineOrAddress val;
       int maxLines, dir;
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       content = (TuiWinContent) disassemWin->generic.content;
-      if (current_source_symtab == (struct symtab *) NULL)
+      if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (selected_frame->pc);
       else
-	s = current_source_symtab;
+	s = cursal.symtab;
 
       /* account for hilite */
       maxLines = disassemWin->generic.height - 2;

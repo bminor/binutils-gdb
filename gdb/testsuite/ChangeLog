@@ -48,6 +48,161 @@
 	out what version of MI is running. Use this to determine the proper
 	output of setting a breakpoint.
 
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi0-basics.exp, mi0-break.exp, mi0-console.exp: Delete.
+	* mi0-disassemble.exp, mi0-eval.exp: Delete.
+	* mi0-hack-cli.exp, mi0-read-memory.exp: Delete.
+	* mi0-regs.exp, mi0-return.exp, mi0-simplerun.exp: Delete.
+	* mi0-stack.exp, mi0-stepi.exp, mi0-until.exp: Delete.
+	* mi0-var-block.exp, mi0-var-child.exp: Delete.
+	* mi0-var-cmd.exp, mi0-var-display.exp, mi0-watch.exp: Delete.
+	
+2002-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/annota1.exp (info break): Make directory components of
+	path optional since not all compilers emit this debug information.
+
+ 	* gdb.base/shlib-call.exp (step inside shr2): Don't fail if first
+ 	step ends up stepping out of the function instead of stopping on
+ 	the epilogue.
+
+2002-09-26  Keith Seitz  <keiths@redhat.com>
+
+	* lib/insight-support.exp (gdbtk_start): Figure out where
+	the insight executable is based on where gdb is. Use this
+	executable to start insight instead of gdb.
+
+2002-09-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/pc-fp.exp, gdb.base/pc-fp.c: New test.
+
+2002-09-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.gdb/complaints.exp (test_initial_complaints): Rename
+	test_isolated_complaints.
+	(test_empty_complaint): New function.
+	(test_empty_complaints): New function.  Check no output when no
+	complaints.
+	
+2002-09-19  Jim Blandy  <jimb@redhat.com>
+
+        * gdb.base/charset.exp, gdb.base/charset.c: New files.
+
+2002-09-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.gdb/complaints.exp: New file.
+
+2002-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/maint.exp: Check `help maint internal-warning'.
+
+2002-09-18  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-static.exp: Remove breakpoints depending on line
+	numbers, and replace them by a single breakpoint after the
+	constructors are all finished.
+	Add test 4.
+	* gdb.c++/m-static.cc: Add test 4.
+	* gdb.c++/m-static.h: New file.
+	* gdb.c++/m-static1.cc: New file.
+
+	* gdb.c++/printmethod.exp: New file.
+	* gdb.c++/printmethod.cc: New file.
+
+	* gdb.c++/pr-574.exp: New file.
+	* gdb.c++/pr-574.cc: New file.
+
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Add handling of "step to end of run" for
+	embedded targets which never actually exit.
+
+2002-09-18  Fernando Nasser  <fnasser@redhat.com>
+
+	* gdb.base/ending-run.exp: Properly mark "continue after exit" and
+	"don't step after run" as unresolved or unsupported, instead of xfail.
+
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Fix expected string for _wrap_main to
+	allow correct handling of #ifdef UNDERSCORES from dejagnu/testglue.c.
+	Add newline to expected string in "step out of main (status wrapper)"
+	case.
+
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* lib/gdb.exp (rerun_to_main): Allow restarting application.
+	* gdb.base/ena-dis-br.exp (rerun_to_main): Eliminate.
+
+2002-09-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/printcmds.exp (test_print_string_constants): Expect
+	\000, not \0, in double-quoted string.
+
+2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/command.exp: Don't expect a "Program exited normally"
+	string after running the commands execution on breakpoint tests.
+
+2002-09-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* lib/gdb.exp (gdb_continue_to_end): Fix typo in expected string.
+
+2002-09-12  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/call-strs.exp: Fix a small typo in one of the comments.
+
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_runto): New proc. Does the same as gdb's
+	runto proc.
+	(mi_run_to_main): Use mi_runto.
+	(mi_execute_to): Renamed from mi_run_to. Changed all callers.
+
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp: (mi_run_to_main): Allow anything to precede
+	regexp for stopping at main. Could have multiple event notifications.
+	Don't assume that main was declared with no parameters.
+	(mi_next): Use mi_step_to.
+	(mi_step): Use mi_next_to.
+
+2002-09-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/default.exp: Fix expected string in `info float' test.
+
+2002-09-09  Ben Elliston  <bje@redhat.com>
+
+	* config/mips.exp: Update comments.
+	* config/mips-idt.exp: Likewise.
+	* config/nind.exp: Likewise.
+	* config/slite.exp: Likewise.
+	* config/sparclet.exp: Likewise.
+	* config/udi.exp: Likewise.
+	* config/vx.exp: Likewise.
+	* config/vxworks29k.exp: Likewise.
+
+2002-09-05  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.threads/killed.exp: Fix test failure message.
+
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp: Update copyright.
+	(mi_gdb_test): Increase the priority of the expected pattern
+	so that it matches gdb_test.
+
+2002-09-03  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.
+	Use integer comparison instead of string comparison for testing
+	whether binary was built.
+
+2002-09-03  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.threads/killed.exp, gdb.threads/killed.c: New test.
+
 2002-08-29  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.threads/pthreads.exp: Move the portable thread compilation

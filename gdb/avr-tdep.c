@@ -524,7 +524,6 @@ avr_scan_prologue (struct frame_info *fi)
 		{
 		  fi->frame = locals;
 
-		  /* TRoth: Does -1 mean we're in main? */
 		  fi->extra_info->is_main = 1;
 		  return;
 		}
@@ -755,7 +754,8 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, fi->frame);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  AVR_PC_REGNUM);
     }
   else if (!fi->next)		/* this is the innermost frame? */
     fi->frame = read_register (fi->extra_info->framereg);
@@ -867,8 +867,8 @@ static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return generic_read_register_dummy (frame->pc, frame->frame,
-					AVR_PC_REGNUM);
+    return deprecated_read_register_dummy (frame->pc, frame->frame,
+					   AVR_PC_REGNUM);
   else
     return frame->extra_info->return_pc;
 }
@@ -957,10 +957,10 @@ avr_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[2];
   int wordsize = 2;
+#if 0
   struct minimal_symbol *msymbol;
   CORE_ADDR mon_brk;
-
-  fprintf_unfiltered (gdb_stderr, "avr_push_return_address() was called\n");
+#endif
 
   buf[0] = 0;
   buf[1] = 0;
@@ -1033,10 +1033,9 @@ avr_frame_chain (struct frame_info *frame)
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       /* initialize the return_pc now */
-      frame->extra_info->return_pc = generic_read_register_dummy (frame->pc,
-								  frame->
-								  frame,
-								  AVR_PC_REGNUM);
+      frame->extra_info->return_pc
+	= deprecated_read_register_dummy (frame->pc, frame->frame,
+					  AVR_PC_REGNUM);
       return frame->frame;
     }
   return (frame->extra_info->is_main ? 0
@@ -1216,8 +1215,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, avr_register_virtual_type);
 
-  /* We might need to define our own here or define FRAME_INIT_SAVED_REGS */
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
 
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
@@ -1241,7 +1239,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-/*    set_gdbarch_push_return_address (gdbarch, avr_push_return_address); */
+  set_gdbarch_push_return_address (gdbarch, avr_push_return_address);
   set_gdbarch_pop_frame (gdbarch, avr_pop_frame);
 
   set_gdbarch_deprecated_store_return_value (gdbarch, avr_store_return_value);

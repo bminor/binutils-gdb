@@ -3317,8 +3317,9 @@ map_sections_to_segments (abfd)
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
-	       && (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
-		   == hdr->lma))
+	       && (((last_hdr->lma + last_hdr->_raw_size - 1)
+		    & ~(maxpagesize - 1))
+		   != (hdr->lma & ~(maxpagesize - 1))))
 	{
 	  /* We don't want to put a writable section in a read only
              segment, unless they are on the same page in memory
@@ -5572,7 +5573,11 @@ _bfd_elf_canonicalize_dynamic_symtab (abfd, alocation)
      asymbol **alocation;
 {
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  return bed->s->slurp_symbol_table (abfd, alocation, true);
+  long symcount = bed->s->slurp_symbol_table (abfd, alocation, true);
+
+  if (symcount >= 0)
+    bfd_get_dynamic_symcount (abfd) = symcount;
+  return symcount;
 }
 
 /* Return the size required for the dynamic reloc entries.  Any
@@ -6041,7 +6046,7 @@ _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
 					     functionname_ptr, line_ptr,
 					     &elf_tdata (abfd)->line_info))
     return false;
-  if (found)
+  if (found && (*functionname_ptr || *line_ptr))
     return true;
 
   if (symbols == NULL)

@@ -30,6 +30,7 @@
 #include "arch-utils.h"
 
 #include "ns32k-tdep.h"
+#include "gdb_string.h"
 
 static int sign_extend (int value, int bits);
 static CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);

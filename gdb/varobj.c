@@ -1345,7 +1345,10 @@ make_cleanup_free_variable (struct varobj *var)
 
 /* This returns the type of the variable. This skips past typedefs
    and returns the real type of the variable. It also dereferences
-   pointers and references. */
+   pointers and references.
+
+   NOTE: TYPE_TARGET_TYPE should NOT be used anywhere in this file
+   except within get_target_type and get_type. */
 static struct type *
 get_type (struct varobj *var)
 {
@@ -1374,7 +1377,10 @@ get_type_deref (struct varobj *var)
 }
 
 /* This returns the target type (or NULL) of TYPE, also skipping
-   past typedefs, just like get_type (). */
+   past typedefs, just like get_type ().
+
+   NOTE: TYPE_TARGET_TYPE should NOT be used anywhere in this file
+   except within get_target_type and get_type. */
 static struct type *
 get_target_type (struct type *type)
 {
@@ -1959,7 +1965,7 @@ c_type_of_child (struct varobj *parent, int index)
   switch (TYPE_CODE (parent->type))
     {
     case TYPE_CODE_ARRAY:
-      type = TYPE_TARGET_TYPE (parent->type);
+      type = get_target_type (parent->type);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -1968,7 +1974,7 @@ c_type_of_child (struct varobj *parent, int index)
       break;
 
     case TYPE_CODE_PTR:
-      switch (TYPE_CODE (TYPE_TARGET_TYPE (parent->type)))
+      switch (TYPE_CODE (get_target_type (parent->type)))
 	{
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_UNION:
@@ -1976,7 +1982,7 @@ c_type_of_child (struct varobj *parent, int index)
 	  break;
 
 	default:
-	  type = TYPE_TARGET_TYPE (parent->type);
+	  type = get_target_type (parent->type);
 	  break;
 	}
       break;

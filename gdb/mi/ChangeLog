@@ -151,6 +151,31 @@
 	(mi_init_ui): Remove.
 	(_initialize_mi_main): Remove. No longer needed.
 
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_version): New function.
+	* mi-out.h (mi_version): Declare.
+
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-07-12 Mo DeJong <supermo@bayarea.net>
+	* gdbmi.texinfo (var-evaluate-expression): Note that
+	var-list-children must be invoked before child variable
+	values can be evaluated.
+
+2002-09-26  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-disas.c (dump_insns): Add text only output for CLI.
+        (do_mixed_source_and_assembly): Ditto.
+
+2002-09-11  Keith Seitz  <keiths@redhat.com>
+
+	* mi-main.c (mi_cmd_data_list_register_names): Use cleanups
+	for the uiout list. Do the cleanups when returning an error.
+	(mi_cmd_data_list_changed_registers): Ditto.
+	(mi_cmd_data_list_register_values): Use cleanups for the uiout list
+	and tuples. Do the cleanups when returning errors.
+
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-cmd-var.c: Include "gdb_string.h".

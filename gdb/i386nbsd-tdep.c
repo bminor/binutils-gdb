@@ -23,8 +23,13 @@
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "arch-utils.h"
 
+#include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "nbsd-tdep.h"
+
+#include "solib-svr4.h"
 
 /* Map a GDB register number to an offset in the reg structure.  */
 static int regmap[] =
@@ -137,9 +142,165 @@ static struct core_fns i386nbsd_elfcore_fns =
   NULL					/* next */
 };
 
+/* Under NetBSD/i386, signal handler invocations can be identified by the
+   designated code sequence that is used to return from a signal handler.
+   In particular, the return address of a signal handler points to the
+   following code sequence:
+
+	leal	0x10(%esp), %eax
+	pushl	%eax
+	pushl	%eax
+	movl	$0x127, %eax		# __sigreturn14
+	int	$0x80
+
+   Each instruction has a unique encoding, so we simply attempt to match
+   the instruction the PC is pointing to with any of the above instructions.
+   If there is a hit, we know the offset to the start of the designated
+   sequence and can then check whether we really are executing in the
+   signal trampoline.  If not, -1 is returned, otherwise the offset from the
+   start of the return sequence is returned.  */
+#define RETCODE_INSN1		0x8d
+#define RETCODE_INSN2		0x50
+#define RETCODE_INSN3		0x50
+#define RETCODE_INSN4		0xb8
+#define RETCODE_INSN5		0xcd
+
+#define RETCODE_INSN2_OFF	4
+#define RETCODE_INSN3_OFF	5
+#define RETCODE_INSN4_OFF	6
+#define RETCODE_INSN5_OFF	11
+
+static const unsigned char sigtramp_retcode[] =
+{
+  RETCODE_INSN1, 0x44, 0x24, 0x10,
+  RETCODE_INSN2,
+  RETCODE_INSN3,
+  RETCODE_INSN4, 0x27, 0x01, 0x00, 0x00,
+  RETCODE_INSN5, 0x80,
+};
+
+static LONGEST
+i386nbsd_sigtramp_offset (CORE_ADDR pc)
+{
+  unsigned char ret[sizeof(sigtramp_retcode)], insn;
+  LONGEST off;
+  int i;
+
+  if (read_memory_nobpt (pc, &insn, 1) != 0)
+    return -1;
+
+  switch (insn)
+    {
+    case RETCODE_INSN1:
+      off = 0;
+      break;
+
+    case RETCODE_INSN2:
+      /* INSN2 and INSN3 are the same.  Read at the location of PC+1
+	 to determine if we're actually looking at INSN2 or INSN3.  */
+      if (read_memory_nobpt (pc + 1, &insn, 1) != 0)
+	return -1;
+
+      if (insn == RETCODE_INSN3)
+	off = RETCODE_INSN2_OFF;
+      else
+	off = RETCODE_INSN3_OFF;
+      break;
+
+    case RETCODE_INSN4:
+      off = RETCODE_INSN4_OFF;
+      break;
+
+    case RETCODE_INSN5:
+      off = RETCODE_INSN5_OFF;
+      break;
+
+    default:
+      return -1;
+    }
+
+  pc -= off;
+
+  if (read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+    return -1;
+
+  if (memcmp (ret, sigtramp_retcode, sizeof (ret)) == 0)
+    return off;
+
+  return -1;
+}
+
+static int
+i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  return (nbsd_pc_in_sigtramp (pc, name)
+	  || i386nbsd_sigtramp_offset (pc) >= 0);
+}
+
+/* From <machine/signal.h>.  */
+int i386nbsd_sc_pc_offset = 44;
+int i386nbsd_sc_sp_offset = 56;
+
+static void 
+i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Obviously NetBSD is BSD-based.  */
+  i386bsd_init_abi (info, gdbarch);
+
+  /* NetBSD has different signal trampoline conventions.  */
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
+  /* FIXME: kettenis/20020906: We should probably provide
+     NetBSD-specific versions of these functions if we want to
+     recognize signal trampolines that live on the stack.  */
+  set_gdbarch_sigtramp_start (gdbarch, NULL);
+  set_gdbarch_sigtramp_end (gdbarch, NULL);
+
+  /* NetBSD uses -freg-struct-return by default.  */
+  tdep->struct_return = reg_struct_return;
+
+  /* NetBSD has a `struct sigcontext' that's different from the
+     origional 4.3 BSD.  */
+  tdep->sc_pc_offset = i386nbsd_sc_pc_offset;
+  tdep->sc_sp_offset = i386nbsd_sc_sp_offset;
+}
+
+/* NetBSD ELF.  */
+static void
+i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* It's still NetBSD.  */
+  i386nbsd_init_abi (info, gdbarch);
+
+  /* But ELF-based.  */
+  i386_elf_init_abi (info, gdbarch);
+
+  /* NetBSD ELF uses SVR4-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch,
+                                        generic_in_solib_call_trampoline);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+				 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+
+  /* NetBSD ELF uses -fpcc-struct-return by default.  */
+  tdep->struct_return = pcc_struct_return;
+
+  /* We support the SSE registers on NetBSD ELF.  */
+  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS
+                        + I386_NUM_XREGS);
+}
+
 void
 _initialize_i386nbsd_tdep (void)
 {
   add_core_fns (&i386nbsd_core_fns);
   add_core_fns (&i386nbsd_elfcore_fns);
+
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_AOUT,
+			  i386nbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_ELF,
+			  i386nbsdelf_init_abi);
 }

@@ -83,7 +83,7 @@ int inhibit_gdbinit = 0;
 /* If nonzero, and GDB has been configured to be able to use windows,
    attempt to open them upon startup.  */
 
-int use_windows = 1;
+int use_windows = 0;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
@@ -1958,6 +1958,7 @@ init_main (void)
 				 get_gdb_completer_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_readline_name = "gdb";
+  rl_terminal_name = getenv ("TERM");
 
   /* The name for this defun comes from Bash, where it originated.
      15 is Control-o, the same binding this function has in Bash.  */

@@ -1665,7 +1665,7 @@ proc gdb_continue_to_end {mssg} {
     # Don't bother to check the output of the program, that may be
     # extremely tough for some remote systems.
     gdb_test "continue"\
-      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|)Program exited normally\\..*"\
+      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|Program exited normally\\.).*"\
       "continue until exit at $mssg"
   }
 }
@@ -1685,6 +1685,10 @@ proc rerun_to_main {} {
   } else {
     send_gdb "run\n"
     gdb_expect {
+      -re "The program .* has been started already.*y or n. $" {
+	  send_gdb "y\n"
+	  exp_continue
+      }
       -re "Starting program.*$gdb_prompt $"\
 	      {pass "rerun to main" ; return 0}
       -re "$gdb_prompt $"\

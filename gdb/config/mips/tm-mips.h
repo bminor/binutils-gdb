@@ -1,7 +1,8 @@
 /* Definitions to make GDB run on a mips box under 4.3bsd.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+
    Contributed by Per Bothner (bothner@cs.wisc.edu) at U.Wisconsin
    and by Alessandro Forin (af@cs.cmu.edu) at CMU..
 
@@ -86,7 +87,7 @@ extern int mips_step_skips_delay (CORE_ADDR);
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15", \
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",\
 	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",\
-	"fsr",  "fir",  "fp",	"", \
+	"fsr",  "fir",  ""/*"fp"*/,	"", \
 	"",	"",	"",	"",	"",	"",	"",	"", \
 	"",	"",	"",	"",	"",	"",	"",	"", \
     }
@@ -115,7 +116,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
 #define FCRCS_REGNUM 70		/* FP control/status */
 #define FCRIR_REGNUM 71		/* FP implementation/revision */
-#define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
 #define	UNUSED_REGNUM 73	/* Never used, FIXME */
 #define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
 #define	PRID_REGNUM 89		/* Processor ID */

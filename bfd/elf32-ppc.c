@@ -2743,11 +2743,11 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       else
 	{
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_PPC_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
 
+      bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
       bfd_elf32_swap_reloca_out (output_bfd, &rela,
 				 ((Elf32_External_Rela *) srela->contents
 				  + srela->reloc_count));
@@ -3287,13 +3287,19 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					  + sreloc->reloc_count));
 	      ++sreloc->reloc_count;
 
-	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, unless this is a RELATIVE
-                 reloc in an unallocated section.  */
-	      if (skip != -1
-		  || (input_section->flags & SEC_ALLOC) != 0
-		  || ELF32_R_TYPE (outrel.r_info) != R_PPC_RELATIVE)
+	      if (skip == -1)
 		continue;
+
+	      /* This reloc will be computed at runtime.  We clear the memory
+		 so that it contains predictable value.  */
+	      if (! skip
+		  && ((input_section->flags & SEC_ALLOC) != 0
+		      || ELF32_R_TYPE (outrel.r_info) != R_PPC_RELATIVE))
+		{
+		  relocation = howto->pc_relative ? outrel.r_offset : 0;
+		  addend = 0;
+		  break;
+		}
 	    }
 
 	  /* Arithmetic adjust relocations that aren't going into a
@@ -3390,7 +3396,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		off &= ~1;
 	      else
 		{
-		  bfd_put_32 (output_bfd, relocation, sgot->contents + off);
 
 		  if (info->shared)
 		    {
@@ -3412,8 +3417,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						   srelgot->contents)
 						  + srelgot->reloc_count));
 		      ++srelgot->reloc_count;
+		      relocation = 0;
 		    }
 
+		  bfd_put_32 (output_bfd, relocation, sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 		}
 
@@ -3476,8 +3483,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata") != 0
-		&& strcmp (name, ".sbss") != 0)
+	    if (! ((strncmp (name, ".sdata", 6) == 0
+		    && (name[6] == 0 || name[6] == '.'))
+		   || (strncmp (name, ".sbss", 5) == 0
+		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
@@ -3498,7 +3507,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata2") != 0 && strcmp (name, ".sbss2") != 0)
+	    if (! (strncmp (name, ".sdata2", 7) == 0
+		   || strncmp (name, ".sbss2", 6) == 0))
 	      {
 		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
@@ -3525,7 +3535,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
+	    if (((strncmp (name, ".sdata", 6) == 0	
+		  && (name[6] == 0 || name[6] == '.'))
+		 || (strncmp (name, ".sbss", 5) == 0
+		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
 		addend -= (sdata->sym_hash->root.u.def.value
@@ -3533,8 +3546,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   + sdata->sym_hash->root.u.def.section->output_offset);
 	      }
 
-	    else if (strcmp (name, ".sdata2") == 0
-		     || strcmp (name, ".sbss2") == 0)
+	    else if (strncmp (name, ".sdata2", 7) == 0
+		     || strncmp (name, ".sbss2", 6) == 0)
 	      {
 		reg = 2;
 		addend -= (sdata2->sym_hash->root.u.def.value

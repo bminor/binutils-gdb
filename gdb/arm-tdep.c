@@ -225,10 +225,10 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
 static CORE_ADDR
 arm_addr_bits_remove (CORE_ADDR val)
 {
-  if (arm_pc_is_thumb (val))
-    return (val & (arm_apcs_32 ? 0xfffffffe : 0x03fffffe));
+  if (arm_apcs_32)
+    return (val & (arm_pc_is_thumb (val) ? 0xfffffffe : 0xfffffffc));
   else
-    return (val & (arm_apcs_32 ? 0xfffffffc : 0x03fffffc));
+    return (val & 0x03fffffc);
 }
 
 /* When reading symbols, we need to zap the low bit of the address,
@@ -995,7 +995,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
       if (USE_GENERIC_DUMMY_FRAMES
 	  && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
 	{
-	  return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
 	}
       else if (fi->saved_regs[regnum] != 0)
 	{
@@ -1110,8 +1110,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	   && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = generic_read_register_dummy (fi->next->pc, fi->next->frame,
-				      ARM_SP_REGNUM);
+    sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
+					 ARM_SP_REGNUM);
   else
     sp = (fi->next->frame - fi->next->extra_info->frameoffset
 	  + fi->next->extra_info->framesize);
@@ -1143,7 +1143,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       fi->extra_info->frameoffset = 0;
 
     }
-  else if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
+  else if (!USE_GENERIC_DUMMY_FRAMES
+	   && PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
     {
       CORE_ADDR rp;
       CORE_ADDR callers_sp;
@@ -1162,7 +1163,10 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       callers_sp = read_memory_integer (fi->saved_regs[ARM_SP_REGNUM],
                                         REGISTER_RAW_SIZE (ARM_SP_REGNUM));
-      fi->extra_info->framereg = ARM_FP_REGNUM;
+      if (arm_pc_is_thumb (fi->pc))
+	fi->extra_info->framereg = THUMB_FP_REGNUM;
+      else
+	fi->extra_info->framereg = ARM_FP_REGNUM;
       fi->extra_info->framesize = callers_sp - sp;
       fi->extra_info->frameoffset = fi->frame - sp;
     }
@@ -1217,7 +1221,7 @@ arm_frame_saved_pc (struct frame_info *fi)
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
   if (USE_GENERIC_DUMMY_FRAMES
       && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
-    return generic_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
@@ -2279,9 +2283,12 @@ arm_extract_return_value (struct type *type,
    the address in which a function should return its structure value.  */
 
 static CORE_ADDR
-arm_extract_struct_value_address (char *regbuf)
+arm_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_address (regbuf, REGISTER_RAW_SIZE(ARM_A1_REGNUM));
+  ULONGEST ret;
+
+  regcache_cooked_read_unsigned (regcache, ARM_A1_REGNUM, &ret);
+  return ret;
 }
 
 /* Will a function return an aggregate type in memory or in a
@@ -2929,7 +2936,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+  set_gdbarch_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);
 
   /* Single stepping.  */

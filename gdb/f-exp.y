@@ -91,6 +91,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	yylloc	f_lloc
 #define yyreds	f_reds		/* With YYDEBUG defined */
 #define yytoks	f_toks		/* With YYDEBUG defined */
+#define yyname	f_name		/* With YYDEBUG defined */
+#define yyrule	f_rule		/* With YYDEBUG defined */
 #define yylhs	f_yylhs
 #define yylen	f_yylen
 #define yydefred f_yydefred

@@ -75,7 +75,8 @@ powerpc_dialect(info)
 	dialect &= ~PPC_OPCODE_ALTIVEC;
       }
   else
-    dialect |= PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_COMMON;
+    dialect |= (PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_CLASSIC
+		| PPC_OPCODE_COMMON);
 
   if (info->disassembler_options
       && strcmp (info->disassembler_options, "power4") == 0)
@@ -295,4 +296,19 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
   (*info->fprintf_func) (info->stream, ".long 0x%lx", insn);
 
   return 4;
+}
+
+void
+print_ppc_disassembler_options (FILE * stream)
+{
+  fprintf (stream, "\n\
+The following PPC specific disassembler options are supported for use with\n\
+the -M switch:\n");
+  
+  fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
+  fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
+  fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
+  fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
+  fprintf (stream, "  32                       Do not disassemble 64-bit instructions\n");
+  fprintf (stream, "  64                       Allow disassembly of 64-bit instructions\n");
 }

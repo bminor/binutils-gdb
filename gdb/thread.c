@@ -265,7 +265,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
   prune_threads ();
   target_find_new_threads ();
 
-  ui_out_list_begin (uiout, "thread-ids");
+  ui_out_tuple_begin (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
     {
@@ -273,7 +273,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }

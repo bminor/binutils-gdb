@@ -1852,10 +1852,7 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
    supplied by run-time quantities other than discriminants. */
 
 struct value *
-ada_array_bound (arr, n, which)
-     struct value *arr;
-     int n;
-     int which;
+ada_array_bound (struct value *arr, int n, int which)
 {
   struct type *arr_type = VALUE_TYPE (arr);
 
@@ -2334,10 +2331,7 @@ ada_resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
    liberal.  FIXME: TOO liberal, in fact. */
 
 static int
-ada_type_match (ftype, atype, may_deref)
-     struct type *ftype;
-     struct type *atype;
-     int may_deref;
+ada_type_match (struct type *ftype, struct type *atype, int may_deref)
 {
   CHECK_TYPEDEF (ftype);
   CHECK_TYPEDEF (atype);
@@ -8104,7 +8098,7 @@ const struct language_defn ada_language_defn = {
 };
 
 void
-_initialize_ada_language ()
+_initialize_ada_language (void)
 {
   builtin_type_ada_int =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,

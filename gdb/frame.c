@@ -27,6 +27,8 @@
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
+#include "builtin-regs.h"
 
 /* Return a frame uniq ID that can be used to, later re-find the
    frame.  */
@@ -78,43 +80,6 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
-/* FIND_SAVED_REGISTER ()
-
-   Return the address in which frame FRAME's value of register REGNUM
-   has been saved in memory.  Or return zero if it has not been saved.
-   If REGNUM specifies the SP, the value we return is actually
-   the SP value, not an address where it was saved.  */
-
-CORE_ADDR
-find_saved_register (struct frame_info *frame, int regnum)
-{
-  register struct frame_info *frame1 = NULL;
-  register CORE_ADDR addr = 0;
-
-  if (frame == NULL)		/* No regs saved if want current frame */
-    return 0;
-
-  /* Note that the following loop assumes that registers used in
-     frame x will be saved only in the frame that x calls and frames
-     interior to it.  */
-  while (1)
-    {
-      QUIT;
-      frame1 = get_next_frame (frame);
-      if (frame1 == 0)
-	break;
-      frame = frame1;
-      FRAME_INIT_SAVED_REGS (frame1);
-      if (frame1->saved_regs[regnum])
-	{
-	  addr = frame1->saved_regs[regnum];
-	  break;
-	}
-    }
-
-  return addr;
-}
-
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
@@ -159,6 +124,33 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 			  optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
+void
+frame_unwind_signed_register (struct frame_info *frame, int regnum,
+			      LONGEST *val)
+{
+  int optimized;
+  CORE_ADDR addr;
+  int realnum;
+  enum lval_type lval;
+  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
+			 &realnum, buf);
+  (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+void
+frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
+				ULONGEST *val)
+{
+  int optimized;
+  CORE_ADDR addr;
+  int realnum;
+  enum lval_type lval;
+  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
+			 &realnum, buf);
+  (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
 
 void
 generic_unwind_get_saved_register (char *raw_buffer,
@@ -242,4 +234,45 @@ frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
     return 0;			/* register value not available */
 
   return !optim;
+}
+
+
+/* Map between a frame register number and its name.  A frame register
+   space is a superset of the cooked register space --- it also
+   includes builtin registers.  */
+
+int
+frame_map_name_to_regnum (const char *name, int len)
+{
+  int i;
+
+  /* Search register name space. */
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
+	&& strncmp (name, REGISTER_NAME (i), len) == 0)
+      {
+	return i;
+      }
+
+  /* Try builtin registers.  */
+  i = builtin_reg_map_name_to_regnum (name, len);
+  if (i >= 0)
+    {
+      /* A builtin register doesn't fall into the architecture's
+         register range.  */
+      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
+      return i;
+    }
+
+  return -1;
+}
+
+const char *
+frame_map_regnum_to_name (int regnum)
+{
+  if (regnum < 0)
+    return NULL;
+  if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+    return REGISTER_NAME (regnum);
+  return builtin_reg_map_regnum_to_name (regnum);
 }

@@ -75,8 +75,7 @@ static int ada_val_print_1 (struct type *, char *, int, CORE_ADDR,
 
 /* Make TYPE unsigned if its range of values includes no negatives. */
 static void
-adjust_type_signedness (type)
-     struct type *type;
+adjust_type_signedness (struct type *type)
 {
   if (type != NULL && TYPE_CODE (type) == TYPE_CODE_RANGE
       && TYPE_LOW_BOUND (type) >= 0)

@@ -1,5 +1,5 @@
 /* TUI support I/O functions.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -36,6 +36,13 @@ extern void tui_initialize_io (void);
 /* Get a character from the command window.  */
 extern int tui_getc (FILE*);
 
+/* Readline callback.
+   Redisplay the command line with its prompt after readline has
+   changed the edited text.  */
+extern void tui_redisplay_readline (void);
+
+extern struct ui_out *tui_out;
+extern struct ui_out *tui_old_uiout;
 
 #define m_tuiStartNewLine       tuiStartNewLines(1)
 #define m_isStartSequence(ch)   (ch == 27)

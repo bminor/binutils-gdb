@@ -25,7 +25,7 @@
    routines with an "x" prefix so they do not collide with the native regex
    routines or with other components regex routines. */
 /* AIX requires this to be the first thing in the file. */
-#if defined _AIX && !defined REGEX_MALLOC
+#if defined _AIX && !defined __GNUC__ && !defined REGEX_MALLOC
   #pragma alloca
 #endif
 
@@ -4648,7 +4648,7 @@ PREFIX(re_compile_fastmap) (bufp)
 
   while (1)
     {
-      if (p == pend || *p == succeed)
+      if (p == pend || *p == (UCHAR_T) succeed)
 	{
 	  /* We have reached the (effective) end of pattern.  */
 	  if (!FAIL_STACK_EMPTY ())

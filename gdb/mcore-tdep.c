@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "arch-utils.h"
+#include "gdb_string.h"
 
 /* Functions declared and used only in this file */
 
@@ -756,7 +757,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
   for (; fi != NULL; fi = fi->next)
     {
       if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-	return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+	return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
       else if (fi->saved_regs[regnum] != 0)
 	return read_memory_integer (fi->saved_regs[regnum],
 				    REGISTER_SIZE);
@@ -772,7 +773,7 @@ mcore_frame_saved_pc (struct frame_info * fi)
 {
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return mcore_find_callers_reg (fi, PR_REGNUM);
 }
@@ -1049,7 +1050,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
     }
   else
     mcore_analyze_prologue (fi, 0, 0);

@@ -79,8 +79,6 @@ static void forward_search_command (char *, int);
 
 static void line_info (char *, int);
 
-static void list_command (char *, int);
-
 static void ambiguous_line_spec (struct symtabs_and_lines *);
 
 static void source_info (char *, int);
@@ -94,11 +92,11 @@ char *source_path;
 
 /* Symtab of default file for listing lines of.  */
 
-struct symtab *current_source_symtab;
+static struct symtab *current_source_symtab;
 
 /* Default next line to list.  */
 
-int current_source_line;
+static int current_source_line;
 
 /* Default number of lines to print with commands like "list".
    This is based on guessing how many long (i.e. more than chars_per_line
@@ -123,6 +121,93 @@ static int first_line_listed;
 static struct symtab *last_source_visited = NULL;
 static int last_source_error = 0;
 
+/* Return the first line listed by print_source_lines.
+   Used by command interpreters to request listing from
+   a previous point. */
+
+int
+get_first_line_listed (void)
+{
+  return first_line_listed;
+}
+
+/* Return the default number of lines to print with commands like the
+   cli "list".  The caller of print_source_lines must use this to
+   calculate the end line and use it in the call to print_source_lines
+   as it does not automatically use this value. */
+
+int
+get_lines_to_list (void)
+{
+  return lines_to_list;
+}
+
+/* Return the current source file for listing and next line to list.
+   NOTE: The returned sal pc and end fields are not valid. */
+   
+struct symtab_and_line
+get_current_source_symtab_and_line (void)
+{
+  struct symtab_and_line cursal;
+
+  cursal.symtab = current_source_symtab;
+  cursal.line = current_source_line;
+  cursal.pc = 0;
+  cursal.end = 0;
+  
+  return cursal;
+}
+
+/* If the current source file for listing is not set, try and get a default.
+   Usually called before get_current_source_symtab_and_line() is called.
+   It may err out if a default cannot be determined.
+   We must be cautious about where it is called, as it can recurse as the
+   process of determining a new default may call the caller!
+   Use get_current_source_symtab_and_line only to get whatever
+   we have without erroring out or trying to get a default. */
+   
+void
+set_default_source_symtab_and_line (void)
+{
+  struct symtab_and_line cursal;
+
+  if (!have_full_symbols () && !have_partial_symbols ())
+    error ("No symbol table is loaded.  Use the \"file\" command.");
+
+  /* Pull in a current source symtab if necessary */
+  if (current_source_symtab == 0)
+    select_source_symtab (0);
+}
+
+/* Return the current default file for listing and next line to list
+   (the returned sal pc and end fields are not valid.)
+   and set the current default to whatever is in SAL.
+   NOTE: The returned sal pc and end fields are not valid. */
+   
+struct symtab_and_line
+set_current_source_symtab_and_line (const struct symtab_and_line *sal)
+{
+  struct symtab_and_line cursal;
+  
+  cursal.symtab = current_source_symtab;
+  cursal.line = current_source_line;
+
+  current_source_symtab = sal->symtab;
+  current_source_line = sal->line;
+  cursal.pc = 0;
+  cursal.end = 0;
+  
+  return cursal;
+}
+
+/* Reset any information stored about a default file and line to print. */
+
+void
+clear_current_source_symtab_and_line (void)
+{
+  current_source_symtab = 0;
+  current_source_line = 0;
+}
 
 /* Set the source file default for the "list" command to be S.
 
@@ -1110,8 +1195,6 @@ print_source_lines (struct symtab *s, int line, int stopline, int noerror)
   print_source_lines_base (s, line, stopline, noerror);
 }
 
-
-
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as with
    `list classname::overloadedfuncname', for example).  The vector in
@@ -1125,182 +1208,6 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
   for (i = 0; i < sals->nelts; ++i)
     printf_filtered ("file: \"%s\", line number: %d\n",
 		     sals->sals[i].symtab->filename, sals->sals[i].line);
-}
-
-static void
-list_command (char *arg, int from_tty)
-{
-  struct symtabs_and_lines sals, sals_end;
-  struct symtab_and_line sal, sal_end;
-  struct symbol *sym;
-  char *arg1;
-  int no_end = 1;
-  int dummy_end = 0;
-  int dummy_beg = 0;
-  int linenum_beg = 0;
-  char *p;
-
-  if (!have_full_symbols () && !have_partial_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
-
-  /* Pull in a current source symtab if necessary */
-  if (current_source_symtab == 0 &&
-      (arg == 0 || arg[0] == '+' || arg[0] == '-'))
-    select_source_symtab (0);
-
-  /* "l" or "l +" lists next ten lines.  */
-
-  if (arg == 0 || STREQ (arg, "+"))
-    {
-      if (current_source_symtab == 0)
-	error ("No default source file yet.  Do \"help list\".");
-      print_source_lines (current_source_symtab, current_source_line,
-			  current_source_line + lines_to_list, 0);
-      return;
-    }
-
-  /* "l -" lists previous ten lines, the ones before the ten just listed.  */
-  if (STREQ (arg, "-"))
-    {
-      if (current_source_symtab == 0)
-	error ("No default source file yet.  Do \"help list\".");
-      print_source_lines (current_source_symtab,
-			  max (first_line_listed - lines_to_list, 1),
-			  first_line_listed, 0);
-      return;
-    }
-
-  /* Now if there is only one argument, decode it in SAL
-     and set NO_END.
-     If there are two arguments, decode them in SAL and SAL_END
-     and clear NO_END; however, if one of the arguments is blank,
-     set DUMMY_BEG or DUMMY_END to record that fact.  */
-
-  arg1 = arg;
-  if (*arg1 == ',')
-    dummy_beg = 1;
-  else
-    {
-      sals = decode_line_1 (&arg1, 0, 0, 0, 0);
-
-      if (!sals.nelts)
-	return;			/*  C++  */
-      if (sals.nelts > 1)
-	{
-	  ambiguous_line_spec (&sals);
-	  xfree (sals.sals);
-	  return;
-	}
-
-      sal = sals.sals[0];
-      xfree (sals.sals);
-    }
-
-  /* Record whether the BEG arg is all digits.  */
-
-  for (p = arg; p != arg1 && *p >= '0' && *p <= '9'; p++);
-  linenum_beg = (p == arg1);
-
-  while (*arg1 == ' ' || *arg1 == '\t')
-    arg1++;
-  if (*arg1 == ',')
-    {
-      no_end = 0;
-      arg1++;
-      while (*arg1 == ' ' || *arg1 == '\t')
-	arg1++;
-      if (*arg1 == 0)
-	dummy_end = 1;
-      else
-	{
-	  if (dummy_beg)
-	    sals_end = decode_line_1 (&arg1, 0, 0, 0, 0);
-	  else
-	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line, 0);
-	  if (sals_end.nelts == 0)
-	    return;
-	  if (sals_end.nelts > 1)
-	    {
-	      ambiguous_line_spec (&sals_end);
-	      xfree (sals_end.sals);
-	      return;
-	    }
-	  sal_end = sals_end.sals[0];
-	  xfree (sals_end.sals);
-	}
-    }
-
-  if (*arg1)
-    error ("Junk at end of line specification.");
-
-  if (!no_end && !dummy_beg && !dummy_end
-      && sal.symtab != sal_end.symtab)
-    error ("Specified start and end are in different files.");
-  if (dummy_beg && dummy_end)
-    error ("Two empty args do not say what lines to list.");
-
-  /* if line was specified by address,
-     first print exactly which line, and which file.
-     In this case, sal.symtab == 0 means address is outside
-     of all known source files, not that user failed to give a filename.  */
-  if (*arg == '*')
-    {
-      if (sal.symtab == 0)
-	/* FIXME-32x64--assumes sal.pc fits in long.  */
-	error ("No source file for address %s.",
-	       local_hex_string ((unsigned long) sal.pc));
-      sym = find_pc_function (sal.pc);
-      if (sym)
-	{
-	  print_address_numeric (sal.pc, 1, gdb_stdout);
-	  printf_filtered (" is in ");
-	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
-	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
-	}
-      else
-	{
-	  print_address_numeric (sal.pc, 1, gdb_stdout);
-	  printf_filtered (" is at %s:%d.\n",
-			   sal.symtab->filename, sal.line);
-	}
-    }
-
-  /* If line was not specified by just a line number,
-     and it does not imply a symtab, it must be an undebuggable symbol
-     which means no source code.  */
-
-  if (!linenum_beg && sal.symtab == 0)
-    error ("No line number known for %s.", arg);
-
-  /* If this command is repeated with RET,
-     turn it into the no-arg variant.  */
-
-  if (from_tty)
-    *arg = 0;
-
-  if (dummy_beg && sal_end.symtab == 0)
-    error ("No default source file yet.  Do \"help list\".");
-  if (dummy_beg)
-    print_source_lines (sal_end.symtab,
-			max (sal_end.line - (lines_to_list - 1), 1),
-			sal_end.line + 1, 0);
-  else if (sal.symtab == 0)
-    error ("No default source file yet.  Do \"help list\".");
-  else if (no_end)
-    {
-      int first_line = sal.line - lines_to_list / 2;
-
-      if (first_line < 1) first_line = 1;
-
-      print_source_lines (sal.symtab, first_line, first_line + lines_to_list,
-			  0);
-    }
-  else
-    print_source_lines (sal.symtab, sal.line,
-			(dummy_end
-			 ? sal.line + lines_to_list
-			 : sal_end.line + 1),
-			0);
 }
 
 /* Print info on range of pc's in a specified line.  */
@@ -1661,29 +1568,6 @@ The matching line number is also stored as the value of \"$_\".");
       add_com_alias ("/", "forward-search", class_files, 0);
       add_com_alias ("?", "reverse-search", class_files, 0);
     }
-
-  add_com ("list", class_files, list_command,
-	   concat ("List specified function or line.\n\
-With no argument, lists ten more lines after or around previous listing.\n\
-\"list -\" lists the ten lines before a previous ten-line listing.\n\
-One argument specifies a line, and ten lines are listed around that line.\n\
-Two arguments with comma between specify starting and ending lines to list.\n\
-", "\
-Lines can be specified in these ways:\n\
-  LINENUM, to list around that line in current file,\n\
-  FILE:LINENUM, to list around that line in that file,\n\
-  FUNCTION, to list around beginning of that function,\n\
-  FILE:FUNCTION, to distinguish among like-named static functions.\n\
-  *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from the other arg.", NULL));
-
-  if (!xdb_commands)
-    add_com_alias ("l", "list", class_files, 1);
-  else
-    add_com_alias ("v", "list", class_files, 1);
-
-  if (dbx_commands)
-    add_com_alias ("file", "list", class_files, 1);
 
   add_show_from_set
     (add_set_cmd ("listsize", class_support, var_uinteger,

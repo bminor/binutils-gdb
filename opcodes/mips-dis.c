@@ -110,6 +110,8 @@ print_insn_arg (d, l, pc, info)
     case ',':
     case '(':
     case ')':
+    case '[':
+    case ']':
       (*info->fprintf_func) (info->stream, "%c", *d);
       break;
 
@@ -279,6 +281,16 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
       break;
 
+    case 'e':
+      (*info->fprintf_func) (info->stream, "%d",
+			     (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
+      break;
+
+    case '%':
+      (*info->fprintf_func) (info->stream, "%d",
+			     (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
+      break;
+
     case 'H':
       (*info->fprintf_func) (info->stream, "%d",
 			     (l >> OP_SH_SEL) & OP_MASK_SEL);
@@ -374,6 +386,10 @@ mips_isa_type (mach, isa, cputype)
       *cputype = CPU_R4111;
       *isa = ISA_MIPS3;
       break;
+    case bfd_mach_mips4120:
+      *cputype = CPU_VR4120;
+      *isa = ISA_MIPS3;
+      break;
     case bfd_mach_mips4300:
       *cputype = CPU_R4300;
       *isa = ISA_MIPS3;
@@ -392,6 +408,14 @@ mips_isa_type (mach, isa, cputype)
       break;
     case bfd_mach_mips5000:
       *cputype = CPU_R5000;
+      *isa = ISA_MIPS4;
+      break;
+    case bfd_mach_mips5400:
+      *cputype = CPU_VR5400;
+      *isa = ISA_MIPS4;
+      break;
+    case bfd_mach_mips5500:
+      *cputype = CPU_VR5500;
       *isa = ISA_MIPS4;
       break;
     case bfd_mach_mips6000:
@@ -526,7 +550,9 @@ print_insn_mips (memaddr, word, info)
 	    {
 	      register const char *d;
 
-	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor))
+	      /* We always allow to disassemble the jalx instruction.  */
+	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor)
+		  && strcmp (op->name, "jalx"))
 		continue;
 
 	      /* Figure out instruction type and branch delay information.  */
@@ -595,7 +621,7 @@ _print_insn_mips (memaddr, info, endianness)
 #endif
 
 #if SYMTAB_AVAILABLE
-  if (info->mach == 16
+  if (info->mach == bfd_mach_mips16
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbols != NULL
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other

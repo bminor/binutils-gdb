@@ -633,8 +633,12 @@ proc mi_run_to_main { } {
     mi_runto main
 }
 
+
 # Just like gdb's "runto" proc, it will run the target to a given
-# function.
+# function.  The big difference here between mi_runto and mi_execute_to
+# is that mi_execute_to must have the inferior running already.  This
+# proc will (like gdb's runto) (re)start the inferior, too.
+#
 # FUNC is the linespec of the place to stop (it inserts a breakpoint here).
 # It returns:
 #   -1  if test suppressed, failed, timedout
@@ -648,20 +652,10 @@ proc mi_runto {func} {
 
   global mi_gdb_prompt expect_out
   global hex decimal
-  global MIFLAGS
 
   set test "mi runto $func"
-  set version 2
-  scan $MIFLAGS "\-i=mi%d" version
-  if {$version < 2} {
-    # MI0 or MI1
-    set bp_result "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"$func\",file=\".*\",line=\"\[0-9\]*\",times=\"0\"\}"
-  } else {
-    # MI2+
-    set bp_result "=breakpoint-create,number=\"\[0-9\]\"\r\n200\\^done"
-  }
   mi_gdb_test "200-break-insert $func" \
-    $bp_result \
+    "\(=breakpoint-create,number=\"\[0-9\]+\")\r\n200\\^done" \
     "breakpoint at $func"
 
   if {![regexp {number="[0-9]+"} $expect_out(buffer) str]
@@ -687,7 +681,7 @@ proc mi_runto {func} {
 
 
 # Next to the next statement
-# For return values, see mi_run_to_helper
+# For return values, see mi_execute_to_helper
 
 proc mi_next { test } {
   return [mi_next_to {.*} {.*} {.*} {.*} $test]
@@ -695,7 +689,7 @@ proc mi_next { test } {
 
 
 # Step to the next statement
-# For return values, see mi_run_to_helper
+# For return values, see mi_execute_to_helper
 
 proc mi_step { test } {
   return [mi_step_to {.*} {.*} {.*} {.*} $test]
@@ -707,7 +701,7 @@ proc mi_step { test } {
 # Can not match -re ".*\r\n${mi_gdb_prompt}", because of false positives
 # after the first prompt is printed.
 
-proc mi_run_to_helper { cmd reason func args file line extra test } {
+proc mi_execute_to_helper { cmd reason func args file line extra test } {
     global suppress_flag
     if { $suppress_flag } {
 	return -1
@@ -736,56 +730,56 @@ proc mi_run_to_helper { cmd reason func args file line extra test } {
     }
 }
 
-proc mi_run_to { cmd reason func args file line extra test } {
-    mi_run_to_helper "$cmd" "$reason" "$func" "\\\[$args\\\]" \
+proc mi_execute_to { cmd reason func args file line extra test } {
+    mi_execute_to_helper "$cmd" "$reason" "$func" "\\\[$args\\\]" \
 	"$file" "$line" "$extra" "$test"
 }
 
 proc mi_next_to { func args file line test } {
-    mi_run_to "exec-next" "end-stepping-range" "$func" "$args" \
+    mi_execute_to "exec-next" "end-stepping-range" "$func" "$args" \
 	"$file" "$line" "" "$test"
 }
 
 proc mi_step_to { func args file line test } {
-    mi_run_to "exec-step" "end-stepping-range" "$func" "$args" \
+    mi_execute_to "exec-step" "end-stepping-range" "$func" "$args" \
 	"$file" "$line" "" "$test"
 }
 
 proc mi_finish_to { func args file line result ret test } {
-    mi_run_to "exec-finish" "function-finished" "$func" "$args" \
+    mi_execute_to "exec-finish" "function-finished" "$func" "$args" \
 	"$file" "$line" \
 	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
 	"$test"
 }
 
 proc mi_continue_to { bkptno func args file line test } {
-    mi_run_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
+    mi_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
 	"$func" "$args" "$file" "$line" "" "$test"
 }
 
-proc mi0_run_to { cmd reason func args file line extra test } {
-    mi_run_to_helper "$cmd" "$reason" "$func" "\{$args\}" \
+proc mi0_execute_to { cmd reason func args file line extra test } {
+    mi_execute_to_helper "$cmd" "$reason" "$func" "\{$args\}" \
 	"$file" "$line" "$extra" "$test"
 }
 
 proc mi0_next_to { func args file line test } {
-    mi0_run_to "exec-next" "end-stepping-range" "$func" "$args" \
+    mi0_execute_to "exec-next" "end-stepping-range" "$func" "$args" \
 	"$file" "$line" "" "$test"
 }
 
 proc mi0_step_to { func args file line test } {
-    mi0_run_to "exec-step" "end-stepping-range" "$func" "$args" \
+    mi0_execute_to "exec-step" "end-stepping-range" "$func" "$args" \
 	"$file" "$line" "" "$test"
 }
 
 proc mi0_finish_to { func args file line result ret test } {
-    mi0_run_to "exec-finish" "function-finished" "$func" "$args" \
+    mi0_execute_to "exec-finish" "function-finished" "$func" "$args" \
 	"$file" "$line" \
 	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
 	"$test"
 }
 
 proc mi0_continue_to { bkptno func args file line test } {
-    mi0_run_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
+    mi0_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
 	"$func" "$args" "$file" "$line" "" "$test"
 }

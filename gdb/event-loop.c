@@ -211,7 +211,6 @@ static void create_file_handler (int fd, int mask, handler_func * proc, gdb_clie
 static void invoke_async_signal_handler (void);
 static void handle_file_event (int event_file_desc);
 static int gdb_wait_for_event (void);
-static int gdb_do_one_event (void *data);
 static int check_async_ready (void);
 static void async_queue_event (gdb_event * event_ptr, queue_position position);
 static gdb_event *create_file_event (int fd);
@@ -347,7 +346,7 @@ process_event (void)
    can happen if there are no event sources to wait for).  If an error
    occurs catch_errors() which calls this function returns zero. */
 
-static int
+int
 gdb_do_one_event (void *data)
 {
   /* Any events already waiting in the queue? */

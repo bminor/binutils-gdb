@@ -95,7 +95,7 @@ int unwind_on_signal_p = 0;
 /* Find the address of function name NAME in the inferior.  */
 
 struct value *
-find_function_in_inferior (char *name)
+find_function_in_inferior (const char *name)
 {
   register struct symbol *sym;
   sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
@@ -138,7 +138,7 @@ struct value *
 value_allocate_space_in_inferior (int len)
 {
   struct value *blocklen;
-  struct value *val = find_function_in_inferior ("malloc");
+  struct value *val = find_function_in_inferior (NAME_OF_MALLOC);
 
   blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
   val = call_function_by_hand (val, 1, &blocklen);
@@ -1353,7 +1353,55 @@ hand_function_call (struct value *function, int nargs, struct value **args)
      they are saved on the stack in the inferior.  */
   PUSH_DUMMY_FRAME;
 
-  old_sp = sp = read_sp ();
+  old_sp = read_sp ();
+
+  /* Ensure that the initial SP is correctly aligned.  */
+  if (gdbarch_frame_align_p (current_gdbarch))
+    {
+      /* NOTE: cagney/2002-09-18:
+
+	 On a RISC architecture, a void parameterless generic dummy
+	 frame (i.e., no parameters, no result) typically does not
+	 need to push anything the stack and hence can leave SP and
+	 FP.  Similarly, a framelss (possibly leaf) function does not
+	 push anything on the stack and, hence, that too can leave FP
+	 and SP unchanged.  As a consequence, a sequence of void
+	 parameterless generic dummy frame calls to frameless
+	 functions will create a sequence of effectively identical
+	 frames (SP, FP and TOS and PC the same).  This, not
+	 suprisingly, results in what appears to be a stack in an
+	 infinite loop --- when GDB tries to find a generic dummy
+	 frame on the internal dummy frame stack, it will always find
+	 the first one.
+
+	 To avoid this problem, the code below always grows the stack.
+	 That way, two dummy frames can never be identical.  It does
+	 burn a few bytes of stack but that is a small price to pay
+	 :-).  */
+      sp = gdbarch_frame_align (current_gdbarch, old_sp);
+      if (sp == old_sp)
+	{
+	  if (INNER_THAN (1, 2))
+	    /* Stack grows down.  */
+	    sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
+	  else
+	    /* Stack grows up.  */
+	    sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
+	}
+      gdb_assert ((INNER_THAN (1, 2) && sp <= old_sp)
+		  || (INNER_THAN (2, 1) && sp >= old_sp));
+    }
+  else
+    /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how badly
+       aligned the SP is!  Further, per comment above, if the generic
+       dummy frame ends up empty (because nothing is pushed) GDB won't
+       be able to correctly perform back traces.  If a target is
+       having trouble with backtraces, first thing to do is add
+       FRAME_ALIGN() to its architecture vector.  After that, try
+       adding SAVE_DUMMY_FRAME_TOS() and modifying FRAME_CHAIN so that
+       when the next outer frame is a generic dummy, it returns the
+       current frame's base.  */
+    sp = old_sp;
 
   if (INNER_THAN (1, 2))
     {
@@ -1367,6 +1415,11 @@ hand_function_call (struct value *function, int nargs, struct value **args)
       start_sp = sp;
       sp += sizeof_dummy1;
     }
+
+  /* NOTE: cagney/2002-09-10: Don't bother re-adjusting the stack
+     after allocating space for the call dummy.  A target can specify
+     a SIZEOF_DUMMY1 (via SIZEOF_CALL_DUMMY_WORDS) such that all local
+     alignment requirements are met.  */
 
   funaddr = find_function_addr (function, &value_type);
   CHECK_TYPEDEF (value_type);
@@ -1564,7 +1617,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 
   /* Reserve space for the return structure to be written on the
-     stack, if necessary */
+     stack, if necessary.  Make certain that the value is correctly
+     aligned. */
 
   if (struct_return)
     {
@@ -1576,15 +1630,23 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	len = STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
-	  /* stack grows downward */
+	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
+             making space for the return value.  */
 	  sp -= len;
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    sp = gdbarch_frame_align (current_gdbarch, sp);
 	  struct_addr = sp;
 	}
       else
 	{
-	  /* stack grows upward */
+	  /* Stack grows upward.  Align the frame, allocate space, and
+             then again, re-align the frame??? */
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    sp = gdbarch_frame_align (current_gdbarch, sp);
 	  struct_addr = sp;
 	  sp += len;
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    sp = gdbarch_frame_align (current_gdbarch, sp);
 	}
     }
 
@@ -1780,14 +1842,13 @@ the function call).", name);
     do_cleanups (inf_status_cleanup);
 
     /* Figure out the value returned by the function.  */
-/* elz: I defined this new macro for the hppa architecture only.
-   this gives us a way to get the value returned by the function from the stack,
-   at the same address we told the function to put it.
-   We cannot assume on the pa that r28 still contains the address of the returned
-   structure. Usually this will be overwritten by the callee.
-   I don't know about other architectures, so I defined this macro
- */
-
+    /* elz: I defined this new macro for the hppa architecture only.
+       this gives us a way to get the value returned by the function
+       from the stack, at the same address we told the function to put
+       it.  We cannot assume on the pa that r28 still contains the
+       address of the returned structure. Usually this will be
+       overwritten by the callee.  I don't know about other
+       architectures, so I defined this macro */
 #ifdef VALUE_RETURNED_FROM_STACK
     if (struct_return)
       {
@@ -1795,12 +1856,26 @@ the function call).", name);
 	return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
       }
 #endif
-
-    {
-      struct value *retval = value_being_returned (value_type, retbuf, struct_return);
-      do_cleanups (retbuf_cleanup);
-      return retval;
-    }
+    /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
+       aligned (using frame_align()) do we can trust STRUCT_ADDR and
+       fetch the return value direct from the stack.  This lack of
+       trust comes about because legacy targets have a nasty habit of
+       silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.
+       For such targets, just hope that value_being_returned() can
+       find the adjusted value.  */
+    if (struct_return && gdbarch_frame_align_p (current_gdbarch))
+      {
+        struct value *retval = value_at (value_type, struct_addr, NULL);
+        do_cleanups (retbuf_cleanup);
+        return retval;
+      }
+    else
+      {
+	struct value *retval = value_being_returned (value_type, retbuf,
+						     struct_return);
+	do_cleanups (retbuf_cleanup);
+	return retval;
+      }
   }
 }
 
@@ -2304,12 +2379,11 @@ search_struct_method (char *name, struct value **arg1p,
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	  name_matched = 1;
 
+	  check_stub_method_group (type, i);
 	  if (j > 0 && args == 0)
 	    error ("cannot resolve overloaded method `%s': no arguments supplied", name);
 	  else if (j == 0 && args == 0)
 	    {
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (type, i, j);
 	      v = value_fn_field (arg1p, f, j, type, offset);
 	      if (v != NULL)
 		return v;
@@ -2317,8 +2391,6 @@ search_struct_method (char *name, struct value **arg1p,
 	  else
 	    while (j >= 0)
 	      {
-		if (TYPE_FN_FIELD_STUB (f, j))
-		  check_stub_method (type, i, j);
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
 			      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)),
@@ -2557,20 +2629,15 @@ find_method_list (struct value **argp, char *method, int offset,
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
-	  /* Resolve any stub methods.  */
 	  int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-	  int j;
 
 	  *num_fns = len;
 	  *basetype = type;
 	  *boffset = offset;
 
-	  for (j = 0; j < len; j++)
-	    {
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (type, i, j);
-	    }
+	  /* Resolve any stub methods.  */
+	  check_stub_method_group (type, i);
 
 	  return f;
 	}
@@ -3096,6 +3163,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
 
+	  check_stub_method_group (t, i);
+
 	  if (intype == 0 && j > 1)
 	    error ("non-unique member `%s' requires type instantiation", name);
 	  if (intype)
@@ -3109,8 +3178,6 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else
 	    j = 0;
 
-	  if (TYPE_FN_FIELD_STUB (f, j))
-	    check_stub_method (t, i, j);
 	  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 	    {
 	      return value_from_longest

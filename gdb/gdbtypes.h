@@ -1124,7 +1124,7 @@ extern struct type *check_typedef (struct type *);
 
 #define CHECK_TYPEDEF(TYPE) (TYPE) = check_typedef (TYPE)
 
-extern void check_stub_method (struct type *, int, int);
+extern void check_stub_method_group (struct type *, int);
 
 extern struct type *lookup_primitive_typename (char *);
 

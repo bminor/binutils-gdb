@@ -118,8 +118,18 @@ maintenance_dump_me (char *args, int from_tty)
 static void
 maintenance_internal_error (char *args, int from_tty)
 {
-  internal_error (__FILE__, __LINE__,
-		  "internal maintenance");
+  internal_error (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
+}
+
+/* Stimulate the internal error mechanism that GDB uses when an
+   internal problem is detected.  Allows testing of the mechanism.
+   Also useful when the user wants to drop a core file but not exit
+   GDB. */
+
+static void
+maintenance_internal_warning (char *args, int from_tty)
+{
+  internal_warning (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
 
 /* Someday we should allow demangling for things other than just
@@ -695,6 +705,11 @@ itself a SIGQUIT signal.",
   add_cmd ("internal-error", class_maintenance, maintenance_internal_error,
 	   "Give GDB an internal error.\n\
 Cause GDB to behave as if an internal error was detected.",
+	   &maintenancelist);
+
+  add_cmd ("internal-warning", class_maintenance, maintenance_internal_warning,
+	   "Give GDB an internal warning.\n\
+Cause GDB to behave as if an internal warning was reported.",
 	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle,

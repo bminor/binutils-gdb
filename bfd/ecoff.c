@@ -205,21 +205,21 @@ _bfd_ecoff_set_arch_mach_hook (abfd, filehdr)
     case MIPS_MAGIC_LITTLE:
     case MIPS_MAGIC_BIG:
       arch = bfd_arch_mips;
-      mach = 3000;
+      mach = bfd_mach_mips3000;
       break;
 
     case MIPS_MAGIC_LITTLE2:
     case MIPS_MAGIC_BIG2:
       /* MIPS ISA level 2: the r6000.  */
       arch = bfd_arch_mips;
-      mach = 6000;
+      mach = bfd_mach_mips6000;
       break;
 
     case MIPS_MAGIC_LITTLE3:
     case MIPS_MAGIC_BIG3:
       /* MIPS ISA level 3: the r4000.  */
       arch = bfd_arch_mips;
-      mach = 4000;
+      mach = bfd_mach_mips4000;
       break;
 
     case ALPHA_MAGIC:
@@ -252,17 +252,17 @@ ecoff_get_magic (abfd)
 	{
 	default:
 	case 0:
-	case 3000:
+	case bfd_mach_mips3000:
 	  big = MIPS_MAGIC_BIG;
 	  little = MIPS_MAGIC_LITTLE;
 	  break;
 
-	case 6000:
+	case bfd_mach_mips6000:
 	  big = MIPS_MAGIC_BIG2;
 	  little = MIPS_MAGIC_LITTLE2;
 	  break;
 
-	case 4000:
+	case bfd_mach_mips4000:
 	  big = MIPS_MAGIC_BIG3;
 	  little = MIPS_MAGIC_LITTLE3;
 	  break;
@@ -553,7 +553,9 @@ _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
   UPDATE_RAW_END (cbDnOffset, idnMax, backend->debug_swap.external_dnr_size);
   UPDATE_RAW_END (cbPdOffset, ipdMax, backend->debug_swap.external_pdr_size);
   UPDATE_RAW_END (cbSymOffset, isymMax, backend->debug_swap.external_sym_size);
-  UPDATE_RAW_END (cbOptOffset, ioptMax, backend->debug_swap.external_opt_size);
+  /* eraxxon@alumni.rice.edu: ioptMax refers to the size of the
+     optimization symtab, not the number of entries */
+  UPDATE_RAW_END (cbOptOffset, ioptMax, sizeof (char));
   UPDATE_RAW_END (cbAuxOffset, iauxMax, sizeof (union aux_ext));
   UPDATE_RAW_END (cbSsOffset, issMax, sizeof (char));
   UPDATE_RAW_END (cbSsExtOffset, issExtMax, sizeof (char));

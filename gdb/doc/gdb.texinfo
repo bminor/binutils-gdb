@@ -31,7 +31,10 @@
 @set EDITION Ninth
 
 @c !!set GDB manual's revision date
-@set DATE December 2001
+@set DATE June 2002
+
+@c !!set GDB edit command default editor
+@set EDITOR /bin/ex
 
 @c THIS MANUAL REQUIRES TEXINFO 4.0 OR LATER.
 
@@ -345,7 +348,7 @@ omitted from this list, we would like to add your names!
 So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
-Andrew Cagney (releases 5.0 and 5.1);
+Andrew Cagney (releases 5.3, 5.2, 5.1 and 5.0);
 Jim Blandy (release 4.18);
 Jason Molenda (release 4.17);
 Stan Shebs (release 4.14);
@@ -392,7 +395,7 @@ Tim Tucker contributed support for the Gould NP1 and Gould Powernode.
 Pace Willison contributed Intel 386 support.
 Jay Vosburgh contributed Symmetry support.
 
-Andreas Schwab contributed M68K Linux support.
+Andreas Schwab contributed M68K @sc{gnu}/Linux support.
 
 Rich Schaefer and Peter Schauer helped with support of SunOS shared
 libraries.
@@ -2615,7 +2618,7 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, Linux and some other x86-based targets,
+On some systems, such as HP-UX, @sc{gnu}/Linux and some other x86-based targets,
 @value{GDBN} includes support for
 hardware watchpoints, which do not slow down the running of your
 program.
@@ -3922,7 +3925,10 @@ For example:
 
 After such a printout, the @code{list} command with no arguments
 prints ten lines centered on the point of execution in the frame.
-@xref{List, ,Printing source lines}.
+You can also edit the program at the point of execution with your favorite
+editing program by typing @code{edit}.
+@xref{List, ,Printing source lines},
+for details.
 
 @table @code
 @kindex down-silently
@@ -4029,6 +4035,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 
 @menu
 * List::                        Printing source lines
+* Edit::                        Editing source files
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
@@ -4150,6 +4157,69 @@ identically named functions in different source files.
 Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
+
+@node Edit
+@section Editing source files
+@cindex editing source files
+
+@kindex edit
+@kindex e @r{(@code{edit})}
+To edit the lines in a source file, use the @code{edit} command.
+The editing program of your choice
+is invoked with the current line set to
+the active line in the program.
+Alternatively, there are several ways to specify what part of the file you
+want to print if you want to see other parts of the program.
+
+Here are the forms of the @code{edit} command most commonly used:
+
+@table @code
+@item edit
+Edit the current source file at the active line number in the program.
+
+@item edit @var{number}
+Edit the current source file with @var{number} as the active line number.
+
+@item edit @var{function}
+Edit the file containing @var{function} at the beginning of its definition.
+
+@item edit @var{filename}:@var{number}
+Specifies line @var{number} in the source file @var{filename}.
+
+@item edit @var{filename}:@var{function}
+Specifies the line that begins the body of the
+function @var{function} in the file @var{filename}.  You only need the
+file name with a function name to avoid ambiguity when there are
+identically named functions in different source files.
+
+@item edit *@var{address}
+Specifies the line containing the program address @var{address}.
+@var{address} may be any expression.
+@end table
+
+@subsection Choosing your editor
+You can customize @value{GDBN} to use any editor you want
+@footnote{
+The only restriction is that your editor (say @code{ex}), recognizes the
+following command-line syntax:
+@smallexample
+ex +@var{number} file
+@end smallexample
+The optional numeric value +@var{number} designates the active line in
+the file.}.  By default, it is @value{EDITOR}, but you can change this
+by setting the environment variable @code{EDITOR} before using
+@value{GDBN}.  For example, to configure @value{GDBN} to use the
+@code{vi} editor, you could use these commands with the @code{sh} shell:
+@smallexample
+EDITOR=/usr/bin/vi
+export EDITOR
+gdb ...
+@end smallexample
+or in the @code{csh} shell,
+@smallexample
+setenv EDITOR /usr/bin/vi
+gdb ...
+@end smallexample
 
 @node Search
 @section Searching source files
@@ -4417,6 +4487,8 @@ Table}.
 * Vector Unit::                 Vector Unit
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
+* Character Sets::              Debugging programs that use a different
+                                character set than GDB does
 @end menu
 
 @node Expressions
@@ -5802,6 +5874,254 @@ These offsets are relative to the addresses in the file, before
 the @var{bias} argument is applied.
 
 @end table
+
+@node Character Sets
+@section Character Sets
+@cindex character sets
+@cindex charset
+@cindex translating between character sets
+@cindex host character set
+@cindex target character set
+
+If the program you are debugging uses a different character set to
+represent characters and strings than the one @value{GDBN} uses itself,
+@value{GDBN} can automatically translate between the character sets for
+you.  The character set @value{GDBN} uses we call the @dfn{host
+character set}; the one the inferior program uses we call the
+@dfn{target character set}.
+
+For example, if you are running @value{GDBN} on a @sc{gnu}/Linux system, which
+uses the ISO Latin 1 character set, but you are using @value{GDBN}'s
+remote protocol (@pxref{Remote,Remote Debugging}) to debug a program
+running on an IBM mainframe, which uses the @sc{ebcdic} character set,
+then the host character set is Latin-1, and the target character set is
+@sc{ebcdic}.  If you give @value{GDBN} the command @code{set
+target-charset ebcdic-us}, then @value{GDBN} translates between
+@sc{ebcdic} and Latin 1 as you print character or string values, or use
+character and string literals in expressions.
+
+@value{GDBN} has no way to automatically recognize which character set
+the inferior program uses; you must tell it, using the @code{set
+target-charset} command, described below.
+
+Here are the commands for controlling @value{GDBN}'s character set
+support:
+
+@table @code
+@item set target-charset @var{charset}
+@kindex set target-charset
+Set the current target character set to @var{charset}.  We list the
+character set names @value{GDBN} recognizes below, but if you invoke the
+@code{set target-charset} command with no argument, @value{GDBN} lists
+the character sets it supports.
+@end table
+
+@table @code
+@item set host-charset @var{charset}
+@kindex set host-charset
+Set the current host character set to @var{charset}.
+
+By default, @value{GDBN} uses a host character set appropriate to the
+system it is running on; you can override that default using the
+@code{set host-charset} command.
+
+@value{GDBN} can only use certain character sets as its host character
+set.  We list the character set names @value{GDBN} recognizes below, and
+indicate which can be host character sets, but if you invoke the
+@code{set host-charset} command with no argument, @value{GDBN} lists the
+character sets it supports, placing an asterisk (@samp{*}) after those
+it can use as a host character set.
+
+@item set charset @var{charset}
+@kindex set charset
+Set the current host and target character sets to @var{charset}.  If you
+invoke the @code{set charset} command with no argument, it lists the
+character sets it supports.  @value{GDBN} can only use certain character
+sets as its host character set; it marks those in the list with an
+asterisk (@samp{*}).
+
+@item show charset
+@itemx show host-charset
+@itemx show target-charset
+@kindex show charset
+@kindex show host-charset
+@kindex show target-charset
+Show the current host and target charsets.  The @code{show host-charset}
+and @code{show target-charset} commands are synonyms for @code{show
+charset}.
+
+@end table
+
+@value{GDBN} currently includes support for the following character
+sets:
+
+@table @code
+
+@item ASCII
+@cindex ASCII character set
+Seven-bit U.S. @sc{ascii}.  @value{GDBN} can use this as its host
+character set.
+
+@item ISO-8859-1
+@cindex ISO 8859-1 character set
+@cindex ISO Latin 1 character set
+The ISO Latin 1 character set.  This extends ASCII with accented
+characters needed for French, German, and Spanish.  @value{GDBN} can use
+this as its host character set.
+
+@item EBCDIC-US
+@itemx IBM1047
+@cindex EBCDIC character set
+@cindex IBM1047 character set
+Variants of the @sc{ebcdic} character set, used on some of IBM's
+mainframe operating systems.  (@sc{gnu}/Linux on the S/390 uses U.S. @sc{ascii}.)
+@value{GDBN} cannot use these as its host character set.
+
+@end table
+
+Note that these are all single-byte character sets.  More work inside
+GDB is needed to support multi-byte or variable-width character
+encodings, like the UTF-8 and UCS-2 encodings of Unicode.
+
+Here is an example of @value{GDBN}'s character set support in action.
+Assume that the following source code has been placed in the file
+@file{charset-test.c}:
+
+@smallexample
+#include <stdio.h>
+
+char ascii_hello[]
+  = @{72, 101, 108, 108, 111, 44, 32, 119,
+     111, 114, 108, 100, 33, 10, 0@};
+char ibm1047_hello[]
+  = @{200, 133, 147, 147, 150, 107, 64, 166,
+     150, 153, 147, 132, 90, 37, 0@};
+
+main ()
+@{
+  printf ("Hello, world!\n");
+@}
+@end smallexample
+
+In this program, @code{ascii_hello} and @code{ibm1047_hello} are arrays
+containing the string @samp{Hello, world!} followed by a newline,
+encoded in the @sc{ascii} and @sc{ibm1047} character sets.
+
+We compile the program, and invoke the debugger on it:
+
+@smallexample
+$ gcc -g charset-test.c -o charset-test
+$ gdb -nw charset-test
+GNU gdb 2001-12-19-cvs
+Copyright 2001 Free Software Foundation, Inc.
+@dots{}
+(gdb) 
+@end smallexample
+
+We can use the @code{show charset} command to see what character sets
+@value{GDBN} is currently using to interpret and display characters and
+strings:
+
+@smallexample
+(gdb) show charset
+The current host and target character set is `iso-8859-1'.
+(gdb) 
+@end smallexample
+
+For the sake of printing this manual, let's use @sc{ascii} as our
+initial character set:
+@smallexample
+(gdb) set charset ascii
+(gdb) show charset
+The current host and target character set is `ascii'.
+(gdb) 
+@end smallexample
+
+Let's assume that @sc{ascii} is indeed the correct character set for our
+host system --- in other words, let's assume that if @value{GDBN} prints
+characters using the @sc{ascii} character set, our terminal will display
+them properly.  Since our current target character set is also
+@sc{ascii}, the contents of @code{ascii_hello} print legibly:
+
+@smallexample
+(gdb) print ascii_hello
+$1 = 0x401698 "Hello, world!\n"
+(gdb) print ascii_hello[0]
+$2 = 72 'H'
+(gdb) 
+@end smallexample
+
+@value{GDBN} uses the target character set for character and string
+literals you use in expressions:
+
+@smallexample
+(gdb) print '+'
+$3 = 43 '+'
+(gdb) 
+@end smallexample
+
+The @sc{ascii} character set uses the number 43 to encode the @samp{+}
+character.
+
+@value{GDBN} relies on the user to tell it which character set the
+target program uses.  If we print @code{ibm1047_hello} while our target
+character set is still @sc{ascii}, we get jibberish:
+
+@smallexample
+(gdb) print ibm1047_hello
+$4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
+(gdb) print ibm1047_hello[0]
+$5 = 200 '\310'
+(gdb) 
+@end smallexample
+
+If we invoke the @code{set target-charset} command without an argument,
+@value{GDBN} tells us the character sets it supports:
+
+@smallexample
+(gdb) set target-charset
+Valid character sets are:
+  ascii *
+  iso-8859-1 *
+  ebcdic-us  
+  ibm1047  
+* - can be used as a host character set
+@end smallexample
+
+We can select @sc{ibm1047} as our target character set, and examine the
+program's strings again.  Now the @sc{ascii} string is wrong, but
+@value{GDBN} translates the contents of @code{ibm1047_hello} from the
+target character set, @sc{ibm1047}, to the host character set,
+@sc{ascii}, and they display correctly:
+
+@smallexample
+(gdb) set target-charset ibm1047
+(gdb) show charset
+The current host character set is `ascii'.
+The current target character set is `ibm1047'.
+(gdb) print ascii_hello
+$6 = 0x401698 "\110\145%%?\054\040\167?\162%\144\041\012"
+(gdb) print ascii_hello[0]
+$7 = 72 '\110'
+(gdb) print ibm1047_hello
+$8 = 0x4016a8 "Hello, world!\n"
+(gdb) print ibm1047_hello[0]
+$9 = 200 'H'
+(gdb)
+@end smallexample
+
+As above, @value{GDBN} uses the target character set for character and
+string literals you use in expressions:
+
+@smallexample
+(gdb) print '+'
+$10 = 78 '+'
+(gdb) 
+@end smallexample
+
+The IBM1047 character set uses the number 78 to encode the @samp{+}
+character.
+
 
 @node Macros
 @chapter C Preprocessor Macros
@@ -10870,7 +11190,7 @@ this facility, the command @code{info proc} is available to report on
 several kinds of information about the process running your program.
 @code{info proc} works only on SVR4 systems that include the
 @code{procfs} code.  This includes OSF/1 (Digital Unix), Solaris, Irix,
-and Unixware, but not HP-UX or Linux, for example.
+and Unixware, but not HP-UX or @sc{gnu}/Linux, for example.
 
 @table @code
 @kindex info proc
@@ -13161,6 +13481,7 @@ interpreter-exec mi "-data-list-register-names"
 @menu
 * TUI Overview::                TUI overview
 * TUI Keys::                    TUI key bindings
+* TUI Single Key Mode::         TUI single key mode
 * TUI Commands::                TUI specific commands
 * TUI Configuration::           TUI configuration variables
 @end menu
@@ -13201,8 +13522,6 @@ window is always visible.
 @item source
 The source window shows the source file of the program.  The current
 line as well as active breakpoints are displayed in this window.
-The current program position is shown with the @samp{>} marker and
-active breakpoints are shown with @samp{*} markers.
 
 @item assembly
 The assembly window shows the disassembly output of the program.
@@ -13211,6 +13530,37 @@ The assembly window shows the disassembly output of the program.
 This window shows the processor registers.  It detects when
 a register is changed and when this is the case, registers that have
 changed are highlighted.
+
+@end table
+
+The source and assembly windows show the current program position
+by highlighting the current line and marking them with the @samp{>} marker.
+Breakpoints are also indicated with two markers.  A first one
+indicates the breakpoint type:
+
+@table @code
+@item B
+Breakpoint which was hit at least once.
+
+@item b
+Breakpoint which was never hit.
+
+@item H
+Hardware breakpoint which was hit at least once.
+
+@item h
+Hardware breakpoint which was never hit.
+
+@end table
+
+The second marker indicates whether the breakpoint is enabled or not:
+
+@table @code
+@item +
+Breakpoint is enabled.
+
+@item -
+Breakpoint is disabled.
 
 @end table
 
@@ -13239,6 +13589,35 @@ assembly and registers
 
 @end itemize
 
+On top of the command window a status line gives various information
+concerning the current process begin debugged.  The status line is
+updated when the information it shows changes.  The following fields
+are displayed:
+
+@table @emph
+@item target
+Indicates the current gdb target
+(@pxref{Targets, ,Specifying a Debugging Target}).
+
+@item process
+Gives information about the current process or thread number.
+When no process is being debugged, this field is set to @code{No process}.
+
+@item function
+Gives the current function name for the selected frame.
+The name is demangled if demangling is turned on (@pxref{Print Settings}).
+When there is no symbol corresponding to the current program counter
+the string @code{??} is displayed.
+
+@item line
+Indicates the current line number for the selected frame.
+When the current line number is not known the string @code{??} is displayed.
+
+@item pc
+Indicates the current program counter address.
+
+@end table
+
 @node TUI Keys
 @section TUI Key Bindings
 @cindex TUI key bindings
@@ -13246,7 +13625,9 @@ assembly and registers
 The TUI installs several key bindings in the readline keymaps
 (@pxref{Command Line Editing}).
 They allow to leave or enter in the TUI mode or they operate
-directly on the TUI layout and windows.  The following key bindings
+directly on the TUI layout and windows.  The TUI also provides
+a @emph{SingleKey} keymap which binds several keys directly to
+@value{GDBN} commands.  The following key bindings
 are installed for both TUI mode and the @value{GDBN} standard mode.
 
 @table @kbd
@@ -13278,6 +13659,11 @@ When a new layout is chosen, one window will always be common to the
 previous layout and the new one.
 
 Think of it as the Emacs @kbd{C-x 2} binding.
+
+@kindex C-x s
+@item C-x s
+Use the TUI @emph{SingleKey} keymap that binds single key to gdb commands
+(@pxref{TUI Single Key Mode}).
 
 @end table
 
@@ -13319,6 +13705,65 @@ for scrolling.  This means they are not available for readline.  It is
 necessary to use other readline key bindings such as @key{C-p}, @key{C-n},
 @key{C-b} and @key{C-f}.
 
+@node TUI Single Key Mode
+@section TUI Single Key Mode
+@cindex TUI single key mode
+
+The TUI provides a @emph{SingleKey} mode in which it installs a particular
+key binding in the readline keymaps to connect single keys to
+some gdb commands. 
+
+@table @kbd
+@kindex c @r{(SingleKey TUI key)}
+@item c
+continue
+
+@kindex d @r{(SingleKey TUI key)}
+@item d
+down
+
+@kindex f @r{(SingleKey TUI key)}
+@item f
+finish
+
+@kindex n @r{(SingleKey TUI key)}
+@item n
+next
+
+@kindex q @r{(SingleKey TUI key)}
+@item q
+exit the @emph{SingleKey} mode.
+
+@kindex r @r{(SingleKey TUI key)}
+@item r
+run
+
+@kindex s @r{(SingleKey TUI key)}
+@item s
+step
+
+@kindex u @r{(SingleKey TUI key)}
+@item u
+up
+
+@kindex v @r{(SingleKey TUI key)}
+@item v
+info locals
+
+@kindex w @r{(SingleKey TUI key)}
+@item w
+where
+
+@end table
+
+Other keys temporarily switch to the @value{GDBN} command prompt.
+The key that was pressed is inserted in the editing buffer so that
+it is possible to type most @value{GDBN} commands without interaction
+with the TUI @emph{SingleKey} mode.  Once the command is entered the TUI
+@emph{SingleKey} mode is restored.  The only way to permanently leave
+this mode is by hitting @key{q} or @samp{@key{C-x} @key{s}}.
+
+
 @node TUI Commands
 @section TUI specific commands
 @cindex TUI commands
@@ -13330,6 +13775,10 @@ is in the standard mode, using these commands will automatically switch
 in the TUI mode.
 
 @table @code
+@item info win
+@kindex info win
+List and give the size of all displayed windows.
+
 @item layout next
 @kindex layout next
 Display the next layout.
@@ -14270,6 +14719,30 @@ Shared library events.
 
 @end table
 
+@kindex maint internal-error
+@kindex maint internal-warning
+@item maint internal-error
+@itemx maint internal-warning
+Cause @value{GDBN} to call the internal function @code{internal_error}
+or @code{internal_warning} and hence behave as though an internal error
+or internal warning has been detected.  In addition to reporting the
+internal problem, these functions give the user the opportunity to
+either quit @value{GDBN} or create a core file of the current
+@value{GDBN} session.
+
+@smallexample
+(gdb) @kbd{maint internal-error testing, 1, 2}
+@dots{}/maint.c:121: internal-error: testing, 1, 2
+A problem internal to GDB has been detected.  Further
+debugging may prove unreliable.
+Quit this debugging session? (y or n) @kbd{n}
+Create a core file? (y or n) @kbd{n}
+(gdb) 
+@end smallexample
+
+Takes an optional parameter that is used as the text of the error or
+warning message.
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
@@ -14470,8 +14943,10 @@ of view, nothing actually happened.}
 @cindex @code{B} packet
 
 Set (@var{mode} is @samp{S}) or clear (@var{mode} is @samp{C}) a
-breakpoint at @var{addr}.  @emph{This has been replaced by the @samp{Z}
-and @samp{z} packets.}
+breakpoint at @var{addr}.
+
+This packet has been replaced by the @samp{Z} and @samp{z} packets
+(@pxref{insert breakpoint or watchpoint packet}).
 
 @item @code{c}@var{addr} --- continue
 @cindex @code{c} packet
@@ -14638,7 +15113,7 @@ Reserved for future use.
 
 Read @var{length} bytes of memory starting at address @var{addr}.
 Neither @value{GDBN} nor the stub assume that sized memory transfers are
-assumed using word alligned accesses. FIXME: @emph{A word aligned memory
+assumed using word aligned accesses. FIXME: @emph{A word aligned memory
 transfer mechanism is needed.}
 
 Reply:
@@ -14646,7 +15121,7 @@ Reply:
 @item @var{XX@dots{}}
 @var{XX@dots{}} is mem contents. Can be fewer bytes than requested if able
 to read only part of the data.  Neither @value{GDBN} nor the stub assume
-that sized memory transfers are assumed using word alligned
+that sized memory transfers are assumed using word aligned
 accesses. FIXME: @emph{A word aligned memory transfer mechanism is
 needed.}
 @item E@var{NN}
@@ -14843,32 +15318,128 @@ Reserved for future use.
 
 Reserved for future use.
 
-@item @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- remove break or watchpoint @strong{(draft)}
-@cindex @code{z} packet
-
-@xref{insert breakpoint or watchpoint packet}.
-
-@item @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- insert break or watchpoint @strong{(draft)}
+@item @code{z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- remove breakpoint or watchpoint @strong{(draft)}
+@itemx @code{Z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- insert breakpoint or watchpoint @strong{(draft)}
 @anchor{insert breakpoint or watchpoint packet}
-@cindex @code{Z} packet
+@cindex @code{z} packet
+@cindex @code{Z} packets
 
-@var{t} is type: @samp{0} - software breakpoint, @samp{1} - hardware
-breakpoint, @samp{2} --- write watchpoint, @samp{3} - read watchpoint,
-@samp{4} - access watchpoint; @var{addr} is address; @var{length} is in
-bytes.  For a software breakpoint, @var{length} specifies the size of
-the instruction to be patched.  For hardware breakpoints and watchpoints
-@var{length} specifies the memory region to be monitored.  To avoid
-potential problems with duplicate packets, the operations should be
-implemented in an idempotent way.
+Insert (@code{Z}) or remove (@code{z}) a @var{type} breakpoint or
+watchpoint starting at address @var{address} and covering the next
+@var{length} bytes.
+
+Each breakpoint and watchpoint packet @var{type} is documented
+separately.
+
+@emph{Implementation notes: A remote target shall return an empty string
+for an unrecognized breakpoint or watchpoint packet @var{type}.  A
+remote target shall support either both or neither of a given
+@code{Z}@var{type}@dots{} and @code{z}@var{type}@dots{} packet pair.  To
+avoid potential problems with duplicate packets, the operations should
+be implemented in an idempotent way.}
+
+@item @code{z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- remove memory breakpoint @strong{(draft)}
+@item @code{Z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- insert memory breakpoint @strong{(draft)}
+@cindex @code{z0} packet
+@cindex @code{Z0} packet
+
+Insert (@code{Z0}) or remove (@code{z0}) a memory breakpoint at address
+@code{addr} of size @code{length}.
+
+A memory breakpoint is implemented by replacing the instruction at
+@var{addr} with a software breakpoint or trap instruction.  The
+@code{length} is used by targets that indicates the size of the
+breakpoint (in bytes) that should be inserted (e.g., the @sc{arm} and
+@sc{mips} can insert either a 2 or 4 byte breakpoint).
+
+@emph{Implementation note: It is possible for a target to copy or move
+code that contains memory breakpoints (e.g., when implementing
+overlays).  The behavior of this packet, in the presence of such a
+target, is not defined.}
 
 Reply:
 @table @samp
+@item OK
+success
+@item
+not supported
 @item E@var{NN}
 for an error
+@end table
+
+@item @code{z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- remove hardware breakpoint @strong{(draft)}
+@item @code{Z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- insert hardware breakpoint @strong{(draft)}
+@cindex @code{z1} packet
+@cindex @code{Z1} packet
+
+Insert (@code{Z1}) or remove (@code{z1}) a hardware breakpoint at
+address @code{addr} of size @code{length}.
+
+A hardware breakpoint is implemented using a mechanism that is not
+dependant on being able to modify the target's memory.
+
+@emph{Implementation note: A hardware breakpoint is not affected by code
+movement.}
+
+Reply:
+@table @samp
 @item OK
-for success
-@item @samp{}
-If not supported.
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- remove write watchpoint @strong{(draft)}
+@item @code{Z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- insert write watchpoint @strong{(draft)}
+@cindex @code{z2} packet
+@cindex @code{Z2} packet
+
+Insert (@code{Z2}) or remove (@code{z2}) a write watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- remove read watchpoint @strong{(draft)}
+@item @code{Z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- insert read watchpoint @strong{(draft)}
+@cindex @code{z3} packet
+@cindex @code{Z3} packet
+
+Insert (@code{Z3}) or remove (@code{z3}) a read watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- remove access watchpoint @strong{(draft)}
+@item @code{Z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- insert access watchpoint @strong{(draft)}
+@cindex @code{z4} packet
+@cindex @code{Z4} packet
+
+Insert (@code{Z4}) or remove (@code{z4}) an access watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
 @end table
 
 @end table

@@ -723,7 +723,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
   if (frame->signal_handler_caller)
     return read_sigcontext_register (frame, pc_regnum);
   else if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return generic_read_register_dummy (frame->pc, frame->frame, pc_regnum);
+    return deprecated_read_register_dummy (frame->pc, frame->frame, pc_regnum);
   else
     {
       FRAME_INIT_SAVED_REGS (frame);
@@ -1500,10 +1500,12 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
     }
   else if (next_frame_is_call_dummy)
     {
-      bsp = generic_read_register_dummy (frame->next->pc, frame->next->frame,
-                                         IA64_BSP_REGNUM);
-      cfm = generic_read_register_dummy (frame->next->pc, frame->next->frame,
-                                         IA64_CFM_REGNUM);
+      bsp = deprecated_read_register_dummy (frame->next->pc,
+					    frame->next->frame,
+					    IA64_BSP_REGNUM);
+      cfm = deprecated_read_register_dummy (frame->next->pc,
+					    frame->next->frame,
+					    IA64_CFM_REGNUM);
     }
   else
     {
@@ -1518,8 +1520,8 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       else if (frn->next
                && PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
 	                                           frn->next->frame))
-	cfm = generic_read_register_dummy (frn->next->pc, frn->next->frame,
-	                                   IA64_PFS_REGNUM);
+	cfm = deprecated_read_register_dummy (frn->next->pc, frn->next->frame,
+					      IA64_PFS_REGNUM);
       else
 	cfm = read_register (IA64_PFS_REGNUM);
 

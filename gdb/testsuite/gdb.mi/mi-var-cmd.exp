@@ -227,7 +227,7 @@ mi_gdb_test "-var-update *" \
 #  lsimple.unsigned_integer = 255;
 #  lsimple.character = 'a';
 
-mi_run_to "exec-step 9" "end-stepping-range" "do_locals_tests" "" \
+mi_execute_to "exec-step 9" "end-stepping-range" "do_locals_tests" "" \
 	"var-cmd.c" "119" "" "step at do_locals_tests (5)"
 
 # Test: c_variable-2.6
@@ -243,7 +243,7 @@ mi_gdb_test "-var-update *" \
 #  lpsimple = &lsimple;
 #  func = nothing;
 
-mi_run_to "exec-step 4" "end-stepping-range" "do_locals_tests" "" \
+mi_execute_to "exec-step 4" "end-stepping-range" "do_locals_tests" "" \
 	"var-cmd.c" "125" "" "step at do_locals_tests (6)"
 
 # Test: c_variable-2.7
@@ -262,7 +262,7 @@ mi_gdb_test "-var-update *" \
 #  lsimple.unsigned_integer = 4321;
 #  lsimple.character = 'b';
 
-mi_run_to "exec-step 8" "end-stepping-range" "do_locals_tests" "" \
+mi_execute_to "exec-step 8" "end-stepping-range" "do_locals_tests" "" \
 	"var-cmd.c" "133" "" "step at do_locals_tests (7)"
 
 # Test: c_variable-2.8
@@ -518,6 +518,35 @@ mi_gdb_test "-var-delete i" \
 mi_gdb_test "-var-delete l" \
 	"\\^done,ndeleted=\"1\"" \
 	"delete var l"
+
+# Test whether we can follow the name of a variable through multiple
+# stack frames.
+mi_gdb_test "-break-insert do_special_tests" \
+  "=breakpoint-create,number=\"\[0-9\]+\"\r\n\\^done" \
+  "set breakpoint at do_special_tests"
+
+mi_continue_to {.*} do_special_tests {.*} {.*var-cmd.c} {.*} {stop in do_special_tests}
+
+mi_gdb_test "-var-create selected_a @ a" \
+  {\^done,name="selected_a",numchild="0",type="int"} \
+  "create selected_a"
+
+mi_gdb_test "-break-insert incr_a" \
+  "=breakpoint-create,number=\"\[0-9\]+\"\r\n\\^done" \
+  "set breakpoint at incr_a"
+
+mi_continue_to {.*} incr_a {.*} {.*var-cmd.c} {.*} {stop in incr_a}
+
+mi_gdb_test "-var-update selected_a" \
+  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="char",new_num_children="0"\}} \
+  "update selected_a in incr_a"
+
+mi_next "step a line in incr_a"
+mi_next "return from incr_a to do_special_tests"
+
+mi_gdb_test "-var-update selected_a" \
+  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="int",new_num_children="0"\}} \
+  "update selected_a in do_special_tests"
 
 mi_gdb_exit
 return 0

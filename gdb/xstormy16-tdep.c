@@ -758,7 +758,8 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
-      saved_pc = generic_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
+      saved_pc = deprecated_read_register_dummy (fi->pc, fi->frame,
+						 E_PC_REGNUM);
     }
   else
     {

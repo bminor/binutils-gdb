@@ -1337,13 +1337,15 @@ mips_elf64_be_swap_reloc_out (abfd, src, dst)
 
   mirel.r_offset = src[0].r_offset;
   BFD_ASSERT(src[0].r_offset == src[1].r_offset);
+#if 0  
   BFD_ASSERT(src[0].r_offset == src[2].r_offset);
+#endif
 
   mirel.r_type = ELF64_MIPS_R_TYPE (src[0].r_info);
   mirel.r_sym = ELF64_R_SYM (src[0].r_info);
-  mirel.r_type2 = ELF64_MIPS_R_TYPE2 (src[1].r_info);
+  mirel.r_type2 = ELF64_MIPS_R_TYPE (src[1].r_info);
   mirel.r_ssym = ELF64_MIPS_R_SSYM (src[1].r_info);
-  mirel.r_type3 = ELF64_MIPS_R_TYPE3 (src[2].r_info);
+  mirel.r_type3 = ELF64_MIPS_R_TYPE (src[2].r_info);
 
   mips_elf64_swap_reloc_out (abfd, &mirel,
 			     (Elf64_Mips_External_Rel *) dst);
@@ -1369,9 +1371,9 @@ mips_elf64_be_swap_reloca_out (abfd, src, dst)
   BFD_ASSERT(src[1].r_addend == 0);
   BFD_ASSERT(src[2].r_addend == 0);
 
-  mirela.r_type2 = ELF64_MIPS_R_TYPE2 (src[1].r_info);
+  mirela.r_type2 = ELF64_MIPS_R_TYPE (src[1].r_info);
   mirela.r_ssym = ELF64_MIPS_R_SSYM (src[1].r_info);
-  mirela.r_type3 = ELF64_MIPS_R_TYPE3 (src[2].r_info);
+  mirela.r_type3 = ELF64_MIPS_R_TYPE (src[2].r_info);
 
   mips_elf64_swap_reloca_out (abfd, &mirela,
 			      (Elf64_Mips_External_Rela *) dst);
@@ -1525,7 +1527,7 @@ mips_elf64_final_gp (output_bfd, symbol, relocateable, error_message, pgp)
       if (relocateable)
 	{
 	  /* Make up a value.  */
-	  *pgp = symbol->section->output_section->vma + 0x4000;
+	  *pgp = symbol->section->output_section->vma /*+ 0x4000*/;
 	  _bfd_set_gp_value (output_bfd, *pgp);
 	}
       else if (!mips_elf64_assign_gp (output_bfd, pgp))
@@ -2689,8 +2691,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_default_use_rela_p	1
 
-#define elf_backend_ignore_discarded_relocs \
-					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_write_section	_bfd_mips_elf_write_section
 
 /* We don't set bfd_elf64_bfd_is_local_label_name because the 32-bit

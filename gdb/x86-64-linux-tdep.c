@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "gdb_string.h"
 #include "regcache.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"

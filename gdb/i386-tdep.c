@@ -535,8 +535,8 @@ static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
-    return generic_read_register_dummy (frame->pc, frame->frame,
-					PC_REGNUM);
+    return deprecated_read_register_dummy (frame->pc, frame->frame,
+					   PC_REGNUM);
 
   if (frame->signal_handler_caller)
     return i386_sigtramp_saved_pc (frame);
@@ -1102,10 +1102,10 @@ i386_register_virtual_type (int regnum)
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
-  if (IS_FP_REGNUM (regnum))
+  if (FP_REGNUM_P (regnum))
     return builtin_type_i387_ext;
 
-  if (IS_SSE_REGNUM (regnum))
+  if (SSE_REGNUM_P (regnum))
     return builtin_type_vec128i;
 
   if (mmx_regnum_p (regnum))
@@ -1175,7 +1175,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 i386_register_convertible (int regnum)
 {
-  return IS_FP_REGNUM (regnum);
+  return FP_REGNUM_P (regnum);
 }
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
@@ -1185,7 +1185,7 @@ static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  gdb_assert (IS_FP_REGNUM (regnum));
+  gdb_assert (FP_REGNUM_P (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1208,7 +1208,7 @@ static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
-  gdb_assert (IS_FP_REGNUM (regnum));
+  gdb_assert (FP_REGNUM_P (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1288,15 +1288,17 @@ i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
    deals with switching between those.  */
 
 static int
-gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
+i386_print_insn (bfd_vma pc, disassemble_info *info)
 {
-  if (disassembly_flavor == att_flavor)
-    return print_insn_i386_att (memaddr, info);
-  else if (disassembly_flavor == intel_flavor)
-    return print_insn_i386_intel (memaddr, info);
-  /* Never reached -- disassembly_flavour is always either att_flavor
-     or intel_flavor.  */
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
+  gdb_assert (disassembly_flavor == att_flavor
+	      || disassembly_flavor == intel_flavor);
+
+  /* FIXME: kettenis/20020915: Until disassembler_options is properly
+     constified, cast to prevent a compiler warning.  */
+  info->disassembler_options = (char *) disassembly_flavor;
+  info->mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
+
+  return print_insn_i386 (pc, info);
 }
 
 
@@ -1460,7 +1462,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      on having a `long double' that's not `long' at all.  */
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
 
-  /* Although the i386 extended floating-point has only 80 significant
+  /* Although the i387 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
@@ -1469,11 +1471,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
 
-  set_gdbarch_sp_regnum (gdbarch, 4);
-  set_gdbarch_fp_regnum (gdbarch, 5);
-  set_gdbarch_pc_regnum (gdbarch, 8);
-  set_gdbarch_ps_regnum (gdbarch, 9);
-  set_gdbarch_fp0_regnum (gdbarch, 16);
+  set_gdbarch_sp_regnum (gdbarch, 4); /* %esp */
+  set_gdbarch_fp_regnum (gdbarch, 5); /* %ebp */
+  set_gdbarch_pc_regnum (gdbarch, 8); /* %eip */
+  set_gdbarch_ps_regnum (gdbarch, 9); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, 16);	/* %st(0) */
 
   /* Use the "default" register numbering scheme for stabs and COFF.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
@@ -1518,7 +1520,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
@@ -1570,6 +1571,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
+  set_gdbarch_print_insn (gdbarch, i386_print_insn);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
@@ -1601,9 +1604,6 @@ _initialize_i386_tdep (void)
 {
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
 
-  tm_print_insn = gdb_print_insn_i386;
-  tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
-
   /* Add the variable that controls the disassembly flavor.  */
   {
     struct cmd_list_element *new_cmd;
@@ -1624,7 +1624,7 @@ and the default value is \"att\".",
     struct cmd_list_element *new_cmd;
 
     new_cmd = add_set_enum_cmd ("struct-convention", no_class,
-				 valid_conventions,
+				valid_conventions,
 				&struct_convention, "\
 Set the convention for returning small structs, valid values \
 are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",

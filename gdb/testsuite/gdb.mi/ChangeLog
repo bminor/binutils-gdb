@@ -60,6 +60,64 @@
 	mi-var-display.exp mi-watch.exp: Update to conform to MI2
 	notify-async-output (events).
 
+2002-09-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-pthreads.exp (get_mi_thread_list): Check if expect_out
+	exists before using it.
+	(check_mi_and_console_threads): Likewise.
+	* gdb669.exp (get_mi_thread_list): Likewise.
+	(check_mi_and_console_threads): Likewise.
+
+2002-09-24  Keith Seitz  <keiths@redhat.com>
+
+	* configure.in: Add config header.
+	Check for pthread.h.
+	* configure: Regenerate.
+	* config.in: New file.
+	* pthreads.c: New file.
+	* mi-pthreads.exp: New file to test thread functionality.
+	* gdb669.exp: New file.
+
+2002-09-17  Keith Seitz  <keiths@redhat.com>
+
+	* mi-var-cmd.exp: Add tests to check when varobj pinned to a
+	selected frame changes type.
+
+2002-09-17  Keith Seitz  <keiths@redhat.com>
+
+	* mi-console.exp: Update copyright.
+	* mi-var-block.exp: Likewise.
+	* mi-var-cmd.exp: Likewise.
+	* mi-var-display.exp: Likewise.
+	* mi0-console.exp: Likewise.
+	* mi0-var-child.exp: Likewise.
+	* mi0-var-cmd.exp: Likewise.
+	* mi0-var-display.exp: Likewise.
+
+2002-09-16  Keith Seitz  <keiths@redhat.com>
+
+	* gdb701.exp: New file for testing varobj target type bug.
+	* gdb701.c: New file.
+
+2002-09-13  Keith Seitz  <keiths@redhat.com>
+
+	* mi-var-child.exp: Use mi_step_to and mi_execute_to instead
+	of a bunch of repeated send_gdb/gdb_expect statements.
+	Fix line numbers.
+
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
+	* mi-simplerun.exp (test_controlled_execution): Follow renaming of
+	mi_run_to to mi_execute_to.
+	* mi-var-cmd.exp: Likewise.
+	* mi0-simplerun.exp: Likewise.
+	* mi0-var-cmd.exp: Likewise.
+
+2002-09-03  Keith Seitz  <keiths@redhat.com>
+
+	* gdb680.exp: New file to test to check for uiout list/tuple
+	nesting bug.
+
 2002-03-04  Michael Chastain  <mec@shout.net>
 
 	* mi-var-cmd.exp: In test "create local variable func",

@@ -28,6 +28,7 @@
 #include "frame.h"
 #include "value.h"
 #include "arch-utils.h"
+#include "gdb_string.h"
 
 #include "vax-tdep.h"
 

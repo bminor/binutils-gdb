@@ -31,6 +31,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "source.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
 #include "language.h"
@@ -80,21 +81,6 @@ static void clear_symtab_users_cleanup (void *ignore);
 
 /* Global variables owned by this file */
 int readnow_symbol_files;	/* Read full symbols immediately */
-
-struct complaint oldsyms_complaint =
-{
-  "Replacing old symbols for `%s'", 0, 0
-};
-
-struct complaint empty_symtab_complaint =
-{
-  "Empty symbol table found for `%s'", 0, 0
-};
-
-struct complaint unknown_option_complaint =
-{
-  "Unknown option `%s' ignored", 0, 0
-};
 
 /* External variables and functions referenced. */
 
@@ -706,7 +692,7 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
      initial symbol reading for this file. */
 
   (*objfile->sf->sym_init) (objfile);
-  clear_complaints (1, verbo);
+  clear_complaints (&symfile_complaints, 1, verbo);
 
   (*objfile->sf->sym_offsets) (objfile, addrs);
 
@@ -818,7 +804,7 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
     }
 
   /* We're done reading the symbol file; finish off complaints.  */
-  clear_complaints (0, verbo);
+  clear_complaints (&symfile_complaints, 0, verbo);
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -1801,7 +1787,7 @@ reread_symbols (void)
 		}
 
 	      (*objfile->sf->sym_init) (objfile);
-	      clear_complaints (1, 1);
+	      clear_complaints (&symfile_complaints, 1, 1);
 	      /* The "mainline" parameter is a hideous hack; I think leaving it
 	         zero is OK since dbxread.c also does what it needs to do if
 	         objfile->global_psymbols.size is 0.  */
@@ -1815,7 +1801,7 @@ reread_symbols (void)
 	      objfile->flags |= OBJF_SYMS;
 
 	      /* We're done reading the symbol file; finish off complaints.  */
-	      clear_complaints (0, 1);
+	      clear_complaints (&symfile_complaints, 0, 1);
 
 	      /* Getting new symbols may change our opinion about what is
 	         frameless.  */
@@ -2118,8 +2104,7 @@ clear_symtab_users (void)
   clear_internalvars ();
   breakpoint_re_set ();
   set_default_breakpoint (0, 0, 0, 0);
-  current_source_symtab = 0;
-  current_source_line = 0;
+  clear_current_source_symtab_and_line ();
   clear_pc_function_cache ();
   if (target_new_objfile_hook)
     target_new_objfile_hook (NULL);
@@ -2305,15 +2290,16 @@ again2:
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
 	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)))
 	{
-	  complain (&oldsyms_complaint, name);
-
+	  complaint (&symfile_complaints, "Replacing old symbols for `%s'",
+		     name);
 	  clear_symtab_users_queued++;
 	  make_cleanup (clear_symtab_users_once, 0);
 	  blewit = 1;
 	}
       else
 	{
-	  complain (&empty_symtab_complaint, name);
+	  complaint (&symfile_complaints, "Empty symbol table found for `%s'",
+		     name);
 	}
 
       free_symtab (s);

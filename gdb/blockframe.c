@@ -816,8 +816,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
-#if defined SIGTRAMP_START
-  if (PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  if (SIGTRAMP_START_P () && PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
       cache_pc_function_low = SIGTRAMP_START (mapped_pc);
       cache_pc_function_high = SIGTRAMP_END (mapped_pc);
@@ -825,7 +824,6 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
       cache_pc_function_section = section;
       goto return_cached_value;
     }
-#endif
 
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
   pst = find_pc_sect_psymtab (mapped_pc, section);
@@ -1210,7 +1208,7 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
    Find a saved register from before GDB calls a function in the inferior */
 
 CORE_ADDR
-generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
+deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
   struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 

@@ -280,12 +280,6 @@ sim_open (kind, cb, abfd, argv)
       STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;
-    case bfd_mach_v850ea:
-      PSW |= PSW_US;
-      STATE_CPU (sd, 0)->psw_mask = (PSW_US
-				     | PSW_NP | PSW_EP | PSW_ID | PSW_SAT
-				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
-      break;
     }
 
   return sd;
@@ -310,11 +304,6 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   memset (&State, 0, sizeof (State));
   if (prog_bfd != NULL)
     PC = bfd_get_start_address (prog_bfd);
-  /* For v850ea, set PSW[US] by default */
-  if (STATE_ARCHITECTURE (sd) != NULL
-      && STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850
-      && STATE_ARCHITECTURE (sd)->mach == bfd_mach_v850ea)
-    PSW |= PSW_US;
   return SIM_RC_OK;
 }
 

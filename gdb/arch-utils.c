@@ -423,8 +423,19 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
 			      int *frame_regnum,
 			      LONGEST *frame_offset)
 {
-  gdb_assert (FP_REGNUM >= 0);
-  *frame_regnum = FP_REGNUM;
+  /* FIXME: cagney/2002-09-13: This code is used when identifying the
+     frame pointer of the current PC.  It is assuming that a single
+     register and an offset can determine this.  I think it should
+     instead generate a byte code expression as that would work better
+     with things like Dwarf2's CFI.  */
+  if (FP_REGNUM >= 0 && FP_REGNUM < NUM_REGS)
+    *frame_regnum = FP_REGNUM;
+  else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS)
+    *frame_regnum = SP_REGNUM;
+  else
+    /* Should this be an internal error?  I guess so, it is reflecting
+       an architectural limitation in the current design.  */
+    internal_error (__FILE__, __LINE__, "No virtual frame pointer available");
   *frame_offset = 0;
 }
 
@@ -437,18 +448,6 @@ generic_register_size (int regnum)
   gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
 }
-
-#if !defined (IN_SIGTRAMP)
-#if defined (SIGTRAMP_START)
-#define IN_SIGTRAMP(pc, name) \
-       ((pc) >= SIGTRAMP_START(pc)   \
-        && (pc) < SIGTRAMP_END(pc) \
-        )
-#else
-#define IN_SIGTRAMP(pc, name) \
-       (name && STREQ ("_sigtramp", name))
-#endif
-#endif
 
 /* Assume all registers are adjacent.  */
 
@@ -470,7 +469,14 @@ generic_register_byte (int regnum)
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  return IN_SIGTRAMP(pc, name);
+#if !defined (IN_SIGTRAMP)
+  if (SIGTRAMP_START_P ())
+    return (pc) >= SIGTRAMP_START (pc) && (pc) < SIGTRAMP_END (pc);
+  else
+    return name && strcmp ("_sigtramp", name) == 0;
+#else
+  return IN_SIGTRAMP (pc, name);
+#endif
 }
 
 int

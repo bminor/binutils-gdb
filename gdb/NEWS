@@ -1,7 +1,21 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 5.2:
+*** Changes since GDB 5.3:
+
+* REMOVED configurations and files
+
+V850EA ISA				
+
+* MIPS $fp behavior changed
+
+The convenience variable $fp, for the MIPS, now consistently returns
+the address of the current frame's base.  Previously, depending on the
+context, $fp could refer to either $sp or the current frame's base
+address.  See ``8.10 Registers'' in the manual ``Debugging with GDB:
+The GNU Source-Level Debugger''.
+
+*** Changes in GDB 5.3:
 
 * ``gdbserver'' now supports multi-threaded applications on some targets
 

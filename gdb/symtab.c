@@ -38,6 +38,7 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "linespec.h"
+#include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 
 #include "gdb_obstack.h"
@@ -860,15 +861,20 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	      /* This is a function which has a symtab for its address.  */
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 mangled_name, namespace);
+
+              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+                 `name' argument to lookup_block_symbol.  But the name
+                 of a minimal symbol is always mangled, so that seems
+                 to be clearly the wrong thing to pass as the
+                 unmangled name.  */
+	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     mangled_name, namespace);
+		  sym = lookup_block_symbol (block, name,
+                                             mangled_name, namespace);
 		}
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
@@ -1027,15 +1033,19 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    {
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 mangled_name, namespace);
+              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+                 `name' argument to lookup_block_symbol.  But the name
+                 of a minimal symbol is always mangled, so that seems
+                 to be clearly the wrong thing to pass as the
+                 unmangled name.  */
+	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     mangled_name, namespace);
+		  sym = lookup_block_symbol (block, name,
+                                             mangled_name, namespace);
 		}
 	      /* If we found one, return it */
 	      if (sym)
@@ -3958,11 +3968,19 @@ struct symtabs_and_lines
 decode_line_spec (char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
+  struct symtab_and_line cursal;
+  
   if (string == 0)
     error ("Empty line specification.");
+    
+  /* We use whatever is set as the current source line. We do not try
+     and get a default  or it will recursively call us! */  
+  cursal = get_current_source_symtab_and_line ();
+  
   sals = decode_line_1 (&string, funfirstline,
-			current_source_symtab, current_source_line,
+			cursal.symtab, cursal.line,
 			(char ***) NULL);
+
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;

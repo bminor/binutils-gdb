@@ -364,6 +364,7 @@ static INLINE int elf_mips_isa PARAMS ((flagword));
 static INLINE char* elf_mips_abi_name PARAMS ((bfd *));
 static void mips_elf_irix6_finish_dynamic_symbol
   PARAMS ((bfd *, const char *, Elf_Internal_Sym *));
+static boolean _bfd_mips_elf_mach_extends_p PARAMS ((flagword, flagword));
 
 /* This will be used when we sort the dynamic relocation records.  */
 static bfd *reldyn_sorting_bfd;
@@ -3058,8 +3059,17 @@ _bfd_elf_mips_mach (flags)
     case E_MIPS_MACH_4111:
       return bfd_mach_mips4111;
 
+    case E_MIPS_MACH_4120:
+      return bfd_mach_mips4120;
+
     case E_MIPS_MACH_4650:
       return bfd_mach_mips4650;
+
+    case E_MIPS_MACH_5400:
+      return bfd_mach_mips5400;
+
+    case E_MIPS_MACH_5500:
+      return bfd_mach_mips5500;
 
     case E_MIPS_MACH_SB1:
       return bfd_mach_mips_sb1;
@@ -3644,7 +3654,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
      sh_offset == object size, and ld doesn't allow that.  While the check
      is arguably bogus for empty or SHT_NOBITS sections, it can easily be
      avoided by not emitting those useless sections in the first place.  */
-  if ((IRIX_COMPAT (abfd) != ict_irix5 && (IRIX_COMPAT (abfd) != ict_irix6))
+  if (! SGI_COMPAT (abfd) && ! NEWABI_P(abfd)
       && (sec->flags & SEC_RELOC) != 0)
     {
       struct bfd_elf_section_data *esd;
@@ -5935,8 +5945,20 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4111;
       break;
 
+    case bfd_mach_mips4120:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4120;
+      break;
+
     case bfd_mach_mips4650:
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4650;
+      break;
+
+    case bfd_mach_mips5400:
+      val = E_MIPS_ARCH_4 | E_MIPS_MACH_5400;
+      break;
+
+    case bfd_mach_mips5500:
+      val = E_MIPS_ARCH_4 | E_MIPS_MACH_5500;
       break;
 
     case bfd_mach_mips5000:
@@ -6984,6 +7006,8 @@ _bfd_mips_elf_final_link (abfd, info)
 		    <= g->global_gotno);
     }
 
+#if 0
+  /* We want to set the GP value for ld -r.  */
   /* On IRIX5, we omit the .options section.  On IRIX6, however, we
      include it, even though we don't process it quite right.  (Some
      entries are supposed to be merged.)  Empirically, we seem to be
@@ -7021,6 +7045,7 @@ _bfd_mips_elf_final_link (abfd, info)
 	  break;
 	}
     }
+#endif
 
   /* Get a value for the GP register.  */
   if (elf_gp (abfd) == 0)
@@ -7634,6 +7659,26 @@ _bfd_mips_elf_final_link (abfd, info)
   return true;
 }
 
+/* Return true if machine EXTENSION is an extension of machine BASE,
+   meaning that it should be safe to link code for the two machines
+   and set the output machine to EXTENSION.  EXTENSION and BASE are
+   both submasks of EF_MIPS_MACH.  */
+
+static boolean
+_bfd_mips_elf_mach_extends_p (base, extension)
+     flagword base, extension;
+{
+  /* The vr5500 ISA is an extension of the core vr5400 ISA, but doesn't
+     include the multimedia stuff.  It seems better to allow vr5400
+     and vr5500 code to be merged anyway, since many libraries will
+     just use the core ISA.  Perhaps we could add some sort of ASE
+     flag if this ever proves a problem.  */
+  return (base == 0
+	  || (base == E_MIPS_MACH_5400 && extension == E_MIPS_MACH_5500)
+	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4111)
+	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4120));
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -7740,10 +7785,9 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 
       /* If either has no machine specified, just compare the general isa's.
 	 Some combinations of machines are ok, if the isa's match.  */
-      if (! new_mach
-	  || ! old_mach
-	  || new_mach == old_mach
-	  )
+      if (new_mach == old_mach
+	  || _bfd_mips_elf_mach_extends_p (new_mach, old_mach)
+	  || _bfd_mips_elf_mach_extends_p (old_mach, new_mach))
 	{
 	  /* Don't warn about mixing code using 32-bit ISAs, or mixing code
 	     using 64-bit ISAs.  They will normally use the same data sizes
@@ -7760,8 +7804,11 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	  else
 	    {
 	      /* Do we need to update the mach field?  */
-	      if (old_mach == 0 && new_mach != 0) 
-		elf_elfheader (obfd)->e_flags |= new_mach;
+	      if (_bfd_mips_elf_mach_extends_p (old_mach, new_mach))
+		{
+		  elf_elfheader (obfd)->e_flags &= ~EF_MIPS_MACH;
+		  elf_elfheader (obfd)->e_flags |= new_mach;
+		}
 
 	      /* Do we need to update the ISA field?  */
 	      if (new_isa > old_isa)

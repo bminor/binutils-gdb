@@ -390,7 +390,8 @@ m32r_init_extra_frame_info (struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+						  SP_REGNUM);
       fi->framesize = 0;
       return;
     }
@@ -462,7 +463,7 @@ m32r_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->fsr.regs[regnum] != 0)
       return read_memory_integer (fi->fsr.regs[regnum],
 				  REGISTER_RAW_SIZE (regnum));
@@ -554,7 +555,7 @@ CORE_ADDR
 m32r_frame_saved_pc (struct frame_info *fi)
 {
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+    return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return m32r_find_callers_reg (fi, RP_REGNUM);
 }

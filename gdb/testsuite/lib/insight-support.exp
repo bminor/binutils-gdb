@@ -54,7 +54,15 @@ proc gdbtk_start {test} {
 
   gdb_stop_suppressing_tests;
 
-  verbose "Starting $GDB -nx -q --tclcommand=$test"
+  # Need to convert ::GDB to use (-)?insight...
+  if {[regsub {gdb$} $GDB insight newGDB]} {
+    set INSIGHT $newGDB
+  } else {
+    perror "Cannot find Insight executable"
+    exit 1
+  }
+
+  verbose "Starting $INSIGHT -nx -q --tclcommand=$test"
 
   set real_test [which $test]
   if {$real_test == 0} {
@@ -63,8 +71,8 @@ proc gdbtk_start {test} {
   }
 
   if {![is_remote host]} {
-    if { [which $GDB] == 0 } {
-      perror "$GDB does not exist."
+    if { [which $INSIGHT] == 0 } {
+      perror "$INSIGHT does not exist."
       exit 1
     }
   }
@@ -91,9 +99,9 @@ proc gdbtk_start {test} {
   set env(GDBTK_VERBOSE) 1
   set env(GDBTK_LOGFILE) [to_tcl_path [file join $objdir gdb.log]]
 
-  set err [catch {exec $GDB -nx -q --tclcommand=$test} res]
+  set err [catch {exec $INSIGHT -nx -q --tclcommand=$test} res]
   if { $err } {
-    perror "Execing $GDB failed: $res"
+    perror "Execing $INSIGHT failed: $res"
     append res "\nERROR gdb-crash"
   }
   return $res

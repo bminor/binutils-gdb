@@ -22,6 +22,7 @@
 #include "defs.h"
 
 #include "ns32k-tdep.h"
+#include "gdb_string.h"
 
 static int
 ns32knbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)

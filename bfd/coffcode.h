@@ -1824,6 +1824,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
   enum bfd_architecture arch;
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
+  /* Zero selects the default machine for an arch.  */
   machine = 0;
   switch (internal_f->f_magic)
     {
@@ -1831,13 +1832,11 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case OR32_MAGIC_BIG:
     case OR32_MAGIC_LITTLE:
       arch = bfd_arch_or32;
-      machine = 0;
       break;
 #endif
 #ifdef PPCMAGIC
     case PPCMAGIC:
       arch = bfd_arch_powerpc;
-      machine = 0; /* what does this mean? (krk) */
       break;
 #endif
 #ifdef I386MAGIC
@@ -1846,20 +1845,17 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case I386AIXMAGIC:		/* Danbury PS/2 AIX C Compiler */
     case LYNXCOFFMAGIC:	/* shadows the m68k Lynx number below, sigh */
       arch = bfd_arch_i386;
-      machine = 0;
       break;
 #endif
 #ifdef IA64MAGIC
     case IA64MAGIC:
       arch = bfd_arch_ia64;
-      machine = 0;
       break;
 #endif
 #ifdef A29K_MAGIC_BIG
     case A29K_MAGIC_BIG:
     case A29K_MAGIC_LITTLE:
       arch = bfd_arch_a29k;
-      machine = 0;
       break;
 #endif
 #ifdef ARMMAGIC
@@ -2044,7 +2040,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef WE32KMAGIC
     case WE32KMAGIC:
       arch = bfd_arch_we32k;
-      machine = 0;
       break;
 #endif
 
@@ -2082,21 +2077,18 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case SH_ARCH_MAGIC_WINCE:
 #endif
       arch = bfd_arch_sh;
-      machine = 0;
       break;
 #endif
 
 #ifdef MIPS_ARCH_MAGIC_WINCE
     case MIPS_ARCH_MAGIC_WINCE:
       arch = bfd_arch_mips;
-      machine = 0;
       break;
 #endif
 
 #ifdef H8500MAGIC
     case H8500MAGIC:
       arch = bfd_arch_h8500;
-      machine = 0;
       break;
 #endif
 
@@ -2106,7 +2098,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case LYNXCOFFMAGIC:
 #endif
       arch = bfd_arch_sparc;
-      machine = 0;
       break;
 #endif
 
@@ -2462,7 +2453,8 @@ coff_write_relocs (abfd, first_undef)
 #ifdef SECTION_RELATIVE_ABSOLUTE_SYMBOL_P
                 if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q,s))
 #else
-		if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
+		if ((*q->sym_ptr_ptr)->section == bfd_abs_section_ptr
+		    && ((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0)
 #endif
 		  /* This is a relocation relative to the absolute symbol.  */
 		  n.r_symndx = -1;
@@ -4116,7 +4108,7 @@ coff_write_object_contents (abfd)
 	      internal_a.o_cputype = 4;
 	      break;
 	    case bfd_arch_powerpc:
-	      if (bfd_get_mach (abfd) == 0)
+	      if (bfd_get_mach (abfd) == bfd_mach_ppc)
 		internal_a.o_cputype = 3;
 	      else
 		internal_a.o_cputype = 1;
