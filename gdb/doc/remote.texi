@@ -62,9 +62,12 @@ machine; for example, use @file{sparc-stub.c} to debug programs on
 These working remote stubs are distributed with @value{GDBN}:
 
 @table @code
-@item sparc-stub.c
-@kindex sparc-stub.c
-For @sc{sparc} architectures.
+
+@item i386-stub.c
+@kindex i386-stub.c
+@cindex Intel
+@cindex i386
+For Intel 386 and compatible architectures.
 
 @item m68k-stub.c
 @kindex m68k-stub.c
@@ -72,11 +75,23 @@ For @sc{sparc} architectures.
 @cindex m680x0
 For Motorola 680x0 architectures.
 
-@item i386-stub.c
-@kindex i386-stub.c
-@cindex Intel
-@cindex i386
-For Intel 386 and compatible architectures.
+@item sh-stub.c
+@kindex sh-stub.c
+@cindex Hitachi
+@cindex SH
+For Hitachi SH architectures.
+
+@item sparc-stub.c
+@kindex sparc-stub.c
+@cindex Sparc
+For @sc{sparc} architectures.
+
+@item sparcl-stub.c
+@kindex sparcl-stub.c
+@cindex Fujitsu
+@cindex SparcLite
+For Fujitsu @sc{sparclite} architectures.
+
 @end table
 
 The @file{README} file in the @value{GDBN} distribution may list other

@@ -1,3 +1,7 @@
+Thu Jul 11 13:50:28 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.texi: Update list of stubs in the GDB distribution.
+
 Fri Jul  5 15:38:54 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbint.texinfo (NO_MMCHECK): Renamed from NO_MMALLOC_CHECK.
