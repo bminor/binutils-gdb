@@ -2364,7 +2364,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_ARM_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
             return false;
           break;
         }
