@@ -1,4 +1,21 @@
+Mon Jun  2 11:48:58 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* lib/gas-defs.exp (regexp_diff): Improve messages when one
+	file is shorter than the other.
+
+Wed May  7 16:18:30 1997  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* gas/m88k/init.{s,d}: New checks for proper padding of
+	.init sections.
+	* gas/m88k/m88.exp: Run them.
+
+	* gas/m68k/t2.d: New file for check of presence of section
+	symbols on the m68k-motorola-sysv.
+	* gas/m68k/all.exp: Run t2 if [istarget m68*-motorola-sysv].
+
 Wed May  7 16:12:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/gas.exp: Don't run cofftag test for m88k-coff.
 
 	* gas/mips/lifloat.s: Update for recent changes to floating point
 	handling.
