@@ -167,10 +167,7 @@ sparc_opcode_lookup_arch (name)
 { opcode,	F3(2, op3, 1), F3(~2, ~op3, ~1),		"1,i,d", 0, arch_mask }, \
 { opcode,	F3(2, op3, 1), F3(~2, ~op3, ~1),		"i,1,d", 0, arch_mask }
 
-/* This table is sorted at runtime, so cannot be "const" like most of the
-   opcodes tables for other architectures . */
-
-struct sparc_opcode sparc_opcodes[] = {
+const struct sparc_opcode sparc_opcodes[] = {
 
 { "ld",	F3(3, 0x00, 0), F3(~3, ~0x00, ~0),		"[1+2],d", 0, v6 },
 { "ld",	F3(3, 0x00, 0), F3(~3, ~0x00, ~0)|RS2_G0,	"[1],d", 0, v6 }, /* ld [rs1+%g0],d */
@@ -1463,12 +1460,12 @@ CONDFC  ("fbule", "cb013", 0xe, 0),
 { "fcmped",	CMPFCC(1)|F3F(2, 0x35, 0x056), CMPFCC(~1)|F3F(~2, ~0x35, ~0x056),	 "7,v,B", F_FLOAT, v9 },
 { "fcmped",	CMPFCC(2)|F3F(2, 0x35, 0x056), CMPFCC(~2)|F3F(~2, ~0x35, ~0x056),	 "8,v,B", F_FLOAT, v9 },
 { "fcmped",	CMPFCC(3)|F3F(2, 0x35, 0x056), CMPFCC(~3)|F3F(~2, ~0x35, ~0x056),	 "9,v,B", F_FLOAT, v9 },
-{ "fcmpq",	          F3F(2, 0x34, 0x053),            F3F(~2, ~0x34, ~0x053)|RD_G0,	 "V,R", F_FLOAT, v8 },
+{ "fcmpq",	          F3F(2, 0x35, 0x053),            F3F(~2, ~0x35, ~0x053)|RD_G0,	 "V,R", F_FLOAT, v8 },
 { "fcmpq",	CMPFCC(0)|F3F(2, 0x35, 0x053), CMPFCC(~0)|F3F(~2, ~0x35, ~0x053),	 "6,V,R", F_FLOAT, v9 },
 { "fcmpq",	CMPFCC(1)|F3F(2, 0x35, 0x053), CMPFCC(~1)|F3F(~2, ~0x35, ~0x053),	 "7,V,R", F_FLOAT, v9 },
 { "fcmpq",	CMPFCC(2)|F3F(2, 0x35, 0x053), CMPFCC(~2)|F3F(~2, ~0x35, ~0x053),	 "8,V,R", F_FLOAT, v9 },
 { "fcmpq",	CMPFCC(3)|F3F(2, 0x35, 0x053), CMPFCC(~3)|F3F(~2, ~0x35, ~0x053),	 "9,V,R", F_FLOAT, v9 },
-{ "fcmpeq",	          F3F(2, 0x34, 0x057),            F3F(~2, ~0x34, ~0x057)|RD_G0,	 "V,R", F_FLOAT, v8 },
+{ "fcmpeq",	          F3F(2, 0x35, 0x057),            F3F(~2, ~0x35, ~0x057)|RD_G0,	 "V,R", F_FLOAT, v8 },
 { "fcmpeq",	CMPFCC(0)|F3F(2, 0x35, 0x057), CMPFCC(~0)|F3F(~2, ~0x35, ~0x057),	 "6,V,R", F_FLOAT, v9 },
 { "fcmpeq",	CMPFCC(1)|F3F(2, 0x35, 0x057), CMPFCC(~1)|F3F(~2, ~0x35, ~0x057),	 "7,V,R", F_FLOAT, v9 },
 { "fcmpeq",	CMPFCC(2)|F3F(2, 0x35, 0x057), CMPFCC(~2)|F3F(~2, ~0x35, ~0x057),	 "8,V,R", F_FLOAT, v9 },
