@@ -1,5 +1,8 @@
 Wed Jun 15 01:54:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldmain.c (get_emulation): Ignore -m486 for Linux compatibility.
+	* lexsup.c (parse_args): Ignore -qmagic for Linux compatibility.
+
 	Let the user change the dynamic linker used by ELF code.
 	* ld.h (args_type): Add new field interpreter.
 	* lexsup.c (parse_args): Add dynamic-linker to longopts, and

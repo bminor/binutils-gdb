@@ -98,6 +98,7 @@ parse_args (argc, argv)
     {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
     {"oformat", required_argument, NULL, OPTION_OFORMAT},
     {"Qy", no_argument, NULL, OPTION_IGNORE},
+    {"qmagic", no_argument, NULL, OPTION_IGNORE}, /* Linux compatibility.  */
     {"relax", no_argument, NULL, OPTION_RELAX},
     {"retain-symbols-file", no_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},

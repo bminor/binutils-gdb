@@ -367,6 +367,12 @@ get_emulation (argc, argv)
 		 the arguments and hope that nobody ever creates
 		 emulations named ips1, ips2 or ips3.  */
 	    }
+	  else if (strcmp (argv[i], "-m486") == 0)
+	    {
+	      /* FIXME: The argument -m486 is passed to the linker on
+		 some Linux systems.  Hope that nobody creates an
+		 emulation named 486.  */
+	    }
 	  else
 	    {
 	      /* -mEMUL */
