@@ -1,3 +1,8 @@
+2003-01-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of PRINT_REGISTER_HOOK.
+
 2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
 	(OpenRISC 1000): Fix formatting of command names.

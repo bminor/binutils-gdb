@@ -1,3 +1,7 @@
+2003-01-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-tdep.c: Delete reference to PRINT_REGISTER_HOOK.
+
 2003-01-215  Stephen P. Smith <ischis2@cox.net>
 
 	* MAINTAINERS (Stephen P. Smith): Updated email address

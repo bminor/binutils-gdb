@@ -1862,8 +1862,7 @@ decode_asi (int val)
     }
 }
 
-/* PRINT_REGISTER_HOOK routine.
-   Pretty print various registers.  */
+/* Pretty print various registers.  */
 /* FIXME: Would be nice if this did some fancy things for 32 bit sparc.  */
 
 static void

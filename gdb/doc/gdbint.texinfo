@@ -3652,11 +3652,6 @@ The number of the ``next program counter'' register, if defined.
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
 
-@item PRINT_REGISTER_HOOK (@var{regno})
-@findex PRINT_REGISTER_HOOK
-If defined, this must be a function that prints the contents of the
-given register to standard output.
-
 @item PRINT_TYPELESS_INTEGER
 @findex PRINT_TYPELESS_INTEGER
 This is an obscure substitute for @code{print_longest} that seems to
