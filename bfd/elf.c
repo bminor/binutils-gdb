@@ -1951,8 +1951,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    hdr->bfd_section->flags
 	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
+	  /* We try to keep the same section order as it comes in.  */
+	  idx += n_elt;
 	  while (--n_elt != 0)
-	    if ((s = (++idx)->shdr->bfd_section) != NULL
+	    if ((s = (--idx)->shdr->bfd_section) != NULL
 		&& elf_next_in_group (s) != NULL)
 	      {
 		elf_next_in_group (hdr->bfd_section) = s;
@@ -2060,6 +2062,7 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".gnu.version",   12,  0, SHT_GNU_versym, 0 },
   { ".gnu.version_d", 14,  0, SHT_GNU_verdef, 0 },
   { ".gnu.version_r", 14,  0, SHT_GNU_verneed, 0 },
+  { ".note.GNU-stack",15,  0, SHT_PROGBITS, 0 },
   { ".note",           5, -1, SHT_NOTE,     0 },
   { ".rela",           5, -1, SHT_RELA,     0 },
   { ".rel",            4, -1, SHT_REL,      0 },
@@ -2392,7 +2395,31 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
      asect->flags.  */
   if (this_hdr->sh_type == SHT_NULL)
     {
-      if ((asect->flags & SEC_ALLOC) != 0
+      if ((asect->flags & SEC_GROUP) != 0)
+	{
+	  /* We also need to mark SHF_GROUP here for relocatable
+	     link.  */
+	  struct bfd_link_order *l;
+	  asection *elt;
+
+	  for (l = asect->link_order_head; l != NULL; l = l->next)
+	    if (l->type == bfd_indirect_link_order
+		&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
+	      do
+		{
+		  /* The name is not important. Anything will do.  */
+		  elf_group_name (elt->output_section) = "G";
+		  elf_section_flags (elt->output_section) |= SHF_GROUP;
+
+		  elt = elf_next_in_group (elt);
+		  /* During a relocatable link, the lists are
+		     circular.  */
+		}
+	      while (elt != elf_next_in_group (l->u.indirect.section));
+
+	  this_hdr->sh_type = SHT_GROUP;
+	}
+      else if ((asect->flags & SEC_ALLOC) != 0
 	  && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	      || (asect->flags & SEC_NEVER_LOAD) != 0))
 	this_hdr->sh_type = SHT_NOBITS;

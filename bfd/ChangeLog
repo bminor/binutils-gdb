@@ -1,5 +1,13 @@
 2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (bfd_section_from_shdr): Maintain the section order in
+	a section group.
+	(special_sections): Add ".note.GNU-stack".
+	(elf_fake_sections): Handle section group for relocatable
+	link..
+
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* section.c (bfd_sections_find_if): New.
 	* bfd-in2.h: Regenerated.
 
