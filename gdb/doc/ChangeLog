@@ -1,3 +1,9 @@
+2003-09-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	NPC_REGNUM to DEPRECATED_NPC_REGNUM.  Add cross reference to
+	TARGET_WRITE_PC.
+	
 2003-09-22  Michael Chastain  <mec@shout.net>
 
 	* gdbint.texinfo (Testsuite Organization): Change gdb.c++ to gdb.cp.
