@@ -160,17 +160,50 @@ typedef enum bfd_format {
 	      bfd_type_end}	/* marks the end; don't use it! */
          bfd_format;
 
-/* Object file flag values */
+/* Values that may appear in the flags field of a BFD.  These also
+   appear in the object_flags field of the bfd_target structure, where
+   they indicate the set of flags used by that backend (not all flags
+   are meaningful for all object file formats) (FIXME: at the moment,
+   the object_flags values have mostly just been copied from backend
+   to another, and are not necessarily correct).  */
+
+/* No flags.  */
 #define NO_FLAGS    	0x00
+
+/* BFD contains relocation entries.  */
 #define HAS_RELOC   	0x01
+
+/* BFD is directly executable.  */
 #define EXEC_P      	0x02
+
+/* BFD has line number information (basically used for F_LNNO in a
+   COFF header).  */
 #define HAS_LINENO  	0x04
+
+/* BFD has debugging information.  */
 #define HAS_DEBUG   	0x08
+
+/* BFD has symbols.  */
 #define HAS_SYMS    	0x10
+
+/* BFD has local symbols (basically used for F_LSYMS in a COFF
+   header).  */
 #define HAS_LOCALS  	0x20
+
+/* BFD is a dynamic object.  */
 #define DYNAMIC     	0x40
+
+/* Text section is write protected (if D_PAGED is not set, this is
+   like an a.out NMAGIC file) (the linker sets this by default, but
+   clears it for -r or -N).  */
 #define WP_TEXT     	0x80
+
+/* BFD is dynamically paged (this is like an a.out ZMAGIC file) (the
+   linker sets this by default, but clears it for -r or -n or -N).  */
 #define D_PAGED     	0x100
+
+/* BFD is relaxable (this means that bfd_relax_section may be able to
+   do something).  */
 #define BFD_IS_RELAXABLE 0x200
 
 /* symbols and relocation */
@@ -186,9 +219,6 @@ typedef enum bfd_symclass {
 	      bfd_symclass_debugger, /* some debugger symbol */
 	      bfd_symclass_undefined /* none known */
 	    } symclass;
-
-
-typedef int symtype;		/* Who knows, yet? */
 
 
 /* general purpose part of a symbol;
@@ -385,24 +415,18 @@ CAT(NAME,_bfd_make_debug_symbol)
 
 /* User program access to BFD facilities */
 
-extern CONST short _bfd_host_big_endian;
-#define HOST_BYTE_ORDER_BIG_P	(*(char *)&_bfd_host_big_endian)
-
-/* The bfd itself */
-
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
+#define bfd_get_cacheable(abfd) ((abfd)->cacheable)
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
+#define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
 #define bfd_applicable_file_flags(abfd) ((abfd)->xvec->object_flags)
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
 #define bfd_my_archive(abfd) ((abfd)->my_archive)
 #define bfd_has_map(abfd) ((abfd)->has_armap)
-#define bfd_header_twiddle_required(abfd) \
-        ((((abfd)->xvec->header_byteorder_big_p)		\
-	  != (boolean)HOST_BYTE_ORDER_BIG_P) ? true:false)
 
 #define bfd_valid_reloc_types(abfd) ((abfd)->xvec->valid_reloc_types)
 #define bfd_usrdata(abfd) ((abfd)->usrdata)
@@ -411,13 +435,61 @@ extern CONST short _bfd_host_big_endian;
 #define bfd_get_symcount(abfd) ((abfd)->symcount)
 #define bfd_get_outsymbols(abfd) ((abfd)->outsymbols)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
-#define bfd_get_architecture(abfd) ((abfd)->obj_arch)
-#define bfd_get_machine(abfd) ((abfd)->obj_machine)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define BYTE_SIZE 1
-#define SHORT_SIZE 2
-#define LONG_SIZE 4
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
+
+/* Byte swapping routines.  */
+
+bfd_vma		bfd_getb64	   PARAMS ((unsigned char *));
+bfd_vma 	bfd_getl64	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_64 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_64 PARAMS ((unsigned char *));
+bfd_vma		bfd_getb32	   PARAMS ((unsigned char *));
+bfd_vma		bfd_getl32	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_32 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_32 PARAMS ((unsigned char *));
+bfd_vma		bfd_getb16	   PARAMS ((unsigned char *));
+bfd_vma		bfd_getl16	   PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getb_signed_16 PARAMS ((unsigned char *));
+bfd_signed_vma	bfd_getl_signed_16 PARAMS ((unsigned char *));
+void		bfd_putb64	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl64	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
+void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
+
+/* ECOFF linking routines.  */
+#ifdef __STDC__
+struct ecoff_debug_info;
+struct ecoff_debug_swap;
+struct ecoff_extr;
+struct symbol_cache_entry;
+#endif
+extern boolean bfd_ecoff_debug_accumulate
+  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   bfd *input_bfd, struct ecoff_debug_info *input_debug,
+	   const struct ecoff_debug_swap *input_swap,
+	   boolean relocateable));
+extern boolean bfd_ecoff_debug_link_other
+  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd));
+extern boolean bfd_ecoff_debug_externals
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap,
+	   boolean relocateable,
+	   boolean (*get_extr) (struct symbol_cache_entry *,
+				struct ecoff_extr *),
+	   void (*set_index) (struct symbol_cache_entry *,
+			      bfd_size_type)));
+extern bfd_size_type bfd_ecoff_debug_size
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap));
+extern boolean bfd_ecoff_write_debug
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap, file_ptr where));
 
 /* And more from the source.  */

@@ -1,3 +1,30 @@
+Wed Nov 24 02:02:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecofflink.c: New file to hold ECOFF debug information linking
+	routines.
+	* ecoff.c (ecoff_clear_output_flags, ecoff_rel, ecoff_dump_seclet,
+	ecoff_add_string, ecoff_get_debug): Removed.  Functionality now in
+	ecofflink.c.
+	(ecoff_get_extr, ecoff_set_index): New functions.
+	(ecoff_slurp_symbolic_info): Don't save raw_size.
+	(ecoff_bfd_seclet_link): Rewrote to use ecofflink.c functions.
+	(ecoff_compute_section_file_positions): Don't set EXEC_P just
+	because there is a start address.
+	(ecoff_write_object_contents): Handle external symbols here.  Use
+	ecofflink.c functions to write out debugging information.
+	* elf32-mips.c (mips_elf_read_ecoff_info, mips_elf_get_extr,
+	mips_elf_set_index): New functions.
+	(mips_elf_seclet_link): Discard empty sections, the .options
+	section and .gptab sections.  Handle linking .mdebug section.
+	* libecoff.h (ecoff_data_type): Removed raw_size and ifdbase.
+	* libelf.h (elf_symbol_type): Added mips_extr to tc_data union.
+	* bfd-in.h: Added prototypes for routines in ecofflink.c (some are
+	called by gas, so they are public).
+	* bfd-in2.h: Rebuilt.
+	* Makefile.in (BFD_LIBS): Added ecofflink.o.
+	(CFILES): Added ecofflink.c.
+	(ecofflink.o): New target.  Rebuilt dependencies.
+
 Mon Nov 22 22:26:42 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (hppa_object_p): Also recognize SHARED_MAGIC_CNX as
@@ -27,6 +54,11 @@ Mon Nov 22 02:33:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* som.c (som_get_reloc_upper_bound): Implement.
 	(som_canonicalize_reloc): Implement.
 	(som_set_reloc_info, som_slurp_reloc_table): New functions.
+
+Sun Nov 21 13:46:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hosts/lynx.h (FPRINTF_ALREADY_DECLARED): Define.
+	* hosts/sparclynx.h: Include lynx.h instead of duplicating it.
 
 Fri Nov 19 14:34:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 

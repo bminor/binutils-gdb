@@ -461,6 +461,37 @@ void		bfd_putl32	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb16	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl16	   PARAMS ((bfd_vma, unsigned char *));
 
+/* ECOFF linking routines.  */
+#ifdef __STDC__
+struct ecoff_debug_info;
+struct ecoff_debug_swap;
+struct ecoff_extr;
+struct symbol_cache_entry;
+#endif
+extern boolean bfd_ecoff_debug_accumulate
+  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   bfd *input_bfd, struct ecoff_debug_info *input_debug,
+	   const struct ecoff_debug_swap *input_swap,
+	   boolean relocateable));
+extern boolean bfd_ecoff_debug_link_other
+  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd));
+extern boolean bfd_ecoff_debug_externals
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap,
+	   boolean relocateable,
+	   boolean (*get_extr) (struct symbol_cache_entry *,
+				struct ecoff_extr *),
+	   void (*set_index) (struct symbol_cache_entry *,
+			      bfd_size_type)));
+extern bfd_size_type bfd_ecoff_debug_size
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap));
+extern boolean bfd_ecoff_write_debug
+  PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap, file_ptr where));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));
@@ -1615,6 +1646,7 @@ struct _bfd
       struct trad_core_struct *trad_core_data;
       struct som_data_struct *som_data;
       struct hpux_core_struct *hpux_core_data;
+      struct hppabsd_core_struct *hppabsd_core_data;
       struct sgi_core_struct *sgi_core_data;
       struct lynx_core_struct *lynx_core_data;
       struct osf_core_struct *osf_core_data;
