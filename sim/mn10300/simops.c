@@ -178,7 +178,7 @@ void OP_FC000000 (insn, extension)
 {
   State.regs[REG_D0 + ((insn & 0xc0000) >> 18)]
     = load_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
-		 + ((insn & 0xffff) << 16) | extension), 4);
+		 + ((insn & 0xffff) << 16) + extension), 4);
 }
 
 /* mov (d8,sp), dn */
@@ -509,7 +509,7 @@ void OP_FCCC0000 (insn, extension)
 {
   unsigned long value;
 
-  value = (insn & 0xffff) << 16 | extension;
+  value = ((insn & 0xffff) << 16) + extension;
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = value;
 }
 
@@ -529,7 +529,7 @@ void OP_FCDC0000 (insn, extension)
 {
   unsigned long value;
 
-  value = (insn & 0xffff) << 16 | extension;
+  value = ((insn & 0xffff) << 16) + extension;
   State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 }
 
@@ -1170,7 +1170,7 @@ void OP_FCC00000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 + imm;
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = value;
 
@@ -1239,7 +1239,7 @@ void OP_FCD00000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 + imm;
   State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 
@@ -1258,7 +1258,6 @@ void OP_FCD00000 (insn, extension)
 void OP_F8FE00 (insn, extension)
      unsigned long insn, extension;
 {
-  int z, c, n, v;
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_SP];
@@ -1271,7 +1270,6 @@ void OP_F8FE00 (insn, extension)
 void OP_FAFE0000 (insn, extension)
      unsigned long insn, extension;
 {
-  int z, c, n, v;
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_SP];
@@ -1284,11 +1282,10 @@ void OP_FAFE0000 (insn, extension)
 void OP_FCFE0000 (insn, extension)
      unsigned long insn, extension;
 {
-  int z, c, n, v;
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_SP];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 + imm;
   State.regs[REG_SP] = value;
 }
@@ -1416,7 +1413,7 @@ void OP_FCC40000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 - imm;
 
   z = (value == 0);
@@ -1439,7 +1436,7 @@ void OP_FCD40000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 - imm;
 
   z = (value == 0);
@@ -1750,7 +1747,7 @@ void OP_FCC80000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 - imm;
 
   z = (value == 0);
@@ -1794,7 +1791,7 @@ void OP_FCD80000 (insn, extension)
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
-  imm = ((insn & 0xffff) << 16) | extension;
+  imm = ((insn & 0xffff) << 16) + extension;
   value = reg1 - imm;
 
   z = (value == 0);
@@ -1854,7 +1851,7 @@ void OP_FCE00000 (insn, extension)
   int n, z;
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
-    &= ((insn & 0xffff) << 16 | extension);
+    &= ((insn & 0xffff) << 16) + extension;
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
   n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1914,7 +1911,7 @@ void OP_FCE40000 (insn, extension)
   int n, z;
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
-    |= ((insn & 0xffff) << 16 | extension);
+    |= ((insn & 0xffff) << 16) + extension;
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
   n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -1961,7 +1958,7 @@ void OP_FCE80000 (insn, extension)
   int n, z;
 
   State.regs[REG_D0 + ((insn & 0x30000) >> 16)]
-    ^= ((insn & 0xffff) << 16 | extension);
+    ^= ((insn & 0xffff) << 16) + extension;
   z = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] == 0);
   n = (State.regs[REG_D0 + ((insn & 0x30000) >> 16)] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -2019,7 +2016,7 @@ void OP_FCEC0000 (insn, extension)
   int z, n;
 
   temp = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
-  temp &= ((insn & 0xffff) << 16 | extension);
+  temp &= ((insn & 0xffff) << 16) + extension;
   n = (temp & 0x80000000) != 0;
   z = (temp == 0);
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
@@ -2260,8 +2257,7 @@ void OP_F284 (insn, extension)
   int c,n,z;
 
   value = State.regs[REG_D0 + (insn & 0x3)];
-  if (value & 0x1)
-    c = 1;
+  c = (value & 0x1);
 
   value >>= 1;
   value |= ((PSW & PSW_C) != 0) ? 0x80000000 : 0;
@@ -2280,8 +2276,7 @@ void OP_F280 (insn, extension)
   int c,n,z;
 
   value = State.regs[REG_D0 + (insn & 0x3)];
-  if (value & 0x80000000)
-    c = 1;
+  c = (value & 0x80000000) ? 1 : 0;
 
   value <<= 1;
   value |= ((PSW & PSW_C) != 0);
@@ -2319,7 +2314,7 @@ void OP_C100 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (!((PSW & PSW_Z)
-        || (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0)))
+        || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
@@ -2329,7 +2324,7 @@ void OP_C200 (insn, extension)
 {
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
-  if (!(((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0))
+  if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
@@ -2340,7 +2335,7 @@ void OP_C300 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if ((PSW & PSW_Z)
-       || (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0))
+       || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
@@ -2350,7 +2345,7 @@ void OP_C000 (insn, extension)
 {
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
-  if (((PSW & PSW_N) != 0) ^ (PSW & PSW_V) != 0)
+  if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
     State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
@@ -2545,7 +2540,7 @@ void OP_CC0000 (insn, extension)
 void OP_DC000000 (insn, extension)
      unsigned long insn, extension;
 {
-  State.pc += (((insn & 0xffffff) << 8) | extension) - 5;
+  State.pc += (((insn & 0xffffff) << 8) + extension) - 5;
 }
 
 /* call label:16,reg_list,imm8 */
@@ -2725,7 +2720,7 @@ void OP_FCFF0000 (insn, extension)
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
   State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
-  State.pc += (((insn & 0xffff) << 16) | extension) - 6;
+  State.pc += (((insn & 0xffff) << 16) + extension) - 6;
 }
 
 /* ret reg_list, imm8 */
@@ -2792,7 +2787,8 @@ void OP_DE0000 (insn, extension)
   unsigned int sp;
   unsigned long mask;
 
-  State.regs[REG_SP] += insn & 0xff;
+  sp = State.regs[REG_SP] + (insn & 0xff);
+  State.regs[REG_SP] = sp;
   State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
 	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
   State.pc -= 3;

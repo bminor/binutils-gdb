@@ -15,8 +15,6 @@
 host_callback *mn10300_callback;
 int mn10300_debug;
 
-uint32 OP[4];
-
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins, int));
 static long hash PARAMS ((long));
 static void init_system PARAMS ((void));
@@ -352,7 +350,7 @@ void
 sim_resume (step, siggnal)
      int step, siggnal;
 {
-  uint32 inst, opcode;
+  uint32 inst;
   reg_t oldpc;
   struct hash_entry *h;
 
