@@ -24,6 +24,11 @@
 #define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
 
+/* We use stabs-in-ELF with the DWARF register numbering scheme.  */
+
+#undef STAB_REG_TO_REGNUM
+#define STAB_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
+
 /* If the current gcc for for this target does not produce correct
    debugging information for float parameters, both prototyped and
    unprototyped, then define this macro.  This forces gdb to always
