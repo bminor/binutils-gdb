@@ -34,11 +34,9 @@
 #include "opcode/h8300.h"
 #include <ctype.h>
 
-const char comment_chars[] =
-{';', 0};
-const char line_separator_chars[] =
-{0};
+const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
+const char line_separator_chars[] = "";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:

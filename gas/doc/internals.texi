@@ -912,7 +912,7 @@ comment when they appear at the start of a line.
 @item line_separator_chars
 @cindex line_separator_chars
 This is a null terminated @code{const char} array of characters which separate
-lines (semicolon and newline are such characters by default, and need not be
+lines (null and newline are such characters by default, and need not be
 listed in this array).  Note that line_separator_chars do not separate lines
 if found in a comment, such as after a character in line_comment_chars or
 comment_chars.

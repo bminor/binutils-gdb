@@ -31,12 +31,9 @@
 #include "bfd.h"
 #include <ctype.h>
 
-const char comment_chars[] =
-{'!', 0};
-const char line_separator_chars[] =
-{';', 0};
-const char line_comment_chars[] =
-{'#', 0};
+const char comment_chars[] = "!";
+const char line_comment_chars[] = "#";
+const char line_separator_chars[] = ";";
 
 extern int machine;
 extern int coff_flags;

@@ -50,7 +50,7 @@ const char *m68k_comment_chars = "|";
 /* Also note that comments like this one will always work. */
 const char line_comment_chars[] = "#*";
 
-const char line_separator_chars[] = "";
+const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 CONST char EXP_CHARS[] = "eE";

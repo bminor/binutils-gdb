@@ -62,7 +62,7 @@
 
 const char comment_chars[] = "#";
 const char line_comment_chars[] = LINE_COMMENT_CHARS;
-const char line_separator_chars[] = "";
+const char line_separator_chars[] = ";";
 #if !defined(ABSOLUTE_PREFIX) && !defined(IMMEDIATE_PREFIX)
 #define ABSOLUTE_PREFIX '@'	/* One or the other MUST be defined */
 #endif

@@ -115,11 +115,7 @@ CONST char comment_chars[] = "@";
 /* Also note that comments like this one will always work.  */
 CONST char line_comment_chars[] = "#";
 
-#ifdef TE_LINUX
 CONST char line_separator_chars[] = ";";
-#else
-CONST char line_separator_chars[] = "";
-#endif
 
 /* Chars that can be used to separate mant
    from exp in floating point numbers.  */

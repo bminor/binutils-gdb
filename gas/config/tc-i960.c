@@ -180,9 +180,9 @@ const char comment_chars[] = "#";
 
 /* Also note that comments started like this one will always work. */
 
-const char line_comment_chars[1];
+const char line_comment_chars[] = "";
 
-const char line_separator_chars[1];
+const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";

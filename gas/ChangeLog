@@ -1,3 +1,30 @@
+2000-06-09  Alan Modra  <alan@linuxcare.com.au>
+
+	* app.c (do_scrub_begin): Don't default lex[';'] as a line
+	separator.
+	* doc/internals.texi (line_separator_chars): Semicolon is no
+	longer a default.  Mention null and newline as defaults.
+
+	* read.c (is_end_of_line): Remove ifdef TC_HPPA.
+
+	* config/tc-i386.h (line_separator_chars): Explicitly mention `;'
+	* config/tc-i860.h (line_separator_chars): Likewise.
+	* config/tc-h8300.c (line_separator_chars): Likewise.
+	* config/tc-i960.c (line_separator_chars): Likewise.
+	* config/tc-m68k.c (line_separator_chars): Likewise.
+	* config/tc-mips.c (line_separator_chars): Likewise.
+	* config/tc-ns32k.c (line_separator_chars): Likewise.
+	* config/tc-sparc.c (line_separator_chars): Likewise.
+	* config/tc-vax.c (line_separator_chars): Likewise.
+
+	* config/tc-h8300.c (comment_chars): Use string initialiser.
+	* config/tc-i960.c (line_comment_chars): Likewise.
+	* config/tc-z8k.c (comment_chars, line_comment_chars,
+	line_separator_chars): Likewise.
+
+	* config/tc-arm.c (line_separator_chars): Always use `;', not just
+	for TE_LINUX.
+
 2000-06-08  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (cons_fix_new_arm): Assign correct reloc value

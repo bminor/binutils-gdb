@@ -101,7 +101,6 @@ do_scrub_begin (m68k_mri)
   lex['\t'] = LEX_IS_WHITESPACE;
   lex['\r'] = LEX_IS_WHITESPACE;
   lex['\n'] = LEX_IS_NEWLINE;
-  lex[';'] = LEX_IS_LINE_SEPARATOR;
   lex[':'] = LEX_IS_COLON;
 
 #ifdef TC_M68K

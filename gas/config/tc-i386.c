@@ -169,7 +169,7 @@ const char line_comment_chars[] = "";
 const char line_comment_chars[] = "/";
 #endif
 
-const char line_separator_chars[] = "";
+const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";
