@@ -1,3 +1,7 @@
+Thu Aug 12 08:06:15 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ar.c: Removed obsolete and non-functional GNU960 code.
+
 Wed Aug 11 13:08:26 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* size.c (berkeley_sum): New function.
