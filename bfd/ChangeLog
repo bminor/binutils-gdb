@@ -1,3 +1,31 @@
+2001-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Add "group" and
+	"next_in_group".  Fix gp and gp_size comments.
+	* elf.c (union elf_internal_group): New.
+	(setup_group): New function.
+	(_bfd_elf_make_section_from_shdr): Set BFD flags for SHT_GROUP.
+	Call setup_group for SHF_GROUP sections.
+	(bfd_section_from_shdr): Build a BFD section for SHT_GROUP.
+	(elf_fake_sections): Set header type for SEC_GROUP, and header
+	flags for sections in a group.
+	(set_group_contents): New function.
+	(_bfd_elf_compute_section_file_positions): Call it.
+	(assign_section_numbers): Set sh_link for SHT_GROUP.
+	* elflink.h (gc_mark_hook): Handle section groups.
+	* elfxx-target.h: Add SEC_GROUP to applicable_flags.
+	* section.c (SEC_GROUP): Define.
+	(struct sec): Comment fixes.
+	* bfd-in2.h: Regenerate.
+
+	* elf.c (bfd_elf_print_symbol): Formatting fix; migrate expression
+	out of function args.
+	(_bfd_elf_canonicalize_reloc): Similarly.
+	(_bfd_elf_get_symtab): Here too.
+	(_bfd_elf_canonicalize_dynamic_symtab): And here.
+	* elfcode.h (elf_slurp_symbol_table): Don't recalculate size for
+	bfd_bread, and remove unnecessary cast.
+
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
 
         * bfd/config.bfd (targ_cpu): Add arm9e-*-elf.

@@ -51,7 +51,9 @@ static boolean prep_headers PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **, int));
 static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static char *elf_read PARAMS ((bfd *, file_ptr, bfd_size_type));
+static boolean setup_group PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
+static void set_group_contents PARAMS ((bfd *, asection *, PTR));
 static boolean assign_section_numbers PARAMS ((bfd *));
 static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean elf_map_symbols PARAMS ((bfd *));
@@ -345,6 +347,191 @@ bfd_elf_string_from_elf_section (abfd, shindex, strindex)
   return ((char *) hdr->contents) + strindex;
 }
 
+/* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
+   sections.  The first element is the flags, the rest are section
+   pointers.  */
+
+typedef union elf_internal_group {
+  Elf_Internal_Shdr *shdr;
+  unsigned int flags;
+} Elf_Internal_Group;
+
+/* Set next_in_group list pointer, and group name for NEWSECT.  */
+
+static boolean
+setup_group (abfd, hdr, newsect)
+     bfd *abfd;
+     Elf_Internal_Shdr *hdr;
+     asection *newsect;
+{
+  unsigned int num_group = elf_tdata (abfd)->num_group;
+
+  /* If num_group is zero, read in all SHT_GROUP sections.  The count
+     is set to -1 if there are no SHT_GROUP sections.  */
+  if (num_group == 0)
+    {
+      unsigned int i, shnum;
+
+      /* First count the number of groups.  If we have a SHT_GROUP
+	 section with just a flag word (ie. sh_size is 4), ignore it.  */
+      shnum = elf_elfheader (abfd)->e_shnum;
+      num_group = 0;
+      for (i = 0; i < shnum; i++)
+	{
+	  Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
+	  if (shdr->sh_type == SHT_GROUP && shdr->sh_size >= 8)
+	    num_group += 1;
+	}
+
+      if (num_group == 0)
+	num_group = -1;
+      elf_tdata (abfd)->num_group = num_group;
+
+      if (num_group > 0)
+	{
+	  /* We keep a list of elf section headers for group sections,
+	     so we can find them quickly.  */
+	  bfd_size_type amt = num_group * sizeof (Elf_Internal_Shdr *);
+	  elf_tdata (abfd)->group_sect_ptr = bfd_alloc (abfd, amt);
+	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
+	    return false;
+
+	  num_group = 0;
+	  for (i = 0; i < shnum; i++)
+	    {
+	      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
+	      if (shdr->sh_type == SHT_GROUP && shdr->sh_size >= 8)
+		{
+		  char *src;
+		  Elf_Internal_Group *dest;
+
+		  /* Add to list of sections.  */
+		  elf_tdata (abfd)->group_sect_ptr[num_group] = shdr;
+		  num_group += 1;
+
+		  /* Read the raw contents.  */
+		  BFD_ASSERT (sizeof (*dest) >= 4);
+		  amt = shdr->sh_size * sizeof (*dest) / 4;
+		  shdr->contents = bfd_alloc (abfd, amt);
+		  if (shdr->contents == NULL
+		      || bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
+		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
+			  != shdr->sh_size))
+		    return false;
+
+		  /* Translate raw contents, a flag word followed by an
+		     array of elf section indices all in target byte order,
+		     to the flag word followed by an array of elf section
+		     pointers.  */
+		  src = shdr->contents + shdr->sh_size;
+		  dest = (Elf_Internal_Group *) (shdr->contents + amt);
+		  while (1)
+		    {
+		      unsigned int idx;
+
+		      src -= 4;
+		      --dest;
+		      idx = H_GET_32 (abfd, src);
+		      if (src == shdr->contents)
+			{
+			  dest->flags = idx;
+			  break;
+			}
+		      if (idx >= shnum)
+			{
+			  ((*_bfd_error_handler)
+			   (_("%s: invalid SHT_GROUP entry"),
+			    bfd_archive_filename (abfd)));
+			  idx = 0;
+			}
+		      dest->shdr = elf_elfsections (abfd)[idx];
+		    }
+		}
+	    }
+	}
+    }
+
+  if (num_group != (unsigned) -1)
+    {
+      unsigned int i;
+
+      for (i = 0; i < num_group; i++)
+	{
+	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
+	  Elf_Internal_Group *idx = (Elf_Internal_Group *) shdr->contents;
+	  unsigned int n_elt = shdr->sh_size / 4;
+
+	  /* Look through this group's sections to see if current
+	     section is a member.  */
+	  while (--n_elt != 0)
+	    if ((++idx)->shdr == hdr)
+	      {
+		asection *s;
+
+		/* We are a member of this group.  Go looking through
+		   other members to see if any others are linked via
+		   next_in_group.  */
+		idx = (Elf_Internal_Group *) shdr->contents;
+		n_elt = shdr->sh_size / 4;
+		while (--n_elt != 0)
+		  if ((s = (++idx)->shdr->bfd_section) != NULL
+		      && elf_section_data (s)->next_in_group != NULL)
+		    break;
+		if (n_elt != 0)
+		  {
+		    const char *gname;
+		    asection *next;
+
+		    /* Snarf the group name from other member, and
+		       insert current section in circular list.  */
+		    gname = elf_section_data (s)->group;
+		    elf_section_data (newsect)->group = gname;
+		    next = elf_section_data (s)->next_in_group;
+		    elf_section_data (newsect)->next_in_group = next;
+		    elf_section_data (s)->next_in_group = newsect;
+		  }
+		else
+		  {
+		    struct elf_backend_data *bed;
+		    file_ptr pos;
+		    unsigned char ename[4];
+		    unsigned long iname;
+		    const char *gname;
+
+		    /* Humbug.  Get the name from the group signature
+		       symbol.  Why isn't the signature just a string?
+		       Fortunately, the name index is at the same
+		       place in the external symbol for both 32 and 64
+		       bit ELF.  */
+		    bed = get_elf_backend_data (abfd);
+		    pos = elf_tdata (abfd)->symtab_hdr.sh_offset;
+		    pos += shdr->sh_info * bed->s->sizeof_sym;
+		    if (bfd_seek (abfd, pos, SEEK_SET) != 0
+			|| bfd_bread (ename, 4, abfd) != 4)
+		      return false;
+		    iname = H_GET_32 (abfd, ename);
+		    gname = elf_string_from_elf_strtab (abfd, iname);
+		    elf_section_data (newsect)->group = gname;
+
+		    /* Start a circular list with one element.  */
+		    elf_section_data (newsect)->next_in_group = newsect;
+		  }
+		if (shdr->bfd_section != NULL)
+		  shdr->bfd_section->lineno = (alent *) newsect;
+		i = num_group - 1;
+		break;
+	      }
+	}
+    }
+
+  if (elf_section_data (newsect)->group == NULL)
+    {
+      (*_bfd_error_handler) (_("%s: no group info for section %s"),
+			     bfd_archive_filename (abfd), newsect->name);
+    }
+  return true;
+}
+
 /* Make a BFD section from an ELF section.  We store a pointer to the
    BFD section in the bfd_section field of the header.  */
 
@@ -380,6 +567,8 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   flags = SEC_NO_FLAGS;
   if (hdr->sh_type != SHT_NOBITS)
     flags |= SEC_HAS_CONTENTS;
+  if (hdr->sh_type == SHT_GROUP)
+    flags |= SEC_GROUP | SEC_EXCLUDE;
   if ((hdr->sh_flags & SHF_ALLOC) != 0)
     {
       flags |= SEC_ALLOC;
@@ -399,6 +588,9 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
       if ((hdr->sh_flags & SHF_STRINGS) != 0)
 	flags |= SEC_STRINGS;
     }
+  if (hdr->sh_flags & SHF_GROUP)
+    if (!setup_group (abfd, hdr, newsect))
+      return false;
 
   /* The debugging sections appear to be recognized only by name, not
      any sort of flag.  */
@@ -841,6 +1033,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	const char *name = NULL;
 	struct elf_backend_data *bed;
 	unsigned char st_other;
+	bfd_vma val;
 
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
 
@@ -859,10 +1052,11 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	   we've already printed the size; now print the alignment.
 	   For other symbols, we have no specified alignment, and
 	   we've printed the address; now print the size.  */
-	bfd_fprintf_vma (abfd, file,
-			 (bfd_is_com_section (symbol->section)
-			  ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
-			  : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
+	if (bfd_is_com_section (symbol->section))
+	  val = ((elf_symbol_type *) symbol)->internal_elf_sym.st_value;
+	else
+	  val = ((elf_symbol_type *) symbol)->internal_elf_sym.st_size;
+	bfd_fprintf_vma (abfd, file, val);
 
 	/* If we have version information, print it.  */
 	if (elf_tdata (abfd)->dynversym_section != 0
@@ -1512,6 +1706,26 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_SHLIB:
       return true;
 
+    case SHT_GROUP:
+      /* Make a section for objcopy and relocatable links.  */
+      if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	return false;
+      if (hdr->contents != NULL)
+	{
+	  Elf_Internal_Group *idx = (Elf_Internal_Group *) hdr->contents;
+	  unsigned int n_elt = hdr->sh_size / 4;
+	  asection *s;
+
+	  while (--n_elt != 0)
+	    if ((s = (++idx)->shdr->bfd_section) != NULL
+		&& elf_section_data (s)->next_in_group != NULL)
+	      {
+		hdr->bfd_section->lineno = (alent *) s;
+		break;
+	      }
+	}
+      break;
+
     default:
       /* Check for any processor-specific section types.  */
       {
@@ -1847,6 +2061,11 @@ elf_fake_sections (abfd, asect, failedptrarg)
 	BFD_ASSERT (elf_tdata (abfd)->cverrefs == 0
 		    || this_hdr->sh_info == elf_tdata (abfd)->cverrefs);
     }
+  else if ((asect->flags & SEC_GROUP) != 0)
+    {
+      this_hdr->sh_type = SHT_GROUP;
+      this_hdr->sh_entsize = 4;
+    }
   else if ((asect->flags & SEC_ALLOC) != 0
 	   && ((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0))
     this_hdr->sh_type = SHT_NOBITS;
@@ -1866,6 +2085,8 @@ elf_fake_sections (abfd, asect, failedptrarg)
       if ((asect->flags & SEC_STRINGS) != 0)
 	this_hdr->sh_flags |= SHF_STRINGS;
     }
+  if (elf_section_data (asect)->group != NULL)
+    this_hdr->sh_flags |= SHF_GROUP;
 
   /* Check for processor-specific section types.  */
   if (bed->elf_backend_fake_sections)
@@ -1881,6 +2102,82 @@ elf_fake_sections (abfd, asect, failedptrarg)
 				    asect,
 				    elf_section_data (asect)->use_rela_p))
     *failedptr = true;
+}
+
+/* Fill in the contents of a SHT_GROUP section.  */
+
+static void
+set_group_contents (abfd, sec, failedptrarg)
+     bfd *abfd;
+     asection *sec;
+     PTR failedptrarg ATTRIBUTE_UNUSED;
+{
+  boolean *failedptr = (boolean *) failedptrarg;
+  unsigned long symindx;
+  asection *elt;
+  unsigned char *loc;
+  struct bfd_link_order *l;
+
+  if (elf_section_data (sec)->this_hdr.sh_type != SHT_GROUP
+      || *failedptr)
+    return;
+
+  /* If called from the assembler, swap_out_syms will have set up
+     udata.i;  If called for "ld -r", the symbols won't yet be mapped,
+     so emulate elf_bfd_final_link.  */
+  symindx = sec->symbol->udata.i;
+  if (symindx == 0)
+    symindx = elf_section_data (sec)->this_idx;
+  elf_section_data (sec)->this_hdr.sh_info = symindx;
+
+  /* Nor will the contents be allocated for "ld -r".  */
+  if (sec->contents == NULL)
+    {
+      sec->contents = bfd_alloc (abfd, sec->_raw_size);
+      if (sec->contents == NULL)
+	{
+	  *failedptr = true;
+	  return;
+	}
+    }
+
+  loc = sec->contents + sec->_raw_size;
+
+  /* Get the pointer to the first section in the group that we
+     squirreled away here.  */
+  elt = (asection *) sec->lineno;
+
+  /* First element is a flag word.  Rest of section is elf section
+     indices for all the sections of the group.  Write them backwards
+     just to keep the group in the same order as given in .section
+     directives, not that it matters.  */
+  while (elt != NULL)
+    {
+      loc -= 4;
+      H_PUT_32 (abfd, elf_section_data (elt)->this_idx, loc);
+      elt = elf_section_data (elt)->next_in_group;
+    }
+
+  /* If this is a relocatable link, then the above did nothing because
+     SEC is the output section.  Look through the input sections
+     instead.  */
+  for (l = sec->link_order_head; l != NULL; l = l->next)
+    if (l->type == bfd_indirect_link_order
+	&& (elt = (asection *) l->u.indirect.section->lineno) != NULL)
+      do
+	{
+	  loc -= 4;
+	  H_PUT_32 (abfd,
+		    elf_section_data (elt->output_section)->this_idx, loc);
+	  elt = elf_section_data (elt)->next_in_group;
+	  /* During a relocatable link, the lists are circular.  */
+	}
+      while (elt != (asection *) l->u.indirect.section->lineno);
+
+  loc -= 4;
+  H_PUT_32 (abfd, 0, loc);
+
+  BFD_ASSERT (loc == sec->contents);
 }
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
@@ -2055,6 +2352,9 @@ assign_section_numbers (abfd)
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
+
+	case SHT_GROUP:
+	  d->this_hdr.sh_link = t->symtab_section;
 	}
     }
 
@@ -2328,6 +2628,13 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
       int relocatable_p = ! (abfd->flags & (EXEC_P | DYNAMIC));
 
       if (! swap_out_syms (abfd, &strtab, relocatable_p))
+	return false;
+    }
+
+  if (link_info == NULL || link_info->relocateable)
+    {
+      bfd_map_over_sections (abfd, set_group_contents, &failed);
+      if (failed)
 	return false;
     }
 
@@ -4569,11 +4876,9 @@ _bfd_elf_canonicalize_reloc (abfd, section, relptr, symbols)
 {
   arelent *tblptr;
   unsigned int i;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  if (! get_elf_backend_data (abfd)->s->slurp_reloc_table (abfd,
-							   section,
-							   symbols,
-							   false))
+  if (! bed->s->slurp_reloc_table (abfd, section, symbols, false))
     return -1;
 
   tblptr = section->relocation;
@@ -4590,8 +4895,8 @@ _bfd_elf_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-  long symcount = get_elf_backend_data (abfd)->s->slurp_symbol_table
-    (abfd, alocation, false);
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  long symcount = bed->s->slurp_symbol_table (abfd, alocation, false);
 
   if (symcount >= 0)
     bfd_get_symcount (abfd) = symcount;
@@ -4603,8 +4908,8 @@ _bfd_elf_canonicalize_dynamic_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-  return get_elf_backend_data (abfd)->s->slurp_symbol_table
-    (abfd, alocation, true);
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  return bed->s->slurp_symbol_table (abfd, alocation, true);
 }
 
 /* Return the size required for the dynamic reloc entries.  Any

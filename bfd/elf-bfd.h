@@ -815,6 +815,13 @@ struct bfd_elf_section_data
   /* A pointer used for SEC_MERGE optimizations.  */
   PTR merge_info;
 
+  /* Group name, if this section is part of a group.  */
+  const char *group;
+
+  /* A linked list of sections in the group.  Circular when used by
+     the linker.  */
+  asection *next_in_group;
+
   /* A pointer available for the processor specific ELF backend.  */
   PTR tdata;
 
@@ -905,8 +912,11 @@ struct elf_obj_tdata
   void *prstatus;			/* The raw /proc prstatus structure */
   void *prpsinfo;			/* The raw /proc prpsinfo structure */
 #endif
-  bfd_vma gp;				/* The gp value (MIPS only, for now) */
-  unsigned int gp_size;			/* The gp size (MIPS only, for now) */
+  bfd_vma gp;				/* The gp value */
+  unsigned int gp_size;			/* The gp size */
+
+  Elf_Internal_Shdr **group_sect_ptr;
+  int num_group;
 
   /* Information grabbed from an elf core file.  */
   int core_signal;

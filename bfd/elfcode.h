@@ -1084,10 +1084,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
       if (x_symp == NULL && symcount != 0)
 	goto error_return;
 
-      if (bfd_bread ((PTR) x_symp,
-		    (bfd_size_type) (symcount * sizeof (Elf_External_Sym)),
-		    abfd)
-	  != symcount * sizeof (Elf_External_Sym))
+      if (bfd_bread ((PTR) x_symp, amt, abfd) != amt)
 	goto error_return;
 
       /* Read the raw ELF version symbol information.  */
@@ -1115,7 +1112,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  if (x_versymp == NULL && verhdr->sh_size != 0)
 	    goto error_return;
 
-	  if (bfd_bread ((PTR) x_versymp, (bfd_size_type) verhdr->sh_size, abfd)
+	  if (bfd_bread ((PTR) x_versymp, verhdr->sh_size, abfd)
 	      != verhdr->sh_size)
 	    goto error_return;
 	}

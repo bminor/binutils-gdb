@@ -6878,7 +6878,8 @@ static boolean elf_gc_smash_unused_vtentry_relocs
   PARAMS ((struct elf_link_hash_entry *h, PTR dummy));
 
 /* The mark phase of garbage collection.  For a given section, mark
-   it, and all the sections which define symbols to which it refers.  */
+   it and any sections in this section's group, and all the sections
+   which define symbols to which it refers.  */
 
 static boolean
 elf_gc_mark (info, sec, gc_mark_hook)
@@ -6888,12 +6889,19 @@ elf_gc_mark (info, sec, gc_mark_hook)
        PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
 		struct elf_link_hash_entry *, Elf_Internal_Sym *));
 {
-  boolean ret = true;
+  boolean ret;
+  asection *group_sec;
 
   sec->gc_mark = 1;
 
-  /* Look through the section relocs.  */
+  /* Mark all the sections in the group.  */
+  group_sec = elf_section_data (sec)->next_in_group;
+  if (group_sec && !group_sec->gc_mark)
+    if (!elf_gc_mark (info, group_sec, gc_mark_hook))
+      return false;
 
+  /* Look through the section relocs.  */
+  ret = true;
   if ((sec->flags & SEC_RELOC) != 0 && sec->reloc_count > 0)
     {
       Elf_Internal_Rela *relstart, *rel, *relend;

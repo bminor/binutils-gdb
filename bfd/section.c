@@ -177,7 +177,7 @@ CODE_FRAGMENT
 .
 .  int id;
 .
-.  {* Which section is it; 0..nth.  *}
+.  {* Which section in the bfd; 0..n-1 as sections are created in a bfd.  *}
 .
 .  int index;
 .
@@ -292,9 +292,10 @@ CODE_FRAGMENT
 .     objects are to be further relocated.  *}
 .#define SEC_EXCLUDE 0x40000
 .
-.  {* The contents of this section are to be sorted by the
-.     based on the address specified in the associated symbol
-.     table.  *}
+.  {* The contents of this section are to be sorted based on the sum of
+.     the symbol and addend values specified by the associated relocation
+.     entries.  Entries without associated relocation entries will be
+.     appended to the end of the section in an unspecified order.  *}
 .#define SEC_SORT_ENTRIES 0x80000
 .
 .  {* When linking, duplicate sections of the same name should be
@@ -361,6 +362,9 @@ CODE_FRAGMENT
 .     size entries.  *}
 .#define SEC_STRINGS 0x40000000
 .
+.  {* This section contains data about section groups.  *}
+.#define SEC_GROUP 0x80000000
+.
 .  {*  End of section flags.  *}
 .
 .  {* Some internal packed boolean fields.  *}
@@ -381,7 +385,8 @@ CODE_FRAGMENT
 .  {* A mark flag used by some linker backends for garbage collection.  *}
 .  unsigned int gc_mark : 1;
 .
-.  {* Used by the ELF code to mark sections which have been allocated to segments.  *}
+.  {* Used by the ELF code to mark sections which have been allocated
+.     to segments.  *}
 .  unsigned int segment_mark : 1;
 .
 .  {* End of internal packed boolean fields.  *}
