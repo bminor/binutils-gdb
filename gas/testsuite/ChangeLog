@@ -1,8 +1,13 @@
 start-sanitize-v850
+Sat Aug 31 01:25:03 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/v850/basic.exp (do_branch): Check offsets in branch insns.
+	(do_jumps): Likewise.
+	
 Fri Aug 30 00:37:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/misc.s: Tweak register numbers for better testing.
-	* gas/v850/basic.exp (misc_tests): Corresponding changes.
+	* gas/v850/basic.exp (do_misc): Corresponding changes.
 
 	* gas/v850/hilo.s: New testfile.
 	* gas/v850/basic.exp: Run hilo tests.
@@ -15,38 +20,38 @@ Thu Aug 29 11:32:23 1996  James G. Smith  <jsmith@cygnus.co.uk>
 start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* gas/v850/basic.exp (move_tests): Test instruction bit patterns.
+	* gas/v850/basic.exp (do_move): Test instruction bit patterns.
 	* gas/v850/move.s: Tweak constants for better testing.
 
-	* gas/v850/basic.exp (mem_tests): Test instruction bit patterns.
+	* gas/v850/basic.exp (do_mem): Test instruction bit patterns.
 	xfail sst and sld tests.
-	(mov_tests): Remove bogus xfail.
+	(do_mov): Remove bogus xfail.
 	* gas/v850/mem.s: sst and sld instructions can only index from
 	"ep" register.
 
-	* gas/v850/basic.exp (logical_tests): Test instruction bit patterns.
+	* gas/v850/basic.exp (do_logical): Test instruction bit patterns.
 	Update addresses.
 	* gas/v850/logical.s: Tweak constants for better testing.
 
-	* gas/v850/basic.exp (jump_tests): Test instruction bit patterns,
+	* gas/v850/basic.exp (do_jump): Test instruction bit patterns,
 	but not displacements (yet).
 
-	* gas/v850/basic.exp (compare_tests): Test instruction bit patterns.
+	* gas/v850/basic.exp (do_compare): Test instruction bit patterns.
 
-	* gas/v850/basic.exp (branch_tests): Test instruction bit patterns,
+	* gas/v850/basic.exp (do_branch): Test instruction bit patterns,
 	but not displacements (yet).
 	
-	* gas/v850/basic.exp (bit_tests): Test instruction bit patterns.
+	* gas/v850/basic.exp (do_bit): Test instruction bit patterns.
 
-	* gas/v850/basic.exp (arith_tests): Test instruction bit patterns.	
+	* gas/v850/basic.exp (do_arith): Test instruction bit patterns.	
 	* gas/v850/arith.s: Tweak constants for better testing.
 
-	* gas/v850/basic.exp (misc_tests): No longer expect failures
+	* gas/v850/basic.exp (do_misc): No longer expect failures
 	assembling "ldsr" and "stsr" opcodes.
 	* gas/v850/misc.s: Re-enable assembling of "ldsr" and "stsr"
 	opcodes.
 
-	* gas/v850/basic.exp (misc_tests): No longer expect failures
+	* gas/v850/basic.exp (do_misc): No longer expect failures
 	assembling "trap" opcodes.
 	* gas/v850/misc.s: Re-enable assembling of "trap" opcodes.
 

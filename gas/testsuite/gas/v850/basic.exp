@@ -106,25 +106,25 @@ proc do_branch {} {
     while 1 {
 	expect {
 	    -re "^ +\[0-9\]+ 0000 8F05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0002 8E05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0004 8605\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0006 8705\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0008 8B05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000a 8905\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000c 8105\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000e 8305\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0010 8205\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0012 8A05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0014 8005\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0016 8805\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0018 8405\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001a 8C05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001c 8105\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001e 8905\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0020 8205\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0022 8A05\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0024 8505\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0026 8D05\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0002 FEFD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 E6FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0006 D7FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 CBFD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000a B9FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c A1FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000e 93FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 82FD\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0012 FAF5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 E0F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0016 D8F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 C4F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001a BCF5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c A1F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001e 99F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 82F5\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0022 FAED\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 E5ED\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0026 DDED\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -200,7 +200,7 @@ proc do_jumps {} {
 	expect {
 	    -re "^ +\[0-9\]+ 0000 802F0000\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0004 6500\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0006 80070000\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0006 BF07FAFF\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
