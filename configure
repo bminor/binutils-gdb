@@ -88,10 +88,6 @@ verbose=
 version="$Revision$"
 x11=default
 
-# or maybe grab from gcc/version.c
-version_path=
-next_version_path=
-
 NO_EDIT="This file was generated automatically by configure.  Do not edit."
 
 ## this is a little touchy and won't always work, but...
@@ -125,7 +121,6 @@ do
 #	elif [ -n "${next_namesubdir}" ] ; then \
 #		namesubdir=${arg} ; namesubdiroption="--namesubdir=${namesubdir}" ; next_namesubdir=
 #	elif [ -n "${next_objdir}" ] ; then objdir=${arg} ; objdiroption="--objdir=${objdir}" ; next_objdir=
-	elif [ -n "${next_version_path}" ] ; then version_path=${arg} ; next_version_path=
 	elif [ -n "${next_site}" ] ; then site=${arg} ; next_site=
 	elif [ -n "${next_srcdir}" ] ; then srcdir=${arg} ; next_srcdir=		
 	elif [ -n "${next_target}" ] ; then
@@ -272,10 +267,6 @@ do
 		esac
 	fi
 done
-
-if [ -n "${verbose}" ] ; then
-	echo $0 $*
-fi
 
 # process host and target
 if [ -z "${fatal}" ] ; then
@@ -601,7 +592,7 @@ for host in ${hosts} ; do
 			echo "host_cpu = ${host_cpu}" >> ${Makefile}
 			echo "host_vendor = ${host_vendor}" >> ${Makefile}
 			echo "host_os = ${host_os}" >> ${Makefile}
-			echo "version_path = ${version_path}" >> ${Makefile}
+
 			echo "target_alias = ${target_alias}" >> ${Makefile}
 			echo "target_cpu = ${target_cpu}" >> ${Makefile}
 			echo "target_vendor = ${target_vendor}" >> ${Makefile}
