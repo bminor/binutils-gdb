@@ -52,6 +52,7 @@ mh-pn
 mh-pyramid
 mh-rs6000
 mh-rtbsd
+mh-stratus
 mh-sun2os3
 mh-sun2os4
 mh-sun3
@@ -101,6 +102,7 @@ mt-np1
 mt-pn
 mt-pyramid
 mt-rs6000
+mt-stratus
 mt-sun2os3
 mt-sun2os4
 mt-sun3
