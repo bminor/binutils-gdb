@@ -29,6 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "oasys.h"
 #include "liboasys.h"
 
+/* Define offsetof for those systems which lack it */
+
+#ifndef offsetof
+#define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
+#endif
 
 /* Read in all the section data and relocation stuff too */
 PROTO(static boolean,oasys_slurp_section_data,(bfd *CONST abfd));
