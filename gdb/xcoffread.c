@@ -188,7 +188,7 @@ aixcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));
 static void
 aixcoff_symfile_finish PARAMS ((struct objfile *));
 
-static struct section_offset *
+static struct section_offsets *
 aixcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 static int
