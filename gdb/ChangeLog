@@ -1,3 +1,7 @@
+2002-03-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Update headings, 5.2 has branched.
+
 2002-03-01  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host (sparc64-*-freebsd): Add.
