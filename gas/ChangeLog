@@ -1,5 +1,10 @@
+2005-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* dw2gencfi.c (output_cie, output_fde): Use DW_CFA_nop rather
+	than zero.
+
 2005-02-15  Nigel Stephens  <nigel@mips.com>
-            Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (reloc_needs_lo_p): Handle
 	BFD_RELOC_MIPS16_HI16_S.
@@ -192,7 +197,7 @@
 2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
 
 	* config/tc-maxq.c (md_estimate_size_before_relax): Correct the
-	relative jump calculation. 
+	relative jump calculation.
 	<md_convert_frag) : Likewise.
 	<output_disp): Likewise.
 
@@ -411,7 +416,7 @@
 
 2005-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR 659	
+	PR 659
 	* config/tc-i386.c (i386_scale): Disallow 0 scale.
 
 2005-01-12  Nick Clifton  <nickc@redhat.com>
@@ -486,7 +491,7 @@
 	* configure, Makefile.in: Rebuild.
 
 2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
-    
+
 	* config/tc-avr.c: Add support for the new R_AVR_LDI, R_AVR_6 and
 	R_AVR_6_ADIW relocs for the LDI, ADIW/SBIW and LDD/STD
 	instructions.
@@ -573,7 +578,7 @@
 	* Makefile.in: Regenerated.
 	* aclocal.m4: Likewise.
 	* configure: Likewise.
-	* doc/Makefile.in: Regenerated. 
+	* doc/Makefile.in: Regenerated.
 
 2004-12-02  Bob Wilson  <bob.wilson@acm.org>
 

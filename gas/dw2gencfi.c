@@ -1,5 +1,5 @@
 /* dw2gencfi.c - Support for generating Dwarf2 CFI information.
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -863,7 +863,7 @@ output_cie (struct cie_entry *cie)
     for (i = cie->first; i != cie->last; i = i->next)
       output_cfi_insn (i);
 
-  frag_align (2, 0, 0);
+  frag_align (2, DW_CFA_nop, 0);
   symbol_set_value_now (end_address);
 }
 
@@ -913,7 +913,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   for (; first; first = first->next)
     output_cfi_insn (first);
 
-  frag_align (align, 0, 0);
+  frag_align (align, DW_CFA_nop, 0);
   symbol_set_value_now (end_address);
 }
 
