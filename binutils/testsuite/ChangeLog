@@ -1,3 +1,7 @@
+2003-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add "msp".
+
 2003-10-06  Dave Brolley  <brolley@redhat.com>
 
 	* binutils-all/objdump.exp (cpu_expected): Add fr550.
