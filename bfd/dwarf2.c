@@ -102,6 +102,59 @@ struct dwarf2_debug {
 };
 
 
+
+/* A minimal decoding of DWARF2 compilation units.  We only decode
+   what's needed to get to the line number information. */
+
+struct comp_unit {
+
+  /* Chain the previously read compilation units. */
+  struct comp_unit* next_unit;
+
+  /* Keep the bdf convenient (for memory allocation). */
+  bfd* abfd;
+
+  /* The lowest and higest addresses contained in this compilation
+     unit as specified in the compilation unit header. */
+  bfd_vma low;
+  bfd_vma high;
+
+  /* The DW_AT_name attribute (for error messages). */
+  char* name;
+
+  /* The abbrev hash table. */
+  struct abbrev_info** abbrevs;
+
+  /* Note that an error was found by comp_unit_find_nearest_line. */
+  int error;
+
+  /* The DW_AT_comp_dir attribute */
+  char* comp_dir;
+
+  /* True if there is a line number table associated with this comp. unit. */
+  int stmtlist;
+  
+  /* The offset into .debug_line of the line number table. */
+  unsigned long line_offset;
+
+  /* Pointer to the first child die for the comp unit. */
+  char *first_child_die_ptr;
+
+  /* The end of the comp unit. */
+  char *end_ptr;
+
+  /* The decoded line number, NULL if not yet decoded. */
+  struct line_info_table* line_table;
+
+  /* A list of the functions found in this comp. unit. */
+  struct funcinfo* function_table; 
+
+  /* Address size for this unit - from unit header */
+  unsigned char addr_size;
+};
+
+
+
 /* VERBATUM 
    The following function up to the END VERBATUM mark are 
    copied directly from dwarf2read.c. */
@@ -273,19 +326,18 @@ read_signed_leb128 (abfd, buf, bytes_read_ptr)
 
 /* END VERBATUM */
 
-
 static bfd_vma
-read_address (abfd, buf)
-     bfd *abfd;
+read_address (unit, buf)
+     struct comp_unit* unit;
      char *buf;
 {
   bfd_vma retval = 0;
 
-  if (sizeof(retval) == 4)
+  if (unit->addr_size == 4)
     {
-      retval = bfd_get_32 (abfd, (bfd_byte *) buf);
+      retval = bfd_get_32 (unit->abfd, (bfd_byte *) buf);
     } else {
-      retval = bfd_get_64 (abfd, (bfd_byte *) buf);
+      retval = bfd_get_64 (unit->abfd, (bfd_byte *) buf);
     }
   return retval;
 }
@@ -459,12 +511,13 @@ read_abbrevs (abfd, offset)
 /* Read an attribute described by an abbreviated attribute.  */
 
 static char *
-read_attribute (attr, abbrev, abfd, info_ptr)
-     struct attribute *attr;
+read_attribute (attr, abbrev, unit, info_ptr)
+     struct attribute   *attr;
      struct attr_abbrev *abbrev;
-     bfd *abfd;
-     char *info_ptr;
+     struct comp_unit   *unit;
+     char               *info_ptr;
 {
+  bfd *abfd = unit->abfd;
   unsigned int bytes_read;
   struct dwarf_block *blk;
 
@@ -474,8 +527,8 @@ read_attribute (attr, abbrev, abfd, info_ptr)
     {
     case DW_FORM_addr:
     case DW_FORM_ref_addr:
-      DW_ADDR (attr) = read_address (abfd, info_ptr);
-      info_ptr += sizeof(bfd_vma);
+      DW_ADDR (attr) = read_address (unit, info_ptr);
+      info_ptr += unit->addr_size;
       break;
     case DW_FORM_block2:
       blk = (struct dwarf_block *) bfd_alloc (abfd, sizeof (struct dwarf_block));
@@ -639,16 +692,14 @@ concat_filename (table, file)
     }
 }
 
-/* Decode the line number information for the compilation unit whose
-   line number info is at OFFSET in the .debug_line section.
-   The compilation directory of the file is passed in COMP_DIR.  */
+/* Decode the line number information for UNIT. */
 
 static struct line_info_table*
-decode_line_info (abfd, offset, comp_dir)
-     bfd *abfd;
-     unsigned int offset;
-     char *comp_dir;
+decode_line_info (unit)
+     struct comp_unit *unit;
 {
+  bfd *abfd = unit->abfd;
+
   static char* dwarf_line_buffer = 0;
 
   struct line_info_table* table;
@@ -687,7 +738,7 @@ decode_line_info (abfd, offset, comp_dir)
   table = (struct line_info_table*) bfd_alloc (abfd, 
 					       sizeof (struct line_info_table));
   table->abfd = abfd;
-  table->comp_dir = comp_dir;
+  table->comp_dir = unit->comp_dir;
 
   table->num_files = 0;
   table->files = NULL;
@@ -695,7 +746,7 @@ decode_line_info (abfd, offset, comp_dir)
   table->num_dirs = 0;
   table->dirs = NULL;
 
-  line_ptr = dwarf_line_buffer + offset;
+  line_ptr = dwarf_line_buffer + unit->line_offset;
 
   /* read in the prologue */
   lh.total_length = read_4_bytes (abfd, line_ptr);
@@ -798,9 +849,9 @@ decode_line_info (abfd, offset, comp_dir)
 		  add_line_info (table, address, filename, line, column);
 		  break;
 		case DW_LNE_set_address:
-		  address = read_address (abfd, line_ptr);
+		  address = read_address (unit, line_ptr);
 		  address &= 0xffffffff;
-		  line_ptr += sizeof (bfd_vma);
+		  line_ptr += unit->addr_size;
 		  break;
 		case DW_LNE_define_file:
 		  cur_file = read_string (abfd, line_ptr, &bytes_read);
@@ -970,56 +1021,6 @@ lookup_address_in_function_table (table,
 /* DWARF2 Compilation unit functions. */
 
 
-/* A minimal decoding of DWARF2 compilation units.  We only decode
-   what's needed to get to the line number information. */
-
-struct comp_unit {
-
-  /* Chain the previously read compilation units. */
-  struct comp_unit* next_unit;
-
-  /* Keep the bdf convenient (for memory allocation). */
-  bfd* abfd;
-
-  /* The lowest and higest addresses contained in this compilation
-     unit as specified in the compilation unit header. */
-  bfd_vma low;
-  bfd_vma high;
-
-  /* The DW_AT_name attribute (for error messages). */
-  char* name;
-
-  /* The abbrev hash table. */
-  struct abbrev_info** abbrevs;
-
-  /* Note that an error was found by comp_unit_find_nearest_line. */
-  int error;
-
-  /* The DW_AT_comp_dir attribute */
-  char* comp_dir;
-
-  /* True if there is a line number table associated with this comp. unit. */
-  int stmtlist;
-  
-  /* The offset into .debug_line of the line number table. */
-  unsigned long line_offset;
-
-  /* Pointer to the first child die for the comp unit. */
-  char *first_child_die_ptr;
-
-  /* The end of the comp unit. */
-  char *end_ptr;
-
-  /* The decoded line number, NULL if not yet decoded. */
-  struct line_info_table* line_table;
-
-  /* A list of the functions found in this comp. unit. */
-  struct funcinfo* function_table; 
-
-};
-
-
-
 /* Scan over each die in a comp. unit looking for functions to add
    to the function table. */
 
@@ -1068,7 +1069,7 @@ scan_unit_for_functions (unit)
   
       for (i = 0; i < abbrev->num_attrs; ++i)
 	{
-	  info_ptr = read_attribute (&attr, &abbrev->attrs[i], abfd, info_ptr);
+	  info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
 	  
 	  if (func)
 	    {
@@ -1165,11 +1166,18 @@ parse_comp_unit (abfd, info_ptr, end_ptr)
       return 0;
     }
 
-  if (addr_size != sizeof (bfd_vma))
+  if (addr_size > sizeof (bfd_vma))
     {
-      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this readers only handles address size '%u'.",
+      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'.",
 			 addr_size,
 			 sizeof (bfd_vma));
+      bfd_set_error (bfd_error_bad_value);
+      return 0;
+    }
+
+  if (addr_size != 4 && addr_size != 8)
+    {
+      (*_bfd_error_handler) ("Dwarf Error: found address size '%u', this reader can only handle address sizes '4' and '8'.", addr_size );
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -1200,12 +1208,13 @@ parse_comp_unit (abfd, info_ptr, end_ptr)
   
   unit = (struct comp_unit*) bfd_zalloc (abfd, sizeof (struct comp_unit));
   unit->abfd = abfd;
+  unit->addr_size = addr_size; 
   unit->abbrevs = abbrevs;
   unit->end_ptr = end_ptr;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
-      info_ptr = read_attribute (&attr, &abbrev->attrs[i], abfd, info_ptr);
+      info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
 
       /* Store the data if it is of an attribute we want to keep in a
 	 partial symbol table.  */
@@ -1301,9 +1310,7 @@ comp_unit_find_nearest_line (unit, addr,
 	  return false;
 	}
   
-      unit->line_table = decode_line_info (unit->abfd,
-					   unit->line_offset, 
-					   unit->comp_dir);
+      unit->line_table = decode_line_info (unit);
 
       if (! unit->line_table)
 	{

@@ -1,3 +1,18 @@
+Tue Apr  7 16:25:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* dwarf2.c (comp_unit): Move it earlier in the source. Add
+	addr_size.
+	(read_address): Replace 'bdf*' argument with 'comp_unit*' argument.
+        Use addr_size for address size, rather than sizeof(bfd_vma).
+	(read_attribute): Replace bdf* argument with 'comp_unit*' argument.
+	Fix call to read_address.
+	(decode_line_info): Replace bdf* argument with 'comp_unit*' argument.
+	Scrap other unneeded arguments.  Fix call to read_address.
+	(scan_unit_for_functions): Fix call to read_attribute.
+	(parse_comp_unit): We now handle more values for addr_size.
+	Set addr_size in unit.  Fix call to read_attribute and
+	decode_line_info.
+
 Tue Apr  7 15:44:47 1998  Gavin Romig-Koch <gavin@cygnus.com>
 
 	* dwarf2.c (parse_comp_unit): Drop use of unit->name when it is null.
