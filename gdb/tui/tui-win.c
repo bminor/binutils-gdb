@@ -459,7 +459,7 @@ tui_scroll_forward (TuiWinInfoPtr winToScroll, int numToScroll)
          ** command window do nothing since the term should handle it.
        */
       if (winToScroll == srcWin)
-	tuiVerticalSourceScroll (FORWARD_SCROLL, _numToScroll);
+	tui_vertical_source_scroll (FORWARD_SCROLL, _numToScroll);
       else if (winToScroll == disassemWin)
 	tui_vertical_disassem_scroll (FORWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)
@@ -483,7 +483,7 @@ tui_scroll_backward (TuiWinInfoPtr winToScroll, int numToScroll)
          ** command window do nothing since the term should handle it.
        */
       if (winToScroll == srcWin)
-	tuiVerticalSourceScroll (BACKWARD_SCROLL, _numToScroll);
+	tui_vertical_source_scroll (BACKWARD_SCROLL, _numToScroll);
       else if (winToScroll == disassemWin)
 	tui_vertical_disassem_scroll (BACKWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)

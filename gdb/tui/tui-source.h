@@ -1,5 +1,8 @@
 /* TUI display source window.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2004 Free Software
+   Foundation, Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,17 +22,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _TUI_SOURCE_H
-#define _TUI_SOURCE_H
+#ifndef TUI_SOURCE_H
+#define TUI_SOURCE_H
 
+#include "tui/tui-data.h"
+
+struct symtab;
 struct tui_win_info;
 
 extern void tui_set_source_content_nil (struct tui_win_info *, char *);
 
-extern TuiStatus tuiSetSourceContent (struct symtab *, int, int);
-extern void tuiShowSource (struct symtab *, TuiLineOrAddress, int);
-extern int tuiSourceIsDisplayed (char *);
-extern void tuiVerticalSourceScroll (TuiScrollDirection, int);
+extern enum tui_status tui_set_source_content (struct symtab *, int, int);
+extern void tui_show_symtab_source (struct symtab *, union tui_line_or_address, int);
+extern int tui_source_is_displayed (char *);
+extern void tui_vertical_source_scroll (enum tui_scroll_direction, int);
 
 #endif
-/*_TUI_SOURCE_H*/

@@ -340,7 +340,7 @@ tui_show_frame_info (struct frame_info *fi)
       find_frame_sal (fi, &sal);
 
       sourceAlreadyDisplayed = sal.symtab != 0
-        && tuiSourceIsDisplayed (sal.symtab->filename);
+        && tui_source_is_displayed (sal.symtab->filename);
       tui_set_locator_info (sal.symtab == 0 ? "??" : sal.symtab->filename,
                             tui_get_function_from_frame (fi),
                             sal.line,

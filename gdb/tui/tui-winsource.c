@@ -94,7 +94,7 @@ tui_update_source_window_as_is (TuiWinInfoPtr winInfo, struct symtab *s,
   TuiStatus ret;
 
   if (winInfo->generic.type == SRC_WIN)
-    ret = tuiSetSourceContent (s, lineOrAddr.lineNo, noerror);
+    ret = tui_set_source_content (s, lineOrAddr.lineNo, noerror);
   else
     ret = tui_set_disassem_content (lineOrAddr.addr);
 
@@ -153,7 +153,7 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
 	default:
 	  sal = find_pc_line (addr, 0);
 	  l.lineNo = sal.line;
-	  tuiShowSource (sal.symtab, l, FALSE);
+	  tui_show_symtab_source (sal.symtab, l, FALSE);
 	  break;
 	}
     }
@@ -190,7 +190,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
       break;
     default:
       l.lineNo = line;
-      tuiShowSource (s, l, FALSE);
+      tui_show_symtab_source (s, l, FALSE);
       if (currentLayout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);

@@ -1,7 +1,7 @@
 /* TUI display source window.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -45,8 +45,8 @@
 #endif
 
 /* Function to display source in the source window.  */
-TuiStatus
-tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
+enum tui_status
+tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 {
   TuiStatus ret = TUI_FAILURE;
 
@@ -300,16 +300,17 @@ tui_set_source_content_nil (TuiWinInfoPtr winInfo, char *warning_string)
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tuiShowSource (struct symtab *s, TuiLineOrAddress line, int noerror)
+tui_show_symtab_source (struct symtab *s, TuiLineOrAddress line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
   tui_update_source_window_as_is (srcWin, s, line, noerror);
 }
 
 
-/* Answer whether the source is currently displayed in the source window.  */
+/* Answer whether the source is currently displayed in the source
+   window.  */
 int
-tuiSourceIsDisplayed (char *fname)
+tui_source_is_displayed (char *fname)
 {
   return (srcWin->generic.contentInUse &&
 	  (strcmp (((TuiWinElementPtr) (locatorWinInfoPtr ())->
@@ -319,8 +320,8 @@ tuiSourceIsDisplayed (char *fname)
 
 /* Scroll the source forward or backward vertically.  */
 void
-tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
-                         int numToScroll)
+tui_vertical_source_scroll (TuiScrollDirection scrollDirection,
+			    int numToScroll)
 {
   if (srcWin->generic.content != (OpaquePtr) NULL)
     {

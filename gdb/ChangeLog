@@ -1,5 +1,15 @@
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-source.h: Update copyright.  Include "tui-data.h".
+	(struct symtab): Declare.
+	(tui_set_source_content): Rename tuiSetSourceContent.
+	(tui_show_symtab_source): Rename tuiShowSource.
+	(tui_source_is_displayed): Rename tuiSourceIsDisplayed.
+	(tui_vertical_source_scroll): Rename tuiVerticalSourceScroll.
+	* tui/tui-source.c: Update copyright.  Update references.
+	* tui/tui-win.c, tui/tui-winsource.c: Update references.
+	* tui/tui-stack.c: Update references.
+
 	* tui/tui-win.h: Update copyright.  Include "tui-data.h".
 	(struct tui_win_info): Declare.
 	(tui_scroll_forward): Rename tuiScrollForward.
