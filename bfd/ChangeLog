@@ -1,3 +1,25 @@
+2003-09-10  John David Anglin	<dave.anglin@nrc-cnrc.nrc.ca>
+	    Randolph Chung	<randolph@tausq.org>
+
+	* elf32-hppa.c (struct elf32_hppa_link_hash_entry,
+	hppa_link_hash_newfunc, hppa_build_one_stub,
+	elf32_hppa_adjust_dynamic_symbol, mark_PIC_calls, allocate_plt_static,
+	allocate_dynrelocs, elf32_hppa_size_dynamic_sections,
+	elf32_hppa_finish_dynamic_symbol): Remove pic_call field and all code
+	for generating import stubs for calls to statically linked PIC
+	functions.
+	(hppa_type_of_stub): Don't generate an import stub for calls to
+	statically linked pic functions.  Generate import stubs for calls
+	in a shared object, to functions not in a regular file, and to
+	defined weak functions.  Add new argument INFO.
+	(hppa_build_one_stub): Don't undef ADDIL_DP.
+	(elf32_hppa_check_relocs): Don't set SEC_HAS_GOT_REF flag.
+	(elf32_hppa_size_stubs): Pass info to hppa_type_of_stub.
+	(final_link_relocate): Change all DLTIND relocs to DPREL relocs in a
+	non-shared link.  Convert instructions that use the the linkage table
+	pointer, or a facsimile thereof, to use the global data pointer when
+	the reloc has been changed.
+
 2003-09-08  Joel Brobecker  <brobecker@gnat.com>
 
 	* archures.c: Add new machine names for hppa.
