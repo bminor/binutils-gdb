@@ -1,5 +1,14 @@
 Wed Oct 14 18:56:28 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Sony News native support.
+
+	* Makefile.in (HFILES): added nm-news.h.
+	* nm-news.h: new file.
+	* config/news.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o to NATDEPFILES.
+	  (NAT_FILE, NATDEPFILES): new macros for native support.
+	* config/news.mt (TDEPFILES): removed exec.o.
+
 	* remote-vx.c: remove redundant include of sys/time.h.
 
 	* infrun.c: include ctype.h.  Otherwise some machines result in

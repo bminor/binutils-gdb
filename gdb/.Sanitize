@@ -145,6 +145,7 @@ nindy-tdep.c
 nm-irix3.h
 nm-irix4.h
 nm-mips.h
+nm-news.h
 nm-rs6000.h
 nm-sun2.h
 nm-sun3.h
