@@ -1415,6 +1415,9 @@ extract_tbr (insn, dialect, invalid)
 /* An X_MASK with the RT and RA fields fixed.  */
 #define XRTRA_MASK (X_MASK | RT_MASK | RA_MASK)
 
+/* An XRTRA_MASK, but with L bit clear.  */
+#define XRTLRA_MASK (XRTRA_MASK & ~((unsigned long) 1 << 21))
+
 /* An X form comparison instruction.  */
 #define XCMPL(op, xop, l) (X ((op), (xop)) | ((((unsigned long)(l)) & 1) << 21))
 
@@ -3071,7 +3074,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lhzxe",   X(31,287),	X_MASK,		BOOKE64,	{ RT, RA, RB } },
 
-{ "tlbie",   X(31,306),	XRTRA_MASK,	PPC,		{ RB } },
+{ "tlbie",   X(31,306),	XRTLRA_MASK,	PPC,		{ RB, L } },
 { "tlbi",    X(31,306),	XRT_MASK,	POWER,		{ RA, RB } },
 
 { "eciwx",   X(31,310), X_MASK,		PPC,		{ RT, RA, RB } },

@@ -1,3 +1,8 @@
+2002-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Add optional `L' field to tlbie.
+	(XRTLRA_MASK): Define.
+
 2002-03-06  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Mark "pref" as being
