@@ -1,3 +1,8 @@
+2003-06-10  J. Brobecker  <brobecker@gnat.com>
+
+	* rs6000-nat.c (child_xfer_memory): Compute the right address when
+	fetching the trailing bytes of the buffer we are about to write.
+
 2003-06-10  Andrew Cagney  <cagney@redhat.com>
 
 	* remote-fileio.h (REMOTE_FILEIO_H): Replace FILEIO_H.
