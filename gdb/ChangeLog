@@ -1,5 +1,8 @@
 Tue Sep  7 13:06:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdbserver/Makefile.in (TAGS): config files are in
+	$(srcdir)/../config, not $(srcdir)/config.
+
 	* config/pa/tm-hppa.h: Declare target_read_pc and target_write_pc.
 	(STORE_RETURN_VAULE): Pass the correct offset of the return
 	register to write_register_bytes.
