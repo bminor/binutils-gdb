@@ -1,3 +1,10 @@
+2005-02-17  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (ia64_parse_name): Don't advance 'name' when
+	parsing inN, locN, outN. Set 'idx' to offset register number starts
+	at. Don't handle numbers with leading zeroes or beyond 95. Remove
+	pointless cast.
+
 2005-02-16  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (load_address): Fix formatting.

@@ -1,3 +1,8 @@
+2005-02-17  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/nostkreg.[ds]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/gas.exp (quad): Don't run on i960.

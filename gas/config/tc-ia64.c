@@ -7735,7 +7735,6 @@ ia64_parse_name (name, e, nextcharP)
 {
   struct const_desc *cdesc;
   struct dynreg *dr = 0;
-  unsigned int regnum;
   unsigned int idx;
   struct symbol *sym;
   char *end;
@@ -7841,13 +7840,14 @@ ia64_parse_name (name, e, nextcharP)
     }
 
   /* check for inN, locN, or outN:  */
+  idx = 0;
   switch (name[0])
     {
     case 'i':
       if (name[1] == 'n' && ISDIGIT (name[2]))
 	{
 	  dr = &md.in;
-	  name += 2;
+	  idx = 2;
 	}
       break;
 
@@ -7855,7 +7855,7 @@ ia64_parse_name (name, e, nextcharP)
       if (name[1] == 'o' && name[2] == 'c' && ISDIGIT (name[3]))
 	{
 	  dr = &md.loc;
-	  name += 3;
+	  idx = 3;
 	}
       break;
 
@@ -7863,7 +7863,7 @@ ia64_parse_name (name, e, nextcharP)
       if (name[1] == 'u' && name[2] == 't' && ISDIGIT (name[3]))
 	{
 	  dr = &md.out;
-	  name += 3;
+	  idx = 3;
 	}
       break;
 
@@ -7871,13 +7871,16 @@ ia64_parse_name (name, e, nextcharP)
       break;
     }
 
-  if (dr)
+  /* Ignore register numbers with leading zeroes, except zero itself.  */
+  if (dr && (name[idx] != '0' || name[idx + 1] == '\0'))
     {
+      unsigned long regnum;
+
       /* The name is inN, locN, or outN; parse the register number.  */
-      regnum = strtoul (name, &end, 10);
-      if (end > name && *end == '\0')
+      regnum = strtoul (name + idx, &end, 10);
+      if (end > name + idx && *end == '\0' && regnum < 96)
 	{
-	  if ((unsigned) regnum >= dr->num_regs)
+	  if (regnum >= dr->num_regs)
 	    {
 	      if (!dr->num_regs)
 		as_bad ("No current frame");

@@ -46,7 +46,8 @@ if [istarget "ia64-*"] then {
     run_dump_test "ldxmov-1"
     run_list_test "ldxmov-2" ""
     run_dump_test "ltoff22x-1"
-    
+
+    run_dump_test "nostkreg"
     run_list_test "invalid-ar" ""
 
     run_dump_test "dependency-1"
