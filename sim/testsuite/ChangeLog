@@ -2,6 +2,7 @@
 
 	* lib/sim-defs.exp (run_sim_test): Make multiple "output"
 	specifications concatenate, not override.
+	Support "xfail" and "kfail".
 
 2004-10-26  Nick Clifton  <nickc@redhat.com>
 

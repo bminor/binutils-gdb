@@ -163,9 +163,15 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # sim[(mach-list)]: <simulator options>
 # output: program output pattern to match with string-match
 # xerror: program is expected to return with a "failure" exit code
+# xfail: <PRMS-opt> <target-triples-where-test-fails>
+# kfail: <PRMS> <target-triples-where-test-fails>
 # If `output' is not specified, the program must output "pass" if !xerror or
 # "fail" if xerror.
 # The parens in "optname()" are optional if the specification is for all machs.
+# Multiple "output", "xfail" and "kfail" options concatenate.
+# The xfail and kfail arguments are space-separated target triplets and PRIDs.
+# There must be a PRMS (bug report ID) specified for kfail, while it's
+# optional for xfail.
 
 proc run_sim_test { name requested_machs } {
     global subdir srcdir
@@ -196,6 +202,8 @@ proc run_sim_test { name requested_machs } {
     set opts(mach) ""
     set opts(timeout) ""
     set opts(xerror) "no"
+    set opts(xfail) ""
+    set opts(kfail) ""
 
     if ![info exists global_as_options] {
         set global_as_options ""
@@ -233,6 +241,11 @@ proc run_sim_test { name requested_machs } {
 	if { $opt_name == "output" } {
 	    set opt_val "$opts(output)$opt_val"
 	}
+	# Similar with "xfail" and "kfail", but arguments are space-separated.
+	if { $opt_name == "xfail" || $opt_name == "kfail" } {
+	    set opt_val "$opts($opt_name) $opt_val"
+	}
+
 	foreach m $opt_machs {
 	    set opts($opt_name,$m) $opt_val
 	}
@@ -265,6 +278,18 @@ proc run_sim_test { name requested_machs } {
 	}
 
 	verbose -log "Testing $name on machine $mach."
+
+	# Time to setup xfailures and kfailures.
+	if { "$opts(xfail)" != "" } {
+	    verbose -log "xfail: $opts(xfail)"
+	    # Using eval to make $opts(xfail) appear as individual
+	    # arguments.
+	    eval setup_xfail $opts(xfail)
+	}
+	if { "$opts(kfail)" != "" } {
+	    verbose -log "kfail: $opts(kfail)"
+	    eval setup_kfail $opts(kfail)
+	}
 
 	if ![info exists opts(as,$mach)] {
 	    set opts(as,$mach) $opts(as)
