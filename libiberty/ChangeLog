@@ -1,3 +1,10 @@
+2000-07-27  RodneyBrown  <RodneyBrown@pmsc.com>
+            Jeff Law <law@cygnus.com>
+
+	* Makefile.in (rename.o, waitpid.o): Depend on config.h
+	* rename.c: include config.h, unistd.h
+	* waitpid.c: include config.h, sys/wait.h
+
 2000-07-24	Daniel Berlin <dberlin@redhat.com>
 
 	* cplus-dem.c (demangle_signature): Change if (GNU_DEMANGLING) to 
