@@ -89,6 +89,7 @@ oasys.c
 opncls.c
 reloc.c
 seclet.c
+seclet.h
 section.c
 srec.c
 stab-syms.c
@@ -121,7 +122,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.35  1992/01/24 22:42:49  sac
+# Revision 1.36  1992/01/27 21:48:38  grossman
+# Add seclet.h to files-to-keep.
+#
+# Revision 1.35  1992/01/24  22:42:49  sac
 # Uses the new small reloc type now.
 #
 # Currently self hosts on sun4 and sun3
