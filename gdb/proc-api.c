@@ -440,14 +440,14 @@ static off_t lseek_offset;
 int
 write_with_trace (fd, arg, len, file, line)
      int  fd;
-     long *arg;
+     int *arg;
      size_t len;
      char *file;
      int  line;
 {
   int  i;
-  long opcode = arg[0];
   int ret;
+  int opcode = arg[0];
 
   if (procfs_trace)
     {
@@ -558,7 +558,8 @@ write_with_trace (fd, arg, len, file, line)
 	  if (len == sizeof (break_insn) &&
 	      memcmp (arg, &break_insn, len) == 0)
 	    fprintf (procfs_file ? procfs_file : stdout, 
-		     "write (<breakpoint at 0x%08x>) \n", lseek_offset);
+		     "write (<breakpoint at 0x%08lx>) \n", 
+		     (unsigned long) lseek_offset);
 	  else if (rw_table[i].name)
 	    fprintf (procfs_file ? procfs_file : stdout, 
 		     "write (%s) %s\n", 
@@ -568,11 +569,12 @@ write_with_trace (fd, arg, len, file, line)
 	    {
 	      if (lseek_offset != -1)
 		fprintf (procfs_file ? procfs_file : stdout, 
-			 "write (<unknown>, %d bytes at 0x%08x) \n", 
-			 len, lseek_offset);
+			 "write (<unknown>, %lud bytes at 0x%08lx) \n", 
+			 (unsigned long) len, (unsigned long) lseek_offset);
 	      else
 		fprintf (procfs_file ? procfs_file : stdout, 
-			 "write (<unknown>, %d bytes) \n", len);
+			 "write (<unknown>, %lud bytes) \n", 
+			 (unsigned long) len);
 	    }
 	  break;
 	}
@@ -580,7 +582,7 @@ write_with_trace (fd, arg, len, file, line)
       if (procfs_file)
 	fflush (procfs_file);
     }
-  ret = write (fd, arg, len);
+  ret = write (fd, (void *) arg, len);
   if (procfs_trace && ret != len)
     {
       fprintf (procfs_file ? procfs_file : stdout, 
@@ -632,7 +634,7 @@ lseek_with_trace (fd, offset, whence, file, line)
 	procfs_file = fopen (procfs_filename, "a");
 
       fprintf (procfs_file ? procfs_file : stdout, 
-	       "[lseek (0x%08x) FAILED!\n", offset);
+	       "[lseek (0x%08lx) FAILED!\n", (unsigned long) offset);
       if (procfs_file)
 	fflush (procfs_file);
     }

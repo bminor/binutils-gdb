@@ -6,7 +6,10 @@ Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* utils.c (internal_verror): Call target_terminal_ours.
 	* wrapper.h: fix minor comment typo.
-	
+	* proc-api.c (write_with_trace): Change 'arg' from long to int.
+	Treat 'off_t' and 'size_t' as unsigned long in printfs.
+	(lseek_with_trace): Treat 'off_t' as unsigned long in printf.
+
 2000-04-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/djgpp/fnchange.lst (ia64-linux-nat.c): Map to
