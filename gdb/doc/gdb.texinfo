@@ -5915,10 +5915,10 @@ Depending on the configuration and operating system facilities,
 @kindex info auxv
 @item info auxv
 Display the auxiliary vector of the inferior, which can be either a
-live process or a core dump file.  @{GDBN} prints each tag value
+live process or a core dump file.  @value{GDBN} prints each tag value
 numerically, and also shows names and text descriptions for recognized
 tags.  Some values in the vector are numbers, some bit masks, and some
-pointers to strings or other data.  @{GDBN} displays each value in the
+pointers to strings or other data.  @value{GDBN} displays each value in the
 most appropriate form for a recognized tag, and in hexadecimal for
 an unrecognized tag.
 @end table

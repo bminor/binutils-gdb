@@ -1,3 +1,7 @@
+2004-02-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.texinfo (Auxiliary Vector): Fix thinko with @value{GDBN}.
+
 2004-02-04  Roland McGrath  <roland@redhat.com>
 
 	* gdb.texinfo (Auxiliary Vector): New node (section).
