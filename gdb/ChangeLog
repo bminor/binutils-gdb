@@ -1,5 +1,14 @@
 2003-03-14  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): When a legacy frame, always call
+	legacy_get_prev_frame.  Simplify unwind code using assumption that
+	the unwinder is new.
+	(legacy_get_prev_frame): Handle legacy sentinel frame unwind here.
+	(legacy_frame_p): When no gdbarch_unwind_dummy_id, or
+	SAVED_DUMMY_FRAME_TOS, assume a legacy frame.
+
+2003-03-14  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_saved_register): Delete function.
 	* frame.h (get_saved_register): Delete declaration.
 	* xstormy16-tdep.c: Update comment.
