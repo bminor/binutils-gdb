@@ -1,3 +1,21 @@
+1998-12-04  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Fix logic to
+	decide whether the output file is -mrelocatable-lib,
+	-mrelocatable, or neither.
+
+1998-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c: Add support for R_FR30_48 reloc.
+	* reloc.c: Add BFD_RELOC_FR30_48 relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate
+
+Wed Dec  2 00:58:37 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_adjust_dynamic_symbol): Warn on an attempt to
+	link against a dynamic symbol with no type or size.
+
 1998-12-01  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-i386.c (i386_check_relocs) [R_386_32]: Don't emit
