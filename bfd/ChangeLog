@@ -1,9 +1,17 @@
+Sat Mar  7 10:33:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-i960.c (icoff_little_vec): add COFF_SWAP_TABLE so we can run gdb on little
+	endian 960 code. 
+	* archive.c (compute_and_write_armap): indirect symbols should go
+	into the archive header too.
+
 Thu Mar  5 23:51:42 1992  John Gilmore  (gnu at cygnus.com)
 
 	* coff-msym.c:  Move this file from gdb/ecoff.c.  It
 	handles byte-swapping for ECOFF (MIPS symbol) files.
 	* config/mh-decstation, config/mh-irix3:  Add coff-msym.o
 	to the files built on MIPS-based hosts.
+	* Makefile.in:  Add rule for coff-msym.
 
 Sun Mar  1 22:32:58 1992  Per Bothner  (bothner@cygnus.com)
 
