@@ -1,3 +1,8 @@
+Mon May 18 09:31:43 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* write.c (fixup_segment): Improve error message for sym1-sym2
+	errors when sym1 is in a different segment from sym2.
+
 start-sanitize-m32rx
 Thu May 14 13:49:39 1998  Nick Clifton  <nickc@cygnus.com>
 

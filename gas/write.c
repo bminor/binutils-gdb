@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -166,7 +166,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   /* We've made fx_size a narrow field; check that it's wide enough.  */
   if (fixP->fx_size != size)
     {
-      as_bad ("field fx_size too small to hold %d", size);
+      as_bad (_("field fx_size too small to hold %d"), size);
       abort ();
     }
   fixP->fx_addsy = add_symbol;
@@ -298,7 +298,7 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
 #if defined(TC_RVA_RELOC)
       r_type = TC_RVA_RELOC;
 #else
-      as_fatal("rva not supported");
+      as_fatal(_("rva not supported"));
 #endif
 #endif
       break;
@@ -363,7 +363,7 @@ record_alignment (seg, align)
   if (seg == absolute_section)
     return;
 #ifdef BFD_ASSEMBLER
-  if (align > bfd_get_section_alignment (stdoutput, seg))
+  if ((unsigned int) align > bfd_get_section_alignment (stdoutput, seg))
     bfd_set_section_alignment (stdoutput, seg, align);
 #else
   if (align > section_alignment[(int) seg])
@@ -493,7 +493,7 @@ cvt_frag_to_fill (headersP, sec, fragP)
 			  - fragP->fr_fix) / fragP->fr_var;
       if (fragP->fr_offset < 0)
 	{
-	  as_bad ("attempt to .org/.space backwards? (%ld)",
+	  as_bad (_("attempt to .org/.space backwards? (%ld)"),
 		  (long) fragP->fr_offset);
 	}
       fragP->fr_type = rs_fill;
@@ -518,6 +518,10 @@ cvt_frag_to_fill (headersP, sec, fragP)
       }
       break;
 
+    case rs_cfa:
+      eh_frame_convert_frag (fragP);
+      break;
+
     case rs_machine_dependent:
 #ifdef BFD_ASSEMBLER
       md_convert_frag (stdoutput, sec, fragP);
@@ -525,7 +529,9 @@ cvt_frag_to_fill (headersP, sec, fragP)
       md_convert_frag (headersP, sec, fragP);
 #endif
 
-      assert (fragP->fr_next == NULL || (fragP->fr_next->fr_address - fragP->fr_address == fragP->fr_fix));
+      assert (fragP->fr_next == NULL
+	      || ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
+		  == fragP->fr_fix));
 
       /*
        * After md_convert_frag, we make the frag into a ".space 0".
@@ -696,8 +702,6 @@ adjust_reloc_syms (abfd, sec, xxx)
       {
 	symbolS *sym;
 	asection *symsec;
-
-      reduce_fixup:
 
 #ifdef DEBUG5
 	fprintf (stderr, "\n\nadjusting fixup:\n");
@@ -944,10 +948,10 @@ write_relocs (abfd, sec, xxx)
 	case bfd_reloc_ok:
 	  break;
 	case bfd_reloc_overflow:
-	  as_bad_where (fixp->fx_file, fixp->fx_line, "relocation overflow");
+	  as_bad_where (fixp->fx_file, fixp->fx_line, _("relocation overflow"));
 	  break;
 	default:
-	  as_fatal ("%s:%u: bad return from bfd_install_relocation",
+	  as_fatal (_("%s:%u: bad return from bfd_install_relocation"),
 		    fixp->fx_file, fixp->fx_line);
 	}
       relocs[i++] = reloc;
@@ -992,7 +996,7 @@ write_relocs (abfd, sec, xxx)
       if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      "internal error: fixup not contained within frag");
+		      _("internal error: fixup not contained within frag"));
       for (j = 0; reloc[j]; j++)
         {
 	  s = bfd_install_relocation (stdoutput, reloc[j],
@@ -1005,10 +1009,10 @@ write_relocs (abfd, sec, xxx)
 	      break;
 	    case bfd_reloc_overflow:
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    "relocation overflow");
+			    _("relocation overflow"));
 	      break;
 	    default:
-	      as_fatal ("%s:%u: bad return from bfd_install_relocation",
+	      as_fatal (_("%s:%u: bad return from bfd_install_relocation"),
 			fixp->fx_file, fixp->fx_line);
 	    }
         }
@@ -1091,7 +1095,7 @@ write_contents (abfd, sec, xxx)
 	  if (x == false)
 	    {
 	      bfd_perror (stdoutput->filename);
-	      as_perror ("FATAL: Can't write %s", stdoutput->filename);
+	      as_perror (_("FATAL: Can't write %s"), stdoutput->filename);
 	      exit (EXIT_FAILURE);
 	    }
 	  offset += f->fr_fix;
@@ -1115,7 +1119,7 @@ write_contents (abfd, sec, xxx)
 		  if (x == false)
 		    {
 		      bfd_perror (stdoutput->filename);
-		      as_perror ("FATAL: Can't write %s", stdoutput->filename);
+		      as_perror (_("FATAL: Can't write %s"), stdoutput->filename);
 		      exit (EXIT_FAILURE);
 		    }
 		  offset += fill_size;
@@ -1146,7 +1150,7 @@ write_contents (abfd, sec, xxx)
 						buf, (file_ptr) offset,
 						(bfd_size_type) n_per_buf * fill_size);
 		  if (x != true)
-		    as_fatal ("Cannot write to output file.");
+		    as_fatal (_("Cannot write to output file."));
 		  offset += n_per_buf * fill_size;
 		}
 	    }
@@ -1372,14 +1376,14 @@ write_object_file ()
     if (flag_always_generate_output)
       {
 	if (n_warns || n_errs)
-	  as_warn ("%d error%s, %d warning%s, generating bad object file.\n",
+	  as_warn (_("%d error%s, %d warning%s, generating bad object file.\n"),
 		   n_errs, n_errs == 1 ? "" : "s",
 		   n_warns, n_warns == 1 ? "" : "s");
       }
     else
       {
 	if (n_errs)
-	  as_fatal ("%d error%s, %d warning%s, no object file generated.\n",
+	  as_fatal (_("%d error%s, %d warning%s, no object file generated.\n"),
 		    n_errs, n_errs == 1 ? "" : "s",
 		    n_warns, n_warns == 1 ? "" : "s");
       }
@@ -1763,7 +1767,7 @@ write_object_file ()
 	  if (symp->sy_mri_common)
 	    {
 	      if (S_IS_EXTERNAL (symp))
-		as_bad ("%s: global symbols not supported in common sections",
+		as_bad (_("%s: global symbols not supported in common sections"),
 			S_GET_NAME (symp));
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;
@@ -1776,7 +1780,7 @@ write_object_file ()
 	      /* They only differ if `name' is a fb or dollar local
 		 label name.  */
 	      if (name2 != name && ! S_IS_DEFINED (symp))
-		as_bad ("local label %s is not defined", name2);
+		as_bad (_("local label %s is not defined"), name2);
 	    }
 
 	  /* Do it again, because adjust_reloc_syms might introduce
@@ -1851,7 +1855,7 @@ write_object_file ()
 	  /* Make sure we really got a value for the symbol.  */
 	  if (! symp->sy_resolved)
 	    {
-	      as_bad ("can't resolve value for symbol \"%s\"",
+	      as_bad (_("can't resolve value for symbol \"%s\""),
 		      S_GET_NAME (symp));
 	      symp->sy_resolved = 1;
 	    }
@@ -2095,7 +2099,7 @@ relax_segment (segment_frag_root, segment)
 
 	    if (offset % fragP->fr_var != 0)
 	      {
-		as_bad ("alignment padding (%lu bytes) not a multiple of %ld",
+		as_bad (_("alignment padding (%lu bytes) not a multiple of %ld"),
 			(unsigned long) offset, (long) fragP->fr_var);
 		offset -= (offset % fragP->fr_var);
 	      }
@@ -2123,6 +2127,10 @@ relax_segment (segment_frag_root, segment)
 	  /* Initial guess is always 1; doing otherwise can result in 
 	     stable solutions that are larger than the minimum.  */
 	  address += fragP->fr_offset = 1;
+	  break;
+
+	case rs_cfa:
+	  address += eh_frame_estimate_size_before_relax (fragP);
 	  break;
 
 	default:
@@ -2197,7 +2205,7 @@ relax_segment (segment_frag_root, segment)
 			    {
 			      char buf[50];
 			      sprint_value (buf, (addressT) lie->addnum);
-			      as_warn (".word %s-%s+%s didn't fit",
+			      as_warn (_(".word %s-%s+%s didn't fit"),
 				       S_GET_NAME (lie->add),
 				       S_GET_NAME (lie->sub),
 				       buf);
@@ -2274,7 +2282,7 @@ relax_segment (segment_frag_root, segment)
 		      /* Growth may be negative, but variable part of frag
 			 cannot have fewer than 0 chars.  That is, we can't
 			 .org backwards. */
-		      as_bad ("attempt to .org backwards ignored");
+		      as_bad (_("attempt to .org backwards ignored"));
 		      growth = 0;
 		    }
 
@@ -2290,11 +2298,11 @@ relax_segment (segment_frag_root, segment)
 			|| S_IS_COMMON (symbolP)
 			|| ! S_IS_DEFINED (symbolP))
 		      as_bad_where (fragP->fr_file, fragP->fr_line,
-				    ".space specifies non-absolute value");
+				    _(".space specifies non-absolute value"));
 		    fragP->fr_symbol = 0;
 		    if (growth < 0)
 		      {
-			as_warn (".space or .fill with negative value, ignored");
+			as_warn (_(".space or .fill with negative value, ignored"));
 			growth = 0;
 		      }
 		  }
@@ -2324,6 +2332,10 @@ relax_segment (segment_frag_root, segment)
 		  growth = size - fragP->fr_offset;
 		  fragP->fr_offset = size;
 		}
+		break;
+
+	      case rs_cfa:
+		growth = eh_frame_relax_frag (fragP);
 		break;
 
 	      default:
@@ -2458,7 +2470,7 @@ fixup_segment (fixP, this_segment_type)
 	      else
 	      bad_sub_reloc:
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      "Negative of non-absolute symbol %s",
+			      _("Negative of non-absolute symbol %s"),
 			      S_GET_NAME (sub_symbolP));
 	    }
 	  else if (S_GET_SEGMENT (sub_symbolP) == add_symbol_segment
@@ -2472,7 +2484,7 @@ fixup_segment (fixP, this_segment_type)
 		 as the target of a call instruction.  */
 	      if (fixP->fx_tcbit)
 		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      "callj to difference of 2 symbols");
+			      _("callj to difference of 2 symbols"));
 #endif /* TC_I960 */
 	      add_number += S_GET_VALUE (add_symbolP) -
 		S_GET_VALUE (sub_symbolP);
@@ -2538,9 +2550,12 @@ fixup_segment (fixP, this_segment_type)
 		  char buf[50];
 		  sprint_value (buf, fragP->fr_address + where);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				"Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %s.",
+				_("Can't emit reloc symbol \"%s\" {%s segment} - symbol \"%s\" {%s segment} at file address %s."),
+				S_GET_NAME (add_symbolP),
+				segment_name (S_GET_SEGMENT (add_symbolP)),
+				S_GET_NAME (sub_symbolP),
 				segment_name (S_GET_SEGMENT (sub_symbolP)),
-				S_GET_NAME (sub_symbolP), buf);
+				buf);
 		}
 	    }
 	}
@@ -2613,7 +2628,7 @@ fixup_segment (fixP, this_segment_type)
 		       * relocation.
 		       */
 		      as_bad_where (fixP->fx_file, fixP->fx_line,
-				    "can't use COBR format with external label");
+				    _("can't use COBR format with external label"));
 		      fixP->fx_addsy = NULL;
 		      fixP->fx_done = 1;
 		      continue;
@@ -2659,7 +2674,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
 	{
-	  if (size < sizeof (valueT))
+	  if ((size_t) size < sizeof (valueT))
 	    {
 	      valueT mask, hibit;
 
@@ -2687,7 +2702,7 @@ fixup_segment (fixP, this_segment_type)
 		  else
 		    sprintf (buf2, "%ld", (long) add_number);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				"Value of %s too large for field of %d bytes at %s",
+				_("Value of %s too large for field of %d bytes at %s"),
 				buf2, size, buf);
 		} /* generic error checking */
 	    }
@@ -2699,7 +2714,7 @@ fixup_segment (fixP, this_segment_type)
 	      && size == 2
 	      && add_number > 0x7fff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  "Signed .word overflow; switch may be too large; %ld at 0x%lx",
+			  _("Signed .word overflow; switch may be too large; %ld at 0x%lx"),
 			  (long) add_number,
 			  (unsigned long) (fragP->fr_address + where));
 #endif
@@ -2746,7 +2761,7 @@ number_to_chars_bigendian (buf, val, n)
      valueT val;
      int n;
 {
-  if (n > sizeof (val)|| n <= 0)
+  if ((size_t) n > sizeof (val) || n <= 0)
     abort ();
   while (n--)
     {
@@ -2761,7 +2776,7 @@ number_to_chars_littleendian (buf, val, n)
      valueT val;
      int n;
 {
-  if (n > sizeof (val) || n <= 0)
+  if ((size_t) n > sizeof (val) || n <= 0)
     abort ();
   while (n--)
     {
@@ -2826,6 +2841,9 @@ print_fixup (fixp)
       fprintf (stderr, ">");
     }
   fprintf (stderr, "\n");
+#ifdef TC_FIX_DATA_PRINT
+  TC_FIX_DATA_PRINT (stderr, fixp);
+#endif
 }
 
 /* end of write.c */
