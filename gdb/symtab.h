@@ -760,9 +760,25 @@ int current_source_line;
 /* The virtual function table is now an array of structures
    which have the form { int16 offset, delta; void *pfn; }. 
  
-   Gee, can we have more documentation than that?   FIXME.  -- gnu */
+   In normal virtual function tables, OFFSET is unused.
+   DELTA is the amount which is added to the apparent object's base
+   address in order to point to the actual object to which the
+   virtual function should be applied.
+   PFN is a pointer to the virtual function.  */
   
 #define VTBL_FNADDR_OFFSET 2
+
+/* Macro that yields non-zero value iff NAME is the prefix
+   for C++ operator names.  If you leave out the parenthesis
+   here you will lose!
+
+   Currently 'o' 'p' CPLUS_MARKER is used for both the symbol in the
+   symbol-file and the names in gdb's symbol table.  */
+#define OPNAME_PREFIX_P(NAME) ((NAME)[0] == 'o' && (NAME)[1] == 'p' \
+			       && (NAME)[2] == CPLUS_MARKER)
+
+#define VTBL_PREFIX_P(NAME) ((NAME)[3] == CPLUS_MARKER	\
+			     && !strncmp ((NAME), "_vt", 3))
 
 /* Functions that work on the objects described above */
 
@@ -799,8 +815,10 @@ extern int contained_in();
 /* C++ stuff.  */
 extern struct type *lookup_reference_type ();
 extern struct type *lookup_member_type ();
+extern struct type *lookup_method_type ();
 extern struct type *lookup_class ();
 extern void smash_to_method_type ();
+extern struct type *allocate_stub_method ();
 /* end of C++ stuff.  */
 
 extern void free_all_symtabs ();
@@ -823,10 +841,11 @@ extern struct type *builtin_type_double;
    read-in.  */
 extern struct type *builtin_type_error;
 
-#ifdef LONG_LONG
 extern struct type *builtin_type_long_long;
 extern struct type *builtin_type_unsigned_long_long;
 
+/* LONG_LONG is defined if the host has "long long".  */
+#ifdef LONG_LONG
 #define BUILTIN_TYPE_LONGEST builtin_type_long_long
 #define BUILTIN_TYPE_UNSIGNED_LONGEST builtin_type_unsigned_long_long
 /* This should not be a typedef, because "unsigned LONGEST" needs
