@@ -1,5 +1,8 @@
 Tue Apr  8 00:01:31 1997  Jeffrey A Law  (law@cygnus.com)
 
+        * elf-mn10300.c (mn10300_elf_relax_section): Don't forget the
+        addend for non pc-relative relocations.
+
 	* elf-m10300.c (bfd_elf32_mn10300_reloc): Remove prototype
 	for non-existent function.
 
