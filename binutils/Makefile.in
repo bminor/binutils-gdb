@@ -55,7 +55,7 @@ OBJDUMP_PROG=objdump
 PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 STAGESTUFF = $(PROGS) *.o
 
-BASEDIR = $(unsubdir)/..
+BASEDIR = $(srcdir)/..
 LIBDIR  = $(unsubdir)/../bfd$(subdir)
 
 #### host and target dependant Makefile fragments come in here.
@@ -63,7 +63,7 @@ LIBDIR  = $(unsubdir)/../bfd$(subdir)
 
 INCDIR = $(BASEDIR)/include
 
-CFLAGS  = -g -I. -I$(INCDIR) $(HDEFINES) $(TDEFINES)
+CFLAGS  = -g -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES)
 
 # When adding .o files, to make VPATH work in Sun Make, you have to
 # also add a foo.o: foo.c line at the bottom of the file.

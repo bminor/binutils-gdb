@@ -29,7 +29,7 @@ RANLIB = ranlib
 AR = ar
 AR_FLAGS = clq
 INCDIR = $(srcdir)/../include
-CSEARCH = -I. -I$(INCDIR)
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
 
