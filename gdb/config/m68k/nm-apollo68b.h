@@ -21,3 +21,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	FETCH_INFERIOR_REGISTERS
 
+/* Tell gdb that we can attach and detach other processes */
+#define ATTACH_DETACH
+
+#define U_REGS_OFFSET 6
+
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
+
+#define KERNEL_U_ADDR 0
+
+#undef FLOAT_INFO	/* No float info yet */
+
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+	(addr) = (6 + 4 * (regno))
+
+/* Apollos don't really have a USER area,so trying to read it from the
+ * process address space will fail. It does support a read from a faked
+ * USER area using the "PEEKUSER" ptrace call.
+ */
+#define PT_READ_U 3
+
+#define	MEM_FNS_DECLARED	/* /usr/include/string.h can get it wrong */

@@ -1,5 +1,11 @@
 Fri Oct 22 07:49:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	Merge Apollo patches from Troy Rollo (troy@cbme.unsw.edu.au):
+	* dst.h, dstread.c, config/m68k/{apollo68b.mt,tm-apollo68b.h}:
+	New files.
+	* config/m68k/nm-apollo68b.h: Add more defines.
+	* configure.in: Recognize apollo target, not just host.
+
 	* configure.in: Add * to end of all OS names.
 
 Fri Oct 22 06:14:01 1993  Fred Fish  (fnf@cygnus.com)

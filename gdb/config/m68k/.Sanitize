@@ -28,6 +28,7 @@ altos.mt
 amix.mh
 amix.mt
 apollo68b.mh
+apollo68b.mt
 apollo68v.mh
 delta68.mh
 delta68.mt
@@ -65,6 +66,7 @@ sun3os3.mt
 sun3os4.mh
 sun3os4.mt
 tm-3b1.h
+tm-apollo68b.h
 tm-delta68.h
 tm-m68k-em.h
 tm-m68k.h
