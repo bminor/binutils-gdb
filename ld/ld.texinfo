@@ -963,6 +963,9 @@ For a native linker, the contents of the environment variable
 @code{LD_LIBRARY_PATH}.
 @item
 The default directories, normally @file{/lib} and @file{/usr/lib}.
+@item
+For a native linker on an ELF system, if the file @file{/etc/ld.so.conf}
+exists, the list of directories found in that file.
 @end enumerate
 
 If the required shared library is not found, the linker will issue a

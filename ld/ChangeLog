@@ -1,5 +1,7 @@
 Mon Apr 27 11:56:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.texinfo (Options) [-rpath-link]: Mention ld.so.conf.
+
 	Based on patch from H.J. Lu <hjl@gnu.org>:
 	* emultempl/elf32.em (global_vercheck_needed): New file static
 	variable.
