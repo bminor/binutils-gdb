@@ -1,3 +1,9 @@
+2003-08-11  Michael Snyder  <msnyder@redhat.com>
+
+	* macl.s: New file.
+	* macw.s: New file.
+	* allinsn.exp: Add new tests for mac.w and mac.l.
+
 2003-07-25  Michael Snyder  <msnyder@redhat.com>
 
 	* pshai.s, pshar.s, pshli.s, pshlr.s: New files.

@@ -24,6 +24,8 @@ if [istarget sh-*elf] {
     run_sim_test fsqrt.s  sh
     run_sim_test fsub.s   sh
     run_sim_test ftrc.s   sh
+    run_sim_test macl.s   sh
+    run_sim_test macw.s   sh
     run_sim_test paddc.s  shdsp
     run_sim_test padd.s   shdsp
     run_sim_test pand.s   shdsp
