@@ -4323,7 +4323,7 @@ elf_bfd_final_link (abfd, info)
 	  if (o != NULL)
 	    o->target_index = bfd_get_symcount (abfd);
 	  elfsym.st_shndx = i;
-	  if (info->relocateable || info->emitrelocations || o == NULL)
+	  if (info->relocateable || o == NULL)
 	    elfsym.st_value = 0;
 	  else
 	    elfsym.st_value = o->vma;
@@ -5513,6 +5513,10 @@ elf_link_input_bfd (finfo, input_bfd)
 		  asection *sec;
 
 		  irela->r_offset += o->output_offset;
+
+		  /* Relocs in an executable have to be virtual addresses.  */
+		  if (finfo->info->emitrelocations)
+		    irela->r_offset += o->output_section->vma;
 
 		  r_symndx = ELF_R_SYM (irela->r_info);
 

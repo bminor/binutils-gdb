@@ -1,3 +1,8 @@
+2000-05-18  Momchil Velikov <velco@fadata.bg>
+
+	* elflink.h (elf_bfd_final_link, elf_link_input_bfd): When emiting
+	relocs for an executable, ensure that they are virtual addresses.
+
 Thu May 18 10:55:47 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* config.bfd (hppa*64*-*-hpux11*): New target triplet.
