@@ -733,7 +733,7 @@ lookup_struct_elt_type (type, name, noerr)
     {
       struct type *t;
 
-      t = lookup_struct_elt_type (TYPE_BASECLASS (type, i), name, 0);
+      t = lookup_struct_elt_type (TYPE_BASECLASS (type, i), name, noerr);
       if (t != NULL)
 	{
 	  return t;

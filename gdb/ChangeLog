@@ -1,3 +1,8 @@
+Sun Jan 31 04:32:48 1993  Michael Tiemann  (tiemann@rtl.cygnus.com)
+
+	* gdbtypes.c (lookup_struct_elt_type): Pass NOERR instead of
+	zero on recursive call.
+
 Sat Jan 30 19:55:52 1993  John Gilmore  (gnu@cygnus.com)
 
 	* hppah-nat.c:  Eliminate <sys/user.h> and other unnecessary stuff,
