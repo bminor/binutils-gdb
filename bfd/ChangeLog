@@ -1,3 +1,18 @@
+2002-08-14  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc11.c (m68hc11_relax_group): New to relax group of
+	instructions.
+	(m68hc11_direct_relax): New to define table of relaxable instructions.
+	(find_relaxable_insn): New, find a relaxable insn.
+	(compare_reloc): New to compare two relocs.
+	(m68hc11_elf_relax_section): New, relax text sections.
+	(m68hc11_elf_relax_delete_bytes): New, delete bytes and adjust branchs.
+	(elf32_m68hc11_check_relocs): New function for GC support.
+	(elf32_m68hc11_relocate_section): New function for GC support.
+	(bfd_elf32_bfd_relax_section): Define to support linker relaxation.
+	(elf_backend_check_relocs): Likewise.
+	(elf_backend_relocate_section): Likewise.
+
 2002-08-13  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections): Don't count
