@@ -1,3 +1,8 @@
+2003-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_relax_section): Take symbol hash table
+	from input_bfd.
+
 2003-07-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (special_sections): Set attributes for .got and .plt.

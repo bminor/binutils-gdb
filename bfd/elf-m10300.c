@@ -2065,7 +2065,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 		  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 			      - symtab_hdr->sh_info);
-		  hashes = elf_sym_hashes (abfd);
+		  hashes = elf_sym_hashes (input_bfd);
 		  end_hashes = hashes + symcount;
 		  for (; hashes < end_hashes; hashes++)
 		    {
@@ -2283,7 +2283,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		 need insns deleted from their prologues.  */
 	      symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 			  - symtab_hdr->sh_info);
-	      hashes = elf_sym_hashes (abfd);
+	      hashes = elf_sym_hashes (input_bfd);
 	      end_hashes = hashes + symcount;
 	      for (; hashes < end_hashes; hashes++)
 		{
