@@ -3041,7 +3041,10 @@ aout_link_add_symbols (abfd, info)
 	     which is the symbol to indirect to (actually, an N_INDR
 	     symbol without N_EXT set is pretty useless).  */
 	  if (type == N_INDR)
-	    ++p;
+	    {
+	      ++p;
+	      ++sym_hash;
+	    }
 	  continue;
 	}
 
@@ -3125,6 +3128,9 @@ aout_link_add_symbols (abfd, info)
 	     (info, abfd, name, flags, section, value, string, copy, false,
 	      ARCH_SIZE, (struct bfd_link_hash_entry **) sym_hash)))
 	return false;
+
+      if (type == (N_INDR | N_EXT) || type == N_WARNING)
+	++sym_hash;
     }
 
   return true;
@@ -3401,6 +3407,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
   struct external_nlist *sym_end;
   struct aout_link_hash_entry **sym_hash;
   boolean pass;
+  boolean skip_indirect;
 
   output_bfd = finfo->output_bfd;
   sym_count = obj_aout_external_sym_count (input_bfd);
@@ -3434,6 +3441,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
     }
 
   pass = false;
+  skip_indirect = false;
   sym = obj_aout_external_syms (input_bfd);
   sym_end = sym + sym_count;
   sym_hash = obj_aout_sym_hashes (input_bfd);
@@ -3452,19 +3460,43 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 
       if (pass)
 	{
-	  /* Pass this symbol through.  */
+	  /* Pass this symbol through.  It is the target of an
+	     indirect or warning symbol.  */
 	  val = GET_WORD (input_bfd, sym->e_value);
 	  pass = false;
+	}
+      else if (skip_indirect)
+	{
+	  /* Skip this symbol, which is the target of an indirect
+	     symbol that we have changed to no longer be an indirect
+	     symbol.  */
+	  skip_indirect = false;
+	  continue;
 	}
       else
 	{
 	  struct aout_link_hash_entry *h;
+	  struct aout_link_hash_entry *hresolve;
 
 	  /* We have saved the hash table entry for this symbol, if
 	     there is one.  Note that we could just look it up again
 	     in the hash table, provided we first check that it is an
 	     external symbol. */
 	  h = *sym_hash;
+
+	  /* If this is an indirect symbol, then change hresolve to
+	     the base symbol.  We also change sym_hash so that the
+	     relocation routines relocate against the real symbol.  */
+	  hresolve = h;
+	  if (h != (struct aout_link_hash_entry *) NULL
+	      && h->root.type == bfd_link_hash_indirect)
+	    {
+	      hresolve = (struct aout_link_hash_entry *) h->root.u.i.link;
+	      while (hresolve->root.type == bfd_link_hash_indirect)
+		hresolve = ((struct aout_link_hash_entry *)
+			    hresolve->root.u.i.link);
+	      *sym_hash = hresolve;
+	    }
 
 	  /* If the symbol has already been written out, skip it.  */
 	  if (h != (struct aout_link_hash_entry *) NULL
@@ -3509,10 +3541,17 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	    symsec = obj_bsssec (input_bfd);
 	  else if ((type & N_TYPE) == N_ABS)
 	    symsec = &bfd_abs_section;
-	  else if ((type & N_TYPE) == N_INDR
+	  else if (((type & N_TYPE) == N_INDR
+		    && (hresolve == (struct aout_link_hash_entry *) NULL
+			|| (hresolve->root.type != bfd_link_hash_defined
+			    && hresolve->root.type != bfd_link_hash_common)))
 		   || type == N_WARNING)
 	    {
-	      /* Pass the next symbol through unchanged.  */
+	      /* Pass the next symbol through unchanged.  The
+		 condition above for indirect symbols is so that if
+		 the indirect symbol was defined, we output it with
+		 the correct definition so the debugger will
+		 understand it.  */
 	      pass = true;
 	      val = GET_WORD (input_bfd, sym->e_value);
 	      symsec = NULL;
@@ -3524,20 +3563,32 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	    }
 	  else
 	    {
+	      /* If we get here with an indirect symbol, it means that
+		 we are outputting it with a real definition.  In such
+		 a case we do not want to output the next symbol,
+		 which is the target of the indirection.  */
+	      if ((type & N_TYPE) == N_INDR)
+		skip_indirect = true;
+
+	      /* We need to get the value from the hash table.  We use
+		 hresolve so that if we have defined an indirect
+		 symbol we output the final definition.  */
 	      if (h == (struct aout_link_hash_entry *) NULL)
 		val = 0;
-	      else if (h->root.type == bfd_link_hash_defined)
+	      else if (hresolve->root.type == bfd_link_hash_defined)
 		{
+		  asection *input_section;
 		  asection *output_section;
 
 		  /* This case means a common symbol which was turned
 		     into a defined symbol.  */
-		  output_section = h->root.u.def.section->output_section;
+		  input_section = hresolve->root.u.def.section;
+		  output_section = input_section->output_section;
 		  BFD_ASSERT (output_section == &bfd_abs_section
 			      || output_section->owner == output_bfd);
-		  val = (h->root.u.def.value
+		  val = (hresolve->root.u.def.value
 			 + bfd_get_section_vma (output_bfd, output_section)
-			 + h->root.u.def.section->output_offset);
+			 + input_section->output_offset);
 
 		  /* Get the correct type based on the section.  If
 		     this is a constructed set, force it to be
@@ -3559,8 +3610,8 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 		  else
 		    type |= N_ABS;
 		}
-	      else if (h->root.type == bfd_link_hash_common)
-		val = h->root.u.c.size;
+	      else if (hresolve->root.type == bfd_link_hash_common)
+		val = hresolve->root.u.c.size;
 	      else
 		val = 0;
 
