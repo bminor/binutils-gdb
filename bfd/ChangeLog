@@ -1,3 +1,10 @@
+2000-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+        Add support for FreeBSD/Alpha.
+        * configure.in: Add alpha*-*-freebsd* entry to prevent including
+        OSF core file support.
+	* configure: Regenerate.
+
 2000-05-29  Philip Blundell  <philb@gnu.org>
 
 	* ppcboot.c: Add packed attribute if compiling with GCC.
