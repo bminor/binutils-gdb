@@ -2537,7 +2537,24 @@ again:
 	       the related problems with unnecessarily stubbed types;
 	       someone motivated should attempt to clean up the issue
 	       here as well.  Once a type pointed to has been created it
-	       should not be modified.  */
+	       should not be modified.
+
+               Well, it's not *absolutely* wrong.  Constructing recursive
+               types (trees, linked lists) necessarily entails modifying
+               types after creating them.  Constructing any loop structure
+               entails side effects.  The Dwarf 2 reader does handle this
+               more gracefully (it never constructs more than once
+               instance of a type object, so it doesn't have to copy type
+               objects wholesale), but it still mutates type objects after
+               other folks have references to them.
+
+               Keep in mind that this circularity/mutation issue shows up
+               at the source language level, too: C's "incomplete types",
+               for example.  So the proper cleanup, I think, would be to
+               limit GDB's type smashing to match exactly those required
+               by the source language.  So GDB could have a
+               "complete_this_type" function, but never create unnecessary
+               copies of a type otherwise.  */
 	    replace_type (type, xtype);
 	    TYPE_NAME (type) = NULL;
 	    TYPE_TAG_NAME (type) = NULL;
@@ -5122,10 +5139,7 @@ cleanup_undefined_types (void)
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
 			    && STREQ (SYMBOL_NAME (sym), typename))
-			  {
-			    memcpy (*type, SYMBOL_TYPE (sym),
-				    sizeof (struct type));
-			  }
+                          replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
 	      }

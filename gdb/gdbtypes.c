@@ -521,10 +521,10 @@ finish_cv_type (struct type *type)
 
 /* Replace the contents of ntype with the type *type.
 
-   This function should not be necessary, but is due to quirks in the stabs
-   reader.  This should go away.  It does not handle the replacement type
-   being cv-qualified; it could be easily fixed to, but it should go away,
-   remember?  */
+   When building recursive types, it is necessary to update a type's
+   definition after people already have references to it.  The C
+   language's concept of an `incomplete type' is an acknowledgement of
+   this.  */
 void
 replace_type (struct type *ntype, struct type *type)
 {

@@ -1,5 +1,9 @@
 2002-05-03  Jim Blandy  <jimb@redhat.com>
 
+	* stabsread.c (cleanup_undefined_types): Use replace_type, not memcpy.
+	(read_type): Doc fix.
+	* gdbtypes.c (replace_type): Doc fix.
+
 	* stabsread.c (multiply_defined_struct): New complaint.
 	(read_struct_type): If the type we were passed isn't empty, or
 	incomplete, don't read the new struct type into it; complain,
