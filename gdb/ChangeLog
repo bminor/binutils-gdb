@@ -1,3 +1,7 @@
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* MAINTAINERS: Add self to Write After Approval list.
+
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* infcmd.c (interrupt_target_command_wrapper): Delete.
