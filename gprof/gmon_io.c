@@ -44,17 +44,17 @@ enum gmon_ptr_signedness {
   ptr_unsigned
 };
 
-static enum gmon_ptr_size gmon_get_ptr_size PARAMS ((void));
-static enum gmon_ptr_signedness gmon_get_ptr_signedness PARAMS ((void));
+static enum gmon_ptr_size gmon_get_ptr_size (void);
+static enum gmon_ptr_signedness gmon_get_ptr_signedness (void);
 
 #ifdef BFD_HOST_U_64_BIT
-static int gmon_io_read_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT *));
-static int gmon_io_write_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT));
+static int gmon_io_read_64 (FILE *, BFD_HOST_U_64_BIT *);
+static int gmon_io_write_64 (FILE *, BFD_HOST_U_64_BIT);
 #endif
 static int gmon_read_raw_arc
-  PARAMS ((FILE *, bfd_vma *, bfd_vma *, unsigned long *));
+  (FILE *, bfd_vma *, bfd_vma *, unsigned long *);
 static int gmon_write_raw_arc
-  PARAMS ((FILE *, bfd_vma, bfd_vma, unsigned long));
+  (FILE *, bfd_vma, bfd_vma, unsigned long);
 
 int gmon_input = 0;
 int gmon_file_version = 0;	/* 0 == old (non-versioned) file format.  */
@@ -98,9 +98,7 @@ gmon_get_ptr_signedness ()
 }
 
 int
-gmon_io_read_32 (ifp, valp)
-     FILE *ifp;
-     unsigned int *valp;
+gmon_io_read_32 (FILE *ifp, unsigned int *valp)
 {
   char buf[4];
 
@@ -112,9 +110,7 @@ gmon_io_read_32 (ifp, valp)
 
 #ifdef BFD_HOST_U_64_BIT
 static int
-gmon_io_read_64 (ifp, valp)
-     FILE *ifp;
-     BFD_HOST_U_64_BIT *valp;
+gmon_io_read_64 (FILE *ifp, BFD_HOST_U_64_BIT *valp)
 {
   char buf[8];
 
@@ -126,9 +122,7 @@ gmon_io_read_64 (ifp, valp)
 #endif
 
 int
-gmon_io_read_vma (ifp, valp)
-     FILE *ifp;
-     bfd_vma *valp;
+gmon_io_read_vma (FILE *ifp, bfd_vma *valp)
 {
   unsigned int val32;
 #ifdef BFD_HOST_U_64_BIT
@@ -163,10 +157,7 @@ gmon_io_read_vma (ifp, valp)
 }
 
 int
-gmon_io_read (ifp, buf, n)
-     FILE *ifp;
-     char *buf;
-     size_t n;
+gmon_io_read (FILE *ifp, char *buf, size_t n)
 {
   if (fread (buf, 1, n, ifp) != n)
     return 1;
@@ -174,9 +165,7 @@ gmon_io_read (ifp, buf, n)
 }
 
 int
-gmon_io_write_32 (ofp, val)
-     FILE *ofp;
-     unsigned int val;
+gmon_io_write_32 (FILE *ofp, unsigned int val)
 {
   char buf[4];
 
@@ -188,9 +177,7 @@ gmon_io_write_32 (ofp, val)
 
 #ifdef BFD_HOST_U_64_BIT
 static int
-gmon_io_write_64 (ofp, val)
-     FILE *ofp;	
-     BFD_HOST_U_64_BIT val;
+gmon_io_write_64 (FILE *ofp, BFD_HOST_U_64_BIT val)
 {
   char buf[8];
 
@@ -202,9 +189,7 @@ gmon_io_write_64 (ofp, val)
 #endif
 
 int
-gmon_io_write_vma (ofp, val)
-     FILE *ofp;
-     bfd_vma val;
+gmon_io_write_vma (FILE *ofp, bfd_vma val)
 {
 
   switch (gmon_get_ptr_size ())
@@ -225,9 +210,7 @@ gmon_io_write_vma (ofp, val)
 }
 
 int
-gmon_io_write_8 (ofp, val)
-     FILE *ofp;	
-     unsigned int val;
+gmon_io_write_8 (FILE *ofp, unsigned int val)
 {
   char buf[1];
 
@@ -238,10 +221,7 @@ gmon_io_write_8 (ofp, val)
 }
 
 int
-gmon_io_write (ofp, buf, n)
-     FILE *ofp;	
-     char *buf;
-     size_t n;
+gmon_io_write (FILE *ofp, char *buf, size_t n)
 {
   if (fwrite (buf, 1, n, ofp) != n)
     return 1;
@@ -249,11 +229,7 @@ gmon_io_write (ofp, buf, n)
 }
 
 static int
-gmon_read_raw_arc (ifp, fpc, spc, cnt)
-     FILE *ifp;
-     bfd_vma *fpc;
-     bfd_vma *spc;
-     unsigned long *cnt;
+gmon_read_raw_arc (FILE *ifp, bfd_vma *fpc, bfd_vma *spc, unsigned long *cnt)
 {
 #ifdef BFD_HOST_U_64_BIT
   BFD_HOST_U_64_BIT cnt64;
@@ -284,11 +260,7 @@ gmon_read_raw_arc (ifp, fpc, spc, cnt)
 }
 
 static int
-gmon_write_raw_arc (ofp, fpc, spc, cnt)
-     FILE *ofp;
-     bfd_vma fpc;
-     bfd_vma spc;
-     unsigned long cnt;
+gmon_write_raw_arc (FILE *ofp, bfd_vma fpc, bfd_vma spc, unsigned long cnt)
 {
 
   if (gmon_io_write_vma (ofp, fpc)
@@ -313,8 +285,7 @@ gmon_write_raw_arc (ofp, fpc, spc, cnt)
 }
 
 void
-gmon_out_read (filename)
-     const char *filename;
+gmon_out_read (const char *filename)
 {
   FILE *ifp;
   struct gmon_hdr ghdr;
@@ -619,8 +590,7 @@ gmon_out_read (filename)
 
 
 void
-gmon_out_write (filename)
-     const char *filename;
+gmon_out_write (const char *filename)
 {
   FILE *ofp;
   struct gmon_hdr ghdr;

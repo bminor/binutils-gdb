@@ -68,15 +68,14 @@ struct modebyte
  */
 static Sym indirectchild;
 
-static operandenum vax_operandmode PARAMS ((unsigned char *));
-static char *vax_operandname PARAMS ((operandenum));
-static long vax_operandlength PARAMS ((unsigned char *));
-static bfd_signed_vma vax_offset PARAMS ((unsigned char *));
-void vax_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
+static operandenum vax_operandmode (unsigned char *);
+static char *vax_operandname (operandenum);
+static long vax_operandlength (unsigned char *);
+static bfd_signed_vma vax_offset (unsigned char *);
+void vax_find_call (Sym *, bfd_vma, bfd_vma);
 
 static operandenum
-vax_operandmode (modep)
-     unsigned char *modep;
+vax_operandmode (unsigned char *modep)
 {
   int usesreg = *modep & 0xf;
 
@@ -117,8 +116,7 @@ vax_operandmode (modep)
 }
 
 static char *
-vax_operandname (mode)
-     operandenum mode;
+vax_operandname (operandenum mode)
 {
 
   switch (mode)
@@ -171,8 +169,7 @@ vax_operandname (mode)
 }
 
 static long
-vax_operandlength (modep)
-     unsigned char *modep;
+vax_operandlength (unsigned char *modep)
 {
 
   switch (vax_operandmode (modep))
@@ -209,8 +206,7 @@ vax_operandlength (modep)
 }
 
 static bfd_signed_vma
-vax_offset (modep)
-     unsigned char *modep;
+vax_offset (unsigned char *modep)
 {
   operandenum mode = vax_operandmode (modep);
 
@@ -231,10 +227,7 @@ vax_offset (modep)
 
 
 void
-vax_find_call (parent, p_lowpc, p_highpc)
-     Sym *parent;
-     bfd_vma p_lowpc;
-     bfd_vma p_highpc;
+vax_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 {
   unsigned char *instructp;
   long length;

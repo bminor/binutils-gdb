@@ -32,9 +32,9 @@ extern int *hist_sample;	/* Code histogram.  */
 extern double hist_scale;
 
 
-extern void hist_read_rec        PARAMS ((FILE *, const char *));
-extern void hist_write_hist      PARAMS ((FILE *, const char *));
-extern void hist_assign_samples  PARAMS ((void));
-extern void hist_print           PARAMS ((void));
+extern void hist_read_rec        (FILE *, const char *);
+extern void hist_write_hist      (FILE *, const char *);
+extern void hist_assign_samples  (void);
+extern void hist_print           (void);
 
 #endif /* hist_h */

@@ -1,5 +1,15 @@
 2004-05-26  Ben Elliston  <bje@au.ibm.com>
 
+	* alpha.c, basic_blocks.c, basic_blocks.h, bb_exit_func.c,
+	call_graph.c, call_graph.h, cg_arcs.c, cg_arcs.h, cg_dfn.c,
+	cg_dfn.h, cg_print.c, cg_print.h, corefile.c, corefile.h,
+	gmon_io.c, gmon_io.h, gprof.c, gprof.h, hertz.h, hist.c, hist.h,
+	i386.c, mips.c, search_list.c, search_list.h, source.c, source.h,
+	sparc.c, sym_ids.c, sym_ids.h, symtab.c, symtab.h, tahoe.c,
+	utils.c, utils.h, vax.c, gen-c-prog.awk: Convert K&R C to ANSI C.
+
+2004-05-26  Ben Elliston  <bje@au.ibm.com>
+
 	* corefile.c (core_init): Use a separate local variable,
 	core_sym_bytes, to make the units from bfd_get_symtab_upper_bound
 	more obvious.

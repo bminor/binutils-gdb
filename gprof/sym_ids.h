@@ -35,8 +35,8 @@ Table_Id;
 
 extern Sym_Table syms[NUM_TABLES];
 
-extern void sym_id_add PARAMS ((const char *, Table_Id));
-extern void sym_id_parse PARAMS ((void));
-extern bfd_boolean sym_id_arc_is_present PARAMS ((Sym_Table *, Sym *, Sym *));
+extern void sym_id_add (const char *, Table_Id);
+extern void sym_id_parse (void);
+extern bfd_boolean sym_id_arc_is_present (Sym_Table *, Sym *, Sym *);
 
 #endif /* sym_ids_h */

@@ -39,21 +39,20 @@ int offset_to_code;
 struct function_map *symbol_map;
 unsigned int symbol_map_count;
 
-static void read_function_mappings PARAMS ((const char *));
-static int core_sym_class PARAMS ((asymbol *));
+static void read_function_mappings (const char *);
+static int core_sym_class (asymbol *);
 static bfd_boolean get_src_info
-  PARAMS ((bfd_vma, const char **, const char **, int *));
+  (bfd_vma, const char **, const char **, int *);
 
-extern void i386_find_call  PARAMS ((Sym *, bfd_vma, bfd_vma));
-extern void alpha_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
-extern void vax_find_call   PARAMS ((Sym *, bfd_vma, bfd_vma));
-extern void tahoe_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
-extern void sparc_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
-extern void mips_find_call  PARAMS ((Sym *, bfd_vma, bfd_vma));
+extern void i386_find_call  (Sym *, bfd_vma, bfd_vma);
+extern void alpha_find_call (Sym *, bfd_vma, bfd_vma);
+extern void vax_find_call   (Sym *, bfd_vma, bfd_vma);
+extern void tahoe_find_call (Sym *, bfd_vma, bfd_vma);
+extern void sparc_find_call (Sym *, bfd_vma, bfd_vma);
+extern void mips_find_call  (Sym *, bfd_vma, bfd_vma);
 
 static void
-read_function_mappings (filename)
-     const char *filename;
+read_function_mappings (const char *filename)
 {
   FILE *file = fopen (filename, "r");
   char dummy[1024];
@@ -139,8 +138,7 @@ read_function_mappings (filename)
 
 
 void
-core_init (aout_name)
-     const char *aout_name;
+core_init (const char *aout_name)
 {
   int core_sym_bytes;
   core_bfd = bfd_openr (aout_name, 0);
@@ -216,8 +214,7 @@ core_init (aout_name)
 /* Read in the text space of an a.out file.  */
 
 void
-core_get_text_space (cbfd)
-     bfd *cbfd;
+core_get_text_space (bfd *cbfd)
 {
   core_text_space = (PTR) malloc ((unsigned int) core_text_sect->_raw_size);
 
@@ -242,10 +239,7 @@ core_get_text_space (cbfd)
 
 
 void
-find_call (parent, p_lowpc, p_highpc)
-     Sym *parent;
-     bfd_vma p_lowpc;
-     bfd_vma p_highpc;
+find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 {
   switch (bfd_get_arch (core_bfd))
     {
@@ -288,8 +282,7 @@ find_call (parent, p_lowpc, p_highpc)
 	't' -> symbol is a local (static) name.  */
 
 static int
-core_sym_class (sym)
-     asymbol *sym;
+core_sym_class (asymbol *sym)
 {
   symbol_info syminfo;
   const char *name;
@@ -372,11 +365,7 @@ core_sym_class (sym)
 /* Get whatever source info we can get regarding address ADDR.  */
 
 static bfd_boolean
-get_src_info (addr, filename, name, line_num)
-     bfd_vma addr;
-     const char **filename;
-     const char **name;
-     int *line_num;
+get_src_info (bfd_vma addr, const char **filename, const char **name, int *line_num)
 {
   const char *fname = 0, *func_name = 0;
   int l = 0;

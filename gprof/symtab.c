@@ -26,7 +26,7 @@
 #include "cg_arcs.h"
 #include "corefile.h"
 
-static int cmp_addr PARAMS ((const PTR, const PTR));
+static int cmp_addr (const PTR, const PTR);
 
 Sym_Table symtab;
 
@@ -34,8 +34,7 @@ Sym_Table symtab;
 /* Initialize a symbol (so it's empty).  */
 
 void
-sym_init (sym)
-     Sym *sym;
+sym_init (Sym *sym)
 {
   memset (sym, 0, sizeof (*sym));
 
@@ -59,9 +58,7 @@ sym_init (sym)
    the global symbol survives.  */
 
 static int
-cmp_addr (lp, rp)
-     const PTR lp;
-     const PTR rp;
+cmp_addr (const PTR lp, const PTR rp)
 {
   const Sym *left = (const Sym *) lp;
   const Sym *right = (const Sym *) rp;
@@ -79,8 +76,7 @@ cmp_addr (lp, rp)
 
 
 void
-symtab_finalize (tab)
-     Sym_Table *tab;
+symtab_finalize (Sym_Table *tab)
 {
   Sym *src, *dst;
   bfd_vma prev_addr;
@@ -177,9 +173,7 @@ symtab_finalize (tab)
 #ifdef DEBUG
 
 Sym *
-dbg_sym_lookup (sym_tab, address)
-     Sym_Table *sym_tab;
-     bfd_vma address;
+dbg_sym_lookup (Sym_Table *sym_tab, bfd_vma address)
 {
   long low, mid, high;
   Sym *sym;
@@ -218,9 +212,7 @@ dbg_sym_lookup (sym_tab, address)
 /* Look up an address in the symbol-table that is sorted by address.
    If address does not hit any symbol, 0 is returned.  */
 Sym *
-sym_lookup (sym_tab, address)
-     Sym_Table *sym_tab;
-     bfd_vma address;
+sym_lookup (Sym_Table *sym_tab, bfd_vma address)
 {
   long low, high;
   long mid = -1;

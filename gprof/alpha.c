@@ -78,7 +78,7 @@ alpha_Instruction;
 
 static Sym indirect_child;
 
-void alpha_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
+void alpha_find_call (Sym *, bfd_vma, bfd_vma);
 
 /*
  * On the Alpha we can only detect PC relative calls, which are
@@ -88,10 +88,7 @@ void alpha_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
  *  potentially call integer division routines, for example.)
  */
 void
-alpha_find_call (parent, p_lowpc, p_highpc)
-     Sym *parent;
-     bfd_vma p_lowpc;
-     bfd_vma p_highpc;
+alpha_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 {
   bfd_vma pc, dest_pc;
   unsigned int insn;

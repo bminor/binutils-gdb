@@ -25,9 +25,7 @@
 
 
 void
-search_list_append (list, paths)
-     Search_List *list;
-     const char *paths;
+search_list_append (Search_List *list, const char *paths)
 {
   Search_List_Elem *new_el;
   const char *beg, *colon;

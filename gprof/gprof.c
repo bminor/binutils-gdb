@@ -44,8 +44,8 @@
 #include "demangle.h"
 #include "getopt.h"
 
-static void usage PARAMS ((FILE *, int)) ATTRIBUTE_NORETURN;
-int main PARAMS ((int, char **));
+static void usage (FILE *, int) ATTRIBUTE_NORETURN;
+int main (int, char **);
 
 const char *whoami;
 const char *function_mapping_file;
@@ -156,9 +156,7 @@ static struct option long_options[] =
 
 
 static void
-usage (stream, status)
-     FILE *stream;
-     int status;
+usage (FILE *stream, int status)
 {
   fprintf (stream, _("\
 Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
@@ -182,9 +180,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char **sp, *str;
   Sym **cg = 0;
@@ -650,8 +646,7 @@ This program is free software.  This program has absolutely no warranty.\n"));
 }
 
 void
-done (status)
-     int status;
+done (int status)
 {
   exit (status);
 }

@@ -44,7 +44,7 @@ struct bb *__bb_head = (struct bb *) 0;
 
 
 void
-__bb_exit_func (void)
+__bb_exit_func ()
 {
   const int version = GMON_VERSION;
   struct gmon_hdr ghdr;

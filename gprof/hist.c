@@ -33,13 +33,13 @@
 
 #define UNITS_TO_CODE (offset_to_code / sizeof(UNIT))
 
-static void scale_and_align_entries PARAMS ((void));
-static void print_header PARAMS ((int));
-static void print_line PARAMS ((Sym *, double));
-static int cmp_time PARAMS ((const PTR, const PTR));
+static void scale_and_align_entries (void);
+static void print_header (int);
+static void print_line (Sym *, double);
+static int cmp_time (const PTR, const PTR);
 
 /* Declarations of automatically generated functions to output blurbs.  */
-extern void flat_blurb PARAMS ((FILE * fp));
+extern void flat_blurb (FILE * fp);
 
 bfd_vma s_lowpc;		/* Lowest address in .text.  */
 bfd_vma s_highpc = 0;		/* Highest address in .text.  */
@@ -80,9 +80,7 @@ SItab[] =
    is provided for formatting error messages only.  */
 
 void
-hist_read_rec (ifp, filename)
-     FILE * ifp;
-     const char *filename;
+hist_read_rec (FILE * ifp, const char *filename)
 {
   bfd_vma n_lowpc, n_highpc;
   int i, ncnt, profrate;
@@ -157,9 +155,7 @@ hist_read_rec (ifp, filename)
    of OFP and is provided for formatting error-messages only.  */
 
 void
-hist_write_hist (ofp, filename)
-     FILE * ofp;
-     const char *filename;
+hist_write_hist (FILE * ofp, const char *filename)
 {
   UNIT count;
   int i;
@@ -351,8 +347,7 @@ hist_assign_samples ()
 /* Print header for flag histogram profile.  */
 
 static void
-print_header (prefix)
-     int prefix;
+print_header (int prefix)
 {
   char unit[64];
 
@@ -391,9 +386,7 @@ print_header (prefix)
 
 
 static void
-print_line (sym, scale)
-     Sym *sym;
-     double scale;
+print_line (Sym *sym, double scale)
 {
   if (ignore_zeros && sym->ncalls == 0 && sym->hist.time == 0)
     return;
@@ -430,9 +423,7 @@ print_line (sym, scale)
    lexicographic order of the function names.  */
 
 static int
-cmp_time (lp, rp)
-     const PTR lp;
-     const PTR rp;
+cmp_time (const PTR lp, const PTR rp)
 {
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;

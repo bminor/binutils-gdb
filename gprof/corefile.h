@@ -39,9 +39,9 @@ extern int min_insn_size;	/* Size of smallest instruction, in bytes.  */
 extern int offset_to_code;	/* Offset (in bytes) of code from entry
 				   address of routine.  */
 
-extern void core_init                  PARAMS ((const char *));
-extern void core_get_text_space        PARAMS ((bfd *));
-extern void core_create_function_syms  PARAMS ((void));
-extern void core_create_line_syms      PARAMS ((void));
+extern void core_init                  (const char *);
+extern void core_get_text_space        (bfd *);
+extern void core_create_function_syms  (void);
+extern void core_create_line_syms      (void);
 
 #endif /* corefile_h */
