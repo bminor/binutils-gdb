@@ -17,6 +17,9 @@ Fri Feb 20 12:43:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(record_mach): New function.
 	(md_begin): Initialize `cur_mach'.
 	(assemble_*): Record current mach type.
+	(vu_count): New static local.
+	(assemble_vif): Temporary hack to properly align mpg/direct data.
+	(assemble_vu): Insert mpg every 256 insns.
 
 end-sanitize-sky
 Fri Feb 20 15:03:13 1998  Ian Lance Taylor  <ian@cygnus.com>

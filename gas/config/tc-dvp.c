@@ -129,6 +129,10 @@ static char *cur_varlen_insn;
 /* The length value specified in the insn, or -1 if '*'.  */
 static int cur_varlen_value;
 
+/* Count of vu insns seen since the last mpg.
+   Set to -1 to disable automatic mpg insertion.  */
+static int vu_count;
+
 /* Non-zero if packing vif instructions in dma tags.  */
 static int dma_pack_vif_p;
 
@@ -227,6 +231,9 @@ md_begin ()
   set_asm_state (ASM_INIT);
 
   dma_pack_vif_p = 0;
+
+  /* Disable automatic mpg insertion.  */
+  vu_count = -1;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -421,7 +428,29 @@ assemble_vif (str)
      early if -no-vif.  */
   if (output_vif)
     {
+      /* Record the mach before doing the alignment so that we properly
+	 disassemble any inserted vifnop's.  */
+
       record_mach (DVP_VIF);
+
+      if (opcode->flags & VIF_OPCODE_MPG)
+	{
+	  frag_align (3, 0, 0);
+	  record_alignment (now_seg, 3);
+	  /* FIXME: The data must be aligned on a 64 bit boundary.
+	     Not sure how to do this yet so punt by making the mpg insn
+	     8 bytes (vifnop,mpg).  */
+	  f = frag_more (4);
+	  memset (f, 0, 4);
+	}
+      else if (opcode->flags & VIF_OPCODE_DIRECT)
+	{
+	  frag_align (4, 0, 0);
+	  record_alignment (now_seg, 4);
+	  /* FIXME: revisit */
+	  f = frag_more (12);
+	  memset (f, 0, 12);
+	}
 
       /* Reminder: it is important to fetch enough space in one call to
 	 `frag_more'.  We use (f - frag_now->fr_literal) to compute where
@@ -488,7 +517,11 @@ assemble_vif (str)
 	  cur_varlen_insn = f;
 	  cur_varlen_value = data_len;
 	  if (opcode->flags & VIF_OPCODE_MPG)
-	    set_asm_state (ASM_MPG);
+	    {
+	      set_asm_state (ASM_MPG);
+	      /* Enable automatic mpg insertion every 256 insns.  */
+	      vu_count = 0;
+	    }
 	  else if (opcode->flags & VIF_OPCODE_DIRECT)
 	    set_asm_state (ASM_DIRECT);
 	  else if (opcode->flags & VIF_OPCODE_UNPACK)
@@ -552,6 +585,18 @@ assemble_vu (str)
   char *f;
   const dvp_opcode *opcode;
 
+  /* Handle automatic mpg insertion if enabled.  */
+  if (CUR_ASM_STATE == ASM_MPG
+      && vu_count == 256)
+    {
+      s_endmpg (1);
+      md_assemble ("mpg *,*");
+    }
+
+  /* Do an implicit alignment to a 8 byte boundary.  */
+  frag_align (3, 0, 0);
+  record_alignment (now_seg, 3);
+
   record_mach (DVP_VUUP);
 
   /* The lower instruction has the lower address.
@@ -592,6 +637,10 @@ assemble_vu (str)
       if (strcmp (opcode->mnemonic, "loi") == 0)
 	f[7] |= 0x80;
     }
+
+  /* Increment the vu insn counter.
+     If get reach 256 we need to insert an `mpg'.  */
+  ++vu_count;
 }
 
 static const dvp_opcode *
@@ -1010,7 +1059,7 @@ dvp_parse_done ()
 	 level.  */
   /* Check for missing .EndMpg, and supply one if necessary.  */
   if (CUR_ASM_STATE == ASM_MPG)
-    s_endmpg (0);
+    s_endmpg (1);
   else if (CUR_ASM_STATE == ASM_DIRECT)
     s_enddirect (0);
   else if (CUR_ASM_STATE == ASM_UNPACK)
@@ -1560,10 +1609,11 @@ cur_vif_insn_length ()
     byte_len = frag_more (0) - cur_varlen_insn - 4; /* -4 for mpg itself */
   else
     {
-      byte_len = (cur_varlen_frag->fr_fix + cur_varlen_frag->fr_offset -
-		  (cur_varlen_insn - cur_varlen_frag->fr_literal)) - 4;
+      byte_len = (cur_varlen_frag->fr_fix
+		  /*+ cur_varlen_frag->fr_offset + cur_varlen_frag->fr_var*/
+		  - (cur_varlen_insn - cur_varlen_frag->fr_literal)) - 4;
       for (f = cur_varlen_frag->fr_next; f != frag_now; f = f->fr_next)
-	byte_len += f->fr_fix + f->fr_offset;
+	byte_len += f->fr_fix /*+ f->fr_offset + f->fr_var*/;
       byte_len += frag_now_fix ();
     }
 
@@ -1583,8 +1633,8 @@ install_vif_length (buf, len)
   if ((cmd & 0x70) == 0x40)
     {
       /* mpg */
-      len /= 4;
-      /* ??? Worry about data /= 4 cuts off?  */
+      len /= 8;
+      /* ??? Worry about data /= 8 cuts off?  */
       if (len > 256)
 	as_bad ("`mpg' data length must be between 1 and 256");
       buf[2] = len == 256 ? 0 : len;
@@ -1896,9 +1946,12 @@ s_enddirect (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* INTERNAL_P is non-zero if invoked internally by this file rather than
+   by the user.  In this case we don't touch the input stream.  */
+
 static void
-s_endmpg (ignore)
-     int ignore;
+s_endmpg (internal_p)
+     int internal_p;
 {
   int byte_len;
 
@@ -1922,10 +1975,14 @@ s_endmpg (ignore)
   cur_varlen_insn = NULL;
   cur_varlen_value = 0;
 
+  /* Reset the vu insn counter.  */
+  vu_count = -1;
+
   /* Update $.MpgLoc.  */
   vif_set_mpgloc (vif_get_mpgloc () + byte_len);
 
-  demand_empty_rest_of_line ();
+  if (! internal_p)
+    demand_empty_rest_of_line ();
 }
 
 static void
