@@ -45,6 +45,11 @@ typedef struct ecoff_tdata
   /* The symbol table file position, set by ecoff_mkobject_hook.  */
   file_ptr sym_filepos;
 
+  /* The start and end of the text segment.  Only valid for an
+     existing file, not for one we are creating.  */
+  unsigned long text_start;
+  unsigned long text_end;
+
   /* The cached gp value.  This is used when relocating.  */
   bfd_vma gp;
 
@@ -353,6 +358,8 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
     {
       int i;
 
+      ecoff->text_start = internal_a->text_start;
+      ecoff->text_end = internal_a->text_start + internal_a->tsize;
       ecoff->gp = internal_a->gp_value;
       ecoff->gprmask = internal_a->gprmask;
       for (i = 0; i < 4; i++)
@@ -375,8 +382,8 @@ ecoff_set_arch_mach_hook (abfd, filehdr)
   switch (internal_f->f_magic)
     {
     case MIPS_MAGIC_1:
-    case MIPS_MAGIC_2:
-    case MIPS_MAGIC_3:
+    case MIPS_MAGIC_LITTLE:
+    case MIPS_MAGIC_BIG:
       arch = bfd_arch_mips;
       break;
 
@@ -558,9 +565,9 @@ ecoff_slurp_symbolic_info (abfd)
     {
       long cbline, issmax, issextmax;
 
-      cbline = (internal_symhdr->cbLine + 3) &~ 4;
-      issmax = (internal_symhdr->issMax + 3) &~ 4;
-      issextmax = (internal_symhdr->issExtMax + 3) &~ 4;
+      cbline = (internal_symhdr->cbLine + 3) &~ 3;
+      issmax = (internal_symhdr->issMax + 3) &~ 3;
+      issextmax = (internal_symhdr->issExtMax + 3) &~ 3;
       raw_size = (cbline * sizeof (unsigned char)
 		  + internal_symhdr->idnMax * sizeof (struct dnr_ext)
 		  + internal_symhdr->ipdMax * sizeof (struct pdr_ext)
@@ -2095,7 +2102,9 @@ ecoff_find_nearest_line (abfd,
 
   /* If we're not in the .text section, we don't have any line
      numbers.  */
-  if (strcmp (section->name, _TEXT) != 0)
+  if (strcmp (section->name, _TEXT) != 0
+      || offset < ecoff_data (abfd)->text_start
+      || offset >= ecoff_data (abfd)->text_end)
     return false;
 
   /* Make sure we have the FDR's.  */
@@ -2113,10 +2122,11 @@ ecoff_find_nearest_line (abfd,
   fdr_hold = (FDR *) NULL;
   for (fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
     {
+      if (fdr_ptr->cpd == 0)
+	continue;
       if (offset < fdr_ptr->adr)
 	break;
-      if (fdr_ptr->cpd > 0)
-	fdr_hold = fdr_ptr;
+      fdr_hold = fdr_ptr;
     }
   if (fdr_hold == (FDR *) NULL)
     return false;
@@ -2179,10 +2189,6 @@ ecoff_find_nearest_line (abfd,
 	break;
       offset -= count * 4;
     }
-
-  /* If offset is too large, this line is not interesting.  */
-  if (offset > 100)
-    return false;
 
   /* If fdr_ptr->rss is -1, then this file does not have full symbols,
      at least according to gdb/mipsread.c.  */
@@ -3328,7 +3334,10 @@ ecoff_write_object_contents (abfd)
 
   /* Set up the file header.  */
 
-  internal_f.f_magic = MIPS_MAGIC_2;
+  if (abfd->xvec->header_byteorder_big_p != false)
+    internal_f.f_magic = MIPS_MAGIC_BIG;
+  else
+    internal_f.f_magic = MIPS_MAGIC_LITTLE;
 
   /*
     We will NOT put a fucking timestamp in the header here. Every time you
@@ -3659,7 +3668,7 @@ ecoff_slurp_armap (abfd)
   /* Make sure we have the right byte ordering.  */
   if (((nextname[ARMAP_HEADER_ENDIAN_INDEX] == ARMAP_BIG_ENDIAN)
        ^ (abfd->xvec->header_byteorder_big_p != false))
-      || ((nextname[ARMAP_OBJECT_MARKER_INDEX] == ARMAP_BIG_ENDIAN)
+      || ((nextname[ARMAP_OBJECT_ENDIAN_INDEX] == ARMAP_BIG_ENDIAN)
 	  ^ (abfd->xvec->byteorder_big_p != false)))
     {
       bfd_error = wrong_format;
