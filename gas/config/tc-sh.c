@@ -900,6 +900,15 @@ md_assemble (str)
       return;
     }
 
+  if (sh_relax
+      && ! seg_info (now_seg)->tc_segment_info_data.in_code)
+    {
+      /* Output a CODE reloc to tell the linker that the following
+         bytes are instructions, not data.  */
+      fix_new (frag_now, frag_now_fix (), 2, &abs_symbol, 0, 0, R_SH_CODE);
+      seg_info (now_seg)->tc_segment_info_data.in_code = 1;
+    }
+
   if (opcode->arg[0] == A_BDISP12
       || opcode->arg[0] == A_BDISP8)
     {
@@ -928,6 +937,31 @@ md_assemble (str)
       build_Mytes (opcode, operand);
     }
 
+}
+
+/* This routine is called each time a label definition is seen.  It
+   emits a R_SH_LABEL reloc if necessary.  */
+
+void
+sh_frob_label ()
+{
+  if (sh_relax
+      && seg_info (now_seg)->tc_segment_info_data.in_code)
+    fix_new (frag_now, frag_now_fix (), 2, &abs_symbol, 0, 0, R_SH_LABEL);
+}
+
+/* This routine is called when the assembler is about to output some
+   data.  It emits a R_SH_DATA reloc if necessary.  */
+
+void
+sh_flush_pending_output ()
+{
+  if (sh_relax
+      && seg_info (now_seg)->tc_segment_info_data.in_code)
+    {
+      fix_new (frag_now, frag_now_fix (), 2, &abs_symbol, 0, 0, R_SH_DATA);
+      seg_info (now_seg)->tc_segment_info_data.in_code = 0;
+    }
 }
 
 void
@@ -1166,7 +1200,11 @@ sh_coff_frob_file ()
 	  for (fscan = segment_info[iseg].fix_root;
 	       fscan != NULL;
 	       fscan = fscan->fx_next)
-	    if (val == fscan->fx_frag->fr_address + fscan->fx_where)
+	    if (val == fscan->fx_frag->fr_address + fscan->fx_where
+		&& fscan->fx_r_type != R_SH_ALIGN
+		&& fscan->fx_r_type != R_SH_CODE
+		&& fscan->fx_r_type != R_SH_DATA
+		&& fscan->fx_r_type != R_SH_LABEL)
 	      break;
 	  if (fscan == NULL)
 	    {
@@ -1344,7 +1382,7 @@ md_convert_frag (headers, seg, fragP)
     case C (COND_JUMP, COND32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad ("at %0xlx, displacement overflows 8-bit field", 
+	as_bad ("at 0x%lx, displacement overflows 8-bit field", 
 		(unsigned long) fragP->fr_address);
       else  
 	as_bad ("at 0x%lx, displacement to %sdefined symbol %s overflows 8-bit field ",
@@ -1462,7 +1500,10 @@ sh_force_relocation (fix)
   return (fix->fx_pcrel
 	  || SWITCH_TABLE (fix)
 	  || fix->fx_r_type == R_SH_COUNT
-	  || fix->fx_r_type == R_SH_ALIGN);
+	  || fix->fx_r_type == R_SH_ALIGN
+	  || fix->fx_r_type == R_SH_CODE
+	  || fix->fx_r_type == R_SH_DATA
+	  || fix->fx_r_type == R_SH_LABEL);
 }
 
 /* Apply a fixup to the object file.  */
@@ -1593,6 +1634,9 @@ md_apply_fix (fixP, val)
 
     case R_SH_COUNT:
     case R_SH_ALIGN:
+    case R_SH_CODE:
+    case R_SH_DATA:
+    case R_SH_LABEL:
       /* Nothing to do here.  */
       break;
 
@@ -1705,7 +1749,8 @@ sh_do_align (n, fill, len)
 #ifdef BFD_ASSEMBLER
 	  || (now_seg->flags & SEC_CODE) != 0
 #endif
-	  || strcmp (obj_segment_name (now_seg), ".init") == 0))
+	  || strcmp (obj_segment_name (now_seg), ".init") == 0)
+      && n > 1)
     {
       static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
       static const unsigned char little_nop_pattern[] = { 0x09, 0x00 };
@@ -1802,6 +1847,13 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
       /* Store the alignment in the r_offset field.  */
       intr->r_offset = fix->fx_offset;
       /* This reloc is always absolute.  */
+      symbol_ptr = NULL;
+    }
+  else if (fix->fx_r_type == R_SH_CODE
+	   || fix->fx_r_type == R_SH_DATA
+	   || fix->fx_r_type == R_SH_LABEL)
+    {
+      /* These relocs are always absolute.  */
       symbol_ptr = NULL;
     }
 
