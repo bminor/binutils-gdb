@@ -3375,13 +3375,9 @@ som_slurp_symbol_table (abfd)
   if (obj_som_symtab (abfd) != NULL)
     return true;
 
-  /* Sanity checking.  Make sure there are some symbols and that 
-     we can read the string table too.  */
+  /* Special case.  This is *not* an error.  */
   if (symbol_count == 0)
-    {
-      bfd_error = no_symbols;
-      return false;
-    }
+    return true;
 
   if (!som_slurp_string_table (abfd))
     return false;

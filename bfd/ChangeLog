@@ -1,5 +1,8 @@
 Mon Feb 14 22:55:20 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_slurp_symbol_table): Do not die if a BFD doesn't
+	have any symbols.
+
 	* Finish basic read-write support for SOM archive libraries.  Bugs
 	surely remain as this hasn't been tested all that much.
 	* som.c (SOM_LST_HASH_SIZE, SOM_LST_MODULE_LIMIT): Define.
