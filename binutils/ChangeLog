@@ -1,3 +1,16 @@
+1999-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (enum print_mode): New type.
+	(print_vma): New function.
+	(dump_relocations): Use print_vma to display bfd_vma values.
+	(process_file_header): Use print_vma to display bfd_vma values.
+	(process_program_headers): Use print_vma to display bfd_vma values.
+	(process_section_headers): Use print_vma to display bfd_vma values.
+	(dynamic_segment_parisc_val): Use print_vma to display bfd_vma values.
+	(process_dynamic_segment): Use print_vma to display bfd_vma values.
+	(process_symbol_table): Use print_vma to display bfd_vma values.
+	(process_mips_specific): Use print_vma to display bfd_vma values.
+
 1999-11-25  Fred Fish  <fnf@cygnus.com>
 
 	* readelf.c (process_note): Change arg from Elf_External_Note

@@ -201,7 +201,7 @@ static const char *       get_osabi_name              PARAMS ((unsigned char));
 static int		  guess_is_rela               PARAMS ((unsigned long));
 static char * 		  get_note_type		         PARAMS ((unsigned int));
 static int		  process_note		         PARAMS ((Elf32_Internal_Note *));
-static int		  process_corefile_note_segment  PARAMS ((FILE *, unsigned long, unsigned long));
+static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma));
 static int		  process_corefile_note_segments PARAMS ((FILE *));
 static int 		  process_corefile_contents	 PARAMS ((FILE *));
 
@@ -376,6 +376,97 @@ byte_get_little_endian (field, size)
       error (_("Unhandled data length: %d\n"), size);
       abort ();
     }
+}
+
+/* Print a VMA value.  */
+typedef enum print_mode
+{
+  HEX,
+  DEC,
+  DEC_5,
+  UNSIGNED,
+  PREFIX_HEX,
+  FULL_HEX,
+  LONG_HEX
+}
+print_mode;
+
+static void print_vma PARAMS ((bfd_vma, print_mode));
+
+static void
+print_vma (vma, mode)
+     bfd_vma vma;
+     print_mode mode;
+{
+#ifdef BFD64
+  if (is_32bit_elf)
+#endif
+    {
+      switch (mode)
+	{
+	case FULL_HEX: printf ("0x"); /* drop through */
+	case LONG_HEX: printf ("%08.8lx", vma); break;
+	case PREFIX_HEX: printf ("0x"); /* drop through */
+	case HEX: printf ("%lx", vma); break;
+	case DEC: printf ("%ld", vma); break;
+	case DEC_5: printf ("%5ld", vma); break;
+	case UNSIGNED: printf ("%lu", vma); break;
+	}
+    }
+#ifdef BFD64
+  else
+    {
+      switch (mode)
+	{
+	case FULL_HEX:
+	  printf ("0x");
+	  /* drop through */
+	  
+	case LONG_HEX:
+	  printf_vma (vma);
+	  break;
+	  
+	case PREFIX_HEX:
+	  printf ("0x");
+	  /* drop through */
+	  
+	case HEX:
+#if BFD_HOST_64BIT_LONG
+	  printf ("%lx", vma);
+#else
+	  if (_bfd_int64_high (vma))
+	    printf ("%lx%lx", _bfd_int64_high (vma), _bfd_int64_low (vma));
+	  else
+	    printf ("%lx", _bfd_int64_low (vma));
+#endif
+	  break;
+
+	case DEC:
+	  if (_bfd_int64_high (vma))
+	    /* ugg */
+	    printf ("++%ld", _bfd_int64_low (vma));
+	  else
+	    printf ("%ld", _bfd_int64_low (vma));
+	  break;
+
+	case DEC_5:
+	  if (_bfd_int64_high (vma))
+	    /* ugg */
+	    printf ("++%ld", _bfd_int64_low (vma));
+	  else
+	    printf ("%5ld", _bfd_int64_low (vma));
+	  break;
+	  
+	case UNSIGNED:
+	  if (_bfd_int64_high (vma))
+	    /* ugg */
+	    printf ("++%lu", _bfd_int64_low (vma));
+	  else
+	    printf ("%lu", _bfd_int64_low (vma));
+	  break;
+	}
+    }
+#endif
 }
 
 static bfd_vma
@@ -772,7 +863,9 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 		  psym = symtab + symtab_index;
 
-		  printf (" %08lx  ", (unsigned long) psym->st_value);
+		  printf (" ");
+		  print_vma (psym->st_value, LONG_HEX);
+		  printf ("  ");
 
 		  if (psym->st_name == 0)
 		    printf ("%-25.25s",
@@ -788,7 +881,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	    }
 	}
       else if (is_rela)
-	printf ("%34c%lx", ' ', (unsigned long) relas[i].r_addend);
+	{
+	  printf ("%*c", is_32bit_elf ? 34 : 26, ' ');
+	  print_vma (relas[i].r_addend, LONG_HEX);
+	}
 
       if (elf_header.e_machine == EM_SPARCV9
 	  && !strcmp (rtype, "R_SPARC_OLO10"))
@@ -1828,12 +1924,15 @@ process_file_header ()
 	      get_machine_name (elf_header.e_machine));
       printf (_("  Version:                           0x%lx\n"),
 	      (unsigned long) elf_header.e_version);
-      printf (_("  Entry point address:               0x%lx\n"),
-	      (unsigned long) elf_header.e_entry);
-      printf (_("  Start of program headers:          %ld (bytes into file)\n"),
-	      (long) elf_header.e_phoff);
-      printf (_("  Start of section headers:          %ld (bytes into file)\n"),
-	      (long) elf_header.e_shoff);
+      
+      printf (_("  Entry point address:               "));
+      print_vma ((bfd_vma) elf_header.e_entry, PREFIX_HEX);
+      printf (_("\n  Start of program headers:          "));
+      print_vma ((bfd_vma) elf_header.e_phoff, DEC);
+      printf (_(" (bytes into file)\n  Start of section headers:          "));
+      print_vma ((bfd_vma) elf_header.e_shoff, DEC);
+      printf (_(" (bytes into file)\n"));
+	
       printf (_("  Flags:                             0x%lx%s\n"),
 	      (unsigned long) elf_header.e_flags,
 	      get_machine_flags (elf_header.e_flags, elf_header.e_machine));
@@ -1938,10 +2037,13 @@ process_program_headers (file)
 
   if (do_segments && !do_header)
     {
-      printf (_("\nElf file is %s\n"), get_file_type (elf_header.e_type));
-      printf (_("Entry point 0x%lx\n"), (unsigned long) elf_header.e_entry);
-      printf (_("There are %d program headers, starting at offset %lx:\n"),
-	      elf_header.e_phnum, (unsigned long) elf_header.e_phoff);
+      printf (_("\nElf file type is %s\n"), get_file_type (elf_header.e_type));
+      printf (_("Entry point "));
+      print_vma ((bfd_vma) elf_header.e_entry, PREFIX_HEX);
+      printf (_("\nThere are %d program headers, starting at offset "),
+	      elf_header.e_phnum);
+      print_vma ((bfd_vma) elf_header.e_phoff, DEC);
+      printf ("\n");
     }
 
   program_headers = (Elf_Internal_Phdr *) malloc
@@ -1968,8 +2070,17 @@ process_program_headers (file)
     {
       printf
 	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
-      printf
-	(_("  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+      
+      if (is_32bit_elf)
+	printf
+	  (_("  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+      else
+	{
+	  printf
+	    (_("  Type           Offset             VirtAddr           PhysAddr\n"));
+	  printf
+	    (_("                 FileSiz            MemSiz              Flags  Align\n"));
+	}
     }
 
   loadaddr = -1;
@@ -1983,16 +2094,37 @@ process_program_headers (file)
       if (do_segments)
 	{
 	  printf ("  %-14.14s ", get_segment_type (segment->p_type));
-	  printf ("0x%6.6lx ", (unsigned long) segment->p_offset);
-	  printf ("0x%8.8lx ", (unsigned long) segment->p_vaddr);
-	  printf ("0x%8.8lx ", (unsigned long) segment->p_paddr);
-	  printf ("0x%5.5lx ", (unsigned long) segment->p_filesz);
-	  printf ("0x%5.5lx ", (unsigned long) segment->p_memsz);
-	  printf ("%c%c%c ",
-		  (segment->p_flags & PF_R ? 'R' : ' '),
-		  (segment->p_flags & PF_W ? 'W' : ' '),
-		  (segment->p_flags & PF_X ? 'E' : ' '));
-	  printf ("%#lx", (unsigned long) segment->p_align);
+
+	  if (is_32bit_elf)
+	    {
+	      printf ("0x%6.6lx ", (unsigned long) segment->p_offset);
+	      printf ("0x%8.8lx ", (unsigned long) segment->p_vaddr);
+	      printf ("0x%8.8lx ", (unsigned long) segment->p_paddr);
+	      printf ("0x%5.5lx ", (unsigned long) segment->p_filesz);
+	      printf ("0x%5.5lx ", (unsigned long) segment->p_memsz);
+	      printf ("%c%c%c ",
+		      (segment->p_flags & PF_R ? 'R' : ' '),
+		      (segment->p_flags & PF_W ? 'W' : ' '),
+		      (segment->p_flags & PF_X ? 'E' : ' '));
+	      printf ("%#lx", (unsigned long) segment->p_align);
+	    }
+	  else
+	    {
+	      print_vma (segment->p_offset, FULL_HEX);
+	      putchar (' ');
+	      print_vma (segment->p_vaddr, FULL_HEX);
+	      putchar (' ');
+	      print_vma (segment->p_paddr, FULL_HEX);
+	      printf ("\n                 ");
+	      print_vma (segment->p_filesz, FULL_HEX);
+	      putchar (' ');
+	      print_vma (segment->p_memsz, FULL_HEX);
+	      printf ("  %c%c%c    ",
+		      (segment->p_flags & PF_R ? 'R' : ' '),
+		      (segment->p_flags & PF_W ? 'W' : ' '),
+		      (segment->p_flags & PF_X ? 'E' : ' '));
+	      print_vma (segment->p_align, HEX);
+	    }
 	}
 
       switch (segment->p_type)
@@ -2012,7 +2144,7 @@ process_program_headers (file)
 	  break;
 
 	case PT_INTERP:
-	  if (fseek (file, segment->p_offset, SEEK_SET))
+	  if (fseek (file, (long) segment->p_offset, SEEK_SET))
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
@@ -2343,8 +2475,14 @@ process_section_headers (file)
     return 1;
 
   printf (_("\nSection Header%s:\n"), elf_header.e_shnum > 1 ? "s" : "");
-  printf
-    (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+  if (is_32bit_elf)
+    printf
+      (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+  else
+    {
+      printf (_("  [Nr] Name              Type             Address           Offset\n"));
+      printf (_("       Size              EntSize          Flags  Link  Info  Align\n"));
+    }
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
@@ -2355,19 +2493,43 @@ process_section_headers (file)
 	      SECTION_NAME (section),
 	      get_section_type_name (section->sh_type));
 
-      printf ( "%8.8lx %6.6lx %6.6lx %2.2lx",
-	       (unsigned long) section->sh_addr,
-	       (unsigned long) section->sh_offset,
-	       (unsigned long) section->sh_size,
-	       (unsigned long) section->sh_entsize);
-
-      printf (" %c%c%c %2ld %3lx %ld\n",
-	      (section->sh_flags & SHF_WRITE ? 'W' : ' '),
-	      (section->sh_flags & SHF_ALLOC ? 'A' : ' '),
-	      (section->sh_flags & SHF_EXECINSTR ? 'X' : ' '),
-	      (unsigned long) section->sh_link,
-	      (unsigned long) section->sh_info,
-	      (unsigned long) section->sh_addralign);
+      if (is_32bit_elf)
+	{
+	  print_vma (section->sh_addr, LONG_HEX);
+      
+	  printf ( " %6.6lx %6.6lx %2.2lx",
+		   (unsigned long) section->sh_offset,
+		   (unsigned long) section->sh_size,
+		   (unsigned long) section->sh_entsize);
+	  
+	  printf (" %c%c%c %2ld %3lx %ld\n",
+		  (section->sh_flags & SHF_WRITE ? 'W' : ' '),
+		  (section->sh_flags & SHF_ALLOC ? 'A' : ' '),
+		  (section->sh_flags & SHF_EXECINSTR ? 'X' : ' '),
+		  (unsigned long) section->sh_link,
+		  (unsigned long) section->sh_info,
+		  (unsigned long) section->sh_addralign);
+	}
+      else
+	{
+	  putchar (' ');
+	  print_vma (section->sh_addr, LONG_HEX);
+	  printf ("  %08.8lx", section->sh_offset);
+	  printf ("\n       ");
+	  print_vma (section->sh_size, LONG_HEX);
+	  printf ("  ");
+	  print_vma (section->sh_entsize, LONG_HEX);
+	  
+	  printf (" %c%c%c",
+		  (section->sh_flags & SHF_WRITE ? 'W' : ' '),
+		  (section->sh_flags & SHF_ALLOC ? 'A' : ' '),
+		  (section->sh_flags & SHF_EXECINSTR ? 'X' : ' '));
+	  
+	  printf ("     %2ld   %3lx     %ld\n",
+		  (unsigned long) section->sh_link,
+		  (unsigned long) section->sh_info,
+		  (unsigned long) section->sh_addralign);
+	}
     }
 
   return 1;
@@ -2601,7 +2763,7 @@ dynamic_segment_parisc_val (entry)
 	  };
 	int first = 1;
 	int cnt;
-	long int val = entry->d_un.d_val;
+	bfd_vma val = entry->d_un.d_val;
 
 	for (cnt = 0; cnt < sizeof (flags) / sizeof (flags[0]); ++cnt)
 	  if (val & flags[cnt].bit)
@@ -2613,13 +2775,17 @@ dynamic_segment_parisc_val (entry)
              val ^= flags[cnt].bit;
            }
 	if (val != 0 || first)
-	  printf ("%s%#lx", first ? "" : " ", val);
-	puts ("");
+	  {
+	    if (! first)
+	      putchar (' ');
+	    print_vma (val, HEX);
+	  }
       }
       break;
 
     default:
-      printf ("%#lx\n", (long) entry->d_un.d_ptr);
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      break;
     }
 }
 
@@ -2866,11 +3032,14 @@ process_dynamic_segment (file)
        i++, entry ++)
     {
       if (do_dynamic)
-	printf (_("  0x%-8.8lx (%s)%*s"),
-		(unsigned long) entry->d_tag,
-		get_dynamic_type (entry->d_tag),
-		27 - strlen (get_dynamic_type (entry->d_tag)),
-		" ");
+	{
+	  putchar (' ');
+	  print_vma (entry->d_tag, FULL_HEX);
+	  printf (" (%s)%*s",
+		  get_dynamic_type (entry->d_tag),
+		  (is_32bit_elf ? 27 : 19) - strlen (get_dynamic_type (entry->d_tag)),
+		  " ");
+	}
 
       switch (entry->d_tag)
 	{
@@ -2886,7 +3055,11 @@ process_dynamic_segment (file)
 	      if (dynamic_strings)
 		printf (": [%s]\n", dynamic_strings + entry->d_un.d_val);
 	      else
-		printf (": %#lx\n", (long) entry->d_un.d_val);
+		{
+		  printf (": ");
+		  print_vma (entry->d_un.d_val, PREFIX_HEX);
+		  putchar ('\n');
+		}
 	    }
 	  break;
 
@@ -3047,26 +3220,27 @@ process_dynamic_segment (file)
 		    case DT_NEEDED:
 		      printf (_("Shared library: [%s]"), name);
 
-		      if (strcmp (name, program_interpreter))
-			printf ("\n");
-		      else
-			printf (_(" program interpreter\n"));
+		      if (strcmp (name, program_interpreter) == 0)
+			printf (_(" program interpreter"));
 		      break;
 
 		    case DT_SONAME:
-		      printf (_("Library soname: [%s]\n"), name);
+		      printf (_("Library soname: [%s]"), name);
 		      break;
 
 		    case DT_RPATH:
-		      printf (_("Library rpath: [%s]\n"), name);
+		      printf (_("Library rpath: [%s]"), name);
 		      break;
 
 		    default:
-		      printf ("%#lx\n", (long) entry->d_un.d_val);
+		      print_vma (entry->d_un.d_val, PREFIX_HEX);
+		      break;
 		    }
 		}
 	      else
-		printf ("%#lx\n", (long) entry->d_un.d_val);
+		print_vma (entry->d_un.d_val, PREFIX_HEX);
+
+	      putchar ('\n');
 	    }
 	  break;
 
@@ -3083,7 +3257,10 @@ process_dynamic_segment (file)
 	case DT_INIT_ARRAYSZ:
 	case DT_FINI_ARRAYSZ:
 	  if (do_dynamic)
-	    printf ("%lu (bytes)\n", (unsigned long) entry->d_un.d_val);
+	    {
+	      print_vma (entry->d_un.d_val, UNSIGNED);
+	      printf (" (bytes)\n");
+	    }
 	  break;
 
 	case DT_VERDEFNUM:
@@ -3091,7 +3268,10 @@ process_dynamic_segment (file)
 	case DT_RELACOUNT:
 	case DT_RELCOUNT:
 	  if (do_dynamic)
-	    printf ("%lu\n", (unsigned long) entry->d_un.d_val);
+	    {
+	      print_vma (entry->d_un.d_val, UNSIGNED);
+	      putchar ('\n');
+	    }
 	  break;
 
 	case DT_SYMINSZ:
@@ -3115,7 +3295,8 @@ process_dynamic_segment (file)
 		    }
 		}
 
-	      printf ("%#lx\n", (long) entry->d_un.d_val);
+	      print_vma (entry->d_un.d_val, PREFIX_HEX);
+	      putchar ('\n');
 	    }
 	  break;
 
@@ -3140,7 +3321,8 @@ process_dynamic_segment (file)
 		  dynamic_segment_parisc_val (entry);
 		  break;
 		default:
-		  printf ("%#lx\n", (long) entry->d_un.d_ptr);
+		  print_vma (entry->d_un.d_val, PREFIX_HEX);
+		  putchar ('\n');
 		}
 	    }
 	  break;
@@ -3844,23 +4026,28 @@ process_symbol_table (file)
       int    si;
 
       printf (_("\nSymbol table for image:\n"));
-      printf (_("  Num Buc:    Value  Size   Type   Bind Ot Ndx Name\n"));
+      if (is_32bit_elf)
+	printf (_("  Num Buc:    Value  Size   Type   Bind Ot Ndx Name\n"));
+      else
+	printf (_("  Num Buc:    Value          Size   Type   Bind Ot Ndx Name\n"));
 
       for (hn = 0; hn < nbuckets; hn++)
 	{
 	  if (! buckets [hn])
 	    continue;
 
-	  for (si = buckets [hn]; si; si = chains [si])
+	  for (si = buckets [hn]; si < nchains && si > 0; si = chains [si])
 	    {
 	      Elf_Internal_Sym * psym;
 
 	      psym = dynamic_symbols + si;
 
-	      printf ("  %3d %3d: %8lx %5ld %6s %6s %2d ",
-		      si, hn,
-		      (unsigned long) psym->st_value,
-		      (unsigned long) psym->st_size,
+	      printf ("  %3d %3d: ", si, hn);
+	      print_vma (psym->st_value, LONG_HEX);
+	      putchar (' ' );
+	      print_vma (psym->st_size,  DEC_5);
+		      
+	      printf ("  %6s %6s %2d ",
 		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
 		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
 		      psym->st_other);
@@ -3892,8 +4079,10 @@ process_symbol_table (file)
 	  printf (_("\nSymbol table '%s' contains %lu entries:\n"),
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
-	  fputs (_("  Num:    Value  Size Type    Bind   Ot  Ndx Name\n"),
-		 stdout);
+	  if (is_32bit_elf)
+	    printf (_("  Num:    Value  Size Type    Bind   Ot  Ndx Name\n"));
+	  else
+	    printf (_("  Num:    Value          Size Type    Bind   Ot  Ndx Name\n"));
 
 	  symtab = GET_ELF_SYMBOLS (file, section->sh_offset,
 				    section->sh_size / section->sh_entsize);
@@ -3916,10 +4105,11 @@ process_symbol_table (file)
 	       si < section->sh_size / section->sh_entsize;
 	       si ++, psym ++)
 	    {
-	      printf ("  %3d: %8lx %5ld %-7s %-6s %2d ",
-		      si,
-		      (unsigned long) psym->st_value,
-		      (unsigned long) psym->st_size,
+	      printf ("  %3d: ", si);
+	      print_vma (psym->st_value, LONG_HEX);
+	      putchar (' ');
+	      print_vma (psym->st_size, DEC_5);
+	      printf (" %-7s %-6s %2d ",
 		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
 		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
 		      psym->st_other);
@@ -4090,11 +4280,11 @@ process_symbol_table (file)
 	  if (! buckets [hn])
 	    continue;
 
-	  for (si = buckets[hn]; si; si = chains[si])
+	  for (si = buckets[hn]; si > 0 && si < nchains; si = chains[si])
 	    {
-	      ++nsyms;
+	      ++ nsyms;
 	      if (maxlength < ++lengths[hn])
-		++maxlength;
+		++ maxlength;
 	    }
 	}
 
@@ -6570,11 +6760,10 @@ process_mips_specific (file)
 	{
 	  Elf_Internal_Sym * psym = &dynamic_symbols[iconf[cnt]];
 
-	  printf ("%5u: %8lu  %#10lx  %s\n",
-		  cnt, iconf[cnt], (unsigned long) psym->st_value,
-		  dynamic_strings + psym->st_name);
+	  printf ("%5u: %8lu  ", cnt, iconf[cnt]);
+	  print_vma (psym->st_value, FULL_HEX);
+	  printf ("  %s\n", dynamic_strings + psym->st_name);
 	}
-
 
       free (iconf);
     }
@@ -6624,8 +6813,8 @@ process_note (pnote)
 static int
 process_corefile_note_segment (file, offset, length)
      FILE * file;
-     unsigned long offset;
-     unsigned long length;
+     bfd_vma offset;
+     bfd_vma length;
 {
   Elf_External_Note *  pnotes;
   Elf_External_Note *  external;
@@ -6726,8 +6915,8 @@ process_corefile_note_segments (file)
     {
       if (segment->p_type == PT_NOTE)
 	res &= process_corefile_note_segment (file,
-					      (unsigned long)segment->p_offset,
-					      (unsigned long)segment->p_filesz);
+					      (bfd_vma)segment->p_offset,
+					      (bfd_vma)segment->p_filesz);
     }
 
   free (program_headers);
