@@ -1095,24 +1095,25 @@ srec_write_symbols (abfd)
 	      && (s->flags & BSF_DEBUGGING) == 0)
 	    {
 	      /* Just dump out non debug symbols.  */
-	      char buf[42], *p;
+	      char buf[43], *p;
 
 	      len = strlen (s->name);
 	      if (bfd_bwrite ("  ", (bfd_size_type) 2, abfd) != 2
 		  || bfd_bwrite (s->name, len, abfd) != len)
 		return FALSE;
 
-	      sprintf_vma (buf + 1, (s->value
+	      sprintf_vma (buf + 2, (s->value
 				     + s->section->output_section->lma
 				     + s->section->output_offset));
-	      p = buf + 1;
+	      p = buf + 2;
 	      while (p[0] == '0' && p[1] != 0)
 		p++;
 	      len = strlen (p);
 	      p[len] = '\r';
 	      p[len + 1] = '\n';
+	      *--p = '$';
 	      *--p = ' ';
-	      len += 3;
+	      len += 4;
 	      if (bfd_bwrite (p, len, abfd) != len)
 		return FALSE;
 	    }
@@ -1203,7 +1204,7 @@ srec_get_symtab (abfd, alocation)
 
       csymbols = (asymbol *) bfd_alloc (abfd, symcount * sizeof (asymbol));
       if (csymbols == NULL && symcount != 0)
-	return (long) FALSE;
+	return 0;
       abfd->tdata.srec_data->csymbols = csymbols;
 
       for (s = abfd->tdata.srec_data->symbols, c = csymbols;
