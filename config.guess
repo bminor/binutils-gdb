@@ -124,7 +124,13 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo i386-ibm-aix
 	exit 0 ;;
     *:AIX:2:3)
-	echo rs6000-ibm-aix3.2
+	if grep bos325 /usr/include/stdio.h >/dev/null 2>&1; then
+		echo rs6000-ibm-aix3.2.5
+	elif grep bos324 /usr/include/stdio.h >/dev/null 2>&1; then
+		echo rs6000-ibm-aix3.2.4
+	else
+		echo rs6000-ibm-aix3.2
+	fi
 	exit 0 ;;
     *:AIX:*:*)
 	echo rs6000-ibm-aix
@@ -135,23 +141,25 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     DPX/2?00:B.O.S.:*:*)
 	echo m68k-bull-sysv3
 	exit 0 ;;
-    9000/31?:HP-UX:*:*)
-	echo m68000-hp-hpux
-	exit 0 ;;
-    9000/[34]??:HP-UX:*:*)
-	echo m68k-hp-hpux
-	exit 0 ;;
     9000/[34]??:4.3bsd:1.*:*)
 	echo m68k-hp-bsd
 	exit 0 ;;
     hp300:4.4BSD:*:* | 9000/[34]??:4.3bsd:2.*:*)
 	echo m68k-hp-bsd4.4
 	exit 0 ;;
-    9000/7??:HP-UX:*:* | 9000/8?7:HP-UX:*:* )
-	echo hppa1.1-hp-hpux
-	exit 0 ;;
-    9000/8??:HP-UX:*:*)
-	echo hppa1.0-hp-hpux
+    9000/[3478]??:HP-UX:*:*)
+	case "${UNAME_MACHINE}" in
+	    9000/31? )            HP_ARCH=m68000 ;;
+	    9000/[34]?? )         HP_ARCH=m68k ;;
+	    9000/7?? | 9000/8?7 ) HP_ARCH=hppa1.1 ;;
+	    9000/8?? )            HP_ARCH=hppa1.0 ;;
+	esac
+	case ${UNAME_RELEASE} in
+	    *.B7.* )          HPUX_REV=7 ;;
+	    *.[B0]8.* )       HPUX_REV=8 ;;
+	    *.09.* )          HPUX_REV=9 ;;
+	esac
+	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
 	exit 0 ;;
     3050*:HI-UX:*:*)
 	sed 's/^	//' << EOF >dummy.c

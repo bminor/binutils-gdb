@@ -26,6 +26,14 @@ Fri Aug 26 13:05:27 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
         * config.guess: Recognize i860-stardent-sysv and i860-unknown-sysv.
 
+	Sun May  1 10:23:10 1994  Richard Stallman  (rms@mole.gnu.ai.mit.edu)
+
+	* config.guess: Guess the OS version for HPUX.
+
+	Tue Mar  1 21:53:03 1994  Karl Heuer  (kwzh@hal.gnu.ai.mit.edu)
+
+	* config.guess (UNAME_VERSION): Recognize aix3.2.4 and aix3.2.5.
+
 Fri Aug 26 11:19:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in: Recognize --with-headers, --with-libs, and
