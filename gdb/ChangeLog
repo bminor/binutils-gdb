@@ -1,3 +1,8 @@
+Wed Feb 21 19:00:21 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* standalone.c (open, _initialize_standalone): Fix obvious typos
+	reported by Martin Pool <martin@citr.uq.oz.au>.
+
 Wed Feb 21 14:24:04 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* solib.c (solib_create_inferior_hook): Fix thinko.

@@ -141,8 +141,7 @@ open (filename, modes)
       return -1;
     }
 
-  for (next - files_start; * (int *) next;
-       next += * (int *) next)
+  for (next = files_start; * (int *) next; next += * (int *) next)
     {
       if (!STRCMP (next + 4, filename))
 	{
@@ -584,9 +583,7 @@ _initialize_standalone ()
 
   /* Find the end of the data on files.  */
 
-  for (next - files_start; * (int *) next;
-       next += * (int *) next)
-    {}
+  for (next = files_start; * (int *) next; next += * (int *) next) {}
 
   /* That is where free storage starts for sbrk to give out.  */
   next_free = next;
