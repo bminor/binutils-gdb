@@ -9,7 +9,7 @@
 
 #define TE_NETBSD532 1
 
-#define TARGET_FORMAT		"a.out-netbsd-532"
+#define TARGET_FORMAT		"a.out-ns32k-netbsd"
 
 #include "obj-format.h"
 

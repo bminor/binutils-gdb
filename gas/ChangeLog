@@ -1,3 +1,8 @@
+Wed Oct 12 11:56:50 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* config/tc-i386.h,te-netbsd532.h (TARGET_FORMAT): Changed to
+	  a.out-<arch>-netbsd to match corresponding changes in BFD.
+
 Wed Oct 12 11:06:11 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-ppc.c (ppc_fix_adjustable): Resolve symbol values
