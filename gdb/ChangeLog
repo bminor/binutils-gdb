@@ -1,5 +1,9 @@
 Mon Dec 16 12:31:46 1991  Fred Fish  (fnf at cygnus.com)
 
+	* symfile.c (symbol_file_add):  When verbose is set, print
+	the names of files from which symbols are being loaded, as
+	when from_tty is true.
+
 	* solib.c:  Completely reorganized (rewritten) to support
 	SVR4 shared libraries in a manner very close to the original
 	SunOS implementation.  This support is expected to change and
