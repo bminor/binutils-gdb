@@ -6,6 +6,7 @@ Wed Jun 10 17:39:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(sim_engine_illegal_insn): Moved to traps.c
 	* sim-main.h (SIM_CORE_SIGNAL): Define.
 	(m32r_core_signal): Declare.
+	* m32r-sim.h (m32r_trap): Declare.
 
 	* devices.c (device_io_read_buffer): Handle cache purging via MCCR
 	register.

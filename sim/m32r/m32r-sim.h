@@ -153,4 +153,7 @@ extern device m32r_devices;
 /* FIXME: Temporary, until device support ready.  */
 struct _device { int foo; };
 
+/* Handle the trap insn.  */
+USI m32r_trap (SIM_CPU *, int);
+
 #endif /* M32R_SIM_H */
