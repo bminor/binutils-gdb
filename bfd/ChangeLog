@@ -1,3 +1,8 @@
+Tue Dec 20 15:30:12 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* elfcode.h (assign_file_positions_except_relocs): In assertion,
+	force all values to the same type.
+
 Tue Dec 20 11:11:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* coff-h8300.c (howto_table): All relocs get a special function.

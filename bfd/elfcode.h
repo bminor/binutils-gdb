@@ -1498,7 +1498,7 @@ elf_map_symbols (abfd)
   for (idx = 0; idx < symcount; idx++)
     {
       if ((syms[idx]->flags & BSF_SECTION_SYM) != 0
-	  && syms[idx]->value == asect->vma)
+	  && syms[idx]->value == 0)
 	{
 	  asection *sec;
 
@@ -1507,6 +1507,8 @@ elf_map_symbols (abfd)
 	    {
 	      if (sec->owner != abfd)
 		{
+		  if (sec->output_offset != 0)
+		    continue;
 		  sec = sec->output_section;
 		  BFD_ASSERT (sec->owner == abfd);
 		}
@@ -1527,7 +1529,7 @@ elf_map_symbols (abfd)
 	return false;
       sym->the_bfd = abfd;
       sym->name = asect->name;
-      sym->value = asect->vma;
+      sym->value = 0;
       /* Set the flags to 0 to indicate that this one was newly added.  */
       sym->flags = 0;
       sym->section = asect;
@@ -2114,7 +2116,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
       phdr_map = map_program_segments (abfd, phdr_off, first, phdr_size);
       if (phdr_map == (file_ptr) -1)
 	return false;
-      BFD_ASSERT (phdr_map <= phdr_off + phdr_size);
+      BFD_ASSERT ((bfd_size_type) phdr_map <= (bfd_size_type) phdr_off + phdr_size);
     }
 
   /* Place the section headers.  */
@@ -2605,13 +2607,6 @@ elf_section_from_bfd_section (abfd, asect)
   Elf_Internal_Shdr *hdr;
   int maxindex = elf_elfheader (abfd)->e_shnum;
 
-  if (bfd_is_abs_section (asect))
-    return SHN_ABS;
-  if (bfd_is_com_section (asect))
-    return SHN_COMMON;
-  if (bfd_is_und_section (asect))
-    return SHN_UNDEF;
-
   for (index = 0; index < maxindex; index++)
     {
       hdr = i_shdrp[index];
@@ -2632,6 +2627,13 @@ elf_section_from_bfd_section (abfd, asect)
 	    return retval;
 	}
     }
+
+  if (bfd_is_abs_section (asect))
+    return SHN_ABS;
+  if (bfd_is_com_section (asect))
+    return SHN_COMMON;
+  if (bfd_is_und_section (asect))
+    return SHN_UNDEF;
 
   return -1;
 }
