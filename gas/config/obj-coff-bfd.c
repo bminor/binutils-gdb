@@ -31,12 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  
  Hacked for BFDness by steve chamberlain
 
- Note that this is the first implementation using BFD for coff, and
- this is a pretty special case too - it only works at the moment for
- the H8. Which *can't* do any relaxing during assembly - because the
- linker has to have all the reloc info for fancy stuff later on.
-
- When another machine is supported, relaxing will have to go back in.
+ This object module now supports the Hitachi H8/300 and the AMD 29k
 
  sac@cygnus.com
 */
