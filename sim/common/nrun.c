@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <signal.h>
 #include "sim-main.h"
 
+#include "bfd.h"
+
 #ifdef HAVE_ENVIRON
 extern char **environ;
 #endif
@@ -45,6 +47,7 @@ main (int argc, char **argv)
 {
   char *name;
   char **prog_argv = NULL;
+  struct _bfd *prog_bfd;
   enum sim_stop reason;
   int sigrc;
   RETSIGTYPE (*prev_sigint) ();
@@ -66,23 +69,33 @@ main (int argc, char **argv)
 
   /* Was there a program to run?  */
   prog_argv = STATE_PROG_ARGV (sd);
+  prog_bfd = STATE_PROG_BFD (sd);
   if (prog_argv == NULL || *prog_argv == NULL)
     usage ();
 
   name = *prog_argv;
 
+  /* For simulators that don't open prog during sim_open() */
+  if (prog_bfd == NULL)
+    {
+      prog_bfd = bfd_openr (name, 0);
+      if (prog_bfd == NULL)
+	fprintf (stderr, "%s: can't open \"%s\": %s\n", 
+		 myname, name, bfd_errmsg (bfd_get_error ()));
+    }
+
   if (STATE_VERBOSE_P (sd))
     printf ("%s %s\n", myname, name);
 
   /* Load the program into the simulator.  */
-  if (sim_load (sd, name, NULL, 0) == SIM_RC_FAIL)
+  if (sim_load (sd, name, prog_bfd, 0) == SIM_RC_FAIL)
     exit (1);
 
   /* Prepare the program for execution.  */
 #ifdef HAVE_ENVIRON
-  sim_create_inferior (sd, prog_argv, environ);
+  sim_create_inferior (sd, prog_bfd, prog_argv, environ);
 #else
-  sim_create_inferior (sd, prog_argv, NULL);
+  sim_create_inferior (sd, prog_bfd, prog_argv, NULL);
 #endif
 
   /* Run the program.  */
