@@ -842,17 +842,17 @@ static int
 make_import_fixup (arelent *rel, asection *s)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-  int addend = 0;
+  char addend[4];
 
   if (pe_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
 	    (long) rel->address, (long) rel->addend);
 
-  if (! bfd_get_section_contents (s->owner, s, &addend, rel->address, sizeof (addend)))
+  if (! bfd_get_section_contents (s->owner, s, addend, rel->address, sizeof (addend)))
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
-  pe_create_import_fixup (rel, s, addend);
+  pe_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend));
 
   return 1;
 }

@@ -1,3 +1,8 @@
+2004-07-13  Christof Petig  <christof@petig-baender.de>
+
+	* emultempl/pe.em (make_import_fixup): Use bfd_get_32 to correct
+	for endian-ness of extracted addend.
+
 2004-07-13  Danny Smith  <dannysmith@usesr.sourceforge.net>
 
 	* pe-dll.c (auto_export):  Filter on just the import prefix,
