@@ -175,6 +175,15 @@ x86_64_register_virtual_type (int regno)
   return *x86_64_register_info_table[regno].type;
 }
 
+/* FIXME: cagney/2002-11-11: Once the i386 and x86-64 targets are
+   merged, this function can go away.  */
+int
+i386_fp_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
+}
+
 /* x86_64_register_convertible is true if register N's virtual format is
    different from its raw format.  Note that this definition assumes
    that the host supports IEEE 32-bit floats, since it doesn't say
