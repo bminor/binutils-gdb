@@ -267,9 +267,9 @@ extern void tty_command (char *, int);
 
 extern void attach_command (char *, int);
 
-extern char *get_inferior_arg (void);
+extern char *get_inferior_args (void);
 
-extern char *set_inferior_arg (char *);
+extern char *set_inferior_args (char *);
 
 /* Last signal that the inferior received (why it stopped).  */
 

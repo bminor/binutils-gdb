@@ -1,3 +1,9 @@
+2001-04-06  Fernando Nasser  <fnasser@redhat.com>
+
+	From David Deephanphongs <deephan@telocity.com>
+	* inferior.h:   Fix declarations of get_inferior_args and 
+	set_inferior_args, which were missing the trailing 's'.
+
 2001-04-05  Jeff Holcomb  <jeffh@redhat.com>
 
 	* monitor.c (monitor_supply_register): Only report an error if we
