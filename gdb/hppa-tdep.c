@@ -25,32 +25,22 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "frame.h"
 #include "bfd.h"
 #include "inferior.h"
-#include "value.h"
 #include "regcache.h"
 #include "completer.h"
-#include "language.h"
 #include "osabi.h"
 #include "gdb_assert.h"
-#include "infttrace.h"
 #include "arch-utils.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
-#include "infcall.h"
 #include "dis-asm.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
 
-#include "gdb_stat.h"
-#include "gdb_wait.h"
-
 #include "gdbcore.h"
 #include "gdbcmd.h"
-#include "target.h"
-#include "symfile.h"
 #include "objfiles.h"
 #include "hppa-tdep.h"
 

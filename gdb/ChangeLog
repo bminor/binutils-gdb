@@ -1,5 +1,10 @@
 2004-05-17  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c: Remove superfluous #include's.
+	* Makefile.in (hppa-tdep.o): Update dependencies.
+
+2004-05-17  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (THREAD_INITIAL_FRAME_SYMBOL): Delete unused symbol.
 	(THREAD_INITIAL_FRAME_SYM_LEN): Likewise.
 	(unwind_command, hppa_alignof, prologue_inst_adjust_sp)
