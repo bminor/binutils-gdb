@@ -759,10 +759,56 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
   return 0;
 }
 
-/* On x86_64 there are no reasonable prologs.  */
+/* If a function with debugging information and known beginning
+   is detected, we will return pc of the next line in the source 
+   code. With this approach we effectively skip the prolog.  */
+
+#define PROLOG_BUFSIZE 4
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
+  int i, firstline, currline;
+  struct symtab_and_line v_sal;
+  struct symbol *v_function;
+  CORE_ADDR salendaddr = 0, endaddr = 0;
+
+  /* We will handle only functions beginning with:
+     55          pushq %rbp
+     48 89 e5    movq %rsp,%rbp 
+   */
+  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
+    prolog_buf[PROLOG_BUFSIZE];
+
+  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+
+  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  for (i = 0; i < PROLOG_BUFSIZE; i++)
+    if (prolog_expect[i] != prolog_buf[i])
+      return pc;
+
+  v_function = find_pc_function (pc);
+  v_sal = find_pc_line (pc, 0);
+
+  /* If pc doesn't point to a function with debuginfo, 
+     some of the following may be NULL.  */
+  if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
+    return pc;
+
+  firstline = v_sal.line;
+  currline = firstline;
+  salendaddr = v_sal.end;
+  endaddr = v_function->ginfo.value.block->endaddr;
+
+  for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
+    if (v_sal.symtab->linetable->item[i].line > firstline
+	&& v_sal.symtab->linetable->item[i].pc >= salendaddr
+	&& v_sal.symtab->linetable->item[i].pc < endaddr)
+      {
+	pc = v_sal.symtab->linetable->item[i].pc;
+	currline = v_sal.symtab->linetable->item[i].line;
+	break;
+      }
+
   return pc;
 }
 
