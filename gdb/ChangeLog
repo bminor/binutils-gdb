@@ -1,3 +1,10 @@
+2003-03-17  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (gdb_assert.h): Add missing #include.
+	* somsolib.c (gdb_assert.h): Likewise.
+	* Makefile.in (hppa-tdep.o): Add dependency on gdb_assert.h.
+	(somsolib.o): Likewise.
+
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
 	* disasm.c (gdb_disassembly): Set di.mach using the architecture's

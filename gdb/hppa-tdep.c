@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "language.h"
 #include "osabi.h"
+#include "gdb_assert.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"
