@@ -1,3 +1,7 @@
+Sun Jul 11 12:03:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t17/interrupt.exp: Test for more things.
+
 Fri Jul  9 14:11:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t07/watchpoint.exp: In until test, deal with the way the DEC
