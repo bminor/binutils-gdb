@@ -17,7 +17,7 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
+echo Sanitizing `pwd`.
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -29,7 +29,6 @@ Things-to-keep:
 COPYING
 CVS.adm
 ChangeLog
-Makefile
 Makefile.in
 TODO
 VERSION
@@ -47,7 +46,6 @@ bout.c
 cache.c
 coffcode.h
 config
-config.status
 configure
 configure.in
 core.c
@@ -71,7 +69,6 @@ newsos3.c
 oasys.c
 opncls.c
 reloc.c
-save
 section.c
 srec.c
 sunos.c
@@ -82,12 +79,27 @@ trad-core.h
 
 Do-last:
 
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 in aoutx.h
+else
+	echo Sanitizing v9 in aoutx.h
+	rm -f new
+	while grep -s start-sanitize-v9 aoutx.h ; do
+		sed -e '/start-sanitize-v9/,/end-sanitize-v9/d' <aoutx.h >new
+		rm aoutx.h
+		mv new aoutx.h
+	done
+fi
+
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.7  1991/07/16 00:39:03  steve
+# Revision 1.8  1991/07/31 07:54:31  gnu
+# Better sanitize aoutx.h too!
+#
+# Revision 1.7  1991/07/16  00:39:03  steve
 # *** empty log message ***
 #
 # Revision 1.6  1991/07/16  00:35:56  steve
