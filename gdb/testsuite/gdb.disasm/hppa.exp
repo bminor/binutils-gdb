@@ -995,15 +995,13 @@ proc all_fpu_computational_tests { } {
 	}
     }
 
-    # Spacing problems, wrong format, wrong registers.  Just plain wrong. 
-    setup_xfail hppa*-*-*
     send "x/4i fmpy_addsub_tests\n"
     expect {
 	-re ".*
-.*fmpyadd,sgl fr16,fr17,fr18,fr19,fr20
-.*fmpyadd,dbl fr16,fr17,fr18,fr19,fr20
-.*fmpysub,sgl fr16,fr17,fr18,fr19,fr20
-.*fmpysub,dbl fr16,fr17,fr18,fr19,fr20
+.*fmpyadd,sgl fr16,fr17,fr18,fr19,fr20\r\n\
+.*fmpyadd,dbl fr16,fr17,fr18,fr19,fr20\r\n\
+.*fmpysub,sgl fr16,fr17,fr18,fr19,fr20\r\n\
+.*fmpysub,dbl fr16,fr17,fr18,fr19,fr20\r\n\
 .*$prompt $" { pass "fmpy_addsub_tests" }
 	-re "$prompt $" { fail "fmpy_addsub_tests" }
 	timeout { fail "(timeout) fmpy_addsub_tests" }
@@ -1027,7 +1025,6 @@ proc all_fpu_comparison_tests { } {
 
     set fpu_comparison_formats [list {sgl} {dbl} {quad} ]
 
-    # Fails due to spacing and probably formatting problems.
     foreach i $fpu_comparison_formats {
 	send "x/32i fcmp_$i"; send "_tests\n"
 	expect {
