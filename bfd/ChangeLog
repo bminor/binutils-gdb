@@ -1,3 +1,11 @@
+2002-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-powerpc.c: Comment on ordering of arch_info.
+	* elf32-ppc.c (ppc_elf_object_p): New function.
+	(elf_backend_object_p): Define.
+	* elf64-ppc.c (ppc64_elf_object_p): New function.
+	(elf_backend_object_p): Define.
+
 2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (vax-*-netbsd*): Set COREFILE to netbsd-core.lo.

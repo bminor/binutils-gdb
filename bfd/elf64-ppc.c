@@ -57,6 +57,8 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static void ppc64_elf_get_symbol_info
   PARAMS ((bfd *, asymbol *, symbol_info *));
+static boolean ppc64_elf_object_p
+  PARAMS ((bfd *));
 static boolean ppc64_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 static boolean ppc64_elf_merge_private_bfd_data
@@ -1647,6 +1649,27 @@ ppc64_elf_get_symbol_info (abfd, symbol, ret)
       && (symbol->flags & (BSF_GLOBAL | BSF_LOCAL)) != 0
       && strcmp (symbol->section->name, ".opd") == 0)
     ret->type = (symbol->flags & BSF_GLOBAL) != 0 ? 'D' : 'd';
+}
+
+/* Fix bad default arch selected for a 64 bit input bfd when the
+   default is 32 bit.  */
+
+static boolean
+ppc64_elf_object_p (abfd)
+     bfd *abfd;
+{
+  if (abfd->arch_info->the_default && abfd->arch_info->bits_per_word == 32)
+    {
+      Elf_Internal_Ehdr *i_ehdr = elf_elfheader (abfd);
+
+      if (i_ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+	{
+	  /* Relies on arch after 32 bit default being 64 bit default.  */
+	  abfd->arch_info = abfd->arch_info->next;
+	  BFD_ASSERT (abfd->arch_info->bits_per_word == 64);
+	}
+    }
+  return true;
 }
 
 /* Function to set whether a module needs the -mrelocatable bit set.  */
@@ -6140,6 +6163,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
 #define bfd_elf64_get_symbol_info	      ppc64_elf_get_symbol_info
 
+#define elf_backend_object_p		      ppc64_elf_object_p
 #define elf_backend_section_from_shdr	      ppc64_elf_section_from_shdr
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol

@@ -43,6 +43,7 @@ static boolean ppc_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static boolean ppc_elf_object_p PARAMS ((bfd *));
 static boolean ppc_elf_set_private_flags PARAMS ((bfd *, flagword));
 static boolean ppc_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 
@@ -1378,6 +1379,27 @@ ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
   reloc_entry->addend += (relocation & 0x8000) << 1;
 
   return bfd_reloc_continue;
+}
+
+/* Fix bad default arch selected for a 32 bit input bfd when the
+   default is 64 bit.  */
+
+static boolean
+ppc_elf_object_p (abfd)
+     bfd *abfd;
+{
+  if (abfd->arch_info->the_default && abfd->arch_info->bits_per_word == 64)
+    {
+      Elf_Internal_Ehdr *i_ehdr = elf_elfheader (abfd);
+
+      if (i_ehdr->e_ident[EI_CLASS] == ELFCLASS32)
+	{
+	  /* Relies on arch after 64 bit default being 32 bit default.  */
+	  abfd->arch_info = abfd->arch_info->next;
+	  BFD_ASSERT (abfd->arch_info->bits_per_word == 32);
+	}
+    }
+  return true;
 }
 
 /* Function to set whether a module needs the -mrelocatable bit set.  */
@@ -3797,6 +3819,7 @@ ppc_elf_grok_psinfo (abfd, note)
 #define bfd_elf32_bfd_set_private_flags		ppc_elf_set_private_flags
 #define bfd_elf32_bfd_final_link		_bfd_elf32_gc_common_final_link
 
+#define elf_backend_object_p			ppc_elf_object_p
 #define elf_backend_gc_mark_hook		ppc_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook		ppc_elf_gc_sweep_hook
 #define elf_backend_section_from_shdr		ppc_elf_section_from_shdr
