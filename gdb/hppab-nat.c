@@ -98,52 +98,6 @@ detach (signal)
 
 
 
-/* KERNEL_U_ADDR is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#if defined (KERNEL_U_ADDR_BSD)
-/* Get kernel_u_addr using BSD-style nlist().  */
-CORE_ADDR kernel_u_addr;
-
-#include <a.out.gnu.h>		/* For struct nlist */
-
-void
-_initialize_kernel_u_addr ()
-{
-  struct nlist names[2];
-
-  names[0].n_un.n_name = "_u";
-  names[1].n_un.n_name = NULL;
-  if (nlist ("/vmunix", names) == 0)
-    kernel_u_addr = names[0].n_value;
-  else
-    fatal ("Unable to get kernel u area address.");
-}
-#endif /* KERNEL_U_ADDR_BSD.  */
-
-#if defined (KERNEL_U_ADDR_HPUX)
-/* Get kernel_u_addr using HPUX-style nlist().  */
-CORE_ADDR kernel_u_addr;
-
-struct hpnlist {      
-        char *          n_name;
-        long            n_value;  
-        unsigned char   n_type;   
-        unsigned char   n_length;  
-        short           n_almod;   
-        short           n_unused;
-};
-static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
-
-/* read the value of the u area from the hp-ux kernel */
-void
-_initialize_kernel_u_addr ()
-{
-    struct user u;
-    nlist ("/hp-ux", &nl);
-    kernel_u_addr = nl[0].n_value;
-}
-#endif /* KERNEL_U_ADDR_HPUX.  */
-
 #if !defined (offsetof)
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
