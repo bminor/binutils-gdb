@@ -191,8 +191,7 @@ OP_580 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_OV) != 0)
@@ -208,8 +207,7 @@ OP_581 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_CY) != 0)
@@ -225,8 +223,7 @@ OP_582 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_Z) != 0)
@@ -242,8 +239,7 @@ OP_583 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) != 0)
@@ -259,8 +255,7 @@ OP_584 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_S) != 0)
@@ -276,8 +271,7 @@ OP_585 ()
   unsigned int op0;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   State.pc += op0;
 }
 
@@ -288,8 +282,7 @@ OP_586 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) != 0)
@@ -305,8 +298,7 @@ OP_587 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_Z) != 0)
@@ -323,8 +315,7 @@ OP_588 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_OV) == 0)
@@ -340,8 +331,7 @@ OP_589 ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_CY) == 0)
@@ -357,8 +347,7 @@ OP_58A ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_Z) == 0)
@@ -374,8 +363,7 @@ OP_58B ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) == 0)
@@ -391,8 +379,7 @@ OP_58C ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_S) == 0)
@@ -408,8 +395,7 @@ OP_58D ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((psw & PSW_SAT) != 0)
@@ -425,8 +411,7 @@ OP_58E ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) == 0)
@@ -442,8 +427,7 @@ OP_58F ()
   unsigned int op0, psw;
   int temp;
 
-  temp = (State.regs[OP[0]] << 23) >> 23;
-  op0 = temp;
+  op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
   
   if ((((psw & PSW_Z) != 0)
@@ -498,6 +482,10 @@ OP_1C0 ()
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
 
+  /* According to the manual, 's' is inverted if 'ov'
+     is set.  */
+  s = ov ? !s : s;
+
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
@@ -525,6 +513,10 @@ OP_240 ()
   cy = (result < op0 || result < op1);
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* According to the manual, 's' is inverted if 'ov'
+     is set.  */
+  s = ov ? !s : s;
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
@@ -554,6 +546,10 @@ OP_600 ()
   ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
 
+  /* According to the manual, 's' is inverted if 'ov'
+     is set.  */
+  s = ov ? !s : s;
+
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
@@ -575,9 +571,13 @@ OP_1A0 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (op1 < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
+
+  /* According to the manual, 's' is inverted if 'ov'
+     is set.  */
+  s = ov ? !s : s;
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
@@ -600,9 +600,13 @@ OP_180 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op1);
+  cy = (op0 < op1);
   ov = ((op0 & 0x80000000) != (op1 & 0x80000000)
 	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* According to the manual, 's' is inverted if 'ov'
+     is set.  */
+  s = ov ? !s : s;
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
@@ -694,7 +698,7 @@ OP_1E0 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (op1 < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
@@ -721,7 +725,7 @@ OP_260 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (op1 < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
@@ -883,7 +887,7 @@ OP_A0 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (op1 < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
   sat = ov;
@@ -919,7 +923,7 @@ OP_660 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (op1 < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
   sat = ov;
@@ -951,7 +955,7 @@ OP_80 ()
   /* Compute the condition codes.  */
   z = (result == 0);
   s = (result & 0x80000000);
-  cy = (result < -op0);
+  cy = (result < op0);
   ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
 	&& (op1 & 0x80000000) != (result & 0x80000000));
   sat = ov;
@@ -1400,7 +1404,7 @@ OP_16087E0 ()
 void
 OP_12007E0 ()
 {
-  abort ();
+  State.exception = SIGQUIT;
 }
 
 /* reti, not supported */
@@ -1414,7 +1418,158 @@ OP_14007E0 ()
 void
 OP_10007E0 ()
 {
-  abort ();
+  extern int errno;
+
+  /* Trap 0 is used for simulating low-level I/O */
+
+  if (OP[0] == 0)
+    {
+#if 0
+      char *fstr = State.regs[2] + State.imem;
+      printf (fstr,State.regs[3],State.regs[4],State.regs[5]);
+#else
+      int save_errno = errno;	
+      errno = 0;
+
+/* Registers passed to trap 0 */
+
+#define FUNC   State.regs[6]	/* function number, return value */
+#define PARM1  State.regs[7]	/* optional parm 1 */
+#define PARM2  State.regs[8]	/* optional parm 2 */
+#define PARM3  State.regs[9]	/* optional parm 3 */
+
+/* Registers set by trap 0 */
+
+#define RETVAL State.regs[10]	/* return value */
+#define RETERR State.regs[11]	/* return error code */
+
+/* Turn a pointer in a register into a pointer into real memory. */
+
+#define MEMPTR(x) ((char *)((x) + State.mem))
+
+
+      switch (FUNC)
+	{
+#if 0
+#if !defined(__GO32__) && !defined(_WIN32)
+	case SYS_fork:
+	  RETVAL = fork ();
+	  break;
+	case SYS_execve:
+	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
+			   (char **)MEMPTR (PARM3));
+	  break;
+	case SYS_execv:
+	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
+	  break;
+	case SYS_pipe:
+	  {
+	    reg_t buf;
+	    int host_fd[2];
+
+	    buf = PARM1;
+	    RETVAL = pipe (host_fd);
+	    SW (buf, host_fd[0]);
+	    buf += sizeof(uint16);
+	    SW (buf, host_fd[1]);
+	  }
+	  break;
+
+	case SYS_wait:
+	  {
+	    int status;
+
+	    RETVAL = wait (&status);
+	    SW (PARM1, status);
+	  }
+	  break;
+#endif
+
+	case SYS_read:
+	  RETVAL = v850_callback->read (v850_callback, PARM1, MEMPTR (PARM2),
+					PARM3);
+	  break;
+#endif
+	case SYS_write:
+	  if (PARM1 == 1)
+	    RETVAL = (int)v850_callback->write_stdout (v850_callback,
+				 		       MEMPTR (PARM2), PARM3);
+	  else
+	    RETVAL = (int)v850_callback->write (v850_callback, PARM1,
+						MEMPTR (PARM2), PARM3);
+	  break;
+#if 0
+	case SYS_lseek:
+	  RETVAL = v850_callback->lseek (v850_callback, PARM1, PARM2, PARM3);
+	  break;
+	case SYS_close:
+	  RETVAL = v850_callback->close (v850_callback, PARM1);
+	  break;
+	case SYS_open:
+	  RETVAL = v850_callback->open (v850_callback, MEMPTR (PARM1), PARM2);
+	  break;
+#endif
+	case SYS_exit:
+	  /* EXIT - caller can look in PARM1 to work out the 
+	     reason */
+	  if (PARM1 == 0xdead || PARM1 == 0x1)
+	    State.exception = SIGABRT;
+	  else
+	    State.exception = SIGQUIT;
+	  break;
+
+#if 0
+	case SYS_stat:	/* added at hmsi */
+	  /* stat system call */
+	  {
+	    struct stat host_stat;
+	    reg_t buf;
+
+	    RETVAL = stat (MEMPTR (PARM1), &host_stat);
+
+	    buf = PARM2;
+
+	    /* The hard-coded offsets and sizes were determined by using
+	     * the D10V compiler on a test program that used struct stat.
+	     */
+	    SW  (buf,    host_stat.st_dev);
+	    SW  (buf+2,  host_stat.st_ino);
+	    SW  (buf+4,  host_stat.st_mode);
+	    SW  (buf+6,  host_stat.st_nlink);
+	    SW  (buf+8,  host_stat.st_uid);
+	    SW  (buf+10, host_stat.st_gid);
+	    SW  (buf+12, host_stat.st_rdev);
+	    SLW (buf+16, host_stat.st_size);
+	    SLW (buf+20, host_stat.st_atime);
+	    SLW (buf+28, host_stat.st_mtime);
+	    SLW (buf+36, host_stat.st_ctime);
+	  }
+	  break;
+
+	case SYS_chown:
+	  RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
+	  break;
+	case SYS_chmod:
+	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
+	  break;
+	case SYS_utime:
+	  /* Cast the second argument to void *, to avoid type mismatch
+	     if a prototype is present.  */
+	  RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
+	  break;
+#endif
+	default:
+	  abort ();
+	}
+      RETERR = errno;
+      errno = save_errno;
+#endif
+    }
+  else if (OP[0] == 1 )
+    {
+      char *fstr = State.regs[2] + State.mem;
+      puts (fstr);
+    }
 }
 
 /* ldsr, reg,reg */

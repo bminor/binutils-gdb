@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "ansidecl.h"
+#include "callback.h"
 #include "opcode/v850.h"
+
+extern host_callback *v850_callback;
 
 /* FIXME: host defines */
 typedef unsigned char uint8;
@@ -29,12 +32,11 @@ struct _state
   reg_t regs[32];		/* general-purpose registers */
   reg_t sregs[32];		/* system regsiters, including psw */
   reg_t pc;
-  uint8 *imem;
-  uint8 *dmem;
+  uint8 *mem;
   int   exception;
 } State;
 
-extern uint16 OP[4];
+extern uint32 OP[4];
 extern struct simops Simops[];
 
 #define PC	(State.pc)
@@ -78,33 +80,22 @@ extern struct simops Simops[];
 
 #define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
-#define	RB(x)	(*((uint8 *)((x)+State.imem)))
+#define	RB(x)	(*((uint8 *)((x)+State.mem)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))
 
 #ifdef WORDS_BIGENDIAN
 
-#define RW(x)			(*((uint16 *)((x)+State.imem)))
-#define RLW(x)			(*((uint32 *)((x)+State.imem)))
-#define SW(addr,data)		RW(addr)=data
-#define READ_16(x)		(*((int16 *)(x)))
-#define WRITE_16(addr,data)	(*(int16 *)(addr)=data)	
-#define READ_64(x)		(*((int64 *)(x)))
-#define WRITE_64(addr,data)	(*(int64 *)(addr)=data)	
+uint32 get_word PARAMS ((uint8 *));
+uint16 get_half PARAMS ((uint8 *));
+uint8 get_byte PARAMS ((uint8 *));
+#define RLW(x)			(*((uint32 *)((x)+State.mem)))
 
 #else
 
-uint32 get_longword PARAMS ((uint8 *));
-uint16 get_word PARAMS ((uint8 *));
-int64 get_longlong PARAMS ((uint8 *));
-void write_word PARAMS ((uint8 *addr, uint16 data));
-void write_longlong PARAMS ((uint8 *addr, int64 data));
+uint32 get_word PARAMS ((uint8 *));
+uint16 get_half PARAMS ((uint8 *));
+uint8 get_byte PARAMS ((uint8 *));
 
-#define SW(addr,data)		write_word((long)(addr)+State.imem,data)
-#define RW(x)			get_word((long)(x)+State.imem)
-#define RLW(x)			get_longword((long)(x)+State.imem)
-#define READ_16(x)		get_word(x)
-#define WRITE_16(addr,data)	write_word(addr,data)
-#define READ_64(x)		get_longlong(x)
-#define WRITE_64(addr,data)	write_longlong(addr,data)
+#define RLW(x)			get_word((long)(x)+State.mem)
 
 #endif /* not WORDS_BIGENDIAN */

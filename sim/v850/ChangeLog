@@ -1,3 +1,27 @@
+Tue Sep  3 10:20:30 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c: OP should be an array of 32bit operands!
+	(v850_callback): Declare.
+	(do_format_5): Fix extraction of OP[0].
+	(sim_size): Remove debugging printf.
+	(sim_set_callbacks): Do something useful.
+	(sim_stop_reason): Gross hacks to get c-torture running.
+	* simops.c: Simplify code for computing targets of bCC
+	insns.   Invert 's' bit if 'ov' bit is set for some
+	instructions.  Fix 'cy' bit handling for numerous
+	instructions.  Make the simulator stop when a halt
+	instruction is encountered.  Very crude support for
+	emulated syscalls (trap 0).
+	* v850_sim.h: Include "callback.h" and declare
+	v850_callback.  Items in the operand array are 32bits.
+
+Sun Sep  1 22:35:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (sim_resume): Fix code to check for a format 3
+	opcode.
+	* simops.c: bCC insns only argument is a constant, not a
+	register value (duh...)
+
 Fri Aug 30 10:33:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix "not1" and "set1".

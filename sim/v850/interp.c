@@ -8,7 +8,10 @@
 
 #define MEM_SIZE 18	/* V850 memory size is 18 bits XXX */
 
-uint16 OP[4];
+host_callback *v850_callback;
+
+
+uint32 OP[4];
 
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins));
 
@@ -161,7 +164,7 @@ do_format_5 (insn)
   struct hash_entry *h;
 
   h = lookup_hash (insn);
-  OP[0] = ((insn & 0x3f) | (((insn >> 17) & 0x7fff) << 6)) << 1;
+  OP[0] = (((insn & 0x3f) << 15) | ((insn >> 17) & 0x7fff)) << 1;
   OP[1] = (insn >> 11) & 0x1f;
   (h->ops->func) ();
 }
@@ -233,7 +236,6 @@ sim_size (power)
       fprintf (stderr,"Memory allocation failed.\n");
       exit(1);
     }
-  printf ("Allocated %d bytes memory and\n",1<<MEM_SIZE);
 }
 
 static void
@@ -344,7 +346,7 @@ sim_resume (step, siggnal)
 	 do_format_4 (inst & 0xffff);
 	 PC += 2;
        }
-     else if ((opcode & 0x3C) == 0x23)
+     else if ((opcode & 0x3C) == 0x2C)
        {
 	 do_format_3 (inst & 0xffff);
 	 /* No PC update, it's done in the instruction.  */
@@ -412,25 +414,23 @@ void
 sim_set_callbacks(p)
      host_callback *p;
 {
-  /* callback = p; */
+  v850_callback = p;
 }
 
+/* All the code for exiting, signals, etc needs to be revamped.  */
+
+   This is enough to get c-torture limping though.  */
 void
 sim_stop_reason (reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
 
+  *reason = sim_stopped;
   if (State.exception == SIGQUIT)
-    {
-      *reason = sim_exited;
-      *sigrc = State.exception;
-    }
+    *sigrc = 0;
   else
-    {
-      *reason = sim_stopped;
-      *sigrc = State.exception;
-    } 
+    *sigrc = State.exception;
 }
 
 void
