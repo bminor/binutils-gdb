@@ -1,3 +1,9 @@
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/overload.exp: Test intToChar(1).
+	* gdb.c++/overload.cc (intToChar): New.
+	(main): Call intToChar.
+
 2003-02-03  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/ovldbreak.exp (continue_to_bp_overloaded): Add

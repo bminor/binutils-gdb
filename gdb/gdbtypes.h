@@ -1211,10 +1211,6 @@ extern int count_virtual_fns (struct type *);
 #define TOO_FEW_PARAMS_BADNESS       100
 /* Badness if no conversion among types */
 #define INCOMPATIBLE_TYPE_BADNESS    100
-/* Badness of coercing large integer to smaller size */
-#define INTEGER_COERCION_BADNESS     100
-/* Badness of coercing large floating type to smaller size */
-#define FLOAT_COERCION_BADNESS       100
 
 /* Badness of integral promotion */
 #define INTEGER_PROMOTION_BADNESS      1
