@@ -1,3 +1,16 @@
+start-sanitize-am33
+Thu Jul 16 18:04:46 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c (mn10300_opcodes): Fix opcode for 4 operand "mul" and
+	"mulu".
+
+end-sanitize-am33
+start-sanitize-r5900
+Mon Jul 13 18:14:24 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c (pref): Enabled for the r5900.
+
+end-sanitize-r5900
 Mon Jul 13 14:53:59 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (ckprefix): Handle fwait specially only when it isn't

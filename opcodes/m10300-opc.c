@@ -743,7 +743,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "addc",	0xfb8c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "addc",	0xfb8c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "addc",	0xf140,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 /* start-sanitize-am33 */
@@ -754,7 +754,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "sub",	0xfb9c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "sub",	0xfb9c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "sub",	0xf100,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "sub",	0xf120,	     0xfff0,	 FMT_D0, 0,	{DM1, AN0}},
@@ -772,7 +772,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "subc",	0xfa8c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "subc",	0xfa8c0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "subc",	0xf180,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 /* start-sanitize-am33 */
@@ -783,7 +783,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "mul",	0xfbab0000,  0xffff0000, FMT_D7, AM33,	{RM2, RN0, RD2, RD0}},
+{ "mul",	0xfbad0000,  0xffff0000, FMT_D7, AM33,	{RM2, RN0, RD2, RD0}},
 /* end-sanitize-am33 */
 { "mul",	0xf240,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 /* start-sanitize-am33 */
@@ -794,7 +794,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "mulu",	0xfbbb0000,  0xffff0000, FMT_D7, AM33,	{RM2, RN0, RD2, RD0}},
+{ "mulu",	0xfbbd0000,  0xffff0000, FMT_D7, AM33,	{RM2, RN0, RD2, RD0}},
 /* end-sanitize-am33 */
 { "mulu",	0xf250,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 /* start-sanitize-am33 */
@@ -845,7 +845,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "and",	0xfb0d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "and",	0xfb0d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "and",	0xf200,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "and",	0xf8e000,    0xfffc00,   FMT_D1, 0,	{IMM8, DN0}},
@@ -863,7 +863,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "or",		0xfb1d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "or",		0xfb1d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "or",		0xf210,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "or",		0xf8e400,    0xfffc00,   FMT_D1, 0,	{IMM8, DN0}},
@@ -881,7 +881,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "xor",	0xfb2d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "xor",	0xfb2d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "xor",	0xf220,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "xor",	0xfae80000,  0xfffc0000, FMT_D2, 0,	{IMM16, DN0}},
@@ -928,7 +928,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 							 MEM2(SD8N_SHIFT8,AN0)}},
 
 /* start-sanitize-am33 */
-{ "asr",	0xfb4d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "asr",	0xfb4d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "asr",	0xf2b0,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "asr",	0xf8c800,    0xfffc00,   FMT_D1, 0,	{IMM8, DN0}},
@@ -944,7 +944,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "lsr",	0xfb5d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "lsr",	0xfb5d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "lsr",	0xf2a0,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "lsr",	0xf8c400,    0xfffc00,   FMT_D1, 0,	{IMM8, DN0}},
@@ -960,7 +960,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "asl",	0xfb6d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "asl",	0xfb6d0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "asl",	0xf290,	     0xfff0,	 FMT_D0, 0,	{DM1, DN0}},
 { "asl",	0xf8c000,    0xfffc00,   FMT_D1, 0,	{IMM8, DN0}},
@@ -1060,7 +1060,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 /* start-sanitize-am33 */
-{ "bsch",	0xfbff0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD0}},
+{ "bsch",	0xfbff0000,  0xffff000f, FMT_D7, AM33,	{RM2, RN0, RD2}},
 /* end-sanitize-am33 */
 { "bsch",	0xf670,	     0xfff0,	 FMT_D0, AM30,	{DM1, DN0}},
 /* start-sanitize-am33 */
