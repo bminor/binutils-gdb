@@ -1,5 +1,10 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (set_value_offset): Declare.
+	* value.c (set_value_offset): Declare.
+	* gnu-v2-abi.c, jv-valprint.c, valarith.c, valops.c: Update.
+	* findvar.c: Update.
+
 	* value.h (value_next): Declare.
 	* value.c (value_next): Define.
 	* breakpoint.c: Update.

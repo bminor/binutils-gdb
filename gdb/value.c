@@ -145,6 +145,11 @@ value_offset (struct value *value)
 {
   return value->offset;
 }
+void
+set_value_offset (struct value *value, int offset)
+{
+  value->offset = offset;
+}
 
 int
 value_bitpos (struct value *value)

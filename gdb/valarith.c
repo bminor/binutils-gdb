@@ -240,7 +240,7 @@ value_subscript (struct value *array, struct value *idx)
 	VALUE_LVAL (v) = lval_internalvar_component;
       VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
       VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
-      v->offset = offset + value_offset (array);
+      set_value_offset (v, offset + value_offset (array));
       return v;
     }
 
@@ -281,7 +281,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
   VALUE_REGNUM (v) = VALUE_REGNUM (array);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
-  v->offset = value_offset (array) + elt_offs;
+  set_value_offset (v, value_offset (array) + elt_offs);
   return v;
 }
 

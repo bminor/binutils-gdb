@@ -163,15 +163,15 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		{
 		  set_value_lazy (v, 1);
-		  v->offset = 0;
+		  set_value_offset (v, 0);
 		}
 
-	      next_v->offset = value_offset (v);
+	      set_value_offset (next_v, value_offset (v));
 
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  set_value_lazy (next_v, 1);
-		  next_v->offset += TYPE_LENGTH (el_type);
+		  set_value_offset (next_v, value_offset (next_v) + TYPE_LENGTH (el_type));
 		  if (memcmp (value_contents (v), value_contents (next_v),
 			      TYPE_LENGTH (el_type)) != 0)
 		    break;

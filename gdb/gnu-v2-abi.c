@@ -162,7 +162,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   if (TYPE_CODE (entry_type) == TYPE_CODE_STRUCT)
     {
       /* Move the `this' pointer according to the virtual function table. */
-      arg1->offset += value_as_long (value_field (entry, 0));
+      set_value_offset (arg1, value_offset (arg1) + value_as_long (value_field (entry, 0)));
 
       if (!value_lazy (arg1))
 	{

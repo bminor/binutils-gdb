@@ -172,7 +172,6 @@ struct value
      them.  */
 };
 
-
 /* Values are stored in a chain, so that they can be deleted easily
    over calls to the inferior.  Values assigned to internal variables
    or put into the value history are taken off this list.  */
@@ -186,7 +185,9 @@ extern void deprecated_set_value_type (struct value *value,
 				       struct type *type);
 extern int value_bitsize (struct value *);
 extern int value_bitpos (struct value *);
+
 extern int value_offset (struct value *);
+extern void set_value_offset (struct value *, int offset);
 
 /* The comment from "struct value" reads: ``Is it modifiable?  Only
    relevant if lval != not_lval.''.  Shouldn't the value instead be

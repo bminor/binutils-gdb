@@ -1309,7 +1309,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      VALUE_LVAL (v2) = VALUE_LVAL (arg1);
 	      VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
-	      v2->offset = value_offset (arg1) + boffset;
+	      set_value_offset (v2, value_offset (arg1) + boffset);
 	      if (value_lazy (arg1))
 		set_value_lazy (v2, 1);
 	      else
@@ -2775,7 +2775,7 @@ value_slice (struct value *array, int lowbound, int length)
 	VALUE_LVAL (slice) = VALUE_LVAL (array);
       VALUE_ADDRESS (slice) = VALUE_ADDRESS (array);
       VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
-      slice->offset = value_offset (array) + offset;
+      set_value_offset (slice, value_offset (array) + offset);
     }
   return slice;
 }
