@@ -164,12 +164,25 @@ proc gdb_run_cmd {args} {
     set spawn_id $gdb_spawn_id
 
     if [target_info exists use_gdb_stub] {
-	send_gdb  "jump *start\n"
+	if [target_info exists gdb,start_symbol] {
+	    set start [target_info gdb,start_symbol];
+	} else {
+	    set start "start";
+	}
+	send_gdb  "jump *$start\n"
 	expect {
 	    -re "Continuing at \[^\r\n\]*\[\r\n\]" {
 		if ![target_info exists gdb_stub] {
 		    return;
 		}
+	    }
+	    -re "No symbol \"start\" in current.*$gdb_prompt $" {
+		send_gdb "jump *_start\n";
+		exp_continue;
+	    }
+	    -re "No symbol \"_start\" in current.*$gdb_prompt $" {
+		perror "Can't find start symbol to run in gdb_run";
+		return;
 	    }
 	    -re "Line.* Jump anyway.*y or n. $" {
 		send_gdb "y\n"
@@ -846,6 +859,16 @@ proc gdb_continue { function } {
     global decimal
 
     return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"];
+}
+
+proc gdb_init { args } {
+    if { [llength $args] > 0 } {
+	global pf_prefix
+
+	set file [lindex $args 0];
+
+	set pf_prefix "[file tail [file dirname $file]]/[file tail $file]:";
+    }
 }
 
 proc gdb_finish { } {
