@@ -1,5 +1,8 @@
 Wed Apr 22 12:53:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (INCLUDES): Add -I$(srcdir)/../intl -I../intl.
+	* Makefile.in: Rebuild.
+
 	* bfd-in2.h: Rebuild for Nick's changes.
 
 Tue Apr 21 23:11:51 1998  Richard Henderson  <rth@cygnus.com>
