@@ -1,3 +1,105 @@
+Wed May  5 08:39:21 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* config/tc-i386.c: Replace SEG_* with *_section, fix up subseg_*
+	calls.  Deleted some unused code.
+	* config/obj-coff.c: Likewise.
+
+	ELF support, mostly contributed by Utah:
+	* config/obj-elf.c (obj_elf_section, obj_elf_stab, obj_elf_line,
+	obj_elf_type): Rewrite.
+	(obj_elf_frob_symbol, elf_stab_symbol_string, elf_stab_symbol,
+	obj_elf_desc, obj_elf_version, obj_symbol_new_hook, obj_elf_size):
+	New functions.
+	(obj_elf_ident): Dummy.
+	* config/obj-elf.h (FALSE, TRUE, S_*, tc_frob_symbol,
+	TARGET_SYMBOL_FIELDS): New macros.
+	(gdb_section): New variable decl.
+
+	* config/tc-i386.c (md_atof): Return zero, not empty string, on
+	success.
+
+	BFD_ASSEMBLER conditional changes:
+	* config/obj-coff.c (lineno_rootP, seg_N_TYPE, *_section_header):
+	Don't define these.
+	(SA_SET_SYM_ENDNDX, SA_SET_SYM_TAGNDX): New functions.
+	(fetch_coff_debug_section): Ditto.
+	(obj_coff_endef): Call fetch_coff_debug_section.
+	(struct line_no): New type.
+	(c_symbol_merge): New way for copying aux fields.
+	(c_dot_file_symbol): Put symbol in absolute section, and set flag
+	BSF_DEBUGGING.
+	(function_lineoff): New symbol.
+	(function_lineoff, text_lineno_number, our_lineno_number,
+	lineno_lastP): Don't define.
+	(c_line_new): Don't define.
+	(obj_emit_lineno, obj_coff_endef): Use abort calls as, uh,
+	placeholders, until
+	line-number recording gets implemented.
+	(obj_new_symbol_hook): New code for handling aux fields.
+	(add_lineno, add_linesym): New functions.
+	(obj_coff_ln): Call add_lineno, not c_line_new.
+	(obj_coff_endef): New code for handling symbol names.  New lineno
+	code.  Look for section name "*DEBUG*" for debugging section.
+	(align, coff_check_file_symbols, obj_coff_section,
+	coff_frob_file): New functions.
+	* config/obj-coff.h: Reordered some includes.
+	(BYTE_ORDERING, FILE_HEADER_MAGIC, seg_N_TYPE, N_TYPE_seg,
+	DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE, AOUTHDR, AOUTHDRSIZE): Don't
+	define these.
+	(TARGET_SYMBOL_FIELDS, I960_SYM_FIELDS): New macros.
+	(SYM_AUXENT): New macro (for non-BFD_ASSEMBLER too) for accessing
+	aux entries.  Most SA_* macros now use it unconditionally.
+	(S_*): Use `bsym' field, and access BFD private data.
+	(SF_*): Use `sy_flags' symbol field for most of these.
+	(H_*, object_headers, lineno, lineno_*P, OBJ_EMIT_LINENO): Don't
+	define.
+	(*_section_header): Don't define.
+	* config/tc-i386.c (md_convert_frag, md_apply_fix): Changed
+	interface.
+	(tc_gen_reloc) [I386COFF]: New function.
+	(tc_aout_fix_to_chars, tc_coff_fix2rtype): Don't define.
+	* config/tc-i386.h (TARGET_ARCH, TARGET_BYTES_BIG_ENDIAN): New
+	macros.
+
+	* config/obj-coff.c (stack_init): Don't do assignments inside
+	conditions.
+	(obj_coff_def): Simplified handling of symbol name a bit.
+	(tag_insert): Name argument is now pointer to CONST.
+	(obj_crawl_symbol_chain): Commented out.
+
+	* config/obj-coff.h: Use PARAMS macro in prototypes.
+
+	* write.c (relax_and_size_seg) [BFD_ASSEMBLER]: Don't indirect
+	through frchainP pointer if it is null.
+
+	* configure.in: Warn if BFD mode is explicitly turned off but is
+	required by specified target.
+	(mips ecoff targets): Don't need to set bfd_gas here; it gets
+	taken care of later.
+
+	* config/obj-coffbfd.c (crawl_symbols): Don't clear sy_forward
+	field.
+	(yank_symbols): Merge symbols only if sy_forward is null.
+
+	* config/tc-m68k.h (AOUT_MACHTYPE): Don't define if already
+	defined.
+
+	* tc.h (md_convert_frag) [BFD_ASSEMBLER]: Section arg is not
+	pointer.
+	* config/tc-m68k.c (md_convert_frag) [BFD_ASSEMBLER]: Ditto.
+
+	* config/tc-sparc.h (LOCAL_LABEL) [OBJ_ELF]: Anything starting
+	with "." is a local label.
+
+	* config/te-hppa.h, config/tc-hppa.h, config/tc-hppa.c: New config
+	files.
+
+	* config/te-linux.h, config/te-386bsd.h: New config files.
+	* configure.in (i386-*-linux, i386-*-bsd): Use them.
+	* config/tc-i386.h (TARGET_FORMAT): Select format based on target
+	environment.
+	(DOT_LABEL_PREFIX): Don't define for 386bsd or Linux.
+
 Wed May  5 13:14:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-ecoff.c (init_file): Set fMerge to 0 since dbx seems
@@ -7,6 +109,17 @@ Wed May  5 13:14:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 	st_staticProc symbols correctly.
 	* config/tc-mips.h (NO_LISTING): Don't define.  People might want
 	listings.
+
+Tue May  4 21:22:54 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-hp300.h, config/obj-hp300.c, config/te-hp300.h: New
+	files.
+	* configure.in (m68k-*-hpux): Use them.
+
+	* config/obj-aout.c (obj_pre_write_hook): Use AOUT_VERSION if
+	defined, otherwise zero.
+
+	* config/aout_gnu.h (OMAGIC): Don't define if already defined.
 
 Mon May  3 15:59:32 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -19,6 +132,11 @@ Wed Apr 28 19:11:22 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* config/tc-a29k.c: Include ctype.h.
 	(define_some_regs): Added special-purpose registers for 29050.
+
+	* config/tc-i386.c (comment_chars) [TE_I386AIX]: Include "/".
+
+	* config/obj-coffbfd.c (fill_section): Don't set STYP_REG here.
+	(change_to_section): Set it here instead.
 
 Wed Apr 28 13:40:29 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
 
