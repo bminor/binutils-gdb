@@ -1,3 +1,11 @@
+Sat Mar 12 09:46:09 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* elf32-ppc.c: Renamed from elf32-powerpc.c.
+ 	start-sanitize-powerpc-netware
+	* nlm32-ppc.c: Renamed from nlm32-powerpc.c.
+ 	end-sanitize-powerpc-netware
+	* Makefile.in, configure.in: Corresponding changes.
+
 Fri Mar 11 22:27:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-powerpc.c: Extensive changes to update to preliminary ABI.
@@ -284,7 +292,7 @@ Sat Feb 19 03:17:32 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	start-sanitize-powerpc-netware
+ 	start-sanitize-powerpc-netware
 	Support for PowerPC NetWare.
 	* nlm32-powerpc.c: New file.
 	* config.bfd (powerpc-*-netware*): New target; use ppc-nlm.
