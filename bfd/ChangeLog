@@ -1,3 +1,7 @@
+2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* elf32-crx.c (elf32_crx_relax_section): Support 'bcop' relaxation.
+
 2004-12-21  Kris Warkentin  <kewarken@qnx.com>
 
 	* elf.c (elfcore_grok_nto_gregs): Change name to elfcore_grok_nto_regs.

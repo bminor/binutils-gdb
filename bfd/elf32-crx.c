@@ -1183,7 +1183,9 @@ elf32_crx_relax_section (bfd *abfd, asection *sec,
 	      /* Verify it's a 'cmp&branch' opcode.  */
 	      if ((code & 0xfff0) != 0x3180 && (code & 0xfff0) != 0x3190
 	       && (code & 0xfff0) != 0x31a0 && (code & 0xfff0) != 0x31c0
-	       && (code & 0xfff0) != 0x31d0 && (code & 0xfff0) != 0x31e0)
+	       && (code & 0xfff0) != 0x31d0 && (code & 0xfff0) != 0x31e0
+	       /* Or a Co-processor branch ('bcop').  */
+	       && (code & 0xfff0) != 0x3010 && (code & 0xfff0) != 0x3110)
 		continue;
 
 	      /* Note that we've changed the relocs, section contents, etc.  */
