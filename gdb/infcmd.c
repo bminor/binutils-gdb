@@ -479,7 +479,7 @@ run_command (char *args, int from_tty)
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
   target_create_inferior (exec_file, get_inferior_args (),
-			  environ_vector (inferior_environ));
+			  environ_vector (inferior_environ), from_tty);
 }
 
 

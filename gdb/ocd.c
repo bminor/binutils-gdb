@@ -1014,7 +1014,7 @@ ocd_mourn (void)
    the program at that point.  */
 
 void
-ocd_create_inferior (char *exec_file, char *args, char **env)
+ocd_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   if (args && (*args != '\000'))
     error ("Args are not supported by BDM.");

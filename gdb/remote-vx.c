@@ -202,7 +202,7 @@ vx_remove_breakpoint (int addr)
    On VxWorks, we ignore exec_file.  */
 
 static void
-vx_create_inferior (char *exec_file, char *args, char **env)
+vx_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   enum clnt_stat status;
   arg_array passArgs;

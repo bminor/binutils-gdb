@@ -183,7 +183,7 @@ static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 static void go32_files_info (struct target_ops *target);
 static void go32_stop (void);
 static void go32_kill_inferior (void);
-static void go32_create_inferior (char *exec_file, char *args, char **env);
+static void go32_create_inferior (char *exec_file, char *args, char **env, int from_tty);
 static void go32_mourn_inferior (void);
 static int go32_can_run (void);
 
@@ -574,7 +574,7 @@ go32_kill_inferior (void)
 }
 
 static void
-go32_create_inferior (char *exec_file, char *args, char **env)
+go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   extern char **environ;
   jmp_buf start_state;

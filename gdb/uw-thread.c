@@ -797,12 +797,13 @@ uw_thread_prepare_to_store (void)
    This function only gets called with uw_thread_active == 0. */
 
 static void
-uw_thread_create_inferior (char *exec_file, char *allargs, char **env)
+uw_thread_create_inferior (char *exec_file, char *allargs, char **env,
+			   int from_tty)
 {
   if (uw_thread_active)
     deactivate_uw_thread ();
 
-  procfs_ops.to_create_inferior (exec_file, allargs, env);
+  procfs_ops.to_create_inferior (exec_file, allargs, env, from_tty);
   if (uw_thread_active)
     {
       find_main ();

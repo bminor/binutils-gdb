@@ -2011,7 +2011,8 @@ monitor_kill (void)
    the program at that point.  */
 
 static void
-monitor_create_inferior (char *exec_file, char *args, char **env)
+monitor_create_inferior (char *exec_file, char *args, char **env,
+			 int from_tty)
 {
   if (args && (*args != '\000'))
     error ("Args are not supported by the monitor.");

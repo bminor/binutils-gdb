@@ -1720,7 +1720,8 @@ wince_initialize (void)
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
 static void
-child_create_inferior (char *exec_file, char *args, char **env)
+child_create_inferior (char *exec_file, char *args, char **env,
+		       int from_tty)
 {
   PROCESS_INFORMATION pi;
   struct target_waitstatus dummy;

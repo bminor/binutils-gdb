@@ -1758,9 +1758,10 @@ lin_lwp_kill (void)
 }
 
 static void
-lin_lwp_create_inferior (char *exec_file, char *allargs, char **env)
+lin_lwp_create_inferior (char *exec_file, char *allargs, char **env,
+			 int from_tty)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env);
+  child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void

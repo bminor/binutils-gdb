@@ -73,7 +73,7 @@ static void ptrace_me (void);
 
 static void ptrace_him (int);
 
-static void child_create_inferior (char *, char *, char **);
+static void child_create_inferior (char *, char *, char **, int);
 
 static void child_mourn_inferior (void);
 
@@ -356,7 +356,8 @@ ptrace_him (int pid)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (char *exec_file, char *allargs, char **env)
+child_create_inferior (char *exec_file, char *allargs, char **env,
+		       int from_tty)
 {
 #ifdef HPUXHPPA
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, pre_fork_inferior, NULL);

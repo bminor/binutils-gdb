@@ -431,9 +431,10 @@ hpux_thread_notice_signals (ptid_t ptid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-hpux_thread_create_inferior (char *exec_file, char *allargs, char **env)
+hpux_thread_create_inferior (char *exec_file, char *allargs, char **env,
+			     int from_tty)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env);
+  child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 
   if (hpux_thread_active)
     {

@@ -371,7 +371,8 @@ get_hex_regs (int n, int regno)
    user types "run" after having attached.  */
 
 static void
-e7000_create_inferior (char *execfile, char *args, char **env)
+e7000_create_inferior (char *execfile, char *args, char **env,
+		       int from_tty)
 {
   int entry_pt;
 

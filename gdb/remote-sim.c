@@ -83,8 +83,6 @@ static void gdbsim_kill (void);
 
 static void gdbsim_load (char *prog, int fromtty);
 
-static void gdbsim_create_inferior (char *exec_file, char *args, char **env);
-
 static void gdbsim_open (char *args, int from_tty);
 
 static void gdbsim_close (int quitting);
@@ -429,7 +427,7 @@ gdbsim_load (char *prog, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (char *exec_file, char *args, char **env)
+gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   int len;
   char *arg_buf, **argv;

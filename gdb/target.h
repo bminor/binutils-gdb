@@ -353,7 +353,7 @@ struct target_ops
     void (*to_kill) (void);
     void (*to_load) (char *, int);
     int (*to_lookup_symbol) (char *, CORE_ADDR *);
-    void (*to_create_inferior) (char *, char *, char **);
+    void (*to_create_inferior) (char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
     int (*to_insert_fork_catchpoint) (int);
@@ -712,8 +712,8 @@ extern void target_load (char *arg, int from_tty);
    ENV is the environment vector to pass.  Errors reported with error().
    On VxWorks and various standalone systems, we ignore exec_file.  */
 
-#define	target_create_inferior(exec_file, args, env)	\
-     (*current_target.to_create_inferior) (exec_file, args, env)
+#define	target_create_inferior(exec_file, args, env, FROM_TTY)	\
+     (*current_target.to_create_inferior) (exec_file, args, env, (FROM_TTY))
 
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
@@ -1182,7 +1182,7 @@ extern void noprocess (void);
 
 extern void find_default_attach (char *, int);
 
-extern void find_default_create_inferior (char *, char *, char **);
+extern void find_default_create_inferior (char *, char *, char **, int);
 
 extern struct target_ops *find_run_target (void);
 

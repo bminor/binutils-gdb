@@ -107,9 +107,6 @@ static void extended_remote_restart (void);
 
 static void extended_remote_mourn (void);
 
-static void extended_remote_create_inferior (char *, char *, char **);
-static void extended_remote_async_create_inferior (char *, char *, char **);
-
 static void remote_mourn_1 (struct target_ops *);
 
 static void remote_send (char *buf, long sizeof_buf);
@@ -4246,7 +4243,8 @@ remote_mourn_1 (struct target_ops *target)
    we're debugging, arguments and an environment.  */
 
 static void
-extended_remote_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_create_inferior (char *exec_file, char *args, char **env,
+				 int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */
@@ -4268,7 +4266,8 @@ extended_remote_create_inferior (char *exec_file, char *args, char **env)
 
 /* Async version of extended_remote_create_inferior. */
 static void
-extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_async_create_inferior (char *exec_file, char *args, char **env,
+				       int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */

@@ -41,8 +41,6 @@
 
 static void target_info (char *, int);
 
-static void maybe_kill_then_create_inferior (char *, char *, char **);
-
 static void maybe_kill_then_attach (char *, int);
 
 static void kill_or_be_killed (int);
@@ -150,8 +148,6 @@ static void debug_to_kill (void);
 static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
-
-static void debug_to_create_inferior (char *, char *, char **);
 
 static void debug_to_mourn_inferior (void);
 
@@ -339,10 +335,11 @@ maybe_kill_then_attach (char *args, int from_tty)
 }
 
 static void
-maybe_kill_then_create_inferior (char *exec, char *args, char **env)
+maybe_kill_then_create_inferior (char *exec, char *args, char **env,
+				 int from_tty)
 {
   kill_or_be_killed (0);
-  target_create_inferior (exec, args, env);
+  target_create_inferior (exec, args, env, from_tty);
 }
 
 /* Go through the target stack from top to bottom, copying over zero
@@ -1340,12 +1337,13 @@ find_default_attach (char *args, int from_tty)
 }
 
 void
-find_default_create_inferior (char *exec_file, char *allargs, char **env)
+find_default_create_inferior (char *exec_file, char *allargs, char **env,
+			      int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("run");
-  (t->to_create_inferior) (exec_file, allargs, env);
+  (t->to_create_inferior) (exec_file, allargs, env, from_tty);
   return;
 }
 
@@ -2071,12 +2069,13 @@ debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-debug_to_create_inferior (char *exec_file, char *args, char **env)
+debug_to_create_inferior (char *exec_file, char *args, char **env,
+			  int from_tty)
 {
-  debug_target.to_create_inferior (exec_file, args, env);
+  debug_target.to_create_inferior (exec_file, args, env, from_tty);
 
-  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx)\n",
-		      exec_file, args);
+  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx, %d)\n",
+		      exec_file, args, from_tty);
 }
 
 static void

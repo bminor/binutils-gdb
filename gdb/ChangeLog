@@ -1,3 +1,37 @@
+2004-05-25  Andrew Cagney  <cagney@gnu.org>
+
+	* target.h (struct target_ops): Add from_tty to
+	to_create_inferior.
+	(target_create_inferior, find_default_create_inferior): Update.
+	* infcmd.c (run_command): Update.
+	* wince.c (child_create_inferior): Update.
+	* win32-nat.c (child_create_inferior): Update.
+	* uw-thread.c (uw_thread_create_inferior): Update.
+	* thread-db.c (thread_db_create_inferior): Update.
+	* target.c (debug_to_create_inferior) 
+	(find_default_create_inferior): Update.
+	(maybe_kill_then_create_inferior): Update.
+	* sol-thread.c (sol_thread_create_inferior): Update.
+	* remote.c (extended_remote_async_create_inferior) 
+	(extended_remote_create_inferior): Update.
+	* remote-vx.c (vx_create_inferior): Update.
+	* remote-st.c (st2000_create_inferior): Update.
+	* remote-sim.c (gdbsim_create_inferior): Update.
+	* remote-sds.c (sds_create_inferior): Update.
+	* remote-rdp.c (remote_rdp_create_inferior): Update.
+	* remote-rdi.c (arm_rdi_create_inferior): Update.
+	* remote-m32r-sdi.c (m32r_create_inferior): Update.
+	* remote-e7000.c (e7000_create_inferior): Update.
+	* procfs.c (procfs_create_inferior): Update.
+	* ocd.c (ocd_create_inferior): Update.
+	* ocd.h (ocd_create_inferior): Update.
+	* nto-procfs.c (procfs_create_inferior): Update.
+	* monitor.c (monitor_create_inferior): Update.
+	* lin-lwp.c (lin_lwp_create_inferior): Update.
+	* inftarg.c (child_create_inferior): Update.
+	* hpux-thread.c (hpux_thread_create_inferior): Update.
+	* gnu-nat.c (gnu_create_inferior): Update.
+
 2004-05-25  Andrew Cagney  <cagney@gnu.com>
 
 	* MAINTAINERS: Update e-mail address.

@@ -264,7 +264,8 @@ check_mmu_status (void)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-m32r_create_inferior (char *execfile, char *args, char **env)
+m32r_create_inferior (char *execfile, char *args, char **env,
+		      int from_tty)
 {
   CORE_ADDR entry_pt;
 

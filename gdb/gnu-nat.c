@@ -2040,7 +2040,8 @@ cur_inf (void)
 }
 
 static void
-gnu_create_inferior (char *exec_file, char *allargs, char **env)
+gnu_create_inferior (char *exec_file, char *allargs, char **env,
+		     int from_tty)
 {
   struct inf *inf = cur_inf ();
 

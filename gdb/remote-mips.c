@@ -114,8 +114,6 @@ static int mips_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
 static void mips_files_info (struct target_ops *ignore);
 
-static void mips_create_inferior (char *execfile, char *args, char **env);
-
 static void mips_mourn_inferior (void);
 
 static int pmon_makeb64 (unsigned long v, char *p, int n, int *chksum);
@@ -2178,7 +2176,7 @@ Give up (and stop debugging it)? "))
 /* Start running on the target board.  */
 
 static void
-mips_create_inferior (char *execfile, char *args, char **env)
+mips_create_inferior (char *execfile, char *args, char **env, int from_tty)
 {
   CORE_ADDR entry_pt;
 

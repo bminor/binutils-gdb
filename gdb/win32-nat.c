@@ -1680,7 +1680,8 @@ child_open (char *arg, int from_tty)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (char *exec_file, char *allargs, char **env)
+child_create_inferior (char *exec_file, char *allargs, char **env,
+		       int from_tty)
 {
   char *winenv;
   char *temp;

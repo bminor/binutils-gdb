@@ -76,8 +76,6 @@ static void sds_store_registers (int);
 
 static void sds_mourn (void);
 
-static void sds_create_inferior (char *, char *, char **);
-
 static void sds_load (char *, int);
 
 static int getmessage (unsigned char *, int);
@@ -985,7 +983,7 @@ sds_mourn (void)
 }
 
 static void
-sds_create_inferior (char *exec_file, char *args, char **env)
+sds_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   inferior_ptid = pid_to_ptid (42000);
 

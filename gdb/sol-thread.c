@@ -750,9 +750,10 @@ sol_thread_notice_signals (ptid_t ptid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-sol_thread_create_inferior (char *exec_file, char *allargs, char **env)
+sol_thread_create_inferior (char *exec_file, char *allargs, char **env,
+			    int from_tty)
 {
-  procfs_ops.to_create_inferior (exec_file, allargs, env);
+  procfs_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 
   if (sol_thread_active && !ptid_equal (inferior_ptid, null_ptid))
     {

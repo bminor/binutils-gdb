@@ -1063,7 +1063,8 @@ thread_db_kill (void)
 }
 
 static void
-thread_db_create_inferior (char *exec_file, char *allargs, char **env)
+thread_db_create_inferior (char *exec_file, char *allargs, char **env,
+			   int from_tty)
 {
   if (!keep_thread_db)
     {
@@ -1071,7 +1072,7 @@ thread_db_create_inferior (char *exec_file, char *allargs, char **env)
       using_thread_db = 0;
     }
 
-  target_beneath->to_create_inferior (exec_file, allargs, env);
+  target_beneath->to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void

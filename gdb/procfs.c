@@ -124,7 +124,7 @@ static void procfs_notice_signals (ptid_t);
 static void procfs_prepare_to_store (void);
 static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (void);
-static void procfs_create_inferior (char *, char *, char **);
+static void procfs_create_inferior (char *, char *, char **, int);
 static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
 static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
 			       struct mem_attrib *attrib,
@@ -4972,7 +4972,8 @@ procfs_set_exec_trap (void)
  */
 
 static void
-procfs_create_inferior (char *exec_file, char *allargs, char **env)
+procfs_create_inferior (char *exec_file, char *allargs, char **env,
+			int from_tty)
 {
   char *shell_file = getenv ("SHELL");
   char *tryname;

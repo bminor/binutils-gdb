@@ -1351,7 +1351,8 @@ remote_rdp_files_info (struct target_ops *target)
 
 
 static void
-remote_rdp_create_inferior (char *exec_file, char *allargs, char **env)
+remote_rdp_create_inferior (char *exec_file, char *allargs, char **env,
+			    int from_tty)
 {
   CORE_ADDR entry_point;
 
