@@ -214,11 +214,11 @@ print_insn (memaddr, stream)
 
   if (BIG)
     {
-      return print_insn_z8001 (memaddr, &info);
+      return print_insn_z8001 ((bfd_vma) memaddr, &info);
     }
   else
     {
-      return print_insn_z8002 (memaddr, &info);
+      return print_insn_z8002 ((bfd_vma) memaddr, &info);
     }
 }
 
