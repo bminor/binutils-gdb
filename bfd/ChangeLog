@@ -1,3 +1,9 @@
+Fri Aug  6 12:00:03 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* targets.c (target_vector): Add hp300_bsd_vec.
+	* Makefile.in (BFD32_BACKENDS, CFILES): Add hp300bsd.
+	(hp300bsd.o): New rule.
+
 Fri Aug  6 15:13:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* libelf.h (NAME): Provide a default definition, that's neither

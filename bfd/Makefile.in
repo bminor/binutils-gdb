@@ -89,7 +89,7 @@ BFD32_BACKENDS = \
 	nlm32.o nlm32-gen.o nlm32-i386.o \
 	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o i386lynx.o \
-	hp300hpux.o bout.o \
+	hp300bsd.o hp300hpux.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-u68k.o \
 	coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
@@ -153,7 +153,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 elf64.c elf64-gen.c \
 	 nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
-	 hp300hpux.c i386lynx.c
+	 hp300bsd.c hp300hpux.c i386lynx.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -390,6 +390,10 @@ hp300hpux.o : hp300hpux.c aoutx.h $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h libaout.h libbfd.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/hp300hpux.h aout-target.h
+hp300bsd.o : hp300bsd.c aoutx.h $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/obstack.h libaout.h libbfd.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
+  aout-target.h
 demo64.o : demo64.c 
 
 srec.o : srec.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 

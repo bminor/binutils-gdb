@@ -371,10 +371,11 @@ extern bfd_target bfd_elf32_big_generic_vec;
 extern bfd_target bfd_elf32_little_generic_vec;
 extern bfd_target bfd_elf64_big_generic_vec;
 extern bfd_target bfd_elf64_little_generic_vec;
-extern bfd_target bfd_nlm32_big_generic_vec;
-extern bfd_target bfd_nlm32_little_generic_vec;
-extern bfd_target bfd_nlm64_big_generic_vec;
-extern bfd_target bfd_nlm64_little_generic_vec;
+extern bfd_target nlm32_i386_vec;
+extern bfd_target nlm32_big_generic_vec;
+extern bfd_target nlm32_little_generic_vec;
+extern bfd_target nlm64_big_generic_vec;
+extern bfd_target nlm64_little_generic_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
@@ -395,6 +396,7 @@ extern bfd_target z8kcoff_vec;
 extern bfd_target we32kcoff_vec;
 extern bfd_target shcoff_vec;
 extern bfd_target hp300hpux_vec;
+extern bfd_target hp300bsd_vec;
 
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 extern bfd_target hppa_vec;
@@ -453,13 +455,14 @@ bfd_target *target_vector[] = {
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_big_generic_vec,
-	&bfd_nlm32_little_generic_vec,
-	&bfd_nlm32_big_generic_vec,
+	&nlm32_i386_vec,
+	&nlm32_little_generic_vec,
+	&nlm32_big_generic_vec,
 #ifdef BFD64
 	&bfd_elf64_little_generic_vec,
 	&bfd_elf64_big_generic_vec,
-	&bfd_nlm64_little_generic_vec,
-	&bfd_nlm64_big_generic_vec,
+	&nlm64_little_generic_vec,
+	&nlm64_big_generic_vec,
 #endif
 	&a_out_adobe_vec,
 	&b_out_vec_little_host,
@@ -472,6 +475,7 @@ bfd_target *target_vector[] = {
         &hppa_vec,
 #endif
 	&hp300hpux_vec,
+	&hp300bsd_vec,
 	&we32kcoff_vec,
 
 #ifdef	TRAD_CORE
