@@ -1,3 +1,8 @@
+Wed Jul  1 17:05:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (copy_private_bfd_data): Add support for changing VMA or
+	LMA of sections.
+
 Wed Jul  1 16:58:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (sh_relax_delete_bytes): Correct address comparisons

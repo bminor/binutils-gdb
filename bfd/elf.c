@@ -445,7 +445,8 @@ bfd_elf_find_section (abfd, name)
   i_shdrp = elf_elfsections (abfd);
   if (i_shdrp != NULL)
     {
-      shstrtab = bfd_elf_get_str_section (abfd, elf_elfheader (abfd)->e_shstrndx);
+      shstrtab = bfd_elf_get_str_section
+	(abfd, elf_elfheader (abfd)->e_shstrndx);
       if (shstrtab != NULL)
 	{
 	  max = elf_elfheader (abfd)->e_shnum;
@@ -1841,7 +1842,7 @@ elf_map_symbols (abfd)
       num_sections++;
 #ifdef DEBUG
       fprintf (stderr,
-	       _("creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"),
+ _("creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"),
 	       asect->name, (long) asect->vma, asect->index, (long) asect);
 #endif
     }
@@ -2087,7 +2088,7 @@ map_sections_to_segments (abfd)
   unsigned int phdr_index;
   bfd_vma maxpagesize;
   asection **hdrpp;
-  boolean phdr_in_section = true;
+  boolean phdr_in_segment = true;
   boolean writable;
   asection *dynsec;
 
@@ -2182,7 +2183,7 @@ map_sections_to_segments (abfd)
       if ((abfd->flags & D_PAGED) == 0
 	  || sections[0]->lma < phdr_size
 	  || sections[0]->lma % maxpagesize < phdr_size % maxpagesize)
-	phdr_in_section = false;
+	phdr_in_segment = false;
     }
 
   for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
@@ -2260,7 +2261,7 @@ map_sections_to_segments (abfd)
       /* We need a new program segment.  We must create a new program
          header holding all the sections from phdr_index until hdr.  */
 
-      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_section);
+      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
       if (m == NULL)
 	goto error_return;
 
@@ -2274,13 +2275,13 @@ map_sections_to_segments (abfd)
 
       last_hdr = hdr;
       phdr_index = i;
-      phdr_in_section = false;
+      phdr_in_segment = false;
     }
 
   /* Create a final PT_LOAD program segment.  */
   if (last_hdr != NULL)
     {
-      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_section);
+      m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
       if (m == NULL)
 	goto error_return;
 
@@ -2340,7 +2341,7 @@ map_sections_to_segments (abfd)
   return false;
 }
 
-/* Sort sections by VMA.  */
+/* Sort sections by address.  */
 
 static int
 elf_sort_sections (arg1, arg2)
@@ -2357,8 +2358,8 @@ elf_sort_sections (arg1, arg2)
   else if (sec1->lma > sec2->lma)
     return 1;
 
-  /* Sort by VMA.  Normally the LMA and the VMA will be the same, and
-     this will do nothing.  */
+  /* Then sort by VMA.  Normally the LMA and the VMA will be
+     the same, and this will do nothing.  */
   if (sec1->vma < sec2->vma)
     return -1;
   else if (sec1->vma > sec2->vma)
@@ -2461,6 +2462,7 @@ assign_file_positions_for_segments (abfd)
   filehdr_paddr = 0;
   phdrs_vaddr = 0;
   phdrs_paddr = 0;
+  
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
        m != NULL;
        m = m->next, p++)
@@ -2515,7 +2517,7 @@ assign_file_positions_for_segments (abfd)
       p->p_offset = 0;
       p->p_filesz = 0;
       p->p_memsz = 0;
-
+      
       if (m->includes_filehdr)
 	{
 	  if (! m->p_flags_valid)
@@ -2550,6 +2552,7 @@ assign_file_positions_for_segments (abfd)
 	{
 	  if (! m->p_flags_valid)
 	    p->p_flags |= PF_R;
+	  
 	  if (m->includes_filehdr)
 	    {
 	      if (p->p_type == PT_LOAD)
@@ -2561,6 +2564,7 @@ assign_file_positions_for_segments (abfd)
 	  else
 	    {
 	      p->p_offset = bed->s->sizeof_ehdr;
+	      
 	      if (m->count > 0)
 		{
 		  BFD_ASSERT (p->p_type == PT_LOAD);
@@ -2568,12 +2572,16 @@ assign_file_positions_for_segments (abfd)
 		  if (! m->p_paddr_valid)
 		    p->p_paddr -= off - p->p_offset;
 		}
+	      
 	      if (p->p_type == PT_LOAD)
 		{
 		  phdrs_vaddr = p->p_vaddr;
 		  phdrs_paddr = p->p_paddr;
 		}
+	      else
+		phdrs_vaddr = bed->maxpagesize + bed->s->sizeof_ehdr;
 	    }
+	  
 	  p->p_filesz += alloc * bed->s->sizeof_phdr;
 	  p->p_memsz += alloc * bed->s->sizeof_phdr;
 	}
@@ -2593,6 +2601,7 @@ assign_file_positions_for_segments (abfd)
 	}
 
       voff = off;
+      
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
 	  asection *sec;
@@ -2619,10 +2628,14 @@ assign_file_positions_for_segments (abfd)
 
 	  if (p->p_type == PT_LOAD)
 	    {
-	      bfd_vma adjust;
-
+	      bfd_signed_vma adjust;
+	      
 	      if ((flags & SEC_LOAD) != 0)
-		adjust = sec->lma - (p->p_paddr + p->p_memsz);
+		{
+		  adjust = sec->lma - (p->p_paddr + p->p_memsz);
+		  if (adjust < 0)
+		    adjust = 0;
+		}
 	      else if ((flags & SEC_ALLOC) != 0)
 		{
 		  /* The section VMA must equal the file position
@@ -2641,7 +2654,16 @@ assign_file_positions_for_segments (abfd)
 	      if (adjust != 0)
 		{
 		  if (i == 0)
-		    abort ();
+		    {
+		      (* _bfd_error_handler)
+			(_("Error: First section in segment (%s) starts at 0x%x"),
+			 bfd_section_name (abfd, sec), sec->lma);
+		      (* _bfd_error_handler)
+			(_("       whereas segment starts at 0x%x"),
+			 p->p_paddr);
+		      
+		      return false;
+		    }
 		  p->p_memsz += adjust;
 		  off += adjust;
 		  voff += adjust;
@@ -2658,6 +2680,7 @@ assign_file_positions_for_segments (abfd)
 	      if ((flags & SEC_LOAD) != 0
 		  || (flags & SEC_HAS_CONTENTS) != 0)
 		off += sec->_raw_size;
+	      
 	      if ((flags & SEC_ALLOC) != 0)
 		voff += sec->_raw_size;
 	    }
@@ -2920,7 +2943,7 @@ prep_headers (abfd)
      bfd *abfd;
 {
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_Internal_Phdr *i_phdrp = 0;	/* Program header table, internal form */
+  Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   int count;
   struct bfd_strtab_hash *shstrtab;
@@ -3110,8 +3133,8 @@ _bfd_elf_write_object_contents (abfd)
   unsigned int count;
 
   if (! abfd->output_has_begun
-      && ! _bfd_elf_compute_section_file_positions (abfd,
-						    (struct bfd_link_info *) NULL))
+      && ! _bfd_elf_compute_section_file_positions
+             (abfd, (struct bfd_link_info *) NULL))
     return false;
 
   i_shdrp = elf_elfsections (abfd);
@@ -3121,6 +3144,7 @@ _bfd_elf_write_object_contents (abfd)
   bfd_map_over_sections (abfd, bed->s->write_relocs, &failed);
   if (failed)
     return false;
+
   _bfd_elf_assign_file_positions_for_relocs (abfd);
 
   /* After writing the headers, we need to write the sections too... */
@@ -3264,8 +3288,10 @@ copy_private_bfd_data (ibfd, obfd)
   struct elf_segment_map **pm;
   struct elf_segment_map *m;
   Elf_Internal_Phdr *p;
-  unsigned int i, c;
-
+  unsigned int i;
+  unsigned int num_segments;
+  unsigned int phdr_included = false;
+  
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
@@ -3278,33 +3304,54 @@ copy_private_bfd_data (ibfd, obfd)
   mfirst = NULL;
   pm = &mfirst;
 
-  c = elf_elfheader (ibfd)->e_phnum;
-  for (i = 0, p = elf_tdata (ibfd)->phdr; i < c; i++, p++)
+  num_segments = elf_elfheader (ibfd)->e_phnum;
+
+#define IS_CONTAINED_BY(addr, len, bottom, phdr)		 	\
+	  ((addr) >= (bottom)				 	  	\
+	   && (   ((addr) + (len)) <= ((bottom) + (phdr)->p_memsz)	\
+	       || ((addr) + (len)) <= ((bottom) + (phdr)->p_filesz)))
+
+  /* The complicated case when p_vaddr is 0 is to handle the Solaris
+     linker, which generates a PT_INTERP section with p_vaddr and
+     p_memsz set to 0.  */
+	    
+#define IS_SOLARIS_PT_INTERP(p, s)					\
+	    (p->p_vaddr == 0						\
+	     && p->p_filesz > 0						\
+	     && (s->flags & SEC_HAS_CONTENTS) != 0			\
+	     && s->_raw_size > 0					\
+	     && (bfd_vma) s->filepos >= p->p_offset			\
+	     && ((bfd_vma) s->filepos + s->_raw_size			\
+		     <= p->p_offset + p->p_filesz))
+
+	    
+  /* Scan through the segments specified in the program header
+     of the input BFD.  */
+  for (i = 0, p = elf_tdata (ibfd)->phdr; i < num_segments; i++, p++)
     {
       unsigned int csecs;
       asection *s;
+      asection **sections;
+      asection *os;
       unsigned int isec;
+      bfd_vma matching_lma;
+      bfd_vma suggested_lma;
+      unsigned int j;
 
+      /* For each section in the input BFD, decide if it should be included
+	 in the current segment.  A section will be included if it is within
+	 the address space of the segment, and it is an allocated segment,
+	 and there is an output section associated with it. */
       csecs = 0;
-
-      /* The complicated case when p_vaddr is 0 is to handle the
-	 Solaris linker, which generates a PT_INTERP section with
-	 p_vaddr and p_memsz set to 0.  */
       for (s = ibfd->sections; s != NULL; s = s->next)
-	if (((s->vma >= p->p_vaddr
-	      && (s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
-		  || s->vma + s->_raw_size <= p->p_vaddr + p->p_filesz))
-	     || (p->p_vaddr == 0
-		 && p->p_filesz > 0
-		 && (s->flags & SEC_HAS_CONTENTS) != 0
-		 && s->_raw_size > 0
-		 && (bfd_vma) s->filepos >= p->p_offset
-		 && ((bfd_vma) s->filepos + s->_raw_size
-		     <= p->p_offset + p->p_filesz)))
+	if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+	     || IS_SOLARIS_PT_INTERP (p, s))
 	    && (s->flags & SEC_ALLOC) != 0
 	    && s->output_section != NULL)
 	  ++csecs;
 
+      /* Allocate a segment map big enough to contain all of the
+	 sections we have selected.  */
       m = ((struct elf_segment_map *)
 	   bfd_alloc (obfd,
 		      (sizeof (struct elf_segment_map)
@@ -3312,49 +3359,101 @@ copy_private_bfd_data (ibfd, obfd)
       if (m == NULL)
 	return false;
 
-      m->next = NULL;
-      m->p_type = p->p_type;
-      m->p_flags = p->p_flags;
+      /* Initialise the fields of the segment map.  Default to
+	 using the physical address of the segment in the input BFD.  */
+      m->next          = NULL;
+      m->p_type        = p->p_type;
+      m->p_flags       = p->p_flags;
       m->p_flags_valid = 1;
-      /* Default to using the physical address of the segment
-	 in the input BFD.  */
-      m->p_paddr = p->p_paddr;
+      m->p_paddr       = p->p_paddr;
       m->p_paddr_valid = 1;
 
+      /* Determine if this segment contains the ELF file header
+	 and if it contains the program headers themselves.  */
       m->includes_filehdr = (p->p_offset == 0
 			     && p->p_filesz >= iehdr->e_ehsize);
 
-      m->includes_phdrs = (p->p_offset <= (bfd_vma) iehdr->e_phoff
-			   && (p->p_offset + p->p_filesz
-			       >= ((bfd_vma) iehdr->e_phoff
-				   + iehdr->e_phnum * iehdr->e_phentsize)));
-
-      isec = 0;
-      for (s = ibfd->sections; s != NULL; s = s->next)
+      if (! phdr_included)
 	{
-	  boolean matching_lma = false;
-	  boolean lma_conflict = false;
-	  bfd_vma suggested_lma = 0;
-	  asection * os;
+	  phdr_included = m->includes_phdrs =
+	    (p->p_offset <= (bfd_vma) iehdr->e_phoff
+	     && (p->p_offset + p->p_filesz
+		 >= ((bfd_vma) iehdr->e_phoff
+		     + iehdr->e_phnum * iehdr->e_phentsize)));
+	}
+
+      if (csecs == 0)
+	{
+	  /* Special segments, such as the PT_PHDR segment, may contain
+	     no sections, but ordinary, loadable segments should contain
+	     something.  */
 	  
-#define is_contained_by(addr, len, bottom, phdr)		 	\
-	  ((addr) >= (bottom)				 	  	\
-	   && (   ((addr) + (len)) <= ((bottom) + (phdr)->p_memsz)	\
-	       || ((addr) + (len)) <= ((bottom) + (phdr)->p_filesz)))
+	  if (p->p_type == PT_LOAD)
+	      _bfd_error_handler
+		(_("%s: warning: Empty loadable segment detected\n"),
+		 bfd_get_filename (ibfd));
+	  
+	  m->count = 0;
+	  *pm = m;
+	  pm = &m->next;
+	  
+	  continue;
+	}
+      
+      /* Now scan the sections in the input BFD again and attempt
+	 to add their corresponding output sections to the segment map.
+	 The problem here is how to handle an output section which has
+	 been moved (ie had its LMA changed).  There are four possibilities:
+
+	 1. None of the sections have been moved.
+	    In this case we can continue to use the segment LMA from the
+	    input BFD.
 	    
+	 2. All of the sections have been moved by the same amount.
+	    In this case we can change the segment's LMA to match the LMA
+	    of the first section.
+
+	 3. Some of the sections have been moved, others have not.
+	    In this case those sections which have not been moved can be
+	    placed in the current segment which will have to have its size,
+	    and possibly its LMA changed, and a new segment or segments will
+	    have to be created to contain the other sections.
+
+	 4. The sections have been moved, but not be the same amount.
+	    In this case we can change the segment's LMA to match the LMA
+	    of the first section and we will have to create a new segment
+	    or segments to contain the other sections. 
+	    
+	 In order to save time, we allocate an array to hold the section
+	 pointers that we are interested in.  As these sections get assigned
+	 to a segment, they are removed from this array.  */
+      
+      sections = (asection **) bfd_malloc (sizeof (asection *) * csecs);
+      if (sections == NULL)
+	return false;
+      
+      /* Step One: Scan for segment vs section LMA conflicts.
+	 Also add the sections to the section array allocated above.
+	 Also add the sections to the current segment.  In the common
+	 case, where the sections have not been moved, this means that
+	 we have completely filled the segment, and there is nothing
+	 more to do.  */
+      
+      isec = 0;
+      matching_lma = false;
+      suggested_lma = 0;
+
+      for (j = 0, s = ibfd->sections; s != NULL; s = s->next)
+	{
 	  os = s->output_section;
 	  
-	  if ((is_contained_by (s->vma, s->_raw_size, p->p_vaddr, p)
-	       || (p->p_vaddr == 0
-		   && p->p_filesz > 0
-		   && (s->flags & SEC_HAS_CONTENTS) != 0
-		   && s->_raw_size > 0
-		   && (bfd_vma) s->filepos >= p->p_offset
-		   && ((bfd_vma) s->filepos + s->_raw_size
-		       <= p->p_offset + p->p_filesz)))
+	  if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+	       || IS_SOLARIS_PT_INTERP (p, s))
 	      && (s->flags & SEC_ALLOC) != 0
 	      && os != NULL)
 	    {
+	      sections[j++] = s;
+	      
 	      /* The Solaris native linker always sets p_paddr to 0.
 		 We try to catch that case here, and set it to the
 		 correct value.  */
@@ -3371,42 +3470,154 @@ copy_private_bfd_data (ibfd, obfd)
 				     : 0))))
 		m->p_paddr = p->p_vaddr;
 
-	      m->sections[isec] = os;
-	      ++isec;
-
 	      /* Match up the physical address of the segment with the
-		 LMA addresses of its sections.  */
-
-	      if (is_contained_by (os->lma, os->_raw_size, m->p_paddr, p))
-		matching_lma = true;
+		 LMA address of the output section.  */
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p))
+		{
+		  if (matching_lma == 0)
+		    matching_lma = os->lma;
+		  
+		  /* We assume that if the section fits within the segment
+		     that it does not overlap any other section within that
+		     segment.  */
+		  m->sections[isec++] = os;
+		}
 	      else if (suggested_lma == 0)
 		suggested_lma = os->lma;
-	      else if (! is_contained_by (os->lma, os->_raw_size,
-					  suggested_lma, p))
-		lma_conflict = true;
-	    }
-	  
-	  if (matching_lma)
-	    {
-	      if (suggested_lma)
-		(*_bfd_error_handler)
-(_("Warning: Some sections' LMAs lie outside their segment's physical address\n"));
-	    }
-	  else if (lma_conflict)
-	    {
-	      (*_bfd_error_handler)
-(_("Warning: Cannot change segment's physical address to contain all of its sections' LMAs\n"));
-	    }
-	  else if (suggested_lma)
-	    {
-	      m->p_paddr = suggested_lma;
 	    }
 	}
-      BFD_ASSERT (isec == csecs);
-      m->count = csecs;
 
-      *pm = m;
-      pm = &m->next;
+      BFD_ASSERT (j == csecs);
+
+      /* Step Two: Adjust the physical address of the current segment,
+	 if necessary.  */
+      if (isec == csecs)
+	{
+	  /* All of the sections fitted within the segment as currently
+	     specified.  This is the default case.  Add the segment to
+	     the list of built segments and carry on to process the next
+	     program header in the input BFD.  */
+	  m->count = csecs;
+	  *pm = m;
+	  pm = &m->next;
+
+	  free (sections);
+	  continue;
+	}
+      else if (matching_lma != 0)
+	{
+	  /* At least one section fits inside the current segment.
+	     Keep it, but modify its physical address to match the
+	     LMA of the first section that fitted.  */
+
+	  m->p_paddr = matching_lma;
+	}
+      else 
+	{
+	  /* None of the sections fitted inside the current segment.
+	     Change the current segment's physical address to match
+	     the LMA of the first section.  */
+
+	  m->p_paddr = suggested_lma;
+	}
+
+      /* Step Three: Loop over the sections again, this time assigning
+	 those that fit to the current segment and remvoing them from the
+	 sections array; but making sure not to leave large gaps.  Once all
+	 possible sections have been assigned to the current segment it is
+	 added to the list of built segments and if sections still remain
+	 to be assigned, a new segment is constructed before repeating
+	 the loop.  */
+      isec = 0;
+      do
+	{
+	  m->count = 0;
+	  suggested_lma = 0;
+	  
+	  /* Fill the current segment with sections that fit.  */
+	  for (j = 0; j < csecs; j++)
+	    {
+	      s = sections[j];
+	      
+	      if (s == NULL)
+		continue;
+	      
+	      os = s->output_section;
+	      
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p))
+		{
+		  if (m->count == 0)
+		    {
+		      /* If the first section in a segment does not start at
+			 the beginning of the segment, then something is wrong.  */
+		      if (os->lma != m->p_paddr)
+			abort ();
+		    }
+		  else 
+		    {
+		      asection * prev_sec;
+		      bfd_vma maxpagesize;
+		      
+		      prev_sec = m->sections[m->count - 1];
+		      maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
+
+		      /* If the gap between the end of the previous section
+			 and the start of this section is more than maxpagesize
+			 then we need to start a new segment.  */
+		      if (BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size, maxpagesize)
+			  < BFD_ALIGN (os->lma, maxpagesize))
+			{
+			  if (suggested_lma == 0)
+			    suggested_lma = os->lma;
+			  
+			  continue;
+			}
+		    }
+
+		  m->sections[m->count++] = os;
+		  ++isec;
+		  sections[j] = NULL;
+		}
+	      else if (suggested_lma == 0)
+		suggested_lma = os->lma;
+	    }
+
+	  BFD_ASSERT (m->count > 0);
+	  
+	  /* Add the current segment to the list of built segments.  */
+	  *pm = m;
+	  pm = &m->next;
+
+	  if (isec < csecs)
+	    {
+	      /* We still have not allocated all of the sections to
+		 segments.  Create a new segment here, initialise it
+		 and carry on looping.  */
+
+	      m = ((struct elf_segment_map *)
+		   bfd_alloc (obfd,
+			      (sizeof (struct elf_segment_map)
+			       + ((size_t) csecs - 1) * sizeof (asection *))));
+	      if (m == NULL)
+		return false;
+
+	      /* Initialise the fields of the segment map.  Set the physical
+		 physical address to the LMA of the first section that has
+		 not yet been assigned.  */
+	      
+	      m->next             = NULL;
+	      m->p_type           = p->p_type;
+	      m->p_flags          = p->p_flags;
+	      m->p_flags_valid    = 1;
+	      m->p_paddr          = suggested_lma;
+	      m->p_paddr_valid    = 1;
+	      m->includes_filehdr = 0;
+	      m->includes_phdrs   = 0;
+	    }
+	}
+      while (isec < csecs);
+
+      free (sections);
     }
 
   /* The Solaris linker creates program headers in which all the
@@ -3424,6 +3635,33 @@ copy_private_bfd_data (ibfd, obfd)
 
   elf_tdata (obfd)->segment_map = mfirst;
 
+#if 0
+  /* Final Step: Sort the segments into ascending order of physical address. */
+  if (mfirst != NULL)
+    {
+      struct elf_segment_map* prev;
+      
+      prev = mfirst;
+      for (m = mfirst->next; m != NULL; prev = m, m = m->next)
+	{
+	  /* Yes I know - its a bubble sort....*/
+	  if (m->next != NULL && (m->next->p_paddr < m->p_paddr))
+	    {
+	      /* swap m and m->next */
+	      prev->next = m->next;
+	      m->next = m->next->next;
+	      prev->next->next = m;
+
+	      /* restart loop. */
+	      m = mfirst;
+	    }
+	}
+    }
+#endif
+  
+#undef IS_CONTAINED_BY
+#undef IS_SOLARIS_PT_INTERP
+  
   return true;
 }
 
@@ -3618,8 +3856,8 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	      sym.st_value = value >= 16 ? 16 : (1 << bfd_log2 (value));
 	    else
 	      sym.st_value = type_ptr->internal_elf_sym.st_value;
-	    sym.st_shndx = _bfd_elf_section_from_bfd_section (abfd,
-							      syms[idx]->section);
+	    sym.st_shndx = _bfd_elf_section_from_bfd_section
+	      (abfd, syms[idx]->section);
 	  }
 	else
 	  {
@@ -3824,7 +4062,8 @@ _bfd_elf_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-  long symcount = get_elf_backend_data (abfd)->s->slurp_symbol_table (abfd, alocation, false);
+  long symcount = get_elf_backend_data (abfd)->s->slurp_symbol_table
+    (abfd, alocation, false);
 
   if (symcount >= 0)
     bfd_get_symcount (abfd) = symcount;
@@ -3836,7 +4075,8 @@ _bfd_elf_canonicalize_dynamic_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-  return get_elf_backend_data (abfd)->s->slurp_symbol_table (abfd, alocation, true);
+  return get_elf_backend_data (abfd)->s->slurp_symbol_table
+    (abfd, alocation, true);
 }
 
 /* Return the size required for the dynamic reloc entries.  Any
@@ -4283,8 +4523,8 @@ _bfd_elf_set_section_contents (abfd, section, location, offset, count)
   Elf_Internal_Shdr *hdr;
 
   if (! abfd->output_has_begun
-      && ! _bfd_elf_compute_section_file_positions (abfd,
-						    (struct bfd_link_info *) NULL))
+      && ! _bfd_elf_compute_section_file_positions
+      (abfd, (struct bfd_link_info *) NULL))
     return false;
 
   hdr = &elf_section_data (section)->this_hdr;
