@@ -8,6 +8,9 @@ Thu Jun  6 15:24:45 1996  Richard Henderson  <rth@tamu.edu>
 
 Thu Jun  6 11:24:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (ieee_write_object_contents): Put a timestamp in the file
+	to keep the HP emulator database happy.
+
 	* config.bfd: Recognize powerpc-*-linux* and powerpcle-*-linux*.
 	From Kevin Buettner <kev@primenet.com>.
 
