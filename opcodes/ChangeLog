@@ -1,6 +1,25 @@
+Thu May 23 15:18:23 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (instruction encoding macros): Add explicit casts to
+	unsigned long to silence a warning from the Solaris PowerPC
+	compiler.
+
+Thu Apr 25 19:33:32 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes): Add ultrasparc vis extensions.
+
+Mon Apr 22 17:12:35 1996  Doug Evans  <dje@blues.cygnus.com>
+
+	* sparc-dis.c (X_IMM,X_SIMM): New macros.
+	(X_IMM13): Delete.
+	(print_insn_sparc): Merge cases i,I,j together.  New cases X,Y.
+	* sparc-opc.c (sparc_opcodes): Use X for 5 bit shift constants,
+	Y for 6 bit shift constants.  Rewrite entries for crdcxt, cwrcxt,
+	cpush, cpusha, cpull sparclet insns.
+
 Wed Apr 17 14:20:22 1996  Doug Evans  <dje@canuck.cygnus.com>
 
-	* saprc-dis.c (compute_arch_mask): Replace ANSI style def with K&R.
+	* sparc-dis.c (compute_arch_mask): Replace ANSI style def with K&R.
 
 Thu Apr 11 17:30:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
