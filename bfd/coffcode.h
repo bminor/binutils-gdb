@@ -1032,10 +1032,10 @@ DEFUN(coff_write_relocs,(abfd),
 {
   asection       *s;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next) {
-    unsigned int    i;
+    unsigned int i;
     struct external_reloc dst;
 
-    arelent       **p = s->orelocation;
+    arelent **p = s->orelocation;
     bfd_seek(abfd, s->rel_filepos, SEEK_SET);
     for (i = 0; i < s->reloc_count; i++) {
       struct internal_reloc    n;
@@ -1043,34 +1043,34 @@ DEFUN(coff_write_relocs,(abfd),
       memset((PTR)&n, 0, sizeof(n));
 
       n.r_vaddr = q->address + s->vma;
-      /* The 29k const/consth reloc pair is a real kludge - the consth
-	 part doesn't have a symbol - it has an offset. So rebuilt
-	 that here */
+
 #ifdef R_IHCONST                       
+      /* The 29k const/consth reloc pair is a real kludge.  The consth
+	 part doesn't have a symbol; it has an offset.  So rebuilt
+	 that here.  */
       if (q->howto->type == R_IHCONST)
 	n.r_symndx = q->addend;
       else
 #endif
+	if (q->sym_ptr_ptr) 
+	  {
+	    if (q->sym_ptr_ptr == bfd_abs_section.symbol_ptr_ptr) 
+	      /* This is a relocation relative to the absolute symbol.  */
+	      n.r_symndx = -1;
+	    else
+	      {
+		n.r_symndx = get_index((*(q->sym_ptr_ptr)));
+		/* Take notice if the symbol reloc points to a symbol
+		   we don't have in our symbol table.  What should we
+		   do for this??  */
+		if (n.r_symndx > obj_conv_table_size (abfd))
+		  abort ();
+	      }
+	  }
 
-
-      if (q->sym_ptr_ptr) 
-      {
-	if (q->sym_ptr_ptr == bfd_abs_section.symbol_ptr_ptr) 
-	{
-	  /* This is a relocation relative to the absolute symbol */
-	  n.r_symndx = -1;
-	}
-	else 
-	{
-	  n.r_symndx = get_index((*(q->sym_ptr_ptr)));
-	  /* Take notice if the symbol reloc points to a symbol we don't have
-	     in our symbol table.  What should we do for this??  */
-	  if (n.r_symndx > obj_conv_table_size (abfd))
-	   abort ();
-	}
-
-
-      }
+#ifdef SWAP_OUT_RELOC_OFFSET
+      n.r_offset = q->addend;
+#endif
 
 #ifdef SELECT_RELOC
       /* Work out reloc type from what is required */
@@ -1950,9 +1950,7 @@ DEFUN(coff_slurp_symbol_table,(abfd),
       dst->symbol.the_bfd = abfd;
 
       dst->symbol.name = (char *)(src->u.syment._n._n_n._n_offset);
-      /*
-	We use the native name field to point to the cached field
-	*/
+      /* We use the native name field to point to the cached field.  */
       src->u.syment._n._n_n._n_zeroes = (long) dst;
       dst->symbol.section = coff_section_from_bfd_index(abfd,
 							src->u.syment.n_scnum);
@@ -2089,8 +2087,9 @@ DEFUN(coff_slurp_symbol_table,(abfd),
       case C_HIDDEN:		/* ext symbol in dmert public lib */
       default:
 
-	fprintf(stderr,"Unrecognized storage class %d\n",
-				src->u.syment.n_sclass);
+	fprintf(stderr,"Unrecognized storage class %d (assuming debugging)\n  for %s symbol `%s'\n",
+		src->u.syment.n_sclass, dst->symbol.section->name,
+		dst->symbol.name);
 /*	abort();*/
 	dst->symbol.flags = BSF_DEBUGGING;
 	dst->symbol.value = (src->u.syment.n_value);
@@ -2242,13 +2241,12 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	  ptr = 0;
 	}
 
-      /*
-	The symbols definitions that we have read in have been
-	relocated as if their sections started at 0. But the offsets
-	refering to the symbols in the raw data have not been
-	modified, so we have to have a negative addend to compensate.
-	
-	Note that symbols which used to be common must be left alone */
+      /* The symbols definitions that we have read in have been
+	 relocated as if their sections started at 0. But the offsets
+	 refering to the symbols in the raw data have not been
+	 modified, so we have to have a negative addend to compensate.
+
+	 Note that symbols which used to be common must be left alone */
 
       /* Calculate any reloc addend by looking at the symbol */
       CALC_ADDEND(abfd, ptr, dst, cache_ptr);
@@ -2267,7 +2265,7 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 }
 
 
-/* This is stupid.  This function should be a boolean predicate */
+/* This is stupid.  This function should be a boolean predicate.  */
 static unsigned int
 DEFUN(coff_canonicalize_reloc, (abfd, section, relptr, symbols),
 bfd            *abfd AND
