@@ -1,3 +1,13 @@
+2001-06-15  Michael Snyder  <msnyder@redhat.com>
+
+	* infrun.c (context_switch): New function.  Abstract the operation
+	of saving and restoring infrun's state when switching threads.
+	(handle_inferior_event): Normalize the handling of the 'thread hop'
+	event (when the wrong thread hits a thread-specific breakpoint, 
+	and we need to solo-step that thread past the breakpoint).
+	Call keep_going, instead of target_resume.  Handle the subsequent
+	singlestep-trap as a normal event instead of just resuming.
+
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (core_addr_identity): New function.  Rename

@@ -806,8 +806,6 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 
-
-
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -1433,6 +1431,49 @@ get_last_target_status(ptid_t *ptidp, struct target_waitstatus *status)
   *status = target_last_waitstatus;
 }
 
+/* Switch thread contexts, maintaining "infrun state". */
+
+static void
+context_switch (struct execution_control_state *ecs)
+{
+  /* Caution: it may happen that the new thread (or the old one!)
+     is not in the thread list.  In this case we must not attempt
+     to "switch context", or we run the risk that our context may
+     be lost.  This may happen as a result of the target module
+     mishandling thread creation.  */
+
+  if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
+    { /* Perform infrun state context switch: */
+      /* Save infrun state for the old thread.  */
+      save_infrun_state (inferior_ptid, prev_pc, 
+			 prev_func_start, prev_func_name, 
+			 trap_expected, step_resume_breakpoint,
+			 through_sigtramp_breakpoint, step_range_start, 
+			 step_range_end, step_frame_address, 
+			 ecs->handling_longjmp, ecs->another_trap,
+			 ecs->stepping_through_solib_after_catch,
+			 ecs->stepping_through_solib_catchpoints,
+			 ecs->stepping_through_sigtramp,
+			 ecs->current_line, ecs->current_symtab, 
+			 step_sp);
+
+      /* Load infrun state for the new thread.  */
+      load_infrun_state (ecs->ptid, &prev_pc, 
+			 &prev_func_start, &prev_func_name, 
+			 &trap_expected, &step_resume_breakpoint,
+			 &through_sigtramp_breakpoint, &step_range_start, 
+			 &step_range_end, &step_frame_address, 
+			 &ecs->handling_longjmp, &ecs->another_trap,
+			 &ecs->stepping_through_solib_after_catch,
+			 &ecs->stepping_through_solib_catchpoints,
+			 &ecs->stepping_through_sigtramp, 
+			 &ecs->current_line, &ecs->current_symtab,
+			 &step_sp);
+    }
+  inferior_ptid = ecs->ptid;
+}
+
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1451,6 +1492,11 @@ handle_inferior_event (struct execution_control_state *ecs)
   {
     switch (ecs->infwait_state)
       {
+      case infwait_thread_hop_state:
+	/* Cancel the waiton_ptid. */
+	ecs->waiton_ptid = pid_to_ptid (-1);
+	/* Fall thru to the normal_state case. */
+
       case infwait_normal_state:
 	/* Since we've done a wait, we have a new event.  Don't
 	   carry over any expectations about needing to step over a
@@ -1466,25 +1512,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 	stepped_after_stopped_by_watchpoint = 0;
 	break;
-
-      case infwait_thread_hop_state:
-	insert_breakpoints ();
-
-	/* We need to restart all the threads now,
-	 * unless we're running in scheduler-locked mode. 
-	 * Use currently_stepping to determine whether to 
-	 * step or continue.
-	 */
-
-	if (scheduler_mode == schedlock_on)
-	  target_resume (ecs->ptid, 
-			 currently_stepping (ecs), TARGET_SIGNAL_0);
-	else
-	  target_resume (RESUME_ALL, 
-			 currently_stepping (ecs), TARGET_SIGNAL_0);
-	ecs->infwait_state = infwait_normal_state;
-	prepare_to_wait (ecs);
-	return;
 
       case infwait_nullified_state:
 	break;
@@ -1888,6 +1915,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 		     * Use currently_stepping to determine whether to 
 		     * step or continue.
 		     */
+		    /* FIXME MVS: is there any reason not to call resume()? */
 		    if (scheduler_mode == schedlock_on)
 		      target_resume (ecs->ptid, 
 				     currently_stepping (ecs), 
@@ -1901,14 +1929,24 @@ handle_inferior_event (struct execution_control_state *ecs)
 		  }
 		else
 		  {		/* Single step */
-		    target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
-		    /* FIXME: What if a signal arrives instead of the
-		       single-step happening?  */
-
+		    breakpoints_inserted = 0;
+		    if (!ptid_equal (inferior_ptid, ecs->ptid))
+		      context_switch (ecs);
 		    ecs->waiton_ptid = ecs->ptid;
 		    ecs->wp = &(ecs->ws);
+		    thread_step_needed = 1;
+		    ecs->another_trap = 1;
+
+		    /* keep_stepping will call resume, and the
+		       combination of "thread_step_needed" and
+		       "ecs->another_trap" will cause resume to
+		       solo-step the thread.  The subsequent trap
+		       event will be handled like any other singlestep
+		       event. */
+
 		    ecs->infwait_state = infwait_thread_hop_state;
-		    prepare_to_wait (ecs);
+		    keep_going (ecs);
+		    registers_changed ();
 		    return;
 		  }
 	      }
@@ -1983,44 +2021,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* It's a SIGTRAP or a signal we're interested in.  Switch threads,
 	   and fall into the rest of wait_for_inferior().  */
 
-	/* Caution: it may happen that the new thread (or the old one!)
-	   is not in the thread list.  In this case we must not attempt
-	   to "switch context", or we run the risk that our context may
-	   be lost.  This may happen as a result of the target module
-	   mishandling thread creation.  */
-
-	if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
-	  { /* Perform infrun state context switch: */
-	    /* Save infrun state for the old thread.  */
-	    save_infrun_state (inferior_ptid, prev_pc,
-			       prev_func_start, prev_func_name,
-			       trap_expected, step_resume_breakpoint,
-			       through_sigtramp_breakpoint,
-			       step_range_start, step_range_end,
-			       step_frame_address, ecs->handling_longjmp,
-			       ecs->another_trap,
-			       ecs->stepping_through_solib_after_catch,
-			       ecs->stepping_through_solib_catchpoints,
-			       ecs->stepping_through_sigtramp,
-			       ecs->current_line, ecs->current_symtab, 
-			       step_sp);
-
-	    /* Load infrun state for the new thread.  */
-	    load_infrun_state (ecs->ptid, &prev_pc,
-			       &prev_func_start, &prev_func_name,
-			       &trap_expected, &step_resume_breakpoint,
-			       &through_sigtramp_breakpoint,
-			       &step_range_start, &step_range_end,
-			       &step_frame_address, &ecs->handling_longjmp,
-			       &ecs->another_trap,
-			       &ecs->stepping_through_solib_after_catch,
-			       &ecs->stepping_through_solib_catchpoints,
-			       &ecs->stepping_through_sigtramp, 
-			       &ecs->current_line, &ecs->current_symtab,
-			       &step_sp);
-	  }
-
-	inferior_ptid = ecs->ptid;
+	context_switch (ecs);
 
 	if (context_hook)
 	  context_hook (pid_to_thread_id (ecs->ptid));
