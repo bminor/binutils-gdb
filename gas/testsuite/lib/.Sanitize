@@ -27,6 +27,7 @@ Do-first:
 Things-to-keep:
 
 gas-defs.exp
+gas-dg.exp
 doboth
 doobjcmp
 dostriptest
