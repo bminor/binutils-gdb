@@ -1493,7 +1493,10 @@ configure-target-libio: $(ALL_GCC)
 all-target-libio: configure-target-libio all-gas all-ld all-gcc all-target-libiberty all-target-newlib
 check-target-libio: all-target-libstdc++
 all-libiberty:
-all-libide: all-tcl all-tk all-itcl all-ilu
+# start-sanitize-ide
+all-libide: all-ilu
+# end-sanitize-ide
+all-libide: all-tcl all-tk all-itcl
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
