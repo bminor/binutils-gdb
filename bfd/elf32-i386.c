@@ -154,7 +154,7 @@ static reloc_howto_type elf_howto_table[]=
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),
+	 false),		/* pcrel_offset */
 
 /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_386_GNU_VTENTRY,	/* type */
@@ -169,7 +169,7 @@ static reloc_howto_type elf_howto_table[]=
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false)
+	 false)			/* pcrel_offset */
 
 #define R_386_vt ((unsigned int) R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
 
@@ -1724,6 +1724,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma off;
       bfd_vma relocation;
       boolean unresolved_reloc;
+      boolean overflow;
       bfd_reloc_status_type r;
       unsigned int indx;
 
@@ -1745,22 +1746,66 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (info->relocateable)
 	{
+	  bfd_vma val;
+	  bfd_vma addend;
+	  bfd_byte *where;
+
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  bfd_vma val;
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    continue;
 
-		  sec = local_sections[r_symndx];
-		  val = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		  val += sec->output_offset + sym->st_value;
-		  bfd_put_32 (input_bfd, val, contents + rel->r_offset);
+	  sym = local_syms + r_symndx;
+	  if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+	    continue;
+
+	  sec = local_sections[r_symndx];
+	  val = sec->output_offset;
+	  if (val == 0)
+	    continue;
+
+	  where = contents + rel->r_offset;
+	  switch (howto->size)
+	    {
+	    case 0:
+	      addend = bfd_get_8 (input_bfd, where);
+	      if (howto->pc_relative)
+		addend = (addend ^ 0x80) - 0x80;
+	      val += addend;
+	      bfd_put_8 (input_bfd, val, where);
+	      if (howto->pc_relative)
+		val += 0x80;
+	      if (val > 0xff)
+		{
+		  h = NULL;
+		  r = bfd_reloc_overflow;
+		  goto overflow_error;
 		}
+	      break;
+	    case 1:
+	      addend = bfd_get_16 (input_bfd, where);
+	      if (howto->pc_relative)
+		addend = (addend ^ 0x8000) - 0x8000;
+	      val += addend;
+	      bfd_put_16 (input_bfd, val, where);
+	      if (howto->pc_relative)
+		val += 0x8000;
+	      if (output_bfd->arch_info->mach != bfd_mach_i386_i8086
+		  && val > 0xffff)
+		{
+		  h = NULL;
+		  r = bfd_reloc_overflow;
+		  goto overflow_error;
+		}
+	      break;
+	    case 2:
+	      val += bfd_get_32 (input_bfd, where);
+	      bfd_put_32 (input_bfd, val, where);
+	      break;
+	    default:
+	      abort ();
 	    }
 	  continue;
 	}
@@ -1770,6 +1815,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       sym = NULL;
       sec = NULL;
       unresolved_reloc = false;
+      overflow = false;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1782,24 +1828,68 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      asection *msec;
 	      bfd_vma addend;
+	      bfd_byte *where = contents + rel->r_offset;
 
-	      if (howto->src_mask != 0xffffffff)
+	      switch (howto->size)
 		{
-		  (*_bfd_error_handler)
-		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
-		     bfd_archive_filename (input_bfd),
-		     bfd_get_section_name (input_bfd, input_section),
-		     (long) rel->r_offset, howto->name);
-		  return false;
+		case 0:
+		  addend = bfd_get_8 (input_bfd, where);
+		  if (howto->pc_relative)
+		    {
+		      addend = (addend ^ 0x80) - 0x80;
+		      addend += 1;
+		    }
+		  break;
+		case 1:
+		  addend = bfd_get_16 (input_bfd, where);
+		  if (howto->pc_relative)
+		    {
+		      addend = (addend ^ 0x8000) - 0x8000;
+		      addend += 2;
+		    }
+		  break;
+		case 2:
+		  addend = bfd_get_32 (input_bfd, where);
+		  if (howto->pc_relative)
+		    {
+		      addend = (addend ^ 0x80000000) - 0x80000000;
+		      addend += 4;
+		    }
+		  break;
+		default:
+		  abort ();
 		}
 
-	      addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      msec = sec;
-	      addend =
-		_bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
-		- relocation;
+	      addend = _bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend);
+	      addend -= relocation;
 	      addend += msec->output_section->vma + msec->output_offset;
-	      bfd_put_32 (input_bfd, addend, contents + rel->r_offset);
+
+	      switch (howto->size)
+		{
+		case 0:
+		  if (howto->pc_relative)
+		    addend -= 1;
+		  bfd_put_8 (input_bfd, addend, where);
+		  if (howto->pc_relative)
+		    addend += 0x80;
+		  overflow = addend > 0xff;
+		  break;
+		case 1:
+		  if (howto->pc_relative)
+		    addend -= 2;
+		  bfd_put_16 (input_bfd, addend, where);
+		  if (howto->pc_relative)
+		    addend += 0x8000;
+		  if (output_bfd->arch_info->mach != bfd_mach_i386_i8086)
+		    overflow = addend > 0xffff;
+		  break;
+		case 2:
+		  if (howto->pc_relative)
+		    addend -= 4;
+		  bfd_put_32 (input_bfd, addend, where);
+		  break;
+		}
 	    }
 	}
       else
@@ -2082,7 +2172,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, (bfd_vma) 0);
+      if (overflow && r == bfd_reloc_ok)
+	r = bfd_reloc_overflow;
 
+    overflow_error:
       if (r != bfd_reloc_ok)
 	{
 	  const char *name;
@@ -2102,7 +2195,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (r == bfd_reloc_overflow)
 	    {
-
 	      if (! ((*info->callbacks->reloc_overflow)
 		     (info, name, howto->name, (bfd_vma) 0,
 		      input_bfd, input_section, rel->r_offset)))
