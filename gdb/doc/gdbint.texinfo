@@ -2773,11 +2773,12 @@ does not require it, @value{GDBN} requires it.
 @value{GDBN} follows an additional set of coding standards specific to @value{GDBN},
 as described in the following sections.
 
-You can configure with @samp{--enable-build-warnings} to get GCC to
-check on a number of these rules.  @value{GDBN} sources ought not to engender any
-complaints, unless they are caused by bogus host systems.  (The exact
-set of enabled warnings is currently @samp{-Wall -Wpointer-arith
--Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations}.
+You can configure with @samp{--enable-build-warnings} or
+@samp{--enable-gdb-build-warnings} to get GCC to check on a number of
+these rules.  @value{GDBN} sources ought not to engender any complaints,
+unless they are caused by bogus host systems.  (The exact set of enabled
+warnings is currently @samp{-Wimplicit -Wreturn-type -Wcomment
+-Wtrigraphs -Wformat -Wparentheses -Wpointer-arith -Wuninitialized}.
 
 @subsection Formatting
 
