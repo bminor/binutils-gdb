@@ -692,9 +692,9 @@ monitor_close (quitting)
 #if defined (LOG_FILE)
   if (log_file) {
     if (ferror(log_file))
-      fprintf(stderr, "Error writing log file.\n");
+      printf_filtered ("Error writing log file.\n");
     if (fclose(log_file) != 0)
-      fprintf(stderr, "Error closing log file.\n");
+      printf_filtered ("Error closing log file.\n");
   }
 #endif
 }
@@ -1436,6 +1436,7 @@ monitor_load_srec (args, protocol)
   }
   
   printf_monitor (LOAD_CMD);			/* tell the monitor to load */
+  sleep (3);
   if (protocol == XMODEM) {			/* get the NAK from the target */
     if (GETNAK) {
       debuglogs (3, "Got the NAK to start loading");
@@ -1472,7 +1473,7 @@ monitor_load_srec (args, protocol)
 	    } else {				/* assume we got an ACK */
 	      if (hashmark) {
 		putc_unfiltered ('#');
-		fflush (gdb_stdout);
+		gdb_flush (gdb_stdout);
 	      }
 	      debuglogs (3, "Got an ACK, sending next packet");
 	      break;
@@ -1487,7 +1488,7 @@ monitor_load_srec (args, protocol)
 	}
 	if (hashmark) {
 	  putc_unfiltered ('#');
-	  fflush (gdb_stdout);
+	  gdb_flush (gdb_stdout);
 	}
 	type = 3;				/* switch to a 4 byte address record */
 	fflush (gdb_stdout);

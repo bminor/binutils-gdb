@@ -1,3 +1,8 @@
+Thu Feb 23 21:07:25 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* monitor.c (monitor_load_ascii_srec):  Add a one second sleep
+	after send LOAD_CMD to prevent loss of first S-record.
+
 Tue Feb 21 20:48:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (call_function_by_hand):  Set using_gcc to 2 if gcc-2.
