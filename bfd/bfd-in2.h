@@ -53,6 +53,14 @@ here.  */
 #define BFD64
 #endif
 
+#ifndef INLINE
+#if __GNUC__ >= 2
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+#endif
+
 /* 64-bit type definition (if any) from bfd's sysdep.h goes here */
 
 
@@ -311,14 +319,28 @@ typedef struct _symbol_info
    the standard routine suffix), or it must #define the routines that
    are not so named, before calling JUMP_TABLE in the initializer.  */
 
-/* Semi-portable string concatenation in cpp */
+/* Semi-portable string concatenation in cpp.
+   The CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
+   The problem is, "32_" is not a valid preprocessing token, and we don't
+   want extra underscores (e.g., "nlm_32_").  The XCAT2 macro will cause the
+   inner CAT macros to be evaluated first, producing still-valid pp-tokens.
+   Then the final concatenation can be done.  (Sigh.)  */
 #ifndef CAT
+#ifdef SABER
+#define CAT(a,b)	a##b
+#define CAT3(a,b,c)	a##b##c
+#define CAT4(a,b,c,d)	a##b##c##d
+#else
 #ifdef __STDC__
 #define CAT(a,b) a##b
 #define CAT3(a,b,c) a##b##c
+#define XCAT2(a,b)	CAT(a,b)
+#define CAT4(a,b,c,d)	XCAT2(CAT(a,b),CAT(c,d))
 #else
 #define CAT(a,b) a/**/b
 #define CAT3(a,b,c) a/**/b/**/c
+#define CAT4(a,b,c,d)	a/**/b/**/c/**/d
+#endif
 #endif
 #endif
 
@@ -330,7 +352,7 @@ CAT(NAME,_slurp_armap),\
 CAT(NAME,_slurp_extended_name_table),\
 CAT(NAME,_truncate_arname),\
 CAT(NAME,_write_armap),\
-CAT(NAME,_close_and_cleanup),	\
+CAT(NAME,_close_and_cleanup),\
 CAT(NAME,_set_section_contents),\
 CAT(NAME,_get_section_contents),\
 CAT(NAME,_new_section_hook),\
@@ -1491,6 +1513,7 @@ struct _bfd
       struct srec_data_struct *srec_data;
       struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata *elf_obj_data;
+      struct nlm_obj_tdata *nlm_obj_data;
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
       struct trad_core_struct *trad_core_data;
@@ -1611,6 +1634,7 @@ typedef struct bfd_target
     bfd_target_ecoff_flavour,
     bfd_target_elf_flavour,
     bfd_target_ieee_flavour,
+    bfd_target_nlm_flavour,
     bfd_target_oasys_flavour,
     bfd_target_tekhex_flavour,
     bfd_target_srec_flavour,

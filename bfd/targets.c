@@ -368,6 +368,10 @@ extern bfd_target bfd_elf32_big_generic_vec;
 extern bfd_target bfd_elf32_little_generic_vec;
 extern bfd_target bfd_elf64_big_generic_vec;
 extern bfd_target bfd_elf64_little_generic_vec;
+extern bfd_target bfd_nlm32_big_generic_vec;
+extern bfd_target bfd_nlm32_little_generic_vec;
+extern bfd_target bfd_nlm64_big_generic_vec;
+extern bfd_target bfd_nlm64_little_generic_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
@@ -445,9 +449,13 @@ bfd_target *target_vector[] = {
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_big_generic_vec,
+	&bfd_nlm32_little_generic_vec,
+	&bfd_nlm32_big_generic_vec,
 #ifdef BFD64
 	&bfd_elf64_little_generic_vec,
 	&bfd_elf64_big_generic_vec,
+	&bfd_nlm64_little_generic_vec,
+	&bfd_nlm64_big_generic_vec,
 #endif
 	&a_out_adobe_vec,
 	&b_out_vec_little_host,

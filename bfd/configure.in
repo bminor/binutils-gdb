@@ -58,6 +58,7 @@ case "${target}" in
   i[34]86-*-coff)	bfd_target=i386-coff ;;
   i[34]86-*-aix*)	bfd_target=i386-coff ;;
   i[34]86-*-elf)	bfd_target=i386-elf ;;
+  i[34]86-*-netware*)	bfd_target=i386-nlm ;;
   i[34]86-*-linux*)	bfd_target=i386-linux ;;
   i[34]86-none-*)	bfd_target=i386-coff ;;
   i960-*-vxworks)	bfd_target=i960-bout ;;
@@ -100,6 +101,7 @@ case "${target}" in
 
   *-*-aout)		bfd_target=${target_cpu}-aout ;;
   *-*-bsd*)		bfd_target=${target_cpu}-aout ;;
+  *-*-netware*)		bfd_target=${target_cpu}-nlm ;;
   *-*-sysv4*)		bfd_target=${target_cpu}-elf ;;
   *-*-solaris2*)	bfd_target=${target_cpu}-elf ;;
   *-*-go32)		bfd_target=${target_cpu}-aout ;;

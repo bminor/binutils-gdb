@@ -1429,12 +1429,6 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
    table would be very useful for that, and I don't feel like fleshing out two
    completely different implementations.  [raeburn:930419.0331EDT] */
 
-#if __GNUC__ >= 2
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-
 struct stringtab_entry {
   /* Hash value for this string.  Only useful so long as we aren't doing
      substring matches.  */

@@ -1,3 +1,22 @@
+Mon Jul 19 20:46:18 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* configure.in (*-*-netware, i[34]86-*-netware):  New configs.
+	* Makefile.in (BFD32_BACKENDS):  Add nlm.o, nlm32.o, nlm32-gen.o.
+	* Makefile.in (BFD64_BACKENDS):  Add nlm64.o, nlm64-gen.o.
+	* Makefile.in (CFILES):  Add nlm{32,64}.c, nlm{32,64}-gen.c.
+	* Makefile.in (nlm.o, nlm{32,64}.o, nlm{32,64}-gen.o:  New targets.
+	* bfd-in2.h (INLINE):  Defines moved here.
+	* {aoutx.h, elf.c, elfcode.h}:  Move INLINE defines to bfd-in2.h.
+	* libelf.h (CAT4):  Move define to bfd-in2.h.
+	* bfd-in2.h (CAT4):  Merge CAT4 macro with other CAT macros.
+	* bfd-in2.h (union tdata):  Add nlm_obj_data.
+	* bfd-in2.h (enum target_flavour):  Add bfd_target_nlm_flavour.
+	* targets.c (bfd_nlm{32,64}_{big,little}_vec):  Add prototypes.
+	* targets.c (target_vector):  Add bfd_nlm{32,64}_{big,little}_vec.
+	* (libnlm.h, nlm.c, nlmcode.h, nlm{32,64}-gen.c,
+	nlm{32,64}-target.h, nlm{32,64}.c, config/i386-nlm.mt):  New files
+	for NLM support.
+
 Mon Jul 19 15:09:01 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.{hosts,in}: add i[34]86-*-lynxos* support

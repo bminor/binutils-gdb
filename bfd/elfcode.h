@@ -107,14 +107,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELFCLASS	ELFCLASS32
 #endif
 
-#ifndef INLINE
-#if __GNUC__ >= 2
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
-
 static int shstrtab_length_fixed;
 
 struct elf_sect_data {
