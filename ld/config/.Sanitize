@@ -47,7 +47,10 @@ mt-m68k
 mt-m68kv
 mt-m88k-bcs
 mt-news
+mt-sun3
 mt-sun4
+mt-vxworks68
+mt-vxworks960
 Do-last:
 
 echo Done in `pwd`.
