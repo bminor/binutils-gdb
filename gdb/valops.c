@@ -374,6 +374,12 @@ value_assign (toval, fromval)
 			        VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
 #endif
 	}
+      /* Assigning to the stack pointer, frame pointer, and other
+	 (architecture and calling convention specific) registers may
+	 cause the frame cache to be out of date.  We just do this
+	 on all assignments to registers for simplicity; I doubt the slowdown
+	 matters.  */
+      reinit_frame_cache ();
       break;
 
     case lval_reg_frame_relative:
@@ -463,6 +469,9 @@ value_assign (toval, fromval)
       type = VALUE_TYPE (fromval);
     }
 
+  /* FIXME: This loses if fromval is a different size than toval, for
+     example because fromval got cast in the REGISTER_CONVERTIBLE case
+     above.  */
   val = allocate_value (type);
   memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
   memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
