@@ -44,6 +44,7 @@
 #include "value.h"
 #include "observer.h"
 #include "language.h"
+#include "exec.h"
 
 /* Prototypes for local functions */
 
@@ -1362,7 +1363,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     terminal for any messages produced by
 	     breakpoint_re_set.  */
 	  target_terminal_ours_for_output ();
-	  SOLIB_ADD (NULL, 0, NULL, auto_solib_add);
+	  SOLIB_ADD (NULL, 0, &exec_ops, auto_solib_add);
 	  target_terminal_inferior ();
 
 	  /* Reinsert breakpoints and continue.  */
@@ -2185,7 +2186,7 @@ process_event_stop_test:
 	     terminal for any messages produced by
 	     breakpoint_re_set.  */
 	  target_terminal_ours_for_output ();
-	  SOLIB_ADD (NULL, 0, NULL, auto_solib_add);
+	  SOLIB_ADD (NULL, 0, &exec_ops, auto_solib_add);
 	  target_terminal_inferior ();
 
 	  /* Try to reenable shared library breakpoints, additional

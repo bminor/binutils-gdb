@@ -1,5 +1,11 @@
 2003-11-23  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (infrun.o): Update dependencies.
+	* infrun.c: Include "exec.h".
+	(handle_inferior_event): Pass exec_ops to SOLIB_ADD.
+
+2003-11-23  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (frame_unwind_signed_register): Delete function.
 	* frame.h (frame_unwind_register_signed): Delete declaration.
 	* mips-tdep.c (mips_frame_saved_pc): Use frame_unwind_register_signed.
