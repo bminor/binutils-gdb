@@ -1,3 +1,7 @@
+2003-08-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_add_object_symbols): Don't crash on NULL owner.
+
 2003-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_create_dynamic_sections): Align the
@@ -27,9 +31,9 @@
 	replace some duplicated code in most elfxx-xxxx.c files.  This
 	version uses the new fields in bfd_link_info.
 
-        * elf-m10300.c (mn10300_elf_relocate_section): Use new macro.
-        * elf32-arm.h (elf32_arm_relocate_section): Likewise.
-        * elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf-m10300.c (mn10300_elf_relocate_section): Use new macro.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
 	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
 	* elf32-i386.c (elf_i386_relocate_section): Likewise.
 	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
@@ -46,8 +50,8 @@
 	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
 	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
-        
-        * elf-hppa.h (elf_hppa_unmark_useless_dynamic_symbols,
+
+	* elf-hppa.h (elf_hppa_unmark_useless_dynamic_symbols,
 	elf_hppa_remark_useless_dynamic_symbols,
 	elf_hppa_relocate_section): Use the new fields in
 	bfd_link_info structure.
@@ -59,9 +63,9 @@
 	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
 
 	* elflink.h (elf_link_output_extsym): Fix test for reporting
-        undefined symbols in shared libraries.  Remove redundant test
-        of shlib_undefined when reporting references to forced local
-        symbols.
+	undefined symbols in shared libraries.  Remove redundant test
+	of shlib_undefined when reporting references to forced local
+	symbols.
 
 2003-08-18  Andreas Schwab  <schwab@suse.de>
 

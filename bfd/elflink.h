@@ -1186,7 +1186,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      bfd *common_bfd;
 
 	      symbol_align = ffs (h->root.u.def.value) - 1;
-	      if ((h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+	      if (h->root.u.def.section->owner != NULL
+		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
 		{
 		  normal_align = h->root.u.def.section->alignment_power;
 		  if (normal_align > symbol_align)
