@@ -1,3 +1,10 @@
+2001-01-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/m68hc11/all.exp: Add new tests for dwarf2.
+	* gas/m68hc11/lbranch-dwarf2.d: New file, test for dwarf2.
+	* gas/m68hc11/opers12-dwarf2.d: Likewise.
+	* gas/m68hc11/insns-dwarf2.d: Likewise.
+
 2001-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/adrl.s: Add global label 'foo'.
