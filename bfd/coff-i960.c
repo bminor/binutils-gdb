@@ -106,15 +106,15 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
 }
 
 static reloc_howto_type howto_rellong =
-  { (unsigned int) R_RELLONG, 0, 2, 32,false, 0,
-      complain_overflow_bitfield, 0,"rellong", true, 0xffffffff,
-      0xffffffff};
+  HOWTO ((unsigned int) R_RELLONG, 0, 2, 32,false, 0,
+	 complain_overflow_bitfield, 0,"rellong", true, 0xffffffff,
+	 0xffffffff, 0);
 static reloc_howto_type howto_iprmed =
-  {  R_IPRMED, 0, 2, 24,true,0, complain_overflow_signed,0,
-       "iprmed ", true, 0x00ffffff, 0x00ffffff};
+  HOWTO (R_IPRMED, 0, 2, 24,true,0, complain_overflow_signed,0,
+	 "iprmed ", true, 0x00ffffff, 0x00ffffff, 0);
 static reloc_howto_type howto_optcall =
-  {  R_OPTCALL, 0,2,24,true,0, complain_overflow_signed,
-       optcall_callback, "optcall", true, 0x00ffffff, 0x00ffffff};
+  HOWTO (R_OPTCALL, 0,2,24,true,0, complain_overflow_signed,
+	 optcall_callback, "optcall", true, 0x00ffffff, 0x00ffffff, 0);
 
 static const reloc_howto_type *
 coff_i960_reloc_type_lookup (abfd, code)
@@ -154,7 +154,7 @@ coff_i960_reloc_type_lookup (abfd, code)
 #undef coff_bfd_reloc_type_lookup
 #define coff_bfd_reloc_type_lookup coff_i960_reloc_type_lookup
 
-bfd_target icoff_little_vec =
+const bfd_target icoff_little_vec =
 {
   "coff-Intel-little",		/* name */
   bfd_target_coff_flavour,
@@ -199,7 +199,7 @@ bfd_target icoff_little_vec =
 };
 
 
-bfd_target icoff_big_vec =
+const bfd_target icoff_big_vec =
 {
   "coff-Intel-big",		/* name */
   bfd_target_coff_flavour,
