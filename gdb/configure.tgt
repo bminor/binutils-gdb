@@ -174,7 +174,7 @@ m68*-*-sunos4*)		gdb_target=sun3os4
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
-m88*-harris-cxux*)	gdb_target=cxux ;;
+# OBSOLETE m88*-harris-cxux*)	gdb_target=cxux ;;
 m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
 m88*-motorola-*)	gdb_target=delta88 ;;
 m88*-*-*)		gdb_target=m88k ;;

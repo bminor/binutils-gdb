@@ -1,5 +1,15 @@
 2001-03-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* configure.host (m88*-harris-cxux*): Mark as obsolete.
+	* configure.tgt: Ditto.
+	* config/m88k/xm-cxux.h: Ditto.
+	* config/m88k/tm-cxux.h: Ditto.
+	* config/m88k/nm-cxux.h: Ditto.
+	* config/m88k/cxux.mt: Ditto.
+	* config/m88k/cxux.mh: Ditto.
+
+2001-03-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in: Delete rules for obsolete files.
 
 Thu Mar  8 15:43:40 2001  David Taylor  <taylor@redhat.com>
