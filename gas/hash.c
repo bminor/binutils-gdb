@@ -23,7 +23,7 @@
 /* This version of the hash table code is a wholescale replacement of
    the old hash table code, which was fairly bad.  This is based on
    the hash table code in BFD, but optimized slightly for the
-   asssembler.  The assembler does not need to derive structures that
+   assembler.  The assembler does not need to derive structures that
    are stored in the hash table.  Instead, it always stores a pointer.
    The assembler uses the hash table mostly to store symbols, and we
    don't need to confuse the symbol structure with a hash table

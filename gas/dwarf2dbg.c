@@ -247,7 +247,7 @@ get_line_subseg (segT seg, subsegT subseg)
   return ss;
 }
 
-/* Record an entry for LOC ocurring at OFS within the current fragment.  */
+/* Record an entry for LOC occurring at OFS within the current fragment.  */
 
 void
 dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)

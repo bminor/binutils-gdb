@@ -301,7 +301,7 @@ typedef asection *segT;
 #endif
 typedef int subsegT;
 
-/* What subseg we are accreting now? */
+/* What subseg we are accessing now? */
 COMMON subsegT now_subseg;
 
 /* Segment our instructions emit to.  */

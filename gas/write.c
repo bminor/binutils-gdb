@@ -1389,7 +1389,7 @@ set_symtab ()
 
 #ifndef SUB_SEGMENT_ALIGN
 #ifdef HANDLE_ALIGN
-/* The last subsegment gets an aligment corresponding to the alignment
+/* The last subsegment gets an alignment corresponding to the alignment
    of the section.  This allows proper nop-filling at the end of
    code-bearing sections.  */
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\

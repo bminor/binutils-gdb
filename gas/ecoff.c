@@ -2863,7 +2863,7 @@ ecoff_directive_endef (int ignore ATTRIBUTE_UNUSED)
   else if (coff_symbol_typ == st_Member
 	   && coff_type.num_sizes - coff_type.extra_sizes == 1)
     {
-      /* Is this a bitfield?  This is indicated by a structure memeber
+      /* Is this a bitfield?  This is indicated by a structure member
          having a size field that isn't an array.  */
       coff_type.bitfield = 1;
     }
