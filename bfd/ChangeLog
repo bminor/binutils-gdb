@@ -1,3 +1,10 @@
+Tue Feb 10 15:16:38 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (remember_hi16s_reloc): New function.
+	(find_remembered_hi16s_reloc): New function.
+	(v850_elf_store_addend_in_insn): Use the above new functions to
+	match up HI6S relocs with LO16 relocs.
+
 start-sanitize-sky
 Tue Feb 10 13:25:14 1998  Doug Evans  <devans@canuck.cygnus.com>
 
