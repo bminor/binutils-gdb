@@ -1,3 +1,14 @@
+Thu Jan  4 12:02:05 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/h8300.sc: Use all 64K for ram.
+	* scripttempl/h8300h.sc: Define 256K ram size.
+
+Thu Dec 21 15:57:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Pass
+	export_defines as true to bfd_xcoff_size_dynamic_sections if -unix
+	was used, regardless of whether -bE was used.
+
 Tue Dec 19 17:35:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_after_open): Only set
