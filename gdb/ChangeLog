@@ -1,3 +1,8 @@
+2002-04-20  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* frame.c (find_saved_register): Avoid a NULL pointer
+	dereference and actually walk the frame list.
+
 2002-04-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (gdbarch_update_p): Keep the list of architectures

@@ -83,9 +83,10 @@ find_saved_register (struct frame_info *frame, int regnum)
   while (1)
     {
       QUIT;
-      frame1 = get_next_frame (frame1);
-      if (frame1 == 0 || frame1 == frame)
+      frame1 = get_next_frame (frame);
+      if (frame1 == 0)
 	break;
+      frame = frame1;
       FRAME_INIT_SAVED_REGS (frame1);
       if (frame1->saved_regs[regnum])
 	addr = frame1->saved_regs[regnum];
