@@ -1,3 +1,7 @@
+2004-12-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c (_initialize_inf_ttrace): Unconditionially compile.
+
 2004-12-10  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-tdep.c: New file.  This is a re-implementation of

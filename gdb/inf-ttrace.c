@@ -916,6 +916,7 @@ inf_ttrace_target (void)
   ttrace_ops_hack = t;
   return t;
 }
+#endif
 
 
 /* Prevent warning from -Wmissing-prototypes.  */
@@ -924,6 +925,7 @@ void _initialize_hppa_hpux_nat (void);
 void
 _initialize_inf_ttrace (void)
 {
+#ifdef HAVE_TTRACE
   inf_ttrace_page_dict.pagesize = getpagesize();
-}
 #endif
+}
