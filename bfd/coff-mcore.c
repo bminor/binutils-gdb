@@ -528,7 +528,6 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	case IMAGE_REL_MCORE_PCREL_32:
 	case IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2:
 	case IMAGE_REL_MCORE_ADDR32:
-	case IMAGE_REL_MCORE_RVA:
 	  /* XXX fixme - shouldn't this be like the code for the RVA reloc ? */
 	  rstat = _bfd_relocate_contents (howto, input_bfd, val, loc);
 	  break;
