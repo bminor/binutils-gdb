@@ -1,3 +1,11 @@
+2004-04-01  Dean Luick <luick@cray.com>
+
+	* readelf.c (display_debug_pubnames): Align offset and data
+	columns.
+	(read_and_display_attr_value): Add missing break;
+	(debug_displays): Enable the display of the .debug_pubtypes
+	section.
+
 2004-03-30  Stan Shebs  <shebs@apple.com>
 
 	* mpw-config.in, mpw-make.sed, mac-binutils.r: Remove MPW
