@@ -392,7 +392,8 @@ gdbsim_kill ()
   if (sr_get_debug ())
     printf_filtered ("gdbsim_kill\n");
 
-  sim_kill (gdbsim_desc);	/* close fd's, remove mappings, etc. */
+  /* There is no need to `kill' running simulator - the simulator is
+     not running */
   inferior_pid = 0;
 }
 

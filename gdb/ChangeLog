@@ -1,9 +1,31 @@
+Fri Jun  6 13:01:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_kill): Remove call to depreciated function
+ 	sim_kill.
+
+Thu Jun  5 11:39:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fixes for recent correction to PE format:
+	* coffread.c (pe_file): New static variable.
+	(struct find_targ_sec_arg): Change resultp from pointer to int to
+	pointer to pointer to asection.
+	(find_targ_sec): Just store the section in args->resultp, not the
+	section offset value.
+	(cs_to_section): Compute the section offset value from the
+	section.
+	(cs_section_address): New static function.
+	(coff_symfile_read): Set pe_file.
+	(read_one_sym): When reading a PE file, adjust the symbol value to
+	include the section address if the symbol has an appropriate
+	storage class.
+
 start-sanitize-r3900
 Tue Jun  3 16:24:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
 	* configure.tgt: add mipsr3900-elf target
 	* config/mips/r3900.mt r3900l.mt tm-r3900.h tm-r3900l.h: ditto
-end-sanitize-r3900
 
+end-sanitize-r3900
 start-sanitize-gdbtk
 Tue Jun  3 15:46:51 1997  Tom Tromey  <tromey@cygnus.com>
 

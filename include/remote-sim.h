@@ -101,12 +101,6 @@ SIM_RC sim_load PARAMS ((SIM_DESC sd, char *prog, struct _bfd *abfd, int from_tt
 SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, char **argv, char **env));
 
 
-/* Kill the running program.
-   This may involve closing any open files and deleting any mmap'd areas.  */
-
-void sim_kill PARAMS ((SIM_DESC sd));
-
-
 /* Read LENGTH bytes of the simulated program's memory and store in BUF.
    Result is number of bytes read, or zero if error.  */
 
@@ -173,6 +167,7 @@ void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
 /* Provide simulator with a default (global) host_callback_struct.
    THIS PROCEDURE IS IS DEPRECIATED.
+   GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
 
@@ -181,6 +176,7 @@ void sim_set_callbacks PARAMS ((struct host_callback_struct *));
 
 /* Set the size of the simulator memory array.
    THIS PROCEDURE IS IS DEPRECIATED.
+   GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
 
@@ -189,6 +185,7 @@ void sim_size PARAMS ((int i));
 
 /* Run a simulation with tracing enabled.
    THIS PROCEDURE IS IS DEPRECIATED.
+   GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
 
@@ -197,9 +194,20 @@ int sim_trace PARAMS ((SIM_DESC sd));
 
 /* Configure the size of the profile buffer.
    THIS PROCEDURE IS IS DEPRECIATED.
+   GDB and NRUN do not use this interface.
    This procedure does not take a SIM_DESC argument as it is
    used before sim_open. */
 
 void sim_set_profile_size PARAMS ((int n));
+
+
+/* Kill the running program.
+   THIS PROCEDURE IS IS DEPRECIATED.
+   GDB and NRUN do not use this interface.
+   This procedure will be replaced as part of the introduction of
+   multi-cpu simulators. */
+
+void sim_kill PARAMS ((SIM_DESC sd));
+
 
 #endif /* !defined (REMOTE_SIM_H) */
