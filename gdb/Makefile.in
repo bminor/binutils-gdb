@@ -927,10 +927,7 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # But these rules don't do what we want; we want to hack the foo.o: tm.h
 # dependency to do the right thing.
 tm-sun3.h tm-hp300bsd.h tm-altos.h: tm-m68k.h
-# OBSOLETE tm-news.h: tm-m68k.h
-# OBSOLETE tm-isi.h: tm-m68k.h
 tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-m68k.h
-# OBSOLETE xm-news1000.h: xm-news.h
 xm-i386-sv32.h: xm-i386.h
 tm-i386gas.h: tm-i386.h
 xm-sun4os4.h: xm-sparc.h
@@ -1197,7 +1194,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
-	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
+	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c solib-osf.c \
@@ -1628,8 +1625,6 @@ irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(symtab_h) $(symfile_h) $(objfiles_h) $(command_h) $(frame_h) \
 	gdb_regex.h $(language_h) $(gdb_string_h) $(regcache_h)
 
-# OBSOLETE isi-xdep.o: isi-xdep.c
-
 jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_string_h) $(value_h) c-lang.h jv-lang.h \
@@ -1754,8 +1749,6 @@ mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(gdb_string_h) \
 	$(regcache_h)
-
-news-xdep.o: news-xdep.c
 
 Onindy.o: nindy-share/Onindy.c gdb_wait.h nindy-share/block_io.h \
 	nindy-share/env.h

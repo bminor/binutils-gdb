@@ -1,5 +1,28 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (tm-news.h, tm-isi.h, xm-news1000.h): Delete.
+	(ALLDEPFILES): Delete news-xdep.c.
+	(news-xdep.o): Delete.
+	(isi-xdep.o): Delete.
+	* configure.tgt: Delete m68*-isi-*, m68*-sony-*, m68*-rom68k-*,
+	m68*-*bug-*, m68*-monitor-* and m68*-est-* targets.
+	* configure.host: Delete m68030-sony-*, m68*-isi-* and m68*-sony-*
+	Hosts.
+	* m68k-tdep.c (isi_skip_prologue): Delete function.
+	* news-xdep.c: Delete file.
+	* isi-xdep.c: Delete file.
+	* config/m68k/isi.mh: Delete file.
+	* config/m68k/isi.mt: Delete file.
+	* config/m68k/news.mh: Delete file.
+	* config/m68k/news.mt: Delete file.
+	* config/m68k/news1000.mh: Delete file.
+	* config/m68k/nm-news.h: Delete file.
+	* config/m68k/tm-isi.h: Delete file.
+	* config/m68k/tm-news.h: Delete file.
+	* config/m68k/xm-isi.h: Delete file.
+	* config/m68k/xm-news.h: Delete file.
+	* config/m68k/xm-news1000.h: Delete file.
+
 	* kdb-start.c: Delete file.
 	* stuff.c: Delete file.
 
