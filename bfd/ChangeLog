@@ -1,3 +1,8 @@
+1999-06-04  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf_backend_got_header_size): Define.
+	(elf_backend_plt_header_size): Likewise.
+
 1999-06-28  Jim Pick  <jim@jimpick.com>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Mind no_undefined

@@ -3149,4 +3149,7 @@ elf32_arm_post_process_headers (abfd, link_info)
 #define elf_backend_want_got_plt    1
 #define elf_backend_want_plt_sym    0
 
+#define elf_backend_got_header_size	12
+#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
+
 #include "elf32-target.h"
