@@ -956,10 +956,12 @@ static boolean imm_unmatched_hi;
 
 static boolean mips16_small, mips16_ext;
 
+#ifdef OBJ_ELF
 /* The pdr segment for per procedure frame/regmask info.  Not used for
    ECOFF debugging.  */
 
 static segT pdr_seg;
+#endif
 
 /* The default target format to use.  */
 
@@ -11258,8 +11260,7 @@ void
 s_change_section (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  expressionS rep_exp;
-  
+#ifdef OBJ_ELF
   char *section_name;
   char c;
   char *next_c;
@@ -11268,9 +11269,10 @@ s_change_section (ignore)
   int section_flag;
   int section_entry_size;
   int section_alignment;
-  int log = -1;
-  flagword flags;
   
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    return;
+
   section_name = input_line_pointer;
   c = get_symbol_end ();
   next_c = input_line_pointer + 1;
@@ -11307,6 +11309,7 @@ s_change_section (ignore)
 
   obj_elf_change_section (section_name, section_type, section_flag,
 			  section_entry_size, 0, 0, 0);
+#endif /* OBJ_ELF */
 }
 
 void
