@@ -1,5 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -593,9 +593,17 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
-     (although we could actually do it here).  */
+     (although we could actually do it here).  The STT_NOTYPE
+     condition is a hack specifically for the Oracle libraries
+     delivered for Solaris; for some inexplicable reason, they define
+     some of their functions as STT_NOTYPE when they really should be
+     STT_FUNC.  */
   if (h->type == STT_FUNC
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
+      || (h->type == STT_NOTYPE
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && (h->root.u.def.section->flags & SEC_CODE) != 0))
     {
       if (! elf_hash_table (info)->dynamic_sections_created)
 	{
@@ -805,11 +813,14 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
+	      const char *outname;
 	      asection *target;
 
 	      /* If this relocation section applies to a read only
 		 section, then we probably need a DT_TEXTREL entry.  */
-	      target = bfd_get_section_by_name (output_bfd, name + 5);
+	      outname = bfd_get_section_name (output_bfd,
+					      s->output_section);
+	      target = bfd_get_section_by_name (output_bfd, outname + 5);
 	      if (target != NULL
 		  && (target->flags & SEC_READONLY) != 0)
 		reltext = true;
@@ -862,12 +873,10 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0))
-	return false;
-
       if (relplt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
+	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
 	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
 	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return false;
@@ -1263,8 +1272,10 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (rel->r_offset
 				 + input_section->output_section->vma
 				 + input_section->output_offset);
+	      /* h->dynindx may be -1 if the symbol was marked to
+                 become local.  */
 	      if (h != NULL
-		  && (! info->symbolic
+		  && ((! info->symbolic && h->dynindx != -1)
 		      || (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{

@@ -1,3 +1,8 @@
+Fri Mar 21 13:08:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): If there is
+	no .rela.plt section, don't output a DT_PLTGOT dynamic entry.
+
 Thu Mar 20 12:39:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Philippe De Muyter <phdm@info.ucl.ac.be>.
