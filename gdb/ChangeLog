@@ -1,5 +1,9 @@
 Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* coffread.c (process_coff_symbol, case C_TPDEF): Don't set name
+	of TYPE_CODE_PTR or TYPE_CODE_FUNC types.  This parallels similar
+	changes to stabsread.c from summer 1993.
+
 	* remote-udi.c (udi_files_info): If prog_name is NULL, just skip
 	printing the program, rather than passing NULL to printf.
 	(udi_detach): Set udi_session_id to -1 so that udi_close doesn't
