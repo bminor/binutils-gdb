@@ -1,3 +1,11 @@
+Sun Aug 13 17:03:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* frags.c (frag_align): Handle absolute_section.
+	* write.c (record_alignment): Likewise.
+
+	* config/tc-mips.c (macro_build): Skip insns with an inappropriate
+	ISA level.
+
 Sun Aug 13 00:35:02 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_pseudo_table): Add entries for

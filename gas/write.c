@@ -305,6 +305,8 @@ record_alignment (seg, align)
 	boundary, etc.)  */
      int align;
 {
+  if (seg == absolute_section)
+    return;
 #ifdef BFD_ASSEMBLER
   if (align > bfd_get_section_alignment (stdoutput, seg))
     bfd_set_section_alignment (stdoutput, seg, align);
