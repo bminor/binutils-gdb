@@ -1589,8 +1589,8 @@ frame_in_dummy (frame)
   return 0;
 }
 
-/* breakpoint_match_thread (PC, PID) returns true if the breakpoint at PC
-   is valid for process/thread PID.  */
+/* breakpoint_thread_match (PC, PID) returns true if the breakpoint at
+   PC is valid for process/thread PID.  */
 
 int
 breakpoint_thread_match (pc, pid)

@@ -1,3 +1,7 @@
+2000-06-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.c (breakpoint_thread_match): Fix comment.
+
 2000-06-12  Fernando Nasser  <fnasser@cygnus.com>
 
 	* valops.c (value_assign): Adjust the length to take into
