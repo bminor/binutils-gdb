@@ -1,3 +1,15 @@
+2005-03-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* libbfd-in.h (_bfd_ar_spacepad): New prototype.
+	* libbfd.h: Rebuilt.
+	* archive.c (_bfd_ar_spacepad): New function.
+	(_bfd_construct_extended_name_table, _bfd_write_archive_contents,
+	bsd_write_armap, _bfd_archive_bsd_update_armap_timestamp,
+	coff_write_armap): Use it.
+	(bfd_ar_hdr_from_filesystem): Likewise.  Fix HP-UX large
+	uid/gid support.
+	* archive64.c (bfd_elf64_archive_write_armap): Use _bfd_ar_spacepad.
+
 2005-03-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* archive.c (_bfd_look_for_bfd_in_cache): Move declaration of
