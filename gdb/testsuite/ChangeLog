@@ -1,3 +1,7 @@
+2001-07-02  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/corefile.exp: Quote the curly braces in regexp.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.disasm/Makefile.in (clean mostlyclean): Add h8300s to list

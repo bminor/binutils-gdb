@@ -189,7 +189,7 @@ gdb_test "print coremaker_data" "\\\$$decimal = 202"
 gdb_test "print coremaker_bss" "\\\$$decimal = 10"
 gdb_test "print coremaker_ro" "\\\$$decimal = 201"
 
-gdb_test "print func2::coremaker_local" "\\\$$decimal = {0, 1, 2, 3, 4}"
+gdb_test "print func2::coremaker_local" "\\\$$decimal = \\{0, 1, 2, 3, 4\\}"
 
 # Somehow we better test the ability to read the registers out of the core
 # file correctly.  I don't think the other tests do this.
