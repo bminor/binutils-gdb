@@ -12,9 +12,18 @@ _if__(!_GENERIC__)
 @settitle Using _AS__ (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
-@c @smallbook
-@c @cropmarks
+@input smpklug.texi
+@smallbook
+@cropmarks
 @c %**end of header
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* As: (as).			The GNU assembler.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
 
 @finalout
 @syncodeindex ky cp
@@ -88,8 +97,9 @@ done.
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
-\hfill \manvers\par
+\hfill {\it Using {\tt _AS__}} \manvers\par
 \hfill \TeX{}info \texinfoversion\par
+\hfill Edited by Roland Pesch for Cygnus Support\par
 }
 %"boxit" macro for figures:
 %Modified from Knuth's ``boxit'' macro from TeXbook (answer to exercise 21.3)
@@ -98,8 +108,6 @@ done.
 #2\hfil\strut\kern3pt}\kern3pt\vrule}\hrule}}%box with visible outline
 \gdef\ibox#1#2{\hbox to #1{#2\hfil}\kern8pt}% invisible box
 @end tex
-
-Edited by Roland Pesch for Cygnus Support.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991 Free Software Foundation, Inc.
@@ -163,7 +171,7 @@ Here is a brief summary of how to invoke @code{_AS__}.  For details,
 @c to be limited to one line for the header.
 @smallexample
   _AS__ [ -a | -al | -as ] [ -D ] [ -f ] 
-   [ -I @var{path} ] [ -k ] [ -L ]
+   [ -I @var{path} ] [ -K ] [ -L ]
    [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 _if__(_A29K__)
 @c am29k has no machine-dependent assembler options
@@ -197,7 +205,7 @@ other assemblers; it has no effect on @code{_AS__}.
 @item -I @var{path}
 Add @var{path} to the search list for @code{.include} directives
 
-@item -k
+@item -K
 _if__((!_GENERIC__) && !_DIFFTABKLUG__)
 This option is accepted but has no effect on the _HOST__ family.
 _fi__((!_GENERIC__) && !_DIFFTABKLUG__)
@@ -568,7 +576,7 @@ _if__(_GENERIC__)
 to particular machine architectures.
 _fi__(_GENERIC__)
 
-@section @code{-a}, @code{-al}, @code{-as}
+@section Enable Listings: @code{-a}, @code{-al}, @code{-as}
 
 @kindex -a
 @kindex -al
@@ -625,9 +633,9 @@ working directory is always searched first; after that, @code{_AS__}
 searches any @samp{-I} directories in the same order as they were
 specified (left to right) on the command line.
 
-@section Difference Tables: @code{-k}
+@section Difference Tables: @code{-K}
 
-@kindex -k
+@kindex -K
 _if__((!_GENERIC__) && (!_DIFFTABKLUG__))
 On the _HOST__ family, this option is allowed, but has no effect.  It is
 permitted for compatibility with the GNU assembler on other platforms,
@@ -642,7 +650,7 @@ _if__(_GENERIC__ || _DIFFTABKLUG__ )
 @cindex warning for altered difference tables
 @code{_AS__} sometimes alters the code emitted for directives of the form
 @samp{.word @var{sym1}-@var{sym2}}; @pxref{Word,,@code{.word}}.
-You can use the @samp{-k} option if you want a warning issued when this
+You can use the @samp{-K} option if you want a warning issued when this
 is done.
 _fi__(_GENERIC__ || _DIFFTABKLUG__ )
 
@@ -863,7 +871,6 @@ of @code{_AS__}.
 @node Symbol Intro, Statements, Comments, Syntax
 @section Symbols
 
-@cindex symbols
 @cindex characters used in symbols
 A @dfn{symbol} is one or more characters chosen from the set of all
 letters (both upper and lower case), digits and 
@@ -2366,8 +2373,6 @@ _fi__( _BOUT__ && (! _COFF__))
 @section @code{.align @var{abs-expr} , @var{abs-expr}}
 
 @cindex padding the location counter
-@cindex advancing location counter
-@cindex location counter, advancing
 @cindex @code{align} directive
 Pad the location counter (in the current subsection) to a particular
 storage boundary.  The first expression (which must be absolute) is the
@@ -3122,9 +3127,9 @@ Assemble the following code into end of subsection numbered
 
 @node Set, Short, Section, Pseudo Ops
 _fi__(_COFF__)
-_if__(_BOUT__)
+_if__(_BOUT__&&!_COFF__)
 @node Set, Short, Scl, Pseudo Ops
-_fi__(_BOUT__)
+_fi__(_BOUT__&&!_COFF__)
 _if__(!(_COFF__||_BOUT__))
 @node Set, Short, Quad, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
@@ -3198,17 +3203,17 @@ ignores it.
 _fi__(_BOUT__)
 _fi__(_COFF__||_BOUT__)
 
-_if__(_H8__)
+_if__(_H8__&&!_GENERIC__)
 @node Space, Tag, Size, Pseudo Ops
-_fi__(_H8__)
-_if__(!_H8__)
+_fi__(_H8__&&!_GENERIC__)
+_if__(_GENERIC__||!_H8__)
 _if__(_COFF__||_BOUT__)
 @node Space, Stab, Size, Pseudo Ops
 _fi__(_COFF__||_BOUT__)
 _if__(!(_COFF__||_BOUT__))
 @node Space, Stab, Single, Pseudo Ops
 _fi__(!(_COFF__||_BOUT__))
-_fi__(!_H8__)
+_fi__(_GENERIC__||!_H8__)
 _if__(_GENERIC__ || !_A29K__)
 @section @code{.space @var{size} , @var{fill}}
 
@@ -3220,9 +3225,10 @@ and @var{fill} are omitted, @var{fill} is assumed to be zero.
 _fi__(_GENERIC__ || !_A29K__)
 
 _if__(_A29K__) 
+_if__(!_GENERIC__)
 @section @code{.space}
-
 @cindex @code{space} directive
+_fi__(!_GENERIC__)
 On the AMD 29K, this directive is ignored; it is accepted for
 compatibility with other AMD 29K assemblers.
 
@@ -3300,12 +3306,12 @@ _fi__(_AOUT__||_BOUT__||_COFF__)
 _fi__(_GENERIC__||!_H8__)
 
 _if__(_COFF__||_BOUT__)
-_if__(!_H8__)
+_if__(_GENERIC__||!_H8__)
 @node Tag, Text, Stab, Pseudo Ops
-_fi__(!_H8__)
-_if__(_H8__)
+_fi__(_GENERIC__||!_H8__)
+_if__(_H8__&&!_GENERIC__)
 @node Tag, Text, Space, Pseudo Ops
-_fi__(_H8__)
+_fi__(_H8__&&!_GENERIC__)
 @section @code{.tag @var{structname}}
 
 @cindex COFF structure debugging
@@ -3702,9 +3708,12 @@ Unconditional branch.
 @end table
 @item j@var{COND}
 @var{COND} may be any one of the conditional branches
-@code{neq nequ eql eqlu gtr geq lss gtru lequ vc vs gequ cc lssu cs}.
+@code{neq}, @code{nequ}, @code{eql}, @code{eqlu}, @code{gtr},
+@code{geq}, @code{lss}, @code{gtru}, @code{lequ}, @code{vc}, @code{vs},
+@code{gequ}, @code{cc}, @code{lssu}, @code{cs}.
 @var{COND} may also be one of the bit tests
-@code{bs bc bss bcs bsc bcc bssi bcci lbs lbc}.
+@code{bs}, @code{bc}, @code{bss}, @code{bcs}, @code{bsc}, @code{bcc},
+@code{bssi}, @code{bcci}, @code{lbs}, @code{lbc}.
 @var{NOTCOND} is the opposite condition to @var{COND}.
 @table @asis
 @item (byte displacement)
@@ -4463,8 +4472,8 @@ for the linker to resolve.
 @node Compare-and-branch-i960,  , callj-i960, Opcodes for i960
 _CHAPSEC__(2+_GENERIC__) Compare-and-Branch
 
-@cindex i960 compare and branch instructions
-@cindex compare and branch instructions, i960
+@cindex i960 compare/branch instructions
+@cindex compare/branch instructions, i960
 The 960 architectures provide combined Compare-and-Branch instructions
 that permit you to store the branch target in the lower 13 bits of the
 instruction word itself.  However, if you specify a branch target far
@@ -4579,7 +4588,7 @@ bits).  This may be useful if you want the object file to be as small as
 possible, and you know that the relevant symbols will be less than 17
 bits away.
 
-@cindex @code{-m68000} and related options, M680x0
+@cindex @code{-m68000} and related options
 @cindex architecture options, M680x0
 @cindex M680x0 architecture options
 The 680x0 version of @code{_AS__} is most frequently used to assemble
@@ -4759,10 +4768,10 @@ cases that are more fully described after the table:
 
 @smallexample
           Displacement
-          +---------------------------------------------------------
+          +-------------------------------------------------
           |                68020   68000/10
 Pseudo-Op |BYTE    WORD    LONG    LONG      non-PC relative
-          +---------------------------------------------------------
+          +-------------------------------------------------
      jbsr |bsrs    bsr     bsrl    jsr       jsr
       jra |bras    bra     bral    jmp       jmp
 *     jXX |bXXs    bXX     bXXl    bNXs;jmpl bNXs;jmp

@@ -4,8 +4,9 @@
 @setfilename as.info
 @settitle Using as
 @setchapternewpage odd
-@c @smallbook
-@c @cropmarks
+@input smpklug.texi
+@smallbook
+@cropmarks
 @c %**end of header
 
 @ifinfo
@@ -137,7 +138,7 @@ Here is a brief summary of how to invoke @code{as}.  For details,
 @c to be limited to one line for the header.
 @smallexample
   as [ -a | -al | -as ] [ -D ] [ -f ] 
-   [ -I @var{path} ] [ -k ] [ -L ]
+   [ -I @var{path} ] [ -K ] [ -L ]
    [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
 @c am29k has no machine-dependent assembler options
 @c h8/300 has no machine-dependent assembler options
@@ -163,7 +164,7 @@ other assemblers; it has no effect on @code{as}.
 @item -I @var{path}
 Add @var{path} to the search list for @code{.include} directives
 
-@item -k
+@item -K
 Issue warnings when difference tables altered for long displacements.
 
 @item -L
@@ -515,15 +516,15 @@ working directory is always searched first; after that, @code{as}
 searches any @samp{-I} directories in the same order as they were
 specified (left to right) on the command line.
 
-@section Difference Tables: @code{-k}
+@section Difference Tables: @code{-K}
 
-@kindex -k
+@kindex -K
 
 @cindex difference tables, warning
 @cindex warning for altered difference tables
 @code{as} sometimes alters the code emitted for directives of the form
 @samp{.word @var{sym1}-@var{sym2}}; @pxref{Word,,@code{.word}}.
-You can use the @samp{-k} option if you want a warning issued when this
+You can use the @samp{-K} option if you want a warning issued when this
 is done.
 
 @section Include Local Labels: @code{-L}
