@@ -1,9 +1,15 @@
+2004-08-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_relocate_section): Zero section contents
+	for R_386_32 and R_386_PC32 relocs against symbols defined in
+	discarded sections.
+
 2004-08-25  Dmitry Diky  <diwil@spec.ru>
 
 	* reloc.c (BFD_RELOC_MSP430_2X_PCREL,BFD_RELOC_MSP430_RL_PCREL):
 	Add new relocations.
 	* bfd-in2.h: Regenerate.
-	* libbfd.h: Regenerate..
+	* libbfd.h: Regenerate.
 	* elf32-msp430.c: Clean-up code.
 	(elf_msp430_howto_table): Add new relocation entries.
 	(bfd_elf32_bfd_reloc_type_lookup): New relocation handlers.
