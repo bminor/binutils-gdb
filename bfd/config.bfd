@@ -461,7 +461,7 @@ case "${targ}" in
 	targ_cflags=-DOLD_FREEBSD_ABI_LABEL ;;
     esac
     ;;
-  i[3-7]86-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu*)
+  i[3-7]86-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386netbsd_vec
     ;;

@@ -1,3 +1,9 @@
+2003-10-06  Robert Millan  <robertmh@gnu.org>
+
+	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu triplet.
+	* config.bfd: Likewise.
+	* configure: Regenerate.
+
 2003-10-04  Christian Groessler  <chris@groessler.org>
 
 	* coff-z8k.c (extra_case): Fix displacement length check for R_JR

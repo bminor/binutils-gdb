@@ -170,7 +170,9 @@ i[3-7]86-*-unixware)	targ_emul=elf_i386 ;;
 i[3-7]86-*-solaris*)	targ_emul=elf_i386_ldso
                         targ_extra_emuls="elf_i386"
                         ;;
-i[3-7]86-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu*)
+i[3-7]86-*-netbsdelf* | \
+i[3-7]86-*-netbsd*-gnu* | \
+i[3-7]86-*-knetbsd*-gnu)
 			targ_emul=elf_i386
 			targ_extra_emuls=i386nbsd
 			;;

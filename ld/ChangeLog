@@ -1,3 +1,7 @@
+2003-10-06  Robert Millan  <robertmh@gnu.org>
+
+	* configure.tgt: Match GNU/KNetBSD with new knetbsd*-gnu triplet.
+
 2003-10-02  Ivan Warren <ivan@vmfacility.fr>
 
         * pe-dll.c (make_one): Correct sym def order & pick right sym for

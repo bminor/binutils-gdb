@@ -231,7 +231,7 @@ changequote([,])dnl
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
 changequote(,)dnl
-  i[3-7]86-*-netbsd* | i[3-7]86-*-openbsd*)
+  i[3-7]86-*-netbsd* | i[3-7]86-*-knetbsd*-gnu | i[3-7]86-*-openbsd*)
 changequote([,])dnl
 	COREFILE=netbsd-core.lo
 	;;

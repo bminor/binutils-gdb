@@ -1,3 +1,8 @@
+2003-10-06  Robert Millan  <robertmh@gnu.org>
+
+	* configure.in: Match GNU/KNetBSD with new knetbsd*-gnu	triplet.
+	* configure: Regenerate.
+
 2003-10-05  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (parse_args): Revert patch to change handling of -f

@@ -267,7 +267,8 @@ changequote([,])dnl
       i386-*-bsd*)			fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)			fmt=aout em=386bsd ;;
       i386-*-netbsdpe*)			fmt=coff em=pe ;;
-      i386-*-netbsd*-gnu*)		fmt=elf em=nbsd ;;
+      i386-*-netbsd*-gnu* | \
+      i386-*-knetbsd*-gnu | \
       i386-*-netbsdelf*)		fmt=elf em=nbsd ;;
       i386-*-*n*bsd*)	case ${cpu} in
 			    x86_64)	fmt=elf em=nbsd ;;
