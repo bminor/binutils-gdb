@@ -295,7 +295,7 @@ int minimum_mode;
 int h8500_is_trapped_internalvar PARAMS ((char *name));
 #define IS_TRAPPED_INTERNALVAR h8500_is_trapped_internalvar
 
-PTR h8500_value_of_trapped_internalvar (/* struct internalvar *var */);
+struct value * h8500_value_of_trapped_internalvar (/* struct internalvar *var */);
 #define VALUE_OF_TRAPPED_INTERNALVAR h8500_value_of_trapped_internalvar
 
 void h8500_set_trapped_internalvar (/* struct internalvar *var, value newval, int bitpos, int bitsize, int offset */);
