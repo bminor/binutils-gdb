@@ -45,9 +45,9 @@ code on the hardware.
 #include "sky-vpe.h"
 #include "sky-libvpe.h"
 #include "sky-pke.h"
-#include "sky-gpuif.h"
 #include "idecode.h"
 #include "support.h"
+#include "sky-gdb.h"
 #undef SD
 #endif
 /* end-sanitize-sky */
@@ -177,19 +177,9 @@ static char* board = NULL;
 static DECLARE_OPTION_HANDLER (mips_option_handler);
 
 enum {
-  OPTION_DINERO_TRACE	= OPTION_START,
-  OPTION_DINERO_FILE
-/* start-sanitize-sky */
-#ifdef TARGET_SKY
-#ifdef SKY_FUNIT
-  ,OPTION_FLOAT_TYPE
-#endif
-  ,OPTION_GS_ENABLE
-  ,OPTION_GS_REFRESH1
-  ,OPTION_GS_REFRESH2
-#endif
-/* end-sanitize-sky */
-  ,OPTION_BOARD
+  OPTION_DINERO_TRACE = OPTION_START,
+  OPTION_DINERO_FILE,
+  OPTION_BOARD
 };
 
 
@@ -256,65 +246,6 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 #endif /* TRACE */
       return SIM_RC_OK;
 
-/* start-sanitize-sky */
-#ifdef TARGET_SKY
-#ifdef SKY_FUNIT
-    case OPTION_FLOAT_TYPE:
-      /* Use host (fast) or target (accurate) floating point implementation. */
-      if (arg && strcmp (arg, "fast") == 0)
-	STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_ACCURATE;
-      else if (arg && strcmp (arg, "accurate") == 0)
-	STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_ACCURATE;
-      else
-	{
-	  fprintf (stderr, "Unrecognized float-type option `%s'\n", arg);
-	  return SIM_RC_FAIL;
-	}
-      /*printf ("float-type=0x%08x\n", STATE_FP_TYPE_OPT (sd));*/
-      return SIM_RC_OK;
-#endif
-
-    case OPTION_GS_ENABLE:
-      /* Enable GS libraries.  */
-      if ( arg && strcmp (arg, "on") == 0 )
-        gif_options (&GIF_full,GIF_OPT_GS_ENABLE,1,0,0);
-      else if ( arg && strcmp (arg, "off") == 0 )
-        gif_options (&GIF_full,GIF_OPT_GS_ENABLE,0,0,0);
-      else
-        {
-          fprintf (stderr, "Unrecognized enable-gs option `%s'\n", arg);
-          return SIM_RC_FAIL;
-        }
-      return SIM_RC_OK;
-
-    case OPTION_GS_REFRESH1:
-    case OPTION_GS_REFRESH2:
-      {
-        /* The GS has defineable register and register values.  */     
-        unsigned_4 address[2];
-        long long value[2];
-        char c[3];
-       
-        if ( arg && strlen (arg) == 59 && arg[10] == '=' &&
-             arg[29] == ':' &&  arg[40] == '=' &&
-             ( sscanf (arg,"%lx%c%Lx%c%lx%c%Lx", &address[0],&c[0],&value[0],
-                      &c[1],&address[1],&c[2],&value[1]) == 7 ))
-          {
-            gif_options (&GIF_full, ( opt == OPTION_GS_REFRESH1 ) ?
-                         GIF_OPT_GS_REFRESH1:GIF_OPT_GS_REFRESH2,
-                         0,&address[0],&value[0]);
-          }
-        else
-          {
-            fprintf (stderr, "Unrecognized gs-refresh option `%s'\n", arg);
-            return SIM_RC_FAIL;
-          }
-      }
-      return SIM_RC_OK;
-   
-#endif
-/* end-sanitize-sky */
-      
     case OPTION_BOARD:
       {
 	if (arg)
@@ -338,25 +269,6 @@ static const OPTION mips_options[] =
   { {"dinero-file", required_argument, NULL, OPTION_DINERO_FILE},
       '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
-/* start-sanitize-sky */
-#ifdef TARGET_SKY
-#ifdef SKY_FUNIT
-  { {"float-type", required_argument, NULL, OPTION_FLOAT_TYPE},
-      '\0', "fast|accurate", "Use fast (host) or accurate (target) floating point",
-      mips_option_handler },
-#endif
-  { {"enable-gs", required_argument, NULL, OPTION_GS_ENABLE},
-     '\0', "on|off", "Enable GS library routines",
-     mips_option_handler },
-  { {"gs-refresh1", required_argument, NULL, OPTION_GS_REFRESH1},
-     '\0', "0xaddress0=0xvalue0:0xaddress1=0xvalue1", "GS refresh buffer 1 addresses and values",
-     mips_option_handler },
-  { {"gs-refresh2", required_argument, NULL, OPTION_GS_REFRESH2},
-     '\0', "0xaddress0=0xvalue0:0xaddress1=0xvalue1", "GS refresh buffer 2 addresses and values",
-     mips_option_handler },
-#endif
-/* end-sanitize-sky */
-
   { {"board", required_argument, NULL, OPTION_BOARD},
      '\0', "none" /* rely on compile-time string concatenation for other options */
 
@@ -417,13 +329,7 @@ sim_open (kind, cb, abfd, argv)
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-/* start-sanitize-sky */
 
-#if defined(TARGET_SKY) && defined(SKY_FUNIT)
-  /* Set "--float-type fast" as the default. */
-  STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_ACCURATE;
-#endif
-/* end-sanitize-sky */
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -435,6 +341,12 @@ sim_open (kind, cb, abfd, argv)
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
   sim_add_option_table (sd, NULL, mips_options);
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+  sky_command_options (sd);
+#endif
+/* end-sanitize-sky */
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
