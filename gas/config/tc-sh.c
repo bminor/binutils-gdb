@@ -19,9 +19,9 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
-  Written By Steve Chamberlain
-  sac@cygnus.com
-  */
+   Written By Steve Chamberlain
+   sac@cygnus.com
+ */
 
 #include <stdio.h>
 #include "as.h"
@@ -40,7 +40,7 @@ const char line_comment_chars[] = "!";
    pseudo-op name without dot
    function to call to execute this pseudo-op
    Integer arg to pass to the function
-   */
+ */
 
 void cons ();
 void s_align_bytes ();
@@ -57,7 +57,7 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-/*int md_reloc_size;*/
+/*int md_reloc_size; */
 
 static int relax;		/* set if -relax seen */
 
@@ -118,9 +118,9 @@ const relax_typeS md_relax_table[C (END, 0)];
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 /*
-  This function is called once, at assembler startup time.  This should
-  set up all the tables, etc that the MD part of the assembler needs
-  */
+   This function is called once, at assembler startup time.  This should
+   set up all the tables, etc that the MD part of the assembler needs
+ */
 
 void
 md_begin ()
@@ -141,7 +141,7 @@ md_begin ()
       else
 	{
 	  /* Make all the opcodes with the same name point to the same
-	   string */
+	     string */
 	  opcode->name = prev_name;
 	}
     }
@@ -181,10 +181,10 @@ static int reg_n;
 static expressionS immediate;	/* absolute expression */
 
 typedef struct
-{
-  sh_arg_type type;
-  int reg;
-}
+  {
+    sh_arg_type type;
+    int reg;
+  }
 
 sh_operand_info;
 
@@ -265,6 +265,21 @@ parse_reg (src, mode, reg)
   return 0;
 }
 
+static symbolS *dot()
+{
+  const char *fake;
+
+  /* JF: '.' is pseudo symbol with value of current location
+     in current segment.  */
+  fake = FAKE_LABEL_NAME;
+  return  symbol_new (fake,
+		      now_seg,
+		      (valueT) frag_now_fix (),
+		      frag_now);
+
+}
+
+
 static
 char *
 parse_exp (s)
@@ -272,42 +287,24 @@ parse_exp (s)
 {
   char *save;
   char *new;
-  segT seg;
 
   save = input_line_pointer;
-
-
   input_line_pointer = s;
-
-  seg = expr (0, &immediate);
+  expression (&immediate);
+  if (immediate.X_op == O_absent)
+    as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
-  if (SEG_NORMAL (seg))
-    return new;
-  switch (seg)
-    {
-    case SEG_ABSOLUTE:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_REGISTER:
-      return new;
-    case SEG_ABSENT:
-      as_bad ("Missing operand");
-      return new;
-    default:
-      as_bad ("Don't understand operand of type %s", segment_name (seg));
-      return new;
-    }
+  return new;
 }
 
 
 /* The many forms of operand:
 
-   Rn			Register direct
-   @Rn			Register indirect
-   @Rn+			Autoincrement
-   @-Rn			Autodecrement
+   Rn                   Register direct
+   @Rn                  Register indirect
+   @Rn+                 Autoincrement
+   @-Rn                 Autodecrement
    @(disp:4,Rn)
    @(disp:8,GBR)
    @(disp:8,PC)
@@ -346,7 +343,7 @@ parse_at (src, op)
   else if (src[0] == '(')
     {
       /* Could be @(disp, rn), @(disp, gbr), @(disp, pc),  @(r0, gbr) or
-	 @(r0, rn) */
+         @(r0, rn) */
       src++;
       len = parse_reg (src, &mode, &(op->reg));
       if (len && mode == A_REG_N)
@@ -393,6 +390,11 @@ parse_at (src, op)
 		}
 	      else if (mode == A_DISP_PC)
 		{
+		  /* Turn a plain @(4,pc) into @(.+4,pc) */
+		  if (immediate.X_op == O_constant) { 
+		    immediate.X_add_symbol = dot();
+		    immediate.X_op = O_symbol;
+		  }
 		  op->type = A_DISP_PC;
 		}
 	      else
@@ -507,7 +509,7 @@ get_operands (info, args, operand)
 /* Passed a pointer to a list of opcodes which use different
    addressing modes, return the opcode which matches the opcodes
    provided
-   */
+ */
 
 static
 sh_opcode_info *
@@ -529,9 +531,9 @@ get_specific (opcode, operands)
 	  return 0;
 	}
       /* look at both operands needed by the opcodes and provided by
-	 the user - since an arg test will often fail on the same arg
-	 again and again, we'll try and test the last failing arg the
-	 first on each opcode try */
+         the user - since an arg test will often fail on the same arg
+         again and again, we'll try and test the last failing arg the
+         first on each opcode try */
 
       for (n = 0; this_try->arg[n]; n++)
 	{
@@ -609,7 +611,7 @@ check (operand, low, high)
      int low;
      int high;
 {
-  if (operand->X_seg != SEG_ABSOLUTE
+  if (operand->X_op != O_constant
       || operand->X_add_number < low
       || operand->X_add_number > high)
     {
@@ -625,14 +627,12 @@ insert (where, how, pcrel)
      int how;
      int pcrel;
 {
-  fix_new (frag_now,
-	   where - frag_now->fr_literal,
-	   4,
-	   immediate.X_add_symbol,
-	   immediate.X_subtract_symbol,
-	   immediate.X_add_number,
-	   pcrel,
-	   how);
+  fix_new_exp (frag_now,
+	       where - frag_now->fr_literal,
+	       4,
+	       &immediate,
+	       pcrel,
+	       how);
 
 }
 
@@ -723,10 +723,10 @@ build_Mytes (opcode, operand)
 	      insert (output + 1, R_SH_IMM8, 0);
 	      break;
 	    case PCRELIMM_8BY4:
-	      insert (output + 1, R_SH_PCRELIMM8BY4, 0);
+	      insert (output + 1, R_SH_PCRELIMM8BY4, 1);
 	      break;
 	    case PCRELIMM_8BY2:
-	      insert (output + 1, R_SH_PCRELIMM8BY2, 0);
+	      insert (output + 1, R_SH_PCRELIMM8BY2, 1);
 	      break;
 	    default:
 	      printf ("failed for %d\n", i);
@@ -740,7 +740,7 @@ build_Mytes (opcode, operand)
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.
-   */
+ */
 
 void
 md_assemble (str)
@@ -750,25 +750,26 @@ md_assemble (str)
   unsigned char *op_end;
   sh_operand_info operand[2];
   sh_opcode_info *opcode;
-  unsigned char *name;
-
+  char name[20];
   int nlen = 0;
-
+  char *p;
   /* Drop leading whitespace */
   while (*str == ' ')
     str++;
 
   /* find the op code end */
-  for (name = op_start = op_end = (unsigned char *) (str);
-       *op_end &&
-       !is_end_of_line[*op_end] && *op_end != ' ';
+  for (op_start = op_end = (unsigned char *) (str);
+       *op_end
+       && nlen < 20
+       && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
+      name[nlen] = op_start[nlen];
       nlen++;
     }
   name[nlen] = 0;
 
-  if (op_end == op_start)
+  if (nlen == 0)
     {
       as_bad ("can't find opcode ");
     }
@@ -784,13 +785,15 @@ md_assemble (str)
   if (opcode->arg[0] == A_BDISP12
       || opcode->arg[0] == A_BDISP8)
     {
-      input_line_pointer = parse_exp (op_end + 1);
+      parse_exp (op_end + 1);
       build_relax (opcode);
     }
   else
     {
-      input_line_pointer = get_operands (opcode, op_end, operand);
-
+      if (opcode->arg[0] != A_END)
+	{
+	  get_operands (opcode, op_end, operand);
+	}
       opcode = get_specific (opcode, operand);
 
       if (opcode == 0)
@@ -830,11 +833,6 @@ DEFUN (tc_headers_hook, (headers),
   printf ("call to tc_headers_hook \n");
 }
 
-void
-DEFUN_VOID (md_end)
-{
-}
-
 /* Various routines to kill one day */
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
@@ -842,7 +840,7 @@ DEFUN_VOID (md_end)
 /* Turn a string in input_line_pointer into a floating point constant of type
    type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
    emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
-   */
+ */
 char *
 md_atof (type, litP, sizeP)
      char type;
@@ -895,24 +893,44 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return 0;
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+#define OPTION_RELAX (OPTION_MD_BASE)
+  {"relax", no_argument, NULL, OPTION_RELAX},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  if (!strcmp (*argP, "relax"))
+  switch (c)
     {
+    case OPTION_RELAX:
       relax = 1;
-      **argP = 0;
+      break;
+
+    default:
+      return 0;
     }
+
   return 1;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+SH options:\n\
+-relax			alter jump instructions for long displacements\n");
+}
+
 int md_short_jump_size;
 
 void
@@ -944,8 +962,8 @@ md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
 }
 
 /*
-called after relaxing, change the frags so they know how big they are
-*/
+   called after relaxing, change the frags so they know how big they are
+ */
 void
 md_convert_frag (headers, fragP)
      object_headers *headers;
@@ -964,7 +982,8 @@ md_convert_frag (headers, fragP)
 
 	int disp = targ_addr - next_inst - 2;
 	disp /= 2;
-	md_number_to_chars (buffer + 1, disp, 1);
+	
+	md_number_to_chars (buffer + 1, disp & 0xff, 1);
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
       }
@@ -980,7 +999,7 @@ md_convert_frag (headers, fragP)
 
 	disp /= 2;
 	t = buffer[0] & 0xf0;
-	md_number_to_chars (buffer, disp, 2);
+	md_number_to_chars (buffer, disp & 0xfff, 2);
 	buffer[0] = (buffer[0] & 0xf) | t;
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
@@ -995,7 +1014,7 @@ md_convert_frag (headers, fragP)
 	   mov.w @(0, PC), r14
 	   .long disp
 	   foo: bra @r14
-	   */
+	 */
 
 	int next_inst =
 	fragP->fr_fix + fragP->fr_address + UNCOND32_LENGTH;
@@ -1007,7 +1026,7 @@ md_convert_frag (headers, fragP)
 
 	buffer[0] = 0xa0;	/* branch over move and disp */
 	buffer[1] = 3;
-	buffer[2] = 0xd0 | JREG;/* Build mov insn */
+	buffer[2] = 0xd0 | JREG;	/* Build mov insn */
 	buffer[3] = 0x00;
 
 	buffer[4] = 0;		/* space for 32 bit jump disp */
@@ -1026,7 +1045,6 @@ md_convert_frag (headers, fragP)
 		 fragP->fr_fix + 4,
 		 4,
 		 fragP->fr_symbol,
-		 0,
 		 fragP->fr_offset,
 		 0,
 		 R_SH_IMM32);
@@ -1045,7 +1063,7 @@ md_convert_frag (headers, fragP)
 
 	int disp = targ_addr - next_inst;
 	disp /= 2;
-	md_number_to_chars (buffer + 2, disp, 2);
+	md_number_to_chars (buffer + 2, disp & 0xfff, 2);
 	buffer[0] ^= 0x2;	/* Toggle T/F bit */
 	buffer[1] = 1;		/* branch over jump and nop */
 	buffer[2] = (buffer[2] & 0xf) | 0xa0;	/* Build jump insn */
@@ -1064,11 +1082,11 @@ md_convert_frag (headers, fragP)
 	   displacement either, the code sequence looks like:
 	   b!cond foop
 	   mov.w @(n, PC), r14
-	   jmp	@r14
+	   jmp  @r14
 	   nop
 	   .long where
 	   foop:
-	   */
+	 */
 
 	int next_inst =
 	fragP->fr_fix + fragP->fr_address + COND32_LENGTH;
@@ -1079,9 +1097,9 @@ md_convert_frag (headers, fragP)
 	buffer[0] ^= 0x2;	/* Toggle T/F bit */
 #define JREG 14
 	buffer[1] = 5;		/* branch over mov, jump, nop and ptr */
-	buffer[2] = 0xd0 | JREG;/* Build mov insn */
+	buffer[2] = 0xd0 | JREG;	/* Build mov insn */
 	buffer[3] = 0x2;
-	buffer[4] = 0x40 | JREG;/* Build jmp @JREG */
+	buffer[4] = 0x40 | JREG;	/* Build jmp @JREG */
 	buffer[5] = 0x0b;
 	buffer[6] = 0x20;	/* build nop */
 	buffer[7] = 0x0b;
@@ -1096,7 +1114,6 @@ md_convert_frag (headers, fragP)
 		 fragP->fr_fix + 8,
 		 4,
 		 fragP->fr_symbol,
-		 0,
 		 fragP->fr_offset,
 		 0,
 		 R_SH_IMM32);
@@ -1112,9 +1129,10 @@ md_convert_frag (headers, fragP)
 
   if (donerelax && !relax)
     {
-      as_bad ("Offset doesn't fit at 0x%x, trying to get to 0x%x",
-	      fragP->fr_address,
-	      targ_addr);
+      as_warn ("Offset doesn't fit at 0x%x, trying to get to %s+0x%x",
+	       fragP->fr_address,
+	       fragP->fr_symbol  ?    S_GET_NAME(fragP->fr_symbol): "",
+	       targ_addr);
     }
 
 }
@@ -1138,7 +1156,10 @@ md_apply_fix (fixP, val)
   int addr = fixP->fx_frag->fr_address + fixP->fx_where;
   if (fixP->fx_r_type == 0)
     {
-      fixP->fx_r_type = R_SH_IMM32;
+      if (fixP->fx_size == 2)
+	fixP->fx_r_type = R_SH_IMM16;
+      else
+	fixP->fx_r_type = R_SH_IMM32;
     }
 
   switch (fixP->fx_r_type)
@@ -1170,10 +1191,11 @@ md_apply_fix (fixP, val)
 
     case R_SH_PCRELIMM8BY4:
       addr &= ~1;
-
+#if 0
       if (val & 0x3)
 	as_warn ("non aligned displacement at %x\n", addr);
-      val -= (addr + 4);
+#endif
+      /*      val -= (addr + 4); */
       val += 3;
       val /= 4;
       if (val & ~0xff)
@@ -1186,7 +1208,7 @@ md_apply_fix (fixP, val)
       addr &= ~1;
       if (val & 0x1)
 	as_bad ("odd displacement at %x\n", addr);
-      val -= (addr + 4);
+      /*      val -= (addr + 4); */
       val++;
       val /= 2;
       if (val & ~0xff)
@@ -1197,6 +1219,11 @@ md_apply_fix (fixP, val)
     case R_SH_IMM32:
       *buf++ = val >> 24;
       *buf++ = val >> 16;
+      *buf++ = val >> 8;
+      *buf++ = val >> 0;
+      break;
+
+    case R_SH_IMM16:
       *buf++ = val >> 8;
       *buf++ = val >> 0;
       break;
@@ -1214,9 +1241,9 @@ DEFUN (md_operand, (expressionP), expressionS * expressionP)
 int md_long_jump_size;
 
 /*
-called just before address relaxation, return the length
-by which a fragment must grow to reach it's destination
-*/
+   called just before address relaxation, return the length
+   by which a fragment must grow to reach it's destination
+ */
 int
 md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
@@ -1252,7 +1279,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  && S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
 	  /* Got a symbol and it's defined in this segment, become byte
-	 sized - maybe it will fix up */
+	     sized - maybe it will fix up */
 	  fragP->fr_subtype = C (COND_JUMP, COND8);
 	  fragP->fr_var = md_relax_table[C (COND_JUMP, COND8)].rlx_length;
 	}
@@ -1283,34 +1310,15 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4:
-      *ptr++ = (use >> 24) & 0xff;
-    case 3:
-      *ptr++ = (use >> 16) & 0xff;
-    case 2:
-      *ptr++ = (use >> 8) & 0xff;
-    case 1:
-      *ptr++ = (use >> 0) & 0xff;
-      break;
-    default:
-      abort ();
-    }
+  number_to_chars_bigendian (ptr, use, nbytes);
 }
+
 long
 md_pcrel_from (fixP)
      fixS *fixP;
-
 {
-  int gap = fixP->fx_size + fixP->fx_where +
-  fixP->fx_frag->fr_address;
+  int gap = fixP->fx_size + fixP->fx_where +  fixP->fx_frag->fr_address - 1 ;
   return gap;
-}
-
-void
-tc_coff_symbol_emit_hook ()
-{
 }
 
 short
@@ -1385,6 +1393,3 @@ tc_coff_sizemachdep (frag)
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
 }
-
-
-/* end of tc-sh.c */
