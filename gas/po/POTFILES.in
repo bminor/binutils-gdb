@@ -108,6 +108,8 @@ config/tc-s390.c
 config/tc-s390.h
 config/tc-sh.c
 config/tc-sh.h
+config/tc-sh64.c
+config/tc-sh64.h
 config/tc-sparc.c
 config/tc-sparc.h
 config/tc-tahoe.c

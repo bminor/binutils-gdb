@@ -46,6 +46,7 @@ CPU_DOCS = \
 	c-pj.texi \
 	c-ppc.texi \
 	c-sh.texi \
+	c-sh64.texi \
 	c-sparc.texi \
         c-tic54x.texi \
 	c-vax.texi \

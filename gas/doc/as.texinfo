@@ -5625,6 +5625,7 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
+* SH64-Dependent::              Hitachi SH64 Dependent Features
 @end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features
@@ -5772,6 +5773,7 @@ family.
 
 @ifset SH
 @include c-sh.texi
+@include c-sh64.texi
 @end ifset
 
 @ifset SPARC

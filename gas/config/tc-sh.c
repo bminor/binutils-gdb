@@ -140,6 +140,18 @@ const pseudo_typeS md_pseudo_table[] =
   {"file", dwarf2_directive_file, 0 },
   {"loc", dwarf2_directive_loc, 0 },
 #endif
+#ifdef HAVE_SH64
+  {"mode", s_sh64_mode, 0 },
+
+  /* Have the old name too.  */
+  {"isa", s_sh64_mode, 0 },
+
+  /* Assert that the right ABI is used.  */
+  {"abi", s_sh64_abi, 0 },
+
+  { "vtable_inherit", sh64_vtable_inherit, 0 },
+  { "vtable_entry", sh64_vtable_entry, 0 },
+#endif /* HAVE_SH64 */
   {0, 0, 0}
 };
 
@@ -172,10 +184,36 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define GET_WHAT(x) ((x>>4))
 
 /* These are the three types of relaxable instrction.  */
+/* These are the types of relaxable instructions; except for END which is
+   a marker.  */
 #define COND_JUMP 1
 #define COND_JUMP_DELAY 2
 #define UNCOND_JUMP  3
+
+#ifdef HAVE_SH64
+
+/* A 16-bit (times four) pc-relative operand, at most expanded to 32 bits.  */
+#define SH64PCREL16_32 4
+/* A 16-bit (times four) pc-relative operand, at most expanded to 64 bits.  */
+#define SH64PCREL16_64 5
+
+/* Variants of the above for adjusting the insn to PTA or PTB according to
+   the label.  */
+#define SH64PCREL16PT_32 6
+#define SH64PCREL16PT_64 7
+
+/* A MOVI expansion, expanding to at most 32 or 64 bits.  */
+#define MOVI_IMM_32 8
+#define MOVI_IMM_32_PCREL 9
+#define MOVI_IMM_64 10
+#define MOVI_IMM_64_PCREL 11
+#define END 12
+
+#else  /* HAVE_SH64 */
+
 #define END 4
+
+#endif /* HAVE_SH64 */
 
 #define UNDEF_DISP 0
 #define COND8  1
@@ -185,6 +223,24 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 #define UNCOND12 1
 #define UNCOND32 2
+
+#ifdef HAVE_SH64
+#define UNDEF_SH64PCREL 0
+#define SH64PCREL16 1
+#define SH64PCREL32 2
+#define SH64PCREL48 3
+#define SH64PCREL64 4
+#define SH64PCRELPLT 5
+
+#define UNDEF_MOVI 0
+#define MOVI_16 1
+#define MOVI_32 2
+#define MOVI_48 3
+#define MOVI_64 4
+#define MOVI_PLT 5
+#define MOVI_GOTOFF 6
+#define MOVI_GOTPC 7
+#endif /* HAVE_SH64 */
 
 /* Branch displacements are from the address of the branch plus
    four, thus all minimum and maximum values have 4 added to them.  */
@@ -215,6 +271,85 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define UNCOND32_F (1<<30)
 #define UNCOND32_M -(1<<30)
 #define UNCOND32_LENGTH 14
+
+#ifdef HAVE_SH64
+/* The trivial expansion of a SH64PCREL16 relaxation is just a "PT label,
+   TRd" as is the current insn, so no extra length.  Note that the "reach"
+   is calculated from the address *after* that insn, but the offset in the
+   insn is calculated from the beginning of the insn.  We also need to
+   take into account the implicit 1 coded as the "A" in PTA when counting
+   forward.  If PTB reaches an odd address, we trap that as an error
+   elsewhere, so we don't have to have different relaxation entries.  We
+   don't add a one to the negative range, since PTB would then have the
+   farthest backward-reaching value skipped, not generated at relaxation.  */
+#define SH64PCREL16_F (32767 * 4 - 4 + 1)
+#define SH64PCREL16_M (-32768 * 4 - 4)
+#define SH64PCREL16_LENGTH 0
+
+/* The next step is to change that PT insn into
+     MOVI ((label - datalabel Ln) >> 16) & 65535, R25
+     SHORI (label - datalabel Ln) & 65535, R25
+    Ln:
+     PTREL R25,TRd
+   which means two extra insns, 8 extra bytes.  This is the limit for the
+   32-bit ABI.
+
+   The expressions look a bit bad since we have to adjust this to avoid overflow on a
+   32-bit host.  */
+#define SH64PCREL32_F ((((long) 1 << 30) - 1) * 2 + 1 - 4)
+#define SH64PCREL32_LENGTH (2 * 4)
+
+/* Similarly, we just change the MOVI and add a SHORI for the 48-bit
+   expansion.  */
+#if BFD_HOST_64BIT_LONG
+/* The "reach" type is long, so we can only do this for a 64-bit-long
+   host.  */
+#define SH64PCREL32_M (((long) -1 << 30) * 2 - 4)
+#define SH64PCREL48_F ((((long) 1 << 47) - 1) - 4)
+#define SH64PCREL48_M (((long) -1 << 47) - 4)
+#define SH64PCREL48_LENGTH (3 * 4)
+#else
+/* If the host does not have 64-bit longs, just make this state identical
+   in reach to the 32-bit state.  Note that we have a slightly incorrect
+   reach, but the correct one above will overflow a 32-bit number.  */
+#define SH64PCREL32_M (((long) -1 << 30) * 2)
+#define SH64PCREL48_F SH64PCREL32_F
+#define SH64PCREL48_M SH64PCREL32_M
+#define SH64PCREL48_LENGTH (3 * 4)
+#endif /* BFD_HOST_64BIT_LONG */
+
+/* And similarly for the 64-bit expansion; a MOVI + SHORI + SHORI + SHORI
+   + PTREL sequence.  */
+#define SH64PCREL64_LENGTH (4 * 4)
+
+/* For MOVI, we make the MOVI + SHORI... expansion you can see in the
+   SH64PCREL expansions.  The PCREL one is similar, but the other has no
+   pc-relative reach; it must be fully expanded in
+   shmedia_md_estimate_size_before_relax.  */
+#define MOVI_16_LENGTH 0
+#define MOVI_16_F (32767 - 4)
+#define MOVI_16_M (-32768 - 4)
+#define MOVI_32_LENGTH 4
+#define MOVI_32_F ((((long) 1 << 30) - 1) * 2 + 1 - 4)
+#define MOVI_48_LENGTH 8
+
+#if BFD_HOST_64BIT_LONG
+/* The "reach" type is long, so we can only do this for a 64-bit-long
+   host.  */
+#define MOVI_32_M (((long) -1 << 30) * 2 - 4)
+#define MOVI_48_F ((((long) 1 << 47) - 1) - 4)
+#define MOVI_48_M (((long) -1 << 47) - 4)
+#else
+/* If the host does not have 64-bit longs, just make this state identical
+   in reach to the 32-bit state.  Note that we have a slightly incorrect
+   reach, but the correct one above will overflow a 32-bit number.  */
+#define MOVI_32_M (((long) -1 << 30) * 2)
+#define MOVI_48_F MOVI_32_F
+#define MOVI_48_M MOVI_32_M
+#endif /* BFD_HOST_64BIT_LONG */
+
+#define MOVI_64_LENGTH 12
+#endif /* HAVE_SH64 */
 
 #define EMPTY { 0, 0, 0, 0 }
 
@@ -256,6 +391,118 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   { 0, 0, UNCOND32_LENGTH, 0, },
   EMPTY, EMPTY, EMPTY,
   EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+#ifdef HAVE_SH64
+  /* C (SH64PCREL16_32, SH64PCREL16) */
+  EMPTY,
+  { SH64PCREL16_F, SH64PCREL16_M, SH64PCREL16_LENGTH, C (SH64PCREL16_32, SH64PCREL32) },
+  /* C (SH64PCREL16_32, SH64PCREL32) */
+  { 0, 0, SH64PCREL32_LENGTH, 0 },
+  EMPTY, EMPTY,
+  /* C (SH64PCREL16_32, SH64PCRELPLT) */
+  { 0, 0, SH64PCREL32_LENGTH, 0 },
+  EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (SH64PCREL16_64, SH64PCREL16) */
+  EMPTY,
+  { SH64PCREL16_F, SH64PCREL16_M, SH64PCREL16_LENGTH, C (SH64PCREL16_64, SH64PCREL32) },
+  /* C (SH64PCREL16_64, SH64PCREL32) */
+  { SH64PCREL32_F, SH64PCREL32_M, SH64PCREL32_LENGTH, C (SH64PCREL16_64, SH64PCREL48) },
+  /* C (SH64PCREL16_64, SH64PCREL48) */
+  { SH64PCREL48_F, SH64PCREL48_M, SH64PCREL48_LENGTH, C (SH64PCREL16_64, SH64PCREL64) },
+  /* C (SH64PCREL16_64, SH64PCREL64) */
+  { 0, 0, SH64PCREL64_LENGTH, 0 },
+  /* C (SH64PCREL16_64, SH64PCRELPLT) */
+  { 0, 0, SH64PCREL64_LENGTH, 0 },
+  EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (SH64PCREL16PT_32, SH64PCREL16) */
+  EMPTY,
+  { SH64PCREL16_F, SH64PCREL16_M, SH64PCREL16_LENGTH, C (SH64PCREL16PT_32, SH64PCREL32) },
+  /* C (SH64PCREL16PT_32, SH64PCREL32) */
+  { 0, 0, SH64PCREL32_LENGTH, 0 },
+  EMPTY, EMPTY,
+  /* C (SH64PCREL16PT_32, SH64PCRELPLT) */
+  { 0, 0, SH64PCREL32_LENGTH, 0 },
+  EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (SH64PCREL16PT_64, SH64PCREL16) */
+  EMPTY,
+  { SH64PCREL16_F, SH64PCREL16_M, SH64PCREL16_LENGTH, C (SH64PCREL16PT_64, SH64PCREL32) },
+  /* C (SH64PCREL16PT_64, SH64PCREL32) */
+  { SH64PCREL32_F,
+    SH64PCREL32_M, 
+    SH64PCREL32_LENGTH,
+    C (SH64PCREL16PT_64, SH64PCREL48) },
+  /* C (SH64PCREL16PT_64, SH64PCREL48) */
+  { SH64PCREL48_F, SH64PCREL48_M, SH64PCREL48_LENGTH, C (SH64PCREL16PT_64, SH64PCREL64) },
+  /* C (SH64PCREL16PT_64, SH64PCREL64) */
+  { 0, 0, SH64PCREL64_LENGTH, 0 },
+  /* C (SH64PCREL16PT_64, SH64PCRELPLT) */
+  { 0, 0, SH64PCREL64_LENGTH, 0},
+  EMPTY, EMPTY,
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (MOVI_IMM_32, UNDEF_MOVI) */
+  { 0, 0, MOVI_32_LENGTH, 0 },
+  /* C (MOVI_IMM_32, MOVI_16) */
+  { MOVI_16_F, MOVI_16_M, MOVI_16_LENGTH, C (MOVI_IMM_32, MOVI_32) },
+  /* C (MOVI_IMM_32, MOVI_32) */
+  { MOVI_32_F, MOVI_32_M, MOVI_32_LENGTH, 0 },
+  EMPTY, EMPTY, EMPTY,
+  /* C (MOVI_IMM_32, MOVI_GOTOFF) */
+  { 0, 0, MOVI_32_LENGTH, 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (MOVI_IMM_32_PCREL, MOVI_16) */
+  EMPTY,
+  { MOVI_16_F, MOVI_16_M, MOVI_16_LENGTH, C (MOVI_IMM_32_PCREL, MOVI_32) },
+  /* C (MOVI_IMM_32_PCREL, MOVI_32) */
+  { 0, 0, MOVI_32_LENGTH, 0 },
+  EMPTY, EMPTY,
+  /* C (MOVI_IMM_32_PCREL, MOVI_PLT) */
+  { 0, 0, MOVI_32_LENGTH, 0 },
+  EMPTY,
+  /* C (MOVI_IMM_32_PCREL, MOVI_GOTPC) */
+  { 0, 0, MOVI_32_LENGTH, 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (MOVI_IMM_64, UNDEF_MOVI) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  /* C (MOVI_IMM_64, MOVI_16) */
+  { MOVI_16_F, MOVI_16_M, MOVI_16_LENGTH, C (MOVI_IMM_64, MOVI_32) },
+  /* C (MOVI_IMM_64, MOVI_32) */
+  { MOVI_32_F, MOVI_32_M, MOVI_32_LENGTH, C (MOVI_IMM_64, MOVI_48) },
+  /* C (MOVI_IMM_64, MOVI_48) */
+  { MOVI_48_F, MOVI_48_M, MOVI_48_LENGTH, C (MOVI_IMM_64, MOVI_64) },
+  /* C (MOVI_IMM_64, MOVI_64) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  EMPTY,
+  /* C (MOVI_IMM_64, MOVI_GOTOFF) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+  /* C (MOVI_IMM_64_PCREL, MOVI_16) */
+  EMPTY,
+  { MOVI_16_F, MOVI_16_M, MOVI_16_LENGTH, C (MOVI_IMM_64_PCREL, MOVI_32) },
+  /* C (MOVI_IMM_64_PCREL, MOVI_32) */
+  { MOVI_32_F, MOVI_32_M, MOVI_32_LENGTH, C (MOVI_IMM_64_PCREL, MOVI_48) },
+  /* C (MOVI_IMM_64_PCREL, MOVI_48) */
+  { MOVI_48_F, MOVI_48_M, MOVI_48_LENGTH, C (MOVI_IMM_64_PCREL, MOVI_64) },
+  /* C (MOVI_IMM_64_PCREL, MOVI_64) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  /* C (MOVI_IMM_64_PCREL, MOVI_PLT) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  EMPTY,
+  /* C (MOVI_IMM_64_PCREL, MOVI_GOTPC) */
+  { 0, 0, MOVI_64_LENGTH, 0 },
+  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+
+#endif /* HAVE_SH64 */
+
 };
 
 #undef EMPTY
@@ -277,6 +524,11 @@ sh_PIC_related_p (sym)
 
   if (sym == GOT_symbol)
     return 1;
+
+#ifdef HAVE_SH64
+  if (sh_PIC_related_p (*symbol_get_tc (sym)))
+    return 1;
+#endif
 
   exp = symbol_get_value_expression (sym);
 
@@ -341,11 +593,47 @@ sh_check_fixup (main_exp, r_type_p)
 
   if (exp->X_op == O_symbol || exp->X_op == O_add || exp->X_op == O_subtract)
     {
+#ifdef HAVE_SH64
+      if (exp->X_add_symbol
+	  && (exp->X_add_symbol == GOT_symbol
+	      || (GOT_symbol
+		  && *symbol_get_tc (exp->X_add_symbol) == GOT_symbol)))
+	{
+	  switch (*r_type_p)
+	    {
+	    case BFD_RELOC_SH_IMM_LOW16:
+	      *r_type_p = BFD_RELOC_SH_GOTPC_LOW16;
+	      break;
+
+	    case BFD_RELOC_SH_IMM_MEDLOW16:
+	      *r_type_p = BFD_RELOC_SH_GOTPC_MEDLOW16;
+	      break;
+
+	    case BFD_RELOC_SH_IMM_MEDHI16:
+	      *r_type_p = BFD_RELOC_SH_GOTPC_MEDHI16;
+	      break;
+
+	    case BFD_RELOC_SH_IMM_HI16:
+	      *r_type_p = BFD_RELOC_SH_GOTPC_HI16;
+	      break;
+
+	    case BFD_RELOC_NONE:
+	    case BFD_RELOC_UNUSED:
+	      *r_type_p = BFD_RELOC_SH_GOTPC;
+	      break;
+	      
+	    default:
+	      abort ();
+	    }
+	  return 0;
+	}
+#else
       if (exp->X_add_symbol && exp->X_add_symbol == GOT_symbol)
 	{
 	  *r_type_p = BFD_RELOC_SH_GOTPC;
 	  return 0;
 	}
+#endif
       exp = symbol_get_value_expression (exp->X_add_symbol);
       if (! exp)
 	return 0;
@@ -353,7 +641,116 @@ sh_check_fixup (main_exp, r_type_p)
 
   if (exp->X_op == O_PIC_reloc)
     {
+#ifdef HAVE_SH64
+      switch (*r_type_p)
+	{
+	case BFD_RELOC_NONE:
+	case BFD_RELOC_UNUSED:
+	  *r_type_p = exp->X_md;
+	  break;
+
+	case BFD_RELOC_SH_IMM_LOW16:
+	  switch (exp->X_md)
+	    {
+	    case BFD_RELOC_32_GOTOFF:
+	      *r_type_p = BFD_RELOC_SH_GOTOFF_LOW16;
+	      break;
+	      
+	    case BFD_RELOC_SH_GOTPLT32:
+	      *r_type_p = BFD_RELOC_SH_GOTPLT_LOW16;
+	      break;
+	      
+	    case BFD_RELOC_32_GOT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_GOT_LOW16;
+	      break;
+	      
+	    case BFD_RELOC_32_PLT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_PLT_LOW16;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  break;
+
+	case BFD_RELOC_SH_IMM_MEDLOW16:
+	  switch (exp->X_md)
+	    {
+	    case BFD_RELOC_32_GOTOFF:
+	      *r_type_p = BFD_RELOC_SH_GOTOFF_MEDLOW16;
+	      break;
+	      
+	    case BFD_RELOC_SH_GOTPLT32:
+	      *r_type_p = BFD_RELOC_SH_GOTPLT_MEDLOW16;
+	      break;
+	      
+	    case BFD_RELOC_32_GOT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_GOT_MEDLOW16;
+	      break;
+	      
+	    case BFD_RELOC_32_PLT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_PLT_MEDLOW16;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  break;
+
+	case BFD_RELOC_SH_IMM_MEDHI16:
+	  switch (exp->X_md)
+	    {
+	    case BFD_RELOC_32_GOTOFF:
+	      *r_type_p = BFD_RELOC_SH_GOTOFF_MEDHI16;
+	      break;
+	      
+	    case BFD_RELOC_SH_GOTPLT32:
+	      *r_type_p = BFD_RELOC_SH_GOTPLT_MEDHI16;
+	      break;
+	      
+	    case BFD_RELOC_32_GOT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_GOT_MEDHI16;
+	      break;
+	      
+	    case BFD_RELOC_32_PLT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_PLT_MEDHI16;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  break;
+
+	case BFD_RELOC_SH_IMM_HI16:
+	  switch (exp->X_md)
+	    {
+	    case BFD_RELOC_32_GOTOFF:
+	      *r_type_p = BFD_RELOC_SH_GOTOFF_HI16;
+	      break;
+	      
+	    case BFD_RELOC_SH_GOTPLT32:
+	      *r_type_p = BFD_RELOC_SH_GOTPLT_HI16;
+	      break;
+	      
+	    case BFD_RELOC_32_GOT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_GOT_HI16;
+	      break;
+	      
+	    case BFD_RELOC_32_PLT_PCREL:
+	      *r_type_p = BFD_RELOC_SH_PLT_HI16;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  break;
+
+	default:
+	  abort ();
+	}
+#else
       *r_type_p = exp->X_md;
+#endif
       if (exp == main_exp)
 	exp->X_op = O_symbol;
       else
@@ -397,6 +794,12 @@ sh_cons_fix_new (frag, off, size, exp)
 	r_type = BFD_RELOC_32;
 	break;
 
+#ifdef HAVE_SH64
+      case 8:
+	r_type = BFD_RELOC_64;
+	break;
+#endif
+
       default:
 	goto error;
       }
@@ -419,6 +822,16 @@ sh_elf_cons (nbytes)
      register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
 {
   expressionS exp;
+
+#ifdef HAVE_SH64
+
+  /* Update existing range to include a previous insn, if there was one.  */
+  sh64_update_contents_mark (true);
+
+  /* We need to make sure the contents type is set to data.  */
+  sh64_flag_output ();
+
+#endif /* HAVE_SH64 */
 
   if (is_it_end_of_statement ())
     {
@@ -456,6 +869,10 @@ md_begin ()
 
   target_arch = arch_sh1_up & ~(sh_dsp ? arch_sh3e_up : arch_sh_dsp_up);
   valid_arch = target_arch;
+
+#ifdef HAVE_SH64
+  shmedia_md_begin ();
+#endif
 
   opcode_hash_control = hash_new ();
 
@@ -1908,6 +2325,26 @@ md_assemble (str)
   sh_opcode_info *opcode;
   unsigned int size = 0;
 
+#ifdef HAVE_SH64
+  if (sh64_isa_mode == sh64_isa_shmedia)
+    {
+      shmedia_md_assemble (str);
+      return;
+    }
+  else
+    {
+      /* If we've seen pseudo-directives, make sure any emitted data or
+	 frags are marked as data.  */
+      if (seen_insn == false)
+	{
+	  sh64_update_contents_mark (true);
+	  sh64_set_contents_type (CRT_SH5_ISA16);
+	}
+
+      seen_insn = true;
+    }
+#endif /* HAVE_SH64 */
+
   opcode = find_cooked_opcode (&str);
   op_end = str;
 
@@ -2149,6 +2586,21 @@ struct option md_longopts[] =
   {"little", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
+#ifdef HAVE_SH64
+#define OPTION_ISA                    (OPTION_DSP + 1)
+#define OPTION_ABI                    (OPTION_ISA + 1)
+#define OPTION_NO_MIX                 (OPTION_ABI + 1)
+#define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
+#define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
+#define OPTION_PT32                   (OPTION_NO_EXPAND + 1)
+  {"isa",                    required_argument, NULL, OPTION_ISA},
+  {"abi",                    required_argument, NULL, OPTION_ABI},
+  {"no-mix",                 no_argument, NULL, OPTION_NO_MIX},
+  {"shcompact-const-crange", no_argument, NULL, OPTION_SHCOMPACT_CONST_CRANGE},
+  {"no-expand",              no_argument, NULL, OPTION_NO_EXPAND},
+  {"expand-pt32",            no_argument, NULL, OPTION_PT32},
+#endif /* HAVE_SH64 */
+
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -2180,6 +2632,62 @@ md_parse_option (c, arg)
       sh_dsp = 1;
       break;
 
+#ifdef HAVE_SH64
+    case OPTION_ISA:
+      if (strcasecmp (arg, "shmedia") == 0)
+	{
+	  if (sh64_isa_mode == sh64_isa_shcompact)
+	    as_bad (_("Invalid combination: --isa=SHcompact with --isa=SHmedia"));
+	  sh64_isa_mode = sh64_isa_shmedia;
+	}
+      else if (strcasecmp (arg, "shcompact") == 0)
+	{
+	  if (sh64_isa_mode == sh64_isa_shmedia)
+	    as_bad (_("Invalid combination: --isa=SHmedia with --isa=SHcompact"));
+	  if (sh64_abi == sh64_abi_64)
+	    as_bad (_("Invalid combination: --abi=64 with --isa=SHcompact"));
+	  sh64_isa_mode = sh64_isa_shcompact;
+	}
+      else
+	as_bad ("Invalid argument to --isa option: %s", arg);
+      break;
+
+    case OPTION_ABI:
+      if (strcmp (arg, "32") == 0)
+	{
+	  if (sh64_abi == sh64_abi_64)
+	    as_bad (_("Invalid combination: --abi=32 with --abi=64"));
+	  sh64_abi = sh64_abi_32;
+	}
+      else if (strcmp (arg, "64") == 0)
+	{
+	  if (sh64_abi == sh64_abi_32)
+	    as_bad (_("Invalid combination: --abi=64 with --abi=32"));
+	  if (sh64_isa_mode == sh64_isa_shcompact)
+	    as_bad (_("Invalid combination: --isa=SHcompact with --abi=64"));
+	  sh64_abi = sh64_abi_64;
+	}
+      else
+	as_bad ("Invalid argument to --abi option: %s", arg);
+      break;
+
+    case OPTION_NO_MIX:
+      sh64_mix = false;
+      break;
+
+    case OPTION_SHCOMPACT_CONST_CRANGE:
+      sh64_shcompact_const_crange = true;
+      break;
+
+    case OPTION_NO_EXPAND:
+      sh64_expand = false;
+      break;
+
+    case OPTION_PT32:
+      sh64_pt32 = true;
+      break;
+#endif /* HAVE_SH64 */
+
     default:
       return 0;
     }
@@ -2198,6 +2706,22 @@ SH options:\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
+#ifdef HAVE_SH64
+  fprintf (stream, _("\
+-isa=[shmedia		set default instruction set for SH64\n\
+      | SHmedia\n\
+      | shcompact\n\
+      | SHcompact]\n\
+-abi=[32|64]		set size of expanded SHmedia operands and object\n\
+			file type\n\
+-shcompact-const-crange	emit code-range descriptors for constants in\n\
+			SHcompact code sections\n\
+-no-mix			disallow SHmedia code in the same section as\n\
+			constants and SHcompact code\n\
+-no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
+-expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
+			to 32 bits only"));
+#endif /* HAVE_SH64 */
 }
 
 /* This struct is used to pass arguments to sh_count_relocs through
@@ -2367,6 +2891,10 @@ sh_frob_section (abfd, sec, ignore)
 void
 sh_frob_file ()
 {
+#ifdef HAVE_SH64
+  shmedia_frob_file_before_adjust ();
+#endif
+
   if (! sh_relax)
     return;
 
@@ -2520,7 +3048,11 @@ md_convert_frag (headers, seg, fragP)
       break;
 
     default:
+#ifdef HAVE_SH64
+      shmedia_md_convert_frag (headers, seg, fragP, true);
+#else
       abort ();
+#endif
     }
 
   if (donerelax && !sh_relax)
@@ -2710,6 +3242,9 @@ sh_force_relocation (fix)
 	  || fix->fx_r_type == BFD_RELOC_SH_ALIGN
 	  || fix->fx_r_type == BFD_RELOC_SH_CODE
 	  || fix->fx_r_type == BFD_RELOC_SH_DATA
+#ifdef HAVE_SH64
+	  || fix->fx_r_type == BFD_RELOC_SH_SHMEDIA_CODE
+#endif
 	  || fix->fx_r_type == BFD_RELOC_SH_LABEL);
 }
 
@@ -2750,6 +3285,13 @@ sh_elf_final_processing ()
 
   /* Set file-specific flags to indicate if this code needs
      a processor with the sh-dsp / sh3e ISA to execute.  */
+#ifdef HAVE_SH64
+  /* SH5 and above don't know about the valid_arch arch_sh* bits defined
+     in sh-opc.h, so check SH64 mode before checking valid_arch.  */
+  if (sh64_isa_mode != sh64_isa_unspecified)
+    val = EF_SH5;
+  else
+#endif /* HAVE_SH64 */
   if (valid_arch & arch_sh1)
     val = EF_SH1;
   else if (valid_arch & arch_sh2)
@@ -2998,6 +3540,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case BFD_RELOC_32_GOT_PCREL:
+    case BFD_RELOC_SH_GOTPLT32:
       * valP = 0; /* Fully resolved at runtime.  No addend.  */
       md_number_to_chars (buf, 0, 4);
       break;
@@ -3008,7 +3551,12 @@ md_apply_fix3 (fixP, valP, seg)
 #endif
 
     default:
+#ifdef HAVE_SH64
+      shmedia_md_apply_fix3 (fixP, valP);
+      return;
+#else
       abort ();
+#endif
     }
 
   if (shift != 0)
@@ -3041,7 +3589,12 @@ md_estimate_size_before_relax (fragP, segment_type)
   switch (fragP->fr_subtype)
     {
     default:
+#ifdef HAVE_SH64
+      return shmedia_md_estimate_size_before_relax (fragP, segment_type);
+#else
       abort ();
+#endif
+
 
     case C (UNCOND_JUMP, UNDEF_DISP):
       /* Used to be a branch to somewhere which was unknown.  */
@@ -3110,6 +3663,11 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
+#ifdef HAVE_SH64
+  /* We might need to set the contents type to data.  */
+  sh64_flag_output ();
+#endif
+
   if (! target_big_endian)
     number_to_chars_littleendian (ptr, use, nbytes);
   else
@@ -3355,6 +3913,10 @@ tc_gen_reloc (section, fixp)
       rel->addend = 0;
       rel->address = rel->addend = fixp->fx_offset;
     }
+#ifdef HAVE_SH64
+  else if (shmedia_init_reloc (rel, fixp))
+    ;
+#endif
   else if (fixp->fx_pcrel)
     rel->addend = fixp->fx_addnumber;
   else if (r_type == BFD_RELOC_32 || r_type == BFD_RELOC_32_GOTOFF)
@@ -3440,6 +4002,8 @@ sh_parse_name (name, exprP, nextcharP)
     goto no_suffix;
   else if ((next_end = sh_end_of_match (next + 1, "GOTOFF")))
     reloc_type = BFD_RELOC_32_GOTOFF;
+  else if ((next_end = sh_end_of_match (next + 1, "GOTPLT")))
+    reloc_type = BFD_RELOC_SH_GOTPLT32;
   else if ((next_end = sh_end_of_match (next + 1, "GOT")))
     reloc_type = BFD_RELOC_32_GOT_PCREL;
   else if ((next_end = sh_end_of_match (next + 1, "PLT")))
