@@ -1,3 +1,7 @@
+Mon Jul 26 13:00:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Negative Type Numbers): FORTRAN LOGICAL fix.
+
 Tue Jul 20 16:30:41 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* Makefile.in (refcard.dvi): Use srcdir where necessary.

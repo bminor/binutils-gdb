@@ -1354,14 +1354,15 @@ I'm not sure whether anyone has tried to define what this means if
 their customary size).  If @code{int} has exactly one size for each
 architecture, then it can be handled easily enough, but if the size of
 @code{int} can vary according the compiler options, then it gets hairy.
-I guess the consistent way to do this would be to define separate
-negative type numbers for 16-bit @code{int} and 32-bit @code{int};
-therefore I have indicated below the customary size (and other format
-information) for each type.  The information below is currently correct
-because AIX on the RS6000 is the only system which uses these type
-numbers.  If these type numbers start to get used on other systems, I
-suspect the correct thing to do is to define a new number in cases where
-a type does not have the size and format indicated below.
+The best way to do this would be to define separate negative type
+numbers for 16-bit @code{int} and 32-bit @code{int}; therefore I have
+indicated below the customary size (and other format information) for
+each type.  The information below is currently correct because AIX on
+the RS6000 is the only system which uses these type numbers.  If these
+type numbers start to get used on other systems, I suspect the correct
+thing to do is to define a new number in cases where a type does not
+have the size and format indicated below (or avoid negative type numbers
+in these cases).
 
 Also note that part of the definition of the negative type number is
 the name of the type.  Types with identical size and format but
@@ -1446,7 +1447,9 @@ is zero or non-zero?
 @code{logical*4}, 32 bit unsigned integral type.
 
 @item -24
-@code{logical}, 32 bit unsigned integral type.
+@code{logical}, 32 bit type.  This @sc{fortran} type has a split
+personality in that it is used for boolean variables, but can also be
+used for unsigned integers.
 
 @item -25
 @code{complex}.  A complex type consisting of two IEEE single-precision
