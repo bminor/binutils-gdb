@@ -2066,11 +2066,6 @@ Thu Jan 12 16:30:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* archures.c (archures_init_table): Now const.
 	(bfd_arch_init): Adjusted type of local var `ptable'.
-start-sanitize-rce
-
-	* Makefile.in (ALL_MACHINES): Include cpu-rce.o.
-	(BFD32_BACKENDS): Include aout-rce.o.
-end-sanitize-rce
 start-sanitize-arc
 
 	* Makefile.in (ALL_MACHINES): Include cpu-arc.o.
