@@ -36,6 +36,8 @@
 #include "objfiles.h"
 #include "value.h"
 
+#include "cli/cli-decode.h"
+
 extern void _initialize_maint_cmds (void);
 
 static void maintenance_command (char *, int);

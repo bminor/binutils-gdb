@@ -592,7 +592,7 @@ buildsym_h =	buildsym.h
 c_lang_h =	c-lang.h $(value_h)
 call_cmds_h =	call-cmds.h
 cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
-cli_decode_h =	$(srcdir)/cli/cli-decode.h
+cli_decode_h =	$(srcdir)/cli/cli-decode.h $(command_h)
 cli_out_h =	cli-out.h
 cli_script_h =	$(srcdir)/cli/cli-script.h
 cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
@@ -1391,7 +1391,7 @@ event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
 event-top.o: event-top.c $(top_h) $(readline_headers) \
       $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) $(terminal_h) \
-	$(gdbcmd_h) $(target_h)
+	$(gdbcmd_h) $(target_h) $(cli_decode_h)
 
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
@@ -1709,7 +1709,8 @@ main.o: main.c $(top_h) $(defs_h) $(gdb_string_h) $(event_loop_h) \
 	$(symfile_h)  $(gdbcore_h) $(ui_out_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) \
-	$(language_h) $(expression_h) $(objfiles_h) $(symfile_h)
+	$(language_h) $(expression_h) $(objfiles_h) $(symfile_h) \
+	$(cli_decode_h)
 
 mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) \
 	$(symtab_h) $(symfile_h) $(gdbcore_h) $(inferior_h)
@@ -2094,7 +2095,8 @@ thread.o: thread.c $(defs_h) $(gdbthread_h) $(gdbcmd_h) $(target_h) \
 	$(regcache_h) $(ui_out_h) $(gdb_h)
 
 completer.o: completer.c $(completer_h) $(gdbtypes_h) $(symtab_h) \
-	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
+	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers) \
+	$(cli_decode_h)
 
 top.o: top.c $(top_h) $(bfd_h) $(getopt_h) $(readline_headers) $(call_cmds_h) \
 	$(cli_cmds_h) $(cli_script_h) $(cli_setshow_h) \

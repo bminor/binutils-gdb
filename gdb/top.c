@@ -27,6 +27,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-decode.h"
 #include "symtab.h"
 #include "inferior.h"
 #include <signal.h>

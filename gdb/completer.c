@@ -24,6 +24,8 @@
 #include "expression.h"
 #include "filenames.h"		/* for DOSish file names */
 
+#include "cli/cli-decode.h"
+
 /* FIXME: This is needed because of lookup_cmd_1().
    We should be calling a hook instead so we eliminate the CLI dependency. */
 #include "gdbcmd.h"

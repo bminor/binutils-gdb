@@ -1,5 +1,25 @@
 2002-03-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* command.h: Update copyright.
+	(struct cmd_list_element): Replace definition with opaque
+	declaration.
+	(enum cmd_types): Document that it will eventually be moved to
+	cli/cli-decode.h
+	(CMD_DEPRECATED, DEPRECATED_WARN_USER): Delete macros.
+	(MALLOCED_REPLACEMENT): Delete macro.
+	* Makefile.in (cli_decode_h): Add $(command_h).
+	(top.o, completer.o, maint.o): Add dependency on $(cli_decode_h).
+	* top.c: Include "cli/cli-decode.h".  
+	* completer.c: Include "cli/cli-decode.h".
+	* maint.c: Include "cli/cli-decode.h".
+	* cli/cli-decode.h: Include "command.h".
+	(enum command_class): Delete.
+	(enum cmd_types): Comment out.
+	(enum cmd_auto_boolean): Delete.
+	(enum var_types): Delete.
+
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* cli/cli-decode.c: Include "gdb_assert.h".
 	(add_set_or_show_cmd): New static function.
 	(add_set_cmd): Rewrite.  Use add_set_or_show_cmd.

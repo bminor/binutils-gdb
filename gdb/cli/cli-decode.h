@@ -20,24 +20,11 @@
 #define CLI_DECODE_H 1
 
 #include "gdb_regex.h"		/* Needed by apropos_cmd.  */
+#include "command.h"
 
-/* Command classes are top-level categories into which commands are broken
-   down for "help" purposes.  
-   Notes on classes: class_alias is for alias commands which are not
-   abbreviations of the original command.  class-pseudo is for
-   commands which are not really commands nor help topics ("stop").  */
-
-enum command_class
-{
-  /* Special args to help_list */
-  class_deprecated, all_classes = -2, all_commands = -1,
-  /* Classes of commands */
-  no_class = -1, class_run = 0, class_vars, class_stack,
-  class_files, class_support, class_info, class_breakpoint, class_trace,
-  class_alias, class_obscure, class_user, class_maintenance,
-  class_pseudo, class_tui, class_xdb
-};
-
+#if 0
+/* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
+   cmd_types'' can be moved from "command.h" to "cli-decode.h".  */
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
    not fall into one of the following categories.  */
@@ -48,55 +35,7 @@ typedef enum cmd_types
     show_cmd
   }
 cmd_types;
-
-/* Reasonable values for an AUTO_BOOLEAN variable. */
-enum cmd_auto_boolean
-{
-  CMD_AUTO_BOOLEAN_TRUE,
-  CMD_AUTO_BOOLEAN_FALSE,
-  CMD_AUTO_BOOLEAN_AUTO
-};
-
-/* Types of "set" or "show" command.  */
-typedef enum var_types
-  {
-    /* "on" or "off".  *VAR is an integer which is nonzero for on,
-       zero for off.  */
-    var_boolean,
-
-    /* "on" / "true" / "enable" or "off" / "false" / "disable" or
-       "auto.  *VAR is an ``enum cmd_auto_boolean''.  NOTE: In general
-       a custom show command will need to be implemented - one that
-       for "auto" prints both the "auto" and the current auto-selected
-       value. */
-    var_auto_boolean,
-
-    /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
-       to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
-    var_uinteger,
-
-    /* Like var_uinteger but signed.  *VAR is an int.  The user can type 0
-       to mean "unlimited", which is stored in *VAR as INT_MAX.  */
-    var_integer,
-
-    /* String which the user enters with escapes (e.g. the user types \n and
-       it is a real newline in the stored string).
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
-    var_string,
-    /* String which stores what the user types verbatim.
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
-    var_string_noescape,
-    /* String which stores a filename.
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
-    var_filename,
-    /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
-       that zero really means zero.  */
-    var_zinteger,
-    /* Enumerated type.  Can only have one of the specified values.  *VAR is a
-       char pointer to the name of the element that we find.  */
-    var_enum
-  }
-var_types;
+#endif
 
 /* This structure records one command'd definition.  */
 
