@@ -9956,7 +9956,7 @@ strip the program if necessary to save space.  @value{GDBN} on the host
 system does all the symbol handling.
 
 To use the server, you must tell it how to communicate with @value{GDBN};
-the name of your program; and the arguments for your program.  The
+the name of your program; and the arguments for your program.  The usual
 syntax is:
 
 @smallexample
@@ -9992,6 +9992,16 @@ reserved for @code{telnet}).@footnote{If you choose a port number that
 conflicts with another service, @code{gdbserver} prints an error message
 and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
+
+On some targets, @code{gdbserver} can also attach to running programs.
+This is accomplished via the @code{--attach} argument.  The syntax is:
+
+@smallexample
+target> gdbserver @var{comm} --attach @var{pid}
+@end smallexample
+
+@var{pid} is the process ID of a currently running process.  It isn't necessary
+to point @code{gdbserver} at a binary for the running process.
 
 @item On the @value{GDBN} host machine,
 you need an unstripped copy of your program, since @value{GDBN} needs
