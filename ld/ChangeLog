@@ -1,3 +1,7 @@
+Mon Feb  7 16:31:15 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Rename all "hppaosf" files to "hppaelf".
+
 Sun Feb  6 20:31:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmain.c (main): Call xatexit, not atexit.
