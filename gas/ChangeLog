@@ -1,3 +1,10 @@
+001-02-18  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in (cpu_type, arch): Add a generic FreeBSD specification as
+	all FreeBSD platforms should look the same at this level.
+	* configure: Rebuilt.
+	* config/tc-i386.c: Add support for old FreeBSD a.out hosts.
+
 2001-02-18  lars brinkhoff  <lars@nocrew.org>
 
 	* Makefile.am: Add PDP-11 target.
