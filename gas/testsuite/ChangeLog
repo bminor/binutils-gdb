@@ -1,3 +1,18 @@
+2002-05-30  Tom Rix  <trix@redhat.com>
+
+	* gas/d10v/d10v.exp: Add -gstabs packing, sequence control
+	packing, warning, instruction packing, label, immediate and,
+	error tests.
+	* gas/d10v/instruction_packing-001.d - intruction_packing-010.d: 
+	New tests.
+	* gas/d10v/control-001.d: New test.
+	* gas/d10v/warning-001.d - warning-019.d: New tests.  
+	* gas/d10v/label-001.d: New test.
+	* gas/d10v/error-001.d - error-002.d : New tests.
+	* gas/d10v/immediate-001.d - immediate-007.d: New tests.
+
+	* lib/gas-defs.exp (run_dump_test): Add error option.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* gas/dlx: New directory: DLX gas testsuite

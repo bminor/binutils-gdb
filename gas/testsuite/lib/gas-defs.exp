@@ -233,6 +233,11 @@ proc gas_init { args } {
 #	Assemble the file SOURCE.s.  If omitted, this defaults to FILE.s.
 #       This is useful if several .d files want to share a .s file.
 #
+#   error: REGEX
+#	An error with message matching REGEX must be emitted for the test
+#	to pass.  The PROG, objdump, nm and objcopy options have no
+#	meaning and need not supplied if this is present.
+#
 # Each option may occur at most once.
 #
 # After the option lines come regexp lines.  `run_dump_test' calls
@@ -267,6 +272,7 @@ proc run_dump_test { name } {
     set opts(PROG) {}
     set opts(source) {}
     set opts(stderr) {}
+    set opts(error) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -299,6 +305,10 @@ proc run_dump_test { name } {
 		  unresolved $subdir/$name
 		  return }
 	}
+    } elseif { $opts(error) != "" } {
+	# It's meaningless to require an output-testing method when we
+	# expect an error.  For simplicity, we fake an arbitrary method.
+	set program "nm"
     } else {
 	# Guess which program to run, by seeing which option was specified.
 	set program ""
@@ -343,6 +353,14 @@ proc run_dump_test { name } {
 	if { $opts(stderr) == "" }  then {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
+
+	    if { $opts(error) != "" } {
+		verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
+		if [regexp $opts(error) $comp_output] {
+		    pass $testname
+		    return
+		}
+	    }
 	    fail $testname
 	    return
 	} else {
@@ -359,6 +377,13 @@ proc run_dump_test { name } {
 	    send_log "wrote pruned stderr to dump.stderr\n"
 	    verbose "wrote pruned stderr to dump.stderr" 3
 	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
+		if { $opts(error) != "" } {
+		    verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
+		    if [regexp $opts(error) $comp_output] {
+			pass $testname
+			return
+		    }
+		}
 		fail $testname
 		verbose "pruned stderr is [file_contents "dump.stderr"]" 2
 		return
