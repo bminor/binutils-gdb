@@ -1,3 +1,15 @@
+Fri Apr 14 09:40:22 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/a1-selftest.exp: Add alpha xfail.
+
+Mon Apr 10 13:07:50 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/watchpoint.c (main): Prompt before calling read().
+	* gdb.base/watchpoint.exp (test_watchpoint_triggered_in_syscall):
+	Revise accordingly.  Remove cruft about sending "123" several
+	times, until it gets noticed.  Clean up the "print buf[0]" stuff
+	so that it passes or fails, and waits for prompts in the usual way.
+
 Sun Apr  9 09:02:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/recurse.exp: Fix comment.

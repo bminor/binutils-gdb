@@ -454,6 +454,12 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
 	    pass "$description"
 	}
 	-re ".*$prompt $" {
+	    # On the alpha, we hit the infamous problem about gdb
+	    # being unable to get the frame pointer (mentioned in
+	    # gdb/README).  As it is intermittent, there is no way to
+	    # XFAIL it which will give us an XPASS if the problem goes
+	    # away.
+	    setup_xfail "alpha*-*-osf*"
 	    fail "$description"
 	}
 	timeout {
