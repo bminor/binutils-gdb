@@ -1,3 +1,7 @@
+Tue Mar 24 23:46:20 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* config/mh-sysv: INSTALL_PROG -> INSTALL.
+
 Mon Feb 10 01:41:35 1992  Brian Fox  (bfox at gnuwest.fsf.org)
 
 	* history.c (history_do_write) Build a buffer of all of the lines
