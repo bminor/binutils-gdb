@@ -44,7 +44,7 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = `cd $(srcdir)/..'pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t=$(program_tranform_name)

@@ -1,3 +1,16 @@
+<<<<<<< ChangeLog
+<<<<<<< ChangeLog
+Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
+	
+	* Makefile.in: canonicalize install.sh; for use within
+	this directory (and subdirs)
+
+Tue Jun 15 17:01:23 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: remove parentdir support; use INSTALL_XFORM
+
+=======
+=======
 Thu Jun 17 15:08:35 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* configure.in (alpha-*-osf*), config/alpha/alpha-osf.mh: New
@@ -9,6 +22,7 @@ Thu Jun 17 15:08:35 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	* config/sh/tm-sh.h (REGISTER_NAMES): Know about the news ones the
 	simulator defines.
 
+>>>>>>> 1.1384
 Wed Jun 16 16:08:18 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* NEWS: tracking user visible changes starting with
@@ -27,6 +41,7 @@ Wed Jun 16 12:21:49 1993  Fred Fish  (fnf@cygnus.com)
 	* alldeps.mak, depend:  Update to latest automatically built
 	versions.
 
+>>>>>>> 1.1383
 Tue Jun 15 12:26:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* remote-vx.c: include gdbcmd.h for setlist.
