@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-srctrigger="gdb.t00"
+srctrigger="Makefile.in"
 srcname="DejaGnu"
 
 # Directories to use in all configurations.
