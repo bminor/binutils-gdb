@@ -1,5 +1,10 @@
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
+	* gdb.c++/rtti.exp: New file, containing tests for PR c++/488.
+	* gdb.c++/rtti.h, gdb.c++/rtti1.cc, gdb.c++/rtti2.cc: Ditto.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
 	* gdb.c++/namespace.exp: Add namespace scope and anonymous
 	namespace tests.
 	Bump copyright date.

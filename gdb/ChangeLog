@@ -1,5 +1,9 @@
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
+	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/rtti*.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
 	Partial fix for PR c++/827.
 	* cp-support.h: Include symtab.h.
 	Declare cp_lookup_symbol_nonlocal, cp_lookup_symbol_namespace.
