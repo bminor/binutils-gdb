@@ -1,3 +1,8 @@
+2002-04-15  Richard Henderson  <rth@redhat.com>
+
+	* elf32-mips.c (mips_elf32_object_p): Revert 0404 fragment: allow
+	n32 binaries.
+
 2002-04-15  Michael Snyder  <msnyder@redhat.com>
 
 	* opncls.c (bfd_close): Write contents if writeable.

@@ -1730,9 +1730,6 @@ mips_elf32_object_p (abfd)
   mach = _bfd_elf_mips_mach (elf_elfheader (abfd)->e_flags);
   bfd_default_set_arch_mach (abfd, bfd_arch_mips, mach);
 
-  if (ABI_N32_P (abfd))
-    return false;
-
   return true;
 }
 
