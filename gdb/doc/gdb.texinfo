@@ -9636,6 +9636,18 @@ terminal server named @code{manyfarms}:
 @example
 target remote manyfarms:2828
 @end example
+
+If your remote target is actually running on the same machine as
+your debugger session (e.g.@: a simulator of your target running on
+the same host), you can omit the hostname.  For example, to connect
+to port 1234 on your local machine:
+
+@example
+target remote :1234
+@end example
+@noindent
+
+Note that the colon is still required here.
 @end enumerate
 
 Now you can use all the usual commands to examine and change data and to

@@ -1,3 +1,8 @@
+2001-08-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.texinfo: Explain omitting the hostname in the
+	`target remote' command.
+
 2001-07-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbint.texinfo: Remove extraneous START-INFO-DIR-ENTRY
