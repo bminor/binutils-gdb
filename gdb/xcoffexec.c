@@ -63,7 +63,6 @@ extern int info_verbose;
 bfd *exec_bfd;			/* needed by core.c	*/
 
 extern char *getenv();
-extern void child_create_inferior (), child_attach ();
 extern void add_syms_addr_command ();
 extern void symbol_file_command ();
 static void exec_files_info();
@@ -989,7 +988,7 @@ struct target_ops exec_ops = {
 	"Use an executable file as a target.\n\
 Specify the filename of the executable file.",
 	exec_file_command, exec_close, /* open, close */
-	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
+	find_default_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
 	0, /* prepare_to_store */
 	xfer_memory, exec_files_info,
@@ -997,7 +996,7 @@ Specify the filename of the executable file.",
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
 	0, /* lookup sym */
-	child_create_inferior,
+	find_default_create_inferior,
 	0, /* mourn_inferior */
 	0, /* can_run */
 	file_stratum, 0, /* next */

@@ -1,3 +1,14 @@
+Fri Sep 25 12:09:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* xcoffexec.c (exec_ops): child_attach and child_create_inferior
+	  replaced with find_default_attach and
+	  find_default_create_inferior.
+
+Fri Sep 25 10:21:04 1992  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* i960-pinsn.c: Use _filtered routines for printing, so symbolic
+	addresses don't get displayed in the wrong positions.
+
 Fri Sep 25 09:52:47 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
         Separate core functions along target vector in preparation for
