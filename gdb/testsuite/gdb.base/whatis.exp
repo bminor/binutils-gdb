@@ -85,7 +85,7 @@ if $signed_keyword_not_used then {
 } else {
     set signed_char "signed char"
 }
-setup_xfail "a29k-*-*"
+# OBSOLETE setup_xfail "a29k-*-*"
 if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
 gdb_test "whatis v_signed_char" \
     "type = $signed_char" \

@@ -48,7 +48,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 
 
-# The a29k can't call functions, so don't even bother with this test.
+# Some targets can't call functions, so don't even bother with this
+# test.
 if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416
     fail "This target can not call functions"

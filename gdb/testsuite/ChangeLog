@@ -1,3 +1,23 @@
+2002-01-06  Andrew Cagney  <ac131313@redhat.com>
+
+	Fix PR gdb/66.
+	* gdb.base/structs.exp: Replace skip for a29k with skip for
+	gdb,cannot_call_functions.
+	* gdb.base/call-ar-st.exp: Remove references to a29k in comments.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/call-rt-st.exp: Ditto.
+	* gdb.base/call-strs.exp: Ditto.
+	* gdb.base/callfwmall.exp: Ditto.
+	* gdb.base/scope.exp: Obsolete xfail a29k.
+	* gdb.c++/misc.exp: Ditto.
+	* gdb.c++/cplusfuncs.exp: Ditto.
+	* gdb.base/ptype.exp: Ditto.
+	* gdb.base/printcmds.exp: Ditto.
+	* gdb.base/opaque.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+
 2002-01-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/info-proc.exp: New file, test for "info proc" cmd.

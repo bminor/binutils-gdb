@@ -515,7 +515,7 @@ proc test_at_localscopes {} {
 
     # This test will only fail if the file was compiled by gcc, but
     # there's no way to check that.
-    setup_xfail "a29k-*-udi" 2423
+    # OBSOLETE setup_xfail "a29k-*-udi" 2423
     if [gdb_test "cont" "Break.* marker4.*at .*:$decimal.*" \
 	"continue to marker4 in scope.exp"] then { gdb_suppress_tests }
     if [gdb_test "up" ".*localscopes.*" "up from marker4 in scope.exp"] {

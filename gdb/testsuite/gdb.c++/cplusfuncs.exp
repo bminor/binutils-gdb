@@ -320,12 +320,12 @@ proc test_lookup_operator_functions {} {
     global dm_type_void
     global dm_type_void_star
 
-    # These tests don't work for COFF targets; don't even try them
-    if [istarget "a29k-*-udi"] then {
-	setup_xfail "a29k-*-udi"
-	fail "skipping operator tests"
-	return
-    }
+    # OBSOLETE # # These tests don't work for COFF targets; don't even try them
+    # OBSOLETE # if [istarget "a29k-*-udi"] then {
+    # OBSOLETE #     setup_xfail "a29k-*-udi"
+    # OBSOLETE #     fail "skipping operator tests"
+    # OBSOLETE #     return
+    # OBSOLETE #  }
 
     # operator* requires quoting so that GDB does not treat it as a regexp.
     info_func "operator\\*("	"void foo::operator*($dm_type_foo_ref);"

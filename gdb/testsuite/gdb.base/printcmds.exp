@@ -619,25 +619,25 @@ proc test_print_string_constants {} {
     # (Test may involve inferior malloc() calls).
     set timeout 60;
 
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"a string\""		" = \"a string\""
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\0 null\""
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p \"abcd\"\[2\]"	" = 99 'c'"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p sizeof (\"abcdef\")"	" = 7"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype \"foo\""		" = char \\\[4\\\]"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p *\"foo\""		" = 102 'f'"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype *\"foo\""		" = char"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p &*\"foo\""		" = \"foo\""
     setup_xfail "*-*-*"
     gdb_test "ptype &*\"foo\""	"type = char \\*"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "p (char *)\"foo\""	" = \"foo\""
 }
 
@@ -653,17 +653,17 @@ proc test_print_array_constants {} {
     # (Test may involve inferior malloc() calls).
     set timeout 60;
 
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print {'a','b','c'}"	" = \"abc\""
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {0,1,2}"    " = {0, 1, 2}"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {(long)0,(long)1,(long)2}"  " = {0, 1, 2}"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test_escape_braces "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print {4,5,6}\[2\]"	" = 6"
-    setup_xfail "a29k-*-udi" 2416
+    # OBSOLETE setup_xfail "a29k-*-udi" 2416
     gdb_test "print *&{4,5,6}\[1\]"	" = 5"
 }
 

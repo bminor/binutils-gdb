@@ -47,10 +47,12 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-# The a29k can't call functions, so don't even bother with this test.
-if [istarget "a29k-*-udi"] then {
-    setup_xfail "a29k-*-udi" 2416
-    fail "a29k-*-udi can not call functions"
+
+# Some targets can't call functions, so don't even bother with this
+# test.
+if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "This target can not call functions"
     continue
 }
 

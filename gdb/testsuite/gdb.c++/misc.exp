@@ -41,7 +41,7 @@ proc deduce_language_of_main {} {
 
     # See what language gdb thinks main() is, prior to reading full symbols.
     # I think this fails for COFF targets.
-    setup_xfail "a29k-*-udi"
+    # OBSOLETE setup_xfail "a29k-*-udi"
     send_gdb "show language\n"
     gdb_expect {
 	-re ".* source language is \"auto; currently c\[+\]+\".*$gdb_prompt $" {

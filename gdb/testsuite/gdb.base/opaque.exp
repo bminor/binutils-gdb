@@ -84,7 +84,8 @@ gdb_load ${binfile}
 proc setup_xfail_on_opaque_pointer {} {
 	global gcc_compiled
 
-	setup_xfail "a29k-*-udi" "vax-*-*" "i*86-sequent-bsd*"
+	setup_xfail "vax-*-*" "i*86-sequent-bsd*"
+	# OBSOLETE setup_xfail "a29k-*-udi"
 	if {!$gcc_compiled} then {
 		setup_xfail "alpha-*-*" "mips-sgi-irix5*"
 	}
