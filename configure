@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Configuration script
-#   Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 #This file is part of GNU.
 
@@ -18,8 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-# $Id$
 
 # Please email any bugs, comments, and/or additions to this file to:
 # configure@cygnus.com
@@ -104,9 +102,9 @@ NO_EDIT="This file was generated automatically by configure.  Do not edit."
 
 PWD=`pwd`
 
-if (echo $0 | grep '^/' > /dev/null) ; then
+if echo $0 | grep '^/' > /dev/null ; then
 	progname=$0
-elif (echo $0 | grep '/' > /dev/null) ; then
+elif echo $0 | grep '/' > /dev/null ; then
 	progname=${PWD}/$0
 else
 	progname=$0
@@ -341,7 +339,7 @@ fi
 
 configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
 
-if (${configsub} `echo ${hosts} | sed -e 's/ .*//'`) >/dev/null 2>&1 ; then
+if ${configsub} `echo ${hosts} | sed -e 's/ .*//'` >/dev/null 2>&1 ; then
 	true
 else
 	echo '***' cannot find config.sub.
@@ -481,7 +479,7 @@ for host in ${hosts} ; do
 #				then
 #					if [ ! -d H-${host_alias} ] ; then mkdir H-${host_alias} ; fi
 #
-#					if (${symbolic_link} ${subdirname} H-${host_alias} 2> /dev/null) ; then
+#					if ${symbolic_link} ${subdirname} H-${host_alias} 2> /dev/null ; then
 #						true
 #					else # just give up. they lose.
 #						rmdir H-${host_alias}
@@ -599,11 +597,11 @@ for host in ${hosts} ; do
 			echo "target_os = ${target_os}" >> ${Makefile}
 
 #			if [ -n "${subdirs}" ] ; then
-#				(echo "subdir = /${subdirname}" ;
-#					echo "unsubdir = ..") >> ${Makefile}
+#				echo "subdir = /${subdirname}" >> ${Makefile}
+#				echo "unsubdir = .." >> ${Makefile}
 #			else
-				(echo "subdir =" ;
-					echo "unsubdir = .") >> ${Makefile}
+				echo "subdir =" >> ${Makefile}
+				echo "unsubdir = ." >> ${Makefile}
 #			fi
 
 		#	echo "workdir = ${PWD}" >> ${Makefile}
@@ -617,32 +615,32 @@ for host in ${hosts} ; do
 				site_makefile_frag=config/ms-${site}
 
 				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
-						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
+					echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" > Makefile.tem
+					sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile} >> Makefile.tem
 				else
-					(echo "site_makefile_frag =" ; 
-						cat ${Makefile}) > Makefile.tem
+					echo "site_makefile_frag =" > Makefile.tem
+					cat ${Makefile} >> Makefile.tem
 				fi
 				mv Makefile.tem ${Makefile}
 			fi
 
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
-				(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ;
-					sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
+				echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" > Makefile.tem
+				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile} >> Makefile.tem
 			else
-				(echo "host_makefile_frag =" ;
-					cat ${Makefile}) > Makefile.tem
+				echo "host_makefile_frag =" > Makefile.tem
+				cat ${Makefile} >> Makefile.tem
 			fi
 			mv Makefile.tem ${Makefile}
 
 			# Conditionalize the makefile for this target.
 			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
-				(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+				echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" > Makefile.tem
+				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile} >> Makefile.tem
 			else
-				(echo "target_makefile_frag =" ; 
-					cat ${Makefile}) > Makefile.tem
+				echo "target_makefile_frag =" > Makefile.tem
+				cat ${Makefile} >> Makefile.tem
 			fi
 			mv Makefile.tem ${Makefile}
 
@@ -744,16 +742,16 @@ ${progname}" ${arguments}  "
 					esac
 
 ### The recursion line is here.
-					if [ -x configure ] ; then
+					if [ -f configure ] ; then
 						recprog=`pwd`/configure
 					else
 						recprog=${progname}
 					fi
 
-					if (${recprog} -recurring ${host_alias} -target=${target_alias} \
+					if ${recprog} -recurring ${host_alias} -target=${target_alias} \
 						${verbose} ${subdirs} ${removing} ${prefixoption} \
 						${tmpdiroption} ${namesubdiroption} ${datadiroption} \
-						${srcdiroption}) ; then
+						${srcdiroption} ; then
 						true
 					else
 						exit 1
