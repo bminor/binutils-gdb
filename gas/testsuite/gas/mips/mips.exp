@@ -450,6 +450,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test_arches "jal-empic-elf-3" [mips_arch_list_matching mips1]
     }
     run_list_test_arches "jal-range" "-32" [mips_arch_list_matching mips1]
+    if $has_newabi { run_dump_test "jal-newabi" }
     if !$aout { run_dump_test "la" }
     if $elf { run_dump_test "la-svr4pic" }
     if $elf { run_dump_test "la-xgot" }

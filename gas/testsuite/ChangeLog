@@ -1,3 +1,9 @@
+2003-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/jal-newabi.s: New file, testcase for NewABI xgot jal macro.
+	* gas/mips/jal-newabi.d: Likewise.
+	* gas/mips/mips.exp: Add new testcase.
+
 2003-05-21  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/hppa/parse/parse.exp: Add "space.s".
