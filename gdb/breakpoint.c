@@ -2868,7 +2868,7 @@ bpstat_what (bs)
 /*bp_noisy */
     {sn, sn, sn, sn, sn, sn, sn, sr, ts, shl, shlr},
 /*long_jump */
-    {slr, ss, sn, slr, err, err, err, sr, ts, shl, shlr},
+    {slr, ss, sn, slr, slr, err, err, sr, ts, shl, shlr},
 /*long_resume */
     {clr, ss, sn, clrs, err, err, err, sr, ts, shl, shlr},
 /*step_resume */

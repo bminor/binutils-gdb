@@ -1,3 +1,10 @@
+2000-07-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* breakpoint.c (bpstat_what): Keep returning
+	BPSTAT_WHAT_SET_LONGJMP_RESUME when hitting multiple longjmp()
+	breakpoints instead of signalling an error by returning
+	BPSTAT_WHAT_STOP_NOISY.
+
 2000-07-06  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* mips-tdep.c: Replace '16' with bfd_mach_mips16 where appropriate.
