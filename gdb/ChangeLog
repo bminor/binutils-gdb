@@ -1,3 +1,7 @@
+Fri May 12 06:39:30 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* partial-stab.h: Expand comments.
+
 Thu May 11 19:01:37 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Support debugging using native MACH primitives on hppa*-*-osf*.

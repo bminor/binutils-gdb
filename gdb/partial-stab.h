@@ -22,6 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    SET_NAMESTRING() --Set namestring to name of symbol.
    CUR_SYMBOL_TYPE --Type code of current symbol.
    CUR_SYMBOL_VALUE --Value field of current symbol.  May be adjusted here.
+   namestring - variable pointing to the name of the stab.
+   section_offsets - variable pointing to the section offsets.
+   pst - the partial symbol table being built.
+
+   psymtab_include_list, includes_used, includes_allocated - list of include
+     file names (N_SOL) seen so far.
+   dependency_list, dependencies_used, dependencies_allocated - list of
+     N_EXCL stabs seen so far.
+
+   END_PSYMTAB -- end a partial symbol table.
+   START_PSYMTAB -- start a partial symbol table.
  */
 
 /* End of macro definitions, now let's handle them symbols!  */
