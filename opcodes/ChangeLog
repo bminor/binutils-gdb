@@ -1,3 +1,9 @@
+Mon Apr  8 17:02:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (PPC860): Macro for 860/821 specific instructions and
+	registers.
+ 	(powerpc_opcodes): Add 860/821 specific SPRs.
+
 Mon Apr  8 14:00:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
