@@ -3110,7 +3110,7 @@ static void find_symbol_for_address PARAMS ((struct unw_aux_info *,
 					     struct absaddr, const char **,
 					     bfd_vma *));
 static void dump_ia64_unwind PARAMS ((struct unw_aux_info *));
-static int  slurp_ia64_unwind_table PARAMS ((FILE *file, struct unw_aux_info *,
+static int  slurp_ia64_unwind_table PARAMS ((FILE *, struct unw_aux_info *,
 					    Elf32_Internal_Shdr *));
 
 static void
@@ -3433,7 +3433,6 @@ process_unwind (file)
 
   return 1;
 }
-
 
 static void
 dynamic_segment_mips_val (entry)
