@@ -1,3 +1,9 @@
+2003-11-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (re_enable_breakpoints_in_shlibs): Only re-enable a
+	bp_shlib_disabled breakpoint if there is a shared library mapped
+	at its expected address.
+
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.tgt: Delete mips*tx39*-elf*.

@@ -4297,11 +4297,12 @@ re_enable_breakpoints_in_shlibs (void)
   ALL_BREAKPOINTS (b)
     if (b->enable_state == bp_shlib_disabled)
     {
-      char buf[1];
+      char buf[1], *lib;
 
       /* Do not reenable the breakpoint if the shared library
          is still not mapped in.  */
-      if (target_read_memory (b->loc->address, buf, 1) == 0)
+      lib = PC_SOLIB (b->loc->address);
+      if (lib != NULL && target_read_memory (b->loc->address, buf, 1) == 0)
 	b->enable_state = bp_enabled;
     }
 }
