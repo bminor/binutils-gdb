@@ -1,3 +1,18 @@
+Sat Nov 18 19:43:04 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* pe-arm.c: Fix typos.
+	* coff-arm.c: Likewise.
+
+Fri Nov 17 16:22:04 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (list_ele): Added "cat"egory member.
+	(record_toc): New category parameter (priv or pub).
+	(ppc_record_toc_entry): Check to see if toc bounds exceeded.
+	(ppc_process_before_allocation): Removed embrionic data-in-toc from
+	the mainline. It addes extra toc cells in error.
+	(ppc_coff_swap_sym_in_hook): Added some documentation.
+	(dump_toc): Can now diagnose "virtual toc" chicanery.
+
 Fri Nov 17 10:41:25 1995  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* elf-bfd.h (struct elf_link_hash_table): Change type of

@@ -1,4 +1,4 @@
-/* BFD back-end for Intel arm COFF files.
+/* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -259,6 +259,17 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	0xffffffff,
 	PCRELOFFSET),
 };
+#ifdef COFF_WITH_PE
+/* Return true if this relocation should
+   appear in the output .reloc section. */
+
+static boolean in_reloc_p (abfd, howto)
+     bfd * abfd;
+     reloc_howto_type *howto;
+{
+  return !howto->pc_relative && howto->type != 11;
+}     
+#endif
 
 
 #define RTYPE2HOWTO(cache_ptr, dst) \
@@ -411,10 +422,18 @@ arm_reloc_type_lookup(abfd,code)
 
 #include "coffcode.h"
 
+const bfd_target
 #ifdef TARGET_LITTLE_SYM
-const bfd_target TARGET_LITTLE_SYM =
+TARGET_LITTLE_SYM =
+#else
+armcoff_little_vec =
+#endif
 {
-  TARGET_LITTLE_NAME,		/* name or coff-arm-little */
+#ifdef TARGET_LITTLE_NAME
+  TARGET_LITTLE_NAME,
+#else
+  "coff-arm-little",
+#endif
   bfd_target_coff_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */
@@ -459,12 +478,19 @@ const bfd_target TARGET_LITTLE_SYM =
 
   COFF_SWAP_TABLE,
 };
-#endif
 
+const bfd_target
 #ifdef TARGET_BIG_SYM
-const bfd_target TARGET_BIG_SYM =
+TARGET_BIG_SYM =
+#else
+armcoff_big_vec =
+#endif
 {
-  TARGET_BIG_NAME,		/* name or coff-arm-big */
+#ifdef TARGET_BIG_NAME
+  TARGET_BIG_NAME,
+#else
+  "coff-arm-big",
+#endif
   bfd_target_coff_flavour,
   true,				/* data byte order is big */
   true,				/* header byte order is big */
@@ -509,4 +535,3 @@ const bfd_target TARGET_BIG_SYM =
 
   COFF_SWAP_TABLE,
 };
-#endif
