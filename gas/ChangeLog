@@ -1,5 +1,15 @@
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (md_assemble): Remove superflous casts.
+	(append_insn): Likewise.
+	(mips16_macro_build): Likewise.
+	(macro): Likewise.
+	(mips16_ip): Likewise.
+	(s_cpload): Likewise.
+	(mips_relax_frag): Likewise.
+
+2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (mips_abi_level): Move in front of
 	mips_set_options.
 	(mips_set_options): Add members gp32, fp32, abi.
