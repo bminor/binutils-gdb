@@ -1,3 +1,8 @@
+Fri May  9 17:40:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd: Change #if 0 around uses of host_aout_vec to #if
+	HAVE_host_aout_vec.
+
 Mon May  5 13:57:32 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* coffgen.c (coff_find_nearest_line): If there are no syments,
