@@ -1,3 +1,13 @@
+2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* NEWS: Mention "regs" deprecated for m68hc11 too.
+
+	* m68hc11-tdep.c (_initialize_m68hc11_tdep): Deprecate "regs" command.
+	(m68hc11_print_register): New function to print out one register.
+	(m68hc11_print_registers_info): New function to print registers.
+	(show_regs): Deprecate and use the above.
+	(m68hc11_gdbarch_init): Install the print_registers_info.
+
 2003-07-23  Michal Ludvig  <mludvig@suse.cz>
 	    Elena Zannoni  <ezannoni@redhat.com>
 

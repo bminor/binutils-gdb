@@ -14,7 +14,7 @@ The "detach" command will now resume the application, as documented.  To
 disconnect from gdbserver and leave it stopped, use the new "disconnect"
 command.
 
-* d10v `regs' command deprecated
+* d10v, m68hc11 `regs' command deprecated
 
 The `info registers' command has been updated so that it displays the
 registers using a format identical to the old `regs' command.

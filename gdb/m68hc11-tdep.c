@@ -926,58 +926,165 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
 }
 
+
+/* Get and print the register from the given frame.  */
+static void
+m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
+                        struct frame_info *frame, int regno)
+{
+  LONGEST rval;
+
+  if (regno == HARD_PC_REGNUM || regno == HARD_SP_REGNUM
+      || regno == SOFT_FP_REGNUM || regno == M68HC12_HARD_PC_REGNUM)
+    frame_read_unsigned_register (frame, regno, &rval);
+  else
+    frame_read_signed_register (frame, regno, &rval);
+
+  if (regno == HARD_A_REGNUM || regno == HARD_B_REGNUM
+      || regno == HARD_CCR_REGNUM || regno == HARD_PAGE_REGNUM)
+    {
+      fprintf_filtered (file, "0x%02x   ", (unsigned char) rval);
+      if (regno != HARD_CCR_REGNUM)
+        print_longest (file, 'd', 1, rval);
+    }
+  else
+    {
+      if (regno == HARD_PC_REGNUM && gdbarch_tdep (gdbarch)->use_page_register)
+        {
+          ULONGEST page;
+
+          frame_read_unsigned_register (frame, HARD_PAGE_REGNUM, &page);
+          fprintf_filtered (file, "0x%02x:%04x ", (unsigned) page,
+                            (unsigned) rval);
+        }
+      else
+        {
+          fprintf_filtered (file, "0x%04x ", (unsigned) rval);
+          if (regno != HARD_PC_REGNUM && regno != HARD_SP_REGNUM
+              && regno != SOFT_FP_REGNUM && regno != M68HC12_HARD_PC_REGNUM)
+            print_longest (file, 'd', 1, rval);
+        }
+    }
+
+  if (regno == HARD_CCR_REGNUM)
+    {
+      /* CCR register */
+      int C, Z, N, V;
+      unsigned char l = rval & 0xff;
+
+      fprintf_filtered (file, "%c%c%c%c%c%c%c%c   ",
+                        l & M6811_S_BIT ? 'S' : '-',
+                        l & M6811_X_BIT ? 'X' : '-',
+                        l & M6811_H_BIT ? 'H' : '-',
+                        l & M6811_I_BIT ? 'I' : '-',
+                        l & M6811_N_BIT ? 'N' : '-',
+                        l & M6811_Z_BIT ? 'Z' : '-',
+                        l & M6811_V_BIT ? 'V' : '-',
+                        l & M6811_C_BIT ? 'C' : '-');
+      N = (l & M6811_N_BIT) != 0;
+      Z = (l & M6811_Z_BIT) != 0;
+      V = (l & M6811_V_BIT) != 0;
+      C = (l & M6811_C_BIT) != 0;
+
+      /* Print flags following the h8300  */
+      if ((C | Z) == 0)
+	fprintf_filtered (file, "u> ");
+      else if ((C | Z) == 1)
+	fprintf_filtered (file, "u<= ");
+      else if (C == 0)
+	fprintf_filtered (file, "u< ");
+
+      if (Z == 0)
+	fprintf_filtered (file, "!= ");
+      else
+	fprintf_filtered (file, "== ");
+
+      if ((N ^ V) == 0)
+	fprintf_filtered (file, ">= ");
+      else
+	fprintf_filtered (file, "< ");
+
+      if ((Z | (N ^ V)) == 0)
+	fprintf_filtered (file, "> ");
+      else
+	fprintf_filtered (file, "<= ");
+    }
+}
+
+/* Same as 'info reg' but prints the registers in a different way.  */
+static void
+m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+                              struct frame_info *frame, int regno, int cpregs)
+{
+  if (regno >= 0)
+    {
+      const char *name = gdbarch_register_name (gdbarch, regno);
+
+      if (!name || !*name)
+        return;
+
+      fprintf_filtered (file, "%-10s ", name);
+      m68hc11_print_register (gdbarch, file, frame, regno);
+      fprintf_filtered (file, "\n");
+    }
+  else
+    {
+      int i, nr;
+
+      fprintf_filtered (file, "PC=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_PC_REGNUM);
+
+      fprintf_filtered (file, " SP=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_SP_REGNUM);
+
+      fprintf_filtered (file, " FP=");
+      m68hc11_print_register (gdbarch, file, frame, SOFT_FP_REGNUM);
+
+      fprintf_filtered (file, "\nCCR=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_CCR_REGNUM);
+      
+      fprintf_filtered (file, "\nD=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_D_REGNUM);
+
+      fprintf_filtered (file, " X=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_X_REGNUM);
+
+      fprintf_filtered (file, " Y=");
+      m68hc11_print_register (gdbarch, file, frame, HARD_Y_REGNUM);
+  
+      if (gdbarch_tdep (gdbarch)->use_page_register)
+        {
+          fprintf_filtered (file, "\nPage=");
+          m68hc11_print_register (gdbarch, file, frame, HARD_PAGE_REGNUM);
+        }
+      fprintf_filtered (file, "\n");
+
+      nr = 0;
+      for (i = SOFT_D1_REGNUM; i < M68HC11_ALL_REGS; i++)
+        {
+          /* Skip registers which are not defined in the symbol table.  */
+          if (soft_regs[i].name == 0)
+            continue;
+          
+          fprintf_filtered (file, "D%d=", i - SOFT_D1_REGNUM + 1);
+          m68hc11_print_register (gdbarch, file, frame, i);
+          nr++;
+          if ((nr % 8) == 7)
+            fprintf_filtered (file, "\n");
+          else
+            fprintf_filtered (file, " ");
+        }
+      if (nr && (nr % 8) != 7)
+        fprintf_filtered (file, "\n");
+    }
+}
+
 /* Same as 'info reg' but prints the registers in a different way.  */
 static void
 show_regs (char *args, int from_tty)
 {
-  int ccr = read_register (HARD_CCR_REGNUM);
-  int i;
-  int nr;
-  
-  printf_filtered ("PC=%04x SP=%04x FP=%04x CCR=%02x %c%c%c%c%c%c%c%c\n",
-		   (int) read_register (HARD_PC_REGNUM),
-		   (int) read_register (HARD_SP_REGNUM),
-		   (int) read_register (SOFT_FP_REGNUM),
-		   ccr,
-		   ccr & M6811_S_BIT ? 'S' : '-',
-		   ccr & M6811_X_BIT ? 'X' : '-',
-		   ccr & M6811_H_BIT ? 'H' : '-',
-		   ccr & M6811_I_BIT ? 'I' : '-',
-		   ccr & M6811_N_BIT ? 'N' : '-',
-		   ccr & M6811_Z_BIT ? 'Z' : '-',
-		   ccr & M6811_V_BIT ? 'V' : '-',
-		   ccr & M6811_C_BIT ? 'C' : '-');
-
-  printf_filtered ("D=%04x IX=%04x IY=%04x",
-		   (int) read_register (HARD_D_REGNUM),
-		   (int) read_register (HARD_X_REGNUM),
-		   (int) read_register (HARD_Y_REGNUM));
-
-  if (USE_PAGE_REGISTER)
-    {
-      printf_filtered (" Page=%02x",
-                       (int) read_register (HARD_PAGE_REGNUM));
-    }
-  printf_filtered ("\n");
-
-  nr = 0;
-  for (i = SOFT_D1_REGNUM; i < M68HC11_ALL_REGS; i++)
-    {
-      /* Skip registers which are not defined in the symbol table.  */
-      if (soft_regs[i].name == 0)
-        continue;
-      
-      printf_filtered ("D%d=%04x",
-                       i - SOFT_D1_REGNUM + 1,
-                       (int) read_register (i));
-      nr++;
-      if ((nr % 8) == 7)
-        printf_filtered ("\n");
-      else
-        printf_filtered (" ");
-    }
-  if (nr && (nr % 8) != 7)
-    printf_filtered ("\n");
+  m68hc11_print_registers_info (current_gdbarch, gdb_stdout,
+                                get_current_frame (), -1, 1);
 }
 
 static CORE_ADDR
@@ -1421,6 +1528,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   m68hc11_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, m68hc11_register_reggroup_p);
+  set_gdbarch_print_registers_info (gdbarch, m68hc11_print_registers_info);
 
   /* Minsymbol frobbing.  */
   set_gdbarch_elf_make_msymbol_special (gdbarch,
@@ -1440,6 +1548,8 @@ _initialize_m68hc11_tdep (void)
   register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
   m68hc11_init_reggroups ();
 
-  add_com ("regs", class_vars, show_regs, "Print all registers");
+  deprecate_cmd (add_com ("regs", class_vars, show_regs,
+                          "Print all registers"),
+                 "info registers");
 } 
 
