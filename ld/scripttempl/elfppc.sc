@@ -67,7 +67,6 @@ SECTIONS
   .rela.sbss	${RELOCATING-0} : { *(.rela.sbss2)	}
   .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
   .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
-  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
@@ -76,11 +75,12 @@ SECTIONS
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
   } =${NOP-0}
-  ${RELOCATING+_etext = .;}
-  ${RELOCATING+PROVIDE (etext = .);}
-  .fini		${RELOCATING-0} : { *(.fini)    } =${NOP-0}
+  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
+  .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
   .rodata	${RELOCATING-0} : { *(.rodata)  }
   .rodata1	${RELOCATING-0} : { *(.rodata1) }
+  ${RELOCATING+_etext = .;}
+  ${RELOCATING+PROVIDE (etext = .);}
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}

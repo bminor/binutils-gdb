@@ -1,3 +1,9 @@
+Tue Apr  9 14:22:15 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/elfppc.sc (.init,.fini): Put .init, .fini section
+	next to .text.  Put _etext after .text, .init, .fini, and
+	.rodata{,2} sections.
+
 Tue Apr  9 12:18:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo, ld.1: Mention -E as a synonym for -export-dynamic.
