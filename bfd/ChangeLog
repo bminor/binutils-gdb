@@ -1,6 +1,11 @@
 2003-06-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
+	2003-05-21  Nick Clifton  <nickc@redhat.com>
+	* elf.c (bfd_elf_get_needed_list): Use is_elf_hash_table to check
+	the type of the has table in the bfd_link_info structure.
+	(bfd_elf_get_runpath_list): Likewise.
+
 	2003-05-20  Jakub Jelinek  <jakub@redhat.com>
 	* elflink.h (elf_link_output_extsym): Only issue error about !=
 	STV_DEFAULT symbols if they are bfd_link_hash_undefined.
