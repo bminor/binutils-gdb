@@ -1,5 +1,27 @@
 Fri Mar 18 20:09:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* subsegs.c (section_symbol): Use symbol_new instead of
+	symbol_make, since we may want it to go into the symbol table.
+	Make the new symbol have internal linkage.  If
+	obj_sec_sym_ok_for_reloc says it's okay, use the BFD section
+	symbol with the newly created GAS symbol.
+	(obj_sec_sym_ok_for_reloc): Default to always returning 0.
+	* config/obj-aout.h (obj_sec_sym_ok_for_reloc) [BFD_ASSEMBLER]:
+	New macro.
+	* config/obj-elf.h (obj_sec_sym_ok_for_reloc): New macro.
+
+	* config/tc-sparc.c: Include subsegs.h.
+	(in_signed_range): New function.
+	(sparc_ip): Use it.
+	(sparc_ip, case 'i'): Use BFD_RELOC_SPARC13, not _BASE13.
+	(sparc_ip, label "immediate"): Reject constants for pcrel
+	instructions only if the relocation type indicates a "call"
+	instruction and the offset is within range of a "jmpl %g0".  If
+	it's not in range, use the absolute section symbol plus an offset.
+	(md_apply_fix): Use in_signed_range.  Combined _SPARC13 and
+	_BASE13 cases.
+	(tc_gen_reloc): Permit BFD_RELOC_SPARC13.
+
 	* config/ic960coff.mt (TDEFINES): Fixed typo (MANY_SECTIONS, not
 	MANY_SEGMENTS).
 
