@@ -103,3 +103,6 @@ start:
 	push	6 and 3
 	push	7 xor 4
 	push	8 or 5
+
+	# Force a good alignment.
+	.p2align	4,0

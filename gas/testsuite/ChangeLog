@@ -1,3 +1,10 @@
+2004-11-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/opcode.s: Pad section.
+	* gas/i386/intelok.s: Likewise.
+	* gas/i386/opcode.d: Update.
+	* gas/i386/intelok.d: Update.
+
 2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 	    Vineet Sharma      <vineets@noida.hcltech.com>
 
@@ -78,7 +85,7 @@
 
 2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
-	* gas/crx/cop_insn.s: Reverse operands order in store co-processor 
+	* gas/crx/cop_insn.s: Reverse operands order in store co-processor
 	instructions.
 	* gas/crx/list_insn.s: Remove test for unsupported 'popa' instruction.
 	* gas/crx/cop_insn.d: Regenerate.
@@ -324,7 +331,7 @@
 	* gas/h8300/ffxx1-elf.d: Likewise.
 	* gas/h8300/h8sx_disp2.d: Likewise.
 	* gas/h8300/h8sx_mov_imm.d: Likewise.
-	* gas/h8300/h8sx_rtsl.d: Likewise.	
+	* gas/h8300/h8sx_rtsl.d: Likewise.
 	* gas/h8300/ffxx1-coff.s: Remove inappropriate insn width specifier.
 	* gas/h8300/ffxx1-elf.s: Likewise.
 
@@ -340,7 +347,7 @@
 	rex prefix.
 	* gas/i386/x86-64-inval.[ls]: Add a bunch of instructions illegal
 	in 64-bit mode.
-	
+
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/elf-rel19.d: Pass -march=mips1 to gas as the test
@@ -446,7 +453,7 @@
 2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/ia64.exp: Run invalid-ar.
-	
+
 	* gas/ia64/invalid-ar.l: New file. Test invalid AR access.
 	* gas/ia64/invalid-ar.s: Likewise.
 
@@ -635,7 +642,7 @@
 	* gas/m32r/parallel-2.s: New file: Test	case for parallel code.
 	* gas/m32r/parallel-2.d: New file: Expected results.
 	* gas/m32r/m32r2.exp: Run the test.
-	
+
 	* gas/m32r/seth.s: New file: Test for seth.
 	* gas/m32r/seth.d: New file: Expected results.
 	* gas/m32r/m32r.exp: Run the new test.
@@ -679,7 +686,7 @@
 2004-03-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/cfi/cfi-sh-1.d: New file.
-	* gas/cfi/cfi-sh-1.s: Likewise.	
+	* gas/cfi/cfi-sh-1.s: Likewise.
 	* gas/cfi/cfi.exp: Add SH case.
 
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
