@@ -107,21 +107,6 @@ static ptid_t previous_inferior_ptid;
 
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
-/* Dynamic function trampolines are similar to solib trampolines in that they
-   are between the caller and the callee.  The difference is that when you
-   enter a dynamic trampoline, you can't determine the callee's address.  Some
-   (usually complex) code needs to run in the dynamic trampoline to figure out
-   the callee's address.  This macro is usually called twice.  First, when we
-   enter the trampoline (looks like a normal function call at that point).  It
-   should return the PC of a point within the trampoline where the callee's
-   address is known.  Second, when we hit the breakpoint, this routine returns
-   the callee's address.  At that point, things proceed as per a step resume
-   breakpoint.  */
-
-#ifndef DYNAMIC_TRAMPOLINE_NEXTPC
-#define DYNAMIC_TRAMPOLINE_NEXTPC(pc) 0
-#endif
-
 /* If the program uses ELF-style shared libraries, then calls to
    functions in shared libraries go through stubs, which live in a
    table called the PLT (Procedure Linkage Table).  The first time the
@@ -2404,25 +2389,6 @@ process_event_stop_test:
       real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
-      else
-	{
-	  real_stop_pc = DYNAMIC_TRAMPOLINE_NEXTPC (stop_pc);
-	  if (real_stop_pc)
-	    {
-	      struct symtab_and_line xxx;
-	      /* Why isn't this s_a_l called "sr_sal", like all of the
-	         other s_a_l's where this code is duplicated?  */
-	      init_sal (&xxx);	/* initialize to zeroes */
-	      xxx.pc = real_stop_pc;
-	      xxx.section = find_pc_overlay (xxx.pc);
-	      check_for_old_step_resume_breakpoint ();
-	      step_resume_breakpoint =
-		set_momentary_breakpoint (xxx, null_frame_id, bp_step_resume);
-	      insert_breakpoints ();
-	      keep_going (ecs);
-	      return;
-	    }
-	}
 
       /* If we have line number information for the function we
          are thinking of stepping into, step into it.

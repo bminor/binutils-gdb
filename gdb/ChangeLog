@@ -1,5 +1,9 @@
 2003-03-20  Andrew Cagney  <cagney@redhat.com>
 
+	* infrun.c (DYNAMIC_TRAMPOLINE_NEXTPC): Delete macro.
+	(handle_inferior_event): Remove code calling
+	DYNAMIC_TRAMPOLINE_NEXTPC.
+
 	* Makefile.in (init.c): Don't add $(srcdir) prefix when a file
 	already has a full path.
 
