@@ -1,3 +1,8 @@
+Mon Mar  1 12:03:16 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip):  Correctly assemble prefetch
+	instructions.  Accept integer prefetch function numbers.
+
 Wed Feb 24 18:26:02 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (s_xword): Now call big_cons, so large
