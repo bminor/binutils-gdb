@@ -2521,11 +2521,25 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 
 		case R_ENTRY:
 		  {
-		    int *descp
-		       = (int *) som_symbol_data (*bfd_reloc->sym_ptr_ptr)->unwind;
+		    int *descp = (int *)
+		      som_symbol_data (*bfd_reloc->sym_ptr_ptr)->unwind;
 		    bfd_put_8 (abfd, R_ENTRY, p);
-		    bfd_put_32 (abfd, descp[0], p + 1);
-		    bfd_put_32 (abfd, descp[1], p + 5);
+
+		    /* FIXME:  We should set the sym_ptr for the R_ENTRY
+		       reloc to point to the appropriate function symbol,
+		       and attach unwind bits to the function symbol as
+		       we canonicalize the relocs.  Doing so would ensure
+		       descp would always point to something useful.  */
+		    if (descp)
+		      {
+			bfd_put_32 (abfd, descp[0], p + 1);
+			bfd_put_32 (abfd, descp[1], p + 5);
+		      }
+		    else
+		      {
+			bfd_put_32 (abfd, 0, p + 1);
+			bfd_put_32 (abfd, 0, p + 5);
+		      }
 		    p = try_prev_fixup (abfd, &subspace_reloc_size,
 					p, 9, reloc_queue);
 		    break;
@@ -5539,6 +5553,7 @@ som_bfd_free_cached_info (abfd)
 #define som_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define som_truncate_arname		bfd_bsd_truncate_arname
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#define som_update_armap_timestamp	bfd_true
 
 #define som_get_lineno                  _bfd_nosymbols_get_lineno
 #define som_bfd_make_debug_symbol	_bfd_nosymbols_bfd_make_debug_symbol

@@ -1,3 +1,8 @@
+Tue Aug 30 21:24:54 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_write_fixups, case R_ENTRY): Handle case where no
+	unwind descriptor information is available.
+
 Tue Aug 30 11:43:30 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add soname
