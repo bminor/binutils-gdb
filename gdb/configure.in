@@ -64,7 +64,7 @@ ENABLE_GM=
 AC_ARG_ENABLE(gm,
 [  --enable-gm ],
 [case "${enableval}" in
-yes)	ENABLE_OBS="${ENABLE_OBS} magic.o"
+yes)	ENABLE_OBS="${ENABLE_OBS} gmagic.o"
 	ENABLE_CFLAGS=-DGENERAL_MAGIC
 	;;
 no)	;;
