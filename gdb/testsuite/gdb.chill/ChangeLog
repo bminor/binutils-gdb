@@ -10,29 +10,7 @@ Thu May 21 02:45:18 1998  Felix Lee  <flee@zog.cygnus.com>
 
 Wed Sep 10 15:01:55 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* callch.exp: The end-all be-all of quoting fixes. Ha.
-	* chillvars.exp: Ditto.
-	* gch1272.exp: Ditto.
-	* gch1280.exp: Ditto.
-	* gch922.exp: Ditto.
-	* gch981.exp: Ditto.
-	* pr-4975.exp: Ditto.
-	* pr-5016.exp: Ditto.
-	* pr-5020.exp: Ditto.
-	* pr-5022.exp: Ditto.
-	* pr-5646.exp: Ditto.
-	* pr-5984.exp: Ditto.
-	* pr-6292.exp: Ditto.
-	* pr-6632.exp: Ditto.
-	* pr-8134.exp: Ditto.
-	* pr-8136.exp: Ditto.
-	* pr-8405.exp: Ditto.
-	* pr-8742.exp: Ditto.
-	* pr-8894.exp: Ditto.
-	* pr-9095.exp: Ditto.
-	* result.exp: Ditto.
-	* string.exp: Ditto.
-	* tuples.exp: Ditto.
+	* *.exp: The end-all be-all of quoting fixes. Ha.
 
 Thu Aug 21 10:31:23 1997  Bob Manson  <manson@charmed.cygnus.com>
 
