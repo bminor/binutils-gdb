@@ -190,7 +190,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N) builtin_type_int
+#define REGISTER_VIRTUAL_TYPE(N) \
+	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
+	 ? builtin_type_float : builtin_type_int) \
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 

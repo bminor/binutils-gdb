@@ -1,3 +1,10 @@
+Sat Aug 22 22:33:20 1992  John Gilmore  (gnu@cygnus.com)
+
+	Bug fixes from Andrew Heybey <ath@lcs.mit.edu>.
+
+	* tm-mips.h (REGISTER_VIRTUAL_TYPE):  Float regs are float type.
+	* mips-tdep.c (mips_print_register):  Alloc enough space for two regs.
+
 Fri Aug 21 15:17:03 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* remote.c (remote_open):  Fix baud rate setting to make -b flag
