@@ -1824,7 +1824,7 @@ return_command (char *retval_exp, int from_tty)
 
       /* Make sure the value is fully evaluated.  It may live in the
          stack frame we're about to pop.  */
-      if (VALUE_LAZY (return_value))
+      if (value_lazy (return_value))
 	value_fetch_lazy (return_value);
 
       if (TYPE_CODE (return_type) == TYPE_CODE_VOID)

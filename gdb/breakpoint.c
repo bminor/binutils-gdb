@@ -944,7 +944,7 @@ insert_bp_location (struct bp_location *bpt,
 		 its contents to evaluate the expression, then we
 		 must watch it.  */
 	      if (VALUE_LVAL (v) == lval_memory
-		  && ! VALUE_LAZY (v))
+		  && ! value_lazy (v))
 		{
 		  struct type *vtype = check_typedef (value_type (v));
 
@@ -1123,7 +1123,7 @@ insert_breakpoints (void)
 	  struct value *val;
 	  val = evaluate_expression (b->owner->exp);
 	  release_value (val);
-	  if (VALUE_LAZY (val))
+	  if (value_lazy (val))
 	    value_fetch_lazy (val);
 	  b->owner->val = val;
 	}
@@ -1475,7 +1475,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	  /* For each memory reference remove the watchpoint
 	     at that address.  */
 	  if (VALUE_LVAL (v) == lval_memory
-	      && ! VALUE_LAZY (v))
+	      && ! value_lazy (v))
 	    {
 	      struct type *vtype = check_typedef (value_type (v));
 
@@ -2728,7 +2728,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	for (v = b->val_chain; v; v = v->next)
 	  {
 	    if (VALUE_LVAL (v) == lval_memory
-		&& ! VALUE_LAZY (v))
+		&& ! value_lazy (v))
 	      {
 		struct type *vtype = check_typedef (value_type (v));
 
@@ -5619,7 +5619,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   mark = value_mark ();
   val = evaluate_expression (exp);
   release_value (val);
-  if (VALUE_LAZY (val))
+  if (value_lazy (val))
     value_fetch_lazy (val);
 
   tok = arg;
@@ -5793,7 +5793,7 @@ can_use_hardware_watchpoint (struct value *v)
     {
       if (VALUE_LVAL (v) == lval_memory)
 	{
-	  if (VALUE_LAZY (v))
+	  if (value_lazy (v))
 	    /* A lazy memory lvalue is one that GDB never needed to fetch;
 	       we either just used its address (e.g., `a' in `a.b') or
 	       we never needed it at all (e.g., `a' in `a,b').  */
@@ -7116,7 +7116,7 @@ breakpoint_re_set_one (void *bint)
 	}
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
-      if (VALUE_LAZY (b->val) && breakpoint_enabled (b))
+      if (value_lazy (b->val) && breakpoint_enabled (b))
 	value_fetch_lazy (b->val);
 
       if (b->cond_string != NULL)
@@ -7472,7 +7472,7 @@ is valid is not currently in scope.\n", bpt->number);
 	  mark = value_mark ();
 	  bpt->val = evaluate_expression (bpt->exp);
 	  release_value (bpt->val);
-	  if (VALUE_LAZY (bpt->val))
+	  if (value_lazy (bpt->val))
 	    value_fetch_lazy (bpt->val);
 	  
 	  if (bpt->type == bp_hardware_watchpoint ||

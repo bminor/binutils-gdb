@@ -268,7 +268,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
     error ("no such vector element");
 
   v = allocate_value (elt_type);
-  if (VALUE_LAZY (array))
+  if (value_lazy (array))
     VALUE_LAZY (v) = 1;
   else
     memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs, elt_size);

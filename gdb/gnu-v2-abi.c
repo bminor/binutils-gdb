@@ -164,7 +164,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       /* Move the `this' pointer according to the virtual function table. */
       arg1->offset += value_as_long (value_field (entry, 0));
 
-      if (!VALUE_LAZY (arg1))
+      if (!value_lazy (arg1))
 	{
 	  VALUE_LAZY (arg1) = 1;
 	  value_fetch_lazy (arg1);

@@ -1316,7 +1316,7 @@ x_command (char *exp, int from_tty)
       /* Make contents of last address examined available to the user as $__. */
       /* If the last value has not been fetched from memory then don't
          fetch it now - instead mark it by voiding the $__ variable. */
-      if (VALUE_LAZY (last_examine_value))
+      if (value_lazy (last_examine_value))
 	set_internalvar (lookup_internalvar ("__"),
 			 allocate_value (builtin_type_void));
       else

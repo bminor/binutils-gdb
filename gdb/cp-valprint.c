@@ -781,7 +781,7 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 
 	  /* Get the address of the vfunction entry */
 	  struct value *vf = value_copy (v);
-	  if (VALUE_LAZY (vf))
+	  if (value_lazy (vf))
 	    (void) value_fetch_lazy (vf);
 	  /* adjust by offset */
 	  vf->aligner.contents[0] += 4 * (HP_ACC_VFUNC_START + vx);

@@ -2143,7 +2143,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
    When used in contexts where arrays will be coerced anyway, this is
    equivalent to `evaluate_subexp' but much faster because it avoids
    actually fetching array contents (perhaps obsolete now that we have
-   VALUE_LAZY).
+   value_lazy()).
 
    Note that we currently only do the coercion for C expressions, where
    arrays are zero based and the coercion is correct.  For other languages,

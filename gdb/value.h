@@ -179,6 +179,7 @@ extern int value_bitpos (struct value *);
 extern int value_offset (struct value *);
 
 extern struct type *value_enclosing_type (struct value *);
+extern int value_lazy (struct value *);
 #define VALUE_LAZY(val) (val)->lazy
 
 /* VALUE_CONTENTS and value_contents_raw() both return the address of

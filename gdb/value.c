@@ -95,7 +95,7 @@ allocate_value (struct type *type)
   val->bitpos = 0;
   val->bitsize = 0;
   VALUE_REGNUM (val) = -1;
-  VALUE_LAZY (val) = 0;
+  val->lazy = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
   VALUE_EMBEDDED_OFFSET (val) = 0;
   VALUE_POINTED_TO_OFFSET (val) = 0;
@@ -171,6 +171,12 @@ value_contents_all (struct value *value)
   if (value->lazy)
     value_fetch_lazy (value);
   return value->aligner.contents;
+}
+
+int
+value_lazy (struct value *value)
+{
+  return value->lazy;
 }
 
 
@@ -276,12 +282,12 @@ value_copy (struct value *arg)
   val->bitsize = arg->bitsize;
   VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
   VALUE_REGNUM (val) = VALUE_REGNUM (arg);
-  VALUE_LAZY (val) = VALUE_LAZY (arg);
+  val->lazy = arg->lazy;
   VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (arg);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (arg);
   val->modifiable = arg->modifiable;
-  if (!VALUE_LAZY (val))
+  if (!value_lazy (val))
     {
       memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),
 	      TYPE_LENGTH (value_enclosing_type (arg)));
@@ -306,7 +312,7 @@ record_latest_value (struct value *val)
      In particular, "set $1 = 50" should not affect the variable from which
      the value was taken, and fast watchpoints should be able to assume that
      a value on the value history never changes.  */
-  if (VALUE_LAZY (val))
+  if (value_lazy (val))
     value_fetch_lazy (val);
   /* We preserve VALUE_LVAL so that the user can find out where it was fetched
      from.  This is a bit dubious, because then *&$1 does not just return $1
@@ -476,7 +482,7 @@ value_of_internalvar (struct internalvar *var)
   struct value *val;
 
   val = value_copy (var->value);
-  if (VALUE_LAZY (val))
+  if (value_lazy (val))
     value_fetch_lazy (val);
   VALUE_LVAL (val) = lval_internalvar;
   VALUE_INTERNALVAR (val) = var;
@@ -507,7 +513,7 @@ set_internalvar (struct internalvar *var, struct value *val)
   /* Force the value to be fetched from the target now, to avoid problems
      later when this internalvar is referenced and the target is gone or
      has changed.  */
-  if (VALUE_LAZY (newval))
+  if (value_lazy (newval))
     value_fetch_lazy (newval);
 
   /* Begin code which must not call error().  If var->value points to
@@ -962,7 +968,7 @@ value_primitive_field (struct value *arg1, int offset,
          bases, etc.  */
       v = allocate_value (value_enclosing_type (arg1));
       v->type = type;
-      if (VALUE_LAZY (arg1))
+      if (value_lazy (arg1))
 	VALUE_LAZY (v) = 1;
       else
 	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
@@ -978,7 +984,7 @@ value_primitive_field (struct value *arg1, int offset,
       /* Plain old data member */
       offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
       v = allocate_value (type);
-      if (VALUE_LAZY (arg1))
+      if (value_lazy (arg1))
 	VALUE_LAZY (v) = 1;
       else
 	memcpy (value_contents_raw (v),

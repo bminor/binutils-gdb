@@ -1312,7 +1312,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
 	      v2->offset = value_offset (arg1) + boffset;
-	      if (VALUE_LAZY (arg1))
+	      if (value_lazy (arg1))
 		VALUE_LAZY (v2) = 1;
 	      else
 		memcpy (value_contents_raw (v2),
@@ -2763,7 +2763,7 @@ value_slice (struct value *array, int lowbound, int length)
 				      slice_range_type);
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
       slice = allocate_value (slice_type);
-      if (VALUE_LAZY (array))
+      if (value_lazy (array))
 	VALUE_LAZY (slice) = 1;
       else
 	memcpy (VALUE_CONTENTS (slice), VALUE_CONTENTS (array) + offset,

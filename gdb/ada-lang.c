@@ -451,7 +451,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       result->bitsize = value_bitsize (val);
       result->bitpos = value_bitpos (val);
       VALUE_ADDRESS (result) = VALUE_ADDRESS (val) + value_offset (val);
-      if (VALUE_LAZY (val)
+      if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
         VALUE_LAZY (result) = 1;
       else
@@ -1811,7 +1811,7 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
       v = allocate_value (type);
       bytes = (unsigned char *) (valaddr + offset);
     }
-  else if (VALUE_LAZY (obj))
+  else if (value_lazy (obj))
     {
       v = value_at (type,
                     VALUE_ADDRESS (obj) + value_offset (obj) + offset);

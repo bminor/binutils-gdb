@@ -1,5 +1,9 @@
 2005-02-02  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (value_lazy): Declare.
+	* varobj.c, value.c, valops.c, valarith.c, printcmd.c: Update.
+	* cp-valprint.c, breakpoint.c, ada-lang.c: Update.
+
 	* value.h (VALUE_CONTENTS_ALL): Delete.
 	(value_contents_all): Declare.
 	* value.c (value_contents_all): New function.

@@ -738,7 +738,7 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
   if (lazy_value == 0)
     error ("Address of \"%s\" is unknown.", SYMBOL_PRINT_NAME (var));
 
-  if (VALUE_LAZY (lazy_value)
+  if (value_lazy (lazy_value)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
       struct value *val;

@@ -500,7 +500,7 @@ varobj_create (char *objname,
 	{
 	  /* no error */
 	  release_value (var->value);
-	  if (VALUE_LAZY (var->value))
+	  if (value_lazy (var->value))
 	    gdb_value_fetch_lazy (var->value);
 	}
       else
@@ -1686,7 +1686,7 @@ value_of_child (struct varobj *parent, int index)
   value = (*parent->root->lang->value_of_child) (parent, index);
 
   /* If we're being lazy, fetch the real value of the variable. */
-  if (value != NULL && VALUE_LAZY (value))
+  if (value != NULL && value_lazy (value))
     {
       /* If we fail to fetch the value of the child, return
          NULL so that callers notice that we're leaving an
@@ -1904,7 +1904,7 @@ c_value_of_root (struct varobj **var_handle)
          go on */
       if (gdb_evaluate_expression (var->root->exp, &new_val))
 	{
-	  if (VALUE_LAZY (new_val))
+	  if (value_lazy (new_val))
 	    {
 	      /* We need to catch errors because if
 	         value_fetch_lazy fails we still want to continue
@@ -2092,7 +2092,7 @@ c_value_of_variable (struct varobj *var)
 	    struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
 	    char *thevalue;
 
-	    if (VALUE_LAZY (var->value))
+	    if (value_lazy (var->value))
 	      gdb_value_fetch_lazy (var->value);
 	    val_print (value_type (var->value),
 		       value_contents_raw (var->value), 0,
