@@ -1,3 +1,13 @@
+2004-11-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdbtypes.c (make_qualified_type): Doc fix.  Add assertion to
+	prevent cross-objfile references.
+	(make_cv_type): Doc fix.  Don't create cross-objfile references,
+	even for stub types.
+	(replace_type): Add assertion to prevent cross-objfile references.
+	(check_typedef): Never resolve a stub type by copying over a type
+	from another file.
+
 2004-11-04  Kei Sakamoto  <sakamoto.kei@denesas.com>
 
 	* Makefile.in (m32r-tdep.o): Update dependencies.
