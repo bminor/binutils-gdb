@@ -17,7 +17,7 @@ name:; \
    The compiler actually puts the stabs in .csect [PR], but that didn't
    work here (I guess because there is no text section).  */
 	.csect .data[RW]
-#include "wierd.def"
+#include "weird.def"
 
 /* Stuff with backslashes needs to go here, since the aix assembler treats
    them differently.  */

@@ -19,93 +19,93 @@ proc do_tests {} {
 	clear_xfail "rs*-*-aix*"
 	gdb_test "ptype red" "type = enum \{red, green, blue\}" "ptype unnamed enum"
 
-	print_wierd_var var0
-	print_wierd_var var1
-	print_wierd_var var2
-	print_wierd_var var3
+	print_weird_var var0
+	print_weird_var var1
+	print_weird_var var2
+	print_weird_var var3
 
-	print_wierd_var attr32
-	print_wierd_var attr33
-	print_wierd_var attr35
-	print_wierd_var attr36
-	print_wierd_var attr37
-	print_wierd_var attr38
-	print_wierd_var attr39
-	print_wierd_var attr41
-	print_wierd_var attr42
-	print_wierd_var attr43
-	print_wierd_var attr44
-	print_wierd_var attr46
-	print_wierd_var attr47
-	print_wierd_var attr58
-	print_wierd_var attr59
-	print_wierd_var attr60
-	print_wierd_var attr61
-	print_wierd_var attr62
-	print_wierd_var attr63
-	print_wierd_var attr64
-	print_wierd_var attr65
-	print_wierd_var attr66
-	print_wierd_var attr67
-	print_wierd_var attr68
-	print_wierd_var attr69
-	print_wierd_var attr70
-	print_wierd_var attr71
-	print_wierd_var attr72
-	print_wierd_var attr73
-	print_wierd_var attr74
-	print_wierd_var attr75
-	print_wierd_var attr76
-	print_wierd_var attr77
-	print_wierd_var attr78
-	print_wierd_var attr79
-	print_wierd_var attr80
-	print_wierd_var attr81
-	print_wierd_var attr82
-	print_wierd_var attr83
-	print_wierd_var attr84
-	print_wierd_var attr85
-	print_wierd_var attr86
-	print_wierd_var attr87
-	print_wierd_var attr88
-	print_wierd_var attr89
-	print_wierd_var attr90
-	print_wierd_var attr91
-	print_wierd_var attr92
-	print_wierd_var attr93
-	print_wierd_var attr94
-	print_wierd_var attr95
-	print_wierd_var attr96
-	print_wierd_var attr97
-	print_wierd_var attr98
-	print_wierd_var attr99
-	print_wierd_var attr100
-	print_wierd_var attr101
-	print_wierd_var attr102
-	print_wierd_var attr103
-	print_wierd_var attr104
-	print_wierd_var attr105
-	print_wierd_var attr106
-	print_wierd_var attr107
-	print_wierd_var attr108
-	print_wierd_var attr109
-	print_wierd_var attr110
-	print_wierd_var attr111
-	print_wierd_var attr112
-	print_wierd_var attr113
-	print_wierd_var attr114
-	print_wierd_var attr115
-	print_wierd_var attr116
-	print_wierd_var attr117
-	print_wierd_var attr118
-	print_wierd_var attr119
-	print_wierd_var attr120
-	print_wierd_var attr121
-	print_wierd_var attr122
-	print_wierd_var attr123
-	print_wierd_var attr124
-	print_wierd_var attr125
-	print_wierd_var attr126
+	print_weird_var attr32
+	print_weird_var attr33
+	print_weird_var attr35
+	print_weird_var attr36
+	print_weird_var attr37
+	print_weird_var attr38
+	print_weird_var attr39
+	print_weird_var attr41
+	print_weird_var attr42
+	print_weird_var attr43
+	print_weird_var attr44
+	print_weird_var attr46
+	print_weird_var attr47
+	print_weird_var attr58
+	print_weird_var attr59
+	print_weird_var attr60
+	print_weird_var attr61
+	print_weird_var attr62
+	print_weird_var attr63
+	print_weird_var attr64
+	print_weird_var attr65
+	print_weird_var attr66
+	print_weird_var attr67
+	print_weird_var attr68
+	print_weird_var attr69
+	print_weird_var attr70
+	print_weird_var attr71
+	print_weird_var attr72
+	print_weird_var attr73
+	print_weird_var attr74
+	print_weird_var attr75
+	print_weird_var attr76
+	print_weird_var attr77
+	print_weird_var attr78
+	print_weird_var attr79
+	print_weird_var attr80
+	print_weird_var attr81
+	print_weird_var attr82
+	print_weird_var attr83
+	print_weird_var attr84
+	print_weird_var attr85
+	print_weird_var attr86
+	print_weird_var attr87
+	print_weird_var attr88
+	print_weird_var attr89
+	print_weird_var attr90
+	print_weird_var attr91
+	print_weird_var attr92
+	print_weird_var attr93
+	print_weird_var attr94
+	print_weird_var attr95
+	print_weird_var attr96
+	print_weird_var attr97
+	print_weird_var attr98
+	print_weird_var attr99
+	print_weird_var attr100
+	print_weird_var attr101
+	print_weird_var attr102
+	print_weird_var attr103
+	print_weird_var attr104
+	print_weird_var attr105
+	print_weird_var attr106
+	print_weird_var attr107
+	print_weird_var attr108
+	print_weird_var attr109
+	print_weird_var attr110
+	print_weird_var attr111
+	print_weird_var attr112
+	print_weird_var attr113
+	print_weird_var attr114
+	print_weird_var attr115
+	print_weird_var attr116
+	print_weird_var attr117
+	print_weird_var attr118
+	print_weird_var attr119
+	print_weird_var attr120
+	print_weird_var attr121
+	print_weird_var attr122
+	print_weird_var attr123
+	print_weird_var attr124
+	print_weird_var attr125
+	print_weird_var attr126
 
 	gdb_test "p const69" " = 69" "'e' constant on non-enum type"
 	gdb_test "whatis const69" "type = (unsigned int|inttype)" "whatis const69"
@@ -179,7 +179,7 @@ field3 = 0x77888877\}" "print struct constant"
 <> = {\[_a-zA-Z$\]* = \[0-9xa-fA-F\]*, b = 44}, comb = 45}"
 }
 
-proc print_wierd_var { var } {
+proc print_weird_var { var } {
 	global prompt
 
 	# Make sure that the variable gets printed out correctly, without
@@ -216,7 +216,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # Don't use gdb_load; it doesn't bitch if the loading produced some
 # error messages during symbol reading.
-set binfile $objdir/$subdir/wierd.o
+set binfile $objdir/$subdir/weird.o
 
 if ![file exists $binfile] then {
 	if $all_flag then {
@@ -234,16 +234,16 @@ if ![file exists $binfile] then {
 	# that a filename won't contain a space and a warning message will.
 	expect {
 		-re "^file \[^ \]*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
-			pass "wierd.o read without error"
+			pass "weird.o read without error"
 		}
 		-re ".*$prompt $" {
-			fail "Errors reading wierd.o"
+			fail "Errors reading weird.o"
 		}
 		timeout {
 			error "couldn't load $binfile into $GDB (timed out)."
 			return -1
 		}
-		eof { fail "(eof) cannot read wierd.o" }
+		eof { fail "(eof) cannot read weird.o" }
 	}
 	do_tests
 }

@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-srctrigger="wierd.exp"
+srctrigger="weird.exp"
 srcname="gdb.stabs"
 
 # per-host:

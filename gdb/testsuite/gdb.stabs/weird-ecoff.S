@@ -1,7 +1,7 @@
 /* GDB legitimately expects a file name.  */
- .file	1 "wierd.c"
+ .file	1 "weird.c"
  @stabs
- .stabs "wierd.c",0x64,0,0,0
+ .stabs "weird.c",0x64,0,0,0
 
 #define N_LSYM 0x80
 #define N_GSYM 0x20
@@ -19,7 +19,7 @@ name:; \
 	.word 42
 
 #define STAB(string,type,value) .stabs string,type,0,0,value
-#include "wierd.def"
+#include "weird.def"
 
 /* Stuff with backslashes needs to go here, since gcc with stabs treats
    them differently.  */

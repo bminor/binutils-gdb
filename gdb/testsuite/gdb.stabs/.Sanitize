@@ -27,12 +27,12 @@ Makefile.in
 aout.mt
 configure.in
 ecoff.mt
-wierd-aout.S
-wierd-ecoff.sed
-wierd-ecoff.S
-wierd-xcoff.S
-wierd.def
-wierd.exp
+weird-aout.S
+weird-ecoff.sed
+weird-ecoff.S
+weird-xcoff.S
+weird.def
+weird.exp
 xcoff.mt
 
 Things-to-lose:

@@ -1,3 +1,7 @@
+Wed Sep 15 14:24:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* gdb.stabs: Renamed *wierd* to *weird*.
+
 Wed Sep 15 10:36:50 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* gdb.t13/bitfields.exp: Test for bad output rather than waiting
