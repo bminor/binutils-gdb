@@ -1,3 +1,13 @@
+2002-11-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c: Include "reggroups.h" and <ctype.h>.
+	(print_float_info): Print registers in float_reggroup.
+	(print_vector_info): Print registers in vector_reggroup.
+	(default_print_registers_info): When all, print registers in
+	all_reggroup.  Otherwize, print registers in general_reggroup.
+	(registers_info): Rewrite.  Add support for register groups.
+	Eliminate a goto.
+
 2002-11-06  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symtab.c (methods_info): Delete. It has been ifdeffed out for
