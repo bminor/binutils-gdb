@@ -1,9 +1,12 @@
-2005-02-09  Corinna Vinschen  <vinschen@redhat.com>
-
-	* symmisc.c: Include gdb_stat.h.
-	(maintenance_print_msymbols): Use inode numbers to compare files.
-
 2005-02-09  Andrew Cagney  <cagney@gnu.org>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call)
+	(convert_code_addr_to_desc_addr): Convert any function code
+	address to the corresponding function's descriptor.
+	(ppc64_sysv_abi_return_value): have TYPE_CODE_ENUM and
+	TYPE_CODE_INT use the same code paths as TYPE_CODE_INT.  When
+	writing, convert any function code address to the corresponding
+	descriptor.
 
 	* config/sh/linux.mt (TDEPFILES): Add symfile-mem.o.
 	* config/powerpc/linux.mt (TDEPFILES): Ditto.
@@ -13,6 +16,11 @@
 	* config/m32r/linux.mt (TDEPFILES): Ditto.
 	* config/ia64/linux.mt (TDEPFILES): Ditto.
 	* config/arm/linux.mt (TDEPFILES): Ditto.
+
+2005-02-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* symmisc.c: Include gdb_stat.h.
+	(maintenance_print_msymbols): Use inode numbers to compare files.
 
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 

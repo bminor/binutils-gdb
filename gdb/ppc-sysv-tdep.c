@@ -534,6 +534,47 @@ ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 				   writebuf, 1);
 }
 
+/* The helper function for 64-bit SYSV push_dummy_call.  Converts the
+   function's code address back into the function's descriptor
+   address.
+
+   Find a value for the TOC register.  Every symbol should have both
+   ".FN" and "FN" in the minimal symbol table.  "FN" points at the
+   FN's descriptor, while ".FN" points at the entry point (which
+   matches FUNC_ADDR).  Need to reverse from FUNC_ADDR back to the
+   FN's descriptor address (while at the same time being careful to
+   find "FN" in the same object file as ".FN").  */
+
+static int
+convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
+{
+  struct obj_section *dot_fn_section;
+  struct minimal_symbol *dot_fn;
+  struct minimal_symbol *fn;
+  CORE_ADDR toc;
+  /* Find the minimal symbol that corresponds to CODE_ADDR (should
+     have a name of the form ".FN").  */
+  dot_fn = lookup_minimal_symbol_by_pc (code_addr);
+  if (dot_fn == NULL || SYMBOL_LINKAGE_NAME (dot_fn)[0] != '.')
+    return 0;
+  /* Get the section that contains CODE_ADDR.  Need this for the
+     "objfile" that it contains.  */
+  dot_fn_section = find_pc_section (code_addr);
+  if (dot_fn_section == NULL || dot_fn_section->objfile == NULL)
+    return 0;
+  /* Now find the corresponding "FN" (dropping ".") minimal symbol's
+     address.  Only look for the minimal symbol in ".FN"'s object file
+     - avoids problems when two object files (i.e., shared libraries)
+     contain a minimal symbol with the same name.  */
+  fn = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (dot_fn) + 1, NULL,
+			      dot_fn_section->objfile);
+  if (fn == NULL)
+    return 0;
+  /* Found a descriptor.  */
+  (*desc_addr) = SYMBOL_VALUE_ADDRESS (fn);
+  return 1;
+}
+
 /* Pass the arguments in either registers, or in the stack. Using the
    ppc 64 bit SysV ABI.
 
@@ -704,15 +745,25 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 	    }
 	  else if ((TYPE_CODE (type) == TYPE_CODE_INT
-		    || TYPE_CODE (type) == TYPE_CODE_ENUM)
+		    || TYPE_CODE (type) == TYPE_CODE_ENUM
+		    || TYPE_CODE (type) == TYPE_CODE_PTR)
 		   && TYPE_LENGTH (type) <= 8)
 	    {
-	      /* Scalars get sign[un]extended and go in gpr3 .. gpr10.
-	         They can also end up in memory.  */
+	      /* Scalars and Pointers get sign[un]extended and go in
+	         gpr3 .. gpr10.  They can also end up in memory.  */
 	      if (write_pass)
 		{
 		  /* Sign extend the value, then store it unsigned.  */
 		  ULONGEST word = unpack_long (type, val);
+		  /* Convert any function code addresses into
+		     descriptors.  */
+		  if (TYPE_CODE (type) == TYPE_CODE_PTR
+		      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+		    {
+		      CORE_ADDR desc = word;
+		      convert_code_addr_to_desc_addr (word, &desc);
+		      word = desc;
+		    }
 		  if (greg <= 10)
 		    regcache_cooked_write_unsigned (regcache,
 						    tdep->ppc_gp0_regnum +
@@ -765,6 +816,11 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		   value to memory.  Fortunately, doing this
 		   simplifies the code.  */
 		write_memory (gparam, val, TYPE_LENGTH (type));
+	      if (write_pass)
+		/* WARNING: cagney/2004-06-20: It appears that GCC
+		   likes to put structures containing a single
+		   floating-point member in an FP register instead of
+		   general general purpose.  */
 	      /* Always consume parameter stack space.  */
 	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
 	    }
@@ -793,43 +849,18 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      breakpoint.  */
   regcache_cooked_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
-  /* Find a value for the TOC register.  Every symbol should have both
-     ".FN" and "FN" in the minimal symbol table.  "FN" points at the
-     FN's descriptor, while ".FN" points at the entry point (which
-     matches FUNC_ADDR).  Need to reverse from FUNC_ADDR back to the
-     FN's descriptor address (while at the same time being careful to
-     find "FN" in the same object file as ".FN").  */
+  /* Use the func_addr to find the descriptor, and use that to find
+     the TOC.  */
   {
-    /* Find the minimal symbol that corresponds to FUNC_ADDR (should
-       have the name ".FN").  */
-    struct minimal_symbol *dot_fn = lookup_minimal_symbol_by_pc (func_addr);
-    if (dot_fn != NULL && SYMBOL_LINKAGE_NAME (dot_fn)[0] == '.')
+    CORE_ADDR desc_addr;
+    if (convert_code_addr_to_desc_addr (func_addr, &desc_addr))
       {
-	/* Get the section that contains FUNC_ADR.  Need this for the
-           "objfile" that it contains.  */
-	struct obj_section *dot_fn_section = find_pc_section (func_addr);
-	if (dot_fn_section != NULL && dot_fn_section->objfile != NULL)
-	  {
-	    /* Now find the corresponding "FN" (dropping ".") minimal
-	       symbol's address.  Only look for the minimal symbol in
-	       ".FN"'s object file - avoids problems when two object
-	       files (i.e., shared libraries) contain a minimal symbol
-	       with the same name.  */
-	    struct minimal_symbol *fn =
-	      lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (dot_fn) + 1, NULL,
-				     dot_fn_section->objfile);
-	    if (fn != NULL)
-	      {
-		/* Got the address of that descriptor.  The TOC is the
-		   second double word.  */
-		CORE_ADDR toc =
-		  read_memory_unsigned_integer (SYMBOL_VALUE_ADDRESS (fn)
-						+ tdep->wordsize,
-						tdep->wordsize);
-		regcache_cooked_write_unsigned (regcache,
-						tdep->ppc_gp0_regnum + 2, toc);
-	      }
-	  }
+	/* The TOC is the second double word in the descriptor.  */
+	CORE_ADDR toc =
+	  read_memory_unsigned_integer (desc_addr + tdep->wordsize,
+					tdep->wordsize);
+	regcache_cooked_write_unsigned (regcache,
+					tdep->ppc_gp0_regnum + 2, toc);
       }
   }
 
@@ -876,7 +907,9 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 8)
+  if ((TYPE_CODE (valtype) == TYPE_CODE_INT
+       || TYPE_CODE (valtype) == TYPE_CODE_ENUM)
+      && TYPE_LENGTH (valtype) <= 8)
     {
       /* Integers in r3.  */
       if (writebuf != NULL)
