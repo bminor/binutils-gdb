@@ -7,6 +7,9 @@ Wed Jun 22 17:59:59 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Wed Jun 22 10:52:47 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* linker.c (_bfd_generic_link_add_archive_symbols): Initialize
+	pass from abfd->archive_pass, and save it there as well.
+
 	* hash.c (bfd_hash_allocate): Don't call bfd_set_error if
 	obstack_alloc returns NULL unless the size is non-zero.
 
