@@ -2,6 +2,7 @@
 
 	* sh-tdep.c (sh_gdbarch_init): Move setting of long_bit earlier in
 	the function.
+	Update Copyright year.
 
 2002-01-12  Andrew Cagney  <ac131313@redhat.com>
 
