@@ -97,6 +97,18 @@ SIM_AC_OPTION_FLOAT($mips_fpu)
 
 
 #
+# Select the level of SMP support
+#
+case "${target}" in
+# start-sanitize-r5900
+  mips64r59*-*-*)       mips_smp=1 ;;
+# end-sanitize-r5900
+  *)                    mips_smp=0 ;;
+esac
+SIM_AC_OPTION_SMP($mips_smp)
+
+
+#
 # Select the IGEN architecture
 #
 sim_use_gen=NO
@@ -141,8 +153,8 @@ case "${target}" in
   *)                    sim_default_gen=IGEN
 			;;
 esac
-sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine}"
-sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}"
+sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine} ${sim_igen_smp}"
+sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}  ${sim_igen_smp}"
 AC_SUBST(sim_igen_flags)
 AC_SUBST(sim_m16_flags)
 

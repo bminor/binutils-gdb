@@ -79,6 +79,10 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #include "oengine.c"
 #undef SIM_MANIFESTS
 
+/* Within interp.c we refer to the sim_state and sim_cpu directly. */
+#define SD sd
+#define CPU cpu
+
 
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
@@ -156,6 +160,7 @@ mips_option_handler (sd, opt, arg)
      int opt;
      char *arg;
 {
+  int cpu_nr;
   switch (opt)
     {
     case OPTION_DINERO_TRACE: /* ??? */
@@ -164,20 +169,24 @@ mips_option_handler (sd, opt, arg)
 	 allow external control of the program points being traced
 	 (i.e. only from main onwards, excluding the run-time setup,
 	 etc.). */
-      if (arg == NULL)
-	STATE |= simTRACE;
-      else if (strcmp (arg, "yes") == 0)
-	STATE |= simTRACE;
-      else if (strcmp (arg, "no") == 0)
-	STATE &= ~simTRACE;
-      else if (strcmp (arg, "on") == 0)
-	STATE |= simTRACE;
-      else if (strcmp (arg, "off") == 0)
-	STATE &= ~simTRACE;
-      else
+      for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
 	{
-	  fprintf (stderr, "Unreconized dinero-trace option `%s'\n", arg);
-	  return SIM_RC_FAIL;
+	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
+	  if (arg == NULL)
+	    STATE |= simTRACE;
+	  else if (strcmp (arg, "yes") == 0)
+	    STATE |= simTRACE;
+	  else if (strcmp (arg, "no") == 0)
+	    STATE &= ~simTRACE;
+	  else if (strcmp (arg, "on") == 0)
+	    STATE |= simTRACE;
+	  else if (strcmp (arg, "off") == 0)
+	    STATE &= ~simTRACE;
+	  else
+	    {
+	      fprintf (stderr, "Unreconized dinero-trace option `%s'\n", arg);
+	      return SIM_RC_FAIL;
+	    }
 	}
       return SIM_RC_OK;
 #else /* !TRACE */
@@ -228,6 +237,7 @@ int interrupt_pending;
 static void
 interrupt_event (SIM_DESC sd, void *data)
 {
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   if (SR & status_IE)
     {
       interrupt_pending = 0;
@@ -251,7 +261,7 @@ sim_open (kind, cb, abfd, argv)
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  sim_cpu *cpu = STATE_CPU (sd, 0);
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
@@ -475,8 +485,9 @@ sim_close (sd, quitting)
   if (tracefh != NULL && tracefh != stderr)
    fclose(tracefh);
   tracefh = NULL;
-  STATE &= ~simTRACE;
 #endif /* TRACE */
+
+  /* FIXME - free SD */
 
   return;
 }
@@ -490,6 +501,7 @@ sim_write (sd,addr,buffer,size)
      int size;
 {
   int index;
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   /* Return the number of bytes written, or zero if error. */
 #ifdef DEBUG
@@ -504,9 +516,9 @@ sim_write (sd,addr,buffer,size)
       address_word vaddr = (address_word)addr + index;
       address_word paddr;
       int cca;
-      if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isSTORE, &paddr, &cca, isRAW))
+      if (!address_translation (SD, CPU, NULL_CIA, vaddr, isDATA, isSTORE, &paddr, &cca, isRAW))
 	break;
-      if (sim_core_write_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+      if (sim_core_write_buffer (SD, CPU, sim_core_read_map, buffer + index, paddr, 1) != 1)
 	break;
     }
 
@@ -521,6 +533,7 @@ sim_read (sd,addr,buffer,size)
      int size;
 {
   int index;
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   /* Return the number of bytes read, or zero if error. */
 #ifdef DEBUG
@@ -532,9 +545,9 @@ sim_read (sd,addr,buffer,size)
       address_word vaddr = (address_word)addr + index;
       address_word paddr;
       int cca;
-      if (!address_translation (sd, NULL_CIA, vaddr, isDATA, isLOAD, &paddr, &cca, isRAW))
+      if (!address_translation (SD, CPU, NULL_CIA, vaddr, isDATA, isLOAD, &paddr, &cca, isRAW))
 	break;
-      if (sim_core_read_buffer (sd, NULL, sim_core_read_map, buffer + index, paddr, 1) != 1)
+      if (sim_core_read_buffer (SD, CPU, sim_core_read_map, buffer + index, paddr, 1) != 1)
 	break;
     }
 
@@ -547,7 +560,7 @@ sim_store_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
-  sim_cpu *cpu = STATE_CPU (sd, 0);
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
 #ifdef DEBUG
@@ -580,7 +593,7 @@ sim_fetch_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
-  sim_cpu *cpu = STATE_CPU (sd, 0);
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
 #ifdef DEBUG
@@ -657,8 +670,15 @@ sim_create_inferior (sd, abfd, argv,env)
   ColdReset(sd);
 
   if (abfd != NULL)
-    /* override PC value set by ColdReset () */
-    PC = (unsigned64) bfd_get_start_address (abfd);
+    {
+      /* override PC value set by ColdReset () */
+      int cpu_nr;
+      for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
+	{
+	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
+	  CIA_SET (cpu, (unsigned64) bfd_get_start_address (abfd));
+	}
+    }
 
 #if 0 /* def DEBUG */
   if (argv || env)
@@ -709,10 +729,10 @@ fetch_str (sd, addr)
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
 static void
-sim_monitor(sd,cia,reason)
-     SIM_DESC sd;
-     address_word cia;
-     unsigned int reason;
+sim_monitor (SIM_DESC sd,
+	     sim_cpu *cpu,
+	     address_word cia,
+	     unsigned int reason)
 {
 #ifdef DEBUG
   printf("DBG: sim_monitor: entered (reason = %d)\n",reason);
@@ -796,7 +816,7 @@ sim_monitor(sd,cia,reason)
     case 17: /* void _exit() */
       {
 	sim_io_eprintf (sd, "sim_monitor(17): _exit(int reason) to be coded\n");
-	sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA, sim_exited,
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA, sim_exited,
 			 (unsigned int)(A0 & 0xFFFFFFFF));
 	break;
       }
@@ -943,11 +963,11 @@ sim_monitor(sd,cia,reason)
 /* Store a word into memory.  */
 
 static void
-store_word (sd, cia, vaddr, val)
-     SIM_DESC sd;
-     address_word cia;
-     uword64 vaddr;
-     t_reg val;
+store_word (SIM_DESC sd,
+	    sim_cpu *cpu,
+	    address_word cia,
+	    uword64 vaddr,
+	    t_reg val)
 {
   address_word paddr;
   int uncached;
@@ -975,10 +995,10 @@ store_word (sd, cia, vaddr, val)
 /* Load a word from memory.  */
 
 static t_reg
-load_word (sd, cia, vaddr)
-     SIM_DESC sd;
-     address_word cia;
-     uword64 vaddr;
+load_word (SIM_DESC sd,
+	   sim_cpu *cpu,
+	   address_word cia,
+	   uword64 vaddr)
 {
   if ((vaddr & 3) != 0)
     SignalExceptionAddressLoad ();
@@ -1012,9 +1032,10 @@ load_word (sd, cia, vaddr)
    code, but for ease of simulation we just handle them directly.  */
 
 static void
-mips16_entry (sd,insn)
-     SIM_DESC sd;
-     unsigned int insn;
+mips16_entry (SIM_DESC sd,
+	      sim_cpu *cpu,
+	      address_word cia,
+	      unsigned int insn)
 {
   int aregs, sregs, rreg;
 
@@ -1038,7 +1059,7 @@ mips16_entry (sd,insn)
       /* This is the entry pseudo-instruction.  */
 
       for (i = 0; i < aregs; i++)
-	store_word ((uword64) (SP + 4 * i), GPR[i + 4]);
+	store_word (SD, CPU, cia, (uword64) (SP + 4 * i), GPR[i + 4]);
 
       tsp = SP;
       SP -= 32;
@@ -1046,13 +1067,13 @@ mips16_entry (sd,insn)
       if (rreg)
 	{
 	  tsp -= 4;
-	  store_word ((uword64) tsp, RA);
+	  store_word (SD, CPU, cia, (uword64) tsp, RA);
 	}
 
       for (i = 0; i < sregs; i++)
 	{
 	  tsp -= 4;
-	  store_word ((uword64) tsp, GPR[16 + i]);
+	  store_word (SD, CPU, cia, (uword64) tsp, GPR[16 + i]);
 	}
     }
   else
@@ -1067,13 +1088,13 @@ mips16_entry (sd,insn)
       if (rreg)
 	{
 	  tsp -= 4;
-	  RA = load_word ((uword64) tsp);
+	  RA = load_word (SD, CPU, cia, (uword64) tsp);
 	}
 
       for (i = 0; i < sregs; i++)
 	{
 	  tsp -= 4;
-	  GPR[i + 16] = load_word ((uword64) tsp);
+	  GPR[i + 16] = load_word (SD, CPU, cia, (uword64) tsp);
 	}
 
       SP += 32;
@@ -1137,7 +1158,13 @@ mips16_entry (sd,insn)
 
 
 void
-dotrace (SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
+dotrace (SIM_DESC sd,
+	 sim_cpu *cpu,
+	 FILE *tracefh,
+	 int type,
+	 SIM_ADDR address,
+	 int width,
+	 char *comment,...)
 {
   if (STATE & simTRACE) {
     va_list ap;
@@ -1173,39 +1200,42 @@ dotrace (SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char *com
 /*---------------------------------------------------------------------------*/
 
 static void
-ColdReset (sd)
-     SIM_DESC sd;
+ColdReset (SIM_DESC sd)
 {
-  /* RESET: Fixed PC address: */
-  PC = UNSIGNED64 (0xFFFFFFFFBFC00000);
-  /* The reset vector address is in the unmapped, uncached memory space. */
-
-  SR &= ~(status_SR | status_TS | status_RP);
-  SR |= (status_ERL | status_BEV);
-
-  /* Cheat and allow access to the complete register set immediately */
-  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT
-      && WITH_TARGET_WORD_BITSIZE == 64)
-    SR |= status_FR; /* 64bit registers */
-
-  /* Ensure that any instructions with pending register updates are
-     cleared: */
-  {
-    int loop;
-    for (loop = 0; (loop < PSLOTS); loop++)
-     PENDING_SLOT_REG[loop] = (LAST_EMBED_REGNUM + 1);
-    PENDING_IN = PENDING_OUT = PENDING_TOTAL = 0;
-  }
-
-  /* Initialise the FPU registers to the unknown state */
-  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+  int cpu_nr;
+  for (cpu_nr = 0; cpu_nr < sim_engine_nr_cpus (sd); cpu_nr++)
     {
-      int rn;
-      for (rn = 0; (rn < 32); rn++)
-	FPR_STATE[rn] = fmt_uninterpreted;
+      sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
+      /* RESET: Fixed PC address: */
+      PC = UNSIGNED64 (0xFFFFFFFFBFC00000);
+      /* The reset vector address is in the unmapped, uncached memory space. */
+      
+      SR &= ~(status_SR | status_TS | status_RP);
+      SR |= (status_ERL | status_BEV);
+      
+      /* Cheat and allow access to the complete register set immediately */
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT
+	  && WITH_TARGET_WORD_BITSIZE == 64)
+	SR |= status_FR; /* 64bit registers */
+      
+      /* Ensure that any instructions with pending register updates are
+	 cleared: */
+      {
+	int loop;
+	for (loop = 0; (loop < PSLOTS); loop++)
+	  PENDING_SLOT_REG[loop] = (LAST_EMBED_REGNUM + 1);
+	PENDING_IN = PENDING_OUT = PENDING_TOTAL = 0;
+      }
+      
+      /* Initialise the FPU registers to the unknown state */
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+	{
+	  int rn;
+	  for (rn = 0; (rn < 32); rn++)
+	    FPR_STATE[rn] = fmt_uninterpreted;
+	}
+      
     }
-
-  return;
 }
 
 /* Description from page A-22 of the "MIPS IV Instruction Set" manual
@@ -1227,15 +1257,15 @@ ColdReset (sd)
    function raises an exception and does not return. */
 
 int
-address_translation(sd,cia,vAddr,IorD,LorS,pAddr,CCA,raw)
-     SIM_DESC sd;
-     address_word cia;
-     address_word vAddr;
-     int IorD;
-     int LorS;
-     address_word *pAddr;
-     int *CCA;
-     int raw;
+address_translation (SIM_DESC sd,
+		     sim_cpu *cpu,
+		     address_word cia,
+		     address_word vAddr,
+		     int IorD,
+		     int LorS,
+		     address_word *pAddr,
+		     int *CCA,
+		     int raw)
 {
   int res = -1; /* TRUE : Assume good return */
 
@@ -1263,14 +1293,14 @@ address_translation(sd,cia,vAddr,IorD,LorS,pAddr,CCA,raw)
    program, or alter architecturally-visible state. */
 
 void 
-prefetch(sd,cia,CCA,pAddr,vAddr,DATA,hint)
-     SIM_DESC sd;
-     address_word cia;
-     int CCA;
-     address_word pAddr;
-     address_word vAddr;
-     int DATA;
-     int hint;
+prefetch (SIM_DESC sd,
+	  sim_cpu *cpu,
+	  address_word cia,
+	  int CCA,
+	  address_word pAddr,
+	  address_word vAddr,
+	  int DATA,
+	  int hint)
 {
 #ifdef DEBUG
   sim_io_printf(sd,"Prefetch(%d,0x%s,0x%s,%d,%d);\n",CCA,pr_addr(pAddr),pr_addr(vAddr),DATA,hint);
@@ -1297,16 +1327,16 @@ prefetch(sd,cia,CCA,pAddr,vAddr,DATA,hint)
    satisfy a load reference. At a minimum, the block is the entire
    memory element. */
 void
-load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
-     SIM_DESC sd;
-     address_word cia;
-     uword64* memvalp;
-     uword64* memval1p;
-     int CCA;
-     int AccessLength;
-     address_word pAddr;
-     address_word vAddr;
-     int IorD;
+load_memory (SIM_DESC sd,
+	     sim_cpu *cpu,
+	     address_word cia,
+	     uword64* memvalp,
+	     uword64* memval1p,
+	     int CCA,
+	     int AccessLength,
+	     address_word pAddr,
+	     address_word vAddr,
+	     int IorD)
 {
   uword64 value = 0;
   uword64 value1 = 0;
@@ -1337,7 +1367,7 @@ load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
     }
 
 #if defined(TRACE)
-  dotrace(sd,tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
+  dotrace (SD, CPU, tracefh,((IorD == isDATA) ? 0 : 2),(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"load%s",((IorD == isDATA) ? "" : " instruction"));
 #endif /* TRACE */
   
   /* Read the specified number of bytes from memory.  Adjust for
@@ -1348,38 +1378,38 @@ load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
     {
     case AccessLength_QUADWORD :
       {
-	unsigned_16 val = sim_core_read_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
+	unsigned_16 val = sim_core_read_aligned_16 (cpu, NULL_CIA,
 						    sim_core_read_map, pAddr);
 	value1 = VH8_16 (val);
 	value = VL8_16 (val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
-      value = sim_core_read_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_aligned_8 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
       break;
     case AccessLength_SEPTIBYTE :
-      value = sim_core_read_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_misaligned_7 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
     case AccessLength_SEXTIBYTE :
-      value = sim_core_read_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_misaligned_6 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
     case AccessLength_QUINTIBYTE :
-      value = sim_core_read_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_misaligned_5 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
     case AccessLength_WORD :
-      value = sim_core_read_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_aligned_4 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
       break;
     case AccessLength_TRIPLEBYTE :
-      value = sim_core_read_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_misaligned_3 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
     case AccessLength_HALFWORD :
-      value = sim_core_read_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_aligned_2 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
       break;
     case AccessLength_BYTE :
-      value = sim_core_read_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
+      value = sim_core_read_aligned_1 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
       break;
     default:
@@ -1428,15 +1458,15 @@ load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
    will be changed. */
 
 void
-store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
-     SIM_DESC sd;
-     address_word cia;
-     int CCA;
-     int AccessLength;
-     uword64 MemElem;
-     uword64 MemElem1;   /* High order 64 bits */
-     address_word pAddr;
-     address_word vAddr;
+store_memory (SIM_DESC sd,
+	      sim_cpu *cpu,
+	      address_word cia,
+	      int CCA,
+	      int AccessLength,
+	      uword64 MemElem,
+	      uword64 MemElem1,   /* High order 64 bits */
+	      address_word pAddr,
+	      address_word vAddr)
 {
 #ifdef DEBUG
   sim_io_printf(sd,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr));
@@ -1451,7 +1481,7 @@ store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
     sim_io_error(sd,"AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
   
 #if defined(TRACE)
-  dotrace(sd,tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
+  dotrace (SD, CPU, tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
 #endif /* TRACE */
   
 #ifdef DEBUG
@@ -1480,40 +1510,40 @@ store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
     case AccessLength_QUADWORD :
       {
 	unsigned_16 val = U16_8 (MemElem1, MemElem);
-	sim_core_write_aligned_16 (STATE_CPU (sd, 0), NULL_CIA,
+	sim_core_write_aligned_16 (cpu, NULL_CIA,
 				   sim_core_write_map, pAddr, val);
 	break;
       }
     case AccessLength_DOUBLEWORD :
-      sim_core_write_aligned_8 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_aligned_8 (cpu, NULL_CIA,
 				sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_SEPTIBYTE :
-      sim_core_write_misaligned_7 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_misaligned_7 (cpu, NULL_CIA,
 				   sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_SEXTIBYTE :
-      sim_core_write_misaligned_6 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_misaligned_6 (cpu, NULL_CIA,
 				   sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_QUINTIBYTE :
-      sim_core_write_misaligned_5 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_misaligned_5 (cpu, NULL_CIA,
 				   sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_WORD :
-      sim_core_write_aligned_4 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_aligned_4 (cpu, NULL_CIA,
 				sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_TRIPLEBYTE :
-      sim_core_write_misaligned_3 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_misaligned_3 (cpu, NULL_CIA,
 				   sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_HALFWORD :
-      sim_core_write_aligned_2 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_aligned_2 (cpu, NULL_CIA,
 				sim_core_write_map, pAddr, MemElem);
       break;
     case AccessLength_BYTE :
-      sim_core_write_aligned_1 (STATE_CPU (sd, 0), NULL_CIA,
+      sim_core_write_aligned_1 (cpu, NULL_CIA,
 				sim_core_write_map, pAddr, MemElem);
       break;
     default:
@@ -1526,6 +1556,7 @@ store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
 
 unsigned32
 ifetch32 (SIM_DESC sd,
+	  sim_cpu *cpu,
 	  address_word cia,
 	  address_word vaddr)
 {
@@ -1552,10 +1583,10 @@ ifetch32 (SIM_DESC sd,
    loads and stores indicated by stype occur in the same order for all
    processors. */
 void
-sync_operation(sd,cia,stype)
-     SIM_DESC sd;
-     address_word cia;
-     int stype;
+sync_operation (SIM_DESC sd,
+		sim_cpu *cpu,
+		address_word cia,
+		int stype)
 {
 #ifdef DEBUG
   sim_io_printf(sd,"SyncOperation(%d) : TODO\n",stype);
@@ -1570,6 +1601,7 @@ sync_operation(sd,cia,stype)
 
 void
 signal_exception (SIM_DESC sd,
+		  sim_cpu *cpu,
 		  address_word cia,
 		  int exception,...)
 {
@@ -1627,7 +1659,7 @@ signal_exception (SIM_DESC sd,
           Debug |= Debug_DM;            /* in debugging mode */
           Debug |= Debug_DBp;           /* raising a DBp exception */
           PC = 0xBFC00200;
-          sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
+          sim_engine_restart (SD, CPU, NULL, NULL_CIA);
         }
       break;
 
@@ -1649,11 +1681,11 @@ signal_exception (SIM_DESC sd,
           perform this magic. */
        if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION)
 	 {
-	   sim_monitor(sd, cia, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
+	   sim_monitor (SD, CPU, cia, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
 	   /* NOTE: This assumes that a branch-and-link style
 	      instruction was used to enter the vector (which is the
 	      case with the current IDT monitor). */
-	   sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, RA);
+	   sim_engine_restart (SD, CPU, NULL, RA);
 	 }
        /* Look for the mips16 entry and exit instructions, and
           simulate a handler for them.  */
@@ -1661,7 +1693,7 @@ signal_exception (SIM_DESC sd,
 		&& (instruction & 0xf81f) == 0xe809
 		&& (instruction & 0x0c0) != 0x0c0)
 	 {
-	   mips16_entry (instruction);
+	   mips16_entry (SD, CPU, cia, instruction);
 	   sim_engine_restart (sd, NULL, NULL, NULL_CIA);
 	 }
        /* else fall through to normal exception processing */
@@ -1682,7 +1714,7 @@ signal_exception (SIM_DESC sd,
 	va_end(ap);
 	/* Check for our special terminating BREAK: */
 	if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
-	  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia,
+	  sim_engine_halt (SD, CPU, NULL, cia,
 			   sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
 	}
       }
@@ -1690,7 +1722,7 @@ signal_exception (SIM_DESC sd,
 	PC = cia - 4; /* reference the branch instruction */
       else
 	PC = cia;
-      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia,
+      sim_engine_halt (SD, CPU, NULL, cia,
 		       sim_stopped, SIM_SIGTRAP);
 
     default:
@@ -1745,35 +1777,35 @@ signal_exception (SIM_DESC sd,
 	 /* The following is so that the simulator will continue from the
 	    exception address on breakpoint operations. */
 	 PC = EPC;
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGBUS);
 
        case ReservedInstruction:
        case CoProcessorUnusable:
 	 PC = EPC;
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGILL);
 
        case IntegerOverflow:
        case FPE:
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGFPE);
 
        case Trap:
        case Watch:
        case SystemCall:
 	 PC = EPC;
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGTRAP);
 
        case BreakPoint:
 	 PC = EPC;
-	 sim_engine_abort (sd, STATE_CPU (sd, 0), NULL_CIA,
+	 sim_engine_abort (SD, CPU, NULL_CIA,
 			   "FATAL: Should not encounter a breakpoint\n");
 
        default : /* Unknown internal exception */
 	 PC = EPC;
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	 sim_engine_halt (SD, CPU, NULL, NULL_CIA,
 			  sim_stopped, SIM_SIGABRT);
 
        }
@@ -1785,7 +1817,7 @@ signal_exception (SIM_DESC sd,
        va_start(ap,exception);
        msg = va_arg(ap,char *);
        va_end(ap);
-       sim_engine_abort (sd, STATE_CPU (sd, 0), NULL_CIA,
+       sim_engine_abort (SD, CPU, NULL_CIA,
 			 "FATAL: Simulator error \"%s\"\n",msg);
      }
    }
@@ -1817,13 +1849,13 @@ undefined_result(sd,cia)
 #endif /* WARN_RESULT */
 
 void
-cache_op(sd,cia,op,pAddr,vAddr,instruction)
-     SIM_DESC sd;
-     address_word cia;
-     int op;
-     address_word pAddr;
-     address_word vAddr;
-     unsigned int instruction;
+cache_op (SIM_DESC sd,
+	  sim_cpu *cpu,
+	  address_word cia,
+	  int op,
+	  address_word pAddr,
+	  address_word vAddr,
+	  unsigned int instruction)
 {
 #if 1 /* stop warning message being displayed (we should really just remove the code) */
   static int icache_warning = 1;
@@ -1953,11 +1985,11 @@ cache_op(sd,cia,op,pAddr,vAddr,instruction)
 #endif /* DEBUG */
 
 uword64
-value_fpr(sd,cia,fpr,fmt)
-     SIM_DESC sd;
-     address_word cia;
-     int fpr;
-     FP_formats fmt;
+value_fpr (SIM_DESC sd,
+	   sim_cpu *cpu,
+	   address_word cia,
+	   int fpr,
+	   FP_formats fmt)
 {
   uword64 value = 0;
   int err = 0;
@@ -2058,12 +2090,12 @@ value_fpr(sd,cia,fpr,fmt)
 }
 
 void
-store_fpr(sd,cia,fpr,fmt,value)
-     SIM_DESC sd;
-     address_word cia;
-     int fpr;
-     FP_formats fmt;
-     uword64 value;
+store_fpr (SIM_DESC sd,
+	   sim_cpu *cpu,
+	   address_word cia,
+	   int fpr,
+	   FP_formats fmt,
+	   uword64 value)
 {
   int err = 0;
 
@@ -2711,13 +2743,13 @@ SquareRoot(op,fmt)
 }
 
 uword64
-convert(sd,cia,rm,op,from,to)
-     SIM_DESC sd;
-     address_word cia;
-     int rm;
-     uword64 op;
-     FP_formats from; 
-     FP_formats to; 
+convert (SIM_DESC sd,
+	 sim_cpu *cpu,
+	 address_word cia,
+	 int rm,
+	 uword64 op,
+	 FP_formats from,
+	 FP_formats to)
 {
   sim_fpu wop;
   sim_fpu_round round;
@@ -2828,11 +2860,12 @@ CoProcPresent(coproc_number)
 }
 
 void
-cop_lw(sd,cia,coproc_num,coproc_reg,memword)
-     SIM_DESC sd;
-     address_word cia;
-     int coproc_num, coproc_reg;
-     unsigned int memword;
+cop_lw (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg,
+	unsigned int memword)
 {
   switch (coproc_num) {
 #if defined(HASFPU)
@@ -2856,11 +2889,12 @@ cop_lw(sd,cia,coproc_num,coproc_reg,memword)
 }
 
 void
-cop_ld(sd,cia,coproc_num,coproc_reg,memword)
-     SIM_DESC sd;
-     address_word cia;
-     int coproc_num, coproc_reg;
-     uword64 memword;
+cop_ld (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg,
+	uword64 memword)
 {
   switch (coproc_num) {
 #if defined(HASFPU)
@@ -2880,10 +2914,11 @@ cop_ld(sd,cia,coproc_num,coproc_reg,memword)
 }
 
 unsigned int
-cop_sw(sd,cia,coproc_num,coproc_reg)
-     SIM_DESC sd;
-     address_word cia;
-     int coproc_num, coproc_reg;
+cop_sw (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg)
 {
   unsigned int value = 0;
 
@@ -2922,10 +2957,11 @@ cop_sw(sd,cia,coproc_num,coproc_reg)
 }
 
 uword64
-cop_sd(sd,cia,coproc_num,coproc_reg)
-     SIM_DESC sd;
-     address_word cia;
-     int coproc_num, coproc_reg;
+cop_sd (SIM_DESC sd,
+	sim_cpu *cpu,
+	address_word cia,
+	int coproc_num,
+	int coproc_reg)
 {
   uword64 value = 0;
   switch (coproc_num) {
@@ -2957,10 +2993,10 @@ cop_sd(sd,cia,coproc_num,coproc_reg)
 }
 
 void
-decode_coproc(sd,cia,instruction)
-     SIM_DESC sd;
-     address_word cia;
-     unsigned int instruction;
+decode_coproc (SIM_DESC sd,
+	       sim_cpu *cpu,
+	       address_word cia,
+	       unsigned int instruction)
 {
   int coprocnum = ((instruction >> 26) & 3);
 
@@ -3130,6 +3166,7 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
      int nr_cpus; /* ignore */
      int siggnal; /* ignore */
 {
+  sim_cpu *cpu = STATE_CPU (sd, 0); /* hardwire to cpu 0 */
 #if !defined(FASTSIM)
   unsigned int pipeline_count = 1;
 #endif

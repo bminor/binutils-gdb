@@ -93,11 +93,11 @@ typedef enum {
  fmt_uninterpreted_64 = 0x80000000,
 } FP_formats;
 
-unsigned64 value_fpr PARAMS ((SIM_DESC sd, address_word cia, int fpr, FP_formats));
-#define ValueFPR(FPR,FMT) value_fpr (sd, cia, (FPR), (FMT))
+unsigned64 value_fpr PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int fpr, FP_formats));
+#define ValueFPR(FPR,FMT) value_fpr (SD, CPU, cia, (FPR), (FMT))
 
-void store_fpr PARAMS ((SIM_DESC sd, address_word cia, int fpr, FP_formats fmt, unsigned64 value));
-#define StoreFPR(FPR,FMT,VALUE) store_fpr (sd, cia, (FPR), (FMT), (VALUE))
+void store_fpr PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int fpr, FP_formats fmt, unsigned64 value));
+#define StoreFPR(FPR,FMT,VALUE) store_fpr (SD, CPU, cia, (FPR), (FMT), (VALUE))
 
 int NaN PARAMS ((unsigned64 op, FP_formats fmt));
 int Infinity PARAMS ((unsigned64 op, FP_formats fmt));
@@ -111,8 +111,9 @@ unsigned64 Multiply PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Divide PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Recip PARAMS ((unsigned64 op, FP_formats fmt));
 unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 convert PARAMS ((SIM_DESC sd, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
-#define Convert(rm,op,from,to) convert(sd,cia,rm,op,from,to)
+unsigned64 convert PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
+#define Convert(rm,op,from,to) \
+convert (SD, CPU, cia, rm, op, from, to)
 
 /* Macro to update FPSR condition-code field. This is complicated by
    the fact that there is a hole in the index range of the bits within
@@ -292,7 +293,7 @@ struct _sim_cpu {
 #define CIA_GET(CPU) ((CPU)->registers[PCIDX] + 0)
 #define CIA_SET(CPU,CIA) ((CPU)->registers[PCIDX] = (CIA))
   address_word dspc;  /* delay-slot PC */
-#define DSPC ((STATE_CPU (sd,0))->dspc)
+#define DSPC ((CPU)->dspc)
 
   /* Issue a delay slot instruction immediatly by re-calling
      idecode_issue */
@@ -300,18 +301,18 @@ struct _sim_cpu {
   do { \
     address_word target = (TARGET); \
     instruction_word delay_insn; \
-    sim_events_slip (sd, 1); \
+    sim_events_slip (SD, 1); \
     CIA = CIA + 4; \
     STATE |= simDELAYSLOT; \
     delay_insn = IMEM (CIA); \
-    idecode_issue (sd, delay_insn, (CIA)); \
+    idecode_issue (CPU_, delay_insn, (CIA)); \
     STATE &= ~simDELAYSLOT; \
     NIA = target; \
   } while (0)
 #define NULLIFY_NEXT_INSTRUCTION() \
   do { \
-    sim_events_slip (sd, 1); \
-    dotrace (sd, tracefh, 2, NIA, 4, "load instruction"); \
+    sim_events_slip (SD, 1); \
+    dotrace (SD, CPU, tracefh, 2, NIA, 4, "load instruction"); \
     NIA = CIA + 8; \
   } while (0)
 
@@ -320,8 +321,8 @@ struct _sim_cpu {
   /* State of the simulator */
   unsigned int state;
   unsigned int dsstate;
-#define STATE ((STATE_CPU (sd,0))->state)
-#define DSSTATE ((STATE_CPU (sd,0))->dsstate)
+#define STATE ((CPU)->state)
+#define DSSTATE ((CPU)->dsstate)
 
 /* Flags in the "state" variable: */
 #define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
@@ -371,7 +372,7 @@ struct _sim_cpu {
 
   unsigned_word registers[LAST_EMBED_REGNUM + 1];
   int register_widths[NUM_REGS];
-#define REGISTERS       ((STATE_CPU (sd,0))->registers)
+#define REGISTERS       ((CPU)->registers)
 
 #define GPR     (&REGISTERS[0])
 #define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
@@ -395,7 +396,7 @@ struct _sim_cpu {
 #define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
 
   unsigned_word c0_config_reg;
-#define C0_CONFIG ((STATE_CPU (sd,0))->c0_config_reg)
+#define C0_CONFIG ((CPU)->c0_config_reg)
 
 /* The following are pseudonyms for standard registers */
 #define ZERO    (REGISTERS[0])
@@ -409,7 +410,7 @@ struct _sim_cpu {
 
   /* Keep the current format state for each register: */
   FP_formats fpr_state[32];
-#define FPR_STATE ((STATE_CPU (sd, 0))->fpr_state)
+#define FPR_STATE ((CPU)->fpr_state)
 
 
   /* Slots for delayed register updates. For the moment we just have a
@@ -424,12 +425,12 @@ struct _sim_cpu {
   int pending_slot_count[PSLOTS];
   int pending_slot_reg[PSLOTS];
   unsigned_word pending_slot_value[PSLOTS];
-#define PENDING_IN ((STATE_CPU (sd, 0))->pending_in)
-#define PENDING_OUT ((STATE_CPU (sd, 0))->pending_out)
-#define PENDING_TOTAL ((STATE_CPU (sd, 0))->pending_total)
-#define PENDING_SLOT_COUNT ((STATE_CPU (sd, 0))->pending_slot_count)
-#define PENDING_SLOT_REG ((STATE_CPU (sd, 0))->pending_slot_reg)
-#define PENDING_SLOT_VALUE ((STATE_CPU (sd, 0))->pending_slot_value)
+#define PENDING_IN ((CPU)->pending_in)
+#define PENDING_OUT ((CPU)->pending_out)
+#define PENDING_TOTAL ((CPU)->pending_total)
+#define PENDING_SLOT_COUNT ((CPU)->pending_slot_count)
+#define PENDING_SLOT_REG ((CPU)->pending_slot_reg)
+#define PENDING_SLOT_VALUE ((CPU)->pending_slot_value)
 
   /* The following are not used for MIPS IV onwards: */
 #define PENDING_FILL(r,v) {\
@@ -455,7 +456,7 @@ struct _sim_cpu {
      no longer be atomic. In particular, it is cleared by exception
      return instructions. */
   int llbit;
-#define LLBIT ((STATE_CPU (sd, 0))->llbit)
+#define LLBIT ((CPU)->llbit)
 
 
 /* The HIACCESS and LOACCESS counts are used to ensure that
@@ -464,13 +465,13 @@ struct _sim_cpu {
 
   int hiaccess;
   int loaccess;
-#define HIACCESS ((STATE_CPU (sd, 0))->hiaccess)
-#define LOACCESS ((STATE_CPU (sd, 0))->loaccess)
+#define HIACCESS ((CPU)->hiaccess)
+#define LOACCESS ((CPU)->loaccess)
   /* start-sanitize-r5900 */
   int hi1access;
   int lo1access;
-#define HI1ACCESS ((STATE_CPU (sd, 0))->hi1access)
-#define LO1ACCESS ((STATE_CPU (sd, 0))->lo1access)
+#define HI1ACCESS ((CPU)->hi1access)
+#define LO1ACCESS ((CPU)->lo1access)
   /* end-sanitize-r5900 */
 #if 1
   /* The 4300 and a few other processors have interlocks on hi/lo
@@ -510,14 +511,14 @@ struct _sim_cpu {
      refers to the high 64 bits of that same register.  */
 
   signed_word registers1[LAST_EMBED_REGNUM + 1];
-#define REGISTERS1 ((STATE_CPU (sd, 0))->registers1)
+#define REGISTERS1 ((CPU)->registers1)
 #define GPR1     (&REGISTERS1[0])
 #define LO1      (REGISTERS1[32])
 #define HI1      (REGISTERS1[33])
 #define REGISTER_SA	(124)
 
   unsigned_word sa;        /* the shift amount register */
-#define SA ((STATE_CPU (sd, 0))->sa)
+#define SA ((CPU)->sa)
 
   /* end-sanitize-r5900 */
   /* start-sanitize-vr5400 */
@@ -546,7 +547,7 @@ struct sim_state {
 
   struct swatch watch;
 
-  sim_cpu cpu[1];
+  sim_cpu cpu[MAX_NR_PROCESSORS];
 #if (WITH_SMP)
 #define STATE_CPU(sd,n) (&(sd)->cpu[n])
 #else
@@ -639,32 +640,37 @@ struct sim_state {
    run-time errors in the simulator. */
 #define SimulatorFault      (0xFFFFFFFF)
 
-void signal_exception (SIM_DESC sd, address_word cia, int exception, ...);
-#define SignalException(exc,instruction)     signal_exception (sd, cia, (exc), (instruction))
-#define SignalExceptionInterrupt()           signal_exception (sd, NULL_CIA, Interrupt)
-#define SignalExceptionInstructionFetch()    signal_exception (sd, cia, InstructionFetch)
-#define SignalExceptionAddressStore()        signal_exception (sd, cia, AddressStore)
-#define SignalExceptionAddressLoad()         signal_exception (sd, cia, AddressLoad)
-#define SignalExceptionSimulatorFault(buf)   signal_exception (sd, cia, SimulatorFault, buf)
-#define SignalExceptionFPE()                 signal_exception (sd, cia, FPE)
-#define SignalExceptionIntegerOverflow()     signal_exception (sd, cia, IntegerOverflow)
-#define SignalExceptionCoProcessorUnusable() signal_exception (sd, cia, CoProcessorUnusable)
+void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exception, ...);
+#define SignalException(exc,instruction)     signal_exception (SD, CPU, cia, (exc), (instruction))
+#define SignalExceptionInterrupt()           signal_exception (SD, CPU, NULL_CIA, Interrupt)
+#define SignalExceptionInstructionFetch()    signal_exception (SD, CPU, cia, InstructionFetch)
+#define SignalExceptionAddressStore()        signal_exception (SD, CPU, cia, AddressStore)
+#define SignalExceptionAddressLoad()         signal_exception (SD, CPU, cia, AddressLoad)
+#define SignalExceptionSimulatorFault(buf)   signal_exception (SD, CPU, cia, SimulatorFault, buf)
+#define SignalExceptionFPE()                 signal_exception (SD, CPU, cia, FPE)
+#define SignalExceptionIntegerOverflow()     signal_exception (SD, CPU, cia, IntegerOverflow)
+#define SignalExceptionCoProcessorUnusable() signal_exception (SD, CPU, cia, CoProcessorUnusable)
 
 
 /* Co-processor accesses */
 
-void cop_lw  PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
-void cop_ld  PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg, uword64 memword));
-unsigned int cop_sw PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg));
-uword64 cop_sd PARAMS ((SIM_DESC sd, address_word cia, int coproc_num, int coproc_reg));
+void cop_lw  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
+void cop_ld  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, uword64 memword));
+unsigned int cop_sw PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
+uword64 cop_sd PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
 
-#define COP_LW(coproc_num,coproc_reg,memword) cop_lw(sd,cia,coproc_num,coproc_reg,memword)
-#define COP_LD(coproc_num,coproc_reg,memword) cop_ld(sd,cia,coproc_num,coproc_reg,memword)
-#define COP_SW(coproc_num,coproc_reg) cop_sw(sd,cia,coproc_num,coproc_reg)
-#define COP_SD(coproc_num,coproc_reg) cop_sd(sd,cia,coproc_num,coproc_reg)
+#define COP_LW(coproc_num,coproc_reg,memword) \
+cop_lw (SD, CPU, cia, coproc_num, coproc_reg, memword)
+#define COP_LD(coproc_num,coproc_reg,memword) \
+cop_ld (SD, CPU, cia, coproc_num, coproc_reg, memword)
+#define COP_SW(coproc_num,coproc_reg) \
+cop_sw (SD, CPU, cia, coproc_num, coproc_reg)
+#define COP_SD(coproc_num,coproc_reg) \
+cop_sd (SD, CPU, cia, coproc_num, coproc_reg)
 
-void decode_coproc PARAMS ((SIM_DESC sd, address_word cia, unsigned int instruction));
-#define DecodeCoproc(instruction) decode_coproc(sd, cia, (instruction))
+void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int instruction));
+#define DecodeCoproc(instruction) \
+decode_coproc (SD, CPU, cia, (instruction))
 
 
 
@@ -701,31 +707,34 @@ void decode_coproc PARAMS ((SIM_DESC sd, address_word cia, unsigned int instruct
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-int address_translation PARAMS ((SIM_DESC sd, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
+int address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
-address_translation(sd,cia,vAddr,IorD,LorS,pAddr,CCA,raw)
+address_translation (SD, CPU, cia, vAddr, IorD, LorS, pAddr, CCA, raw)
 
-void load_memory PARAMS ((SIM_DESC sd, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
+void load_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
-load_memory(sd,cia,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD)
+load_memory (SD, CPU, cia, memvalp, memval1p, CCA, AccessLength, pAddr, vAddr, IorD)
 
-void store_memory PARAMS ((SIM_DESC sd, address_word cia, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
+void store_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
-store_memory(sd,cia,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr)
+store_memory (SD, CPU, cia, CCA, AccessLength, MemElem, MemElem1, pAddr, vAddr)
 
-void cache_op PARAMS ((SIM_DESC sd, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
-#define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,cia,op,pAddr,vAddr,instruction)
+void cache_op PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
+#define CacheOp(op,pAddr,vAddr,instruction) \
+cache_op (SD, CPU, cia, op, pAddr, vAddr, instruction)
 
-void sync_operation PARAMS ((SIM_DESC sd, address_word cia, int stype));
-#define SyncOperation(stype) sync_operation (sd, cia, (stype))
+void sync_operation PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int stype));
+#define SyncOperation(stype) \
+sync_operation (SD, CPU, cia, (stype))
 
-void prefetch PARAMS ((SIM_DESC sd, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
-#define Prefetch(CCA,pAddr,vAddr,DATA,hint) prefetch(sd,cia,CCA,pAddr,vAddr,DATA,hint)
+void prefetch PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
+#define Prefetch(CCA,pAddr,vAddr,DATA,hint) \
+prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
-unsigned32 ifetch32 PARAMS ((SIM_DESC sd, address_word cia, address_word vaddr));
-#define IMEM(CIA) ifetch32 (SD, (CIA), (CIA))
+unsigned32 ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
+#define IMEM(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
 
-void dotrace PARAMS ((SIM_DESC sd, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
+void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
 FILE *tracefh;
 
 #endif

@@ -47,11 +47,11 @@
       return 1;
     case 3:
       /* bi word - ss011 */
-      semantic_illegal (sd, cia);
+      semantic_illegal (CPU_, cia);
       return 2;
     case 7:
       /* long - ss111 */
-      semantic_illegal (sd, cia);
+      semantic_illegal (CPU_, cia);
       return 3;
     default:
       abort ();
@@ -74,8 +74,8 @@
     case fmt_unknown:
       break;
     default:
-      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x%08lx)\n",
-		     fpr, (long) cia);
+      sim_io_eprintf (SD, "Vector %d format invalid (PC = 0x%08lx)\n",
+		      fpr, (long) CIA);
       FPR_STATE[fpr] = fmt_unknown;
     }
   switch (scale)
@@ -107,8 +107,8 @@
     case fmt_unknown:
       break;
     default:
-      sim_io_eprintf(sd, "Vector %d format invalid (PC = 0x%08lx)\n",
-		     fpr, (long) cia);
+      sim_io_eprintf (SD, "Vector %d format invalid (PC = 0x%08lx)\n",
+		      fpr, (long) cia);
       FPR_STATE[fpr] = fmt_unknown;
     }
   switch (scale)
@@ -219,13 +219,12 @@
 
 :function:::void:store_cc:int i, int value
 {
-  abort ();
+  SETFCC (i, value);
 }
 
-:function:::int:fetch_cc:int i
+:function:::int:value_cc:int i
 {
-  abort ();
-  return 0;
+  return GETFCC (i);
 }
 
 
@@ -366,8 +365,8 @@
 :function:::void:ByteAlign:int vd, int imm, int vs, int vt
 {
   int s = imm * 8;
-  unsigned64 rs = value_fpr (sd, cia, vs, fmt_long);
-  unsigned64 rt = value_fpr (sd, cia, vt, fmt_long);
+  unsigned64 rs = ValueFPR (vs, fmt_long);
+  unsigned64 rt = ValueFPR (vt, fmt_long);
   unsigned64 rd;
   if (BigEndianCPU)
     {
@@ -387,7 +386,7 @@
 	rd = (MOVED64 (rs, s, 0, 63, 64 - s)
 	      | EXTRACTED64 (rt, 63, s));
     }
-  store_fpr (sd, cia, vd, rd, fmt_long);
+  StoreFPR (vd, fmt_long, rd);
 }
 
 010010,00,3.IMM,5.VT,5.VS,5.VD,0110,X,0::::ALNI.fmt
@@ -743,7 +742,7 @@
   int scale = get_scale (SD_, SEL);
   for (i = 0; i < (8 >> scale); i++)
     store_vr (SD_, scale, VD, i,
-	      (fetch_cc (SD_, i) == 0
+	      (value_cc (SD_, i) == 0
 	       ? value_vr (SD_, scale, VS, i)
 	       : select_vr (SD_, SEL, VT, i)));
 }
@@ -763,7 +762,7 @@
   int scale = get_scale (SD_, SEL);
   for (i = 0; i < (8 >> scale); i++)
     store_vr (SD_, scale, VD, i,
-	      (fetch_cc (SD_, i) != 0
+	      (value_cc (SD_, i) != 0
 	       ? value_vr (SD_, scale, VS, i)
 	       : select_vr (SD_, SEL, VT, i)));
 }

@@ -1,3 +1,49 @@
+Sun Feb  1 11:15:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (sim_state): Make the cpu array MAX_NR_PROCESSORS in
+ 	size.
+
+	* interp.c (SD, CPU): Define.
+	(mips_option_handler): Set flags in each CPU.
+	(interrupt_event): Assume CPU 0 is the one being iterrupted.
+	(sim_close): Do not clear STATE, deleted anyway.
+	(sim_write, sim_read): Assume CPU zero's vm should be used for
+ 	data transfers.
+	(sim_create_inferior): Set the PC for all processors.
+	(sim_monitor, store_word, load_word, mips16_entry): Add cpu
+ 	argument.
+	(mips16_entry): Pass correct nr of args to store_word, load_word.
+	(ColdReset): Cold reset all cpu's.
+	(signal_exception): Pass cpu to sim_monitor & mips16_entry.
+	(sim_monitor, load_memory, store_memory, signal_exception): Use
+ 	`CPU' instead of STATE_CPU.
+
+
+	* sim-main.h: Replace uses of STATE_CPU with CPU. Replace sd with
+ 	SD or CPU_.
+	
+	* sim-main.h (signal_exception): Add sim_cpu arg.
+	(SignalException*): Pass both SD and CPU to signal_exception.
+	* interp.c (signal_exception): Update.
+	
+	* sim-main.h (value_fpr, store_fpr, dotrace, ifetch32), interp.c:
+ 	Ditto
+	(sync_operation, prefetch, cache_op, store_memory, load_memory,
+ 	address_translation): Ditto
+	(decode_coproc, cop_lw, cop_ld, cop_sw, cop_sd): Ditto.
+	
+start-sanitize-vr5400
+	* mdmx.igen (get_scale): Pass CPU_ to semantic_illegal instead of
+ 	`sd'.
+	(ByteAlign): Use StoreFPR, pass args in correct order.
+	
+end-sanitize-vr5400
+start-sanitize-r5900
+Sun Feb  1 10:59:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sim_igen_filter): For r5900, configure as SMP.
+
+end-sanitize-r5900
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,3 +1,8 @@
+Sun Feb  1 14:02:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-profile.c (profile_print): Only print CPU <N> if other
+ 	output is going to appear.
+
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
