@@ -195,9 +195,10 @@ typedef void (cgen_print_fn) ();
    parsed.
    The second argument is a pointer to a cgen_fields struct
    from which the values are fetched.
-   The third argument is a pointer to a buffer in which to place the insn.  */
-typedef void (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
-				       CGEN_FIELDS *, cgen_insn_t *));
+   The third argument is a pointer to a buffer in which to place the insn.
+   The result is an error message or NULL if success.  */
+typedef const char * (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
+					       CGEN_FIELDS *, cgen_insn_t *));
 
 /* Extract handler.
    The first argument is a pointer to a struct describing the insn being
@@ -452,10 +453,8 @@ const CGEN_KEYWORD_ENTRY *cgen_keyword_search_next
 const char * cgen_parse_keyword PARAMS ((const char **,
 					 CGEN_KEYWORD *,
 					 long *));
-const char * cgen_parse_signed_integer PARAMS ((const char **, int,
-						long, long, long *));
+const char * cgen_parse_signed_integer PARAMS ((const char **, int, long *));
 const char * cgen_parse_unsigned_integer PARAMS ((const char **, int,
-						  unsigned long, unsigned long,
 						  unsigned long *));
 const char * cgen_parse_address PARAMS ((const char **, int, int,
 					 enum cgen_parse_operand_result *,
@@ -543,6 +542,13 @@ enum cgen_operand_type;
 /* FIXME: Rename, cpu-opc.h defines this as the typedef of the enum.  */
 #define CGEN_OPERAND_TYPE(operand) ((enum cgen_operand_type) CGEN_OPERAND_INDEX (operand))
 #define CGEN_OPERAND_ENTRY(n) (& CGEN_SYM (operand_table) [n])
+
+/* Types of parse/insert/extract/print cover-fn handlers.  */
+/* FIXME: move opindex first to match caller.  */
+/* FIXME: also need types of insert/extract/print fns.  */
+/* FIXME: not currently used as type of 3rd arg varies.  */
+typedef const char * (CGEN_PARSE_OPERAND_FN) PARAMS ((const char **, int,
+						      long *));
 
 /* Instruction operand instances.
 
@@ -853,11 +859,11 @@ CGEN_SYM (put_operand) PARAMS ((int, const long *,
 CGEN_INLINE long
 CGEN_SYM (get_operand) PARAMS ((int, const CGEN_FIELDS *));
 
-CGEN_INLINE const char *
+const char *
 CGEN_SYM (parse_operand) PARAMS ((int, const char **, CGEN_FIELDS *));
 
-CGEN_INLINE const char *
-CGEN_SYM (validate_operand) PARAMS ((int, const CGEN_FIELDS *));
+const char *
+CGEN_SYM (insert_operand) PARAMS ((int, CGEN_FIELDS *, char *));
 
 /* Default insn parser, printer.  */
 extern cgen_parse_fn CGEN_SYM (parse_insn);

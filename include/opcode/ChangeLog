@@ -1,3 +1,8 @@
+Tue Feb 17 16:00:56 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (cgen_insert_fn): Change type of result to const char *.
+	(cgen_parse_{signed,unsigned}_integer): Delete min,max arguments.
+
 Thu Feb 12 18:30:41 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.h (lookup_insn): New argument alias_p.
