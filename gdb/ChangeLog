@@ -1,3 +1,10 @@
+2003-02-28  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (register_size): New function.
+	* regcache.h (register_size): Declare
+	* d10v-tdep.c: Use register_size instead of REGISTER_RAW_SIZE, use
+	max_register_size instead of MAX_REGISTER_RAW_SIZE.
+
 2003-02-28  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_compound): Extract code into find_method.

@@ -285,6 +285,18 @@ max_register_size (struct gdbarch *gdbarch)
   return descr->max_register_size;
 }
 
+int
+register_size (struct gdbarch *gdbarch, int regnum)
+{
+  struct regcache_descr *descr = regcache_descr (gdbarch);
+  int size;
+  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
+  size = descr->sizeof_register[regnum];
+  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  return size;
+}
+
 /* The register cache for storing raw register values.  */
 
 struct regcache

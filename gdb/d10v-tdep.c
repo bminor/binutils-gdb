@@ -789,7 +789,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
     {
       CORE_ADDR return_pc 
 	= read_memory_unsigned_integer (info->saved_regs[LR_REGNUM], 
-					REGISTER_RAW_SIZE (LR_REGNUM));
+					register_size (current_gdbarch, LR_REGNUM));
       info->return_pc = d10v_make_iaddr (return_pc);
     }
   else
@@ -889,7 +889,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	int i;
 	fprintf_filtered (file, "  ");
 	frame_register_read (frame, a, num);
-	for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
+	for (i = 0; i < max_register_size (current_gdbarch); i++)
 	  {
 	    fprintf_filtered (file, "%02x", (num[i] & 0xff));
 	  }
@@ -1078,7 +1078,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
   printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), 
 	 TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, 
 	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
-					 REGISTER_RAW_SIZE (RET1_REGNUM)));
+					 register_size (current_gdbarch, RET1_REGNUM)));
 #endif
   if (TYPE_LENGTH (type) == 1)
     {
@@ -1464,7 +1464,7 @@ d10v_frame_id_unwind (struct frame_info *frame,
     }
 
   addr = read_memory_unsigned_integer (info->saved_regs[FP_REGNUM],
-				       REGISTER_RAW_SIZE (FP_REGNUM));
+				       register_size (current_gdbarch, FP_REGNUM));
   if (addr == 0)
     return;
 
@@ -1495,7 +1495,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	  *addrp = 0;
 	  *realnump = -1;
 	  if (bufferp != NULL)
-	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
+	    store_address (bufferp, register_size (current_gdbarch, regnum),
 			   saved_regs[regnum]);
 	}
       else
@@ -1510,7 +1510,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	    {
 	      /* Read the value in from memory.  */
 	      read_memory (saved_regs[regnum], bufferp,
-			   REGISTER_RAW_SIZE (regnum));
+			   register_size (current_gdbarch, regnum));
 	    }
 	}
       return;
@@ -1566,7 +1566,8 @@ d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
   frame_unwind_register (fi, LR_REGNUM, raw_buffer);
   regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
 
-  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (SP_REGNUM),
+  store_unsigned_integer (raw_buffer,
+			  register_size (current_gdbarch, SP_REGNUM),
 			  fp + info->size);
   regcache_cooked_write (regcache, SP_REGNUM, raw_buffer);
 

@@ -129,6 +129,32 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 extern int max_register_size (struct gdbarch *gdbarch);
 
 
+/* Return the size of register REGNUM.  All registers should have only
+   one size.
+
+   FIXME: cagney/2003-02-28:
+
+   Unfortunatly, thanks to some legacy architectures, this doesn't
+   hold.  A register's cooked (nee virtual) and raw size can differ
+   (see MIPS).  Such architectures should be using different register
+   numbers for the different sized views of identical registers.
+
+   Anyway, the up-shot is that, until that mess is fixed, core code
+   can end up being very confused - should the RAW or VIRTUAL size be
+   used?  As a rule of thumb, use REGISTER_VIRTUAL_SIZE in cooked
+   code, but with the comment:
+
+   OK: REGISTER_VIRTUAL_SIZE
+
+   or just
+
+   OK
+
+   appended to the end of the line.  */
+   
+extern int register_size (struct gdbarch *gdbarch, int regnum);
+
+
 /* Save/restore a register cache.  The registers saved/restored is
    determined by the save_reggroup and restore_reggroup (although you
    can't restore a register that wasn't saved as well :-).  You can
