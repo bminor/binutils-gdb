@@ -1,3 +1,10 @@
+2002-11-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_vector_info, print_float_info): Move code that
+	checks whether the target has any registers and whether there is a
+	selected frame up, such that it is also used if a target provides
+	multi-arch definitions of these functions.
+
 2002-11-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (DESTDIR): Define.

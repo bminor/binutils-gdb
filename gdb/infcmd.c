@@ -1791,17 +1791,17 @@ static void
 print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 		   struct frame_info *frame, const char *args)
 {
+  if (!target_has_registers)
+    error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+
   if (gdbarch_print_vector_info_p (gdbarch))
     gdbarch_print_vector_info (gdbarch, file, frame, args);
   else
     {
       int regnum;
       int printed_something = 0;
-
-      if (!target_has_registers)
-	error ("The program has no registers now.");
-      if (selected_frame == NULL)
-	error ("No selected frame.");
 
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
@@ -1958,6 +1958,11 @@ static void
 print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, const char *args)
 {
+  if (!target_has_registers)
+    error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+
   if (gdbarch_print_float_info_p (gdbarch))
     gdbarch_print_float_info (gdbarch, file, frame, args);
   else
@@ -1970,11 +1975,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 #else
       int regnum;
       int printed_something = 0;
-
-      if (!target_has_registers)
-	error ("The program has no registers now.");
-      if (selected_frame == NULL)
-	error ("No selected frame.");
 
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	{
