@@ -32,6 +32,10 @@
 //  Similarly, for the single-bit fields which differentiate between
 //  formats (FMTOP), 0 is OB format and 1 is QH format.
 
+//  If you change this file to add instructions, please make sure that model
+//  "sb1" configurations still build, and that you've added no new
+//  instructions to the "sb1" model.
+
 
 // Helper:
 //
@@ -93,6 +97,7 @@
 
 :%s::::FMTSEL:int fmtsel
 *mdmx:
+*sb1:
 {
   if ((fmtsel & 0x1) == 0)
     return "ob";
@@ -105,6 +110,7 @@
 
 :%s::::FMTOP:int fmtop
 *mdmx:
+*sb1:
 {
   switch (fmtop)
     {
@@ -117,6 +123,7 @@
 
 :%s::::SHOP:int shop
 *mdmx:
+*sb1:
 {
   if ((shop & 0x11) == 0x00)
     switch ((shop >> 1) & 0x07)
@@ -146,6 +153,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001011:MDMX:64::ADD.fmt
 "add.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -156,6 +164,7 @@
 011110,5.FMTSEL,5.VT,5.VS,0,0000,110111:MDMX:64::ADDA.fmt
 "adda.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -166,6 +175,7 @@
 011110,5.FMTSEL,5.VT,5.VS,1,0000,110111:MDMX:64::ADDL.fmt
 "addl.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -176,6 +186,7 @@
 011110,00,3.IMM,5.VT,5.VS,5.VD,0110,1.FMTOP,0:MDMX:64::ALNI.fmt
 "alni.%s<FMTOP> v<VD>, v<VS>, v<VT>, <IMM>"
 *mdmx:
+*sb1:
 {
   unsigned64 result;
   int s;
@@ -192,6 +203,7 @@
 011110,5.RS,5.VT,5.VS,5.VD,0110,1.FMTOP,1:MDMX:64::ALNV.fmt
 "alnv.%s<FMTOP> v<VD>, v<VS>, v<VT>, r<RS>"
 *mdmx:
+*sb1:
 {
   unsigned64 result;
   int s;
@@ -208,6 +220,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001100:MDMX:64::AND.fmt
 "and.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -218,6 +231,7 @@
 011110,5.FMTSEL,5.VT,5.VS,00000,000001:MDMX:64::C.EQ.fmt
 "c.eq.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -228,6 +242,7 @@
 011110,5.FMTSEL,5.VT,5.VS,00000,000101:MDMX:64::C.LE.fmt
 "c.le.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -238,6 +253,7 @@
 011110,5.FMTSEL,5.VT,5.VS,00000,000100:MDMX:64::C.LT.fmt
 "c.lt.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -248,6 +264,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,000111:MDMX:64::MAX.fmt
 "max.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -258,6 +275,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,000110:MDMX:64::MIN.fmt
 "min.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -277,6 +295,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,110000:MDMX:64::MUL.fmt
 "mul.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -287,6 +306,7 @@
 011110,5.FMTSEL,5.VT,5.VS,0,0000,110011:MDMX:64::MULA.fmt
 "mula.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -297,6 +317,7 @@
 011110,5.FMTSEL,5.VT,5.VS,1,0000,110011:MDMX:64::MULL.fmt
 "mull.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -307,6 +328,7 @@
 011110,5.FMTSEL,5.VT,5.VS,0,0000,110010:MDMX:64::MULS.fmt
 "muls.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -317,6 +339,7 @@
 011110,5.FMTSEL,5.VT,5.VS,1,0000,110010:MDMX:64::MULSL.fmt
 "mulsl.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -327,6 +350,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001111:MDMX:64::NOR.fmt
 "nor.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -337,6 +361,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001110:MDMX:64::OR.fmt
 "or.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -347,6 +372,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,000010:MDMX:64::PICKF.fmt
 "pickf.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -357,6 +383,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,000011:MDMX:64::PICKT.fmt
 "pickt.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -367,6 +394,7 @@
 011110,1000,1.FMTOP,00000,00000,5.VD,111111:MDMX:64::RACH.fmt
 "rach.%s<FMTOP> v<VD>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -377,6 +405,7 @@
 011110,0000,1.FMTOP,00000,00000,5.VD,111111:MDMX:64::RACL.fmt
 "racl.%s<FMTOP> v<VD>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -387,6 +416,7 @@
 011110,0100,1.FMTOP,00000,00000,5.VD,111111:MDMX:64::RACM.fmt
 "racm.%s<FMTOP> v<VD>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -406,6 +436,7 @@
 011110,5.FMTSEL,5.VT,00000,5.VD,100001:MDMX:64::RNAU.fmt
 "rnau.%s<FMTSEL> v<VD>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -425,6 +456,7 @@
 011110,5.FMTSEL,5.VT,00000,5.VD,100010:MDMX:64::RNEU.fmt
 "rneu.%s<FMTSEL> v<VD>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -444,6 +476,7 @@
 011110,5.FMTSEL,5.VT,00000,5.VD,100000:MDMX:64::RZU.fmt
 "rzu.%s<FMTSEL> v<VD>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -454,6 +487,7 @@
 011110,5.SHOP,5.VT,5.VS,5.VD,011111:MDMX:64::SHFL.op.fmt
 "shfl.%s<SHOP> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, SHOP))
@@ -464,6 +498,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,010000:MDMX:64::SLL.fmt
 "sll.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -483,6 +518,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,010010:MDMX:64::SRL.fmt
 "srl.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -493,6 +529,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001010:MDMX:64::SUB.fmt
 "sub.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -503,6 +540,7 @@
 011110,5.FMTSEL,5.VT,5.VS,0,0000,110110:MDMX:64::SUBA.fmt
 "suba.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -513,6 +551,7 @@
 011110,5.FMTSEL,5.VT,5.VS,1,0000,110110:MDMX:64::SUBL.fmt
 "subl.%s<FMTSEL> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))
@@ -523,6 +562,7 @@
 011110,1000,1.FMTOP,00000,5.VS,00000,111110:MDMX:64::WACH.fmt
 "wach.%s<FMTOP> v<VS>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -533,6 +573,7 @@
 011110,0000,1.FMTOP,5.VT,5.VS,00000,111110:MDMX:64::WACL.fmt
 "wacl.%s<FMTOP> v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -543,6 +584,7 @@
 011110,5.FMTSEL,5.VT,5.VS,5.VD,001101:MDMX:64::XOR.fmt
 "xor.%s<FMTSEL> v<VD>, v<VS>, v<VT>"
 *mdmx:
+*sb1:
 {
   check_mdmx (SD_, instruction_0);
   if (check_mdmx_fmtsel (SD_, instruction_0, FMTSEL))

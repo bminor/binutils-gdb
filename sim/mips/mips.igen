@@ -65,6 +65,12 @@
 :model:::mips16:mips16:			// m16.igen (and m16.dc)
 :model:::mdmx:mdmx:			// mdmx.igen
 
+//  Vendor Extensions
+//
+//  Instructions specific to these extensions are in separate .igen files.
+//  Extensions add instructions on to a base ISA.
+:model:::sb1:sb1:			// sb1.igen
+
 
 // Pseudo instructions known by IGEN
 :internal::::illegal:
@@ -5057,6 +5063,7 @@
 
 :include:::m16.igen
 :include:::mdmx.igen
+:include:::sb1.igen
 :include:::tx.igen
 :include:::vr.igen
 

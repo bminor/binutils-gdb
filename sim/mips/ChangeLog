@@ -1,4 +1,22 @@
 2002-06-03  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* configure.in (mipsisa64sb1*-*-*): New target for supporting
+	Broadcom SiByte SB-1 processor configurations.
+	* configure: Regenerate.
+	* sb1.igen: New file.
+	* mips.igen: Include sb1.igen.
+	(sb1): New model.
+	* Makefile.in (IGEN_INCLUDE): Add sb1.igen.
+	* mdmx.igen: Add "sb1" model to all appropriate functions and
+	instructions.
+	* mdmx.c (AbsDiffOB, AvgOB, AccAbsDiffOB): New functions.
+	(ob_func, ob_acc): Reference the above.
+	(qh_acc): Adjust to keep the same size as ob_acc.
+	* sim-main.h (status_SBX, MX_VECT_ABSD, MX_VECT_AVG, MX_AbsDiff)
+	(MX_Avg, MX_VECT_ABSDA, MX_AbsDiffC): New macros.
+
+2002-06-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* Makefile.in (IGEN_INCLUDE): Add mdmx.igen.
 

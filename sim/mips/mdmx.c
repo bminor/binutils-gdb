@@ -250,12 +250,26 @@ MsgnQH(signed16 ts, signed16 tt)
   return t;
 }
 
-
 static signed16
 SRAQH(signed16 ts, signed16 tt)
 {
   unsigned32 s = (unsigned32)tt & 0xF;
   return (signed16)((signed32)ts >> s);
+}
+
+
+/* "pabsdiff" and "pavg" are defined only for OB format.  */
+
+static unsigned8
+AbsDiffOB(unsigned8 ts, unsigned8 tt)
+{
+  return (ts >= tt ? ts - tt : tt - ts);
+}
+
+static unsigned8
+AvgOB(unsigned8 ts, unsigned8 tt)
+{
+  return ((unsigned32)ts + (unsigned32)tt + 1) >> 1;
 }
 
 
@@ -270,7 +284,7 @@ static const QH_FUNC qh_func[] = {
 static const OB_FUNC ob_func[] = {
   AndOB,  NorOB,  OrOB,   XorOB, SLLOB, SRLOB,
   AddOB,  SubOB,  MinOB,  MaxOB,
-  MulOB,  NULL,   NULL,   NULL, NULL
+  MulOB,  NULL,   NULL,   AbsDiffOB, AvgOB
 };
 
 /* Auxiliary functions for CPR updates.  */
@@ -743,17 +757,26 @@ AccSubLOB(signed24 *a, unsigned8 ts, unsigned8 tt)
   *a = (signed24)ts - (signed24)tt;
 }
 
+static void
+AccAbsDiffOB(signed24 *a, unsigned8 ts, unsigned8 tt)
+{
+  unsigned8 t = (ts >= tt ? ts - tt : tt - ts);
+  *a += (signed24)t;
+}
+
 
 /* Dispatch tables for operations that update a CPR.  */
 
 static const QH_ACC qh_acc[] = {
   AccAddAQH, AccAddAQH, AccMulAQH, AccMulLQH,
-  SubMulAQH, SubMulLQH, AccSubAQH, AccSubLQH
+  SubMulAQH, SubMulLQH, AccSubAQH, AccSubLQH,
+  NULL
 };
 
 static const OB_ACC ob_acc[] = {
   AccAddAOB, AccAddLOB, AccMulAOB, AccMulLOB,
-  SubMulAOB, SubMulLOB, AccSubAOB, AccSubLOB
+  SubMulAOB, SubMulLOB, AccSubAOB, AccSubLOB,
+  AccAbsDiffOB
 };
 
 

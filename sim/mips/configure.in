@@ -128,6 +128,10 @@ case "${target}" in
 		        sim_igen_machine="-M mips32"
 			sim_igen_filter="32,f"
 			;;
+  mipsisa64sb1*-*-*)	sim_gen=IGEN
+		        sim_igen_machine="-M mips64,sb1"
+			sim_igen_filter="32,64,f"
+			;;
   mipsisa64*-*-*)	sim_gen=IGEN
 		        sim_igen_machine="-M mips64"
 			sim_igen_filter="32,64,f"

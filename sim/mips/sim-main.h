@@ -567,6 +567,8 @@ struct sim_state {
 #define status_CU1       (1 << 29)      /* Coprocessor 1 usable */
 #define status_CU2       (1 << 30)      /* Coprocessor 2 usable */
 #define status_CU3       (1 << 31)      /* Coprocessor 3 usable */
+/* Bits reserved for implementations:  */
+#define status_SBX       (1 << 16)      /* Enable SiByte SB-1 extensions.  */
 
 #define cause_BD ((unsigned)1 << 31)    /* L1 Exception in branch delay slot */
 #define cause_BD2         (1 << 30)     /* L2 Exception in branch delay slot */
@@ -743,7 +745,6 @@ typedef unsigned int MX_fmtsel;   /* MDMX format select field (5 bits).  */
 #define MX_VECT_XOR  (3)
 #define MX_VECT_SLL  (4)
 #define MX_VECT_SRL  (5)
-
 #define MX_VECT_ADD  (6)
 #define MX_VECT_SUB  (7)
 #define MX_VECT_MIN  (8)
@@ -751,6 +752,8 @@ typedef unsigned int MX_fmtsel;   /* MDMX format select field (5 bits).  */
 #define MX_VECT_MUL  (10)
 #define MX_VECT_MSGN (11)
 #define MX_VECT_SRA  (12)
+#define MX_VECT_ABSD (13)		/* SB-1 only.  */
+#define MX_VECT_AVG  (14)		/* SB-1 only.  */
 
 unsigned64 mdmx_cpr_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
 #define MX_Add(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_ADD, op1, vt, fmtsel)
@@ -766,6 +769,8 @@ unsigned64 mdmx_cpr_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmt
 #define MX_ShiftRightLogical(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SRL, op1, vt, fmtsel)
 #define MX_Sub(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_SUB, op1, vt, fmtsel)
 #define MX_Xor(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_XOR, op1, vt, fmtsel)
+#define MX_AbsDiff(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_ABSD, op1, vt, fmtsel)
+#define MX_Avg(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_AVG, op1, vt, fmtsel)
 
 #define MX_C_EQ  0x1
 #define MX_C_LT  0x4
@@ -784,6 +789,7 @@ unsigned64 mdmx_pick_op (SIM_STATE, int tf, unsigned64 op1, int vt, MX_fmtsel fm
 #define MX_VECT_MULSL (5)
 #define MX_VECT_SUBA  (6)
 #define MX_VECT_SUBL  (7)
+#define MX_VECT_ABSDA (8)		/* SB-1 only.  */
 
 void mdmx_acc_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
 #define MX_AddA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ADDA, op1, vt, fmtsel)
@@ -794,6 +800,7 @@ void mdmx_acc_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
 #define MX_MulSL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULSL, op1, vt, fmtsel)
 #define MX_SubA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_SUBA, op1, vt, fmtsel)
 #define MX_SubL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_SUBL, op1, vt, fmtsel)
+#define MX_AbsDiffC(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ABSDA, op1, vt, fmtsel)
 
 #define MX_FMT_OB   (0)
 #define MX_FMT_QH   (1)

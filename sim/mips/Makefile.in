@@ -84,6 +84,7 @@ M16_DC=$(srcdir)/m16.dc
 IGEN_INCLUDE=\
 	$(srcdir)/m16.igen \
 	$(srcdir)/mdmx.igen \
+	$(srcdir)/sb1.igen \
 	$(srcdir)/tx.igen \
 	$(srcdir)/vr.igen \
 
