@@ -652,7 +652,7 @@ floatformat_from_length (int len)
     format = NULL;
   if (format == NULL)
     error ("Unrecognized %d-bit floating-point type.",
-	   len & TARGET_CHAR_BIT);
+	   len * TARGET_CHAR_BIT);
   return format;
 }
 
