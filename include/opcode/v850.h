@@ -59,9 +59,11 @@ extern const int v850_num_opcodes;
 struct v850_operand
 {
   /* The number of bits in the operand.  */
+  /* If this value is -1 then the operand's bits are in a discontinous distribution in the instruction. */
   int bits;
 
-  /* How far the operand is left shifted in the instruction.  */
+  /* (bits >= 0):  How far the operand is left shifted in the instruction.  */
+  /* (bits == -1): Bit mask of the bits in the operand.  */
   int shift;
 
   /* Insertion function.  This is used by the assembler.  To insert an
@@ -80,17 +82,16 @@ struct v850_operand
      string (the operand will be inserted in any case).  If the
      operand value is legal, *ERRMSG will be unchanged (most operands
      can accept any value).  */
-  unsigned long (*insert) PARAMS ((unsigned long instruction, long op,
-				   const char **errmsg));
+  unsigned long (* insert) PARAMS ((unsigned long instruction, long op,
+				   const char ** errmsg));
 
   /* Extraction function.  This is used by the disassembler.  To
      extract this operand type from an instruction, check this field.
 
      If it is NULL, compute
-         op = ((i) >> o->shift) & ((1 << o->bits) - 1);
-	 if ((o->flags & PPC_OPERAND_SIGNED) != 0
-	     && (op & (1 << (o->bits - 1))) != 0)
-	   op -= 1 << o->bits;
+         op = o->bits == -1 ? ((i) & o->shift) : ((i) >> o->shift) & ((1 << o->bits) - 1);
+	 if (o->flags & V850_OPERAND_SIGNED)
+	     op = (op << (32 - o->bits)) >> (32 - o->bits);
      (i is the instruction, o is a pointer to this structure, and op
      is the result; this assumes twos complement arithmetic).
 
@@ -100,7 +101,7 @@ struct v850_operand
      non-zero if this operand type can not actually be extracted from
      this operand (i.e., the instruction does not match).  If the
      operand is valid, *INVALID will not be changed.  */
-  long (*extract) PARAMS ((unsigned long instruction, int *invalid));
+  unsigned long (* extract) PARAMS ((unsigned long instruction, int * invalid));
 
   /* One bit syntax flags.  */
   int flags;
@@ -135,5 +136,23 @@ extern const struct v850_operand v850_operands[];
    right now.  We may need others in the future (or maybe handle them like
    promoted operands on the mn10300?)  */
 #define V850_OPERAND_RELAX	0x40
+
+/* Whether this argument is a N-bit offset for a sst.{h,w}/sld.{h,w,hu}
+   instruction, and the addend needs to be shifted right one bit */
+#define V850_OPERAND_ADJUST_SHORT_MEMORY	0x80
+
+/* The register specified must not be r0 */
+#define V850_NOT_R0	        0x100
+
+/* start-sanitize-v850e */
+/* push/pop type instruction, V850E specific.  */
+#define V850E_PUSH_POP		0x200
+
+/* 16 bit immediate follows instruction, V850E specific.  */
+#define V850E_IMMEDIATE16	0x400
+
+/* 32 bit immediate follows instruction, V850E specific.  */
+#define V850E_IMMEDIATE32	0x800
+/* end-sanitize-v850e */
 
 #endif /* V850_H */

@@ -1,3 +1,11 @@
+Fri Aug 22 10:38:29 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h (V850_NOT_R0): New flag.
+
+Mon Aug 18 11:05:58 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h (struct v850_opcode): Remove flags field. 
+
 start-sanitize-v850
 Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
 
