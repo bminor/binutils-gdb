@@ -1,3 +1,32 @@
+2001-08-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* doc/c-mips.tex (-mgp32, -mfp32): Added -mfp32, unified with -mgp32.
+	* config/tc-mips.c (mips_fp32, mips_32bit_abi): New static variables.
+	(md_long_opts): Add -mfp32 option.
+	(md_parse_option): Handle it.  Set mips_32bit_abi given -mabi=32.
+	(md_show_usage): Show usage for -mfp32 and -mgp32.
+	(HAVE_32BIT_GPRS, HAVE_32BIT_FPRS): New macros.
+	(HAVE_64BIT_GPRS, HAVE_64BIT_FPRS): New macros, inverse of the above.
+	(HAVE_32BIT_ADDRESSES): New macro.
+	(load_register): Use HAVE_32BIT_GPRS to determine the register width.
+	(load_address): Use HAVE_32BIT_ADDRESSES to determine the address size.
+	(s_cprestore, s_cpadd): Likewise.
+	(macro): Use HAVE_32BIT_GPRS to determine the width of registers
+	used in branch and M_LI_D macros.  Use HAVE_64BIT_FPRS to determine
+	the width registers used in M_LI_DD macros.  Use HAVE_32BIT_ADDRESSES
+	to determine the width of addresses in load, store and jump macros.
+	(macro2): Use HAVE_32BIT_GPRS to determine the width of registers
+	used in set instructions; do not check the address size for them.
+	Use HAVE_32BIT_ADDRESSES to determine the width of addresses in
+	unaligned load and store macros.
+	(mips_ip): Use the new macros to check the width of a register when
+	processing float constants.  Force a constant into memory if it is
+	destined for an FPR and the FPRs are wider than the GPRs.  Warn about
+	odd FPR numbers if HAVE_32BIT_FPRS.  Use HAVE_32BIT_GPRS rather
+	than mips_gp32 to select synthetic instructions.
+	(macro_build): Use HAVE_32BIT_GPRS rather than mips_gp32 to select
+	synthetic instructions.
+
 2001-08-01  Christian Groessler <cpg@aladdin.de>
 
 	* config/tc-z8k.c (parse_reg): If a string starts with "r", "rl",

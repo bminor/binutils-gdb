@@ -75,13 +75,17 @@ instruction sets during the assembly; see @ref{MIPS ISA, Directives to
 override the ISA level}.
 
 @item -mgp32
-Assume that 32-bit general purpose registers are available.  This
-affects synthetic instructions such as @code{move}, which will assemble
-to a 32-bit or a 64-bit instruction depending on this flag.  On some
-MIPS variants there is a 32-bit mode flag; when this flag is set,
-64-bit instructions generate a trap.  Also, some 32-bit OSes only save
-the 32-bit registers on a context switch, so it is essential never to
-use the 64-bit registers.
+@itemx -mfp32
+Some macros have different expansions for 32-bit and 64-bit registers.
+The register sizes are normally inferred from the ISA and ABI, but these
+flags force a certain group of registers to be treated as 32 bits wide at
+all times.  @samp{-mgp32} controls the size of general-purpose registers
+and @samp{-mfp32} controls the size of floating-point registers.
+
+On some MIPS variants there is a 32-bit mode flag; when this flag is
+set, 64-bit instructions generate a trap.  Also, some 32-bit OSes only
+save the 32-bit registers on a context switch, so it is essential never
+to use the 64-bit registers.
 
 @item -mgp64
 Assume that 64-bit general purpose registers are available.  This is
