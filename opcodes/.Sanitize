@@ -98,7 +98,7 @@ fi
 
 r16_files = "configure.in"
 if ( echo $* | grep keep\-r16 > /dev/null ) ; then
-	for i in r16_files ; do
+	for i in $r16_files ; do
 		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Keeping r16 stuff in $i
@@ -106,7 +106,7 @@ if ( echo $* | grep keep\-r16 > /dev/null ) ; then
 		fi
 	done
 else
-	for i in r16_files ; do
+	for i in $r16_files ; do
 		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Removing traces of \"r16\" from $i...
