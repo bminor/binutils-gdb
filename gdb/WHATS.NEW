@@ -5,12 +5,17 @@
 
  * New machines supported (host and target)
 
-SCO Unix on i386 IBM PC clones		i386-sco-sysv	or  i386sco
 Amiga 3000 running Amix			m68k-cbm-svr4	or  amix
 NCR 3000 386 running SVR4		i386-ncr-svr4	or  ncr3000
 Motorola Delta 88000 running Sys V	m88k-motorola-sysv  or  delta88
 
-There is no core file support on SCO Unix.
+ * Almost SCO Unix support
+
+We had hoped to support:
+SCO Unix on i386 IBM PC clones		i386-sco-sysv	or  i386sco
+(except for core file support), but we discovered very late in the release
+that it has problems with process groups that render gdb unusable.  Sorry
+about that.  I encourage people to fix it and post the fixes.
 
  * Preliminary ELF and DWARF support
 
@@ -19,6 +24,12 @@ debugging records for C, in DWARF format, in ELF files.  This support
 is preliminary.  If you bring up GDB on another SVR4 system, please
 send mail to bug-gdb@prep.ai.mit.edu to let us know what changes were
 reqired (if any).
+
+ * New Readline
+
+GDB now uses the latest `readline' library.  One user-visible change
+is that two tabs will list possible command completions, which previously
+required typing M-? (meta-question mark, or ESC ?).
 
  * Bugs fixed
 
