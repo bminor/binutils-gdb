@@ -3635,7 +3635,13 @@ using the colon-colon notation:
 
 @noindent
 Here @var{file} or @var{function} is the name of the context for the
-static @var{variable}.
+static @var{variable}.  In the case of file names, you can use quotes to
+make sure _GDBN__ parses the file name as a single word---for example,
+to print a global value of @code{x} defined in @file{f2.c}:
+
+@example
+(_GDBP__) p 'f2.c'::x
+@end example
 
 @cindex C++ scope resolution
 This use of @samp{::} is very rarely in conflict with the very similar
@@ -5671,6 +5677,27 @@ does not change as your program executes.  _GDBN__ finds it in your
 program's symbol table, in the file indicated when you started _GDBN__
 (@pxref{File Options, ,Choosing Files}), or by one of the
 file-management commands (@pxref{Files, ,Commands to Specify Files}).
+
+@c FIXME! This might be intentionally specific to C and C++; if so, move
+@c to someplace in C section of lang chapter.
+@cindex symbol names
+@cindex names of symbols
+@cindex quoting names
+Occasionally, you may need to refer to symbols that contain unusual
+characters, which _GDBN__ ordinarily treats as word delimiters.  The
+most frequent case is in referring to static variables in other
+source files (@pxref{Variables,,Program Variables}).  File names
+are recorded in object files as debugging symbols, but _GDBN__ would
+ordinarily parse a typical file name, like @file{foo.c}, as the three words
+@samp{foo} @samp{.} @samp{c}.  To allow _GDBN__ to recognize
+@samp{foo.c} as a single symbol, enclose it in single quotes; for example,
+
+@example
+p 'foo.c'::x
+@end example
+
+@noindent
+looks up the value of @code{x} in the scope of the file @file{foo.c}.
 
 @table @code
 @item info address @var{symbol}
