@@ -613,6 +613,7 @@ guess_is_rela (e_machine)
     case EM_SPARCV9:
     case EM_SPARC:
     case EM_PPC:
+    case EM_PPC64:
     case EM_V850:
     case EM_CYGNUS_V850:
     case EM_D30V:
@@ -1390,6 +1391,7 @@ get_machine_name (e_machine)
     case EM_SPARC32PLUS:	return "Sparc v8+" ;
     case EM_960:		return "Intel 90860";
     case EM_PPC:		return "PowerPC";
+    case EM_PPC64:		return "PowerPC64";
     case EM_V800:		return "NEC V800";
     case EM_FR20:		return "Fujitsu FR20";
     case EM_RH32:		return "TRW RH32";
