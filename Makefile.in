@@ -157,6 +157,7 @@ install: install-dirs install-fixed-includes
 # causing Make to quit.
 install-dirs: force
 	- mkdir $(destdir)
+	- mkdir $(destdir)/include
 	- mkdir $(destdir)/H-$(host_alias)
 	- mkdir $(destdir)/H-$(host_alias)/T-independent
 	- mkdir $(destdir)/H-$(host_alias)/T-independent/bin
