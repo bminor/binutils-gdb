@@ -1,3 +1,30 @@
+Fri Sep 13 17:32:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (change_leading_char): New static variable.
+	(OPTION_CHANGE_LEADING_CHAR): Define.
+	(copy_options): Add "change-leading-char".
+	(copy_usage): Mention --change-leading-char.
+	(filter_symbols): Add obfd parameter.  Change all callers.
+	Implement change_leading_char.
+	(copy_object): Call filter_symbols if change_leading_char.
+	(copy_main): Handle OPTION_CHANGE_LEADING_CHAR.
+	* binutils.texi, objcopy.1: Document --change-leading-char.
+
+Tue Sep  3 14:05:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_enum_type): Don't check index into a NULL names
+	array.
+	* nm.c (sort_symbols_by_size): Always initialize next.
+	* rdcoff.c (parse_coff_type): Warn about an incomprehensible
+	type rather than crashing.
+	* rddbg.c (read_symbol_stabs_debugging_info): Initialize f.
+	* stabs.c (parse_stab_members): Set context in all cases.
+
+Thu Aug 29 16:56:52 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
+	* configure: Regenerate.
+
 Thu Aug 29 11:29:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (L_tmpnam): Never define.
