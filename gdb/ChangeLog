@@ -1,5 +1,8 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* corelow.c (core_xfer_partial): Fix coding standards violation.
+	Add support for TARGET_OBJECT_WCOOKIE.
+
 	* sparc-linux-tdep.c (sparc32_linux_init_abi): Don't set
 	deprecated_pc_in_sigtramp.
 	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Likewise.
