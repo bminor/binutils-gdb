@@ -310,13 +310,6 @@ md_begin (void)
   linkrelax = 1;
 }
 
-struct h8_exp
-{
-  char *e_beg;
-  char *e_end;
-  expressionS e_exp;
-};
-
 struct h8_op
 {
   op_type mode;

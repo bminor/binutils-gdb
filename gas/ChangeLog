@@ -1,3 +1,7 @@
+2003-11-25  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/tc-h8300.c (h8_exp): Remove.
+
 2003-11-25  Asgari Jinia  <asgarij@kpitcummins.com>
 
 	* config/tc-h8300.c (md_assemble): Check operands validity for
