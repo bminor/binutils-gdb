@@ -63,7 +63,6 @@ set timeout 60
 #
 # remote_exec build "sh -c \\\"cd ${objdir}/${subdir}\\; make -v -f ${srcdir}/${subdir}/${testfile}.mk clean require_shlibs all SRCDIR=${srcdir}/${subdir} OBJDIR=${objdir}/${subdir}\\\""
 
-send_user "Making with '${srcdir}/${subdir}/${testfile}.sh $subdir ...\n"
 remote_exec build "${srcdir}/${subdir}/${testfile}.sh $subdir"
 
 # Only HP-UX (and any other platforms using SOM shared libraries, I

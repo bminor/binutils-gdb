@@ -7,6 +7,14 @@
 
 Thu Dec 20 09:54:36 2001  Jeffrey A Law  (law@redhat.com)
 
+	* gdb.hp/gdb.base-hp/hwwatchbus.exp: Allow inferior to get either
+	a SIGBUS or SIGSEGV.
+
+	* gdb.hp/gdb.base-hp/so-thresh.exp: Remove useless send_user command.
+
+	* gdb.hp/gdb.defects/bs14602.exp: Revamp slightly so that test
+	can be compiled with either HP's compiler or GCC.
+
 	* gdb.hp/gdb.threads-hp/usrthbasic.exp: Disable completely.
 	* gdb.hp/gdb.threads-hp/usrthcore.exp: Disable completely.
 	* gdb.hp/gdb.threads-hp/usrthfork.exp: Disable completely.

@@ -17,15 +17,22 @@ set prms_id 0
 set bug_id 0
 
 
-# set up appropriate compile option to recognize long double
-set ansi_option ""
-if [istarget "hppa*-*-*"] {
-    set ansi_option "-Ae"
-}
-
 set testfile bs14602
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
+
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+
+# set up appropriate compile option to recognize long double
+if {$hp_aCC_compiler || $hp_cc_compiler} {
+    set ansi_option "-Ae"
+} else {
+    set ansi_option ""
+}
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "$binfile" executable "debug {additional_flags=${ansi_option}}"] != "" } {
     perror "Couldn't compile ${srcfile}"

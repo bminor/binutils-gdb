@@ -54,7 +54,7 @@ gdb_load ${binfile}
 
 
 # We ought to be able to set a hardware watchpoint, step, and
-# get a SIGBUS signal reported.
+# get a SIGBUS or SIGSEGV signal reported.
 #
 if ![runto_main] then {
   fail "can't run to main"
@@ -72,11 +72,11 @@ gdb_expect {
 
 send_gdb "step\n"
 gdb_expect {
-  -re "Program received signal SIGBUS, Bus error.* in main .*${srcfile}:8.*$gdb_prompt $"\
-          {pass "see real SIGBUS when h/w watchpoint set"}
+  -re "Program received signal (SIGBUS|SIGSEGV), (Bus error|Segmentation fault).* in main .*${srcfile}:8.*$gdb_prompt $"\
+          {pass "see real signal when h/w watchpoint set"}
   -re "$gdb_prompt $"\
-          {fail "see real SIGBUS when h/w watchpoint set"}
-  timeout {fail "(timeout) see real SIGBUS when h/w watchpoint set"}
+          {fail "see real signal when h/w watchpoint set"}
+  timeout {fail "(timeout) see real signal when h/w watchpoint set"}
 }
 
 remote_exec build "mv ${binfile} ${binfile}.bak"
