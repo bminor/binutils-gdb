@@ -1736,6 +1736,15 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"swap",	one(0044100),	one(0177770), "Ds", m68000up | mcf5200 },
 
+/* swbeg and swbegl are magic constants used on sysV68.  The compiler
+   generates them before a switch table.  They tell the debugger and
+   disassembler that a switch table follows.  The parameter is the
+   number of elements in the table.  swbeg means that the entries in
+   the table are word (2 byte) sized, and swbegl means that the
+   entries in the table are longword (4 byte) sized.  */
+{"swbeg",	one(0045374),	one(0177777), "#w",   m68000up | mcf5200 },
+{"swbegl",	one(0045375),	one(0177777), "#l",   m68000up | mcf5200 },
+
 {"tas",		one(0045300),		one(0177700), "$s", m68000up },
 
 #define TBL1(name,signed,round,size)					\

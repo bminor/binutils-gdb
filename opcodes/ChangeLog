@@ -1,3 +1,7 @@
+Thu Feb 27 14:04:32 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* m68k-opc.c (m68k_opcodes): Added swbegl pseudo-instruction.
+
 start-sanitize-tic80
 Thu Feb 27 11:36:41 1997  Michael Meissner  <meissner@cygnus.com>
 
