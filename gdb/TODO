@@ -35,11 +35,9 @@ x86 targets.
 x86 linux GDB and SIGALRM (???)
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
 
-I know there are problems with single stepping through signal
-handlers.  These problems were present in 4.18.  They were just masked
-because 4.18 failed to recognize signal handlers.  Fixing it is not
-easy, and will require changes to handle_inferior_event(), that I
-prefer not to make before the 5.0 release.
+This problem has been fixed, but a regression test still needs to be
+added to the testsuite:
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
 
 Mark
 
