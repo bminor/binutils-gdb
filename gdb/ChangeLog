@@ -1,5 +1,11 @@
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
+	* infrun.c (handle_step_into_function): Delete code conditional on
+	legacy_frame_p.
+	(handle_inferior_event, step_over_function): Ditto.
+
+2004-04-02  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (get_prev_frame_1): Exclude signal trampolines from the
 	"previous frame inner to this frame" test.
 

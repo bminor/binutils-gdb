@@ -1263,25 +1263,6 @@ handle_step_into_function (struct execution_control_state *ecs)
   if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
     {
       /* We're doing a "next".  */
-
-      if (legacy_frame_p (current_gdbarch)
-	  && pc_in_sigtramp (stop_pc)
-          && frame_id_inner (step_frame_id,
-                             frame_id_build (read_sp (), 0)))
-	/* NOTE: cagney/2004-03-15: This is only needed for legacy
-	   systems.  On non-legacy systems step_over_function doesn't
-	   use STEP_FRAME_ID and hence the below update "hack" isn't
-	   needed.  */
-        /* We stepped out of a signal handler, and into its calling
-           trampoline.  This is misdetected as a subroutine call, but
-           stepping over the signal trampoline isn't such a bad idea.
-           In order to do that, we have to ignore the value in
-           step_frame_id, since that doesn't represent the frame
-           that'll reach when we return from the signal trampoline.
-           Otherwise we'll probably continue to the end of the
-           program.  */
-        step_frame_id = null_frame_id;
-
       step_over_function (ecs);
       keep_going (ecs);
       return;
@@ -2523,16 +2504,8 @@ process_event_stop_test:
 
   /* Did we just step into a singal trampoline (either by stepping out
      of a handler, or by taking a signal)?  */
-  /* NOTE: cagney/2004-03-16: Replaced (except for legacy) a check for
-     "pc_in_sigtramp(stop_pc) != pc_in_sigtramp(step_pc)" with
-     frame_type == SIGTRAMP && !frame_id_eq.  The latter is far more
-     robust as it will correctly handle nested signal trampolines.  */
-  if (legacy_frame_p (current_gdbarch)
-      ? (pc_in_sigtramp (stop_pc)
-	 && !pc_in_sigtramp (prev_pc)
-	 && INNER_THAN (read_sp (), step_sp))
-      : (get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME
-	 && !frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)))
+  if (get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME
+      && !frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id))
     {
       {
 	struct frame_id current_frame = get_frame_id (get_current_frame ());
@@ -2924,42 +2897,16 @@ step_over_function (struct execution_control_state *ecs)
 
   check_for_old_step_resume_breakpoint ();
 
-  /* NOTE: cagney/2004-03-15: Code using the current value of
-     "step_frame_id", instead of unwinding that frame ID, removed (at
-     least for non-legacy platforms).  On s390 GNU/Linux, after taking
-     a signal, the program is directly resumed at the signal handler
-     and, consequently, the PC would point at at the first instruction
-     of that signal handler but STEP_FRAME_ID would [incorrectly] at
-     the interrupted code when it should point at the signal
-     trampoline.  By always and locally doing a frame ID unwind, it's
-     possible to assert that the code is always using the correct
-     ID.  */
-  if (legacy_frame_p (current_gdbarch))
-    {
-      if (frame_id_p (step_frame_id)
-	  && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-	/* NOTE: cagney/2004-02-27: Use the global state's idea of the
-	   stepping frame ID.  I suspect this is done as it is lighter
-	   weight than a call to get_prev_frame.  */
-	/* NOTE: cagney/2004-03-15: See comment above about how this
-	   is also broken.  */
-	sr_id = step_frame_id;
-      else
-	/* NOTE: cagney/2004-03-15: This is the way it was 'cos this
-	   is the way it always was.  It should be using the unwound
-	   (or caller's) ID, and not this (or the callee's) ID.  It
-	   appeared to work because: legacy architectures used the
-	   wrong end of the frame for the ID.stack (inner-most rather
-	   than outer-most) so that the callee's id.stack (un
-	   adjusted) matched the caller's id.stack giving the
-	   "correct" id; more often than not
-	   !IN_SOLIB_DYNSYM_RESOLVE_CODE and hence the code above (it
-	   was originally later in the function) fixed the ID by using
-	   global state.  */
-	sr_id = get_frame_id (get_current_frame ());
-    }
-  else
-    sr_id = frame_unwind_id (get_current_frame ());
+  /* NOTE: cagney/2004-03-31: Code using the current value of
+     "step_frame_id", instead of unwinding that frame ID, removed.  On
+     s390 GNU/Linux, after taking a signal, the program is directly
+     resumed at the signal handler and, consequently, the PC would
+     point at at the first instruction of that signal handler but
+     STEP_FRAME_ID would [incorrectly] at the interrupted code when it
+     should point at the signal trampoline.  By always and locally
+     doing a frame ID unwind, it's possible to assert that the code is
+     always using the correct ID.  */
+  sr_id = frame_unwind_id (get_current_frame ());
 
   step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
 
