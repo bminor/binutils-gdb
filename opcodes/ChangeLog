@@ -1,3 +1,12 @@
+Tue May 26 20:47:48 1998  Stan Cox  <scox@cygnus.com>
+
+	* sparc-dis.c (compute_arch_mask): Added bfd_mach_sparc_sparclite_le.
+
+Tue May 26 20:45:33 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparc-dis.c (print_insn_sparc): big endian instruction / little
+	endian data support.
+
 Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_format_table): Change definition of SHORT_B3
