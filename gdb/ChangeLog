@@ -1,9 +1,12 @@
 Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* mips-tdep.c: remove include of sys/dir.h.  Doesn't seem
+	  necessary and Solaris doesn't have it.
+
 	* Makefile.in (clean-info, install, install-info, info, dvi,
 	  check, all): do not echo recursion lines.
 
-	* udip2soc.c (UDIConnect): replace union wait with int.
+	* 29k-share/udip2soc.c (UDIConnect): replace union wait with int.
 
 	* config/sparc/sun4sol2.mh (XM_CLIBS): add -lsocket which is
 	  required target ports which use sockets (like a29k-udi).
