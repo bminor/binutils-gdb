@@ -29,23 +29,22 @@
 
 /* Generic functions in nto-tdep.c.  */
 
-extern void nto_init_solib_absolute_prefix PARAMS ((void));
+extern void nto_init_solib_absolute_prefix (void);
 
-char **nto_parse_redirection
-PARAMS ((char *start_argv[], char **in, char **out, char **err));
+char **nto_parse_redirection (char *start_argv[], char **in,
+			      char **out, char **err);
 
-int proc_iterate_over_mappings PARAMS ((int (*func) (int, CORE_ADDR)));
+int proc_iterate_over_mappings (int (*func) (int, CORE_ADDR));
 
-void nto_relocate_section_addresses
-PARAMS ((struct so_list *, struct section_table *));
+void nto_relocate_section_addresses (struct so_list *, struct section_table *);
 
-int nto_map_arch_to_cputype PARAMS ((const char *));
+int nto_map_arch_to_cputype (const char *);
 
-int nto_find_and_open_solib PARAMS ((char *, unsigned, char **));
+int nto_find_and_open_solib (char *, unsigned, char **);
 
 /* Dummy function for initializing nto_target_ops on targets which do
    not define a particular regset.  */
-void nto_dummy_supply_regset PARAMS ((char *regs));
+void nto_dummy_supply_regset (char *regs);
 
 /* Target operations defined for Neutrino targets (<target>-nto-tdep.c).  */
 

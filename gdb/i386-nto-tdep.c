@@ -242,7 +242,7 @@ i386nto_sigcontext_addr (struct frame_info *frame)
 }
 
 static void
-init_i386nto_ops ()
+init_i386nto_ops (void)
 {
   current_nto_target.nto_regset_id = i386nto_regset_id;
   current_nto_target.nto_supply_gregset = i386nto_supply_gregset;

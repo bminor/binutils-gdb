@@ -1,3 +1,10 @@
+2003-05-06  Kris Warkentin <kewarken@qnx.com>
+
+	* i386-nto-tdep.c: Fix old K&R function definitions.
+	* nto-tdep.c: Likewise and change stat.h include to gdb_stat.h.
+	Also change add_show_from_set() call to add_setshow_cmd().
+	* nto-tdep.h: Remove PARAMS and grep ^func ARI hits.
+
 2003-05-05  Andrew Cagney  <cagney@redhat.com>
 
 	* dummy-frame.c: Include "command.h" and "gdbcmd.h".

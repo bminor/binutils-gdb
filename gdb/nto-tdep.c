@@ -21,7 +21,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include "gdb_string.h"
 #include "nto-tdep.h"
 #include "top.h"
@@ -309,13 +309,21 @@ static struct core_fns regset_core_fns = {
 };
 
 void
-_initialize_nto_tdep ()
+_initialize_nto_tdep (void)
 {
+	/*
   add_show_from_set (add_set_cmd ("nto-debug", class_maintenance, var_zinteger, (char *) &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
 When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
 for different positive values.", &setdebuglist),
 		     &showdebuglist);
+		     */
+  add_setshow_cmd ("nto-debug", class_maintenance, var_zinteger,
+		  &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
+When non-zero, nto specific debug info is\n\
+displayed. Different information is displayed\n\
+for different positive values.",  "Show QNX NTO internal debugging.\n",
+		  NULL, NULL, &setdebuglist, &showdebuglist);
 
   /* We use SIG45 for pulses, or something, so nostop, noprint
      and pass them.  */
