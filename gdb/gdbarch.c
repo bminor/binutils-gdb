@@ -823,9 +823,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_class_type_flags, has predicate */
   /* Skip verify of address_class_type_flags_to_name, has predicate */
   /* Skip verify of address_class_name_to_type_flags, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_reggroup_p == default_register_reggroup_p))
-    fprintf_unfiltered (log, "\n\tregister_reggroup_p");
+  /* Skip verify of register_reggroup_p, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)

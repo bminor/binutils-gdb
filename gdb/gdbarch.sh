@@ -668,7 +668,7 @@ F:2:ADDRESS_CLASS_TYPE_FLAGS:int:address_class_type_flags:int byte_size, int dwa
 M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:char *:address_class_type_flags_to_name:int type_flags:type_flags:
 M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
-m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p
+m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
 EOF
 }
 

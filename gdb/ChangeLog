@@ -1,5 +1,10 @@
 2002-11-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (register_reggroup_p): Allow default value.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2002-11-02  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.h: Add coment indicating replacements for deprecated
 	functions.
 
