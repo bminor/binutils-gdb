@@ -50,6 +50,7 @@ i[3456]86-*-go32)	gdb_host=go32
 			gdb_serial_driver=ser-go32.c
 			;;
 i[3456]86-*-linux*)	gdb_host=linux ;;
+i[3456]86-pc-linux-gnu)	gdb_host=linux ;;
 i[3456]86-*-mach)	gdb_host=i386mach ;;
 i[3456]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[3456]86-*-sco*)	gdb_host=i386sco ;;
