@@ -1,3 +1,9 @@
+Mon Aug 23 12:57:42 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (parse_symbol, parse_type, cross_ref):  Pass name of symbol
+	as an argument and use it in complaints.
+	* symmisc.c (dump_psymtab):  Dump filenames of dependencies.
+
 Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
 		 and Jim Kingdon  (kingdon@cygnus.com)
 

@@ -264,6 +264,7 @@ dump_psymtab (objfile, psymtab, outfile)
      struct partial_symtab *psymtab;
      FILE *outfile;
 {
+  int i;
 
   fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
 		    psymtab -> filename);
@@ -291,6 +292,12 @@ dump_psymtab (objfile, psymtab, outfile)
 		    psymtab -> textlow, psymtab -> texthigh);
   fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
 		    psymtab -> number_of_dependencies);
+  for (i = 0; i < psymtab -> number_of_dependencies; i++)
+    {
+      fprintf_filtered (outfile, "    %d 0x%lx %s\n", i,
+			(unsigned long) psymtab -> dependencies[i],
+			psymtab -> dependencies[i] -> filename);
+    }
   if (psymtab -> n_global_syms > 0)
     {
       print_partial_symbol (objfile -> global_psymbols.list
