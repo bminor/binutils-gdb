@@ -1,3 +1,14 @@
+2003-12-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (debug_line_pointer_size): Replace with an array
+        called 'debug_line_pointer_sizes'.
+        (num_debug_line_pointer_sizes): New variable.
+        (display_debug_lines): Extract pointer size from the
+        debug_line_pointer_sizes array.
+        (display_debug_loc): Likewise.
+        (prescan_debug_info): Fill in the debug_line_pointer_sizes
+        array.
+
 2003-12-23  Ralf Baechle  <ralf@gnu.org>
 	    Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 

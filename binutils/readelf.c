@@ -6274,7 +6274,8 @@ process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
 /* Size of pointers in the .debug_line section.  This information is not
    really present in that section.  It's obtained before dumping the debug
    sections by doing some pre-scan of the .debug_info section.  */
-static int debug_line_pointer_size = 4;
+static unsigned int * debug_line_pointer_sizes = NULL;
+static unsigned int   num_debug_line_pointer_sizes = 0;
 
 static int
 display_debug_lines (Elf_Internal_Shdr *section,
@@ -6290,12 +6291,15 @@ display_debug_lines (Elf_Internal_Shdr *section,
   int i;
   int offset_size;
   int initial_length_size;
+  unsigned int comp_unit = 0;
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  SECTION_NAME (section));
 
   while (data < end)
     {
+      unsigned int pointer_size;
+
       hdrptr = data;
 
       /* Check the length of the block.  */
@@ -6349,6 +6353,19 @@ display_debug_lines (Elf_Internal_Shdr *section,
       info.li_line_base <<= 24;
       info.li_line_base >>= 24;
 
+      /* Get the pointer size from the comp unit associated
+	 with this block of line number information.  */
+      if (comp_unit >= num_debug_line_pointer_sizes)
+	{
+	  error (_("Not enough comp units for .debug_lines section\n"));
+	  return 0;
+	}
+      else
+	{
+	  pointer_size = debug_line_pointer_sizes [comp_unit];
+	  comp_unit ++;
+	}
+
       printf (_("  Length:                      %ld\n"), info.li_length);
       printf (_("  DWARF Version:               %d\n"), info.li_version);
       printf (_("  Prologue Length:             %d\n"), info.li_prologue_length);
@@ -6357,6 +6374,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
       printf (_("  Line Base:                   %d\n"), info.li_line_base);
       printf (_("  Line Range:                  %d\n"), info.li_line_range);
       printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
+      printf (_("  (Pointer size:               %u)\n"), pointer_size);
 
       end_of_sequence = data + info.li_length + initial_length_size;
 
@@ -6449,7 +6467,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	    {
 	    case DW_LNS_extended_op:
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
-						debug_line_pointer_size);
+						pointer_size);
 	      break;
 
 	    case DW_LNS_copy:
@@ -7531,6 +7549,7 @@ display_debug_loc (Elf_Internal_Shdr *section,
   unsigned long bytes;
   unsigned char *section_begin = start;
   bfd_vma addr;
+  unsigned int comp_unit = 0;
 
   addr = section->sh_addr;
   bytes = section->sh_size;
@@ -7551,21 +7570,29 @@ display_debug_loc (Elf_Internal_Shdr *section,
       unsigned long end;
       unsigned short length;
       unsigned long offset;
+      unsigned int pointer_size;
 
       offset = start - section_begin;
 
+      /* Get the pointer size from the comp unit associated
+	 with this block of location information.  */
+      if (comp_unit >= num_debug_line_pointer_sizes)
+	{
+	  error (_("Not enough comp units for .debug_loc section\n"));
+	  return 0;
+	}
+      else
+	{
+	  pointer_size = debug_line_pointer_sizes [comp_unit];
+	  comp_unit ++;
+	}
+
       while (1)
 	{
-	  /* Normally, the lists in the debug_loc section are related to a
-	     given compilation unit, and thus, we would use the pointer size
-	     of that compilation unit.  However, since we are displaying it
-	     separately here, we either have to store pointer sizes of all
-	     compilation units, or assume they don't change.   We assume,
-	     like the debug_line display, that it doesn't change.  */
-	  begin = byte_get (start, debug_line_pointer_size);
-	  start += debug_line_pointer_size;
-	  end = byte_get (start, debug_line_pointer_size);
-	  start += debug_line_pointer_size;
+	  begin = byte_get (start, pointer_size);
+	  start += pointer_size;
+	  end = byte_get (start, pointer_size);
+	  start += pointer_size;
 
 	  if (begin == 0 && end == 0)
 	    break;
@@ -7581,7 +7608,7 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	  start += 2;
 
 	  printf ("    %8.8lx %8.8lx %8.8lx (", offset, begin, end);
-	  decode_location_expression (start, debug_line_pointer_size, length);
+	  decode_location_expression (start, pointer_size, length);
 	  printf (")\n");
 
 	  start += length;
@@ -9167,56 +9194,97 @@ display_debug_not_supported (Elf_Internal_Shdr *section,
   return 1;
 }
 
-/* Pre-scan the .debug_info section to record the size of address.
-   When dumping the .debug_line, we use that size information, assuming
-   that all compilation units have the same address size.  */
-static int
-prescan_debug_info (Elf_Internal_Shdr *section ATTRIBUTE_UNUSED,
-		    unsigned char *start,
+/* Pre-scan the .debug_info section to record the pointer sizes for the
+   compilation units.  Usually an executable will have just one pointer
+   size, but this is not guaranteed, and so we try not to make any
+   assumptions.  Returns zero upon failure, or the number of compilation
+   units upon success.  */
+
+static unsigned int
+prescan_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 		    FILE *file ATTRIBUTE_UNUSED)
 {
-  unsigned long length;
-
-  /* Read the first 4 bytes.  For a 32-bit DWARF section, this will
-     be the length.  For a 64-bit DWARF section, it'll be the escape
-     code 0xffffffff followed by an 8 byte length.  For the purposes
-     of this prescan, we don't care about the actual length, but the
-     presence of the escape bytes does affect the location of the byte
-     which describes the address size.  */
-  length = byte_get (start, 4);
-
-  if (length == 0xffffffff)
+  unsigned char *begin;
+  unsigned char *end = start + section->sh_size;
+  unsigned long  length;
+  unsigned int   num_units;
+  unsigned int   unit;
+    
+  /* First scan the section to compute the number of comp units.  */
+  for (begin = start, num_units = 0; begin < end; num_units++)
     {
-      /* For 64-bit DWARF, the 1-byte address_size field is 22 bytes
-         from the start of the section.  This is computed as follows:
+      /* Read the first 4 bytes.  For a 32-bit DWARF section, this will
+	 be the length.  For a 64-bit DWARF section, it'll be the escape
+	 code 0xffffffff followed by an 8 byte length.  */
+      length = byte_get (begin, 4);
 
-	    unit_length:         12 bytes
-	    version:              2 bytes
-	    debug_abbrev_offset:  8 bytes
-	    -----------------------------
-	    Total:               22 bytes  */
-
-      debug_line_pointer_size = byte_get (start + 22, 1);
+      if (length == 0xffffffff)
+	{
+	  length = byte_get (begin + 4, 8);
+	  begin += length + 12;
+	}
+      else
+	begin += length + 4;
     }
-  else
+
+  if (num_units == 0)
     {
-      /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
-         the start of the section:
-	    unit_length:          4 bytes
-	    version:              2 bytes
-	    debug_abbrev_offset:  4 bytes
-	    -----------------------------
-	    Total:               10 bytes  */
-
-      debug_line_pointer_size = byte_get (start + 10, 1);
+      error (_("No comp units in .debug_info section ?"));
+      return 0;
     }
-  return 0;
+
+  /* Then allocate an array to hold the pointer sizes.  */
+  debug_line_pointer_sizes = malloc (num_units * sizeof * debug_line_pointer_sizes);
+  if (debug_line_pointer_sizes == NULL)
+    {
+      error (_("Not enough memory for a pointer size array of %u entries"),
+	     num_units);
+      return 0;
+    }
+
+  /* Populate the array.  */
+  for (begin = start, unit = 0; begin < end; unit++)
+    {
+      length = byte_get (begin, 4);
+      if (length == 0xffffffff)
+	{
+	  /* For 64-bit DWARF, the 1-byte address_size field is 22 bytes
+	     from the start of the section.  This is computed as follows:
+
+	     unit_length:         12 bytes
+	     version:              2 bytes
+	     debug_abbrev_offset:  8 bytes
+	     -----------------------------
+	     Total:               22 bytes  */
+
+	  debug_line_pointer_sizes [unit] = byte_get (begin + 22, 1);
+	  length = byte_get (begin + 4, 8);
+	  begin += length + 12;
+	}
+      else
+	{
+	  /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
+	     the start of the section:
+	     
+	     unit_length:          4 bytes
+	     version:              2 bytes
+	     debug_abbrev_offset:  4 bytes
+	     -----------------------------
+	     Total:               10 bytes  */
+
+	  debug_line_pointer_sizes [unit] = byte_get (begin + 10, 1);
+	  begin += length + 4;
+	}
+    }
+
+  num_debug_line_pointer_sizes = num_units;
+  return num_units;
 }
 
-  /* A structure containing the name of a debug section and a pointer
-     to a function that can decode it.  The third field is a prescan
-     function to be run over the section before displaying any of the
-     sections.  */
+/* A structure containing the name of a debug section and a pointer
+   to a function that can decode it.  The third field is a prescan
+   function to be run over the section before displaying any of the
+   sections.  */
 struct
 {
   const char *const name;
