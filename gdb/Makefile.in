@@ -441,7 +441,11 @@ gdb.z:gdb.1
 	pack gdb.t ; rm -f gdb.t
 	mv gdb.t.z gdb.z
 	
-install: gdb 
+# Traditionally this depends on "all".  But it is probably more useful
+# not to; for example, if the user has made some trivial change to a 
+# source file and doesn't care about rebuilding or just wants to save the
+# time it takes for make to check that all is up to date.
+install:
 	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
@@ -621,6 +625,8 @@ depend: $(SOURCES) Makefile.in
 	  -e '/:.*\.tab\.c/d' \
 	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
 	  -e 's;$${srcdir}/xcoffread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/xcoffexec.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/paread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
 	  -e 's;$${srcdir}/stabsread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
 	  -e 's;$${srcdir}/dwarfread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
 	  -e 's;$${srcdir}/elfread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \

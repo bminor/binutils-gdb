@@ -1,5 +1,7 @@
 Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* Makefile.in (install): Don't depend on gdb.
+
 	* Rename remote-es1800.c to remote-es.c
 	and remote-st2000.c to remote-st.c for 14-char filenames.
 	config/m68k/{es1800,st2000}: Use the new names.
