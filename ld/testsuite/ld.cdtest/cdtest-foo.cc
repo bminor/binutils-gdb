@@ -18,6 +18,8 @@ extern "C" {
 
 #include "cdtest-foo.h"
 
+const Foo::len = FOO_MSG_LEN;
+
 int Foo::foos = 0;
 
 void Foo::init_foo ()
@@ -54,7 +56,7 @@ Foo::Foo (const Foo& foo)
 {
     i = ++foos;
 #ifdef WITH_ADDR
-    printf ("Initializing Foo(%d) \"%s\" at %08x with Foo(%d) %08x\n", 
+    printf ("Initializing Foo(%d) \"%s\" at %08x with Foo(%d) %08x\n",
 	    i, foo.message, this, foo.i, &foo);
 #else
    printf ("Initializing Foo(%d) \"%s\" with Foo(%d)\n",i, foo.message, foo.i);
@@ -66,7 +68,7 @@ Foo::Foo (const Foo& foo)
 Foo& Foo::operator= (const Foo& foo)
 {
 #ifdef WITH_ADDR
-    printf ("Copying Foo(%d) \"%s\" at %08x to Foo(%d) %08x\n", 
+    printf ("Copying Foo(%d) \"%s\" at %08x to Foo(%d) %08x\n",
 	    foo.i, foo.message, &foo, i, this);
 #else
    printf ("Copying Foo(%d) \"%s\" to Foo(%d)\n", foo.i, foo.message, i);

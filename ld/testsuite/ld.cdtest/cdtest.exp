@@ -21,6 +21,15 @@
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 #
 
+#
+# Bugs:
+# + Assumes native toolchain, not cross.
+# + Doesn't detect compilation failures (including lack of C++ compiler)
+#   cleanly.
+# + Shouldn't use fixed names in /tmp for temp files -- either use names
+#   in current directory, or generate unique names.
+#
+
 if $tracelevel then {
     strace $tracelevel
 }
@@ -68,10 +77,8 @@ foreach test [glob -nocomplain $srcdir/$subdir/*.dat] {
 	}
     }
     # remove generated targets
-    verbose "Exec exec rm -f $tmptarget.o $tmptarget.out"
-    catch "exec rm -f $tmptarget.o $tmptarget.out" result
-    verbose "Exec exec rm -f $tmptarget.grt $tmptarget"
-    catch "exec rm -f $tmptarget.grt $tmptarget" result
+    verbose "Exec exec rm -f $tmptarget.o $tmptarget.out $tmptarget $tmptarget.grt"
+    catch "exec rm -f $tmptarget.o $tmptarget.out $tmptarget.grt $tmptarget" result
 }
     
 # remove dependant objects	
