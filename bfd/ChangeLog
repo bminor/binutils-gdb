@@ -1,7 +1,11 @@
-2003-04-30  Nick Clifton  <nickc@redhat.com>
+2003-05-01  Alan Modra  <amodra@bigpond.net.au>
 
-	* elf32-h8300.c (elf32_h8_relax_section): Do not crash when
-	encountering relocs against the *ABS* section.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Test whether the
+	weakdef sym has already been adjusted before treating it specially.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Don't copy
+	ELF_LINK_NON_GOT_REF for weakdefs when symbol already adjusted.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	(ppc64_elf_check_relocs): Set ELF_LINK_NON_GOT_REF.
 
 2003-04-28  H.J. Lu <hjl@gnu.org>
 

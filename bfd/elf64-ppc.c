@@ -3272,6 +3272,7 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
   struct ppc_link_hash_entry *edir, *eind;
+  flagword mask;
 
   edir = (struct ppc_link_hash_entry *) dir;
   eind = (struct ppc_link_hash_entry *) ind;
@@ -3316,20 +3317,24 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
   edir->is_entry |= eind->is_entry;
   edir->tls_mask |= eind->tls_mask;
 
-  /* Copy down any references that we may have already seen to the
-     symbol which just became indirect.  */
-  edir->elf.elf_link_hash_flags |=
-    (eind->elf.elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-	| ELF_LINK_HASH_REF_REGULAR
-	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	| ELF_LINK_NON_GOT_REF));
+  mask = (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR
+	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF);
+  /* If called to transfer flags for a weakdef during processing
+     of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+  if (ELIMINATE_COPY_RELOCS
+      && eind->elf.root.type != bfd_link_hash_indirect
+      && (edir->elf.elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    mask &= ~ELF_LINK_NON_GOT_REF;
+
+  edir->elf.elf_link_hash_flags |= eind->elf.elf_link_hash_flags & mask;
 
   /* If we were called to copy over info for a weak sym, that's all.  */
   if (eind->elf.root.type != bfd_link_hash_indirect)
     return;
 
-  /* Copy over got entries.  */
+  /* Copy over got entries that we may have already seen to the
+     symbol which just became indirect.  */
   if (eind->elf.got.glist != NULL)
     {
       if (edir->elf.got.glist != NULL)
@@ -3877,6 +3882,10 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
+	  if (h != NULL && !info->shared)
+	    /* We may need a copy reloc.  */
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* Don't propagate .opd relocs.  */
 	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
