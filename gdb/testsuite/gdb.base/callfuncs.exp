@@ -189,17 +189,14 @@ proc do_function_calls {} {
     # and attempting a jump through that (a totally random address).
     setup_kfail "rs6000*-*-aix*" gdb/1457
     setup_kfail "powerpc*-*-aix*" gdb/1457
-    setup_kfail "powerpc64*-*-*" gdb/1457
     setup_kfail hppa*-*-hpux* gdb/1457
     gdb_test "p t_func_values(add,func_val2)" " = 1"
     setup_kfail "rs6000*-*-aix*" gdb/1457
     setup_kfail "powerpc*-*-aix*" gdb/1457
-    setup_kfail "powerpc64*-*-*" gdb/1457
     setup_kfail hppa*-*-hpux* gdb/1457
     gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
     setup_kfail "rs6000*-*-aix*" gdb/1457
     setup_kfail "powerpc*-*-aix*" gdb/1457
-    setup_kfail "powerpc64*-*-*" gdb/1457
     setup_kfail hppa*-*-hpux* gdb/1457
     gdb_test "p t_call_add(add,3,4)" " = 7"
     gdb_test "p t_call_add(func_val1,3,4)" " = 7"

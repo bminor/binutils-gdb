@@ -256,14 +256,12 @@ proc do_function_calls {} {
     # to avoid such problems in the common case.  This may or may not help
     # the RS6000.
     setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
 
     if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_func_values(add,func_val2)" " = 1"
     }
 
     setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
 
     if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
@@ -272,7 +270,6 @@ proc do_function_calls {} {
     gdb_test "p t_call_add(func_val1,3,4)" " = 7"
 
     setup_xfail "rs6000*-*-*"
-    setup_xfail "powerpc*-*-*"
 
     if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_call_add(add,3,4)" " = 7"

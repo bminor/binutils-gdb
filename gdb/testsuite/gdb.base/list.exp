@@ -235,7 +235,6 @@ proc test_list_function {} {
     # Test "list function" for C include file
     # Ultrix gdb is the second case, still correct.
     # SunPRO cc is the third case.
-    setup_xfail "powerpc-*-*"
     gdb_test "list foo" "(3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;|2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;|1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;)" "list function in include file"
 }
 
@@ -422,7 +421,6 @@ proc test_list_filename_and_function {} {
     # Ultrix gdb is the second case, one line different but still correct.
     # SunPRO cc is the third case.
     setup_xfail "rs6000-*-*" 1804
-    setup_xfail "powerpc-*-*" 1804
     setup_xfail_format "COFF"
     send_gdb "list list0.h:foo\n"
     gdb_expect {

@@ -1,3 +1,12 @@
+2005-01-19  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/scope.exp (test_at_main): Delete any XFAIL and/or KFAIL
+	of powerpc*-*-*.
+	* gdb.hp/gdb.base-hp/callfwmall.exp (do_function_calls): Ditto.
+	* gdb.base/list.exp (test_list_function) 
+	(test_list_filename_and_function): Ditto.
+	* gdb.base/callfuncs.exp (do_function_calls): Ditto.
+
 2005-01-16  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/source.exp: Delete KFAIL gdb/1846, simplify.

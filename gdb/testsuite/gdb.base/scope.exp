@@ -94,8 +94,7 @@ proc test_at_main {} {
 
     # Print scope0.c::filelocal_ro, which is 201
 
-    # No clue why the powerpc fails this test.
-    setup_xfail "powerpc-*-*"
+    # No clue why the rs6000 fails this test.
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
     if [gdb_test "print filelocal_ro" "\\\$$decimal = 201" "print filelocal_ro in test_at_main" ] { 
       gdb_suppress_tests ; 
@@ -103,7 +102,6 @@ proc test_at_main {} {
 
 
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
-    setup_xfail "powerpc-*-*"
     if [gdb_test "print 'scope0.c'::filelocal_ro" "\\\$$decimal = 201" "print 'scope0.c'::filelocal_ro"  "No symbol \"scope0.c\" in current context.*" "print '$srcdir/$subdir/scope0.c'::filelocal_ro"] { 
       gdb_suppress_tests ; 
     }
@@ -204,7 +202,6 @@ proc test_at_foo {} {
     # Print scope0.c::filelocal_ro, which is 201
 
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
-    setup_xfail "powerpc-*-*"
     if [gdb_test "print 'scope0.c'::filelocal_ro" "\\\$$decimal = 201" "print 'scope0.c'::filelocal_ro"  "No symbol \"scope0.c\" in current context.*" "print '$srcdir/$subdir/scope0.c'::filelocal_ro"] { 
       gdb_suppress_tests ; 
     }
@@ -309,7 +306,6 @@ proc test_at_bar {} {
    # Print scope0.c::filelocal_ro, which is 201
 
     if { [test_compiler_info gcc-*-*] } then { setup_xfail "rs6000-*-*" }
-    setup_xfail "powerpc-*-*"
     if [gdb_test "print 'scope0.c'::filelocal_ro" "\\\$$decimal = 201" "print 'scope0.c'::filelocal_ro at bar"  "No symbol \"scope0.c\" in current context.*" "print '$srcdir/$subdir/scope0.c'::filelocal_ro"] { 
       gdb_suppress_tests ; 
     }
@@ -540,7 +536,6 @@ if [istarget "*-*-vxworks*"] {
 
 # AIX--sections get mapped to the same address so we can't get the right one.
 setup_xfail "rs6000-*-*"
-setup_xfail "powerpc-*-*"
 
 gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 
