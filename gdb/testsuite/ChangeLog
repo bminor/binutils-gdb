@@ -1,5 +1,10 @@
 2003-05-16  David Carlton  <carlton@bactrian.org>
 
+	* gdb.c++/rtti.exp: Convert the gdb/488 kfail into a fail, and
+	delete the <.*BaseN> branches.
+	
+2003-05-16  David Carlton  <carlton@bactrian.org>
+
 	* carlton_runnamespace: Run gdb.c++/rtti.exp, too.
 	* carlton_runtest (FASTTESTS): Add gdb.c++/breakpoint.exp and
 	gdb.c++/rtti.exp.

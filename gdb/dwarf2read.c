@@ -316,13 +316,14 @@ struct attr_abbrev
 struct die_info
   {
     enum dwarf_tag tag;		/* Tag indicating type of die */
-    unsigned short has_children;	/* Does the die have children */
     unsigned int abbrev;	/* Abbrev number */
     unsigned int offset;	/* Offset in .debug_info section */
     unsigned int num_attrs;	/* Number of attributes */
     struct attribute *attrs;	/* An array of attributes */
     struct die_info *next_ref;	/* Next die in ref hash table */
-    struct die_info *next;	/* Next die in linked list */
+    struct die_info *child;	/* Its first child, if any.  */
+    struct die_info *sibling;	/* Its next sibling, if any.  */
+    struct die_info *parent;	/* Its parent, if any.  */
     struct type *type;		/* Cached type information */
   };
 
@@ -731,7 +732,7 @@ static char *read_partial_die (struct partial_die_info *,
 			       const struct comp_unit_head *);
 
 static char *read_full_die (struct die_info **, bfd *, char *,
-			    const struct comp_unit_head *);
+			    const struct comp_unit_head *, int *);
 
 static char *read_attribute (struct attribute *, struct attr_abbrev *,
 			     bfd *, char *, const struct comp_unit_head *);
@@ -813,6 +814,12 @@ static struct type *tag_type_to_type (struct die_info *, struct objfile *,
 static void read_type_die (struct die_info *, struct objfile *,
 			   const struct comp_unit_head *);
 
+static char *determine_prefix (struct die_info *die);
+
+static char *typename_concat (const char *prefix, const char *suffix);
+
+static char *class_name (struct die_info *die);
+
 static void read_typedef (struct die_info *, struct objfile *,
 			  const struct comp_unit_head *);
 
@@ -854,6 +861,9 @@ static void read_common_block (struct die_info *, struct objfile *,
 static void read_namespace (struct die_info *die, struct objfile *objfile,
 			    const struct comp_unit_head *cu_header);
 
+static const char *namespace_name (struct die_info *die,
+				   int *is_anonymous);
+
 static void read_enumeration (struct die_info *, struct objfile *,
 			      const struct comp_unit_head *);
 
@@ -887,6 +897,16 @@ static void read_subroutine_type (struct die_info *, struct objfile *,
 
 static struct die_info *read_comp_unit (char *, bfd *,
                                         const struct comp_unit_head *);
+
+static struct die_info *read_die_and_children (char *info_ptr, bfd *abfd,
+					       const struct comp_unit_head *,
+					       char **new_info_ptr,
+					       struct die_info *parent);
+
+static struct die_info *read_die_and_siblings (char *info_ptr, bfd *abfd,
+					       const struct comp_unit_head *,
+					       char **new_info_ptr,
+					       struct die_info *parent);
 
 static void free_die_list (struct die_info *);
 
@@ -1941,9 +1961,9 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
          the compilation unit.   If the DW_AT_high_pc is missing,
          synthesize it, by scanning the DIE's below the compilation unit.  */
       highpc = 0;
-      if (dies->has_children)
+      if (dies->child != NULL)
 	{
-	  child_die = dies->next;
+	  child_die = dies->child;
 	  while (child_die && child_die->tag)
 	    {
 	      if (child_die->tag == DW_TAG_subprogram)
@@ -2053,7 +2073,7 @@ process_die (struct die_info *die, struct objfile *objfile,
 	 Fortran case, so we'll have to replace this gdb_assert if
 	 Fortran compilers start generating that info.  */
       processing_has_namespace_info = 1;
-      gdb_assert (!die->has_children);
+      gdb_assert (die->child == NULL);
       break;
     default:
       new_symbol (die, NULL, objfile, cu_header);
@@ -2083,9 +2103,9 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
 
   if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile, cu_header))
     {
-      if (die->has_children)
+      if (die->child != NULL)
 	{
-	  child_die = die->next;
+	  child_die = die->child;
 	  while (child_die && child_die->tag)
 	    {
 	      if (child_die->tag == DW_TAG_subprogram)
@@ -2162,9 +2182,9 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   initialize_cu_func_list ();
 
   /* Process all dies in compilation unit.  */
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, objfile, cu_header);
@@ -2302,9 +2322,9 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
 
   list_in_scope = &local_symbols;
 
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, objfile, cu_header);
@@ -2352,9 +2372,9 @@ read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
   highpc += baseaddr;
 
   push_context (0, lowpc);
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, objfile, cu_header);
@@ -3043,7 +3063,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
      type within the structure itself. */
   die->type = type;
 
-  if (die->has_children && ! die_is_declaration (die))
+  if (die->child != NULL && ! die_is_declaration (die))
     {
       struct field_info fi;
       struct die_info *child_die;
@@ -3051,7 +3071,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 
       memset (&fi, 0, sizeof (struct field_info));
 
-      child_die = die->next;
+      child_die = die->child;
 
       while (child_die && child_die->tag)
 	{
@@ -3233,9 +3253,9 @@ read_enumeration (struct die_info *die, struct objfile *objfile,
 
   num_fields = 0;
   fields = NULL;
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  if (child_die->tag != DW_TAG_enumerator)
@@ -3314,7 +3334,7 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 
   /* Irix 6.2 native cc creates array types without children for
      arrays with unspecified length.  */
-  if (die->has_children == 0)
+  if (die->child == NULL)
     {
       index_type = dwarf2_fundamental_type (objfile, FT_INTEGER);
       range_type = create_range_type (NULL, index_type, 0, -1);
@@ -3323,7 +3343,7 @@ read_array_type (struct die_info *die, struct objfile *objfile,
     }
 
   back_to = make_cleanup (null_cleanup, NULL);
-  child_die = die->next;
+  child_die = die->child;
   while (child_die && child_die->tag)
     {
       if (child_die->tag == DW_TAG_subrange_type)
@@ -3469,9 +3489,9 @@ read_common_block (struct die_info *die, struct objfile *objfile,
 						 "common block member");
         }
     }
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  sym = new_symbol (child_die, NULL, objfile, cu_header);
@@ -3494,26 +3514,11 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 		const struct comp_unit_head *cu_header)
 {
   const char *previous_prefix = processing_current_prefix;
-  const char *name = NULL;
+  const char *name;
   int is_anonymous;
   struct die_info *current_die;
 
-  /* Loop through the extensions until we find a name.  */
-
-  for (current_die = die;
-       current_die != NULL;
-       current_die = dwarf2_extension (die))
-    {
-      name = dwarf2_name (current_die);
-      if (name != NULL)
-	break;
-    }
-
-  /* Is it an anonymous namespace?  */
-
-  is_anonymous = (name == NULL);
-  if (is_anonymous)
-    name = "(anonymous namespace)";
+  name = namespace_name (die, &is_anonymous);
 
   /* Now build the name of the current namespace.  */
 
@@ -3542,9 +3547,9 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 			    strlen (previous_prefix),
 			    strlen (processing_current_prefix));
   
-  if (die->has_children)
+  if (die->child != NULL)
     {
-      struct die_info *child_die = die->next;
+      struct die_info *child_die = die->child;
       
       while (child_die && child_die->tag)
 	{
@@ -3554,6 +3559,32 @@ read_namespace (struct die_info *die, struct objfile *objfile,
     }
 
   processing_current_prefix = previous_prefix;
+}
+
+static const char *
+namespace_name (struct die_info *die, int *is_anonymous)
+{
+  struct die_info *current_die;
+  const char *name = NULL;
+
+  /* Loop through the extensions until we find a name.  */
+
+  for (current_die = die;
+       current_die != NULL;
+       current_die = dwarf2_extension (die))
+    {
+      name = dwarf2_name (current_die);
+      if (name != NULL)
+	break;
+    }
+
+  /* Is it an anonymous namespace?  */
+
+  *is_anonymous = (name == NULL);
+  if (*is_anonymous)
+    name = "(anonymous namespace)";
+
+  return name;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to
@@ -3779,7 +3810,7 @@ read_subroutine_type (struct die_info *die, struct objfile *objfile,
       || cu_language == language_cplus)
     TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 
-  if (die->has_children)
+  if (die->child != NULL)
     {
       struct die_info *child_die;
       int nparams = 0;
@@ -3788,7 +3819,7 @@ read_subroutine_type (struct die_info *die, struct objfile *objfile,
       /* Count the number of parameters.
          FIXME: GDB currently ignores vararg functions, but knows about
          vararg member functions.  */
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  if (child_die->tag == DW_TAG_formal_parameter)
@@ -3803,7 +3834,7 @@ read_subroutine_type (struct die_info *die, struct objfile *objfile,
       TYPE_FIELDS (ftype) = (struct field *)
 	TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-      child_die = die->next;
+      child_die = die->child;
       while (child_die && child_die->tag)
 	{
 	  if (child_die->tag == DW_TAG_formal_parameter)
@@ -3935,46 +3966,82 @@ static struct die_info *
 read_comp_unit (char *info_ptr, bfd *abfd,
 		const struct comp_unit_head *cu_header)
 {
-  struct die_info *first_die, *last_die, *die;
-  char *cur_ptr;
-  int nesting_level;
-
   /* Reset die reference table; we are
      building new ones now.  */
   dwarf2_empty_hash_tables ();
 
-  cur_ptr = info_ptr;
-  nesting_level = 0;
-  first_die = last_die = NULL;
-  do
+  return read_die_and_children (info_ptr, abfd, cu_header, &info_ptr, NULL);
+}
+
+/* Read a single die and all its descendents.  */
+
+static struct die_info *
+read_die_and_children (char *info_ptr, bfd *abfd,
+		       const struct comp_unit_head *cu_header,
+		       char **new_info_ptr,
+		       struct die_info *parent)
+{
+  struct die_info *die;
+  char *cur_ptr;
+  int has_children;
+
+  cur_ptr = read_full_die (&die, abfd, info_ptr, cu_header, &has_children);
+  store_in_ref_table (die->offset, die);
+
+  if (has_children)
     {
-      cur_ptr = read_full_die (&die, abfd, cur_ptr, cu_header);
-      if (die->has_children)
-	{
-	  nesting_level++;
-	}
-      if (die->tag == 0)
-	{
-	  nesting_level--;
-	}
+      die->child = read_die_and_siblings (cur_ptr, abfd, cu_header,
+					  new_info_ptr, die);
+    }
+  else
+    {
+      die->child = NULL;
+      *new_info_ptr = cur_ptr;
+    }
 
-      die->next = NULL;
+  die->sibling = NULL;
+  die->parent = parent;
+  return die;
+}
 
-      /* Enter die in reference hash table */
-      store_in_ref_table (die->offset, die);
+/* Helper function for read_comp_unit; it reads in a die, all of its
+   descendents, and all of its siblings.  */
+
+static struct die_info *
+read_die_and_siblings (char *info_ptr, bfd *abfd,
+		       const struct comp_unit_head *cu_header,
+		       char **new_info_ptr,
+		       struct die_info *parent)
+{
+  struct die_info *first_die, *last_sibling, *die;
+  char *cur_ptr;
+
+  cur_ptr = info_ptr;
+  first_die = last_sibling = NULL;
+
+  while (1)
+    {
+      die = read_die_and_children (cur_ptr, abfd, cu_header, &cur_ptr, parent);
 
       if (!first_die)
 	{
-	  first_die = last_die = die;
+	  first_die = die;
 	}
       else
 	{
-	  last_die->next = die;
-	  last_die = die;
+	  last_sibling->sibling = die;
+	}
+
+      if (die->tag == 0)
+	{
+	  *new_info_ptr = cur_ptr;
+	  return first_die;
+	}
+      else
+	{
+	  last_sibling = die;
 	}
     }
-  while (nesting_level > 0);
-  return first_die;
 }
 
 /* Free a linked list of dies.  */
@@ -3987,7 +4054,9 @@ free_die_list (struct die_info *dies)
   die = dies;
   while (die)
     {
-      next = die->next;
+      if (die->child != NULL)
+	free_die_list (die->child);
+      next = die->sibling;
       xfree (die->attrs);
       xfree (die);
       die = next;
@@ -4301,12 +4370,13 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
   return info_ptr;
 }
 
-/* Read the die from the .debug_info section buffer.  And set diep to
-   point to a newly allocated die with its information.  */
+/* Read the die from the .debug_info section buffer.  Set DIEP to
+   point to a newly allocated die with its information, and set
+   HAS_CHILDREN to tell whether the die has children or not.  */
 
 static char *
 read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
-	       const struct comp_unit_head *cu_header)
+	       const struct comp_unit_head *cu_header, int *has_children)
 {
   unsigned int abbrev_number, bytes_read, i, offset;
   struct abbrev_info *abbrev;
@@ -4322,6 +4392,7 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
       die->abbrev = abbrev_number;
       die->type = NULL;
       *diep = die;
+      *has_children = 0;
       return info_ptr;
     }
 
@@ -4334,7 +4405,6 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
   die = dwarf_alloc_die ();
   die->offset = offset;
   die->tag = abbrev->tag;
-  die->has_children = abbrev->has_children;
   die->abbrev = abbrev_number;
   die->type = NULL;
 
@@ -4349,6 +4419,7 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
     }
 
   *diep = die;
+  *has_children = abbrev->has_children;
   return info_ptr;
 }
 
@@ -5869,6 +5940,11 @@ static void
 read_type_die (struct die_info *die, struct objfile *objfile,
 	       const struct comp_unit_head *cu_header)
 {
+  char *prefix = determine_prefix (die);
+  const char *old_prefix = processing_current_prefix;
+  struct cleanup *back_to = make_cleanup (xfree, prefix);
+  processing_current_prefix = prefix;
+  
   switch (die->tag)
     {
     case DW_TAG_class_type:
@@ -5915,7 +5991,99 @@ read_type_die (struct die_info *die, struct objfile *objfile,
 		 dwarf_tag_name (die->tag));
       break;
     }
+
+  processing_current_prefix = old_prefix;
+  do_cleanups (back_to);
 }
+
+/* Determine the name of the namespace/class that DIE is defined
+   within, or NULL if we can't tell.  The caller should xfree the
+   result.  */
+
+static char *
+determine_prefix (struct die_info *die)
+{
+  struct die_info *parent;
+
+  if (cu_language != language_cplus)
+    return NULL;
+
+  parent = die->parent;
+
+  if (parent == NULL)
+    {
+      return (processing_has_namespace_info ? xstrdup ("") : NULL);
+    }
+  else
+    {
+      char *parent_prefix = determine_prefix (parent);
+
+      switch (parent->tag) {
+      case DW_TAG_namespace:
+	{
+	  int dummy;
+
+	  return typename_concat (parent_prefix,
+				  namespace_name (parent, &dummy));
+	}
+      case DW_TAG_class_type:
+      case DW_TAG_structure_type:
+	{
+
+	  if (parent_prefix != NULL)
+	    return typename_concat (parent_prefix, dwarf2_name (parent));
+	  else
+	    return class_name (parent);
+	}
+      default:
+	return parent_prefix;
+      }
+    }
+}
+
+/* Return a newly-allocated string formed by concatenating PREFIX,
+   "::", and SUFFIX, except that if PREFIX is NULL or the empty
+   string, just return a copy of SUFFIX.  */
+
+static char *
+typename_concat (const char *prefix, const char *suffix)
+{
+  if (prefix == NULL || prefix[0] == '\0')
+    return xstrdup (suffix);
+  else
+    {
+      char *retval = xmalloc (strlen (prefix) + 2 + strlen (suffix) + 1);
+
+      strcpy (retval, prefix);
+      strcat (retval, "::");
+      strcat (retval, suffix);
+
+      return retval;
+    }
+}
+
+/* Return a newly-allocated string giving the name of the class given
+   by DIE.  */
+
+static char *
+class_name (struct die_info *die)
+{
+  struct die_info *child;
+  const char *name;
+
+  for (child = die->child; child != NULL; child = sibling_die (child))
+    {
+      if (child->tag == DW_TAG_subprogram)
+	return class_name_from_physname (dwarf2_linkage_name (child));
+    }
+
+  name = dwarf2_name (die);
+  if (name != NULL)
+    return xstrdup (name);
+  else
+    return xstrdup ("");
+}
+
 
 static struct type *
 dwarf_base_type (int encoding, int size, struct objfile *objfile)
@@ -6031,43 +6199,7 @@ copy_die (struct die_info *old_die)
 static struct die_info *
 sibling_die (struct die_info *die)
 {
-  int nesting_level = 0;
-
-  if (!die->has_children)
-    {
-      if (die->next && (die->next->tag == 0))
-	{
-	  return NULL;
-	}
-      else
-	{
-	  return die->next;
-	}
-    }
-  else
-    {
-      do
-	{
-	  if (die->has_children)
-	    {
-	      nesting_level++;
-	    }
-	  if (die->tag == 0)
-	    {
-	      nesting_level--;
-	    }
-	  die = die->next;
-	}
-      while (nesting_level);
-      if (die && (die->tag == 0))
-	{
-	  return NULL;
-	}
-      else
-	{
-	  return die;
-	}
-    }
+  return die->sibling;
 }
 
 /* Get linkage name of a die, return NULL if not found.  */
@@ -6936,7 +7068,7 @@ dump_die (struct die_info *die)
   fprintf_unfiltered (gdb_stderr, "Die: %s (abbrev = %d, offset = %d)\n",
 	   dwarf_tag_name (die->tag), die->abbrev, die->offset);
   fprintf_unfiltered (gdb_stderr, "\thas children: %s\n",
-	   dwarf_bool_name (die->has_children));
+	   dwarf_bool_name (die->child != NULL));
 
   fprintf_unfiltered (gdb_stderr, "\tattributes:\n");
   for (i = 0; i < die->num_attrs; ++i)
@@ -6999,7 +7131,10 @@ dump_die_list (struct die_info *die)
   while (die)
     {
       dump_die (die);
-      die = die->next;
+      if (die->child != NULL)
+	dump_die_list (die->child);
+      if (die->sibling != NULL)
+	dump_die_list (die->sibling);
     }
 }
 

@@ -1,3 +1,25 @@
+2003-05-16  David Carlton  <carlton@bactrian.org>
+
+	* dwarf2read.c (read_comp_unit): Separate code out into
+	read_die_and_children and read_die_and_siblings.
+	(read_die_and_children): New.
+	(read_die_and_siblings): New.
+	(read_full_die): Add HAS_CHILDREN argument.
+	struct die_info: Delete HAS_CHILDREN, NEXT members; add CHILD,
+	SIBLING, PARENT members.
+	(psymtab_to_symtab_1): Use new members of struct die_info.
+	(process_die, read_file_scope, read_func_scope)
+	(read_lexical_block_scope, read_structure_scope, read_enumeration)
+	(read_array_type, read_common_block, read_namespace) 
+	(read_subroutine_type, read_die_and_children, free_die_list)
+	(dump_die, dump_die_list): Ditto.
+	(read_namespace): Separate code out into namespace_name.
+	(namespace_name): New.
+	(typename_concat): New.
+	(determine_prefix): New.
+	(read_type_die): Set prefix appropriately.
+	(class_name): New.
+
 2003-05-09  David Carlton  <carlton@bactrian.org>
 
 	* linespec.c (examine_compound_token): Handled classes nested
