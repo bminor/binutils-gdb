@@ -1,3 +1,8 @@
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel19.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2004-01-11 Tom Rix   <tcrix@worldnet.att.net>
 
 	* gas/m68hc11/movb.s: Add m68hc12 movb and movw dump test.

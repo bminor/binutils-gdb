@@ -1,5 +1,40 @@
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.h (tc_frag_data_type, TC_FRAG_TYPE): Remove.
+	* config/tc-mips.c (RELAX_ENCODE): Take three arguments: the size of
+	the first sequence, the size of the second sequence, and a flag
+	that says whether we should warn.
+	(RELAX_OLD, RELAX_NEW, RELAX_RELOC[123]): Delete.
+	(RELAX_FIRST, RELAX_SECOND): New.
+	(mips_relax): New variable.
+	(relax_close_frag, relax_start, relax_switch, relax_end): New fns.
+	(append_insn): Remove "place" argument.  Use mips_relax.sequence
+	rather than "place" to check whether we're expanding the second
+	alternative of a relaxable macro.  Remove redundant check for
+	branch relaxation.  If generating a normal insn, and there
+	is not enough room in the current frag, call relax_close_frag()
+	to close it.  Update mips_relax.sizes[].  Emit fixups for the
+	second version of a relaxable macro.  Record the first relaxable
+	fixup in mips_relax.  Remove tc_gen_reloc workaround.
+	(macro_build): Remove all uses of "place".  Use mips_relax.sequence
+	in the same way as in append_insn.
+	(mips16_macro_build): Remove "place" argument.
+	(macro_build_lui): As for macro_build.  Don't drop the add_symbol
+	when generating the second version of a relaxable macro.
+	(load_got_offset, add_got_offset): New functions.
+	(load_address, macro): Use new relaxation machinery.  Remove
+	tc_gen_reloc workarounds.
+	(md_estimate_size_before_relax): Set RELAX_USE_SECOND if the second
+	version of a relaxable macro is needed.  Return -RELAX_SECOND if the
+	first version is needed.
+	(tc_gen_reloc): Remove relaxation handling.
+	(md_convert_frag): Go through the fixups for a relaxable macro and
+	mark those that belong to the unneeded alternative as done.  If the
+	second alternative is needed, adjust the fixup addresses to account
+	for the deleted first alternative.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
 	* frags.h (frag_room): Declare.
 	* frags.c (frag_room): New function.
 	* doc/internals.texi: Document it.

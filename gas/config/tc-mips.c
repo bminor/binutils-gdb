@@ -616,81 +616,47 @@ static int mips_fix_4122_bugs;
 
 static int mips_relax_branch;
 
-/* Since the MIPS does not have multiple forms of PC relative
-   instructions, we do not have to do relaxing as is done on other
-   platforms.  However, we do have to handle GP relative addressing
-   correctly, which turns out to be a similar problem.
+/* The expansion of many macros depends on the type of symbol that
+   they refer to.  For example, when generating position-dependent code,
+   a macro that refers to a symbol may have two different expansions,
+   one which uses GP-relative addresses and one which uses absolute
+   addresses.  When generating SVR4-style PIC, a macro may have
+   different expansions for local and global symbols.
 
-   Every macro that refers to a symbol can occur in (at least) two
-   forms, one with GP relative addressing and one without.  For
-   example, loading a global variable into a register generally uses
-   a macro instruction like this:
-     lw $4,i
-   If i can be addressed off the GP register (this is true if it is in
-   the .sbss or .sdata section, or if it is known to be smaller than
-   the -G argument) this will generate the following instruction:
-     lw $4,i($gp)
-   This instruction will use a GPREL reloc.  If i can not be addressed
-   off the GP register, the following instruction sequence will be used:
-     lui $at,i
-     lw $4,i($at)
-   In this case the first instruction will have a HI16 reloc, and the
-   second reloc will have a LO16 reloc.  Both relocs will be against
-   the symbol i.
+   We handle these situations by generating both sequences and putting
+   them in variant frags.  In position-dependent code, the first sequence
+   will be the GP-relative one and the second sequence will be the
+   absolute one.  In SVR4 PIC, the first sequence will be for global
+   symbols and the second will be for local symbols.
 
-   The issue here is that we may not know whether i is GP addressable
-   until after we see the instruction that uses it.  Therefore, we
-   want to be able to choose the final instruction sequence only at
-   the end of the assembly.  This is similar to the way other
-   platforms choose the size of a PC relative instruction only at the
-   end of assembly.
+   The frag's "subtype" is RELAX_ENCODE (FIRST, SECOND, WARN), where
+   FIRST and SECOND are the lengths of the two sequences in bytes
+   and WARN is true if ".set nomacro" was in effect when the macro
+   was expanded.  These fields can be extracted using RELAX_FIRST(),
+   RELAX_SECOND() and RELAX_WARN().
 
-   When generating position independent code we do not use GP
-   addressing in quite the same way, but the issue still arises as
-   external symbols and local symbols must be handled differently.
+   In addition, the RELAX_USE_SECOND flag is set if it has been decided
+   that we should use the second sequence instead of the first.
 
-   We handle these issues by actually generating both possible
-   instruction sequences.  The longer one is put in a frag_var with
-   type rs_machine_dependent.  We encode what to do with the frag in
-   the subtype field.  We encode (1) the number of existing bytes to
-   replace, (2) the number of new bytes to use, (3) the offset from
-   the start of the existing bytes to the first reloc we must generate
-   (that is, the offset is applied from the start of the existing
-   bytes after they are replaced by the new bytes, if any), (4) the
-   offset from the start of the existing bytes to the second reloc,
-   (5) whether a third reloc is needed (the third reloc is always four
-   bytes after the second reloc), and (6) whether to warn if this
-   variant is used (this is sometimes needed if .set nomacro or .set
-   noat is in effect).  All these numbers are reasonably small.
+   The frag's "opcode" points to the first fixup for relaxable code.
 
-   Generating two instruction sequences must be handled carefully to
-   ensure that delay slots are handled correctly.  Fortunately, there
-   are a limited number of cases.  When the second instruction
-   sequence is generated, append_insn is directed to maintain the
-   existing delay slot information, so it continues to apply to any
-   code after the second instruction sequence.  This means that the
-   second instruction sequence must not impose any requirements not
-   required by the first instruction sequence.
+   Relaxable macros are generated using a sequence such as:
 
-   These variant frags are then handled in functions called by the
-   machine independent code.  md_estimate_size_before_relax returns
-   the final size of the frag.  md_convert_frag sets up the final form
-   of the frag.  tc_gen_reloc adjust the first reloc and adds a second
-   one if needed.  */
-#define RELAX_ENCODE(old, new, reloc1, reloc2, reloc3, warn) \
-  ((relax_substateT) \
-   (((old) << 23) \
-    | ((new) << 16) \
-    | (((reloc1) + 64) << 9) \
-    | (((reloc2) + 64) << 2) \
-    | ((reloc3) ? (1 << 1) : 0) \
-    | ((warn) ? 1 : 0)))
-#define RELAX_OLD(i) (((i) >> 23) & 0x7f)
-#define RELAX_NEW(i) (((i) >> 16) & 0x7f)
-#define RELAX_RELOC1(i) ((valueT) (((i) >> 9) & 0x7f) - 64)
-#define RELAX_RELOC2(i) ((valueT) (((i) >> 2) & 0x7f) - 64)
-#define RELAX_RELOC3(i) (((i) >> 1) & 1)
-#define RELAX_WARN(i) ((i) & 1)
+      relax_start (SYMBOL);
+      ... generate first expansion ...
+      relax_switch ();
+      ... generate second expansion ...
+      relax_end ();
+
+   The code and fixups for the unwanted alternative are discarded
+   by md_convert_frag.  */
+#define RELAX_ENCODE(FIRST, SECOND, WARN) \
+  (((FIRST) << 8) | ((SECOND) << 1) | ((WARN) != 0))
+
+#define RELAX_FIRST(X) (((X) >> 8) & 0x7f)
+#define RELAX_SECOND(X) (((X) >> 1) & 0x7f)
+#define RELAX_WARN(X) ((X) & 1)
+#define RELAX_USE_SECOND 0x8000
 
 /* Branch without likely bit.  If label is out of range, we turn:
 
@@ -823,6 +789,27 @@ static int mips_relax_branch;
    || (((x) &~ (offsetT) 0x7fff) == ~ (offsetT) 0x7fff))
 
 
+/* Global variables used when generating relaxable macros.  See the
+   comment above RELAX_ENCODE for more details about how relaxation
+   is used.  */
+static struct {
+  /* 0 if we're not emitting a relaxable macro.
+     1 if we're emitting the first of the two relaxation alternatives.
+     2 if we're emitting the second alternative.  */
+  int sequence;
+
+  /* The first relaxable fixup in the current frag.  (In other words,
+     the first fixup that refers to relaxable code.)  */
+  fixS *first_fixup;
+
+  /* sizes[0] says how many bytes of the first alternative are stored in
+     the current frag.  Likewise sizes[1] for the second alternative.  */
+  unsigned int sizes[2];
+
+  /* The symbol on which the choice of sequence depends.  */
+  symbolS *symbol;
+} mips_relax;
+
 /* Prototypes for static functions.  */
 
 #define internalError()							\
@@ -831,11 +818,10 @@ static int mips_relax_branch;
 enum mips_regclass { MIPS_GR_REG, MIPS_FP_REG, MIPS16_REG };
 
 static void append_insn
-  (char *place, struct mips_cl_insn *ip, expressionS *p,
-   bfd_reloc_code_real_type *r);
+  (struct mips_cl_insn *ip, expressionS *p, bfd_reloc_code_real_type *r);
 static void mips_no_prev_insn (int);
 static void mips16_macro_build
-  (char *, int *, expressionS *, const char *, const char *, va_list);
+  (int *, expressionS *, const char *, const char *, va_list);
 static void load_register (int *, int, expressionS *, int);
 static void macro (struct mips_cl_insn * ip);
 static void mips16_macro (struct mips_cl_insn * ip);
@@ -1362,11 +1348,11 @@ md_assemble (char *str)
   else
     {
       if (imm_expr.X_op != O_absent)
-	append_insn (NULL, &insn, &imm_expr, imm_reloc);
+	append_insn (&insn, &imm_expr, imm_reloc);
       else if (offset_expr.X_op != O_absent)
-	append_insn (NULL, &insn, &offset_expr, offset_reloc);
+	append_insn (&insn, &offset_expr, offset_reloc);
       else
-	append_insn (NULL, &insn, NULL, unused_reloc);
+	append_insn (&insn, NULL, unused_reloc);
     }
 }
 
@@ -1526,13 +1512,59 @@ mips16_mark_labels (void)
     }
 }
 
-/* Output an instruction.  PLACE is where to put the instruction; if
-   it is NULL, this uses frag_more to get room.  IP is the instruction
-   information.  ADDRESS_EXPR is an operand of the instruction to be
-   used with RELOC_TYPE.  */
+/* End the current frag.  Make it a variant frag and record the
+   relaxation info.  */
 
 static void
-append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
+relax_close_frag (void)
+{
+  frag_var (rs_machine_dependent, 0, 0,
+	    RELAX_ENCODE (mips_relax.sizes[0],
+			  mips_relax.sizes[1],
+			  mips_opts.warn_about_macros),
+	    mips_relax.symbol, 0, (char *) mips_relax.first_fixup);
+
+  memset (&mips_relax.sizes, 0, sizeof (mips_relax.sizes));
+  mips_relax.first_fixup = 0;
+}
+
+/* Start a new relaxation sequence whose expansion depends on SYMBOL.
+   See the comment above RELAX_ENCODE for more details.  */
+
+static void
+relax_start (symbolS *symbol)
+{
+  assert (mips_relax.sequence == 0);
+  mips_relax.sequence = 1;
+  mips_relax.symbol = symbol;
+}
+
+/* Start generating the second version of a relaxable sequence.
+   See the comment above RELAX_ENCODE for more details.  */
+
+static void
+relax_switch (void)
+{
+  assert (mips_relax.sequence == 1);
+  mips_relax.sequence = 2;
+}
+
+/* End the current relaxable sequence.  */
+
+static void
+relax_end (void)
+{
+  assert (mips_relax.sequence == 2);
+  relax_close_frag ();
+  mips_relax.sequence = 0;
+}
+
+/* Output an instruction.  IP is the instruction information.
+   ADDRESS_EXPR is an operand of the instruction to be used with
+   RELOC_TYPE.  */
+
+static void
+append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
   register unsigned long prev_pinfo, pinfo;
@@ -1549,7 +1581,8 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
-  if (place == NULL && (! mips_opts.noreorder || prev_nop_frag != NULL))
+  if (mips_relax.sequence != 2
+      && (!mips_opts.noreorder || prev_nop_frag != NULL))
     {
       int prev_prev_nop;
 
@@ -1925,8 +1958,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
   if (prev_insn_frag)
     prev_insn_frag_type = prev_insn_frag->fr_type;
 
-  if (place == NULL
-      && address_expr
+  if (address_expr
       && *reloc_type == BFD_RELOC_16_PCREL_S2
       && (pinfo & INSN_UNCOND_BRANCH_DELAY || pinfo & INSN_COND_BRANCH_DELAY
 	  || pinfo & INSN_COND_BRANCH_LIKELY)
@@ -1967,8 +1999,6 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 					  == BFD_RELOC_MIPS16_JMP)),
 		    make_expr_symbol (address_expr), 0, NULL);
     }
-  else if (place != NULL)
-    f = place;
   else if (mips_opts.mips16
 	   && ! ip->use_extend
 	   && *reloc_type != BFD_RELOC_MIPS16_JMP)
@@ -1984,6 +2014,16 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	  && mips_opts.noreorder
 	  && (prev_pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
 	as_warn (_("extended instruction in delay slot"));
+
+      if (mips_relax.sequence)
+	{
+	  /* If we've reached the end of this frag, turn it into a variant
+	     frag and record the information for the instructions we've
+	     written so far.  */
+	  if (frag_room () < 4)
+	    relax_close_frag ();
+	  mips_relax.sizes[mips_relax.sequence - 1] += 4;
+	}
 
       f = frag_more (4);
     }
@@ -2058,84 +2098,85 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	    }
 	}
       else
-	{
 	need_reloc:
-	  /* Don't generate a reloc if we are writing into a variant frag.  */
-	  if (place == NULL)
+	{
+	  reloc_howto_type *howto;
+	  int i;
+
+	  /* In a compound relocation, it is the final (outermost)
+	     operator that determines the relocated field.  */
+	  for (i = 1; i < 3; i++)
+	    if (reloc_type[i] == BFD_RELOC_UNUSED)
+	      break;
+
+	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
+	  fixp[0] = fix_new_exp (frag_now, f - frag_now->fr_literal,
+				 bfd_get_reloc_size(howto),
+				 address_expr,
+				 reloc_type[0] == BFD_RELOC_16_PCREL_S2,
+				 reloc_type[0]);
+
+	  /* These relocations can have an addend that won't fit in
+	     4 octets for 64bit assembly.  */
+	  if (HAVE_64BIT_GPRS
+	      && ! howto->partial_inplace
+	      && (reloc_type[0] == BFD_RELOC_16
+		  || reloc_type[0] == BFD_RELOC_32
+		  || reloc_type[0] == BFD_RELOC_MIPS_JMP
+		  || reloc_type[0] == BFD_RELOC_HI16_S
+		  || reloc_type[0] == BFD_RELOC_LO16
+		  || reloc_type[0] == BFD_RELOC_GPREL16
+		  || reloc_type[0] == BFD_RELOC_MIPS_LITERAL
+		  || reloc_type[0] == BFD_RELOC_GPREL32
+		  || reloc_type[0] == BFD_RELOC_64
+		  || reloc_type[0] == BFD_RELOC_CTOR
+		  || reloc_type[0] == BFD_RELOC_MIPS_SUB
+		  || reloc_type[0] == BFD_RELOC_MIPS_HIGHEST
+		  || reloc_type[0] == BFD_RELOC_MIPS_HIGHER
+		  || reloc_type[0] == BFD_RELOC_MIPS_SCN_DISP
+		  || reloc_type[0] == BFD_RELOC_MIPS_REL16
+		  || reloc_type[0] == BFD_RELOC_MIPS_RELGOT))
+	    fixp[0]->fx_no_overflow = 1;
+
+	  if (mips_relax.sequence)
 	    {
-	      reloc_howto_type *howto;
-	      int i;
-
-	      /* In a compound relocation, it is the final (outermost)
-		 operator that determines the relocated field.  */
-	      for (i = 1; i < 3; i++)
-		if (reloc_type[i] == BFD_RELOC_UNUSED)
-		  break;
-
-	      howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
-	      fixp[0] = fix_new_exp (frag_now, f - frag_now->fr_literal,
-				     bfd_get_reloc_size(howto),
-				     address_expr,
-				     reloc_type[0] == BFD_RELOC_16_PCREL_S2,
-				     reloc_type[0]);
-
-	      /* These relocations can have an addend that won't fit in
-	         4 octets for 64bit assembly.  */
-	      if (HAVE_64BIT_GPRS
-		  && ! howto->partial_inplace
-		  && (reloc_type[0] == BFD_RELOC_16
-		      || reloc_type[0] == BFD_RELOC_32
-		      || reloc_type[0] == BFD_RELOC_MIPS_JMP
-		      || reloc_type[0] == BFD_RELOC_HI16_S
-		      || reloc_type[0] == BFD_RELOC_LO16
-		      || reloc_type[0] == BFD_RELOC_GPREL16
-		      || reloc_type[0] == BFD_RELOC_MIPS_LITERAL
-		      || reloc_type[0] == BFD_RELOC_GPREL32
-		      || reloc_type[0] == BFD_RELOC_64
-		      || reloc_type[0] == BFD_RELOC_CTOR
-		      || reloc_type[0] == BFD_RELOC_MIPS_SUB
-		      || reloc_type[0] == BFD_RELOC_MIPS_HIGHEST
-		      || reloc_type[0] == BFD_RELOC_MIPS_HIGHER
-		      || reloc_type[0] == BFD_RELOC_MIPS_SCN_DISP
-		      || reloc_type[0] == BFD_RELOC_MIPS_REL16
-		      || reloc_type[0] == BFD_RELOC_MIPS_RELGOT))
-		fixp[0]->fx_no_overflow = 1;
-
-	      if (reloc_needs_lo_p (*reloc_type))
-		{
-		  struct mips_hi_fixup *hi_fixup;
-
-		  /* Reuse the last entry if it already has a matching %lo.  */
-		  hi_fixup = mips_hi_fixup_list;
-		  if (hi_fixup == 0
-		      || !fixup_has_matching_lo_p (hi_fixup->fixp))
-		    {
-		      hi_fixup = ((struct mips_hi_fixup *)
-				  xmalloc (sizeof (struct mips_hi_fixup)));
-		      hi_fixup->next = mips_hi_fixup_list;
-		      mips_hi_fixup_list = hi_fixup;
-		    }
-		  hi_fixup->fixp = fixp[0];
-		  hi_fixup->seg = now_seg;
-		}
-
-	      /* Add fixups for the second and third relocations, if given.
-		 Note that the ABI allows the second relocation to be
-		 against RSS_UNDEF, RSS_GP, RSS_GP0 or RSS_LOC.  At the
-		 moment we only use RSS_UNDEF, but we could add support
-		 for the others if it ever becomes necessary.  */
-	      for (i = 1; i < 3; i++)
-		if (reloc_type[i] != BFD_RELOC_UNUSED)
-		  {
-		    address_expr->X_op = O_absent;
-		    address_expr->X_add_symbol = 0;
-		    address_expr->X_add_number = 0;
-
-		    fixp[i] = fix_new_exp (frag_now, fixp[0]->fx_where,
-					   fixp[0]->fx_size, address_expr,
-					   FALSE, reloc_type[i]);
-		  }
+	      if (mips_relax.first_fixup == 0)
+		mips_relax.first_fixup = fixp[0];
 	    }
+	  else if (reloc_needs_lo_p (*reloc_type))
+	    {
+	      struct mips_hi_fixup *hi_fixup;
+
+	      /* Reuse the last entry if it already has a matching %lo.  */
+	      hi_fixup = mips_hi_fixup_list;
+	      if (hi_fixup == 0
+		  || !fixup_has_matching_lo_p (hi_fixup->fixp))
+		{
+		  hi_fixup = ((struct mips_hi_fixup *)
+			      xmalloc (sizeof (struct mips_hi_fixup)));
+		  hi_fixup->next = mips_hi_fixup_list;
+		  mips_hi_fixup_list = hi_fixup;
+		}
+	      hi_fixup->fixp = fixp[0];
+	      hi_fixup->seg = now_seg;
+	    }
+
+	  /* Add fixups for the second and third relocations, if given.
+	     Note that the ABI allows the second relocation to be
+	     against RSS_UNDEF, RSS_GP, RSS_GP0 or RSS_LOC.  At the
+	     moment we only use RSS_UNDEF, but we could add support
+	     for the others if it ever becomes necessary.  */
+	  for (i = 1; i < 3; i++)
+	    if (reloc_type[i] != BFD_RELOC_UNUSED)
+	      {
+		address_expr->X_op = O_absent;
+		address_expr->X_add_symbol = 0;
+		address_expr->X_add_number = 0;
+
+		fixp[i] = fix_new_exp (frag_now, fixp[0]->fx_where,
+				       fixp[0]->fx_size, address_expr,
+				       FALSE, reloc_type[i]);
+	      }
 	}
     }
 
@@ -2223,7 +2264,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 			      & MIPS16OP_MASK_REGR32);
     }
 
-  if (place == NULL && ! mips_opts.noreorder)
+  if (mips_relax.sequence != 2 && !mips_opts.noreorder)
     {
       /* Filling the branch delay slot is more complex.  We try to
 	 switch the branch with the previous instruction, which we can
@@ -2647,7 +2688,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_valid = 1;
     }
-  else if (place == NULL)
+  else if (mips_relax.sequence != 2)
     {
       /* We need to record a bit of information even when we are not
          reordering, in order to determine the base address for mips16
@@ -2663,15 +2704,6 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 
   /* We just output an insn, so the next one doesn't have a label.  */
   mips_clear_insn_labels ();
-
-  /* We must ensure that the frag to which an instruction that was
-     moved from a non-variant frag doesn't become a variant frag,
-     otherwise tc_gen_reloc may get confused.  */
-  if (force_new_frag)
-    {
-      frag_wane (frag_now);
-      frag_new (0);
-    }
 }
 
 /* This function forgets that there was any previous instruction or
@@ -2825,8 +2857,8 @@ mips_emit_delays (bfd_boolean insns)
    string, and corresponding arguments.  */
 
 static void
-macro_build (char *place, int *counter, expressionS *ep, const char *name,
-	     const char *fmt, ...)
+macro_build (char *place ATTRIBUTE_UNUSED, int *counter,
+	     expressionS *ep, const char *name, const char *fmt, ...)
 {
   struct mips_cl_insn insn;
   bfd_reloc_code_real_type r[3];
@@ -2834,32 +2866,31 @@ macro_build (char *place, int *counter, expressionS *ep, const char *name,
 
   va_start (args, fmt);
 
-  /*
-   * If the macro is about to expand into a second instruction,
-   * print a warning if needed. We need to pass ip as a parameter
-   * to generate a better warning message here...
-   */
-  if (mips_opts.warn_about_macros && place == NULL && *counter == 1)
-    as_warn (_("Macro instruction expanded into multiple instructions"));
+  if (mips_relax.sequence != 2)
+    {
+      if (*counter == 1)
+	{
+	  /* If the macro is about to expand into a second instruction,
+	     and it is in a delay slot, print a warning.  */
+	  if (mips_opts.noreorder
+	      && (prev_prev_insn.insn_mo->pinfo
+		  & (INSN_UNCOND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_LIKELY)) != 0)
+	    as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
 
-  /*
-   * If the macro is about to expand into a second instruction,
-   * and it is in a delay slot, print a warning.
-   */
-  if (place == NULL
-      && *counter == 1
-      && mips_opts.noreorder
-      && (prev_prev_insn.insn_mo->pinfo
-	  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY
-	     | INSN_COND_BRANCH_LIKELY)) != 0)
-    as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
-
-  if (place == NULL)
-    ++*counter;		/* bump instruction counter */
+	  /* If the macro is about to expand into a second instruction,
+	     print a warning if needed. We need to pass ip as a parameter
+	     to generate a better warning message here...  */
+	  else if (mips_opts.warn_about_macros)
+	    as_warn (_("Macro instruction expanded into multiple instructions"));
+	}
+      ++*counter;
+    }
 
   if (mips_opts.mips16)
     {
-      mips16_macro_build (place, counter, ep, name, fmt, args);
+      mips16_macro_build (counter, ep, name, fmt, args);
       va_end (args);
       return;
     }
@@ -3073,11 +3104,11 @@ macro_build (char *place, int *counter, expressionS *ep, const char *name,
   va_end (args);
   assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
-  append_insn (place, &insn, ep, r);
+  append_insn (&insn, ep, r);
 }
 
 static void
-mips16_macro_build (char *place, int *counter ATTRIBUTE_UNUSED,
+mips16_macro_build (int *counter ATTRIBUTE_UNUSED,
 		    expressionS *ep, const char *name, const char *fmt,
 		    va_list args)
 {
@@ -3195,7 +3226,7 @@ mips16_macro_build (char *place, int *counter ATTRIBUTE_UNUSED,
 
   assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
-  append_insn (place, &insn, ep, r);
+  append_insn (&insn, ep, r);
 }
 
 /*
@@ -3222,7 +3253,8 @@ macro_build_jalr (int icnt, expressionS *ep)
  * Generate a "lui" instruction.
  */
 static void
-macro_build_lui (char *place, int *counter, expressionS *ep, int regnum)
+macro_build_lui (char *place ATTRIBUTE_UNUSED, int *counter,
+		 expressionS *ep, int regnum)
 {
   expressionS high_expr;
   struct mips_cl_insn insn;
@@ -3233,12 +3265,15 @@ macro_build_lui (char *place, int *counter, expressionS *ep, int regnum)
 
   assert (! mips_opts.mips16);
 
-  if (place == NULL)
-    high_expr = *ep;
-  else
+  high_expr = *ep;
+  if (mips_relax.sequence != 2)
     {
-      high_expr.X_op = O_constant;
-      high_expr.X_add_number = ep->X_add_number;
+      /* If the macro is about to expand into a second instruction,
+	 print a warning if needed. We need to pass ip as a parameter
+	 to generate a better warning message here...  */
+      if (mips_opts.warn_about_macros && *counter == 1)
+	as_warn (_("Macro instruction expanded into multiple instructions"));
+      ++*counter;
     }
 
   if (high_expr.X_op == O_constant)
@@ -3258,17 +3293,6 @@ macro_build_lui (char *place, int *counter, expressionS *ep, int regnum)
       *r = BFD_RELOC_HI16_S;
     }
 
-  /*
-   * If the macro is about to expand into a second instruction,
-   * print a warning if needed. We need to pass ip as a parameter
-   * to generate a better warning message here...
-   */
-  if (mips_opts.warn_about_macros && place == NULL && *counter == 1)
-    as_warn (_("Macro instruction expanded into multiple instructions"));
-
-  if (place == NULL)
-    ++*counter;		/* bump instruction counter */
-
   insn.insn_mo = (struct mips_opcode *) hash_find (op_hash, name);
   assert (insn.insn_mo);
   assert (strcmp (name, insn.insn_mo->name) == 0);
@@ -3278,10 +3302,10 @@ macro_build_lui (char *place, int *counter, expressionS *ep, int regnum)
   if (*r == BFD_RELOC_UNUSED)
     {
       insn.insn_opcode |= high_expr.X_add_number;
-      append_insn (place, &insn, NULL, r);
+      append_insn (&insn, NULL, r);
     }
   else
-    append_insn (place, &insn, &high_expr, r);
+    append_insn (&insn, &high_expr, r);
 }
 
 /* Generate a sequence of instructions to do a load or store from a constant
@@ -3792,19 +3816,16 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
 	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
 	      && ! nopic_need_relax (ep->X_add_symbol, 1))
 	    {
-	      frag_grow (20);
+	      relax_start (ep->X_add_symbol);
 	      macro_build (NULL, counter, ep, ADDRESS_ADDI_INSN, "t,r,j", reg,
 			   mips_gp_register, BFD_RELOC_GPREL16);
-	      p = frag_var (rs_machine_dependent, 8, 0,
-			    RELAX_ENCODE (4, 8, 0, 4, 0,
-					  mips_opts.warn_about_macros),
-			    ep->X_add_symbol, 0, NULL);
+	      relax_switch ();
 	    }
 	  macro_build_lui (p, counter, ep, reg);
-	  if (p != NULL)
-	    p += 4;
 	  macro_build (p, counter, ep, ADDRESS_ADDI_INSN, "t,r,j", reg, reg,
 		       BFD_RELOC_LO16);
+	  if (mips_relax.sequence)
+	    relax_end ();
 	}
     }
   else if (mips_pic == SVR4_PIC && ! mips_big_got)
@@ -3825,13 +3846,11 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
          offset, in which case cst must be added separately.  */
       if (HAVE_NEWABI)
 	{
-	  frag_grow (12);
-
 	  if (ep->X_add_number)
 	    {
-	      frag_now->tc_frag_data.tc_fr_offset =
-		ex.X_add_number = ep->X_add_number;
+	      ex.X_add_number = ep->X_add_number;
 	      ep->X_add_number = 0;
+	      relax_start (ep->X_add_symbol);
 	      macro_build (NULL, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)",
 			   reg, BFD_RELOC_MIPS_GOT_DISP, mips_gp_register);
 	      if (ex.X_add_number < -0x8000 || ex.X_add_number >= 0x8000)
@@ -3839,38 +3858,27 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
 	      ex.X_op = O_constant;
 	      macro_build (NULL, counter, &ex, ADDRESS_ADDI_INSN, "t,r,j",
 			   reg, reg, BFD_RELOC_LO16);
-	      p = frag_var (rs_machine_dependent, 8, 0,
-			    RELAX_ENCODE (8, 4, 0, 0, 0,
-					  mips_opts.warn_about_macros),
-			    ep->X_add_symbol, 0, NULL);
 	      ep->X_add_number = ex.X_add_number;
+	      relax_switch ();
 	    }
-
 	  macro_build (p, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT_DISP, mips_gp_register);
-
-	  if (! p)
-	    {
-	      /* To avoid confusion in tc_gen_reloc, we must ensure
-		 that this does not become a variant frag.  */
-	      frag_wane (frag_now);
-	      frag_new (0);
-	    }
+	  if (mips_relax.sequence)
+	    relax_end ();
 	}
       else
 	{
 	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
-	  frag_grow (20);
 	  macro_build (NULL, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT16,
 		       mips_gp_register);
 	  macro_build (NULL, counter, NULL, "nop", "");
-	  p = frag_var (rs_machine_dependent, 4, 0,
-			RELAX_ENCODE (0, 4, -8, 0, 0, mips_opts.warn_about_macros),
-			ep->X_add_symbol, 0, NULL);
+	  relax_start (ep->X_add_symbol);
+	  relax_switch ();
 	  macro_build (p, counter, ep, ADDRESS_ADDI_INSN, "t,r,j", reg, reg,
 		       BFD_RELOC_LO16);
+	  relax_end ();
 
 	  if (ex.X_add_number != 0)
 	    {
@@ -3885,7 +3893,6 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
   else if (mips_pic == SVR4_PIC)
     {
       expressionS ex;
-      int off;
 
       /* This is the large GOT case.  If this is a reference to an
 	 external symbol, we want
@@ -3905,11 +3912,9 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
       */
       if (HAVE_NEWABI)
 	{
-	  frag_grow (24);
-
-	  frag_now->tc_frag_data.tc_fr_offset =
-	    ex.X_add_number = ep->X_add_number;
+	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
+	  relax_start (ep->X_add_symbol);
 	  macro_build (NULL, counter, ep, "lui", "t,u", reg,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, counter, NULL, ADDRESS_ADD_INSN, "d,v,t", reg,
@@ -3926,50 +3931,39 @@ load_address (int *counter, int reg, expressionS *ep, int *used_at)
 	    }
 
 	  ep->X_add_number = ex.X_add_number;
-	  p = frag_var (rs_machine_dependent, 8, 0,
-			RELAX_ENCODE (ex.X_add_number ? 16 : 12, 8, 0, 4, 0,
-				      mips_opts.warn_about_macros),
-			ep->X_add_symbol, 0, NULL);
+	  relax_switch ();
 	  macro_build (p, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT_PAGE, mips_gp_register);
 	  macro_build (p + 4, counter, ep, ADDRESS_ADDI_INSN, "t,r,j", reg,
 		       reg, BFD_RELOC_MIPS_GOT_OFST);
+	  relax_end ();
 	}
       else
 	{
 	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
-	  if (reg_needs_delay (mips_gp_register))
-	    off = 4;
-	  else
-	    off = 0;
-	  frag_grow (32);
+	  relax_start (ep->X_add_symbol);
 	  macro_build (NULL, counter, ep, "lui", "t,u", reg,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, counter, NULL, ADDRESS_ADD_INSN, "d,v,t", reg,
 		       reg, mips_gp_register);
 	  macro_build (NULL, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT_LO16, reg);
-	  p = frag_var (rs_machine_dependent, 12 + off, 0,
-			RELAX_ENCODE (12, 12 + off, off, 8 + off, 0,
-				      mips_opts.warn_about_macros),
-			ep->X_add_symbol, 0, NULL);
-	  if (off > 0)
+	  relax_switch ();
+	  if (reg_needs_delay (mips_gp_register))
 	    {
 	      /* We need a nop before loading from $gp.  This special
 		 check is required because the lui which starts the main
 		 instruction stream does not refer to $gp, and so will not
 		 insert the nop which may be required.  */
 	      macro_build (p, counter, NULL, "nop", "");
-		p += 4;
 	    }
 	  macro_build (p, counter, ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  p += 4;
 	  macro_build (p, counter, NULL, "nop", "");
-	  p += 4;
 	  macro_build (p, counter, ep, ADDRESS_ADDI_INSN, "t,r,j", reg, reg,
 		       BFD_RELOC_LO16);
+	  relax_end ();
 
 	  if (ex.X_add_number != 0)
 	    {
@@ -4000,6 +3994,55 @@ move_register (int *counter, int dest, int source)
 {
   macro_build (NULL, counter, NULL, HAVE_32BIT_GPRS ? "addu" : "daddu",
 	       "d,v,t", dest, source, 0);
+}
+
+/* Emit an SVR4 PIC sequence to load address LOCAL into DEST, where
+   LOCAL is the sum of a symbol and a 16-bit displacement.  The two
+   alternatives are:
+
+   Global symbol		Local sybmol
+   -------------		------------
+   lw DEST,%got(SYMBOL)		lw DEST,%got(SYMBOL + OFFSET)
+   ...				...
+   addiu DEST,DEST,OFFSET	addiu DEST,DEST,%lo(SYMBOL + OFFSET)
+
+   load_got_offset emits the first instruction and add_got_offset
+   emits the second.  */
+
+static void
+load_got_offset (int *counter, int dest, expressionS *local)
+{
+  expressionS global;
+
+  global = *local;
+  global.X_add_number = 0;
+
+  relax_start (local->X_add_symbol);
+  macro_build (NULL, counter, &global, ADDRESS_LOAD_INSN, "t,o(b)",
+	       dest, BFD_RELOC_MIPS_GOT16, mips_gp_register);
+  relax_switch ();
+  macro_build (NULL, counter, local, ADDRESS_LOAD_INSN, "t,o(b)",
+	       dest, BFD_RELOC_MIPS_GOT16, mips_gp_register);
+  relax_end ();
+}
+
+static void
+add_got_offset (int *counter, int dest, expressionS *local)
+{
+  expressionS global;
+
+  global.X_op = O_constant;
+  global.X_op_symbol = NULL;
+  global.X_add_symbol = NULL;
+  global.X_add_number = local->X_add_number;
+
+  relax_start (local->X_add_symbol);
+  macro_build (NULL, counter, &global, ADDRESS_ADDI_INSN, "t,r,j",
+	       dest, dest, BFD_RELOC_LO16);
+  relax_switch ();
+  macro_build (NULL, counter, local, ADDRESS_ADDI_INSN, "t,r,j",
+	       dest, dest, BFD_RELOC_LO16);
+  relax_end ();
 }
 
 /*
@@ -4054,30 +4097,6 @@ macro (struct mips_cl_insn *ip)
   expr1.X_op_symbol = NULL;
   expr1.X_add_symbol = NULL;
   expr1.X_add_number = 1;
-
-  /* Unmatched fixups should not be put in the same frag as a relaxable
-     macro.  For example, suppose we have:
-
-	lui $4,%hi(l1)		# 1
-	la $5,l2		# 2
-	addiu $4,$4,%lo(l1)	# 3
-
-     If instructions 1 and 2 were put in the same frag, md_frob_file would
-     move the fixup for #1 after the fixups for the "unrelaxed" version of
-     #2.  This would confuse tc_gen_reloc, which expects the relocations
-     for #2 to be the last for that frag.
-
-     Also, if tc_gen_reloc sees certain relocations in a variant frag,
-     it assumes that they belong to a relaxable macro.  We mustn't put
-     other uses of such relocations into a variant frag.
-
-     To avoid both problems, finish the current frag it contains a
-     %reloc() operator.  The macro then goes into a new frag.  */
-  if (prev_reloc_op_frag == frag_now)
-    {
-      frag_wane (frag_now);
-      frag_new (0);
-    }
 
   switch (mask)
     {
@@ -4957,20 +4976,17 @@ macro (struct mips_cl_insn *ip)
 	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
 		  && ! nopic_need_relax (offset_expr.X_add_symbol, 1))
 		{
-		  frag_grow (20);
+		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			       "t,r,j", tempreg, mips_gp_register,
 			       BFD_RELOC_GPREL16);
-		  p = frag_var (rs_machine_dependent, 8, 0,
-				RELAX_ENCODE (4, 8, 0, 4, 0,
-					      mips_opts.warn_about_macros),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		}
 	      macro_build_lui (p, &icnt, &offset_expr, tempreg);
-	      if (p != NULL)
-		p += 4;
 	      macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			   "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
+	      if (mips_relax.sequence)
+		relax_end ();
 	    }
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got && ! HAVE_NEWABI)
@@ -5007,60 +5023,50 @@ macro (struct mips_cl_insn *ip)
 	     addiu instruction.
 	   */
 
-	  expr1.X_add_number = offset_expr.X_add_number;
-	  offset_expr.X_add_number = 0;
-	  frag_grow (32);
-	  if (expr1.X_add_number == 0 && breg == 0
-	      && (call || tempreg == PIC_CALL_REG))
-	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
-	  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
-		       tempreg, lw_reloc_type, mips_gp_register);
-	  if (expr1.X_add_number == 0)
+	  if (offset_expr.X_add_number == 0)
 	    {
-	      int off;
-	      char *p;
+	      char *p = NULL;
 
-	      if (breg == 0)
-		off = 0;
-	      else
+	      if (breg == 0 && (call || tempreg == PIC_CALL_REG))
+		lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
+
+	      relax_start (offset_expr.X_add_symbol);
+	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			   "t,o(b)", tempreg, lw_reloc_type, mips_gp_register);
+	      if (breg != 0)
 		{
 		  /* We're going to put in an addu instruction using
 		     tempreg, so we may as well insert the nop right
 		     now.  */
 		  macro_build (NULL, &icnt, NULL, "nop", "");
-		  off = 4;
 		}
-	      p = frag_var (rs_machine_dependent, 8 - off, 0,
-			    RELAX_ENCODE (0, 8 - off, -4 - off, 4 - off, 0,
-					  (breg == 0
-					   ? mips_opts.warn_about_macros
-					   : 0)),
-			    offset_expr.X_add_symbol, 0, NULL);
-	      if (breg == 0)
-		{
-		  macro_build (p, &icnt, NULL, "nop", "");
-		  p += 4;
-		}
-	      macro_build (p, &icnt, &expr1, ADDRESS_ADDI_INSN,
+	      relax_switch ();
+	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			   "t,o(b)", tempreg, BFD_RELOC_MIPS_GOT16,
+			   mips_gp_register);
+	      macro_build (p, &icnt, NULL, "nop", "");
+	      macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			   "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
+	      relax_end ();
 	      /* FIXME: If breg == 0, and the next instruction uses
 		 $tempreg, then if this variant case is used an extra
 		 nop will be generated.  */
 	    }
-	  else if (expr1.X_add_number >= -0x8000
-		   && expr1.X_add_number < 0x8000)
+	  else if (offset_expr.X_add_number >= -0x8000
+		   && offset_expr.X_add_number < 0x8000)
 	    {
+	      load_got_offset (&icnt, tempreg, &offset_expr);
 	      macro_build (NULL, &icnt, NULL, "nop", "");
-	      macro_build (NULL, &icnt, &expr1, ADDRESS_ADDI_INSN,
-			   "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
-	      frag_var (rs_machine_dependent, 0, 0,
-			RELAX_ENCODE (0, 0, -12, -4, 0, 0),
-			offset_expr.X_add_symbol, 0, NULL);
+	      add_got_offset (&icnt, tempreg, &offset_expr);
 	    }
 	  else
 	    {
 	      int off1;
 
+	      expr1.X_add_number = offset_expr.X_add_number;
+	      offset_expr.X_add_number =
+		((offset_expr.X_add_number + 0x8000) & 0xffff) - 0x8000;
+	      load_got_offset (&icnt, tempreg, &offset_expr);
 	      /* If we are going to add in a base register, and the
 		 target register and the base register are the same,
 		 then we are using AT as a temporary register.  Since
@@ -5087,20 +5093,15 @@ macro (struct mips_cl_insn *ip)
 	      macro_build_lui (NULL, &icnt, &expr1, AT);
 	      mips_optimize = hold_mips_optimize;
 
-	      macro_build (NULL, &icnt, &expr1, ADDRESS_ADDI_INSN, "t,r,j",
-			   AT, AT, BFD_RELOC_LO16);
+	      add_got_offset (&icnt, AT, &offset_expr);
 	      macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   tempreg, tempreg, AT);
-	      frag_var (rs_machine_dependent, 0, 0,
-			RELAX_ENCODE (0, 0, -16 + off1, -8, 0, 0),
-			offset_expr.X_add_symbol, 0, NULL);
 	      used_at = 1;
 	    }
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got && HAVE_NEWABI)
 	{
 	  char *p = NULL;
-	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_DISP;
 	  int adj = 0;
 
 	  /* If this is a reference to an external, and there is no
@@ -5126,18 +5127,14 @@ macro (struct mips_cl_insn *ip)
 	     local symbols, even though it introduces an additional
 	     instruction.  */
 
-	  frag_grow (28);
-	  if (offset_expr.X_add_number == 0 && breg == 0
-	      && (call || tempreg == PIC_CALL_REG))
-	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 	  if (offset_expr.X_add_number)
 	    {
-	      frag_now->tc_frag_data.tc_fr_offset =
-		expr1.X_add_number = offset_expr.X_add_number;
+	      expr1.X_add_number = offset_expr.X_add_number;
 	      offset_expr.X_add_number = 0;
 
+	      relax_start (offset_expr.X_add_symbol);
 	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
-			   "t,o(b)", tempreg, lw_reloc_type,
+			   "t,o(b)", tempreg, BFD_RELOC_MIPS_GOT_DISP,
 			   mips_gp_register);
 
 	      if (expr1.X_add_number >= -0x8000
@@ -5145,9 +5142,6 @@ macro (struct mips_cl_insn *ip)
 		{
 		  macro_build (NULL, &icnt, &expr1, ADDRESS_ADDI_INSN,
 			       "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
-		  p = frag_var (rs_machine_dependent, 4, 0,
-				RELAX_ENCODE (8, 4, 0, 0, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
 		}
 	      else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 		{
@@ -5177,16 +5171,12 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       dreg, dreg, AT);
 
-		  p = frag_var (rs_machine_dependent, 4 + adj, 0,
-				RELAX_ENCODE (16 + adj, 4 + adj,
-					      0, 0, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
-
 		  used_at = 1;
 		}
 	      else
 		as_bad (_("PIC code offset overflow (max 32 signed bits)"));
 
+	      relax_switch ();
 	      offset_expr.X_add_number = expr1.X_add_number;
 
 	      macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
@@ -5199,30 +5189,31 @@ macro (struct mips_cl_insn *ip)
 		  breg = 0;
 		  tempreg = treg;
 		}
+	      relax_end ();
+	    }
+	  else if (breg == 0 && (call || tempreg == PIC_CALL_REG))
+	    {
+	      relax_start (offset_expr.X_add_symbol);
+	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			   "t,o(b)", tempreg, BFD_RELOC_MIPS_CALL16,
+			   mips_gp_register);
+	      relax_switch ();
+	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			   "t,o(b)", tempreg, BFD_RELOC_MIPS_GOT_DISP,
+			   mips_gp_register);
+	      relax_end ();
 	    }
 	  else
 	    {
 	      macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
-			   "t,o(b)", tempreg, lw_reloc_type,
+			   "t,o(b)", tempreg, BFD_RELOC_MIPS_GOT_DISP,
 			   mips_gp_register);
-	      if (lw_reloc_type != BFD_RELOC_MIPS_GOT_DISP)
-		p = frag_var (rs_machine_dependent, 0, 0,
-			      RELAX_ENCODE (0, 0, -4, 0, 0, 0),
-			      offset_expr.X_add_symbol, 0, NULL);
-	    }
-
-	  if (! p)
-	    {
-	      /* To avoid confusion in tc_gen_reloc, we must ensure
-		 that this does not become a variant frag.  */
-	      frag_wane (frag_now);
-	      frag_new (0);
 	    }
 	}
       else if (mips_pic == SVR4_PIC && ! HAVE_NEWABI)
 	{
 	  int gpdel;
-	  char *p;
+	  char *p = NULL;
 	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
 	  int local_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
@@ -5270,7 +5261,7 @@ macro (struct mips_cl_insn *ip)
 
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
-	  frag_grow (52);
+	  relax_start (offset_expr.X_add_symbol);
 	  if (reg_needs_delay (mips_gp_register))
 	    gpdel = 4;
 	  else
@@ -5301,14 +5292,6 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (NULL, &icnt, NULL, "nop", "");
 		  off = 4;
 		}
-
-	      p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
-			    RELAX_ENCODE (12 + off, 12 + gpdel, gpdel,
-					  8 + gpdel, 0,
-					  (breg == 0
-					   ? mips_opts.warn_about_macros
-					   : 0)),
-			    offset_expr.X_add_symbol, 0, NULL);
 	    }
 	  else if (expr1.X_add_number >= -0x8000
 		   && expr1.X_add_number < 0x8000)
@@ -5316,13 +5299,6 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (NULL, &icnt, NULL, "nop", "");
 	      macro_build (NULL, &icnt, &expr1, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
-
-	      p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
-			    RELAX_ENCODE (20, 12 + gpdel, gpdel, 8 + gpdel, 0,
-					  (breg == 0
-					   ? mips_opts.warn_about_macros
-					   : 0)),
-			    offset_expr.X_add_symbol, 0, NULL);
 	    }
 	  else
 	    {
@@ -5362,34 +5338,26 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   dreg, dreg, AT);
 
-	      p = frag_var (rs_machine_dependent, 16 + gpdel + adj, 0,
-			    RELAX_ENCODE (24 + adj, 16 + gpdel + adj, gpdel,
-					  8 + gpdel, 0,
-					  (breg == 0
-					   ? mips_opts.warn_about_macros
-					   : 0)),
-			    offset_expr.X_add_symbol, 0, NULL);
-
 	      used_at = 1;
 	    }
+	  offset_expr.X_add_number =
+	    ((expr1.X_add_number + 0x8000) & 0xffff) - 0x8000;
+	  relax_switch ();
 
 	  if (gpdel > 0)
 	    {
 	      /* This is needed because this instruction uses $gp, but
 		 the first instruction on the main stream does not.  */
 	      macro_build (p, &icnt, NULL, "nop", "");
-	      p += 4;
 	    }
 
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, local_reloc_type, mips_gp_register);
-	  p += 4;
 	  if (expr1.X_add_number >= -0x8000
 	      && expr1.X_add_number < 0x8000)
 	    {
 	      macro_build (p, &icnt, NULL, "nop", "");
-	      p += 4;
-	      macro_build (p, &icnt, &expr1, ADDRESS_ADDI_INSN,
+	      macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			   "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
 	      /* FIXME: If add_number is 0, and there was no base
 		 register, the external symbol case ended with a load,
@@ -5405,10 +5373,8 @@ macro (struct mips_cl_insn *ip)
 		     external symbol case.  */
 		  assert (tempreg == AT);
 		  macro_build (p, &icnt, NULL, "nop", "");
-		  p += 4;
 		  macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       treg, AT, breg);
-		  p += 4;
 		  tempreg = treg;
 		  /* We set breg to 0 because we have arranged to add
 		     it in in both cases.  */
@@ -5416,14 +5382,12 @@ macro (struct mips_cl_insn *ip)
 		}
 
 	      macro_build_lui (p, &icnt, &expr1, AT);
-	      p += 4;
-	      macro_build (p, &icnt, &expr1, ADDRESS_ADDI_INSN, "t,r,j",
+	      macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   AT, AT, BFD_RELOC_LO16);
-	      p += 4;
 	      macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   tempreg, tempreg, AT);
-	      p += 4;
 	    }
+	  relax_end ();
 	}
       else if (mips_pic == SVR4_PIC && HAVE_NEWABI)
 	{
@@ -5463,10 +5427,9 @@ macro (struct mips_cl_insn *ip)
 	       addiu	$reg,$reg,<sym>		(BFD_RELOC_MIPS_GOT_OFST)
 	     otherwise we have to resort to GOT_HI16/GOT_LO16.  */
 
-	  frag_grow (40);
+	  relax_start (offset_expr.X_add_symbol);
 
-	  frag_now->tc_frag_data.tc_fr_offset =
-	    expr1.X_add_number = offset_expr.X_add_number;
+	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 
 	  if (expr1.X_add_number == 0 && breg == 0
@@ -5483,21 +5446,12 @@ macro (struct mips_cl_insn *ip)
 		       "t,o(b)", tempreg, lw_reloc_type, tempreg);
 
 	  if (expr1.X_add_number == 0)
-	    {
-	      p = frag_var (rs_machine_dependent, 8, 0,
-			    RELAX_ENCODE (12, 8, 0, 4, 0,
-					  mips_opts.warn_about_macros),
-			    offset_expr.X_add_symbol, 0, NULL);
-	    }
+	    ;
 	  else if (expr1.X_add_number >= -0x8000
 		   && expr1.X_add_number < 0x8000)
 	    {
 	      macro_build (NULL, &icnt, &expr1, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
-	      p = frag_var (rs_machine_dependent, 8, 0,
-			    RELAX_ENCODE (16, 8, 0, 4, 0,
-					  mips_opts.warn_about_macros),
-			    offset_expr.X_add_symbol, 0, NULL);
 	    }
 	  else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 	    {
@@ -5529,19 +5483,12 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   dreg, dreg, AT);
 
-	      p = frag_var (rs_machine_dependent, 8 + adj, 0,
-			    RELAX_ENCODE (24 + adj, 8 + adj,
-					  0, 4, 0,
-					  (breg == 0
-					   ? mips_opts.warn_about_macros
-					   : 0)),
-			    offset_expr.X_add_symbol, 0, NULL);
-
 	      used_at = 1;
 	    }
 	  else
 	    as_bad (_("PIC code offset overflow (max 32 signed bits)"));
 
+	  relax_switch ();
 	  offset_expr.X_add_number = expr1.X_add_number;
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, BFD_RELOC_MIPS_GOT_PAGE, mips_gp_register);
@@ -5554,6 +5501,7 @@ macro (struct mips_cl_insn *ip)
 	      breg = 0;
 	      tempreg = treg;
 	    }
+	  relax_end ();
 	}
       else if (mips_pic == EMBEDDED_PIC)
 	{
@@ -5646,7 +5594,7 @@ macro (struct mips_cl_insn *ip)
 	macro_build (NULL, &icnt, &offset_expr, "jal", "a");
       else if (mips_pic == SVR4_PIC)
 	{
-	  char *p;
+	  char *p = NULL;
 
 	  /* If this is a reference to an external symbol, and we are
 	     using a small GOT, we want
@@ -5680,17 +5628,19 @@ macro (struct mips_cl_insn *ip)
 	    {
 	      if (! mips_big_got)
 		{
-		  frag_grow (4);
+		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
 			       "t,o(b)", PIC_CALL_REG, BFD_RELOC_MIPS_CALL16,
 			       mips_gp_register);
-		  frag_var (rs_machine_dependent, 0, 0,
-			    RELAX_ENCODE (0, 0, -4, 0, 0, 0),
-			    offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
+		  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			       "t,o(b)", PIC_CALL_REG, BFD_RELOC_MIPS_GOT_DISP,
+			       mips_gp_register);
+		  relax_end ();
 		}
 	      else
 		{
-		  frag_grow (20);
+		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, &icnt, &offset_expr, "lui", "t,u",
 			       PIC_CALL_REG, BFD_RELOC_MIPS_CALL_HI16);
 		  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -5698,31 +5648,28 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
 			       "t,o(b)", PIC_CALL_REG,
 			       BFD_RELOC_MIPS_CALL_LO16, PIC_CALL_REG);
-		  p = frag_var (rs_machine_dependent, 8, 0,
-				RELAX_ENCODE (12, 8, 0, 4, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
 			       "t,o(b)", PIC_CALL_REG,
 			       BFD_RELOC_MIPS_GOT_PAGE, mips_gp_register);
 		  macro_build (p + 4, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			       "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
 			       BFD_RELOC_MIPS_GOT_OFST);
+		  relax_end ();
 		}
 
 	      macro_build_jalr (icnt, &offset_expr);
 	    }
 	  else
 	    {
-	      frag_grow (40);
+	      relax_start (offset_expr.X_add_symbol);
 	      if (! mips_big_got)
 		{
 		  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
 			       "t,o(b)", PIC_CALL_REG, BFD_RELOC_MIPS_CALL16,
 			       mips_gp_register);
 		  macro_build (NULL, &icnt, NULL, "nop", "");
-		  p = frag_var (rs_machine_dependent, 4, 0,
-				RELAX_ENCODE (0, 4, -8, 0, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		}
 	      else
 		{
@@ -5740,25 +5687,21 @@ macro (struct mips_cl_insn *ip)
 			       "t,o(b)", PIC_CALL_REG,
 			       BFD_RELOC_MIPS_CALL_LO16, PIC_CALL_REG);
 		  macro_build (NULL, &icnt, NULL, "nop", "");
-		  p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
-				RELAX_ENCODE (16, 12 + gpdel, gpdel,
-					      8 + gpdel, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		  if (gpdel > 0)
 		    {
 		      macro_build (p, &icnt, NULL, "nop", "");
 		      p += 4;
 		    }
-		  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
-			       "t,o(b)", PIC_CALL_REG, BFD_RELOC_MIPS_GOT16,
-			       mips_gp_register);
-		  p += 4;
-		  macro_build (p, &icnt, NULL, "nop", "");
-		  p += 4;
 		}
+	      macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN,
+			   "t,o(b)", PIC_CALL_REG, BFD_RELOC_MIPS_GOT16,
+			   mips_gp_register);
+	      macro_build (p, &icnt, NULL, "nop", "");
 	      macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 			   "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
 			   BFD_RELOC_LO16);
+	      relax_end ();
 	      macro_build_jalr (icnt, &offset_expr);
 
 	      if (mips_cprestore_offset < 0)
@@ -6042,7 +5985,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
-	  char *p;
+	  char *p = NULL;
 
 	  /* If this is a reference to a GP relative symbol, and there
 	     is no base register, we want
@@ -6186,22 +6129,17 @@ macro (struct mips_cl_insn *ip)
 		p = NULL;
 	      else
 		{
-		  frag_grow (20);
+		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, &icnt, &offset_expr, s, fmt, treg,
 			       BFD_RELOC_GPREL16, mips_gp_register);
-		  p = frag_var (rs_machine_dependent, 8, 0,
-				RELAX_ENCODE (4, 8, 0, 4, 0,
-					      (mips_opts.warn_about_macros
-					       || (used_at
-						   && mips_opts.noat))),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		  used_at = 0;
 		}
 	      macro_build_lui (p, &icnt, &offset_expr, tempreg);
-	      if (p != NULL)
-		p += 4;
 	      macro_build (p, &icnt, &offset_expr, s, fmt, treg,
 			   BFD_RELOC_LO16, tempreg);
+	      if (mips_relax.sequence)
+		relax_end ();
 	    }
 	  else
 	    {
@@ -6210,29 +6148,25 @@ macro (struct mips_cl_insn *ip)
 		p = NULL;
 	      else
 		{
-		  frag_grow (28);
+		  relax_start (offset_expr.X_add_symbol);
 		  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       tempreg, breg, mips_gp_register);
 		  macro_build (NULL, &icnt, &offset_expr, s, fmt, treg,
 			       BFD_RELOC_GPREL16, tempreg);
-		  p = frag_var (rs_machine_dependent, 12, 0,
-				RELAX_ENCODE (8, 12, 0, 8, 0, 0),
-				offset_expr.X_add_symbol, 0, NULL);
+		  relax_switch ();
 		}
 	      macro_build_lui (p, &icnt, &offset_expr, tempreg);
-	      if (p != NULL)
-		p += 4;
 	      macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   tempreg, tempreg, breg);
-	      if (p != NULL)
-		p += 4;
 	      macro_build (p, &icnt, &offset_expr, s, fmt, treg,
 			   BFD_RELOC_LO16, tempreg);
+	      if (mips_relax.sequence)
+		relax_end ();
 	    }
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
-	  char *p;
+	  char *p = NULL;
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
 
 	  /* If this is a reference to an external symbol, we want
@@ -6277,15 +6211,14 @@ macro (struct mips_cl_insn *ip)
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
-	  frag_grow (20);
 	  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, lw_reloc_type, mips_gp_register);
 	  macro_build (NULL, &icnt, NULL, "nop", "");
-	  p = frag_var (rs_machine_dependent, 4, 0,
-			RELAX_ENCODE (0, 4, -8, 0, 0, 0),
-			offset_expr.X_add_symbol, 0, NULL);
+	  relax_start (offset_expr.X_add_symbol);
+	  relax_switch ();
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN,
 		       "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
+	  relax_end ();
 	  if (breg != 0)
 	    macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			 tempreg, tempreg, breg);
@@ -6295,7 +6228,7 @@ macro (struct mips_cl_insn *ip)
       else if (mips_pic == SVR4_PIC && ! HAVE_NEWABI)
 	{
 	  int gpdel;
-	  char *p;
+	  char *p = NULL;
 
 	  /* If this is a reference to an external symbol, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
@@ -6323,28 +6256,23 @@ macro (struct mips_cl_insn *ip)
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
-	  frag_grow (36);
+	  relax_start (offset_expr.X_add_symbol);
 	  macro_build (NULL, &icnt, &offset_expr, "lui", "t,u", tempreg,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 		       tempreg, tempreg, mips_gp_register);
 	  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, BFD_RELOC_MIPS_GOT_LO16, tempreg);
-	  p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
-			RELAX_ENCODE (12, 12 + gpdel, gpdel, 8 + gpdel, 0, 0),
-			offset_expr.X_add_symbol, 0, NULL);
+	  relax_switch ();
 	  if (gpdel > 0)
-	    {
-	      macro_build (p, &icnt, NULL, "nop", "");
-	      p += 4;
-	    }
+	    macro_build (p, &icnt, NULL, "nop", "");
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  p += 4;
 	  macro_build (p, &icnt, NULL, "nop", "");
-	  p += 4;
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 		       tempreg, tempreg, BFD_RELOC_LO16);
+	  relax_end ();
+
 	  if (breg != 0)
 	    macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			 tempreg, tempreg, breg);
@@ -6353,7 +6281,7 @@ macro (struct mips_cl_insn *ip)
 	}
       else if (mips_pic == SVR4_PIC && HAVE_NEWABI)
 	{
-	  char *p;
+	  char *p = NULL;
 	  int bregsz = breg != 0 ? 4 : 0;
 
 	  /* If this is a reference to an external symbol, we want
@@ -6365,13 +6293,12 @@ macro (struct mips_cl_insn *ip)
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT_PAGE)
 	       <op>	$treg,<sym>($tempreg)   (BFD_RELOC_MIPS_GOT_OFST)  */
 	  assert (offset_expr.X_op == O_symbol);
-	  frag_grow (36);
-	  frag_now->tc_frag_data.tc_fr_offset =
-	    expr1.X_add_number = offset_expr.X_add_number;
+	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
+	  relax_start (offset_expr.X_add_symbol);
 	  macro_build (NULL, &icnt, &offset_expr, "lui", "t,u", tempreg,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -6384,11 +6311,8 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, &icnt, &expr1, s, fmt, treg, BFD_RELOC_LO16,
 		       tempreg);
 
+	  relax_switch ();
 	  offset_expr.X_add_number = expr1.X_add_number;
-	  p = frag_var (rs_machine_dependent, 12 + bregsz, 0,
-			RELAX_ENCODE (16 + bregsz, 8 + bregsz,
-				      0, 4 + bregsz, 0, 0),
-			offset_expr.X_add_symbol, 0, NULL);
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, BFD_RELOC_MIPS_GOT_PAGE, mips_gp_register);
 	  if (breg != 0)
@@ -6396,6 +6320,7 @@ macro (struct mips_cl_insn *ip)
 			 tempreg, tempreg, breg);
 	  macro_build (p + 4 + bregsz, &icnt, &offset_expr, s, fmt, treg,
 		       BFD_RELOC_MIPS_GOT_OFST, tempreg);
+	  relax_end ();
 	}
       else if (mips_pic == EMBEDDED_PIC)
 	{
@@ -6536,12 +6461,6 @@ macro (struct mips_cl_insn *ip)
 			   treg + 1, BFD_RELOC_LO16, AT);
 	    }
 	}
-
-      /* To avoid confusion in tc_gen_reloc, we must ensure that this
-	 does not become a variant frag.  */
-      frag_wane (frag_now);
-      frag_new (0);
-
       break;
 
     case M_LI_DD:
@@ -6605,12 +6524,6 @@ macro (struct mips_cl_insn *ip)
 	    {
 	      macro_build (NULL, &icnt, &offset_expr, "ldc1", "T,o(b)", treg,
 			   BFD_RELOC_LO16, AT);
-
-	      /* To avoid confusion in tc_gen_reloc, we must ensure
-		 that this does not become a variant frag.  */
-	      frag_wane (frag_now);
-	      frag_new (0);
-
 	      break;
 	    }
 	  breg = AT;
@@ -6636,11 +6549,6 @@ macro (struct mips_cl_insn *ip)
       offset_expr.X_add_number += 4;
       macro_build (NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		   target_big_endian ? treg : treg + 1, r, breg);
-
-      /* To avoid confusion in tc_gen_reloc, we must ensure that this
-	 does not become a variant frag.  */
-      frag_wane (frag_now);
-      frag_new (0);
 
       if (breg != AT)
 	return;
@@ -6738,7 +6646,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_pic == NO_PIC
 	  || offset_expr.X_op == O_constant)
 	{
-	  char *p;
+	  char *p = NULL;
 
 	  /* If this is a reference to a GP relative symbol, we want
 	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
@@ -6764,16 +6672,15 @@ macro (struct mips_cl_insn *ip)
 	    {
 	      int off;
 
+	      relax_start (offset_expr.X_add_symbol);
 	      if (breg == 0)
 		{
-		  frag_grow (28);
 		  tempreg = mips_gp_register;
 		  off = 0;
 		  used_at = 0;
 		}
 	      else
 		{
-		  frag_grow (36);
 		  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       AT, breg, mips_gp_register);
 		  tempreg = AT;
@@ -6797,10 +6704,7 @@ macro (struct mips_cl_insn *ip)
 			   BFD_RELOC_GPREL16, tempreg);
 	      mips_optimize = hold_mips_optimize;
 
-	      p = frag_var (rs_machine_dependent, 12 + off, 0,
-			    RELAX_ENCODE (8 + off, 12 + off, 0, 4 + off, 1,
-					  used_at && mips_opts.noat),
-			    offset_expr.X_add_symbol, 0, NULL);
+	      relax_switch ();
 
 	      /* We just generated two relocs.  When tc_gen_reloc
 		 handles this case, it will skip the first reloc and
@@ -6824,27 +6728,21 @@ macro (struct mips_cl_insn *ip)
 		}
 	    }
 	  macro_build_lui (p, &icnt, &offset_expr, AT);
-	  if (p != NULL)
-	    p += 4;
 	  if (breg != 0)
-	    {
-	      macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
+	    macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   AT, breg, AT);
-	      if (p != NULL)
-		p += 4;
-	    }
 	  /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       BFD_RELOC_LO16, AT);
-	  if (p != NULL)
-	    p += 4;
 	  /* FIXME: How do we handle overflow here?  */
 	  offset_expr.X_add_number += 4;
 	  /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg : treg + 1,
 		       BFD_RELOC_LO16, AT);
+	  if (mips_relax.sequence)
+	    relax_end ();
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
@@ -6865,7 +6763,6 @@ macro (struct mips_cl_insn *ip)
 	     in the lwc1 instructions.  */
 	  used_at = 1;
 	  expr1.X_add_number = offset_expr.X_add_number;
-	  offset_expr.X_add_number = 0;
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000 - 4)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
@@ -6873,35 +6770,38 @@ macro (struct mips_cl_insn *ip)
 	    off = 0;
 	  else
 	    off = 4;
-	  frag_grow (24 + off);
-	  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
-		       AT, BFD_RELOC_MIPS_GOT16, mips_gp_register);
+	  load_got_offset (&icnt, AT, &offset_expr);
 	  macro_build (NULL, &icnt, NULL, "nop", "");
 	  if (breg != 0)
 	    macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
 			 AT, breg, AT);
-	  /* Itbl support may require additional care here.  */
-	  macro_build (NULL, &icnt, &expr1, s, fmt, coproc ? treg + 1 : treg,
-		       BFD_RELOC_LO16, AT);
-	  expr1.X_add_number += 4;
 
 	  /* Set mips_optimize to 2 to avoid inserting an undesired
              nop.  */
 	  hold_mips_optimize = mips_optimize;
 	  mips_optimize = 2;
-	  /* Itbl support may require additional care here.  */
-	  macro_build (NULL, &icnt, &expr1, s, fmt, coproc ? treg : treg + 1,
-		       BFD_RELOC_LO16, AT);
-	  mips_optimize = hold_mips_optimize;
 
-	  (void) frag_var (rs_machine_dependent, 0, 0,
-			   RELAX_ENCODE (0, 0, -16 - off, -8, 1, 0),
-			   offset_expr.X_add_symbol, 0, NULL);
+	  /* Itbl support may require additional care here.  */
+	  relax_start (offset_expr.X_add_symbol);
+	  macro_build (NULL, &icnt, &expr1, s, fmt,
+		       coproc ? treg + 1 : treg, BFD_RELOC_LO16, AT);
+	  expr1.X_add_number += 4;
+	  macro_build (NULL, &icnt, &expr1, s, fmt,
+		       coproc ? treg : treg + 1, BFD_RELOC_LO16, AT);
+	  relax_switch ();
+	  macro_build (NULL, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg + 1 : treg, BFD_RELOC_LO16, AT);
+	  offset_expr.X_add_number += 4;
+	  macro_build (NULL, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg : treg + 1, BFD_RELOC_LO16, AT);
+	  relax_end ();
+
+	  mips_optimize = hold_mips_optimize;
 	}
       else if (mips_pic == SVR4_PIC)
 	{
 	  int gpdel, off;
-	  char *p;
+	  char *p = NULL;
 
 	  /* If this is a reference to an external symbol, we want
 	       lui	$at,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
@@ -6932,7 +6832,7 @@ macro (struct mips_cl_insn *ip)
 	    off = 0;
 	  else
 	    off = 4;
-	  frag_grow (56);
+	  relax_start (offset_expr.X_add_symbol);
 	  macro_build (NULL, &icnt, &offset_expr, "lui", "t,u", AT,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -6958,40 +6858,30 @@ macro (struct mips_cl_insn *ip)
 	  mips_optimize = hold_mips_optimize;
 	  expr1.X_add_number -= 4;
 
-	  p = frag_var (rs_machine_dependent, 16 + gpdel + off, 0,
-			RELAX_ENCODE (24 + off, 16 + gpdel + off, gpdel,
-				      8 + gpdel + off, 1, 0),
-			offset_expr.X_add_symbol, 0, NULL);
+	  relax_switch ();
+	  offset_expr.X_add_number = expr1.X_add_number;
 	  if (gpdel > 0)
-	    {
-	      macro_build (p, &icnt, NULL, "nop", "");
-	      p += 4;
-	    }
+	    macro_build (p, &icnt, NULL, "nop", "");
 	  macro_build (p, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       AT, BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  p += 4;
 	  macro_build (p, &icnt, NULL, "nop", "");
-	  p += 4;
 	  if (breg != 0)
-	    {
-	      macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
-			   AT, breg, AT);
-	      p += 4;
-	    }
+	    macro_build (p, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",
+			 AT, breg, AT);
 	  /* Itbl support may require additional care here.  */
-	  macro_build (p, &icnt, &expr1, s, fmt, coproc ? treg + 1 : treg,
-		       BFD_RELOC_LO16, AT);
-	  p += 4;
-	  expr1.X_add_number += 4;
+	  macro_build (p, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg + 1 : treg, BFD_RELOC_LO16, AT);
+	  offset_expr.X_add_number += 4;
 
 	  /* Set mips_optimize to 2 to avoid inserting an undesired
              nop.  */
 	  hold_mips_optimize = mips_optimize;
 	  mips_optimize = 2;
 	  /* Itbl support may require additional care here.  */
-	  macro_build (p, &icnt, &expr1, s, fmt, coproc ? treg : treg + 1,
-		       BFD_RELOC_LO16, AT);
+	  macro_build (p, &icnt, &offset_expr, s, fmt,
+		       coproc ? treg : treg + 1, BFD_RELOC_LO16, AT);
 	  mips_optimize = hold_mips_optimize;
+	  relax_end ();
 	}
       else if (mips_pic == EMBEDDED_PIC)
 	{
@@ -13264,22 +13154,16 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
 
   if (change)
     {
-      /* Record the offset to the first reloc in the fr_opcode field.
-	 This lets md_convert_frag and tc_gen_reloc know that the code
-	 must be expanded.  */
-      fragp->fr_opcode = (fragp->fr_literal
-			  + fragp->fr_fix
-			  - RELAX_OLD (fragp->fr_subtype)
-			  + RELAX_RELOC1 (fragp->fr_subtype));
+      fragp->fr_subtype |= RELAX_USE_SECOND;
       /* FIXME: This really needs as_warn_where.  */
       if (RELAX_WARN (fragp->fr_subtype))
 	as_warn (_("AT used after \".set noat\" or macro used after "
 		   "\".set nomacro\""));
 
-      return RELAX_NEW (fragp->fr_subtype) - RELAX_OLD (fragp->fr_subtype);
+      return -RELAX_FIRST (fragp->fr_subtype);
     }
-
-  return 0;
+  else
+    return -RELAX_SECOND (fragp->fr_subtype);
 }
 
 /* This is called to see whether a reloc against a defined symbol
@@ -13382,112 +13266,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     }
   else
     reloc->addend = fixp->fx_addnumber;
-
-  /* If this is a variant frag, we may need to adjust the existing
-     reloc and generate a new one.  */
-  if (fixp->fx_frag->fr_opcode != NULL
-      && ((fixp->fx_r_type == BFD_RELOC_GPREL16
-	   && ! HAVE_NEWABI)
-	  || (fixp->fx_r_type == BFD_RELOC_MIPS_GOT_DISP
-	      && HAVE_NEWABI)
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT_HI16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT_LO16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL_HI16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL_LO16)
-    )
-    {
-      arelent *reloc2;
-
-      assert (! RELAX_MIPS16_P (fixp->fx_frag->fr_subtype));
-
-      /* If this is not the last reloc in this frag, then we have two
-	 GPREL relocs, or a GOT_HI16/GOT_LO16 pair, or a
-	 CALL_HI16/CALL_LO16, both of which are being replaced.  Let
-	 the second one handle all of them.  */
-      if (fixp->fx_next != NULL
-	  && fixp->fx_frag == fixp->fx_next->fx_frag)
-	{
-	  assert ((fixp->fx_r_type == BFD_RELOC_GPREL16
-		   && fixp->fx_next->fx_r_type == BFD_RELOC_GPREL16)
-		  || (fixp->fx_r_type == BFD_RELOC_MIPS_GOT_HI16
-		      && (fixp->fx_next->fx_r_type
-			  == BFD_RELOC_MIPS_GOT_LO16))
-		  || (fixp->fx_r_type == BFD_RELOC_MIPS_CALL_HI16
-		      && (fixp->fx_next->fx_r_type
-			  == BFD_RELOC_MIPS_CALL_LO16)));
-	  retval[0] = NULL;
-	  return retval;
-	}
-
-      fixp->fx_where = fixp->fx_frag->fr_opcode - fixp->fx_frag->fr_literal;
-      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-      reloc->addend += fixp->fx_frag->tc_frag_data.tc_fr_offset;
-      reloc2 = retval[1] = (arelent *) xmalloc (sizeof (arelent));
-      reloc2->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-      reloc2->address = (reloc->address
-			 + (RELAX_RELOC2 (fixp->fx_frag->fr_subtype)
-			    - RELAX_RELOC1 (fixp->fx_frag->fr_subtype)));
-      reloc2->addend = reloc->addend;
-      reloc2->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO16);
-      assert (reloc2->howto != NULL);
-
-      if (RELAX_RELOC3 (fixp->fx_frag->fr_subtype))
-	{
-	  arelent *reloc3;
-
-	  reloc3 = retval[2] = (arelent *) xmalloc (sizeof (arelent));
-	  *reloc3 = *reloc2;
-	  reloc3->address += 4;
-	}
-
-      if (mips_pic == NO_PIC)
-	{
-	  assert (fixp->fx_r_type == BFD_RELOC_GPREL16);
-	  fixp->fx_r_type = BFD_RELOC_HI16_S;
-	}
-      else if (mips_pic == SVR4_PIC)
-	{
-	  switch (fixp->fx_r_type)
-	    {
-	    default:
-	      abort ();
-	    case BFD_RELOC_MIPS_GOT16:
-	      break;
-	    case BFD_RELOC_MIPS_GOT_LO16:
-	    case BFD_RELOC_MIPS_CALL_LO16:
-	      if (HAVE_NEWABI)
-		{
-		  fixp->fx_r_type = BFD_RELOC_MIPS_GOT_PAGE;
-		  reloc2->howto = bfd_reloc_type_lookup
-		    (stdoutput, BFD_RELOC_MIPS_GOT_OFST);
-		}
-	      else
-		fixp->fx_r_type = BFD_RELOC_MIPS_GOT16;
-	      break;
-	    case BFD_RELOC_MIPS_CALL16:
-	    case BFD_RELOC_MIPS_GOT_OFST:
-	    case BFD_RELOC_MIPS_GOT_DISP:
-	      if (HAVE_NEWABI)
-		{
-		  /* It may seem nonsensical to relax GOT_DISP to
-		     GOT_DISP, but we're actually turning a GOT_DISP
-		     without offset into a GOT_DISP with an offset,
-		     getting rid of the separate addition, which we can
-		     do when the symbol is found to be local.  */
-		  fixp->fx_r_type = BFD_RELOC_MIPS_GOT_DISP;
-		  retval[1] = NULL;
-		}
-	      else
-		fixp->fx_r_type = BFD_RELOC_MIPS_GOT16;
-	      break;
-	    }
-	}
-      else
-	abort ();
-    }
 
   /* Since the old MIPS ELF ABI uses Rel instead of Rela, encode the vtable
      entry to be used in the relocation's section offset.  */
@@ -13596,9 +13374,6 @@ mips_relax_frag (asection *sec, fragS *fragp, long stretch)
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 {
-  int old, new;
-  char *fixptr;
-
   if (RELAX_BRANCH_P (fragp->fr_subtype))
     {
       bfd_byte *buf;
@@ -13898,17 +13673,48 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
     }
   else
     {
-      if (fragp->fr_opcode == NULL)
-	return;
+      int first, second;
+      fixS *fixp;
 
-      old = RELAX_OLD (fragp->fr_subtype);
-      new = RELAX_NEW (fragp->fr_subtype);
-      fixptr = fragp->fr_literal + fragp->fr_fix;
+      first = RELAX_FIRST (fragp->fr_subtype);
+      second = RELAX_SECOND (fragp->fr_subtype);
+      fixp = (fixS *) fragp->fr_opcode;
 
-      if (new > 0)
-	memmove (fixptr - old, fixptr, new);
+      /* Go through all the fixups for the first sequence.  Disable them
+	 (by marking them as done) if we're going to use the second
+	 sequence instead.  */
+      while (fixp
+	     && fixp->fx_frag == fragp
+	     && fixp->fx_where < fragp->fr_fix - second)
+	{
+	  if (fragp->fr_subtype & RELAX_USE_SECOND)
+	    fixp->fx_done = 1;
+	  fixp = fixp->fx_next;
+	}
 
-      fragp->fr_fix += new - old;
+      /* Go through the fixups for the second sequence.  Disable them if
+	 we're going to use the first sequence, otherwise adjust their
+	 addresses to account for the relaxation.  */
+      while (fixp && fixp->fx_frag == fragp)
+	{
+	  if (fragp->fr_subtype & RELAX_USE_SECOND)
+	    fixp->fx_where -= first;
+	  else
+	    fixp->fx_done = 1;
+	  fixp = fixp->fx_next;
+	}
+
+      /* Now modify the frag contents.  */
+      if (fragp->fr_subtype & RELAX_USE_SECOND)
+	{
+	  char *start;
+
+	  start = fragp->fr_literal + fragp->fr_fix - first - second;
+	  memmove (start, start + first, second);
+	  fragp->fr_fix -= first;
+	}
+      else
+	fragp->fr_fix -= second;
     }
 }
 
