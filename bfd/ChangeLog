@@ -1,6 +1,6 @@
 Tue Nov 10 16:17:06 1998  Geoffrey Noer  <noer@cygnus.com>
 
-	* acinclude.m4: detect cygwin* instead of cygwin32*.
+	* acinclude.m4, config.bfd: detect cygwin* instead of cygwin32*.
 	* aclocal.m4, configure: regenerate
 
 Tue Nov 10 15:13:59 1998  Nick Clifton  <nickc@cygnus.com>
