@@ -1,3 +1,19 @@
+Tue Jul 22 17:19:45 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
+
+	* coffswap.h (coff_swap_filehdr_in): Invoke
+	COFF_ADJUST_FILEHDR_IN_PRE and COFF_ADJUST_FILEHDR_IN_POST if they
+	are defined.
+	(coff_swap_filehdr_out): Invoke COFF_ADJUST_FILEHDR_OUT_PRE and
+	COFF_ADJUST_FILEHDR_OUT_POST if they are defined.
+	(coff_swap_aux_in): Invoke COFF_ADJUST_AUX_IN_PRE and
+	COFF_ADJUST_AUX_IN_POST if they are defined.
+	(coff_swap_aux_out): Invoke COFF_ADJUST_AUX_OUT_PRE and
+	COFF_ADJUST_AUX_OUT_POST if they are defined.
+	(coff_swap_scnhdr_in): Invoke COFF_ADJUST_SCNHDR_IN_PRE and
+	COFF_ADJUST_SCNHDR_IN_POST if they are defined.
+	(coff_swap_scnhdr_out): Invoke COFF_ADJUST_SCNHDR_OUT_PRE and
+	COFF_ADJUST_SCNHDR_OUT_POST if they are defined.
+
 Tue Jul 22 15:09:12 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Check for fdopen.
