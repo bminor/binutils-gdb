@@ -1,5 +1,10 @@
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* frv-tdep.c (frv_analyze_prologue): Terminate prologue scan,
+	but not via a call to error(), when unable to read memory.
+
+2004-03-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* frv-tdep.c (frv_call_dummy_words): Delete.
 	(frv_frame_unwind_cache): Delete unused variable, ``prev_sp''.
 

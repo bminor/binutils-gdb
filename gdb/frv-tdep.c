@@ -511,7 +511,13 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
   /* Scan the prologue.  */
   while (pc < lim_pc)
     {
-      LONGEST op = read_memory_integer (pc, 4);
+      char buf[frv_instr_size];
+      LONGEST op;
+
+      if (target_read_memory (pc, buf, sizeof buf) != 0)
+	break;
+      op = extract_signed_integer (buf, sizeof buf);
+
       next_pc = pc + 4;
 
       /* The tests in this chain of ifs should be in order of
