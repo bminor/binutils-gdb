@@ -241,7 +241,8 @@ default_double_format (struct gdbarch *gdbarch)
 }
 
 void
-default_print_float_info (void)
+default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+			  struct frame_info *frame)
 {
 #ifdef FLOAT_INFO
 #if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
@@ -249,7 +250,8 @@ default_print_float_info (void)
 #endif
   FLOAT_INFO;
 #else
-  printf_filtered ("No floating point info available for this processor.\n");
+  fprintf_filtered (file, "\
+No floating point info available for this processor.\n");
 #endif
 }
 

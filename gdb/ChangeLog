@@ -1,5 +1,15 @@
 2002-06-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (PRINT_FLOAT_INFO): Add frame and ui_file parameters.
+	Make multi-arch pure.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arm-tdep.c (arm_print_float_info): Update.
+	* arch-utils.h (default_print_float_info): Update.
+	* arch-utils.c (default_print_float_info): Update.
+	* infcmd.c (float_info): Update call.
+
+2002-06-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (init.c): Move the call to _initialize_gdbtypes to
 	the front of the initialize list.
 

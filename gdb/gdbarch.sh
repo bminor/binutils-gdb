@@ -468,7 +468,7 @@ f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_r
 v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
 f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
 f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs:::do_registers_info::0
-f:2:PRINT_FLOAT_INFO:void:print_float_info:void::::default_print_float_info::0
+m:2:PRINT_FLOAT_INFO:void:print_float_info:struct ui_file *file, struct frame_info *frame:file, frame:::default_print_float_info::0
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
 f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::legacy_register_sim_regno::0

@@ -1558,7 +1558,8 @@ print_fpu_flags (int flags)
 /* Print interesting information about the floating point processor
    (if present) or emulator.  */
 static void
-arm_print_float_info (void)
+arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		      struct frame_info *frame)
 {
   register unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;

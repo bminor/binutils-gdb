@@ -321,7 +321,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
+  default_print_float_info,
   0,
   0,
   0,
@@ -1533,20 +1533,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->prepare_to_proceed
                         /*PREPARE_TO_PROCEED ()*/);
 #endif
-#ifdef PRINT_FLOAT_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PRINT_FLOAT_INFO()",
-                      XSTRING (PRINT_FLOAT_INFO ()));
-#endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: PRINT_FLOAT_INFO = 0x%08lx\n",
-                        (long) current_gdbarch->print_float_info
-                        /*PRINT_FLOAT_INFO ()*/);
-#endif
+                        "gdbarch_dump: print_float_info = 0x%08lx\n",
+                        (long) current_gdbarch->print_float_info);
 #ifdef PROLOGUE_FRAMELESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3007,7 +2997,7 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_print_float_info (struct gdbarch *gdbarch)
+gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->print_float_info == 0)
@@ -3015,7 +3005,7 @@ gdbarch_print_float_info (struct gdbarch *gdbarch)
                     "gdbarch: gdbarch_print_float_info invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_print_float_info called\n");
-  gdbarch->print_float_info ();
+  gdbarch->print_float_info (gdbarch, file, frame);
 }
 
 void

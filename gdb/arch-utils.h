@@ -142,7 +142,9 @@ extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
-extern void default_print_float_info (void);
+extern void default_print_float_info (struct gdbarch *gdbarch,
+				      struct ui_file *file,
+				      struct frame_info *frame);
 
 /* Assume that the world is sane, a registers raw and virtual size
    both match its type.  */

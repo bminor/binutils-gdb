@@ -789,22 +789,9 @@ extern void set_gdbarch_do_registers_info (struct gdbarch *gdbarch, gdbarch_do_r
 #endif
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (PRINT_FLOAT_INFO)
-#define PRINT_FLOAT_INFO() (default_print_float_info ())
-#endif
-
-typedef void (gdbarch_print_float_info_ftype) (void);
-extern void gdbarch_print_float_info (struct gdbarch *gdbarch);
+typedef void (gdbarch_print_float_info_ftype) (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame);
+extern void gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame);
 extern void set_gdbarch_print_float_info (struct gdbarch *gdbarch, gdbarch_print_float_info_ftype *print_float_info);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PRINT_FLOAT_INFO)
-#error "Non multi-arch definition of PRINT_FLOAT_INFO"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PRINT_FLOAT_INFO)
-#define PRINT_FLOAT_INFO() (gdbarch_print_float_info (current_gdbarch))
-#endif
-#endif
 
 /* MAP a GDB RAW register number onto a simulator register number.  See
    also include/...-sim.h. */
