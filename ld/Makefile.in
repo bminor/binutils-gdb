@@ -25,15 +25,17 @@ DEBUG	= -g
 
 SCRIPTS = ld-gld68k.script ld-gld68k-Ur.script ld-gld68k-r.script \
 	ld-gld.script ld-gld-Ur.script ld-gld-r.script ld-lnk960.script \
-	ld-lnk960-r.script ld-gld960.script
+	ld-lnk960-r.script ld-gld960.script \
+	ld-gldm88kbcs.script ld-gldm88kbcs-Ur.script ld-gldm88kbcs-r.script
 
 PROCESSED_SCRIPTS = ld-gld68k.x ld-gld68k-Ur.x ld-gld68k-r.x ld-gld.x \
-	ld-gld-Ur.x ld-gld-r.x ld-lnk960.x ld-lnk960-r.x ld-gld960.x
+	ld-gld-Ur.x ld-gld-r.x ld-lnk960.x ld-lnk960-r.x ld-gld960.x \
+	ld-gldm88kbcs.x ld-gldm88kbcs-Ur.x ld-gldm88kbcs-r.x
 
 #### target and host dependent Makefile fragments come in here.
 ###
 
-CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES)
+CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES) $(CDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
 .SUFFIXES: .y .x .script $(SUFFIXES)
@@ -58,6 +60,7 @@ LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
+	ld-gldm88kbcs.o \
 	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ld-vanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
@@ -66,6 +69,7 @@ HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldmain.c ldwrite.c ld-lnk960.c ld-gld.c ld-gld68k.c \
+	ld-gldm88kbcs.c \
 	ld-gld960.c ld-emul.c ldversion.c ldmisc.c ldexp.c ldsym.c ldfile.c ld-vanilla.c
 
 GENERATED_SOURCES=ldgram.tab.c ldlex.c ldgram.tab.h y.tab.h
@@ -128,6 +132,7 @@ ldlang.o: ldlang.c ldgram.tab.h
 
 ld-gld68k.o: $(PROCESSED_SCRIPTS) ld-gld68k.c
 ld-gld960.o: $(PROCESSED_SCRIPTS) ld-gld960.c
+ld-gldm88kbcs.o: $(PROCESSED_SCRIPTS) ld-gldm88kbcs.c
 ld-emul.o: ld-emul.c
 ld-vanilla.o: ld-vanilla.c
 ld-lnk960.o: $(PROCESSED_SCRIPTS) ld-lnk960.c

@@ -326,7 +326,7 @@ bfd_vma dot;
 					 sdef->section->vma : 0));
 		      }
 		  else {
-		    result = new_rel(sdef->value, os);
+		    result = new_rel(sdef->value + sdef->section->output_offset, os);
 		  }
 		}
 	      }

@@ -1015,6 +1015,7 @@ DEFUN(print_input_section,(in),
 	else {
 	  printf("%s", abfd->filename);
 	}
+	printf("(%d bytes)", bfd_alloc_size(abfd));
 	print_nl();
 
 	/* Find all the symbols in this file defined in this section */
@@ -2237,3 +2238,4 @@ CONST char *format)
 {
   output_target = format;
 }
+

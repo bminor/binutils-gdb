@@ -333,3 +333,20 @@ DEFUN(ldfile_add_arch,(in_name),
 
 }
 #endif
+
+/* Set the output architecture */
+void
+DEFUN(ldfile_set_output_arch,(string),
+CONST char *string)
+{
+  enum bfd_architecture arch;
+  unsigned long machine;
+  if (bfd_scan_arch_mach(string, &arch, &machine) == true) {
+    ldfile_output_architecture = arch;
+    ldfile_output_machine = machine;
+    ldfile_output_machine_name = string;
+  }
+  else {
+    info("%P%F: Can't represent machine `%s'\n", string);
+  }
+}

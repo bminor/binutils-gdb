@@ -47,7 +47,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 int debug;
 
 
-extern boolean ldgram_in_defsym;
+static boolean ldgram_in_defsym;
 static boolean ldgram_had_equals;
 extern boolean ldgram_in_script;
 static char *command_line;
@@ -87,6 +87,7 @@ keyword_type keywords[] =
 "FILL",FILL,
 "STARTUP",STARTUP,
 "OUTPUT_FORMAT",OUTPUT_FORMAT,
+"OUTPUT_ARCH", OUTPUT_ARCH,
 "HLL",HLL,
 "SYSLIB",SYSLIB,
 "FLOAT",FLOAT,
@@ -125,7 +126,7 @@ lex_input()
       ldlex_input_stack = (FILE *)NULL;
       ldfile_input_filename = (char *)NULL;
       /* First char after script eof is a @ so that we can tell the grammer
-	 that we've eft */
+	 that we've left */
       thischar = '@';
 
     }
@@ -269,12 +270,13 @@ WHITE		[ \t]+
 
 %%
 
-"@" { return ENDSCRIPT; }
-"\ -defsym\ " { return OPTION_defsym; }
+"@" { return '}'; }
+"\ -defsym\ " { ldgram_in_defsym = true; return OPTION_defsym; }
 "\ -noinhibit_exec\ " { return OPTION_noinhibit_exec; }
 "\ -format\ " { return OPTION_format; }
 "\ -n\ "		{ return OPTION_n; }
 "\ -r\ "		{ return OPTION_r; }
+"\ -i\ "		{ return OPTION_r; }
 "\ -Ur\ "		{ return OPTION_Ur; }
 "\ -o\ "		{ return OPTION_o; }
 "\ -g\ "		{ return OPTION_g; }
@@ -293,6 +295,7 @@ WHITE		[ \t]+
 "\ -u\ "		{ return OPTION_u; }
 "\ -s\ "            { return OPTION_s; }
 "\ -S\ "            { return OPTION_S; }
+"\ -B{FILENAME}\ "    { /* Ignored */ }
 "\ -l"{FILENAME} {
 	 	yylval.name = buystring(yytext+3);
 		return OPTION_l; 
@@ -335,7 +338,12 @@ WHITE		[ \t]+
 		 return OPTION_Aarch;
 	       }
 
-" "		{ if (ldgram_had_equals == true) ldgram_in_defsym = false; }
+" "		{
+		 if (ldgram_had_equals == true) {
+			  ldgram_in_defsym = false;
+			  ldgram_had_equals = false;
+		  }
+	}
 "<<="		{ RTOKEN(LSHIFTEQ);}
 ">>="		{ RTOKEN(RSHIFTEQ);}
 "||"		{ RTOKEN(OROR);}
@@ -471,7 +479,18 @@ WHITE		[ \t]+
 	  }
 	  
 	}
-	
+	if(ldgram_in_script == true) {
+	  switch (ch) {
+	  case '*': 
+	  case '=': 
+	  case '+': 
+	  case '-': 
+	  case '!': 
+	  case '~': 
+	    goto quit;
+	  }
+        }
+
 	if (isalpha(ch) || isdigit(ch) || ch == '.'  || ch == '_'  ||
 	    ch == '/' || ch == '.' || ch == '+' || ch == '-' || ch =='=') {
 	  yytext[yyleng++] = ch;

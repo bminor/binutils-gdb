@@ -54,7 +54,6 @@ static void gld_before_parse()
   ldfile_add_library_path("/lib");
   ldfile_add_library_path("/usr/lib");
   ldfile_add_library_path("/usr/local/lib/lib");
-  ldfile_output_architecture = bfd_arch_sparc;
 }
 
 
@@ -81,8 +80,7 @@ static void
 gld_set_output_arch()
 {
   /* Set the output architecture and machine if possible */
-  unsigned long  machine = 0;
-  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, machine);
+  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, ldfile_output_machine);
 }
 
 static char *

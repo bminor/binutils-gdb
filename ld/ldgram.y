@@ -62,7 +62,6 @@ boolean had_script = false;
 boolean force_make_executable = false;
 
 boolean ldgram_in_script = false;
-boolean ldgram_in_defsym = false;
 boolean ldgram_had_equals = false;
 /* LOCALS */
 
@@ -96,7 +95,7 @@ boolean ldgram_had_equals = false;
 %token <name> NAME
 %type  <integer> length
 
-%right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ ANDEQ OREQ
+%right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ 
 %right <token> '?' ':'
 %left <token> OROR
 %left <token>  ANDAND
@@ -113,7 +112,7 @@ boolean ldgram_had_equals = false;
 %token <token> ALIGN_K BLOCK LONG SHORT BYTE
 %token SECTIONS  
 %token '{' '}'
-%token ALIGNMENT SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION
+%token ALIGNMENT SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
@@ -121,8 +120,8 @@ boolean ldgram_had_equals = false;
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S
 %token OPTION_format  OPTION_F OPTION_u
 
-%token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X
-%token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT OPTION_defsym
+%token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
+%token OPTION_v OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_A OPTION_R
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
@@ -152,11 +151,11 @@ command_line:
 	;
 
 command_line_option:
-		SCRIPT 
+		'{'
                  	{ ldgram_in_script = true; }
 		ifile_list 
 			{ ldgram_in_script = false; }
-		ENDSCRIPT
+		'}'
 	|	OPTION_v
 			{	
 			ldversion();
@@ -280,14 +279,11 @@ command_line_option:
 			}
 	|	OPTION_defsym 
 			{
-			ldgram_in_defsym = true;
-			ldgram_had_equals = false;
 			}
 		NAME 	 '='
 		exp_head 
 			{
 			lang_add_assignment(exp_assop($4,$3,$5));
-			ldgram_in_defsym = false;
 			}	
 	| '-' NAME
 		 { info("%P%F Unrecognised option -%s\n", $2);  }
@@ -303,7 +299,7 @@ command_line_option:
 
 script_file:
 	{ ldgram_in_script = true; }
-       ifile_list ENDSCRIPT
+       ifile_list '}'
         { ldgram_in_script = false; }
 
         ;
@@ -332,6 +328,8 @@ ifile_p1:
 		{ lang_add_output($3); }
         |       OUTPUT_FORMAT '(' NAME ')'
 		  { lang_add_output_format($3); }
+        |       OUTPUT_ARCH '(' NAME ')'
+		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = true ; }
 	|	INPUT '(' input_list ')'

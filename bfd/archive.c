@@ -65,13 +65,13 @@ boolean
 _bfd_generic_mkarchive (abfd)
      bfd *abfd;
 {
-  abfd->tdata =(PTR) zalloc (sizeof (struct artdata));
+  abfd->tdata = bfd_zalloc(abfd, sizeof (struct artdata));
 
   if (abfd->tdata == NULL) {
     bfd_error = no_memory;
     return false;
   }
-bfd_ardata(abfd)->cache = 0;
+  bfd_ardata(abfd)->cache = 0;
   return true;
 }
 
@@ -139,8 +139,7 @@ add_bfd_to_cache (arch_bfd, filepos, new_elt)
      bfd *arch_bfd, *new_elt;
      file_ptr filepos;
 {
-  struct ar_cache *new_cache = ((struct ar_cache *)
-				zalloc (sizeof (struct ar_cache)));
+  struct ar_cache *new_cache = ((struct ar_cache *)bfd_zalloc(arch_bfd,sizeof (struct ar_cache)));
 
   if (new_cache == NULL) {
     bfd_error = no_memory;
@@ -252,7 +251,7 @@ snarf_ar_hdr (abfd)
 	    allocsize += namelen + 1;
 	}
 
-    allocptr = zalloc (allocsize);
+    allocptr = bfd_zalloc(abfd, allocsize);
     if (allocptr == NULL) {
 	bfd_error = no_memory;
 	return NULL;
@@ -296,7 +295,6 @@ get_elt_at_filepos (archive, filepos)
   
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
   if (n_nfd == NULL) {
-    free (new_areldata);
     return NULL;
   }
   n_nfd->origin = bfd_tell (archive);
@@ -307,8 +305,6 @@ get_elt_at_filepos (archive, filepos)
     return n_nfd;
 
   /* huh? */
-  free (new_areldata);
-  free (n_nfd);
   return NULL;
 }
 
@@ -379,7 +375,7 @@ bfd_generic_archive_p (abfd)
   if (strncmp (armag, ARMAG, SARMAG)) return 0;
 #endif
 
-  bfd_set_ardata(abfd, (struct artdata *) zalloc (sizeof (struct artdata)));
+  bfd_set_ardata(abfd, (struct artdata *) bfd_zalloc(abfd,sizeof (struct artdata)));
 
   if (bfd_ardata (abfd)  == NULL) {
     bfd_error = no_memory;
@@ -389,14 +385,14 @@ bfd_generic_archive_p (abfd)
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
   
   if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))) {
-    free (bfd_ardata (abfd));
+    bfd_release(abfd, bfd_ardata (abfd));
     abfd->tdata = NULL;
     return 0;
   }
 
   /* armap could be left ungc'd! FIXME -- potential storage leak */
   if (!BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd))) {
-    free (bfd_ardata (abfd));
+    bfd_release(abfd, bfd_ardata (abfd));
     abfd->tdata = NULL;
     return 0;
   }
@@ -428,18 +424,16 @@ bfd_slurp_bsd_armap (abfd)
       mapdata = snarf_ar_hdr (abfd);
       if (mapdata == NULL) return false;
 
-      raw_armap = (int *) zalloc (mapdata->parsed_size);
+      raw_armap = (int *) bfd_zalloc(abfd,mapdata->parsed_size);
       if (raw_armap == NULL) {
 	  bfd_error = no_memory;
   byebye:
-	  free (mapdata);
 	  return false;
       }
 
       if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
 	  mapdata->parsed_size) {
 	  bfd_error = malformed_archive;
-	  free (raw_armap);
 	  goto byebye;
       }
 
@@ -457,7 +451,6 @@ bfd_slurp_bsd_armap (abfd)
       ardata->first_file_filepos = bfd_tell (abfd);
       /* Pad to an even boundary if you have to */
       ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
-      free (mapdata);
       bfd_has_map (abfd) = true;
   }
   return true;
@@ -492,11 +485,11 @@ bfd_slurp_coff_armap (abfd)
   mapdata = snarf_ar_hdr (abfd);
   if (mapdata == NULL) return false;
 
-  raw_armap = (int *) zalloc (mapdata->parsed_size);
+  raw_armap = (int *) bfd_alloc(abfd,mapdata->parsed_size);
   if (raw_armap == NULL) {
     bfd_error = no_memory;
   byebye:
-    free (mapdata);
+
     return false;
   }
 
@@ -504,7 +497,7 @@ bfd_slurp_coff_armap (abfd)
       mapdata->parsed_size) {
     bfd_error = malformed_archive;
   oops:
-    free (raw_armap);
+
     goto byebye;
   }
 
@@ -518,7 +511,7 @@ bfd_slurp_coff_armap (abfd)
     unsigned int carsym_size = (nsymz * sizeof (carsym));
     unsigned int ptrsize = (4 * nsymz);
     unsigned int i;
-    ardata->symdefs = (carsym *) zalloc (carsym_size + stringsize + 1);
+    ardata->symdefs = (carsym *) bfd_zalloc(abfd,carsym_size + stringsize + 1);
     if (ardata->symdefs == NULL) {
       bfd_error = no_memory;
       goto oops;
@@ -544,8 +537,7 @@ bfd_slurp_coff_armap (abfd)
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
-  free (raw_armap);
-  free (mapdata);
+
   bfd_has_map (abfd) = true;
   return true;
 }
@@ -580,18 +572,18 @@ _bfd_slurp_extended_name_table (abfd)
   if (namedata == NULL) return false;
   
   
-  bfd_ardata (abfd)->extended_names = zalloc (namedata->parsed_size);
+  bfd_ardata (abfd)->extended_names = bfd_zalloc(abfd,namedata->parsed_size);
   if (bfd_ardata (abfd)->extended_names == NULL) {
     bfd_error = no_memory;
   byebye:
-    free (namedata);
+
     return false;
   }
 
   if (bfd_read ((PTR)bfd_ardata (abfd)->extended_names, 1,
 		namedata->parsed_size, abfd) != namedata->parsed_size) {
     bfd_error = malformed_archive;
-    free (bfd_ardata (abfd)->extended_names);
+
     bfd_ardata (abfd)->extended_names = NULL;
     goto byebye;
   }
@@ -609,7 +601,7 @@ _bfd_slurp_extended_name_table (abfd)
   bfd_ardata (abfd)->first_file_filepos +=
     (bfd_ardata (abfd)->first_file_filepos) %2;
 
-  free (namedata);
+
 }
   return true;
 }
@@ -656,7 +648,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 
   if (total_namelen == 0) return true;
 
-  *tabloc = zalloc (total_namelen);
+  *tabloc = bfd_zalloc (abfd,total_namelen);
   if (*tabloc == NULL) {
     bfd_error = no_memory;
     return false;
@@ -701,8 +693,9 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 */
 
 struct areltdata *
-bfd_ar_hdr_from_filesystem (filename)
-     char *filename;
+DEFUN(bfd_ar_hdr_from_filesystem, (abfd,filename),
+      bfd* abfd AND
+      CONST char *filename)
 {
   struct stat status;
   struct areltdata *ared;
@@ -715,7 +708,7 @@ bfd_ar_hdr_from_filesystem (filename)
     return NULL;
   }
 
-  ared = (struct areltdata *) zalloc (sizeof (struct ar_hdr) +
+  ared = (struct areltdata *) bfd_zalloc(abfd, sizeof (struct ar_hdr) +
 				      sizeof (struct areltdata));
   if (ared == NULL) {
     bfd_error = no_memory;
@@ -751,11 +744,12 @@ bfd_ar_hdr_from_filesystem (filename)
 }
 
 struct ar_hdr *
-bfd_special_undocumented_glue (filename)
-     char *filename;
+DEFUN(bfd_special_undocumented_glue, (abfd, filename),
+      bfd *abfd AND
+      char *filename)
 {
 
-  return (struct ar_hdr *) bfd_ar_hdr_from_filesystem (filename) -> arch_header;
+  return (struct ar_hdr *) bfd_ar_hdr_from_filesystem (abfd, filename) -> arch_header;
 }
 
 
@@ -916,7 +910,7 @@ _bfd_write_archive_contents (arch)
     }
     if (!current->arelt_data) {
       current->arelt_data =
-	  (PTR) bfd_ar_hdr_from_filesystem (current->filename);
+	  (PTR) bfd_ar_hdr_from_filesystem (arch, current->filename);
       if (!current->arelt_data) return false;
 
       /* Put in the file name */
@@ -951,7 +945,6 @@ _bfd_write_archive_contents (arch)
   if (makemap && hasobjects) {
 
     if (compute_and_write_armap (arch, elength) != true) {
-      if (etable) free (etable);
       return false;
     }
   }
@@ -968,7 +961,7 @@ _bfd_write_archive_contents (arch)
     bfd_write (&hdr, 1, sizeof (struct ar_hdr), arch);
     bfd_write (etable, 1, elength, arch);
     if ((elength % 2) == 1) bfd_write ("\n", 1, 1, arch);
-    if (etable) free (etable);
+
   }
 
   for (current = arch->archive_head; current; current = current->next) {
@@ -1018,7 +1011,7 @@ compute_and_write_armap (arch, elength)
   if (elength != 0) elength += sizeof (struct ar_hdr);
   elength += elength %2 ;
 
-  map = (struct orl *) zalloc (orl_max * sizeof (struct orl));
+  map = (struct orl *) bfd_zalloc (arch,orl_max * sizeof (struct orl));
   if (map == NULL) {
     bfd_error = no_memory;
     return false;
@@ -1039,7 +1032,7 @@ compute_and_write_armap (arch, elength)
 	  storage = get_symtab_upper_bound (current);
 	  if (storage != 0) {
 
-	    syms = (asymbol **) zalloc (storage);
+	    syms = (asymbol **) bfd_zalloc (arch,storage);
 	    if (syms == NULL) {
 	      bfd_error = no_memory; /* FIXME -- memory leak */
 	      return false;
@@ -1057,7 +1050,7 @@ compute_and_write_armap (arch, elength)
 		if (orl_count == orl_max) 
 		    {
 		      orl_max *= 2;
-		      map = (struct orl *) realloc ((char *) map,
+		      map = (struct orl *) bfd_realloc (arch, (char *) map,
 						    orl_max * sizeof (struct orl));
 		    }
 
@@ -1075,11 +1068,11 @@ compute_and_write_armap (arch, elength)
   /* OK, now we have collected all the data, let's write them out */
   if (!BFD_SEND (arch, write_armap,
 		 (arch, elength, map, orl_count, stridx))) {
-    free (map);
+
     return false;
   }
 
-  free (map);
+
   return true;
 }
 

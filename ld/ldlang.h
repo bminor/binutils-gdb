@@ -341,4 +341,4 @@ PROTO(lang_output_section_statement_type *,
 lang_output_section_statement_lookup,(CONST char * CONST name));
 
 PROTO(void, ldlang_add_undef,(CONST char *CONST name));
-
+PROTO(void, lang_add_output_format,(CONST char *));

@@ -33,6 +33,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 
 extern ld_emulation_xfer_type ld_lnk960_emulation;
+extern ld_emulation_xfer_type ld_gldm88kbcs_emulation;
 extern ld_emulation_xfer_type ld_gld_emulation;
 extern ld_emulation_xfer_type ld_vanilla_emulation;
 extern ld_emulation_xfer_type ld_gld68k_emulation;
@@ -111,6 +112,9 @@ char *target;
   else if (strcmp(target,GLD960_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld960_emulation;
   }
+else if (strcmp(target,GLDM88KBCS_EMULATION_NAME)==0) {
+  ld_emulation = &ld_gldm88kbcs_emulation;
+}
 #ifndef GNU960
   else if (strcmp(target,GLD_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld_emulation;
