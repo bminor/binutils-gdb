@@ -37,6 +37,8 @@ mh-sco
 mh-solaris
 mh-sysv
 mh-sysv4
+mt-OSE68000
+mt-OSE68k
 mt-a29k
 mt-ebmon29k
 mt-os68k
