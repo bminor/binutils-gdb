@@ -6,7 +6,7 @@ SUBDIRS = po
 
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
-MKDEP = mkdep
+MKDEP = gcc -MM
 
 lib_LTLIBRARIES = libopcodes.la
 
@@ -191,7 +191,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
-	libopcodes.a stamp-lib dep.sed DEP DEP1
+	libopcodes.a stamp-lib dep.sed DEP DEP1 DEP2
 
 
 
@@ -204,17 +204,15 @@ CLEANFILES = \
 
 DEP: dep.sed $(CFILES) $(HFILES) config.h
 	rm -f DEP1
-	$(MAKE) MKDEP=$(MKDEP) DEP1
-	sed -f dep.sed < DEP1 > DEP
+	$(MAKE) MKDEP="$(MKDEP)" DEP1
+	sed -f dep.sed < DEP1 > $@
+	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> $@
 
 DEP1: $(CFILES)
-	rm -f DEP2 DEP2a
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
-	echo > DEP2a
-	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
-	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
-	rm -f DEP2a
-	$(srcdir)/../move-if-change DEP2 DEP1
+	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP2
+	$(MKDEP) $(INCLUDES) $(CFLAGS) $? >> DEP2
+	mv -f DEP2 $@
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -257,11 +255,13 @@ arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   opintl.h
 arc-opc.lo: arc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h \
   opintl.h
-arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
+arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) arm-opc.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/arm.h \
+  $(INCDIR)/elf/reloc-macros.h
+avr-dis.lo: avr-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h opintl.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -300,6 +300,9 @@ h8500-dis.lo: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
 hppa-dis.lo: hppa-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h
+i370-dis.lo: i370-dis.c $(INCDIR)/ansidecl.h sysdep.h \
+  config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/i370.h
+i370-opc.lo: i370-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/i370.h
 i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
 i960-dis.lo: i960-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \

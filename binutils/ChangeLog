@@ -1,3 +1,19 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (MKDEP): Use gcc -MM rather than mkdep.
+	(DEP): Quote when passing vars to sub-make.  Add warning
+	message to end.
+	(DEP1): Rewrite for "gcc -MM".
+	(CLEANFILES): Add DEP2.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
+2000-04-04  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (GENERATED_HFILES): Add rcparse.h
+	(arparse.h): Depend on arparse.c
+	(defparse.h, nlmheader.h, rcparse.h, sysinfo.h): Similarly.
+
 2000-04-03  H.J. Lu  (hjl@gnu.org)
 
 	* size.c (usage): Use REPORT_BUGS_TO.
@@ -13,7 +29,7 @@
 	(long_options): Use OPTION_TARGET rather than 200.
 	(main): Likewise.
 
-	* objcopy.c (copy_usage): Likewise.
+	* objcopy.c (copy_usage): Use REPORT_BUGS_TO.
 	(strip_usage): Likewise.
 	* objdump.c (usage): Likewise.
 	* readelf.c (usage): Likewise.

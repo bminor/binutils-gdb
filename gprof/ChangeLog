@@ -1,4 +1,16 @@
-2000-04-01  Alan Modra  <alan@linuxcare.com.au>
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (BASEDIR): Define.
+	(BFDDIR): Define.
+	(INCDIR): Define.
+	(MKDEP): Define.
+	(INCLUDES): Add "-I."
+	(DEP, DEP1, dep.sed, dep, dep-in, dep-am): New targets.
+	(CLEANFILES): Define.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
+2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* gprof.h: #include "bin-bugs.h".
 	* gprof.c (usage): Use REPORT_BUGS_TO.

@@ -12,7 +12,7 @@ tooldir = $(exec_prefix)/$(target_alias)
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
 
-MKDEP = $${srcdir}/../mkdep
+MKDEP = gcc -MM
 
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
@@ -590,7 +590,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 	testsuite/*.o testsuite/*.out testsuite/gas.log testsuite/gas.sum \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
-CLEANFILES = dep.sed DEPTC DEPOBJ DEP2 DEP1 DEPA DEP DEPDIR
+CLEANFILES = dep.sed DEPTC DEPTCA DEPOBJ DEPOBJA DEP2 DEP2a DEP1 DEPA DEP DEPDIR
 
 .PHONY: install-exec-local install-data-local
 .PHONY: install-exec-bindir install-exec-tooldir
@@ -704,7 +704,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 DEP: dep.sed $(DEP_FILE_DEPS) DEPTC DEPOBJ DEP2
 	rm -f DEP1
 	srcdir=`cd $(srcdir); pwd`; \
-	$(MAKE) MKDEP=$(MKDEP) srcdir=$${srcdir} VPATH=$${srcdir} DEP1
+	$(MAKE) MKDEP="$(MKDEP)" srcdir="$${srcdir}" VPATH="$${srcdir}" DEP1
 	rm -rf DEPDIR
 	sed -f dep.sed < DEP1 > DEPA
 	sed -f dep.sed < DEPTC >> DEPA
@@ -714,9 +714,8 @@ DEP: dep.sed $(DEP_FILE_DEPS) DEPTC DEPOBJ DEP2
 	echo '$$(TARG_CPU_O): $$(DEPTC_@target''_cpu_type@_@obj''_format@)' >> DEPA
 	echo '$$(OBJ_FORMAT_O): $$(DEPOBJ_@target''_cpu_type@_@obj''_format@)' >> DEPA
 	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
-	$(SHELL) $(srcdir)/../move-if-change DEPA DEP
+	mv -f DEPA $@
 
-# This rule needs a mkdep that runs "gcc -MM".
 DEP1: $(CFILES) $(MULTI_CFILES)
 	if [ -d DEPDIR ]; then true; else mkdir DEPDIR; fi
 	srcdir=`cd $(srcdir); pwd`; \
@@ -727,9 +726,9 @@ DEP1: $(CFILES) $(MULTI_CFILES)
 	echo '' > itbl-cpu.h; \
 	echo '' > itbl-parse.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP; \
-	$(MKDEP) -f DEP -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $?
-	sed -e '/IF YOU PUT ANYTHING/,$$d' < DEPDIR/DEP > DEP1
-	rm -f DEPDIR/DEP
+	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP; \
+	$(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $? >> DEP
+	mv -f DEPDIR/DEP $@
 
 # Work out the special dependencies for the tc-*.c files.
 DEPTC: $(TARGET_CPU_CFILES)
@@ -749,12 +748,8 @@ DEPTC: $(TARGET_CPU_CFILES)
 	      echo '#include "opcodes/'"$${c}"'-desc.h"' > cgen-desc.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/tc-$${c}.c dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP; \
-	      $(MKDEP) -f DEP -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/DEPTC_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < DEP >> ../DEPTCA; \
+	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	        sed -e "s/dummy.o: dummy.c/DEPTC_$${c}_$${o} =/" >> ../DEPTCA; \
 	      rm -f dummy.c; \
 	    else true; fi; \
 	  done; \
@@ -795,12 +790,8 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	      echo '' > itbl-parse.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/obj-$${o}.c dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP; \
-	      $(MKDEP) -f DEP -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/DEPOBJ_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < DEP >> ../DEPOBJA; \
+	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	        sed -e "s/dummy.o: dummy.c/DEPOBJ_$${c}_$${o} =/" >> ../DEPOBJA; \
 	      rm -f dummy.c; \
 	    else true; fi; \
 	  done; \
@@ -838,17 +829,13 @@ DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	    if [ x$${valid} = xyes ]; then \
 	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
 	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
-	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP; \
-	      $(MKDEP) -f DEP -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c; \
-	      sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" \
-		  -e '1,/DO NOT PUT ANYTHING AFTER/d' \
-		  -e '/IF YOU PUT ANYTHING/,$$d' \
-		  -e '/^$$/d' < DEP >> ../DEP2a; \
+	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	        sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" >> ../DEP2a; \
 	    else true; fi; \
 	  done; \
 	done
 	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> DEP2a
-	# We don't try to handle all multi cases.
+# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
 	  if [ x$${valid} = xyes ]; then \
@@ -890,630 +877,742 @@ dep-am: DEP
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-
-app.o: app.c
-as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
-  sb.h macro.h
-atof-generic.o: atof-generic.c
-bignum-copy.o: bignum-copy.c
-cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
-depend.o: depend.c
-dwarf2dbg.o: dwarf2dbg.c dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/elf/dwarf2.h
-ecoff.o: ecoff.c ecoff.h
-ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
-expr.o: expr.c $(INCDIR)/obstack.h
-flonum-copy.o: flonum-copy.c
+app.o: app.c $(INCDIR)/bin-bugs.h emul.h
+as.o: as.c $(INCDIR)/bin-bugs.h emul.h subsegs.h $(INCDIR)/obstack.h \
+  output-file.h sb.h macro.h
+atof-generic.o: atof-generic.c $(INCDIR)/bin-bugs.h \
+  emul.h
+bignum-copy.o: bignum-copy.c $(INCDIR)/bin-bugs.h emul.h
+cond.o: cond.c $(INCDIR)/bin-bugs.h emul.h macro.h \
+  sb.h $(INCDIR)/obstack.h
+depend.o: depend.c $(INCDIR)/bin-bugs.h emul.h
+dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/bin-bugs.h emul.h \
+  dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+ecoff.o: ecoff.c $(INCDIR)/bin-bugs.h emul.h ecoff.h
+ehopt.o: ehopt.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+expr.o: expr.c $(INCDIR)/bin-bugs.h emul.h $(INCDIR)/obstack.h
+flonum-copy.o: flonum-copy.c $(INCDIR)/bin-bugs.h emul.h
 flonum-konst.o: flonum-konst.c
 flonum-mult.o: flonum-mult.c
-frags.o: frags.c subsegs.h $(INCDIR)/obstack.h
-hash.o: hash.c $(INCDIR)/obstack.h
-input-file.o: input-file.c input-file.h
-input-scrub.o: input-scrub.c input-file.h sb.h
-listing.o: listing.c input-file.h subsegs.h
-literal.o: literal.c subsegs.h $(INCDIR)/obstack.h
+frags.o: frags.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h
+hash.o: hash.c $(INCDIR)/bin-bugs.h emul.h $(INCDIR)/obstack.h
+input-file.o: input-file.c $(INCDIR)/bin-bugs.h emul.h \
+  input-file.h
+input-scrub.o: input-scrub.c $(INCDIR)/bin-bugs.h emul.h \
+  input-file.h sb.h
+listing.o: listing.c $(INCDIR)/bin-bugs.h emul.h input-file.h \
+  subsegs.h
+literal.o: literal.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h
 macro.o: macro.c sb.h macro.h
-messages.o: messages.c
-output-file.o: output-file.c output-file.h
-read.o: read.c subsegs.h $(INCDIR)/obstack.h sb.h macro.h \
-  ecoff.h
+messages.o: messages.c $(INCDIR)/bin-bugs.h emul.h
+output-file.o: output-file.c $(INCDIR)/bin-bugs.h emul.h \
+  output-file.h
+read.o: read.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h sb.h macro.h ecoff.h
 sb.o: sb.c sb.h
-stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
-subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
-symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h \
-  struc-symbol.h
-write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
-gasp.o: gasp.c sb.h macro.h
-itbl-ops.o: itbl-ops.c itbl-ops.h itbl-parse.h
-e-i386aout.o: $(srcdir)/config/e-i386aout.c emul.h \
-  emul-target.h
-e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
-  emul-target.h
-e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h
-e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c emul.h \
-  emul-target.h
-e-mipself.o: $(srcdir)/config/e-mipself.c emul.h emul-target.h
-
-DEPTC_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/a29k.h
-DEPTC_a29k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-a29k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/a29k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/opcode/a29k.h
-DEPTC_a29k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-a29k.h $(INCDIR)/opcode/a29k.h
-DEPTC_alpha_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-alpha.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h ecoff.h $(INCDIR)/opcode/alpha.h \
+stabs.o: stabs.c $(INCDIR)/bin-bugs.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h ecoff.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+subsegs.o: subsegs.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h
+symbols.o: symbols.c $(INCDIR)/bin-bugs.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h struc-symbol.h
+write.o: write.c $(INCDIR)/bin-bugs.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h output-file.h
+gasp.o: gasp.c $(INCDIR)/bin-bugs.h sb.h macro.h
+itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/bin-bugs.h \
+  emul.h itbl-parse.h
+e-i386aout.o: $(srcdir)/config/e-i386aout.c $(INCDIR)/bin-bugs.h \
+  emul.h emul-target.h
+e-i386coff.o: $(srcdir)/config/e-i386coff.c $(INCDIR)/bin-bugs.h \
+  emul.h emul-target.h
+e-i386elf.o: $(srcdir)/config/e-i386elf.c $(INCDIR)/bin-bugs.h \
+  emul.h emul-target.h
+e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c $(INCDIR)/bin-bugs.h \
+  emul.h emul-target.h
+e-mipself.o: $(srcdir)/config/e-mipself.c $(INCDIR)/bin-bugs.h \
+  emul.h emul-target.h
+DEPTC_a29k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-a29k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/a29k.h
+DEPTC_a29k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-a29k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/a29k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/a29k.h
+DEPTC_a29k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-a29k.h \
+  emul.h $(INCDIR)/opcode/a29k.h
+DEPTC_alpha_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-alpha.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h struc-symbol.h ecoff.h $(INCDIR)/opcode/alpha.h \
   $(srcdir)/config/atof-vax.c
-DEPTC_alpha_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-alpha.h \
+DEPTC_alpha_ecoff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-ecoff.h \
+  $(srcdir)/config/tc-alpha.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h emul.h subsegs.h $(INCDIR)/obstack.h \
+  struc-symbol.h $(INCDIR)/opcode/alpha.h $(srcdir)/config/atof-vax.c
+DEPTC_alpha_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h struc-symbol.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/alpha.h \
-  $(srcdir)/config/atof-vax.c
-DEPTC_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h subsegs.h \
-  $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/opcode/alpha.h $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \
   $(srcdir)/config/atof-vax.c
-DEPTC_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h \
-  subsegs.h $(INCDIR)/obstack.h ecoff.h $(INCDIR)/opcode/alpha.h \
-  $(srcdir)/config/atof-vax.c
-DEPTC_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h \
-  $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h
-DEPTC_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h subsegs.h \
+DEPTC_alpha_evax = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-evax.h \
+  $(srcdir)/config/tc-alpha.h emul.h subsegs.h $(INCDIR)/obstack.h \
+  struc-symbol.h ecoff.h $(INCDIR)/opcode/alpha.h $(srcdir)/config/atof-vax.c
+DEPTC_arc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-arc.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h $(INCDIR)/elf/arc.h \
   $(INCDIR)/elf/reloc-macros.h
-DEPTC_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h
-DEPTC_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/arm.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h
-DEPTC_arm_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
-DEPTC_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/d10v.h \
-  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h
-DEPTC_d10v_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d10v.h subsegs.h \
+DEPTC_arc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h \
+  $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_arm_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-arm.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+DEPTC_arm_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-arm.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/arm.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+DEPTC_arm_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/arm.h \
+  $(INCDIR)/elf/reloc-macros.h
+DEPTC_d10v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-d10v.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/d10v.h $(INCDIR)/elf/ppc.h \
   $(INCDIR)/elf/reloc-macros.h
-DEPTC_d30v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d30v.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/d30v.h
-DEPTC_d30v_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d30v.h subsegs.h \
+DEPTC_d10v_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d10v.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/d10v.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_d30v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-d30v.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/d30v.h
-DEPTC_fr30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-fr30.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h $(srcdir)/../opcodes/fr30-desc.h \
-  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/fr30-opc.h \
-  cgen.h
-DEPTC_fr30_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-fr30.h subsegs.h \
+DEPTC_d30v_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d30v.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/d30v.h
+DEPTC_fr30_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-fr30.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/symcat.h $(srcdir)/../opcodes/fr30-desc.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/fr30-opc.h \
   cgen.h
-DEPTC_h8300_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-h8300.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/h8300.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h
-DEPTC_h8300_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h
-DEPTC_h8500_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-h8500.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/h8500.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/h8500-opc.h
-DEPTC_h8500_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8500.h subsegs.h \
-  $(INCDIR)/obstack.h $(srcdir)/../opcodes/h8500-opc.h
-DEPTC_hppa_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-hppa.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(BFDDIR)/libbfd.h \
+DEPTC_fr30_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-fr30.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h \
+  $(srcdir)/../opcodes/fr30-desc.h $(INCDIR)/opcode/cgen.h \
+  $(srcdir)/../opcodes/fr30-opc.h cgen.h
+DEPTC_h8300_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-h8300.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/h8300.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h
+DEPTC_h8300_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h
+DEPTC_h8500_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-h8500.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/h8500.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/h8500-opc.h
+DEPTC_h8500_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8500.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/h8500-opc.h
+DEPTC_hppa_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-hppa.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(BFDDIR)/libbfd.h \
   $(INCDIR)/opcode/hppa.h
-DEPTC_hppa_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-hppa.h $(BFDDIR)/elf32-hppa.h \
-  $(BFDDIR)/libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  subsegs.h $(INCDIR)/obstack.h $(BFDDIR)/libbfd.h $(INCDIR)/opcode/hppa.h
-DEPTC_i386_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i386.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/i386.h
-DEPTC_i386_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i386.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i386.h
-DEPTC_i386_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/i386.h
-DEPTC_i860_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i860.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/i860.h
-DEPTC_i860_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i860.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/opcode/i860.h
-DEPTC_i860_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i860.h $(INCDIR)/opcode/i860.h
-DEPTC_i960_bout = $(srcdir)/config/obj-bout.h $(srcdir)/config/tc-i960.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/i960.h
-DEPTC_i960_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i960.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/i960.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i960.h
-DEPTC_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h $(INCDIR)/obstack.h \
+DEPTC_i370_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i370.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h struc-symbol.h $(INCDIR)/opcode/i370.h
+DEPTC_i370_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i370.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h struc-symbol.h \
+  $(INCDIR)/opcode/i370.h $(INCDIR)/elf/i370.h
+DEPTC_i386_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-i386.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i386.h
+DEPTC_i386_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i386.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/i386.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i386.h
+DEPTC_i386_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i386.h
+DEPTC_i860_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-i860.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/i860.h
+DEPTC_i860_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i860.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/opcode/i860.h
+DEPTC_i860_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i860.h \
+  emul.h $(INCDIR)/opcode/i860.h
+DEPTC_i960_bout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-bout.h \
+  $(srcdir)/config/tc-i960.h emul.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/i960.h
-DEPTC_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h $(srcdir)/../opcodes/m32r-desc.h \
-  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/m32r-opc.h \
-  cgen.h
-DEPTC_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
+DEPTC_i960_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i960.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/i960.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i960.h
+DEPTC_i960_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h \
+  emul.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i960.h
+DEPTC_m32r_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m32r.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/symcat.h $(srcdir)/../opcodes/m32r-desc.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/m32r-opc.h \
   cgen.h
-DEPTC_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
-DEPTC_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/m68k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
-  $(srcdir)/config/m68k-parse.h
-DEPTC_m68k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h \
-  $(INCDIR)/elf/m68k.h $(INCDIR)/elf/reloc-macros.h
-DEPTC_m68k_hp300 = $(srcdir)/config/obj-hp300.h $(srcdir)/config/obj-aout.h \
+DEPTC_m32r_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h \
+  $(srcdir)/../opcodes/m32r-desc.h $(INCDIR)/opcode/cgen.h \
+  $(srcdir)/../opcodes/m32r-opc.h cgen.h
+DEPTC_m68k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
   $(srcdir)/config/m68k-parse.h
-DEPTC_m88k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m88k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/m88k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/config/m88k-opcode.h
-DEPTC_m88k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m88k.h subsegs.h \
-  $(INCDIR)/obstack.h $(srcdir)/config/m88k-opcode.h
-DEPTC_mcore_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mcore.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/mcore.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mcore-opc.h
-DEPTC_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h subsegs.h \
-  $(INCDIR)/obstack.h $(srcdir)/../opcodes/mcore-opc.h \
+DEPTC_m68k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m68k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/m68k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
+  $(srcdir)/config/m68k-parse.h
+DEPTC_m68k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
+  $(srcdir)/config/m68k-parse.h $(INCDIR)/elf/m68k.h \
+  $(INCDIR)/elf/reloc-macros.h
+DEPTC_m68k_hp300 = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-hp300.h \
+  $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
+DEPTC_m88k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m88k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/m88k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/config/m88k-opcode.h
+DEPTC_m88k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m88k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/config/m88k-opcode.h
+DEPTC_mcore_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mcore.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/mcore.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mcore-opc.h
+DEPTC_mcore_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/mcore-opc.h \
   $(INCDIR)/elf/mcore.h $(INCDIR)/elf/reloc-macros.h
-DEPTC_mips_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-mips.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/mips.h itbl-ops.h ecoff.h $(INCDIR)/coff/sym.h \
-  $(INCDIR)/coff/ecoff.h
-DEPTC_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h \
-  itbl-ops.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
-DEPTC_mips_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-mips.h \
-  ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h \
-  itbl-ops.h
-DEPTC_mips_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+DEPTC_mips_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-mips.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h \
+  itbl-ops.h $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h itbl-ops.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h ecoff.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
-DEPTC_mn10200_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10200.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10200.h
-DEPTC_mn10200_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+DEPTC_mips_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mips.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/mipspe.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h \
+  itbl-ops.h $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10200.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10200.h
-DEPTC_mn10300_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10300.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10300.h
-DEPTC_mn10300_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10300.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10300.h
-DEPTC_ns32k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-ns32k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/ns32k.h \
-  $(INCDIR)/obstack.h
-DEPTC_ns32k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ns32k.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/opcode/ns32k.h $(INCDIR)/obstack.h
-DEPTC_ns32k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h $(INCDIR)/opcode/ns32k.h \
-  $(INCDIR)/obstack.h
-DEPTC_pj_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pj.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/opcode/pj.h
-DEPTC_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h $(INCDIR)/opcode/pj.h
-DEPTC_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h
-DEPTC_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h $(INCDIR)/elf/ppc.h \
-  $(INCDIR)/elf/reloc-macros.h
-DEPTC_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h
-DEPTC_sh_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h subsegs.h \
-  $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h
-DEPTC_sparc_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-sparc.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/sparc.h
-DEPTC_sparc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sparc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sparc.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h
-DEPTC_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sparc.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h $(INCDIR)/elf/sparc.h \
-  $(INCDIR)/elf/reloc-macros.h
-DEPTC_tahoe_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tahoe.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/tahoe.h
-DEPTC_tahoe_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tahoe.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/tahoe.h
-DEPTC_tahoe_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tahoe.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/tahoe.h
-DEPTC_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/tic30.h
-DEPTC_tic30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic30.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic30.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/opcode/tic30.h
-DEPTC_tic30_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic30.h $(INCDIR)/opcode/tic30.h
-DEPTC_tic80_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic80.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/opcode/tic80.h
-DEPTC_tic80_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic80.h $(INCDIR)/opcode/tic80.h
-DEPTC_vax_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-vax.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
-DEPTC_vax_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-vax.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
-DEPTC_vax_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
-DEPTC_vax_vms = $(srcdir)/config/obj-vms.h $(srcdir)/config/tc-vax.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
-DEPTC_w65_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-w65.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/w65.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
-DEPTC_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
-  $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
-DEPTC_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
-DEPTC_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
-DEPTC_z8k_coff = $(srcdir)/../opcodes/z8k-opc.h $(srcdir)/config/obj-coff.h \
-  $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
-DEPTC_z8k_elf = $(srcdir)/../opcodes/z8k-opc.h $(srcdir)/config/obj-elf.h \
+  $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h ecoff.h \
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
+DEPTC_mips_ecoff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-ecoff.h \
+  $(srcdir)/config/tc-mips.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h emul.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/mips.h itbl-ops.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-z8k.h
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h \
+  $(INCDIR)/elf/reloc-macros.h
+DEPTC_mips_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mips.h \
+  itbl-ops.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h \
+  ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
+DEPTC_mn10200_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10200.h
+DEPTC_mn10200_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10200.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10200.h
+DEPTC_mn10300_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mn10300.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10300.h
+DEPTC_mn10300_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10300.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/mn10300.h
+DEPTC_ns32k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-ns32k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/ns32k.h $(INCDIR)/obstack.h
+DEPTC_ns32k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ns32k.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/opcode/ns32k.h \
+  $(INCDIR)/obstack.h
+DEPTC_ns32k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h \
+  emul.h $(INCDIR)/opcode/ns32k.h $(INCDIR)/obstack.h
+DEPTC_pj_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-pj.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/opcode/pj.h
+DEPTC_pj_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h \
+  emul.h $(INCDIR)/opcode/pj.h
+DEPTC_ppc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ppc.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h
+DEPTC_ppc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h \
+  $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_sh_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h
+DEPTC_sh_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/sh-opc.h \
+  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_sparc_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h
+DEPTC_sparc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-sparc.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sparc.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h
+DEPTC_sparc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sparc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/sparc.h \
+  $(INCDIR)/elf/sparc.h $(INCDIR)/elf/reloc-macros.h
+DEPTC_tahoe_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-tahoe.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h $(INCDIR)/opcode/tahoe.h
+DEPTC_tahoe_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tahoe.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/tahoe.h
+DEPTC_tahoe_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tahoe.h \
+  emul.h $(INCDIR)/obstack.h $(INCDIR)/opcode/tahoe.h
+DEPTC_tic30_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-tic30.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/tic30.h
+DEPTC_tic30_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tic30.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/tic30.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/tic30.h
+DEPTC_tic30_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic30.h \
+  emul.h $(INCDIR)/opcode/tic30.h
+DEPTC_tic80_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tic80.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/opcode/tic80.h
+DEPTC_tic80_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic80.h \
+  emul.h $(INCDIR)/opcode/tic80.h
+DEPTC_vax_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-vax.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/vax.h
+DEPTC_vax_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-vax.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(srcdir)/config/vax-inst.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
+DEPTC_vax_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h \
+  emul.h $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/vax.h
+DEPTC_vax_vms = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-vms.h \
+  $(srcdir)/config/tc-vax.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def emul.h $(srcdir)/config/vax-inst.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h
+DEPTC_w65_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-w65.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/w65.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
+DEPTC_w65_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
+DEPTC_v850_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-v850.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
+DEPTC_v850_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/v850.h
+DEPTC_z8k_coff = $(srcdir)/../opcodes/z8k-opc.h $(INCDIR)/bin-bugs.h \
+  $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h emul.h
+DEPTC_z8k_elf = $(srcdir)/../opcodes/z8k-opc.h $(INCDIR)/bin-bugs.h \
+  $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(srcdir)/config/tc-z8k.h emul.h
 DEPTC_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h \
   $(BFDDIR)/som.h
 DEPTC_i386_multi = $(DEPTC_i386_coff) $(DEPTC_i386_elf)
 DEPTC_mips_multi = $(DEPTC_mips_coff) $(DEPTC_mips_ecoff) \
   $(DEPTC_mips_elf)
-DEPOBJ_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_a29k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-a29k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/a29k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_a29k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-a29k.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_alpha_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-alpha.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_alpha_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-alpha.h \
-  ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(BFDDIR)/libecoff.h
-DEPOBJ_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h subsegs.h \
-  $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \
+DEPOBJ_a29k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-a29k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_a29k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-a29k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/a29k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_a29k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-a29k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_alpha_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-alpha.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_alpha_ecoff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-ecoff.h \
+  $(srcdir)/config/tc-alpha.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h emul.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(BFDDIR)/libecoff.h
+DEPOBJ_alpha_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/aout/aout64.h
-DEPOBJ_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h
-DEPOBJ_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/arm.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_arm_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_d10v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d10v.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_d10v_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d10v.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_d30v_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-d30v.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_d30v_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d30v.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_fr30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-fr30.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_fr30_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-fr30.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_h8300_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-h8300.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/h8300.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_h8300_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_h8500_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-h8500.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/h8500.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_h8500_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8500.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_hppa_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-hppa.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_hppa_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-hppa.h $(BFDDIR)/elf32-hppa.h \
-  $(BFDDIR)/libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_i386_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i386.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_i386_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i386.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_i386_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_i860_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i860.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_i860_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i860.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_i860_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i860.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_i960_bout = $(srcdir)/config/obj-bout.h $(srcdir)/config/tc-i960.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_i960_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i960.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/i960.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/m68k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_m68k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_m68k_hp300 = $(srcdir)/config/obj-aout.c $(srcdir)/config/obj-hp300.h \
+DEPOBJ_alpha_evax = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-evax.h \
+  $(srcdir)/config/tc-alpha.h emul.h
+DEPOBJ_arc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-arc.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_arc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_arm_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-arm.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_arm_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-arm.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/arm.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_arm_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arm.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_d10v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-d10v.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_d10v_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d10v.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_d30v_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-d30v.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_d30v_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-d30v.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_fr30_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-fr30.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_fr30_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-fr30.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_h8300_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-h8300.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/h8300.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_h8300_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_h8500_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-h8500.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/h8500.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_h8500_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8500.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_hppa_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-hppa.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_i370_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i370.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_i370_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i370.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/i370.h \
+  $(INCDIR)/aout/aout64.h
+DEPOBJ_i386_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-i386.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_i386_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i386.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/i386.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_i386_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_i860_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-i860.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_i860_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i860.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_i860_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i860.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_i960_bout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-bout.h \
+  $(srcdir)/config/tc-i960.h emul.h $(INCDIR)/obstack.h
+DEPOBJ_i960_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-i960.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/i960.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_i960_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_m32r_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m32r.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_m32r_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_m68k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_m68k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m68k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/m68k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_m68k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_m68k_hp300 = $(srcdir)/config/obj-aout.c $(INCDIR)/bin-bugs.h \
   $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
+  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
-DEPOBJ_m88k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m88k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/m88k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_m88k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m88k.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_mcore_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mcore.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/mcore.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_mips_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-mips.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_mips_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-mips.h \
-  ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(BFDDIR)/libecoff.h
-DEPOBJ_mips_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h subsegs.h \
-  $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h
-DEPOBJ_mn10200_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10200.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_mn10200_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10200.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_mn10300_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10300.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_mn10300_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10300.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_ns32k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-ns32k.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_ns32k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ns32k.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_ns32k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_pj_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-pj.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
+DEPOBJ_m88k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-m88k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/m88k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_m88k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m88k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mcore_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mcore.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/mcore.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_mcore_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mcore.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mips_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-mips.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_mips_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mips.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/mipspe.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_mips_ecoff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-ecoff.h \
+  $(srcdir)/config/tc-mips.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h emul.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(BFDDIR)/libecoff.h
+DEPOBJ_mips_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/ecoff.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/aout/aout64.h
-DEPOBJ_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_sh_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_sparc_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-sparc.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_sparc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sparc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sparc.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_sparc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sparc.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_tahoe_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tahoe.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_tahoe_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tahoe.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_tahoe_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tahoe.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_tic30_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-tic30.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_tic30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic30.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic30.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_tic30_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic30.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_tic80_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic80.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_tic80_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic80.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_vax_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-vax.h \
-  $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_vax_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-vax.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_vax_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_vax_vms = $(srcdir)/config/obj-vms.h $(srcdir)/config/tc-vax.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def subsegs.h \
-  $(INCDIR)/obstack.h
-DEPOBJ_w65_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-w65.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/w65.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
-DEPOBJ_z8k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_z8k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-z8k.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mn10200_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_mn10200_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10200.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mn10300_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-mn10300.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_mn10300_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mn10300.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_ns32k_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-ns32k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_ns32k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ns32k.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_ns32k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ns32k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_pj_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-pj.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_pj_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_ppc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ppc.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_ppc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/ppc.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h
+DEPOBJ_sh_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sh.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_sh_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_sparc_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_sparc_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-sparc.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sparc.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_sparc_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sparc.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_tahoe_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-tahoe.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_tahoe_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tahoe.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_tahoe_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tahoe.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_tic30_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-tic30.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_tic30_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tic30.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/tic30.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_tic30_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic30.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_tic80_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-tic80.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_tic80_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic80.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_vax_aout = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-aout.h \
+  $(srcdir)/config/tc-vax.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+DEPOBJ_vax_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-vax.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_vax_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_vax_vms = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-vms.h \
+  $(srcdir)/config/tc-vax.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def emul.h subsegs.h $(INCDIR)/obstack.h
+DEPOBJ_w65_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-w65.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/w65.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_w65_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_v850_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-v850.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h \
+  subsegs.h
+DEPOBJ_v850_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_z8k_coff = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_z8k_elf = $(INCDIR)/bin-bugs.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-z8k.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 DEPOBJ_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(BFDDIR)/som.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
@@ -1578,10 +1677,11 @@ DEP_h8500_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8500.h
 DEP_hppa_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-hppa.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
-DEP_hppa_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+DEP_i370_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i370.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_i370_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-hppa.h $(BFDDIR)/elf32-hppa.h \
-  $(BFDDIR)/libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i370.h
 DEP_i386_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i386.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_i386_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i386.h \
@@ -1634,7 +1734,8 @@ DEP_mcore_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 DEP_mips_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-mips.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_mips_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mips.h \
-  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/mipspe.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h
 DEP_mips_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-mips.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 DEP_mips_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \

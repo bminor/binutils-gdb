@@ -1,3 +1,16 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (MKDEP): Use gcc -MM rather than ../mkdep.
+	(DEP): Quote when passing vars to sub-make.  Use "mv -f" rather
+	than move-if-change.
+	(DEP1): Modify for "gcc -MM".
+	(DEPTC): Likewise.
+	(DEPOBJ): Likewise.
+	(DEP2): Likewise.
+	(CLEANFILES): Add DEPTCA, DEPOBJA, DEP2a, DEPA.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
 2000-04-03  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* config/tc-mn10300.c (md_pseudo_table): Use constant names.

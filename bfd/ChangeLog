@@ -1,3 +1,14 @@
+2000-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am: Remove extraneous mkdep comment.
+	(MKDEP): Use gcc -MM rather than mkdep.
+	(DEP): Quote when passing vars to sub-make.  Add warning
+	message to end.
+	(DEP1): Rewrite for "gcc -MM".
+	(CLEANFILES): Add DEP2.
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
 2000-04-03  Kevin Buettner  <kevinb@redhat.com>
 
         * configure.in: Added corefile support for AIX 4.3.  In particular,
@@ -8,7 +19,7 @@
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
 	* cache.c (bfd_open_file): Unlink the output file only if
-	it has none zero size.
+	it has non-zero size.
 
 2000-04-01  Ken Block USG  <block@zk3.dec.com>
 
