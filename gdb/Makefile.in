@@ -1906,7 +1906,7 @@ mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(value_h) $(osabi_h) $(mipsnbsd_tdep_h) $(solib_svr4_h) \
-	nbsd-tdep.h
+	$(nbsd_tdep_h)
 mipsread.o: mipsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
 	$(coff_sym_h) $(coff_internal_h) $(coff_ecoff_h) $(libcoff_h) \
