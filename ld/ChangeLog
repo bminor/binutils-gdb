@@ -1,3 +1,8 @@
+2002-12-17  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (..._recognized_file): Use LD_PATHMAX+1 to
+	account for trailing '\0'.
+
 2002-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (longopts): Duplicate entry for --compact-implib

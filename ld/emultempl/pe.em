@@ -1392,11 +1392,11 @@ gld_${EMULATION_NAME}_recognized_file (entry)
 #endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
-      char fbuf[LD_PATHMAX];
+      char fbuf[LD_PATHMAX + 1];
       const char *ext;
 
       if (REALPATH (entry->filename, fbuf) == NULL)
-	strncpy (fbuf, entry->filename, LD_PATHMAX);
+	strncpy (fbuf, entry->filename, sizeof (fbuf));
 
       ext = fbuf + strlen (fbuf) - 4;
 
