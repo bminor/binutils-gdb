@@ -975,8 +975,12 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 	}
 
       /* Success if we reached the end of the CIE list, and we've either
-	 run out of FDE entries or we've encountered an advance.  */
-      if (i == cie->last && (!j || j->insn == DW_CFA_advance_loc))
+	 run out of FDE entries or we've encountered an advance or
+	 escape.  */
+      if (i == cie->last
+	  && (!j
+	      || j->insn == DW_CFA_advance_loc
+	      || j->insn == CFI_escape))
 	{
 	  *pfirst = j;
 	  return cie;
@@ -992,7 +996,8 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
   cie->first = fde->data;
 
   for (i = cie->first; i ; i = i->next)
-    if (i->insn == DW_CFA_advance_loc)
+    if (i->insn == DW_CFA_advance_loc
+	|| i->insn == CFI_escape)
       break;
 
   cie->last = i;

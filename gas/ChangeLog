@@ -1,3 +1,8 @@
+2004-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* dw2gencfi.c (select_cie_for_fde): When separating CIE out
+	from FDE, treat a CFI_escape as we do a DW_CFA_advance_loc.
+
 2004-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* config/obj-elf.c (obj_elf_section_type): Handle init_array,
