@@ -6,6 +6,13 @@ Fri Feb  4 15:53:18 1994  Steve Chamberlain  (sac@cygnus.com)
 	change memory model.
 	* remote-7000.c (initialize_remote_e7000): Change name of snoop
 	command.
+	* remote-hms.c (hms_load): Remove breakpoints when loaded.
+	(hms_wait): Use new status structure
+	(hms_open): Push the target here. (hms_before_main_loop): Not
+	here.  (supply_val, hms_fetch_register, hms_store_register):  Cope
+	with H8/500 names too. (hms_fetch_register): Take out REGISTER_TYPE.
+	* sh-tdep.c (show_regs, initialize_sh_tdep): New command to print
+	all registers in a compact way.
 
 Fri Feb  4 07:41:13 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 

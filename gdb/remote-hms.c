@@ -920,8 +920,7 @@ hms_fetch_register (dummy)
   int s;
   int gottok;
 
-  REGISTER_TYPE reg[NUM_REGS];
-  int foo[NUM_REGS];
+  LONGEST reg[NUM_REGS];
   check_open ();
 
   do
@@ -998,7 +997,6 @@ hms_fetch_register (dummy)
   int gottok;
 
   unsigned LONGEST reg[NUM_REGS];
-  int foo[8];
 
   check_open ();
 
