@@ -569,9 +569,10 @@ getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
-remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
+remote_sim_h =	$(INCLUDE_DIR)/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
+sim_d10v_h =	$(INCLUDE_DIR)/sim-d10v.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
 readline_headers = \
@@ -1392,6 +1393,11 @@ cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
 
+d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(obstack_h) $(symtab_h) \
+	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
+	$(inferior_h) $(dis-asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
+	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h)
+
 dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
 	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) \
@@ -1972,9 +1978,9 @@ remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h) \
 	$(gdb_string_h) $(regcache_h)
 
-remote-sim.o: remote-sim.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(target_h) $(terminal_h) $(gdb_string_h) \
-	$(INCLUDE_DIR)/callback.h $(regcache_h)
+remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) $(gdb_string_h) \
+	$(terminal_h) $(target_h) $(gdbcore_h) $(INCLUDE_DIR)/callback.h \
+	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) 
 
 remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(target_h) $(gdb_string_h) $(regcache_h)

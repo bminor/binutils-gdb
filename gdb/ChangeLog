@@ -1,3 +1,10 @@
+2002-05-15  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (remote_sim_h): Replace remote-sim_h.
+	(remote-sim.o): Update dependencies.
+	(d10v-tdep.o): Specify dependencies.
+	(sim_d10v_h): Define.
+
 2002-05-14  Jim Blandy  <jimb@redhat.com>
 
 	* macroexp.c (init_buffer, gather_arguments, expand): Use NULL, not 0.
