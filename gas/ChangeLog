@@ -1,3 +1,9 @@
+2002-07-08  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (load_address): Use non-trapping "daddu"
+	instead of "dadd" in address calculations.
+	(macro): Likewise.
+
 2002-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (process_suffix): Remove intel mode movsx and

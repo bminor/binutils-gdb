@@ -3528,7 +3528,7 @@ load_address (counter, reg, ep, used_at)
 	   daddiu	$reg,<sym>		(BFD_RELOC_MIPS_HIGHER)
 	   daddiu	$at,<sym>		(BFD_RELOC_LO16)
 	   dsll32	$reg,0
-	   dadd		$reg,$reg,$at
+	   daddu	$reg,$reg,$at
 
 	 If $at is already in use, we use an path which is suboptimal
 	 on superscalar processors.
@@ -3556,7 +3556,7 @@ load_address (counter, reg, ep, used_at)
 			   AT, AT, (int) BFD_RELOC_LO16);
 	      macro_build (p, counter, (expressionS *) NULL, "dsll32",
 			   "d,w,<", reg, reg, 0);
-	      macro_build (p, counter, (expressionS *) NULL, "dadd",
+	      macro_build (p, counter, (expressionS *) NULL, "daddu",
 			   "d,v,t", reg, reg, AT);
 	      *used_at = 1;
 	    }
@@ -4542,7 +4542,7 @@ macro (ip)
 	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
 	      daddiu	$at,<sym>		(BFD_RELOC_LO16)
 	      dsll32	$tempreg,0
-	      dadd	$tempreg,$tempreg,$at
+	      daddu	$tempreg,$tempreg,$at
 
 	    If $at is already in use, we use an path which is suboptimal
 	    on superscalar processors.
@@ -4571,8 +4571,8 @@ macro (ip)
 			       AT, AT, (int) BFD_RELOC_LO16);
 		  macro_build (p, &icnt, (expressionS *) NULL, "dsll32",
 			       "d,w,<", tempreg, tempreg, 0);
-		  macro_build (p, &icnt, (expressionS *) NULL, "dadd", "d,v,t",
-			       tempreg, tempreg, AT);
+		  macro_build (p, &icnt, (expressionS *) NULL, "daddu",
+			       "d,v,t", tempreg, tempreg, AT);
 		  used_at = 1;
 		}
 	      else
