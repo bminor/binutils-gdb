@@ -19,10 +19,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
+int HMODE;
 
-#define UNSIGNED_SHORT(X) ((X) & 0xffff)
 
-
+#define BINWORD (HMODE?4:2)
 #define EXTRA_FRAME_INFO 	\
 	struct frame_saved_regs *fsr;	\
 	CORE_ADDR from_pc; \
@@ -47,9 +47,11 @@ extern void init_extra_frame_info ();
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 #undef TARGET_INT_BIT
-#define TARGET_INT_BIT 16
+#define TARGET_INT_BIT  16
+#undef TARGET_LONG_BIT
+#define TARGET_LONG_BIT  32
 #undef TARGET_PTR_BIT
-#define TARGET_PTR_BIT 16
+#define TARGET_PTR_BIT  (HMODE ? 32:16)
 
 
 /* Offset from address of function to start of its code.
@@ -71,14 +73,13 @@ extern CORE_ADDR h8300_skip_prologue ();
    some instructions.  */
 
 #define SAVED_PC_AFTER_CALL(frame) \
-UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
+  read_memory_unsigned_integer (read_register (SP_REGNUM), BINWORD)
 
 /* Stack grows downward.  */
 
 #define INNER_THAN <
 
-
-#define BREAKPOINT {0x53, 0x00}
+#define BREAKPOINT {0x7A, 0xFF}
 
 
 /* If your kernel resets the pc after the trap happens you may need to
@@ -92,7 +93,7 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 /* Allow any of the return instructions, including a trapv and a return
    from interupt.  */
 
-#define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 2) & ~0x3) == 0x4e74)
+#define ABOUT_TO_RETURN(pc) ((read_memory_unsigned_integer (pc, 2) & ~0x3) == 0x4e74)
 
 /* Return 1 if P points to an invalid floating point value.  */
 
@@ -103,32 +104,32 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 #define REGISTER_TYPE  unsigned short
 
 /*#  define NUM_REGS 20 /* 20 for fake HW support */
-#  define NUM_REGS 11
+#  define NUM_REGS 13  
 #  define REGISTER_BYTES (NUM_REGS*2)
 
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N)  ((N) * 2)
+#define REGISTER_BYTE(N)  ((N) * 4)
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the H8/300, all regs are 2 bytes.  */
 
-#define REGISTER_RAW_SIZE(N) 2
+#define REGISTER_RAW_SIZE(N) (HMODE ? 4:2)
 
 /* Number of bytes of storage in the program's representation
-   for register N.  On the H8/300, all regs are 2 bytes.  */
+   for register N.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) 2
+#define REGISTER_VIRTUAL_SIZE(N) (HMODE ? 4 : 2)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 2
+#define MAX_REGISTER_RAW_SIZE 4
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
-#define MAX_REGISTER_VIRTUAL_SIZE 2
+#define MAX_REGISTER_VIRTUAL_SIZE 4
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
@@ -148,7 +149,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N)  builtin_type_unsigned_short
+#define REGISTER_VIRTUAL_TYPE(N) \
+(  HMODE ? builtin_type_unsigned_int : builtin_type_unsigned_short)
 
 
 /* Initializer for an array of names of registers.
@@ -161,7 +163,7 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
    "ocra","ocrb","tcr","tocr","icra"} 
 #else
 #define REGISTER_NAMES \
-  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles"}
+  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles","tick","inst"}
 #endif
 
 /* Register numbers of various important registers.
@@ -285,9 +287,9 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ memcpy((TO), (FROM),  2); }
+{ memcpy((TO), (FROM),  BINWORD); }
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ memcpy((TO), (FROM),  2); }
+{ memcpy((TO), (FROM),  BINWORD); }
 
 #define	BEFORE_MAIN_LOOP_HOOK	\
   hms_before_main_loop();
@@ -297,7 +299,6 @@ typedef unsigned short INSN_WORD;
 #define ADDR_BITS_REMOVE(addr) ((addr) & 0xffff)
 #define ADDR_BITS_SET(addr) (((addr)))
 
-#define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
 #define DONT_USE_REMOTE
 
 
