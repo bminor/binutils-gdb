@@ -654,19 +654,20 @@ eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
 eelf32lppcnto.c: $(srcdir)/emulparams/elf32lppcnto.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcnto "$(tdir_elf32lppcnto)"
 eelf32lppcsim.c: $(srcdir)/emulparams/elf32lppcsim.sh \
   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppcsim "$(tdir_elf32lppcsim)"
 eelf32ppcnto.c: $(srcdir)/emulparams/elf32ppcnto.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcnto "$(tdir_elf32ppcnto)"
 eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh \
@@ -679,19 +680,19 @@ eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
 eelf32openrisc.c: $(srcdir)/emulparams/elf32openrisc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32openrisc "$(tdir_openrisc)"
-eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
+eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"
 eelf32ppc_fbsd.c: $(srcdir)/emulparams/elf32ppc_fbsd.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc_fbsd "$(tdir_elf32ppc_fbsd)"
 eelf32ppcsim.c: $(srcdir)/emulparams/elf32ppcsim.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcsim "$(tdir_elf32ppcsim)"
 eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
-  $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
 eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \

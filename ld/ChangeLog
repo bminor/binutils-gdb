@@ -1,5 +1,19 @@
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc32elf.em: New file.
+	* emulparams/elf32ppc.sh (EXTRA_EM_FILE): Define.
+	* Makefile.am (eelf32lppc.c): Depend on emultempl/ppc32elf.em.
+	(eelf32lppcnto.c): Likewise.
+	(eelf32lppcsim.c): Likewise.
+	(eelf32ppcnto.c): Likewise.
+	(eelf32ppc.c): Likewise.
+	(eelf32ppc_fbsd.c): Likewise.
+	(eelf32ppcsim.c): Likewise.
+	(eelf32ppclinux.c): Likewise.
+	* Makefile.in: Regenerate.
+
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld.texinfo: Remove spaces between @samp and opening brace.
 
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>

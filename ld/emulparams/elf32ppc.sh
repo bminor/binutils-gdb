@@ -2,6 +2,7 @@
 # elf32lppc.sh elf32ppclinux.sh elf32ppcsim.sh
 
 TEMPLATE_NAME=elf32
+EXTRA_EM_FILE=ppc32elf
 GENERATE_SHLIB_SCRIPT=yes
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-powerpc"
