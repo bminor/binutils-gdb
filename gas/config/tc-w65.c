@@ -846,7 +846,7 @@ md_parse_option (c, a)
      int c;
      char *a;
 {
-  return 1;
+  return 0;
 }
 
 void
@@ -980,7 +980,7 @@ md_section_align (seg, size)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     vauleT * valP;
+     valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   long val = * (long *) valP;
