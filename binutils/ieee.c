@@ -154,10 +154,16 @@ struct ieee_info
   const bfd_byte *pend;
   /* The block stack.  */
   struct ieee_blockstack blockstack;
+  /* Whether we have seen a BB1 or BB2.  */
+  boolean saw_filename;
   /* The variables.  */
   struct ieee_vars vars;
+  /* The global variables, after a global typedef block.  */
+  struct ieee_vars *global_vars;
   /* The types.  */
   struct ieee_types types;
+  /* The global types, after a global typedef block.  */
+  struct ieee_types *global_types;
   /* The list of tagged structs.  */
   struct ieee_tag *tags;
 };
@@ -891,6 +897,7 @@ parse_ieee (dhandle, abfd, bytes, len)
   info.bytes = bytes;
   info.pend = bytes + len;
   info.blockstack.bsp = info.blockstack.stack;
+  info.saw_filename = false;
   info.vars.alloc = 0;
   info.vars.vars = NULL;
   info.types.alloc = 0;
@@ -999,6 +1006,29 @@ parse_ieee_bb (info, pp)
 	return false;
       if (! debug_set_filename (info->dhandle, namcopy))
 	return false;
+      info->saw_filename = true;
+
+      /* Discard any variables or types we may have seen before.  */
+      if (info->vars.vars != NULL)
+	free (info->vars.vars);
+      info->vars.vars = NULL;
+      info->vars.alloc = 0;
+      if (info->types.types != NULL)
+	free (info->types.types);
+      info->types.types = NULL;
+      info->types.alloc = 0;
+
+      /* Initialize the types to the global types.  */
+      if (info->global_types != NULL)
+	{
+	  info->types.alloc = info->global_types->alloc;
+	  info->types.types = ((struct ieee_type *)
+			       xmalloc (info->types.alloc
+					* sizeof (*info->types.types)));
+	  memcpy (info->types.types, info->global_types->types,
+		  info->types.alloc * sizeof (*info->types.types));
+	}
+
       break;
 
     case 2:
@@ -1006,6 +1036,7 @@ parse_ieee_bb (info, pp)
 	 empty, but we don't check. */
       if (! debug_set_filename (info->dhandle, "*global*"))
 	return false;
+      info->saw_filename = true;
       break;
 
     case 3:
@@ -1145,14 +1176,24 @@ parse_ieee_bb (info, pp)
       break;
 
     case 10:
-      /* BB10: Assembler module scope.  We completely ignore all this
-	 information.  FIXME.  */
+      /* BB10: Assembler module scope.  In the normal case, we
+	 completely ignore all this information.  FIXME.  */
       {
 	const char *inam, *vstr;
 	unsigned long inamlen, vstrlen;
 	bfd_vma tool_type;
 	boolean present;
 	unsigned int i;
+
+	if (! info->saw_filename)
+	  {
+	    namcopy = savestring (name, namlen);
+	    if (namcopy == NULL)
+	      return false;
+	    if (! debug_set_filename (info->dhandle, namcopy))
+	      return false;
+	    info->saw_filename = true;
+	  }
 
 	if (! ieee_read_id (info, pp, &inam, &inamlen)
 	    || ! ieee_read_number (info, pp, &tool_type)
@@ -1227,6 +1268,37 @@ parse_ieee_be (info, pp)
 
   switch (info->blockstack.bsp->kind)
     {
+    case 2:
+      /* When we end the global typedefs block, we copy out the the
+         contents of info->vars.  This is because the variable indices
+         may be reused in the local blocks.  However, we need to
+         preserve them so that we can locate a function returning a
+         reference variable whose type is named in the global typedef
+         block.  */
+      info->global_vars = ((struct ieee_vars *)
+			   xmalloc (sizeof *info->global_vars));
+      info->global_vars->alloc = info->vars.alloc;
+      info->global_vars->vars = ((struct ieee_var *)
+				 xmalloc (info->vars.alloc
+					  * sizeof (*info->vars.vars)));
+      memcpy (info->global_vars->vars, info->vars.vars,
+	      info->vars.alloc * sizeof (*info->vars.vars));
+
+      /* We also copy out the non builtin parts of info->types, since
+         the types are discarded when we start a new block.  */
+      info->global_types = ((struct ieee_types *)
+			    xmalloc (sizeof *info->global_types));
+      info->global_types->alloc = info->types.alloc;
+      info->global_types->types = ((struct ieee_type *)
+				   xmalloc (info->types.alloc
+					    * sizeof (*info->types.types)));
+      memcpy (info->global_types->types, info->types.types,
+	      info->types.alloc * sizeof (*info->types.types));
+      memset (info->global_types->builtins, 0,
+	      sizeof (info->global_types->builtins));
+
+      break;
+
     case 4:
     case 6:
       if (! ieee_read_expression (info, pp, &offset))
@@ -1799,16 +1871,31 @@ parse_ieee_ty (info, pp)
     case 'g':
       /* Bitfield type.  */
       {
-	bfd_vma signedp, bitsize;
+	bfd_vma signedp, bitsize, dummy;
+	const bfd_byte *hold;
+	boolean present;
 
 	if (! ieee_read_number (info, pp, &signedp)
-	    || ! ieee_read_number (info, pp, &bitsize)
-	    || ! ieee_read_type_index (info, pp, &type))
+	    || ! ieee_read_number (info, pp, &bitsize))
 	  return false;
 
-	/* FIXME: This is just a guess.  */
-	if (! signedp)
-	  type = debug_make_int_type (dhandle, 4, true);
+	/* I think the documentation says that there is a type index,
+           but some actual files do not have one.  */
+	hold = *pp;
+	if (! ieee_read_optional_number (info, pp, &dummy, &present))
+	  return false;
+	if (! present)
+	  {
+	    /* FIXME: This is just a guess.  */
+	    type = debug_make_int_type (dhandle, 4,
+					signedp ? false : true);
+	  }
+	else
+	  {
+	    *pp = hold;
+	    if (! ieee_read_type_index (info, pp, &type))
+	      return false;
+	  }
 	type_bitsize = bitsize;
       }
       break;
@@ -1959,8 +2046,7 @@ parse_ieee_ty (info, pp)
       break;
     }
 
-  /* Record the type in the table.  If the corresponding NN record has
-     a name, name it.  FIXME: Is this always correct?  */
+  /* Record the type in the table.  */
 
   if (type == DEBUG_TYPE_NULL)
     return false;
@@ -2064,8 +2150,38 @@ parse_ieee_atn (info, pp)
       if (varindx >= info->vars.alloc
 	  || info->vars.vars[varindx].name == NULL)
 	{
-	  ieee_error (info, atn_start, "undefined variable in ATN");
-	  return false;
+	  /* The MRI compiler or linker sometimes omits the NN record
+             for a pmisc record.  */
+	  if (atn_code == 62)
+	    {
+	      if (varindx >= info->vars.alloc)
+		{
+		  unsigned int alloc;
+
+		  alloc = info->vars.alloc;
+		  if (alloc == 0)
+		    alloc = 4;
+		  while (varindx >= alloc)
+		    alloc *= 2;
+		  info->vars.vars = ((struct ieee_var *)
+				     xrealloc (info->vars.vars,
+					       (alloc
+						* sizeof *info->vars.vars)));
+		  memset (info->vars.vars + info->vars.alloc, 0,
+			  ((alloc - info->vars.alloc)
+			   * sizeof *info->vars.vars));
+		  info->vars.alloc = alloc;
+		}
+
+	      pvar = info->vars.vars + varindx;
+	      pvar->name = "";
+	      pvar->namlen = 0;
+	    }
+	  else
+	    {
+	      ieee_error (info, atn_start, "undefined variable in ATN");
+	      return false;
+	    }
 	}
 
       pvar = info->vars.vars + varindx;
@@ -3245,60 +3361,79 @@ ieee_read_reference (info, pp)
   pslot = NULL;
   if (flags != 3)
     {
-      int i;
-      struct ieee_var *pv = NULL;
+      int pass;
 
       /* We search from the last variable indices to the first in
-	 hopes of finding local variables correctly.  FIXME: This
-	 probably won't work in all cases.  On the other hand, I don't
-	 know what will.  */
-      for (i = (int) info->vars.alloc - 1; i >= 0; i--)
+	 hopes of finding local variables correctly.  We search the
+	 local variables on the first pass, and the global variables
+	 on the second.  FIXME: This probably won't work in all cases.
+	 On the other hand, I don't know what will.  */
+      for (pass = 0; pass < 2; pass++)
 	{
-	  boolean found;
+	  struct ieee_vars *vars;
+	  int i;
+	  struct ieee_var *pv = NULL;
 
-	  pv = info->vars.vars + i;
-
-	  if (pv->pslot == NULL
-	      || pv->namlen != namlen
-	      || strncmp (pv->name, name, namlen) != 0)
-	    continue;
-
-	  found = false;
-	  switch (flags)
+	  if (pass == 0)
+	    vars = &info->vars;
+	  else
 	    {
-	    default:
-	      ieee_error (info, start,
-			  "unrecognized C++ reference type");
-	      return false;
-
-	    case 0:
-	      /* Global variable or function.  */
-	      if (pv->kind == IEEE_GLOBAL
-		  || pv->kind == IEEE_EXTERNAL
-		  || pv->kind == IEEE_FUNCTION)
-		found = true;
-	      break;
-
-	    case 1:
-	      /* Global static variable or function.  */
-	      if (pv->kind == IEEE_STATIC
-		  || pv->kind == IEEE_FUNCTION)
-		found = true;
-	      break;
-
-	    case 2:
-	      /* Local variable.  */
-	      if (pv->kind == IEEE_LOCAL)
-		found = true;
-	      break;
+	      vars = info->global_vars;
+	      if (vars == NULL)
+		break;
 	    }
 
-	  if (found)
-	    break;
-	}
+	  for (i = (int) vars->alloc - 1; i >= 0; i--)
+	    {
+	      boolean found;
 
-      if (i >= 0)
-	pslot = pv->pslot;
+	      pv = vars->vars + i;
+
+	      if (pv->pslot == NULL
+		  || pv->namlen != namlen
+		  || strncmp (pv->name, name, namlen) != 0)
+		continue;
+
+	      found = false;
+	      switch (flags)
+		{
+		default:
+		  ieee_error (info, start,
+			      "unrecognized C++ reference type");
+		  return false;
+
+		case 0:
+		  /* Global variable or function.  */
+		  if (pv->kind == IEEE_GLOBAL
+		      || pv->kind == IEEE_EXTERNAL
+		      || pv->kind == IEEE_FUNCTION)
+		    found = true;
+		  break;
+
+		case 1:
+		  /* Global static variable or function.  */
+		  if (pv->kind == IEEE_STATIC
+		      || pv->kind == IEEE_FUNCTION)
+		    found = true;
+		  break;
+
+		case 2:
+		  /* Local variable.  */
+		  if (pv->kind == IEEE_LOCAL)
+		    found = true;
+		  break;
+		}
+
+	      if (found)
+		break;
+	    }
+
+	  if (i >= 0)
+	    {
+	      pslot = pv->pslot;
+	      break;
+	    }
+	}
     }
   else
     {
@@ -5299,7 +5434,10 @@ ieee_enum_type (p, tag, names, vals)
 	}
 
       if ((names == NULL && e->names == NULL)
-	  || (names[i] == NULL && e->names[i] == NULL))
+	  || (names != NULL
+	      && e->names != NULL
+	      && names[i] == NULL
+	      && e->names[i] == NULL))
 	{
 	  /* We've seen this enum before.  */
 	  return ieee_push_type (info, e->indx, 0, true, false);

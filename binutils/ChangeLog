@@ -1,3 +1,11 @@
+Mon Sep 16 15:30:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (struct ieee_info): Add global_types field.
+	(parse_ieee_bb): When starting a BB1, initialize the types field
+	to the global_types field.
+	(parse_ieee_be): When ending a BB2, copy the types field to the
+	global_types field.
+
 Fri Sep 13 17:32:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (change_leading_char): New static variable.
