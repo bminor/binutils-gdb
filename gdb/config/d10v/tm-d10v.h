@@ -48,8 +48,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
    The return address is the value saved in the PR register + 4  */
 
-#define SAVED_PC_AFTER_CALL(frame) \
-  (ADDR_BITS_REMOVE(read_register(PR_REGNUM)))
+#define SAVED_PC_AFTER_CALL(frame) (read_register(LR_REGNUM) << 2 )
 
 /* Stack grows downward.  */
 
@@ -84,7 +83,6 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define SP_REGNUM 	15
 #define FP_REGNUM	11
 #define PC_REGNUM 	18
-#define PR_REGNUM 	17
 #define PSW_REGNUM 	16
 #define A0_REGNUM 	32
 
