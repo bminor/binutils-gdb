@@ -507,7 +507,7 @@ for subdir in . ${subdirs} ; do
 	# Make the links.
 	configlinks="${links}"
 	if [ -r config.status ] ; then
-		mv -f config.status config.back
+		mv -f ${subdir}/config.status ${subdir}/config.back
 	fi
 	while [ -n "${files}" ] ; do
 		# set file to car of files, files to cdr of files
@@ -727,9 +727,9 @@ ${progname}" ${arguments}  "
 	fi
 	chmod a+x ${subdir}/config.new
 	if [ -r config.back ] ; then
-		mv -f config.back config.status
+		mv -f ${subdir}/config.back ${subdir}/config.status
 	fi
-	${moveifchange} config.new config.back
+	${moveifchange} ${subdir}/config.new ${subdir}/config.status
 	;;
 
     *)	rm -f ${Makefile} ${subdir}/config.status ${links} ;;
