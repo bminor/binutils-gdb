@@ -1,5 +1,7 @@
 Wed Sep  2 01:18:31 1992  John Gilmore  (gnu@cygnus.com)
 
+	* Makefile.in (VERSION):  Roll to 4.6.5.
+
 	* ser-termios.c, ser-go32.c:  Remove DEFUN crap, clean up.
 	* serial.h (EXFUN):  Remove all uses, convert to PARAMS.
 	* config/sun4os4.mh:  Include ser-termios.o.  FIXME, all .mh files
