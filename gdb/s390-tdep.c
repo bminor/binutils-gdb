@@ -1285,15 +1285,6 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 }
 
-void
-s390_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		     struct value **args, struct type *value_type,
-		     int using_gcc)
-{
-  store_unsigned_integer (dummy + 4, REGISTER_SIZE, fun);
-}
-
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 struct type *
@@ -1342,13 +1333,6 @@ s390_skip_prologue (CORE_ADDR pc)
   return fextra_info.skip_prologue_function_start;
 }
 
-/* pc_in_call_dummy_on stack may work for us must test this */
-int
-s390_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
-{
-  return pc > sp && pc < (sp + 4096);
-}
-
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
    the new frame is not set up until the new function executes
@@ -1369,32 +1353,14 @@ s390_addr_bits_remove (CORE_ADDR addr)
 static CORE_ADDR
 s390_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
+  write_register (S390_RETADDR_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
 struct gdbarch *
 s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-
-  /* instruction sequence for s390 call dummy is as follows
-     bras %r1,.+8      ; 0xA7150004   
-     long basraddr     ; 0x00000000
-     l    %r1,0(%r1)   ; 0x58101000
-     basr %r14,%r1     ; 0x0DE1
-     breakpoint        ; 0x0001 */
-  static LONGEST s390_call_dummy_words[] = { 0xA7150004, 0x00000000,
-    0x58101000, 0x0DE10001
-  };
-  /* instruction sequence for esame call dummy is as follows
-     bras %r1,.+12     ; 0xA7150006   
-     long basraddr     ; 0x0000000000000000
-     lg   %r1,0(%r1)   ; 0xE31010000004
-     basr %r14,%r1     ; 0x0DE1
-     breakpoint        ; 0x0001 */
-  static LONGEST s390x_call_dummy_words[] = { 0xA715000600000000,
-    0x00000000E3101000,
-    0x00040DE100010000
-  };
+  static LONGEST s390_call_dummy_words[] = { 0 };
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
@@ -1413,13 +1379,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
 
-  /* We don't define set_gdbarch_call_dummy_breakpoint_offset 
-     as we already have a breakpoint inserted. */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, s390_pc_in_call_dummy);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
   set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
@@ -1435,8 +1394,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      but not always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   set_gdbarch_pop_frame (gdbarch, s390_pop_frame);
-  set_gdbarch_push_dummy_frame (gdbarch, s390_push_dummy_frame);
-  set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_ieee_float (gdbarch, 1);
   /* Stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -1478,34 +1435,39 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
 
-  /* Stuff below here wouldn't be required if gdbarch.sh was a little */
-  /* more intelligent */
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  /* Parameters for inferior function calls.  */
   set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_extract_struct_value_address (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, s390_fix_call_dummy);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_push_return_address (gdbarch, s390_push_return_address);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch,
+                                       sizeof (s390_call_dummy_words));
+  set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
 
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_s390_esa:
       set_gdbarch_register_size (gdbarch, 4);
-      set_gdbarch_call_dummy_length (gdbarch, 16);
       set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
 
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
-
-      set_gdbarch_sizeof_call_dummy_words (gdbarch,
-					   sizeof (s390_call_dummy_words));
-      set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
       set_gdbarch_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_esame:
       set_gdbarch_register_size (gdbarch, 8);
-      set_gdbarch_call_dummy_length (gdbarch, 22);
       set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
       set_gdbarch_register_virtual_type (gdbarch,
@@ -1514,9 +1476,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
-      set_gdbarch_sizeof_call_dummy_words (gdbarch,
-					   sizeof (s390x_call_dummy_words));
-      set_gdbarch_call_dummy_words (gdbarch, s390x_call_dummy_words);
       set_gdbarch_register_bytes (gdbarch, S390X_REGISTER_BYTES);
       break;
     }

@@ -1,5 +1,20 @@
 2001-11-09  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c: Don't use a call dummy.
+	(s390_fix_call_dummy, s390_pc_in_call_dummy): Delete.
+	(s390_push_return_address): Put the address of the inferior call
+ 	breakpoint in r14.
+	(s390_gdbarch_init):
+	- Provide trivial definition of s390_call_dummy_words; register it
+	  with the gdbarch appropriately.
+	- Delete S390x_call_dummy_words.
+  	- Gather inferior-call-related settings into a group.
+  	- Use generic dummy frames.
+  	- Put the inferior call breakpoint at the entry point.
+	- Use generic gdbarch methods: pc_in_call_dummy_at_entry_point,
+	  generic_push_dummy_frame, generic_fix_call_dummy.
+	- There is a call dummy breakpoint offset; it's zero.
+
 	* s390-tdep.c: (s390_push_arguments): Write a back chain pointer
 	into the dummy frame, to help us get backtraces.
 
