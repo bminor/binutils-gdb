@@ -1,3 +1,14 @@
+Mon Jun  1 18:26:40 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Yuli Barcohen <yuli.barcohen@telrad.co.il>:
+	* debug.c (debug_type_samep): Avoid endless loops comparing
+	function and method parameter types.
+
+Fri May 22 14:02:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (dump_iat): Comment out; not used.
+	(display): Rename from tell.  Change all callers.
+
 Thu May 14 14:00:56 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c: Add support for Thumb DLLs.  Add support for

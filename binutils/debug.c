@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1998 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -56,6 +56,9 @@ struct debug_handle
   unsigned int class_id;
   /* The base for class_id for this call to debug_write.  */
   unsigned int base_id;
+  /* The current line number in debug_write.  */
+  struct debug_lineno *current_write_lineno;
+  unsigned int current_write_lineno_index;
   /* A list of classes which have assigned ID's during debug_write.
      This is linked through the next_id field of debug_class_type.  */
   struct debug_class_id *id_list;
@@ -565,6 +568,9 @@ static boolean debug_write_function
 static boolean debug_write_block
   PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
 	   struct debug_block *));
+static boolean debug_write_linenos
+  PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
+	   bfd_vma));
 static boolean debug_set_class_id
   PARAMS ((struct debug_handle *, const char *, struct debug_type *));
 static boolean debug_type_samep
@@ -632,7 +638,7 @@ debug_add_to_current_namespace (info, name, kind, linkage)
   if (info->current_unit == NULL
       || info->current_file == NULL)
     {
-      debug_error ("debug_add_to_current_namespace: no current file");
+      debug_error (_("debug_add_to_current_namespace: no current file"));
       return NULL;
     }
 
@@ -715,7 +721,7 @@ debug_start_source (handle, name)
 
   if (info->current_unit == NULL)
     {
-      debug_error ("debug_start_source: no debug_set_filename call");
+      debug_error (_("debug_start_source: no debug_set_filename call"));
       return false;
     }
 
@@ -774,7 +780,7 @@ debug_record_function (handle, name, return_type, global, addr)
 
   if (info->current_unit == NULL)
     {
-      debug_error ("debug_record_function: no debug_set_filename call");
+      debug_error (_("debug_record_function: no debug_set_filename call"));
       return false;
     }
 
@@ -830,7 +836,7 @@ debug_record_parameter (handle, name, type, kind, val)
   if (info->current_unit == NULL
       || info->current_function == NULL)
     {
-      debug_error ("debug_record_parameter: no current function");
+      debug_error (_("debug_record_parameter: no current function"));
       return false;
     }
 
@@ -864,13 +870,13 @@ debug_end_function (handle, addr)
       || info->current_block == NULL
       || info->current_function == NULL)
     {
-      debug_error ("debug_end_function: no current function");
+      debug_error (_("debug_end_function: no current function"));
       return false;
     }
 
   if (info->current_block->parent != NULL)
     {
-      debug_error ("debug_end_function: some blocks were not closed");
+      debug_error (_("debug_end_function: some blocks were not closed"));
       return false;
     }
 
@@ -900,7 +906,7 @@ debug_start_block (handle, addr)
   if (info->current_unit == NULL
       || info->current_block == NULL)
     {
-      debug_error ("debug_start_block: no current block");
+      debug_error (_("debug_start_block: no current block"));
       return false;
     }
 
@@ -938,14 +944,14 @@ debug_end_block (handle, addr)
   if (info->current_unit == NULL
       || info->current_block == NULL)
     {
-      debug_error ("debug_end_block: no current block");
+      debug_error (_("debug_end_block: no current block"));
       return false;
     }
 
   parent = info->current_block->parent;
   if (parent == NULL)
     {
-      debug_error ("debug_end_block: attempt to close top level block");
+      debug_error (_("debug_end_block: attempt to close top level block"));
       return false;
     }
 
@@ -971,7 +977,7 @@ debug_record_line (handle, lineno, addr)
 
   if (info->current_unit == NULL)
     {
-      debug_error ("debug_record_line: no current unit");
+      debug_error (_("debug_record_line: no current unit"));
       return false;
     }
 
@@ -1025,7 +1031,7 @@ debug_start_common_block (handle, name)
      const char *name;
 {
   /* FIXME */
-  debug_error ("debug_start_common_block: not implemented");
+  debug_error (_("debug_start_common_block: not implemented"));
   return false;
 }
 
@@ -1037,7 +1043,7 @@ debug_end_common_block (handle, name)
      const char *name;
 {
   /* FIXME */
-  debug_error ("debug_end_common_block: not implemented");
+  debug_error (_("debug_end_common_block: not implemented"));
   return false;
 }
 
@@ -1131,7 +1137,7 @@ debug_record_label (handle, name, type, addr)
      bfd_vma addr;
 {
   /* FIXME.  */
-  debug_error ("debug_record_label not implemented");
+  debug_error (_("debug_record_label not implemented"));
   return false;
 }
 
@@ -1157,7 +1163,7 @@ debug_record_variable (handle, name, type, kind, val)
   if (info->current_unit == NULL
       || info->current_file == NULL)
     {
-      debug_error ("debug_record_variable: no current file");
+      debug_error (_("debug_record_variable: no current file"));
       return false;
     }
 
@@ -1173,7 +1179,7 @@ debug_record_variable (handle, name, type, kind, val)
     {
       if (info->current_block == NULL)
 	{
-	  debug_error ("debug_record_variable: no current block");
+	  debug_error (_("debug_record_variable: no current block"));
 	  return false;
 	}
       nsp = &info->current_block->locals;
@@ -1743,7 +1749,7 @@ debug_make_undefined_tagged_type (handle, name, kind)
       break;
 
     default:
-      debug_error ("debug_make_undefined_type: unsupported kind");
+      debug_error (_("debug_make_undefined_type: unsupported kind"));
       return DEBUG_TYPE_NULL;
     }
 
@@ -1949,7 +1955,7 @@ debug_name_type (handle, name, type)
   if (info->current_unit == NULL
       || info->current_file == NULL)
     {
-      debug_error ("debug_record_variable: no current file");
+      debug_error (_("debug_name_type: no current file"));
       return false;
     }
 
@@ -1997,7 +2003,7 @@ debug_tag_type (handle, name, type)
 
   if (info->current_file == NULL)
     {
-      debug_error ("debug_tag_type: no current file");
+      debug_error (_("debug_tag_type: no current file"));
       return DEBUG_TYPE_NULL;
     }
 
@@ -2005,7 +2011,7 @@ debug_tag_type (handle, name, type)
     {
       if (strcmp (type->u.knamed->name->name, name) == 0)
 	return type;
-      debug_error ("debug_tag_type: extra tag attempted");
+      debug_error (_("debug_tag_type: extra tag attempted"));
       return DEBUG_TYPE_NULL;
     }
 
@@ -2045,7 +2051,7 @@ debug_record_type_size (handle, type, size)
      unsigned int size;
 {
   if (type->size != 0 && type->size != size)
-    fprintf (stderr, "Warning: changing type size from %d to %d\n",
+    fprintf (stderr, _("Warning: changing type size from %d to %d\n"),
 	     type->size, size);
 
   type->size = size;
@@ -2069,7 +2075,7 @@ debug_find_named_type (handle, name)
 
   if (info->current_unit == NULL)
     {
-      debug_error ("debug_find_named_type: no current compilation unit");
+      debug_error (_("debug_find_named_type: no current compilation unit"));
       return DEBUG_TYPE_NULL;
     }
 
@@ -2439,7 +2445,9 @@ debug_write (handle, fns, fhandle)
     {
       struct debug_file *f;
       boolean first_file;
-      struct debug_lineno *l;
+
+      info->current_write_lineno = u->linenos;
+      info->current_write_lineno_index = 0;
 
       if (! (*fns->start_compilation_unit) (fhandle, u->files->filename))
 	return false;
@@ -2467,19 +2475,10 @@ debug_write (handle, fns, fhandle)
 	    }
 	}
 
-      for (l = u->linenos; l != NULL; l = l->next)
-	{
-	  unsigned int i;
-
-	  for (i = 0; i < DEBUG_LINENO_COUNT; i++)
-	    {
-	      if (l->linenos[i] == (unsigned long) -1)
-		break;
-	      if (! (*fns->lineno) (fhandle, l->file->filename, l->linenos[i],
-				    l->addrs[i]))
-		return false;
-	    }
-	}
+      /* Output any line number information which hasn't already been
+         handled.  */
+      if (! debug_write_linenos (info, fns, fhandle, (bfd_vma) -1))
+	return false;
     }
 
   return true;
@@ -2607,7 +2606,7 @@ debug_write_type (info, fns, fhandle, type, name)
   switch (type->kind)
     {
     case DEBUG_KIND_ILLEGAL:
-      debug_error ("debug_write_type: illegal type encountered");
+      debug_error (_("debug_write_type: illegal type encountered"));
       return false;
     case DEBUG_KIND_INDIRECT:
       if (*type->u.kindirect->slot == DEBUG_TYPE_NULL)
@@ -2684,6 +2683,10 @@ debug_write_type (info, fns, fhandle, type, name)
 	return false;
       return (*fns->pointer_type) (fhandle);
     case DEBUG_KIND_FUNCTION:
+      if (! debug_write_type (info, fns, fhandle,
+			      type->u.kfunction->return_type,
+			      (struct debug_name *) NULL))
+	return false;
       if (type->u.kfunction->arg_types == NULL)
 	is = -1;
       else
@@ -2694,10 +2697,6 @@ debug_write_type (info, fns, fhandle, type, name)
 				    (struct debug_name *) NULL))
 	      return false;
 	}
-      if (! debug_write_type (info, fns, fhandle,
-			      type->u.kfunction->return_type,
-			      (struct debug_name *) NULL))
-	return false;
       return (*fns->function_type) (fhandle, is,
 				    type->u.kfunction->varargs);
     case DEBUG_KIND_REFERENCE:
@@ -2948,6 +2947,9 @@ debug_write_function (info, fns, fhandle, name, linkage, function)
   struct debug_parameter *p;
   struct debug_block *b;
 
+  if (! debug_write_linenos (info, fns, fhandle, function->blocks->start))
+    return false;
+
   if (! debug_write_type (info, fns, fhandle, function->return_type,
 			  (struct debug_name *) NULL))
     return false;
@@ -2985,6 +2987,9 @@ debug_write_block (info, fns, fhandle, block)
   struct debug_name *n;
   struct debug_block *b;
 
+  if (! debug_write_linenos (info, fns, fhandle, block->start))
+    return false;
+
   /* I can't see any point to writing out a block with no local
      variables, so we don't bother, except for the top level block.  */
   if (block->locals != NULL || block->parent == NULL)
@@ -3008,10 +3013,52 @@ debug_write_block (info, fns, fhandle, block)
 	return false;
     }
 
+  if (! debug_write_linenos (info, fns, fhandle, block->end))
+    return false;
+
   if (block->locals != NULL || block->parent == NULL)
     {
       if (! (*fns->end_block) (fhandle, block->end))
 	return false;
+    }
+
+  return true;
+}
+
+/* Write out line number information up to ADDRESS.  */
+
+static boolean
+debug_write_linenos (info, fns, fhandle, address)
+     struct debug_handle *info;
+     const struct debug_write_fns *fns;
+     PTR fhandle;
+     bfd_vma address;
+{
+  while (info->current_write_lineno != NULL)
+    {
+      struct debug_lineno *l;
+
+      l = info->current_write_lineno;
+
+      while (info->current_write_lineno_index < DEBUG_LINENO_COUNT)
+	{
+	  if (l->linenos[info->current_write_lineno_index]
+	      == (unsigned long) -1)
+	    break;
+
+	  if (l->addrs[info->current_write_lineno_index] >= address)
+	    return true;
+
+	  if (! (*fns->lineno) (fhandle, l->file->filename,
+				l->linenos[info->current_write_lineno_index],
+				l->addrs[info->current_write_lineno_index]))
+	    return false;
+
+	  ++info->current_write_lineno_index;
+	}
+
+      info->current_write_lineno = l->next;
+      info->current_write_lineno_index = 0;
     }
 
   return true;
@@ -3095,6 +3142,11 @@ debug_type_samep (info, t1, t2)
   struct debug_type_compare_list *l;
   struct debug_type_compare_list top;
   boolean ret;
+
+  if (t1 == NULL)
+    return t2 == NULL;
+  if (t2 == NULL)
+    return false;
 
   while (t1->kind == DEBUG_KIND_INDIRECT)
     {
@@ -3226,8 +3278,12 @@ debug_type_samep (info, t1, t2)
 	  a1 = t1->u.kfunction->arg_types;
 	  a2 = t2->u.kfunction->arg_types;
 	  while (*a1 != NULL && *a2 != NULL)
-	    if (! debug_type_samep (info, *a1, *a2))
-	      break;
+	    {
+	      if (! debug_type_samep (info, *a1, *a2))
+		break;
+	      ++a1;
+	      ++a2;
+	    }
 	  ret = *a1 == NULL && *a2 == NULL;
 	}
       break;
@@ -3280,8 +3336,12 @@ debug_type_samep (info, t1, t2)
 	  a1 = t1->u.kmethod->arg_types;
 	  a2 = t2->u.kmethod->arg_types;
 	  while (*a1 != NULL && *a2 != NULL)
-	    if (! debug_type_samep (info, *a1, *a2))
-	      break;
+	    {
+	      if (! debug_type_samep (info, *a1, *a2))
+		break;
+	      ++a1;
+	      ++a2;
+	    }
 	  ret = *a1 == NULL && *a2 == NULL;
 	}
       break;
