@@ -1,3 +1,23 @@
+2001-06-23  Alan Modra  <amodra@bigpond.net.au>
+
+	Avoid creating COPY relocs if possible.
+	* elf32-i386.c (elf_i386_check_relocs): Tweak condition under
+	which .got created.  Mark symbols used by R_386_32 and R_386_PC32
+	relocs as ELF_LINK_NON_GOT_REF to create COPY relocs only when the
+	reloc is in a read-only section.  Instead, allocate space for a
+	dynamic reloc to reference the library symbol directly.  Keep
+	track of space we allocate using pcrel_relocs_copied.
+	(discard_copies): Delete, and move code to ..
+	(allocate_plt_and_got): ..here.  Rename to
+	allocate_plt_and_got_and_discard_relocs.  Remove unneeded dynamic
+	relocs for non-shared link.
+	(elf_i386_size_dynamic_sections): Update calls to above functions.
+	(elf_i386_relocate_section): Write out the dynamic relocs.  Add
+	more ugly logic to avoid "unresolvable relocation" error.  Use
+	htab shortcut in place of elf_hash_table macro.
+	(elf_i386_finish_dynamic_sections): Allow that dynamic .got may
+	not always be created now.
+
 2001-06-20  Bo Thorsen  <bo@suse.co.uk>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix linking of
