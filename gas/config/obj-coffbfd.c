@@ -550,7 +550,7 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 		    }
 
 		  fill_size = frag->fr_var;
-		  if (fill_size)
+		  if (fill_size && frag->fr_offset > 0)
 		    {
 		      unsigned int count;
 		      unsigned int off = frag->fr_fix;

@@ -1,3 +1,9 @@
+Thu Jun 17 14:56:07 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/obj-coffbfd.c (fill_section): Don't allow fills backwards.
+	* config/tc-sh (get_specific, md_convert_frag,
+	md_estimate_size_before_relax): Add support for rest of opcodes.
+
 Tue Jun 15 17:03:25 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: remove parentdir support; use INSTALL_XFORM
