@@ -2457,6 +2457,13 @@ ENUMDOC
   This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
   instruction.
 
+ENUM
+  BFD_RELOC_TIC30_LDP
+ENUMDOC
+  This is a 8bit DP reloc for the tms320c30, where the most
+  significant 8 bits of a 24 bit word are placed into the least
+  significant 8 bits of the opcode.
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

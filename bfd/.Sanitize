@@ -58,6 +58,7 @@ aout-encap.c
 aout-ns32k.c
 aout-sparcle.c
 aout-target.h
+aout-tic30.c
 aout0.c
 aout32.c
 aout64.c
@@ -96,6 +97,7 @@ coff-sh.c
 coff-sparc.c
 coff-stgo32.c
 coff-svm68k.c
+coff-tic30.c
 coff-u68k.c
 coff-we32k.c
 coff-w65.c
@@ -134,6 +136,7 @@ cpu-powerpc.c
 cpu-rs6000.c
 cpu-sh.c
 cpu-sparc.c
+cpu-tic30.c
 cpu-v850.c
 cpu-vax.c
 cpu-we32k.c

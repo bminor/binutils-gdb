@@ -583,6 +583,8 @@ extern const bfd_target sparcnetbsd_vec;
 extern const bfd_target sparccoff_vec;
 extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
+extern const bfd_target tic30_aout_vec;
+extern const bfd_target tic30_coff_vec;
 /* start-sanitize-tic80 */
 extern const bfd_target tic80coff_vec;
 /* end-sanitize-tic80 */
@@ -796,6 +798,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&sunos_big_vec,
 	&aout0_big_vec,
 	&tekhex_vec,
+	&tic30_aout_vec,
+	&tic30_coff_vec,
 /* start-sanitize-tic80 */
 	&tic80coff_vec,
 /* end-sanitize-tic80 */

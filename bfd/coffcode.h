@@ -1604,6 +1604,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
+#ifdef TIC30MAGIC
+    case TIC30MAGIC:
+      arch = bfd_arch_tic30;
+      break;
+#endif
+
 /* start-sanitize-tic80 */
 #ifdef TIC80_ARCH_MAGIC
     case TIC80_ARCH_MAGIC:
@@ -1982,6 +1988,12 @@ coff_set_flags (abfd, magicp, flagsp)
       }
       break;
 #endif
+
+#ifdef TIC30MAGIC
+    case bfd_arch_tic30:
+      *magicp = TIC30MAGIC;
+      return true;
+#endif
 /* start-sanitize-tic80 */
 #ifdef TIC80_ARCH_MAGIC
     case bfd_arch_tic80:
@@ -2168,6 +2180,15 @@ coff_set_arch_mach (abfd, arch, machine)
 
 /* Calculate the file position for each section. */
 
+#ifndef I960
+#define ALIGN_SECTIONS_IN_FILE
+#endif
+/* start-sanitize-tic80 */
+#ifdef TIC80COFF
+#undef ALIGN_SECTIONS_IN_FILE
+#endif
+/* end-sanitize-tic80 */
+
 static boolean
 coff_compute_section_file_positions (abfd)
      bfd * abfd;
@@ -2276,7 +2297,7 @@ coff_compute_section_file_positions (abfd)
 	 which they are aligned in virtual memory.  I960 doesn't
 	 do this (FIXME) so we can stay in sync with Intel.  960
 	 doesn't yet page from files... */
-#ifndef I960
+#ifdef ALIGN_SECTIONS_IN_FILE
       if ((abfd->flags & EXEC_P) != 0)
 	{
 	  /* make sure this section is aligned on the right boundary - by
@@ -2327,7 +2348,7 @@ coff_compute_section_file_positions (abfd)
 
       sofar += current->_raw_size;
 
-#ifndef I960
+#ifdef ALIGN_SECTIONS_IN_FILE
       /* make sure that this section is of the right size too */
       if ((abfd->flags & EXEC_P) == 0)
 	{
