@@ -1,3 +1,28 @@
+200007-22  Jason Eckhardt  <jle@cygnus.com>
+
+	* cpu-i860.c: Added comments.
+
+	* elf32-i860.c (TARGET_LITTLE_SYM): Defined to
+	bfd_elf32_i860_little_vec.
+	(TARGET_LITTLE_NAME): Defined to "elf32-i860-little".
+	(ELF_MAXPAGESIZE): Changed to 4096.
+
+	* targets.c (bfd_elf32_i860_little_vec): Declaration of
+	new target.
+	(bfd_target_vector): Added bfd_elf32_i860_little_vec.
+
+	* config.bfd (i860-stardent-sysv4*, i860-stardent-elf*): Added
+	config for little endian elf32 i860.
+	(targ_defvec): Define for the new config above
+	as "bfd_elf32_i860_little_vec". 
+	(targ_selvecs): Define for the new config above
+	as "bfd_elf32_i860_vec bfd_elf32_i860_little_vec"
+
+	* configure.in (bfd_elf32_i860_little_vec): Added recognition
+	of new target vec.
+
+	* configure: Regenerated.
+
 2000-07-27  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_merge_symbol): Take one more argument,
