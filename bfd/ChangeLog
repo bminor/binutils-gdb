@@ -1,3 +1,11 @@
+Mon Dec 28 11:03:22 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (coff-we32k.o, coff-z8k.o): Note dependencies.
+
+	* reloc.c (bfd_perform_relocation): For normal 2- or 4-byte
+	relocs, don't bother doing the adjustment if the value to add is
+	zero.
+
 Sun Dec 27 17:45:05 1992  Fred Fish  (fnf@cygnus.com)
 
 	* bfd.c (bfd_get_size):  New function that gets an upper bound
