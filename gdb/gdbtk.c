@@ -44,14 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "guitcl.h"
 #include "gdbtk.h"
 
-/* start-sanitize-ide */
-#ifdef IDE
-#include "event.h"
-#include "idetcl.h"
-#include "ilutk.h"
-#endif
-/* end-sanitize-ide */
-
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -317,12 +309,6 @@ gdbtk_cleanup (dummy)
      PTR dummy;
 {
   Tcl_Eval (gdbtk_interp, "gdbtk_cleanup");
-#ifdef IDE
-  {
-    struct ide_event_handle *h = (struct ide_event_handle *) dummy;
-    ide_interface_deregister_all (h);
-  }
-#endif
   Tcl_Finalize ();
 }
 
@@ -341,14 +327,6 @@ gdbtk_init ( argv0 )
   int found_main;
   char s[5];
   Tcl_Obj *auto_path_elem, *auto_path_name;
-
-  /* start-sanitize-ide */
-#ifdef IDE
-  struct ide_event_handle *h;
-  const char *errmsg;
-  char *libexecdir;
-#endif 
-  /* end-sanitize-ide */
 
   /* If there is no DISPLAY environment variable, Tk_Init below will fail,
      causing gdb to abort.  If instead we simply return here, gdb will
@@ -380,83 +358,11 @@ gdbtk_init ( argv0 )
   sprintf (s, "%d", inhibit_gdbinit);
   Tcl_SetVar2 (gdbtk_interp, "GDBStartup", "inhibit_prefs", s, TCL_GLOBAL_ONLY);
 
-  /* start-sanitize-ide */
-#ifndef IDE
-  /* end-sanitize-ide */
-  /* For the IDE we register the cleanup later, after we've
-     initialized events.  */
   make_final_cleanup (gdbtk_cleanup,  NULL);
-  /* start-sanitize-ide */
-#endif /* IDE */
-  /* end-sanitize-ide */
 
   /* Initialize the Paths variable.  */
   if (ide_initialize_paths (gdbtk_interp, "") != TCL_OK)
     error ("ide_initialize_paths failed: %s", gdbtk_interp->result);
-
-  /* start-sanitize-ide */
-#ifdef IDE
-  /* Find the directory where we expect to find idemanager.  We ignore
-     errors since it doesn't really matter if this fails.  */
-  libexecdir = Tcl_GetVar2 (gdbtk_interp, "Paths", "libexecdir", TCL_GLOBAL_ONLY);
-
-  IluTk_Init ();
-
-  h = ide_event_init_from_environment (&errmsg, libexecdir);
-  make_final_cleanup (gdbtk_cleanup, h);
-  if (h == NULL)
-    {
-      Tcl_AppendResult (gdbtk_interp, "can't initialize event system: ", errmsg,
-			(char *) NULL);
-      fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", gdbtk_interp->result);
-
-      Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "0", 0);
-    }
-  else 
-    {
-      if (ide_create_tclevent_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_tclevent_command failed: %s", gdbtk_interp->result);
-
-      if (ide_create_edit_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_edit_command failed: %s", gdbtk_interp->result);
-      
-      if (ide_create_property_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_property_command failed: %s", gdbtk_interp->result);
-
-      if (ide_create_build_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_build_command failed: %s", gdbtk_interp->result);
-
-      if (ide_create_window_register_command (gdbtk_interp, h, "gdb-restore")
-	  != TCL_OK)
-	error ("ide_create_window_register_command failed: %s",
-	       gdbtk_interp->result);
-
-      if (ide_create_window_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_window_command failed: %s", gdbtk_interp->result);
-
-      if (ide_create_exit_command (gdbtk_interp, h) != TCL_OK)
-	error ("ide_create_exit_command failed: %s", gdbtk_interp->result);
-
-      if (ide_create_help_command (gdbtk_interp) != TCL_OK)
-	error ("ide_create_help_command failed: %s", gdbtk_interp->result);
-
-      /*
-	if (ide_initialize (gdbtk_interp, "gdb") != TCL_OK)
-	error ("ide_initialize failed: %s", gdbtk_interp->result);
-      */
-
-      Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "1", 0);
-    }
-#else
-  /* end-sanitize-ide */
-  Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "0", 0);
-  /* start-sanitize-ide */
-#endif /* IDE */
-  /* end-sanitize-ide */
-
-  /* We don't want to open the X connection until we've done all the
-     IDE initialization.  Otherwise, goofy looking unfinished windows
-     pop up when ILU drops into the TCL event loop.  */
 
   if (Tk_Init(gdbtk_interp) != TCL_OK)
     error ("Tk_Init failed: %s", gdbtk_interp->result);
@@ -493,11 +399,6 @@ gdbtk_init ( argv0 )
     error ("sizebox creation failed");
   if (ide_create_winprint_command (gdbtk_interp) != TCL_OK)
     error ("windows print code initialization failed");
-  /* start-sanitize-ide */
-  /* An interface to ShellExecute.  */
-  if (ide_create_shell_execute_command (gdbtk_interp) != TCL_OK)
-    error ("shell execute command initialization failed");
-  /* end-sanitize-ide */
   if (ide_create_win_grab_command (gdbtk_interp) != TCL_OK)
     error ("grab support command initialization failed");
   /* Path conversion functions.  */
@@ -603,16 +504,6 @@ gdbtk_find_main";
 	
       }
   }
-
-  
-  /* start-sanitize-ide */
-#ifdef IDE
-  /* Don't do this until we have initialized.  Otherwise, we may get a
-     run command before we are ready for one.  */
-  if (ide_run_server_init (gdbtk_interp, h) != TCL_OK)
-    error ("ide_run_server_init failed: %s", gdbtk_interp->result);
-#endif
-  /* end-sanitize-ide */
 
   /* Now source in the filename provided by the --tclcommand option.
      This is mostly used for the gdbtk testsuite... */

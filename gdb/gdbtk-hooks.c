@@ -44,14 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "guitcl.h"
 #include "gdbtk.h"
 
-#ifdef IDE
-/* start-sanitize-ide */
-#include "event.h"
-#include "idetcl.h"
-#include "ilutk.h"
-/* end-sanitize-ide */
-#endif
-
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else

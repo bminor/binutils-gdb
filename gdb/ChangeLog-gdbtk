@@ -1,3 +1,7 @@
+1999-02-11  Martin Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c, gdbtk-cmds.c, gdbtk-hooks.c: Removed old IDE stuff.
+
 1999-02-09  Martin Hunt  <hunt@cygnus.com>
 
 	* gdbtk-hooks.c: Remove gdbtk_ignorable_warning prototype.
