@@ -1153,6 +1153,97 @@ in the @code{REGISTER_NAME} and related macros.
 
 GDB can handle big-endian, little-endian, and bi-endian architectures.
 
+@section Using Different Register and Memory Data Representations
+@cindex raw representation
+@cindex virtual representation
+@cindex representations, raw and virtual
+@cindex register data formats, converting
+@cindex @code{struct value}, converting register contents to
+
+Some architectures use one representation for a value when it lives in a
+register, but use a different representation when it lives in memory.
+In GDB's terminology, the @dfn{raw} representation is the one used in
+the target registers, and the @dfn{virtual} representation is the one
+used in memory, and within GDB @code{struct value} objects.
+
+For almost all data types on almost all architectures, the virtual and
+raw representations are identical, and no special handling is needed.
+However, they do occasionally differ.  For example:
+
+@itemize @bullet
+
+@item
+The x86 architecture supports an 80-bit long double type.  However, when
+we store those values in memory, they occupy twelve bytes: the
+floating-point number occupies the first ten, and the final two bytes
+are unused.  This keeps the values aligned on four-byte boundaries,
+allowing more efficient access.  Thus, the x86 80-bit floating-point
+type is the raw representation, and the twelve-byte loosely-packed
+arrangement is the virtual representation.
+
+@item
+Some 64-bit MIPS targets present 32-bit registers to GDB as 64-bit
+registers, with garbage in their upper bits.  GDB ignores the top 32
+bits.  Thus, the 64-bit form, with garbage in the upper 32 bits, is the
+raw representation, and the trimmed 32-bit representation is the
+virtual representation.
+
+@end itemize
+
+In general, the raw representation is determined by the architecture, or
+GDB's interface to the architecture, while the virtual representation
+can be chosen for GDB's convenience.  GDB's register file,
+@code{registers}, holds the register contents in raw format, and the GDB
+remote protocol transmits register values in raw format.
+
+Your architecture may define the following macros to request raw /
+virtual conversions:
+
+@deftypefn {Target Macro} int REGISTER_CONVERTIBLE (int @var{reg})
+Return non-zero if register number @var{reg}'s value needs different raw
+and virtual formats.
+@end deftypefn
+
+@deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
+The size of register number @var{reg}'s raw value.  This is the number
+of bytes the register will occupy in @code{registers}, or in a GDB
+remote protocol packet.
+@end deftypefn
+
+@deftypefn {Target Macro} int REGISTER_VIRTUAL_SIZE (int @var{reg})
+The size of register number @var{reg}'s value, in its virtual format.
+This is the size a @code{struct value}'s buffer will have, holding that
+register's value.
+@end deftypefn
+
+@deftypefn {Target Macro} struct type *REGISTER_VIRTUAL_TYPE (int @var{reg})
+This is the type of the virtual representation of register number
+@var{reg}.  Note that there is no need for a macro giving a type for the
+register's raw form; once the register's value has been obtained, GDB
+always uses the virtual form.
+@end deftypefn
+
+@deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
+Convert the value of register number @var{reg} to @var{type}, which
+should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+at @var{from} holds the register's value in raw format; the macro should
+convert the value to virtual format, and place it at @var{to}.
+
+Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
+their @var{reg} and @var{type} arguments in different orders.
+@end deftypefn
+
+@deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
+Convert the value of register number @var{reg} to @var{type}, which
+should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+at @var{from} holds the register's value in raw format; the macro should
+convert the value to virtual format, and place it at @var{to}.
+
+Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
+their @var{reg} and @var{type} arguments in different orders.
+@end deftypefn
+
+
 @section Frame Interpretation
 
 @section Inferior Call Setup
@@ -1583,6 +1674,30 @@ text section.  (Seems dubious.)
 
 @item NO_HIF_SUPPORT
 (Specific to the a29k.)
+
+@item REGISTER_CONVERTIBLE (@var{reg})
+Return non-zero if @var{reg} uses different raw and virtual formats.
+@xref{Using Different Target and Host Data Representations}.
+
+@item REGISTER_RAW_SIZE (@var{reg})
+Return the raw size of @var{reg}.
+@xref{Using Different Target and Host Data Representations}.
+
+@item REGISTER_VIRTUAL_SIZE (@var{reg})
+Return the virtual size of @var{reg}.
+@xref{Using Different Target and Host Data Representations}.
+
+@item REGISTER_VIRTUAL_TYPE (@var{reg})
+Return the virtual type of @var{reg}.
+@xref{Using Different Target and Host Data Representations}.
+
+@item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
+Convert the value of register @var{reg} from its raw form to its virtual
+form.  @xref{Using Different Target and Host Data Representations}.
+
+@item REGISTER_CONVERT_TO_RAW(@var{type}, @var{reg}, @var{from}, @var{to})
+Convert the value of register @var{reg} from its virtual form to its raw
+form.  @xref{Using Different Target and Host Data Representations}.
 
 @item SOFTWARE_SINGLE_STEP_P
 Define this as 1 if the target does not have a hardware single-step
