@@ -7,3 +7,4 @@
 /\/\*:cpu-empty.c\*\//r cpu-empty.ip
 /\/\*:archures.c\*\//r archures.ip
 /\/\*:reloc.c\*\//r reloc.ip
+/\/\*:ctor.c\*\//r ctor.ip
