@@ -29,19 +29,6 @@
 #define KEEP_RELOC_INFO
 #endif
 
-
-/* structure used to keep the filenames which
-   are too long around so that we can stick them
-   into the string table */
-struct filename_list 
-{
-  char *filename;
-  struct filename_list *next;
-};
-
-static struct filename_list *filename_list_head;
-static struct filename_list *filename_list_tail;
-
 const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *def_symbol_in_progress;
 
@@ -333,41 +320,6 @@ c_dot_file_symbol (filename)
     }				/* if not first on the list */
 }
 
-/*
- * Build a 'section static' symbol.
- */
-
-char *
-c_section_symbol (name, value, length, nreloc, nlnno)
-     char *name;
-     long value;
-     long length;
-     unsigned short nreloc;
-     unsigned short nlnno;
-{
-  symbolS *symbolP;
-
-  symbolP = symbol_new (name,
-			(name[1] == 't'
-			 ? text_section
-			 : name[1] == 'd'
-			 ? data_section
-			 : bss_section),
-			value,
-			&zero_address_frag);
-
-  S_SET_STORAGE_CLASS (symbolP, C_STAT);
-  S_SET_NUMBER_AUXILIARY (symbolP, 1);
-
-  SA_SET_SCN_SCNLEN (symbolP, length);
-  SA_SET_SCN_NRELOC (symbolP, nreloc);
-  SA_SET_SCN_NLINNO (symbolP, nlnno);
-
-  SF_SET_STATICS (symbolP);
-
-  return (char *) symbolP;
-}
-
 /* Line number handling */
 
 struct line_no {
@@ -606,14 +558,17 @@ obj_coff_endef (ignore)
 #endif /* C_AUTOARG */
     case C_AUTO:
     case C_REG:
-    case C_MOS:
-    case C_MOE:
-    case C_MOU:
     case C_ARG:
     case C_REGPARM:
     case C_FIELD:
-    case C_EOS:
       SF_SET_DEBUG (def_symbol_in_progress);
+      S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
+      break;
+
+    case C_MOS:
+    case C_MOE:
+    case C_MOU:
+    case C_EOS:
       S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
       break;
 
@@ -671,7 +626,8 @@ obj_coff_endef (ignore)
 	 previous definition. */
 
       c_symbol_merge (def_symbol_in_progress, symbolP);
-      /* FIXME-SOON Should *def_symbol_in_progress be free'd? xoxorich. */
+      symbol_remove (def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
+
       def_symbol_in_progress = symbolP;
 
       if (SF_GET_FUNCTION (def_symbol_in_progress)
@@ -689,10 +645,15 @@ obj_coff_endef (ignore)
 	}
     }
 
-  if (SF_GET_TAG (def_symbol_in_progress)
-      && symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP) == NULL)
+  if (SF_GET_TAG (def_symbol_in_progress))
     {
-      tag_insert (S_GET_NAME (def_symbol_in_progress), def_symbol_in_progress);
+      symbolS *oldtag;
+
+      oldtag = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
+				 DO_NOT_STRIP);
+      if (oldtag == NULL || ! SF_GET_TAG (oldtag))
+	tag_insert (S_GET_NAME (def_symbol_in_progress),
+		    def_symbol_in_progress);
     }
 
   if (SF_GET_FUNCTION (def_symbol_in_progress))
@@ -1019,18 +980,6 @@ coff_frob_symbol (symp, punt)
 	      coff_last_function = 0;
 	    }
 	}
-      else if (SF_GET_TAG (symp))
-	last_tagP = symp;
-      else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
-	next_set_end = last_tagP;
-      else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
-	{
-	  if (S_GET_VALUE (symp))
-	    {
-	      S_SET_VALUE ((symbolS *) S_GET_VALUE (symp), 0xdeadbeef);
-	      S_SET_VALUE (symp, 0);
-	    }
-	}
       if (S_IS_EXTERNAL (symp))
 	S_SET_STORAGE_CLASS (symp, C_EXT);
       else if (SF_GET_LOCAL (symp))
@@ -1040,6 +989,19 @@ coff_frob_symbol (symp, punt)
 	symp->bsym->flags |= BSF_FUNCTION;
 
       /* more ... */
+    }
+
+  if (SF_GET_TAG (symp))
+    last_tagP = symp;
+  else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
+    next_set_end = last_tagP;
+  else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
+    {
+      if (S_GET_VALUE (symp))
+	{
+	  S_SET_VALUE ((symbolS *) S_GET_VALUE (symp), 0xdeadbeef);
+	  S_SET_VALUE (symp, 0);
+	}
     }
 
 #ifdef OBJ_XCOFF
@@ -1054,7 +1016,11 @@ coff_frob_symbol (symp, punt)
 #endif
 
   if (set_end != (symbolS *) NULL
-      && ! *punt)
+      && ! *punt
+      && ((symp->bsym->flags & BSF_NOT_AT_END) != 0
+	  || (S_IS_DEFINED (symp)
+	      && ! S_IS_COMMON (symp)
+	      && (! S_IS_EXTERNAL (symp) || SF_GET_FUNCTION (symp)))))
     {
       SA_SET_SYM_ENDNDX (set_end, symp);
       set_end = NULL;
@@ -1131,7 +1097,11 @@ coff_adjust_section_syms (abfd, sec, x)
       }
   }
   if (bfd_get_section_size_before_reloc (sec) == 0
-      && nrelocs == 0 && nlnno == 0)
+      && nrelocs == 0
+      && nlnno == 0
+      && sec != text_section
+      && sec != data_section
+      && sec != bss_section)
     return;
   secsym = section_symbol (sec);
   SA_SET_SCN_NRELOC (secsym, nrelocs);
@@ -1261,7 +1231,7 @@ coff_frob_section (sec)
      segT sec;
 {
   segT strsec;
-  char *strname, *p;
+  char *p;
   fragS *fragp;
   bfd_vma size, n_entries, mask;
 
@@ -1279,7 +1249,10 @@ coff_frob_section (sec)
   /* If the section size is non-zero, the section symbol needs an aux
      entry associated with it, indicating the size.  We don't know
      all the values yet; coff_frob_symbol will fill them in later.  */
-  if (size)
+  if (size != 0
+      || sec == text_section
+      || sec == data_section
+      || sec == bss_section)
     {
       symbolS *secsym = section_symbol (sec);
 
@@ -1412,6 +1385,18 @@ const short seg_N_TYPE[] =
 
 int function_lineoff = -1;	/* Offset in line#s where the last function
 				   started (the odd entry for line #0) */
+
+/* structure used to keep the filenames which
+   are too long around so that we can stick them
+   into the string table */
+struct filename_list 
+{
+  char *filename;
+  struct filename_list *next;
+};
+
+static struct filename_list *filename_list_head;
+static struct filename_list *filename_list_tail;
 
 static symbolS *last_line_symbol;
 
@@ -1587,7 +1572,7 @@ count_entries_in_chain (idx)
   nrelocs = 0;
   while (fixup_ptr != (fixS *) NULL)
     {
-      if (TC_COUNT_RELOC (fixup_ptr))
+      if (fixup_ptr->fx_done == 0 && TC_COUNT_RELOC (fixup_ptr))
 	{
 #ifdef TC_A29K
 	  if (fixup_ptr->fx_r_type == RELOC_CONSTH)
@@ -1662,7 +1647,7 @@ do_relocs_for (abfd, h, file_cursor)
 		  struct internal_reloc intr;
 
 		  /* Only output some of the relocations */
-		  if (TC_COUNT_RELOC (fix_ptr))
+		  if (fix_ptr->fx_done == 0 && TC_COUNT_RELOC (fix_ptr))
 		    {
 #ifdef TC_RELOC_MANGLE
 		      TC_RELOC_MANGLE (&segment_info[idx], fix_ptr, &intr,
@@ -2270,10 +2255,15 @@ obj_coff_endef (ignore)
 	}			/* if function */
     }				/* normal or mergable */
 
-  if (SF_GET_TAG (def_symbol_in_progress)
-      && symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP) == NULL)
+  if (SF_GET_TAG (def_symbol_in_progress))
     {
-      tag_insert (S_GET_NAME (def_symbol_in_progress), def_symbol_in_progress);
+      symbolS *oldtag;
+
+      oldtag = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
+				 DO_NOT_STRIP);
+      if (oldtag == NULL || ! SF_GET_TAG (oldtag))
+	tag_insert (S_GET_NAME (def_symbol_in_progress),
+		    def_symbol_in_progress);
     }
 
   if (SF_GET_FUNCTION (def_symbol_in_progress))
@@ -3817,9 +3807,6 @@ fixup_segment (segP, this_segment_type)
   register fragS *fragP;
   register segT add_symbol_segment = absolute_section;
 
-  if (linkrelax)
-    return;
-
   for (fixP = segP->fix_root; fixP; fixP = fixP->fx_next)
     {
       fragP = fixP->fx_frag;
@@ -3828,6 +3815,22 @@ fixup_segment (segP, this_segment_type)
       place = fragP->fr_literal + where;
       size = fixP->fx_size;
       add_symbolP = fixP->fx_addsy;
+      sub_symbolP = fixP->fx_subsy;
+      add_number = fixP->fx_offset;
+      pcrel = fixP->fx_pcrel;
+
+      /* We want function-relative stabs to work on systems which
+	 may use a relaxing linker; thus we must handle the sym1-sym2
+	 fixups function-relative stabs generates.
+
+	 Of course, if you actually enable relaxing in the linker, the
+	 line and block scoping information is going to be incorrect
+	 in some cases.  The only way to really fix this is to support
+	 a reloc involving the difference of two symbols.  */
+      if (linkrelax
+	  && (!sub_symbolP || pcrel))
+	continue;
+
 #ifdef TC_I960
       if (fixP->fx_tcbit && SF_GET_CALLNAME (add_symbolP))
 	{
@@ -3844,9 +3847,6 @@ fixup_segment (segP, this_segment_type)
 	  fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
 	}
 #endif
-      sub_symbolP = fixP->fx_subsy;
-      add_number = fixP->fx_offset;
-      pcrel = fixP->fx_pcrel;
 
       if (add_symbolP != NULL
 	  && add_symbolP->sy_mri_common)

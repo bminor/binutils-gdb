@@ -6,6 +6,25 @@ Mon Jun 10 14:52:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (struct filename_list): Only define if not
+	BFD_ASSEMBLER.
+	(filename_list_head, filename_list_tail): Likewise.
+	(c_section_symbol): Remove unused BFD_ASSEMBLER version.
+	(obj_coff_endef, BFD_ASSEMBLER version): Don't set the debugging
+	flag for C_MOS, C_MOE, C_MOU, or C_EOS symbols, since they should
+	have a section of N_ABS rather than N_DEBUG.  If we do a merge,
+	remove the new symbol from the list.
+ 	(obj_coff_endef, both versions): Call tag_insert even if there is
+	an old symbol with the same name, if the old symbol does not
+	happen to be a tag.
+	(coff_frob_symbol): Check SF_GET_TAG, C_EOF, and C_FILE outside of
+	the SF_GET_DEBUG condition.  Don't call SA_SET_SYM_ENDNDX with a
+	symbol that will be moved to the end of the symbol list.
+	(coff_adjust_section_syms): Always call section_symbol for .text,
+	.data, and .bss.
+	(coff_frob_section): Likewise.  Also, remove unused variable
+	strname.
+
 	* config/tc-ns32k.c (convert_iif): Call frag_grow rather than
 	manipulating frags directly.
 	(md_number_to_field): Adjust mem_ptr correctly if ENDIAN is
