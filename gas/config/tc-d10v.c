@@ -35,7 +35,12 @@ const char FLT_CHARS[] = "dD";
 
 int Optimizing = 0;
 
-#define AT_WORD (-1)
+#define AT_WORD_P(X) ((X)->X_op == O_right_shift \
+		      && (X)->X_op_symbol != NULL \
+		      && (X)->X_op_symbol->sy_value.X_op == O_constant \
+		      && (X)->X_op_symbol->sy_value.X_add_number == AT_WORD_RIGHT_SHIFT)
+#define AT_WORD_RIGHT_SHIFT 2
+
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
@@ -79,6 +84,8 @@ static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1
 				int exec_type));
 
 struct option md_longopts[] = {
+#define OPTION_NOWARNSWAP (OPTION_MD_BASE)
+  {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);       
@@ -217,6 +224,9 @@ md_parse_option (c, arg)
     case 'O':
       /* Optimize. Will attempt to parallelize operations */
       Optimizing = 1;
+      break;
+    case OPTION_NOWARNSWAP:
+      flag_warn_suppress_instructionswap = 1;
       break;
     default:
       return 0;
@@ -425,18 +435,39 @@ get_operands (exp)
 	  expression (&exp[numops]);
 	}
 
-      if (!strncasecmp (input_line_pointer, "@word", 5))
+      if (strncasecmp (input_line_pointer, "@word", 5) == 0)
 	{
+	  input_line_pointer += 5;
 	  if (exp[numops].X_op == O_register)
 	    {
-	      /* if it looked like a register name but was followed by "@word" */
-	      /* then it was really a symbol, so change it to one */
+	      /* if it looked like a register name but was followed by
+                 "@word" then it was really a symbol, so change it to
+                 one */
 	      exp[numops].X_op = O_symbol;
 	      exp[numops].X_add_symbol = symbol_find_or_make ((char *)exp[numops].X_op_symbol);
 	    }
-	  exp[numops].X_op_symbol = (struct symbol *)-1;
-	  exp[numops].X_add_number = AT_WORD;
-	  input_line_pointer += 5;
+
+	  /* check for identifier@word+constant */
+	  if (*input_line_pointer == '-' || *input_line_pointer == '+')
+	  {
+	    char *orig_line = input_line_pointer;
+	    expressionS new_exp;
+	    expression (&new_exp);
+	    exp[numops].X_add_number = new_exp.X_add_number;
+	  }
+
+	  /* convert expr into a right shift by AT_WORD_RIGHT_SHIFT */
+	  {
+	    expressionS new_exp;
+	    memset (&new_exp, 0, sizeof new_exp);
+	    new_exp.X_add_number = AT_WORD_RIGHT_SHIFT;
+	    new_exp.X_op = O_constant;
+	    new_exp.X_unsigned = 1;
+	    exp[numops].X_op_symbol = make_expr_symbol (&new_exp);
+	    exp[numops].X_op = O_right_shift;
+	  }
+
+	  know (AT_WORD_P (&exp[numops]));
 	}
       
       if (exp[numops].X_op == O_illegal) 
@@ -533,14 +564,22 @@ build_insn (opcode, opers, insn)
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
 
-	  if (opers[i].X_op == O_symbol && number == AT_WORD && 
-	     opers[i].X_op_symbol == (struct symbol *)-1 )
+	  if (AT_WORD_P (&opers[i]))
 	    {
-	      number = opers[i].X_add_number = 0;
+	      /* Reconize XXX>>1+N aka XXX@word+N as special (AT_WORD) */
 	      fixups->fix[fixups->fc].reloc = BFD_RELOC_D10V_18;
-	    } else
-	      fixups->fix[fixups->fc].reloc = 
-		get_reloc((struct d10v_operand *)&d10v_operands[opcode->operands[i]]);
+	      opers[i].X_op = O_symbol;
+	      opers[i].X_op_symbol = NULL; /* Should free it */
+	      /* number is left shifted by AT_WORD_RIGHT_SHIFT so
+                 that, it is aligned with the symbol's value.  Later,
+                 BFD_RELOC_D10V_18 will right shift (symbol_value +
+                 X_add_number). */
+	      number <<= AT_WORD_RIGHT_SHIFT;
+	      opers[i].X_add_number = number;
+	    }
+	  else
+	    fixups->fix[fixups->fc].reloc = 
+	      get_reloc((struct d10v_operand *)&d10v_operands[opcode->operands[i]]);
 
 	  if (fixups->fix[fixups->fc].reloc == BFD_RELOC_16 || 
 	      fixups->fix[fixups->fc].reloc == BFD_RELOC_D10V_18)
@@ -718,7 +757,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	{
 	  if (opcode2->unit == IU)
 	    as_fatal ("Two IU instructions may not be executed in parallel");
-          if (flag_warn_instructionswap)
+          if (!flag_warn_suppress_instructionswap)
 	    as_warn ("Swapping instruction order");
  	  insn = FM00 | (insn2 << 15) | insn1;
 	}
@@ -726,7 +765,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	{
 	  if (opcode1->unit == MU)
 	    as_fatal ("Two MU instructions may not be executed in parallel");
-          if (flag_warn_instructionswap)
+          if (!flag_warn_suppress_instructionswap)
 	    as_warn ("Swapping instruction order");
 	  insn = FM00 | (insn2 << 15) | insn1;
 	}
@@ -1149,8 +1188,7 @@ find_opcode (opcode, myops)
 		  else
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol);
 
-		  if (myops[opnum].X_add_number == AT_WORD && 
-		      myops[opnum].X_op_symbol == (struct symbol *)-1)
+		  if (AT_WORD_P (&myops[opnum]))
 		    {
 		      if (bits > 4)
 			{
@@ -1368,7 +1406,7 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_D10V_18_PCREL:
     case BFD_RELOC_D10V_18:
       /* instruction addresses are always right-shifted by 2 */
-      value >>= 2;
+      value >>= AT_WORD_RIGHT_SHIFT;
       if (fixp->fx_size == 2)
 	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       else
