@@ -2,6 +2,15 @@ Thu Oct  8 10:18:33 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (find_format): Test for missing flag and
 	control registers.
+	
+	(md_apply_fix3): Fix error messages to avoid
+	assumption about presence of a symbol.
+
+	(parallel_ok): Disallow parallel instructions that both modify the
+	same flag register.
+
+	(find_format): Generate a warning if an odd numbered register is
+	used as the first register in a mutli-register instruction.
 
 Wed Oct  7 14:09:14 1998  Nick Clifton  <nickc@cygnus.com>
 

@@ -98,8 +98,8 @@ static segT d30v_current_align_seg;
 static symbolS *d30v_last_label;
 
 /* Two nops */
-#define NOP_LEFT  ((long long)NOP << 32)
-#define NOP_RIGHT ((long long)NOP)
+#define NOP_LEFT   ((long long) NOP << 32)
+#define NOP_RIGHT  ((long long) NOP)
 #define NOP2 (FM00 | NOP_LEFT | NOP_RIGHT)
 
 /* local functions */
@@ -264,6 +264,7 @@ check_range (num, bits, flags)
       if ((num > max) || (num < min))
 	retval = 1;
     }
+  
   return retval;
 }
 
@@ -388,7 +389,7 @@ md_section_align (seg, addr)
 void
 md_begin ()
 {
-  struct d30v_opcode *opcode;
+  struct d30v_opcode * opcode;
   d30v_hash = hash_new ();
 
   /* Insert opcode names into a hash table. */
@@ -744,8 +745,8 @@ write_1_short (opcode, insn, fx, use_sequential)
   fx->fc = 0;
 }
 
-/* Write out a short form instruction if possible; */
-/* return number of instructions not written out. */
+/* Write out a short form instruction if possible.
+   Return number of instructions not written out.  */
 static int
 write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx) 
      struct d30v_insn *opcode1, *opcode2;
@@ -828,18 +829,18 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_PARALLEL:	/* parallel */
       flag_explicitly_parallel = flag_xp_state;
       if (! parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
-	as_fatal (_("Instructions may not be executed in parallel"));
+	as_bad (_("Instructions may not be executed in parallel"));
       else if (opcode1->op->unit == IU)
 	{
 	  if (opcode2->op->unit == IU)
-	    as_fatal (_("Two IU instructions may not be executed in parallel"));
+	    as_bad (_("Two IU instructions may not be executed in parallel"));
 	  as_warn (_("Swapping instruction order"));
  	  insn = FM00 | (insn2 << 32) | insn1;
 	}
       else if (opcode2->op->unit == MU)
 	{
 	  if (opcode1->op->unit == MU)
-	    as_fatal (_("Two MU instructions may not be executed in parallel"));
+	    as_bad (_("Two MU instructions may not be executed in parallel"));
 	  else if (opcode1->op->unit == EITHER_BUT_PREFER_MU)
 	    as_warn (_("Executing %s in IU may not work"), opcode1->op->name);
 	  as_warn (_("Swapping instruction order"));
@@ -858,9 +859,9 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
     case EXEC_SEQ:	/* sequential */
       if (opcode1->op->unit == IU)
-	as_fatal (_("IU instruction may not be in the left container"));
+	as_bad (_("IU instruction may not be in the left container"));
       if (prev_left_kills_right_p)
-	as_warn (_("special left instruction `%s' kills instruction "
+	as_bad (_("special left instruction `%s' kills instruction "
 		   "`%s' in right container"),
 		 opcode1->op->name, opcode2->op->name);
       if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
@@ -871,7 +872,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
     case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
-	as_fatal (_("MU instruction may not be in the right container"));
+	as_bad (_("MU instruction may not be in the right container"));
       if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
 	as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
       insn = FM10 | (insn1 << 32) | insn2;  
@@ -1097,7 +1098,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	    }
 	}
     }
-
+  
   flags_set1 = op1->op->flags_set;
   flags_set2 = op2->op->flags_set;
   flags_used1 = op1->op->flags_used;
@@ -1140,9 +1141,11 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	 don't trust the human if both instructions modify the same
 	 register but we do trust the human if they modify the same
 	 flags. */
+      /* We have now been requested not to trust the human if the
+	 instructions modify the same flag registers either.  */
       if (flag_explicitly_parallel)
 	{
-	  if ((j < 2) && (mod_reg[0][j] & mod_reg[1][j]) != 0)
+	  if ((mod_reg[0][j] & mod_reg[1][j]) != 0)
 	    return 0;
 	}
       else
@@ -1219,9 +1222,9 @@ md_assemble (str)
 	  /* Assemble first instruction and save it.  */
 	  prev_insn = do_assemble (str, &prev_opcode, 1, 0);
 	  if (prev_insn == -1)
-	    as_fatal (_("Cannot assemble instruction"));
+	    as_bad (_("Cannot assemble instruction"));
 	  if (prev_opcode.form->form >= LONG)
-	    as_fatal (_("First opcode is long.  Unable to mix instructions as specified.")); 
+	    as_bad (_("First opcode is long.  Unable to mix instructions as specified.")); 
 	  fixups = fixups->next;
 	  str = str2 + 2;
 	  prev_seg = now_seg;
@@ -1239,7 +1242,7 @@ md_assemble (str)
 	  etype = extype;
 	  return;
 	}
-      as_fatal (_("Cannot assemble instruction"));
+      as_bad (_("Cannot assemble instruction"));
     }
 
   if (etype != EXEC_UNKNOWN)
@@ -1323,14 +1326,15 @@ md_assemble (str)
   if (opcode.form->form >= LONG) 
     {
       if (extype != EXEC_UNKNOWN) 
-	as_fatal (_("Instruction uses long version, so it cannot be mixed as specified"));
+	as_bad (_("Instruction uses long version, so it cannot be mixed as specified"));
       d30v_cleanup (false);
       write_long (& opcode, insn, fixups);
       prev_insn = -1;
     }
-  else if ((prev_insn != -1) && 
-      (write_2_short
-       (& prev_opcode, (long) prev_insn, & opcode, (long) insn, extype, fixups) == 0)) 
+  else if ((prev_insn != -1)
+	   && (write_2_short
+	       (& prev_opcode, (long) prev_insn, & opcode,
+		(long) insn, extype, fixups) == 0)) 
     {
       /* No instructions saved.  */
       prev_insn = -1;
@@ -1338,7 +1342,7 @@ md_assemble (str)
   else
     {
       if (extype != EXEC_UNKNOWN) 
-	as_fatal (_("Unable to mix instructions as specified"));
+	as_bad (_("Unable to mix instructions as specified"));
       
       /* Save off last instruction so it may be packed on next pass.  */
       memcpy (&prev_opcode, &opcode, sizeof (prev_opcode));
@@ -1385,7 +1389,7 @@ do_assemble (str, opcode, shortp, is_parallel)
     }
 
   if (nlen == 0)
-    return (-1);
+    return -1;
 
   name[nlen] = 0;
 
@@ -1401,10 +1405,10 @@ do_assemble (str, opcode, shortp, is_parallel)
 	  char tmp[4];
 	  strncpy (tmp, op_end + 1, 2);
 	  tmp[2] = 0;
-	  as_fatal (_("unknown condition code: %s"),tmp);
+	  as_bad (_("unknown condition code: %s"),tmp);
 	  return -1;
 	}
-      /*      printf("condition code=%d\n",i); */
+      /*      printf ("condition code=%d\n",i); */
       opcode->ecc = i;
       op_end += 3;
     }
@@ -1431,14 +1435,14 @@ do_assemble (str, opcode, shortp, is_parallel)
 	  if (i < 3 || i > 6)
 	    {
 	      name[p+2]=0;
-	      as_fatal (_("cmpu doesn't support condition code %s"),&name[p]);
+	      as_bad (_("cmpu doesn't support condition code %s"),&name[p]);
 	    }
 	}
 
       if (!*str)
 	{
 	  name[p+2]=0;
-	  as_fatal (_("unknown condition code: %s"),&name[p]);      
+	  as_bad (_("unknown condition code: %s"),&name[p]);      
 	}
       
       cmp_hack = i;
@@ -1467,7 +1471,7 @@ do_assemble (str, opcode, shortp, is_parallel)
   /* find the first opcode with the proper name */  
   opcode->op = (struct d30v_opcode *)hash_find (d30v_hash, name);
   if (opcode->op == NULL)
-    as_fatal (_("unknown opcode: %s"),name);
+    as_bad (_("unknown opcode: %s"),name);
 
   save = input_line_pointer;
   input_line_pointer = op_end;
@@ -1475,7 +1479,7 @@ do_assemble (str, opcode, shortp, is_parallel)
     {
       opcode->op++;
       if (strcmp (opcode->op->name, name))
-	as_fatal (_("operands for opcode `%s' do not match any valid format"), name);
+	as_bad (_("operands for opcode `%s' do not match any valid format"), name);
     }
   input_line_pointer = save;
 
@@ -1673,8 +1677,21 @@ find_format (opcode, myops, fsize, cmp_hack)
 	  /* printf("through the loop: match=%d\n",match);  */
 	  /* We're only done if the operands matched so far AND there
 	     are no more to check.  */
-	  if (match && myops[j].X_op == 0) 
-	    return fm;
+	  if (match && myops[j].X_op == 0)
+	    {
+	      /* Final check - issue a warning if an odd numbered register
+		 is used as the first register in an instruction that reads
+		 or writes 2 registers.  */
+
+	      for (j = 0; fm->operands[j]; j++)
+		if (myops[j].X_op == O_register
+		    && (myops[j].X_add_number & 1)
+		    && (d30v_operand_table[fm->operands[j]].flags & OPERAND_2REG))
+		  as_warn (\
+_("Odd numbered register used as target of multi-register instruction"));
+	      
+	      return fm;
+	    }
 	  fm = (struct d30v_format *)&d30v_format_table[++k];
 	}
       /* printf("trying another format: i=%d\n",i); */
@@ -1734,7 +1751,7 @@ md_apply_fix3 (fixp, valuep, seg)
   char * where;
   unsigned long insn, insn2;
   long value;
-
+  
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
       value = * valuep;
@@ -1871,8 +1888,10 @@ md_apply_fix3 (fixp, valuep, seg)
       break;
 
     default:
-      as_fatal (_("line %d: unknown relocation type: 0x%x"),fixp->fx_line,fixp->fx_r_type);
+      as_bad (_("line %d: unknown relocation type: 0x%x"),
+	      fixp->fx_line,fixp->fx_r_type);
     }
+  
   return 0;
 }
 
