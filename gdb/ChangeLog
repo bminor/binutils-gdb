@@ -1,3 +1,29 @@
+2001-01-22  J.T. Conklin  <jtc@redback.com>
+
+	* ns32k-tdep.c: #include "frame.h"
+	* config/ns32k/tm-umax.h (FRAME_FIND_SAVED_REGS): Restore.  It
+ 	appears to have been inadvertantly removed sometime in May 1999.
+
+	* Revert 2000-11-09 changes where shared library objects were
+ 	moved from NATDEPFILES to TDEPFILES on NetBSD targets.  While
+	we'd like to be able to debug dynamically linked executables,
+	this makes it impossible to build a cross debugger on a many
+	hosts.
+
+	* config/i386/nbsd.mt: Remove solib.o, solib-svr4.o from TDEPFILES.
+        * config/i386/nbsdelf.mt: Likewise.
+        * config/m68k/nbsd.mt: Likewise.
+        * config/ns32k/nbsd.mt: Likewise.
+        * config/powerpc/nbsd.mt: Likewise.
+        * config/sparc/nbsd.mt: Likewise.
+        * config/sparc/nbsdelf.mt: Likewise.
+        * config/i386/nbsd.mh: Add solib.o, solib-svr4.o to NATDEPFILES.
+        * config/i386/nbsdelf.mh: Likewise. 
+        * config/m68k/nbsd.mh: Likewise.
+        * config/ns32k/nbsd.mh: Likewise.
+        * config/powerpc/nbsd.mh: Likewise.
+        * config/sparc/nbsd.mh: Likewise.
+
 2001-01-19  Jason Merrill  <jason@redhat.com>
 
 	* dbxread.c (read_ofile_symtab): Stay with AUTO_DEMANGLING for G++.

@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "frame.h"
 
 void
 _initialize_ns32k_tdep (void)

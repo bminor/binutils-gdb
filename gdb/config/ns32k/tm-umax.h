@@ -222,6 +222,12 @@ extern CORE_ADDR umax_skip_prologue (CORE_ADDR);
 
 extern CORE_ADDR ns32k_get_enter_addr ();
 
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+extern int umax_frame_num_args (struct frame_info *fi);
+#define FRAME_NUM_ARGS(fi) (umax_frame_num_args ((fi)))
+
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
@@ -232,8 +238,35 @@ extern CORE_ADDR ns32k_get_enter_addr ();
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern int umax_frame_num_args (struct frame_info *fi);
-#define FRAME_NUM_ARGS(fi) (umax_frame_num_args ((fi)))
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	\
+{ 								\
+  register int	regmask, regnum;				\
+  int		localcount;					\
+  register CORE_ADDR	enter_addr;				\
+  register CORE_ADDR	next_addr;				\
+								\
+  memset (&(frame_saved_regs), '\0', sizeof (frame_saved_regs));	\
+  enter_addr = ns32k_get_enter_addr ((frame_info)->pc);		\
+  if (enter_addr > 1)						\
+    {								\
+      regmask = read_memory_integer (enter_addr+1, 1) & 0xff;	\
+      localcount = ns32k_localcount (enter_addr);		\
+      next_addr = (frame_info)->frame + localcount;		\
+      for (regnum = 0; regnum < 8; regnum++, regmask >>= 1)	\
+	(frame_saved_regs).regs[regnum] = (regmask & 1) ?	\
+					  (next_addr -= 4) : 0;	\
+      (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame + 4;\
+      (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;\
+      (frame_saved_regs).regs[FP_REGNUM] =			\
+		  (read_memory_integer ((frame_info)->frame, 4));\
+    }								\
+  else if (enter_addr == 1)					\
+    {								\
+      CORE_ADDR sp = read_register (SP_REGNUM);			\
+      (frame_saved_regs).regs[PC_REGNUM] = sp;			\
+      (frame_saved_regs).regs[SP_REGNUM] = sp + 4;		\
+    }								\
+}
 
 /* Things needed for making the inferior call functions.  */
 
