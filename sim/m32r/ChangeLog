@@ -1,3 +1,67 @@
+Wed May  6 14:51:39 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* arch.h,arch.c,cpu.h,cpuall.h: Regenerate, tweaks mostly.
+	* model.c: Ditto.  Reorganize model/mach data.
+start-sanitize-m32rx
+	* cpux.h: Ditto.
+	* modelx.c: Ditto.
+end-sanitize-m32rx
+
+	* Makefile.in (m32r.o,mloop.o,cpu.o,model.o): Add decode.h dependency.
+start-sanitize-m32rx
+	(m32rx.o,mloopx.o,cpux.o,modelx.o): Add decodex.h dependency.
+end-sanitize-m32rx
+	* decode.c,decode.h: Regenerate, introduces IDESC table.
+	* mloop.in (extract16,extract32): Add IDESC support.
+	Update names of semantic handler member names.
+	(execute): Ditto.  Delete call to PROFILE_COUNT_INSN.
+start-sanitize-m32rx
+	* decodex.c,decodex.h: Regenerate, introduces IDESC table.
+	* mloopx.in: Add IDESC support.
+	Update names of semantic handler member names.
+	Delete call to PROFILE_COUNT_INSN.
+end-sanitize-m32rx
+
+	* sem-switch.c: Regenerate.  Redo computed goto label handling.
+	* sem.c: Regenerate.  Call PROFILE_COUNT_INSN.
+start-sanitize-m32rx
+	* readx.c: Regenerate.  Redo computed goto label handling.
+	* semx.c: Regenerate.  Call PROFILE_COUNT_INSN.  Finish profiling
+	support.
+	* Makefile.in (stamp-xcpu): Turn on profiling support.
+end-sanitize-m32rx
+
+	* m32r.c (m32r_fetch_register): Change result type and args to
+	conform to sim_fetch_register interface.
+	(m32r_store_register): Ditto for sim_store_register interface.
+start-sanitize-m32rx
+	* m32rx.c (m32rx_fetch_register): Change result type and args to
+	conform to sim_fetch_register interface.
+	(m32rx_store_register): Ditto for sim_store_register interface.
+end-sanitize-m32rx
+
+	* sim-if.c (alloc_cpu): Delete.
+	(free_state): Uninstall modules here ...
+	(sim_open): ... and not here.  Call sim_cpu_alloc_all.
+	Set default architecture/model if not specified.
+	(sim_fetch_register,sim_store_register): Rewrite.
+
+	* sim-if.c (h_pc_get,h_pc_set): Delete.  Renamed to sim_pc_[gs]et
+	and moved to common/sim-cpu.c.
+	(sim_create_inferior): Update.
+	(do_trap): Update.
+	* sim-main.h (h_pc_get,h_pc_set): Delete.
+
+	* sim-main.h (sim_cia): Change to USI.
+	(sim_cpu): Move m32r_misc_profile before machine generated part.
+
+Fri May  1 18:25:41 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in: Replace @MAINT@ with $(CGEN_MAINT).
+	(CGEN_MAINT): New variable.
+	* configure.in: Add support for --enable-cgen-maint.
+	* configure: Regenerate.
+
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.
