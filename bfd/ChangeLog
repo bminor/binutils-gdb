@@ -1,3 +1,11 @@
+2001-06-18  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_info_failed): Add a new field, verdefs.
+	(NAME(bfd_elf,size_dynamic_sections): Pass verdefs to
+	elf_export_symbol.
+	(elf_export_symbol): Check eif->verdefs to decide if a symbol
+	should be exported.
+
 2001-06-17  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-mips.c (mips_elf_link_hash_entry): Add a new field,

@@ -27,6 +27,7 @@ struct elf_info_failed
 {
   boolean failed;
   struct bfd_link_info *info;
+  struct bfd_elf_version_tree *verdefs;
 };
 
 static boolean elf_link_add_object_symbols
@@ -2967,6 +2968,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	}
 
       eif.info = info;
+      eif.verdefs = verdefs;
       eif.failed = false;
 
       /* If we are supposed to export all symbols into the dynamic symbol
@@ -3705,11 +3707,39 @@ elf_export_symbol (h, data)
       && (h->elf_link_hash_flags
 	  & (ELF_LINK_HASH_DEF_REGULAR | ELF_LINK_HASH_REF_REGULAR)) != 0)
     {
-      if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
+      struct bfd_elf_version_tree *t;
+      struct bfd_elf_version_expr *d;
+
+      for (t = eif->verdefs; t != NULL; t = t->next)
 	{
-	  eif->failed = true;
-	  return false;
+	  if (t->globals != NULL)
+	    {
+	      for (d = t->globals; d != NULL; d = d->next)
+		{
+		  if ((*d->match) (d, h->root.root.string))
+		    goto doit;
+		}
+	    }
+
+	  if (t->locals != NULL)
+	    {
+	      for (d = t->locals ; d != NULL; d = d->next)
+		{
+		  if ((*d->match) (d, h->root.root.string))
+		    return true;
+		}
+	    }
 	}
+
+      if (!eif->verdefs)
+        {
+doit:
+	  if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
+	    {
+	      eif->failed = true;
+	      return false;
+	    }
+        }
     }
 
   return true;
