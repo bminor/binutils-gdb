@@ -1,5 +1,8 @@
 Wed Jan 24 12:06:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c: Various changes to write out types for functions and
+	references, and to not write out unnecessary function types.
+
 	* ieee.c (struct ieee_var): Remove variable field.  Add kind
 	field, and define some enum constants for it.
 	(parse_ieee_ty): Set kind field of variable for 'x' and 'X' types.
