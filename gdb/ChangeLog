@@ -1,3 +1,8 @@
+Tue Sep 17 12:20:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add cases for MIPS 5000 like MIPS 4300.
+	* configure: Rebuild.
+
 Tue Sep 17 12:09:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
 
 	* ser-e7kpc.c: Added wingdb support for target e7000pc.
