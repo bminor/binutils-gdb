@@ -2062,7 +2062,7 @@ sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 
 sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) \
-	$(arch_utils_h) $(regcache_h)
+	$(arch_utils_h) $(regcache_h) $(BFD_SRC)/elf-bfd.h sparc-tdep.h
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(target_h) $(regcache_h)
 
