@@ -1,5 +1,11 @@
 2002-08-28  Keith Seitz  <keiths@redhat.com>
 
+	* interps.c (interpreter_exec_cmd): Temporarily set
+	current interpreter to quiet, too, so that we don't get
+	too many prompts when switching interpreters.
+
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
 	* thread.c (do_captured_thread_select): Add context-changed
 	notification.
 	* infrun.c (handle_inferior_event): Remove context-changed

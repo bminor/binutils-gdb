@@ -537,7 +537,7 @@ interpreter_exec_cmd (char *args, int from_tty)
   char **trule = NULL;
   unsigned int nrules;
   unsigned int i;
-  int old_quiet;
+  int old_quiet, use_quiet;
 
   prules = buildargv (args);
   if (prules == NULL)
@@ -563,7 +563,9 @@ interpreter_exec_cmd (char *args, int from_tty)
   if (interp_to_use == NULL)
     error ("Could not find interpreter \"%s\".", prules[0]);
 
-  old_quiet = gdb_interpreter_set_quiet (interp_to_use, 1);
+  /* Temporarily set interpreters quiet */
+  old_quiet = gdb_interpreter_set_quiet (old_interp, 1);
+  use_quiet = gdb_interpreter_set_quiet (interp_to_use, 1);
 
   if (!gdb_set_interpreter (interp_to_use))
     error ("Could not switch to interpreter \"%s\".", prules[0]);
@@ -582,7 +584,8 @@ interpreter_exec_cmd (char *args, int from_tty)
     }
 
   gdb_set_interpreter (old_interp);
-  gdb_interpreter_set_quiet (interp_to_use, old_quiet);
+  gdb_interpreter_set_quiet (interp_to_use, use_quiet);
+  gdb_interpreter_set_quiet (old_interp, old_quiet);
 }
 
 /* List the possible interpreters which could complete the given text. */
