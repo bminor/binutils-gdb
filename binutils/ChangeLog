@@ -1,5 +1,11 @@
 Fri Apr 22 11:14:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* nlmconv.c (setup_sections): Remove special handling of .reginfo
+	section.
+	(copy_sections): Likewise.
+	(alpha_mangle_relocs): Use bfd_ecoff_get_gp_value rather than the
+	special ECOFF .reginfo section.
+
 	* objcopy.c (copy_object): Call bfd_copy_private_bfd_data after
 	copying everything else, to let it fiddle with the file in its
 	final state.

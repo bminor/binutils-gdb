@@ -1169,13 +1169,6 @@ setup_sections (inbfd, insec, data_ptr)
   bfd_size_type add;
   bfd_size_type secsecsize;
 
-  /* FIXME: We don't want to copy the .reginfo section of an ECOFF
-     file.  However, I don't have a good way to describe this section.
-     We do want to copy the section when using objcopy.  */
-  if (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour
-      && strcmp (bfd_section_name (inbfd, insec), ".reginfo") == 0)
-    return;
-
   f = bfd_get_section_flags (inbfd, insec);
   if (f & SEC_CODE)
     outname = NLM_CODE_NAME;
@@ -1247,13 +1240,6 @@ copy_sections (inbfd, insec, data_ptr)
   bfd_size_type add;
 
   inname = bfd_section_name (inbfd, insec);
-
-  /* FIXME: We don't want to copy the .reginfo section of an ECOFF
-     file.  However, I don't have a good way to describe this section.
-     We do want to copy the section when using objcopy.  */
-  if (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour
-      && strcmp (inname, ".reginfo") == 0)
-    return;
 
   outsec = insec->output_section;
   assert (outsec != NULL);
@@ -1633,22 +1619,10 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       ++(*reloc_count_ptr);
     }
 
-  /* Get the GP value from bfd.  It is in the .reginfo section.  */
+  /* Get the GP value from bfd.  */
   if (nlm_alpha_backend_data (outbfd)->gp == 0)
-    {
-      bfd *inbfd;
-      asection *reginfo_sec;
-      struct ecoff_reginfo sreginfo;
-
-      inbfd = insec->owner;
-      assert (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour);
-      reginfo_sec = bfd_get_section_by_name (inbfd, REGINFO);
-      if (reginfo_sec != (asection *) NULL
-	  && bfd_get_section_contents (inbfd, reginfo_sec,
-				       (PTR) &sreginfo, (file_ptr) 0,
-				       sizeof sreginfo) != false)
-	nlm_alpha_backend_data (outbfd)->gp = sreginfo.gp_value;
-    }
+    nlm_alpha_backend_data (outbfd)->gp =
+      bfd_ecoff_get_gp_value (insec->owner);
 
   *relocs = (arelent *) xmalloc (sizeof (arelent));
   (*relocs)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
