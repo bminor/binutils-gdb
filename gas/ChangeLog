@@ -1,3 +1,8 @@
+Thu Feb 19 22:25:42 1998  Richard Henderson  <rth@cygnus.com>
+
+	* tc-ppc.c (ppc_biei): Cache the last symbol we inserted
+	so we don't have to scan the entire list.
+
 start-sanitize-d30v
 Tue Feb 17 17:02:15 1998  Fred Fish  <fnf@cygnus.com>
 

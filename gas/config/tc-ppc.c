@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1206,8 +1206,17 @@ ppc_elf_suffix (str_p, exp_p)
 
   ch = ident[0];
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
-    if (ch == ptr->string[0] && len == ptr->length && memcmp (ident, ptr->string, ptr->length) == 0)
+    if (ch == ptr->string[0]
+	&& len == ptr->length
+	&& memcmp (ident, ptr->string, ptr->length) == 0)
       {
+	if (exp_p->X_add_number != 0
+	    && (ptr->reloc == BFD_RELOC_16_GOTOFF
+		|| ptr->reloc == BFD_RELOC_LO16_GOTOFF
+		|| ptr->reloc == BFD_RELOC_HI16_GOTOFF
+		|| ptr->reloc == BFD_RELOC_HI16_S_GOTOFF))
+	  as_warn ("identifier+constant@got means identifier@got+constant");
+
 	/* Now check for identifier@suffix+constant */
 	if (*str == '-' || *str == '+')
 	  {
@@ -2857,6 +2866,8 @@ static void
 ppc_biei (ei)
      int ei;
 {
+  static symbolS *last_biei;
+
   char *name;
   int len;
   symbolS *sym;
@@ -2879,7 +2890,7 @@ ppc_biei (ei)
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
   sym->sy_tc.output = 1;
   
-  for (look = symbol_rootP;
+  for (look = last_biei ? last_biei : symbol_rootP;
        (look != (symbolS *) NULL
 	&& (S_GET_STORAGE_CLASS (look) == C_FILE
 	    || S_GET_STORAGE_CLASS (look) == C_BINCL
@@ -2890,6 +2901,7 @@ ppc_biei (ei)
     {
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_insert (sym, look, &symbol_rootP, &symbol_lastP);
+      last_biei = sym;
     }
 
   demand_empty_rest_of_line ();
@@ -4405,13 +4417,6 @@ md_pcrel_from_section (fixp, sec)
      fixS *fixp;
      segT sec;
 {
-#ifdef OBJ_ELF
-  if (fixp->fx_addsy != (symbolS *) NULL
-      && (! S_IS_DEFINED (fixp->fx_addsy)
-	  || TC_FORCE_RELOCATION_SECTION (fixp, sec)))
-    return 0;
-#endif
-
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
@@ -4466,7 +4471,13 @@ ppc_fix_adjustable (fix)
       && fix->fx_addsy->sy_tc.subseg == 0
       && fix->fx_addsy->sy_tc.class != XMC_TC0
       && fix->fx_addsy->sy_tc.class != XMC_TC
-      && S_GET_SEGMENT (fix->fx_addsy) != bss_section)
+      && S_GET_SEGMENT (fix->fx_addsy) != bss_section
+      /* Don't adjust if this is a reloc in the toc section.  */
+      && (S_GET_SEGMENT (fix->fx_addsy) != data_section
+	  || ppc_toc_csect == NULL
+	  || fix->fx_frag->fr_address < ppc_toc_frag->fr_address
+	  || (ppc_after_toc_frag != NULL
+	      && fix->fx_frag->fr_address >= ppc_after_toc_frag->fr_address)))
     {
       symbolS *csect;
 
@@ -4592,6 +4603,29 @@ md_apply_fix3 (fixp, valuep, seg)
 {
   valueT value;
 
+#ifdef OBJ_ELF
+  value = *valuep;
+  if (fixp->fx_addsy != NULL)
+    {
+      /* `*valuep' may contain the value of the symbol on which the reloc
+	 will be based; we have to remove it.  */
+      if (fixp->fx_addsy->sy_used_in_reloc
+	  && S_GET_SEGMENT (fixp->fx_addsy) != absolute_section
+	  && S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
+	  && ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
+	value -= S_GET_VALUE (fixp->fx_addsy);
+
+      /* FIXME: Why '+'?  Better yet, what exactly is '*valuep'
+	 supposed to be?  I think this is related to various similar
+	 FIXMEs in tc-i386.c and tc-sparc.c.  */
+      if (fixp->fx_pcrel)
+	value += fixp->fx_frag->fr_address + fixp->fx_where;
+    }
+  else
+    {
+      fixp->fx_done = 1;
+    }
+#else
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
      doing this relocation the code in write.c is going to call
@@ -4602,7 +4636,6 @@ md_apply_fix3 (fixp, valuep, seg)
      *valuep, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valuep since it includes the
      result of md_pcrel_from.  This is confusing.  */
-
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
       value = *valuep;
@@ -4625,6 +4658,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    }
 	}
     }
+#endif
 
   if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
@@ -4753,8 +4787,6 @@ md_apply_fix3 (fixp, valuep, seg)
 	  break;
 
 	case BFD_RELOC_LO16:
-	case BFD_RELOC_HI16:
-	case BFD_RELOC_HI16_S:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
 	case BFD_RELOC_16_GOT_PCREL:
@@ -4789,6 +4821,22 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 2);
+	  break;
+
+	  /* This case happens when you write, for example,
+	     lis %r3,(L1-L2)@ha
+	     where L1 and L2 are defined later.  */
+	case BFD_RELOC_HI16:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value >> 16, 2);
+	  break;
+	case BFD_RELOC_HI16_S:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value + 0x8000 >> 16, 2);
 	  break;
 
 	  /* Because SDA21 modifies the register field, the size is set to 4
@@ -4830,7 +4878,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	    if ((value & 3) != 0)
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
 			    "must branch to an address a multiple of 4");
-	    if ((long)value << 6 >> 6 != value)
+	    if ((offsetT) value < -0x40000000
+		|| (offsetT) value >= 0x40000000)
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
 			    "@local or @plt branch destination is too far "
 			    "away, %ld bytes",
