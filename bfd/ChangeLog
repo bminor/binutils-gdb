@@ -1,3 +1,8 @@
+Tue Jun 30 09:55:03 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (bfd_mn10300_elf_merge_private_bfd_data): New function.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define.
+
 Thu Jun 25 18:31:41 1998  Richard Henderson  <rth@cygnus.com>
 
 	ELF Section-level Garbage Collection:
