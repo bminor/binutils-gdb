@@ -1,3 +1,11 @@
+2002-02-14  Tom Rix  <trix@redhat.com>
+
+	* gas/ppc/ppc.exp: Add xcoff altivec tests.
+	* gas/ppc/altivec_xcoff.s: New.
+	* gas/ppc/altivec_xcoff.d: New.
+	* gas/ppc/altivec_xcoff64.s: New.
+	* gas/ppc/altivec_xcoff64.d: New.
+
 2002-02-13  Ben Elliston  <bje@redhat.com>
 
 	* gasp/flonums.asm: New test.
