@@ -1,7 +1,18 @@
 Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
 
+	* tm-{irix3,mips,nindy960,pn,symmetry,vx960}.h:  Move
+	REGISTER_U_ADDR to corresponding xm- file.  Sugg. by Peter Schauer.
+
+	* symmisc.c (print_partial_symtabs):  Add printpsyms debug cmd.
+
+	* m68k-tdep.c (m68k_push_dummy_frame, m68k_pop_frame):  Add
+	generic routines for calling inferior functions.
+
+	* blockframe.c (inside_main_scope, inside_entry_scope):  New.
+
 	* copying.awk:  Filter formfeeds out of copying & warrantee.
 	Make them available as `show copying' and `show warrantee' also.
+	* main.c (print_gnu_advertisement):  Advt `show' commands.
 
 Thu Oct 10 17:25:47 1991  John Gilmore  (gnu at cygnus.com)
 
