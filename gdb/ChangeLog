@@ -1,3 +1,8 @@
+2004-01-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* frame.c (get_prev_frame): Don't try to unwind the PC.  This
+	fixes PR backtrace/1476.
+
 2004-01-05  Andrew Cagney  <cagney@redhat.com>
 
 	* libunwind-frame.h (struct frame_id): Add opaque declaration,

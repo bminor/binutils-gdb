@@ -1943,37 +1943,6 @@ get_prev_frame (struct frame_info *this_frame)
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = this_frame->level + 1;
 
-  /* Try to unwind the PC.  If that doesn't work, assume we've reached
-     the oldest frame and simply return.  Is there a better sentinal
-     value?  The unwound PC value is then used to initialize the new
-     previous frame's type.
-
-     Note that the pc-unwind is intentionally performed before the
-     frame chain.  This is ok since, for old targets, both
-     frame_pc_unwind (nee, FRAME_SAVED_PC) and
-     DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
-     have already been initialized (using
-     DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
-     doesn't matter.
-
-     By unwinding the PC first, it becomes possible to, in the case of
-     a dummy frame, avoid also unwinding the frame ID.  This is
-     because (well ignoring the PPC) a dummy frame can be located
-     using THIS_FRAME's frame ID.  */
-
-  if (frame_pc_unwind (this_frame) == 0)
-    {
-      /* The allocated PREV_FRAME will be reclaimed when the frame
-	 obstack is next purged.  */
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // unwound PC zero }\n");
-	}
-      return NULL;
-    }
-
   /* Don't yet compute ->unwind (and hence ->type).  It is computed
      on-demand in get_frame_type, frame_register_unwind, and
      get_frame_id.  */
