@@ -3715,13 +3715,6 @@ be the number (greater than or equal to zero) of that register.
 This should only need to be defined if @code{TARGET_READ_PC} and
 @code{TARGET_WRITE_PC} are not defined.
 
-@item DEPRECATED_NPC_REGNUM
-@findex DEPRECATED_NPC_REGNUM
-The number of the ``next program counter'' register, if defined.
-
-@code{DEPRECATED_NPC_REGNUM} has been replaced by @code{TARGET_WRITE_PC}
-(@pxref{TARGET_WRITE_PC}).
-
 @item PARM_BOUNDARY
 @findex PARM_BOUNDARY
 If non-zero, round arguments to a boundary of this many bits before

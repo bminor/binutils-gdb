@@ -1,5 +1,13 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* procfs.c (procfs_fetch_registers): Delete reference to
+	DEPRECATED_NPC_REGNUM.
+	(procfs_store_registers): Ditto.
+	* regcache.c (generic_target_write_pc): Simplify.
+	* lynx-nat.c: Delete #ifdef SPARC code.  Not used.
+
 	* core-sol2.c (fetch_core_registers): Replace
 	DEPRECATED_NPC_REGNUM with equivalent tdep value.
 

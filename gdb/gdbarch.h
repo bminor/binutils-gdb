@@ -376,18 +376,6 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 #define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
 #endif
 
-/* Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
-   that updates PC, NPC and even NNPC. */
-
-extern int gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch, int deprecated_npc_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_NPC_REGNUM)
-#error "Non multi-arch definition of DEPRECATED_NPC_REGNUM"
-#endif
-#if !defined (DEPRECATED_NPC_REGNUM)
-#define DEPRECATED_NPC_REGNUM (gdbarch_deprecated_npc_regnum (current_gdbarch))
-#endif
-
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
 
 typedef int (gdbarch_stab_reg_to_regnum_ftype) (int stab_regnr);

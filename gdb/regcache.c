@@ -1351,15 +1351,11 @@ read_pc (void)
 void
 generic_target_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
-#ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     write_register_pid (PC_REGNUM, pc, ptid);
-  if (DEPRECATED_NPC_REGNUM >= 0)
-    write_register_pid (DEPRECATED_NPC_REGNUM, pc + 4, ptid);
-#else
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_write_pc");
-#endif
+  else
+    internal_error (__FILE__, __LINE__,
+		    "generic_target_write_pc");
 }
 
 void

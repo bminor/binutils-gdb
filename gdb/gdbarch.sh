@@ -454,9 +454,6 @@ v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
 v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
-# Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
-# that updates PC, NPC and even NNPC.
-v:2:DEPRECATED_NPC_REGNUM:int:deprecated_npc_regnum::::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
 f:2:STAB_REG_TO_REGNUM:int:stab_reg_to_regnum:int stab_regnr:stab_regnr:::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.

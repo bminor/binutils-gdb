@@ -3703,11 +3703,10 @@ procfs_fetch_registers (int regno)
 
   if (FP0_REGNUM >= 0)	/* need floating point? */
     {
-      if ((regno >= 0 && regno < FP0_REGNUM) ||
-	  regno == PC_REGNUM  ||
-	  (DEPRECATED_NPC_REGNUM >= 0 && regno == DEPRECATED_NPC_REGNUM) ||
-	  regno == DEPRECATED_FP_REGNUM  ||
-	  regno == SP_REGNUM)
+      if ((regno >= 0 && regno < FP0_REGNUM)
+	  || regno == PC_REGNUM
+	  || regno == DEPRECATED_FP_REGNUM
+	  || regno == SP_REGNUM)
 	return;			/* not a floating point register */
 
       if ((fpregs = proc_get_fpregs (pi)) == NULL)
@@ -3777,11 +3776,10 @@ procfs_store_registers (int regno)
 
   if (FP0_REGNUM >= 0)		/* need floating point? */
     {
-      if ((regno >= 0 && regno < FP0_REGNUM) ||
-	  regno == PC_REGNUM  ||
-	  (DEPRECATED_NPC_REGNUM >= 0 && regno == DEPRECATED_NPC_REGNUM) ||
-	  regno == DEPRECATED_FP_REGNUM  ||
-	  regno == SP_REGNUM)
+      if ((regno >= 0 && regno < FP0_REGNUM)
+	  || regno == PC_REGNUM
+	  || regno == DEPRECATED_FP_REGNUM
+	  || regno == SP_REGNUM)
 	return;			/* not a floating point register */
 
       if ((fpregs = proc_get_fpregs (pi)) == NULL)
