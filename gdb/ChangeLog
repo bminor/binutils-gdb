@@ -1,3 +1,8 @@
+2003-05-14  Theodore A. Roth  <troth@openavr.org>
+
+	* MAINTAINERS: Update my email address.
+	* avr-tdep.c: Ditto.
+
 2003-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symtab.h (enum domain_enum): Rename from namespace_enum.

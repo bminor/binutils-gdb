@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Contributed by Theodore A. Roth, troth@verinet.com */
+/* Contributed by Theodore A. Roth, troth@openavr.org */
 
 /* Portions of this file were taken from the original gdb-4.18 patch developed
    by Denis Chertykov, denisc@overta.ru */
@@ -331,7 +331,7 @@ avr_pointer_to_address (struct type *type, const void *buf)
       fprintf_unfiltered (gdb_stderr, "CODE_SPACE ---->> ptr->addr: 0x%lx\n",
 			  addr);
       fprintf_unfiltered (gdb_stderr,
-			  "+++ If you see this, please send me an email <troth@verinet.com>\n");
+			  "+++ If you see this, please send me an email <troth@openavr.org>\n");
     }
 
   /* Is it a code address?  */
