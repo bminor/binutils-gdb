@@ -1,3 +1,7 @@
+2002-04-20  David S. Miller  <davem@redhat.com>
+
+	* sparc-nat.c (store-inferior_registers): Fix ambiguous else.
+
 2002-04-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Use gdbarch_num_pseudo_regs

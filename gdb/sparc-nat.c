@@ -155,21 +155,23 @@ store_inferior_registers (int regno)
   /* First decide which pieces of machine-state we need to modify.  
      Default for regno == -1 case is all pieces.  */
   if (regno >= 0)
-    if (FP0_REGNUM <= regno && regno < FP0_REGNUM + 32)
-      {
-	wanna_store = FP_REGS;
-      }
-    else
-      {
-	if (regno == SP_REGNUM)
-	  wanna_store = INT_REGS + STACK_REGS;
-	else if (regno < L0_REGNUM || regno > I7_REGNUM)
-	  wanna_store = INT_REGS;
-	else if (regno == FPS_REGNUM)
+    {
+      if (FP0_REGNUM <= regno && regno < FP0_REGNUM + 32)
+	{
 	  wanna_store = FP_REGS;
-	else
-	  wanna_store = STACK_REGS;
-      }
+	}
+      else
+	{
+	  if (regno == SP_REGNUM)
+	    wanna_store = INT_REGS + STACK_REGS;
+	  else if (regno < L0_REGNUM || regno > I7_REGNUM)
+	    wanna_store = INT_REGS;
+	  else if (regno == FPS_REGNUM)
+	    wanna_store = FP_REGS;
+	  else
+	    wanna_store = STACK_REGS;
+	}
+    }
 
   /* See if we're forcing the stores to happen now, or deferring. */
   if (regno == -2)
