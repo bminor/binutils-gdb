@@ -1048,41 +1048,45 @@ init_cli_cmds (void)
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
 
-  add_cmd ("internals", class_maintenance, NULL,
-	   "Maintenance commands.\n\
+  add_cmd ("internals", class_maintenance, NULL, _("\
+Maintenance commands.\n\
 Some gdb commands are provided just for use by gdb maintainers.\n\
 These commands are subject to frequent change, and may not be as\n\
-well documented as user commands.",
+well documented as user commands."),
 	   &cmdlist);
-  add_cmd ("obscure", class_obscure, NULL, "Obscure features.", &cmdlist);
-  add_cmd ("aliases", class_alias, NULL, "Aliases of other commands.", &cmdlist);
-  add_cmd ("user-defined", class_user, NULL, "User-defined commands.\n\
+  add_cmd ("obscure", class_obscure, NULL, _("Obscure features."), &cmdlist);
+  add_cmd ("aliases", class_alias, NULL, _("Aliases of other commands."), &cmdlist);
+  add_cmd ("user-defined", class_user, NULL, _("\
+User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
-Use the \"define\" command to define a command.", &cmdlist);
-  add_cmd ("support", class_support, NULL, "Support facilities.", &cmdlist);
+Use the \"define\" command to define a command."), &cmdlist);
+  add_cmd ("support", class_support, NULL, _("Support facilities."), &cmdlist);
   if (!dbx_commands)
-    add_cmd ("status", class_info, NULL, "Status inquiries.", &cmdlist);
-  add_cmd ("files", class_files, NULL, "Specifying and examining files.", &cmdlist);
-  add_cmd ("breakpoints", class_breakpoint, NULL, "Making program stop at certain points.", &cmdlist);
-  add_cmd ("data", class_vars, NULL, "Examining data.", &cmdlist);
-  add_cmd ("stack", class_stack, NULL, "Examining the stack.\n\
+    add_cmd ("status", class_info, NULL, _("Status inquiries."), &cmdlist);
+  add_cmd ("files", class_files, NULL, _("Specifying and examining files."),
+	   &cmdlist);
+  add_cmd ("breakpoints", class_breakpoint, NULL,
+	   _("Making program stop at certain points."), &cmdlist);
+  add_cmd ("data", class_vars, NULL, _("Examining data."), &cmdlist);
+  add_cmd ("stack", class_stack, NULL, _("\
+Examining the stack.\n\
 The stack is made up of stack frames.  Gdb assigns numbers to stack frames\n\
 counting from zero for the innermost (currently executing) frame.\n\n\
 At any time gdb identifies one frame as the \"selected\" frame.\n\
 Variable lookups are done with respect to the selected frame.\n\
 When the program being debugged stops, gdb selects the innermost frame.\n\
-The commands below can be used to select other frames by number or address.",
+The commands below can be used to select other frames by number or address."),
 	   &cmdlist);
-  add_cmd ("running", class_run, NULL, "Running the program.", &cmdlist);
+  add_cmd ("running", class_run, NULL, _("Running the program."), &cmdlist);
 
   /* Define general commands. */
 
   add_com ("pwd", class_files, pwd_command,
 	"Print working directory.  This is used for your program as well.");
-  c = add_cmd ("cd", class_files, cd_command,
-	       "Set working directory to DIR for debugger and program being debugged.\n\
+  c = add_cmd ("cd", class_files, cd_command, _("\
+Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
-until the next time it is started.", &cmdlist);
+until the next time it is started."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("echo", class_support, echo_command,
@@ -1104,10 +1108,10 @@ End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
 Commands defined in this way may have up to ten arguments.");
 
-  c = add_cmd ("source", class_support, source_command,
-	       "Read commands from a file named FILE.\n\
+  c = add_cmd ("source", class_support, source_command, _("\
+Read commands from a file named FILE.\n\
 Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
-when gdb is started.", &cmdlist);
+when gdb is started."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");
@@ -1150,14 +1154,14 @@ Without an argument, history expansion is enabled.", &sethistlist),
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, "Show all GDB settings.");
 
-  add_cmd ("commands", no_class, show_commands,
-	   "Show the history of commands you typed.\n\
+  add_cmd ("commands", no_class, show_commands, _("\
+Show the history of commands you typed.\n\
 You can supply a command number to start with, or a `+' to start after\n\
-the previous command number shown.",
+the previous command number shown."),
 	   &showlist);
 
   add_cmd ("version", no_class, show_version,
-	   "Show what version of GDB this is.", &showlist);
+	   _("Show what version of GDB this is."), &showlist);
 
   add_com ("while", class_support, while_command,
 	   "Execute nested commands WHILE the conditional expression is non zero.\n\
@@ -1267,10 +1271,10 @@ Two arguments are taken as a range of memory to dump.");
   c = add_com ("make", class_support, make_command,
           "Run the ``make'' program using the rest of the line as arguments.");
   set_cmd_completer (c, filename_completer);
-  add_cmd ("user", no_class, show_user,
-	   "Show definitions of user defined commands.\n\
+  add_cmd ("user", no_class, show_user, _("\
+Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
-With no argument, show definitions of all user defined commands.", &showlist);
+With no argument, show definitions of all user defined commands."), &showlist);
   add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
 
   deprecated_add_show_from_set

@@ -280,9 +280,9 @@ _initialize_reggroup (void)
   add_group (&default_groups, restore_reggroup, XMALLOC (struct reggroup_el));
 
   add_cmd ("reggroups", class_maintenance,
-	   maintenance_print_reggroups, "\
+	   maintenance_print_reggroups, _("\
 Print the internal register group names.\n\
-Takes an optional file parameter.",
+Takes an optional file parameter."),
 	   &maintenanceprintlist);
 
 }

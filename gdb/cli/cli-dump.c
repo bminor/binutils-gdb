@@ -726,64 +726,64 @@ Append target code/data to a raw binary file.",
 		  0 /*allow-unknown*/, 
 		  &append_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_srec_memory, "\
+  add_cmd ("memory", all_commands, dump_srec_memory, _("\
 Write contents of memory to an srec file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in srec format.",
+within the range [START .. STOP) to the specifed FILE in srec format."),
 	   &srec_cmdlist);
 
-  add_cmd ("value", all_commands, dump_srec_value, "\
+  add_cmd ("value", all_commands, dump_srec_value, _("\
 Write the value of an expression to an srec file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
-to the specified FILE in srec format.",
+to the specified FILE in srec format."),
 	   &srec_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_ihex_memory, "\
+  add_cmd ("memory", all_commands, dump_ihex_memory, _("\
 Write contents of memory to an ihex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within\n\
-the range [START .. STOP) to the specifed FILE in intel hex format.",
+the range [START .. STOP) to the specifed FILE in intel hex format."),
 	   &ihex_cmdlist);
 
-  add_cmd ("value", all_commands, dump_ihex_value, "\
+  add_cmd ("value", all_commands, dump_ihex_value, _("\
 Write the value of an expression to an ihex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
-to the specified FILE in intel hex format.",
+to the specified FILE in intel hex format."),
 	   &ihex_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_tekhex_memory, "\
+  add_cmd ("memory", all_commands, dump_tekhex_memory, _("\
 Write contents of memory to a tekhex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in tekhex format.",
+within the range [START .. STOP) to the specifed FILE in tekhex format."),
 	   &tekhex_cmdlist);
 
-  add_cmd ("value", all_commands, dump_tekhex_value, "\
+  add_cmd ("value", all_commands, dump_tekhex_value, _("\
 Write the value of an expression to a tekhex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
-to the specified FILE in tekhex format.",
+to the specified FILE in tekhex format."),
 	   &tekhex_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_binary_memory, "\
+  add_cmd ("memory", all_commands, dump_binary_memory, _("\
 Write contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in binary format.",
+within the range [START .. STOP) to the specifed FILE in binary format."),
 	   &binary_dump_cmdlist);
 
-  add_cmd ("value", all_commands, dump_binary_value, "\
+  add_cmd ("value", all_commands, dump_binary_value, _("\
 Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
-to the specified FILE in raw target ordered bytes.",
+to the specified FILE in raw target ordered bytes."),
 	   &binary_dump_cmdlist);
 
-  add_cmd ("memory", all_commands, append_binary_memory, "\
+  add_cmd ("memory", all_commands, append_binary_memory, _("\
 Append contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within the\n\
-range [START .. STOP) to the specifed FILE in raw target ordered bytes.",
+range [START .. STOP) to the specifed FILE in raw target ordered bytes."),
 	   &binary_append_cmdlist);
 
-  add_cmd ("value", all_commands, append_binary_value, "\
+  add_cmd ("value", all_commands, append_binary_value, _("\
 Append the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
-to the specified FILE in raw target ordered bytes.",
+to the specified FILE in raw target ordered bytes."),
 	   &binary_append_cmdlist);
 
   c = add_com ("restore", class_vars, restore_command, 

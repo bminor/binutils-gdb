@@ -196,9 +196,9 @@ The logfile is used when directing GDB's output."),
 			    NULL, NULL,
 			    &set_logging_cmdlist, &show_logging_cmdlist);
   add_cmd ("on", class_support, set_logging_on,
-	   "Enable logging.", &set_logging_cmdlist);
+	   _("Enable logging."), &set_logging_cmdlist);
   add_cmd ("off", class_support, set_logging_off,
-	   "Disable logging.", &set_logging_cmdlist);
+	   _("Disable logging."), &set_logging_cmdlist);
 
   logging_filename = xstrdup ("gdb.txt");
 }

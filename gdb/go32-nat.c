@@ -1910,39 +1910,39 @@ _initialize_go32_nat (void)
 		  "Print information specific to DJGPP (aka MS-DOS) debugging.",
 		  &info_dos_cmdlist, "info dos ", 0, &infolist);
 
-  add_cmd ("sysinfo", class_info, go32_sysinfo,
-	    "Display information about the target system, including CPU, OS, DPMI, etc.",
+  add_cmd ("sysinfo", class_info, go32_sysinfo, _("\
+Display information about the target system, including CPU, OS, DPMI, etc."),
 	   &info_dos_cmdlist);
-  add_cmd ("ldt", class_info, go32_sldt,
-	   "Display entries in the LDT (Local Descriptor Table).\n"
-	   "Entry number (an expression) as an argument means display only that entry.",
+  add_cmd ("ldt", class_info, go32_sldt, _("\
+Display entries in the LDT (Local Descriptor Table).\n\
+Entry number (an expression) as an argument means display only that entry."),
 	   &info_dos_cmdlist);
-  add_cmd ("gdt", class_info, go32_sgdt,
-	   "Display entries in the GDT (Global Descriptor Table).\n"
-	   "Entry number (an expression) as an argument means display only that entry.",
+  add_cmd ("gdt", class_info, go32_sgdt, _("\
+Display entries in the GDT (Global Descriptor Table).\n\
+Entry number (an expression) as an argument means display only that entry."),
 	   &info_dos_cmdlist);
-  add_cmd ("idt", class_info, go32_sidt,
-	   "Display entries in the IDT (Interrupt Descriptor Table).\n"
-	   "Entry number (an expression) as an argument means display only that entry.",
+  add_cmd ("idt", class_info, go32_sidt, _("\
+Display entries in the IDT (Interrupt Descriptor Table).\n\
+Entry number (an expression) as an argument means display only that entry."),
 	   &info_dos_cmdlist);
-  add_cmd ("pde", class_info, go32_pde,
-	   "Display entries in the Page Directory.\n"
-	   "Entry number (an expression) as an argument means display only that entry.",
+  add_cmd ("pde", class_info, go32_pde, _("\
+Display entries in the Page Directory.\n\
+Entry number (an expression) as an argument means display only that entry."),
 	   &info_dos_cmdlist);
-  add_cmd ("pte", class_info, go32_pte,
-	   "Display entries in Page Tables.\n"
-	   "Entry number (an expression) as an argument means display only entries\n"
-	   "from the Page Table pointed to by the specified Page Directory entry.",
+  add_cmd ("pte", class_info, go32_pte, _("\
+Display entries in Page Tables.\n\
+Entry number (an expression) as an argument means display only entries\n\
+from the Page Table pointed to by the specified Page Directory entry."),
 	   &info_dos_cmdlist);
-  add_cmd ("address-pte", class_info, go32_pte_for_address,
-	   "Display a Page Table entry for a linear address.\n"
-	   "The address argument must be a linear address, after adding to\n"
-	   "it the base address of the appropriate segment.\n"
-	   "The base address of variables and functions in the debuggee's data\n"
-	   "or code segment is stored in the variable __djgpp_base_address,\n"
-	   "so use `__djgpp_base_address + (char *)&var' as the argument.\n"
-	   "For other segments, look up their base address in the output of\n"
-	   "the `info dos ldt' command.",
+  add_cmd ("address-pte", class_info, go32_pte_for_address, _("\
+Display a Page Table entry for a linear address.\n\
+The address argument must be a linear address, after adding to\n\
+it the base address of the appropriate segment.\n\
+The base address of variables and functions in the debuggee's data\n\
+or code segment is stored in the variable __djgpp_base_address,\n\
+so use `__djgpp_base_address + (char *)&var' as the argument.\n\
+For other segments, look up their base address in the output of\n\
+the `info dos ldt' command."),
 	   &info_dos_cmdlist);
 }
 

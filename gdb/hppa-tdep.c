@@ -2868,7 +2868,7 @@ _initialize_hppa_tdep (void)
   hppa_objfile_priv_data = register_objfile_data ();
 
   add_cmd ("unwind", class_maintenance, unwind_command,
-	   "Print unwind table entry at given address.",
+	   _("Print unwind table entry at given address."),
 	   &maintenanceprintlist);
 
   /* Debug this files internals. */

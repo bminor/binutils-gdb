@@ -1606,16 +1606,17 @@ using_struct_return (struct type *value_type, int gcc_p)
 void
 _initialize_values (void)
 {
-  add_cmd ("convenience", no_class, show_convenience,
-	   "Debugger convenience (\"$foo\") variables.\n\
+  add_cmd ("convenience", no_class, show_convenience, _("\
+Debugger convenience (\"$foo\") variables.\n\
 These variables are created when you assign them values;\n\
-thus, \"print $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\n\
+thus, \"print $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\
+\n\
 A few convenience variables are given values automatically:\n\
 \"$_\"holds the last address examined with \"x\" or \"info lines\",\n\
-\"$__\" holds the contents of the last address examined with \"x\".",
+\"$__\" holds the contents of the last address examined with \"x\"."),
 	   &showlist);
 
   add_cmd ("values", no_class, show_values,
-	   "Elements of value history around item number IDX (or last ten).",
+	   _("Elements of value history around item number IDX (or last ten)."),
 	   &showlist);
 }

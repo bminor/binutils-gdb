@@ -971,24 +971,22 @@ _initialize_remote_rdi (void)
   Adp_SetLogfile (log_filename);
   Adp_SetLogEnable (log_enable);
 
-  c = add_cmd ("rdilogfile", class_maintenance,
-	       rdilogfile_command,
-	       "Set filename for ADP packet log.\n"
-	       "This file is used to log Angel Debugger Protocol packets.\n"
-	       "With a single argument, sets the logfile name to that value.\n"
-	       "Without an argument, shows the current logfile name.\n"
-	       "See also: rdilogenable\n",
+  c = add_cmd ("rdilogfile", class_maintenance, rdilogfile_command, _("\
+Set filename for ADP packet log.\n\
+This file is used to log Angel Debugger Protocol packets.\n\
+With a single argument, sets the logfile name to that value.\n\
+Without an argument, shows the current logfile name.\n\
+See also: rdilogenable\n"),
 	       &maintenancelist);
   set_cmd_completer (c, filename_completer);
 
-  add_cmd ("rdilogenable", class_maintenance,
-	   rdilogenable_command,
-	   "Set enable logging of ADP packets.\n"
-	   "This will log ADP packets exchanged between gdb and the\n"
-	   "rdi target device.\n"
-	   "An argument of 1, t, true, y or yes will enable.\n"
-	   "An argument of 0, f, false, n or no will disabled.\n"
-	   "Withough an argument, it will display current state.\n",
+  add_cmd ("rdilogenable", class_maintenance, rdilogenable_command, _("\
+Set enable logging of ADP packets.\n\
+This will log ADP packets exchanged between gdb and the\n\
+rdi target device.\n\
+An argument of 1, t, true, y or yes will enable.\n\
+An argument of 0, f, false, n or no will disabled.\n\
+Withough an argument, it will display current state."),
 	   &maintenancelist);
 
   add_setshow_boolean_cmd ("rdiromatzero", no_class, &rom_at_zero, _("\

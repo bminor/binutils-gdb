@@ -1376,10 +1376,10 @@ initialize_remote_fileio (struct cmd_list_element *remote_set_cmdlist,
 {
   add_cmd ("system-call-allowed", no_class,
 	   set_system_call_allowed,
-	   "Set if the host system(3) call is allowed for the target.\n",
+	   _("Set if the host system(3) call is allowed for the target."),
 	   &remote_set_cmdlist);
   add_cmd ("system-call-allowed", no_class,
 	   show_system_call_allowed,
-	   "Show if the host system(3) call is allowed for the target.\n",
+	   _("Show if the host system(3) call is allowed for the target."),
 	   &remote_show_cmdlist);
 }

@@ -1658,7 +1658,7 @@ _initialize_sol_thread (void)
   procfs_suppress_run = 1;
 
   add_cmd ("sol-threads", class_maintenance, info_solthreads,
-	   "Show info on Solaris user threads.\n", &maintenanceinfolist);
+	   _("Show info on Solaris user threads."), &maintenanceinfolist);
 
   memcpy (&orig_core_ops, &core_ops, sizeof (struct target_ops));
   memcpy (&core_ops, &sol_core_ops, sizeof (struct target_ops));

@@ -1165,7 +1165,8 @@ _initialize_remote_ocd (void)
   add_prefix_cmd ("ocd", class_obscure, bdm_command, "", &ocd_cmd_list, "ocd ",
 		  0, &cmdlist);
 
-  add_cmd ("reset", class_obscure, bdm_reset_command, "", &ocd_cmd_list);
-  add_cmd ("restart", class_obscure, bdm_restart_command, "", &ocd_cmd_list);
-  add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &ocd_cmd_list);
+  /* FIXME: i18n: what documentation? */
+  add_cmd ("reset", class_obscure, bdm_reset_command, (""), &ocd_cmd_list);
+  add_cmd ("restart", class_obscure, bdm_restart_command, (""), &ocd_cmd_list);
+  add_cmd ("update-flash", class_obscure, bdm_update_flash_command, (""), &ocd_cmd_list);
 }

@@ -5214,7 +5214,7 @@ This option can be set to one of:\n\
      "  o64\n" "  n32\n" "  n64\n" "  eabi32\n" "  eabi64", &setmipscmdlist);
   set_cmd_sfunc (c, mips_abi_update);
   add_cmd ("abi", class_obscure, show_mips_abi,
-	   "Show ABI in use by MIPS target", &showmipscmdlist);
+	   _("Show ABI in use by MIPS target"), &showmipscmdlist);
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
@@ -5223,24 +5223,24 @@ This option can be set to one of:\n\
 		  "Set use of MIPS floating-point coprocessor.",
 		  &mipsfpulist, "set mipsfpu ", 0, &setlist);
   add_cmd ("single", class_support, set_mipsfpu_single_command,
-	   "Select single-precision MIPS floating-point coprocessor.",
+	   _("Select single-precision MIPS floating-point coprocessor."),
 	   &mipsfpulist);
   add_cmd ("double", class_support, set_mipsfpu_double_command,
-	   "Select double-precision MIPS floating-point coprocessor.",
+	   _("Select double-precision MIPS floating-point coprocessor."),
 	   &mipsfpulist);
   add_alias_cmd ("on", "double", class_support, 1, &mipsfpulist);
   add_alias_cmd ("yes", "double", class_support, 1, &mipsfpulist);
   add_alias_cmd ("1", "double", class_support, 1, &mipsfpulist);
   add_cmd ("none", class_support, set_mipsfpu_none_command,
-	   "Select no MIPS floating-point coprocessor.", &mipsfpulist);
+	   _("Select no MIPS floating-point coprocessor."), &mipsfpulist);
   add_alias_cmd ("off", "none", class_support, 1, &mipsfpulist);
   add_alias_cmd ("no", "none", class_support, 1, &mipsfpulist);
   add_alias_cmd ("0", "none", class_support, 1, &mipsfpulist);
   add_cmd ("auto", class_support, set_mipsfpu_auto_command,
-	   "Select MIPS floating-point coprocessor automatically.",
+	   _("Select MIPS floating-point coprocessor automatically."),
 	   &mipsfpulist);
   add_cmd ("mipsfpu", class_support, show_mipsfpu_command,
-	   "Show current use of MIPS floating-point coprocessor target.",
+	   _("Show current use of MIPS floating-point coprocessor target."),
 	   &showlist);
 
   /* We really would like to have both "0" and "unlimited" work, but

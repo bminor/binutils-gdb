@@ -751,7 +751,7 @@ _initialize_cp_support (void)
   add_alias_cmd ("cp", "cplus", class_maintenance, 1, &maintenancelist);
 
   add_cmd ("first_component", class_maintenance, first_component_command,
-	   "Print the first class/namespace component of NAME.",
+	   _("Print the first class/namespace component of NAME."),
 	   &maint_cplus_cmd_list);
 		  
 }

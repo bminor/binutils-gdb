@@ -5583,18 +5583,18 @@ the packets being used",
 		  &remote_show_cmdlist, "show remote ",
 		  0 /* allow-unknown */, &showlist);
 
-  add_cmd ("compare-sections", class_obscure, compare_sections_command,
-	   "Compare section data on target to the exec file.\n\
-Argument is a single section name (default: all loaded sections).",
+  add_cmd ("compare-sections", class_obscure, compare_sections_command, _("\
+Compare section data on target to the exec file.\n\
+Argument is a single section name (default: all loaded sections)."),
 	   &cmdlist);
 
-  add_cmd ("packet", class_maintenance, packet_command,
-	   "Send an arbitrary packet to a remote target.\n\
+  add_cmd ("packet", class_maintenance, packet_command, _("\
+Send an arbitrary packet to a remote target.\n\
    maintenance packet TEXT\n\
 If GDB is talking to an inferior via the GDB serial protocol, then\n\
 this command sends the string TEXT to the inferior, and displays the\n\
 response packet.  GDB supplies the initial `$' character, and the\n\
-terminating `#' character and checksum.",
+terminating `#' character and checksum."),
 	   &maintenancelist);
 
   add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break, _("\
@@ -5607,35 +5607,35 @@ If set, a break, instead of a cntrl-c, is sent to the remote target."),
 
   /* Install commands for configuring memory read/write packets.  */
 
-  add_cmd ("remotewritesize", no_class, set_memory_write_packet_size,
-	   "Set the maximum number of bytes per memory write packet (deprecated).\n",
+  add_cmd ("remotewritesize", no_class, set_memory_write_packet_size, _("\
+Set the maximum number of bytes per memory write packet (deprecated)."),
 	   &setlist);
-  add_cmd ("remotewritesize", no_class, show_memory_write_packet_size,
-	   "Show the maximum number of bytes per memory write packet (deprecated).\n",
+  add_cmd ("remotewritesize", no_class, show_memory_write_packet_size, _("\
+Show the maximum number of bytes per memory write packet (deprecated)."),
 	   &showlist);
   add_cmd ("memory-write-packet-size", no_class,
-	   set_memory_write_packet_size,
-	   "Set the maximum number of bytes per memory-write packet.\n"
-	   "Specify the number of bytes in a packet or 0 (zero) for the\n"
-	   "default packet size.  The actual limit is further reduced\n"
-	   "dependent on the target.  Specify ``fixed'' to disable the\n"
-	   "further restriction and ``limit'' to enable that restriction\n",
+	   set_memory_write_packet_size, _("\
+Set the maximum number of bytes per memory-write packet.\n\
+Specify the number of bytes in a packet or 0 (zero) for the\n\
+default packet size.  The actual limit is further reduced\n\
+dependent on the target.  Specify ``fixed'' to disable the\n\
+further restriction and ``limit'' to enable that restriction."),
 	   &remote_set_cmdlist);
   add_cmd ("memory-read-packet-size", no_class,
-	   set_memory_read_packet_size,
-	   "Set the maximum number of bytes per memory-read packet.\n"
-	   "Specify the number of bytes in a packet or 0 (zero) for the\n"
-	   "default packet size.  The actual limit is further reduced\n"
-	   "dependent on the target.  Specify ``fixed'' to disable the\n"
-	   "further restriction and ``limit'' to enable that restriction\n",
+	   set_memory_read_packet_size, _("\
+Set the maximum number of bytes per memory-read packet.\n\
+Specify the number of bytes in a packet or 0 (zero) for the\n\
+default packet size.  The actual limit is further reduced\n\
+dependent on the target.  Specify ``fixed'' to disable the\n\
+further restriction and ``limit'' to enable that restriction."),
 	   &remote_set_cmdlist);
   add_cmd ("memory-write-packet-size", no_class,
 	   show_memory_write_packet_size,
-	   "Show the maximum number of bytes per memory-write packet.\n",
+	   _("Show the maximum number of bytes per memory-write packet."),
 	   &remote_show_cmdlist);
   add_cmd ("memory-read-packet-size", no_class,
 	   show_memory_read_packet_size,
-	   "Show the maximum number of bytes per memory-read packet.\n",
+	   _("Show the maximum number of bytes per memory-read packet."),
 	   &remote_show_cmdlist);
 
   add_setshow_zinteger_cmd ("hardware-watchpoint-limit", no_class,

@@ -7685,24 +7685,24 @@ This is used to cancel the effect of the \"disable\" command.\n\
 May be abbreviated to simply \"enable\".\n",
 		   &enablebreaklist, "enable breakpoints ", 1, &enablelist);
 
-  add_cmd ("once", no_class, enable_once_command,
-	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it becomes disabled.",
+  add_cmd ("once", no_class, enable_once_command, _("\
+Enable breakpoints for one hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 	   &enablebreaklist);
 
-  add_cmd ("delete", no_class, enable_delete_command,
-	   "Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it is deleted.",
+  add_cmd ("delete", no_class, enable_delete_command, _("\
+Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it is deleted."),
 	   &enablebreaklist);
 
-  add_cmd ("delete", no_class, enable_delete_command,
-	   "Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it is deleted.",
+  add_cmd ("delete", no_class, enable_delete_command, _("\
+Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it is deleted."),
 	   &enablelist);
 
-  add_cmd ("once", no_class, enable_once_command,
-	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
-If a breakpoint is hit while enabled in this fashion, it becomes disabled.",
+  add_cmd ("once", no_class, enable_once_command, _("\
+Enable breakpoints for one hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 	   &enablelist);
 
   add_prefix_cmd ("disable", class_breakpoint, disable_command,
@@ -7720,12 +7720,12 @@ Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until reenabled.");
 
-  add_cmd ("breakpoints", class_alias, disable_command,
-	   "Disable some breakpoints.\n\
+  add_cmd ("breakpoints", class_alias, disable_command, _("\
+Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
-This command may be abbreviated \"disable\".",
+This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
   add_prefix_cmd ("delete", class_breakpoint, delete_command,
@@ -7743,11 +7743,11 @@ The \"unset\" command is also an alias for \"delete\".",
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n");
 
-  add_cmd ("breakpoints", class_alias, delete_command,
-	   "Delete some breakpoints or auto-display expressions.\n\
+  add_cmd ("breakpoints", class_alias, delete_command, _("\
+Delete some breakpoints or auto-display expressions.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
-This command may be abbreviated \"delete\".",
+This command may be abbreviated \"delete\"."),
 	   &deletelist);
 
   add_com ("clear", class_breakpoint, clear_command,
@@ -7792,9 +7792,9 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.", N
 	"Break in function/address or break at a line in the current file.",
 			     &stoplist, "stop ", 1, &cmdlist);
       add_cmd ("in", class_breakpoint, stopin_command,
-	       "Break in function or address.\n", &stoplist);
+	       _("Break in function or address."), &stoplist);
       add_cmd ("at", class_breakpoint, stopat_command,
-	       "Break at a line in the current file.\n", &stoplist);
+	       _("Break at a line in the current file."), &stoplist);
       add_com ("status", class_info, breakpoints_info,
 	       concat ("Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
@@ -7839,23 +7839,25 @@ are set to the address of the last breakpoint listed.\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set.", NULL));
 
-  add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints,
-	   concat ("Status of all breakpoints, or breakpoint number NUMBER.\n\
+  add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
+Status of all breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
 \twatchpoint     - watchpoint\n\
 \tlongjmp        - internal breakpoint used to step through longjmp()\n\
 \tlongjmp resume - internal breakpoint at the target of longjmp()\n\
 \tuntil          - internal breakpoint used by the \"until\" command\n\
-\tfinish         - internal breakpoint used by the \"finish\" command\n",
-		   "The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
+\tfinish         - internal breakpoint used by the \"finish\" command\n\
+The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\n",
-		   "Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed.\n\n\
+address and file/line number respectively.\n\
+\n\
+Convenience variable \"$_\" and default examine address for \"x\"\n\
+are set to the address of the last breakpoint listed.\n\
+\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set.", NULL),
+breakpoint set."),
 	   &maintenanceinfolist);
 
   add_com ("catch", class_breakpoint, catch_command,

@@ -2016,12 +2016,12 @@ with this command or \"print\".", NULL));
   add_info ("display", display_info,
 	    "Expressions to display when program stops, with code numbers.");
 
-  add_cmd ("undisplay", class_vars, undisplay_command,
-	   "Cancel some expressions to be displayed when program stops.\n\
+  add_cmd ("undisplay", class_vars, undisplay_command, _("\
+Cancel some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
 \"delete display\" has the same effect as this command.\n\
-Do \"info display\" to see current list of code numbers.",
+Do \"info display\" to see current list of code numbers."),
 	   &cmdlist);
 
   add_com ("display", class_vars, display_command,
@@ -2034,23 +2034,23 @@ With no argument, display all currently requested auto-display expressions.\n\
 Use \"undisplay\" to cancel display requests previously made."
     );
 
-  add_cmd ("display", class_vars, enable_display,
-	   "Enable some expressions to be displayed when program stops.\n\
+  add_cmd ("display", class_vars, enable_display, _("\
+Enable some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to resume displaying.\n\
 No argument means enable all automatic-display expressions.\n\
-Do \"info display\" to see current list of code numbers.", &enablelist);
+Do \"info display\" to see current list of code numbers."), &enablelist);
 
-  add_cmd ("display", class_vars, disable_display_command,
-	   "Disable some expressions to be displayed when program stops.\n\
+  add_cmd ("display", class_vars, disable_display_command, _("\
+Disable some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means disable all automatic-display expressions.\n\
-Do \"info display\" to see current list of code numbers.", &disablelist);
+Do \"info display\" to see current list of code numbers."), &disablelist);
 
-  add_cmd ("display", class_vars, undisplay_command,
-	   "Cancel some expressions to be displayed when program stops.\n\
+  add_cmd ("display", class_vars, undisplay_command, _("\
+Cancel some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
-Do \"info display\" to see current list of code numbers.", &deletelist);
+Do \"info display\" to see current list of code numbers."), &deletelist);
 
   add_com ("printf", class_vars, printf_command,
 	   "printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
@@ -2089,13 +2089,13 @@ current working language.  The result is printed and saved in the value\n\
 history, if it is not void.");
   set_cmd_completer (c, location_completer);
 
-  add_cmd ("variable", class_vars, set_command,
-	   "Evaluate expression EXP and assign result to variable VAR, using assignment\n\
+  add_cmd ("variable", class_vars, set_command, _("\
+Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
-This may usually be abbreviated to simply \"set\".",
+This may usually be abbreviated to simply \"set\"."),
 	   &setlist);
 
   c = add_com ("print", class_vars, print_command,

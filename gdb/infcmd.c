@@ -1990,29 +1990,28 @@ Follow this command with any number of args, to be passed to the program.",
   c = deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, notice_args_read);
 
-  c = add_cmd
-    ("environment", no_class, environment_info,
-     "The environment to give the program, or one variable's value.\n\
+  c = add_cmd ("environment", no_class, environment_info, _("\
+The environment to give the program, or one variable's value.\n\
 With an argument VAR, prints the value of environment variable VAR to\n\
 give the program being debugged.  With no arguments, prints the entire\n\
-environment to be given to the program.", &showlist);
+environment to be given to the program."), &showlist);
   set_cmd_completer (c, noop_completer);
 
   add_prefix_cmd ("unset", no_class, unset_command,
 		  "Complement to certain \"set\" commands.",
 		  &unsetlist, "unset ", 0, &cmdlist);
 
-  c = add_cmd ("environment", class_run, unset_environment_command,
-	       "Cancel environment variable VAR for the program.\n\
-This does not affect the program until the next \"run\" command.",
+  c = add_cmd ("environment", class_run, unset_environment_command, _("\
+Cancel environment variable VAR for the program.\n\
+This does not affect the program until the next \"run\" command."),
 	       &unsetlist);
   set_cmd_completer (c, noop_completer);
 
-  c = add_cmd ("environment", class_run, set_environment_command,
-	       "Set environment variable value to give the program.\n\
+  c = add_cmd ("environment", class_run, set_environment_command, _("\
+Set environment variable value to give the program.\n\
 Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
 VALUES of environment variables are uninterpreted strings.\n\
-This does not affect the program until the next \"run\" command.",
+This does not affect the program until the next \"run\" command."),
 	       &setlist);
   set_cmd_completer (c, noop_completer);
 
@@ -2024,12 +2023,12 @@ directories, separated by colons.  These directories are searched to find\n\
 fully linked executable files and separately compiled object files as needed.");
   set_cmd_completer (c, filename_completer);
 
-  c = add_cmd ("paths", no_class, path_info,
-	       "Current search path for finding object files.\n\
+  c = add_cmd ("paths", no_class, path_info, _("\
+Current search path for finding object files.\n\
 $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
-fully linked executable files and separately compiled object files as needed.",
+fully linked executable files and separately compiled object files as needed."),
 	       &showlist);
   set_cmd_completer (c, noop_completer);
 

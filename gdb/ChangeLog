@@ -1,5 +1,17 @@
 2005-02-14  Andrew Cagney  <cagney@gnu.org>
 
+	Mark up add_cmd.
+	* arch-utils.c, avr-tdep.c, breakpoint.c, corefile.c: Update.
+	* cp-abi.c, cp-namespace.c, cp-support.c, dummy-frame.c: Update.
+	* exec.c, gnu-nat.c, go32-nat.c, hppa-tdep.c, infcmd.c: Update.
+	* infrun.c, interps.c, macrocmd.c, maint.c, memattr.c: Update.
+	* mips-tdep.c, ocd.c, osabi.c, printcmd.c, regcache.c: Update.
+	* reggroups.c, remote-fileio.c, remote-rdi.c, remote.c: Update.
+	* sol-thread.c, source.c, stack.c, symfile-mem.c: Update.
+	* symfile.c, thread.c, tracepoint.c, valprint.c, value.c: Update.
+	* win32-nat.c, cli/cli-cmds.c, cli/cli-dump.c: Update.
+	* cli/cli-logging.c, tui/tui-regs.c: Update.
+
 	Mark up add_setshow functions, replace "PRINT:" comment prefix
 	with "FIXME: i18n:".
 	* aix-thread.c, alpha-tdep.c, arm-tdep.c, breakpoint.c: Update.

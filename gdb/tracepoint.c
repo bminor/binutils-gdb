@@ -2713,7 +2713,7 @@ _initialize_tracepoint (void)
 	    "List the variables local to a scope");
 
   add_cmd ("tracepoints", class_trace, NULL,
-	   "Tracing of program execution without stopping the program.",
+	   _("Tracing of program execution without stopping the program."),
 	   &cmdlist);
 
   add_info ("tracepoints", tracepoints_info,
@@ -2736,44 +2736,44 @@ Use the 'source' command in another debug session to restore them.");
 No argument means forward by one frame; '-' means backward by one frame.",
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
-  add_cmd ("outside", class_trace, trace_find_outside_command,
-	   "Select a trace frame whose PC is outside the given \
-range.\nUsage: tfind outside addr1, addr2",
+  add_cmd ("outside", class_trace, trace_find_outside_command, _("\
+Select a trace frame whose PC is outside the given range.\n\
+Usage: tfind outside addr1, addr2"),
 	   &tfindlist);
 
-  add_cmd ("range", class_trace, trace_find_range_command,
-	   "Select a trace frame whose PC is in the given range.\n\
-Usage: tfind range addr1,addr2",
+  add_cmd ("range", class_trace, trace_find_range_command, _("\
+Select a trace frame whose PC is in the given range.\n\
+Usage: tfind range addr1,addr2"),
 	   &tfindlist);
 
-  add_cmd ("line", class_trace, trace_find_line_command,
-	   "Select a trace frame by source line.\n\
+  add_cmd ("line", class_trace, trace_find_line_command, _("\
+Select a trace frame by source line.\n\
 Argument can be a line number (with optional source file), \n\
 a function name, or '*' followed by an address.\n\
-Default argument is 'the next source line that was traced'.",
+Default argument is 'the next source line that was traced'."),
 	   &tfindlist);
 
-  add_cmd ("tracepoint", class_trace, trace_find_tracepoint_command,
-	   "Select a trace frame by tracepoint number.\n\
-Default is the tracepoint for the current trace frame.",
+  add_cmd ("tracepoint", class_trace, trace_find_tracepoint_command, _("\
+Select a trace frame by tracepoint number.\n\
+Default is the tracepoint for the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("pc", class_trace, trace_find_pc_command,
-	   "Select a trace frame by PC.\n\
-Default is the current PC, or the PC of the current trace frame.",
+  add_cmd ("pc", class_trace, trace_find_pc_command, _("\
+Select a trace frame by PC.\n\
+Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("end", class_trace, trace_find_end_command,
-	   "Synonym for 'none'.\n\
-De-select any trace frame and resume 'live' debugging.",
+  add_cmd ("end", class_trace, trace_find_end_command, _("\
+Synonym for 'none'.\n\
+De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
   add_cmd ("none", class_trace, trace_find_none_command,
-	   "De-select any trace frame and resume 'live' debugging.",
+	   _("De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
   add_cmd ("start", class_trace, trace_find_start_command,
-	   "Select the first trace frame in the trace buffer.",
+	   _("Select the first trace frame in the trace buffer."),
 	   &tfindlist);
 
   add_com ("tstatus", class_trace, trace_status_command,
@@ -2825,22 +2825,22 @@ Tracepoint actions may include collecting of specified data, \n\
 single-stepping, or enabling/disabling other tracepoints, \n\
 depending on target's capabilities.");
 
-  add_cmd ("tracepoints", class_trace, delete_trace_command,
-	   "Delete specified tracepoints.\n\
+  add_cmd ("tracepoints", class_trace, delete_trace_command, _("\
+Delete specified tracepoints.\n\
 Arguments are tracepoint numbers, separated by spaces.\n\
-No argument means delete all tracepoints.",
+No argument means delete all tracepoints."),
 	   &deletelist);
 
-  add_cmd ("tracepoints", class_trace, disable_trace_command,
-	   "Disable specified tracepoints.\n\
+  add_cmd ("tracepoints", class_trace, disable_trace_command, _("\
+Disable specified tracepoints.\n\
 Arguments are tracepoint numbers, separated by spaces.\n\
-No argument means disable all tracepoints.",
+No argument means disable all tracepoints."),
 	   &disablelist);
 
-  add_cmd ("tracepoints", class_trace, enable_trace_command,
-	   "Enable specified tracepoints.\n\
+  add_cmd ("tracepoints", class_trace, enable_trace_command, _("\
+Enable specified tracepoints.\n\
 Arguments are tracepoint numbers, separated by spaces.\n\
-No argument means enable all tracepoints.",
+No argument means enable all tracepoints."),
 	   &enablelist);
 
   c = add_com ("trace", class_trace, trace_command,

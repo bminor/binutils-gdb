@@ -3069,71 +3069,67 @@ info_port_rights_cmd (char *args, int from_tty)
 static void
 add_task_commands (void)
 {
-  add_cmd ("pause", class_run, set_thread_default_pause_cmd,
-	   "Set whether the new threads are suspended while gdb has control.\n\
+  add_cmd ("pause", class_run, set_thread_default_pause_cmd, _("\
+Set whether the new threads are suspended while gdb has control.\n\
 This property normally has no effect because the whole task is\n\
 suspended, however, that may be disabled with \"set task pause off\".\n\
-The default value is \"off\".",
+The default value is \"off\"."),
 	   &set_thread_default_cmd_list);
-  add_cmd ("pause", no_class, show_thread_default_pause_cmd,
-	   "Show whether new threads are suspended while gdb has control.",
+  add_cmd ("pause", no_class, show_thread_default_pause_cmd, _("\
+Show whether new threads are suspended while gdb has control."),
 	   &show_thread_default_cmd_list);
   
-  add_cmd ("run", class_run, set_thread_default_run_cmd,
-	   "Set whether new threads are allowed to run \
-(once gdb has noticed them).",
+  add_cmd ("run", class_run, set_thread_default_run_cmd, _("\
+Set whether new threads are allowed to run (once gdb has noticed them)."),
 	   &set_thread_default_cmd_list);
-  add_cmd ("run", no_class, show_thread_default_run_cmd,
-	   "Show whether new threads are allowed to run \
-(once gdb has noticed them).",
+  add_cmd ("run", no_class, show_thread_default_run_cmd, _("\
+Show whether new threads are allowed to run (once gdb has noticed them)."),
 	   &show_thread_default_cmd_list);
   
   add_cmd ("detach-suspend-count", class_run, set_thread_default_detach_sc_cmd,
-	   "Set the default detach-suspend-count value for new threads.",
+	   _("Set the default detach-suspend-count value for new threads."),
 	   &set_thread_default_cmd_list);
   add_cmd ("detach-suspend-count", no_class, show_thread_default_detach_sc_cmd,
-	   "Show the default detach-suspend-count value for new threads.",
+	   _("Show the default detach-suspend-count value for new threads."),
 	   &show_thread_default_cmd_list);
 
-  add_cmd ("signals", class_run, set_signals_cmd,
-	   "Set whether the inferior process's signals will be intercepted.\n\
-Mach exceptions (such as breakpoint traps) are not affected.",
+  add_cmd ("signals", class_run, set_signals_cmd, _("\
+Set whether the inferior process's signals will be intercepted.\n\
+Mach exceptions (such as breakpoint traps) are not affected."),
 	   &setlist);
   add_alias_cmd ("sigs", "signals", class_run, 1, &setlist);
-  add_cmd ("signals", no_class, show_signals_cmd,
-	   "Show whether the inferior process's signals will be intercepted.",
+  add_cmd ("signals", no_class, show_signals_cmd, _("\
+Show whether the inferior process's signals will be intercepted."),
 	   &showlist);
   add_alias_cmd ("sigs", "signals", no_class, 1, &showlist);
 
-  add_cmd ("signal-thread", class_run, set_sig_thread_cmd,
-	   "Set the thread that gdb thinks is the libc signal thread.\n\
-This thread is run when delivering a signal to a non-stopped process.",
+  add_cmd ("signal-thread", class_run, set_sig_thread_cmd, _("\
+Set the thread that gdb thinks is the libc signal thread.\n\
+This thread is run when delivering a signal to a non-stopped process."),
 	   &setlist);
   add_alias_cmd ("sigthread", "signal-thread", class_run, 1, &setlist);
-  add_cmd ("signal-thread", no_class, show_sig_thread_cmd,
-	   "Set the thread that gdb thinks is the libc signal thread.",
+  add_cmd ("signal-thread", no_class, show_sig_thread_cmd, _("\
+Set the thread that gdb thinks is the libc signal thread."),
 	   &showlist);
   add_alias_cmd ("sigthread", "signal-thread", no_class, 1, &showlist);
 
-  add_cmd ("stopped", class_run, set_stopped_cmd,
-	   "Set whether gdb thinks the inferior process is stopped \
-as with SIGSTOP.\n\
-Stopped process will be continued by sending them a signal.",
+  add_cmd ("stopped", class_run, set_stopped_cmd, _("\
+Set whether gdb thinks the inferior process is stopped as with SIGSTOP.\n\
+Stopped process will be continued by sending them a signal."),
 	   &setlist);
-  add_cmd ("stopped", no_class, show_signals_cmd,
-	   "Show whether gdb thinks the inferior process is stopped \
-as with SIGSTOP.",
+  add_cmd ("stopped", no_class, show_signals_cmd, _("\
+Show whether gdb thinks the inferior process is stopped as with SIGSTOP."),
 	   &showlist);
 
-  add_cmd ("exceptions", class_run, set_exceptions_cmd,
-	   "Set whether exceptions in the inferior process will be trapped.\n\
+  add_cmd ("exceptions", class_run, set_exceptions_cmd, _("\
+Set whether exceptions in the inferior process will be trapped.\n\
 When exceptions are turned off, neither breakpoints nor single-stepping\n\
-will work.",
+will work."),
 	   &setlist);
   /* Allow `set exc' despite conflict with `set exception-port'.  */
   add_alias_cmd ("exc", "exceptions", class_run, 1, &setlist);
-  add_cmd ("exceptions", no_class, show_exceptions_cmd,
-	   "Show whether exceptions in the inferior process will be trapped.",
+  add_cmd ("exceptions", no_class, show_exceptions_cmd, _("\
+Show whether exceptions in the inferior process will be trapped."),
 	   &showlist);
 
   add_prefix_cmd ("task", no_class, set_task_cmd,
@@ -3143,27 +3139,27 @@ will work.",
 		  "Command prefix for showing task attributes.",
 		  &show_task_cmd_list, "show task ", 0, &showlist);
 
-  add_cmd ("pause", class_run, set_task_pause_cmd,
-	   "Set whether the task is suspended while gdb has control.\n\
+  add_cmd ("pause", class_run, set_task_pause_cmd, _("\
+Set whether the task is suspended while gdb has control.\n\
 A value of \"on\" takes effect immediately, otherwise nothing happens\n\
 until the next time the program is continued.\n\
 When setting this to \"off\", \"set thread default pause on\" can be\n\
-used to pause individual threads by default instead.",
+used to pause individual threads by default instead."),
 	   &set_task_cmd_list);
   add_cmd ("pause", no_class, show_task_pause_cmd,
-	   "Show whether the task is suspended while gdb has control.",
+	   _("Show whether the task is suspended while gdb has control."),
 	   &show_task_cmd_list);
 
   add_cmd ("detach-suspend-count", class_run, set_task_detach_sc_cmd,
-	   "Set the suspend count will leave on the thread when detaching.",
+	   _("Set the suspend count will leave on the thread when detaching."),
 	   &set_task_cmd_list);
   add_cmd ("detach-suspend-count", no_class, show_task_detach_sc_cmd,
-	   "Show the suspend count will leave on the thread when detaching.",
+	   _("Show the suspend count will leave on the thread when detaching."),
 	   &show_task_cmd_list);
 
-  add_cmd ("exception-port", no_class, set_task_exc_port_cmd,
-	   "Set the task exception port to which we forward exceptions.\n\
-The argument should be the value of the send right in the task.",
+  add_cmd ("exception-port", no_class, set_task_exc_port_cmd, _("\
+Set the task exception port to which we forward exceptions.\n\
+The argument should be the value of the send right in the task."),
 	   &set_task_cmd_list);
   add_alias_cmd ("excp", "exception-port", no_class, 1, &set_task_cmd_list);
   add_alias_cmd ("exc-port", "exception-port", no_class, 1,
@@ -3171,27 +3167,27 @@ The argument should be the value of the send right in the task.",
 
   /* A convenient way of turning on all options require to noninvasively
      debug running tasks.  */
-  add_cmd ("noninvasive", no_class, set_noninvasive_cmd,
-	   "Set task options so that we interfere as little as possible.\n\
+  add_cmd ("noninvasive", no_class, set_noninvasive_cmd, _("\
+Set task options so that we interfere as little as possible.\n\
 This is the same as setting `task pause', `exceptions', and\n\
-`signals' to the opposite value.",
+`signals' to the opposite value."),
 	   &setlist);
 
   /* Commands to show information about the task's ports.  */
   add_cmd ("send-rights", class_info, info_send_rights_cmd,
-	   "Show information about the task's send rights",
+	   _("Show information about the task's send rights"),
 	   &infolist);
   add_cmd ("receive-rights", class_info, info_recv_rights_cmd,
-	   "Show information about the task's receive rights",
+	   _("Show information about the task's receive rights"),
 	   &infolist);
   add_cmd ("port-rights", class_info, info_port_rights_cmd,
-	   "Show information about the task's port rights",
+	   _("Show information about the task's port rights"),
 	   &infolist);
   add_cmd ("port-sets", class_info, info_port_sets_cmd,
-	   "Show information about the task's port sets",
+	   _("Show information about the task's port sets"),
 	   &infolist);
   add_cmd ("dead-names", class_info, info_dead_names_cmd,
-	   "Show information about the task's dead names",
+	   _("Show information about the task's dead names"),
 	   &infolist);
   add_info_alias ("ports", "port-rights", 1);
   add_info_alias ("port", "port-rights", 1);
@@ -3318,51 +3314,49 @@ add_thread_commands (void)
 		  &show_thread_default_cmd_list, "show thread default ", 0,
 		  &show_thread_cmd_list);
 
-  add_cmd ("pause", class_run, set_thread_pause_cmd,
-	   "Set whether the current thread is suspended \
-while gdb has control.\n\
+  add_cmd ("pause", class_run, set_thread_pause_cmd, _("\
+Set whether the current thread is suspended while gdb has control.\n\
 A value of \"on\" takes effect immediately, otherwise nothing happens\n\
 until the next time the program is continued.  This property normally\n\
 has no effect because the whole task is suspended, however, that may\n\
 be disabled with \"set task pause off\".\n\
-The default value is \"off\".",
+The default value is \"off\"."),
 	   &set_thread_cmd_list);
-  add_cmd ("pause", no_class, show_thread_pause_cmd,
-	   "Show whether the current thread is suspended \
-while gdb has control.",
+  add_cmd ("pause", no_class, show_thread_pause_cmd, _("\
+Show whether the current thread is suspended while gdb has control."),
 	   &show_thread_cmd_list);
 
   add_cmd ("run", class_run, set_thread_run_cmd,
-	   "Set whether the current thread is allowed to run.",
+	   _("Set whether the current thread is allowed to run."),
 	   &set_thread_cmd_list);
   add_cmd ("run", no_class, show_thread_run_cmd,
-	   "Show whether the current thread is allowed to run.",
+	   _("Show whether the current thread is allowed to run."),
 	   &show_thread_cmd_list);
 
-  add_cmd ("detach-suspend-count", class_run, set_thread_detach_sc_cmd,
-	   "Set the suspend count will leave on the thread when detaching.\n\
+  add_cmd ("detach-suspend-count", class_run, set_thread_detach_sc_cmd, _("\
+Set the suspend count will leave on the thread when detaching.\n\
 Note that this is relative to suspend count when gdb noticed the thread;\n\
-use the `thread takeover-suspend-count' to force it to an absolute value.",
+use the `thread takeover-suspend-count' to force it to an absolute value."),
 	   &set_thread_cmd_list);
-  add_cmd ("detach-suspend-count", no_class, show_thread_detach_sc_cmd,
-	   "Show the suspend count will leave on the thread when detaching.\n\
+  add_cmd ("detach-suspend-count", no_class, show_thread_detach_sc_cmd, _("\
+Show the suspend count will leave on the thread when detaching.\n\
 Note that this is relative to suspend count when gdb noticed the thread;\n\
-use the `thread takeover-suspend-count' to force it to an absolute value.",
+use the `thread takeover-suspend-count' to force it to an absolute value."),
 	   &show_thread_cmd_list);
 
-  add_cmd ("exception-port", no_class, set_thread_exc_port_cmd,
-	   "Set the thread exception port to which we forward exceptions.\n\
+  add_cmd ("exception-port", no_class, set_thread_exc_port_cmd, _("\
+Set the thread exception port to which we forward exceptions.\n\
 This overrides the task exception port.\n\
-The argument should be the value of the send right in the task.",
+The argument should be the value of the send right in the task."),
 	   &set_thread_cmd_list);
   add_alias_cmd ("excp", "exception-port", no_class, 1, &set_thread_cmd_list);
   add_alias_cmd ("exc-port", "exception-port", no_class, 1,
 		 &set_thread_cmd_list);
 
-  add_cmd ("takeover-suspend-count", no_class, thread_takeover_sc_cmd,
-	   "Force the threads absolute suspend-count to be gdb's.\n\
+  add_cmd ("takeover-suspend-count", no_class, thread_takeover_sc_cmd, _("\
+Force the threads absolute suspend-count to be gdb's.\n\
 Prior to giving this command, gdb's thread suspend-counts are relative\n\
-to the thread's initial suspend-count when gdb notices the threads.",
+to the thread's initial suspend-count when gdb notices the threads."),
 	   &thread_cmd_list);
 }
 

@@ -653,6 +653,8 @@ initialize_current_architecture (void)
     add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
     /* Don't use set_from_show - need to print both auto/manual and
        current setting. */
+    /* FIXME: i18n: add_setshow_enum_cmd uses a print function so
+       fancy printing is possible.  */
     add_cmd ("architecture", class_support, show_architecture,
 	     _("Show the current target architecture"), &showlist);
   }
@@ -736,6 +738,8 @@ _initialize_gdbarch_utils (void)
   set_cmd_sfunc (c, set_endian);
   /* Don't use set_from_show - need to print both auto/manual and
      current setting. */
+  /* FIXME: i18n: add_setshow_enum_cmd uses a print function so
+     fancy printing is possible.  */
   add_cmd ("endian", class_support, show_endian,
 	   _("Show the current byte-order"), &showlist);
 }

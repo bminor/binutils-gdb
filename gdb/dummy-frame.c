@@ -258,7 +258,7 @@ void
 _initialize_dummy_frame (void)
 {
   add_cmd ("dummy-frames", class_maintenance, maintenance_print_dummy_frames,
-	   "Print the contents of the internal dummy-frame stack.",
+	   _("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
 }

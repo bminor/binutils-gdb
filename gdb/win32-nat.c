@@ -2180,7 +2180,7 @@ _initialize_win32_nat (void)
 		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
 
   add_cmd ("selector", class_info, display_selectors,
-	   "Display selectors infos.",
+	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
 
   add_target (&deprecated_child_ops);

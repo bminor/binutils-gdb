@@ -633,7 +633,7 @@ _initialize_gdb_osabi (void)
 			&set_osabi_string, "Set OS ABI of target.", &setlist);
 
   set_cmd_sfunc (c, set_osabi);
-  add_cmd ("osabi", class_support, show_osabi, "Show OS/ABI of target.",
+  add_cmd ("osabi", class_support, show_osabi, _("Show OS/ABI of target."),
 	   &showlist);
   user_osabi_state = osabi_auto;
 }

@@ -3534,32 +3534,32 @@ _initialize_symfile (void)
 {
   struct cmd_list_element *c;
 
-  c = add_cmd ("symbol-file", class_files, symbol_file_command,
-	       "Load symbol table from executable file FILE.\n\
+  c = add_cmd ("symbol-file", class_files, symbol_file_command, _("\
+Load symbol table from executable file FILE.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
-to execute.", &cmdlist);
+to execute."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
-	       "Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
+  c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
+Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
 Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
 The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\
-with the text.  SECT is a section name to be loaded at SECT_ADDR.",
+with the text.  SECT is a section name to be loaded at SECT_ADDR."),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-shared-symbol-files", class_files,
-	       add_shared_symbol_files_command,
-   "Load the symbols from shared objects in the dynamic linker's link map.",
+	       add_shared_symbol_files_command, _("\
+Load the symbols from shared objects in the dynamic linker's link map."),
 	       &cmdlist);
   c = add_alias_cmd ("assf", "add-shared-symbol-files", class_files, 1,
 		     &cmdlist);
 
-  c = add_cmd ("load", class_files, load_command,
-	       "Dynamically load FILE into the running program, and record its symbols\n\
-for access from GDB.", &cmdlist);
+  c = add_cmd ("load", class_files, load_command, _("\
+Dynamically load FILE into the running program, and record its symbols\n\
+for access from GDB."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   deprecated_add_show_from_set
@@ -3577,22 +3577,22 @@ for access from GDB.", &cmdlist);
   add_com_alias ("ov", "overlay", class_alias, 1);
 
   add_cmd ("map-overlay", class_support, map_overlay_command,
-	   "Assert that an overlay section is mapped.", &overlaylist);
+	   _("Assert that an overlay section is mapped."), &overlaylist);
 
   add_cmd ("unmap-overlay", class_support, unmap_overlay_command,
-	   "Assert that an overlay section is unmapped.", &overlaylist);
+	   _("Assert that an overlay section is unmapped."), &overlaylist);
 
   add_cmd ("list-overlays", class_support, list_overlays_command,
-	   "List mappings of overlay sections.", &overlaylist);
+	   _("List mappings of overlay sections."), &overlaylist);
 
   add_cmd ("manual", class_support, overlay_manual_command,
-	   "Enable overlay debugging.", &overlaylist);
+	   _("Enable overlay debugging."), &overlaylist);
   add_cmd ("off", class_support, overlay_off_command,
-	   "Disable overlay debugging.", &overlaylist);
+	   _("Disable overlay debugging."), &overlaylist);
   add_cmd ("auto", class_support, overlay_auto_command,
-	   "Enable automatic overlay debugging.", &overlaylist);
+	   _("Enable automatic overlay debugging."), &overlaylist);
   add_cmd ("load-target", class_support, overlay_load_command,
-	   "Read the overlay mapping state from the target.", &overlaylist);
+	   _("Read the overlay mapping state from the target."), &overlaylist);
 
   /* Filename extension to source language lookup table: */
   init_filename_language_table ();

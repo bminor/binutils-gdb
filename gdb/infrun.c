@@ -3832,11 +3832,11 @@ Pass and Stop may be combined.", NULL));
     }
 
   if (!dbx_commands)
-    stop_command =
-      add_cmd ("stop", class_obscure, not_just_help_class_command, 
-	       "There is no `stop' command, but you can set a hook on `stop'.\n\
+    stop_command = add_cmd ("stop", class_obscure,
+			    not_just_help_class_command, _("\
+There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
-of the program stops.", &cmdlist);
+of the program stops."), &cmdlist);
 
   add_set_cmd ("infrun", class_maintenance, var_zinteger,
 	       &debug_infrun, "Set inferior debugging.\n\

@@ -693,7 +693,7 @@ The new thread ID must be currently known.", &thread_cmd_list, "thread ", 1, &cm
 		  &thread_apply_list, "apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,
-	   "Apply a command to all threads.", &thread_apply_list);
+	   _("Apply a command to all threads."), &thread_apply_list);
 
   if (!xdb_commands)
     add_com_alias ("t", "thread", class_run, 1);

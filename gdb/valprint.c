@@ -1272,14 +1272,14 @@ _initialize_valprint (void)
      independent variables to be either set or shown with a single
      command.  So the usual deprecated_add_set_cmd() and
      add_show_from_set() commands aren't really appropriate. */
-  add_cmd ("radix", class_support, set_radix,
-	   "Set default input and output number radices.\n\
+  add_cmd ("radix", class_support, set_radix, _("\
+Set default input and output number radices.\n\
 Use 'set input-radix' or 'set output-radix' to independently set each.\n\
-Without an argument, sets both radices back to the default value of 10.",
+Without an argument, sets both radices back to the default value of 10."),
 	   &setlist);
-  add_cmd ("radix", class_support, show_radix,
-	   "Show the default input and output number radices.\n\
-Use 'show input-radix' or 'show output-radix' to independently show each.",
+  add_cmd ("radix", class_support, show_radix, _("\
+Show the default input and output number radices.\n\
+Use 'show input-radix' or 'show output-radix' to independently show each."),
 	   &showlist);
 
   /* Give people the defaults which they are used to.  */

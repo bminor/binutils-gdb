@@ -1421,25 +1421,21 @@ _initialize_regcache (void)
       registers.  For now, -1 is special, and means `no current process'.  */
   registers_ptid = pid_to_ptid (-1);
 
-  add_cmd ("registers", class_maintenance,
-	   maintenance_print_registers,
-	   "Print the internal register configuration.\
-Takes an optional file parameter.",
-	   &maintenanceprintlist);
+  add_cmd ("registers", class_maintenance, maintenance_print_registers, _("\
+Print the internal register configuration.\n\
+Takes an optional file parameter."), &maintenanceprintlist);
   add_cmd ("raw-registers", class_maintenance,
-	   maintenance_print_raw_registers,
-	   "Print the internal register configuration including raw values.\
-Takes an optional file parameter.",
-	   &maintenanceprintlist);
+	   maintenance_print_raw_registers, _("\
+Print the internal register configuration including raw values.\n\
+Takes an optional file parameter."), &maintenanceprintlist);
   add_cmd ("cooked-registers", class_maintenance,
-	   maintenance_print_cooked_registers,
-	   "Print the internal register configuration including cooked values.\
-Takes an optional file parameter.",
-	   &maintenanceprintlist);
+	   maintenance_print_cooked_registers, _("\
+Print the internal register configuration including cooked values.\n\
+Takes an optional file parameter."), &maintenanceprintlist);
   add_cmd ("register-groups", class_maintenance,
-	   maintenance_print_register_groups,
-	   "Print the internal register configuration including each register's group.\
-Takes an optional file parameter.",
+	   maintenance_print_register_groups, _("\
+Print the internal register configuration including each register's group.\n\
+Takes an optional file parameter."),
 	   &maintenanceprintlist);
 
 }

@@ -223,10 +223,9 @@ void
 _initialize_symfile_mem (void)
 {
   add_cmd ("add-symbol-file-from-memory", class_files,
-           add_symbol_file_from_memory_command,
-           "\
+           add_symbol_file_from_memory_command, _("\
 Load the symbols out of memory from a dynamically loaded object file.\n\
-Give an expression for the address of the file's shared object file header.",
+Give an expression for the address of the file's shared object file header."),
            &cmdlist);
 
   /* Want to know of each new inferior so that its vsyscall info can

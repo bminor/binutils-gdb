@@ -442,10 +442,10 @@ void
 _initialize_core (void)
 {
   struct cmd_list_element *c;
-  c = add_cmd ("core-file", class_files, core_file_command,
-	       "Use FILE as core dump for examining memory and registers.\n\
+  c = add_cmd ("core-file", class_files, core_file_command, _("\
+Use FILE as core dump for examining memory and registers.\n\
 No arg means have no core file.  This command has been superseded by the\n\
-`target core' and `detach' commands.", &cmdlist);
+`target core' and `detach' commands."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   c = add_set_cmd ("gnutarget", class_files, var_string_noescape,

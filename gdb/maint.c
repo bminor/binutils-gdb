@@ -711,8 +711,8 @@ to test internal functions such as the C++/ObjC demangler, etc.",
 		  &maintenancelist);
   add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
 
-  add_cmd ("sections", class_maintenance, maintenance_info_sections,
-	   "List the BFD sections of the exec and core files. \n\
+  add_cmd ("sections", class_maintenance, maintenance_info_sections, _("\
+List the BFD sections of the exec and core files. \n\
 Arguments may be any combination of:\n\
 	[one or more section names]\n\
 	ALLOC LOAD RELOC READONLY CODE DATA ROM CONSTRUCTOR\n\
@@ -720,7 +720,7 @@ Arguments may be any combination of:\n\
 Sections matching any argument will be listed (no argument\n\
 implies all sections).  In addition, the special argument\n\
 	ALLOBJ\n\
-lists all sections from all object files, including shared libraries.",
+lists all sections from all object files, including shared libraries."),
 	   &maintenanceinfolist);
 
   add_prefix_cmd ("print", class_maintenance, maintenance_print_command,
@@ -743,110 +743,113 @@ Configure variables internal to GDB that aid in GDB's maintenance",
 		  &maintenancelist);
 
 #ifndef _WIN32
-  add_cmd ("dump-me", class_maintenance, maintenance_dump_me,
-	   "Get fatal error; make debugger dump its core.\n\
+  add_cmd ("dump-me", class_maintenance, maintenance_dump_me, _("\
+Get fatal error; make debugger dump its core.\n\
 GDB sets its handling of SIGQUIT back to SIG_DFL and then sends\n\
-itself a SIGQUIT signal.",
+itself a SIGQUIT signal."),
 	   &maintenancelist);
 #endif
 
-  add_cmd ("internal-error", class_maintenance, maintenance_internal_error,
-	   "Give GDB an internal error.\n\
-Cause GDB to behave as if an internal error was detected.",
+  add_cmd ("internal-error", class_maintenance,
+	   maintenance_internal_error, _("\
+Give GDB an internal error.\n\
+Cause GDB to behave as if an internal error was detected."),
 	   &maintenancelist);
 
-  add_cmd ("internal-warning", class_maintenance, maintenance_internal_warning,
-	   "Give GDB an internal warning.\n\
-Cause GDB to behave as if an internal warning was reported.",
+  add_cmd ("internal-warning", class_maintenance,
+	   maintenance_internal_warning, _("\
+Give GDB an internal warning.\n\
+Cause GDB to behave as if an internal warning was reported."),
 	   &maintenancelist);
 
-  add_cmd ("demangle", class_maintenance, maintenance_demangle,
-	   "Demangle a C++/ObjC mangled name.\n\
+  add_cmd ("demangle", class_maintenance, maintenance_demangle, _("\
+Demangle a C++/ObjC mangled name.\n\
 Call internal GDB demangler routine to demangle a C++ link name\n\
-and prints the result.",
+and prints the result."),
 	   &maintenancelist);
 
-  add_cmd ("time", class_maintenance, maintenance_time_display,
-	   "Set the display of time usage.\n\
+  add_cmd ("time", class_maintenance, maintenance_time_display, _("\
+Set the display of time usage.\n\
 If nonzero, will cause the execution time for each command to be\n\
-displayed, following the command's output.",
+displayed, following the command's output."),
 	   &maintenancelist);
 
-  add_cmd ("space", class_maintenance, maintenance_space_display,
-	   "Set the display of space usage.\n\
+  add_cmd ("space", class_maintenance, maintenance_space_display, _("\
+Set the display of space usage.\n\
 If nonzero, will cause the execution space for each command to be\n\
-displayed, following the command's output.",
+displayed, following the command's output."),
 	   &maintenancelist);
 
-  add_cmd ("type", class_maintenance, maintenance_print_type,
-	   "Print a type chain for a given symbol.\n\
+  add_cmd ("type", class_maintenance, maintenance_print_type, _("\
+Print a type chain for a given symbol.\n\
 For each node in a type chain, print the raw data for each member of\n\
-the type structure, and the interpretation of the data.",
+the type structure, and the interpretation of the data."),
 	   &maintenanceprintlist);
 
-  add_cmd ("symbols", class_maintenance, maintenance_print_symbols,
-	   "Print dump of current symbol definitions.\n\
+  add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _("\
+Print dump of current symbol definitions.\n\
 Entries in the full symbol table are dumped to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's symbols.",
+If a SOURCE file is specified, dump only that file's symbols."),
 	   &maintenanceprintlist);
 
-  add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols,
-	   "Print dump of current minimal symbol definitions.\n\
+  add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols, _("\
+Print dump of current minimal symbol definitions.\n\
 Entries in the minimal symbol table are dumped to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's minimal symbols.",
+If a SOURCE file is specified, dump only that file's minimal symbols."),
 	   &maintenanceprintlist);
 
-  add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols,
-	   "Print dump of current partial symbol definitions.\n\
+  add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols, _("\
+Print dump of current partial symbol definitions.\n\
 Entries in the partial symbol table are dumped to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's partial symbols.",
+If a SOURCE file is specified, dump only that file's partial symbols."),
 	   &maintenanceprintlist);
 
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
-	   "Print dump of current object file definitions.",
+	   _("Print dump of current object file definitions."),
 	   &maintenanceprintlist);
 
-  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs,
-	   "List the full symbol tables for all object files.\n\
+  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs, _("\
+List the full symbol tables for all object files.\n\
 This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
-With an argument REGEXP, list the symbol tables whose names that match that.",
+With an argument REGEXP, list the symbol tables whose names that match that."),
 	   &maintenanceinfolist);
 
-  add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs,
-	   "List the partial symbol tables for all object files.\n\
+  add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs, _("\
+List the partial symbol tables for all object files.\n\
 This does not include information about individual partial symbols,\n\
-just the symbol table structures themselves.",
+just the symbol table structures themselves."),
 	   &maintenanceinfolist);
 
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
-	   "Print statistics about internal gdb state.",
+	   _("Print statistics about internal gdb state."),
 	   &maintenanceprintlist);
 
-  add_cmd ("architecture", class_maintenance, maintenance_print_architecture,
-	   "Print the internal architecture configuration.\
-Takes an optional file parameter.",
+  add_cmd ("architecture", class_maintenance,
+	   maintenance_print_architecture, _("\
+Print the internal architecture configuration.\n\
+Takes an optional file parameter."),
 	   &maintenanceprintlist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
-	   "Check consistency of psymtabs and symtabs.",
+	   _("Check consistency of psymtabs and symtabs."),
 	   &maintenancelist);
 
   add_cmd ("translate-address", class_maintenance, maintenance_translate_address,
-	   "Translate a section name and address to a symbol.",
+	   _("Translate a section name and address to a symbol."),
 	   &maintenancelist);
 
-  add_cmd ("deprecate", class_maintenance, maintenance_deprecate,
-	   "Deprecate a command.  Note that this is just in here so the \n\
+  add_cmd ("deprecate", class_maintenance, maintenance_deprecate, _("\
+Deprecate a command.  Note that this is just in here so the \n\
 testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
 rather you should use the C function deprecate_cmd().  If you decide you \n\
 want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\
-replacement is optional.", &maintenancelist);
+replacement is optional."), &maintenancelist);
 
-  add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate,
-	   "Undeprecate a command.  Note that this is just in here so the \n\
+  add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate, _("\
+Undeprecate a command.  Note that this is just in here so the \n\
 testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
-If you decide you want to use it: maintenance undeprecate 'commandname'",
+If you decide you want to use it: maintenance undeprecate 'commandname'"),
 	   &maintenancelist);
 
   deprecated_add_show_from_set

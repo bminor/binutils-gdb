@@ -866,6 +866,6 @@ void
 _initialize_cp_namespace (void)
 {
   add_cmd ("namespace", class_maintenance, maintenance_cplus_namespace,
-	   "Print the list of possible C++ namespaces.",
+	   _("Print the list of possible C++ namespaces."),
 	   &maint_cplus_cmd_list);
 }

@@ -1411,5 +1411,6 @@ _initialize_avr_tdep (void)
      io_registers' to signify it is not available on other platforms. */
 
   add_cmd ("io_registers", class_info, avr_io_reg_read_command,
-	   _("query remote avr target for io space register values"), &infolist);
+	   _("query remote avr target for io space register values"),
+	   &infolist);
 }

@@ -718,21 +718,21 @@ _initialize_exec (void)
 
   if (!dbx_commands)
     {
-      c = add_cmd ("file", class_files, file_command,
-		   "Use FILE as program to be debugged.\n\
+      c = add_cmd ("file", class_files, file_command, _("\
+Use FILE as program to be debugged.\n\
 It is read for its symbols, for getting the contents of pure memory,\n\
 and it is the program executed when you use the `run' command.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
-No arg means to have no executable file and no symbols.", &cmdlist);
+No arg means to have no executable file and no symbols."), &cmdlist);
       set_cmd_completer (c, filename_completer);
     }
 
-  c = add_cmd ("exec-file", class_files, exec_file_command,
-	       "Use FILE as program for getting contents of pure memory.\n\
+  c = add_cmd ("exec-file", class_files, exec_file_command, _("\
+Use FILE as program for getting contents of pure memory.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 is searched for a command of that name.\n\
-No arg means have no executable file.", &cmdlist);
+No arg means have no executable file."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("section", class_files, set_section_command,

@@ -1574,12 +1574,12 @@ _initialize_source (void)
      just an approximation.  */
   re_set_syntax (RE_SYNTAX_GREP);
 
-  c = add_cmd ("directory", class_files, directory_command,
-	       "Add directory DIR to beginning of search path for source files.\n\
+  c = add_cmd ("directory", class_files, directory_command, _("\
+Add directory DIR to beginning of search path for source files.\n\
 Forget cached info on source file locations and line positions.\n\
 DIR can also be $cwd for the current working directory, or $cdir for the\n\
 directory in which the source file was compiled into object code.\n\
-With no argument, reset the search path to $cdir:$cwd, the default.",
+With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
 
   if (dbx_commands)
@@ -1587,19 +1587,19 @@ With no argument, reset the search path to $cdir:$cwd, the default.",
 
   set_cmd_completer (c, filename_completer);
 
-  add_cmd ("directories", no_class, show_directories,
-	   "Current search path for finding source files.\n\
+  add_cmd ("directories", no_class, show_directories, _("\
+Current search path for finding source files.\n\
 $cwd in the path means the current working directory.\n\
-$cdir in the path means the compilation directory of the source file.",
+$cdir in the path means the compilation directory of the source file."),
 	   &showlist);
 
   if (xdb_commands)
     {
       add_com_alias ("D", "directory", class_files, 0);
-      add_cmd ("ld", no_class, show_directories,
-	       "Current search path for finding source files.\n\
+      add_cmd ("ld", no_class, show_directories, _("\
+Current search path for finding source files.\n\
 $cwd in the path means the current working directory.\n\
-$cdir in the path means the compilation directory of the source file.",
+$cdir in the path means the compilation directory of the source file."),
 	       &cmdlist);
     }
 

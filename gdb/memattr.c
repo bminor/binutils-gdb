@@ -526,23 +526,23 @@ where <mode>  may be rw (read/write), ro (read-only) or wo (write-only), \n\
       <width> may be 8, 16, 32, or 64, and \n\
       <cache> may be cache or nocache");
 
-  add_cmd ("mem", class_vars, mem_enable_command,
-	   "Enable memory region.\n\
+  add_cmd ("mem", class_vars, mem_enable_command, _("\
+Enable memory region.\n\
 Arguments are the code numbers of the memory regions to enable.\n\
 Usage: enable mem <code number>\n\
-Do \"info mem\" to see current list of code numbers.", &enablelist);
+Do \"info mem\" to see current list of code numbers."), &enablelist);
 
-  add_cmd ("mem", class_vars, mem_disable_command,
-	   "Disable memory region.\n\
+  add_cmd ("mem", class_vars, mem_disable_command, _("\
+Disable memory region.\n\
 Arguments are the code numbers of the memory regions to disable.\n\
 Usage: disable mem <code number>\n\
-Do \"info mem\" to see current list of code numbers.", &disablelist);
+Do \"info mem\" to see current list of code numbers."), &disablelist);
 
-  add_cmd ("mem", class_vars, mem_delete_command,
-	   "Delete memory region.\n\
+  add_cmd ("mem", class_vars, mem_delete_command, _("\
+Delete memory region.\n\
 Arguments are the code numbers of the memory regions to delete.\n\
 Usage: delete mem <code number>\n\
-Do \"info mem\" to see current list of code numbers.", &deletelist);
+Do \"info mem\" to see current list of code numbers."), &deletelist);
 
   add_info ("mem", mem_info_command,
 	    "Memory region attributes");

@@ -600,16 +600,16 @@ _initialize_tui_regs (void)
                   tuicmd);
 
   add_cmd ("float", class_tui, tui_reg_float_command,
-           "Display only floating point registers\n",
+           _("Display only floating point registers."),
            &tuireglist);
   add_cmd ("general", class_tui, tui_reg_general_command,
-           "Display only general registers\n",
+           _("Display only general registers."),
            &tuireglist);
   add_cmd ("system", class_tui, tui_reg_system_command,
-           "Display only system registers\n",
+           _("Display only system registers."),
            &tuireglist);
   add_cmd ("next", class_tui, tui_reg_next_command,
-           "Display next register group\n",
+           _("Display next register group."),
            &tuireglist);
 
   if (xdb_commands)
