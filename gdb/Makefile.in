@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 3.98.2
+VERSION = 3.99
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -225,7 +225,7 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
 OTHERS = Makefile.in depend alldeps.mak \
-	 createtags munch configure configure.in \
+	 createtags munch configure configure.in config.sub \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING expread.tab.c \
@@ -450,6 +450,7 @@ gdb.tar.Z: force_update
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
 	./configure none
+	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texinfo)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
 
@@ -551,6 +552,11 @@ gdb.dvi : $(srcdir)/doc/gdb-all.texinfo $(srcdir)/doc/rdl-apps.texinfo
 gdb.info: $(srcdir)/doc/gdb-all.texinfo
 	( cd $(srcdir)/doc; make gdb.info )
 	mv $(srcdir)/doc/gdb.info* .
+
+$(srcdir)/doc/gdb-all.texinfo:
+	(cd $(srcdir)/doc; $(MAKE) gdb-all.texinfo)
+$(srcdir)/doc/rdl-apps.texinfo:
+	(cd $(srcdir)/doc; $(MAKE) rdl-apps.texinfo)
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk

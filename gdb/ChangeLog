@@ -1,3 +1,8 @@
+Fri Aug 23 01:02:00 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Makefile.in:  Add config.sub, make doc/rdl-apps.texinfo for
+	tar file, add dependencies for referenced doc files.
+
 Thu Aug 22 22:17:06 1991  Stu Grossman  (grossman at cygint.cygnus.com)
 
 	* coffread.c, symfile.c, stack.c:  saberized.
