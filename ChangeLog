@@ -1,3 +1,9 @@
+Thu Dec 26 10:13:36 1991  Fred Fish  (fnf at cygnus.com)
+
+	* config.sub:  Merge in some small additions from the FSF version,
+	taken from the gcc distribution, to bring the Cygnus and FSF
+	versions into closer sync.
+
 Fri Dec 20 11:34:18 1991  Fred Fish  (fnf at cygnus.com)
 
 	* configure.in:  Changed svr4 references to sysv4.
