@@ -1,3 +1,8 @@
+2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/size.exp: New.
+	* ld-scripts/size-[12].{d,s,t}: New.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-frv/fr450-link[abc].s, fr450-link.d: New test.
