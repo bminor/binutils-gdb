@@ -339,18 +339,7 @@ cisco_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define cisco_bfd_is_local_label \
   ((boolean (*) PARAMS ((bfd *, asection *))) bfd_false)
 
-/* If somebody calls any byte-swapping routines, shoot them.  */
-void
-swap_abort()
-{
-  abort(); /* This way doesn't require any declaration for ANSI to fuck up */
-}
-#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
-#define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET \
-  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
-
-bfd_target trad_core_vec =
+bfd_target cisco_core_vec =
   {
     "trad-core",
     bfd_target_unknown_flavour,
@@ -364,12 +353,12 @@ bfd_target trad_core_vec =
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     3,							   /* minimum alignment power */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit hdrs */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit hdrs */
-    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit hdrs */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+    bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+    bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
     {				/* bfd_check_format */
      _bfd_dummy_target,		/* unknown format */

@@ -14,7 +14,10 @@ Fri Mar 18 19:12:47 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* bfd.c (struct _bfd): Add cisco_core_struct to tdata union.
 	* libbfd.c (bfd_read, bfd_seek): Add comments regarding errors.
 	* cisco-core.c: New file.
-	* Makfile.in: Change accordingly.
+	* Makefile.in: Change accordingly.
+	* configure.in: Recognize cisco_core_vec.
+	* config/m68k-aout.mt (SELECT_VECS): Add cisco_core_vec.
+	* targets.c: Add cisco_core_vec.
 	* bfd-in2.h: Rebuilt.
 
 Fri Mar 18 18:13:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
