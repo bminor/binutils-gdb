@@ -1,3 +1,16 @@
+Mon May 22 20:03:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/e-mipself.c (mipself): New emulation mode, doesn't change
+	endianness from configured default.
+	* config/e-mipsecoff.c (mipsecoff): Ditto.
+	* configure.in (mips ecoff/elf targets): Include them.
+	* as.c (mipself, mipsecoff): Declare.
+
+	* as.c (emulation_name): New variable.
+	(select_emulation_mode): Set emulation_name.  Don't change argv.
+	(parse_args): Handle --emulation; complain if the supplied name
+	isn't what select_emulation_name came up with.
+
 start-sanitize-arc
 Mon May 22 16:56:58 1995  Doug Evans  <dje@chestnut.cygnus.com>
 

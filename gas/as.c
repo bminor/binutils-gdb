@@ -104,6 +104,90 @@ Options:\n\
   md_show_usage (stream);
 }
 
+#ifdef USE_EMULATIONS
+#define EMULATION_ENVIRON "AS_EMULATION"
+
+extern struct emulation mipsbelf, mipslelf, mipself;
+extern struct emulation mipsbecoff, mipslecoff, mipsecoff;
+
+static const char *emulation_name;
+static struct emulation *const emulations[] = { EMULATIONS };
+static const int n_emulations = sizeof (emulations) / sizeof (emulations[0]);
+
+static void
+select_emulation_mode (argc, argv)
+     int argc;
+     char **argv;
+{
+  int i;
+  char *p, *em = 0;
+
+  for (i = 1; i < argc; i++)
+    if (!strncmp ("--em", argv[i], 4))
+      break;
+
+  if (i == argc)
+    goto do_default;
+
+  p = strchr (argv[i], '=');
+  if (p)
+    p++;
+  else
+    p = argv[i+1];
+
+  if (!p || !*p)
+    as_fatal ("missing emulation mode name");
+  em = p;
+
+ do_default:
+  if (em == 0)
+    em = getenv (EMULATION_ENVIRON);
+  if (em == 0)
+    em = DEFAULT_EMULATION;
+
+  if (em)
+    {
+      for (i = 0; i < n_emulations; i++)
+	if (!strcmp (emulations[i]->name, em))
+	  break;
+      if (i == n_emulations)
+	as_fatal ("unrecognized emulation name `%s'", em);
+      this_emulation = emulations[i];
+    }
+  else
+    this_emulation = emulations[0];
+
+  this_emulation->init ();
+}
+
+const char *
+default_emul_bfd_name ()
+{
+  abort ();
+}
+
+void
+common_emul_init ()
+{
+  this_format = this_emulation->format;
+
+  if (this_emulation->leading_underscore == 2)
+    this_emulation->leading_underscore = this_format->dfl_leading_underscore;
+
+  if (this_emulation->default_endian != 2)
+    target_big_endian = this_emulation->default_endian;
+
+  if (this_emulation->fake_label_name == 0)
+    {
+      if (this_emulation->leading_underscore)
+	this_emulation->fake_label_name = "L0\001";
+      else
+	/* What other parameters should we test?  */
+	this_emulation->fake_label_name = ".L0\001";
+    }
+}
+#endif
+
 /*
  * Since it is easy to do here we interpret the special arg "-"
  * to mean "use stdin" and we set that argv[] pointing to "".
@@ -153,6 +237,8 @@ parse_args (pargc, pargv)
     {"dump-config", no_argument, NULL, OPTION_DUMPCONFIG},
 #define OPTION_VERBOSE (OPTION_STD_BASE + 5)
     {"verbose", no_argument, NULL, OPTION_VERBOSE},
+#define OPTION_EMULATION (OPTION_STD_BASE + 6)
+    {"emulation", required_argument, NULL, OPTION_EMULATION},
   };
 
   /* Construct the option lists from the standard list and the
@@ -236,6 +322,12 @@ parse_args (pargc, pargv)
 	case OPTION_VERSION:
 	  print_version_id ();
 	  exit (EXIT_SUCCESS);
+
+	case OPTION_EMULATION:
+	  /* Already handled; ignore it this time, except error checking.  */
+	  if (strcmp (optarg, this_emulation->name))
+	    as_fatal ("multiple emulation names specified");
+	  break;
 
 	case OPTION_DUMPCONFIG:
 	  fprintf (stderr, "alias = %s\n", TARGET_ALIAS);
@@ -370,8 +462,13 @@ main (argc, argv)
 
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
+  hex_init ();
 #ifdef BFD_ASSEMBLER
   bfd_init ();
+#endif
+
+#ifdef USE_EMULATIONS
+  select_emulation_mode (argc, argv);
 #endif
 
   PROGRESS (1);
