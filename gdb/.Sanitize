@@ -232,6 +232,8 @@ target.c
 target.h
 terminal.h
 testsuite
+thread.c
+thread.h
 typeprint.c
 typeprint.h
 ultra3-nat.c
