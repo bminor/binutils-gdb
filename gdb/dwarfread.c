@@ -902,6 +902,7 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
   
   if ((type = lookup_utype (dip -> dieref)) == NULL)
     {
+      /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip -> dieref, NULL);
     }
   TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
@@ -911,7 +912,7 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
   switch (dip -> dietag)
     {
       case TAG_structure_type:
-	TYPE_CODE (type) = TYPE_CODE_STRUCT;
+        TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	tpart1 = "struct";
 	break;
       case TAG_union_type:
@@ -925,9 +926,9 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
 	SQUAWK (("missing structure or union tag"));
 	break;
     }
-  /* Some compilers try to be helpful by inventing "fake" names for anonymous
-     enums, structures, and unions, like "~0fake" or ".0fake".  Thanks, but
-     no thanks... */
+  /* Some compilers try to be helpful by inventing "fake" names for
+     anonymous enums, structures, and unions, like "~0fake" or ".0fake".
+     Thanks, but no thanks... */
   if (dip -> at_name != NULL
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
@@ -975,15 +976,26 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
 	}
       thisdie = nextdie;
     }
-  /* Now create the vector of fields, and record how big it is.  */
-  TYPE_NFIELDS (type) = nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
-  /* Copy the saved-up fields into the field vector.  */
-  for (n = nfields; list; list = list -> next)
+  /* Now create the vector of fields, and record how big it is.  We may
+     not even have any fields, if this DIE was generated due to a reference
+     to an anonymous structure or union.  In this case, TYPE_FLAG_STUB is
+     set, which clues gdb in to the fact that it needs to search elsewhere
+     for the full structure definition. */
+  if (nfields == 0)
     {
-      TYPE_FIELD (type, --n) = list -> field;
-    }	
+      TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+    }
+  else
+    {
+      TYPE_NFIELDS (type) = nfields;
+      TYPE_FIELDS (type) = (struct field *)
+	obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
+      /* Copy the saved-up fields into the field vector.  */
+      for (n = nfields; list; list = list -> next)
+	{
+	  TYPE_FIELD (type, --n) = list -> field;
+	}	
+    }
   return (type);
 }
 
