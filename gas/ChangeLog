@@ -1,3 +1,11 @@
+	Mon Oct 11 16:46:31 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	fix for pr 3571
+	* config/tc-h8300.c (get_specific): Special action if 8 bit
+	address seen. (check_operand): Don't complain if truncating top
+	bits of an 8 bit address.  (build_bytes): Allow an immediate and
+	an absolute in the same insn.
+
 Mon Oct 11 17:18:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* write.c (write_contents): Don't crash if seginfo is NULL.
