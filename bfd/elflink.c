@@ -2940,7 +2940,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  || !is_elf_hash_table (hash_table)
 	  || hash_table->root.creator != abfd->xvec)
 	{
-	  bfd_set_error (bfd_error_invalid_operation);
+	  if (info->relocatable)
+	    bfd_set_error (bfd_error_invalid_operation);
+	  else
+	    bfd_set_error (bfd_error_wrong_format);
 	  goto error_return;
 	}
     }

@@ -1,3 +1,9 @@
+2004-09-06  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Set the error code to
+	bfd_error_wrong_format when the input format does not match the
+	output format.
+
 2004-09-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (is_ppc64_target): New function, extracted from..
