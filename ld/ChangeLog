@@ -1,3 +1,21 @@
+Tue Mar 23 00:13:29 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: add dvi target, define & use TEXI2DVI, add installcheck
+
+Mon Mar  8 20:30:35 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: rename HOST_CC to CC_FOR_BUILD
+
+Thu Mar  4 12:44:33 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.sc-sh: Added variables which may be overridden by a
+	specific emulation.
+	* mipsidt.sh: New file; emulation for IDT MIPS board.
+	* Makefile.in (ALL_EMULATIONS): Added em_mipsidt.o.
+	(em_mipsidt.c): New target.  Uses mipsidt.sh and mips.sc-sh.
+	* config/mips-idt.mt: New file; sets EMUL to mipsidt.
+	* configure.in (mips-idt-ecoff): New target; uses mips-idt.
+
 Sat Feb 27 00:00:14 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* aout-mipsbsd.sc-sh, mipsbsd.sh: New files from Ralph Campbell,
