@@ -2,21 +2,22 @@
    Copyright 1997, 1999 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include <fcntl.h>
 
@@ -29,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "floatformat.h"
 
-#include <stdio.h>     /* required for __DJGPP_MINOR__ */
+#include <stdio.h>		/* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -39,139 +40,128 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if __DJGPP_MINOR__ < 3
 /* This code will be provided from DJGPP 2.03 on. Until then I code it
    here */
-typedef struct {
-  unsigned short sig0;
-  unsigned short sig1;
-  unsigned short sig2;
-  unsigned short sig3;
-  unsigned short exponent:15;
-  unsigned short sign:1;
-} NPXREG;
+typedef struct
+  {
+    unsigned short sig0;
+    unsigned short sig1;
+    unsigned short sig2;
+    unsigned short sig3;
+    unsigned short exponent:15;
+    unsigned short sign:1;
+  }
+NPXREG;
 
-typedef struct {
-  unsigned int control;
-  unsigned int status;
-  unsigned int tag;
-  unsigned int eip;
-  unsigned int cs;
-  unsigned int dataptr;
-  unsigned int datasel;
-  NPXREG reg[8];
-} NPX;
+typedef struct
+  {
+    unsigned int control;
+    unsigned int status;
+    unsigned int tag;
+    unsigned int eip;
+    unsigned int cs;
+    unsigned int dataptr;
+    unsigned int datasel;
+    NPXREG reg[8];
+  }
+NPX;
 
 static NPX npx;
 
-static void save_npx (void); /* Save the FPU of the debugged program */
-static void load_npx (void); /* Restore the FPU of the debugged program */
+static void save_npx (void);	/* Save the FPU of the debugged program */
+static void load_npx (void);	/* Restore the FPU of the debugged program */
 
 /* ------------------------------------------------------------------------- */
 /* Store the contents of the NPX in the global variable `npx'.  */
+/* *INDENT-OFF* */
 
 static void
 save_npx (void)
 {
   asm ("inb    $0xa0, %%al
-       testb   $0x20, %%al
-       jz      1f
-       xorb    %%al, %%al
-       outb    %%al, $0xf0
-       movb    $0x20, %%al
-       outb    %%al, $0xa0
-       outb    %%al, $0x20
+       testb $0x20, %%al
+       jz 1f
+       xorb %% al, %%al
+       outb %% al, $0xf0
+       movb $0x20, %%al
+       outb %% al, $0xa0
+       outb %% al, $0x20
 1:
-       fnsave  %0
-       fwait"
-       : "=m" (npx)
-       : /* No input */
-       : "%eax");
+       fnsave % 0
+       fwait "
+:     "=m" (npx)
+:				/* No input */
+:     "%eax");
 }
+
+/* *INDENT-ON* */
+
+
+
+
+
 /* ------------------------------------------------------------------------- */
 /* Reload the contents of the NPX from the global variable `npx'.  */
 
 static void
 load_npx (void)
 {
-  asm ("frstor %0" : "=m" (npx));
+asm ("frstor %0":"=m" (npx));
 }
 #endif /* __DJGPP_MINOR < 3 */
 
 extern void _initialize_go32_nat (void);
 
 struct env387
-{
-  unsigned short control;
-  unsigned short r0;
-  unsigned short status;
-  unsigned short r1;
-  unsigned short tag;
-  unsigned short r2;
-  unsigned long eip;
-  unsigned short code_seg;
-  unsigned short opcode;
-  unsigned long operand;
-  unsigned short operand_seg;
-  unsigned short r3;
-  unsigned char regs[8][10];
-};
+  {
+    unsigned short control;
+    unsigned short r0;
+    unsigned short status;
+    unsigned short r1;
+    unsigned short tag;
+    unsigned short r2;
+    unsigned long eip;
+    unsigned short code_seg;
+    unsigned short opcode;
+    unsigned long operand;
+    unsigned short operand_seg;
+    unsigned short r3;
+    unsigned char regs[8][10];
+  };
 
 extern char **environ;
 
 #define SOME_PID 42
 
 static int prog_has_started = 0;
-static void
-print_387_status (unsigned short status, struct env387 *ep);
-static void
-go32_open (char *name, int from_tty);
-static void
-go32_close (int quitting);
-static void
-go32_attach (char *args, int from_tty);
-static void
-go32_detach (char *args, int from_tty);
-static void
-go32_resume (int pid, int step, enum target_signal siggnal);
-static int
-go32_wait (int pid, struct target_waitstatus *status);
-static void
-go32_fetch_registers (int regno);
-static void
-store_register (int regno);
-static void
-go32_store_registers (int regno);
-static void
-go32_prepare_to_store (void);
-static int
-go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-                 struct target_ops *target);
-static void
-go32_files_info (struct target_ops *target);
-static void
-go32_stop (void);
-static void
-go32_kill_inferior (void);
-static void
-go32_create_inferior (char *exec_file, char *args, char **env);
-static void
-go32_mourn_inferior (void);
-static int
-go32_can_run (void);
-static void
-ignore (void);
-static void
-ignore2 (char *a, int b);
+static void print_387_status (unsigned short status, struct env387 *ep);
+static void go32_open (char *name, int from_tty);
+static void go32_close (int quitting);
+static void go32_attach (char *args, int from_tty);
+static void go32_detach (char *args, int from_tty);
+static void go32_resume (int pid, int step, enum target_signal siggnal);
+static int go32_wait (int pid, struct target_waitstatus *status);
+static void go32_fetch_registers (int regno);
+static void store_register (int regno);
+static void go32_store_registers (int regno);
+static void go32_prepare_to_store (void);
+static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			     int write, struct target_ops *target);
+static void go32_files_info (struct target_ops *target);
+static void go32_stop (void);
+static void go32_kill_inferior (void);
+static void go32_create_inferior (char *exec_file, char *args, char **env);
+static void go32_mourn_inferior (void);
+static int go32_can_run (void);
+static void ignore (void);
+static void ignore2 (char *a, int b);
 static int go32_insert_aligned_watchpoint (int pid, CORE_ADDR waddr,
-                                          CORE_ADDR addr, int len, int rw);
+					   CORE_ADDR addr, int len, int rw);
 static int go32_insert_nonaligned_watchpoint (int pid, CORE_ADDR waddr,
-                                             CORE_ADDR addr, int len, int rw);
+					   CORE_ADDR addr, int len, int rw);
 
 static struct target_ops go32_ops;
-static void
-go32_terminal_init (void);
-static void
-go32_terminal_inferior (void);
-static void
-go32_terminal_ours (void);
+static void go32_terminal_init (void);
+static void go32_terminal_inferior (void);
+static void go32_terminal_ours (void);
 
 static void
 print_387_status (unsigned short status, struct env387 *ep)
@@ -254,36 +244,36 @@ static struct
 regno_mapping[] =
 {
   r_ofs (tss_eax), 4,
-  r_ofs (tss_ecx), 4,
-  r_ofs (tss_edx), 4,
-  r_ofs (tss_ebx), 4,
-  r_ofs (tss_esp), 4,
-  r_ofs (tss_ebp), 4,
-  r_ofs (tss_esi), 4,
-  r_ofs (tss_edi), 4,
-  r_ofs (tss_eip), 4,
-  r_ofs (tss_eflags), 4,
-  r_ofs (tss_cs), 2,
-  r_ofs (tss_ss), 2,
-  r_ofs (tss_ds), 2,
-  r_ofs (tss_es), 2,
-  r_ofs (tss_fs), 2,
-  r_ofs (tss_gs), 2,
-  0, 10,
-  1, 10,
-  2, 10,
-  3, 10,
-  4, 10,
-  5, 10,
-  6, 10,
-  7, 10,
-  0, 2,
-  4, 2,
-  8, 2,
-  12, 4,
-  16, 2,
-  20, 4,
-  24, 2
+    r_ofs (tss_ecx), 4,
+    r_ofs (tss_edx), 4,
+    r_ofs (tss_ebx), 4,
+    r_ofs (tss_esp), 4,
+    r_ofs (tss_ebp), 4,
+    r_ofs (tss_esi), 4,
+    r_ofs (tss_edi), 4,
+    r_ofs (tss_eip), 4,
+    r_ofs (tss_eflags), 4,
+    r_ofs (tss_cs), 2,
+    r_ofs (tss_ss), 2,
+    r_ofs (tss_ds), 2,
+    r_ofs (tss_es), 2,
+    r_ofs (tss_fs), 2,
+    r_ofs (tss_gs), 2,
+    0, 10,
+    1, 10,
+    2, 10,
+    3, 10,
+    4, 10,
+    5, 10,
+    6, 10,
+    7, 10,
+    0, 2,
+    4, 2,
+    8, 2,
+    12, 4,
+    16, 2,
+    20, 4,
+    24, 2
 };
 
 static struct
@@ -294,26 +284,26 @@ static struct
 sig_map[] =
 {
   0, TARGET_SIGNAL_FPE,
-  1, TARGET_SIGNAL_TRAP,
-  2, TARGET_SIGNAL_UNKNOWN,
-  3, TARGET_SIGNAL_TRAP,
-  4, TARGET_SIGNAL_FPE,
-  5, TARGET_SIGNAL_SEGV,
-  6, TARGET_SIGNAL_ILL,
-  7, TARGET_SIGNAL_FPE,
-  8, TARGET_SIGNAL_SEGV,
-  9, TARGET_SIGNAL_SEGV,
-  10, TARGET_SIGNAL_BUS,
-  11, TARGET_SIGNAL_SEGV,
-  12, TARGET_SIGNAL_SEGV,
-  13, TARGET_SIGNAL_ABRT,
-  14, TARGET_SIGNAL_SEGV,
-  16, TARGET_SIGNAL_FPE,
-  31, TARGET_SIGNAL_ILL,
-  0x75, TARGET_SIGNAL_FPE,
-  0x79, TARGET_SIGNAL_INT,
-  0x1b, TARGET_SIGNAL_INT,
-  -1, -1
+    1, TARGET_SIGNAL_TRAP,
+    2, TARGET_SIGNAL_UNKNOWN,
+    3, TARGET_SIGNAL_TRAP,
+    4, TARGET_SIGNAL_FPE,
+    5, TARGET_SIGNAL_SEGV,
+    6, TARGET_SIGNAL_ILL,
+    7, TARGET_SIGNAL_FPE,
+    8, TARGET_SIGNAL_SEGV,
+    9, TARGET_SIGNAL_SEGV,
+    10, TARGET_SIGNAL_BUS,
+    11, TARGET_SIGNAL_SEGV,
+    12, TARGET_SIGNAL_SEGV,
+    13, TARGET_SIGNAL_ABRT,
+    14, TARGET_SIGNAL_SEGV,
+    16, TARGET_SIGNAL_FPE,
+    31, TARGET_SIGNAL_ILL,
+    0x75, TARGET_SIGNAL_FPE,
+    0x79, TARGET_SIGNAL_INT,
+    0x1b, TARGET_SIGNAL_INT,
+    -1, -1
 };
 
 static void
@@ -342,9 +332,9 @@ static int resume_is_step;
 
 static void
 go32_resume (int pid, int step, enum target_signal siggnal)
-  {
-    resume_is_step = step;
-  }
+{
+  resume_is_step = step;
+}
 
 static int
 go32_wait (int pid, struct target_waitstatus *status)
@@ -390,7 +380,7 @@ go32_wait (int pid, struct target_waitstatus *status)
 static void
 go32_fetch_registers (int regno)
 {
-  /*JHW*/
+  /*JHW */
   int end_reg = regno + 1;	/* just one reg initially */
 
   if (regno < 0)		/* do the all registers */
@@ -628,7 +618,7 @@ ignore2 (char *a, int b)
    (CONTROL & (DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * index)))\
   )
 
-#if 0 /* use debugging macro */
+#if 0				/* use debugging macro */
 #define SHOW_DR(text) \
 do { \
   fprintf(stderr,"%08x %08x ",edi.dr[7],edi.dr[6]); \
@@ -826,10 +816,10 @@ static void
 go32_terminal_init (void)
 {
   /* Save the filemodes for stdin/stout */
-  inf_in_flag = setmode(0, 0);
-  setmode(0, inf_in_flag);
-  inf_out_flag = setmode(1, 0);
-  setmode(1, inf_out_flag);
+  inf_in_flag = setmode (0, 0);
+  setmode (0, inf_in_flag);
+  inf_out_flag = setmode (1, 0);
+  setmode (1, inf_out_flag);
   inf_flags_valid = 1;
 }
 
@@ -838,10 +828,10 @@ go32_terminal_inferior (void)
 {
   /* set the filemodes for stdin/stdout of the inferior */
   if (inf_flags_valid)
-  {
-    setmode(0, inf_in_flag);
-    setmode(1, inf_out_flag);
-  }
+    {
+      setmode (0, inf_in_flag);
+      setmode (1, inf_out_flag);
+    }
 }
 
 static void
@@ -849,8 +839,8 @@ go32_terminal_ours (void)
 {
   /* Switch to text mode on stdin/stdout always on the gdb terminal and
      save the inferior modes to be restored later */
-  inf_in_flag = setmode(0, O_TEXT);
-  inf_out_flag = setmode(1, O_TEXT);
+  inf_in_flag = setmode (0, O_TEXT);
+  inf_out_flag = setmode (1, O_TEXT);
 }
 
 static void

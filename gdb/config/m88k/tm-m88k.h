@@ -2,21 +2,22 @@
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* g++ support is not yet included.  */
 
@@ -266,9 +267,9 @@ extern CORE_ADDR m88k_addr_bits_remove PARAMS ((CORE_ADDR));
 
 #define PC_REGNUM SXIP_REGNUM	/* Program Counter */
 #define NPC_REGNUM SNIP_REGNUM	/* Next Program Counter */
-#define NNPC_REGNUM SFIP_REGNUM /* Next Next Program Counter */
+#define NNPC_REGNUM SFIP_REGNUM	/* Next Next Program Counter */
 
-#define PSR_REGNUM 32           /* Processor Status Register */
+#define PSR_REGNUM 32		/* Processor Status Register */
 #define FPSR_REGNUM 33		/* Floating Point Status Register */
 #define FPCR_REGNUM 34		/* Floating Point Control Register */
 #define XFP_REGNUM 38		/* First Extended Float Register */
@@ -502,18 +503,18 @@ extern CORE_ADDR frame_locals_address ();
    nice information for GDB to have, but it is not strictly manditory if we
    can live without the ability to look at values within (or backup to)
    previous frames.
-*/
+ */
 
 struct frame_saved_regs;
 struct frame_info;
 
-void frame_find_saved_regs PARAMS((struct frame_info *fi,
-				   struct frame_saved_regs *fsr));
+void frame_find_saved_regs PARAMS ((struct frame_info * fi,
+				    struct frame_saved_regs * fsr));
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
         frame_find_saved_regs (frame_info, &frame_saved_regs)
-
 
+
 #define POP_FRAME pop_frame ()
 extern void pop_frame ();
 
@@ -521,7 +522,7 @@ extern void pop_frame ();
 
 #define CALL_DUMMY_LOCATION AFTER_TEXT_END
 
-extern void m88k_push_dummy_frame();
+extern void m88k_push_dummy_frame ();
 #define PUSH_DUMMY_FRAME	m88k_push_dummy_frame()
 
 #define CALL_DUMMY { 				\
@@ -597,11 +598,11 @@ extern void m88k_push_dummy_frame();
 /* According to the MC88100 RISC Microprocessor User's Manual, section
    6.4.3.1.2:
 
-   	... can be made to return to a particular instruction by placing a
-	valid instruction address in the SNIP and the next sequential
-	instruction address in the SFIP (with V bits set and E bits clear).
-	The rte resumes execution at the instruction pointed to by the 
-	SNIP, then the SFIP.
+   ... can be made to return to a particular instruction by placing a
+   valid instruction address in the SNIP and the next sequential
+   instruction address in the SFIP (with V bits set and E bits clear).
+   The rte resumes execution at the instruction pointed to by the 
+   SNIP, then the SFIP.
 
    The E bit is the least significant bit (bit 0).  The V (valid) bit is
    bit 1.  This is why we logical or 2 into the values we are writing
@@ -610,8 +611,8 @@ extern void m88k_push_dummy_frame();
    (presumably) give it a totally bogus value.
 
    -- Kevin Buettner
-*/
- 
+ */
+
 #define TARGET_WRITE_PC(val, pid) { \
   write_register_pid(SXIP_REGNUM, (long) val, pid); \
   write_register_pid(SNIP_REGNUM, (long) val | 2, pid); \

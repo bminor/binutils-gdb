@@ -1,21 +1,22 @@
 /* Functions for manipulating expressions designed to be executed on the agent
    Copyright 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Despite what the above comment says about this file being part of
    GDB, we would like to keep these functions free of GDB
@@ -27,13 +28,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "value.h"
 
-static void grow_expr PARAMS ((struct agent_expr *x, int n));
+static void grow_expr PARAMS ((struct agent_expr * x, int n));
 
-static void append_const PARAMS ((struct agent_expr *x, LONGEST val, int n));
+static void append_const PARAMS ((struct agent_expr * x, LONGEST val, int n));
 
-static LONGEST read_const PARAMS ((struct agent_expr *x, int o, int n));
+static LONGEST read_const PARAMS ((struct agent_expr * x, int o, int n));
 
-static void generic_ext PARAMS ((struct agent_expr *x, enum agent_op op, int n));
+static void generic_ext PARAMS ((struct agent_expr * x, enum agent_op op, int n));
 
 /* Functions for building expressions.  */
 
@@ -43,10 +44,10 @@ new_agent_expr (scope)
      CORE_ADDR scope;
 {
   struct agent_expr *x = xmalloc (sizeof (*x));
-  x->len  = 0;
+  x->len = 0;
   x->size = 1;			/* Change this to a larger value once
 				   reallocation code is tested.  */
-  x->buf   = xmalloc (x->size);
+  x->buf = xmalloc (x->size);
   x->scope = scope;
 
   return x;
@@ -115,7 +116,7 @@ read_const (x, o, n)
 
   for (i = 0; i < n; i++)
     accum = (accum << 8) | x->buf[o + i];
-  
+
   return accum;
 }
 
@@ -194,7 +195,8 @@ ax_trace_quick (x, n)
    for the target, and return the offset in EXPR of that space, so we
    can backpatch it once we do know the target offset.  Use ax_label
    to do the backpatching.  */
-int ax_goto (x, op)
+int
+ax_goto (x, op)
      struct agent_expr *x;
      enum agent_op op;
 {
@@ -208,7 +210,7 @@ int ax_goto (x, op)
 
 /* Suppose a given call to ax_goto returns some value PATCH.  When you
    know the offset TARGET that goto should jump to, call
-	ax_label (EXPR, PATCH, TARGET)
+   ax_label (EXPR, PATCH, TARGET)
    to patch TARGET into the ax_goto instruction.  */
 void
 ax_label (x, patch, target)
@@ -220,7 +222,7 @@ ax_label (x, patch, target)
      offset; that's our magic sentinel value for unpatched branches.  */
   if (target < 0 || target >= 0xffff)
     error ("GDB bug: ax-general.c (ax_label): label target out of range");
-  
+
   x->buf[patch] = (target >> 8) & 0xff;
   x->buf[patch + 1] = target & 0xff;
 }
@@ -233,7 +235,8 @@ ax_const_l (x, l)
      LONGEST l;
 {
   static enum agent_op ops[]
-    = { aop_const8, aop_const16, aop_const32, aop_const64 };
+  =
+  {aop_const8, aop_const16, aop_const32, aop_const64};
   int size;
   int op;
 
@@ -270,7 +273,8 @@ ax_const_d (x, d)
 
 /* Assemble code to push the value of register number REG on the
    stack.  */
-void ax_reg (x, reg)
+void
+ax_reg (x, reg)
      struct agent_expr *x;
      int reg;
 {
@@ -278,67 +282,68 @@ void ax_reg (x, reg)
   if (reg < 0 || reg > 0xffff)
     error ("GDB bug: ax-general.c (ax_reg): register number out of range");
   grow_expr (x, 3);
-  x->buf[x->len    ] = aop_reg;
+  x->buf[x->len] = aop_reg;
   x->buf[x->len + 1] = (reg >> 8) & 0xff;
-  x->buf[x->len + 2] = (reg     ) & 0xff;
+  x->buf[x->len + 2] = (reg) & 0xff;
   x->len += 3;
 }
-
-
 
+
+
 /* Functions for disassembling agent expressions, and otherwise
    debugging the expression compiler.  */
 
-struct aop_map aop_map[] = {
-  { 0, 0, 0, 0, 0 },
-  { "float", 0, 0, 0, 0 },		   /* 0x01 */
-  { "add", 0, 0, 2, 1 },		   /* 0x02 */
-  { "sub", 0, 0, 2, 1 },		   /* 0x03 */
-  { "mul", 0, 0, 2, 1 },		   /* 0x04 */
-  { "div_signed", 0, 0, 2, 1 },		   /* 0x05 */
-  { "div_unsigned", 0, 0, 2, 1 },	   /* 0x06 */
-  { "rem_signed", 0, 0, 2, 1 },		   /* 0x07 */
-  { "rem_unsigned", 0, 0, 2, 1 },	   /* 0x08 */
-  { "lsh", 0, 0, 2, 1 },		   /* 0x09 */
-  { "rsh_signed", 0, 0, 2, 1 },		   /* 0x0a */
-  { "rsh_unsigned", 0, 0, 2, 1 },	   /* 0x0b */
-  { "trace", 0, 0, 2, 0 },		   /* 0x0c */
-  { "trace_quick", 1, 0, 1, 1 },	   /* 0x0d */
-  { "log_not", 0, 0, 1, 1 },		   /* 0x0e */
-  { "bit_and", 0, 0, 2, 1 },		   /* 0x0f */
-  { "bit_or", 0, 0, 2, 1 },		   /* 0x10 */
-  { "bit_xor", 0, 0, 2, 1 },		   /* 0x11 */
-  { "bit_not", 0, 0, 1, 1 },		   /* 0x12 */
-  { "equal", 0, 0, 2, 1 },		   /* 0x13 */
-  { "less_signed", 0, 0, 2, 1 },	   /* 0x14 */
-  { "less_unsigned", 0, 0, 2, 1 },	   /* 0x15 */
-  { "ext", 1, 0, 1, 1 },		   /* 0x16 */
-  { "ref8", 0, 8, 1, 1 },		   /* 0x17 */
-  { "ref16", 0, 16, 1, 1 },		   /* 0x18 */
-  { "ref32", 0, 32, 1, 1 },		   /* 0x19 */
-  { "ref64", 0, 64, 1, 1 },		   /* 0x1a */
-  { "ref_float", 0, 0, 1, 1 },		   /* 0x1b */
-  { "ref_double", 0, 0, 1, 1 },		   /* 0x1c */
-  { "ref_long_double", 0, 0, 1, 1 },	   /* 0x1d */
-  { "l_to_d", 0, 0, 1, 1 },		   /* 0x1e */
-  { "d_to_l", 0, 0, 1, 1 },		   /* 0x1f */
-  { "if_goto", 2, 0, 1, 0 },		   /* 0x20 */
-  { "goto", 2, 0, 0, 0 },		   /* 0x21 */
-  { "const8", 1, 8, 0, 1 },		   /* 0x22 */
-  { "const16", 2, 16, 0, 1 },		   /* 0x23 */
-  { "const32", 4, 32, 0, 1 },		   /* 0x24 */
-  { "const64", 8, 64, 0, 1 },		   /* 0x25 */
-  { "reg", 2, 0, 0, 1 },		   /* 0x26 */
-  { "end", 0, 0, 0, 0 },		   /* 0x27 */
-  { "dup", 0, 0, 1, 2 },		   /* 0x28 */
-  { "pop", 0, 0, 1, 0 },		   /* 0x29 */
-  { "zero_ext", 1, 0, 1, 1 },		   /* 0x2a */
-  { "swap", 0, 0, 2, 2 },		   /* 0x2b */
-  { 0, 0, 0, 0, 0 },			   /* 0x2c */
-  { 0, 0, 0, 0, 0 },			   /* 0x2d */
-  { 0, 0, 0, 0, 0 },			   /* 0x2e */
-  { 0, 0, 0, 0, 0 },			   /* 0x2f */
-  { "trace16", 2, 0, 1, 1 },		   /* 0x30 */
+struct aop_map aop_map[] =
+{
+  {0, 0, 0, 0, 0},
+  {"float", 0, 0, 0, 0},	/* 0x01 */
+  {"add", 0, 0, 2, 1},		/* 0x02 */
+  {"sub", 0, 0, 2, 1},		/* 0x03 */
+  {"mul", 0, 0, 2, 1},		/* 0x04 */
+  {"div_signed", 0, 0, 2, 1},	/* 0x05 */
+  {"div_unsigned", 0, 0, 2, 1},	/* 0x06 */
+  {"rem_signed", 0, 0, 2, 1},	/* 0x07 */
+  {"rem_unsigned", 0, 0, 2, 1},	/* 0x08 */
+  {"lsh", 0, 0, 2, 1},		/* 0x09 */
+  {"rsh_signed", 0, 0, 2, 1},	/* 0x0a */
+  {"rsh_unsigned", 0, 0, 2, 1},	/* 0x0b */
+  {"trace", 0, 0, 2, 0},	/* 0x0c */
+  {"trace_quick", 1, 0, 1, 1},	/* 0x0d */
+  {"log_not", 0, 0, 1, 1},	/* 0x0e */
+  {"bit_and", 0, 0, 2, 1},	/* 0x0f */
+  {"bit_or", 0, 0, 2, 1},	/* 0x10 */
+  {"bit_xor", 0, 0, 2, 1},	/* 0x11 */
+  {"bit_not", 0, 0, 1, 1},	/* 0x12 */
+  {"equal", 0, 0, 2, 1},	/* 0x13 */
+  {"less_signed", 0, 0, 2, 1},	/* 0x14 */
+  {"less_unsigned", 0, 0, 2, 1},	/* 0x15 */
+  {"ext", 1, 0, 1, 1},		/* 0x16 */
+  {"ref8", 0, 8, 1, 1},		/* 0x17 */
+  {"ref16", 0, 16, 1, 1},	/* 0x18 */
+  {"ref32", 0, 32, 1, 1},	/* 0x19 */
+  {"ref64", 0, 64, 1, 1},	/* 0x1a */
+  {"ref_float", 0, 0, 1, 1},	/* 0x1b */
+  {"ref_double", 0, 0, 1, 1},	/* 0x1c */
+  {"ref_long_double", 0, 0, 1, 1},	/* 0x1d */
+  {"l_to_d", 0, 0, 1, 1},	/* 0x1e */
+  {"d_to_l", 0, 0, 1, 1},	/* 0x1f */
+  {"if_goto", 2, 0, 1, 0},	/* 0x20 */
+  {"goto", 2, 0, 0, 0},		/* 0x21 */
+  {"const8", 1, 8, 0, 1},	/* 0x22 */
+  {"const16", 2, 16, 0, 1},	/* 0x23 */
+  {"const32", 4, 32, 0, 1},	/* 0x24 */
+  {"const64", 8, 64, 0, 1},	/* 0x25 */
+  {"reg", 2, 0, 0, 1},		/* 0x26 */
+  {"end", 0, 0, 0, 0},		/* 0x27 */
+  {"dup", 0, 0, 1, 2},		/* 0x28 */
+  {"pop", 0, 0, 1, 0},		/* 0x29 */
+  {"zero_ext", 1, 0, 1, 1},	/* 0x2a */
+  {"swap", 0, 0, 2, 2},		/* 0x2b */
+  {0, 0, 0, 0, 0},		/* 0x2c */
+  {0, 0, 0, 0, 0},		/* 0x2d */
+  {0, 0, 0, 0, 0},		/* 0x2e */
+  {0, 0, 0, 0, 0},		/* 0x2f */
+  {"trace16", 2, 0, 1, 1},	/* 0x30 */
 };
 
 
@@ -356,13 +361,13 @@ ax_print (f, x)
   if ((sizeof (aop_map) / sizeof (aop_map[0]))
       != aop_last)
     error ("GDB bug: ax-general.c (ax_print): opcode map out of sync");
-  
-  for (i = 0; i < x->len; )
+
+  for (i = 0; i < x->len;)
     {
       enum agent_op op = x->buf[i];
 
       if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
-	  || ! aop_map[op].name)
+	  || !aop_map[op].name)
 	{
 	  fprintf_filtered (f, "%3d  <bad opcode %02x>\n", i, op);
 	  i++;
@@ -379,7 +384,7 @@ ax_print (f, x)
       if (aop_map[op].op_size > 0)
 	{
 	  fputs_filtered (" ", f);
-	  
+
 	  print_longest (f, 'd', 0,
 			 read_const (x, i + 1, aop_map[op].op_size));
 	}
@@ -440,13 +445,13 @@ ax_reqs (ax, reqs)
 
       op = &aop_map[ax->buf[i]];
 
-      if (! op->name)
+      if (!op->name)
 	{
 	  reqs->flaw = agent_flaw_bad_instruction;
 	  free (reg_mask);
 	  return;
 	}
-	
+
       if (i + 1 + op->op_size > ax->len)
 	{
 	  reqs->flaw = agent_flaw_incomplete_instruction;
@@ -477,8 +482,8 @@ ax_reqs (ax, reqs)
 	reqs->max_data_size = op->data_size;
 
       /* For jump instructions, check that the target is a valid
-	 offset.  If it is, record the fact that that location is a
-	 jump target, and record the height we expect there.  */
+         offset.  If it is, record the fact that that location is a
+         jump target, and record the height we expect there.  */
       if (aop_goto == op - aop_map
 	  || aop_if_goto == op - aop_map)
 	{
@@ -505,13 +510,13 @@ ax_reqs (ax, reqs)
 	      heights[target] = height;
 	    }
 	}
-      
+
       /* For unconditional jumps with a successor, check that the
          successor is a target, and pick up its stack height.  */
       if (aop_goto == op - aop_map
 	  && i + 3 < ax->len)
 	{
-	  if (! targets[i + 3])
+	  if (!targets[i + 3])
 	    {
 	      reqs->flaw = agent_flaw_hole;
 	      free (reg_mask);
@@ -531,9 +536,9 @@ ax_reqs (ax, reqs)
 	  if (byte >= reg_mask_len)
 	    {
 	      /* It's not appropriate to double here.  This isn't a
-                 string buffer.  */
+	         string buffer.  */
 	      int new_len = byte + 1;
-	      reg_mask = xrealloc (reg_mask, 
+	      reg_mask = xrealloc (reg_mask,
 				   new_len * sizeof (reg_mask[0]));
 	      memset (reg_mask + reg_mask_len, 0,
 		      (new_len - reg_mask_len) * sizeof (reg_mask[0]));

@@ -65,17 +65,17 @@
 /* OBSOLETE       op = read_memory_integer (pc, 2); */
 /* OBSOLETE       ix = (op >> 3) & 7; */
 /* OBSOLETE       if (ix != 6) */
-/* OBSOLETE 	break; */
+/* OBSOLETE     break; */
 /* OBSOLETE       if ((op & 0xfcc0) == 0x3000) */
-/* OBSOLETE 	pc += 4; */
+/* OBSOLETE     pc += 4; */
 /* OBSOLETE       else if ((op & 0xfcc0) == 0x3040) */
-/* OBSOLETE 	pc += 6; */
+/* OBSOLETE     pc += 6; */
 /* OBSOLETE       else if ((op & 0xfcc0) == 0x2800) */
-/* OBSOLETE 	pc += 4; */
+/* OBSOLETE     pc += 4; */
 /* OBSOLETE       else if ((op & 0xfcc0) == 0x2840) */
-/* OBSOLETE 	pc += 6; */
+/* OBSOLETE     pc += 6; */
 /* OBSOLETE       else */
-/* OBSOLETE 	break; */
+/* OBSOLETE     break; */
 /* OBSOLETE     } */
 /* OBSOLETE   return pc; */
 /* OBSOLETE } */
@@ -88,7 +88,7 @@
 /* OBSOLETE   extern CORE_ADDR text_start, text_end; */
 /* OBSOLETE   CORE_ADDR call_addr = SAVED_PC_AFTER_CALL (FI); */
 /* OBSOLETE   frameless = (call_addr >= text_start && call_addr < text_end */
-/* OBSOLETE 	       && read_memory_integer (call_addr - 6, 1) == 0x22); */
+/* OBSOLETE            && read_memory_integer (call_addr - 6, 1) == 0x22); */
 /* OBSOLETE   return frameless; */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -136,46 +136,46 @@
 /* OBSOLETE       make_cleanup (free, filename); */
 /* OBSOLETE        */
 /* OBSOLETE       execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0, */
-/* OBSOLETE 			&execfile); */
+/* OBSOLETE                     &execfile); */
 /* OBSOLETE       if (execchan < 0) */
-/* OBSOLETE 	perror_with_name (filename); */
+/* OBSOLETE     perror_with_name (filename); */
 /* OBSOLETE  */
 /* OBSOLETE       if (myread (execchan, &filehdr, sizeof filehdr) < 0) */
-/* OBSOLETE 	perror_with_name (filename); */
+/* OBSOLETE     perror_with_name (filename); */
 /* OBSOLETE  */
 /* OBSOLETE       if (! IS_SOFF_MAGIC (filehdr.h_magic)) */
-/* OBSOLETE 	error ("%s: not an executable file.", filename); */
+/* OBSOLETE     error ("%s: not an executable file.", filename); */
 /* OBSOLETE  */
 /* OBSOLETE       if (myread (execchan, &opthdr, filehdr.h_opthdr) <= 0) */
-/* OBSOLETE 	perror_with_name (filename); */
+/* OBSOLETE     perror_with_name (filename); */
 /* OBSOLETE  */
 /* OBSOLETE       /* Read through the section headers. */
-/* OBSOLETE 	 For text, data, etc, record an entry in the exec file map. */
-/* OBSOLETE 	 Record text_start and text_end.  *x/ */
+/* OBSOLETE      For text, data, etc, record an entry in the exec file map. */
+/* OBSOLETE      Record text_start and text_end.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE       lseek (execchan, (long) filehdr.h_scnptr, 0); */
 /* OBSOLETE  */
 /* OBSOLETE       for (n = 0; n < filehdr.h_nscns; n++) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  if (myread (execchan, &scnhdr, sizeof scnhdr) < 0) */
-/* OBSOLETE 	    perror_with_name (filename); */
+/* OBSOLETE     { */
+/* OBSOLETE       if (myread (execchan, &scnhdr, sizeof scnhdr) < 0) */
+/* OBSOLETE         perror_with_name (filename); */
 /* OBSOLETE  */
-/* OBSOLETE 	  if ((scnhdr.s_flags & S_TYPMASK) >= S_TEXT */
-/* OBSOLETE 	      && (scnhdr.s_flags & S_TYPMASK) <= S_COMON) */
-/* OBSOLETE 	    { */
-/* OBSOLETE 	      exec_map[n_exec].mem_addr = scnhdr.s_vaddr; */
-/* OBSOLETE 	      exec_map[n_exec].mem_end = scnhdr.s_vaddr + scnhdr.s_size; */
-/* OBSOLETE 	      exec_map[n_exec].file_addr = scnhdr.s_scnptr; */
-/* OBSOLETE 	      exec_map[n_exec].type = scnhdr.s_flags & S_TYPMASK; */
-/* OBSOLETE 	      n_exec++; */
+/* OBSOLETE       if ((scnhdr.s_flags & S_TYPMASK) >= S_TEXT */
+/* OBSOLETE           && (scnhdr.s_flags & S_TYPMASK) <= S_COMON) */
+/* OBSOLETE         { */
+/* OBSOLETE           exec_map[n_exec].mem_addr = scnhdr.s_vaddr; */
+/* OBSOLETE           exec_map[n_exec].mem_end = scnhdr.s_vaddr + scnhdr.s_size; */
+/* OBSOLETE           exec_map[n_exec].file_addr = scnhdr.s_scnptr; */
+/* OBSOLETE           exec_map[n_exec].type = scnhdr.s_flags & S_TYPMASK; */
+/* OBSOLETE           n_exec++; */
 /* OBSOLETE  */
-/* OBSOLETE 	      if ((scnhdr.s_flags & S_TYPMASK) == S_TEXT) */
-/* OBSOLETE 		{ */
-/* OBSOLETE 		  text_start = scnhdr.s_vaddr; */
-/* OBSOLETE 		  text_end =  scnhdr.s_vaddr + scnhdr.s_size; */
-/* OBSOLETE 		} */
-/* OBSOLETE 	    } */
-/* OBSOLETE 	} */
+/* OBSOLETE           if ((scnhdr.s_flags & S_TYPMASK) == S_TEXT) */
+/* OBSOLETE             { */
+/* OBSOLETE               text_start = scnhdr.s_vaddr; */
+/* OBSOLETE               text_end =  scnhdr.s_vaddr + scnhdr.s_size; */
+/* OBSOLETE             } */
+/* OBSOLETE         } */
+/* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE       fstat (execchan, &st_exec); */
 /* OBSOLETE       exec_mtime = st_exec.st_mtime; */
@@ -214,79 +214,79 @@
 /* OBSOLETE       xferchan = 0; */
 /* OBSOLETE  */
 /* OBSOLETE       /* Determine which file the next bunch of addresses reside in, */
-/* OBSOLETE 	 and where in the file.  Set the file's read/write pointer */
-/* OBSOLETE 	 to point at the proper place for the desired address */
-/* OBSOLETE 	 and set xferfile and xferchan for the correct file. */
-/* OBSOLETE 	 If desired address is nonexistent, leave them zero. */
-/* OBSOLETE 	 i is set to the number of bytes that can be handled */
-/* OBSOLETE 	 along with the next address.  *x/ */
+/* OBSOLETE      and where in the file.  Set the file's read/write pointer */
+/* OBSOLETE      to point at the proper place for the desired address */
+/* OBSOLETE      and set xferfile and xferchan for the correct file. */
+/* OBSOLETE      If desired address is nonexistent, leave them zero. */
+/* OBSOLETE      i is set to the number of bytes that can be handled */
+/* OBSOLETE      along with the next address.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE       i = len; */
 /* OBSOLETE  */
 /* OBSOLETE       for (n = 0; n < n_core; n++) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  if (memaddr >= core_map[n].mem_addr && memaddr < core_map[n].mem_end */
-/* OBSOLETE 	      && (core_map[n].thread == -1 */
-/* OBSOLETE 		  || core_map[n].thread == inferior_thread)) */
-/* OBSOLETE 	    { */
-/* OBSOLETE 	      i = min (len, core_map[n].mem_end - memaddr); */
-/* OBSOLETE 	      fileptr = core_map[n].file_addr + memaddr - core_map[n].mem_addr; */
-/* OBSOLETE 	      if (core_map[n].file_addr) */
-/* OBSOLETE 		{ */
-/* OBSOLETE 		  xferfile = &corefile; */
-/* OBSOLETE 		  xferchan = corechan; */
-/* OBSOLETE 		} */
-/* OBSOLETE 	      break; */
-/* OBSOLETE 	    } */
-/* OBSOLETE 	  else if (core_map[n].mem_addr >= memaddr */
-/* OBSOLETE 		   && core_map[n].mem_addr < memaddr + i) */
-/* OBSOLETE  	    i = core_map[n].mem_addr - memaddr; */
+/* OBSOLETE     { */
+/* OBSOLETE       if (memaddr >= core_map[n].mem_addr && memaddr < core_map[n].mem_end */
+/* OBSOLETE           && (core_map[n].thread == -1 */
+/* OBSOLETE               || core_map[n].thread == inferior_thread)) */
+/* OBSOLETE         { */
+/* OBSOLETE           i = min (len, core_map[n].mem_end - memaddr); */
+/* OBSOLETE           fileptr = core_map[n].file_addr + memaddr - core_map[n].mem_addr; */
+/* OBSOLETE           if (core_map[n].file_addr) */
+/* OBSOLETE             { */
+/* OBSOLETE               xferfile = &corefile; */
+/* OBSOLETE               xferchan = corechan; */
+/* OBSOLETE             } */
+/* OBSOLETE           break; */
+/* OBSOLETE         } */
+/* OBSOLETE       else if (core_map[n].mem_addr >= memaddr */
+/* OBSOLETE                && core_map[n].mem_addr < memaddr + i) */
+/* OBSOLETE         i = core_map[n].mem_addr - memaddr; */
 /* OBSOLETE         } */
 /* OBSOLETE  */
 /* OBSOLETE       if (!xferfile)  */
-/* OBSOLETE 	for (n = 0; n < n_exec; n++) */
-/* OBSOLETE 	  { */
-/* OBSOLETE 	    if (memaddr >= exec_map[n].mem_addr */
-/* OBSOLETE 		&& memaddr < exec_map[n].mem_end) */
-/* OBSOLETE 	      { */
-/* OBSOLETE 		i = min (len, exec_map[n].mem_end - memaddr); */
-/* OBSOLETE 		fileptr = exec_map[n].file_addr + memaddr */
-/* OBSOLETE 		  - exec_map[n].mem_addr; */
-/* OBSOLETE 		if (exec_map[n].file_addr) */
-/* OBSOLETE 		  { */
-/* OBSOLETE 		    xferfile = &execfile; */
-/* OBSOLETE 		    xferchan = execchan; */
-/* OBSOLETE 		  } */
-/* OBSOLETE 		break; */
-/* OBSOLETE 	      } */
-/* OBSOLETE 	    else if (exec_map[n].mem_addr >= memaddr */
-/* OBSOLETE 		     && exec_map[n].mem_addr < memaddr + i) */
-/* OBSOLETE 	      i = exec_map[n].mem_addr - memaddr; */
-/* OBSOLETE 	  } */
+/* OBSOLETE     for (n = 0; n < n_exec; n++) */
+/* OBSOLETE       { */
+/* OBSOLETE         if (memaddr >= exec_map[n].mem_addr */
+/* OBSOLETE             && memaddr < exec_map[n].mem_end) */
+/* OBSOLETE           { */
+/* OBSOLETE             i = min (len, exec_map[n].mem_end - memaddr); */
+/* OBSOLETE             fileptr = exec_map[n].file_addr + memaddr */
+/* OBSOLETE               - exec_map[n].mem_addr; */
+/* OBSOLETE             if (exec_map[n].file_addr) */
+/* OBSOLETE               { */
+/* OBSOLETE                 xferfile = &execfile; */
+/* OBSOLETE                 xferchan = execchan; */
+/* OBSOLETE               } */
+/* OBSOLETE             break; */
+/* OBSOLETE           } */
+/* OBSOLETE         else if (exec_map[n].mem_addr >= memaddr */
+/* OBSOLETE                  && exec_map[n].mem_addr < memaddr + i) */
+/* OBSOLETE           i = exec_map[n].mem_addr - memaddr; */
+/* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE       /* Now we know which file to use. */
-/* OBSOLETE 	 Set up its pointer and transfer the data.  *x/ */
+/* OBSOLETE      Set up its pointer and transfer the data.  *x/ */
 /* OBSOLETE       if (xferfile) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  if (*xferfile == 0) */
-/* OBSOLETE 	    if (xferfile == &execfile) */
-/* OBSOLETE 	      error ("No program file to examine."); */
-/* OBSOLETE 	    else */
-/* OBSOLETE 	      error ("No core dump file or running program to examine."); */
-/* OBSOLETE 	  val = lseek (xferchan, fileptr, 0); */
-/* OBSOLETE 	  if (val < 0) */
-/* OBSOLETE 	    perror_with_name (*xferfile); */
-/* OBSOLETE 	  val = myread (xferchan, myaddr, i); */
-/* OBSOLETE 	  if (val < 0) */
-/* OBSOLETE 	    perror_with_name (*xferfile); */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       if (*xferfile == 0) */
+/* OBSOLETE         if (xferfile == &execfile) */
+/* OBSOLETE           error ("No program file to examine."); */
+/* OBSOLETE         else */
+/* OBSOLETE           error ("No core dump file or running program to examine."); */
+/* OBSOLETE       val = lseek (xferchan, fileptr, 0); */
+/* OBSOLETE       if (val < 0) */
+/* OBSOLETE         perror_with_name (*xferfile); */
+/* OBSOLETE       val = myread (xferchan, myaddr, i); */
+/* OBSOLETE       if (val < 0) */
+/* OBSOLETE         perror_with_name (*xferfile); */
+/* OBSOLETE     } */
 /* OBSOLETE       /* If this address is for nonexistent memory, */
-/* OBSOLETE 	 read zeros if reading, or do nothing if writing.  *x/ */
+/* OBSOLETE      read zeros if reading, or do nothing if writing.  *x/ */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  memset (myaddr, '\0', i); */
-/* OBSOLETE 	  returnval = EIO; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       memset (myaddr, '\0', i); */
+/* OBSOLETE       returnval = EIO; */
+/* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE       memaddr += i; */
 /* OBSOLETE       myaddr += i; */
@@ -328,15 +328,15 @@
 /* OBSOLETE     { */
 /* OBSOLETE       struct pmap *p = &ptrs[n]; */
 /* OBSOLETE       if (n > 0) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  if (p->mem_addr < ptrs[n-1].mem_end) */
-/* OBSOLETE 	    p->mem_addr = ptrs[n-1].mem_end; */
-/* OBSOLETE 	  if (p->mem_addr >= p->mem_end) */
-/* OBSOLETE 	    continue; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       if (p->mem_addr < ptrs[n-1].mem_end) */
+/* OBSOLETE         p->mem_addr = ptrs[n-1].mem_end; */
+/* OBSOLETE       if (p->mem_addr >= p->mem_end) */
+/* OBSOLETE         continue; */
+/* OBSOLETE     } */
 /* OBSOLETE       printf_filtered ("%08x .. %08x  %-6s  %s\n", */
-/* OBSOLETE 		       p->mem_addr, p->mem_end, idstr[p->type], */
-/* OBSOLETE 		       p->which ? execfile : corefile); */
+/* OBSOLETE                    p->mem_addr, p->mem_end, idstr[p->type], */
+/* OBSOLETE                    p->which ? execfile : corefile); */
 /* OBSOLETE     } */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -369,17 +369,17 @@
 /* OBSOLETE      char *name; */
 /* OBSOLETE { */
 /* OBSOLETE     if ((name[0] == 'c' || name[0] == 'C') */
-/* OBSOLETE 	&& name[1] >= '0' && name[1] <= '9' */
-/* OBSOLETE 	&& (name[2] == '\0' */
-/* OBSOLETE 	    || (name[2] >= '0' && name[2] <= '9' */
-/* OBSOLETE 		&& name[3] == '\0' && name[1] != '0')) */
-/* OBSOLETE 	&& atoi (&name[1]) < 64) return 1; */
+/* OBSOLETE     && name[1] >= '0' && name[1] <= '9' */
+/* OBSOLETE     && (name[2] == '\0' */
+/* OBSOLETE         || (name[2] >= '0' && name[2] <= '9' */
+/* OBSOLETE             && name[3] == '\0' && name[1] != '0')) */
+/* OBSOLETE     && atoi (&name[1]) < 64) return 1; */
 /* OBSOLETE  */
 /* OBSOLETE   if ((name[0] == 'v' || name[0] == 'V') */
 /* OBSOLETE       && (((name[1] & -8) == '0' && name[2] == '\0') */
-/* OBSOLETE 	  || STREQ (name, "vl") */
-/* OBSOLETE 	  || STREQ (name, "vs")  */
-/* OBSOLETE 	  || STREQ (name, "vm"))) */
+/* OBSOLETE       || STREQ (name, "vl") */
+/* OBSOLETE       || STREQ (name, "vs")  */
+/* OBSOLETE       || STREQ (name, "vm"))) */
 /* OBSOLETE     return 1; */
 /* OBSOLETE   else return 0; */
 /* OBSOLETE } */
@@ -400,12 +400,12 @@
 /* OBSOLETE   if (STREQ (name, "vl")) */
 /* OBSOLETE     { */
 /* OBSOLETE       val = value_from_longest (builtin_type_int, */
-/* OBSOLETE 			     (LONGEST) *read_vector_register_1 (VL_REGNUM)); */
+/* OBSOLETE                          (LONGEST) *read_vector_register_1 (VL_REGNUM)); */
 /* OBSOLETE     } */
 /* OBSOLETE   else if (STREQ (name, "vs")) */
 /* OBSOLETE     { */
 /* OBSOLETE       val = value_from_longest (builtin_type_int, */
-/* OBSOLETE 			     (LONGEST) *read_vector_register_1 (VS_REGNUM)); */
+/* OBSOLETE                          (LONGEST) *read_vector_register_1 (VS_REGNUM)); */
 /* OBSOLETE     } */
 /* OBSOLETE   else if (STREQ (name, "vm")) */
 /* OBSOLETE     { */
@@ -413,34 +413,34 @@
 /* OBSOLETE       long i, *p; */
 /* OBSOLETE       memcpy (vm, read_vector_register_1 (VM_REGNUM), sizeof vm); */
 /* OBSOLETE       range_type = */
-/* OBSOLETE 	create_range_type ((struct type *) NULL, builtin_type_int, 0, len - 1); */
+/* OBSOLETE     create_range_type ((struct type *) NULL, builtin_type_int, 0, len - 1); */
 /* OBSOLETE       type = */
-/* OBSOLETE 	create_array_type ((struct type *) NULL, builtin_type_int, range_type); */
+/* OBSOLETE     create_array_type ((struct type *) NULL, builtin_type_int, range_type); */
 /* OBSOLETE       val = allocate_value (type); */
 /* OBSOLETE       p = (long *) VALUE_CONTENTS (val); */
 /* OBSOLETE       for (i = 0; i < len; i++)  */
-/* OBSOLETE 	*p++ = !! (vm[3 - (i >> 5)] & (1 << (i & 037))); */
+/* OBSOLETE     *p++ = !! (vm[3 - (i >> 5)] & (1 << (i & 037))); */
 /* OBSOLETE     } */
 /* OBSOLETE   else if (name[0] == 'V') */
 /* OBSOLETE     { */
 /* OBSOLETE       range_type = */
-/* OBSOLETE 	create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1); */
+/* OBSOLETE     create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1); */
 /* OBSOLETE       type = */
-/* OBSOLETE 	create_array_type ((struct type *) NULL, builtin_type_long_long, */
-/* OBSOLETE 			   range_type); */
+/* OBSOLETE     create_array_type ((struct type *) NULL, builtin_type_long_long, */
+/* OBSOLETE                        range_type); */
 /* OBSOLETE       val = allocate_value (type); */
 /* OBSOLETE       memcpy (VALUE_CONTENTS (val), */
-/* OBSOLETE 	     read_vector_register_1 (name[1] - '0'), */
-/* OBSOLETE 	     TYPE_LENGTH (type)); */
+/* OBSOLETE          read_vector_register_1 (name[1] - '0'), */
+/* OBSOLETE          TYPE_LENGTH (type)); */
 /* OBSOLETE     } */
 /* OBSOLETE   else if (name[0] == 'v') */
 /* OBSOLETE     { */
 /* OBSOLETE       long *p1, *p2; */
 /* OBSOLETE       range_type = */
-/* OBSOLETE 	create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1); */
+/* OBSOLETE     create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1); */
 /* OBSOLETE       type = */
-/* OBSOLETE 	create_array_type ((struct type *) NULL, builtin_type_long, */
-/* OBSOLETE 			   range_type); */
+/* OBSOLETE     create_array_type ((struct type *) NULL, builtin_type_long, */
+/* OBSOLETE                        range_type); */
 /* OBSOLETE       val = allocate_value (type); */
 /* OBSOLETE       p1 = read_vector_register_1 (name[1] - '0'); */
 /* OBSOLETE       p2 = (long *) VALUE_CONTENTS (val); */
@@ -449,10 +449,10 @@
 /* OBSOLETE  */
 /* OBSOLETE   else if (name[0] == 'c') */
 /* OBSOLETE     val = value_from_longest (builtin_type_int, */
-/* OBSOLETE 			   read_comm_register (atoi (&name[1]))); */
+/* OBSOLETE                        read_comm_register (atoi (&name[1]))); */
 /* OBSOLETE   else if (name[0] == 'C') */
 /* OBSOLETE     val = value_from_longest (builtin_type_long_long, */
-/* OBSOLETE 			   read_comm_register (atoi (&name[1]))); */
+/* OBSOLETE                        read_comm_register (atoi (&name[1]))); */
 /* OBSOLETE  */
 /* OBSOLETE   VALUE_LVAL (val) = lval_internalvar; */
 /* OBSOLETE   VALUE_INTERNALVAR (val) = var; */
@@ -501,12 +501,12 @@
 /* OBSOLETE     { */
 /* OBSOLETE     case 0: */
 /* OBSOLETE       if ((lv == val || (unsigned) lv == val) */
-/* OBSOLETE 	  && ((lv & 0xf0000000) == 0x80000000 */
-/* OBSOLETE 	      || ((lv & 0xf0000000) == 0xf0000000 && lv < STACK_END_ADDR))) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  print_longest (stream, "x", 0, val); */
-/* OBSOLETE 	  return; */
-/* OBSOLETE 	} */
+/* OBSOLETE       && ((lv & 0xf0000000) == 0x80000000 */
+/* OBSOLETE           || ((lv & 0xf0000000) == 0xf0000000 && lv < STACK_END_ADDR))) */
+/* OBSOLETE     { */
+/* OBSOLETE       print_longest (stream, "x", 0, val); */
+/* OBSOLETE       return; */
+/* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE     case 10: */
 /* OBSOLETE       print_longest (stream, TYPE_UNSIGNED (type) ? "u" : "d", 0, val); */
@@ -538,7 +538,7 @@
 /* OBSOLETE     { */
 /* OBSOLETE       new_radix = atoi (arg); */
 /* OBSOLETE       if (new_radix != 10 && new_radix != 16 && new_radix != 8)  */
-/* OBSOLETE 	error ("base must be 8, 10 or 16, or null"); */
+/* OBSOLETE     error ("base must be 8, 10 or 16, or null"); */
 /* OBSOLETE       else output_radix = new_radix; */
 /* OBSOLETE     } */
 /* OBSOLETE } */
@@ -604,29 +604,29 @@
 /* OBSOLETE  */
 /* OBSOLETE     if (!arg) */
 /* OBSOLETE       error_no_arg ("newname oldname"); */
-/* OBSOLETE 	 */
+/* OBSOLETE      */
 /* OBSOLETE     new = lookup_cmd (&arg, cmdlist, "", -1); */
 /* OBSOLETE     if (new && !strncmp (newname, new->name, strlen (new->name))) */
 /* OBSOLETE       { */
-/* OBSOLETE 	newname = new->name; */
-/* OBSOLETE 	if (!(*arg == '-'  */
-/* OBSOLETE 	      || (*arg >= 'a' && *arg <= 'z') */
-/* OBSOLETE 	      || (*arg >= 'A' && *arg <= 'Z') */
-/* OBSOLETE 	      || (*arg >= '0' && *arg <= '9'))) */
-/* OBSOLETE 	  error (aliaserr); */
+/* OBSOLETE     newname = new->name; */
+/* OBSOLETE     if (!(*arg == '-'  */
+/* OBSOLETE           || (*arg >= 'a' && *arg <= 'z') */
+/* OBSOLETE           || (*arg >= 'A' && *arg <= 'Z') */
+/* OBSOLETE           || (*arg >= '0' && *arg <= '9'))) */
+/* OBSOLETE       error (aliaserr); */
 /* OBSOLETE       } */
 /* OBSOLETE     else */
 /* OBSOLETE       { */
-/* OBSOLETE 	arg = newname; */
-/* OBSOLETE 	while (*arg == '-'  */
-/* OBSOLETE 	       || (*arg >= 'a' && *arg <= 'z') */
-/* OBSOLETE 	       || (*arg >= 'A' && *arg <= 'Z') */
-/* OBSOLETE 	       || (*arg >= '0' && *arg <= '9')) */
-/* OBSOLETE 	  arg++; */
-/* OBSOLETE 	if (*arg != ' ' && *arg != '\t') */
-/* OBSOLETE 	  error (aliaserr); */
-/* OBSOLETE 	*arg = '\0'; */
-/* OBSOLETE 	arg++; */
+/* OBSOLETE     arg = newname; */
+/* OBSOLETE     while (*arg == '-'  */
+/* OBSOLETE            || (*arg >= 'a' && *arg <= 'z') */
+/* OBSOLETE            || (*arg >= 'A' && *arg <= 'Z') */
+/* OBSOLETE            || (*arg >= '0' && *arg <= '9')) */
+/* OBSOLETE       arg++; */
+/* OBSOLETE     if (*arg != ' ' && *arg != '\t') */
+/* OBSOLETE       error (aliaserr); */
+/* OBSOLETE     *arg = '\0'; */
+/* OBSOLETE     arg++; */
 /* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE     old = lookup_cmd (&arg, cmdlist, "", 0); */
@@ -636,13 +636,13 @@
 /* OBSOLETE  */
 /* OBSOLETE     if (new && !strncmp (newname, new->name, strlen (new->name))) */
 /* OBSOLETE       { */
-/* OBSOLETE 	char *tem; */
-/* OBSOLETE 	if (new->class == (int) class_user || new->class == (int) class_alias) */
-/* OBSOLETE 	  tem = "Redefine command \"%s\"? "; */
-/* OBSOLETE 	else */
-/* OBSOLETE 	  tem = "Really redefine built-in command \"%s\"? "; */
-/* OBSOLETE 	if (!query (tem, new->name)) */
-/* OBSOLETE 	  error ("Command \"%s\" not redefined.", new->name); */
+/* OBSOLETE     char *tem; */
+/* OBSOLETE     if (new->class == (int) class_user || new->class == (int) class_alias) */
+/* OBSOLETE       tem = "Redefine command \"%s\"? "; */
+/* OBSOLETE     else */
+/* OBSOLETE       tem = "Really redefine built-in command \"%s\"? "; */
+/* OBSOLETE     if (!query (tem, new->name)) */
+/* OBSOLETE       error ("Command \"%s\" not redefined.", new->name); */
 /* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE     add_com (newname, class_alias, old->function, old->doc); */
@@ -669,17 +669,17 @@
 /* OBSOLETE   /* FIXME: stop_signal is from target.h but stop_sigcode is a */
 /* OBSOLETE      convex-specific thing.  *x/ */
 /* OBSOLETE   printf_filtered ("Current thread %d stopped with signal %d.%d (%s).\n", */
-/* OBSOLETE 		   inferior_thread, stop_signal, stop_sigcode, */
-/* OBSOLETE 		   subsig_name (stop_signal, stop_sigcode)); */
+/* OBSOLETE                inferior_thread, stop_signal, stop_sigcode, */
+/* OBSOLETE                subsig_name (stop_signal, stop_sigcode)); */
 /* OBSOLETE    */
 /* OBSOLETE   for (p = signal_stack; p->pid; p--) */
 /* OBSOLETE     printf_filtered ("Thread %d stopped with signal %d.%d (%s).\n", */
-/* OBSOLETE 		     p->thread, p->signo, p->subsig, */
-/* OBSOLETE 		     subsig_name (p->signo, p->subsig)); */
-/* OBSOLETE 		 */
+/* OBSOLETE                  p->thread, p->signo, p->subsig, */
+/* OBSOLETE                  subsig_name (p->signo, p->subsig)); */
+/* OBSOLETE              */
 /* OBSOLETE   if (iscrlbit (comm_registers.crctl.lbits.cc, 64+13)) */
 /* OBSOLETE     printf_filtered ("New thread start pc %#x\n", */
-/* OBSOLETE 		     (long) (comm_registers.crreg.pcpsw >> 32)); */
+/* OBSOLETE                  (long) (comm_registers.crreg.pcpsw >> 32)); */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Return string describing a signal.subcode number *x/ */
@@ -743,12 +743,12 @@
 /* OBSOLETE   for (t = 0; t < n_threads; t++) */
 /* OBSOLETE     if (thread_state[t] == PI_TALIVE) */
 /* OBSOLETE       { */
-/* OBSOLETE 	printf_filtered ("%d%c %08x%c %d.%d ", t, */
-/* OBSOLETE 			 (t == inferior_thread ? '*' : ' '), thread_pc[t], */
-/* OBSOLETE 			 (thread_is_in_kernel[t] ? '#' : ' '), */
-/* OBSOLETE 			 thread_signal[t], thread_sigcode[t]); */
-/* OBSOLETE 	print_insn (thread_pc[t], stdout); */
-/* OBSOLETE 	printf_filtered ("\n"); */
+/* OBSOLETE     printf_filtered ("%d%c %08x%c %d.%d ", t, */
+/* OBSOLETE                      (t == inferior_thread ? '*' : ' '), thread_pc[t], */
+/* OBSOLETE                      (thread_is_in_kernel[t] ? '#' : ' '), */
+/* OBSOLETE                      thread_signal[t], thread_sigcode[t]); */
+/* OBSOLETE     print_insn (thread_pc[t], stdout); */
+/* OBSOLETE     printf_filtered ("\n"); */
 /* OBSOLETE       } */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -761,8 +761,8 @@
 /* OBSOLETE  */
 /* OBSOLETE     if (!arg) */
 /* OBSOLETE       { */
-/* OBSOLETE 	threadstat (); */
-/* OBSOLETE 	return; */
+/* OBSOLETE     threadstat (); */
+/* OBSOLETE     return; */
 /* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE     thread = parse_and_eval_address (arg); */
@@ -813,28 +813,28 @@
 /* OBSOLETE   if (arg) */
 /* OBSOLETE     { */
 /* OBSOLETE              if (sscanf (arg, "$c%d", &regnum) == 1) { */
-/* OBSOLETE 	; */
+/* OBSOLETE     ; */
 /* OBSOLETE       } else if (sscanf (arg, "$C%d", &regnum) == 1) { */
-/* OBSOLETE 	; */
+/* OBSOLETE     ; */
 /* OBSOLETE       } else { */
-/* OBSOLETE 	regnum = parse_and_eval_address (arg); */
-/* OBSOLETE 	if (regnum > 0) */
-/* OBSOLETE 	  regnum &= ~0x8000; */
+/* OBSOLETE     regnum = parse_and_eval_address (arg); */
+/* OBSOLETE     if (regnum > 0) */
+/* OBSOLETE       regnum &= ~0x8000; */
 /* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE       if (regnum >= 64) */
-/* OBSOLETE 	error ("%s: invalid register name.", arg); */
+/* OBSOLETE     error ("%s: invalid register name.", arg); */
 /* OBSOLETE  */
 /* OBSOLETE       /* if we got a (user) address, examine the resource struct there *x/ */
 /* OBSOLETE  */
 /* OBSOLETE       if (regnum < 0) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  static int buf[3]; */
-/* OBSOLETE 	  read_memory (regnum, buf, sizeof buf); */
-/* OBSOLETE 	  printf_filtered ("%08x  %08x%08x%s\n", regnum, buf[1], buf[2], */
-/* OBSOLETE 			   buf[0] & 0xff ? " locked" : ""); */
-/* OBSOLETE 	  return; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       static int buf[3]; */
+/* OBSOLETE       read_memory (regnum, buf, sizeof buf); */
+/* OBSOLETE       printf_filtered ("%08x  %08x%08x%s\n", regnum, buf[1], buf[2], */
+/* OBSOLETE                        buf[0] & 0xff ? " locked" : ""); */
+/* OBSOLETE       return; */
+/* OBSOLETE     } */
 /* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE   ps.pi_buffer = (char *) &comm_registers; */
@@ -846,9 +846,9 @@
 /* OBSOLETE   for (i = 0; i < 64; i++) */
 /* OBSOLETE     if (!arg || i == regnum) */
 /* OBSOLETE       printf_filtered ("%2d 0x8%03x %016llx%s\n", i, i, */
-/* OBSOLETE 		       comm_registers.crreg.r4[i], */
-/* OBSOLETE 		       (iscrlbit (comm_registers.crctl.lbits.cc, i) */
-/* OBSOLETE 			? " locked" : "")); */
+/* OBSOLETE                    comm_registers.crreg.r4[i], */
+/* OBSOLETE                    (iscrlbit (comm_registers.crctl.lbits.cc, i) */
+/* OBSOLETE                     ? " locked" : "")); */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Print the psw *x/ */
@@ -905,11 +905,11 @@
 /* OBSOLETE   for (p = pswbit; p->bit; p++) */
 /* OBSOLETE     { */
 /* OBSOLETE       if (p->pos < 0) */
-/* OBSOLETE 	printf_filtered ("%08x  %s  %s\n", p->bit, */
-/* OBSOLETE 			 (psw & p->bit) ? "yes" : "no ", p->text); */
+/* OBSOLETE     printf_filtered ("%08x  %s  %s\n", p->bit, */
+/* OBSOLETE                      (psw & p->bit) ? "yes" : "no ", p->text); */
 /* OBSOLETE       else */
-/* OBSOLETE 	printf_filtered ("%08x %3d   %s\n", p->bit, */
-/* OBSOLETE 			 (psw & p->bit) >> p->pos, p->text); */
+/* OBSOLETE     printf_filtered ("%08x %3d   %s\n", p->bit, */
+/* OBSOLETE                      (psw & p->bit) >> p->pos, p->text); */
 /* OBSOLETE     } */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -931,21 +931,21 @@
 /* OBSOLETE  */
 /* OBSOLETE union inst { */
 /* OBSOLETE     struct { */
-/* OBSOLETE 	unsigned   : 7; */
-/* OBSOLETE 	unsigned i : 3; */
-/* OBSOLETE 	unsigned j : 3; */
-/* OBSOLETE 	unsigned k : 3; */
-/* OBSOLETE 	unsigned   : 16; */
-/* OBSOLETE 	unsigned   : 32; */
+/* OBSOLETE     unsigned   : 7; */
+/* OBSOLETE     unsigned i : 3; */
+/* OBSOLETE     unsigned j : 3; */
+/* OBSOLETE     unsigned k : 3; */
+/* OBSOLETE     unsigned   : 16; */
+/* OBSOLETE     unsigned   : 32; */
 /* OBSOLETE     } f0; */
 /* OBSOLETE     struct { */
-/* OBSOLETE 	unsigned   : 8; */
-/* OBSOLETE 	unsigned indir : 1; */
-/* OBSOLETE 	unsigned len : 1; */
-/* OBSOLETE 	unsigned j : 3; */
-/* OBSOLETE 	unsigned k : 3; */
-/* OBSOLETE 	unsigned   : 16; */
-/* OBSOLETE 	unsigned   : 32; */
+/* OBSOLETE     unsigned   : 8; */
+/* OBSOLETE     unsigned indir : 1; */
+/* OBSOLETE     unsigned len : 1; */
+/* OBSOLETE     unsigned j : 3; */
+/* OBSOLETE     unsigned k : 3; */
+/* OBSOLETE     unsigned   : 16; */
+/* OBSOLETE     unsigned   : 32; */
 /* OBSOLETE     } f1; */
 /* OBSOLETE     unsigned char byte[8]; */
 /* OBSOLETE     unsigned short half[4]; */
@@ -954,15 +954,15 @@
 /* OBSOLETE }; */
 /* OBSOLETE  */
 /* OBSOLETE struct opform { */
-/* OBSOLETE     int mask;			/* opcode mask *x/ */
-/* OBSOLETE     int shift;			/* opcode align *x/ */
-/* OBSOLETE     struct formstr *formstr[3];	/* ST, E0, E1 *x/ */
+/* OBSOLETE     int mask;                       /* opcode mask *x/ */
+/* OBSOLETE     int shift;                      /* opcode align *x/ */
+/* OBSOLETE     struct formstr *formstr[3];     /* ST, E0, E1 *x/ */
 /* OBSOLETE }; */
 /* OBSOLETE  */
 /* OBSOLETE struct formstr { */
-/* OBSOLETE     unsigned lop:8, rop:5;	/* opcode *x/ */
-/* OBSOLETE     unsigned fmt:5;		/* inst format *x/ */
-/* OBSOLETE     unsigned i:5, j:5, k:2;	/* operand formats *x/ */
+/* OBSOLETE     unsigned lop:8, rop:5;  /* opcode *x/ */
+/* OBSOLETE     unsigned fmt:5;         /* inst format *x/ */
+/* OBSOLETE     unsigned i:5, j:5, k:2; /* operand formats *x/ */
 /* OBSOLETE }; */
 /* OBSOLETE  */
 /* OBSOLETE #include "opcode/convex.h" */
@@ -1032,13 +1032,13 @@
 /* OBSOLETE   if (format == 9) */
 /* OBSOLETE     { */
 /* OBSOLETE       if (pfx) */
-/* OBSOLETE 	fmt = formatx; */
+/* OBSOLETE     fmt = formatx; */
 /* OBSOLETE       else if (inst.f1.j == 0) */
-/* OBSOLETE 	fmt = &format1a[op1]; */
+/* OBSOLETE     fmt = &format1a[op1]; */
 /* OBSOLETE       else if (inst.f1.j == 1) */
-/* OBSOLETE 	fmt = &format1b[op1]; */
+/* OBSOLETE     fmt = &format1b[op1]; */
 /* OBSOLETE       else */
-/* OBSOLETE 	fmt = formatx; */
+/* OBSOLETE     fmt = formatx; */
 /* OBSOLETE     } */
 /* OBSOLETE   else */
 /* OBSOLETE     fmt = &opdecode[format].formstr[pfx][op1]; */
@@ -1056,117 +1056,117 @@
 /* OBSOLETE     pfx = 2; */
 /* OBSOLETE  */
 /* OBSOLETE   fprintf (stream, "%s%s%s", lop[fmt->lop], rop[fmt->rop], */
-/* OBSOLETE 	   &"        "[strlen(lop[fmt->lop]) + strlen(rop[fmt->rop])]); */
+/* OBSOLETE        &"        "[strlen(lop[fmt->lop]) + strlen(rop[fmt->rop])]); */
 /* OBSOLETE  */
 /* OBSOLETE   switch (fmt->fmt) */
 /* OBSOLETE     { */
-/* OBSOLETE     case rrr:			/* three register *x/ */
+/* OBSOLETE     case rrr:                       /* three register *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s,%s", reg(i,i), reg(j,j), reg(k,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case rr:			/* two register *x/ */
+/* OBSOLETE     case rr:                        /* two register *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s", reg(i,j), reg(j,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case rxr:			/* two register, reversed i and j fields *x/ */
+/* OBSOLETE     case rxr:                       /* two register, reversed i and j fields *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s", reg(i,k), reg(j,j)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case r:			/* one register *x/ */
+/* OBSOLETE     case r:                 /* one register *x/ */
 /* OBSOLETE       fprintf (stream, "%s", reg(i,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case nops:			/* no operands *x/ */
+/* OBSOLETE     case nops:                      /* no operands *x/ */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case nr:			/* short immediate, one register *x/ */
+/* OBSOLETE     case nr:                        /* short immediate, one register *x/ */
 /* OBSOLETE       fprintf (stream, "#%d,%s", inst.f0.j, reg(i,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case pcrel:			/* pc relative *x/ */
+/* OBSOLETE     case pcrel:                     /* pc relative *x/ */
 /* OBSOLETE       print_address (memaddr + 2 * inst.signed_byte[1], stream); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case lr:			/* literal, one register *x/ */
+/* OBSOLETE     case lr:                        /* literal, one register *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s", lit(i), reg(j,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case rxl:			/* one register, literal *x/ */
+/* OBSOLETE     case rxl:                       /* one register, literal *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s", reg(i,k), lit(j)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case rlr:			/* register, literal, register *x/ */
+/* OBSOLETE     case rlr:                       /* register, literal, register *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s,%s", reg(i,j), lit(j), reg(k,k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case rrl:			/* register, register, literal *x/ */
+/* OBSOLETE     case rrl:                       /* register, register, literal *x/ */
 /* OBSOLETE       fprintf (stream, "%s,%s,%s", reg(i,j), reg(j,k), lit(k)); */
 /* OBSOLETE       return pfx + 2; */
 /* OBSOLETE  */
-/* OBSOLETE     case iml:			/* immediate, literal *x/ */
+/* OBSOLETE     case iml:                       /* immediate, literal *x/ */
 /* OBSOLETE       if (inst.f1.len) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  fprintf (stream, "#%#x,%s", */
-/* OBSOLETE 		   (inst.signed_half[1] << 16) + inst.half[2], lit(i)); */
-/* OBSOLETE 	  return pfx + 6; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       fprintf (stream, "#%#x,%s", */
+/* OBSOLETE                (inst.signed_half[1] << 16) + inst.half[2], lit(i)); */
+/* OBSOLETE       return pfx + 6; */
+/* OBSOLETE     } */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  fprintf (stream, "#%d,%s", inst.signed_half[1], lit(i)); */
-/* OBSOLETE 	  return pfx + 4; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       fprintf (stream, "#%d,%s", inst.signed_half[1], lit(i)); */
+/* OBSOLETE       return pfx + 4; */
+/* OBSOLETE     } */
 /* OBSOLETE  */
-/* OBSOLETE     case imr:			/* immediate, register *x/ */
+/* OBSOLETE     case imr:                       /* immediate, register *x/ */
 /* OBSOLETE       if (inst.f1.len) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  fprintf (stream, "#%#x,%s", */
-/* OBSOLETE 		   (inst.signed_half[1] << 16) + inst.half[2], reg(i,k)); */
-/* OBSOLETE 	  return pfx + 6; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       fprintf (stream, "#%#x,%s", */
+/* OBSOLETE                (inst.signed_half[1] << 16) + inst.half[2], reg(i,k)); */
+/* OBSOLETE       return pfx + 6; */
+/* OBSOLETE     } */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  fprintf (stream, "#%d,%s", inst.signed_half[1], reg(i,k)); */
-/* OBSOLETE 	  return pfx + 4; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       fprintf (stream, "#%d,%s", inst.signed_half[1], reg(i,k)); */
+/* OBSOLETE       return pfx + 4; */
+/* OBSOLETE     } */
 /* OBSOLETE  */
-/* OBSOLETE     case a1r:			/* memory, register *x/ */
+/* OBSOLETE     case a1r:                       /* memory, register *x/ */
 /* OBSOLETE       l = print_effa (inst, stream); */
 /* OBSOLETE       fprintf (stream, ",%s", reg(i,k)); */
 /* OBSOLETE       return pfx + l; */
 /* OBSOLETE  */
-/* OBSOLETE     case a1l:			/* memory, literal  *x/ */
+/* OBSOLETE     case a1l:                       /* memory, literal  *x/ */
 /* OBSOLETE       l = print_effa (inst, stream); */
 /* OBSOLETE       fprintf (stream, ",%s", lit(i)); */
 /* OBSOLETE       return pfx + l; */
 /* OBSOLETE  */
-/* OBSOLETE     case a2r:			/* register, memory *x/ */
+/* OBSOLETE     case a2r:                       /* register, memory *x/ */
 /* OBSOLETE       fprintf (stream, "%s,", reg(i,k)); */
 /* OBSOLETE       return pfx + print_effa (inst, stream); */
 /* OBSOLETE  */
-/* OBSOLETE     case a2l:			/* literal, memory *x/ */
+/* OBSOLETE     case a2l:                       /* literal, memory *x/ */
 /* OBSOLETE       fprintf (stream, "%s,", lit(i)); */
 /* OBSOLETE       return pfx + print_effa (inst, stream); */
 /* OBSOLETE  */
-/* OBSOLETE     case a3:			/* memory *x/ */
+/* OBSOLETE     case a3:                        /* memory *x/ */
 /* OBSOLETE       return pfx + print_effa (inst, stream); */
 /* OBSOLETE  */
-/* OBSOLETE     case a4:			/* system call *x/ */
+/* OBSOLETE     case a4:                        /* system call *x/ */
 /* OBSOLETE       l = 29; goto a4a5; */
-/* OBSOLETE     case a5:			/* trap *x/ */
+/* OBSOLETE     case a5:                        /* trap *x/ */
 /* OBSOLETE       l = 27; */
 /* OBSOLETE     a4a5: */
 /* OBSOLETE       if (inst.f1.len) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  unsigned int m = (inst.signed_half[1] << 16) + inst.half[2]; */
-/* OBSOLETE 	  fprintf (stream, "#%d,#%d", m >> l, m & (-1 >> (32-l))); */
-/* OBSOLETE 	  return pfx + 6; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       unsigned int m = (inst.signed_half[1] << 16) + inst.half[2]; */
+/* OBSOLETE       fprintf (stream, "#%d,#%d", m >> l, m & (-1 >> (32-l))); */
+/* OBSOLETE       return pfx + 6; */
+/* OBSOLETE     } */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  unsigned int m = inst.signed_half[1]; */
-/* OBSOLETE 	  fprintf (stream, "#%d,#%d", m >> l, m & (-1 >> (32-l))); */
-/* OBSOLETE 	  return pfx + 4; */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       unsigned int m = inst.signed_half[1]; */
+/* OBSOLETE       fprintf (stream, "#%d,#%d", m >> l, m & (-1 >> (32-l))); */
+/* OBSOLETE       return pfx + 4; */
+/* OBSOLETE     } */
 /* OBSOLETE     } */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -1189,7 +1189,7 @@
 /* OBSOLETE       n = inst.signed_half[1]; */
 /* OBSOLETE       l = 4; */
 /* OBSOLETE     } */
-/* OBSOLETE 	 */
+/* OBSOLETE      */
 /* OBSOLETE   if (inst.f1.indir) */
 /* OBSOLETE     printf ("@"); */
 /* OBSOLETE  */
@@ -1200,7 +1200,7 @@
 /* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE   fprintf (stream, (n & 0xf0000000) == 0x80000000 ? "%#x(%s)" : "%d(%s)", */
-/* OBSOLETE 	   n, aj[inst.f1.j]); */
+/* OBSOLETE        n, aj[inst.f1.j]); */
 /* OBSOLETE  */
 /* OBSOLETE   return l; */
 /* OBSOLETE } */
@@ -1210,68 +1210,68 @@
 /* OBSOLETE _initialize_convex_dep () */
 /* OBSOLETE { */
 /* OBSOLETE   add_com ("alias", class_support, alias_command, */
-/* OBSOLETE 	   "Add a new name for an existing command."); */
+/* OBSOLETE        "Add a new name for an existing command."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_cmd ("base", class_vars, set_base_command, */
-/* OBSOLETE 	   "Change the integer output radix to 8, 10 or 16\n\ */
+/* OBSOLETE        "Change the integer output radix to 8, 10 or 16\n\ */
 /* OBSOLETE or use just `set base' with no args to return to the ad-hoc default,\n\ */
 /* OBSOLETE which is 16 for integers that look like addresses, 10 otherwise.", */
-/* OBSOLETE 	   &setlist); */
+/* OBSOLETE        &setlist); */
 /* OBSOLETE  */
 /* OBSOLETE   add_cmd ("pipeline", class_run, set_pipelining_command, */
-/* OBSOLETE 	   "Enable or disable overlapped execution of instructions.\n\ */
+/* OBSOLETE        "Enable or disable overlapped execution of instructions.\n\ */
 /* OBSOLETE With `set pipe off', exceptions are reported with\n\ */
 /* OBSOLETE $pc pointing at the instruction after the faulting one.\n\ */
 /* OBSOLETE The default is `set pipe on', which runs faster.", */
-/* OBSOLETE 	   &setlist); */
+/* OBSOLETE        &setlist); */
 /* OBSOLETE  */
 /* OBSOLETE   add_cmd ("parallel", class_run, set_parallel_command, */
-/* OBSOLETE 	   "Enable or disable multi-threaded execution of parallel code.\n\ */
+/* OBSOLETE        "Enable or disable multi-threaded execution of parallel code.\n\ */
 /* OBSOLETE `set parallel off' means run the program on a single CPU.\n\ */
 /* OBSOLETE `set parallel fixed' means run the program with all CPUs assigned to it.\n\ */
 /* OBSOLETE `set parallel on' means run the program on any CPUs that are available.", */
-/* OBSOLETE 	   &setlist); */
+/* OBSOLETE        &setlist); */
 /* OBSOLETE  */
 /* OBSOLETE   add_com ("1cont", class_run, one_cont_command, */
-/* OBSOLETE 	   "Continue the program, activating only the current thread.\n\ */
+/* OBSOLETE        "Continue the program, activating only the current thread.\n\ */
 /* OBSOLETE Args are the same as the `cont' command."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_com ("thread", class_run, set_thread_command, */
-/* OBSOLETE 	   "Change the current thread, the one under scrutiny and control.\n\ */
+/* OBSOLETE        "Change the current thread, the one under scrutiny and control.\n\ */
 /* OBSOLETE With no arg, show the active threads, the current one marked with *."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_info ("threads", thread_info, */
-/* OBSOLETE 	    "List status of active threads."); */
+/* OBSOLETE         "List status of active threads."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_info ("comm-registers", comm_registers_info, */
-/* OBSOLETE 	    "List communication registers and their contents.\n\ */
+/* OBSOLETE         "List communication registers and their contents.\n\ */
 /* OBSOLETE A communication register name as argument means describe only that register.\n\ */
 /* OBSOLETE An address as argument means describe the resource structure at that address.\n\ */
 /* OBSOLETE `Locked' means that the register has been sent to but not yet received from."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_info ("psw", psw_info,  */
-/* OBSOLETE 	    "Display $ps, the processor status word, bit by bit.\n\ */
+/* OBSOLETE         "Display $ps, the processor status word, bit by bit.\n\ */
 /* OBSOLETE An argument means display that value's interpretation as a psw."); */
 /* OBSOLETE  */
 /* OBSOLETE   add_cmd ("convex", no_class, 0, "Convex-specific commands.\n\ */
 /* OBSOLETE 32-bit registers  $pc $ps $sp $ap $fp $a1-5 $s0-7 $v0-7 $vl $vs $vm $c0-63\n\ */
 /* OBSOLETE 64-bit registers  $S0-7 $V0-7 $C0-63\n\ */
 /* OBSOLETE \n\ */
-/* OBSOLETE info threads	    display info on stopped threads waiting to signal\n\ */
-/* OBSOLETE thread		    display list of active threads\n\ */
-/* OBSOLETE thread N	    select thread N (its registers, stack, memory, etc.)\n\ */
+/* OBSOLETE info threads            display info on stopped threads waiting to signal\n\ */
+/* OBSOLETE thread                  display list of active threads\n\ */
+/* OBSOLETE thread N        select thread N (its registers, stack, memory, etc.)\n\ */
 /* OBSOLETE step, next, etc     step selected thread only\n\ */
-/* OBSOLETE 1cont		    continue selected thread only\n\ */
-/* OBSOLETE cont		    continue all threads\n\ */
+/* OBSOLETE 1cont                   continue selected thread only\n\ */
+/* OBSOLETE cont                    continue all threads\n\ */
 /* OBSOLETE info comm-registers display contents of comm register(s) or a resource struct\n\ */
-/* OBSOLETE info psw	    display processor status word $ps\n\ */
-/* OBSOLETE set base N	    change integer radix used by `print' without a format\n\ */
+/* OBSOLETE info psw        display processor status word $ps\n\ */
+/* OBSOLETE set base N      change integer radix used by `print' without a format\n\ */
 /* OBSOLETE set pipeline off    exceptions are precise, $pc points after the faulting insn\n\ */
 /* OBSOLETE set pipeline on     normal mode, $pc is somewhere ahead of faulting insn\n\ */
 /* OBSOLETE set parallel off    program runs on a single CPU\n\ */
 /* OBSOLETE set parallel fixed  all CPUs are assigned to the program\n\ */
 /* OBSOLETE set parallel on     normal mode, parallel execution on random available CPUs\n\ */
 /* OBSOLETE ", */
-/* OBSOLETE 	   &cmdlist); */
+/* OBSOLETE        &cmdlist); */
 /* OBSOLETE  */
 /* OBSOLETE } */

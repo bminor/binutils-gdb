@@ -2,21 +2,22 @@
    Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -43,7 +44,7 @@ static void
 nlm_symfile_finish PARAMS ((struct objfile *));
 
 static void
-nlm_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
+nlm_symtab_read PARAMS ((bfd *, CORE_ADDR, struct objfile *));
 
 /* Initialize anything that needs initializing when a completely new symbol
    file is specified (not just adding some symbols from another file, e.g. a
@@ -78,22 +79,22 @@ nlm_symfile_init (ignore)
 
 /*
 
-LOCAL FUNCTION
+   LOCAL FUNCTION
 
-	nlm_symtab_read -- read the symbol table of an NLM file
+   nlm_symtab_read -- read the symbol table of an NLM file
 
-SYNOPSIS
+   SYNOPSIS
 
-	void nlm_symtab_read (bfd *abfd, CORE_ADDR addr,
-			      struct objfile *objfile)
+   void nlm_symtab_read (bfd *abfd, CORE_ADDR addr,
+   struct objfile *objfile)
 
-DESCRIPTION
+   DESCRIPTION
 
-	Given an open bfd, a base address to relocate symbols to, and a
-	flag that specifies whether or not this bfd is for an executable
-	or not (may be shared library for example), add all the global
-	function and data symbols to the minimal symbol table.
-*/
+   Given an open bfd, a base address to relocate symbols to, and a
+   flag that specifies whether or not this bfd is for an executable
+   or not (may be shared library for example), add all the global
+   function and data symbols to the minimal symbol table.
+ */
 
 static void
 nlm_symtab_read (abfd, addr, objfile)
@@ -109,7 +110,7 @@ nlm_symtab_read (abfd, addr, objfile)
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   enum minimal_symbol_type ms_type;
-  
+
   storage_needed = bfd_get_symtab_upper_bound (abfd);
   if (storage_needed < 0)
     error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
@@ -118,33 +119,33 @@ nlm_symtab_read (abfd, addr, objfile)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
+      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
 	       bfd_errmsg (bfd_get_error ()));
-  
+
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
-	  if (/*sym -> flags & BSF_GLOBAL*/ 1)
+	  if ( /*sym -> flags & BSF_GLOBAL */ 1)
 	    {
 	      /* Bfd symbols are section relative. */
-	      symaddr = sym -> value + sym -> section -> vma;
+	      symaddr = sym->value + sym->section->vma;
 	      /* Relocate all non-absolute symbols by base address.  */
-	      if (sym -> section != &bfd_abs_section)
+	      if (sym->section != &bfd_abs_section)
 		symaddr += addr;
 
 	      /* For non-absolute symbols, use the type of the section
-		 they are relative to, to intuit text/data.  BFD provides
-		 no way of figuring this out for absolute symbols. */
-	      if (sym -> section -> flags & SEC_CODE)
+	         they are relative to, to intuit text/data.  BFD provides
+	         no way of figuring this out for absolute symbols. */
+	      if (sym->section->flags & SEC_CODE)
 		ms_type = mst_text;
-	      else if (sym -> section -> flags & SEC_DATA)
+	      else if (sym->section->flags & SEC_DATA)
 		ms_type = mst_data;
 	      else
 		ms_type = mst_unknown;
 
-	      prim_record_minimal_symbol (sym -> name, symaddr, ms_type,
+	      prim_record_minimal_symbol (sym->name, symaddr, ms_type,
 					  objfile);
 	    }
 	}
@@ -186,7 +187,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
      struct section_offsets *section_offsets;
      int mainline;
 {
-  bfd *abfd = objfile -> obfd;
+  bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
   CORE_ADDR offset;
   struct symbol *mainsym;
@@ -209,7 +210,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
 
   if (mainsym
-      && SYMBOL_CLASS(mainsym) == LOC_BLOCK)
+      && SYMBOL_CLASS (mainsym) == LOC_BLOCK)
     {
       objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
       objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
@@ -236,9 +237,9 @@ static void
 nlm_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (objfile -> sym_private != NULL)
+  if (objfile->sym_private != NULL)
     {
-      mfree (objfile -> md, objfile -> sym_private);
+      mfree (objfile->md, objfile->sym_private);
     }
 }
 
@@ -247,13 +248,13 @@ nlm_symfile_finish (objfile)
 static struct sym_fns nlm_sym_fns =
 {
   bfd_target_nlm_flavour,
-  nlm_new_init,		/* sym_new_init: init anything gbl to entire symtab */
-  nlm_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
-  nlm_symfile_read,	/* sym_read: read a symbol file into symtab */
-  nlm_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  nlm_new_init,			/* sym_new_init: init anything gbl to entire symtab */
+  nlm_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
+  nlm_symfile_read,		/* sym_read: read a symbol file into symtab */
+  nlm_symfile_finish,		/* sym_finish: finished with file, cleanup */
   default_symfile_offsets,
 			/* sym_offsets:  Translate ext. to int. relocation */
-  NULL			/* next: pointer to next struct sym_fns */
+  NULL				/* next: pointer to next struct sym_fns */
 };
 
 void

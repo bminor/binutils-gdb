@@ -2,21 +2,22 @@
    Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* This is like remote.c but is for an esoteric situation--
    having a a29k board in a PC hooked up to a unix machine with
@@ -41,9 +42,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 
-extern struct target_ops eb_ops;		/* Forward declaration */
+extern struct target_ops eb_ops;	/* Forward declaration */
 
-static void eb_close();
+static void eb_close ();
 
 #define LOG_FILE "eb.log"
 #if defined (LOG_FILE)
@@ -103,7 +104,7 @@ expect (string)
   immediate_quit = 1;
   while (1)
     {
-      if (readchar() == *p)
+      if (readchar () == *p)
 	{
 	  p++;
 	  if (*p == '\0')
@@ -194,7 +195,7 @@ get_hex_regs (n, regno)
   for (i = 0; i < n; i++)
     {
       int j;
-      
+
       val = 0;
       for (j = 0; j < 8; j++)
 	val = (val << 4) + get_hex_digit (j == 0);
@@ -206,7 +207,8 @@ get_hex_regs (n, regno)
 #ifndef HAVE_TERMIO
 
 #ifndef __STDC__
-#define volatile /**/
+#define volatile
+/**/
 #endif
 volatile int n_alarms;
 
@@ -259,7 +261,7 @@ eb_create_inferior (execfile, args, env)
     fprintf (eb_stream, "YC D,0:%s", prog_name);
 
     if (args != NULL)
-	fprintf(eb_stream, " %s", args);
+      fprintf (eb_stream, " %s", args);
 
     fprintf (eb_stream, "\n");
     fflush (eb_stream);
@@ -285,7 +287,7 @@ eb_create_inferior (execfile, args, env)
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  proceed ((CORE_ADDR)entry_pt, TARGET_SIGNAL_DEFAULT, 0);		/* Let 'er rip... */
+  proceed ((CORE_ADDR) entry_pt, TARGET_SIGNAL_DEFAULT, 0);	/* Let 'er rip... */
 }
 
 /* Translate baud rates from integers to damn B_codes.  Unix should
@@ -298,34 +300,92 @@ eb_create_inferior (execfile, args, env)
 #define B38400 EXTB
 #endif
 
-struct {int rate, damn_b;} baudtab[] = {
-	{0, B0},
-	{50, B50},
-	{75, B75},
-	{110, B110},
-	{134, B134},
-	{150, B150},
-	{200, B200},
-	{300, B300},
-	{600, B600},
-	{1200, B1200},
-	{1800, B1800},
-	{2400, B2400},
-	{4800, B4800},
-	{9600, B9600},
-	{19200, B19200},
-	{38400, B38400},
-	{-1, -1},
+struct
+{
+  int rate, damn_b;
+}
+baudtab[] =
+{
+  {
+    0, B0
+  }
+  ,
+  {
+    50, B50
+  }
+  ,
+  {
+    75, B75
+  }
+  ,
+  {
+    110, B110
+  }
+  ,
+  {
+    134, B134
+  }
+  ,
+  {
+    150, B150
+  }
+  ,
+  {
+    200, B200
+  }
+  ,
+  {
+    300, B300
+  }
+  ,
+  {
+    600, B600
+  }
+  ,
+  {
+    1200, B1200
+  }
+  ,
+  {
+    1800, B1800
+  }
+  ,
+  {
+    2400, B2400
+  }
+  ,
+  {
+    4800, B4800
+  }
+  ,
+  {
+    9600, B9600
+  }
+  ,
+  {
+    19200, B19200
+  }
+  ,
+  {
+    38400, B38400
+  }
+  ,
+  {
+    -1, -1
+  }
+  ,
 };
 
-int damn_b (rate)
+int
+damn_b (rate)
      int rate;
 {
   int i;
 
   for (i = 0; baudtab[i].rate != -1; i++)
-    if (rate == baudtab[i].rate) return baudtab[i].damn_b;
-  return B38400;	/* Random */
+    if (rate == baudtab[i].rate)
+      return baudtab[i].damn_b;
+  return B38400;		/* Random */
 }
 
 
@@ -345,7 +405,7 @@ eb_open (name, from_tty)
   char *p;
 
   target_preopen (from_tty);
-  
+
   /* Find the first whitespace character, it separates dev_name from
      prog_name.  */
   if (name == 0)
@@ -355,7 +415,7 @@ eb_open (name, from_tty)
        *p != '\0' && !isspace (*p); p++)
     ;
   if (*p == '\0')
-erroid:
+  erroid:
     error ("\
 Please include the name of the device for the serial port,\n\
 the baud rate, and the name of the program to run on the remote system.");
@@ -365,17 +425,17 @@ the baud rate, and the name of the program to run on the remote system.");
 
   /* Skip over the whitespace after dev_name */
   for (; isspace (*p); p++)
-    /*EMPTY*/;
-  
+    /*EMPTY */ ;
+
   if (1 != sscanf (p, "%d ", &baudrate))
     goto erroid;
 
   /* Skip the number and then the spaces */
   for (; isdigit (*p); p++)
-    /*EMPTY*/;
+    /*EMPTY */ ;
   for (; isspace (*p); p++)
-    /*EMPTY*/;
-  
+    /*EMPTY */ ;
+
   if (prog_name != NULL)
     free (prog_name);
   prog_name = savestring (p, strlen (p));
@@ -427,7 +487,7 @@ the baud rate, and the name of the program to run on the remote system.");
 
   /* Hello?  Are you there?  */
   write (eb_desc, "\n", 1);
-  
+
   expect_prompt ();
 }
 
@@ -442,21 +502,22 @@ eb_close (quitting)
      but also the file descriptor.  So we don't actually close
      eb_desc.  */
   if (eb_stream)
-    fclose (eb_stream);	/* This also closes eb_desc */
+    fclose (eb_stream);		/* This also closes eb_desc */
   if (eb_desc >= 0)
     /* close (eb_desc); */
 
-  /* Do not try to close eb_desc again, later in the program.  */
-  eb_stream = NULL;
+    /* Do not try to close eb_desc again, later in the program.  */
+    eb_stream = NULL;
   eb_desc = -1;
 
 #if defined (LOG_FILE)
-  if (log_file) {
-    if (ferror (log_file))
-      printf ("Error writing log file.\n");
-    if (fclose (log_file) != 0)
-      printf ("Error closing log file.\n");
-  }
+  if (log_file)
+    {
+      if (ferror (log_file))
+	printf ("Error writing log file.\n");
+      if (fclose (log_file) != 0)
+	printf ("Error closing log file.\n");
+    }
 #endif
 }
 
@@ -467,11 +528,11 @@ void
 eb_detach (from_tty)
      int from_tty;
 {
-  pop_target();		/* calls eb_close to do the real work */
+  pop_target ();		/* calls eb_close to do the real work */
   if (from_tty)
     printf ("Ending remote %s debugging\n", target_shortname);
 }
- 
+
 /* Tell the remote machine to resume.  */
 
 void
@@ -500,7 +561,7 @@ eb_resume (pid, step, sig)
 	{
 	  need_gi = 0;
 	  write (eb_desc, "gi\n", 3);
-	  
+
 	  /* Swallow the echo of "gi".  */
 	  expect ("gi\r");
 	}
@@ -524,7 +585,7 @@ eb_wait (status)
      Note that with the algorithm we use, the initial character
      of the string cannot recur in the string, or we will not
      find some cases of the string in the input.  */
-  
+
   static char bpt[] = "Invalid interrupt taken - #0x50 - ";
   /* It would be tempting to look for "\n[__exit + 0x8]\n"
      but that requires loading symbols with "yc i" and even if
@@ -554,7 +615,7 @@ eb_wait (status)
       return 0;
     }
 
-  timeout = 0;		/* Don't time out -- user program is running. */
+  timeout = 0;			/* Don't time out -- user program is running. */
   while (1)
     {
       ch_handled = 0;
@@ -592,12 +653,12 @@ eb_wait (status)
 	  for (p = swallowed; p < swallowed_p; ++p)
 	    putc (*p, stdout);
 	  swallowed_p = swallowed;
-	  
+
 	  putc (ch, stdout);
 	}
     }
   expect_prompt ();
-  if (*bp== '\0')
+  if (*bp == '\0')
     {
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = TARGET_SIGNAL_TRAP;
@@ -674,7 +735,7 @@ eb_fetch_registers ()
   for (i = 0; i < 128; i += 32)
     {
       /* The PC has a tendency to hang if we get these
-	 all in one fell swoop ("dw lr0,lr127").  */
+         all in one fell swoop ("dw lr0,lr127").  */
       sprintf (tempbuf, "dw lr%d\n", i);
       write (eb_desc, tempbuf, strlen (tempbuf));
       for (reg_index = i, regnum_index = LR0_REGNUM + i;
@@ -806,11 +867,11 @@ eb_store_register (regno)
       char *name = get_reg_name (regno);
       fprintf (eb_stream, "s %s,%x\n", name, read_register (regno));
       /* Setting GR1 changes the numbers of all the locals, so
-	 invalidate the register cache.  Do this *after* calling
-	 read_register, because we want read_register to return the
-	 value that write_register has just stuffed into the registers
-	 array, not the value of the register fetched from the
-	 inferior.  */
+         invalidate the register cache.  Do this *after* calling
+         read_register, because we want read_register to return the
+         value that write_register has just stuffed into the registers
+         array, not the value of the register fetched from the
+         inferior.  */
       if (regno == GR1_REGNUM)
 	registers_changed ();
       expect_prompt ();
@@ -837,7 +898,7 @@ eb_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      char *myaddr;
      int len;
      int write;
-     struct target_ops *target;		/* ignored */
+     struct target_ops *target;	/* ignored */
 {
   if (write)
     return eb_write_inferior_memory (memaddr, myaddr, len);
@@ -868,11 +929,11 @@ eb_write_inferior_memory (memaddr, myaddr, len)
 	fprintf (eb_stream, "sb %x,", memaddr + i);
       if ((i % 16) == 15 || i == len - 1)
 	{
-	  fprintf (eb_stream, "%x\n", ((unsigned char *)myaddr)[i]);
+	  fprintf (eb_stream, "%x\n", ((unsigned char *) myaddr)[i]);
 	  expect_prompt ();
 	}
       else
-	fprintf (eb_stream, "%x,", ((unsigned char *)myaddr)[i]);
+	fprintf (eb_stream, "%x,", ((unsigned char *) myaddr)[i]);
     }
   return len;
 }
@@ -880,7 +941,7 @@ eb_write_inferior_memory (memaddr, myaddr, len)
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns length moved.  */
 int
-eb_read_inferior_memory(memaddr, myaddr, len)
+eb_read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -905,11 +966,12 @@ eb_read_inferior_memory(memaddr, myaddr, len)
      eb_read_bytes (CORE_ADDR_MAX - 3, foo, 4)
      doesn't need to work.  Detect it and give up if there's an attempt
      to do that.  */
-  if (((memaddr - 1) + len) < memaddr) {
-    errno = EIO;
-    return 0;
-  }
-  
+  if (((memaddr - 1) + len) < memaddr)
+    {
+      errno = EIO;
+      return 0;
+    }
+
   startaddr = memaddr;
   count = 0;
   while (count < len)
@@ -956,7 +1018,7 @@ eb_kill (args, from_tty)
      char *args;
      int from_tty;
 {
-  return;		/* Ignore attempts to kill target system */
+  return;			/* Ignore attempts to kill target system */
 }
 
 /* Clean up when a program exits.
@@ -974,83 +1036,83 @@ eb_mourn_inferior ()
 }
 /* Define the target subroutine names */
 
-struct target_ops eb_ops ;
+struct target_ops eb_ops;
 
-static void 
-init_eb_ops(void)
+static void
+init_eb_ops (void)
 {
-  eb_ops.to_shortname = 	"amd-eb";
-  eb_ops.to_longname = 	"Remote serial AMD EBMON target";
-  eb_ops.to_doc = 	"Use a remote computer running EBMON connected by a serial line.\n\
+  eb_ops.to_shortname = "amd-eb";
+  eb_ops.to_longname = "Remote serial AMD EBMON target";
+  eb_ops.to_doc = "Use a remote computer running EBMON connected by a serial line.\n\
 Arguments are the name of the device for the serial line,\n\
 the speed to connect at in bits per second, and the filename of the\n\
 executable as it exists on the remote computer.  For example,\n\
 target amd-eb /dev/ttya 9600 demo",
-    eb_ops.to_open = 	eb_open;
-  eb_ops.to_close = 	eb_close;
-  eb_ops.to_attach = 	0;
+    eb_ops.to_open = eb_open;
+  eb_ops.to_close = eb_close;
+  eb_ops.to_attach = 0;
   eb_ops.to_post_attach = NULL;
   eb_ops.to_require_attach = NULL;
-  eb_ops.to_detach = 	eb_detach;
+  eb_ops.to_detach = eb_detach;
   eb_ops.to_require_detach = NULL;
-  eb_ops.to_resume = 	eb_resume;
-  eb_ops.to_wait  = 	eb_wait;
+  eb_ops.to_resume = eb_resume;
+  eb_ops.to_wait = eb_wait;
   eb_ops.to_post_wait = NULL;
-  eb_ops.to_fetch_registers  = 	eb_fetch_register;
-  eb_ops.to_store_registers  = 	eb_store_register;
-  eb_ops.to_prepare_to_store = 	eb_prepare_to_store;
-  eb_ops.to_xfer_memory  = 	eb_xfer_inferior_memory;
-  eb_ops.to_files_info  = 	eb_files_info;
-  eb_ops.to_insert_breakpoint = 	0;
-  eb_ops.to_remove_breakpoint = 	0;	/* Breakpoints */
-  eb_ops.to_terminal_init  = 	0;
-  eb_ops.to_terminal_inferior = 	0;
-  eb_ops.to_terminal_ours_for_output = 	0;
-  eb_ops.to_terminal_ours  = 	0;
-  eb_ops.to_terminal_info  = 	0;	/* Terminal handling */
-  eb_ops.to_kill  = 	eb_kill;
-  eb_ops.to_load  = 	generic_load;	/* load */
-  eb_ops.to_lookup_symbol = 	0; /* lookup_symbol */
-  eb_ops.to_create_inferior = 	eb_create_inferior;
+  eb_ops.to_fetch_registers = eb_fetch_register;
+  eb_ops.to_store_registers = eb_store_register;
+  eb_ops.to_prepare_to_store = eb_prepare_to_store;
+  eb_ops.to_xfer_memory = eb_xfer_inferior_memory;
+  eb_ops.to_files_info = eb_files_info;
+  eb_ops.to_insert_breakpoint = 0;
+  eb_ops.to_remove_breakpoint = 0;	/* Breakpoints */
+  eb_ops.to_terminal_init = 0;
+  eb_ops.to_terminal_inferior = 0;
+  eb_ops.to_terminal_ours_for_output = 0;
+  eb_ops.to_terminal_ours = 0;
+  eb_ops.to_terminal_info = 0;	/* Terminal handling */
+  eb_ops.to_kill = eb_kill;
+  eb_ops.to_load = generic_load;	/* load */
+  eb_ops.to_lookup_symbol = 0;	/* lookup_symbol */
+  eb_ops.to_create_inferior = eb_create_inferior;
   eb_ops.to_post_startup_inferior = NULL;
   eb_ops.to_acknowledge_created_inferior = NULL;
-  eb_ops.to_clone_and_follow_inferior = NULL;      
+  eb_ops.to_clone_and_follow_inferior = NULL;
   eb_ops.to_post_follow_inferior_by_clone = NULL;
   eb_ops.to_insert_fork_catchpoint = NULL;
   eb_ops.to_remove_fork_catchpoint = NULL;
   eb_ops.to_insert_vfork_catchpoint = NULL;
-  eb_ops.to_remove_vfork_catchpoint = NULL;                  
+  eb_ops.to_remove_vfork_catchpoint = NULL;
   eb_ops.to_has_forked = NULL;
-  eb_ops.to_has_vforked = NULL;            
-  eb_ops.to_can_follow_vfork_prior_to_exec = NULL;        
+  eb_ops.to_has_vforked = NULL;
+  eb_ops.to_can_follow_vfork_prior_to_exec = NULL;
   eb_ops.to_post_follow_vfork = NULL;
   eb_ops.to_insert_exec_catchpoint = NULL;
   eb_ops.to_remove_exec_catchpoint = NULL;
   eb_ops.to_has_execd = NULL;
   eb_ops.to_reported_exec_events_per_exec_call = NULL;
   eb_ops.to_has_exited = NULL;
-  eb_ops.to_mourn_inferior = 	eb_mourn_inferior;
-  eb_ops.to_can_run  =   	0;	/* can_run */
-  eb_ops.to_notice_signals =   	0; /* notice_signals */
-  eb_ops.to_thread_alive  = 	0; /* thread-alive */
-  eb_ops.to_stop  = 	0;			/* to_stop */
+  eb_ops.to_mourn_inferior = eb_mourn_inferior;
+  eb_ops.to_can_run = 0;	/* can_run */
+  eb_ops.to_notice_signals = 0;	/* notice_signals */
+  eb_ops.to_thread_alive = 0;	/* thread-alive */
+  eb_ops.to_stop = 0;		/* to_stop */
   eb_ops.to_pid_to_exec_file = NULL;
   eb_ops.to_core_file_to_sym_file = NULL;
-  eb_ops.to_stratum = 	process_stratum;
-  eb_ops.DONT_USE = 	0; /* next */
-  eb_ops.to_has_all_memory = 	1;
-  eb_ops.to_has_memory = 	1;
-  eb_ops.to_has_stack = 	1;
-  eb_ops.to_has_registers = 	1;
-  eb_ops.to_has_execution = 	1;	/* all mem, mem, stack, regs, exec */
-  eb_ops.to_sections = 	0; /* sections */
-  eb_ops.to_sections_end = 	0; /* sections end */
-  eb_ops.to_magic = 	OPS_MAGIC;		/* Always the last thing */
+  eb_ops.to_stratum = process_stratum;
+  eb_ops.DONT_USE = 0;		/* next */
+  eb_ops.to_has_all_memory = 1;
+  eb_ops.to_has_memory = 1;
+  eb_ops.to_has_stack = 1;
+  eb_ops.to_has_registers = 1;
+  eb_ops.to_has_execution = 1;	/* all mem, mem, stack, regs, exec */
+  eb_ops.to_sections = 0;	/* sections */
+  eb_ops.to_sections_end = 0;	/* sections end */
+  eb_ops.to_magic = OPS_MAGIC;	/* Always the last thing */
 };
 
 void
 _initialize_remote_eb ()
 {
-  init_eb_ops() ;
+  init_eb_ops ();
   add_target (&eb_ops);
 }

@@ -1,21 +1,22 @@
 /* Parameters for execution on a Fujitsu FR30 processor.
    Copyright 1999, Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define FR30_GENREGS		16
 #define FR30_DEDICATEDREGS	8
@@ -84,7 +85,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define REGISTER_RAW_SIZE(N) FR30_REGSIZE
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
-#define MAX_REGISTER_RAW_SIZE FR30_REGSIZE 
+#define MAX_REGISTER_RAW_SIZE FR30_REGSIZE
 
 /* Number of bytes of storage in the program's representation
    for register N.  */
@@ -137,7 +138,7 @@ extern void fr30_pop_frame PARAMS ((void));
    Can return -1, meaning no way to tell.  */
 #define FRAME_NUM_ARGS(fi) (-1)
 
-#ifdef __STDC__		/* Forward decls for prototypes */
+#ifdef __STDC__			/* Forward decls for prototypes */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
@@ -150,10 +151,10 @@ struct value;
   int frameoffset;		\
   int framereg;
 
-extern CORE_ADDR fr30_frame_chain PARAMS ((struct frame_info *fi));
+extern CORE_ADDR fr30_frame_chain PARAMS ((struct frame_info * fi));
 #define FRAME_CHAIN(fi) fr30_frame_chain (fi)
 
-extern CORE_ADDR fr30_frame_saved_pc   PARAMS ((struct frame_info *));
+extern CORE_ADDR fr30_frame_saved_pc PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(fi) (fr30_frame_saved_pc (fi))
 
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
@@ -165,7 +166,7 @@ extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
    TYPE, given in virtual format.  VALBUF is in the target byte order;
    it's typically the VALUE_CONTENTS of some struct value, and those
    are in the target's byte order.  */
-extern void fr30_store_return_value PARAMS ((struct type *type, char *valbuf));
+extern void fr30_store_return_value PARAMS ((struct type * type, char *valbuf));
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   (fr30_store_return_value ((TYPE), (VALBUF)))
@@ -192,18 +193,18 @@ extern void fr30_store_return_value PARAMS ((struct type *type, char *valbuf));
 
 /* An expression that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  */
-extern int fr30_frameless_function_invocation PARAMS ((struct frame_info *frame));
+extern int fr30_frameless_function_invocation PARAMS ((struct frame_info * frame));
 #define FRAMELESS_FUNCTION_INVOCATION(FI) (fr30_frameless_function_invocation (FI));
 
-extern void fr30_init_extra_frame_info PARAMS ((struct frame_info *fi));
+extern void fr30_init_extra_frame_info PARAMS ((struct frame_info * fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) fr30_init_extra_frame_info (fi)
 
 #define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR
-fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
-			     int struct_return,
-			     CORE_ADDR struct_addr));
+  fr30_push_arguments PARAMS ((int nargs, struct value ** args, CORE_ADDR sp,
+			       int struct_return,
+			       CORE_ADDR struct_addr));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (fr30_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

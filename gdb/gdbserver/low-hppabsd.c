@@ -1,21 +1,22 @@
 /* Low level interface to ptrace, for the remote server for GDB.
    Copyright (C) 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <sys/wait.h>
@@ -90,7 +91,7 @@ kill_inferior ()
     return;
   ptrace (8, inferior_pid, 0, 0, 0);
   wait (0);
-  /*************inferior_died ();****VK**************/
+/*************inferior_died ();****VK**************/
 }
 
 /* Return nonzero if the given thread is still alive.  */
@@ -195,8 +196,8 @@ fetch_register (regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
       errno = 0;
-      *(int *) &registers[ regno * 4 + i] = ptrace (PT_RUREGS, inferior_pid,
-				 (PTRACE_ARG3_TYPE) regaddr, 0, 0);
+      *(int *) &registers[regno * 4 + i] = ptrace (PT_RUREGS, inferior_pid,
+					  (PTRACE_ARG3_TYPE) regaddr, 0, 0);
       regaddr += sizeof (int);
       if (errno != 0)
 	{
@@ -209,7 +210,7 @@ fetch_register (regno)
 	  goto error_exit;
 	}
     }
- error_exit:;
+error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -247,20 +248,20 @@ store_inferior_registers (regno)
       regaddr = register_addr (regno, offset);
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-        {
-          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                  scratch, 0);
-          if (errno != 0)
-            {
+	{
+	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  scratch, 0);
+	  if (errno != 0)
+	    {
 	      /* Error, even if attached.  Failing to write these two
-		 registers is pretty serious.  */
-              sprintf (buf, "writing register number %d", regno);
-              perror_with_name (buf);
-            }
-        }
+	         registers is pretty serious.  */
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
       else
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	  {
 	    errno = 0;
 	    ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
@@ -276,7 +277,7 @@ store_inferior_registers (regno)
 		error (msg);
 		return;
 	      }
-	    regaddr += sizeof(int);
+	    regaddr += sizeof (int);
 	  }
     }
   else

@@ -1,5 +1,5 @@
 /* Remote serial interface for Macraigor Systems implementation of
-	On-Chip Debugging using serial target box or serial wiggler
+   On-Chip Debugging using serial target box or serial wiggler
 
    Copyright 1994, 1997 Free Software Foundation, Inc.
 
@@ -17,7 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -57,7 +58,7 @@ ocd_open (scb, name)
       if (handle == NULL)
 	error ("Can't load Wigglers.dll");
 
-      dll_do_command = ((int (*) PARAMS ((const char *, char *)))
+      dll_do_command = ((int (*)PARAMS ((const char *, char *)))
 			GetProcAddress (handle, "do_command"));
       if (dll_do_command == NULL)
 	error ("Can't find do_command function in Wigglers.dll");
@@ -91,7 +92,7 @@ ocd_readremote ()
 /* We need a buffer to store responses from the Wigglers.dll */
 #define WIGGLER_BUFF_SIZE 512
 unsigned char from_wiggler_buffer[WIGGLER_BUFF_SIZE];
-unsigned char * wiggler_buffer_ptr;	/* curr spot in buffer */
+unsigned char *wiggler_buffer_ptr;	/* curr spot in buffer */
 
 static int
 ocd_readchar (scb, timeout)
@@ -100,13 +101,14 @@ ocd_readchar (scb, timeout)
 {
   /* Catch attempts at reading past the end of the buffer */
   if (wiggler_buffer_ptr >
-              (from_wiggler_buffer + (sizeof (char *) * WIGGLER_BUFF_SIZE)))
-    error ("ocd_readchar asked to read past the end of the buffer!");
+      (from_wiggler_buffer + (sizeof (char *) * WIGGLER_BUFF_SIZE)))
+      error ("ocd_readchar asked to read past the end of the buffer!");
 
-  return (int) *wiggler_buffer_ptr++; /* return curr char and increment ptr */
+  return (int) *wiggler_buffer_ptr++;	/* return curr char and increment ptr */
 }
 
-struct ocd_ttystate {
+struct ocd_ttystate
+{
   int dummy;
 };
 
@@ -166,9 +168,9 @@ ocd_write (scb, str, len)
 {
   char c;
 
-#ifdef _WIN32 
+#ifdef _WIN32
   /* send packet to Wigglers.dll and store response so we can give it to
-	remote-wiggler.c when get_packet is run */
+     remote-wiggler.c when get_packet is run */
   dll_do_command (str, from_wiggler_buffer);
   wiggler_buffer_ptr = from_wiggler_buffer;
 #endif
@@ -190,16 +192,16 @@ static struct serial_ops ocd_ops =
   ocd_close,
   ocd_readchar,
   ocd_write,
-  ocd_noop,		/* flush output */
-  ocd_noop,		/* flush input */
-  ocd_noop,		/* send break -- currently used only for nindy */
+  ocd_noop,			/* flush output */
+  ocd_noop,			/* flush input */
+  ocd_noop,			/* send break -- currently used only for nindy */
   ocd_raw,
   ocd_get_tty_state,
   ocd_set_tty_state,
   ocd_print_tty_state,
   ocd_noflush_set_tty_state,
   ocd_setbaudrate,
-  ocd_noop,		/* wait for output to drain */
+  ocd_noop,			/* wait for output to drain */
 };
 
 void

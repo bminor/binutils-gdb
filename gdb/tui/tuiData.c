@@ -1,8 +1,8 @@
 /*
-** tuiData.c
-**    This module contains functions for manipulating the data
-**    structures used by the TUI
-*/
+   ** tuiData.c
+   **    This module contains functions for manipulating the data
+   **    structures used by the TUI
+ */
 
 #include "defs.h"
 #include "tui.h"
@@ -64,9 +64,9 @@ static void freeContentElements PARAMS ((TuiWinContent, int, TuiWinType));
 ******************************************/
 
 /*
-** tuiWinResized().
-**        Answer a whether the terminal window has been resized or not
-*/
+   ** tuiWinResized().
+   **        Answer a whether the terminal window has been resized or not
+ */
 int
 #ifdef __STDC__
 tuiWinResized (void)
@@ -79,9 +79,9 @@ tuiWinResized ()
 
 
 /*
-** tuiSetWinResized().
-**        Set a whether the terminal window has been resized or not
-*/
+   ** tuiSetWinResized().
+   **        Set a whether the terminal window has been resized or not
+ */
 void
 #ifdef __STDC__
 tuiSetWinResizedTo (
@@ -98,9 +98,9 @@ tuiSetWinResizedTo (resized)
 
 
 /*
-** tuiLayoutDef().
-**        Answer a pointer to the current layout definition
-*/
+   ** tuiLayoutDef().
+   **        Answer a pointer to the current layout definition
+ */
 TuiLayoutDefPtr
 #ifdef __STDC__
 tuiLayoutDef (void)
@@ -113,9 +113,9 @@ tuiLayoutDef ()
 
 
 /*
-** tuiWinWithFocus().
-**        Answer the window with the logical focus
-*/
+   ** tuiWinWithFocus().
+   **        Answer the window with the logical focus
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 tuiWinWithFocus (void)
@@ -128,9 +128,9 @@ tuiWinWithFocus ()
 
 
 /*
-** tuiSetWinWithFocus().
-**        Set the window that has the logical focus
-*/
+   ** tuiSetWinWithFocus().
+   **        Set the window that has the logical focus
+ */
 void
 #ifdef __STDC__
 tuiSetWinWithFocus (
@@ -147,9 +147,9 @@ tuiSetWinWithFocus (winInfo)
 
 
 /*
-** tuiDefaultTabLen().
-**        Answer the length in chars, of tabs
-*/
+   ** tuiDefaultTabLen().
+   **        Answer the length in chars, of tabs
+ */
 int
 #ifdef __STDC__
 tuiDefaultTabLen (void)
@@ -162,9 +162,9 @@ tuiDefaultTabLen ()
 
 
 /*
-** tuiSetDefaultTabLen().
-**        Set the length in chars, of tabs
-*/
+   ** tuiSetDefaultTabLen().
+   **        Set the length in chars, of tabs
+ */
 void
 #ifdef __STDC__
 tuiSetDefaultTabLen (
@@ -181,11 +181,11 @@ tuiSetDefaultTabLen (len)
 
 
 /*
-** currentSourceWin()
-**        Accessor for the current source window.  Usually there is only
-**        one source window (either source or disassembly), but both can
-**        be displayed at the same time.
-*/
+   ** currentSourceWin()
+   **        Accessor for the current source window.  Usually there is only
+   **        one source window (either source or disassembly), but both can
+   **        be displayed at the same time.
+ */
 TuiListPtr
 #ifdef __STDC__
 sourceWindows (void)
@@ -198,11 +198,11 @@ sourceWindows ()
 
 
 /*
-** clearSourceWindows()
-**        Clear the list of source windows.  Usually there is only one
-**        source window (either source or disassembly), but both can be
-**        displayed at the same time.
-*/
+   ** clearSourceWindows()
+   **        Clear the list of source windows.  Usually there is only one
+   **        source window (either source or disassembly), but both can be
+   **        displayed at the same time.
+ */
 void
 #ifdef __STDC__
 clearSourceWindows (void)
@@ -219,9 +219,9 @@ clearSourceWindows ()
 
 
 /*
-** clearSourceWindowsDetail()
-**        Clear the pertinant detail in the source windows.
-*/
+   ** clearSourceWindowsDetail()
+   **        Clear the pertinant detail in the source windows.
+ */
 void
 #ifdef __STDC__
 clearSourceWindowsDetail (void)
@@ -239,11 +239,11 @@ clearSourceWindowsDetail ()
 
 
 /*
-** addSourceWindowToList().
-**       Add a window to the list of source windows.  Usually there is
-**       only one source window (either source or disassembly), but
-**       both can be displayed at the same time.
-*/
+   ** addSourceWindowToList().
+   **       Add a window to the list of source windows.  Usually there is
+   **       only one source window (either source or disassembly), but
+   **       both can be displayed at the same time.
+ */
 void
 #ifdef __STDC__
 addToSourceWindows (
@@ -261,9 +261,9 @@ addToSourceWindows (winInfo)
 
 
 /*
-** clearWinDetail()
-**        Clear the pertinant detail in the windows.
-*/
+   ** clearWinDetail()
+   **        Clear the pertinant detail in the windows.
+ */
 void
 #ifdef __STDC__
 clearWinDetail (
@@ -308,9 +308,9 @@ clearWinDetail (winInfo)
 
 
 /*
-** blankStr()
-**        Accessor for the blank string.
-*/
+   ** blankStr()
+   **        Accessor for the blank string.
+ */
 char *
 #ifdef __STDC__
 blankStr (void)
@@ -323,9 +323,9 @@ blankStr ()
 
 
 /*
-** locationStr()
-**        Accessor for the location string.
-*/
+   ** locationStr()
+   **        Accessor for the location string.
+ */
 char *
 #ifdef __STDC__
 locationStr (void)
@@ -338,9 +338,9 @@ locationStr ()
 
 
 /*
-** breakStr()
-**        Accessor for the break string.
-*/
+   ** breakStr()
+   **        Accessor for the break string.
+ */
 char *
 #ifdef __STDC__
 breakStr (void)
@@ -353,9 +353,9 @@ breakStr ()
 
 
 /*
-** breakLocationStr()
-**        Accessor for the breakLocation string.
-*/
+   ** breakLocationStr()
+   **        Accessor for the breakLocation string.
+ */
 char *
 #ifdef __STDC__
 breakLocationStr (void)
@@ -368,9 +368,9 @@ breakLocationStr ()
 
 
 /*
-** nullStr()
-**        Accessor for the null string.
-*/
+   ** nullStr()
+   **        Accessor for the null string.
+ */
 char *
 #ifdef __STDC__
 nullStr (void)
@@ -383,9 +383,9 @@ nullStr ()
 
 
 /*
-** sourceExecInfoPtr().
-**        Accessor for the source execution info ptr.
-*/
+   ** sourceExecInfoPtr().
+   **        Accessor for the source execution info ptr.
+ */
 TuiGenWinInfoPtr
 #ifdef __STDC__
 sourceExecInfoWinPtr (void)
@@ -398,9 +398,9 @@ sourceExecInfoWinPtr ()
 
 
 /*
-** disassemExecInfoPtr().
-**        Accessor for the disassem execution info ptr.
-*/
+   ** disassemExecInfoPtr().
+   **        Accessor for the disassem execution info ptr.
+ */
 TuiGenWinInfoPtr
 #ifdef __STDC__
 disassemExecInfoWinPtr (void)
@@ -413,10 +413,10 @@ disassemExecInfoWinPtr ()
 
 
 /*
-** locatorWinInfoPtr().
-**        Accessor for the locator win info.  Answers a pointer to the
-**        static locator win info struct.
-*/
+   ** locatorWinInfoPtr().
+   **        Accessor for the locator win info.  Answers a pointer to the
+   **        static locator win info struct.
+ */
 TuiGenWinInfoPtr
 #ifdef __STDC__
 locatorWinInfoPtr (void)
@@ -429,9 +429,9 @@ locatorWinInfoPtr ()
 
 
 /*
-** historyLimit().
-**        Accessor for the history limit
-*/
+   ** historyLimit().
+   **        Accessor for the history limit
+ */
 int
 #ifdef __STDC__
 historyLimit (void)
@@ -444,9 +444,9 @@ historyLimit ()
 
 
 /*
-** setHistoryLimitTo().
-**        Mutator for the history limit
-*/
+   ** setHistoryLimitTo().
+   **        Mutator for the history limit
+ */
 void
 #ifdef __STDC__
 setHistoryLimitTo (
@@ -462,9 +462,9 @@ setHistoryLimitTo (h)
 }				/* setHistoryLimitTo */
 
 /*
-** termHeight().
-**        Accessor for the termHeight
-*/
+   ** termHeight().
+   **        Accessor for the termHeight
+ */
 int
 #ifdef __STDC__
 termHeight (void)
@@ -477,9 +477,9 @@ termHeight ()
 
 
 /*
-** setTermHeightTo().
-**        Mutator for the term height
-*/
+   ** setTermHeightTo().
+   **        Mutator for the term height
+ */
 void
 #ifdef __STDC__
 setTermHeightTo (
@@ -496,9 +496,9 @@ setTermHeightTo (h)
 
 
 /*
-** termWidth().
-**        Accessor for the termWidth
-*/
+   ** termWidth().
+   **        Accessor for the termWidth
+ */
 int
 #ifdef __STDC__
 termWidth (void)
@@ -511,9 +511,9 @@ termWidth ()
 
 
 /*
-** setTermWidth().
-**        Mutator for the termWidth
-*/
+   ** setTermWidth().
+   **        Mutator for the termWidth
+ */
 void
 #ifdef __STDC__
 setTermWidthTo (
@@ -530,9 +530,9 @@ setTermWidthTo (w)
 
 
 /*
-** currentLayout().
-**        Accessor for the current layout
-*/
+   ** currentLayout().
+   **        Accessor for the current layout
+ */
 TuiLayoutType
 #ifdef __STDC__
 currentLayout (void)
@@ -545,9 +545,9 @@ currentLayout ()
 
 
 /*
-** setCurrentLayoutTo().
-**        Mutator for the current layout
-*/
+   ** setCurrentLayoutTo().
+   **        Mutator for the current layout
+ */
 void
 #ifdef __STDC__
 setCurrentLayoutTo (
@@ -564,9 +564,9 @@ setCurrentLayoutTo (newLayout)
 
 
 /*
-** setGenWinOrigin().
-**        Set the origin of the window
-*/
+   ** setGenWinOrigin().
+   **        Set the origin of the window
+ */
 void
 #ifdef __STDC__
 setGenWinOrigin (
@@ -593,10 +593,10 @@ setGenWinOrigin (winInfo, x, y)
 
 
 /*
-** tuiNextWin().
-**        Answer the next window in the list, cycling back to the top
-**        if necessary
-*/
+   ** tuiNextWin().
+   **        Answer the next window in the list, cycling back to the top
+   **        if necessary
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 tuiNextWin (
@@ -631,10 +631,10 @@ tuiNextWin (curWin)
 
 
 /*
-** tuiPrevWin().
-**        Answer the prev window in the list, cycling back to the bottom
-**        if necessary
-*/
+   ** tuiPrevWin().
+   **        Answer the prev window in the list, cycling back to the bottom
+   **        if necessary
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 tuiPrevWin (
@@ -669,11 +669,11 @@ tuiPrevWin (curWin)
 
 
 /*
-** displayableWinContentOf().
-**        Answer a the content at the location indicated by index.  Note
-**        that if this is a locator window, the string returned should be
-**        freed after use.
-*/
+   ** displayableWinContentOf().
+   **        Answer a the content at the location indicated by index.  Note
+   **        that if this is a locator window, the string returned should be
+   **        freed after use.
+ */
 char *
 #ifdef __STDC__
 displayableWinContentOf (
@@ -691,8 +691,8 @@ displayableWinContentOf (winInfo, elementPtr)
   if (elementPtr != (TuiWinElementPtr) NULL || winInfo->type == LOCATOR_WIN)
     {
       /*
-        ** Now convert the line to a displayable string
-        */
+         ** Now convert the line to a displayable string
+       */
       switch (winInfo->type)
 	{
 	case SRC_WIN:
@@ -712,12 +712,12 @@ displayableWinContentOf (winInfo, elementPtr)
 	      register int strSize = termWidth (), i, procWidth, fileWidth;
 
 	      /*
-                    ** First determine the amount of file/proc name width
-                    ** we have available
-                    */
+	         ** First determine the amount of file/proc name width
+	         ** we have available
+	       */
 	      i = strSize - (PC_WIDTH + LINE_WIDTH
 			     + 25	/* pc and line labels */
-			     + strlen (FILE_PREFIX) + 1	/* file label */
+			     + strlen (FILE_PREFIX) + 1		/* file label */
 			     + 15 /* procedure label */ );
 	      if (i >= FILE_WIDTH + PROC_WIDTH)
 		{
@@ -755,11 +755,11 @@ displayableWinContentOf (winInfo, elementPtr)
 	      else
 		strcpy (pc, "??");
 	      /*
-                    ** Now create the locator line from the string version
-                    ** of the elements.  We could use sprintf() here but
-                    ** that wouldn't ensure that we don't overrun the size
-                    ** of the allocated buffer.  strcat_to_buf() will.
-                    */
+	         ** Now create the locator line from the string version
+	         ** of the elements.  We could use sprintf() here but
+	         ** that wouldn't ensure that we don't overrun the size
+	         ** of the allocated buffer.  strcat_to_buf() will.
+	       */
 	      *string = (char) 0;
 	      /* Filename */
 	      strcat_to_buf (string, strSize, " ");
@@ -808,9 +808,9 @@ displayableWinContentOf (winInfo, elementPtr)
 
 
 /*
-**    winContentAt().
-**        Answer a the content at the location indicated by index
-*/
+   **    winContentAt().
+   **        Answer a the content at the location indicated by index
+ */
 char *
 #ifdef __STDC__
 displayableWinContentAt (
@@ -827,9 +827,9 @@ displayableWinContentAt (winInfo, index)
 
 
 /*
-** winElementHeight().
-**        Answer the height of the element in lines
-*/
+   ** winElementHeight().
+   **        Answer the height of the element in lines
+ */
 int
 #ifdef __STDC__
 winElementHeight (
@@ -854,9 +854,9 @@ winElementHeight (winInfo, element)
 
 
 /*
-**  winByName().
-**      Answer the window represented by name
-*/
+   **  winByName().
+   **      Answer the window represented by name
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 winByName (
@@ -881,9 +881,9 @@ winByName (name)
 
 
 /*
-**  partialWinByName().
-**      Answer the window represented by name
-*/
+   **  partialWinByName().
+   **      Answer the window represented by name
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 partialWinByName (
@@ -914,9 +914,9 @@ partialWinByName (name)
 
 
 /*
-** winName().
-**      Answer the name of the window
-*/
+   ** winName().
+   **      Answer the name of the window
+ */
 char *
 #ifdef __STDC__
 winName (
@@ -952,8 +952,8 @@ winName (winInfo)
 
 
 /*
-** initializeStaticData
-*/
+   ** initializeStaticData
+ */
 void
 #ifdef __STDC__
 initializeStaticData (void)
@@ -970,8 +970,8 @@ initializeStaticData ()
 
 
 /*
-** allocGenericWinInfo().
-*/
+   ** allocGenericWinInfo().
+ */
 TuiGenWinInfoPtr
 #ifdef __STDC__
 allocGenericWinInfo (void)
@@ -990,8 +990,8 @@ allocGenericWinInfo ()
 
 
 /*
-** initGenericPart().
-*/
+   ** initGenericPart().
+ */
 void
 #ifdef __STDC__
 initGenericPart (
@@ -1018,8 +1018,8 @@ initGenericPart (win)
 
 
 /*
-** initContentElement().
-*/
+   ** initContentElement().
+ */
 void
 #ifdef __STDC__
 initContentElement (
@@ -1075,8 +1075,8 @@ initContentElement (element, type)
 }				/* initContentElement */
 
 /*
-** initWinInfo().
-*/
+   ** initWinInfo().
+ */
 void
 #ifdef __STDC__
 initWinInfo (
@@ -1122,8 +1122,8 @@ initWinInfo (winInfo)
 
 
 /*
-** allocWinInfo().
-*/
+   ** allocWinInfo().
+ */
 TuiWinInfoPtr
 #ifdef __STDC__
 allocWinInfo (
@@ -1147,9 +1147,9 @@ allocWinInfo (type)
 
 
 /*
-** allocContent().
-**        Allocates the content and elements in a block.
-*/
+   ** allocContent().
+   **        Allocates the content and elements in a block.
+ */
 TuiWinContent
 #ifdef __STDC__
 allocContent (
@@ -1168,10 +1168,10 @@ allocContent (numElements, type)
   if ((content = (TuiWinContent)
   xmalloc (sizeof (TuiWinElementPtr) * numElements)) != (TuiWinContent) NULL)
     {				/*
-        ** All windows, except the data window, can allocate the elements
-        ** in a chunk.  The data window cannot because items can be
-        ** added/removed from the data display by the user at any time.
-        */
+				   ** All windows, except the data window, can allocate the elements
+				   ** in a chunk.  The data window cannot because items can be
+				   ** added/removed from the data display by the user at any time.
+				 */
       if (type != DATA_WIN)
 	{
 	  if ((elementBlockPtr = (char *)
@@ -1197,13 +1197,13 @@ allocContent (numElements, type)
 
 
 /*
-** addContentElements().
-**        Adds the input number of elements to the windows's content.  If
-**        no content has been allocated yet, allocContent() is called to
-**        do this.  The index of the first element added is returned,
-**        unless there is a memory allocation error, in which case, (-1)
-**        is returned.
-*/
+   ** addContentElements().
+   **        Adds the input number of elements to the windows's content.  If
+   **        no content has been allocated yet, allocContent() is called to
+   **        do this.  The index of the first element added is returned,
+   **        unless there is a memory allocation error, in which case, (-1)
+   **        is returned.
+ */
 int
 #ifdef __STDC__
 addContentElements (
@@ -1236,7 +1236,7 @@ addContentElements (winInfo, numElements)
 	      initContentElement (elementPtr, winInfo->type);
 	      winInfo->contentSize++;
 	    }
-	  else			/* things must be really hosed now! We ran out of memory!?*/
+	  else			/* things must be really hosed now! We ran out of memory!? */
 	    return (-1);
 	}
     }
@@ -1246,10 +1246,10 @@ addContentElements (winInfo, numElements)
 
 
 /*
-**  tuiDelWindow().
-**     Delete all curses windows associated with winInfo, leaving everything
-**     else in tact.
-*/
+   **  tuiDelWindow().
+   **     Delete all curses windows associated with winInfo, leaving everything
+   **     else in tact.
+ */
 void
 #ifdef __STDC__
 tuiDelWindow (
@@ -1311,8 +1311,8 @@ tuiDelWindow (winInfo)
 
 
 /*
-**  freeWindow().
-*/
+   **  freeWindow().
+ */
 void
 #ifdef __STDC__
 freeWindow (
@@ -1385,8 +1385,8 @@ freeWindow (winInfo)
 
 
 /*
-** freeAllSourceWinsContent().
-*/
+   ** freeAllSourceWinsContent().
+ */
 void
 #ifdef __STDC__
 freeAllSourceWinsContent (void)
@@ -1412,8 +1412,8 @@ freeAllSourceWinsContent ()
 
 
 /*
-** freeWinContent().
-*/
+   ** freeWinContent().
+ */
 void
 #ifdef __STDC__
 freeWinContent (
@@ -1437,8 +1437,8 @@ freeWinContent (winInfo)
 
 
 /*
-** freeAllWindows().
-*/
+   ** freeAllWindows().
+ */
 void
 #ifdef __STDC__
 freeAllWindows (void)
@@ -1470,9 +1470,9 @@ tuiDelDataWindows (content, contentSize)
   int i;
 
   /*
-    ** Remember that data window content elements are of type TuiGenWinInfoPtr,
-    ** each of which whose single element is a data element.
-    */
+     ** Remember that data window content elements are of type TuiGenWinInfoPtr,
+     ** each of which whose single element is a data element.
+   */
   for (i = 0; i < contentSize; i++)
     {
       TuiGenWinInfoPtr genericWin = &content[i]->whichElement.dataWindow;
@@ -1503,9 +1503,9 @@ freeDataContent (content, contentSize)
   int i;
 
   /*
-    ** Remember that data window content elements are of type TuiGenWinInfoPtr,
-    ** each of which whose single element is a data element.
-    */
+     ** Remember that data window content elements are of type TuiGenWinInfoPtr,
+     ** each of which whose single element is a data element.
+   */
   for (i = 0; i < contentSize; i++)
     {
       TuiGenWinInfoPtr genericWin = &content[i]->whichElement.dataWindow;
@@ -1531,8 +1531,8 @@ freeDataContent (content, contentSize)
 
 
 /*
-** freeContent().
-*/
+   ** freeContent().
+ */
 static void
 #ifdef __STDC__
 freeContent (
@@ -1557,8 +1557,8 @@ freeContent (content, contentSize, winType)
 
 
 /*
-** freeContentElements().
-*/
+   ** freeContentElements().
+ */
 static void
 #ifdef __STDC__
 freeContentElements (
@@ -1598,9 +1598,9 @@ freeContentElements (content, contentSize, type)
 		      break;
 		    case DATA_ITEM_WIN:
 		      /*
-                            ** Note that data elements are not allocated
-                            ** in a single block, but individually, as needed.
-                            */
+		         ** Note that data elements are not allocated
+		         ** in a single block, but individually, as needed.
+		       */
 		      if (element->whichElement.data.type != TUI_REGISTER)
 			tuiFree ((char *)
 				 element->whichElement.data.name);

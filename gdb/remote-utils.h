@@ -2,21 +2,22 @@
 
    Copyright 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifndef REMOTE_UTILS_H
 #define REMOTE_UTILS_H
@@ -28,15 +29,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Stuff that should be shared (and handled consistently) among the various
    remote targets.  */
 
-struct _sr_settings {
-  unsigned int timeout;
+struct _sr_settings
+  {
+    unsigned int timeout;
 
-  int retries;
+    int retries;
 
-  char *device;
-  serial_t desc;
+    char *device;
+    serial_t desc;
 
-};
+  };
 
 extern struct _sr_settings sr_settings;
 
@@ -69,16 +71,17 @@ extern struct _sr_settings sr_settings;
 #define sr_check_open() 	{ if (!sr_is_open()) \
 				    error ("Remote device not open"); }
 
-struct gr_settings {
-  /* This is our data cache. */
-  DCACHE *dcache;
-  char *prompt;
-  struct target_ops *ops;
-  int (*clear_all_breakpoints)PARAMS((void));
-  memxferfunc readfunc;
-  memxferfunc writefunc;
-  void (*checkin)PARAMS((void));
-};
+struct gr_settings
+  {
+    /* This is our data cache. */
+    DCACHE *dcache;
+    char *prompt;
+    struct target_ops *ops;
+    int (*clear_all_breakpoints) PARAMS ((void));
+    memxferfunc readfunc;
+    memxferfunc writefunc;
+    void (*checkin) PARAMS ((void));
+  };
 
 extern struct gr_settings *gr_settings;
 
@@ -114,29 +117,29 @@ extern struct gr_settings *gr_settings;
 
 #define gr_expect_prompt()	sr_expect(gr_get_prompt())
 
-int gr_fetch_word PARAMS((CORE_ADDR addr));
-int gr_multi_scan PARAMS((char *list[], int passthrough));
-int sr_get_hex_digit PARAMS((int ignore_space));
-int sr_pollchar PARAMS((void));
-int sr_readchar PARAMS((void));
-int sr_timed_read PARAMS((char *buf, int n));
-long sr_get_hex_word PARAMS((void));
-void gr_close PARAMS((int quitting));
-void gr_create_inferior PARAMS((char *execfile, char *args, char **env));
-void gr_detach PARAMS((char *args, int from_tty));
-void gr_files_info PARAMS((struct target_ops *ops));
-void gr_generic_checkin PARAMS((void));
-void gr_kill PARAMS((void));
-void gr_mourn PARAMS((void));
-void gr_prepare_to_store PARAMS((void));
-void gr_store_word PARAMS((CORE_ADDR addr, int word));
-void sr_expect PARAMS((char *string));
-void sr_get_hex_byte PARAMS((char *byt));
-void sr_scan_args PARAMS((char *proto, char *args));
-void sr_write PARAMS((char *a, int l));
-void sr_write_cr PARAMS((char *s));
+int gr_fetch_word PARAMS ((CORE_ADDR addr));
+int gr_multi_scan PARAMS ((char *list[], int passthrough));
+int sr_get_hex_digit PARAMS ((int ignore_space));
+int sr_pollchar PARAMS ((void));
+int sr_readchar PARAMS ((void));
+int sr_timed_read PARAMS ((char *buf, int n));
+long sr_get_hex_word PARAMS ((void));
+void gr_close PARAMS ((int quitting));
+void gr_create_inferior PARAMS ((char *execfile, char *args, char **env));
+void gr_detach PARAMS ((char *args, int from_tty));
+void gr_files_info PARAMS ((struct target_ops * ops));
+void gr_generic_checkin PARAMS ((void));
+void gr_kill PARAMS ((void));
+void gr_mourn PARAMS ((void));
+void gr_prepare_to_store PARAMS ((void));
+void gr_store_word PARAMS ((CORE_ADDR addr, int word));
+void sr_expect PARAMS ((char *string));
+void sr_get_hex_byte PARAMS ((char *byt));
+void sr_scan_args PARAMS ((char *proto, char *args));
+void sr_write PARAMS ((char *a, int l));
+void sr_write_cr PARAMS ((char *s));
 
-void gr_open PARAMS((char *args, int from_tty,
-		     struct gr_settings *gr_settings)); 
-void gr_load_image PARAMS((char*, int from_tty));
+void gr_open PARAMS ((char *args, int from_tty,
+		      struct gr_settings * gr_settings));
+void gr_load_image PARAMS ((char *, int from_tty));
 #endif /* REMOTE_UTILS_H */

@@ -2,21 +2,22 @@
    Copyright 1996
    Free Software Foundation, Inc. 
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
@@ -81,7 +82,7 @@ extern char **v850_register_names;
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 
-#define BREAKPOINT {0x40, 0xF8} /* little-ended */
+#define BREAKPOINT {0x40, 0xF8}	/* little-ended */
 
 #define FUNCTION_START_OFFSET 0
 
@@ -100,19 +101,19 @@ struct value;
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
 
-extern void v850_init_extra_frame_info PARAMS ((struct frame_info *fi));
+extern void v850_init_extra_frame_info PARAMS ((struct frame_info * fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) v850_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern void v850_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *regaddr));
+extern void v850_frame_find_saved_regs PARAMS ((struct frame_info * fi, struct frame_saved_regs * regaddr));
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
 
-extern CORE_ADDR v850_frame_chain PARAMS ((struct frame_info *fi));
+extern CORE_ADDR v850_frame_chain PARAMS ((struct frame_info * fi));
 #define FRAME_CHAIN(fi) v850_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
 
-extern CORE_ADDR v850_find_callers_reg PARAMS ((struct frame_info *fi, int regnum));
-extern CORE_ADDR v850_frame_saved_pc   PARAMS ((struct frame_info *));
+extern CORE_ADDR v850_find_callers_reg PARAMS ((struct frame_info * fi, int regnum));
+extern CORE_ADDR v850_frame_saved_pc PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FI) (v850_frame_saved_pc (FI))
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
@@ -134,7 +135,7 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(fi) (-1)
 
-extern void v850_pop_frame PARAMS ((struct frame_info *frame));
+extern void v850_pop_frame PARAMS ((struct frame_info * frame));
 #define POP_FRAME v850_pop_frame (get_current_frame ())
 
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -151,9 +152,9 @@ extern CORE_ADDR v850_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 extern CORE_ADDR
-v850_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
-			     unsigned char struct_return,
-			     CORE_ADDR struct_addr));
+  v850_push_arguments PARAMS ((int nargs, struct value ** args, CORE_ADDR sp,
+			       unsigned char struct_return,
+			       CORE_ADDR struct_addr));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (v850_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

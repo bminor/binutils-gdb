@@ -5,21 +5,22 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Forward declarations of some types we use in prototypes */
 
@@ -68,7 +69,7 @@ struct inferior_status;
    Zero on most machines.  */
 
 #define FUNCTION_START_OFFSET 0
-     
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
@@ -105,10 +106,10 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
 
 /* elz: adjust the quantity to the next highest value which is 64-bit aligned.
    This is used in valops.c, when the sp is adjusted.
-   On hppa the sp must always be kept 64-bit aligned*/
+   On hppa the sp must always be kept 64-bit aligned */
 
 #define STACK_ALIGN(arg) ( ((arg)%8) ? (((arg)+7)&-8) : (arg))
-#define NO_EXTRA_ALIGNMENT_NEEDED 1 
+#define NO_EXTRA_ALIGNMENT_NEEDED 1
 
 /* Sequence of bytes for breakpoint instruction.  */
 
@@ -145,11 +146,11 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
    is of these "really, truly negative" addresses that come from the
    minimal symbols, I'm resorting to the gross hack of checking the
    top byte of the address for all 1's.  Sigh.
-   */
+ */
 #define PC_REQUIRES_RUN_BEFORE_USE(pc) \
   (! target_has_stack && (pc & 0xFF000000))
 
-/* return instruction is bv r0(rp) or bv,n r0(rp)*/
+/* return instruction is bv r0(rp) or bv,n r0(rp) */
 
 #define ABOUT_TO_RETURN(pc) ((read_memory_integer (pc, 4) | 0x2) == 0xE840C002)
 
@@ -212,14 +213,14 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
 #define RCR_REGNUM 51		/* Recover Counter (also known as cr0) */
 #define CCR_REGNUM 54		/* Coprocessor Configuration Register */
 #define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
-#define CR27_REGNUM 60          /* Base register for thread-local storage, cr27 */
-#define FP0_REGNUM 64		/* floating point reg. 0 (fspr)*/
+#define CR27_REGNUM 60		/* Base register for thread-local storage, cr27 */
+#define FP0_REGNUM 64		/* floating point reg. 0 (fspr) */
 #define FP4_REGNUM 72
 
-#define ARG0_REGNUM 26          /* The first argument of a callee. */
-#define ARG1_REGNUM 25          /* The second argument of a callee. */
-#define ARG2_REGNUM 24          /* The third argument of a callee. */
-#define ARG3_REGNUM 23          /* The fourth argument of a callee. */
+#define ARG0_REGNUM 26		/* The first argument of a callee. */
+#define ARG1_REGNUM 25		/* The second argument of a callee. */
+#define ARG2_REGNUM 24		/* The third argument of a callee. */
+#define ARG3_REGNUM 23		/* The fourth argument of a callee. */
 
 /* compatibility with the rest of gdb. */
 #define PC_REGNUM PCOQ_HEAD_REGNUM
@@ -229,22 +230,22 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
  * Processor Status Word Masks
  */
 
-#define PSW_T   0x01000000      /* Taken Branch Trap Enable */
-#define PSW_H   0x00800000      /* Higher-Privilege Transfer Trap Enable */
-#define PSW_L   0x00400000      /* Lower-Privilege Transfer Trap Enable */
-#define PSW_N   0x00200000      /* PC Queue Front Instruction Nullified */
-#define PSW_X   0x00100000      /* Data Memory Break Disable */
-#define PSW_B   0x00080000      /* Taken Branch in Previous Cycle */
-#define PSW_C   0x00040000      /* Code Address Translation Enable */
-#define PSW_V   0x00020000      /* Divide Step Correction */
-#define PSW_M   0x00010000      /* High-Priority Machine Check Disable */
-#define PSW_CB  0x0000ff00      /* Carry/Borrow Bits */
-#define PSW_R   0x00000010      /* Recovery Counter Enable */
-#define PSW_Q   0x00000008      /* Interruption State Collection Enable */
-#define PSW_P   0x00000004      /* Protection ID Validation Enable */
-#define PSW_D   0x00000002      /* Data Address Translation Enable */
-#define PSW_I   0x00000001      /* External, Power Failure, Low-Priority */
-                                /* Machine Check Interruption Enable */
+#define PSW_T   0x01000000	/* Taken Branch Trap Enable */
+#define PSW_H   0x00800000	/* Higher-Privilege Transfer Trap Enable */
+#define PSW_L   0x00400000	/* Lower-Privilege Transfer Trap Enable */
+#define PSW_N   0x00200000	/* PC Queue Front Instruction Nullified */
+#define PSW_X   0x00100000	/* Data Memory Break Disable */
+#define PSW_B   0x00080000	/* Taken Branch in Previous Cycle */
+#define PSW_C   0x00040000	/* Code Address Translation Enable */
+#define PSW_V   0x00020000	/* Divide Step Correction */
+#define PSW_M   0x00010000	/* High-Priority Machine Check Disable */
+#define PSW_CB  0x0000ff00	/* Carry/Borrow Bits */
+#define PSW_R   0x00000010	/* Recovery Counter Enable */
+#define PSW_Q   0x00000008	/* Interruption State Collection Enable */
+#define PSW_P   0x00000004	/* Protection ID Validation Enable */
+#define PSW_D   0x00000002	/* Data Address Translation Enable */
+#define PSW_I   0x00000001	/* External, Power Failure, Low-Priority */
+				/* Machine Check Interruption Enable */
 
 /* When fetching register values from an inferior or a core file,
    clean them up using this macro.  BUF is a char pointer to
@@ -347,7 +348,7 @@ extern void pa_do_strcat_registers_info PARAMS ((int, int, GDB_FILE *, enum prec
     fr4: floating point up to 64 bits
     sr1: space identifier (32-bit)
     stack: any lager than 64-bit, with the address in r28
- */
+  */
 extern use_struct_convention_fn hppa_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p,type) hppa_use_struct_convention (gcc_p,type)
 
@@ -384,7 +385,7 @@ extern use_struct_convention_fn hppa_use_struct_convention;
    convention doc. As far as I know, the only way to get the return value
    is to have the caller tell us where it told the callee to put it, rather
    than have the callee tell us.
-*/
+ */
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
@@ -441,7 +442,7 @@ extern int hppa_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
   (frameless_function_invocation (FI))
 extern int frameless_function_invocation PARAMS ((struct frame_info *));
 
-extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info *frame));
+extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info * frame));
 #define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
@@ -463,8 +464,8 @@ extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info *frame));
 extern void
 hppa_frame_find_saved_regs PARAMS ((struct frame_info *,
 				    struct frame_saved_regs *));
-
 
+
 /* Things needed for making the inferior call functions.  */
 
 /* Push an empty stack frame, to record the current PC, etc. */
@@ -486,40 +487,40 @@ extern void hppa_pop_frame PARAMS ((void));
 
 /* This sequence of words is the instructions
 
-; Call stack frame has already been built by gdb. Since we could be calling 
-; a varargs function, and we do not have the benefit of a stub to put things in
-; the right place, we load the first 4 word of arguments into both the general
-; and fp registers.
-call_dummy
-	ldw -36(sp), arg0
-	ldw -40(sp), arg1
-	ldw -44(sp), arg2
-	ldw -48(sp), arg3
-	ldo -36(sp), r1
-	fldws 0(0, r1), fr4
-	fldds -4(0, r1), fr5
-	fldws -8(0, r1), fr6
-	fldds -12(0, r1), fr7
-	ldil 0, r22			; FUNC_LDIL_OFFSET must point here
-	ldo 0(r22), r22			; FUNC_LDO_OFFSET must point here
-	ldsid (0,r22), r4
-	ldil 0, r1			; SR4EXPORT_LDIL_OFFSET must point here
-	ldo 0(r1), r1			; SR4EXPORT_LDO_OFFSET must point here
-	ldsid (0,r1), r20
-	combt,=,n r4, r20, text_space	; If target is in data space, do a
-	ble 0(sr5, r22)			; "normal" procedure call
-	copy r31, r2
-	break 4, 8 
-	mtsp r21, sr0
-	ble,n 0(sr0, r22)
-text_space				; Otherwise, go through _sr4export,
-	ble (sr4, r1)			; which will return back here.
-	stw r31,-24(r30)
-	break 4, 8
-	mtsp r21, sr0
-	ble,n 0(sr0, r22)
-	nop				; To avoid kernel bugs 
-	nop				; and keep the dummy 8 byte aligned
+   ; Call stack frame has already been built by gdb. Since we could be calling 
+   ; a varargs function, and we do not have the benefit of a stub to put things in
+   ; the right place, we load the first 4 word of arguments into both the general
+   ; and fp registers.
+   call_dummy
+   ldw -36(sp), arg0
+   ldw -40(sp), arg1
+   ldw -44(sp), arg2
+   ldw -48(sp), arg3
+   ldo -36(sp), r1
+   fldws 0(0, r1), fr4
+   fldds -4(0, r1), fr5
+   fldws -8(0, r1), fr6
+   fldds -12(0, r1), fr7
+   ldil 0, r22                  ; FUNC_LDIL_OFFSET must point here
+   ldo 0(r22), r22                      ; FUNC_LDO_OFFSET must point here
+   ldsid (0,r22), r4
+   ldil 0, r1                   ; SR4EXPORT_LDIL_OFFSET must point here
+   ldo 0(r1), r1                        ; SR4EXPORT_LDO_OFFSET must point here
+   ldsid (0,r1), r20
+   combt,=,n r4, r20, text_space        ; If target is in data space, do a
+   ble 0(sr5, r22)                      ; "normal" procedure call
+   copy r31, r2
+   break 4, 8 
+   mtsp r21, sr0
+   ble,n 0(sr0, r22)
+   text_space                           ; Otherwise, go through _sr4export,
+   ble (sr4, r1)                        ; which will return back here.
+   stw r31,-24(r30)
+   break 4, 8
+   mtsp r21, sr0
+   ble,n 0(sr0, r22)
+   nop                          ; To avoid kernel bugs 
+   nop                          ; and keep the dummy 8 byte aligned
 
    The dummy decides if the target is in text space or data space. If
    it's in data space, there's no problem because the target can
@@ -570,21 +571,21 @@ text_space				; Otherwise, go through _sr4export,
    registers (or floating point??), so we skip all that inter-space call stuff,
    and avoid touching the fp regs.
 
-call_dummy
+   call_dummy
 
-	ldw -36(%sp), %arg0
-	ldw -40(%sp), %arg1
-	ldw -44(%sp), %arg2
-	ldw -48(%sp), %arg3
-	ldil 0, %r31			; FUNC_LDIL_OFFSET must point here
-	ldo 0(%r31), %r31		; FUNC_LDO_OFFSET must point here
-	ble 0(%sr0, %r31)
-	copy %r31, %r2
-	break 4, 8 
-	nop				; restore_pc_queue expects these
-	bv,n 0(%r22)			; instructions to be here...
-	nop
-*/
+   ldw -36(%sp), %arg0
+   ldw -40(%sp), %arg1
+   ldw -44(%sp), %arg2
+   ldw -48(%sp), %arg3
+   ldil 0, %r31                 ; FUNC_LDIL_OFFSET must point here
+   ldo 0(%r31), %r31            ; FUNC_LDO_OFFSET must point here
+   ble 0(%sr0, %r31)
+   copy %r31, %r2
+   break 4, 8 
+   nop                          ; restore_pc_queue expects these
+   bv,n 0(%r22)                 ; instructions to be here...
+   nop
+ */
 
 /* Define offsets into the call dummy for the target function address */
 #define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 4)
@@ -620,14 +621,14 @@ call_dummy
 #define FIX_CALL_DUMMY hppa_fix_call_dummy
 
 extern CORE_ADDR
-hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
-			     struct value **, struct type *, int));
+  hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
+			       struct value **, struct type *, int));
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
-hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
-			     CORE_ADDR));
+  hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
+			       CORE_ADDR));
 
 /* The low two bits of the PC on the PA contain the privilege level.  Some
    genius implementing a (non-GCC) compiler apparently decided this means
@@ -645,51 +646,54 @@ hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
  * Unwind table and descriptor.
  */
 
-struct unwind_table_entry {
-  unsigned int region_start;
-  unsigned int region_end;
+struct unwind_table_entry
+  {
+    unsigned int region_start;
+    unsigned int region_end;
 
-  unsigned int Cannot_unwind         :  1;                      /* 0 */
-  unsigned int Millicode             :  1;                      /* 1 */
-  unsigned int Millicode_save_sr0    :  1;                      /* 2 */
-  unsigned int Region_description    :  2;                      /* 3..4 */
-  unsigned int reserved1             :  1;                      /* 5 */
-  unsigned int Entry_SR              :  1;                      /* 6 */
-  unsigned int Entry_FR              :  4; /* number saved */   /* 7..10 */
-  unsigned int Entry_GR              :  5; /* number saved */   /* 11..15 */
-  unsigned int Args_stored           :  1;                      /* 16 */
-  unsigned int Variable_Frame	     :  1;                      /* 17 */
-  unsigned int Separate_Package_Body :  1;                      /* 18 */
-  unsigned int Frame_Extension_Millicode:1;                     /* 19 */
-  unsigned int Stack_Overflow_Check  :  1;                      /* 20 */
-  unsigned int Two_Instruction_SP_Increment:1;                  /* 21 */
-  unsigned int Ada_Region	     :  1;                      /* 22 */
-  unsigned int cxx_info              :  1;                      /* 23 */
-  unsigned int cxx_try_catch         :  1;                      /* 24 */
-  unsigned int sched_entry_seq       :  1;                      /* 25 */
-  unsigned int reserved2	     :  1;                      /* 26 */
-  unsigned int Save_SP               :  1;                      /* 27 */
-  unsigned int Save_RP               :  1;                      /* 28 */
-  unsigned int Save_MRP_in_frame     :  1;                      /* 29 */
-  unsigned int extn_ptr_defined      :  1;                      /* 30 */
-  unsigned int Cleanup_defined       :  1;                      /* 31 */
+    unsigned int Cannot_unwind:1;	/* 0 */
+    unsigned int Millicode:1;	/* 1 */
+    unsigned int Millicode_save_sr0:1;	/* 2 */
+    unsigned int Region_description:2;	/* 3..4 */
+    unsigned int reserved1:1;	/* 5 */
+    unsigned int Entry_SR:1;	/* 6 */
+    unsigned int Entry_FR:4;	/* number saved *//* 7..10 */
+    unsigned int Entry_GR:5;	/* number saved *//* 11..15 */
+    unsigned int Args_stored:1;	/* 16 */
+    unsigned int Variable_Frame:1;	/* 17 */
+    unsigned int Separate_Package_Body:1;	/* 18 */
+    unsigned int Frame_Extension_Millicode:1;	/* 19 */
+    unsigned int Stack_Overflow_Check:1;	/* 20 */
+    unsigned int Two_Instruction_SP_Increment:1;	/* 21 */
+    unsigned int Ada_Region:1;	/* 22 */
+    unsigned int cxx_info:1;	/* 23 */
+    unsigned int cxx_try_catch:1;	/* 24 */
+    unsigned int sched_entry_seq:1;	/* 25 */
+    unsigned int reserved2:1;	/* 26 */
+    unsigned int Save_SP:1;	/* 27 */
+    unsigned int Save_RP:1;	/* 28 */
+    unsigned int Save_MRP_in_frame:1;	/* 29 */
+    unsigned int extn_ptr_defined:1;	/* 30 */
+    unsigned int Cleanup_defined:1;	/* 31 */
 
-  unsigned int MPE_XL_interrupt_marker: 1;                      /* 0 */
-  unsigned int HP_UX_interrupt_marker:  1;                      /* 1 */
-  unsigned int Large_frame	     :  1;                      /* 2 */
-  unsigned int Pseudo_SP_Set         :  1;                      /* 3 */
-  unsigned int reserved4             :  1;                      /* 4 */
-  unsigned int Total_frame_size      : 27;                      /* 5..31 */
+    unsigned int MPE_XL_interrupt_marker:1;	/* 0 */
+    unsigned int HP_UX_interrupt_marker:1;	/* 1 */
+    unsigned int Large_frame:1;	/* 2 */
+    unsigned int Pseudo_SP_Set:1;	/* 3 */
+    unsigned int reserved4:1;	/* 4 */
+    unsigned int Total_frame_size:27;	/* 5..31 */
 
-  /* This is *NOT* part of an actual unwind_descriptor in an object
-     file.  It is *ONLY* part of the "internalized" descriptors that
-     we create from those in a file.
+    /* This is *NOT* part of an actual unwind_descriptor in an object
+       file.  It is *ONLY* part of the "internalized" descriptors that
+       we create from those in a file.
      */
-  struct {
-    unsigned int  stub_type          : 4;                       /* 0..3 */
-    unsigned int  padding            : 28;                      /* 4..31 */
-  } stub_unwind;
-};
+    struct
+      {
+	unsigned int stub_type:4;	/* 0..3 */
+	unsigned int padding:28;	/* 4..31 */
+      }
+    stub_unwind;
+  };
 
 /* HP linkers also generate unwinds for various linker-generated stubs.
    GDB reads in the stubs from the $UNWIND_END$ subspace, then 
@@ -697,19 +701,19 @@ struct unwind_table_entry {
    fields to store the stub type.  */
 
 struct stub_unwind_entry
-{
-  /* The offset within the executable for the associated stub.  */
-  unsigned stub_offset;
+  {
+    /* The offset within the executable for the associated stub.  */
+    unsigned stub_offset;
 
-  /* The type of stub this unwind entry describes.  */
-  char type;
+    /* The type of stub this unwind entry describes.  */
+    char type;
 
-  /* Unknown.  Not needed by GDB at this time.  */
-  char prs_info;
+    /* Unknown.  Not needed by GDB at this time.  */
+    char prs_info;
 
-  /* Length (in instructions) of the associated stub.  */
-  short stub_length;
-};
+    /* Length (in instructions) of the associated stub.  */
+    short stub_length;
+  };
 
 /* Sizes (in bytes) of the native unwind entries.  */
 #define UNWIND_ENTRY_SIZE 16
@@ -718,61 +722,65 @@ struct stub_unwind_entry
 /* The gaps represent linker stubs used in MPE and space for future
    expansion.  */
 enum unwind_stub_types
-{
-  LONG_BRANCH = 1,
-  PARAMETER_RELOCATION = 2,
-  EXPORT = 10,
-  IMPORT = 11,
-  IMPORT_SHLIB = 12,
-};
+  {
+    LONG_BRANCH = 1,
+    PARAMETER_RELOCATION = 2,
+    EXPORT = 10,
+    IMPORT = 11,
+    IMPORT_SHLIB = 12,
+  };
 
 /* We use the objfile->obj_private pointer for two things:
- *
+
  * 1.  An unwind table;
  *
  * 2.  A pointer to any associated shared library object.
  *
  * #defines are used to help refer to these objects.
  */
- 
+
 /* Info about the unwind table associated with an object file.
- *
+
  * This is hung off of the "objfile->obj_private" pointer, and
  * is allocated in the objfile's psymbol obstack.  This allows
  * us to have unique unwind info for each executable and shared
  * library that we are debugging.
  */
-struct obj_unwind_info {
-  struct unwind_table_entry *table; /* Pointer to unwind info */
-  struct unwind_table_entry *cache; /* Pointer to last entry we found */
-  int last;		   	    /* Index of last entry */
-};
+struct obj_unwind_info
+  {
+    struct unwind_table_entry *table;	/* Pointer to unwind info */
+    struct unwind_table_entry *cache;	/* Pointer to last entry we found */
+    int last;			/* Index of last entry */
+  };
 
-typedef struct obj_private_struct {
-   struct obj_unwind_info *unwind_info; /* a pointer */
-   struct so_list         *so_info;     /* a pointer  */
-} obj_private_data_t;
+typedef struct obj_private_struct
+  {
+    struct obj_unwind_info *unwind_info;	/* a pointer */
+    struct so_list *so_info;	/* a pointer  */
+  }
+obj_private_data_t;
 
 #if 0
-extern void target_write_pc PARAMS ((CORE_ADDR, int))
-extern CORE_ADDR target_read_pc PARAMS ((int));
-extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
+extern void target_write_pc
+PARAMS ((CORE_ADDR, int))
+     extern CORE_ADDR target_read_pc PARAMS ((int));
+     extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
 #endif
 
 #define TARGET_READ_PC(pid) target_read_pc (pid)
-extern CORE_ADDR target_read_pc PARAMS ((int));
+     extern CORE_ADDR target_read_pc PARAMS ((int));
 
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
-extern void target_write_pc PARAMS ((CORE_ADDR, int));
+     extern void target_write_pc PARAMS ((CORE_ADDR, int));
 
 #define TARGET_READ_FP() target_read_fp (inferior_pid)
-extern CORE_ADDR  target_read_fp PARAMS ((int));
+     extern CORE_ADDR target_read_fp PARAMS ((int));
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  */
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
-extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
+     extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
 
 /* If the current gcc for for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then

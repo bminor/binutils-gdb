@@ -20,7 +20,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcmd.h"
@@ -153,21 +154,22 @@ extern long rawclock (void);
 #define CNT_ORUN	19
 #define NCNT		20
 
-static int	intrcnt;
-static int	cnts[NCNT];
-static char	*cntnames[NCNT] = {
+static int intrcnt;
+static int cnts[NCNT];
+static char *cntnames[NCNT] =
+{
   /* h/w interrupt counts. */
-  "mlsc",	"nopend",	"txrdy",	"?3",
-  "rxrdy",	"?5",		"rls", 		"?7", 
-  "?8", 	"?9", 		"?a", 		"?b", 
-  "rxtout", 	"?d", 		"?e",		"?f", 
+  "mlsc", "nopend", "txrdy", "?3",
+  "rxrdy", "?5", "rls", "?7",
+  "?8", "?9", "?a", "?b",
+  "rxtout", "?d", "?e", "?f",
   /* s/w counts. */
-  "rxcnt",	"txcnt",	"stray",	"swoflo"
+  "rxcnt", "txcnt", "stray", "swoflo"
 };
 
 #define COUNT(x) cnts[x]++
 #else
-#define COUNT(x) 
+#define COUNT(x)
 #endif
 
 /* Main interrupt controller port addresses. */
@@ -176,45 +178,59 @@ static char	*cntnames[NCNT] = {
 #define ICU_MASK	(ICU_BASE + 1)
 
 /* Original interrupt controller mask register. */
-unsigned char	icu_oldmask;
+unsigned char icu_oldmask;
 
 /* Maximum of 8 interrupts (we don't handle the slave icu yet). */
 #define NINTR	8
 
 static struct intrupt
-{  
-  char			inuse;
-  struct dos_ttystate	*port;
-  _go32_dpmi_seginfo	old_rmhandler;
-  _go32_dpmi_seginfo	old_pmhandler;
-  _go32_dpmi_seginfo	new_rmhandler;
-  _go32_dpmi_seginfo	new_pmhandler;
-  _go32_dpmi_registers	regs;
-} intrupts[NINTR];
+  {
+    char inuse;
+    struct dos_ttystate *port;
+    _go32_dpmi_seginfo old_rmhandler;
+    _go32_dpmi_seginfo old_pmhandler;
+    _go32_dpmi_seginfo new_rmhandler;
+    _go32_dpmi_seginfo new_pmhandler;
+    _go32_dpmi_registers regs;
+  }
+intrupts[NINTR];
 
 
 static struct dos_ttystate
+  {
+    int base;
+    int irq;
+    int refcnt;
+    struct intrupt *intrupt;
+    int fifo;
+    int baudrate;
+    unsigned char cbuf[CBSIZE];
+    unsigned int first;
+    unsigned int count;
+    int txbusy;
+    unsigned char old_mcr;
+    int ferr;
+    int perr;
+    int oflo;
+    int msr;
+  }
+ports[4] =
 {
-  int		base;
-  int		irq;
-  int		refcnt;
-  struct intrupt *intrupt;
-  int		fifo;
-  int		baudrate;
-  unsigned char	cbuf[CBSIZE];
-  unsigned int	first;
-  unsigned int	count;
-  int		txbusy;
-  unsigned char	old_mcr;
-  int		ferr;
-  int		perr;
-  int		oflo;
-  int		msr;
-} ports[4] = {
-  {COM1ADDR, 4}, 
-  {COM2ADDR, 3}, 
-  {COM3ADDR, 4}, 
-  {COM4ADDR, 3}
+  {
+    COM1ADDR, 4
+  }
+  ,
+  {
+    COM2ADDR, 3
+  }
+  ,
+  {
+    COM3ADDR, 4
+  }
+  ,
+  {
+    COM4ADDR, 3
+  }
 };
 
 static int dos_open PARAMS ((serial_t scb, const char *name));
@@ -237,33 +253,33 @@ static int
 dos_getc (port)
      volatile struct dos_ttystate *port;
 {
-    int c;
+  int c;
 
-    if (port->count == 0)
-      return -1;
+  if (port->count == 0)
+    return -1;
 
-    c = port->cbuf[port->first];
-    disable ();
-    port->first = (port->first + 1) & (CBSIZE - 1);
-    port->count--;
-    enable ();
-    return c;
+  c = port->cbuf[port->first];
+  disable ();
+  port->first = (port->first + 1) & (CBSIZE - 1);
+  port->count--;
+  enable ();
+  return c;
 }
-    
 
-static int 
+
+static int
 dos_putc (c, port)
      int c;
      struct dos_ttystate *port;
 {
-    if (port->count >= CBSIZE - 1)
-	return -1;
-    port->cbuf[(port->first + port->count) & (CBSIZE - 1)] = c;
-    port->count++;
-    return 0;
+  if (port->count >= CBSIZE - 1)
+    return -1;
+  port->cbuf[(port->first + port->count) & (CBSIZE - 1)] = c;
+  port->count++;
+  return 0;
 }
-
 
+
 
 static void
 dos_comisr (irq)
@@ -279,28 +295,28 @@ dos_comisr (irq)
 #endif
 
   port = intrupts[irq].port;
-  if (!port) 
+  if (!port)
     {
       COUNT (CNT_STRAY);
-      return;		/* not open */
+      return;			/* not open */
     }
 
   while (1)
     {
       iir = inb (port, com_iir) & IIR_IMASK;
-      switch (iir) 
+      switch (iir)
 	{
-	  
+
 	case IIR_RLS:
 	  lsr = inb (port, com_lsr);
 	  goto rx;
-	  
+
 	case IIR_RXTOUT:
 	case IIR_RXRDY:
 	  lsr = 0;
-	  
-      rx:
-	  do 
+
+	rx:
+	  do
 	    {
 	      c = inb (port, com_data);
 	      if (lsr & (LSR_BI | LSR_FE | LSR_PE | LSR_OE))
@@ -324,12 +340,12 @@ dos_comisr (irq)
 	    }
 	  while ((lsr = inb (port, com_lsr)) & LSR_RXRDY);
 	  break;
-	  
+
 	case IIR_MLSC:
 	  /* could be used to flowcontrol Tx */
 	  port->msr = inb (port, com_msr);
 	  break;
-	  
+
 	case IIR_TXRDY:
 	  port->txbusy = 0;
 	  break;
@@ -343,7 +359,7 @@ dos_comisr (irq)
 	  break;
 	}
       COUNT (iir);
-    } 
+    }
 }
 
 #ifdef __STDC__
@@ -353,20 +369,21 @@ dos_comisr (irq)
 #endif
 #define ISR(x) static void ISRNAME(x)() {dos_comisr(x);}
 
-ISR(0) ISR(1) ISR(2) ISR(3)
-ISR(4) ISR(5) ISR(6) ISR(7)
+ISR (0) ISR (1) ISR (2) ISR (3)
+ISR (4) ISR (5) ISR (6) ISR (7)
 
-typedef void (*isr_t)();
+     typedef void (*isr_t) ();
 
-static isr_t isrs[NINTR] = {
-  ISRNAME(0), ISRNAME(1), ISRNAME(2), ISRNAME(3),
-  ISRNAME(4), ISRNAME(5), ISRNAME(6), ISRNAME(7)
+     static isr_t isrs[NINTR] =
+     {
+       ISRNAME (0), ISRNAME (1), ISRNAME (2), ISRNAME (3),
+       ISRNAME (4), ISRNAME (5), ISRNAME (6), ISRNAME (7)
 };
-
 
 
-static struct intrupt *
-dos_hookirq (irq)
+
+     static struct intrupt *
+       dos_hookirq (irq)
      unsigned int irq;
 {
   struct intrupt *intr;
@@ -379,15 +396,15 @@ dos_hookirq (irq)
   intr = &intrupts[irq];
   if (intr->inuse)
     return 0;
-  
+
   vec = 0x08 + irq;
   isr = isrs[irq];
 
   /* setup real mode handler */
   _go32_dpmi_get_real_mode_interrupt_vector (vec, &intr->old_rmhandler);
 
-  intr->new_rmhandler.pm_selector = _go32_my_cs();
-  intr->new_rmhandler.pm_offset = (u_long)isr;
+  intr->new_rmhandler.pm_selector = _go32_my_cs ();
+  intr->new_rmhandler.pm_offset = (u_long) isr;
   if (_go32_dpmi_allocate_real_mode_callback_iret (&intr->new_rmhandler,
 						   &intr->regs))
     {
@@ -398,15 +415,15 @@ dos_hookirq (irq)
     {
       return 0;
     }
-      
-  /* setup protected mode handler */
-  _go32_dpmi_get_protected_mode_interrupt_vector(vec, &intr->old_pmhandler);
 
-  intr->new_pmhandler.pm_selector = _go32_my_cs();
-  intr->new_pmhandler.pm_offset = (u_long)isr;
+  /* setup protected mode handler */
+  _go32_dpmi_get_protected_mode_interrupt_vector (vec, &intr->old_pmhandler);
+
+  intr->new_pmhandler.pm_selector = _go32_my_cs ();
+  intr->new_pmhandler.pm_offset = (u_long) isr;
   _go32_dpmi_allocate_iret_wrapper (&intr->new_pmhandler);
 
-  if (_go32_dpmi_set_protected_mode_interrupt_vector(vec, &intr->new_pmhandler))
+  if (_go32_dpmi_set_protected_mode_interrupt_vector (vec, &intr->new_pmhandler))
     {
       return 0;
     }
@@ -440,14 +457,14 @@ dos_unhookirq (intr)
   /* remove real mode handler */
   _go32_dpmi_set_real_mode_interrupt_vector (vec, &intr->old_rmhandler);
   _go32_dpmi_free_real_mode_callback (&intr->new_rmhandler);
-      
+
   /* remove protected mode handler */
   _go32_dpmi_set_protected_mode_interrupt_vector (vec, &intr->old_pmhandler);
   _go32_dpmi_free_iret_wrapper (&intr->new_pmhandler);
   intr->inuse = 0;
 }
-
 
+
 
 static int
 dos_open (scb, name)
@@ -484,38 +501,39 @@ dos_open (scb, name)
     }
 
   /* force access to ID reg */
-  outb(port, com_cfcr, 0);
-  outb(port, com_iir, 0);
-  for (i = 0; i < 17; i++) {
-    if ((inb(port, com_iir) & 0x38) == 0)
-      goto ok;
-    (void) inb(port, com_data); /* clear recv */
-  }
+  outb (port, com_cfcr, 0);
+  outb (port, com_iir, 0);
+  for (i = 0; i < 17; i++)
+    {
+      if ((inb (port, com_iir) & 0x38) == 0)
+	goto ok;
+      (void) inb (port, com_data);	/* clear recv */
+    }
   errno = ENODEV;
   return -1;
 
 ok:
   /* disable all interrupts in chip */
-  outb(port, com_ier, 0);
+  outb (port, com_ier, 0);
 
   /* tentatively enable 16550 fifo, and see if it responds */
-  outb(port, com_fifo, FIFO_ENABLE|FIFO_RCV_RST|FIFO_XMT_RST|FIFO_TRIGGER);
-  sleep(1);
-  port->fifo = ((inb(port, com_iir) & IIR_FIFO_MASK) == IIR_FIFO_MASK);
+  outb (port, com_fifo, FIFO_ENABLE | FIFO_RCV_RST | FIFO_XMT_RST | FIFO_TRIGGER);
+  sleep (1);
+  port->fifo = ((inb (port, com_iir) & IIR_FIFO_MASK) == IIR_FIFO_MASK);
 
   /* clear pending status reports. */
-  (void) inb(port, com_lsr);
-  (void) inb(port, com_msr);
+  (void) inb (port, com_lsr);
+  (void) inb (port, com_msr);
 
   /* enable external interrupt gate (to avoid floating IRQ) */
-  outb(port, com_mcr, MCR_IENABLE);
+  outb (port, com_mcr, MCR_IENABLE);
 
   /* hook up interrupt handler and initialise icu */
   port->intrupt = dos_hookirq (port->irq);
   if (!port->intrupt)
     {
-      outb(port, com_mcr, 0);
-      outb(port, com_fifo, 0);
+      outb (port, com_mcr, 0);
+      outb (port, com_fifo, 0);
       errno = ENODEV;
       return -1;
     }
@@ -523,7 +541,7 @@ ok:
   disable ();
 
   /* record port */
-  port->intrupt->port = port; 
+  port->intrupt->port = port;
   scb->fd = fd;
 
   /* clear rx buffer, tx busy flag and overflow count */
@@ -533,16 +551,16 @@ ok:
 
   /* set default baud rate and mode: 9600,8,n,1 */
   i = dos_baudconv (port->baudrate = 9600);
-  outb(port, com_cfcr, CFCR_DLAB);
-  outb(port, com_dlbl, i & 0xff);
-  outb(port, com_dlbh, i >> 8);
-  outb(port, com_cfcr, CFCR_8BITS);
+  outb (port, com_cfcr, CFCR_DLAB);
+  outb (port, com_dlbl, i & 0xff);
+  outb (port, com_dlbh, i >> 8);
+  outb (port, com_cfcr, CFCR_8BITS);
 
   /* enable all interrupts */
-  outb(port, com_ier, IER_ETXRDY | IER_ERXRDY | IER_ERLS | IER_EMSC);
+  outb (port, com_ier, IER_ETXRDY | IER_ERXRDY | IER_ERLS | IER_EMSC);
 
   /* enable DTR & RTS */
-  outb(port, com_mcr, MCR_DTR | MCR_RTS | MCR_IENABLE);
+  outb (port, com_mcr, MCR_DTR | MCR_RTS | MCR_IENABLE);
 
   enable ();
 
@@ -554,44 +572,44 @@ static void
 dos_close (scb)
      serial_t scb;
 {
-    struct dos_ttystate *port;
-    struct intrupt *intrupt;
+  struct dos_ttystate *port;
+  struct intrupt *intrupt;
 
-    if (!scb)
-      return;
+  if (!scb)
+    return;
 
-    port = &ports[scb->fd];
+  port = &ports[scb->fd];
 
-    if (port->refcnt-- > 1)
-      return;
+  if (port->refcnt-- > 1)
+    return;
 
-    if (!(intrupt = port->intrupt))
-      return;
+  if (!(intrupt = port->intrupt))
+    return;
 
-    /* disable interrupts, fifo, flow control */
-    disable ();
-    port->intrupt = 0;
-    intrupt->port = 0;
-    outb(port, com_fifo, 0);
-    outb(port, com_ier, 0);
-    enable ();
+  /* disable interrupts, fifo, flow control */
+  disable ();
+  port->intrupt = 0;
+  intrupt->port = 0;
+  outb (port, com_fifo, 0);
+  outb (port, com_ier, 0);
+  enable ();
 
-    /* unhook handler, and disable interrupt gate */
-    dos_unhookirq (intrupt);
-    outb(port, com_mcr, 0);
+  /* unhook handler, and disable interrupt gate */
+  dos_unhookirq (intrupt);
+  outb (port, com_mcr, 0);
 
-    /* Check for overflow errors */
-    if (port->oflo)
-      {
-	fprintf_unfiltered (gdb_stderr,
-			    "Serial input overruns occurred.\n");
-	fprintf_unfiltered (gdb_stderr, "This system %s handle %d baud.\n",
-			    port->fifo ? "cannot" : "needs a 16550 to",
-			    port->baudrate);
-      }
+  /* Check for overflow errors */
+  if (port->oflo)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "Serial input overruns occurred.\n");
+      fprintf_unfiltered (gdb_stderr, "This system %s handle %d baud.\n",
+			  port->fifo ? "cannot" : "needs a 16550 to",
+			  port->baudrate);
+    }
 }
-
 
+
 
 static int
 dos_noop (scb)
@@ -616,7 +634,7 @@ dos_readchar (scb, timeout)
   long then;
   int c;
 
-  then = rawclock() + (timeout * RAWHZ);
+  then = rawclock () + (timeout * RAWHZ);
   while ((c = dos_getc (port)) < 0)
     {
       if (timeout >= 0 && (rawclock () - then) >= 0)
@@ -670,11 +688,11 @@ dos_flush_input (scb)
      serial_t scb;
 {
   struct dos_ttystate *port = &ports[scb->fd];
-  disable();
+  disable ();
   port->first = port->count = 0;
   if (port->fifo)
-    outb(port, com_fifo, FIFO_ENABLE|FIFO_RCV_RST|FIFO_TRIGGER);
-  enable();
+    outb (port, com_fifo, FIFO_ENABLE | FIFO_RCV_RST | FIFO_TRIGGER);
+  enable ();
 }
 
 static void
@@ -691,16 +709,16 @@ dos_baudconv (rate)
      int rate;
 {
   long x, err;
-  
-  if (rate <= 0) 
+
+  if (rate <= 0)
     return -1;
 
-#define divrnd(n, q)	(((n) * 2 / (q) + 1) / 2) /* divide and round off */
-  x = divrnd(COMTICK, rate);
+#define divrnd(n, q)	(((n) * 2 / (q) + 1) / 2)	/* divide and round off */
+  x = divrnd (COMTICK, rate);
   if (x <= 0)
     return -1;
-  
-  err = divrnd(1000 * COMTICK, x * rate) - 1000;
+
+  err = divrnd (1000 * COMTICK, x * rate) - 1000;
   if (err < 0)
     err = -err;
   if (err > SPEED_TOLERANCE)
@@ -715,33 +733,33 @@ dos_setbaudrate (scb, rate)
      serial_t scb;
      int rate;
 {
-    struct dos_ttystate *port = &ports[scb->fd];
+  struct dos_ttystate *port = &ports[scb->fd];
 
-    if (port->baudrate != rate) 
-      {
-	int x;
-	unsigned char cfcr;
+  if (port->baudrate != rate)
+    {
+      int x;
+      unsigned char cfcr;
 
-	x = dos_baudconv (rate);
-	if (x <= 0)
-	  {
-	    fprintf_unfiltered (gdb_stderr, "%d: impossible baudrate\n", rate);
-	    errno = EINVAL;
-	    return -1;
-	  }
+      x = dos_baudconv (rate);
+      if (x <= 0)
+	{
+	  fprintf_unfiltered (gdb_stderr, "%d: impossible baudrate\n", rate);
+	  errno = EINVAL;
+	  return -1;
+	}
 
-	disable ();
-	cfcr = inb (port, com_cfcr);
+      disable ();
+      cfcr = inb (port, com_cfcr);
 
-	outb(port, com_cfcr, CFCR_DLAB);
-	outb(port, com_dlbl, x & 0xff);
-	outb(port, com_dlbh, x >> 8);
-	outb(port, com_cfcr, cfcr);
-	port->baudrate = rate;
-	enable ();
-      }
+      outb (port, com_cfcr, CFCR_DLAB);
+      outb (port, com_dlbl, x & 0xff);
+      outb (port, com_dlbh, x >> 8);
+      outb (port, com_cfcr, cfcr);
+      port->baudrate = rate;
+      enable ();
+    }
 
-    return 0;
+  return 0;
 }
 
 static int
@@ -749,28 +767,28 @@ dos_setstopbits (scb, num)
      serial_t scb;
      int num;
 {
-    struct dos_ttystate *port = &ports[scb->fd];
-    unsigned char cfcr;
+  struct dos_ttystate *port = &ports[scb->fd];
+  unsigned char cfcr;
 
-    disable ();
-    cfcr = inb (port, com_cfcr);
+  disable ();
+  cfcr = inb (port, com_cfcr);
 
-    switch (num)
-      {
-      case SERIAL_1_STOPBITS:
-	outb (port, com_cfcr, cfcr & ~CFCR_STOPB);
-	break;
-      case SERIAL_1_AND_A_HALF_STOPBITS:
-      case SERIAL_2_STOPBITS:
-	outb (port, com_cfcr, cfcr | CFCR_STOPB);
-	break;
-      default:
-	enable ();
-	return 1;
-      }
-    enable ();
+  switch (num)
+    {
+    case SERIAL_1_STOPBITS:
+      outb (port, com_cfcr, cfcr & ~CFCR_STOPB);
+      break;
+    case SERIAL_1_AND_A_HALF_STOPBITS:
+    case SERIAL_2_STOPBITS:
+      outb (port, com_cfcr, cfcr | CFCR_STOPB);
+      break;
+    default:
+      enable ();
+      return 1;
+    }
+  enable ();
 
-    return 0;
+  return 0;
 }
 
 static int
@@ -784,27 +802,27 @@ dos_write (scb, str, len)
   long then;
   int cnt;
 
-   while (len > 0) 
-     {
-	/* send the data, fifosize bytes at a time */
-	cnt = fifosize > len ? len : fifosize;
-	port->txbusy = 1;
-	outportsb (port->base + com_data, str, cnt);
-	str += cnt;
-	len -= cnt;
+  while (len > 0)
+    {
+      /* send the data, fifosize bytes at a time */
+      cnt = fifosize > len ? len : fifosize;
+      port->txbusy = 1;
+      outportsb (port->base + com_data, str, cnt);
+      str += cnt;
+      len -= cnt;
 #ifdef DOS_STATS
-	cnts[CNT_TX] += cnt;
+      cnts[CNT_TX] += cnt;
 #endif
-	/* wait for transmission to complete (max 1 sec) */
-	then = rawclock() + RAWHZ;
-	while (port->txbusy)
-	  {
-	    if ((rawclock () - then) >= 0)
-	      {
-		  errno = EIO;
-		  return SERIAL_ERROR;
-	      }
-	  }
+      /* wait for transmission to complete (max 1 sec) */
+      then = rawclock () + RAWHZ;
+      while (port->txbusy)
+	{
+	  if ((rawclock () - then) >= 0)
+	    {
+	      errno = EIO;
+	      return SERIAL_ERROR;
+	    }
+	}
     }
   return 0;
 }
@@ -818,15 +836,15 @@ dos_sendbreak (scb)
   unsigned char cfcr;
   long then;
 
-  cfcr = inb(port, com_cfcr);
-  outb(port, com_cfcr, cfcr | CFCR_SBREAK);
+  cfcr = inb (port, com_cfcr);
+  outb (port, com_cfcr, cfcr | CFCR_SBREAK);
 
   /* 0.25 sec delay */
   then = rawclock () + RAWHZ / 4;
   while ((rawclock () - then) < 0)
     continue;
 
-  outb(port, com_cfcr, cfcr);
+  outb (port, com_cfcr, cfcr);
   return 0;
 }
 
@@ -861,7 +879,7 @@ dos_info (arg, from_tty)
   struct dos_ttystate *port;
   int i;
 
-  for (port = ports; port < &ports[4]; port++) 
+  for (port = ports; port < &ports[4]; port++)
     {
       if (port->baudrate == 0)
 	continue;
@@ -870,7 +888,7 @@ dos_info (arg, from_tty)
       printf_filtered ("Addr:\t0x%03x (irq %d)\n", port->base, port->irq);
       printf_filtered ("16550:\t%s\n", port->fifo ? "yes" : "no");
       printf_filtered ("Speed:\t%d baud\n", port->baudrate);
-      printf_filtered ("Errs:\tframing %d parity %d overflow %d\n\n", 
+      printf_filtered ("Errs:\tframing %d parity %d overflow %d\n\n",
 		       port->ferr, port->perr, port->oflo);
     }
 
@@ -896,63 +914,63 @@ _initialize_ser_dos ()
   /* Mark fixed motherboard irqs as inuse. */
   intrupts[0].inuse =		/* timer tick */
     intrupts[1].inuse =		/* keyboard */
-      intrupts[2].inuse = 1;	/* slave icu */
-    
-  add_show_from_set (
-    add_set_cmd ("com1base", class_obscure, var_zinteger,
-		 (char *) &ports[0].base,
-		 "Set COM1 base i/o port address.",
-		 &setlist),
-	&showlist);
+    intrupts[2].inuse = 1;	/* slave icu */
 
   add_show_from_set (
-    add_set_cmd ("com1irq", class_obscure, var_zinteger,
-		 (char *) &ports[0].irq,
-		 "Set COM1 interrupt request.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com1base", class_obscure, var_zinteger,
+				   (char *) &ports[0].base,
+				   "Set COM1 base i/o port address.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com2base", class_obscure, var_zinteger,
-		 (char *) &ports[1].base,
-		 "Set COM2 base i/o port address.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com1irq", class_obscure, var_zinteger,
+				   (char *) &ports[0].irq,
+				   "Set COM1 interrupt request.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com2irq", class_obscure, var_zinteger,
-		 (char *) &ports[1].irq,
-		 "Set COM2 interrupt request.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com2base", class_obscure, var_zinteger,
+				   (char *) &ports[1].base,
+				   "Set COM2 base i/o port address.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com3base", class_obscure, var_zinteger,
-		 (char *) &ports[2].base,
-		 "Set COM3 base i/o port address.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com2irq", class_obscure, var_zinteger,
+				   (char *) &ports[1].irq,
+				   "Set COM2 interrupt request.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com3irq", class_obscure, var_zinteger,
-		 (char *) &ports[2].irq,
-		 "Set COM3 interrupt request.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com3base", class_obscure, var_zinteger,
+				   (char *) &ports[2].base,
+				   "Set COM3 base i/o port address.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com4base", class_obscure, var_zinteger,
-		 (char *) &ports[3].base,
-		 "Set COM4 base i/o port address.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com3irq", class_obscure, var_zinteger,
+				   (char *) &ports[2].irq,
+				   "Set COM3 interrupt request.",
+				   &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("com4irq", class_obscure, var_zinteger,
-		 (char *) &ports[3].irq,
-		 "Set COM4 interrupt request.",
-		 &setlist),
-	&showlist);
+		      add_set_cmd ("com4base", class_obscure, var_zinteger,
+				   (char *) &ports[3].base,
+				   "Set COM4 base i/o port address.",
+				   &setlist),
+		      &showlist);
+
+  add_show_from_set (
+		      add_set_cmd ("com4irq", class_obscure, var_zinteger,
+				   (char *) &ports[3].irq,
+				   "Set COM4 interrupt request.",
+				   &setlist),
+		      &showlist);
 
   add_info ("serial", dos_info,
 	    "Print DOS serial port status.");

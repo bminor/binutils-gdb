@@ -1,21 +1,22 @@
 /* Target-specific definition for the Mitsubishi D10V
    Copyright (C) 1996,1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Martin Hunt, hunt@cygnus.com */
 
@@ -86,7 +87,7 @@ extern char *d10v_register_name PARAMS ((int reg_nr));
 #define REGISTER_SIZE 2
 
 /* Say how much memory is needed to store a copy of the register set */
-#define REGISTER_BYTES    ((37/*NUM_REGS*/-2)*2+16) 
+#define REGISTER_BYTES    ((37/*NUM_REGS*/-2)*2+16)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -99,7 +100,7 @@ extern int d10v_register_raw_size PARAMS ((int reg_nr));
 #define REGISTER_RAW_SIZE(N) (d10v_register_raw_size (N))
 
 /* Number of bytes of storage in the program's representation
-   for register N.  */   
+   for register N.  */
 extern int d10v_register_virtual_size PARAMS ((int reg_nr));
 #define REGISTER_VIRTUAL_SIZE(N) (d10v_register_virtual_size (N))
 
@@ -119,8 +120,8 @@ extern struct type *d10v_register_virtual_type PARAMS ((int reg_nr));
 
 /* convert $pc and $sp to/from virtual addresses */
 extern int d10v_register_convertible PARAMS ((int nr));
-extern void d10v_register_convert_to_virtual PARAMS ((int regnum, struct type *type, char *from, char *to));
-extern void d10v_register_convert_to_raw PARAMS ((struct type *type, int regnum, char *from, char *to));
+extern void d10v_register_convert_to_virtual PARAMS ((int regnum, struct type * type, char *from, char *to));
+extern void d10v_register_convert_to_raw PARAMS ((struct type * type, int regnum, char *from, char *to));
 #define REGISTER_CONVERTIBLE(N) (d10v_register_convertible ((N)))
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
   d10v_register_convert_to_virtual ((REGNUM), (TYPE), (FROM), (TO))
@@ -157,7 +158,7 @@ extern void d10v_store_struct_return PARAMS ((CORE_ADDR addr, CORE_ADDR sp));
 
    Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
 
-extern void d10v_store_return_value PARAMS ((struct type *type, char *valbuf));
+extern void d10v_store_return_value PARAMS ((struct type * type, char *valbuf));
 #define STORE_RETURN_VALUE(TYPE,VALBUF) d10v_store_return_value ((TYPE), (VALBUF))
 
 
@@ -177,15 +178,15 @@ extern CORE_ADDR d10v_extract_struct_value_address PARAMS ((char *regbuf));
 
 extern use_struct_convention_fn d10v_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p, type) d10v_use_struct_convention (gcc_p, type)
-
 
+
 /* Define other aspects of the stack frame. 
    we keep a copy of the worked out return pc lying around, since it
    is a useful bit of info */
 
-extern void d10v_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info *fi));
+extern void d10v_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info * fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
-    d10v_init_extra_frame_info(fromleaf, fi) 
+    d10v_init_extra_frame_info(fromleaf, fi)
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -194,24 +195,24 @@ extern void d10v_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info 
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (frameless_look_for_prologue (FI))
 
-extern CORE_ADDR d10v_frame_chain PARAMS ((struct frame_info *frame));
+extern CORE_ADDR d10v_frame_chain PARAMS ((struct frame_info * frame));
 #define FRAME_CHAIN(FRAME)       d10v_frame_chain(FRAME)
 extern int d10v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 #define FRAME_CHAIN_VALID(chain, thisframe) d10v_frame_chain_valid (chain, thisframe)
-extern CORE_ADDR d10v_frame_saved_pc PARAMS ((struct frame_info *fi));
+extern CORE_ADDR d10v_frame_saved_pc PARAMS ((struct frame_info * fi));
 #define FRAME_SAVED_PC(fi) (d10v_frame_saved_pc ((fi)))
-extern CORE_ADDR d10v_frame_args_address PARAMS ((struct frame_info *fi));
+extern CORE_ADDR d10v_frame_args_address PARAMS ((struct frame_info * fi));
 #define FRAME_ARGS_ADDRESS(fi) (d10v_frame_args_address ((fi)))
-extern CORE_ADDR d10v_frame_locals_address PARAMS ((struct frame_info *fi));
+extern CORE_ADDR d10v_frame_locals_address PARAMS ((struct frame_info * fi));
 #define FRAME_LOCALS_ADDRESS(fi) (d10v_frame_locals_address ((fi)))
 
 /* Immediately after a function call, return the saved pc.  We can't */
 /* use frame->return_pc beause that is determined by reading R13 off the */
 /*stack and that may not be written yet. */
 
-extern CORE_ADDR d10v_saved_pc_after_call PARAMS ((struct frame_info *frame));
+extern CORE_ADDR d10v_saved_pc_after_call PARAMS ((struct frame_info * frame));
 #define SAVED_PC_AFTER_CALL(frame) (d10v_saved_pc_after_call ((frame)))
-    
+
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
 /* We can't tell how many args there are */
@@ -297,13 +298,13 @@ CORE_ADDR d10v_read_fp PARAMS ((void));
 #define TARGET_PTR_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_DOUBLE_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_LONG_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
-
 
+
 /* For the d10v when talking to the remote d10v board, GDB addresses
    need to be translated into a format that the d10v rom monitor
    understands. */
 
-extern void remote_d10v_translate_xfer_address PARAMS ((CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len));
+extern void remote_d10v_translate_xfer_address PARAMS ((CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR * rem_addr, int *rem_len));
 #define REMOTE_TRANSLATE_XFER_ADDRESS(GDB_ADDR, GDB_LEN, REM_ADDR, REM_LEN) \
  remote_d10v_translate_xfer_address ((GDB_ADDR), (GDB_LEN), (REM_ADDR), (REM_LEN))
 

@@ -1,21 +1,22 @@
 /* Parameters for execution on a H8/300 series machine.
    Copyright 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
@@ -84,9 +85,9 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
-/*#define BREAKPOINT {0x7A, 0xFF}*/
-#define BREAKPOINT {0x01, 0x80}  /* Sleep */
-#define REMOTE_BREAKPOINT { 0x57, 0x30}  /* trapa #3 */
+/*#define BREAKPOINT {0x7A, 0xFF} */
+#define BREAKPOINT {0x01, 0x80}	/* Sleep */
+#define REMOTE_BREAKPOINT { 0x57, 0x30}		/* trapa #3 */
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.    */
 
@@ -96,7 +97,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define REGISTER_SIZE 4
 
-#define NUM_REGS 13  
+#define NUM_REGS 13
 
 #define REGISTER_BYTES (NUM_REGS * 4)
 
@@ -160,7 +161,7 @@ extern char **h8300_register_names;
 
 /* FIXME: Won't work with both h8/300's.  */
 
-extern void h8300_extract_return_value PARAMS((struct type *, char *, char *));
+extern void h8300_extract_return_value PARAMS ((struct type *, char *, char *));
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
     h8300_extract_return_value (TYPE, (char *)(REGBUF), (char *)(VALBUF))
 
@@ -169,7 +170,7 @@ extern void h8300_extract_return_value PARAMS((struct type *, char *, char *));
    in d0/d1.  */
 /* FIXME: Won't work with both h8/300's.  */
 
-extern void h8300_store_return_value PARAMS((struct type *, char *));
+extern void h8300_store_return_value PARAMS ((struct type *, char *));
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
     h8300_store_return_value(TYPE, (char *) (VALBUF))
 
@@ -186,7 +187,7 @@ extern void h8300_store_return_value PARAMS((struct type *, char *));
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      extract_address (REGBUF + REGISTER_BYTE (0), \
 		      REGISTER_RAW_SIZE (0))
-     
+
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
@@ -225,7 +226,7 @@ CORE_ADDR h8300_frame_chain PARAMS ((struct frame_info *));
    SAVED FP   <-FP POINTS HERE
    LOCALS0
    LOCALS1    <-SP POINTS HERE
-   */
+ */
 
 #define FRAME_SAVED_PC(FRAME) h8300_frame_saved_pc(FRAME)
 
@@ -263,7 +264,7 @@ typedef unsigned short INSN_WORD;
 #define GDB_TARGET_IS_H8300
 
 #define NUM_REALREGS 10
-#define NOP { 0x01, 0x80} /* A sleep insn */
+#define NOP { 0x01, 0x80}	/* A sleep insn */
 
 #define BELIEVE_PCC_PROMOTION 1
 
@@ -279,8 +280,8 @@ typedef unsigned short INSN_WORD;
 #define CALL_DUMMY_START_OFFSET		(0)
 #define CALL_DUMMY_BREAKPOINT_OFFSET	(0)
 
-extern CORE_ADDR h8300_push_arguments PARAMS ((int nargs, 
-					       struct value **args, 
+extern CORE_ADDR h8300_push_arguments PARAMS ((int nargs,
+					       struct value ** args,
 					       CORE_ADDR sp,
 					       unsigned char struct_return,
 					       CORE_ADDR struct_addr));
@@ -300,6 +301,3 @@ extern CORE_ADDR h8300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-
-
-

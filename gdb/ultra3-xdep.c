@@ -2,21 +2,22 @@
    Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by David Wood (wood@nyu.edu) at New York University.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define DEBUG
 #include "defs.h"
@@ -29,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/param.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <fcntl.h>  
+#include <fcntl.h>
 
 #include "gdbcore.h"
 
@@ -42,77 +43,89 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* FIXME: Kludge this for now. It really should be system call. */
 int
-getpagesize()
-{ return(8192); }
+getpagesize ()
+{
+  return (8192);
+}
 
 /* FIXME: Fake out the fcntl() call, which we don't have.  */
-fcntl(fd, cmd, arg)
-int fd, cmd, arg;
+fcntl (fd, cmd, arg)
+     int fd, cmd, arg;
 {
 
-  switch (cmd) {
-	case F_GETFL: return(O_RDONLY);	break;
-	default:	
-		printf_unfiltered("Ultra3's fcntl() failing, cmd = %d.\n",cmd);
-		return(-1);
-  }
+  switch (cmd)
+    {
+    case F_GETFL:
+      return (O_RDONLY);
+      break;
+    default:
+      printf_unfiltered ("Ultra3's fcntl() failing, cmd = %d.\n", cmd);
+      return (-1);
+    }
 }
 
 
 /* 
  * 4.2 Signal support, requires linking with libjobs.
  */
-static int	_SigMask;
+static int _SigMask;
 #define sigbit(s)       (1L << ((s)-1))
 
-init_SigMask()
+init_SigMask ()
 {
-	/* Taken from the sym1 kernel in machdep.c:startup() */
-	_SigMask = sigbit (SIGTSTP) | sigbit (SIGTTOU) | sigbit (SIGTTIN) |
-                        sigbit (SIGCHLD) | sigbit (SIGTINT);
+  /* Taken from the sym1 kernel in machdep.c:startup() */
+  _SigMask = sigbit (SIGTSTP) | sigbit (SIGTTOU) | sigbit (SIGTTIN) |
+    sigbit (SIGCHLD) | sigbit (SIGTINT);
 }
 
-sigmask(signo)
-	int signo;
+sigmask (signo)
+     int signo;
 {
-	return (1 << (signo-1));
+  return (1 << (signo - 1));
 }
 
-sigsetmask(sigmask)
-unsigned int sigmask;
+sigsetmask (sigmask)
+     unsigned int sigmask;
 {
-	int i, mask = 1;
-	int lastmask = _SigMask;
+  int i, mask = 1;
+  int lastmask = _SigMask;
 
-	for (i=0 ; i<NSIG ; i++) {
-		if (sigmask & mask) { 
-			if (!(_SigMask & mask)) {
-				sighold(i+1);
-				_SigMask |= mask;
-			}
-		} else if (_SigMask & mask) {
-			sigrelse(i+1);
-			_SigMask &= ~mask;
-		}
-		mask <<= 1;
+  for (i = 0; i < NSIG; i++)
+    {
+      if (sigmask & mask)
+	{
+	  if (!(_SigMask & mask))
+	    {
+	      sighold (i + 1);
+	      _SigMask |= mask;
+	    }
 	}
-	return (lastmask);
+      else if (_SigMask & mask)
+	{
+	  sigrelse (i + 1);
+	  _SigMask &= ~mask;
+	}
+      mask <<= 1;
+    }
+  return (lastmask);
 }
 
-sigblock(sigmask)
-unsigned int sigmask;
+sigblock (sigmask)
+     unsigned int sigmask;
 {
-	int i, mask = 1;
-	int lastmask = _SigMask;
+  int i, mask = 1;
+  int lastmask = _SigMask;
 
-	for (i=0 ; i<NSIG ; i++) {
-		if ((sigmask & mask) && !(_SigMask & mask)) {
-			sighold(i+1);
-			_SigMask |= mask;
-		}
-		mask <<= 1;
+  for (i = 0; i < NSIG; i++)
+    {
+      if ((sigmask & mask) && !(_SigMask & mask))
+	{
+	  sighold (i + 1);
+	  _SigMask |= mask;
 	}
-	return (lastmask);
+      mask <<= 1;
+    }
+  return (lastmask);
 }
 #endif /* SYM1 */
 
@@ -123,6 +136,6 @@ void
 _initialize_ultra3 ()
 {
 #ifdef SYM1
-	init_SigMask();
+  init_SigMask ();
 #endif
 }

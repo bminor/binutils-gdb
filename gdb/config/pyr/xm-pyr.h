@@ -61,31 +61,31 @@
 /* OBSOLETE #define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Define offsets of registers in the core file (or maybe u area) *x/ */
-/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno)	\ */
-/* OBSOLETE { struct user __u;					\ */
-/* OBSOLETE   addr = blockend  + (regno - 16 ) * 4;			\ */
-/* OBSOLETE   if (regno == 67) {   					\ */
-/* OBSOLETE       printf("\\geting reg 67\\");			\ */
-/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;	\ */
-/* OBSOLETE   } else if (regno == KSP_REGNUM) {			\ */
-/* OBSOLETE       printf("\\geting KSP (reg %d)\\", KSP_REGNUM);	\ */
-/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_ksp) - (int) &__u;	\ */
-/* OBSOLETE   } else if (regno == CSP_REGNUM) {			\ */
-/* OBSOLETE       printf("\\geting CSP (reg %d\\",CSP_REGNUM);	\ */
-/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;	\ */
-/* OBSOLETE   } else if (regno == 64) {				\ */
-/* OBSOLETE       printf("\\geting reg 64\\");			\ */
-/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;	\ */
-/* OBSOLETE    } else if (regno == PS_REGNUM)			\ */
-/* OBSOLETE       addr = blockend - 4;				\ */
-/* OBSOLETE   else if (1 && ((16 > regno) && (regno > 11)))		\ */
-/* OBSOLETE       addr = last_frame_offset + (4 *(regno+32));	\ */
-/* OBSOLETE   else if (0 && (12 > regno)) 				\ */
-/* OBSOLETE       addr = global_reg_offset + (4 *regno);		\ */
-/* OBSOLETE   else if (16 > regno)	 				\ */
-/* OBSOLETE       addr = global_reg_offset + (4 *regno);		\ */
-/* OBSOLETE  else							\ */
-/* OBSOLETE       addr = blockend  + (regno - 16 ) * 4;		\ */
+/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno)      \ */
+/* OBSOLETE { struct user __u;                                  \ */
+/* OBSOLETE   addr = blockend  + (regno - 16 ) * 4;                     \ */
+/* OBSOLETE   if (regno == 67) {                                        \ */
+/* OBSOLETE       printf("\\geting reg 67\\");                  \ */
+/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;        \ */
+/* OBSOLETE   } else if (regno == KSP_REGNUM) {                 \ */
+/* OBSOLETE       printf("\\geting KSP (reg %d)\\", KSP_REGNUM);        \ */
+/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_ksp) - (int) &__u;        \ */
+/* OBSOLETE   } else if (regno == CSP_REGNUM) {                 \ */
+/* OBSOLETE       printf("\\geting CSP (reg %d\\",CSP_REGNUM);  \ */
+/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;        \ */
+/* OBSOLETE   } else if (regno == 64) {                         \ */
+/* OBSOLETE       printf("\\geting reg 64\\");                  \ */
+/* OBSOLETE       addr = (int)(&__u.u_pcb.pcb_csp) - (int) &__u;        \ */
+/* OBSOLETE    } else if (regno == PS_REGNUM)                   \ */
+/* OBSOLETE       addr = blockend - 4;                          \ */
+/* OBSOLETE   else if (1 && ((16 > regno) && (regno > 11)))             \ */
+/* OBSOLETE       addr = last_frame_offset + (4 *(regno+32));   \ */
+/* OBSOLETE   else if (0 && (12 > regno))                               \ */
+/* OBSOLETE       addr = global_reg_offset + (4 *regno);                \ */
+/* OBSOLETE   else if (16 > regno)                                      \ */
+/* OBSOLETE       addr = global_reg_offset + (4 *regno);                \ */
+/* OBSOLETE  else                                                       \ */
+/* OBSOLETE       addr = blockend  + (regno - 16 ) * 4;         \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  *x/ */

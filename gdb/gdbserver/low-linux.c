@@ -1,21 +1,22 @@
 /* Low level interface to ptrace, for the remote server for GDB.
    Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <sys/wait.h>
@@ -95,7 +96,7 @@ kill_inferior ()
     return;
   ptrace (PTRACE_KILL, inferior_pid, 0, 0);
   wait (0);
-  /*************inferior_died ();****VK**************/
+/*************inferior_died ();****VK**************/
 }
 
 /* Return nonzero if the given thread is still alive.  */
@@ -169,7 +170,7 @@ myresume (step, signal)
 #ifndef TARGET_M68K
 /* this table must line up with REGISTER_NAMES in tm-i386v.h */
 /* symbols like 'EAX' come from <sys/reg.h> */
-static int regmap[] = 
+static int regmap[] =
 {
   EAX, ECX, EDX, EBX,
   UESP, EBP, ESI, EDI,
@@ -187,22 +188,22 @@ i386_register_u_addr (blockend, regnum)
   /* for now, you can look at them with 'info float'
    * sys5 wont let you change them with ptrace anyway
    */
-  if (regnum >= FP0_REGNUM && regnum <= FP7_REGNUM) 
+  if (regnum >= FP0_REGNUM && regnum <= FP7_REGNUM)
     {
       int ubase, fpstate;
       struct user u;
       ubase = blockend + 4 * (SS + 1) - KSTKSZ;
-      fpstate = ubase + ((char *)&u.u_fpstate - (char *)&u);
+      fpstate = ubase + ((char *) &u.u_fpstate - (char *) &u);
       return (fpstate + 0x1c + 10 * (regnum - FP0_REGNUM));
-    } 
+    }
   else
 #endif
     return (blockend + 4 * regmap[regnum]);
-  
+
 }
 #else /* TARGET_M68K */
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
-static int regmap[] = 
+static int regmap[] =
 {
 #ifdef PT_D0
   PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
@@ -228,7 +229,7 @@ m68k_linux_register_u_addr (blockend, regnum)
      int blockend;
      int regnum;
 {
-    return (blockend + 4 * regmap[regnum]);
+  return (blockend + 4 * regmap[regnum]);
 }
 #endif
 
@@ -265,8 +266,8 @@ fetch_register (regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
       errno = 0;
-      *(int *) &registers[ regno * 4 + i] = ptrace (PTRACE_PEEKUSR, inferior_pid,
-				 (PTRACE_ARG3_TYPE) regaddr, 0);
+      *(int *) &registers[regno * 4 + i] = ptrace (PTRACE_PEEKUSR, inferior_pid,
+					     (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (int);
       if (errno != 0)
 	{
@@ -279,7 +280,7 @@ fetch_register (regno)
 	  goto error_exit;
 	}
     }
- error_exit:;
+error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -289,7 +290,7 @@ fetch_inferior_registers (regno)
      int regno;
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < NUM_REGS-NUM_FREGS; regno++)
+    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -317,21 +318,21 @@ store_inferior_registers (regno)
       errno = 0;
 #if 0
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-        {
-          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                  scratch, 0);
-          if (errno != 0)
-            {
+	{
+	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  scratch, 0);
+	  if (errno != 0)
+	    {
 	      /* Error, even if attached.  Failing to write these two
-		 registers is pretty serious.  */
-              sprintf (buf, "writing register number %d", regno);
-              perror_with_name (buf);
-            }
-        }
+	         registers is pretty serious.  */
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
       else
 #endif
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	  {
 	    errno = 0;
 	    ptrace (PTRACE_POKEUSR, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
@@ -347,11 +348,11 @@ store_inferior_registers (regno)
 		error (msg);
 		return;
 	      }
-	    regaddr += sizeof(int);
+	    regaddr += sizeof (int);
 	  }
     }
   else
-    for (regno = 0; regno < NUM_REGS-NUM_FREGS; regno++)
+    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
       store_inferior_registers (regno);
 }
 

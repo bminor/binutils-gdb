@@ -20,20 +20,20 @@
 /* OBSOLETE #define HOST_BYTE_ORDER BIG_ENDIAN */
 /* OBSOLETE  */
 /* OBSOLETE /* Address of U in kernel space *x/ */
-/* OBSOLETE #define	KERNEL_U_ADDR		0x7fffc000 */
+/* OBSOLETE #define     KERNEL_U_ADDR           0x7fffc000 */
 /* OBSOLETE  */
 /* OBSOLETE /* This is a piece of magic that is given a register number REGNO */
 /* OBSOLETE    and as BLOCKEND the address in the system of the end of the user structure */
 /* OBSOLETE    and stores in ADDR the address in the kernel or core dump */
 /* OBSOLETE    of that register. *x/ */
-/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno) {			\ */
-/* OBSOLETE 	addr = blockend + regno * 4;					\ */
-/* OBSOLETE 	if (regno == VE_REGNUM) addr = blockend - 9 * 4;		\ */
-/* OBSOLETE 	if (regno == PC_REGNUM) addr = blockend - 8 * 4;		\ */
-/* OBSOLETE 	if (regno == PS_REGNUM) addr = blockend - 7 * 4;		\ */
-/* OBSOLETE 	if (regno == FP_REGNUM) addr = blockend - 6 * 4;		\ */
-/* OBSOLETE 	if (regno >= V1_REGNUM) 					\ */
-/* OBSOLETE 	    addr = blockend + 16 * 4 + (regno - V1_REGNUM) * VR_SIZE;	\ */
+/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno) {                    \ */
+/* OBSOLETE     addr = blockend + regno * 4;                                    \ */
+/* OBSOLETE     if (regno == VE_REGNUM) addr = blockend - 9 * 4;                \ */
+/* OBSOLETE     if (regno == PC_REGNUM) addr = blockend - 8 * 4;                \ */
+/* OBSOLETE     if (regno == PS_REGNUM) addr = blockend - 7 * 4;                \ */
+/* OBSOLETE     if (regno == FP_REGNUM) addr = blockend - 6 * 4;                \ */
+/* OBSOLETE     if (regno >= V1_REGNUM)                                         \ */
+/* OBSOLETE         addr = blockend + 16 * 4 + (regno - V1_REGNUM) * VR_SIZE;   \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Don't try to write the frame pointer.  *x/ */
@@ -80,8 +80,8 @@
 /* OBSOLETE    The fault code will be on the stack beyond the last register.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define PUSH_REGISTERS        \ */
-/* OBSOLETE { asm ("clrw -(sp)");	      \ */
-/* OBSOLETE   asm ("pea 10(sp)");	      \ */
+/* OBSOLETE { asm ("clrw -(sp)");             \ */
+/* OBSOLETE   asm ("pea 10(sp)");             \ */
 /* OBSOLETE   asm ("movem $ 0xfffe,-(sp)"); } */
 /* OBSOLETE  */
 /* OBSOLETE /* Assuming the registers (including processor status) have been */

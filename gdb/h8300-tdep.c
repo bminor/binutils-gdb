@@ -1,25 +1,26 @@
 /* Target-machine dependent code for Hitachi H8/300, for GDB.
    Copyright (C) 1988, 1990, 1991 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*
- Contributed by Steve Chamberlain
-                sac@cygnus.com
+   Contributed by Steve Chamberlain
+   sac@cygnus.com
  */
 
 #include "defs.h"
@@ -57,8 +58,8 @@ extern int h8300hmode, h8300smode;
 static char *original_register_names[] = REGISTER_NAMES;
 
 static char *h8300h_register_names[] =
-  {"er0", "er1", "er2", "er3", "er4", "er5", "er6",
-    "sp", "ccr","pc","cycles","tick","inst" };
+{"er0", "er1", "er2", "er3", "er4", "er5", "er6",
+ "sp", "ccr", "pc", "cycles", "tick", "inst"};
 
 char **h8300_register_names = original_register_names;
 
@@ -70,7 +71,7 @@ static void set_machine_hook PARAMS ((char *filename));
 
 void h8300_frame_find_saved_regs ();
 
-CORE_ADDR 
+CORE_ADDR
 h8300_skip_prologue (start_pc)
      CORE_ADDR start_pc;
 {
@@ -165,10 +166,10 @@ CORE_ADDR
 h8300_frame_chain (thisframe)
      struct frame_info *thisframe;
 {
-  if (PC_IN_CALL_DUMMY(thisframe->pc, thisframe->frame, thisframe->frame))
-    { /* initialize the from_pc now */
+  if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+    {				/* initialize the from_pc now */
       thisframe->from_pc = generic_read_register_dummy (thisframe->pc,
-							thisframe->frame, 
+							thisframe->frame,
 							PC_REGNUM);
       return thisframe->frame;
     }
@@ -203,15 +204,15 @@ h8300_frame_find_saved_regs (fi, fsr)
 
       fi->fsr = cache_fsr;
 
-      if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
-	{	/* no more to do. */
+      if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+	{			/* no more to do. */
 	  if (fsr)
 	    *fsr = *fi->fsr;
 	  return;
 	}
       /* Find the start and end of the function prologue.  If the PC
-	 is in the function prologue, we only consider the part that
-	 has executed already.  */
+         is in the function prologue, we only consider the part that
+         has executed already.  */
 
       ip = get_pc_function_start (fi->pc);
       sal = find_pc_line (ip, 0);
@@ -228,7 +229,7 @@ h8300_frame_find_saved_regs (fi, fsr)
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
-   of the instruction.*/
+   of the instruction. */
 
 CORE_ADDR
 NEXT_PROLOGUE_INSN (addr, lim, pword1)
@@ -404,7 +405,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
   /* Rememeber any others too */
   in_frame[PC_REGNUM] = 0;
-  
+
   if (have_fp)
     /* We keep the old FP in the SP spot */
     fsr->regs[SP_REGNUM] = read_memory_unsigned_integer (fsr->regs[6], BINWORD);
@@ -423,8 +424,8 @@ h8300_init_extra_frame_info (fromleaf, fi)
   fi->args_pointer = 0;		/* Unknown */
   fi->locals_pointer = 0;	/* Unknown */
   fi->from_pc = 0;
-  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
-    { /* anything special to do? */
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    {				/* anything special to do? */
       return;
     }
 }
@@ -438,7 +439,7 @@ CORE_ADDR
 h8300_frame_saved_pc (frame)
      struct frame_info *frame;
 {
-  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return generic_read_register_dummy (frame->pc, frame->frame, PC_REGNUM);
   else
     return frame->from_pc;
@@ -448,7 +449,7 @@ CORE_ADDR
 frame_locals_address (fi)
      struct frame_info *fi;
 {
-  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   if (!fi->locals_pointer)
     {
@@ -467,7 +468,7 @@ CORE_ADDR
 frame_args_address (fi)
      struct frame_info *fi;
 {
-  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
   if (!fi->args_pointer)
     {
@@ -510,7 +511,7 @@ frame_args_address (fi)
    optimization.  I suspect this is a compiler bug.  Arguments of
    these odd sizes are left-justified within the word (as opposed to
    arguments smaller than WORDSIZE bytes, which are right-justified).
- 
+
    If the function is to return an aggregate type such as a struct,
    the caller must allocate space into which the callee will copy the
    return value.  In this case, a pointer to the return value location
@@ -518,7 +519,7 @@ frame_args_address (fi)
    the other arguments passed in via registers R0 to R2.  */
 
 CORE_ADDR
-h8300_push_arguments(nargs, args, sp, struct_return, struct_addr)
+h8300_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
      struct value **args;
      CORE_ADDR sp;
@@ -538,27 +539,27 @@ h8300_push_arguments(nargs, args, sp, struct_return, struct_addr)
   if (h8300hmode || h8300smode)
     {
       stack_align = 3;
-      wordsize    = 4;
+      wordsize = 4;
     }
   else
     {
       stack_align = 1;
-      wordsize    = 2;
+      wordsize = 2;
     }
 
   /* first force sp to a n-byte alignment */
   sp = sp & ~stack_align;
 
   /* Now make sure there's space on the stack */
-  for (argnum = 0, stack_alloc = 0; 
+  for (argnum = 0, stack_alloc = 0;
        argnum < nargs; argnum++)
-    stack_alloc += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + stack_align) 
+    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + stack_align)
 		    & ~stack_align);
-  sp -= stack_alloc;	/* make room on stack for args */
+  sp -= stack_alloc;		/* make room on stack for args */
   /* we may over-allocate a little here, but that won't hurt anything */
 
-  argreg = ARG0_REGNUM; 
-  if (struct_return)	/* "struct return" pointer takes up one argreg */
+  argreg = ARG0_REGNUM;
+  if (struct_return)		/* "struct return" pointer takes up one argreg */
     {
       write_register (argreg++, struct_addr);
     }
@@ -571,30 +572,30 @@ h8300_push_arguments(nargs, args, sp, struct_return, struct_addr)
     {
       type = VALUE_TYPE (args[argnum]);
       len = TYPE_LENGTH (type);
-      memset(valbuf, 0, sizeof(valbuf));
+      memset (valbuf, 0, sizeof (valbuf));
       if (len < wordsize)
 	{
 	  /* the purpose of this is to right-justify the value within the word */
-	  memcpy(valbuf + (wordsize - len), 
-		 (char *) VALUE_CONTENTS (args[argnum]), len);
+	  memcpy (valbuf + (wordsize - len),
+		  (char *) VALUE_CONTENTS (args[argnum]), len);
 	  val = valbuf;
 	}
       else
 	val = (char *) VALUE_CONTENTS (args[argnum]);
 
-      if (len > (ARGLAST_REGNUM+1 - argreg) * REGISTER_RAW_SIZE(ARG0_REGNUM) ||
-	 (len > wordsize && (len & stack_align) != 0))
-	{ /* passed on the stack */
-	  write_memory (sp + stack_offset, val, 
+      if (len > (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM) ||
+	  (len > wordsize && (len & stack_align) != 0))
+	{			/* passed on the stack */
+	  write_memory (sp + stack_offset, val,
 			len < wordsize ? wordsize : len);
 	  stack_offset += (len + stack_align) & ~stack_align;
 	}
       /* NOTE WELL!!!!!  This is not an "else if" clause!!!
-	 That's because some *&^%$ things get passed on the stack
-	 AND in the registers!   */
-      if (len <= (ARGLAST_REGNUM+1 - argreg) * REGISTER_RAW_SIZE(ARG0_REGNUM))
+         That's because some *&^%$ things get passed on the stack
+         AND in the registers!   */
+      if (len <= (ARGLAST_REGNUM + 1 - argreg) * REGISTER_RAW_SIZE (ARG0_REGNUM))
 	while (len > 0)
-	  { /* there's room in registers */
+	  {			/* there's room in registers */
 	    regval = extract_address (val, wordsize);
 	    write_register (argreg, regval);
 	    len -= wordsize;
@@ -635,16 +636,16 @@ h8300_push_return_address (pc, sp)
    was created.  Usually used either by the "RETURN" command, or by
    call_function_by_hand after the dummy_frame is finished. */
 
-void 
+void
 h8300_pop_frame ()
 {
   unsigned regnum;
   struct frame_saved_regs fsr;
   struct frame_info *frame = get_current_frame ();
 
-  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
-      generic_pop_dummy_frame();
+      generic_pop_dummy_frame ();
     }
   else
     {
@@ -655,8 +656,8 @@ h8300_pop_frame ()
 	  /* Don't forget SP_REGNUM is a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
 	  if (fsr.regs[regnum] && regnum != SP_REGNUM)
-	    write_register (regnum, 
-			    read_memory_integer(fsr.regs[regnum], BINWORD));
+	    write_register (regnum,
+			    read_memory_integer (fsr.regs[regnum], BINWORD));
 	  else if (fsr.regs[regnum] && regnum == SP_REGNUM)
 	    write_register (regnum, frame->frame + 2 * BINWORD);
 	}
@@ -684,70 +685,72 @@ h8300_extract_return_value (type, regbuf, valbuf)
   else
     wordsize = 2;
 
-  len = TYPE_LENGTH(type);
+  len = TYPE_LENGTH (type);
 
-  switch (len) {
-  case 1:	/* (char) */
-  case 2:	/* (short), (int) */
-    memcpy (valbuf,   regbuf + REGISTER_BYTE(0) + (wordsize - len), len);
-    break;
-  case 4:	/* (long), (float) */
-    if (h8300smode || h8300hmode)
-      {
-	memcpy (valbuf,   regbuf + REGISTER_BYTE(0), 4);
-      }
-    else
-      {
-	memcpy (valbuf,   regbuf + REGISTER_BYTE(0), 2);
-	memcpy (valbuf+2, regbuf + REGISTER_BYTE(1), 2);
-      }
-    break;
-  case 8:	/* (double) (doesn't seem to happen, which is good,
-		   because this almost certainly isn't right.  */
-    error ("I don't know how a double is returned.");
-    break;
-  }
+  switch (len)
+    {
+    case 1:			/* (char) */
+    case 2:			/* (short), (int) */
+      memcpy (valbuf, regbuf + REGISTER_BYTE (0) + (wordsize - len), len);
+      break;
+    case 4:			/* (long), (float) */
+      if (h8300smode || h8300hmode)
+	{
+	  memcpy (valbuf, regbuf + REGISTER_BYTE (0), 4);
+	}
+      else
+	{
+	  memcpy (valbuf, regbuf + REGISTER_BYTE (0), 2);
+	  memcpy (valbuf + 2, regbuf + REGISTER_BYTE (1), 2);
+	}
+      break;
+    case 8:			/* (double) (doesn't seem to happen, which is good,
+				   because this almost certainly isn't right.  */
+      error ("I don't know how a double is returned.");
+      break;
+    }
 }
 
 /* Function: store_return_value
    Place the appropriate value in the appropriate registers.
    Primarily used by the RETURN command.  */
 
-void 
+void
 h8300_store_return_value (type, valbuf)
      struct type *type;
      char *valbuf;
 {
   int wordsize, len, regval;
-  
+
   if (h8300hmode || h8300smode)
     wordsize = 4;
   else
     wordsize = 2;
 
-  len = TYPE_LENGTH(type);
-  switch (len) {
-  case 1:	/* char */
-  case 2:	/* short, int */
-    regval = extract_address(valbuf, len);
-    write_register (0, regval);
-    break;
-  case 4:	/* long, float */
-    regval = extract_address(valbuf, len);
-    if (h8300smode || h8300hmode)
-      {
-	write_register (0, regval);
-      }
-    else
-      {
-	write_register (0, regval >> 16);
-	write_register (1, regval & 0xffff);
-      }
-    break;
-  case 8:	/* presumeably double, but doesn't seem to happen */
-    error ("I don't know how to return a double.");
-    break;
-  }
+  len = TYPE_LENGTH (type);
+  switch (len)
+    {
+    case 1:			/* char */
+    case 2:			/* short, int */
+      regval = extract_address (valbuf, len);
+      write_register (0, regval);
+      break;
+    case 4:			/* long, float */
+      regval = extract_address (valbuf, len);
+      if (h8300smode || h8300hmode)
+	{
+	  write_register (0, regval);
+	}
+      else
+	{
+	  write_register (0, regval >> 16);
+	  write_register (1, regval & 0xffff);
+	}
+      break;
+    case 8:			/* presumeably double, but doesn't seem to happen */
+      error ("I don't know how to return a double.");
+      break;
+    }
 }
 
 struct cmd_list_element *setmemorylist;
@@ -762,7 +765,7 @@ set_register_names ()
 }
 
 static void
-h8300_command(args, from_tty)
+h8300_command (args, from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 0;
@@ -771,7 +774,7 @@ h8300_command(args, from_tty)
 }
 
 static void
-h8300h_command(args, from_tty)
+h8300h_command (args, from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 1;
@@ -780,7 +783,7 @@ h8300h_command(args, from_tty)
 }
 
 static void
-h8300s_command(args, from_tty)
+h8300s_command (args, from_tty)
 {
   extern int h8300smode;
   extern int h8300hmode;
@@ -790,7 +793,7 @@ h8300s_command(args, from_tty)
 }
 
 
-static void 
+static void
 set_machine (args, from_tty)
      char *args;
      int from_tty;
@@ -815,8 +818,7 @@ set_machine_hook (filename)
       h8300smode = 1;
       h8300hmode = 1;
     }
-  else 
-    if (bfd_get_mach (exec_bfd) == bfd_mach_h8300h)
+  else if (bfd_get_mach (exec_bfd) == bfd_mach_h8300h)
     {
       h8300smode = 0;
       h8300hmode = 1;
@@ -833,7 +835,7 @@ void
 _initialize_h8300m ()
 {
   add_prefix_cmd ("machine", no_class, set_machine,
-		  "set the machine type", 
+		  "set the machine type",
 		  &setmemorylist, "set machine ", 0,
 		  &setlist);
 
@@ -848,7 +850,7 @@ _initialize_h8300m ()
 
   /* Add a hook to set the machine type when we're loading a file. */
 
-  specify_exec_file_hook(set_machine_hook);
+  specify_exec_file_hook (set_machine_hook);
 }
 
 
@@ -863,7 +865,7 @@ print_register_hook (regno)
       unsigned char b[4];
       unsigned char l;
       read_relative_register_raw_bytes (regno, b);
-      l = b[REGISTER_VIRTUAL_SIZE(8) -1];
+      l = b[REGISTER_VIRTUAL_SIZE (8) - 1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
       printf_unfiltered ("H-%d - ", (l & 0x20) != 0);

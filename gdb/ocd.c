@@ -1,21 +1,22 @@
 /* Target communications support for Macraigor Systems' On-Chip Debugging
    Copyright 1996, 1997 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -39,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Prototypes for local functions */
 
 static int ocd_read_bytes PARAMS ((CORE_ADDR memaddr,
-				      char *myaddr, int len));
+				   char *myaddr, int len));
 
 static int ocd_start_remote PARAMS ((PTR dummy));
 
@@ -59,11 +60,11 @@ static void ocd_interrupt_twice PARAMS ((int signo));
 
 static void interrupt_query PARAMS ((void));
 
-static unsigned char * ocd_do_command PARAMS ((int cmd, int *statusp, int *lenp));
+static unsigned char *ocd_do_command PARAMS ((int cmd, int *statusp, int *lenp));
 
 static void ocd_put_packet PARAMS ((unsigned char *packet, int pktlen));
 
-static unsigned char * ocd_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
+static unsigned char *ocd_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
 
 static struct target_ops *current_ops = NULL;
 
@@ -97,21 +98,51 @@ ocd_error (s, error_code)
 
   switch (error_code)
     {
-    case 0x1: s = "Unknown fault"; break;
-    case 0x2: s = "Power failed"; break;
-    case 0x3: s = "Cable disconnected"; break;
-    case 0x4: s = "Couldn't enter OCD mode"; break;
-    case 0x5: s = "Target stuck in reset"; break;
-    case 0x6: s = "OCD hasn't been initialized"; break;
-    case 0x7: s = "Write verify failed"; break;
-    case 0x8: s = "Reg buff error (during MPC5xx fp reg read/write)"; break;
-    case 0x9: s = "Invalid CPU register access attempt failed"; break;
-    case 0x11: s = "Bus error"; break;
-    case 0x12: s = "Checksum error"; break;
-    case 0x13: s = "Illegal command"; break;
-    case 0x14: s = "Parameter error"; break;
-    case 0x15: s = "Internal error"; break;
-    case 0x80: s = "Flash erase error"; break;
+    case 0x1:
+      s = "Unknown fault";
+      break;
+    case 0x2:
+      s = "Power failed";
+      break;
+    case 0x3:
+      s = "Cable disconnected";
+      break;
+    case 0x4:
+      s = "Couldn't enter OCD mode";
+      break;
+    case 0x5:
+      s = "Target stuck in reset";
+      break;
+    case 0x6:
+      s = "OCD hasn't been initialized";
+      break;
+    case 0x7:
+      s = "Write verify failed";
+      break;
+    case 0x8:
+      s = "Reg buff error (during MPC5xx fp reg read/write)";
+      break;
+    case 0x9:
+      s = "Invalid CPU register access attempt failed";
+      break;
+    case 0x11:
+      s = "Bus error";
+      break;
+    case 0x12:
+      s = "Checksum error";
+      break;
+    case 0x13:
+      s = "Illegal command";
+      break;
+    case 0x14:
+      s = "Parameter error";
+      break;
+    case 0x15:
+      s = "Internal error";
+      break;
+    case 0x80:
+      s = "Flash erase error";
+      break;
     default:
       sprintf (buf, "Unknown error code %d", error_code);
       s = buf;
@@ -154,11 +185,11 @@ ocd_start_remote (dummy)
   int speed;
   enum ocd_target_type target_type;
 
-  target_type = *(enum ocd_target_type*)dummy;
+  target_type = *(enum ocd_target_type *) dummy;
 
   immediate_quit = 1;		/* Allow user to interrupt it */
 
-  SERIAL_SEND_BREAK (ocd_desc); /* Wake up the wiggler */
+  SERIAL_SEND_BREAK (ocd_desc);	/* Wake up the wiggler */
 
   speed = 80;			/* Divide clock by 4000 */
 
@@ -189,7 +220,7 @@ ocd_start_remote (dummy)
   /* Reset the target */
 
   ocd_do_command (OCD_RESET_RUN, &status, &pktlen);
-/*  ocd_do_command (OCD_RESET, &status, &pktlen);*/
+/*  ocd_do_command (OCD_RESET, &status, &pktlen); */
 #endif
 
   /* If processor is still running, stop it.  */
@@ -233,12 +264,12 @@ ocd_start_remote (dummy)
   print_stack_frame (selected_frame, -1, 1);
 
   buf[0] = OCD_LOG_FILE;
-  buf[1] = 3;   /* close existing WIGGLERS.LOG */
+  buf[1] = 3;			/* close existing WIGGLERS.LOG */
   ocd_put_packet (buf, 2);
   p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
   buf[0] = OCD_LOG_FILE;
-  buf[1] = 2;   /* append to existing WIGGLERS.LOG */
+  buf[1] = 2;			/* append to existing WIGGLERS.LOG */
   ocd_put_packet (buf, 2);
   p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
@@ -273,28 +304,29 @@ device the OCD device is attached to (e.g. /dev/ttya).");
 
   ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
 
-  if (strncmp(name,"wiggler",7) == 0)
-      {
-	  ocd_desc = SERIAL_OPEN ("ocd");
-          if (!ocd_desc)
-            perror_with_name (name);
+  if (strncmp (name, "wiggler", 7) == 0)
+    {
+      ocd_desc = SERIAL_OPEN ("ocd");
+      if (!ocd_desc)
+	perror_with_name (name);
 
-	  buf[0] = OCD_LOG_FILE;
-	  buf[1] = 1;	/* open new or overwrite existing WIGGLERS.LOG */
-	  ocd_put_packet (buf, 2);
-	  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+      buf[0] = OCD_LOG_FILE;
+      buf[1] = 1;		/* open new or overwrite existing WIGGLERS.LOG */
+      ocd_put_packet (buf, 2);
+      p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
-	  buf[0] = OCD_SET_CONNECTION;
-	  buf[1] = 0x01;	/* atoi (name[11]); */
-	  ocd_put_packet (buf, 2);
-	  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
-      }
-  else	/* not using Wigglers.dll */
-      {
-          ocd_desc = SERIAL_OPEN (name);
-	  if (!ocd_desc)
-	      perror_with_name (name);
-      }
+      buf[0] = OCD_SET_CONNECTION;
+      buf[1] = 0x01;		/* atoi (name[11]); */
+      ocd_put_packet (buf, 2);
+      p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
+    }
+  else
+    /* not using Wigglers.dll */
+    {
+      ocd_desc = SERIAL_OPEN (name);
+      if (!ocd_desc)
+	perror_with_name (name);
+    }
 
   if (baud_rate != -1)
     {
@@ -334,7 +366,7 @@ device the OCD device is attached to (e.g. /dev/ttya).");
 		     "Couldn't establish connection to remote target\n",
 		     RETURN_MASK_ALL))
     {
-      pop_target();
+      pop_target ();
       error ("Failed to connect to OCD.");
     }
 }
@@ -397,7 +429,7 @@ ocd_interrupt (signo)
 {
   /* If this doesn't work, try more severe steps.  */
   signal (signo, ocd_interrupt_twice);
-  
+
   if (remote_debug)
     printf_unfiltered ("ocd_interrupt called\n");
 
@@ -411,7 +443,7 @@ ocd_interrupt (signo)
   }
 }
 
-static void (*ofunc)();
+static void (*ofunc) ();
 
 /* The user typed ^C twice.  */
 static void
@@ -419,7 +451,7 @@ ocd_interrupt_twice (signo)
      int signo;
 {
   signal (signo, ofunc);
-  
+
   interrupt_query ();
 
   signal (signo, ocd_interrupt);
@@ -601,7 +633,7 @@ ocd_write_bdm_register (bdm_regno, reg)
   ocd_write_bdm_registers (bdm_regno, buf, 4);
 }
 
-void 
+void
 ocd_prepare_to_store ()
 {
 }
@@ -769,7 +801,7 @@ ocd_xfer_memory (memaddr, myaddr, len, should_write, target)
      char *myaddr;
      int len;
      int should_write;
-     struct target_ops *target;			/* ignored */
+     struct target_ops *target;	/* ignored */
 {
   return dcache_xfer_memory (ocd_dcache, memaddr, myaddr, len, should_write);
 }
@@ -836,7 +868,7 @@ get_quoted_char (timeout)
     }
 }
 
-static unsigned char pkt[256 * 2 + 10], *pktp; /* Worst case */
+static unsigned char pkt[256 * 2 + 10], *pktp;	/* Worst case */
 
 static void
 reset_packet ()
@@ -934,7 +966,7 @@ ocd_put_packet (buf, len)
   unsigned char c;
   unsigned char *packet, *packet_ptr;
 
-  packet = alloca (len + 1 + 1); /* packet + SYN + checksum */
+  packet = alloca (len + 1 + 1);	/* packet + SYN + checksum */
   packet_ptr = packet;
 
   checksum = 0;
@@ -960,7 +992,7 @@ ocd_put_packet (buf, len)
    first byte of the packet.  Subsequent bytes are expected to arrive in
    time <= remote_timeout.  Returns a pointer to a static buffer containing
    the payload of the packet.  *LENP contains the length of the packet.
-*/
+ */
 
 static unsigned char *
 stu_get_packet (cmd, lenp, timeout)
@@ -972,7 +1004,7 @@ stu_get_packet (cmd, lenp, timeout)
   static unsigned char buf[256 + 10], *p;
   unsigned char checksum;
 
- find_packet:
+find_packet:
 
   ch = get_quoted_char (timeout);
 
@@ -982,7 +1014,7 @@ stu_get_packet (cmd, lenp, timeout)
   if (ch != RAW_SYN)
     goto find_packet;
 
- found_syn:			/* Found the start of a packet */
+found_syn:			/* Found the start of a packet */
 
   p = buf;
   checksum = 0;
@@ -1025,7 +1057,7 @@ stu_get_packet (cmd, lenp, timeout)
    first byte of the packet.  Subsequent bytes are expected to arrive in
    time <= remote_timeout.  Returns a pointer to a static buffer containing
    the payload of the packet.  *LENP contains the length of the packet.
-*/
+ */
 
 static unsigned char *
 ocd_get_packet (cmd, lenp, timeout)
@@ -1086,7 +1118,7 @@ ocd_get_packet (cmd, lenp, timeout)
       len = 8;			/* write address, value read back */
       break;
     case 0x11:			/* Bus error? */
-				/* write address, read flag */
+      /* write address, read flag */
     case 0x15:			/* Internal error */
       len = 5;			/* error code, vector */
       break;
@@ -1096,43 +1128,43 @@ ocd_get_packet (cmd, lenp, timeout)
     case 0x0:			/* Normal result */
       switch (packet[0])
 	{
-	case OCD_AYT:	/* Are You There? */
-	case OCD_SET_BAUD_RATE: /* Set Baud Rate */
-	case OCD_INIT:	/* Initialize OCD device */
+	case OCD_AYT:		/* Are You There? */
+	case OCD_SET_BAUD_RATE:	/* Set Baud Rate */
+	case OCD_INIT:		/* Initialize OCD device */
 	case OCD_SET_SPEED:	/* Set Speed */
-	case OCD_SET_FUNC_CODE: /* Set Function Code */
-	case OCD_SET_CTL_FLAGS: /* Set Control Flags */
-	case OCD_SET_BUF_ADDR: /* Set Register Buffer Address */
-	case OCD_RUN:	/* Run Target from PC  */
+	case OCD_SET_FUNC_CODE:	/* Set Function Code */
+	case OCD_SET_CTL_FLAGS:	/* Set Control Flags */
+	case OCD_SET_BUF_ADDR:	/* Set Register Buffer Address */
+	case OCD_RUN:		/* Run Target from PC  */
 	case OCD_RUN_ADDR:	/* Run Target from Specified Address  */
-	case OCD_STOP:	/* Stop Target */
+	case OCD_STOP:		/* Stop Target */
 	case OCD_RESET_RUN:	/* Reset Target and Run */
 	case OCD_RESET:	/* Reset Target and Halt */
-	case OCD_STEP:	/* Single Step */
-	case OCD_WRITE_REGS: /* Write Register */
+	case OCD_STEP:		/* Single Step */
+	case OCD_WRITE_REGS:	/* Write Register */
 	case OCD_WRITE_MEM:	/* Write Memory */
 	case OCD_FILL_MEM:	/* Fill Memory */
 	case OCD_MOVE_MEM:	/* Move Memory */
-	case OCD_WRITE_INT_MEM: /* Write Internal Memory */
-	case OCD_JUMP:	/* Jump to Subroutine */
-	case OCD_ERASE_FLASH: /* Erase flash memory */
-	case OCD_PROGRAM_FLASH: /* Write flash memory */
+	case OCD_WRITE_INT_MEM:	/* Write Internal Memory */
+	case OCD_JUMP:		/* Jump to Subroutine */
+	case OCD_ERASE_FLASH:	/* Erase flash memory */
+	case OCD_PROGRAM_FLASH:	/* Write flash memory */
 	case OCD_EXIT_MON:	/* Exit the flash programming monitor  */
 	case OCD_ENTER_MON:	/* Enter the flash programming monitor  */
 	case OCD_LOG_FILE:	/* Make Wigglers.dll save Wigglers.log */
-	case OCD_SET_CONNECTION: /* Set type of connection in Wigglers.dll */
+	case OCD_SET_CONNECTION:	/* Set type of connection in Wigglers.dll */
 	  len = 0;
 	  break;
-	case OCD_GET_VERSION: /* Get Version */
+	case OCD_GET_VERSION:	/* Get Version */
 	  len = 10;
 	  break;
-	case OCD_GET_STATUS_MASK: /* Get Status Mask */
+	case OCD_GET_STATUS_MASK:	/* Get Status Mask */
 	  len = 1;
 	  break;
 	case OCD_GET_CTRS:	/* Get Error Counters */
 	case OCD_READ_REGS:	/* Read Register */
 	case OCD_READ_MEM:	/* Read Memory */
-	case OCD_READ_INT_MEM: /* Read Internal Memory */
+	case OCD_READ_INT_MEM:	/* Read Internal Memory */
 	  len = 257;
 	  break;
 	default:
@@ -1169,7 +1201,7 @@ ocd_get_packet (cmd, lenp, timeout)
   if (cmd != -1 && cmd != packet[0])
     error ("Response phase error.  Got 0x%x, expected 0x%x", packet[0], cmd);
 
-  *lenp = packet_ptr - packet - 1; /* Subtract checksum byte */
+  *lenp = packet_ptr - packet - 1;	/* Subtract checksum byte */
   return packet;
 }
 #endif
@@ -1191,7 +1223,7 @@ ocd_do_command (cmd, statusp, lenp)
   int logpktlen;
 
   buf[0] = cmd;
-  ocd_put_packet (buf, 1);		/* Send command */
+  ocd_put_packet (buf, 1);	/* Send command */
   p = ocd_get_packet (*buf, lenp, remote_timeout);
 
   if (*lenp < 3)
@@ -1214,12 +1246,12 @@ ocd_do_command (cmd, statusp, lenp)
   *statusp = status;
 
   logbuf[0] = OCD_LOG_FILE;
-  logbuf[1] = 3;   /* close existing WIGGLERS.LOG */
+  logbuf[1] = 3;		/* close existing WIGGLERS.LOG */
   ocd_put_packet (logbuf, 2);
   ocd_get_packet (logbuf[0], &logpktlen, remote_timeout);
 
   logbuf[0] = OCD_LOG_FILE;
-  logbuf[1] = 2;   /* append to existing WIGGLERS.LOG */
+  logbuf[1] = 2;		/* append to existing WIGGLERS.LOG */
   ocd_put_packet (logbuf, 2);
   ocd_get_packet (logbuf[0], &logpktlen, remote_timeout);
 
@@ -1287,10 +1319,10 @@ ocd_load (args, from_tty)
 /* This should be defined for each target */
 /* But we want to be able to compile this file for some configurations
    not yet supported fully */
-   
-#define BDM_BREAKPOINT {0x0,0x0,0x0,0x0} /* For ppc 8xx */
+
+#define BDM_BREAKPOINT {0x0,0x0,0x0,0x0}	/* For ppc 8xx */
 #if 0
-#define BDM_BREAKPOINT {0x4a,0xfa} /* BGND insn used for CPU32 */
+#define BDM_BREAKPOINT {0x4a,0xfa}	/* BGND insn used for CPU32 */
 #endif
 
 /* BDM (at least on CPU32) uses a different breakpoint */
@@ -1388,7 +1420,7 @@ bdm_update_flash_command (args, from_tty)
   if (!args)
     error ("Must specify file containing new OCD code.");
 
-/*  old_chain = make_cleanup (flash_cleanup, 0);*/
+/*  old_chain = make_cleanup (flash_cleanup, 0); */
 
   ocd_do_command (OCD_ENTER_MON, &status, &pktlen);
 
@@ -1405,7 +1437,7 @@ bdm_update_flash_command (args, from_tty)
 
   ocd_do_command (OCD_EXIT_MON, &status, &pktlen);
 
-/*  discard_cleanups (old_chain);*/
+/*  discard_cleanups (old_chain); */
 }
 
 static void
@@ -1430,8 +1462,8 @@ _initialize_remote_ocd ()
   static struct cmd_list_element *ocd_cmd_list = NULL;
 
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
-				  var_integer, (char *)&remote_timeout,
-				  "Set timeout value for remote read.\n", &setlist),
+				  var_integer, (char *) &remote_timeout,
+			  "Set timeout value for remote read.\n", &setlist),
 		     &showlist);
 
   add_prefix_cmd ("ocd", class_obscure, bdm_command, "", &ocd_cmd_list, "ocd ",
@@ -1440,5 +1472,5 @@ _initialize_remote_ocd ()
   add_cmd ("reset", class_obscure, bdm_reset_command, "", &ocd_cmd_list);
   add_cmd ("restart", class_obscure, bdm_restart_command, "", &ocd_cmd_list);
   add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &ocd_cmd_list);
-  /*  add_cmd ("read-register", class_obscure, bdm_read_register_command, "", &ocd_cmd_list);*/
+  /*  add_cmd ("read-register", class_obscure, bdm_read_register_command, "", &ocd_cmd_list); */
 }

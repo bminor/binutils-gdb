@@ -2,21 +2,22 @@
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -33,12 +34,14 @@ extern int errno;
 
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
-static struct sstep_breaks {
-  /* Address, or 0 if this is not in use.  */
-  CORE_ADDR address;
-  /* Shadow contents.  */
-  char data[4];
-} stepBreaks[2];
+static struct sstep_breaks
+  {
+    /* Address, or 0 if this is not in use.  */
+    CORE_ADDR address;
+    /* Shadow contents.  */
+    char data[4];
+  }
+stepBreaks[2];
 
 /* Hook for determining the TOC address when calling functions in the
    inferior under AIX. The initialization code in rs6000-nat.c sets
@@ -48,15 +51,15 @@ CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR)) = NULL;
 
 /* Static function prototypes */
 
-static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
-				      CORE_ADDR safety));
+     static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
+					   CORE_ADDR safety));
 
-static void frame_get_saved_regs PARAMS ((struct frame_info *fi,
-					  struct rs6000_framedata *fdatap));
+     static void frame_get_saved_regs PARAMS ((struct frame_info * fi,
+					 struct rs6000_framedata * fdatap));
 
-static void pop_dummy_frame PARAMS ((void));
+     static void pop_dummy_frame PARAMS ((void));
 
-static CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
+     static CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
 
 CORE_ADDR
 rs6000_skip_prologue (pc)
@@ -77,7 +80,7 @@ struct frame_extra_info
      r31 by gcc) in such cases. If a compiler emits traceback table,
      then we should use the alloca register specified in traceback
      table. FIXME. */
-  CORE_ADDR initial_sp;			/* initial stack pointer. */
+  CORE_ADDR initial_sp;		/* initial stack pointer. */
 };
 
 void
@@ -85,7 +88,7 @@ rs6000_init_extra_frame_info (fromleaf, fi)
      int fromleaf;
      struct frame_info *fi;
 {
-  fi->extra_info = (struct frame_extra_info*)
+  fi->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
   fi->extra_info->initial_sp = 0;
   if (fi->next != (CORE_ADDR) 0
@@ -132,60 +135,63 @@ branch_dest (opcode, instr, pc, safety)
 
   absolute = (int) ((instr >> 1) & 1);
 
-  switch (opcode) {
-     case 18	:
-	immediate = ((instr & ~3) << 6) >> 6;	/* br unconditional */
-	if (absolute)
-	  dest = immediate;	
-	else
-	  dest = pc + immediate;
-	break;
+  switch (opcode)
+    {
+    case 18:
+      immediate = ((instr & ~3) << 6) >> 6;	/* br unconditional */
+      if (absolute)
+	dest = immediate;
+      else
+	dest = pc + immediate;
+      break;
 
-     case 16	:  
-        immediate = ((instr & ~3) << 16) >> 16;	/* br conditional */
-	if (absolute)
-	  dest = immediate;	
-	else
-	  dest = pc + immediate;
-	break;
+    case 16:
+      immediate = ((instr & ~3) << 16) >> 16;	/* br conditional */
+      if (absolute)
+	dest = immediate;
+      else
+	dest = pc + immediate;
+      break;
 
-      case 19	:
-	ext_op = (instr>>1) & 0x3ff;
+    case 19:
+      ext_op = (instr >> 1) & 0x3ff;
 
-	if (ext_op == 16)			/* br conditional register */
-	  {
+      if (ext_op == 16)		/* br conditional register */
+	{
+	  dest = read_register (LR_REGNUM) & ~3;
+
+	  /* If we are about to return from a signal handler, dest is
+	     something like 0x3c90.  The current frame is a signal handler
+	     caller frame, upon completion of the sigreturn system call
+	     execution will return to the saved PC in the frame.  */
+	  if (dest < TEXT_SEGMENT_BASE)
+	    {
+	      struct frame_info *fi;
+
+	      fi = get_current_frame ();
+	      if (fi != NULL)
+		dest = read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET,
+					    4);
+	    }
+	}
+
+      else if (ext_op == 528)	/* br cond to count reg */
+	{
+	  dest = read_register (CTR_REGNUM) & ~3;
+
+	  /* If we are about to execute a system call, dest is something
+	     like 0x22fc or 0x3b00.  Upon completion the system call
+	     will return to the address in the link register.  */
+	  if (dest < TEXT_SEGMENT_BASE)
 	    dest = read_register (LR_REGNUM) & ~3;
+	}
+      else
+	return -1;
+      break;
 
-	    /* If we are about to return from a signal handler, dest is
-	       something like 0x3c90.  The current frame is a signal handler
-	       caller frame, upon completion of the sigreturn system call
-	       execution will return to the saved PC in the frame.  */
-	    if (dest < TEXT_SEGMENT_BASE)
-	      {
-		struct frame_info *fi;
-
-		fi = get_current_frame ();
-		if (fi != NULL)
-		  dest = read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET,
-					      4);
-	      }
-	  }
-
-	else if (ext_op == 528)			/* br cond to count reg */
-	  {
-	    dest = read_register (CTR_REGNUM) & ~3;
-
-	    /* If we are about to execute a system call, dest is something
-	       like 0x22fc or 0x3b00.  Upon completion the system call
-	       will return to the address in the link register.  */
-	    if (dest < TEXT_SEGMENT_BASE)
-	      dest = read_register (LR_REGNUM) & ~3;
-	  }
-	else return -1; 
-	break;
-	
-       default: return -1;
-  }
+    default:
+      return -1;
+    }
   return (dest < TEXT_SEGMENT_BASE) ? safety : dest;
 }
 
@@ -227,45 +233,49 @@ rs6000_software_single_step (signal, insert_breakpoints_p)
   CORE_ADDR breaks[2];
   int opcode;
 
-  if (insert_breakpoints_p) {
+  if (insert_breakpoints_p)
+    {
 
-    loc = read_pc ();
+      loc = read_pc ();
 
-    insn = read_memory_integer (loc, 4);
+      insn = read_memory_integer (loc, 4);
 
-    breaks[0] = loc + INSNLEN(insn);
-    opcode = insn >> 26;
-    breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
+      breaks[0] = loc + INSNLEN (insn);
+      opcode = insn >> 26;
+      breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
 
-    /* Don't put two breakpoints on the same address. */
-    if (breaks[1] == breaks[0])
-      breaks[1] = -1;
+      /* Don't put two breakpoints on the same address. */
+      if (breaks[1] == breaks[0])
+	breaks[1] = -1;
 
-    stepBreaks[1].address = 0;
+      stepBreaks[1].address = 0;
 
-    for (ii=0; ii < 2; ++ii) {
+      for (ii = 0; ii < 2; ++ii)
+	{
 
-      /* ignore invalid breakpoint. */
-      if ( breaks[ii] == -1)
-        continue;
+	  /* ignore invalid breakpoint. */
+	  if (breaks[ii] == -1)
+	    continue;
 
-      read_memory (breaks[ii], stepBreaks[ii].data, 4);
+	  read_memory (breaks[ii], stepBreaks[ii].data, 4);
 
-      write_memory (breaks[ii], breakp, 4);
-      stepBreaks[ii].address = breaks[ii];
-    }  
+	  write_memory (breaks[ii], breakp, 4);
+	  stepBreaks[ii].address = breaks[ii];
+	}
 
-  } else {
+    }
+  else
+    {
 
-    /* remove step breakpoints. */
-    for (ii=0; ii < 2; ++ii)
-      if (stepBreaks[ii].address != 0)
-        write_memory 
-           (stepBreaks[ii].address, stepBreaks[ii].data, 4);
+      /* remove step breakpoints. */
+      for (ii = 0; ii < 2; ++ii)
+	if (stepBreaks[ii].address != 0)
+	  write_memory
+	    (stepBreaks[ii].address, stepBreaks[ii].data, 4);
 
-  }
+    }
   errno = 0;			/* FIXME, don't ignore errors! */
-			/* What errors?  {read,write}_memory call error().  */
+  /* What errors?  {read,write}_memory call error().  */
 }
 
 
@@ -273,19 +283,19 @@ rs6000_software_single_step (signal, insert_breakpoints_p)
    information about a function frame.
 
    in struct rs6000_framedata fdata:
-    - frameless is TRUE, if function does not have a frame.
-    - nosavedpc is TRUE, if function does not save %pc value in its frame.
-    - offset is the initial size of this stack frame --- the amount by
-      which we decrement the sp to allocate the frame.
-    - saved_gpr is the number of the first saved gpr.
-    - saved_fpr is the number of the first saved fpr.
-    - alloca_reg is the number of the register used for alloca() handling.
-      Otherwise -1.
-    - gpr_offset is the offset of the first saved gpr from the previous frame.
-    - fpr_offset is the offset of the first saved fpr from the previous frame.
-    - lr_offset is the offset of the saved lr
-    - cr_offset is the offset of the saved cr
-*/
+   - frameless is TRUE, if function does not have a frame.
+   - nosavedpc is TRUE, if function does not save %pc value in its frame.
+   - offset is the initial size of this stack frame --- the amount by
+   which we decrement the sp to allocate the frame.
+   - saved_gpr is the number of the first saved gpr.
+   - saved_fpr is the number of the first saved fpr.
+   - alloca_reg is the number of the register used for alloca() handling.
+   Otherwise -1.
+   - gpr_offset is the offset of the first saved gpr from the previous frame.
+   - fpr_offset is the offset of the first saved fpr from the previous frame.
+   - lr_offset is the offset of the saved lr
+   - cr_offset is the offset of the saved cr
+ */
 
 #define SIGNED_SHORT(x) 						\
   ((sizeof (short) == 2)						\
@@ -297,7 +307,7 @@ rs6000_software_single_step (signal, insert_breakpoints_p)
 CORE_ADDR
 skip_prologue (pc, fdata)
      CORE_ADDR pc;
-     struct rs6000_framedata *fdata; 
+     struct rs6000_framedata *fdata;
 {
   CORE_ADDR orig_pc = pc;
   char buf[4];
@@ -327,148 +337,191 @@ skip_prologue (pc, fdata)
       pc += 4;
       op = read_memory_integer (pc, 4);
 
-      if ((op & 0xfc1fffff) == 0x7c0802a6) {		/* mflr Rx */
-	lr_reg = (op & 0x03e00000) | 0x90010000;
-	continue;
+      if ((op & 0xfc1fffff) == 0x7c0802a6)
+	{			/* mflr Rx */
+	  lr_reg = (op & 0x03e00000) | 0x90010000;
+	  continue;
 
-      } else if ((op & 0xfc1fffff) == 0x7c000026) {	/* mfcr Rx */
-	cr_reg = (op & 0x03e00000) | 0x90010000;
-	continue;
-
-      } else if ((op & 0xfc1f0000) == 0xd8010000) {	/* stfd Rx,NUM(r1) */
-	reg = GET_SRC_REG (op);
-	if (fdata->saved_fpr == -1 || fdata->saved_fpr > reg) {
-	  fdata->saved_fpr = reg;
-	  fdata->fpr_offset = SIGNED_SHORT (op) + offset;
 	}
-	continue;
+      else if ((op & 0xfc1fffff) == 0x7c000026)
+	{			/* mfcr Rx */
+	  cr_reg = (op & 0x03e00000) | 0x90010000;
+	  continue;
 
-      } else if (((op & 0xfc1f0000) == 0xbc010000) || 	/* stm Rx, NUM(r1) */
-		 ((op & 0xfc1f0000) == 0x90010000 &&	/* st rx,NUM(r1), 
+	}
+      else if ((op & 0xfc1f0000) == 0xd8010000)
+	{			/* stfd Rx,NUM(r1) */
+	  reg = GET_SRC_REG (op);
+	  if (fdata->saved_fpr == -1 || fdata->saved_fpr > reg)
+	    {
+	      fdata->saved_fpr = reg;
+	      fdata->fpr_offset = SIGNED_SHORT (op) + offset;
+	    }
+	  continue;
+
+	}
+      else if (((op & 0xfc1f0000) == 0xbc010000) ||	/* stm Rx, NUM(r1) */
+	       ((op & 0xfc1f0000) == 0x90010000 &&	/* st rx,NUM(r1), 
 							   rx >= r13 */
-		  (op & 0x03e00000) >= 0x01a00000)) {
+		(op & 0x03e00000) >= 0x01a00000))
+	{
 
-	reg = GET_SRC_REG (op);
-	if (fdata->saved_gpr == -1 || fdata->saved_gpr > reg) {
-	  fdata->saved_gpr = reg;
-	  fdata->gpr_offset = SIGNED_SHORT (op) + offset;
+	  reg = GET_SRC_REG (op);
+	  if (fdata->saved_gpr == -1 || fdata->saved_gpr > reg)
+	    {
+	      fdata->saved_gpr = reg;
+	      fdata->gpr_offset = SIGNED_SHORT (op) + offset;
+	    }
+	  continue;
+
 	}
-	continue;
+      else if ((op & 0xffff0000) == 0x3c000000)
+	{			/* addis 0,0,NUM, used
+				   for >= 32k frames */
+	  fdata->offset = (op & 0x0000ffff) << 16;
+	  fdata->frameless = 0;
+	  continue;
 
-      } else if ((op & 0xffff0000) == 0x3c000000) {	/* addis 0,0,NUM, used
-							   for >= 32k frames */
-	fdata->offset = (op & 0x0000ffff) << 16;
-	fdata->frameless = 0;
-	continue;
+	}
+      else if ((op & 0xffff0000) == 0x60000000)
+	{			/* ori 0,0,NUM, 2nd ha
+				   lf of >= 32k frames */
+	  fdata->offset |= (op & 0x0000ffff);
+	  fdata->frameless = 0;
+	  continue;
 
-      } else if ((op & 0xffff0000) == 0x60000000) {	/* ori 0,0,NUM, 2nd ha
-							   lf of >= 32k frames */
-	fdata->offset |= (op & 0x0000ffff);
-	fdata->frameless = 0;
-	continue;
+	}
+      else if ((op & 0xffff0000) == lr_reg)
+	{			/* st Rx,NUM(r1) 
+				   where Rx == lr */
+	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
+	  fdata->nosavedpc = 0;
+	  lr_reg = 0;
+	  continue;
 
-      } else if ((op & 0xffff0000) == lr_reg) {		/* st Rx,NUM(r1) 
-							   where Rx == lr */
-	fdata->lr_offset = SIGNED_SHORT (op) + offset;
-	fdata->nosavedpc = 0;
-	lr_reg = 0;
-	continue;
+	}
+      else if ((op & 0xffff0000) == cr_reg)
+	{			/* st Rx,NUM(r1) 
+				   where Rx == cr */
+	  fdata->cr_offset = SIGNED_SHORT (op) + offset;
+	  cr_reg = 0;
+	  continue;
 
-      } else if ((op & 0xffff0000) == cr_reg) {		/* st Rx,NUM(r1) 
-							   where Rx == cr */
-	fdata->cr_offset = SIGNED_SHORT (op) + offset;
-	cr_reg = 0;
-	continue;
+	}
+      else if (op == 0x48000005)
+	{			/* bl .+4 used in 
+				   -mrelocatable */
+	  continue;
 
-      } else if (op == 0x48000005) {			/* bl .+4 used in 
-							   -mrelocatable */
-	continue;
-
-      } else if (op == 0x48000004) {			/* b .+4 (xlc) */
-	break;
-
-      } else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used
-							   in V.4 -mrelocatable */
-		  op == 0x7fc0f214) &&			/* add r30,r0,r30, used
-							   in V.4 -mrelocatable */
-		 lr_reg == 0x901e0000) {
-	continue;
-
-      } else if ((op & 0xffff0000) == 0x3fc00000 ||	/* addis 30,0,foo@ha, used
-							   in V.4 -mminimal-toc */
-		 (op & 0xffff0000) == 0x3bde0000) {	/* addi 30,30,foo@l */
-	continue;
-
-      } else if ((op & 0xfc000001) == 0x48000001) {	/* bl foo, 
-							   to save fprs??? */
-
-	fdata->frameless = 0;
-	/* Don't skip over the subroutine call if it is not within the first
-	   three instructions of the prologue.  */
-	if ((pc - orig_pc) > 8)
+	}
+      else if (op == 0x48000004)
+	{			/* b .+4 (xlc) */
 	  break;
 
-	op = read_memory_integer (pc+4, 4);
+	}
+      else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used
+							   in V.4 -mrelocatable */
+		op == 0x7fc0f214) &&	/* add r30,r0,r30, used
+					   in V.4 -mrelocatable */
+	       lr_reg == 0x901e0000)
+	{
+	  continue;
 
-	/* At this point, make sure this is not a trampoline function
-	   (a function that simply calls another functions, and nothing else).
-	   If the next is not a nop, this branch was part of the function
-	   prologue. */
+	}
+      else if ((op & 0xffff0000) == 0x3fc00000 ||	/* addis 30,0,foo@ha, used
+							   in V.4 -mminimal-toc */
+	       (op & 0xffff0000) == 0x3bde0000)
+	{			/* addi 30,30,foo@l */
+	  continue;
 
-	if (op == 0x4def7b82 || op == 0)		/* crorc 15, 15, 15 */
-	  break;					/* don't skip over 
-							   this branch */
-	continue;
+	}
+      else if ((op & 0xfc000001) == 0x48000001)
+	{			/* bl foo, 
+				   to save fprs??? */
 
-      /* update stack pointer */
-      } else if ((op & 0xffff0000) == 0x94210000) {	/* stu r1,NUM(r1) */
-	fdata->frameless = 0;
-	fdata->offset = SIGNED_SHORT (op);
-	offset = fdata->offset;
-	continue;
+	  fdata->frameless = 0;
+	  /* Don't skip over the subroutine call if it is not within the first
+	     three instructions of the prologue.  */
+	  if ((pc - orig_pc) > 8)
+	    break;
 
-      } else if (op == 0x7c21016e) {			/* stwux 1,1,0 */
-	fdata->frameless = 0;
-	offset = fdata->offset;
-	continue;
+	  op = read_memory_integer (pc + 4, 4);
 
-      /* Load up minimal toc pointer */
-      } else if ((op >> 22) == 0x20f
-	         && ! minimal_toc_loaded) {	/* l r31,... or l r30,... */
-	minimal_toc_loaded = 1;
-	continue;
+	  /* At this point, make sure this is not a trampoline function
+	     (a function that simply calls another functions, and nothing else).
+	     If the next is not a nop, this branch was part of the function
+	     prologue. */
 
-      /* store parameters in stack */
-      } else if ((op & 0xfc1f0000) == 0x90010000 ||	/* st rx,NUM(r1) */
-		 (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
-		 (op & 0xfc1f0000) == 0xfc010000) {	/* frsp, fp?,NUM(r1) */
-	continue;
+	  if (op == 0x4def7b82 || op == 0)	/* crorc 15, 15, 15 */
+	    break;		/* don't skip over 
+				   this branch */
+	  continue;
 
-      /* store parameters in stack via frame pointer */
-      } else if (framep &&
-		 ((op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
-		 (op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
-		 (op & 0xfc1f0000) == 0xfc1f0000)) {	/* frsp, fp?,NUM(r1) */
-	continue;
+	  /* update stack pointer */
+	}
+      else if ((op & 0xffff0000) == 0x94210000)
+	{			/* stu r1,NUM(r1) */
+	  fdata->frameless = 0;
+	  fdata->offset = SIGNED_SHORT (op);
+	  offset = fdata->offset;
+	  continue;
 
-      /* Set up frame pointer */
-      } else if (op == 0x603f0000			/* oril r31, r1, 0x0 */
-		 || op == 0x7c3f0b78) {			/* mr r31, r1 */
-	fdata->frameless = 0;
-	framep = 1;
-	fdata->alloca_reg = 31;
-	continue;
+	}
+      else if (op == 0x7c21016e)
+	{			/* stwux 1,1,0 */
+	  fdata->frameless = 0;
+	  offset = fdata->offset;
+	  continue;
 
-      /* Another way to set up the frame pointer.  */
-      } else if ((op & 0xfc1fffff) == 0x38010000) {	/* addi rX, r1, 0x0 */
-	fdata->frameless = 0;
-	framep = 1;
-	fdata->alloca_reg = (op & ~0x38010000) >> 21;
-	continue;
+	  /* Load up minimal toc pointer */
+	}
+      else if ((op >> 22) == 0x20f
+	       && !minimal_toc_loaded)
+	{			/* l r31,... or l r30,... */
+	  minimal_toc_loaded = 1;
+	  continue;
 
-      } else {
-	break;
-      }
+	  /* store parameters in stack */
+	}
+      else if ((op & 0xfc1f0000) == 0x90010000 ||	/* st rx,NUM(r1) */
+	       (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
+	       (op & 0xfc1f0000) == 0xfc010000)
+	{			/* frsp, fp?,NUM(r1) */
+	  continue;
+
+	  /* store parameters in stack via frame pointer */
+	}
+      else if (framep &&
+	       ((op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
+		(op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
+		(op & 0xfc1f0000) == 0xfc1f0000))
+	{			/* frsp, fp?,NUM(r1) */
+	  continue;
+
+	  /* Set up frame pointer */
+	}
+      else if (op == 0x603f0000	/* oril r31, r1, 0x0 */
+	       || op == 0x7c3f0b78)
+	{			/* mr r31, r1 */
+	  fdata->frameless = 0;
+	  framep = 1;
+	  fdata->alloca_reg = 31;
+	  continue;
+
+	  /* Another way to set up the frame pointer.  */
+	}
+      else if ((op & 0xfc1fffff) == 0x38010000)
+	{			/* addi rX, r1, 0x0 */
+	  fdata->frameless = 0;
+	  framep = 1;
+	  fdata->alloca_reg = (op & ~0x38010000) >> 21;
+	  continue;
+
+	}
+      else
+	{
+	  break;
+	}
     }
 
 #if 0
@@ -481,24 +534,26 @@ skip_prologue (pc, fdata)
      We'd like to skip over it as well. Fortunately, xlc does some extra
      work before calling a function right after a prologue, thus we can
      single out such gcc2 behaviour. */
-     
 
-  if ((op & 0xfc000001) == 0x48000001) { /* bl foo, an initializer function? */
-    op = read_memory_integer (pc+4, 4);
 
-    if (op == 0x4def7b82) {		/* cror 0xf, 0xf, 0xf (nop) */
+  if ((op & 0xfc000001) == 0x48000001)
+    {				/* bl foo, an initializer function? */
+      op = read_memory_integer (pc + 4, 4);
 
-      /* check and see if we are in main. If so, skip over this initializer
-         function as well. */
+      if (op == 0x4def7b82)
+	{			/* cror 0xf, 0xf, 0xf (nop) */
 
-      tmp = find_pc_misc_function (pc);
-      if (tmp >= 0 && STREQ (misc_function_vector [tmp].name, "main"))
-        return pc + 8;
+	  /* check and see if we are in main. If so, skip over this initializer
+	     function as well. */
+
+	  tmp = find_pc_misc_function (pc);
+	  if (tmp >= 0 && STREQ (misc_function_vector[tmp].name, "main"))
+	    return pc + 8;
+	}
     }
-  }
 #endif /* 0 */
- 
-  fdata->offset = - fdata->offset;
+
+  fdata->offset = -fdata->offset;
   return pc;
 }
 
@@ -510,12 +565,12 @@ skip_prologue (pc, fdata)
 
 /* The total size of dummy frame is 436, which is;
 
-	32 gpr's	- 128 bytes
-	32 fpr's	- 256   "
-	7  the rest	- 28    "
-	and 24 extra bytes for the callee's link area. The last 24 bytes
-	for the link area might not be necessary, since it will be taken
-	care of by push_arguments(). */
+   32 gpr's     - 128 bytes
+   32 fpr's     - 256   "
+   7  the rest  - 28    "
+   and 24 extra bytes for the callee's link area. The last 24 bytes
+   for the link area might not be necessary, since it will be taken
+   care of by push_arguments(). */
 
 #define DUMMY_FRAME_SIZE 436
 
@@ -532,7 +587,7 @@ extern int stop_stack_dummy;
 
 /* push a dummy frame into stack, save all register. Currently we are saving
    only gpr's and fpr's, which is not good enough! FIXMEmgo */
-   
+
 void
 push_dummy_frame ()
 {
@@ -545,7 +600,7 @@ push_dummy_frame ()
   CORE_ADDR pc;
   /* Same thing, target byte order.  */
   char pc_targ[4];
-  
+
   /* Needed to figure out where to save the dummy link area.
      FIXME: There should be an easier way to do this, no?  tiemann 9/9/95.  */
   struct rs6000_framedata fdata;
@@ -554,23 +609,24 @@ push_dummy_frame ()
 
   target_fetch_registers (-1);
 
-  if (dummy_frame_count >= dummy_frame_size) {
-    dummy_frame_size += DUMMY_FRAME_ADDR_SIZE;
-    if (dummy_frame_addr)
-      dummy_frame_addr = (CORE_ADDR*) xrealloc 
-        (dummy_frame_addr, sizeof(CORE_ADDR) * (dummy_frame_size));
-    else
-      dummy_frame_addr = (CORE_ADDR*) 
-	xmalloc (sizeof(CORE_ADDR) * (dummy_frame_size));
-  }
-  
-  sp = read_register(SP_REGNUM);
-  pc = read_register(PC_REGNUM);
+  if (dummy_frame_count >= dummy_frame_size)
+    {
+      dummy_frame_size += DUMMY_FRAME_ADDR_SIZE;
+      if (dummy_frame_addr)
+	dummy_frame_addr = (CORE_ADDR *) xrealloc
+	  (dummy_frame_addr, sizeof (CORE_ADDR) * (dummy_frame_size));
+      else
+	dummy_frame_addr = (CORE_ADDR *)
+	  xmalloc (sizeof (CORE_ADDR) * (dummy_frame_size));
+    }
+
+  sp = read_register (SP_REGNUM);
+  pc = read_register (PC_REGNUM);
   store_address (pc_targ, 4, pc);
 
   skip_prologue (get_pc_function_start (pc), &fdata);
 
-  dummy_frame_addr [dummy_frame_count++] = sp;
+  dummy_frame_addr[dummy_frame_count++] = sp;
 
   /* Be careful! If the stack pointer is not decremented first, then kernel 
      thinks he is free to use the space underneath it. And kernel actually 
@@ -582,7 +638,7 @@ push_dummy_frame ()
      This is a problem on the ppc simulator (which only grants one page
      (4096 bytes) by default.  */
 
-  write_register (SP_REGNUM, sp-DUMMY_FRAME_SIZE);
+  write_register (SP_REGNUM, sp - DUMMY_FRAME_SIZE);
 
   /* gdb relies on the state of current_frame. We'd better update it,
      otherwise things like do_registers_info() wouldn't work properly! */
@@ -591,33 +647,34 @@ push_dummy_frame ()
 
   /* save program counter in link register's space. */
   write_memory (sp + (fdata.lr_offset ? fdata.lr_offset : DEFAULT_LR_SAVE),
-	        pc_targ, 4);
+		pc_targ, 4);
 
   /* save all floating point and general purpose registers here. */
 
   /* fpr's, f0..f31 */
   for (ii = 0; ii < 32; ++ii)
-    write_memory (sp-8-(ii*8), &registers[REGISTER_BYTE (31-ii+FP0_REGNUM)], 8);
+    write_memory (sp - 8 - (ii * 8), &registers[REGISTER_BYTE (31 - ii + FP0_REGNUM)], 8);
 
   /* gpr's r0..r31 */
-  for (ii=1; ii <=32; ++ii)
-    write_memory (sp-256-(ii*4), &registers[REGISTER_BYTE (32-ii)], 4);
+  for (ii = 1; ii <= 32; ++ii)
+    write_memory (sp - 256 - (ii * 4), &registers[REGISTER_BYTE (32 - ii)], 4);
 
   /* so far, 32*2 + 32 words = 384 bytes have been written. 
      7 extra registers in our register set: pc, ps, cnd, lr, cnt, xer, mq */
 
-  for (ii=1; ii <= (LAST_UISA_SP_REGNUM-FIRST_UISA_SP_REGNUM+1); ++ii) {
-    write_memory (sp-384-(ii*4), 
-		  &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
-  }
+  for (ii = 1; ii <= (LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM + 1); ++ii)
+    {
+      write_memory (sp - 384 - (ii * 4),
+		    &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
+    }
 
   /* Save sp or so called back chain right here. */
   store_address (sp_targ, 4, sp);
-  write_memory (sp-DUMMY_FRAME_SIZE, sp_targ, 4);
+  write_memory (sp - DUMMY_FRAME_SIZE, sp_targ, 4);
   sp -= DUMMY_FRAME_SIZE;
 
   /* And finally, this is the back chain. */
-  write_memory (sp+8, pc_targ, 4);
+  write_memory (sp + 8, pc_targ, 4);
 }
 
 
@@ -634,42 +691,43 @@ push_dummy_frame ()
    detect that was a dummy frame, we pop it back to its parent by using
    dummy frame stack (`dummy_frame_addr' array). 
 
-FIXME:  This whole concept is broken.  You should be able to detect
-a dummy stack frame *on the user's stack itself*.  When you do,
-then you know the format of that stack frame -- including its
-saved SP register!  There should *not* be a separate stack in the
-GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92
+   FIXME:  This whole concept is broken.  You should be able to detect
+   a dummy stack frame *on the user's stack itself*.  When you do,
+   then you know the format of that stack frame -- including its
+   saved SP register!  There should *not* be a separate stack in the
+   GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92
  */
-   
+
 static void
 pop_dummy_frame ()
 {
   CORE_ADDR sp, pc;
   int ii;
-  sp = dummy_frame_addr [--dummy_frame_count];
+  sp = dummy_frame_addr[--dummy_frame_count];
 
   /* restore all fpr's. */
   for (ii = 1; ii <= 32; ++ii)
-    read_memory (sp-(ii*8), &registers[REGISTER_BYTE (32-ii+FP0_REGNUM)], 8);
+    read_memory (sp - (ii * 8), &registers[REGISTER_BYTE (32 - ii + FP0_REGNUM)], 8);
 
   /* restore all gpr's */
-  for (ii=1; ii <= 32; ++ii) {
-    read_memory (sp-256-(ii*4), &registers[REGISTER_BYTE (32-ii)], 4);
-  }
+  for (ii = 1; ii <= 32; ++ii)
+    {
+      read_memory (sp - 256 - (ii * 4), &registers[REGISTER_BYTE (32 - ii)], 4);
+    }
 
   /* restore the rest of the registers. */
-  for (ii=1; ii <=(LAST_UISA_SP_REGNUM-FIRST_UISA_SP_REGNUM+1); ++ii)
-    read_memory (sp-384-(ii*4),
-    		&registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
+  for (ii = 1; ii <= (LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM + 1); ++ii)
+    read_memory (sp - 384 - (ii * 4),
+		 &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
 
-  read_memory (sp-(DUMMY_FRAME_SIZE-8), 
-	       &registers [REGISTER_BYTE(PC_REGNUM)], 4);
+  read_memory (sp - (DUMMY_FRAME_SIZE - 8),
+	       &registers[REGISTER_BYTE (PC_REGNUM)], 4);
 
   /* when a dummy frame was being pushed, we had to decrement %sp first, in 
      order to secure astack space. Thus, saved %sp (or %r1) value, is not the
      one we should restore. Change it with the one we need. */
 
-  memcpy (&registers [REGISTER_BYTE(FP_REGNUM)], (char *) &sp, sizeof (int));
+  memcpy (&registers[REGISTER_BYTE (FP_REGNUM)], (char *) &sp, sizeof (int));
 
   /* Now we can restore all registers. */
 
@@ -684,7 +742,7 @@ pop_dummy_frame ()
 void
 pop_frame ()
 {
-  CORE_ADDR pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
+  CORE_ADDR pc, lr, sp, prev_sp;	/* %pc, %lr, %sp */
   struct rs6000_framedata fdata;
   struct frame_info *frame = get_current_frame ();
   int addr, ii;
@@ -702,7 +760,7 @@ pop_frame ()
 	}
       else
 	{
-	  if (dummy_frame_count) 
+	  if (dummy_frame_count)
 	    pop_dummy_frame ();
 	  return;
 	}
@@ -735,19 +793,21 @@ pop_frame ()
   if (fdata.saved_gpr != -1)
     {
       addr = prev_sp + fdata.gpr_offset;
-      for (ii = fdata.saved_gpr; ii <= 31; ++ii) {
-	read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
-	addr += 4;
-      }
+      for (ii = fdata.saved_gpr; ii <= 31; ++ii)
+	{
+	  read_memory (addr, &registers[REGISTER_BYTE (ii)], 4);
+	  addr += 4;
+	}
     }
 
   if (fdata.saved_fpr != -1)
     {
       addr = prev_sp + fdata.fpr_offset;
-      for (ii = fdata.saved_fpr; ii <= 31; ++ii) {
-	read_memory (addr, &registers [REGISTER_BYTE (ii+FP0_REGNUM)], 8);
-	addr += 8;
-      }
+      for (ii = fdata.saved_fpr; ii <= 31; ++ii)
+	{
+	  read_memory (addr, &registers[REGISTER_BYTE (ii + FP0_REGNUM)], 8);
+	  addr += 8;
+	}
     }
 
   write_register (SP_REGNUM, prev_sp);
@@ -779,23 +839,23 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
       CORE_ADDR tocvalue;
 
       tocvalue = (*find_toc_address_hook) (fun);
-      ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET);
+      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET);
       ii = (ii & 0xffff0000) | (tocvalue >> 16);
-      *(int*)((char*)dummyname + TOC_ADDR_OFFSET) = ii;
+      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET) = ii;
 
-      ii  = *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4);
+      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4);
       ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
-      *(int*)((char*)dummyname + TOC_ADDR_OFFSET+4) = ii;
+      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4) = ii;
     }
 
   target_addr = fun;
-  ii  = *(int*)((char*)dummyname + TARGET_ADDR_OFFSET);
+  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET);
   ii = (ii & 0xffff0000) | (target_addr >> 16);
-  *(int*)((char*)dummyname + TARGET_ADDR_OFFSET) = ii;
+  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET) = ii;
 
-  ii  = *(int*)((char*)dummyname + TARGET_ADDR_OFFSET+4);
+  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4);
   ii = (ii & 0xffff0000) | (target_addr & 0x0000ffff);
-  *(int*)((char*)dummyname + TARGET_ADDR_OFFSET+4) = ii;
+  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4) = ii;
 }
 
 /* Pass the arguments in either registers, or in the stack. In RS6000,
@@ -821,10 +881,10 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   int ii;
   int len = 0;
-  int argno;					/* current argument number */
-  int argbytes;					/* current argument byte */
-  char tmp_buffer [50];
-  int f_argno = 0;				/* current floating point argno */
+  int argno;			/* current argument number */
+  int argbytes;			/* current argument byte */
+  char tmp_buffer[50];
+  int f_argno = 0;		/* current floating point argno */
 
   value_ptr arg = 0;
   struct type *type;
@@ -845,71 +905,76 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
      case we should advance one word and start from r4 register to copy 
      parameters. */
 
-  ii =  struct_return ? 1 : 0;
+  ii = struct_return ? 1 : 0;
 
 /* 
-effectively indirect call... gcc does...
+   effectively indirect call... gcc does...
 
-return_val example( float, int);
+   return_val example( float, int);
 
-eabi: 
-    float in fp0, int in r3
-    offset of stack on overflow 8/16
-    for varargs, must go by type.
-power open:
-    float in r3&r4, int in r5
-    offset of stack on overflow different 
-both: 
-    return in r3 or f0.  If no float, must study how gcc emulates floats;
-    pay attention to arg promotion.  
-    User may have to cast\args to handle promotion correctly 
-    since gdb won't know if prototype supplied or not.
-*/
+   eabi: 
+   float in fp0, int in r3
+   offset of stack on overflow 8/16
+   for varargs, must go by type.
+   power open:
+   float in r3&r4, int in r5
+   offset of stack on overflow different 
+   both: 
+   return in r3 or f0.  If no float, must study how gcc emulates floats;
+   pay attention to arg promotion.  
+   User may have to cast\args to handle promotion correctly 
+   since gdb won't know if prototype supplied or not.
+ */
 
-  for (argno=0, argbytes=0; argno < nargs && ii<8; ++ii) {
+  for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
+    {
 
-    arg = args[argno];
-    type = check_typedef (VALUE_TYPE (arg));
-    len = TYPE_LENGTH (type);
+      arg = args[argno];
+      type = check_typedef (VALUE_TYPE (arg));
+      len = TYPE_LENGTH (type);
 
-    if (TYPE_CODE (type) == TYPE_CODE_FLT) {
+      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	{
 
-      /* floating point arguments are passed in fpr's, as well as gpr's.
-         There are 13 fpr's reserved for passing parameters. At this point
-         there is no way we would run out of them. */
+	  /* floating point arguments are passed in fpr's, as well as gpr's.
+	     There are 13 fpr's reserved for passing parameters. At this point
+	     there is no way we would run out of them. */
 
-      if (len > 8)
-        printf_unfiltered (
-"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
+	  if (len > 8)
+	    printf_unfiltered (
+				"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-      memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], 
-	      VALUE_CONTENTS (arg), 
-	      len);
-      ++f_argno;
+	  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+		  VALUE_CONTENTS (arg),
+		  len);
+	  ++f_argno;
+	}
+
+      if (len > 4)
+	{
+
+	  /* Argument takes more than one register. */
+	  while (argbytes < len)
+	    {
+	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
+	      memcpy (&registers[REGISTER_BYTE (ii + 3)],
+		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
+		      (len - argbytes) > 4 ? 4 : len - argbytes);
+	      ++ii, argbytes += 4;
+
+	      if (ii >= 8)
+		goto ran_out_of_registers_for_arguments;
+	    }
+	  argbytes = 0;
+	  --ii;
+	}
+      else
+	{			/* Argument can fit in one register. No problem. */
+	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
+	  memcpy (&registers[REGISTER_BYTE (ii + 3)], VALUE_CONTENTS (arg), len);
+	}
+      ++argno;
     }
-
-    if (len > 4) {
-
-      /* Argument takes more than one register. */
-      while (argbytes < len) {
-	memset (&registers[REGISTER_BYTE(ii+3)], 0, sizeof(int));
-	memcpy (&registers[REGISTER_BYTE(ii+3)], 
-		((char*)VALUE_CONTENTS (arg))+argbytes, 
-		(len - argbytes) > 4 ? 4 : len - argbytes);
-	++ii, argbytes += 4;
-
-	if (ii >= 8)
-	  goto ran_out_of_registers_for_arguments;
-      }
-      argbytes = 0;
-      --ii;
-    }
-    else {        /* Argument can fit in one register. No problem. */
-      memset (&registers[REGISTER_BYTE(ii+3)], 0, sizeof(int));
-      memcpy (&registers[REGISTER_BYTE(ii+3)], VALUE_CONTENTS (arg), len);
-    }
-    ++argno;
-  }
 
 ran_out_of_registers_for_arguments:
 
@@ -929,68 +994,74 @@ ran_out_of_registers_for_arguments:
   /* if there are more arguments, allocate space for them in 
      the stack, then push them starting from the ninth one. */
 
-  if ((argno < nargs) || argbytes) {
-    int space = 0, jj;
+  if ((argno < nargs) || argbytes)
+    {
+      int space = 0, jj;
 
-    if (argbytes) {
-      space += ((len - argbytes + 3) & -4);
-      jj = argno + 1;
+      if (argbytes)
+	{
+	  space += ((len - argbytes + 3) & -4);
+	  jj = argno + 1;
+	}
+      else
+	jj = argno;
+
+      for (; jj < nargs; ++jj)
+	{
+	  value_ptr val = args[jj];
+	  space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
+	}
+
+      /* add location required for the rest of the parameters */
+      space = (space + 7) & -8;
+      sp -= space;
+
+      /* This is another instance we need to be concerned about securing our
+         stack space. If we write anything underneath %sp (r1), we might conflict
+         with the kernel who thinks he is free to use this area. So, update %sp
+         first before doing anything else. */
+
+      write_register (SP_REGNUM, sp);
+
+      /* if the last argument copied into the registers didn't fit there 
+         completely, push the rest of it into stack. */
+
+      if (argbytes)
+	{
+	  write_memory (sp + 24 + (ii * 4),
+			((char *) VALUE_CONTENTS (arg)) + argbytes,
+			len - argbytes);
+	  ++argno;
+	  ii += ((len - argbytes + 3) & -4) / 4;
+	}
+
+      /* push the rest of the arguments into stack. */
+      for (; argno < nargs; ++argno)
+	{
+
+	  arg = args[argno];
+	  type = check_typedef (VALUE_TYPE (arg));
+	  len = TYPE_LENGTH (type);
+
+
+	  /* float types should be passed in fpr's, as well as in the stack. */
+	  if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13)
+	    {
+
+	      if (len > 8)
+		printf_unfiltered (
+				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
+
+	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + 1 + f_argno)],
+		      VALUE_CONTENTS (arg),
+		      len);
+	      ++f_argno;
+	    }
+
+	  write_memory (sp + 24 + (ii * 4), (char *) VALUE_CONTENTS (arg), len);
+	  ii += ((len + 3) & -4) / 4;
+	}
     }
-    else
-      jj = argno;
-
-    for (; jj < nargs; ++jj) {
-      value_ptr val = args[jj];
-      space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
-    }
-
-    /* add location required for the rest of the parameters */
-    space = (space + 7) & -8;
-    sp -= space;
-
-    /* This is another instance we need to be concerned about securing our
-	stack space. If we write anything underneath %sp (r1), we might conflict
-	with the kernel who thinks he is free to use this area. So, update %sp
-	first before doing anything else. */
-
-    write_register (SP_REGNUM, sp);
-
-    /* if the last argument copied into the registers didn't fit there 
-       completely, push the rest of it into stack. */
-
-    if (argbytes) {
-      write_memory (sp+24+(ii*4), 
-		    ((char*)VALUE_CONTENTS (arg))+argbytes, 
-		    len - argbytes);
-      ++argno;
-      ii += ((len - argbytes + 3) & -4) / 4;
-    }
-
-    /* push the rest of the arguments into stack. */
-    for (; argno < nargs; ++argno) {
-
-      arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (type);
-
-
-      /* float types should be passed in fpr's, as well as in the stack. */
-      if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13) {
-
-        if (len > 8)
-          printf_unfiltered (
-"Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
-
-        memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], 
-		VALUE_CONTENTS (arg), 
-		len);
-        ++f_argno;
-      }
-
-      write_memory (sp+24+(ii*4), (char *) VALUE_CONTENTS (arg), len);
-      ii += ((len + 3) & -4) / 4;
-    }
-  }
   else
     /* Secure stack areas first, before doing anything else. */
     write_register (SP_REGNUM, sp);
@@ -998,9 +1069,9 @@ ran_out_of_registers_for_arguments:
   if (!USE_GENERIC_DUMMY_FRAMES)
     {
       /* we want to copy 24 bytes of target's frame to dummy's frame,
-	 then set back chain to point to new frame. */
-      
-      saved_sp = dummy_frame_addr [dummy_frame_count - 1];
+         then set back chain to point to new frame. */
+
+      saved_sp = dummy_frame_addr[dummy_frame_count - 1];
       read_memory (saved_sp, tmp_buffer, 24);
       write_memory (sp, tmp_buffer, 24);
     }
@@ -1017,7 +1088,7 @@ ran_out_of_registers_for_arguments:
 /* Function: ppc_push_return_address (pc, sp)
    Set up the return address for the inferior function call. */
 
-CORE_ADDR                                      
+CORE_ADDR
 ppc_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
@@ -1039,33 +1110,37 @@ extract_return_value (valtype, regbuf, valbuf)
 {
   int offset = 0;
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT) {
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    {
 
-    double dd; float ff;
-    /* floats and doubles are returned in fpr1. fpr's have a size of 8 bytes.
-       We need to truncate the return value into float size (4 byte) if
-       necessary. */
+      double dd;
+      float ff;
+      /* floats and doubles are returned in fpr1. fpr's have a size of 8 bytes.
+         We need to truncate the return value into float size (4 byte) if
+         necessary. */
 
-    if (TYPE_LENGTH (valtype) > 4) 		/* this is a double */
-      memcpy (valbuf, 
-	      &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
-	      TYPE_LENGTH (valtype));
-    else {		/* float */
-      memcpy (&dd, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)], 8);
-      ff = (float)dd;
-      memcpy (valbuf, &ff, sizeof(float));
+      if (TYPE_LENGTH (valtype) > 4)	/* this is a double */
+	memcpy (valbuf,
+		&regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
+		TYPE_LENGTH (valtype));
+      else
+	{			/* float */
+	  memcpy (&dd, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)], 8);
+	  ff = (float) dd;
+	  memcpy (valbuf, &ff, sizeof (float));
+	}
     }
-  }
-  else {
-    /* return value is copied starting from r3. */
-    if (TARGET_BYTE_ORDER == BIG_ENDIAN
-	&& TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
-      offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
+  else
+    {
+      /* return value is copied starting from r3. */
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN
+	  && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
+	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
-    memcpy (valbuf, 
-	    regbuf + REGISTER_BYTE (3) + offset,
-	    TYPE_LENGTH (valtype));
-  }
+      memcpy (valbuf,
+	      regbuf + REGISTER_BYTE (3) + offset,
+	      TYPE_LENGTH (valtype));
+    }
 }
 
 
@@ -1092,15 +1167,16 @@ skip_trampoline_code (pc)
   register unsigned int ii, op;
   CORE_ADDR solib_target_pc;
 
-  static unsigned trampoline_code[] = {
-	0x800b0000,			/*     l   r0,0x0(r11)	*/
-	0x90410014,			/*    st   r2,0x14(r1)	*/
-	0x7c0903a6,			/* mtctr   r0		*/
-	0x804b0004,			/*     l   r2,0x4(r11)	*/
-	0x816b0008,			/*     l  r11,0x8(r11)	*/
-	0x4e800420,			/*  bctr		*/
-	0x4e800020,			/*    br		*/
-	0
+  static unsigned trampoline_code[] =
+  {
+    0x800b0000,			/*     l   r0,0x0(r11)  */
+    0x90410014,			/*    st   r2,0x14(r1)  */
+    0x7c0903a6,			/* mtctr   r0           */
+    0x804b0004,			/*     l   r2,0x4(r11)  */
+    0x816b0008,			/*     l  r11,0x8(r11)  */
+    0x4e800420,			/*  bctr                */
+    0x4e800020,			/*    br                */
+    0
   };
 
   /* If pc is in a shared library trampoline, return its target.  */
@@ -1108,13 +1184,14 @@ skip_trampoline_code (pc)
   if (solib_target_pc)
     return solib_target_pc;
 
-  for (ii=0; trampoline_code[ii]; ++ii) {
-    op  = read_memory_integer (pc + (ii*4), 4);
-    if (op != trampoline_code [ii])
-      return 0;
-  }
-  ii = read_register (11);		/* r11 holds destination addr	*/
-  pc = read_memory_integer (ii, 4);	/* (r11) value			*/
+  for (ii = 0; trampoline_code[ii]; ++ii)
+    {
+      op = read_memory_integer (pc + (ii * 4), 4);
+      if (op != trampoline_code[ii])
+	return 0;
+    }
+  ii = read_register (11);	/* r11 holds destination addr   */
+  pc = read_memory_integer (ii, 4);	/* (r11) value                  */
   return pc;
 }
 
@@ -1131,7 +1208,7 @@ frameless_function_invocation (fi)
      or if the function was interrupted by a signal.  */
   if (fi->next != NULL && !fi->next->signal_handler_caller)
     return 0;
-  
+
   func_start = get_pc_function_start (fi->pc);
 
   /* If we failed to find the start of the function, it is a mistake
@@ -1140,9 +1217,9 @@ frameless_function_invocation (fi)
   if (!func_start)
     {
       /* A frame with a zero PC is usually created by dereferencing a NULL
-	 function pointer, normally causing an immediate core dump of the
-	 inferior. Mark function as frameless, as the inferior has no chance
-	 of setting up a stack frame.  */
+         function pointer, normally causing an immediate core dump of the
+         inferior. Mark function as frameless, as the inferior has no chance
+         of setting up a stack frame.  */
       if (fi->pc == 0)
 	return 1;
       else
@@ -1168,7 +1245,7 @@ frame_saved_pc (fi)
   if (USE_GENERIC_DUMMY_FRAMES)
     {
       if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-	return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+	return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
     }
 
   func_start = get_pc_function_start (fi->pc);
@@ -1205,12 +1282,12 @@ frame_get_saved_regs (fi, fdatap)
      struct rs6000_framedata *fdatap;
 {
   int ii;
-  CORE_ADDR frame_addr; 
+  CORE_ADDR frame_addr;
   struct rs6000_framedata work_fdata;
 
   if (fi->saved_regs)
     return;
-  
+
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
@@ -1231,7 +1308,7 @@ frame_get_saved_regs (fi, fdatap)
     frame_addr = fi->prev->frame;
   else
     frame_addr = read_memory_integer (fi->frame, 4);
-  
+
   /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
 
@@ -1241,7 +1318,7 @@ frame_get_saved_regs (fi, fdatap)
       int fpr_offset = frame_addr + fdatap->fpr_offset;
       for (i = fdatap->saved_fpr; i < 32; i++)
 	{
-	  fi->saved_regs [FP0_REGNUM + i] = fpr_offset;
+	  fi->saved_regs[FP0_REGNUM + i] = fpr_offset;
 	  fpr_offset += 8;
 	}
     }
@@ -1255,7 +1332,7 @@ frame_get_saved_regs (fi, fdatap)
       int gpr_offset = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  fi->saved_regs [i] = gpr_offset;
+	  fi->saved_regs[i] = gpr_offset;
 	  gpr_offset += 4;
 	}
     }
@@ -1263,12 +1340,12 @@ frame_get_saved_regs (fi, fdatap)
   /* If != 0, fdatap->cr_offset is the offset from the frame that holds
      the CR.  */
   if (fdatap->cr_offset != 0)
-    fi->saved_regs [CR_REGNUM] = frame_addr + fdatap->cr_offset;
+    fi->saved_regs[CR_REGNUM] = frame_addr + fdatap->cr_offset;
 
   /* If != 0, fdatap->lr_offset is the offset from the frame that holds
      the LR.  */
   if (fdatap->lr_offset != 0)
-    fi->saved_regs [LR_REGNUM] = frame_addr + fdatap->lr_offset;
+    fi->saved_regs[LR_REGNUM] = frame_addr + fdatap->lr_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
@@ -1311,29 +1388,31 @@ frame_initial_stack_address (fi)
      (with the lowest address), the value in alloca register is good. */
 
   if (!fi->next)
-    return fi->extra_info->initial_sp = read_register (fdata.alloca_reg);     
+    return fi->extra_info->initial_sp = read_register (fdata.alloca_reg);
 
   /* Otherwise, this is a caller frame. Callee has usually already saved
      registers, but there are exceptions (such as when the callee
      has no parameters). Find the address in which caller's alloca
      register is saved. */
 
-  for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next) {
+  for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next)
+    {
 
-    if (!callee_fi->saved_regs)
-      frame_get_saved_regs (callee_fi, NULL);
+      if (!callee_fi->saved_regs)
+	frame_get_saved_regs (callee_fi, NULL);
 
-    /* this is the address in which alloca register is saved. */
+      /* this is the address in which alloca register is saved. */
 
-    tmpaddr = callee_fi->saved_regs [fdata.alloca_reg];
-    if (tmpaddr) {
-      fi->extra_info->initial_sp = read_memory_integer (tmpaddr, 4); 
-      return fi->extra_info->initial_sp;
+      tmpaddr = callee_fi->saved_regs[fdata.alloca_reg];
+      if (tmpaddr)
+	{
+	  fi->extra_info->initial_sp = read_memory_integer (tmpaddr, 4);
+	  return fi->extra_info->initial_sp;
+	}
+
+      /* Go look into deeper levels of the frame chain to see if any one of
+         the callees has saved alloca register. */
     }
-
-    /* Go look into deeper levels of the frame chain to see if any one of
-       the callees has saved alloca register. */
-  }
 
   /* If alloca register was not saved, by the callee (or any of its callees)
      then the value in the register is still good. */
@@ -1354,7 +1433,7 @@ rs6000_frame_chain (thisframe)
 	return thisframe->frame;	/* dummy frame same as caller's frame */
     }
 
-  if (inside_entry_file (thisframe->pc) || 
+  if (inside_entry_file (thisframe->pc) ||
       thisframe->pc == entry_point_address ())
     return 0;
 
@@ -1411,8 +1490,8 @@ gdb_print_insn_powerpc (memaddr, info)
     return print_insn_little_powerpc (memaddr, info);
 }
 #endif
-
 
+
 /* Handling the various PowerPC/RS6000 variants.  */
 
 
@@ -1429,8 +1508,8 @@ gdb_print_insn_powerpc (memaddr, info)
    For the 505 and 860 family: eie eid nri
 
    For the 403 and 403GC: icdbdr esr dear evpr cdbcr tsr tcr pit tbhi
-	tblo srr2 srr3 dbsr dbcr iac1 iac2 dac1 dac2 dccr iccr pbl1
-	pbu1 pbl2 pbu2
+   tblo srr2 srr3 dbsr dbcr iac1 iac2 dac1 dac2 dccr iccr pbl1
+   pbu1 pbl2 pbu2
 
    Most of these register groups aren't anything formal.  I arrived at
    them by looking at the registers that occurred in more than one
@@ -1485,30 +1564,30 @@ char *register_names_uisa[] =
 };
 
 char *register_names_403[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "icdbdr", "esr", "dear", "evpr", "cdbcr", "tsr", "tcr", "pit", 
-  /* 127 */ "tbhi", "tblo", "srr2", "srr3", "dbsr", "dbcr", "iac1", "iac2", 
+  /* 119 */ "icdbdr", "esr", "dear", "evpr", "cdbcr", "tsr", "tcr", "pit",
+  /* 127 */ "tbhi", "tblo", "srr2", "srr3", "dbsr", "dbcr", "iac1", "iac2",
   /* 135 */ "dac1", "dac2", "dccr", "iccr", "pbl1", "pbu1", "pbl2", "pbu2"
 };
 
 char *register_names_403GC[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "icdbdr", "esr", "dear", "evpr", "cdbcr", "tsr", "tcr", "pit", 
-  /* 127 */ "tbhi", "tblo", "srr2", "srr3", "dbsr", "dbcr", "iac1", "iac2", 
-  /* 135 */ "dac1", "dac2", "dccr", "iccr", "pbl1", "pbu1", "pbl2", "pbu2", 
+  /* 119 */ "icdbdr", "esr", "dear", "evpr", "cdbcr", "tsr", "tcr", "pit",
+  /* 127 */ "tbhi", "tblo", "srr2", "srr3", "dbsr", "dbcr", "iac1", "iac2",
+  /* 135 */ "dac1", "dac2", "dccr", "iccr", "pbl1", "pbu1", "pbl2", "pbu2",
   /* 143 */ "zpr", "pid", "sgr", "dcwr", "tbhu", "tblu"
 };
 
 char *register_names_505[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
@@ -1517,18 +1596,18 @@ char *register_names_505[] =
 };
 
 char *register_names_860[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "eie", "eid", "nri", "cmpa", "cmpb", "cmpc", "cmpd", "icr", 
-  /* 127 */ "der", "counta", "countb", "cmpe", "cmpf", "cmpg", "cmph", 
-  /* 134 */ "lctrl1", "lctrl2", "ictrl", "bar", "ic_cst", "ic_adr", "ic_dat", 
-  /* 141 */ "dc_cst", "dc_adr", "dc_dat", "dpdr", "dpir", "immr", "mi_ctr", 
-  /* 148 */ "mi_ap", "mi_epn", "mi_twc", "mi_rpn", "md_ctr", "m_casid", 
-  /* 154 */ "md_ap", "md_epn", "md_twb", "md_twc", "md_rpn", "m_tw", 
-  /* 160 */ "mi_dbcam", "mi_dbram0", "mi_dbram1", "md_dbcam", "md_dbram0", 
+  /* 119 */ "eie", "eid", "nri", "cmpa", "cmpb", "cmpc", "cmpd", "icr",
+  /* 127 */ "der", "counta", "countb", "cmpe", "cmpf", "cmpg", "cmph",
+  /* 134 */ "lctrl1", "lctrl2", "ictrl", "bar", "ic_cst", "ic_adr", "ic_dat",
+  /* 141 */ "dc_cst", "dc_adr", "dc_dat", "dpdr", "dpir", "immr", "mi_ctr",
+  /* 148 */ "mi_ap", "mi_epn", "mi_twc", "mi_rpn", "md_ctr", "m_casid",
+  /* 154 */ "md_ap", "md_epn", "md_twb", "md_twc", "md_rpn", "m_tw",
+  /* 160 */ "mi_dbcam", "mi_dbram0", "mi_dbram1", "md_dbcam", "md_dbram0",
   /* 165 */ "md_dbram1"
 };
 
@@ -1536,72 +1615,72 @@ char *register_names_860[] =
    writing RTCU and RTCL.  However, how one reads and writes a
    register is the stub's problem.  */
 char *register_names_601[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "hid0", "hid1", "iabr", "dabr", "pir", "mq", "rtcu", 
+  /* 119 */ "hid0", "hid1", "iabr", "dabr", "pir", "mq", "rtcu",
   /* 126 */ "rtcl"
 };
 
 char *register_names_602[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "hid0", "hid1", "iabr", "", "", "tcr", "ibr", "esassr", "sebr", 
+  /* 119 */ "hid0", "hid1", "iabr", "", "", "tcr", "ibr", "esassr", "sebr",
   /* 128 */ "ser", "sp", "lt"
 };
 
 char *register_names_603[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "hid0", "hid1", "iabr", "", "", "dmiss", "dcmp", "hash1", 
+  /* 119 */ "hid0", "hid1", "iabr", "", "", "dmiss", "dcmp", "hash1",
   /* 127 */ "hash2", "imiss", "icmp", "rpa"
 };
 
 char *register_names_604[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "hid0", "hid1", "iabr", "dabr", "pir", "mmcr0", "pmc1", "pmc2", 
+  /* 119 */ "hid0", "hid1", "iabr", "dabr", "pir", "mmcr0", "pmc1", "pmc2",
   /* 127 */ "sia", "sda"
 };
 
 char *register_names_750[] =
-{ 
+{
   COMMON_UISA_REG_NAMES,
   PPC_UISA_SPR_NAMES,
   PPC_SEGMENT_REG_NAMES,
   PPC_32_OEA_SPR_NAMES,
-  /* 119 */ "hid0", "hid1", "iabr", "dabr", "", "ummcr0", "upmc1", "upmc2", 
-  /* 127 */ "usia", "ummcr1", "upmc3", "upmc4", "mmcr0", "pmc1", "pmc2", 
-  /* 134 */ "sia", "mmcr1", "pmc3", "pmc4", "l2cr", "ictc", "thrm1", "thrm2", 
+  /* 119 */ "hid0", "hid1", "iabr", "dabr", "", "ummcr0", "upmc1", "upmc2",
+  /* 127 */ "usia", "ummcr1", "upmc3", "upmc4", "mmcr0", "pmc1", "pmc2",
+  /* 134 */ "sia", "mmcr1", "pmc3", "pmc4", "l2cr", "ictc", "thrm1", "thrm2",
   /* 142 */ "thrm3"
 };
 
 
 /* Information about a particular processor variant.  */
 struct variant
-{
-  /* Name of this variant.  */
-  char *name;
+  {
+    /* Name of this variant.  */
+    char *name;
 
-  /* English description of the variant.  */
-  char *description;
+    /* English description of the variant.  */
+    char *description;
 
-  /* Table of register names; registers[R] is the name of the register
-     number R.  */
-  int num_registers;
-  char **registers;
-};
+    /* Table of register names; registers[R] is the name of the register
+       number R.  */
+    int num_registers;
+    char **registers;
+  };
 
 #define num_registers(list) (sizeof (list) / sizeof((list)[0]))
 
@@ -1617,31 +1696,31 @@ struct variant
    value as an argument to the --with-cpu flag, in configure.in.  */
 
 static struct variant
-variants[] =
+  variants[] =
 {
-  { "ppc-uisa", "PowerPC UISA - a PPC processor as viewed by user-level code",
-    num_registers (register_names_uisa),   register_names_uisa },
-  { "rs6000", "IBM RS6000 (\"POWER\") architecture, user-level view",
-    num_registers (register_names_rs6000), register_names_rs6000 },
-  { "403", "IBM PowerPC 403",
-    num_registers (register_names_403),   register_names_403 },
-  { "403GC", "IBM PowerPC 403GC",
-    num_registers (register_names_403GC), register_names_403GC },
-  { "505", "Motorola PowerPC 505",
-    num_registers (register_names_505),   register_names_505 },
-  { "860", "Motorola PowerPC 860 or 850",
-    num_registers (register_names_860),   register_names_860 },
-  { "601", "Motorola PowerPC 601",
-    num_registers (register_names_601),   register_names_601 },
-  { "602", "Motorola PowerPC 602",
-    num_registers (register_names_602),   register_names_602 },
-  { "603", "Motorola/IBM PowerPC 603 or 603e",
-    num_registers (register_names_603),   register_names_603 },
-  { "604", "Motorola PowerPC 604 or 604e",
-    num_registers (register_names_604),   register_names_604 },
-  { "750", "Motorola/IBM PowerPC 750 or 740",
-    num_registers (register_names_750),   register_names_750 },
-  { 0, 0, 0, 0 }
+  {"ppc-uisa", "PowerPC UISA - a PPC processor as viewed by user-level code",
+   num_registers (register_names_uisa), register_names_uisa},
+  {"rs6000", "IBM RS6000 (\"POWER\") architecture, user-level view",
+   num_registers (register_names_rs6000), register_names_rs6000},
+  {"403", "IBM PowerPC 403",
+   num_registers (register_names_403), register_names_403},
+  {"403GC", "IBM PowerPC 403GC",
+   num_registers (register_names_403GC), register_names_403GC},
+  {"505", "Motorola PowerPC 505",
+   num_registers (register_names_505), register_names_505},
+  {"860", "Motorola PowerPC 860 or 850",
+   num_registers (register_names_860), register_names_860},
+  {"601", "Motorola PowerPC 601",
+   num_registers (register_names_601), register_names_601},
+  {"602", "Motorola PowerPC 602",
+   num_registers (register_names_602), register_names_602},
+  {"603", "Motorola/IBM PowerPC 603 or 603e",
+   num_registers (register_names_603), register_names_603},
+  {"604", "Motorola PowerPC 604 or 604e",
+   num_registers (register_names_604), register_names_604},
+  {"750", "Motorola/IBM PowerPC 750 or 740",
+   num_registers (register_names_750), register_names_750},
+  {0, 0, 0, 0}
 };
 
 
@@ -1672,9 +1751,9 @@ static struct variant *
 find_variant_by_name (char *name)
 {
   int i;
-  
+
   for (i = 0; variants[i].name; i++)
-    if (! strcmp (name, variants[i].name))
+    if (!strcmp (name, variants[i].name))
       return &variants[i];
 
   return 0;
@@ -1729,7 +1808,7 @@ set_processor (char *arg, int from_tty)
 {
   int i;
 
-  if (! arg || arg[0] == '\0')
+  if (!arg || arg[0] == '\0')
     {
       list_variants ();
       return;
@@ -1739,7 +1818,7 @@ set_processor (char *arg, int from_tty)
     {
       error_begin ();
       fprintf_filtered (gdb_stderr,
-			"`%s' is not a recognized PowerPC / RS6000 variant name.\n\n", arg);
+	"`%s' is not a recognized PowerPC / RS6000 variant name.\n\n", arg);
       list_variants ();
       return_to_top_level (RETURN_ERROR);
     }
@@ -1752,9 +1831,9 @@ show_processor (char *arg, int from_tty)
 {
   show_current_variant ();
 }
-
-
 
+
+
 /* Initialization code.  */
 
 void

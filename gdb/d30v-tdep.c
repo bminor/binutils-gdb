@@ -1,21 +1,22 @@
 /* Target-dependent code for Mitsubishi D30V, for GDB.
    Copyright (C) 1996, 1997 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*  Contributed by Martin Hunt, hunt@cygnus.com */
 
@@ -29,15 +30,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "value.h"
 #include "inferior.h"
-#include "dis-asm.h"  
+#include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
 
-void d30v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
-					 struct frame_saved_regs *fsr));
-void d30v_frame_find_saved_regs_offsets PARAMS ((struct frame_info *fi,
-						 struct frame_saved_regs *fsr));
-static void d30v_pop_dummy_frame PARAMS ((struct frame_info *fi));
+void d30v_frame_find_saved_regs PARAMS ((struct frame_info * fi,
+					 struct frame_saved_regs * fsr));
+void d30v_frame_find_saved_regs_offsets PARAMS ((struct frame_info * fi,
+					    struct frame_saved_regs * fsr));
+static void d30v_pop_dummy_frame PARAMS ((struct frame_info * fi));
 static void d30v_print_flags PARAMS ((void));
 static void print_flags_command PARAMS ((char *, int));
 
@@ -45,40 +46,40 @@ static void print_flags_command PARAMS ((char *, int));
    fp is r61, lr is r62, sp is r63, and ?? is r22
    if that changes, they will need to be updated */
 
-#define OP_MASK_ALL_BUT_RA	0x0ffc0fff /* throw away Ra, keep the rest */
+#define OP_MASK_ALL_BUT_RA	0x0ffc0fff	/* throw away Ra, keep the rest */
 
-#define OP_STW_SPM		0x054c0fc0 /* stw Ra, @(sp-) */
-#define OP_STW_SP_R0		0x05400fc0 /* stw Ra, @(sp,r0) */
-#define OP_STW_SP_IMM0		0x05480fc0 /* st Ra, @(sp, 0x0) */
-#define OP_STW_R22P_R0		0x05440580 /* stw Ra, @(r22+,r0) */
+#define OP_STW_SPM		0x054c0fc0	/* stw Ra, @(sp-) */
+#define OP_STW_SP_R0		0x05400fc0	/* stw Ra, @(sp,r0) */
+#define OP_STW_SP_IMM0		0x05480fc0	/* st Ra, @(sp, 0x0) */
+#define OP_STW_R22P_R0		0x05440580	/* stw Ra, @(r22+,r0) */
 
-#define OP_ST2W_SPM		0x056c0fc0 /* st2w Ra, @(sp-) */
-#define OP_ST2W_SP_R0		0x05600fc0 /* st2w Ra, @(sp, r0) */
-#define OP_ST2W_SP_IMM0		0x05680fc0 /* st2w Ra, @(sp, 0x0) */
-#define OP_ST2W_R22P_R0		0x05640580 /* st2w Ra, @(r22+, r0) */
+#define OP_ST2W_SPM		0x056c0fc0	/* st2w Ra, @(sp-) */
+#define OP_ST2W_SP_R0		0x05600fc0	/* st2w Ra, @(sp, r0) */
+#define OP_ST2W_SP_IMM0		0x05680fc0	/* st2w Ra, @(sp, 0x0) */
+#define OP_ST2W_R22P_R0		0x05640580	/* st2w Ra, @(r22+, r0) */
 
-#define OP_MASK_OPCODE		0x0ffc0000 /* just the opcode, ign operands */
-#define OP_NOP			0x00f00000 /* nop */
+#define OP_MASK_OPCODE		0x0ffc0000	/* just the opcode, ign operands */
+#define OP_NOP			0x00f00000	/* nop */
 
-#define OP_MASK_ALL_BUT_IMM	0x0fffffc0 /* throw away imm, keep the rest */
-#define OP_SUB_SP_IMM		0x082bffc0 /* sub sp,sp,imm */
-#define OP_ADD_SP_IMM		0x080bffc0 /* add sp,sp,imm */
-#define OP_ADD_R22_SP_IMM	0x08096fc0 /* add r22,sp,imm */
-#define OP_STW_FP_SP_IMM	0x054bdfc0 /* stw fp,@(sp,imm) */
-#define OP_OR_SP_R0_IMM		0x03abf000 /* or sp,r0,imm */
+#define OP_MASK_ALL_BUT_IMM	0x0fffffc0	/* throw away imm, keep the rest */
+#define OP_SUB_SP_IMM		0x082bffc0	/* sub sp,sp,imm */
+#define OP_ADD_SP_IMM		0x080bffc0	/* add sp,sp,imm */
+#define OP_ADD_R22_SP_IMM	0x08096fc0	/* add r22,sp,imm */
+#define OP_STW_FP_SP_IMM	0x054bdfc0	/* stw fp,@(sp,imm) */
+#define OP_OR_SP_R0_IMM		0x03abf000	/* or sp,r0,imm */
 
 /* no mask */
-#define OP_OR_FP_R0_SP		0x03a3d03f /* or fp,r0,sp */
-#define OP_OR_FP_SP_R0		0x03a3dfc0 /* or fp,sp,r0 */
-#define OP_OR_FP_IMM0_SP	0x03abd03f /* or fp,0x0,sp */
-#define OP_STW_FP_R22P_R0	0x0547d580 /* stw fp,@(r22+,r0) */
-#define OP_STW_LR_R22P_R0	0x0547e580 /* stw lr,@(r22+,r0) */
+#define OP_OR_FP_R0_SP		0x03a3d03f	/* or fp,r0,sp */
+#define OP_OR_FP_SP_R0		0x03a3dfc0	/* or fp,sp,r0 */
+#define OP_OR_FP_IMM0_SP	0x03abd03f	/* or fp,0x0,sp */
+#define OP_STW_FP_R22P_R0	0x0547d580	/* stw fp,@(r22+,r0) */
+#define OP_STW_LR_R22P_R0	0x0547e580	/* stw lr,@(r22+,r0) */
 
-#define OP_MASK_OP_AND_RB	0x0ff80fc0 /* keep op and rb,throw away rest */
-#define OP_STW_SP_IMM		0x05480fc0 /* stw Ra,@(sp,imm) */
-#define OP_ST2W_SP_IMM		0x05680fc0 /* st2w Ra,@(sp,imm) */
-#define OP_STW_FP_IMM		0x05480f40 /* stw Ra,@(fp,imm) */
-#define OP_STW_FP_R0		0x05400f40 /* stw Ra,@(fp,r0) */
+#define OP_MASK_OP_AND_RB	0x0ff80fc0	/* keep op and rb,throw away rest */
+#define OP_STW_SP_IMM		0x05480fc0	/* stw Ra,@(sp,imm) */
+#define OP_ST2W_SP_IMM		0x05680fc0	/* st2w Ra,@(sp,imm) */
+#define OP_STW_FP_IMM		0x05480f40	/* stw Ra,@(fp,imm) */
+#define OP_STW_FP_R0		0x05400f40	/* stw Ra,@(fp,r0) */
 
 #define OP_MASK_FM_BIT		0x80000000
 #define OP_MASK_CC_BITS		0x70000000
@@ -96,7 +97,7 @@ static void print_flags_command PARAMS ((char *, int));
 int
 d30v_frame_chain_valid (chain, fi)
      CORE_ADDR chain;
-     struct frame_info *fi;      /* not used here */
+     struct frame_info *fi;	/* not used here */
 {
 #if 0
   return ((chain) != 0 && (fi) != 0 && (fi)->return_pc != 0);
@@ -120,16 +121,16 @@ d30v_pop_frame ()
   fp = FRAME_FP (frame);
   if (frame->dummy)
     {
-      d30v_pop_dummy_frame(frame);
+      d30v_pop_dummy_frame (frame);
       return;
     }
 
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
-  
+
   /* now update the current registers with the old values */
-  for (regnum = A0_REGNUM; regnum < A0_REGNUM+2 ; regnum++)
+  for (regnum = A0_REGNUM; regnum < A0_REGNUM + 2; regnum++)
     {
       if (fsr.regs[regnum])
 	{
@@ -149,13 +150,13 @@ d30v_pop_frame ()
       write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 4));
     }
 
-  write_register (PC_REGNUM, read_register(LR_REGNUM));
+  write_register (PC_REGNUM, read_register (LR_REGNUM));
   write_register (SP_REGNUM, fp + frame->size);
   target_store_registers (-1);
   flush_cached_frames ();
 }
 
-static int 
+static int
 check_prologue (op)
      unsigned long op;
 {
@@ -184,36 +185,36 @@ check_prologue (op)
     return 1;
 
   /* st2w  Ra,@(sp,r0) */
- if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_R0)
-   return 1;
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_R0)
+    return 1;
 
   /* st2w  Ra,@(sp,0x0) */
- if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0)
-   return 1;
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0)
+    return 1;
 
- /* stw fp, @(r22+,r0) -- observed */
- if (op == OP_STW_FP_R22P_R0)
-   return 1;
+  /* stw fp, @(r22+,r0) -- observed */
+  if (op == OP_STW_FP_R22P_R0)
+    return 1;
 
- /* stw r62, @(r22+,r0) -- observed */
- if (op == OP_STW_LR_R22P_R0)
-   return 1;
+  /* stw r62, @(r22+,r0) -- observed */
+  if (op == OP_STW_LR_R22P_R0)
+    return 1;
 
- /* stw Ra, @(fp,r0) -- observed */
- if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_FP_R0)
-   return 1;			/* first arg */
+  /* stw Ra, @(fp,r0) -- observed */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_FP_R0)
+    return 1;			/* first arg */
 
- /* stw Ra, @(fp,imm) -- observed */
- if ((op & OP_MASK_OP_AND_RB) == OP_STW_FP_IMM)
-   return 1;			/* second and subsequent args */
+  /* stw Ra, @(fp,imm) -- observed */
+  if ((op & OP_MASK_OP_AND_RB) == OP_STW_FP_IMM)
+    return 1;			/* second and subsequent args */
 
- /* stw fp,@(sp,imm) -- observed */
- if ((op & OP_MASK_ALL_BUT_IMM) == OP_STW_FP_SP_IMM)
-   return 1;
+  /* stw fp,@(sp,imm) -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_STW_FP_SP_IMM)
+    return 1;
 
- /* st2w Ra,@(r22+,r0) */
- if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_R22P_R0)
-   return 1;
+  /* st2w Ra,@(r22+,r0) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_R22P_R0)
+    return 1;
 
   /* stw  Ra, @(sp-) */
   if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SPM)
@@ -247,17 +248,17 @@ d30v_skip_prologue (pc)
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
-      if ( sal.end && sal.end < func_end)
+      if (sal.end && sal.end < func_end)
 	return sal.end;
     }
-  
-  if (target_read_memory (pc, (char *)&op[0], 8))
+
+  if (target_read_memory (pc, (char *) &op[0], 8))
     return pc;			/* Can't access it -- assume no prologue. */
 
   while (1)
     {
-      opl = (unsigned long)read_memory_integer (pc, 4);
-      opr = (unsigned long)read_memory_integer (pc+4, 4);
+      opl = (unsigned long) read_memory_integer (pc, 4);
+      opr = (unsigned long) read_memory_integer (pc + 4, 4);
 
       fm0 = (opl & OP_MASK_FM_BIT);
       fm1 = (opr & OP_MASK_FM_BIT);
@@ -271,10 +272,10 @@ d30v_skip_prologue (pc)
       if (fm0 && fm1)
 	{
 	  /* long instruction (opl contains the opcode) */
-	  if (((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_SP_IMM) && /* add sp,sp,imm */
-	      ((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_R22_SP_IMM) && /* add r22,sp,imm */
-	      ((opl & OP_MASK_OP_AND_RB) != OP_STW_SP_IMM) && /* stw Ra, @(sp,imm) */
-	      ((opl & OP_MASK_OP_AND_RB) != OP_ST2W_SP_IMM)) /* st2w Ra, @(sp,imm) */
+	  if (((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_SP_IMM) &&		/* add sp,sp,imm */
+	      ((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_R22_SP_IMM) &&	/* add r22,sp,imm */
+	      ((opl & OP_MASK_OP_AND_RB) != OP_STW_SP_IMM) &&	/* stw Ra, @(sp,imm) */
+	      ((opl & OP_MASK_OP_AND_RB) != OP_ST2W_SP_IMM))	/* st2w Ra, @(sp,imm) */
 	    break;
 	}
       else
@@ -284,15 +285,15 @@ d30v_skip_prologue (pc)
 	    {
 	      op1 = opr;
 	      op2 = opl;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      op1 = opl;
 	      op2 = opr;
 	    }
-	  if (check_prologue(op1))
+	  if (check_prologue (op1))
 	    {
-	      if (!check_prologue(op2))
+	      if (!check_prologue (op2))
 		{
 		  /* if the previous opcode was really part of the prologue */
 		  /* and not just a NOP, then we want to break after both instructions */
@@ -314,7 +315,7 @@ static int end_of_stack;
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-*/
+ */
 
 CORE_ADDR
 d30v_frame_chain (frame)
@@ -325,29 +326,29 @@ d30v_frame_chain (frame)
   d30v_frame_find_saved_regs (frame, &fsr);
 
   if (end_of_stack)
-    return (CORE_ADDR)0;
+    return (CORE_ADDR) 0;
 
   if (frame->return_pc == IMEM_START)
-    return (CORE_ADDR)0;
+    return (CORE_ADDR) 0;
 
   if (!fsr.regs[FP_REGNUM])
     {
       if (!fsr.regs[SP_REGNUM] || fsr.regs[SP_REGNUM] == STACK_START)
-	return (CORE_ADDR)0;
-      
+	return (CORE_ADDR) 0;
+
       return fsr.regs[SP_REGNUM];
     }
 
-  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4))
-    return (CORE_ADDR)0;
+  if (!read_memory_unsigned_integer (fsr.regs[FP_REGNUM], 4))
+    return (CORE_ADDR) 0;
 
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4);
-}  
+  return read_memory_unsigned_integer (fsr.regs[FP_REGNUM], 4);
+}
 
 static int next_addr, uses_frame;
 static int frame_size;
 
-static int 
+static int
 prologue_find_regs (op, fsr, addr)
      unsigned long op;
      struct frame_saved_regs *fsr;
@@ -359,8 +360,8 @@ prologue_find_regs (op, fsr, addr)
   /* add sp,sp,imm -- observed */
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
     {
-      offset = EXTRACT_IMM6(op);
-      /*next_addr += offset;*/
+      offset = EXTRACT_IMM6 (op);
+      /*next_addr += offset; */
       frame_size += -offset;
       return 1;
     }
@@ -368,7 +369,7 @@ prologue_find_regs (op, fsr, addr)
   /* add r22,sp,imm -- observed */
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_R22_SP_IMM)
     {
-      offset = EXTRACT_IMM6(op);
+      offset = EXTRACT_IMM6 (op);
       next_addr = (offset - frame_size);
       return 1;
     }
@@ -376,8 +377,8 @@ prologue_find_regs (op, fsr, addr)
   /* stw Ra, @(fp, offset) -- observed */
   if ((op & OP_MASK_OP_AND_RB) == OP_STW_FP_IMM)
     {
-      n = EXTRACT_RA(op);
-      offset = EXTRACT_IMM6(op);
+      n = EXTRACT_RA (op);
+      offset = EXTRACT_IMM6 (op);
       fsr->regs[n] = (offset - frame_size);
       return 1;
     }
@@ -385,8 +386,8 @@ prologue_find_regs (op, fsr, addr)
   /* stw Ra, @(fp, r0) -- observed */
   if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_FP_R0)
     {
-      n = EXTRACT_RA(op);
-      fsr->regs[n] = (- frame_size);
+      n = EXTRACT_RA (op);
+      fsr->regs[n] = (-frame_size);
       return 1;
     }
 
@@ -406,7 +407,7 @@ prologue_find_regs (op, fsr, addr)
   /* stw Ra,@(r22+,r0) -- observed */
   if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_R22P_R0)
     {
-      n = EXTRACT_RA(op);
+      n = EXTRACT_RA (op);
       fsr->regs[n] = next_addr;
       next_addr += 4;
       return 1;
@@ -415,7 +416,7 @@ prologue_find_regs (op, fsr, addr)
   /* stw fp,@(r22+,r0) -- observed */
   if (op == OP_STW_FP_R22P_R0)
     {
-      fsr->regs[FP_REGNUM] = next_addr;	/* XXX */
+      fsr->regs[FP_REGNUM] = next_addr;		/* XXX */
       next_addr += 4;
       return 1;
     }
@@ -431,9 +432,9 @@ prologue_find_regs (op, fsr, addr)
   /* st2w Ra,@(r22+,r0) -- observed */
   if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_R22P_R0)
     {
-      n = EXTRACT_RA(op);
+      n = EXTRACT_RA (op);
       fsr->regs[n] = next_addr;
-      fsr->regs[n+1] = next_addr + 4;
+      fsr->regs[n + 1] = next_addr + 4;
       next_addr += 8;
       return 1;
     }
@@ -441,7 +442,7 @@ prologue_find_regs (op, fsr, addr)
   /* stw  rn, @(sp-) */
   if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SPM)
     {
-      n = EXTRACT_RA(op);
+      n = EXTRACT_RA (op);
       fsr->regs[n] = next_addr;
       next_addr -= 4;
       return 1;
@@ -450,9 +451,9 @@ prologue_find_regs (op, fsr, addr)
   /* st2w  Ra, @(sp-) */
   else if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SPM)
     {
-      n = EXTRACT_RA(op);
+      n = EXTRACT_RA (op);
       fsr->regs[n] = next_addr;
-      fsr->regs[n+1] = next_addr+4;
+      fsr->regs[n + 1] = next_addr + 4;
       next_addr -= 8;
       return 1;
     }
@@ -460,7 +461,7 @@ prologue_find_regs (op, fsr, addr)
   /* sub  sp,sp,imm */
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_SUB_SP_IMM)
     {
-      offset = EXTRACT_IMM6(op);
+      offset = EXTRACT_IMM6 (op);
       frame_size += -offset;
       return 1;
     }
@@ -469,8 +470,8 @@ prologue_find_regs (op, fsr, addr)
   if (((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_R0) ||
       ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_IMM0))
     {
-      n = EXTRACT_RA(op);
-      fsr->regs[n] = (- frame_size);
+      n = EXTRACT_RA (op);
+      fsr->regs[n] = (-frame_size);
       return 1;
     }
 
@@ -478,16 +479,16 @@ prologue_find_regs (op, fsr, addr)
   if (((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_R0) ||
       ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0))
     {
-      n = EXTRACT_RA(op);
-      fsr->regs[n] = (- frame_size);
-      fsr->regs[n+1] = (- frame_size) + 4;
+      n = EXTRACT_RA (op);
+      fsr->regs[n] = (-frame_size);
+      fsr->regs[n + 1] = (-frame_size) + 4;
       return 1;
     }
 
   /* stw fp,@(sp,imm) -- observed */
   if ((op & OP_MASK_ALL_BUT_IMM) == OP_STW_FP_SP_IMM)
     {
-      offset = EXTRACT_IMM6(op);
+      offset = EXTRACT_IMM6 (op);
       fsr->regs[FP_REGNUM] = (offset - frame_size);
       return 1;
     }
@@ -519,30 +520,30 @@ d30v_frame_find_saved_regs (fi, fsr)
   uses_frame = 0;
 
   d30v_frame_find_saved_regs_offsets (fi, fsr);
-  
+
   fi->size = frame_size;
 
   if (!fp)
-    fp = read_register(SP_REGNUM);
+    fp = read_register (SP_REGNUM);
 
-  for (i=0; i<NUM_REGS-1; i++)
+  for (i = 0; i < NUM_REGS - 1; i++)
     if (fsr->regs[i])
       {
 	fsr->regs[i] = fsr->regs[i] + fp + frame_size;
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = read_memory_unsigned_integer(fsr->regs[LR_REGNUM],4);
+    fi->return_pc = read_memory_unsigned_integer (fsr->regs[LR_REGNUM], 4);
   else
-    fi->return_pc = read_register(LR_REGNUM);
-  
+    fi->return_pc = read_register (LR_REGNUM);
+
   /* the SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
-	fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
+	fsr->regs[SP_REGNUM] = read_register (FP_REGNUM) + fi->size;
       else
 	{
 	  fsr->regs[SP_REGNUM] = fp + fi->size;
@@ -574,8 +575,8 @@ d30v_frame_find_saved_regs_offsets (fi, fsr)
   uses_frame = 0;
   while (pc < fi->pc)
     {
-      opl = (unsigned long)read_memory_integer (pc, 4);
-      opr = (unsigned long)read_memory_integer (pc+4, 4);
+      opl = (unsigned long) read_memory_integer (pc, 4);
+      opr = (unsigned long) read_memory_integer (pc + 4, 4);
 
       fm0 = (opl & OP_MASK_FM_BIT);
       fm1 = (opr & OP_MASK_FM_BIT);
@@ -589,29 +590,29 @@ d30v_frame_find_saved_regs_offsets (fi, fsr)
 	  if ((opl & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
 	    {
 	      /* add sp,sp,n */
-	      long offset = EXTRACT_IMM32(opl, opr);
+	      long offset = EXTRACT_IMM32 (opl, opr);
 	      frame_size += -offset;
 	    }
 	  else if ((opl & OP_MASK_ALL_BUT_IMM) == OP_ADD_R22_SP_IMM)
 	    {
 	      /* add r22,sp,offset */
-	      long offset = EXTRACT_IMM32(opl,opr);
+	      long offset = EXTRACT_IMM32 (opl, opr);
 	      next_addr = (offset - frame_size);
 	    }
 	  else if ((opl & OP_MASK_OP_AND_RB) == OP_STW_SP_IMM)
 	    {
 	      /* st Ra, @(sp,imm) */
-	      long offset = EXTRACT_IMM32(opl, opr);
-	      short n = EXTRACT_RA(opl);
+	      long offset = EXTRACT_IMM32 (opl, opr);
+	      short n = EXTRACT_RA (opl);
 	      fsr->regs[n] = (offset - frame_size);
 	    }
 	  else if ((opl & OP_MASK_OP_AND_RB) == OP_ST2W_SP_IMM)
 	    {
 	      /* st2w Ra, @(sp,offset) */
-	      long offset = EXTRACT_IMM32(opl, opr);
-	      short n = EXTRACT_RA(opl);
+	      long offset = EXTRACT_IMM32 (opl, opr);
+	      short n = EXTRACT_RA (opl);
 	      fsr->regs[n] = (offset - frame_size);
-	      fsr->regs[n+1] = (offset - frame_size) + 4;
+	      fsr->regs[n + 1] = (offset - frame_size) + 4;
 	    }
 	  else if ((opl & OP_MASK_ALL_BUT_IMM) == OP_OR_SP_R0_IMM)
 	    {
@@ -627,42 +628,42 @@ d30v_frame_find_saved_regs_offsets (fi, fsr)
 	    {
 	      op2 = opl;
 	      op1 = opr;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      op1 = opl;
 	      op2 = opr;
 	    }
-	  if (!prologue_find_regs(op1,fsr,pc) || !prologue_find_regs(op2,fsr,pc))
+	  if (!prologue_find_regs (op1, fsr, pc) || !prologue_find_regs (op2, fsr, pc))
 	    break;
 	}
       pc += 8;
     }
-  
+
 #if 0
   fi->size = frame_size;
 
   if (!fp)
-    fp = read_register(SP_REGNUM);
+    fp = read_register (SP_REGNUM);
 
-  for (i=0; i<NUM_REGS-1; i++)
+  for (i = 0; i < NUM_REGS - 1; i++)
     if (fsr->regs[i])
       {
 	fsr->regs[i] = fsr->regs[i] + fp + frame_size;
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = read_memory_unsigned_integer(fsr->regs[LR_REGNUM],4);
+    fi->return_pc = read_memory_unsigned_integer (fsr->regs[LR_REGNUM], 4);
   else
-    fi->return_pc = read_register(LR_REGNUM);
-  
+    fi->return_pc = read_register (LR_REGNUM);
+
   /* the SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
-	fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
+	fsr->regs[SP_REGNUM] = read_register (FP_REGNUM) + fi->size;
       else
 	{
 	  fsr->regs[SP_REGNUM] = fp + fi->size;
@@ -681,7 +682,7 @@ d30v_init_extra_frame_info (fromleaf, fi)
   struct frame_saved_regs dummy;
 
   if (fi->next && (fi->pc == 0))
-    fi->pc = fi->next->return_pc; 
+    fi->pc = fi->next->return_pc;
 
   d30v_frame_find_saved_regs_offsets (fi, &dummy);
 
@@ -699,10 +700,10 @@ d30v_init_extra_frame_info (fromleaf, fi)
     {
       /* it was saved, grab it! */
       dummy.regs[LR_REGNUM] += (fi->frame + frame_size);
-      fi->return_pc = read_memory_unsigned_integer(dummy.regs[LR_REGNUM],4);
+      fi->return_pc = read_memory_unsigned_integer (dummy.regs[LR_REGNUM], 4);
     }
   else
-    fi->return_pc = read_register(LR_REGNUM);
+    fi->return_pc = read_register (LR_REGNUM);
 }
 
 void
@@ -744,7 +745,7 @@ d30v_print_register (regnum, tabular)
 	{
 	  printf_filtered ("	");
 	  val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0, 0,
-		 gdb_stdout, 'd', 1, 0, Val_pretty_default);
+		     gdb_stdout, 'd', 1, 0, Val_pretty_default);
 	}
     }
 }
@@ -896,18 +897,18 @@ d30v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
   char buffer[MAX_REGISTER_RAW_SIZE];
   struct frame_info *frame = get_current_frame ();
   frame->dummy = start_sp;
-  /*start_sp |= DMEM_START;*/
+  /*start_sp |= DMEM_START; */
 
   sp = start_sp;
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
-      sp -= REGISTER_RAW_SIZE(regnum);
-      store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
-      write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
+      sp -= REGISTER_RAW_SIZE (regnum);
+      store_address (buffer, REGISTER_RAW_SIZE (regnum), read_register (regnum));
+      write_memory (sp, buffer, REGISTER_RAW_SIZE (regnum));
     }
-  write_register (SP_REGNUM, (LONGEST)sp);
+  write_register (SP_REGNUM, (LONGEST) sp);
   /* now we need to load LR with the return address */
-  write_register (LR_REGNUM, (LONGEST)d30v_call_dummy_address());  
+  write_register (LR_REGNUM, (LONGEST) d30v_call_dummy_address ());
   return sp;
 }
 
@@ -920,10 +921,10 @@ d30v_pop_dummy_frame (fi)
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
-      sp -= REGISTER_RAW_SIZE(regnum);
-      write_register(regnum, read_memory_unsigned_integer (sp, REGISTER_RAW_SIZE(regnum)));
+      sp -= REGISTER_RAW_SIZE (regnum);
+      write_register (regnum, read_memory_unsigned_integer (sp, REGISTER_RAW_SIZE (regnum)));
     }
-  flush_cached_frames (); /* needed? */
+  flush_cached_frames ();	/* needed? */
 }
 
 
@@ -935,7 +936,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  int i, len, index=0, regnum=2;
+  int i, len, index = 0, regnum = 2;
   char buffer[4], *contents;
   LONGEST val;
   CORE_ADDR ptrs[10];
@@ -947,7 +948,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       value_ptr arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
-      contents = VALUE_CONTENTS(arg);
+      contents = VALUE_CONTENTS (arg);
       val = extract_signed_integer (contents, len);
       if (len > 4)
 	{
@@ -965,7 +966,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       value_ptr arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
-      contents = VALUE_CONTENTS(arg);
+      contents = VALUE_CONTENTS (arg);
       if (len > 4)
 	{
 	  /* we need multiple registers */
@@ -982,9 +983,9 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		  write_register (regnum++, val);
 
 		  if (len >= 8)
-		    val = extract_signed_integer (&contents[ndx+4], 4);
+		    val = extract_signed_integer (&contents[ndx + 4], 4);
 		  else
-		    val = extract_signed_integer (&contents[ndx+4], len-4);
+		    val = extract_signed_integer (&contents[ndx + 4], len - 4);
 		  write_register (regnum++, val);
 		}
 	      else
@@ -992,11 +993,11 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		  /* no more registers available.  put it on the stack */
 
 		  /* all args > 4 bytes are padded to a multiple of 8 bytes
-		   and start on an 8 byte boundary */
+		     and start on an 8 byte boundary */
 		  if (sp & 7)
-		    sp -= (sp & 7); /* align it */
+		    sp -= (sp & 7);	/* align it */
 
-		  sp -= ((len + 7) & ~7); /* allocate space */
+		  sp -= ((len + 7) & ~7);	/* allocate space */
 		  write_memory (sp, &contents[ndx], len);
 		  break;
 		}
@@ -1004,7 +1005,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       else
 	{
-	  if (regnum < 18 )
+	  if (regnum < 18)
 	    {
 	      val = extract_signed_integer (contents, len);
 	      write_register (regnum++, val);
@@ -1113,11 +1114,13 @@ static int trace_display;
 
 static int default_trace_show_source = 1;
 
-struct trace_buffer {
-  int size;
-  short *counts;
-  CORE_ADDR *addrs;
-} trace_data;
+struct trace_buffer
+  {
+    int size;
+    short *counts;
+    CORE_ADDR *addrs;
+  }
+trace_data;
 
 static void
 trace_command (args, from_tty)
@@ -1127,9 +1130,9 @@ trace_command (args, from_tty)
   /* Clear the host-side trace buffer, allocating space if needed.  */
   trace_data.size = 0;
   if (trace_data.counts == NULL)
-    trace_data.counts = (short *) xmalloc (65536 * sizeof(short));
+    trace_data.counts = (short *) xmalloc (65536 * sizeof (short));
   if (trace_data.addrs == NULL)
-    trace_data.addrs = (CORE_ADDR *) xmalloc (65536 * sizeof(CORE_ADDR));
+    trace_data.addrs = (CORE_ADDR *) xmalloc (65536 * sizeof (CORE_ADDR));
 
   tracing = 1;
 
@@ -1213,7 +1216,7 @@ d30v_eva_get_trace_data ()
   if (!tracing)
     return;
 
-  tmpspace = xmalloc (65536 * sizeof(unsigned int));
+  tmpspace = xmalloc (65536 * sizeof (unsigned int));
 
   last_trace = read_memory_unsigned_integer (DBBC_ADDR, 2) << 2;
 
@@ -1307,7 +1310,7 @@ display_trace (low, high)
   CORE_ADDR next_address;
 
   trace_show_source = default_trace_show_source;
-  if (!have_full_symbols () && !have_partial_symbols())
+  if (!have_full_symbols () && !have_partial_symbols ())
     {
       trace_show_source = 0;
       printf_filtered ("No symbol table is loaded.  Use the \"file\" command.\n");
@@ -1319,7 +1322,7 @@ display_trace (low, high)
   for (i = low; i < high; ++i)
     {
       next_address = trace_data.addrs[i];
-      count = trace_data.counts[i]; 
+      count = trace_data.counts[i];
       while (count-- > 0)
 	{
 	  QUIT;
@@ -1341,7 +1344,7 @@ display_trace (low, high)
 		  if (!suppress)
 		    /* FIXME-32x64--assumes sal.pc fits in long.  */
 		    printf_filtered ("No source file for address %s.\n",
-				     local_hex_string((unsigned long) sal.pc));
+				 local_hex_string ((unsigned long) sal.pc));
 		  suppress = 1;
 		}
 	    }
@@ -1374,7 +1377,7 @@ _initialize_d30v_tdep ()
 	   "Enable tracing of instruction execution.");
 
   add_com ("untrace", class_support, untrace_command,
- 	   "Disable tracing of instruction execution.");
+	   "Disable tracing of instruction execution.");
 
   add_com ("tdisassemble", class_vars, tdisassemble_command,
 	   "Disassemble the trace buffer.\n\
@@ -1385,12 +1388,12 @@ as reported by info trace (NOT addresses!).");
 	    "Display info about the trace data buffer.");
 
   add_show_from_set (add_set_cmd ("tracedisplay", no_class,
-				  var_integer, (char *)&trace_display,
-				  "Set automatic display of trace.\n", &setlist),
+				  var_integer, (char *) &trace_display,
+			     "Set automatic display of trace.\n", &setlist),
 		     &showlist);
   add_show_from_set (add_set_cmd ("tracesource", no_class,
-				  var_integer, (char *)&default_trace_show_source,
-				  "Set display of source code with trace.\n", &setlist),
+			   var_integer, (char *) &default_trace_show_source,
+		      "Set display of source code with trace.\n", &setlist),
 		     &showlist);
 
-} 
+}

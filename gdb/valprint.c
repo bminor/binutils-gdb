@@ -1,22 +1,23 @@
 /* Print values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1998
-             Free Software Foundation, Inc.
+   Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -36,8 +37,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-static void print_hex_chars PARAMS ((GDB_FILE *, unsigned char *, 
-                                     unsigned int));
+static void print_hex_chars PARAMS ((GDB_FILE *, unsigned char *,
+				     unsigned int));
 
 static void show_print PARAMS ((char *, int));
 
@@ -97,8 +98,8 @@ int unionprint;			/* Controls printing of nested unions.  */
 /* If nonzero, causes machine addresses to be printed in certain contexts. */
 
 int addressprint;		/* Controls printing of machine addresses */
-
 
+
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
    FORMAT (a letter, or 0 for natural format using TYPE).
@@ -121,7 +122,7 @@ int addressprint;		/* Controls printing of machine addresses */
 
 int
 val_print (type, valaddr, embedded_offset, address,
-           stream, format, deref_ref, recurse, pretty)
+	   stream, format, deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
      int embedded_offset;
@@ -137,7 +138,7 @@ val_print (type, valaddr, embedded_offset, address,
     {
       pretty = prettyprint_structs ? Val_prettyprint : Val_no_prettyprint;
     }
-  
+
   QUIT;
 
   /* Ensure that the type is complete and not just a stub.  If the type is
@@ -150,9 +151,9 @@ val_print (type, valaddr, embedded_offset, address,
       gdb_flush (stream);
       return (0);
     }
-  
+
   return (LA_VAL_PRINT (type, valaddr, embedded_offset, address,
-                        stream, format, deref_ref, recurse, pretty));
+			stream, format, deref_ref, recurse, pretty));
 }
 
 /* Print the value VAL in C-ish syntax on stream STREAM.
@@ -233,10 +234,10 @@ val_print_type_code_int (type, valaddr, stream)
    format it according to the current language (this should be used for most
    integers which GDB prints, the exception is things like protocols where
    the format of the integer is a protocol thing, not a user-visible thing).
-   */
+ */
 
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
-static void print_decimal PARAMS ((GDB_FILE *stream, char *sign, int use_local, ULONGEST val_ulong));
+static void print_decimal PARAMS ((GDB_FILE * stream, char *sign, int use_local, ULONGEST val_ulong));
 static void
 print_decimal (stream, sign, use_local, val_ulong)
      GDB_FILE *stream;
@@ -343,7 +344,7 @@ print_longest (stream, format, use_local, val_long)
     case 'd':
       fprintf_filtered (stream,
 			use_local ? local_decimal_format_custom ("ll")
-				  : "%lld",
+			: "%lld",
 			val_long);
       break;
     case 'u':
@@ -352,13 +353,13 @@ print_longest (stream, format, use_local, val_long)
     case 'x':
       fprintf_filtered (stream,
 			use_local ? local_hex_format_custom ("ll")
-				  : "%llx",
+			: "%llx",
 			val_long);
       break;
     case 'o':
       fprintf_filtered (stream,
 			use_local ? local_octal_format_custom ("ll")
-				  : "%llo",
+			: "%llo",
 			val_long);
       break;
     case 'b':
@@ -376,7 +377,7 @@ print_longest (stream, format, use_local, val_long)
     default:
       abort ();
     }
-#else /* !CC_HAS_LONG_LONG || !PRINTF_HAS_LONG_LONG*/
+#else /* !CC_HAS_LONG_LONG || !PRINTF_HAS_LONG_LONG */
   /* In the following it is important to coerce (val_long) to a long. It does
      nothing if !LONG_LONG, but it will chop off the top half (which we know
      we can ignore) if the host supports long longs.  */
@@ -386,7 +387,7 @@ print_longest (stream, format, use_local, val_long)
     case 'd':
       fprintf_filtered (stream,
 			use_local ? local_decimal_format_custom ("l")
-				  : "%ld",
+			: "%ld",
 			(long) val_long);
       break;
     case 'u':
@@ -395,13 +396,13 @@ print_longest (stream, format, use_local, val_long)
     case 'x':
       fprintf_filtered (stream,
 			use_local ? local_hex_format_custom ("l")
-				  : "%lx",
+			: "%lx",
 			(unsigned long) val_long);
       break;
     case 'o':
       fprintf_filtered (stream,
 			use_local ? local_octal_format_custom ("l")
-				  : "%lo",
+			: "%lo",
 			(unsigned long) val_long);
       break;
     case 'b':
@@ -442,7 +443,7 @@ strcat_longest (format, use_local, val_long, buf, buflen)
   vbot = (long) val_long;
 
   if ((format == 'd' && (val_long < INT_MIN || val_long > INT_MAX))
-      || ((format == 'u' || format == 'x') && (unsigned long long)val_long > UINT_MAX))
+      || ((format == 'u' || format == 'x') && (unsigned long long) val_long > UINT_MAX))
     {
       sprintf (buf, "0x%lx%08lx", vtop, vbot);
       return;
@@ -454,34 +455,34 @@ strcat_longest (format, use_local, val_long, buf, buflen)
     {
     case 'd':
       sprintf (buf,
-	       (use_local ? local_decimal_format_custom ("ll") : "%lld"), 
+	       (use_local ? local_decimal_format_custom ("ll") : "%lld"),
 	       val_long);
       break;
     case 'u':
-      sprintf (buf, "%llu",  val_long);
+      sprintf (buf, "%llu", val_long);
       break;
     case 'x':
       sprintf (buf,
-	       (use_local ? local_hex_format_custom ("ll") : "%llx"), 
-			
+	       (use_local ? local_hex_format_custom ("ll") : "%llx"),
+
 	       val_long);
       break;
     case 'o':
       sprintf (buf,
-	       (use_local ? local_octal_format_custom ("ll") : "%llo"), 
+	       (use_local ? local_octal_format_custom ("ll") : "%llo"),
 	       val_long);
       break;
     case 'b':
-      sprintf (buf, local_hex_format_custom ("02ll"),  val_long);
+      sprintf (buf, local_hex_format_custom ("02ll"), val_long);
       break;
     case 'h':
-      sprintf (buf, local_hex_format_custom ("04ll"),  val_long);
+      sprintf (buf, local_hex_format_custom ("04ll"), val_long);
       break;
     case 'w':
-      sprintf (buf, local_hex_format_custom ("08ll"),  val_long);
+      sprintf (buf, local_hex_format_custom ("08ll"), val_long);
       break;
     case 'g':
-      sprintf (buf, local_hex_format_custom ("016ll"),  val_long);
+      sprintf (buf, local_hex_format_custom ("016ll"), val_long);
       break;
     default:
       abort ();
@@ -494,30 +495,30 @@ strcat_longest (format, use_local, val_long, buf, buflen)
   switch (format)
     {
     case 'd':
-      sprintf (buf, (use_local ? local_decimal_format_custom ("l") : "%ld"), 
-								 ((long) val_long));
+      sprintf (buf, (use_local ? local_decimal_format_custom ("l") : "%ld"),
+	       ((long) val_long));
       break;
     case 'u':
-      sprintf (buf, "%lu",  ((unsigned long) val_long));
+      sprintf (buf, "%lu", ((unsigned long) val_long));
       break;
     case 'x':
-      sprintf (buf, (use_local ? local_hex_format_custom ("l") : "%lx"), 
+      sprintf (buf, (use_local ? local_hex_format_custom ("l") : "%lx"),
 	       ((long) val_long));
       break;
     case 'o':
-      sprintf (buf, (use_local ? local_octal_format_custom ("l") : "%lo"), 
+      sprintf (buf, (use_local ? local_octal_format_custom ("l") : "%lo"),
 	       ((long) val_long));
       break;
     case 'b':
-      sprintf (buf, local_hex_format_custom ("02l"), 
+      sprintf (buf, local_hex_format_custom ("02l"),
 	       ((long) val_long));
       break;
     case 'h':
-      sprintf (buf, local_hex_format_custom ("04l"), 
+      sprintf (buf, local_hex_format_custom ("04l"),
 	       ((long) val_long));
       break;
     case 'w':
-      sprintf (buf, local_hex_format_custom ("08l"), 
+      sprintf (buf, local_hex_format_custom ("08l"),
 	       ((long) val_long));
       break;
     case 'g':
@@ -527,7 +528,7 @@ strcat_longest (format, use_local, val_long, buf, buflen)
     default:
       abort ();
     }
-    
+
 #endif /* !PRINTF_HAS_LONG_LONG */
 }
 #endif
@@ -568,7 +569,7 @@ print_floating (valaddr, type, stream)
   DOUBLEST doub;
   int inv;
   unsigned len = TYPE_LENGTH (type);
-  
+
 #if defined (IEEE_FLOAT)
 
   /* Check for NaN's.  Note that this code does not depend on us being
@@ -595,7 +596,7 @@ print_floating (valaddr, type, stream)
 	   integer byte order.  */
 	low = extract_unsigned_integer (valaddr, 4);
 	nonnegative = ((low & 0x80000000) == 0);
-	is_nan = ((((low >> 23) & 0xFF) == 0xFF) 
+	is_nan = ((((low >> 23) & 0xFF) == 0xFF)
 		  && 0 != (low & 0x7FFFFF));
 	low &= 0x7fffff;
 	high = 0;
@@ -618,13 +619,13 @@ print_floating (valaddr, type, stream)
 	  }
 	nonnegative = ((high & 0x80000000) == 0);
 	is_nan = (((high >> 20) & 0x7ff) == 0x7ff
-		  && ! ((((high & 0xfffff) == 0)) && (low == 0)));
+		  && !((((high & 0xfffff) == 0)) && (low == 0)));
 	high &= 0xfffff;
       }
     else
       /* Extended.  We can't detect NaNs for extendeds yet.  Also note
-	 that currently extendeds get nuked to double in
-	 REGISTER_CONVERTIBLE.  */
+         that currently extendeds get nuked to double in
+         REGISTER_CONVERTIBLE.  */
       is_nan = 0;
 
     if (is_nan)
@@ -651,9 +652,9 @@ print_floating (valaddr, type, stream)
     }
 
   if (len < sizeof (double))
-    fprintf_filtered (stream, "%.9g", (double) doub);
+      fprintf_filtered (stream, "%.9g", (double) doub);
   else if (len == sizeof (double))
-    fprintf_filtered (stream, "%.17g", (double) doub);
+      fprintf_filtered (stream, "%.17g", (double) doub);
   else
 #ifdef PRINTF_HAS_LONG_DOUBLE
     fprintf_filtered (stream, "%.35Lg", doub);
@@ -663,7 +664,7 @@ print_floating (valaddr, type, stream)
 #endif
 }
 
-void 
+void
 print_binary_chars (stream, valaddr, len)
      GDB_FILE *stream;
      unsigned char *valaddr;
@@ -673,13 +674,13 @@ print_binary_chars (stream, valaddr, len)
 #define BITS_IN_BYTES 8
 
   unsigned char *p;
-  int            i;
-  int            b;
+  int i;
+  int b;
 
   /* Declared "int" so it will be signed.
    * This ensures that right shift will shift in zeros.
    */
-  const int      mask = 0x080;
+  const int mask = 0x080;
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
@@ -690,17 +691,18 @@ print_binary_chars (stream, valaddr, len)
 	   p < valaddr + len;
 	   p++)
 	{
-          /* Every byte has 8 binary characters; peel off
-           * and print from the MSB end.
-           */
-          for( i = 0; i < (BITS_IN_BYTES * sizeof( *p )); i++ ) {
-              if( *p & ( mask >> i ))
-                  b = 1;
-              else
-                  b = 0;
+	  /* Every byte has 8 binary characters; peel off
+	   * and print from the MSB end.
+	   */
+	  for (i = 0; i < (BITS_IN_BYTES * sizeof (*p)); i++)
+	    {
+	      if (*p & (mask >> i))
+		b = 1;
+	      else
+		b = 0;
 
-     	      fprintf_filtered (stream, "%1d", b);
-          }
+	      fprintf_filtered (stream, "%1d", b);
+	    }
 	}
     }
   else
@@ -709,14 +711,15 @@ print_binary_chars (stream, valaddr, len)
 	   p >= valaddr;
 	   p--)
 	{
-          for( i = 0; i < (BITS_IN_BYTES * sizeof( *p )); i++ ) {
-              if( *p & ( mask >> i ))
-                  b = 1;
-              else
-                  b = 0;
+	  for (i = 0; i < (BITS_IN_BYTES * sizeof (*p)); i++)
+	    {
+	      if (*p & (mask >> i))
+		b = 1;
+	      else
+		b = 0;
 
-     	      fprintf_filtered (stream, "%1d", b);
-          }
+	      fprintf_filtered (stream, "%1d", b);
+	    }
 	}
     }
   fprintf_filtered (stream, local_binary_format_suffix ());
@@ -733,8 +736,8 @@ print_octal_chars (stream, valaddr, len)
 {
   unsigned char *p;
   unsigned char octa1, octa2, octa3, carry;
-  int           cycle;
-  
+  int cycle;
+
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
 
@@ -770,7 +773,7 @@ print_octal_chars (stream, valaddr, len)
    */
   cycle = (len * BITS_IN_BYTES) % BITS_IN_OCTAL;
   carry = 0;
-  
+
   fprintf_filtered (stream, local_octal_format_prefix ());
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     {
@@ -778,47 +781,48 @@ print_octal_chars (stream, valaddr, len)
 	   p < valaddr + len;
 	   p++)
 	{
-          switch (cycle) {
-              case 0:
-                 /* No carry in, carry out two bits.
-                  */
-                 octa1 = (HIGH_ZERO  & *p) >> 5;
-                 octa2 = (LOW_ZERO   & *p) >> 2;
-                 carry = (CARRY_ZERO & *p);
-    	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-                 break;
+	  switch (cycle)
+	    {
+	    case 0:
+	      /* No carry in, carry out two bits.
+	       */
+	      octa1 = (HIGH_ZERO & *p) >> 5;
+	      octa2 = (LOW_ZERO & *p) >> 2;
+	      carry = (CARRY_ZERO & *p);
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      break;
 
-              case 1:
-                 /* Carry in two bits, carry out one bit.
-                  */
-                 octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
-                 octa2 = (MID_ONE   & *p) >> 4;
-                 octa3 = (LOW_ONE   & *p) >> 1;
-                 carry = (CARRY_ONE & *p);
-    	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-    	         fprintf_filtered (stream, "%o", octa3);
-                 break;
+	    case 1:
+	      /* Carry in two bits, carry out one bit.
+	       */
+	      octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
+	      octa2 = (MID_ONE & *p) >> 4;
+	      octa3 = (LOW_ONE & *p) >> 1;
+	      carry = (CARRY_ONE & *p);
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      fprintf_filtered (stream, "%o", octa3);
+	      break;
 
-              case 2:
-                 /* Carry in one bit, no carry out.
-                  */
-                 octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
-                 octa2 = (MID_TWO & *p) >> 3;
-                 octa3 = (LOW_TWO & *p);
-                 carry = 0;
-    	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-    	         fprintf_filtered (stream, "%o", octa3);
-                 break;
-                 
-              default:
-                 error( "Internal error in octal conversion;" );
-          }
+	    case 2:
+	      /* Carry in one bit, no carry out.
+	       */
+	      octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
+	      octa2 = (MID_TWO & *p) >> 3;
+	      octa3 = (LOW_TWO & *p);
+	      carry = 0;
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      fprintf_filtered (stream, "%o", octa3);
+	      break;
 
-          cycle++;
-          cycle = cycle % BITS_IN_OCTAL;
+	    default:
+	      error ("Internal error in octal conversion;");
+	    }
+
+	  cycle++;
+	  cycle = cycle % BITS_IN_OCTAL;
 	}
     }
   else
@@ -827,44 +831,45 @@ print_octal_chars (stream, valaddr, len)
 	   p >= valaddr;
 	   p--)
 	{
-          switch (cycle) {
-              case 0:
-                 /* Carry out, no carry in */
-                 octa1 = (HIGH_ZERO  & *p) >> 5;
-                 octa2 = (LOW_ZERO   & *p) >> 2;
-                 carry = (CARRY_ZERO & *p);
-    	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-                 break;
+	  switch (cycle)
+	    {
+	    case 0:
+	      /* Carry out, no carry in */
+	      octa1 = (HIGH_ZERO & *p) >> 5;
+	      octa2 = (LOW_ZERO & *p) >> 2;
+	      carry = (CARRY_ZERO & *p);
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      break;
 
-              case 1:
-                 /* Carry in, carry out */
-                 octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
-                 octa2 = (MID_ONE   & *p) >> 4;
-                 octa3 = (LOW_ONE   & *p) >> 1;
-                 carry = (CARRY_ONE & *p);
-    	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-    	         fprintf_filtered (stream, "%o", octa3);
-                 break;
+	    case 1:
+	      /* Carry in, carry out */
+	      octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
+	      octa2 = (MID_ONE & *p) >> 4;
+	      octa3 = (LOW_ONE & *p) >> 1;
+	      carry = (CARRY_ONE & *p);
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      fprintf_filtered (stream, "%o", octa3);
+	      break;
 
-              case 2:
-                 /* Carry in, no carry out */
-                 octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
-                 octa2 = (MID_TWO & *p) >> 3;
-                 octa3 = (LOW_TWO & *p);
-                 carry = 0;
-     	         fprintf_filtered (stream, "%o", octa1);
-    	         fprintf_filtered (stream, "%o", octa2);
-    	         fprintf_filtered (stream, "%o", octa3);
-                 break;
-                 
-              default:
-                 error( "Internal error in octal conversion;" );
-          }
+	    case 2:
+	      /* Carry in, no carry out */
+	      octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
+	      octa2 = (MID_TWO & *p) >> 3;
+	      octa3 = (LOW_TWO & *p);
+	      carry = 0;
+	      fprintf_filtered (stream, "%o", octa1);
+	      fprintf_filtered (stream, "%o", octa2);
+	      fprintf_filtered (stream, "%o", octa3);
+	      break;
 
-          cycle++;
-          cycle = cycle % BITS_IN_OCTAL;
+	    default:
+	      error ("Internal error in octal conversion;");
+	    }
+
+	  cycle++;
+	  cycle = cycle % BITS_IN_OCTAL;
 	}
     }
 
@@ -882,7 +887,7 @@ print_decimal_chars (stream, valaddr, len)
 {
 #define TEN             10
 #define TWO_TO_FOURTH   16
-#define CARRY_OUT(  x ) ((x) / TEN)  /* extend char to int */
+#define CARRY_OUT(  x ) ((x) / TEN)	/* extend char to int */
 #define CARRY_LEFT( x ) ((x) % TEN)
 #define SHIFT( x )      ((x) << 4)
 #define START_P \
@@ -896,23 +901,24 @@ print_decimal_chars (stream, valaddr, len)
 
   unsigned char *p;
   unsigned char *digits;
-  int            carry;
-  int            decimal_len;
-  int            i, j, decimal_digits;
-  int            dummy;
-  int            flip;
-  
+  int carry;
+  int decimal_len;
+  int i, j, decimal_digits;
+  int dummy;
+  int flip;
+
   /* Base-ten number is less than twice as many digits
    * as the base 16 number, which is 2 digits per byte.
    */
   decimal_len = len * 2 * 2;
-  digits = (unsigned char *) malloc( decimal_len );
-  if( digits == NULL )
-      error( "Can't allocate memory for conversion to decimal." );
+  digits = (unsigned char *) malloc (decimal_len);
+  if (digits == NULL)
+    error ("Can't allocate memory for conversion to decimal.");
 
-  for( i = 0; i < decimal_len; i++ ) {
+  for (i = 0; i < decimal_len; i++)
+    {
       digits[i] = 0;
-  }
+    }
 
   fprintf_filtered (stream, local_decimal_format_prefix ());
 
@@ -929,38 +935,42 @@ print_decimal_chars (stream, valaddr, len)
    * Outer loop is per nibble (hex digit) of input, from MSD end to
    * LSD end.
    */
-  decimal_digits = 0;  /* Number of decimal digits so far */
+  decimal_digits = 0;		/* Number of decimal digits so far */
   p = START_P;
   flip = 0;
-  while( NOT_END_P ) {
+  while (NOT_END_P)
+    {
       /*
        * Multiply current base-ten number by 16 in place.
        * Each digit was between 0 and 9, now is between
        * 0 and 144.
        */
-      for( j = 0; j < decimal_digits; j++ ) {
-           digits[j] = SHIFT( digits[j] );
-      }
-    
+      for (j = 0; j < decimal_digits; j++)
+	{
+	  digits[j] = SHIFT (digits[j]);
+	}
+
       /* Take the next nibble off the input and add it to what
        * we've got in the LSB position.  Bottom 'digit' is now
        * between 0 and 159.
        *
        * "flip" is used to run this loop twice for each byte.
        */
-      if( flip == 0 ) {
-          /* Take top nibble.
-           */
-          digits[0] += HIGH_NIBBLE( *p );
-          flip = 1;
-      }
-      else {
-          /* Take low nibble and bump our pointer "p".
-           */
-          digits[0] += LOW_NIBBLE( *p );
-          NEXT_P;
-          flip = 0;
-      }
+      if (flip == 0)
+	{
+	  /* Take top nibble.
+	   */
+	  digits[0] += HIGH_NIBBLE (*p);
+	  flip = 1;
+	}
+      else
+	{
+	  /* Take low nibble and bump our pointer "p".
+	   */
+	  digits[0] += LOW_NIBBLE (*p);
+	  NEXT_P;
+	  flip = 0;
+	}
 
       /* Re-decimalize.  We have to do this often enough
        * that we don't overflow, but once per nibble is
@@ -971,39 +981,42 @@ print_decimal_chars (stream, valaddr, len)
        * the carrying beyond the last current digit.
        */
       carry = 0;
-      for( j = 0; j < decimal_len - 1; j++ ) {
-          digits[j] += carry;
+      for (j = 0; j < decimal_len - 1; j++)
+	{
+	  digits[j] += carry;
 
-          /* "/" won't handle an unsigned char with
-           * a value that if signed would be negative.
-           * So extend to longword int via "dummy".
-           */
-          dummy     = digits[j];
-          carry     = CARRY_OUT(  dummy );
-          digits[j] = CARRY_LEFT( dummy );
+	  /* "/" won't handle an unsigned char with
+	   * a value that if signed would be negative.
+	   * So extend to longword int via "dummy".
+	   */
+	  dummy = digits[j];
+	  carry = CARRY_OUT (dummy);
+	  digits[j] = CARRY_LEFT (dummy);
 
-          if( j >= decimal_digits && carry == 0 ) {
-              /*
-               * All higher digits are 0 and we
-               * no longer have a carry.
-               *
-               * Note: "j" is 0-based, "decimal_digits" is
-               *       1-based.
-               */
-              decimal_digits = j + 1;
-              break;
-          }
-      }
-  }
+	  if (j >= decimal_digits && carry == 0)
+	    {
+	      /*
+	       * All higher digits are 0 and we
+	       * no longer have a carry.
+	       *
+	       * Note: "j" is 0-based, "decimal_digits" is
+	       *       1-based.
+	       */
+	      decimal_digits = j + 1;
+	      break;
+	    }
+	}
+    }
 
   /* Ok, now "digits" is the decimal representation, with
    * the "decimal_digits" actual digits.  Print!
    */
-  for( i = decimal_digits - 1; i >= 0; i-- ) {
-      fprintf_filtered( stream, "%1d", digits[i] );
-  }
-  free( digits );
-  
+  for (i = decimal_digits - 1; i >= 0; i--)
+    {
+      fprintf_filtered (stream, "%1d", digits[i]);
+    }
+  free (digits);
+
   fprintf_filtered (stream, local_decimal_format_suffix ());
 }
 
@@ -1042,13 +1055,13 @@ print_hex_chars (stream, valaddr, len)
 }
 
 /*  Called by various <lang>_val_print routines to print elements of an
-    array in the form "<elem1>, <elem2>, <elem3>, ...".
+   array in the form "<elem1>, <elem2>, <elem3>, ...".
 
-    (FIXME?)  Assumes array element separator is a comma, which is correct
-    for all languages currently handled.
-    (FIXME?)  Some languages have a notation for repeated array elements,
-    perhaps we should try to use that notation when appropriate.
-    */
+   (FIXME?)  Assumes array element separator is a comma, which is correct
+   for all languages currently handled.
+   (FIXME?)  Some languages have a notation for repeated array elements,
+   perhaps we should try to use that notation when appropriate.
+ */
 
 void
 val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
@@ -1072,7 +1085,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
-      
+
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
   len = TYPE_LENGTH (type) / eltlen;
@@ -1097,7 +1110,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 
       rep1 = i + 1;
       reps = 1;
-      while ((rep1 < len) && 
+      while ((rep1 < len) &&
 	     !memcmp (valaddr + i * eltlen, valaddr + rep1 * eltlen, eltlen))
 	{
 	  ++reps;
@@ -1131,19 +1144,19 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
 }
 
 /*  Print a string from the inferior, starting at ADDR and printing up to LEN
-    characters, of WIDTH bytes a piece, to STREAM.  If LEN is -1, printing
-    stops at the first null byte, otherwise printing proceeds (including null
-    bytes) until either print_max or LEN characters have been printed,
-    whichever is smaller. */
+   characters, of WIDTH bytes a piece, to STREAM.  If LEN is -1, printing
+   stops at the first null byte, otherwise printing proceeds (including null
+   bytes) until either print_max or LEN characters have been printed,
+   whichever is smaller. */
 
 /* FIXME: Use target_read_string.  */
 
 int
 val_print_string (addr, len, width, stream)
-    CORE_ADDR addr;
-    int len;
-    int width;
-    GDB_FILE *stream;
+     CORE_ADDR addr;
+     int len;
+     int width;
+     GDB_FILE *stream;
 {
   int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero. */
   int errcode;			/* Errno returned from bad reads. */
@@ -1153,7 +1166,7 @@ val_print_string (addr, len, width, stream)
   char *buffer = NULL;		/* Dynamically growable fetch buffer. */
   char *bufptr;			/* Pointer to next available byte in buffer. */
   char *limit;			/* First location past end of fetch buffer. */
-  struct cleanup *old_chain = NULL; /* Top of the old cleanup chain. */
+  struct cleanup *old_chain = NULL;	/* Top of the old cleanup chain. */
   int found_nul;		/* Non-zero if we found the nul char */
 
   /* First we need to figure out the limit on the number of characters we are
@@ -1216,7 +1229,7 @@ val_print_string (addr, len, width, stream)
 
 	  /* Read as much as we can. */
 	  nfetch = target_read_memory_partial (addr, bufptr, nfetch * width, &errcode)
-		   / width;
+	    / width;
 
 	  /* Scan this chunk for the null byte that terminates the string
 	     to print.  If found, we don't need to fetch any more.  Note
@@ -1242,9 +1255,9 @@ val_print_string (addr, len, width, stream)
 		}
 	    }
 	}
-    while (errcode == 0				      /* no error */
-	   && bufptr - buffer < fetchlimit * width   /* no overrun */
-	   && !found_nul);			      /* haven't found nul yet */
+      while (errcode == 0	/* no error */
+	     && bufptr - buffer < fetchlimit * width	/* no overrun */
+	     && !found_nul);	/* haven't found nul yet */
     }
   else
     {				/* length of string is really 0! */
@@ -1263,8 +1276,8 @@ val_print_string (addr, len, width, stream)
       char *peekbuf;
 
       /* We didn't find a null terminator we were looking for.  Attempt
-	 to peek at the next character.  If not successful, or it is not
-	 a null byte, then force ellipsis to be printed.  */
+         to peek at the next character.  If not successful, or it is not
+         a null byte, then force ellipsis to be printed.  */
 
       peekbuf = (char *) alloca (width);
 
@@ -1272,11 +1285,11 @@ val_print_string (addr, len, width, stream)
 	  && extract_unsigned_integer (peekbuf, width) != 0)
 	force_ellipsis = 1;
     }
-  else if ((len >= 0 && errcode != 0) || (len > (bufptr - buffer)/width))
+  else if ((len >= 0 && errcode != 0) || (len > (bufptr - buffer) / width))
     {
       /* Getting an error when we have a requested length, or fetching less
-	 than the number of characters actually requested, always make us
-	 print ellipsis. */
+         than the number of characters actually requested, always make us
+         print ellipsis. */
       force_ellipsis = 1;
     }
 
@@ -1291,7 +1304,7 @@ val_print_string (addr, len, width, stream)
 	{
 	  fputs_filtered (" ", stream);
 	}
-      LA_PRINT_STRING (stream, buffer, (bufptr - buffer)/width, width, force_ellipsis);
+      LA_PRINT_STRING (stream, buffer, (bufptr - buffer) / width, width, force_ellipsis);
     }
 
   if (errcode != 0)
@@ -1311,10 +1324,10 @@ val_print_string (addr, len, width, stream)
     }
   gdb_flush (stream);
   do_cleanups (old_chain);
-  return ((bufptr - buffer)/width);
+  return ((bufptr - buffer) / width);
 }
-
 
+
 /* Validate an input or output radix setting, and make sure the user
    knows what they really did here.  Radix setting is confusing, e.g.
    setting the input radix to "10" never changes it!  */
@@ -1326,7 +1339,7 @@ set_input_radix (args, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-  set_input_radix_1 (from_tty, *(unsigned *)c->var);
+  set_input_radix_1 (from_tty, *(unsigned *) c->var);
 }
 
 /* ARGSUSED */
@@ -1362,7 +1375,7 @@ set_output_radix (args, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-  set_output_radix_1 (from_tty, *(unsigned *)c->var);
+  set_output_radix_1 (from_tty, *(unsigned *) c->var);
 }
 
 static void
@@ -1375,13 +1388,13 @@ set_output_radix_1 (from_tty, radix)
   switch (radix)
     {
     case 16:
-      output_format = 'x';		/* hex */
+      output_format = 'x';	/* hex */
       break;
     case 10:
-      output_format = 0;		/* decimal */
+      output_format = 0;	/* decimal */
       break;
     case 8:
-      output_format = 'o';		/* octal */
+      output_format = 'o';	/* octal */
       break;
     default:
       error ("Unsupported output radix ``decimal %u''; output radix unchanged.",
@@ -1422,7 +1435,7 @@ set_radix (arg, from_tty)
 
 /* Show both the input and output radices. */
 
-/*ARGSUSED*/
+/*ARGSUSED */
 static void
 show_radix (arg, from_tty)
      char *arg;
@@ -1444,20 +1457,20 @@ show_radix (arg, from_tty)
 	}
     }
 }
-
 
-/*ARGSUSED*/
+
+/*ARGSUSED */
 static void
 set_print (arg, from_tty)
      char *arg;
      int from_tty;
 {
   printf_unfiltered (
-"\"set print\" must be followed by the name of a print subcommand.\n");
+     "\"set print\" must be followed by the name of a print subcommand.\n");
   help_list (setprintlist, "set print ", -1, gdb_stdout);
 }
 
-/*ARGSUSED*/
+/*ARGSUSED */
 static void
 show_print (args, from_tty)
      char *args;
@@ -1474,18 +1487,18 @@ _initialize_valprint ()
   add_prefix_cmd ("print", no_class, set_print,
 		  "Generic command for setting how things print.",
 		  &setprintlist, "set print ", 0, &setlist);
-  add_alias_cmd ("p", "print", no_class, 1, &setlist); 
-  /* prefer set print to set prompt */ 
+  add_alias_cmd ("p", "print", no_class, 1, &setlist);
+  /* prefer set print to set prompt */
   add_alias_cmd ("pr", "print", no_class, 1, &setlist);
 
   add_prefix_cmd ("print", no_class, show_print,
 		  "Generic command for showing print settings.",
 		  &showprintlist, "show print ", 0, &showlist);
-  add_alias_cmd ("p", "print", no_class, 1, &showlist); 
-  add_alias_cmd ("pr", "print", no_class, 1, &showlist); 
+  add_alias_cmd ("p", "print", no_class, 1, &showlist);
+  add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
   add_show_from_set
-    (add_set_cmd ("elements", no_class, var_uinteger, (char *)&print_max,
+    (add_set_cmd ("elements", no_class, var_uinteger, (char *) &print_max,
 		  "Set limit on string chars or array elements to print.\n\
 \"set print elements 0\" causes there to be no limit.",
 		  &setprintlist),
@@ -1493,14 +1506,14 @@ _initialize_valprint ()
 
   add_show_from_set
     (add_set_cmd ("null-stop", no_class, var_boolean,
-		  (char *)&stop_print_at_null,
+		  (char *) &stop_print_at_null,
 		  "Set printing of char arrays to stop at first null char.",
 		  &setprintlist),
      &showprintlist);
 
   add_show_from_set
     (add_set_cmd ("repeats", no_class, var_uinteger,
-		  (char *)&repeat_count_threshold,
+		  (char *) &repeat_count_threshold,
 		  "Set threshold for repeated print elements.\n\
 \"set print repeats 0\" causes all elements to be individually printed.",
 		  &setprintlist),
@@ -1508,41 +1521,41 @@ _initialize_valprint ()
 
   add_show_from_set
     (add_set_cmd ("pretty", class_support, var_boolean,
-		  (char *)&prettyprint_structs,
+		  (char *) &prettyprint_structs,
 		  "Set prettyprinting of structures.",
 		  &setprintlist),
      &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("union", class_support, var_boolean, (char *)&unionprint,
+    (add_set_cmd ("union", class_support, var_boolean, (char *) &unionprint,
 		  "Set printing of unions interior to structures.",
 		  &setprintlist),
      &showprintlist);
-  
+
   add_show_from_set
     (add_set_cmd ("array", class_support, var_boolean,
-		  (char *)&prettyprint_arrays,
+		  (char *) &prettyprint_arrays,
 		  "Set prettyprinting of arrays.",
 		  &setprintlist),
      &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("address", class_support, var_boolean, (char *)&addressprint,
+    (add_set_cmd ("address", class_support, var_boolean, (char *) &addressprint,
 		  "Set printing of addresses.",
 		  &setprintlist),
      &showprintlist);
 
   c = add_set_cmd ("input-radix", class_support, var_uinteger,
-		   (char *)&input_radix,
-		  "Set default input radix for entering numbers.",
-		  &setlist);
+		   (char *) &input_radix,
+		   "Set default input radix for entering numbers.",
+		   &setlist);
   add_show_from_set (c, &showlist);
   c->function.sfunc = set_input_radix;
 
   c = add_set_cmd ("output-radix", class_support, var_uinteger,
-		   (char *)&output_radix,
-		  "Set default output radix for printing of values.",
-		  &setlist);
+		   (char *) &output_radix,
+		   "Set default output radix for printing of values.",
+		   &setlist);
   add_show_from_set (c, &showlist);
   c->function.sfunc = set_output_radix;
 

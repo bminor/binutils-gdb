@@ -1,21 +1,22 @@
 /* Acorn Risc Machine host machine support.
    Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -42,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 void
 fetch_inferior_registers (regno)
-     int regno;		/* Original value discarded */
+     int regno;			/* Original value discarded */
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -51,34 +52,35 @@ fetch_inferior_registers (regno)
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
   offset = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0)
-      - KERNEL_U_ADDR;
+    - KERNEL_U_ADDR;
 
   registers_fetched ();
-  
+
   for (regno = 0; regno < 16; regno++)
     {
       regaddr = offset + regno * 4;
-      *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid,
-				(PTRACE_ARG3_TYPE) regaddr, 0);
+      *(int *) &buf[0] = ptrace (PT_READ_U, inferior_pid,
+				 (PTRACE_ARG3_TYPE) regaddr, 0);
       if (regno == PC_REGNUM)
-	  *(int *)&buf[0] = GET_PC_PART(*(int *)&buf[0]);
+	*(int *) &buf[0] = GET_PC_PART (*(int *) &buf[0]);
       supply_register (regno, buf);
     }
-  *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid,
-			    (PTRACE_ARG3_TYPE) (offset + PC*4), 0);
-  supply_register (PS_REGNUM, buf); /* set virtual register ps same as pc */
+  *(int *) &buf[0] = ptrace (PT_READ_U, inferior_pid,
+			     (PTRACE_ARG3_TYPE) (offset + PC * 4), 0);
+  supply_register (PS_REGNUM, buf);	/* set virtual register ps same as pc */
 
   /* read the floating point registers */
-  offset = (char *) &u.u_fp_regs - (char *)&u;
-  *(int *)buf = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0);
+  offset = (char *) &u.u_fp_regs - (char *) &u;
+  *(int *) buf = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0);
   supply_register (FPS_REGNUM, buf);
-  for (regno = 16; regno < 24; regno++) {
+  for (regno = 16; regno < 24; regno++)
+    {
       regaddr = offset + 4 + 12 * (regno - 16);
-      for (i = 0; i < 12; i += sizeof(int))
-	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
-				     (PTRACE_ARG3_TYPE) (regaddr + i), 0);
+      for (i = 0; i < 12; i += sizeof (int))
+	 *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
+				      (PTRACE_ARG3_TYPE) (regaddr + i), 0);
       supply_register (regno, buf);
-  }
+    }
 }
 
 /* Store our register values back into the inferior.
@@ -96,15 +98,17 @@ store_inferior_registers (regno)
   unsigned long value;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
   offset = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0)
-      - KERNEL_U_ADDR;
+    - KERNEL_U_ADDR;
 
-  if (regno >= 0) {
-      if (regno >= 16) return;
+  if (regno >= 0)
+    {
+      if (regno >= 16)
+	return;
       regaddr = offset + 4 * regno;
       errno = 0;
-      value = read_register(regno);
+      value = read_register (regno);
       if (regno == PC_REGNUM)
-	  value = SET_PC_PART(read_register (PS_REGNUM), value);
+	value = SET_PC_PART (read_register (PS_REGNUM), value);
       ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
       if (errno != 0)
 	{
@@ -112,20 +116,21 @@ store_inferior_registers (regno)
 	  perror_with_name (buf);
 	}
     }
-  else for (regno = 0; regno < 15; regno++)
-    {
-      regaddr = offset + regno * 4;
-      errno = 0;
-      value = read_register(regno);
-      if (regno == PC_REGNUM)
-	  value = SET_PC_PART(read_register (PS_REGNUM), value);
-      ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
-      if (errno != 0)
-	{
-	  sprintf (buf, "writing all regs, number %d", regno);
-	  perror_with_name (buf);
-	}
-    }
+  else
+    for (regno = 0; regno < 15; regno++)
+      {
+	regaddr = offset + regno * 4;
+	errno = 0;
+	value = read_register (regno);
+	if (regno == PC_REGNUM)
+	  value = SET_PC_PART (read_register (PS_REGNUM), value);
+	ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
+	if (errno != 0)
+	  {
+	    sprintf (buf, "writing all regs, number %d", regno);
+	    perror_with_name (buf);
+	  }
+      }
 }
 
 /* Work with core dump and executable files, for GDB. 
@@ -135,20 +140,21 @@ store_inferior_registers (regno)
    by the execfile.
    e.g. prog shares Xt which shares X11 which shares c. */
 
-struct shared_library {
-    struct exec_header header;
-    char name[SHLIBLEN];
-    CORE_ADDR text_start;	/* CORE_ADDR of 1st byte of text, this file */
-    long data_offset;		/* offset of data section in file */
-    int chan;			/* file descriptor for the file */
-    struct shared_library *shares; /* library this one shares */
+struct shared_library
+{
+  struct exec_header header;
+  char name[SHLIBLEN];
+  CORE_ADDR text_start;		/* CORE_ADDR of 1st byte of text, this file */
+  long data_offset;		/* offset of data section in file */
+  int chan;			/* file descriptor for the file */
+  struct shared_library *shares;	/* library this one shares */
 };
 static struct shared_library *shlib = 0;
 
 /* Hook for `exec_file_command' command to call.  */
 
 extern void (*exec_file_display_hook) ();
-   
+
 static CORE_ADDR unshared_text_start;
 
 /* extended header from exec file (for shared library info) */
@@ -184,7 +190,7 @@ core_file_command (filename, from_tty)
     {
       filename = tilde_expand (filename);
       make_cleanup (free, filename);
-      
+
       if (have_inferior_p ())
 	error ("To look at a core file, you must kill the program with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
@@ -218,7 +224,7 @@ core_file_command (filename, from_tty)
 	reg_offset = (int) u.u_ar0;
 	if (reg_offset > NBPG * UPAGES)
 	  reg_offset -= KERNEL_U_ADDR;
-	fp_reg_offset = (char *) &u.u_fp_regs - (char *)&u;
+	fp_reg_offset = (char *) &u.u_fp_regs - (char *) &u;
 
 	/* I don't know where to find this info.
 	   So, for now, mark it as not available.  */
@@ -235,26 +241,26 @@ core_file_command (filename, from_tty)
 	      char buf[MAX_REGISTER_RAW_SIZE];
 
 	      if (regno < 16)
-		  val = lseek (corechan, reg_offset + 4 * regno, 0);
+		val = lseek (corechan, reg_offset + 4 * regno, 0);
 	      else if (regno < 24)
-		  val = lseek (corechan, fp_reg_offset + 4 + 12*(regno - 24), 0);
+		val = lseek (corechan, fp_reg_offset + 4 + 12 * (regno - 24), 0);
 	      else if (regno == 24)
-		  val = lseek (corechan, fp_reg_offset, 0);
+		val = lseek (corechan, fp_reg_offset, 0);
 	      else if (regno == 25)
-		  val = lseek (corechan, reg_offset + 4 * PC, 0);
+		val = lseek (corechan, reg_offset + 4 * PC, 0);
 	      if (val < 0
 		  || (val = myread (corechan, buf, sizeof buf)) < 0)
 		{
-		  char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno))
-						   + 30);
+		  char *buffer = (char *) alloca (strlen (REGISTER_NAME (regno))
+						  + 30);
 		  strcpy (buffer, "Reading register ");
 		  strcat (buffer, REGISTER_NAME (regno));
-						   
+
 		  perror_with_name (buffer);
 		}
 
 	      if (regno == PC_REGNUM)
-		  *(int *)buf = GET_PC_PART(*(int *)buf);
+		*(int *) buf = GET_PC_PART (*(int *) buf);
 	      supply_register (regno, buf);
 	    }
 	}
@@ -282,20 +288,21 @@ core_file_command (filename, from_tty)
    by the execfile.
    e.g. prog shares Xt which shares X11 which shares c. */
 
-struct shared_library {
-    struct exec_header header;
-    char name[SHLIBLEN];
-    CORE_ADDR text_start;	/* CORE_ADDR of 1st byte of text, this file */
-    long data_offset;		/* offset of data section in file */
-    int chan;			/* file descriptor for the file */
-    struct shared_library *shares; /* library this one shares */
+struct shared_library
+{
+  struct exec_header header;
+  char name[SHLIBLEN];
+  CORE_ADDR text_start;		/* CORE_ADDR of 1st byte of text, this file */
+  long data_offset;		/* offset of data section in file */
+  int chan;			/* file descriptor for the file */
+  struct shared_library *shares;	/* library this one shares */
 };
 static struct shared_library *shlib = 0;
 
 /* Hook for `exec_file_command' command to call.  */
 
 extern void (*exec_file_display_hook) ();
-   
+
 static CORE_ADDR unshared_text_start;
 
 /* extended header from exec file (for shared library info) */
@@ -325,10 +332,11 @@ exec_file_command (filename, from_tty)
   if (execchan >= 0)
     close (execchan);
   execchan = -1;
-  if (shlib) {
-      close_shared_library(shlib);
+  if (shlib)
+    {
+      close_shared_library (shlib);
       shlib = 0;
-  }
+    }
 
   /* Now open and digest the file the user requested, if any.  */
 
@@ -348,7 +356,7 @@ exec_file_command (filename, from_tty)
 #ifdef HEADER_SEEK_FD
 	HEADER_SEEK_FD (execchan);
 #endif
-	
+
 	val = myread (execchan, &exec_header, sizeof exec_header);
 	exec_aouthdr = exec_header.a_exec;
 
@@ -359,21 +367,23 @@ exec_file_command (filename, from_tty)
 
 	/* Look for shared library if needed */
 	if (exec_header.a_exec.a_magic & MF_USES_SL)
-	    shlib = open_shared_library(exec_header.a_shlibname, text_start);
+	  shlib = open_shared_library (exec_header.a_shlibname, text_start);
 
 	text_offset = N_TXTOFF (exec_aouthdr);
 	exec_data_offset = N_TXTOFF (exec_aouthdr) + exec_aouthdr.a_text;
 
-	if (shlib) {
-	    unshared_text_start = shared_text_end(shlib) & ~0x7fff;
+	if (shlib)
+	  {
+	    unshared_text_start = shared_text_end (shlib) & ~0x7fff;
 	    stack_start = shlib->header.a_exec.a_sldatabase;
 	    stack_end = STACK_END_ADDR;
-	} else
-	    unshared_text_start = 0x8000;
+	  }
+	else
+	  unshared_text_start = 0x8000;
 	text_end = unshared_text_start + exec_aouthdr.a_text;
 
 	exec_data_start = unshared_text_start + exec_aouthdr.a_text;
-        exec_data_end = exec_data_start + exec_aouthdr.a_data;
+	exec_data_end = exec_data_start + exec_aouthdr.a_data;
 
 	data_start = exec_data_start;
 	data_end += exec_data_start;
@@ -421,19 +431,19 @@ xfer_core_file (memaddr, myaddr, len)
       xferchan = 0;
 
       /* Determine which file the next bunch of addresses reside in,
-	 and where in the file.  Set the file's read/write pointer
-	 to point at the proper place for the desired address
-	 and set xferfile and xferchan for the correct file.
+         and where in the file.  Set the file's read/write pointer
+         to point at the proper place for the desired address
+         and set xferfile and xferchan for the correct file.
 
-	 If desired address is nonexistent, leave them zero.
+         If desired address is nonexistent, leave them zero.
 
-	 i is set to the number of bytes that can be handled
-	 along with the next address.
+         i is set to the number of bytes that can be handled
+         along with the next address.
 
-	 We put the most likely tests first for efficiency.  */
+         We put the most likely tests first for efficiency.  */
 
       /* Note that if there is no core file
-	 data_start and data_end are equal.  */
+         data_start and data_end are equal.  */
       if (memaddr >= data_start && memaddr < data_end)
 	{
 	  i = min (len, data_end - memaddr);
@@ -442,29 +452,33 @@ xfer_core_file (memaddr, myaddr, len)
 	  xferchan = corechan;
 	}
       /* Note that if there is no core file
-	 stack_start and stack_end define the shared library data.  */
+         stack_start and stack_end define the shared library data.  */
       else if (memaddr >= stack_start && memaddr < stack_end)
 	{
-	    if (corechan < 0) {
-		struct shared_library *lib;
-		for (lib = shlib; lib; lib = lib->shares)
-		    if (memaddr >= lib->header.a_exec.a_sldatabase &&
-			memaddr < lib->header.a_exec.a_sldatabase +
-			  lib->header.a_exec.a_data)
-			break;
-		if (lib) {
-		    i = min (len, lib->header.a_exec.a_sldatabase +
-			     lib->header.a_exec.a_data - memaddr);
-		    fileptr = lib->data_offset + memaddr -
-			lib->header.a_exec.a_sldatabase;
-		    xferfile = execfile;
-		    xferchan = lib->chan;
+	  if (corechan < 0)
+	    {
+	      struct shared_library *lib;
+	      for (lib = shlib; lib; lib = lib->shares)
+		if (memaddr >= lib->header.a_exec.a_sldatabase &&
+		    memaddr < lib->header.a_exec.a_sldatabase +
+		    lib->header.a_exec.a_data)
+		  break;
+	      if (lib)
+		{
+		  i = min (len, lib->header.a_exec.a_sldatabase +
+			   lib->header.a_exec.a_data - memaddr);
+		  fileptr = lib->data_offset + memaddr -
+		    lib->header.a_exec.a_sldatabase;
+		  xferfile = execfile;
+		  xferchan = lib->chan;
 		}
-	    } else {
-		i = min (len, stack_end - memaddr);
-		fileptr = memaddr - stack_start + stack_offset;
-		xferfile = &corefile;
-		xferchan = corechan;
+	    }
+	  else
+	    {
+	      i = min (len, stack_end - memaddr);
+	      fileptr = memaddr - stack_start + stack_offset;
+	      xferfile = &corefile;
+	      xferchan = corechan;
 	    }
 	}
       else if (corechan < 0
@@ -477,22 +491,25 @@ xfer_core_file (memaddr, myaddr, len)
 	}
       else if (memaddr >= text_start && memaddr < text_end)
 	{
-	    struct shared_library *lib;
-	    for (lib = shlib; lib; lib = lib->shares)
-		if (memaddr >= lib->text_start &&
-		    memaddr < lib->text_start + lib->header.a_exec.a_text)
-		    break;
-	    if (lib) {
-		i = min (len, lib->header.a_exec.a_text +
-			 lib->text_start - memaddr);
-		fileptr = memaddr - lib->text_start + text_offset;
-		xferfile = &execfile;
-		xferchan = lib->chan;
-	    } else {
-		i = min (len, text_end - memaddr);
-		fileptr = memaddr - unshared_text_start + text_offset;
-		xferfile = &execfile;
-		xferchan = execchan;
+	  struct shared_library *lib;
+	  for (lib = shlib; lib; lib = lib->shares)
+	    if (memaddr >= lib->text_start &&
+		memaddr < lib->text_start + lib->header.a_exec.a_text)
+	      break;
+	  if (lib)
+	    {
+	      i = min (len, lib->header.a_exec.a_text +
+		       lib->text_start - memaddr);
+	      fileptr = memaddr - lib->text_start + text_offset;
+	      xferfile = &execfile;
+	      xferchan = lib->chan;
+	    }
+	  else
+	    {
+	      i = min (len, text_end - memaddr);
+	      fileptr = memaddr - unshared_text_start + text_offset;
+	      xferfile = &execfile;
+	      xferchan = execchan;
 	    }
 	}
       else if (memaddr < text_start)
@@ -500,7 +517,7 @@ xfer_core_file (memaddr, myaddr, len)
 	  i = min (len, text_start - memaddr);
 	}
       else if (memaddr >= text_end
-	       && memaddr < (corechan >= 0? data_start : exec_data_start))
+	       && memaddr < (corechan >= 0 ? data_start : exec_data_start))
 	{
 	  i = min (len, data_start - memaddr);
 	}
@@ -511,11 +528,11 @@ xfer_core_file (memaddr, myaddr, len)
 	}
       else if (corechan < 0 && memaddr >= exec_data_end)
 	{
-	  i = min (len, - memaddr);
+	  i = min (len, -memaddr);
 	}
       else if (memaddr >= stack_end && stack_end != 0)
 	{
-	  i = min (len, - memaddr);
+	  i = min (len, -memaddr);
 	}
       else
 	{
@@ -525,7 +542,7 @@ xfer_core_file (memaddr, myaddr, len)
 	}
 
       /* Now we know which file to use.
-	 Set up its pointer and transfer the data.  */
+         Set up its pointer and transfer the data.  */
       if (xferfile)
 	{
 	  if (*xferfile == 0)
@@ -541,8 +558,8 @@ xfer_core_file (memaddr, myaddr, len)
 	    perror_with_name (*xferfile);
 	}
       /* If this address is for nonexistent memory,
-	 read zeros if reading, or do nothing if writing.
-	 Actually, we never right.  */
+         read zeros if reading, or do nothing if writing.
+         Actually, we never right.  */
       else
 	{
 	  memset (myaddr, '\0', i);

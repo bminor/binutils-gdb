@@ -3,21 +3,22 @@
 
    Copyright 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -159,7 +160,7 @@ w89k_supply_register (regname, regnamelen, val, vallen)
 
 static int hashmark = 1;	/* flag set by "set hash" */
 
-extern struct monitor_ops w89k_cmds; /* fwd decl */
+extern struct monitor_ops w89k_cmds;	/* fwd decl */
 
 static void
 w89k_load (desc, file, hashmark)
@@ -186,7 +187,7 @@ w89k_load (desc, file, hashmark)
       printf_filtered ("File is not an object file\n");
       return;
     }
-  
+
   for (s = abfd->sections; s; s = s->next)
     if (s->flags & SEC_LOAD)
       {
@@ -228,8 +229,8 @@ w89k_load (desc, file, hashmark)
 
 	putchar_unfiltered ('\n');
       }				/* Loadable sections */
-  
-  if (hashmark) 
+
+  if (hashmark)
     putchar_unfiltered ('\n');
 }
 
@@ -241,60 +242,61 @@ w89k_load (desc, file, hashmark)
 
 static struct target_ops w89k_ops;
 
-static char *w89k_inits[] = {"\n", NULL};
+static char *w89k_inits[] =
+{"\n", NULL};
 
-static struct monitor_ops w89k_cmds ;
+static struct monitor_ops w89k_cmds;
 static void
-init_w89k_cmds(void)
+init_w89k_cmds (void)
 {
-  w89k_cmds.flags =   MO_GETMEM_NEEDS_RANGE|MO_FILL_USES_ADDR; /* flags */
-  w89k_cmds.init =   w89k_inits;		/* Init strings */
-  w89k_cmds.cont =   "g\n";			/* continue command */
-  w89k_cmds.step =   "t\n";			/* single step */
-  w89k_cmds.stop =   "\003";			/* Interrupt char (^C) */
-  w89k_cmds.set_break =   "bp %x\n";		/* set a breakpoint */
-  w89k_cmds.clr_break =   "bc %x\n";		/* clear a breakpoint */
-  w89k_cmds.clr_all_break =   "bc *\n";		/* clear all breakpoints */
-  w89k_cmds.fill =   "f %x %x %x\n";		/* memory fill cmd */
-  w89k_cmds.setmem.cmdb =     "eb %x %x\n";	/* setmem.cmdb (addr, value) */
-  w89k_cmds.setmem.cmdw =     "eh %x %x\n";	/* setmem.cmdw (addr, value) */
-  w89k_cmds.setmem.cmdl =     "ew %x %x\n";	/* setmem.cmdl (addr, value) */
-  w89k_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
-  w89k_cmds.setmem.resp_delim =     NULL;	/* setreg.resp_delim */
-  w89k_cmds.setmem.term =     NULL;		/* setreg.term */
-  w89k_cmds.setmem.term_cmd =     NULL;		/* setreg.term_cmd */
-  w89k_cmds.getmem.cmdb =     "db %x %x\n";/* getmem.cmdb (startaddr, endaddr) */
-  w89k_cmds.getmem.cmdw =     "dh %x %x\n";/* getmem.cmdw (startaddr, endaddr) */
-  w89k_cmds.getmem.cmdl =     "dw %x %x\n";/* getmem.cmdl (startaddr, endaddr) */
-  w89k_cmds.getmem.cmdll =     NULL;	  /* getmem.cmdll (startaddr, endaddr) */
-  w89k_cmds.getmem.resp_delim =     "  ";	/* getmem.resp_delim */
-  w89k_cmds.getmem.term =     NULL;		/* getmem.term */
-  w89k_cmds.getmem.term_cmd =     NULL;		/* getmem.term_cmd */
-  w89k_cmds.setreg.cmd =     "r %s %x\n";	/* setreg.cmd (name, value) */
-  w89k_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
-  w89k_cmds.setreg.term =     NULL;		/* setreg.term */
-  w89k_cmds.setreg.term_cmd =     NULL;		/* setreg.term_cmd */
-  w89k_cmds.getreg.cmd =     "r %s\n";		/* getreg.cmd (name) */
-  w89k_cmds.getreg.resp_delim =     "\r";	/* getreg.resp_delim */
-  w89k_cmds.getreg.term =     NULL;		/* getreg.term */
-  w89k_cmds.getreg.term_cmd =     NULL;		/* getreg.term_cmd */
-  w89k_cmds.dump_registers =   "r\n";		/* dump_registers */
-  w89k_cmds.register_pattern =   "\\(\\w+\\)\\( +[0-9a-fA-F]+\\b\\)+";
-  w89k_cmds.supply_register =   w89k_supply_register;		/* supply_register */
-  w89k_cmds.load_routine =   w89k_load;		/* load routine */
-  w89k_cmds.load =   "u %x\n";			/* download command */
-  w89k_cmds.loadresp =   "\021";		/* load response (^Q) */
-  w89k_cmds.prompt =   "ROM>";			/* monitor command prompt */
-  w89k_cmds.line_term =   "\n";			/* end-of-line terminator */
-  w89k_cmds.cmd_end =   NULL;			/* optional command terminator */
-  w89k_cmds.target =   &w89k_ops;		/* target operations */
-  w89k_cmds.stopbits =   SERIAL_1_STOPBITS;	/* number of stop bits */
-  w89k_cmds.regnames =   w89k_regnames;		/* register names */
-  w89k_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
-} /* init_w89k_cmds */
-    
+  w89k_cmds.flags = MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;	/* flags */
+  w89k_cmds.init = w89k_inits;	/* Init strings */
+  w89k_cmds.cont = "g\n";	/* continue command */
+  w89k_cmds.step = "t\n";	/* single step */
+  w89k_cmds.stop = "\003";	/* Interrupt char (^C) */
+  w89k_cmds.set_break = "bp %x\n";	/* set a breakpoint */
+  w89k_cmds.clr_break = "bc %x\n";	/* clear a breakpoint */
+  w89k_cmds.clr_all_break = "bc *\n";	/* clear all breakpoints */
+  w89k_cmds.fill = "f %x %x %x\n";	/* memory fill cmd */
+  w89k_cmds.setmem.cmdb = "eb %x %x\n";		/* setmem.cmdb (addr, value) */
+  w89k_cmds.setmem.cmdw = "eh %x %x\n";		/* setmem.cmdw (addr, value) */
+  w89k_cmds.setmem.cmdl = "ew %x %x\n";		/* setmem.cmdl (addr, value) */
+  w89k_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
+  w89k_cmds.setmem.resp_delim = NULL;	/* setreg.resp_delim */
+  w89k_cmds.setmem.term = NULL;	/* setreg.term */
+  w89k_cmds.setmem.term_cmd = NULL;	/* setreg.term_cmd */
+  w89k_cmds.getmem.cmdb = "db %x %x\n";		/* getmem.cmdb (startaddr, endaddr) */
+  w89k_cmds.getmem.cmdw = "dh %x %x\n";		/* getmem.cmdw (startaddr, endaddr) */
+  w89k_cmds.getmem.cmdl = "dw %x %x\n";		/* getmem.cmdl (startaddr, endaddr) */
+  w89k_cmds.getmem.cmdll = NULL;	/* getmem.cmdll (startaddr, endaddr) */
+  w89k_cmds.getmem.resp_delim = "  ";	/* getmem.resp_delim */
+  w89k_cmds.getmem.term = NULL;	/* getmem.term */
+  w89k_cmds.getmem.term_cmd = NULL;	/* getmem.term_cmd */
+  w89k_cmds.setreg.cmd = "r %s %x\n";	/* setreg.cmd (name, value) */
+  w89k_cmds.setreg.resp_delim = NULL;	/* setreg.resp_delim */
+  w89k_cmds.setreg.term = NULL;	/* setreg.term */
+  w89k_cmds.setreg.term_cmd = NULL;	/* setreg.term_cmd */
+  w89k_cmds.getreg.cmd = "r %s\n";	/* getreg.cmd (name) */
+  w89k_cmds.getreg.resp_delim = "\r";	/* getreg.resp_delim */
+  w89k_cmds.getreg.term = NULL;	/* getreg.term */
+  w89k_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
+  w89k_cmds.dump_registers = "r\n";	/* dump_registers */
+  w89k_cmds.register_pattern = "\\(\\w+\\)\\( +[0-9a-fA-F]+\\b\\)+";
+  w89k_cmds.supply_register = w89k_supply_register;	/* supply_register */
+  w89k_cmds.load_routine = w89k_load;	/* load routine */
+  w89k_cmds.load = "u %x\n";	/* download command */
+  w89k_cmds.loadresp = "\021";	/* load response (^Q) */
+  w89k_cmds.prompt = "ROM>";	/* monitor command prompt */
+  w89k_cmds.line_term = "\n";	/* end-of-line terminator */
+  w89k_cmds.cmd_end = NULL;	/* optional command terminator */
+  w89k_cmds.target = &w89k_ops;	/* target operations */
+  w89k_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
+  w89k_cmds.regnames = w89k_regnames;	/* register names */
+  w89k_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
+}				/* init_w89k_cmds */
+
 static void
-w89k_open(args, from_tty)
+w89k_open (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -304,7 +306,7 @@ w89k_open(args, from_tty)
 void
 _initialize_w89k ()
 {
-  init_w89k_cmds() ;
+  init_w89k_cmds ();
   init_monitor_ops (&w89k_ops);
 
   w89k_ops.to_shortname = "w89k";

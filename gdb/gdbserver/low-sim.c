@@ -1,27 +1,28 @@
 /* Low level interface to simulators, for the remote server for GDB.
    Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
 #include "server.h"
-#include "callback.h"   /* GDB simulator callback interface */
-#include "remote-sim.h" /* GDB simulator interface */
+#include "callback.h"		/* GDB simulator callback interface */
+#include "remote-sim.h"		/* GDB simulator interface */
 
 extern int remote_debug;
 
@@ -29,7 +30,7 @@ extern host_callback default_callback;	/* in sim/common/callback.c */
 
 char registers[REGISTER_BYTES] __attribute__ ((aligned));
 
-int target_byte_order;	/* used by simulator */
+int target_byte_order;		/* used by simulator */
 
 /* We record the result of sim_open so we can pass it
    back to the other sim_foo routines.  */
@@ -40,13 +41,13 @@ static SIM_DESC gdbsim_desc = 0;
 
 static void
 generic_load (loadfile_bfd)
-    bfd *loadfile_bfd;
+     bfd *loadfile_bfd;
 {
   asection *s;
 
-  for (s = loadfile_bfd->sections; s; s = s->next) 
+  for (s = loadfile_bfd->sections; s; s = s->next)
     {
-      if (s->flags & SEC_LOAD) 
+      if (s->flags & SEC_LOAD)
 	{
 	  bfd_size_type size;
 
@@ -60,11 +61,11 @@ generic_load (loadfile_bfd)
 	      lma = s->lma;
 
 	      /* Is this really necessary?  I guess it gives the user something
-		 to look at during a long download.  */
+	         to look at during a long download.  */
 	      printf ("Loading section %s, size 0x%lx lma 0x%lx\n",
 		      bfd_get_section_name (loadfile_bfd, s),
 		      (unsigned long) size,
-		      (unsigned long) lma); /* chops high 32 bits.  FIXME!! */
+		      (unsigned long) lma);	/* chops high 32 bits.  FIXME!! */
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
@@ -75,11 +76,11 @@ generic_load (loadfile_bfd)
     }
 
   printf ("Start address 0x%lx\n",
-	  (unsigned long)loadfile_bfd->start_address);
+	  (unsigned long) loadfile_bfd->start_address);
 
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
-  /* write_pc (loadfile_bfd->start_address); */	/* FIXME!! */
+  /* write_pc (loadfile_bfd->start_address); *//* FIXME!! */
 }
 
 int
@@ -95,9 +96,9 @@ create_inferior (program, argv)
 #endif
 
   abfd = bfd_openr (program, 0);
-  if (!abfd) 
+  if (!abfd)
     {
-      fprintf (stderr, "gdbserver: can't open %s: %s\n", 
+      fprintf (stderr, "gdbserver: can't open %s: %s\n",
 	       program, bfd_errmsg (bfd_get_error ()));
       exit (1);
     }
@@ -166,7 +167,7 @@ fetch_inferior_registers (regno)
      int regno;
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < NUM_REGS/*-NUM_FREGS*/; regno++)
+    for (regno = 0; regno < NUM_REGS /*-NUM_FREGS*/ ; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -180,7 +181,7 @@ void
 store_inferior_registers (regno)
      int regno;
 {
-  if (regno  == -1) 
+  if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	store_inferior_registers (regno);
@@ -224,7 +225,7 @@ mywait (status)
       return sigrc;
 #endif
 
-    default:   /* should this be sim_signalled or sim_stopped?  FIXME!! */
+    default:			/* should this be sim_signalled or sim_stopped?  FIXME!! */
       if (remote_debug)
 	printf ("\nChild received signal = %x \n", sigrc);
       fetch_inferior_registers (0);
@@ -270,7 +271,7 @@ write_inferior_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  sim_write (gdbsim_desc, memaddr, myaddr, len);  /* should check for error.  FIXME!! */
+  sim_write (gdbsim_desc, memaddr, myaddr, len);	/* should check for error.  FIXME!! */
   return 0;
 }
 

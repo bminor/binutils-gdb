@@ -3,21 +3,22 @@
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -59,7 +60,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
   : 0)
 
-static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+{0};
 
 static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
 
@@ -79,11 +81,11 @@ fetch_inferior_registers (regno)
     {
       regaddr = REGISTER_PTRACE_ADDR (regno);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
- 	{
- 	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
+	{
+	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
 				     (PTRACE_ARG3_TYPE) regaddr, 0);
- 	  regaddr += sizeof (int);
- 	}
+	  regaddr += sizeof (int);
+	}
       supply_register (regno, buf);
     }
 
@@ -134,7 +136,7 @@ store_inferior_registers (regno)
    This routine returns true on success. */
 
 int
-get_longjmp_target(pc)
+get_longjmp_target (pc)
      CORE_ADDR *pc;
 {
   CORE_ADDR jb_addr;
@@ -157,11 +159,11 @@ get_longjmp_target(pc)
    CORE_REG_SECT points to the register values themselves, read into memory.
    CORE_REG_SIZE is the size of that area.
    WHICH says which set of registers we are handling (0 = int, 2 = float
-         on machines where they are discontiguous).
+   on machines where they are discontiguous).
    REG_ADDR is the offset from u.u_ar0 to the register values relative to
-            core_reg_sect.  This is used with old-fashioned core files to
-	    locate the registers in a large upage-plus-stack ".reg" section.
-	    Original upage address X is at location core_reg_sect+x+reg_addr.
+   core_reg_sect.  This is used with old-fashioned core files to
+   locate the registers in a large upage-plus-stack ".reg" section.
+   Original upage address X is at location core_reg_sect+x+reg_addr.
  */
 
 static void
@@ -174,7 +176,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   register int regno;
   register unsigned int addr;
   int bad_reg = -1;
-  register reg_ptr = -reg_addr;		/* Original u.u_ar0 is -reg_addr. */
+  register reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
 
   /* If u.u_ar0 was an absolute address in the core file, relativize it now,
      so we can use it as an offset into core_reg_sect.  When we're done,
@@ -192,12 +194,15 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   for (regno = 0; regno < NUM_REGS; regno++)
     {
       addr = register_addr (regno, reg_ptr);
-      if (addr >= core_reg_size) {
-	if (bad_reg < 0)
-	  bad_reg = regno;
-      } else {
-	supply_register (regno, core_reg_sect + addr);
-      }
+      if (addr >= core_reg_size)
+	{
+	  if (bad_reg < 0)
+	    bad_reg = regno;
+	}
+      else
+	{
+	  supply_register (regno, core_reg_sect + addr);
+	}
     }
   if (bad_reg >= 0)
     {
@@ -225,8 +230,8 @@ register_addr (regno, blockend)
 
   return addr;
 }
-
 
+
 /* Register that we are able to handle mips core file formats.
    FIXME: is this really bfd_target_unknown_flavour? */
 

@@ -1,7 +1,7 @@
 /*
-** tuiCommand.c
-**     This module contains functions specific to command window processing.
-*/
+   ** tuiCommand.c
+   **     This module contains functions specific to command window processing.
+ */
 
 
 #include "defs.h"
@@ -22,9 +22,9 @@
 ******************************************/
 
 /*
-** tuiDispatchCtrlChar().
-**        Dispatch the correct tui function based upon the control character.
-*/
+   ** tuiDispatchCtrlChar().
+   **        Dispatch the correct tui function based upon the control character.
+ */
 unsigned int
 #ifdef __STDC__
 tuiDispatchCtrlChar (
@@ -37,10 +37,10 @@ tuiDispatchCtrlChar (ch)
   TuiWinInfoPtr winInfo = tuiWinWithFocus ();
 
   /*
-    ** If the command window has the logical focus, or no-one does
-    ** assume it is the command window; in this case, pass the
-    ** character on through and do nothing here.
-    */
+     ** If the command window has the logical focus, or no-one does
+     ** assume it is the command window; in this case, pass the
+     ** character on through and do nothing here.
+   */
   if (winInfo == (TuiWinInfoPtr) NULL || winInfo == cmdWin)
     return ch;
   else
@@ -50,9 +50,9 @@ tuiDispatchCtrlChar (ch)
       char *term;
 
       /* If this is an xterm, page next/prev keys aren't returned
-        ** by keypad as a single char, so we must handle them here.
-        ** Seems like a bug in the curses library?
-        */
+         ** by keypad as a single char, so we must handle them here.
+         ** Seems like a bug in the curses library?
+       */
       term = (char *) getenv ("TERM");
       for (i = 0; (term && term[i]); i++)
 	term[i] = toupper (term[i]);
@@ -109,10 +109,10 @@ tuiDispatchCtrlChar (ch)
 
 
 /*
-** tuiIncrCommandCharCountBy()
-**     Increment the current character count in the command window,
-**     checking for overflow.  Returns the new value of the char count.
-*/
+   ** tuiIncrCommandCharCountBy()
+   **     Increment the current character count in the command window,
+   **     checking for overflow.  Returns the new value of the char count.
+ */
 int
 #ifdef __STDC__
 tuiIncrCommandCharCountBy (
@@ -136,10 +136,10 @@ tuiIncrCommandCharCountBy (count)
 
 
 /*
-** tuiDecrCommandCharCountBy()
-**     Decrement the current character count in the command window,
-**     checking for overflow.  Returns the new value of the char count.
-*/
+   ** tuiDecrCommandCharCountBy()
+   **     Decrement the current character count in the command window,
+   **     checking for overflow.  Returns the new value of the char count.
+ */
 int
 #ifdef __STDC__
 tuiDecrCommandCharCountBy (
@@ -163,9 +163,9 @@ tuiDecrCommandCharCountBy (count)
 
 
 /*
-** tuiSetCommandCharCountTo()
-**     Set the character count to count.
-*/
+   ** tuiSetCommandCharCountTo()
+   **     Set the character count to count.
+ */
 int
 #ifdef __STDC__
 tuiSetCommandCharCountTo (
@@ -192,9 +192,9 @@ tuiSetCommandCharCountTo (count)
 
 
 /*
-** tuiClearCommandCharCount()
-**     Clear the character count to count.
-*/
+   ** tuiClearCommandCharCount()
+   **     Clear the character count to count.
+ */
 int
 #ifdef __STDC__
 tuiClearCommandCharCount (void)

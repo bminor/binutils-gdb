@@ -2,21 +2,22 @@
    Where it is, why it stopped, and how to step it.
    Copyright 1986, 1989, 1992, 1996, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
@@ -45,7 +46,7 @@ extern void restore_inferior_status PARAMS ((struct inferior_status *));
 
 extern void discard_inferior_status PARAMS ((struct inferior_status *));
 
-extern void write_inferior_status_register PARAMS ((struct inferior_status *inf_status, int regno, LONGEST val));
+extern void write_inferior_status_register PARAMS ((struct inferior_status * inf_status, int regno, LONGEST val));
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
@@ -89,7 +90,7 @@ extern int sync_execution;
 
    If this is > 0, then that many subsequent exec events should be
    ignored (i.e., not be reported to the user).
-   */
+ */
 extern int inferior_ignoring_startup_exec_events;
 
 /* This is only valid when inferior_ignoring_startup_exec_events is
@@ -100,7 +101,7 @@ extern int inferior_ignoring_startup_exec_events;
    need actually be noticed and responded to by the debugger (i.e.,
    be reported to the user), then this is the number of "leading"
    exec events which should be ignored.
-   */
+ */
 extern int inferior_ignoring_leading_exec_events;
 
 /* Inferior environment. */
@@ -127,7 +128,7 @@ extern void generic_mourn_inferior PARAMS ((void));
 
 extern void terminal_ours PARAMS ((void));
 
-extern int run_stack_dummy PARAMS ((CORE_ADDR, char*));
+extern int run_stack_dummy PARAMS ((CORE_ADDR, char *));
 
 extern CORE_ADDR read_pc PARAMS ((void));
 
@@ -305,7 +306,7 @@ extern int stopped_by_random_signal;
    that address plus one.  But maybe not.).  */
 
 extern CORE_ADDR step_range_start;	/* Inclusive */
-extern CORE_ADDR step_range_end;/* Exclusive */
+extern CORE_ADDR step_range_end;	/* Exclusive */
 
 /* Stack frame address as of when stepping command was issued.
    This is how we know when we step into a subroutine call,
@@ -390,20 +391,20 @@ extern int attach_flag;
 #endif /* No CALL_DUMMY_LOCATION.  */
 
 #if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (abort (), 0) /* anything to abort GDB */
+#define CALL_DUMMY_ADDRESS() (abort (), 0)	/* anything to abort GDB */
 #endif
 #if !defined (CALL_DUMMY_START_OFFSET)
-#define CALL_DUMMY_START_OFFSET (abort (), 0) /* anything to abort GDB */
+#define CALL_DUMMY_START_OFFSET (abort (), 0)	/* anything to abort GDB */
 #endif
 #if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (abort (), 0) /* anything to abort GDB */
+#define CALL_DUMMY_BREAKPOINT_OFFSET (abort (), 0)	/* anything to abort GDB */
 #endif
 #if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
 #define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
 #endif
 #if !defined (CALL_DUMMY_LENGTH)
-#define CALL_DUMMY_LENGTH (abort (), 0) /* anything to abort GDB */
+#define CALL_DUMMY_LENGTH (abort (), 0)		/* anything to abort GDB */
 #endif
 
 #if defined (CALL_DUMMY_STACK_ADJUST)
@@ -431,7 +432,7 @@ extern int attach_flag;
 extern LONGEST call_dummy_words[];
 #define CALL_DUMMY_WORDS (call_dummy_words)
 #else
-#define CALL_DUMMY_WORDS (abort (), (void*) 0) /* anything to abort GDB */
+#define CALL_DUMMY_WORDS (abort (), (void*) 0)	/* anything to abort GDB */
 #endif
 #endif
 
@@ -440,7 +441,7 @@ extern LONGEST call_dummy_words[];
 extern int sizeof_call_dummy_words;
 #define SIZEOF_CALL_DUMMY_WORDS (sizeof_call_dummy_words)
 #else
-#define SIZEOF_CALL_DUMMY_WORDS (abort (), 0) /* anything to abort GDB */
+#define SIZEOF_CALL_DUMMY_WORDS (abort (), 0)	/* anything to abort GDB */
 #endif
 #endif
 
@@ -469,7 +470,7 @@ extern int pc_in_call_dummy_before_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp,
 extern int pc_in_call_dummy_after_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address) 
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address)
 #endif
 #endif
 
@@ -503,7 +504,7 @@ extern int pc_in_call_dummy_at_entry_point PARAMS ((CORE_ADDR pc, CORE_ADDR sp, 
    default implementation of CALL_DUMMY_HAS_COMPLETED is sufficient.
    Else, a target may wish to supply an implementation that works in
    the presense of multiple breakpoints in its call dummy.
-   */
+ */
 #if !defined(CALL_DUMMY_HAS_COMPLETED)
 #define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
   PC_IN_CALL_DUMMY((pc), (sp), (frame_address))

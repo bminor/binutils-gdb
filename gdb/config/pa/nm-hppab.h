@@ -1,21 +1,22 @@
 /* HPPA PA-RISC machine native support for BSD, for GDB.
    Copyright 1991, 1992 Free Software Foundation, Inc. 
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "somsolib.h"
 
@@ -74,7 +75,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    it possible for the kernel to easily decide if a trap was caused
    by a watchpoint or by the user writing to protected memory and can
    signal the user program differently in each case.  
-   
+
    Second, the PA has a bit in the processor status word which causes
    data memory breakpoints (aka watchpoints) to be disabled for a single
    instruction.  This bit can be used to avoid the overhead of unprotecting
@@ -97,7 +98,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    fired because of a write to an address on the same page as a watchpoint,
    but no write to the watched address occured).  */
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS	/* Enable the code in procfs.c */
+#define TARGET_HAS_HARDWARE_WATCHPOINTS		/* Enable the code in procfs.c */
 
 /* The PA can watch any number of locations, there's no need for it to reject
    anything (generic routines already check that all intermediates are

@@ -1,21 +1,22 @@
 /* Low level interface for debugging HPUX/DCE threads for GDB, the GNU debugger.
    Copyright 1996, 1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* This module implements a sort of half target that sits between the
    machine-independent parts of GDB and the ptrace interface (infptrace.c) to
@@ -27,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    structures that live in the user's heap.  For the most part, the kernel has
    no knowlege of these threads.
 
-   */
+ */
 
 #include "defs.h"
 
@@ -44,15 +45,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 
 extern int child_suppress_run;
-extern struct target_ops child_ops; /* target vector for inftarg.c */
+extern struct target_ops child_ops;	/* target vector for inftarg.c */
 
 extern void _initialize_hpux_thread PARAMS ((void));
 
 struct string_map
-{
-  int num;
-  char *str;
-};
+  {
+    int num;
+    char *str;
+  };
 
 static int hpux_thread_active = 0;
 
@@ -61,7 +62,7 @@ static int main_pid;		/* Real process ID */
 static CORE_ADDR P_cma__g_known_threads;
 static CORE_ADDR P_cma__g_current_thread;
 
-static struct cleanup * save_inferior_pid PARAMS ((void));
+static struct cleanup *save_inferior_pid PARAMS ((void));
 
 static void restore_inferior_pid PARAMS ((int pid));
 
@@ -74,28 +75,28 @@ static struct target_ops hpux_thread_ops;
 
 /*
 
-LOCAL FUNCTION
+   LOCAL FUNCTION
 
-	save_inferior_pid - Save inferior_pid on the cleanup list
-	restore_inferior_pid - Restore inferior_pid from the cleanup list
+   save_inferior_pid - Save inferior_pid on the cleanup list
+   restore_inferior_pid - Restore inferior_pid from the cleanup list
 
-SYNOPSIS
+   SYNOPSIS
 
-	struct cleanup *save_inferior_pid ()
-	void restore_inferior_pid (int pid)
+   struct cleanup *save_inferior_pid ()
+   void restore_inferior_pid (int pid)
 
-DESCRIPTION
+   DESCRIPTION
 
-	These two functions act in unison to restore inferior_pid in
-	case of an error.
+   These two functions act in unison to restore inferior_pid in
+   case of an error.
 
-NOTES
+   NOTES
 
-	inferior_pid is a global variable that needs to be changed by many of
-	these routines before calling functions in procfs.c.  In order to
-	guarantee that inferior_pid gets restored (in case of errors), you
-	need to call save_inferior_pid before changing it.  At the end of the
-	function, you should invoke do_cleanups to restore it.
+   inferior_pid is a global variable that needs to be changed by many of
+   these routines before calling functions in procfs.c.  In order to
+   guarantee that inferior_pid gets restored (in case of errors), you
+   need to call save_inferior_pid before changing it.  At the end of the
+   function, you should invoke do_cleanups to restore it.
 
  */
 
@@ -128,16 +129,16 @@ find_active_thread ()
   if (cached_active_thread != 0)
     return cached_active_thread;
 
-  read_memory ((CORE_ADDR)P_cma__g_current_thread,
-	       (char *)&tcb_ptr,
+  read_memory ((CORE_ADDR) P_cma__g_current_thread,
+	       (char *) &tcb_ptr,
 	       sizeof tcb_ptr);
 
-  read_memory (tcb_ptr, (char *)&tcb, sizeof tcb);
+  read_memory (tcb_ptr, (char *) &tcb, sizeof tcb);
 
   return (cma_thread_get_unique (&tcb.prolog.client_thread) << 16) | main_pid;
 }
 
-static cma__t_int_tcb * find_tcb PARAMS ((int thread));
+static cma__t_int_tcb *find_tcb PARAMS ((int thread));
 
 static cma__t_int_tcb *
 find_tcb (thread)
@@ -149,19 +150,19 @@ find_tcb (thread)
   if (thread == cached_thread)
     return &cached_tcb;
 
-  read_memory ((CORE_ADDR)P_cma__g_known_threads,
-	       (char *)&queue_header,
+  read_memory ((CORE_ADDR) P_cma__g_known_threads,
+	       (char *) &queue_header,
 	       sizeof queue_header);
 
   for (queue_ptr = queue_header.queue.flink;
-       queue_ptr != (cma__t_queue *)P_cma__g_known_threads;
+       queue_ptr != (cma__t_queue *) P_cma__g_known_threads;
        queue_ptr = cached_tcb.threads.flink)
     {
       cma__t_int_tcb *tcb_ptr;
 
       tcb_ptr = cma__base (queue_ptr, threads, cma__t_int_tcb);
 
-      read_memory ((CORE_ADDR)tcb_ptr, (char *)&cached_tcb, sizeof cached_tcb);
+      read_memory ((CORE_ADDR) tcb_ptr, (char *) &cached_tcb, sizeof cached_tcb);
 
       if (cached_tcb.header.type == cma__c_obj_tcb)
 	if (cma_thread_get_unique (&cached_tcb.prolog.client_thread) == thread >> 16)
@@ -279,9 +280,9 @@ hpux_thread_wait (pid, ourstatus)
 
 static char regmap[NUM_REGS] =
 {
-  -2, -1, -1, 0, 4, 8, 12, 16, 20, 24, /* flags, r1 -> r9 */
-  28, 32, 36, 40, 44, 48, 52, 56, 60, -1, /* r10 -> r19 */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /* r20 -> r29 */
+  -2, -1, -1, 0, 4, 8, 12, 16, 20, 24,	/* flags, r1 -> r9 */
+  28, 32, 36, 40, 44, 48, 52, 56, 60, -1,	/* r10 -> r19 */
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,	/* r20 -> r29 */
 
   /* r30, r31, sar, pcoqh, pcsqh, pcoqt, pcsqt, eiem, iir, isr */
   -2, -1, -1, -2, -1, -1, -1, -1, -1, -1,
@@ -293,14 +294,14 @@ static char regmap[NUM_REGS] =
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 
   -1, -1, -1, -1,		/* mpsfu_high, mpsfu_low, mpsfu_ovflo, pad */
-  144, -1, -1, -1, -1, -1, -1, -1, /* fpsr, fpe1 -> fpe7 */
-  -1, -1, -1, -1, -1, -1, -1, -1, /* fr4 -> fr7 */
-  -1, -1, -1, -1, -1, -1, -1, -1, /* fr8 -> fr11 */
-  136, -1, 128, -1, 120, -1, 112, -1, /* fr12 -> fr15 */
-  104, -1, 96, -1, 88, -1, 80, -1, /* fr16 -> fr19 */
-  72, -1, 64, -1, -1, -1, -1, -1, /* fr20 -> fr23 */
-  -1, -1, -1, -1, -1, -1, -1, -1, /* fr24 -> fr27 */
-  -1, -1, -1, -1, -1, -1, -1, -1, /* fr28 -> fr31 */
+  144, -1, -1, -1, -1, -1, -1, -1,	/* fpsr, fpe1 -> fpe7 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* fr4 -> fr7 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* fr8 -> fr11 */
+  136, -1, 128, -1, 120, -1, 112, -1,	/* fr12 -> fr15 */
+  104, -1, 96, -1, 88, -1, 80, -1,	/* fr16 -> fr19 */
+  72, -1, 64, -1, -1, -1, -1, -1,	/* fr20 -> fr23 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* fr24 -> fr27 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* fr28 -> fr31 */
 };
 
 static void
@@ -347,7 +348,7 @@ hpux_thread_fetch_registers (regno)
 	  unsigned char buf[MAX_REGISTER_RAW_SIZE];
 	  CORE_ADDR sp;
 
-	  sp = (CORE_ADDR)tcb_ptr->static_ctx.sp - 160;
+	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
 	  if (regno == FLAGS_REGNUM)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
@@ -410,13 +411,13 @@ hpux_thread_store_registers (regno)
 	  unsigned char buf[MAX_REGISTER_RAW_SIZE];
 	  CORE_ADDR sp;
 
-	  sp = (CORE_ADDR)tcb_ptr->static_ctx.sp - 160;
+	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
 	  if (regno == FLAGS_REGNUM)
-	    child_ops.to_store_registers (regno); /* Let lower layer handle this... */
+	    child_ops.to_store_registers (regno);	/* Let lower layer handle this... */
 	  else if (regno == SP_REGNUM)
 	    {
-	      write_memory ((CORE_ADDR)&tcb_ptr->static_ctx.sp,
+	      write_memory ((CORE_ADDR) & tcb_ptr->static_ctx.sp,
 			    registers + REGISTER_BYTE (regno),
 			    REGISTER_RAW_SIZE (regno));
 	      tcb_ptr->static_ctx.sp = (cma__t_hppa_regs *)
@@ -454,7 +455,7 @@ hpux_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
      char *myaddr;
      int len;
      int dowrite;
-     struct target_ops *target; /* ignored */
+     struct target_ops *target;	/* ignored */
 {
   int retval;
   struct cleanup *old_chain;

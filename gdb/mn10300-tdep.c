@@ -1,21 +1,22 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
    Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -28,23 +29,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info *fi,
-						  CORE_ADDR pc));
+static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info * fi,
+						   CORE_ADDR pc));
 
 /* Additional info used by the frame */
 
 struct frame_extra_info
-{
-  int status;
-  int stack_size;
-};
+  {
+    int status;
+    int stack_size;
+  };
 
 
-static char *mn10300_generic_register_names[] = 
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
-  "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
-  "", "", "", "", "", "", "", "",
-  "", "", "", "", "", "", "", "fp" };
+static char *mn10300_generic_register_names[] =
+{"d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+ "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
+ "", "", "", "", "", "", "", "",
+ "", "", "", "", "", "", "", "fp"};
 
 static char **mn10300_register_names = mn10300_generic_register_names;
 
@@ -145,7 +146,8 @@ mn10300_breakpoint_from_pc (bp_addr, bp_size)
      CORE_ADDR *bp_addr;
      int *bp_size;
 {
-  static char breakpoint[] = {0xff};
+  static char breakpoint[] =
+  {0xff};
   *bp_size = 1;
   return breakpoint;
 }
@@ -156,8 +158,8 @@ mn10300_breakpoint_from_pc (bp_addr, bp_size)
 
 static void
 fix_frame_pointer (fi, stack_size)
-    struct frame_info *fi;
-    int stack_size;
+     struct frame_info *fi;
+     int stack_size;
 {
   if (fi && fi->next == NULL)
     {
@@ -174,8 +176,8 @@ fix_frame_pointer (fi, stack_size)
 
 static void
 set_movm_offsets (fi, movm_args)
-    struct frame_info *fi;
-    int movm_args;
+     struct frame_info *fi;
+     int movm_args;
 {
   int offset = 0;
 
@@ -210,53 +212,53 @@ set_movm_offsets (fi, movm_args)
 
    For reference here's how prologues look on the mn10300:
 
-     With frame pointer:
-	movm [d2,d3,a2,a3],sp
-	mov sp,a3
-	add <size>,sp
+   With frame pointer:
+   movm [d2,d3,a2,a3],sp
+   mov sp,a3
+   add <size>,sp
 
-     Without frame pointer:
-	movm [d2,d3,a2,a3],sp (if needed)
-        add <size>,sp
+   Without frame pointer:
+   movm [d2,d3,a2,a3],sp (if needed)
+   add <size>,sp
 
    One day we might keep the stack pointer constant, that won't
    change the code for prologues, but it will make the frame
    pointerless case much more common.  */
-	
+
 /* Analyze the prologue to determine where registers are saved,
    the end of the prologue, etc etc.  Return the end of the prologue
    scanned.
 
    We store into FI (if non-null) several tidbits of information:
 
-    * stack_size -- size of this stack frame.  Note that if we stop in
-    certain parts of the prologue/epilogue we may claim the size of the
-    current frame is zero.  This happens when the current frame has
-    not been allocated yet or has already been deallocated.
+   * stack_size -- size of this stack frame.  Note that if we stop in
+   certain parts of the prologue/epilogue we may claim the size of the
+   current frame is zero.  This happens when the current frame has
+   not been allocated yet or has already been deallocated.
 
-    * fsr -- Addresses of registers saved in the stack by this frame.
+   * fsr -- Addresses of registers saved in the stack by this frame.
 
-    * status -- A (relatively) generic status indicator.  It's a bitmask
-    with the following bits: 
+   * status -- A (relatively) generic status indicator.  It's a bitmask
+   with the following bits: 
 
-      MY_FRAME_IN_SP: The base of the current frame is actually in
-      the stack pointer.  This can happen for frame pointerless
-      functions, or cases where we're stopped in the prologue/epilogue
-      itself.  For these cases mn10300_analyze_prologue will need up
-      update fi->frame before returning or analyzing the register
-      save instructions.
+   MY_FRAME_IN_SP: The base of the current frame is actually in
+   the stack pointer.  This can happen for frame pointerless
+   functions, or cases where we're stopped in the prologue/epilogue
+   itself.  For these cases mn10300_analyze_prologue will need up
+   update fi->frame before returning or analyzing the register
+   save instructions.
 
-      MY_FRAME_IN_FP: The base of the current frame is in the
-      frame pointer register ($a2).
+   MY_FRAME_IN_FP: The base of the current frame is in the
+   frame pointer register ($a2).
 
-      NO_MORE_FRAMES: Set this if the current frame is "start" or
-      if the first instruction looks like mov <imm>,sp.  This tells
-      frame chain to not bother trying to unwind past this frame.  */
+   NO_MORE_FRAMES: Set this if the current frame is "start" or
+   if the first instruction looks like mov <imm>,sp.  This tells
+   frame chain to not bother trying to unwind past this frame.  */
 
 static CORE_ADDR
 mn10300_analyze_prologue (fi, pc)
-    struct frame_info *fi;
-    CORE_ADDR pc;
+     struct frame_info *fi;
+     CORE_ADDR pc;
 {
   CORE_ADDR func_addr, func_end, addr, stop;
   CORE_ADDR stack_size;
@@ -418,14 +420,14 @@ mn10300_analyze_prologue (fi, pc)
 	  return addr;
 	}
     }
-  
+
   /* Next we should allocate the local frame.  No more prologue insns
      are found after allocating the local frame.
-       
+
      Search for add imm8,sp (0xf8feXX)
-        or	add imm16,sp (0xfafeXXXX)
-        or	add imm32,sp (0xfcfeXXXXXXXX).
-       
+     or add imm16,sp (0xfafeXXXX)
+     or add imm32,sp (0xfcfeXXXXXXXX).
+
      If none of the above was found, then this prologue has no 
      additional stack.  */
 
@@ -489,7 +491,7 @@ mn10300_analyze_prologue (fi, pc)
   set_movm_offsets (fi, movm_args);
   return addr;
 }
-  
+
 /* Function: frame_chain
    Figure out and return the caller's frame pointer given current
    frame_info struct.
@@ -505,7 +507,7 @@ mn10300_frame_chain (fi)
   /* Walk through the prologue to determine the stack size,
      location of saved registers, end of the prologue, etc.  */
   if (fi->extra_info->status == 0)
-    mn10300_analyze_prologue (fi, (CORE_ADDR)0);
+    mn10300_analyze_prologue (fi, (CORE_ADDR) 0);
 
   /* Quit now if mn10300_analyze_prologue set NO_MORE_FRAMES.  */
   if (fi->extra_info->status & NO_MORE_FRAMES)
@@ -514,17 +516,17 @@ mn10300_frame_chain (fi)
   /* Now that we've analyzed our prologue, determine the frame
      pointer for our caller.
 
-       If our caller has a frame pointer, then we need to
-       find the entry value of $a3 to our function.
+     If our caller has a frame pointer, then we need to
+     find the entry value of $a3 to our function.
 
-	 If fsr.regs[A3_REGNUM] is nonzero, then it's at the memory
-	 location pointed to by fsr.regs[A3_REGNUM].
+     If fsr.regs[A3_REGNUM] is nonzero, then it's at the memory
+     location pointed to by fsr.regs[A3_REGNUM].
 
-	 Else it's still in $a3.
+     Else it's still in $a3.
 
-       If our caller does not have a frame pointer, then his
-       frame base is fi->frame + -caller's stack size.  */
-       
+     If our caller does not have a frame pointer, then his
+     frame base is fi->frame + -caller's stack size.  */
+
   /* The easiest way to get that info is to analyze our caller's frame.
      So we set up a dummy frame and call mn10300_analyze_prologue to
      find stuff for us.  */
@@ -549,8 +551,8 @@ mn10300_frame_chain (fi)
       adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
 
       /* Our caller does not have a frame pointer.  So his frame starts
-	 at the base of our frame (fi->frame) + register save space
-	 + <his size>.  */
+         at the base of our frame (fi->frame) + register save space
+         + <his size>.  */
       return fi->frame + adjust + -dummy->extra_info->stack_size;
     }
 }
@@ -578,7 +580,7 @@ mn10300_pop_frame (frame)
 {
   int regnum;
 
-  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -591,7 +593,7 @@ mn10300_pop_frame (frame)
 	    ULONGEST value;
 
 	    value = read_memory_unsigned_integer (frame->saved_regs[regnum],
-						  REGISTER_RAW_SIZE (regnum));
+						REGISTER_RAW_SIZE (regnum));
 	    write_register (regnum, value);
 	  }
 
@@ -657,13 +659,13 @@ mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
 	{
 	  /* XXX Wrong, we want a pointer to this argument.  */
-          len = TYPE_LENGTH (VALUE_TYPE (*args));
-          val = (char *)VALUE_CONTENTS (*args);
+	  len = TYPE_LENGTH (VALUE_TYPE (*args));
+	  val = (char *) VALUE_CONTENTS (*args);
 	}
       else
 	{
 	  len = TYPE_LENGTH (VALUE_TYPE (*args));
-	  val = (char *)VALUE_CONTENTS (*args);
+	  val = (char *) VALUE_CONTENTS (*args);
 	}
 
       while (regsused < 2 && len > 0)
@@ -693,7 +695,7 @@ mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
 /* Function: push_return_address (pc)
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
- 
+
 CORE_ADDR
 mn10300_push_return_address (pc, sp)
      CORE_ADDR pc;
@@ -709,7 +711,7 @@ mn10300_push_return_address (pc, sp)
 /* Function: store_struct_return (addr,sp)
    Store the structure value return address for an inferior function
    call.  */
- 
+
 CORE_ADDR
 mn10300_store_struct_return (addr, sp)
      CORE_ADDR addr;
@@ -719,7 +721,7 @@ mn10300_store_struct_return (addr, sp)
   write_register (0, addr);
   return sp;
 }
- 
+
 /* Function: frame_saved_pc 
    Find the caller of this frame.  We do this by seeing if RP_REGNUM
    is saved in the stack anywhere, otherwise we get it from the
@@ -789,16 +791,16 @@ mn10300_virtual_frame_pointer (pc, reg, offset)
   /* Results will tell us which type of frame it uses.  */
   if (dummy->extra_info->status & MY_FRAME_IN_SP)
     {
-      *reg    = SP_REGNUM;
+      *reg = SP_REGNUM;
       *offset = -(dummy->extra_info->stack_size);
     }
   else
     {
-      *reg    = A3_REGNUM;
+      *reg = A3_REGNUM;
       *offset = 0;
     }
 }
-  
+
 /* This can be made more generic later.  */
 static void
 set_machine_hook (filename)
@@ -823,4 +825,3 @@ _initialize_mn10300_tdep ()
 
   specify_exec_file_hook (set_machine_hook);
 }
-

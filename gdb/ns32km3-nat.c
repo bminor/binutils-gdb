@@ -1,21 +1,22 @@
 /* Low level interface to ns532 running mach 3.0.
    Copyright (C) 1992 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -28,8 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <mach_error.h>
 
 #define private static
-
 
+
 /* Find offsets to thread states at compile time.
  * If your compiler does not grok this, calculate offsets
  * offsets yourself and use them (or get a compatible compiler :-)
@@ -42,16 +43,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * location where the gdb registers[i] is stored.
  */
 
-static int reg_offset[] = 
+static int reg_offset[] =
 {
-  REG_N_OFFSET(r0),  REG_N_OFFSET(r1), REG_N_OFFSET(r2), REG_N_OFFSET(r3),
-  REG_N_OFFSET(r4),  REG_N_OFFSET(r5), REG_N_OFFSET(r6), REG_N_OFFSET(r7),
-  REG_F_OFFSET(l0a), REG_F_OFFSET(l0b),REG_F_OFFSET(l2a),REG_F_OFFSET(l2b),
-  REG_F_OFFSET(l4a), REG_F_OFFSET(l4b),REG_F_OFFSET(l6a),REG_F_OFFSET(l6b),
-  REG_N_OFFSET(sp),  REG_N_OFFSET(fp), REG_N_OFFSET(pc), REG_N_OFFSET(psr),
-  REG_F_OFFSET(fsr),
-  REG_F_OFFSET(l0a), REG_F_OFFSET(l1a),REG_F_OFFSET(l2a),REG_F_OFFSET(l3a),
-  REG_F_OFFSET(l4a), REG_F_OFFSET(l5a),REG_F_OFFSET(l6a),REG_F_OFFSET(l7a),
+  REG_N_OFFSET (r0), REG_N_OFFSET (r1), REG_N_OFFSET (r2), REG_N_OFFSET (r3),
+  REG_N_OFFSET (r4), REG_N_OFFSET (r5), REG_N_OFFSET (r6), REG_N_OFFSET (r7),
+  REG_F_OFFSET (l0a), REG_F_OFFSET (l0b), REG_F_OFFSET (l2a), REG_F_OFFSET (l2b),
+  REG_F_OFFSET (l4a), REG_F_OFFSET (l4b), REG_F_OFFSET (l6a), REG_F_OFFSET (l6b),
+REG_N_OFFSET (sp), REG_N_OFFSET (fp), REG_N_OFFSET (pc), REG_N_OFFSET (psr),
+  REG_F_OFFSET (fsr),
+  REG_F_OFFSET (l0a), REG_F_OFFSET (l1a), REG_F_OFFSET (l2a), REG_F_OFFSET (l3a),
+  REG_F_OFFSET (l4a), REG_F_OFFSET (l5a), REG_F_OFFSET (l6a), REG_F_OFFSET (l7a),
 };
 
 #define REG_ADDRESS(state,regnum) ((char *)(state)+reg_offset[regnum])
@@ -83,8 +84,8 @@ fetch_inferior_registers (regno)
   thread_state_data_t state;
   unsigned int stateCnt = NS532_COMBINED_STATE_COUNT;
   int index;
-  
-  if (! MACH_PORT_VALID (current_thread))
+
+  if (!MACH_PORT_VALID (current_thread))
     error ("fetch inferior registers: Invalid thread");
 
   if (must_suspend_thread)
@@ -103,12 +104,12 @@ fetch_inferior_registers (regno)
    * since we fetched them all anyway
    */
   else if (regno != -1)
-    supply_register (regno, (char *)state+reg_offset[regno]);
+    supply_register (regno, (char *) state + reg_offset[regno]);
 #endif
   else
     {
-      for (index = 0; index < NUM_REGS; index++) 
-	supply_register (index, (char *)state+reg_offset[index]);
+      for (index = 0; index < NUM_REGS; index++)
+	supply_register (index, (char *) state + reg_offset[index]);
     }
 
   if (must_suspend_thread)
@@ -130,7 +131,7 @@ store_inferior_registers (regno)
   unsigned int stateCnt = NS532_COMBINED_STATE_COUNT;
   register int index;
 
-  if (! MACH_PORT_VALID (current_thread))
+  if (!MACH_PORT_VALID (current_thread))
     error ("store inferior registers: Invalid thread");
 
   if (must_suspend_thread)
@@ -142,7 +143,7 @@ store_inferior_registers (regno)
 			  state,
 			  &stateCnt);
 
-   if (ret != KERN_SUCCESS) 
+  if (ret != KERN_SUCCESS)
     {
       warning ("store_inferior_registers (get): %s",
 	       mach_error_string (ret));
@@ -152,7 +153,7 @@ store_inferior_registers (regno)
     }
 
   /* move gdb's registers to thread's state
-   *
+
    * Since we save all registers anyway, save the ones
    * that gdb thinks are valid (e.g. ignore the regno
    * parameter)
@@ -163,17 +164,17 @@ store_inferior_registers (regno)
   else
 #endif
     {
-      for (index = 0; index < NUM_REGS; index++) 
+      for (index = 0; index < NUM_REGS; index++)
 	STORE_REGS (state, index, 1);
     }
-  
+
   /* Write gdb's current view of register to the thread
    */
   ret = thread_set_state (current_thread,
 			  NS532_COMBINED_STATE,
 			  state,
 			  NS532_COMBINED_STATE_COUNT);
-  
+
   if (ret != KERN_SUCCESS)
     warning ("store_inferior_registers (set): %s",
 	     mach_error_string (ret));

@@ -31,7 +31,7 @@
 /* OBSOLETE  */
 /* OBSOLETE #define HAVE_TERMIO */
 /* OBSOLETE  */
-/* OBSOLETE #define CBREAK XTABS	/* It takes all kinds... *x/ */
+/* OBSOLETE #define CBREAK XTABS        /* It takes all kinds... *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #ifndef R_OK */
 /* OBSOLETE #define R_OK 4 */
@@ -51,27 +51,27 @@
 /* OBSOLETE  */
 /* OBSOLETE #define KERNEL_U_ADDR 0x1fbf000 */
 /* OBSOLETE  */
-/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno)		\ */
-/* OBSOLETE {	if (regno <= SP_REGNUM) \ */
-/* OBSOLETE 	  addr = blockend + regno * 4; \ */
-/* OBSOLETE 	else if (regno == PS_REGNUM) \ */
-/* OBSOLETE 	  addr = blockend + regno * 4 + 4; \ */
-/* OBSOLETE 	else if (regno == PC_REGNUM) \ */
-/* OBSOLETE 	  addr = blockend + regno * 4 + 2; \ */
+/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno)              \ */
+/* OBSOLETE {   if (regno <= SP_REGNUM) \ */
+/* OBSOLETE       addr = blockend + regno * 4; \ */
+/* OBSOLETE     else if (regno == PS_REGNUM) \ */
+/* OBSOLETE       addr = blockend + regno * 4 + 4; \ */
+/* OBSOLETE     else if (regno == PC_REGNUM) \ */
+/* OBSOLETE       addr = blockend + regno * 4 + 2; \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
-/* OBSOLETE #define REGISTER_ADDR(u_ar0, regno)					\ */
-/* OBSOLETE   (((regno) < PS_REGNUM)						\ */
-/* OBSOLETE    ? (&((struct exception_stack *) (u_ar0))->e_regs[(regno + R0)])	\ */
-/* OBSOLETE    : (((regno) == PS_REGNUM)						\ */
-/* OBSOLETE       ? ((int *) (&((struct exception_stack *) (u_ar0))->e_PS))		\ */
+/* OBSOLETE #define REGISTER_ADDR(u_ar0, regno)                                 \ */
+/* OBSOLETE   (((regno) < PS_REGNUM)                                            \ */
+/* OBSOLETE    ? (&((struct exception_stack *) (u_ar0))->e_regs[(regno + R0)])  \ */
+/* OBSOLETE    : (((regno) == PS_REGNUM)                                                \ */
+/* OBSOLETE       ? ((int *) (&((struct exception_stack *) (u_ar0))->e_PS))             \ */
 /* OBSOLETE       : (&((struct exception_stack *) (u_ar0))->e_PC))) */
 /* OBSOLETE  */
-/* OBSOLETE #define FP_REGISTER_ADDR(u, regno)					\ */
-/* OBSOLETE   (((char *)								\ */
-/* OBSOLETE     (((regno) < FPC_REGNUM)						\ */
+/* OBSOLETE #define FP_REGISTER_ADDR(u, regno)                                  \ */
+/* OBSOLETE   (((char *)                                                                \ */
+/* OBSOLETE     (((regno) < FPC_REGNUM)                                         \ */
 /* OBSOLETE      ? (&u.u_pcb.pcb_mc68881[FMC68881_R0 + (((regno) - FP0_REGNUM) * 3)]) \ */
-/* OBSOLETE      : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)])))	\ */
+/* OBSOLETE      : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)])))        \ */
 /* OBSOLETE    - ((char *) (& u))) */
 /* OBSOLETE  */
 /* OBSOLETE  */
@@ -161,19 +161,19 @@
 /* OBSOLETE  */
 /* OBSOLETE #ifdef MOTOROLA */
 /* OBSOLETE #define PUSH_REGISTERS        \ */
-/* OBSOLETE { asm ("clr.w -(sp)");	      \ */
-/* OBSOLETE   asm ("pea (10,sp)");	      \ */
+/* OBSOLETE { asm ("clr.w -(sp)");            \ */
+/* OBSOLETE   asm ("pea (10,sp)");            \ */
 /* OBSOLETE   asm ("movem $ 0xfffe,-(sp)"); } */
 /* OBSOLETE #else */
 /* OBSOLETE #ifdef ALTOS_AS */
 /* OBSOLETE #define PUSH_REGISTERS        \ */
-/* OBSOLETE { asm ("clr.w -(%sp)");	      \ */
-/* OBSOLETE   asm ("pea (10,%sp)");	      \ */
+/* OBSOLETE { asm ("clr.w -(%sp)");           \ */
+/* OBSOLETE   asm ("pea (10,%sp)");           \ */
 /* OBSOLETE   asm ("movm.l &0xfffe,-(%sp)"); } */
 /* OBSOLETE #else */
 /* OBSOLETE #define PUSH_REGISTERS        \ */
-/* OBSOLETE { asm ("clrw -(sp)");	      \ */
-/* OBSOLETE   asm ("pea 10(sp)");	      \ */
+/* OBSOLETE { asm ("clrw -(sp)");             \ */
+/* OBSOLETE   asm ("pea 10(sp)");             \ */
 /* OBSOLETE   asm ("movem $ 0xfffe,-(sp)"); } */
 /* OBSOLETE #endif */
 /* OBSOLETE #endif */

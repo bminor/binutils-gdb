@@ -1,21 +1,22 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
    Copyright 1986, 88, 89, 91, 92, 93, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "obstack.h"
@@ -44,7 +45,7 @@ static void
 ptype_command PARAMS ((char *, int));
 
 static struct type *
-ptype_eval PARAMS ((struct expression *));
+  ptype_eval PARAMS ((struct expression *));
 
 static void
 whatis_command PARAMS ((char *, int));
@@ -80,7 +81,7 @@ whatis_exp (exp, show)
   struct expression *expr;
   register value_ptr val;
   register struct cleanup *old_chain = NULL;
-  struct type * real_type = NULL;
+  struct type *real_type = NULL;
   int full = 0;
   int top = -1;
   int using_enc = 0;
@@ -88,8 +89,8 @@ whatis_exp (exp, show)
   if (exp)
     {
       expr = parse_expression (exp);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
-                                &expr);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
+				&expr);
       val = evaluate_type (expr);
     }
   else
@@ -101,8 +102,8 @@ whatis_exp (exp, show)
 
   if (real_type && objectprint)
     printf_filtered ("/* real type = %s%s */\n",
-                     TYPE_NAME (real_type),
-                     full ? "" : " (incomplete object)");
+		     TYPE_NAME (real_type),
+		     full ? "" : " (incomplete object)");
   /* FIXME: maybe better to use type_print (real_type, "", gdb_stdout, -1); */
 
   type_print (VALUE_TYPE (val), "", gdb_stdout, show);
@@ -160,8 +161,8 @@ ptype_command (typename, from_tty)
   else
     {
       expr = parse_expression (typename);
-      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
-                                &expr);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents,
+				&expr);
       type = ptype_eval (expr);
       if (type != NULL)
 	{
@@ -279,30 +280,30 @@ maintenance_print_type (typename, from_tty)
   struct expression *expr;
 
   if (typename != NULL)
-  {
-    expr = parse_expression (typename);
-    old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
-    if (expr -> elts[0].opcode == OP_TYPE)
-      {
-	/* The user expression names a type directly, just use that type. */
-	type = expr -> elts[1].type;
-      }
-    else
-      {
-	/* The user expression may name a type indirectly by naming an
-	   object of that type.  Find that indirectly named type. */
-	val = evaluate_type (expr);
-	type = VALUE_TYPE (val);
-      }
-    if (type != NULL)
-      {
-	recursive_dump_type (type, 0);
-      }
-    do_cleanups (old_chain);
-  }
+    {
+      expr = parse_expression (typename);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
+      if (expr->elts[0].opcode == OP_TYPE)
+	{
+	  /* The user expression names a type directly, just use that type. */
+	  type = expr->elts[1].type;
+	}
+      else
+	{
+	  /* The user expression may name a type indirectly by naming an
+	     object of that type.  Find that indirectly named type. */
+	  val = evaluate_type (expr);
+	  type = VALUE_TYPE (val);
+	}
+      if (type != NULL)
+	{
+	  recursive_dump_type (type, 0);
+	}
+      do_cleanups (old_chain);
+    }
 }
-
 
+
 void
 _initialize_typeprint ()
 {

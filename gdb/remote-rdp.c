@@ -15,7 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  
 
 
  */
@@ -168,7 +169,7 @@ ds;
 
 static int timeout = 2;
 
-static char * commandline = NULL;
+static char *commandline = NULL;
 
 static int
 remote_rdp_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
@@ -278,9 +279,9 @@ rdp_init (cold, tty)
 	printf_unfiltered ("Trying to connect at %d baud.\n", baudtry);
 
       /*
-      ** It seems necessary to reset an EmbeddedICE to get it going.
-      ** This has the side benefit of displaying the startup banner.
-      */
+         ** It seems necessary to reset an EmbeddedICE to get it going.
+         ** This has the side benefit of displaying the startup banner.
+       */
       if (cold)
 	{
 	  put_byte (RDP_RESET);
@@ -308,7 +309,7 @@ rdp_init (cold, tty)
 
       put_byte (RDP_OPEN);
 
-      put_byte (type | RDP_OPEN_TYPE_RETURN_SEX );
+      put_byte (type | RDP_OPEN_TYPE_RETURN_SEX);
       put_word (0);
 
       while (!sync && (restype = SERIAL_READCHAR (io, 1)) > 0)
@@ -723,14 +724,14 @@ rdp_execute_start ()
 
 static void
 rdp_set_command_line (command, args)
-     char * command;
-     char * args;
+     char *command;
+     char *args;
 {
   /*
-  ** We could use RDP_INFO_SET_CMDLINE to send this, but EmbeddedICE systems
-  ** don't implement that, and get all confused at the unexpected text.
-  ** Instead, just keep a copy, and send it when the target does a SWI_GetEnv
-  */
+     ** We could use RDP_INFO_SET_CMDLINE to send this, but EmbeddedICE systems
+     ** don't implement that, and get all confused at the unexpected text.
+     ** Instead, just keep a copy, and send it when the target does a SWI_GetEnv
+   */
 
   if (commandline != NULL)
     free (commandline);
@@ -748,22 +749,22 @@ static void
 rdp_catch_vectors ()
 {
   /*
-  ** We want the target monitor to intercept the abort vectors
-  ** i.e. stop the program if any of these are used.
-  */
+     ** We want the target monitor to intercept the abort vectors
+     ** i.e. stop the program if any of these are used.
+   */
   send_rdp ("bww-SZ", RDP_INFO, RDP_INFO_VECTOR_CATCH,
-	    /*
-	    ** Specify a bitmask including
-	    **  the reset vector
-	    **  the undefined instruction vector
-	    **  the prefetch abort vector
-	    **  the data abort vector
-	    **  the address exception vector
-	    */
-	    (1<<0)|(1<<1)|(1<<3)|(1<<4)|(1<<5)
-	    );
+  /*
+     ** Specify a bitmask including
+     **  the reset vector
+     **  the undefined instruction vector
+     **  the prefetch abort vector
+     **  the data abort vector
+     **  the address exception vector
+   */
+	    (1 << 0) | (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5)
+    );
 }
-  
+
 
 
 #define a_byte 1
@@ -817,18 +818,18 @@ argsin;
 
 static int translate_open_mode[] =
 {
-  O_RDONLY,                          /* "r"   */
-  O_RDONLY+O_BINARY,                 /* "rb"  */
-  O_RDWR,                            /* "r+"  */
-  O_RDWR  +O_BINARY,                 /* "r+b" */
-  O_WRONLY         +O_CREAT+O_TRUNC, /* "w"   */
-  O_WRONLY+O_BINARY+O_CREAT+O_TRUNC, /* "wb"  */
-  O_RDWR           +O_CREAT+O_TRUNC, /* "w+"  */
-  O_RDWR  +O_BINARY+O_CREAT+O_TRUNC, /* "w+b" */
-  O_WRONLY         +O_APPEND+O_CREAT,/* "a"   */
-  O_WRONLY+O_BINARY+O_APPEND+O_CREAT,/* "ab"  */
-  O_RDWR           +O_APPEND+O_CREAT,/* "a+"  */
-  O_RDWR  +O_BINARY+O_APPEND+O_CREAT /* "a+b" */
+  O_RDONLY,			/* "r"   */
+  O_RDONLY + O_BINARY,		/* "rb"  */
+  O_RDWR,			/* "r+"  */
+  O_RDWR + O_BINARY,		/* "r+b" */
+  O_WRONLY + O_CREAT + O_TRUNC,	/* "w"   */
+  O_WRONLY + O_BINARY + O_CREAT + O_TRUNC,	/* "wb"  */
+  O_RDWR + O_CREAT + O_TRUNC,	/* "w+"  */
+  O_RDWR + O_BINARY + O_CREAT + O_TRUNC,	/* "w+b" */
+  O_WRONLY + O_APPEND + O_CREAT,	/* "a"   */
+  O_WRONLY + O_BINARY + O_APPEND + O_CREAT,	/* "ab"  */
+  O_RDWR + O_APPEND + O_CREAT,	/* "a+"  */
+  O_RDWR + O_BINARY + O_APPEND + O_CREAT	/* "a+b" */
 };
 
 static int
@@ -861,18 +862,18 @@ exec_swi (swi, args)
       args->n = callback->time (callback, NULL);
       return 1;
 
-    case SWI_Clock :
-       /* return number of centi-seconds... */
-       args->n = 
+    case SWI_Clock:
+      /* return number of centi-seconds... */
+      args->n =
 #ifdef CLOCKS_PER_SEC
-          (CLOCKS_PER_SEC >= 100)
-             ? (clock() / (CLOCKS_PER_SEC / 100))
-             : ((clock() * 100) / CLOCKS_PER_SEC) ;
+	(CLOCKS_PER_SEC >= 100)
+	? (clock () / (CLOCKS_PER_SEC / 100))
+	: ((clock () * 100) / CLOCKS_PER_SEC);
 #else
-     /* presume unix... clock() returns microseconds */
-          clock() / 10000 ;
+      /* presume unix... clock() returns microseconds */
+	clock () / 10000;
 #endif
-       return 1 ;
+      return 1;
 
     case SWI_Remove:
       args->n = callback->unlink (callback, args->s);
@@ -882,19 +883,19 @@ exec_swi (swi, args)
       return 1;
 
     case SWI_Open:
-	/* Now we need to decode the Demon open mode */
-	i = translate_open_mode[args[1].n];
+      /* Now we need to decode the Demon open mode */
+      i = translate_open_mode[args[1].n];
 
-	/* Filename ":tt" is special: it denotes stdin/out */
-	if (strcmp(args->s,":tt")==0)
-	  {
-	    if (i == O_RDONLY ) /* opening tty "r" */
-	      args->n = 0 /* stdin */ ;
-	    else 
-	      args->n = 1 /* stdout */ ;
-	  }
-	else
-	  args->n = callback->open (callback, args->s, i);
+      /* Filename ":tt" is special: it denotes stdin/out */
+      if (strcmp (args->s, ":tt") == 0)
+	{
+	  if (i == O_RDONLY)	/* opening tty "r" */
+	    args->n = 0 /* stdin */ ;
+	  else
+	    args->n = 1 /* stdout */ ;
+	}
+      else
+	args->n = callback->open (callback, args->s, i);
       return 1;
 
     case SWI_Close:
@@ -913,7 +914,7 @@ exec_swi (swi, args)
 	int done = callback->read (callback, args[0].n, copy, args[2].n);
 	if (done > 0)
 	  remote_rdp_xfer_inferior_memory (args[1].n, copy, done, 1, 0);
-	args->n = args[2].n-done;
+	args->n = args[2].n - done;
 	return 1;
       }
 
@@ -941,15 +942,15 @@ exec_swi (swi, args)
 	  if (len > 255)
 	    {
 	      len = 255;
-	      commandline [255]='\0';
+	      commandline[255] = '\0';
 	    }
 	  remote_rdp_xfer_inferior_memory (args[0].n,
-					   commandline, len+1, 1, 0);
+					   commandline, len + 1, 1, 0);
 	}
       else
 	remote_rdp_xfer_inferior_memory (args[0].n, "", 1, 1, 0);
       return 1;
-      
+
     default:
       return 0;
     }
@@ -1177,32 +1178,32 @@ remote_rdp_open (args, from_tty)
   rdp_info ();
 
   /* Need to set up the vector interception state */
-  rdp_catch_vectors();
+  rdp_catch_vectors ();
 
   /*
-  ** If it's an EmbeddedICE, we need to set the processor config.
-  ** Assume we can always have ARM7TDI...
-  */
-  send_rdp ("bw-SB", RDP_INFO, RDP_INFO_ICEBREAKER, & not_icebreaker);
+     ** If it's an EmbeddedICE, we need to set the processor config.
+     ** Assume we can always have ARM7TDI...
+   */
+  send_rdp ("bw-SB", RDP_INFO, RDP_INFO_ICEBREAKER, &not_icebreaker);
   if (!not_icebreaker)
     {
-      const char * CPU = "ARM7TDI";
+      const char *CPU = "ARM7TDI";
       int ICEversion;
       int len = strlen (CPU);
-      
+
       send_rdp ("bbbbw-p-SWZ",
 		RDP_SELECT_CONFIG,
 		RDI_ConfigCPU,	/* Aspect: set the CPU */
 		len,		/* The number of bytes in the name */
 		RDI_MatchAny,	/* We'll take whatever we get */
 		0,		/* We'll take whatever version's there */
-		CPU,len,
-		& ICEversion);
+		CPU, len,
+		&ICEversion);
     }
 
-  /* command line initialised on 'run'*/
+  /* command line initialised on 'run' */
 
-  push_target (& remote_rdp_ops);
+  push_target (&remote_rdp_ops);
 
   callback->init (callback);
   flush_cached_frames ();
@@ -1386,18 +1387,18 @@ remote_rdp_files_info (target)
 
 static void
 remote_rdp_create_inferior (exec_file, allargs, env)
-     char *  exec_file;
-     char *  allargs;
-     char ** env;
+     char *exec_file;
+     char *allargs;
+     char **env;
 {
   CORE_ADDR entry_point;
 
   if (exec_file == 0 || exec_bfd == 0)
-   error ("No executable file specified.");
+    error ("No executable file specified.");
 
   entry_point = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
-  remote_rdp_kill ();	 
+  remote_rdp_kill ();
   remove_breakpoints ();
   init_wait_for_inferior ();
 
@@ -1405,12 +1406,12 @@ remote_rdp_create_inferior (exec_file, allargs, env)
   rdp_set_command_line (exec_file, allargs);
 
   inferior_pid = 42;
-  insert_breakpoints ();  /* Needed to get correct instruction in cache */
+  insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   /*
-  ** RDP targets don't provide any facility to set the top of memory,
-  ** so we don't bother to look for MEMSIZE in the environment.
-  */
+     ** RDP targets don't provide any facility to set the top of memory,
+     ** so we don't bother to look for MEMSIZE in the environment.
+   */
 
   /* Let's go! */
   proceed (entry_point, TARGET_SIGNAL_DEFAULT, 0);
@@ -1418,56 +1419,56 @@ remote_rdp_create_inferior (exec_file, allargs, env)
 
 /* Accept any stray run/attach commands */
 static int
-remote_rdp_can_run()
+remote_rdp_can_run ()
 {
   return 1;
 }
 
 /* Attach doesn't need to do anything */
 static void
-remote_rdp_attach(args, from_tty)
-     char * args;
+remote_rdp_attach (args, from_tty)
+     char *args;
      int from_tty;
 {
   return;
 }
-  
+
 /* Define the target subroutine names */
 
-struct target_ops remote_rdp_ops ;
+struct target_ops remote_rdp_ops;
 
-static void 
-init_remote_rdp_ops(void)
+static void
+init_remote_rdp_ops (void)
 {
-  remote_rdp_ops.to_shortname =   "rdp";
-  remote_rdp_ops.to_longname =   "Remote Target using the RDProtocol";
-  remote_rdp_ops.to_doc =   "Use a remote ARM system which uses the ARM Remote Debugging Protocol";
-  remote_rdp_ops.to_open =   remote_rdp_open;	
-  remote_rdp_ops.to_close =   remote_rdp_close;	
-  remote_rdp_ops.to_attach =   remote_rdp_attach;
+  remote_rdp_ops.to_shortname = "rdp";
+  remote_rdp_ops.to_longname = "Remote Target using the RDProtocol";
+  remote_rdp_ops.to_doc = "Use a remote ARM system which uses the ARM Remote Debugging Protocol";
+  remote_rdp_ops.to_open = remote_rdp_open;
+  remote_rdp_ops.to_close = remote_rdp_close;
+  remote_rdp_ops.to_attach = remote_rdp_attach;
   remote_rdp_ops.to_post_attach = NULL;
   remote_rdp_ops.to_require_attach = NULL;
-  remote_rdp_ops.to_detach =   NULL;
-  remote_rdp_ops.to_require_detach = NULL;		
-  remote_rdp_ops.to_resume =   remote_rdp_resume;
-  remote_rdp_ops.to_wait  =   remote_rdp_wait;
-  remote_rdp_ops.to_post_wait = NULL;	
-  remote_rdp_ops.to_fetch_registers  =   remote_rdp_fetch_register;
-  remote_rdp_ops.to_store_registers  =   remote_rdp_store_register;
-  remote_rdp_ops.to_prepare_to_store =   remote_rdp_prepare_to_store;
-  remote_rdp_ops.to_xfer_memory  =   remote_rdp_xfer_inferior_memory;
-  remote_rdp_ops.to_files_info  =   remote_rdp_files_info;
-  remote_rdp_ops.to_insert_breakpoint =   remote_rdp_insert_breakpoint;
-  remote_rdp_ops.to_remove_breakpoint =   remote_rdp_remove_breakpoint;
-  remote_rdp_ops.to_terminal_init  =   NULL;		
-  remote_rdp_ops.to_terminal_inferior =   NULL;		
-  remote_rdp_ops.to_terminal_ours_for_output =   NULL;
-  remote_rdp_ops.to_terminal_ours  =   NULL;	
-  remote_rdp_ops.to_terminal_info  =   NULL;	
-  remote_rdp_ops.to_kill  =   remote_rdp_kill;	
-  remote_rdp_ops.to_load  =   generic_load;	
-  remote_rdp_ops.to_lookup_symbol =   NULL;				
-  remote_rdp_ops.to_create_inferior =   remote_rdp_create_inferior;
+  remote_rdp_ops.to_detach = NULL;
+  remote_rdp_ops.to_require_detach = NULL;
+  remote_rdp_ops.to_resume = remote_rdp_resume;
+  remote_rdp_ops.to_wait = remote_rdp_wait;
+  remote_rdp_ops.to_post_wait = NULL;
+  remote_rdp_ops.to_fetch_registers = remote_rdp_fetch_register;
+  remote_rdp_ops.to_store_registers = remote_rdp_store_register;
+  remote_rdp_ops.to_prepare_to_store = remote_rdp_prepare_to_store;
+  remote_rdp_ops.to_xfer_memory = remote_rdp_xfer_inferior_memory;
+  remote_rdp_ops.to_files_info = remote_rdp_files_info;
+  remote_rdp_ops.to_insert_breakpoint = remote_rdp_insert_breakpoint;
+  remote_rdp_ops.to_remove_breakpoint = remote_rdp_remove_breakpoint;
+  remote_rdp_ops.to_terminal_init = NULL;
+  remote_rdp_ops.to_terminal_inferior = NULL;
+  remote_rdp_ops.to_terminal_ours_for_output = NULL;
+  remote_rdp_ops.to_terminal_ours = NULL;
+  remote_rdp_ops.to_terminal_info = NULL;
+  remote_rdp_ops.to_kill = remote_rdp_kill;
+  remote_rdp_ops.to_load = generic_load;
+  remote_rdp_ops.to_lookup_symbol = NULL;
+  remote_rdp_ops.to_create_inferior = remote_rdp_create_inferior;
   remote_rdp_ops.to_post_startup_inferior = NULL;
   remote_rdp_ops.to_acknowledge_created_inferior = NULL;
   remote_rdp_ops.to_clone_and_follow_inferior = NULL;
@@ -1485,28 +1486,28 @@ init_remote_rdp_ops(void)
   remote_rdp_ops.to_has_execd = NULL;
   remote_rdp_ops.to_reported_exec_events_per_exec_call = NULL;
   remote_rdp_ops.to_has_exited = NULL;
-  remote_rdp_ops.to_mourn_inferior =   generic_mourn_inferior;
-  remote_rdp_ops.to_can_run  =   remote_rdp_can_run;
-  remote_rdp_ops.to_notice_signals =   0;	
-  remote_rdp_ops.to_thread_alive  =   0;	
-  remote_rdp_ops.to_stop  =   0;
+  remote_rdp_ops.to_mourn_inferior = generic_mourn_inferior;
+  remote_rdp_ops.to_can_run = remote_rdp_can_run;
+  remote_rdp_ops.to_notice_signals = 0;
+  remote_rdp_ops.to_thread_alive = 0;
+  remote_rdp_ops.to_stop = 0;
   remote_rdp_ops.to_pid_to_exec_file = NULL;
-  remote_rdp_ops.to_core_file_to_sym_file = NULL;		
-  remote_rdp_ops.to_stratum =   process_stratum;
-  remote_rdp_ops.DONT_USE =   NULL;		
-  remote_rdp_ops.to_has_all_memory =   1;	
-  remote_rdp_ops.to_has_memory =   1;		
-  remote_rdp_ops.to_has_stack =   1;		
-  remote_rdp_ops.to_has_registers =   1;	
-  remote_rdp_ops.to_has_execution =   1;	
-  remote_rdp_ops.to_sections =   NULL;		
-  remote_rdp_ops.to_sections_end =   NULL;
-  remote_rdp_ops.to_magic =   OPS_MAGIC;
+  remote_rdp_ops.to_core_file_to_sym_file = NULL;
+  remote_rdp_ops.to_stratum = process_stratum;
+  remote_rdp_ops.DONT_USE = NULL;
+  remote_rdp_ops.to_has_all_memory = 1;
+  remote_rdp_ops.to_has_memory = 1;
+  remote_rdp_ops.to_has_stack = 1;
+  remote_rdp_ops.to_has_registers = 1;
+  remote_rdp_ops.to_has_execution = 1;
+  remote_rdp_ops.to_sections = NULL;
+  remote_rdp_ops.to_sections_end = NULL;
+  remote_rdp_ops.to_magic = OPS_MAGIC;
 }
 
 void
 _initialize_remote_rdp ()
 {
-  init_remote_rdp_ops() ;
+  init_remote_rdp_ops ();
   add_target (&remote_rdp_ops);
 }

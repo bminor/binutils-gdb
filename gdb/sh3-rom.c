@@ -1,21 +1,22 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
    Copyright 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -104,7 +105,7 @@ sh3_supply_register (regname, regnamelen, val, vallen)
   else if (regnamelen == 5)
     {
       if (regname[1] == '8' && regname[2] == '-' && regname[3] == '1'
-	  && regname[4] =='5')
+	  && regname[4] == '5')
 	{
 	  regno = R0_REGNUM + 8;
 	  numregs = 8;
@@ -125,23 +126,23 @@ sh3_load (desc, file, hashmark)
      char *file;
      int hashmark;
 {
-  if (parallel_in_use) 
+  if (parallel_in_use)
     {
-      monitor_printf("pl;s\r");
+      monitor_printf ("pl;s\r");
       load_srec (parallel, file, 0, 80, SREC_ALL, hashmark, NULL);
       monitor_expect_prompt (NULL, 0);
     }
-  else 
+  else
     {
       monitor_printf ("il;s:x\r");
-      monitor_expect ("\005", NULL, 0); /* Look for ENQ */
-      SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
-      monitor_expect ("LO x\r", NULL, 0); /* Look for filename */
+      monitor_expect ("\005", NULL, 0);		/* Look for ENQ */
+      SERIAL_WRITE (desc, "\006", 1);	/* Send ACK */
+      monitor_expect ("LO x\r", NULL, 0);	/* Look for filename */
 
       load_srec (desc, file, 0, 80, SREC_ALL, hashmark, NULL);
 
-      monitor_expect ("\005", NULL, 0); /* Look for ENQ */
-      SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
+      monitor_expect ("\005", NULL, 0);		/* Look for ENQ */
+      SERIAL_WRITE (desc, "\006", 1);	/* Send ACK */
       monitor_expect_prompt (NULL, 0);
     }
 }
@@ -151,10 +152,11 @@ sh3_load (desc, file, hashmark)
    than does GDB, and don't necessarily support all the registers
    either. So, typing "info reg sp" becomes a "r30".  */
 
-static char *sh3_regnames[NUM_REGS] = {
-  "R0", "R1", "R2",  "R3", "R4",  "R5",   "R6",  "R7",
-  "R8", "R9", "R10", "R11","R12", "R13",  "R14", "R15",
-  "PC", "PR", "GBR", "VBR","MACH","MACL", "SR",
+static char *sh3_regnames[NUM_REGS] =
+{
+  "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
+  "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
+  "PC", "PR", "GBR", "VBR", "MACH", "MACL", "SR",
   NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -165,14 +167,15 @@ static char *sh3_regnames[NUM_REGS] = {
   "R4_BANK1", "R5_BANK1", "R6_BANK1", "R7_BANK1"
 };
 
-static char *sh3e_regnames[NUM_REGS] = {
-  "R0", "R1", "R2",  "R3", "R4",  "R5",   "R6",  "R7",
-  "R8", "R9", "R10", "R11","R12", "R13",  "R14", "R15",
-  "PC", "PR", "GBR", "VBR","MACH","MACL", "SR",
+static char *sh3e_regnames[NUM_REGS] =
+{
+  "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
+  "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
+  "PC", "PR", "GBR", "VBR", "MACH", "MACL", "SR",
   "FPUL", "FPSCR",
   "FR0", "FR1", "FR2", "FR3", "FR4", "FR5", "FR6", "FR7",
   "FR8", "FR9", "FR10", "FR11", "FR12", "FR13", "FR14", "FR15",
-  "SSR","SPC",
+  "SSR", "SPC",
   "R0_BANK0", "R1_BANK0", "R2_BANK0", "R3_BANK0",
   "R4_BANK0", "R5_BANK0", "R6_BANK0", "R7_BANK0",
   "R0_BANK1", "R1_BANK1", "R2_BANK1", "R3_BANK1",
@@ -185,58 +188,59 @@ static char *sh3e_regnames[NUM_REGS] = {
 
 static struct target_ops sh3_ops, sh3e_ops;
 
-static char *sh3_inits[] = {"\003", NULL}; /* Exits sub-command mode & download cmds */
+static char *sh3_inits[] =
+{"\003", NULL};			/* Exits sub-command mode & download cmds */
 
-static struct monitor_ops sh3_cmds ;
+static struct monitor_ops sh3_cmds;
 
-static void 
-init_sh3_cmds(void)
+static void
+init_sh3_cmds (void)
 {
-  sh3_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE ;	/* flags */
-  sh3_cmds.init =   sh3_inits;		/* monitor init string */
-  sh3_cmds.cont =   "g\r";		/* continue command */
-  sh3_cmds.step =   "s\r";		/* single step */
-  sh3_cmds.stop =   "\003";		/* Interrupt program */
-  sh3_cmds.set_break =   "b %x\r";	/* set a breakpoint */
-  sh3_cmds.clr_break =   "b -%x\r";	/* clear a breakpoint */
-  sh3_cmds.clr_all_break =   "b -\r";	/* clear all breakpoints */
-  sh3_cmds.fill =   "f %x @%x %x\r";		/* fill (start len val) */
-  sh3_cmds.setmem.cmdb =     "m %x %x\r";	/* setmem.cmdb (addr, value) */
-  sh3_cmds.setmem.cmdw =     "m %x %x;w\r";	/* setmem.cmdw (addr, value) */
-  sh3_cmds.setmem.cmdl =     "m %x %x;l\r";	/* setmem.cmdl (addr, value) */
-  sh3_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
-  sh3_cmds.setmem.resp_delim =     NULL;	/* setreg.resp_delim */
-  sh3_cmds.setmem.term =     NULL;		/* setreg.term */
-  sh3_cmds.setmem.term_cmd =     NULL;		/* setreg.term_cmd */
-  sh3_cmds.getmem.cmdb =     "m %x\r";		/* getmem.cmdb (addr, len) */
-  sh3_cmds.getmem.cmdw =     "m %x;w\r";	/* getmem.cmdw (addr, len) */
-  sh3_cmds.getmem.cmdl =     "m %x;l\r";	/* getmem.cmdl (addr, len) */
-  sh3_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, len) */
-  sh3_cmds.getmem.resp_delim =     "^ [0-9A-F]+ "; /* getmem.resp_delim */
-  sh3_cmds.getmem.term =     "? ";		/* getmem.term */
-  sh3_cmds.getmem.term_cmd =     ".\r";		/* getmem.term_cmd */
-  sh3_cmds.setreg.cmd =     ".%s %x\r";		/* setreg.cmd (name, value) */
-  sh3_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
-  sh3_cmds.setreg.term =     NULL;		/* setreg.term */
-  sh3_cmds.setreg.term_cmd =     NULL;		/* setreg.term_cmd */
-  sh3_cmds.getreg.cmd =     ".%s\r";		/* getreg.cmd (name) */
-  sh3_cmds.getreg.resp_delim =     "=";		/* getreg.resp_delim */
-  sh3_cmds.getreg.term =     "? ";		/* getreg.term */
-  sh3_cmds.getreg.term_cmd =     ".\r"	;	/* getreg.term_cmd */
-  sh3_cmds.dump_registers =   "r\r";		/* dump_registers */
-  sh3_cmds.register_pattern = 	"\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)";
-  sh3_cmds.supply_register =  sh3_supply_register ;	/* supply_register */
-  sh3_cmds.load_routine =   sh3_load;		/* load_routine */
-  sh3_cmds.load =   NULL;			/* download command */
-  sh3_cmds.loadresp =   NULL;			/* Load response */
-  sh3_cmds.prompt =   "\n:";			/* monitor command prompt */
-  sh3_cmds.line_term =   "\r";			/* end-of-line terminator */
-  sh3_cmds.cmd_end =   ".\r";			/* optional command terminator */
-  sh3_cmds.target =   &sh3_ops;			/* target operations */
-  sh3_cmds.stopbits =   SERIAL_1_STOPBITS;	/* number of stop bits */
-  sh3_cmds.regnames =   sh3_regnames;		/* registers names */
-  sh3_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
-} /* init_sh3_cmds */
+  sh3_cmds.flags = MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE;	/* flags */
+  sh3_cmds.init = sh3_inits;	/* monitor init string */
+  sh3_cmds.cont = "g\r";	/* continue command */
+  sh3_cmds.step = "s\r";	/* single step */
+  sh3_cmds.stop = "\003";	/* Interrupt program */
+  sh3_cmds.set_break = "b %x\r";	/* set a breakpoint */
+  sh3_cmds.clr_break = "b -%x\r";	/* clear a breakpoint */
+  sh3_cmds.clr_all_break = "b -\r";	/* clear all breakpoints */
+  sh3_cmds.fill = "f %x @%x %x\r";	/* fill (start len val) */
+  sh3_cmds.setmem.cmdb = "m %x %x\r";	/* setmem.cmdb (addr, value) */
+  sh3_cmds.setmem.cmdw = "m %x %x;w\r";		/* setmem.cmdw (addr, value) */
+  sh3_cmds.setmem.cmdl = "m %x %x;l\r";		/* setmem.cmdl (addr, value) */
+  sh3_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
+  sh3_cmds.setmem.resp_delim = NULL;	/* setreg.resp_delim */
+  sh3_cmds.setmem.term = NULL;	/* setreg.term */
+  sh3_cmds.setmem.term_cmd = NULL;	/* setreg.term_cmd */
+  sh3_cmds.getmem.cmdb = "m %x\r";	/* getmem.cmdb (addr, len) */
+  sh3_cmds.getmem.cmdw = "m %x;w\r";	/* getmem.cmdw (addr, len) */
+  sh3_cmds.getmem.cmdl = "m %x;l\r";	/* getmem.cmdl (addr, len) */
+  sh3_cmds.getmem.cmdll = NULL;	/* getmem.cmdll (addr, len) */
+  sh3_cmds.getmem.resp_delim = "^ [0-9A-F]+ ";	/* getmem.resp_delim */
+  sh3_cmds.getmem.term = "? ";	/* getmem.term */
+  sh3_cmds.getmem.term_cmd = ".\r";	/* getmem.term_cmd */
+  sh3_cmds.setreg.cmd = ".%s %x\r";	/* setreg.cmd (name, value) */
+  sh3_cmds.setreg.resp_delim = NULL;	/* setreg.resp_delim */
+  sh3_cmds.setreg.term = NULL;	/* setreg.term */
+  sh3_cmds.setreg.term_cmd = NULL;	/* setreg.term_cmd */
+  sh3_cmds.getreg.cmd = ".%s\r";	/* getreg.cmd (name) */
+  sh3_cmds.getreg.resp_delim = "=";	/* getreg.resp_delim */
+  sh3_cmds.getreg.term = "? ";	/* getreg.term */
+  sh3_cmds.getreg.term_cmd = ".\r";	/* getreg.term_cmd */
+  sh3_cmds.dump_registers = "r\r";	/* dump_registers */
+  sh3_cmds.register_pattern = "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)";
+  sh3_cmds.supply_register = sh3_supply_register;	/* supply_register */
+  sh3_cmds.load_routine = sh3_load;	/* load_routine */
+  sh3_cmds.load = NULL;		/* download command */
+  sh3_cmds.loadresp = NULL;	/* Load response */
+  sh3_cmds.prompt = "\n:";	/* monitor command prompt */
+  sh3_cmds.line_term = "\r";	/* end-of-line terminator */
+  sh3_cmds.cmd_end = ".\r";	/* optional command terminator */
+  sh3_cmds.target = &sh3_ops;	/* target operations */
+  sh3_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
+  sh3_cmds.regnames = sh3_regnames;	/* registers names */
+  sh3_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
+}				/* init_sh3_cmds */
 
 /* This monitor structure is identical except for a couple slots, so
    we will fill it in from the base structure when needed.  */
@@ -251,12 +255,12 @@ sh3_open (args, from_tty)
   char *serial_port_name = args;
   char *parallel_port_name = 0;
 
-  if (args) 
+  if (args)
     {
       char *cursor = serial_port_name = strsave (args);
 
       while (*cursor && *cursor != ' ')
- 	cursor++;
+	cursor++;
 
       if (*cursor)
 	*cursor++ = 0;
@@ -293,12 +297,12 @@ sh3e_open (args, from_tty)
   char *serial_port_name = args;
   char *parallel_port_name = 0;
 
-  if (args) 
+  if (args)
     {
       char *cursor = serial_port_name = strsave (args);
 
       while (*cursor && *cursor != ' ')
- 	cursor++;
+	cursor++;
 
       if (*cursor)
 	*cursor++ = 0;
@@ -338,22 +342,23 @@ sh3_close (quitting)
      int quitting;
 {
   monitor_close (quitting);
-  if (parallel_in_use) {
-    SERIAL_CLOSE (parallel);
-    parallel_in_use = 0;
-  }
+  if (parallel_in_use)
+    {
+      SERIAL_CLOSE (parallel);
+      parallel_in_use = 0;
+    }
 }
 
 void
 _initialize_sh3_rom ()
 {
-  init_sh3_cmds() ;
+  init_sh3_cmds ();
   init_monitor_ops (&sh3_ops);
 
   sh3_ops.to_shortname = "sh3";
   sh3_ops.to_longname = "Hitachi SH-3 rom monitor";
 
-  sh3_ops.to_doc = 
+  sh3_ops.to_doc =
 #ifdef _WINDOWS
   /* On windows we can talk through the parallel port too. */
     "Debug on a Hitachi eval board running the SH-3 rom monitor.\n"
@@ -377,7 +382,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   sh3e_ops.to_shortname = "sh3e";
   sh3e_ops.to_longname = "Hitachi SH-3E rom monitor";
 
-  sh3e_ops.to_doc = 
+  sh3e_ops.to_doc =
 #ifdef _WINDOWS
   /* On windows we can talk through the parallel port too. */
     "Debug on a Hitachi eval board running the SH-3E rom monitor.\n"

@@ -1,21 +1,22 @@
 /* Print in infix form a struct expression.
    Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -73,7 +74,7 @@ print_subexp (exp, pos, stream, prec)
   opcode = exp->elts[pc].opcode;
   switch (opcode)
     {
-    /* Common ops */
+      /* Common ops */
 
     case OP_SCOPE:
       myprec = PREC_PREFIX;
@@ -124,7 +125,7 @@ print_subexp (exp, pos, stream, prec)
     case OP_REGISTER:
       (*pos) += 2;
       fprintf_filtered (stream, "$%s",
-	       REGISTER_NAME (longest_to_int (exp->elts[pc + 1].longconst)));
+	      REGISTER_NAME (longest_to_int (exp->elts[pc + 1].longconst)));
       return;
 
     case OP_BOOL:
@@ -137,7 +138,7 @@ print_subexp (exp, pos, stream, prec)
     case OP_INTERNALVAR:
       (*pos) += 2;
       fprintf_filtered (stream, "$%s",
-	       internalvar_name (exp->elts[pc + 1].internalvar));
+			internalvar_name (exp->elts[pc + 1].internalvar));
       return;
 
     case OP_FUNCALL:
@@ -156,22 +157,22 @@ print_subexp (exp, pos, stream, prec)
 
     case OP_NAME:
     case OP_EXPRSTRING:
-      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
       fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     case OP_STRING:
-      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
       /* LA_PRINT_STRING will print using the current repeat count threshold.
-	 If necessary, we can temporarily set it to zero, or pass it as an
-	 additional parameter to LA_PRINT_STRING.  -fnf */
+         If necessary, we can temporarily set it to zero, or pass it as an
+         additional parameter to LA_PRINT_STRING.  -fnf */
       LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0);
       return;
 
     case OP_BITSTRING:
-      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos)
 	+= 3 + BYTES_TO_EXP_ELEM ((nargs + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
       fprintf_unfiltered (stream, "B'<unimplemented>'");
@@ -265,9 +266,9 @@ print_subexp (exp, pos, stream, prec)
       if ((int) prec > (int) PREC_COMMA)
 	fputs_filtered ("(", stream);
       /* Print the subexpressions, forcing parentheses
-	 around any binary operations within them.
-	 This is more parentheses than are strictly necessary,
-	 but it looks clearer.  */
+         around any binary operations within them.
+         This is more parentheses than are strictly necessary,
+         but it looks clearer.  */
       print_subexp (exp, pos, stream, PREC_HYPER);
       fputs_filtered (" ? ", stream);
       print_subexp (exp, pos, stream, PREC_HYPER);
@@ -295,7 +296,7 @@ print_subexp (exp, pos, stream, prec)
       fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
-    /* Will not occur for Modula-2 */
+      /* Will not occur for Modula-2 */
     case STRUCTOP_PTR:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
@@ -324,38 +325,41 @@ print_subexp (exp, pos, stream, prec)
     case UNOP_CAST:
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
-        fputs_filtered ("(", stream);
+	fputs_filtered ("(", stream);
       fputs_filtered ("(", stream);
       type_print (exp->elts[pc + 1].type, "", stream, 0);
       fputs_filtered (") ", stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
       if ((int) prec > (int) PREC_PREFIX)
-        fputs_filtered (")", stream);
+	fputs_filtered (")", stream);
       return;
 
     case UNOP_MEMVAL:
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
-        fputs_filtered ("(", stream);
+	fputs_filtered ("(", stream);
       if (exp->elts[pc + 1].type->code == TYPE_CODE_FUNC &&
-	  exp->elts[pc + 3].opcode == OP_LONG) {
-	/* We have a minimal symbol fn, probably.  It's encoded
-	   as a UNOP_MEMVAL (function-type) of an OP_LONG (int, address).
-	   Swallow the OP_LONG (including both its opcodes); ignore
-	   its type; print the value in the type of the MEMVAL.  */
-	(*pos) += 4;
-	val = value_at_lazy (exp->elts[pc + 1].type,
-			     (CORE_ADDR) exp->elts[pc + 5].longconst,
-			     NULL);
-	value_print (val, stream, 0, Val_no_prettyprint);
-      } else {
-	fputs_filtered ("{", stream);
-	type_print (exp->elts[pc + 1].type, "", stream, 0);
-	fputs_filtered ("} ", stream);
-        print_subexp (exp, pos, stream, PREC_PREFIX);
-      }
+	  exp->elts[pc + 3].opcode == OP_LONG)
+	{
+	  /* We have a minimal symbol fn, probably.  It's encoded
+	     as a UNOP_MEMVAL (function-type) of an OP_LONG (int, address).
+	     Swallow the OP_LONG (including both its opcodes); ignore
+	     its type; print the value in the type of the MEMVAL.  */
+	  (*pos) += 4;
+	  val = value_at_lazy (exp->elts[pc + 1].type,
+			       (CORE_ADDR) exp->elts[pc + 5].longconst,
+			       NULL);
+	  value_print (val, stream, 0, Val_no_prettyprint);
+	}
+      else
+	{
+	  fputs_filtered ("{", stream);
+	  type_print (exp->elts[pc + 1].type, "", stream, 0);
+	  fputs_filtered ("} ", stream);
+	  print_subexp (exp, pos, stream, PREC_PREFIX);
+	}
       if ((int) prec > (int) PREC_PREFIX)
-        fputs_filtered (")", stream);
+	fputs_filtered (")", stream);
       return;
 
     case BINOP_ASSIGN_MODIFY:
@@ -377,14 +381,14 @@ print_subexp (exp, pos, stream, prec)
 	error ("Invalid expression");
       break;
 
-    /* C++ ops */
+      /* C++ ops */
 
     case OP_THIS:
       ++(*pos);
       fputs_filtered ("this", stream);
       return;
 
-    /* Modula-2 ops */
+      /* Modula-2 ops */
 
     case MULTI_SUBSCRIPT:
       (*pos) += 2;
@@ -401,19 +405,19 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case BINOP_VAL:
-      (*pos)+=2;
-      fprintf_unfiltered(stream,"VAL(");
-      type_print(exp->elts[pc+1].type,"",stream,0);
-      fprintf_unfiltered(stream,",");
-      print_subexp(exp,pos,stream,PREC_PREFIX);
-      fprintf_unfiltered(stream,")");
+      (*pos) += 2;
+      fprintf_unfiltered (stream, "VAL(");
+      type_print (exp->elts[pc + 1].type, "", stream, 0);
+      fprintf_unfiltered (stream, ",");
+      print_subexp (exp, pos, stream, PREC_PREFIX);
+      fprintf_unfiltered (stream, ")");
       return;
-      
+
     case BINOP_INCL:
     case BINOP_EXCL:
-      error("print_subexp:  Not implemented.");
+      error ("print_subexp:  Not implemented.");
 
-    /* Default ops */
+      /* Default ops */
 
     default:
       op_str = "???";
@@ -430,7 +434,7 @@ print_subexp (exp, pos, stream, prec)
 	   to interpret further elements.  For example, this happens
 	   if opcode is OP_TYPE.  */
 	error ("Invalid expression");
-   }
+    }
 
   /* Note that PREC_BUILTIN will always emit parentheses. */
   if ((int) myprec < (int) prec)
@@ -458,8 +462,8 @@ print_subexp (exp, pos, stream, prec)
     {
       /* Binary operator.  */
       /* Print left operand.
-	 If operator is right-associative,
-	 increment precedence for this operand.  */
+         If operator is right-associative,
+         increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + assoc));
       /* Print the operator itself.  */
@@ -470,8 +474,8 @@ print_subexp (exp, pos, stream, prec)
       else
 	fprintf_filtered (stream, " %s ", op_str);
       /* Print right operand.
-	 If operator is left-associative,
-	 increment precedence for this operand.  */
+         If operator is left-associative,
+         increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + !assoc));
     }
@@ -484,8 +488,8 @@ print_subexp (exp, pos, stream, prec)
    a string.   NULL indicates that the opcode was not found in the
    current language table.  */
 char *
-op_string(op)
-   enum exp_opcode op;
+op_string (op)
+     enum exp_opcode op;
 {
   int tem;
   register const struct op_print *op_print_tab;
@@ -500,11 +504,11 @@ op_string(op)
 /* Support for dumping the raw data from expressions in a human readable
    form.  */
 
-static char * op_name PARAMS ((int opcode));
+static char *op_name PARAMS ((int opcode));
 
 static char *
 op_name (opcode)
-	int opcode;
+     int opcode;
 {
   switch (opcode)
     {
@@ -515,92 +519,178 @@ op_name (opcode)
 	sprintf (buf, "<unknown %d>", opcode);
 	return buf;
       }
-    case OP_NULL: return "OP_NULL";
-    case BINOP_ADD: return "BINOP_ADD";
-    case BINOP_SUB: return "BINOP_SUB";
-    case BINOP_MUL: return "BINOP_MUL";
-    case BINOP_DIV: return "BINOP_DIV";
-    case BINOP_REM: return "BINOP_REM";
-    case BINOP_MOD: return "BINOP_MOD";
-    case BINOP_LSH: return "BINOP_LSH";
-    case BINOP_RSH: return "BINOP_RSH";
-    case BINOP_LOGICAL_AND: return "BINOP_LOGICAL_AND";
-    case BINOP_LOGICAL_OR: return "BINOP_LOGICAL_OR";
-    case BINOP_BITWISE_AND: return "BINOP_BITWISE_AND";
-    case BINOP_BITWISE_IOR: return "BINOP_BITWISE_IOR";
-    case BINOP_BITWISE_XOR: return "BINOP_BITWISE_XOR";
-    case BINOP_EQUAL: return "BINOP_EQUAL";
-    case BINOP_NOTEQUAL: return "BINOP_NOTEQUAL";
-    case BINOP_LESS: return "BINOP_LESS";
-    case BINOP_GTR: return "BINOP_GTR";
-    case BINOP_LEQ: return "BINOP_LEQ";
-    case BINOP_GEQ: return "BINOP_GEQ";
-    case BINOP_REPEAT: return "BINOP_REPEAT";
-    case BINOP_ASSIGN: return "BINOP_ASSIGN";
-    case BINOP_COMMA: return "BINOP_COMMA";
-    case BINOP_SUBSCRIPT: return "BINOP_SUBSCRIPT";
-    case MULTI_SUBSCRIPT: return "MULTI_SUBSCRIPT";
-    case BINOP_EXP: return "BINOP_EXP";
-    case BINOP_MIN: return "BINOP_MIN";
-    case BINOP_MAX: return "BINOP_MAX";
-    case BINOP_SCOPE: return "BINOP_SCOPE";
-    case STRUCTOP_MEMBER: return "STRUCTOP_MEMBER";
-    case STRUCTOP_MPTR: return "STRUCTOP_MPTR";
-    case BINOP_INTDIV: return "BINOP_INTDIV";
-    case BINOP_ASSIGN_MODIFY: return "BINOP_ASSIGN_MODIFY";
-    case BINOP_VAL: return "BINOP_VAL";
-    case BINOP_INCL: return "BINOP_INCL";
-    case BINOP_EXCL: return "BINOP_EXCL";
-    case BINOP_CONCAT: return "BINOP_CONCAT";
-    case BINOP_RANGE: return "BINOP_RANGE";
-    case BINOP_END: return "BINOP_END";
-    case TERNOP_COND: return "TERNOP_COND";
-    case TERNOP_SLICE: return "TERNOP_SLICE";
-    case TERNOP_SLICE_COUNT: return "TERNOP_SLICE_COUNT";
-    case OP_LONG: return "OP_LONG";
-    case OP_DOUBLE: return "OP_DOUBLE";
-    case OP_VAR_VALUE: return "OP_VAR_VALUE";
-    case OP_LAST: return "OP_LAST";
-    case OP_REGISTER: return "OP_REGISTER";
-    case OP_INTERNALVAR: return "OP_INTERNALVAR";
-    case OP_FUNCALL: return "OP_FUNCALL";
-    case OP_STRING: return "OP_STRING";
-    case OP_BITSTRING: return "OP_BITSTRING";
-    case OP_ARRAY: return "OP_ARRAY";
-    case UNOP_CAST: return "UNOP_CAST";
-    case UNOP_MEMVAL: return "UNOP_MEMVAL";
-    case UNOP_NEG: return "UNOP_NEG";
-    case UNOP_LOGICAL_NOT: return "UNOP_LOGICAL_NOT";
-    case UNOP_COMPLEMENT: return "UNOP_COMPLEMENT";
-    case UNOP_IND: return "UNOP_IND";
-    case UNOP_ADDR: return "UNOP_ADDR";
-    case UNOP_PREINCREMENT: return "UNOP_PREINCREMENT";
-    case UNOP_POSTINCREMENT: return "UNOP_POSTINCREMENT";
-    case UNOP_PREDECREMENT: return "UNOP_PREDECREMENT";
-    case UNOP_POSTDECREMENT: return "UNOP_POSTDECREMENT";
-    case UNOP_SIZEOF: return "UNOP_SIZEOF";
-    case UNOP_LOWER: return "UNOP_LOWER";
-    case UNOP_UPPER: return "UNOP_UPPER";
-    case UNOP_LENGTH: return "UNOP_LENGTH";
-    case UNOP_PLUS: return "UNOP_PLUS";
-    case UNOP_CAP: return "UNOP_CAP";
-    case UNOP_CHR: return "UNOP_CHR";
-    case UNOP_ORD: return "UNOP_ORD";
-    case UNOP_ABS: return "UNOP_ABS";
-    case UNOP_FLOAT: return "UNOP_FLOAT";
-    case UNOP_HIGH: return "UNOP_HIGH";
-    case UNOP_MAX: return "UNOP_MAX";
-    case UNOP_MIN: return "UNOP_MIN";
-    case UNOP_ODD: return "UNOP_ODD";
-    case UNOP_TRUNC: return "UNOP_TRUNC";
-    case OP_BOOL: return "OP_BOOL";
-    case OP_M2_STRING: return "OP_M2_STRING";
-    case STRUCTOP_STRUCT: return "STRUCTOP_STRUCT";
-    case STRUCTOP_PTR: return "STRUCTOP_PTR";
-    case OP_THIS: return "OP_THIS";
-    case OP_SCOPE: return "OP_SCOPE";
-    case OP_TYPE: return "OP_TYPE";
-    case OP_LABELED: return "OP_LABELED";
+    case OP_NULL:
+      return "OP_NULL";
+    case BINOP_ADD:
+      return "BINOP_ADD";
+    case BINOP_SUB:
+      return "BINOP_SUB";
+    case BINOP_MUL:
+      return "BINOP_MUL";
+    case BINOP_DIV:
+      return "BINOP_DIV";
+    case BINOP_REM:
+      return "BINOP_REM";
+    case BINOP_MOD:
+      return "BINOP_MOD";
+    case BINOP_LSH:
+      return "BINOP_LSH";
+    case BINOP_RSH:
+      return "BINOP_RSH";
+    case BINOP_LOGICAL_AND:
+      return "BINOP_LOGICAL_AND";
+    case BINOP_LOGICAL_OR:
+      return "BINOP_LOGICAL_OR";
+    case BINOP_BITWISE_AND:
+      return "BINOP_BITWISE_AND";
+    case BINOP_BITWISE_IOR:
+      return "BINOP_BITWISE_IOR";
+    case BINOP_BITWISE_XOR:
+      return "BINOP_BITWISE_XOR";
+    case BINOP_EQUAL:
+      return "BINOP_EQUAL";
+    case BINOP_NOTEQUAL:
+      return "BINOP_NOTEQUAL";
+    case BINOP_LESS:
+      return "BINOP_LESS";
+    case BINOP_GTR:
+      return "BINOP_GTR";
+    case BINOP_LEQ:
+      return "BINOP_LEQ";
+    case BINOP_GEQ:
+      return "BINOP_GEQ";
+    case BINOP_REPEAT:
+      return "BINOP_REPEAT";
+    case BINOP_ASSIGN:
+      return "BINOP_ASSIGN";
+    case BINOP_COMMA:
+      return "BINOP_COMMA";
+    case BINOP_SUBSCRIPT:
+      return "BINOP_SUBSCRIPT";
+    case MULTI_SUBSCRIPT:
+      return "MULTI_SUBSCRIPT";
+    case BINOP_EXP:
+      return "BINOP_EXP";
+    case BINOP_MIN:
+      return "BINOP_MIN";
+    case BINOP_MAX:
+      return "BINOP_MAX";
+    case BINOP_SCOPE:
+      return "BINOP_SCOPE";
+    case STRUCTOP_MEMBER:
+      return "STRUCTOP_MEMBER";
+    case STRUCTOP_MPTR:
+      return "STRUCTOP_MPTR";
+    case BINOP_INTDIV:
+      return "BINOP_INTDIV";
+    case BINOP_ASSIGN_MODIFY:
+      return "BINOP_ASSIGN_MODIFY";
+    case BINOP_VAL:
+      return "BINOP_VAL";
+    case BINOP_INCL:
+      return "BINOP_INCL";
+    case BINOP_EXCL:
+      return "BINOP_EXCL";
+    case BINOP_CONCAT:
+      return "BINOP_CONCAT";
+    case BINOP_RANGE:
+      return "BINOP_RANGE";
+    case BINOP_END:
+      return "BINOP_END";
+    case TERNOP_COND:
+      return "TERNOP_COND";
+    case TERNOP_SLICE:
+      return "TERNOP_SLICE";
+    case TERNOP_SLICE_COUNT:
+      return "TERNOP_SLICE_COUNT";
+    case OP_LONG:
+      return "OP_LONG";
+    case OP_DOUBLE:
+      return "OP_DOUBLE";
+    case OP_VAR_VALUE:
+      return "OP_VAR_VALUE";
+    case OP_LAST:
+      return "OP_LAST";
+    case OP_REGISTER:
+      return "OP_REGISTER";
+    case OP_INTERNALVAR:
+      return "OP_INTERNALVAR";
+    case OP_FUNCALL:
+      return "OP_FUNCALL";
+    case OP_STRING:
+      return "OP_STRING";
+    case OP_BITSTRING:
+      return "OP_BITSTRING";
+    case OP_ARRAY:
+      return "OP_ARRAY";
+    case UNOP_CAST:
+      return "UNOP_CAST";
+    case UNOP_MEMVAL:
+      return "UNOP_MEMVAL";
+    case UNOP_NEG:
+      return "UNOP_NEG";
+    case UNOP_LOGICAL_NOT:
+      return "UNOP_LOGICAL_NOT";
+    case UNOP_COMPLEMENT:
+      return "UNOP_COMPLEMENT";
+    case UNOP_IND:
+      return "UNOP_IND";
+    case UNOP_ADDR:
+      return "UNOP_ADDR";
+    case UNOP_PREINCREMENT:
+      return "UNOP_PREINCREMENT";
+    case UNOP_POSTINCREMENT:
+      return "UNOP_POSTINCREMENT";
+    case UNOP_PREDECREMENT:
+      return "UNOP_PREDECREMENT";
+    case UNOP_POSTDECREMENT:
+      return "UNOP_POSTDECREMENT";
+    case UNOP_SIZEOF:
+      return "UNOP_SIZEOF";
+    case UNOP_LOWER:
+      return "UNOP_LOWER";
+    case UNOP_UPPER:
+      return "UNOP_UPPER";
+    case UNOP_LENGTH:
+      return "UNOP_LENGTH";
+    case UNOP_PLUS:
+      return "UNOP_PLUS";
+    case UNOP_CAP:
+      return "UNOP_CAP";
+    case UNOP_CHR:
+      return "UNOP_CHR";
+    case UNOP_ORD:
+      return "UNOP_ORD";
+    case UNOP_ABS:
+      return "UNOP_ABS";
+    case UNOP_FLOAT:
+      return "UNOP_FLOAT";
+    case UNOP_HIGH:
+      return "UNOP_HIGH";
+    case UNOP_MAX:
+      return "UNOP_MAX";
+    case UNOP_MIN:
+      return "UNOP_MIN";
+    case UNOP_ODD:
+      return "UNOP_ODD";
+    case UNOP_TRUNC:
+      return "UNOP_TRUNC";
+    case OP_BOOL:
+      return "OP_BOOL";
+    case OP_M2_STRING:
+      return "OP_M2_STRING";
+    case STRUCTOP_STRUCT:
+      return "STRUCTOP_STRUCT";
+    case STRUCTOP_PTR:
+      return "STRUCTOP_PTR";
+    case OP_THIS:
+      return "OP_THIS";
+    case OP_SCOPE:
+      return "OP_SCOPE";
+    case OP_TYPE:
+      return "OP_TYPE";
+    case OP_LABELED:
+      return "OP_LABELED";
     }
 }
 
@@ -623,21 +713,21 @@ dump_prefix_expression (exp, stream, note)
   else
     fprintf_filtered (stream, "Type printing not yet supported....");
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %d bytes each.\n",
-		    exp->language_defn->la_name, exp -> nelts,
+		    exp->language_defn->la_name, exp->nelts,
 		    sizeof (union exp_element));
   fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
 		    "Hex Value", "String Value");
-  for (elt = 0; elt < exp -> nelts; elt++)
+  for (elt = 0; elt < exp->nelts; elt++)
     {
       fprintf_filtered (stream, "\t%5d  ", elt);
-      opcode_name = op_name (exp -> elts[elt].opcode);
+      opcode_name = op_name (exp->elts[elt].opcode);
 
       fprintf_filtered (stream, "%20s  ", opcode_name);
-      print_longest (stream, 'd', 0, exp -> elts[elt].longconst);
+      print_longest (stream, 'd', 0, exp->elts[elt].longconst);
       fprintf_filtered (stream, "  ");
 
       for (eltscan = (char *) &exp->elts[elt],
-	     eltsize = sizeof (union exp_element) ;
+	   eltsize = sizeof (union exp_element);
 	   eltsize-- > 0;
 	   eltscan++)
 	{
@@ -648,7 +738,7 @@ dump_prefix_expression (exp, stream, note)
     }
 }
 
-static int dump_subexp PARAMS ((struct expression *exp, GDB_FILE *stream, int elt));
+static int dump_subexp PARAMS ((struct expression * exp, GDB_FILE * stream, int elt));
 
 static int
 dump_subexp (exp, stream, elt)
@@ -668,7 +758,7 @@ dump_subexp (exp, stream, elt)
 
   fprintf_filtered (stream, "%-20s  ", op_name (exp->elts[elt].opcode));
 
-  switch (exp -> elts[elt++].opcode)
+  switch (exp->elts[elt++].opcode)
     {
     case TERNOP_COND:
     case TERNOP_SLICE:
@@ -744,32 +834,32 @@ dump_subexp (exp, stream, elt)
       fprintf_filtered (stream, "Type @0x%x (", exp->elts[elt].type);
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, "), value %ld (0x%lx)",
-			(long)exp->elts[elt+1].longconst,
-			(long)exp->elts[elt+1].longconst);
+			(long) exp->elts[elt + 1].longconst,
+			(long) exp->elts[elt + 1].longconst);
       elt += 3;
       break;
     case OP_DOUBLE:
       fprintf_filtered (stream, "Type @0x%x (", exp->elts[elt].type);
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, "), value %g",
-			(double)exp->elts[elt+1].doubleconst);
+			(double) exp->elts[elt + 1].doubleconst);
       elt += 3;
       break;
     case OP_VAR_VALUE:
       fprintf_filtered (stream, "Block @0x%x, symbol @0x%x (%s)",
 			exp->elts[elt].block,
-			exp->elts[elt+1].symbol,
-			SYMBOL_NAME (exp->elts[elt+1].symbol));
+			exp->elts[elt + 1].symbol,
+			SYMBOL_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
       break;
     case OP_LAST:
       fprintf_filtered (stream, "History element %ld",
-			(long)exp->elts[elt].longconst);
+			(long) exp->elts[elt].longconst);
       elt += 2;
       break;
     case OP_REGISTER:
       fprintf_filtered (stream, "Register %ld",
-			(long)exp->elts[elt].longconst);
+			(long) exp->elts[elt].longconst);
       elt += 2;
       break;
     case OP_INTERNALVAR:
@@ -809,14 +899,14 @@ dump_subexp (exp, stream, elt)
     case UNOP_MEMVAL:
     case UNOP_CAST:
       fprintf_filtered (stream, "Type @0x%x (",
-			  exp->elts[elt].type);
+			exp->elts[elt].type);
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt = dump_subexp (exp, stream, elt + 2);
       break;
     case OP_TYPE:
       fprintf_filtered (stream, "Type @0x%x (",
-			  exp->elts[elt].type);
+			exp->elts[elt].type);
       type_print (exp->elts[elt].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt += 2;
@@ -889,11 +979,11 @@ dump_postfix_expression (exp, stream, note)
   else
     fputs_filtered ("Type printing not yet supported....", stream);
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %d bytes each.\n",
-		    exp->language_defn->la_name, exp -> nelts,
+		    exp->language_defn->la_name, exp->nelts,
 		    sizeof (union exp_element));
   fputs_filtered ("\n", stream);
 
-  for (elt = 0; elt < exp -> nelts;)
+  for (elt = 0; elt < exp->nelts;)
     elt = dump_subexp (exp, stream, elt);
   fputs_filtered ("\n", stream);
 }

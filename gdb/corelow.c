@@ -2,21 +2,22 @@
    Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -24,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "frame.h"  /* required by inferior.h */
+#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"
 #include "command.h"
@@ -76,7 +77,7 @@ void
 add_core_fns (cf)
      struct core_fns *cf;
 {
-  cf -> next = core_file_fns;
+  cf->next = core_file_fns;
   core_file_fns = cf;
 }
 
@@ -96,7 +97,7 @@ core_close (quitting)
       inferior_pid = 0;		/* Avoid confusion from thread stuff */
 
       /* Clear out solib state while the bfd is still open. See
-	 comments in clear_solib in solib.c. */
+         comments in clear_solib in solib.c. */
 #ifdef CLEAR_SOLIB
       CLEAR_SOLIB ();
 #endif
@@ -109,7 +110,7 @@ core_close (quitting)
       core_bfd = NULL;
       if (core_ops.to_sections)
 	{
-	  free ((PTR)core_ops.to_sections);
+	  free ((PTR) core_ops.to_sections);
 	  core_ops.to_sections = NULL;
 	  core_ops.to_sections_end = NULL;
 	}
@@ -120,11 +121,11 @@ core_close (quitting)
 /* Stub function for catch_errors around shared library hacking.  FROM_TTYP
    is really an int * which points to from_tty.  */
 
-static int 
+static int
 solib_add_stub (from_ttyp)
      PTR from_ttyp;
 {
-  SOLIB_ADD (NULL, *(int *)from_ttyp, &current_target);
+  SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target);
   re_enable_breakpoints_in_shlibs ();
   return 0;
 }
@@ -152,7 +153,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
 /* Warning, Will Robinson, looking at BFD private data! */
 
   if (reg_sect != NULL
-      && asect->filepos == reg_sect->filepos) /* Did we find .reg? */
+      && asect->filepos == reg_sect->filepos)	/* Did we find .reg? */
     inferior_pid = thread_id;	/* Yes, make it current */
 }
 
@@ -174,9 +175,9 @@ core_open (filename, from_tty)
   target_preopen (from_tty);
   if (!filename)
     {
-      error (core_bfd ? 
-       "No core file specified.  (Use `detach' to stop debugging a core file.)"
-     : "No core file specified.");
+      error (core_bfd ?
+	     "No core file specified.  (Use `detach' to stop debugging a core file.)"
+	     : "No core file specified.");
     }
 
   filename = tilde_expand (filename);
@@ -201,8 +202,8 @@ core_open (filename, from_tty)
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one thing,
-	 on error it does not free all the storage associated with the
-	 bfd).  */
+         on error it does not free all the storage associated with the
+         bfd).  */
       make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     filename, bfd_errmsg (bfd_get_error ()));
@@ -210,7 +211,7 @@ core_open (filename, from_tty)
 
   /* Looks semi-reasonable.  Toss the old core file and work on the new.  */
 
-  discard_cleanups (old_chain);		/* Don't free filename any more */
+  discard_cleanups (old_chain);	/* Don't free filename any more */
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
   old_chain = make_cleanup ((make_cleanup_func) core_close, core_bfd);
@@ -248,7 +249,7 @@ core_open (filename, from_tty)
 
       /* Add symbols and section mappings for any shared libraries.  */
 #ifdef SOLIB_ADD
-      catch_errors (solib_add_stub, &from_tty, (char *)0,
+      catch_errors (solib_add_stub, &from_tty, (char *) 0,
 		    RETURN_MASK_ALL);
 #endif
 
@@ -260,7 +261,7 @@ core_open (filename, from_tty)
   else
     {
       warning (
-"you won't be able to access this core file until you terminate\n\
+		"you won't be able to access this core file until you terminate\n\
 your %s; do ``info files''", target_longname);
     }
 }
@@ -299,7 +300,7 @@ get_core_registers (regno)
   if (core_file_fns == NULL)
     {
       fprintf_filtered (gdb_stderr,
-			"Can't fetch registers from this type of core file\n");
+		     "Can't fetch registers from this type of core file\n");
       return;
     }
 
@@ -321,9 +322,9 @@ get_core_registers (regno)
   the_regs = alloca (size);
   /* Look for the core functions that match this flavor.  Default to the
      first one if nothing matches. */
-  for (cf = core_file_fns; cf != NULL; cf = cf -> next)
+  for (cf = core_file_fns; cf != NULL; cf = cf->next)
     {
-      if (our_flavour == cf -> core_flavour)
+      if (our_flavour == cf->core_flavour)
 	{
 	  break;
 	}
@@ -333,15 +334,15 @@ get_core_registers (regno)
       cf = core_file_fns;
     }
   if (cf != NULL &&
-      bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size) &&
-      cf -> core_read_registers != NULL)
+      bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
+      cf->core_read_registers != NULL)
     {
-      (cf -> core_read_registers (the_regs, size, 0,
-				  (unsigned) bfd_section_vma (abfd,reg_sec)));
+      (cf->core_read_registers (the_regs, size, 0,
+				(unsigned) bfd_section_vma (abfd, reg_sec)));
     }
   else
     {
-cant:
+    cant:
       fprintf_filtered (gdb_stderr,
 			"Couldn't fetch registers from core file: %s\n",
 			bfd_errmsg (bfd_get_error ()));
@@ -354,16 +355,16 @@ cant:
       size = bfd_section_size (core_bfd, reg_sec);
       the_regs = alloca (size);
       if (cf != NULL &&
-	  bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size) &&
-	  cf -> core_read_registers != NULL)
+	  bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
+	  cf->core_read_registers != NULL)
 	{
-	  (cf -> core_read_registers (the_regs, size, 2,
-				      (unsigned) bfd_section_vma (abfd,reg_sec)));
+	  (cf->core_read_registers (the_regs, size, 2,
+			       (unsigned) bfd_section_vma (abfd, reg_sec)));
 	}
       else
 	{
-	  fprintf_filtered (gdb_stderr, 
-			    "Couldn't fetch register set 2 from core file: %s\n",
+	  fprintf_filtered (gdb_stderr,
+		       "Couldn't fetch register set 2 from core file: %s\n",
 			    bfd_errmsg (bfd_get_error ()));
 	}
     }
@@ -372,15 +373,15 @@ cant:
 
 static char *
 core_file_to_sym_file (core)
-  char *  core;
+     char *core;
 {
-  CONST char *  failing_command;
-  char *  p;
-  char *  temp;
-  bfd *  temp_bfd;
-  int  scratch_chan;
+  CONST char *failing_command;
+  char *p;
+  char *temp;
+  bfd *temp_bfd;
+  int scratch_chan;
 
-  if (! core)
+  if (!core)
     error ("No core file specified.");
 
   core = tilde_expand (core);
@@ -402,8 +403,8 @@ core_file_to_sym_file (core)
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one thing,
-	 on error it does not free all the storage associated with the
-	 bfd).  */
+         on error it does not free all the storage associated with the
+         bfd).  */
       make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     core, bfd_errmsg (bfd_get_error ()));
@@ -425,7 +426,7 @@ core_file_to_sym_file (core)
      than trying to be sauve about finding it, just check if the file
      exists where we are now.  If not, then punt and tell our client
      we couldn't find the sym file.
-     */
+   */
   p = (char *) failing_command;
   if ((p != NULL) && (access (p, F_OK) != 0))
     p = NULL;
@@ -435,7 +436,7 @@ core_file_to_sym_file (core)
 
 static void
 core_files_info (t)
-  struct target_ops *t;
+     struct target_ops *t;
 {
   print_section_info (t, core_bfd);
 }
@@ -457,10 +458,10 @@ ignore (addr, contents)
    that each & every one is alive, then we don't get any of them
    to appear in an "info thread" command, which is quite a useful
    behaviour.
-   */
+ */
 static int
 core_file_thread_alive (tid)
-  int  tid;
+     int tid;
 {
   return 1;
 }
@@ -493,7 +494,7 @@ init_core_ops ()
   core_ops.to_has_memory = 1;
   core_ops.to_has_stack = 1;
   core_ops.to_has_registers = 1;
-  core_ops.to_magic = OPS_MAGIC;	
+  core_ops.to_magic = OPS_MAGIC;
 }
 
 /* non-zero if we should not do the add_target call in

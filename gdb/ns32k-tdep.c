@@ -2,21 +2,22 @@
    Copyright 1986, 1988, 1991, 1992, 1994, 1995
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 
@@ -36,12 +37,13 @@ merlin_skip_prologue (pc)
   register int op = read_memory_integer (pc, 1);
   if (op == 0x82)
     {
-      op = read_memory_integer (pc+2,1);
+      op = read_memory_integer (pc + 2, 1);
       if ((op & 0x80) == 0)
 	pc += 3;
       else if ((op & 0xc0) == 0x80)
 	pc += 4;
-      else pc += 6;
+      else
+	pc += 6;
     }
   return pc;
 }
@@ -53,14 +55,14 @@ umax_skip_prologue (pc)
   register unsigned char op = read_memory_integer (pc, 1);
   if (op == 0x82)
     {
-      op = read_memory_integer (pc+2,1);
+      op = read_memory_integer (pc + 2, 1);
       if ((op & 0x80) == 0)
 	pc += 3;
       else if ((op & 0xc0) == 0x80)
 	pc += 4;
       else
 	pc += 6;
-    } 
+    }
   return pc;
 }
 
@@ -78,22 +80,22 @@ merlin_frame_num_args (fi)
   int width;
 
   pc = FRAME_SAVED_PC (fi);
-  insn = read_memory_integer (pc,2);
+  insn = read_memory_integer (pc, 2);
   addr_mode = (insn >> 11) & 0x1f;
   insn = insn & 0x7ff;
   if ((insn & 0x7fc) == 0x57c
-      && addr_mode == 0x14) /* immediate */
+      && addr_mode == 0x14)	/* immediate */
     {
-      if (insn == 0x57c) /* adjspb */
+      if (insn == 0x57c)	/* adjspb */
 	width = 1;
-      else if (insn == 0x57d) /* adjspw */
+      else if (insn == 0x57d)	/* adjspw */
 	width = 2;
-      else if (insn == 0x57f) /* adjspd */
+      else if (insn == 0x57f)	/* adjspd */
 	width = 4;
-      numargs = read_memory_integer (pc+2,width);
+      numargs = read_memory_integer (pc + 2, width);
       if (width > 1)
 	flip_bytes (&numargs, width);
-      numargs = - sign_extend (numargs, width*8) / 4;
+      numargs = -sign_extend (numargs, width * 8) / 4;
     }
   else
     numargs = -1;
@@ -124,22 +126,22 @@ umax_frame_num_args (fi)
       pc = ((enter_addr == 1)
 	    ? SAVED_PC_AFTER_CALL (fi)
 	    : FRAME_SAVED_PC (fi));
-      insn = read_memory_integer (pc,2);
+      insn = read_memory_integer (pc, 2);
       addr_mode = (insn >> 11) & 0x1f;
       insn = insn & 0x7ff;
       if ((insn & 0x7fc) == 0x57c
-	  && addr_mode == 0x14) /* immediate */
+	  && addr_mode == 0x14)	/* immediate */
 	{
-	  if (insn == 0x57c) /* adjspb */
+	  if (insn == 0x57c)	/* adjspb */
 	    width = 1;
-	  else if (insn == 0x57d) /* adjspw */
+	  else if (insn == 0x57d)	/* adjspw */
 	    width = 2;
-	  else if (insn == 0x57f) /* adjspd */
+	  else if (insn == 0x57f)	/* adjspd */
 	    width = 4;
-	  numargs = read_memory_integer (pc+2,width);
+	  numargs = read_memory_integer (pc + 2, width);
 	  if (width > 1)
 	    flip_bytes (&numargs, width);
-	  numargs = - sign_extend (numargs, width*8) / 4;
+	  numargs = -sign_extend (numargs, width * 8) / 4;
 	}
     }
   return numargs;
@@ -149,7 +151,7 @@ umax_frame_num_args (fi)
 sign_extend (value, bits)
 {
   value = value & ((1 << bits) - 1);
-  return (value & (1 << (bits-1))
+  return (value & (1 << (bits - 1))
 	  ? value | (~((1 << bits) - 1))
 	  : value);
 }
@@ -164,8 +166,8 @@ flip_bytes (ptr, count)
   while (count > 0)
     {
       tmp = *ptr;
-      ptr[0] = ptr[count-1];
-      ptr[count-1] = tmp;
+      ptr[0] = ptr[count - 1];
+      ptr[count - 1] = tmp;
       ptr++;
       count -= 2;
     }
@@ -182,17 +184,17 @@ ns32k_localcount (enter_pc)
   unsigned char localtype;
   int localcount;
 
-  localtype = read_memory_integer (enter_pc+2, 1);
+  localtype = read_memory_integer (enter_pc + 2, 1);
   if ((localtype & 0x80) == 0)
     localcount = localtype;
   else if ((localtype & 0xc0) == 0x80)
     localcount = (((localtype & 0x3f) << 8)
-		  | (read_memory_integer (enter_pc+3, 1) & 0xff));
+		  | (read_memory_integer (enter_pc + 3, 1) & 0xff));
   else
     localcount = (((localtype & 0x3f) << 24)
-		  | ((read_memory_integer (enter_pc+3, 1) & 0xff) << 16)
-		  | ((read_memory_integer (enter_pc+4, 1) & 0xff) << 8 )
-		  | (read_memory_integer (enter_pc+5, 1) & 0xff));
+		  | ((read_memory_integer (enter_pc + 3, 1) & 0xff) << 16)
+		  | ((read_memory_integer (enter_pc + 4, 1) & 0xff) << 8)
+		  | (read_memory_integer (enter_pc + 5, 1) & 0xff));
   return localcount;
 }
 
@@ -226,17 +228,17 @@ ns32k_get_enter_addr (pc)
     return 0;
 
   if (ns32k_about_to_return (pc))
-    return 1;		/* after exit */
+    return 1;			/* after exit */
 
   enter_addr = get_pc_function_start (pc);
 
-  if (pc == enter_addr) 
-    return 1;		/* before enter */
+  if (pc == enter_addr)
+    return 1;			/* before enter */
 
   op = read_memory_integer (enter_addr, 1);
 
   if (op != 0x82)
-    return 0;		/* function has no enter/exit */
+    return 0;			/* function has no enter/exit */
 
-  return enter_addr;	/* pc is between enter and exit */
+  return enter_addr;		/* pc is between enter and exit */
 }

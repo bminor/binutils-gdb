@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -100,11 +101,11 @@ mac_open (scb, name)
       return (-1);
     }
   /* We got something open. */
-  if (1 /* using custom buffer */)
+  if (1 /* using custom buffer */ )
     SerSetBuf (input_refnum, mac_input_buffer, 4096);
   /* Set to a GDB-preferred state. */
-  SerReset (input_refnum,  stop10|noParity|data8|baud9600);
-  SerReset (output_refnum, stop10|noParity|data8|baud9600);
+  SerReset (input_refnum, stop10 | noParity | data8 | baud9600);
+  SerReset (output_refnum, stop10 | noParity | data8 | baud9600);
   {
     CntrlParam cb;
     struct SerShk *handshake;
@@ -120,7 +121,7 @@ mac_open (scb, name)
     handshake->evts = 0;
     handshake->fInX = 0;
     handshake->fDTR = 0;
-    err = PBControl ((ParmBlkPtr) &cb, 0);
+    err = PBControl ((ParmBlkPtr) & cb, 0);
     if (err < 0)
       return (-1);
   }
@@ -168,7 +169,7 @@ mac_readchar (scb, timeout)
     {
       cb.ioCRefNum = input_refnum;
       cb.csCode = 2;
-      err = PBStatus ((ParmBlkPtr) &cb, 0);
+      err = PBStatus ((ParmBlkPtr) & cb, 0);
       if (err < 0)
 	return SERIAL_ERROR;
       n = *((long *) &cb.csParam[0]);
@@ -177,7 +178,7 @@ mac_readchar (scb, timeout)
 	  pb.ioRefNum = input_refnum;
 	  pb.ioBuffer = (Ptr) (scb->buf);
 	  pb.ioReqCount = (n > 64 ? 64 : n);
-	  err = PBRead ((ParmBlkPtr) &pb, 0);
+	  err = PBRead ((ParmBlkPtr) & pb, 0);
 	  if (err < 0)
 	    return SERIAL_ERROR;
 	  scb->bufcnt = pb.ioReqCount;
@@ -243,23 +244,64 @@ mac_print_tty_state (scb, ttystate)
    to what the serial driver wants, we should use it.  Until
    we get one, this table will have to do.  */
 
-static struct {
+static struct
+{
   int real_rate;
   int bits;
-} mac_baud_rate_table[] = {
-  { 57600, baud57600 },
-  { 38400, 1 },
-  { 19200, baud19200 },
-  { 9600, baud9600 },
-  { 7200, baud7200 },
-  { 4800, baud4800 },
-  { 3600, baud3600 },
-  { 2400, baud2400 },
-  { 1800, baud1800 },
-  { 1200, baud1200 },
-  { 600, baud600 },
-  { 300, baud300 },
-  { 0, 0 }
+}
+mac_baud_rate_table[] =
+{
+  {
+    57600, baud57600
+  }
+  ,
+  {
+    38400, 1
+  }
+  ,
+  {
+    19200, baud19200
+  }
+  ,
+  {
+    9600, baud9600
+  }
+  ,
+  {
+    7200, baud7200
+  }
+  ,
+  {
+    4800, baud4800
+  }
+  ,
+  {
+    3600, baud3600
+  }
+  ,
+  {
+    2400, baud2400
+  }
+  ,
+  {
+    1800, baud1800
+  }
+  ,
+  {
+    1200, baud1200
+  }
+  ,
+  {
+    600, baud600
+  }
+  ,
+  {
+    300, baud300
+  }
+  ,
+  {
+    0, 0
+  }
 };
 
 static int
@@ -277,8 +319,8 @@ mac_set_baud_rate (scb, rate)
 	  break;
 	}
     }
-  SerReset (input_refnum,  stop10|noParity|data8|bits);
-  SerReset (output_refnum, stop10|noParity|data8|bits);
+  SerReset (input_refnum, stop10 | noParity | data8 | bits);
+  SerReset (output_refnum, stop10 | noParity | data8 | bits);
 }
 
 static int
@@ -307,7 +349,7 @@ mac_write (scb, str, len)
   pb.ioRefNum = output_refnum;
   pb.ioBuffer = (Ptr) str;
   pb.ioReqCount = len;
-  err = PBWrite ((ParmBlkPtr) &pb, 0);
+  err = PBWrite ((ParmBlkPtr) & pb, 0);
   if (err < 0)
     {
       return 1;
@@ -320,14 +362,14 @@ mac_close (serial_t scb)
 {
   if (input_refnum)
     {
-      if (1 /* custom buffer */)
+      if (1 /* custom buffer */ )
 	SerSetBuf (input_refnum, mac_input_buffer, 0);
       CloseDriver (input_refnum);
       input_refnum = 0;
     }
   if (output_refnum)
     {
-      if (0 /* custom buffer */)
+      if (0 /* custom buffer */ )
 	SerSetBuf (input_refnum, mac_output_buffer, 0);
       CloseDriver (output_refnum);
       output_refnum = 0;

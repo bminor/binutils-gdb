@@ -1,24 +1,25 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
    Copyright 1993, 1996, 1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
 
-Written by the Center for Software Science at the Univerity of Utah
-and by Cygnus Support.  */
+   Written by the Center for Software Science at the Univerity of Utah
+   and by Cygnus Support.  */
 
 
 #include "defs.h"
@@ -50,7 +51,7 @@ and by Cygnus Support.  */
 
 /* #define SOLIB_DEBUG
  */
- 
+
 /* Defined in exec.c; used to prevent dangling pointer bug.
  */
 extern struct target_ops exec_ops;
@@ -62,7 +63,7 @@ extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
    define the meaning of the various bits in the distinguished __dld_flags
    variable that is declared in every debuggable a.out on HP-UX, and that
    is shared between the debugger and the dynamic linker.
-   */
+ */
 #define DLD_FLAGS_MAPPRIVATE    0x1
 #define DLD_FLAGS_HOOKVALID     0x2
 #define DLD_FLAGS_LISTVALID     0x4
@@ -80,76 +81,76 @@ extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
    any HPUX include file.  */
 
 struct som_solib_mapped_entry
-{
-  /* The name of the library.  */
-  char *name;
+  {
+    /* The name of the library.  */
+    char *name;
 
-  /* Version of this structure (it is expected to change again in hpux10).  */
-  unsigned char struct_version;
+    /* Version of this structure (it is expected to change again in hpux10).  */
+    unsigned char struct_version;
 
-  /* Binding mode for this library.  */
-  unsigned char bind_mode;
+    /* Binding mode for this library.  */
+    unsigned char bind_mode;
 
-  /* Version of this library.  */
-  short library_version;
+    /* Version of this library.  */
+    short library_version;
 
-  /* Start of text address,
-   * link-time text location (length of text area),
-   * end of text address.  */
-  CORE_ADDR text_addr;
-  CORE_ADDR text_link_addr;
-  CORE_ADDR text_end;
+    /* Start of text address,
+     * link-time text location (length of text area),
+     * end of text address.  */
+    CORE_ADDR text_addr;
+    CORE_ADDR text_link_addr;
+    CORE_ADDR text_end;
 
-  /* Start of data, start of bss and end of data.  */
-  CORE_ADDR data_start;
-  CORE_ADDR bss_start;
-  CORE_ADDR data_end;
+    /* Start of data, start of bss and end of data.  */
+    CORE_ADDR data_start;
+    CORE_ADDR bss_start;
+    CORE_ADDR data_end;
 
-  /* Value of linkage pointer (%r19).  */
-  CORE_ADDR got_value;
+    /* Value of linkage pointer (%r19).  */
+    CORE_ADDR got_value;
 
-  /* Next entry.  */
-  struct som_solib_mapped_entry *next;
+    /* Next entry.  */
+    struct som_solib_mapped_entry *next;
 
-  /* There are other fields, but I don't have information as to what is
-     contained in them.  */
+    /* There are other fields, but I don't have information as to what is
+       contained in them.  */
 
-  /* For versions from HPUX-10.30 and up */
+    /* For versions from HPUX-10.30 and up */
 
-  /* Address in target of offset from thread-local register of
-   * start of this thread's data.  I.e., the first thread-local
-   * variable in this shared library starts at *(tsd_start_addr)
-   * from that area pointed to by cr27 (mpsfu_hi).
-   *
-   * We do the indirection as soon as we read it, so from then
-   * on it's the offset itself.
-   */
-  CORE_ADDR tsd_start_addr;
+    /* Address in target of offset from thread-local register of
+     * start of this thread's data.  I.e., the first thread-local
+     * variable in this shared library starts at *(tsd_start_addr)
+     * from that area pointed to by cr27 (mpsfu_hi).
+     *
+     * We do the indirection as soon as we read it, so from then
+     * on it's the offset itself.
+     */
+    CORE_ADDR tsd_start_addr;
 
-  /* Following this are longwords holding:
-   *
-   * ?, ?, ?, ptr to -1, ptr to-1, ptr to lib name (leaf name),
-   * ptr to __data_start, ptr to __data_end
-   */
+    /* Following this are longwords holding:
 
-  
-};
+     * ?, ?, ?, ptr to -1, ptr to-1, ptr to lib name (leaf name),
+     * ptr to __data_start, ptr to __data_end
+     */
+
+
+  };
 
 /* A structure to keep track of all the known shared objects.  */
 struct so_list
-{
-  struct som_solib_mapped_entry som_solib;
-  struct objfile *objfile;
-  bfd *abfd;
-  struct section_table *sections;
-  struct section_table *sections_end;
+  {
+    struct som_solib_mapped_entry som_solib;
+    struct objfile *objfile;
+    bfd *abfd;
+    struct section_table *sections;
+    struct section_table *sections_end;
 /* elz: added this field to store the address in target space (in the
    library) of the library descriptor (handle) which we read into
-   som_solib_mapped_entry structure*/
-  CORE_ADDR solib_addr;
-  struct so_list *next;
-  
-};
+   som_solib_mapped_entry structure */
+    CORE_ADDR solib_addr;
+    struct so_list *next;
+
+  };
 
 static struct so_list *so_list_head;
 
@@ -162,8 +163,8 @@ static struct so_list *so_list_head;
    (in megabytes).  If adding symbols for the new shlib would cause
    the total size to exceed the threshold, then the new shlib's symbols
    are not loaded.
-   */
-static LONGEST  som_solib_total_st_size;
+ */
+static LONGEST som_solib_total_st_size;
 
 /* When the threshold is reached for any shlib, we refuse to add
    symbols for subsequent shlibs, even if those shlibs' symbols would
@@ -173,28 +174,32 @@ static LONGEST  som_solib_total_st_size;
    message.  The alternative, to issue a message for each shlib whose
    symbols aren't loaded, could be a big annoyance where the threshold
    is exceeded due to a very large number of shlibs.)
-   */
-static int  som_solib_st_size_threshold_exceeded;
+ */
+static int som_solib_st_size_threshold_exceeded;
 
 /* These addresses should be filled in by som_solib_create_inferior_hook.
    They are also used elsewhere in this module.
-   */
-typedef struct {
-  CORE_ADDR  address;
-  struct unwind_table_entry *  unwind;
-} addr_and_unwind_t;
+ */
+typedef struct
+  {
+    CORE_ADDR address;
+    struct unwind_table_entry *unwind;
+  }
+addr_and_unwind_t;
 
 /* When adding fields, be sure to clear them in _initialize_som_solib. */
-static struct {
-  boolean  is_valid;
-  addr_and_unwind_t  hook;
-  addr_and_unwind_t  hook_stub;
-  addr_and_unwind_t  load;
-  addr_and_unwind_t  load_stub;
-  addr_and_unwind_t  unload;
-  addr_and_unwind_t  unload2;
-  addr_and_unwind_t  unload_stub;
-} dld_cache;
+static struct
+  {
+    boolean is_valid;
+    addr_and_unwind_t hook;
+    addr_and_unwind_t hook_stub;
+    addr_and_unwind_t load;
+    addr_and_unwind_t load_stub;
+    addr_and_unwind_t unload;
+    addr_and_unwind_t unload2;
+    addr_and_unwind_t unload_stub;
+  }
+dld_cache;
 
 
 
@@ -204,17 +209,17 @@ static void som_solib_sharedlibrary_command PARAMS ((char *, int));
 
 static LONGEST
 som_solib_sizeof_symbol_table (filename)
-  char *  filename;
+     char *filename;
 {
-  bfd *  abfd;
-  int  desc;
-  char *  absolute_name;
-  LONGEST  st_size = (LONGEST) 0;
-  asection *  sect;
+  bfd *abfd;
+  int desc;
+  char *absolute_name;
+  LONGEST st_size = (LONGEST) 0;
+  asection *sect;
 
   /* We believe that filename was handed to us by the dynamic linker, and
      is therefore always an absolute path.
-     */
+   */
   desc = openp (getenv ("PATH"), 1, filename, O_RDONLY | O_BINARY, 0, &absolute_name);
   if (desc < 0)
     {
@@ -223,17 +228,17 @@ som_solib_sizeof_symbol_table (filename)
   filename = absolute_name;
 
   abfd = bfd_fdopenr (filename, gnutarget, desc);
-  if (! abfd)
+  if (!abfd)
     {
       close (desc);
       make_cleanup (free, filename);
       error ("\"%s\": can't open to read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
-  
-  if (!bfd_check_format (abfd, bfd_object))   /* Reads in section info */
+
+  if (!bfd_check_format (abfd, bfd_object))	/* Reads in section info */
     {
-      bfd_close (abfd);	/* This also closes desc */
+      bfd_close (abfd);		/* This also closes desc */
       make_cleanup (free, filename);
       error ("\"%s\": can't read symbols: %s.", filename,
 	     bfd_errmsg (bfd_get_error ()));
@@ -251,7 +256,7 @@ som_solib_sizeof_symbol_table (filename)
   if (sect)
     st_size += (LONGEST) bfd_section_size (abfd, sect);
 
-  bfd_close (abfd);	/* This also closes desc */
+  bfd_close (abfd);		/* This also closes desc */
   free (filename);
 
   /* Unfortunately, just summing the sizes of various debug info
@@ -269,20 +274,20 @@ som_solib_sizeof_symbol_table (filename)
      factor to the debug info sections' size-sum.  No, this doesn't
      account for minimal symbols in non-debuggable shlibs.  But it
      all roughly washes out in the end.
-     */
+   */
   return st_size * (LONGEST) 10;
 }
 
 
 static void
 som_solib_add_solib_objfile (so, name, from_tty, text_addr)
-  struct so_list *  so;
-  char *  name;
-  int  from_tty;
-  CORE_ADDR  text_addr;
+     struct so_list *so;
+     char *name;
+     int from_tty;
+     CORE_ADDR text_addr;
 {
   obj_private_data_t *obj_private;
-  
+
   so->objfile = symbol_file_add (name, from_tty, text_addr, 0, 0, 0, 0, 1);
   so->abfd = so->objfile->obfd;
 
@@ -290,15 +295,15 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
    */
   so->objfile->flags |= OBJF_SHARED;
 
-  if( so->objfile->obj_private == NULL )
+  if (so->objfile->obj_private == NULL)
     {
       obj_private = (obj_private_data_t *)
-                        obstack_alloc( &so->objfile->psymbol_obstack,
-                                       sizeof( obj_private_data_t ));
+	obstack_alloc (&so->objfile->psymbol_obstack,
+		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
-      obj_private->so_info     = NULL;
+      obj_private->so_info = NULL;
       so->objfile->obj_private = (PTR) obj_private;
-   }
+    }
 
   obj_private = (obj_private_data_t *) so->objfile->obj_private;
   obj_private->so_info = so;
@@ -306,26 +311,26 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
   if (!bfd_check_format (so->abfd, bfd_object))
     {
       error ("\"%s\": not in executable format: %s.",
-             name, bfd_errmsg (bfd_get_error ()));
+	     name, bfd_errmsg (bfd_get_error ()));
     }
 }
 
 
 static void
 som_solib_load_symbols (so, name, from_tty, text_addr, target)
-  struct so_list *  so;
-  char *  name;
-  int  from_tty;
-  CORE_ADDR  text_addr;
-  struct target_ops *  target;
+     struct so_list *so;
+     char *name;
+     int from_tty;
+     CORE_ADDR text_addr;
+     struct target_ops *target;
 {
-  struct section_table *  p;
-  int  status;
-  char  buf[4];
-  CORE_ADDR  presumed_data_start;
+  struct section_table *p;
+  int status;
+  char buf[4];
+  CORE_ADDR presumed_data_start;
 
 #ifdef SOLIB_DEBUG
-  printf( "--Adding symbols for shared library \"%s\"\n", name );
+  printf ("--Adding symbols for shared library \"%s\"\n", name);
 #endif
 
   som_solib_add_solib_objfile (so, name, from_tty, text_addr);
@@ -334,8 +339,8 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
      we might be debugging a core file from a dynamically linked
      executable in which the libraries were not privately mapped.  */
   if (build_section_table (so->abfd,
-                           &so->sections,
-                           &so->sections_end))
+			   &so->sections,
+			   &so->sections_end))
     {
       error ("Unable to build section table for shared library\n.");
       return;
@@ -345,15 +350,15 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
   for (p = so->sections; p < so->sections_end; p++)
     {
       if (p->the_bfd_section->flags & SEC_CODE)
-        {
-          p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-          p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
-        }
+	{
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT);
+	}
       else if (p->the_bfd_section->flags & SEC_DATA)
-        {
-          p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-          p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
-        }
+	{
+	  p->addr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	  p->endaddr += ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA);
+	}
     }
 
   /* Now see if we need to map in the text and data for this shared
@@ -385,38 +390,38 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
       new = so->sections_end - so->sections;
       /* Add sections from the shared library to the core target.  */
       if (target->to_sections)
-        {
-          old = target->to_sections_end - target->to_sections;
-          target->to_sections = (struct section_table *)
-            xrealloc ((char *)target->to_sections,
-                      ((sizeof (struct section_table)) * (old + new)));
-        }
+	{
+	  old = target->to_sections_end - target->to_sections;
+	  target->to_sections = (struct section_table *)
+	    xrealloc ((char *) target->to_sections,
+		      ((sizeof (struct section_table)) * (old + new)));
+	}
       else
-        {
-          old = 0;
-          target->to_sections = (struct section_table *)
-            xmalloc ((sizeof (struct section_table)) * new);
-        }
+	{
+	  old = 0;
+	  target->to_sections = (struct section_table *)
+	    xmalloc ((sizeof (struct section_table)) * new);
+	}
       target->to_sections_end = (target->to_sections + old + new);
 
       /* Update the to_sections field in the core_ops structure
          if needed, ditto exec_ops.  */
       if (update_coreops)
-        {
-          core_ops.to_sections = target->to_sections;
-          core_ops.to_sections_end = target->to_sections_end;
-        }
+	{
+	  core_ops.to_sections = target->to_sections;
+	  core_ops.to_sections_end = target->to_sections_end;
+	}
 
       if (update_execops)
-        {
-          exec_ops.to_sections = target->to_sections;
-          exec_ops.to_sections_end = target->to_sections_end;
-        }
+	{
+	  exec_ops.to_sections = target->to_sections;
+	  exec_ops.to_sections_end = target->to_sections_end;
+	}
 
       /* Copy over the old data before it gets clobbered.  */
-      memcpy ((char *)(target->to_sections + old),
-              so->sections,
-              ((sizeof (struct section_table)) * new));
+      memcpy ((char *) (target->to_sections + old),
+	      so->sections,
+	      ((sizeof (struct section_table)) * new));
     }
 }
 
@@ -438,7 +443,7 @@ som_solib_add (arg_string, from_tty, target)
   int status;
   unsigned int dld_flags;
   char buf[4], *re_err;
-  int  threshold_warning_given = 0;
+  int threshold_warning_given = 0;
 
   /* First validate our arguments.  */
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
@@ -487,11 +492,11 @@ som_solib_add (arg_string, from_tty, target)
 
   /* __dld_list may not be valid.  If not, then we punt, warning the user if
      we were called as a result of the add-symfile command.
-     */
+   */
   if ((dld_flags & DLD_FLAGS_LISTVALID) == 0)
     {
       if (from_tty)
-        error ("__dld_list is not valid according to __dld_flags.\n");
+	error ("__dld_list is not valid according to __dld_flags.\n");
       return;
     }
 
@@ -503,7 +508,7 @@ som_solib_add (arg_string, from_tty, target)
   if (!msymbol)
     {
       /* Older crt0.o files (hpux8) don't have __dld_list as a symbol,
-	 but the data is still available if you know where to look.  */
+         but the data is still available if you know where to look.  */
       msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
       if (!msymbol)
 	{
@@ -554,7 +559,7 @@ som_solib_add (arg_string, from_tty, target)
     so_list_tail = so_list_tail->next;
 
 #ifdef SOLIB_DEBUG
-  printf( "--About to read shared library list data\n" );
+  printf ("--About to read shared library list data\n");
 #endif
 
   /* "addr" will always point to the base of the
@@ -569,8 +574,8 @@ som_solib_add (arg_string, from_tty, target)
       struct so_list *new_so;
       struct so_list *so_list = so_list_head;
       struct stat statbuf;
-      LONGEST  st_size;
-      int  is_main_program;
+      LONGEST st_size;
+      int is_main_program;
 
       if (addr == 0)
 	break;
@@ -606,7 +611,7 @@ som_solib_add (arg_string, from_tty, target)
 	}
 
       /* See if the file exists.  If not, give a warning, but don't
-	 die.  */
+         die.  */
       status = stat (name, &statbuf);
       if (status == -1)
 	{
@@ -616,7 +621,7 @@ som_solib_add (arg_string, from_tty, target)
 	  if (status != 0)
 	    goto err;
 
-	  addr = (CORE_ADDR) extract_unsigned_integer (buf, 4);          
+	  addr = (CORE_ADDR) extract_unsigned_integer (buf, 4);
 	  continue;
 	}
 
@@ -624,32 +629,32 @@ som_solib_add (arg_string, from_tty, target)
       is_main_program = (strcmp (name, symfile_objfile->name) == 0);
       if (so_list || is_main_program)
 	{
-          /* This is the "next" pointer in the strcuture.
-           */
+	  /* This is the "next" pointer in the strcuture.
+	   */
 	  status = target_read_memory (addr + 36, buf, 4);
 	  if (status != 0)
 	    goto err;
 
 	  addr = (CORE_ADDR) extract_unsigned_integer (buf, 4);
 
-          /* Record the main program's symbol table size. */
-          if (is_main_program && !so_list)
-            {
-              st_size = som_solib_sizeof_symbol_table (name);
-              som_solib_total_st_size += st_size;
-            }
+	  /* Record the main program's symbol table size. */
+	  if (is_main_program && !so_list)
+	    {
+	      st_size = som_solib_sizeof_symbol_table (name);
+	      som_solib_total_st_size += st_size;
+	    }
 
-          /* Was this a shlib that we noted but didn't load the symbols for?
-             If so, were we invoked this time from the command-line, via
-             a 'sharedlibrary' or 'add-symbol-file' command?  If yes to
-             both, we'd better load the symbols this time.
-             */
-          if (from_tty && so_list && !is_main_program && (so_list->objfile == NULL))
-            som_solib_load_symbols (so_list,
-                                    name,
-                                    from_tty,
-                                    so_list->som_solib.text_addr,
-                                    target);
+	  /* Was this a shlib that we noted but didn't load the symbols for?
+	     If so, were we invoked this time from the command-line, via
+	     a 'sharedlibrary' or 'add-symbol-file' command?  If yes to
+	     both, we'd better load the symbols this time.
+	   */
+	  if (from_tty && so_list && !is_main_program && (so_list->objfile == NULL))
+	    som_solib_load_symbols (so_list,
+				    name,
+				    from_tty,
+				    so_list->som_solib.text_addr,
+				    target);
 
 	  continue;
 	}
@@ -664,7 +669,7 @@ som_solib_add (arg_string, from_tty, target)
       text_addr = extract_unsigned_integer (buf, 4);
 
       new_so = (struct so_list *) xmalloc (sizeof (struct so_list));
-      memset ((char *)new_so, 0, sizeof (struct so_list));
+      memset ((char *) new_so, 0, sizeof (struct so_list));
       if (so_list_head == NULL)
 	{
 	  so_list_head = new_so;
@@ -678,7 +683,7 @@ som_solib_add (arg_string, from_tty, target)
 
       /* Fill in all the entries in GDB's shared library list.
        */
-       
+
       new_so->solib_addr = addr;
       new_so->som_solib.name = name;
       status = target_read_memory (addr + 4, buf, 4);
@@ -687,15 +692,15 @@ som_solib_add (arg_string, from_tty, target)
 
       new_so->som_solib.struct_version = extract_unsigned_integer (buf + 3, 1);
       new_so->som_solib.bind_mode = extract_unsigned_integer (buf + 2, 1);
-        /* Following is "high water mark", highest version number
-         * seen, rather than plain version number.
-         */
+      /* Following is "high water mark", highest version number
+       * seen, rather than plain version number.
+       */
       new_so->som_solib.library_version = extract_unsigned_integer (buf, 2);
       new_so->som_solib.text_addr = text_addr;
 
-        /* Q: What about longword at "addr + 8"?
-         * A: It's read above, out of order, into "text_addr".
-         */
+      /* Q: What about longword at "addr + 8"?
+       * A: It's read above, out of order, into "text_addr".
+       */
 
       status = target_read_memory (addr + 12, buf, 4);
       if (status != 0)
@@ -737,7 +742,7 @@ som_solib_add (arg_string, from_tty, target)
       if (status != 0)
 	goto err;
 
-      new_so->som_solib.next = (void *)extract_unsigned_integer (buf, 4);
+      new_so->som_solib.next = (void *) extract_unsigned_integer (buf, 4);
 
       /* Note that we don't re-set "addr" to the next pointer
        * until after we've read the trailing data.
@@ -746,33 +751,33 @@ som_solib_add (arg_string, from_tty, target)
       status = target_read_memory (addr + 40, buf, 4);
       new_so->som_solib.tsd_start_addr = extract_unsigned_integer (buf, 4);
       if (status != 0)
-        goto err;
+	goto err;
 
       /* Now indirect via that value!
        */
       status = target_read_memory (new_so->som_solib.tsd_start_addr, buf, 4);
       new_so->som_solib.tsd_start_addr = extract_unsigned_integer (buf, 4);
       if (status != 0)
-        goto err;
+	goto err;
 #ifdef SOLIB_DEBUG
-      printf( "\n+ library \"%s\" is described at 0x%x\n", name, addr );
-      printf( "  'version' is %d\n",          new_so->som_solib.struct_version );
-      printf( "  'bind_mode' is %d\n",        new_so->som_solib.bind_mode );
-      printf( "  'library_version' is %d\n",  new_so->som_solib.library_version );
-      printf( "  'text_addr' is 0x%x\n",      new_so->som_solib.text_addr );
-      printf( "  'text_link_addr' is 0x%x\n", new_so->som_solib.text_link_addr );
-      printf( "  'text_end' is 0x%x\n",       new_so->som_solib.text_end );
-      printf( "  'data_start' is 0x%x\n",     new_so->som_solib.data_start );
-      printf( "  'bss_start' is 0x%x\n",      new_so->som_solib.bss_start );
-      printf( "  'data_end' is 0x%x\n",       new_so->som_solib.data_end );
-      printf( "  'got_value' is %x\n",        new_so->som_solib.got_value );
-      printf( "  'next' is 0x%x\n",           new_so->som_solib.next );
-      printf( "  'tsd_start_addr' is 0x%x\n", new_so->som_solib.tsd_start_addr );
+      printf ("\n+ library \"%s\" is described at 0x%x\n", name, addr);
+      printf ("  'version' is %d\n", new_so->som_solib.struct_version);
+      printf ("  'bind_mode' is %d\n", new_so->som_solib.bind_mode);
+      printf ("  'library_version' is %d\n", new_so->som_solib.library_version);
+      printf ("  'text_addr' is 0x%x\n", new_so->som_solib.text_addr);
+      printf ("  'text_link_addr' is 0x%x\n", new_so->som_solib.text_link_addr);
+      printf ("  'text_end' is 0x%x\n", new_so->som_solib.text_end);
+      printf ("  'data_start' is 0x%x\n", new_so->som_solib.data_start);
+      printf ("  'bss_start' is 0x%x\n", new_so->som_solib.bss_start);
+      printf ("  'data_end' is 0x%x\n", new_so->som_solib.data_end);
+      printf ("  'got_value' is %x\n", new_so->som_solib.got_value);
+      printf ("  'next' is 0x%x\n", new_so->som_solib.next);
+      printf ("  'tsd_start_addr' is 0x%x\n", new_so->som_solib.tsd_start_addr);
 #endif
 
       /* Go on to the next shared library descriptor.
        */
-      addr = (CORE_ADDR)new_so->som_solib.next;
+      addr = (CORE_ADDR) new_so->som_solib.next;
 
 
 
@@ -790,32 +795,32 @@ som_solib_add (arg_string, from_tty, target)
          actually load its symbols.  (This is more useful than it might
          sound, for it allows us to e.g., still load and use the shlibs'
          unwind information for stack tracebacks.)
-         */
+       */
 
       /* Note that we DON'T want to preclude the user from using the
          add-symbol-file command!  Thus, we only worry about the threshold
          when we're invoked for other reasons.
-         */
+       */
       st_size = som_solib_sizeof_symbol_table (name);
       som_solib_st_size_threshold_exceeded =
-        !from_tty &&
-        ((st_size + som_solib_total_st_size) > (auto_solib_add * (LONGEST)1000000));
+	!from_tty &&
+	((st_size + som_solib_total_st_size) > (auto_solib_add * (LONGEST) 1000000));
 
       if (som_solib_st_size_threshold_exceeded)
-        {
-          if (! threshold_warning_given)
-            warning ("Symbols for some libraries have not been loaded, because\ndoing so would exceed the size threshold specified by auto-solib-add.\nTo manually load symbols, use the 'sharedlibrary' command.\nTo raise the threshold, set auto-solib-add to a larger value and rerun\nthe program.\n");
-          threshold_warning_given = 1;
+	{
+	  if (!threshold_warning_given)
+	    warning ("Symbols for some libraries have not been loaded, because\ndoing so would exceed the size threshold specified by auto-solib-add.\nTo manually load symbols, use the 'sharedlibrary' command.\nTo raise the threshold, set auto-solib-add to a larger value and rerun\nthe program.\n");
+	  threshold_warning_given = 1;
 
-          /* We'll still make note of this shlib, even if we don't
-             read its symbols.  This allows us to use its unwind
-             information well enough to know how to e.g., correctly
-             do a traceback from a PC within the shlib, even if we
-             can't symbolize those PCs...
-             */
-          som_solib_add_solib_objfile (new_so, name, from_tty, text_addr);
-          continue;
-        }
+	  /* We'll still make note of this shlib, even if we don't
+	     read its symbols.  This allows us to use its unwind
+	     information well enough to know how to e.g., correctly
+	     do a traceback from a PC within the shlib, even if we
+	     can't symbolize those PCs...
+	   */
+	  som_solib_add_solib_objfile (new_so, name, from_tty, text_addr);
+	  continue;
+	}
 
       som_solib_total_st_size += st_size;
 
@@ -824,7 +829,7 @@ som_solib_add (arg_string, from_tty, target)
     }
 
 #ifdef SOLIB_DEBUG
-    printf( "--Done reading shared library data\n" );
+  printf ("--Done reading shared library data\n");
 #endif
 
   /* Getting new symbols may change our opinion about what is
@@ -856,14 +861,14 @@ err:
    bit 0 when set indicates that private copies of the libraries are needed
    bit 1 when set indicates that the callback hook routine is valid
    bit 2 when set indicates that the dynamic linker should maintain the
-         __dld_list structure when loading/unloading libraries.
+   __dld_list structure when loading/unloading libraries.
 
    Note that shared libraries are not mapped in at this time, so we have
    run the inferior until the libraries are mapped in.  Typically this
    means running until the "_start" is called.  */
 
 void
-som_solib_create_inferior_hook()
+som_solib_create_inferior_hook ()
 {
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status, have_endo;
@@ -877,7 +882,7 @@ som_solib_create_inferior_hook()
   remove_solib_event_breakpoints ();
 
   if (symfile_objfile == NULL)
-    return; 
+    return;
 
   /* First see if the objfile was dynamically linked.  */
   shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
@@ -918,10 +923,10 @@ som_solib_create_inferior_hook()
      the dld provides an export stub named "__d_trap" as well as the
      function named "__d_trap" itself, but doesn't provide "_DLD_HOOK".
      We'll look first for the old flavor and then the new.
-     */
+   */
   msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
   if (msymbol == NULL)
-      msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
+    msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
       warning ("Unable to find _DLD_HOOK symbol in object file.");
@@ -935,31 +940,31 @@ som_solib_create_inferior_hook()
   /* Grrr, this might not be an export symbol!  We have to find the
      export stub.  */
   ALL_OBJFILES (objfile)
-    {
-      struct unwind_table_entry *u;
-      struct minimal_symbol *msymbol2;
+  {
+    struct unwind_table_entry *u;
+    struct minimal_symbol *msymbol2;
 
-      /* What a crock.  */
-      msymbol2 = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
-							 NULL, objfile);
-      /* Found a symbol with the right name.  */
-      if (msymbol2)
-	{
-	  struct unwind_table_entry *u;
-	  /* It must be a shared library trampoline.  */
-	  if (SYMBOL_TYPE (msymbol2) != mst_solib_trampoline)
-	    continue;
+    /* What a crock.  */
+    msymbol2 = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),
+						       NULL, objfile);
+    /* Found a symbol with the right name.  */
+    if (msymbol2)
+      {
+	struct unwind_table_entry *u;
+	/* It must be a shared library trampoline.  */
+	if (SYMBOL_TYPE (msymbol2) != mst_solib_trampoline)
+	  continue;
 
-	  /* It must also be an export stub.  */
-	  u = find_unwind_entry (SYMBOL_VALUE (msymbol2));
-	  if (!u || u->stub_unwind.stub_type != EXPORT)
-	    continue;
+	/* It must also be an export stub.  */
+	u = find_unwind_entry (SYMBOL_VALUE (msymbol2));
+	if (!u || u->stub_unwind.stub_type != EXPORT)
+	  continue;
 
-	  /* OK.  Looks like the correct import stub.  */
-	  anaddr = SYMBOL_VALUE (msymbol2);
-          dld_cache.hook_stub.address = anaddr;
-	}
-    }
+	/* OK.  Looks like the correct import stub.  */
+	anaddr = SYMBOL_VALUE (msymbol2);
+	dld_cache.hook_stub.address = anaddr;
+      }
+  }
   store_unsigned_integer (buf, 4, anaddr);
 
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
@@ -972,7 +977,7 @@ som_solib_create_inferior_hook()
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
   status = target_write_memory (anaddr, buf, 4);
-  
+
   /* Now set a shlib_event breakpoint at __d_trap so we can track
      significant shared library events.  */
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
@@ -1023,12 +1028,12 @@ keep_going:
   /* Now find the address of _start and set a breakpoint there. 
      We still need this code for two reasons:
 
-	* Not all sites have /opt/langtools/lib/end.o, so it's not always
-	possible to track the dynamic linker's events.
+     * Not all sites have /opt/langtools/lib/end.o, so it's not always
+     possible to track the dynamic linker's events.
 
-	* At this time no events are triggered for shared libraries
-	loaded at startup time (what a crock).  */
-	
+     * At this time no events are triggered for shared libraries
+     loaded at startup time (what a crock).  */
+
   msymbol = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
@@ -1056,7 +1061,7 @@ keep_going:
 
 static void
 reset_inferior_pid (saved_inferior_pid)
-  int  saved_inferior_pid;
+     int saved_inferior_pid;
 {
   inferior_pid = saved_inferior_pid;
 }
@@ -1071,18 +1076,18 @@ reset_inferior_pid (saved_inferior_pid)
 
    This operation does not remove any knowledge of shared libraries which
    GDB may already have been notified of.
-   */
+ */
 void
 som_solib_remove_inferior_hook (pid)
-  int  pid;
+     int pid;
 {
-  CORE_ADDR  addr;
-  struct minimal_symbol *  msymbol;
-  int  status;
-  char  dld_flags_buffer [TARGET_INT_BIT/TARGET_CHAR_BIT];
-  unsigned int  dld_flags_value;
-  int  saved_inferior_pid = inferior_pid;
-  struct cleanup *  old_cleanups = make_cleanup (reset_inferior_pid, saved_inferior_pid);
+  CORE_ADDR addr;
+  struct minimal_symbol *msymbol;
+  int status;
+  char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
+  unsigned int dld_flags_value;
+  int saved_inferior_pid = inferior_pid;
+  struct cleanup *old_cleanups = make_cleanup (reset_inferior_pid, saved_inferior_pid);
 
   /* Ensure that we're really operating on the specified process. */
   inferior_pid = pid;
@@ -1093,20 +1098,20 @@ som_solib_remove_inferior_hook (pid)
      and thus we're not supposed to remove it.
 
      Rather, we'll merely clear the dld_flags bit that enables callbacks.
-     */
+   */
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
 
   addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  status = target_read_memory (addr, dld_flags_buffer, TARGET_INT_BIT/TARGET_CHAR_BIT);
+  status = target_read_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
 
   dld_flags_value = extract_unsigned_integer (dld_flags_buffer,
-                                              sizeof (dld_flags_value));
+					      sizeof (dld_flags_value));
 
   dld_flags_value &= ~DLD_FLAGS_HOOKVALID;
   store_unsigned_integer (dld_flags_buffer,
-                          sizeof (dld_flags_value),
-                          dld_flags_value);
-  status = target_write_memory (addr, dld_flags_buffer, TARGET_INT_BIT/TARGET_CHAR_BIT);
+			  sizeof (dld_flags_value),
+			  dld_flags_value);
+  status = target_write_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
 
   do_cleanups (old_cleanups);
 }
@@ -1122,13 +1127,13 @@ som_solib_remove_inferior_hook (pid)
 
    Undefined behaviour is guaranteed if this function is called before
    som_solib_create_inferior_hook.
-   */
+ */
 void
 som_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
-  int  pid;
-  int  tempflag;
-  char *  filename;
-  char *  cond_string;
+     int pid;
+     int tempflag;
+     char *filename;
+     char *cond_string;
 {
   create_solib_load_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
 }
@@ -1143,22 +1148,22 @@ som_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
 
    Undefined behaviour is guaranteed if this function is called before
    som_solib_create_inferior_hook.
-   */
+ */
 void
 som_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
-  int  pid;
-  int  tempflag;
-  char *  filename;
-  char *  cond_string;
+     int pid;
+     int tempflag;
+     char *filename;
+     char *cond_string;
 {
   create_solib_unload_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
 }
 
 int
 som_solib_have_load_event (pid)
-  int  pid;
+     int pid;
 {
-  CORE_ADDR  event_kind;
+  CORE_ADDR event_kind;
 
   event_kind = read_register (ARG0_REGNUM);
   return (event_kind == SHL_LOAD);
@@ -1166,9 +1171,9 @@ som_solib_have_load_event (pid)
 
 int
 som_solib_have_unload_event (pid)
-  int  pid;
+     int pid;
 {
-  CORE_ADDR  event_kind;
+  CORE_ADDR event_kind;
 
   event_kind = read_register (ARG0_REGNUM);
   return (event_kind == SHL_UNLOAD);
@@ -1176,13 +1181,13 @@ som_solib_have_unload_event (pid)
 
 static char *
 som_solib_library_pathname (pid)
-  int  pid;
+     int pid;
 {
-  CORE_ADDR  dll_handle_address;
-  CORE_ADDR  dll_pathname_address;
-  struct som_solib_mapped_entry  dll_descriptor;
-  char *  p;
-  static char  dll_pathname [1024];
+  CORE_ADDR dll_handle_address;
+  CORE_ADDR dll_pathname_address;
+  struct som_solib_mapped_entry dll_descriptor;
+  char *p;
+  static char dll_pathname[1024];
 
   /* Read the descriptor of this newly-loaded library. */
   dll_handle_address = read_register (ARG1_REGNUM);
@@ -1190,16 +1195,16 @@ som_solib_library_pathname (pid)
 
   /* We can find a pointer to the dll's pathname within the descriptor. */
   dll_pathname_address = (CORE_ADDR) dll_descriptor.name;
-  
+
   /* Read the pathname, one byte at a time. */
   p = dll_pathname;
   for (;;)
     {
-      char  b;
+      char b;
       read_memory (dll_pathname_address++, (char *) &b, 1);
       *p++ = b;
       if (b == '\0')
-        break;
+	break;
     }
 
   return dll_pathname;
@@ -1207,9 +1212,9 @@ som_solib_library_pathname (pid)
 
 char *
 som_solib_loaded_library_pathname (pid)
-  int  pid;
+     int pid;
 {
-  if (! som_solib_have_load_event (pid))
+  if (!som_solib_have_load_event (pid))
     error ("Must have a load event to use this query");
 
   return som_solib_library_pathname (pid);
@@ -1217,9 +1222,9 @@ som_solib_loaded_library_pathname (pid)
 
 char *
 som_solib_unloaded_library_pathname (pid)
-  int  pid;
+     int pid;
 {
-  if (! som_solib_have_unload_event (pid))
+  if (!som_solib_have_unload_event (pid))
     error ("Must have an unload event to use this query");
 
   return som_solib_library_pathname (pid);
@@ -1230,105 +1235,105 @@ som_solib_desire_dynamic_linker_symbols ()
 {
   struct objfile *objfile;
   struct unwind_table_entry *u;
-  struct minimal_symbol *  dld_msymbol;
+  struct minimal_symbol *dld_msymbol;
 
   /* Do we already know the value of these symbols?  If so, then
      we've no work to do.
 
      (If you add clauses to this test, be sure to likewise update the
      test within the loop.)
-     */
+   */
   if (dld_cache.is_valid)
     return;
 
   ALL_OBJFILES (objfile)
-    {
-      dld_msymbol = lookup_minimal_symbol ("shl_load", NULL, objfile);
-      if (dld_msymbol != NULL)
-        {
-          dld_cache.load.address = SYMBOL_VALUE (dld_msymbol);
-          dld_cache.load.unwind = find_unwind_entry (dld_cache.load.address);
-        }
+  {
+    dld_msymbol = lookup_minimal_symbol ("shl_load", NULL, objfile);
+    if (dld_msymbol != NULL)
+      {
+	dld_cache.load.address = SYMBOL_VALUE (dld_msymbol);
+	dld_cache.load.unwind = find_unwind_entry (dld_cache.load.address);
+      }
 
-      dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_load",
-                                                            NULL,
-                                                            objfile);
-      if (dld_msymbol != NULL)
-        {
-          if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
-            {
-              u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
-              if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
-                {
-                  dld_cache.load_stub.address = SYMBOL_VALUE (dld_msymbol);
-                  dld_cache.load_stub.unwind = u;
-                }
-            }
-        }
+    dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_load",
+							  NULL,
+							  objfile);
+    if (dld_msymbol != NULL)
+      {
+	if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
+	  {
+	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
+	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
+	      {
+		dld_cache.load_stub.address = SYMBOL_VALUE (dld_msymbol);
+		dld_cache.load_stub.unwind = u;
+	      }
+	  }
+      }
 
-      dld_msymbol = lookup_minimal_symbol ("shl_unload", NULL, objfile);
-      if (dld_msymbol != NULL)
-        {
-          dld_cache.unload.address = SYMBOL_VALUE (dld_msymbol);
-          dld_cache.unload.unwind = find_unwind_entry (dld_cache.unload.address);
+    dld_msymbol = lookup_minimal_symbol ("shl_unload", NULL, objfile);
+    if (dld_msymbol != NULL)
+      {
+	dld_cache.unload.address = SYMBOL_VALUE (dld_msymbol);
+	dld_cache.unload.unwind = find_unwind_entry (dld_cache.unload.address);
 
-          /* ??rehrauer: I'm not sure exactly what this is, but it appears
-             that on some HPUX 10.x versions, there's two unwind regions to
-             cover the body of "shl_unload", the second being 4 bytes past
-             the end of the first.  This is a large hack to handle that
-             case, but since I don't seem to have any legitimate way to
-             look for this thing via the symbol table...
-             */
-          if (dld_cache.unload.unwind != NULL)
-            {
-              u = find_unwind_entry (dld_cache.unload.unwind->region_end + 4);
-              if (u != NULL)
-                {
-                  dld_cache.unload2.address = u->region_start;
-                  dld_cache.unload2.unwind = u;
-                }
-            }
-        }
+	/* ??rehrauer: I'm not sure exactly what this is, but it appears
+	   that on some HPUX 10.x versions, there's two unwind regions to
+	   cover the body of "shl_unload", the second being 4 bytes past
+	   the end of the first.  This is a large hack to handle that
+	   case, but since I don't seem to have any legitimate way to
+	   look for this thing via the symbol table...
+	 */
+	if (dld_cache.unload.unwind != NULL)
+	  {
+	    u = find_unwind_entry (dld_cache.unload.unwind->region_end + 4);
+	    if (u != NULL)
+	      {
+		dld_cache.unload2.address = u->region_start;
+		dld_cache.unload2.unwind = u;
+	      }
+	  }
+      }
 
-      dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_unload",
-                                                            NULL,
-                                                            objfile);
-      if (dld_msymbol != NULL)
-        {
-          if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
-            {
-              u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
-              if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
-                {
-                  dld_cache.unload_stub.address = SYMBOL_VALUE (dld_msymbol);
-                  dld_cache.unload_stub.unwind = u;
-                }
-            }
-        }
+    dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_unload",
+							  NULL,
+							  objfile);
+    if (dld_msymbol != NULL)
+      {
+	if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
+	  {
+	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
+	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
+	      {
+		dld_cache.unload_stub.address = SYMBOL_VALUE (dld_msymbol);
+		dld_cache.unload_stub.unwind = u;
+	      }
+	  }
+      }
 
-      /* Did we find everything we were looking for?  If so, stop. */
-      if ((dld_cache.load.address != NULL) && (dld_cache.load_stub.address != NULL)
-          && (dld_cache.unload.address != NULL) && (dld_cache.unload_stub.address != NULL))
-        {
-          dld_cache.is_valid = 1;
-          break;
-        }
-    }
+    /* Did we find everything we were looking for?  If so, stop. */
+    if ((dld_cache.load.address != NULL) && (dld_cache.load_stub.address != NULL)
+	&& (dld_cache.unload.address != NULL) && (dld_cache.unload_stub.address != NULL))
+      {
+	dld_cache.is_valid = 1;
+	break;
+      }
+  }
 
   dld_cache.hook.unwind = find_unwind_entry (dld_cache.hook.address);
   dld_cache.hook_stub.unwind = find_unwind_entry (dld_cache.hook_stub.address);
 
   /* We're prepared not to find some of these symbols, which is why
      this function is a "desire" operation, and not a "require".
-     */
+   */
 }
 
 int
 som_solib_in_dynamic_linker (pid, pc)
-  int  pid;
-  CORE_ADDR  pc;
+     int pid;
+     CORE_ADDR pc;
 {
-  struct unwind_table_entry *  u_pc;
+  struct unwind_table_entry *u_pc;
 
   /* Are we in the dld itself?
 
@@ -1339,13 +1344,13 @@ som_solib_in_dynamic_linker (pid, pc)
      that case the debugger probably isn't able to set the fundamental
      breakpoint in the dld callback anyways, so this hack should be
      safe.
-     */
+   */
   if ((pc & (CORE_ADDR) 0xc0000000) == (CORE_ADDR) 0xc0000000)
     return 1;
 
   /* Cache the address of some symbols that are part of the dynamic
      linker, if not already known.
-     */
+   */
   som_solib_desire_dynamic_linker_symbols ();
 
   /* Are we in the dld callback?  Or its export stub? */
@@ -1396,7 +1401,7 @@ som_solib_get_got_by_pc (addr)
    Return the address of the handle of the shared library
    in which ADDR belongs.  If
    ADDR isn't in any known shared library, return zero.  */
-/* this function is used in hppa_fix_call_dummy in hppa-tdep.c*/
+/* this function is used in hppa_fix_call_dummy in hppa-tdep.c */
 
 CORE_ADDR
 som_solib_get_solib_by_pc (addr)
@@ -1408,15 +1413,15 @@ som_solib_get_solib_by_pc (addr)
     {
       if (so_list->som_solib.text_addr <= addr
 	  && so_list->som_solib.text_end > addr)
-        {
+	{
 	  break;
-        }
+	}
       so_list = so_list->next;
     }
   if (so_list)
-   return so_list->solib_addr;
+    return so_list->solib_addr;
   else
-   return 0;
+    return 0;
 }
 
 
@@ -1430,7 +1435,7 @@ som_solib_section_offsets (objfile, offsets)
   while (so_list)
     {
       /* Oh what a pain!  We need the offsets before so_list->objfile
-	 is valid.  The BFDs will never match.  Make a best guess.  */
+         is valid.  The BFDs will never match.  Make a best guess.  */
       if (strstr (objfile->name, so_list->som_solib.name))
 	{
 	  asection *private_section;
@@ -1487,7 +1492,7 @@ som_sharedlibrary_info_command (ignore, from_tty)
 
   printf_unfiltered ("Shared Object Libraries\n");
   printf_unfiltered ("    %-12s%-12s%-12s%-12s%-12s%-12s\n",
-		     "  flags", "  tstart", "   tend", "  dstart", "   dend", "   dlt");
+	 "  flags", "  tstart", "   tend", "  dstart", "   dend", "   dlt");
   while (so_list)
     {
       unsigned int flags;
@@ -1497,19 +1502,19 @@ som_sharedlibrary_info_command (ignore, from_tty)
       flags |= so_list->som_solib.library_version;
       printf_unfiltered ("%s", so_list->som_solib.name);
       if (so_list->objfile == NULL)
-        printf_unfiltered ("  (symbols not loaded)");
+	printf_unfiltered ("  (symbols not loaded)");
       printf_unfiltered ("\n");
       printf_unfiltered ("    %-12s", local_hex_string_custom (flags, "08l"));
       printf_unfiltered ("%-12s",
-	      local_hex_string_custom (so_list->som_solib.text_addr, "08l"));
+	     local_hex_string_custom (so_list->som_solib.text_addr, "08l"));
       printf_unfiltered ("%-12s",
 	      local_hex_string_custom (so_list->som_solib.text_end, "08l"));
       printf_unfiltered ("%-12s",
-	      local_hex_string_custom (so_list->som_solib.data_start, "08l"));
+	    local_hex_string_custom (so_list->som_solib.data_start, "08l"));
       printf_unfiltered ("%-12s",
 	      local_hex_string_custom (so_list->som_solib.data_end, "08l"));
       printf_unfiltered ("%-12s\n",
-	      local_hex_string_custom (so_list->som_solib.got_value, "08l"));
+	     local_hex_string_custom (so_list->som_solib.got_value, "08l"));
       so_list = so_list->next;
     }
 }
@@ -1527,17 +1532,17 @@ som_solib_sharedlibrary_command (args, from_tty)
 
 char *
 som_solib_address (addr)
-  CORE_ADDR  addr;
+     CORE_ADDR addr;
 {
-  struct so_list *  so = so_list_head;
+  struct so_list *so = so_list_head;
 
   while (so)
     {
       /* Is this address within this shlib's text range?  If so,
          return the shlib's name.
-         */
+       */
       if ((addr >= so->som_solib.text_addr) && (addr <= so->som_solib.text_end))
-        return so->som_solib.name;
+	return so->som_solib.name;
 
       /* Nope, keep looking... */
       so = so->next;
@@ -1551,18 +1556,18 @@ som_solib_address (addr)
 void
 som_solib_restart ()
 {
-  struct so_list *  sl = so_list_head;
+  struct so_list *sl = so_list_head;
 
   /* Before the shlib info vanishes, use it to disable any breakpoints
      that may still be active in those shlibs.
-     */
+   */
   disable_breakpoints_in_shlibs (0);
 
   /* Discard all the shlib descriptors.
-     */
+   */
   while (sl)
     {
-      struct so_list *  next_sl = sl->next;
+      struct so_list *next_sl = sl->next;
       free (sl);
       sl = next_sl;
     }
@@ -1601,7 +1606,7 @@ void
 _initialize_som_solib ()
 {
   add_com ("sharedlibrary", class_files, som_solib_sharedlibrary_command,
-           "Load shared object library symbols for files matching REGEXP.");
+	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
 	    "Status of loaded shared object libraries.");
   add_show_from_set
@@ -1624,8 +1629,8 @@ Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
      is only crudely approximated rather than actually measured, and [2]
      50 Mbytes is too small for debugging gdb itself.  Thus, the arbitrary
      100 figure.
-     */
-  auto_solib_add = 100; /* Megabytes */
+   */
+  auto_solib_add = 100;		/* Megabytes */
 
   som_solib_restart ();
 }
@@ -1633,8 +1638,8 @@ Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 /* Get some HPUX-specific data from a shared lib.
  */
 CORE_ADDR
-so_lib_thread_start_addr( so )
-    struct so_list *so;
+so_lib_thread_start_addr (so)
+     struct so_list *so;
 {
-    return so->som_solib.tsd_start_addr;
+  return so->som_solib.tsd_start_addr;
 }

@@ -1,21 +1,22 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
    Copyright 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -35,7 +36,7 @@ c_val_print PARAMS ((struct type *, char *, int, CORE_ADDR, GDB_FILE *, int, int
 
 static void scm_ipruk PARAMS ((char *, LONGEST, GDB_FILE *));
 static void scm_scmlist_print PARAMS ((LONGEST, GDB_FILE *, int, int,
-				      int, enum val_prettyprint));
+				       int, enum val_prettyprint));
 static int scm_inferior_print PARAMS ((LONGEST, GDB_FILE *, int, int,
 				       int, enum val_prettyprint));
 
@@ -156,7 +157,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
      int recurse;
      enum val_prettyprint pretty;
 {
- taloop:
+taloop:
   switch (7 & (int) svalue)
     {
     case 2:
@@ -210,10 +211,10 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 #if 1
 	      fputs_filtered ("???", stream);
 #else
-	      name = ((SCM n*)(STRUCT_TYPE( exp)))[struct_i_name];
+	      name = ((SCM n *) (STRUCT_TYPE (exp)))[struct_i_name];
 	      scm_lfwrite (CHARS (name),
 			   (sizet) sizeof (char),
-			   (sizet) LENGTH (name),
+			     (sizet) LENGTH (name),
 			   port);
 #endif
 	      fprintf_filtered (stream, " #X%lX>", svalue);
@@ -248,7 +249,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 	      {
 		buf_size = min (len - done, 64);
 		read_memory (addr + done, buffer, buf_size);
-		
+
 		for (i = 0; i < buf_size; ++i)
 		  switch (buffer[i])
 		    {
@@ -267,7 +268,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 	  {
 	    int len = SCM_LENGTH (svalue);
 
-	    char * str = (char*) alloca (len);
+	    char *str = (char *) alloca (len);
 	    read_memory (SCM_CDR (svalue), str, len + 1);
 	    /* Should handle weird characters FIXME */
 	    str[len] = '\0';
@@ -278,7 +279,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 	  {
 	    int len = SCM_LENGTH (svalue);
 	    int i;
-	    LONGEST elements = SCM_CDR(svalue);
+	    LONGEST elements = SCM_CDR (svalue);
 	    fputs_filtered ("#(", stream);
 	    for (i = 0; i < len; ++i)
 	      {
@@ -299,15 +300,15 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 	    if (hook == BOOL_F)
 	      {
 		scm_puts ("#<locked-vector ", port);
-		scm_intprint(CDR(exp), 16, port);
+		scm_intprint (CDR (exp), 16, port);
 		scm_puts (">", port);
 	      }
 	    else
 	      {
 		result
 		  = scm_apply (hook,
-			       scm_listify (exp, port, (writing ? BOOL_T : BOOL_F),
-					    SCM_UNDEFINED),
+			scm_listify (exp, port, (writing ? BOOL_T : BOOL_F),
+				     SCM_UNDEFINED),
 			       EOL);
 		if (result == BOOL_F)
 		  goto punk;
@@ -331,7 +332,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 	    char str[20];
 	    sprintf (str, "#%d", index);
 #else
-	    char *str = index ? SCM_CHARS (scm_heap_org+index) : "";
+	    char *str = index ? SCM_CHARS (scm_heap_org + index) : "";
 #define SCM_CHARS(x) ((char *)(SCM_CDR(x)))
 	    char *str = CHARS (SNAME (exp));
 #endif
@@ -376,7 +377,7 @@ scm_scmval_print (svalue, stream, format, deref_ref, recurse, pretty)
 
 int
 scm_val_print (type, valaddr, embedded_offset, address,
-               stream, format, deref_ref, recurse, pretty)
+	       stream, format, deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
      int embedded_offset;
@@ -397,7 +398,7 @@ scm_val_print (type, valaddr, embedded_offset, address,
       else
 	{
 	  scm_scmval_print (svalue, stream, format,
-			      deref_ref, recurse, pretty);
+			    deref_ref, recurse, pretty);
 	}
 
       gdb_flush (stream);

@@ -1,21 +1,22 @@
 /* Target machine definitions for GDB for an embedded SPARC.
    Copyright 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-sparc.h"
 
@@ -37,11 +38,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define BIG_BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
 #define LITTLE_BREAKPOINT {0x01, 0x20, 0xd0, 0x91}
 
-#undef  NUM_REGS /* formerly "72" */
+#undef  NUM_REGS		/* formerly "72" */
 /*                WIN  FP   CPU  CCP  ASR  AWR  APSR */
 #define NUM_REGS (32 + 32 + 8  + 8  + 8/*+ 32 + 1*/)
 
-#undef  REGISTER_BYTES /* formerly "(32*4 + 32*4 + 8*4)" */
+#undef  REGISTER_BYTES		/* formerly "(32*4 + 32*4 + 8*4)" */
 #define REGISTER_BYTES (32*4 + 32*4 + 8*4 + 8*4 + 8*4/* + 32*4 + 1*4*/)
 
 /* Initializer for an array of names of registers.
@@ -78,9 +79,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 }
 
 /* Remove FP dependant code which was defined in tm-sparc.h */
-#undef	FP0_REGNUM /* Floating point register 0 */
-#undef	FPS_REGNUM /* Floating point status register */
-#undef 	CPS_REGNUM /* Coprocessor status register */
+#undef	FP0_REGNUM		/* Floating point register 0 */
+#undef	FPS_REGNUM		/* Floating point status register */
+#undef 	CPS_REGNUM		/* Coprocessor status register */
 
 /* sparclet register numbers */
 #define CCSR_REGNUM 72

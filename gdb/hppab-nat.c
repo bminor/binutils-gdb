@@ -6,21 +6,22 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -80,7 +81,7 @@ fetch_register (regno)
 	}
     }
   supply_register (regno, buf);
- error_exit:;
+error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -117,20 +118,20 @@ store_inferior_registers (regno)
       regaddr = register_addr (regno, offset);
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-        {
-          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                  scratch);
-          if (errno != 0)
-            {
+	{
+	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  scratch);
+	  if (errno != 0)
+	    {
 	      /* Error, even if attached.  Failing to write these two
-		 registers is pretty serious.  */
-              sprintf (buf, "writing register number %d", regno);
-              perror_with_name (buf);
-            }
-        }
+	         registers is pretty serious.  */
+	      sprintf (buf, "writing register number %d", regno);
+	      perror_with_name (buf);
+	    }
+	}
       else
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	  {
 	    errno = 0;
 	    ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
@@ -146,7 +147,7 @@ store_inferior_registers (regno)
 		warning (msg);
 		return;
 	      }
-	    regaddr += sizeof(int);
+	    regaddr += sizeof (int);
 	  }
     }
   else
@@ -164,28 +165,28 @@ store_inferior_registers (regno)
 
    The arguments are as follows:
 
-      PT_PROT -- The ptrace action to perform.
+   PT_PROT -- The ptrace action to perform.
 
-      INFERIOR_PID -- The pid of the process who's page table entries
-      will be modified.
+   INFERIOR_PID -- The pid of the process who's page table entries
+   will be modified.
 
-      PT_ARGS -- The *address* of a 3 word block of memory which has
-      additional information:
+   PT_ARGS -- The *address* of a 3 word block of memory which has
+   additional information:
 
-        word 0 -- The start address to watch.  This should be a page-aligned
-	address.
+   word 0 -- The start address to watch.  This should be a page-aligned
+   address.
 
-	word 1 -- The ending address to watch.  Again, this should be a 
-	page aligned address.
+   word 1 -- The ending address to watch.  Again, this should be a 
+   page aligned address.
 
-	word 2 -- Nonzero to enable the data memory break bit on the
-	given address range or zero to disable the data memory break
-	bit on the given address range.
+   word 2 -- Nonzero to enable the data memory break bit on the
+   given address range or zero to disable the data memory break
+   bit on the given address range.
 
-  This call may fail if the given addresses are not valid in the inferior
-  process.  This most often happens when restarting a program which
-  as watchpoints inserted on heap or stack memory.  */
-	
+   This call may fail if the given addresses are not valid in the inferior
+   process.  This most often happens when restarting a program which
+   as watchpoints inserted on heap or stack memory.  */
+
 #define PT_PROT 21
 
 int
@@ -198,16 +199,16 @@ hppa_set_watchpoint (addr, len, flag)
   pt_args[2] = flag;
 
   /* Mask off the lower 12 bits since we want to work on a page basis.  */
-  pt_args[0] >>= 12; 
-  pt_args[1] >>= 12; 
+  pt_args[0] >>= 12;
+  pt_args[1] >>= 12;
 
   /* Rounding adjustments.  */
-  pt_args[1] -= pt_args[0]; 
-  pt_args[1]++; 
+  pt_args[1] -= pt_args[0];
+  pt_args[1]++;
 
   /* Put the lower 12 bits back as zero.  */
-  pt_args[0] <<= 12; 
-  pt_args[1] <<= 12; 
+  pt_args[0] <<= 12;
+  pt_args[1] <<= 12;
 
   /* Do it.  */
   return ptrace (PT_PROT, inferior_pid, (PTRACE_ARG3_TYPE) pt_args, 0);

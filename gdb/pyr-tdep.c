@@ -31,21 +31,21 @@
 /* OBSOLETE  */
 /* OBSOLETE   for (regno = 0; regno < 16; regno++) { */
 /* OBSOLETE     printf_unfiltered/*_filtered*x/ ("%6.6s: %8x  %6.6s: %8x  %6s: %8x  %6s: %8x\n", */
-/* OBSOLETE 		     REGISTER_NAME (regno), reg_buf[regno], */
-/* OBSOLETE 		     REGISTER_NAME (regno+16), reg_buf[regno+16], */
-/* OBSOLETE 		     REGISTER_NAME (regno+32), reg_buf[regno+32], */
-/* OBSOLETE 		     REGISTER_NAME (regno+48), reg_buf[regno+48]); */
+/* OBSOLETE                  REGISTER_NAME (regno), reg_buf[regno], */
+/* OBSOLETE                  REGISTER_NAME (regno+16), reg_buf[regno+16], */
+/* OBSOLETE                  REGISTER_NAME (regno+32), reg_buf[regno+32], */
+/* OBSOLETE                  REGISTER_NAME (regno+48), reg_buf[regno+48]); */
 /* OBSOLETE   } */
 /* OBSOLETE   usp = ptrace (3, inferior_pid, */
-/* OBSOLETE 		(PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_usp) - */
-/* OBSOLETE 		((char *)&u), 0); */
+/* OBSOLETE             (PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_usp) - */
+/* OBSOLETE             ((char *)&u), 0); */
 /* OBSOLETE   ksp = ptrace (3, inferior_pid, */
-/* OBSOLETE 		(PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_ksp) - */
-/* OBSOLETE 		((char *)&u), 0); */
+/* OBSOLETE             (PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_ksp) - */
+/* OBSOLETE             ((char *)&u), 0); */
 /* OBSOLETE   printf_unfiltered/*_filtered*x/ ("\n%6.6s: %8x  %6.6s: %8x (%08x) %6.6s %8x\n", */
-/* OBSOLETE 		   REGISTER_NAME (CSP_REGNUM),reg_buf[CSP_REGNUM], */
-/* OBSOLETE 		   REGISTER_NAME (KSP_REGNUM), reg_buf[KSP_REGNUM], ksp, */
-/* OBSOLETE 		   "usp", usp); */
+/* OBSOLETE                REGISTER_NAME (CSP_REGNUM),reg_buf[CSP_REGNUM], */
+/* OBSOLETE                REGISTER_NAME (KSP_REGNUM), reg_buf[KSP_REGNUM], ksp, */
+/* OBSOLETE                "usp", usp); */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Print the register regnum, or all registers if regnum is -1. */
@@ -68,16 +68,16 @@
 /* OBSOLETE   else */
 /* OBSOLETE     for (i = 0; i < NUM_REGS; i++) */
 /* OBSOLETE       if (i == regnum) { */
-/* OBSOLETE 	long val = raw_regs[i]; */
-/* OBSOLETE 	 */
-/* OBSOLETE 	fputs_filtered (REGISTER_NAME (i), gdb_stdout); */
-/* OBSOLETE 	printf_filtered(":"); */
-/* OBSOLETE 	print_spaces_filtered (6 - strlen (REGISTER_NAME (i)), gdb_stdout); */
-/* OBSOLETE 	if (val == 0) */
-/* OBSOLETE 	  printf_filtered ("0"); */
-/* OBSOLETE 	else */
-/* OBSOLETE 	  printf_filtered ("%s  %d", local_hex_string_custom(val,"08"), val); */
-/* OBSOLETE 	printf_filtered("\n"); */
+/* OBSOLETE     long val = raw_regs[i]; */
+/* OBSOLETE      */
+/* OBSOLETE     fputs_filtered (REGISTER_NAME (i), gdb_stdout); */
+/* OBSOLETE     printf_filtered(":"); */
+/* OBSOLETE     print_spaces_filtered (6 - strlen (REGISTER_NAME (i)), gdb_stdout); */
+/* OBSOLETE     if (val == 0) */
+/* OBSOLETE       printf_filtered ("0"); */
+/* OBSOLETE     else */
+/* OBSOLETE       printf_filtered ("%s  %d", local_hex_string_custom(val,"08"), val); */
+/* OBSOLETE     printf_filtered("\n"); */
 /* OBSOLETE       } */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -90,15 +90,15 @@
 /* OBSOLETE   register int result = read_memory_integer (addr, 4); */
 /* OBSOLETE #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING */
 /* OBSOLETE   fprintf_unfiltered (gdb_stderr, */
-/* OBSOLETE 	   "\t[[..frame_locals:%8x, %s= %x @%x fcfp= %x foo= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n", */
-/* OBSOLETE 	   frame->frame, */
-/* OBSOLETE 	   REGISTER_NAME (CFP_REGNUM), */
-/* OBSOLETE 	   result, addr, */
-/* OBSOLETE 	   frame->frame_cfp, (CFP_REGNUM), */
+/* OBSOLETE        "\t[[..frame_locals:%8x, %s= %x @%x fcfp= %x foo= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n", */
+/* OBSOLETE        frame->frame, */
+/* OBSOLETE        REGISTER_NAME (CFP_REGNUM), */
+/* OBSOLETE        result, addr, */
+/* OBSOLETE        frame->frame_cfp, (CFP_REGNUM), */
 /* OBSOLETE  */
 /* OBSOLETE  */
-/* OBSOLETE 	   read_register(13), read_register(29), read_register(61), */
-/* OBSOLETE 	   find_saved_register(frame, 61)); */
+/* OBSOLETE        read_register(13), read_register(29), read_register(61), */
+/* OBSOLETE        find_saved_register(frame, 61)); */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE  */
 /* OBSOLETE   /* FIXME: I thought read_register (CFP_REGNUM) should be the right answer; */
@@ -116,14 +116,14 @@
 /* OBSOLETE  */
 /* OBSOLETE #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING */
 /* OBSOLETE   fprintf_unfiltered (gdb_stderr, */
-/* OBSOLETE 	   "\t[[..frame_args:%8x, %s= %x @%x fcfp= %x r_r= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n", */
-/* OBSOLETE 	   frame->frame, */
-/* OBSOLETE 	   REGISTER_NAME (CFP_REGNUM), */
-/* OBSOLETE 	   result, addr, */
-/* OBSOLETE 	   frame->frame_cfp, read_register(CFP_REGNUM), */
+/* OBSOLETE        "\t[[..frame_args:%8x, %s= %x @%x fcfp= %x r_r= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n", */
+/* OBSOLETE        frame->frame, */
+/* OBSOLETE        REGISTER_NAME (CFP_REGNUM), */
+/* OBSOLETE        result, addr, */
+/* OBSOLETE        frame->frame_cfp, read_register(CFP_REGNUM), */
 /* OBSOLETE  */
-/* OBSOLETE 	   read_register(13), read_register(29), read_register(61), */
-/* OBSOLETE 	   find_saved_register(frame, 61)); */
+/* OBSOLETE        read_register(13), read_register(29), read_register(61), */
+/* OBSOLETE        find_saved_register(frame, 61)); */
 /* OBSOLETE #endif /*  PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE  */
 /* OBSOLETE   /* FIXME: I thought read_register (CFP_REGNUM) should be the right answer; */
@@ -162,7 +162,7 @@
 /* OBSOLETE     int foo=0; */
 /* OBSOLETE     foo = read_memory_integer (((CORE_ADDR)(frame))+60, 4); */
 /* OBSOLETE     printf_unfiltered ("..reading pc from frame 0x%0x+%d regs: got %0x\n", */
-/* OBSOLETE 	    frame, 60/4, foo); */
+/* OBSOLETE         frame, 60/4, foo); */
 /* OBSOLETE     return foo; */
 /* OBSOLETE } */
 /* OBSOLETE  */
@@ -192,8 +192,8 @@
 /* OBSOLETE   register char *d; */
 /* OBSOLETE   register int insn_opcode, operand_mode; */
 /* OBSOLETE   register int index_multiplier, index_reg_regno, op_1_regno, op_2_regno ; */
-/* OBSOLETE   long insn;			/* first word of the insn, not broken down. *x/ */
-/* OBSOLETE   pyr_insn_format insn_decode;	/* the same, broken out into op{code,erands} *x/ */
+/* OBSOLETE   long insn;                        /* first word of the insn, not broken down. *x/ */
+/* OBSOLETE   pyr_insn_format insn_decode;      /* the same, broken out into op{code,erands} *x/ */
 /* OBSOLETE   long extra_1, extra_2; */
 /* OBSOLETE  */
 /* OBSOLETE   read_memory (memaddr, buffer, MAXLEN); */
@@ -215,26 +215,26 @@
 /* OBSOLETE   } */
 /* OBSOLETE  */
 /* OBSOLETE   for (i = 0; i < NOPCODES; i++) */
-/* OBSOLETE 	  if (pyr_opcodes[i].datum.code == insn_opcode) */
-/* OBSOLETE 		  break; */
+/* OBSOLETE       if (pyr_opcodes[i].datum.code == insn_opcode) */
+/* OBSOLETE               break; */
 /* OBSOLETE  */
 /* OBSOLETE   if (i == NOPCODES) */
-/* OBSOLETE 	  /* FIXME: Handle unrecognised instructions better.  *x/ */
-/* OBSOLETE 	  fprintf_unfiltered (stream, "???\t#%08x\t(op=%x mode =%x)", */
-/* OBSOLETE 		   insn, insn_decode.operator, insn_decode.mode); */
+/* OBSOLETE       /* FIXME: Handle unrecognised instructions better.  *x/ */
+/* OBSOLETE       fprintf_unfiltered (stream, "???\t#%08x\t(op=%x mode =%x)", */
+/* OBSOLETE                insn, insn_decode.operator, insn_decode.mode); */
 /* OBSOLETE   else */
 /* OBSOLETE     { */
 /* OBSOLETE       /* Print the mnemonic for the instruction.  Pyramid insn operands */
 /* OBSOLETE          are so regular that we can deal with almost all of them */
 /* OBSOLETE          separately. */
-/* OBSOLETE 	 Unconditional branches are an exception: they are encoded as */
-/* OBSOLETE 	 conditional branches (branch if false condition, I think) */
-/* OBSOLETE 	 with no condition specified. The average user will not be */
-/* OBSOLETE 	 aware of this. To maintain their illusion that an */
-/* OBSOLETE 	 unconditional branch insn exists, we will have to FIXME to */
-/* OBSOLETE 	 treat the insn mnemnonic of all branch instructions here as a */
-/* OBSOLETE 	 special case: check the operands of branch insn and print an */
-/* OBSOLETE 	 appropriate mnemonic. *x/  */
+/* OBSOLETE      Unconditional branches are an exception: they are encoded as */
+/* OBSOLETE      conditional branches (branch if false condition, I think) */
+/* OBSOLETE      with no condition specified. The average user will not be */
+/* OBSOLETE      aware of this. To maintain their illusion that an */
+/* OBSOLETE      unconditional branch insn exists, we will have to FIXME to */
+/* OBSOLETE      treat the insn mnemnonic of all branch instructions here as a */
+/* OBSOLETE      special case: check the operands of branch insn and print an */
+/* OBSOLETE      appropriate mnemonic. *x/  */
 /* OBSOLETE  */
 /* OBSOLETE       fprintf_unfiltered (stream, "%s\t", pyr_opcodes[i].name); */
 /* OBSOLETE  */
@@ -248,200 +248,200 @@
 /* OBSOLETE       register int i; */
 /* OBSOLETE       register int displacement = (insn & 0x0000ffff) << 2; */
 /* OBSOLETE  */
-/* OBSOLETE       static char cc_bit_names[] = "cvzn";	/* z,n,c,v: strange order? *x/ */
+/* OBSOLETE       static char cc_bit_names[] = "cvzn";  /* z,n,c,v: strange order? *x/ */
 /* OBSOLETE  */
 /* OBSOLETE       /* Is bfc and no bits specified an unconditional branch?*x/ */
 /* OBSOLETE       for (i=0;i<4;i++) { */
-/* OBSOLETE 	if ((bit_codes) & 0x1) */
-/* OBSOLETE 		fputc_unfiltered (cc_bit_names[i], stream); */
-/* OBSOLETE 	bit_codes >>= 1; */
+/* OBSOLETE     if ((bit_codes) & 0x1) */
+/* OBSOLETE             fputc_unfiltered (cc_bit_names[i], stream); */
+/* OBSOLETE     bit_codes >>= 1; */
 /* OBSOLETE       } */
 /* OBSOLETE  */
 /* OBSOLETE       fprintf_unfiltered (stream, ",%0x", */
-/* OBSOLETE 	       displacement + memaddr); */
+/* OBSOLETE            displacement + memaddr); */
 /* OBSOLETE       return (insn_size); */
 /* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE       switch (operand_mode) { */
 /* OBSOLETE       case 0: */
-/* OBSOLETE 	fprintf_unfiltered (stream, "%s,%s", */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno)); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	     */
+/* OBSOLETE     fprintf_unfiltered (stream, "%s,%s", */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno)); */
+/* OBSOLETE     break; */
+/* OBSOLETE          */
 /* OBSOLETE       case 1: */
-/* OBSOLETE 	fprintf_unfiltered (stream, " 0x%0x,%s", */
-/* OBSOLETE 		 op_1_regno, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno)); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     fprintf_unfiltered (stream, " 0x%0x,%s", */
+/* OBSOLETE              op_1_regno, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno)); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 2: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, " $0x%0x,%s", */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno)); */
-/* OBSOLETE 	break; */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, " $0x%0x,%s", */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno)); */
+/* OBSOLETE     break; */
 /* OBSOLETE       case 3: */
-/* OBSOLETE 	fprintf_unfiltered (stream, " (%s),%s", */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno)); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     fprintf_unfiltered (stream, " (%s),%s", */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno)); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 4: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, " 0x%0x(%s),%s", */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno)); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
-/* OBSOLETE 	/* S1 destination mode *x/ */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, " 0x%0x(%s),%s", */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno)); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
+/* OBSOLETE     /* S1 destination mode *x/ */
 /* OBSOLETE       case 5: */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? "%s,(%s)[%s*%1d]" : "%s,(%s)"), */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? "%s,(%s)[%s*%1d]" : "%s,(%s)"), */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 6: */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]" */
-/* OBSOLETE 		  : " $%#0x,(%s)"), */
-/* OBSOLETE 		 op_1_regno, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]" */
+/* OBSOLETE               : " $%#0x,(%s)"), */
+/* OBSOLETE              op_1_regno, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 7: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]" */
-/* OBSOLETE 		  : " $%#0x,(%s)"), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? " $%#0x,(%s)[%s*%1d]" */
+/* OBSOLETE               : " $%#0x,(%s)"), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 8: */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? " (%s),(%s)[%s*%1d]" : " (%s),(%s)"), */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? " (%s),(%s)[%s*%1d]" : " (%s),(%s)"), */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 9: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) */
-/* OBSOLETE 		  ? "%#0x(%s),(%s)[%s*%1d]" */
-/* OBSOLETE 		  : "%#0x(%s),(%s)"), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
-/* OBSOLETE 	/* S2 destination mode *x/ */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) */
+/* OBSOLETE               ? "%#0x(%s),(%s)[%s*%1d]" */
+/* OBSOLETE               : "%#0x(%s),(%s)"), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
+/* OBSOLETE     /* S2 destination mode *x/ */
 /* OBSOLETE       case 10: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? "%s,%#0x(%s)[%s*%1d]" : "%s,%#0x(%s)"), */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? "%s,%#0x(%s)[%s*%1d]" : "%s,%#0x(%s)"), */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
 /* OBSOLETE       case 11: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? */
-/* OBSOLETE 		  " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"), */
-/* OBSOLETE 		 op_1_regno, */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? */
+/* OBSOLETE               " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"), */
+/* OBSOLETE              op_1_regno, */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
 /* OBSOLETE       case 12: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	read_memory (memaddr+8, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_2 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? */
-/* OBSOLETE 		  " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 extra_2, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     read_memory (memaddr+8, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_2 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? */
+/* OBSOLETE               " $%#0x,%#0x(%s)[%s*%1d]" : " $%#0x,%#0x(%s)"), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              extra_2, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       case 13: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) */
-/* OBSOLETE 		  ? " (%s),%#0x(%s)[%s*%1d]"  */
-/* OBSOLETE 		  : " (%s),%#0x(%s)"), */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) */
+/* OBSOLETE               ? " (%s),%#0x(%s)[%s*%1d]"  */
+/* OBSOLETE               : " (%s),%#0x(%s)"), */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
 /* OBSOLETE       case 14: */
-/* OBSOLETE 	read_memory (memaddr+4, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_1 = * ((int *) buffer); */
-/* OBSOLETE 	read_memory (memaddr+8, buffer, MAXLEN); */
-/* OBSOLETE 	insn_size += 4; */
-/* OBSOLETE 	extra_2 = * ((int *) buffer); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? "%#0x(%s),%#0x(%s)[%s*%1d]" */
-/* OBSOLETE 		  : "%#0x(%s),%#0x(%s) "), */
-/* OBSOLETE 		 extra_1, */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 extra_2, */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	break; */
-/* OBSOLETE 	 */
+/* OBSOLETE     read_memory (memaddr+4, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_1 = * ((int *) buffer); */
+/* OBSOLETE     read_memory (memaddr+8, buffer, MAXLEN); */
+/* OBSOLETE     insn_size += 4; */
+/* OBSOLETE     extra_2 = * ((int *) buffer); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? "%#0x(%s),%#0x(%s)[%s*%1d]" */
+/* OBSOLETE               : "%#0x(%s),%#0x(%s) "), */
+/* OBSOLETE              extra_1, */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              extra_2, */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     break; */
+/* OBSOLETE      */
 /* OBSOLETE       default: */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 ((index_reg_regno) ? "%s,%s [%s*%1d]" : "%s,%s"), */
-/* OBSOLETE 		 REGISTER_NAME (op_1_regno), */
-/* OBSOLETE 		 REGISTER_NAME (op_2_regno), */
-/* OBSOLETE 		 REGISTER_NAME (index_reg_regno), */
-/* OBSOLETE 		 index_multiplier); */
-/* OBSOLETE 	fprintf_unfiltered (stream, */
-/* OBSOLETE 		 "\t\t# unknown mode in %08x", */
-/* OBSOLETE 		 insn); */
-/* OBSOLETE 	break; */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              ((index_reg_regno) ? "%s,%s [%s*%1d]" : "%s,%s"), */
+/* OBSOLETE              REGISTER_NAME (op_1_regno), */
+/* OBSOLETE              REGISTER_NAME (op_2_regno), */
+/* OBSOLETE              REGISTER_NAME (index_reg_regno), */
+/* OBSOLETE              index_multiplier); */
+/* OBSOLETE     fprintf_unfiltered (stream, */
+/* OBSOLETE              "\t\t# unknown mode in %08x", */
+/* OBSOLETE              insn); */
+/* OBSOLETE     break; */
 /* OBSOLETE       } /* switch *x/ */
 /* OBSOLETE     } */
 /* OBSOLETE    */

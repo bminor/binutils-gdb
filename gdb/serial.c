@@ -1,21 +1,22 @@
 /* Generic serial interface routines
    Copyright 1992, 1993, 1996, 1997 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <ctype.h>
@@ -48,10 +49,11 @@ static void serial_logchar PARAMS ((int, int, int));
 static char logbase_hex[] = "hex";
 static char logbase_octal[] = "octal";
 static char logbase_ascii[] = "ascii";
-static char *logbase_enums[] = {logbase_hex, logbase_octal, logbase_ascii, NULL};
+static char *logbase_enums[] =
+{logbase_hex, logbase_octal, logbase_ascii, NULL};
 static char *serial_logbase = logbase_ascii;
-
 
+
 static int serial_current_type = 0;
 
 /* Log char CH of type CHTYPE, with TIMEOUT */
@@ -97,14 +99,30 @@ serial_logchar (ch_type, ch, timeout)
       else
 	switch (ch)
 	  {
-	  case '\\':	fputs_unfiltered ("\\\\", serial_logfp); break;	
-	  case '\b':	fputs_unfiltered ("\\b", serial_logfp); break;	
-	  case '\f':	fputs_unfiltered ("\\f", serial_logfp); break;	
-	  case '\n':	fputs_unfiltered ("\\n", serial_logfp); break;	
-	  case '\r':	fputs_unfiltered ("\\r", serial_logfp); break;	
-	  case '\t':	fputs_unfiltered ("\\t", serial_logfp); break;	
-	  case '\v':	fputs_unfiltered ("\\v", serial_logfp); break;	
-	  default:	fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
+	  case '\\':
+	    fputs_unfiltered ("\\\\", serial_logfp);
+	    break;
+	  case '\b':
+	    fputs_unfiltered ("\\b", serial_logfp);
+	    break;
+	  case '\f':
+	    fputs_unfiltered ("\\f", serial_logfp);
+	    break;
+	  case '\n':
+	    fputs_unfiltered ("\\n", serial_logfp);
+	    break;
+	  case '\r':
+	    fputs_unfiltered ("\\r", serial_logfp);
+	    break;
+	  case '\t':
+	    fputs_unfiltered ("\\t", serial_logfp);
+	    break;
+	  case '\v':
+	    fputs_unfiltered ("\\v", serial_logfp);
+	    break;
+	  default:
+	    fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
+	    break;
 	  }
     }
 }
@@ -140,11 +158,11 @@ serial_write (scb, str, len)
 	serial_logchar ('w', str[count] & 0xff, 0);
 
       /* Make sure that the log file is as up-to-date as possible,
-	 in case we are getting ready to dump core or something. */
+         in case we are getting ready to dump core or something. */
       gdb_flush (serial_logfp);
     }
 
-  return (scb -> ops -> write (scb, str, len));
+  return (scb->ops->write (scb, str, len));
 }
 
 int
@@ -154,13 +172,13 @@ serial_readchar (scb, timeout)
 {
   int ch;
 
-  ch = scb -> ops -> readchar (scb, timeout);
+  ch = scb->ops->readchar (scb, timeout);
   if (serial_logfp != NULL)
     {
       serial_logchar ('r', ch, timeout);
 
       /* Make sure that the log file is as up-to-date as possible,
-	 in case we are getting ready to dump core or something. */
+         in case we are getting ready to dump core or something. */
       gdb_flush (serial_logfp);
     }
 
@@ -174,7 +192,7 @@ serial_send_break (scb)
   if (serial_logfp != NULL)
     serial_logchar ('w', SERIAL_BREAK, 0);
 
-  return (scb -> ops -> send_break (scb));
+  return (scb->ops->send_break (scb));
 }
 
 static struct serial_ops *
@@ -191,7 +209,7 @@ serial_interface_lookup (name)
 }
 
 void
-serial_add_interface(optable)
+serial_add_interface (optable)
      struct serial_ops *optable;
 {
   optable->next = serial_ops_list;
@@ -228,14 +246,14 @@ serial_open (name)
   if (!ops)
     return NULL;
 
-  scb = (serial_t)xmalloc (sizeof (struct _serial_t));
+  scb = (serial_t) xmalloc (sizeof (struct _serial_t));
 
   scb->ops = ops;
 
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
 
-  if (scb->ops->open(scb, name))
+  if (scb->ops->open (scb, name))
     {
       free (scb);
       return NULL;
@@ -277,7 +295,7 @@ serial_fdopen (fd)
   if (!ops)
     return NULL;
 
-  scb = (serial_t)xmalloc (sizeof (struct _serial_t));
+  scb = (serial_t) xmalloc (sizeof (struct _serial_t));
 
   scb->ops = ops;
 
@@ -311,7 +329,7 @@ serial_close (scb, really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr? */
-      gdb_fclose (&serial_logfp); 
+      gdb_fclose (&serial_logfp);
       serial_logfp = NULL;
     }
 
@@ -343,33 +361,33 @@ serial_close (scb, really_close)
 	break;
       }
 
-  free(scb);
+  free (scb);
 }
 
 #if 0
 /*
-The connect command is #if 0 because I hadn't thought of an elegant
-way to wait for I/O on two serial_t's simultaneously.  Two solutions
-came to mind:
+   The connect command is #if 0 because I hadn't thought of an elegant
+   way to wait for I/O on two serial_t's simultaneously.  Two solutions
+   came to mind:
 
-	1) Fork, and have have one fork handle the to user direction,
-	   and have the other hand the to target direction.  This
-	   obviously won't cut it for MSDOS.
+   1) Fork, and have have one fork handle the to user direction,
+   and have the other hand the to target direction.  This
+   obviously won't cut it for MSDOS.
 
-	2) Use something like select.  This assumes that stdin and
-	   the target side can both be waited on via the same
-	   mechanism.  This may not be true for DOS, if GDB is
-	   talking to the target via a TCP socket.
--grossman, 8 Jun 93
-*/
+   2) Use something like select.  This assumes that stdin and
+   the target side can both be waited on via the same
+   mechanism.  This may not be true for DOS, if GDB is
+   talking to the target via a TCP socket.
+   -grossman, 8 Jun 93
+ */
 
 /* Connect the user directly to the remote system.  This command acts just like
    the 'cu' or 'tip' command.  Use <CR>~. or <CR>~^D to break out.  */
 
-static serial_t tty_desc;		/* Controlling terminal */
+static serial_t tty_desc;	/* Controlling terminal */
 
 static void
-cleanup_tty(ttystate)
+cleanup_tty (ttystate)
      serial_ttystate ttystate;
 {
   printf_unfiltered ("\r\n[Exiting connect mode]\r\n");
@@ -380,20 +398,20 @@ cleanup_tty(ttystate)
 
 static void
 connect_command (args, fromtty)
-     char	*args;
-     int	fromtty;
+     char *args;
+     int fromtty;
 {
   int c;
   char cur_esc = 0;
   serial_ttystate ttystate;
   serial_t port_desc;		/* TTY port */
 
-  dont_repeat();
+  dont_repeat ();
 
   if (args)
-    fprintf_unfiltered(gdb_stderr, "This command takes no args.  They have been ignored.\n");
-	
-  printf_unfiltered("[Entering connect mode.  Use ~. or ~^D to escape]\n");
+    fprintf_unfiltered (gdb_stderr, "This command takes no args.  They have been ignored.\n");
+
+  printf_unfiltered ("[Entering connect mode.  Use ~. or ~^D to escape]\n");
 
   tty_desc = SERIAL_FDOPEN (0);
   port_desc = last_serial_opened;
@@ -417,16 +435,16 @@ connect_command (args, fromtty)
 
 	  while (1)
 	    {
-	      c = SERIAL_READCHAR(tty_desc, 0);
+	      c = SERIAL_READCHAR (tty_desc, 0);
 
 	      if (c == SERIAL_TIMEOUT)
-		  break;
+		break;
 
 	      if (c < 0)
-		perror_with_name("connect");
+		perror_with_name ("connect");
 
 	      cx = c;
-	      SERIAL_WRITE(port_desc, &cx, 1);
+	      SERIAL_WRITE (port_desc, &cx, 1);
 
 	      switch (cur_esc)
 		{
@@ -455,17 +473,17 @@ connect_command (args, fromtty)
 
 	  while (1)
 	    {
-	      c = SERIAL_READCHAR(port_desc, 0);
+	      c = SERIAL_READCHAR (port_desc, 0);
 
 	      if (c == SERIAL_TIMEOUT)
-		  break;
+		break;
 
 	      if (c < 0)
-		perror_with_name("connect");
+		perror_with_name ("connect");
 
 	      cx = c;
 
-	      SERIAL_WRITE(tty_desc, &cx, 1);
+	      SERIAL_WRITE (tty_desc, &cx, 1);
 	    }
 	}
     }
@@ -475,7 +493,7 @@ connect_command (args, fromtty)
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-serial_printf (serial_t desc, const char *format, ...)
+serial_printf (serial_t desc, const char *format,...)
 #else
 serial_printf (va_alist)
      va_dcl
@@ -510,16 +528,16 @@ _initialize_serial ()
 Use <CR>~. or <CR>~^D to break out.");
 #endif /* 0 */
 
-  add_show_from_set 
+  add_show_from_set
     (add_set_cmd ("remotelogfile", no_class,
 		  var_filename, (char *) &serial_logfile,
 		  "Set filename for remote session recording.\n\
 This file is used to record the remote session for future playback\n\
-by gdbserver.", 
+by gdbserver.",
 		  &setlist),
      &showlist);
 
-  add_show_from_set 
+  add_show_from_set
     (add_set_enum_cmd ("remotelogbase", no_class,
 		       logbase_enums, (char *) &serial_logbase,
 		       "Set numerical base for remote session logging",

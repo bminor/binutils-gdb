@@ -30,5 +30,3 @@
 #define miDebugNext 6
 
 #define wConsole 128
-
-

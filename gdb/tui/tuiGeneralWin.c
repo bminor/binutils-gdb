@@ -1,7 +1,7 @@
 /*
-** TuiGeneralWin.c
-** This module supports general window behavior
-*/
+   ** TuiGeneralWin.c
+   ** This module supports general window behavior
+ */
 
 #include <curses.h>
 #include "defs.h"
@@ -11,8 +11,8 @@
 
 
 /*
-** local support functions
-*/
+   ** local support functions
+ */
 static void _winResize PARAMS ((void));
 
 
@@ -20,9 +20,9 @@ static void _winResize PARAMS ((void));
 ** PUBLIC FUNCTIONS
 ***********************/
 /*
-** tuiRefreshWin()
-**        Refresh the window
-*/
+   ** tuiRefreshWin()
+   **        Refresh the window
+ */
 void
 #ifdef __STDC__
 tuiRefreshWin (
@@ -62,9 +62,9 @@ tuiRefreshWin (winInfo)
 
 
 /*
-** tuiDelwin()
-**        Function to delete the curses window, checking for null
-*/
+   ** tuiDelwin()
+   **        Function to delete the curses window, checking for null
+ */
 void
 #ifdef __STDC__
 tuiDelwin (
@@ -82,8 +82,8 @@ tuiDelwin (window)
 
 
 /*
-** boxWin().
-*/
+   ** boxWin().
+ */
 void
 #ifdef __STDC__
 boxWin (
@@ -101,9 +101,9 @@ boxWin (winInfo, highlightFlag)
 	box (winInfo->handle, '|', '-');
       else
 	{
-/*            wattron(winInfo->handle, A_DIM);*/
+/*            wattron(winInfo->handle, A_DIM); */
 	  box (winInfo->handle, ':', '.');
-/*            wattroff(winInfo->handle, A_DIM);*/
+/*            wattroff(winInfo->handle, A_DIM); */
 	}
     }
 
@@ -112,8 +112,8 @@ boxWin (winInfo, highlightFlag)
 
 
 /*
-** unhighlightWin().
-*/
+   ** unhighlightWin().
+ */
 void
 #ifdef __STDC__
 unhighlightWin (
@@ -133,8 +133,8 @@ unhighlightWin (winInfo)
 
 
 /*
-** highlightWin().
-*/
+   ** highlightWin().
+ */
 void
 #ifdef __STDC__
 highlightWin (
@@ -155,8 +155,8 @@ highlightWin (winInfo)
 
 
 /*
-** checkAndDisplayHighlightIfNecessay
-*/
+   ** checkAndDisplayHighlightIfNecessay
+ */
 void
 #ifdef __STDC__
 checkAndDisplayHighlightIfNeeded (
@@ -179,8 +179,8 @@ checkAndDisplayHighlightIfNeeded (winInfo)
 
 
 /*
-** makeWindow().
-*/
+   ** makeWindow().
+ */
 void
 #ifdef __STDC__
 makeWindow (
@@ -215,7 +215,7 @@ makeWindow (winInfo, boxIt)
 	  mvwaddstr (handle, 1, 1, winName (winInfo));
 	  tuiRefreshWin (winInfo);
 	}
-#endif /*FOR_TEST*/
+#endif /*FOR_TEST */
     }
 
   return;
@@ -223,9 +223,9 @@ makeWindow (winInfo, boxIt)
 
 
 /*
-** tuiClearWin().
-**        Clear the window of all contents without calling wclear.
-*/
+   ** tuiClearWin().
+   **        Clear the window of all contents without calling wclear.
+ */
 void
 #ifdef __STDC__
 tuiClearWin (
@@ -251,11 +251,11 @@ tuiClearWin (winInfo)
 
 
 /*
-** makeVisible().
-**        We can't really make windows visible, or invisible.  So we
-**        have to delete the entire window when making it visible,
-**        and create it again when making it visible.
-*/
+   ** makeVisible().
+   **        We can't really make windows visible, or invisible.  So we
+   **        have to delete the entire window when making it visible,
+   **        and create it again when making it visible.
+ */
 void
 #ifdef __STDC__
 makeVisible (
@@ -296,9 +296,9 @@ makeVisible (winInfo, visible)
 
 
 /*
-** makeAllVisible().
-**        Makes all windows invisible (except the command and locator windows)
-*/
+   ** makeAllVisible().
+   **        Makes all windows invisible (except the command and locator windows)
+ */
 void
 #ifdef __STDC__
 makeAllVisible (
@@ -327,8 +327,8 @@ makeAllVisible (visible)
 
 
 /*
-** scrollWinForward
-*/
+   ** scrollWinForward
+ */
 void
 #ifdef __STDC__
 scrollWinForward (
@@ -377,8 +377,8 @@ scrollWinForward (winInfo, numLines)
 
 
 /*
-** scrollWinBackward
-*/
+   ** scrollWinBackward
+ */
 void
 #ifdef __STDC__
 scrollWinBackward (
@@ -426,9 +426,9 @@ scrollWinBackward (winInfo, numLines)
 
 
 /*
-** refreshAll().
-**        Function to refresh all the windows currently displayed
-*/
+   ** refreshAll().
+   **        Function to refresh all the windows currently displayed
+ */
 void
 #ifdef __STDC__
 refreshAll (

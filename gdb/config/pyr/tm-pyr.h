@@ -140,21 +140,21 @@
 /* OBSOLETE    but do serve to get the desired values when passed to read_register.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* pseudo-registers: *x/ */
-/* OBSOLETE #define PS_REGNUM 64		/* Contains processor status *x/ */
-/* OBSOLETE #define PSW_REGNUM 64		/* Contains current psw, whatever it is.*x/ */
-/* OBSOLETE #define CSP_REGNUM 65		/* address of this control stack frame*x/ */
-/* OBSOLETE #define KSP_REGNUM 66		/* Contains process's Kernel Stack Pointer *x/ */
+/* OBSOLETE #define PS_REGNUM 64                /* Contains processor status *x/ */
+/* OBSOLETE #define PSW_REGNUM 64               /* Contains current psw, whatever it is.*x/ */
+/* OBSOLETE #define CSP_REGNUM 65               /* address of this control stack frame*x/ */
+/* OBSOLETE #define KSP_REGNUM 66               /* Contains process's Kernel Stack Pointer *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define CFP_REGNUM 13		/* Current data-stack frame ptr *x/ */
-/* OBSOLETE #define TR0_REGNUM 48		/* After function call, contains */
-/* OBSOLETE 				   function result *x/ */
+/* OBSOLETE #define CFP_REGNUM 13               /* Current data-stack frame ptr *x/ */
+/* OBSOLETE #define TR0_REGNUM 48               /* After function call, contains */
+/* OBSOLETE                                function result *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* Registers interesting to the machine-independent part of gdb*x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define FP_REGNUM CSP_REGNUM	/* Contains address of executing (control) */
-/* OBSOLETE 				   stack frame *x/ */
-/* OBSOLETE #define SP_REGNUM 14		/* Contains address of top of stack -??*x/ */
-/* OBSOLETE #define PC_REGNUM 15		/* Contains program counter *x/ */
+/* OBSOLETE #define FP_REGNUM CSP_REGNUM        /* Contains address of executing (control) */
+/* OBSOLETE                                stack frame *x/ */
+/* OBSOLETE #define SP_REGNUM 14                /* Contains address of top of stack -??*x/ */
+/* OBSOLETE #define PC_REGNUM 15                /* Contains program counter *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* Define DO_REGISTERS_INFO() to do machine-specific formatting */
 /* OBSOLETE    of register dumps. *x/ */
@@ -179,7 +179,7 @@
 /* OBSOLETE    registers shifting into ins counts) upon subroutine calls and thus */
 /* OBSOLETE    there is no need to search more than one stack frame for it. *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define REGISTER_IN_WINDOW_P(regnum)	\ */
+/* OBSOLETE #define REGISTER_IN_WINDOW_P(regnum)        \ */
 /* OBSOLETE   ((regnum) >= 16 && (regnum) < 64) */
 /* OBSOLETE  */
 /* OBSOLETE /* Index within `registers' of the first byte of the space for */
@@ -250,9 +250,9 @@
 /* OBSOLETE    (its caller).  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define EXTRA_FRAME_INFO \ */
-/* OBSOLETE 	CORE_ADDR bottom;	\ */
-/* OBSOLETE 	CORE_ADDR frame_cfp;	\ */
-/* OBSOLETE 	CORE_ADDR frame_window_addr; */
+/* OBSOLETE     CORE_ADDR bottom;       \ */
+/* OBSOLETE     CORE_ADDR frame_cfp;    \ */
+/* OBSOLETE     CORE_ADDR frame_window_addr; */
 /* OBSOLETE  */
 /* OBSOLETE /* The bottom field is misnamed, since it might imply that memory from */
 /* OBSOLETE    bottom to frame contains this frame.  That need not be true if */
@@ -260,18 +260,18 @@
 /* OBSOLETE    stack, some on a heap in the data segment).  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \ */
-/* OBSOLETE do {								\ */
-/* OBSOLETE   (fci)->frame_window_addr = (fci)->frame;			\ */
-/* OBSOLETE   (fci)->bottom =						\ */
-/* OBSOLETE 	  ((fci)->next ?					\ */
-/* OBSOLETE 	   ((fci)->frame == (fci)->next->frame ?			\ */
-/* OBSOLETE 	    (fci)->next->bottom : (fci)->next->frame) :		\ */
-/* OBSOLETE 	   read_register (SP_REGNUM));				\ */
-/* OBSOLETE   (fci)->frame_cfp =						\ */
-/* OBSOLETE 	  read_register (CFP_REGNUM);				\ */
-/* OBSOLETE   /***fprintf (stderr,						\ */
-/* OBSOLETE 	   "[[creating new frame for %0x,pc=%0x,csp=%0x]]\n",	\ */
-/* OBSOLETE 	   (fci)->frame, (fci)->pc,(fci)->frame_cfp);*x/		\ */
+/* OBSOLETE do {                                                                \ */
+/* OBSOLETE   (fci)->frame_window_addr = (fci)->frame;                  \ */
+/* OBSOLETE   (fci)->bottom =                                           \ */
+/* OBSOLETE       ((fci)->next ?                                        \ */
+/* OBSOLETE        ((fci)->frame == (fci)->next->frame ?                        \ */
+/* OBSOLETE         (fci)->next->bottom : (fci)->next->frame) :         \ */
+/* OBSOLETE        read_register (SP_REGNUM));                          \ */
+/* OBSOLETE   (fci)->frame_cfp =                                                \ */
+/* OBSOLETE       read_register (CFP_REGNUM);                           \ */
+/* OBSOLETE   /***fprintf (stderr,                                              \ */
+/* OBSOLETE        "[[creating new frame for %0x,pc=%0x,csp=%0x]]\n",   \ */
+/* OBSOLETE        (fci)->frame, (fci)->pc,(fci)->frame_cfp);*x/                \ */
 /* OBSOLETE } while (0); */
 /* OBSOLETE  */
 /* OBSOLETE /* FRAME_CHAIN takes a frame's nominal address */
@@ -280,7 +280,7 @@
 /* OBSOLETE /* In the case of the pyr, the frame's nominal address is the address */
 /* OBSOLETE    of parameter register 0.  The previous frame is found 32 words up.   *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define FRAME_CHAIN(thisframe)	\ */
+/* OBSOLETE #define FRAME_CHAIN(thisframe)      \ */
 /* OBSOLETE   ( (thisframe) -> frame - CONTROL_STACK_FRAME_SIZE) */
 /* OBSOLETE  */
 /* OBSOLETE  /*((thisframe) >= CONTROL_STACK_ADDR))*x/ */
@@ -362,54 +362,54 @@
 /* OBSOLETE    compiler and gcc currently ignore them, so it's not an issue.   *x/  */
 /* OBSOLETE  */
 /* OBSOLETE #define FRAME_FIND_SAVED_REGS(fi_p, frame_saved_regs) \ */
-/* OBSOLETE {  register int regnum;							\ */
-/* OBSOLETE   register CORE_ADDR pc;						\ */
-/* OBSOLETE   register CORE_ADDR fn_start_pc;					\ */
-/* OBSOLETE   register int first_insn;						\ */
-/* OBSOLETE   register CORE_ADDR prev_cf_addr;					\ */
-/* OBSOLETE   register int window_ptr;						\ */
-/* OBSOLETE   if (!fi_p) fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");	\ */
-/* OBSOLETE   memset (&(frame_saved_regs), '\0', sizeof (frame_saved_regs));		\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   window_ptr = prev_cf_addr = FRAME_FP(fi_p);				\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   for (regnum = 16 ; regnum < 64; regnum++,window_ptr+=4)		\ */
-/* OBSOLETE   {									\ */
-/* OBSOLETE     (frame_saved_regs).regs[regnum] = window_ptr;			\ */
-/* OBSOLETE   }									\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   /* In each window, psw, and pc are "saved" in tr14,tr15. *x/		\ */
-/* OBSOLETE   /*** psw is sometimes saved in gr12 (so sez <sys/pcb.h>) *x/		\ */
-/* OBSOLETE   (frame_saved_regs).regs[PS_REGNUM] = FRAME_FP(fi_p) + (14*4);  	\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE /*(frame_saved_regs).regs[PC_REGNUM] = (frame_saved_regs).regs[31];*x/	\ */
-/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = FRAME_FP(fi_p) + ((15+32)*4);	\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   /* Functions that allocate a frame save sp *where*? *x/		\ */
+/* OBSOLETE {  register int regnum;                                                     \ */
+/* OBSOLETE   register CORE_ADDR pc;                                            \ */
+/* OBSOLETE   register CORE_ADDR fn_start_pc;                                   \ */
+/* OBSOLETE   register int first_insn;                                          \ */
+/* OBSOLETE   register CORE_ADDR prev_cf_addr;                                  \ */
+/* OBSOLETE   register int window_ptr;                                          \ */
+/* OBSOLETE   if (!fi_p) fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");      \ */
+/* OBSOLETE   memset (&(frame_saved_regs), '\0', sizeof (frame_saved_regs));            \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   window_ptr = prev_cf_addr = FRAME_FP(fi_p);                               \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   for (regnum = 16 ; regnum < 64; regnum++,window_ptr+=4)           \ */
+/* OBSOLETE   {                                                                 \ */
+/* OBSOLETE     (frame_saved_regs).regs[regnum] = window_ptr;                   \ */
+/* OBSOLETE   }                                                                 \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   /* In each window, psw, and pc are "saved" in tr14,tr15. *x/              \ */
+/* OBSOLETE   /*** psw is sometimes saved in gr12 (so sez <sys/pcb.h>) *x/              \ */
+/* OBSOLETE   (frame_saved_regs).regs[PS_REGNUM] = FRAME_FP(fi_p) + (14*4);     \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE /*(frame_saved_regs).regs[PC_REGNUM] = (frame_saved_regs).regs[31];*x/      \ */
+/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = FRAME_FP(fi_p) + ((15+32)*4);        \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   /* Functions that allocate a frame save sp *where*? *x/           \ */
 /* OBSOLETE /*first_insn = read_memory_integer (get_pc_function_start ((fi_p)->pc),4); *x/ \ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   fn_start_pc = (get_pc_function_start ((fi_p)->pc));			\ */
-/* OBSOLETE   first_insn = read_memory_integer(fn_start_pc, 4);			\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   if (0x08 == ((first_insn >> 20) &0x0ff)) {				\ */
-/* OBSOLETE     /* NB: because WINDOW_REGISTER_P(cfp) is false, a saved cfp		\ */
-/* OBSOLETE        in this frame is only visible in this frame's callers.		\ */
-/* OBSOLETE        That means the cfp we mark saved is my caller's cfp, ie pr13.	\ */
-/* OBSOLETE        I don't understand why we don't have to do that for pc, too.  *x/	\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE     (frame_saved_regs).regs[CFP_REGNUM] = FRAME_FP(fi_p)+(13*4);	\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] =				\ */
-/* OBSOLETE 	  read_memory_integer (FRAME_FP(fi_p)+((13+32)*4),4);		\ */
-/* OBSOLETE   }									\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE /*									\ */
-/* OBSOLETE  *(frame_saved_regs).regs[CFP_REGNUM] = (frame_saved_regs).regs[61];	\ */
-/* OBSOLETE  * (frame_saved_regs).regs[SP_REGNUM] =					\ */
-/* OBSOLETE  *	  read_memory_integer (FRAME_FP(fi_p)+((13+32)*4),4);		\ */
-/* OBSOLETE  *x/									\ */
-/* OBSOLETE 									\ */
-/* OBSOLETE   (frame_saved_regs).regs[CSP_REGNUM] = prev_cf_addr;			\ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   fn_start_pc = (get_pc_function_start ((fi_p)->pc));                       \ */
+/* OBSOLETE   first_insn = read_memory_integer(fn_start_pc, 4);                 \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   if (0x08 == ((first_insn >> 20) &0x0ff)) {                                \ */
+/* OBSOLETE     /* NB: because WINDOW_REGISTER_P(cfp) is false, a saved cfp             \ */
+/* OBSOLETE        in this frame is only visible in this frame's callers.               \ */
+/* OBSOLETE        That means the cfp we mark saved is my caller's cfp, ie pr13.        \ */
+/* OBSOLETE        I don't understand why we don't have to do that for pc, too.  *x/    \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE     (frame_saved_regs).regs[CFP_REGNUM] = FRAME_FP(fi_p)+(13*4);    \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] =                            \ */
+/* OBSOLETE       read_memory_integer (FRAME_FP(fi_p)+((13+32)*4),4);           \ */
+/* OBSOLETE   }                                                                 \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE /*                                                                  \ */
+/* OBSOLETE  *(frame_saved_regs).regs[CFP_REGNUM] = (frame_saved_regs).regs[61];        \ */
+/* OBSOLETE  * (frame_saved_regs).regs[SP_REGNUM] =                                     \ */
+/* OBSOLETE  *    read_memory_integer (FRAME_FP(fi_p)+((13+32)*4),4);           \ */
+/* OBSOLETE  *x/                                                                        \ */
+/* OBSOLETE                                                                     \ */
+/* OBSOLETE   (frame_saved_regs).regs[CSP_REGNUM] = prev_cf_addr;                       \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Things needed for making the inferior call functions.  *x/ */
@@ -425,41 +425,41 @@
 /* OBSOLETE  */
 /* OBSOLETE #define PUSH_DUMMY_FRAME \ */
 /* OBSOLETE { register CORE_ADDR sp = read_register (SP_REGNUM);\ */
-/* OBSOLETE   register int regnum;				    \ */
-/* OBSOLETE   sp = push_word (sp, 0); /* arglist *x/		    \ */
-/* OBSOLETE   for (regnum = 11; regnum >= 0; regnum--)	    \ */
+/* OBSOLETE   register int regnum;                                  \ */
+/* OBSOLETE   sp = push_word (sp, 0); /* arglist *x/                \ */
+/* OBSOLETE   for (regnum = 11; regnum >= 0; regnum--)      \ */
 /* OBSOLETE     sp = push_word (sp, read_register (regnum));    \ */
 /* OBSOLETE   sp = push_word (sp, read_register (PC_REGNUM));   \ */
 /* OBSOLETE   sp = push_word (sp, read_register (FP_REGNUM));   \ */
 /* OBSOLETE /*  sp = push_word (sp, read_register (AP_REGNUM));*x/   \ */
 /* OBSOLETE   sp = push_word (sp, (read_register (PS_REGNUM) & 0xffef)   \ */
-/* OBSOLETE 		      + 0x2fff0000);		    \ */
-/* OBSOLETE   sp = push_word (sp, 0); 			    \ */
-/* OBSOLETE   write_register (SP_REGNUM, sp);		    \ */
-/* OBSOLETE   write_register (FP_REGNUM, sp);		    \ */
+/* OBSOLETE                   + 0x2fff0000);                \ */
+/* OBSOLETE   sp = push_word (sp, 0);                       \ */
+/* OBSOLETE   write_register (SP_REGNUM, sp);               \ */
+/* OBSOLETE   write_register (FP_REGNUM, sp);               \ */
 /* OBSOLETE /*  write_register (AP_REGNUM, sp + 17 * sizeof (int));*x/ } */
 /* OBSOLETE  */
 /* OBSOLETE /* Discard from the stack the innermost frame, restoring all registers.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define POP_FRAME  \ */
-/* OBSOLETE { register CORE_ADDR fp = read_register (FP_REGNUM);		 \ */
-/* OBSOLETE   register int regnum;						 \ */
-/* OBSOLETE   register int regmask = read_memory_integer (fp + 4, 4);	 \ */
-/* OBSOLETE   write_register (PS_REGNUM, 					 \ */
-/* OBSOLETE 		  (regmask & 0xffff)				 \ */
-/* OBSOLETE 		  | (read_register (PS_REGNUM) & 0xffff0000));	 \ */
+/* OBSOLETE { register CORE_ADDR fp = read_register (FP_REGNUM);                 \ */
+/* OBSOLETE   register int regnum;                                               \ */
+/* OBSOLETE   register int regmask = read_memory_integer (fp + 4, 4);    \ */
+/* OBSOLETE   write_register (PS_REGNUM,                                         \ */
+/* OBSOLETE               (regmask & 0xffff)                             \ */
+/* OBSOLETE               | (read_register (PS_REGNUM) & 0xffff0000));   \ */
 /* OBSOLETE   write_register (PC_REGNUM, read_memory_integer (fp + 16, 4));  \ */
 /* OBSOLETE   write_register (FP_REGNUM, read_memory_integer (fp + 12, 4));  \ */
 /* OBSOLETE /*  write_register (AP_REGNUM, read_memory_integer (fp + 8, 4));*x/   \ */
-/* OBSOLETE   fp += 16;							 \ */
-/* OBSOLETE   for (regnum = 0; regnum < 12; regnum++)			 \ */
-/* OBSOLETE     if (regmask & (0x10000 << regnum))				 \ */
+/* OBSOLETE   fp += 16;                                                  \ */
+/* OBSOLETE   for (regnum = 0; regnum < 12; regnum++)                    \ */
+/* OBSOLETE     if (regmask & (0x10000 << regnum))                               \ */
 /* OBSOLETE       write_register (regnum, read_memory_integer (fp += 4, 4)); \ */
-/* OBSOLETE   fp = fp + 4 + ((regmask >> 30) & 3);				 \ */
-/* OBSOLETE   if (regmask & 0x20000000)					 \ */
-/* OBSOLETE     { regnum = read_memory_integer (fp, 4);			 \ */
-/* OBSOLETE       fp += (regnum + 1) * 4; }					 \ */
-/* OBSOLETE   write_register (SP_REGNUM, fp);				 \ */
+/* OBSOLETE   fp = fp + 4 + ((regmask >> 30) & 3);                               \ */
+/* OBSOLETE   if (regmask & 0x20000000)                                  \ */
+/* OBSOLETE     { regnum = read_memory_integer (fp, 4);                  \ */
+/* OBSOLETE       fp += (regnum + 1) * 4; }                                      \ */
+/* OBSOLETE   write_register (SP_REGNUM, fp);                            \ */
 /* OBSOLETE   set_current_frame (read_register (FP_REGNUM)); } */
 /* OBSOLETE  */
 /* OBSOLETE /* This sequence of words is the instructions */
@@ -475,7 +475,7 @@
 /* OBSOLETE    into a call sequence of the above form stored at DUMMYNAME.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \ */
-/* OBSOLETE { *((char *) dummyname + 1) = nargs;		\ */
+/* OBSOLETE { *((char *) dummyname + 1) = nargs;                \ */
 /* OBSOLETE   *(int *)((char *) dummyname + 3) = fun; } */
 /* OBSOLETE #endif /* 0 *x/ */
 /* OBSOLETE  */

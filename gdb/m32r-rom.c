@@ -4,21 +4,22 @@
 
    Adapted by Michael Snyder of Cygnus Support.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* This module defines communication with the Mitsubishi m32r monitor */
 
@@ -30,10 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symtab.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "symfile.h"	/* for generic load */
-#include <time.h>	/* for time_t */
+#include "symfile.h"		/* for generic load */
+#include <time.h>		/* for time_t */
 #include "gdb_string.h"
-#include "objfiles.h"	/* for ALL_OBJFILES etc. */
+#include "objfiles.h"		/* for ALL_OBJFILES etc. */
 
 
 extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
@@ -43,10 +44,10 @@ extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t))
  * All this stuff just to get my host computer's IP address!
  */
 #include <sys/types.h>
-#include <netdb.h>	/* for hostent */
-#include <netinet/in.h>	/* for struct in_addr */
+#include <netdb.h>		/* for hostent */
+#include <netinet/in.h>		/* for struct in_addr */
 #if 1
-#include <arpa/inet.h>	/* for inet_ntoa */
+#include <arpa/inet.h>		/* for inet_ntoa */
 #endif
 #endif
 
@@ -61,15 +62,15 @@ static char *download_path;	/* user-settable path for SREC files     */
 
 static void
 m32r_load_section (abfd, s, data_count)
-     bfd      *abfd;
+     bfd *abfd;
      asection *s;
      unsigned int *data_count;
 {
   if (s->flags & SEC_LOAD)
     {
       bfd_size_type section_size = bfd_section_size (abfd, s);
-      bfd_vma       section_base = bfd_section_lma  (abfd, s);
-      unsigned int  buffer, i;
+      bfd_vma section_base = bfd_section_lma (abfd, s);
+      unsigned int buffer, i;
 
       *data_count += section_size;
 
@@ -78,7 +79,7 @@ m32r_load_section (abfd, s, data_count)
       print_address_numeric (section_base, 1, gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
-      monitor_printf ("%x mw\r" , section_base);
+      monitor_printf ("%x mw\r", section_base);
       for (i = 0; i < section_size; i += 4)
 	{
 	  QUIT;
@@ -92,7 +93,7 @@ m32r_load_section (abfd, s, data_count)
     }
 }
 
-static int 
+static int
 m32r_load_1 (dummy)
      void *dummy;
 {
@@ -107,9 +108,9 @@ m32r_load_1 (dummy)
  */
 
 static void
-m32r_load (filename, from_tty) 
-    char *filename;
-    int from_tty;
+m32r_load (filename, from_tty)
+     char *filename;
+     int from_tty;
 {
   extern int inferior_pid;
   bfd *abfd;
@@ -131,8 +132,8 @@ m32r_load (filename, from_tty)
     if (s->flags & SEC_LOAD)
       {
 	bfd_size_type section_size = bfd_section_size (abfd, s);
-	bfd_vma       section_base = bfd_section_vma  (abfd, s);
-	unsigned int  buffer;
+	bfd_vma section_base = bfd_section_vma (abfd, s);
+	unsigned int buffer;
 
 	data_count += section_size;
 
@@ -140,8 +141,8 @@ m32r_load (filename, from_tty)
 			 bfd_section_name (abfd, s), section_size);
 	print_address_numeric (section_base, 1, gdb_stdout);
 	printf_filtered ("\n");
- 	gdb_flush (gdb_stdout);
-	monitor_printf ("%x mw\r" , section_base);
+	gdb_flush (gdb_stdout);
+	monitor_printf ("%x mw\r", section_base);
 	for (i = 0; i < section_size; i += 4)
 	  {
 	    monitor_expect (" -> ", NULL, 0);
@@ -167,7 +168,7 @@ m32r_load (filename, from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;             /* No process now */
+  inferior_pid = 0;		/* No process now */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid
@@ -180,9 +181,9 @@ m32r_load (filename, from_tty)
 }
 
 static void
-m32r_load_gen (filename, from_tty) 
-    char *filename;
-    int from_tty;
+m32r_load_gen (filename, from_tty)
+     char *filename;
+     int from_tty;
 {
   generic_load (filename, from_tty);
 }
@@ -195,10 +196,10 @@ static void mon2000_open PARAMS ((char *args, int from_tty));
    different names than GDB does, and don't support all the registers
    either. So, typing "info reg sp" becomes an "A7". */
 
-static char *m32r_regnames[] = 
-{ "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7", 
-  "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15", 
-  "psw", "cbr", "spi", "spu", "bpc", "pc",  "accl", "acch", 
+static char *m32r_regnames[] =
+{"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+ "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+ "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch",
 };
 
 static void
@@ -209,19 +210,19 @@ m32r_supply_register (regname, regnamelen, val, vallen)
      int vallen;
 {
   int regno;
-  int num_regs = sizeof(m32r_regnames) / sizeof(m32r_regnames[0]);
+  int num_regs = sizeof (m32r_regnames) / sizeof (m32r_regnames[0]);
 
   for (regno = 0; regno < num_regs; regno++)
-    if (strncmp(regname, m32r_regnames[regno], regnamelen) == 0)
+    if (strncmp (regname, m32r_regnames[regno], regnamelen) == 0)
       break;
 
   if (regno >= num_regs)
-    return;		/* no match */
+    return;			/* no match */
 
   if (regno == ACCL_REGNUM)
-    { /* special handling for 64-bit acc reg */
+    {				/* special handling for 64-bit acc reg */
       monitor_supply_register (ACCH_REGNUM, val);
-      val = strchr (val, ':'); /* skip past ':' to get 2nd word */
+      val = strchr (val, ':');	/* skip past ':' to get 2nd word */
       if (val != NULL)
 	monitor_supply_register (ACCL_REGNUM, val + 1);
     }
@@ -257,15 +258,15 @@ m32r_supply_register (regname, regnamelen, val, vallen)
 	  monitor_supply_register (CBR_REGNUM, (psw & 0x1) ? one : zero);
 #endif
 #ifdef BPC_REGNUM
-	  monitor_supply_register (BPC_REGNUM, zero); /* KLUDGE:   (???????) */
+	  monitor_supply_register (BPC_REGNUM, zero);	/* KLUDGE:   (???????) */
 #endif
 #ifdef BCARRY_REGNUM
-	  monitor_supply_register (BCARRY_REGNUM, zero); /* KLUDGE: (??????) */
+	  monitor_supply_register (BCARRY_REGNUM, zero);	/* KLUDGE: (??????) */
 #endif
-	}	  
+	}
 
-      if (regno == SPI_REGNUM || regno == SPU_REGNUM)	
-	{ /* special handling for stack pointer (spu or spi) */
+      if (regno == SPI_REGNUM || regno == SPU_REGNUM)
+	{			/* special handling for stack pointer (spu or spi) */
 	  unsigned long stackmode = read_register (PSW_REGNUM) & 0x80;
 
 	  if (regno == SPI_REGNUM && !stackmode)	/* SP == SPI */
@@ -280,61 +281,62 @@ m32r_supply_register (regname, regnamelen, val, vallen)
 
 static struct target_ops m32r_ops;
 
-static char *m32r_inits[] = {"\r", NULL};
+static char *m32r_inits[] =
+{"\r", NULL};
 
-static struct monitor_ops m32r_cmds ;
-
-static void 
-init_m32r_cmds(void)
-{
-  m32r_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_REGISTER_VALUE_FIRST;
-  m32r_cmds.init =   m32r_inits;		/* Init strings */
-  m32r_cmds.cont =   "go\r";			/* continue command */
-  m32r_cmds.step =   "step\r";			/* single step */
-  m32r_cmds.stop =   NULL;			/* interrupt command */
-  m32r_cmds.set_break =   "%x +bp\r";		/* set a breakpoint */
-  m32r_cmds.clr_break =   "%x -bp\r";		/* clear a breakpoint */
-  m32r_cmds.clr_all_break =   "bpoff\r";	/* clear all breakpoints */
-  m32r_cmds.fill =   "%x %x %x fill\r";		/* fill (start length val) */
-  m32r_cmds.setmem.cmdb =     "%x 1 %x fill\r";	/* setmem.cmdb (addr, value) */
-  m32r_cmds.setmem.cmdw =     "%x 1 %x fillh\r";/* setmem.cmdw (addr, value) */
-  m32r_cmds.setmem.cmdl =     "%x 1 %x fillw\r";/* setmem.cmdl (addr, value) */
-  m32r_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
-  m32r_cmds.setmem.resp_delim =     NULL;	/* setmem.resp_delim */
-  m32r_cmds.setmem.term =     NULL;		/* setmem.term */
-  m32r_cmds.setmem.term_cmd =     NULL;		/* setmem.term_cmd */
-  m32r_cmds.getmem.cmdb =     "%x %x dump\r";	/* getmem.cmdb (addr, len) */
-  m32r_cmds.getmem.cmdw =     NULL;		/* getmem.cmdw (addr, len) */
-  m32r_cmds.getmem.cmdl =     NULL;		/* getmem.cmdl (addr, len) */
-  m32r_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, len) */
-  m32r_cmds.getmem.resp_delim =     ": ";	/* getmem.resp_delim */
-  m32r_cmds.getmem.term =     NULL;		/* getmem.term */
-  m32r_cmds.getmem.term_cmd =     NULL	;	/* getmem.term_cmd */
-  m32r_cmds.setreg.cmd =     "%x to %%%s\r";	/* setreg.cmd (name, value) */
-  m32r_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
-  m32r_cmds.setreg.term =     NULL;		/* setreg.term */
-  m32r_cmds.setreg.term_cmd =     NULL	;	/* setreg.term_cmd */
-  m32r_cmds.getreg.cmd =     NULL;		/* getreg.cmd (name) */
-  m32r_cmds.getreg.resp_delim =     NULL;	/* getreg.resp_delim */
-  m32r_cmds.getreg.term =     NULL;		/* getreg.term */
-  m32r_cmds.getreg.term_cmd =     NULL	;	/* getreg.term_cmd */
-  m32r_cmds.dump_registers =   ".reg\r";	/* dump_registers */
-  m32r_cmds.register_pattern =   "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)"; /* register_pattern */
-  m32r_cmds.supply_register =   m32r_supply_register;	/* supply_register */
-  m32r_cmds.load_routine =   NULL;		/* load_routine (defaults to SRECs) */
-  m32r_cmds.load =   NULL;			/* download command */
-  m32r_cmds.loadresp =   NULL;			/* load response */
-  m32r_cmds.prompt =   "ok ";			/* monitor command prompt */
-  m32r_cmds.line_term =   "\r";			/* end-of-line terminator */
-  m32r_cmds.cmd_end =   NULL;			/* optional command terminator */
-  m32r_cmds.target =   &m32r_ops;		/* target operations */
-  m32r_cmds.stopbits =   SERIAL_1_STOPBITS;	/* number of stop bits */
-  m32r_cmds.regnames =   m32r_regnames;		/* registers names */
-  m32r_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
-} /* init_m32r_cmds */
+static struct monitor_ops m32r_cmds;
 
 static void
-m32r_open(args, from_tty)
+init_m32r_cmds (void)
+{
+  m32r_cmds.flags = MO_CLR_BREAK_USES_ADDR | MO_REGISTER_VALUE_FIRST;
+  m32r_cmds.init = m32r_inits;	/* Init strings */
+  m32r_cmds.cont = "go\r";	/* continue command */
+  m32r_cmds.step = "step\r";	/* single step */
+  m32r_cmds.stop = NULL;	/* interrupt command */
+  m32r_cmds.set_break = "%x +bp\r";	/* set a breakpoint */
+  m32r_cmds.clr_break = "%x -bp\r";	/* clear a breakpoint */
+  m32r_cmds.clr_all_break = "bpoff\r";	/* clear all breakpoints */
+  m32r_cmds.fill = "%x %x %x fill\r";	/* fill (start length val) */
+  m32r_cmds.setmem.cmdb = "%x 1 %x fill\r";	/* setmem.cmdb (addr, value) */
+  m32r_cmds.setmem.cmdw = "%x 1 %x fillh\r";	/* setmem.cmdw (addr, value) */
+  m32r_cmds.setmem.cmdl = "%x 1 %x fillw\r";	/* setmem.cmdl (addr, value) */
+  m32r_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
+  m32r_cmds.setmem.resp_delim = NULL;	/* setmem.resp_delim */
+  m32r_cmds.setmem.term = NULL;	/* setmem.term */
+  m32r_cmds.setmem.term_cmd = NULL;	/* setmem.term_cmd */
+  m32r_cmds.getmem.cmdb = "%x %x dump\r";	/* getmem.cmdb (addr, len) */
+  m32r_cmds.getmem.cmdw = NULL;	/* getmem.cmdw (addr, len) */
+  m32r_cmds.getmem.cmdl = NULL;	/* getmem.cmdl (addr, len) */
+  m32r_cmds.getmem.cmdll = NULL;	/* getmem.cmdll (addr, len) */
+  m32r_cmds.getmem.resp_delim = ": ";	/* getmem.resp_delim */
+  m32r_cmds.getmem.term = NULL;	/* getmem.term */
+  m32r_cmds.getmem.term_cmd = NULL;	/* getmem.term_cmd */
+  m32r_cmds.setreg.cmd = "%x to %%%s\r";	/* setreg.cmd (name, value) */
+  m32r_cmds.setreg.resp_delim = NULL;	/* setreg.resp_delim */
+  m32r_cmds.setreg.term = NULL;	/* setreg.term */
+  m32r_cmds.setreg.term_cmd = NULL;	/* setreg.term_cmd */
+  m32r_cmds.getreg.cmd = NULL;	/* getreg.cmd (name) */
+  m32r_cmds.getreg.resp_delim = NULL;	/* getreg.resp_delim */
+  m32r_cmds.getreg.term = NULL;	/* getreg.term */
+  m32r_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
+  m32r_cmds.dump_registers = ".reg\r";	/* dump_registers */
+  m32r_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
+  m32r_cmds.supply_register = m32r_supply_register;	/* supply_register */
+  m32r_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
+  m32r_cmds.load = NULL;	/* download command */
+  m32r_cmds.loadresp = NULL;	/* load response */
+  m32r_cmds.prompt = "ok ";	/* monitor command prompt */
+  m32r_cmds.line_term = "\r";	/* end-of-line terminator */
+  m32r_cmds.cmd_end = NULL;	/* optional command terminator */
+  m32r_cmds.target = &m32r_ops;	/* target operations */
+  m32r_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
+  m32r_cmds.regnames = m32r_regnames;	/* registers names */
+  m32r_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
+}				/* init_m32r_cmds */
+
+static void
+m32r_open (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -346,57 +348,57 @@ m32r_open(args, from_tty)
 static struct target_ops mon2000_ops;
 static struct monitor_ops mon2000_cmds;
 
-static void 
-init_mon2000_cmds(void)
+static void
+init_mon2000_cmds (void)
 {
-  mon2000_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_REGISTER_VALUE_FIRST;
-  mon2000_cmds.init =   m32r_inits;		/* Init strings */
-  mon2000_cmds.cont =   "go\r";			/* continue command */
-  mon2000_cmds.step =   "step\r";			/* single step */
-  mon2000_cmds.stop =   NULL;			/* interrupt command */
-  mon2000_cmds.set_break =   "%x +bp\r";		/* set a breakpoint */
-  mon2000_cmds.clr_break =   "%x -bp\r";		/* clear a breakpoint */
-  mon2000_cmds.clr_all_break =   "bpoff\r";	/* clear all breakpoints */
-  mon2000_cmds.fill =   "%x %x %x fill\r";		/* fill (start length val) */
-  mon2000_cmds.setmem.cmdb =     "%x 1 %x fill\r";	/* setmem.cmdb (addr, value) */
-  mon2000_cmds.setmem.cmdw =     "%x 1 %x fillh\r";/* setmem.cmdw (addr, value) */
-  mon2000_cmds.setmem.cmdl =     "%x 1 %x fillw\r";/* setmem.cmdl (addr, value) */
-  mon2000_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
-  mon2000_cmds.setmem.resp_delim =     NULL;	/* setmem.resp_delim */
-  mon2000_cmds.setmem.term =     NULL;		/* setmem.term */
-  mon2000_cmds.setmem.term_cmd =     NULL;		/* setmem.term_cmd */
-  mon2000_cmds.getmem.cmdb =     "%x %x dump\r";	/* getmem.cmdb (addr, len) */
-  mon2000_cmds.getmem.cmdw =     NULL;		/* getmem.cmdw (addr, len) */
-  mon2000_cmds.getmem.cmdl =     NULL;		/* getmem.cmdl (addr, len) */
-  mon2000_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, len) */
-  mon2000_cmds.getmem.resp_delim =     ": ";	/* getmem.resp_delim */
-  mon2000_cmds.getmem.term =     NULL;		/* getmem.term */
-  mon2000_cmds.getmem.term_cmd =     NULL	;	/* getmem.term_cmd */
-  mon2000_cmds.setreg.cmd =     "%x to %%%s\r";	/* setreg.cmd (name, value) */
-  mon2000_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
-  mon2000_cmds.setreg.term =     NULL;		/* setreg.term */
-  mon2000_cmds.setreg.term_cmd =     NULL	;	/* setreg.term_cmd */
-  mon2000_cmds.getreg.cmd =     NULL;		/* getreg.cmd (name) */
-  mon2000_cmds.getreg.resp_delim =     NULL;	/* getreg.resp_delim */
-  mon2000_cmds.getreg.term =     NULL;		/* getreg.term */
-  mon2000_cmds.getreg.term_cmd =     NULL	;	/* getreg.term_cmd */
-  mon2000_cmds.dump_registers =   ".reg\r";	/* dump_registers */
-  mon2000_cmds.register_pattern =   "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)"; /* register_pattern */
-  mon2000_cmds.supply_register =   m32r_supply_register;	/* supply_register */
-  mon2000_cmds.load_routine =   NULL;		/* load_routine (defaults to SRECs) */
-  mon2000_cmds.load =   NULL;			/* download command */
-  mon2000_cmds.loadresp =   NULL;			/* load response */
-  mon2000_cmds.prompt =   "Mon2000>";			/* monitor command prompt */
-  mon2000_cmds.line_term =   "\r";			/* end-of-line terminator */
-  mon2000_cmds.cmd_end =   NULL;			/* optional command terminator */
-  mon2000_cmds.target =   &mon2000_ops;		/* target operations */
-  mon2000_cmds.stopbits =   SERIAL_1_STOPBITS;	/* number of stop bits */
-  mon2000_cmds.regnames =   m32r_regnames;		/* registers names */
-  mon2000_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
-} /* init_mon2000_cmds */
+  mon2000_cmds.flags = MO_CLR_BREAK_USES_ADDR | MO_REGISTER_VALUE_FIRST;
+  mon2000_cmds.init = m32r_inits;	/* Init strings */
+  mon2000_cmds.cont = "go\r";	/* continue command */
+  mon2000_cmds.step = "step\r";	/* single step */
+  mon2000_cmds.stop = NULL;	/* interrupt command */
+  mon2000_cmds.set_break = "%x +bp\r";	/* set a breakpoint */
+  mon2000_cmds.clr_break = "%x -bp\r";	/* clear a breakpoint */
+  mon2000_cmds.clr_all_break = "bpoff\r";	/* clear all breakpoints */
+  mon2000_cmds.fill = "%x %x %x fill\r";	/* fill (start length val) */
+  mon2000_cmds.setmem.cmdb = "%x 1 %x fill\r";	/* setmem.cmdb (addr, value) */
+  mon2000_cmds.setmem.cmdw = "%x 1 %x fillh\r";		/* setmem.cmdw (addr, value) */
+  mon2000_cmds.setmem.cmdl = "%x 1 %x fillw\r";		/* setmem.cmdl (addr, value) */
+  mon2000_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
+  mon2000_cmds.setmem.resp_delim = NULL;	/* setmem.resp_delim */
+  mon2000_cmds.setmem.term = NULL;	/* setmem.term */
+  mon2000_cmds.setmem.term_cmd = NULL;	/* setmem.term_cmd */
+  mon2000_cmds.getmem.cmdb = "%x %x dump\r";	/* getmem.cmdb (addr, len) */
+  mon2000_cmds.getmem.cmdw = NULL;	/* getmem.cmdw (addr, len) */
+  mon2000_cmds.getmem.cmdl = NULL;	/* getmem.cmdl (addr, len) */
+  mon2000_cmds.getmem.cmdll = NULL;	/* getmem.cmdll (addr, len) */
+  mon2000_cmds.getmem.resp_delim = ": ";	/* getmem.resp_delim */
+  mon2000_cmds.getmem.term = NULL;	/* getmem.term */
+  mon2000_cmds.getmem.term_cmd = NULL;	/* getmem.term_cmd */
+  mon2000_cmds.setreg.cmd = "%x to %%%s\r";	/* setreg.cmd (name, value) */
+  mon2000_cmds.setreg.resp_delim = NULL;	/* setreg.resp_delim */
+  mon2000_cmds.setreg.term = NULL;	/* setreg.term */
+  mon2000_cmds.setreg.term_cmd = NULL;	/* setreg.term_cmd */
+  mon2000_cmds.getreg.cmd = NULL;	/* getreg.cmd (name) */
+  mon2000_cmds.getreg.resp_delim = NULL;	/* getreg.resp_delim */
+  mon2000_cmds.getreg.term = NULL;	/* getreg.term */
+  mon2000_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
+  mon2000_cmds.dump_registers = ".reg\r";	/* dump_registers */
+  mon2000_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
+  mon2000_cmds.supply_register = m32r_supply_register;	/* supply_register */
+  mon2000_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
+  mon2000_cmds.load = NULL;	/* download command */
+  mon2000_cmds.loadresp = NULL;	/* load response */
+  mon2000_cmds.prompt = "Mon2000>";	/* monitor command prompt */
+  mon2000_cmds.line_term = "\r";	/* end-of-line terminator */
+  mon2000_cmds.cmd_end = NULL;	/* optional command terminator */
+  mon2000_cmds.target = &mon2000_ops;	/* target operations */
+  mon2000_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
+  mon2000_cmds.regnames = m32r_regnames;	/* registers names */
+  mon2000_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
+}				/* init_mon2000_cmds */
 
 static void
-mon2000_open(args, from_tty)
+mon2000_open (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -411,7 +413,7 @@ mon2000_open(args, from_tty)
 static void
 m32r_set_board_address (args, from_tty)
      char *args;
-     int  from_tty;
+     int from_tty;
 {
   int resp_len;
   char buf[1024];
@@ -419,7 +421,7 @@ m32r_set_board_address (args, from_tty)
   if (args && *args)
     {
       monitor_printf ("ulip %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof(buf));
+      resp_len = monitor_expect_prompt (buf, sizeof (buf));
       /* now parse the result for success */
     }
   else
@@ -432,7 +434,7 @@ m32r_set_board_address (args, from_tty)
 static void
 m32r_set_server_address (args, from_tty)
      char *args;
-     int  from_tty;
+     int from_tty;
 {
   int resp_len;
   char buf[1024];
@@ -440,7 +442,7 @@ m32r_set_server_address (args, from_tty)
   if (args && *args)
     {
       monitor_printf ("uhip %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof(buf));
+      resp_len = monitor_expect_prompt (buf, sizeof (buf));
       /* now parse the result for success */
     }
   else
@@ -453,7 +455,7 @@ m32r_set_server_address (args, from_tty)
 static void
 m32r_set_download_path (args, from_tty)
      char *args;
-     int  from_tty;
+     int from_tty;
 {
   int resp_len;
   char buf[1024];
@@ -461,7 +463,7 @@ m32r_set_download_path (args, from_tty)
   if (args && *args)
     {
       monitor_printf ("up %s\n", args);
-      resp_len = monitor_expect_prompt (buf, sizeof(buf));
+      resp_len = monitor_expect_prompt (buf, sizeof (buf));
       /* now parse the result for success */
     }
   else
@@ -484,35 +486,35 @@ m32r_upload_command (args, from_tty)
 
   /* first check to see if there's an ethernet port! */
   monitor_printf ("ust\r");
-  resp_len = monitor_expect_prompt (buf, sizeof(buf));
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));
   if (!strchr (buf, ':'))
     error ("No ethernet connection!");
 
   if (board_addr == 0)
     {
       /* scan second colon in the output from the "ust" command */
-      char * myIPaddress = strchr (strchr (buf, ':') + 1, ':') + 1;
+      char *myIPaddress = strchr (strchr (buf, ':') + 1, ':') + 1;
 
-      while (isspace(*myIPaddress))
+      while (isspace (*myIPaddress))
 	myIPaddress++;
 
-      if (!strncmp (myIPaddress, "0.0.", 4))    /* empty */
+      if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
 	error ("Please use 'set board-address' to set the M32R-EVA board's IP address.");
       if (strchr (myIPaddress, '('))
-	*(strchr (myIPaddress, '(')) = '\0';    /* delete trailing junk */
+	*(strchr (myIPaddress, '(')) = '\0';	/* delete trailing junk */
       board_addr = strsave (myIPaddress);
     }
   if (server_addr == 0)
     {
       buf[0] = 0;
-      gethostname (buf, sizeof(buf));
+      gethostname (buf, sizeof (buf));
       if (buf[0] != 0)
 	hostent = gethostbyname (buf);
       if (hostent != 0)
 	{
 #if 1
-	  memcpy (&inet_addr.s_addr, hostent->h_addr, 
-		  sizeof(inet_addr.s_addr));
+	  memcpy (&inet_addr.s_addr, hostent->h_addr,
+		  sizeof (inet_addr.s_addr));
 	  server_addr = (char *) inet_ntoa (inet_addr);
 #else
 	  server_addr = (char *) inet_ntoa (hostent->h_addr);
@@ -535,30 +537,30 @@ m32r_upload_command (args, from_tty)
 
   start_time = time (NULL);
   monitor_printf ("uhip %s\r", server_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof(buf));  /* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
   monitor_printf ("ulip %s\r", board_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof(buf));  /* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
   if (args[0] != '/')
     monitor_printf ("up %s\r", download_path);	/* use default path */
   else
-    monitor_printf ("up\r");			/* rooted filename/path */
-  resp_len = monitor_expect_prompt (buf, sizeof(buf));  /* parse result? */
+    monitor_printf ("up\r");	/* rooted filename/path */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
 
   if (strrchr (args, '.') && !strcmp (strrchr (args, '.'), ".srec"))
     monitor_printf ("ul %s\r", args);
-  else					/* add ".srec" suffix */
+  else				/* add ".srec" suffix */
     monitor_printf ("ul %s.srec\r", args);
-  resp_len = monitor_expect_prompt (buf, sizeof(buf));  /* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));		/* parse result? */
 
-  if (buf[0] == 0 || strstr(buf, "complete") == 0)
-    error("Upload file not found: %s.srec\nCheck IP addresses and download path.", args);
+  if (buf[0] == 0 || strstr (buf, "complete") == 0)
+    error ("Upload file not found: %s.srec\nCheck IP addresses and download path.", args);
   else
     printf_filtered (" -- Ethernet load complete.\n");
 
   end_time = time (NULL);
   abfd = bfd_openr (args, 0);
   if (abfd != NULL)
-    { /* Download is done -- print section statistics */
+    {				/* Download is done -- print section statistics */
       if (bfd_check_format (abfd, bfd_object) == 0)
 	{
 	  printf_filtered ("File is not an object file\n");
@@ -567,8 +569,8 @@ m32r_upload_command (args, from_tty)
 	if (s->flags & SEC_LOAD)
 	  {
 	    bfd_size_type section_size = bfd_section_size (abfd, s);
-	    bfd_vma       section_base = bfd_section_lma  (abfd, s);
-	    unsigned int  buffer;
+	    bfd_vma section_base = bfd_section_lma (abfd, s);
+	    unsigned int buffer;
 
 	    data_count += section_size;
 
@@ -583,7 +585,7 @@ m32r_upload_command (args, from_tty)
       report_transfer_performance (data_count, start_time, end_time);
       printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
     }
-  inferior_pid = 0;             /* No process now */
+  inferior_pid = 0;		/* No process now */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid
@@ -601,7 +603,7 @@ void
 _initialize_m32r_rom ()
 {
   /* Initialize m32r RevC monitor target */
-  init_m32r_cmds () ;
+  init_m32r_cmds ();
   init_monitor_ops (&m32r_ops);
 
   m32r_ops.to_shortname = "m32r";
@@ -642,12 +644,12 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   add_show_from_set
     (add_set_cmd ("server-address", class_obscure, var_string,
 		  (char *) &server_addr,
-		  "Set IP address for download server (GDB's host computer).",
+		"Set IP address for download server (GDB's host computer).",
 		  &setlist),
      &showlist);
 
   add_com ("upload", class_obscure, m32r_upload_command,
-	   "Upload the srec file via the monitor's Ethernet upload capability."); 
+      "Upload the srec file via the monitor's Ethernet upload capability.");
 
   add_com ("tload", class_obscure, m32r_load, "test upload command.");
 #endif

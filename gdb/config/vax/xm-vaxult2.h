@@ -1,7 +1,7 @@
 /* Definitions to make GDB run on a vax under Ultrix. */
 
 #include "vax/xm-vax.h"
-extern char *strdup();
+extern char *strdup ();
 
 #define NO_PTRACE_H
 

@@ -1,6 +1,6 @@
 /*
-** This module contains functions for displaying the locator information in the locator window.
-*/
+   ** This module contains functions for displaying the locator information in the locator window.
+ */
 
 #include "defs.h"
 #include "symtab.h"
@@ -27,8 +27,8 @@ static void _tuiUpdateLocation_command PARAMS ((char *, int));
 ******************************************/
 
 /*
-** tuiClearLocatorDisplay()
-*/
+   ** tuiClearLocatorDisplay()
+ */
 void
 #ifdef __STDC__
 tuiClearLocatorDisplay (void)
@@ -43,7 +43,7 @@ tuiClearLocatorDisplay ()
     {
       /* No need to werase, since writing a line of
          * blanks which we do below, is equivalent.
-         */
+       */
       /* werase(locator->handle); */
       wmove (locator->handle, 0, 0);
       wstandout (locator->handle);
@@ -60,8 +60,8 @@ tuiClearLocatorDisplay ()
 
 
 /*
-** tuiShowLocatorContent()
-*/
+   ** tuiShowLocatorContent()
+ */
 void
 #ifdef __STDC__
 tuiShowLocatorContent (void)
@@ -96,9 +96,9 @@ tuiShowLocatorContent ()
 
 
 /*
-** tuiSetLocatorInfo().
-**        Function to update the locator, with the provided arguments.
-*/
+   ** tuiSetLocatorInfo().
+   **        Function to update the locator, with the provided arguments.
+ */
 void
 #ifdef __STDC__
 tuiSetLocatorInfo (
@@ -145,9 +145,9 @@ tuiSetLocatorInfo (fname, procname, lineNo, addr, element)
 
 
 /*
-** tuiUpdateLocatorFilename().
-**        Update only the filename portion of the locator.
-*/
+   ** tuiUpdateLocatorFilename().
+   **        Update only the filename portion of the locator.
+ */
 void
 #ifdef __STDC__
 tuiUpdateLocatorFilename (
@@ -173,9 +173,9 @@ tuiUpdateLocatorFilename (fileName)
 
 
 /*
-** tui_vUpdateLocatorFilename().
-**        Update only the filename portion of the locator with args in a va_list.
-*/
+   ** tui_vUpdateLocatorFilename().
+   **        Update only the filename portion of the locator with args in a va_list.
+ */
 void
 #ifdef __STDC__
 tui_vUpdateLocatorFilename (
@@ -195,10 +195,10 @@ tui_vUpdateLocatorFilename (args)
 
 
 /*
-** tuiSwitchFilename().
-**   Update the filename portion of the locator. Clear the other info in locator.
-** (elz)
-*/
+   ** tuiSwitchFilename().
+   **   Update the filename portion of the locator. Clear the other info in locator.
+   ** (elz)
+ */
 void
 #ifdef __STDC__
 tuiSwitchFilename (
@@ -227,10 +227,10 @@ tuiSwitchFilename (fileName)
 
 
 /*
-** tuiGetLocatorFilename().
-**   Get the filename portion of the locator.
-** (elz)
-*/
+   ** tuiGetLocatorFilename().
+   **   Get the filename portion of the locator.
+   ** (elz)
+ */
 void
 #ifdef __STDC__
 tuiGetLocatorFilename (
@@ -260,9 +260,9 @@ tuiGetLocatorFilename (locator, filename)
 
 
 /*
-** tuiUpdateLocatorInfoFromFrame().
-**        Function to update the locator, with the information extracted from frameInfo
-*/
+   ** tuiUpdateLocatorInfoFromFrame().
+   **        Function to update the locator, with the information extracted from frameInfo
+ */
 void
 #ifdef __STDC__
 tuiUpdateLocatorInfoFromFrame (
@@ -299,9 +299,9 @@ tuiUpdateLocatorInfoFromFrame (frameInfo, element)
 
 
 /*
-** tuiSetLocatorContent().
-**        Function to set the content of the locator
-*/
+   ** tuiSetLocatorContent().
+   **        Function to set the content of the locator
+ */
 void
 #ifdef __STDC__
 tuiSetLocatorContent (
@@ -339,9 +339,9 @@ tuiSetLocatorContent (frameInfo)
 
 
 /*
-** tuiUpdateLocatorDisplay().
-**        Function to update the locator display
-*/
+   ** tuiUpdateLocatorDisplay().
+   **        Function to update the locator display
+ */
 void
 #ifdef __STDC__
 tuiUpdateLocatorDisplay (
@@ -360,9 +360,9 @@ tuiUpdateLocatorDisplay (frameInfo)
 
 
 /*
-** tuiShowFrameInfo().
-**        Function to print the frame inforrmation for the TUI.
-*/
+   ** tuiShowFrameInfo().
+   **        Function to print the frame inforrmation for the TUI.
+ */
 void
 #ifdef __STDC__
 tuiShowFrameInfo (
@@ -449,9 +449,9 @@ tuiShowFrameInfo (fi)
 
 
 /*
-** tui_vShowFrameInfo().
-**        Function to print the frame inforrmation for the TUI with args in a va_list.
-*/
+   ** tui_vShowFrameInfo().
+   **        Function to print the frame inforrmation for the TUI with args in a va_list.
+ */
 void
 #ifdef __STDC__
 tui_vShowFrameInfo (
@@ -471,9 +471,9 @@ tui_vShowFrameInfo (args)
 
 
 /*
-** _initialize_tuiStack().
-**      Function to initialize gdb commands, for tui window stack manipulation.
-*/
+   ** _initialize_tuiStack().
+   **      Function to initialize gdb commands, for tui window stack manipulation.
+ */
 void
 _initialize_tuiStack ()
 {
@@ -492,8 +492,8 @@ _initialize_tuiStack ()
 ******************************************/
 
 /*
-**    _getFuncNameFromFrame().
-*/
+   **    _getFuncNameFromFrame().
+ */
 static char *
 #ifdef __STDC__
 _getFuncNameFromFrame (
@@ -514,9 +514,9 @@ _getFuncNameFromFrame (frameInfo)
 
 
 /*
-** _tuiUpdateLocation_command().
-**        Command to update the display with the current execution point
-*/
+   ** _tuiUpdateLocation_command().
+   **        Command to update the display with the current execution point
+ */
 static void
 #ifdef __STDC__
 _tuiUpdateLocation_command (

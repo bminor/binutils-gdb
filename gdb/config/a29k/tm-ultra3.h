@@ -1,22 +1,23 @@
 /* Parameters for NYU Ultracomputer 29000 target, for GDB, the GNU debugger.
    Copyright 1990, 1991 Free Software Foundation, Inc.
    Contributed by David Wood @ New York University (wood@nyu.edu). 
-   
-This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This file is part of GDB.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* This file includes tm-a29k.h, but predefines REGISTER_NAMES and
    related macros.  The file supports a a29k running our flavor of
@@ -28,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.
  */
-#define NUM_REGS   (EXO_REGNUM + 1)	
+#define NUM_REGS   (EXO_REGNUM + 1)
 
 #define REGISTER_NAMES { 						 \
  "gr1",									 \
@@ -62,14 +63,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 #ifdef KERNEL_DEBUGGING
-# define	PADDR_U_REGNUM	22		/* gr86 */
-# define	RETURN_REGNUM	GR64_REGNUM	
+#define	PADDR_U_REGNUM	22	/* gr86 */
+#define	RETURN_REGNUM	GR64_REGNUM
 #else
-# define	RETURN_REGNUM	GR96_REGNUM	
-#endif	/* KERNEL_DEBUGGING */
+#define	RETURN_REGNUM	GR96_REGNUM
+#endif /* KERNEL_DEBUGGING */
 
 
-/* Should rename all GR96_REGNUM to RETURN_REGNUM */ 
+/* Should rename all GR96_REGNUM to RETURN_REGNUM */
 #define GR1_REGNUM 	(0)
 #define GR64_REGNUM	1
 #define GR96_REGNUM 	(GR64_REGNUM + 32)
@@ -90,41 +91,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define RFB_REGNUM (127 - 96 + RETURN_REGNUM)
 /* Register Stack Pointer.  */
 #define RSP_REGNUM GR1_REGNUM
-#define LR0_REGNUM ( 32 +  GR96_REGNUM) 
+#define LR0_REGNUM ( 32 +  GR96_REGNUM)
 
 /* Protected Special registers */
 #define VAB_REGNUM (LR0_REGNUM +  128)
-#define OPS_REGNUM (VAB_REGNUM + 1)  
-#define CPS_REGNUM (VAB_REGNUM + 2)  
-#define CFG_REGNUM (VAB_REGNUM + 3)  
-#define CHA_REGNUM (VAB_REGNUM + 4)  
-#define CHD_REGNUM (VAB_REGNUM + 5)  
-#define CHC_REGNUM (VAB_REGNUM + 6)  
-#define RBP_REGNUM (VAB_REGNUM + 7)  
-#define TMC_REGNUM (VAB_REGNUM + 8)  
-#define TMR_REGNUM (VAB_REGNUM + 9)  
+#define OPS_REGNUM (VAB_REGNUM + 1)
+#define CPS_REGNUM (VAB_REGNUM + 2)
+#define CFG_REGNUM (VAB_REGNUM + 3)
+#define CHA_REGNUM (VAB_REGNUM + 4)
+#define CHD_REGNUM (VAB_REGNUM + 5)
+#define CHC_REGNUM (VAB_REGNUM + 6)
+#define RBP_REGNUM (VAB_REGNUM + 7)
+#define TMC_REGNUM (VAB_REGNUM + 8)
+#define TMR_REGNUM (VAB_REGNUM + 9)
 #define NPC_REGNUM (VAB_REGNUM + 10)	/* pc0 */
-#define PC_REGNUM  (VAB_REGNUM + 11)  	/* pc1 */
-#define PC2_REGNUM (VAB_REGNUM + 12)  	/* pc2 */
+#define PC_REGNUM  (VAB_REGNUM + 11)	/* pc1 */
+#define PC2_REGNUM (VAB_REGNUM + 12)	/* pc2 */
 #define MMU_REGNUM (VAB_REGNUM + 13)
 #define LRU_REGNUM (VAB_REGNUM + 14)
 	/* Register sequence gap */
 /* Unprotected Special registers */
-#define IPC_REGNUM (LRU_REGNUM + 1) 
-#define IPA_REGNUM (IPC_REGNUM + 1) 
-#define IPB_REGNUM (IPC_REGNUM + 2) 
-#define Q_REGNUM   (IPC_REGNUM + 3) 
-#define ALU_REGNUM (IPC_REGNUM + 4) 
+#define IPC_REGNUM (LRU_REGNUM + 1)
+#define IPA_REGNUM (IPC_REGNUM + 1)
+#define IPB_REGNUM (IPC_REGNUM + 2)
+#define Q_REGNUM   (IPC_REGNUM + 3)
+#define ALU_REGNUM (IPC_REGNUM + 4)
 #define PS_REGNUM  ALU_REGNUM
-#define BP_REGNUM  (IPC_REGNUM + 5) 
-#define FC_REGNUM  (IPC_REGNUM + 6) 
-#define CR_REGNUM  (IPC_REGNUM + 7) 
+#define BP_REGNUM  (IPC_REGNUM + 5)
+#define FC_REGNUM  (IPC_REGNUM + 6)
+#define CR_REGNUM  (IPC_REGNUM + 7)
 	/* Register sequence gap */
-#define FPE_REGNUM (CR_REGNUM  + 1) 
-#define INT_REGNUM (FPE_REGNUM + 1) 
-#define FPS_REGNUM (FPE_REGNUM + 2) 
+#define FPE_REGNUM (CR_REGNUM  + 1)
+#define INT_REGNUM (FPE_REGNUM + 1)
+#define FPS_REGNUM (FPE_REGNUM + 2)
 	/* Register sequence gap */
-#define EXO_REGNUM (FPS_REGNUM + 1) 
+#define EXO_REGNUM (FPS_REGNUM + 1)
 
 /* Special register #x.  */
 #define SR_REGNUM(x) \
@@ -160,7 +161,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /*
  * Converts an sdb register number to an internal gdb register number.
  * Currently under gcc, gr96->0...gr128->31...lr0->32...lr127->159, or...
- * 		  	gr64->0...gr95->31, lr0->32...lr127->159.
+ *                      gr64->0...gr95->31, lr0->32...lr127->159.
  */
 #define SDB_REG_TO_REGNUM(value) (((value)<32) ? ((value)+RETURN_REGNUM) : \
 		 		                 ((value)-32+LR0_REGNUM))
@@ -168,7 +169,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef KERNEL_DEBUGGING
   /* ublock virtual address as defined in our sys/param.h */
   /* FIXME: Should get this from sys/param.h */
-# define UVADDR	((32*0x100000)-8192)    
+#define UVADDR	((32*0x100000)-8192)
 #endif
 
 /*
@@ -177,11 +178,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  */
 #if !defined(KERNEL_DEBUGGING)
 #ifdef SYM1
-# define IN_SIGTRAMP(pc, name) (name && STREQ ("sigtramp", name))
+#define IN_SIGTRAMP(pc, name) (name && STREQ ("sigtramp", name))
 #else
-        Need to define IN_SIGTRAMP() for sym2.
+Need to define
+IN_SIGTRAMP () for sym2.
 #endif
-#endif /* !KERNEL_DEBUGGING */
+#endif				/* !KERNEL_DEBUGGING */
 
 #include "a29k/tm-a29k.h"
 
@@ -191,36 +193,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    mtsrim cr, 15
    loadm 0, 0, lr2, msp     ; load first 16 words of arguments into registers
    add msp, msp, 16 * 4     ; point to the remaining arguments
-  CONST_INSN:
+   CONST_INSN:
    const gr96,inf
    consth gr96,inf
    calli lr0, gr96
    aseq 0x40,gr1,gr1   ; nop
    asneq 0x50,gr1,gr1  ; breakpoint
    When KERNEL_DEBUGGIN is defined, msp -> gr93, gr96 -> gr64,
-                                    7d  -> 5d,    60  -> 40
-   */
+   7d  -> 5d,    60  -> 40
+ */
 
 /* Position of the "const" instruction within CALL_DUMMY in bytes.  */
 #undef CALL_DUMMY
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
-#ifdef KERNEL_DEBUGGING /* gr96 -> gr64 */
-#  define CALL_DUMMY {0x0400870f, 0x3600825d, 0x155d5d40, 0x03ff40ff,    \
+#ifdef KERNEL_DEBUGGING		/* gr96 -> gr64 */
+#define CALL_DUMMY {0x0400870f, 0x3600825d, 0x155d5d40, 0x03ff40ff,    \
                     0x02ff40ff, 0xc8008040, 0x70400101, 0x72500101}
 #else
-#  define CALL_DUMMY {0x0400870f, 0x3600827d, 0x157d7d40, 0x03ff60ff,    \
+#define CALL_DUMMY {0x0400870f, 0x3600827d, 0x157d7d40, 0x03ff60ff,    \
                     0x02ff60ff, 0xc8008060, 0x70400101, 0x72500101}
-#endif /* KERNEL_DEBUGGING */
-#else /* Byte order differs.  */
-  you lose
-#endif /* Byte order differs.  */
+#endif				/* KERNEL_DEBUGGING */
+#else				/* Byte order differs.  */
+you lose
+#endif				/* Byte order differs.  */
 
 #if !defined(KERNEL_DEBUGGING)
-# ifdef SYM1
-#  undef  DECR_PC_AFTER_BREAK
-#  define DECR_PC_AFTER_BREAK 0	/* Sym1 kernel does the decrement */
-# else
-    ->"ULTRA3 running other than sym1 OS"!;
-# endif
+#ifdef SYM1
+#undef  DECR_PC_AFTER_BREAK
+#define DECR_PC_AFTER_BREAK 0	/* Sym1 kernel does the decrement */
+#else
+->"ULTRA3 running other than sym1 OS" !;
+#endif
 #endif /* !KERNEL_DEBUGGING */
-

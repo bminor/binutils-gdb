@@ -2,21 +2,22 @@
    Copyright 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Stan Shebs.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 
@@ -100,7 +101,8 @@ int use_color_qd;
 
 int inbackground;
 
-Rect dragrect = { -32000, -32000, 32000, 32000 };
+Rect dragrect =
+{-32000, -32000, 32000, 32000};
 Rect sizerect;
 
 int sbarwid = 15;
@@ -118,7 +120,10 @@ TEHandle console_text;
 Rect console_text_rect;
 
 /* This will go away eventually. */
-gdb_has_a_terminal () { return 1; }
+gdb_has_a_terminal ()
+{
+  return 1;
+}
 
 mac_init ()
 {
@@ -137,13 +142,13 @@ mac_init ()
 
   mac_app = 0;
 
-  str = getenv("DEBUG_GDB");
+  str = getenv ("DEBUG_GDB");
   if (str != NULL && str[0] != '\0')
     {
-      if (strcmp(str, "openp") == 0)
+      if (strcmp (str, "openp") == 0)
 	debug_openp = 1;
     }
-  
+
   /* Don't do anything if we`re running under MPW. */
   if (!StandAlone)
     return;
@@ -153,7 +158,7 @@ mac_init ()
      {RIncludes}siow.r, not be messed with.  If it is, then the
      standard Mac setup below will step on SIOW's Mac setup and
      most likely crash the machine. */
-  siow_resource = GetResource('siow', 0);
+  siow_resource = GetResource ('siow', 0);
   if (siow_resource != nil)
     return;
 
@@ -170,7 +175,7 @@ mac_init ()
   InitCursor ();
 
   /* Color Quickdraw is different from Classic QD. */
-  SysEnvirons(2, &se);
+  SysEnvirons (2, &se);
   has_color_qd = se.hasColorQD;
   /* Use it if we got it. */
   use_color_qd = has_color_qd;
@@ -178,10 +183,10 @@ mac_init ()
   sizerect.top = 50;
   sizerect.left = 50;
   sizerect.bottom = 1000;
-  sizerect.right  = 1000;
+  sizerect.right = 1000;
 #if 0
   sizerect.bottom = screenBits.bounds.bottom - screenBits.bounds.top;
-  sizerect.right  = screenBits.bounds.right  - screenBits.bounds.left;
+  sizerect.right = screenBits.bounds.right - screenBits.bounds.left;
 #endif
 
   /* Set up the menus. */
@@ -189,9 +194,10 @@ mac_init ()
   SetMenuBar (menubar);
   /* Add the DAs etc as usual. */
   menu = GetMHandle (mApple);
-  if (menu != nil) {
-    AddResMenu (menu, 'DRVR');
-  }
+  if (menu != nil)
+    {
+      AddResMenu (menu, 'DRVR');
+    }
   DrawMenuBar ();
 
   new_console_window ();
@@ -201,9 +207,9 @@ new_console_window ()
 {
   /* Create the main window we're going to play in. */
   if (has_color_qd)
-    console_window = GetNewCWindow (wConsole, NULL, (WindowPtr) -1L);
+    console_window = GetNewCWindow (wConsole, NULL, (WindowPtr) - 1L);
   else
-    console_window = GetNewWindow (wConsole, NULL, (WindowPtr) -1L);
+    console_window = GetNewWindow (wConsole, NULL, (WindowPtr) - 1L);
 
   SetPort (console_window);
   console_text_rect = console_window->portRect;
@@ -228,7 +234,7 @@ new_console_window ()
   SelectWindow (console_window);
 }
 
-mac_command_loop()
+mac_command_loop ()
 {
   SysEnvRec se;
   int eventloopdone = 0;
@@ -254,7 +260,7 @@ mac_command_loop()
 	{
 	  get_global_mouse (&mouse);
 	  adjust_cursor (mouse, cursorRgn);
-	  tm = GetCaretTime();
+	  tm = GetCaretTime ();
 	  gotevent = WaitNextEvent (everyEvent, &event, tm, cursorRgn);
 	}
       else
@@ -267,7 +273,7 @@ mac_command_loop()
 	{
 	  short itemhit;
 	  DialogPtr dialog;
-      
+
 	  /* Handle all the modeless dialogs here. */
 	  if (DialogSelect (&event, &dialog, &itemhit))
 	    {
@@ -289,10 +295,10 @@ mac_command_loop()
 /* Collect the global coordinates of the mouse pointer.  */
 
 get_global_mouse (mouse)
-Point *mouse;
+     Point *mouse;
 {
   EventRecord evt;
-	
+
   OSEventAvail (0, &evt);
   *mouse = evt.where;
 }
@@ -301,15 +307,15 @@ Point *mouse;
    location.  */
 
 adjust_cursor (mouse, region)
-Point mouse;
-RgnHandle region;
+     Point mouse;
+     RgnHandle region;
 {
 }
 
 /* Decipher an event, maybe do something with it.  */
 
 do_event (evt)
-EventRecord *evt;
+     EventRecord *evt;
 {
   short part, err, rslt = 0;
   WindowPtr win;
@@ -339,10 +345,11 @@ EventRecord *evt;
 	      /* Fix the menu to match the new front window. */
 	      adjust_menus ();
 	      /* We always want to discard the event now, since clicks in a
-		 windows are often irreversible actions. */
-	    } else
-	      /* Mouse clicks in the front window do something useful. */
-	      do_mouse_down (win, evt);
+	         windows are often irreversible actions. */
+	    }
+	  else
+	    /* Mouse clicks in the front window do something useful. */
+	    do_mouse_down (win, evt);
 	  break;
 	case inDrag:
 	  /* Standard drag behavior, no tricks necessary. */
@@ -389,7 +396,7 @@ EventRecord *evt;
       break;
     case diskEvt:
       /* Call DIBadMount in response to a diskEvt, so that the user can format
-	 a floppy. (from DTS Sample) */
+         a floppy. (from DTS Sample) */
       if (HiWord (evt->message) != noErr)
 	{
 	  SetPt (&pnt, 50, 50);
@@ -429,8 +436,8 @@ do_idle ()
 }
 
 grow_window (win, where)
-WindowPtr win;
-Point where;
+     WindowPtr win;
+     Point where;
 {
   long winsize;
   int h, v;
@@ -455,9 +462,9 @@ Point where;
 }
 
 zoom_window (win, where, part)
-WindowPtr win;
-Point where;
-short part;
+     WindowPtr win;
+     Point where;
+     short part;
 {
   ZoomWindow (win, part, (win == FrontWindow ()));
   if (win == console_window)
@@ -475,7 +482,7 @@ resize_console_window ()
 }
 
 close_window (win)
-WindowPtr win;
+     WindowPtr win;
 {
 }
 
@@ -499,13 +506,13 @@ v_scroll_proc (ControlHandle control, short part)
 	  amount = pagesize;
 	  break;
 	case inPageDown:
-	  amount = - pagesize;
+	  amount = -pagesize;
 	  break;
 	default:
 	  /* (should freak out) */
 	  break;
 	}
-      SetCtlValue(control, oldval - amount);
+      SetCtlValue (control, oldval - amount);
       newval = GetCtlValue (control);
       amount = oldval - newval;
       if (amount)
@@ -513,18 +520,18 @@ v_scroll_proc (ControlHandle control, short part)
     }
 }
 
-do_mouse_down (WindowPtr win, EventRecord *event)
+do_mouse_down (WindowPtr win, EventRecord * event)
 {
   short part, value;
   Point mouse;
   ControlHandle control;
 
-  if (1 /*is_app_window(win)*/)
+  if (1 /*is_app_window(win) */ )
     {
       SetPort (win);
       mouse = event->where;
       GlobalToLocal (&mouse);
-      part = FindControl(mouse, win, &control);
+      part = FindControl (mouse, win, &control);
       if (control == console_v_scrollbar)
 	{
 	  switch (part)
@@ -536,13 +543,13 @@ do_mouse_down (WindowPtr win, EventRecord *event)
 		{
 		  value -= GetCtlValue (control);
 		  if (value)
-		    TEScroll(0, value * (*console_text)->lineHeight,
-			     console_text);
+		    TEScroll (0, value * (*console_text)->lineHeight,
+			      console_text);
 		}
 	      break;
 	    default:
-#if 0 /* don't deal with right now */
-#if 1 /* universal headers */
+#if 0				/* don't deal with right now */
+#if 1				/* universal headers */
 	      value = TrackControl (control, mouse, (ControlActionUPP) v_scroll_proc);
 #else
 	      value = TrackControl (control, mouse, (ProcPtr) v_scroll_proc);
@@ -559,21 +566,22 @@ do_mouse_down (WindowPtr win, EventRecord *event)
 }
 
 scroll_text (hlines, vlines)
-int hlines, vlines;
+     int hlines, vlines;
 {
 }
 
 activate_window (win, activate)
-WindowPtr win;
-int activate;
+     WindowPtr win;
+     int activate;
 {
   Rect grow_rect;
 
-  if (win == nil) return;
+  if (win == nil)
+    return;
   /* It's convenient to make the activated window also be the
      current GrafPort. */
   if (activate)
-    SetPort(win);
+    SetPort (win);
   /* Activate the console window's scrollbar. */
   if (win == console_window)
     {
@@ -596,7 +604,7 @@ int activate;
 }
 
 update_window (win)
-WindowPtr win;
+     WindowPtr win;
 {
   int controls = 1, growbox = 0;
   GrafPtr oldport;
@@ -625,7 +633,7 @@ adjust_menus ()
 }
 
 do_menu_command (which)
-long which;
+     long which;
 {
   short menuid, menuitem;
   short itemHit;
@@ -729,7 +737,7 @@ long which;
 char commandbuf[1000];
 
 do_keyboard_command (key)
-int key;
+     int key;
 {
   int startpos, endpos, i, len;
   char *last_newline;
@@ -757,13 +765,15 @@ int key;
 	  len = (text_str + startpos) - 1 - last_newline;
 	  cmd_start = last_newline + 1;
 	}
-      if (len > 1000) len = 999;
-      if (len < 0) len = 0;
+      if (len > 1000)
+	len = 999;
+      if (len < 0)
+	len = 0;
       strncpy (commandbuf + 1, cmd_start, len);
       commandbuf[1 + len] = 0;
       command = commandbuf + 1;
       HUnlock ((Handle) text);
-      commandbuf[0] = strlen(command);
+      commandbuf[0] = strlen (command);
 
       /* Insert a newline and recalculate before doing any command. */
       key = '\015';
@@ -797,11 +807,12 @@ draw_console ()
 /* Cause an update of a given window's entire contents.  */
 
 force_update (win)
-WindowPtr win;
+     WindowPtr win;
 {
   GrafPtr oldport;
 
-  if (win == nil) return;
+  if (win == nil)
+    return;
   GetPort (&oldport);
   SetPort (win);
   EraseRect (&win->portRect);
@@ -821,12 +832,12 @@ adjust_console_sizes ()
   tmprect.left += 7;
   tmprect.right -= sbarwid;
   tmprect.bottom -= sbarwid;
-  InsetRect(&tmprect, 1, 1);
+  InsetRect (&tmprect, 1, 1);
   (*console_text)->destRect = tmprect;
   /* Fiddle bottom of viewrect to be even multiple of text lines. */
   tmprect.bottom = tmprect.top
     + ((tmprect.bottom - tmprect.top) / (*console_text)->lineHeight)
-      * (*console_text)->lineHeight;
+    * (*console_text)->lineHeight;
   (*console_text)->viewRect = tmprect;
 }
 
@@ -839,7 +850,8 @@ adjust_console_scrollbars ()
   newmax = lines - (((*console_text)->viewRect.bottom
 		     - (*console_text)->viewRect.top)
 		    / (*console_text)->lineHeight);
-  if (newmax < 0) newmax = 0;
+  if (newmax < 0)
+    newmax = 0;
   SetCtlMax (console_v_scrollbar, newmax);
   value = ((*console_text)->viewRect.top - (*console_text)->destRect.top)
     / (*console_text)->lineHeight;
@@ -854,7 +866,7 @@ adjust_console_text ()
 {
   TEScroll (((*console_text)->viewRect.left
 	     - (*console_text)->destRect.left)
-	    - 0 /* get h scroll value */,
+	    - 0 /* get h scroll value */ ,
 	    ((((*console_text)->viewRect.top - (*console_text)->destRect.top)
 	      / (*console_text)->lineHeight)
 	     - GetCtlValue (console_v_scrollbar))
@@ -939,7 +951,7 @@ tilde_expand (char *str)
 #undef fprintf
 
 int
-hacked_fprintf (FILE *fp, const char *fmt, ...)
+hacked_fprintf (FILE * fp, const char *fmt,...)
 {
   int ret;
   va_list ap;
@@ -949,8 +961,8 @@ hacked_fprintf (FILE *fp, const char *fmt, ...)
     {
       char buf[1000];
 
-      ret = vsprintf(buf, fmt, ap);
-      TEInsert (buf, strlen(buf), console_text);
+      ret = vsprintf (buf, fmt, ap);
+      TEInsert (buf, strlen (buf), console_text);
     }
   else
     ret = vfprintf (fp, fmt, ap);
@@ -961,30 +973,30 @@ hacked_fprintf (FILE *fp, const char *fmt, ...)
 #undef printf
 
 int
-hacked_printf (const char *fmt, ...)
+hacked_printf (const char *fmt,...)
 {
   int ret;
   va_list ap;
 
   va_start (ap, fmt);
-  ret = hacked_vfprintf(stdout, fmt, ap);
+  ret = hacked_vfprintf (stdout, fmt, ap);
   va_end (ap);
   return ret;
 }
 
 #undef vfprintf
 
-int 
-hacked_vfprintf (FILE *fp, const char *format, va_list args)
+int
+hacked_vfprintf (FILE * fp, const char *format, va_list args)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
       char buf[1000];
       int ret;
 
-      ret = vsprintf(buf, format, args);
-      TEInsert (buf, strlen(buf), console_text);
-      if (strchr(buf, '\n'))
+      ret = vsprintf (buf, format, args);
+      TEInsert (buf, strlen (buf), console_text);
+      if (strchr (buf, '\n'))
 	{
 	  adjust_console_sizes ();
 	  adjust_console_scrollbars ();
@@ -998,12 +1010,12 @@ hacked_vfprintf (FILE *fp, const char *format, va_list args)
 
 #undef fputs
 
-hacked_fputs (const char *s, FILE *fp)
+hacked_fputs (const char *s, FILE * fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
-      TEInsert (s, strlen(s), console_text);
-      if (strchr(s, '\n'))
+      TEInsert (s, strlen (s), console_text);
+      if (strchr (s, '\n'))
 	{
 	  adjust_console_sizes ();
 	  adjust_console_scrollbars ();
@@ -1017,7 +1029,7 @@ hacked_fputs (const char *s, FILE *fp)
 
 #undef fputc
 
-hacked_fputc (const char c, FILE *fp)
+hacked_fputc (const char c, FILE * fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
@@ -1039,7 +1051,7 @@ hacked_fputc (const char c, FILE *fp)
 
 #undef putc
 
-hacked_putc (const char c, FILE *fp)
+hacked_putc (const char c, FILE * fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
@@ -1061,7 +1073,7 @@ hacked_putc (const char c, FILE *fp)
 
 #undef fflush
 
-hacked_fflush (FILE *fp)
+hacked_fflush (FILE * fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
@@ -1075,12 +1087,12 @@ hacked_fflush (FILE *fp)
 
 #undef fgetc
 
-hacked_fgetc (FILE *fp)
+hacked_fgetc (FILE * fp)
 {
   if (mac_app && (fp == stdin))
     {
       /* Catch any attempts to use this.  */
-      DebugStr("\pShould not be reading from stdin!");
+      DebugStr ("\pShould not be reading from stdin!");
       return '\n';
     }
   return fgetc (fp);

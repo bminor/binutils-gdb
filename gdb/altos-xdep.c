@@ -40,7 +40,7 @@
 /* OBSOLETE #endif */
 /* OBSOLETE  */
 /* OBSOLETE #include "gdbcore.h" */
-/* OBSOLETE #include <sys/user.h>		/* After a.out.h  *x/ */
+/* OBSOLETE #include <sys/user.h>               /* After a.out.h  *x/ */
 /* OBSOLETE #include <sys/file.h> */
 /* OBSOLETE #include "gdb_stat.h" */
 /* OBSOLETE  */
@@ -79,22 +79,22 @@
 /* OBSOLETE       make_cleanup (free, filename); */
 /* OBSOLETE        */
 /* OBSOLETE       if (have_inferior_p ()) */
-/* OBSOLETE 	error ("To look at a core file, you must kill the program with \"kill\"."); */
+/* OBSOLETE     error ("To look at a core file, you must kill the program with \"kill\"."); */
 /* OBSOLETE       corechan = open (filename, O_RDONLY, 0); */
 /* OBSOLETE       if (corechan < 0) */
-/* OBSOLETE 	perror_with_name (filename); */
+/* OBSOLETE     perror_with_name (filename); */
 /* OBSOLETE       /* 4.2-style (and perhaps also sysV-style) core dump file.  *x/ */
 /* OBSOLETE       { */
-/* OBSOLETE 	struct user u; */
+/* OBSOLETE     struct user u; */
 /* OBSOLETE  */
-/* OBSOLETE 	unsigned int reg_offset; */
+/* OBSOLETE     unsigned int reg_offset; */
 /* OBSOLETE  */
-/* OBSOLETE 	val = myread (corechan, &u, sizeof u); */
-/* OBSOLETE 	if (val < 0) */
-/* OBSOLETE 	  perror_with_name ("Not a core file: reading upage"); */
-/* OBSOLETE 	if (val != sizeof u) */
-/* OBSOLETE 	  error ("Not a core file: could only read %d bytes", val); */
-/* OBSOLETE 	data_start = exec_data_start; */
+/* OBSOLETE     val = myread (corechan, &u, sizeof u); */
+/* OBSOLETE     if (val < 0) */
+/* OBSOLETE       perror_with_name ("Not a core file: reading upage"); */
+/* OBSOLETE     if (val != sizeof u) */
+/* OBSOLETE       error ("Not a core file: could only read %d bytes", val); */
+/* OBSOLETE     data_start = exec_data_start; */
 /* OBSOLETE  */
 /* OBSOLETE #if !defined (NBPG) */
 /* OBSOLETE #define NBPG NBPP */
@@ -103,56 +103,56 @@
 /* OBSOLETE #define UPAGES USIZE */
 /* OBSOLETE #endif */
 /* OBSOLETE  */
-/* OBSOLETE 	data_end = data_start + NBPG * u.u_dsize; */
-/* OBSOLETE 	stack_start = stack_end - NBPG * u.u_ssize; */
-/* OBSOLETE 	data_offset = NBPG * UPAGES + exec_data_start % NBPG /* Not sure about this //jkp *x/; */
-/* OBSOLETE 	stack_offset = NBPG * (UPAGES + u.u_dsize); */
+/* OBSOLETE     data_end = data_start + NBPG * u.u_dsize; */
+/* OBSOLETE     stack_start = stack_end - NBPG * u.u_ssize; */
+/* OBSOLETE     data_offset = NBPG * UPAGES + exec_data_start % NBPG /* Not sure about this //jkp *x/; */
+/* OBSOLETE     stack_offset = NBPG * (UPAGES + u.u_dsize); */
 /* OBSOLETE  */
-/* OBSOLETE 	/* Some machines put an absolute address in here and some put */
-/* OBSOLETE 	   the offset in the upage of the regs.  *x/ */
-/* OBSOLETE 	reg_offset = (int) u.u_state; */
-/* OBSOLETE 	if (reg_offset > NBPG * UPAGES) */
-/* OBSOLETE 	  reg_offset -= KERNEL_U_ADDR; */
+/* OBSOLETE     /* Some machines put an absolute address in here and some put */
+/* OBSOLETE        the offset in the upage of the regs.  *x/ */
+/* OBSOLETE     reg_offset = (int) u.u_state; */
+/* OBSOLETE     if (reg_offset > NBPG * UPAGES) */
+/* OBSOLETE       reg_offset -= KERNEL_U_ADDR; */
 /* OBSOLETE  */
-/* OBSOLETE 	memcpy (&core_aouthdr, &u.u_exdata, sizeof (AOUTHDR)); */
-/* OBSOLETE 	printf_unfiltered ("Core file is from \"%s\".\n", u.u_comm); */
+/* OBSOLETE     memcpy (&core_aouthdr, &u.u_exdata, sizeof (AOUTHDR)); */
+/* OBSOLETE     printf_unfiltered ("Core file is from \"%s\".\n", u.u_comm); */
 /* OBSOLETE  */
-/* OBSOLETE 	/* I don't know where to find this info. */
-/* OBSOLETE 	   So, for now, mark it as not available.  *x/ */
-/* OBSOLETE 	N_SET_MAGIC (core_aouthdr, 0); */
+/* OBSOLETE     /* I don't know where to find this info. */
+/* OBSOLETE        So, for now, mark it as not available.  *x/ */
+/* OBSOLETE     N_SET_MAGIC (core_aouthdr, 0); */
 /* OBSOLETE  */
-/* OBSOLETE 	/* Read the register values out of the core file and store */
-/* OBSOLETE 	   them where `read_register' will find them.  *x/ */
+/* OBSOLETE     /* Read the register values out of the core file and store */
+/* OBSOLETE        them where `read_register' will find them.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  register int regno; */
+/* OBSOLETE     { */
+/* OBSOLETE       register int regno; */
 /* OBSOLETE  */
-/* OBSOLETE 	  for (regno = 0; regno < NUM_REGS; regno++) */
-/* OBSOLETE 	    { */
-/* OBSOLETE 	      char buf[MAX_REGISTER_RAW_SIZE]; */
+/* OBSOLETE       for (regno = 0; regno < NUM_REGS; regno++) */
+/* OBSOLETE         { */
+/* OBSOLETE           char buf[MAX_REGISTER_RAW_SIZE]; */
 /* OBSOLETE  */
-/* OBSOLETE 	      val = lseek (corechan, register_addr (regno, reg_offset), 0); */
-/* OBSOLETE 	      if (val < 0 */
-/* OBSOLETE 		  || (val = myread (corechan, buf, sizeof buf)) < 0) */
-/* OBSOLETE 		{ */
-/* OBSOLETE 		  char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) */
-/* OBSOLETE 						   + 30); */
-/* OBSOLETE 		  strcpy (buffer, "Reading register "); */
-/* OBSOLETE 		  strcat (buffer, REGISTER_NAME (regno)); */
-/* OBSOLETE 						    */
-/* OBSOLETE 		  perror_with_name (buffer); */
-/* OBSOLETE 		} */
+/* OBSOLETE           val = lseek (corechan, register_addr (regno, reg_offset), 0); */
+/* OBSOLETE           if (val < 0 */
+/* OBSOLETE               || (val = myread (corechan, buf, sizeof buf)) < 0) */
+/* OBSOLETE             { */
+/* OBSOLETE               char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) */
+/* OBSOLETE                                                + 30); */
+/* OBSOLETE               strcpy (buffer, "Reading register "); */
+/* OBSOLETE               strcat (buffer, REGISTER_NAME (regno)); */
+/* OBSOLETE                                                 */
+/* OBSOLETE               perror_with_name (buffer); */
+/* OBSOLETE             } */
 /* OBSOLETE  */
-/* OBSOLETE 	      supply_register (regno, buf); */
-/* OBSOLETE 	    } */
-/* OBSOLETE 	} */
+/* OBSOLETE           supply_register (regno, buf); */
+/* OBSOLETE         } */
+/* OBSOLETE     } */
 /* OBSOLETE       } */
 /* OBSOLETE       if (filename[0] == '/') */
-/* OBSOLETE 	corefile = savestring (filename, strlen (filename)); */
+/* OBSOLETE     corefile = savestring (filename, strlen (filename)); */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  corefile = concat (current_directory, "/", filename, NULL); */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       corefile = concat (current_directory, "/", filename, NULL); */
+/* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE       flush_cached_frames (); */
 /* OBSOLETE       select_frame (get_current_frame (), 0); */

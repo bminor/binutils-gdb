@@ -3,23 +3,24 @@
    Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__		/* Forward decls for prototypes */
+#ifdef __STDC__			/* Forward decls for prototypes */
 struct frame_info;
 struct type;
 struct value;
@@ -52,33 +53,36 @@ extern int inferior_pid;
 
 /* We are missing register descriptions in the system header files. Sigh! */
 
-struct regs {
-	int	gregs [32];		/* general purpose registers */
-	int	pc;			/* program conter	*/
-	int	ps;			/* processor status, or machine state */
-};
+struct regs
+  {
+    int gregs[32];		/* general purpose registers */
+    int pc;			/* program conter       */
+    int ps;			/* processor status, or machine state */
+  };
 
-struct fp_status {
-	double	fpregs [32];		/* floating GP registers */
-};
+struct fp_status
+  {
+    double fpregs[32];		/* floating GP registers */
+  };
 
 
 /* To be used by skip_prologue. */
 
-struct rs6000_framedata {
-  int	offset;				/* total size of frame --- the distance
-					   by which we decrement sp to allocate
-					   the frame */
-  int	saved_gpr;			/* smallest # of saved gpr */
-  int	saved_fpr;			/* smallest # of saved fpr */
-  int	alloca_reg;			/* alloca register number (frame ptr) */
-  char	frameless;			/* true if frameless functions. */
-  char	nosavedpc;			/* true if pc not saved. */
-  int	gpr_offset;			/* offset of saved gprs from prev sp */
-  int	fpr_offset;			/* offset of saved fprs from prev sp */
-  int	lr_offset;			/* offset of saved lr */
-  int	cr_offset;			/* offset of saved cr */
-};
+struct rs6000_framedata
+  {
+    int offset;			/* total size of frame --- the distance
+				   by which we decrement sp to allocate
+				   the frame */
+    int saved_gpr;		/* smallest # of saved gpr */
+    int saved_fpr;		/* smallest # of saved fpr */
+    int alloca_reg;		/* alloca register number (frame ptr) */
+    char frameless;		/* true if frameless functions. */
+    char nosavedpc;		/* true if pc not saved. */
+    int gpr_offset;		/* offset of saved gprs from prev sp */
+    int fpr_offset;		/* offset of saved fprs from prev sp */
+    int lr_offset;		/* offset of saved lr */
+    int cr_offset;		/* offset of saved cr */
+  };
 
 /* Define the byte order of the machine.  */
 
@@ -100,7 +104,7 @@ struct rs6000_framedata {
 extern CORE_ADDR rs6000_skip_prologue PARAMS ((CORE_ADDR));
 #define SKIP_PROLOGUE(pc) (rs6000_skip_prologue (pc))
 
-extern CORE_ADDR skip_prologue PARAMS((CORE_ADDR, struct rs6000_framedata *));
+extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, struct rs6000_framedata *));
 
 
 /* If PC is in some function-call trampoline code, return the PC
@@ -134,7 +138,7 @@ extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR));
 
 #define	PROCESS_LINENUMBER_HOOK()	aix_process_linenos ()
 extern void aix_process_linenos PARAMS ((void));
-   
+
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
    the new frame is not set up until the new function executes
@@ -198,13 +202,13 @@ extern char *rs6000_register_name (int reg);
 #define FP0_REGNUM 32		/* Floating point register 0 */
 #define	GP0_REGNUM 0		/* GPR register 0 */
 #define FP0_REGNUM 32		/* FPR (Floating point) register 0 */
-#define FPLAST_REGNUM 63	/* Last floating point register */  
+#define FPLAST_REGNUM 63	/* Last floating point register */
 
 /* Special purpose registers... */
 /* P.S. keep these in the same order as in /usr/mstsave.h `mstsave'
    structure, for easier processing */
 
-#define PC_REGNUM 64		/* Program counter (instruction address %iar)*/
+#define PC_REGNUM 64		/* Program counter (instruction address %iar) */
 #define PS_REGNUM 65		/* Processor (or machine) status (%msr) */
 #define	CR_REGNUM 66		/* Condition register */
 #define	LR_REGNUM 67		/* Link register */
@@ -223,11 +227,11 @@ extern char *rs6000_register_name (int reg);
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.
-	     32 4-byte gpr's
-	     32 8-byte fpr's
-	     7  4-byte UISA special purpose registers, 
-	     16 4-byte segment registers,
-	     32 4-byte standard OEA special-purpose registers,
+   32 4-byte gpr's
+   32 8-byte fpr's
+   7  4-byte UISA special purpose registers, 
+   16 4-byte segment registers,
+   32 4-byte standard OEA special-purpose registers,
    and up to 64 4-byte non-standard OEA special purpose regs.
    total: (+ (* 32 4) (* 32 8) (* 7 4) (* 16 4) (* 32 4) (* 64 4)) 860 bytes
    Keep some extra space for now, in case to add more. */
@@ -327,11 +331,11 @@ extern CORE_ADDR rs6000_struct_return_address;
    into VALBUF.  */
 
 /* #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE)) */
+   memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE)) */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   extract_return_value(TYPE,REGBUF,VALBUF)
-extern void extract_return_value PARAMS ((struct type *, char [], char *));
+extern void extract_return_value PARAMS ((struct type *, char[], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
@@ -380,12 +384,12 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (frameless_function_invocation (FI))
 
-extern int frameless_function_invocation PARAMS((struct frame_info *));
+extern int frameless_function_invocation PARAMS ((struct frame_info *));
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
   prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-#define INIT_FRAME_PC(fromleaf, prev) /* nothing */
+#define INIT_FRAME_PC(fromleaf, prev)	/* nothing */
 extern void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
 #define	INIT_EXTRA_FRAME_INFO(fromleaf, fi) rs6000_init_extra_frame_info (fromleaf, fi)
 
@@ -454,39 +458,39 @@ extern void pop_frame PARAMS ((void));
 
 /* This sequence of words is the instructions:
 
-	mflr	r0		// 0x7c0802a6
-				// save fpr's
-	stfd	r?, num(r1)	// 0xd8010000 there should be 32 of this??
-				// save gpr's
-	stm	r0, num(r1)	// 0xbc010000
-	stu	r1, num(r1)	// 0x94210000
+   mflr r0              // 0x7c0802a6
+   // save fpr's
+   stfd r?, num(r1)     // 0xd8010000 there should be 32 of this??
+   // save gpr's
+   stm  r0, num(r1)     // 0xbc010000
+   stu  r1, num(r1)     // 0x94210000
 
-	// the function we want to branch might be in a different load 
-	// segment. reset the toc register. Note that the actual toc address
-	// will be fix by fix_call_dummy () along with function address.
+   // the function we want to branch might be in a different load 
+   // segment. reset the toc register. Note that the actual toc address
+   // will be fix by fix_call_dummy () along with function address.
 
-	st	r2, 0x14(r1)	// 0x90410014 save toc register
-	liu	r2, 0x1234	// 0x3c401234 reset a new toc value 0x12345678
-	oril	r2, r2,0x5678   // 0x60425678	
+   st   r2, 0x14(r1)    // 0x90410014 save toc register
+   liu  r2, 0x1234      // 0x3c401234 reset a new toc value 0x12345678
+   oril r2, r2,0x5678   // 0x60425678   
 
-				// load absolute address 0x12345678 to r0
-	liu	r0, 0x1234	// 0x3c001234
-	oril	r0, r0,0x5678	// 0x60005678
-	mtctr	r0		// 0x7c0903a6 ctr <- r0
-	bctrl			// 0x4e800421 jump subroutine 0x12345678 (%ctr)
-	cror	0xf, 0xf, 0xf	// 0x4def7b82
-	brpt			// 0x7d821008, breakpoint
-	cror	0xf, 0xf, 0xf	// 0x4def7b82 (for 8 byte alignment)
+   // load absolute address 0x12345678 to r0
+   liu  r0, 0x1234      // 0x3c001234
+   oril r0, r0,0x5678   // 0x60005678
+   mtctr        r0              // 0x7c0903a6 ctr <- r0
+   bctrl                        // 0x4e800421 jump subroutine 0x12345678 (%ctr)
+   cror 0xf, 0xf, 0xf   // 0x4def7b82
+   brpt                 // 0x7d821008, breakpoint
+   cror 0xf, 0xf, 0xf   // 0x4def7b82 (for 8 byte alignment)
 
 
-  We actually start executing by saving the toc register first, since the pushing 
-  of the registers is done by PUSH_DUMMY_FRAME.  If this were real code,
-  the arguments for the function called by the `bctrl' would be pushed
-  between the `stu' and the `bctrl', and we could allow it to execute through.
-  But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is done,
-  and we cannot allow to push the registers again.
-*/
-	
+   We actually start executing by saving the toc register first, since the pushing 
+   of the registers is done by PUSH_DUMMY_FRAME.  If this were real code,
+   the arguments for the function called by the `bctrl' would be pushed
+   between the `stu' and the `bctrl', and we could allow it to execute through.
+   But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is done,
+   and we cannot allow to push the registers again.
+ */
+
 #define CALL_DUMMY {0x7c0802a6, 0xd8010000, 0xbc010000, 0x94210000, \
 		    0x90410014, 0x3c401234, 0x60425678,		    \
 		    0x3c001234, 0x60005678, 0x7c0903a6, 0x4e800421, \
@@ -509,16 +513,17 @@ extern void rs6000_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */
-extern CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
+extern
+CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
 
 /* xcoffread.c provides a function to determine the TOC offset
    for a given object file.
    It is used under native AIX configurations for determining the
    TOC address when calling functions in the inferior.  */
 #ifdef __STDC__
-struct objfile;
+     struct objfile;
 #endif
-extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
+     extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
 
 /* Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
@@ -536,7 +541,7 @@ extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
 
 #define CONVERT_FROM_FUNC_PTR_ADDR(ADDR) \
   (is_magic_function_pointer (ADDR) ? read_memory_integer (ADDR, 4) : (ADDR))
-extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
+     extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
@@ -544,7 +549,7 @@ extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
 /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
 
 #define SOFTWARE_SINGLE_STEP_P 1
-extern void rs6000_software_single_step PARAMS ((unsigned int, int));
+     extern void rs6000_software_single_step PARAMS ((unsigned int, int));
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
 
 /* If the current gcc for for this target does not produce correct debugging

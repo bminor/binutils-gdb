@@ -1,7 +1,7 @@
 
 /*
-** This module contains functions to support i/o in the TUI
-*/
+   ** This module contains functions to support i/o in the TUI
+ */
 
 
 #include <stdio.h>
@@ -38,14 +38,14 @@ static unsigned int _tuiHandleResizeDuringIO PARAMS ((unsigned int));
 *********************************************************************************/
 
 /*
-** tuiPuts_unfiltered().
-**        Function to put a string to the command window
-**              When running in TUI mode, this is the "hook"
-**              for fputs_unfiltered(). That is, all debugger
-**              output eventually makes it's way to the bottom-level
-**              routine fputs_unfiltered (main.c), which (in TUI
-**              mode), calls tuiPuts_unfiltered().
-*/
+   ** tuiPuts_unfiltered().
+   **        Function to put a string to the command window
+   **              When running in TUI mode, this is the "hook"
+   **              for fputs_unfiltered(). That is, all debugger
+   **              output eventually makes it's way to the bottom-level
+   **              routine fputs_unfiltered (main.c), which (in TUI
+   **              mode), calls tuiPuts_unfiltered().
+ */
 void
 #ifdef __STDC__
 tuiPuts_unfiltered (
@@ -159,11 +159,11 @@ tui_tputs (str, affcnt, putfunc)
       /* Backspace. */
 
       /* We see this on an emacs control-B.
-     * I.e., it's like the left-arrow key (not like the backspace key).
-     * The effect that readline wants when it transmits this
-     * character to us is simply to back up one character
-     * (but not to write a space over the old character).
-     */
+         * I.e., it's like the left-arrow key (not like the backspace key).
+         * The effect that readline wants when it transmits this
+         * character to us is simply to back up one character
+         * (but not to write a space over the old character).
+       */
 
       _updateCommandInfo (-1);
       wmove (cmdWin->generic.handle,
@@ -195,15 +195,15 @@ tui_tputs (str, affcnt, putfunc)
     {
 
       /* This is actually a tgoto() specifying a character position,
-     * followed by either a term_IC/term_DC which [I think] means
-     * insert/delete one character at that position.
-     * There are complications with this one - need to either
-     * extract the position from the string, or have a backdoor
-     * means of communicating it from ../readline/display.c.
-     * So this one is not yet implemented.
-     * Not doing it seems to have no ill effects on command-line-editing
-     * that I've noticed so far. - RT
-     */
+         * followed by either a term_IC/term_DC which [I think] means
+         * insert/delete one character at that position.
+         * There are complications with this one - need to either
+         * extract the position from the string, or have a backdoor
+         * means of communicating it from ../readline/display.c.
+         * So this one is not yet implemented.
+         * Not doing it seems to have no ill effects on command-line-editing
+         * that I've noticed so far. - RT
+       */
 
     }
   else if (str == term_dc)
@@ -228,24 +228,24 @@ tui_tputs (str, affcnt, putfunc)
       insert_mode = 0;
 
       /* Strings we know about but don't handle
-   * specially here are just passed along to tputs().
-   *
-   * These are not handled because (as far as I can tell)
-   * they are not actually emitted by the readline package
-   * in the course of doing command-line editing. Some of them
-   * theoretically could be used in the future, in which case we'd
-   * need to handle them.
-   */
+         * specially here are just passed along to tputs().
+         *
+         * These are not handled because (as far as I can tell)
+         * they are not actually emitted by the readline package
+         * in the course of doing command-line editing. Some of them
+         * theoretically could be used in the future, in which case we'd
+         * need to handle them.
+       */
     }
   else if (str == term_ic ||	/* insert character */
 	   str == term_cursor_move ||	/* cursor move */
-	   str == term_clrpag ||/* clear page */
+	   str == term_clrpag ||	/* clear page */
 	   str == term_mm ||	/* turn on meta key */
 	   str == term_mo ||	/* turn off meta key */
 	   str == term_up ||	/* up one line (not expected) */
-	   str == term_scroll_region ||	/* set scroll region */
+	   str == term_scroll_region ||		/* set scroll region */
 	   str == term_memory_lock ||	/* lock screen above cursor */
-	   str == term_memory_unlock ||	/* unlock screen above cursor */
+	   str == term_memory_unlock ||		/* unlock screen above cursor */
 	   str == visible_bell)
     {				/* flash screen */
       tputs (str, affcnt, putfunc);
@@ -258,9 +258,9 @@ tui_tputs (str, affcnt, putfunc)
 
 
 /*
-** tui_vwgetch()
-**        Wrapper around wgetch with the window in a va_list
-*/
+   ** tui_vwgetch()
+   **        Wrapper around wgetch with the window in a va_list
+ */
 unsigned int
 #ifdef __STDC__
 tui_vwgetch (va_list args)
@@ -279,9 +279,9 @@ tui_vwgetch (args)
 
 
 /*
-** tui_vread()
-**   Wrapper around read() with paramets in a va_list
-*/
+   ** tui_vread()
+   **   Wrapper around read() with paramets in a va_list
+ */
 unsigned int
 #ifdef __STDC__
 tui_vread (va_list args)
@@ -301,9 +301,9 @@ tui_vread (args)
 }				/* tui_vread() */
 
 /*
-** tuiRead()
-**    Function to perform a read() catching resize events
-*/
+   ** tuiRead()
+   **    Function to perform a read() catching resize events
+ */
 int
 #ifdef __STDC__
 tuiRead (
@@ -327,14 +327,14 @@ tuiRead (filedes, buf, nbytes)
 
 
 /*
-** tuiGetc().
-**        Get a character from the command window.
-**		This is called from the readline package,
-**              that is, we have:
-**                tuiGetc() [here], called from
-**                readline code [in ../readline/], called from
-**                command_line_input() in top.c
-*/
+   ** tuiGetc().
+   **        Get a character from the command window.
+   **           This is called from the readline package,
+   **              that is, we have:
+   **                tuiGetc() [here], called from
+   **                readline code [in ../readline/], called from
+   **                command_line_input() in top.c
+ */
 unsigned int
 #ifdef __STDC__
 tuiGetc (void)
@@ -373,15 +373,15 @@ tuiGetc ()
 
 
 /*
-** tuiBufferGetc().
-*/
+   ** tuiBufferGetc().
+ */
 /*elz: this function reads a line of input from the user and
-puts it in a static buffer. Subsequent calls to this same function
-obtain one char at the time, providing the caller with a behavior
-similar to fgetc. When the input is buffered, the backspaces have
-the needed effect, i.e. ignore the last char active in the buffer*/
+   puts it in a static buffer. Subsequent calls to this same function
+   obtain one char at the time, providing the caller with a behavior
+   similar to fgetc. When the input is buffered, the backspaces have
+   the needed effect, i.e. ignore the last char active in the buffer */
 /* so far this function is called only from the query function in
-utils.c*/
+   utils.c */
 
 unsigned int
 #ifdef __STDC__
@@ -398,7 +398,7 @@ tuiBufferGetc ()
 
   if (length_of_answer == -1)
     {
-      /* this is the first time through, need to read the answer*/
+      /* this is the first time through, need to read the answer */
       do
 	{
 	  /* Call the curses routine that reads one character */
@@ -422,7 +422,7 @@ tuiBufferGetc ()
 
   if (index_read == length_of_answer)
     {
-      /*this is the last time through, reset for next query*/
+      /*this is the last time through, reset for next query */
       index_read = -1;
       length_of_answer = -1;
     }
@@ -434,8 +434,8 @@ tuiBufferGetc ()
 
 
 /*
-** tuiStartNewLines().
-*/
+   ** tuiStartNewLines().
+ */
 void
 #ifdef __STDC__
 tuiStartNewLines (
@@ -464,9 +464,9 @@ tuiStartNewLines (numLines)
 
 
 /*
-** tui_vStartNewLines().
-**        With numLines in a va_list
-*/
+   ** tui_vStartNewLines().
+   **        With numLines in a va_list
+ */
 void
 #ifdef __STDC__
 tui_vStartNewLines (
@@ -490,11 +490,11 @@ tui_vStartNewLines (args)
 
 
 /*
-** _tuiHandleResizeDuringIO
-**    This function manages the cleanup when a resize has occured
-**    From within a call to getch() or read.  Returns the character
-**    to return from getc or read.
-*/
+   ** _tuiHandleResizeDuringIO
+   **    This function manages the cleanup when a resize has occured
+   **    From within a call to getch() or read.  Returns the character
+   **    to return from getc or read.
+ */
 static unsigned int
 #ifdef __STDC__
 _tuiHandleResizeDuringIO (
@@ -518,9 +518,9 @@ _tuiHandleResizeDuringIO (originalCh)
 
 
 /*
-** _updateCommandInfo().
-**        Function to update the command window information.
-*/
+   ** _updateCommandInfo().
+   **        Function to update the command window information.
+ */
 static void
 #ifdef __STDC__
 _updateCommandInfo (
@@ -580,7 +580,7 @@ tuiTermSetup (turn_off_echo)
      * case, since that is what applies on HP-UX. turn_off_echo
      * is 1 except for the case where we're being called
      * on a "quit", in which case we want to leave echo on.
-     */
+   */
   if (turn_off_echo)
     {
 #ifdef HAVE_TERMIOS
@@ -593,7 +593,7 @@ tuiTermSetup (turn_off_echo)
 
   /* Compute the start and end lines of the command
      * region. (Actually we only use end here)
-     */
+   */
   start = winList[CMD_WIN]->generic.origin.y;
   end = start + winList[CMD_WIN]->generic.height - 1;
   endcol = winList[CMD_WIN]->generic.width - 1;
@@ -623,22 +623,22 @@ tuiTermSetup (turn_off_echo)
     }				/* else we're out of luck */
 
   /* This is an attempt to keep the logical & physical
-       * cursor in synch, going into curses. Without this,
-       * curses seems to be confused by the fact that
-       * GDB has physically moved the curser on it. One
-       * visible effect of removing this code is that the
-       * locator window fails to get updated and the line
-       * of text that *should* go into the locator window
-       * often goes to the wrong place.
-       */
+     * cursor in synch, going into curses. Without this,
+     * curses seems to be confused by the fact that
+     * GDB has physically moved the curser on it. One
+     * visible effect of removing this code is that the
+     * locator window fails to get updated and the line
+     * of text that *should* go into the locator window
+     * often goes to the wrong place.
+   */
   /* What's done here is to  tell curses to write a ' '
-       * at the bottom right corner of the screen.
-       * The idea is to wind up with the cursor in a known
-       * place.
-       * Note I'm relying on refresh()
-       * only writing what changed (the space),
-       * not the whole screen.
-       */
+     * at the bottom right corner of the screen.
+     * The idea is to wind up with the cursor in a known
+     * place.
+     * Note I'm relying on refresh()
+     * only writing what changed (the space),
+     * not the whole screen.
+   */
   standend ();
   move (end, endcol - 1);
   addch (' ');
@@ -677,7 +677,7 @@ tuiTermUnsetup (turn_on_echo, to_column)
   /* We need to turn on echoing, since the TUI turns it off */
   /* Below I only put in the TERMIOS case, since that
      * is what applies on HP-UX.
-     */
+   */
   if (turn_on_echo)
     {
 #ifdef HAVE_TERMIOS
@@ -692,7 +692,7 @@ tuiTermUnsetup (turn_on_echo, to_column)
      * region, as well as the last "real" line of
      * the region (normally same as end, except when
      * we're first populating the region)
-     */
+   */
   start = winList[CMD_WIN]->generic.origin.y;
   end = start + winList[CMD_WIN]->generic.height - 1;
   curline = start + winList[CMD_WIN]->detail.commandInfo.curLine;
@@ -700,7 +700,7 @@ tuiTermUnsetup (turn_on_echo, to_column)
   /* We want to confine target I/O to the command region.
      * In order to do so, we must either have "memory lock"
      * (hpterm's) or "scroll regions" (xterm's).
-     */
+   */
   if (term_cursor_move && term_memory_lock)
     {
 

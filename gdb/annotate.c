@@ -1,21 +1,22 @@
 /* Annotation routines for GDB.
    Copyright 1986, 89, 90, 91, 92, 95, 98, 1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "annotate.h"
@@ -92,9 +93,9 @@ annotate_starting ()
   else
     {
       if (annotation_level > 1)
-        {
-          printf_filtered ("\n\032\032starting\n");
-        }
+	{
+	  printf_filtered ("\n\032\032starting\n");
+	}
     }
 }
 
@@ -106,7 +107,7 @@ annotate_stopped ()
   else
     {
       if (annotation_level > 1)
-        printf_filtered ("\n\032\032stopped\n");
+	printf_filtered ("\n\032\032stopped\n");
     }
 }
 
@@ -119,7 +120,7 @@ annotate_exited (exitstatus)
   else
     {
       if (annotation_level > 1)
-        printf_filtered ("\n\032\032exited %d\n", exitstatus);
+	printf_filtered ("\n\032\032exited %d\n", exitstatus);
     }
 }
 

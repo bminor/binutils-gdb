@@ -12,7 +12,7 @@
 /*
  * Software defined PSW masks.
  */
-#define PSW_SS  0x10000000      /* Kernel managed single step */
+#define PSW_SS  0x10000000	/* Kernel managed single step */
 
 /* Thread flavors used in re-setting the T bit.
  * @@ this is also bad for cross debugging.
@@ -89,7 +89,7 @@
         write_register(IPSW_REGNUM, ipsw & ~(PSW_N | PSW_B | PSW_X)); \
         stop_pc = pcoqt; \
       } \
-   }), 0) 
+   }), 0)
 
 /* It's mostly just the common stuff.  */
 

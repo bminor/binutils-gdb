@@ -1,28 +1,29 @@
 /* Am29k-dependent portions of the RPC protocol
    used with a VxWorks target 
 
-Contributed by Wind River Systems.
+   Contributed by Wind River Systems.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
 
-#include "vx-share/regPacket.h"  
+#include "vx-share/regPacket.h"
 #include "frame.h"
 #include "inferior.h"
 #include "wait.h"
@@ -40,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/time.h>
 #include <sys/socket.h>
 
-#ifdef _AIX                     /* IBM claims "void *malloc()" not char * */
+#ifdef _AIX			/* IBM claims "void *malloc()" not char * */
 #define malloc bogon_malloc
 #endif
 
@@ -107,7 +108,7 @@ vx_read_register (regno)
   if (target_has_fp)
     {
       net_read_registers (am29k_fpreg_packet, AM29K_FPREG_PLEN,
-                          PTRACE_GETFPREGS);
+			  PTRACE_GETFPREGS);
       registers[REGISTER_BYTE (FPE_REGNUM)] = am29k_fpreg_packet[AM29K_R_FPE];
       registers[REGISTER_BYTE (FPS_REGNUM)] = am29k_fpreg_packet[AM29K_R_FPS];
 
@@ -116,7 +117,7 @@ vx_read_register (regno)
       memset (&registers[REGISTER_BYTE (161)], '\0', 21 * AM29K_FPREG_SIZE);
     }
   else
-    { 
+    {
       memset (&registers[REGISTER_BYTE (FPE_REGNUM)], '\0', AM29K_FPREG_SIZE);
       memset (&registers[REGISTER_BYTE (FPS_REGNUM)], '\0', AM29K_FPREG_SIZE);
 
@@ -163,7 +164,7 @@ vx_write_register (regno)
       am29k_fpreg_packet[AM29K_R_FPS] = registers[REGISTER_BYTE (FPS_REGNUM)];
 
       net_write_registers (am29k_fpreg_packet, AM29K_FPREG_PLEN,
-                           PTRACE_SETFPREGS);
+			   PTRACE_SETFPREGS);
     }
 }
 
@@ -172,17 +173,16 @@ vx_write_register (regno)
    a frame, that is, the return address (lr0) address in the stack. To
    obtain the frame pointer (lr1) contents, we must add 4 bytes.
    Note : may be we should modify init_frame_info() to get the frame pointer
-          and store it into the frame_info struct rather than reading its
-          contents when FRAME_CHAIN_VALID is invoked. */
+   and store it into the frame_info struct rather than reading its
+   contents when FRAME_CHAIN_VALID is invoked. */
 
 int
 vx29k_frame_chain_valid (chain, thisframe)
      CORE_ADDR chain;
-     struct frame_info *thisframe;      /* not used here */
+     struct frame_info *thisframe;	/* not used here */
 {
-   int fp_contents;
+  int fp_contents;
 
-   read_memory ((CORE_ADDR)(chain + 4), (char *) &fp_contents, 4);
-   return (fp_contents != 0);
+  read_memory ((CORE_ADDR) (chain + 4), (char *) &fp_contents, 4);
+  return (fp_contents != 0);
 }
-

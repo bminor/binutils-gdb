@@ -1,21 +1,22 @@
 /* Remote target glue for the SPARC Sparclet ROM monitor.
    Copyright 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #include "defs.h"
@@ -25,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 #include "srec.h"
 #include "symtab.h"
-#include "symfile.h" /* for generic_load */
+#include "symfile.h"		/* for generic_load */
 #include <time.h>
 
 extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
@@ -40,22 +41,22 @@ static void sparclet_open PARAMS ((char *args, int from_tty));
    either. So, typing "info reg sp" becomes a "r30".  */
 
 /*PSR 0x00000080  impl ver icc AW LE EE EC EF PIL S PS ET CWP  WIM
-                0x0  0x0 0x0  0  0  0  0  0 0x0 1  0  0 0x00 0x2
-                                                             0000010
-       INS        LOCALS       OUTS      GLOBALS
- 0  0x00000000  0x00000000  0x00000000  0x00000000
- 1  0x00000000  0x00000000  0x00000000  0x00000000
- 2  0x00000000  0x00000000  0x00000000  0x00000000
- 3  0x00000000  0x00000000  0x00000000  0x00000000
- 4  0x00000000  0x00000000  0x00000000  0x00000000
- 5  0x00000000  0x00001000  0x00000000  0x00000000
- 6  0x00000000  0x00000000  0x123f0000  0x00000000
- 7  0x00000000  0x00000000  0x00000000  0x00000000
-pc:  0x12010000 0x00000000    unimp
-npc: 0x12010004 0x00001000    unimp     0x1000
-tbr: 0x00000000
-y:   0x00000000
-*/
+   0x0  0x0 0x0  0  0  0  0  0 0x0 1  0  0 0x00 0x2
+   0000010
+   INS        LOCALS       OUTS      GLOBALS
+   0  0x00000000  0x00000000  0x00000000  0x00000000
+   1  0x00000000  0x00000000  0x00000000  0x00000000
+   2  0x00000000  0x00000000  0x00000000  0x00000000
+   3  0x00000000  0x00000000  0x00000000  0x00000000
+   4  0x00000000  0x00000000  0x00000000  0x00000000
+   5  0x00000000  0x00001000  0x00000000  0x00000000
+   6  0x00000000  0x00000000  0x123f0000  0x00000000
+   7  0x00000000  0x00000000  0x00000000  0x00000000
+   pc:  0x12010000 0x00000000    unimp
+   npc: 0x12010004 0x00001000    unimp     0x1000
+   tbr: 0x00000000
+   y:   0x00000000
+ */
 /* these correspond to the offsets from tm-* files from config directories */
 
 /* is wim part of psr?? */
@@ -95,8 +96,8 @@ sparclet_load (desc, file, hashmark)
 
   /* enable user to specify address for downloading as 2nd arg to load */
 
-  i = sscanf(file, "%*s 0x%lx", &load_offset);
-  if (i >= 1 ) 
+  i = sscanf (file, "%*s 0x%lx", &load_offset);
+  if (i >= 1)
     {
       char *p;
 
@@ -119,7 +120,7 @@ sparclet_load (desc, file, hashmark)
       printf_filtered ("File is not an object file\n");
       return;
     }
-  
+
   start_time = time (NULL);
 
   for (s = abfd->sections; s; s = s->next)
@@ -175,7 +176,7 @@ sparclet_load (desc, file, hashmark)
 
   end_time = time (NULL);
 
-  if (hashmark) 
+  if (hashmark)
     putchar_unfiltered ('\n');
 
   report_transfer_performance (data_count, start_time, end_time);
@@ -192,70 +193,71 @@ sparclet_load (desc, file, hashmark)
 
 /* need to pause the monitor for timing reasons, so slow it down */
 
-static char *sparclet_inits[] = {"\n\r\r\n", NULL};
+static char *sparclet_inits[] =
+{"\n\r\r\n", NULL};
 
-static struct monitor_ops sparclet_cmds ;
+static struct monitor_ops sparclet_cmds;
 
-static void 
-init_sparclet_cmds(void)
+static void
+init_sparclet_cmds (void)
 {
-  sparclet_cmds.flags =   MO_CLR_BREAK_USES_ADDR |
-    MO_HEX_PREFIX          |
-    MO_NO_ECHO_ON_OPEN     |
-    MO_NO_ECHO_ON_SETMEM   |
-    MO_RUN_FIRST_TIME      |
-    MO_GETMEM_READ_SINGLE ;	/* flags */
-  sparclet_cmds.init =   sparclet_inits;		/* Init strings */
-  sparclet_cmds.cont =   "cont\r";			/* continue command */
-  sparclet_cmds.step =   "step\r";			/* single step */
-  sparclet_cmds.stop =   "\r";				/* break interrupts the program */
-  sparclet_cmds.set_break =   "+bp %x\r";		/* set a breakpoint */
-  sparclet_cmds.clr_break =  "-bp %x\r" ;		/* can't use "br" because only 2 hw bps are supported */
-  sparclet_cmds.clr_all_break =   "-bp %x\r";		/* clear a breakpoint */
-  "-bp\r" ;			/* clear all breakpoints */
-  sparclet_cmds.fill =   "fill %x -n %x -v %x -b\r";	/* fill (start length val) */
+  sparclet_cmds.flags = MO_CLR_BREAK_USES_ADDR |
+    MO_HEX_PREFIX |
+    MO_NO_ECHO_ON_OPEN |
+    MO_NO_ECHO_ON_SETMEM |
+    MO_RUN_FIRST_TIME |
+    MO_GETMEM_READ_SINGLE;	/* flags */
+  sparclet_cmds.init = sparclet_inits;	/* Init strings */
+  sparclet_cmds.cont = "cont\r";	/* continue command */
+  sparclet_cmds.step = "step\r";	/* single step */
+  sparclet_cmds.stop = "\r";	/* break interrupts the program */
+  sparclet_cmds.set_break = "+bp %x\r";		/* set a breakpoint */
+  sparclet_cmds.clr_break = "-bp %x\r";		/* can't use "br" because only 2 hw bps are supported */
+  sparclet_cmds.clr_all_break = "-bp %x\r";	/* clear a breakpoint */
+  "-bp\r";			/* clear all breakpoints */
+  sparclet_cmds.fill = "fill %x -n %x -v %x -b\r";	/* fill (start length val) */
   /* can't use "fi" because it takes words, not bytes */
   /* ex [addr] [-n count] [-b|-s|-l]          default: ex cur -n 1 -b */
-  sparclet_cmds.setmem.cmdb =     "ex %x -b\r%x\rq\r";	/* setmem.cmdb (addr, value) */
-  sparclet_cmds.setmem.cmdw =     "ex %x -s\r%x\rq\r";	/* setmem.cmdw (addr, value) */
-  sparclet_cmds.setmem.cmdl =     "ex %x -l\r%x\rq\r";  /* setmem.cmdl (addr, value) */
-  sparclet_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
-  sparclet_cmds.setmem.resp_delim =     NULL; /*": " */	/* setmem.resp_delim */
-  sparclet_cmds.setmem.term =     NULL; /*"? " */	/* setmem.term */
-  sparclet_cmds.setmem.term_cmd =     NULL; /*"q\r" */	/* setmem.term_cmd */
+  sparclet_cmds.setmem.cmdb = "ex %x -b\r%x\rq\r";	/* setmem.cmdb (addr, value) */
+  sparclet_cmds.setmem.cmdw = "ex %x -s\r%x\rq\r";	/* setmem.cmdw (addr, value) */
+  sparclet_cmds.setmem.cmdl = "ex %x -l\r%x\rq\r";	/* setmem.cmdl (addr, value) */
+  sparclet_cmds.setmem.cmdll = NULL;	/* setmem.cmdll (addr, value) */
+  sparclet_cmds.setmem.resp_delim = NULL;	/*": " *//* setmem.resp_delim */
+  sparclet_cmds.setmem.term = NULL;	/*"? " *//* setmem.term */
+  sparclet_cmds.setmem.term_cmd = NULL;		/*"q\r" *//* setmem.term_cmd */
   /* since the parsing of multiple bytes is difficult due to
      interspersed addresses, we'll only read 1 value at a time,
      even tho these can handle a count */
   /* we can use -n to set count to read, but may have to parse? */
-  sparclet_cmds.getmem.cmdb =     "ex %x -n 1 -b\r";	/* getmem.cmdb (addr, #bytes) */
-  sparclet_cmds.getmem.cmdw =     "ex %x -n 1 -s\r";	/* getmem.cmdw (addr, #swords) */
-  sparclet_cmds.getmem.cmdl =     "ex %x -n 1 -l\r";	/* getmem.cmdl (addr, #words) */
-  sparclet_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, #dwords) */
-  sparclet_cmds.getmem.resp_delim =     ": ";		/* getmem.resp_delim */
-  sparclet_cmds.getmem.term =     NULL;			/* getmem.term */
-  sparclet_cmds.getmem.term_cmd =     NULL;		/* getmem.term_cmd */
-  sparclet_cmds.setreg.cmd =     "reg %s 0x%x\r";	/* setreg.cmd (name, value) */
-  sparclet_cmds.setreg.resp_delim =     NULL;		/* setreg.resp_delim */
-  sparclet_cmds.setreg.term =     NULL;			/* setreg.term */
-  sparclet_cmds.setreg.term_cmd =  NULL ;		/* setreg.term_cmd */
-  sparclet_cmds.getreg.cmd =     "reg %s\r";		/* getreg.cmd (name) */
-  sparclet_cmds.getreg.resp_delim =     " ";		/* getreg.resp_delim */
-  sparclet_cmds.getreg.term =     NULL;			/* getreg.term */
-  sparclet_cmds.getreg.term_cmd =     NULL;		/* getreg.term_cmd */
-  sparclet_cmds.dump_registers =   "reg\r";		/* dump_registers */
-  sparclet_cmds.register_pattern =   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)";	/* register_pattern */
-  sparclet_cmds.supply_register =   sparclet_supply_register;	/* supply_register */
-  sparclet_cmds.load_routine =   sparclet_load;		/* load_routine */
-  sparclet_cmds.load =   NULL;				/* download command (srecs on console) */
-  sparclet_cmds.loadresp =   NULL;			/* load response */
-  sparclet_cmds.prompt =   "monitor>";			/* monitor command prompt */
+  sparclet_cmds.getmem.cmdb = "ex %x -n 1 -b\r";	/* getmem.cmdb (addr, #bytes) */
+  sparclet_cmds.getmem.cmdw = "ex %x -n 1 -s\r";	/* getmem.cmdw (addr, #swords) */
+  sparclet_cmds.getmem.cmdl = "ex %x -n 1 -l\r";	/* getmem.cmdl (addr, #words) */
+  sparclet_cmds.getmem.cmdll = NULL;	/* getmem.cmdll (addr, #dwords) */
+  sparclet_cmds.getmem.resp_delim = ": ";	/* getmem.resp_delim */
+  sparclet_cmds.getmem.term = NULL;	/* getmem.term */
+  sparclet_cmds.getmem.term_cmd = NULL;		/* getmem.term_cmd */
+  sparclet_cmds.setreg.cmd = "reg %s 0x%x\r";	/* setreg.cmd (name, value) */
+  sparclet_cmds.setreg.resp_delim = NULL;	/* setreg.resp_delim */
+  sparclet_cmds.setreg.term = NULL;	/* setreg.term */
+  sparclet_cmds.setreg.term_cmd = NULL;		/* setreg.term_cmd */
+  sparclet_cmds.getreg.cmd = "reg %s\r";	/* getreg.cmd (name) */
+  sparclet_cmds.getreg.resp_delim = " ";	/* getreg.resp_delim */
+  sparclet_cmds.getreg.term = NULL;	/* getreg.term */
+  sparclet_cmds.getreg.term_cmd = NULL;		/* getreg.term_cmd */
+  sparclet_cmds.dump_registers = "reg\r";	/* dump_registers */
+  sparclet_cmds.register_pattern = "\\(\\w+\\)=\\([0-9a-fA-F]+\\)";	/* register_pattern */
+  sparclet_cmds.supply_register = sparclet_supply_register;	/* supply_register */
+  sparclet_cmds.load_routine = sparclet_load;	/* load_routine */
+  sparclet_cmds.load = NULL;	/* download command (srecs on console) */
+  sparclet_cmds.loadresp = NULL;	/* load response */
+  sparclet_cmds.prompt = "monitor>";	/* monitor command prompt */
   /* yikes!  gdb core dumps without this delimitor!! */
-  sparclet_cmds.line_term =   "\r";			/* end-of-command delimitor */
-  sparclet_cmds.cmd_end =   NULL;			/* optional command terminator */
-  sparclet_cmds.target =   &sparclet_ops;		/* target operations */
-  sparclet_cmds.stopbits =   SERIAL_1_STOPBITS;		/* number of stop bits */
-  sparclet_cmds.regnames =   sparclet_regnames;		/* registers names */
-  sparclet_cmds.magic =   MONITOR_OPS_MAGIC ;	/* magic */
+  sparclet_cmds.line_term = "\r";	/* end-of-command delimitor */
+  sparclet_cmds.cmd_end = NULL;	/* optional command terminator */
+  sparclet_cmds.target = &sparclet_ops;		/* target operations */
+  sparclet_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
+  sparclet_cmds.regnames = sparclet_regnames;	/* registers names */
+  sparclet_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
 };
 
 static void
@@ -270,27 +272,26 @@ void
 _initialize_sparclet ()
 {
   int i;
-  init_sparclet_cmds() ;
+  init_sparclet_cmds ();
 
   for (i = 0; i < NUM_REGS; i++)
     if (sparclet_regnames[i][0] == 'c' ||
 	sparclet_regnames[i][0] == 'a')
-      sparclet_regnames[i] = 0;		/* mon can't report c* or a* regs */
+      sparclet_regnames[i] = 0;	/* mon can't report c* or a* regs */
 
-  sparclet_regnames[0] = 0;		/* mon won't report %G0 */
+  sparclet_regnames[0] = 0;	/* mon won't report %G0 */
 
   init_monitor_ops (&sparclet_ops);
-  sparclet_ops.to_shortname = "sparclet"; /* for the target command */
+  sparclet_ops.to_shortname = "sparclet";	/* for the target command */
   sparclet_ops.to_longname = "SPARC Sparclet monitor";
   /* use SW breaks; target only supports 2 HW breakpoints */
-  sparclet_ops.to_insert_breakpoint = memory_insert_breakpoint; 
-  sparclet_ops.to_remove_breakpoint = memory_remove_breakpoint; 
+  sparclet_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  sparclet_ops.to_remove_breakpoint = memory_remove_breakpoint;
 
-  sparclet_ops.to_doc = 
+  sparclet_ops.to_doc =
     "Use a board running the Sparclet debug monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
 
   sparclet_ops.to_open = sparclet_open;
   add_target (&sparclet_ops);
 }
-

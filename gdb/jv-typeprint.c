@@ -1,21 +1,22 @@
 /* Support for printing Java types for GDB, the GNU debugger.
    Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #include "defs.h"
@@ -30,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Local functions */
 
-static void java_type_print_base PARAMS ((struct type *type, GDB_FILE *stream, int show, int level));
+static void java_type_print_base PARAMS ((struct type * type, GDB_FILE * stream, int show, int level));
 
 static void
 java_type_print_derivation_info (stream, type)
@@ -48,7 +49,7 @@ java_type_print_derivation_info (stream, type)
     {
       int kind;
 
-      kind = BASETYPE_VIA_VIRTUAL(type, i) ? 'I' : 'E';
+      kind = BASETYPE_VIA_VIRTUAL (type, i) ? 'I' : 'E';
 
       fputs_filtered (kind == prev ? ", "
 		      : kind == 'I' ? " implements "
@@ -149,7 +150,7 @@ java_type_print_base (type, stream, show, level)
       else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
 	{
 	  java_type_print_derivation_info (stream, type);
-	  
+
 	  fprintf_filtered (stream, "{\n");
 	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
@@ -200,7 +201,7 @@ java_type_print_base (type, stream, show, level)
 	  /* If there are both fields and methods, put a space between. */
 	  len = TYPE_NFN_FIELDS (type);
 	  if (len)
-	     fprintf_filtered (stream, "\n");
+	    fprintf_filtered (stream, "\n");
 
 	  /* Print out the methods */
 
@@ -226,7 +227,7 @@ java_type_print_base (type, stream, show, level)
 
 		  physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-		  is_full_physname_constructor = 
+		  is_full_physname_constructor =
 		    ((physname[0] == '_' && physname[1] == '_'
 		      && strchr ("0123456789Qt", physname[2]))
 		     || STREQN (physname, "__ct__", 6)
@@ -259,7 +260,7 @@ java_type_print_base (type, stream, show, level)
 		    {
 		      /* Keep GDB from crashing here.  */
 		      fprintf_filtered (stream, "<undefined type> %s;\n",
-			       TYPE_FN_FIELD_PHYSNAME (f, j));
+					TYPE_FN_FIELD_PHYSNAME (f, j));
 		      break;
 		    }
 		  else if (!is_constructor && !is_full_physname_constructor)
@@ -315,8 +316,8 @@ java_type_print_base (type, stream, show, level)
 	}
       break;
 
-      default:
-	c_type_print_base (type, stream, show, level);
+    default:
+      c_type_print_base (type, stream, show, level);
     }
 }
 
@@ -346,6 +347,6 @@ java_print_type (type, varstring, stream, show, level)
   /* For demangled function names, we have the arglist as part of the name,
      so don't print an additional pair of ()'s */
 
-  demangled_args = strchr(varstring, '(') != NULL;
+  demangled_args = strchr (varstring, '(') != NULL;
   c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
 }

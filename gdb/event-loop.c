@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA. */
 
 #include "defs.h"
 #include "top.h"
@@ -106,10 +107,10 @@ gdb_notifier;
 static struct
   {
     /* Pointer to first in handler list. */
-    async_signal_handler *first_handler;     
-    
+    async_signal_handler *first_handler;
+
     /* Pointer to last in handler list. */
-    async_signal_handler *last_handler;	     
+    async_signal_handler *last_handler;
   }
 sighandler_list;
 
@@ -294,7 +295,7 @@ gdb_do_one_event ()
 
 /* Start up the event loop. This is the entry point to the event loop
    from the command loop. */
-void 
+void
 start_event_loop ()
 {
   /* Loop until there is something to do. This is the entry point to
@@ -308,13 +309,13 @@ start_event_loop ()
      to listen to.  So we exit GDB. */
   return;
 }
-
 
+
 
 /* Wrapper function for create_file_handler, so that the caller
    doesn't have to know implementation details about the use of poll
    vs. select. */
-void 
+void
 add_file_handler (fd, proc, client_data)
      int fd;
      file_handler_func *proc;
@@ -378,10 +379,10 @@ create_file_handler (fd, mask, proc, client_data)
   if (gdb_notifier.poll_fds)
     gdb_notifier.poll_fds =
       (struct pollfd *) realloc (gdb_notifier.poll_fds,
-				 (gdb_notifier.num_fds) * sizeof (struct pollfd));
+			   (gdb_notifier.num_fds) * sizeof (struct pollfd));
   else
-     gdb_notifier.poll_fds = 
-       (struct pollfd *) xmalloc (sizeof (struct pollfd));
+    gdb_notifier.poll_fds =
+      (struct pollfd *) xmalloc (sizeof (struct pollfd));
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
   (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
@@ -733,7 +734,7 @@ invoke_async_signal_handler ()
 
   while (1)
     {
-      for (async_handler_ptr = sighandler_list.first_handler; 
+      for (async_handler_ptr = sighandler_list.first_handler;
 	   async_handler_ptr != NULL;
 	   async_handler_ptr = async_handler_ptr->next_handler)
 	{

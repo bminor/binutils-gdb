@@ -3,21 +3,22 @@
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* The mn10200 is little endian.  */
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
@@ -105,7 +106,7 @@ extern void mn10200_init_extra_frame_info PARAMS ((struct frame_info *));
 #define INIT_FRAME_PC(x,y)
 
 extern void mn10200_frame_find_saved_regs PARAMS ((struct frame_info *,
-						   struct frame_saved_regs *));
+						struct frame_saved_regs *));
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
 
 extern CORE_ADDR mn10200_frame_chain PARAMS ((struct frame_info *));
@@ -113,7 +114,7 @@ extern CORE_ADDR mn10200_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR mn10200_find_callers_reg PARAMS ((struct frame_info *, int));
-extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10200_frame_saved_pc PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FI) (mn10200_frame_saved_pc (FI))
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -191,8 +192,8 @@ extern CORE_ADDR mn10200_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 extern CORE_ADDR
-mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-			     unsigned char, CORE_ADDR));
+  mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
+				  unsigned char, CORE_ADDR));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

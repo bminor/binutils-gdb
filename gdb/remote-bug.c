@@ -4,21 +4,22 @@
    Copyright 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by K. Richard Pixley.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -38,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "remote-utils.h"
 
 
-extern int sleep();
+extern int sleep ();
 
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
@@ -47,15 +48,15 @@ extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
-static int bug_clear_breakpoints PARAMS((void));
+static int bug_clear_breakpoints PARAMS ((void));
 
-static int bug_read_memory PARAMS((CORE_ADDR memaddr,
-					    unsigned char *myaddr,
-					    int len));
+static int bug_read_memory PARAMS ((CORE_ADDR memaddr,
+				    unsigned char *myaddr,
+				    int len));
 
-static int bug_write_memory PARAMS((CORE_ADDR memaddr,
-					     unsigned char *myaddr,
-					     int len));
+static int bug_write_memory PARAMS ((CORE_ADDR memaddr,
+				     unsigned char *myaddr,
+				     int len));
 
 /* This variable is somewhat arbitrary.  It's here so that it can be
    set from within a running gdb.  */
@@ -122,7 +123,7 @@ bug_load (args, fromtty)
 
   sr_check_open ();
 
-  dcache_flush (gr_get_dcache());
+  dcache_flush (gr_get_dcache ());
   inferior_pid = 0;
   abfd = bfd_openr (args, 0);
   if (!abfd)
@@ -200,17 +201,19 @@ get_word (p)
 }
 #endif
 
-static struct gr_settings bug_settings = {
-  NULL,	/* dcache */
-  "Bug>", /* prompt */
-  &bug_ops, /* ops */
-  bug_clear_breakpoints, /* clear_all_breakpoints */
-  bug_read_memory, /* readfunc */
-  bug_write_memory, /* writefunc */
-  gr_generic_checkin, /* checkin */
+static struct gr_settings bug_settings =
+{
+  NULL,				/* dcache */
+  "Bug>",			/* prompt */
+  &bug_ops,			/* ops */
+  bug_clear_breakpoints,	/* clear_all_breakpoints */
+  bug_read_memory,		/* readfunc */
+  bug_write_memory,		/* writefunc */
+  gr_generic_checkin,		/* checkin */
 };
 
-static char *cpu_check_strings[] = {
+static char *cpu_check_strings[] =
+{
   "=",
   "Invalid Register",
 };
@@ -221,23 +224,23 @@ bug_open (args, from_tty)
      int from_tty;
 {
   if (args == NULL)
-      args = "";
+    args = "";
 
-  gr_open(args, from_tty, &bug_settings);
+  gr_open (args, from_tty, &bug_settings);
   /* decide *now* whether we are on an 88100 or an 88110 */
-  sr_write_cr("rs cr06");
-  sr_expect("rs cr06");
+  sr_write_cr ("rs cr06");
+  sr_expect ("rs cr06");
 
-  switch (gr_multi_scan(cpu_check_strings, 0))
+  switch (gr_multi_scan (cpu_check_strings, 0))
     {
-    case 0: /* this is an m88100 */
+    case 0:			/* this is an m88100 */
       target_is_m88110 = 0;
       break;
-    case 1: /* this is an m88110 */
+    case 1:			/* this is an m88110 */
       target_is_m88110 = 1;
       break;
     default:
-      abort();
+      abort ();
     }
 }
 
@@ -248,19 +251,19 @@ bug_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
-  dcache_flush (gr_get_dcache());
+  dcache_flush (gr_get_dcache ());
 
   if (step)
     {
-      sr_write_cr("t");
+      sr_write_cr ("t");
 
       /* Force the next bug_wait to return a trap.  Not doing anything
-       about I/O from the target means that the user has to type
-       "continue" to see any.  FIXME, this should be fixed.  */
+         about I/O from the target means that the user has to type
+         "continue" to see any.  FIXME, this should be fixed.  */
       need_artificial_trap = 1;
     }
   else
-      sr_write_cr ("g");
+    sr_write_cr ("g");
 
   return;
 }
@@ -268,10 +271,11 @@ bug_resume (pid, step, sig)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-static char *wait_strings[] = {
+static char *wait_strings[] =
+{
   "At Breakpoint",
   "Exception: Data Access Fault (Local Bus Timeout)",
-  "\r8??\?-Bug>",	/* The '\?' avoids creating a trigraph */
+  "\r8??\?-Bug>",		/* The '\?' avoids creating a trigraph */
   "\r197-Bug>",
   NULL,
 };
@@ -281,7 +285,7 @@ bug_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
-  int old_timeout = sr_get_timeout();
+  int old_timeout = sr_get_timeout ();
   int old_immediate_quit = immediate_quit;
 
   status->kind = TARGET_WAITKIND_EXITED;
@@ -291,31 +295,31 @@ bug_wait (pid, status)
      back out as stdout.  */
   if (need_artificial_trap == 0)
     {
-      sr_expect("Effective address: ");
-      (void) sr_get_hex_word();
+      sr_expect ("Effective address: ");
+      (void) sr_get_hex_word ();
       sr_expect ("\r\n");
     }
 
-  sr_set_timeout(-1); /* Don't time out -- user program is running. */
-  immediate_quit = 1; /* Helps ability to QUIT */
+  sr_set_timeout (-1);		/* Don't time out -- user program is running. */
+  immediate_quit = 1;		/* Helps ability to QUIT */
 
-  switch (gr_multi_scan(wait_strings, need_artificial_trap == 0))
+  switch (gr_multi_scan (wait_strings, need_artificial_trap == 0))
     {
-    case 0: /* breakpoint case */
+    case 0:			/* breakpoint case */
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = TARGET_SIGNAL_TRAP;
       /* user output from the target can be discarded here. (?) */
-      gr_expect_prompt();
+      gr_expect_prompt ();
       break;
 
-    case 1: /* bus error */
+    case 1:			/* bus error */
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = TARGET_SIGNAL_BUS;
       /* user output from the target can be discarded here. (?) */
-      gr_expect_prompt();
+      gr_expect_prompt ();
       break;
 
-    case 2: /* normal case */
+    case 2:			/* normal case */
     case 3:
       if (need_artificial_trap != 0)
 	{
@@ -333,14 +337,14 @@ bug_wait (pid, status)
 	  break;
 	}
 
-    case -1: /* trouble */
+    case -1:			/* trouble */
     default:
       fprintf_filtered (gdb_stderr,
 			"Trouble reading target during wait\n");
       break;
     }
 
-  sr_set_timeout(old_timeout);
+  sr_set_timeout (old_timeout);
   immediate_quit = old_immediate_quit;
   return 0;
 }
@@ -353,21 +357,22 @@ static char *
 get_reg_name (regno)
      int regno;
 {
-  static char *rn[] = {
+  static char *rn[] =
+  {
     "r00", "r01", "r02", "r03", "r04", "r05", "r06", "r07",
     "r08", "r09", "r10", "r11", "r12", "r13", "r14", "r15",
     "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
     "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
 
-    /* these get confusing because we omit a few and switch some ordering around. */
+  /* these get confusing because we omit a few and switch some ordering around. */
 
-    "cr01",  /* 32 = psr */
-    "fcr62", /* 33 = fpsr*/
-    "fcr63", /* 34 = fpcr */
+    "cr01",			/* 32 = psr */
+    "fcr62",			/* 33 = fpsr */
+    "fcr63",			/* 34 = fpcr */
     "ip",			/* this is something of a cheat. */
   /* 35 = sxip */
-    "cr05", /* 36 = snip */
-    "cr06", /* 37 = sfip */
+    "cr05",			/* 36 = snip */
+    "cr06",			/* 37 = sfip */
 
     "x00", "x01", "x02", "x03", "x04", "x05", "x06", "x07",
     "x08", "x09", "x10", "x11", "x12", "x13", "x14", "x15",
@@ -378,7 +383,7 @@ get_reg_name (regno)
   return rn[regno];
 }
 
-#if 0 /* not currently used */
+#if 0				/* not currently used */
 /* Read from remote while the input matches STRING.  Return zero on
    success, -1 on failure.  */
 
@@ -390,16 +395,16 @@ bug_scan (s)
 
   while (*s)
     {
-      c = sr_readchar();
+      c = sr_readchar ();
       if (c != *s++)
 	{
-	  fflush(stdout);
-	  printf("\nNext character is '%c' - %d and s is \"%s\".\n", c, c, --s);
-	  return(-1);
+	  fflush (stdout);
+	  printf ("\nNext character is '%c' - %d and s is \"%s\".\n", c, c, --s);
+	  return (-1);
 	}
     }
 
-  return(0);
+  return (0);
 }
 #endif /* never */
 
@@ -412,52 +417,52 @@ bug_srec_write_cr (s)
   if (srec_echo_pace)
     for (p = s; *p; ++p)
       {
-	if (sr_get_debug() > 0)
+	if (sr_get_debug () > 0)
 	  printf ("%c", *p);
 
 	do
-	  SERIAL_WRITE(sr_get_desc(), p, 1);
-	while (sr_pollchar() != *p);
+	  SERIAL_WRITE (sr_get_desc (), p, 1);
+	while (sr_pollchar () != *p);
       }
   else
-    {  
+    {
       sr_write_cr (s);
 /*       return(bug_scan (s) || bug_scan ("\n")); */
     }
 
-  return(0);
+  return (0);
 }
 
 /* Store register REGNO, or all if REGNO == -1. */
 
 static void
-bug_fetch_register(regno)
+bug_fetch_register (regno)
      int regno;
 {
-  sr_check_open();
+  sr_check_open ();
 
   if (regno == -1)
     {
       int i;
 
       for (i = 0; i < NUM_REGS; ++i)
-	bug_fetch_register(i);
+	bug_fetch_register (i);
     }
   else if (target_is_m88110 && regno == SFIP_REGNUM)
     {
       /* m88110 has no sfip. */
       long l = 0;
-      supply_register(regno, (char *) &l);
+      supply_register (regno, (char *) &l);
     }
   else if (regno < XFP_REGNUM)
     {
       char buffer[MAX_REGISTER_RAW_SIZE];
 
       sr_write ("rs ", 3);
-      sr_write_cr (get_reg_name(regno));
+      sr_write_cr (get_reg_name (regno));
       sr_expect ("=");
       store_unsigned_integer (buffer, REGISTER_RAW_SIZE (regno),
-			      sr_get_hex_word());
+			      sr_get_hex_word ());
       gr_expect_prompt ();
       supply_register (regno, buffer);
     }
@@ -467,41 +472,41 @@ bug_fetch_register(regno)
       long p;
       unsigned char fpreg_buf[10];
 
-      sr_write("rs ", 3);
-      sr_write(get_reg_name(regno), strlen(get_reg_name(regno)));
-      sr_write_cr(";d");
-      sr_expect("rs");
-      sr_expect(get_reg_name(regno));
-      sr_expect(";d");
-      sr_expect("=");
+      sr_write ("rs ", 3);
+      sr_write (get_reg_name (regno), strlen (get_reg_name (regno)));
+      sr_write_cr (";d");
+      sr_expect ("rs");
+      sr_expect (get_reg_name (regno));
+      sr_expect (";d");
+      sr_expect ("=");
 
       /* sign */
-      p = sr_get_hex_digit(1);
+      p = sr_get_hex_digit (1);
       fpreg_buf[0] = p << 7;
 
       /* exponent */
-      sr_expect("_");
-      p = sr_get_hex_digit(1);
+      sr_expect ("_");
+      p = sr_get_hex_digit (1);
       fpreg_buf[0] += (p << 4);
-      fpreg_buf[0] += sr_get_hex_digit(1);
+      fpreg_buf[0] += sr_get_hex_digit (1);
 
-      fpreg_buf[1] = sr_get_hex_digit(1) << 4;
+      fpreg_buf[1] = sr_get_hex_digit (1) << 4;
 
       /* fraction */
-      sr_expect("_");
-      fpreg_buf[1] += sr_get_hex_digit(1);
+      sr_expect ("_");
+      fpreg_buf[1] += sr_get_hex_digit (1);
 
-      fpreg_buf[2] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      fpreg_buf[3] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      fpreg_buf[4] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      fpreg_buf[5] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      fpreg_buf[6] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
-      fpreg_buf[7] = (sr_get_hex_digit(1) << 4) + sr_get_hex_digit(1);
+      fpreg_buf[2] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
+      fpreg_buf[3] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
+      fpreg_buf[4] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
+      fpreg_buf[5] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
+      fpreg_buf[6] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
+      fpreg_buf[7] = (sr_get_hex_digit (1) << 4) + sr_get_hex_digit (1);
       fpreg_buf[8] = 0;
       fpreg_buf[9] = 0;
 
-      gr_expect_prompt();
-      supply_register(regno, fpreg_buf);
+      gr_expect_prompt ();
+      supply_register (regno, fpreg_buf);
     }
 
   return;
@@ -514,51 +519,51 @@ bug_store_register (regno)
      int regno;
 {
   char buffer[1024];
-  sr_check_open();
+  sr_check_open ();
 
   if (regno == -1)
     {
       int i;
 
       for (i = 0; i < NUM_REGS; ++i)
-	bug_store_register(i);
+	bug_store_register (i);
     }
   else
     {
       char *regname;
 
-      regname = get_reg_name(regno);
+      regname = get_reg_name (regno);
 
       if (target_is_m88110 && regno == SFIP_REGNUM)
 	return;
       else if (regno < XFP_REGNUM)
-	sprintf(buffer, "rs %s %08x",
-		regname,
-		read_register(regno));
+	sprintf (buffer, "rs %s %08x",
+		 regname,
+		 read_register (regno));
       else
 	{
 	  unsigned char *fpreg_buf =
-	    (unsigned char *)&registers[REGISTER_BYTE(regno)];
-	  
-	  sprintf(buffer, "rs %s %1x_%02x%1x_%1x%02x%02x%02x%02x%02x%02x;d",
-		  regname,
-		  /* sign */
-		  (fpreg_buf[0] >> 7) & 0xf,
-		  /* exponent */
-		  fpreg_buf[0] & 0x7f,
-		  (fpreg_buf[1] >> 8) & 0xf,
-		  /* fraction */
-		  fpreg_buf[1] & 0xf,
-		  fpreg_buf[2],
-		  fpreg_buf[3],
-		  fpreg_buf[4],
-		  fpreg_buf[5],
-		  fpreg_buf[6],
-		  fpreg_buf[7]);
+	  (unsigned char *) &registers[REGISTER_BYTE (regno)];
+
+	  sprintf (buffer, "rs %s %1x_%02x%1x_%1x%02x%02x%02x%02x%02x%02x;d",
+		   regname,
+	  /* sign */
+		   (fpreg_buf[0] >> 7) & 0xf,
+	  /* exponent */
+		   fpreg_buf[0] & 0x7f,
+		   (fpreg_buf[1] >> 8) & 0xf,
+	  /* fraction */
+		   fpreg_buf[1] & 0xf,
+		   fpreg_buf[2],
+		   fpreg_buf[3],
+		   fpreg_buf[4],
+		   fpreg_buf[5],
+		   fpreg_buf[6],
+		   fpreg_buf[7]);
 	}
 
-      sr_write_cr(buffer);
-      gr_expect_prompt();
+      sr_write_cr (buffer);
+      gr_expect_prompt ();
     }
 
   return;
@@ -644,7 +649,7 @@ bug_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-start_load()
+start_load ()
 {
   char *command;
 
@@ -670,7 +675,8 @@ start_load()
    data records each containing srec_bytes, and an S7 termination
    record.  */
 
-static char *srecord_strings[] = {
+static char *srecord_strings[] =
+{
   "S-RECORD",
   "-Bug>",
   NULL,
@@ -695,22 +701,22 @@ bug_write_memory (memaddr, myaddr, len)
       done = 0;
 
       if (retries > srec_max_retries)
-	return(-1);
+	return (-1);
 
       if (retries > 0)
 	{
-	  if (sr_get_debug() > 0)
-	    printf("\n<retrying...>\n");
+	  if (sr_get_debug () > 0)
+	    printf ("\n<retrying...>\n");
 
 	  /* This gr_expect_prompt call is extremely important.  Without
 	     it, we will tend to resend our packet so fast that it
 	     will arrive before the bug monitor is ready to receive
 	     it.  This would lead to a very ugly resend loop.  */
 
-	  gr_expect_prompt();
+	  gr_expect_prompt ();
 	}
 
-      start_load();
+      start_load ();
 
       while (done < len)
 	{
@@ -730,7 +736,7 @@ bug_write_memory (memaddr, myaddr, len)
 
 	  checksum += (thisgo + 4 + 1
 		       + (address & 0xff)
-		       + ((address >>  8) & 0xff)
+		       + ((address >> 8) & 0xff)
 		       + ((address >> 16) & 0xff)
 		       + ((address >> 24) & 0xff));
 
@@ -744,8 +750,8 @@ bug_write_memory (memaddr, myaddr, len)
 	  if (srec_noise > 0)
 	    {
 	      /* FIXME-NOW: insert a deliberate error every now and then.
-		 This is intended for testing/debugging the error handling
-		 stuff.  */
+	         This is intended for testing/debugging the error handling
+	         stuff.  */
 	      static int counter = 0;
 	      if (++counter > srec_noise)
 		{
@@ -754,11 +760,11 @@ bug_write_memory (memaddr, myaddr, len)
 		}
 	    }
 
-	  sprintf(buf, "%02X", ~checksum & 0xff);
+	  sprintf (buf, "%02X", ~checksum & 0xff);
 	  bug_srec_write_cr (buffer);
 
 	  if (srec_sleep != 0)
-	    sleep(srec_sleep);
+	    sleep (srec_sleep);
 
 	  /* This pollchar is probably redundant to the gr_multi_scan
 	     below.  Trouble is, we can't be sure when or where an
@@ -766,18 +772,18 @@ bug_write_memory (memaddr, myaddr, len)
 	     full speed from a typical sun4, error messages tend to
 	     appear to arrive only *after* the s7 record.   */
 
-	  if ((x = sr_pollchar()) != 0)
+	  if ((x = sr_pollchar ()) != 0)
 	    {
-	      if (sr_get_debug() > 0)
-		printf("\n<retrying...>\n");
+	      if (sr_get_debug () > 0)
+		printf ("\n<retrying...>\n");
 
 	      ++retries;
 
 	      /* flush any remaining input and verify that we are back
-		 at the prompt level. */
-	      gr_expect_prompt();
+	         at the prompt level. */
+	      gr_expect_prompt ();
 	      /* start all over again. */
-	      start_load();
+	      start_load ();
 	      done = 0;
 	      continue;
 	    }
@@ -785,19 +791,20 @@ bug_write_memory (memaddr, myaddr, len)
 	  done += thisgo;
 	}
 
-      bug_srec_write_cr("S7060000000000F9");
+      bug_srec_write_cr ("S7060000000000F9");
       ++retries;
 
       /* Having finished the load, we need to figure out whether we
-	 had any errors.  */
-    } while (gr_multi_scan(srecord_strings, 0) == 0);;
+         had any errors.  */
+    }
+  while (gr_multi_scan (srecord_strings, 0) == 0);;
 
-  return(0);
+  return (0);
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.  Returns errno value.
- * sb/sh instructions don't work on unaligned addresses, when TU=1.
+   * sb/sh instructions don't work on unaligned addresses, when TU=1.
  */
 
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
@@ -817,24 +824,24 @@ bug_read_memory (memaddr, myaddr, len)
   unsigned int inaddr;
   unsigned int checksum;
 
-  sprintf(request, "du 0 %x:&%d", memaddr, len);
-  sr_write_cr(request);
+  sprintf (request, "du 0 %x:&%d", memaddr, len);
+  sr_write_cr (request);
 
-  p = buffer = alloca(len);
+  p = buffer = alloca (len);
 
   /* scan up through the header */
-  sr_expect("S0030000FC");
+  sr_expect ("S0030000FC");
 
   while (p < buffer + len)
     {
       /* scan off any white space. */
-      while (sr_readchar() != 'S') ;;
+      while (sr_readchar () != 'S');;
 
       /* what kind of s-rec? */
-      type = sr_readchar();
+      type = sr_readchar ();
 
       /* scan record size */
-      sr_get_hex_byte(&size);
+      sr_get_hex_byte (&size);
       checksum = size;
       --size;
       inaddr = 0;
@@ -847,23 +854,23 @@ bug_read_memory (memaddr, myaddr, len)
 	  goto done;
 
 	case '3':
-	  sr_get_hex_byte(&c);
+	  sr_get_hex_byte (&c);
 	  inaddr = (inaddr << 8) + c;
 	  checksum += c;
 	  --size;
 	  /* intentional fall through */
 	case '2':
-	  sr_get_hex_byte(&c);
+	  sr_get_hex_byte (&c);
 	  inaddr = (inaddr << 8) + c;
 	  checksum += c;
 	  --size;
 	  /* intentional fall through */
 	case '1':
-	  sr_get_hex_byte(&c);
+	  sr_get_hex_byte (&c);
 	  inaddr = (inaddr << 8) + c;
 	  checksum += c;
 	  --size;
-	  sr_get_hex_byte(&c);
+	  sr_get_hex_byte (&c);
 	  inaddr = (inaddr << 8) + c;
 	  checksum += c;
 	  --size;
@@ -871,34 +878,34 @@ bug_read_memory (memaddr, myaddr, len)
 
 	default:
 	  /* bonk */
-	  error("reading s-records.");
+	  error ("reading s-records.");
 	}
 
       if (inaddr < memaddr
 	  || (memaddr + len) < (inaddr + size))
-	error("srec out of memory range.");
+	error ("srec out of memory range.");
 
       if (p != buffer + inaddr - memaddr)
-	error("srec out of sequence.");
+	error ("srec out of sequence.");
 
       for (; size; --size, ++p)
 	{
-	  sr_get_hex_byte(p);
+	  sr_get_hex_byte (p);
 	  checksum += *p;
 	}
 
-      sr_get_hex_byte(&c);
+      sr_get_hex_byte (&c);
       if (c != (~checksum & 0xff))
-	error("bad s-rec checksum");
+	error ("bad s-rec checksum");
     }
 
- done:
-  gr_expect_prompt();
+done:
+  gr_expect_prompt ();
   if (p != buffer + len)
-    return(1);
+    return (1);
 
-  memcpy(myaddr, buffer, len);
-  return(0);
+  memcpy (myaddr, buffer, len);
+  return (0);
 }
 
 #define MAX_BREAKS	16
@@ -918,13 +925,13 @@ bug_insert_breakpoint (addr, save)
       sprintf (buffer, "br %x", addr);
       sr_write_cr (buffer);
       gr_expect_prompt ();
-      return(0);
+      return (0);
     }
   else
     {
       fprintf_filtered (gdb_stderr,
 		      "Too many break points, break point not installed\n");
-      return(1);
+      return (1);
     }
 
 }
@@ -951,90 +958,91 @@ static int
 bug_clear_breakpoints ()
 {
 
-  if (sr_is_open())
+  if (sr_is_open ())
     {
       sr_write_cr ("nobr");
-      sr_expect("nobr");
+      sr_expect ("nobr");
       gr_expect_prompt ();
     }
   num_brkpts = 0;
-  return(0);
+  return (0);
 }
 
-struct target_ops bug_ops ;
+struct target_ops bug_ops;
 
-static void 
-init_bug_ops(void)
+static void
+init_bug_ops (void)
 {
-  bug_ops.to_shortname =   "bug"; "Remote BUG monitor",
-				    bug_ops.to_longname =   "Use the mvme187 board running the BUG monitor connected by a serial line.";
-  bug_ops.to_doc =   " ";
-  bug_ops.to_open =   bug_open;
-  bug_ops.to_close =   gr_close;
-  bug_ops.to_attach =   0;
+  bug_ops.to_shortname = "bug";
+  "Remote BUG monitor",
+    bug_ops.to_longname = "Use the mvme187 board running the BUG monitor connected by a serial line.";
+  bug_ops.to_doc = " ";
+  bug_ops.to_open = bug_open;
+  bug_ops.to_close = gr_close;
+  bug_ops.to_attach = 0;
   bug_ops.to_post_attach = NULL;
   bug_ops.to_require_attach = NULL;
-  bug_ops.to_detach =   gr_detach;
+  bug_ops.to_detach = gr_detach;
   bug_ops.to_require_detach = NULL;
-  bug_ops.to_resume =   bug_resume;
-  bug_ops.to_wait  =   bug_wait;
+  bug_ops.to_resume = bug_resume;
+  bug_ops.to_wait = bug_wait;
   bug_ops.to_post_wait = NULL;
-  bug_ops.to_fetch_registers  =   bug_fetch_register;
-  bug_ops.to_store_registers  =   bug_store_register;
-  bug_ops.to_prepare_to_store =   gr_prepare_to_store;
-  bug_ops.to_xfer_memory  =   bug_xfer_memory;
-  bug_ops.to_files_info  =   gr_files_info;
-  bug_ops.to_insert_breakpoint =   bug_insert_breakpoint;
-  bug_ops.to_remove_breakpoint =   bug_remove_breakpoint;
-  bug_ops.to_terminal_init  =   0;
-  bug_ops.to_terminal_inferior =   0;
-  bug_ops.to_terminal_ours_for_output =   0;
-  bug_ops.to_terminal_ours  =   0;
-  bug_ops.to_terminal_info  =   0;		
-  bug_ops.to_kill  =   gr_kill;			
-  bug_ops.to_load  =   bug_load;
-  bug_ops.to_lookup_symbol =   0;			
-  bug_ops.to_create_inferior =   gr_create_inferior;	
+  bug_ops.to_fetch_registers = bug_fetch_register;
+  bug_ops.to_store_registers = bug_store_register;
+  bug_ops.to_prepare_to_store = gr_prepare_to_store;
+  bug_ops.to_xfer_memory = bug_xfer_memory;
+  bug_ops.to_files_info = gr_files_info;
+  bug_ops.to_insert_breakpoint = bug_insert_breakpoint;
+  bug_ops.to_remove_breakpoint = bug_remove_breakpoint;
+  bug_ops.to_terminal_init = 0;
+  bug_ops.to_terminal_inferior = 0;
+  bug_ops.to_terminal_ours_for_output = 0;
+  bug_ops.to_terminal_ours = 0;
+  bug_ops.to_terminal_info = 0;
+  bug_ops.to_kill = gr_kill;
+  bug_ops.to_load = bug_load;
+  bug_ops.to_lookup_symbol = 0;
+  bug_ops.to_create_inferior = gr_create_inferior;
   bug_ops.to_post_startup_inferior = NULL;
   bug_ops.to_acknowledge_created_inferior = NULL;
-  bug_ops.to_clone_and_follow_inferior = NULL;          
-  bug_ops.to_post_follow_inferior_by_clone = NULL;  
+  bug_ops.to_clone_and_follow_inferior = NULL;
+  bug_ops.to_post_follow_inferior_by_clone = NULL;
   bug_ops.to_insert_fork_catchpoint = NULL;
   bug_ops.to_remove_fork_catchpoint = NULL;
   bug_ops.to_insert_vfork_catchpoint = NULL;
-  bug_ops.to_remove_vfork_catchpoint = NULL;                      
+  bug_ops.to_remove_vfork_catchpoint = NULL;
   bug_ops.to_has_forked = NULL;
-  bug_ops.to_has_vforked = NULL; 
-  bug_ops.to_can_follow_vfork_prior_to_exec = NULL;                       
+  bug_ops.to_has_vforked = NULL;
+  bug_ops.to_can_follow_vfork_prior_to_exec = NULL;
   bug_ops.to_post_follow_vfork = NULL;
   bug_ops.to_insert_exec_catchpoint = NULL;
   bug_ops.to_remove_exec_catchpoint = NULL;
   bug_ops.to_has_execd = NULL;
   bug_ops.to_reported_exec_events_per_exec_call = NULL;
   bug_ops.to_has_exited = NULL;
-  bug_ops.to_mourn_inferior =   gr_mourn;		
-  bug_ops.to_can_run  =   0;				
-  bug_ops.to_notice_signals =   0;			
-  bug_ops.to_thread_alive  =  0 ;
-  bug_ops.to_stop  =   0;
+  bug_ops.to_mourn_inferior = gr_mourn;
+  bug_ops.to_can_run = 0;
+  bug_ops.to_notice_signals = 0;
+  bug_ops.to_thread_alive = 0;
+  bug_ops.to_stop = 0;
   bug_ops.to_pid_to_exec_file = NULL;
   bug_ops.to_core_file_to_sym_file = NULL;
-  bug_ops.to_stratum =   process_stratum ;
-  bug_ops.DONT_USE =   0;
-  bug_ops.to_has_all_memory =   1;
-  bug_ops.to_has_memory =   1;
-  bug_ops.to_has_stack =   1;	
-  bug_ops.to_has_registers =   0;
-  bug_ops.to_has_execution =   0;			
-  bug_ops.to_sections =   0 ;
-  bug_ops.to_sections_end = 0 ;
-  bug_ops.to_magic = OPS_MAGIC;			/* Always the last thing */
-} /* init_bug_ops */
+  bug_ops.to_stratum = process_stratum;
+  bug_ops.DONT_USE = 0;
+  bug_ops.to_has_all_memory = 1;
+  bug_ops.to_has_memory = 1;
+  bug_ops.to_has_stack = 1;
+  bug_ops.to_has_registers = 0;
+  bug_ops.to_has_execution = 0;
+  bug_ops.to_sections = 0;
+  bug_ops.to_sections_end = 0;
+  bug_ops.to_magic = OPS_MAGIC;	/* Always the last thing */
+}				/* init_bug_ops */
 
 void
 _initialize_remote_bug ()
 {
-  init_bug_ops() ;
+  init_bug_ops ();
   add_target (&bug_ops);
 
   add_show_from_set
@@ -1093,7 +1101,7 @@ This affects the communication protocol with the remote target.",
 		  "\
 Set echo-verification.\n\
 When on, use verification by echo when downloading S-records.  This is\n\
-much slower, but generally more reliable.", 
+much slower, but generally more reliable.",
 		  &setlist),
      &showlist);
 }

@@ -3,21 +3,22 @@
    Contributed by the State University of New York at Buffalo, by the
    Distributed Computer Systems Lab, Department of Computer Science, 1991.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -40,24 +41,24 @@ tahoe_skip_prologue (pc)
 {
   register int op = (unsigned char) read_memory_integer (pc, 1);
   if (op == 0x11)
-    pc += 2;  /* skip brb */
+    pc += 2;			/* skip brb */
   if (op == 0x13)
-    pc += 3;  /* skip brw */
+    pc += 3;			/* skip brw */
   if (op == 0x2c
-      && ((unsigned char) read_memory_integer (pc+2, 1)) == 0x5e)
-    pc += 3;  /* skip subl2 */
+      && ((unsigned char) read_memory_integer (pc + 2, 1)) == 0x5e)
+    pc += 3;			/* skip subl2 */
   if (op == 0xe9
-      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xae
-      && ((unsigned char) read_memory_integer(pc+3, 1)) == 0x5e)
-    pc += 4;  /* skip movab */
+      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xae
+      && ((unsigned char) read_memory_integer (pc + 3, 1)) == 0x5e)
+    pc += 4;			/* skip movab */
   if (op == 0xe9
-      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xce
-      && ((unsigned char) read_memory_integer(pc+4, 1)) == 0x5e)
-    pc += 5;  /* skip movab */
+      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xce
+      && ((unsigned char) read_memory_integer (pc + 4, 1)) == 0x5e)
+    pc += 5;			/* skip movab */
   if (op == 0xe9
-      && ((unsigned char) read_memory_integer (pc+1, 1)) == 0xee
-      && ((unsigned char) read_memory_integer(pc+6, 1)) == 0x5e)
-    pc += 7;  /* skip movab */
+      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xee
+      && ((unsigned char) read_memory_integer (pc + 6, 1)) == 0x5e)
+    pc += 7;			/* skip movab */
   return pc;
 }
 
@@ -68,7 +69,7 @@ int
 tahoe_frame_num_args (fi)
      struct frame_info *fi;
 {
-  return (((0xffff & read_memory_integer(((fi)->frame-4),4)) - 4) >> 2);
+  return (((0xffff & read_memory_integer (((fi)->frame - 4), 4)) - 4) >> 2);
 }
 
 /* Print the Tahoe instruction at address MEMADDR in debugged memory,
@@ -88,7 +89,7 @@ tahoe_print_insn (memaddr, stream)
 
   for (i = 0; i < NOPCODES; i++)
     if (votstrs[i].detail.code == buffer[0]
-	|| votstrs[i].detail.code == *(unsigned short *)buffer)
+	|| votstrs[i].detail.code == *(unsigned short *) buffer)
       break;
 
   /* Handle undefined instructions.  */
@@ -152,7 +153,7 @@ print_insn_arg (d, p, addr, stream)
       case 3:			/* Literal (short immediate byte) mode */
 	if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
 	  {
-	    *(int *)&floatlitbuf = 0x4000 + ((p[-1] & 0x3f) << 4);
+	    *(int *) &floatlitbuf = 0x4000 + ((p[-1] & 0x3f) << 4);
 	    fprintf_unfiltered (stream, "$%f", floatlitbuf);
 	  }
 	else
@@ -174,13 +175,13 @@ print_insn_arg (d, p, addr, stream)
 	fprintf_unfiltered (stream, "(%s)", REGISTER_NAME (regnum));
 	break;
 
-      case 9:	                /* Absolute Address & Autoincrement deferred */
+      case 9:			/* Absolute Address & Autoincrement deferred */
 	fputc_unfiltered ('*', stream);
 	if (regnum == PC_REGNUM)
 	  {
 	    temp1 = *p;
 	    temp1 <<= 8;
-	    temp1 |= *(p +1);
+	    temp1 |= *(p + 1);
 
 	    fputc_unfiltered ('$', stream);
 	    print_address (temp1, stream);
@@ -188,38 +189,38 @@ print_insn_arg (d, p, addr, stream)
 	    break;
 	  }
       case 8:			/*Immediate & Autoincrement SP */
-        if (regnum == 8)         /*88 is Immediate Byte Mode*/
+	if (regnum == 8)	/*88 is Immediate Byte Mode */
 	  fprintf_unfiltered (stream, "$%d", *p++);
 
-	else if (regnum == 9)        /*89 is Immediate Word Mode*/
+	else if (regnum == 9)	/*89 is Immediate Word Mode */
 	  {
 	    temp1 = *p;
-	    temp1 <<= 8; 
-	    temp1 |= *(p +1);
+	    temp1 <<= 8;
+	    temp1 |= *(p + 1);
 	    fprintf_unfiltered (stream, "$%d", temp1);
 	    p += 2;
-	  }  
+	  }
 
-	else if (regnum == PC_REGNUM)    /*8F is Immediate Long Mode*/
+	else if (regnum == PC_REGNUM)	/*8F is Immediate Long Mode */
 	  {
 	    temp1 = *p;
-	    temp1 <<=8;
-	    temp1 |= *(p +1);
-	    temp1 <<=8;
-	    temp1 |= *(p +2);
 	    temp1 <<= 8;
-	    temp1 |= *(p +3);
+	    temp1 |= *(p + 1);
+	    temp1 <<= 8;
+	    temp1 |= *(p + 2);
+	    temp1 <<= 8;
+	    temp1 |= *(p + 3);
 	    fprintf_unfiltered (stream, "$%d", temp1);
 	    p += 4;
 	  }
 
-	else                            /*8E is Autoincrement SP Mode*/
-	      fprintf_unfiltered (stream, "(%s)+", REGISTER_NAME (regnum));
+	else			/*8E is Autoincrement SP Mode */
+	  fprintf_unfiltered (stream, "(%s)+", REGISTER_NAME (regnum));
 	break;
 
-      case 11:			/* Register + Byte Displacement Deferred Mode*/
+      case 11:			/* Register + Byte Displacement Deferred Mode */
 	fputc_unfiltered ('*', stream);
-      case 10:			/* Register + Byte Displacement Mode*/
+      case 10:			/* Register + Byte Displacement Mode */
 	if (regnum == PC_REGNUM)
 	  print_address (addr + *p + 2, stream);
 	else
@@ -227,12 +228,12 @@ print_insn_arg (d, p, addr, stream)
 	p += 1;
 	break;
 
-      case 13:			/* Register + Word Displacement Deferred Mode*/
+      case 13:			/* Register + Word Displacement Deferred Mode */
 	fputc_unfiltered ('*', stream);
-      case 12:			/* Register + Word Displacement Mode*/
+      case 12:			/* Register + Word Displacement Mode */
 	temp1 = *p;
 	temp1 <<= 8;
-	temp1 |= *(p +1);
+	temp1 |= *(p + 1);
 	if (regnum == PC_REGNUM)
 	  print_address (addr + temp1 + 3, stream);
 	else
@@ -240,16 +241,16 @@ print_insn_arg (d, p, addr, stream)
 	p += 2;
 	break;
 
-      case 15:			/* Register + Long Displacement Deferred Mode*/
+      case 15:			/* Register + Long Displacement Deferred Mode */
 	fputc_unfiltered ('*', stream);
-      case 14:			/* Register + Long Displacement Mode*/
+      case 14:			/* Register + Long Displacement Mode */
 	temp1 = *p;
 	temp1 <<= 8;
-	temp1 |= *(p +1);
+	temp1 |= *(p + 1);
 	temp1 <<= 8;
-	temp1 |= *(p +2);
+	temp1 |= *(p + 2);
 	temp1 <<= 8;
-	temp1 |= *(p +3);
+	temp1 |= *(p + 3);
 	if (regnum == PC_REGNUM)
 	  print_address (addr + temp1 + 5, stream);
 	else
@@ -259,16 +260,3 @@ print_insn_arg (d, p, addr, stream)
 
   return (unsigned char *) p;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

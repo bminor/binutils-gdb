@@ -1,21 +1,22 @@
 /* Target-specific definition for a Hitachi Super-H.
    Copyright (C) 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
@@ -62,8 +63,8 @@ extern CORE_ADDR sh_skip_prologue PARAMS ((CORE_ADDR));
 /* Illegal instruction - used by the simulator for breakpoint
    detection */
 
-#define BREAKPOINT {0xc3, 0xc3}  /* 0xc3c3 is trapa #c3, and it works in big
-				    and little endian modes  */
+#define BREAKPOINT {0xc3, 0xc3}	/* 0xc3c3 is trapa #c3, and it works in big
+				   and little endian modes  */
 
 #define BIG_REMOTE_BREAKPOINT    { 0xc3, 0x20 }
 #define LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 }
@@ -215,8 +216,8 @@ extern void sh_init_extra_frame_info PARAMS ((int, struct frame_info *));
 
 #define FRAME_ARGS_SKIP 0
 
-extern void sh_frame_find_saved_regs PARAMS ((struct frame_info *fi,
-					      struct frame_saved_regs *fsr));
+extern void sh_frame_find_saved_regs PARAMS ((struct frame_info * fi,
+					    struct frame_saved_regs * fsr));
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -230,7 +231,7 @@ extern void sh_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 typedef unsigned short INSN_WORD;
 
 extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
-					    struct value **args,
+					    struct value ** args,
 					    CORE_ADDR sp,
 					    unsigned char struct_return,
 					    CORE_ADDR struct_addr));
@@ -243,7 +244,7 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 #define FIX_CALL_DUMMY(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
-extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR sh_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  sh_push_return_address (PC, SP)
 
 

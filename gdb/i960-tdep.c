@@ -3,21 +3,22 @@
    Contributed by Intel Corporation.
    examine_prologue and other parts contributed by Wind River Systems.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -57,33 +58,56 @@ i960_use_struct_convention (gcc_p, type)
    This routine must be called as part of gdb initialization.  */
 
 static void
-check_host()
+check_host ()
 {
-	int i;
+  int i;
 
-	static struct typestruct {
-		int hostsize;		/* Size of type on host		*/
-		int i960size;		/* Size of type on i960		*/
-		char *typename;		/* Name of type, for error msg	*/
-	} types[] = {
-		{ sizeof(short),  2, "short" },
-		{ sizeof(int),    4, "int" },
-		{ sizeof(long),   4, "long" },
-		{ sizeof(float),  4, "float" },
-		{ sizeof(double), 8, "double" },
-		{ sizeof(char *), 4, "pointer" },
-	};
+  static struct typestruct
+    {
+      int hostsize;		/* Size of type on host         */
+      int i960size;		/* Size of type on i960         */
+      char *typename;		/* Name of type, for error msg  */
+    }
+  types[] =
+  {
+    {
+      sizeof (short), 2, "short"
+    }
+     ,
+    {
+      sizeof (int), 4, "int"
+    }
+     ,
+    {
+      sizeof (long), 4, "long"
+    }
+     ,
+    {
+      sizeof (float), 4, "float"
+    }
+     ,
+    {
+      sizeof (double), 8, "double"
+    }
+     ,
+    {
+      sizeof (char *), 4, "pointer"
+    }
+     ,
+  };
 #define TYPELEN	(sizeof(types) / sizeof(struct typestruct))
 
-	/* Make sure that host type sizes are same as i960
-	 */
-	for ( i = 0; i < TYPELEN; i++ ){
-		if ( types[i].hostsize != types[i].i960size ){
-			printf_unfiltered("sizeof(%s) != %d:  PROCEED AT YOUR OWN RISK!\n",
-					types[i].typename, types[i].i960size );
-		}
-
+  /* Make sure that host type sizes are same as i960
+   */
+  for (i = 0; i < TYPELEN; i++)
+    {
+      if (types[i].hostsize != types[i].i960size)
+	{
+	  printf_unfiltered ("sizeof(%s) != %d:  PROCEED AT YOUR OWN RISK!\n",
+			     types[i].typename, types[i].i960size);
 	}
+
+    }
 }
 
 /* Examine an i960 function prologue, recording the addresses at which
@@ -107,23 +131,23 @@ check_host()
    the function prologue is given below:
 
    (lda LRn, g14
-    mov g14, g[0-7]
-    (mov 0, g14) | (lda 0, g14))?
+   mov g14, g[0-7]
+   (mov 0, g14) | (lda 0, g14))?
 
    (mov[qtl]? g[0-15], r[4-15])*
    ((addo [1-31], sp, sp) | (lda n(sp), sp))?
    (st[qtl]? g[0-15], n(fp))*
 
    (cmpobne 0, g14, LFn
-    mov sp, g14
-    lda 0x30(sp), sp
-    LFn: stq g0, (g14)
-    stq g4, 0x10(g14)
-    stq g8, 0x20(g14))?
+   mov sp, g14
+   lda 0x30(sp), sp
+   LFn: stq g0, (g14)
+   stq g4, 0x10(g14)
+   stq g8, 0x20(g14))?
 
    (st g14, n(fp))?
    (mov g13,r[4-15])?
-*/
+ */
 
 /* Macros for extracting fields from i960 instructions.  */
 
@@ -159,15 +183,15 @@ examine_prologue (ip, limit, frame_addr, fsr)
   int size;
   int within_leaf_prologue;
   CORE_ADDR save_addr;
-  static unsigned int varargs_prologue_code [] =
-    {
-       0x3507a00c,	/* cmpobne 0x0, g14, LFn */
-       0x5cf01601,	/* mov sp, g14		 */
-       0x8c086030,	/* lda 0x30(sp), sp	 */
-       0xb2879000,	/* LFn: stq  g0, (g14)   */
-       0xb2a7a010,	/* stq g4, 0x10(g14)	 */
-       0xb2c7a020	/* stq g8, 0x20(g14)	 */
-    };
+  static unsigned int varargs_prologue_code[] =
+  {
+    0x3507a00c,			/* cmpobne 0x0, g14, LFn */
+    0x5cf01601,			/* mov sp, g14           */
+    0x8c086030,			/* lda 0x30(sp), sp      */
+    0xb2879000,			/* LFn: stq  g0, (g14)   */
+    0xb2a7a010,			/* stq g4, 0x10(g14)     */
+    0xb2c7a020			/* stq g8, 0x20(g14)     */
+  };
 
   /* Accept a leaf procedure prologue code fragment if present.
      Note that ip might point to either the leaf or non-leaf
@@ -175,8 +199,8 @@ examine_prologue (ip, limit, frame_addr, fsr)
 
   within_leaf_prologue = 0;
   if ((next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2))
-      && ((insn1 & 0xfffff000) == 0x8cf00000         /* lda LRx, g14 (MEMA) */
-	  || (insn1 & 0xfffffc60) == 0x8cf03000))    /* lda LRx, g14 (MEMB) */
+      && ((insn1 & 0xfffff000) == 0x8cf00000	/* lda LRx, g14 (MEMA) */
+	  || (insn1 & 0xfffffc60) == 0x8cf03000))	/* lda LRx, g14 (MEMB) */
     {
       within_leaf_prologue = 1;
       next_ip = NEXT_PROLOGUE_INSN (next_ip, limit, &insn1, &insn2);
@@ -185,13 +209,13 @@ examine_prologue (ip, limit, frame_addr, fsr)
   /* Now look for the prologue code at a leaf entry point:  */
 
   if (next_ip
-      && (insn1 & 0xff87ffff) == 0x5c80161e         /* mov g14, gx */
+      && (insn1 & 0xff87ffff) == 0x5c80161e	/* mov g14, gx */
       && REG_SRCDST (insn1) <= G0_REGNUM + 7)
     {
       within_leaf_prologue = 1;
       if ((next_ip = NEXT_PROLOGUE_INSN (next_ip, limit, &insn1, &insn2))
-	  && (insn1 == 0x8cf00000                   /* lda 0, g14 */
-	      || insn1 == 0x5cf01e00))              /* mov 0, g14 */
+	  && (insn1 == 0x8cf00000	/* lda 0, g14 */
+	      || insn1 == 0x5cf01e00))	/* mov 0, g14 */
 	{
 	  ip = next_ip;
 	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
@@ -205,7 +229,7 @@ examine_prologue (ip, limit, frame_addr, fsr)
 
   if (within_leaf_prologue)
     return (ip);
-	  
+
   /* Accept zero or more instances of "mov[qtl]? gx, ry", where y >= 4.
      This may cause us to mistake the moving of a register
      parameter to a local register for the saving of a callee-saved
@@ -248,16 +272,16 @@ examine_prologue (ip, limit, frame_addr, fsr)
      since that is matched explicitly below.  */
 
   while (next_ip &&
-	 ((insn1 & 0xf787f000) == 0x9287e000      /* stl? gx, n(fp) (MEMA) */
-	  || (insn1 & 0xf787fc60) == 0x9287f400   /* stl? gx, n(fp) (MEMB) */
-	  || (insn1 & 0xef87f000) == 0xa287e000   /* st[tq] gx, n(fp) (MEMA) */
-	  || (insn1 & 0xef87fc60) == 0xa287f400)  /* st[tq] gx, n(fp) (MEMB) */
+	 ((insn1 & 0xf787f000) == 0x9287e000	/* stl? gx, n(fp) (MEMA) */
+	  || (insn1 & 0xf787fc60) == 0x9287f400		/* stl? gx, n(fp) (MEMB) */
+	  || (insn1 & 0xef87f000) == 0xa287e000		/* st[tq] gx, n(fp) (MEMA) */
+	  || (insn1 & 0xef87fc60) == 0xa287f400)	/* st[tq] gx, n(fp) (MEMB) */
 	 && ((src = MEM_SRCDST (insn1)) != G14_REGNUM))
     {
       save_addr = frame_addr + ((insn1 & BITMASK (12, 1))
 				? insn2 : MEMA_OFFSET (insn1));
       size = (insn1 & BITMASK (29, 1)) ? ((insn1 & BITMASK (28, 1)) ? 4 : 3)
-	                               : ((insn1 & BITMASK (27, 1)) ? 2 : 1);
+	: ((insn1 & BITMASK (27, 1)) ? 2 : 1);
       while (size--)
 	{
 	  fsr->regs[src++] = save_addr;
@@ -280,11 +304,11 @@ examine_prologue (ip, limit, frame_addr, fsr)
   /* Accept an optional "st g14, n(fp)".  */
 
   if (next_ip &&
-      ((insn1 & 0xfffff000) == 0x92f7e000	 /* st g14, n(fp) (MEMA) */
-       || (insn1 & 0xfffffc60) == 0x92f7f400))   /* st g14, n(fp) (MEMB) */
+      ((insn1 & 0xfffff000) == 0x92f7e000	/* st g14, n(fp) (MEMA) */
+       || (insn1 & 0xfffffc60) == 0x92f7f400))	/* st g14, n(fp) (MEMB) */
     {
       fsr->regs[G14_REGNUM] = frame_addr + ((insn1 & BITMASK (12, 1))
-				            ? insn2 : MEMA_OFFSET (insn1));
+					    ? insn2 : MEMA_OFFSET (insn1));
       ip = next_ip;
       next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
     }
@@ -297,9 +321,9 @@ examine_prologue (ip, limit, frame_addr, fsr)
       && (dst = REG_SRCDST (insn1)) >= (R0_REGNUM + 4))
     {
       save_addr = frame_addr + ((dst - R0_REGNUM) * 4);
-      fsr->regs[G0_REGNUM+13] = save_addr;
+      fsr->regs[G0_REGNUM + 13] = save_addr;
       ip = next_ip;
-#if 0  /* We'll need this once there is a subsequent instruction examined. */
+#if 0				/* We'll need this once there is a subsequent instruction examined. */
       next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
 #endif
     }
@@ -313,7 +337,7 @@ examine_prologue (ip, limit, frame_addr, fsr)
 
 CORE_ADDR
 i960_skip_prologue (ip)
-     CORE_ADDR (ip);
+CORE_ADDR (ip);
 {
   struct frame_saved_regs saved_regs_dummy;
   struct symtab_and_line sal;
@@ -355,19 +379,19 @@ frame_find_saved_regs (fi, fsr)
       fi->fsr = cache_fsr;
 
       /* Find the start and end of the function prologue.  If the PC
-	 is in the function prologue, we only consider the part that
-	 has executed already.  */
-         
+         is in the function prologue, we only consider the part that
+         has executed already.  */
+
       ip = get_pc_function_start (fi->pc);
       sal = find_pc_line (ip, 0);
-      limit = (sal.end && sal.end < fi->pc) ? sal.end: fi->pc;
+      limit = (sal.end && sal.end < fi->pc) ? sal.end : fi->pc;
 
       examine_prologue (ip, limit, fi->frame, cache_fsr);
 
       /* Record the addresses at which the local registers are saved.
-	 Strictly speaking, we should only do this for non-leaf procedures,
-	 but no one will ever look at these values if it is a leaf procedure,
-	 since local registers are always caller-saved.  */
+         Strictly speaking, we should only do this for non-leaf procedures,
+         but no one will ever look at these values if it is a leaf procedure,
+         since local registers are always caller-saved.  */
 
       next_addr = (CORE_ADDR) fi->frame;
       saved_regs = cache_fsr->regs;
@@ -391,7 +415,7 @@ frame_find_saved_regs (fi, fsr)
      through to FRAME_FIND_SAVED_REGS (), permitting more efficient
      computation of saved register addresses (e.g., on the i960,
      we don't have to examine the prologue to find local registers). 
-	-- markf@wrs.com 
+     -- markf@wrs.com 
      FIXME, we don't need to refetch this, since the cache is cleared
      every time the child process is restarted.  If GDB itself
      modifies SP, it has to clear the cache by hand (does it?).  -gnu */
@@ -415,11 +439,11 @@ frame_args_address (fi, must_be_correct)
 
   get_frame_saved_regs (fi, &fsr);
   if (fsr.regs[G14_REGNUM])
-    ap = read_memory_integer (fsr.regs[G14_REGNUM],4);
+    ap = read_memory_integer (fsr.regs[G14_REGNUM], 4);
   else
     {
       if (must_be_correct)
-	return 0;			/* Don't cache this result */
+	return 0;		/* Don't cache this result */
       if (get_next_frame (fi))
 	ap = 0;
       else
@@ -453,7 +477,7 @@ frame_struct_result_address (fi)
     {
       get_frame_saved_regs (fi, &fsr);
       if (fsr.regs[G13_REGNUM])
-	ap = read_memory_integer (fsr.regs[G13_REGNUM],4);
+	ap = read_memory_integer (fsr.regs[G13_REGNUM], 4);
       else
 	ap = 0;
     }
@@ -465,7 +489,7 @@ frame_struct_result_address (fi)
 
 /* Return address to which the currently executing leafproc will return,
    or 0 if ip is not in a leafproc (or if we can't tell if it is).
-  
+
    Do this by finding the starting address of the routine in which ip lies.
    If the instruction there is "mov g14, gx" (where x is in [0,7]), this
    is a leafproc and the return address is in register gx.  Well, this is
@@ -475,7 +499,7 @@ frame_struct_result_address (fi)
 
 CORE_ADDR
 leafproc_return (ip)
-     CORE_ADDR ip;	/* ip from currently executing function	*/
+     CORE_ADDR ip;		/* ip from currently executing function */
 {
   register struct minimal_symbol *msymbol;
   char *p;
@@ -485,37 +509,37 @@ leafproc_return (ip)
 
   if ((msymbol = lookup_minimal_symbol_by_pc (ip)) != NULL)
     {
-      if ((p = strchr(SYMBOL_NAME (msymbol), '.')) && STREQ (p, ".lf"))
+      if ((p = strchr (SYMBOL_NAME (msymbol), '.')) && STREQ (p, ".lf"))
 	{
 	  if (next_insn (SYMBOL_VALUE_ADDRESS (msymbol), &insn1, &insn2)
-	      && (insn1 & 0xff87ffff) == 0x5c80161e       /* mov g14, gx */
+	      && (insn1 & 0xff87ffff) == 0x5c80161e	/* mov g14, gx */
 	      && (dst = REG_SRCDST (insn1)) <= G0_REGNUM + 7)
 	    {
 	      /* Get the return address.  If the "mov g14, gx" 
-		 instruction hasn't been executed yet, read
-		 the return address from g14; otherwise, read it
-		 from the register into which g14 was moved.  */
+	         instruction hasn't been executed yet, read
+	         the return address from g14; otherwise, read it
+	         from the register into which g14 was moved.  */
 
 	      return_addr =
-		  read_register ((ip == SYMBOL_VALUE_ADDRESS (msymbol))
-				           ? G14_REGNUM : dst);
+		read_register ((ip == SYMBOL_VALUE_ADDRESS (msymbol))
+			       ? G14_REGNUM : dst);
 
 	      /* We know we are in a leaf procedure, but we don't know
-		 whether the caller actually did a "bal" to the ".lf"
-		 entry point, or a normal "call" to the non-leaf entry
-		 point one instruction before.  In the latter case, the
-		 return address will be the address of a "ret"
-		 instruction within the procedure itself.  We test for
-		 this below.  */
+	         whether the caller actually did a "bal" to the ".lf"
+	         entry point, or a normal "call" to the non-leaf entry
+	         point one instruction before.  In the latter case, the
+	         return address will be the address of a "ret"
+	         instruction within the procedure itself.  We test for
+	         this below.  */
 
 	      if (!next_insn (return_addr, &insn1, &insn2)
-		  || (insn1 & 0xff000000) != 0xa000000   /* ret */
-	          || lookup_minimal_symbol_by_pc (return_addr) != msymbol)
+		  || (insn1 & 0xff000000) != 0xa000000	/* ret */
+		  || lookup_minimal_symbol_by_pc (return_addr) != msymbol)
 		return (return_addr);
 	    }
 	}
     }
-  
+
   return (0);
 }
 
@@ -565,8 +589,8 @@ pop_frame ()
       /* Non-leaf procedure.  Restore local registers, incl IP.  */
       prev_fi = get_prev_frame (current_fi);
       read_memory (prev_fi->frame, local_regs_buf, sizeof (local_regs_buf));
-      write_register_bytes (REGISTER_BYTE (R0_REGNUM), local_regs_buf, 
-		            sizeof (local_regs_buf));
+      write_register_bytes (REGISTER_BYTE (R0_REGNUM), local_regs_buf,
+			    sizeof (local_regs_buf));
 
       /* Restore frame pointer.  */
       write_register (FP_REGNUM, prev_fi->frame);
@@ -597,132 +621,170 @@ pop_frame ()
 
 enum target_signal
 i960_fault_to_signal (fault)
-    int fault;
+     int fault;
 {
   switch (fault)
     {
-    case 0: return TARGET_SIGNAL_BUS; /* parallel fault */
-    case 1: return TARGET_SIGNAL_UNKNOWN;
-    case 2: return TARGET_SIGNAL_ILL; /* operation fault */
-    case 3: return TARGET_SIGNAL_FPE; /* arithmetic fault */
-    case 4: return TARGET_SIGNAL_FPE; /* floating point fault */
+    case 0:
+      return TARGET_SIGNAL_BUS;	/* parallel fault */
+    case 1:
+      return TARGET_SIGNAL_UNKNOWN;
+    case 2:
+      return TARGET_SIGNAL_ILL;	/* operation fault */
+    case 3:
+      return TARGET_SIGNAL_FPE;	/* arithmetic fault */
+    case 4:
+      return TARGET_SIGNAL_FPE;	/* floating point fault */
 
       /* constraint fault.  This appears not to distinguish between
-	 a range constraint fault (which should be SIGFPE) and a privileged
-	 fault (which should be SIGILL).  */
-    case 5: return TARGET_SIGNAL_ILL;
+         a range constraint fault (which should be SIGFPE) and a privileged
+         fault (which should be SIGILL).  */
+    case 5:
+      return TARGET_SIGNAL_ILL;
 
-    case 6: return TARGET_SIGNAL_SEGV; /* virtual memory fault */
+    case 6:
+      return TARGET_SIGNAL_SEGV;	/* virtual memory fault */
 
       /* protection fault.  This is for an out-of-range argument to
-	 "calls".  I guess it also could be SIGILL. */
-    case 7: return TARGET_SIGNAL_SEGV;
+         "calls".  I guess it also could be SIGILL. */
+    case 7:
+      return TARGET_SIGNAL_SEGV;
 
-    case 8: return TARGET_SIGNAL_BUS; /* machine fault */
-    case 9: return TARGET_SIGNAL_BUS; /* structural fault */
-    case 0xa: return TARGET_SIGNAL_ILL; /* type fault */
-    case 0xb: return TARGET_SIGNAL_UNKNOWN; /* reserved fault */
-    case 0xc: return TARGET_SIGNAL_BUS; /* process fault */
-    case 0xd: return TARGET_SIGNAL_SEGV; /* descriptor fault */
-    case 0xe: return TARGET_SIGNAL_BUS; /* event fault */
-    case 0xf: return TARGET_SIGNAL_UNKNOWN; /* reserved fault */
-    case 0x10: return TARGET_SIGNAL_TRAP; /* single-step trace */
-    case 0x11: return TARGET_SIGNAL_TRAP; /* branch trace */
-    case 0x12: return TARGET_SIGNAL_TRAP; /* call trace */
-    case 0x13: return TARGET_SIGNAL_TRAP; /* return trace */
-    case 0x14: return TARGET_SIGNAL_TRAP; /* pre-return trace */
-    case 0x15: return TARGET_SIGNAL_TRAP; /* supervisor call trace */
-    case 0x16: return TARGET_SIGNAL_TRAP; /* breakpoint trace */
-    default: return TARGET_SIGNAL_UNKNOWN;
+    case 8:
+      return TARGET_SIGNAL_BUS;	/* machine fault */
+    case 9:
+      return TARGET_SIGNAL_BUS;	/* structural fault */
+    case 0xa:
+      return TARGET_SIGNAL_ILL;	/* type fault */
+    case 0xb:
+      return TARGET_SIGNAL_UNKNOWN;	/* reserved fault */
+    case 0xc:
+      return TARGET_SIGNAL_BUS;	/* process fault */
+    case 0xd:
+      return TARGET_SIGNAL_SEGV;	/* descriptor fault */
+    case 0xe:
+      return TARGET_SIGNAL_BUS;	/* event fault */
+    case 0xf:
+      return TARGET_SIGNAL_UNKNOWN;	/* reserved fault */
+    case 0x10:
+      return TARGET_SIGNAL_TRAP;	/* single-step trace */
+    case 0x11:
+      return TARGET_SIGNAL_TRAP;	/* branch trace */
+    case 0x12:
+      return TARGET_SIGNAL_TRAP;	/* call trace */
+    case 0x13:
+      return TARGET_SIGNAL_TRAP;	/* return trace */
+    case 0x14:
+      return TARGET_SIGNAL_TRAP;	/* pre-return trace */
+    case 0x15:
+      return TARGET_SIGNAL_TRAP;	/* supervisor call trace */
+    case 0x16:
+      return TARGET_SIGNAL_TRAP;	/* breakpoint trace */
+    default:
+      return TARGET_SIGNAL_UNKNOWN;
     }
 }
 
 /****************************************/
-/* MEM format				*/
+/* MEM format                           */
 /****************************************/
 
-struct tabent {
-	char	*name;
-	char	numops;
+struct tabent
+{
+  char *name;
+  char numops;
 };
 
-static int				/* returns instruction length: 4 or 8 */
-mem( memaddr, word1, word2, noprint )
-    unsigned long memaddr;
-    unsigned long word1, word2;
-    int noprint;		/* If TRUE, return instruction length, but
+static int			/* returns instruction length: 4 or 8 */
+mem (memaddr, word1, word2, noprint)
+     unsigned long memaddr;
+     unsigned long word1, word2;
+     int noprint;		/* If TRUE, return instruction length, but
 				   don't output any text.  */
 {
-	int i, j;
-	int len;
-	int mode;
-	int offset;
-	const char *reg1, *reg2, *reg3;
+  int i, j;
+  int len;
+  int mode;
+  int offset;
+  const char *reg1, *reg2, *reg3;
 
-	/* This lookup table is too sparse to make it worth typing in, but not
-	 * so large as to make a sparse array necessary.  We allocate the
-	 * table at runtime, initialize all entries to empty, and copy the
-	 * real ones in from an initialization table.
-	 *
-	 * NOTE: In this table, the meaning of 'numops' is:
-	 *	 1: single operand
-	 *	 2: 2 operands, load instruction
-	 *	-2: 2 operands, store instruction
-	 */
-	static struct tabent *mem_tab = NULL;
+  /* This lookup table is too sparse to make it worth typing in, but not
+   * so large as to make a sparse array necessary.  We allocate the
+   * table at runtime, initialize all entries to empty, and copy the
+   * real ones in from an initialization table.
+   *
+   * NOTE: In this table, the meaning of 'numops' is:
+   *       1: single operand
+   *       2: 2 operands, load instruction
+   *      -2: 2 operands, store instruction
+   */
+  static struct tabent *mem_tab = NULL;
 /* Opcodes of 0x8X, 9X, aX, bX, and cX must be in the table.  */
 #define MEM_MIN	0x80
 #define MEM_MAX	0xcf
 #define MEM_SIZ	((MEM_MAX-MEM_MIN+1) * sizeof(struct tabent))
 
-	static struct { int opcode; char *name; char numops; } mem_init[] = {
-		0x80,	"ldob",	 2,
-		0x82,	"stob",	-2,
-		0x84,	"bx",	 1,
-		0x85,	"balx",	 2,
-		0x86,	"callx", 1,
-		0x88,	"ldos",	 2,
-		0x8a,	"stos",	-2,
-		0x8c,	"lda",	 2,
-		0x90,	"ld",	 2,
-		0x92,	"st",	-2,
-		0x98,	"ldl",	 2,
-		0x9a,	"stl",	-2,
-		0xa0,	"ldt",	 2,
-		0xa2,	"stt",	-2,
-		0xb0,	"ldq",	 2,
-		0xb2,	"stq",	-2,
-		0xc0,	"ldib",	 2,
-		0xc2,	"stib",	-2,
-		0xc8,	"ldis",	 2,
-		0xca,	"stis",	-2,
-		0,	NULL,	0
-	};
+  static struct
+    {
+      int opcode;
+      char *name;
+      char numops;
+    }
+  mem_init[] =
+  {
+    0x80, "ldob", 2,
+      0x82, "stob", -2,
+      0x84, "bx", 1,
+      0x85, "balx", 2,
+      0x86, "callx", 1,
+      0x88, "ldos", 2,
+      0x8a, "stos", -2,
+      0x8c, "lda", 2,
+      0x90, "ld", 2,
+      0x92, "st", -2,
+      0x98, "ldl", 2,
+      0x9a, "stl", -2,
+      0xa0, "ldt", 2,
+      0xa2, "stt", -2,
+      0xb0, "ldq", 2,
+      0xb2, "stq", -2,
+      0xc0, "ldib", 2,
+      0xc2, "stib", -2,
+      0xc8, "ldis", 2,
+      0xca, "stis", -2,
+      0, NULL, 0
+  };
 
-	if ( mem_tab == NULL ){
-		mem_tab = (struct tabent *) xmalloc( MEM_SIZ );
-		memset( mem_tab, '\0', MEM_SIZ );
-		for ( i = 0; mem_init[i].opcode != 0; i++ ){
-			j = mem_init[i].opcode - MEM_MIN;
-			mem_tab[j].name = mem_init[i].name;
-			mem_tab[j].numops = mem_init[i].numops;
-		}
+  if (mem_tab == NULL)
+    {
+      mem_tab = (struct tabent *) xmalloc (MEM_SIZ);
+      memset (mem_tab, '\0', MEM_SIZ);
+      for (i = 0; mem_init[i].opcode != 0; i++)
+	{
+	  j = mem_init[i].opcode - MEM_MIN;
+	  mem_tab[j].name = mem_init[i].name;
+	  mem_tab[j].numops = mem_init[i].numops;
 	}
+    }
 
-	i = ((word1 >> 24) & 0xff) - MEM_MIN;
-	mode = (word1 >> 10) & 0xf;
+  i = ((word1 >> 24) & 0xff) - MEM_MIN;
+  mode = (word1 >> 10) & 0xf;
 
-	if ( (mem_tab[i].name != NULL)		/* Valid instruction */
-	&&   ((mode == 5) || (mode >=12)) ){	/* With 32-bit displacement */
-		len = 8;
-	} else {
-		len = 4;
-	}
+  if ((mem_tab[i].name != NULL)	/* Valid instruction */
+      && ((mode == 5) || (mode >= 12)))
+    {				/* With 32-bit displacement */
+      len = 8;
+    }
+  else
+    {
+      len = 4;
+    }
 
-	if ( noprint ){
-		return len;
-	}
-	abort ();
+  if (noprint)
+    {
+      return len;
+    }
+  abort ();
 }
 
 /* Read the i960 instruction at 'memaddr' and return the address of 
@@ -748,19 +810,19 @@ next_insn (memaddr, pword1, pword2)
   *pword1 = extract_unsigned_integer (buf, 4);
   *pword2 = extract_unsigned_integer (buf + 4, 4);
 
-  /* Divide instruction set into classes based on high 4 bits of opcode*/
+  /* Divide instruction set into classes based on high 4 bits of opcode */
 
   switch ((*pword1 >> 28) & 0xf)
     {
     case 0x0:
-    case 0x1:	/* ctrl */
+    case 0x1:			/* ctrl */
 
     case 0x2:
-    case 0x3:	/* cobr */
+    case 0x3:			/* cobr */
 
     case 0x5:
     case 0x6:
-    case 0x7:	/* reg */
+    case 0x7:			/* reg */
       len = 4;
       break;
 
@@ -772,7 +834,7 @@ next_insn (memaddr, pword1, pword2)
       len = mem (memaddr, *pword1, *pword2, 1);
       break;
 
-    default:	/* invalid instruction */
+    default:			/* invalid instruction */
       len = 0;
       break;
     }
@@ -791,43 +853,47 @@ next_insn (memaddr, pword1, pword2)
 
 int
 mon960_frame_chain_valid (chain, curframe)
-    CORE_ADDR chain;
-    struct frame_info *curframe;
+     CORE_ADDR chain;
+     struct frame_info *curframe;
 {
-	struct symbol *sym;
-	struct minimal_symbol *msymbol;
+  struct symbol *sym;
+  struct minimal_symbol *msymbol;
 
-	/* crtmon960.o is an assembler module that is assumed to be linked
-	 * first in an i80960 executable.  It contains the true entry point;
-	 * it performs startup up initialization and then calls 'main'.
-	 *
-	 * 'sf' is the name of a variable in crtmon960.o that is set
-	 *	during startup to the address of the first frame.
-	 *
-	 * 'a' is the address of that variable in 80960 memory.
-	 */
-	static char sf[] = "start_frame";
-	CORE_ADDR a;
+  /* crtmon960.o is an assembler module that is assumed to be linked
+   * first in an i80960 executable.  It contains the true entry point;
+   * it performs startup up initialization and then calls 'main'.
+   *
+   * 'sf' is the name of a variable in crtmon960.o that is set
+   *      during startup to the address of the first frame.
+   *
+   * 'a' is the address of that variable in 80960 memory.
+   */
+  static char sf[] = "start_frame";
+  CORE_ADDR a;
 
 
-	chain &= ~0x3f; /* Zero low 6 bits because previous frame pointers
-			   contain return status info in them.  */
-	if ( chain == 0 ){
-		return 0;
-	}
+  chain &= ~0x3f;		/* Zero low 6 bits because previous frame pointers
+				   contain return status info in them.  */
+  if (chain == 0)
+    {
+      return 0;
+    }
 
-	sym = lookup_symbol(sf, 0, VAR_NAMESPACE, (int *)NULL, 
-				  (struct symtab **)NULL);
-	if ( sym != 0 ){
-		a = SYMBOL_VALUE (sym);
-	} else {
-		msymbol = lookup_minimal_symbol (sf, NULL, NULL);
-		if (msymbol == NULL)
-			return 0;
-		a = SYMBOL_VALUE_ADDRESS (msymbol);
-	}
+  sym = lookup_symbol (sf, 0, VAR_NAMESPACE, (int *) NULL,
+		       (struct symtab **) NULL);
+  if (sym != 0)
+    {
+      a = SYMBOL_VALUE (sym);
+    }
+  else
+    {
+      msymbol = lookup_minimal_symbol (sf, NULL, NULL);
+      if (msymbol == NULL)
+	return 0;
+      a = SYMBOL_VALUE_ADDRESS (msymbol);
+    }
 
-	return ( chain != read_memory_integer(a,4) );
+  return (chain != read_memory_integer (a, 4));
 }
 
 void

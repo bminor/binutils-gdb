@@ -2,21 +2,22 @@
    Copyright (C) 1988, 1989, 1991, 1992, 1993, 1995-1999
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -28,13 +29,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 
 /*
-  The following macros are actually wrong.  Neither arm nor thumb can
-  or should set the lsb on addr.
-  The thumb addresses are mod 2, so (addr & 2) would be a good heuristic
-  to use when checking for thumb (see arm_pc_is_thumb() below).
-  Unfortunately, something else depends on these (incorrect) macros, so
-  fixing them actually breaks gdb.  I didn't have time to investigate. Z.R.
-*/
+   The following macros are actually wrong.  Neither arm nor thumb can
+   or should set the lsb on addr.
+   The thumb addresses are mod 2, so (addr & 2) would be a good heuristic
+   to use when checking for thumb (see arm_pc_is_thumb() below).
+   Unfortunately, something else depends on these (incorrect) macros, so
+   fixing them actually breaks gdb.  I didn't have time to investigate. Z.R.
+ */
 /* Thumb function addresses are odd (bit 0 is set).  Here are some
    macros to test, set, or clear bit 0 of addresses.  */
 #define IS_THUMB_ADDR(addr)	((addr) & 1)
@@ -47,25 +48,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ROUND_UP(n,a) 		(((n) + (a) - 1) & ~((a) - 1))
 
 static char *APCS_register_names[] =
-{ "a1", "a2", "a3", "a4", /*  0  1  2  3 */
-  "v1", "v2", "v3", "v4", /*  4  5  6  7 */
-  "v5", "v6", "sl", "fp", /*  8  9 10 11 */
-  "ip", "sp", "lr", "pc", /* 12 13 14 15 */
-  "f0", "f1", "f2", "f3", /* 16 17 18 19 */
-  "f4", "f5", "f6", "f7", /* 20 21 22 23 */
-  "fps","ps" }            /* 24 25       */;
+{"a1", "a2", "a3", "a4",	/*  0  1  2  3 */
+ "v1", "v2", "v3", "v4",	/*  4  5  6  7 */
+ "v5", "v6", "sl", "fp",	/*  8  9 10 11 */
+ "ip", "sp", "lr", "pc",	/* 12 13 14 15 */
+ "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
+ "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
+ "fps", "ps"} /* 24 25       */ ;
 
 /* These names are the ones which gcc emits, and 
    I find them less confusing.  Toggle between them
    using the `othernames' command. */
 static char *additional_register_names[] =
-{ "r0", "r1", "r2", "r3", /*  0  1  2  3 */
-  "r4", "r5", "r6", "r7",    /*  4  5  6  7 */
-  "r8", "r9", "r10", "r11",  /*  8  9 10 11 */
-  "r12", "r13", "r14", "pc", /* 12 13 14 15 */
-  "f0", "f1", "f2", "f3",    /* 16 17 18 19 */
-  "f4", "f5", "f6", "f7",    /* 20 21 22 23 */
-  "fps","ps" }               /* 24 25       */;
+{"r0", "r1", "r2", "r3",	/*  0  1  2  3 */
+ "r4", "r5", "r6", "r7",	/*  4  5  6  7 */
+ "r8", "r9", "r10", "r11",	/*  8  9 10 11 */
+ "r12", "r13", "r14", "pc",	/* 12 13 14 15 */
+ "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
+ "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
+ "fps", "ps"} /* 24 25       */ ;
 
 /* By default use the APCS registers names */
 
@@ -86,7 +87,7 @@ arm_frame_chain_valid (chain, thisframe)
      CORE_ADDR chain;
      struct frame_info *thisframe;
 {
-#define LOWEST_PC 0x20  /* the first 0x20 bytes are the trap vectors. */
+#define LOWEST_PC 0x20		/* the first 0x20 bytes are the trap vectors. */
   return (chain != 0 && (FRAME_SAVED_PC (thisframe) >= LOWEST_PC));
 }
 
@@ -113,7 +114,7 @@ int
 arm_pc_is_thumb (memaddr)
      bfd_vma memaddr;
 {
-  struct minimal_symbol * sym;
+  struct minimal_symbol *sym;
   CORE_ADDR sp;
 
   /* If bit 0 of the address is set, assume this is a Thumb address. */
@@ -124,7 +125,7 @@ arm_pc_is_thumb (memaddr)
   sym = lookup_minimal_symbol_by_pc (memaddr);
   if (sym)
     {
-      return (MSYMBOL_IS_SPECIAL(sym));
+      return (MSYMBOL_IS_SPECIAL (sym));
     }
   else
     return 0;
@@ -137,9 +138,9 @@ int
 arm_pc_is_thumb_dummy (memaddr)
      bfd_vma memaddr;
 {
-  CORE_ADDR sp = read_sp();
+  CORE_ADDR sp = read_sp ();
 
-  if (PC_IN_CALL_DUMMY (memaddr, sp, sp+64))
+  if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 64))
     return caller_is_thumb;
   else
     return 0;
@@ -176,12 +177,12 @@ arm_frameless_function_invocation (fi)
 }
 
 /* A typical Thumb prologue looks like this:
-        push    {r7, lr}
-        add     sp, sp, #-28
-        add     r7, sp, #12
+   push    {r7, lr}
+   add     sp, sp, #-28
+   add     r7, sp, #12
    Sometimes the latter instruction may be replaced by:
-        mov     r7, sp 
-*/
+   mov     r7, sp 
+ */
 
 static CORE_ADDR
 thumb_skip_prologue (pc)
@@ -193,10 +194,10 @@ thumb_skip_prologue (pc)
     {
       unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if (   (insn & 0xfe00) != 0xb400		/* push {..., r7, lr} */
-	  && (insn & 0xff00) != 0xb000		/* add sp, #simm */
-	  && (insn & 0xff00) != 0xaf00		/* add r7, sp, #imm */
-	  && insn != 0x466f			/* mov r7, sp */
+      if ((insn & 0xfe00) != 0xb400	/* push {..., r7, lr} */
+	  && (insn & 0xff00) != 0xb000	/* add sp, #simm */
+	  && (insn & 0xff00) != 0xaf00	/* add r7, sp, #imm */
+	  && insn != 0x466f	/* mov r7, sp */
 	  && (insn & 0xffc0) != 0x4640)		/* mov r0-r7, r8-r15 */
 	break;
     }
@@ -206,15 +207,15 @@ thumb_skip_prologue (pc)
 
 /* APCS (ARM procedure call standard) defines the following prologue:
 
-   mov		ip, sp
-  [stmfd	sp!, {a1,a2,a3,a4}]
-   stmfd	sp!, {...,fp,ip,lr,pc}
-  [stfe		f7, [sp, #-12]!]
-  [stfe		f6, [sp, #-12]!]
-  [stfe		f5, [sp, #-12]!]
-  [stfe		f4, [sp, #-12]!]
-   sub		fp, ip, #nn	// nn == 20 or 4 depending on second ins
-*/
+   mov          ip, sp
+   [stmfd       sp!, {a1,a2,a3,a4}]
+   stmfd        sp!, {...,fp,ip,lr,pc}
+   [stfe                f7, [sp, #-12]!]
+   [stfe                f6, [sp, #-12]!]
+   [stfe                f5, [sp, #-12]!]
+   [stfe                f4, [sp, #-12]!]
+   sub          fp, ip, #nn     // nn == 20 or 4 depending on second ins
+ */
 
 CORE_ADDR
 arm_skip_prologue (pc)
@@ -226,7 +227,7 @@ arm_skip_prologue (pc)
   struct symtab_and_line sal;
 
   /* See what the symbol table says. */
-  if (find_pc_partial_function (pc, NULL, & func_addr, & func_end))
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
       if (sal.line != 0 && sal.end < func_end)
@@ -241,18 +242,18 @@ arm_skip_prologue (pc)
      by disassembling the instructions. */
   skip_pc = pc;
   inst = read_memory_integer (skip_pc, 4);
-  if (inst != 0xe1a0c00d)  /* mov ip, sp */
+  if (inst != 0xe1a0c00d)	/* mov ip, sp */
     return pc;
 
   skip_pc += 4;
   inst = read_memory_integer (skip_pc, 4);
-  if ((inst & 0xfffffff0) == 0xe92d0000)  /* stmfd sp!,{a1,a2,a3,a4}  */
+  if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4}  */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
     }
 
-  if ((inst & 0xfffff800) != 0xe92dd800)  /* stmfd sp!,{...,fp,ip,lr,pc} */
+  if ((inst & 0xfffff800) != 0xe92dd800)	/* stmfd sp!,{...,fp,ip,lr,pc} */
     return pc;
 
   skip_pc += 4;
@@ -264,28 +265,26 @@ arm_skip_prologue (pc)
 
   /* We may have either one sfmfd instruction here, or several stfe insns,
      depending on the version of floating point code we support.  */
-  if ((inst & 0xffbf0fff) == 0xec2d0200)  /* sfmfd fn, <cnt>, [sp]! */
+  if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
     }
   else
     {
-      while ((inst & 0xffff8fff) == 0xed6d0103) /* stfe fn, [sp, #-12]! */
-        {
-          skip_pc += 4;
-          inst = read_memory_integer (skip_pc, 4);
-        }
+      while ((inst & 0xffff8fff) == 0xed6d0103)		/* stfe fn, [sp, #-12]! */
+	{
+	  skip_pc += 4;
+	  inst = read_memory_integer (skip_pc, 4);
+	}
     }
 
-  if ((inst & 0xfffff000) == 0xe24cb000) /* sub fp, ip, #nn */
+  if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
     skip_pc += 4;
 
   return skip_pc;
 }
-
-
-
+/* *INDENT-OFF* */
 /* Function: thumb_scan_prologue (helper function for arm_scan_prologue)
    This function decodes a Thumb function prologue to determine:
      1) the size of the stack frame
@@ -306,29 +305,33 @@ arm_skip_prologue (pc)
      SP ->     -12  additional stack space (12 bytes)
    The frame size would thus be 36 bytes, and the frame offset would be
    12 bytes.  The frame register is R7.  */
-	
+/* *INDENT-ON* */
+
+
+
+
 static void
 thumb_scan_prologue (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
   CORE_ADDR current_pc;
-  int       saved_reg[16];	/* which register has been copied to register n? */
-  int       i;
+  int saved_reg[16];		/* which register has been copied to register n? */
+  int i;
 
-  if (find_pc_partial_function (fi->pc, NULL, & prologue_start, & prologue_end))
+  if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
-      if (sal.line == 0)		/* no line info, use current PC */
+      if (sal.line == 0)	/* no line info, use current PC */
 	prologue_end = fi->pc;
       else if (sal.end < prologue_end)	/* next line begins after fn end */
-	prologue_end = sal.end;		/* (probably means no prologue)  */
+	prologue_end = sal.end;	/* (probably means no prologue)  */
     }
   else
-    prologue_end = prologue_start + 40; /* We're in the boondocks: allow for */
-					/* 16 pushes, an add, and "mv fp,sp" */
+    prologue_end = prologue_start + 40;		/* We're in the boondocks: allow for */
+  /* 16 pushes, an add, and "mv fp,sp" */
 
   prologue_end = min (prologue_end, fi->pc);
 
@@ -349,7 +352,7 @@ thumb_scan_prologue (fi)
 
       insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
+      if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
 	{
 	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
 	     whether to save LR (R14).  */
@@ -358,7 +361,7 @@ thumb_scan_prologue (fi)
 	  /* Calculate offsets of saved R0-R7 and LR. */
 	  for (regno = LR_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
- 	      {
+	      {
 		fi->framesize += 4;
 		fi->fsr.regs[saved_reg[regno]] = -(fi->framesize);
 		saved_reg[regno] = regno;	/* reset saved register map */
@@ -366,17 +369,17 @@ thumb_scan_prologue (fi)
 	}
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm */
 	{
-	  offset = (insn & 0x7f) << 2;		/* get scaled offset */
-	  if (insn & 0x80)			/* is it signed? */
-	     offset = -offset;
+	  offset = (insn & 0x7f) << 2;	/* get scaled offset */
+	  if (insn & 0x80)	/* is it signed? */
+	    offset = -offset;
 	  fi->framesize -= offset;
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
 	  fi->framereg = THUMB_FP_REGNUM;
-	  fi->frameoffset = (insn & 0xff) << 2;	/* get scaled offset */
+	  fi->frameoffset = (insn & 0xff) << 2;		/* get scaled offset */
 	}
-      else if (insn == 0x466f)			/* mov r7, sp */
+      else if (insn == 0x466f)	/* mov r7, sp */
 	{
 	  fi->framereg = THUMB_FP_REGNUM;
 	  fi->frameoffset = 0;
@@ -384,12 +387,12 @@ thumb_scan_prologue (fi)
 	}
       else if ((insn & 0xffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
 	{
-	  int lo_reg = insn & 7;		/* dest. register (r0-r7) */
+	  int lo_reg = insn & 7;	/* dest. register (r0-r7) */
 	  int hi_reg = ((insn >> 3) & 7) + 8;	/* source register (r8-15) */
-	  saved_reg[lo_reg] = hi_reg;		/* remember hi reg was saved */
+	  saved_reg[lo_reg] = hi_reg;	/* remember hi reg was saved */
 	}
       else
-	break;				/* anything else isn't prologue */
+	break;			/* anything else isn't prologue */
     }
 }
 
@@ -399,23 +402,23 @@ thumb_scan_prologue (fi)
    return non-zero.  Otherwise do not copy anything and return zero.
 
    The information saved in the cache includes:
-     * the frame register number;
-     * the size of the stack frame;
-     * the offsets of saved regs (relative to the old SP); and
-     * the offset from the stack pointer to the frame pointer
+   * the frame register number;
+   * the size of the stack frame;
+   * the offsets of saved regs (relative to the old SP); and
+   * the offset from the stack pointer to the frame pointer
 
    The cache contains only one entry, since this is adequate
    for the typical sequence of prologue scan requests we get.
    When performing a backtrace, GDB will usually ask to scan
    the same function twice in a row (once to get the frame chain,
    and once to fill in the extra frame information).
-*/
+ */
 
 static struct frame_info prologue_cache;
 
 static int
 check_prologue_cache (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
   int i;
 
@@ -435,19 +438,19 @@ check_prologue_cache (fi)
 
 /* Function: save_prologue_cache
    Copy the prologue information from fi to the prologue cache.
-*/
+ */
 
 static void
 save_prologue_cache (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
   int i;
 
-  prologue_cache.pc          = fi->pc;
-  prologue_cache.framereg    = fi->framereg;
-  prologue_cache.framesize   = fi->framesize;
+  prologue_cache.pc = fi->pc;
+  prologue_cache.framereg = fi->framereg;
+  prologue_cache.framesize = fi->framesize;
   prologue_cache.frameoffset = fi->frameoffset;
-  
+
   for (i = 0; i <= NUM_REGS; i++)
     prologue_cache.fsr.regs[i] = fi->fsr.regs[i];
 }
@@ -455,30 +458,30 @@ save_prologue_cache (fi)
 
 /* Function: arm_scan_prologue
    This function decodes an ARM function prologue to determine:
-     1) the size of the stack frame
-     2) which registers are saved on it
-     3) the offsets of saved regs
-     4) the offset from the stack pointer to the frame pointer
+   1) the size of the stack frame
+   2) which registers are saved on it
+   3) the offsets of saved regs
+   4) the offset from the stack pointer to the frame pointer
    This information is stored in the "extra" fields of the frame_info.
 
    A typical Arm function prologue might look like this:
-	mov    ip, sp
-	stmfd  sp!, {fp, ip, lr, pc}
-	sub    fp, ip, #4
-	sub    sp, sp, #16
+   mov    ip, sp
+   stmfd  sp!, {fp, ip, lr, pc}
+   sub    fp, ip, #4
+   sub    sp, sp, #16
    Which would create this stack frame (offsets relative to FP):
-     IP ->   4	(caller's stack)
-     FP ->   0	PC (points to address of stmfd instruction + 12 in callee)
-	    -4	LR (return address in caller)
-	    -8	IP (copy of caller's SP)
-     	   -12	FP (caller's FP)
-     SP -> -28	Local variables
+   IP ->   4    (caller's stack)
+   FP ->   0    PC (points to address of stmfd instruction + 12 in callee)
+   -4   LR (return address in caller)
+   -8   IP (copy of caller's SP)
+   -12  FP (caller's FP)
+   SP -> -28    Local variables
    The frame size would thus be 32 bytes, and the frame offset would be
    28 bytes.  */
 
 static void
 arm_scan_prologue (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
   int regno, sp_offset, fp_offset;
   CORE_ADDR prologue_start, prologue_end, current_pc;
@@ -488,8 +491,8 @@ arm_scan_prologue (fi)
     return;
 
   /* Assume there is no frame until proven otherwise.  */
-  fi->framereg    = SP_REGNUM;
-  fi->framesize   = 0;
+  fi->framereg = SP_REGNUM;
+  fi->framesize = 0;
   fi->frameoffset = 0;
 
   /* Check for Thumb prologue.  */
@@ -508,17 +511,17 @@ arm_scan_prologue (fi)
          in the function and the first source line.  */
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
-      if (sal.line == 0)		/* no line info, use current PC */
+      if (sal.line == 0)	/* no line info, use current PC */
 	prologue_end = fi->pc;
       else if (sal.end < prologue_end)	/* next line begins after fn end */
-	prologue_end = sal.end;		/* (probably means no prologue)  */
+	prologue_end = sal.end;	/* (probably means no prologue)  */
     }
   else
     {
       /* Get address of the stmfd in the prologue of the callee; the saved
          PC is the address of the stmfd + 12.  */
-      prologue_start = ADDR_BITS_REMOVE(read_memory_integer (fi->frame, 4)) - 12;
-      prologue_end = prologue_start + 40; /* FIXME: should be big enough */
+      prologue_start = ADDR_BITS_REMOVE (read_memory_integer (fi->frame, 4)) - 12;
+      prologue_end = prologue_start + 40;	/* FIXME: should be big enough */
     }
 
   /* Now search the prologue looking for instructions that set up the
@@ -543,29 +546,29 @@ arm_scan_prologue (fi)
 	}
       else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
 	{
-	  unsigned imm = insn & 0xff;			/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32-rot));
+	  unsigned imm = insn & 0xff;	/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
 	  fp_offset = -imm;
 	  fi->framereg = FP_REGNUM;
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
 	{
-	  unsigned imm = insn & 0xff;			/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32-rot));
+	  unsigned imm = insn & 0xff;	/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
 	  sp_offset -= imm;
 	}
-      else if ((insn & 0xffff7fff) == 0xed6d0103) /* stfe f?, [sp, -#c]! */
+      else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
 	{
 	  sp_offset -= 12;
 	  regno = F0_REGNUM + ((insn >> 12) & 0x07);
 	  fi->fsr.regs[regno] = sp_offset;
 	}
-      else if (insn == 0xe1a0c00d)			/* mov ip, sp */
+      else if (insn == 0xe1a0c00d)	/* mov ip, sp */
 	continue;
       else
-	break;	/* not a recognized prologue instruction */
+	break;			/* not a recognized prologue instruction */
     }
 
   /* The frame size is just the negative of the offset (from the original SP)
@@ -573,7 +576,7 @@ arm_scan_prologue (fi)
      [new FP] - [new SP].  */
   fi->framesize = -sp_offset;
   fi->frameoffset = fp_offset - sp_offset;
-  
+
   save_prologue_cache (fi);
 }
 
@@ -587,23 +590,22 @@ arm_scan_prologue (fi)
 
 static CORE_ADDR
 arm_find_callers_reg (fi, regnum)
-     struct frame_info * fi;
+     struct frame_info *fi;
      int regnum;
 {
   for (; fi; fi = fi->next)
-    
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
+
+#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else
 #endif
-      if (fi->fsr.regs[regnum] != 0)
-	return read_memory_integer (fi->fsr.regs[regnum], 
-				  REGISTER_RAW_SIZE(regnum));
+    if (fi->fsr.regs[regnum] != 0)
+      return read_memory_integer (fi->fsr.regs[regnum],
+				  REGISTER_RAW_SIZE (regnum));
   return read_register (regnum);
 }
-
-
+/* *INDENT-OFF* */
 /* Function: frame_chain
    Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
@@ -619,27 +621,31 @@ arm_find_callers_reg (fi, regnum)
 	 read_memory_integer ((thisframe)->frame - 12, 4) :\
 	 0)
 */
+/* *INDENT-ON* */
+
+
+
 
 CORE_ADDR
 arm_frame_chain (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
   CORE_ADDR fn_start, callers_pc, fp;
 
   /* is this a dummy frame? */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return fi->frame;	/* dummy frame same as caller's frame */
+    return fi->frame;		/* dummy frame same as caller's frame */
 
   /* is caller-of-this a dummy frame? */
-  callers_pc = FRAME_SAVED_PC(fi);  /* find out who called us: */
+  callers_pc = FRAME_SAVED_PC (fi);	/* find out who called us: */
   fp = arm_find_callers_reg (fi, FP_REGNUM);
-  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))	
-    return fp;		/* dummy frame's frame may bear no relation to ours */
+  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
+    return fp;			/* dummy frame's frame may bear no relation to ours */
 
   if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
     if (fn_start == entry_point_address ())
-      return 0;		/* in _start fn, don't chain further */
+      return 0;			/* in _start fn, don't chain further */
 #endif
   CORE_ADDR caller_pc, fn_start;
   struct frame_info caller_fi;
@@ -660,9 +666,9 @@ arm_frame_chain (fi)
      frame register number. */
   if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (fi->pc))
     {
-      memset (& caller_fi, 0, sizeof (caller_fi));
+      memset (&caller_fi, 0, sizeof (caller_fi));
       caller_fi.pc = caller_pc;
-      arm_scan_prologue (& caller_fi);
+      arm_scan_prologue (&caller_fi);
       framereg = caller_fi.framereg;
     }
 
@@ -683,7 +689,7 @@ arm_frame_chain (fi)
 
 void
 arm_init_extra_frame_info (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
   int reg;
 
@@ -692,29 +698,29 @@ arm_init_extra_frame_info (fi)
 
   memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
 
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-	 by assuming it's always FP.  */
-      fi->frame       = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
-      fi->framesize   = 0;
+         by assuming it's always FP.  */
+      fi->frame = generic_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->framesize = 0;
       fi->frameoffset = 0;
       return;
     }
-  else 
+  else
 #endif
     {
       arm_scan_prologue (fi);
 
-      if (!fi->next)			/* this is the innermost frame? */
+      if (!fi->next)		/* this is the innermost frame? */
 	fi->frame = read_register (fi->framereg);
-      else			 	/* not the innermost frame */
-	/* If we have an FP,  the callee saved it. */
-	if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
-	  if (fi->next->fsr.regs[fi->framereg] != 0)
-	    fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
-					     4);
+      else
+	/* not the innermost frame */
+	/* If we have an FP,  the callee saved it. */ if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
+	if (fi->next->fsr.regs[fi->framereg] != 0)
+	  fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
+					   4);
 
       /* Calculate actual addresses of saved registers using offsets determined
          by arm_scan_prologue.  */
@@ -730,15 +736,15 @@ arm_init_extra_frame_info (fi)
    in the stack anywhere, otherwise we get it from the registers.
 
    The old definition of this function was a macro:
-     #define FRAME_SAVED_PC(FRAME) \
-	ADDR_BITS_REMOVE (read_memory_integer ((FRAME)->frame - 4, 4))
-*/
+   #define FRAME_SAVED_PC(FRAME) \
+   ADDR_BITS_REMOVE (read_memory_integer ((FRAME)->frame - 4, 4))
+ */
 
 CORE_ADDR
 arm_frame_saved_pc (fi)
-     struct frame_info * fi;
+     struct frame_info *fi;
 {
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
@@ -759,7 +765,7 @@ arm_target_read_fp ()
   if (read_register (PS_REGNUM) & 0x20)		/* Bit 5 is Thumb state bit */
     return read_register (THUMB_FP_REGNUM);	/* R7 if Thumb */
   else
-    return read_register (FP_REGNUM);		/* R11 if ARM */
+    return read_register (FP_REGNUM);	/* R11 if ARM */
 }
 
 
@@ -792,13 +798,13 @@ arm_push_dummy_frame ()
      stm instruction stores the PC, it stores the address of the stm
      instruction itself plus 12.  */
   fp = sp = push_word (sp, prologue_start + 12);
-  sp = push_word (sp, read_register (PC_REGNUM)); /* FIXME: was PS_REGNUM */
+  sp = push_word (sp, read_register (PC_REGNUM));	/* FIXME: was PS_REGNUM */
   sp = push_word (sp, old_sp);
   sp = push_word (sp, read_register (FP_REGNUM));
-  
-  for (regnum = 10; regnum >= 0; regnum --)
+
+  for (regnum = 10; regnum >= 0; regnum--)
     sp = push_word (sp, read_register (regnum));
-  
+
   write_register (FP_REGNUM, fp);
   write_register (THUMB_FP_REGNUM, fp);
   write_register (SP_REGNUM, sp);
@@ -810,36 +816,36 @@ arm_push_dummy_frame ()
    different dummies:
 
    * ARM calling ARM: uses the call dummy in tm-arm.h, which has already
-     been copied into the dummy parameter to this function.
+   been copied into the dummy parameter to this function.
    * ARM calling Thumb: uses the call dummy in tm-arm.h, but with the
-     "mov pc,r4" instruction patched to be a "bx r4" instead.
+   "mov pc,r4" instruction patched to be a "bx r4" instead.
    * Thumb calling anything: uses the Thumb dummy defined below, which
-     works for calling both ARM and Thumb functions.
+   works for calling both ARM and Thumb functions.
 
    All three call dummies expect to receive the target function address
    in R4, with the low bit set if it's a Thumb function.
-*/
+ */
 
 void
 arm_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
-     char *        dummy;
-     CORE_ADDR     pc;
-     CORE_ADDR     fun;
-     int           nargs;
-     value_ptr *   args;
-     struct type * type;
-     int           gcc_p;
+     char *dummy;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
 {
   static short thumb_dummy[4] =
   {
-    0xf000, 0xf801,	/*	  bl      label */
-    0xdf18,		/*	  swi     24 */
-    0x4720,		/* label: bx	  r4 */
+    0xf000, 0xf801,		/*        bl      label */
+    0xdf18,			/*        swi     24 */
+    0x4720,			/* label: bx      r4 */
   };
   static unsigned long arm_bx_r4 = 0xe12fff14;	/* bx r4 instruction */
 
   /* Set flag indicating whether the current PC is in a Thumb function. */
-  caller_is_thumb = arm_pc_is_thumb (read_pc());
+  caller_is_thumb = arm_pc_is_thumb (read_pc ());
 
   /* If the target function is Thumb, set the low bit of the function address.
      And if the CPU is currently in ARM mode, patch the second instruction
@@ -879,7 +885,7 @@ arm_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
    as a place-holder now.
 
    This implements the CALL_DUMMY_BREAK_OFFSET macro.
-*/
+ */
 
 int
 arm_call_dummy_breakpoint_offset ()
@@ -892,24 +898,25 @@ arm_call_dummy_breakpoint_offset ()
 
 
 CORE_ADDR
-arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
-     int         nargs;
-     value_ptr * args;
-     CORE_ADDR   sp;
-     int         struct_return;
-     CORE_ADDR   struct_addr;
+arm_push_arguments (nargs, args, sp, struct_return, struct_addr)
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
 {
   int argreg;
   int float_argreg;
   int argnum;
   int stack_offset;
-  struct stack_arg {
+  struct stack_arg
+    {
       char *val;
       int len;
       int offset;
     };
   struct stack_arg *stack_args =
-      (struct stack_arg*)alloca (nargs * sizeof (struct stack_arg));
+  (struct stack_arg *) alloca (nargs * sizeof (struct stack_arg));
   int nstack_args = 0;
 
 
@@ -919,7 +926,7 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
   /* the struct_return pointer occupies the first parameter-passing reg */
   if (struct_return)
-      write_register (argreg++, struct_addr);
+    write_register (argreg++, struct_addr);
 
   /* The offset onto the stack at which we will start copying parameters
      (after the registers are used up) begins at 16 in the old ABI.
@@ -927,16 +934,16 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
   stack_offset = REGISTER_SIZE * 4;
 
   /* Process args from left to right.  Store as many as allowed in
-	registers, save the rest to be pushed on the stack */
-  for(argnum = 0; argnum < nargs; argnum++)
+     registers, save the rest to be pushed on the stack */
+  for (argnum = 0; argnum < nargs; argnum++)
     {
-      char *         val;
-      value_ptr      arg = args[argnum];
-      struct type *  arg_type = check_typedef (VALUE_TYPE (arg));
-      struct type *  target_type = TYPE_TARGET_TYPE (arg_type);
-      int            len = TYPE_LENGTH (arg_type);
+      char *val;
+      value_ptr arg = args[argnum];
+      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      struct type *target_type = TYPE_TARGET_TYPE (arg_type);
+      int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
-      CORE_ADDR      regval;
+      CORE_ADDR regval;
       int newarg;
 
       val = (char *) VALUE_CONTENTS (arg);
@@ -952,7 +959,7 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	    store_address (val, len, MAKE_THUMB_ADDR (regval));
 	}
 
-#define MAPCS_FLOAT 0	/* --mapcs-float not implemented by the compiler yet */
+#define MAPCS_FLOAT 0		/* --mapcs-float not implemented by the compiler yet */
 #if MAPCS_FLOAT
       /* Up to four floating point arguments can be passed in floating
          point registers on ARM (not on Thumb).  */
@@ -975,15 +982,15 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	    {
 	      if (argreg <= ARM_LAST_ARG_REGNUM)
 		{
-	          int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+		  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
 		  regval = extract_address (val, partial_len);
 
 		  /* It's a simple argument being passed in a general
 		     register.  */
 		  write_register (argreg, regval);
 		  argreg++;
-	          len -= partial_len;
-	          val += partial_len;
+		  len -= partial_len;
+		  val += partial_len;
 		}
 	      else
 		{
@@ -995,13 +1002,13 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	    }
 	}
     }
-    /* now do the real stack pushing, process args right to left */
-    while(nstack_args--)
-      {
-	sp -= stack_args[nstack_args].len;
-	write_memory(sp, stack_args[nstack_args].val,
-		stack_args[nstack_args].len);
-      }
+  /* now do the real stack pushing, process args right to left */
+  while (nstack_args--)
+    {
+      sp -= stack_args[nstack_args].len;
+      write_memory (sp, stack_args[nstack_args].val,
+		    stack_args[nstack_args].len);
+    }
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -1010,14 +1017,14 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 void
 arm_pop_frame ()
 {
-  struct frame_info *frame = get_current_frame();
+  struct frame_info *frame = get_current_frame ();
   int regnum;
   CORE_ADDR old_SP;
 
   old_SP = read_register (frame->framereg);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (frame->fsr.regs[regnum] != 0)
-      write_register (regnum, 
+      write_register (regnum,
 		      read_memory_integer (frame->fsr.regs[regnum], 4));
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
@@ -1030,61 +1037,69 @@ static void
 print_fpu_flags (flags)
      int flags;
 {
-    if (flags & (1 << 0)) fputs ("IVO ", stdout);
-    if (flags & (1 << 1)) fputs ("DVZ ", stdout);
-    if (flags & (1 << 2)) fputs ("OFL ", stdout);
-    if (flags & (1 << 3)) fputs ("UFL ", stdout);
-    if (flags & (1 << 4)) fputs ("INX ", stdout);
-    putchar ('\n');
+  if (flags & (1 << 0))
+    fputs ("IVO ", stdout);
+  if (flags & (1 << 1))
+    fputs ("DVZ ", stdout);
+  if (flags & (1 << 2))
+    fputs ("OFL ", stdout);
+  if (flags & (1 << 3))
+    fputs ("UFL ", stdout);
+  if (flags & (1 << 4))
+    fputs ("INX ", stdout);
+  putchar ('\n');
 }
 
 void
 arm_float_info ()
 {
-    register unsigned long status = read_register (FPS_REGNUM);
-    int type;
+  register unsigned long status = read_register (FPS_REGNUM);
+  int type;
 
-    type = (status >> 24) & 127;
-    printf ("%s FPU type %d\n",
-	    (status & (1<<31)) ? "Hardware" : "Software",
-	    type);
-    fputs ("mask: ", stdout);
-    print_fpu_flags (status >> 16);
-    fputs ("flags: ", stdout);
-    print_fpu_flags (status);
+  type = (status >> 24) & 127;
+  printf ("%s FPU type %d\n",
+	  (status & (1 << 31)) ? "Hardware" : "Software",
+	  type);
+  fputs ("mask: ", stdout);
+  print_fpu_flags (status >> 16);
+  fputs ("flags: ", stdout);
+  print_fpu_flags (status);
 }
 
 static void
 arm_othernames ()
 {
 
-  if (arm_register_names ==  APCS_register_names) { 
-    arm_register_names =  additional_register_names;
-    arm_toggle_regnames ();
-  } else {
-    arm_register_names =  APCS_register_names;
-    arm_toggle_regnames ();
-  }    
-    
+  if (arm_register_names == APCS_register_names)
+    {
+      arm_register_names = additional_register_names;
+      arm_toggle_regnames ();
+    }
+  else
+    {
+      arm_register_names = APCS_register_names;
+      arm_toggle_regnames ();
+    }
+
 }
 
 /* FIXME:  Fill in with the 'right thing', see asm 
    template in arm-convert.s */
 
-void 
+void
 convert_from_extended (ptr, dbl)
-     void * ptr;
-     double * dbl;
+     void *ptr;
+     double *dbl;
 {
-  *dbl = *(double*)ptr;
+  *dbl = *(double *) ptr;
 }
 
-void 
+void
 convert_to_extended (dbl, ptr)
-     void * ptr;
-     double * dbl;
+     void *ptr;
+     double *dbl;
 {
-  *(double*)ptr = *dbl;
+  *(double *) ptr = *dbl;
 }
 
 static int
@@ -1123,10 +1138,10 @@ condition_true (cond, status_reg)
       return (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0));
     case INST_GT:
       return (((status_reg & FLAG_Z) == 0) &&
-	      (((status_reg & FLAG_N) == 0) == ((status_reg & FLAG_V) == 0)));
+	    (((status_reg & FLAG_N) == 0) == ((status_reg & FLAG_V) == 0)));
     case INST_LE:
       return (((status_reg & FLAG_Z) != 0) ||
-	      (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0)));
+	    (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0)));
     }
   return 1;
 }
@@ -1150,42 +1165,43 @@ shifted_reg_val (inst, carry, pc_val, status_reg)
   unsigned long res, shift;
   int rm = bits (inst, 0, 3);
   unsigned long shifttype = bits (inst, 5, 6);
- 
-  if (bit(inst, 4))
+
+  if (bit (inst, 4))
     {
       int rs = bits (inst, 8, 11);
       shift = (rs == 15 ? pc_val + 8 : read_register (rs)) & 0xFF;
     }
   else
     shift = bits (inst, 7, 11);
- 
-  res = (rm == 15 
+
+  res = (rm == 15
 	 ? ((pc_val | (ARM_PC_32 ? 0 : status_reg))
-	    + (bit (inst, 4) ? 12 : 8)) 
+	    + (bit (inst, 4) ? 12 : 8))
 	 : read_register (rm));
 
   switch (shifttype)
     {
-    case 0: /* LSL */
+    case 0:			/* LSL */
       res = shift >= 32 ? 0 : res << shift;
       break;
-      
-    case 1: /* LSR */
+
+    case 1:			/* LSR */
       res = shift >= 32 ? 0 : res >> shift;
       break;
 
-    case 2: /* ASR */
-      if (shift >= 32) shift = 31;
+    case 2:			/* ASR */
+      if (shift >= 32)
+	shift = 31;
       res = ((res & 0x80000000L)
 	     ? ~((~res) >> shift) : res >> shift);
       break;
 
-    case 3: /* ROR/RRX */
+    case 3:			/* ROR/RRX */
       shift &= 31;
       if (shift == 0)
 	res = (res >> 1) | (carry ? 0x80000000L : 0);
       else
-	res = (res >> shift) | (res << (32-shift));
+	res = (res >> shift) | (res << (32 - shift));
       break;
     }
 
@@ -1201,7 +1217,7 @@ bitcount (val)
 {
   int nbits;
   for (nbits = 0; val != 0; nbits++)
-    val &= val - 1;	/* delete rightmost 1-bit in val */
+    val &= val - 1;		/* delete rightmost 1-bit in val */
   return nbits;
 }
 
@@ -1210,9 +1226,9 @@ static CORE_ADDR
 thumb_get_next_pc (pc)
      CORE_ADDR pc;
 {
-  unsigned long pc_val = ((unsigned long)pc) + 4;	/* PC after prefetch */
+  unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1 = read_memory_integer (pc, 2);
-  CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
+  CORE_ADDR nextpc = pc + 2;	/* default is next instruction */
   unsigned long offset;
 
   if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
@@ -1231,7 +1247,7 @@ thumb_get_next_pc (pc)
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
     {
       unsigned long status = read_register (PS_REGNUM);
-      unsigned long cond = bits (inst1, 8, 11); 
+      unsigned long cond = bits (inst1, 8, 11);
       if (cond != 0x0f && condition_true (cond, status))	/* 0x0f = SWI */
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
     }
@@ -1242,7 +1258,7 @@ thumb_get_next_pc (pc)
   else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link */
     {
       unsigned short inst2 = read_memory_integer (pc + 2, 2);
-      offset = (sbits (inst1, 0, 10) << 12) + (bits  (inst2, 0, 10) << 1);
+      offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
     }
 
@@ -1265,93 +1281,98 @@ arm_get_next_pc (pc)
   pc_val = (unsigned long) pc;
   this_instr = read_memory_integer (pc, 4);
   status = read_register (PS_REGNUM);
-  nextpc = (CORE_ADDR) (pc_val + 4);  /* Default case */
+  nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
   if (condition_true (bits (this_instr, 28, 31), status))
     {
       switch (bits (this_instr, 24, 27))
 	{
-	case 0x0: case 0x1: /* data processing */
-	case 0x2: case 0x3:
+	case 0x0:
+	case 0x1:		/* data processing */
+	case 0x2:
+	case 0x3:
 	  {
 	    unsigned long operand1, operand2, result = 0;
 	    unsigned long rn;
 	    int c;
- 
+
 	    if (bits (this_instr, 12, 15) != 15)
 	      break;
 
 	    if (bits (this_instr, 22, 25) == 0
-		&& bits (this_instr, 4, 7) == 9)  /* multiply */
+		&& bits (this_instr, 4, 7) == 9)	/* multiply */
 	      error ("Illegal update to pc in instruction");
 
 	    /* Multiply into PC */
 	    c = (status & FLAG_C) ? 1 : 0;
 	    rn = bits (this_instr, 16, 19);
 	    operand1 = (rn == 15) ? pc_val + 8 : read_register (rn);
- 
+
 	    if (bit (this_instr, 25))
 	      {
 		unsigned long immval = bits (this_instr, 0, 7);
 		unsigned long rotate = 2 * bits (this_instr, 8, 11);
-		operand2 = ((immval >> rotate) | (immval << (32-rotate)))
-			   & 0xffffffff;
+		operand2 = ((immval >> rotate) | (immval << (32 - rotate)))
+		  & 0xffffffff;
 	      }
-	    else  /* operand 2 is a shifted register */
+	    else		/* operand 2 is a shifted register */
 	      operand2 = shifted_reg_val (this_instr, c, pc_val, status);
- 
+
 	    switch (bits (this_instr, 21, 24))
 	      {
-	      case 0x0: /*and*/
+	      case 0x0:	/*and */
 		result = operand1 & operand2;
 		break;
 
-	      case 0x1: /*eor*/
+	      case 0x1:	/*eor */
 		result = operand1 ^ operand2;
 		break;
 
-	      case 0x2: /*sub*/
+	      case 0x2:	/*sub */
 		result = operand1 - operand2;
 		break;
 
-	      case 0x3: /*rsb*/
+	      case 0x3:	/*rsb */
 		result = operand2 - operand1;
 		break;
 
-	      case 0x4:  /*add*/
+	      case 0x4:	/*add */
 		result = operand1 + operand2;
 		break;
 
-	      case 0x5: /*adc*/
+	      case 0x5:	/*adc */
 		result = operand1 + operand2 + c;
 		break;
 
-	      case 0x6: /*sbc*/
+	      case 0x6:	/*sbc */
 		result = operand1 - operand2 + c;
 		break;
 
-	      case 0x7: /*rsc*/
+	      case 0x7:	/*rsc */
 		result = operand2 - operand1 + c;
 		break;
 
-	      case 0x8: case 0x9: case 0xa: case 0xb: /* tst, teq, cmp, cmn */
+	      case 0x8:
+	      case 0x9:
+	      case 0xa:
+	      case 0xb:	/* tst, teq, cmp, cmn */
 		result = (unsigned long) nextpc;
 		break;
 
-	      case 0xc: /*orr*/
+	      case 0xc:	/*orr */
 		result = operand1 | operand2;
 		break;
 
-	      case 0xd: /*mov*/
+	      case 0xd:	/*mov */
 		/* Always step into a function.  */
 		result = operand2;
-                break;
+		break;
 
-	      case 0xe: /*bic*/
+	      case 0xe:	/*bic */
 		result = operand1 & ~operand2;
 		break;
 
-	      case 0xf: /*mvn*/
+	      case 0xf:	/*mvn */
 		result = ~operand2;
 		break;
 	      }
@@ -1361,18 +1382,20 @@ arm_get_next_pc (pc)
 	      error ("Infinite loop detected");
 	    break;
 	  }
- 
-	case 0x4: case 0x5: /* data transfer */
-	case 0x6: case 0x7:
+
+	case 0x4:
+	case 0x5:		/* data transfer */
+	case 0x6:
+	case 0x7:
 	  if (bit (this_instr, 20))
 	    {
 	      /* load */
 	      if (bits (this_instr, 12, 15) == 15)
 		{
 		  /* rd == pc */
-		  unsigned long  rn;
+		  unsigned long rn;
 		  unsigned long base;
- 
+
 		  if (bit (this_instr, 22))
 		    error ("Illegal update to pc in instruction");
 
@@ -1384,18 +1407,18 @@ arm_get_next_pc (pc)
 		      /* pre-indexed */
 		      int c = (status & FLAG_C) ? 1 : 0;
 		      unsigned long offset =
-			(bit (this_instr, 25)
-			 ? shifted_reg_val (this_instr, c, pc_val)
-			 : bits (this_instr, 0, 11));
+		      (bit (this_instr, 25)
+		       ? shifted_reg_val (this_instr, c, pc_val)
+		       : bits (this_instr, 0, 11));
 
 		      if (bit (this_instr, 23))
 			base += offset;
 		      else
 			base -= offset;
 		    }
-		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base, 
+		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base,
 							    4);
- 
+
 		  nextpc = ADDR_BITS_REMOVE (nextpc);
 
 		  if (nextpc == pc)
@@ -1403,8 +1426,9 @@ arm_get_next_pc (pc)
 		}
 	    }
 	  break;
- 
-	case 0x8: case 0x9: /* block transfer */
+
+	case 0x8:
+	case 0x9:		/* block transfer */
 	  if (bit (this_instr, 20))
 	    {
 	      /* LDM */
@@ -1418,18 +1442,18 @@ arm_get_next_pc (pc)
 		      /* up */
 		      unsigned long reglist = bits (this_instr, 0, 14);
 		      offset = bitcount (reglist) * 4;
-		      if (bit (this_instr, 24)) /* pre */
+		      if (bit (this_instr, 24))		/* pre */
 			offset += 4;
 		    }
 		  else if (bit (this_instr, 24))
 		    offset = -4;
- 
+
 		  {
-		    unsigned long rn_val = 
-		      read_register (bits (this_instr, 16, 19));
+		    unsigned long rn_val =
+		    read_register (bits (this_instr, 16, 19));
 		    nextpc =
 		      (CORE_ADDR) read_memory_integer ((CORE_ADDR) (rn_val
-								    + offset),
+								  + offset),
 						       4);
 		  }
 		  nextpc = ADDR_BITS_REMOVE (nextpc);
@@ -1438,9 +1462,9 @@ arm_get_next_pc (pc)
 		}
 	    }
 	  break;
- 
-	case 0xb:           /* branch & link */
-	case 0xa:           /* branch */
+
+	case 0xb:		/* branch & link */
+	case 0xa:		/* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
 
@@ -1449,10 +1473,11 @@ arm_get_next_pc (pc)
 	      error ("Infinite loop detected");
 	    break;
 	  }
- 
-	case 0xc: case 0xd:
-	case 0xe:           /* coproc ops */
-	case 0xf:           /* SWI */
+
+	case 0xc:
+	case 0xd:
+	case 0xe:		/* coproc ops */
+	case 0xf:		/* SWI */
 	  break;
 
 	default:
@@ -1470,15 +1495,15 @@ arm_get_next_pc (pc)
 static int
 gdb_print_insn_arm (memaddr, info)
      bfd_vma memaddr;
-     disassemble_info * info;
+     disassemble_info *info;
 {
   if (arm_pc_is_thumb (memaddr))
     {
-      static asymbol *                  asym;
-      static combined_entry_type        ce;
-      static struct coff_symbol_struct  csym;
-      static struct _bfd                fake_bfd;
-      static bfd_target                 fake_target;
+      static asymbol *asym;
+      static combined_entry_type ce;
+      static struct coff_symbol_struct csym;
+      static struct _bfd fake_bfd;
+      static bfd_target fake_target;
 
       if (csym.native == NULL)
 	{
@@ -1486,22 +1511,22 @@ gdb_print_insn_arm (memaddr, info)
 	     solely so that the code in print_insn_little_arm() and
 	     print_insn_big_arm() in opcodes/arm-dis.c will detect the presence
 	     of a Thumb symbol and switch to decoding Thumb instructions.  */
-	     
-	  fake_target.flavour  = bfd_target_coff_flavour;
-	  fake_bfd.xvec        = & fake_target;
+
+	  fake_target.flavour = bfd_target_coff_flavour;
+	  fake_bfd.xvec = &fake_target;
 	  ce.u.syment.n_sclass = C_THUMBEXTFUNC;
-	  csym.native          = & ce;
-	  csym.symbol.the_bfd  = & fake_bfd;
-	  csym.symbol.name     = "fake";
-	  asym                 = (asymbol *) & csym;
+	  csym.native = &ce;
+	  csym.symbol.the_bfd = &fake_bfd;
+	  csym.symbol.name = "fake";
+	  asym = (asymbol *) & csym;
 	}
-      
+
       memaddr = UNMAKE_THUMB_ADDR (memaddr);
-      info->symbols = & asym;
+      info->symbols = &asym;
     }
   else
     info->symbols = NULL;
-  
+
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return print_insn_big_arm (memaddr, info);
   else
@@ -1509,10 +1534,10 @@ gdb_print_insn_arm (memaddr, info)
 }
 
 /* Sequence of bytes for breakpoint instruction.  */
-#define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7} /* Recognized illegal opcodes */
-#define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE} 
-#define THUMB_LE_BREAKPOINT {0xfe,0xdf}       
-#define THUMB_BE_BREAKPOINT {0xdf,0xfe}       
+#define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}		/* Recognized illegal opcodes */
+#define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
+#define THUMB_LE_BREAKPOINT {0xfe,0xdf}
+#define THUMB_BE_BREAKPOINT {0xdf,0xfe}
 
 /* The following has been superseded by BREAKPOINT_FOR_PC, but
    is defined merely to keep mem-break.c happy.  */
@@ -1528,40 +1553,40 @@ gdb_print_insn_arm (memaddr, info)
 
 unsigned char *
 arm_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR * pcptr;
-     int * lenptr;
+     CORE_ADDR *pcptr;
+     int *lenptr;
 {
   if (arm_pc_is_thumb (*pcptr) || arm_pc_is_thumb_dummy (*pcptr))
     {
       if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-        {
-          static char thumb_breakpoint[] = THUMB_BE_BREAKPOINT;
-          *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-          *lenptr = sizeof (thumb_breakpoint);
-          return thumb_breakpoint;
-         }
+	{
+	  static char thumb_breakpoint[] = THUMB_BE_BREAKPOINT;
+	  *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+	  *lenptr = sizeof (thumb_breakpoint);
+	  return thumb_breakpoint;
+	}
       else
-        {
-          static char thumb_breakpoint[] = THUMB_LE_BREAKPOINT;
-          *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-          *lenptr = sizeof (thumb_breakpoint);
-          return thumb_breakpoint;
-        }
+	{
+	  static char thumb_breakpoint[] = THUMB_LE_BREAKPOINT;
+	  *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+	  *lenptr = sizeof (thumb_breakpoint);
+	  return thumb_breakpoint;
+	}
     }
   else
     {
       if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-        {
-          static char arm_breakpoint[] = ARM_BE_BREAKPOINT;
-          *lenptr = sizeof (arm_breakpoint);
-          return arm_breakpoint;
-        }
+	{
+	  static char arm_breakpoint[] = ARM_BE_BREAKPOINT;
+	  *lenptr = sizeof (arm_breakpoint);
+	  return arm_breakpoint;
+	}
       else
-        {
-          static char arm_breakpoint[] = ARM_LE_BREAKPOINT;
-          *lenptr = sizeof (arm_breakpoint);
-          return arm_breakpoint;
-        }
+	{
+	  static char arm_breakpoint[] = ARM_LE_BREAKPOINT;
+	  *lenptr = sizeof (arm_breakpoint);
+	  return arm_breakpoint;
+	}
     }
 }
 /* Return non-zero if the PC is inside a call thunk (aka stub or trampoline).
@@ -1570,7 +1595,7 @@ arm_breakpoint_from_pc (pcptr, lenptr)
 int
 arm_in_call_stub (pc, name)
      CORE_ADDR pc;
-     char * name;
+     char *name;
 {
   CORE_ADDR start_addr;
 
@@ -1592,7 +1617,7 @@ CORE_ADDR
 arm_skip_stub (pc)
      CORE_ADDR pc;
 {
-  char * name;
+  char *name;
   CORE_ADDR start_addr;
 
   /* Find the starting address and name of the function containing the PC.  */
@@ -1604,50 +1629,50 @@ arm_skip_stub (pc)
     {
       /* Use the name suffix to determine which register contains
          the target PC.  */
-      static char *table[15] = 
-	{ "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-	  "r8", "r9", "sl", "fp", "ip", "sp", "lr"
-	};
+      static char *table[15] =
+      {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+       "r8", "r9", "sl", "fp", "ip", "sp", "lr"
+      };
       int regno;
 
       for (regno = 0; regno <= 14; regno++)
 	if (strcmp (&name[10], table[regno]) == 0)
 	  return read_register (regno);
     }
-  return 0;	/* not a stub */
+  return 0;			/* not a stub */
 }
 
 
 void
 _initialize_arm_tdep ()
 {
-  int regname_is_APCS = (arm_register_names ==  APCS_register_names);
+  int regname_is_APCS = (arm_register_names == APCS_register_names);
 
   tm_print_insn = gdb_print_insn_arm;
-  
+
   /* Sync the opcode insn printer with our register viewer: */
 
   if (arm_toggle_regnames () != regname_is_APCS)
     arm_toggle_regnames ();
-     
+
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the other set of register names.");
 
   /* ??? Maybe this should be a boolean.  */
   add_show_from_set (add_set_cmd ("apcs32", no_class,
-				  var_zinteger, (char *)&arm_apcs_32,
-				  "Set usage of ARM 32-bit mode.\n", &setlist),
-		     & showlist);
+				  var_zinteger, (char *) &arm_apcs_32,
+			       "Set usage of ARM 32-bit mode.\n", &setlist),
+		     &showlist);
 
 }
 
 /* Test whether the coff symbol specific value corresponds to a Thumb function */
 int
-coff_sym_is_thumb(int val)
+coff_sym_is_thumb (int val)
 {
-	return (val == C_THUMBEXT ||
-      val == C_THUMBSTAT ||
-      val == C_THUMBEXTFUNC ||
-      val == C_THUMBSTATFUNC ||
-      val == C_THUMBLABEL);
+  return (val == C_THUMBEXT ||
+	  val == C_THUMBSTAT ||
+	  val == C_THUMBEXTFUNC ||
+	  val == C_THUMBSTATFUNC ||
+	  val == C_THUMBLABEL);
 }

@@ -1,21 +1,22 @@
 /* Serial interface for raw TCP connections on Un*x like systems
    Copyright 1992, 1993, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -39,9 +40,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern int (*ui_loop_hook) PARAMS ((int));
 
 struct tcp_ttystate
-{
-  int bogus;
-};
+  {
+    int bogus;
+  };
 
 static int tcp_open PARAMS ((serial_t scb, const char *name));
 static void tcp_raw PARAMS ((serial_t scb));
@@ -64,7 +65,7 @@ void _initialize_ser_tcp PARAMS ((void));
 /* Open up a raw tcp socket */
 
 static int
-tcp_open(scb, name)
+tcp_open (scb, name)
      serial_t scb;
      const char *name;
 {
@@ -80,10 +81,10 @@ tcp_open(scb, name)
   port_str = strchr (name, ':');
 
   if (!port_str)
-    error ("tcp_open: No colon in host name!"); /* Shouldn't ever happen */
+    error ("tcp_open: No colon in host name!");		/* Shouldn't ever happen */
 
   tmp = min (port_str - name, (int) sizeof hostname - 1);
-  strncpy (hostname, name, tmp); /* Don't want colon */
+  strncpy (hostname, name, tmp);	/* Don't want colon */
   hostname[tmp] = '\000';	/* Tie off host name */
   port = atoi (port_str + 1);
 
@@ -104,18 +105,18 @@ tcp_open(scb, name)
 
       /* Allow rapid reuse of this port. */
       tmp = 1;
-      setsockopt (scb->fd, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp));
+      setsockopt (scb->fd, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp, sizeof (tmp));
 
       /* Enable TCP keep alive process. */
       tmp = 1;
-      setsockopt (scb->fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&tmp, sizeof(tmp));
+      setsockopt (scb->fd, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
 
       sockaddr.sin_family = PF_INET;
-      sockaddr.sin_port = htons(port);
+      sockaddr.sin_port = htons (port);
       memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
 	      sizeof (struct in_addr));
 
-      if (!connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)))
+      if (!connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr)))
 	break;
 
       close (scb->fd);
@@ -136,34 +137,34 @@ tcp_open(scb, name)
 
   tmp = 1;
   if (setsockopt (scb->fd, protoent->p_proto, TCP_NODELAY,
-		  (char *)&tmp, sizeof(tmp)))
+		  (char *) &tmp, sizeof (tmp)))
     return -1;
 
-  signal(SIGPIPE, SIG_IGN);	/* If we don't do this, then GDB simply exits
+  signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then GDB simply exits
 				   when the remote side dies.  */
 
   return 0;
 }
 
 static serial_ttystate
-tcp_get_tty_state(scb)
+tcp_get_tty_state (scb)
      serial_t scb;
 {
   struct tcp_ttystate *state;
 
-  state = (struct tcp_ttystate *)xmalloc(sizeof *state);
+  state = (struct tcp_ttystate *) xmalloc (sizeof *state);
 
-  return (serial_ttystate)state;
+  return (serial_ttystate) state;
 }
 
 static int
-tcp_set_tty_state(scb, ttystate)
+tcp_set_tty_state (scb, ttystate)
      serial_t scb;
      serial_ttystate ttystate;
 {
   struct tcp_ttystate *state;
 
-  state = (struct tcp_ttystate *)ttystate;
+  state = (struct tcp_ttystate *) ttystate;
 
   return 0;
 }
@@ -176,7 +177,7 @@ tcp_return_0 (scb)
 }
 
 static void
-tcp_raw(scb)
+tcp_raw (scb)
      serial_t scb;
 {
   return;			/* Always in raw mode */
@@ -204,25 +205,25 @@ wait_for (scb, timeout)
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
 
-  FD_SET(scb->fd, &readfds);
-  FD_SET(scb->fd, &exceptfds);
+  FD_SET (scb->fd, &readfds);
+  FD_SET (scb->fd, &exceptfds);
 
   while (1)
     {
       if (timeout >= 0)
-	numfds = select(scb->fd+1, &readfds, 0, &exceptfds, &tv);
+	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
       else
-	numfds = select(scb->fd+1, &readfds, 0, &exceptfds, 0);
+	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, 0);
 
       if (numfds <= 0)
-        {
+	{
 	  if (numfds == 0)
 	    return SERIAL_TIMEOUT;
 	  else if (errno == EINTR)
 	    continue;
 	  else
 	    return SERIAL_ERROR;	/* Got an error from select or poll */
-        }
+	}
 
       return 0;
     }
@@ -250,16 +251,16 @@ tcp_readchar (scb, timeout)
 
      Also, timeout = 0 means to poll, so we just set the delta to 0, so we
      will only go through the loop once. */
-   
+
   delta = (timeout == 0 ? 0 : 1);
   while (1)
     {
 
       /* N.B. The UI may destroy our world (for instance by calling
-	 remote_stop,) in which case we want to get out of here as
-	 quickly as possible.  It is not safe to touch scb, since
-	 someone else might have freed it.  The ui_loop_hook signals that 
-	 we should exit by returning 1. */
+         remote_stop,) in which case we want to get out of here as
+         quickly as possible.  It is not safe to touch scb, since
+         someone else might have freed it.  The ui_loop_hook signals that 
+         we should exit by returning 1. */
 
       if (ui_loop_hook)
 	{
@@ -272,15 +273,15 @@ tcp_readchar (scb, timeout)
 
       /* If we got a character or an error back from wait_for, then we can 
          break from the loop before the timeout is completed. */
-      
+
       if (status != SERIAL_TIMEOUT)
 	{
 	  break;
 	}
 
       /* If we have exhausted the original timeout, then generate
-	 a SERIAL_TIMEOUT, and pass it out of the loop. */
-      
+         a SERIAL_TIMEOUT, and pass it out of the loop. */
+
       else if (timeout == 0)
 	{
 	  status == SERIAL_TIMEOUT;
@@ -293,7 +294,7 @@ tcp_readchar (scb, timeout)
 
   while (1)
     {
-      scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+      scb->bufcnt = read (scb->fd, scb->buf, BUFSIZ);
       if (scb->bufcnt != -1 || errno != EINTR)
 	break;
     }
@@ -301,11 +302,11 @@ tcp_readchar (scb, timeout)
   if (scb->bufcnt <= 0)
     {
       if (scb->bufcnt == 0)
-        return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-				     distinguish between EOF & timeouts
-				     someday] */
+	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				   distinguish between EOF & timeouts
+				   someday] */
       else
-        return SERIAL_ERROR;	/* Got an error from read */
+	return SERIAL_ERROR;	/* Got an error from read */
     }
 
   scb->bufcnt--;
@@ -332,7 +333,7 @@ tcp_print_tty_state (scb, ttystate)
 }
 
 static int
-tcp_setbaudrate(scb, rate)
+tcp_setbaudrate (scb, rate)
      serial_t scb;
      int rate;
 {
@@ -340,7 +341,7 @@ tcp_setbaudrate(scb, rate)
 }
 
 static int
-tcp_setstopbits(scb, num)
+tcp_setstopbits (scb, num)
      serial_t scb;
      int num;
 {
@@ -348,7 +349,7 @@ tcp_setstopbits(scb, num)
 }
 
 static int
-tcp_write(scb, str, len)
+tcp_write (scb, str, len)
      serial_t scb;
      const char *str;
      int len;
@@ -357,7 +358,7 @@ tcp_write(scb, str, len)
 
   while (len > 0)
     {
-      cc = write(scb->fd, str, len);
+      cc = write (scb->fd, str, len);
 
       if (cc < 0)
 	return 1;
@@ -368,13 +369,13 @@ tcp_write(scb, str, len)
 }
 
 static void
-tcp_close(scb)
+tcp_close (scb)
      serial_t scb;
 {
   if (scb->fd < 0)
     return;
 
-  close(scb->fd);
+  close (scb->fd);
   scb->fd = -1;
 }
 
@@ -386,9 +387,9 @@ static struct serial_ops tcp_ops =
   tcp_close,
   tcp_readchar,
   tcp_write,
-  tcp_return_0, /* flush output */
-  tcp_return_0, /* flush input */
-  tcp_return_0, /* send break */
+  tcp_return_0,			/* flush output */
+  tcp_return_0,			/* flush input */
+  tcp_return_0,			/* send break */
   tcp_raw,
   tcp_get_tty_state,
   tcp_set_tty_state,
@@ -396,7 +397,7 @@ static struct serial_ops tcp_ops =
   tcp_noflush_set_tty_state,
   tcp_setbaudrate,
   tcp_setstopbits,
-  tcp_return_0,	/* wait for output to drain */
+  tcp_return_0,			/* wait for output to drain */
 };
 
 void

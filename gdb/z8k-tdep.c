@@ -1,25 +1,26 @@
 /* Target-machine dependent code for Zilog Z8000, for GDB.
    Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*
- Contributed by Steve Chamberlain
-                sac@cygnus.com
+   Contributed by Steve Chamberlain
+   sac@cygnus.com
  */
 
 #include "defs.h"
@@ -80,7 +81,7 @@ skip_adjust (pc, size)
   return pc;
 }
 
-static CORE_ADDR examine_frame PARAMS ((CORE_ADDR, CORE_ADDR *regs, CORE_ADDR));
+static CORE_ADDR examine_frame PARAMS ((CORE_ADDR, CORE_ADDR * regs, CORE_ADDR));
 static CORE_ADDR
 examine_frame (pc, regs, sp)
      CORE_ADDR pc;
@@ -120,8 +121,8 @@ examine_frame (pc, regs, sp)
   else if (IS_SUB_SP (w))
     {
       /* Subtracting a value from the sp, so were in a function
-       which needs stack space for locals, but has no fp.  We fake up
-       the values as if we had an fp */
+         which needs stack space for locals, but has no fp.  We fake up
+         the values as if we had an fp */
       regs[FP_REGNUM] = sp;
     }
   else
@@ -130,7 +131,7 @@ examine_frame (pc, regs, sp)
       regs[SP_REGNUM] = sp;
     }
   /* stack pointer contains address of next frame */
-  /*  regs[fp_regnum()] = fp;*/
+  /*  regs[fp_regnum()] = fp; */
   regs[SP_REGNUM] = sp;
   return pc;
 }
@@ -220,7 +221,7 @@ gdb_print_insn_z8k (memaddr, info)
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
-   of the instruction.*/
+   of the instruction. */
 
 CORE_ADDR
 NEXT_PROLOGUE_INSN (addr, lim, pword1)
@@ -296,7 +297,7 @@ frame_find_saved_regs (fip, fsrp)
 int
 saved_pc_after_call ()
 {
-  return ADDR_BITS_REMOVE 
+  return ADDR_BITS_REMOVE
     (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
 }
 
@@ -329,7 +330,7 @@ write_return_value (type, valbuf)
   int len;
 
   for (len = 0; len < TYPE_LENGTH (type); len += 2)
-    write_register_bytes (REGISTER_BYTE (len / 2  + 2), valbuf + len, 2);
+    write_register_bytes (REGISTER_BYTE (len / 2 + 2), valbuf + len, 2);
 }
 
 void

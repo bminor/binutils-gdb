@@ -1,21 +1,22 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
    Copyright 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -29,9 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_TERMIOS
 
 struct hardwire_ttystate
-{
-  struct termios termios;
-};
+  {
+    struct termios termios;
+  };
 #endif /* termios */
 
 #ifdef HAVE_TERMIO
@@ -42,9 +43,9 @@ struct hardwire_ttystate
    bewildering.  So we don't attempt it.  */
 
 struct hardwire_ttystate
-{
-  struct termio termio;
-};
+  {
+    struct termio termio;
+  };
 #endif /* termio */
 
 #ifdef HAVE_SGTTY
@@ -53,13 +54,13 @@ struct hardwire_ttystate
 #include <sys/time.h>
 
 struct hardwire_ttystate
-{
-  struct sgttyb sgttyb;
-  struct tchars tc;
-  struct ltchars ltc;
-  /* Line discipline flags.  */
-  int lmode;
-};
+  {
+    struct sgttyb sgttyb;
+    struct tchars tc;
+    struct ltchars ltc;
+    /* Line discipline flags.  */
+    int lmode;
+  };
 #endif /* sgtty */
 
 static int hardwire_open PARAMS ((serial_t scb, const char *name));
@@ -70,8 +71,8 @@ static int rate_to_code PARAMS ((int rate));
 static int hardwire_setbaudrate PARAMS ((serial_t scb, int rate));
 static int hardwire_write PARAMS ((serial_t scb, const char *str, int len));
 static void hardwire_close PARAMS ((serial_t scb));
-static int get_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
-static int set_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
+static int get_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate * state));
+static int set_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate * state));
 static serial_ttystate hardwire_get_tty_state PARAMS ((serial_t scb));
 static int hardwire_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
 static int hardwire_noflush_set_tty_state PARAMS ((serial_t, serial_ttystate,
@@ -90,7 +91,7 @@ extern int (*ui_loop_hook) PARAMS ((int));
 /* Open up a real live device for serial I/O */
 
 static int
-hardwire_open(scb, name)
+hardwire_open (scb, name)
      serial_t scb;
      const char *name;
 {
@@ -107,7 +108,7 @@ get_tty_state (scb, state)
      struct hardwire_ttystate *state;
 {
 #ifdef HAVE_TERMIOS
-  if (tcgetattr(scb->fd, &state->termios) < 0)
+  if (tcgetattr (scb->fd, &state->termios) < 0)
     return -1;
 
   return 0;
@@ -134,12 +135,12 @@ get_tty_state (scb, state)
 }
 
 static int
-set_tty_state(scb, state)
+set_tty_state (scb, state)
      serial_t scb;
      struct hardwire_ttystate *state;
 {
 #ifdef HAVE_TERMIOS
-  if (tcsetattr(scb->fd, TCSANOW, &state->termios) < 0)
+  if (tcsetattr (scb->fd, TCSANOW, &state->termios) < 0)
     return -1;
 
   return 0;
@@ -166,29 +167,29 @@ set_tty_state(scb, state)
 }
 
 static serial_ttystate
-hardwire_get_tty_state(scb)
+hardwire_get_tty_state (scb)
      serial_t scb;
 {
   struct hardwire_ttystate *state;
 
-  state = (struct hardwire_ttystate *)xmalloc(sizeof *state);
+  state = (struct hardwire_ttystate *) xmalloc (sizeof *state);
 
-  if (get_tty_state(scb, state))
+  if (get_tty_state (scb, state))
     return NULL;
 
-  return (serial_ttystate)state;
+  return (serial_ttystate) state;
 }
 
 static int
-hardwire_set_tty_state(scb, ttystate)
+hardwire_set_tty_state (scb, ttystate)
      serial_t scb;
      serial_ttystate ttystate;
 {
   struct hardwire_ttystate *state;
 
-  state = (struct hardwire_ttystate *)ttystate;
+  state = (struct hardwire_ttystate *) ttystate;
 
-  return set_tty_state(scb, state);
+  return set_tty_state (scb, state);
 }
 
 static int
@@ -202,7 +203,7 @@ hardwire_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) old_ttystate;
 #endif
 
-  new_state = *(struct hardwire_ttystate *)new_ttystate;
+  new_state = *(struct hardwire_ttystate *) new_ttystate;
 
   /* Don't change in or out of raw mode; we don't want to flush input.
      termio and termios have no such restriction; for them flushing input
@@ -265,13 +266,13 @@ hardwire_print_tty_state (scb, ttystate)
   printf_filtered ("sgttyb.sg_flags = 0x%x.\n", state->sgttyb.sg_flags);
 
   printf_filtered ("tchars: ");
-  for (i = 0; i < (int)sizeof (struct tchars); i++)
-    printf_filtered ("0x%x ", ((unsigned char *)&state->tc)[i]);
+  for (i = 0; i < (int) sizeof (struct tchars); i++)
+    printf_filtered ("0x%x ", ((unsigned char *) &state->tc)[i]);
   printf_filtered ("\n");
 
   printf_filtered ("ltchars: ");
-  for (i = 0; i < (int)sizeof (struct ltchars); i++)
-    printf_filtered ("0x%x ", ((unsigned char *)&state->ltc)[i]);
+  for (i = 0; i < (int) sizeof (struct ltchars); i++)
+    printf_filtered ("0x%x ", ((unsigned char *) &state->ltc)[i]);
   printf_filtered ("\n");
 
   printf_filtered ("lmode:  0x%x\n", state->lmode);
@@ -307,7 +308,7 @@ hardwire_drain_output (scb)
 	return (ioctl (scb->fd, TIOCSETP, &state.sgttyb));
       }
   }
-#endif  
+#endif
 }
 
 static int
@@ -325,7 +326,7 @@ hardwire_flush_output (scb)
 #ifdef HAVE_SGTTY
   /* This flushes both input and output, but we can't do better.  */
   return ioctl (scb->fd, TIOCFLUSH, 0);
-#endif  
+#endif
 }
 
 static int
@@ -346,7 +347,7 @@ hardwire_flush_input (scb)
 #ifdef HAVE_SGTTY
   /* This flushes both input and output, but we can't do better.  */
   return ioctl (scb->fd, TIOCFLUSH, 0);
-#endif  
+#endif
 }
 
 static int
@@ -377,23 +378,23 @@ hardwire_send_break (scb)
     status = ioctl (scb->fd, TIOCCBRK, 0);
     return status;
   }
-#endif  
+#endif
 }
 
 static void
-hardwire_raw(scb)
+hardwire_raw (scb)
      serial_t scb;
 {
   struct hardwire_ttystate state;
 
-  if (get_tty_state(scb, &state))
-    fprintf_unfiltered(gdb_stderr, "get_tty_state failed: %s\n", safe_strerror(errno));
+  if (get_tty_state (scb, &state))
+    fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n", safe_strerror (errno));
 
 #ifdef HAVE_TERMIOS
   state.termios.c_iflag = 0;
   state.termios.c_oflag = 0;
   state.termios.c_lflag = 0;
-  state.termios.c_cflag &= ~(CSIZE|PARENB);
+  state.termios.c_cflag &= ~(CSIZE | PARENB);
   state.termios.c_cflag |= CLOCAL | CS8;
   state.termios.c_cc[VMIN] = 0;
   state.termios.c_cc[VTIME] = 0;
@@ -403,7 +404,7 @@ hardwire_raw(scb)
   state.termio.c_iflag = 0;
   state.termio.c_oflag = 0;
   state.termio.c_lflag = 0;
-  state.termio.c_cflag &= ~(CSIZE|PARENB);
+  state.termio.c_cflag &= ~(CSIZE | PARENB);
   state.termio.c_cflag |= CLOCAL | CS8;
   state.termio.c_cc[VMIN] = 0;
   state.termio.c_cc[VTIME] = 0;
@@ -417,7 +418,7 @@ hardwire_raw(scb)
   scb->current_timeout = 0;
 
   if (set_tty_state (scb, &state))
-    fprintf_unfiltered(gdb_stderr, "set_tty_state failed: %s\n", safe_strerror(errno));
+    fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n", safe_strerror (errno));
 }
 
 /* Wait for input on scb, with timeout seconds.  Returns 0 on success,
@@ -428,7 +429,7 @@ hardwire_raw(scb)
  */
 
 static int
-wait_for(scb, timeout)
+wait_for (scb, timeout)
      serial_t scb;
      int timeout;
 {
@@ -442,16 +443,16 @@ wait_for(scb, timeout)
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
 
-    FD_SET(scb->fd, &readfds);
+    FD_SET (scb->fd, &readfds);
 
     while (1)
       {
 	int numfds;
 
 	if (timeout >= 0)
-	  numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
+	  numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
 	else
-	  numfds = select(scb->fd+1, &readfds, 0, 0, 0);
+	  numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
 
 	if (numfds <= 0)
 	  if (numfds == 0)
@@ -464,7 +465,7 @@ wait_for(scb, timeout)
 	return 0;
       }
   }
-#endif	/* HAVE_SGTTY */
+#endif /* HAVE_SGTTY */
 
 #if defined HAVE_TERMIO || defined HAVE_TERMIOS
   if (timeout == scb->current_timeout)
@@ -475,8 +476,8 @@ wait_for(scb, timeout)
   {
     struct hardwire_ttystate state;
 
-    if (get_tty_state(scb, &state))
-      fprintf_unfiltered(gdb_stderr, "get_tty_state failed: %s\n", safe_strerror(errno));
+    if (get_tty_state (scb, &state))
+      fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n", safe_strerror (errno));
 
 #ifdef HAVE_TERMIOS
     if (timeout < 0)
@@ -528,11 +529,11 @@ wait_for(scb, timeout)
 #endif
 
     if (set_tty_state (scb, &state))
-      fprintf_unfiltered(gdb_stderr, "set_tty_state failed: %s\n", safe_strerror(errno));
+      fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n", safe_strerror (errno));
 
     return 0;
   }
-#endif	/* HAVE_TERMIO || HAVE_TERMIOS */
+#endif /* HAVE_TERMIO || HAVE_TERMIOS */
 }
 
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds
@@ -558,7 +559,7 @@ hardwire_readchar (scb, timeout)
      each time through the loop.
      Also, timeout = 0 means to poll, so we just set the delta to 0, so we
      will only go through the loop once. */
-   
+
   delta = (timeout == 0 ? 0 : 1);
   while (1)
     {
@@ -570,7 +571,7 @@ hardwire_readchar (scb, timeout)
          we should exit by returning 1. */
 
       if (ui_loop_hook)
-        detach = ui_loop_hook (0);
+	detach = ui_loop_hook (0);
 
       if (detach)
 	return SERIAL_TIMEOUT;
@@ -588,14 +589,14 @@ hardwire_readchar (scb, timeout)
 	  if (scb->bufcnt == 0)
 	    {
 	      /* Zero characters means timeout (it could also be EOF, but
-		 we don't (yet at least) distinguish).  */
+	         we don't (yet at least) distinguish).  */
 	      if (scb->timeout_remaining > 0)
 		{
 		  timeout = scb->timeout_remaining;
 		  continue;
 		}
-          else if (scb->timeout_remaining < 0)
-            continue;
+	      else if (scb->timeout_remaining < 0)
+		continue;
 	      else
 		return SERIAL_TIMEOUT;
 	    }
@@ -629,57 +630,117 @@ static struct
 }
 baudtab[] =
 {
-  {50, B50},
-  {75, B75},
-  {110, B110},
-  {134, B134},
-  {150, B150},
-  {200, B200},
-  {300, B300},
-  {600, B600},
-  {1200, B1200},
-  {1800, B1800},
-  {2400, B2400},
-  {4800, B4800},
-  {9600, B9600},
-  {19200, B19200},
-  {38400, B38400},
+  {
+    50, B50
+  }
+  ,
+  {
+    75, B75
+  }
+  ,
+  {
+    110, B110
+  }
+  ,
+  {
+    134, B134
+  }
+  ,
+  {
+    150, B150
+  }
+  ,
+  {
+    200, B200
+  }
+  ,
+  {
+    300, B300
+  }
+  ,
+  {
+    600, B600
+  }
+  ,
+  {
+    1200, B1200
+  }
+  ,
+  {
+    1800, B1800
+  }
+  ,
+  {
+    2400, B2400
+  }
+  ,
+  {
+    4800, B4800
+  }
+  ,
+  {
+    9600, B9600
+  }
+  ,
+  {
+    19200, B19200
+  }
+  ,
+  {
+    38400, B38400
+  }
+  ,
 #ifdef B57600
-  {57600, B57600},
+  {
+    57600, B57600
+  }
+  ,
 #endif
 #ifdef B115200
-  {115200, B115200},
+  {
+    115200, B115200
+  }
+  ,
 #endif
 #ifdef B230400
-  {230400, B230400},
+  {
+    230400, B230400
+  }
+  ,
 #endif
 #ifdef B460800
-  {460800, B460800},
+  {
+    460800, B460800
+  }
+  ,
 #endif
-  {-1, -1},
+  {
+    -1, -1
+  }
+  ,
 };
 
-static int 
-rate_to_code(rate)
+static int
+rate_to_code (rate)
      int rate;
 {
   int i;
 
   for (i = 0; baudtab[i].rate != -1; i++)
-    if (rate == baudtab[i].rate)  
+    if (rate == baudtab[i].rate)
       return baudtab[i].code;
 
   return -1;
 }
 
 static int
-hardwire_setbaudrate(scb, rate)
+hardwire_setbaudrate (scb, rate)
      serial_t scb;
      int rate;
 {
   struct hardwire_ttystate state;
 
-  if (get_tty_state(scb, &state))
+  if (get_tty_state (scb, &state))
     return -1;
 
 #ifdef HAVE_TERMIOS
@@ -705,14 +766,14 @@ hardwire_setbaudrate(scb, rate)
 }
 
 static int
-hardwire_setstopbits(scb, num)
+hardwire_setstopbits (scb, num)
      serial_t scb;
      int num;
 {
   struct hardwire_ttystate state;
   int newbit;
 
-  if (get_tty_state(scb, &state))
+  if (get_tty_state (scb, &state))
     return -1;
 
   switch (num)
@@ -732,14 +793,14 @@ hardwire_setstopbits(scb, num)
   if (!newbit)
     state.termios.c_cflag &= ~CSTOPB;
   else
-    state.termios.c_cflag |= CSTOPB; /* two bits */
+    state.termios.c_cflag |= CSTOPB;	/* two bits */
 #endif
 
 #ifdef HAVE_TERMIO
   if (!newbit)
     state.termio.c_cflag &= ~CSTOPB;
   else
-    state.termio.c_cflag |= CSTOPB; /* two bits */
+    state.termio.c_cflag |= CSTOPB;	/* two bits */
 #endif
 
 #ifdef HAVE_SGTTY
@@ -750,7 +811,7 @@ hardwire_setstopbits(scb, num)
 }
 
 static int
-hardwire_write(scb, str, len)
+hardwire_write (scb, str, len)
      serial_t scb;
      const char *str;
      int len;
@@ -759,7 +820,7 @@ hardwire_write(scb, str, len)
 
   while (len > 0)
     {
-      cc = write(scb->fd, str, len);
+      cc = write (scb->fd, str, len);
 
       if (cc < 0)
 	return 1;
@@ -770,13 +831,13 @@ hardwire_write(scb, str, len)
 }
 
 static void
-hardwire_close(scb)
+hardwire_close (scb)
      serial_t scb;
 {
   if (scb->fd < 0)
     return;
 
-  close(scb->fd);
+  close (scb->fd);
   scb->fd = -1;
 }
 

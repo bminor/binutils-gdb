@@ -1,21 +1,22 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
    Copyright 1996, Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -47,37 +48,49 @@ static char *v850e_reg_names[] =
 char **v850_register_names = v850_generic_reg_names;
 
 struct
+  {
+    char **regnames;
+    int mach;
+  }
+v850_processor_type_table[] =
 {
-  char **regnames;
-  int mach;
-} v850_processor_type_table[] =
-{
-  { v850_generic_reg_names, bfd_mach_v850 },
-  { v850e_reg_names, bfd_mach_v850e },
-  { v850e_reg_names, bfd_mach_v850ea },
-  { NULL, 0 }
+  {
+    v850_generic_reg_names, bfd_mach_v850
+  }
+  ,
+  {
+    v850e_reg_names, bfd_mach_v850e
+  }
+  ,
+  {
+    v850e_reg_names, bfd_mach_v850ea
+  }
+  ,
+  {
+    NULL, 0
+  }
 };
 
 /* Info gleaned from scanning a function's prologue.  */
 
 struct pifsr			/* Info about one saved reg */
-{
-  int framereg;			/* Frame reg (SP or FP) */
-  int offset;			/* Offset from framereg */
-  int cur_frameoffset;		/* Current frameoffset */
-  int reg;			/* Saved register number */
-};
+  {
+    int framereg;		/* Frame reg (SP or FP) */
+    int offset;			/* Offset from framereg */
+    int cur_frameoffset;	/* Current frameoffset */
+    int reg;			/* Saved register number */
+  };
 
 struct prologue_info
-{
-  int framereg;
-  int frameoffset;
-  int start_function;
-  struct pifsr *pifsrs;
-};
+  {
+    int framereg;
+    int frameoffset;
+    int start_function;
+    struct pifsr *pifsrs;
+  };
 
-static CORE_ADDR v850_scan_prologue PARAMS ((CORE_ADDR pc, 
-					     struct prologue_info *fs));
+static CORE_ADDR v850_scan_prologue PARAMS ((CORE_ADDR pc,
+					     struct prologue_info * fs));
 
 
 /* Should call_function allocate stack space for a struct return?  */
@@ -88,11 +101,11 @@ v850_use_struct_convention (gcc_p, type)
 {
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 4);
 }
-
 
 
+
 /* Structure for mapping bits in register lists to register numbers. */
-struct reg_list 
+struct reg_list
 {
   long mask;
   int regno;
@@ -101,7 +114,7 @@ struct reg_list
 /* Helper function for v850_scan_prologue to handle prepare instruction. */
 
 static void
-handle_prepare (int insn, int insn2, CORE_ADDR *current_pc_ptr,
+handle_prepare (int insn, int insn2, CORE_ADDR * current_pc_ptr,
 		struct prologue_info *pi, struct pifsr **pifsr_ptr)
 
 {
@@ -110,25 +123,25 @@ handle_prepare (int insn, int insn2, CORE_ADDR *current_pc_ptr,
   long next = insn2 & 0xffff;
   long list12 = ((insn & 1) << 16) + (next & 0xffe0);
   long offset = (insn & 0x3e) << 1;
-  static struct reg_list reg_table [] =
+  static struct reg_list reg_table[] =
   {
-    { 0x00800, 20 },	/* r20 */
-    { 0x00400, 21 },	/* r21 */
-    { 0x00200, 22 },	/* r22 */
-    { 0x00100, 23 },	/* r23 */
-    { 0x08000, 24 },	/* r24 */
-    { 0x04000, 25 },	/* r25 */
-    { 0x02000, 26 },	/* r26 */
-    { 0x01000, 27 },	/* r27 */
-    { 0x00080, 28 },	/* r28 */
-    { 0x00040, 29 },	/* r29 */
-    { 0x10000, 30 },	/* ep */
-    { 0x00020, 31 },	/* lp */
-    { 0, 0 }		/* end of table */
+    {0x00800, 20},		/* r20 */
+    {0x00400, 21},		/* r21 */
+    {0x00200, 22},		/* r22 */
+    {0x00100, 23},		/* r23 */
+    {0x08000, 24},		/* r24 */
+    {0x04000, 25},		/* r25 */
+    {0x02000, 26},		/* r26 */
+    {0x01000, 27},		/* r27 */
+    {0x00080, 28},		/* r28 */
+    {0x00040, 29},		/* r29 */
+    {0x10000, 30},		/* ep */
+    {0x00020, 31},		/* lp */
+    {0, 0}			/* end of table */
   };
   int i;
 
-  if ((next & 0x1f) == 0x0b)		/* skip imm16 argument */
+  if ((next & 0x1f) == 0x0b)	/* skip imm16 argument */
     current_pc += 2;
   else if ((next & 0x1f) == 0x13)	/* skip imm16 argument */
     current_pc += 2;
@@ -156,9 +169,9 @@ handle_prepare (int insn, int insn2, CORE_ADDR *current_pc_ptr,
 	      pifsr->reg = reg;
 	      pifsr->offset = offset;
 	      pifsr->cur_frameoffset = pi->frameoffset;
-    #ifdef DEBUG
+#ifdef DEBUG
 	      printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
-    #endif
+#endif
 	      pifsr++;
 	    }
 	}
@@ -179,51 +192,51 @@ handle_prepare (int insn, int insn2, CORE_ADDR *current_pc_ptr,
 
 static void
 handle_pushm (int insn, int insn2, struct prologue_info *pi,
-	     struct pifsr **pifsr_ptr)
+	      struct pifsr **pifsr_ptr)
 
 {
   struct pifsr *pifsr = *pifsr_ptr;
   long list12 = ((insn & 0x0f) << 16) + (insn2 & 0xfff0);
   long offset = 0;
-  static struct reg_list pushml_reg_table [] =
+  static struct reg_list pushml_reg_table[] =
   {
-    { 0x80000, PS_REGNUM },	/* PSW */
-    { 0x40000, 1 },		/* r1 */
-    { 0x20000, 2 },		/* r2 */
-    { 0x10000, 3 },		/* r3 */
-    { 0x00800, 4 },		/* r4 */
-    { 0x00400, 5 },		/* r5 */
-    { 0x00200, 6 },		/* r6 */
-    { 0x00100, 7 },		/* r7 */
-    { 0x08000, 8 },		/* r8 */
-    { 0x04000, 9 },		/* r9 */
-    { 0x02000, 10 },		/* r10 */
-    { 0x01000, 11 },		/* r11 */
-    { 0x00080, 12 },		/* r12 */
-    { 0x00040, 13 },		/* r13 */
-    { 0x00020, 14 },		/* r14 */
-    { 0x00010, 15 },		/* r15 */
-    { 0, 0 }		/* end of table */
+    {0x80000, PS_REGNUM},	/* PSW */
+    {0x40000, 1},		/* r1 */
+    {0x20000, 2},		/* r2 */
+    {0x10000, 3},		/* r3 */
+    {0x00800, 4},		/* r4 */
+    {0x00400, 5},		/* r5 */
+    {0x00200, 6},		/* r6 */
+    {0x00100, 7},		/* r7 */
+    {0x08000, 8},		/* r8 */
+    {0x04000, 9},		/* r9 */
+    {0x02000, 10},		/* r10 */
+    {0x01000, 11},		/* r11 */
+    {0x00080, 12},		/* r12 */
+    {0x00040, 13},		/* r13 */
+    {0x00020, 14},		/* r14 */
+    {0x00010, 15},		/* r15 */
+    {0, 0}			/* end of table */
   };
-  static struct reg_list pushmh_reg_table [] =
+  static struct reg_list pushmh_reg_table[] =
   {
-    { 0x80000, 16 },		/* r16 */
-    { 0x40000, 17 },		/* r17 */
-    { 0x20000, 18 },		/* r18 */
-    { 0x10000, 19 },		/* r19 */
-    { 0x00800, 20 },		/* r20 */
-    { 0x00400, 21 },		/* r21 */
-    { 0x00200, 22 },		/* r22 */
-    { 0x00100, 23 },		/* r23 */
-    { 0x08000, 24 },		/* r24 */
-    { 0x04000, 25 },		/* r25 */
-    { 0x02000, 26 },		/* r26 */
-    { 0x01000, 27 },		/* r27 */
-    { 0x00080, 28 },		/* r28 */
-    { 0x00040, 29 },		/* r29 */
-    { 0x00010, 30 },		/* r30 */
-    { 0x00020, 31 },		/* r31 */
-    { 0, 0 }		/* end of table */
+    {0x80000, 16},		/* r16 */
+    {0x40000, 17},		/* r17 */
+    {0x20000, 18},		/* r18 */
+    {0x10000, 19},		/* r19 */
+    {0x00800, 20},		/* r20 */
+    {0x00400, 21},		/* r21 */
+    {0x00200, 22},		/* r22 */
+    {0x00100, 23},		/* r23 */
+    {0x08000, 24},		/* r24 */
+    {0x04000, 25},		/* r25 */
+    {0x02000, 26},		/* r26 */
+    {0x01000, 27},		/* r27 */
+    {0x00080, 28},		/* r28 */
+    {0x00040, 29},		/* r29 */
+    {0x00010, 30},		/* r30 */
+    {0x00020, 31},		/* r31 */
+    {0, 0}			/* end of table */
   };
   struct reg_list *reg_table;
   int i;
@@ -255,9 +268,9 @@ handle_pushm (int insn, int insn2, struct prologue_info *pi,
 	      pifsr->reg = reg;
 	      pifsr->offset = offset;
 	      pifsr->cur_frameoffset = pi->frameoffset;
-    #ifdef DEBUG
+#ifdef DEBUG
 	      printf_filtered ("\tSaved register r%d, offset %d", reg, pifsr->offset);
-    #endif
+#endif
 	      pifsr++;
 	    }
 	}
@@ -269,10 +282,10 @@ handle_pushm (int insn, int insn2, struct prologue_info *pi,
   /* Set result parameters. */
   *pifsr_ptr = pifsr;
 }
-
-
-
 
+
+
+
 /* Function: scan_prologue
    Scan the prologue of the function that contains PC, and record what
    we find in PI.  PI->fsr must be zeroed by the called.  Returns the
@@ -329,7 +342,7 @@ v850_scan_prologue (pc, pi)
 
   /* Now, search the prologue looking for instructions that setup fp, save
      rp, adjust sp and such.  We also record the frame offset of any saved
-     registers. */ 
+     registers. */
 
   pi->frameoffset = 0;
   pi->framereg = SP_REGNUM;
@@ -343,21 +356,21 @@ v850_scan_prologue (pc, pi)
 
 #ifdef DEBUG
   printf_filtered ("Current_pc = 0x%.8lx, prologue_end = 0x%.8lx\n",
-		   (long)func_addr, (long)prologue_end);
+		   (long) func_addr, (long) prologue_end);
 #endif
 
-  for (current_pc = func_addr; current_pc < prologue_end; )
+  for (current_pc = func_addr; current_pc < prologue_end;)
     {
       int insn, insn2;
 
 #ifdef DEBUG
-      printf_filtered ("0x%.8lx ", (long)current_pc);
+      printf_filtered ("0x%.8lx ", (long) current_pc);
       (*tm_print_insn) (current_pc, &tm_print_insn_info);
 #endif
 
       insn = read_memory_unsigned_integer (current_pc, 2);
       current_pc += 2;
-      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
+      if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction? */
 	{
 	  insn2 = read_memory_unsigned_integer (current_pc, 2);
 	  current_pc += 2;
@@ -365,9 +378,9 @@ v850_scan_prologue (pc, pi)
 
       if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
 	{			/* jarl <func>,10 */
-	  long low_disp = insn2 & ~ (long) 1;
+	  long low_disp = insn2 & ~(long) 1;
 	  long disp = (((((insn & 0x3f) << 16) + low_disp)
-			& ~ (long) 1) ^ 0x00200000) - 0x00200000;
+			& ~(long) 1) ^ 0x00200000) - 0x00200000;
 
 	  save_pc = current_pc;
 	  save_end = prologue_end;
@@ -375,14 +388,14 @@ v850_scan_prologue (pc, pi)
 	  current_pc += disp - 4;
 	  prologue_end = (current_pc
 			  + (2 * 3)	/* moves to/from ep */
-			  + 4		/* addi <const>,sp,sp */
-			  + 2		/* jmp [r10] */
+			  + 4	/* addi <const>,sp,sp */
+			  + 2	/* jmp [r10] */
 			  + (2 * 12)	/* sst.w to save r2, r20-r29, r31 */
 			  + 20);	/* slop area */
 
 #ifdef DEBUG
 	  printf_filtered ("\tfound jarl <func>,r10, disp = %ld, low_disp = %ld, new pc = 0x%.8lx\n",
-			   disp, low_disp, (long)current_pc + 2);
+			   disp, low_disp, (long) current_pc + 2);
 #endif
 	  continue;
 	}
@@ -397,12 +410,12 @@ v850_scan_prologue (pc, pi)
 	  current_pc = ctbp + (read_memory_unsigned_integer (adr, 2) & 0xffff);
 	  prologue_end = (current_pc
 			  + (2 * 3)	/* prepare list2,imm5,sp/imm */
-			  + 4		/* ctret */
+			  + 4	/* ctret */
 			  + 20);	/* slop area */
 
 #ifdef DEBUG
 	  printf_filtered ("\tfound callt,  ctbp = 0x%.8lx, adr = %.8lx, new pc = 0x%.8lx\n",
-			   ctbp, adr, (long)current_pc);
+			   ctbp, adr, (long) current_pc);
 #endif
 	  continue;
 	}
@@ -443,7 +456,7 @@ v850_scan_prologue (pc, pi)
 #ifdef DEBUG
 	  printf_filtered ("\n");
 #endif
-	  break;				/* Ran into end of prologue */
+	  break;		/* Ran into end of prologue */
 	}
 
       else if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240))		/* add <imm>,sp */
@@ -460,19 +473,19 @@ v850_scan_prologue (pc, pi)
 	r12_tmp = insn2 << 16;
       else if (insn == ((R12_REGNUM << 11) | 0x0620 | R12_REGNUM))	/* movea lo(const),r12,r12 */
 	r12_tmp += insn2;
-      else if (insn == ((SP_REGNUM << 11) | 0x01c0 | R12_REGNUM) && r12_tmp) /* add r12,sp */
+      else if (insn == ((SP_REGNUM << 11) | 0x01c0 | R12_REGNUM) && r12_tmp)	/* add r12,sp */
 	pi->frameoffset = r12_tmp;
       else if (insn == ((EP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,ep */
 	ep_used = 1;
       else if (insn == ((EP_REGNUM << 11) | 0x0000 | R1_REGNUM))	/* mov r1,ep */
 	ep_used = 0;
-      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)			/* st.w <reg>,<offset>[sp] */
+      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)		/* st.w <reg>,<offset>[sp] */
 		|| (fp_used
 		    && (insn & 0x07ff) == (0x0760 | FP_RAW_REGNUM)))	/* st.w <reg>,<offset>[fp] */
 	       && pifsr
 	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
 		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
-		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
+		 || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
 	{
 	  pifsr->reg = reg;
 	  pifsr->offset = insn2 & ~1;
@@ -483,12 +496,12 @@ v850_scan_prologue (pc, pi)
 	  pifsr++;
 	}
 
-      else if (ep_used						/* sst.w <reg>,<offset>[ep] */
+      else if (ep_used		/* sst.w <reg>,<offset>[ep] */
 	       && ((insn & 0x0781) == 0x0501)
 	       && pifsr
 	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
 		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
-		   || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
+		 || (reg >= SAVE3_START_REGNUM && reg <= SAVE3_END_REGNUM)))
 	{
 	  pifsr->reg = reg;
 	  pifsr->offset = (insn & 0x007e) << 1;
@@ -516,7 +529,7 @@ v850_scan_prologue (pc, pi)
 
 #ifdef DEBUG
       printf_filtered ("Saved register r%d, offset = %d, framereg = r%d\n",
-		       pifsr_tmp->reg, pifsr_tmp->offset, pifsr_tmp->framereg);
+		    pifsr_tmp->reg, pifsr_tmp->offset, pifsr_tmp->framereg);
 #endif
     }
 
@@ -555,7 +568,7 @@ v850_init_extra_frame_info (fi)
   /* The call dummy doesn't save any registers on the stack, so we can return
      now.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return;
+    return;
 
   pi.pifsrs = pifsrs;
 
@@ -591,8 +604,8 @@ v850_frame_chain (fi)
   callers_pc = FRAME_SAVED_PC (fi);
   /* If caller is a call-dummy, then our FP bears no relation to his FP! */
   fp = v850_find_callers_reg (fi, FP_RAW_REGNUM);
-  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
-    return fp;	/* caller is call-dummy: return oldest value of FP */
+  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
+    return fp;			/* caller is call-dummy: return oldest value of FP */
 
   /* Caller is NOT a call-dummy, so everything else should just work.
      Even if THIS frame is a call-dummy! */
@@ -626,8 +639,8 @@ v850_find_callers_reg (fi, regnum)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else if (fi->fsr.regs[regnum] != 0)
-      return read_memory_unsigned_integer (fi->fsr.regs[regnum], 
-					   REGISTER_RAW_SIZE(regnum));
+      return read_memory_unsigned_integer (fi->fsr.regs[regnum],
+					   REGISTER_RAW_SIZE (regnum));
 
   return read_register (regnum);
 }
@@ -672,7 +685,7 @@ v850_pop_frame (frame)
 {
   int regnum;
 
-  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -681,8 +694,8 @@ v850_pop_frame (frame)
       for (regnum = 0; regnum < NUM_REGS; regnum++)
 	if (frame->fsr.regs[regnum] != 0)
 	  write_register (regnum,
-			  read_memory_unsigned_integer (frame->fsr.regs[regnum],
-							REGISTER_RAW_SIZE(regnum)));
+		      read_memory_unsigned_integer (frame->fsr.regs[regnum],
+					       REGISTER_RAW_SIZE (regnum)));
 
       write_register (SP_REGNUM, FRAME_FP (frame));
     }
@@ -699,7 +712,7 @@ v850_pop_frame (frame)
    in as a secret first argument (always in R6).
 
    Stack space for the args has NOT been allocated: that job is up to us.
-   */
+ */
 
 CORE_ADDR
 v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -719,15 +732,15 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   /* Now make space on the stack for the args. */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
-  sp -= len;	/* possibly over-allocating, but it works... */
-		/* (you might think we could allocate 16 bytes */
-		/* less, but the ABI seems to use it all! )  */
+    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
+  sp -= len;			/* possibly over-allocating, but it works... */
+  /* (you might think we could allocate 16 bytes */
+  /* less, but the ABI seems to use it all! )  */
   argreg = ARG0_REGNUM;
 
   /* the struct_return pointer occupies the first parameter-passing reg */
   if (struct_return)
-      write_register (argreg++, struct_addr);
+    write_register (argreg++, struct_addr);
 
   stack_offset = 16;
   /* The offset onto the stack at which we will start copying parameters
@@ -741,7 +754,7 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
     {
       int len;
       char *val;
-      char valbuf[REGISTER_RAW_SIZE(ARG0_REGNUM)];
+      char valbuf[REGISTER_RAW_SIZE (ARG0_REGNUM)];
 
       if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
@@ -753,11 +766,11 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
       else
 	{
 	  len = TYPE_LENGTH (VALUE_TYPE (*args));
-	  val = (char *)VALUE_CONTENTS (*args);
+	  val = (char *) VALUE_CONTENTS (*args);
 	}
 
       while (len > 0)
-	if  (argreg <= ARGLAST_REGNUM)
+	if (argreg <= ARGLAST_REGNUM)
 	  {
 	    CORE_ADDR regval;
 
@@ -784,7 +797,7 @@ v850_push_arguments (nargs, args, sp, struct_return, struct_addr)
 /* Function: push_return_address (pc)
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
- 
+
 CORE_ADDR
 v850_push_return_address (pc, sp)
      CORE_ADDR pc;
@@ -793,7 +806,7 @@ v850_push_return_address (pc, sp)
   write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
- 
+
 /* Function: frame_saved_pc 
    Find the caller of this frame.  We do this by seeing if RP_REGNUM
    is saved in the stack anywhere, otherwise we get it from the
@@ -805,8 +818,8 @@ CORE_ADDR
 v850_frame_saved_pc (fi)
      struct frame_info *fi;
 {
-  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+    return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return v850_find_callers_reg (fi, RP_REGNUM);
 }
@@ -815,9 +828,9 @@ v850_frame_saved_pc (fi)
 /* Function: fix_call_dummy
    Pokes the callee function's address into the CALL_DUMMY assembly stub.
    Assumes that the CALL_DUMMY looks like this:
-	jarl <offset24>, r31
-	trap
-   */
+   jarl <offset24>, r31
+   trap
+ */
 
 int
 v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
@@ -835,8 +848,8 @@ v850_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
   offset24 &= 0x3fffff;
   offset24 |= 0xff800000;	/* jarl <offset24>, r31 */
 
-  store_unsigned_integer ((unsigned int *)&dummy[2], 2, offset24 & 0xffff);
-  store_unsigned_integer ((unsigned int *)&dummy[0], 2, offset24 >> 16);
+  store_unsigned_integer ((unsigned int *) &dummy[2], 2, offset24 & 0xffff);
+  store_unsigned_integer ((unsigned int *) &dummy[0], 2, offset24 >> 16);
   return 0;
 }
 

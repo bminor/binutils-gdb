@@ -1,21 +1,22 @@
 /* Low level interface to ptrace, for the remote server for GDB.
    Copyright (C) 1986, 1987, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
 #include "frame.h"
@@ -66,18 +67,18 @@ create_inferior (program, allargs)
       int pgrp;
 
       /* Switch child to it's own process group so that signals won't
-	 directly affect gdbserver. */
+         directly affect gdbserver. */
 
-      pgrp = getpid();
-      setpgrp(0, pgrp);
+      pgrp = getpid ();
+      setpgrp (0, pgrp);
       ioctl (0, TIOCSPGRP, &pgrp);
 
-      ptrace (PTRACE_TRACEME, 0, (PTRACE_ARG3_TYPE)0, 0);
+      ptrace (PTRACE_TRACEME, 0, (PTRACE_ARG3_TYPE) 0, 0);
 
       execv (program, allargs);
 
       fprintf (stderr, "GDBserver (process %d):  Cannot exec %s: %s.\n",
-	       getpid(), program,
+	       getpid (), program,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
       fflush (stderr);
       _exit (0177);
@@ -128,34 +129,34 @@ mywait (status)
 
   while (1)
     {
-      enable_async_io();
+      enable_async_io ();
 
       pid = wait (&w);
 
-      disable_async_io();
+      disable_async_io ();
 
-      if (pid != PIDGET(inferior_pid))
+      if (pid != PIDGET (inferior_pid))
 	perror_with_name ("wait");
 
       thread_from_wait = w.w_tid;
       inferior_pid = BUILDPID (inferior_pid, w.w_tid);
 
-      if (WIFSTOPPED(w)
-	  && WSTOPSIG(w) == SIGTRAP)
+      if (WIFSTOPPED (w)
+	  && WSTOPSIG (w) == SIGTRAP)
 	{
 	  int realsig;
 
 	  realsig = ptrace (PTRACE_GETTRACESIG, inferior_pid,
-			    (PTRACE_ARG3_TYPE)0, 0);
+			    (PTRACE_ARG3_TYPE) 0, 0);
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
 	      /* It's a new thread notification.  Nothing to do here since
-		 the machine independent code in wait_for_inferior will
-		 add the thread to the thread list and restart the thread
-		 when pid != inferior_pid and pid is not in the thread list.
-		 We don't even want to muck with realsig -- the code in
-		 wait_for_inferior expects SIGTRAP.  */
+	         the machine independent code in wait_for_inferior will
+	         add the thread to the thread list and restart the thread
+	         when pid != inferior_pid and pid is not in the thread list.
+	         We don't even want to muck with realsig -- the code in
+	         wait_for_inferior expects SIGTRAP.  */
 	      ;
 	    }
 	}
@@ -209,22 +210,22 @@ myresume (step, signal)
 
 static int regmap[] =
 {
-  X(eax),
-  X(ecx),
-  X(edx),
-  X(ebx),
-  X(esp),			/* sp */
-  X(ebp),			/* fp */
-  X(esi),
-  X(edi),
-  X(eip),			/* pc */
-  X(flags),			/* ps */
-  X(cs),
-  X(ss),
-  X(ds),
-  X(es),
-  X(ecode),			/* Lynx doesn't give us either fs or gs, so */
-  X(fault),			/* we just substitute these two in the hopes
+  X (eax),
+  X (ecx),
+  X (edx),
+  X (ebx),
+  X (esp),			/* sp */
+  X (ebp),			/* fp */
+  X (esi),
+  X (edi),
+  X (eip),			/* pc */
+  X (flags),			/* ps */
+  X (cs),
+  X (ss),
+  X (ds),
+  X (es),
+  X (ecode),			/* Lynx doesn't give us either fs or gs, so */
+  X (fault),			/* we just substitute these two in the hopes
 				   that they are useful. */
 };
 #endif
@@ -234,39 +235,39 @@ static int regmap[] =
 
 static int regmap[] =
 {
-  X(regs[0]),			/* d0 */
-  X(regs[1]),			/* d1 */
-  X(regs[2]),			/* d2 */
-  X(regs[3]),			/* d3 */
-  X(regs[4]),			/* d4 */
-  X(regs[5]),			/* d5 */
-  X(regs[6]),			/* d6 */
-  X(regs[7]),			/* d7 */
-  X(regs[8]),			/* a0 */
-  X(regs[9]),			/* a1 */
-  X(regs[10]),			/* a2 */
-  X(regs[11]),			/* a3 */
-  X(regs[12]),			/* a4 */
-  X(regs[13]),			/* a5 */
-  X(regs[14]),			/* fp */
+  X (regs[0]),			/* d0 */
+  X (regs[1]),			/* d1 */
+  X (regs[2]),			/* d2 */
+  X (regs[3]),			/* d3 */
+  X (regs[4]),			/* d4 */
+  X (regs[5]),			/* d5 */
+  X (regs[6]),			/* d6 */
+  X (regs[7]),			/* d7 */
+  X (regs[8]),			/* a0 */
+  X (regs[9]),			/* a1 */
+  X (regs[10]),			/* a2 */
+  X (regs[11]),			/* a3 */
+  X (regs[12]),			/* a4 */
+  X (regs[13]),			/* a5 */
+  X (regs[14]),			/* fp */
   0,				/* sp */
-  X(status),			/* ps */
-  X(pc),
+  X (status),			/* ps */
+  X (pc),
 
-  X(fregs[0*3]),		/* fp0 */
-  X(fregs[1*3]),		/* fp1 */
-  X(fregs[2*3]),		/* fp2 */
-  X(fregs[3*3]),		/* fp3 */
-  X(fregs[4*3]),		/* fp4 */
-  X(fregs[5*3]),		/* fp5 */
-  X(fregs[6*3]),		/* fp6 */
-  X(fregs[7*3]),		/* fp7 */
+  X (fregs[0 * 3]),		/* fp0 */
+  X (fregs[1 * 3]),		/* fp1 */
+  X (fregs[2 * 3]),		/* fp2 */
+  X (fregs[3 * 3]),		/* fp3 */
+  X (fregs[4 * 3]),		/* fp4 */
+  X (fregs[5 * 3]),		/* fp5 */
+  X (fregs[6 * 3]),		/* fp6 */
+  X (fregs[7 * 3]),		/* fp7 */
 
-  X(fcregs[0]),			/* fpcontrol */
-  X(fcregs[1]),			/* fpstatus */
-  X(fcregs[2]),			/* fpiaddr */
-  X(ssw),			/* fpcode */
-  X(fault),			/* fpflags */
+  X (fcregs[0]),		/* fpcontrol */
+  X (fcregs[1]),		/* fpstatus */
+  X (fcregs[2]),		/* fpiaddr */
+  X (ssw),			/* fpcode */
+  X (fault),			/* fpflags */
 };
 #endif
 
@@ -278,67 +279,67 @@ static int regmap[] =
 static int regmap[] =
 {
   -1,				/* g0 */
-  X(g1),
-  X(g2),
-  X(g3),
-  X(g4),
+  X (g1),
+  X (g2),
+  X (g3),
+  X (g4),
   -1,				/* g5->g7 aren't saved by Lynx */
   -1,
   -1,
 
-  X(o[0]),
-  X(o[1]),
-  X(o[2]),
-  X(o[3]),
-  X(o[4]),
-  X(o[5]),
-  X(o[6]),			/* sp */
-  X(o[7]),			/* ra */
+  X (o[0]),
+  X (o[1]),
+  X (o[2]),
+  X (o[3]),
+  X (o[4]),
+  X (o[5]),
+  X (o[6]),			/* sp */
+  X (o[7]),			/* ra */
 
-  -1,-1,-1,-1,-1,-1,-1,-1,	/* l0 -> l7 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* l0 -> l7 */
 
-  -1,-1,-1,-1,-1,-1,-1,-1,	/* i0 -> i7 */
+  -1, -1, -1, -1, -1, -1, -1, -1,	/* i0 -> i7 */
 
-  FX(f.fregs[0]),		/* f0 */
-  FX(f.fregs[1]),
-  FX(f.fregs[2]),
-  FX(f.fregs[3]),
-  FX(f.fregs[4]),
-  FX(f.fregs[5]),
-  FX(f.fregs[6]),
-  FX(f.fregs[7]),
-  FX(f.fregs[8]),
-  FX(f.fregs[9]),
-  FX(f.fregs[10]),
-  FX(f.fregs[11]),
-  FX(f.fregs[12]),
-  FX(f.fregs[13]),
-  FX(f.fregs[14]),
-  FX(f.fregs[15]),
-  FX(f.fregs[16]),
-  FX(f.fregs[17]),
-  FX(f.fregs[18]),
-  FX(f.fregs[19]),
-  FX(f.fregs[20]),
-  FX(f.fregs[21]),
-  FX(f.fregs[22]),
-  FX(f.fregs[23]),
-  FX(f.fregs[24]),
-  FX(f.fregs[25]),
-  FX(f.fregs[26]),
-  FX(f.fregs[27]),
-  FX(f.fregs[28]),
-  FX(f.fregs[29]),
-  FX(f.fregs[30]),
-  FX(f.fregs[31]),
+  FX (f.fregs[0]),		/* f0 */
+  FX (f.fregs[1]),
+  FX (f.fregs[2]),
+  FX (f.fregs[3]),
+  FX (f.fregs[4]),
+  FX (f.fregs[5]),
+  FX (f.fregs[6]),
+  FX (f.fregs[7]),
+  FX (f.fregs[8]),
+  FX (f.fregs[9]),
+  FX (f.fregs[10]),
+  FX (f.fregs[11]),
+  FX (f.fregs[12]),
+  FX (f.fregs[13]),
+  FX (f.fregs[14]),
+  FX (f.fregs[15]),
+  FX (f.fregs[16]),
+  FX (f.fregs[17]),
+  FX (f.fregs[18]),
+  FX (f.fregs[19]),
+  FX (f.fregs[20]),
+  FX (f.fregs[21]),
+  FX (f.fregs[22]),
+  FX (f.fregs[23]),
+  FX (f.fregs[24]),
+  FX (f.fregs[25]),
+  FX (f.fregs[26]),
+  FX (f.fregs[27]),
+  FX (f.fregs[28]),
+  FX (f.fregs[29]),
+  FX (f.fregs[30]),
+  FX (f.fregs[31]),
 
-  X(y),
-  X(psr),
-  X(wim),
-  X(tbr),
-  X(pc),
-  X(npc),
-  FX(fsr),			/* fpsr */
+  X (y),
+  X (psr),
+  X (wim),
+  X (tbr),
+  X (pc),
+  X (npc),
+  FX (fsr),			/* fpsr */
   -1,				/* cpsr */
 };
 #endif
@@ -371,7 +372,7 @@ fetch_inferior_registers (regno)
 
   if (whatregs & WHATREGS_GEN)
     {
-      struct econtext ec;		/* general regs */
+      struct econtext ec;	/* general regs */
       char buf[MAX_REGISTER_RAW_SIZE];
       int retval;
       int i;
@@ -379,25 +380,25 @@ fetch_inferior_registers (regno)
       errno = 0;
       retval = ptrace (PTRACE_GETREGS,
 		       BUILDPID (inferior_pid, general_thread),
-		       (PTRACE_ARG3_TYPE) &ec,
+		       (PTRACE_ARG3_TYPE) & ec,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
-  
+
       memset (buf, 0, REGISTER_RAW_SIZE (G0_REGNUM));
       supply_register (G0_REGNUM, buf);
-      supply_register (TBR_REGNUM, (char *)&ec.tbr);
+      supply_register (TBR_REGNUM, (char *) &ec.tbr);
 
       memcpy (&registers[REGISTER_BYTE (G1_REGNUM)], &ec.g1,
 	      4 * REGISTER_RAW_SIZE (G1_REGNUM));
       for (i = G1_REGNUM; i <= G1_REGNUM + 3; i++)
 	register_valid[i] = 1;
 
-      supply_register (PS_REGNUM, (char *)&ec.psr);
-      supply_register (Y_REGNUM, (char *)&ec.y);
-      supply_register (PC_REGNUM, (char *)&ec.pc);
-      supply_register (NPC_REGNUM, (char *)&ec.npc);
-      supply_register (WIM_REGNUM, (char *)&ec.wim);
+      supply_register (PS_REGNUM, (char *) &ec.psr);
+      supply_register (Y_REGNUM, (char *) &ec.y);
+      supply_register (PC_REGNUM, (char *) &ec.pc);
+      supply_register (NPC_REGNUM, (char *) &ec.npc);
+      supply_register (WIM_REGNUM, (char *) &ec.wim);
 
       memcpy (&registers[REGISTER_BYTE (O0_REGNUM)], ec.o,
 	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
@@ -413,13 +414,13 @@ fetch_inferior_registers (regno)
       sp = read_register (SP_REGNUM);
 
       target_xfer_memory (sp + FRAME_SAVED_I0,
-			  &registers[REGISTER_BYTE(I0_REGNUM)],
+			  &registers[REGISTER_BYTE (I0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (I0_REGNUM), 0);
       for (i = I0_REGNUM; i <= I7_REGNUM; i++)
 	register_valid[i] = 1;
 
       target_xfer_memory (sp + FRAME_SAVED_L0,
-			  &registers[REGISTER_BYTE(L0_REGNUM)],
+			  &registers[REGISTER_BYTE (L0_REGNUM)],
 			  8 * REGISTER_RAW_SIZE (L0_REGNUM), 0);
       for (i = L0_REGNUM; i <= L0_REGNUM + 7; i++)
 	register_valid[i] = 1;
@@ -427,22 +428,22 @@ fetch_inferior_registers (regno)
 
   if (whatregs & WHATREGS_FLOAT)
     {
-      struct fcontext fc;		/* fp regs */
+      struct fcontext fc;	/* fp regs */
       int retval;
       int i;
 
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) & fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
-  
+
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], fc.f.fregs,
 	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
       for (i = FP0_REGNUM; i <= FP0_REGNUM + 31; i++)
 	register_valid[i] = 1;
 
-      supply_register (FPS_REGNUM, (char *)&fc.fsr);
+      supply_register (FPS_REGNUM, (char *) &fc.fsr);
     }
 #endif
 }
@@ -474,7 +475,7 @@ store_inferior_registers (regno)
 
   if (whatregs & WHATREGS_GEN)
     {
-      struct econtext ec;		/* general regs */
+      struct econtext ec;	/* general regs */
       int retval;
 
       ec.tbr = read_register (TBR_REGNUM);
@@ -491,7 +492,7 @@ store_inferior_registers (regno)
 	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
 
       errno = 0;
-      retval = ptrace (PTRACE_SETREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &ec,
+      retval = ptrace (PTRACE_SETREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) & ec,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
@@ -506,8 +507,8 @@ store_inferior_registers (regno)
 
       if (regno == -1 || regno == SP_REGNUM)
 	{
-	  if (!register_valid[L0_REGNUM+5])
-	    abort();
+	  if (!register_valid[L0_REGNUM + 5])
+	    abort ();
 	  target_xfer_memory (sp + FRAME_SAVED_I0,
 			      &registers[REGISTER_BYTE (I0_REGNUM)],
 			      8 * REGISTER_RAW_SIZE (I0_REGNUM), 1);
@@ -519,7 +520,7 @@ store_inferior_registers (regno)
       else if (regno >= L0_REGNUM && regno <= I7_REGNUM)
 	{
 	  if (!register_valid[regno])
-	    abort();
+	    abort ();
 	  if (regno >= L0_REGNUM && regno <= L0_REGNUM + 7)
 	    regoffset = REGISTER_BYTE (regno) - REGISTER_BYTE (L0_REGNUM)
 	      + FRAME_SAVED_L0;
@@ -533,27 +534,27 @@ store_inferior_registers (regno)
 
   if (whatregs & WHATREGS_FLOAT)
     {
-      struct fcontext fc;		/* fp regs */
+      struct fcontext fc;	/* fp regs */
       int retval;
 
 /* We read fcontext first so that we can get good values for fq_t... */
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_GETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) & fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
-  
+
       memcpy (fc.f.fregs, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
 
       fc.fsr = read_register (FPS_REGNUM);
 
       errno = 0;
-      retval = ptrace (PTRACE_SETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) &fc,
+      retval = ptrace (PTRACE_SETFPREGS, BUILDPID (inferior_pid, general_thread), (PTRACE_ARG3_TYPE) & fc,
 		       0);
       if (errno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
-      }
+    }
 #endif
 }
 #endif /* SPARC */
@@ -564,20 +565,20 @@ store_inferior_registers (regno)
    saved context block.  */
 
 static unsigned long
-lynx_registers_addr()
+lynx_registers_addr ()
 {
   CORE_ADDR stblock;
-  int ecpoff = offsetof(st_t, ecp);
+  int ecpoff = offsetof (st_t, ecp);
   CORE_ADDR ecp;
 
   errno = 0;
   stblock = (CORE_ADDR) ptrace (PTRACE_THREADUSER, BUILDPID (inferior_pid, general_thread),
-				(PTRACE_ARG3_TYPE)0, 0);
+				(PTRACE_ARG3_TYPE) 0, 0);
   if (errno)
     perror_with_name ("PTRACE_THREADUSER");
 
   ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, BUILDPID (inferior_pid, general_thread),
-			    (PTRACE_ARG3_TYPE)ecpoff, 0);
+			    (PTRACE_ARG3_TYPE) ecpoff, 0);
   if (errno)
     perror_with_name ("lynx_registers_addr(PTRACE_PEEKTHREAD)");
 
@@ -596,7 +597,7 @@ fetch_inferior_registers (ignored)
   unsigned long reg;
   unsigned long ecp;
 
-  ecp = lynx_registers_addr();
+  ecp = lynx_registers_addr ();
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
@@ -611,8 +612,8 @@ fetch_inferior_registers (ignored)
 		    (PTRACE_ARG3_TYPE) (ecp + regmap[regno]), 0);
       if (errno)
 	perror_with_name ("fetch_inferior_registers(PTRACE_PEEKTHREAD)");
-  
-      *(unsigned long *)&registers[REGISTER_BYTE (regno)] = reg;
+
+      *(unsigned long *) &registers[REGISTER_BYTE (regno)] = reg;
     }
 }
 
@@ -628,7 +629,7 @@ store_inferior_registers (ignored)
   unsigned long reg;
   unsigned long ecp;
 
-  ecp = lynx_registers_addr();
+  ecp = lynx_registers_addr ();
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
@@ -638,7 +639,7 @@ store_inferior_registers (ignored)
       ptrace_fun = regno == SP_REGNUM ? PTRACE_POKEUSP : PTRACE_POKEUSER;
 #endif
 
-      reg = *(unsigned long *)&registers[REGISTER_BYTE (regno)];
+      reg = *(unsigned long *) &registers[REGISTER_BYTE (regno)];
 
       errno = 0;
       ptrace (ptrace_fun, BUILDPID (inferior_pid, general_thread),
@@ -730,12 +731,12 @@ write_inferior_memory (memaddr, myaddr, len)
 	  ptrace (PTRACE_POKETEXT, BUILDPID (inferior_pid, general_thread), addr, buffer[i]);
 	  if (errno)
 	    {
-	      fprintf(stderr, "\
+	      fprintf (stderr, "\
 ptrace (PTRACE_POKETEXT): errno=%d, pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n",
-		      errno, BUILDPID (inferior_pid, general_thread),
-		      addr, buffer[i]);
-	      fprintf(stderr, "Sleeping for 1 second\n");
-	      sleep(1);
+		       errno, BUILDPID (inferior_pid, general_thread),
+		       addr, buffer[i]);
+	      fprintf (stderr, "Sleeping for 1 second\n");
+	      sleep (1);
 	    }
 	  else
 	    break;

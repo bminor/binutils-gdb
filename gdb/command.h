@@ -1,19 +1,20 @@
 /* Header file for command-reading library command.c.
    Copyright (C) 1986, 1989, 1990 Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #if !defined (COMMAND_H)
 #define COMMAND_H 1
@@ -21,42 +22,46 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
    not fall into one of the following categories.  */
-typedef enum cmd_types {
-  not_set_cmd,
-  set_cmd,
-  show_cmd
-} cmd_types;
+typedef enum cmd_types
+  {
+    not_set_cmd,
+    set_cmd,
+    show_cmd
+  }
+cmd_types;
 
 /* Types of "set" or "show" command.  */
-typedef enum var_types {
-  /* "on" or "off".  *VAR is an integer which is nonzero for on,
-     zero for off.  */
-  var_boolean,
-  /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
-     to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
-  var_uinteger,
+typedef enum var_types
+  {
+    /* "on" or "off".  *VAR is an integer which is nonzero for on,
+       zero for off.  */
+    var_boolean,
+    /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
+       to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
+    var_uinteger,
 
-  /* Like var_uinteger but signed.  *VAR is an int.  The user can type 0
-     to mean "unlimited", which is stored in *VAR as INT_MAX.  */
-  var_integer,
+    /* Like var_uinteger but signed.  *VAR is an int.  The user can type 0
+       to mean "unlimited", which is stored in *VAR as INT_MAX.  */
+    var_integer,
 
-  /* String which the user enters with escapes (e.g. the user types \n and
-     it is a real newline in the stored string).
-     *VAR is a malloc'd string, or NULL if the string is empty.  */
-  var_string,
-  /* String which stores what the user types verbatim.
-     *VAR is a malloc'd string, or NULL if the string is empty.  */
-  var_string_noescape,
-  /* String which stores a filename.
-     *VAR is a malloc'd string, or NULL if the string is empty.  */
-  var_filename,
-  /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
-     that zero really means zero.  */
-  var_zinteger,
-  /* Enumerated type.  Can only have one of the specified values.  *VAR is a
-     char pointer to the name of the element that we find.  */
-  var_enum
-} var_types;
+    /* String which the user enters with escapes (e.g. the user types \n and
+       it is a real newline in the stored string).
+       *VAR is a malloc'd string, or NULL if the string is empty.  */
+    var_string,
+    /* String which stores what the user types verbatim.
+       *VAR is a malloc'd string, or NULL if the string is empty.  */
+    var_string_noescape,
+    /* String which stores a filename.
+       *VAR is a malloc'd string, or NULL if the string is empty.  */
+    var_filename,
+    /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
+       that zero really means zero.  */
+    var_zinteger,
+    /* Enumerated type.  Can only have one of the specified values.  *VAR is a
+       char pointer to the name of the element that we find.  */
+    var_enum
+  }
+var_types;
 
 /* This structure records one command'd definition.  */
 
@@ -82,9 +87,10 @@ struct cmd_list_element
 	/* If type is cmd_set or show_cmd, first set the variables, and
 	   then call this.  */
 	void (*sfunc) PARAMS ((char *args, int from_tty,
-			       struct cmd_list_element *c));
-      } function;
-#   define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
+			       struct cmd_list_element * c));
+      }
+    function;
+#define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
 
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,
@@ -129,7 +135,7 @@ struct cmd_list_element
        returned relative to this position.  For example, suppose TEXT is "foo"
        and we want to complete to "foobar".  If WORD is "oo", return
        "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
-    char ** (*completer) PARAMS ((char *text, char *word));
+    char **(*completer) PARAMS ((char *text, char *word));
 
     /* Type of "set" or "show" command (or SET_NOT_SET if not "set"
        or "show").  */
@@ -160,33 +166,33 @@ struct cmd_list_element
 /* Forward-declarations of the entry-points of command.c.  */
 
 extern struct cmd_list_element *
-add_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
-		 char *, struct cmd_list_element **));
+  add_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
+		   char *, struct cmd_list_element **));
 
 extern struct cmd_list_element *
-add_alias_cmd PARAMS ((char *, char *, enum command_class, int,
-		       struct cmd_list_element **));
+  add_alias_cmd PARAMS ((char *, char *, enum command_class, int,
+			 struct cmd_list_element **));
 
 extern struct cmd_list_element *
-add_prefix_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
-			char *, struct cmd_list_element **, char *, int,
-			struct cmd_list_element **));
+  add_prefix_cmd PARAMS ((char *, enum command_class, void (*fun) (char *, int),
+			  char *, struct cmd_list_element **, char *, int,
+			  struct cmd_list_element **));
 
 extern struct cmd_list_element *
-add_abbrev_prefix_cmd PARAMS ((char *, enum command_class,
-			       void (*fun) (char *, int), char *,
-			       struct cmd_list_element **, char *, int,
-			       struct cmd_list_element **));
+  add_abbrev_prefix_cmd PARAMS ((char *, enum command_class,
+				 void (*fun) (char *, int), char *,
+				 struct cmd_list_element **, char *, int,
+				 struct cmd_list_element **));
 
 extern struct cmd_list_element *
-lookup_cmd PARAMS ((char **, struct cmd_list_element *, char *, int, int));
+  lookup_cmd PARAMS ((char **, struct cmd_list_element *, char *, int, int));
 
 extern struct cmd_list_element *
-lookup_cmd_1 PARAMS ((char **, struct cmd_list_element *,
-		      struct cmd_list_element **, int));
+  lookup_cmd_1 PARAMS ((char **, struct cmd_list_element *,
+			struct cmd_list_element **, int));
 
 extern void
-add_com PARAMS ((char *, enum command_class, void (*fun)(char *, int),
+add_com PARAMS ((char *, enum command_class, void (*fun) (char *, int),
 		 char *));
 
 extern void
@@ -199,10 +205,10 @@ extern void
 add_info_alias PARAMS ((char *, char *, int));
 
 extern char **
-complete_on_cmdlist PARAMS ((struct cmd_list_element *, char *, char *));
+  complete_on_cmdlist PARAMS ((struct cmd_list_element *, char *, char *));
 
 extern char **
-complete_on_enum PARAMS ((char **enumlist, char *, char *));
+  complete_on_enum PARAMS ((char **enumlist, char *, char *));
 
 extern void
 delete_cmd PARAMS ((char *, struct cmd_list_element **));
@@ -219,16 +225,16 @@ help_cmd_list PARAMS ((struct cmd_list_element *, enum command_class, char *,
 		       int, GDB_FILE *));
 
 extern struct cmd_list_element *
-add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,
-		     struct cmd_list_element **));
+  add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,
+		       struct cmd_list_element **));
 
 extern struct cmd_list_element *
-add_set_enum_cmd PARAMS ((char *name, enum command_class, char *list[],
-			  char *var, char *doc, struct cmd_list_element **c));
+  add_set_enum_cmd PARAMS ((char *name, enum command_class, char *list[],
+		       char *var, char *doc, struct cmd_list_element ** c));
 
 extern struct cmd_list_element *
-add_show_from_set PARAMS ((struct cmd_list_element *,
-			   struct cmd_list_element **));
+  add_show_from_set PARAMS ((struct cmd_list_element *,
+			     struct cmd_list_element **));
 
 /* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
    of the argument, and FROM_TTY is nonzero if this command is being entered

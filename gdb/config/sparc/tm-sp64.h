@@ -5,21 +5,22 @@
    Contributed by Doug Evans (dje@cygnus.com).
    Further modified by Bob Manson (manson@cygnus.com).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define GDB_TARGET_IS_SPARC64
 
@@ -69,7 +70,7 @@ struct value;
    ta  1
    nop
    nop
-   */
+ */
 
 #define CALL_DUMMY {		 0x9de3bec0fd3fa7f7LL, 0xf93fa7eff53fa7e7LL,\
 				 0xf13fa7dfed3fa7d7LL, 0xe93fa7cfe53fa7c7LL,\
@@ -156,8 +157,8 @@ struct value;
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#if 0 /* defined in tm-sparc.h, replicated for doc purposes */
-#define	G0_REGNUM 0             /* %g0 */
+#if 0				/* defined in tm-sparc.h, replicated for doc purposes */
+#define	G0_REGNUM 0		/* %g0 */
 #define	G1_REGNUM 1		/* %g1 */
 #define O0_REGNUM 8		/* %o0 */
 #define	SP_REGNUM 14		/* Contains address of top of stack, \
@@ -188,38 +189,38 @@ struct value;
 
 /* v9 misc. and priv. regs */
 
-#define C0_REGNUM FP_MAX_REGNUM			/* Start of control registers */
-#define PC_REGNUM (C0_REGNUM + 0)		/* Current PC */
-#define NPC_REGNUM (C0_REGNUM + 1)		/* Next PC */
-#define CCR_REGNUM (C0_REGNUM + 2)		/* Condition Code Register (%xcc,%icc) */
-#define FSR_REGNUM (C0_REGNUM + 3)		/* Floating Point State */
-#define FPRS_REGNUM (C0_REGNUM + 4)		/* Floating Point Registers State */
-#define	Y_REGNUM (C0_REGNUM + 5)		/* Temp register for multiplication, etc.  */
-#define ASI_REGNUM (C0_REGNUM + 6)		/* Alternate Space Identifier */
-#define VER_REGNUM (C0_REGNUM + 7)		/* Version register */
-#define TICK_REGNUM (C0_REGNUM + 8)		/* Tick register */
-#define PIL_REGNUM (C0_REGNUM + 9)		/* Processor Interrupt Level */
-#define PSTATE_REGNUM (C0_REGNUM + 10)		/* Processor State */
-#define TSTATE_REGNUM (C0_REGNUM + 11)		/* Trap State */
-#define TBA_REGNUM (C0_REGNUM + 12)		/* Trap Base Address */
-#define TL_REGNUM (C0_REGNUM + 13)		/* Trap Level */
-#define TT_REGNUM (C0_REGNUM + 14)		/* Trap Type */
-#define TPC_REGNUM (C0_REGNUM + 15)		/* Trap pc */
-#define TNPC_REGNUM (C0_REGNUM + 16)		/* Trap npc */
-#define WSTATE_REGNUM (C0_REGNUM + 17)		/* Window State */
-#define CWP_REGNUM (C0_REGNUM + 18)		/* Current Window Pointer */
+#define C0_REGNUM FP_MAX_REGNUM	/* Start of control registers */
+#define PC_REGNUM (C0_REGNUM + 0)	/* Current PC */
+#define NPC_REGNUM (C0_REGNUM + 1)	/* Next PC */
+#define CCR_REGNUM (C0_REGNUM + 2)	/* Condition Code Register (%xcc,%icc) */
+#define FSR_REGNUM (C0_REGNUM + 3)	/* Floating Point State */
+#define FPRS_REGNUM (C0_REGNUM + 4)	/* Floating Point Registers State */
+#define	Y_REGNUM (C0_REGNUM + 5)	/* Temp register for multiplication, etc.  */
+#define ASI_REGNUM (C0_REGNUM + 6)	/* Alternate Space Identifier */
+#define VER_REGNUM (C0_REGNUM + 7)	/* Version register */
+#define TICK_REGNUM (C0_REGNUM + 8)	/* Tick register */
+#define PIL_REGNUM (C0_REGNUM + 9)	/* Processor Interrupt Level */
+#define PSTATE_REGNUM (C0_REGNUM + 10)	/* Processor State */
+#define TSTATE_REGNUM (C0_REGNUM + 11)	/* Trap State */
+#define TBA_REGNUM (C0_REGNUM + 12)	/* Trap Base Address */
+#define TL_REGNUM (C0_REGNUM + 13)	/* Trap Level */
+#define TT_REGNUM (C0_REGNUM + 14)	/* Trap Type */
+#define TPC_REGNUM (C0_REGNUM + 15)	/* Trap pc */
+#define TNPC_REGNUM (C0_REGNUM + 16)	/* Trap npc */
+#define WSTATE_REGNUM (C0_REGNUM + 17)	/* Window State */
+#define CWP_REGNUM (C0_REGNUM + 18)	/* Current Window Pointer */
 #define CANSAVE_REGNUM (C0_REGNUM + 19)		/* Savable Windows */
 #define CANRESTORE_REGNUM (C0_REGNUM + 20)	/* Restorable Windows */
 #define CLEANWIN_REGNUM (C0_REGNUM + 21)	/* Clean Windows */
 #define OTHERWIN_REGNUM (C0_REGNUM + 22)	/* Other Windows */
 #define ASR_REGNUM(n) (C0_REGNUM+(23-16)+(n))	/* Ancillary State Register
 						   (n = 16...31) */
-#define ICC_REGNUM (C0_REGNUM + 39)		/* 32 bit condition codes */
-#define XCC_REGNUM (C0_REGNUM + 40)		/* 64 bit condition codes */
-#define FCC0_REGNUM (C0_REGNUM + 41)		/* fp cc reg 0 */
-#define FCC1_REGNUM (C0_REGNUM + 42)		/* fp cc reg 1 */
-#define FCC2_REGNUM (C0_REGNUM + 43)		/* fp cc reg 2 */
-#define FCC3_REGNUM (C0_REGNUM + 44)		/* fp cc reg 3 */
+#define ICC_REGNUM (C0_REGNUM + 39)	/* 32 bit condition codes */
+#define XCC_REGNUM (C0_REGNUM + 40)	/* 64 bit condition codes */
+#define FCC0_REGNUM (C0_REGNUM + 41)	/* fp cc reg 0 */
+#define FCC1_REGNUM (C0_REGNUM + 42)	/* fp cc reg 1 */
+#define FCC2_REGNUM (C0_REGNUM + 43)	/* fp cc reg 2 */
+#define FCC3_REGNUM (C0_REGNUM + 44)	/* fp cc reg 3 */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.
@@ -375,4 +376,4 @@ CORE_ADDR sp64_push_arguments PARAMS ((int, struct value **, CORE_ADDR, unsigned
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   sparc64_extract_return_value(TYPE, REGBUF, VALBUF, 0)
 extern void
-sparc64_extract_return_value PARAMS ((struct type *, char [], char *, int));
+sparc64_extract_return_value PARAMS ((struct type *, char[], char *, int));

@@ -2,21 +2,22 @@
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* ??? Support for calling functions from gdb in sparc64 is unfinished.  */
 
@@ -125,7 +126,8 @@ typedef enum
 #ifdef GDB_TARGET_IS_SPARC64
   done_retry
 #endif
-} branch_type;
+}
+branch_type;
 
 /* Simulate single-step ptrace call for sun4.  Code written by Gary
    Beihl (beihl@mcc.com).  */
@@ -149,7 +151,7 @@ static branch_type isbranch PARAMS ((long, CORE_ADDR, CORE_ADDR *));
 
 void
 sparc_software_single_step (ignore, insert_breakpoints_p)
-     enum target_signal ignore; /* pid, but we don't need it */
+     enum target_signal ignore;	/* pid, but we don't need it */
      int insert_breakpoints_p;
 {
   branch_type br;
@@ -160,7 +162,7 @@ sparc_software_single_step (ignore, insert_breakpoints_p)
     {
       /* Always set breakpoint for NPC.  */
       next_pc = read_register (NPC_REGNUM);
-      npc4 = next_pc + 4; /* branch not taken */
+      npc4 = next_pc + 4;	/* branch not taken */
 
       target_insert_breakpoint (next_pc, break_mem[0]);
       /* printf_unfiltered ("set break at %x\n",next_pc); */
@@ -233,7 +235,7 @@ sparc_init_extra_frame_info (fromleaf, fi)
       char buf[MAX_REGISTER_RAW_SIZE];
 
       /* Compute ->frame as if not flat.  If it is flat, we'll change
-	 it later.  */
+         it later.  */
       if (fi->next->next != NULL
 	  && (fi->next->next->signal_handler_caller
 	      || frame_in_dummy (fi->next->next))
@@ -253,7 +255,7 @@ sparc_init_extra_frame_info (fromleaf, fi)
 	  if (fi->frame & 1)
 	    fi->frame += 2047;
 #endif
-	  
+
 	}
     }
 
@@ -264,9 +266,9 @@ sparc_init_extra_frame_info (fromleaf, fi)
   if (find_pc_partial_function (fi->pc, &name, &prologue_start, &prologue_end))
     {
       /* See if the function starts with an add (which will be of a
-	 negative number if a flat frame) to the sp.  FIXME: Does not
-	 handle large frames which will need more than one instruction
-	 to adjust the sp.  */
+         negative number if a flat frame) to the sp.  FIXME: Does not
+         handle large frames which will need more than one instruction
+         to adjust the sp.  */
       insn = fetch_instruction (prologue_start, 4);
       if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0
 	  && X_I (insn) && X_SIMM13 (insn) < 0)
@@ -307,35 +309,35 @@ sparc_init_extra_frame_info (fromleaf, fi)
 		fi->pc_addr = fi->frame + fi->sp_offset + X_SIMM13 (insn);
 	    }
 	}
-	else
-	  {
-	    /* Check if the PC is in the function prologue before a SAVE
-	       instruction has been executed yet.  If so, set the frame
-	       to the current value of the stack pointer and set
-	       the in_prologue flag.  */
-	    CORE_ADDR addr;
-	    struct symtab_and_line sal;
+      else
+	{
+	  /* Check if the PC is in the function prologue before a SAVE
+	     instruction has been executed yet.  If so, set the frame
+	     to the current value of the stack pointer and set
+	     the in_prologue flag.  */
+	  CORE_ADDR addr;
+	  struct symtab_and_line sal;
 
-	    sal = find_pc_line (prologue_start, 0);
-	    if (sal.line == 0)			/* no line info, use PC */
-	      prologue_end = fi->pc;
-	    else if (sal.end < prologue_end)
-	      prologue_end = sal.end;
-	    if (fi->pc < prologue_end)
-	      {
-		for (addr = prologue_start; addr < fi->pc; addr += 4)
-		  {
-		    insn = read_memory_integer (addr, 4);
-		    if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
-		      break;			/* SAVE seen, stop searching */
-		  }
-		if (addr >= fi->pc)
-		  {
-		    fi->in_prologue = 1;
-		    fi->frame = read_register (SP_REGNUM);
-		  }
-	      }
-	  }
+	  sal = find_pc_line (prologue_start, 0);
+	  if (sal.line == 0)	/* no line info, use PC */
+	    prologue_end = fi->pc;
+	  else if (sal.end < prologue_end)
+	    prologue_end = sal.end;
+	  if (fi->pc < prologue_end)
+	    {
+	      for (addr = prologue_start; addr < fi->pc; addr += 4)
+		{
+		  insn = read_memory_integer (addr, 4);
+		  if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
+		    break;	/* SAVE seen, stop searching */
+		}
+	      if (addr >= fi->pc)
+		{
+		  fi->in_prologue = 1;
+		  fi->frame = read_register (SP_REGNUM);
+		}
+	    }
+	}
     }
   if (fi->next && fi->frame == 0)
     {
@@ -352,7 +354,7 @@ sparc_frame_chain (frame)
   /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
      value.  If it realy is zero, we detect it later in
      sparc_init_prev_frame.  */
-  return (CORE_ADDR)1;
+  return (CORE_ADDR) 1;
 }
 
 CORE_ADDR
@@ -375,7 +377,7 @@ sparc_frame_saved_pc (frame)
   if (frame->signal_handler_caller)
     {
       /* This is the signal trampoline frame.
-	 Get the saved PC from the sigcontext structure.  */
+         Get the saved PC from the sigcontext structure.  */
 
 #ifndef SIGCONTEXT_PC_OFFSET
 #define SIGCONTEXT_PC_OFFSET 12
@@ -387,19 +389,19 @@ sparc_frame_saved_pc (frame)
       char *name = NULL;
 
       /* Solaris2 ucbsigvechandler passes a pointer to a sigcontext
-	 as the third parameter.  The offset to the saved pc is 12.  */
+         as the third parameter.  The offset to the saved pc is 12.  */
       find_pc_partial_function (frame->pc, &name,
-				(CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+				(CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
       if (name && STREQ (name, "ucbsigvechandler"))
 	saved_pc_offset = 12;
 
       /* The sigcontext address is contained in register O2.  */
-      get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
-			  frame, O0_REGNUM + 2, (enum lval_type *)NULL);
+      get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
+			  frame, O0_REGNUM + 2, (enum lval_type *) NULL);
       sigcontext_addr = extract_address (buf, REGISTER_RAW_SIZE (O0_REGNUM + 2));
 
       /* Don't cause a memory_error when accessing sigcontext in case the
-	 stack layout has changed or the stack is corrupt.  */
+         stack layout has changed or the stack is corrupt.  */
       target_read_memory (sigcontext_addr + saved_pc_offset,
 			  scbuf, sizeof (scbuf));
       return extract_address (scbuf, sizeof (scbuf));
@@ -407,13 +409,13 @@ sparc_frame_saved_pc (frame)
   else if (frame->in_prologue ||
 	   (frame->next != NULL
 	    && (frame->next->signal_handler_caller
-	        || frame_in_dummy (frame->next))
+		|| frame_in_dummy (frame->next))
 	    && frameless_look_for_prologue (frame)))
     {
       /* A frameless function interrupted by a signal did not save
-	 the PC, it is still in %o7.  */
-      get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
-			  frame, O7_REGNUM, (enum lval_type *)NULL);
+         the PC, it is still in %o7.  */
+      get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
+			  frame, O7_REGNUM, (enum lval_type *) NULL);
       return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
     }
   if (frame->flat)
@@ -453,7 +455,7 @@ setup_arbitrary_frame (argc, argv)
 
   if (!frame)
     fatal ("internal: create_new_frame returned invalid frame");
-  
+
   frame->bottom = argv[1];
   frame->pc = FRAME_SAVED_PC (frame);
   return frame;
@@ -471,7 +473,7 @@ setup_arbitrary_frame (argc, argv)
 static CORE_ADDR examine_prologue PARAMS ((CORE_ADDR, int, struct frame_info *,
 					   struct frame_saved_regs *));
 
-static CORE_ADDR 
+static CORE_ADDR
 examine_prologue (start_pc, frameless_p, fi, saved_regs)
      CORE_ADDR start_pc;
      int frameless_p;
@@ -511,16 +513,16 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
   if (X_OP (insn) == 2 && X_OP3 (insn) == 60)
     {
       pc += 4;
-      if (frameless_p)			/* If the save is all we care about, */
-	return pc;			/* return before doing more work */
+      if (frameless_p)		/* If the save is all we care about, */
+	return pc;		/* return before doing more work */
       insn = fetch_instruction (pc);
     }
   /* Recognize add to %sp.  */
   else if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0)
     {
       pc += 4;
-      if (frameless_p)			/* If the add is all we care about, */
-	return pc;			/* return before doing more work */
+      if (frameless_p)		/* If the add is all we care about, */
+	return pc;		/* return before doing more work */
       is_flat = 1;
       insn = fetch_instruction (pc);
       /* Recognize store of frame pointer (i7).  */
@@ -533,7 +535,7 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
 	  insn = fetch_instruction (pc);
 
 	  /* Recognize sub %sp, <anything>, %i7.  */
-	  if (X_OP (insn) ==  2
+	  if (X_OP (insn) == 2
 	      && X_OP3 (insn) == 4
 	      && X_RS1 (insn) == 14
 	      && X_RD (insn) == 31)
@@ -554,14 +556,14 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
   while (1)
     {
       /* Recognize stores into the frame from the input registers.
-	 This recognizes all non alternate stores of input register,
-	 into a location offset from the frame pointer.  */
+         This recognizes all non alternate stores of input register,
+         into a location offset from the frame pointer.  */
       if ((X_OP (insn) == 3
-	   && (X_OP3 (insn) & 0x3c) == 4 /* Store, non-alternate.  */
-	   && (X_RD (insn) & 0x18) == 0x18 /* Input register.  */
-	   && X_I (insn)		/* Immediate mode.  */
+	   && (X_OP3 (insn) & 0x3c) == 4	/* Store, non-alternate.  */
+	   && (X_RD (insn) & 0x18) == 0x18	/* Input register.  */
+	   && X_I (insn)	/* Immediate mode.  */
 	   && X_RS1 (insn) == 30	/* Off of frame pointer.  */
-	   /* Into reserved stack space.  */
+      /* Into reserved stack space.  */
 	   && X_SIMM13 (insn) >= 0x44
 	   && X_SIMM13 (insn) < 0x5b))
 	;
@@ -569,7 +571,7 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
 	       && X_OP (insn) == 3
 	       && X_OP3 (insn) == 4
 	       && X_RS1 (insn) == 14
-	       )
+	)
 	{
 	  if (saved_regs && X_I (insn))
 	    saved_regs->regs[X_RD (insn)] =
@@ -584,7 +586,7 @@ examine_prologue (start_pc, frameless_p, fi, saved_regs)
   return pc;
 }
 
-CORE_ADDR 
+CORE_ADDR
 sparc_skip_prologue (start_pc, frameless_p)
      CORE_ADDR start_pc;
      int frameless_p;
@@ -617,7 +619,7 @@ isbranch (instruction, addr, target)
 #ifndef GDB_TARGET_IS_SPARC64
 	  || X_OP2 (instruction) == 7
 #endif
-	  ))
+      ))
     {
       if (X_COND (instruction) == 8)
 	val = X_A (instruction) ? baa : ba;
@@ -697,13 +699,13 @@ sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
     {
       /* error ("No selected frame."); */
       if (!target_has_registers)
-        error ("The program has no registers now.");
-      if (selected_frame == NULL) 
-        error ("No selected frame.");
+	error ("The program has no registers now.");
+      if (selected_frame == NULL)
+	error ("No selected frame.");
       /* Try to use selected frame */
-      frame = get_prev_frame (selected_frame);  
+      frame = get_prev_frame (selected_frame);
       if (frame == 0)
-        error ("Cmd not meaningful in the outermost frame."); 
+	error ("Cmd not meaningful in the outermost frame.");
     }
 
 
@@ -903,25 +905,25 @@ sparc_push_dummy_frame ()
       write_fp (old_sp);
 
       /* Set return address register for the call dummy to the current PC.  */
-      write_register (I7_REGNUM, read_pc() - 8);
+      write_register (I7_REGNUM, read_pc () - 8);
     }
   else
     {
       /* The call dummy will write this value to FP before executing
          the 'save'.  This ensures that register window flushes work
-	 correctly in the simulator.  */
-      write_register (G0_REGNUM+1, read_register (FP_REGNUM));
-    
+         correctly in the simulator.  */
+      write_register (G0_REGNUM + 1, read_register (FP_REGNUM));
+
       /* The call dummy will write this value to FP after executing
          the 'save'. */
-      write_register (G0_REGNUM+2, old_sp);
-    
+      write_register (G0_REGNUM + 2, old_sp);
+
       /* The call dummy will write this value to the return address (%i7) after
-	 executing the 'save'. */
-      write_register (G0_REGNUM+3, read_pc() - 8);
-    
+         executing the 'save'. */
+      write_register (G0_REGNUM + 3, read_pc () - 8);
+
       /* Set the FP that the call dummy will be using after the 'save'.
-	 This makes backtraces from an inferior function call work properly.  */
+         This makes backtraces from an inferior function call work properly.  */
       write_register (FP_REGNUM, old_sp);
     }
 }
@@ -977,44 +979,44 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
   memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
 
   if (fi->pc >= (fi->bottom ? fi->bottom :
-		   read_sp ())
-      && fi->pc <= FRAME_FP(fi))
+		 read_sp ())
+      && fi->pc <= FRAME_FP (fi))
     {
       /* Dummy frame.  All but the window regs are in there somewhere. */
-      for (regnum = G1_REGNUM; regnum < G1_REGNUM+7; regnum++)
+      for (regnum = G1_REGNUM; regnum < G1_REGNUM + 7; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  frame_addr + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
-	    - DUMMY_STACK_REG_BUF_SIZE + 16 * SPARC_INTREG_SIZE;
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
+	  - DUMMY_STACK_REG_BUF_SIZE + 16 * SPARC_INTREG_SIZE;
+      for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
-	    - DUMMY_STACK_REG_BUF_SIZE + 8 * SPARC_INTREG_SIZE;
+	  - DUMMY_STACK_REG_BUF_SIZE + 8 * SPARC_INTREG_SIZE;
 #ifdef FP0_REGNUM
       for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 32; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  frame_addr + (regnum - FP0_REGNUM) * 4
-	    - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
+	  - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
 #ifdef GDB_TARGET_IS_SPARC64
       for (regnum = FP0_REGNUM + 32; regnum < FP_MAX_REGNUM; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  frame_addr + 32 * 4 + (regnum - FP0_REGNUM - 32) * 4
-	    - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
+	  - DUMMY_STACK_REG_BUF_SIZE + 24 * SPARC_INTREG_SIZE;
 #endif
 #endif /* FP0_REGNUM */
 #ifdef GDB_TARGET_IS_SPARC64
       for (regnum = PC_REGNUM; regnum < PC_REGNUM + 7; regnum++)
 	{
 	  saved_regs_addr->regs[regnum] =
-	    frame_addr + (regnum - PC_REGNUM) * SPARC_INTREG_SIZE 
-	      - DUMMY_STACK_REG_BUF_SIZE;
+	    frame_addr + (regnum - PC_REGNUM) * SPARC_INTREG_SIZE
+	    - DUMMY_STACK_REG_BUF_SIZE;
 	}
-      saved_regs_addr->regs[PSTATE_REGNUM] = 
+      saved_regs_addr->regs[PSTATE_REGNUM] =
 	frame_addr + 8 * SPARC_INTREG_SIZE - DUMMY_STACK_REG_BUF_SIZE;
 #else
       for (regnum = Y_REGNUM; regnum < NUM_REGS; regnum++)
 	saved_regs_addr->regs[regnum] =
-	  frame_addr + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE 
-	    - DUMMY_STACK_REG_BUF_SIZE;
+	  frame_addr + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
+	  - DUMMY_STACK_REG_BUF_SIZE;
 #endif
       frame_addr = fi->bottom ?
 	fi->bottom : read_sp ();
@@ -1034,11 +1036,11 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
       /* Normal frame.  Just Local and In registers */
       frame_addr = fi->bottom ?
 	fi->bottom : read_sp ();
-      for (regnum = L0_REGNUM; regnum < L0_REGNUM+8; regnum++)
+      for (regnum = L0_REGNUM; regnum < L0_REGNUM + 8; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  (frame_addr + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 	   + FRAME_SAVED_L0);
-      for (regnum = I0_REGNUM; regnum < I0_REGNUM+8; regnum++)
+      for (regnum = I0_REGNUM; regnum < I0_REGNUM + 8; regnum++)
 	saved_regs_addr->regs[regnum] =
 	  (frame_addr + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 	   + FRAME_SAVED_I0);
@@ -1053,10 +1055,10 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
 	{
 	  /* Pull off either the next frame pointer or the stack pointer */
 	  CORE_ADDR next_next_frame_addr =
-	    (fi->next->bottom ?
-	     fi->next->bottom :
-	     read_sp ());
-	  for (regnum = O0_REGNUM; regnum < O0_REGNUM+8; regnum++)
+	  (fi->next->bottom ?
+	   fi->next->bottom :
+	   read_sp ());
+	  for (regnum = O0_REGNUM; regnum < O0_REGNUM + 8; regnum++)
 	    saved_regs_addr->regs[regnum] =
 	      (next_next_frame_addr
 	       + (regnum - O0_REGNUM) * SPARC_INTREG_SIZE
@@ -1122,7 +1124,7 @@ sparc_pop_frame ()
   if (frame->flat)
     {
       /* Each register might or might not have been saved, need to test
-	 individually.  */
+         individually.  */
       for (regnum = L0_REGNUM; regnum < L0_REGNUM + 8; ++regnum)
 	if (fsr.regs[regnum])
 	  write_register (regnum, read_memory_integer (fsr.regs[regnum],
@@ -1153,10 +1155,10 @@ sparc_pop_frame ()
       read_memory (fsr.regs[I0_REGNUM], raw_buffer, 8 * SPARC_INTREG_SIZE);
 
       /* Get the ins and locals which we are about to restore.  Just
-	 moving the stack pointer is all that is really needed, except
-	 store_inferior_registers is then going to write the ins and
-	 locals from the registers array, so we need to muck with the
-	 registers array.  */
+         moving the stack pointer is all that is really needed, except
+         store_inferior_registers is then going to write the ins and
+         locals from the registers array, so we need to muck with the
+         registers array.  */
       sp = fsr.regs[SP_REGNUM];
 #ifdef GDB_TARGET_IS_SPARC64
       if (sp & 1)
@@ -1165,7 +1167,7 @@ sparc_pop_frame ()
       read_memory (sp, reg_temp, SPARC_INTREG_SIZE * 16);
 
       /* Restore the out registers.
-	 Among other things this writes the new stack pointer.  */
+         Among other things this writes the new stack pointer.  */
       write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer,
 			    SPARC_INTREG_SIZE * 8);
 
@@ -1182,11 +1184,11 @@ sparc_pop_frame ()
     {
       /* Explicitly specified PC (and maybe NPC) -- just restore them. */
       write_register (PC_REGNUM, read_memory_integer (fsr.regs[PC_REGNUM],
-						      REGISTER_RAW_SIZE (PC_REGNUM)));
+					    REGISTER_RAW_SIZE (PC_REGNUM)));
       if (fsr.regs[NPC_REGNUM])
 	write_register (NPC_REGNUM,
 			read_memory_integer (fsr.regs[NPC_REGNUM],
-					     REGISTER_RAW_SIZE (NPC_REGNUM)));
+					   REGISTER_RAW_SIZE (NPC_REGNUM)));
     }
   else if (frame->flat)
     {
@@ -1205,7 +1207,7 @@ sparc_pop_frame ()
 			  (buf, REGISTER_RAW_SIZE (O7_REGNUM)));
 	}
 
-      write_register (PC_REGNUM,  pc);
+      write_register (PC_REGNUM, pc);
       write_register (NPC_REGNUM, pc + 4);
     }
   else if (fsr.regs[I7_REGNUM])
@@ -1213,7 +1215,7 @@ sparc_pop_frame ()
       /* Return address in %i7 -- adjust it, then restore PC and NPC from it */
       pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (fsr.regs[I7_REGNUM],
 						       SPARC_INTREG_SIZE));
-      write_register (PC_REGNUM,  pc);
+      write_register (PC_REGNUM, pc);
       write_register (NPC_REGNUM, pc + 4);
     }
   flush_cached_frames ();
@@ -1224,7 +1226,7 @@ sparc_pop_frame ()
    a fake insn, step past it.  */
 
 CORE_ADDR
-sparc_pc_adjust(pc)
+sparc_pc_adjust (pc)
      CORE_ADDR pc;
 {
   unsigned long insn;
@@ -1234,17 +1236,17 @@ sparc_pc_adjust(pc)
   err = target_read_memory (pc + 8, buf, 4);
   insn = extract_unsigned_integer (buf, 4);
   if ((err == 0) && (insn & 0xffc00000) == 0)
-    return pc+12;
+    return pc + 12;
   else
-    return pc+8;
+    return pc + 8;
 }
 
 /* If pc is in a shared library trampoline, return its target.
    The SunOs 4.x linker rewrites the jump table entries for PIC
    compiled modules in the main executable to bypass the dynamic linker
    with jumps of the form
-	sethi %hi(addr),%g1
-	jmp %g1+%lo(addr)
+   sethi %hi(addr),%g1
+   jmp %g1+%lo(addr)
    and removes the corresponding jump table relocation entry in the
    dynamic relocations.
    find_solib_trampoline_target relies on the presence of the jump
@@ -1281,8 +1283,7 @@ sunos4_skip_trampoline_code (pc)
   return find_solib_trampoline_target (pc);
 }
 
-#ifdef USE_PROC_FS	/* Target dependent support for /proc */
-
+#ifdef USE_PROC_FS		/* Target dependent support for /proc */
 /* *INDENT-OFF* */
 /*  The /proc interface divides the target machine's register set up into
     two different sets, the general register set (gregset) and the floating
@@ -1321,20 +1322,23 @@ sunos4_skip_trampoline_code (pc)
  */
 /* *INDENT-ON* */
 
+
+
 /* Given a pointer to a general register set in /proc format (gregset_t *),
    unpack the register contents and supply them as gdb's idea of the current
    register values. */
 
 void
 supply_gregset (gregsetp)
-prgregset_t *gregsetp;
+     prgregset_t *gregsetp;
 {
   register int regi;
   register prgreg_t *regp = (prgreg_t *) gregsetp;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  {0};
 
   /* GDB register numbers for Gn, On, Ln, In all match /proc reg numbers.  */
-  for (regi = G0_REGNUM ; regi <= I7_REGNUM ; regi++)
+  for (regi = G0_REGNUM; regi <= I7_REGNUM; regi++)
     {
       supply_register (regi, (char *) (regp + regi));
     }
@@ -1342,8 +1346,8 @@ prgregset_t *gregsetp;
   /* These require a bit more care.  */
   supply_register (PS_REGNUM, (char *) (regp + R_PS));
   supply_register (PC_REGNUM, (char *) (regp + R_PC));
-  supply_register (NPC_REGNUM,(char *) (regp + R_nPC));
-  supply_register (Y_REGNUM,  (char *) (regp + R_Y));
+  supply_register (NPC_REGNUM, (char *) (regp + R_nPC));
+  supply_register (Y_REGNUM, (char *) (regp + R_Y));
 
   /* Fill inaccessible registers with zero.  */
   supply_register (WIM_REGNUM, zerobuf);
@@ -1353,13 +1357,13 @@ prgregset_t *gregsetp;
 
 void
 fill_gregset (gregsetp, regno)
-prgregset_t *gregsetp;
-int regno;
+     prgregset_t *gregsetp;
+     int regno;
 {
   int regi;
   register prgreg_t *regp = (prgreg_t *) gregsetp;
 
-  for (regi = 0 ; regi <= R_I7 ; regi++)
+  for (regi = 0; regi <= R_I7; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{
@@ -1387,45 +1391,45 @@ int regno;
 #if defined (FP0_REGNUM)
 
 /*  Given a pointer to a floating point register set in /proc format
-    (fpregset_t *), unpack the register contents and supply them as gdb's
-    idea of the current floating point register values. */
+   (fpregset_t *), unpack the register contents and supply them as gdb's
+   idea of the current floating point register values. */
 
-void 
+void
 supply_fpregset (fpregsetp)
-prfpregset_t *fpregsetp;
+     prfpregset_t *fpregsetp;
 {
   register int regi;
   char *from;
-  
-  for (regi = FP0_REGNUM ; regi < FP_MAX_REGNUM ; regi++)
+
+  for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
     {
-      from = (char *) &fpregsetp->pr_fr.pr_regs[regi-FP0_REGNUM];
+      from = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
       supply_register (regi, from);
     }
   supply_register (FPS_REGNUM, (char *) &(fpregsetp->pr_fsr));
 }
 
 /*  Given a pointer to a floating point register set in /proc format
-    (fpregset_t *), update the register specified by REGNO from gdb's idea
-    of the current floating point register set.  If REGNO is -1, update
-    them all. */
+   (fpregset_t *), update the register specified by REGNO from gdb's idea
+   of the current floating point register set.  If REGNO is -1, update
+   them all. */
 /* ??? This will probably need some changes for sparc64.  */
 
 void
 fill_fpregset (fpregsetp, regno)
-prfpregset_t *fpregsetp;
-int regno;
+     prfpregset_t *fpregsetp;
+     int regno;
 {
   int regi;
   char *to;
   char *from;
 
-  for (regi = FP0_REGNUM ; regi < FP_MAX_REGNUM ; regi++)
+  for (regi = FP0_REGNUM; regi < FP_MAX_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
-	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi-FP0_REGNUM];
+	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi - FP0_REGNUM];
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
@@ -1435,9 +1439,9 @@ int regno;
     }
 }
 
-#endif	/* defined (FP0_REGNUM) */
+#endif /* defined (FP0_REGNUM) */
 
-#endif  /* USE_PROC_FS */
+#endif /* USE_PROC_FS */
 
 
 #ifdef GET_LONGJMP_TARGET
@@ -1480,12 +1484,12 @@ sunpro_static_transform_name (name)
   if (name[0] == '$')
     {
       /* For file-local statics there will be a dollar sign, a bunch
-	 of junk (the contents of which match a string given in the
-	 N_OPT), a period and the name.  For function-local statics
-	 there will be a bunch of junk (which seems to change the
-	 second character from 'A' to 'B'), a period, the name of the
-	 function, and the name.  So just skip everything before the
-	 last period.  */
+         of junk (the contents of which match a string given in the
+         N_OPT), a period and the name.  For function-local statics
+         there will be a bunch of junk (which seems to change the
+         second character from 'A' to 'B'), a period, the name of the
+         function, and the name.  So just skip everything before the
+         last period.  */
       p = strrchr (name, '.');
       if (p != NULL)
 	name = p + 1;
@@ -1507,11 +1511,11 @@ dump_ccreg (reg, val)
 {
   /* page 41 */
   printf_unfiltered ("%s:%s,%s,%s,%s", reg,
-	  val & 8 ? "N" : "NN",
-	  val & 4 ? "Z" : "NZ",
-	  val & 2 ? "O" : "NO",
-	  val & 1 ? "C" : "NC"
-  );
+		     val & 8 ? "N" : "NN",
+		     val & 4 ? "Z" : "NZ",
+		     val & 2 ? "O" : "NO",
+		     val & 1 ? "C" : "NC"
+    );
 }
 
 static char *
@@ -1521,21 +1525,36 @@ decode_asi (val)
   /* page 72 */
   switch (val)
     {
-    case 4 : return "ASI_NUCLEUS";
-    case 0x0c : return "ASI_NUCLEUS_LITTLE";
-    case 0x10 : return "ASI_AS_IF_USER_PRIMARY";
-    case 0x11 : return "ASI_AS_IF_USER_SECONDARY";
-    case 0x18 : return "ASI_AS_IF_USER_PRIMARY_LITTLE";
-    case 0x19 : return "ASI_AS_IF_USER_SECONDARY_LITTLE";
-    case 0x80 : return "ASI_PRIMARY";
-    case 0x81 : return "ASI_SECONDARY";
-    case 0x82 : return "ASI_PRIMARY_NOFAULT";
-    case 0x83 : return "ASI_SECONDARY_NOFAULT";
-    case 0x88 : return "ASI_PRIMARY_LITTLE";
-    case 0x89 : return "ASI_SECONDARY_LITTLE";
-    case 0x8a : return "ASI_PRIMARY_NOFAULT_LITTLE";
-    case 0x8b : return "ASI_SECONDARY_NOFAULT_LITTLE";
-    default : return NULL;
+    case 4:
+      return "ASI_NUCLEUS";
+    case 0x0c:
+      return "ASI_NUCLEUS_LITTLE";
+    case 0x10:
+      return "ASI_AS_IF_USER_PRIMARY";
+    case 0x11:
+      return "ASI_AS_IF_USER_SECONDARY";
+    case 0x18:
+      return "ASI_AS_IF_USER_PRIMARY_LITTLE";
+    case 0x19:
+      return "ASI_AS_IF_USER_SECONDARY_LITTLE";
+    case 0x80:
+      return "ASI_PRIMARY";
+    case 0x81:
+      return "ASI_SECONDARY";
+    case 0x82:
+      return "ASI_PRIMARY_NOFAULT";
+    case 0x83:
+      return "ASI_SECONDARY_NOFAULT";
+    case 0x88:
+      return "ASI_PRIMARY_LITTLE";
+    case 0x89:
+      return "ASI_SECONDARY_LITTLE";
+    case 0x8a:
+      return "ASI_PRIMARY_NOFAULT_LITTLE";
+    case 0x8b:
+      return "ASI_SECONDARY_NOFAULT_LITTLE";
+    default:
+      return NULL;
     }
 }
 
@@ -1561,7 +1580,7 @@ sparc_print_register_hook (regno)
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_double, gdb_stdout);
 	}
-#if 0 /* FIXME: gdb doesn't handle long doubles */
+#if 0				/* FIXME: gdb doesn't handle long doubles */
       if ((regno & 3) == 0)
 	{
 	  if (!read_relative_register_raw_bytes (regno + 2, value + 8)
@@ -1575,11 +1594,11 @@ sparc_print_register_hook (regno)
       return;
     }
 
-#if 0 /* FIXME: gdb doesn't handle long doubles */
+#if 0				/* FIXME: gdb doesn't handle long doubles */
   /* Print upper fp regs as long double if appropriate.  */
   if (regno >= FP0_REGNUM + 32 && regno < FP_MAX_REGNUM
-      /* We test for even numbered regs and not a multiple of 4 because
-	 the upper fp regs are recorded as doubles.  */
+  /* We test for even numbered regs and not a multiple of 4 because
+     the upper fp regs are recorded as doubles.  */
       && (regno & 1) == 0)
     {
       char value[16];
@@ -1605,20 +1624,22 @@ sparc_print_register_hook (regno)
   switch (regno)
     {
 #ifdef GDB_TARGET_IS_SPARC64
-    case CCR_REGNUM :
-      printf_unfiltered("\t");
+    case CCR_REGNUM:
+      printf_unfiltered ("\t");
       dump_ccreg ("xcc", val >> 4);
-      printf_unfiltered(", ");
+      printf_unfiltered (", ");
       dump_ccreg ("icc", val & 15);
       break;
-    case FPRS_REGNUM :
+    case FPRS_REGNUM:
       printf ("\tfef:%d, du:%d, dl:%d",
 	      BITS (2, 1), BITS (1, 1), BITS (0, 1));
       break;
-    case FSR_REGNUM :
+    case FSR_REGNUM:
       {
-	static char *fcc[4] = { "=", "<", ">", "?" };
-	static char *rd[4] = { "N", "0", "+", "-" };
+	static char *fcc[4] =
+	{"=", "<", ">", "?"};
+	static char *rd[4] =
+	{"N", "0", "+", "-"};
 	/* Long, yes, but I'd rather leave it as is and use a wide screen.  */
 	printf ("\t0:%s, 1:%s, 2:%s, 3:%s, rd:%s, tem:%d, ns:%d, ver:%d, ftt:%d, qne:%d, aexc:%d, cexc:%d",
 		fcc[BITS (10, 3)], fcc[BITS (32, 3)],
@@ -1627,55 +1648,56 @@ sparc_print_register_hook (regno)
 		BITS (14, 7), BITS (13, 1), BITS (5, 31), BITS (0, 31));
 	break;
       }
-    case ASI_REGNUM :
+    case ASI_REGNUM:
       {
 	char *asi = decode_asi (val);
 	if (asi != NULL)
 	  printf ("\t%s", asi);
 	break;
       }
-    case VER_REGNUM :
+    case VER_REGNUM:
       printf ("\tmanuf:%d, impl:%d, mask:%d, maxtl:%d, maxwin:%d",
 	      BITS (48, 0xffff), BITS (32, 0xffff),
 	      BITS (24, 0xff), BITS (8, 0xff), BITS (0, 31));
       break;
-    case PSTATE_REGNUM :
+    case PSTATE_REGNUM:
       {
-	static char *mm[4] = { "tso", "pso", "rso", "?" };
+	static char *mm[4] =
+	{"tso", "pso", "rso", "?"};
 	printf ("\tcle:%d, tle:%d, mm:%s, red:%d, pef:%d, am:%d, priv:%d, ie:%d, ag:%d",
 		BITS (9, 1), BITS (8, 1), mm[BITS (6, 3)], BITS (5, 1),
 		BITS (4, 1), BITS (3, 1), BITS (2, 1), BITS (1, 1),
 		BITS (0, 1));
 	break;
       }
-    case TSTATE_REGNUM :
+    case TSTATE_REGNUM:
       /* FIXME: print all 4? */
       break;
-    case TT_REGNUM :
+    case TT_REGNUM:
       /* FIXME: print all 4? */
       break;
-    case TPC_REGNUM :
+    case TPC_REGNUM:
       /* FIXME: print all 4? */
       break;
-    case TNPC_REGNUM :
+    case TNPC_REGNUM:
       /* FIXME: print all 4? */
       break;
-    case WSTATE_REGNUM :
+    case WSTATE_REGNUM:
       printf ("\tother:%d, normal:%d", BITS (3, 7), BITS (0, 7));
       break;
-    case CWP_REGNUM :
+    case CWP_REGNUM:
       printf ("\t%d", BITS (0, 31));
       break;
-    case CANSAVE_REGNUM :
+    case CANSAVE_REGNUM:
       printf ("\t%-2d before spill", BITS (0, 31));
       break;
-    case CANRESTORE_REGNUM :
+    case CANRESTORE_REGNUM:
       printf ("\t%-2d before fill", BITS (0, 31));
       break;
-    case CLEANWIN_REGNUM :
+    case CLEANWIN_REGNUM:
       printf ("\t%-2d before clean", BITS (0, 31));
       break;
-    case OTHERWIN_REGNUM :
+    case OTHERWIN_REGNUM:
       printf ("\t%d", BITS (0, 31));
       break;
 #else
@@ -1688,8 +1710,10 @@ sparc_print_register_hook (regno)
       break;
     case FPS_REGNUM:
       {
-	static char *fcc[4] = { "=", "<", ">", "?" };
-	static char *rd[4] = { "N", "0", "+", "-" };
+	static char *fcc[4] =
+	{"=", "<", ">", "?"};
+	static char *rd[4] =
+	{"N", "0", "+", "-"};
 	/* Long, yes, but I'd rather leave it as is and use a wide screen.  */
 	printf ("\trd:%s, tem:%d, ns:%d, ver:%d, ftt:%d, qne:%d, "
 		"fcc:%s, aexc:%d, cexc:%d",
@@ -1699,7 +1723,7 @@ sparc_print_register_hook (regno)
 	break;
       }
 
-#endif	/* GDB_TARGET_IS_SPARC64 */
+#endif /* GDB_TARGET_IS_SPARC64 */
     }
 
 #undef BITS
@@ -1735,7 +1759,7 @@ sparc_push_arguments (nargs, args, sp, struct_return, struct_addr)
       int offset;
     };
   struct sparc_arg *sparc_args =
-      (struct sparc_arg*)alloca (nargs * sizeof (struct sparc_arg));
+  (struct sparc_arg *) alloca (nargs * sizeof (struct sparc_arg));
   struct sparc_arg *m_arg;
 
   /* Promote arguments if necessary, and calculate their stack offsets
@@ -1764,7 +1788,7 @@ sparc_push_arguments (nargs, args, sp, struct_return, struct_addr)
       m_arg->len = TYPE_LENGTH (arg_type);
       m_arg->offset = accumulate_size;
       accumulate_size = (accumulate_size + m_arg->len + 3) & ~3;
-      m_arg->contents = VALUE_CONTENTS(arg);
+      m_arg->contents = VALUE_CONTENTS (arg);
     }
 
   /* Make room for the arguments on the stack.  */
@@ -1772,8 +1796,8 @@ sparc_push_arguments (nargs, args, sp, struct_return, struct_addr)
   sp = ((sp - accumulate_size) & ~7) + CALL_DUMMY_STACK_ADJUST;
 
   /* `Push' arguments on the stack.  */
-  for (i = nargs; m_arg--, --i >= 0; )
-    write_memory(sp + m_arg->offset, m_arg->contents, m_arg->len);
+  for (i = nargs; m_arg--, --i >= 0;)
+    write_memory (sp + m_arg->offset, m_arg->contents, m_arg->len);
 
   return sp;
 }
@@ -1793,13 +1817,13 @@ sparc_extract_return_value (type, regbuf, valbuf)
   int regsize = REGISTER_RAW_SIZE (O0_REGNUM);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    memcpy (valbuf, &regbuf [REGISTER_BYTE (FP0_REGNUM)], typelen);
+    memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)], typelen);
   else
     memcpy (valbuf,
-	    &regbuf [O0_REGNUM * regsize +
-		     (typelen >= regsize
-		      || TARGET_BYTE_ORDER == LITTLE_ENDIAN ? 0
-			 : regsize - typelen)],
+	    &regbuf[O0_REGNUM * regsize +
+		    (typelen >= regsize
+		     || TARGET_BYTE_ORDER == LITTLE_ENDIAN ? 0
+		     : regsize - typelen)],
 	    typelen);
 }
 
@@ -1826,13 +1850,13 @@ sparc_store_return_value (type, valbuf)
     regno = O0_REGNUM;
 
   /* Add leading zeros to the value. */
-  if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE(regno))
+  if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (regno))
     {
-      bzero (buffer, REGISTER_RAW_SIZE(regno));
-      memcpy (buffer + REGISTER_RAW_SIZE(regno) - TYPE_LENGTH (type), valbuf,
+      bzero (buffer, REGISTER_RAW_SIZE (regno));
+      memcpy (buffer + REGISTER_RAW_SIZE (regno) - TYPE_LENGTH (type), valbuf,
 	      TYPE_LENGTH (type));
-      write_register_bytes (REGISTER_BYTE (regno), buffer, 
-			    REGISTER_RAW_SIZE(regno));
+      write_register_bytes (REGISTER_BYTE (regno), buffer,
+			    REGISTER_RAW_SIZE (regno));
     }
   else
     write_register_bytes (REGISTER_BYTE (regno), valbuf, TYPE_LENGTH (type));
@@ -1863,7 +1887,7 @@ sparc_fix_call_dummy (dummy, pc, fun, value_type, using_gcc)
   store_unsigned_integer (dummy + CALL_DUMMY_CALL_OFFSET, 4,
 			  (0x40000000
 			   | (((fun - (pc + CALL_DUMMY_CALL_OFFSET)) >> 2)
-			       & 0x3fffffff)));
+			      & 0x3fffffff)));
 
   /* Comply with strange Sun cc calling convention for struct-returning
      functions.  */
@@ -1891,12 +1915,12 @@ sparc_fix_call_dummy (dummy, pc, fun, value_type, using_gcc)
     {
       for (i = 0; i < CALL_DUMMY_LENGTH; i += 4)
 	{
-	  char tmp = dummy [i];
-	  dummy [i] = dummy [i+3];
-	  dummy [i+3] = tmp;
-	  tmp = dummy [i+1];
-	  dummy [i+1] = dummy [i+2];
-	  dummy [i+2] = tmp;
+	  char tmp = dummy[i];
+	  dummy[i] = dummy[i + 3];
+	  dummy[i + 3] = tmp;
+	  tmp = dummy[i + 1];
+	  dummy[i + 1] = dummy[i + 2];
+	  dummy[i + 2] = tmp;
 	}
     }
 }
@@ -1926,13 +1950,13 @@ sparc_target_architecture_hook (ap)
     bi_endian = 0;
   return 1;
 }
-
 
+
 void
 _initialize_sparc_tdep ()
 {
   tm_print_insn = gdb_print_insn_sparc;
-  tm_print_insn_info.mach = TM_PRINT_INSN_MACH;  /* Selects sparc/sparclite */
+  tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
   target_architecture_hook = sparc_target_architecture_hook;
 }
 
@@ -1997,8 +2021,8 @@ sp64_push_arguments (nargs, args, sp, struct_return, struct_retaddr)
   int x;
   int regnum = 0;
   CORE_ADDR tempsp;
-  
-  sp = (sp & ~(((unsigned long)TYPE_LENGTH (builtin_type_long)) - 1UL));
+
+  sp = (sp & ~(((unsigned long) TYPE_LENGTH (builtin_type_long)) - 1UL));
 
   /* Figure out how much space we'll need. */
   for (x = nargs - 1; x >= 0; x--)
@@ -2010,9 +2034,9 @@ sp64_push_arguments (nargs, args, sp, struct_return, struct_retaddr)
       /* This code is, of course, no longer correct. */
       if (copylen < TYPE_LENGTH (builtin_type_long))
 	{
-	  copyarg = value_cast(builtin_type_long, copyarg);
-          copylen = TYPE_LENGTH (builtin_type_long);
-        }
+	  copyarg = value_cast (builtin_type_long, copyarg);
+	  copylen = TYPE_LENGTH (builtin_type_long);
+	}
       sp -= copylen;
     }
 
@@ -2031,9 +2055,9 @@ sp64_push_arguments (nargs, args, sp, struct_return, struct_retaddr)
       /* This code is, of course, no longer correct. */
       if (copylen < TYPE_LENGTH (builtin_type_long))
 	{
-	  copyarg = value_cast(builtin_type_long, copyarg);
-          copylen = TYPE_LENGTH (builtin_type_long);
-        }
+	  copyarg = value_cast (builtin_type_long, copyarg);
+	  copylen = TYPE_LENGTH (builtin_type_long);
+	}
       write_memory (tempsp, VALUE_CONTENTS (copyarg), copylen);
       tempsp += copylen;
       if (TYPE_CODE (VALUE_TYPE (args[x])) == TYPE_CODE_FLT && regnum < 32)
@@ -2072,7 +2096,7 @@ sparc64_extract_return_value (type, regbuf, valbuf, bitoffset)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
     {
-      memcpy (valbuf, &regbuf [REGISTER_BYTE (FP0_REGNUM)], typelen);
+      memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)], typelen);
       return;
     }
 
@@ -2080,7 +2104,7 @@ sparc64_extract_return_value (type, regbuf, valbuf, bitoffset)
       || (TYPE_LENGTH (type) > 32))
     {
       memcpy (valbuf,
-	      &regbuf [O0_REGNUM * regsize +
+	      &regbuf[O0_REGNUM * regsize +
 		      (typelen >= regsize ? 0 : regsize - typelen)],
 	      typelen);
       return;
@@ -2093,7 +2117,7 @@ sparc64_extract_return_value (type, regbuf, valbuf, bitoffset)
 
       for (x = 0; x < TYPE_NFIELDS (type); x++)
 	{
-	  struct field *f = &TYPE_FIELDS(type)[x];
+	  struct field *f = &TYPE_FIELDS (type)[x];
 	  /* FIXME: We may need to handle static fields here. */
 	  int whichreg = (f->loc.bitpos + bitoffset) / 32;
 	  int remainder = ((f->loc.bitpos + bitoffset) % 32) / 8;

@@ -2,21 +2,22 @@
    Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 1999
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "top.h"
@@ -45,9 +46,9 @@ int display_time;
 int display_space;
 
 /* Whether this is the async version or not.  The async version is
-invoked on the command line with the -nw --async options.  In this
-version, the usual command_loop is substituted by and event loop which
-processes UI events asynchronously. */
+   invoked on the command line with the -nw --async options.  In this
+   version, the usual command_loop is substituted by and event loop which
+   processes UI events asynchronously. */
 int async_p = 1;
 
 /* Whether this is the command line version or not */
@@ -73,11 +74,11 @@ static void print_gdb_help PARAMS ((GDB_FILE *));
    out files to be edited by another program. */
 
 extern int enable_external_editor;
-extern char * external_editor_command;
+extern char *external_editor_command;
 
 #ifdef __CYGWIN__
-#include <windows.h> /* for MAX_PATH */
-#include <sys/cygwin.h> /* for cygwin32_conv_to_posix_path */
+#include <windows.h>		/* for MAX_PATH */
+#include <sys/cygwin.h>		/* for cygwin32_conv_to_posix_path */
 #endif
 
 int
@@ -113,7 +114,7 @@ main (argc, argv)
   int dirsize;
   /* Number of elements used.  */
   int ndir;
-  
+
   struct stat homebuf, cwdbuf;
   char *homedir, *homeinit;
 
@@ -140,9 +141,10 @@ main (argc, argv)
 #endif
 
   /* If error() is called from initialization code, just exit */
-  if (SET_TOP_LEVEL ()) {
-    exit(1);
-  }
+  if (SET_TOP_LEVEL ())
+    {
+      exit (1);
+    }
 
   cmdsize = 1;
   cmdarg = (char **) xmalloc (cmdsize * sizeof (*cmdarg));
@@ -163,13 +165,13 @@ main (argc, argv)
   /* not yet */
   gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);
-  gdb_stdlog = gdb_stderr; /* for moment */
-  gdb_stdtarg = gdb_stderr; /* for moment */
+  gdb_stdlog = gdb_stderr;	/* for moment */
+  gdb_stdtarg = gdb_stderr;	/* for moment */
 #else
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
-  gdb_stdlog = gdb_stdout; /* for moment */
-  gdb_stdtarg = gdb_stderr; /* for moment */
+  gdb_stdlog = gdb_stdout;	/* for moment */
+  gdb_stdtarg = gdb_stderr;	/* for moment */
 #endif
 
   /* Parse arguments and options.  */
@@ -179,61 +181,61 @@ main (argc, argv)
        short option (or arbitrary numbers starting at 10 for those
        with no equivalent).  */
     static struct option long_options[] =
-       {
-        {"async", no_argument, &async_p, 1},  
-        {"noasync", no_argument, &async_p, 0},  
+    {
+      {"async", no_argument, &async_p, 1},
+      {"noasync", no_argument, &async_p, 0},
 #if defined(TUI)
-	{"tui", no_argument, &tui_version, 1},
+      {"tui", no_argument, &tui_version, 1},
 #endif
-	{"xdb", no_argument, &xdb_commands, 1},
-	{"dbx", no_argument, &dbx_commands, 1},
-	{"readnow", no_argument, &readnow_symbol_files, 1},
-	{"r", no_argument, &readnow_symbol_files, 1},
-	{"mapped", no_argument, &mapped_symbol_files, 1},
-	{"m", no_argument, &mapped_symbol_files, 1},
-	{"quiet", no_argument, &quiet, 1},
-	{"q", no_argument, &quiet, 1},
-	{"silent", no_argument, &quiet, 1},
-	{"nx", no_argument, &inhibit_gdbinit, 1},
-	{"n", no_argument, &inhibit_gdbinit, 1},
-	{"batch", no_argument, &batch, 1},
-	{"epoch", no_argument, &epoch_interface, 1},
+      {"xdb", no_argument, &xdb_commands, 1},
+      {"dbx", no_argument, &dbx_commands, 1},
+      {"readnow", no_argument, &readnow_symbol_files, 1},
+      {"r", no_argument, &readnow_symbol_files, 1},
+      {"mapped", no_argument, &mapped_symbol_files, 1},
+      {"m", no_argument, &mapped_symbol_files, 1},
+      {"quiet", no_argument, &quiet, 1},
+      {"q", no_argument, &quiet, 1},
+      {"silent", no_argument, &quiet, 1},
+      {"nx", no_argument, &inhibit_gdbinit, 1},
+      {"n", no_argument, &inhibit_gdbinit, 1},
+      {"batch", no_argument, &batch, 1},
+      {"epoch", no_argument, &epoch_interface, 1},
 
-	/* This is a synonym for "--annotate=1".  --annotate is now preferred,
-	   but keep this here for a long time because people will be running
-	   emacses which use --fullname.  */
-	{"fullname", no_argument, 0, 'f'},
-	{"f", no_argument, 0, 'f'},
+    /* This is a synonym for "--annotate=1".  --annotate is now preferred,
+       but keep this here for a long time because people will be running
+       emacses which use --fullname.  */
+      {"fullname", no_argument, 0, 'f'},
+      {"f", no_argument, 0, 'f'},
 
-	{"annotate", required_argument, 0, 12},
-	{"help", no_argument, &print_help, 1},
-	{"se", required_argument, 0, 10},
-	{"symbols", required_argument, 0, 's'},
-	{"s", required_argument, 0, 's'},
-	{"exec", required_argument, 0, 'e'},
-	{"e", required_argument, 0, 'e'},
-	{"core", required_argument, 0, 'c'},
-	{"c", required_argument, 0, 'c'},
-	{"command", required_argument, 0, 'x'},
-	{"version", no_argument, &print_version, 1},
-	{"x", required_argument, 0, 'x'},
-	{"directory", required_argument, 0, 'd'},
-	{"cd", required_argument, 0, 11},
-	{"tty", required_argument, 0, 't'},
-	{"baud", required_argument, 0, 'b'},
-	{"b", required_argument, 0, 'b'},
-	{"nw", no_argument, &use_windows, 0},
-	{"nowindows", no_argument, &use_windows, 0},
-	{"w", no_argument, &use_windows, 1},
-	{"windows", no_argument, &use_windows, 1},
-	{"statistics", no_argument, 0, 13},
-	{"write", no_argument, &write_files, 1},
+      {"annotate", required_argument, 0, 12},
+      {"help", no_argument, &print_help, 1},
+      {"se", required_argument, 0, 10},
+      {"symbols", required_argument, 0, 's'},
+      {"s", required_argument, 0, 's'},
+      {"exec", required_argument, 0, 'e'},
+      {"e", required_argument, 0, 'e'},
+      {"core", required_argument, 0, 'c'},
+      {"c", required_argument, 0, 'c'},
+      {"command", required_argument, 0, 'x'},
+      {"version", no_argument, &print_version, 1},
+      {"x", required_argument, 0, 'x'},
+      {"directory", required_argument, 0, 'd'},
+      {"cd", required_argument, 0, 11},
+      {"tty", required_argument, 0, 't'},
+      {"baud", required_argument, 0, 'b'},
+      {"b", required_argument, 0, 'b'},
+      {"nw", no_argument, &use_windows, 0},
+      {"nowindows", no_argument, &use_windows, 0},
+      {"w", no_argument, &use_windows, 1},
+      {"windows", no_argument, &use_windows, 1},
+      {"statistics", no_argument, 0, 13},
+      {"write", no_argument, &write_files, 1},
 /* Allow machine descriptions to add more options... */
 #ifdef ADDITIONAL_OPTIONS
-	ADDITIONAL_OPTIONS
+      ADDITIONAL_OPTIONS
 #endif
-	{0, no_argument, 0, 0}
-      };
+      {0, no_argument, 0, 0}
+    };
 
     while (1)
       {
@@ -288,7 +290,7 @@ main (argc, argv)
 	    if (ncmd >= cmdsize)
 	      {
 		cmdsize *= 2;
-		cmdarg = (char **) xrealloc ((char *)cmdarg,
+		cmdarg = (char **) xrealloc ((char *) cmdarg,
 					     cmdsize * sizeof (*cmdarg));
 	      }
 	    break;
@@ -297,7 +299,7 @@ main (argc, argv)
 	    if (ndir >= dirsize)
 	      {
 		dirsize *= 2;
-		dirarg = (char **) xrealloc ((char *)dirarg,
+		dirarg = (char **) xrealloc ((char *) dirarg,
 					     dirsize * sizeof (*dirarg));
 	      }
 	    break;
@@ -316,7 +318,7 @@ main (argc, argv)
 	      if (i == 0 && p == optarg)
 
 		/* Don't use *_filtered or warning() (which relies on
-                   current_target) until after initialize_all_files(). */
+		   current_target) until after initialize_all_files(). */
 
 		fprintf_unfiltered
 		  (gdb_stderr,
@@ -333,23 +335,23 @@ main (argc, argv)
 	      if (i == 0 && p == optarg)
 
 		/* Don't use *_filtered or warning() (which relies on
-                   current_target) until after initialize_all_files(). */
+		   current_target) until after initialize_all_files(). */
 
 		fprintf_unfiltered
 		  (gdb_stderr,
-		   "warning: could not set timeout limit to `%s'.\n", optarg);
+		 "warning: could not set timeout limit to `%s'.\n", optarg);
 	      else
 		remote_timeout = i;
 	    }
 	    break;
 
 #ifdef ADDITIONAL_OPTION_CASES
-	  ADDITIONAL_OPTION_CASES
+	    ADDITIONAL_OPTION_CASES
 #endif
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
-		     "Use `%s --help' for a complete list of options.\n",
-		     argv[0]);
+			"Use `%s --help' for a complete list of options.\n",
+				argv[0]);
 	    exit (1);
 	  }
       }
@@ -369,7 +371,7 @@ main (argc, argv)
        window system.  */
     if (tui_version)
       use_windows = 0;
-#endif      
+#endif
 
     /* OK, that's all the options.  The other arguments are filenames.  */
     count = 0;
@@ -385,8 +387,8 @@ main (argc, argv)
 	  break;
 	case 3:
 	  fprintf_unfiltered (gdb_stderr,
-		   "Excess command line arguments ignored. (%s%s)\n",
-		   argv[optind], (optind == argc - 1) ? "" : " ...");
+			  "Excess command line arguments ignored. (%s%s)\n",
+			  argv[optind], (optind == argc - 1) ? "" : " ...");
 	  break;
 	}
     if (batch)
@@ -423,12 +425,12 @@ main (argc, argv)
   if (!quiet)
     {
       /* Print all the junk at the top, with trailing "..." if we are about
-	 to read a symbol file (possibly slowly).  */
+         to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout);
       if (symarg)
 	printf_filtered ("..");
-      wrap_here("");
-      gdb_flush (gdb_stdout);		/* Force to screen during slow operations */
+      wrap_here ("");
+      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
     }
 
   error_pre_print = "\n\n";
@@ -443,18 +445,18 @@ main (argc, argv)
      debugging or what directory you are in.  */
 #ifdef __CYGWIN32__
   {
-    char * tmp = getenv ("HOME");
-    
+    char *tmp = getenv ("HOME");
+
     if (tmp != NULL)
       {
-        homedir = (char *) alloca (MAX_PATH+1);
-        cygwin32_conv_to_posix_path (tmp, homedir);
+	homedir = (char *) alloca (MAX_PATH + 1);
+	cygwin32_conv_to_posix_path (tmp, homedir);
       }
     else
       homedir = NULL;
   }
 #else
-  homedir = getenv ("HOME");  
+  homedir = getenv ("HOME");
 #endif
   if (homedir)
     {
@@ -472,16 +474,16 @@ main (argc, argv)
       do_cleanups (ALL_CLEANUPS);
 
       /* Do stats; no need to do them elsewhere since we'll only
-	 need them if homedir is set.  Make sure that they are
-	 zero in case one of them fails (this guarantees that they
-	 won't match if either exists).  */
-      
+         need them if homedir is set.  Make sure that they are
+         zero in case one of them fails (this guarantees that they
+         won't match if either exists).  */
+
       memset (&homebuf, 0, sizeof (struct stat));
       memset (&cwdbuf, 0, sizeof (struct stat));
-      
+
       stat (homeinit, &homebuf);
-      stat (gdbinit, &cwdbuf); /* We'll only need this if
-				       homedir was set.  */
+      stat (gdbinit, &cwdbuf);	/* We'll only need this if
+				   homedir was set.  */
     }
 
   /* Now perform all the actions indicated by the arguments.  */
@@ -497,7 +499,7 @@ main (argc, argv)
   for (i = 0; i < ndir; i++)
     if (!SET_TOP_LEVEL ())
       directory_command (dirarg[i], 0);
-  free ((PTR)dirarg);
+  free ((PTR) dirarg);
   do_cleanups (ALL_CLEANUPS);
 
   if (execarg != NULL
@@ -505,7 +507,7 @@ main (argc, argv)
       && STREQ (execarg, symarg))
     {
       /* The exec file and the symbol-file are the same.  If we can't open
-	 it, better only print one error message.  */
+         it, better only print one error message.  */
       if (!SET_TOP_LEVEL ())
 	{
 	  exec_file_command (execarg, !batch);
@@ -557,7 +559,7 @@ main (argc, argv)
 
   /* Read the .gdbinit file in the current directory, *if* it isn't
      the same as the $HOME/.gdbinit file (it should exist, also).  */
-  
+
   if (!homedir
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
     if (!inhibit_gdbinit)
@@ -573,7 +575,7 @@ main (argc, argv)
 	{
 	  /* NOTE: I am commenting this out, because it is not clear
 	     where this feature is used. It is very old and
-	     undocumented. ezannoni: 1999-05-04*/
+	     undocumented. ezannoni: 1999-05-04 */
 #if 0
 	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
 	    read_command_file (stdin);
@@ -583,10 +585,10 @@ main (argc, argv)
 	  do_cleanups (ALL_CLEANUPS);
 	}
     }
-  free ((PTR)cmdarg);
+  free ((PTR) cmdarg);
 
   /* Read in the old history after all the command files have been read. */
-  init_history();
+  init_history ();
 
   if (batch)
     {
@@ -632,7 +634,7 @@ main (argc, argv)
     {
       if (!SET_TOP_LEVEL ())
 	{
-	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
+	  do_cleanups (ALL_CLEANUPS);	/* Do complete cleanup */
 	  /* GUIs generally have their own command loop, mainloop, or whatever.
 	     This is a good place to gain control because many error
 	     conditions will end up here via longjmp(). */
@@ -640,7 +642,7 @@ main (argc, argv)
 	    command_loop_hook ();
 	  else
 	    command_loop ();
-          quit_command ((char *)0, instream == stdin);
+	  quit_command ((char *) 0, instream == stdin);
 	}
     }
   /* No exit -- exit is through quit_command.  */
@@ -654,24 +656,24 @@ main (argc, argv)
 
 static void
 print_gdb_help (stream)
-  GDB_FILE *stream;
+     GDB_FILE *stream;
 {
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\n\
 Options:\n\n\
 ", stream);
-       fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --[no]async        Enable (disable) asynchronous version of CLI\n\
 ", stream);
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --batch            Exit after processing options.\n\
   --cd=DIR           Change current directory to DIR.\n\
   --command=FILE     Execute GDB commands from FILE.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
 ", stream);
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --dbx              DBX compatibility mode.\n\
   --directory=DIR    Search for source files in DIR.\n\
   --epoch            Output information used by epoch emacs-GDB interface.\n\
@@ -679,40 +681,40 @@ Options:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --help             Print this message.\n\
 ", stream);
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --nw		     Do not use a window interface.\n\
   --nx               Do not read .gdbinit file.\n\
   --quiet            Do not print version number on startup.\n\
   --readnow          Fully read symbol files on first access.\n\
 ", stream);
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --se=FILE          Use FILE as symbol file and executable file.\n\
   --symbols=SYMFILE  Read symbols from SYMFILE.\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
 ", stream);
 #if defined(TUI)
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --tui              Use a terminal user interface.\n\
 ", stream);
 #endif
-      fputs_unfiltered ("\
+  fputs_unfiltered ("\
   --version          Print version information and then exit.\n\
   -w                 Use a window interface.\n\
   --write            Set writing into executable and core files.\n\
   --xdb              XDB compatibility mode.\n\
 ", stream);
 #ifdef ADDITIONAL_OPTION_HELP
-      fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
+  fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
 #endif
-      fputs_unfiltered ("\n\
+  fputs_unfiltered ("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 Report bugs to \"bug-gdb@prep.ai.mit.edu\".\
 ", stream);
 }
-
 
+
 /* All TUI I/O sent to the *_filtered and *_unfiltered functions
    eventually ends up here.  The fputs_unfiltered_hook is primarily
    used by GUIs to collect all output and send it to the GUI, instead
@@ -744,39 +746,51 @@ tui_file_fputs (linebuffer, file)
   else
     {
 #if defined(TUI)
-      if (tui_version && tui_owns_terminal) {
-	/* If we get here somehow while updating the TUI (from
-	 * within a tuiDo(), then we need to temporarily 
-	 * set up the terminal for GDB output. This probably just
-	 * happens on error output.
-	 */
+      if (tui_version && tui_owns_terminal)
+	{
+	  /* If we get here somehow while updating the TUI (from
+	   * within a tuiDo(), then we need to temporarily 
+	   * set up the terminal for GDB output. This probably just
+	   * happens on error output.
+	   */
 
-        if (stream->ts_streamtype == astring) {
-           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
-           strcat(stream->ts_strbuf, linebuffer);
-        } else {
-           tuiTermUnsetup(0, (tui_version) ? cmdWin->detail.commandInfo.curch : 0);
-           fputs (linebuffer, stream->ts_filestream);
-           tuiTermSetup(0);
-           if (linebuffer[strlen(linebuffer) - 1] == '\n')
-              tuiClearCommandCharCount();
-           else
-              tuiIncrCommandCharCountBy(strlen(linebuffer));
-        }
-      } else {
-        /* The normal case - just do a fputs() */
-        if (stream->ts_streamtype == astring) {
-           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
-           strcat(stream->ts_strbuf, linebuffer);
-        } else fputs (linebuffer, stream->ts_filestream);
-      }
- 
+	  if (stream->ts_streamtype == astring)
+	    {
+	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      strcat (stream->ts_strbuf, linebuffer);
+	    }
+	  else
+	    {
+	      tuiTermUnsetup (0, (tui_version) ? cmdWin->detail.commandInfo.curch : 0);
+	      fputs (linebuffer, stream->ts_filestream);
+	      tuiTermSetup (0);
+	      if (linebuffer[strlen (linebuffer) - 1] == '\n')
+		tuiClearCommandCharCount ();
+	      else
+		tuiIncrCommandCharCountBy (strlen (linebuffer));
+	    }
+	}
+      else
+	{
+	  /* The normal case - just do a fputs() */
+	  if (stream->ts_streamtype == astring)
+	    {
+	      gdb_file_adjust_strbuf (strlen (linebuffer), stream);
+	      strcat (stream->ts_strbuf, linebuffer);
+	    }
+	  else
+	    fputs (linebuffer, stream->ts_filestream);
+	}
+
 
 #else
-      if (stream->ts_streamtype == astring) {
-           gdb_file_adjust_strbuf(strlen(linebuffer), file);
-           strcat(stream->ts_strbuf, linebuffer);
-        } else fputs (linebuffer, stream->ts_filestream);
+      if (stream->ts_streamtype == astring)
+	{
+	  gdb_file_adjust_strbuf (strlen (linebuffer), file);
+	  strcat (stream->ts_strbuf, linebuffer);
+	}
+      else
+	fputs (linebuffer, stream->ts_filestream);
 #endif
     }
 }

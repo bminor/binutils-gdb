@@ -31,48 +31,48 @@
 /* OBSOLETE #define NO_GNU_STABS */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro for text-offset and data info (in NPL a.out format).  *x/ */
-/* OBSOLETE #define	TEXTINFO						\ */
-/* OBSOLETE         text_offset = N_TXTOFF (exec_coffhdr, exec_aouthdr);	\ */
+/* OBSOLETE #define     TEXTINFO                                                \ */
+/* OBSOLETE         text_offset = N_TXTOFF (exec_coffhdr, exec_aouthdr);        \ */
 /* OBSOLETE         exec_data_offset = N_TXTOFF (exec_coffhdr, exec_aouthdr)\ */
 /* OBSOLETE                 + exec_aouthdr.a_text */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro for number of symbol table entries *x/ */
-/* OBSOLETE #define NUMBER_OF_SYMBOLS					\ */
-/* OBSOLETE 	(coffhdr.f_nsyms) */
+/* OBSOLETE #define NUMBER_OF_SYMBOLS                                   \ */
+/* OBSOLETE     (coffhdr.f_nsyms) */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro for file-offset of symbol table (in NPL a.out format).  *x/ */
-/* OBSOLETE #define SYMBOL_TABLE_OFFSET					\ */
-/* OBSOLETE 	N_SYMOFF (coffhdr) */
+/* OBSOLETE #define SYMBOL_TABLE_OFFSET                                 \ */
+/* OBSOLETE     N_SYMOFF (coffhdr) */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro for file-offset of string table (in NPL a.out format).  *x/ */
-/* OBSOLETE #define STRING_TABLE_OFFSET					\ */
-/* OBSOLETE 	(N_STROFF (coffhdr)) */
+/* OBSOLETE #define STRING_TABLE_OFFSET                                 \ */
+/* OBSOLETE     (N_STROFF (coffhdr)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro to store the length of the string table data in INTO.  *x/ */
-/* OBSOLETE #define READ_STRING_TABLE_SIZE(INTO)				\ */
-/* OBSOLETE 	{ INTO = hdr.a_stsize; } */
+/* OBSOLETE #define READ_STRING_TABLE_SIZE(INTO)                                \ */
+/* OBSOLETE     { INTO = hdr.a_stsize; } */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro to declare variables to hold the file's header data.  *x/ */
-/* OBSOLETE #define DECLARE_FILE_HEADERS  struct exec hdr;			\ */
-/* OBSOLETE 			      FILHDR coffhdr */
+/* OBSOLETE #define DECLARE_FILE_HEADERS  struct exec hdr;                      \ */
+/* OBSOLETE                           FILHDR coffhdr */
 /* OBSOLETE  */
 /* OBSOLETE /* Macro to read the header data from descriptor DESC and validate it. */
 /* OBSOLETE    NAME is the file name, for error messages.  *x/ */
-/* OBSOLETE #define READ_FILE_HEADERS(DESC, NAME)				\ */
-/* OBSOLETE { val = myread (DESC, &coffhdr, sizeof coffhdr);		\ */
-/* OBSOLETE   if (val < 0)							\ */
-/* OBSOLETE     perror_with_name (NAME);					\ */
-/* OBSOLETE   val = myread (DESC, &hdr, sizeof hdr);			\ */
-/* OBSOLETE   if (val < 0)							\ */
-/* OBSOLETE     perror_with_name (NAME);					\ */
-/* OBSOLETE   if (coffhdr.f_magic != GNP1MAGIC)				\ */
-/* OBSOLETE     error ("File \"%s\" not in coff executable format.", NAME);	\ */
-/* OBSOLETE   if (N_BADMAG (hdr))						\ */
+/* OBSOLETE #define READ_FILE_HEADERS(DESC, NAME)                               \ */
+/* OBSOLETE { val = myread (DESC, &coffhdr, sizeof coffhdr);            \ */
+/* OBSOLETE   if (val < 0)                                                      \ */
+/* OBSOLETE     perror_with_name (NAME);                                        \ */
+/* OBSOLETE   val = myread (DESC, &hdr, sizeof hdr);                    \ */
+/* OBSOLETE   if (val < 0)                                                      \ */
+/* OBSOLETE     perror_with_name (NAME);                                        \ */
+/* OBSOLETE   if (coffhdr.f_magic != GNP1MAGIC)                         \ */
+/* OBSOLETE     error ("File \"%s\" not in coff executable format.", NAME);     \ */
+/* OBSOLETE   if (N_BADMAG (hdr))                                               \ */
 /* OBSOLETE     error ("File \"%s\" not in executable format.", NAME); } */
 /* OBSOLETE  */
 /* OBSOLETE /* Define COFF and other symbolic names needed on NP1 *x/ */
-/* OBSOLETE #define	NS32GMAGIC	GNP1MAGIC */
-/* OBSOLETE #define	NS32SMAGIC	GPNMAGIC */
+/* OBSOLETE #define     NS32GMAGIC      GNP1MAGIC */
+/* OBSOLETE #define     NS32SMAGIC      GPNMAGIC */
 /* OBSOLETE  */
 /* OBSOLETE /* Address of blocks in N_LBRAC and N_RBRAC symbols are absolute addresses, */
 /* OBSOLETE    not relative to start of source address.  *x/ */
@@ -80,7 +80,7 @@
 /* OBSOLETE  */
 /* OBSOLETE /* Offset from address of function to start of its code. */
 /* OBSOLETE    Zero on most machines.  *x/ */
-/* OBSOLETE #define FUNCTION_START_OFFSET	8 */
+/* OBSOLETE #define FUNCTION_START_OFFSET       8 */
 /* OBSOLETE  */
 /* OBSOLETE /* Advance PC across any function entry prologue instructions */
 /* OBSOLETE    to reach some "real" code.  One NPL we can have one two startup */
@@ -97,70 +97,70 @@
 /* OBSOLETE      or */
 /* OBSOLETE    Optional "stw r2,8(b3)"   (Gould first argument register passing) */
 /* OBSOLETE  *x/ */
-/* OBSOLETE #define SKIP_PROLOGUE(pc) { 						\ */
-/* OBSOLETE 	register int op = read_memory_integer ((pc), 4);		\ */
-/* OBSOLETE 	if ((op & 0xffff0000) == 0xFA0B0000) { 				\ */
-/* OBSOLETE 	    pc += 4;							\ */
-/* OBSOLETE 	    op = read_memory_integer ((pc), 4);				\ */
-/* OBSOLETE 	    if ((op & 0xffff0000) == 0x59400000) {			\ */
-/* OBSOLETE 		pc += 4;						\ */
-/* OBSOLETE 	        op = read_memory_integer ((pc), 4);			\ */
-/* OBSOLETE 		if ((op & 0xffff0000) == 0x5F000000) {			\ */
-/* OBSOLETE 		    pc += 4;						\ */
-/* OBSOLETE 	            op = read_memory_integer ((pc), 4);			\ */
-/* OBSOLETE 		    if (op == 0xD4820008) {				\ */
-/* OBSOLETE 		    	pc += 4;					\ */
-/* OBSOLETE 	            	op = read_memory_integer ((pc), 4);		\ */
-/* OBSOLETE 		    	if (op == 0x5582000C) {				\ */
-/* OBSOLETE 		    	    pc += 4;					\ */
-/* OBSOLETE 	                    op = read_memory_integer ((pc), 2);		\ */
-/* OBSOLETE 		            if (op == 0x2fa0) {				\ */
-/* OBSOLETE 		    	        pc += 2;				\ */
-/* OBSOLETE 		            } else {					\ */
-/* OBSOLETE 	                        op = read_memory_integer ((pc), 4);	\ */
-/* OBSOLETE 		                if (op == 0xd5030008) {			\ */
-/* OBSOLETE 		    	            pc += 4;				\ */
-/* OBSOLETE 		                }					\ */
-/* OBSOLETE 		            }						\ */
-/* OBSOLETE 		        } else {					\ */
-/* OBSOLETE 	                    op = read_memory_integer ((pc), 2);		\ */
-/* OBSOLETE 		            if (op == 0x2fa0) {				\ */
-/* OBSOLETE 		    	        pc += 2;				\ */
-/* OBSOLETE 		            }						\ */
-/* OBSOLETE 		        }						\ */
-/* OBSOLETE 		    }							\ */
-/* OBSOLETE 		}							\ */
-/* OBSOLETE 	    }								\ */
-/* OBSOLETE 	} 								\ */
-/* OBSOLETE 	if ((op & 0xffff0000) == 0x59000000) { 				\ */
-/* OBSOLETE 	    pc += 4;							\ */
-/* OBSOLETE 	    op = read_memory_integer ((pc), 4);				\ */
-/* OBSOLETE 	    if ((op & 0xffff0000) == 0x5F000000) {			\ */
-/* OBSOLETE 		pc += 4;						\ */
-/* OBSOLETE 	        op = read_memory_integer ((pc), 4);			\ */
-/* OBSOLETE 		if (op == 0xD4820008) {					\ */
-/* OBSOLETE 		    pc += 4;						\ */
-/* OBSOLETE 	            op = read_memory_integer ((pc), 4);			\ */
-/* OBSOLETE 		    if (op == 0x5582000C) {				\ */
-/* OBSOLETE 		    	pc += 4;					\ */
-/* OBSOLETE 	                op = read_memory_integer ((pc), 2);		\ */
-/* OBSOLETE 		        if (op == 0x2fa0) {				\ */
-/* OBSOLETE 		    	    pc += 2;					\ */
-/* OBSOLETE 		        } else {					\ */
-/* OBSOLETE 	                    op = read_memory_integer ((pc), 4);		\ */
-/* OBSOLETE 		            if (op == 0xd5030008) {			\ */
-/* OBSOLETE 		    	        pc += 4;				\ */
-/* OBSOLETE 		            }						\ */
-/* OBSOLETE 		        }						\ */
-/* OBSOLETE 		    } else {						\ */
-/* OBSOLETE 	                op = read_memory_integer ((pc), 2);		\ */
-/* OBSOLETE 		        if (op == 0x2fa0) {				\ */
-/* OBSOLETE 		    	    pc += 2;					\ */
-/* OBSOLETE 		        }						\ */
-/* OBSOLETE 		    }							\ */
-/* OBSOLETE 		}							\ */
-/* OBSOLETE 	    }								\ */
-/* OBSOLETE 	} 								\ */
+/* OBSOLETE #define SKIP_PROLOGUE(pc) {                                                 \ */
+/* OBSOLETE     register int op = read_memory_integer ((pc), 4);                \ */
+/* OBSOLETE     if ((op & 0xffff0000) == 0xFA0B0000) {                          \ */
+/* OBSOLETE         pc += 4;                                                    \ */
+/* OBSOLETE         op = read_memory_integer ((pc), 4);                         \ */
+/* OBSOLETE         if ((op & 0xffff0000) == 0x59400000) {                      \ */
+/* OBSOLETE             pc += 4;                                                \ */
+/* OBSOLETE             op = read_memory_integer ((pc), 4);                     \ */
+/* OBSOLETE             if ((op & 0xffff0000) == 0x5F000000) {                  \ */
+/* OBSOLETE                 pc += 4;                                            \ */
+/* OBSOLETE                 op = read_memory_integer ((pc), 4);                 \ */
+/* OBSOLETE                 if (op == 0xD4820008) {                             \ */
+/* OBSOLETE                     pc += 4;                                        \ */
+/* OBSOLETE                     op = read_memory_integer ((pc), 4);             \ */
+/* OBSOLETE                     if (op == 0x5582000C) {                         \ */
+/* OBSOLETE                         pc += 4;                                    \ */
+/* OBSOLETE                         op = read_memory_integer ((pc), 2);         \ */
+/* OBSOLETE                         if (op == 0x2fa0) {                         \ */
+/* OBSOLETE                             pc += 2;                                \ */
+/* OBSOLETE                         } else {                                    \ */
+/* OBSOLETE                             op = read_memory_integer ((pc), 4);     \ */
+/* OBSOLETE                             if (op == 0xd5030008) {                 \ */
+/* OBSOLETE                                 pc += 4;                            \ */
+/* OBSOLETE                             }                                       \ */
+/* OBSOLETE                         }                                           \ */
+/* OBSOLETE                     } else {                                        \ */
+/* OBSOLETE                         op = read_memory_integer ((pc), 2);         \ */
+/* OBSOLETE                         if (op == 0x2fa0) {                         \ */
+/* OBSOLETE                             pc += 2;                                \ */
+/* OBSOLETE                         }                                           \ */
+/* OBSOLETE                     }                                               \ */
+/* OBSOLETE                 }                                                   \ */
+/* OBSOLETE             }                                                       \ */
+/* OBSOLETE         }                                                           \ */
+/* OBSOLETE     }                                                               \ */
+/* OBSOLETE     if ((op & 0xffff0000) == 0x59000000) {                          \ */
+/* OBSOLETE         pc += 4;                                                    \ */
+/* OBSOLETE         op = read_memory_integer ((pc), 4);                         \ */
+/* OBSOLETE         if ((op & 0xffff0000) == 0x5F000000) {                      \ */
+/* OBSOLETE             pc += 4;                                                \ */
+/* OBSOLETE             op = read_memory_integer ((pc), 4);                     \ */
+/* OBSOLETE             if (op == 0xD4820008) {                                 \ */
+/* OBSOLETE                 pc += 4;                                            \ */
+/* OBSOLETE                 op = read_memory_integer ((pc), 4);                 \ */
+/* OBSOLETE                 if (op == 0x5582000C) {                             \ */
+/* OBSOLETE                     pc += 4;                                        \ */
+/* OBSOLETE                     op = read_memory_integer ((pc), 2);             \ */
+/* OBSOLETE                     if (op == 0x2fa0) {                             \ */
+/* OBSOLETE                         pc += 2;                                    \ */
+/* OBSOLETE                     } else {                                        \ */
+/* OBSOLETE                         op = read_memory_integer ((pc), 4);         \ */
+/* OBSOLETE                         if (op == 0xd5030008) {                     \ */
+/* OBSOLETE                             pc += 4;                                \ */
+/* OBSOLETE                         }                                           \ */
+/* OBSOLETE                     }                                               \ */
+/* OBSOLETE                 } else {                                            \ */
+/* OBSOLETE                     op = read_memory_integer ((pc), 2);             \ */
+/* OBSOLETE                     if (op == 0x2fa0) {                             \ */
+/* OBSOLETE                         pc += 2;                                    \ */
+/* OBSOLETE                     }                                               \ */
+/* OBSOLETE                 }                                                   \ */
+/* OBSOLETE             }                                                       \ */
+/* OBSOLETE         }                                                           \ */
+/* OBSOLETE     }                                                               \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Immediately after a function call, return the saved pc. */
@@ -169,10 +169,10 @@
 /* OBSOLETE    some instructions.  True on NPL! Return address is in R1. */
 /* OBSOLETE    The true return address is REALLY 4 past that location! *x/ */
 /* OBSOLETE #define SAVED_PC_AFTER_CALL(frame) \ */
-/* OBSOLETE 	(read_register(R1_REGNUM) + 4) */
+/* OBSOLETE     (read_register(R1_REGNUM) + 4) */
 /* OBSOLETE  */
 /* OBSOLETE /* Address of end of stack space.  *x/ */
-/* OBSOLETE #define STACK_END_ADDR 		0x7fffc000 */
+/* OBSOLETE #define STACK_END_ADDR              0x7fffc000 */
 /* OBSOLETE  */
 /* OBSOLETE /* Stack grows downward.  *x/ */
 /* OBSOLETE #define INNER_THAN(lhs,rhs) ((lhs) < (rhs)) */
@@ -181,15 +181,15 @@
 /* OBSOLETE    This is padded out to the size of a machine word.  When it was just */
 /* OBSOLETE    {0x28, 0x09} it gave problems if hit breakpoint on returning from a */
 /* OBSOLETE    function call.  *x/ */
-/* OBSOLETE #define BREAKPOINT 		{0x28, 0x09, 0x0, 0x0} */
+/* OBSOLETE #define BREAKPOINT          {0x28, 0x09, 0x0, 0x0} */
 /* OBSOLETE  */
 /* OBSOLETE /* Amount PC must be decremented by after a breakpoint. */
 /* OBSOLETE    This is often the number of bytes in BREAKPOINT */
 /* OBSOLETE    but not always.  *x/ */
-/* OBSOLETE #define DECR_PC_AFTER_BREAK	2 */
+/* OBSOLETE #define DECR_PC_AFTER_BREAK 2 */
 /* OBSOLETE  */
 /* OBSOLETE /* Return 1 if P points to an invalid floating point value.  *x/ */
-/* OBSOLETE #define INVALID_FLOAT(p, len) 	((*(short *)p & 0xff80) == 0x8000) */
+/* OBSOLETE #define INVALID_FLOAT(p, len)       ((*(short *)p & 0xff80) == 0x8000) */
 /* OBSOLETE  */
 /* OBSOLETE /* Say how long (ordinary) registers are.  This is a piece of bogosity */
 /* OBSOLETE    used in push_word and a few other places; REGISTER_RAW_SIZE is the */
@@ -198,13 +198,13 @@
 /* OBSOLETE #define REGISTER_SIZE 4 */
 /* OBSOLETE  */
 /* OBSOLETE /* Size of bytes of vector register (NP1 only), 32 elements * sizeof(int) *x/ */
-/* OBSOLETE #define VR_SIZE			128 */
+/* OBSOLETE #define VR_SIZE                     128 */
 /* OBSOLETE  */
 /* OBSOLETE /* Number of machine registers *x/ */
-/* OBSOLETE #define NUM_REGS 		27 */
-/* OBSOLETE #define NUM_GEN_REGS		16 */
-/* OBSOLETE #define NUM_CPU_REGS		4 */
-/* OBSOLETE #define NUM_VECTOR_REGS		7 */
+/* OBSOLETE #define NUM_REGS            27 */
+/* OBSOLETE #define NUM_GEN_REGS                16 */
+/* OBSOLETE #define NUM_CPU_REGS                4 */
+/* OBSOLETE #define NUM_VECTOR_REGS             7 */
 /* OBSOLETE  */
 /* OBSOLETE /* Initializer for an array of names of registers. */
 /* OBSOLETE    There should be NUM_REGS strings in this initializer.  *x/ */
@@ -221,52 +221,52 @@
 /* OBSOLETE    and some are "phony" register numbers which are too large */
 /* OBSOLETE    to be actual register numbers as far as the user is concerned */
 /* OBSOLETE    but do serve to get the desired values when passed to read_register.  *x/ */
-/* OBSOLETE #define R1_REGNUM	1	/* Gr1 => return address of caller *x/ */
-/* OBSOLETE #define R2_REGNUM	2	/* Gr2 => return value from function *x/ */
-/* OBSOLETE #define R4_REGNUM	4	/* Gr4 => register save area *x/ */
-/* OBSOLETE #define R5_REGNUM	5	/* Gr5 => register save area *x/ */
-/* OBSOLETE #define R6_REGNUM	6	/* Gr6 => register save area *x/ */
-/* OBSOLETE #define R7_REGNUM	7	/* Gr7 => register save area *x/ */
-/* OBSOLETE #define B1_REGNUM	9	/* Br1 => start of this code routine *x/ */
-/* OBSOLETE #define SP_REGNUM	10	/* Br2 == (sp) *x/ */
-/* OBSOLETE #define AP_REGNUM	11	/* Br3 == (ap) *x/ */
-/* OBSOLETE #define FP_REGNUM 	16	/* A copy of Br2 saved in trap *x/ */
-/* OBSOLETE #define PS_REGNUM 	17	/* Contains processor status *x/ */
-/* OBSOLETE #define PC_REGNUM 	18	/* Contains program counter *x/ */
-/* OBSOLETE #define VE_REGNUM 	19	/* Vector end (user setup) register *x/ */
-/* OBSOLETE #define V1_REGNUM 	20	/* First vector register *x/ */
-/* OBSOLETE #define V7_REGNUM 	26	/* First vector register *x/ */
+/* OBSOLETE #define R1_REGNUM   1       /* Gr1 => return address of caller *x/ */
+/* OBSOLETE #define R2_REGNUM   2       /* Gr2 => return value from function *x/ */
+/* OBSOLETE #define R4_REGNUM   4       /* Gr4 => register save area *x/ */
+/* OBSOLETE #define R5_REGNUM   5       /* Gr5 => register save area *x/ */
+/* OBSOLETE #define R6_REGNUM   6       /* Gr6 => register save area *x/ */
+/* OBSOLETE #define R7_REGNUM   7       /* Gr7 => register save area *x/ */
+/* OBSOLETE #define B1_REGNUM   9       /* Br1 => start of this code routine *x/ */
+/* OBSOLETE #define SP_REGNUM   10      /* Br2 == (sp) *x/ */
+/* OBSOLETE #define AP_REGNUM   11      /* Br3 == (ap) *x/ */
+/* OBSOLETE #define FP_REGNUM   16      /* A copy of Br2 saved in trap *x/ */
+/* OBSOLETE #define PS_REGNUM   17      /* Contains processor status *x/ */
+/* OBSOLETE #define PC_REGNUM   18      /* Contains program counter *x/ */
+/* OBSOLETE #define VE_REGNUM   19      /* Vector end (user setup) register *x/ */
+/* OBSOLETE #define V1_REGNUM   20      /* First vector register *x/ */
+/* OBSOLETE #define V7_REGNUM   26      /* First vector register *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* Total amount of space needed to store our copies of the machine's */
 /* OBSOLETE    register state, the array `registers'.  *x/ */
 /* OBSOLETE #define REGISTER_BYTES \ */
-/* OBSOLETE 	(NUM_GEN_REGS*4 + NUM_VECTOR_REGS*VR_SIZE + NUM_CPU_REGS*4) */
+/* OBSOLETE     (NUM_GEN_REGS*4 + NUM_VECTOR_REGS*VR_SIZE + NUM_CPU_REGS*4) */
 /* OBSOLETE  */
 /* OBSOLETE /* Index within `registers' of the first byte of the space for */
 /* OBSOLETE    register N.  *x/ */
 /* OBSOLETE #define REGISTER_BYTE(N)  \ */
-/* OBSOLETE 	(((N) < V1_REGNUM) ? ((N) * 4) : (((N) - V1_REGNUM) * VR_SIZE) + 80) */
+/* OBSOLETE     (((N) < V1_REGNUM) ? ((N) * 4) : (((N) - V1_REGNUM) * VR_SIZE) + 80) */
 /* OBSOLETE  */
 /* OBSOLETE /* Number of bytes of storage in the actual machine representation */
 /* OBSOLETE    for register N.  On the NP1, all normal regs are 4 bytes, but */
 /* OBSOLETE    the vector registers are VR_SIZE*4 bytes long. *x/ */
 /* OBSOLETE #define REGISTER_RAW_SIZE(N) \ */
-/* OBSOLETE 	(((N) < V1_REGNUM) ? 4 : VR_SIZE) */
+/* OBSOLETE     (((N) < V1_REGNUM) ? 4 : VR_SIZE) */
 /* OBSOLETE  */
 /* OBSOLETE /* Number of bytes of storage in the program's representation */
 /* OBSOLETE    for register N.  On the NP1, all regs are 4 bytes. *x/ */
 /* OBSOLETE #define REGISTER_VIRTUAL_SIZE(N) \ */
-/* OBSOLETE 	(((N) < V1_REGNUM) ? 4 : VR_SIZE) */
+/* OBSOLETE     (((N) < V1_REGNUM) ? 4 : VR_SIZE) */
 /* OBSOLETE  */
 /* OBSOLETE /* Largest value REGISTER_RAW_SIZE can have.  *x/ */
-/* OBSOLETE #define MAX_REGISTER_RAW_SIZE		VR_SIZE */
+/* OBSOLETE #define MAX_REGISTER_RAW_SIZE               VR_SIZE */
 /* OBSOLETE  */
 /* OBSOLETE /* Largest value REGISTER_VIRTUAL_SIZE can have.  *x/ */
-/* OBSOLETE #define MAX_REGISTER_VIRTUAL_SIZE	VR_SIZE */
+/* OBSOLETE #define MAX_REGISTER_VIRTUAL_SIZE   VR_SIZE */
 /* OBSOLETE  */
 /* OBSOLETE /* Return the GDB type object for the "standard" data type */
 /* OBSOLETE    of data in register N.  *x/ */
-/* OBSOLETE #define REGISTER_VIRTUAL_TYPE(N)	\ */
+/* OBSOLETE #define REGISTER_VIRTUAL_TYPE(N)    \ */
 /* OBSOLETE   ((N) > VE_REGNUM ? builtin_type_np1_vector : builtin_type_int) */
 /* OBSOLETE extern struct type *builtin_type_np1_vector; */
 /* OBSOLETE  */
@@ -283,14 +283,14 @@
 /* OBSOLETE    into VALBUF. *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \ */
-/* OBSOLETE 	memcpy (VALBUF, ((int *)(REGBUF)) + 2, TYPE_LENGTH (TYPE)) */
+/* OBSOLETE     memcpy (VALBUF, ((int *)(REGBUF)) + 2, TYPE_LENGTH (TYPE)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Write into appropriate registers a function return value */
 /* OBSOLETE    of type TYPE, given in virtual format.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define STORE_RETURN_VALUE(TYPE,VALBUF) \ */
-/* OBSOLETE 	write_register_bytes (REGISTER_BYTE (R2_REGNUM), VALBUF,      \ */
-/* OBSOLETE 			      TYPE_LENGTH (TYPE)) */
+/* OBSOLETE     write_register_bytes (REGISTER_BYTE (R2_REGNUM), VALBUF,      \ */
+/* OBSOLETE                           TYPE_LENGTH (TYPE)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Extract from an array REGBUF containing the (raw) register state */
 /* OBSOLETE    the address in which a function should return its structure value, */
@@ -315,31 +315,31 @@
 /* OBSOLETE /* In the case of the NPL, the frame's norminal address is Br2 and the  */
 /* OBSOLETE    previous routines frame is up the stack X bytes, where X is the */
 /* OBSOLETE    value stored in the code function header xA(Br1). *x/ */
-/* OBSOLETE #define FRAME_CHAIN(thisframe)		(findframe(thisframe)) */
+/* OBSOLETE #define FRAME_CHAIN(thisframe)              (findframe(thisframe)) */
 /* OBSOLETE  */
 /* OBSOLETE extern int gould_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *)); */
 /* OBSOLETE #define FRAME_CHAIN_VALID(chain, thisframe) gould_frame_chain_valid (chain, thisframe) */
 /* OBSOLETE  */
 /* OBSOLETE /* Define other aspects of the stack frame on NPL.  *x/ */
 /* OBSOLETE #define FRAME_SAVED_PC(FRAME) \ */
-/* OBSOLETE 	(read_memory_integer ((FRAME)->frame + 8, 4)) */
+/* OBSOLETE     (read_memory_integer ((FRAME)->frame + 8, 4)) */
 /* OBSOLETE  */
 /* OBSOLETE #define FRAME_ARGS_ADDRESS(fi) \ */
-/* OBSOLETE 	((fi)->next ? \ */
-/* OBSOLETE 	 read_memory_integer ((fi)->frame + 12, 4) : \ */
-/* OBSOLETE 	 read_register (AP_REGNUM)) */
+/* OBSOLETE     ((fi)->next ? \ */
+/* OBSOLETE      read_memory_integer ((fi)->frame + 12, 4) : \ */
+/* OBSOLETE      read_register (AP_REGNUM)) */
 /* OBSOLETE  */
-/* OBSOLETE #define FRAME_LOCALS_ADDRESS(fi)	((fi)->frame) */
+/* OBSOLETE #define FRAME_LOCALS_ADDRESS(fi)    ((fi)->frame) */
 /* OBSOLETE  */
 /* OBSOLETE /* Set VAL to the number of args passed to frame described by FI. */
 /* OBSOLETE    Can set VAL to -1, meaning no way to tell.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* We can check the stab info to see how */
 /* OBSOLETE    many arg we have.  No info in stack will tell us *x/ */
-/* OBSOLETE #define FRAME_NUM_ARGS(fi)		(findarg(fi)) */
+/* OBSOLETE #define FRAME_NUM_ARGS(fi)          (findarg(fi)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Return number of bytes at start of arglist that are not really args.  *x/ */
-/* OBSOLETE #define FRAME_ARGS_SKIP			8 */
+/* OBSOLETE #define FRAME_ARGS_SKIP                     8 */
 /* OBSOLETE  */
 /* OBSOLETE /* Put here the code to store, into a struct frame_saved_regs, */
 /* OBSOLETE    the addresses of the saved registers of frame described by FRAME_INFO. */
@@ -347,21 +347,21 @@
 /* OBSOLETE    ways in the stack frame.  sp is even more special: */
 /* OBSOLETE    the address we return for it IS the sp for the next frame.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\ */
+/* OBSOLETE #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)         \ */
 /* OBSOLETE {                                                                       \ */
-/* OBSOLETE   memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);			\ */
+/* OBSOLETE   memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);                        \ */
 /* OBSOLETE   (frame_saved_regs).regs[SP_REGNUM] = framechain (frame_info);         \ */
-/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 8;		\ */
-/* OBSOLETE   (frame_saved_regs).regs[R4_REGNUM] = (frame_info)->frame + 0x30;	\ */
-/* OBSOLETE   (frame_saved_regs).regs[R5_REGNUM] = (frame_info)->frame + 0x34;	\ */
-/* OBSOLETE   (frame_saved_regs).regs[R6_REGNUM] = (frame_info)->frame + 0x38;	\ */
-/* OBSOLETE   (frame_saved_regs).regs[R7_REGNUM] = (frame_info)->frame + 0x3C;	\ */
+/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 8;             \ */
+/* OBSOLETE   (frame_saved_regs).regs[R4_REGNUM] = (frame_info)->frame + 0x30;  \ */
+/* OBSOLETE   (frame_saved_regs).regs[R5_REGNUM] = (frame_info)->frame + 0x34;  \ */
+/* OBSOLETE   (frame_saved_regs).regs[R6_REGNUM] = (frame_info)->frame + 0x38;  \ */
+/* OBSOLETE   (frame_saved_regs).regs[R7_REGNUM] = (frame_info)->frame + 0x3C;  \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Things needed for making the inferior call functions.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define CALL_DUMMY_LOCATION	BEFORE_TEXT_END */
-/* OBSOLETE #define	NEED_TEXT_START_END 1 */
+/* OBSOLETE #define CALL_DUMMY_LOCATION BEFORE_TEXT_END */
+/* OBSOLETE #define     NEED_TEXT_START_END 1 */
 /* OBSOLETE  */
 /* OBSOLETE /* Push an empty stack frame, to record the current PC, etc.  *x/ */
 /* OBSOLETE  */
@@ -414,15 +414,15 @@
 /* OBSOLETE    *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define CALL_DUMMY {0x00000000,  \ */
-/* OBSOLETE 		    0x00000000,  \ */
-/* OBSOLETE 		    0x59000000,  \ */
-/* OBSOLETE 		    0x598a0000,  \ */
-/* OBSOLETE 		    0xb5030008,  \ */
-/* OBSOLETE 		    0x5c820000,  \ */
-/* OBSOLETE 		    0x44810008,  \ */
-/* OBSOLETE 		    0x00000000,  \ */
-/* OBSOLETE 		    0x590a0000,  \ */
-/* OBSOLETE 		    0x28090000 } */
+/* OBSOLETE                 0x00000000,  \ */
+/* OBSOLETE                 0x59000000,  \ */
+/* OBSOLETE                 0x598a0000,  \ */
+/* OBSOLETE                 0xb5030008,  \ */
+/* OBSOLETE                 0x5c820000,  \ */
+/* OBSOLETE                 0x44810008,  \ */
+/* OBSOLETE                 0x00000000,  \ */
+/* OBSOLETE                 0x590a0000,  \ */
+/* OBSOLETE                 0x28090000 } */
 /* OBSOLETE  */
 /* OBSOLETE #define CALL_DUMMY_LENGTH 40 */
 /* OBSOLETE  */
@@ -450,9 +450,9 @@
 /* OBSOLETE       int arg_len = 0, total_len;\ */
 /* OBSOLETE       old_sp = push_word(old_sp,fun);\ */
 /* OBSOLETE       for(i = nargs - 1;i >= 0;i--)\ */
-/* OBSOLETE 	arg_len += TYPE_LENGTH (VALUE_TYPE (value_arg_coerce (args[i])));\ */
+/* OBSOLETE     arg_len += TYPE_LENGTH (VALUE_TYPE (value_arg_coerce (args[i])));\ */
 /* OBSOLETE       if(struct_return)\ */
-/* OBSOLETE 	arg_len += TYPE_LENGTH(value_type);\ */
+/* OBSOLETE     arg_len += TYPE_LENGTH(value_type);\ */
 /* OBSOLETE       total_len = DUMMY_FRAME_SIZE+CALL_DUMMY_STACK_ADJUST+4+arg_len;\ */
 /* OBSOLETE       dummyname[0] += total_len;\ */
 /* OBSOLETE       dummyname[2] += total_len;\ */

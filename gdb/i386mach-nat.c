@@ -1,21 +1,22 @@
 /* Native dependent code for Mach 386's for GDB, the GNU debugger.
    Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -40,7 +41,7 @@ static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
 
 void
 fetch_inferior_registers (regno)
-     int regno;		/* Original value discarded */
+     int regno;			/* Original value discarded */
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
@@ -48,18 +49,18 @@ fetch_inferior_registers (regno)
   registers_fetched ();
 
   ptrace (PTRACE_GETREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_registers);
+	  (PTRACE_ARG3_TYPE) & inferior_registers);
   ptrace (PTRACE_GETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
+	  (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 
   memcpy (registers, &inferior_registers, sizeof inferior_registers);
 
   memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-	 inferior_fp_registers.f_st,
-	 sizeof inferior_fp_registers.f_st);
+	  inferior_fp_registers.f_st,
+	  sizeof inferior_fp_registers.f_st);
   memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.f_ctrl,
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
+	  &inferior_fp_registers.f_ctrl,
+	  sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
 }
 
 /* Store our register values back into the inferior.
@@ -75,12 +76,12 @@ store_inferior_registers (regno)
 
   memcpy (&inferior_registers, registers, 20 * 4);
 
-  memcpy (inferior_fp_registers.f_st,&registers[REGISTER_BYTE (FP0_REGNUM)],
-	 sizeof inferior_fp_registers.f_st);
+  memcpy (inferior_fp_registers.f_st, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	  sizeof inferior_fp_registers.f_st);
   memcpy (&inferior_fp_registers.f_ctrl,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
-  
+	  &registers[REGISTER_BYTE (FPC_REGNUM)],
+	  sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
+
 #ifdef PTRACE_FP_BUG
   if (regno == FP_REGNUM || regno == -1)
     /* Storing the frame pointer requires a gross hack, in which an
@@ -93,7 +94,7 @@ store_inferior_registers (regno)
       inferior_registers.r_reg[EAX] =
 	inferior_registers.r_reg[FP_REGNUM];
       ptrace (PTRACE_SETREGS, inferior_pid,
-	      (PTRACE_ARG3_TYPE) &inferior_registers);
+	      (PTRACE_ARG3_TYPE) & inferior_registers);
       ptrace (PTRACE_POKEDATA, inferior_pid, (PTRACE_ARG3_TYPE) stack, 0xc589);
       ptrace (PTRACE_SINGLESTEP, inferior_pid, (PTRACE_ARG3_TYPE) stack, 0);
       wait (0);
@@ -102,9 +103,9 @@ store_inferior_registers (regno)
     }
 #endif
   ptrace (PTRACE_SETREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_registers);
+	  (PTRACE_ARG3_TYPE) & inferior_registers);
   ptrace (PTRACE_SETFPREGS, inferior_pid,
-	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
+	  (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 }
 
 
@@ -120,29 +121,30 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 {
   int val;
 
-  switch (which) {
-  case 0:
-  case 1:
-    memcpy (registers, core_reg_sect, core_reg_size);
-    break;
+  switch (which)
+    {
+    case 0:
+    case 1:
+      memcpy (registers, core_reg_sect, core_reg_size);
+      break;
 
-  case 2:
+    case 2:
 #ifdef FP0_REGNUM
-    memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
-	   core_reg_sect,
-	   core_reg_size);		/* FIXME, probably bogus */
+      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+	      core_reg_sect,
+	      core_reg_size);	/* FIXME, probably bogus */
 #endif
 #ifdef FPC_REGNUM
-    memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	   &corestr.c_fpu.f_fpstatus.f_ctrl,
-	   sizeof corestr.c_fpu.f_fpstatus -
-	   sizeof corestr.c_fpu.f_fpstatus.f_st);
+      memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	      &corestr.c_fpu.f_fpstatus.f_ctrl,
+	      sizeof corestr.c_fpu.f_fpstatus -
+	      sizeof corestr.c_fpu.f_fpstatus.f_st);
 #endif
-    break;
-  }
+      break;
+    }
 }
-
 
+
 /* Register that we are able to handle i386mach core file formats.
    FIXME: is this really bfd_target_unknown_flavour? */
 

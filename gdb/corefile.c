@@ -2,28 +2,29 @@
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
-#include "frame.h"  /* required by inferior.h */
+#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "symtab.h"
 #include "command.h"
@@ -52,15 +53,15 @@ static void call_extra_exec_file_hooks PARAMS ((char *filename));
 
 typedef void (*hook_type) PARAMS ((char *));
 
-hook_type exec_file_display_hook;		/* the original hook */
+hook_type exec_file_display_hook;	/* the original hook */
 static hook_type *exec_file_extra_hooks;	/* array of additional hooks */
-static int exec_file_hook_count = 0;		/* size of array */
+static int exec_file_hook_count = 0;	/* size of array */
 
 /* Binary file diddling handle for the core file.  */
 
 bfd *core_bfd = NULL;
-
 
+
 /* Backward compatability with old way of specifying core files.  */
 
 void
@@ -70,7 +71,7 @@ core_file_command (filename, from_tty)
 {
   struct target_ops *t;
 
-  dont_repeat ();			/* Either way, seems bogus. */
+  dont_repeat ();		/* Either way, seems bogus. */
 
   t = find_core_target ();
   if (t != NULL)
@@ -78,33 +79,33 @@ core_file_command (filename, from_tty)
       (t->to_detach) (filename, from_tty);
     else
       {
-        /* Yes, we were given the path of a core file.  Do we already
-           have a symbol file?  If not, can we determine it from the
-           core file?  If we can, do so.
-           */
+	/* Yes, we were given the path of a core file.  Do we already
+	   have a symbol file?  If not, can we determine it from the
+	   core file?  If we can, do so.
+	 */
 #ifdef HPUXHPPA
-        if (symfile_objfile == NULL)
-          {
-            char *  symfile;
-            symfile = t->to_core_file_to_sym_file (filename);
-            if (symfile)
-              {
-                char *  symfile_copy = strdup (symfile);
+	if (symfile_objfile == NULL)
+	  {
+	    char *symfile;
+	    symfile = t->to_core_file_to_sym_file (filename);
+	    if (symfile)
+	      {
+		char *symfile_copy = strdup (symfile);
 
-                make_cleanup (free, symfile_copy);
-                symbol_file_command (symfile_copy, from_tty);
-              }
-            else
-              warning ("Unknown symbols for '%s'; use the 'symbol-file' command.", filename);
-          }
+		make_cleanup (free, symfile_copy);
+		symbol_file_command (symfile_copy, from_tty);
+	      }
+	    else
+	      warning ("Unknown symbols for '%s'; use the 'symbol-file' command.", filename);
+	  }
 #endif
-        (t->to_open) (filename, from_tty);
+	(t->to_open) (filename, from_tty);
       }
   else
     error ("GDB can't read core files on this machine.");
 }
-
 
+
 /* If there are two or more functions that wish to hook into exec_file_command,
  * this function will call all of the hook functions. */
 
@@ -115,7 +116,7 @@ call_extra_exec_file_hooks (filename)
   int i;
 
   for (i = 0; i < exec_file_hook_count; i++)
-    (*exec_file_extra_hooks[i])(filename);
+    (*exec_file_extra_hooks[i]) (filename);
 }
 
 /* Call this to specify the hook for exec_file_command to call back.
@@ -134,7 +135,7 @@ specify_exec_file_hook (hook)
       if (exec_file_hook_count == 0)
 	{
 	  /* If this is the first extra hook, initialize the hook array. */
-	  exec_file_extra_hooks = (hook_type *) xmalloc (sizeof(hook_type));
+	  exec_file_extra_hooks = (hook_type *) xmalloc (sizeof (hook_type));
 	  exec_file_extra_hooks[0] = exec_file_display_hook;
 	  exec_file_display_hook = call_extra_exec_file_hooks;
 	  exec_file_hook_count = 1;
@@ -146,7 +147,7 @@ specify_exec_file_hook (hook)
       exec_file_hook_count++;
       new_array =
 	(hook_type *) xrealloc (exec_file_extra_hooks,
-				exec_file_hook_count * sizeof(hook_type));
+				exec_file_hook_count * sizeof (hook_type));
       exec_file_extra_hooks = new_array;
       exec_file_extra_hooks[exec_file_hook_count - 1] = hook;
     }
@@ -161,7 +162,7 @@ specify_exec_file_hook (hook)
 void
 close_exec_file ()
 {
-#if 0 /* FIXME */
+#if 0				/* FIXME */
   if (exec_bfd)
     bfd_tempclose (exec_bfd);
 #endif
@@ -170,7 +171,7 @@ close_exec_file ()
 void
 reopen_exec_file ()
 {
-#if 0 /* FIXME */
+#if 0				/* FIXME */
   if (exec_bfd)
     bfd_reopen (exec_bfd);
 #else
@@ -182,11 +183,11 @@ reopen_exec_file ()
   /* Don't do anything if the current target isn't exec. */
   if (exec_bfd == NULL || strcmp (target_shortname, "exec") != 0)
     return;
- 
+
   /* If the timestamp of the exec file has changed, reopen it. */
   filename = strdup (bfd_get_filename (exec_bfd));
   make_cleanup (free, filename);
-  mtime = bfd_get_mtime(exec_bfd);
+  mtime = bfd_get_mtime (exec_bfd);
   res = stat (filename, &st);
 
   if (mtime && mtime != st.st_mtime)
@@ -204,7 +205,7 @@ validate_files ()
     {
       if (!core_file_matches_executable_p (core_bfd, exec_bfd))
 	warning ("core file may not match specified executable file.");
-      else if (bfd_get_mtime(exec_bfd) > bfd_get_mtime(core_bfd))
+      else if (bfd_get_mtime (exec_bfd) > bfd_get_mtime (core_bfd))
 	warning ("exec file is newer than core file.");
     }
 }
@@ -217,15 +218,17 @@ char *
 get_exec_file (err)
      int err;
 {
-  if (exec_bfd) return bfd_get_filename(exec_bfd);
-  if (!err)     return NULL;
+  if (exec_bfd)
+    return bfd_get_filename (exec_bfd);
+  if (!err)
+    return NULL;
 
   error ("No executable file specified.\n\
 Use the \"file\" or \"exec-file\" command.");
   return NULL;
 }
-
 
+
 /* Report a memory error with error().  */
 
 void
@@ -236,7 +239,7 @@ memory_error (status, memaddr)
   if (status == EIO)
     {
       /* Actually, address between memaddr and memaddr + len
-	 was out of bounds. */
+         was out of bounds. */
       error_begin ();
       printf_filtered ("Cannot access memory at address ");
       print_address_numeric (memaddr, 1, gdb_stdout);
@@ -249,7 +252,7 @@ memory_error (status, memaddr)
       printf_filtered ("Error accessing memory address ");
       print_address_numeric (memaddr, 1, gdb_stdout);
       printf_filtered (": %s.\n",
-			 safe_strerror (status));
+		       safe_strerror (status));
       return_to_top_level (RETURN_ERROR);
     }
 }
@@ -352,10 +355,10 @@ read_memory_unsigned_integer (memaddr, len)
 void
 read_memory_string (memaddr, buffer, max_len)
      CORE_ADDR memaddr;
-     char * buffer;
+     char *buffer;
      int max_len;
 {
-  register char * cp;
+  register char *cp;
   register int i;
   int cnt;
 
@@ -363,23 +366,23 @@ read_memory_string (memaddr, buffer, max_len)
   while (1)
     {
       if (cp - buffer >= max_len)
-        {
-          buffer[max_len - 1] = '\0';
-          break;
-        }
+	{
+	  buffer[max_len - 1] = '\0';
+	  break;
+	}
       cnt = max_len - (cp - buffer);
       if (cnt > 8)
 	cnt = 8;
       read_memory (memaddr + (int) (cp - buffer), cp, cnt);
       for (i = 0; i < cnt && *cp; i++, cp++)
-        ; /* null body */
+	;			/* null body */
 
       if (i < cnt && !*cp)
-        break;
+	break;
     }
 }
-
 
+
 #if 0
 /* Enable after 4.12.  It is not tested.  */
 
@@ -415,7 +418,7 @@ generic_search (len, data, mask, startaddr, increment, lorange, hirange
     try_again:
       curaddr += increment;
     }
-  *addr_found = (CORE_ADDR)0;
+  *addr_found = (CORE_ADDR) 0;
   return;
 }
 #endif /* 0 */
@@ -454,7 +457,7 @@ set_gnutarget (newtarget)
 }
 
 void
-_initialize_core()
+_initialize_core ()
 {
   struct cmd_list_element *c;
   c = add_cmd ("core-file", class_files, core_file_command,
@@ -464,10 +467,10 @@ No arg means have no core file.  This command has been superseded by the\n\
   c->completer = filename_completer;
 
   c = add_set_cmd ("gnutarget", class_files, var_string_noescape,
-		  (char *) &gnutarget_string,
-		  "Set the current BFD target.\n\
+		   (char *) &gnutarget_string,
+		   "Set the current BFD target.\n\
 Use `set gnutarget auto' to specify automatic detection.",
-		  &setlist);
+		   &setlist);
   c->function.sfunc = set_gnutarget_command;
   add_show_from_set (c, &showlist);
 

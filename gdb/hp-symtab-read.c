@@ -15,7 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
 
    Written by the Center for Software Science at the University of Utah
    and by Cygnus Support.  */
@@ -29,21 +30,21 @@
 #include "hpread.h"
 #include "demangle.h"
 #include "complaints.h"
-
 
 
 
-static struct complaint  hpread_unhandled_end_common_complaint =
+
+static struct complaint hpread_unhandled_end_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n", 0, 0
 };
 
-static struct complaint  hpread_unhandled_type_complaint =
+static struct complaint hpread_unhandled_type_complaint =
 {
   "hpread_type_translate: unhandled type code.", 0, 0
 };
 
-static struct complaint  hpread_struct_complaint =
+static struct complaint hpread_struct_complaint =
 {
   "hpread_read_struct_type: expected SVAR type...", 0, 0
 };
@@ -53,28 +54,28 @@ static struct complaint hpread_array_complaint =
   "error in hpread_array_type.", 0, 0
 };
 
-static struct complaint  hpread_type_lookup_complaint =
+static struct complaint hpread_type_lookup_complaint =
 {
   "error in hpread_type_lookup().", 0, 0
 };
 
 
-static struct complaint  hpread_unexpected_end_complaint =
+static struct complaint hpread_unexpected_end_complaint =
 {
   "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.", 0, 0
 };
 
-static struct complaint hpread_tagdef_complaint  =
+static struct complaint hpread_tagdef_complaint =
 {
   "error processing class tagdef", 0, 0
 };
 
-static struct complaint  hpread_unhandled_common_complaint =
+static struct complaint hpread_unhandled_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.", 0, 0
 };
 
-static struct complaint  hpread_unhandled_blockdata_complaint =
+static struct complaint hpread_unhandled_blockdata_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.", 0, 0
 };
@@ -91,17 +92,17 @@ static unsigned long hpread_get_line
 static CORE_ADDR hpread_get_location
   PARAMS ((sltpointer, struct objfile *));
 
-static void hpread_psymtab_to_symtab_1 
+static void hpread_psymtab_to_symtab_1
   PARAMS ((struct partial_symtab *));
 
-void hpread_psymtab_to_symtab 
+void hpread_psymtab_to_symtab
   PARAMS ((struct partial_symtab *));
 
 static struct symtab *hpread_expand_symtab
   PARAMS ((struct objfile *, int, int, CORE_ADDR, int,
 	   struct section_offsets *, char *));
 
-static int hpread_type_translate 
+static int hpread_type_translate
   PARAMS ((dnttpointer));
 
 static struct type **hpread_lookup_type
@@ -125,19 +126,19 @@ static struct type *hpread_read_struct_type
 static struct type *hpread_get_nth_template_arg
   PARAMS ((struct objfile *, int));
 
-static struct type * hpread_read_templ_arg_type 
+static struct type *hpread_read_templ_arg_type
   PARAMS ((dnttpointer, union dnttentry *, struct objfile *, char *));
 
 static struct type *hpread_read_set_type
   PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
-static struct type * hpread_read_array_type 
-  PARAMS ((dnttpointer, union dnttentry *dn_bufp, struct objfile *objfile));
+static struct type *hpread_read_array_type
+  PARAMS ((dnttpointer, union dnttentry * dn_bufp, struct objfile * objfile));
 
 static struct type *hpread_read_subrange_type
   PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
-static struct type * hpread_type_lookup
+static struct type *hpread_type_lookup
   PARAMS ((dnttpointer, struct objfile *));
 
 static sltpointer hpread_record_lines
@@ -146,12 +147,12 @@ static sltpointer hpread_record_lines
 
 static void hpread_process_one_debug_symbol
   PARAMS ((union dnttentry *, char *, struct section_offsets *,
-	   struct objfile *, CORE_ADDR, int, char *, int, int * ));
+	   struct objfile *, CORE_ADDR, int, char *, int, int *));
 
 static int hpread_get_scope_depth
   PARAMS ((union dnttentry *, struct objfile *, int));
 
-static void fix_static_member_physnames 
+static void fix_static_member_physnames
   PARAMS ((struct type *, char *, struct objfile *));
 
 static void fixup_class_method_type
@@ -164,18 +165,18 @@ static dnttpointer hpread_get_next_skip_over_anon_unions
 
 /* Global to indicate presence of HP-compiled objects,
    in particular, SOM executable file with SOM debug info 
-   Defined in symtab.c, used in hppa-tdep.c. */ 
+   Defined in symtab.c, used in hppa-tdep.c. */
 extern int hp_som_som_object_present;
 
 /* Static used to indicate a class type that requires a
    fix-up of one of its method types */
-static struct type * fixup_class = NULL;
+static struct type *fixup_class = NULL;
 
 /* Static used to indicate the method type that is to be
    used to fix-up the type for fixup_class */
-static struct type * fixup_method = NULL;
-
+static struct type *fixup_method = NULL;
 
+
 
 /* Get the nesting depth for the source line identified by INDEX.  */
 
@@ -220,24 +221,24 @@ hpread_get_location (index, objfile)
     {
       /* find previous normal sltentry and get address */
       for (i = 0; ((sl_bufp->snorm.sltdesc != SLT_NORMAL) &&
-                   (sl_bufp->snorm.sltdesc != SLT_NORMAL_OFFSET) &&
+		   (sl_bufp->snorm.sltdesc != SLT_NORMAL_OFFSET) &&
 		   (sl_bufp->snorm.sltdesc != SLT_EXIT)); i++)
 	sl_bufp = hpread_get_slt (index - i, objfile);
       if (sl_bufp->snorm.sltdesc == SLT_NORMAL_OFFSET)
-        return sl_bufp->snormoff.address;
+	return sl_bufp->snormoff.address;
       else
-        return sl_bufp->snorm.address;
+	return sl_bufp->snorm.address;
     }
 
   /* find next normal sltentry and get address */
   for (i = 0; ((sl_bufp->snorm.sltdesc != SLT_NORMAL) &&
 	       (sl_bufp->snorm.sltdesc != SLT_NORMAL_OFFSET) &&
-               (sl_bufp->snorm.sltdesc != SLT_EXIT)); i++)
+	       (sl_bufp->snorm.sltdesc != SLT_EXIT)); i++)
     sl_bufp = hpread_get_slt (index + i, objfile);
-      if (sl_bufp->snorm.sltdesc == SLT_NORMAL_OFFSET)
-        return sl_bufp->snormoff.address;
-      else
-        return sl_bufp->snorm.address;
+  if (sl_bufp->snorm.sltdesc == SLT_NORMAL_OFFSET)
+    return sl_bufp->snormoff.address;
+  else
+    return sl_bufp->snorm.address;
 }
 
 
@@ -301,18 +302,18 @@ hpread_has_name (kind)
     case DNTT_TYPE_INHERITANCE:
     case DNTT_TYPE_FRIEND_CLASS:
     case DNTT_TYPE_FRIEND_FUNC:
-    case DNTT_TYPE_MODIFIER: 
+    case DNTT_TYPE_MODIFIER:
     case DNTT_TYPE_OBJECT_ID:
     case DNTT_TYPE_TEMPLATE:
     case DNTT_TYPE_TEMPLATE_ARG:
     case DNTT_TYPE_FUNC_TEMPLATE:
     case DNTT_TYPE_LINK:
-    /* DNTT_TYPE_DYN_ARRAY_DESC ? */
-    /* DNTT_TYPE_DESC_SUBRANGE ? */
-    /* DNTT_TYPE_BEGIN_EXT ? */
-    /* DNTT_TYPE_INLN ? */
-    /* DNTT_TYPE_INLN_LIST ? */
-    /* DNTT_TYPE_ALIAS ? */
+      /* DNTT_TYPE_DYN_ARRAY_DESC ? */
+      /* DNTT_TYPE_DESC_SUBRANGE ? */
+      /* DNTT_TYPE_BEGIN_EXT ? */
+      /* DNTT_TYPE_INLN ? */
+      /* DNTT_TYPE_INLN_LIST ? */
+      /* DNTT_TYPE_ALIAS ? */
     default:
       return 0;
     }
@@ -400,7 +401,7 @@ hpread_psymtab_to_symtab (pst)
      was compiled using an HP compiler (aCC, cc) 
      the processing_acc_compilation variable is declared in the 
      file buildsym.h, the HP_COMPILED_TARGET is defined to be equal
-     to 3 in the file tm_hppa.h*/
+     to 3 in the file tm_hppa.h */
 
   processing_gcc_compilation = 0;
 
@@ -448,11 +449,11 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
      struct section_offsets *section_offsets;
      char *filename;
 {
-  char            *namestring;
+  char *namestring;
   union dnttentry *dn_bufp;
-  unsigned         max_symnum;
-  int              at_module_boundary = 0;
-                   /* 1 => at end, -1 => at beginning */ 
+  unsigned max_symnum;
+  int at_module_boundary = 0;
+  /* 1 => at end, -1 => at beginning */
 
   int sym_index = sym_offset / sizeof (struct dntt_type_block);
 
@@ -462,11 +463,12 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   last_source_file = 0;
 
   /* Demangling style -- if EDG style already set, don't change it,
-     as HP style causes some problems with the KAI EDG compiler */ 
-  if (current_demangling_style != edg_demangling) {
-    /* Otherwise, ensure that we are using HP style demangling */ 
-    set_demangling_style (HP_DEMANGLING_STYLE_STRING);
-  }
+     as HP style causes some problems with the KAI EDG compiler */
+  if (current_demangling_style != edg_demangling)
+    {
+      /* Otherwise, ensure that we are using HP style demangling */
+      set_demangling_style (HP_DEMANGLING_STYLE_STRING);
+    }
 
   dn_bufp = hpread_get_lntt (sym_index, objfile);
   if (!((dn_bufp->dblock.kind == (unsigned char) DNTT_TYPE_SRCFILE) ||
@@ -492,12 +494,12 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
    * in to prepare for backing this out again. -JB
    */
   max_symnum = sym_size / sizeof (struct dntt_type_block);
-           /* No reason to multiply on pst side and divide on sym side... FIXME */
+  /* No reason to multiply on pst side and divide on sym side... FIXME */
 
   /* Read in and process each debug symbol within the specified range.
    */
   for (symnum = 0;
-       symnum < max_symnum;       
+       symnum < max_symnum;
        symnum++)
     {
       QUIT;			/* Allow this to be interruptable */
@@ -512,9 +514,9 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       hpread_process_one_debug_symbol (dn_bufp, namestring, section_offsets,
 				       objfile, text_offset, text_size,
 				       filename, symnum + sym_index,
-                                      &at_module_boundary
-                                       );
-                                       
+				       &at_module_boundary
+	);
+
       /* OLD COMMENTS: This routine is only called for psts.  All psts
        * correspond to MODULES.  If we ever do lazy-reading of globals
        * from the LNTT, then there will be a pst which ends when the
@@ -522,7 +524,7 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
        * to re-visit this break.  
 
        if( at_end_of_module )
-           break;
+       break;
 
        */
 
@@ -535,12 +537,12 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
          the psymtab, so we break out if we enter a new module. */
 
       if (at_module_boundary == -1)
-        break;
+	break;
     }
 
   current_objfile = NULL;
-  hp_som_som_object_present = 1; /* Indicate we've processed an HP SOM SOM file */
-  
+  hp_som_som_object_present = 1;	/* Indicate we've processed an HP SOM SOM file */
+
   return end_symtab (text_offset + text_size, objfile, 0);
 }
 
@@ -553,10 +555,11 @@ static int
 hpread_type_translate (typep)
      dnttpointer typep;
 {
-  if (!typep.dntti.immediate) {
-    error ("error in hpread_type_translate\n.");
-    return;
-  }
+  if (!typep.dntti.immediate)
+    {
+      error ("error in hpread_type_translate\n.");
+      return;
+    }
 
   switch (typep.dntti.type)
     {
@@ -564,13 +567,13 @@ hpread_type_translate (typep)
     case HP_TYPE_BOOLEAN_S300_COMPAT:
     case HP_TYPE_BOOLEAN_VAX_COMPAT:
       return FT_BOOLEAN;
-    case HP_TYPE_CHAR:                /* C signed char, C++ plain char */
- 
+    case HP_TYPE_CHAR:		/* C signed char, C++ plain char */
+
     case HP_TYPE_WIDE_CHAR:
       return FT_CHAR;
     case HP_TYPE_INT:
       if (typep.dntti.bitlength <= 8)
-	return FT_SIGNED_CHAR;         /* C++ signed char */
+	return FT_SIGNED_CHAR;	/* C++ signed char */
       if (typep.dntti.bitlength <= 16)
 	return FT_SHORT;
       if (typep.dntti.bitlength <= 32)
@@ -578,11 +581,11 @@ hpread_type_translate (typep)
       return FT_LONG_LONG;
     case HP_TYPE_LONG:
       if (typep.dntti.bitlength <= 8)
-	return FT_SIGNED_CHAR;           /* C++ signed char. */ 
+	return FT_SIGNED_CHAR;	/* C++ signed char. */
       return FT_LONG;
     case HP_TYPE_UNSIGNED_LONG:
       if (typep.dntti.bitlength <= 8)
-	return FT_UNSIGNED_CHAR;        /* C/C++ unsigned char */
+	return FT_UNSIGNED_CHAR;	/* C/C++ unsigned char */
       if (typep.dntti.bitlength <= 16)
 	return FT_UNSIGNED_SHORT;
       if (typep.dntti.bitlength <= 32)
@@ -626,9 +629,9 @@ hpread_type_translate (typep)
     case HP_TYPE_TEXT:
     case HP_TYPE_FLABEL:
     case HP_TYPE_PACKED_DECIMAL:
-    case HP_TYPE_ANYPOINTER:  
+    case HP_TYPE_ANYPOINTER:
     case HP_TYPE_GLOBAL_ANYPOINTER:
-    case HP_TYPE_LOCAL_ANYPOINTER: 
+    case HP_TYPE_LOCAL_ANYPOINTER:
     default:
       warning ("hpread_type_translate: unhandled type code.\n");
       return FT_VOID;
@@ -685,35 +688,37 @@ hpread_lookup_type (hp_type, objfile)
 	{
 	  old_len = TYPE_VECTOR_LENGTH (objfile);
 
-          /* See if we need to allocate a type-vector. */
+	  /* See if we need to allocate a type-vector. */
 	  if (old_len == 0)
 	    {
-              TYPE_VECTOR_LENGTH(objfile) = LNTT_SYMCOUNT (objfile) + GNTT_SYMCOUNT (objfile);
+	      TYPE_VECTOR_LENGTH (objfile) = LNTT_SYMCOUNT (objfile) + GNTT_SYMCOUNT (objfile);
 	      TYPE_VECTOR (objfile) = (struct type **)
 		xmmalloc (objfile->md, TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
 	      memset (&TYPE_VECTOR (objfile)[old_len], 0,
-		        (TYPE_VECTOR_LENGTH (objfile) - old_len) *
-		        sizeof (struct type *));
+		      (TYPE_VECTOR_LENGTH (objfile) - old_len) *
+		      sizeof (struct type *));
 	    }
 
-          /* See if we need to resize type-vector. With my change to
-           * initially allocate a correct-size type-vector, this code
-           * should no longer trigger.
-           */
-	  while (index >= TYPE_VECTOR_LENGTH (objfile)) {
-	    TYPE_VECTOR_LENGTH (objfile) *= 2;
-            size_changed = 1;
-          }
-          if (size_changed) {
-	    TYPE_VECTOR (objfile) = (struct type **)
-	      xmrealloc (objfile -> md,
-                         (char *) TYPE_VECTOR (objfile),
-                         (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
+	  /* See if we need to resize type-vector. With my change to
+	   * initially allocate a correct-size type-vector, this code
+	   * should no longer trigger.
+	   */
+	  while (index >= TYPE_VECTOR_LENGTH (objfile))
+	    {
+	      TYPE_VECTOR_LENGTH (objfile) *= 2;
+	      size_changed = 1;
+	    }
+	  if (size_changed)
+	    {
+	      TYPE_VECTOR (objfile) = (struct type **)
+		xmrealloc (objfile->md,
+			   (char *) TYPE_VECTOR (objfile),
+		   (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
 
 	      memset (&TYPE_VECTOR (objfile)[old_len], 0,
-		        (TYPE_VECTOR_LENGTH (objfile) - old_len) *
-		        sizeof (struct type *));
-          } 
+		      (TYPE_VECTOR_LENGTH (objfile) - old_len) *
+		      sizeof (struct type *));
+	    }
 
 	}
       return &TYPE_VECTOR (objfile)[index];
@@ -734,15 +739,16 @@ hpread_alloc_type (hp_type, objfile)
   struct type **type_addr;
 
   type_addr = hpread_lookup_type (hp_type, objfile);
-  if (*type_addr == 0) {
-    *type_addr = alloc_type (objfile);
+  if (*type_addr == 0)
+    {
+      *type_addr = alloc_type (objfile);
 
-    /* A hack - if we really are a C++ class symbol, then this default
-     * will get overriden later on.
-     */
-    TYPE_CPLUS_SPECIFIC (*type_addr)
-      = (struct cplus_struct_type *) &cplus_struct_default;
-  }
+      /* A hack - if we really are a C++ class symbol, then this default
+       * will get overriden later on.
+       */
+      TYPE_CPLUS_SPECIFIC (*type_addr)
+	= (struct cplus_struct_type *) &cplus_struct_default;
+    }
 
   return *type_addr;
 }
@@ -797,7 +803,7 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (name, strlen (name), 
+      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -866,24 +872,24 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
   type = hpread_alloc_type (hp_type, objfile);
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
-      record_args = 0; /* already read in, don't modify type */ 
+      record_args = 0;		/* already read in, don't modify type */
     }
   else
     {
       /* Nope, so read it in and store it away.  */
       if (dn_bufp->dblock.kind == DNTT_TYPE_FUNCTION ||
-          dn_bufp->dblock.kind == DNTT_TYPE_MEMFUNC)
-        type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunc.retval,
-                                                          objfile));
+	  dn_bufp->dblock.kind == DNTT_TYPE_MEMFUNC)
+	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunc.retval,
+							  objfile));
       else if (dn_bufp->dblock.kind == DNTT_TYPE_FUNCTYPE)
-        type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunctype.retval,
-                                                          objfile));
-      else /* expect DNTT_TYPE_FUNC_TEMPLATE */
-        type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunc_template.retval,
-                                                          objfile));
+	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunctype.retval,
+							  objfile));
+      else			/* expect DNTT_TYPE_FUNC_TEMPLATE */
+	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->dfunc_template.retval,
+							  objfile));
       memcpy ((char *) type, (char *) type1, sizeof (struct type));
-      
-      /* Mark it -- in the middle of processing */ 
+
+      /* Mark it -- in the middle of processing */
       TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
     }
 
@@ -894,7 +900,7 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
     param = dn_bufp->dfunc.firstparam;
   else if (dn_bufp->dblock.kind == DNTT_TYPE_FUNCTYPE)
     param = dn_bufp->dfunctype.firstparam;
-  else /* expect DNTT_TYPE_FUNC_TEMPLATE */
+  else				/* expect DNTT_TYPE_FUNC_TEMPLATE */
     param = dn_bufp->dfunc_template.firstparam;
   while (param.word && param.word != DNTTNIL)
     {
@@ -920,18 +926,18 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (paramp->dfparam.copyparam)
 	{
-	  SYMBOL_VALUE (sym) = paramp->dfparam.location ;
+	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
 #ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
 	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
 #endif
 	  /* This is likely a pass-by-invisible reference parameter,
 	     Hack on the symbol class to make GDB happy.  */
-          /* ??rehrauer: This appears to be broken w/r/t to passing
-             C values of type float and struct.  Perhaps this ought
-             to be highighted as a special case, but for now, just
-             allowing these to be LOC_ARGs seems to work fine.
-             */
+	  /* ??rehrauer: This appears to be broken w/r/t to passing
+	     C values of type float and struct.  Perhaps this ought
+	     to be highighted as a special case, but for now, just
+	     allowing these to be LOC_ARGs seems to work fine.
+	   */
 #if 0
 	  SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
 #endif
@@ -953,7 +959,7 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
       /* Note 3 (pai/1997-08-11) I removed the add_symbol_to_list() which put
          each fparam on the local_symbols list from here.  Now we use the
          local_list to which fparams are added below, and set the param_symbols
-         global to point to that at the end of this routine. */ 
+         global to point to that at the end of this routine. */
       /* elz: I added this new list of symbols which is local to the function.
          this list is the one which is actually used to build the type for the
          function rather than the gloabal list pointed to by symlist.
@@ -962,16 +968,16 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
          a function itself with more parameters in it. Adding parameters to the
          same global symbol list would not work!      
          Actually it did work in case of cc compiled programs where you do 
-         not check the parameter lists of the arguments. */ 
+         not check the parameter lists of the arguments. */
       add_symbol_to_list (sym, &local_list);
 
     }
 
   /* If type was read in earlier, don't bother with modifying
-     the type struct */ 
+     the type struct */
   if (!record_args)
     goto finish;
-  
+
   /* Note how many parameters we found.  */
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
@@ -984,14 +990,14 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
   /* Note that we preserve the order of the parameters, so
      that in something like "enum {FOO, LAST_THING=FOO}" we print
      FOO, not LAST_THING.  */
-  
+
   /* get the parameters types from the local list not the global list
      so that the type can be correctly constructed for functions which
      have function as parameters */
   for (syms = local_list, n = 0; syms; syms = syms->next)
     {
       int j = 0;
-      for (j=0; j < syms->nsyms; j++, n++)
+      for (j = 0; j < syms->nsyms; j++, n++)
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
@@ -1000,7 +1006,7 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
     }
-  /* Mark it as having been processed */ 
+  /* Mark it as having been processed */
   TYPE_FLAGS (type) &= ~(TYPE_FLAG_INCOMPLETE);
 
   /* Check whether we need to fix-up a class type with this function's type */
@@ -1016,11 +1022,11 @@ hpread_read_function_type (hp_type, dn_bufp, objfile, newblock)
      called for creating a new block, and not if it was called
      simply to get the function type. This prevents recursive
      invocations from trashing param_symbols. */
-finish:  
+finish:
   if (newblock)
     param_symbols = local_list;
-  
-   return type;
+
+  return type;
 }
 
 
@@ -1052,18 +1058,18 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
   type = hpread_alloc_type (hp_type, objfile);
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
-      record_args = 0; /* already read in, don't modify type */ 
+      record_args = 0;		/* already read in, don't modify type */
     }
   else
     {
       /* Nope, so read it in and store it away.  */
       if (dn_bufp->dblock.kind == DNTT_TYPE_DOC_FUNCTION ||
-          dn_bufp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC)
-        type1 = lookup_function_type (hpread_type_lookup (dn_bufp->ddocfunc.retval,
-                                                          objfile));
+	  dn_bufp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC)
+	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->ddocfunc.retval,
+							  objfile));
       memcpy ((char *) type, (char *) type1, sizeof (struct type));
-      
-      /* Mark it -- in the middle of processing */ 
+
+      /* Mark it -- in the middle of processing */
       TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
     }
 
@@ -1095,18 +1101,18 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (paramp->dfparam.copyparam)
 	{
-	  SYMBOL_VALUE (sym) = paramp->dfparam.location ;
+	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
 #ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
 	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
 #endif
 	  /* This is likely a pass-by-invisible reference parameter,
 	     Hack on the symbol class to make GDB happy.  */
-          /* ??rehrauer: This appears to be broken w/r/t to passing
-             C values of type float and struct.  Perhaps this ought
-             to be highighted as a special case, but for now, just
-             allowing these to be LOC_ARGs seems to work fine.
-             */
+	  /* ??rehrauer: This appears to be broken w/r/t to passing
+	     C values of type float and struct.  Perhaps this ought
+	     to be highighted as a special case, but for now, just
+	     allowing these to be LOC_ARGs seems to work fine.
+	   */
 #if 0
 	  SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
 #endif
@@ -1128,8 +1134,8 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
       /* Note 3 (pai/1997-08-11) I removed the add_symbol_to_list() which put
          each fparam on the local_symbols list from here.  Now we use the
          local_list to which fparams are added below, and set the param_symbols
-         global to point to that at the end of this routine. */ 
-         
+         global to point to that at the end of this routine. */
+
       /* elz: I added this new list of symbols which is local to the function.
          this list is the one which is actually used to build the type for the
          function rather than the gloabal list pointed to by symlist.
@@ -1143,15 +1149,15 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
     }
 
   /* If type was read in earlier, don't bother with modifying
-     the type struct */ 
+     the type struct */
   if (!record_args)
     goto finish;
-  
+
   /* Note how many parameters we found.  */
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
     obstack_alloc (&objfile->type_obstack,
-                   sizeof (struct field) * nsyms);
+		   sizeof (struct field) * nsyms);
 
   /* Find the symbols for the parameters and 
      use them to fill parameter-type information into the function-type.
@@ -1159,25 +1165,25 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
   /* Note that we preserve the order of the parameters, so
      that in something like "enum {FOO, LAST_THING=FOO}" we print
      FOO, not LAST_THING.  */
-  
+
   /* get the parameters types from the local list not the global list
      so that the type can be correctly constructed for functions which
      have function as parameters
-  */
+   */
   for (syms = local_list, n = 0; syms; syms = syms->next)
     {
       int j = 0;
       for (j = 0; j < syms->nsyms; j++, n++)
-        {
-          struct symbol *xsym = syms->symbol[j];
-          TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
-          TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
-          TYPE_FIELD_BITPOS (type, n) = n;
-          TYPE_FIELD_BITSIZE (type, n) = 0;
-        }
+	{
+	  struct symbol *xsym = syms->symbol[j];
+	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
+	  TYPE_FIELD_BITPOS (type, n) = n;
+	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	}
     }
-  
-  /* Mark it as having been processed */ 
+
+  /* Mark it as having been processed */
   TYPE_FLAGS (type) &= ~(TYPE_FLAG_INCOMPLETE);
 
   /* Check whether we need to fix-up a class type with this function's type */
@@ -1193,10 +1199,10 @@ hpread_read_doc_function_type (hp_type, dn_bufp, objfile, newblock)
      called for creating a new block, and not if it was called
      simply to get the function type. This prevents recursive
      invocations from trashing param_symbols. */
-finish:  
+finish:
   if (newblock)
     param_symbols = local_list;
-  
+
   return type;
 }
 
@@ -1215,7 +1221,7 @@ finish:
  * 
  * There may be problems handling nested templates... tough.
  */
-static struct type * current_template = NULL;
+static struct type *current_template = NULL;
 
 /* Read in and internalize a structure definition.  
  * This same routine is called for struct, union, and class types.
@@ -1234,10 +1240,10 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
     {
       struct nextfield *next;
       struct field field;
-      unsigned char attributes; /* store visibility and virtuality info */
-#     define ATTR_VIRTUAL 1      
-#     define ATTR_PRIVATE 2      
-#     define ATTR_PROTECT 3      
+      unsigned char attributes;	/* store visibility and virtuality info */
+#define ATTR_VIRTUAL 1
+#define ATTR_PRIVATE 2
+#define ATTR_PROTECT 3
     };
 
 
@@ -1248,7 +1254,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       struct fn_fieldlist field;
       struct fn_field fn_field;
       int num_fn_fields;
-     };
+    };
 
   /* The template args get linked together into a list of struct next_template's */
   struct next_template
@@ -1258,10 +1264,10 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
     };
 
   /* The template instantiations get linked together into a list of these... */
-  struct next_instantiation 
+  struct next_instantiation
     {
-      struct next_instantiation * next;
-      struct type * t;
+      struct next_instantiation *next;
+      struct type *t;
     };
 
   struct type *type;
@@ -1285,9 +1291,9 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
   int volatile_member = 0;
   unsigned long vtbl_offset;
   int need_bitvectors = 0;
-  char * method_name = NULL;
-  char * method_alias = NULL;
-  
+  char *method_name = NULL;
+  char *method_alias = NULL;
+
 
   /* Is it something we've already dealt with?  */
   type = hpread_alloc_type (hp_type, objfile);
@@ -1295,7 +1301,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       (TYPE_CODE (type) == TYPE_CODE_UNION) ||
       (TYPE_CODE (type) == TYPE_CODE_CLASS) ||
       (TYPE_CODE (type) == TYPE_CODE_TEMPLATE))
-      return type;
+    return type;
 
   /* Get the basic type correct.  */
   if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
@@ -1310,13 +1316,13 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
     }
   else if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS)
     {
-      TYPE_CODE (type) = TYPE_CODE_CLASS; 
+      TYPE_CODE (type) = TYPE_CODE_CLASS;
       TYPE_LENGTH (type) = dn_bufp->dclass.bitlength / 8;
 
       /* Overrides the TYPE_CPLUS_SPECIFIC(type) with allocated memory
        * rather than &cplus_struct_default.
        */
-      allocate_cplus_struct_type(type);
+      allocate_cplus_struct_type (type);
 
       /* Fill in declared-type.
        * (The C++ compiler will emit TYPE_CODE_CLASS 
@@ -1325,14 +1331,14 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
        * want to know how it was really declared)
        */
       /* (0==class, 1==union, 2==struct) */
-      TYPE_DECLARED_TYPE(type) = dn_bufp->dclass.class_decl;
+      TYPE_DECLARED_TYPE (type) = dn_bufp->dclass.class_decl;
     }
   else if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE)
     {
       /* Get the basic type correct.  */
-      TYPE_CODE (type) = TYPE_CODE_TEMPLATE; 
-      allocate_cplus_struct_type(type);
-      TYPE_DECLARED_TYPE(type) = DECLARED_TYPE_TEMPLATE;
+      TYPE_CODE (type) = TYPE_CODE_TEMPLATE;
+      allocate_cplus_struct_type (type);
+      TYPE_DECLARED_TYPE (type) = DECLARED_TYPE_TEMPLATE;
     }
   else
     return type;
@@ -1343,60 +1349,62 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
   /* For classes, read the parent list.
    * Question (RT): Do we need to do this for templates also?
    */
-  if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS) {
+  if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS)
+    {
 
-    /* First read the parent-list (classes from which we derive fields) */
-    parent = dn_bufp->dclass.parentlist;
-    while (parent.word && parent.word != DNTTNIL) {
-      parentp = hpread_get_lntt (parent.dnttp.index, objfile);
+      /* First read the parent-list (classes from which we derive fields) */
+      parent = dn_bufp->dclass.parentlist;
+      while (parent.word && parent.word != DNTTNIL)
+	{
+	  parentp = hpread_get_lntt (parent.dnttp.index, objfile);
 
-      /* "parentp" should point to a DNTT_TYPE_INHERITANCE record */
+	  /* "parentp" should point to a DNTT_TYPE_INHERITANCE record */
 
-      /* Get space to record the next field/data-member. */
-      new = (struct nextfield *) alloca (sizeof (struct nextfield));
-      new->next = list;
-      list = new;
+	  /* Get space to record the next field/data-member. */
+	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  new->next = list;
+	  list = new;
 
-      FIELD_BITSIZE (list->field) = 0;
+	  FIELD_BITSIZE (list->field) = 0;
 
-      /* The "classname" field is actually a DNTT pointer to the base class */
-      baseclass = hpread_type_lookup (parentp->dinheritance.classname, 
-  					     objfile);
-      FIELD_TYPE (list->field) = baseclass;
+	  /* The "classname" field is actually a DNTT pointer to the base class */
+	  baseclass = hpread_type_lookup (parentp->dinheritance.classname,
+					  objfile);
+	  FIELD_TYPE (list->field) = baseclass;
 
-      list->field.name = type_name_no_tag(FIELD_TYPE (list->field));
+	  list->field.name = type_name_no_tag (FIELD_TYPE (list->field));
 
-      list->attributes = 0;
+	  list->attributes = 0;
 
-      /* Check for virtuality of base, and set the
-       * offset of the base subobject within the object.
-       * (Offset set to -1 for virtual bases (for now).)
-       */
-      if (parentp->dinheritance.Virtual)
-        {
-	  B_SET(&(list->attributes), ATTR_VIRTUAL);
-          parentp->dinheritance.offset = -1;
-        }
-      else
-        FIELD_BITPOS (list->field) = parentp->dinheritance.offset;
+	  /* Check for virtuality of base, and set the
+	   * offset of the base subobject within the object.
+	   * (Offset set to -1 for virtual bases (for now).)
+	   */
+	  if (parentp->dinheritance.Virtual)
+	    {
+	      B_SET (&(list->attributes), ATTR_VIRTUAL);
+	      parentp->dinheritance.offset = -1;
+	    }
+	  else
+	    FIELD_BITPOS (list->field) = parentp->dinheritance.offset;
 
-      /* Check visibility */
-      switch (parentp->dinheritance.visibility)
-        {
-          case 1:
-            B_SET(&(list->attributes), ATTR_PROTECT);
-            break;
-          case 2:
-            B_SET(&(list->attributes), ATTR_PRIVATE);
-            break;
-        }
-      
-      n_base_classes++;
-      nfields++;
+	  /* Check visibility */
+	  switch (parentp->dinheritance.visibility)
+	    {
+	    case 1:
+	      B_SET (&(list->attributes), ATTR_PROTECT);
+	      break;
+	    case 2:
+	      B_SET (&(list->attributes), ATTR_PRIVATE);
+	      break;
+	    }
 
-      parent = parentp->dinheritance.next;
+	  n_base_classes++;
+	  nfields++;
+
+	  parent = parentp->dinheritance.next;
+	}
     }
-  }
 
   /* For templates, read the template argument list.
    * This must be done before processing the member list, because
@@ -1408,46 +1416,48 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
    *   };
    * We need to read the argument list "T1", "T2" first.
    */
-  if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE) {
-    /* Kludge alert: This stuffs a global "current_template" which
-     * is referred to by hpread_get_nth_templ_arg(). The global
-     * is cleared at the end of this routine.
-     */
-    current_template = type;
+  if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE)
+    {
+      /* Kludge alert: This stuffs a global "current_template" which
+       * is referred to by hpread_get_nth_templ_arg(). The global
+       * is cleared at the end of this routine.
+       */
+      current_template = type;
 
-    /* Read in the argument list */
-    field = dn_bufp->dtemplate.arglist;
-    while (field.word && field.word != DNTTNIL) {
-      /* Get this template argument*/
-      fieldp = hpread_get_lntt (field.dnttp.index, objfile);
-      if (fieldp->dblock.kind != DNTT_TYPE_TEMPLATE_ARG)
-        {
-          warning ("Invalid debug info: Template argument entry is of wrong kind");
-          break;
-        }
-      /* Bump the count */ 
-      n_templ_args++;
-      /* Allocate and fill in a struct next_template */
-      t_new = (struct next_template *) alloca (sizeof (struct next_template));
-      t_new->next = t_list;
-      t_list = t_new;
-      t_list->arg.name = VT (objfile) + fieldp->dtempl_arg.name;
-      t_list->arg.type = hpread_read_templ_arg_type(field, fieldp, 
-                                                    objfile, t_list->arg.name);
-      /* Walk to the next template argument */
-      field = fieldp->dtempl_arg.nextarg;
+      /* Read in the argument list */
+      field = dn_bufp->dtemplate.arglist;
+      while (field.word && field.word != DNTTNIL)
+	{
+	  /* Get this template argument */
+	  fieldp = hpread_get_lntt (field.dnttp.index, objfile);
+	  if (fieldp->dblock.kind != DNTT_TYPE_TEMPLATE_ARG)
+	    {
+	      warning ("Invalid debug info: Template argument entry is of wrong kind");
+	      break;
+	    }
+	  /* Bump the count */
+	  n_templ_args++;
+	  /* Allocate and fill in a struct next_template */
+	  t_new = (struct next_template *) alloca (sizeof (struct next_template));
+	  t_new->next = t_list;
+	  t_list = t_new;
+	  t_list->arg.name = VT (objfile) + fieldp->dtempl_arg.name;
+	  t_list->arg.type = hpread_read_templ_arg_type (field, fieldp,
+						 objfile, t_list->arg.name);
+	  /* Walk to the next template argument */
+	  field = fieldp->dtempl_arg.nextarg;
+	}
     }
-  }
 
-  TYPE_NTEMPLATE_ARGS(type) = n_templ_args;
+  TYPE_NTEMPLATE_ARGS (type) = n_templ_args;
 
   if (n_templ_args > 0)
-    TYPE_TEMPLATE_ARGS(type) = (struct template_arg *)
+    TYPE_TEMPLATE_ARGS (type) = (struct template_arg *)
       obstack_alloc (&objfile->type_obstack, sizeof (struct template_arg) * n_templ_args);
   for (n = n_templ_args; t_list; t_list = t_list->next)
     {
       n -= 1;
-      TYPE_TEMPLATE_ARG(type, n) = t_list->arg;
+      TYPE_TEMPLATE_ARG (type, n) = t_list->arg;
     }
 
   /* Next read in and internalize all the fields/members.  */
@@ -1473,453 +1483,471 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       static_member = 0;
       const_member = 0;
       volatile_member = 0;
-       
-      if (fieldp->dblock.kind == DNTT_TYPE_GENFIELD) {
 
-        /* The type will be GENFIELD if the field is a method or
-         * a static member (or some other cases -- see below)
-         */
+      if (fieldp->dblock.kind == DNTT_TYPE_GENFIELD)
+	{
 
-        /* Follow a link to get to the record for the field. */
-        fn_field = fieldp->dgenfield.field;
-        fn_fieldp = hpread_get_lntt(fn_field.dnttp.index, objfile);
+	  /* The type will be GENFIELD if the field is a method or
+	   * a static member (or some other cases -- see below)
+	   */
 
-        /* Virtual funcs are indicated by a VFUNC which points to the
-         * real entry
-         */
-        if (fn_fieldp->dblock.kind == DNTT_TYPE_VFUNC) {
-          vtbl_offset = fn_fieldp->dvfunc.vtbl_offset;
-          fn_field = fn_fieldp->dvfunc.funcptr;
-          fn_fieldp = hpread_get_lntt(fn_field.dnttp.index, objfile);
-        }
+	  /* Follow a link to get to the record for the field. */
+	  fn_field = fieldp->dgenfield.field;
+	  fn_fieldp = hpread_get_lntt (fn_field.dnttp.index, objfile);
 
-        /* A function's entry may be preceded by a modifier which
-         * labels it static/constant/volatile.
-         */
-        if (fn_fieldp->dblock.kind == DNTT_TYPE_MODIFIER) {
-          static_member = fn_fieldp->dmodifier.m_static;
-          const_member = fn_fieldp->dmodifier.m_const;
-          volatile_member = fn_fieldp->dmodifier.m_volatile;
-          fn_field = fn_fieldp->dmodifier.type;
-          fn_fieldp = hpread_get_lntt(fn_field.dnttp.index, objfile);
-        }
+	  /* Virtual funcs are indicated by a VFUNC which points to the
+	   * real entry
+	   */
+	  if (fn_fieldp->dblock.kind == DNTT_TYPE_VFUNC)
+	    {
+	      vtbl_offset = fn_fieldp->dvfunc.vtbl_offset;
+	      fn_field = fn_fieldp->dvfunc.funcptr;
+	      fn_fieldp = hpread_get_lntt (fn_field.dnttp.index, objfile);
+	    }
 
-        /* Check whether we have a method */
-        if ((fn_fieldp->dblock.kind == DNTT_TYPE_MEMFUNC) ||
-            (fn_fieldp->dblock.kind == DNTT_TYPE_FUNCTION) ||
-            (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC) ||
-            (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_FUNCTION)) {
-          /* Method found */
+	  /* A function's entry may be preceded by a modifier which
+	   * labels it static/constant/volatile.
+	   */
+	  if (fn_fieldp->dblock.kind == DNTT_TYPE_MODIFIER)
+	    {
+	      static_member = fn_fieldp->dmodifier.m_static;
+	      const_member = fn_fieldp->dmodifier.m_const;
+	      volatile_member = fn_fieldp->dmodifier.m_volatile;
+	      fn_field = fn_fieldp->dmodifier.type;
+	      fn_fieldp = hpread_get_lntt (fn_field.dnttp.index, objfile);
+	    }
 
-          short ix = 0;
+	  /* Check whether we have a method */
+	  if ((fn_fieldp->dblock.kind == DNTT_TYPE_MEMFUNC) ||
+	      (fn_fieldp->dblock.kind == DNTT_TYPE_FUNCTION) ||
+	      (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC) ||
+	      (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_FUNCTION))
+	    {
+	      /* Method found */
 
-          /* Look up function type of method */
-	  memtype = hpread_type_lookup (fn_field, objfile);
+	      short ix = 0;
 
-          /* Methods can be seen before classes in the SOM records.
-             If we are processing this class because it's a parameter of a
-             method, at this point the method's type is actually incomplete;
-             we'll have to fix it up later; mark the class for this. */ 
-             
-          if (TYPE_INCOMPLETE (memtype))
-            {
-              TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
-              if (fixup_class)
-                warning ("Two classes to fix up for method??  Type information may be incorrect for some classes.");
-              if (fixup_method)
-                warning ("Two methods to be fixed up at once?? Type information may be incorrect for some classes.");
-              fixup_class = type;     /* remember this class has to be fixed up */
-              fixup_method = memtype; /* remember the method type to be used in fixup */ 
-            }
+	      /* Look up function type of method */
+	      memtype = hpread_type_lookup (fn_field, objfile);
 
-          /* HP aCC generates operator names without the "operator" keyword, and
-             generates null strings as names for operators that are 
-             user-defined type conversions to basic types (e.g. operator int ()).
-             So try to reconstruct name as best as possible. */
+	      /* Methods can be seen before classes in the SOM records.
+	         If we are processing this class because it's a parameter of a
+	         method, at this point the method's type is actually incomplete;
+	         we'll have to fix it up later; mark the class for this. */
 
-          method_name = (char *) (VT (objfile) + fn_fieldp->dfunc.name);
-          method_alias = (char *) (VT (objfile) + fn_fieldp->dfunc.alias);
+	      if (TYPE_INCOMPLETE (memtype))
+		{
+		  TYPE_FLAGS (type) |= TYPE_FLAG_INCOMPLETE;
+		  if (fixup_class)
+		    warning ("Two classes to fix up for method??  Type information may be incorrect for some classes.");
+		  if (fixup_method)
+		    warning ("Two methods to be fixed up at once?? Type information may be incorrect for some classes.");
+		  fixup_class = type;	/* remember this class has to be fixed up */
+		  fixup_method = memtype;	/* remember the method type to be used in fixup */
+		}
 
-          if (!method_name ||                               /* no name */ 
-              !*method_name ||                              /* or null name */ 
-              cplus_mangle_opname (method_name, DMGL_ANSI)) /* or name is an operator like "<" */ 
-            {
-              char * tmp_name = cplus_demangle (method_alias, DMGL_ANSI);
-              char * op_string = strstr (tmp_name, "operator");
-              method_name = xmalloc (strlen (op_string) + 1); /* don't overwrite VT! */ 
-              strcpy (method_name, op_string);
-            }
-                        
-          /* First check if a method of the same name has already been seen. */
-          fn_p = fn_list;
-          while (fn_p)
-            {
-              if (STREQ (fn_p->field.name, method_name))
-                break;
-              fn_p = fn_p->next;
-            }
+	      /* HP aCC generates operator names without the "operator" keyword, and
+	         generates null strings as names for operators that are 
+	         user-defined type conversions to basic types (e.g. operator int ()).
+	         So try to reconstruct name as best as possible. */
 
-          /* If no such method was found, allocate a new entry in the list */ 
-          if (!fn_p)
-            {
-              /* Get space to record this member function */
-              /* Note: alloca used; this will disappear on routine exit */
-              fn_new = (struct next_fn_field *) alloca (sizeof (struct next_fn_field));
-              fn_new->next = fn_list;
-              fn_list = fn_new;
+	      method_name = (char *) (VT (objfile) + fn_fieldp->dfunc.name);
+	      method_alias = (char *) (VT (objfile) + fn_fieldp->dfunc.alias);
 
-              /* Fill in the fields of the struct nextfield */
-          
-              /* Record the (unmangled) method name */
-              fn_list->field.name = method_name;
-              /* Initial space for overloaded methods */
-              /* Note: xmalloc is used; this will persist after this routine exits */ 
-              fn_list->field.fn_fields = (struct fn_field *) xmalloc (5 * (sizeof (struct fn_field)));
-              fn_list->field.length = 1; /* Init # of overloaded instances */ 
-              fn_list->num_fn_fields = 5; /* # of entries for which space allocated */
-              fn_p = fn_list;
-              ix = 0; /* array index for fn_field */ 
-              /* Bump the total count of the distinctly named methods */
-              n_fn_fields++;
-            }
-          else /* Another overloaded instance of an already seen method name */
-            {
-              if (++(fn_p->field.length) > fn_p->num_fn_fields)
-                {
-                  /* Increase space allocated for overloaded instances */ 
-                  fn_p->field.fn_fields
-                    = (struct fn_field *) xrealloc (fn_p->field.fn_fields,
-                                                     (fn_p->num_fn_fields + 5) * sizeof (struct fn_field));
-                  fn_p->num_fn_fields += 5;
-                }
-              ix = fn_p->field.length -1;  /* array index for fn_field */
-            }
-          
-          /* "physname" is intended to be the name of this overloaded instance. */
-          if ((fn_fieldp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) && 
-	      method_alias && 
-              *method_alias) /* not a null string */
-            fn_p->field.fn_fields[ix].physname = method_alias;
+	      if (!method_name ||	/* no name */
+		  !*method_name ||	/* or null name */
+		  cplus_mangle_opname (method_name, DMGL_ANSI))		/* or name is an operator like "<" */
+		{
+		  char *tmp_name = cplus_demangle (method_alias, DMGL_ANSI);
+		  char *op_string = strstr (tmp_name, "operator");
+		  method_name = xmalloc (strlen (op_string) + 1);	/* don't overwrite VT! */
+		  strcpy (method_name, op_string);
+		}
+
+	      /* First check if a method of the same name has already been seen. */
+	      fn_p = fn_list;
+	      while (fn_p)
+		{
+		  if (STREQ (fn_p->field.name, method_name))
+		    break;
+		  fn_p = fn_p->next;
+		}
+
+	      /* If no such method was found, allocate a new entry in the list */
+	      if (!fn_p)
+		{
+		  /* Get space to record this member function */
+		  /* Note: alloca used; this will disappear on routine exit */
+		  fn_new = (struct next_fn_field *) alloca (sizeof (struct next_fn_field));
+		  fn_new->next = fn_list;
+		  fn_list = fn_new;
+
+		  /* Fill in the fields of the struct nextfield */
+
+		  /* Record the (unmangled) method name */
+		  fn_list->field.name = method_name;
+		  /* Initial space for overloaded methods */
+		  /* Note: xmalloc is used; this will persist after this routine exits */
+		  fn_list->field.fn_fields = (struct fn_field *) xmalloc (5 * (sizeof (struct fn_field)));
+		  fn_list->field.length = 1;	/* Init # of overloaded instances */
+		  fn_list->num_fn_fields = 5;	/* # of entries for which space allocated */
+		  fn_p = fn_list;
+		  ix = 0;	/* array index for fn_field */
+		  /* Bump the total count of the distinctly named methods */
+		  n_fn_fields++;
+		}
+	      else
+		/* Another overloaded instance of an already seen method name */
+		{
+		  if (++(fn_p->field.length) > fn_p->num_fn_fields)
+		    {
+		      /* Increase space allocated for overloaded instances */
+		      fn_p->field.fn_fields
+			= (struct fn_field *) xrealloc (fn_p->field.fn_fields,
+		      (fn_p->num_fn_fields + 5) * sizeof (struct fn_field));
+		      fn_p->num_fn_fields += 5;
+		    }
+		  ix = fn_p->field.length - 1;	/* array index for fn_field */
+		}
+
+	      /* "physname" is intended to be the name of this overloaded instance. */
+	      if ((fn_fieldp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) &&
+		  method_alias &&
+		  *method_alias)	/* not a null string */
+		fn_p->field.fn_fields[ix].physname = method_alias;
+	      else
+		fn_p->field.fn_fields[ix].physname = method_name;
+	      /* What's expected here is the function type */
+	      /* But mark it as NULL if the method was incompletely processed
+	         We'll fix this up later when the method is fully processed */
+	      if (TYPE_INCOMPLETE (memtype))
+		{
+		  fn_p->field.fn_fields[ix].type = NULL;
+		  fn_p->field.fn_fields[ix].args = NULL;
+		}
+	      else
+		{
+		  fn_p->field.fn_fields[ix].type = memtype;
+
+		  /* The argument list */
+		  fn_p->field.fn_fields[ix].type->type_specific.arg_types =
+		    (struct type **) obstack_alloc (&objfile->type_obstack,
+			   sizeof (struct type *) * (memtype->nfields + 1));
+		  for (i = 0; i < memtype->nfields; i++)
+		    fn_p->field.fn_fields[ix].type->type_specific.arg_types[i] = memtype->fields[i].type;
+		  /* void termination */
+		  fn_p->field.fn_fields[ix].type->type_specific.arg_types[memtype->nfields] = builtin_type_void;
+
+		  /* pai: It's not clear why this args field has to be set.  Perhaps
+		   * it should be eliminated entirely. */
+		  fn_p->field.fn_fields[ix].args =
+		    (struct type **) obstack_alloc (&objfile->type_obstack,
+			   sizeof (struct type *) * (memtype->nfields + 1));
+		  for (i = 0; i < memtype->nfields; i++)
+		    fn_p->field.fn_fields[ix].args[i] = memtype->fields[i].type;
+		  /* null-terminated, unlike arg_types above e */
+		  fn_p->field.fn_fields[ix].args[memtype->nfields] = NULL;
+		}
+	      /* For virtual functions, fill in the voffset field with the
+	       * virtual table offset. (This is just copied over from the
+	       * SOM record; not sure if it is what GDB expects here...).
+	       * But if the function is a static method, set it to 1.
+	       * 
+	       * Note that we have to add 1 because 1 indicates a static
+	       * method, and 0 indicates a non-static, non-virtual method */
+
+	      if (static_member)
+		fn_p->field.fn_fields[ix].voffset = VOFFSET_STATIC;
+	      else
+		fn_p->field.fn_fields[ix].voffset = vtbl_offset ? vtbl_offset + 1 : 0;
+
+	      /* Also fill in the fcontext field with the current
+	       * class. (The latter isn't quite right: should be the baseclass
+	       * that defines the virtual function... Note we do have
+	       * a variable "baseclass" that we could stuff into the fcontext
+	       * field, but "baseclass" isn't necessarily right either,
+	       * since the virtual function could have been defined more
+	       * than one level up).
+	       */
+
+	      if (vtbl_offset != 0)
+		fn_p->field.fn_fields[ix].fcontext = type;
+	      else
+		fn_p->field.fn_fields[ix].fcontext = NULL;
+
+	      /* Other random fields pertaining to this method */
+	      fn_p->field.fn_fields[ix].is_const = const_member;
+	      fn_p->field.fn_fields[ix].is_volatile = volatile_member;	/* ?? */
+	      switch (fieldp->dgenfield.visibility)
+		{
+		case 1:
+		  fn_p->field.fn_fields[ix].is_protected = 1;
+		  fn_p->field.fn_fields[ix].is_private = 0;
+		  break;
+		case 2:
+		  fn_p->field.fn_fields[ix].is_protected = 0;
+		  fn_p->field.fn_fields[ix].is_private = 1;
+		  break;
+		default:	/* public */
+		  fn_p->field.fn_fields[ix].is_protected = 0;
+		  fn_p->field.fn_fields[ix].is_private = 0;
+		}
+	      fn_p->field.fn_fields[ix].is_stub = 0;
+
+	      /* HP aCC emits both MEMFUNC and FUNCTION entries for a method;
+	         if the class points to the FUNCTION, there is usually separate
+	         code for the method; but if we have a MEMFUNC, the method has
+	         been inlined (and there is usually no FUNCTION entry)
+	         FIXME Not sure if this test is accurate. pai/1997-08-22 */
+	      if ((fn_fieldp->dblock.kind == DNTT_TYPE_MEMFUNC) ||
+		  (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC))
+		fn_p->field.fn_fields[ix].is_inlined = 1;
+	      else
+		fn_p->field.fn_fields[ix].is_inlined = 0;
+
+	      fn_p->field.fn_fields[ix].dummy = 0;
+
+	      /* Bump the total count of the member functions */
+	      n_fn_fields_total++;
+
+	    }
+	  else if (fn_fieldp->dblock.kind == DNTT_TYPE_SVAR)
+	    {
+	      /* This case is for static data members of classes */
+
+	      /* pai:: FIXME -- check that "staticmem" bit is set */
+
+	      /* Get space to record this static member */
+	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      new->next = list;
+	      list = new;
+
+	      list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
+	      FIELD_BITSIZE (list->field) = -1;		/* indicates static member */
+	      SET_FIELD_PHYSNAME (list->field, 0);	/* initialize to empty */
+	      memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
+
+	      FIELD_TYPE (list->field) = memtype;
+	      list->attributes = 0;
+	      switch (fieldp->dgenfield.visibility)
+		{
+		case 1:
+		  B_SET (&(list->attributes), ATTR_PROTECT);
+		  break;
+		case 2:
+		  B_SET (&(list->attributes), ATTR_PRIVATE);
+		  break;
+		}
+	      nfields++;
+	    }
+
+	  else if (fn_fieldp->dblock.kind == DNTT_TYPE_FIELD)
+	    {
+	      /* FIELDs follow GENFIELDs for fields of anonymous unions.
+	         Code below is replicated from the case for FIELDs further
+	         below, except that fieldp is replaced by fn_fieldp */
+	      if (!fn_fieldp->dfield.a_union)
+		warning ("Debug info inconsistent: FIELD of anonymous union doesn't have a_union bit set");
+	      /* Get space to record the next field/data-member. */
+	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      new->next = list;
+	      list = new;
+
+	      list->field.name = VT (objfile) + fn_fieldp->dfield.name;
+	      FIELD_BITPOS (list->field) = fn_fieldp->dfield.bitoffset;
+	      if (fn_fieldp->dfield.bitlength % 8)
+		list->field.bitsize = fn_fieldp->dfield.bitlength;
+	      else
+		list->field.bitsize = 0;
+
+	      memtype = hpread_type_lookup (fn_fieldp->dfield.type, objfile);
+	      list->field.type = memtype;
+	      list->attributes = 0;
+	      switch (fn_fieldp->dfield.visibility)
+		{
+		case 1:
+		  B_SET (&(list->attributes), ATTR_PROTECT);
+		  break;
+		case 2:
+		  B_SET (&(list->attributes), ATTR_PRIVATE);
+		  break;
+		}
+	      nfields++;
+	    }
+	  else if (fn_fieldp->dblock.kind == DNTT_TYPE_SVAR)
+	    {
+	      /* Field of anonymous union; union is not inside a class */
+	      if (!fn_fieldp->dsvar.a_union)
+		warning ("Debug info inconsistent: SVAR field in anonymous union doesn't have a_union bit set");
+	      /* Get space to record the next field/data-member. */
+	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      new->next = list;
+	      list = new;
+
+	      list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
+	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
+	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
+	      list->field.type = memtype;
+	      list->attributes = 0;
+	      /* No info to set visibility -- always public */
+	      nfields++;
+	    }
+	  else if (fn_fieldp->dblock.kind == DNTT_TYPE_DVAR)
+	    {
+	      /* Field of anonymous union; union is not inside a class */
+	      if (!fn_fieldp->ddvar.a_union)
+		warning ("Debug info inconsistent: DVAR field in anonymous union doesn't have a_union bit set");
+	      /* Get space to record the next field/data-member. */
+	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      new->next = list;
+	      list = new;
+
+	      list->field.name = VT (objfile) + fn_fieldp->ddvar.name;
+	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
+	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      memtype = hpread_type_lookup (fn_fieldp->ddvar.type, objfile);
+	      list->field.type = memtype;
+	      list->attributes = 0;
+	      /* No info to set visibility -- always public */
+	      nfields++;
+	    }
 	  else
-            fn_p->field.fn_fields[ix].physname = method_name;
-          /* What's expected here is the function type */
-   /* But mark it as NULL if the method was incompletely processed
-             We'll fix this up later when the method is fully processed */
-          if (TYPE_INCOMPLETE (memtype))
-            {
-              fn_p->field.fn_fields[ix].type = NULL;
-              fn_p->field.fn_fields[ix].args = NULL;
-            }
-          else
-            {
-              fn_p->field.fn_fields[ix].type = memtype;
+	    {			/* Not a method, nor a static data member, nor an anon union field */
 
-              /* The argument list */
-              fn_p->field.fn_fields[ix].type->type_specific.arg_types =
-                (struct type **) obstack_alloc(&objfile->type_obstack,
-                                               sizeof(struct type *) * (memtype->nfields + 1));
-              for (i = 0; i < memtype->nfields; i++) 
-                fn_p->field.fn_fields[ix].type->type_specific.arg_types[i] = memtype->fields[i].type;
-              /* void termination */ 
-              fn_p->field.fn_fields[ix].type->type_specific.arg_types[memtype->nfields] = builtin_type_void;
+	      /* This case is for miscellaneous type entries (local enums,
+	         local function templates, etc.) that can be present
+	         inside a class. */
 
-              /* pai: It's not clear why this args field has to be set.  Perhaps
-               * it should be eliminated entirely. */
-              fn_p->field.fn_fields[ix].args =
-                (struct type **) obstack_alloc(&objfile->type_obstack,
-                                               sizeof(struct type *) * (memtype->nfields + 1));
-              for (i = 0; i < memtype->nfields; i++)
-                fn_p->field.fn_fields[ix].args[i] = memtype->fields[i].type;
-              /* null-terminated, unlike arg_types above e*/ 
-              fn_p->field.fn_fields[ix].args[memtype->nfields] = NULL;
-            }
-          /* For virtual functions, fill in the voffset field with the
-           * virtual table offset. (This is just copied over from the
-           * SOM record; not sure if it is what GDB expects here...).
-           * But if the function is a static method, set it to 1.
-           * 
-           * Note that we have to add 1 because 1 indicates a static
-           * method, and 0 indicates a non-static, non-virtual method */
+	      /* Enums -- will be handled by other code that takes care
+	         of DNTT_TYPE_ENUM; here we see only DNTT_TYPE_MEMENUM so
+	         it's not clear we could have handled them here at all. */
+	      /* FUNC_TEMPLATE: is handled by other code (??). */
+	      /* MEMACCESS: modified access for inherited member. Not
+	         sure what to do with this, ignoriing it at present. */
 
-          if (static_member)
-            fn_p->field.fn_fields[ix].voffset = VOFFSET_STATIC;
-          else
-            fn_p->field.fn_fields[ix].voffset = vtbl_offset ? vtbl_offset + 1 : 0;
+	      /* What other entries can appear following a GENFIELD which
+	         we do not handle above?  (MODIFIER, VFUNC handled above.) */
 
-          /* Also fill in the fcontext field with the current
-           * class. (The latter isn't quite right: should be the baseclass
-           * that defines the virtual function... Note we do have
-           * a variable "baseclass" that we could stuff into the fcontext
-           * field, but "baseclass" isn't necessarily right either,
-           * since the virtual function could have been defined more
-           * than one level up).
-           */
+	      if ((fn_fieldp->dblock.kind != DNTT_TYPE_MEMACCESS) &&
+		  (fn_fieldp->dblock.kind != DNTT_TYPE_MEMENUM) &&
+		  (fn_fieldp->dblock.kind != DNTT_TYPE_FUNC_TEMPLATE))
+		warning ("Internal error: Unexpected debug record kind %d found following DNTT_GENFIELD",
+			 fn_fieldp->dblock.kind);
+	    }
+	  /* walk to the next FIELD or GENFIELD */
+	  field = fieldp->dgenfield.nextfield;
 
-          if (vtbl_offset != 0)
-            fn_p->field.fn_fields[ix].fcontext = type;
-          else
-            fn_p->field.fn_fields[ix].fcontext = NULL;
+	}
+      else if (fieldp->dblock.kind == DNTT_TYPE_FIELD)
+	{
 
-          /* Other random fields pertaining to this method */
-          fn_p->field.fn_fields[ix].is_const = const_member;
-          fn_p->field.fn_fields[ix].is_volatile = volatile_member; /* ?? */ 
-          switch (fieldp->dgenfield.visibility) {
-            case 1:
-              fn_p->field.fn_fields[ix].is_protected = 1;
-              fn_p->field.fn_fields[ix].is_private = 0;
-              break;
-            case 2:
-              fn_p->field.fn_fields[ix].is_protected = 0;
-              fn_p->field.fn_fields[ix].is_private = 1;
-              break;
-            default: /* public */
-              fn_p->field.fn_fields[ix].is_protected = 0;
-              fn_p->field.fn_fields[ix].is_private = 0;
-          }
-          fn_p->field.fn_fields[ix].is_stub = 0;
+	  /* Ordinary structure/union/class field */
+	  struct type *anon_union_type;
 
-          /* HP aCC emits both MEMFUNC and FUNCTION entries for a method;
-             if the class points to the FUNCTION, there is usually separate
-             code for the method; but if we have a MEMFUNC, the method has
-             been inlined (and there is usually no FUNCTION entry)
-             FIXME Not sure if this test is accurate. pai/1997-08-22 */ 
-          if ((fn_fieldp->dblock.kind == DNTT_TYPE_MEMFUNC) ||
-              (fn_fieldp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC))
-            fn_p->field.fn_fields[ix].is_inlined = 1;
-          else
-            fn_p->field.fn_fields[ix].is_inlined = 0;
-          
-          fn_p->field.fn_fields[ix].dummy = 0;
-          
-          /* Bump the total count of the member functions */
-          n_fn_fields_total++;
+	  /* Get space to record the next field/data-member. */
+	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  new->next = list;
+	  list = new;
 
-        } else if (fn_fieldp->dblock.kind == DNTT_TYPE_SVAR) {
-          /* This case is for static data members of classes */ 
-          
-          /* pai:: FIXME -- check that "staticmem" bit is set */
-
-          /* Get space to record this static member */
-          new = (struct nextfield *) alloca (sizeof (struct nextfield));
-          new->next = list;
-          list = new;
-          
-          list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
-          FIELD_BITSIZE (list->field) = -1; /* indicates static member */
-          SET_FIELD_PHYSNAME (list->field, 0);  /* initialize to empty */
-          memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
-          
-          FIELD_TYPE (list->field) = memtype;
-          list->attributes = 0;
-          switch (fieldp->dgenfield.visibility) {
-            case 1:
-              B_SET(&(list->attributes), ATTR_PROTECT);
-              break;
-            case 2:
-              B_SET(&(list->attributes), ATTR_PRIVATE);
-              break;
-          }
-          nfields++;
-        }
-
-        else if (fn_fieldp->dblock.kind == DNTT_TYPE_FIELD)
-          {
-            /* FIELDs follow GENFIELDs for fields of anonymous unions.
-               Code below is replicated from the case for FIELDs further
-               below, except that fieldp is replaced by fn_fieldp */ 
-            if (!fn_fieldp->dfield.a_union)
-              warning ("Debug info inconsistent: FIELD of anonymous union doesn't have a_union bit set");
-            /* Get space to record the next field/data-member. */
-            new = (struct nextfield *) alloca (sizeof (struct nextfield));
-            new->next = list;
-            list = new;
-
-            list->field.name = VT (objfile) + fn_fieldp->dfield.name;
-            FIELD_BITPOS (list->field) = fn_fieldp->dfield.bitoffset;
-            if (fn_fieldp->dfield.bitlength % 8)
-              list->field.bitsize = fn_fieldp->dfield.bitlength;
-            else
-              list->field.bitsize = 0;
-
-            memtype = hpread_type_lookup (fn_fieldp->dfield.type, objfile);
-            list->field.type = memtype;
-            list->attributes = 0;
-            switch (fn_fieldp->dfield.visibility) {
-              case 1:
-                B_SET(&(list->attributes), ATTR_PROTECT);
-                break;
-              case 2:
-                B_SET(&(list->attributes), ATTR_PRIVATE);
-                break;
-            }
-            nfields++;
-          }
-        else if (fn_fieldp->dblock.kind == DNTT_TYPE_SVAR)
-          {
-            /* Field of anonymous union; union is not inside a class */
-            if (!fn_fieldp->dsvar.a_union)
-              warning ("Debug info inconsistent: SVAR field in anonymous union doesn't have a_union bit set");
-            /* Get space to record the next field/data-member. */
-            new = (struct nextfield *) alloca (sizeof (struct nextfield));
-            new->next = list;
-            list = new;
-
-            list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
-            FIELD_BITPOS (list->field) = 0;  /* FIXME is this always true? */
-            FIELD_BITSIZE (list->field) = 0; /* use length from type */
-            memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
-            list->field.type = memtype;
-            list->attributes = 0;
-            /* No info to set visibility -- always public */ 
-            nfields++;
-          }
-        else if (fn_fieldp->dblock.kind == DNTT_TYPE_DVAR)
-          {
-            /* Field of anonymous union; union is not inside a class */
-            if (!fn_fieldp->ddvar.a_union)
-              warning ("Debug info inconsistent: DVAR field in anonymous union doesn't have a_union bit set");
-            /* Get space to record the next field/data-member. */
-            new = (struct nextfield *) alloca (sizeof (struct nextfield));
-            new->next = list;
-            list = new;
-
-            list->field.name = VT (objfile) + fn_fieldp->ddvar.name;
-            FIELD_BITPOS (list->field) = 0;  /* FIXME is this always true? */
-            FIELD_BITSIZE (list->field) = 0; /* use length from type */ 
-            memtype = hpread_type_lookup (fn_fieldp->ddvar.type, objfile);
-            list->field.type = memtype;
-            list->attributes = 0;
-            /* No info to set visibility -- always public */ 
-            nfields++;
-          }
-        else { /* Not a method, nor a static data member, nor an anon union field */
-
-          /* This case is for miscellaneous type entries (local enums,
-             local function templates, etc.) that can be present
-             inside a class. */
-
-          /* Enums -- will be handled by other code that takes care
-             of DNTT_TYPE_ENUM; here we see only DNTT_TYPE_MEMENUM so
-             it's not clear we could have handled them here at all. */
-          /* FUNC_TEMPLATE: is handled by other code (??). */
-          /* MEMACCESS: modified access for inherited member. Not
-             sure what to do with this, ignoriing it at present. */ 
-
-          /* What other entries can appear following a GENFIELD which
-             we do not handle above?  (MODIFIER, VFUNC handled above.) */
-
-          if ((fn_fieldp->dblock.kind != DNTT_TYPE_MEMACCESS) &&
-              (fn_fieldp->dblock.kind != DNTT_TYPE_MEMENUM) &&
-              (fn_fieldp->dblock.kind != DNTT_TYPE_FUNC_TEMPLATE))
-            warning ("Internal error: Unexpected debug record kind %d found following DNTT_GENFIELD",
-                     fn_fieldp->dblock.kind);
-        }
-        /* walk to the next FIELD or GENFIELD */
-        field = fieldp->dgenfield.nextfield;
-
-      } 
-      else if (fieldp->dblock.kind == DNTT_TYPE_FIELD) {
-        
-        /* Ordinary structure/union/class field */
-        struct type * anon_union_type;
-
-        /* Get space to record the next field/data-member. */
-	new = (struct nextfield *) alloca (sizeof (struct nextfield));
-        new->next = list;
-        list = new;
-        
-        list->field.name = VT (objfile) + fieldp->dfield.name;
+	  list->field.name = VT (objfile) + fieldp->dfield.name;
 
 
-        /* A FIELD by itself (without a GENFIELD) can also be a static member */
-        if (fieldp->dfield.staticmem)
-          {
-	    FIELD_BITPOS (list->field) = -1;
-	    FIELD_BITSIZE (list->field) = 0;
-          }
-        else /* Non-static data member */ 
-          {
-	    FIELD_BITPOS (list->field) = fieldp->dfield.bitoffset;
-	    if (fieldp->dfield.bitlength % 8)
-	      FIELD_BITSIZE (list->field) = fieldp->dfield.bitlength;
-	    else
+	  /* A FIELD by itself (without a GENFIELD) can also be a static member */
+	  if (fieldp->dfield.staticmem)
+	    {
+	      FIELD_BITPOS (list->field) = -1;
 	      FIELD_BITSIZE (list->field) = 0;
-          }
+	    }
+	  else
+	    /* Non-static data member */
+	    {
+	      FIELD_BITPOS (list->field) = fieldp->dfield.bitoffset;
+	      if (fieldp->dfield.bitlength % 8)
+		FIELD_BITSIZE (list->field) = fieldp->dfield.bitlength;
+	      else
+		FIELD_BITSIZE (list->field) = 0;
+	    }
 
-        memtype = hpread_type_lookup (fieldp->dfield.type, objfile);
-        FIELD_TYPE (list->field) = memtype;
-        list->attributes = 0;
-        switch (fieldp->dfield.visibility) {
-          case 1:
-            B_SET(&(list->attributes), ATTR_PROTECT);
-            break;
-          case 2:
-            B_SET(&(list->attributes), ATTR_PRIVATE);
-            break;
-        }
-        nfields++;
+	  memtype = hpread_type_lookup (fieldp->dfield.type, objfile);
+	  FIELD_TYPE (list->field) = memtype;
+	  list->attributes = 0;
+	  switch (fieldp->dfield.visibility)
+	    {
+	    case 1:
+	      B_SET (&(list->attributes), ATTR_PROTECT);
+	      break;
+	    case 2:
+	      B_SET (&(list->attributes), ATTR_PRIVATE);
+	      break;
+	    }
+	  nfields++;
 
 
-        /* Note 1: First, we have to check if the current field is an anonymous
-           union. If it is, then *its* fields are threaded along in the
-           nextfield chain. :-( This was supposed to help debuggers, but is
-           really just a nuisance since we deal with anonymous unions anyway by
-           checking that the name is null.  So anyway, we skip over the fields
-           of the anonymous union. pai/1997-08-22 */
-        /* Note 2: In addition, the bitoffsets for the fields of the anon union
-           are relative to the enclosing struct, *NOT* relative to the anon
-           union!  This is an even bigger nuisance -- we have to go in and munge
-           the anon union's type information appropriately. pai/1997-08-22 */
+	  /* Note 1: First, we have to check if the current field is an anonymous
+	     union. If it is, then *its* fields are threaded along in the
+	     nextfield chain. :-( This was supposed to help debuggers, but is
+	     really just a nuisance since we deal with anonymous unions anyway by
+	     checking that the name is null.  So anyway, we skip over the fields
+	     of the anonymous union. pai/1997-08-22 */
+	  /* Note 2: In addition, the bitoffsets for the fields of the anon union
+	     are relative to the enclosing struct, *NOT* relative to the anon
+	     union!  This is an even bigger nuisance -- we have to go in and munge
+	     the anon union's type information appropriately. pai/1997-08-22 */
 
-        /* Both tasks noted above are done by a separate function.  This takes us
-           to the next FIELD or GENFIELD, skipping anon unions, and recursively
-           processing intermediate types. */ 
-        field = hpread_get_next_skip_over_anon_unions (1, field, &fieldp, objfile);
+	  /* Both tasks noted above are done by a separate function.  This takes us
+	     to the next FIELD or GENFIELD, skipping anon unions, and recursively
+	     processing intermediate types. */
+	  field = hpread_get_next_skip_over_anon_unions (1, field, &fieldp, objfile);
 
-      } else {
-        /* neither field nor genfield ?? is this possible?? */
-        /* pai:: FIXME walk to the next -- how? */
-        warning ("Internal error: unexpected DNTT kind %d encountered as field of struct");
-        warning ("Skipping remaining fields of struct");
-        break; /* get out of loop of fields */ 
-      }
+	}
+      else
+	{
+	  /* neither field nor genfield ?? is this possible?? */
+	  /* pai:: FIXME walk to the next -- how? */
+	  warning ("Internal error: unexpected DNTT kind %d encountered as field of struct");
+	  warning ("Skipping remaining fields of struct");
+	  break;		/* get out of loop of fields */
+	}
     }
 
   /* If it's a template, read in the instantiation list */
-  if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE) {
-    ninstantiations = 0;
-    field = dn_bufp->dtemplate.expansions;
-    while (field.word && field.word != DNTTNIL) {
-      fieldp = hpread_get_lntt (field.dnttp.index, objfile);
- 
-      /* The expansions or nextexp should point to a tagdef */
-      if (fieldp->dblock.kind != DNTT_TYPE_TAGDEF) 
-        break;
+  if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE)
+    {
+      ninstantiations = 0;
+      field = dn_bufp->dtemplate.expansions;
+      while (field.word && field.word != DNTTNIL)
+	{
+	  fieldp = hpread_get_lntt (field.dnttp.index, objfile);
 
-      i_new = (struct next_instantiation *) alloca (sizeof (struct next_instantiation)); 
-      i_new->next = i_list;
-      i_list = i_new;
-      i_list->t = hpread_type_lookup (field, objfile);
-      ninstantiations++;
+	  /* The expansions or nextexp should point to a tagdef */
+	  if (fieldp->dblock.kind != DNTT_TYPE_TAGDEF)
+	    break;
 
-      /* And the "type" field of that should point to a class */
-      field = fieldp->dtag.type;
-      fieldp = hpread_get_lntt (field.dnttp.index, objfile);
-      if (fieldp->dblock.kind != DNTT_TYPE_CLASS) 
-        break;
+	  i_new = (struct next_instantiation *) alloca (sizeof (struct next_instantiation));
+	  i_new->next = i_list;
+	  i_list = i_new;
+	  i_list->t = hpread_type_lookup (field, objfile);
+	  ninstantiations++;
 
-      /* Get the next expansion */
-      field = fieldp->dclass.nextexp;
+	  /* And the "type" field of that should point to a class */
+	  field = fieldp->dtag.type;
+	  fieldp = hpread_get_lntt (field.dnttp.index, objfile);
+	  if (fieldp->dblock.kind != DNTT_TYPE_CLASS)
+	    break;
+
+	  /* Get the next expansion */
+	  field = fieldp->dclass.nextexp;
+	}
     }
-  }
-  TYPE_NINSTANTIATIONS(type) = ninstantiations;
-  if (ninstantiations > 0) 
-    TYPE_INSTANTIATIONS(type) = (struct type **)
+  TYPE_NINSTANTIATIONS (type) = ninstantiations;
+  if (ninstantiations > 0)
+    TYPE_INSTANTIATIONS (type) = (struct type **)
       obstack_alloc (&objfile->type_obstack, sizeof (struct type *) * ninstantiations);
   for (n = ninstantiations; i_list; i_list = i_list->next)
     {
       n -= 1;
-      TYPE_INSTANTIATION(type, n) = i_list->t;
+      TYPE_INSTANTIATION (type, n) = i_list->t;
     }
 
 
@@ -1940,12 +1968,12 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
    */
   TYPE_NFN_FIELDS (type) = n_fn_fields;
   TYPE_NFN_FIELDS_TOTAL (type) = n_fn_fields_total;
-  TYPE_FN_FIELDLISTS(type) = (struct fn_fieldlist *)
+  TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
     obstack_alloc (&objfile->type_obstack, sizeof (struct fn_fieldlist) * n_fn_fields);
   for (n = n_fn_fields; fn_list; fn_list = fn_list->next)
     {
       n -= 1;
-      TYPE_FN_FIELDLIST(type, n) = fn_list->field;
+      TYPE_FN_FIELDLIST (type, n) = fn_list->field;
     }
 
   /* pai:: FIXME -- perhaps each bitvector should be created individually */
@@ -1953,15 +1981,15 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
     {
       n -= 1;
       if (tmp_list->attributes)
-        {
-          need_bitvectors = 1;
-          break;
-        }
+	{
+	  need_bitvectors = 1;
+	  break;
+	}
     }
 
   if (need_bitvectors)
     {
-      /* pai:: this step probably redundant */ 
+      /* pai:: this step probably redundant */
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
 
       TYPE_FIELD_VIRTUAL_BITS (type) =
@@ -1971,7 +1999,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       TYPE_FIELD_PRIVATE_BITS (type) =
 	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
-      
+
       TYPE_FIELD_PROTECTED_BITS (type) =
 	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
@@ -1982,48 +2010,48 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
 
       while (nfields-- > 0)
-        {
-          if (B_TST(&(list->attributes),ATTR_VIRTUAL))
-            SET_TYPE_FIELD_VIRTUAL (type, nfields);
-          if (B_TST(&(list->attributes),ATTR_PRIVATE))
-            SET_TYPE_FIELD_PRIVATE (type, nfields);
-          if (B_TST(&(list->attributes),ATTR_PROTECT))
-            SET_TYPE_FIELD_PROTECTED (type, nfields);
+	{
+	  if (B_TST (&(list->attributes), ATTR_VIRTUAL))
+	    SET_TYPE_FIELD_VIRTUAL (type, nfields);
+	  if (B_TST (&(list->attributes), ATTR_PRIVATE))
+	    SET_TYPE_FIELD_PRIVATE (type, nfields);
+	  if (B_TST (&(list->attributes), ATTR_PROTECT))
+	    SET_TYPE_FIELD_PROTECTED (type, nfields);
 
-          list = list->next;
-        }
+	  list = list->next;
+	}
     }
   else
     {
-      TYPE_FIELD_VIRTUAL_BITS(type) = NULL;
-      TYPE_FIELD_PROTECTED_BITS(type) = NULL;
-      TYPE_FIELD_PRIVATE_BITS(type) = NULL;
+      TYPE_FIELD_VIRTUAL_BITS (type) = NULL;
+      TYPE_FIELD_PROTECTED_BITS (type) = NULL;
+      TYPE_FIELD_PRIVATE_BITS (type) = NULL;
     }
-  
-  if (has_vtable(type))
+
+  if (has_vtable (type))
     {
       /* Allocate space for class runtime information */
-      TYPE_RUNTIME_PTR(type) = (struct runtime_info *) xmalloc (sizeof(struct runtime_info));
+      TYPE_RUNTIME_PTR (type) = (struct runtime_info *) xmalloc (sizeof (struct runtime_info));
       /* Set flag for vtable */
-      TYPE_VTABLE(type) = 1;
+      TYPE_VTABLE (type) = 1;
       /* The first non-virtual base class with a vtable. */
-      TYPE_PRIMARY_BASE(type) = primary_base_class(type);
+      TYPE_PRIMARY_BASE (type) = primary_base_class (type);
       /* The virtual base list. */
-      TYPE_VIRTUAL_BASE_LIST(type) = virtual_base_list(type);
+      TYPE_VIRTUAL_BASE_LIST (type) = virtual_base_list (type);
     }
   else
-    TYPE_RUNTIME_PTR(type) = NULL;
+    TYPE_RUNTIME_PTR (type) = NULL;
 
   /* If this is a local type (C++ - declared inside a function), record file name & line # */
-  if (hpread_get_scope_depth (dn_bufp, objfile, 1 /* no need for real depth */))
+  if (hpread_get_scope_depth (dn_bufp, objfile, 1 /* no need for real depth */ ))
     {
       TYPE_LOCALTYPE_PTR (type) = (struct local_type_info *) xmalloc (sizeof (struct local_type_info));
       TYPE_LOCALTYPE_FILE (type) = (char *) xmalloc (strlen (current_subfile->name) + 1);
       strcpy (TYPE_LOCALTYPE_FILE (type), current_subfile->name);
       if (current_subfile->line_vector && (current_subfile->line_vector->nitems > 0))
-        TYPE_LOCALTYPE_LINE (type) = current_subfile->line_vector->item[current_subfile->line_vector->nitems - 1].line;
+	TYPE_LOCALTYPE_LINE (type) = current_subfile->line_vector->item[current_subfile->line_vector->nitems - 1].line;
       else
-        TYPE_LOCALTYPE_LINE (type) = 0;
+	TYPE_LOCALTYPE_LINE (type) = 0;
     }
   else
     TYPE_LOCALTYPE_PTR (type) = NULL;
@@ -2040,32 +2068,32 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
    work correctly.
    TYPE is a pointer to the struct/class type
    NAME is a char * (string) which is the class/struct name
-   Void return */ 
+   Void return */
 
 static void
 fix_static_member_physnames (type, class_name, objfile)
-  struct type * type;
-  char * class_name;
-  struct objfile * objfile;
+     struct type *type;
+     char *class_name;
+     struct objfile *objfile;
 {
   int i;
 
-  /* We fix the member names only for classes or structs */ 
+  /* We fix the member names only for classes or structs */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
     return;
 
-  for (i=0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < TYPE_NFIELDS (type); i++)
     if (TYPE_FIELD_STATIC (type, i))
       {
-        if (TYPE_FIELD_STATIC_PHYSNAME (type, i))
-          return;  /* physnames are already set */
+	if (TYPE_FIELD_STATIC_PHYSNAME (type, i))
+	  return;		/* physnames are already set */
 
-        SET_FIELD_PHYSNAME (type->fields[i], 
-                 obstack_alloc (&objfile->type_obstack,
-                                  strlen (class_name) + strlen (TYPE_FIELD_NAME (type, i)) + 3));
-        strcpy (TYPE_FIELD_STATIC_PHYSNAME (type, i), class_name);
-        strcat (TYPE_FIELD_STATIC_PHYSNAME (type, i), "::");
-        strcat (TYPE_FIELD_STATIC_PHYSNAME (type, i), TYPE_FIELD_NAME (type, i));
+	SET_FIELD_PHYSNAME (type->fields[i],
+			    obstack_alloc (&objfile->type_obstack,
+	     strlen (class_name) + strlen (TYPE_FIELD_NAME (type, i)) + 3));
+	strcpy (TYPE_FIELD_STATIC_PHYSNAME (type, i), class_name);
+	strcat (TYPE_FIELD_STATIC_PHYSNAME (type, i), "::");
+	strcat (TYPE_FIELD_STATIC_PHYSNAME (type, i), TYPE_FIELD_NAME (type, i));
       }
 }
 
@@ -2073,13 +2101,13 @@ fix_static_member_physnames (type, class_name, objfile)
  * for a method (previously marked with a null type in hpread_read_struct_type()
  * is set correctly to METHOD.
  * OBJFILE is as for other such functions. 
- * Void return. */ 
- 
+ * Void return. */
+
 static void
 fixup_class_method_type (class, method, objfile)
-  struct type * class;
-  struct type * method;
-  struct objfile * objfile;
+     struct type *class;
+     struct type *method;
+     struct objfile *objfile;
 {
   int i, j, k;
 
@@ -2091,38 +2119,38 @@ fixup_class_method_type (class, method, objfile)
       (TYPE_CODE (class) != TYPE_CODE_UNION))
     return;
 
-  /* Loop over all methods and find the one marked with a NULL type */ 
+  /* Loop over all methods and find the one marked with a NULL type */
   for (i = 0; i < TYPE_NFN_FIELDS (class); i++)
     for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (class, i); j++)
       if (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j) == NULL)
-        {
-          /* Set the method type */ 
-          TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j) = method;
-          /* The argument list */
-          (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types
-            = (struct type **) obstack_alloc(&objfile->type_obstack,
-                                             sizeof(struct type *) * (method->nfields + 1));
-          for (k = 0; k < method->nfields; k++) 
-          (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[k] = method->fields[k].type;
-          /* void termination */ 
-          (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[method->nfields] = builtin_type_void;
-          
-          /* pai: It's not clear why this args field has to be set.  Perhaps
-           * it should be eliminated entirely. */
-          (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args
-            = (struct type **) obstack_alloc(&objfile->type_obstack,
-                                             sizeof(struct type *) * (method->nfields + 1));
-          for (k = 0; k < method->nfields; k++)
-            (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[k] = method->fields[k].type;
-          /* null-terminated, unlike arg_types above */ 
-          (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[method->nfields] = NULL;
+	{
+	  /* Set the method type */
+	  TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j) = method;
+	  /* The argument list */
+	  (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types
+	    = (struct type **) obstack_alloc (&objfile->type_obstack,
+			    sizeof (struct type *) * (method->nfields + 1));
+	  for (k = 0; k < method->nfields; k++)
+	    (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[k] = method->fields[k].type;
+	  /* void termination */
+	  (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j))->type_specific.arg_types[method->nfields] = builtin_type_void;
 
-          /* Break out of both loops -- only one method to fix up in a class */ 
-          goto finish;
-        }
+	  /* pai: It's not clear why this args field has to be set.  Perhaps
+	   * it should be eliminated entirely. */
+	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args
+	    = (struct type **) obstack_alloc (&objfile->type_obstack,
+			    sizeof (struct type *) * (method->nfields + 1));
+	  for (k = 0; k < method->nfields; k++)
+	    (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[k] = method->fields[k].type;
+	  /* null-terminated, unlike arg_types above */
+	  (TYPE_FN_FIELD (TYPE_FN_FIELDLIST1 (class, i), j)).args[method->nfields] = NULL;
+
+	  /* Break out of both loops -- only one method to fix up in a class */
+	  goto finish;
+	}
 
 finish:
-  TYPE_FLAGS (class) &= ~TYPE_FLAG_INCOMPLETE;  
+  TYPE_FLAGS (class) &= ~TYPE_FLAG_INCOMPLETE;
 }
 
 
@@ -2139,15 +2167,15 @@ finish:
  * We need to look these up in order to fill in "a" and "b"'s type.
  * This is called from hpread_type_lookup().
  */
-static struct type * 
-hpread_get_nth_template_arg(objfile, n)
+static struct type *
+hpread_get_nth_template_arg (objfile, n)
      struct objfile *objfile;
      int n;
 {
-   if (current_template != NULL)
-     return TYPE_TEMPLATE_ARG(current_template, n).type;
-   else
-     return lookup_fundamental_type (objfile, FT_TEMPLATE_ARG);
+  if (current_template != NULL)
+    return TYPE_TEMPLATE_ARG (current_template, n).type;
+  else
+    return lookup_fundamental_type (objfile, FT_TEMPLATE_ARG);
 }
 
 /* Read in and internalize a TEMPL_ARG (template arg) symbol.  */
@@ -2157,7 +2185,7 @@ hpread_read_templ_arg_type (hp_type, dn_bufp, objfile, name)
      dnttpointer hp_type;
      union dnttentry *dn_bufp;
      struct objfile *objfile;
-     char * name;
+     char *name;
 {
   struct type *type;
 
@@ -2207,7 +2235,7 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
      struct objfile *objfile;
 {
   struct type *type;
-  
+
   /* Allocate an array type symbol.
    * Why no check for already-read here, like in the other
    * hpread_read_xxx_type routines?  Because it kept us 
@@ -2223,18 +2251,22 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
    * or express both array-length and element-length in bytes.
    */
   if (!((dn_bufp->darray.arrayisbytes && dn_bufp->darray.elemisbytes) ||
-	(!dn_bufp->darray.arrayisbytes && !dn_bufp->darray.elemisbytes))) {
-    warning ("error in hpread_array_type.\n");
-    return;
-  } else if (dn_bufp->darray.arraylength == 0x7fffffff) {
-    /* The HP debug format represents char foo[]; as an array with
-     * length 0x7fffffff.  Internally GDB wants to represent this
-     *	as an array of length zero.  
-     */
-    TYPE_LENGTH (type) = 0;
-  } else if (dn_bufp->darray.arrayisbytes)
+	(!dn_bufp->darray.arrayisbytes && !dn_bufp->darray.elemisbytes)))
+    {
+      warning ("error in hpread_array_type.\n");
+      return;
+    }
+  else if (dn_bufp->darray.arraylength == 0x7fffffff)
+    {
+      /* The HP debug format represents char foo[]; as an array with
+       * length 0x7fffffff.  Internally GDB wants to represent this
+       *  as an array of length zero.  
+       */
+      TYPE_LENGTH (type) = 0;
+    }
+  else if (dn_bufp->darray.arrayisbytes)
     TYPE_LENGTH (type) = dn_bufp->darray.arraylength;
-  else /* arraylength is in bits */
+  else				/* arraylength is in bits */
     TYPE_LENGTH (type) = dn_bufp->darray.arraylength / 8;
 
   TYPE_TARGET_TYPE (type) = hpread_type_lookup (dn_bufp->darray.elemtype,
@@ -2325,7 +2357,7 @@ hpread_type_lookup (hp_type, objfile)
      struct objfile *objfile;
 {
   union dnttentry *dn_bufp;
-  struct type * tmp_type;
+  struct type *tmp_type;
 
   /* First see if it's a simple builtin type.  */
   if (hp_type.dntti.immediate)
@@ -2334,7 +2366,7 @@ hpread_type_lookup (hp_type, objfile)
      * GDB's representation of this fundamental type.
      */
     if (hp_type.dntti.type == HP_TYPE_TEMPLATE_ARG)
-      return hpread_get_nth_template_arg(objfile, hp_type.dntti.bitlength);
+      return hpread_get_nth_template_arg (objfile, hp_type.dntti.bitlength);
     else
       return lookup_fundamental_type (objfile, hpread_type_translate (hp_type));
 
@@ -2390,54 +2422,54 @@ hpread_type_lookup (hp_type, objfile)
 
     case DNTT_TYPE_TYPEDEF:
       {
-        /* A typedef - chase it down by making a recursive call */
+	/* A typedef - chase it down by making a recursive call */
 	struct type *structtype = hpread_type_lookup (dn_bufp->dtype.type,
 						      objfile);
 
-        /* The following came from the base hpread.c that we inherited.
-         * It is WRONG so I have commented it out. - RT
-         *...
+	/* The following came from the base hpread.c that we inherited.
+	 * It is WRONG so I have commented it out. - RT
+	 *...
 
-	char *suffix;
-	suffix = VT (objfile) + dn_bufp->dtype.name;
- 	TYPE_NAME (structtype) = suffix;
+	 char *suffix;
+	 suffix = VT (objfile) + dn_bufp->dtype.name;
+	 TYPE_NAME (structtype) = suffix;
 
-         * ... further explanation ....
-         *
-         * What we have here is a typedef pointing to a typedef.
-         * E.g.,
-         * typedef int foo;
-         * typedef foo fum;
-         *
-         * What we desire to build is (these are pictures
-         * of "struct type"'s): 
-         *
-         *  +---------+     +----------+     +------------+
-         *  | typedef |     | typedef  |     | fund. type |
-         *  |     type| ->  |      type| ->  |            |
-         *  | "fum"   |     | "foo"    |     | "int"      |
-         *  +---------+     +----------+     +------------+
-         *
-         * What this commented-out code is doing is smashing the
-         * name of pointed-to-type to be the same as the pointed-from
-         * type. So we wind up with something like:
-         *
-         *  +---------+     +----------+     +------------+
-         *  | typedef |     | typedef  |     | fund. type |
-         *  |     type| ->  |      type| ->  |            |
-         *  | "fum"   |     | "fum"    |     | "fum"      |
-         *  +---------+     +----------+     +------------+
-         * 
-         */
+	 * ... further explanation ....
+	 *
+	 * What we have here is a typedef pointing to a typedef.
+	 * E.g.,
+	 * typedef int foo;
+	 * typedef foo fum;
+	 *
+	 * What we desire to build is (these are pictures
+	 * of "struct type"'s): 
+	 *
+	 *  +---------+     +----------+     +------------+
+	 *  | typedef |     | typedef  |     | fund. type |
+	 *  |     type| ->  |      type| ->  |            |
+	 *  | "fum"   |     | "foo"    |     | "int"      |
+	 *  +---------+     +----------+     +------------+
+	 *
+	 * What this commented-out code is doing is smashing the
+	 * name of pointed-to-type to be the same as the pointed-from
+	 * type. So we wind up with something like:
+	 *
+	 *  +---------+     +----------+     +------------+
+	 *  | typedef |     | typedef  |     | fund. type |
+	 *  |     type| ->  |      type| ->  |            |
+	 *  | "fum"   |     | "fum"    |     | "fum"      |
+	 *  +---------+     +----------+     +------------+
+	 * 
+	 */
 
 	return structtype;
       }
 
     case DNTT_TYPE_TAGDEF:
-	{
+      {
 	/* Just a little different from above.  We have to tack on
 	 * an identifier of some kind (struct, union, enum, class, etc).  
-         */
+	 */
 	struct type *structtype = hpread_type_lookup (dn_bufp->dtype.type,
 						      objfile);
 	char *prefix, *suffix;
@@ -2445,37 +2477,49 @@ hpread_type_lookup (hp_type, objfile)
 
 	/* Lookup the next type in the list.  It should be a structure,
 	 * union, class, enum, or template type.  
-         * We will need to attach that to our name.  
-         */
+	 * We will need to attach that to our name.  
+	 */
 	if (dn_bufp->dtype.type.dnttp.index < LNTT_SYMCOUNT (objfile))
 	  dn_bufp = hpread_get_lntt (dn_bufp->dtype.type.dnttp.index, objfile);
-	else {
-          complain (&hpread_type_lookup_complaint);
-          return;
-        }
+	else
+	  {
+	    complain (&hpread_type_lookup_complaint);
+	    return;
+	  }
 
-	if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT) {
-	  prefix = "struct ";
-	} else if (dn_bufp->dblock.kind == DNTT_TYPE_UNION) {
-	  prefix = "union ";
-	} else if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS) { 
-          /* Further field for CLASS saying how it was really declared */
-          /* 0==class, 1==union, 2==struct */
-          if (dn_bufp->dclass.class_decl == 0) 
-	    prefix = "class ";
-          else if (dn_bufp->dclass.class_decl == 1) 
-	    prefix = "union ";
-          else if (dn_bufp->dclass.class_decl == 2) 
+	if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
+	  {
 	    prefix = "struct ";
-          else
-            prefix = "";
-	} else if (dn_bufp->dblock.kind == DNTT_TYPE_ENUM) {
-	  prefix = "enum ";
-	} else if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE) {
-	  prefix = "template ";
-        } else {
-          prefix = "";
-        }
+	  }
+	else if (dn_bufp->dblock.kind == DNTT_TYPE_UNION)
+	  {
+	    prefix = "union ";
+	  }
+	else if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS)
+	  {
+	    /* Further field for CLASS saying how it was really declared */
+	    /* 0==class, 1==union, 2==struct */
+	    if (dn_bufp->dclass.class_decl == 0)
+	      prefix = "class ";
+	    else if (dn_bufp->dclass.class_decl == 1)
+	      prefix = "union ";
+	    else if (dn_bufp->dclass.class_decl == 2)
+	      prefix = "struct ";
+	    else
+	      prefix = "";
+	  }
+	else if (dn_bufp->dblock.kind == DNTT_TYPE_ENUM)
+	  {
+	    prefix = "enum ";
+	  }
+	else if (dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE)
+	  {
+	    prefix = "template ";
+	  }
+	else
+	  {
+	    prefix = "";
+	  }
 
 	/* Build the correct name.  */
 	structtype->name
@@ -2485,10 +2529,10 @@ hpread_type_lookup (hp_type, objfile)
 	TYPE_NAME (structtype) = strcat (TYPE_NAME (structtype), suffix);
 	TYPE_TAG_NAME (structtype) = suffix;
 
-        /* For classes/structs, we have to set the static member "physnames"
-           to point to strings like "Class::Member" */ 
-        if (TYPE_CODE (structtype) == TYPE_CODE_STRUCT)
-          fix_static_member_physnames (structtype, suffix, objfile);
+	/* For classes/structs, we have to set the static member "physnames"
+	   to point to strings like "Class::Member" */
+	if (TYPE_CODE (structtype) == TYPE_CODE_STRUCT)
+	  fix_static_member_physnames (structtype, suffix, objfile);
 
 	return structtype;
       }
@@ -2498,19 +2542,19 @@ hpread_type_lookup (hp_type, objfile)
        * the appropriate GDB type.
        */
       return make_pointer_type (
-          hpread_type_lookup (dn_bufp->dptr.pointsto, 
-                              objfile), 
-          NULL);
+				 hpread_type_lookup (dn_bufp->dptr.pointsto,
+						     objfile),
+				 NULL);
 
     case DNTT_TYPE_REFERENCE:
       /* C++ reference type - call a routine in gdbtypes.c that constructs
        * the appropriate GDB type.
        */
       return make_reference_type (
-                 hpread_type_lookup (dn_bufp->dreference.pointsto, 
-                                     objfile), 
-                 NULL);
-   
+			   hpread_type_lookup (dn_bufp->dreference.pointsto,
+					       objfile),
+				   NULL);
+
     case DNTT_TYPE_ENUM:
       return hpread_read_enum_type (hp_type, dn_bufp, objfile);
     case DNTT_TYPE_SET:
@@ -2538,16 +2582,16 @@ hpread_type_lookup (hp_type, objfile)
        * while the "memtype" field defines the pointed-to-type.
        */
       {
-      struct type * ptrmemtype;
-      struct type * class_type;
-      struct type * memtype;
-      memtype = hpread_type_lookup (dn_bufp->dptrmem.memtype, 
-                                    objfile), 
-      class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto, 
-                                       objfile), 
-      ptrmemtype = alloc_type(objfile);
-      smash_to_member_type(ptrmemtype, class_type, memtype); 
-      return make_pointer_type(ptrmemtype, NULL);
+	struct type *ptrmemtype;
+	struct type *class_type;
+	struct type *memtype;
+	memtype = hpread_type_lookup (dn_bufp->dptrmem.memtype,
+				      objfile),
+	  class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto,
+					   objfile),
+	  ptrmemtype = alloc_type (objfile);
+	smash_to_member_type (ptrmemtype, class_type, memtype);
+	return make_pointer_type (ptrmemtype, NULL);
       }
       break;
 
@@ -2557,31 +2601,32 @@ hpread_type_lookup (hp_type, objfile)
        * while the "memtype" field defines the pointed-to-type.
        */
       {
-      struct type * ptrmemtype;
-      struct type * class_type;
-      struct type * functype;
-      struct type * retvaltype;
-      int nargs;
-      int i;
-      struct type ** args_type;
-      class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto, 
-                                       objfile); 
-      functype = hpread_type_lookup (dn_bufp->dptrmem.memtype, 
-                                     objfile); 
-      retvaltype = TYPE_TARGET_TYPE (functype);
-      nargs =   TYPE_NFIELDS (functype);
-      args_type = (struct type **) xmalloc ((nargs+1) * sizeof (struct type *));
-      for (i = 0; i < nargs; i++) {
-        args_type[i] = TYPE_FIELD_TYPE (functype, i); 
-      }
-      args_type[nargs] = NULL;
-      ptrmemtype = alloc_type(objfile);
-      smash_to_method_type(ptrmemtype, class_type, retvaltype, args_type); 
-      return make_pointer_type(ptrmemtype, NULL);
+	struct type *ptrmemtype;
+	struct type *class_type;
+	struct type *functype;
+	struct type *retvaltype;
+	int nargs;
+	int i;
+	struct type **args_type;
+	class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto,
+					 objfile);
+	functype = hpread_type_lookup (dn_bufp->dptrmem.memtype,
+				       objfile);
+	retvaltype = TYPE_TARGET_TYPE (functype);
+	nargs = TYPE_NFIELDS (functype);
+	args_type = (struct type **) xmalloc ((nargs + 1) * sizeof (struct type *));
+	for (i = 0; i < nargs; i++)
+	  {
+	    args_type[i] = TYPE_FIELD_TYPE (functype, i);
+	  }
+	args_type[nargs] = NULL;
+	ptrmemtype = alloc_type (objfile);
+	smash_to_method_type (ptrmemtype, class_type, retvaltype, args_type);
+	return make_pointer_type (ptrmemtype, NULL);
       }
       break;
 
-    case DNTT_TYPE_CLASS: 
+    case DNTT_TYPE_CLASS:
       return hpread_read_struct_type (hp_type, dn_bufp, objfile);
 
     case DNTT_TYPE_GENFIELD:
@@ -2606,12 +2651,12 @@ hpread_type_lookup (hp_type, objfile)
        * "m_void" modifiers?  Is static_flag really needed here?
        * (m_static used for methods of classes, elsewhere).
        */
-      tmp_type = make_cv_type (dn_bufp->dmodifier.m_const, 
-                               dn_bufp->dmodifier.m_volatile,
-                               hpread_type_lookup (dn_bufp->dmodifier.type, objfile),
-                               0);
+      tmp_type = make_cv_type (dn_bufp->dmodifier.m_const,
+			       dn_bufp->dmodifier.m_volatile,
+		      hpread_type_lookup (dn_bufp->dmodifier.type, objfile),
+			       0);
       return tmp_type;
-      
+
 
     case DNTT_TYPE_MEMFUNC:
       /* Member function. Treat like a function.
@@ -2632,13 +2677,13 @@ hpread_type_lookup (hp_type, objfile)
 
     case DNTT_TYPE_TEMPLATE_ARG:
       {
-      char * name;
-      /* The TEMPLATE record points to an argument list of
-       * TEMPLATE_ARG records, each of which describes one
-       * of the type-arguments. 
-       */
-      name =  VT (objfile) + dn_bufp->dtempl_arg.name;
-      return hpread_read_templ_arg_type (hp_type, dn_bufp, objfile, name);
+	char *name;
+	/* The TEMPLATE record points to an argument list of
+	 * TEMPLATE_ARG records, each of which describes one
+	 * of the type-arguments. 
+	 */
+	name = VT (objfile) + dn_bufp->dtempl_arg.name;
+	return hpread_read_templ_arg_type (hp_type, dn_bufp, objfile, name);
       }
 
     case DNTT_TYPE_FUNC_TEMPLATE:
@@ -2654,13 +2699,13 @@ hpread_type_lookup (hp_type, objfile)
        */
       return lookup_fundamental_type (objfile, FT_VOID);
 
-    /* Also not yet handled... */
-    /* case DNTT_TYPE_DYN_ARRAY_DESC: */
-    /* case DNTT_TYPE_DESC_SUBRANGE: */
-    /* case DNTT_TYPE_BEGIN_EXT: */
-    /* case DNTT_TYPE_INLN: */
-    /* case DNTT_TYPE_INLN_LIST: */
-    /* case DNTT_TYPE_ALIAS: */
+      /* Also not yet handled... */
+      /* case DNTT_TYPE_DYN_ARRAY_DESC: */
+      /* case DNTT_TYPE_DESC_SUBRANGE: */
+      /* case DNTT_TYPE_BEGIN_EXT: */
+      /* case DNTT_TYPE_INLN: */
+      /* case DNTT_TYPE_INLN_LIST: */
+      /* case DNTT_TYPE_ALIAS: */
     default:
       /* A fancy way of returning NULL */
       return lookup_fundamental_type (objfile, FT_VOID);
@@ -2699,47 +2744,48 @@ hpread_record_lines (subfile, s_idx, e_idx, objfile, offset)
  * Called from hpread_process_one_debug_symbol()
  * If "f" is not a member function, return NULL.
  */
-char * class_of (functype)
-struct type * functype;
+char *
+class_of (functype)
+     struct type *functype;
 {
-  struct type * first_param_type;
-  char * first_param_name;
-  struct type * pointed_to_type;
-  char * class_name;
+  struct type *first_param_type;
+  char *first_param_name;
+  struct type *pointed_to_type;
+  char *class_name;
 
   /* Check that the function has a first argument "this",
    * and that "this" is a pointer to a class. If not,
    * functype is not a member function, so return NULL.
    */
-  if (TYPE_NFIELDS(functype) == 0)
+  if (TYPE_NFIELDS (functype) == 0)
     return NULL;
   first_param_name = TYPE_FIELD_NAME (functype, 0);
   if (first_param_name == NULL)
-    return NULL; /* paranoia */
-  if (strcmp(first_param_name, "this"))
+    return NULL;		/* paranoia */
+  if (strcmp (first_param_name, "this"))
     return NULL;
   first_param_type = TYPE_FIELD_TYPE (functype, 0);
   if (first_param_type == NULL)
-    return NULL; /* paranoia */
-  if (TYPE_CODE(first_param_type) != TYPE_CODE_PTR)
+    return NULL;		/* paranoia */
+  if (TYPE_CODE (first_param_type) != TYPE_CODE_PTR)
     return NULL;
 
   /* Get the thing that "this" points to, check that
    * it's a class, and get its class name.
    */
-  pointed_to_type = TYPE_TARGET_TYPE(first_param_type);
-  if (pointed_to_type == NULL) 
-    return NULL; /* paranoia */
-  if (TYPE_CODE(pointed_to_type) != TYPE_CODE_CLASS)
+  pointed_to_type = TYPE_TARGET_TYPE (first_param_type);
+  if (pointed_to_type == NULL)
+    return NULL;		/* paranoia */
+  if (TYPE_CODE (pointed_to_type) != TYPE_CODE_CLASS)
     return NULL;
-  class_name = TYPE_NAME(pointed_to_type);
+  class_name = TYPE_NAME (pointed_to_type);
   if (class_name == NULL)
-    return NULL; /* paranoia */
+    return NULL;		/* paranoia */
 
   /* The class name may be of the form "class c", in which case
    * we want to strip off the leading "class ".
    */
-  if (strncmp(class_name, "class ", 6) == 0)
+  if (strncmp (class_name, "class ", 6) == 0)
     class_name += 6;
 
   return class_name;
@@ -2755,24 +2801,24 @@ struct type * functype;
  *   text_offset: 
  *   text_size: 
  *   filename: 
- *   index: 		Index of this symbol
+ *   index:             Index of this symbol
  *   at_module_boundary_p Pointer to boolean flag to control caller's loop.
  */
 
 static void
 hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 				 text_offset, text_size, filename,
-                                 index, at_module_boundary_p
-                                 )
+				 index, at_module_boundary_p
+)
      union dnttentry *dn_bufp;
      char *name;
      struct section_offsets *section_offsets;
      struct objfile *objfile;
      CORE_ADDR text_offset;
-     int       text_size;
-     char     *filename;
-     int       index;
-     int      *at_module_boundary_p;
+     int text_size;
+     char *filename;
+     int index;
+     int *at_module_boundary_p;
 {
   unsigned long desc;
   int type;
@@ -2783,9 +2829,9 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
   dnttpointer hp_type;
   struct symbol *sym;
   struct context_stack *new;
-  char * class_scope_name;
-  extern int is_in_import_list (); /* in somread.c */ 
-  
+  char *class_scope_name;
+  extern int is_in_import_list ();	/* in somread.c */
+
   /* Allocate one GDB debug symbol and fill in some default values. */
   sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					 sizeof (struct symbol));
@@ -2833,35 +2879,37 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        */
 
       valu = text_offset;
-      if (!last_source_file ) {
-          /*
-           * A note on "last_source_file": this is a char* pointing
-           * to the actual file name.  "start_symtab" sets it,
-           * "end_symtab" clears it.
-           *
-           * So if "last_source_file" is NULL, then either this is
-           * the first record we are looking at, or a previous call
-           * to "end_symtab()" was made to close out the previous
-           * module.  Since we're now quitting the scan loop when we
-           * see a MODULE END record, we should never get here, except
-           * in the case that we're not using the quick look-up tables
-           * and have to use the old system as a fall-back.
-           */
+      if (!last_source_file)
+	{
+	  /*
+	   * A note on "last_source_file": this is a char* pointing
+	   * to the actual file name.  "start_symtab" sets it,
+	   * "end_symtab" clears it.
+	   *
+	   * So if "last_source_file" is NULL, then either this is
+	   * the first record we are looking at, or a previous call
+	   * to "end_symtab()" was made to close out the previous
+	   * module.  Since we're now quitting the scan loop when we
+	   * see a MODULE END record, we should never get here, except
+	   * in the case that we're not using the quick look-up tables
+	   * and have to use the old system as a fall-back.
+	   */
 	  start_symtab (name, NULL, valu);
 	  record_debugformat ("HP");
 	  SL_INDEX (objfile) = dn_bufp->dsfile.address;
-      }
+	}
 
-      else {
-          /* Either a new include file, or a SRCFILE record
-           * saying we are back in the main source (or out of
-           * a nested include file) again.
-           */
+      else
+	{
+	  /* Either a new include file, or a SRCFILE record
+	   * saying we are back in the main source (or out of
+	   * a nested include file) again.
+	   */
 	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
 						    SL_INDEX (objfile),
 						    dn_bufp->dsfile.address,
 						    objfile, offset);
-      }
+	}
 
       /* A note on "start_subfile".  This routine will check
        * the name we pass it and look for an existing subfile
@@ -2872,7 +2920,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        */
       start_subfile (name, NULL);
       break;
-      
+
     case DNTT_TYPE_MODULE:
       /*
        * We no longer ignore DNTT_TYPE_MODULE symbols.  The module 
@@ -2902,27 +2950,27 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        */
 
       valu = text_offset;
-      if (!last_source_file )
+      if (!last_source_file)
 	{
-          /* Start of a new module. We know this because "last_source_file"
-           * is NULL, which can only happen the first time or if we just 
-           * made a call to end_symtab() to close out the previous module.
-           */
+	  /* Start of a new module. We know this because "last_source_file"
+	   * is NULL, which can only happen the first time or if we just 
+	   * made a call to end_symtab() to close out the previous module.
+	   */
 	  start_symtab (name, NULL, valu);
 	  SL_INDEX (objfile) = dn_bufp->dmodule.address;
 	}
       else
 	{
-          /* This really shouldn't happen if we're using the quick
-           * look-up tables, as it would mean we'd scanned past an
-           * END MODULE entry.  But if we're not using the tables,
-           * we started the module on the SRCFILE entry, so it's ok.
-           * For now, accept this.
-           */
-     /* warning( "Error expanding psymtab, missed module end, found entry for %s",
-      *           name );
-      */
-          *at_module_boundary_p = -1;
+	  /* This really shouldn't happen if we're using the quick
+	   * look-up tables, as it would mean we'd scanned past an
+	   * END MODULE entry.  But if we're not using the tables,
+	   * we started the module on the SRCFILE entry, so it's ok.
+	   * For now, accept this.
+	   */
+	  /* warning( "Error expanding psymtab, missed module end, found entry for %s",
+	   *           name );
+	   */
+	  *at_module_boundary_p = -1;
 	}
 
       start_subfile (name, NULL);
@@ -2938,7 +2986,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 						SL_INDEX (objfile),
 						dn_bufp->dfunc.address,
 						objfile, offset);
-      
+
       WITHIN_FUNCTION (objfile) = 1;
       CURRENT_FUNCTION_VALUE (objfile) = valu;
 
@@ -2957,64 +3005,66 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * (if any), which we get from the "alias" field of the SOM record
        * if that exists.
        */
-      if ((dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) && 
-          dn_bufp->dfunc.alias && /* has an alias */ 
-          *(char *)(VT (objfile) + dn_bufp->dfunc.alias)) /* not a null string */ 
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.alias;
+      if ((dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) &&
+	  dn_bufp->dfunc.alias &&	/* has an alias */
+	  *(char *) (VT (objfile) + dn_bufp->dfunc.alias))	/* not a null string */
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.alias;
       else
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
 
       /* Special hack to get around HP compilers' insistence on
        * reporting "main" as "_MAIN_" for C/C++ */
       if ((strcmp (SYMBOL_NAME (sym), "_MAIN_") == 0) &&
-          (strcmp (VT (objfile) + dn_bufp->dfunc.name, "main") == 0))
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
-      
+	  (strcmp (VT (objfile) + dn_bufp->dfunc.name, "main") == 0))
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->dfunc.name;
+
       /* The SYMBOL_CPLUS_DEMANGLED_NAME field is expected to
        * be the demangled name.
        */
       if (dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS)
 	{
-        /* SYMBOL_INIT_DEMANGLED_NAME is a macro which winds up
-         * calling the demangler in libiberty (cplus_demangle()) to
-         * do the job. This generally does the job, even though
-         * it's intended for the GNU compiler and not the aCC compiler
-         * Note that SYMBOL_INIT_DEMANGLED_NAME calls the
-         * demangler with arguments DMGL_PARAMS | DMGL_ANSI.
-         * Generally, we don't want params when we display
-         * a demangled name, but when I took out the DMGL_PARAMS,
-         * some things broke, so I'm leaving it in here, and
-         * working around the issue in stack.c. - RT
-         */
-        SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
-        if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->dfunc.alias) &&
-           (!SYMBOL_CPLUS_DEMANGLED_NAME(sym))) {
+	  /* SYMBOL_INIT_DEMANGLED_NAME is a macro which winds up
+	   * calling the demangler in libiberty (cplus_demangle()) to
+	   * do the job. This generally does the job, even though
+	   * it's intended for the GNU compiler and not the aCC compiler
+	   * Note that SYMBOL_INIT_DEMANGLED_NAME calls the
+	   * demangler with arguments DMGL_PARAMS | DMGL_ANSI.
+	   * Generally, we don't want params when we display
+	   * a demangled name, but when I took out the DMGL_PARAMS,
+	   * some things broke, so I'm leaving it in here, and
+	   * working around the issue in stack.c. - RT
+	   */
+	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+	  if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->dfunc.alias) &&
+	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
+	    {
 
-          /* Well, the symbol name is mangled, but the
-           * demangler in libiberty failed so the demangled
-           * field is still NULL. Try to
-           * do the job ourselves based on the "name" field
-           * in the SOM record. A complication here is that
-           * the name field contains only the function name
-           * (like "f"), whereas we want the class qualification
-           * (as in "c::f"). Try to reconstruct that.
-           */          
-          char * basename;
-          char * classname;
-          char * dem_name;
-          basename = VT (objfile) + dn_bufp->dfunc.name;
-          classname = class_of(SYMBOL_TYPE(sym));
-          if (classname) {
-            dem_name = xmalloc(strlen(basename)+strlen(classname)+3);
-            strcpy(dem_name, classname);
-            strcat(dem_name, "::");
-            strcat(dem_name, basename);
-            SYMBOL_CPLUS_DEMANGLED_NAME(sym) = dem_name;
-            SYMBOL_LANGUAGE (sym) = language_cplus;
-          }
-        }
-      }
- 
+	      /* Well, the symbol name is mangled, but the
+	       * demangler in libiberty failed so the demangled
+	       * field is still NULL. Try to
+	       * do the job ourselves based on the "name" field
+	       * in the SOM record. A complication here is that
+	       * the name field contains only the function name
+	       * (like "f"), whereas we want the class qualification
+	       * (as in "c::f"). Try to reconstruct that.
+	       */
+	      char *basename;
+	      char *classname;
+	      char *dem_name;
+	      basename = VT (objfile) + dn_bufp->dfunc.name;
+	      classname = class_of (SYMBOL_TYPE (sym));
+	      if (classname)
+		{
+		  dem_name = xmalloc (strlen (basename) + strlen (classname) + 3);
+		  strcpy (dem_name, classname);
+		  strcat (dem_name, "::");
+		  strcat (dem_name, basename);
+		  SYMBOL_CPLUS_DEMANGLED_NAME (sym) = dem_name;
+		  SYMBOL_LANGUAGE (sym) = language_cplus;
+		}
+	    }
+	}
+
       /* Add the function symbol to the list of symbols in this blockvector */
       if (dn_bufp->dfunc.global)
 	add_symbol_to_list (sym, &global_symbols);
@@ -3030,19 +3080,20 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * So I made it C/C++ specific. - RT
        */
       if (dn_bufp->dfunc.language == HP_LANGUAGE_C ||
-          dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS) {
-        while (dn_bufp->dblock.kind != DNTT_TYPE_BEGIN)
-	  {
-	  dn_bufp = hpread_get_lntt (++index, objfile);
-	  if (dn_bufp->dblock.extension)
-	    continue;
-	  }
-        SL_INDEX (objfile) = hpread_record_lines (current_subfile,
-  						  SL_INDEX (objfile),
-						  dn_bufp->dbegin.address,
-						  objfile, offset);
-        SYMBOL_LINE (sym) = hpread_get_line (dn_bufp->dbegin.address, objfile);
-      }
+	  dn_bufp->dfunc.language == HP_LANGUAGE_CPLUSPLUS)
+	{
+	  while (dn_bufp->dblock.kind != DNTT_TYPE_BEGIN)
+	    {
+	      dn_bufp = hpread_get_lntt (++index, objfile);
+	      if (dn_bufp->dblock.extension)
+		continue;
+	    }
+	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
+						    SL_INDEX (objfile),
+						    dn_bufp->dbegin.address,
+						    objfile, offset);
+	  SYMBOL_LINE (sym) = hpread_get_line (dn_bufp->dbegin.address, objfile);
+	}
       record_line (current_subfile, SYMBOL_LINE (sym), valu);
       break;
 
@@ -3054,7 +3105,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 						SL_INDEX (objfile),
 						dn_bufp->ddocfunc.address,
 						objfile, offset);
-      
+
       WITHIN_FUNCTION (objfile) = 1;
       CURRENT_FUNCTION_VALUE (objfile) = valu;
       /* Stack must be empty now.  */
@@ -3072,61 +3123,64 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * (if any), which we get from the "alias" field of the SOM record
        * if that exists.
        */
-      if ((dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS) && 
-          dn_bufp->ddocfunc.alias && /* has an alias */ 
-          *(char *)(VT (objfile) + dn_bufp->ddocfunc.alias)) /* not a null string */ 
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.alias;
+      if ((dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS) &&
+	  dn_bufp->ddocfunc.alias &&	/* has an alias */
+	  *(char *) (VT (objfile) + dn_bufp->ddocfunc.alias))	/* not a null string */
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.alias;
       else
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
 
       /* Special hack to get around HP compilers' insistence on
        * reporting "main" as "_MAIN_" for C/C++ */
       if ((strcmp (SYMBOL_NAME (sym), "_MAIN_") == 0) &&
-          (strcmp (VT (objfile) + dn_bufp->ddocfunc.name, "main") == 0))
-        SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
-      
-      if (dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS) {
+	  (strcmp (VT (objfile) + dn_bufp->ddocfunc.name, "main") == 0))
+	SYMBOL_NAME (sym) = VT (objfile) + dn_bufp->ddocfunc.name;
 
-        /* SYMBOL_INIT_DEMANGLED_NAME is a macro which winds up
-         * calling the demangler in libiberty (cplus_demangle()) to
-         * do the job. This generally does the job, even though
-         * it's intended for the GNU compiler and not the aCC compiler
-         * Note that SYMBOL_INIT_DEMANGLED_NAME calls the
-         * demangler with arguments DMGL_PARAMS | DMGL_ANSI.
-         * Generally, we don't want params when we display
-         * a demangled name, but when I took out the DMGL_PARAMS,
-         * some things broke, so I'm leaving it in here, and
-         * working around the issue in stack.c. - RT 
-         */
-        SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+      if (dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS)
+	{
 
-        if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->ddocfunc.alias) &&
-           (!SYMBOL_CPLUS_DEMANGLED_NAME(sym))) {
+	  /* SYMBOL_INIT_DEMANGLED_NAME is a macro which winds up
+	   * calling the demangler in libiberty (cplus_demangle()) to
+	   * do the job. This generally does the job, even though
+	   * it's intended for the GNU compiler and not the aCC compiler
+	   * Note that SYMBOL_INIT_DEMANGLED_NAME calls the
+	   * demangler with arguments DMGL_PARAMS | DMGL_ANSI.
+	   * Generally, we don't want params when we display
+	   * a demangled name, but when I took out the DMGL_PARAMS,
+	   * some things broke, so I'm leaving it in here, and
+	   * working around the issue in stack.c. - RT 
+	   */
+	  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
 
-          /* Well, the symbol name is mangled, but the
-           * demangler in libiberty failed so the demangled
-           * field is still NULL. Try to
-           * do the job ourselves based on the "name" field
-           * in the SOM record. A complication here is that
-           * the name field contains only the function name
-           * (like "f"), whereas we want the class qualification
-           * (as in "c::f"). Try to reconstruct that.
-           */          
-          char * basename;
-          char * classname;
-          char * dem_name;
-          basename = VT (objfile) + dn_bufp->ddocfunc.name;
-          classname = class_of(SYMBOL_TYPE(sym));
-          if (classname) {
-            dem_name = xmalloc(strlen(basename)+strlen(classname)+3);
-            strcpy(dem_name, classname);
-            strcat(dem_name, "::");
-            strcat(dem_name, basename);
-            SYMBOL_CPLUS_DEMANGLED_NAME(sym) = dem_name;
-            SYMBOL_LANGUAGE (sym) = language_cplus;
-          }
-        }
-      }
+	  if ((SYMBOL_NAME (sym) == VT (objfile) + dn_bufp->ddocfunc.alias) &&
+	      (!SYMBOL_CPLUS_DEMANGLED_NAME (sym)))
+	    {
+
+	      /* Well, the symbol name is mangled, but the
+	       * demangler in libiberty failed so the demangled
+	       * field is still NULL. Try to
+	       * do the job ourselves based on the "name" field
+	       * in the SOM record. A complication here is that
+	       * the name field contains only the function name
+	       * (like "f"), whereas we want the class qualification
+	       * (as in "c::f"). Try to reconstruct that.
+	       */
+	      char *basename;
+	      char *classname;
+	      char *dem_name;
+	      basename = VT (objfile) + dn_bufp->ddocfunc.name;
+	      classname = class_of (SYMBOL_TYPE (sym));
+	      if (classname)
+		{
+		  dem_name = xmalloc (strlen (basename) + strlen (classname) + 3);
+		  strcpy (dem_name, classname);
+		  strcat (dem_name, "::");
+		  strcat (dem_name, basename);
+		  SYMBOL_CPLUS_DEMANGLED_NAME (sym) = dem_name;
+		  SYMBOL_LANGUAGE (sym) = language_cplus;
+		}
+	    }
+	}
 
       /* Add the function symbol to the list of symbols in this blockvector */
       if (dn_bufp->ddocfunc.global)
@@ -3143,69 +3197,72 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * So I made it C/C++ specific. - RT
        */
       if (dn_bufp->ddocfunc.language == HP_LANGUAGE_C ||
-          dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS) {
-        while (dn_bufp->dblock.kind != DNTT_TYPE_BEGIN)
-	  {
-	  dn_bufp = hpread_get_lntt (++index, objfile);
-	  if (dn_bufp->dblock.extension)
-	    continue;
-	  }
-        SL_INDEX (objfile) = hpread_record_lines (current_subfile,
-  						  SL_INDEX (objfile),
-						  dn_bufp->dbegin.address,
-						  objfile, offset);
-        SYMBOL_LINE (sym) = hpread_get_line (dn_bufp->dbegin.address, objfile);
-      }
+	  dn_bufp->ddocfunc.language == HP_LANGUAGE_CPLUSPLUS)
+	{
+	  while (dn_bufp->dblock.kind != DNTT_TYPE_BEGIN)
+	    {
+	      dn_bufp = hpread_get_lntt (++index, objfile);
+	      if (dn_bufp->dblock.extension)
+		continue;
+	    }
+	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
+						    SL_INDEX (objfile),
+						    dn_bufp->dbegin.address,
+						    objfile, offset);
+	  SYMBOL_LINE (sym) = hpread_get_line (dn_bufp->dbegin.address, objfile);
+	}
       record_line (current_subfile, SYMBOL_LINE (sym), valu);
       break;
 
     case DNTT_TYPE_BEGIN:
       /* Begin a new scope. */
-      if (context_stack_depth == 1 /* this means we're at function level */ &&
-          context_stack[0].name != NULL /* this means it's a function */ &&
-          context_stack[0].depth == 0 /* this means it's the first BEGIN 
-                                         we've seen after the FUNCTION */ 
-         )
-      {
-        /* This is the first BEGIN after a FUNCTION.
-         * We ignore this one, since HP compilers always insert
-         * at least one BEGIN, i.e. it's:
-         * 
-         *     FUNCTION
-         *     argument symbols
-         *     BEGIN
-         *     local symbols
-         *        (possibly nested BEGIN ... END's if there are inner { } blocks)
-         *     END
-         *     END
-         *
-         * By ignoring this first BEGIN, the local symbols get treated
-         * as belonging to the function scope, and "print func::local_sym"
-         * works (which is what we want).
-         */
+      if (context_stack_depth == 1 /* this means we're at function level */  &&
+	  context_stack[0].name != NULL /* this means it's a function */  &&
+	  context_stack[0].depth == 0	/* this means it's the first BEGIN 
+					   we've seen after the FUNCTION */
+	)
+	{
+	  /* This is the first BEGIN after a FUNCTION.
+	   * We ignore this one, since HP compilers always insert
+	   * at least one BEGIN, i.e. it's:
+	   * 
+	   *     FUNCTION
+	   *     argument symbols
+	   *     BEGIN
+	   *     local symbols
+	   *        (possibly nested BEGIN ... END's if there are inner { } blocks)
+	   *     END
+	   *     END
+	   *
+	   * By ignoring this first BEGIN, the local symbols get treated
+	   * as belonging to the function scope, and "print func::local_sym"
+	   * works (which is what we want).
+	   */
 
-        /* All we do here is increase the depth count associated with
-         * the FUNCTION entry in the context stack. This ensures that
-         * the next BEGIN we see (if any), representing a real nested { }
-         * block, will get processed.
-         */ 
+	  /* All we do here is increase the depth count associated with
+	   * the FUNCTION entry in the context stack. This ensures that
+	   * the next BEGIN we see (if any), representing a real nested { }
+	   * block, will get processed.
+	   */
 
-         context_stack[0].depth++;
+	  context_stack[0].depth++;
 
-      } else { 
+	}
+      else
+	{
 
-        /* Record lines up to this SLT pointer. */
-        SL_INDEX (objfile) = hpread_record_lines (current_subfile,
-                      			 	  SL_INDEX (objfile),
-						  dn_bufp->dbegin.address,
-						  objfile, offset);
-        /* Calculate start address of new scope */
-        valu = hpread_get_location (dn_bufp->dbegin.address, objfile);
-        valu += offset;		/* Relocate for dynamic loading */
-        /* We use the scope start DNTT index as nesting depth identifier! */
-        desc = hpread_get_scope_start (dn_bufp->dbegin.address, objfile);
-        new = push_context (desc, valu);
-      }
+	  /* Record lines up to this SLT pointer. */
+	  SL_INDEX (objfile) = hpread_record_lines (current_subfile,
+						    SL_INDEX (objfile),
+						    dn_bufp->dbegin.address,
+						    objfile, offset);
+	  /* Calculate start address of new scope */
+	  valu = hpread_get_location (dn_bufp->dbegin.address, objfile);
+	  valu += offset;	/* Relocate for dynamic loading */
+	  /* We use the scope start DNTT index as nesting depth identifier! */
+	  desc = hpread_get_scope_start (dn_bufp->dbegin.address, objfile);
+	  new = push_context (desc, valu);
+	}
       break;
 
     case DNTT_TYPE_END:
@@ -3228,22 +3285,22 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	{
 	case DNTT_TYPE_MODULE:
 	  /* Ending a module ends the symbol table for that module.  
-           * Calling end_symtab() has the side effect of clearing the
-           * last_source_file pointer, which in turn signals 
-           * process_one_debug_symbol() to treat the next DNTT_TYPE_SRCFILE
-           * record as a module-begin.
-           */
+	   * Calling end_symtab() has the side effect of clearing the
+	   * last_source_file pointer, which in turn signals 
+	   * process_one_debug_symbol() to treat the next DNTT_TYPE_SRCFILE
+	   * record as a module-begin.
+	   */
 	  valu = text_offset + text_size + offset;
 
-          /* Tell our caller that we're done with expanding the
-           * debug information for a module.
-           */
-          *at_module_boundary_p = 1;
+	  /* Tell our caller that we're done with expanding the
+	   * debug information for a module.
+	   */
+	  *at_module_boundary_p = 1;
 
-          /* Don't do this, as our caller will do it!
-           *
-           *	  (void) end_symtab (valu, objfile, 0);
-           */
+	  /* Don't do this, as our caller will do it!
+
+	   *      (void) end_symtab (valu, objfile, 0);
+	   */
 	  break;
 
 	case DNTT_TYPE_FUNCTION:
@@ -3251,63 +3308,65 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	  dn_temp = hpread_get_lntt (dn_bufp->dend.beginscope.dnttp.index,
 				     objfile);
 	  valu = dn_temp->dfunc.hiaddr + offset;
-          /* Insert func params into local list */ 
-          merge_symbol_lists (&param_symbols, &local_symbols);
+	  /* Insert func params into local list */
+	  merge_symbol_lists (&param_symbols, &local_symbols);
 	  new = pop_context ();
 	  /* Make a block for the local symbols within.  */
 	  finish_block (new->name, &local_symbols, new->old_blocks,
 			new->start_addr, valu, objfile);
-	  WITHIN_FUNCTION (objfile) = 0; /* This may have to change for Pascal */ 
-          local_symbols = new->locals;
-          param_symbols = new->params;
+	  WITHIN_FUNCTION (objfile) = 0;	/* This may have to change for Pascal */
+	  local_symbols = new->locals;
+	  param_symbols = new->params;
 	  break;
 
 	case DNTT_TYPE_BEGIN:
-          if (context_stack_depth == 1 &&
-              context_stack[0].name != NULL &&
-              context_stack[0].depth == 1)         
-          {
-            /* This is the END corresponding to the
-             * BEGIN which we ignored - see DNTT_TYPE_BEGIN case above.
-             */
-            context_stack[0].depth--;
-          } else {
-	    /* Ending a local scope.  */
-	    valu = hpread_get_location (dn_bufp->dend.address, objfile);
-	    /* Why in the hell is this needed?  */
-	    valu += offset + 9;	/* Relocate for dynamic loading */
-	    new = pop_context ();
-	    desc = dn_bufp->dend.beginscope.dnttp.index;
-	    if (desc != new->depth)
-	      complain (&lbrac_mismatch_complaint, (char *) symnum);
+	  if (context_stack_depth == 1 &&
+	      context_stack[0].name != NULL &&
+	      context_stack[0].depth == 1)
+	    {
+	      /* This is the END corresponding to the
+	       * BEGIN which we ignored - see DNTT_TYPE_BEGIN case above.
+	       */
+	      context_stack[0].depth--;
+	    }
+	  else
+	    {
+	      /* Ending a local scope.  */
+	      valu = hpread_get_location (dn_bufp->dend.address, objfile);
+	      /* Why in the hell is this needed?  */
+	      valu += offset + 9;	/* Relocate for dynamic loading */
+	      new = pop_context ();
+	      desc = dn_bufp->dend.beginscope.dnttp.index;
+	      if (desc != new->depth)
+		complain (&lbrac_mismatch_complaint, (char *) symnum);
 
-	    /* Make a block for the local symbols within.  */
-	    finish_block (new->name, &local_symbols, new->old_blocks,
-	                  new->start_addr, valu, objfile);
-	    local_symbols = new->locals;
-	    param_symbols = new->params;
-          }
+	      /* Make a block for the local symbols within.  */
+	      finish_block (new->name, &local_symbols, new->old_blocks,
+			    new->start_addr, valu, objfile);
+	      local_symbols = new->locals;
+	      param_symbols = new->params;
+	    }
 	  break;
 
-        case DNTT_TYPE_WITH:
-          /* Since we ignore the DNTT_TYPE_WITH that starts the scope,
-           * we can ignore the DNTT_TYPE_END that ends it.
-           */
+	case DNTT_TYPE_WITH:
+	  /* Since we ignore the DNTT_TYPE_WITH that starts the scope,
+	   * we can ignore the DNTT_TYPE_END that ends it.
+	   */
 	  break;
 
-        case DNTT_TYPE_COMMON:
-          /* End a FORTRAN common block. We don't currently handle these */
-          complain (&hpread_unhandled_end_common_complaint);
+	case DNTT_TYPE_COMMON:
+	  /* End a FORTRAN common block. We don't currently handle these */
+	  complain (&hpread_unhandled_end_common_complaint);
 	  break;
 
-        case DNTT_TYPE_CLASS_SCOPE: 
+	case DNTT_TYPE_CLASS_SCOPE:
 
-         /* pai: FIXME Not handling nested classes for now -- must
-           * maintain a stack */
-          class_scope_name = NULL;
+	  /* pai: FIXME Not handling nested classes for now -- must
+	     * maintain a stack */
+	  class_scope_name = NULL;
 
 #if 0
-          /* End a class scope */
+	  /* End a class scope */
 	  valu = hpread_get_location (dn_bufp->dend.address, objfile);
 	  /* Why in the hell is this needed?  */
 	  valu += offset + 9;	/* Relocate for dynamic loading */
@@ -3323,13 +3382,13 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 #endif
 	  break;
 
-        default:
-          complain (&hpread_unexpected_end_complaint);
-          break;
+	default:
+	  complain (&hpread_unexpected_end_complaint);
+	  break;
 	}
       break;
 
-    /* DNTT_TYPE_IMPORT is not handled */
+      /* DNTT_TYPE_IMPORT is not handled */
 
     case DNTT_TYPE_LABEL:
       SYMBOL_NAMESPACE (sym) = LABEL_NAMESPACE;
@@ -3356,28 +3415,28 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
          So I've added code in hpread_read_function_type() to add fparams
          to a param_symbols list for the current context level.  These are
          then merged into local_symbols when a function end is reached.
-         pai/1997-08-11 */ 
-         
-      break; /* do nothing; handled in hpread_read_function_type() */ 
-      
-#if 0 /* Old code */ 
+         pai/1997-08-11 */
+
+      break;			/* do nothing; handled in hpread_read_function_type() */
+
+#if 0				/* Old code */
       if (dn_bufp->dfparam.regparam)
-        SYMBOL_CLASS (sym) = LOC_REGISTER;
+	SYMBOL_CLASS (sym) = LOC_REGISTER;
       else if (dn_bufp->dfparam.indirect)
 	SYMBOL_CLASS (sym) = LOC_REF_ARG;
       else
 	SYMBOL_CLASS (sym) = LOC_ARG;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (dn_bufp->dfparam.copyparam)
-        {
-          SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
+	{
+	  SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
 #ifdef HPREAD_ADJUST_STACK_ADDRESS
-          SYMBOL_VALUE (sym)
-            += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
+	  SYMBOL_VALUE (sym)
+	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
 #endif
-        }
+	}
       else
-        SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
+	SYMBOL_VALUE (sym) = dn_bufp->dfparam.location;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dfparam.type, objfile);
       add_symbol_to_list (sym, &fparam_symbols);
       break;
@@ -3385,7 +3444,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
     case DNTT_TYPE_SVAR:
       /* Static variables.  */
-      SYMBOL_CLASS (sym) = LOC_STATIC; 
+      SYMBOL_CLASS (sym) = LOC_STATIC;
 
       /* Note: There is a case that arises with globals in shared
        * libraries where we need to set the address to LOC_INDIRECT.
@@ -3396,54 +3455,55 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * in the symbol table contains a pointer to the real "g".
        * We use the storage class LOC_INDIRECT to indicate this. RT
        */
-      if (is_in_import_list (SYMBOL_NAME(sym), objfile))
-        SYMBOL_CLASS (sym) = LOC_INDIRECT;
+      if (is_in_import_list (SYMBOL_NAME (sym), objfile))
+	SYMBOL_CLASS (sym) = LOC_INDIRECT;
 
       SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location + data_offset;
       SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dsvar.type, objfile);
 
       if (dn_bufp->dsvar.global)
 	add_symbol_to_list (sym, &global_symbols);
-        
+
       else if (WITHIN_FUNCTION (objfile))
 	add_symbol_to_list (sym, &local_symbols);
-        
+
       else
 	add_symbol_to_list (sym, &file_symbols);
 
       if (dn_bufp->dsvar.thread_specific)
-        {
-          /* Thread-local variable.
-           */
-          SYMBOL_CLASS (sym)   = LOC_THREAD_LOCAL_STATIC;
-          SYMBOL_BASEREG (sym) = CR27_REGNUM;
+	{
+	  /* Thread-local variable.
+	   */
+	  SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+	  SYMBOL_BASEREG (sym) = CR27_REGNUM;
 
-          if( objfile->flags & OBJF_SHARED ) {
-              /*
-               * This variable is not only thread local but
-               * in a shared library.
-               *
-               * Alas, the shared lib structures are private
-               * to "somsolib.c".  But C lets us point to one.
-               */
-              struct so_list *so;
+	  if (objfile->flags & OBJF_SHARED)
+	    {
+	      /*
+	       * This variable is not only thread local but
+	       * in a shared library.
+	       *
+	       * Alas, the shared lib structures are private
+	       * to "somsolib.c".  But C lets us point to one.
+	       */
+	      struct so_list *so;
 
-              if( objfile->obj_private == NULL )
-                  error( "Internal error in reading shared library information." );
+	      if (objfile->obj_private == NULL)
+		error ("Internal error in reading shared library information.");
 
-              so = ((obj_private_data_t *)(objfile->obj_private))->so_info;
-              if( so == NULL )
-                  error( "Internal error in reading shared library information." );
+	      so = ((obj_private_data_t *) (objfile->obj_private))->so_info;
+	      if (so == NULL)
+		error ("Internal error in reading shared library information.");
 
-              /* Thread-locals in shared libraries do NOT have the
-               * standard offset ("data_offset"), so we re-calculate
-               * where to look for this variable, using a call-back
-               * to interpret the private shared-library data.
-               */
-              SYMBOL_VALUE_ADDRESS(sym) = dn_bufp->dsvar.location +
-                                             so_lib_thread_start_addr( so );
-          }
-        }
+	      /* Thread-locals in shared libraries do NOT have the
+	       * standard offset ("data_offset"), so we re-calculate
+	       * where to look for this variable, using a call-back
+	       * to interpret the private shared-library data.
+	       */
+	      SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
+		so_lib_thread_start_addr (so);
+	    }
+	}
       break;
 
     case DNTT_TYPE_DVAR:
@@ -3452,7 +3512,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	SYMBOL_CLASS (sym) = LOC_REGISTER;
       else
 	SYMBOL_CLASS (sym) = LOC_LOCAL;
-        
+
       SYMBOL_VALUE (sym) = dn_bufp->ddvar.location;
 #ifdef HPREAD_ADJUST_STACK_ADDRESS
       SYMBOL_VALUE (sym)
@@ -3496,79 +3556,81 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
     case DNTT_TYPE_TAGDEF:
       {
-      int global = dn_bufp->dtag.global;
-      /* Structure, union, enum, template, or class tag definition */
-      /* We do want to process these, since a name is
-       * added to the namespace for the tag name (and if C++ class,
-       * for the typename also).
-       */
-      SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+	int global = dn_bufp->dtag.global;
+	/* Structure, union, enum, template, or class tag definition */
+	/* We do want to process these, since a name is
+	 * added to the namespace for the tag name (and if C++ class,
+	 * for the typename also).
+	 */
+	SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
 
-      /* The tag contains in its "type" field a pointer to the
-       * DNTT_TYPE_STRUCT, DNTT_TYPE_UNION, DNTT_TYPE_ENUM, 
-       * DNTT_TYPE_CLASS or DNTT_TYPE_TEMPLATE
-       * record that actually defines the type.
-       */
-      SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
-      TYPE_NAME (sym->type) = SYMBOL_NAME (sym);
-      TYPE_TAG_NAME (sym->type) = SYMBOL_NAME (sym);
-      if (dn_bufp->dtag.global)
-	add_symbol_to_list (sym, &global_symbols);
-      else if (WITHIN_FUNCTION (objfile))
-	add_symbol_to_list (sym, &local_symbols);
-      else
-	add_symbol_to_list (sym, &file_symbols);
+	/* The tag contains in its "type" field a pointer to the
+	 * DNTT_TYPE_STRUCT, DNTT_TYPE_UNION, DNTT_TYPE_ENUM, 
+	 * DNTT_TYPE_CLASS or DNTT_TYPE_TEMPLATE
+	 * record that actually defines the type.
+	 */
+	SYMBOL_TYPE (sym) = hpread_type_lookup (dn_bufp->dtype.type, objfile);
+	TYPE_NAME (sym->type) = SYMBOL_NAME (sym);
+	TYPE_TAG_NAME (sym->type) = SYMBOL_NAME (sym);
+	if (dn_bufp->dtag.global)
+	  add_symbol_to_list (sym, &global_symbols);
+	else if (WITHIN_FUNCTION (objfile))
+	  add_symbol_to_list (sym, &local_symbols);
+	else
+	  add_symbol_to_list (sym, &file_symbols);
 
-      /* If this is a C++ class, then we additionally 
-       * need to define a typedef for the
-       * class type. E.g., so that the name "c" becomes visible as
-       * a type name when the user says "class c { ... }".
-       * In order to figure this out, we need to chase down the "type"
-       * field to get to the DNTT_TYPE_CLASS record. 
-       *
-       * We also add the typename for ENUM. Though this isn't
-       * strictly correct, it is necessary because of the debug info
-       * generated by the aCC compiler, in which we cannot
-       * distinguish between:
-       *   enum e { ... };
-       * and
-       *   typedef enum { ... } e;
-       * I.e., the compiler emits the same debug info for the above
-       * two cases, in both cases "e" appearing as a tagdef.
-       * Therefore go ahead and generate the typename so that
-       * "ptype e" will work in the above cases.
-       *
-       * We also add the typename for TEMPLATE, so as to allow "ptype t"
-       * when "t" is a template name. 
-       */
-      if (dn_bufp->dtype.type.dnttp.index < LNTT_SYMCOUNT (objfile))
-        dn_bufp = hpread_get_lntt (dn_bufp->dtag.type.dnttp.index, objfile);
-      else {
-        complain (&hpread_tagdef_complaint);
-        return;
-      }
-      if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS ||
-          dn_bufp->dblock.kind == DNTT_TYPE_ENUM ||
-          dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE) {
-        struct symbol *newsym;
-        
-        newsym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
-	             				  sizeof (struct symbol));
-        memset (newsym, 0, sizeof (struct symbol));
-        SYMBOL_NAME (newsym) = name;
-        SYMBOL_LANGUAGE (newsym) = language_auto;
-        SYMBOL_NAMESPACE (newsym) = VAR_NAMESPACE;
-        SYMBOL_LINE (newsym) = 0;
-        SYMBOL_VALUE (newsym) = 0;
-        SYMBOL_CLASS (newsym) = LOC_TYPEDEF;
-        SYMBOL_TYPE (newsym) = sym->type;
-        if (global)
-  	  add_symbol_to_list (newsym, &global_symbols);
-        else if (WITHIN_FUNCTION (objfile))
-  	  add_symbol_to_list (newsym, &local_symbols);
-        else
-  	  add_symbol_to_list (newsym, &file_symbols);
-      }
+	/* If this is a C++ class, then we additionally 
+	 * need to define a typedef for the
+	 * class type. E.g., so that the name "c" becomes visible as
+	 * a type name when the user says "class c { ... }".
+	 * In order to figure this out, we need to chase down the "type"
+	 * field to get to the DNTT_TYPE_CLASS record. 
+	 *
+	 * We also add the typename for ENUM. Though this isn't
+	 * strictly correct, it is necessary because of the debug info
+	 * generated by the aCC compiler, in which we cannot
+	 * distinguish between:
+	 *   enum e { ... };
+	 * and
+	 *   typedef enum { ... } e;
+	 * I.e., the compiler emits the same debug info for the above
+	 * two cases, in both cases "e" appearing as a tagdef.
+	 * Therefore go ahead and generate the typename so that
+	 * "ptype e" will work in the above cases.
+	 *
+	 * We also add the typename for TEMPLATE, so as to allow "ptype t"
+	 * when "t" is a template name. 
+	 */
+	if (dn_bufp->dtype.type.dnttp.index < LNTT_SYMCOUNT (objfile))
+	  dn_bufp = hpread_get_lntt (dn_bufp->dtag.type.dnttp.index, objfile);
+	else
+	  {
+	    complain (&hpread_tagdef_complaint);
+	    return;
+	  }
+	if (dn_bufp->dblock.kind == DNTT_TYPE_CLASS ||
+	    dn_bufp->dblock.kind == DNTT_TYPE_ENUM ||
+	    dn_bufp->dblock.kind == DNTT_TYPE_TEMPLATE)
+	  {
+	    struct symbol *newsym;
+
+	    newsym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+						    sizeof (struct symbol));
+	    memset (newsym, 0, sizeof (struct symbol));
+	    SYMBOL_NAME (newsym) = name;
+	    SYMBOL_LANGUAGE (newsym) = language_auto;
+	    SYMBOL_NAMESPACE (newsym) = VAR_NAMESPACE;
+	    SYMBOL_LINE (newsym) = 0;
+	    SYMBOL_VALUE (newsym) = 0;
+	    SYMBOL_CLASS (newsym) = LOC_TYPEDEF;
+	    SYMBOL_TYPE (newsym) = sym->type;
+	    if (global)
+	      add_symbol_to_list (newsym, &global_symbols);
+	    else if (WITHIN_FUNCTION (objfile))
+	      add_symbol_to_list (newsym, &local_symbols);
+	    else
+	      add_symbol_to_list (newsym, &file_symbols);
+	  }
       }
       break;
 
@@ -3630,9 +3692,9 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        */
       break;
 
-    /* DNTT_TYPE_VARIANT is not handled by GDB */
+      /* DNTT_TYPE_VARIANT is not handled by GDB */
 
-    /* DNTT_TYPE_FILE is not handled by GDB */
+      /* DNTT_TYPE_FILE is not handled by GDB */
 
     case DNTT_TYPE_FUNCTYPE:
       /* Function type */
@@ -3654,10 +3716,10 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
       complain (&hpread_unhandled_common_complaint);
       break;
 
-    /* DNTT_TYPE_COBSTRUCT is not handled by GDB.  */
-    /* DNTT_TYPE_XREF is not handled by GDB.  */
-    /* DNTT_TYPE_SA is not handled by GDB.  */
-    /* DNTT_TYPE_MACRO is not handled by GDB */
+      /* DNTT_TYPE_COBSTRUCT is not handled by GDB.  */
+      /* DNTT_TYPE_XREF is not handled by GDB.  */
+      /* DNTT_TYPE_SA is not handled by GDB.  */
+      /* DNTT_TYPE_MACRO is not handled by GDB */
 
     case DNTT_TYPE_BLOCKDATA:
       /* Not sure what this is - part of FORTRAN support maybe? 
@@ -3693,16 +3755,16 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 
       dn_temp = hpread_get_lntt (dn_bufp->dclass_scope.type.dnttp.index, objfile);
       if (dn_temp->dblock.kind == DNTT_TYPE_TAGDEF)
-        class_scope_name = VT (objfile) + dn_temp->dtag.name;
+	class_scope_name = VT (objfile) + dn_temp->dtag.name;
       else
-        class_scope_name = NULL;
+	class_scope_name = NULL;
 
 #if 0
 
       /* Begin a new scope.  */
       SL_INDEX (objfile) = hpread_record_lines (current_subfile,
 						SL_INDEX (objfile),
-						dn_bufp->dclass_scope.address,
+					      dn_bufp->dclass_scope.address,
 						objfile, offset);
       valu = hpread_get_location (dn_bufp->dclass_scope.address, objfile);
       valu += offset;		/* Relocate for dynamic loading */
@@ -3775,7 +3837,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        * info. DDE only uses it in "describe". We may later want
        * to extend GDB's "ptype" to give this info, but for now
        * it seems safe enough to ignore it.
-       */  
+       */
       break;
 
     case DNTT_TYPE_MODIFIER:
@@ -3835,12 +3897,12 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
        */
       break;
 
-    /* DNTT_TYPE_DYN_ARRAY_DESC is not handled by GDB */
-    /* DNTT_TYPE_DESC_SUBRANGE is not handled by GDB */
-    /* DNTT_TYPE_BEGIN_EXT is not handled by GDB */
-    /* DNTT_TYPE_INLN is not handled by GDB */
-    /* DNTT_TYPE_INLN_LIST is not handled by GDB */
-    /* DNTT_TYPE_ALIAS is not handled by GDB */
+      /* DNTT_TYPE_DYN_ARRAY_DESC is not handled by GDB */
+      /* DNTT_TYPE_DESC_SUBRANGE is not handled by GDB */
+      /* DNTT_TYPE_BEGIN_EXT is not handled by GDB */
+      /* DNTT_TYPE_INLN is not handled by GDB */
+      /* DNTT_TYPE_INLN_LIST is not handled by GDB */
+      /* DNTT_TYPE_ALIAS is not handled by GDB */
 
     default:
       break;
@@ -3857,54 +3919,54 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
  * Return value is an integer.  0 => not a local type / name
  * positive return => type or name is local to some 
  * block or function.
- */ 
+ */
 
 
 /* elz: ATTENTION: FIXME: NOTE: WARNING!!!!
    this function now returns 0 right away. It was taking too much time
    at start up. Now, though, the local types are not handled correctly.
-*/
+ */
 
 
 static int
 hpread_get_scope_depth (dn_bufp, objfile, report_nested)
-  union dnttentry * dn_bufp;
-  struct objfile * objfile;
-  int  report_nested;
+     union dnttentry *dn_bufp;
+     struct objfile *objfile;
+     int report_nested;
 {
   register int index;
-  register union dnttentry * dn_tmp;
+  register union dnttentry *dn_tmp;
   register short depth = 0;
 /****************************/
   return 0;
 /****************************/
 
   index = (((char *) dn_bufp) - LNTT (objfile)) / (sizeof (struct dntt_type_block));
-  
+
   while (--index >= 0)
     {
       dn_tmp = hpread_get_lntt (index, objfile);
       switch (dn_tmp->dblock.kind)
-        {
-          case DNTT_TYPE_MODULE:
-            return depth;
-          case DNTT_TYPE_END:
-            /* index is signed int; dnttp.index is 29-bit unsigned int! */
-            index = (int) dn_tmp->dend.beginscope.dnttp.index;
-            break;
-          case DNTT_TYPE_BEGIN:
-          case DNTT_TYPE_FUNCTION:
-          case DNTT_TYPE_DOC_FUNCTION:
-          case DNTT_TYPE_WITH:   
-          case DNTT_TYPE_COMMON: 
-          case DNTT_TYPE_CLASS_SCOPE:
-            depth++;
-            if (report_nested)
-              return 1;
-            break;
-          default:
-            break;
-        }
+	{
+	case DNTT_TYPE_MODULE:
+	  return depth;
+	case DNTT_TYPE_END:
+	  /* index is signed int; dnttp.index is 29-bit unsigned int! */
+	  index = (int) dn_tmp->dend.beginscope.dnttp.index;
+	  break;
+	case DNTT_TYPE_BEGIN:
+	case DNTT_TYPE_FUNCTION:
+	case DNTT_TYPE_DOC_FUNCTION:
+	case DNTT_TYPE_WITH:
+	case DNTT_TYPE_COMMON:
+	case DNTT_TYPE_CLASS_SCOPE:
+	  depth++;
+	  if (report_nested)
+	    return 1;
+	  break;
+	default:
+	  break;
+	}
     }
   return depth;
 }
@@ -3912,17 +3974,17 @@ hpread_get_scope_depth (dn_bufp, objfile, report_nested)
 /* Adjust the bitoffsets for all fields of an anonymous union of
    type TYPE by negative BITS.  This handles HP aCC's hideous habit
    of giving members of anonymous unions bit offsets relative to the
-   enclosing structure instead of relative to the union itself. */  
+   enclosing structure instead of relative to the union itself. */
 
 static void
 hpread_adjust_bitoffsets (type, bits)
-  struct type * type;
-  int bits;
+     struct type *type;
+     int bits;
 {
   register int i;
 
   /* This is done only for unions; caller had better check that
-     it is an anonymous one. */ 
+     it is an anonymous one. */
   if (TYPE_CODE (type) != TYPE_CODE_UNION)
     return;
 
@@ -3944,7 +4006,7 @@ hpread_adjust_bitoffsets (type, bits)
 
    This function does a "next" in the chain of FIELD entries, but transparently
    skips over anonymous unions' fields (recursively).
-   
+
    Inputs are the number of times to do "next" at the top level, the dnttpointer
    (FIELD) and entry pointer (FIELDP) for the dntt record corresponding to it,
    and the ubiquitous objfile parameter. (Note: FIELDP is a **.)  Return value
@@ -3952,17 +4014,17 @@ hpread_adjust_bitoffsets (type, bits)
 
 static dnttpointer
 hpread_get_next_skip_over_anon_unions (skip_fields, field, fieldp, objfile)
-  int skip_fields;
-  dnttpointer field;
-  union dnttentry ** fieldp;
-  struct objfile * objfile;
+     int skip_fields;
+     dnttpointer field;
+     union dnttentry **fieldp;
+     struct objfile *objfile;
 {
-  struct type * anon_type;
+  struct type *anon_type;
   register int i;
   int bitoffset;
-  char * name;
+  char *name;
 
-  for (i=0; i < skip_fields; i++)
+  for (i = 0; i < skip_fields; i++)
     {
       /* Get type of item we're looking at now; recursively processes the types
          of these intermediate items we skip over, so they aren't lost. */
@@ -3970,19 +4032,17 @@ hpread_get_next_skip_over_anon_unions (skip_fields, field, fieldp, objfile)
       anon_type = CHECK_TYPEDEF (anon_type);
       bitoffset = (*fieldp)->dfield.bitoffset;
       name = VT (objfile) + (*fieldp)->dfield.name;
-      /* First skip over one item to avoid stack death on recursion */ 
+      /* First skip over one item to avoid stack death on recursion */
       field = (*fieldp)->dfield.nextfield;
       *fieldp = hpread_get_lntt (field.dnttp.index, objfile);
       /* Do we have another anonymous union? If so, adjust the bitoffsets
          of its members and skip over its members. */
       if ((TYPE_CODE (anon_type) == TYPE_CODE_UNION) &&
-          (!name || STREQ (name, "")))
-        {
-          hpread_adjust_bitoffsets (anon_type, bitoffset);
-          field = hpread_get_next_skip_over_anon_unions (TYPE_NFIELDS (anon_type), field, fieldp, objfile);
-        }
+	  (!name || STREQ (name, "")))
+	{
+	  hpread_adjust_bitoffsets (anon_type, bitoffset);
+	  field = hpread_get_next_skip_over_anon_unions (TYPE_NFIELDS (anon_type), field, fieldp, objfile);
+	}
     }
   return field;
 }
-
-

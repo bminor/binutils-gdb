@@ -16,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* An event loop listens for events from multiple event sources. When
    an event arrives, it is queued and processed by calling the
@@ -107,7 +108,7 @@ file_handler;
 
 typedef struct async_signal_handler
   {
-    int ready;	/* If ready, call this handler from the main event loop, 
+    int ready;			/* If ready, call this handler from the main event loop, 
 				   using invoke_async_handler. */
     struct async_signal_handler *next_handler;	/* Ptr to next handler */
     async_handler_func *proc;	/* Function to call to do the work */
@@ -123,7 +124,7 @@ typedef enum
     TAIL,
     /* Add at head of queue. It will be processed in last in first out
        order. */
-    HEAD	
+    HEAD
   }
 queue_position;
 
@@ -230,12 +231,12 @@ extern void add_file_handler PARAMS ((int, file_handler_func, gdb_client_data));
 extern void mark_async_signal_handler PARAMS ((async_signal_handler *));
 extern async_signal_handler *
   create_async_signal_handler PARAMS ((async_handler_func *, gdb_client_data));
-extern void delete_async_signal_handler PARAMS ((async_signal_handler **async_handler_ptr));
+extern void delete_async_signal_handler PARAMS ((async_signal_handler ** async_handler_ptr));
 
 /* Exported functions from event-top.c. 
    FIXME: these should really go into top.h. */
 
-extern void display_gdb_prompt PARAMS ((char*));
+extern void display_gdb_prompt PARAMS ((char *));
 extern void async_init_signals PARAMS ((void));
 extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
 extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));

@@ -1,21 +1,22 @@
 /* Parameters for execution on a z8000 series machine.
    Copyright 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define IEEE_FLOAT 1
 
@@ -68,8 +69,8 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define REGISTER_TYPE unsigned int
 
-#define NUM_REGS 	23   /* 16 registers + 1 ccr + 1 pc + 3 debug
-				regs + fake fp + fake sp*/
+#define NUM_REGS 	23	/* 16 registers + 1 ccr + 1 pc + 3 debug
+				   regs + fake fp + fake sp */
 #define REGISTER_BYTES  (NUM_REGS *4)
 
 /* Index within `registers' of the first byte of the space for
@@ -87,7 +88,7 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 /* Number of bytes of storage in the program's representation
    for register N.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) REGISTER_RAW_SIZE(N) 
+#define REGISTER_VIRTUAL_SIZE(N) REGISTER_RAW_SIZE(N)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -103,7 +104,7 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 #define REGISTER_VIRTUAL_TYPE(N) \
  (REGISTER_VIRTUAL_SIZE(N) == 2? builtin_type_unsigned_int : builtin_type_long)
 
-/*#define INIT_FRAME_PC(x,y) init_frame_pc(x,y)*/
+/*#define INIT_FRAME_PC(x,y) init_frame_pc(x,y) */
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
@@ -202,8 +203,8 @@ struct frame_info;
 #endif
 extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
 #define FRAME_INIT_SAVED_REGS(fi) z8k_frame_init_saved_regs (fi)
-
 
+
 /* Things needed for making the inferior call functions.
    It seems like every m68k based machine has almost identical definitions
    in the individual machine's configuration files.  Most other cpu types
@@ -214,20 +215,20 @@ extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
 /* The CALL_DUMMY macro is the sequence of instructions, as disassembled
    by gdb itself:
 
-	fmovemx fp0-fp7,sp@-			0xf227 0xe0ff
-	moveml d0-a5,sp@-			0x48e7 0xfffc
-	clrw sp@-				0x4267
-	movew ccr,sp@-				0x42e7
+   fmovemx fp0-fp7,sp@-                 0xf227 0xe0ff
+   moveml d0-a5,sp@-                    0x48e7 0xfffc
+   clrw sp@-                            0x4267
+   movew ccr,sp@-                               0x42e7
 
-	/..* The arguments are pushed at this point by GDB;
-	no code is needed in the dummy for this.
-	The CALL_DUMMY_START_OFFSET gives the position of 
-	the following jsr instruction.  *../
+   /..* The arguments are pushed at this point by GDB;
+   no code is needed in the dummy for this.
+   The CALL_DUMMY_START_OFFSET gives the position of 
+   the following jsr instruction.  *../
 
-	jsr @#0x32323232			0x4eb9 0x3232 0x3232
-	addal #0x69696969,sp			0xdffc 0x6969 0x6969
-	trap #<your BPT_VECTOR number here>	0x4e4?
-	nop					0x4e71
+   jsr @#0x32323232                     0x4eb9 0x3232 0x3232
+   addal #0x69696969,sp                 0xdffc 0x6969 0x6969
+   trap #<your BPT_VECTOR number here>  0x4e4?
+   nop                                  0x4e71
 
    Note this is CALL_DUMMY_LENGTH bytes (28 for the above example).
    We actually start executing at the jsr, since the pushing of the
@@ -240,8 +241,8 @@ extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
 
 
 #define CALL_DUMMY { 0 }
-#define CALL_DUMMY_LENGTH 24		/* Size of CALL_DUMMY */
-#define CALL_DUMMY_START_OFFSET 8	/* Offset to jsr instruction*/
+#define CALL_DUMMY_LENGTH 24	/* Size of CALL_DUMMY */
+#define CALL_DUMMY_START_OFFSET 8	/* Offset to jsr instruction */
 
 
 /* Insert the specified number of args and function address
@@ -284,4 +285,3 @@ int sim_z8001_mode;
   z8k_set_pointer_size(objfile->obfd->arch_info->bits_per_address);
 
 #define REGISTER_SIZE 4
-

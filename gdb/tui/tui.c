@@ -1,7 +1,7 @@
 /*
-** tui.c
-**         General functions for the WDB TUI
-*/
+   ** tui.c
+   **         General functions for the WDB TUI
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,8 +57,8 @@ static Opaque _tui_vDo PARAMS ((TuiOpaqueFuncPtr, va_list));
 ************************/
 
 /*
-** tuiInit().
-*/
+   ** tuiInit().
+ */
 void
 #ifdef __STDC__
 tuiInit (char *argv0)
@@ -83,12 +83,12 @@ tuiInit (argv0)
      * the XDB way. However, one thing we do want to do in
      * XDB style is set up the scrolling region to be
      * the bottom of the screen (tuiTermUnsetup()).
-     */
+   */
   fputs_unfiltered_hook = NULL;
   flush_hook = NULL;
   rl_initialize ();		/* need readline initialization to
-		      * create termcap sequences
-		      */
+				   * create termcap sequences
+				 */
   tuiTermUnsetup (1, cmdWin->detail.commandInfo.curch);
 
   return;
@@ -96,8 +96,8 @@ tuiInit (argv0)
 
 
 /*
-** tuiInitWindows().
-*/
+   ** tuiInitWindows().
+ */
 void
 #ifdef __STDC__
 tuiInitWindows (void)
@@ -120,9 +120,9 @@ tuiInitWindows ()
 
 
 /*
-** tuiCleanUp().
-**        Kill signal handler and cleanup termination method
-*/
+   ** tuiCleanUp().
+   **        Kill signal handler and cleanup termination method
+ */
 void
 #ifdef __STDC__
 tuiResetScreen (void)
@@ -152,9 +152,9 @@ tuiResetScreen ()
 
 
 /*
-** tuiCleanUp().
-**        Kill signal handler and cleanup termination method
-*/
+   ** tuiCleanUp().
+   **        Kill signal handler and cleanup termination method
+ */
 void
 #ifdef __STDC__
 tuiCleanUp (void)
@@ -179,8 +179,8 @@ tuiCleanUp ()
 
 
 /*
-** tuiError().
-*/
+   ** tuiError().
+ */
 void
 #ifdef __STDC__
 tuiError (
@@ -204,9 +204,9 @@ tuiError (string, exitGdb)
 
 
 /*
-** tui_vError()
-**        tuiError with args in a va_list.
-*/
+   ** tui_vError()
+   **        tuiError with args in a va_list.
+ */
 void
 #ifdef __STDC__
 tui_vError (
@@ -229,9 +229,9 @@ tui_vError (args)
 
 
 /*
-** tuiFree()
-**    Wrapper on top of free() to ensure that input address is greater than 0x0
-*/
+   ** tuiFree()
+   **    Wrapper on top of free() to ensure that input address is greater than 0x0
+ */
 void
 #ifdef __STDC__
 tuiFree (
@@ -251,10 +251,10 @@ tuiFree (ptr)
 
 
 /* tuiGetLowDisassemblyAddress().
-**        Determine what the low address will be to display in the TUI's
-**        disassembly window.  This may or may not be the same as the
-**        low address input.
-*/
+   **        Determine what the low address will be to display in the TUI's
+   **        disassembly window.  This may or may not be the same as the
+   **        low address input.
+ */
 Opaque
 #ifdef __STDC__
 tuiGetLowDisassemblyAddress (
@@ -270,9 +270,9 @@ tuiGetLowDisassemblyAddress (low, pc)
   Opaque newLow;
 
   /*
-    ** Determine where to start the disassembly so that the pc is about in the
-    ** middle of the viewport.
-    */
+     ** Determine where to start the disassembly so that the pc is about in the
+     ** middle of the viewport.
+   */
   for (line = 0, newLow = pc;
        (newLow > low &&
 	line < (tuiDefaultWinViewportHeight (DISASSEM_WIN,
@@ -289,9 +289,9 @@ tuiGetLowDisassemblyAddress (low, pc)
 
 
 /* tui_vGetLowDisassemblyAddress().
-**        Determine what the low address will be to display in the TUI's
-**        disassembly window with args in a va_list.
-*/
+   **        Determine what the low address will be to display in the TUI's
+   **        disassembly window with args in a va_list.
+ */
 Opaque
 #ifdef __STDC__
 tui_vGetLowDisassemblyAddress (
@@ -315,20 +315,20 @@ tui_vGetLowDisassemblyAddress (args)
 
 
 /*
-** tuiDo().
-**        General purpose function to execute a tui function.  Transitions
-**        between curses and the are handled here.  This function is called
-**        by non-tui gdb functions.
-**
-**        Errors are caught here.
-**        If there is no error, the value returned by 'func' is returned.
-**        If there is an error, then zero is returned.
-**
-**       Must not be called with immediate_quit in effect (bad things might
-**       happen, say we got a signal in the middle of a memcpy to quit_return).
-**       This is an OK restriction; with very few exceptions immediate_quit can
-**       be replaced by judicious use of QUIT.
-*/
+   ** tuiDo().
+   **        General purpose function to execute a tui function.  Transitions
+   **        between curses and the are handled here.  This function is called
+   **        by non-tui gdb functions.
+   **
+   **        Errors are caught here.
+   **        If there is no error, the value returned by 'func' is returned.
+   **        If there is an error, then zero is returned.
+   **
+   **       Must not be called with immediate_quit in effect (bad things might
+   **       happen, say we got a signal in the middle of a memcpy to quit_return).
+   **       This is an OK restriction; with very few exceptions immediate_quit can
+   **       be replaced by judicious use of QUIT.
+ */
 Opaque
 #ifdef __STDC__
 tuiDo (
@@ -345,7 +345,7 @@ tuiDo (func, va_alist)
 
   /* It is an error to be tuiDo'ing if we
      * don't own the terminal.
-     */
+   */
   if (!terminal_is_ours)
     return ret;
 
@@ -367,22 +367,22 @@ tuiDo (func, va_alist)
 
 
 /*
-** tuiDoAndReturnToTop().
-**        General purpose function to execute a tui function.  Transitions
-**        between curses and the are handled here.  This function is called
-**        by non-tui gdb functions who wish to reset gdb to the top level.
-**        After the tuiDo is performed, a return to the top level occurs.
-**
-**        Errors are caught here.
-**        If there is no error, the value returned by 'func' is returned.
-**        If there is an error, then zero is returned.
-**
-**       Must not be called with immediate_quit in effect (bad things might
-**       happen, say we got a signal in the middle of a memcpy to quit_return).
-**       This is an OK restriction; with very few exceptions immediate_quit can
-**       be replaced by judicious use of QUIT.
-**
-*/
+   ** tuiDoAndReturnToTop().
+   **        General purpose function to execute a tui function.  Transitions
+   **        between curses and the are handled here.  This function is called
+   **        by non-tui gdb functions who wish to reset gdb to the top level.
+   **        After the tuiDo is performed, a return to the top level occurs.
+   **
+   **        Errors are caught here.
+   **        If there is no error, the value returned by 'func' is returned.
+   **        If there is an error, then zero is returned.
+   **
+   **       Must not be called with immediate_quit in effect (bad things might
+   **       happen, say we got a signal in the middle of a memcpy to quit_return).
+   **       This is an OK restriction; with very few exceptions immediate_quit can
+   **       be replaced by judicious use of QUIT.
+   **
+ */
 Opaque
 #ifdef __STDC__
 tuiDoAndReturnToTop (
@@ -399,7 +399,7 @@ tuiDoAndReturnToTop (func, va_alist)
 
   /* It is an error to be tuiDo'ing if we
      * don't own the terminal.
-     */
+   */
   if (!terminal_is_ours)
     return ret;
 
@@ -439,9 +439,9 @@ tui_vSelectSourceSymtab (args)
 
 
 /*
-** _initialize_tui().
-**      Function to initialize gdb commands, for tui window manipulation.
-*/
+   ** _initialize_tui().
+   **      Function to initialize gdb commands, for tui window manipulation.
+ */
 void
 _initialize_tui ()
 {
@@ -469,21 +469,21 @@ Usage:\ttoggle $fregs\n\ttoggle breakpoints";
 			 "toggle ",
 			 1,
 			 &cmdlist);
-}				/* _initialize_tui*/
+}				/* _initialize_tui */
 
 
 /*
-** va_catch_errors().
-**       General purpose function to execute a function, catching errors.
-**       If there is no error, the value returned by 'func' is returned.
-**       If there is error, then zero is returned.
-**       Note that 'func' must take a variable argument list as well.
-**
-**       Must not be called with immediate_quit in effect (bad things might
-**       happen, say we got a signal in the middle of a memcpy to quit_return).
-**       This is an OK restriction; with very few exceptions immediate_quit can
-**       be replaced by judicious use of QUIT.
-*/
+   ** va_catch_errors().
+   **       General purpose function to execute a function, catching errors.
+   **       If there is no error, the value returned by 'func' is returned.
+   **       If there is error, then zero is returned.
+   **       Note that 'func' must take a variable argument list as well.
+   **
+   **       Must not be called with immediate_quit in effect (bad things might
+   **       happen, say we got a signal in the middle of a memcpy to quit_return).
+   **       This is an OK restriction; with very few exceptions immediate_quit can
+   **       be replaced by judicious use of QUIT.
+ */
 Opaque
 #ifdef __STDC__
 va_catch_errors (
@@ -498,10 +498,10 @@ va_catch_errors (func, args)
   Opaque ret = (Opaque) NULL;
 
   /*
-  ** We could have used catch_errors(), but it doesn't handle variable args.
-  ** Also, for the tui, we always want to catch all errors, so we don't
-  ** need to pass a mask, or an error string.
-  */
+     ** We could have used catch_errors(), but it doesn't handle variable args.
+     ** Also, for the tui, we always want to catch all errors, so we don't
+     ** need to pass a mask, or an error string.
+   */
   jmp_buf saved_error;
   jmp_buf saved_quit;
   jmp_buf tmp_jmp;
@@ -537,11 +537,11 @@ va_catch_errors (func, args)
 }
 
 /*
-** vcatch_errors().
-**        Catch errors occurring in tui or non tui function, handling
-**        variable param lists. Note that 'func' must take a variable
-**        argument list as well.
-*/
+   ** vcatch_errors().
+   **        Catch errors occurring in tui or non tui function, handling
+   **        variable param lists. Note that 'func' must take a variable
+   **        argument list as well.
+ */
 Opaque
 #ifdef __STDC__
 vcatch_errors (
@@ -550,10 +550,10 @@ vcatch_errors (
 vcatch_errors (va_alist)
      va_dcl
 /*
-vcatch_errors(func, va_alist)
-    OpaqueFuncPtr    func;
-    va_dcl
-*/
+   vcatch_errors(func, va_alist)
+   OpaqueFuncPtr    func;
+   va_dcl
+ */
 #endif
 {
   Opaque ret = (Opaque) NULL;
@@ -561,8 +561,8 @@ vcatch_errors(func, va_alist)
 #ifdef __STDC__
   va_start (args, func);
 /*
-    va_arg(args, OpaqueFuncPtr);
-*/
+   va_arg(args, OpaqueFuncPtr);
+ */
 #else
   OpaqueFuncPtr func;
 
@@ -644,20 +644,20 @@ strcat_to_buf_with_fmt (va_alist)
 
 
 /*
-** _tui_vDo().
-**        General purpose function to execute a tui function.  Transitions
-**        between curses and the are handled here.  This function is called
-**        by non-tui gdb functions.
-**
-**        Errors are caught here.
-**        If there is no error, the value returned by 'func' is returned.
-**        If there is an error, then zero is returned.
-**
-**       Must not be called with immediate_quit in effect (bad things might
-**       happen, say we got a signal in the middle of a memcpy to quit_return).
-**       This is an OK restriction; with very few exceptions immediate_quit can
-**       be replaced by judicious use of QUIT.
-*/
+   ** _tui_vDo().
+   **        General purpose function to execute a tui function.  Transitions
+   **        between curses and the are handled here.  This function is called
+   **        by non-tui gdb functions.
+   **
+   **        Errors are caught here.
+   **        If there is no error, the value returned by 'func' is returned.
+   **        If there is an error, then zero is returned.
+   **
+   **       Must not be called with immediate_quit in effect (bad things might
+   **       happen, say we got a signal in the middle of a memcpy to quit_return).
+   **       This is an OK restriction; with very few exceptions immediate_quit can
+   **       be replaced by judicious use of QUIT.
+ */
 static Opaque
 #ifdef __STDC__
 _tui_vDo (
@@ -675,7 +675,7 @@ _tui_vDo (func, args)
 
   /* It is an error to be tuiDo'ing if we
      * don't own the terminal.
-     */
+   */
   if (!terminal_is_ours)
     return ret;
 
@@ -683,7 +683,7 @@ _tui_vDo (func, args)
     {
       /* If doing command window the "XDB way" (command window
          * is unmanaged by curses...
-         */
+       */
       /* Set up terminal for TUI */
       tuiTermSetup (1);
 
@@ -711,13 +711,13 @@ _toggle_command (arg, fromTTY)
   printf_filtered ("Specify feature to toggle.\n%s\n",
 		   (tui_version) ? TUI_TOGGLE_USAGE : TOGGLE_USAGE);
 /*
-  tuiDo((TuiOpaqueFuncPtr)_Toggle_command, arg, fromTTY);
-*/
+   tuiDo((TuiOpaqueFuncPtr)_Toggle_command, arg, fromTTY);
+ */
 }
 
 /*
-** _tui_vToggle_command().
-*/
+   ** _tui_vToggle_command().
+ */
 static void
 #ifdef __STDC__
 _tui_vToggle_command (
@@ -745,8 +745,8 @@ _tui_vToggle_command (args)
       if (subsetCompare (ptr, TUI_FLOAT_REGS_NAME))
 	tuiToggleFloatRegs ();
 /*        else if (subsetCompare(ptr, "ANOTHER TOGGLE OPTION"))
-            ...
-*/
+   ...
+ */
       else
 	printf_filtered (TOGGLE_USAGE);
       tuiFree (ptr);
@@ -766,9 +766,9 @@ _tuiReset ()
   struct termio mode;
 
   /*
-    ** reset the teletype mode bits to a sensible state.
-    ** Copied tset.c
-    */
+     ** reset the teletype mode bits to a sensible state.
+     ** Copied tset.c
+   */
 #if ! defined (USG) && defined (TIOCGETC)
   struct tchars tbuf;
 #endif /* !USG && TIOCGETC */
@@ -804,7 +804,7 @@ _tuiReset ()
 #endif /* CBREAK */
 		     | VTDELAY | ALLDELAY);
   mode.sg_flags |= XTABS | ECHO | CRMOD | ANYP;
-#else /*USG*/
+#else /*USG */
   ioctl (FILEDES, TCGETA, &mode);
   mode.c_cc[VINTR] = CHK (mode.c_cc[VINTR], CTRL ('?'));
   mode.c_cc[VQUIT] = CHK (mode.c_cc[VQUIT], CTRL ('\\'));
@@ -818,7 +818,7 @@ _tuiReset ()
   mode.c_cflag &= ~(CSIZE | PARODD | CLOCAL);
 #ifndef hp9000s800
   mode.c_cflag |= (CS8 | CREAD);
-#else /*hp9000s800*/
+#else /*hp9000s800 */
   mode.c_cflag |= (CS8 | CSTOPB | CREAD);
 #endif /* hp9000s800 */
   mode.c_lflag &= ~(XCASE | ECHONL | NOFLSH);

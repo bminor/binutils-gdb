@@ -15,7 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
 
    Written by the Center for Software Science at the University of Utah
    and by Cygnus Support.  */
@@ -38,35 +39,35 @@
    and internalize the HP C debug symbols within that objfile.  */
 
 struct hpread_symfile_info
-{
-  /* The contents of each of the debug sections (there are 4 of them).  */
-  char *gntt;
-  char *lntt;
-  char *slt;
-  char *vt;
+  {
+    /* The contents of each of the debug sections (there are 4 of them).  */
+    char *gntt;
+    char *lntt;
+    char *slt;
+    char *vt;
 
-  /* We keep the size of the $VT$ section for range checking.  */
-  unsigned int vt_size;
+    /* We keep the size of the $VT$ section for range checking.  */
+    unsigned int vt_size;
 
-  /* Some routines still need to know the number of symbols in the
-     main debug sections ($LNTT$ and $GNTT$). */
-  unsigned int lntt_symcount;
-  unsigned int gntt_symcount;
+    /* Some routines still need to know the number of symbols in the
+       main debug sections ($LNTT$ and $GNTT$). */
+    unsigned int lntt_symcount;
+    unsigned int gntt_symcount;
 
-  /* To keep track of all the types we've processed.  */
-  struct type **type_vector;
-  int type_vector_length;
+    /* To keep track of all the types we've processed.  */
+    struct type **type_vector;
+    int type_vector_length;
 
-  /* Keeps track of the beginning of a range of source lines.  */
-  sltpointer sl_index;
+    /* Keeps track of the beginning of a range of source lines.  */
+    sltpointer sl_index;
 
-  /* Some state variables we'll need.  */
-  int within_function;
+    /* Some state variables we'll need.  */
+    int within_function;
 
-  /* Keep track of the current function's address.  We may need to look
-     up something based on this address.  */
-  unsigned int current_function_value;
-};
+    /* Keep track of the current function's address.  We may need to look
+       up something based on this address.  */
+    unsigned int current_function_value;
+  };
 
 /* Accessor macros to get at the fields.  */
 #define HPUX_SYMFILE_INFO(o) \
@@ -105,20 +106,20 @@ struct hpread_symfile_info
    of the psymtab.  */
 
 struct symloc
-{
-  /* The offset within the file symbol table of first local symbol for
-     this file.  */
+  {
+    /* The offset within the file symbol table of first local symbol for
+       this file.  */
 
-  int ldsymoff;
+    int ldsymoff;
 
-  /* Length (in bytes) of the section of the symbol table devoted to
-     this file's symbols (actually, the section bracketed may contain
-     more than just this file's symbols).  If ldsymlen is 0, the only
-     reason for this thing's existence is the dependency list.
-     Nothing else will happen when it is read in.  */
+    /* Length (in bytes) of the section of the symbol table devoted to
+       this file's symbols (actually, the section bracketed may contain
+       more than just this file's symbols).  If ldsymlen is 0, the only
+       reason for this thing's existence is the dependency list.
+       Nothing else will happen when it is read in.  */
 
-  int ldsymlen;
-};
+    int ldsymlen;
+  };
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
 #define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
@@ -132,12 +133,12 @@ extern int info_verbose;
 extern struct complaint string_table_offset_complaint;
 extern struct complaint lbrac_unmatched_complaint;
 extern struct complaint lbrac_mismatch_complaint;
-
 
-void hpread_symfile_init  PARAMS ((struct objfile *));
+
+void hpread_symfile_init PARAMS ((struct objfile *));
 
 static struct type *
-hpread_read_array_type PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  hpread_read_array_type PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
 static struct type *hpread_alloc_type
   PARAMS ((dnttpointer, struct objfile *));
@@ -185,7 +186,7 @@ static sltpointer hpread_record_lines
 static struct type *hpread_read_function_type
   PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
 
-static struct type * hpread_type_lookup
+static struct type *hpread_type_lookup
   PARAMS ((dnttpointer, struct objfile *));
 
 static unsigned long hpread_get_depth
@@ -205,8 +206,8 @@ static union sltentry *hpread_get_slt PARAMS ((int, struct objfile *));
 static void hpread_psymtab_to_symtab PARAMS ((struct partial_symtab *));
 static void hpread_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 static int hpread_has_name PARAMS ((enum dntt_entry_type));
-
 
+
 /* Initialization for reading native HP C debug symbols from OBJFILE.
 
    It's only purpose in life is to set up the symbol reader's private
@@ -243,11 +244,11 @@ hpread_symfile_init (objfile)
 		     bfd_section_size (objfile->obfd, gntt_section));
 
   bfd_get_section_contents (objfile->obfd, gntt_section, GNTT (objfile),
-			    0, bfd_section_size (objfile->obfd, gntt_section));
+			 0, bfd_section_size (objfile->obfd, gntt_section));
 
   GNTT_SYMCOUNT (objfile)
     = bfd_section_size (objfile->obfd, gntt_section)
-			/ sizeof (struct dntt_type_block);
+    / sizeof (struct dntt_type_block);
 
   /* Read in data from the $LNTT$ subspace.   Also keep track of the number
      of LNTT symbols.  */
@@ -260,11 +261,11 @@ hpread_symfile_init (objfile)
 		     bfd_section_size (objfile->obfd, lntt_section));
 
   bfd_get_section_contents (objfile->obfd, lntt_section, LNTT (objfile),
-			    0, bfd_section_size (objfile->obfd, lntt_section));
+			 0, bfd_section_size (objfile->obfd, lntt_section));
 
   LNTT_SYMCOUNT (objfile)
     = bfd_section_size (objfile->obfd, lntt_section)
-			/ sizeof (struct dntt_type_block);
+    / sizeof (struct dntt_type_block);
 
   /* Read in data from the $SLT$ subspace.  $SLT$ contains information
      on source line numbers.  */
@@ -277,7 +278,7 @@ hpread_symfile_init (objfile)
 		   bfd_section_size (objfile->obfd, slt_section));
 
   bfd_get_section_contents (objfile->obfd, slt_section, SLT (objfile),
-			    0, bfd_section_size (objfile->obfd, slt_section));
+			  0, bfd_section_size (objfile->obfd, slt_section));
 
   /* Read in data from the $VT$ subspace.  $VT$ contains things like
      names and constants.  Keep track of the number of symbols in the VT.  */
@@ -472,7 +473,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		pst = hpread_start_psymtab (objfile, section_offsets,
 					    namestring, valu,
 					    (hp_symnum
-					     * sizeof (struct dntt_type_block)),
+					 * sizeof (struct dntt_type_block)),
 					    objfile->global_psymbols.next,
 					    objfile->static_psymbols.next);
 		texthigh = valu;
@@ -482,8 +483,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
 	    case DNTT_TYPE_MODULE:
 	      /* A source file.  It's still unclear to me what the
-		 real difference between a DNTT_TYPE_SRCFILE and DNTT_TYPE_MODULE
-		 is supposed to be.  */
+	         real difference between a DNTT_TYPE_SRCFILE and DNTT_TYPE_MODULE
+	         is supposed to be.  */
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile);
 	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
@@ -492,7 +493,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  pst = hpread_start_psymtab (objfile, section_offsets,
 					      namestring, valu,
 					      (hp_symnum
-					       * sizeof (struct dntt_type_block)),
+					 * sizeof (struct dntt_type_block)),
 					      objfile->global_psymbols.next,
 					      objfile->static_psymbols.next);
 		  texthigh = valu;
@@ -502,7 +503,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	    case DNTT_TYPE_FUNCTION:
 	    case DNTT_TYPE_ENTRY:
 	      /* The beginning of a function.  DNTT_TYPE_ENTRY may also denote
-		 a secondary entry point.  */
+	         a secondary entry point.  */
 	      valu = dn_bufp->dfunc.hiaddr + ANOFFSET (section_offsets,
 						       SECT_OFF_TEXT);
 	      if (valu > texthigh)
@@ -519,7 +520,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	    case DNTT_TYPE_BEGIN:
 	    case DNTT_TYPE_END:
 	      /* Scope block begin/end.  We only care about function
-		 and file blocks right now.  */
+	         and file blocks right now.  */
 	      if (dn_bufp->dend.endkind == DNTT_TYPE_MODULE)
 		{
 		  hpread_end_psymtab (pst, psymtab_include_list, includes_used,
@@ -573,9 +574,9 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		    pst = hpread_start_psymtab (objfile, section_offsets,
 						"globals", 0,
 						(hp_symnum
-						 * sizeof (struct dntt_type_block)),
-						objfile->global_psymbols.next,
-						objfile->static_psymbols.next);
+					 * sizeof (struct dntt_type_block)),
+					      objfile->global_psymbols.next,
+					     objfile->static_psymbols.next);
 		  }
 		if (dn_bufp->dsvar.global)
 		  {
@@ -603,8 +604,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		{
 		  pst = hpread_start_psymtab (objfile, section_offsets,
 					      "globals", 0,
-					      (hp_symnum 
-					       * sizeof (struct dntt_type_block)),
+					      (hp_symnum
+					 * sizeof (struct dntt_type_block)),
 					      objfile->global_psymbols.next,
 					      objfile->static_psymbols.next);
 		}
@@ -673,7 +674,7 @@ hpread_get_slt (index, objfile)
      int index;
      struct objfile *objfile;
 {
-  return (union sltentry *)&(SLT (objfile)[index * sizeof (union sltentry)]);
+  return (union sltentry *) &(SLT (objfile)[index * sizeof (union sltentry)]);
 }
 
 /* Get the low address associated with some symbol (typically the start
@@ -697,8 +698,9 @@ hpread_get_textlow (global, index, objfile)
 	dn_bufp = hpread_get_gntt (index++, objfile);
       else
 	dn_bufp = hpread_get_lntt (index++, objfile);
-    } while (dn_bufp->dblock.kind != DNTT_TYPE_FUNCTION
-	     && dn_bufp->dblock.kind != DNTT_TYPE_END);
+    }
+  while (dn_bufp->dblock.kind != DNTT_TYPE_FUNCTION
+	 && dn_bufp->dblock.kind != DNTT_TYPE_END);
 
   /* Avoid going past a DNTT_TYPE_END when looking for a DNTT_TYPE_FUNCTION.  This
      might happen when a sourcefile has no functions.  */
@@ -825,7 +827,7 @@ hpread_has_name (kind)
 
 static struct partial_symtab *
 hpread_start_psymtab (objfile, section_offsets,
-		  filename, textlow, ldsymoff, global_syms, static_syms)
+		      filename, textlow, ldsymoff, global_syms, static_syms)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
      char *filename;
@@ -854,7 +856,7 @@ hpread_start_psymtab (objfile, section_offsets,
 
 static struct partial_symtab *
 hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
-	     capping_text, dependency_list, number_dependencies)
+		    capping_text, dependency_list, number_dependencies)
      struct partial_symtab *pst;
      char **include_list;
      int num_includes;
@@ -864,10 +866,10 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      int number_dependencies;
 {
   int i;
-  struct objfile *objfile = pst -> objfile;
+  struct objfile *objfile = pst->objfile;
 
   if (capping_symbol_offset != -1)
-      LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
+    LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
   pst->texthigh = capping_text;
 
   pst->n_global_syms =
@@ -880,9 +882,9 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
     {
       pst->dependencies = (struct partial_symtab **)
 	obstack_alloc (&objfile->psymbol_obstack,
-		       number_dependencies * sizeof (struct partial_symtab *));
+		    number_dependencies * sizeof (struct partial_symtab *));
       memcpy (pst->dependencies, dependency_list,
-	     number_dependencies * sizeof (struct partial_symtab *));
+	      number_dependencies * sizeof (struct partial_symtab *));
     }
   else
     pst->dependencies = 0;
@@ -890,19 +892,19 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   for (i = 0; i < num_includes; i++)
     {
       struct partial_symtab *subpst =
-	allocate_psymtab (include_list[i], objfile);
+      allocate_psymtab (include_list[i], objfile);
 
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
-	  (char *) obstack_alloc (&objfile->psymbol_obstack,
-				  sizeof (struct symloc));
-      LDSYMOFF(subpst) =
-	LDSYMLEN(subpst) =
-	  subpst->textlow =
-	    subpst->texthigh = 0;
+	(char *) obstack_alloc (&objfile->psymbol_obstack,
+				sizeof (struct symloc));
+      LDSYMOFF (subpst) =
+	LDSYMLEN (subpst) =
+	subpst->textlow =
+	subpst->texthigh = 0;
 
       /* We could save slight bits of space by only making one of these,
-	 shared by the entire set of include files.  FIXME-someday.  */
+         shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies = (struct partial_symtab **)
 	obstack_alloc (&objfile->psymbol_obstack,
 		       sizeof (struct partial_symtab *));
@@ -911,8 +913,8 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
       subpst->globals_offset =
 	subpst->n_global_syms =
-	  subpst->statics_offset =
-	    subpst->n_static_syms = 0;
+	subpst->statics_offset =
+	subpst->n_static_syms = 0;
 
       subpst->readin = 0;
       subpst->symtab = 0;
@@ -932,17 +934,17 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       && pst->n_static_syms == 0)
     {
       /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-	 it is on the obstack, but we can forget to chain it on the list.  */
+         it is on the obstack, but we can forget to chain it on the list.  */
       /* Empty psymtabs happen as a result of header files which don't have
-	 any symbols in them.  There can be a lot of them.  But this check
-	 is wrong, in that a psymtab with N_SLINE entries but nothing else
-	 is not empty, but we don't realize that.  Fixing that without slowing
-	 things down might be tricky.  */
+         any symbols in them.  There can be a lot of them.  But this check
+         is wrong, in that a psymtab with N_SLINE entries but nothing else
+         is not empty, but we don't realize that.  Fixing that without slowing
+         things down might be tricky.  */
 
       discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
-      pst = (struct partial_symtab *)NULL;
+      pst = (struct partial_symtab *) NULL;
     }
   return pst;
 }
@@ -1209,15 +1211,15 @@ hpread_lookup_type (hp_type, objfile)
 	    {
 	      TYPE_VECTOR_LENGTH (objfile) = 100;
 	      TYPE_VECTOR (objfile) = (struct type **)
-		xmmalloc (objfile -> md,
-			  TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
+		xmmalloc (objfile->md,
+		     TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
 	    }
 	  while (index >= TYPE_VECTOR_LENGTH (objfile))
 	    TYPE_VECTOR_LENGTH (objfile) *= 2;
 	  TYPE_VECTOR (objfile) = (struct type **)
-	    xmrealloc (objfile -> md,
+	    xmrealloc (objfile->md,
 		       (char *) TYPE_VECTOR (objfile),
-		      (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
+		   (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
 	  memset (&TYPE_VECTOR (objfile)[old_len], 0,
 		  (TYPE_VECTOR_LENGTH (objfile) - old_len) *
 		  sizeof (struct type *));
@@ -1282,7 +1284,7 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (name, strlen (name), 
+      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1386,7 +1388,7 @@ hpread_read_function_type (hp_type, dn_bufp, objfile)
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       if (paramp->dfparam.copyparam)
 	{
-	  SYMBOL_VALUE (sym) = paramp->dfparam.location ;
+	  SYMBOL_VALUE (sym) = paramp->dfparam.location;
 #ifdef HPREAD_ADJUST_STACK_ADDRESS
 	  SYMBOL_VALUE (sym)
 	    += HPREAD_ADJUST_STACK_ADDRESS (CURRENT_FUNCTION_VALUE (objfile));
@@ -1462,7 +1464,7 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
   type = hpread_alloc_type (hp_type, objfile);
   if ((TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
       (TYPE_CODE (type) == TYPE_CODE_UNION))
-      return type;
+    return type;
 
   /* Get the basic type correct.  */
   if (dn_bufp->dblock.kind == DNTT_TYPE_STRUCT)
@@ -1566,9 +1568,9 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
   else if (dn_bufp->darray.arraylength == 0x7fffffff)
     {
       /* The HP debug format represents char foo[]; as an array with
-	 length 0x7fffffff.  Internally GDB wants to represent this
-	 as an array of length zero.  */
-     TYPE_LENGTH (type) = 0;
+         length 0x7fffffff.  Internally GDB wants to represent this
+         as an array of length zero.  */
+      TYPE_LENGTH (type) = 0;
     }
   else
     TYPE_LENGTH (type) = dn_bufp->darray.arraylength / 8;
@@ -1665,7 +1667,7 @@ hpread_type_lookup (hp_type, objfile)
 
 	TYPE_CPLUS_SPECIFIC (structtype)
 	  = (struct cplus_struct_type *) &cplus_struct_default;
- 	TYPE_NAME (structtype) = suffix;
+	TYPE_NAME (structtype) = suffix;
 	return structtype;
       }
 
@@ -1827,7 +1829,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	}
       start_subfile (name, NULL);
       break;
-      
+
     case DNTT_TYPE_MODULE:
       /* No need to do anything with these DNTT_TYPE_MODULE symbols anymore.  */
       break;
@@ -1840,7 +1842,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 						SL_INDEX (objfile),
 						dn_bufp->dfunc.address,
 						objfile, offset);
-      
+
       WITHIN_FUNCTION (objfile) = 1;
       CURRENT_FUNCTION_VALUE (objfile) = valu;
 

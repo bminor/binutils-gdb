@@ -2,21 +2,22 @@
    Copyright 1994, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "a29k/tm-a29k.h"
 #include "tm-vxworks.h"
@@ -68,9 +69,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    want the inferior to stop after the function call has completed.
    call_function_by_hand () sets a breakpoint here (via CALL_DUMMY_BREAK_SET),
    which POP_FRAME later deletes (via CALL_DUMMY_BREAK_DELETE).  */
- 
+
 #define CALL_DUMMY_STOP_OFFSET (7 * 4)
- 
+
 /* The offset of the first instruction of the CALL_DUMMY code fragment
    relative to the frame pointer for a dummy frame.  This is equal to
    the size of the CALL_DUMMY plus the arg_slop area size (see the diagram
@@ -118,12 +119,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    frame pointer in the dummy frame.
 
    NOTE: in the both of the following definitions, we take advantage of
-	 knowledge of the implementation of the target breakpoint operation,
-	 in that we pass a null pointer as the second argument.  It seems
-	 reasonable to assume that any target requiring the use of 
-	 CALL_DUMMY_BREAK_{SET,DELETE} will not store the breakpoint
-	 shadow contents in GDB; in any case, this assumption is vaild
-	 for all VxWorks-related targets.  */
+   knowledge of the implementation of the target breakpoint operation,
+   in that we pass a null pointer as the second argument.  It seems
+   reasonable to assume that any target requiring the use of 
+   CALL_DUMMY_BREAK_{SET,DELETE} will not store the breakpoint
+   shadow contents in GDB; in any case, this assumption is vaild
+   for all VxWorks-related targets.  */
 
 #define CALL_DUMMY_BREAK_SET(call_dummy_addr) \
   target_insert_breakpoint ((call_dummy_addr) + CALL_DUMMY_STOP_OFFSET, \
@@ -146,7 +147,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    the CALL_DUMMY handling for all targets (at least, a clean solution
    would probably require this).  Arguably, this should go in "tm-29k.h"
    rather than here.  */
-   
+
 #define STRUCT_VAL_ARGS_UNSUPPORTED
 
 #define BKPT_OFFSET	(7 * 4)
@@ -159,16 +160,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     STUFF_I16((char *)dummyname + CONST_INSN + 4, fun >> 16);\
     *(int *)((char *)dummyname + BKPT_OFFSET) = BKPT_INSTR;\
   }
-
 
+
 /* Offsets into jmp_buf.  They are derived from VxWorks' REG_SET struct
    (see VxWorks' setjmp.h). Note that Sun2, Sun3 and SunOS4 and VxWorks have
    different REG_SET structs, hence different layouts for the jmp_buf struct.
    Only JB_PC is needed for getting the saved PC value.  */
 
-#define JB_ELEMENT_SIZE 4       /* size of each element in jmp_buf */
+#define JB_ELEMENT_SIZE 4	/* size of each element in jmp_buf */
 #define JB_PC		3	/* offset of pc (pc1) in jmp_buf */
- 
+
 /* Figure out where the longjmp will land.  We expect that we have just entered
    longjmp and haven't yet setup the stack frame, so the args are still in the
    output regs.  lr2 (LR2_REGNUM) points at the jmp_buf structure from which we
@@ -179,14 +180,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern int get_longjmp_target PARAMS ((CORE_ADDR *));
 
 /* VxWorks adjusts the PC after a breakpoint has been hit.  */
- 
+
 #undef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 0
 
 /* Do whatever promotions are appropriate on a value being returned
    from a function.  VAL is the user-supplied value, and FUNC_TYPE
    is the return type of the function if known, else 0.
- 
+
    For the Am29k, as far as I understand, if the function return type is known,
    cast the value to that type; otherwise, ensure that integer return values
    fill all of gr96.
@@ -195,7 +196,7 @@ extern int get_longjmp_target PARAMS ((CORE_ADDR *));
    to most Am29K-based systems; but once moved into that file, it might
    need to be redefined for all Am29K-based targets that also redefine
    STORE_RETURN_VALUE.  For now, to be safe, we define it here.  */
- 
+
 #define PROMOTE_RETURN_VALUE(val, func_type) \
   do {                                                                  \
       if (func_type)                                                    \

@@ -1,21 +1,22 @@
 /* Definitions to target GDB to a merlin under utek 2.1
    Copyright 1986, 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
@@ -137,7 +138,7 @@ extern CORE_ADDR merlin_skip_prologue PARAMS ((CORE_ADDR));
     ((N) >= LP0_REGNUM ?	\
      builtin_type_double	\
      : builtin_type_float)	\
-   : builtin_type_int)	
+   : builtin_type_int)
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function.
@@ -192,7 +193,7 @@ extern CORE_ADDR merlin_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int merlin_frame_num_args PARAMS ((struct frame_info *fi));
+extern int merlin_frame_num_args PARAMS ((struct frame_info * fi));
 #define FRAME_NUM_ARGS(fi) (merlin_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
@@ -222,8 +223,8 @@ extern int merlin_frame_num_args PARAMS ((struct frame_info *fi));
   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;	\
   (frame_saved_regs).regs[FP_REGNUM]				\
      = read_memory_integer ((frame_info)->frame, 4); }
-
 
+
 /* Things needed for making the inferior call functions.  */
 
 /* Push an empty stack frame, to record the current PC, etc.  */
@@ -259,10 +260,10 @@ extern int merlin_frame_num_args PARAMS ((struct frame_info *fi));
 }
 
 /* This sequence of words is the instructions
-     enter	0xff,0		82 ff 00
-     jsr	@0x00010203	7f ae c0 01 02 03
-     adjspd	0x69696969	7f a5 01 02 03 04
-     bpt			f2
+   enter        0xff,0          82 ff 00
+   jsr  @0x00010203     7f ae c0 01 02 03
+   adjspd       0x69696969      7f a5 01 02 03 04
+   bpt                  f2
    Note this is 16 bytes.  */
 
 #define CALL_DUMMY { 0x7f00ff82, 0x0201c0ae, 0x01a57f03, 0xf2040302 }

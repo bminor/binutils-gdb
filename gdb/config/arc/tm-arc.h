@@ -2,21 +2,22 @@
    Copyright (C) 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Used by arc-tdep.c to set the default cpu type.  */
 #define DEFAULT_ARC_CPU_TYPE "base"
@@ -116,15 +117,15 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
 /* Register numbers of various important registers (used to index
    into arrays of register names and register values).  */
 
-#define R0_REGNUM   0	   /* First local register		*/
-#define R59_REGNUM 59	   /* Last local register		*/
-#define FP_REGNUM  27	   /* Contains address of executing stack frame */
-#define SP_REGNUM  28      /* stack pointer */
-#define BLINK_REGNUM 31    /* link register */
-#define	STA_REGNUM 61	   /* processor status word */
-#define PC_REGNUM  91	   /* instruction pointer */
-#define AUX_BEG_REGNUM  61 /* aux reg begins */
-#define AUX_END_REGNUM  90 /* aux reg ends, pc not real aux reg */
+#define R0_REGNUM   0		/* First local register           */
+#define R59_REGNUM 59		/* Last local register            */
+#define FP_REGNUM  27		/* Contains address of executing stack frame */
+#define SP_REGNUM  28		/* stack pointer */
+#define BLINK_REGNUM 31		/* link register */
+#define	STA_REGNUM 61		/* processor status word */
+#define PC_REGNUM  91		/* instruction pointer */
+#define AUX_BEG_REGNUM  61	/* aux reg begins */
+#define AUX_END_REGNUM  90	/* aux reg ends, pc not real aux reg */
 
 /* Fake registers used to mark immediate data.  */
 #define SHIMM_FLAG_REGNUM 61
@@ -158,8 +159,8 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
       0 \
     } \
 }
-   
-#define PFP_REGNUM R0_REGNUM	/* Previous frame pointer	*/
+
+#define PFP_REGNUM R0_REGNUM	/* Previous frame pointer */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
@@ -184,8 +185,8 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 #define REGISTER_VIRTUAL_TYPE(N) (builtin_type_int)
-
 
+
 /* Macros for understanding function return values... */
 
 /* Does the specified function use the "struct returning" convention
@@ -207,7 +208,7 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  This is only called if USE_STRUCT_CONVENTION for this
    type is 0.
-*/
+ */
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 	memcpy(VALBUF, REGBUF+REGISTER_BYTE(R0_REGNUM), TYPE_LENGTH (TYPE))
 
@@ -228,8 +229,8 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
    subroutine will return.  This is called from call_function. */
 #define STORE_STRUCT_RETURN(ADDR, SP) \
     error ("Returning values from functions is not implemented in arc gdb")
-
 
+
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
@@ -275,7 +276,7 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
    A leaf function may never save blink, so we have to check for that here.  */
 
 #define FRAME_SAVED_PC(frame) (arc_frame_saved_pc (frame))
-struct frame_info; /* in case frame.h not included yet */
+struct frame_info;		/* in case frame.h not included yet */
 CORE_ADDR arc_frame_saved_pc PARAMS ((struct frame_info *));
 
 /* If the argument is on the stack, it will be here.
@@ -304,9 +305,9 @@ CORE_ADDR arc_frame_saved_pc PARAMS ((struct frame_info *));
 
 #define FRAME_FIND_SAVED_REGS(frame_info_addr, sr) \
 	frame_find_saved_regs (frame_info_addr, &sr)
-extern void frame_find_saved_regs();		/* See arc-tdep.c */
-
+extern void frame_find_saved_regs ();	/* See arc-tdep.c */
 
+
 /* Things needed for making calls to functions in the inferior process */
 #define PUSH_DUMMY_FRAME \
 	push_dummy_frame ()
@@ -316,14 +317,14 @@ extern void frame_find_saved_regs();		/* See arc-tdep.c */
 	pop_frame ()
 
 /* This sequence of words is the instructions  bl xxxx, flag 1 */
-#define CALL_DUMMY { 0x28000000, 0x1fbe8001 }   
+#define CALL_DUMMY { 0x28000000, 0x1fbe8001 }
 #define CALL_DUMMY_LENGTH 8
 
 /* Start execution at beginning of dummy */
-#define CALL_DUMMY_START_OFFSET 0 
+#define CALL_DUMMY_START_OFFSET 0
 
 /* Insert the specified number of args and function address
-   into a call sequence of the above form stored at 'dummyname'.*/  
+   into a call sequence of the above form stored at 'dummyname'. */
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
 { \
         int from, to, delta, loc; \
@@ -336,4 +337,3 @@ extern void frame_find_saved_regs();		/* See arc-tdep.c */
         *((char *)(dummyname) + 3) = ((delta >> 9) & 0xff); \
         *((char *)(dummyname) + 4) = ((delta >> 17) & 0x7); \
 }
-

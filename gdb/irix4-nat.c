@@ -5,21 +5,22 @@
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -42,23 +43,24 @@ fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
  * See the comment in m68k-tdep.c regarding the utility of these functions.
  */
 
-void 
+void
 supply_gregset (gregsetp)
      gregset_t *gregsetp;
 {
   register int regi;
-  register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  register greg_t *regp = (greg_t *) (gregsetp->gp_regs);
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  {0};
 
   /* FIXME: somewhere, there should be a #define for the meaning
      of this magic number 32; we should use that. */
-  for(regi = 0; regi < 32; regi++)
-    supply_register (regi, (char *)(regp + regi));
+  for (regi = 0; regi < 32; regi++)
+    supply_register (regi, (char *) (regp + regi));
 
-  supply_register (PC_REGNUM, (char *)&(gregsetp->gp_pc));
-  supply_register (HI_REGNUM, (char *)&(gregsetp->gp_mdhi));
-  supply_register (LO_REGNUM, (char *)&(gregsetp->gp_mdlo));
-  supply_register (CAUSE_REGNUM, (char *)&(gregsetp->gp_cause));
+  supply_register (PC_REGNUM, (char *) &(gregsetp->gp_pc));
+  supply_register (HI_REGNUM, (char *) &(gregsetp->gp_mdhi));
+  supply_register (LO_REGNUM, (char *) &(gregsetp->gp_mdlo));
+  supply_register (CAUSE_REGNUM, (char *) &(gregsetp->gp_cause));
 
   /* Fill inaccessible registers with zero.  */
   supply_register (BADVADDR_REGNUM, zerobuf);
@@ -70,24 +72,24 @@ fill_gregset (gregsetp, regno)
      int regno;
 {
   int regi;
-  register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
+  register greg_t *regp = (greg_t *) (gregsetp->gp_regs);
 
-  /* same FIXME as above wrt 32*/
+  /* same FIXME as above wrt 32 */
   for (regi = 0; regi < 32; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(greg_t *) &registers[REGISTER_BYTE (regi)];
+      *(regp + regi) = *(greg_t *) & registers[REGISTER_BYTE (regi)];
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    gregsetp->gp_pc = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
+    gregsetp->gp_pc = *(greg_t *) & registers[REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    gregsetp->gp_cause = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
+    gregsetp->gp_cause = *(greg_t *) & registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
-    gregsetp->gp_mdhi = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
+    gregsetp->gp_mdhi = *(greg_t *) & registers[REGISTER_BYTE (HI_REGNUM)];
 
   if ((regno == -1) || (regno == LO_REGNUM))
-    gregsetp->gp_mdlo = *(greg_t *) &registers[REGISTER_BYTE (LO_REGNUM)];
+    gregsetp->gp_mdlo = *(greg_t *) & registers[REGISTER_BYTE (LO_REGNUM)];
 }
 
 /*
@@ -103,13 +105,14 @@ supply_fpregset (fpregsetp)
      fpregset_t *fpregsetp;
 {
   register int regi;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  {0};
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
-		     (char *)&fpregsetp->fp_r.fp_regs[regi]);
+		     (char *) &fpregsetp->fp_r.fp_regs[regi]);
 
-  supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
+  supply_register (FCRCS_REGNUM, (char *) &fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR_REGNUM?  SGI doesn't tell us. */
   supply_register (FCRIR_REGNUM, zerobuf);
@@ -129,12 +132,12 @@ fill_fpregset (fpregsetp, regno)
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy(to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE(FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 
@@ -174,10 +177,10 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       return;
     }
 
-  memcpy ((char *)registers, core_reg_sect, core_reg_size);
+  memcpy ((char *) registers, core_reg_sect, core_reg_size);
 }
-
 
+
 /* Register that we are able to handle irix4 core file formats.
    FIXME: is this really bfd_target_unknown_flavour? */
 

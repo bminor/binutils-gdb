@@ -1,21 +1,22 @@
 /* Definitions to make GDB target for a tahoe running 4.3-Reno.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*
  * Ported by the State University of New York at Buffalo by the Distributed
@@ -189,7 +190,7 @@ extern CORE_ADDR tahoe_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int tahoe_frame_num_args PARAMS ((struct frame_info *fi));
+extern int tahoe_frame_num_args PARAMS ((struct frame_info * fi));
 #define FRAME_NUM_ARGS(fi) (tahoe_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
@@ -251,8 +252,8 @@ printf("POP_FRAME\n");							\
 }
 
 /* This sequence of words is the instructions
-     calls #69, @#32323232
-     bpt
+   calls #69, @#32323232
+   bpt
    Note this is 8 bytes.  */
 
 #define CALL_DUMMY {0xbf699f32, 0x32323230}
@@ -268,4 +269,3 @@ printf("POP_FRAME\n");							\
 { int temp = (int) fun;				\
   *((char *) dummyname + 1) = nargs;		\
   memcpy((char *)dummyname+3,&temp,4); }
-

@@ -44,12 +44,12 @@
 /* OBSOLETE /* Advance PC across any function entry prologue instructions */
 /* OBSOLETE    to reach some "real" code. */
 /* OBSOLETE    Convex prolog is: */
-/* OBSOLETE        [sub.w #-,sp]		in one of 3 possible sizes */
-/* OBSOLETE        [mov psw,-		fc/vc main program prolog */
-/* OBSOLETE         and #-,-		  (skip it because the "mov psw" saves the */
-/* OBSOLETE 	mov -,psw]		   T bit, so continue gets a surprise trap) */
-/* OBSOLETE        [and #-,sp]		fc/vc O2 main program prolog */
-/* OBSOLETE        [ld.- -(ap),-]		pcc/gcc register arg loads */
+/* OBSOLETE        [sub.w #-,sp]                in one of 3 possible sizes */
+/* OBSOLETE        [mov psw,-           fc/vc main program prolog */
+/* OBSOLETE         and #-,-              (skip it because the "mov psw" saves the */
+/* OBSOLETE     mov -,psw]                 T bit, so continue gets a surprise trap) */
+/* OBSOLETE        [and #-,sp]          fc/vc O2 main program prolog */
+/* OBSOLETE        [ld.- -(ap),-]               pcc/gcc register arg loads */
 /* OBSOLETE *x/ */
 /* OBSOLETE  */
 /* OBSOLETE extern CORE_ADDR convex_skip_prologue PARAMS ((CORE_ADDR pc)); */
@@ -78,9 +78,9 @@
 /* OBSOLETE  */
 /* OBSOLETE /* We need to manipulate trap bits in the psw *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define PSW_TRAP_FLAGS	0x69670000 */
-/* OBSOLETE #define PSW_T_BIT	0x08000000 */
-/* OBSOLETE #define PSW_S_BIT	0x01000000 */
+/* OBSOLETE #define PSW_TRAP_FLAGS      0x69670000 */
+/* OBSOLETE #define PSW_T_BIT   0x08000000 */
+/* OBSOLETE #define PSW_S_BIT   0x01000000 */
 /* OBSOLETE  */
 /* OBSOLETE /* Stack grows downward.  *x/ */
 /* OBSOLETE  */
@@ -112,8 +112,8 @@
 /* OBSOLETE    There should be NUM_REGS strings in this initializer.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define REGISTER_NAMES {"pc","psw","fp","ap","a5","a4","a3","a2","a1","sp",\ */
-/* OBSOLETE 			"s7","s6","s5","s4","s3","s2","s1","s0",\ */
-/* OBSOLETE 			"S7","S6","S5","S4","S3","S2","S1","S0"} */
+/* OBSOLETE                     "s7","s6","s5","s4","s3","s2","s1","s0",\ */
+/* OBSOLETE                     "S7","S6","S5","S4","S3","S2","S1","S0"} */
 /* OBSOLETE  */
 /* OBSOLETE /* Register numbers of various important registers. */
 /* OBSOLETE    Note that some of these values are "real" register numbers, */
@@ -122,17 +122,17 @@
 /* OBSOLETE    to be actual register numbers as far as the user is concerned */
 /* OBSOLETE    but do serve to get the desired values when passed to read_register.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define S0_REGNUM 25		/* the real S regs *x/ */
+/* OBSOLETE #define S0_REGNUM 25                /* the real S regs *x/ */
 /* OBSOLETE #define S7_REGNUM 18 */
-/* OBSOLETE #define s0_REGNUM 17		/* low-order halves of S regs *x/ */
+/* OBSOLETE #define s0_REGNUM 17                /* low-order halves of S regs *x/ */
 /* OBSOLETE #define s7_REGNUM 10 */
-/* OBSOLETE #define SP_REGNUM 9 		/* A regs *x/ */
+/* OBSOLETE #define SP_REGNUM 9                 /* A regs *x/ */
 /* OBSOLETE #define A1_REGNUM 8 */
 /* OBSOLETE #define A5_REGNUM 4 */
 /* OBSOLETE #define AP_REGNUM 3 */
-/* OBSOLETE #define FP_REGNUM 2		/* Contains address of executing stack frame *x/ */
-/* OBSOLETE #define PS_REGNUM 1		/* Contains processor status *x/ */
-/* OBSOLETE #define PC_REGNUM 0		/* Contains program counter *x/ */
+/* OBSOLETE #define FP_REGNUM 2         /* Contains address of executing stack frame *x/ */
+/* OBSOLETE #define PS_REGNUM 1         /* Contains processor status *x/ */
+/* OBSOLETE #define PC_REGNUM 0         /* Contains program counter *x/ */
 /* OBSOLETE  */
 /* OBSOLETE /* convert dbx stab register number (from `r' declaration) to a gdb REGNUM *x/ */
 /* OBSOLETE  */
@@ -158,8 +158,8 @@
 /* OBSOLETE    NB: must match structure of struct syscall_context for correct operation *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define REGISTER_BYTE(N) ((N) < s7_REGNUM ? 4*(N) : \ */
-/* OBSOLETE 			  (N) < S7_REGNUM ? 44 + 8 * ((N)-s7_REGNUM) : \ */
-/* OBSOLETE 			                    40 + 8 * ((N)-S7_REGNUM)) */
+/* OBSOLETE                       (N) < S7_REGNUM ? 44 + 8 * ((N)-s7_REGNUM) : \ */
+/* OBSOLETE                                         40 + 8 * ((N)-S7_REGNUM)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Number of bytes of storage in the actual machine representation */
 /* OBSOLETE    for register N. *x/ */
@@ -197,8 +197,8 @@
 /* OBSOLETE  */
 /* OBSOLETE #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \ */
 /* OBSOLETE   memcpy (VALBUF, &((char *) REGBUF) [REGISTER_BYTE (S0_REGNUM) + \ */
-/* OBSOLETE 			     8 - TYPE_LENGTH (TYPE)],\ */
-/* OBSOLETE 	 TYPE_LENGTH (TYPE)) */
+/* OBSOLETE                          8 - TYPE_LENGTH (TYPE)],\ */
+/* OBSOLETE      TYPE_LENGTH (TYPE)) */
 /* OBSOLETE  */
 /* OBSOLETE /* Write into appropriate registers a function return value */
 /* OBSOLETE    of type TYPE, given in virtual format.  *x/ */
@@ -258,7 +258,7 @@
 /* OBSOLETE /* We need the boundaries of the text in the exec file, as a kludge, */
 /* OBSOLETE    for FRAMELESS_FUNCTION_INVOCATION and CALL_DUMMY_LOCATION. *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define	NEED_TEXT_START_END 1 */
+/* OBSOLETE #define     NEED_TEXT_START_END 1 */
 /* OBSOLETE  */
 /* OBSOLETE /* An expression that tells us whether the function invocation represented */
 /* OBSOLETE    by FI does not have a frame on the stack associated with it. */
@@ -298,132 +298,132 @@
 /* OBSOLETE    random load as a saved register; this is harmless.  vc does not */
 /* OBSOLETE    declare its register allocation actions in the stabs.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\ */
-/* OBSOLETE { register int regnum;							\ */
-/* OBSOLETE   register int frame_length =	/* 3 short, 2 long, 1 extended, 0 context *x/\ */
-/* OBSOLETE       (read_memory_integer ((frame_info)->frame + 4, 4) >> 25) & 3;	\ */
-/* OBSOLETE   register CORE_ADDR frame_fp =						\ */
-/* OBSOLETE       read_memory_integer ((frame_info)->frame + 8, 4);			\ */
-/* OBSOLETE   register CORE_ADDR next_addr;						\ */
-/* OBSOLETE   memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);			\ */
-/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 0;		\ */
-/* OBSOLETE   (frame_saved_regs).regs[PS_REGNUM] = (frame_info)->frame + 4;		\ */
-/* OBSOLETE   (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame + 8;		\ */
-/* OBSOLETE   (frame_saved_regs).regs[AP_REGNUM] = frame_fp + 12;			\ */
-/* OBSOLETE   next_addr = (frame_info)->frame + 12;					\ */
-/* OBSOLETE   if (frame_length < 3)							\ */
-/* OBSOLETE     for (regnum = A5_REGNUM; regnum < SP_REGNUM; ++regnum)		\ */
-/* OBSOLETE       (frame_saved_regs).regs[regnum] = (next_addr += 4);		\ */
-/* OBSOLETE   if (frame_length < 2)							\ */
-/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] = (next_addr += 4);		\ */
-/* OBSOLETE   next_addr -= 4;							\ */
-/* OBSOLETE   if (frame_length < 3)							\ */
-/* OBSOLETE     for (regnum = S7_REGNUM; regnum < S0_REGNUM; ++regnum)		\ */
-/* OBSOLETE       (frame_saved_regs).regs[regnum] = (next_addr += 8);		\ */
-/* OBSOLETE   if (frame_length < 2)							\ */
-/* OBSOLETE     (frame_saved_regs).regs[S0_REGNUM] = (next_addr += 8);		\ */
-/* OBSOLETE   else									\ */
-/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] = next_addr + 8;			\ */
-/* OBSOLETE   if (frame_length == 3) {						\ */
-/* OBSOLETE     CORE_ADDR pc = read_memory_integer ((frame_info)->frame, 4);	\ */
-/* OBSOLETE     int op, ix, disp;							\ */
-/* OBSOLETE     op = read_memory_integer (pc, 2);					\ */
-/* OBSOLETE     if ((op & 0xffc7) == 0x1480) pc += 4; 	/* add.w #-,sp *x/	\ */
-/* OBSOLETE     else if ((op & 0xffc7) == 0x58c0) pc += 2;	/* add.w #-,sp *x/	\ */
-/* OBSOLETE     op = read_memory_integer (pc, 2);					\ */
-/* OBSOLETE     if ((op & 0xffc7) == 0x2a06) pc += 4;	/* ld.w -,ap *x/		\ */
-/* OBSOLETE     for (;;) {								\ */
-/* OBSOLETE       op = read_memory_integer (pc, 2);					\ */
-/* OBSOLETE       ix = (op >> 3) & 7;						\ */
-/* OBSOLETE       if ((op & 0xfcc0) == 0x2800) {		/* ld.- -,ak *x/		\ */
-/* OBSOLETE         regnum = SP_REGNUM - (op & 7);					\ */
-/* OBSOLETE 	disp = read_memory_integer (pc + 2, 2);				\ */
-/* OBSOLETE 	pc += 4;}							\ */
-/* OBSOLETE       else if ((op & 0xfcc0) == 0x2840) {	/* ld.- -,ak *x/		\ */
-/* OBSOLETE         regnum = SP_REGNUM - (op & 7);					\ */
-/* OBSOLETE 	disp = read_memory_integer (pc + 2, 4);				\ */
-/* OBSOLETE 	pc += 6;}							\ */
-/* OBSOLETE       if ((op & 0xfcc0) == 0x3000) {		/* ld.- -,sk *x/		\ */
-/* OBSOLETE         regnum = S0_REGNUM - (op & 7);					\ */
-/* OBSOLETE 	disp = read_memory_integer (pc + 2, 2);				\ */
-/* OBSOLETE 	pc += 4;}							\ */
-/* OBSOLETE       else if ((op & 0xfcc0) == 0x3040) {	/* ld.- -,sk *x/		\ */
-/* OBSOLETE         regnum = S0_REGNUM - (op & 7);					\ */
-/* OBSOLETE 	disp = read_memory_integer (pc + 2, 4);				\ */
-/* OBSOLETE 	pc += 6;}							\ */
-/* OBSOLETE       else if ((op & 0xff00) == 0x7100) {	/* br crossjump *x/	\ */
-/* OBSOLETE         pc += 2 * (char) op;						\ */
-/* OBSOLETE         continue;}							\ */
-/* OBSOLETE       else if (op == 0x0140) {			/* jmp crossjump *x/	\ */
-/* OBSOLETE         pc = read_memory_integer (pc + 2, 4);				\ */
-/* OBSOLETE         continue;}							\ */
-/* OBSOLETE       else break;							\ */
-/* OBSOLETE       if ((frame_saved_regs).regs[regnum])				\ */
-/* OBSOLETE 	break;								\ */
-/* OBSOLETE       if (ix == 7) disp += frame_fp;					\ */
-/* OBSOLETE       else if (ix == 6) disp += read_memory_integer (frame_fp + 12, 4);	\ */
-/* OBSOLETE       else if (ix != 0) break;						\ */
-/* OBSOLETE       (frame_saved_regs).regs[regnum] =					\ */
-/* OBSOLETE 	disp - 8 + (1 << ((op >> 8) & 3));				\ */
-/* OBSOLETE       if (regnum >= S7_REGNUM)						\ */
-/* OBSOLETE         (frame_saved_regs).regs[regnum - S0_REGNUM + s0_REGNUM] =	\ */
-/* OBSOLETE 	  disp - 4 + (1 << ((op >> 8) & 3));				\ */
-/* OBSOLETE     }									\ */
-/* OBSOLETE   }									\ */
+/* OBSOLETE #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)         \ */
+/* OBSOLETE { register int regnum;                                                      \ */
+/* OBSOLETE   register int frame_length =       /* 3 short, 2 long, 1 extended, 0 context *x/\ */
+/* OBSOLETE       (read_memory_integer ((frame_info)->frame + 4, 4) >> 25) & 3; \ */
+/* OBSOLETE   register CORE_ADDR frame_fp =                                             \ */
+/* OBSOLETE       read_memory_integer ((frame_info)->frame + 8, 4);                     \ */
+/* OBSOLETE   register CORE_ADDR next_addr;                                             \ */
+/* OBSOLETE   memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);                        \ */
+/* OBSOLETE   (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 0;             \ */
+/* OBSOLETE   (frame_saved_regs).regs[PS_REGNUM] = (frame_info)->frame + 4;             \ */
+/* OBSOLETE   (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame + 8;             \ */
+/* OBSOLETE   (frame_saved_regs).regs[AP_REGNUM] = frame_fp + 12;                       \ */
+/* OBSOLETE   next_addr = (frame_info)->frame + 12;                                     \ */
+/* OBSOLETE   if (frame_length < 3)                                                     \ */
+/* OBSOLETE     for (regnum = A5_REGNUM; regnum < SP_REGNUM; ++regnum)          \ */
+/* OBSOLETE       (frame_saved_regs).regs[regnum] = (next_addr += 4);           \ */
+/* OBSOLETE   if (frame_length < 2)                                                     \ */
+/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] = (next_addr += 4);          \ */
+/* OBSOLETE   next_addr -= 4;                                                   \ */
+/* OBSOLETE   if (frame_length < 3)                                                     \ */
+/* OBSOLETE     for (regnum = S7_REGNUM; regnum < S0_REGNUM; ++regnum)          \ */
+/* OBSOLETE       (frame_saved_regs).regs[regnum] = (next_addr += 8);           \ */
+/* OBSOLETE   if (frame_length < 2)                                                     \ */
+/* OBSOLETE     (frame_saved_regs).regs[S0_REGNUM] = (next_addr += 8);          \ */
+/* OBSOLETE   else                                                                      \ */
+/* OBSOLETE     (frame_saved_regs).regs[SP_REGNUM] = next_addr + 8;                     \ */
+/* OBSOLETE   if (frame_length == 3) {                                          \ */
+/* OBSOLETE     CORE_ADDR pc = read_memory_integer ((frame_info)->frame, 4);    \ */
+/* OBSOLETE     int op, ix, disp;                                                       \ */
+/* OBSOLETE     op = read_memory_integer (pc, 2);                                       \ */
+/* OBSOLETE     if ((op & 0xffc7) == 0x1480) pc += 4;   /* add.w #-,sp *x/      \ */
+/* OBSOLETE     else if ((op & 0xffc7) == 0x58c0) pc += 2;      /* add.w #-,sp *x/      \ */
+/* OBSOLETE     op = read_memory_integer (pc, 2);                                       \ */
+/* OBSOLETE     if ((op & 0xffc7) == 0x2a06) pc += 4;   /* ld.w -,ap *x/                \ */
+/* OBSOLETE     for (;;) {                                                              \ */
+/* OBSOLETE       op = read_memory_integer (pc, 2);                                     \ */
+/* OBSOLETE       ix = (op >> 3) & 7;                                           \ */
+/* OBSOLETE       if ((op & 0xfcc0) == 0x2800) {                /* ld.- -,ak *x/                \ */
+/* OBSOLETE         regnum = SP_REGNUM - (op & 7);                                      \ */
+/* OBSOLETE     disp = read_memory_integer (pc + 2, 2);                         \ */
+/* OBSOLETE     pc += 4;}                                                       \ */
+/* OBSOLETE       else if ((op & 0xfcc0) == 0x2840) {   /* ld.- -,ak *x/                \ */
+/* OBSOLETE         regnum = SP_REGNUM - (op & 7);                                      \ */
+/* OBSOLETE     disp = read_memory_integer (pc + 2, 4);                         \ */
+/* OBSOLETE     pc += 6;}                                                       \ */
+/* OBSOLETE       if ((op & 0xfcc0) == 0x3000) {                /* ld.- -,sk *x/                \ */
+/* OBSOLETE         regnum = S0_REGNUM - (op & 7);                                      \ */
+/* OBSOLETE     disp = read_memory_integer (pc + 2, 2);                         \ */
+/* OBSOLETE     pc += 4;}                                                       \ */
+/* OBSOLETE       else if ((op & 0xfcc0) == 0x3040) {   /* ld.- -,sk *x/                \ */
+/* OBSOLETE         regnum = S0_REGNUM - (op & 7);                                      \ */
+/* OBSOLETE     disp = read_memory_integer (pc + 2, 4);                         \ */
+/* OBSOLETE     pc += 6;}                                                       \ */
+/* OBSOLETE       else if ((op & 0xff00) == 0x7100) {   /* br crossjump *x/     \ */
+/* OBSOLETE         pc += 2 * (char) op;                                                \ */
+/* OBSOLETE         continue;}                                                  \ */
+/* OBSOLETE       else if (op == 0x0140) {                      /* jmp crossjump *x/    \ */
+/* OBSOLETE         pc = read_memory_integer (pc + 2, 4);                               \ */
+/* OBSOLETE         continue;}                                                  \ */
+/* OBSOLETE       else break;                                                   \ */
+/* OBSOLETE       if ((frame_saved_regs).regs[regnum])                          \ */
+/* OBSOLETE     break;                                                          \ */
+/* OBSOLETE       if (ix == 7) disp += frame_fp;                                        \ */
+/* OBSOLETE       else if (ix == 6) disp += read_memory_integer (frame_fp + 12, 4);     \ */
+/* OBSOLETE       else if (ix != 0) break;                                              \ */
+/* OBSOLETE       (frame_saved_regs).regs[regnum] =                                     \ */
+/* OBSOLETE     disp - 8 + (1 << ((op >> 8) & 3));                              \ */
+/* OBSOLETE       if (regnum >= S7_REGNUM)                                              \ */
+/* OBSOLETE         (frame_saved_regs).regs[regnum - S0_REGNUM + s0_REGNUM] =   \ */
+/* OBSOLETE       disp - 4 + (1 << ((op >> 8) & 3));                            \ */
+/* OBSOLETE     }                                                                       \ */
+/* OBSOLETE   }                                                                 \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* Things needed for making the inferior call functions.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE #define	CALL_DUMMY_LOCATION	BEFORE_TEXT_END */
+/* OBSOLETE #define     CALL_DUMMY_LOCATION     BEFORE_TEXT_END */
 /* OBSOLETE  */
 /* OBSOLETE /* Push an empty stack frame, to record the current PC, etc.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define PUSH_DUMMY_FRAME \ */
-/* OBSOLETE { register CORE_ADDR sp = read_register (SP_REGNUM);			\ */
-/* OBSOLETE   register int regnum;				    			\ */
-/* OBSOLETE   char buf[8];					    			\ */
-/* OBSOLETE   long word;								\ */
-/* OBSOLETE   for (regnum = S0_REGNUM; regnum >= S7_REGNUM; --regnum) { 		\ */
-/* OBSOLETE     read_register_bytes (REGISTER_BYTE (regnum), buf, 8); 		\ */
-/* OBSOLETE     sp = push_bytes (sp, buf, 8);}		    			\ */
-/* OBSOLETE   for (regnum = SP_REGNUM; regnum >= FP_REGNUM; --regnum) { 		\ */
-/* OBSOLETE     word = read_register (regnum);					\ */
-/* OBSOLETE     sp = push_bytes (sp, &word, 4);}   					\ */
-/* OBSOLETE   word = (read_register (PS_REGNUM) &~ (3<<25)) | (1<<25);		\ */
-/* OBSOLETE   sp = push_bytes (sp, &word, 4); 					\ */
-/* OBSOLETE   word = read_register (PC_REGNUM);					\ */
-/* OBSOLETE   sp = push_bytes (sp, &word, 4);   					\ */
-/* OBSOLETE   write_register (SP_REGNUM, sp);		    			\ */
-/* OBSOLETE   write_register (FP_REGNUM, sp);		    			\ */
+/* OBSOLETE { register CORE_ADDR sp = read_register (SP_REGNUM);                        \ */
+/* OBSOLETE   register int regnum;                                                      \ */
+/* OBSOLETE   char buf[8];                                                              \ */
+/* OBSOLETE   long word;                                                                \ */
+/* OBSOLETE   for (regnum = S0_REGNUM; regnum >= S7_REGNUM; --regnum) {                 \ */
+/* OBSOLETE     read_register_bytes (REGISTER_BYTE (regnum), buf, 8);           \ */
+/* OBSOLETE     sp = push_bytes (sp, buf, 8);}                                  \ */
+/* OBSOLETE   for (regnum = SP_REGNUM; regnum >= FP_REGNUM; --regnum) {                 \ */
+/* OBSOLETE     word = read_register (regnum);                                  \ */
+/* OBSOLETE     sp = push_bytes (sp, &word, 4);}                                        \ */
+/* OBSOLETE   word = (read_register (PS_REGNUM) &~ (3<<25)) | (1<<25);          \ */
+/* OBSOLETE   sp = push_bytes (sp, &word, 4);                                   \ */
+/* OBSOLETE   word = read_register (PC_REGNUM);                                 \ */
+/* OBSOLETE   sp = push_bytes (sp, &word, 4);                                           \ */
+/* OBSOLETE   write_register (SP_REGNUM, sp);                                   \ */
+/* OBSOLETE   write_register (FP_REGNUM, sp);                                   \ */
 /* OBSOLETE   write_register (AP_REGNUM, sp);} */
 /* OBSOLETE  */
 /* OBSOLETE /* Discard from the stack the innermost frame, restoring all registers.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define POP_FRAME  do {\ */
-/* OBSOLETE   register CORE_ADDR fp = read_register (FP_REGNUM);	    \ */
-/* OBSOLETE   register int regnum;					    \ */
-/* OBSOLETE   register int frame_length =	/* 3 short, 2 long, 1 extended, 0 context *x/ \ */
+/* OBSOLETE   register CORE_ADDR fp = read_register (FP_REGNUM);            \ */
+/* OBSOLETE   register int regnum;                                          \ */
+/* OBSOLETE   register int frame_length =       /* 3 short, 2 long, 1 extended, 0 context *x/ \ */
 /* OBSOLETE       (read_memory_integer (fp + 4, 4) >> 25) & 3;          \ */
-/* OBSOLETE   char buf[8];					            \ */
+/* OBSOLETE   char buf[8];                                                  \ */
 /* OBSOLETE   write_register (PC_REGNUM, read_memory_integer (fp, 4));  \ */
 /* OBSOLETE   write_register (PS_REGNUM, read_memory_integer (fp += 4, 4));  \ */
 /* OBSOLETE   write_register (FP_REGNUM, read_memory_integer (fp += 4, 4));  \ */
 /* OBSOLETE   write_register (AP_REGNUM, read_memory_integer (fp += 4, 4));  \ */
-/* OBSOLETE   if (frame_length < 3) 				     \ */
+/* OBSOLETE   if (frame_length < 3)                                  \ */
 /* OBSOLETE     for (regnum = A5_REGNUM; regnum < SP_REGNUM; ++regnum)   \ */
 /* OBSOLETE       write_register (regnum, read_memory_integer (fp += 4, 4)); \ */
-/* OBSOLETE   if (frame_length < 2)					     \ */
+/* OBSOLETE   if (frame_length < 2)                                          \ */
 /* OBSOLETE     write_register (SP_REGNUM, read_memory_integer (fp += 4, 4)); \ */
-/* OBSOLETE   fp -= 4;							\ */
-/* OBSOLETE   if (frame_length < 3)  					\ */
-/* OBSOLETE     for (regnum = S7_REGNUM; regnum < S0_REGNUM; ++regnum) {	\ */
-/* OBSOLETE       read_memory (fp += 8, buf, 8);				\ */
+/* OBSOLETE   fp -= 4;                                                  \ */
+/* OBSOLETE   if (frame_length < 3)                                     \ */
+/* OBSOLETE     for (regnum = S7_REGNUM; regnum < S0_REGNUM; ++regnum) {        \ */
+/* OBSOLETE       read_memory (fp += 8, buf, 8);                                \ */
 /* OBSOLETE       write_register_bytes (REGISTER_BYTE (regnum), buf, 8);}   \ */
-/* OBSOLETE   if (frame_length < 2)	{					\ */
-/* OBSOLETE     read_memory (fp += 8, buf, 8);				\ */
+/* OBSOLETE   if (frame_length < 2)     {                                       \ */
+/* OBSOLETE     read_memory (fp += 8, buf, 8);                          \ */
 /* OBSOLETE     write_register_bytes (REGISTER_BYTE (regnum), buf, 8);}     \ */
-/* OBSOLETE   else write_register (SP_REGNUM, fp + 8);			\ */
-/* OBSOLETE   flush_cached_frames ();					\ */
+/* OBSOLETE   else write_register (SP_REGNUM, fp + 8);                  \ */
+/* OBSOLETE   flush_cached_frames ();                                   \ */
 /* OBSOLETE } while (0) */
 /* OBSOLETE  */
 /* OBSOLETE /* This sequence of words is the instructions */
@@ -443,7 +443,7 @@
 /* OBSOLETE    into a call sequence of the above form stored at DUMMYNAME.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \ */
-/* OBSOLETE { *(int *)((char *) dummyname + 4) = nargs;	\ */
+/* OBSOLETE { *(int *)((char *) dummyname + 4) = nargs; \ */
 /* OBSOLETE   *(int *)((char *) dummyname + 10) = fun; } */
 /* OBSOLETE  */
 /* OBSOLETE /* Defs to read soff symbol tables, see dbxread.c *x/ */
@@ -459,28 +459,28 @@
 /* OBSOLETE     (BUFFER = STRING_TABLE_SIZE) */
 /* OBSOLETE  */
 /* OBSOLETE #define DECLARE_FILE_HEADERS \ */
-/* OBSOLETE   FILEHDR filehdr;							\ */
-/* OBSOLETE   OPTHDR opthdr;							\ */
+/* OBSOLETE   FILEHDR filehdr;                                                  \ */
+/* OBSOLETE   OPTHDR opthdr;                                                    \ */
 /* OBSOLETE   SCNHDR txthdr */
 /* OBSOLETE  */
 /* OBSOLETE #define READ_FILE_HEADERS(DESC,NAME) \ */
-/* OBSOLETE {									\ */
-/* OBSOLETE   int n;								\ */
-/* OBSOLETE   val = myread (DESC, &filehdr, sizeof filehdr);			\ */
-/* OBSOLETE   if (val < 0)								\ */
-/* OBSOLETE     perror_with_name (NAME);						\ */
-/* OBSOLETE   if (! IS_SOFF_MAGIC (filehdr.h_magic))				\ */
-/* OBSOLETE     error ("%s: not an executable file.", NAME);			\ */
-/* OBSOLETE   lseek (DESC, 0L, 0);							\ */
-/* OBSOLETE   if (myread (DESC, &filehdr, sizeof filehdr) < 0)			\ */
-/* OBSOLETE     perror_with_name (NAME);						\ */
-/* OBSOLETE   if (myread (DESC, &opthdr, filehdr.h_opthdr) <= 0)			\ */
-/* OBSOLETE     perror_with_name (NAME);						\ */
-/* OBSOLETE   for (n = 0; n < filehdr.h_nscns; n++)					\ */
-/* OBSOLETE     {									\ */
-/* OBSOLETE       if (myread (DESC, &txthdr, sizeof txthdr) < 0)			\ */
-/* OBSOLETE 	perror_with_name (NAME);					\ */
-/* OBSOLETE       if ((txthdr.s_flags & S_TYPMASK) == S_TEXT)			\ */
-/* OBSOLETE 	break;								\ */
-/* OBSOLETE     }									\ */
+/* OBSOLETE {                                                                   \ */
+/* OBSOLETE   int n;                                                            \ */
+/* OBSOLETE   val = myread (DESC, &filehdr, sizeof filehdr);                    \ */
+/* OBSOLETE   if (val < 0)                                                              \ */
+/* OBSOLETE     perror_with_name (NAME);                                                \ */
+/* OBSOLETE   if (! IS_SOFF_MAGIC (filehdr.h_magic))                            \ */
+/* OBSOLETE     error ("%s: not an executable file.", NAME);                    \ */
+/* OBSOLETE   lseek (DESC, 0L, 0);                                                      \ */
+/* OBSOLETE   if (myread (DESC, &filehdr, sizeof filehdr) < 0)                  \ */
+/* OBSOLETE     perror_with_name (NAME);                                                \ */
+/* OBSOLETE   if (myread (DESC, &opthdr, filehdr.h_opthdr) <= 0)                        \ */
+/* OBSOLETE     perror_with_name (NAME);                                                \ */
+/* OBSOLETE   for (n = 0; n < filehdr.h_nscns; n++)                                     \ */
+/* OBSOLETE     {                                                                       \ */
+/* OBSOLETE       if (myread (DESC, &txthdr, sizeof txthdr) < 0)                        \ */
+/* OBSOLETE     perror_with_name (NAME);                                        \ */
+/* OBSOLETE       if ((txthdr.s_flags & S_TYPMASK) == S_TEXT)                   \ */
+/* OBSOLETE     break;                                                          \ */
+/* OBSOLETE     }                                                                       \ */
 /* OBSOLETE } */

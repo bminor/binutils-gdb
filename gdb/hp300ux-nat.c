@@ -1,21 +1,22 @@
 /* HP/UX native interface for HP 300's, for GDB when running under Unix.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
-   
-This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This file is part of GDB.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -46,25 +47,29 @@ store_inferior_register PARAMS ((int, unsigned int));
 /* Get kernel_u_addr using HPUX-style nlist().  */
 CORE_ADDR kernel_u_addr;
 
-struct hpnlist {
-        char *          n_name;
-        long            n_value;
-        unsigned char   n_type;
-        unsigned char   n_length;
-        short           n_almod;
-        short           n_unused;
-};
-static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
+struct hpnlist
+  {
+    char *n_name;
+    long n_value;
+    unsigned char n_type;
+    unsigned char n_length;
+    short n_almod;
+    short n_unused;
+  };
+static struct hpnlist nl[] =
+{
+  {"_u", -1,},
+  {(char *) 0,}};
 
 /* read the value of the u area from the hp-ux kernel */
 void
 _initialize_hp300ux_nat ()
 {
 #ifndef HPUX_VERSION_5
-    nlist ("/hp-ux", nl);
-    kernel_u_addr = nl[0].n_value;
+  nlist ("/hp-ux", nl);
+  kernel_u_addr = nl[0].n_value;
 #else /* HPUX version 5.  */
-    kernel_u_addr = (CORE_ADDR) 0x0097900;
+  kernel_u_addr = (CORE_ADDR) 0x0097900;
 #endif
 }
 
@@ -82,20 +87,25 @@ fetch_inferior_register (regno, regaddr)
 #ifndef HPUX_VERSION_5
   if (regno == PS_REGNUM)
     {
-      union { int i; short s[2]; } ps_val;
+      union
+	{
+	  int i;
+	  short s[2];
+	}
+      ps_val;
       int regval;
-      
+
       ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 			  0, 0));
       regval = ps_val.s[0];
-      supply_register (regno, (char *)&regval);
+      supply_register (regno, (char *) &regval);
     }
   else
 #endif /* not HPUX_VERSION_5 */
     {
       char buf[MAX_REGISTER_RAW_SIZE];
       register int i;
-      
+
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  *(int *) &buf[i] = ptrace (PT_RUAREA, inferior_pid,
@@ -121,7 +131,7 @@ store_inferior_register_1 (regno, regaddr, val)
   if (errno != 0)
     {
       char string_buf[64];
-      
+
       sprintf (string_buf, "writing register number %d", regno);
       perror_with_name (string_buf);
     }
@@ -137,8 +147,13 @@ store_inferior_register (regno, regaddr)
 #ifndef HPUX_VERSION_5
   if (regno == PS_REGNUM)
     {
-      union { int i; short s[2]; } ps_val;
-      
+      union
+	{
+	  int i;
+	  short s[2];
+	}
+      ps_val;
+
       ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 			  0, 0));
       ps_val.s[0] = (read_register (regno));
@@ -148,7 +163,7 @@ store_inferior_register (regno, regaddr)
 #endif /* not HPUX_VERSION_5 */
     {
       register int i;
-      
+
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  store_inferior_register_1
@@ -166,7 +181,7 @@ fetch_inferior_registers (regno)
 {
   struct user u;
   register unsigned int ar0_offset;
-  
+
   ar0_offset = (INFERIOR_AR0 (u));
   if (regno == -1)
     {
@@ -198,7 +213,7 @@ store_inferior_registers (regno)
       store_inferior_register (regno, (FP_REGISTER_ADDR (u, regno)));
       return;
     }
-  
+
   ar0_offset = (INFERIOR_AR0 (u));
   if (regno >= 0)
     {

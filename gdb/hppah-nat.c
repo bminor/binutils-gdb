@@ -5,21 +5,22 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #include "defs.h"
@@ -73,13 +74,13 @@ store_inferior_registers (regno)
 	  if (errno != 0)
 	    {
 	      /* Error, even if attached.  Failing to write these two
-		 registers is pretty serious.  */
+	         registers is pretty serious.  */
 	      sprintf (buf, "writing register number %d", regno);
 	      perror_with_name (buf);
 	    }
 	}
       else
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	  {
 	    errno = 0;
 	    call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
@@ -95,7 +96,7 @@ store_inferior_registers (regno)
 		warning (msg);
 		return;
 	      }
-	    regaddr += sizeof(int);
+	    regaddr += sizeof (int);
 	  }
     }
   else
@@ -139,13 +140,13 @@ fetch_register (regno)
   if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
     buf[3] &= ~0x3;
   supply_register (regno, buf);
- error_exit:;
+error_exit:;
 }
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if
    WRITE is nonzero.
-  
+
    Returns the length copied, which is either the LEN argument or zero.
    This xfer function does not do partial moves, since child_ops
    doesn't allow memory operations to cross below us in the target stack
@@ -157,14 +158,14 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
      char *myaddr;
      int len;
      int write;
-     struct target_ops *target;		/* ignored */
+     struct target_ops *target;	/* ignored */
 {
   register int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & - sizeof (int);
+  register CORE_ADDR addr = memaddr & -sizeof (int);
   /* Round ending address up; get number of longwords that makes.  */
   register int count
-    = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
+  = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
 
   /* Allocate buffer of that many longwords.
      Note -- do not use alloca to allocate this buffer since there is no
@@ -179,10 +180,10 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
   if (write)
     {
       /* Fill start and end extra bytes of buffer with existing memory data.  */
-      if (addr != memaddr || len < (int)sizeof (int))
+      if (addr != memaddr || len < (int) sizeof (int))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+	  buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
 				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
@@ -212,7 +213,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	  errno = 0;
 	  pt_request = (addr < text_end) ? PT_WIUSER : PT_WDUSER;
 	  pt_status = call_ptrace (pt_request,
-				   inferior_pid, 
+				   inferior_pid,
 				   (PTRACE_ARG3_TYPE) addr,
 				   buffer[i]);
 
@@ -224,14 +225,14 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	      errno = 0;
 	      pt_request = (pt_request == PT_WIUSER) ? PT_WDUSER : PT_WIUSER;
 	      pt_status = call_ptrace (pt_request,
-				       inferior_pid, 
+				       inferior_pid,
 				       (PTRACE_ARG3_TYPE) addr,
 				       buffer[i]);
 
 	      /* No, we still fail.  Okay, time to punt. */
 	      if ((pt_status == -1) && errno)
 		{
-		  free(buffer);
+		  free (buffer);
 		  return 0;
 		}
 	    }
@@ -243,11 +244,11 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  buffer[i] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+	  buffer[i] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
 				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    {
-	      free(buffer);
+	      free (buffer);
 	      return 0;
 	    }
 	  QUIT;
@@ -256,7 +257,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       /* Copy appropriate bytes out of the buffer.  */
       memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
     }
-  free(buffer);
+  free (buffer);
   return len;
 }
 
@@ -313,9 +314,9 @@ child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
   if (followed_child)
     {
       /* If the child has exited, then there's nothing for us to do.
-	 In the case of an exec event, we'll let that be handled by
-	 the normal mechanism that notices and handles exec events, in
-	 resume(). */
+         In the case of an exec event, we'll let that be handled by
+         the normal mechanism that notices and handles exec events, in
+         resume(). */
     }
 }
 
@@ -323,33 +324,33 @@ child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
    this with a null--it's going to be printed via a "%s".  */
 char *
 hppa_pid_to_str (pid)
-    pid_t pid;
+     pid_t pid;
 {
-    /* Static because address returned */
-    static char buf[30];
+  /* Static because address returned */
+  static char buf[30];
 
-    /* Extra NULLs for paranoia's sake */
-    sprintf (buf, "process %d\0\0\0\0", pid);
-	     
-    return buf;
+  /* Extra NULLs for paranoia's sake */
+  sprintf (buf, "process %d\0\0\0\0", pid);
+
+  return buf;
 }
 
 /* Format a thread id, given TID.  Be sure to terminate
    this with a null--it's going to be printed via a "%s".
 
    Note: This is a core-gdb tid, not the actual system tid.
-         See infttrace.c for details.  */
+   See infttrace.c for details.  */
 char *
 hppa_tid_to_str (tid)
-    pid_t tid;
+     pid_t tid;
 {
-    /* Static because address returned */
-    static char buf[30];
+  /* Static because address returned */
+  static char buf[30];
 
-    /* Extra NULLs for paranoia's sake */
-    sprintf (buf, "system thread %d\0\0\0\0", tid);
-	     
-    return buf;
+  /* Extra NULLs for paranoia's sake */
+  sprintf (buf, "system thread %d\0\0\0\0", tid);
+
+  return buf;
 }
 
 #if !defined (GDB_NATIVE_HPUX_11)
@@ -364,15 +365,17 @@ hppa_tid_to_str (tid)
    after a fork(), and before an exec() by the child.  See
    parent_attach_all for details.  */
 
-typedef struct {
-    int parent_channel[2];  /* Parent "talks" to [1], child "listens" to [0] */
-    int child_channel[2];   /* Child "talks" to [1], parent "listens" to [0] */
-} startup_semaphore_t;
+typedef struct
+{
+  int parent_channel[2];	/* Parent "talks" to [1], child "listens" to [0] */
+  int child_channel[2];		/* Child "talks" to [1], parent "listens" to [0] */
+}
+startup_semaphore_t;
 
 #define SEM_TALK (1)
 #define SEM_LISTEN (0)
 
-static startup_semaphore_t  startup_semaphore;
+static startup_semaphore_t startup_semaphore;
 
 extern int parent_attach_all PARAMS ((int, PTRACE_ARG3_TYPE, int));
 
@@ -423,7 +426,7 @@ parent_attach_all (pid, addr, data)
 	&tc_magic_parent,
 	sizeof (tc_magic_parent));
   if (tc_magic_child != tc_magic_parent)
-      warning ("mismatched semaphore magic");
+    warning ("mismatched semaphore magic");
 
   /* Discard our copy of the semaphore. */
   (void) close (startup_semaphore.parent_channel[SEM_LISTEN]);
@@ -431,7 +434,7 @@ parent_attach_all (pid, addr, data)
   (void) close (startup_semaphore.child_channel[SEM_LISTEN]);
   (void) close (startup_semaphore.child_channel[SEM_TALK]);
 #endif
-  
+
   return 0;
 }
 #endif
@@ -472,12 +475,12 @@ hppa_require_attach (pid)
 
 int
 hppa_require_detach (pid, signal)
-  int pid;
-  int signal;
+     int pid;
+     int signal;
 {
   errno = 0;
   call_ptrace (PT_DETACH, pid, (PTRACE_ARG3_TYPE) 1, signal);
-  errno = 0;  /* Ignore any errors. */
+  errno = 0;			/* Ignore any errors. */
   return pid;
 }
 
@@ -570,7 +573,7 @@ hppa_ensure_vforking_parent_remains_stopped (pid)
 int
 hppa_resume_execd_vforking_child_to_get_parent_vfork ()
 {
-  return 1;  /* Yes, the child must be resumed. */
+  return 1;			/* Yes, the child must be resumed. */
 }
 
 void
@@ -600,14 +603,14 @@ require_notification_of_events (pid)
   ptrace_events.pe_set_event |= PTRACE_FORK;
   ptrace_events.pe_set_event |= PTRACE_VFORK;
   /* ??rehrauer: Add this one when we're prepared to catch it...
-  ptrace_events.pe_set_event |= PTRACE_EXIT;
-  */
+     ptrace_events.pe_set_event |= PTRACE_EXIT;
+   */
 
   errno = 0;
   pt_status = call_ptrace (PT_SET_EVENT_MASK,
-		      pid,
-		      (PTRACE_ARG3_TYPE) &ptrace_events,
-		      sizeof (ptrace_events));
+			   pid,
+			   (PTRACE_ARG3_TYPE) & ptrace_events,
+			   sizeof (ptrace_events));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -639,14 +642,14 @@ require_notification_of_exec_events (pid)
 
   ptrace_events.pe_set_event |= PTRACE_EXEC;
   /* ??rehrauer: Add this one when we're prepared to catch it...
-  ptrace_events.pe_set_event |= PTRACE_EXIT;
-  */
+     ptrace_events.pe_set_event |= PTRACE_EXIT;
+   */
 
   errno = 0;
   pt_status = call_ptrace (PT_SET_EVENT_MASK,
-		      pid,
-		      (PTRACE_ARG3_TYPE) &ptrace_events,
-		      sizeof (ptrace_events));
+			   pid,
+			   (PTRACE_ARG3_TYPE) & ptrace_events,
+			   sizeof (ptrace_events));
   if (errno)
     perror_with_name ("ptrace");
   if (pt_status < 0)
@@ -672,7 +675,7 @@ child_acknowledge_created_inferior (pid)
   /* Wait for the child to tell us that it has forked. */
   read (startup_semaphore.child_channel[SEM_LISTEN],
 	&tc_magic_child,
-	sizeof(tc_magic_child));
+	sizeof (tc_magic_child));
 
   /* Notify the child that it can exec.
 
@@ -790,12 +793,12 @@ child_has_forked (pid, childpid)
   return 0;
 #else
   int pt_status;
-  ptrace_state_t  ptrace_state;
+  ptrace_state_t ptrace_state;
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
 			   pid,
-			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   (PTRACE_ARG3_TYPE) & ptrace_state,
 			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
@@ -824,12 +827,12 @@ child_has_vforked (pid, childpid)
 
 #else
   int pt_status;
-  ptrace_state_t  ptrace_state;
+  ptrace_state_t ptrace_state;
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
 			   pid,
-			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   (PTRACE_ARG3_TYPE) & ptrace_state,
 			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
@@ -897,12 +900,12 @@ child_has_execd (pid, execd_pathname)
 
 #else
   int pt_status;
-  ptrace_state_t  ptrace_state;
+  ptrace_state_t ptrace_state;
 
   errno = 0;
   pt_status = call_ptrace (PT_GET_PROCESS_STATE,
 			   pid,
-			   (PTRACE_ARG3_TYPE) &ptrace_state,
+			   (PTRACE_ARG3_TYPE) & ptrace_state,
 			   sizeof (ptrace_state));
   if (errno)
     perror_with_name ("ptrace");
@@ -911,7 +914,7 @@ child_has_execd (pid, execd_pathname)
 
   if (ptrace_state.pe_report_event & PTRACE_EXEC)
     {
-      char *  exec_file = target_pid_to_exec_file (pid);
+      char *exec_file = target_pid_to_exec_file (pid);
       *execd_pathname = savestring (exec_file, strlen (exec_file));
       return 1;
     }
@@ -923,7 +926,7 @@ child_has_execd (pid, execd_pathname)
 int
 child_reported_exec_events_per_exec_call ()
 {
-  return 2;  /* ptrace reports the event twice per call. */
+  return 2;			/* ptrace reports the event twice per call. */
 }
 
 int
@@ -952,7 +955,7 @@ child_pid_to_exec_file (pid)
   int i;
   int saved_inferior_pid;
   boolean done;
-  
+
 #ifdef PT_GET_PROCESS_PATHNAME
   /* As of 10.x HP-UX, there's an explicit request to get the pathname. */
   pt_status = call_ptrace (PT_GET_PROCESS_PATHNAME,
@@ -980,7 +983,7 @@ child_pid_to_exec_file (pid)
   inferior_pid = pid;
 
   /* Try to grab a null-terminated string. */
-  while (! done)
+  while (!done)
     {
       if (target_read_memory (top_of_stack, four_chars, 4) != 0)
 	{
@@ -1026,8 +1029,8 @@ pre_fork_inferior ()
       return;
     }
 }
-
 
+
 /* Check to see if the given thread is alive.
 
    This is a no-op, as ptrace doesn't support threads, so we just
@@ -1037,7 +1040,7 @@ int
 child_thread_alive (pid)
      int pid;
 {
-   return 1;
+  return 1;
 }
 
 #endif /* ! GDB_NATIVE_HPUX_11 */

@@ -20,7 +20,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
 
    Written by the Center for Software Science at the University of Utah
    and by Cygnus Support.  */
@@ -43,35 +44,35 @@
    and internalize the HP C debug symbols within that objfile.  */
 
 struct hpread_symfile_info
-{
-  /* The contents of each of the debug sections (there are 4 of them).  */
-  char *gntt;
-  char *lntt;
-  char *slt;
-  char *vt;
+  {
+    /* The contents of each of the debug sections (there are 4 of them).  */
+    char *gntt;
+    char *lntt;
+    char *slt;
+    char *vt;
 
-  /* We keep the size of the $VT$ section for range checking.  */
-  unsigned int vt_size;
+    /* We keep the size of the $VT$ section for range checking.  */
+    unsigned int vt_size;
 
-  /* Some routines still need to know the number of symbols in the
-     main debug sections ($LNTT$ and $GNTT$). */
-  unsigned int lntt_symcount;
-  unsigned int gntt_symcount;
+    /* Some routines still need to know the number of symbols in the
+       main debug sections ($LNTT$ and $GNTT$). */
+    unsigned int lntt_symcount;
+    unsigned int gntt_symcount;
 
-  /* To keep track of all the types we've processed.  */
-  struct type **type_vector;
-  int type_vector_length;
+    /* To keep track of all the types we've processed.  */
+    struct type **type_vector;
+    int type_vector_length;
 
-  /* Keeps track of the beginning of a range of source lines.  */
-  sltpointer sl_index;
+    /* Keeps track of the beginning of a range of source lines.  */
+    sltpointer sl_index;
 
-  /* Some state variables we'll need.  */
-  int within_function;
+    /* Some state variables we'll need.  */
+    int within_function;
 
-  /* Keep track of the current function's address.  We may need to look
-     up something based on this address.  */
-  unsigned int current_function_value;
-};
+    /* Keep track of the current function's address.  We may need to look
+       up something based on this address.  */
+    unsigned int current_function_value;
+  };
 
 /* Accessor macros to get at the fields.  */
 #define HPUX_SYMFILE_INFO(o) \
@@ -110,20 +111,20 @@ struct hpread_symfile_info
    of the psymtab.  */
 
 struct symloc
-{
-  /* The offset within the file symbol table of first local symbol for
-     this file.  */
+  {
+    /* The offset within the file symbol table of first local symbol for
+       this file.  */
 
-  int ldsymoff;
+    int ldsymoff;
 
-  /* Length (in bytes) of the section of the symbol table devoted to
-     this file's symbols (actually, the section bracketed may contain
-     more than just this file's symbols).  If ldsymlen is 0, the only
-     reason for this thing's existence is the dependency list.
-     Nothing else will happen when it is read in.  */
+    /* Length (in bytes) of the section of the symbol table devoted to
+       this file's symbols (actually, the section bracketed may contain
+       more than just this file's symbols).  If ldsymlen is 0, the only
+       reason for this thing's existence is the dependency list.
+       Nothing else will happen when it is read in.  */
 
-  int ldsymlen;
-};
+    int ldsymlen;
+  };
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
 #define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)

@@ -4,21 +4,22 @@
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -35,43 +36,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/types.h>
 #include <signal.h>
 
-/*#include "lynxos-core.h"*/
+/*#include "lynxos-core.h" */
 
 struct thread_info
-{
-  struct thread_info *next;
-  int pid;			/* Actual process id */
-  int num;			/* Convenient handle */
-  CORE_ADDR prev_pc;		/* State from wait_for_inferior */
-  CORE_ADDR prev_func_start;
-  char *prev_func_name;
-  struct breakpoint *step_resume_breakpoint;
-  struct breakpoint *through_sigtramp_breakpoint;
-  CORE_ADDR step_range_start;
-  CORE_ADDR step_range_end;
-  CORE_ADDR step_frame_address;
-  int trap_expected;
-  int handling_longjmp;
-  int another_trap;
+  {
+    struct thread_info *next;
+    int pid;			/* Actual process id */
+    int num;			/* Convenient handle */
+    CORE_ADDR prev_pc;		/* State from wait_for_inferior */
+    CORE_ADDR prev_func_start;
+    char *prev_func_name;
+    struct breakpoint *step_resume_breakpoint;
+    struct breakpoint *through_sigtramp_breakpoint;
+    CORE_ADDR step_range_start;
+    CORE_ADDR step_range_end;
+    CORE_ADDR step_frame_address;
+    int trap_expected;
+    int handling_longjmp;
+    int another_trap;
 
-  /* This is set TRUE when a catchpoint of a shared library event
-     triggers.  Since we don't wish to leave the inferior in the
-     solib hook when we report the event, we step the inferior
-     back to user code before stopping and reporting the event.
+    /* This is set TRUE when a catchpoint of a shared library event
+       triggers.  Since we don't wish to leave the inferior in the
+       solib hook when we report the event, we step the inferior
+       back to user code before stopping and reporting the event.
      */
-  int  stepping_through_solib_after_catch;
+    int stepping_through_solib_after_catch;
 
-  /* When stepping_through_solib_after_catch is TRUE, this is a
-     list of the catchpoints that should be reported as triggering
-     when we finally do stop stepping.
+    /* When stepping_through_solib_after_catch is TRUE, this is a
+       list of the catchpoints that should be reported as triggering
+       when we finally do stop stepping.
      */
-  bpstat  stepping_through_solib_catchpoints;
+    bpstat stepping_through_solib_catchpoints;
 
-  /* This is set to TRUE when this thread is in a signal handler
-     trampoline and we're single-stepping through it */
-  int stepping_through_sigtramp;
+    /* This is set to TRUE when this thread is in a signal handler
+       trampoline and we're single-stepping through it */
+    int stepping_through_sigtramp;
 
-};
+  };
 
 /* Prototypes for exported functions. */
 
@@ -82,11 +83,11 @@ void _initialize_thread PARAMS ((void));
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
-static struct thread_info * find_thread_id PARAMS ((int num));
+static struct thread_info *find_thread_id PARAMS ((int num));
 
-static void thread_command PARAMS ((char * tidstr, int from_tty));
+static void thread_command PARAMS ((char *tidstr, int from_tty));
 static void thread_apply_all_command PARAMS ((char *, int));
-static int  thread_alive PARAMS ((struct thread_info *));
+static int thread_alive PARAMS ((struct thread_info *));
 static void info_threads_command PARAMS ((char *, int));
 static void thread_apply_command PARAMS ((char *, int));
 static void restore_current_thread PARAMS ((int));
@@ -126,7 +127,7 @@ add_thread (pid)
   tp->prev_func_name = NULL;
   tp->step_range_start = 0;
   tp->step_range_end = 0;
-  tp->step_frame_address =0;
+  tp->step_frame_address = 0;
   tp->step_resume_breakpoint = 0;
   tp->through_sigtramp_breakpoint = 0;
   tp->handling_longjmp = 0;
@@ -166,7 +167,7 @@ delete_thread (pid)
 
 static struct thread_info *
 find_thread_id (num)
-    int num;
+     int num;
 {
   struct thread_info *tp;
 
@@ -179,7 +180,7 @@ find_thread_id (num)
 
 int
 valid_thread_id (num)
-    int num;
+     int num;
 {
   struct thread_info *tp;
 
@@ -192,7 +193,7 @@ valid_thread_id (num)
 
 int
 pid_to_thread_id (pid)
-    int pid;
+     int pid;
 {
   struct thread_info *tp;
 
@@ -205,7 +206,7 @@ pid_to_thread_id (pid)
 
 int
 thread_id_to_pid (num)
-    int num;
+     int num;
 {
   struct thread_info *thread = find_thread_id (num);
   if (thread)
@@ -216,7 +217,7 @@ thread_id_to_pid (num)
 
 int
 in_thread_list (pid)
-    int pid;
+     int pid;
 {
   struct thread_info *tp;
 
@@ -229,14 +230,15 @@ in_thread_list (pid)
 
 /* Load infrun state for the thread PID.  */
 
-void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
-			trap_expected, step_resume_breakpoint,
-			through_sigtramp_breakpoint, step_range_start,
-			step_range_end, step_frame_address,
-			handling_longjmp, another_trap,
-			stepping_through_solib_after_catch,
-			stepping_through_solib_catchpoints,
-			stepping_through_sigtramp)
+void
+load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
+		   trap_expected, step_resume_breakpoint,
+		   through_sigtramp_breakpoint, step_range_start,
+		   step_range_end, step_frame_address,
+		   handling_longjmp, another_trap,
+		   stepping_through_solib_after_catch,
+		   stepping_through_solib_catchpoints,
+		   stepping_through_sigtramp)
      int pid;
      CORE_ADDR *prev_pc;
      CORE_ADDR *prev_func_start;
@@ -249,9 +251,9 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
      CORE_ADDR *step_frame_address;
      int *handling_longjmp;
      int *another_trap;
-     int *  stepping_through_solib_after_catch;
-     bpstat *  stepping_through_solib_catchpoints;
-     int *  stepping_through_sigtramp;
+     int *stepping_through_solib_after_catch;
+     bpstat *stepping_through_solib_catchpoints;
+     int *stepping_through_sigtramp;
 {
   struct thread_info *tp;
 
@@ -279,14 +281,15 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 
 /* Save infrun state for the thread PID.  */
 
-void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
-			trap_expected, step_resume_breakpoint,
-			through_sigtramp_breakpoint, step_range_start,
-			step_range_end, step_frame_address,
-			handling_longjmp, another_trap,
-			stepping_through_solib_after_catch,
-			stepping_through_solib_catchpoints,
-			stepping_through_sigtramp)
+void
+save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
+		   trap_expected, step_resume_breakpoint,
+		   through_sigtramp_breakpoint, step_range_start,
+		   step_range_end, step_frame_address,
+		   handling_longjmp, another_trap,
+		   stepping_through_solib_after_catch,
+		   stepping_through_solib_catchpoints,
+		   stepping_through_sigtramp)
      int pid;
      CORE_ADDR prev_pc;
      CORE_ADDR prev_func_start;
@@ -299,9 +302,9 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
      CORE_ADDR step_frame_address;
      int handling_longjmp;
      int another_trap;
-     int  stepping_through_solib_after_catch;
-     bpstat  stepping_through_solib_catchpoints;
-     int  stepping_through_sigtramp;
+     int stepping_through_solib_after_catch;
+     bpstat stepping_through_solib_catchpoints;
+     int stepping_through_sigtramp;
 {
   struct thread_info *tp;
 
@@ -334,9 +337,9 @@ thread_alive (tp)
 {
   if (tp->pid == -1)
     return 0;
-  if (! target_thread_alive (tp->pid))
+  if (!target_thread_alive (tp->pid))
     {
-      tp->pid = -1;	/* Mark it as dead */
+      tp->pid = -1;		/* Mark it as dead */
       return 0;
     }
   return 1;
@@ -356,7 +359,7 @@ prune_threads ()
 	  if (tpprev)
 	    tpprev->next = next;
 	  else
-	    thread_list  = next;
+	    thread_list = next;
 	  free (tp);
 	}
       else
@@ -365,7 +368,7 @@ prune_threads ()
 }
 
 /* Print information about currently known threads 
- *
+
  * Note: this has the drawback that it _really_ switches
  *       threads, which frees the frame cache.  A no-side
  *       effects info-threads command would be nicer.
@@ -377,14 +380,15 @@ info_threads_command (arg, from_tty)
      int from_tty;
 {
   struct thread_info *tp;
-  int                current_pid;
-  struct frame_info  *cur_frame;
-  int                saved_frame_level = selected_frame_level;
-  int                counter;
+  int current_pid;
+  struct frame_info *cur_frame;
+  int saved_frame_level = selected_frame_level;
+  int counter;
 
   /* Avoid coredumps which would happen if we tried to access a NULL
      selected_frame.  */
-  if (!target_has_stack) error ("No stack.");
+  if (!target_has_stack)
+    error ("No stack.");
 
   prune_threads ();
   target_find_new_threads ();
@@ -416,8 +420,8 @@ info_threads_command (arg, from_tty)
    * back to the current thread.  That switch has put us at the top
    * of the stack (leaf frame).
    */
-  counter   = saved_frame_level;
-  cur_frame = find_relative_frame(selected_frame, &counter);
+  counter = saved_frame_level;
+  cur_frame = find_relative_frame (selected_frame, &counter);
   if (counter != 0)
     {
       /* Ooops, can't restore, tell user where we are. */
@@ -426,11 +430,11 @@ info_threads_command (arg, from_tty)
     }
   else
     {
-      select_frame(cur_frame, saved_frame_level);
+      select_frame (cur_frame, saved_frame_level);
     }
 
   /* re-show current frame. */
-  show_stack_frame(cur_frame);
+  show_stack_frame (cur_frame);
 }
 
 /* Switch from one thread to another. */
@@ -445,7 +449,7 @@ switch_to_thread (pid)
   inferior_pid = pid;
   flush_cached_frames ();
   registers_changed ();
-  stop_pc = read_pc();
+  stop_pc = read_pc ();
   select_frame (get_current_frame (), 0);
 }
 
@@ -453,10 +457,10 @@ static void
 restore_current_thread (pid)
      int pid;
 {
-  if (pid != inferior_pid) 
+  if (pid != inferior_pid)
     {
       switch_to_thread (pid);
-      print_stack_frame( get_current_frame(), 0, -1);
+      print_stack_frame (get_current_frame (), 0, -1);
     }
 }
 
@@ -464,10 +468,10 @@ restore_current_thread (pid)
    seperated list of numbers, or ranges, or the keyword `all'.  Ranges consist
    of two numbers seperated by a hyphen.  Examples:
 
-	thread apply 1 2 7 4 backtrace	Apply backtrace cmd to threads 1,2,7,4
-	thread apply 2-7 9 p foo(1)	Apply p foo(1) cmd to threads 2->7 & 9
-	thread apply all p x/i $pc	Apply x/i $pc cmd to all threads
-*/
+   thread apply 1 2 7 4 backtrace       Apply backtrace cmd to threads 1,2,7,4
+   thread apply 2-7 9 p foo(1)  Apply p foo(1) cmd to threads 2->7 & 9
+   thread apply all p x/i $pc   Apply x/i $pc cmd to all threads
+ */
 
 static void
 thread_apply_all_command (cmd, from_tty)
@@ -480,7 +484,7 @@ thread_apply_all_command (cmd, from_tty)
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread, 
+  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
 			    (void *) inferior_pid);
 
   for (tp = thread_list; tp; tp = tp->next)
@@ -511,12 +515,12 @@ thread_apply_command (tidlist, from_tty)
   if (tidlist == NULL || *tidlist == '\000')
     error ("Please specify a thread ID list");
 
-  for (cmd = tidlist; *cmd != '\000' && !isalpha(*cmd); cmd++);
+  for (cmd = tidlist; *cmd != '\000' && !isalpha (*cmd); cmd++);
 
   if (*cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread, 
+  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
 			    (void *) inferior_pid);
 
   while (tidlist < cmd)
@@ -534,7 +538,7 @@ thread_apply_command (tidlist, from_tty)
 
       if (*tidlist == '-')	/* Got a range of IDs? */
 	{
-	  tidlist++;	/* Skip the - */
+	  tidlist++;		/* Skip the - */
 	  end = strtol (tidlist, &p, 10);
 	  if (p == tidlist)
 	    error ("Error parsing %s", tidlist);
@@ -586,13 +590,13 @@ thread_command (tidstr, from_tty)
       /* Don't generate an error, just say which thread is current. */
       if (target_has_stack)
 	printf_filtered ("[Current thread is %d (%s)]\n",
-			 pid_to_thread_id(inferior_pid),
+			 pid_to_thread_id (inferior_pid),
 #if defined(HPUXHPPA)
-			 target_tid_to_str(inferior_pid)
+			 target_tid_to_str (inferior_pid)
 #else
-			 target_pid_to_str(inferior_pid)
+			 target_pid_to_str (inferior_pid)
 #endif
-			 );
+	  );
       else
 	error ("No stack.");
       return;
@@ -620,7 +624,7 @@ see the IDs of currently known threads.", num);
 #else
 		   target_pid_to_str (inferior_pid)
 #endif
-		   );
+    );
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 

@@ -7,87 +7,88 @@
    TT/SJ. It was modified for gdb 4.0 by TX/DK Jan Nordenand by TX/DKG
    Harald Johansen.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+   GDB is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
 
-GDB is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GDB is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 /* Emulator communication protocol.
    All values are encoded in ascii hex digits.
 
-        Request
-Command
-Reply
-	read registers:
-DR<cr>
-     - 0 -    - 1 -    - 2 -    - 3 -      - 4 -    - 5 -    -- 6 -   - 7 - 
-D = XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
-A = XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX XXXXXXXX 
-    PC = XXXXXX       SSP = XXXXXX    USP = XXXXXX     SR = XXXXXXXX
- >
-Each byte of register data is described by two hex digits.
+   Request
+   Command
+   Reply
+   read registers:
+   DR<cr>
+   - 0 -    - 1 -    - 2 -    - 3 -      - 4 -    - 5 -    -- 6 -   - 7 - 
+   D = XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX
+   A = XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX XXXXXXXX 
+   PC = XXXXXX       SSP = XXXXXX    USP = XXXXXX     SR = XXXXXXXX
+   >
+   Each byte of register data is described by two hex digits.
 
-	write regs
-D0=XXXXXXXX<cr>
- >D1=XXXXXXXX<cr>
- >D2=XXXXXXXX<cr>
- >D3=XXXXXXXX<cr>
- >D4=XXXXXXXX<cr>
- >D5=XXXXXXXX<cr>
- >D6=XXXXXXXX<cr>
- >D7=XXXXXXXX<cr>
- >A0=XXXXXXXX<cr>
- >A1=XXXXXXXX<cr>
- >A2=XXXXXXXX<cr>
- >A3=XXXXXXXX<cr>
- >A4=XXXXXXXX<cr>
- >A5=XXXXXXXX<cr>
- >A6=XXXXXXXX<cr>
- >A7=XXXXXXXX<cr>
- >SR=XXXXXXXX<cr>
- >PC=XXXXXX<cr>
- >
-Each byte of register data is described by two hex digits.
+   write regs
+   D0=XXXXXXXX<cr>
+   >D1=XXXXXXXX<cr>
+   >D2=XXXXXXXX<cr>
+   >D3=XXXXXXXX<cr>
+   >D4=XXXXXXXX<cr>
+   >D5=XXXXXXXX<cr>
+   >D6=XXXXXXXX<cr>
+   >D7=XXXXXXXX<cr>
+   >A0=XXXXXXXX<cr>
+   >A1=XXXXXXXX<cr>
+   >A2=XXXXXXXX<cr>
+   >A3=XXXXXXXX<cr>
+   >A4=XXXXXXXX<cr>
+   >A5=XXXXXXXX<cr>
+   >A6=XXXXXXXX<cr>
+   >A7=XXXXXXXX<cr>
+   >SR=XXXXXXXX<cr>
+   >PC=XXXXXX<cr>
+   >
+   Each byte of register data is described by two hex digits.
 
-	read mem
-@.BAA..AA
-$FFFFFFXX
- >
-AA..AA is address, XXXXXXX is the contents
+   read mem
+   @.BAA..AA
+   $FFFFFFXX
+   >
+   AA..AA is address, XXXXXXX is the contents
 
-	write mem
-	@.BAA..AA=$XXXXXXXX
- >
-AA..AA is address, XXXXXXXX is data
+   write mem
+   @.BAA..AA=$XXXXXXXX
+   >
+   AA..AA is address, XXXXXXXX is data
 
-	cont
-PC=$AA..AA
- >RBK
-R>
-AA..AA is address to resume. If AA..AA is omitted, resume at same address.
+   cont
+   PC=$AA..AA
+   >RBK
+   R>
+   AA..AA is address to resume. If AA..AA is omitted, resume at same address.
 
-	step
-PC=$AA..AA
- >STP
-R>
-AA..AA is address to resume. If AA..AA is omitted, resume at same address.
+   step
+   PC=$AA..AA
+   >STP
+   R>
+   AA..AA is address to resume. If AA..AA is omitted, resume at same address.
 
-	kill req
-STP
- >
-*/
+   kill req
+   STP
+   >
+ */
 
 
 #include <stdio.h>
@@ -117,7 +118,7 @@ es1800_child_detach PARAMS ((char *, int));
 static void
 es1800_child_open PARAMS ((char *, int));
 
-static void 
+static void
 es1800_transparent PARAMS ((char *, int));
 
 static void
@@ -145,7 +146,7 @@ static int
 es1800_xfer_inferior_memory PARAMS ((CORE_ADDR, char *, int, int,
 				     struct target_ops *));
 
-static void 
+static void
 es1800_prepare_to_store PARAMS ((void));
 
 static int es1800_wait PARAMS ((int, struct target_waitstatus *));
@@ -246,14 +247,14 @@ es1800_init_break PARAMS ((char *, int));
 static FILE *log_file;
 #endif
 
-extern struct target_ops es1800_ops;		/* Forward decl */
+extern struct target_ops es1800_ops;	/* Forward decl */
 extern struct target_ops es1800_child_ops;	/* Forward decl */
 
 static int kiodebug;
-static int timeout = 100; 
-static char *savename;				/* Name of i/o device used */
+static int timeout = 100;
+static char *savename;		/* Name of i/o device used */
 static serial_ttystate es1800_saved_ttystate;
-static int es1800_fc_save;			/* Save fcntl state */
+static int es1800_fc_save;	/* Save fcntl state */
 
 /* indicates that the emulator uses 32-bit data-adress (68020-mode) 
    instead of 24-bit (68000 -mode) */
@@ -280,7 +281,7 @@ static serial_t es1800_desc = NULL;
 static int es1800_break_vec = 0;
 static char es1800_break_insn[2];
 static long es1800_break_address;
-static void (*old_sigint)();		/* Old signal-handler for sigint */
+static void (*old_sigint) ();	/* Old signal-handler for sigint */
 static jmp_buf interrupt;
 
 /* Local signalhandler to allow breaking tranfers or program run.
@@ -297,7 +298,7 @@ es1800_request_quit ()
 
 /* Reset emulator.
    Sending reset character(octal 32) to emulator.
-   quit - return to '(esgdb)' prompt or continue	*/
+   quit - return to '(esgdb)' prompt or continue        */
 
 static void
 es1800_reset (quit)
@@ -338,7 +339,7 @@ es1800_open (name, from_tty)
 
   m68020 = 0;
 
-  if (!name)           /* no device name given in target command */
+  if (!name)			/* no device name given in target command */
     {
       error_no_arg ("serial port device name");
     }
@@ -365,7 +366,7 @@ es1800_open (name, from_tty)
     }
   es1800_fc_save = fcflag;
 
-  fcflag = (fcflag & (FREAD | FWRITE)); /* mask out any funny stuff */
+  fcflag = (fcflag & (FREAD | FWRITE));		/* mask out any funny stuff */
   if (fcntl (es1800_desc->fd, F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
@@ -386,7 +387,7 @@ es1800_open (name, from_tty)
      response to a command, which would be bad.  */
   SERIAL_FLUSH_INPUT (es1800_desc);
 
-#endif	/* DEBUG_STDIN */
+#endif /* DEBUG_STDIN */
 
   push_target (&es1800_ops);	/* Switch to using remote target now */
   if (from_tty)
@@ -402,29 +403,37 @@ es1800_open (name, from_tty)
       perror_with_name (LOG_FILE);
     }
 
-#endif	/* LOG_FILE */
+#endif /* LOG_FILE */
 
   /* Hello?  Are you there?, also check mode  */
 
   /*  send_with_reply( "DB 0 TO 1", buf, sizeof(buf)); */
-  /*  for (p = buf, i = 0; *p++ =='0';)  */   /* count the number of zeros */
+  /*  for (p = buf, i = 0; *p++ =='0';)  *//* count the number of zeros */
   /*      i++; */
 
   send ("\032");
-  getmessage (buf, sizeof (buf));  /* send reset character */
+  getmessage (buf, sizeof (buf));	/* send reset character */
 
   if (from_tty)
     {
       printf ("Checking mode.... ");
     }
-  /*  m68020 = (i==8); */   /* if eight zeros then we are in m68020 mode */
+  /*  m68020 = (i==8); *//* if eight zeros then we are in m68020 mode */
 
-  /* What kind of processor am i talking to ?*/
+  /* What kind of processor am i talking to ? */
   p = buf;
-  while (*p++ != '\n') {;}
-  while (*p++ != '\n') {;}
-  while (*p++ != '\n') {;}
-  for (i = 0; i < 20; i++, p++) {;}
+  while (*p++ != '\n')
+    {;
+    }
+  while (*p++ != '\n')
+    {;
+    }
+  while (*p++ != '\n')
+    {;
+    }
+  for (i = 0; i < 20; i++, p++)
+    {;
+    }
   m68020 = !strncmp (p, "68020", 5);
   if (from_tty)
     {
@@ -450,7 +459,7 @@ es1800_open (name, from_tty)
 }
 
 /*  Close out all files and local state before this target loses control.
-    quitting - are we quitting gdb now? */
+   quitting - are we quitting gdb now? */
 
 static void
 es1800_close (quitting)
@@ -486,18 +495,18 @@ es1800_close (quitting)
       log_file = NULL;
     }
 
-#endif	/* LOG_FILE */
+#endif /* LOG_FILE */
 
 }
 
 /*  Attaches to a process on the target side
-    proc_id  - the id of the process to be attached.
-    from_tty - says whether to be verbose or not */
+   proc_id  - the id of the process to be attached.
+   from_tty - says whether to be verbose or not */
 
 static void
 es1800_attach (args, from_tty)
-    char *args;
-    int from_tty;
+     char *args;
+     int from_tty;
 {
   error ("Cannot attach to pid %s, this feature is not implemented yet.",
 	 args);
@@ -510,7 +519,7 @@ es1800_attach (args, from_tty)
    Close the open connection to the remote debugger.
    Use this when you want to detach and do something else
    with your gdb.
- 
+
    args     - arguments given to the 'detach' command
    from_tty - says whether to be verbose or not */
 
@@ -549,7 +558,7 @@ es1800_resume (pid, step, siggnal)
     }
   if (step)
     {
-      strcpy (buf,"STP\r");
+      strcpy (buf, "STP\r");
       send (buf);
     }
   else
@@ -561,7 +570,7 @@ es1800_resume (pid, step, siggnal)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.
    status -  */
- 
+
 static int
 es1800_wait (pid, status)
      int pid;
@@ -573,14 +582,14 @@ es1800_wait (pid, status)
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
 
-  timeout = 0;		/* Don't time out -- user program is running. */
+  timeout = 0;			/* Don't time out -- user program is running. */
   if (!setjmp (interrupt))
     {
       old_sigint = signal (SIGINT, es1800_request_quit);
       while (1)
-        {
-	  getmessage (buf, sizeof(buf));
-	  if (strncmp ( buf, "\r\n* BREAK *", 11) == 0) 
+	{
+	  getmessage (buf, sizeof (buf));
+	  if (strncmp (buf, "\r\n* BREAK *", 11) == 0)
 	    {
 	      status->kind = TARGET_WAITKIND_STOPPED;
 	      status->value.sig = TARGET_SIGNAL_TRAP;
@@ -608,7 +617,7 @@ es1800_wait (pid, status)
 	      status->value.sig = TARGET_SIGNAL_QUIT;
 	      break;
 	    }
-        }
+	}
     }
   else
     {
@@ -621,11 +630,11 @@ es1800_wait (pid, status)
 	  printf (" emulator stopped\n");
 	  status->kind = TARGET_WAITKIND_STOPPED;
 	  status->value.sig = TARGET_SIGNAL_INT;
-        }
+	}
       else
 	{
 	  fflush (stdin);
-	  es1800_reset ((char*) 1);
+	  es1800_reset ((char *) 1);
 	}
     }
   signal (SIGINT, old_sigint);
@@ -645,12 +654,12 @@ es1800_fetch_register (regno)
   int k;
   int r;
   char *p;
-  static char regtab[18][4] = 
-    {
-      "D0 ", "D1 ", "D2 ", "D3 ", "D4 ", "D5 ", "D6 ", "D7 ",
-      "A0 ", "A1 ", "A2 ", "A3 ", "A4 ", "A5 ", "A6 ", "SSP",
-      "SR ", "PC "
-    };
+  static char regtab[18][4] =
+  {
+    "D0 ", "D1 ", "D2 ", "D3 ", "D4 ", "D5 ", "D6 ", "D7 ",
+    "A0 ", "A1 ", "A2 ", "A3 ", "A4 ", "A5 ", "A6 ", "SSP",
+    "SR ", "PC "
+  };
 
   if ((regno < 15) || (regno == 16) || (regno == 17))
     {
@@ -659,11 +668,11 @@ es1800_fetch_register (regno)
       p = buf;
       for (k = 0; k < 4; k++)
 	{
-	  if ((p[k*2 + 1] == 0) || (p[k*2 + 2] == 0))
+	  if ((p[k * 2 + 1] == 0) || (p[k * 2 + 2] == 0))
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[k*2 + 1]) * 16) + fromhex (p[k*2 + 2]);
+	  registers[r++] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
 	}
     }
   else
@@ -695,16 +704,18 @@ es1800_fetch_registers ()
 
   /*  parsing row one - D0-D7-registers  */
 
-  while (*p++ != '\n') {;}
+  while (*p++ != '\n')
+    {;
+    }
   for (i = 4; i < 70; i += (i == 39 ? 3 : 1))
     {
       for (k = 0; k < 4; k++)
 	{
-	  if (p[i+0] == 0 || p[i+1] == 0)
+	  if (p[i + 0] == 0 || p[i + 1] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i+0]) * 16) + fromhex (p[i+1]);
+	  registers[r++] = (fromhex (p[i + 0]) * 16) + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
@@ -712,22 +723,26 @@ es1800_fetch_registers ()
 
   /*  parsing row two - A0-A6-registers  */
 
-  while (*p++ != '\n') {;}
+  while (*p++ != '\n')
+    {;
+    }
   for (i = 4; i < 61; i += (i == 39 ? 3 : 1))
     {
       for (k = 0; k < 4; k++)
 	{
-	  if (p[i+0] == 0 || p[i+1] == 0)
+	  if (p[i + 0] == 0 || p[i + 1] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i+0])) * 16 + fromhex (p[i+1]);
+	  registers[r++] = (fromhex (p[i + 0])) * 16 + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
   p += i;
 
-  while (*p++ != '\n') {;}
+  while (*p++ != '\n')
+    {;
+    }
 
   /* fetch SSP-, SR- and PC-registers  */
 
@@ -739,7 +754,7 @@ es1800_fetch_registers ()
 
   if (m68020)
     {
-      if (*p == '3')		 /* use masterstackpointer MSP */
+      if (*p == '3')		/* use masterstackpointer MSP */
 	{
 	  send_with_reply ("MSP", buf, sizeof (buf));
 	}
@@ -747,50 +762,53 @@ es1800_fetch_registers ()
 	{
 	  send_with_reply ("ISP", buf, sizeof (buf));
 	}
-      else			/* use userstackpointer USP  */
+      else
+	/* use userstackpointer USP  */
 	{
-	  send_with_reply ("USP", buf, sizeof (buf)); 
+	  send_with_reply ("USP", buf, sizeof (buf));
 	}
       p = buf;
-      for (k = 0; k<4; k++)
+      for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2+1] == 0 || p[k*2+2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k*2+1]) * 16 + fromhex (buf[k*2+2]);
+	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       p = SR_buf;
       for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2+1] == 0 || p[k*2+2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
 	  registers[r++] =
-	    fromhex (SR_buf[k*2+1]) * 16 + fromhex (SR_buf[k*2+2]);
+	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
       send_with_reply ("PC", buf, sizeof (buf));
       p = buf;
-      for (k = 0; k<4; k++)
+      for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2+1] == 0 || p[k*2+2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k*2+1]) * 16 + fromhex (buf[k*2+2]);
+	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
     }
-  else    /* 68000-mode */
-    {                       
-      if (*p == '2') /* use supervisorstackpointer SSP  */
+  else
+    /* 68000-mode */
+    {
+      if (*p == '2')		/* use supervisorstackpointer SSP  */
 	{
-	  send_with_reply ("SSP", buf, sizeof (buf)); 
+	  send_with_reply ("SSP", buf, sizeof (buf));
 	}
-      else  /* use userstackpointer USP  */
+      else
+	/* use userstackpointer USP  */
 	{
-	  send_with_reply ("USP", buf, sizeof (buf)); 
+	  send_with_reply ("USP", buf, sizeof (buf));
 	}
 
       /* fetch STACKPOINTER */
@@ -798,11 +816,11 @@ es1800_fetch_registers ()
       p = buf;
       for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2 + 1] == 0 || p[k*2 + 2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k*2+1]) * 16 + fromhex (buf[k*2+2]);
+	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       /* fetch STATUS */
@@ -810,45 +828,45 @@ es1800_fetch_registers ()
       p = SR_buf;
       for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2+1] == 0 || p[k*2+2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
 	  registers[r++] =
-	    fromhex (SR_buf[k*2+1]) * 16 + fromhex (SR_buf[k*2+2]);
+	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
 
       /* fetch PC */
 
-      send_with_reply ("PC", buf, sizeof (buf)); 
+      send_with_reply ("PC", buf, sizeof (buf));
       p = buf;
       for (k = 0; k < 4; k++)
 	{
-	  if (p[k*2+1] == 0 || p[k*2+2] == 0)
+	  if (p[k * 2 + 1] == 0 || p[k * 2 + 2] == 0)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k*2+1]) * 16 + fromhex (buf[k*2+2]);
-	}    
+	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	}
     }
 }
 
 /* Store register value, located in REGISTER, on the target processor.
    regno - the register-number of the register to store
-           (-1 means store them all)
+   (-1 means store them all)
    FIXME: Return errno value.  */
 
 static void
-es1800_store_register(regno)
+es1800_store_register (regno)
      int regno;
 {
 
   static char regtab[18][4] =
-    {
-      "D0 ", "D1 ", "D2 ", "D3 ", "D4 ", "D5 ", "D6 ", "D7 ",
-      "A0 ", "A1 ", "A2 ", "A3 ", "A4 ", "A5 ", "A6 ", "SSP",
-      "SR ", "PC "
-    };
+  {
+    "D0 ", "D1 ", "D2 ", "D3 ", "D4 ", "D5 ", "D6 ", "D7 ",
+    "A0 ", "A1 ", "A2 ", "A3 ", "A4 ", "A5 ", "A6 ", "SSP",
+    "SR ", "PC "
+  };
 
   char buf[PBUFSIZ];
   char SR_buf[PBUFSIZ];
@@ -861,17 +879,18 @@ es1800_store_register(regno)
 
   r = (unsigned char *) registers;
 
-  if (regno == -1)  /* write all registers */
+  if (regno == -1)		/* write all registers */
     {
       j = 0;
       k = 18;
     }
-  else              /* write one register */
+  else
+    /* write one register */
     {
       j = regno;
-      k = regno+1;
-      r += regno * 4; 
-    }    
+      k = regno + 1;
+      r += regno * 4;
+    }
 
   if ((regno == -1) || (regno == 15))
     {
@@ -881,37 +900,38 @@ es1800_store_register(regno)
       p += 5;
       if (m68020)
 	{
-	  if (*p == '3') /* use masterstackpointer MSP */
+	  if (*p == '3')	/* use masterstackpointer MSP */
 	    {
-	      strcpy (stack_pointer,"MSP");  
+	      strcpy (stack_pointer, "MSP");
 	    }
 	  else
 	    {
-	      if (*p == '2') /* use interruptstackpointer ISP  */
+	      if (*p == '2')	/* use interruptstackpointer ISP  */
 		{
-		  strcpy (stack_pointer,"ISP");  
+		  strcpy (stack_pointer, "ISP");
 		}
 	      else
 		{
-		  strcpy (stack_pointer,"USP");  /* use userstackpointer USP  */
+		  strcpy (stack_pointer, "USP");	/* use userstackpointer USP  */
 		}
 	    }
 	}
-      else  /* 68000-mode */
+      else
+	/* 68000-mode */
 	{
-	  if (*p == '2') /* use supervisorstackpointer SSP  */
+	  if (*p == '2')	/* use supervisorstackpointer SSP  */
 	    {
-	      strcpy (stack_pointer,"SSP");  
+	      strcpy (stack_pointer, "SSP");
 	    }
 	  else
 	    {
-	      strcpy (stack_pointer,"USP");/* use userstackpointer USP  */  
+	      strcpy (stack_pointer, "USP");	/* use userstackpointer USP  */
 	    }
 	}
-      strcpy (regtab[15],stack_pointer);
+      strcpy (regtab[15], stack_pointer);
     }
 
-  for (i = j; i<k; i++)
+  for (i = j; i < k; i++)
     {
       buf[0] = regtab[i][0];
       buf[1] = regtab[i][1];
@@ -928,14 +948,14 @@ es1800_store_register(regno)
       buf[12] = tohex (*r++ & 0x0f);
       buf[13] = 0;
 
-      send_with_reply (buf, buf, sizeof (buf)); /* FIXME, reply not used? */
+      send_with_reply (buf, buf, sizeof (buf));		/* FIXME, reply not used? */
     }
 }
 
 
 /* Prepare to store registers.  */
 
-static void 
+static void
 es1800_prepare_to_store ()
 {
   /* Do nothing, since we can store individual regs */
@@ -986,11 +1006,11 @@ tohex (nib)
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
    to or from debugger address MYADDR.  Write to inferior if WRITE is
    nonzero.  Returns length of data written or read; 0 for error. 
- 
+
    memaddr - the target's address
    myaddr  - gdb's address
    len     - number of bytes 
-   write   - write if != 0 otherwise read	*/
+   write   - write if != 0 otherwise read       */
 
 static int
 es1800_xfer_inferior_memory (memaddr, myaddr, len, write, tops)
@@ -1018,7 +1038,7 @@ es1800_xfer_inferior_memory (memaddr, myaddr, len, write, tops)
       myaddr += xfersize;
       len -= xfersize;
     }
-  return (origlen); /* no error possible */
+  return (origlen);		/* no error possible */
 }
 
 
@@ -1027,7 +1047,7 @@ es1800_xfer_inferior_memory (memaddr, myaddr, len, write, tops)
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
- 
+
    memaddr - the target's address
    myaddr  - gdb's address
    len     - number of bytes   */
@@ -1045,15 +1065,15 @@ es1800_write_bytes (memaddr, myaddr, len)
   p = myaddr;
   for (i = 0; i < len; i++)
     {
-      sprintf (buf, "@.B$%x=$%x", memaddr+i, (*p++) & 0xff);
-      send_with_reply (buf, buf, sizeof (buf));      /* FIXME send_command? */
+      sprintf (buf, "@.B$%x=$%x", memaddr + i, (*p++) & 0xff);
+      send_with_reply (buf, buf, sizeof (buf));		/* FIXME send_command? */
     }
 }
 
 
 /* Read memory data directly from the emulator.
    This does not use the data cache; the data cache uses this.
- 
+
    memaddr - the target's address
    myaddr  - gdb's address
    len     - number of bytes   */
@@ -1064,7 +1084,8 @@ es1800_read_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  static int DB_tab[16] = {8,11,14,17,20,23,26,29,34,37,40,43,46,49,52,55};
+  static int DB_tab[16] =
+  {8, 11, 14, 17, 20, 23, 26, 29, 34, 37, 40, 43, 46, 49, 52, 55};
   char buf[PBUFSIZ];
   int i;
   int low_addr;
@@ -1076,31 +1097,33 @@ es1800_read_bytes (memaddr, myaddr, len)
       abort ();
     }
 
-  if (len == 1)	/* The emulator does not like expressions like:  */
+  if (len == 1)			/* The emulator does not like expressions like:  */
     {
-      len = 2;	/* DB.B $20018 TO $20018                       */
+      len = 2;			/* DB.B $20018 TO $20018                       */
     }
 
   /* Reply describes registers byte by byte, each byte encoded as two hex
      characters.  */
 
-  sprintf (buf, "DB.B $%x TO $%x", memaddr, memaddr+len-1);
+  sprintf (buf, "DB.B $%x TO $%x", memaddr, memaddr + len - 1);
   send_with_reply (buf, buf, sizeof (buf));
   b = buf;
-  low_addr = memaddr&0x0f;
+  low_addr = memaddr & 0x0f;
   for (i = low_addr; i < low_addr + len; i++)
     {
       if ((!(i % 16)) && i)
-	{   /* if (i = 16,32,48)  */
-	  while (*p++!='\n') {;}
+	{			/* if (i = 16,32,48)  */
+	  while (*p++ != '\n')
+	    {;
+	    }
 	  b = p;
 	}
-      p = b + DB_tab[i%16] + (m68020 ? 2 : 0);
+      p = b + DB_tab[i % 16] + (m68020 ? 2 : 0);
       if (p[0] == 32 || p[1] == 32)
 	{
 	  error ("Emulator reply is too short: %s", buf);
 	}
-      myaddr[i-low_addr] = fromhex (p[0]) * 16 + fromhex (p[1]);
+      myaddr[i - low_addr] = fromhex (p[0]) * 16 + fromhex (p[1]);
     }
 }
 
@@ -1117,12 +1140,12 @@ es1800_files_info (tops)
 
 /* We read the contents of the target location and stash it,
    then overwrite it with a breakpoint instruction.
- 
+
    addr           - is the target location in the target machine.
    contents_cache - is a pointer to memory allocated for saving the target contents.
-                    It is guaranteed by the caller to be long enough to save sizeof 
-                    BREAKPOINT bytes.
- 
+   It is guaranteed by the caller to be long enough to save sizeof 
+   BREAKPOINT bytes.
+
    FIXME: This size is target_arch dependent and should be available in
    the target_arch transfer vector, if we ever have one...  */
 
@@ -1131,7 +1154,7 @@ es1800_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int val; 
+  int val;
 
   val = target_read_memory (addr, contents_cache, sizeof (es1800_break_insn));
 
@@ -1146,12 +1169,12 @@ es1800_insert_breakpoint (addr, contents_cache)
 
 
 /* Write back the stashed instruction
- 
+
    addr           - is the target location in the target machine.
    contents_cache - is a pointer to memory allocated for saving the target contents.
-                    It is guaranteed by the caller to be long enough to save sizeof 
-                    BREAKPOINT bytes.	*/
- 
+   It is guaranteed by the caller to be long enough to save sizeof 
+   BREAKPOINT bytes.    */
+
 static int
 es1800_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
@@ -1189,28 +1212,28 @@ verify_break (vec)
 {
   CORE_ADDR memaddress;
   char buf[8];
-  char *instr = "NqNqNqNs";      /* breakpoint routine */
+  char *instr = "NqNqNqNs";	/* breakpoint routine */
   int status;
 
   get_break_addr (vec, &memaddress);
 
   if (memaddress)
     {
-      status = target_read_memory (memaddress, buf, 8); 
+      status = target_read_memory (memaddress, buf, 8);
       if (status != 0)
 	{
 	  memory_error (status, memaddress);
 	}
       return (STRCMP (instr, buf));
     }
-    return (-1);
+  return (-1);
 }
 
 
 /* get_break_addr ()
    find address of breakpint routine
    vec - trap vector used for breakpoints
-   addrp - store the address here	*/
+   addrp - store the address here       */
 
 static void
 get_break_addr (vec, addrp)
@@ -1230,22 +1253,22 @@ get_break_addr (vec, addrp)
       p = buf;
       for (k = 0; k < 4; k++)
 	{
-	  if ((p[k*2 + 1] == 0) || (p[k*2 + 2] == 0))
+	  if ((p[k * 2 + 1] == 0) || (p[k * 2 + 2] == 0))
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  base_addr[k] = (fromhex (p[k*2 + 1]) * 16) + fromhex (p[k*2 + 2]);
+	  base_addr[k] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
 	}
       /* base addr of exception vector table */
       memaddress = *((CORE_ADDR *) base_addr);
     }
 
-    memaddress += (vec + 32) * 4;     /* address of trap vector */
-    status = target_read_memory (memaddress, (char *) addrp, 4); 
-    if (status != 0)                                                   
-      {
-	memory_error (status, memaddress);
-      }
+  memaddress += (vec + 32) * 4;	/* address of trap vector */
+  status = target_read_memory (memaddress, (char *) addrp, 4);
+  if (status != 0)
+    {
+      memory_error (status, memaddress);
+    }
 }
 
 
@@ -1268,8 +1291,8 @@ es1800_kill ()
    Also loads the trap routine, and sets the ES1800 breakpoint on it
    filename - the a.out to be loaded
    from_tty - says whether to be verbose or not
-   FIXME Uses emulator overlay memory for trap routine	*/
- 
+   FIXME Uses emulator overlay memory for trap routine  */
+
 static void
 es1800_load (filename, from_tty)
      char *filename;
@@ -1282,7 +1305,7 @@ es1800_load (filename, from_tty)
   struct cleanup *old_chain;
   int es1800_load_format = 5;
 
-  if (es1800_desc == NULL) 
+  if (es1800_desc == NULL)
     {
       printf ("No emulator attached, type emulator-command first\n");
       return;
@@ -1293,40 +1316,40 @@ es1800_load (filename, from_tty)
 
   switch (es1800_load_format)
     {
-      case 2:   /* Extended Tekhex  */
-        if (from_tty)
-	  {
-	    printf ("Converting \"%s\" to Extended Tekhex Format\n", filename);
-	  }
-	sprintf (buf, "tekhex %s", filename);
-	system (buf);
-	sprintf (loadname, "out.hex");
-	break;
+    case 2:			/* Extended Tekhex  */
+      if (from_tty)
+	{
+	  printf ("Converting \"%s\" to Extended Tekhex Format\n", filename);
+	}
+      sprintf (buf, "tekhex %s", filename);
+      system (buf);
+      sprintf (loadname, "out.hex");
+      break;
 
-      case 5:   /* Motorola S-rec  */
-	if (from_tty)
-	  {
-	    printf ("Converting \"%s\" to Motorola S-record format\n",
-		    filename);
-	  }
-	/* in the future the source code in copy (part of binutils-1.93) will
-	   be included in this file */
-	sprintf (buf,
-		 "copy -s \"a.out-sunos-big\" -d \"srec\" %s /tmp/out.hex",
-		 filename);
-	system (buf);
-	sprintf (loadname, "/tmp/out.hex");
-	break;
+    case 5:			/* Motorola S-rec  */
+      if (from_tty)
+	{
+	  printf ("Converting \"%s\" to Motorola S-record format\n",
+		  filename);
+	}
+      /* in the future the source code in copy (part of binutils-1.93) will
+         be included in this file */
+      sprintf (buf,
+	       "copy -s \"a.out-sunos-big\" -d \"srec\" %s /tmp/out.hex",
+	       filename);
+      system (buf);
+      sprintf (loadname, "/tmp/out.hex");
+      break;
 
-      default:
-	error ("Downloading format not defined\n");
+    default:
+      error ("Downloading format not defined\n");
     }
- 
+
   breakpoint_init_inferior ();
   inferior_pid = 0;
   if (from_tty)
     {
-      printf ("Downloading \"%s\" to the ES 1800\n",filename);
+      printf ("Downloading \"%s\" to the ES 1800\n", filename);
     }
   if ((instream = fopen (loadname, "r")) == NULL)
     {
@@ -1356,7 +1379,7 @@ es1800_load (filename, from_tty)
 
   do_cleanups (old_chain);
   expect_prompt ();
-  readchar ();  /* FIXME I am getting a ^G = 7 after the prompt  */
+  readchar ();			/* FIXME I am getting a ^G = 7 after the prompt  */
   printf ("\n");
 
   if (fclose (instream) == EOF)
@@ -1370,7 +1393,7 @@ es1800_load (filename, from_tty)
       system (buf);
     }
 
-  symbol_file_command (filename, from_tty);   /* reading symbol table */
+  symbol_file_command (filename, from_tty);	/* reading symbol table */
   immediate_quit--;
 }
 
@@ -1403,23 +1426,23 @@ bfd_copy (from_bfd, to_bfd)
 	  error ("bfd_set_section_flags");
 	}
       new->vma = p->vma;
-      
-      for (i = 0; (i + NUMCPYBYTES) < p->_cooked_size ; i += NUMCPYBYTES)
+
+      for (i = 0; (i + NUMCPYBYTES) < p->_cooked_size; i += NUMCPYBYTES)
 	{
 	  if (!bfd_get_section_contents (from_bfd, p, (PTR) buf, (file_ptr) i,
-					(bfd_size_type) NUMCPYBYTES))
+					 (bfd_size_type) NUMCPYBYTES))
 	    {
 	      error ("bfd_get_section_contents\n");
 	    }
-	if (!bfd_set_section_contents (to_bfd, new, (PTR) buf, (file_ptr) i,
-				      (bfd_size_type) NUMCPYBYTES))
-	  {
-	    error ("bfd_set_section_contents\n");
-	  }
-      }
+	  if (!bfd_set_section_contents (to_bfd, new, (PTR) buf, (file_ptr) i,
+					 (bfd_size_type) NUMCPYBYTES))
+	    {
+	      error ("bfd_set_section_contents\n");
+	    }
+	}
       bfd_get_section_contents (from_bfd, p, (PTR) buf, (file_ptr) i,
 				(bfd_size_type) (p->_cooked_size - i));
-      bfd_set_section_contents (to_bfd, new, (PTR) buf,(file_ptr) i,
+      bfd_set_section_contents (to_bfd, new, (PTR) buf, (file_ptr) i,
 				(bfd_size_type) (p->_cooked_size - i));
     }
 }
@@ -1430,7 +1453,7 @@ bfd_copy (from_bfd, to_bfd)
    process' pid.
    execfile - the file to run
    args     - arguments passed to the program
-   env      - the environment vector to pass	*/
+   env      - the environment vector to pass    */
 
 static void
 es1800_create_inferior (execfile, args, env)
@@ -1525,12 +1548,12 @@ es1800_mourn_inferior ()
    Let the user break out immediately. 
    string - the string to expect
    nowait - break out if string not the emulator's first respond otherwise
-            read until string is found (== 0)   */
- 
+   read until string is found (== 0)   */
+
 static void
 expect (string, nowait)
      char *string;
-    int nowait;
+     int nowait;
 {
   char c;
   char *p = string;
@@ -1558,9 +1581,9 @@ expect (string, nowait)
 	}
       else
 	{
-	  printf ("\'%s\' expected\n" , string);
+	  printf ("\'%s\' expected\n", string);
 	  printf ("char %d is %d", p - string, c);
-	  error ("\n" );
+	  error ("\n");
 	}
     }
 }
@@ -1596,7 +1619,7 @@ readchar ()
   return (buf[0] & 0x7f);
 }
 
-#else	/* !DEBUG_STDIN */
+#else /* !DEBUG_STDIN */
 
 /* Read a character from the remote system, doing all the fancy
    timeout stuff.  */
@@ -1623,7 +1646,7 @@ readchar ()
   return (ch);
 }
 
-#endif	/* DEBUG_STDIN */
+#endif /* DEBUG_STDIN */
 
 
 /* Send a command to the emulator and save the reply.
@@ -1634,8 +1657,8 @@ readchar ()
 
 static void
 send_with_reply (string, buf, len)
-    char *string, *buf;
-    int len;
+     char *string, *buf;
+     int len;
 {
   send (string);
   SERIAL_WRITE (es1800_desc, "\r", 1);
@@ -1652,7 +1675,7 @@ send_with_reply (string, buf, len)
 /* Send the command in STR to the emulator adding \r. check
    the echo for consistency. 
    string - the es1800 command  */
- 
+
 static void
 send_command (string)
      char *string;
@@ -1674,7 +1697,7 @@ static void
 send (string)
      char *string;
 {
-  if (kiodebug) 
+  if (kiodebug)
     {
       fprintf (stderr, "Sending: %s\n", string);
     }
@@ -1685,7 +1708,7 @@ send (string)
 /* Read a message from the emulator and store it in BUF. 
    buf    - containing the emulator reply on return
    len    - size of buf  */
- 
+
 static void
 getmessage (buf, len)
      char *buf;
@@ -1706,9 +1729,9 @@ getmessage (buf, len)
   c = readchar ();
   do
     {
-      if (c) 
+      if (c)
 	{
-	  if (len-- < 2) /* char and terminaling NULL */
+	  if (len-- < 2)	/* char and terminaling NULL */
 	    {
 	      error ("input buffer overrun\n");
 	    }
@@ -1722,16 +1745,16 @@ getmessage (buf, len)
     }
   while (!prompt_found);
   *bp = 0;
-  
+
   if (kiodebug)
     {
-      fprintf (stderr,"message received :%s\n", buf);
+      fprintf (stderr, "message received :%s\n", buf);
     }
 }
 
 static void
 download (instream, from_tty, format)
-FILE *instream;
+     FILE *instream;
      int from_tty;
      int format;
 {
@@ -1739,15 +1762,15 @@ FILE *instream;
   char buf[160];
   int i = 0;
 
-  send_command ("SET #2,$1A");                  /* reset char = ^Z */
-  send_command ("SET #3,$11,$13");              /* XON  XOFF */
+  send_command ("SET #2,$1A");	/* reset char = ^Z */
+  send_command ("SET #3,$11,$13");	/* XON  XOFF */
   if (format == 2)
     {
       send_command ("SET #26,#2");
     }
   else
     {
-      send_command ("SET #26,#5");		/* Format=Extended Tekhex */
+      send_command ("SET #26,#5");	/* Format=Extended Tekhex */
     }
   send_command ("DFB = $10");
   send_command ("PUR");
@@ -1759,18 +1782,18 @@ FILE *instream;
       printf ("    0 records loaded...\r");
     }
   while (fgets (buf, 160, instream))
-      {
-	send (buf);
-	if (from_tty)
-	  {
-	    printf ("%5d\b\b\b\b\b",++i);
-	    fflush (stdout);
-	  }
-	if ((c = readchar ()) != 006) 
-	  {
-	    error ("expected ACK");
-	  }
-      }
+    {
+      send (buf);
+      if (from_tty)
+	{
+	  printf ("%5d\b\b\b\b\b", ++i);
+	  fflush (stdout);
+	}
+      if ((c = readchar ()) != 006)
+	{
+	  error ("expected ACK");
+	}
+    }
   if (from_tty)
     {
       printf ("- All");
@@ -1787,8 +1810,8 @@ FILE *instream;
 /* Talk directly to the emulator
    FIXME, uses busy wait, and is SUNOS (or at least BSD) specific  */
 
-/*ARGSUSED*/
-static void 
+/*ARGSUSED */
+static void
 es1800_transparent (args, from_tty)
      char *args;
      int from_tty;
@@ -1809,7 +1832,7 @@ es1800_transparent (args, from_tty)
   int i;
 
   dont_repeat ();
-  if (es1800_desc == NULL) 
+  if (es1800_desc == NULL)
     {
       printf ("No emulator attached, type emulator-command first\n");
       return;
@@ -1822,7 +1845,7 @@ es1800_transparent (args, from_tty)
   printf (" >");
   fflush (stdout);
 
-  if ((console = open ("/dev/tty", O_RDWR)) == -1) 
+  if ((console = open ("/dev/tty", O_RDWR)) == -1)
     {
       perror_with_name ("/dev/tty:");
     }
@@ -1846,7 +1869,7 @@ es1800_transparent (args, from_tty)
     }
 
   console_mode_save = modebl;
-  modebl.sg_flags = RAW; 
+  modebl.sg_flags = RAW;
 
   if (ioctl (console, TIOCSETP, &modebl))
     {
@@ -1867,7 +1890,7 @@ es1800_transparent (args, from_tty)
     }
 
   while (1)
-    { 
+    {
       cc = read (console, inputbuf, inputcnt);
       if (cc != -1)
 	{
@@ -1875,7 +1898,7 @@ es1800_transparent (args, from_tty)
 	    {
 	      break;
 	    }
-	  for (i = 0; i < cc; )
+	  for (i = 0; i < cc;)
 	    {
 	      es1800_buf[es1800_cnt++] = inputbuf[i++];
 	    }
@@ -1884,11 +1907,11 @@ es1800_transparent (args, from_tty)
 	      perror_with_name ("FEL! write:");
 	    }
 	  es1800_cnt -= cc;
-	  if (es1800_cnt && cc) 
+	  if (es1800_cnt && cc)
 	    {
 	      for (i = 0; i < es1800_cnt; i++)
 		{
-		  es1800_buf[i] = es1800_buf[cc+i];
+		  es1800_buf[i] = es1800_buf[cc + i];
 		}
 	    }
 	}
@@ -1896,24 +1919,24 @@ es1800_transparent (args, from_tty)
 	{
 	  perror_with_name ("FEL! read:");
 	}
-      
-      cc = read (es1800_desc->fd,inputbuf,inputcnt);
+
+      cc = read (es1800_desc->fd, inputbuf, inputcnt);
       if (cc != -1)
 	{
-	  for (i = 0; i < cc; )
+	  for (i = 0; i < cc;)
 	    {
 	      consolebuf[consolecnt++] = inputbuf[i++];
 	    }
-	  if ((cc = write (console,consolebuf,consolecnt)) == -1)
+	  if ((cc = write (console, consolebuf, consolecnt)) == -1)
 	    {
 	      perror_with_name ("FEL! write:");
 	    }
 	  consolecnt -= cc;
-	  if (consolecnt && cc) 
+	  if (consolecnt && cc)
 	    {
 	      for (i = 0; i < consolecnt; i++)
 		{
-		  consolebuf[i] = consolebuf[cc+i];
+		  consolebuf[i] = consolebuf[cc + i];
 		}
 	    }
 	}
@@ -1981,38 +2004,38 @@ es1800_init_break (args, from_tty)
       p = buf;
       for (k = 0; k < 4; k++)
 	{
-	  if ((p[k*2 + 1] == 0) || (p[k*2 + 2] == 0))
+	  if ((p[k * 2 + 1] == 0) || (p[k * 2 + 2] == 0))
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  base_addr[k] = (fromhex (p[k*2 + 1]) * 16) + fromhex (p[k*2 + 2]);
+	  base_addr[k] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
 	}
       /* base addr of exception vector table */
-      memaddress =  *((CORE_ADDR *) base_addr);
+      memaddress = *((CORE_ADDR *) base_addr);
     }
 
-  memaddress += (es1800_break_vec + 32) * 4;     /* address of trap vector */
+  memaddress += (es1800_break_vec + 32) * 4;	/* address of trap vector */
 
   sprintf (buf, "@.L%lx=$%lx", memaddress, es1800_break_address);
-  send_command (buf);   /* set the address of the break routine in the */
-  		       /* trap vector */
-  
-  sprintf (buf, "@.L%lx=$4E714E71", es1800_break_address);      /* NOP; NOP */
+  send_command (buf);		/* set the address of the break routine in the */
+  /* trap vector */
+
+  sprintf (buf, "@.L%lx=$4E714E71", es1800_break_address);	/* NOP; NOP */
   send_command (buf);
-  sprintf (buf, "@.L%lx=$4E714E73", es1800_break_address + 4);  /* NOP; RTE */
+  sprintf (buf, "@.L%lx=$4E714E73", es1800_break_address + 4);	/* NOP; RTE */
   send_command (buf);
-  
+
   sprintf (buf, "AC2=$%lx", es1800_break_address + 4);
   /* breakpoint at es1800-break_address */
   send_command (buf);
-  send_command ("WHEN AC2 THEN BRK");          /* ie in exception routine */
+  send_command ("WHEN AC2 THEN BRK");	/* ie in exception routine */
 
   if (from_tty)
     {
       printf ("Breakpoint (trap $%x) routine at address: %lx\n",
 	      es1800_break_vec, es1800_break_address);
     }
-}	  
+}
 
 static void
 es1800_child_open (arg, from_tty)
@@ -2031,7 +2054,7 @@ es1800_child_detach (args, from_tty)
     {
       error ("Argument given to \"detach\" when remotely debugging.");
     }
-  
+
   pop_target ();
   if (from_tty)
     {
@@ -2042,114 +2065,114 @@ es1800_child_detach (args, from_tty)
 
 /* Define the target subroutine names  */
 
-struct target_ops es1800_ops ;
+struct target_ops es1800_ops;
 
-static void 
-init_es1800_ops(void)
+static void
+init_es1800_ops (void)
 {
-  es1800_ops.to_shortname =   "es1800";		
-  es1800_ops.to_longname =   "Remote serial target in ES1800-emulator protocol";
-  es1800_ops.to_doc =   "Remote debugging on the es1800 emulator via a serial line.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya)." ;
-  es1800_ops.to_open =   es1800_open;		
-  es1800_ops.to_close =   es1800_close;		
-  es1800_ops.to_attach =   es1800_attach;
-  es1800_ops.to_post_attach = NULL;	
+  es1800_ops.to_shortname = "es1800";
+  es1800_ops.to_longname = "Remote serial target in ES1800-emulator protocol";
+  es1800_ops.to_doc = "Remote debugging on the es1800 emulator via a serial line.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  es1800_ops.to_open = es1800_open;
+  es1800_ops.to_close = es1800_close;
+  es1800_ops.to_attach = es1800_attach;
+  es1800_ops.to_post_attach = NULL;
   es1800_ops.to_require_attach = NULL;
-  es1800_ops.to_detach =   es1800_detach;	
+  es1800_ops.to_detach = es1800_detach;
   es1800_ops.to_require_detach = NULL;
-  es1800_ops.to_resume =   es1800_resume;	
-  es1800_ops.to_wait  =   NULL;
-  es1800_ops.to_post_wait = NULL;	
-  es1800_ops.to_fetch_registers  =   NULL;	
-  es1800_ops.to_store_registers  =   NULL;	
-  es1800_ops.to_prepare_to_store =   es1800_prepare_to_store;
-  es1800_ops.to_xfer_memory  =   es1800_xfer_inferior_memory;
-  es1800_ops.to_files_info  =   es1800_files_info;		
-  es1800_ops.to_insert_breakpoint =   es1800_insert_breakpoint;	
-  es1800_ops.to_remove_breakpoint =   es1800_remove_breakpoint;	
-  es1800_ops.to_terminal_init  =   NULL;			
-  es1800_ops.to_terminal_inferior =   NULL;			
-  es1800_ops.to_terminal_ours_for_output =   NULL;		
-  es1800_ops.to_terminal_ours  =   NULL;			
-  es1800_ops.to_terminal_info  =   NULL;			
-  es1800_ops.to_kill  =   NULL;			
-  es1800_ops.to_load  =   es1800_load;		
-  es1800_ops.to_lookup_symbol =   NULL;		
-  es1800_ops.to_create_inferior =   es1800_create_inferior;
+  es1800_ops.to_resume = es1800_resume;
+  es1800_ops.to_wait = NULL;
+  es1800_ops.to_post_wait = NULL;
+  es1800_ops.to_fetch_registers = NULL;
+  es1800_ops.to_store_registers = NULL;
+  es1800_ops.to_prepare_to_store = es1800_prepare_to_store;
+  es1800_ops.to_xfer_memory = es1800_xfer_inferior_memory;
+  es1800_ops.to_files_info = es1800_files_info;
+  es1800_ops.to_insert_breakpoint = es1800_insert_breakpoint;
+  es1800_ops.to_remove_breakpoint = es1800_remove_breakpoint;
+  es1800_ops.to_terminal_init = NULL;
+  es1800_ops.to_terminal_inferior = NULL;
+  es1800_ops.to_terminal_ours_for_output = NULL;
+  es1800_ops.to_terminal_ours = NULL;
+  es1800_ops.to_terminal_info = NULL;
+  es1800_ops.to_kill = NULL;
+  es1800_ops.to_load = es1800_load;
+  es1800_ops.to_lookup_symbol = NULL;
+  es1800_ops.to_create_inferior = es1800_create_inferior;
   es1800_ops.to_post_startup_inferior = NULL;
   es1800_ops.to_acknowledge_created_inferior = NULL;
-  es1800_ops.to_clone_and_follow_inferior = NULL;  
+  es1800_ops.to_clone_and_follow_inferior = NULL;
   es1800_ops.to_post_follow_inferior_by_clone = NULL;
   es1800_ops.to_insert_fork_catchpoint = NULL;
   es1800_ops.to_remove_fork_catchpoint = NULL;
   es1800_ops.to_insert_vfork_catchpoint = NULL;
-  es1800_ops.to_remove_vfork_catchpoint = NULL;              
+  es1800_ops.to_remove_vfork_catchpoint = NULL;
   es1800_ops.to_has_forked = NULL;
-  es1800_ops.to_has_vforked = NULL;            
-  es1800_ops.to_can_follow_vfork_prior_to_exec = NULL;    
+  es1800_ops.to_has_vforked = NULL;
+  es1800_ops.to_can_follow_vfork_prior_to_exec = NULL;
   es1800_ops.to_post_follow_vfork = NULL;
   es1800_ops.to_insert_exec_catchpoint = NULL;
   es1800_ops.to_remove_exec_catchpoint = NULL;
   es1800_ops.to_has_execd = NULL;
   es1800_ops.to_reported_exec_events_per_exec_call = NULL;
   es1800_ops.to_has_exited = NULL;
-  es1800_ops.to_mourn_inferior =   NULL;			
-  es1800_ops.to_can_run  =   0;			
-  es1800_ops.to_notice_signals =   0;		
-  es1800_ops.to_thread_alive  =   0;		
-  es1800_ops.to_stop  =   0;
+  es1800_ops.to_mourn_inferior = NULL;
+  es1800_ops.to_can_run = 0;
+  es1800_ops.to_notice_signals = 0;
+  es1800_ops.to_thread_alive = 0;
+  es1800_ops.to_stop = 0;
   es1800_ops.to_pid_to_exec_file = NULL;
-  es1800_ops.to_core_file_to_sym_file = NULL;	
-  es1800_ops.to_stratum =   core_stratum;	
-  es1800_ops.DONT_USE =   0;			
-  es1800_ops.to_has_all_memory =   0;		
-  es1800_ops.to_has_memory =   1;		
-  es1800_ops.to_has_stack =   0;		
-  es1800_ops.to_has_registers =   0;		
-  es1800_ops.to_has_execution =   0;		
-  es1800_ops.to_sections =   NULL;		
-  es1800_ops.to_sections_end =   NULL;		
-  es1800_ops.to_magic =   OPS_MAGIC ;		
+  es1800_ops.to_core_file_to_sym_file = NULL;
+  es1800_ops.to_stratum = core_stratum;
+  es1800_ops.DONT_USE = 0;
+  es1800_ops.to_has_all_memory = 0;
+  es1800_ops.to_has_memory = 1;
+  es1800_ops.to_has_stack = 0;
+  es1800_ops.to_has_registers = 0;
+  es1800_ops.to_has_execution = 0;
+  es1800_ops.to_sections = NULL;
+  es1800_ops.to_sections_end = NULL;
+  es1800_ops.to_magic = OPS_MAGIC;
 }
 
 /* Define the target subroutine names  */
 
-struct target_ops es1800_child_ops ;
+struct target_ops es1800_child_ops;
 
-static void 
-init_es1800_child_ops(void)
+static void
+init_es1800_child_ops (void)
 {
-  es1800_child_ops.to_shortname =   "es1800_process";	
-  es1800_child_ops.to_longname =   "Remote serial target in ES1800-emulator protocol";
-  es1800_child_ops.to_doc =   "Remote debugging on the es1800 emulator via a serial line.\n\
+  es1800_child_ops.to_shortname = "es1800_process";
+  es1800_child_ops.to_longname = "Remote serial target in ES1800-emulator protocol";
+  es1800_child_ops.to_doc = "Remote debugging on the es1800 emulator via a serial line.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
-  es1800_child_ops.to_open =   es1800_child_open;	
-  es1800_child_ops.to_close =   NULL;			
-  es1800_child_ops.to_attach =   es1800_attach;
+  es1800_child_ops.to_open = es1800_child_open;
+  es1800_child_ops.to_close = NULL;
+  es1800_child_ops.to_attach = es1800_attach;
   es1800_child_ops.to_post_attach = NULL;
-  es1800_child_ops.to_require_attach = NULL;	
-  es1800_child_ops.to_detach =   es1800_child_detach;
-  es1800_child_ops.to_require_detach = NULL;	
-  es1800_child_ops.to_resume =   es1800_resume;	
-  es1800_child_ops.to_wait  =   es1800_wait;
-  es1800_child_ops.to_post_wait = NULL;	
-  es1800_child_ops.to_fetch_registers  =   es1800_fetch_register;
-  es1800_child_ops.to_store_registers  =   es1800_store_register;
-  es1800_child_ops.to_prepare_to_store =   es1800_prepare_to_store;
-  es1800_child_ops.to_xfer_memory  =   es1800_xfer_inferior_memory;
-  es1800_child_ops.to_files_info  =   es1800_files_info;		
-  es1800_child_ops.to_insert_breakpoint =   es1800_insert_breakpoint;	
-  es1800_child_ops.to_remove_breakpoint =   es1800_remove_breakpoint;	
-  es1800_child_ops.to_terminal_init  =   NULL;			
-  es1800_child_ops.to_terminal_inferior =   NULL;			
-  es1800_child_ops.to_terminal_ours_for_output =   NULL;		
-  es1800_child_ops.to_terminal_ours  =   NULL;			
-  es1800_child_ops.to_terminal_info  =   NULL;			
-  es1800_child_ops.to_kill  =   es1800_kill;			
-  es1800_child_ops.to_load  =   es1800_load;			
-  es1800_child_ops.to_lookup_symbol =   NULL;			
-  es1800_child_ops.to_create_inferior =   es1800_create_inferior;
+  es1800_child_ops.to_require_attach = NULL;
+  es1800_child_ops.to_detach = es1800_child_detach;
+  es1800_child_ops.to_require_detach = NULL;
+  es1800_child_ops.to_resume = es1800_resume;
+  es1800_child_ops.to_wait = es1800_wait;
+  es1800_child_ops.to_post_wait = NULL;
+  es1800_child_ops.to_fetch_registers = es1800_fetch_register;
+  es1800_child_ops.to_store_registers = es1800_store_register;
+  es1800_child_ops.to_prepare_to_store = es1800_prepare_to_store;
+  es1800_child_ops.to_xfer_memory = es1800_xfer_inferior_memory;
+  es1800_child_ops.to_files_info = es1800_files_info;
+  es1800_child_ops.to_insert_breakpoint = es1800_insert_breakpoint;
+  es1800_child_ops.to_remove_breakpoint = es1800_remove_breakpoint;
+  es1800_child_ops.to_terminal_init = NULL;
+  es1800_child_ops.to_terminal_inferior = NULL;
+  es1800_child_ops.to_terminal_ours_for_output = NULL;
+  es1800_child_ops.to_terminal_ours = NULL;
+  es1800_child_ops.to_terminal_info = NULL;
+  es1800_child_ops.to_kill = es1800_kill;
+  es1800_child_ops.to_load = es1800_load;
+  es1800_child_ops.to_lookup_symbol = NULL;
+  es1800_child_ops.to_create_inferior = es1800_create_inferior;
   es1800_child_ops.to_post_startup_inferior = NULL;
   es1800_child_ops.to_acknowledge_created_inferior = NULL;
   es1800_child_ops.to_clone_and_follow_inferior = NULL;
@@ -2157,9 +2180,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   es1800_child_ops.to_insert_fork_catchpoint = NULL;
   es1800_child_ops.to_remove_fork_catchpoint = NULL;
   es1800_child_ops.to_insert_vfork_catchpoint = NULL;
-  es1800_child_ops.to_remove_vfork_catchpoint = NULL;        
+  es1800_child_ops.to_remove_vfork_catchpoint = NULL;
   es1800_child_ops.to_has_forked = NULL;
-  es1800_child_ops.to_has_vforked = NULL;          
+  es1800_child_ops.to_has_vforked = NULL;
   es1800_child_ops.to_can_follow_vfork_prior_to_exec = NULL;
   es1800_child_ops.to_post_follow_vfork = NULL;
   es1800_child_ops.to_insert_exec_catchpoint = NULL;
@@ -2167,30 +2190,30 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   es1800_child_ops.to_has_execd = NULL;
   es1800_child_ops.to_reported_exec_events_per_exec_call = NULL;
   es1800_child_ops.to_has_exited = NULL;
-  es1800_child_ops.to_mourn_inferior =   es1800_mourn_inferior;	
-  es1800_child_ops.to_can_run  =   0;				
-  es1800_child_ops.to_notice_signals =   0;			
-  es1800_child_ops.to_thread_alive  =   0;			
-  es1800_child_ops.to_stop  =   0;
+  es1800_child_ops.to_mourn_inferior = es1800_mourn_inferior;
+  es1800_child_ops.to_can_run = 0;
+  es1800_child_ops.to_notice_signals = 0;
+  es1800_child_ops.to_thread_alive = 0;
+  es1800_child_ops.to_stop = 0;
   es1800_child_ops.to_pid_to_exec_file = NULL;
   es1800_child_ops.to_core_file_to_sym_file = NULL;
-  es1800_child_ops.to_stratum =   process_stratum;		
-  es1800_child_ops.DONT_USE =   0;				
-  es1800_child_ops.to_has_all_memory =   1;			
-  es1800_child_ops.to_has_memory =   1;			
-  es1800_child_ops.to_has_stack =   1;			
-  es1800_child_ops.to_has_registers =   1;			
-  es1800_child_ops.to_has_execution =   1;			
-  es1800_child_ops.to_sections =   NULL;			
-  es1800_child_ops.to_sections_end =   NULL;			
-  es1800_child_ops.to_magic =   OPS_MAGIC;			
+  es1800_child_ops.to_stratum = process_stratum;
+  es1800_child_ops.DONT_USE = 0;
+  es1800_child_ops.to_has_all_memory = 1;
+  es1800_child_ops.to_has_memory = 1;
+  es1800_child_ops.to_has_stack = 1;
+  es1800_child_ops.to_has_registers = 1;
+  es1800_child_ops.to_has_execution = 1;
+  es1800_child_ops.to_sections = NULL;
+  es1800_child_ops.to_sections_end = NULL;
+  es1800_child_ops.to_magic = OPS_MAGIC;
 }
 
 void
 _initialize_es1800 ()
 {
-  init_es1800_ops() ;
-  init_es1800_child_ops() ;
+  init_es1800_ops ();
+  init_es1800_child_ops ();
   add_target (&es1800_ops);
   add_target (&es1800_child_ops);
 #ifdef PROVIDE_TRANSPARENT
@@ -2198,5 +2221,5 @@ _initialize_es1800 ()
 	   "Start transparent communication with the ES 1800 emulator.");
 #endif /* PROVIDE_TRANSPARENT */
   add_com ("init_break", class_support, es1800_init_break,
-	   "Download break routine and initialize break facility on ES 1800");
+	 "Download break routine and initialize break facility on ES 1800");
 }

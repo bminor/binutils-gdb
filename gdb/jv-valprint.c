@@ -1,21 +1,22 @@
 /* Support for printing Java values for GDB, the GNU debugger.
    Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -32,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Local functions */
 
-static void java_print_value_fields PARAMS ((struct type *type, char *valaddr, CORE_ADDR address, GDB_FILE *stream, int format, int recurse, enum val_prettyprint pretty));
+static void java_print_value_fields PARAMS ((struct type * type, char *valaddr, CORE_ADDR address, GDB_FILE * stream, int format, int recurse, enum val_prettyprint pretty));
 
 
 int
@@ -67,17 +68,17 @@ java_value_print (val, stream, format, pretty)
 	}
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR && ! value_logical_not (val))
+  if (TYPE_CODE (type) == TYPE_CODE_PTR && !value_logical_not (val))
     type_print (TYPE_TARGET_TYPE (type), "", stream, -1);
 
   name = TYPE_TAG_NAME (type);
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT && name != NULL
-      && (i = strlen (name), name[i-1] == ']'))
+      && (i = strlen (name), name[i - 1] == ']'))
     {
       char buf4[4];
       long length;
       unsigned int things_printed = 0;
-      int reps; 
+      int reps;
       struct type *el_type = java_primitive_type_from_name (name, i - 2);
 
       i = 0;
@@ -90,7 +91,7 @@ java_value_print (val, stream, format, pretty)
 	{
 	  CORE_ADDR element, next_element;
 
-	  address += JAVA_OBJECT_SIZE + 4; /* Skip object header and length. */
+	  address += JAVA_OBJECT_SIZE + 4;	/* Skip object header and length. */
 
 	  while (i < length && things_printed < print_max)
 	    {
@@ -103,16 +104,16 @@ java_value_print (val, stream, format, pretty)
 		element = next_element;
 	      else
 		{
-		  read_memory (address, buf, sizeof(buf));
+		  read_memory (address, buf, sizeof (buf));
 		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
-		  element = extract_address (buf, sizeof(buf));
+		  element = extract_address (buf, sizeof (buf));
 		}
 
-	      for (reps = 1;  i + reps < length;  reps++)
+	      for (reps = 1; i + reps < length; reps++)
 		{
-		  read_memory (address, buf, sizeof(buf));
+		  read_memory (address, buf, sizeof (buf));
 		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
-		  next_element = extract_address (buf, sizeof(buf));
+		  next_element = extract_address (buf, sizeof (buf));
 		  if (next_element != element)
 		    break;
 		}
@@ -160,7 +161,7 @@ java_value_print (val, stream, format, pretty)
 
 	      VALUE_OFFSET (next_v) = VALUE_OFFSET (v);
 
-	      for (reps = 1;  i + reps < length;  reps++)
+	      for (reps = 1; i + reps < length; reps++)
 		{
 		  VALUE_LAZY (next_v) = 1;
 		  VALUE_OFFSET (next_v) += TYPE_LENGTH (el_type);
@@ -195,7 +196,7 @@ java_value_print (val, stream, format, pretty)
   if (TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
       && TYPE_NAME (TYPE_TARGET_TYPE (type))
-      && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
+    && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
       && (format == 0 || format == 's')
       && address != 0)
     {
@@ -218,7 +219,7 @@ java_value_print (val, stream, format, pretty)
       count_val = value_struct_elt (&val, NULL, "count", NULL, NULL);
       count = value_as_pointer (count_val);
 
-      value_free_to_mark (mark); /* Release unnecessary values */
+      value_free_to_mark (mark);	/* Release unnecessary values */
 
       val_print_string (data + boffset, count, 2, stream);
 
@@ -264,7 +265,7 @@ java_print_value_fields (type, valaddr, address, stream,
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
 	  char *basename = TYPE_NAME (baseclass);
 	  char *base_valaddr;
-	  
+
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
 	    continue;
 
@@ -276,7 +277,7 @@ java_print_value_fields (type, valaddr, address, stream,
 	  if (pretty)
 	    {
 	      fprintf_filtered (stream, "\n");
-	      print_spaces_filtered (2 * (recurse+1), stream);
+	      print_spaces_filtered (2 * (recurse + 1), stream);
 	    }
 	  fputs_filtered ("<", stream);
 	  /* Not sure what the best notation is in the case where there is no
@@ -287,9 +288,9 @@ java_print_value_fields (type, valaddr, address, stream,
 	  base_valaddr = valaddr;
 
 	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
-				   stream, format, recurse+1, pretty);
+				   stream, format, recurse + 1, pretty);
 	  fputs_filtered (", ", stream);
-	  
+
 	flush_it:
 	  ;
 	}
@@ -334,7 +335,7 @@ java_print_value_fields (type, valaddr, address, stream,
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  else 
+	  else
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
@@ -374,25 +375,25 @@ java_print_value_fields (type, valaddr, address, stream,
 	      value_ptr v;
 
 	      /* Bitfields require special handling, especially due to byte
-		 order problems.  */
+	         order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		   fputs_filtered ("<optimized out or zero length>", stream);
+		  fputs_filtered ("<optimized out or zero length>", stream);
 		}
 	      else
 		{
-	           v = value_from_longest (TYPE_FIELD_TYPE (type, i),
+		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-                   val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 0,
-			      0, stream, format, 0, recurse + 1, pretty);
+		  val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
+			     0, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	  else
 	    {
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		   fputs_filtered ("<optimized out or zero length>", stream);
+		  fputs_filtered ("<optimized out or zero length>", stream);
 		}
 	      else if (TYPE_FIELD_STATIC (type, i))
 		{
@@ -406,17 +407,17 @@ java_print_value_fields (type, valaddr, address, stream,
 			v = value_addr (v);
 		      val_print (VALUE_TYPE (v),
 				 VALUE_CONTENTS (v), 0, VALUE_ADDRESS (v),
-				 stream, format, 0, recurse+1, pretty);
+				 stream, format, 0, recurse + 1, pretty);
 		    }
 		}
 	      else if (TYPE_FIELD_TYPE (type, i) == NULL)
 		fputs_filtered ("<unknown type>", stream);
 	      else
 		{
-	           val_print (TYPE_FIELD_TYPE (type, i), 
-			      valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
-			      address + TYPE_FIELD_BITPOS (type, i) / 8,
-			      stream, format, 0, recurse + 1, pretty);
+		  val_print (TYPE_FIELD_TYPE (type, i),
+			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
+			     address + TYPE_FIELD_BITPOS (type, i) / 8,
+			     stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	  annotate_field_end ();
@@ -456,7 +457,7 @@ java_val_print (type, valaddr, embedded_offset, address, stream, format,
      int recurse;
      enum val_prettyprint pretty;
 {
-  register unsigned int i = 0;		/* Number of characters printed */
+  register unsigned int i = 0;	/* Number of characters printed */
   struct type *target_type;
   CORE_ADDR addr;
 
@@ -470,13 +471,13 @@ java_val_print (type, valaddr, embedded_offset, address, stream, format,
 	  break;
 	}
 #if 0
-      if (vtblprint && cp_is_vtbl_ptr_type(type))
+      if (vtblprint && cp_is_vtbl_ptr_type (type))
 	{
-          /* Print the unmangled name if desired.  */
+	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
-	  print_address_demangle(extract_address (valaddr, TYPE_LENGTH (type)),
-				 stream, demangle);
+	  print_address_demangle (extract_address (valaddr, TYPE_LENGTH (type)),
+				  stream, demangle);
 	  break;
 	}
 #endif

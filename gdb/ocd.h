@@ -1,21 +1,22 @@
 /* Definitions for the Macraigor Systems BDM Wiggler
    Copyright 1996, 1997 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifndef OCD_H
 #define OCD_H
@@ -24,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DLE 020			/* Quote char */
 #define SYN 026			/* Start of packet */
-#define RAW_SYN ((026 << 8) | 026) /* get_quoted_char found a naked SYN */
+#define RAW_SYN ((026 << 8) | 026)	/* get_quoted_char found a naked SYN */
 
 /* Status flags */
 
@@ -32,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define OCD_FLAG_STOPPED 0x02	/* Target is halted */
 #define OCD_FLAG_BDM 0x04	/* Target is in BDM */
 #define OCD_FLAG_PWF 0x08	/* Power failed */
-#define OCD_FLAG_CABLE_DISC 0x10 /* BDM cable disconnected */
+#define OCD_FLAG_CABLE_DISC 0x10	/* BDM cable disconnected */
 
 /* Commands */
 
@@ -41,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define OCD_SET_BAUD_RATE 0x2	/* Set Baud Rate */
 #define OCD_INIT 0x10		/* Initialize Wiggler */
 #define OCD_SET_SPEED 0x11	/* Set Speed */
-#define OCD_GET_STATUS_MASK 0x12 /* Get Status Mask */
+#define OCD_GET_STATUS_MASK 0x12	/* Get Status Mask */
 #define OCD_GET_CTRS 0x13	/* Get Error Counters */
 #define OCD_SET_FUNC_CODE 0x14	/* Set Function Code */
 #define OCD_SET_CTL_FLAGS 0x15	/* Set Control Flags */
@@ -73,18 +74,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define OCD_LOG_FILE 0xf1	/* Cmd to get Wigglers.dll to log cmds */
 #define OCD_FLAG_STOP 0x0	/* Stop the target, enter BDM */
 #define OCD_FLAG_START 0x01	/* Start the target at PC */
-#define OCD_FLAG_RETURN_STATUS 0x04 /* Return async status */
+#define OCD_FLAG_RETURN_STATUS 0x04	/* Return async status */
 
 /* Target type (for OCD_INIT command) */
 
-enum ocd_target_type {
-  OCD_TARGET_CPU32=0x0,		/* Moto cpu32 family */
-  OCD_TARGET_CPU16=0x1,
-  OCD_TARGET_MOTO_PPC=0x2,	/* Motorola PPC 5xx/8xx */
-  OCD_TARGET_IBM_PPC=0x3};	/* IBM PPC 4xx */
+enum ocd_target_type
+  {
+    OCD_TARGET_CPU32 = 0x0,	/* Moto cpu32 family */
+    OCD_TARGET_CPU16 = 0x1,
+    OCD_TARGET_MOTO_PPC = 0x2,	/* Motorola PPC 5xx/8xx */
+    OCD_TARGET_IBM_PPC = 0x3
+  };				/* IBM PPC 4xx */
 
 void ocd_open PARAMS ((char *name, int from_tty, enum ocd_target_type,
-			   struct target_ops *ops));
+		       struct target_ops * ops));
 
 void ocd_close PARAMS ((int quitting));
 
@@ -96,18 +99,18 @@ void ocd_prepare_to_store PARAMS ((void));
 
 void ocd_stop PARAMS ((void));
 
-void ocd_files_info PARAMS ((struct target_ops *ignore));
+void ocd_files_info PARAMS ((struct target_ops * ignore));
 
 
 int ocd_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				 int len, int should_write,
-				 struct target_ops *target));
+			     int len, int should_write,
+			     struct target_ops * target));
 
 void ocd_mourn PARAMS ((void));
 
 void ocd_create_inferior PARAMS ((char *exec_file,
-				      char *args,
-				      char **env));
+				  char *args,
+				  char **env));
 
 int ocd_thread_alive PARAMS ((int th));
 
@@ -115,17 +118,17 @@ void ocd_error PARAMS ((char *s, int error_code));
 
 void ocd_kill PARAMS ((void));
 
-void ocd_load PARAMS((char *args, int from_tty));
+void ocd_load PARAMS ((char *args, int from_tty));
 
-unsigned char * ocd_read_bdm_registers PARAMS ((int first_bdm_regno,
-						    int last_bdm_regno,
-						    int *reglen));
+unsigned char *ocd_read_bdm_registers PARAMS ((int first_bdm_regno,
+					       int last_bdm_regno,
+					       int *reglen));
 
 CORE_ADDR ocd_read_bdm_register PARAMS ((int bdm_regno));
 
 void ocd_write_bdm_registers PARAMS ((int first_bdm_regno,
-					  unsigned char *regptr,
-					  int reglen));
+				      unsigned char *regptr,
+				      int reglen));
 
 void ocd_write_bdm_register PARAMS ((int bdm_regno, CORE_ADDR reg));
 

@@ -1,21 +1,22 @@
 /* XMODEM support for GDB, the GNU debugger.
    Copyright 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -87,7 +88,7 @@ crcinit ()
 	    crc ^= CRC16;
 	}
 
-      crctab [val] = crc;
+      crctab[val] = crc;
     }
 
   crctab_inited = 1;
@@ -103,7 +104,7 @@ docrc (p, len)
   unsigned short crc = 0;
 
   while (len-- > 0)
-    crc = (crc << 8) ^ crctab [(crc >> 8) ^ *p++];
+    crc = (crc << 8) ^ crctab[(crc >> 8) ^ *p++];
 
   return crc;
 }
@@ -144,17 +145,17 @@ xmodem_init_xfer (desc)
 }
 
 /* Take 128 bytes of data and make a packet out of it.
- *
- *	Each packet looks like this:
- *	+-----+-------+-------+------+-----+
- *	| SOH | Seq1. | Seq2. | data | SUM |
- *	+-----+-------+-------+------+-----+
- *	SOH  = 0x01
- *	Seq1 = The sequence number.
- *	Seq2 = The complement of the sequence number.
- *	Data = A 128 bytes of data.
- *	SUM  = Add the contents of the 128 bytes and use the low-order
- *	       8 bits of the result.
+
+ *      Each packet looks like this:
+ *      +-----+-------+-------+------+-----+
+ *      | SOH | Seq1. | Seq2. | data | SUM |
+ *      +-----+-------+-------+------+-----+
+ *      SOH  = 0x01
+ *      Seq1 = The sequence number.
+ *      Seq2 = The complement of the sequence number.
+ *      Data = A 128 bytes of data.
+ *      SUM  = Add the contents of the 128 bytes and use the low-order
+ *             8 bits of the result.
  *
  * send_xmodem_packet fills in the XMODEM fields of PACKET and sends it to the
  * remote system.  PACKET must be XMODEM_PACKETSIZE bytes long.  The data must
@@ -174,14 +175,14 @@ xmodem_send_packet (desc, packet, len, hashmark)
   int retries;
   int pktlen;
   int datasize;
-  
+
   /* build the packet header */
 
   packet[1] = blknum;
   packet[2] = ~blknum;
 
   blknum++;
-  
+
   if (len <= XMODEM_DATASIZE)
     {
       packet[0] = SOH;
@@ -217,7 +218,7 @@ xmodem_send_packet (desc, packet, len, hashmark)
       for (i = 3; i < datasize + 3; i++)
 	sum += packet[i];
 
-      packet[3 + datasize] = sum; /* add the checksum */
+      packet[3 + datasize] = sum;	/* add the checksum */
       pktlen = datasize + 4;
     }
 
@@ -246,7 +247,7 @@ xmodem_send_packet (desc, packet, len, hashmark)
 	}
     }
 
-  SERIAL_WRITE (desc, "\004", 1); /* Send an EOT */
+  SERIAL_WRITE (desc, "\004", 1);	/* Send an EOT */
 
   error ("xmodem_send_packet:  Excessive retries.");
 }
@@ -263,7 +264,7 @@ xmodem_finish_xfer (desc)
     {
       int c;
 
-      SERIAL_WRITE (desc, "\004", 1); /* Send an EOT */
+      SERIAL_WRITE (desc, "\004", 1);	/* Send an EOT */
 
       c = readchar (desc, 3);
       switch (c)

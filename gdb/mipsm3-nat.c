@@ -1,21 +1,22 @@
 /* Definitions to make GDB run on a mips box under Mach 3.0
    Copyright (C) 1992 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Mach specific routines for little endian mips (e.g. pmax)
  * running Mach 3.0
@@ -49,70 +50,70 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  *
  * -1 means mach does not save it anywhere.
  */
-static int reg_offset[] = 
+static int reg_offset[] =
 {
-  /*  zero		at		  v0		    v1       */
-      -1,           REG_OFFSET(r1),   REG_OFFSET(r2),   REG_OFFSET(r3),
+  /*  zero              at                v0                v1       */
+  -1, REG_OFFSET (r1), REG_OFFSET (r2), REG_OFFSET (r3),
 
-  /*  a0		a1		  a2		    a3       */
-  REG_OFFSET(r4),   REG_OFFSET(r5),   REG_OFFSET(r6),   REG_OFFSET(r7),
+  /*  a0                a1                a2                a3       */
+  REG_OFFSET (r4), REG_OFFSET (r5), REG_OFFSET (r6), REG_OFFSET (r7),
 
-  /*  t0		t1		  t2		    t3       */
-  REG_OFFSET(r8),   REG_OFFSET(r9),   REG_OFFSET(r10),  REG_OFFSET(r11),
+  /*  t0                t1                t2                t3       */
+  REG_OFFSET (r8), REG_OFFSET (r9), REG_OFFSET (r10), REG_OFFSET (r11),
 
-  /*  t4		t5		  t6		    t7       */
-  REG_OFFSET(r12),  REG_OFFSET(r13),  REG_OFFSET(r14),  REG_OFFSET(r15),
+  /*  t4                t5                t6                t7       */
+  REG_OFFSET (r12), REG_OFFSET (r13), REG_OFFSET (r14), REG_OFFSET (r15),
 
-  /*  s0		s1		  s2		    s3       */
-  REG_OFFSET(r16),  REG_OFFSET(r17),  REG_OFFSET(r18),  REG_OFFSET(r19),
+  /*  s0                s1                s2                s3       */
+  REG_OFFSET (r16), REG_OFFSET (r17), REG_OFFSET (r18), REG_OFFSET (r19),
 
-  /*  s4		s5		  s6		    s7       */
-  REG_OFFSET(r20),  REG_OFFSET(r21),  REG_OFFSET(r22),  REG_OFFSET(r23),
+  /*  s4                s5                s6                s7       */
+  REG_OFFSET (r20), REG_OFFSET (r21), REG_OFFSET (r22), REG_OFFSET (r23),
 
-  /*  t8		t9		  k0		    k1       */
-  REG_OFFSET(r24),  REG_OFFSET(r25),  REG_OFFSET(r26),  REG_OFFSET(r27),
+  /*  t8                t9                k0                k1       */
+  REG_OFFSET (r24), REG_OFFSET (r25), REG_OFFSET (r26), REG_OFFSET (r27),
 
-  /*  gp		sp	      s8(30) == fp(72)	    ra       */
-  REG_OFFSET(r28),  REG_OFFSET(r29),  REG_OFFSET(r30),  REG_OFFSET(r31),
+  /*  gp                sp            s8(30) == fp(72)      ra       */
+  REG_OFFSET (r28), REG_OFFSET (r29), REG_OFFSET (r30), REG_OFFSET (r31),
 
   /*  sr(32) PS_REGNUM   */
-  EREG_OFFSET(coproc_state),
+  EREG_OFFSET (coproc_state),
 
-  /*  lo(33)		hi(34)    */
-  REG_OFFSET(mdlo), REG_OFFSET(mdhi),
+  /*  lo(33)            hi(34)    */
+  REG_OFFSET (mdlo), REG_OFFSET (mdhi),
 
-  /*  bad(35)          	      cause(36)	         pc(37)  */
-  EREG_OFFSET(address),  EREG_OFFSET(cause), REG_OFFSET(pc),
+  /*  bad(35)                 cause(36)          pc(37)  */
+  EREG_OFFSET (address), EREG_OFFSET (cause), REG_OFFSET (pc),
 
-  /*  f0(38)		 f1(39)		    f2(40)	       f3(41)   */
-  CREG_OFFSET(r0),   CREG_OFFSET(r1),   CREG_OFFSET(r2),   CREG_OFFSET(r3),
-  CREG_OFFSET(r4),   CREG_OFFSET(r5),   CREG_OFFSET(r6),   CREG_OFFSET(r7),
-  CREG_OFFSET(r8),   CREG_OFFSET(r9),   CREG_OFFSET(r10),  CREG_OFFSET(r11),
-  CREG_OFFSET(r12),  CREG_OFFSET(r13),  CREG_OFFSET(r14),  CREG_OFFSET(r15),
-  CREG_OFFSET(r16),  CREG_OFFSET(r17),  CREG_OFFSET(r18),  CREG_OFFSET(r19),
-  CREG_OFFSET(r20),  CREG_OFFSET(r21),  CREG_OFFSET(r22),  CREG_OFFSET(r23),
-  CREG_OFFSET(r24),  CREG_OFFSET(r25),  CREG_OFFSET(r26),  CREG_OFFSET(r27),
-  CREG_OFFSET(r28),  CREG_OFFSET(r29),  CREG_OFFSET(r30),  CREG_OFFSET(r31),
+  /*  f0(38)             f1(39)             f2(40)             f3(41)   */
+  CREG_OFFSET (r0), CREG_OFFSET (r1), CREG_OFFSET (r2), CREG_OFFSET (r3),
+  CREG_OFFSET (r4), CREG_OFFSET (r5), CREG_OFFSET (r6), CREG_OFFSET (r7),
+  CREG_OFFSET (r8), CREG_OFFSET (r9), CREG_OFFSET (r10), CREG_OFFSET (r11),
+  CREG_OFFSET (r12), CREG_OFFSET (r13), CREG_OFFSET (r14), CREG_OFFSET (r15),
+  CREG_OFFSET (r16), CREG_OFFSET (r17), CREG_OFFSET (r18), CREG_OFFSET (r19),
+  CREG_OFFSET (r20), CREG_OFFSET (r21), CREG_OFFSET (r22), CREG_OFFSET (r23),
+  CREG_OFFSET (r24), CREG_OFFSET (r25), CREG_OFFSET (r26), CREG_OFFSET (r27),
+  CREG_OFFSET (r28), CREG_OFFSET (r29), CREG_OFFSET (r30), CREG_OFFSET (r31),
 
-  /*  fsr(70)		fir(71)		fp(72) == s8(30) */
-  CREG_OFFSET(csr),  CREG_OFFSET(esr),  REG_OFFSET(r30)
+  /*  fsr(70)           fir(71)         fp(72) == s8(30) */
+  CREG_OFFSET (csr), CREG_OFFSET (esr), REG_OFFSET (r30)
 };
 #else
 /* If the compiler does not grok the above defines */
-static int reg_offset[] = 
+static int reg_offset[] =
 {
 /* mach_thread_state offsets: */
-  -1,  0,  4,  8,  12, 16, 20, 24,  28, 32, 36, 40,  44, 48, 52, 56,
-  60, 64, 68, 72,  76, 80, 84, 88,  92, 96,100,104, 108,112,116,120,
+  -1, 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56,
+  60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120,
 /*sr, lo, hi,addr,cause,pc   */
-   8,124,128,  4,   0,132,
+  8, 124, 128, 4, 0, 132,
 /* mach_float_state offsets: */
-   0,  4,  8, 12,  16, 20, 24, 28,  32, 36, 40, 44,  48, 52, 56, 60,
-  64, 68, 72, 76,  80, 84, 88, 92,  96,100,104,108, 112,116,120,124,
-/*fsr,fir*/
- 128,132,
+  0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60,
+  64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124,
+/*fsr,fir */
+  128, 132,
 /* FP_REGNUM pseudo maps to s8==r30 in mach_thread_state */
- 116
+  116
 };
 #endif
 
@@ -143,18 +144,18 @@ void
 fetch_inferior_registers (regno)
      int regno;
 {
-  kern_return_t ret;  
+  kern_return_t ret;
 
-  thread_state_data_t      state;
-  struct mips_exc_state    exc_state;
+  thread_state_data_t state;
+  struct mips_exc_state exc_state;
 
-  int stateCnt   = MIPS_THREAD_STATE_COUNT;
+  int stateCnt = MIPS_THREAD_STATE_COUNT;
 
-  int which_regs = 0; /* A bit mask */
+  int which_regs = 0;		/* A bit mask */
 
-  if (! MACH_PORT_VALID (current_thread))
+  if (!MACH_PORT_VALID (current_thread))
     error ("fetch inferior registers: Invalid thread");
-  
+
   if (regno < -1 || regno >= NUM_REGS)
     error ("invalid register %d supplied to fetch_inferior_registers", regno);
 
@@ -192,24 +193,24 @@ fetch_inferior_registers (regno)
 	  if (regno == MACH_FP_REGNUM || regno == FP_REGNUM)
 	    {
 	      supply_register (FP_REGNUM,
-			       (char *)state+reg_offset[ MACH_FP_REGNUM ]);
+			       (char *) state + reg_offset[MACH_FP_REGNUM]);
 	      supply_register (MACH_FP_REGNUM,
-			       (char *)state+reg_offset[ MACH_FP_REGNUM ]);
+			       (char *) state + reg_offset[MACH_FP_REGNUM]);
 	    }
 	  else
 	    supply_register (regno,
-			     (char *)state+reg_offset[ regno ]);
+			     (char *) state + reg_offset[regno]);
 	  return;
 	}
-			   
+
       /* ZERO_REGNUM is always zero */
       *(int *) registers = 0;
-      
+
       /* Copy thread saved regs 1..31 to gdb's reg value array
        * Luckily, they are contiquous
        */
       FETCH_REGS (state, 1, 31);
-      
+
       /* Copy mdlo and mdhi */
       FETCH_REGS (state, LO_REGNUM, 2);
 
@@ -228,7 +229,7 @@ fetch_inferior_registers (regno)
       stateCnt = MIPS_EXC_STATE_COUNT;
       ret = thread_get_state (current_thread,
 			      MIPS_EXC_STATE,
-			      (thread_state_t) &exc_state,
+			      (thread_state_t) & exc_state,
 			      &stateCnt);
       CHK ("fetch inferior regs (exc): thread_get_state", ret);
 
@@ -238,15 +239,15 @@ fetch_inferior_registers (regno)
 
       /* cproc_state: Which coprocessors the thread uses */
       supply_register (PS_REGNUM,
-		       (char *)&exc_state+reg_offset[ PS_REGNUM ]);
-      
+		       (char *) &exc_state + reg_offset[PS_REGNUM]);
+
       if (which_regs == REGS_EXC || which_regs == REGS_ALL)
 	{
 	  supply_register (BADVADDR_REGNUM,
-			   (char *)&exc_state+reg_offset[ BADVADDR_REGNUM ]);
-	  
+			 (char *) &exc_state + reg_offset[BADVADDR_REGNUM]);
+
 	  supply_register (CAUSE_REGNUM,
-			   (char *)&exc_state+reg_offset[ CAUSE_REGNUM ]);
+			   (char *) &exc_state + reg_offset[CAUSE_REGNUM]);
 	  if (which_regs == REGS_EXC)
 	    return;
 	}
@@ -256,9 +257,9 @@ fetch_inferior_registers (regno)
   if (which_regs & REGS_COP1)
     {
       /* If the thread does not have saved COPROC1, set regs to zero */
-      
-      if (! (exc_state.coproc_state & MIPS_STATUS_USE_COP1))
-	bzero (&registers[ REGISTER_BYTE (FP0_REGNUM) ],
+
+      if (!(exc_state.coproc_state & MIPS_STATUS_USE_COP1))
+	bzero (&registers[REGISTER_BYTE (FP0_REGNUM)],
 	       sizeof (struct mips_float_state));
       else
 	{
@@ -268,18 +269,18 @@ fetch_inferior_registers (regno)
 				  state,
 				  &stateCnt);
 	  CHK ("fetch inferior regs (floats): thread_get_state", ret);
-	  
+
 	  if (regno != -1)
 	    {
 	      supply_register (regno,
-			       (char *)state+reg_offset[ regno ]);
+			       (char *) state + reg_offset[regno]);
 	      return;
 	    }
-	  
+
 	  FETCH_REGS (state, FP0_REGNUM, 34);
 	}
     }
-  
+
   /* All registers are valid, if not returned yet */
   registers_fetched ();
 }
@@ -300,21 +301,21 @@ store_inferior_registers (regno)
 {
   thread_state_data_t state;
   kern_return_t ret;
-  
-  if (! MACH_PORT_VALID (current_thread))
+
+  if (!MACH_PORT_VALID (current_thread))
     error ("store inferior registers: Invalid thread");
-  
+
   /* Check for read only regs.
    * @@ If some of these is can be changed, fix this
    */
-  if (regno == ZERO_REGNUM	||
-      regno == PS_REGNUM	||
-      regno == BADVADDR_REGNUM	||
-      regno == CAUSE_REGNUM	||
+  if (regno == ZERO_REGNUM ||
+      regno == PS_REGNUM ||
+      regno == BADVADDR_REGNUM ||
+      regno == CAUSE_REGNUM ||
       regno == FCRIR_REGNUM)
     {
       message ("You can not alter read-only register `%s'",
-	       REGISTER_NAME ( regno ));
+	       REGISTER_NAME (regno));
       fetch_inferior_registers (regno);
       return;
     }
@@ -324,8 +325,8 @@ store_inferior_registers (regno)
       /* Don't allow these to change */
 
       /* ZERO_REGNUM */
-      *(int *)registers = 0;
-      
+      *(int *) registers = 0;
+
       fetch_inferior_registers (PS_REGNUM);
       fetch_inferior_registers (BADVADDR_REGNUM);
       fetch_inferior_registers (CAUSE_REGNUM);
@@ -346,7 +347,7 @@ store_inferior_registers (regno)
 	      &registers[REGISTER_BYTE (FP_REGNUM)],
 	      REGISTER_RAW_SIZE (FP_REGNUM));
 #endif
-      
+
       /* Save gdb's regs 1..31 to thread saved regs 1..31
        * Luckily, they are contiquous
        */
@@ -355,7 +356,7 @@ store_inferior_registers (regno)
       /* Save mdlo, mdhi */
       STORE_REGS (state, LO_REGNUM, 2);
 
-     /* Save PC */
+      /* Save PC */
       STORE_REGS (state, PC_REGNUM, 1);
 
       ret = thread_set_state (current_thread,
@@ -364,7 +365,7 @@ store_inferior_registers (regno)
 			      MIPS_FLOAT_STATE_COUNT);
       CHK ("store inferior regs : thread_set_state", ret);
     }
-  
+
   if (regno == -1 || regno >= FP0_REGNUM)
     {
       /* If thread has floating state, save it */
@@ -372,7 +373,7 @@ store_inferior_registers (regno)
 	{
 	  /* Do NOT save FCRIR_REGNUM */
 	  STORE_REGS (state, FP0_REGNUM, 33);
-	
+
 	  ret = thread_set_state (current_thread,
 				  MIPS_FLOAT_STATE,
 				  state,

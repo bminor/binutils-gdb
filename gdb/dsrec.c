@@ -1,21 +1,22 @@
 /* S-record download support for GDB, the GNU debugger.
    Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "serial.h"
@@ -27,21 +28,21 @@ extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t))
 
 extern int remote_debug;
 
-static int make_srec PARAMS ((char *srec, CORE_ADDR targ_addr, bfd *abfd,
-			      asection *sect, int sectoff, int *maxrecsize,
+static int make_srec PARAMS ((char *srec, CORE_ADDR targ_addr, bfd * abfd,
+			      asection * sect, int sectoff, int *maxrecsize,
 			      int flags));
 
 /* Download an executable by converting it to S records.  DESC is a
-    serial_t to send the data to.  FILE is the name of the file to be
-    loaded.  LOAD_OFFSET is the offset into memory to load data into.
-    It is usually specified by the user and is useful with the a.out
-    file format.  MAXRECSIZE is the length in chars of the largest
-    S-record the host can accomodate.  This is measured from the
-    starting `S' to the last char of the checksum.  FLAGS is various
-    random flags, and HASHMARK is non-zero to cause a `#' to be
-    printed out for each record loaded.  WAITACK, if non-NULL, is a
-    function that waits for an acknowledgement after each S-record,
-    and returns non-zero if the ack is read correctly.  */
+   serial_t to send the data to.  FILE is the name of the file to be
+   loaded.  LOAD_OFFSET is the offset into memory to load data into.
+   It is usually specified by the user and is useful with the a.out
+   file format.  MAXRECSIZE is the length in chars of the largest
+   S-record the host can accomodate.  This is measured from the
+   starting `S' to the last char of the checksum.  FLAGS is various
+   random flags, and HASHMARK is non-zero to cause a `#' to be
+   printed out for each record loaded.  WAITACK, if non-NULL, is a
+   function that waits for an acknowledgement after each S-record,
+   and returns non-zero if the ack is read correctly.  */
 
 void
 load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
@@ -82,7 +83,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
      is no data, so len is 0.  */
 
   reclen = maxrecsize;
-  make_srec (srec, 0, NULL, (asection *)1, 0, &reclen, flags);
+  make_srec (srec, 0, NULL, (asection *) 1, 0, &reclen, flags);
   if (remote_debug)
     {
       srec[reclen] = '\0';
@@ -96,7 +97,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	int numbytes;
 	bfd_vma addr = bfd_get_section_vma (abfd, s) + load_offset;
 	bfd_size_type size = bfd_get_section_size_before_reloc (s);
-	char * section_name = (char *)bfd_get_section_name (abfd, s);
+	char *section_name = (char *) bfd_get_section_name (abfd, s);
 	printf_filtered ("%s\t: 0x%08x .. 0x%08x  ",
 			 section_name, (int) addr, (int) addr + size);
 	gdb_flush (gdb_stdout);
@@ -119,7 +120,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	       acknowledgement is sent back.  */
 	    do
 	      {
-	        SERIAL_WRITE (desc, srec, reclen);
+		SERIAL_WRITE (desc, srec, reclen);
 		if (ui_load_progress_hook)
 		  if (ui_load_progress_hook (section_name, (unsigned long) i))
 		    error ("Canceled the download");
@@ -139,11 +140,11 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	putchar_unfiltered ('\n');
       }
 
-  if (hashmark) 
+  if (hashmark)
     putchar_unfiltered ('\n');
 
   end_time = time (NULL);
-  
+
   /* Write a terminator record.  */
 
   reclen = maxrecsize;
@@ -169,19 +170,19 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 
 /*
  * make_srec -- make an srecord. This writes each line, one at a
- *	time, each with it's own header and trailer line.
- *	An srecord looks like this:
+ *      time, each with it's own header and trailer line.
+ *      An srecord looks like this:
  *
  * byte count-+     address
  * start ---+ |        |       data        +- checksum
- *	    | |        |                   |
- *	  S01000006F6B692D746573742E73726563E4
- *	  S315000448600000000000000000FC00005900000000E9
- *	  S31A0004000023C1400037DE00F023604000377B009020825000348D
- *	  S30B0004485A0000000000004E
- *	  S70500040000F6
+ *          | |        |                   |
+ *        S01000006F6B692D746573742E73726563E4
+ *        S315000448600000000000000000FC00005900000000E9
+ *        S31A0004000023C1400037DE00F023604000377B009020825000348D
+ *        S30B0004485A0000000000004E
+ *        S70500040000F6
  *
- *	S<type><length><address><data><checksum>
+ *      S<type><length><address><data><checksum>
  *
  *      Where
  *      - length
@@ -204,7 +205,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
  *      - data
  *        is the data.
  *      - checksum
- *	  is the sum of all the raw byte data in the record, from the length
+ *        is the sum of all the raw byte data in the record, from the length
  *        upwards, modulo 256 and subtracted from 255.
  *
  * This routine returns the length of the S-record.
@@ -227,9 +228,10 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   const static char data_code_table[] = "123";
   const static char term_code_table[] = "987";
   const static char header_code_table[] = "000";
-  const static char *formats[] = { "S%c%02X%04X",
-				   "S%c%02X%06X",
-				   "S%c%02X%08X" };
+  const static char *formats[] =
+  {"S%c%02X%04X",
+   "S%c%02X%06X",
+   "S%c%02X%08X"};
   char const *code_table;
   int addr_size;
   int payload_size;
@@ -240,11 +242,11 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
     {
       tmp = flags;		/* Data or header record */
       code_table = abfd ? data_code_table : header_code_table;
-      binbuf = alloca (*maxrecsize/2);
+      binbuf = alloca (*maxrecsize / 2);
     }
   else
     {
-      tmp = flags >> SREC_TERM_SHIFT; /* Term record */
+      tmp = flags >> SREC_TERM_SHIFT;	/* Term record */
       code_table = term_code_table;
     }
 
@@ -274,20 +276,20 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   /* Output the header.  */
 
   sprintf (srec, formats[addr_size - 2], code_table[addr_size - 2],
-	   addr_size + payload_size + 1, (int)targ_addr);
+	   addr_size + payload_size + 1, (int) targ_addr);
 
   /* Note that the checksum is calculated on the raw data, not the
      hexified data.  It includes the length, address and the data
      portions of the packet.  */
 
   checksum = 0;
-  
+
   checksum += (payload_size + addr_size + 1	/* Packet length */
-	       + (targ_addr & 0xff)		/* Address... */
-	       + ((targ_addr >>  8) & 0xff)
+	       + (targ_addr & 0xff)	/* Address... */
+	       + ((targ_addr >> 8) & 0xff)
 	       + ((targ_addr >> 16) & 0xff)
 	       + ((targ_addr >> 24) & 0xff));
-  
+
   p = srec + 1 + 1 + 2 + addr_size * 2;
 
   /* Build the Srecord.  */
@@ -296,8 +298,8 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
       unsigned char k;
 
       k = binbuf[tmp];
-      *p++ = hextab [k >> 4];
-      *p++ = hextab [k & 0xf];
+      *p++ = hextab[k >> 4];
+      *p++ = hextab[k & 0xf];
       checksum += k;
     }
 

@@ -1,19 +1,20 @@
 /* environ.c -- library for manipulating environments for GNU.
    Copyright (C) 1986, 1989 Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -22,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "environ.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
-
 
+
 /* Return a new environment object.  */
 
 struct environ *
@@ -67,12 +68,12 @@ init_environ (e)
   if (environ == NULL)
     return;
 
-  for (i = 0; environ[i]; i++) /*EMPTY*/;
+  for (i = 0; environ[i]; i++) /*EMPTY */ ;
 
   if (e->allocated < i)
     {
       e->allocated = max (i, e->allocated + 10);
-      e->vector = (char **) xrealloc ((char *)e->vector,
+      e->vector = (char **) xrealloc ((char *) e->vector,
 				      (e->allocated + 1) * sizeof (char *));
     }
 
@@ -137,7 +138,7 @@ set_in_environ (e, var, value)
       if (i == e->allocated)
 	{
 	  e->allocated += 10;
-	  vector = (char **) xrealloc ((char *)vector,
+	  vector = (char **) xrealloc ((char *) vector,
 				       (e->allocated + 1) * sizeof (char *));
 	  e->vector = vector;
 	}

@@ -1,7 +1,7 @@
 /*
-** tuiDataWin.c
-**   This module contains functions to support the data/register window display.
-*/
+   ** tuiDataWin.c
+   **   This module contains functions to support the data/register window display.
+ */
 
 
 #include "defs.h"
@@ -22,10 +22,10 @@
 
 
 /*
-** tuiFirstDataItemDisplayed()
-**    Answer the index first element displayed.
-**    If none are displayed, then return (-1).
-*/
+   ** tuiFirstDataItemDisplayed()
+   **    Answer the index first element displayed.
+   **    If none are displayed, then return (-1).
+ */
 int
 #ifdef __STDC__
 tuiFirstDataItemDisplayed (void)
@@ -51,10 +51,10 @@ tuiFirstDataItemDisplayed ()
 
 
 /*
-** tuiFirstDataElementNoInLine()
-**        Answer the index of the first element in lineNo.  If lineNo is
-**        past the data area (-1) is returned.
-*/
+   ** tuiFirstDataElementNoInLine()
+   **        Answer the index of the first element in lineNo.  If lineNo is
+   **        past the data area (-1) is returned.
+ */
 int
 #ifdef __STDC__
 tuiFirstDataElementNoInLine (
@@ -67,13 +67,13 @@ tuiFirstDataElementNoInLine (lineNo)
   int firstElementNo = (-1);
 
   /*
-    ** First see if there is a register on lineNo, and if so, set the
-    ** first element number
-    */
+     ** First see if there is a register on lineNo, and if so, set the
+     ** first element number
+   */
   if ((firstElementNo = tuiFirstRegElementNoInLine (lineNo)) == -1)
     {				/*
-      ** Looking at the general data, the 1st element on lineNo
-      */
+				   ** Looking at the general data, the 1st element on lineNo
+				 */
     }
 
   return firstElementNo;
@@ -81,10 +81,10 @@ tuiFirstDataElementNoInLine (lineNo)
 
 
 /*
-** tuiDeleteDataContentWindows()
-**        Function to delete all the item windows in the data window.
-**        This is usually done when the data window is scrolled.
-*/
+   ** tuiDeleteDataContentWindows()
+   **        Function to delete all the item windows in the data window.
+   **        This is usually done when the data window is scrolled.
+ */
 void
 #ifdef __STDC__
 tuiDeleteDataContentWindows (void)
@@ -140,10 +140,10 @@ tuiEraseDataContent (prompt)
 
 
 /*
-** tuiDisplayAllData().
-**        This function displays the data that is in the data window's
-**        content.  It does not set the content.
-*/
+   ** tuiDisplayAllData().
+   **        This function displays the data that is in the data window's
+   **        content.  It does not set the content.
+ */
 void
 #ifdef __STDC__
 tuiDisplayAllData (void)
@@ -160,8 +160,8 @@ tuiDisplayAllData ()
       checkAndDisplayHighlightIfNeeded (dataWin);
       tuiDisplayRegistersFrom (0);
       /*
-        ** Then display the other data
-        */
+         ** Then display the other data
+       */
       if (dataWin->detail.dataDisplayInfo.dataContent !=
 	  (TuiWinContent) NULL &&
 	  dataWin->detail.dataDisplayInfo.dataContentCount > 0)
@@ -173,10 +173,10 @@ tuiDisplayAllData ()
 
 
 /*
-** tuiDisplayDataFromLine()
-**        Function to display the data starting at line, lineNo, in the
-**        data window.
-*/
+   ** tuiDisplayDataFromLine()
+   **        Function to display the data starting at line, lineNo, in the
+   **        data window.
+ */
 void
 #ifdef __STDC__
 tuiDisplayDataFromLine (
@@ -205,20 +205,20 @@ tuiDisplayDataFromLine (lineNo)
       /* display regs if we can */
       if (tuiDisplayRegistersFromLine (_lineNo, FALSE) < 0)
 	{			/*
-            ** _lineNo is past the regs display, so calc where the
-            ** start data element is
-            */
+				   ** _lineNo is past the regs display, so calc where the
+				   ** start data element is
+				 */
 	  if (regsLastLine < _lineNo)
 	    {			/* figure out how many lines each element is to obtain
-                    the start elementNo */
+				   the start elementNo */
 	    }
 	}
       else
 	{			/*
-           ** calculate the starting element of the data display, given
-           ** regsLastLine and how many lines each element is, up to
-           ** _lineNo
-           */
+				   ** calculate the starting element of the data display, given
+				   ** regsLastLine and how many lines each element is, up to
+				   ** _lineNo
+				 */
 	}
       /* Now display the data , starting at elementNo */
     }
@@ -228,9 +228,9 @@ tuiDisplayDataFromLine (lineNo)
 
 
 /*
-** tuiDisplayDataFrom()
-**        Display data starting at element elementNo
-*/
+   ** tuiDisplayDataFrom()
+   **        Display data starting at element elementNo
+ */
 void
 #ifdef __STDC__
 tuiDisplayDataFrom (
@@ -263,9 +263,9 @@ tuiDisplayDataFrom (elementNo, reuseWindows)
 
 
 /*
-** tuiRefreshDataWin()
-**        Function to redisplay the contents of the data window.
-*/
+   ** tuiRefreshDataWin()
+   **        Function to redisplay the contents of the data window.
+ */
 void
 #ifdef __STDC__
 tuiRefreshDataWin (void)
@@ -287,9 +287,9 @@ tuiRefreshDataWin ()
 
 
 /*
-** tuiCheckDataValues().
-**        Function to check the data values and hilite any that have changed
-*/
+   ** tuiCheckDataValues().
+   **        Function to check the data values and hilite any that have changed
+ */
 void
 #ifdef __STDC__
 tuiCheckDataValues (
@@ -330,10 +330,10 @@ tuiCheckDataValues (frame)
 
 
 /*
-** tui_vCheckDataValues().
-**        Function to check the data values and hilite any that have
-**        changed with args in a va_list
-*/
+   ** tui_vCheckDataValues().
+   **        Function to check the data values and hilite any that have
+   **        changed with args in a va_list
+ */
 void
 #ifdef __STDC__
 tui_vCheckDataValues (
@@ -352,9 +352,9 @@ tui_vCheckDataValues (args)
 
 
 /*
-** tuiVerticalDataScroll()
-**        Scroll the data window vertically forward or backward.
-*/
+   ** tuiVerticalDataScroll()
+   **        Scroll the data window vertically forward or backward.
+ */
 void
 #ifdef __STDC__
 tuiVerticalDataScroll (
@@ -374,8 +374,8 @@ tuiVerticalDataScroll (scrollDirection, numToScroll)
     firstLine = tuiLineFromRegElementNo (firstElementNo);
   else
     {				/* calculate the first line from the element number which is in
-        ** the general data content
-        */
+				   ** the general data content
+				 */
     }
 
   if (firstLine >= 0)

@@ -20,17 +20,17 @@
 /* OBSOLETE #define HOST_BYTE_ORDER BIG_ENDIAN */
 /* OBSOLETE  */
 /* OBSOLETE /* Address of U in kernel space *x/ */
-/* OBSOLETE #define	KERNEL_U_ADDR		0x3fc000 */
+/* OBSOLETE #define     KERNEL_U_ADDR           0x3fc000 */
 /* OBSOLETE  */
 /* OBSOLETE /* This is a piece of magic that is given a register number REGNO */
 /* OBSOLETE    and as BLOCKEND the address in the system of the end of the user structure */
 /* OBSOLETE    and stores in ADDR the address in the kernel or core dump */
 /* OBSOLETE    of that register. *x/ */
-/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno) {			\ */
-/* OBSOLETE 	addr = blockend + regno * 4;					\ */
-/* OBSOLETE 	if (regno == PC_REGNUM) addr = blockend - 8 * 4;		\ */
-/* OBSOLETE 	if (regno == PS_REGNUM) addr = blockend - 7 * 4;		\ */
-/* OBSOLETE 	if (regno == SP_REGNUM) addr = blockend - 6 * 4;		\ */
+/* OBSOLETE #define REGISTER_U_ADDR(addr, blockend, regno) {                    \ */
+/* OBSOLETE     addr = blockend + regno * 4;                                    \ */
+/* OBSOLETE     if (regno == PC_REGNUM) addr = blockend - 8 * 4;                \ */
+/* OBSOLETE     if (regno == PS_REGNUM) addr = blockend - 7 * 4;                \ */
+/* OBSOLETE     if (regno == SP_REGNUM) addr = blockend - 6 * 4;                \ */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /* No KDB support, Yet! *x/ */
@@ -73,8 +73,8 @@
 /* OBSOLETE    The fault code will be on the stack beyond the last register.  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #define PUSH_REGISTERS        \ */
-/* OBSOLETE { asm ("clrw -(sp)");	      \ */
-/* OBSOLETE   asm ("pea 10(sp)");	      \ */
+/* OBSOLETE { asm ("clrw -(sp)");             \ */
+/* OBSOLETE   asm ("pea 10(sp)");             \ */
 /* OBSOLETE   asm ("movem $ 0xfffe,-(sp)"); } */
 /* OBSOLETE  */
 /* OBSOLETE /* Assuming the registers (including processor status) have been */

@@ -1,23 +1,24 @@
 /* Definitions to make GDB target for an ARM
    Copyright 1986-1989, 1991, 1993-1999 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__		/* Forward decls for prototypes */
+#ifdef __STDC__			/* Forward decls for prototypes */
 struct type;
 struct value;
 #endif
@@ -199,7 +200,7 @@ extern char **arm_register_names;
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 12 
+#define MAX_REGISTER_RAW_SIZE 12
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
@@ -275,8 +276,8 @@ extern use_struct_convention_fn arm_use_struct_convention;
    lexical context are listed after the beginning LBRAC instead of
    before in the executables list of symbols.  */
 #define VARIABLES_INSIDE_BLOCK(desc, gcc_p) (!(gcc_p))
-
 
+
 /* Define other aspects of the stack frame. 
    We keep the offsets of all saved registers, 'cause we need 'em a lot!
    We also keep the current size of the stack frame, and the offset of
@@ -289,7 +290,7 @@ extern use_struct_convention_fn arm_use_struct_convention;
   int frameoffset;		\
   int framereg;
 
-extern void arm_init_extra_frame_info PARAMS ((struct frame_info *fi));
+extern void arm_init_extra_frame_info PARAMS ((struct frame_info * fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) arm_init_extra_frame_info (fi)
 
 /* Return the frame address.  On ARM, it is R11; on Thumb it is R7.  */
@@ -315,7 +316,7 @@ extern int arm_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 /* An expression that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it. */
-extern int arm_frameless_function_invocation PARAMS ((struct frame_info *frame));
+extern int arm_frameless_function_invocation PARAMS ((struct frame_info * frame));
 #define FRAMELESS_FUNCTION_INVOCATION(FI) (arm_frameless_function_invocation (FI))
 
 /* Saved Pc.  */
@@ -344,13 +345,13 @@ extern CORE_ADDR arm_frame_saved_pc PARAMS ((struct frame_info *));
 
 struct frame_saved_regs;
 struct frame_info;
-void frame_find_saved_regs PARAMS((struct frame_info *fi,
-				   struct frame_saved_regs *fsr));
+void frame_find_saved_regs PARAMS ((struct frame_info * fi,
+				    struct frame_saved_regs * fsr));
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
  arm_frame_find_saved_regs (frame_info, &(frame_saved_regs));
-
 
+
 /* Things needed for making the inferior call functions.  */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
@@ -371,15 +372,15 @@ void arm_pop_frame PARAMS ((void));
 
 /* This sequence of words is the instructions
 
-     mov 	lr,pc
-     mov	pc,r4
-     illegal
+   mov  lr,pc
+   mov  pc,r4
+   illegal
 
    Note this is 12 bytes.  */
 
 #define CALL_DUMMY {0xe1a0e00f, 0xe1a0f004, 0xE7FFDEFE}
 
-#define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
+#define CALL_DUMMY_START_OFFSET 0	/* Start execution at beginning of dummy */
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET arm_call_dummy_breakpoint_offset()
 extern int arm_call_dummy_breakpoint_offset PARAMS ((void));
@@ -391,15 +392,15 @@ extern int arm_call_dummy_breakpoint_offset PARAMS ((void));
    arm_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
 
 void arm_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-				 int nargs, struct value **args,
-				 struct type *type, int gcc_p));
+				 int nargs, struct value ** args,
+				 struct type * type, int gcc_p));
 
 CORE_ADDR arm_get_next_pc PARAMS ((CORE_ADDR));
 
 /* Functions for dealing with Thumb call thunks.  */
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name)	arm_in_call_stub (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)		arm_skip_stub (pc)
-extern int arm_in_call_stub PARAMS ((CORE_ADDR pc,  char *name));
+extern int arm_in_call_stub PARAMS ((CORE_ADDR pc, char *name));
 extern CORE_ADDR arm_skip_stub PARAMS ((CORE_ADDR pc));
 
 /* Function to determine whether MEMADDR is in a Thumb function.  */
@@ -414,18 +415,18 @@ extern int arm_pc_is_thumb_dummy PARAMS ((bfd_vma memaddr));
    "info" field is used for this purpose. This field is already
    being used to store the symbol size, so the assumption is
    that the symbol size cannot exceed 2^31.
- 
+
    COFF_MAKE_MSYMBOL_SPECIAL
-   ELF_MAKE_MSYMBOL_SPECIAL	tests whether the COFF or ELF symbol corresponds 
-                        to a thumb function, and sets a "special" bit in a
-                        minimal symbol to indicate that it does
-   MSYMBOL_SET_SPECIAL	actually sets the "special" bit
+   ELF_MAKE_MSYMBOL_SPECIAL     tests whether the COFF or ELF symbol corresponds 
+   to a thumb function, and sets a "special" bit in a
+   minimal symbol to indicate that it does
+   MSYMBOL_SET_SPECIAL  actually sets the "special" bit
    MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol
    MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
-                        the "info" field with the "special" bit masked out
-*/
- 
-extern int coff_sym_is_thumb(int val);
+   the "info" field with the "special" bit masked out
+ */
+
+extern int coff_sym_is_thumb (int val);
 #define MSYMBOL_SET_SPECIAL(msym) \
     MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000)
 #define MSYMBOL_IS_SPECIAL(msym) \
@@ -437,7 +438,7 @@ extern int coff_sym_is_thumb(int val);
 #define ELF_MAKE_MSYMBOL_SPECIAL(sym,msym) \
  { if(ELF_ST_TYPE(((elf_symbol_type *)(sym))->internal_elf_sym.st_info) == STT_LOPROC) \
 	MSYMBOL_SET_SPECIAL(msym); }
-  
+
 #define COFF_MAKE_MSYMBOL_SPECIAL(val,msym) \
  { if(coff_sym_is_thumb(val)) MSYMBOL_SET_SPECIAL(msym); }
 

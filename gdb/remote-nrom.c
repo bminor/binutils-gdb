@@ -1,30 +1,31 @@
 /* Remote debugging with the XLNT Designs, Inc (XDI) NetROM.
    Copyright 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
    Contributed by:
-	 Roger Moyers 
-	 XLNT Designs, Inc.
-	 15050 Avenue of Science, Suite 106
-	 San Diego, CA  92128
-	 (619)487-9320
-	 roger@xlnt.com
+   Roger Moyers 
+   XLNT Designs, Inc.
+   15050 Avenue of Science, Suite 106
+   San Diego, CA  92128
+   (619)487-9320
+   roger@xlnt.com
    Adapted from work done at Cygnus Support in remote-nindy.c,
    later merged in by Stan Shebs at Cygnus.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcmd.h"
@@ -149,11 +150,11 @@ nrom_load (args, fromtty)
     {
       make_cleanup (bfd_close, pbfd);
 
-      if (!bfd_check_format (pbfd, bfd_object)) 
+      if (!bfd_check_format (pbfd, bfd_object))
 	error ("\"%s\": not in executable format: %s",
 	       args, bfd_errmsg (bfd_get_error ()));
 
-      for (section = pbfd->sections; section; section = section->next) 
+      for (section = pbfd->sections; section; section = section->next)
 	{
 	  if (bfd_get_section_flags (pbfd, section) & SEC_ALLOC)
 	    {
@@ -179,7 +180,7 @@ nrom_load (args, fromtty)
 		    {
 		      char buffer[1024];
 		      int count;
-		      
+
 		      count = min (section_size, 1024);
 
 		      bfd_get_section_contents (pbfd, section, buffer, fptr,
@@ -191,7 +192,8 @@ nrom_load (args, fromtty)
 		      section_size -= count;
 		    }
 		}
-	      else			/* BSS and such */
+	      else
+		/* BSS and such */
 		{
 		  printf_filtered ("[section %s: not loading]\n",
 				   section_name);
@@ -216,7 +218,7 @@ nrom_open (name, from_tty)
 
   if (!name || strchr (name, '/') || strchr (name, ':'))
     error (
-"To open a NetROM connection, you must specify the hostname\n\
+	    "To open a NetROM connection, you must specify the hostname\n\
 or IP address of the NetROM device you wish to use.");
 
   strcpy (nrom_hostname, name);
@@ -260,48 +262,48 @@ nrom_passthru (args, fromtty)
 }
 
 static void
-nrom_mourn() 
-{ 
+nrom_mourn ()
+{
   unpush_target (&nrom_ops);
   generic_mourn_inferior ();
 }
 
 /* Define the target vector. */
 
-struct target_ops nrom_ops ;
+struct target_ops nrom_ops;
 
-static void 
-init_nrom_ops(void)
+static void
+init_nrom_ops (void)
 {
-  nrom_ops.to_shortname =   "nrom";	
-  nrom_ops.to_longname =   "Remote XDI `NetROM' target";
-  nrom_ops.to_doc =   "Remote debug using a NetROM over Ethernet"; 
-  nrom_ops.to_open =   nrom_open;		
-  nrom_ops.to_close =   nrom_close;		
-  nrom_ops.to_attach =   NULL;
+  nrom_ops.to_shortname = "nrom";
+  nrom_ops.to_longname = "Remote XDI `NetROM' target";
+  nrom_ops.to_doc = "Remote debug using a NetROM over Ethernet";
+  nrom_ops.to_open = nrom_open;
+  nrom_ops.to_close = nrom_close;
+  nrom_ops.to_attach = NULL;
   nrom_ops.to_post_attach = NULL;
-  nrom_ops.to_require_attach = NULL;			
-  nrom_ops.to_detach =   NULL;
-  nrom_ops.to_require_detach = NULL;	
-  nrom_ops.to_resume =   NULL;			
-  nrom_ops.to_wait  =   NULL;
-  nrom_ops.to_post_wait = NULL;		
-  nrom_ops.to_fetch_registers  =   NULL;
-  nrom_ops.to_store_registers  =   NULL;
-  nrom_ops.to_prepare_to_store =   NULL;
-  nrom_ops.to_xfer_memory  =   NULL;	
-  nrom_ops.to_files_info  =   NULL;
-  nrom_ops.to_insert_breakpoint =   NULL;
-  nrom_ops.to_remove_breakpoint =   NULL;
-  nrom_ops.to_terminal_init  =   NULL;	
-  nrom_ops.to_terminal_inferior =   NULL;
-  nrom_ops.to_terminal_ours_for_output =   NULL;
-  nrom_ops.to_terminal_ours  =   NULL;	
-  nrom_ops.to_terminal_info  =   NULL;	
-  nrom_ops.to_kill  =   nrom_kill;
-  nrom_ops.to_load  =   nrom_load;
-  nrom_ops.to_lookup_symbol =   NULL;	
-  nrom_ops.to_create_inferior =   NULL;
+  nrom_ops.to_require_attach = NULL;
+  nrom_ops.to_detach = NULL;
+  nrom_ops.to_require_detach = NULL;
+  nrom_ops.to_resume = NULL;
+  nrom_ops.to_wait = NULL;
+  nrom_ops.to_post_wait = NULL;
+  nrom_ops.to_fetch_registers = NULL;
+  nrom_ops.to_store_registers = NULL;
+  nrom_ops.to_prepare_to_store = NULL;
+  nrom_ops.to_xfer_memory = NULL;
+  nrom_ops.to_files_info = NULL;
+  nrom_ops.to_insert_breakpoint = NULL;
+  nrom_ops.to_remove_breakpoint = NULL;
+  nrom_ops.to_terminal_init = NULL;
+  nrom_ops.to_terminal_inferior = NULL;
+  nrom_ops.to_terminal_ours_for_output = NULL;
+  nrom_ops.to_terminal_ours = NULL;
+  nrom_ops.to_terminal_info = NULL;
+  nrom_ops.to_kill = nrom_kill;
+  nrom_ops.to_load = nrom_load;
+  nrom_ops.to_lookup_symbol = NULL;
+  nrom_ops.to_create_inferior = NULL;
   nrom_ops.to_post_startup_inferior = NULL;
   nrom_ops.to_acknowledge_created_inferior = NULL;
   nrom_ops.to_clone_and_follow_inferior = NULL;
@@ -313,46 +315,46 @@ init_nrom_ops(void)
   nrom_ops.to_has_forked = NULL;
   nrom_ops.to_has_vforked = NULL;
   nrom_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  nrom_ops.to_post_follow_vfork = NULL;	
+  nrom_ops.to_post_follow_vfork = NULL;
   nrom_ops.to_insert_exec_catchpoint = NULL;
   nrom_ops.to_remove_exec_catchpoint = NULL;
   nrom_ops.to_has_execd = NULL;
   nrom_ops.to_reported_exec_events_per_exec_call = NULL;
   nrom_ops.to_has_exited = NULL;
-  nrom_ops.to_mourn_inferior =   nrom_mourn;
-  nrom_ops.to_can_run  =   NULL;
-  nrom_ops.to_notice_signals =   0;
-  nrom_ops.to_thread_alive  =   0;
-  nrom_ops.to_stop  =   0;
+  nrom_ops.to_mourn_inferior = nrom_mourn;
+  nrom_ops.to_can_run = NULL;
+  nrom_ops.to_notice_signals = 0;
+  nrom_ops.to_thread_alive = 0;
+  nrom_ops.to_stop = 0;
   nrom_ops.to_pid_to_exec_file = NULL;
   nrom_ops.to_core_file_to_sym_file = NULL;
-  nrom_ops.to_stratum =   download_stratum;
-  nrom_ops.DONT_USE =   NULL;			
-  nrom_ops.to_has_all_memory =   1;		
-  nrom_ops.to_has_memory =   1;			
-  nrom_ops.to_has_stack =   1;			
-  nrom_ops.to_has_registers =   1;		
-  nrom_ops.to_has_execution =   0;		
-  nrom_ops.to_sections =   NULL;		
-  nrom_ops.to_sections_end =   NULL;		
-  nrom_ops.to_magic =   OPS_MAGIC ;		
+  nrom_ops.to_stratum = download_stratum;
+  nrom_ops.DONT_USE = NULL;
+  nrom_ops.to_has_all_memory = 1;
+  nrom_ops.to_has_memory = 1;
+  nrom_ops.to_has_stack = 1;
+  nrom_ops.to_has_registers = 1;
+  nrom_ops.to_has_execution = 0;
+  nrom_ops.to_sections = NULL;
+  nrom_ops.to_sections_end = NULL;
+  nrom_ops.to_magic = OPS_MAGIC;
 };
 
 void
 _initialize_remote_nrom ()
 {
-  init_nrom_ops() ;
+  init_nrom_ops ();
   add_target (&nrom_ops);
 
   add_show_from_set (
-    add_set_cmd ("nrom_load_port", no_class, var_zinteger, (char *)&load_port,
-		 "Set the port to use for NetROM downloads\n", &setlist),
-		     &showlist);
+  add_set_cmd ("nrom_load_port", no_class, var_zinteger, (char *) &load_port,
+	       "Set the port to use for NetROM downloads\n", &setlist),
+		      &showlist);
 
   add_show_from_set (
-    add_set_cmd ("nrom_control_port", no_class, var_zinteger, (char *)&control_port,
-		 "Set the port to use for NetROM debugger services\n", &setlist),
-		     &showlist);
+		      add_set_cmd ("nrom_control_port", no_class, var_zinteger, (char *) &control_port,
+	    "Set the port to use for NetROM debugger services\n", &setlist),
+		      &showlist);
 
   add_cmd ("nrom", no_class, nrom_passthru,
 	   "Pass arguments as command to NetROM",

@@ -4,21 +4,22 @@
    Contributed by Per Bothner (bothner@cs.wisc.edu) at U.Wisconsin
    and by Alessandro Forin (af@cs.cmu.edu) at CMU..
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifndef TM_MIPS_H
 #define TM_MIPS_H 1
@@ -187,32 +188,32 @@ extern char *mips_register_name PARAMS ((int regnr));
 #define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #if MIPS_EABI
-#  define MIPS_LAST_ARG_REGNUM 11 /* EABI uses R4 through R11 for args */
-#  define MIPS_NUM_ARG_REGS 8
+#define MIPS_LAST_ARG_REGNUM 11	/* EABI uses R4 through R11 for args */
+#define MIPS_NUM_ARG_REGS 8
 #else
-#  define MIPS_LAST_ARG_REGNUM 7  /* old ABI uses R4 through R7 for args */
-#  define MIPS_NUM_ARG_REGS 4
+#define MIPS_LAST_ARG_REGNUM 7	/* old ABI uses R4 through R7 for args */
+#define MIPS_NUM_ARG_REGS 4
 #endif
 #define T9_REGNUM 25		/* Contains address of callee in PIC */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
-#define HI_REGNUM 34            /* Multiple/divide temp */
-#define LO_REGNUM 33            /* ... */
+#define HI_REGNUM 34		/* Multiple/divide temp */
+#define LO_REGNUM 33		/* ... */
 #define BADVADDR_REGNUM 35	/* bad vaddr for addressing exception */
 #define CAUSE_REGNUM 36		/* describes last exception */
 #define PC_REGNUM 37		/* Contains program counter */
-#define FP0_REGNUM 38           /* Floating point register 0 (single float) */
-#define FPA0_REGNUM (FP0_REGNUM+12) /* First float argument register */
+#define FP0_REGNUM 38		/* Floating point register 0 (single float) */
+#define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
 #if MIPS_EABI			/* EABI uses F12 through F19 for args */
-#  define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
-#  define MIPS_NUM_FP_ARG_REGS 8
-#else				/* old ABI uses F12 through F15 for args */
-#  define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
-#  define MIPS_NUM_FP_ARG_REGS 4
+#define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
+#define MIPS_NUM_FP_ARG_REGS 8
+#else /* old ABI uses F12 through F15 for args */
+#define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
+#define MIPS_NUM_FP_ARG_REGS 4
 #endif
-#define FCRCS_REGNUM 70         /* FP control/status */
-#define FCRIR_REGNUM 71         /* FP implementation/revision */
+#define FCRCS_REGNUM 70		/* FP control/status */
+#define FCRIR_REGNUM 71		/* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
 #define	UNUSED_REGNUM 73	/* Never used, FIXME */
 #define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
@@ -294,7 +295,8 @@ extern void mips_do_registers_info PARAMS ((int, int));
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  Handled by mips_push_arguments.  */
 
-#define STORE_STRUCT_RETURN(addr, sp)	/**/
+#define STORE_STRUCT_RETURN(addr, sp)
+/**/
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -303,7 +305,7 @@ extern void mips_do_registers_info PARAMS ((int, int));
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   mips_extract_return_value(TYPE, REGBUF, VALBUF)
 extern void
-mips_extract_return_value PARAMS ((struct type *, char [], char *));
+mips_extract_return_value PARAMS ((struct type *, char[], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
@@ -378,8 +380,8 @@ extern int mips_frame_num_args PARAMS ((struct frame_info *));
     (frame_info)->saved_regs[SP_REGNUM] = (frame_info)->frame; \
   } while (0)
 extern void mips_find_saved_regs PARAMS ((struct frame_info *));
-
 
+
 /* Things needed for making the inferior call functions.  */
 
 /* Stack must be aligned on 32-bit boundaries when synthesizing
@@ -422,7 +424,7 @@ extern CORE_ADDR mips_call_dummy_address PARAMS ((void));
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
 
-#define	INIT_FRAME_PC(fromleaf, prev) /* nada */
+#define	INIT_FRAME_PC(fromleaf, prev)	/* nada */
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
    mips_init_frame_pc_first(fromleaf, prev)
@@ -438,18 +440,20 @@ extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
    This overlays the MIPS's PDR records, 
    mipsread.c (ab)uses this to save memory */
 
-typedef struct mips_extra_func_info {
-	long	numargs;	/* number of args to procedure (was iopt) */
-	bfd_vma high_addr;      /* upper address bound */
-	long	frame_adjust;	/* offset of FP from SP (used on MIPS16) */
-	PDR	pdr;		/* Procedure descriptor record */
-} *mips_extra_func_info_t;
+typedef struct mips_extra_func_info
+  {
+    long numargs;		/* number of args to procedure (was iopt) */
+    bfd_vma high_addr;		/* upper address bound */
+    long frame_adjust;		/* offset of FP from SP (used on MIPS16) */
+    PDR pdr;			/* Procedure descriptor record */
+  }
+ *mips_extra_func_info_t;
 
 extern void mips_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info *));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   mips_init_extra_frame_info(fromleaf, fci)
 
-extern void mips_print_extra_frame_info PARAMS ((struct frame_info *frame));
+extern void mips_print_extra_frame_info PARAMS ((struct frame_info * frame));
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   mips_print_extra_frame_info (fi)
 
@@ -508,8 +512,8 @@ extern char *mips_read_processor_type PARAMS ((void));
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	mips_in_return_stub (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)		mips_skip_stub (pc)
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
-extern int mips_in_call_stub PARAMS ((CORE_ADDR pc,  char *name));
-extern int mips_in_return_stub PARAMS ((CORE_ADDR pc,  char *name));
+extern int mips_in_call_stub PARAMS ((CORE_ADDR pc, char *name));
+extern int mips_in_return_stub PARAMS ((CORE_ADDR pc, char *name));
 extern CORE_ADDR mips_skip_stub PARAMS ((CORE_ADDR pc));
 extern int mips_ignore_helper PARAMS ((CORE_ADDR pc));
 
@@ -519,7 +523,7 @@ extern int mips_ignore_helper PARAMS ((CORE_ADDR pc));
 
 /* Definitions and declarations used by mips-tdep.c and remote-mips.c  */
 #define MIPS_INSTLEN 4		/* Length of an instruction */
-#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16*/
+#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16 */
 #define MIPS_NUMREGS 32		/* Number of integer or float registers */
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
@@ -529,7 +533,7 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 #define MAKE_MIPS16_ADDR(addr)	 ((addr) | 1)
 #define UNMAKE_MIPS16_ADDR(addr) ((addr) & ~1)
 
-#endif	/* TM_MIPS_H */
+#endif /* TM_MIPS_H */
 
 /* Macros for setting and testing a bit in a minimal symbol that
    marks it as 16-bit function.  The MSB of the minimal symbol's
@@ -538,13 +542,13 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
    that the symbol size cannot exceed 2^31.
 
    ELF_MAKE_MSYMBOL_SPECIAL
-			tests whether an ELF symbol is "special", i.e. refers
-			to a 16-bit function, and sets a "special" bit in a 
-			minimal symbol to mark it as a 16-bit function
-   MSYMBOL_IS_SPECIAL	tests the "special" bit in a minimal symbol
-   MSYMBOL_SIZE		returns the size of the minimal symbol, i.e.
-			the "info" field with the "special" bit masked out
-*/
+   tests whether an ELF symbol is "special", i.e. refers
+   to a 16-bit function, and sets a "special" bit in a 
+   minimal symbol to mark it as a 16-bit function
+   MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol
+   MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
+   the "info" field with the "special" bit masked out
+ */
 
 #define ELF_MAKE_MSYMBOL_SPECIAL(sym,msym) \
  { \
@@ -553,7 +557,7 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
     SYMBOL_VALUE_ADDRESS (msym) |= 1; \
   } \
  }
-   
+
 #define MSYMBOL_IS_SPECIAL(msym) \
   (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
 #define MSYMBOL_SIZE(msym) \

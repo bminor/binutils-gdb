@@ -1,21 +1,22 @@
 /* Definitions to make GDB run on a vax under 4.2bsd.
    Copyright 1986, 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
@@ -151,8 +152,8 @@ extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
-
 
+
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
@@ -213,7 +214,7 @@ extern CORE_ADDR vax_skip_prologue PARAMS ((CORE_ADDR));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int vax_frame_num_args PARAMS ((struct frame_info *fi));
+extern int vax_frame_num_args PARAMS ((struct frame_info * fi));
 #define FRAME_NUM_ARGS(fi) (vax_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
@@ -290,13 +291,13 @@ extern int vax_frame_num_args PARAMS ((struct frame_info *fi));
 }
 
 /* This sequence of words is the instructions
-     calls #69, @#32323232
-     bpt
+   calls #69, @#32323232
+   bpt
    Note this is 8 bytes.  */
 
 #define CALL_DUMMY {0x329f69fb, 0x03323232}
 
-#define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
+#define CALL_DUMMY_START_OFFSET 0	/* Start execution at beginning of dummy */
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET 7
 

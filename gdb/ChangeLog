@@ -1,5 +1,9 @@
 1999-07-07  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* All C files except *-stub.c and *-share/*: Indent to GNU
+	standard, using indent 1.9.1.
+	* defs.h: Make indent ignore this file, macros confuse it.
+
 	* gnu-regex.c, gnu-regex.h: Don't let indent mess with these.
 
 Wed Jul  7 13:06:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>

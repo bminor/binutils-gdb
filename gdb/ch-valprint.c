@@ -2,21 +2,22 @@
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "obstack.h"
@@ -27,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "value.h"
 #include "language.h"
 #include "demangle.h"
-#include "c-lang.h" /* For c_val_print */
+#include "c-lang.h"		/* For c_val_print */
 #include "typeprint.h"
 #include "ch-lang.h"
 #include "annotate.h"
@@ -41,9 +42,9 @@ chill_print_type_scalar PARAMS ((struct type *, LONGEST, GDB_FILE *));
 
 static void
 chill_val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
-					int, int, int, enum val_prettyprint));
-
+				      int, int, int, enum val_prettyprint));
 
+
 /* Print integral scalar data VAL, of type TYPE, onto stdio stream STREAM.
    Used to print data from type structures in a specified type.  For example,
    array bounds may be characters or booleans in some languages, and this
@@ -120,8 +121,8 @@ chill_val_print_array_elements (type, valaddr, address, stream,
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
-  LONGEST low_bound =  TYPE_FIELD_BITPOS (range_type, 0);
-      
+  LONGEST low_bound = TYPE_FIELD_BITPOS (range_type, 0);
+
   elttype = check_typedef (TYPE_TARGET_TYPE (type));
   eltlen = TYPE_LENGTH (elttype);
   len = TYPE_LENGTH (type) / eltlen;
@@ -146,7 +147,7 @@ chill_val_print_array_elements (type, valaddr, address, stream,
 
       rep1 = i + 1;
       reps = 1;
-      while ((rep1 < len) && 
+      while ((rep1 < len) &&
 	     !memcmp (valaddr + i * eltlen, valaddr + rep1 * eltlen, eltlen))
 	{
 	  ++reps;
@@ -198,7 +199,7 @@ chill_val_print_array_elements (type, valaddr, address, stream,
 
 int
 chill_val_print (type, valaddr, embedded_offset, address,
-                 stream, format, deref_ref, recurse, pretty)
+		 stream, format, deref_ref, recurse, pretty)
      struct type *type;
      char *valaddr;
      int embedded_offset;
@@ -227,7 +228,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
 	    }
 	  fprintf_filtered (stream, "[");
 	  chill_val_print_array_elements (type, valaddr, address, stream,
-					  format, deref_ref, recurse, pretty);
+					format, deref_ref, recurse, pretty);
 	  fprintf_filtered (stream, "]");
 	}
       else
@@ -288,8 +289,8 @@ chill_val_print (type, valaddr, embedded_offset, address,
 
     case TYPE_CODE_UNDEF:
       /* This happens (without TYPE_FLAG_STUB set) on systems which don't use
-	 dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
-	 and no complete type for struct foo in that file.  */
+         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
+         and no complete type for struct foo in that file.  */
       fprintf_filtered (stream, "<incomplete type>");
       break;
 
@@ -308,7 +309,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
 	  fputs_filtered ("NULL", stream);
 	  return 0;
 	}
-      
+
       if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	{
 	  /* Try to print what function it points to.  */
@@ -320,20 +321,20 @@ chill_val_print (type, valaddr, embedded_offset, address,
 	{
 	  print_address_numeric (addr, 1, stream);
 	}
-      
+
       /* For a pointer to char or unsigned char, also print the string
-	 pointed to, unless pointer is null.  */
+         pointed to, unless pointer is null.  */
       if (TYPE_LENGTH (elttype) == 1
 	  && TYPE_CODE (elttype) == TYPE_CODE_CHAR
 	  && (format == 0 || format == 's')
 	  && addr != 0
-	  && /* If print_max is UINT_MAX, the alloca below will fail.
-		In that case don't try to print the string.  */
+	  &&			/* If print_max is UINT_MAX, the alloca below will fail.
+				   In that case don't try to print the string.  */
 	  print_max < UINT_MAX)
 	i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
 
       /* Return number of characters printed, plus one for the
-	 terminating null if we have "reached the end".  */
+         terminating null if we have "reached the end".  */
       return (i + (print_max && i != print_max));
       break;
 
@@ -341,7 +342,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
       i = TYPE_LENGTH (type);
       LA_PRINT_STRING (stream, valaddr, i, 1, 0);
       /* Return number of characters printed, plus one for the terminating
-	 null if we have "reached the end".  */
+         null if we have "reached the end".  */
       return (i + (print_max && i != print_max));
       break;
 
@@ -393,11 +394,11 @@ chill_val_print (type, valaddr, embedded_offset, address,
 		need_comma = 1;
 
 		/* Look for a continuous range of true elements. */
-		if (i+1 <= high_bound && value_bit_index (type, valaddr, ++i))
+		if (i + 1 <= high_bound && value_bit_index (type, valaddr, ++i))
 		  {
-		    int j = i; /* j is the upper bound so far of the range */
+		    int j = i;	/* j is the upper bound so far of the range */
 		    fputs_filtered (":", stream);
-		    while (i+1 <= high_bound
+		    while (i + 1 <= high_bound
 			   && value_bit_index (type, valaddr, ++i))
 		      j = i;
 		    chill_print_type_scalar (range, (LONGEST) j, stream);
@@ -418,14 +419,14 @@ chill_val_print (type, valaddr, embedded_offset, address,
 	  struct type *inner = check_typedef (TYPE_FIELD_TYPE (type, 1));
 	  long length = unpack_long (TYPE_FIELD_TYPE (type, 0), valaddr);
 	  char *data_addr = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
-	  
+
 	  switch (TYPE_CODE (inner))
 	    {
 	    case TYPE_CODE_STRING:
 	      if (length > TYPE_LENGTH (type) - 2)
 		{
 		  fprintf_filtered (stream,
-				    "<dynamic length %ld > static length %d> *invalid*",
+			"<dynamic length %ld > static length %d> *invalid*",
 				    length, TYPE_LENGTH (type));
 
 		  /* Don't print the string; doing so might produce a
@@ -444,7 +445,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
 
     case TYPE_CODE_REF:
       if (addressprint)
-        {
+	{
 	  fprintf_filtered (stream, "LOC(");
 	  print_address_numeric
 	    (extract_address (valaddr, TARGET_PTR_BIT / HOST_CHAR_BIT),
@@ -453,21 +454,21 @@ chill_val_print (type, valaddr, embedded_offset, address,
 	  fprintf_filtered (stream, ")");
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
-        }
+	}
       /* De-reference the reference.  */
       if (deref_ref)
 	{
 	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
 	      value_ptr deref_val =
-		value_at
-		  (TYPE_TARGET_TYPE (type),
-		   unpack_pointer (lookup_pointer_type (builtin_type_void),
-				   valaddr),
-		   NULL);
+	      value_at
+	      (TYPE_TARGET_TYPE (type),
+	       unpack_pointer (lookup_pointer_type (builtin_type_void),
+			       valaddr),
+	       NULL);
 	      val_print (VALUE_TYPE (deref_val),
 			 VALUE_CONTENTS (deref_val),
-                         0,
+			 0,
 			 VALUE_ADDRESS (deref_val), stream, format,
 			 deref_ref, recurse + 1, pretty);
 	    }
@@ -494,7 +495,7 @@ chill_val_print (type, valaddr, embedded_offset, address,
     case TYPE_CODE_ERROR:
     default:
       /* Let's defer printing to the C printer, rather than
-	 print an error message.  FIXME! */
+         print an error message.  FIXME! */
       c_val_print (type, valaddr, 0, address, stream, format,
 		   deref_ref, recurse, pretty);
     }
@@ -547,7 +548,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  else 
+	  else
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
@@ -560,16 +561,16 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	      value_ptr v;
 
 	      /* Bitfields require special handling, especially due to byte
-		 order problems.  */
+	         order problems.  */
 	      v = value_from_longest (TYPE_FIELD_TYPE (type, i),
-				      unpack_field_as_long (type, valaddr, i));
+				   unpack_field_as_long (type, valaddr, i));
 
 	      chill_val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0, 0,
 			       stream, format, 0, recurse + 1, pretty);
 	    }
 	  else
 	    {
-	      chill_val_print (TYPE_FIELD_TYPE (type, i), 
+	      chill_val_print (TYPE_FIELD_TYPE (type, i),
 			       valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
 			       0, stream, format, 0, recurse + 1, pretty);
 	    }
@@ -591,7 +592,7 @@ chill_value_print (val, stream, format, pretty)
      enum val_prettyprint pretty;
 {
   struct type *type = VALUE_TYPE (val);
-  struct type *real_type = check_typedef  (type);
+  struct type *real_type = check_typedef (type);
 
   /* If it is a pointer, indicate what it points to.
 
@@ -626,5 +627,3 @@ chill_value_print (val, stream, format, pretty)
   return (val_print (type, VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
 }
-
-

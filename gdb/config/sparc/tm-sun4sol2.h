@@ -2,37 +2,38 @@
    Copyright 1989, 1992, 1993, 1994, 1995, 1997, 1998
    Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
- 
+
 /* There are two different signal handler trampolines in Solaris2.  */
 #define IN_SIGTRAMP(pc, name) \
   ((name) \
    && (STREQ ("sigacthandler", name) || STREQ ("ucbsigvechandler", name)))
- 
+
 /* The signal handler gets a pointer to an ucontext as third argument
    if it is called from sigacthandler.  This is the offset to the saved
    PC within it.  sparc_frame_saved_pc knows how to deal with
-   ucbsigvechandler.  */  
+   ucbsigvechandler.  */
 #define SIGCONTEXT_PC_OFFSET 44
 
-#if 0	/* FIXME Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
+#if 0				/* FIXME Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
@@ -59,7 +60,7 @@ extern int
 get_longjmp_target PARAMS ((CORE_ADDR *));
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-#endif  /* 0 */
+#endif /* 0 */
 
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */

@@ -1,21 +1,22 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
    Copyright 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -35,9 +36,9 @@ static value_ptr evaluate_subexp_scm PARAMS ((struct type *, struct expression *
 					      int *, enum noside));
 static value_ptr scm_lookup_name PARAMS ((char *));
 static int in_eval_c PARAMS ((void));
-static void scm_printstr PARAMS ((GDB_FILE *stream, char *string, unsigned int length, int width, int force_ellipses));
+static void scm_printstr PARAMS ((GDB_FILE * stream, char *string, unsigned int length, int width, int force_ellipses));
 
-extern struct type ** CONST_PTR (c_builtin_types[]);
+extern struct type **CONST_PTR (c_builtin_types[]);
 
 struct type *builtin_type_scm;
 
@@ -108,10 +109,11 @@ scm_unpack (type, valaddr, context)
 	}
       switch (7 & (int) svalue)
 	{
-	case 2:  case 6: /* fixnum */
+	case 2:
+	case 6:		/* fixnum */
 	  return svalue >> 2;
-	case 4: /* other immediate value */
-	  if (SCM_ICHRP (svalue)) /* character */
+	case 4:		/* other immediate value */
+	  if (SCM_ICHRP (svalue))	/* character */
 	    return SCM_ICHR (svalue);
 	  else if (SCM_IFLAGP (svalue))
 	    {
@@ -192,7 +194,8 @@ scm_lookup_name (str)
 
 value_ptr
 scm_evaluate_string (str, len)
-     char *str; int len;
+     char *str;
+     int len;
 {
   value_ptr func;
   value_ptr addr = value_allocate_space_in_inferior (len + 1);
@@ -212,7 +215,8 @@ evaluate_subexp_scm (expect_type, exp, pos, noside)
      enum noside noside;
 {
   enum exp_opcode op = exp->elts[*pos].opcode;
-  int len, pc;  char *str;
+  int len, pc;
+  char *str;
   switch (op)
     {
     case OP_NAME:
@@ -231,14 +235,15 @@ evaluate_subexp_scm (expect_type, exp, pos, noside)
 	goto nosideret;
       str = &exp->elts[pc + 2].string;
       return scm_evaluate_string (str, len);
-    default: ;
+    default:;
     }
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
- nosideret:
+nosideret:
   return value_from_longest (builtin_type_long, (LONGEST) 1);
 }
 
-const struct language_defn scm_language_defn = {
+const struct language_defn scm_language_defn =
+{
   "scheme",			/* Language name */
   language_scm,
   c_builtin_types,
@@ -254,14 +259,14 @@ const struct language_defn scm_language_defn = {
   c_print_type,			/* Print a type using appropriate syntax */
   scm_val_print,		/* Print a value using appropriate syntax */
   scm_value_print,		/* Print a top-level value */
-  {"",     "",    "",  ""},	/* Binary format info */
-  {"#o%lo",  "#o",   "o", ""},	/* Octal format info */
-  {"%ld",   "",    "d", ""},	/* Decimal format info */
-  {"#x%lX", "#X",  "X", ""},	/* Hex format info */
+  {"", "", "", ""},		/* Binary format info */
+  {"#o%lo", "#o", "o", ""},	/* Octal format info */
+  {"%ld", "", "d", ""},		/* Decimal format info */
+  {"#x%lX", "#X", "X", ""},	/* Hex format info */
   NULL,				/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */ 
+  &builtin_type_char,		/* Type of string elements */
   LANG_MAGIC
 };
 

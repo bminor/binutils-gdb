@@ -4,21 +4,22 @@
    Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifdef __STDC__
 struct frame_info;
@@ -158,7 +159,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#define	G0_REGNUM 0             /* %g0 */
+#define	G0_REGNUM 0		/* %g0 */
 #define	G1_REGNUM 1		/* %g1 */
 #define O0_REGNUM 8		/* %o0 */
 #define	SP_REGNUM 14		/* Contains address of top of stack, \
@@ -178,7 +179,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 #define	WIM_REGNUM 66		/* Window Invalid Mask (not really supported) */
 #define	TBR_REGNUM 67		/* Trap Base Register (not really supported) */
 #define	PC_REGNUM 68		/* Contains program counter */
-#define	NPC_REGNUM 69           /* Contains next PC */
+#define	NPC_REGNUM 69		/* Contains next PC */
 #define	FPS_REGNUM 70		/* Floating point status register */
 #define	CPS_REGNUM 71		/* Coprocessor status register */
 
@@ -208,7 +209,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 struct frame_info;
 enum lval_type;
 #endif
-void sparc_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lvalp));
+void sparc_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_ADDR * addrp, struct frame_info * frame, int regnum, enum lval_type * lvalp));
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
       sparc_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
@@ -262,7 +263,7 @@ void sparc_get_saved_register PARAMS ((char *raw_buffer, int *optimized, CORE_AD
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   sparc_extract_return_value(TYPE, REGBUF, VALBUF)
 extern void
-sparc_extract_return_value PARAMS ((struct type *, char [], char *));
+sparc_extract_return_value PARAMS ((struct type *, char[], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
@@ -278,9 +279,9 @@ extern void sparc_store_return_value PARAMS ((struct type *, char *));
   (sparc_extract_struct_value_address (REGBUF))
 
 extern CORE_ADDR
-sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
-
+  sparc_extract_struct_value_address PARAMS ((char[REGISTER_BYTES]));
 
+
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
@@ -334,11 +335,11 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
   /* time of the register saves.  */ \
   int sp_offset;
 
-#define FRAME_INIT_SAVED_REGS(fp) /*no-op*/
+#define FRAME_INIT_SAVED_REGS(fp)	/*no-op */
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   sparc_init_extra_frame_info (fromleaf, fci)
-extern void sparc_init_extra_frame_info PARAMS((int, struct frame_info *));
+extern void sparc_init_extra_frame_info PARAMS ((int, struct frame_info *));
 
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   { \
@@ -352,7 +353,7 @@ extern CORE_ADDR sparc_frame_chain PARAMS ((struct frame_info *));
 
 /* INIT_EXTRA_FRAME_INFO needs the PC to detect flat frames.  */
 
-#define	INIT_FRAME_PC(fromleaf, prev) /* nothing */
+#define	INIT_FRAME_PC(fromleaf, prev)	/* nothing */
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
   (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
 	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
@@ -473,24 +474,24 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
    4:   9d e3 80 00     save  %sp, %g0, %sp
    8:   bc 10 00 02     mov  %g2, %fp
    c:   be 10 00 03     mov  %g3, %i7
-  10:   da 03 a0 58     ld  [ %sp + 0x58 ], %o5
-  14:   d8 03 a0 54     ld  [ %sp + 0x54 ], %o4
-  18:   d6 03 a0 50     ld  [ %sp + 0x50 ], %o3
-  1c:   d4 03 a0 4c     ld  [ %sp + 0x4c ], %o2
-  20:   d2 03 a0 48     ld  [ %sp + 0x48 ], %o1
-  24:   40 00 00 00     call  <fun>
-  28:   d0 03 a0 44     ld  [ %sp + 0x44 ], %o0
-  2c:   01 00 00 00     nop 
-  30:   91 d0 20 01     ta  1
-  34:   01 00 00 00     nop
+   10:   da 03 a0 58     ld  [ %sp + 0x58 ], %o5
+   14:   d8 03 a0 54     ld  [ %sp + 0x54 ], %o4
+   18:   d6 03 a0 50     ld  [ %sp + 0x50 ], %o3
+   1c:   d4 03 a0 4c     ld  [ %sp + 0x4c ], %o2
+   20:   d2 03 a0 48     ld  [ %sp + 0x48 ], %o1
+   24:   40 00 00 00     call  <fun>
+   28:   d0 03 a0 44     ld  [ %sp + 0x44 ], %o0
+   2c:   01 00 00 00     nop 
+   30:   91 d0 20 01     ta  1
+   34:   01 00 00 00     nop
 
    NOTES:
-	* the first four instructions are necessary only on the simulator.
-	* this is a multiple of 8 (not only 4) bytes.
-	* the `call' insn is a relative, not an absolute call.
-	* the `nop' at the end is needed to keep the trap from
-	  clobbering things (if NPC pointed to garbage instead).
-*/
+   * the first four instructions are necessary only on the simulator.
+   * this is a multiple of 8 (not only 4) bytes.
+   * the `call' insn is a relative, not an absolute call.
+   * the `nop' at the end is needed to keep the trap from
+   clobbering things (if NPC pointed to garbage instead).
+ */
 
 #define CALL_DUMMY { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,	\
 		     0xda03a058, 0xd803a054, 0xd603a050, 0xd403a04c,	\
@@ -523,7 +524,7 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
  sparc_fix_call_dummy (dummyname, pc, fun, type, gcc_p)
 void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-				   struct type *value_type, int using_gcc));
+				   struct type * value_type, int using_gcc));
 
 /* The Sparc returns long doubles on the stack.  */
 
@@ -585,4 +586,4 @@ extern int deferred_stores;
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (sparc_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
-sparc_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+  sparc_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));

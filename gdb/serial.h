@@ -1,21 +1,22 @@
 /* Remote serial support interface definitions for GDB, the GNU Debugger.
    Copyright 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifndef SERIAL_H
 #define SERIAL_H
@@ -25,51 +26,52 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 typedef PTR serial_ttystate;
 
 struct _serial_t
-{
-  int fd;			/* File descriptor */
-  struct serial_ops *ops;	/* Function vector */
-  serial_ttystate ttystate;	/* Not used (yet) */
-  int bufcnt;			/* Amount of data in receive buffer */
-  unsigned char *bufp;		/* Current byte */
-  unsigned char buf[BUFSIZ];	/* Da buffer itself */
-  int current_timeout;		/* (termio{s} only), last value of VTIME */
-  /* ser-unix.c termio{,s} only, we still need to wait for this many more
-     seconds.  */
-  int timeout_remaining;
-  char *name;			/* The name of the device or host */
-  struct _serial_t *next;	/* Pointer to the next serial_t */
-  int refcnt;			/* Number of pointers to this block */
-};
+  {
+    int fd;			/* File descriptor */
+    struct serial_ops *ops;	/* Function vector */
+    serial_ttystate ttystate;	/* Not used (yet) */
+    int bufcnt;			/* Amount of data in receive buffer */
+    unsigned char *bufp;	/* Current byte */
+    unsigned char buf[BUFSIZ];	/* Da buffer itself */
+    int current_timeout;	/* (termio{s} only), last value of VTIME */
+    /* ser-unix.c termio{,s} only, we still need to wait for this many more
+       seconds.  */
+    int timeout_remaining;
+    char *name;			/* The name of the device or host */
+    struct _serial_t *next;	/* Pointer to the next serial_t */
+    int refcnt;			/* Number of pointers to this block */
+  };
 
 typedef struct _serial_t *serial_t;
 
-struct serial_ops {
-  char *name;
-  struct serial_ops *next;
-  int (*open) PARAMS ((serial_t, const char *name));
-  void (*close) PARAMS ((serial_t));
-  int (*readchar) PARAMS ((serial_t, int timeout));
-  int (*write) PARAMS ((serial_t, const char *str, int len));
-  /* Discard pending output */
-  int (*flush_output) PARAMS ((serial_t));
-  /* Discard pending input */
-  int (*flush_input) PARAMS ((serial_t));
-  int (*send_break) PARAMS ((serial_t));
-  void (*go_raw) PARAMS ((serial_t));
-  serial_ttystate (*get_tty_state) PARAMS ((serial_t));
-  int (*set_tty_state) PARAMS ((serial_t, serial_ttystate));
-  void (*print_tty_state) PARAMS ((serial_t, serial_ttystate));
-  int (*noflush_set_tty_state)
-    PARAMS ((serial_t, serial_ttystate, serial_ttystate));
-  int (*setbaudrate) PARAMS ((serial_t, int rate));
-  int (*setstopbits) PARAMS ((serial_t, int num));
-  /* Wait for output to drain */
-  int (*drain_output) PARAMS ((serial_t));
-};
+struct serial_ops
+  {
+    char *name;
+    struct serial_ops *next;
+    int (*open) PARAMS ((serial_t, const char *name));
+    void (*close) PARAMS ((serial_t));
+    int (*readchar) PARAMS ((serial_t, int timeout));
+    int (*write) PARAMS ((serial_t, const char *str, int len));
+    /* Discard pending output */
+    int (*flush_output) PARAMS ((serial_t));
+    /* Discard pending input */
+    int (*flush_input) PARAMS ((serial_t));
+    int (*send_break) PARAMS ((serial_t));
+    void (*go_raw) PARAMS ((serial_t));
+      serial_ttystate (*get_tty_state) PARAMS ((serial_t));
+    int (*set_tty_state) PARAMS ((serial_t, serial_ttystate));
+    void (*print_tty_state) PARAMS ((serial_t, serial_ttystate));
+    int (*noflush_set_tty_state)
+      PARAMS ((serial_t, serial_ttystate, serial_ttystate));
+    int (*setbaudrate) PARAMS ((serial_t, int rate));
+    int (*setstopbits) PARAMS ((serial_t, int num));
+    /* Wait for output to drain */
+    int (*drain_output) PARAMS ((serial_t));
+  };
 
 /* Add a new serial interface to the interface list */
 
-void serial_add_interface PARAMS ((struct serial_ops *optable));
+void serial_add_interface PARAMS ((struct serial_ops * optable));
 
 serial_t serial_open PARAMS ((const char *name));
 
@@ -91,7 +93,7 @@ serial_t serial_fdopen PARAMS ((const int fd));
 
 #define SERIAL_DRAIN_OUTPUT(SERIAL_T) \
   ((SERIAL_T)->ops->drain_output((SERIAL_T)))
-  
+
 /* Flush (discard) pending output.  Might also flush input (if this system can't flush
    only output).  */
 
@@ -159,7 +161,7 @@ extern int serial_readchar PARAMS ((serial_t scb, int timeout));
    -1 for failure.  */
 
 #define SERIAL_1_STOPBITS 1
-#define SERIAL_1_AND_A_HALF_STOPBITS 2 /* 1.5 bits, snicker... */
+#define SERIAL_1_AND_A_HALF_STOPBITS 2	/* 1.5 bits, snicker... */
 #define SERIAL_2_STOPBITS 3
 
 #define SERIAL_SETSTOPBITS(SERIAL_T, NUM) ((SERIAL_T)->ops->setstopbits((SERIAL_T), NUM))
@@ -181,11 +183,12 @@ extern void serial_close PARAMS ((serial_t, int));
 
 #define SERIAL_UN_FDOPEN(SERIAL_T) serial_close(SERIAL_T, 0)
 
-extern void serial_printf PARAMS ((serial_t desc, const char *, ...))
-     ATTR_FORMAT(printf, 2, 3);
+extern void serial_printf
+PARAMS ((serial_t desc, const char *,...))
+ATTR_FORMAT (printf, 2, 3);
 
 /* File in which to record the remote debugging session */
 
-extern void serial_log_command PARAMS ((const char *));
+     extern void serial_log_command PARAMS ((const char *));
 
 #endif /* SERIAL_H */

@@ -28,7 +28,7 @@
 /* OBSOLETE /* #include <fcntl.h>  Can we live without this?  *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #include "gdbcore.h" */
-/* OBSOLETE #include <sys/user.h>		/* After a.out.h  *x/ */
+/* OBSOLETE #include <sys/user.h>               /* After a.out.h  *x/ */
 /* OBSOLETE #include <sys/file.h> */
 /* OBSOLETE #include "gdb_stat.h" */
 /* OBSOLETE  */
@@ -50,21 +50,21 @@
 /* OBSOLETE      */
 /* OBSOLETE #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING) */
 /* OBSOLETE     printf_unfiltered ("Fetching register %s, got %0x\n", */
-/* OBSOLETE 	    REGISTER_NAME (regno), */
-/* OBSOLETE 	    reg_buf[regno]); */
+/* OBSOLETE         REGISTER_NAME (regno), */
+/* OBSOLETE         reg_buf[regno]); */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE      */
 /* OBSOLETE     if (reg_buf[regno] == -1 && errno == EIO) { */
 /* OBSOLETE       printf_unfiltered("fetch_interior_registers: fetching register %s\n", */
-/* OBSOLETE 	     REGISTER_NAME (regno)); */
+/* OBSOLETE          REGISTER_NAME (regno)); */
 /* OBSOLETE       errno = 0; */
 /* OBSOLETE     } */
 /* OBSOLETE     supply_register (regno, reg_buf+regno); */
 /* OBSOLETE   } */
 /* OBSOLETE   /* that leaves regs 64, 65, and 66 *x/ */
 /* OBSOLETE   datum = ptrace (3, inferior_pid, */
-/* OBSOLETE 		  (PTRACE_ARG3_TYPE) (((char *)&u.u_pcb.pcb_csp) - */
-/* OBSOLETE 		  ((char *)&u)), 0); */
+/* OBSOLETE               (PTRACE_ARG3_TYPE) (((char *)&u.u_pcb.pcb_csp) - */
+/* OBSOLETE               ((char *)&u)), 0); */
 /* OBSOLETE    */
 /* OBSOLETE    */
 /* OBSOLETE    */
@@ -101,11 +101,11 @@
 /* OBSOLETE   while (1) { */
 /* OBSOLETE     register int inferior_saved_pc; */
 /* OBSOLETE     inferior_saved_pc = ptrace (1, inferior_pid, */
-/* OBSOLETE 				(PTRACE_ARG3_TYPE) (datum+((32+15)*4)), 0); */
+/* OBSOLETE                             (PTRACE_ARG3_TYPE) (datum+((32+15)*4)), 0); */
 /* OBSOLETE     if (inferior_saved_pc > 0) break; */
 /* OBSOLETE #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING) */
 /* OBSOLETE     printf_unfiltered("skipping kernel frame %08x, pc=%08x\n", datum, */
-/* OBSOLETE 	   inferior_saved_pc); */
+/* OBSOLETE        inferior_saved_pc); */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE     skipped_frames++; */
 /* OBSOLETE     datum -= CONTROL_STACK_FRAME_SIZE; */
@@ -116,8 +116,8 @@
 /* OBSOLETE #ifdef  PYRAMID_CONTROL_FRAME_DEBUGGING */
 /* OBSOLETE   if (skipped_frames) { */
 /* OBSOLETE     fprintf_unfiltered (gdb_stderr, */
-/* OBSOLETE 	     "skipped %d frames from %x to %x; cfp was %x, now %x\n", */
-/* OBSOLETE 	     skipped_frames, reg_buf[CSP_REGNUM]); */
+/* OBSOLETE          "skipped %d frames from %x to %x; cfp was %x, now %x\n", */
+/* OBSOLETE          skipped_frames, reg_buf[CSP_REGNUM]); */
 /* OBSOLETE   } */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE } */
@@ -136,33 +136,33 @@
 /* OBSOLETE   if (regno >= 0) */
 /* OBSOLETE     { */
 /* OBSOLETE       if ((0 <= regno) && (regno < 64)) { */
-/* OBSOLETE 	/*regaddr = register_addr (regno, offset);*x/ */
-/* OBSOLETE 	regaddr = regno; */
-/* OBSOLETE 	errno = 0; */
-/* OBSOLETE 	ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, */
-/* OBSOLETE 		read_register (regno)); */
-/* OBSOLETE 	if (errno != 0) */
-/* OBSOLETE 	  { */
-/* OBSOLETE 	    sprintf (buf, "writing register number %d", regno); */
-/* OBSOLETE 	    perror_with_name (buf); */
-/* OBSOLETE 	  } */
+/* OBSOLETE     /*regaddr = register_addr (regno, offset);*x/ */
+/* OBSOLETE     regaddr = regno; */
+/* OBSOLETE     errno = 0; */
+/* OBSOLETE     ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, */
+/* OBSOLETE             read_register (regno)); */
+/* OBSOLETE     if (errno != 0) */
+/* OBSOLETE       { */
+/* OBSOLETE         sprintf (buf, "writing register number %d", regno); */
+/* OBSOLETE         perror_with_name (buf); */
+/* OBSOLETE       } */
 /* OBSOLETE       } */
 /* OBSOLETE     } */
 /* OBSOLETE   else */
 /* OBSOLETE     { */
 /* OBSOLETE       for (regno = 0; regno < NUM_REGS; regno++) */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  /*regaddr = register_addr (regno, offset);*x/ */
-/* OBSOLETE 	  regaddr = regno; */
-/* OBSOLETE 	  errno = 0; */
-/* OBSOLETE 	  ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, */
-/* OBSOLETE 		  read_register (regno)); */
-/* OBSOLETE 	  if (errno != 0) */
-/* OBSOLETE 	    { */
-/* OBSOLETE 	      sprintf (buf, "writing all regs, number %d", regno); */
-/* OBSOLETE 	      perror_with_name (buf); */
-/* OBSOLETE 	    } */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       /*regaddr = register_addr (regno, offset);*x/ */
+/* OBSOLETE       regaddr = regno; */
+/* OBSOLETE       errno = 0; */
+/* OBSOLETE       ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, */
+/* OBSOLETE               read_register (regno)); */
+/* OBSOLETE       if (errno != 0) */
+/* OBSOLETE         { */
+/* OBSOLETE           sprintf (buf, "writing all regs, number %d", regno); */
+/* OBSOLETE           perror_with_name (buf); */
+/* OBSOLETE         } */
+/* OBSOLETE     } */
 /* OBSOLETE } */
 /* OBSOLETE  */
 /* OBSOLETE /*** Extensions to  core and dump files, for GDB. *x/ */
@@ -219,7 +219,7 @@
 /* OBSOLETE  */
 /* OBSOLETE #ifdef PYRAMID_CORE */
 /* OBSOLETE   reg_stack_start = CONTROL_STACK_ADDR; */
-/* OBSOLETE   reg_stack_end = CONTROL_STACK_ADDR;	/* this isn't strictly true...*x/ */
+/* OBSOLETE   reg_stack_end = CONTROL_STACK_ADDR;       /* this isn't strictly true...*x/ */
 /* OBSOLETE #endif /* PYRAMID_CORE *x/ */
 /* OBSOLETE  */
 /* OBSOLETE   /* Now, if a new core file was specified, open it and digest it.  *x/ */
@@ -230,135 +230,135 @@
 /* OBSOLETE       make_cleanup (free, filename); */
 /* OBSOLETE        */
 /* OBSOLETE       if (have_inferior_p ()) */
-/* OBSOLETE 	error ("To look at a core file, you must kill the program with \"kill\"."); */
+/* OBSOLETE     error ("To look at a core file, you must kill the program with \"kill\"."); */
 /* OBSOLETE       corechan = open (filename, O_RDONLY, 0); */
 /* OBSOLETE       if (corechan < 0) */
-/* OBSOLETE 	perror_with_name (filename); */
+/* OBSOLETE     perror_with_name (filename); */
 /* OBSOLETE       /* 4.2-style (and perhaps also sysV-style) core dump file.  *x/ */
 /* OBSOLETE       { */
-/* OBSOLETE 	struct user u; */
+/* OBSOLETE     struct user u; */
 /* OBSOLETE  */
-/* OBSOLETE 	unsigned int reg_offset; */
+/* OBSOLETE     unsigned int reg_offset; */
 /* OBSOLETE  */
-/* OBSOLETE 	val = myread (corechan, &u, sizeof u); */
-/* OBSOLETE 	if (val < 0) */
-/* OBSOLETE 	  perror_with_name ("Not a core file: reading upage"); */
-/* OBSOLETE 	if (val != sizeof u) */
-/* OBSOLETE 	  error ("Not a core file: could only read %d bytes", val); */
-/* OBSOLETE 	data_start = exec_data_start; */
+/* OBSOLETE     val = myread (corechan, &u, sizeof u); */
+/* OBSOLETE     if (val < 0) */
+/* OBSOLETE       perror_with_name ("Not a core file: reading upage"); */
+/* OBSOLETE     if (val != sizeof u) */
+/* OBSOLETE       error ("Not a core file: could only read %d bytes", val); */
+/* OBSOLETE     data_start = exec_data_start; */
 /* OBSOLETE  */
-/* OBSOLETE 	data_end = data_start + NBPG * u.u_dsize; */
-/* OBSOLETE 	data_offset = NBPG * UPAGES; */
-/* OBSOLETE 	stack_offset = NBPG * (UPAGES + u.u_dsize); */
+/* OBSOLETE     data_end = data_start + NBPG * u.u_dsize; */
+/* OBSOLETE     data_offset = NBPG * UPAGES; */
+/* OBSOLETE     stack_offset = NBPG * (UPAGES + u.u_dsize); */
 /* OBSOLETE  */
-/* OBSOLETE 	/* find registers in core file *x/ */
+/* OBSOLETE     /* find registers in core file *x/ */
 /* OBSOLETE #ifdef PYRAMID_PTRACE */
-/* OBSOLETE 	stack_start = stack_end - NBPG * u.u_ussize; */
-/* OBSOLETE 	reg_stack_offset = stack_offset + (NBPG *u.u_ussize); */
-/* OBSOLETE 	reg_stack_end = reg_stack_start + NBPG * u.u_cssize; */
+/* OBSOLETE     stack_start = stack_end - NBPG * u.u_ussize; */
+/* OBSOLETE     reg_stack_offset = stack_offset + (NBPG *u.u_ussize); */
+/* OBSOLETE     reg_stack_end = reg_stack_start + NBPG * u.u_cssize; */
 /* OBSOLETE  */
-/* OBSOLETE 	last_frame_address = ((int) u.u_pcb.pcb_csp); */
-/* OBSOLETE 	last_frame_offset = reg_stack_offset + last_frame_address */
-/* OBSOLETE 		- CONTROL_STACK_ADDR ; */
-/* OBSOLETE 	global_reg_offset = (char *)&u - (char *)&u.u_pcb.pcb_gr0 ; */
+/* OBSOLETE     last_frame_address = ((int) u.u_pcb.pcb_csp); */
+/* OBSOLETE     last_frame_offset = reg_stack_offset + last_frame_address */
+/* OBSOLETE             - CONTROL_STACK_ADDR ; */
+/* OBSOLETE     global_reg_offset = (char *)&u - (char *)&u.u_pcb.pcb_gr0 ; */
 /* OBSOLETE  */
-/* OBSOLETE 	/* skip any control-stack frames that were executed in the */
-/* OBSOLETE 	   kernel. *x/ */
+/* OBSOLETE     /* skip any control-stack frames that were executed in the */
+/* OBSOLETE        kernel. *x/ */
 /* OBSOLETE  */
-/* OBSOLETE 	while (1) { */
-/* OBSOLETE 	    char buf[4]; */
-/* OBSOLETE 	    val = lseek (corechan, last_frame_offset+(47*4), 0); */
-/* OBSOLETE 	    if (val < 0) */
-/* OBSOLETE 		    perror_with_name (filename); */
-/* OBSOLETE 	    val = myread (corechan, buf, sizeof buf); */
-/* OBSOLETE 	    if (val < 0) */
-/* OBSOLETE 		    perror_with_name (filename); */
+/* OBSOLETE     while (1) { */
+/* OBSOLETE         char buf[4]; */
+/* OBSOLETE         val = lseek (corechan, last_frame_offset+(47*4), 0); */
+/* OBSOLETE         if (val < 0) */
+/* OBSOLETE                 perror_with_name (filename); */
+/* OBSOLETE         val = myread (corechan, buf, sizeof buf); */
+/* OBSOLETE         if (val < 0) */
+/* OBSOLETE                 perror_with_name (filename); */
 /* OBSOLETE  */
-/* OBSOLETE 	    if (*(int *)buf >= 0) */
-/* OBSOLETE 		    break; */
-/* OBSOLETE 	    printf_unfiltered ("skipping frame %s\n", local_hex_string (last_frame_address)); */
-/* OBSOLETE 	    last_frame_offset -= CONTROL_STACK_FRAME_SIZE; */
-/* OBSOLETE 	    last_frame_address -= CONTROL_STACK_FRAME_SIZE; */
-/* OBSOLETE 	} */
-/* OBSOLETE 	reg_offset = last_frame_offset; */
+/* OBSOLETE         if (*(int *)buf >= 0) */
+/* OBSOLETE                 break; */
+/* OBSOLETE         printf_unfiltered ("skipping frame %s\n", local_hex_string (last_frame_address)); */
+/* OBSOLETE         last_frame_offset -= CONTROL_STACK_FRAME_SIZE; */
+/* OBSOLETE         last_frame_address -= CONTROL_STACK_FRAME_SIZE; */
+/* OBSOLETE     } */
+/* OBSOLETE     reg_offset = last_frame_offset; */
 /* OBSOLETE  */
 /* OBSOLETE #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING) */
-/* OBSOLETE 	printf_unfiltered ("Control stack pointer = %s\n", */
-/* OBSOLETE 		local_hex_string (u.u_pcb.pcb_csp)); */
-/* OBSOLETE 	printf_unfiltered ("offset to control stack %d outermost frame %d (%s)\n", */
-/* OBSOLETE 	      reg_stack_offset, reg_offset, local_hex_string (last_frame_address)); */
+/* OBSOLETE     printf_unfiltered ("Control stack pointer = %s\n", */
+/* OBSOLETE             local_hex_string (u.u_pcb.pcb_csp)); */
+/* OBSOLETE     printf_unfiltered ("offset to control stack %d outermost frame %d (%s)\n", */
+/* OBSOLETE           reg_stack_offset, reg_offset, local_hex_string (last_frame_address)); */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #else /* not PYRAMID_CORE *x/ */
-/* OBSOLETE 	stack_start = stack_end - NBPG * u.u_ssize; */
+/* OBSOLETE     stack_start = stack_end - NBPG * u.u_ssize; */
 /* OBSOLETE         reg_offset = (int) u.u_ar0 - KERNEL_U_ADDR; */
 /* OBSOLETE #endif /* not PYRAMID_CORE *x/ */
 /* OBSOLETE  */
 /* OBSOLETE #ifdef __not_on_pyr_yet */
-/* OBSOLETE 	/* Some machines put an absolute address in here and some put */
-/* OBSOLETE 	   the offset in the upage of the regs.  *x/ */
-/* OBSOLETE 	reg_offset = (int) u.u_ar0; */
-/* OBSOLETE 	if (reg_offset > NBPG * UPAGES) */
-/* OBSOLETE 	  reg_offset -= KERNEL_U_ADDR; */
+/* OBSOLETE     /* Some machines put an absolute address in here and some put */
+/* OBSOLETE        the offset in the upage of the regs.  *x/ */
+/* OBSOLETE     reg_offset = (int) u.u_ar0; */
+/* OBSOLETE     if (reg_offset > NBPG * UPAGES) */
+/* OBSOLETE       reg_offset -= KERNEL_U_ADDR; */
 /* OBSOLETE #endif */
 /* OBSOLETE  */
-/* OBSOLETE 	/* I don't know where to find this info. */
-/* OBSOLETE 	   So, for now, mark it as not available.  *x/ */
-/* OBSOLETE 	N_SET_MAGIC (core_aouthdr, 0); */
+/* OBSOLETE     /* I don't know where to find this info. */
+/* OBSOLETE        So, for now, mark it as not available.  *x/ */
+/* OBSOLETE     N_SET_MAGIC (core_aouthdr, 0); */
 /* OBSOLETE  */
-/* OBSOLETE 	/* Read the register values out of the core file and store */
-/* OBSOLETE 	   them where `read_register' will find them.  *x/ */
+/* OBSOLETE     /* Read the register values out of the core file and store */
+/* OBSOLETE        them where `read_register' will find them.  *x/ */
 /* OBSOLETE  */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  register int regno; */
+/* OBSOLETE     { */
+/* OBSOLETE       register int regno; */
 /* OBSOLETE  */
-/* OBSOLETE 	  for (regno = 0; regno < 64; regno++) */
-/* OBSOLETE 	    { */
-/* OBSOLETE 	      char buf[MAX_REGISTER_RAW_SIZE]; */
+/* OBSOLETE       for (regno = 0; regno < 64; regno++) */
+/* OBSOLETE         { */
+/* OBSOLETE           char buf[MAX_REGISTER_RAW_SIZE]; */
 /* OBSOLETE  */
-/* OBSOLETE 	      val = lseek (corechan, register_addr (regno, reg_offset), 0); */
-/* OBSOLETE 	      if (val < 0 */
-/* OBSOLETE 		  || (val = myread (corechan, buf, sizeof buf)) < 0) */
-/* OBSOLETE 		{ */
-/* OBSOLETE 		  char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) */
-/* OBSOLETE 						   + 30); */
-/* OBSOLETE 		  strcpy (buffer, "Reading register "); */
-/* OBSOLETE 		  strcat (buffer, REGISTER_NAME (regno)); */
-/* OBSOLETE 						    */
-/* OBSOLETE 		  perror_with_name (buffer); */
-/* OBSOLETE 		} */
+/* OBSOLETE           val = lseek (corechan, register_addr (regno, reg_offset), 0); */
+/* OBSOLETE           if (val < 0 */
+/* OBSOLETE               || (val = myread (corechan, buf, sizeof buf)) < 0) */
+/* OBSOLETE             { */
+/* OBSOLETE               char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) */
+/* OBSOLETE                                                + 30); */
+/* OBSOLETE               strcpy (buffer, "Reading register "); */
+/* OBSOLETE               strcat (buffer, REGISTER_NAME (regno)); */
+/* OBSOLETE                                                 */
+/* OBSOLETE               perror_with_name (buffer); */
+/* OBSOLETE             } */
 /* OBSOLETE  */
-/* OBSOLETE 	      if (val < 0) */
-/* OBSOLETE 		perror_with_name (filename); */
+/* OBSOLETE           if (val < 0) */
+/* OBSOLETE             perror_with_name (filename); */
 /* OBSOLETE #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING */
 /* OBSOLETE       printf_unfiltered ("[reg %s(%d), offset in file %s=0x%0x, addr =0x%0x, =%0x]\n", */
-/* OBSOLETE 	      REGISTER_NAME (regno), regno, filename, */
-/* OBSOLETE 	      register_addr(regno, reg_offset), */
-/* OBSOLETE 	      regno * 4 + last_frame_address, */
-/* OBSOLETE 	      *((int *)buf)); */
+/* OBSOLETE           REGISTER_NAME (regno), regno, filename, */
+/* OBSOLETE           register_addr(regno, reg_offset), */
+/* OBSOLETE           regno * 4 + last_frame_address, */
+/* OBSOLETE           *((int *)buf)); */
 /* OBSOLETE #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING *x/ */
-/* OBSOLETE 	      supply_register (regno, buf); */
-/* OBSOLETE 	    } */
-/* OBSOLETE 	} */
+/* OBSOLETE           supply_register (regno, buf); */
+/* OBSOLETE         } */
+/* OBSOLETE     } */
 /* OBSOLETE       } */
 /* OBSOLETE       if (filename[0] == '/') */
-/* OBSOLETE 	corefile = savestring (filename, strlen (filename)); */
+/* OBSOLETE     corefile = savestring (filename, strlen (filename)); */
 /* OBSOLETE       else */
-/* OBSOLETE 	{ */
-/* OBSOLETE 	  corefile = concat (current_directory, "/", filename, NULL); */
-/* OBSOLETE 	} */
+/* OBSOLETE     { */
+/* OBSOLETE       corefile = concat (current_directory, "/", filename, NULL); */
+/* OBSOLETE     } */
 /* OBSOLETE  */
 /* OBSOLETE #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING) */
 /* OBSOLETE       printf_unfiltered ("Providing CSP (%s) as nominal address of current frame.\n", */
-/* OBSOLETE 	      local_hex_string(last_frame_address)); */
+/* OBSOLETE           local_hex_string(last_frame_address)); */
 /* OBSOLETE #endif PYRAMID_CONTROL_FRAME_DEBUGGING */
 /* OBSOLETE       /* FIXME: Which of the following is correct? *x/ */
 /* OBSOLETE #if 0 */
 /* OBSOLETE       set_current_frame ( create_new_frame (read_register (FP_REGNUM), */
-/* OBSOLETE 					    read_pc ())); */
+/* OBSOLETE                                         read_pc ())); */
 /* OBSOLETE #else */
 /* OBSOLETE       set_current_frame ( create_new_frame (last_frame_address, */
-/* OBSOLETE 					    read_pc ())); */
+/* OBSOLETE                                         read_pc ())); */
 /* OBSOLETE #endif */
 /* OBSOLETE  */
 /* OBSOLETE       select_frame (get_current_frame (), 0); */

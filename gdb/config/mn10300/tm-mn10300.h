@@ -3,21 +3,22 @@
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* The mn10300 is little endian.  */
 #define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
@@ -65,7 +66,7 @@ extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
-extern CORE_ADDR mn10300_saved_pc_after_call PARAMS ((struct frame_info *frame));
+extern CORE_ADDR mn10300_saved_pc_after_call PARAMS ((struct frame_info * frame));
 #define SAVED_PC_AFTER_CALL(frame) \
   mn10300_saved_pc_after_call (frame)
 
@@ -79,21 +80,21 @@ extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
-#define FRAME_INIT_SAVED_REGS(fi) /* handled by init_extra_frame_info */
+#define FRAME_INIT_SAVED_REGS(fi)	/* handled by init_extra_frame_info */
 
 extern CORE_ADDR mn10300_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(fi) mn10300_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR mn10300_find_callers_reg PARAMS ((struct frame_info *, int));
-extern CORE_ADDR mn10300_frame_saved_pc   PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10300_frame_saved_pc PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FI) (mn10300_frame_saved_pc (FI))
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF. */
 
-extern void mn10300_extract_return_value PARAMS ((struct type *type, char *regbuf, char *valbuf));
+extern void mn10300_extract_return_value PARAMS ((struct type * type, char *regbuf, char *valbuf));
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   mn10300_extract_return_value (TYPE, REGBUF, VALBUF)
 
@@ -101,7 +102,7 @@ CORE_ADDR mn10300_extract_struct_value_address PARAMS ((char *regbuf));
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   mn10300_extract_struct_value_address (REGBUF)
 
-void mn10300_store_return_value PARAMS ((struct type *type, char *valbuf));
+void mn10300_store_return_value PARAMS ((struct type * type, char *valbuf));
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   mn10300_store_return_value (TYPE, VALBUF)
 
@@ -137,8 +138,8 @@ extern CORE_ADDR mn10300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define SAVE_DUMMY_FRAME_TOS(SP) generic_save_dummy_frame_tos (SP)
 
 extern CORE_ADDR
-mn10300_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-				unsigned char, CORE_ADDR ));
+  mn10300_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
+				  unsigned char, CORE_ADDR));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10300_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

@@ -1,7 +1,7 @@
 /*
-** tuiLayout.c
-** This module contains procedures for handling the layout of the windows.
-*/
+   ** tuiLayout.c
+   ** This module contains procedures for handling the layout of the windows.
+ */
 
 
 #include "defs.h"
@@ -65,9 +65,9 @@ static TuiLayoutType lastLayout = UNDEFINED_LAYOUT;
 ***************************************/
 
 /*
-** showLayout().
-**        Show the screen layout defined
-*/
+   ** showLayout().
+   **        Show the screen layout defined
+ */
 void
 #ifdef __STDC__
 showLayout (
@@ -82,10 +82,10 @@ showLayout (layout)
   if (layout != curLayout)
     {
       /*
-        ** Since the new layout may cause changes in window size, we
-        ** should free the content and reallocate on next display of
-        ** source/asm
-        */
+         ** Since the new layout may cause changes in window size, we
+         ** should free the content and reallocate on next display of
+         ** source/asm
+       */
       tuiClearAllSourceWinsContent (NO_EMPTY_SOURCE_PROMPT);
       freeAllSourceWinsContent ();
       clearSourceWindows ();
@@ -127,13 +127,13 @@ showLayout (layout)
 
 
 /*
-** tuiSetLayout()
-**    Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
-**    SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.
-**    If the layout is SRC_DATA_COMMAND, DISASSEM_DATA_COMMAND, or
-**    UNDEFINED_LAYOUT, then the data window is populated according
-**    to regsDisplayType.
-*/
+   ** tuiSetLayout()
+   **    Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
+   **    SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.
+   **    If the layout is SRC_DATA_COMMAND, DISASSEM_DATA_COMMAND, or
+   **    UNDEFINED_LAYOUT, then the data window is populated according
+   **    to regsDisplayType.
+ */
 TuiStatus
 #ifdef __STDC__
 tuiSetLayout (
@@ -181,8 +181,8 @@ tuiSetLayout (layoutType, regsDisplayType)
 		tuiClearWinFocus ();
 	      showLayout (newLayout);
 	      /*
-                ** Now determine where focus should be
-                */
+	         ** Now determine where focus should be
+	       */
 	      if (winWithFocus != cmdWin)
 		{
 		  switch (newLayout)
@@ -194,12 +194,12 @@ tuiSetLayout (layoutType, regsDisplayType)
 		      break;
 		    case DISASSEM_COMMAND:
 		      /* the previous layout was not showing
-                            ** code. this can happen if there is no
-                            ** source available:
-                            ** 1. if the source file is in another dir OR
-                            ** 2. if target was compiled without -g
-                            ** We still want to show the assembly though!
-                            */
+		         ** code. this can happen if there is no
+		         ** source available:
+		         ** 1. if the source file is in another dir OR
+		         ** 2. if target was compiled without -g
+		         ** We still want to show the assembly though!
+		       */
 		      addr = vcatch_errors ((OpaqueFuncPtr)
 					    tuiGetBeginAsmAddress);
 		      tuiSetWinFocusTo (disassemWin);
@@ -208,12 +208,12 @@ tuiSetLayout (layoutType, regsDisplayType)
 		      break;
 		    case SRC_DISASSEM_COMMAND:
 		      /* the previous layout was not showing
-                            ** code. this can happen if there is no
-                            ** source available:
-                            ** 1. if the source file is in another dir OR
-                            ** 2. if target was compiled without -g
-                            ** We still want to show the assembly though!
-                            */
+		         ** code. this can happen if there is no
+		         ** source available:
+		         ** 1. if the source file is in another dir OR
+		         ** 2. if target was compiled without -g
+		         ** We still want to show the assembly though!
+		       */
 		      addr = vcatch_errors ((OpaqueFuncPtr)
 					    tuiGetBeginAsmAddress);
 		      if (winWithFocus == srcWin)
@@ -232,12 +232,12 @@ tuiSetLayout (layoutType, regsDisplayType)
 		      break;
 		    case DISASSEM_DATA_COMMAND:
 		      /* the previous layout was not showing
-                            ** code. this can happen if there is no
-                            ** source available:
-                            ** 1. if the source file is in another dir OR
-                            ** 2. if target was compiled without -g
-                            ** We still want to show the assembly though!
-                            */
+		         ** code. this can happen if there is no
+		         ** source available:
+		         ** 1. if the source file is in another dir OR
+		         ** 2. if target was compiled without -g
+		         ** We still want to show the assembly though!
+		       */
 		      addr = vcatch_errors ((OpaqueFuncPtr)
 					    tuiGetBeginAsmAddress);
 		      if (winWithFocus != dataWin)
@@ -254,8 +254,8 @@ tuiSetLayout (layoutType, regsDisplayType)
 	      if (newWinWithFocus != (TuiWinInfoPtr) NULL)
 		tuiSetWinFocusTo (newWinWithFocus);
 	      /*
-                ** Now update the window content
-                */
+	         ** Now update the window content
+	       */
 	      if (!regsPopulate &&
 		  (newLayout == SRC_DATA_COMMAND ||
 		   newLayout == DISASSEM_DATA_COMMAND))
@@ -280,10 +280,10 @@ tuiSetLayout (layoutType, regsDisplayType)
 
 
 /*
-** tui_vSetLayoutTo()
-**        Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA,
-**        REGS, $REGS, $GREGS, $FREGS, $SREGS with arguments in a va_list
-*/
+   ** tui_vSetLayoutTo()
+   **        Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA,
+   **        REGS, $REGS, $GREGS, $FREGS, $SREGS with arguments in a va_list
+ */
 TuiStatus
 #ifdef __STDC__
 tui_vSetLayoutTo (
@@ -302,11 +302,11 @@ tui_vSetLayoutTo (args)
 
 
 /*
-** tuiAddWinToLayout().
-**        Add the specified window to the layout in a logical way.
-**        This means setting up the most logical layout given the
-**        window to be added.
-*/
+   ** tuiAddWinToLayout().
+   **        Add the specified window to the layout in a logical way.
+   **        This means setting up the most logical layout given the
+   **        window to be added.
+ */
 void
 #ifdef __STDC__
 tuiAddWinToLayout (
@@ -363,10 +363,10 @@ tuiAddWinToLayout (type)
 
 
 /*
-** tui_vAddWinToLayout().
-**        Add the specified window to the layout in a logical way,
-**        with arguments in a va_list.
-*/
+   ** tui_vAddWinToLayout().
+   **        Add the specified window to the layout in a logical way,
+   **        with arguments in a va_list.
+ */
 void
 #ifdef __STDC__
 tui_vAddWinToLayout (
@@ -385,11 +385,11 @@ tui_vAddWinToLayout (args)
 
 
 /*
-** tuiDefaultWinHeight().
-**        Answer the height of a window.  If it hasn't been created yet,
-**        answer what the height of a window would be based upon its
-**        type and the layout.
-*/
+   ** tuiDefaultWinHeight().
+   **        Answer the height of a window.  If it hasn't been created yet,
+   **        answer what the height of a window would be based upon its
+   **        type and the layout.
+ */
 int
 #ifdef __STDC__
 tuiDefaultWinHeight (
@@ -435,11 +435,11 @@ tuiDefaultWinHeight (type, layout)
 
 
 /*
-** tuiDefaultWinViewportHeight().
-**        Answer the height of a window.  If it hasn't been created yet,
-**        answer what the height of a window would be based upon its
-**        type and the layout.
-*/
+   ** tuiDefaultWinViewportHeight().
+   **        Answer the height of a window.  If it hasn't been created yet,
+   **        answer what the height of a window would be based upon its
+   **        type and the layout.
+ */
 int
 #ifdef __STDC__
 tuiDefaultWinViewportHeight (
@@ -465,10 +465,10 @@ tuiDefaultWinViewportHeight (type, layout)
 
 
 /*
-** _initialize_tuiLayout().
-**        Function to initialize gdb commands, for tui window layout
-**        manipulation.
-*/
+   ** _initialize_tuiLayout().
+   **        Function to initialize gdb commands, for tui window layout
+   **        manipulation.
+ */
 void
 _initialize_tuiLayout ()
 {
@@ -507,10 +507,10 @@ Source/Disassembly/Command layouts.\n");
 
 
 /*
-** _tuiSetLayoutTo()
-**    Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, REGS,
-**        $REGS, $GREGS, $FREGS, $SREGS.
-*/
+   ** _tuiSetLayoutTo()
+   **    Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, REGS,
+   **        $REGS, $GREGS, $FREGS, $SREGS.
+ */
 static TuiStatus
 #ifdef __STDC__
 _tuiSetLayoutTo (
@@ -767,9 +767,9 @@ _tuiLayout_command (arg, fromTTY)
 }				/* _tuiLayout_command */
 
 /*
-** _nextLayout().
-**        Answer the previous layout to cycle to.
-*/
+   ** _nextLayout().
+   **        Answer the previous layout to cycle to.
+ */
 static TuiLayoutType
 #ifdef __STDC__
 _nextLayout (void)
@@ -794,9 +794,9 @@ _nextLayout ()
 
 
 /*
-** _prevLayout().
-**        Answer the next layout to cycle to.
-*/
+   ** _prevLayout().
+   **        Answer the next layout to cycle to.
+ */
 static TuiLayoutType
 #ifdef __STDC__
 _prevLayout (void)
@@ -822,8 +822,8 @@ _prevLayout ()
 
 
 /*
-** _makeCommandWindow().
-*/
+   ** _makeCommandWindow().
+ */
 static void
 #ifdef __STDC__
 _makeCommandWindow (
@@ -852,8 +852,8 @@ _makeCommandWindow (winInfoPtr, height, originY)
 
 
 /*
-** _makeSourceWindow().
-*/
+   ** _makeSourceWindow().
+ */
 static void
 #ifdef __STDC__
 _makeSourceWindow (
@@ -874,8 +874,8 @@ _makeSourceWindow (winInfoPtr, height, originY)
 
 
 /*
-** _makeDisassemWindow().
-*/
+   ** _makeDisassemWindow().
+ */
 static void
 #ifdef __STDC__
 _makeDisassemWindow (
@@ -896,8 +896,8 @@ _makeDisassemWindow (winInfoPtr, height, originY)
 
 
 /*
-** _makeDataWindow().
-*/
+   ** _makeDataWindow().
+ */
 static void
 #ifdef __STDC__
 _makeDataWindow (
@@ -925,9 +925,9 @@ _makeDataWindow (winInfoPtr, height, originY)
 
 
 /*
-**    _showSourceCommand().
-**        Show the Source/Command layout
-*/
+   **    _showSourceCommand().
+   **        Show the Source/Command layout
+ */
 static void
 #ifdef __STDC__
 _showSourceCommand (void)
@@ -942,9 +942,9 @@ _showSourceCommand ()
 
 
 /*
-**    _showDisassemCommand().
-**        Show the Dissassem/Command layout
-*/
+   **    _showDisassemCommand().
+   **        Show the Dissassem/Command layout
+ */
 static void
 #ifdef __STDC__
 _showDisassemCommand (void)
@@ -959,9 +959,9 @@ _showDisassemCommand ()
 
 
 /*
-**    _showSourceDisassemCommand().
-**        Show the Source/Disassem/Command layout
-*/
+   **    _showSourceDisassemCommand().
+   **        Show the Source/Disassem/Command layout
+ */
 static void
 #ifdef __STDC__
 _showSourceDisassemCommand (void)
@@ -1081,9 +1081,9 @@ _showSourceDisassemCommand ()
 
 
 /*
-**    _showData().
-**        Show the Source/Data/Command or the Dissassembly/Data/Command layout
-*/
+   **    _showData().
+   **        Show the Source/Data/Command or the Dissassembly/Data/Command layout
+ */
 static void
 #ifdef __STDC__
 _showData (
@@ -1156,8 +1156,8 @@ _showData (newLayout)
 }				/* _showData */
 
 /*
-** _initGenWinInfo().
-*/
+   ** _initGenWinInfo().
+ */
 static void
 #ifdef __STDC__
 _initGenWinInfo (
@@ -1197,8 +1197,8 @@ _initGenWinInfo (winInfo, type, height, width, originX, originY)
 }				/* _initGenWinInfo */
 
 /*
-** _initAndMakeWin().
-*/
+   ** _initAndMakeWin().
+ */
 static void
 #ifdef __STDC__
 _initAndMakeWin (
@@ -1257,8 +1257,8 @@ _initAndMakeWin (winInfoPtr, winType, height, width, originX, originY, boxIt)
 
 
 /*
-** _makeSourceOrDisassemWindow().
-*/
+   ** _makeSourceOrDisassemWindow().
+ */
 static void
 #ifdef __STDC__
 _makeSourceOrDisassemWindow (
@@ -1277,8 +1277,8 @@ _makeSourceOrDisassemWindow (winInfoPtr, type, height, originY)
   TuiGenWinInfoPtr executionInfo = (TuiGenWinInfoPtr) NULL;
 
   /*
-    ** Create the exeuction info window.
-    */
+     ** Create the exeuction info window.
+   */
   if (type == SRC_WIN)
     executionInfo = sourceExecInfoWinPtr ();
   else
@@ -1291,8 +1291,8 @@ _makeSourceOrDisassemWindow (winInfoPtr, type, height, originY)
 		   originY,
 		   DONT_BOX_WINDOW);
   /*
-    ** Now create the source window.
-    */
+     ** Now create the source window.
+   */
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   type,
 		   height,
@@ -1308,9 +1308,9 @@ _makeSourceOrDisassemWindow (winInfoPtr, type, height, originY)
 
 
 /*
-**    _showSourceOrDisassemAndCommand().
-**        Show the Source/Command or the Disassem layout
-*/
+   **    _showSourceOrDisassemAndCommand().
+   **        Show the Source/Command or the Disassem layout
+ */
 static void
 #ifdef __STDC__
 _showSourceOrDisassemAndCommand (

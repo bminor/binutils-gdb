@@ -1,21 +1,22 @@
 /* Native support for MIPS running SVR4, for GDB.
    Copyright 1994, 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
@@ -37,21 +38,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * any MIPS SVR4 target.
  */
 
-void 
+void
 supply_gregset (gregsetp)
      gregset_t *gregsetp;
 {
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  {0};
 
   for (regi = 0; regi <= CXT_RA; regi++)
-    supply_register (regi, (char *)(regp + regi));
+    supply_register (regi, (char *) (regp + regi));
 
-  supply_register (PC_REGNUM, (char *)(regp + CXT_EPC));
-  supply_register (HI_REGNUM, (char *)(regp + CXT_MDHI));
-  supply_register (LO_REGNUM, (char *)(regp + CXT_MDLO));
-  supply_register (CAUSE_REGNUM, (char *)(regp + CXT_CAUSE));
+  supply_register (PC_REGNUM, (char *) (regp + CXT_EPC));
+  supply_register (HI_REGNUM, (char *) (regp + CXT_MDHI));
+  supply_register (LO_REGNUM, (char *) (regp + CXT_MDLO));
+  supply_register (CAUSE_REGNUM, (char *) (regp + CXT_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
   supply_register (PS_REGNUM, zerobuf);
@@ -72,19 +74,19 @@ fill_gregset (gregsetp, regno)
 
   for (regi = 0; regi <= 32; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(greg_t *) &registers[REGISTER_BYTE (regi)];
+      *(regp + regi) = *(greg_t *) & registers[REGISTER_BYTE (regi)];
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + CXT_EPC) = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
+    *(regp + CXT_EPC) = *(greg_t *) & registers[REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    *(regp + CXT_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
+    *(regp + CXT_CAUSE) = *(greg_t *) & registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
-    *(regp + CXT_MDHI) = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
+    *(regp + CXT_MDHI) = *(greg_t *) & registers[REGISTER_BYTE (HI_REGNUM)];
 
   if ((regno == -1) || (regno == LO_REGNUM))
-    *(regp + CXT_MDLO) = *(greg_t *) &registers[REGISTER_BYTE (LO_REGNUM)];
+    *(regp + CXT_MDLO) = *(greg_t *) & registers[REGISTER_BYTE (LO_REGNUM)];
 }
 
 /*
@@ -100,13 +102,14 @@ supply_fpregset (fpregsetp)
      fpregset_t *fpregsetp;
 {
   register int regi;
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  {0};
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
-		     (char *)&fpregsetp->fp_r.fp_regs[regi]);
+		     (char *) &fpregsetp->fp_r.fp_regs[regi]);
 
-  supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
+  supply_register (FCRCS_REGNUM, (char *) &fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR_REGNUM?  The ABI doesn't tell us. */
   supply_register (FCRIR_REGNUM, zerobuf);
@@ -126,12 +129,12 @@ fill_fpregset (fpregsetp, regno)
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy(to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE(FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 

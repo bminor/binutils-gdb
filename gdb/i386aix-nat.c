@@ -1,21 +1,22 @@
 /* Intel 386 native support.
    Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -52,11 +53,11 @@ extern int errno;
 #include "target.h"
 
 static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
-
 
+
 /* this table must line up with REGISTER_NAMES in tm-i386v.h */
 /* symbols like 'EAX' come from <sys/reg.h> */
-static int regmap[] = 
+static int regmap[] =
 {
   EAX, ECX, EDX, EBX,
   USP, EBP, ESI, EDI,
@@ -78,25 +79,25 @@ i386_register_u_addr (blockend, regnum)
   /* for now, you can look at them with 'info float'
    * sys5 wont let you change them with ptrace anyway
    */
-  if (regnum >= FP0_REGNUM && regnum <= FP7_REGNUM) 
+  if (regnum >= FP0_REGNUM && regnum <= FP7_REGNUM)
     {
       int ubase, fpstate;
       struct user u;
       ubase = blockend + 4 * (SS + 1) - KSTKSZ;
-      fpstate = ubase + ((char *)&u.u_fpstate - (char *)&u);
+      fpstate = ubase + ((char *) &u.u_fpstate - (char *) &u);
       return (fpstate + 0x1c + 10 * (regnum - FP0_REGNUM));
-    } 
+    }
   else
 #endif
     return (blockend + 4 * regmap[regnum]);
-  
+
 }
 
 /* The code below only work on the aix ps/2 (i386-ibm-aix) -
  * mtranle@paris - Sat Apr 11 10:34:12 1992
  */
 
-struct env387 
+struct env387
 {
   unsigned short control;
   unsigned short r0;
@@ -123,50 +124,58 @@ print_387_status (status, ep)
   int top;
   int fpreg;
   unsigned char *p;
-  
+
   bothstatus = ((status != 0) && (ep->status != 0));
-  if (status != 0) 
+  if (status != 0)
     {
       if (bothstatus)
 	printf_unfiltered ("u: ");
       print_387_status_word (status);
     }
-  
-  if (ep->status != 0) 
+
+  if (ep->status != 0)
     {
       if (bothstatus)
 	printf_unfiltered ("e: ");
       print_387_status_word (ep->status);
     }
-  
+
   print_387_control_word (ep->control);
   printf_unfiltered ("last exception: ");
-  printf_unfiltered ("opcode %s; ", local_hex_string(ep->opcode));
-  printf_unfiltered ("pc %s:", local_hex_string(ep->code_seg));
-  printf_unfiltered ("%s; ", local_hex_string(ep->eip));
-  printf_unfiltered ("operand %s", local_hex_string(ep->operand_seg));
-  printf_unfiltered (":%s\n", local_hex_string(ep->operand));
+  printf_unfiltered ("opcode %s; ", local_hex_string (ep->opcode));
+  printf_unfiltered ("pc %s:", local_hex_string (ep->code_seg));
+  printf_unfiltered ("%s; ", local_hex_string (ep->eip));
+  printf_unfiltered ("operand %s", local_hex_string (ep->operand_seg));
+  printf_unfiltered (":%s\n", local_hex_string (ep->operand));
 
   top = ((ep->status >> 11) & 7);
 
   printf_unfiltered ("regno  tag  msb              lsb  value\n");
-  for (fpreg = 7; fpreg >= 0; fpreg--) 
+  for (fpreg = 7; fpreg >= 0; fpreg--)
     {
       double val;
 
       printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
 
-      switch ((ep->tag >> ((7 - fpreg) * 2)) & 3) 
+      switch ((ep->tag >> ((7 - fpreg) * 2)) & 3)
 	{
-	case 0: printf_unfiltered ("valid "); break;
-	case 1: printf_unfiltered ("zero  "); break;
-	case 2: printf_unfiltered ("trap  "); break;
-	case 3: printf_unfiltered ("empty "); break;
+	case 0:
+	  printf_unfiltered ("valid ");
+	  break;
+	case 1:
+	  printf_unfiltered ("zero  ");
+	  break;
+	case 2:
+	  printf_unfiltered ("trap  ");
+	  break;
+	case 3:
+	  printf_unfiltered ("empty ");
+	  break;
 	}
       for (i = 9; i >= 0; i--)
 	printf_unfiltered ("%02x", ep->regs[fpreg][i]);
-      
-      i387_to_double ((char *)ep->regs[fpreg], (char *)&val);
+
+      i387_to_double ((char *) ep->regs[fpreg], (char *) &val);
       printf_unfiltered ("  %#g\n", val);
     }
 }
@@ -188,17 +197,17 @@ i386_float_info ()
       char buf[10];
       unsigned short status;
 
-      ptrace (PT_READ_FPR, inferior_pid, buf, offsetof(struct env387, status));
+      ptrace (PT_READ_FPR, inferior_pid, buf, offsetof (struct env387, status));
       memcpy (&status, buf, sizeof (status));
       fpsaved = status;
     }
   else
     {
       if ((fpsaved = core_env387.status) != 0)
-	memcpy(&fps, &core_env387, sizeof(fps));
+	memcpy (&fps, &core_env387, sizeof (fps));
     }
-  
-  if (fpsaved == 0) 
+
+  if (fpsaved == 0)
     {
       printf_unfiltered ("no floating point status saved\n");
       return;
@@ -207,14 +216,14 @@ i386_float_info ()
   if (inferior_pid)
     {
       int offset;
-      for (offset = 0; offset < sizeof(fps); offset += 10)
+      for (offset = 0; offset < sizeof (fps); offset += 10)
 	{
 	  char buf[10];
 	  ptrace (PT_READ_FPR, inferior_pid, buf, offset);
-	  memcpy ((char *)&fps.control + offset, buf,
-		  MIN(10, sizeof(fps) - offset));
+	  memcpy ((char *) &fps.control + offset, buf,
+		  MIN (10, sizeof (fps) - offset));
 	}
-    } 
+    }
   fps_fixed = fps;
   for (i = 0; i < 8; ++i)
     memcpy (fps_fixed.regs[i], fps.regs[7 - i], 10);
@@ -228,11 +237,11 @@ fetch_register (regno)
 {
   char buf[MAX_REGISTER_RAW_SIZE];
   if (regno < FP0_REGNUM)
-    *(int *)buf = ptrace (PT_READ_GPR, inferior_pid,
-			  PT_REG(regmap[regno]), 0, 0);
+    *(int *) buf = ptrace (PT_READ_GPR, inferior_pid,
+			   PT_REG (regmap[regno]), 0, 0);
   else
     ptrace (PT_READ_FPR, inferior_pid, buf,
-	    (regno - FP0_REGNUM)*10 + offsetof(struct env387, regs));
+	    (regno - FP0_REGNUM) * 10 + offsetof (struct env387, regs));
   supply_register (regno, buf);
 }
 
@@ -255,11 +264,11 @@ store_register (regno)
   char buf[80];
   errno = 0;
   if (regno < FP0_REGNUM)
-    ptrace (PT_WRITE_GPR, inferior_pid, PT_REG(regmap[regno]),
+    ptrace (PT_WRITE_GPR, inferior_pid, PT_REG (regmap[regno]),
 	    *(int *) &registers[REGISTER_BYTE (regno)], 0);
   else
     ptrace (PT_WRITE_FPR, inferior_pid, &registers[REGISTER_BYTE (regno)],
-	    (regno - FP0_REGNUM)*10 + offsetof(struct env387, regs));
+	    (regno - FP0_REGNUM) * 10 + offsetof (struct env387, regs));
 
   if (errno != 0)
     {
@@ -283,29 +292,29 @@ store_inferior_registers (regno)
 }
 
 #ifndef CD_AX			/* defined in sys/i386/coredump.h */
-# define CD_AX	0
-# define CD_BX	1
-# define CD_CX	2
-# define CD_DX	3
-# define CD_SI	4
-# define CD_DI	5
-# define CD_BP	6
-# define CD_SP	7
-# define CD_FL	8
-# define CD_IP	9
-# define CD_CS	10
-# define CD_DS	11
-# define CD_ES	12
-# define CD_FS	13
-# define CD_GS	14
-# define CD_SS	15
+#define CD_AX	0
+#define CD_BX	1
+#define CD_CX	2
+#define CD_DX	3
+#define CD_SI	4
+#define CD_DI	5
+#define CD_BP	6
+#define CD_SP	7
+#define CD_FL	8
+#define CD_IP	9
+#define CD_CS	10
+#define CD_DS	11
+#define CD_ES	12
+#define CD_FS	13
+#define CD_GS	14
+#define CD_SS	15
 #endif
 
 /*
  * The order here in core_regmap[] has to be the same as in 
  * regmap[] above.
  */
-static int core_regmap[] = 
+static int core_regmap[] =
 {
   CD_AX, CD_CX, CD_DX, CD_BX,
   CD_SP, CD_BP, CD_SI, CD_DI,
@@ -330,7 +339,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 
       int i;
       for (i = 0; i < FP0_REGNUM; i++)
-	regs(i) = cd_regs(core_regmap[i]);
+	regs (i) = cd_regs (core_regmap[i]);
     }
   else if (which == 2)
     {
@@ -342,8 +351,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
     }
 }
-
 
+
 /* Register that we are able to handle i386aix core file formats.
    FIXME: is this really bfd_target_unknown_flavour? */
 

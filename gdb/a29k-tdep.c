@@ -3,21 +3,22 @@
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -59,10 +60,10 @@ struct prologue_info
 {
   CORE_ADDR pc;			/* First addr after fn prologue */
   unsigned rsize, msize;	/* register stack frame size, mem stack ditto */
-  unsigned mfp_used : 1;	/* memory frame pointer used */
-  unsigned rsize_valid : 1;	/* Validity bits for the above */
-  unsigned msize_valid : 1;
-  unsigned mfp_valid : 1;
+  unsigned mfp_used:1;		/* memory frame pointer used */
+  unsigned rsize_valid:1;	/* Validity bits for the above */
+  unsigned msize_valid:1;
+  unsigned mfp_valid:1;
 };
 
 /* Examine the prologue of a function which starts at PC.  Return
@@ -94,7 +95,7 @@ examine_prologue (pc, rsize, msize, mfp_used)
   struct prologue_info *mi = 0;
 
   if (msymbol != NULL)
-    mi = (struct prologue_info *) msymbol -> info;
+    mi = (struct prologue_info *) msymbol->info;
 
   if (mi != 0)
     {
@@ -124,21 +125,21 @@ examine_prologue (pc, rsize, msize, mfp_used)
     *msize = 0;
   if (mfp_used != NULL)
     *mfp_used = 0;
-  
+
   /* Prologue must start with subtracting a constant from gr1.
      Normally this is sub gr1,gr1,<rsize * 4>.  */
   insn = read_memory_integer (p, 4);
   if ((insn & 0xffffff00) != 0x25010100)
     {
       /* If the frame is large, instead of a single instruction it
-	 might be a pair of instructions:
-	 const <reg>, <rsize * 4>
-	 sub gr1,gr1,<reg>
-	 */
+         might be a pair of instructions:
+         const <reg>, <rsize * 4>
+         sub gr1,gr1,<reg>
+       */
       int reg;
       /* Possible value for rsize.  */
       unsigned int rsize0;
-      
+
       if ((insn & 0xff000000) != 0x03000000)
 	{
 	  p = pc;
@@ -172,7 +173,7 @@ examine_prologue (pc, rsize, msize, mfp_used)
    * way down.
    */
   insn = read_memory_integer (p, 4);
-  if ((insn & 0xff00ffff) == (0x5e000100|RAB_HW_REGNUM))
+  if ((insn & 0xff00ffff) == (0x5e000100 | RAB_HW_REGNUM))
     {
       p += 4;
     }
@@ -191,9 +192,9 @@ examine_prologue (pc, rsize, msize, mfp_used)
   else
     {
       /* However, for large frames it can be
-	 const <reg>, <size *4>
-	 add lr1,gr1,<reg>
-	 */
+         const <reg>, <size *4>
+         add lr1,gr1,<reg>
+       */
       int reg;
       CORE_ADDR q;
 
@@ -221,8 +222,8 @@ examine_prologue (pc, rsize, msize, mfp_used)
      to be looking for a "sub" instruction here, but the mask was set
      up to lose all the time. */
   insn = read_memory_integer (p, 4);
-  if (((insn & 0xff80ffff) == (0x15800000|(MSP_HW_REGNUM<<8)))     /* add */
-   || ((insn & 0xff80ffff) == (0x81800000|(MSP_HW_REGNUM<<8))))    /* sll */
+  if (((insn & 0xff80ffff) == (0x15800000 | (MSP_HW_REGNUM << 8)))	/* add */
+      || ((insn & 0xff80ffff) == (0x81800000 | (MSP_HW_REGNUM << 8))))	/* sll */
     {
       p += 4;
       if (mfp_used != NULL)
@@ -238,24 +239,24 @@ examine_prologue (pc, rsize, msize, mfp_used)
 
      Normally this is just
      sub msp,msp,<msize>
-     */
+   */
   insn = read_memory_integer (p, 4);
-  if ((insn & 0xffffff00) == 
-		(0x25000000|(MSP_HW_REGNUM<<16)|(MSP_HW_REGNUM<<8)))
+  if ((insn & 0xffffff00) ==
+      (0x25000000 | (MSP_HW_REGNUM << 16) | (MSP_HW_REGNUM << 8)))
     {
       p += 4;
-      if (msize != NULL) 
+      if (msize != NULL)
 	*msize = insn & 0xff;
     }
   else
     {
       /* For large frames, instead of a single instruction it might
-	 be
+         be
 
-	 const <reg>, <msize>
-	 consth <reg>, <msize>     ; optional
-	 sub msp,msp,<reg>
-	 */
+         const <reg>, <msize>
+         consth <reg>, <msize>     ; optional
+         sub msp,msp,<reg>
+       */
       int reg;
       unsigned msize0;
       CORE_ADDR q = p;
@@ -276,8 +277,8 @@ examine_prologue (pc, rsize, msize, mfp_used)
 	      insn = read_memory_integer (q, 4);
 	    }
 	  /* Check for sub msp,msp,<reg>.  */
-          if ((insn & 0xffffff00) == 
-		(0x24000000|(MSP_HW_REGNUM<<16)|(MSP_HW_REGNUM<<8))
+	  if ((insn & 0xffffff00) ==
+	      (0x24000000 | (MSP_HW_REGNUM << 16) | (MSP_HW_REGNUM << 8))
 	      && (insn & 0xff) == reg)
 	    {
 	      p = q + 4;
@@ -295,19 +296,19 @@ examine_prologue (pc, rsize, msize, mfp_used)
    * way down after everything else.
    */
   insn = read_memory_integer (p, 4);
-  if ((insn & 0xff00ffff) == (0x5e000100|RAB_HW_REGNUM))
+  if ((insn & 0xff00ffff) == (0x5e000100 | RAB_HW_REGNUM))
     {
       p += 4;
     }
 
- done:
+done:
   if (msymbol != NULL)
     {
       if (mi == 0)
 	{
 	  /* Add a new cache entry.  */
-	  mi = (struct prologue_info *)xmalloc (sizeof (struct prologue_info));
-	  msymbol -> info = (char *)mi;
+	  mi = (struct prologue_info *) xmalloc (sizeof (struct prologue_info));
+	  msymbol->info = (char *) mi;
 	  mi->rsize_valid = 0;
 	  mi->msize_valid = 0;
 	  mi->mfp_valid = 0;
@@ -353,7 +354,7 @@ a29k_skip_prologue (pc)
  * msize is return in bytes.
  */
 
-static int	/* 0/1 - failure/success of finding the tag word  */
+static int			/* 0/1 - failure/success of finding the tag word  */
 examine_tag (p, is_trans, argcount, msize, mfp_used)
      CORE_ADDR p;
      int *is_trans;
@@ -366,19 +367,20 @@ examine_tag (p, is_trans, argcount, msize, mfp_used)
   tag1 = read_memory_integer (p, 4);
   if ((tag1 & TAGWORD_ZERO_MASK) != 0)	/* Not a tag word */
     return 0;
-  if (tag1 & (1<<23)) 			/* A two word tag */
+  if (tag1 & (1 << 23))		/* A two word tag */
     {
-       tag2 = read_memory_integer (p-4, 4);
-       if (msize)
-	 *msize = tag2 * 2;
+      tag2 = read_memory_integer (p - 4, 4);
+      if (msize)
+	*msize = tag2 * 2;
     }
-  else					/* A one word tag */
+  else
+    /* A one word tag */
     {
-       if (msize)
-	 *msize = tag1 & 0x7ff;
+      if (msize)
+	*msize = tag1 & 0x7ff;
     }
   if (is_trans)
-    *is_trans = ((tag1 & (1<<21)) ? 1 : 0);
+    *is_trans = ((tag1 & (1 << 21)) ? 1 : 0);
   /* Note that this includes the frame pointer and the return address
      register, so the actual number of registers of arguments is two less.
      argcount can be zero, however, sometimes, for strange assembler
@@ -386,7 +388,7 @@ examine_tag (p, is_trans, argcount, msize, mfp_used)
   if (argcount)
     *argcount = (tag1 >> 16) & 0x1f;
   if (mfp_used)
-    *mfp_used = ((tag1 & (1<<22)) ? 1 : 0); 
+    *mfp_used = ((tag1 & (1 << 22)) ? 1 : 0);
   return 1;
 }
 
@@ -413,8 +415,8 @@ init_frame_info (innermost_frame, frame)
     frame->frame = read_register (GR1_REGNUM);
   else
     frame->frame = frame->next->frame + frame->next->rsize;
-  
-#if 0 /* CALL_DUMMY_LOCATION == ON_STACK */
+
+#if 0				/* CALL_DUMMY_LOCATION == ON_STACK */
   This wont work;
 #else
   if (PC_IN_CALL_DUMMY (p, 0, 0))
@@ -422,34 +424,35 @@ init_frame_info (innermost_frame, frame)
     {
       frame->rsize = DUMMY_FRAME_RSIZE;
       /* This doesn't matter since we never try to get locals or args
-	 from a dummy frame.  */
+         from a dummy frame.  */
       frame->msize = 0;
       /* Dummy frames always use a memory frame pointer.  */
-      frame->saved_msp = 
+      frame->saved_msp =
 	read_register_stack_integer (frame->frame + DUMMY_FRAME_RSIZE - 4, 4);
-      frame->flags |= (TRANSPARENT_FRAME|MFP_USED);
+      frame->flags |= (TRANSPARENT_FRAME | MFP_USED);
       return;
     }
-    
+
   func = find_pc_function (p);
   if (func != NULL)
     p = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
   else
     {
       /* Search backward to find the trace-back tag.  However,
-	 do not trace back beyond the start of the text segment
-	 (just as a sanity check to avoid going into never-never land).  */
+         do not trace back beyond the start of the text segment
+         (just as a sanity check to avoid going into never-never land).  */
 #if 1
       while (p >= text_start
-	     && ((insn = read_memory_integer (p, 4)) & TAGWORD_ZERO_MASK) != 0)
+	  && ((insn = read_memory_integer (p, 4)) & TAGWORD_ZERO_MASK) != 0)
 	p -= 4;
 #else /* 0 */
-      char pat[4] = {0, 0, 0, 0};
+      char pat[4] =
+      {0, 0, 0, 0};
       char mask[4];
       char insn_raw[4];
       store_unsigned_integer (mask, 4, TAGWORD_ZERO_MASK);
       /* Enable this once target_search is enabled and tested.  */
-      target_search (4, pat, mask, p, -4, text_start, p+1, &p, &insn_raw);
+      target_search (4, pat, mask, p, -4, text_start, p + 1, &p, &insn_raw);
       insn = extract_unsigned_integer (insn_raw, 4);
 #endif /* 0 */
 
@@ -475,18 +478,18 @@ init_frame_info (innermost_frame, frame)
      If one doesn't exist, try using a more exhaustive search of
      the prologue.  */
 
-  if (examine_tag(p-4,&trans,(int *)NULL,&msize,&mfp_used)) /* Found good tag */
-      examine_prologue (p, &rsize, 0, 0);
-  else 						/* No tag try prologue */
-      examine_prologue (p, &rsize, &msize, &mfp_used);
+  if (examine_tag (p - 4, &trans, (int *) NULL, &msize, &mfp_used))	/* Found good tag */
+    examine_prologue (p, &rsize, 0, 0);
+  else				/* No tag try prologue */
+    examine_prologue (p, &rsize, &msize, &mfp_used);
 
   frame->rsize = rsize;
   frame->msize = msize;
   frame->flags = 0;
   if (mfp_used)
-  	frame->flags |= MFP_USED;
+    frame->flags |= MFP_USED;
   if (trans)
-  	frame->flags |= TRANSPARENT_FRAME;
+    frame->flags |= TRANSPARENT_FRAME;
   if (innermost_frame)
     {
       frame->saved_msp = read_register (MSP_REGNUM) + msize;
@@ -494,10 +497,10 @@ init_frame_info (innermost_frame, frame)
   else
     {
       if (mfp_used)
-  	 frame->saved_msp =
-	      read_register_stack_integer (frame->frame + rsize - 4, 4);
+	frame->saved_msp =
+	  read_register_stack_integer (frame->frame + rsize - 4, 4);
       else
-  	    frame->saved_msp = frame->next->saved_msp + msize;
+	frame->saved_msp = frame->next->saved_msp + msize;
     }
 }
 
@@ -509,7 +512,8 @@ init_extra_frame_info (frame)
     /* Assume innermost frame.  May produce strange results for "info frame"
        but there isn't any way to tell the difference.  */
     init_frame_info (1, frame);
-  else {
+  else
+    {
       /* We're in get_prev_frame.
          Take care of everything in init_frame_pc.  */
       ;
@@ -522,7 +526,7 @@ init_frame_pc (fromleaf, frame)
      struct frame_info *frame;
 {
   frame->pc = (fromleaf ? SAVED_PC_AFTER_CALL (frame->next) :
-	     frame->next ? FRAME_SAVED_PC (frame->next) : read_pc ());
+	       frame->next ? FRAME_SAVED_PC (frame->next) : read_pc ());
   init_frame_info (fromleaf, frame);
 }
 
@@ -534,7 +538,7 @@ CORE_ADDR
 frame_locals_address (fi)
      struct frame_info *fi;
 {
-  if (fi->flags & MFP_USED) 
+  if (fi->flags & MFP_USED)
     return fi->saved_msp;
   else
     return fi->saved_msp - fi->msize;
@@ -562,10 +566,11 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   long rsp = read_register (RSP_REGNUM);
 
   /* If we don't do this 'info register' stops in the middle. */
-  if (memaddr >= rstack_high_address) 
+  if (memaddr >= rstack_high_address)
     {
       /* a bogus value */
-      static char val[] = {~0, ~0, ~0, ~0};
+      static char val[] =
+      {~0, ~0, ~0, ~0};
       /* It's in a local register, but off the end of the stack.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
       if (myaddr != NULL)
@@ -573,7 +578,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
 	  /* Provide bogusness */
 	  memcpy (myaddr, val, 4);
 	}
-      supply_register(regnum, val);	/* More bogusness */
+      supply_register (regnum, val);	/* More bogusness */
       if (lval != NULL)
 	*lval = lval_register;
       if (actual_mem_addr != NULL)
@@ -599,7 +604,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   else
     {
       /* It's in the memory portion of the register stack.  */
-      if (myaddr != NULL) 
+      if (myaddr != NULL)
 	read_memory (memaddr, myaddr, 4);
       if (lval != NULL)
 	*lval = lval_memory;
@@ -632,11 +637,11 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
   /* If we don't do this 'info register' stops in the middle. */
-  if (memaddr >= rstack_high_address) 
+  if (memaddr >= rstack_high_address)
     {
       /* It's in a register, but off the end of the stack.  */
       if (actual_mem_addr != NULL)
-	*actual_mem_addr = 0; 
+	*actual_mem_addr = 0;
     }
   else if (memaddr < rfb)
     {
@@ -645,7 +650,7 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
       if (regnum < LR0_REGNUM || regnum > LR0_REGNUM + 127)
 	error ("Attempt to read register stack out of range.");
       if (myaddr != NULL)
-	write_register (regnum, *(long *)myaddr);
+	write_register (regnum, *(long *) myaddr);
       if (actual_mem_addr != NULL)
 	*actual_mem_addr = 0;
     }
@@ -733,7 +738,7 @@ a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
   else if (regnum < LR0_REGNUM || regnum >= LR0_REGNUM + 128)
     {
       /* These registers are not saved over procedure calls,
-	 so just print out the current values.  */
+         so just print out the current values.  */
       if (raw_buffer != NULL)
 	read_register_gen (regnum, raw_buffer);
       if (lvalp != NULL)
@@ -742,7 +747,7 @@ a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
 	*addrp = REGISTER_BYTE (regnum);
       return;
     }
-      
+
   addr = frame->frame + (regnum - LR0_REGNUM) * 4;
   if (raw_buffer != NULL)
     read_register_stack (addr, raw_buffer, &addr, &lval);
@@ -760,9 +765,9 @@ void
 pop_frame ()
 {
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR rfb = read_register (RFB_REGNUM);		      
+  CORE_ADDR rfb = read_register (RFB_REGNUM);
   CORE_ADDR gr1 = frame->frame + frame->rsize;
-  CORE_ADDR lr1;							      
+  CORE_ADDR lr1;
   CORE_ADDR original_lr0;
   int must_fix_lr0 = 0;
   int i;
@@ -772,54 +777,54 @@ pop_frame ()
 			read_register (SP_REGNUM),
 			FRAME_FP (frame)))
     {
-      int lrnum = LR0_REGNUM + DUMMY_ARG/4;
+      int lrnum = LR0_REGNUM + DUMMY_ARG / 4;
       for (i = 0; i < DUMMY_SAVE_SR128; ++i)
-	write_register (SR_REGNUM (i + 128),read_register (lrnum++));
+	write_register (SR_REGNUM (i + 128), read_register (lrnum++));
       for (i = 0; i < DUMMY_SAVE_SR160; ++i)
-	write_register (SR_REGNUM(i+160), read_register (lrnum++));
+	write_register (SR_REGNUM (i + 160), read_register (lrnum++));
       for (i = 0; i < DUMMY_SAVE_GREGS; ++i)
 	write_register (RETURN_REGNUM + i, read_register (lrnum++));
       /* Restore the PCs and prepare to restore LR0.  */
-      write_register(PC_REGNUM, read_register (lrnum++));
-      write_register(NPC_REGNUM, read_register (lrnum++));
-      write_register(PC2_REGNUM, read_register (lrnum++));
+      write_register (PC_REGNUM, read_register (lrnum++));
+      write_register (NPC_REGNUM, read_register (lrnum++));
+      write_register (PC2_REGNUM, read_register (lrnum++));
       original_lr0 = read_register (lrnum++);
       must_fix_lr0 = 1;
     }
 
   /* Restore the memory stack pointer.  */
   write_register (MSP_REGNUM, frame->saved_msp);
-  /* Restore the register stack pointer.  */				      
+  /* Restore the register stack pointer.  */
   write_register (GR1_REGNUM, gr1);
 
   /* If we popped a dummy frame, restore lr0 now that gr1 has been restored. */
-  if (must_fix_lr0) 
+  if (must_fix_lr0)
     write_register (LR0_REGNUM, original_lr0);
 
-  /* Check whether we need to fill registers.  */			      
-  lr1 = read_register (LR0_REGNUM + 1);				      
-  if (lr1 > rfb)							      
-    {									      
-      /* Fill.  */							      
+  /* Check whether we need to fill registers.  */
+  lr1 = read_register (LR0_REGNUM + 1);
+  if (lr1 > rfb)
+    {
+      /* Fill.  */
       int num_bytes = lr1 - rfb;
-      int i;								      
+      int i;
       long word;
-						      
-      write_register (RAB_REGNUM, read_register (RAB_REGNUM) + num_bytes);  
-      write_register (RFB_REGNUM, lr1);				      
-      for (i = 0; i < num_bytes; i += 4)				      
-        {
+
+      write_register (RAB_REGNUM, read_register (RAB_REGNUM) + num_bytes);
+      write_register (RFB_REGNUM, lr1);
+      for (i = 0; i < num_bytes; i += 4)
+	{
 	  /* Note: word is in host byte order.  */
-          word = read_memory_integer (rfb + i, 4);
-          write_register (LR0_REGNUM + ((rfb - gr1) % 0x80) + i / 4, word);
-        }								      
+	  word = read_memory_integer (rfb + i, 4);
+	  write_register (LR0_REGNUM + ((rfb - gr1) % 0x80) + i / 4, word);
+	}
     }
-  flush_cached_frames ();						      
+  flush_cached_frames ();
 }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-void 
+void
 push_dummy_frame ()
 {
   long w;
@@ -827,13 +832,13 @@ push_dummy_frame ()
   CORE_ADDR msp = read_register (MSP_REGNUM);
   int lrnum, i;
   CORE_ADDR original_lr0;
-      
+
   /* Read original lr0 before changing gr1.  This order isn't really needed
      since GDB happens to have a snapshot of all the regs and doesn't toss
      it when gr1 is changed.  But it's The Right Thing To Do.  */
   original_lr0 = read_register (LR0_REGNUM);
 
-  /* Allocate the new frame. */ 
+  /* Allocate the new frame. */
   gr1 = read_register (GR1_REGNUM) - DUMMY_FRAME_RSIZE;
   write_register (GR1_REGNUM, gr1);
 
@@ -877,7 +882,7 @@ push_dummy_frame ()
   write_register (MSP_REGNUM, msp - 16 * 4);
 
   /* Save registers.  */
-  lrnum = LR0_REGNUM + DUMMY_ARG/4;
+  lrnum = LR0_REGNUM + DUMMY_ARG / 4;
   for (i = 0; i < DUMMY_SAVE_SR128; ++i)
     write_register (lrnum++, read_register (SR_REGNUM (i + 128)));
   for (i = 0; i < DUMMY_SAVE_SR160; ++i)
@@ -918,7 +923,7 @@ setup_arbitrary_frame (argc, argv)
 
   if (!frame)
     fatal ("internal: create_new_frame returned invalid frame id");
-  
+
   /* Creating a new frame munges the `frame' value from the current
      GR1, so we restore it again here.  FIXME, untangle all this
      29K frame stuff...  */
@@ -991,25 +996,25 @@ a29k_get_processor_type ()
 
 #ifdef GET_LONGJMP_TARGET
 /* Figure out where the longjmp will land.  We expect that we have just entered
-  longjmp and haven't yet setup the stack frame, so the args are still in the
+   longjmp and haven't yet setup the stack frame, so the args are still in the
    output regs.  lr2 (LR2_REGNUM) points at the jmp_buf structure from which we
    extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
 int
-get_longjmp_target(pc)
+get_longjmp_target (pc)
      CORE_ADDR *pc;
 {
   CORE_ADDR jb_addr;
-  char buf[sizeof(CORE_ADDR)];
+  char buf[sizeof (CORE_ADDR)];
 
-  jb_addr = read_register(LR2_REGNUM);
+  jb_addr = read_register (LR2_REGNUM);
 
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) buf,
-                         sizeof(CORE_ADDR)))
+  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) buf,
+			  sizeof (CORE_ADDR)))
     return 0;
 
-  *pc = extract_address ((PTR) buf, sizeof(CORE_ADDR));
+  *pc = extract_address ((PTR) buf, sizeof (CORE_ADDR));
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */
@@ -1024,7 +1029,7 @@ _initialize_a29k_tdep ()
   /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
   add_show_from_set
     (add_set_cmd ("rstack_high_address", class_support, var_uinteger,
-		  (char *)&rstack_high_address,
+		  (char *) &rstack_high_address,
 		  "Set top address in memory of the register stack.\n\
 Attempts to access registers saved above this address will be ignored\n\
 or will produce the value -1.", &setlist),
@@ -1033,8 +1038,8 @@ or will produce the value -1.", &setlist),
   /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
   add_show_from_set
     (add_set_cmd ("call_scratch_address", class_support, var_uinteger,
-		  (char *)&text_end,
-"Set address in memory where small amounts of RAM can be used\n\
+		  (char *) &text_end,
+		  "Set address in memory where small amounts of RAM can be used\n\
 when making function calls into the inferior.", &setlist),
      &showlist);
 }

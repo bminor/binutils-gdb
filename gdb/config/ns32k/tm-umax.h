@@ -1,21 +1,22 @@
 /* Definitions to make GDB run on an encore under umax 4.2
    Copyright 1987, 1989, 1991, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* This is also included by tm-ns32km3.h, as well as being used by umax.  */
 
@@ -64,11 +65,11 @@ extern CORE_ADDR umax_skip_prologue PARAMS ((CORE_ADDR));
 
 #define DECR_PC_AFTER_BREAK 0
 
-#if 0 /* Disable until fixed *correctly*.  */
+#if 0				/* Disable until fixed *correctly*.  */
 #ifndef INVALID_FLOAT
 #ifndef NaN
 #include <nan.h>
-#endif NaN
+#endif /* NaN */
 
 /* Return 1 if P points to an invalid floating point value.  */
 /* Surely wrong for cross-debugging.  */
@@ -231,7 +232,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern int umax_frame_num_args PARAMS ((struct frame_info *fi));
+extern int umax_frame_num_args PARAMS ((struct frame_info * fi));
 #define FRAME_NUM_ARGS(fi) (umax_frame_num_args ((fi)))
 
 /* Things needed for making the inferior call functions.  */
@@ -269,10 +270,10 @@ extern int umax_frame_num_args PARAMS ((struct frame_info *fi));
 }
 
 /* This sequence of words is the instructions
-     enter	0xff,0		82 ff 00
-     jsr	@0x00010203	7f ae c0 01 02 03
-     adjspd	0x69696969	7f a5 01 02 03 04
-     bpt			f2
+   enter        0xff,0          82 ff 00
+   jsr  @0x00010203     7f ae c0 01 02 03
+   adjspd       0x69696969      7f a5 01 02 03 04
+   bpt                  f2
    Note this is 16 bytes.  */
 
 #define CALL_DUMMY { 0x7f00ff82, 0x0201c0ae, 0x01a57f03, 0xf2040302 }

@@ -1,21 +1,22 @@
 /* Main code for remote server for GDB.
    Copyright (C) 1989, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
 
@@ -52,14 +53,14 @@ main (argc, argv)
   unsigned int len;
   CORE_ADDR mem_addr;
 
-  if (setjmp(toplevel))
+  if (setjmp (toplevel))
     {
-      fprintf(stderr, "Exiting\n");
-      exit(1);
+      fprintf (stderr, "Exiting\n");
+      exit (1);
     }
 
   if (argc < 3)
-    error("Usage: gdbserver tty prog [args ...]");
+    error ("Usage: gdbserver tty prog [args ...]");
 
   /* Wait till we are at first instruction in program.  */
   signal = start_inferior (&argv[2], &status);
@@ -70,8 +71,8 @@ main (argc, argv)
     {
       remote_open (argv[1]);
 
-restart:
-      setjmp(toplevel);
+    restart:
+      setjmp (toplevel);
       while (getpkt (own_buf) > 0)
 	{
 	  unsigned char sig;
@@ -154,7 +155,7 @@ restart:
 	      fprintf (stderr, "Killing inferior\n");
 	      kill_inferior ();
 	      /* When using the extended protocol, we start up a new
-		 debugging session.   The traditional protocol will
+	         debugging session.   The traditional protocol will
 	         exit instead.  */
 	      if (extended_protocol)
 		{
@@ -179,7 +180,7 @@ restart:
 	      break;
 	    case 'R':
 	      /* Restarting the inferior is only supported in the
-		 extended protocol.  */
+	         extended protocol.  */
 	      if (extended_protocol)
 		{
 		  kill_inferior ();
@@ -201,8 +202,8 @@ restart:
 		}
 	    default:
 	      /* It is a request we don't understand.  Respond with an
-		 empty packet so that gdb knows that we don't support this
-		 request.  */
+	         empty packet so that gdb knows that we don't support this
+	         request.  */
 	      own_buf[0] = '\0';
 	      break;
 	    }
@@ -238,11 +239,11 @@ restart:
 
       /* We come here when getpkt fails.
 
-	 For the extended remote protocol we exit (and this is the only
-	 way we gracefully exit!).
+         For the extended remote protocol we exit (and this is the only
+         way we gracefully exit!).
 
-	 For the traditional remote protocol close the connection,
-	 and re-open it at the top of the loop.  */
+         For the traditional remote protocol close the connection,
+         and re-open it at the top of the loop.  */
       if (extended_protocol)
 	{
 	  remote_close ();

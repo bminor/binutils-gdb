@@ -2,21 +2,22 @@
    Copyright (C) 1995 Free Software Foundation, Inc.
    Written by Stan Shebs.  Contributed by Cygnus Support.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without eve nthe implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without eve nthe implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* Note that because all the available Mac compilers are ANSI or very
    close, and this is a native-only file, the code may be purely ANSI.  */
@@ -103,7 +104,7 @@ child_attach (args, from_tty)
   psn.highLongOfPSN = 0;
   psn.lowLongOfPSN = pid;
 
-  inforec.processInfoLength = sizeof(ProcessInfoRec);
+  inforec.processInfoLength = sizeof (ProcessInfoRec);
   inforec.processName = name;
   inforec.processAppSpec = fsspec;
 
@@ -193,14 +194,14 @@ child_create_inferior (exec_file, allargs, env)
   launchparms.launchControlFlags = launchContinue | launchNoFileFlags;
   fsspec.vRefNum = 0;
   fsspec.parID = 0;
-  strcpy(fsspec.name + 1, exec_file);
-  fsspec.name[0] = strlen(exec_file);
+  strcpy (fsspec.name + 1, exec_file);
+  fsspec.name[0] = strlen (exec_file);
   launchparms.launchAppSpec = &fsspec;
   launchparms.launchAppParameters = nil;
 
   launch_err = LaunchApplication (&launchparms);
 
-  if (launch_err == 999 /*memFullErr*/)
+  if (launch_err == 999 /*memFullErr */ )
     {
       error ("Not enough memory to launch %s\n", exec_file);
     }
@@ -233,7 +234,7 @@ child_stop ()
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-		 int write, struct target_ops *target)
+		   int write, struct target_ops *target)
 {
   int i;
 
@@ -294,7 +295,7 @@ info_proc (args, from_tty)
   psn.highLongOfPSN = 0;
   psn.lowLongOfPSN = kNoProcess;
 
-  inforec.processInfoLength = sizeof(ProcessInfoRec);
+  inforec.processInfoLength = sizeof (ProcessInfoRec);
   inforec.processName = name;
   inforec.processAppSpec = fsspec;
 
@@ -310,14 +311,14 @@ info_proc (args, from_tty)
 	  printf_filtered (" %c%c%c%c",
 			   (code >> 24) & 0xff,
 			   (code >> 16) & 0xff,
-			   (code >>  8) & 0xff,
-			   (code >>  0) & 0xff);
+			   (code >> 8) & 0xff,
+			   (code >> 0) & 0xff);
 	  code = inforec.processType;
 	  printf_filtered (" %c%c%c%c",
 			   (code >> 24) & 0xff,
 			   (code >> 16) & 0xff,
-			   (code >>  8) & 0xff,
-			   (code >>  0) & 0xff);
+			   (code >> 8) & 0xff,
+			   (code >> 0) & 0xff);
 	  if (psn.highLongOfPSN == 0)
 	    printf_filtered (" %9d", psn.lowLongOfPSN);
 	  else
@@ -332,80 +333,80 @@ info_proc (args, from_tty)
     }
 }
 
-struct target_ops child_ops ;
+struct target_ops child_ops;
 
-static void 
-init_child_ops(void)
+static void
+init_child_ops (void)
 {
-  child_ops.to_shortname =   "mac";		
-  child_ops.to_longname =   "MacOS application";
-  child_ops.to_doc    =  "MacOS application (started by the \"run\" command).";
-  child_ops.to_open   =  child_open; 
-  child_ops.to_close  =  child_close;
-  child_ops.to_attach =  child_attach;
+  child_ops.to_shortname = "mac";
+  child_ops.to_longname = "MacOS application";
+  child_ops.to_doc = "MacOS application (started by the \"run\" command).";
+  child_ops.to_open = child_open;
+  child_ops.to_close = child_close;
+  child_ops.to_attach = child_attach;
   child_ops.to_post_attach = NULL;
-  child_ops.to_require_attach = NULL;                         /* to_require_attach */  
-  child_ops.to_detach =  child_detach;
-  child_ops.to_require_detach = NULL;                         /* to_require_detach */
-  child_ops.to_resume =  child_resume;
-  child_ops.to_wait   =  child_wait;	
-  child_ops.to_post_wait = NULL;                         /* to_post_wait */
-  child_ops.to_fetch_registers  =   child_fetch_inferior_registers;
-  child_ops.to_store_registers  =   child_store_inferior_registers;
-  child_ops.to_prepare_to_store =   child_prepare_to_store;
-  child_ops.to_xfer_memory =   child_xfer_memory;		
-  child_ops.to_files_info  =   child_files_info;		
-  child_ops.to_insert_breakpoint =   memory_insert_breakpoint;	
-  child_ops.to_remove_breakpoint =   memory_remove_breakpoint;	
-  child_ops.to_terminal_init  =   0;				
-  child_ops.to_terminal_inferior =   0;				
-  child_ops.to_terminal_ours_for_output =  0;
-  child_ops.to_terminal_ours  =   0;			
-  child_ops.to_terminal_info  =   0;			
-  child_ops.to_kill  =   child_kill_inferior;	
-  child_ops.to_load  =   0;	
-  child_ops.to_lookup_symbol   = 0;			
+  child_ops.to_require_attach = NULL;	/* to_require_attach */
+  child_ops.to_detach = child_detach;
+  child_ops.to_require_detach = NULL;	/* to_require_detach */
+  child_ops.to_resume = child_resume;
+  child_ops.to_wait = child_wait;
+  child_ops.to_post_wait = NULL;	/* to_post_wait */
+  child_ops.to_fetch_registers = child_fetch_inferior_registers;
+  child_ops.to_store_registers = child_store_inferior_registers;
+  child_ops.to_prepare_to_store = child_prepare_to_store;
+  child_ops.to_xfer_memory = child_xfer_memory;
+  child_ops.to_files_info = child_files_info;
+  child_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  child_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  child_ops.to_terminal_init = 0;
+  child_ops.to_terminal_inferior = 0;
+  child_ops.to_terminal_ours_for_output = 0;
+  child_ops.to_terminal_ours = 0;
+  child_ops.to_terminal_info = 0;
+  child_ops.to_kill = child_kill_inferior;
+  child_ops.to_load = 0;
+  child_ops.to_lookup_symbol = 0;
   child_ops.to_create_inferior = child_create_inferior;
-  child_ops.to_post_startup_inferior = NULL;                         /* to_post_startup_inferior */
-  child_ops.to_acknowledge_created_inferior = NULL;                         /* to_acknowledge_created_inferior */
-  child_ops.to_clone_and_follow_inferior = NULL;                         /* to_clone_and_follow_inferior */
-  child_ops.to_post_follow_inferior_by_clone = NULL;                         /* to_post_follow_inferior_by_clone */
+  child_ops.to_post_startup_inferior = NULL;	/* to_post_startup_inferior */
+  child_ops.to_acknowledge_created_inferior = NULL;	/* to_acknowledge_created_inferior */
+  child_ops.to_clone_and_follow_inferior = NULL;	/* to_clone_and_follow_inferior */
+  child_ops.to_post_follow_inferior_by_clone = NULL;	/* to_post_follow_inferior_by_clone */
   child_ops.to_insert_fork_catchpoint = NULL;
   child_ops.to_remove_fork_catchpoint = NULL;
   child_ops.to_insert_vfork_catchpoint = NULL;
   child_ops.to_remove_vfork_catchpoint = NULL;
-  child_ops.to_has_forked = NULL;                         /* to_has_forked */
-  child_ops.to_has_vforked = NULL;                         /* to_has_vforked */
+  child_ops.to_has_forked = NULL;	/* to_has_forked */
+  child_ops.to_has_vforked = NULL;	/* to_has_vforked */
   child_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  child_ops.to_post_follow_vfork = NULL;                         /* to_post_follow_vfork */
+  child_ops.to_post_follow_vfork = NULL;	/* to_post_follow_vfork */
   child_ops.to_insert_exec_catchpoint = NULL;
   child_ops.to_remove_exec_catchpoint = NULL;
   child_ops.to_has_execd = NULL;
   child_ops.to_reported_exec_events_per_exec_call = NULL;
   child_ops.to_has_exited = NULL;
-  child_ops.to_mourn_inferior  = child_mourn_inferior;		
-  child_ops.to_can_run         = child_can_run;
-  child_ops.to_notice_signals =  0;      
-  child_ops.to_thread_alive  =   0;       
-  child_ops.to_stop  =   child_stop;      
-  child_ops.to_pid_to_exec_file =  NULL;                         /* to_pid_to_exec_file */
+  child_ops.to_mourn_inferior = child_mourn_inferior;
+  child_ops.to_can_run = child_can_run;
+  child_ops.to_notice_signals = 0;
+  child_ops.to_thread_alive = 0;
+  child_ops.to_stop = child_stop;
+  child_ops.to_pid_to_exec_file = NULL;		/* to_pid_to_exec_file */
   child_ops.to_core_file_to_sym_file = NULL;
-  child_ops.to_stratum =   process_stratum;
-  child_ops.DONT_USE =   0; 
-  child_ops.to_has_all_memory = 1; 
-  child_ops.to_has_memory     = 1; 
-  child_ops.to_has_stack      = 1; 
-  child_ops.to_has_registers  = 1; 
-  child_ops.to_has_execution  = 1; 
-  child_ops.to_sections       = 0; 
-  child_ops.to_sections_end   = 0; 
-  child_ops.to_magic =   OPS_MAGIC;
+  child_ops.to_stratum = process_stratum;
+  child_ops.DONT_USE = 0;
+  child_ops.to_has_all_memory = 1;
+  child_ops.to_has_memory = 1;
+  child_ops.to_has_stack = 1;
+  child_ops.to_has_registers = 1;
+  child_ops.to_has_execution = 1;
+  child_ops.to_sections = 0;
+  child_ops.to_sections_end = 0;
+  child_ops.to_magic = OPS_MAGIC;
 };
 
 void
 _initialize_mac_nat ()
 {
-  init_child_ops() ;
+  init_child_ops ();
 
   add_info ("proc", info_proc,
 	    "Show information about processes.");

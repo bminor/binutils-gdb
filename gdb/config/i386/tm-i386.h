@@ -1,26 +1,27 @@
 /* Macro definitions for GDB on an Intel i[345]86.
    Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
-#ifdef __STDC__		/* Forward decl's for prototypes */
+#ifdef __STDC__			/* Forward decl's for prototypes */
 struct frame_info;
 struct frame_saved_regs;
 struct type;
@@ -78,7 +79,7 @@ extern int i386_skip_prologue PARAMS ((int));
 
 /* Number of machine registers */
 
-#define NUM_FREGS 0 /*8*/		/* Number of FP regs */
+#define NUM_FREGS 0 /*8*/	/* Number of FP regs */
 #define NUM_REGS (16 + NUM_FREGS)	/* Basic i*86 regs + FP regs */
 
 /* Initializer for an array of names of registers.  There should be at least
@@ -102,13 +103,13 @@ extern int i386_skip_prologue PARAMS ((int));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#define FP_REGNUM 5	/* (ebp) Contains address of executing stack frame */
-#define SP_REGNUM 4	/* (usp) Contains address of top of stack */
-#define PC_REGNUM 8	/* (eip) Contains program counter */
-#define PS_REGNUM 9	/* (ps)  Contains processor status */
+#define FP_REGNUM 5		/* (ebp) Contains address of executing stack frame */
+#define SP_REGNUM 4		/* (usp) Contains address of top of stack */
+#define PC_REGNUM 8		/* (eip) Contains program counter */
+#define PS_REGNUM 9		/* (ps)  Contains processor status */
 
-#define FP0_REGNUM 16   /* (st0) 387 register */
-#define FPC_REGNUM 25	/* 80387 control register */
+#define FP0_REGNUM 16		/* (st0) 387 register */
+#define FPC_REGNUM 25		/* 80387 control register */
 
 /* Total amount of space needed to store our copies of the machine's register
    state, the array `registers'. */
@@ -119,7 +120,7 @@ extern int i386_skip_prologue PARAMS ((int));
 
 #define REGISTER_BYTE(N) \
   (((N) < FP0_REGNUM) ? ((N) * 4) : ((((N) - FP0_REGNUM) * 10) + 64))
- 
+
 /* Number of bytes of storage in the actual machine representation for
    register N.  All registers are 4 bytes, except 387 st(0) - st(7),
    which are 80 bits each. */
@@ -166,7 +167,7 @@ extern int i386_skip_prologue PARAMS ((int));
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
    i386_extract_return_value ((TYPE),(REGBUF),(VALBUF))
 
-extern void i386_extract_return_value PARAMS ((struct type *, char [], char *));
+extern void i386_extract_return_value PARAMS ((struct type *, char[], char *));
 
 /* Write into appropriate registers a function return value of type TYPE, given
    in virtual format.  */
@@ -246,8 +247,8 @@ extern int i386_frame_num_args PARAMS ((struct frame_info *));
 
 extern void i386_frame_find_saved_regs PARAMS ((struct frame_info *,
 						struct frame_saved_regs *));
-
 
+
 /* Things needed for making the inferior call functions.  */
 
 /* Push an empty stack frame, to record the current PC, etc.  */
@@ -261,8 +262,8 @@ extern void i386_push_dummy_frame PARAMS ((void));
 #define POP_FRAME  { i386_pop_frame (); }
 
 extern void i386_pop_frame PARAMS ((void));
-
 
+
 /* this is 
  *   call 11223344 (32 bit relative)
  *   int3
@@ -272,7 +273,7 @@ extern void i386_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_LENGTH 8
 
-#define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
+#define CALL_DUMMY_START_OFFSET 0	/* Start execution at beginning of dummy */
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET 5
 

@@ -1,23 +1,24 @@
 /* Shared library declarations for GDB, the GNU Debugger.
    Copyright (C) 1992, 1998 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-#ifdef __STDC__		/* Forward decl's for prototypes */
+#ifdef __STDC__			/* Forward decl's for prototypes */
 struct target_ops;
 #endif
 
@@ -50,18 +51,18 @@ solib_add PARAMS ((char *, int, struct target_ops *));
    the debugger, as CLEAR_SOLIB does.)
 
    This functionality is presently not implemented for this target.
-   */
+ */
 #define SOLIB_REMOVE_INFERIOR_HOOK(PID) (0)
 
 extern void
-solib_create_inferior_hook PARAMS((void));	/* solib.c */
+solib_create_inferior_hook PARAMS ((void));	/* solib.c */
 
 /* This function is called by the "catch load" command.  It allows
    the debugger to be notified by the dynamic linker when a specified
    library file (or any library file, if filename is NULL) is loaded.
 
    Presently, this functionality is not implemented.
-   */
+ */
 #define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag,filename,cond_string) \
    error("catch of library loads/unloads not yet implemented on this platform")
 
@@ -70,7 +71,7 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    library file (or any library file, if filename is NULL) is unloaded.
 
    Presently, this functionality is not implemented.
-   */
+ */
 #define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid,tempflag,filename,cond_string) \
    error("catch of library loads/unloads not yet implemented on this platform")
 
@@ -81,12 +82,12 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    the dynamic linker hook, or undefined results are guaranteed.
 
    Presently, this functionality is not implemented.
-   */
+ */
 
 /*
-#define SOLIB_HAVE_LOAD_EVENT(pid) \
-    error("catch of library loads/unloads not yet implemented on this platform")
-*/
+   #define SOLIB_HAVE_LOAD_EVENT(pid) \
+   error("catch of library loads/unloads not yet implemented on this platform")
+ */
 
 #define SOLIB_HAVE_LOAD_EVENT(pid) \
 (0)
@@ -103,12 +104,12 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    string if they wish to continue the inferior and then access the string.
 
    Presently, this functionality is not implemented.
-   */
+ */
 
 /*
-#define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
+   #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
    error("catch of library loads/unloads not yet implemented on this platform")
-*/
+ */
 
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) \
 (0)
@@ -120,11 +121,11 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    the dynamic linker hook, or undefined results are guaranteed.
 
    Presently, this functionality is not implemented.
-   */
+ */
 /*
-#define SOLIB_HAVE_UNLOAD_EVENT(pid) \
+   #define SOLIB_HAVE_UNLOAD_EVENT(pid) \
    error("catch of library loads/unloads not yet implemented on this platform")
-*/
+ */
 
 #define SOLIB_HAVE_UNLOAD_EVENT(pid) \
 (0)
@@ -141,11 +142,11 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    string if they wish to continue the inferior and then access the string.
 
    Presently, this functionality is not implemented.
-   */
+ */
 /*
-#define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
+   #define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
    error("catch of library loads/unloads not yet implemented on this platform")
-*/
+ */
 
 #define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
 (0)
@@ -159,12 +160,12 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    results are guaranteed.
 
    Presently, this functionality is not implemented.
-   */
+ */
 
 /*
-#define SOLIB_IN_DYNAMIC_LINKER(pid,pc) \
+   #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) \
    error("catch of library loads/unloads not yet implemented on this platform")
-*/
+ */
 
 #define SOLIB_IN_DYNAMIC_LINKER(pid,pc) \
 (0)
@@ -174,7 +175,7 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
    any symbol tables.
 
    Presently, this functionality is not implemented.
-   */
+ */
 #define SOLIB_RESTART() \
   (0)
 
@@ -184,7 +185,7 @@ solib_create_inferior_hook PARAMS((void));	/* solib.c */
 #define DISABLE_UNSETTABLE_BREAK(addr)	(solib_address(addr) != NULL)
 
 extern char *
-solib_address PARAMS ((CORE_ADDR));		/* solib.c */
+  solib_address PARAMS ((CORE_ADDR));	/* solib.c */
 
 /* If ADDR lies in a shared library, return its name.  */
 

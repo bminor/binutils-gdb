@@ -2,21 +2,22 @@
    Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free
    Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -27,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "target.h"
 #include "wait.h"
-/*#include "terminal.h"*/
+/*#include "terminal.h" */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
@@ -85,138 +86,139 @@ remote_d10v_translate_xfer_address (memaddr, nr_bytes, targ_addr, targ_len)
 
   /* GDB interprets addresses as:
 
-       0x00xxxxxx: Logical data address segment        (DMAP translated memory)
-       0x01xxxxxx: Logical instruction address segment (IMAP translated memory)
-       0x10xxxxxx: Physical data memory segment        (On-chip data memory)
-       0x11xxxxxx: Physical instruction memory segment (On-chip insn memory)
-       0x12xxxxxx: Phisical unified memory segment     (Unified memory)
+     0x00xxxxxx: Logical data address segment        (DMAP translated memory)
+     0x01xxxxxx: Logical instruction address segment (IMAP translated memory)
+     0x10xxxxxx: Physical data memory segment        (On-chip data memory)
+     0x11xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x12xxxxxx: Phisical unified memory segment     (Unified memory)
 
      The remote d10v board interprets addresses as:
 
-       0x00xxxxxx: Phisical unified memory segment     (Unified memory)
-       0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
-       0x02xxxxxx: Physical data memory segment        (On-chip data memory)
+     0x00xxxxxx: Phisical unified memory segment     (Unified memory)
+     0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x02xxxxxx: Physical data memory segment        (On-chip data memory)
 
      Translate according to current IMAP/dmap registers */
 
-  enum {
-    targ_unified = 0x00000000,
-    targ_insn = 0x01000000,
-    targ_data = 0x02000000,
-  };
+  enum
+    {
+      targ_unified = 0x00000000,
+      targ_insn = 0x01000000,
+      targ_data = 0x02000000,
+    };
 
   seg = (memaddr >> 24);
   off = (memaddr & 0xffffffL);
 
-  switch (seg) 
+  switch (seg)
+    {
+    case 0x00:			/* in logical data address segment */
       {
-      case 0x00: /* in logical data address segment */
-	{
-	  from = "logical-data";
-	  if (off <= 0x7fffL)
-	    {
-	      /* On chip data */
-	      phys = targ_data + off;
-	      if (off + nr_bytes > 0x7fffL)
-		/* don't cross VM boundary */
-		nr_bytes = 0x7fffL - off + 1;
-	      to = "chip-data";
-	    }
-	  else if (off <= 0xbfffL)
-	    {
-	      short map = dmap;
-	      if (map & 0x1000)
-		{
-		  /* Instruction memory */
-		  phys = targ_insn | ((map & 0xf) << 14) | (off & 0x3fff);
-		  to = "chip-insn";
-		}
-	      else
-		{
-		  /* Unified memory */
-		  phys = targ_unified | ((map & 0x3ff) << 14) | (off & 0x3fff);
-		  to = "unified";
-		}
-	      if (off + nr_bytes > 0xbfffL)
-		/* don't cross VM boundary */
-		nr_bytes = (0xbfffL - off + 1);
-	    }	    
-	  else
-	    {
-	      /* Logical address out side of data segments, not supported */
-	      *targ_len = 0;
-	      return;
-	    }
-	  break;
-	}
-
-      case 0x01: /* in logical instruction address segment */
-	{
-	  short map;
-	  from = "logical-insn";
-	  if (off <= 0x1ffffL)
-	    {
-	      map = imap0;
-	    }
-	  else if (off <= 0x3ffffL)
-	    {
-	      map = imap1;
-	    }
-	  else
-	    {
-	      /* Logical address outside of IMAP[01] segment, not
-		 supported */
-	      *targ_len = 0;
-	      return;
-	    }
-	  if ((off & 0x1ffff) + nr_bytes > 0x1ffffL)
-	    {
+	from = "logical-data";
+	if (off <= 0x7fffL)
+	  {
+	    /* On chip data */
+	    phys = targ_data + off;
+	    if (off + nr_bytes > 0x7fffL)
 	      /* don't cross VM boundary */
-	      nr_bytes = 0x1ffffL - (off & 0x1ffffL) + 1;
-	    }
-	  if (map & 0x1000)
-	    /* Instruction memory */
-	    {
-	      phys = targ_insn | off;
-	      to = "chip-insn";
-	    }
-	  else
-	    {
-	      phys = ((map & 0x7fL) << 17) + (off & 0x1ffffL);
-	      if (phys > 0xffffffL)
-		{
-		  /* Address outside of unified address segment */
-		  *targ_len = 0;
-		  return;
-		}
-	      phys |= targ_unified;
-	      to = "unified";
-	    }
-	  break;
-	}
-
-      case 0x10: /* Physical data memory segment */
-	from = "phys-data";
-	phys = targ_data | off;
-	to = "chip-data";
+	      nr_bytes = 0x7fffL - off + 1;
+	    to = "chip-data";
+	  }
+	else if (off <= 0xbfffL)
+	  {
+	    short map = dmap;
+	    if (map & 0x1000)
+	      {
+		/* Instruction memory */
+		phys = targ_insn | ((map & 0xf) << 14) | (off & 0x3fff);
+		to = "chip-insn";
+	      }
+	    else
+	      {
+		/* Unified memory */
+		phys = targ_unified | ((map & 0x3ff) << 14) | (off & 0x3fff);
+		to = "unified";
+	      }
+	    if (off + nr_bytes > 0xbfffL)
+	      /* don't cross VM boundary */
+	      nr_bytes = (0xbfffL - off + 1);
+	  }
+	else
+	  {
+	    /* Logical address out side of data segments, not supported */
+	    *targ_len = 0;
+	    return;
+	  }
 	break;
-
-      case 0x11: /* Physical instruction memory */
-	from = "phys-insn";
-	phys = targ_insn | off;
-	to = "chip-insn";
-	break;
-
-      case 0x12: /* Physical unified memory */
-	from = "phys-unified";
-	phys = targ_unified | off;
-	to = "unified";
-	break;
-
-      default:
-	*targ_len = 0;
-	return;
       }
+
+    case 0x01:			/* in logical instruction address segment */
+      {
+	short map;
+	from = "logical-insn";
+	if (off <= 0x1ffffL)
+	  {
+	    map = imap0;
+	  }
+	else if (off <= 0x3ffffL)
+	  {
+	    map = imap1;
+	  }
+	else
+	  {
+	    /* Logical address outside of IMAP[01] segment, not
+	       supported */
+	    *targ_len = 0;
+	    return;
+	  }
+	if ((off & 0x1ffff) + nr_bytes > 0x1ffffL)
+	  {
+	    /* don't cross VM boundary */
+	    nr_bytes = 0x1ffffL - (off & 0x1ffffL) + 1;
+	  }
+	if (map & 0x1000)
+	  /* Instruction memory */
+	  {
+	    phys = targ_insn | off;
+	    to = "chip-insn";
+	  }
+	else
+	  {
+	    phys = ((map & 0x7fL) << 17) + (off & 0x1ffffL);
+	    if (phys > 0xffffffL)
+	      {
+		/* Address outside of unified address segment */
+		*targ_len = 0;
+		return;
+	      }
+	    phys |= targ_unified;
+	    to = "unified";
+	  }
+	break;
+      }
+
+    case 0x10:			/* Physical data memory segment */
+      from = "phys-data";
+      phys = targ_data | off;
+      to = "chip-data";
+      break;
+
+    case 0x11:			/* Physical instruction memory */
+      from = "phys-insn";
+      phys = targ_insn | off;
+      to = "chip-insn";
+      break;
+
+    case 0x12:			/* Physical unified memory */
+      from = "phys-unified";
+      phys = targ_unified | off;
+      to = "unified";
+      break;
+
+    default:
+      *targ_len = 0;
+      return;
+    }
 
 
   *targ_addr = phys;

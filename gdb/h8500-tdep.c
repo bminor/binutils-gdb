@@ -1,25 +1,26 @@
 /* Target-dependent code for Hitachi H8/500, for GDB.
    Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /*
- Contributed by Steve Chamberlain
-                sac@cygnus.com
+   Contributed by Steve Chamberlain
+   sac@cygnus.com
  */
 
 #include "defs.h"
@@ -45,20 +46,20 @@ static int data_size = 2;
    arg-2
    arg-1
    return address <2 or 4 bytes>
-   old fp	  <2 bytes>
+   old fp         <2 bytes>
    auto-n
    ..
    auto-1
    saved registers
 
-*/
+ */
 
 /* an easy to debug H8 stack frame looks like:
-0x6df6		push	r6
-0x0d76  	mov.w   r7,r6
-0x6dfn          push    reg
-0x7905 nnnn  	mov.w  #n,r5    or   0x1b87  subs #2,sp
-0x1957       	sub.w  r5,sp
+   0x6df6               push    r6
+   0x0d76       mov.w   r7,r6
+   0x6dfn          push    reg
+   0x7905 nnnn          mov.w  #n,r5    or   0x1b87  subs #2,sp
+   0x1957               sub.w  r5,sp
 
  */
 
@@ -125,7 +126,7 @@ h8500_frame_chain (thisframe)
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
    is not the address of a valid instruction, the address of the next
    instruction beyond ADDR otherwise.  *PWORD1 receives the first word
-   of the instruction.*/
+   of the instruction. */
 
 CORE_ADDR
 NEXT_PROLOGUE_INSN (addr, lim, pword1)
@@ -161,7 +162,7 @@ frame_saved_pc (frame)
   return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
 }
 
-void 
+void
 h8500_pop_frame ()
 {
   unsigned regnum;
@@ -328,9 +329,9 @@ frame_find_saved_regs (frame_info, frame_saved_regs)
     {
       pc = get_pc_function_start ((frame_info)->pc);
       /* Verify we have a link a6 instruction next;
-	 if not we lose.  If we win, find the address above the saved
-	 regs using the amount of storage from the link instruction.
-	 */
+         if not we lose.  If we win, find the address above the saved
+         regs using the amount of storage from the link instruction.
+       */
 
       thebyte = read_memory_integer (pc, 1);
       if (0x1f == thebyte)
@@ -523,7 +524,7 @@ h8500_value_of_trapped_internalvar (var)
   regval = regbuf[0] << 16;
 
   get_saved_register (regbuf, NULL, NULL, selected_frame, regnum, NULL);
-  regval |= regbuf[0] << 8 | regbuf[1];	/* XXX host/target byte order */
+  regval |= regbuf[0] << 8 | regbuf[1];		/* XXX host/target byte order */
 
   free (var->value);		/* Free up old value */
 
@@ -639,15 +640,15 @@ _initialize_h8500_tdep ()
 		  &setlist);
 
   add_cmd ("small", class_support, small_command,
-	   "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
+      "Set small memory model. (16 bit code, 16 bit data)", &setmemorylist);
 
   add_cmd ("big", class_support, big_command,
-	   "Set big memory model. (32 bit code, 32 bit data)", &setmemorylist);
+	"Set big memory model. (32 bit code, 32 bit data)", &setmemorylist);
 
   add_cmd ("medium", class_support, medium_command,
-	   "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);
+     "Set medium memory model. (32 bit code, 16 bit data)", &setmemorylist);
 
   add_cmd ("compact", class_support, compact_command,
-	   "Set compact memory model. (16 bit code, 32 bit data)", &setmemorylist);
+    "Set compact memory model. (16 bit code, 32 bit data)", &setmemorylist);
 
 }
