@@ -1,3 +1,8 @@
+Sat Apr 25 17:45:01 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-types.h (cell_word): New type.
+	(natural_cell): Delete type.
+
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
