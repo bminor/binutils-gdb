@@ -1,3 +1,8 @@
+Tue Aug 12 21:48:08 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* tests2.exp: Fix quoting.
+	* tests1.exp: Ditto.
+
 Sat Nov 23 14:00:59 1996  Fred Fish  <fnf@cygnus.com>
 
 	* misc.exp: Change x86 linux setup_xfails to use new
