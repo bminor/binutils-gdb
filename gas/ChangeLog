@@ -1,3 +1,12 @@
+Wed Oct  8 16:11:15 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/obj-coff.h (TC_SPARC): Don't define TARGET_FORMAT.
+	* config/tc-sparc.c (sparc_target_format): Handle coff here.
+	(sparc_ip): Add %hix,%lox.
+	(md_apply_fix3): Call as_bad_where, not as_bad.
+	Add support for BFD_RELOC_SPARC_{HIX22,LOX10}.
+	(tc_gen_reloc): Add support for BFD_RELOC_SPARC_{HIX22,LOX10}.
+
 Wed Oct  8 12:33:32 1997  Richard Henderson  <rth@cygnus.com>
 
 	* configure.in: Change alpha-*-* to alpha*-*-*; config.guess now

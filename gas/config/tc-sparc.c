@@ -24,11 +24,13 @@
 #include "as.h"
 #include "subsegs.h"
 
-/* careful, this file includes data *declarations* */
 #include "opcode/sparc.h"
 
+static struct sparc_arch *lookup_arch PARAMS ((char *));
+static void init_default_arch PARAMS ((void));
 static void sparc_ip PARAMS ((char *, const struct sparc_opcode **));
 static int in_signed_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
+static int in_unsigned_range PARAMS ((bfd_vma, bfd_vma));
 static int in_bitfield_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
 static int sparc_ffs PARAMS ((unsigned int));
 static bfd_vma BSR PARAMS ((bfd_vma, int));
@@ -37,6 +39,19 @@ static int parse_keyword_arg PARAMS ((int (*) (const char *), char **, int *));
 static int parse_const_expr_arg PARAMS ((char **, int *));
 static int get_expression PARAMS ((char *str));
 
+/* Default architecture.  */
+/* ??? The default value should be V8, but sparclite support was added
+   by making it the default.  GCC now passes -Asparclite, so maybe sometime in
+   the future we can set this to V8.  */
+#ifndef DEFAULT_ARCH
+#define DEFAULT_ARCH "sparclite"
+#endif
+static char *default_arch = DEFAULT_ARCH;
+
+/* Non-zero if the initial values of `max_architecture' and `sparc_arch_size'
+   have been set.  */
+static int default_init_p;
+
 /* Current architecture.  We don't bump up unless necessary.  */
 static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
 
@@ -44,15 +59,11 @@ static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
    In a 32 bit environment, don't allow bumping up to v9 by default.
    The native assembler works this way.  The user is required to pass
    an explicit argument before we'll create v9 object files.  However, if
-   we don't see any v9 insns, a v9 object file is not created.  */
-#ifdef SPARC_ARCH64
-static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_V9;
-#else
-/* ??? This should be V8, but sparclite support was added by making it the
-   default.  GCC now passes -Asparclite, so maybe sometime in the future
-   we can set this to V8.  */
-static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_SPARCLITE;
-#endif
+   we don't see any v9 insns, a v8plus object file is not created.  */
+static enum sparc_opcode_arch_val max_architecture;
+
+/* Either 32 or 64, selects file format.  */
+static int sparc_arch_size;
 
 static int architecture_requested;
 static int warn_on_bump;
@@ -164,6 +175,103 @@ struct sparc_it the_insn, set_insn;
 static void output_insn
   PARAMS ((const struct sparc_opcode *, struct sparc_it *));
 
+/* Table of arguments to -A.
+   The sparc_opcode_arch table in sparc-opc.c is insufficient and incorrect
+   for this use.  That table is for opcodes only.  This table is for opcodes
+   and file formats.  */
+
+static struct sparc_arch {
+  char *name;
+  char *opcode_arch;
+  int arch_size;
+} sparc_arch_table[] = {
+  { "v6", "v6", 32 },
+  { "v7", "v7", 32 },
+  { "v8", "v8", 32 },
+  { "sparclet", "sparclet", 32 },
+  { "sparclite", "sparclite", 32 },
+  { "v8plus", "v9", 32 },
+  { "v8plusa", "v9a", 32 },
+#ifdef BFD64
+  { "v9", "v9", 64 },
+  { "v9a", "v9a", 64 },
+#endif
+  { NULL, NULL, 0 }
+};
+
+static struct sparc_arch *
+lookup_arch (name)
+     char *name;
+{
+  struct sparc_arch *sa;
+
+  for (sa = &sparc_arch_table[0]; sa->name != NULL; sa++)
+    if (strcmp (sa->name, name) == 0)
+      break;
+  if (sa->name == NULL)
+    return NULL;
+  return sa;
+}
+
+/* Initialize the default opcode arch and word size from the default
+   architecture name.  */
+
+static void
+init_default_arch ()
+{
+  struct sparc_arch *sa = lookup_arch (default_arch);
+
+  if (sa == NULL)
+    as_fatal ("Invalid default architecture, broken assembler.");
+
+  max_architecture = sparc_opcode_lookup_arch (sa->opcode_arch);
+  if (max_architecture == SPARC_OPCODE_ARCH_BAD)
+    as_fatal ("Bad opcode table, broken assembler.");
+  sparc_arch_size = sa->arch_size;
+  default_init_p = 1;
+}
+
+/* Called by TARGET_FORMAT.  */
+
+const char *
+sparc_target_format ()
+{
+  /* We don't get a chance to initialize anything before we're called,
+     so handle that now.  */
+  if (! default_init_p)
+    init_default_arch ();
+
+#ifdef OBJ_AOUT
+#ifdef TE_NetBSD
+  return "a.out-sparc-netbsd";
+#else
+#ifdef TE_SPARCAOUT
+  return target_big_endian ? "a.out-sunos-big" : "a.out-sparc-little";
+#else
+  return "a.out-sunos-big";
+#endif
+#endif
+#endif
+
+#ifdef OBJ_BOUT
+  return "b.out.big";
+#endif
+
+#ifdef OBJ_COFF
+#ifdef TE_LYNX
+  return "coff-sparc-lynx";
+#else
+  return "coff-sparc";
+#endif
+#endif
+
+#ifdef OBJ_ELF
+  return sparc_arch_size == 64 ? "elf64-sparc" : "elf32-sparc";
+#endif
+
+  abort ();
+}
+
 /*
  * md_parse_option
  *	Invocation line includes a switch not recognized by the base assembler.
@@ -186,10 +294,9 @@ static void output_insn
  *		architecture cause fatal errors.
  *
  *		The default is to start at v6, and bump the architecture up
- *		whenever an instruction is seen at a higher level.  If 32 bit
- *		environments, v9 is not bumped up to, the user must pass -Av9.
- *
- *		-xarch=v8plus{,a} is for compatibility with the Sun assembler.
+ *		whenever an instruction is seen at a higher level.  In 32 bit
+ *		environments, v9 is not bumped up to, the user must pass
+ * 		-Av8plus{,a}.
  *
  *		If -bump is specified, a warning is printing when bumping to
  *		higher levels.
@@ -197,15 +304,15 @@ static void output_insn
  *		If an architecture is specified, all instructions must match
  *		that architecture.  Any higher level instructions are flagged
  *		as errors.  Note that in the 32 bit environment specifying
- *		-Av9 does not automatically create a v9 object file, a v9
- *		insn must be seen.
+ *		-Av8plus does not automatically create a v8plus object file, a
+ *		v9 insn must be seen.
  *
  *		If both an architecture and -bump are specified, the
  *		architecture starts at the specified level, but bumps are
  *		warnings.  Note that we can't set `current_architecture' to
  *		the requested level in this case: in the 32 bit environment,
- *		we still must avoid creating v9 object files unless v9 insns
- *		are seen.
+ *		we still must avoid creating v8plus object files unless v9
+ * 		insns are seen.
  *
  * Note:
  *		Bumping between incompatible architectures is always an
@@ -245,6 +352,11 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
+  /* We don't get a chance to initialize anything before we're called,
+     so handle that now.  */
+  if (! default_init_p)
+    init_default_arch ();
+
   switch (c)
     {
     case OPTION_BUMP:
@@ -253,16 +365,9 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_XARCH:
-      /* This is for compatibility with Sun's assembler.
-         We could add v8plus and v8plusa to sparc_opcode_archs,
-	 but that table is used to describe architectures whereas here we
-	 want the argument to describe *both* the architecture and the file
-	 format.  */
-      if (strcmp (arg, "v8plus") == 0)
-	arg = "v9";
-      else if (strcmp (arg, "v8plusa") == 0)
-	arg = "v9a";
-      else
+      /* This is for compatibility with Sun's assembler.  */
+      if (strcmp (arg, "v8plus") != 0
+	  && strcmp (arg, "v8plusa") != 0)
 	{
 	  as_bad ("invalid architecture -xarch=%s", arg);
 	  return 0;
@@ -272,15 +377,22 @@ md_parse_option (c, arg)
 
     case 'A':
       {
-	enum sparc_opcode_arch_val new_arch = sparc_opcode_lookup_arch (arg);
+	struct sparc_arch *sa;
+	enum sparc_opcode_arch_val opcode_arch;
 
-	if (new_arch == SPARC_OPCODE_ARCH_BAD)
+	sa = lookup_arch (arg);
+	if (sa == NULL)
 	  {
 	    as_bad ("invalid architecture -A%s", arg);
 	    return 0;
 	  }
 
-	max_architecture = new_arch;
+	opcode_arch = sparc_opcode_lookup_arch (sa->opcode_arch);
+	if (opcode_arch == SPARC_OPCODE_ARCH_BAD)
+	  as_fatal ("Bad opcode table, broken assembler.");
+
+	max_architecture = opcode_arch;
+	sparc_arch_size = sa->arch_size;
 	architecture_requested = 1;
       }
       break;
@@ -345,12 +457,12 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  const struct sparc_opcode_arch *arch;
+  const struct sparc_arch *arch;
 
   fprintf(stream, "SPARC options:\n");
-  for (arch = &sparc_opcode_archs[0]; arch->name; arch++)
+  for (arch = &sparc_arch_table[0]; arch->name; arch++)
     {
-      if (arch != &sparc_opcode_archs[0])
+      if (arch != &sparc_arch_table[0])
 	fprintf (stream, " | ");
       fprintf (stream, "-A%s", arch->name);
     }
@@ -430,6 +542,12 @@ md_begin ()
   int lose = 0;
   register unsigned int i = 0;
 
+  /* We don't get a chance to initialize anything before md_parse_option
+     is called, and it may not be called, so handle default initialization
+     now if not already done.  */
+  if (! default_init_p)
+    init_default_arch ();
+
   op_hash = hash_new ();
 
   while (i < sparc_num_opcodes)
@@ -501,26 +619,29 @@ md_begin ()
 void
 sparc_md_end ()
 {
-#ifdef SPARC_ARCH64
-  if (current_architecture == SPARC_OPCODE_ARCH_V9A)
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
-  else
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
-#else
-  if (current_architecture == SPARC_OPCODE_ARCH_V9)
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
-  else if (current_architecture == SPARC_OPCODE_ARCH_V9A)
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
-  else if (current_architecture == SPARC_OPCODE_ARCH_SPARCLET)
-    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclet);
+  if (sparc_arch_size == 64)
+    {
+      if (current_architecture == SPARC_OPCODE_ARCH_V9A)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
+      else
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
+    }
   else
     {
-      /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
-	 be but for now it is (since that's the way it's always been
-	 treated).  */
-      bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
+      if (current_architecture == SPARC_OPCODE_ARCH_V9)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
+      else if (current_architecture == SPARC_OPCODE_ARCH_V9A)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
+      else if (current_architecture == SPARC_OPCODE_ARCH_SPARCLET)
+	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_sparclet);
+      else
+	{
+	  /* The sparclite is treated like a normal sparc.  Perhaps it shouldn't
+	     be but for now it is (since that's the way it's always been
+	     treated).  */
+	  bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
+	}
     }
-#endif
 }
 
 /* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
@@ -534,6 +655,17 @@ in_signed_range (val, max)
   if (val > max)
     return 0;
   if (val < ~max)
+    return 0;
+  return 1;
+}
+
+/* Return non-zero if VAL is in the range 0 to MAX.  */
+
+static INLINE int
+in_unsigned_range (val, max)
+     bfd_vma val, max;
+{
+  if (val > max)
     return 0;
   return 1;
 }
@@ -885,7 +1017,6 @@ sparc_ip (str, pinsn)
   unsigned int mask = 0;
   int match = 0;
   int comma = 0;
-  long immediate_max = 0;
   int v9_arg_p;
 
   for (s = str; islower (*s) || (*s >= '0' && *s <= '3'); ++s)
@@ -1090,12 +1221,10 @@ sparc_ip (str, pinsn)
 
 	    case 'I':
 	      the_insn.reloc = BFD_RELOC_SPARC_11;
-	      immediate_max = 0x03FF;
 	      goto immediate;
 
 	    case 'j':
 	      the_insn.reloc = BFD_RELOC_SPARC_10;
-	      immediate_max = 0x01FF;
 	      goto immediate;
 
 	    case 'X':
@@ -1106,7 +1235,6 @@ sparc_ip (str, pinsn)
 		the_insn.reloc = BFD_RELOC_SPARC13;
 	      /* These fields are unsigned, but for upward compatibility,
 		 allow negative values as well.  */
-	      immediate_max = 0x1f;
 	      goto immediate;
 
 	    case 'Y':
@@ -1117,7 +1245,6 @@ sparc_ip (str, pinsn)
 		the_insn.reloc = BFD_RELOC_SPARC13;
 	      /* These fields are unsigned, but for upward compatibility,
 		 allow negative values as well.  */
-	      immediate_max = 0x3f;
 	      goto immediate;
 
 	    case 'k':
@@ -1559,44 +1686,57 @@ sparc_ip (str, pinsn)
 
 	    case 'i':		/* 13 bit immediate */
 	      the_insn.reloc = BFD_RELOC_SPARC13;
-	      immediate_max = 0x0FFF;
 
-	      /*FALLTHROUGH */
+	      /* fallthrough */
 
 	    immediate:
 	      if (*s == ' ')
 		s++;
+
+	      /* Check for %hi, etc.  */
 	      if (*s == '%')
 		{
-		  if ((c = s[1]) == 'h' && s[2] == 'i')
-		    {
-		      the_insn.reloc = BFD_RELOC_HI22;
-		      s += 3;
-		    }
-		  else if (c == 'l' && s[2] == 'o')
-		    {
-		      the_insn.reloc = BFD_RELOC_LO10;
-		      s += 3;
-		    }
-		  else if (c == 'u'
-			   && s[2] == 'h'
-			   && s[3] == 'i')
-		    {
-		      the_insn.reloc = BFD_RELOC_SPARC_HH22;
-		      s += 4;
-		      v9_arg_p = 1;
-		    }
-		  else if (c == 'u'
-			   && s[2] == 'l'
-			   && s[3] == 'o')
-		    {
-		      the_insn.reloc = BFD_RELOC_SPARC_HM10;
-		      s += 4;
-		      v9_arg_p = 1;
-		    }
-		  else
+		  static struct ops {
+		    /* The name as it appears in assembler.  */
+		    char *name;
+		    /* strlen (name), precomputed for speed */
+		    int len;
+		    /* The reloc this pseudo-op translates to.  */
+		    int reloc;
+		    /* Non-zero if for v9 only.  */
+		    int v9_p;
+		    /* Non-zero if can be used in pc-relative contexts.  */
+		    int pcrel_p;/*FIXME:wip*/
+		  } ops[] = {
+		    /* hix/lox must appear before hi/lo so %hix won't be
+		       mistaken for %hi.  */
+		    { "hix", 3, BFD_RELOC_SPARC_HIX22, 1, 0 },
+		    { "lox", 3, BFD_RELOC_SPARC_LOX10, 1, 0 },
+		    { "hi", 2, BFD_RELOC_HI22, 0, 1 },
+		    { "lo", 2, BFD_RELOC_LO10, 0, 1 },
+		    { "hh", 2, BFD_RELOC_SPARC_HH22, 1, 1 },
+		    { "hm", 2, BFD_RELOC_SPARC_HM10, 1, 1 },
+		    { "lm", 2, BFD_RELOC_SPARC_LM22, 1, 1 },
+		    { "h44", 3, BFD_RELOC_SPARC_H44, 1, 0 },
+		    { "m44", 3, BFD_RELOC_SPARC_M44, 1, 0 },
+		    { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
+		    { "uhi", 3, BFD_RELOC_SPARC_HH22, 1, 0 },
+		    { "ulo", 3, BFD_RELOC_SPARC_HM10, 1, 0 },
+		    { NULL }
+		  };
+		  struct ops *o;
+
+		  for (o = ops; o->name; o++)
+		    if (strncmp (s + 1, o->name, o->len) == 0)
+		      break;
+		  if (o->name == NULL)
 		    break;
+
+		  the_insn.reloc = o->reloc;
+		  s += o->len + 1;
+		  v9_arg_p = o->v9_p;
 		}
+
 	      /* Note that if the get_expression() fails, we will still
 		 have created U entries in the symbol table for the
 		 'symbols' in the input string.  Try not to create U
@@ -1636,70 +1776,30 @@ sparc_ip (str, pinsn)
 	      (void) get_expression (s);
 	      s = expr_end;
 
+	      /* Check for constants that don't require emitting a reloc.  */
 	      if (the_insn.exp.X_op == O_constant
 		  && the_insn.exp.X_add_symbol == 0
 		  && the_insn.exp.X_op_symbol == 0)
 		{
-		  /* Handle %uhi/%ulo by moving the upper word to the lower
-		     one and pretending it's %hi/%lo.  We also need to watch
-		     for %hi/%lo: the top word needs to be zeroed otherwise
-		     fixup_segment will complain the value is too big.  */
-		  switch (the_insn.reloc)
-		    {
-		    case BFD_RELOC_SPARC_HH22:
-		      the_insn.reloc = BFD_RELOC_HI22;
-		      the_insn.exp.X_add_number = BSR (the_insn.exp.X_add_number, 32);
-		      break;
-		    case BFD_RELOC_SPARC_HM10:
-		      the_insn.reloc = BFD_RELOC_LO10;
-		      the_insn.exp.X_add_number = BSR (the_insn.exp.X_add_number, 32);
-		      break;
-		    case BFD_RELOC_HI22:
-		    case BFD_RELOC_LO10:
-		      the_insn.exp.X_add_number &= 0xffffffff;
-		      break;
-		    default:
-		      break;
-		    }
-
 		  /* For pc-relative call instructions, we reject
 		     constants to get better code.  */
 		  if (the_insn.pcrel
 		      && the_insn.reloc == BFD_RELOC_32_PCREL_S2
-		      && in_signed_range (the_insn.exp.X_add_number, 0x3fff)
-		      )
+		      && in_signed_range (the_insn.exp.X_add_number, 0x3fff))
 		    {
 		      error_message = ": PC-relative operand can't be a constant";
 		      goto error;
 		    }
-		  /* Check for invalid constant values.  Don't warn if
-		     constant was inside %hi or %lo, since these
-		     truncate the constant to fit.  */
-		  if (immediate_max != 0
-		      && the_insn.reloc != BFD_RELOC_LO10
-		      && the_insn.reloc != BFD_RELOC_HI22
-		      && !in_signed_range (the_insn.exp.X_add_number,
-					   immediate_max)
-		      )
-		    {
-		      if (the_insn.pcrel)
-			/* Who knows?  After relocation, we may be within
-			   range.  Let the linker figure it out.  */
-			{
-			  the_insn.exp.X_op = O_symbol;
-			  the_insn.exp.X_add_symbol = section_symbol (absolute_section);
-			}
-		      else
-			/* Immediate value is non-pcrel, and out of
-                           range.  */
-			as_bad ("constant value %ld out of range (%ld .. %ld)",
-				the_insn.exp.X_add_number,
-				~immediate_max, immediate_max);
-		    }
-		}
 
-	      /* Reset to prevent extraneous range check.  */
-	      immediate_max = 0;
+		  /* Constants that won't fit are checked in md_apply_fix3
+		     and bfd_install_relocation.
+		     ??? It would be preferable to install the constants
+		     into the insn here and save having to create a fixS
+		     for each one.  There already exists code to handle
+		     all the various cases (e.g. in md_apply_fix3 and
+		     bfd_install_relocation) so duplicating all that code
+		     here isn't right.  */
+		}
 
 	      continue;
 
@@ -2069,12 +2169,17 @@ output_insn (insn, the_insn)
   /* put out the symbol-dependent stuff */
   if (the_insn->reloc != BFD_RELOC_NONE)
     {
-      fix_new_exp (frag_now,	/* which frag */
-		   (toP - frag_now->fr_literal),	/* where */
-		   4,		/* size */
-		   &the_insn->exp,
-		   the_insn->pcrel,
-		   the_insn->reloc);
+      fixS *fixP =  fix_new_exp (frag_now,	/* which frag */
+				 (toP - frag_now->fr_literal),	/* where */
+				 4,		/* size */
+				 &the_insn->exp,
+				 the_insn->pcrel,
+				 the_insn->reloc);
+      /* Turn off overflow checking in fixup_segment.  We'll do our
+	 own overflow checking in md_apply_fix3.  This is necessary because
+	 the insn size is 4 and fixup_segment will signal an overflow for
+	 large 8 byte quantities.  */
+      fixP->fx_no_overflow = 1;
     }
 
   last_insn = insn;
@@ -2288,25 +2393,31 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC_11:
 	  if (! in_signed_range (val, 0x7ff))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= val & 0x7ff;
 	  break;
 
 	case BFD_RELOC_SPARC_10:
 	  if (! in_signed_range (val, 0x3ff))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= val & 0x3ff;
+	  break;
+
+	case BFD_RELOC_SPARC_7:
+	  if (! in_bitfield_range (val, 0x7f))
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
+	  insn |= val & 0x7f;
 	  break;
 
 	case BFD_RELOC_SPARC_6:
 	  if (! in_bitfield_range (val, 0x3f))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= val & 0x3f;
 	  break;
 
 	case BFD_RELOC_SPARC_5:
 	  if (! in_bitfield_range (val, 0x1f))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= val & 0x1f;
 	  break;
 
@@ -2314,7 +2425,7 @@ md_apply_fix3 (fixP, value, segment)
 	  /* FIXME: simplify */
 	  if (((val > 0) && (val & ~0x3fffc))
 	      || ((val < 0) && (~(val - 1) & ~0x3fffc)))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  /* FIXME: The +1 deserves a comment.  */
 	  val = (val >> 2) + 1;
 	  insn |= ((val & 0xc000) << 6) | (val & 0x3fff);
@@ -2324,7 +2435,7 @@ md_apply_fix3 (fixP, value, segment)
 	  /* FIXME: simplify */
 	  if (((val > 0) && (val & ~0x1ffffc))
 	      || ((val < 0) && (~(val - 1) & ~0x1ffffc)))
-	    as_bad ("relocation overflow.");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  /* FIXME: The +1 deserves a comment.  */
 	  val = (val >> 2) + 1;
 	  insn |= val & 0x7ffff;
@@ -2336,6 +2447,7 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC_LM22:
 	case BFD_RELOC_HI22:
+	  /* FIXME: HI22 should signal overflow for 64 bit ABI.  */
 	  if (!fixP->fx_addsy)
 	    {
 	      insn |= (val >> 10) & 0x3fffff;
@@ -2349,7 +2461,7 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC22:
 	  if (val & ~0x003fffff)
-	    as_bad ("relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= (val & 0x3fffff);
 	  break;
 
@@ -2371,7 +2483,7 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC13:
 	  if (! in_signed_range (val, 0x1fff))
-	    as_bad ("relocation overflow");
+	    as_bad_where (fixP->fx_file, fixP->fx_line, "relocation overflow");
 	  insn |= val & 0x1fff;
 	  break;
 
@@ -2382,9 +2494,49 @@ md_apply_fix3 (fixP, value, segment)
 	  insn |= val & 0x3fffff;
 	  break;
 
+	case BFD_RELOC_SPARC_H44:
+	  if (!fixP->fx_addsy)
+	    {
+	      bfd_vma tval = val;
+	      tval >>= 22;
+	      if (! in_unsigned_range (tval, 0x3fffff))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      "relocation overflow");
+	      insn |= tval & 0x3fffff;
+	    }
+	  break;
+
+	case BFD_RELOC_SPARC_M44:
+	  if (!fixP->fx_addsy)
+	    insn |= (val >> 12) & 0x3ff;
+	  break;
+
+	case BFD_RELOC_SPARC_L44:
+	  if (!fixP->fx_addsy)
+	    insn |= val & 0xfff;
+	  break;
+
+	case BFD_RELOC_SPARC_HIX22:
+	  if (!fixP->fx_addsy)
+	    {
+	      val ^= ~ (offsetT) 0;
+	      if ((val & ~ (offsetT) 0xffffffff) != 0)
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      "relocation overflow");
+	      insn |= (val >> 10) & 0x3fffff;
+	    }
+	  break;
+
+	case BFD_RELOC_SPARC_LOX10:
+	  if (!fixP->fx_addsy)
+	    insn |= 0x1c00 | (val & 0x3ff);
+	  break;
+
 	case BFD_RELOC_NONE:
 	default:
-	  as_bad ("bad or unhandled relocation type: 0x%02x", fixP->fx_r_type);
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			"bad or unhandled relocation type: 0x%02x",
+			fixP->fx_r_type);
 	  break;
 	}
 
@@ -2431,6 +2583,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_64:
     case BFD_RELOC_SPARC_5:
     case BFD_RELOC_SPARC_6:
+    case BFD_RELOC_SPARC_7:
     case BFD_RELOC_SPARC_10:
     case BFD_RELOC_SPARC_11:
     case BFD_RELOC_SPARC_HH22:
@@ -2439,6 +2592,11 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_PC_HH22:
     case BFD_RELOC_SPARC_PC_HM10:
     case BFD_RELOC_SPARC_PC_LM22:
+    case BFD_RELOC_SPARC_H44:
+    case BFD_RELOC_SPARC_M44:
+    case BFD_RELOC_SPARC_L44:
+    case BFD_RELOC_SPARC_HIX22:
+    case BFD_RELOC_SPARC_LOX10:
       code = fixp->fx_r_type;
       break;
     default:
