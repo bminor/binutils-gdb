@@ -1,3 +1,8 @@
+2001-11-20  Ben Elliston  <bje@redhat.com>
+
+	* config/tc-m88k.c (md_apply_fix3): Match local variable `val' to
+	 usage after md_apply_fix3 cleanups.
+
 2001-11-19  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* doc/c-mmix.texi: Use texinfo 4 features.
@@ -22,7 +27,7 @@
 
 2001-11-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* write.c (fixup_segment): Remove referrences to md_apply_fix and
+	* write.c (fixup_segment): Remove references to md_apply_fix and
 	TC_HANDLE_FX_DONE.
 	* cgen.c, config/obj-coff.c, config/tc-*.c: Update all occurances
 	of md_apply_fix to md_apply_fix3.
