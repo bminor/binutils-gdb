@@ -1,3 +1,7 @@
+Tue Nov  5 13:26:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_EXTENDED): Define.
+
 Mon Nov  4 12:52:48 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.h (MN10300_OPERAND_REPEATED): Define.

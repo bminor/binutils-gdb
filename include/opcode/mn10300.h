@@ -92,6 +92,8 @@ extern const struct mn10300_operand mn10300_operands[];
 
 #define MN10300_OPERAND_REPEATED 0x100
 
+#define MN10300_OPERAND_EXTENDED 0x200
+
 /* Opcode Formats.  */
 #define FMT_S0 1
 #define FMT_S1 2
