@@ -1,5 +1,10 @@
 2004-09-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-fbsd64.h: Remove file.
+	* config/i386/fbsd64.mh (NAT_FILE): Set to config/nm-nbsd.h.
+
+2004-09-26  Mark Kettenis  <kettenis@gnu.org>
+
 	* amd64-nat.h: Update copyright year.
 	(amd64bsd_target): New prototype.
 	* amd64bsd-nat.c: Include "target.h" and "inf-ptrace.h".
