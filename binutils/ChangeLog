@@ -1,5 +1,10 @@
 Tue Jun 21 12:53:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* nlmconv.c (powerpc_build_stubs): Don't generate the PowerPC
+	NetWare custom header; no longer needed.
+	(powerpc_mangle_relocs): Convert relocs against the uninitialized
+	data section into relocs against the data section.
+
 	* configure.in: Set nlmconv_defs to -DNLMCONV_cputype for all the
 	netware targets.  Write it into Makefile as NLMCONV_DEFS.
 	* Makefile.in (nlmconv.o): Pass $(NLMCONV_DEFS) to $(CC).
