@@ -2,7 +2,9 @@
 NAT_FILE= nm-sun4os4.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o
 HOST_IPC=-DBSD_IPC
-GDBSERVER_DEPFILES= low-sparc.o
+
+## OBSOLETE ## GDBSERVER_DEPFILES= low-sparc.o
+
 # Setting XM_CLIBS=-lresolv would let us use the DNS, but that would screw
 # anyone who wants to use NIS, which includes at least one Cygnus customer
 # (PR 3593).  So leave it this way until/unless we find a resolver which can

@@ -12,4 +12,5 @@ NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o \
 LOADLIBES = -ldl -rdynamic
 
 HOST_IPC=-DBSD_IPC
-GDBSERVER_DEPFILES= low-sparc.o
+
+## OBSOLETE ## GDBSERVER_DEPFILES= low-sparc.o

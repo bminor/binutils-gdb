@@ -11,4 +11,4 @@ NATDEPFILES= infptrace.o inftarg.o fork-child.o \
 # gdb executable.
 LOADLIBES = -ldl -rdynamic
 
-GDBSERVER_DEPFILES= low-linux.o
+GDBSERVER_DEPFILES = linux-low.o linux-m68k-low.o reg-m68k.o

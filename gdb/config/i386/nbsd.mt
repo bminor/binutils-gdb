@@ -2,4 +2,4 @@
 TDEPFILES= i386-tdep.o i387-tdep.o i386bsd-tdep.o i386nbsd-tdep.o
 TM_FILE= tm-nbsd.h
 
-GDBSERVER_DEPFILES= low-nbsd.o
+## OBSOLETE ## GDBSERVER_DEPFILES= low-nbsd.o

@@ -10,4 +10,4 @@ NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o linux-proc.o \
 
 LOADLIBES = -ldl -rdynamic
 
-GDBSERVER_DEPFILES= low-linux.o
+GDBSERVER_DEPFILES = linux-low.o linux-ppc-low.o reg-ppc.o

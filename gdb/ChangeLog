@@ -1,5 +1,37 @@
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
+	* config/arm/linux.mt: Update GDBSERVER_DEPFILES.
+	* config/i386/linux.mt: Likewise.
+	* config/ia64/linux.mt: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/mips/linux.mt: Likewise.
+
+	* config/sh/linux.mt: Add GDBSERVER_DEPFILES.
+
+	* config/i386/i386lynx.mh: Mark gdbserver variables
+	as (currently) obsolete for this target.
+	* config/i386/nbsd.mt: Likewise.
+	* config/i386/nbsdelf.mt: Likewise.
+	* config/m32r/m32r.mt: Likewise.
+	* config/m68k/m68klynx.mh: Likewise.
+	* config/m68k/nbsd.mt: Likewise.
+	* config/m68k/sun3os4.mh: Likewise.
+	* config/mips/vr5000.mt: Likewise.
+	* config/ns32k/nbsd.mt: Likewise.
+	* config/pa/hppabsd.mh: Likewise.
+	* config/pa/hppaosf.mh: Likewise.
+	* config/powerpc/nbsd.mt: Likewise.
+	* config/rs6000/rs6000lynx.mh: Likewise.
+	* config/s390/s390.mt: Likewise.
+	* config/s390/s390x.mt: Likewise.
+	* config/sparc/sparclynx.mh: Likewise.
+	* config/sparc/sun4os4.mh: Likewise.
+	* config/i386/x86-64linux.mt: Likewise.
+	* config/sparc/linux.mh: Likewise.
+
+2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
 	* configure.tgt: Configure gdbserver only for known working
 	targets.  Set ${build_gdbserver} instead of modifying ${configdirs}.
 	* configure.in: Check ${build_gdbserver}.  Put gdbserver/ into
