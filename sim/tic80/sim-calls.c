@@ -132,8 +132,8 @@ sim_close (SIM_DESC sd, int quitting)
 #define Rn_REGNUM 31            /* Last General Purpose Register - for sim */
 #define An_REGNUM A3_REGNUM     /* Last Accumulator register - for sim */
 
-void
-sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf)
+int
+sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf, int length)
 {
   if (regnr == R0_REGNUM)
     memset (buf, 0, sizeof (unsigned32));
@@ -147,12 +147,12 @@ sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf)
     *(unsigned64*)buf = H2T_8 (STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM]);
   else
     sim_io_error (sd, "sim_fetch_register - unknown register nr %d", regnr);
-  return;
+  return -1;
 }
 
 
-void
-sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
+int
+sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf, int length)
 {
   if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
     STATE_CPU (sd, 0)->reg[regnr - R0_REGNUM] = T2H_4 (*(unsigned32*)buf);
@@ -164,7 +164,7 @@ sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
     STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM] = T2H_8 (*(unsigned64*)buf);
   else
     sim_io_error (sd, "sim_store_register - unknown register nr %d", regnr);
-  return;
+  return -1;
 }
 
 

@@ -180,15 +180,28 @@ int sim_read PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 int sim_write PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
 
-/* Fetch register REGNO and store the raw (target endian) value in
-   BUF.  */
+/* Fetch register REGNO storing its raw (target endian) value in the
+   LENGTH byte buffer BUF.  Return the actual size of the register or
+   zero if REGNO is not applicable.
 
-void sim_fetch_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
+   Legacy implementations ignore LENGTH and always return -1.
+
+   If LENGTH does not match the size of REGNO no data is transfered
+   (the actual register size is still returned). */
+
+int sim_fetch_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf, int length));
 
 
-/* Store register REGNO from the raw (target endian) value in BUF.  */
+/* Store register REGNO from the raw (target endian) value in BUF.
+   Return the actual size of the register or zero if REGNO is not
+   applicable.
 
-void sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
+   Legacy implementations ignore LENGTH and always return -1.
+
+   If LENGTH does not match the size of REGNO no data is transfered
+   (the actual register size is still returned). */
+
+int sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf, int length));
 
 
 /* Print whatever statistics the simulator has collected.

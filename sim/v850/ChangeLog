@@ -1,3 +1,17 @@
+Tue Feb 17 12:51:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+
+Tue Feb  3 16:24:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (IMEM16, IMEM16_IMMED): Rename IMEM and
+ 	IMEM_IMMED. To match recent igen change.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

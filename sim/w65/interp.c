@@ -233,10 +233,11 @@ rinfo[] =
   0
 };
 
-void
-sim_store_register (rn, value)
+int
+sim_store_register (rn, value, length)
      int rn;
      unsigned char *value;
+     int length;
 {
   unsigned int val;
   int i;
@@ -247,12 +248,14 @@ sim_store_register (rn, value)
     }
 
   *(rinfo[rn].ptr) = val;
+  return -1;
 }
 
-void
-sim_fetch_register (rn, buf)
+int
+sim_fetch_register (rn, buf, length)
      int rn;
      unsigned char *buf;
+     int length;
 {
   unsigned int val = *(rinfo[rn].ptr);
   int i;
@@ -262,6 +265,7 @@ sim_fetch_register (rn, buf)
       *buf++ = val;
       val = val >> 8;
     }
+  return -1;
 }
 
 

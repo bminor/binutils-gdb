@@ -1,3 +1,12 @@
+Tue Feb 17 12:47:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

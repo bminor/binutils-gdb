@@ -1,3 +1,9 @@
+Tue Feb 17 12:44:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+	(sim_create_inferior): Pass 4 sim_store_register.
+
 Wed Feb 11 19:53:48 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-main.h (CIA_GET,CIA_SET): Provide dummy definitions for now.

@@ -113,7 +113,7 @@ main (ac, av)
 	  /* Find out what was in r0 and return that */
 	  {
 	    unsigned char b[4];
-	    sim_fetch_register(0, b);
+	    sim_fetch_register(0, b, 4);
 	    return b[3];
 	  }
 	  
