@@ -994,7 +994,8 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   srelgot = NULL;
   sreloc = NULL;
 
-  rel_end = relocs + sec->reloc_count;
+  rel_end = relocs + elf_section_data (sec)->rel_hdr.sh_size
+		     / elf_section_data (sec)->rel_hdr.sh_entsize;
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned long r_symndx;
@@ -1900,7 +1901,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sgot = splt = sreloc = NULL;
 
   rel = relocs;
-  relend = relocs + input_section->reloc_count;
+  relend = relocs + elf_section_data (input_section)->rel_hdr.sh_size
+		    / elf_section_data (input_section)->rel_hdr.sh_entsize;
   for (; rel < relend; rel++)
     {
       int r_type;

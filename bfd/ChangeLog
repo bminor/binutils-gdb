@@ -1,3 +1,8 @@
+2001-02-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-sparc.c (sparc64_elf_check_relocs): Don't trust reloc_count.
+	(sparc64_elf_relocate_section): Likewise.
+
 2001-02-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Treat R_SPARC_UA32
