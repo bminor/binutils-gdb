@@ -624,6 +624,7 @@ find_pc_partial_function (pc, name, address, endaddr)
   struct symbol *f;
   struct minimal_symbol *msymbol;
   struct partial_symbol *psb;
+  struct obj_section *sec;
 
   if (pc >= cache_pc_function_low && pc < cache_pc_function_high)
     goto return_cached_value;
@@ -688,6 +689,16 @@ find_pc_partial_function (pc, name, address, endaddr)
 	}
     }
 
+  /* Not in the normal symbol tables, see if the pc is in a known section.
+     If it's not, then give up.  This ensures that anything beyond the end
+     of the text seg doesn't appear to be part of the last function in the
+     text segment.  */
+
+  sec = find_pc_section (pc);
+
+  if (!sec)
+    msymbol = NULL;
+
   /* Must be in the minimal symbol table.  */
   if (msymbol == NULL)
     {
@@ -701,40 +712,26 @@ find_pc_partial_function (pc, name, address, endaddr)
       return 0;
     }
 
-  /* I believe the purpose of this check is to make sure that anything
-     beyond the end of the text segment does not appear as part of the
-     last function of the text segment.  It assumes that there is something
-     other than a mst_text symbol after the text segment.  It is broken in
-     various cases, so anything relying on this behavior (there might be
-     some places) should be using find_pc_section or some such instead.  */
+  /* See if we're in a transfer table for Sun shared libs.  */
+
   if (msymbol -> type == mst_text)
     cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
   else
     /* It is a transfer table for Sun shared libraries.  */
     cache_pc_function_low = pc - FUNCTION_START_OFFSET;
+
   cache_pc_function_name = SYMBOL_NAME (msymbol);
 
-  if (SYMBOL_NAME (msymbol + 1) != NULL)
-    /* This might be part of a different segment, which might be a bad
-       idea.  Perhaps we should be using the smaller of this address or the
-       endaddr from find_pc_section.  */
+  /* Use the lesser of the next minimal symbol, or the end of the section, as
+     the end of the function.  */
+
+  if (SYMBOL_NAME (msymbol + 1) != NULL
+      && SYMBOL_VALUE_ADDRESS (msymbol + 1) < sec->endaddr)
     cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + 1);
   else
-    {
-      /* We got the start address from the last msymbol in the objfile.
-	 So the end address is the end of the section.  */
-      struct obj_section *sec;
-
-      sec = find_pc_section (pc);
-      if (sec == NULL)
-	{
-	  /* Don't know if this can happen but if it does, then just say
-	     that the function is 1 byte long.  */
-	  cache_pc_function_high = cache_pc_function_low + 1;
-	}
-      else
-	cache_pc_function_high = sec->endaddr;
-    }
+    /* We got the start address from the last msymbol in the objfile.
+       So the end address is the end of the section.  */
+    cache_pc_function_high = sec->endaddr;
 
  return_cached_value:
   if (address)

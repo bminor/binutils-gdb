@@ -209,6 +209,9 @@ remote_interrupt PARAMS ((int signo));
 static void
 remote_interrupt_twice PARAMS ((int signo));
 
+static void
+interrupt_query PARAMS ((void));
+
 extern struct target_ops remote_ops;	/* Forward decl */
 
 /* This was 5 seconds, which is a long time to sit and wait.
@@ -424,18 +427,26 @@ remote_interrupt_twice (signo)
 {
   signal (signo, ofunc);
   
+  interrupt_query ();
+
+  signal (signo, remote_interrupt);
+}
+
+/* Ask the user what to do when an interrupt is received.  */
+
+static void
+interrupt_query ()
+{
   target_terminal_ours ();
+
   if (query ("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
       return_to_top_level (RETURN_QUIT);
     }
-  else
-    {
-      signal (signo, remote_interrupt);
-      target_terminal_inferior ();
-    }
+
+  target_terminal_inferior ();
 }
 
 /* Wait until the remote machine stops, then return,
@@ -521,19 +532,25 @@ remote_wait (status)
 	     new data address, and BB is the new bss address.  This is
 	     used by the NLM stub; gdb may see more sections.  */
 	  p = &buf[3];
-	  text_addr = strtol (p, &p1, 16);
+	  text_addr = strtoul (p, &p1, 16);
 	  if (p1 == p || *p1 != ';')
 	    warning ("Malformed relocation packet: Packet '%s'", buf);
 	  p = p1 + 1;
-	  data_addr = strtol (p, &p1, 16);
+	  data_addr = strtoul (p, &p1, 16);
 	  if (p1 == p || *p1 != ';')
 	    warning ("Malformed relocation packet: Packet '%s'", buf);
 	  p = p1 + 1;
-	  bss_addr = strtol (p, &p1, 16);
+	  bss_addr = strtoul (p, &p1, 16);
 	  if (p1 == p)
 	    warning ("Malformed relocation packet: Packet '%s'", buf);
 
-	  if (symfile_objfile != NULL)
+	  if (symfile_objfile != NULL
+	      && (ANOFFSET (symfile_objfile->section_offsets,
+			    SECT_OFF_TEXT) != text_addr
+		  || ANOFFSET (symfile_objfile->section_offsets,
+			       SECT_OFF_DATA) != data_addr
+		  || ANOFFSET (symfile_objfile->section_offsets,
+			       SECT_OFF_BSS) != bss_addr))
 	    {
 	      struct section_offsets *offs;
 
@@ -562,6 +579,36 @@ remote_wait (status)
 	      ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
 
 	      objfile_relocate (symfile_objfile, offs);
+	      {
+		struct obj_section *s;
+		bfd *bfd;
+
+		bfd = symfile_objfile->obfd;
+
+		for (s = symfile_objfile->sections;
+		     s < symfile_objfile->sections_end; ++s)
+		  {
+		    flagword flags;
+
+		    flags = bfd_get_section_flags (bfd, s->sec_ptr);
+
+		    if (flags & SEC_CODE)
+		      {
+			s->addr += text_addr;
+			s->endaddr += text_addr;
+		      }
+		    else if (flags & (SEC_DATA | SEC_LOAD))
+		      {
+			s->addr += data_addr;
+			s->endaddr += data_addr;
+		      }
+		    else if (flags & SEC_ALLOC)
+		      {
+			s->addr += bss_addr;
+			s->endaddr += bss_addr;
+		      }
+		  }
+	      }
 	    }
 	  break;
 	}
@@ -602,6 +649,17 @@ remote_fetch_registers (regno)
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, REGISTER_BYTES);
+
+  /* We can get out of synch in various cases.  If the first character
+     in the buffer is not a hex character, assume that has happened
+     and try to fetch another packet to read.  */
+  while ((buf[0] < '0' || buf[0] > '9')
+	 && (buf[0] < 'a' || buf[0] > 'f'))
+    {
+      if (sr_get_debug () > 0)
+	printf ("Bad register packet; fetching a new packet\n");
+      getpkt (buf, 0);
+    }
 
   /* Reply describes registers byte by byte, each byte encoded as two
      hex characters.  Suck them all up, then supply them to the
@@ -972,6 +1030,12 @@ putpkt (buf)
 	    }
 	  break;		/* Here to retransmit */
 	}
+
+      if (quit_flag)
+	{
+	  quit_flag = 0;
+	  interrupt_query ();
+	}
     }
 }
 
@@ -994,6 +1058,12 @@ getpkt (buf, forever)
 
   while (1)
     {
+      if (quit_flag)
+	{
+	  quit_flag = 0;
+	  interrupt_query ();
+	}
+
       /* This can loop forever if the remote side sends us characters
 	 continuously, but if it pauses, we'll get a zero from readchar
 	 because of timeout.  Then we'll count that as a retry.  */

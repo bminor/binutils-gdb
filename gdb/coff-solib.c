@@ -61,8 +61,8 @@ coff_solib_add (arg_string, from_tty, target)
       unsigned char *lib;
       struct libent
 	{
-	  long len;
-	  long unk;
+	  bfd_byte len[4];
+	  bfd_byte unk[4];
 	  char filename[1];
 	};
 
@@ -76,10 +76,13 @@ coff_solib_add (arg_string, from_tty, target)
 	{
 	  struct libent *ent;
 	  struct objfile *objfile;
+	  int len;
 
 	  ent = (struct libent *)lib;
 
-	  if (ent->len <= 0)
+	  len = bfd_get_32 (exec_bfd, ent->len);
+
+	  if (len <= 0)
 	    break;
 
 	  objfile = symbol_file_add (ent->filename, from_tty,
@@ -87,8 +90,8 @@ coff_solib_add (arg_string, from_tty, target)
 				     0, /* not mainline */
 				     0, /* not mapped */
 				     0); /* Not readnow */
-	  libsize -= ent->len * 4;
-	  lib += ent->len * 4;
+	  libsize -= len * 4;
+	  lib += len * 4;
 	}
     }
 }

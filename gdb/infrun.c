@@ -475,6 +475,7 @@ wait_for_inferior ()
   int random_signal;
   CORE_ADDR stop_sp = 0;
   CORE_ADDR stop_func_start;
+  CORE_ADDR stop_func_end;
   char *stop_func_name;
   CORE_ADDR prologue_pc = 0, tmp;
   struct symtab_and_line sal;
@@ -649,11 +650,12 @@ wait_for_inferior ()
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_sp ();
       stop_func_start = 0;
+      stop_func_end = 0;
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
       find_pc_partial_function (stop_pc, &stop_func_name, &stop_func_start,
-				(CORE_ADDR *)NULL);
+				&stop_func_end);
       stop_func_start += FUNCTION_START_OFFSET;
       another_trap = 0;
       bpstat_clear (&stop_bpstat);
@@ -1015,7 +1017,9 @@ wait_for_inferior ()
 
       /* ==> See comments at top of file on this algorithm.  <==*/
 
-      if ((stop_pc == stop_func_start
+      if ((stop_pc < stop_func_start
+	   || stop_pc >= stop_func_end
+	   || stop_pc == stop_func_start
 	   || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name))
 	  && (stop_func_start != prev_func_start
 	      || prologue_pc != stop_func_start

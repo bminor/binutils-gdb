@@ -1,3 +1,14 @@
+Thu Oct  7 09:22:04 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* blockframe.c (find_pc_partial_function):  Fix handling for PCs
+	beyond the end of the last function in an objfile.
+	* coff-solib.c (coff_solib_add):  Use BFD to get fields from .lib
+	section.
+	* infrun.c (wait_for_inferior):  Modify test for subroutine entry
+	to include pc out of bounds of the previous function.
+	* remote.c (remote_wait):  Use strtoul for parsing 'N' message.
+	Add code to relocate symfile_objfile->sections.
+
 Thu Oct  7 06:22:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/sparc/sun4os4.mh: Add comment saying why we don't use
