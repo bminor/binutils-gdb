@@ -60,6 +60,15 @@ is_operator_name (const char *name)
   return (*current_cp_abi.is_operator_name) (name);
 }
 
+int
+baseclass_offset (struct type *type, int index, char *valaddr,
+		  CORE_ADDR address)
+{
+  if (current_cp_abi.baseclass_offset == NULL)
+    error ("ABI doesn't define required function baseclass_offset");
+  return (*current_cp_abi.baseclass_offset) (type, index, valaddr, address);
+}
+
 struct value *
 value_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
@@ -68,6 +77,7 @@ value_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
     return NULL;
   return (*current_cp_abi.virtual_fn_field) (arg1p, f, j, type, offset);
 }
+
 struct type *
 value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {

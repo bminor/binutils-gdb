@@ -132,7 +132,17 @@ extern struct value *value_virtual_fn_field (struct value **valuep,
 extern struct type *value_rtti_type (struct value *value,
                                      int *full, int *top, int *using_enc);
 
+/* Compute the offset of the baseclass which is
+   the INDEXth baseclass of class TYPE,
+   for value at VALADDR (in host) at ADDRESS (in target).
+   The result is the offset of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.
 
+   -1 is returned on error. */
+
+extern int baseclass_offset (struct type *type, int index, char *valaddr,
+			     CORE_ADDR address);
+                  
 struct cp_abi_ops
 {
   const char *shortname;
@@ -148,6 +158,8 @@ struct cp_abi_ops
 				     int j, struct type * type, int offset);
   struct type *(*rtti_type) (struct value *v, int *full, int *top,
 			     int *using_enc);
+  int (*baseclass_offset) (struct type *type, int index, char *valaddr,
+			   CORE_ADDR address);
 };
 
 

@@ -339,6 +339,66 @@ gnuv3_virtual_fn_field (struct value **value_p,
   return vfn;
 }
 
+/* Compute the offset of the baseclass which is
+   the INDEXth baseclass of class TYPE,
+   for value at VALADDR (in host) at ADDRESS (in target).
+   The result is the offset of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.
+
+   -1 is returned on error. */
+int
+gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
+			CORE_ADDR address)
+{
+  struct type *vtable_type = gdbarch_data (vtable_type_gdbarch_data);
+  struct type *basetype = TYPE_BASECLASS (type, index);
+  struct value *full_object, *vbase_object, *orig_object;
+  struct value *vtable, *orig_typeinfo, *orig_base_info;
+  struct type *orig_type, *vbasetype;
+  struct value *offset_val, *vbase_array;
+  CORE_ADDR vtable_address;
+  long int cur_base_offset, base_offset;
+  int to_top;
+  int baseclasses, i;
+
+  /* If it isn't a virtual base, this is easy.  The offset is in the
+     type definition.  */
+  if (!BASETYPE_VIA_VIRTUAL (type, index))
+    return TYPE_BASECLASS_BITPOS (type, index) / 8;
+
+  /* To access a virtual base, we need to use the vbase offset stored in
+     our vtable.  Recent GCC versions provide this information.  If it isn't
+     available, we could get what we needed from RTTI, or from drawing the
+     complete inheritance graph based on the debug info.  Neither is
+     worthwhile.  */
+  cur_base_offset = TYPE_BASECLASS_BITPOS (type, index) / 8;
+  if (cur_base_offset >= - vtable_address_point_offset ())
+    error ("Expected a negative vbase offset (old compiler?)");
+
+  cur_base_offset = cur_base_offset + vtable_address_point_offset ();
+  if ((- cur_base_offset) % TYPE_LENGTH (builtin_type_void_data_ptr) != 0)
+    error ("Misaligned vbase offset.");
+  cur_base_offset = cur_base_offset
+    / ((int) TYPE_LENGTH (builtin_type_void_data_ptr));
+
+  /* We're now looking for the cur_base_offset'th entry (negative index)
+     in the vcall_and_vbase_offsets array.  */
+
+  orig_object = value_at_lazy (type, address, NULL);
+  vbasetype = TYPE_VPTR_BASETYPE (VALUE_TYPE (orig_object));
+  vbase_object = value_cast (vbasetype, orig_object);
+
+  vtable_address
+    = value_as_address (value_field (vbase_object,
+				     TYPE_VPTR_FIELDNO (vbasetype)));
+  vtable = value_at_lazy (vtable_type,
+                          vtable_address - vtable_address_point_offset (),
+                          NULL);
+  offset_val = value_from_longest(builtin_type_int, cur_base_offset);
+  vbase_array = value_field (vtable, vtable_field_vcall_and_vbase_offsets);
+  base_offset = value_as_long (value_subscript (vbase_array, offset_val));
+  return base_offset;
+}
 
 static void
 init_gnuv3_ops (void)
@@ -354,6 +414,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.is_operator_name = gnuv3_is_operator_name;
   gnu_v3_abi_ops.rtti_type = gnuv3_rtti_type;
   gnu_v3_abi_ops.virtual_fn_field = gnuv3_virtual_fn_field;
+  gnu_v3_abi_ops.baseclass_offset = gnuv3_baseclass_offset;
 }
 
 

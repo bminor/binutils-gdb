@@ -287,6 +287,8 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   return rtti_type;
 }
 
+extern int gnuv2_baseclass_offset (struct type *type, int index,
+				   char *valaddr, CORE_ADDR address);
 
 static void
 init_hpacc_ops (void)
@@ -300,6 +302,11 @@ init_hpacc_ops (void)
   hpacc_abi_ops.is_operator_name = hpacc_is_operator_name;
   hpacc_abi_ops.virtual_fn_field = hpacc_virtual_fn_field;
   hpacc_abi_ops.rtti_type = hpacc_value_rtti_type;
+  /* It seems that this function is specific to GNU G++ < 3.0.
+     However, it is called for data members even in the HP
+     case (although not for member functions).
+     FIXME: Is that correct?  */
+  hpacc_abi_ops.baseclass_offset = gnuv2_baseclass_offset;
 }
 
 

@@ -1,5 +1,23 @@
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-abi.c: Fix whitespace.
+	(baseclass_offset): New wrapper function.
+	* cp-abi.h (baseclass_offset): Add prototype.
+	(struct cp_abi_ops): Add baseclass_offset pointer.
+
+	* valops.c (vb_match): Move to...
+	* gnu-v2-abi.c (vb_match): here.
+	* valops.c (baseclass_offset): Move to...
+	* gnu-v2-abi.c (gnuv2_baseclass_offset): here, and rename.
+
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): New function.
+
+	* gnu-v2-abi.c (init_gnuv2_ops): Initialize baseclass_offset.
+	* gnu-v3-abi.c (init_gnuv3_ops): Likewise.
+	* hpacc-abi.c (init_hpacc_ops): Likewise.
+
+2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* valops.c (find_overload_match): Accept obj as a
 	reference parameter.  Update it before returning.
 	* value.h (find_overload_match): Update prototype.

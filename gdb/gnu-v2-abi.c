@@ -34,6 +34,8 @@
 struct cp_abi_ops gnu_v2_abi_ops;
 
 static int vb_match (struct type *, int, struct type *);
+int gnuv2_baseclass_offset (struct type *type, int index, char *valaddr,
+			    CORE_ADDR address);
 
 static enum dtor_kinds
 gnuv2_is_destructor_name (const char *name)
@@ -308,6 +310,100 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   return rtti_type;
 }
 
+/* Return true if the INDEXth field of TYPE is a virtual baseclass
+   pointer which is for the base class whose type is BASECLASS.  */
+
+static int
+vb_match (struct type *type, int index, struct type *basetype)
+{
+  struct type *fieldtype;
+  char *name = TYPE_FIELD_NAME (type, index);
+  char *field_class_name = NULL;
+
+  if (*name != '_')
+    return 0;
+  /* gcc 2.4 uses _vb$.  */
+  if (name[1] == 'v' && name[2] == 'b' && is_cplus_marker (name[3]))
+    field_class_name = name + 4;
+  /* gcc 2.5 will use __vb_.  */
+  if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
+    field_class_name = name + 5;
+
+  if (field_class_name == NULL)
+    /* This field is not a virtual base class pointer.  */
+    return 0;
+
+  /* It's a virtual baseclass pointer, now we just need to find out whether
+     it is for this baseclass.  */
+  fieldtype = TYPE_FIELD_TYPE (type, index);
+  if (fieldtype == NULL
+      || TYPE_CODE (fieldtype) != TYPE_CODE_PTR)
+    /* "Can't happen".  */
+    return 0;
+
+  /* What we check for is that either the types are equal (needed for
+     nameless types) or have the same name.  This is ugly, and a more
+     elegant solution should be devised (which would probably just push
+     the ugliness into symbol reading unless we change the stabs format).  */
+  if (TYPE_TARGET_TYPE (fieldtype) == basetype)
+    return 1;
+
+  if (TYPE_NAME (basetype) != NULL
+      && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
+      && STREQ (TYPE_NAME (basetype),
+		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
+    return 1;
+  return 0;
+}
+
+/* Compute the offset of the baseclass which is
+   the INDEXth baseclass of class TYPE,
+   for value at VALADDR (in host) at ADDRESS (in target).
+   The result is the offset of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.
+
+   -1 is returned on error. */
+
+int
+gnuv2_baseclass_offset (struct type *type, int index, char *valaddr,
+		  CORE_ADDR address)
+{
+  struct type *basetype = TYPE_BASECLASS (type, index);
+
+  if (BASETYPE_VIA_VIRTUAL (type, index))
+    {
+      /* Must hunt for the pointer to this virtual baseclass.  */
+      register int i, len = TYPE_NFIELDS (type);
+      register int n_baseclasses = TYPE_N_BASECLASSES (type);
+
+      /* First look for the virtual baseclass pointer
+         in the fields.  */
+      for (i = n_baseclasses; i < len; i++)
+	{
+	  if (vb_match (type, i, basetype))
+	    {
+	      CORE_ADDR addr
+	      = unpack_pointer (TYPE_FIELD_TYPE (type, i),
+				valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
+
+	      return addr - (LONGEST) address;
+	    }
+	}
+      /* Not in the fields, so try looking through the baseclasses.  */
+      for (i = index + 1; i < n_baseclasses; i++)
+	{
+	  int boffset =
+	  baseclass_offset (type, i, valaddr, address);
+	  if (boffset)
+	    return boffset;
+	}
+      /* Not found.  */
+      return -1;
+    }
+
+  /* Baseclass is easily computed.  */
+  return TYPE_BASECLASS_BITPOS (type, index) / 8;
+}
 
 static void
 init_gnuv2_ops (void)
@@ -321,6 +417,7 @@ init_gnuv2_ops (void)
   gnu_v2_abi_ops.is_operator_name = gnuv2_is_operator_name;
   gnu_v2_abi_ops.virtual_fn_field = gnuv2_virtual_fn_field;
   gnu_v2_abi_ops.rtti_type = gnuv2_value_rtti_type;
+  gnu_v2_abi_ops.baseclass_offset = gnuv2_baseclass_offset;
 }
 
 void

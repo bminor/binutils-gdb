@@ -547,8 +547,6 @@ extern void clear_internalvars (void);
 
 extern struct value *value_copy (struct value *);
 
-extern int baseclass_offset (struct type *, int, char *, CORE_ADDR);
-
 /* From valops.c */
 
 extern struct value *varying_to_slice (struct value *);
