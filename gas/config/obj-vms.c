@@ -2146,7 +2146,7 @@ forward_reference (char *pnt)
       pnt = cvt_integer (pnt + 1, &i);
       pnt = cvt_integer (pnt + 1, &i);
     } while (*++pnt != ';');
-  return 0;			/* no forward refences found */
+  return 0;			/* no forward references found */
 }
 
 /* Used to check a single element of a structure on the final pass.  */
@@ -2163,7 +2163,7 @@ final_forward_reference (struct VMS_DBG_Symbol *spnt)
 	return 1;
       spnt = spnt1;
     }
-  return 0;	/* no forward refences found */
+  return 0;	/* no forward references found */
 }
 
 /* This routine parses the stabs directives to find any definitions of dbx

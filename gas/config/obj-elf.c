@@ -2192,7 +2192,7 @@ elf_frob_file_after_relocs ()
 
 #ifdef SCO_ELF
 
-/* Heavily plagarized from obj_elf_version.  The idea is to emit the
+/* Heavily plagiarized from obj_elf_version.  The idea is to emit the
    SCO specific identifier in the .notes section to satisfy the SCO
    linker.
 
