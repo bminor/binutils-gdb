@@ -42,7 +42,7 @@ LIBDIR  = $(srcdir)/../bfd$(subdir)
 
 INCDIR = $(BASEDIR)/include
 
-CFLAGS  = -g -I$(srcdir)/../include-cygnus -I$(INCDIR) $(HDEFINES) $(TDEFINES)
+CFLAGS  = -g -I$(srcdir)/../include -I$(INCDIR) $(HDEFINES) $(TDEFINES)
 
 DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
 

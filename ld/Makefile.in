@@ -19,7 +19,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_FILE = $(INSTALL)
 
 BASEDIR	= ../..
-INCLUDE	= $(srcdir)/../include-cygnus
+INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
