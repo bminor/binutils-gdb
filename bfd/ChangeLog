@@ -1,3 +1,7 @@
+2001-04-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* efi-app-ia32.c (ALIGN_SECTIONS_IN_FILE): Deleted.
+
 2001-03-30  H.J. Lu  <hjl@gnu.org>
 
 	* efi-app-ia32.c (PEI_TARGET_SUBSYSTEM): Rename from ...
