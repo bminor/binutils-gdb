@@ -1,3 +1,8 @@
+2000-07-12  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* pe-dll.c (make_one): fix a typo in the __imp_ name decoration
+	for dll import libraries
+
 2000-07-12  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* scripttempl/i386go32.sc: Support the g++ attribute init_priority in

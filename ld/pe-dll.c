@@ -1444,7 +1444,7 @@ make_one (exp, parent)
   if (! exp->flag_data)
     quick_symbol (abfd, U(""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
-  quick_symbol (abfd, U("__imp_"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
+  quick_symbol (abfd, U("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
   if (pe_dll_compat_implib)
     quick_symbol (abfd, U("__imp_"), exp->internal_name, "", 
                   id5, BSF_GLOBAL, 0);
