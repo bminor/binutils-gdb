@@ -1632,7 +1632,13 @@ init_sol_core_ops ()
   sol_core_ops.to_has_registers = 1;
   sol_core_ops.to_has_execution = 0;
   sol_core_ops.to_has_thread_control = tc_none;
+  sol_core_ops.to_thread_alive = sol_thread_alive;
   sol_core_ops.to_pid_to_str = solaris_pid_to_str;
+  /* On Solaris/x86, when debugging a threaded core file from process <n>,
+     the following causes "info threads" to produce "procfs: couldn't find pid
+     <n> in procinfo list" where <n> is the pid of the process that produced
+     the core file.  Disable it for now. */
+  /* sol_core_ops.to_find_new_threads = sol_find_new_threads; */
   sol_core_ops.to_sections = 0;
   sol_core_ops.to_sections_end = 0;
   sol_core_ops.to_magic = OPS_MAGIC;

@@ -1,3 +1,8 @@
+2000-04-13  Nick Duffek  <nsd@cygnus.com>
+
+	* sol-thread.c (init_sol_core_ops): Initialize to_thread_alive
+	and document to_find_new_threads bug.
+
 Wed Apr 19 17:03:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Philippe De Muyter <phdm@macqel.be>:
