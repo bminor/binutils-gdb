@@ -1,3 +1,15 @@
+2001-12-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (macro_build): Replace BFD_RELOC_MIPS_GPREL
+	by BFD_RELOC_GPREL16.
+	(load_address): Likewise.
+	(macro): Likewise.
+	(md_apply_fix): Likewise. Replace BFD_RELOC_MIPS_GPREL32 by
+	BFD_RELOC_GPREL32.
+	(s_gpword): Replace BFD_RELOC_MIPS_GPREL32 by BFD_RELOC_GPREL32.
+	(tc_gen_reloc): Replace BFD_RELOC_MIPS_GPREL by BFD_RELOC_GPREL16.
+	*config/tc-mips.h: Replace BFD_RELOC_MIPS_GPREL by BFD_RELOC_GPREL16.
+
 2001-11-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-d10v.c (get_operands): Emit OPERAND_PLUS for

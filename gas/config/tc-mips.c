@@ -2886,7 +2886,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	case 'j':
 	case 'o':
 	  *r = (bfd_reloc_code_real_type) va_arg (args, int);
-	  assert (*r == BFD_RELOC_MIPS_GPREL
+	  assert (*r == BFD_RELOC_GPREL16
 		  || *r == BFD_RELOC_MIPS_LITERAL
 		  || *r == BFD_RELOC_MIPS_HIGHER
 		  || *r == BFD_RELOC_HI16_S
@@ -3561,7 +3561,7 @@ load_address (counter, reg, ep, dbl, used_at)
   if (mips_pic == NO_PIC)
     {
       /* If this is a reference to a GP relative symbol, we want
-	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
+	   addiu	$reg,$gp,<sym>		(BFD_RELOC_GPREL16)
 	 Otherwise we want
 	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
@@ -3631,8 +3631,8 @@ load_address (counter, reg, ep, dbl, used_at)
 	    {
 	      frag_grow (20);
 	      macro_build ((char *) NULL, counter, ep,
-			   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-			   "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
+			   dbl ? "daddiu" : "addiu", "t,r,j", reg, GP,
+			   (int) BFD_RELOC_GPREL16);
 	      p = frag_var (rs_machine_dependent, 8, 0,
 			    RELAX_ENCODE (4, 8, 0, 4, 0,
 					  mips_opts.warn_about_macros),
@@ -3743,11 +3743,10 @@ load_address (counter, reg, ep, dbl, used_at)
   else if (mips_pic == EMBEDDED_PIC)
     {
       /* We always do
-	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
+	   addiu	$reg,$gp,<sym>		(BFD_RELOC_GPREL16)
 	 */
-      macro_build ((char *) NULL, counter, ep,
-		   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		   "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
+      macro_build ((char *) NULL, counter, ep, dbl ? "daddiu" : "addiu",
+		   "t,r,j", reg, GP, (int) BFD_RELOC_GPREL16);
     }
   else
     abort ();
@@ -4551,7 +4550,7 @@ macro (ip)
       else if (mips_pic == NO_PIC)
 	{
 	  /* If this is a reference to a GP relative symbol, we want
-	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
+	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_GPREL16)
 	     Otherwise we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       addiu	$tempreg,$tempreg,<sym>	(BFD_RELOC_LO16)
@@ -4621,7 +4620,7 @@ macro (ip)
 		frag_grow (20);
 		macro_build ((char *) NULL, &icnt, &offset_expr,
 			     HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-			     "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
+			     "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
 		p = frag_var (rs_machine_dependent, 8, 0,
 			      RELAX_ENCODE (4, 8, 0, 4, 0,
 					    mips_opts.warn_about_macros),
@@ -4982,11 +4981,11 @@ macro (ip)
       else if (mips_pic == EMBEDDED_PIC)
 	{
 	  /* We use
-	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
+	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_GPREL16)
 	     */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
+		       "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
 	}
       else
 	abort ();
@@ -5386,7 +5385,7 @@ macro (ip)
 	{
 	  /* If this is a reference to a GP relative symbol, and there
 	     is no base register, we want
-	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
 	     Otherwise, if there is no base register, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
@@ -5396,7 +5395,7 @@ macro (ip)
 	     If we have a base register, and this is a reference to a
 	     GP relative symbol, we want
 	       addu	$tempreg,$breg,$gp
-	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_GPREL16)
 	     Otherwise we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       addu	$tempreg,$tempreg,$breg
@@ -5494,7 +5493,7 @@ macro (ip)
 		{
 		  frag_grow (20);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			       treg, (int) BFD_RELOC_MIPS_GPREL, GP);
+			       treg, (int) BFD_RELOC_GPREL16, GP);
 		  p = frag_var (rs_machine_dependent, 8, 0,
 				RELAX_ENCODE (4, 8, 0, 4, 0,
 					      (mips_opts.warn_about_macros
@@ -5522,7 +5521,7 @@ macro (ip)
 			       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
 			       "d,v,t", tempreg, breg, GP);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			       treg, (int) BFD_RELOC_MIPS_GPREL, tempreg);
+			       treg, (int) BFD_RELOC_GPREL16, tempreg);
 		  p = frag_var (rs_machine_dependent, 12, 0,
 				RELAX_ENCODE (8, 12, 0, 8, 0, 0),
 				offset_expr.X_add_symbol, (offsetT) 0,
@@ -5648,16 +5647,16 @@ macro (ip)
       else if (mips_pic == EMBEDDED_PIC)
 	{
 	  /* If there is no base register, we want
-	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
 	     If there is a base register, we want
 	       addu	$tempreg,$breg,$gp
-	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_GPREL16)
 	     */
 	  assert (offset_expr.X_op == O_symbol);
 	  if (breg == 0)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			   treg, (int) BFD_RELOC_MIPS_GPREL, GP);
+			   treg, (int) BFD_RELOC_GPREL16, GP);
 	      used_at = 0;
 	    }
 	  else
@@ -5666,7 +5665,7 @@ macro (ip)
 			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
 			   "d,v,t", tempreg, breg, GP);
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			   treg, (int) BFD_RELOC_MIPS_GPREL, tempreg);
+			   treg, (int) BFD_RELOC_GPREL16, tempreg);
 	    }
 	}
       else
@@ -5765,7 +5764,7 @@ macro (ip)
 	     a single instruction.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", AT, GP, (int) BFD_RELOC_MIPS_GPREL);
+		       "t,r,j", AT, GP, (int) BFD_RELOC_GPREL16);
 	  offset_expr.X_op = O_constant;
 	  offset_expr.X_add_number = 0;
 	}
@@ -5998,12 +5997,12 @@ macro (ip)
 	  || offset_expr.X_op == O_constant)
 	{
 	  /* If this is a reference to a GP relative symbol, we want
-	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
-	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
+	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_GPREL16)
 	     If we have a base register, we use this
 	       addu	$at,$breg,$gp
-	       <op>	$treg,<sym>($at)	(BFD_RELOC_MIPS_GPREL)
-	       <op>	$treg+1,<sym>+4($at)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($at)	(BFD_RELOC_GPREL16)
+	       <op>	$treg+1,<sym>+4($at)	(BFD_RELOC_GPREL16)
 	     If this is not a GP relative symbol, we want
 	       lui	$at,<sym>		(BFD_RELOC_HI16_S)
 	       <op>	$treg,<sym>($at)	(BFD_RELOC_LO16)
@@ -6042,7 +6041,7 @@ macro (ip)
 	      /* Itbl support may require additional care here.  */
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   coproc ? treg + 1 : treg,
-			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
+			   (int) BFD_RELOC_GPREL16, tempreg);
 	      offset_expr.X_add_number += 4;
 
 	      /* Set mips_optimize to 2 to avoid inserting an
@@ -6052,7 +6051,7 @@ macro (ip)
 	      /* Itbl support may require additional care here.  */
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   coproc ? treg : treg + 1,
-			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
+			   (int) BFD_RELOC_GPREL16, tempreg);
 	      mips_optimize = hold_mips_optimize;
 
 	      p = frag_var (rs_machine_dependent, 12 + off, 0,
@@ -6268,12 +6267,12 @@ macro (ip)
       else if (mips_pic == EMBEDDED_PIC)
 	{
 	  /* If there is no base register, we use
-	       <op>	$treg,<sym>($gp)	(BFD_RELOC_MIPS_GPREL)
-	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($gp)	(BFD_RELOC_GPREL16)
+	       <op>	$treg+1,<sym>+4($gp)	(BFD_RELOC_GPREL16)
 	     If we have a base register, we use
 	       addu	$at,$breg,$gp
-	       <op>	$treg,<sym>($at)	(BFD_RELOC_MIPS_GPREL)
-	       <op>	$treg+1,<sym>+4($at)	(BFD_RELOC_MIPS_GPREL)
+	       <op>	$treg,<sym>($at)	(BFD_RELOC_GPREL16)
+	       <op>	$treg+1,<sym>+4($at)	(BFD_RELOC_GPREL16)
 	     */
 	  if (breg == 0)
 	    {
@@ -6292,12 +6291,12 @@ macro (ip)
 	  /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg + 1 : treg,
-		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
+		       (int) BFD_RELOC_GPREL16, tempreg);
 	  offset_expr.X_add_number += 4;
 	  /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg : treg + 1,
-		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
+		       (int) BFD_RELOC_GPREL16, tempreg);
 	}
       else
 	abort ();
@@ -10373,11 +10372,11 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_MIPS_JALR:
     case BFD_RELOC_HI16:
     case BFD_RELOC_HI16_S:
-    case BFD_RELOC_MIPS_GPREL:
+    case BFD_RELOC_GPREL16:
     case BFD_RELOC_MIPS_LITERAL:
     case BFD_RELOC_MIPS_CALL16:
     case BFD_RELOC_MIPS_GOT16:
-    case BFD_RELOC_MIPS_GPREL32:
+    case BFD_RELOC_GPREL32:
     case BFD_RELOC_MIPS_GOT_HI16:
     case BFD_RELOC_MIPS_GOT_LO16:
     case BFD_RELOC_MIPS_CALL_HI16:
@@ -11475,7 +11474,7 @@ s_gpword (ignore)
   p = frag_more (4);
   md_number_to_chars (p, (valueT) 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, 0,
-	       BFD_RELOC_MIPS_GPREL32);
+	       BFD_RELOC_GPREL32);
 
   demand_empty_rest_of_line ();
 }
@@ -12137,7 +12136,7 @@ tc_gen_reloc (section, fixp)
   /* If this is a variant frag, we may need to adjust the existing
      reloc and generate a new one.  */
   if (fixp->fx_frag->fr_opcode != NULL
-      && (fixp->fx_r_type == BFD_RELOC_MIPS_GPREL
+      && (fixp->fx_r_type == BFD_RELOC_GPREL16
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT16
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL16
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT_HI16
@@ -12157,8 +12156,8 @@ tc_gen_reloc (section, fixp)
       if (fixp->fx_next != NULL
 	  && fixp->fx_frag == fixp->fx_next->fx_frag)
 	{
-	  assert ((fixp->fx_r_type == BFD_RELOC_MIPS_GPREL
-		   && fixp->fx_next->fx_r_type == BFD_RELOC_MIPS_GPREL)
+	  assert ((fixp->fx_r_type == BFD_RELOC_GPREL16
+		   && fixp->fx_next->fx_r_type == BFD_RELOC_GPREL16)
 		  || (fixp->fx_r_type == BFD_RELOC_MIPS_GOT_HI16
 		      && (fixp->fx_next->fx_r_type
 			  == BFD_RELOC_MIPS_GOT_LO16))
@@ -12194,7 +12193,7 @@ tc_gen_reloc (section, fixp)
 
       if (mips_pic == NO_PIC)
 	{
-	  assert (fixp->fx_r_type == BFD_RELOC_MIPS_GPREL);
+	  assert (fixp->fx_r_type == BFD_RELOC_GPREL16);
 	  fixp->fx_r_type = BFD_RELOC_HI16_S;
 	}
       else if (mips_pic == SVR4_PIC)

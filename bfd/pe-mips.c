@@ -527,7 +527,7 @@ coff_mips_reloc_type_lookup (abfd, code)
     case BFD_RELOC_LO16:
       mips_type = MIPS_R_REFLO;
       break;
-    case BFD_RELOC_MIPS_GPREL:
+    case BFD_RELOC_GPREL16:
       mips_type = MIPS_R_GPREL;
       break;
     case BFD_RELOC_MIPS_LITERAL:
