@@ -1,3 +1,8 @@
+Thu Jun 16 12:22:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/aout.sc: Let sections align to their natural
+	boundaries.
+
 Wed Jun 15 01:54:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldemul.h (ldemul_open_dynamic_archive): Declare.
