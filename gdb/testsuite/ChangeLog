@@ -1,5 +1,8 @@
 2004-02-24  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/corefile.exp: Use gdb_test_multiple, make "accessing
+	mmapped data in core file" PASS and FAIL messages consistent.
+
 	* gdb.java/jmisc.exp: Use the fully quallified name of "main" when
 	setting a breakpoint.  Work around PR java/1565.
 
