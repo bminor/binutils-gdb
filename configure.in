@@ -402,7 +402,8 @@ case "${host}" in
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
-     configdirs="bfd gdb libiberty opcodes readline sim"
+# note that powerpc-eabi depends on sim configured before gdb.
+     configdirs="bfd libiberty opcodes readline sim gdb"
      target_configdirs=
     ;;
   ppc*-*-pe)
