@@ -1,3 +1,16 @@
+2004-10-06  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	* Makefile.in (.l.c): Do conversions of names of alloc and free 
+	functions that are done for .y.c files, plus special one
+	for yy_flex_realloc.  Also, correct missing-file tests here.
+	* ada-lex.l (malloc, free): Remove macros.
+	(resize_tempbuf): Use "realloc"; rely on sed changes to convert to
+	xrealloc.
+	(ada_flex_use): Dummy definition to remove warnings about unused
+	functions.
+	* ada-exp.y (dummy_string_to_ada_operator): Temporary definition
+	to suppress warning.
+	
 2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_return_value_nofpu): New function, implementing

@@ -42,8 +42,6 @@ EXP	(e[+-]{NUM10})
 POSEXP  (e"+"?{NUM10})
 
 %{
-#define malloc xmalloc
-#define free xfree
 
 #define NUMERAL_WIDTH 256
 #define LONGEST_SIGN ((ULONGEST) 1 << (sizeof(LONGEST) * HOST_CHAR_BIT - 1))
@@ -349,7 +347,7 @@ resize_tempbuf (unsigned int n)
   if (tempbufsize < n)
     {
       tempbufsize = (n+63) & ~63;
-      tempbuf = (char *) xrealloc (tempbuf, tempbufsize);
+      tempbuf = (char *) realloc (tempbuf, tempbufsize);
     }
 }
 
@@ -923,3 +921,10 @@ yywrap(void)
 {
   return 1;
 }
+
+/* Dummy definition to suppress warnings about unused static definitions. */
+typedef void (*dummy_function) ();
+dummy_function ada_flex_use[] = 
+{ 
+  (dummy_function) yyrealloc, (dummy_function) yyunput
+};

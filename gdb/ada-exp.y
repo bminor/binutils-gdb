@@ -952,3 +952,13 @@ _initialize_ada_exp (void)
 {
   obstack_init (&temp_parse_space);
 }
+
+/* FIXME: hilfingr/2004-10-05: Hack to remove warning.  The function
+   string_to_operator is supposed to be used for cases where one
+   calls an operator function with prefix notation, as in 
+   "+" (a, b), but at some point, this code seems to have gone
+   missing. */
+
+struct stoken (*dummy_string_to_ada_operator) (struct stoken) 
+     = string_to_operator;
+
