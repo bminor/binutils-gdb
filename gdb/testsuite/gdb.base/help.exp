@@ -535,7 +535,8 @@ gdb_test "help source" "Read commands from a file named FILE\.\[\r\n\]+Note that
 # test help stack
 gdb_test "help stack" "Examining the stack\..*\[\r\n\]+When the program being debugged stops, gdb selects the innermost frame\.\[\r\n\]+The commands below can be used to select other frames by number or address\.\[\r\n\]+List of commands:\[\r\n\]+backtrace -- Print backtrace of all stack frames\[\r\n\]+bt -- Print backtrace of all stack frames\[\r\n\]+down -- Select and print stack frame called by this one\[\r\n\]+frame -- Select and print a stack frame\[\r\n\]+return -- Make selected stack frame return to its caller\[\r\n\]+select-frame -- Select a stack frame without printing anything\[\r\n\]+up -- Select and print stack frame that called this one\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help stack"
 # test help status
-gdb_test "help status" "Status inquiries\.\[\r\n\]+List of commands:\[\r\n\]+info -- Generic command for showing things about the program being debugged\[\r\n\]+show -- Generic command for showing things about the debugger\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help status"
+gdb_test "help status" "Status inquiries\.\[\r\n\]+List of commands:\[\r\n\]+info -- Generic command for showing things about the program being debugged.*\[\r\n\]+show -- Generic command for showing things about the debugger\[\r\n\]+Type \"help\" followed by command name for full documentation\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\." "help status"
+
 # test help support
 # FIXME -- Ultrix hangs randomly on this very long output from gdb and
 # continues with its output only if something is sent to gdb.
