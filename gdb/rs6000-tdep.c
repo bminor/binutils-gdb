@@ -320,7 +320,7 @@ push_dummy_frame ()
   int sp, pc;				/* stack pointer and link register */
   int ii;
 
-  fetch_inferior_registers (-1);
+  target_fetch_registers (-1);
 
   if (dummy_frame_count >= dummy_frame_size) {
     dummy_frame_size += DUMMY_FRAME_ADDR_SIZE;
@@ -432,7 +432,7 @@ pop_dummy_frame ()
 
   /* Now we can restore all registers. */
 
-  store_inferior_registers (-1);
+  target_store_registers (-1);
   pc = read_pc ();
   flush_cached_frames ();
   set_current_frame (create_new_frame (sp, pc));
@@ -489,7 +489,7 @@ pop_frame ()
   }
 
   write_register (SP_REGNUM, prev_sp);
-  store_inferior_registers (-1);
+  target_store_registers (-1);
   flush_cached_frames ();
   set_current_frame (create_new_frame (prev_sp, lr));
 }
@@ -813,7 +813,7 @@ ran_out_of_registers_for_arguments:
 
     write_memory (sp, &saved_sp, 4);	/* set back chain properly */
 
-  store_inferior_registers (-1);
+  target_store_registers (-1);
   return sp;
 }
 

@@ -8,6 +8,10 @@ Wed Sep 16 22:31:55 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* remote-udi.c (udi_attach): change printf to error to prevent
 	fallthrough bug.
 
+	* rs6000-tdep.c (push_dummy_frame, pop_dummy_frame): replace
+	calls to {fetch|store}_inferior_registers with calls to
+	target_{fetch|store}_registers, for remote-target independence.
+
 Sat Sep 19 04:23:54 1992  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in:  Fix bug I introduced in merging Rich's change.
