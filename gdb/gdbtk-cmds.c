@@ -2106,7 +2106,7 @@ gdb_disassemble (clientData, interp, objc, objv)
 
       symtab = find_pc_symtab (low); /* Assume symtab is valid for whole PC range */
 
-      if (!symtab)
+      if (!symtab || !symtab->linetable)
         goto assembly_only;
 
       /* First, convert the linetable to a bunch of my_line_entry's.  */

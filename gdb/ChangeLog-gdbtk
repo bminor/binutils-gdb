@@ -1,3 +1,8 @@
+Thu Sep 10 22:10:29  1998 Jim Ingham <jingham@cygnus.com>
+
+	*gdbtk-cmds.c (gdb_disassemble): Make sure the symtab's linetable is not
+	null before trying to use it...
+	
 1998-09-02  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_cmd): Do not run the timer when downloading --
