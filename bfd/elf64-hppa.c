@@ -1912,7 +1912,7 @@ elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
   hppa_info = elf64_hppa_hash_table (info);
   dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 				      name, FALSE, FALSE);
-  if (dyn_h->h != h)
+  if (!dyn_h || dyn_h->h != h)
     return TRUE;
 
   /* Function symbols for which we created .opd entries *may* have been
@@ -1922,7 +1922,7 @@ elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
      into non-dynamic ones, so we initialize st_shndx to -1 in
      mark_exported_functions and check to see if it was overwritten
      here instead of just checking dyn_h->h->dynindx.  */
-  if (dyn_h && dyn_h->want_opd && dyn_h->st_shndx != -1)
+  if (dyn_h->want_opd && dyn_h->st_shndx != -1)
     {
       /* Restore the saved value and section index.  */
       sym->st_value = dyn_h->st_value;
