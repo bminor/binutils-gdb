@@ -57,6 +57,8 @@ sim-load.c
 sim-n-bits.h
 sim-n-core.h
 sim-n-endian.h
+sim-options.c
+sim-options.h
 sim-trace.h
 sim-types.h
 sim-utils.c

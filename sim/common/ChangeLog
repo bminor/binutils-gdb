@@ -1,5 +1,7 @@
 Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* sim-options.c, sim-options.h: New files.
+
 	* run.c (main): Check return value of sim_open.
 
 	* Make-common.in (sim-options.o, sim-load.o): Add rules for.
