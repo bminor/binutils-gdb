@@ -436,13 +436,13 @@ static int follow_vfork_when_exec;
 
 static char *follow_fork_mode_kind_names[] =
 {
-/* ??rehrauer:  The "both" option is broken, by what may be a 10.20
-   kernel problem.  It's also not terribly useful without a GUI to
-   help the user drive two debuggers.  So for now, I'm disabling
-   the "both" option.
-   "parent", "child", "both", "ask" };
- */
-  "parent", "child", "ask"};
+  /* ??rehrauer: The "both" option is broken, by what may be a 10.20
+     kernel problem.  It's also not terribly useful without a GUI to
+     help the user drive two debuggers.  So for now, I'm disabling the
+     "both" option. */
+  /* "parent", "child", "both", "ask" */
+  "parent", "child", "ask", NULL
+};
 
 static char *follow_fork_mode_string = NULL;
 
@@ -762,7 +762,12 @@ static char schedlock_on[] = "on";
 static char schedlock_step[] = "step";
 static char *scheduler_mode = schedlock_off;
 static char *scheduler_enums[] =
-{schedlock_off, schedlock_on, schedlock_step};
+{
+  schedlock_off,
+  schedlock_on,
+  schedlock_step,
+  NULL
+};
 
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
