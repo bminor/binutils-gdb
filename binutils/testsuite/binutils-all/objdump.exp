@@ -20,9 +20,11 @@
 # This file was written by Rob Savoye <rob@cygnus.com>
 # and rewritten by Ian Lance Taylor <ian@cygnus.com>
 
-if {[which $OBJDUMP] == 0} then {
-    perror "$OBJDUMP does not exist"
-    return
+if ![is_remote host] {
+    if {[which $OBJDUMP] == 0} then {
+	perror "$OBJDUMP does not exist"
+	return
+    }
 }
 
 send_user "Version [binutil_version $OBJDUMP]"
@@ -33,8 +35,16 @@ set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -i"]
 
 set cpus_expected "(a29k|alliant|alpha|arc|arm|convex|d10v|h8|hppa|i386|i860|i960|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k|z8001|z8002)"
 # start-sanitize-d30v
-set cpus_expected "(a29k|alliant|alpha|arm|convex|d10v|h8|hppa|i386|i860|i960|d30v|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k|z8001|z8002)"
+set cpus_expected "(a29k|alliant|alpha|arc|arm|convex|d10v|h8|hppa|i386|i860|i960|d30v|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|vax|we32k|z8k|z8001|z8002)"
 # end-sanitize-d30v
+# start-sanitize-sky
+set cpus_expected "(a29k|alliant|alpha|arc|arm|convex|d10v|h8|hppa|i386|i860|i960|m32r|m68k|m88k|mips|mn10200|mn10300|ns32k|powerpc|pyramid|romp|rs6000|sh|sparc|tahoe|txvu|vax|we32k|z8k|z8001|z8002)"
+# end-sanitize-sky
+
+# Make sure the target CPU shows up in the list.
+if ![regexp $cpus_expected $target_cpu] {
+    regsub "^\[(\]" "$cpus_expected" "(${target_cpu}|" cpus_expected;
+}
 
 set want "BFD header file version.*srec.*header .* endian.*, data .* endian.*$cpus_expected"
 

@@ -1,4 +1,4 @@
-# .Sanitize for deja-gnu.
+# .Sanitize for devo/binutils/testsuite/binutils-all.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -65,6 +65,35 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+sky_files="objdump.exp"
+
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	for i in $sky_files ; do
+		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping sky stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"sky\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-sky/,/end-\sanitize\-sky/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
