@@ -1,3 +1,21 @@
+2003-06-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (linux-nat.o): Add rule.
+	* linux-nat.c: New file.
+	* config/nm-linux.h (CHILD_INSERT_FORK_CATCHPOINT): Define.
+	(CHILD_INSERT_VFORK_CATCHPOINT): Define.
+	(CHILD_INSERT_EXEC_CATCHPOINT): Define.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Add linux-nat.o.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/x86-64linux.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/s390/s390.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+
 2003-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c: Reorder includes, fix some whitespace issues and
