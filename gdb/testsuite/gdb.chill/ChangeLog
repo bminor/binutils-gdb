@@ -1,3 +1,9 @@
+Fri Dec  1 00:08:37 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* tests1.ch, tests1.exp, tests2.ch, tests2.exp, Makefile.in:
+	New (extensive) test cases.
+	* chexp.exp:  Fix relations to return TRUE or FALSE.
+
 Wed Nov 29 19:28:13 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in:  Add .exp.check rule.

@@ -60,6 +60,10 @@ result.ch
 result.exp
 string.ch
 string.exp
+tests1.ch
+tests1.exp
+tests2.ch
+tests2.exp
 tuples.ch
 tuples.exp
 
