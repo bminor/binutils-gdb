@@ -62,9 +62,6 @@
 
 #include "targ-cpu.h"
 
-/* We want \v. */
-#define BACKSLASH_V 1
-
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME	"b.out"
 
 extern const short seg_N_TYPE[];

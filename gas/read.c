@@ -2384,11 +2384,9 @@ next_char_of_string ()
 	  c = '\t';
 	  break;
 
-#ifdef BACKSLASH_V
 	case 'v':
 	  c = '\013';
 	  break;
-#endif
 
 	case '\\':
 	case '"':

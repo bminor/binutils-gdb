@@ -1,5 +1,11 @@
 Fri Jul  7 11:17:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_next_char): Always accept \v.  Don't make it
+	conditional on BACKSLASH_V.
+	* read.c (next_char_of_string): Likewise.
+	* config/obj-bout.h (BACKSLASH_V): Don't define.
+	* config/tc-mips.h (BACKSLASH_V): Don't define.
+
 	Add SPARC ELF PIC support.
 	* write.c (fixup_segment): Pass fixP to TC_RELOC_RTSYM_LOC_FIXUP,
 	not fixP->fx_r_type.
