@@ -1152,7 +1152,7 @@ arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 
 You can abbreviate a _GDBN__ command to the first few letters of the command
 name, if that abbreviation is unambiguous; and you can repeat certain
-GDB commands by typing just @key{RET}.  You can also use the @key{TAB}
+_GDBN__ commands by typing just @key{RET}.  You can also use the @key{TAB}
 key to get _GDBN__ to fill out the rest of a word in a command (or to
 show you the alternatives available, if there's more than one possibility).
 
