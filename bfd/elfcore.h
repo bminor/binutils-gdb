@@ -220,7 +220,9 @@ elf_core_file_p (abfd)
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
     }
 
-  /* Set the machine architecture.  */
+  /* Set the machine architecture.  Do this before processing the
+     program headers since we need to know the architecture type
+     when processing the notes of some systems' core files.  */
   if (! bfd_default_set_arch_mach (abfd, ebd->arch, 0))
     {
       /* It's OK if this fails for the generic target.  */
