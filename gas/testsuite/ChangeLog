@@ -1,3 +1,14 @@
+2001-06-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/arm.exp: Remove msr-bad.s test.
+	Select processor type for architecture specific instruction tests.
+
+	* gas/arm/adrl.s: Add adrEQl as a test.
+	* gas/arm/adrl.d: Adjusted expected output.
+
+	* gas/arm/arm7dm.s: Add "msr CPSR_x, #0" as a test instruction.
+	* gas/arm/msr-bad.s: Delete.
+
 2001-06-18  Tom Rix  <trix@redhat.com>
 
 	* gas/ppc/aix.exp: New file, aix specific tests.

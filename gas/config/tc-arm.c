@@ -414,7 +414,7 @@ static CONST struct asm_flg except_flag[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg cplong_flag[] =
+static CONST struct asm_flg long_flag[] =
 {
   {"l", 0x00400000},
   {NULL, 0}
@@ -760,8 +760,7 @@ static CONST struct asm_opcode insns[] =
 #endif
 
 /* Pseudo ops.  */
-  {"adr",   0x028f0000, NULL,   NULL,        ARM_ANY,      do_adr},
-  {"adrl",  0x028f0000, NULL,   NULL,        ARM_ANY,      do_adrl},
+  {"adr",   0x028f0000, NULL,   long_flag,   ARM_ANY,      do_adr},
   {"nop",   0x01a00000, NULL,   NULL,        ARM_ANY,      do_nop},
 
 /* ARM 2 multiplies.  */
@@ -837,8 +836,8 @@ static CONST struct asm_opcode insns[] =
 
 /* Generic copressor instructions.  */
   {"cdp",   0x0e000000, NULL,  NULL,         ARM_2UP,      do_cdp},
-  {"ldc",   0x0c100000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
-  {"stc",   0x0c000000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
+  {"ldc",   0x0c100000, NULL,  long_flag,    ARM_2UP,      do_lstc},
+  {"stc",   0x0c000000, NULL,  long_flag,    ARM_2UP,      do_lstc},
   {"mcr",   0x0e000010, NULL,  NULL,         ARM_2UP,      do_co_reg},
   {"mrc",   0x0e100010, NULL,  NULL,         ARM_2UP,      do_co_reg},
 
@@ -848,8 +847,8 @@ static CONST struct asm_opcode insns[] =
   {"blx",            0, NULL,   NULL,        ARM_EXT_V5, do_blx},
   {"clz",   0x016f0f10, NULL,   NULL,        ARM_EXT_V5, do_clz},
   {"bkpt",  0xe1200070, "",   	NULL,        ARM_EXT_V5, do_bkpt},
-  {"ldc2",  0xfc100000, "",  	cplong_flag, ARM_EXT_V5, do_lstc2},
-  {"stc2",  0xfc000000, "",  	cplong_flag, ARM_EXT_V5, do_lstc2},
+  {"ldc2",  0xfc100000, "",  	long_flag,   ARM_EXT_V5, do_lstc2},
+  {"stc2",  0xfc000000, "",  	long_flag,   ARM_EXT_V5, do_lstc2},
   {"cdp2",  0xfe000000, "",  	NULL,        ARM_EXT_V5, do_cdp2},
   {"mcr2",  0xfe000010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
   {"mrc2",  0xfe100010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
@@ -4075,8 +4074,6 @@ do_adr (str, flags)
      char * str;
      unsigned long flags;
 {
-  /* This is a pseudo-op of the form "adr rd, label" to be converted
-     into a relative address of the form "add rd, pc, #label-.-8".  */
   skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
@@ -4088,48 +4085,33 @@ do_adr (str, flags)
       return;
     }
 
-  /* Frag hacking will turn this into a sub instruction if the offset turns
-     out to be negative.  */
-  inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
-  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
-  inst.reloc.pc_rel = 1;
-  inst.instruction |= flags;
-
-  end_of_line (str);
-}
-
-static void
-do_adrl (str, flags)
-     char * str;
-     unsigned long flags;
-{
-  /* This is a pseudo-op of the form "adrl rd, label" to be converted
-     into a relative address of the form:
-     	add rd, pc, #low(label-.-8)"
-     	add rd, rd, #high(label-.-8)"  */
-
-  skip_whitespace (str);
-
-  if (reg_required_here (& str, 12) == FAIL
-      || skip_past_comma (& str) == FAIL
-      || my_get_expression (& inst.reloc.exp, & str))
+  if (flags & 0x00400000)
     {
-      if (!inst.error)
-	inst.error = BAD_ARGS;
-      return;
+      /* This is a pseudo-op of the form "adrl rd, label" to be converted
+	 into a relative address of the form:
+	 add rd, pc, #low(label-.-8)"
+	 add rd, rd, #high(label-.-8)"  */
+      /* Frag hacking will turn this into a sub instruction if the offset turns
+	 out to be negative.  */
+      inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
+      inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
+      inst.reloc.pc_rel            = 1;
+      inst.instruction            |= flags & ~0x00400000;
+      inst.size                    = INSN_SIZE * 2;
+    }
+  else
+    {
+      /* This is a pseudo-op of the form "adr rd, label" to be converted
+	 into a relative address of the form "add rd, pc, #label-.-8".  */
+      /* Frag hacking will turn this into a sub instruction if the offset turns
+	 out to be negative.  */
+      inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
+      inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
+      inst.reloc.pc_rel = 1;
+      inst.instruction |= flags;
     }
 
   end_of_line (str);
-
-  /* Frag hacking will turn this into a sub instruction if the offset turns
-     out to be negative.  */
-  inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
-  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
-  inst.reloc.pc_rel            = 1;
-  inst.instruction            |= flags;
-  inst.size                    = INSN_SIZE * 2;
-
-  return;
 }
 
 static void

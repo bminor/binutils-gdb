@@ -4,18 +4,17 @@
 if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "inst"
 
-    gas_test "arm3.s" "" $stdoptlist "Arm 3 instructions"
+    gas_test "arm3.s" "-marm3" $stdoptlist "Arm 3 instructions"
 
-    gas_test "arm6.s" "" $stdoptlist "Arm 6 instructions"
-    gas_test_error "msr-bad.s" "-marmv3" "immediate value cannot be used to set this field"
+    gas_test "arm6.s" "-marm6" $stdoptlist "Arm 6 instructions"
 
-    gas_test "arm7dm.s" "" $stdoptlist "Arm 7DM instructions"
+    gas_test "arm7dm.s" "-marm7dm" $stdoptlist "Arm 7DM instructions"
 
     run_dump_test "arm7t"
 
-    gas_test "thumb.s" "" $stdoptlist "Thumb instructions"
+    gas_test "thumb.s" "-marm7t" $stdoptlist "Thumb instructions"
 
-    gas_test "arch4t.s" "" $stdoptlist "Arm architecture 4t instructions"
+    gas_test "arch4t.s" "-marmv4t" $stdoptlist "Arm architecture 4t instructions"
 
     gas_test "copro.s" "" $stdoptlist "Co processor instructions"
 

@@ -1,3 +1,11 @@
+2001-06-21  Philip Blundell  <philb@gnu.org>
+
+	* config/tc-arm.c (cplong_flag): Rename to long_flag.  All uses
+	updated.
+	(insns): Remove entry for adrl.  Add long_flag for adr.
+	(do_adr): Handle `l' suffix.
+	(do_adrl): Delete.
+
 2001-06-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-hppa.c (CHECK_FIELD_WHERE): Define.
