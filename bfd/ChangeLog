@@ -1,3 +1,22 @@
+2004-03-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (struct frv_pic_relocs_info): Added fixups and
+	dynrelocs.
+	(_frv_count_got_plt_entries): Initialize them.
+	(frv_pic_relocs_info_find): Add insert argument.  Adjust all
+	callers.
+	(frv_pic_relocs_info_for_global): Likewise.
+	(frv_pic_relocs_info_for_local): Likewise.
+	(frv_pic_merge_early_relocs_info): New.
+	(_frv_resolve_final_relocs_info): Use it in case one entry maps to
+	another.
+	(_frv_add_dyn_reloc): Add entry argument.  Adjust all callers.
+	Check that we don't exceed the allocated count for entry.
+	(_frv_add_rofixup): Likewise.
+	(_frv_emit_got_relocs_plt_entries): Adjust for coding standards.
+	(elf32_frv_finish_dynamic_sections): Improve error message in case
+	we emit too few rofixup entries.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* archures.c (bfd_mach_fr450): New.
