@@ -1,3 +1,7 @@
+Wed Jul 31 10:57:44 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/asi.s: Update ASI_AS_IF_USER_{PRIMARY,SECONDARY}_LITTLE.
+
 Wed Jul 31 15:55:12 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/arm7t.s: Added.
