@@ -1,3 +1,9 @@
+Fri Aug 20 10:52:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c: Added r6000 and r4000 instructions and macros.
+	Changed hazard information to distinguish between memory load
+	delays and coprocessor load delays.
+
 Wed Aug 18 15:39:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: li.d uses "T,L", not "S,F".  Added li.s.
