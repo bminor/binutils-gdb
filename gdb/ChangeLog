@@ -1,3 +1,8 @@
+2004-11-09  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Correct allocated
+	size.
+
 2004-11-09  Andrew Cagney  <cagney@gnu.org>
 
 	* TODO: Delete.

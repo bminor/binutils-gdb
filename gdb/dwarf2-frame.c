@@ -162,7 +162,7 @@ dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
 static struct dwarf2_frame_state_reg *
 dwarf2_frame_state_copy_regs (struct dwarf2_frame_state_reg_info *rs)
 {
-  size_t size = rs->num_regs * sizeof (struct dwarf2_frame_state_reg_info);
+  size_t size = rs->num_regs * sizeof (struct dwarf2_frame_state_reg);
   struct dwarf2_frame_state_reg *reg;
 
   reg = (struct dwarf2_frame_state_reg *) xmalloc (size);
