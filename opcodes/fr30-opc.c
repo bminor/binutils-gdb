@@ -621,7 +621,7 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* scr: system condition bits */
   { "scr", & HW_ENT (HW_H_SCR), 0, 0,
     { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_SEM_ONLY), { (1<<MACH_BASE) } }  },
-/* ilm: condition code bits */
+/* ilm: interrupt level mask */
   { "ilm", & HW_ENT (HW_H_ILM), 0, 0,
     { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_SEM_ONLY), { (1<<MACH_BASE) } }  },
 };
@@ -1206,8 +1206,8 @@ static const CGEN_OPERAND_INSTANCE fmt_reti_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_brad_ops[] = {
-  { INPUT, "label9", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (LABEL9), 0, COND_REF },
-  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, COND_REF },
+  { INPUT, "label9", & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (LABEL9), 0, 0 },
+  { OUTPUT, "pc", & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0, 0 },
   { 0 }
 };
 
@@ -2862,7 +2862,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_brad, { 0xf000 },
     (PTR) & fmt_brad_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(UNCOND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bra $label9 */
   {
@@ -2871,7 +2871,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_brad, { 0xe000 },
     (PTR) & fmt_brad_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bno:d $label9 */
   {
@@ -2880,7 +2880,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_brad, { 0xf100 },
     (PTR) & fmt_brad_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(UNCOND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bno $label9 */
   {
@@ -2889,7 +2889,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_brad, { 0xe100 },
     (PTR) & fmt_brad_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* beq:d $label9 */
   {
@@ -2898,7 +2898,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_beqd, { 0xf200 },
     (PTR) & fmt_beqd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* beq $label9 */
   {
@@ -2907,7 +2907,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_beqd, { 0xe200 },
     (PTR) & fmt_beqd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bne:d $label9 */
   {
@@ -2916,7 +2916,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_beqd, { 0xf300 },
     (PTR) & fmt_beqd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bne $label9 */
   {
@@ -2925,7 +2925,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_beqd, { 0xe300 },
     (PTR) & fmt_beqd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bc:d $label9 */
   {
@@ -2934,7 +2934,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bcd, { 0xf400 },
     (PTR) & fmt_bcd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bc $label9 */
   {
@@ -2943,7 +2943,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bcd, { 0xe400 },
     (PTR) & fmt_bcd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bnc:d $label9 */
   {
@@ -2952,7 +2952,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bcd, { 0xf500 },
     (PTR) & fmt_bcd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bnc $label9 */
   {
@@ -2961,7 +2961,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bcd, { 0xe500 },
     (PTR) & fmt_bcd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bn:d $label9 */
   {
@@ -2970,7 +2970,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bnd, { 0xf600 },
     (PTR) & fmt_bnd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bn $label9 */
   {
@@ -2979,7 +2979,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bnd, { 0xe600 },
     (PTR) & fmt_bnd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bp:d $label9 */
   {
@@ -2988,7 +2988,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bnd, { 0xf700 },
     (PTR) & fmt_bnd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bp $label9 */
   {
@@ -2997,7 +2997,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bnd, { 0xe700 },
     (PTR) & fmt_bnd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bv:d $label9 */
   {
@@ -3006,7 +3006,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bvd, { 0xf800 },
     (PTR) & fmt_bvd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bv $label9 */
   {
@@ -3015,7 +3015,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bvd, { 0xe800 },
     (PTR) & fmt_bvd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bnv:d $label9 */
   {
@@ -3024,7 +3024,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bvd, { 0xf900 },
     (PTR) & fmt_bvd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bnv $label9 */
   {
@@ -3033,7 +3033,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bvd, { 0xe900 },
     (PTR) & fmt_bvd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* blt:d $label9 */
   {
@@ -3042,7 +3042,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bltd, { 0xfa00 },
     (PTR) & fmt_bltd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* blt $label9 */
   {
@@ -3051,7 +3051,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bltd, { 0xea00 },
     (PTR) & fmt_bltd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bge:d $label9 */
   {
@@ -3060,7 +3060,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bltd, { 0xfb00 },
     (PTR) & fmt_bltd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bge $label9 */
   {
@@ -3069,7 +3069,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bltd, { 0xeb00 },
     (PTR) & fmt_bltd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* ble:d $label9 */
   {
@@ -3078,7 +3078,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bled, { 0xfc00 },
     (PTR) & fmt_bled_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* ble $label9 */
   {
@@ -3087,7 +3087,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bled, { 0xec00 },
     (PTR) & fmt_bled_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bgt:d $label9 */
   {
@@ -3096,7 +3096,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bled, { 0xfd00 },
     (PTR) & fmt_bled_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bgt $label9 */
   {
@@ -3105,7 +3105,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_bled, { 0xed00 },
     (PTR) & fmt_bled_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bls:d $label9 */
   {
@@ -3114,7 +3114,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_blsd, { 0xfe00 },
     (PTR) & fmt_blsd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bls $label9 */
   {
@@ -3123,7 +3123,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_blsd, { 0xee00 },
     (PTR) & fmt_blsd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bhi:d $label9 */
   {
@@ -3132,7 +3132,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_blsd, { 0xff00 },
     (PTR) & fmt_blsd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI)|A(DELAY_SLOT), { (1<<MACH_BASE) } }
   },
 /* bhi $label9 */
   {
@@ -3141,7 +3141,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LABEL9), 0 } },
     & fmt_blsd, { 0xef00 },
     (PTR) & fmt_blsd_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI)|A(NOT_IN_DELAY_SLOT), { (1<<MACH_BASE) } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(NOT_IN_DELAY_SLOT)|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* dmov $R13,@$dir10 */
   {

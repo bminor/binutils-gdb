@@ -23,14 +23,6 @@ else
 	lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
-fr30_files="fr30-opc.h fr30-opc.c fr30-asm.c fr30-dis.c"
-
-if ( echo $* | grep keep\-fr30 > /dev/null ) ; then
-	keep_these_too="${fr30_files} ${keep_these_too}"
-else
-	lose_these_too="${fr30_files} ${lose_these_too}"
-fi
-
 tic80_files="tic80-opc.c tic80-dis.c"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -82,6 +74,10 @@ d30v-opc.c
 dep-in.sed
 dis-buf.c
 disassemble.c
+fr30-asm.c
+fr30-dis.c
+fr30-opc.c
+fr30-opc.h
 h8300-dis.c
 h8500-dis.c
 h8500-opc.h
@@ -422,34 +418,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-tic80/,/end-\sanitize\-tic80/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-fr30_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c"
-if ( echo $* | grep keep\-fr30 > /dev/null ) ; then
-	for i in $fr30_files ; do
-		if test ! -d $i && (grep sanitize-fr30 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping fr30 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $fr30_files ; do
-		if test ! -d $i && (grep sanitize-fr30 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"fr30\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-fr30/,/end-\sanitize\-fr30/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

@@ -1,3 +1,7 @@
+1999-01-11  Doug Evans  <devans@casey.cygnus.com>
+
+	* fr30-opc.c: Regenerate.
+
 1999-01-06  Doug Evans  <devans@casey.cygnus.com>
 
 	* m32r-dis.c: Regenerate.
@@ -15,9 +19,7 @@ start-sanitize-cygnus
 	* cgen-asm.in (insert_normal): Use CGEN_BOOL_ATTR.
 	* cgen-asm.in (extract_normal): Ditto.
 end-sanitize-cygnus
-start-sanitize-fr30
 	* fr30-asm.c,fr30-dis.c,fr30-opc.h,fr30-opc.c: Regenerate.
-end-sanitize-fr30
 	* i960c-asm.c,i960c-dis.c,i960c-opc.h,i960c-opc.c: Regenerate.
 	* m32r-asm.c,m32r-dis.c,m32r-opc.h,m32r-opc.c: Regenerate.
 
@@ -29,19 +31,16 @@ end-sanitize-fr30
 
 	* mips16-opc.c: Mark branch insns with MIPS16_INSN_BRANCH.
 
-start-sanitize-fr30
 Wed Dec 16 16:17:49 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-opc.c: Regenerated.
 
-end-sanitize-fr30
 start-sanitize-vr4xxx
 1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips-dis.c (set_mips_isa_type): Handle bfd_mach_mips4111.
 
 end-sanitize-vr4xxx
-start-sanitize-fr30
 1998-12-15  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-opc.c,fr30-opc.h: Regenerated.
@@ -50,7 +49,6 @@ start-sanitize-fr30
 
 	* fr30-opc.c,fr30-opc.h: Regenerated.
 
-end-sanitize-fr30
 start-sanitize-vr4xxx
 1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
 
@@ -59,12 +57,10 @@ start-sanitize-vr4xxx
 	* mips-opc.c: Add vr4121.
 
 end-sanitize-vr4xxx
-start-sanitize-fr30
 Thu Dec 10 18:39:46 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-opc.c,fr30-opc.h: Regenerated.
 
-end-sanitize-fr30
 Thu Dec 10 12:49:24 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.c: Regenerate.
@@ -104,12 +100,10 @@ Tue Dec  8 13:56:18 1998  David Taylor  <taylor@texas.cygnus.com>
 	* dis-buf.c (generic_strcat_address): reformat to GNU coding
 	conventions.  change sprintf call to an sprintf_vma call.
 
-start-sanitize-fr30
 Tue Dec  8 13:12:44 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerated.
 
-end-sanitize-fr30
 Tue Dec  8 10:50:46 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by
@@ -160,12 +154,10 @@ end-sanitize-cygnus
 	* i960-dis.c (print_insn_i960): Rename to print_insn_i960_orig.
 	* i960c-asm.c, i960c-dis.c, i960c-opc.c, i960c-opc.h: New files.
 	
-start-sanitize-fr30
 Mon Dec  7 14:33:44 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerated.
 
-end-sanitize-fr30
 Sun Dec  6 14:06:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add dmfc2 and dmtc2.
@@ -173,7 +165,6 @@ Sun Dec  6 14:06:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* ppc-opc.c (powerpc_opcodes): Add PowerPC403 GC[X] instructions.
 	From Saitoh Masanobu <msaitoh@spa.is.uec.ac.jp>.
 
-start-sanitize-fr30
 Fri Dec  4 17:45:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* fr30-opc.c: Regenerate.
@@ -190,7 +181,6 @@ Thu Dec  3 00:09:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerate.
 
-end-sanitize-fr30
 1998-11-30  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-dis.c (hash_insn_array): CGEN_INSN_VALUE ->
@@ -207,9 +197,7 @@ start-sanitize-cygnus
 	* cgen-opc.in (FLD): Define.
 end-sanitize-cygnus
 	* m32r-opc.c,m32r-opc.h,m32r-asm.c,m32r-dis.c: Regenerate.
-start-sanitize-fr30
 	* fr30-opc.c,fr30-opc.h,fr30-asm.c,fr30-dis.c: Regenerate.
-end-sanitize-fr30
 
 start-sanitize-cygnus
 Mon Nov 30 11:52:44 1998  Doug Evans  <devans@canuck.cygnus.com>
@@ -218,7 +206,6 @@ Mon Nov 30 11:52:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* Makefile.in: Rebuild.
 
 end-sanitize-cygnus
-start-sanitize-fr30
 Thu Nov 26 11:26:32 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c: Regenerated.
@@ -242,12 +229,10 @@ Thu Nov 19 16:02:46 1998  Dave Brolley  <brolley@cygnus.com>
 	* fr30-dis.c: Regenerated.
 	* fr30-asm.c: Regenerated.
 
-end-sanitize-fr30
 Thu Nov 19 07:54:15 1998  Doug Evans  <devans@charmed.cygnus.com>
 
 	* mips-opc.c (sync.p,sync.l): Swap insn values.
 
-start-sanitize-fr30
 1998-11-19  Doug Evans  <devans@tobor.to.cygnus.com>
 
 	* fr30-opc.c: Regenerate.
@@ -257,7 +242,6 @@ Wed Nov 18 21:36:37 1998  Dave Brolley  <brolley@cygnus.com>
 	* fr30-opc.c: Regenerated.
 	* fr30-opc.h: Regenerated.
 
-end-sanitize-fr30
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
 start-sanitize-cygnus
@@ -277,11 +261,8 @@ start-sanitize-cygnus
 	(@arch@_cgen_lookup_insn): Rewrite ! CGEN_INT_INSN_P case.
 end-sanitize-cygnus
 	* m32r-asm.c,m32r-dis.c,m32r-opc.c: Rebuild.
-start-sanitize-fr30
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c: Rebuild.
-end-sanitize-fr30
 
-start-sanitize-fr30
 Wed Nov 18 11:30:04 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-opc.c: Regenerated.
@@ -305,7 +286,6 @@ Tue Nov 10 15:26:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* disassemble.c (disassembler): Add support for FR30 target.
 	
-end-sanitize-fr30
 Tue Nov 10 11:00:04 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 start-sanitize-cygnus
@@ -313,7 +293,6 @@ start-sanitize-cygnus
 	CGEN_OPERAND_SEM_ONLY.
 end-sanitize-cygnus
 	* m32r-dis.c,m32r-opc.c,m32r-opc.h: Rebuild.
-start-sanitize-fr30
 	* fr30-dis.c,fr30-opc.c,fr30-opc.h: Rebuild.
 
 Mon Nov  9 18:22:55 1998  Dave Brolley  <brolley@cygnus.com>
@@ -322,12 +301,11 @@ Mon Nov  9 18:22:55 1998  Dave Brolley  <brolley@cygnus.com>
 	* po/POTFILES.in: Regenerate.
 	* fr30-opc.c: Regenerate.
 	* fr30-opc.h: Regenerate.
-end-sanitize-fr30
+
 Fri Nov  6 17:21:38 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c: Regenerate.
 
-start-sanitize-fr30
 Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* configure.in: Added case for bfd_fr30_arch.
@@ -342,7 +320,6 @@ Wed Nov  4 18:46:47 1998  Dave Brolley  <brolley@cygnus.com>
 	* po/POTFILES.in: Regenerated
 	* po/opcodes.pot: Regenerated
 
-end-sanitize-fr30
 start-sanitize-m32rx
 Mon Nov  2 20:08:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -37,16 +37,14 @@ CFILES = \
 	d30v-opc.c \
 	dis-buf.c \
 	disassemble.c \
-	$(start-sanitize-fr30) \
-	fr30-asm.c \
-	fr30-dis.c \
-	fr30-opc.c \
-	$(end-sanitize-fr30) \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
 	i386-dis.c \
 	i960-dis.c \
+	i960c-asm.c \
+	i960c-dis.c \
+	i960c-opc.c \
 	m32r-asm.c \
 	m32r-dis.c \
 	m32r-opc.c \
@@ -86,16 +84,17 @@ ALL_MACHINES = \
 	d10v-opc.lo \
 	d30v-dis.lo \
 	d30v-opc.lo \
-	$(end-sanitize-fr30) \
 	fr30-asm.lo \
 	fr30-dis.lo \
 	fr30-opc.lo \
-	$(end-sanitize-fr30) \
 	h8300-dis.lo \
 	h8500-dis.lo \
 	hppa-dis.lo \
 	i386-dis.lo \
 	i960-dis.lo \
+	i960c-asm.lo \
+	i960c-dis.lo \
+	i960c-opc.lo \
 	m32r-asm.lo \
 	m32r-dis.lo \
 	m32r-opc.lo \
@@ -170,17 +169,17 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
+CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 \
+	stamp-m32r stamp-fr30 stamp-i960
 # end-sanitize-cygnus
-# start-sanitize-fr30
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r stamp-fr30
-# end-sanitize-fr30
 
-# start-sanitize-cygnus
+# start-sanitize-cygnus-never
 # CGEN support is sanitized out of FSF releases for now.
 # Sanitization must be split between assignments and rules because
 # automake splits them that way.
+# end-sanitize-cygnus-never
 
+# start-sanitize-cygnus
 CGENDIR = @cgendir@
 CGEN = @cgen@
 CGENFLAGS = -v
@@ -192,16 +191,19 @@ CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm \
 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
 	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm \
-	$(CGENDIR)/opcodes.scm $(CGENDIR)/rtl.scm \
-	$(CGENDIR)/cgen-opc.scm cgen-opc.in cgen-asm.in cgen-dis.in
+	$(CGENDIR)/rtl.scm $(CGENDIR)/rtx-funcs.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm \
+	cgen-opc.in cgen-asm.in cgen-dis.in
 # The CGEN_MAINT conditional is put here so it ends up in Makefile.in
 # properly sanitized.
 if CGEN_MAINT
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
+I960_DEPS = stamp-i960
 else
 M32R_DEPS =
 FR30_DEPS =
+I960_DEPS =
 endif
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
@@ -217,13 +219,19 @@ m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
 	$(MAKE) run-cgen arch=m32r prefix=m32r
-# end-sanitize-cygnus
-# start-sanitize-fr30
+
 fr30-opc.h fr30-opc.c fr30-asm.c fr30-dis.c: $(FR30_DEPS)
 	@true
 stamp-fr30: $(CGENFILES) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30
-# end-sanitize-fr30
+
+# Use a prefix of i960c, so that the existing i960-dis.c can remain for now.
+# When the cgen i960 disassembler support is complete, this `c' can go away.
+i960c-opc.h i960c-opc.c i960c-asm.c i960c-dis.c: $(I960_DEPS)
+	@true
+stamp-i960: $(CGENFILES) $(CGENDIR)/i960.cpu $(CGENDIR)/i960.opc
+	$(MAKE) run-cgen arch=i960 prefix=i960c
+# end-sanitize-cygnus
 
 # start-sanitize-tic80
 tic80-dis.lo: tic80-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
@@ -239,18 +247,6 @@ dvp-opc.lo: dvp-opc.c $(INCDIR)/opcode/dvp.h
 mips-dis.lo: mips-dis.c
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/mips-dis.c
 # end-sanitize-sky
-
-# start-sanitize-fr30
-fr30-asm.lo: fr30-asm.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
-  opintl.h
-fr30-dis.lo: fr30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
-  opintl.h
-fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
-  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
-  opintl.h
-# end-sanitize-fr30
 
 # This dependency stuff is copied from BFD.
 
@@ -323,6 +319,15 @@ dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) opintl.h
 disassemble.lo: disassemble.c $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
+fr30-asm.lo: fr30-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-dis.lo: fr30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 h8300-dis.lo: h8300-dis.c $(INCDIR)/opcode/h8300.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
 h8500-dis.lo: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h \
@@ -333,6 +338,15 @@ i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
 i960-dis.lo: i960-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h
+i960c-asm.lo: i960c-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/symcat.h i960c-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+i960c-dis.lo: i960c-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/symcat.h i960c-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+i960c-opc.lo: i960c-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
+  $(BFD_H) $(INCDIR)/symcat.h i960c-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(BFD_H) \
   $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
   opintl.h
