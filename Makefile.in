@@ -180,7 +180,7 @@ install.all: install-dirs install-autoconf install-texinfo \
 install.cross: install-dirs install-libiberty install-mmalloc \
         install-binutils install-bison install-byacc install-flex \
         install-ld install-gas install-libgcc install-readline \
-        install-glob install-gdb install-mmalloc install-gprof
+        install-glob install-gdb install-mmalloc install-gprof install-newlib install-gcc
 
 ### autoconf
 all-autoconf: force
@@ -374,7 +374,7 @@ install-newlib: force
 	@if [ -d ./newlib ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./newlib; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE)  install) ; \
 	else \
 		true ; \
 	fi
