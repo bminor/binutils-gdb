@@ -1,3 +1,7 @@
+2002-12-14  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* doc/binutils.texi: Add missing parenthesis.
+
 2002-12-15  Nick Kelsey  <nickk@ubicom.com>
 
 	* objcopy.c: Add --prefix-symbols=<prefix> option to rename all
