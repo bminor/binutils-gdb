@@ -26,6 +26,7 @@ echo Sanitizing `pwd`...
 # with rm -rf.
 
 Things-to-keep:
+README
 i386aout.c
 i386aout.sc
 ChangeLog
@@ -37,6 +38,7 @@ ld.h
 ld.texinfo
 ldemul.c
 ldemul.h
+ldctor.c
 ldexp.c
 ldexp.h
 ldfile.c
@@ -86,7 +88,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.19  1991/11/04 00:46:44  steve
+# Revision 1.20  1991/11/05 20:36:54  sac
+# *** empty log message ***
+#
+# Revision 1.19  1991/11/04  00:46:44  steve
 # 	 i386 aout changes from Bob Kukura
 #
 # Revision 1.18  1991/10/12  06:43:01  bothner

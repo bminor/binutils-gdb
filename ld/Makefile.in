@@ -23,11 +23,11 @@
 
 srcdir = .
 
-destdir = /usr/local
+ddestdir = /usr/local
 
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
-bindir = $(destdir)/bin
-gcclibdir = $(destdir)/lib/gcc/$(target_alias)/$(version)
+bindir = $(ddestdir)/bin
+gcclibdir = $(ddestdir)/lib/gcc/$(target_alias)/$(version)
 
 # Seach path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
