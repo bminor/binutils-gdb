@@ -1,5 +1,10 @@
 2002-07-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Bump version for snapshot.
+	* configure: Regenerated.
+
+2002-07-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* po/bfd.pot: Regenerated.
 
 2002-07-23  Nick Clifton  <nickc@redhat.com>
