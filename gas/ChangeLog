@@ -1,3 +1,10 @@
+2000-10-18  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+        * config/tc-m68k.h (RELAX_RELOC_*): New definitions for both
+        BFD_ASSEMBLER and !BFD_ASSEMBLER.
+        * config/tc-m68k.c (md_convert_frag_1): Use them instead of
+        BFD_RELOC_*.
+
 2000-10-17  Kazu Hirata  <kazu@hxi.com>
 
 	* debug.c: Fix formatting.

@@ -157,6 +157,12 @@ do								\
 while (0)
 
 #define NO_RELOC BFD_RELOC_NONE
+#define RELAX_RELOC_ABS8  BFD_RELOC_8
+#define RELAX_RELOC_ABS16 BFD_RELOC_16
+#define RELAX_RELOC_ABS32 BFD_RELOC_32
+#define RELAX_RELOC_PC8   BFD_RELOC_8_PCREL
+#define RELAX_RELOC_PC16  BFD_RELOC_16_PCREL
+#define RELAX_RELOC_PC32  BFD_RELOC_32_PCREL
 
 #ifdef OBJ_ELF
 
@@ -194,7 +200,13 @@ extern void m68k_elf_final_processing PARAMS ((void));
 
 #define tc_frob_coff_symbol(sym) m68k_frob_symbol (sym)
 
-#define NO_RELOC 0
+#define NO_RELOC          0
+#define RELAX_RELOC_ABS8  0
+#define RELAX_RELOC_ABS16 0
+#define RELAX_RELOC_ABS32 0
+#define RELAX_RELOC_PC8   0
+#define RELAX_RELOC_PC16  0
+#define RELAX_RELOC_PC32  0
 
 #endif /* ! BFD_ASSEMBLER */
 

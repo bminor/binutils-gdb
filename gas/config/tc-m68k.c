@@ -4359,7 +4359,7 @@ md_convert_frag_1 (fragP)
       if (disp == 0)
 	as_bad (_("short branch with zero offset: use :w"));
       fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
-		      fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
+		      fragP->fr_offset, 1, RELAX_RELOC_PC8);
       fixP->fx_pcrel_adjust = -1;
       break;
     case TAB (BRANCHBWL, SHORT):
@@ -4368,13 +4368,13 @@ md_convert_frag_1 (fragP)
     case TAB (BRANCHBW, SHORT):
       fragP->fr_opcode[1] = 0x00;
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_16_PCREL);
+	       1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (BRANCHBWL, LONG):
       fragP->fr_opcode[1] = (char) 0xFF;
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_32_PCREL);
+	       1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (BRABSJUNC, LONG):
@@ -4383,7 +4383,7 @@ md_convert_frag_1 (fragP)
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xB9; /* JSR with ABSL LONG operand */
 	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-		   0, BFD_RELOC_32);
+		   0, RELAX_RELOC_PC32);
 	  fragP->fr_fix += 4;
 	}
       else if (fragP->fr_opcode[0] == 0x60)	/* jbra */
@@ -4391,7 +4391,7 @@ md_convert_frag_1 (fragP)
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xF9; /* JMP with ABSL LONG operand */
 	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-		   0, BFD_RELOC_32);
+		   0, RELAX_RELOC_ABS32);
 	  fragP->fr_fix += 4;
 	}
       else
@@ -4415,25 +4415,25 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 0, BFD_RELOC_32);
+	       fragP->fr_offset, 0, RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
     case TAB (FBRANCH, SHORT):
       know ((fragP->fr_opcode[1] & 0x40) == 0);
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_16_PCREL);
+	       1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (FBRANCH, LONG):
       fragP->fr_opcode[1] |= 0x40;	/* Turn on LONG bit */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_32_PCREL);
+	       1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (DBCCLBR, SHORT):
     case TAB (DBCCABSJ, SHORT):
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_16_PCREL);
+	       1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (DBCCLBR, LONG):
@@ -4450,7 +4450,7 @@ md_convert_frag_1 (fragP)
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 1,
-	       BFD_RELOC_32_PCREL);
+	       RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (DBCCABSJ, LONG):
@@ -4467,14 +4467,14 @@ md_convert_frag_1 (fragP)
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 0,
-	       BFD_RELOC_32);
+	       RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
     case TAB (PCREL1632, SHORT):
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x3A; /* 072 - mode 7.2 */
       fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
+	       fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (PCREL1632, LONG):
@@ -4484,7 +4484,7 @@ md_convert_frag_1 (fragP)
       *buffer_address++ = 0x70;
       fragP->fr_fix += 2;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
-		      fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fixP->fx_pcrel_adjust = 2;
       fragP->fr_fix += 4;
       break;
@@ -4492,7 +4492,7 @@ md_convert_frag_1 (fragP)
       assert (fragP->fr_fix >= 2);
       buffer_address[-2] &= ~1;
       fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
-		      fragP->fr_offset, 1, BFD_RELOC_8_PCREL);
+		      fragP->fr_offset, 1, RELAX_RELOC_PC8);
       fixP->fx_pcrel_adjust = 1;
       break;
     case TAB (PCINDEX, SHORT):
@@ -4500,7 +4500,7 @@ md_convert_frag_1 (fragP)
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x20;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-		      fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fixP->fx_pcrel_adjust = 2;
       fragP->fr_fix += 2;
       break;
@@ -4509,13 +4509,13 @@ md_convert_frag_1 (fragP)
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x30;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
-		      fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fixP->fx_pcrel_adjust = 2;
       fragP->fr_fix += 4;
       break;
     case TAB (ABSTOPCREL, SHORT):
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, BFD_RELOC_16_PCREL);
+	       1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (ABSTOPCREL, LONG):
@@ -4526,7 +4526,7 @@ md_convert_frag_1 (fragP)
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       0, BFD_RELOC_32);
+	       0, RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
     }
