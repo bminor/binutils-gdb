@@ -1,3 +1,21 @@
+2002-03-04  H.J. Lu <hjl@gnu.org>
+
+	* elf.c (bfd_section_from_shdr): Handle special sections,
+	.init_array, .fini_array and .preinit_array.
+	(elf_fake_sections): Likewise.
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Create the
+	DT entry only if the section is in output for .init_array,
+	.fini_array and .preinit_array. Complain about .preinit_array
+	section in DSO.
+	(elf_bfd_final_link): Warn zero size for .init_array,
+	.fini_array and .preinit_array sections.
+
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Remove
+	SHT_INIT_ARRAY, SHT_FINI_ARRAY and SHT_PREINIT_ARRAY.
+	(elfNN_ia64_fake_sections): Remove .init_array, .fini_array and
+	.preinit_array.
+
 2002-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (WIN32LIBADD): Don't eval PICFLAG assignment.

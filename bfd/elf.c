@@ -1563,6 +1563,9 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_NOBITS:	/* .bss section.  */
     case SHT_HASH:	/* .hash section.  */
     case SHT_NOTE:	/* .note section.  */
+    case SHT_INIT_ARRAY:	/* .init_array section.  */
+    case SHT_FINI_ARRAY:	/* .fini_array section.  */
+    case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_SYMTAB:		/* A symbol table */
@@ -2177,6 +2180,12 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_REL;
       this_hdr->sh_entsize = bed->s->sizeof_rel;
     }
+  else if (strcmp (asect->name, ".init_array") == 0)
+    this_hdr->sh_type = SHT_INIT_ARRAY;
+  else if (strcmp (asect->name, ".fini_array") == 0)
+    this_hdr->sh_type = SHT_FINI_ARRAY;
+  else if (strcmp (asect->name, ".preinit_array") == 0)
+    this_hdr->sh_type = SHT_PREINIT_ARRAY;
   else if (strncmp (asect->name, ".note", 5) == 0)
     this_hdr->sh_type = SHT_NOTE;
   else if (strncmp (asect->name, ".stab", 5) == 0

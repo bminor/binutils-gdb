@@ -3029,9 +3029,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
      struct bfd_elf_version_tree *verdefs;
 {
   bfd_size_type soname_indx;
-  bfd *dynobj, *sub;
-  asection *o;
-  int need_preinit_array = 0, need_init_array = 0, need_fini_array = 0;
+  bfd *dynobj;
   struct elf_backend_data *bed;
   struct elf_assign_sym_version_info asvinfo;
 
@@ -3202,27 +3200,36 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
-      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
-	for (o = sub->sections; o != NULL; o = o->next)
-	  {
-	    /* yuck, more matching by name... */
-
-	    if (strcmp (bfd_section_name (sub, o), ".preinit_array") == 0)
-	      need_preinit_array = 1;
-	    if (strcmp (bfd_section_name (sub, o), ".init_array") == 0)
-	      need_init_array = 1;
-	    if (strcmp (bfd_section_name (sub, o), ".fini_array") == 0)
-	      need_fini_array = 1;
-	  }
-      if (need_preinit_array)
+      if (bfd_get_section_by_name (output_bfd, ".preinit_array") != NULL)
 	{
+	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
+	  if (info->shared)
+	    {
+	      bfd *sub;
+	      asection *o;
+
+	      for (sub = info->input_bfds; sub != NULL;
+		   sub = sub->link_next)
+		for (o = sub->sections; o != NULL; o = o->next)
+		  if (elf_section_data (o)->this_hdr.sh_type
+		      == SHT_PREINIT_ARRAY)
+		    {
+		      (*_bfd_error_handler)
+			(_("%s: .preinit_array section is not allowed in DSO"),
+			  bfd_archive_filename (sub));
+		      break;
+		    }
+
+	      return false;
+	    }
+
 	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAY,
 				      (bfd_vma) 0)
 	      || !elf_add_dynamic_entry (info, (bfd_vma) DT_PREINIT_ARRAYSZ,
 					 (bfd_vma) 0))
 	    return false;
 	}
-      if (need_init_array)
+      if (bfd_get_section_by_name (output_bfd, ".init_array") != NULL)
 	{
 	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_INIT_ARRAY,
 				      (bfd_vma) 0)
@@ -3230,7 +3237,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 					 (bfd_vma) 0))
 	    return false;
 	}
-      if (need_fini_array)
+      if (bfd_get_section_by_name (output_bfd, ".fini_array") != NULL)
 	{
 	  if (!elf_add_dynamic_entry (info, (bfd_vma) DT_FINI_ARRAY,
 				      (bfd_vma) 0)
@@ -5600,6 +5607,9 @@ elf_bfd_final_link (abfd, info)
 	    get_size:
 	      o = bfd_get_section_by_name (abfd, name);
 	      BFD_ASSERT (o != NULL);
+	      if (o->_raw_size == 0)
+		(*_bfd_error_handler)
+		  (_("warning: %s section has zero size"), name);
 	      dyn.d_un.d_val = o->_raw_size;
 	      elf_swap_dyn_out (dynobj, &dyn, dyncon);
 	      break;
