@@ -59,6 +59,8 @@ if [istarget "x86_64-*"] then {
 } elseif { [istarget "arm*-*"] || [istarget "xscale*-*"] } then {
     run_dump_test "cfi-arm-1"
 
+} elseif { [istarget "mips*-*"] } then {
+    run_dump_test "cfi-mips-1"
 } else {
     return
 }

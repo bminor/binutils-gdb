@@ -1,3 +1,14 @@
+2005-03-14  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c: Include dw2gencfi.h.
+	(mips_cfi_frame_initial_instructions): New.
+	* config/tc-mips.h (TARGET_USE_CFIPOP): Define.
+	(tc_cfi_frame_initial_instructions): Ditto.
+	(DWARF2_DEFAULT_RETURN_COLUMN): Ditto.
+	(DWARF2_CIE_DATA_ALIGNMENT): Ditto.
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Regenerate.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.
