@@ -1062,8 +1062,7 @@ Run _GDBN__ using @var{directory} as its working directory,
 instead of the current directory.
 
 _if__(_LUCID__)
-@item -energize @var{authentication}
-@itemx -cadillac @var{authentication}
+@item -context @var{authentication}
 When the Energize programming system starts up _GDBN__, it uses this
 option to trigger an alternate mode of interaction.
 @var{authentication} is a pair of numeric codes that identify _GDBN__
