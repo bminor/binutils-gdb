@@ -1,3 +1,12 @@
+Wed Jan  3 17:54:41 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (newlib.tar.gz): Delete building of newlib's info files.
+
+Mon Jan  1 19:09:14 1996  Brendan Kehoe  <brendan@rtl.cygnus.com>
+
+	* configure.in (noconfigdirs): Put ld or gas in this early, if the
+	user specifically used --with-gnu-ld=no or --with-gnu-as=no.
+
 Sat Dec 30 16:08:57 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config-ml.in: Add support for

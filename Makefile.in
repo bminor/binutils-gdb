@@ -371,7 +371,15 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX=$(HOST_PREFIX)' \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
-	'RANLIB=$$(RANLIB_FOR_TARGET)'
+	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	`if test x"$(LANGUAGES)" != x; then echo "LANGUAGES=$(LANGUAGES)"; fi` \
+	`if test x"$(STMP_FIXPROTO)" != x; then echo "STMP_FIXPROTO=$(STMP_FIXPROTO)"; fi` \
+	`if test x"$(LIMITS_H_TEST)" != x; then echo "LIMITS_H_TEST=$(LIMITS_H_TEST)"; fi` \
+	`if test x"$(LIBGCC1_TEST)" != x; then echo "LIBGCC1_TEST=$(LIBGCC1_TEST)"; fi` \
+	`if test x"$(LIBGCC2_CFLAGS)" != x; then echo "LIBGCC2_CFLAGS=$(LIBGCC2_CFLAGS)"; fi` \
+	`if test x"$(LIBGCC2_INCLUDES)" != x; then echo "LIBGCC2_INCLUDES=$(LIBGCC2_INCLUDES)"; fi` \
+	`if test x"$(ENQUIRE)" != x; then echo "ENQUIRE=$(ENQUIRE)"; fi` \
+	`if test x"$(BOOT_CFLAGS)" != x; then echo "BOOT_CFLAGS=$(BOOT_CFLAGS)"; fi`
 
 GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
@@ -570,7 +578,8 @@ ALL_TARGET_MODULES = \
 	all-target-newlib \
 	all-target-winsup \
 	all-target-libgloss \
-	all-target-libiberty
+	all-target-libiberty \
+	all-target-examples
 
 # This is a list of the configure targets for all of the modules which
 # are compiled using the target tools.
@@ -582,7 +591,8 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-newlib \
 	configure-target-winsup \
 	configure-target-libgloss \
-	configure-target-libiberty
+	configure-target-libiberty \
+	configure-target-examples
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -1001,6 +1011,16 @@ all-gcc:
 	  true; \
 	fi
 
+.PHONY: all-bootstrap
+all-bootstrap:
+	@if [ -f ./gcc/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) bootstrap); \
+	else \
+	  true; \
+	fi
+
 .PHONY: check-gcc
 check-gcc:
 	@if [ -f ./gcc/Makefile ] ; then \
@@ -1050,6 +1070,8 @@ all-diff: all-libiberty
 all-emacs:
 all-emacs19: all-byacc
 all-etc:
+configure-target-examples: $(ALL_GCC)
+all-target-examples: configure-target-examples
 all-expect: all-tcl all-tk
 all-fileutils: all-libiberty
 all-find:
@@ -1059,6 +1081,7 @@ all-gash: all-tcl
 all-gawk:
 ALL_GCC = all-gcc
 all-gcc: all-libiberty all-byacc all-binutils all-gas all-ld
+all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements)
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
@@ -1303,15 +1326,12 @@ NEWLIB_SUPPORT_DIRS=libgloss
 # taz will build the .info files but since SUBDIRS won't contain newlib,
 # distclean won't be run (leaving Makefile, config.status, and the tmp files
 # used in building the .info files, eg: *.def, *.ref).
-# Compensate here by configuring newlib for a simple (no multilib support)
-# cross target (sparc64), building the info files, and doing make distclean
-# ourselves.
+# The problem isn't solvable however without a lot of extra work because
+# target libraries are built in subdir $(target_alias) which gets nuked during
+# the make distclean.  For now punt on the issue of shipping newlib info files
+# with newlib net releases and wait for a day when some native target (sun4?)
+# supports newlib (if only minimally).
 newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
-	rootme=`pwd` ; \
-	  cd newlib && ../configure --srcdir $$rootme/newlib \
-		--host sun4 --target sparc64-elf
-	cd newlib ; make info
-	cd newlib ; make distclean
 	$(MAKE) -f Makefile.in taz TOOL=newlib \
 		SUPPORT_FILES="$(NEWLIB_SUPPORT_DIRS)" \
 		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" newlib
