@@ -1,3 +1,9 @@
+2000-05-03  J.T. Conklin  <jtc@redback.com>
+
+	* config/tc-ppc.c (pre_defined_registers): Add entries for vector
+ 	unit registers.
+	(md_parse_option): Recognize -m7400.
+
 2000-05-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/atof-ieee.c (gen_to_words): When adding carry back in,

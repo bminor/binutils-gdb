@@ -239,10 +239,13 @@ struct pd_reg
    1. r<reg_num> which has the value <reg_num>.
    2. r.<reg_num> which has the value <reg_num>.
 
-
    Each floating point register has predefined names of the form:
    1. f<reg_num> which has the value <reg_num>.
    2. f.<reg_num> which has the value <reg_num>.
+
+   Each vector unit register has predefined names of the form:
+   1. v<reg_num> which has the value <reg_num>.
+   2. v.<reg_num> which has the value <reg_num>.
 
    Each condition register has predefined names of the form:
    1. cr<reg_num> which has the value <reg_num>.
@@ -441,6 +444,72 @@ static const struct pd_reg pre_defined_registers[] =
 
   { "srr0", 26 }, /* Machine Status Save/Restore Register 0 */
   { "srr1", 27 }, /* Machine Status Save/Restore Register 1 */
+  
+  { "v.0", 0 },     /* Vector registers */
+  { "v.1", 1 }, 
+  { "v.10", 10 }, 
+  { "v.11", 11 }, 
+  { "v.12", 12 }, 
+  { "v.13", 13 }, 
+  { "v.14", 14 }, 
+  { "v.15", 15 }, 
+  { "v.16", 16 }, 
+  { "v.17", 17 }, 
+  { "v.18", 18 }, 
+  { "v.19", 19 }, 
+  { "v.2", 2 }, 
+  { "v.20", 20 }, 
+  { "v.21", 21 }, 
+  { "v.22", 22 }, 
+  { "v.23", 23 }, 
+  { "v.24", 24 }, 
+  { "v.25", 25 }, 
+  { "v.26", 26 }, 
+  { "v.27", 27 }, 
+  { "v.28", 28 }, 
+  { "v.29", 29 }, 
+  { "v.3", 3 }, 
+  { "v.30", 30 },
+  { "v.31", 31 },
+  { "v.4", 4 }, 
+  { "v.5", 5 }, 
+  { "v.6", 6 }, 
+  { "v.7", 7 }, 
+  { "v.8", 8 }, 
+  { "v.9", 9 }, 
+
+  { "v0", 0 },
+  { "v1", 1 }, 
+  { "v10", 10 }, 
+  { "v11", 11 }, 
+  { "v12", 12 }, 
+  { "v13", 13 }, 
+  { "v14", 14 }, 
+  { "v15", 15 }, 
+  { "v16", 16 }, 
+  { "v17", 17 }, 
+  { "v18", 18 }, 
+  { "v19", 19 }, 
+  { "v2", 2 }, 
+  { "v20", 20 }, 
+  { "v21", 21 }, 
+  { "v22", 22 }, 
+  { "v23", 23 }, 
+  { "v24", 24 }, 
+  { "v25", 25 }, 
+  { "v26", 26 }, 
+  { "v27", 27 }, 
+  { "v28", 28 }, 
+  { "v29", 29 }, 
+  { "v3", 3 }, 
+  { "v30", 30 },
+  { "v31", 31 },
+  { "v4", 4 }, 
+  { "v5", 5 }, 
+  { "v6", 6 }, 
+  { "v7", 7 }, 
+  { "v8", 8 }, 
+  { "v9", 9 },
 
   { "xer", 1 },
 
@@ -776,6 +845,8 @@ md_parse_option (c, arg)
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
+      else if (strcmp (arg, "7400") == 0)
+        ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
       /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
          620.  */
       else if (strcmp (arg, "ppc64") == 0 || strcmp (arg, "620") == 0)
