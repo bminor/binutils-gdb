@@ -1,3 +1,7 @@
+2000-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Overall Structure): Spelling fix.
+
 2000-08-10  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbint.texinfo (Target Architecture Definition): Document that

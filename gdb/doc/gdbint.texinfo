@@ -137,7 +137,7 @@ for even half as many configurations as @value{GDBN} supports.
 @value{GDBN} consists of three major subsystems: user interface, symbol handling
 (the ``symbol side''), and target system handling (the ``target side'').
 
-Ther user interface consists of several actual interfaces, plus
+The user interface consists of several actual interfaces, plus
 supporting code.
 
 The symbol side consists of object file readers, debugging info
