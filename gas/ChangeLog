@@ -1,5 +1,8 @@
 Wed May  7 15:39:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (write_object_file): Just pass NULL to
+ 	md_do_align, not the address of a char holding NOP_OPCODE.
+
 	* config/tc-mips.c (macro): Handle constants for M_LI_D and
 	M_LI_DD.
 	(mips_ip): For 'F', 'L', 'f', and 'l', generate a constant rather
