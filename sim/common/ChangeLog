@@ -1,3 +1,24 @@
+Thu Jan 23 13:35:03 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* aclocal.m4 (SIM_AC_COMMON):  Move contents of Make-common.in
+	into here.  Makes insertion into makefiles easier.  Also, change
+	the way that callback.o, gentmap, targ-vals.h, targ-map.c,
+	targ-map.o, and run are built.  They are now built in the
+	individual simulator directories, taking sources from ../common as
+	necessary.  This replaces the merging of libcommon.a into
+	linsim.a, which was problematic for the WinGDB build process.
+	* run.c:  Include config.h from . instead of ../common.
+	* Make-common.in:  Remove.  It's no longer necessary.
+
+Mon Dec 16 15:02:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Make-common.in (ALL_CLAGS): Put CFLAGS at the end.
+	(.c.o): Put $(ALL_CFLAGS) before the file being compiled.
+
+Wed Dec 11 11:30:58 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* run.c (main): Set target_byte_order before call to sim_open.
+
 Sun Dec  8 18:22:06 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* callback.c: #include <stdlib.h>
