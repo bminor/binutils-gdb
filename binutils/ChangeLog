@@ -1,3 +1,8 @@
+Wed Jan 17 14:23:00 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* srconv.c (wr_du): Set du.stackfrmt to 0.
+	(wr_un, wr_sc): Emit all sections, even those with 0 size.
+
 Tue Jan 16 16:15:49 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* srconv.c (wr_hd): Space size within segment was being
