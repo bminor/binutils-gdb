@@ -698,6 +698,23 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false)			/* pcrel_offset */
 };
 
+/* The reloc used for BFD_RELOC_CTOR when doing a 64 bit link.  This
+   is a hack to make the linker think that we need 64 bit values.  */
+static reloc_howto_type elf_mips_ctor64_howto =
+  HOWTO (R_MIPS_64,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 mips32_64bit_reloc,	/* special_function */
+	 "R_MIPS_64",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false);		/* pcrel_offset */
+
 /* The reloc used for the mips16 jump instruction.  */
 static reloc_howto_type elf_mips16_jump_howto =
   HOWTO (R_MIPS16_26,		/* type */
@@ -1453,6 +1470,26 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   return ret;
 }
 
+/* Return the ISA for a MIPS e_flags value.  */
+
+static INLINE int
+elf_mips_isa (flags)
+     flagword flags;
+{
+  switch (flags & EF_MIPS_ARCH)
+    {
+    case E_MIPS_ARCH_1:
+      return 1;
+    case E_MIPS_ARCH_2:
+      return 2;
+    case E_MIPS_ARCH_3:
+      return 3;
+    case E_MIPS_ARCH_4:
+      return 4;
+    }
+  return 4;
+}
+
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
@@ -1465,7 +1502,6 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_NONE, R_MIPS_NONE, },
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
-  { BFD_RELOC_CTOR, R_MIPS_32 },
   { BFD_RELOC_64, R_MIPS_64 },
   { BFD_RELOC_MIPS_JMP, R_MIPS_26 },
   { BFD_RELOC_HI16_S, R_MIPS_HI16 },
@@ -1495,6 +1531,17 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     {
       if (mips_reloc_map[i].bfd_reloc_val == code)
 	return &elf_mips_howto_table[(int) mips_reloc_map[i].elf_reloc_val];
+    }
+
+  /* We need to handle BFD_RELOC_CTOR specially.  If this is a mips3
+     file, then we assume that we are using 64 bit addresses, and use
+     R_MIPS_64.  Otherwise, we use R_MIPS_32.  */
+  if (code == BFD_RELOC_CTOR)
+    {
+      if (elf_mips_isa (elf_elfheader (abfd)->e_flags) < 3)
+	return &elf_mips_howto_table[(int) R_MIPS_32];
+      else
+	return &elf_mips_ctor64_howto;
     }
 
   /* Special handling for the MIPS16 relocs, since they are made up
@@ -1904,26 +1951,6 @@ _bfd_mips_elf_copy_private_bfd_data (ibfd, obfd)
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = true;
   return true;
-}
-
-/* Return the ISA for a MIPS e_flags value.  */
-
-static INLINE int
-elf_mips_isa (flags)
-     flagword flags;
-{
-  switch (flags & EF_MIPS_ARCH)
-    {
-    case E_MIPS_ARCH_1:
-      return 1;
-    case E_MIPS_ARCH_2:
-      return 2;
-    case E_MIPS_ARCH_3:
-      return 3;
-    case E_MIPS_ARCH_4:
-      return 4;
-    }
-  return 4;
 }
 
 /* Merge backend specific data from an object file to the output
