@@ -1,3 +1,13 @@
+2001-08-10  Daniel Jacobowitz  <drow@mvista.com>
+	    H.J. Lu  (hjl@gnu.org)
+
+	* partial-stab.h: valu should be a CORE_ADDR.
+
+2001-08-08  H.J. Lu  (hjl@gnu.org)
+
+	* dbxread.c (SWAP_SYMBOL): Removed.
+	(INTERNALIZE_SYMBOL): Check sign extended vma.
+
 2001-08-13  Christopher Faylor  <cgf@cygnus.com>
 
 	* top.c (SIGSETJMP): Protect env argument with parentheses.

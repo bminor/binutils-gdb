@@ -201,7 +201,7 @@ switch (CUR_SYMBOL_TYPE)
 
   case N_SO:
     {
-      unsigned long valu;
+      CORE_ADDR valu;
       static int prev_so_symnum = -10;
       static int first_so_symnum;
       char *p;
@@ -399,7 +399,7 @@ switch (CUR_SYMBOL_TYPE)
     /* See if this is an end of function stab.  */
     if (pst && CUR_SYMBOL_TYPE == N_FUN && *namestring == '\000')
       {
-	unsigned long valu;
+	CORE_ADDR valu;
 
 	/* It's value is the size (in bytes) of the function for
 	   function relative stabs, or the address of the function's
