@@ -61,6 +61,9 @@ struct ar_hdr *
 /* Forward declarations */
 
 static void
+remove_output PARAMS ((void));
+
+static void
 map_over_members PARAMS ((bfd *, void (*)(bfd *), char **, int));
 
 static void
@@ -201,7 +204,7 @@ void
 do_show_version ()
 {
   printf ("GNU %s version %s\n", program_name, program_version);
-  exit (0);
+  xexit (0);
 }
 
 void
@@ -215,7 +218,45 @@ Usage: %s [-]{dmpqrtx}[abcilosuvV] [member-name] archive-file file...\n\
   else
     fprintf (stderr, "\
 Usage: %s [-vV] archive\n", program_name);
-  exit (1);
+  xexit (1);
+}
+
+/* Normalize a file name specified on the command line into a file
+   name which we will use in an archive.  */
+
+static char *
+normalize (file)
+     char *file;
+{
+  char *filename = strrchr (file, '/');
+  if (filename != (char *) NULL)
+    {
+      filename++;
+    }
+  else
+    {
+      filename = file;
+    }
+  return filename;
+}
+
+/* Remove any output file.  This is only called via xatexit.  */
+
+static char *output_filename = NULL;
+static FILE *output_file = NULL;
+static bfd *output_bfd = NULL;
+
+static void
+remove_output ()
+{
+  if (output_filename != NULL)
+    {
+      if (output_bfd != NULL && output_bfd->iostream != NULL)
+	fclose ((FILE *) (output_bfd->iostream));
+      if (output_file != NULL)
+	fclose (output_file);
+      unlink (output_filename);
+    }
 }
 
 /* The option parsing should be in its own function.
@@ -244,6 +285,8 @@ main (argc, argv)
 
   bfd_init ();
   show_version = 0;
+
+  xatexit (remove_output);
 
   temp = strrchr (program_name, '/');
   if (temp == (char *) NULL)
@@ -275,7 +318,7 @@ main (argc, argv)
 	    ranlib_touch (argv[arg_index]);
 	  ++arg_index;
 	}
-      exit (0);
+      xexit (0);
     }
   else
     is_ranlib = 0;
@@ -283,7 +326,7 @@ main (argc, argv)
   if (argc == 2 && strcmp (argv[1], "-M") == 0)
     {
       mri_emul ();
-      exit (0);
+      xexit (0);
     }
 
   if (argc < 2)
@@ -387,11 +430,16 @@ main (argc, argv)
     {
       bfd *arch;
 
+      /* We can't write an armap when using ar q, so just do ar r
+         instead.  */
+      if (operation == quick_append && write_armap)
+	operation = replace;
+
       if ((operation == none || operation == print_table)
 	  && write_armap == 1)
 	{
 	  ranlib_only (argv[2]);
-	  exit (0);
+	  xexit (0);
 	}
 
       if (operation == none)
@@ -409,12 +457,31 @@ main (argc, argv)
 
       files = arg_index < argc ? argv + arg_index : NULL;
 
+      /* We can't do a quick append if we need to construct an
+	 extended name table, because do_quick_append won't be able to
+	 rebuild the name table.  Unfortunately, at this point we
+	 don't actually know the maximum name length permitted by this
+	 object file format.  So, we guess.  FIXME.  */
+      if (operation == quick_append)
+	{
+	  char **chk;
+
+	  for (chk = files; chk != NULL && *chk != '\0'; chk++)
+	    {
+	      if (strlen (normalize (*chk)) > 14)
+		{
+		  operation = replace;
+		  break;
+		}
+	    }
+	}
+
       if (operation == quick_append)
 	{
 	  /* Note that quick appending to a non-existent archive creates it,
 	     even if there are no files to append. */
 	  do_quick_append (inarch_filename, files);
-	  exit (0);
+	  xexit (0);
 	}
 
       arch = open_inarch (inarch_filename);
@@ -452,26 +519,12 @@ main (argc, argv)
 	default:
 	  fprintf (stderr, "%s: internal error -- this option not implemented\n",
 		   program_name);
-	  exit (1);
+	  xexit (1);
 	}
     }
-  return 0;
-}
 
-static char *
-normalize (file)
-     char *file;
-{
-  char *filename = strrchr (file, '/');
-  if (filename != (char *) NULL)
-    {
-      filename++;
-    }
-  else
-    {
-      filename = file;
-    }
-  return filename;
+  xexit (0);
+  return 0;
 }
 
 bfd *
@@ -602,12 +655,16 @@ extract_file (abfd)
   if (size == 0)
     {
       /* Seems like an abstraction violation, eh?  Well it's OK! */
+      output_filename = bfd_get_filename (abfd);
+
       ostream = fopen (bfd_get_filename (abfd), FOPEN_WB);
       if (!ostream)
 	{
 	  perror (bfd_get_filename (abfd));
-	  exit (1);
+	  xexit (1);
 	}
+
+      output_file = ostream;
     }
   else
     while (ncopied < size)
@@ -625,18 +682,26 @@ extract_file (abfd)
 	if (!ostream)
 	  {
 	    /* Seems like an abstraction violation, eh?  Well it's OK! */
+	    output_filename = bfd_get_filename (abfd);
+
 	    ostream = fopen (bfd_get_filename (abfd), FOPEN_WB);
 	    if (!ostream)
 	      {
 		perror (bfd_get_filename (abfd));
-		exit (1);
+		xexit (1);
 	      }
+
+	    output_file = ostream;
 	  }
 	fwrite (cbuf, 1, nread, ostream);
 	ncopied += tocopy;
       }
 
   fclose (ostream);
+
+  output_file = NULL;
+  output_filename = NULL;
+
   chmod (bfd_get_filename (abfd), buf.st_mode);
 
   if (preserve_dates)
@@ -700,7 +765,7 @@ do_quick_append (archive_filename, files_to_append)
   if (ofile == NULL)
     {
       perror (program_name);
-      exit (1);
+      xexit (1);
     }
 
   temp = bfd_openr (archive_filename, NULL);
@@ -787,10 +852,14 @@ write_archive (iarch)
   strcpy (new_name + namelen, "-art");
 #endif
 
+  output_filename = new_name;
+
   obfd = bfd_openw (new_name, bfd_get_target (iarch));
 
   if (obfd == NULL)
     bfd_fatal (old_name);
+
+  output_bfd = obfd;
 
   bfd_set_format (obfd, bfd_archive);
 
@@ -803,6 +872,9 @@ write_archive (iarch)
 
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
+
+  output_bfd = NULL;
+  output_filename = NULL;
 
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
@@ -939,7 +1011,7 @@ move_members (arch, files_to_move)
 	}
       fprintf (stderr, "%s: no entry %s in archive %s!\n",
 	       program_name, *files_to_move, arch->filename);
-      exit (1);
+      xexit (1);
     next_file:;
     }
 
@@ -1049,7 +1121,7 @@ ranlib_only (archname)
   write_armap = 1;
   arch = open_inarch (archname);
   if (arch == NULL)
-    exit (1);
+    xexit (1);
   write_archive (arch);
 }
 
@@ -1077,6 +1149,9 @@ ranlib_touch (archname)
   if (arch == NULL
       || ! bfd_check_format (arch, bfd_archive))
     bfd_fatal (archname);
+
+  if (! bfd_has_map (arch))
+    fatal ("%s: no archive map to update", archname);
 
   bfd_update_armap_timestamp (arch);
 

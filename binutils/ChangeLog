@@ -1,5 +1,8 @@
 Thu Nov 17 15:00:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* ar.c (main): Don't call do_quick_append if any of the archive
+	names are longer than 14 characters.
+
 	* objcopy.c (main): Fix is_strip test.  From
 	pirker@eiunix.tuwien.ac.at (Martin Pirker).
 
