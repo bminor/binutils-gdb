@@ -1,6 +1,7 @@
 #PIII SIMD instructions
 
 .text
+foo:
  addps		(%ecx),%xmm0
  addps		%xmm2,%xmm1
  addss		(%ebx),%xmm2

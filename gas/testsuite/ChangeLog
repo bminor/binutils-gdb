@@ -1,3 +1,10 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/i386/amd.s: Add a symbol so a.out tests will work.
+	* gas/i386/katmai.s: Likewise.
+	* gas/i386/amd.d: Corresponding change.
+	* gas/i386/katmai.d: Corresponding change.
+
 1999-06-10  Ian Lance Taylor  <ian@zembu.com>
 
 	* gas/mips/sync.d: Pass -mips2 to the assembler.

@@ -1,6 +1,7 @@
 #AMD 3DNow! instructions
 
 .text
+foo:
  prefetch	(%ebx)
  prefetchw	0x1000(,%esi,2)
  femms

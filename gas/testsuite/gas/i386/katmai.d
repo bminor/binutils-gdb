@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 
-0+000 <.text>:
+0+000 <foo>:
    0:	0f 58 01 [ 	]*addps  \(%ecx\),%xmm0
    3:	0f 58 ca [ 	]*addps  %xmm2,%xmm1
    6:	f3 0f 58 13 [ 	]*addss  \(%ebx\),%xmm2

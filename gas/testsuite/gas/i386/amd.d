@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 
-0+000 <.text>:
+0+000 <foo>:
    0:	0f 0d 03 [ 	]*prefetch \(%ebx\)
    3:	0f 0d 0c 75 00 10 00 00 [ 	]*prefetchw 0x1000\(,%esi,2\)
    b:	0f 0e [ 	]*femms  
