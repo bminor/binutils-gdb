@@ -1,3 +1,7 @@
+2002-05-04  Bob Byrnes  <byrnes@curl.com>
+
+	* size.c (display_archive): Add last_arfile and code to close archives.
+
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* nm.c (print_symbol): Check returned filename from
