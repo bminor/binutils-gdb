@@ -237,9 +237,9 @@ Determines the syntax class for the instruction.  It can have the
 following values:
 
 @table @code
-@item{SYNTAX_2OP}:
+@item @code{SYNTAX_2OP}:
 2 Operand Instruction 
-@item{SYNTAX_3OP}:
+@item @code{SYNTAX_3OP}:
 3 Operand Instruction 
 @end table
 
