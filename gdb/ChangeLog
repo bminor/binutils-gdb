@@ -1,3 +1,11 @@
+2004-06-12  Andrew Cagney  <cagney@gnu.org>
+
+	Import from mainline:
+	2004-05-05  Jim Ingham  <jingham@apple.com>
+	* breakpoint.c (create_breakpoints): Copy the ignore count and
+	thread id over from the pended breakpoint to the actual
+	breakpoint.
+	
 2004-06-11  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS: Mention ISO-C fixes.
