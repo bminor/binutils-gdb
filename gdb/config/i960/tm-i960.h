@@ -25,6 +25,8 @@
 #define I80960
 #endif
 
+#include "doublest.h"
+
 /* Hook for the SYMBOL_CLASS of a parameter when decoding DBX symbol
    information.  In the i960, parameters can be stored as locals or as
    args, depending on the type of the debug record.

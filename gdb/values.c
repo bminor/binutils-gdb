@@ -32,6 +32,7 @@
 #include "language.h"
 #include "scm-lang.h"
 #include "demangle.h"
+#include "doublest.h"
 
 /* Prototypes for exported functions. */
 

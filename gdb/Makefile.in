@@ -541,7 +541,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
 	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-file.h ui-file.c \
-	frame.c \
+	frame.c doublest.c \
 	gnu-v2-abi.c gnu-v3-abi.c hpacc-abi.c cp-abi.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
@@ -579,7 +579,7 @@ nm_h =		@nm_h@
 
 annotate_h =	annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h =	arch-utils.h
-ax_h = 		ax.h
+ax_h = 		ax.h $(doublest_h)
 breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 call_cmds_h =	call-cmds.h
 cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
@@ -593,9 +593,10 @@ completer_h =	completer.h
 cp_abi_h =	cp-abi.h
 dcache_h =	dcache.h
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file.h
+doublest_h =	doublest.h $(floatformat_h)
 event_loop_h =  event-loop.h
 event_top_h = 	event-top.h
-expression_h =	expression.h
+expression_h =	expression.h $(doublest_h) $(symtab_h)
 frame_h =	frame.h
 gdb_h =		gdb.h
 gdb_string_h =  gdb_string.h
@@ -606,7 +607,7 @@ gdbtypes_h =	gdbtypes.h
 inf_loop_h =  	inf-loop.h
 inferior_h =	inferior.h $(breakpoint_h)
 memattr_h =     memattr.h
-parser_defs_h =	parser-defs.h
+parser_defs_h =	parser-defs.h $(doublest_h)
 regcache_h =	regcache.h
 remote_h =	remote.h
 remote_utils_h =  remote-utils.h $(target_h)
@@ -616,7 +617,7 @@ target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 top_h =		top.h
 tracepoint_h =	tracepoint.h
 ui_out_h =      ui-out.h
-value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h)
+value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h) $(doublest_h)
 version_h = 	version.h
 
 # Header files that need to have srcdir added.  Note that in the cases
@@ -693,7 +694,9 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
 	ui-file.o \
-	frame.o \
+	frame.o doublest.o \
+	ui-file.o \
+	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
@@ -1201,8 +1204,8 @@ alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(regcache_h)
 
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(symtab_h) $(dis_asm_h) $(gdb_string_h) linespec.h \
-	$(regcache_h)
+	$(inferior_h) $(symtab_h) $(dis-asm.h) $(gdb_string_h) linespec.h \
+	$(regcache_h) $(doublest_h)
 
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 
@@ -1210,10 +1213,10 @@ arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h)
 
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
-	$(gdbtypes_h) $(floatformat_h) $(regcache_h)
+	$(gdbtypes_h) $(floatformat_h) $(regcache_h) $(doublest_h)
 
 arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
-	$(gdbcore_h) $(regcache_h)
+	$(gdbcore_h) $(regcache_h) $(doublest_h)
 
 bcache.o: bcache.c bcache.h $(defs_h)
 
@@ -1236,6 +1239,9 @@ c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h) $(cp_abi_h)
+
+doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
+	gdb_assert.h gdb_string.h
 
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(parser_defs_h) $(symtab_h) $(gdb_string_h)
@@ -1522,7 +1528,8 @@ i386gnu-nat.o: gnu-nat.h
 
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdb_string_h) $(frame_h)	\
 	$(inferior_h) $(gdbcore_h) $(target_h) $(floatformat_h)	\
-	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h) $(regcache_h)
+	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h) $(regcache_h) \
+	$(doublest_h)
 
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
 
@@ -1561,7 +1568,7 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) language.h $(regcache_h)
+	$(inferior_h) language.h $(regcache_h) $(doublest_h)
 
 i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(gdbcore_h) \
@@ -1574,7 +1581,7 @@ ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h)
 
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) objfiles.h \
-	$(INCLUDE_DIR)/elf/common.h $(regcache_h)
+	$(INCLUDE_DIR)/elf/common.h $(regcache_h) $(doublest_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) language.h $(symfile_h) $(gdb_string_h) \
@@ -1771,7 +1778,7 @@ hp-symtab-read.o: hp-symtab-read.c hpread.h $(bfd_h) buildsym.h complaints.h \
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(gdb_string_h) linespec.h
+	$(gdb_string_h) linespec.h $(doublest_h)
 
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
@@ -1956,7 +1963,7 @@ serial.o: serial.c $(defs_h) serial.h $(gdb_string_h)
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h) \
-	$(regcache_h)
+	$(regcache_h) $(doublest_h)
 
 sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) serial.h terminal.h $(arch_utils_h) \
@@ -1995,7 +2002,7 @@ dsrec.o: dsrec.c $(defs_h) srec.h
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \
 	$(gdbtypes_h) objfiles.h stabsread.h $(symfile_h) $(symtab_h) \
-	$(gdb_string_h)
+	$(gdb_string_h) $(doublest_h)
 
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	language.h $(target_h) $(gdb_string_h) $(ui_out_h)
@@ -2050,7 +2057,7 @@ top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(cli_cmds_h) $(cli_script_h) $(cli_setshow_h) \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h \
 	$(remote_utils_h) $(gdb_string_h) $(event_loop_h) $(event_top_h) \
-	$(completer_h) $(version_h) $(ui_out_h) \
+	$(completer_h) $(version_h) $(ui_out_h) $(doublest_h) \
 	serial.h
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
@@ -2069,18 +2076,18 @@ utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h $(symtab_h) $(target_h) $(value_h) \
-	$(gdb_string_h)
+	$(gdb_string_h) $(doublest_h)
 
 valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(regcache_h) $(cp_abi_h)
 
 valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) $(target_h) \
-	$(value_h) $(gdb_string_h) valprint.h
+	$(value_h) $(gdb_string_h) valprint.h $(doublest_h)
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) $(target_h) $(value_h) \
-	$(gdb_string_h) scm-lang.h
+	$(gdb_string_h) scm-lang.h $(doublest_h)
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 

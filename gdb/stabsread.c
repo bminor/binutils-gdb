@@ -43,6 +43,7 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "language.h"
+#include "doublest.h"
 
 #include <ctype.h>
 

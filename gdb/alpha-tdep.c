@@ -32,6 +32,7 @@
 #include "gdb_string.h"
 #include "linespec.h"
 #include "regcache.h"
+#include "doublest.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 

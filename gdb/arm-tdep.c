@@ -30,6 +30,7 @@
 #include "dis-asm.h"		/* For register flavors. */
 #include <ctype.h>		/* for isupper () */
 #include "regcache.h"
+#include "doublest.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.

@@ -28,6 +28,7 @@
 #include "target.h"
 #include "language.h"
 #include "gdb_string.h"
+#include "doublest.h"
 #include <math.h>
 
 /* Define whether or not the C operator '/' truncates towards zero for

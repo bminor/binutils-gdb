@@ -31,6 +31,7 @@
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "doublest.h"
 
 #include "bfd/libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */

@@ -1,3 +1,43 @@
+2001-07-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)
+	(HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)
+	(HOST_LONG_DOUBLE_FORMAT, DOUBLEST)
+	(floatformat_to_doublest, floatformat_from_doublest)
+	(floatformat_is_negative, floatformat_is_nan)
+	(floatformat_mantissa, store_floating)
+	(extract_floating): Move declaration from here.
+	* doublest.h: To here.  New file.
+	* utils.c (get_field, floatformat_to_doublest, put_field)
+	(ldfrexp, floatformat_from_doublest, floatformat_is_negative)
+	(floatformat_is_nan, floatformat_mantissa)
+	(FLOATFORMAT_CHAR_BIT): Move from here.
+	* doublest.c: To here.  New file.
+	* findvar.c (store_floating, extract_floating): Move from here.
+	* doublest.c: To here.
+	* Makefile.in (SFILES): Add doublest.c.
+	(COMMON_OBS): Add doublest.o.
+	(doublest.o): Specify dependencies.
+	(doublest_h): Define.
+
+	* config/m88k/tm-m88k.h: Include "doublest.h".
+	* config/i960/tm-i960.h: Ditto.
+	* config/i386/tm-symmetry.h: Ditto.
+	* rs6000-tdep.c, valarith.c: Ditto.
+	* valprint.c, stabsread.c, sh-tdep.c: Ditto.
+	* ia64-tdep.c, i387-tdep.c, i386-tdep.c: Ditto.
+	* values.c, arm-tdep.c, arm-linux-tdep.c: Ditto.
+	* alpha-tdep.c, ax.h, expression.h: Ditto.
+	* sh-tdep.c, parse.c, top.c, value.h: Ditto.
+	
+	* Makefile.in (arm-tdep.o): Add $(doublest_h).
+	(i386-tdep.o, i387-tdep.o, ia64-tdep.o): Ditto.
+	(rs6000-tdep.o, stabsread.o, valarith.o): Ditto.
+	(values.o, valprint.o, arm-linux-tdep.o): Ditto.
+	(alpha-tdep.o, ax_h, parse.o, top.o, value_h): Ditto.
+	(parser_defs_h): Ditto.
+	(expression_h): Add $(doublest_h) and $(symtab_h).
+
 2001-08-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Sort header definitions.

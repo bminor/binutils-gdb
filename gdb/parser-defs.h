@@ -24,6 +24,8 @@
 #if !defined (PARSER_DEFS_H)
 #define PARSER_DEFS_H 1
 
+#include "doublest.h"
+
 struct std_regs
   {
     char *name;

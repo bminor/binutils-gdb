@@ -23,6 +23,7 @@
 
 
 #include "symtab.h"		/* Needed for "struct block" type. */
+#include "doublest.h"		/* Needed for DOUBLEST.  */
 
 
 /* Definitions for saved C expressions.  */

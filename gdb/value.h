@@ -23,6 +23,8 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
+#include "doublest.h"
+
 /*
  * The structure which defines the type of a value.  It should never
  * be possible for a program lval value to survive over a call to the inferior

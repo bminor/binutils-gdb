@@ -28,6 +28,7 @@
 #include "floatformat.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "doublest.h"
 
 
 /* FIXME: Eliminate the next two functions when we have the time to

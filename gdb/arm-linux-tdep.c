@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "frame.h"
 #include "regcache.h"
+#include "doublest.h"
 
 /* For arm_linux_skip_solib_resolver.  */
 #include "symtab.h"

@@ -33,6 +33,7 @@
 #include "annotate.h"
 #include "valprint.h"
 #include "floatformat.h"
+#include "doublest.h"
 
 #include <errno.h>
 

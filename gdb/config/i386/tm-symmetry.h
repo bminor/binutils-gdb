@@ -25,6 +25,7 @@
 #define TM_SYMMETRY_H 1
 
 #include "regcache.h"
+#include "doublest.h"
 
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */

@@ -40,6 +40,7 @@
 #include "top.h"
 #include "version.h"
 #include "serial.h"
+#include "doublest.h"
 
 /* readline include files */
 #include <readline/readline.h>
