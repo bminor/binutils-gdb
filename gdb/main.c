@@ -37,6 +37,7 @@
 #include "event-loop.h"
 #include "ui-out.h"
 
+#include "interps.h"
 #include "main.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
@@ -234,6 +235,12 @@ captured_main (void *data)
 #endif
 #endif
 
+  /* There will always be an interpreter.  Either the one passed into
+     this captured main (not yet implemented), or one specified by the
+     user at start up, or the console.  Make life easier by always
+     initializing the interpreter to something.  */
+  interpreter_p = xstrdup (GDB_INTERPRETER_CONSOLE);
+
   /* Parse arguments and options.  */
   {
     int c;
@@ -388,6 +395,7 @@ extern int gdbtk_test (char *);
 	    }
 #endif /* GDBTK */
 	  case 'i':
+	    xfree (interpreter_p);
 	    interpreter_p = xstrdup (optarg);
 	    break;
 	  case 'd':
@@ -516,7 +524,10 @@ extern int gdbtk_test (char *);
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
-     after initialize_all_files.  */
+     after initialize_all_files() but before the interpreter has been
+     installed.  Otherwize the help/version messages will be eaten by
+     the interpreter's output handler.  */
+
   if (print_version)
     {
       print_gdb_version (gdb_stdout);
@@ -532,7 +543,49 @@ extern int gdbtk_test (char *);
       exit (0);
     }
 
-  if (!quiet)
+  /* FIXME: cagney/2003-02-03: The big hack (part 1 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message before the interpreter is installed.  That way
+     it isn't encapsulated in MI output.  */
+  if (!quiet && strcmp (interpreter_p, GDB_INTERPRETER_MI1) == 0)
+    {
+      /* Print all the junk at the top, with trailing "..." if we are about
+         to read a symbol file (possibly slowly).  */
+      print_gdb_version (gdb_stdout);
+      if (symarg)
+	printf_filtered ("..");
+      wrap_here ("");
+      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
+    }
+
+
+  /* Install the default UI.  All the interpreters should have had a
+     look at things by now.  Initialize the default interpreter. */
+
+  {
+    /* Find it.  */
+    struct gdb_interpreter *interp = gdb_interpreter_lookup (interpreter_p);
+    if (interp == NULL)
+      {
+        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+                            interpreter_p);
+        exit (1);
+      }
+    /* Install it.  */
+    if (!gdb_interpreter_set (interp))
+      {
+        fprintf_unfiltered (gdb_stderr,
+			    "Interpreter `%s' failed to initialize.\n",
+                            interpreter_p);
+        exit (1);
+      }
+  }
+
+  /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
+     GDB retain the old MI1 interpreter startup behavior.  Output the
+     copyright message after the interpreter is installed when it is
+     any sane interpreter.  */
+  if (!quiet && !gdb_interpreter_current_is_named_p (GDB_INTERPRETER_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are about
          to read a symbol file (possibly slowly).  */

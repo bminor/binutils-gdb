@@ -1876,7 +1876,7 @@ macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) \
 	$(bcache_h) $(complaints_h)
 main.o: main.c $(defs_h) $(top_h) $(target_h) $(inferior_h) $(symfile_h) \
 	$(gdbcore_h) $(getopt_h) $(gdb_stat_h) $(gdb_string_h) \
-	$(event_loop_h) $(ui_out_h) $(main_h)
+	$(event_loop_h) $(ui_out_h) $(main_h) $(interps_h)
 maint.o: maint.c $(defs_h) $(command_h) $(gdbcmd_h) $(symtab_h) \
 	$(gdbtypes_h) $(demangle_h) $(gdbcore_h) $(expression_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(value_h) $(cli_decode_h)

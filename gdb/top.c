@@ -2126,31 +2126,4 @@ gdb_init (char *argv0)
   if (init_ui_hook)
     init_ui_hook (argv0);
 
-  /* Install the default UI */
-  /* All the interpreters should have had a look at things by now.
-     Initialize the selected interpreter. */
-  {
-
-    /* There will always be an interpreter.  Either the one specified
-       by the user at start up or the console.  */
-
-    struct gdb_interpreter *interp;
-    if (interpreter_p == NULL)
-      interpreter_p = xstrdup (GDB_INTERPRETER_CONSOLE);
-
-    interp = gdb_interpreter_lookup (interpreter_p);
-
-    if (interp == NULL)
-      {
-        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-                            interpreter_p);
-        exit (1);
-      }
-    if (!gdb_interpreter_set (interp))
-      {
-        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' failed to initialize.\n",
-                            interpreter_p);
-        exit (1);
-      }
-  }
 }

@@ -1,3 +1,11 @@
+2003-02-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* top.c (gdb_init): Move interpreter init code from here ...
+	* main.c (captured_main): ... to here.  Include "interps.h".
+	(captured_main): Set interpreter_p to a default before parsing the
+	options.
+	* Makefile.in (main.o): Update dependencies.
+
 2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
         * defs.h (selected_frame_level_changed_hook): Removed.
