@@ -1,5 +1,7 @@
 Wed Jan 27 17:19:09 1999  Doug Evans  <devans@canuck.cygnus.com>
 
+	* cgen-engine.h (EXTRACT_LSB0_{INT,UINT}): Fix.
+
 	* sim-profile.h: Make like sim-trace.h.
 	(PROFILE_USEFUL_MASK): New macro.
 	* sim-profile.c (profile_options): Make like trace_options, allow
