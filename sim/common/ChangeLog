@@ -1,3 +1,8 @@
+2004-07-26  Andrew Cagney  <cagney@gnu.org>
+
+	Problem from Olaf Hering <olh@suse.de>.
+	* Makefile.in (install-man, installdirs): Add DESTDIR prefix.
+
 2004-06-28  Andrew Cagney  <cagney@gnu.org>
 
 	* run.c: Rename ui_loop_hook to deprecated_ui_loop_hook.
