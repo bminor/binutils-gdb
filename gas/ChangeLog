@@ -1,3 +1,9 @@
+Wed Oct  8 12:33:32 1997  Richard Henderson  <rth@cygnus.com>
+
+	* configure.in: Change alpha-*-* to alpha*-*-*; config.guess now
+	recognizes alphaev5 etc.
+	* configure: Rebuild.
+
 Wed Oct  8 00:04:05 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (md_begin): Replace the TARGET_CPU value

@@ -1292,6 +1292,7 @@ for this_target in $target $canon_targets ; do
     arch=
     endian=
     case ${cpu} in
+      alpha*)		cpu_type=alpha ;;
       armeb)		cpu_type=arm endian=big ;;
       arm*)		cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
@@ -1345,12 +1346,12 @@ EOF
       a29k-nyu-sym1)        fmt=coff ;;
       a29k-*-vxworks*)      fmt=coff ;;
 
-      alpha-*-*vms*)	    fmt=evax ;;
-      alpha-*-netware*)     fmt=ecoff ;;
-      alpha-*-openbsd*)     fmt=ecoff ;;
-      alpha-*-osf*)         fmt=ecoff ;;
-      alpha-*-linuxecoff*)  fmt=ecoff ;;
-      alpha-*-linux*)       fmt=elf em=linux ;;
+      alpha*-*-*vms*)	    fmt=evax ;;
+      alpha*-*-netware*)    fmt=ecoff ;;
+      alpha*-*-openbsd*)    fmt=ecoff ;;
+      alpha*-*-osf*)        fmt=ecoff ;;
+      alpha*-*-linuxecoff*) fmt=ecoff ;;
+      alpha*-*-linux*)      fmt=elf em=linux ;;
 
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 
