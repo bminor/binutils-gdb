@@ -1,3 +1,8 @@
+2001-11-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Clarify obvious fix a little (as suggested by Eli
+	Zaretskii).
+
 2001-11-25  Jim Blandy  <jimb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): Doc fixes.

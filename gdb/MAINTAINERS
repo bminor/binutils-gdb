@@ -33,12 +33,15 @@ All maintainers listed in this file are allowed to check in obvious
 fixes.
 
 An "obvious fix" means that there is no possibility that anyone will
-disagree with the change.  Something like bypassing an interface will
-result in instantaneous and loud complaints.
+disagree with the change.
 
 A good mental test is "will the person who hates my work the most be
 able to find fault with the change" - if so, then it's not obvious and
 needs to be posted first. :-)
+
+Something like changing or bypassing an interface is _not_ an obvious
+fix, since such a change without discussion will result in
+instantaneous and loud complaints.
 
 
 Target/Architecture:
