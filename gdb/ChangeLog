@@ -1,5 +1,9 @@
 2001-11-06  Jim Blandy  <jimb@redhat.com>
 
+	* s390-nat.c: #include "regcache.h", to get declaration for
+ 	`supply_register'.  (The last change already added the dependency
+ 	of s390-nat.o on regcache.h.  Oops.)
+
 	* Makefile.in (ALLDEPFILES): Add s390-tdep.c and s390-nat.c.
 	(s390-tdep.o, s390-nat.o): New rules.
 

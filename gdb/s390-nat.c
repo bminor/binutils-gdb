@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "tm.h"
+#include "regcache.h"
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
 #include <asm/processor.h>
