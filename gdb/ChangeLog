@@ -1,3 +1,8 @@
+Wed Aug 24 09:41:09 1994  J.T. Conklin  (jtc@cygnus.com)
+
+	* configure.in (i386-*-netware): Automatically configure nlm
+	  subdir.
+
 Tue Aug 23 17:51:13 1994  J.T. Conklin  (jtc@cygnus.com)
 
 	* nlm/gdbserve.c: conditionalize header file inclusion for either

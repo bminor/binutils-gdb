@@ -224,7 +224,8 @@ i[34]86-*-linux*)	gdb_target=linux ;;
 i[34]86-*-isc*)		gdb_target=i386v ;;
 i[34]86-*-mach3*)	gdb_target=i386m3 ;;
 i[34]86-*-mach*)	gdb_target=i386mach ;;
-i[34]86-*-netware*)	gdb_target=i386nw ;;
+i[34]86-*-netware*)	gdb_target=i386nw
+			configdirs="${configdirs} nlm" ;;
 i[34]86-*-osf1mk*)	gdb_target=i386mk ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
