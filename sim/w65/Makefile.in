@@ -46,7 +46,7 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/../..;pwd`/install.sh -c
+INSTALL = `cd $(srcdir)/../..;pwd`/install-sh -c
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'

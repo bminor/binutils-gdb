@@ -1,3 +1,7 @@
+Mon Apr 14 16:30:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
+
 Wed Apr  2 15:40:30 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interp.c (sim_open): New arg `kind'.  `name is now `argv'.
