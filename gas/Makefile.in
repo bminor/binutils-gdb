@@ -326,7 +326,7 @@ config-stamp: Makefile conf
 
 # Compiling object files from source files.
 
-gasp.o : gasp.c
+gasp.o : gasp.c config.h
 app.o : app.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 

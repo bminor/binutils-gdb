@@ -20,6 +20,8 @@ Wed Sep 28 14:56:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 Wed Sep 28 11:50:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* Makefile.in (gasp.o): Depends upon config.h.
+
 	* config/tc-mips.c: Include subsegs.h.
 	(md_apply_fix): If an unconditional b or bal overflows, and we are
 	not assembling PIC code, replace it with a j or jal.
