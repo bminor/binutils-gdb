@@ -1,3 +1,8 @@
+Sun Dec  6 14:06:48 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add PowerPC403 GC[X] instructions.
+	From Saitoh Masanobu <msaitoh@spa.is.uec.ac.jp>.
+
 start-sanitize-fr30
 Fri Dec  4 17:45:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 
