@@ -960,18 +960,16 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   if (fi->extra_info)
     {
       fi->extra_info->saved_pc_valid = 1;
-      if (fi->extra_info->good_prologue)
-	{
-	  if (fi->saved_regs[S390_RETADDR_REGNUM])
-	    {
-	      return (fi->extra_info->saved_pc =
-		      ADDR_BITS_REMOVE (read_memory_integer
-					(fi->saved_regs[S390_RETADDR_REGNUM],
-					 S390_GPR_SIZE)));
-	    }
-          else
-            return read_register (S390_RETADDR_REGNUM);
-	}
+      if (fi->extra_info->good_prologue
+          && fi->saved_regs[S390_RETADDR_REGNUM])
+        fi->extra_info->saved_pc
+          = ADDR_BITS_REMOVE (read_memory_integer
+                              (fi->saved_regs[S390_RETADDR_REGNUM],
+                               S390_GPR_SIZE));
+      else
+        fi->extra_info->saved_pc
+          = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
+      return fi->extra_info->saved_pc;
     }
   return 0;
 }

@@ -1,5 +1,10 @@
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_frame_saved_pc_nofix): If we get the saved PC
+	out of the return address register, cache that in the frame's
+	extra info, just as if we'd gotten it from the saved regs array;
+	that way, it's not a lie to set the saved_pc_valid flag.
+
 	* s390-tdep.c (s390_get_frame_info): Give orig_sp a reasonable
 	value, even when fextra_info->stack_bought can't be trusted,
 
