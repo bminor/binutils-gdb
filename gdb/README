@@ -464,7 +464,6 @@ monitors and other hardware:
 
 	remote-array.c   Array Tech RAID controller
 	remote-e7000.c	 Hitachi E7000 ICE
-	remote-es.c	 Ericsson 1800 monitor
 	remote-est.c	 EST emulator
 	remote-hms.c	 Hitachi Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol

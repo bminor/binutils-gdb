@@ -1384,7 +1384,7 @@ ALLDEPFILES = a68v-nat.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
 	remote-array.c remote-e7000.c \
-	remote-es.c remote-hms.c remote-mips.c \
+	remote-hms.c remote-mips.c \
 	remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-vx.c \
@@ -2046,9 +2046,6 @@ remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(gdbcmd_h) $(serial_h) $(remote_utils_h) $(symfile_h) $(regcache_h)
-remote-es.o: remote-es.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
-	$(target_h) $(command_h) $(symfile_h) $(remote_utils_h) $(gdbcore_h) \
-	$(serial_h) $(regcache_h) $(value_h)
 remote-est.o: remote-est.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 remote-hms.o: remote-hms.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \

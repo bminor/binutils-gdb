@@ -11831,19 +11831,6 @@ ROM 68K monitor, running on an M68K IDP board.
 
 @end table
 
-If @value{GDBN} is configured with @code{m68*-ericsson-*}, it will
-instead have only a single special target command:
-
-@table @code
-
-@kindex target es1800
-@item target es1800 @var{dev}
-ES-1800 emulator for M68K.
-
-@end table
-
-[context?]
-
 @table @code
 
 @kindex target rombug

@@ -172,7 +172,6 @@
 @V@/gdb/remote-array.c @V@/gdb/rmt-array.c
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
 @V@/gdb/remote-eb.c @V@/gdb/rmt-eb.c
-@V@/gdb/remote-es.c @V@/gdb/rmt-es.c
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c
 @V@/gdb/remote-mips.c @V@/gdb/emt-mips.c
 @V@/gdb/remote-mm.c @V@/gdb/emt-mm.c

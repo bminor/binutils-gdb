@@ -1,3 +1,13 @@
+2003-01-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* README: Remove reference to Ericsson 1800 monitor.
+	* Makefile.in (remote-es.o): Delete rule.
+	(ALLDEPFILES): Delete remote-es.c.
+	* remote-es.c: Delete file.
+	* config/m68k/es1800.mt: Delete file.
+	* config/djgpp/fnchange.lst: Update.
+	* configure.tgt: Delete m68*-ericsson-* target.
+
 2003-01-31  Adam Fedor  <fedor@gnu.org>
 
 	* infrun.c (handle_inferior_event): Rename 'tmp' to real_stop_pc.

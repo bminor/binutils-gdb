@@ -5,6 +5,10 @@
 
 2003-01-29  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo (M68K): Delete reference to es1800.
+
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.texinfo (Maintenance Commands): Document `maint print
 	reggroups' and `maint print register-groups'.
 	* gdbint.texinfo (Target Architecture Definition): Document
