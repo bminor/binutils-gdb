@@ -8938,6 +8938,10 @@ For any @var{command} not supported by the stub, an empty response
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
 on that response.
 
+A stub is required to support the @samp{g}, @samp{G}, @samp{m}, @samp{M}, 
+@samp{c}, and @samp{s} @var{command}s.  All other @var{command}s are 
+optional.
+
 Below is a complete list of all currently defined @var{command}s and
 their corresponding response @var{data}:
 
@@ -8946,7 +8950,7 @@ their corresponding response @var{data}:
 @tab Request
 @tab Description
 
-@item extended ops @emph{(optional)}
+@item extended ops
 @tab @code{!}
 @tab
 Use the extended remote protocol.  Sticky---only needs to be set once.
@@ -8972,7 +8976,7 @@ and continue.
 @tab @code{a}
 @tab Reserved for future use
 
-@item set program arguments @strong{(reserved)} @emph{(optional)}
+@item set program arguments @strong{(reserved)}
 @tab @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,...}
 @tab
 Initialized @samp{argv[]} array passed into program. @var{arglen}
@@ -9012,7 +9016,7 @@ current address.
 @tab reply
 @tab see below
 
-@item continue with signal @emph{(optional)}
+@item continue with signal
 @tab @code{C}@var{sig}@code{;}@var{addr}
 @tab
 Continue with signal @var{sig} (hex signal number).  If
@@ -9026,7 +9030,7 @@ Continue with signal @var{sig} (hex signal number).  If
 @tab
 toggle debug flag.
 
-@item detach @emph{(optional)}
+@item detach
 @tab @code{D}
 @tab
 Detach @value{GDBN} from the remote system.  Sent to the remote target before
@@ -9083,7 +9087,7 @@ See @samp{g} for a description of the @var{XX...} data.
 @tab @code{h}
 @tab Reserved for future use
 
-@item set thread @emph{(optional)}
+@item set thread 
 @tab @code{H}@var{c}@var{t...}
 @tab
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
@@ -9112,14 +9116,14 @@ thread used in other operations.  If zero, pick a thread, any thread.
 @c                selected, sets the registers of the register block of
 @c                that thread; otherwise sets current registers.
 
-@item cycle step @strong{(draft)} @emph{(optional)}
+@item cycle step @strong{(draft)}
 @tab @code{i}@var{addr}@code{,}@var{nnn}
 @tab
 Step the remote target by a single clock cycle.  If @code{,}@var{nnn} is
 present, cycle step @var{nnn} cycles.  If @var{addr} is present, cycle
 step starting at that address.
 
-@item signal then cycle step @strong{(reserved)} @emph{(optional)}
+@item signal then cycle step @strong{(reserved)}
 @tab @code{I}
 @tab
 See @samp{i} and @samp{S} for likely syntax and semantics.
@@ -9132,7 +9136,7 @@ See @samp{i} and @samp{S} for likely syntax and semantics.
 @tab @code{J}
 @tab Reserved for future use
 
-@item kill request @emph{(optional)}
+@item kill request
 @tab @code{k}
 @tab
 FIXME: @emph{There is no description of how operate when a specific
@@ -9202,7 +9206,7 @@ See write register.
 @tab return @var{r....}
 @tab The hex encoded value of the register in target byte order.
 
-@item write reg @emph{(optional)}
+@item write reg
 @tab @code{P}@var{n...}@code{=}@var{r...}
 @tab
 Write register @var{n...} with value @var{r...}, which contains two hex
@@ -9214,7 +9218,7 @@ digits for each byte in the register (target byte order).
 @tab reply @code{E}@var{NN}
 @tab for an error
 
-@item general query @emph{(optional)}
+@item general query
 @tab @code{q}@var{query}
 @tab
 Request info about @var{query}.  In general @value{GDBN} @var{query}'s
@@ -9232,7 +9236,7 @@ must ensure that they match the full @var{query} name.
 @tab reply @samp{}
 @tab Indicating an unrecognized @var{query}.
 
-@item general set @emph{(optional)}
+@item general set
 @tab @code{Q}@var{var}@code{=}@var{val}
 @tab
 Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
@@ -9243,14 +9247,14 @@ naming conventions.
 @tab
 Reset the entire system.
 
-@item remote restart @emph{(optional)}
+@item remote restart
 @tab @code{R}@var{XX}
 @tab
 Restart the remote server.  @var{XX} while needed has no clear
 definition.  FIXME: @emph{An example interaction explaining how this
 packet is used in extended-remote mode is needed}.
 
-@item step @emph{(optional)}
+@item step
 @tab @code{s}@var{addr}
 @tab
 @var{addr} is address to resume.  If @var{addr} is omitted, resume at
@@ -9259,7 +9263,7 @@ same address.
 @tab reply
 @tab see below
 
-@item step with signal @emph{(optional)}
+@item step with signal
 @tab @code{S}@var{sig}@code{;}@var{addr}
 @tab
 Like @samp{C} but step not continue.
@@ -9267,14 +9271,14 @@ Like @samp{C} but step not continue.
 @tab reply
 @tab see below
 
-@item search @emph{(optional)}
+@item search 
 @tab @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM}
 @tab
 Search backwards starting at address @var{addr} for a match with pattern
 @var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4
 bytes.  @var{addr} must be at least 3 digits.
 
-@item thread alive @emph{(optional)}
+@item thread alive
 @tab @code{T}@var{XX}
 @tab Find out if the thread XX is alive.
 @item
@@ -9312,7 +9316,7 @@ bytes.  @var{addr} must be at least 3 digits.
 @tab @code{x}
 @tab Reserved for future use
 
-@item write mem (binary) @emph{(optional)}
+@item write mem (binary)
 @tab @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX...}
 @tab
 @var{addr} is address, @var{length} is number of bytes, @var{XX...} is
@@ -9333,12 +9337,12 @@ escaped using @code{0x7d}.
 @tab @code{Y}
 @tab Reserved for future use
 
-@item remove break or watchpoint @strong{(draft)} @emph{(optional)}
+@item remove break or watchpoint @strong{(draft)}
 @tab @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length}
 @tab
 See @samp{Z}.
 
-@item insert break or watchpoint @strong{(draft)} @emph{(optional)}
+@item insert break or watchpoint @strong{(draft)}
 @tab @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length}
 @tab
 @var{t} is type: @samp{0} - software breakpoint, @samp{1} - hardware
