@@ -1,6 +1,7 @@
 2000-08-11  Kazu Hirata  <kazu@hxi.com>
 
 	* expr.c: Fix formatting.
+	* config/obj-bout.c: Likewise.
 
 2000-08-10  Jason Eckhardt  <jle@cygnus.com>
 
