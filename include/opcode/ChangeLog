@@ -1,3 +1,12 @@
+Mon Nov 25 17:56:54 1996  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k.h: Document new <, >, m, n, o and p operand specifiers.
+
+Wed Nov 20 10:59:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_PCREL): Define.
+	(MN10300_OPERAND_MEMADDR): Define.
+
 Tue Nov 19 13:30:40 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.h (MN10300_OPERAND_REG_LIST): Define.
