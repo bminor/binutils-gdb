@@ -101,7 +101,7 @@ supply_fpregset (fpregset_t *fpregsetp)
       if (CANNOT_FETCH_REGISTER (i))
 	supply_register (i, NULL);
       else
-	supply_register (i, (char *) &fpregsetp->fpr_regs[i]);
+	supply_register (i, (char *) &fpregsetp->fpr_regs[i - FP0_REGNUM]);
     }
 
   supply_register (FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);

@@ -1,3 +1,8 @@
+2000-06-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphabsd-nat.c (supply_fpregset): Substract FP0_REGNUM from
+	register number when used as index into fpr_regs array.
+
 Tue May 30 13:31:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (TARGET_FLOAT_FORMAT, TARGET_DOUBLE_FORMAT,
