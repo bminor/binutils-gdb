@@ -32,6 +32,13 @@ bit.s
 cmp.s
 ext.s
 logical.s
+mov1.s
+mov2.s
+mov3.s
+mov4.s
+movb.s
+movbu.s
+movx.s
 muldiv.s
 other.s
 shift.s
