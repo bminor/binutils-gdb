@@ -55,57 +55,58 @@ parse_args (argc, argv)
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
+#define OPTION_CALL_SHARED		150
+#define OPTION_DEFSYM			(OPTION_CALL_SHARED + 1)
+#define OPTION_EB			(OPTION_DEFSYM + 1)
+#define OPTION_EL			(OPTION_EB + 1)
+#define OPTION_HELP			(OPTION_EL + 1)
+#define OPTION_IGNORE			(OPTION_HELP + 1)
+#define OPTION_MAP			(OPTION_IGNORE + 1)
+#define OPTION_NO_KEEP_MEMORY		(OPTION_MAP + 1)
+#define OPTION_NOINHIBIT_EXEC		(OPTION_NO_KEEP_MEMORY + 1)
+#define OPTION_NON_SHARED		(OPTION_NOINHIBIT_EXEC + 1)
+#define OPTION_OFORMAT			(OPTION_NON_SHARED + 1)
+#define OPTION_RELAX			(OPTION_OFORMAT + 1)
+#define OPTION_RETAIN_SYMBOLS_FILE	(OPTION_RELAX + 1)
+#define OPTION_SORT_COMMON		(OPTION_RETAIN_SYMBOLS_FILE + 1)
+#define OPTION_STATS			(OPTION_SORT_COMMON + 1)
+#define OPTION_TBSS			(OPTION_STATS + 1)
+#define OPTION_TDATA			(OPTION_TBSS + 1)
+#define OPTION_TTEXT			(OPTION_TDATA + 1)
+#define OPTION_TRADITIONAL_FORMAT	(OPTION_TTEXT + 1)
+#define OPTION_UR			(OPTION_TRADITIONAL_FORMAT + 1)
+#define OPTION_VERSION			(OPTION_UR + 1)
+#define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
+
   static struct option longopts[] = {
-#define OPTION_CALL_SHARED 150
-#define OPTION_NON_SHARED 151
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
-#define OPTION_DEFSYM 152
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
     {"dn", no_argument, NULL, OPTION_NON_SHARED},
     {"dp", no_argument, NULL, 'd'},
     {"dy", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_EB 153
     {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL 154
     {"EL", no_argument, NULL, OPTION_EL},
     {"format", required_argument, NULL, 'b'},
-#define OPTION_HELP 155
     {"help", no_argument, NULL, OPTION_HELP},
-#define OPTION_MAP 156
     {"Map", required_argument, NULL, OPTION_MAP},
-#define OPTION_NO_KEEP_MEMORY 157
     {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
-#define OPTION_NOINHIBIT_EXEC 158
     {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
     {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
     {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
-#define OPTION_OFORMAT 159
     {"oformat", required_argument, NULL, OPTION_OFORMAT},
-#define OPTION_IGNORE 160
     {"Qy", no_argument, NULL, OPTION_IGNORE},
-#define OPTION_RELAX 161
     {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_RETAIN_SYMBOLS_FILE 162
     {"retain-symbols-file", no_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
-#define OPTION_SORT_COMMON 163
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
-#define OPTION_STATS 164
     {"stats", no_argument, NULL, OPTION_STATS},
-#define OPTION_TBSS 165
     {"Tbss", required_argument, NULL, OPTION_TBSS},
-#define OPTION_TDATA 166
     {"Tdata", required_argument, NULL, OPTION_TDATA},
-#define OPTION_TTEXT 167
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
-#define OPTION_TRADITIONAL_FORMAT 168
     {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
-#define OPTION_UR 169
     {"Ur", no_argument, NULL, OPTION_UR},
-#define OPTION_VERSION 170
     {"version", no_argument, NULL, OPTION_VERSION},
-#define OPTION_WARN_COMMON 171
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {NULL, no_argument, NULL, 0}
   };
