@@ -31,7 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/user.h>
-#include <sys/ptrace.h>
+#ifndef NO_PTRACE_H
+# ifdef PTRACE_IN_WRONG_PLACE
+#  include <ptrace.h>
+# else /* !PTRACE_IN_WRONG_PLACE */
+#  include <sys/ptrace.h>
+# endif /* !PTRACE_IN_WRONG_PLACE */
+#endif /* NO_PTRACE_H */
 #endif
 
 /* Extract the register values out of the core file and store
