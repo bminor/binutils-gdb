@@ -1,4 +1,15 @@
+start-sanitize-arc
+Thu Jun  8 11:44:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* config/tc-arc.h (MD_APPLY_FIX3): Define.
+	* config/tc-arc.c (md_apply_fix3): Renamed from md_apply_fix.
+	Undo effects of md_pcrel_from if symbol is in another section.
+end-sanitize-arc
+
 Tue Jun  6 13:53:06 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-sparc.c (sparc_ip): Handle defined absolute symbols as
+	ASI values.
 
 	* config/obj-vms.c (vms_write_object_file, case N_DATA): Use
 	strcmp against FAKE_LABEL_NAME instead of checking third
