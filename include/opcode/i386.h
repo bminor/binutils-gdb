@@ -1,5 +1,5 @@
 /* i386-opcode.h -- Intel 80386 opcode table
-   Copyright 1989, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation.
+   Copyright 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
 
 This file is part of GAS, the GNU Assembler, and GDB, the GNU Debugger.
 
@@ -468,8 +468,8 @@ static const template i386_optab[] = {
 /* protection control */
 {"arpl", 2, 0x63, _, Modrm, { Reg16, Reg16|Mem, 0} },
 {"lar", 2, 0x0f02, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
-{"lgdt", 1, 0x0f01, 2, Modrm|LinearAddress, { Mem, 0, 0} },
-{"lidt", 1, 0x0f01, 3, Modrm|LinearAddress, { Mem, 0, 0} },
+{"lgdt", 1, 0x0f01, 2, Modrm, { Mem, 0, 0} },
+{"lidt", 1, 0x0f01, 3, Modrm, { Mem, 0, 0} },
 {"lldt", 1, 0x0f00, 2, Modrm, { WordReg|Mem, 0, 0} },
 {"lmsw", 1, 0x0f01, 6, Modrm, { WordReg|Mem, 0, 0} },
 {"lsl", 2, 0x0f03, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
@@ -702,36 +702,38 @@ static const template i386_optab[] = {
 {"fabs", 0, 0xd9e1, _, NoModrm, { 0, 0, 0} },
 
 /* processor control */
-{"fninit", 0, 0xdbe3, _, NoModrm, { 0, 0, 0} },
-{"finit", 0, 0x9bdbe3, _, NoModrm, { 0, 0, 0} },
-{"fldcw", 1, 0xd9, 5, Modrm, { Mem, 0, 0} },
-{"fnstcw", 1, 0xd9, 7, Modrm, { Mem, 0, 0} },
-{"fstcw", 1, 0x9bd9, 7, Modrm, { Mem, 0, 0} },
-{"fnstsw", 1, 0xdfe0, _, NoModrm, { Acc, 0, 0} },
-{"fnstsw", 1, 0xdd, 7, Modrm, { Mem, 0, 0} },
-{"fnstsw", 0, 0xdfe0, _, NoModrm, { 0, 0, 0} },
-{"fstsw", 1, 0x9bdfe0, _, NoModrm, { Acc, 0, 0} },
-{"fstsw", 1, 0x9bdd, 7, Modrm, { Mem, 0, 0} },
-{"fstsw", 0, 0x9bdfe0, _, NoModrm, { 0, 0, 0} },
-{"fnclex", 0, 0xdbe2, _, NoModrm, { 0, 0, 0} },
-{"fclex", 0, 0x9bdbe2, _, NoModrm, { 0, 0, 0} },
-/*
- We ignore the short format (287) versions of fstenv/fldenv & fsave/frstor
- instructions;  i'm not sure how to add them or how they are different.
- My 386/387 book offers no details about this.
-*/
-{"fnstenv", 1, 0xd9, 6, Modrm, { Mem, 0, 0} },
-{"fstenv", 1, 0x9bd9, 6, Modrm, { Mem, 0, 0} },
-{"fldenv", 1, 0xd9, 4, Modrm, { Mem, 0, 0} },
-{"fnsave", 1, 0xdd, 6, Modrm, { Mem, 0, 0} },
-{"fsave", 1, 0x9bdd, 6, Modrm, { Mem, 0, 0} },
-{"frstor", 1, 0xdd, 4, Modrm, { Mem, 0, 0} },
+{"fninit", 0, 0xdbe3, _, NoModrm,	{ 0, 0, 0} },
+{"finit",  0, 0xdbe3, _, FWait|NoModrm, { 0, 0, 0} },
+{"fldcw",  1,	0xd9, 5, Modrm,		{ Mem, 0, 0} },
+{"fnstcw", 1,	0xd9, 7, Modrm,		{ Mem, 0, 0} },
+{"fstcw",  1,	0xd9, 7, FWait|Modrm,	{ Mem, 0, 0} },
+{"fnstsw", 1, 0xdfe0, _, NoModrm,	{ Acc, 0, 0} },
+{"fnstsw", 1,	0xdd, 7, Modrm,		{ Mem, 0, 0} },
+{"fnstsw", 0, 0xdfe0, _, NoModrm,	{ 0, 0, 0} },
+{"fstsw",  1, 0xdfe0, _, FWait|NoModrm,	{ Acc, 0, 0} },
+{"fstsw",  1,	0xdd, 7, FWait|Modrm,	{ Mem, 0, 0} },
+{"fstsw",  0, 0xdfe0, _, FWait|NoModrm,	{ 0, 0, 0} },
+{"fnclex", 0, 0xdbe2, _, NoModrm,	{ 0, 0, 0} },
+{"fclex",  0, 0xdbe2, _, FWait|NoModrm,	{ 0, 0, 0} },
+{"fnstenv",1,	0xd9, 6, Modrm,		{ Mem, 0, 0} },
+{"fstenv", 1,	0xd9, 6, FWait|Modrm,	{ Mem, 0, 0} },
+{"fldenv", 1,	0xd9, 4, Modrm,		{ Mem, 0, 0} },
+{"fnsave", 1,	0xdd, 6, Modrm,		{ Mem, 0, 0} },
+{"fsave",  1,	0xdd, 6, FWait|Modrm,	{ Mem, 0, 0} },
+{"frstor", 1,	0xdd, 4, Modrm,		{ Mem, 0, 0} },
+/* Short forms of fldenv, fstenv use data size prefix. (At least I
+   think so.  The PentPro prog ref I have says address size in one
+   place, operand size elsewhere).  FIXME: Are these the right names?  */
+{"fnstenvs",1,	0xd9, 6, Modrm|Data16,	{ Mem, 0, 0} },
+{"fstenvs", 1,	0xd9, 6, FWait|Modrm|Data16, { Mem, 0, 0} },
+{"fldenvs", 1,	0xd9, 4, Modrm|Data16,	{ Mem, 0, 0} },
 
-{"ffree", 1, 0xddc0, _, ShortForm, { FloatReg, 0, 0} },
+{"ffree",  1, 0xddc0, _, ShortForm,	{ FloatReg, 0, 0} },
 /* P6:free st(i), pop st */
-{"ffreep", 1, 0xdfc0, _, ShortForm, { FloatReg, 0, 0} },
-{"fnop", 0, 0xd9d0, _, NoModrm, { 0, 0, 0} },
-{"fwait", 0, 0x9b, _, NoModrm, { 0, 0, 0} },
+{"ffreep", 1, 0xdfc0, _, ShortForm,	{ FloatReg, 0, 0} },
+{"fnop",   0, 0xd9d0, _, NoModrm,	{ 0, 0, 0} },
+#define FWAIT_OPCODE 0x9b
+{"fwait",  0,	0x9b, _, NoModrm,	{ 0, 0, 0} },
 
 /*
   opcode prefixes; we allow them as seperate insns too
