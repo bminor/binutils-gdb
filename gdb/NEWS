@@ -9,6 +9,11 @@ The command "set prompt-escape-char" has been deleted.  This command,
 and its very obscure effet on GDB's prompt, was never documented,
 tested, nor mentioned in the NEWS file.
 
+* REMOVED configurations and files
+
+SGI Irix-4.x				mips-sgi-irix4	or iris4
+SGI Iris (MIPS) running Irix V3:  	mips-sgi-irix   or  iris
+
 *** Changes in GDB 6.0:
 
 * GNU/Linux support for fork, vfork, and exec.

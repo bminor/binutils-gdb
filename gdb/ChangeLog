@@ -1,3 +1,21 @@
+2003-09-11  Andrew Cagney  <cagney@redhat.com>
+
+	Since the IRIX 4 configuration was forcing K&R mode it hasn't been
+	buildable since GDB 5.0.
+	* NEWS: Mention that IRIX 3 and IRIX 4 support were removed.
+	* configure.host: Delete "mips-sgi-irix3*" and "mips-sgi-irix4*".
+	* configure.tgt: Delete "mips*-sgi-*" a.k.a. irix3.
+	* irix4-nat.c: Delete file.
+	* config/mips/irix4.mh: Delete file.
+	* config/mips/irix3.mh: Delete file.
+	* config/mips/irix3.mt: Delete file.
+	* config/mips/tm-irix3.h: Delete file.
+	* config/mips/nm-irix3.h: Delete file.
+	* config/mips/xm-irix3.h: Delete file.
+	* config/mips/nm-irix4.h: Delete file.
+	* config/mips/xm-irix4.h: Delete file.
+	* config/mips/tm-irix5.h: Inline contents of "tm-irix3.h".
+
 2003-09-10  J. Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c: Include "dis-asm.h". Fixes a build failure.
