@@ -2473,7 +2473,8 @@ value_aggregate_elt (struct type *curtype,
     case TYPE_CODE_NAMESPACE:
       return value_namespace_elt (curtype, name, noside);
     default:
-      error ("Internal error: non-aggregate type to value_aggregate_elt");
+      internal_error (__FILE__, __LINE__,
+		      "non-aggregate type in value_aggregate_elt");
     }
 }
 
@@ -2613,8 +2614,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	return v;
     }
 
-  /* As a last chance, look it up using lookup_symbol_namespace: this
-     works for types.  */
+  /* As a last chance, pretend that CURTYPE is a namespace, and look
+     it up that way; this (frequently) works for types nested inside
+     classes.  */
 
   return value_maybe_namespace_elt (curtype, name, noside);
 }
@@ -2638,7 +2640,10 @@ value_namespace_elt (const struct type *curtype,
 }
 
 /* A helper function used by value_namespace_elt and
-   value_struct_elt_for_reference.  */
+   value_struct_elt_for_reference.  It looks up NAME inside the
+   context CURTYPE; this works if CURTYPE is a namespace or if CURTYPE
+   is a class and NAME refers to a type in CURTYPE itself (as opposed
+   to, say, some base class of CURTYPE).  */
 
 static struct value *
 value_maybe_namespace_elt (const struct type *curtype,

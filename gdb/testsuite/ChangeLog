@@ -1,3 +1,7 @@
+2003-11-11  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Remove doubled comment.
+
 2003-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* gdb.base/shreloc.exp: Do not run for targets which do not

@@ -33,18 +33,29 @@
 #include "command.h"
 #include "frame.h"
 
-/* When set, the file that we're processing seems to have debugging
-   info for C++ namespaces, so cp-namespace.c shouldn't try to guess
-   namespace info itself.  */
+/* When set, the file that we're processing is known to have debugging
+   info for C++ namespaces.  */
+
+/* NOTE: carlton/2003-11-10: No currently released version of GCC (the
+   latest of which is 3.3.x at the time of this writing) produces this
+   debug info.  */
 
 unsigned char processing_has_namespace_info;
 
-/* If processing_has_namespace_info is nonzero, this string should
-   contain the name of the current namespace.  The string is
-   temporary; copy it if you need it.  */
+/* This contains our best guess as to the name of the current
+   enclosing namespace(s)/class(es), if any.  For example, if we're
+   within the method foo() in the following code:
 
-/* FIXME: carlton/2003-06-12: This isn't entirely reliable: currently,
-   we get mislead by DW_AT_specification.  */
+    namespace N {
+      class C {
+	void foo () {
+	}
+      };
+    }
+
+    then processing_current_prefix should be set to "N::C".  If
+    processing_has_namespace_info is false, then this variable might
+    not be reliable.  */
 
 const char *processing_current_prefix;
 
@@ -219,12 +230,6 @@ cp_set_block_scope (const struct symbol *symbol,
 
   if (SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
     {
-#if 0
-      /* FIXME: carlton/2003-06-12: As mentioned above,
-	 'processing_has_namespace_info' currently isn't entirely
-	 reliable, so let's always use demangled names to get this
-	 information for now.  */
-
       if (processing_has_namespace_info)
 	{
 	  block_set_scope
@@ -234,7 +239,6 @@ cp_set_block_scope (const struct symbol *symbol,
 	     obstack);
 	}
       else
-#endif
 	{
 	  /* Try to figure out the appropriate namespace from the
 	     demangled name.  */
@@ -503,13 +507,6 @@ lookup_symbol_file (const char *name,
   /* FIXME: carlton/2003-06-12: This is a hack and should eventually
      be deleted: see comments below.  */
 
-  /* FIXME: carlton/2003-01-06: Searching this seems a bit fishy if
-     anonymous_namespace is nonzero, since we might return a namespace
-     that's really a class that doesn't happen to be mentioned in the
-     current file.  Sigh.  Still, I don't think anything catastrophic
-     should happen in that case.  Probably the right thing to do is to
-     move anonymous namespace symbols to files' static blocks.  */
-
   if (domain == VAR_DOMAIN)
     {
       sym = lookup_possible_namespace_symbol (name, symtab);
@@ -522,7 +519,7 @@ lookup_symbol_file (const char *name,
 
 /* Look up a type named NESTED_NAME that is nested inside the C++
    class or namespace given by PARENT_TYPE, from within the context
-   given by BLOCK.  */
+   given by BLOCK.  Return NULL if there is no such nested type.  */
 
 struct type *
 cp_lookup_nested_type (struct type *parent_type,
@@ -560,8 +557,8 @@ cp_lookup_nested_type (struct type *parent_type,
 	  return SYMBOL_TYPE (sym);
       }
     default:
-      error ("\"%s\" is not defined as a compound type.",
-	     TYPE_NAME (parent_type));
+      internal_error (__FILE__, __LINE__,
+		      "cp_lookup_nested_type called on a non-aggregate type.");
     }
 }
 

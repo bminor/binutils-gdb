@@ -1,5 +1,16 @@
 2003-11-11  David Carlton  <carlton@kealia.com>
 
+	* valops.c: Tweak comments to match proposed patch.
+	(value_aggregate_elt): Use internal_error instead of error.
+	* dwarf2read.c: Tweak comments to match proposed patch.
+	(new_symbol): Use SYMBOL_LINKAGE_NAME or SYMBOL_NATURAL_NAME
+	instead of DEPRECATED_SYMBOL_NAME.
+	* cp-namespace.c: Tweak comments to match proposed patch.
+	(cp_set_block_scope): Remove #if 0.
+	(cp_lookup_nested_type): Use internal_error instead of error.
+
+2003-11-11  David Carlton  <carlton@kealia.com>
+
 	* Merge with mainline; tag is carlton-dictionary-20031111-merge.
 
 2003-11-10  Michael Chastain  <mec.gnu@mindspring.com>

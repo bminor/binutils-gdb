@@ -1680,6 +1680,10 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 					 objfile);
 }
 
+/* Determine whether a die of type TAG living in the C++ namespace
+   NAMESPACE needs to have the name of the namespace prepended to the
+   name listed in the die.  */
+
 static int
 pdi_needs_namespace (enum dwarf_tag tag, const char *namespace)
 {
@@ -3146,7 +3150,11 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 		     debug info.  We could solve this by using the
 		     demangled name to get the prefix; if doing so,
 		     however, we'd need to be careful when reading a
-		     class that's nested inside a template class.  */
+		     class that's nested inside a template class.
+		     That would also cause problems when trying to
+		     determine RTTI information, since we use the
+		     demangler to determine the appropriate class
+		     name.  */
 		  char *actual_class_name
 		    = class_name_from_physname (dwarf2_linkage_name
 						(child_die));
@@ -5017,8 +5025,8 @@ die_is_declaration (struct die_info *die)
 	  && ! dwarf_attr (die, DW_AT_specification));
 }
 
-/* Returns the die giving the specification for this one, or NULL if
-   none.  */
+/* Return the die giving the specification for DIE, if there is
+   one.  */
 
 static struct die_info *
 die_specification (struct die_info *die)
@@ -5686,13 +5694,13 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	      
 	      if (TYPE_TAG_NAME (type) != NULL)
 		{
-		  /* FIXME: carlton/2003-01-10: We're being a bit
-		     profligate with memory names here.  */
-		  DEPRECATED_SYMBOL_NAME (sym)
+		  /* FIXME: carlton/2003-11-10: Should this use
+		     SYMBOL_SET_NAMES instead?  (The same problem also
+		     arises a further down in the function.)  */
+		  SYMBOL_LINKAGE_NAME (sym)
 		    = obsavestring (TYPE_TAG_NAME (type),
 				    strlen (TYPE_TAG_NAME (type)),
 				    &objfile->symbol_obstack);
-		  gdb_assert (SYMBOL_DEMANGLED_NAME (sym) == NULL);
 		}
 	    }
 
@@ -5725,8 +5733,8 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 		  TYPE_NAME (SYMBOL_TYPE (sym)) =
-		    obsavestring (DEPRECATED_SYMBOL_NAME (sym),
-				  strlen (DEPRECATED_SYMBOL_NAME (sym)),
+		    obsavestring (SYMBOL_NATURAL_NAME (sym),
+				  strlen (SYMBOL_NATURAL_NAME (sym)),
 				  &objfile->type_obstack);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
@@ -5736,10 +5744,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
-						       processing_current_prefix,
-						       "::",
-						       name);
+	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->symbol_obstack,
+						    processing_current_prefix,
+						    "::",
+						    name);
 	    }
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -5754,10 +5762,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
-						       processing_current_prefix,
-						       "::",
-						       name);
+	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->symbol_obstack,
+						    processing_current_prefix,
+						    "::",
+						    name);
 	    }
 	  attr = dwarf_attr (die, DW_AT_const_value);
 	  if (attr)
@@ -6068,7 +6076,7 @@ read_type_die (struct die_info *die, struct objfile *objfile,
   do_cleanups (back_to);
 }
 
-/* Determine the name of the namespace/class that DIE is defined
+/* Return the name of the namespace/class that DIE is defined
    within, or NULL if we can't tell.  The caller should xfree the
    result.  */
 
@@ -6172,7 +6180,6 @@ class_name (struct die_info *die)
   else
     return xstrdup ("");
 }
-
 
 static struct type *
 dwarf_base_type (int encoding, int size, struct objfile *objfile)
