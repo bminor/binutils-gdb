@@ -207,6 +207,28 @@ struct linked_proc_info
 } *linked_proc_desc_table = NULL;
 
 
+/* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
+
+static int
+pc_is_mips16 (bfd_vma memaddr)
+{
+  struct minimal_symbol *sym;
+
+  /* If bit 0 of the address is set, assume this is a MIPS16 address. */
+  if (IS_MIPS16_ADDR (memaddr))
+    return 1;
+
+  /* A flag indicating that this is a MIPS16 function is stored by elfread.c in
+     the high bit of the info field.  Use this to decide if the function is
+     MIPS16 or normal MIPS.  */
+  sym = lookup_minimal_symbol_by_pc (memaddr);
+  if (sym)
+    return MSYMBOL_IS_SPECIAL (sym);
+  else
+    return 0;
+}
+
+
 /* This returns the PC of the first inst after the prologue.  If we can't
    find the prologue, then return 0.  */
 
@@ -316,7 +338,7 @@ mips_fetch_instruction (addr)
   int instlen;
   int status;
 
-  if (IS_MIPS16_ADDR (addr))
+  if (pc_is_mips16 (addr))
     {
       instlen = MIPS16_INSTLEN;
       addr = UNMAKE_MIPS16_ADDR (addr);
@@ -429,14 +451,14 @@ mips_find_saved_regs (fci)
 
       /* If the address is odd, assume this is MIPS16 code.  */
       addr = PROC_LOW_ADDR (proc_desc);
-      instlen = IS_MIPS16_ADDR (addr) ? MIPS16_INSTLEN : MIPS_INSTLEN;
+      instlen = pc_is_mips16 (addr) ? MIPS16_INSTLEN : MIPS_INSTLEN;
 
       /* Scan through this function's instructions preceding the current
          PC, and look for those that save registers.  */
       while (addr < fci->pc)
 	{
 	  inst = mips_fetch_instruction (addr);
-	  if (IS_MIPS16_ADDR (addr))
+	  if (pc_is_mips16 (addr))
 	    mips16_decode_reg_save (inst, &gen_save_found);
 	  else
 	    mips32_decode_reg_save (inst, &gen_save_found, &float_save_found);
@@ -460,7 +482,7 @@ mips_find_saved_regs (fci)
      of that normally used by gcc.  Therefore, we have to fetch the first
      instruction of the function, and if it's an entry instruction that
      saves $s0 or $s1, correct their saved addresses.  */
-  if (IS_MIPS16_ADDR (PROC_LOW_ADDR (proc_desc)))
+  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
     {
       inst = mips_fetch_instruction (PROC_LOW_ADDR (proc_desc));
       if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
@@ -620,7 +642,7 @@ heuristic_proc_start(pc)
 	|| fence < VM_MIN_ADDRESS)
       fence = VM_MIN_ADDRESS;
 
-    instlen = IS_MIPS16_ADDR (pc) ? MIPS16_INSTLEN : MIPS_INSTLEN;
+    instlen = pc_is_mips16 (pc) ? MIPS16_INSTLEN : MIPS_INSTLEN;
 
     /* search back for previous return */
     for (start_pc -= instlen; ; start_pc -= instlen)
@@ -655,7 +677,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 
 	    return 0; 
 	  }
-	else if (IS_MIPS16_ADDR (start_pc))
+	else if (pc_is_mips16 (start_pc))
 	  {
 	    unsigned short inst;
 
@@ -971,7 +993,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
   if (start_pc + 200 < limit_pc)
     limit_pc = start_pc + 200;
-  if (IS_MIPS16_ADDR (start_pc))
+  if (pc_is_mips16 (start_pc))
     mips16_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
   else
     mips32_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
@@ -1586,20 +1608,21 @@ mips_print_register (regnum, all)
     }
 
   /* If an even floating point register, also print as double. */
-  if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+MIPS_NUMREGS
+  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
       && !((regnum-FP0_REGNUM) & 1))
-    {
-      char dbuffer[2 * MAX_REGISTER_RAW_SIZE]; 
+    if (REGISTER_RAW_SIZE(regnum) == 4)	/* this would be silly on MIPS64 */
+      {
+	char dbuffer[2 * MAX_REGISTER_RAW_SIZE]; 
 
-      read_relative_register_raw_bytes (regnum, dbuffer);
-      read_relative_register_raw_bytes (regnum+1, dbuffer+MIPS_REGSIZE);
-      REGISTER_CONVERT_TO_TYPE (regnum, builtin_type_double, dbuffer);
+	read_relative_register_raw_bytes (regnum, dbuffer);
+	read_relative_register_raw_bytes (regnum+1, dbuffer+MIPS_REGSIZE);
+	REGISTER_CONVERT_TO_TYPE (regnum, builtin_type_double, dbuffer);
 
-      printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
-      val_print (builtin_type_double, dbuffer, 0,
-		 gdb_stdout, 0, 1, 0, Val_pretty_default);
-      printf_filtered ("); ");
-    }
+	printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
+	val_print (builtin_type_double, dbuffer, 0,
+		   gdb_stdout, 0, 1, 0, Val_pretty_default);
+	printf_filtered ("); ");
+      }
   fputs_filtered (reg_names[regnum], gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
@@ -1613,22 +1636,146 @@ mips_print_register (regnum, all)
 
   /* If virtual format is floating, print it that way.  */
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-    val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
-	       gdb_stdout, 0, 1, 0, Val_pretty_default);
+    if (REGISTER_RAW_SIZE(regnum) == 8)
+      { /* show 8-byte floats as float AND double: */
+	int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
+
+	printf_filtered (" (float) ");
+	val_print (builtin_type_float, raw_buffer + offset, 0,
+		   gdb_stdout, 0, 1, 0, Val_pretty_default);
+	printf_filtered (", (double) ");
+	val_print (builtin_type_double, raw_buffer, 0,
+		   gdb_stdout, 0, 1, 0, Val_pretty_default);
+      }
+    else
+      val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
+		 gdb_stdout, 0, 1, 0, Val_pretty_default);
   /* Else print as integer in hex.  */
   else
     print_scalar_formatted (raw_buffer, REGISTER_VIRTUAL_TYPE (regnum),
 			    'x', 0, gdb_stdout);
 }
 
-/* Replacement for generic do_registers_info.  */
+/* Replacement for generic do_registers_info.  
+   Print regs in pretty columns.  */
+
+static int
+do_fp_register_row (regnum)
+     int regnum;
+{ /* do values for FP (float) regs */
+  char raw_buffer[2] [REGISTER_RAW_SIZE(FP0_REGNUM)];
+  char dbl_buffer[2 * REGISTER_RAW_SIZE(FP0_REGNUM)];
+  /* use HI and LO to control the order of combining two flt regs */
+  int HI = (TARGET_BYTE_ORDER == BIG_ENDIAN);
+  int LO = (TARGET_BYTE_ORDER != BIG_ENDIAN);
+  double doub, flt1, flt2;	/* doubles extracted from raw hex data */
+  int inv1, inv2, inv3;
+   
+  /* Get the data in raw format.  */
+  if (read_relative_register_raw_bytes (regnum, raw_buffer[HI]))
+    error ("can't read register %d (%s)", regnum, reg_names[regnum]);
+  if (REGISTER_RAW_SIZE(regnum) == 4)
+    {
+      /* 4-byte registers: we can fit two registers per row. */
+      /* Also print every pair of 4-byte regs as an 8-byte double. */
+      if (read_relative_register_raw_bytes (regnum + 1, raw_buffer[LO]))
+	error ("can't read register %d (%s)", 
+	       regnum + 1, reg_names[regnum + 1]);
+
+      /* copy the two floats into one double, and unpack both */
+      memcpy (dbl_buffer, raw_buffer, sizeof(dbl_buffer));
+      flt1 = unpack_double (builtin_type_float,  raw_buffer[HI], &inv1);
+      flt2 = unpack_double (builtin_type_float,  raw_buffer[LO], &inv2);
+      doub = unpack_double (builtin_type_double, dbl_buffer,     &inv3);
+
+      printf_filtered (inv1 ? " %-5s: <invalid float>" : 
+		       " %-5s%-17.9g", reg_names[regnum],     flt1);
+      printf_filtered (inv2 ? " %-5s: <invalid float>" : 
+		       " %-5s%-17.9g", reg_names[regnum + 1], flt2);
+      printf_filtered (inv3 ? " dbl: <invalid double>\n" : 
+		       " dbl: %-24.17g\n", doub);
+      /* may want to do hex display here (future enhancement) */
+      regnum +=2;
+    }
+  else
+    { /* eight byte registers: print each one as float AND as double. */
+      int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
+
+      memcpy (dbl_buffer, raw_buffer[HI], sizeof(dbl_buffer));
+      flt1 = unpack_double (builtin_type_float, 
+			    &raw_buffer[HI][offset], &inv1);
+      doub = unpack_double (builtin_type_double, dbl_buffer,    &inv3);
+
+      printf_filtered (inv1 ? " %-5s: <invalid float>" : 
+		       " %-5s flt: %-17.9g", reg_names[regnum], flt1);
+      printf_filtered (inv3 ? " dbl: <invalid double>\n" : 
+		       " dbl: %-24.17g\n", doub);
+      /* may want to do hex display here (future enhancement) */
+      regnum++;
+    }
+  return regnum;
+}
+
+/* Print a row's worth of GP (int) registers, with name labels above */
+
+static int
+do_gp_register_row (regnum)
+     int regnum;
+{ /* do values for GP (int) regs */
+  char raw_buffer[REGISTER_RAW_SIZE(0)];
+  int ncols = MIPS_REGSIZE == 8 ? 4 : 8;	/* display cols per row */
+  int col, byte, start_regnum = regnum;
+
+  /* For GP registers, we print a separate row of names above the vals */
+  printf_filtered ("     ");
+  for (col = 0; col < ncols && regnum < NUM_REGS; regnum++)
+    {
+      if (*reg_names[regnum] == '\0')
+	continue;	/* unused register */
+      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	break;	/* end the row: reached FP register */
+      printf_filtered (MIPS_REGSIZE == 8 ? "%17s" : "%9s", 
+		       reg_names[regnum]);
+      col++;
+    }
+  printf_filtered (start_regnum < MIPS_NUMREGS ? "\n R%-4d" : "\n      ", 
+		   start_regnum);	/* print the R0 to R31 names */
+
+  regnum = start_regnum;	/* go back to start of row */
+  /* now print the values in hex, 4 or 8 to the row */
+  for (col = 0; col < ncols && regnum < NUM_REGS; regnum++)
+    {
+      if (*reg_names[regnum] == '\0')
+	continue;	/* unused register */
+      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	break;	/* end row: reached FP register */
+      /* OK: get the data in raw format.  */
+      if (read_relative_register_raw_bytes (regnum, raw_buffer))
+	error ("can't read register %d (%s)", regnum, reg_names[regnum]);
+      /* Now print the register value in hex, endian order. */
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	for (byte = 0; byte < REGISTER_RAW_SIZE (regnum); byte++)
+	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
+      else
+	for (byte = REGISTER_RAW_SIZE (regnum) - 1; byte >= 0; byte--)
+	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
+      printf_filtered (" ");
+      col++;
+    }
+  if (col > 0)	/* ie. if we actually printed anything... */
+    printf_filtered ("\n");
+
+  return regnum;
+}
+
+/* MIPS_DO_REGISTERS_INFO(): called by "info register" command */
 
 void
 mips_do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
 {
-  if (regnum != -1)
+  if (regnum != -1)	/* do one specified register */
     {
       if (*(reg_names[regnum]) == '\0')
 	error ("Not a valid register for the current processor type");
@@ -1636,30 +1783,17 @@ mips_do_registers_info (regnum, fpregs)
       mips_print_register (regnum, 0);
       printf_filtered ("\n");
     }
-  else
+  else			/* do all (or most) registers */
     {
-      int did_newline = 0;
-
-      for (regnum = 0; regnum < NUM_REGS; )
-	{
-	  if (((!fpregs) && regnum >= FP0_REGNUM && regnum <= FCRIR_REGNUM)
-	      || *(reg_names[regnum]) == '\0')
-	    {
-	      regnum++;
-	      continue;
-	    }
-	  mips_print_register (regnum, 1);
-	  regnum++;
-	  printf_filtered ("; ");
-	  did_newline = 0;
-	  if ((regnum & 3) == 0)
-	    {
-	      printf_filtered ("\n");
-	      did_newline = 1;
-	    }
-	}
-      if (!did_newline)
-	printf_filtered ("\n");
+      regnum = 0;
+      while (regnum < NUM_REGS)
+	if (TYPE_CODE(REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	  if (fpregs)	/* true for "INFO ALL-REGISTERS" command */
+	    regnum = do_fp_register_row (regnum);	/* FP regs */
+	  else
+	    regnum += MIPS_NUMREGS;	/* skip floating point regs */
+	else
+	  regnum = do_gp_register_row (regnum);		/* GP (int) regs */
     }
 }
 
@@ -1706,7 +1840,7 @@ mips_step_skips_delay (pc)
   char buf[MIPS_INSTLEN];
 
   /* There is no branch delay slot on MIPS16.  */
-  if (IS_MIPS16_ADDR (pc))
+  if (pc_is_mips16 (pc))
     return 0;
 
   if (target_read_memory (pc, buf, MIPS_INSTLEN) != 0)
@@ -1909,7 +2043,7 @@ mips_skip_prologue (pc, lenient)
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */
 
-  if (IS_MIPS16_ADDR (pc))
+  if (pc_is_mips16 (pc))
     return mips16_skip_prologue (pc, lenient);
   else
     return mips32_skip_prologue (pc, lenient);
@@ -2188,9 +2322,9 @@ gdb_print_insn_mips (memaddr, info)
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
-    info->mach = IS_MIPS16_ADDR (PROC_LOW_ADDR (proc_desc)) ? 16 : 0;
+    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 16 : 0;
   else
-    info->mach = IS_MIPS16_ADDR (memaddr) ? 16 : 0;
+    info->mach = pc_is_mips16 (memaddr) ? 16 : 0;
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == 16 ? ~1 : ~3);
@@ -2215,7 +2349,7 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     {
-      if (IS_MIPS16_ADDR (*pcptr))
+      if (pc_is_mips16 (*pcptr))
 	{
 	  static char mips16_big_breakpoint[] = MIPS16_BIG_BREAKPOINT;
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
@@ -2242,7 +2376,7 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
     }
   else
     {
-      if (IS_MIPS16_ADDR (*pcptr))
+      if (pc_is_mips16 (*pcptr))
 	{
 	  static char mips16_little_breakpoint[] = MIPS16_LITTLE_BREAKPOINT;
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
@@ -2276,7 +2410,7 @@ int
 mips_about_to_return (pc)
      CORE_ADDR pc;
 {
-  if (IS_MIPS16_ADDR (pc))
+  if (pc_is_mips16 (pc))
     /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
        generates a "jr $ra"; other times it generates code to load
        the return address from the stack to an accessible register (such

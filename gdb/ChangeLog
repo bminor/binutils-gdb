@@ -1,3 +1,23 @@
+Mon Sep 15 13:01:22 1997  Mark Alexander  <marka@cygnus.com>
+
+	* dbxread.c (MSYMBOL_SIZE): New macro.
+	(end_psymtab): Use MSYMBOL_SIZE to extract size from minimal symbol.
+	* elfread.c (elf_symtab_read): If ELF symbol is "special",
+	such as a MIPS16 function, mark minimal symbol as special too.
+	* mips-tdep.c (pc_is_mips16): New function to check whether
+	a function is MIPS16 by looking at the minimal symbol.  Use
+	pc_is_mips16 throughout instead of IS_MIPS16_ADDR macro.
+	* config/mips/tm-mips.h (SYMBOL_IS_SPECIAL, MAKE_MSYMBOL_SPECIAL,
+	MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): New functions for setting/testing
+	"special" MIPS16 bit in ELF and minimal symbols.
+	* mdebugread.c (parse_partial_symbols): Don't construct a partial
+	symbol table for a file that already has one.
+start-sanitize-tx19
+	* configure.tgt: Support TX19.
+	* config/mips/tm-tx19.h, config/mips/tm-tx19l.h, config/mips/tx19.mt,
+	config/mips/tx19l.mt: New files for TX19.
+end-sanitize-tx19
+
 Sat Sep 13 08:32:13 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol, handle_psymbol_enumerators):  Handle

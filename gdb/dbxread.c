@@ -62,6 +62,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
 
+/* This macro returns the size field of a minimal symbol, which is normally
+   stored in the "info" field.  The macro can be overridden for specific
+   targets (e.g. MIPS16) that use the info field for other purposes.  */
+#ifndef MSYMBOL_SIZE
+#define MSYMBOL_SIZE(msym) ((long) MSYMBOL_INFO (msym))
+#endif
+
+
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
@@ -1417,8 +1425,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       minsym = lookup_minimal_symbol (p, pst->filename, objfile);
 
       if (minsym)
-	pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym)
-	  + (long) MSYMBOL_INFO (minsym);
+	pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym);
 
       last_function_name = NULL;
     }

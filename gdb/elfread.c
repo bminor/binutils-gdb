@@ -538,6 +538,10 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      if (msym != NULL)
 		msym->filename = filesymname;
 #endif
+#ifdef SYMBOL_IS_SPECIAL
+	      if (SYMBOL_IS_SPECIAL (sym))
+		MAKE_MSYMBOL_SPECIAL (msym);
+#endif
 	    }
 	}
       do_cleanups (back_to);

@@ -91,6 +91,10 @@ r3900.mt
 r3900l.mt
 tm-r3900.h
 tm-r3900l.h
+tm-tx19.h
+tm-tx19l.h
+tx19.mt
+tx19l.mt
 
 Do-last:
 
