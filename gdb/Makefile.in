@@ -77,7 +77,8 @@ BFD_DEP = $$(BFD_DIR)
 
 # the parent of the directory in which live the readline headers.
 READLINE_DIR = ${srcdir}/..
-READLINE_DEP = $$(READLINE_DIR)
+RL_LIB = $(READLINE_DIR)/readline${subdir}/libreadline.a
+RL_LIB_DEP = $(RL_LIB)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -110,9 +111,9 @@ TERMCAP = -ltermcap
 # For example, -lPW for System V to get alloca().
 # FIXME STOPGAP FOR BFD LIBRARY: BFD stuff
 CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}${subdir}/libbfd.a \
-	${LIBIBERTY} ${READLINE_DIR}/readline${subdir}/libreadline.a
+	${LIBIBERTY} ${READLINE}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}${subdir}/libbfd.a \
-	${LIBIBERTY} ${READLINE_DIR}/readline${subdir}/libreadline.a
+	${LIBIBERTY} ${READLINE}
 
 ADD_FILES = ${REGEX} ${ALLOCA} ${GNU_MALLOC}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC}
@@ -234,9 +235,6 @@ NTSOBS = standalone.o
 TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
-
-RL_LIB = ../readline/libreadline.a
-RL_LIB_DEP = $(RL_LIB)
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -428,7 +426,7 @@ clean:
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
 	rm -f gdb.dvi gdb-all*
-	cd readline ; make clean
+#	cd readline ; make clean
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
