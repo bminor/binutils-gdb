@@ -377,7 +377,7 @@ bump_line_counters ()
  * If the line_number is -1, we don't change the current logical line
  * number.  If it is -2, we decrement the logical line number (this is
  * to support the .appfile pseudo-op inserted into the stream by
- * do_scrub_next_char).
+ * do_scrub_chars).
  * If the fname is NULL, we don't change the current logical file name.
  */
 void 
@@ -423,7 +423,7 @@ as_where (namep, linep)
     }
   else
     {
-      *namep = (char *) "*unknown*";
+      *namep = 0;
       if (linep != NULL)
 	*linep = 0;
     }
@@ -453,7 +453,6 @@ as_howmuch (stream)
   for (; p <= input_line_pointer; p++)
     {
       /* Assume ASCII. EBCDIC & other micro-computer char sets ignored. */
-      /* c = *p & 0xFF; JF unused */
       as_1_char ((unsigned char) *p, stream);
     }
 }
