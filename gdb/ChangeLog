@@ -1,7 +1,8 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
-	* config/tm-h8300.h (NUM_REGS): rewrite to avoid nested comment.
+	* config/m88k/tm-m88k.h (frame_find_saved_regs): prototype.
+	* config/h8300/tm-h8300.h (NUM_REGS): rewrite to avoid nested comment.
 	* blockframe.c (get_prev_frame_info): initialize address.
 	* breakpoint.c (bpstat_copy): initialize retval.
 	  (bpstat_stop_status): initialize value_is_zero.
