@@ -815,6 +815,23 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
+static enum return_value_convention
+sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
+		      struct regcache *regcache, void *readbuf,
+		      const void *writebuf)
+{
+  if (sparc_structure_or_union_p (type)
+      || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (readbuf)
+    sparc32_extract_return_value (type, regcache, readbuf);
+  if (writebuf)
+    sparc32_store_return_value (type, regcache, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 /* Extract from REGCACHE, which contains the (raw) register state, the
    address in which a function should return its structure value, as a
    CORE_ADDR.  */
@@ -826,20 +843,6 @@ sparc_extract_struct_value_address (struct regcache *regcache)
 
   regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
   return addr;
-}
-
-static int
-sparc32_use_struct_convention (int gcc_p, struct type *type)
-{
-  gdb_assert (sparc_structure_or_union_p (type));
-  return 1;
-}
-
-static int
-sparc32_return_value_on_stack (struct type *type)
-{
-  gdb_assert (!sparc_structure_or_union_p (type));
-  return (sparc_floating_p (type) && TYPE_LENGTH (type) == 16);
 }
 
 static int
@@ -1040,12 +1043,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_code (gdbarch, sparc32_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
-  set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
-  set_gdbarch_extract_struct_value_address
-    (gdbarch, sparc_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, sparc32_use_struct_convention);
-  set_gdbarch_return_value_on_stack (gdbarch, sparc32_return_value_on_stack);
+  set_gdbarch_return_value (gdbarch, sparc32_return_value);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, sparc32_stabs_argument_has_addr);
 
