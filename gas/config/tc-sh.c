@@ -54,6 +54,7 @@ little (ignore)
      int ignore;
 {
   shl = 1;
+  target_big_endian = 0;
 }
 
 const pseudo_typeS md_pseudo_table[] =
@@ -167,6 +168,9 @@ md_begin ()
   sh_opcode_info *opcode;
   char *prev_name = "";
 
+  if (! shl)
+    target_big_endian = 1;
+
   opcode_hash_control = hash_new ();
 
   /* Insert unique names into hash table */
@@ -188,6 +192,8 @@ md_begin ()
 
 static int reg_m;
 static int reg_n;
+static int reg_b;
+
 static expressionS immediate;	/* absolute expression */
 
 typedef struct
@@ -205,6 +211,16 @@ parse_reg (src, mode, reg)
      int *mode;
      int *reg;
 {
+  if (src[0] == 'r') 
+    {
+      if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0)
+	{
+	  *mode = A_REG_B;
+	  *reg  = (src[1] - '0');
+	  return 7;
+	}
+    }
+
   if (src[0] == 'r')
     {
       if (src[1] == '1')
@@ -222,6 +238,18 @@ parse_reg (src, mode, reg)
 	  *reg = (src[1] - '0');
 	  return 2;
 	}
+    }
+
+  if (src[0] == 's' && src[1] == 's' && src[2] == 'r')
+    {
+      *mode = A_SSR;
+      return 3;
+    }
+
+  if (src[0] == 's' && src[1] == 'p' && src[2] == 'c')
+    {
+      *mode = A_SPC;
+      return 3;
     }
 
   if (src[0] == 's' && src[1] == 'r')
@@ -534,16 +562,36 @@ get_operands (info, args, operand)
 	      ptr++;
 	    }
 	  get_operand (&ptr, operand + 1);
+/* start-sanitize-sh3e */
+	  if (info->arg[2])
+	    {
+	      if (*ptr == ',')
+		{
+		  ptr++;
+		}
+	      get_operand (&ptr, operand + 2);
+	    }
+	  else
+	    {
+	      operand[2].type = 0;
+	    }
+/* end-sanitize-sh3e */
 	}
       else
 	{
 	  operand[1].type = 0;
+/* start-sanitize-sh3e */
+	  operand[2].type = 0;
+/* end-sanitize-sh3e */
 	}
     }
   else
     {
       operand[0].type = 0;
       operand[1].type = 0;
+/* start-sanitize-sh3e */
+      operand[2].type = 0;
+/* end-sanitize-sh3e */
     }
   return ptr;
 }
@@ -561,7 +609,6 @@ get_specific (opcode, operands)
 {
   sh_opcode_info *this_try = opcode;
   char *name = opcode->name;
-  int arg_to_test = 0;
   int n = 0;
   while (opcode->name)
     {
@@ -579,8 +626,8 @@ get_specific (opcode, operands)
 
       for (n = 0; this_try->arg[n]; n++)
 	{
-	  sh_operand_info *user = operands + arg_to_test;
-	  sh_arg_type arg = this_try->arg[arg_to_test];
+	  sh_operand_info *user = operands + n;
+	  sh_arg_type arg = this_try->arg[n];
 	  switch (arg)
 	    {
 	    case A_IMM:
@@ -603,6 +650,12 @@ get_specific (opcode, operands)
 	      if (user->type != A_R0_GBR || user->reg != 0)
 		goto fail;
 	      break;
+/* start-sanitize-sh3e */
+	    case F_FR0:
+	      if (user->type != F_REG_N || user->reg != 0)
+		goto fail;
+	      break;
+/* end-sanitize-sh3e */
 
 	    case A_REG_N:
 	    case A_INC_N:
@@ -623,8 +676,16 @@ get_specific (opcode, operands)
 	    case A_GBR:
 	    case A_SR:
 	    case A_VBR:
+	    case A_SSR:
+	    case A_SPC:
 	      if (user->type != arg)
 		goto fail;
+	      break;
+
+            case A_REG_B:
+	      if (user->type != arg)
+		goto fail;
+	      reg_b = user->reg;
 	      break;
 
 	    case A_REG_M:
@@ -654,8 +715,6 @@ get_specific (opcode, operands)
 	      printf ("unhandled %d\n", arg);
 	      goto fail;
 	    }
-	  /* If we did 0, test 1 next, else 0 */
-	  arg_to_test = 1 - arg_to_test;
 	}
       return this_try;
     fail:;
@@ -698,7 +757,7 @@ static void
 build_relax (opcode)
      sh_opcode_info *opcode;
 {
-  int high_byte = shl ? 1 : 0 ;
+  int high_byte = target_big_endian ? 0 : 1;
   char *p;
 
   if (opcode->arg[0] == A_BDISP8)
@@ -737,7 +796,7 @@ build_Mytes (opcode, operand)
   int index;
   char nbuf[4];
   char *output = frag_more (2);
-  int low_byte = shl ? 0 : 1;
+  int low_byte = target_big_endian ? 1 : 0;
   nbuf[0] = 0;
   nbuf[1] = 0;
   nbuf[2] = 0;
@@ -759,6 +818,9 @@ build_Mytes (opcode, operand)
 	      break;
 	    case REG_M:
 	      nbuf[index] = reg_m;
+	      break;
+            case REG_B:
+	      nbuf[index] = reg_b | 0x08;
 	      break;
 	    case DISP_4:
 	      insert (output + low_byte, R_SH_IMM4, 0);
@@ -792,7 +854,7 @@ build_Mytes (opcode, operand)
 	    }
 	}
     }
-  if (shl) {
+  if (! target_big_endian) {
     output[1] = (nbuf[0] << 4) | (nbuf[1]);
     output[0] = (nbuf[2] << 4) | (nbuf[3]);
   }
@@ -813,7 +875,7 @@ md_assemble (str)
 {
   unsigned char *op_start;
   unsigned char *op_end;
-  sh_operand_info operand[2];
+  sh_operand_info operand[3];
   sh_opcode_info *opcode;
   char name[20];
   int nlen = 0;
@@ -937,7 +999,7 @@ md_atof (type, litP, sizeP)
 
   *sizeP = prec * 2;
 
-  if (shl)
+  if (! target_big_endian)
     {
       for (i = prec - 1; i >= 0; i--)
 	{
@@ -1009,6 +1071,7 @@ md_parse_option (c, arg)
       break;
     case OPTION_LITTLE:
       shl = 1;
+      target_big_endian = 0;
       break;
 
     default:
@@ -1260,8 +1323,8 @@ md_convert_frag (headers, seg, fragP)
       {
 	unsigned char *buffer =
 	  (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
-	int highbyte = shl ? 1 : 0;
-	int lowbyte = shl ? 0 : 1;
+	int highbyte = target_big_endian ? 0 : 1;
+	int lowbyte = target_big_endian ? 1 : 0;
 
 	/* Toggle the true/false bit of the bcond.  */
 	buffer[highbyte] ^= 0x2;
@@ -1420,8 +1483,8 @@ md_apply_fix (fixP, val)
      long val;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  int lowbyte = shl ? 0 : 1;
-  int highbyte = shl ? 1 : 0;
+  int lowbyte = target_big_endian ? 1 : 0;
+  int highbyte = target_big_endian ? 0 : 1;
 
   if (fixP->fx_r_type == 0)
     {
@@ -1477,34 +1540,34 @@ md_apply_fix (fixP, val)
 	 variable val.  */
       val = (val + 2) / 4;
       if (val & ~0xff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
     case R_SH_PCRELIMM8BY2:
       val /= 2;
       if (val & ~0xff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
     case R_SH_PCDISP8BY2:
       val /= 2;
       if (val < -0x80 || val > 0x7f)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val;
       break;
 
     case R_SH_PCDISP:
       val /= 2;
       if (val < -0x800 || val >= 0x7ff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
+	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far");
       buf[lowbyte] = val & 0xff;
       buf[highbyte] |= (val >> 8) & 0xf;
       break;
 
     case R_SH_IMM32:
-      if (shl) 
+      if (! target_big_endian) 
 	{
 	  *buf++ = val >> 0;
 	  *buf++ = val >> 8;
@@ -1521,7 +1584,7 @@ md_apply_fix (fixP, val)
       break;
 
     case R_SH_IMM16:
-      if (shl) 
+      if (! target_big_endian)
 	{
 	  *buf++ = val >> 0;
 	  *buf++ = val >> 8;
@@ -1619,7 +1682,7 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
-  if (shl)
+  if (! target_big_endian)
     number_to_chars_littleendian (ptr, use, nbytes);
   else
     number_to_chars_bigendian (ptr, use, nbytes);

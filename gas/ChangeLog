@@ -1,3 +1,8 @@
+Tue Jan  2 12:43:23 1996  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/tc-sh.c (md_apply_fix): Call as_bad_where instead of
+	as_warn_where for relocation overflow.
+
 Sat Dec 30 23:42:51 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* ecoff.c (ecoff_stab): Simplify.  Correctly handle sym + offset
