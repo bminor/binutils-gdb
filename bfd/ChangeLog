@@ -1,3 +1,11 @@
+Thu Dec 14 13:45:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ihex.c (ihex_set_arch_mach): Don't accept any architecture, just
+	a recognized one or bfd_arch_unknown.
+	(ihex_get_symtab_upper_bound): Define as bfd_0l, to permit objcopy
+	to succeed.
+	(ihex_get_symtab): Likewise.
+
 Wed Dec 13 15:44:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h: Include <ctype.h>.

@@ -899,7 +899,11 @@ ihex_set_arch_mach (abfd, arch, mach)
      enum bfd_architecture arch;
      unsigned long mach;
 {
-  bfd_default_set_arch_mach (abfd, arch, mach);
+  if (! bfd_default_set_arch_mach (abfd, arch, mach))
+    {
+      if (arch != bfd_arch_unknown)
+	return false;
+    }
   return true;
 }
 
@@ -922,8 +926,9 @@ ihex_sizeof_headers (abfd, exec)
 #define ihex_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
 
-#define ihex_get_symtab_upper_bound _bfd_nosymbols_get_symtab_upper_bound
-#define ihex_get_symtab _bfd_nosymbols_get_symtab
+#define ihex_get_symtab_upper_bound bfd_0l
+#define ihex_get_symtab \
+  ((long (*) PARAMS ((bfd *, asymbol **))) bfd_0l)
 #define ihex_print_symbol _bfd_nosymbols_print_symbol
 #define ihex_get_symbol_info _bfd_nosymbols_get_symbol_info
 #define ihex_bfd_is_local_label _bfd_nosymbols_bfd_is_local_label
