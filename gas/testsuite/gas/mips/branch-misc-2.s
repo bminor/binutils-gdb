@@ -34,6 +34,10 @@ g6:
 
 	b	x1
 	b	x2
+	b	.Ldata
 
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.space	8
+
+	.data
+.Ldata:
