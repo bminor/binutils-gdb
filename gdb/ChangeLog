@@ -1,3 +1,9 @@
+Mon Aug 16 13:52:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stack.c (frame_info, print_frame_info): Add comment about using
+	the starting source line number on a line boundary if backtracing
+	through sigtramp.
+
 Mon Aug 16 02:56:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* blockframe.c (create_new_frame, get_prev_frame_info):
