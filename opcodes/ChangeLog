@@ -1,3 +1,10 @@
+2004-04-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* sparc-opc.c (fmoviccx, fmovfccx, fmovccx): Define.
+	(fmovicc, fmovfcc, fmovcc): Remove fpsize argument, change opcode to
+	suffix.  Use fmov*x macros, create all 3 fpsize variants in one
+	macro.  Adjust all users.
+
 2004-04-15  Anil Paranjpe  <anilp1@kpitcummins.com>
 	
 	* h8300-dis.c (bfd_h8_disassemble) : Treat "adds" & "subs"
