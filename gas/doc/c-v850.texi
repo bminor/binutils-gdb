@@ -221,22 +221,30 @@ loads the contents of the location pointed to by the label '_a_variable'
 into register 6, provided that the label is located somewhere within +/-
 32K of the address held in the GP register.  [Note the linker assumes
 that the GP register contains a fixed address set to the address of the
-label called '__gp'].
+label called '__gp'.  This can either be set up automatically by the
+linker, or specifically set by using the @samp{--defsym __gp=<value>}
+command line option].
 
 @cindex @code{tdaoff} pseudo-op, V850
 @item tdaoff()
 Computes the offset of the named variable from the start of the Tiny
 Data Area (whoes address is held in register 30, the EP register) and
-stores the result as a 4,5,7 or 8 bit unsigned value in the immediate
+stores the result as a
+@c start-santize-v850e
+4,5,
+@c end-santize-v850e
+7 or 8 bit unsigned value in the immediate
 operand field of the given instruction.  For example:
 
       @samp{sld.w tdaoff(_a_variable)[ep],r6}
 
 loads the contents of the location pointed to by the label '_a_variable'
-into register 6, provided that the label is located somewhere within 256
+into register 6, provided that the label is located somewhere within +256
 bytes of the address held in the EP register.  [Note the linker assumes
 that the EP register contains a fixed address set to the address of the
-label called '__ep'].
+label called '__ep'.  This can either be set up automatically by the
+linker, or specifically set by using the @samp{--defsym __ep=<value>}
+command line option].
 
 @cindex @code{zdaoff} pseudo-op, V850
 @item zdaoff()
@@ -247,7 +255,9 @@ given instruction.  For example:
       @samp{movea zdaoff(_a_variable),zero,r6}
 
 puts the address of the label '_a_variable' into register 6, assuming
-that the label is somewhere within the first 32K of memory.
+that the label is somewhere within the first 32K of memory.  (Strictly
+speaking it also possible to access the last 32K of memory as well, as
+the offsets are signed).
 
 @end table
 

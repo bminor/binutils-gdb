@@ -1,5 +1,8 @@
 Tue Sep  2 15:58:52 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* doc/c-v850.texi: Explanations of offsets in SDA/ZDA areas
+	correcetd. 
+
 	* config/tc-v850.c: Add support for SDA/TDA/ZDA sections.
 	(v850_reloc_prefix): Duplicate code eliminated.  Add code to
 	recognise special instructions.
