@@ -1,3 +1,9 @@
+Fri Mar 15 16:17:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/corefile.exp: Remove "alpha-dec-osf2*" native compiled 
+	setup_xfail for "print coremaker_bss", "print coremaker_ro",
+ 	"print func2::coremaker_local", and "backtrace in corefile.exp".
+
 Wed Mar 13 14:54:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/signals.exp: Remove "alpha-*-osf2*" setup_xfail for

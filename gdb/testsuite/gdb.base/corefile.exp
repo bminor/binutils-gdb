@@ -61,7 +61,7 @@ if ![file exists ${objdir}/${subdir}/corefile] then {
     #    execute_anywhere "${binfile}"
     foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
 	set exec_output [execute_anywhere "ls $i"]
-	if [ regexp "No such file or directory" ${exec_output} ] {
+	if [ regexp "No such file or directory|not found" ${exec_output} ] {
 	    continue
 	} else {
 	    execute_anywhere "mv $i ${objdir}/${subdir}/corefile"
@@ -69,8 +69,24 @@ if ![file exists ${objdir}/${subdir}/corefile] then {
 	}
     }
     if { $found == 0 } {
-	warning "can't generate a core file - core tests suppressed - check ulimit -c"
-	return 0
+	# The braindamaged HPUX shell quits after the ulimit -c above
+	# without executing ${binfile}.  So we try again without the
+	# ulimit here if we didn't fine a core file above.
+	catch "system \"(cd ${objdir}/${subdir}; ${binfile}; true) >/dev/null 2>&1\""
+	foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
+	    set exec_output [execute_anywhere "ls $i"]
+	    if [ regexp "No such file or directory|not found" ${exec_output} ] {
+		continue
+	    } else {
+		execute_anywhere "mv $i ${objdir}/${subdir}/corefile"
+		set found 1
+	    }
+	}
+
+	if { $found == 0  } {
+	    warning "can't generate a core file - core tests suppressed - check ulimit -c"
+	    return 0
+	}
     }
 }
 
@@ -172,7 +188,6 @@ gdb_test "print func2::coremaker_local" "\\\$$decimal = {0, 1, 2, 3, 4}"
 
 # Haven't investigated this xfail
 setup_xfail "m68k-*-hpux*" "i*86-*-sysv4*"
-# Strange that this one depends upon being native compiled.
 gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
 
 # test reinit_frame_cache
