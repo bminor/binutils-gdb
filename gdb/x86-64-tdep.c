@@ -21,249 +21,198 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "inferior.h"
-#include "gdbcore.h"
-#include "gdbcmd.h"
 #include "arch-utils.h"
+#include "block.h"
+#include "dummy-frame.h"
+#include "frame.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
+#include "inferior.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "objfiles.h"
 #include "regcache.h"
 #include "symfile.h"
-#include "objfiles.h"
-#include "x86-64-tdep.h"
-#include "dwarf2cfi.h"
+
 #include "gdb_assert.h"
-#include "block.h"
+
+#include "x86-64-tdep.h"
+#include "i387-tdep.h"
 
 /* Register numbers of various important registers.  */
-#define RAX_REGNUM 0
-#define RDX_REGNUM 3
-#define RDI_REGNUM 5
-#define EFLAGS_REGNUM 17
-#define ST0_REGNUM 22
-#define XMM1_REGNUM  39
 
-struct register_info
+#define X86_64_RAX_REGNUM	0 /* %rax */
+#define X86_64_RDX_REGNUM	3 /* %rdx */
+#define X86_64_RDI_REGNUM	5 /* %rdi */
+#define X86_64_RBP_REGNUM	6 /* %rbp */
+#define X86_64_RSP_REGNUM	7 /* %rsp */
+#define X86_64_RIP_REGNUM	16 /* %rip */
+#define X86_64_EFLAGS_REGNUM	17 /* %eflags */
+#define X86_64_ST0_REGNUM	22 /* %st0 */
+#define X86_64_XMM0_REGNUM	38 /* %xmm0 */
+#define X86_64_XMM1_REGNUM	39 /* %xmm1 */
+
+struct x86_64_register_info
 {
-  int size;
   char *name;
   struct type **type;
 };
 
-/* x86_64_register_raw_size_table[i] is the number of bytes of storage in
-   GDB's register array occupied by register i.  */
-static struct register_info x86_64_register_info_table[] = {
-  /*  0 */ {8, "rax", &builtin_type_int64},
-  /*  1 */ {8, "rbx", &builtin_type_int64},
-  /*  2 */ {8, "rcx", &builtin_type_int64},
-  /*  3 */ {8, "rdx", &builtin_type_int64},
-  /*  4 */ {8, "rsi", &builtin_type_int64},
-  /*  5 */ {8, "rdi", &builtin_type_int64},
-  /*  6 */ {8, "rbp", &builtin_type_void_func_ptr},
-  /*  7 */ {8, "rsp", &builtin_type_void_func_ptr},
-  /*  8 */ {8, "r8", &builtin_type_int64},
-  /*  9 */ {8, "r9", &builtin_type_int64},
-  /* 10 */ {8, "r10", &builtin_type_int64},
-  /* 11 */ {8, "r11", &builtin_type_int64},
-  /* 12 */ {8, "r12", &builtin_type_int64},
-  /* 13 */ {8, "r13", &builtin_type_int64},
-  /* 14 */ {8, "r14", &builtin_type_int64},
-  /* 15 */ {8, "r15", &builtin_type_int64},
-  /* 16 */ {8, "rip", &builtin_type_void_func_ptr},
-  /* 17 */ {4, "eflags", &builtin_type_int32},
-  /* 18 */ {4, "ds", &builtin_type_int32},
-  /* 19 */ {4, "es", &builtin_type_int32},
-  /* 20 */ {4, "fs", &builtin_type_int32},
-  /* 21 */ {4, "gs", &builtin_type_int32},
-  /* 22 */ {10, "st0", &builtin_type_i387_ext},
-  /* 23 */ {10, "st1", &builtin_type_i387_ext},
-  /* 24 */ {10, "st2", &builtin_type_i387_ext},
-  /* 25 */ {10, "st3", &builtin_type_i387_ext},
-  /* 26 */ {10, "st4", &builtin_type_i387_ext},
-  /* 27 */ {10, "st5", &builtin_type_i387_ext},
-  /* 28 */ {10, "st6", &builtin_type_i387_ext},
-  /* 29 */ {10, "st7", &builtin_type_i387_ext},
-  /* 30 */ {4, "fctrl", &builtin_type_int32},
-  /* 31 */ {4, "fstat", &builtin_type_int32},
-  /* 32 */ {4, "ftag", &builtin_type_int32},
-  /* 33 */ {4, "fiseg", &builtin_type_int32},
-  /* 34 */ {4, "fioff", &builtin_type_int32},
-  /* 35 */ {4, "foseg", &builtin_type_int32},
-  /* 36 */ {4, "fooff", &builtin_type_int32},
-  /* 37 */ {4, "fop", &builtin_type_int32},
-  /* 38 */ {16, "xmm0", &builtin_type_v4sf},
-  /* 39 */ {16, "xmm1", &builtin_type_v4sf},
-  /* 40 */ {16, "xmm2", &builtin_type_v4sf},
-  /* 41 */ {16, "xmm3", &builtin_type_v4sf},
-  /* 42 */ {16, "xmm4", &builtin_type_v4sf},
-  /* 43 */ {16, "xmm5", &builtin_type_v4sf},
-  /* 44 */ {16, "xmm6", &builtin_type_v4sf},
-  /* 45 */ {16, "xmm7", &builtin_type_v4sf},
-  /* 46 */ {16, "xmm8", &builtin_type_v4sf},
-  /* 47 */ {16, "xmm9", &builtin_type_v4sf},
-  /* 48 */ {16, "xmm10", &builtin_type_v4sf},
-  /* 49 */ {16, "xmm11", &builtin_type_v4sf},
-  /* 50 */ {16, "xmm12", &builtin_type_v4sf},
-  /* 51 */ {16, "xmm13", &builtin_type_v4sf},
-  /* 52 */ {16, "xmm14", &builtin_type_v4sf},
-  /* 53 */ {16, "xmm15", &builtin_type_v4sf},
-  /* 54 */ {4, "mxcsr", &builtin_type_int32}
+static struct x86_64_register_info x86_64_register_info[] =
+{
+  { "rax", &builtin_type_int64 },
+  { "rbx", &builtin_type_int64 },
+  { "rcx", &builtin_type_int64 },
+  { "rdx", &builtin_type_int64 },
+  { "rsi", &builtin_type_int64 },
+  { "rdi", &builtin_type_int64 },
+  { "rbp", &builtin_type_void_data_ptr },
+  { "rsp", &builtin_type_void_data_ptr },
+
+  /* %r8 is indeed register number 8.  */
+  { "r8", &builtin_type_int64 },
+  { "r9", &builtin_type_int64 },
+  { "r10", &builtin_type_int64 },
+  { "r11", &builtin_type_int64 },
+  { "r12", &builtin_type_int64 },
+  { "r13", &builtin_type_int64 },
+  { "r14", &builtin_type_int64 },
+  { "r15", &builtin_type_int64 },
+  { "rip", &builtin_type_void_func_ptr },
+  { "eflags", &builtin_type_int32 },
+  { "ds", &builtin_type_int32 },
+  { "es", &builtin_type_int32 },
+  { "fs", &builtin_type_int32 },
+  { "gs", &builtin_type_int32 },
+
+  /* %st0 is register number 22.  */
+  { "st0", &builtin_type_i387_ext },
+  { "st1", &builtin_type_i387_ext },
+  { "st2", &builtin_type_i387_ext },
+  { "st3", &builtin_type_i387_ext },
+  { "st4", &builtin_type_i387_ext },
+  { "st5", &builtin_type_i387_ext },
+  { "st6", &builtin_type_i387_ext },
+  { "st7", &builtin_type_i387_ext },
+  { "fctrl", &builtin_type_int32 },
+  { "fstat", &builtin_type_int32 },
+  { "ftag", &builtin_type_int32 },
+  { "fiseg", &builtin_type_int32 },
+  { "fioff", &builtin_type_int32 },
+  { "foseg", &builtin_type_int32 },
+  { "fooff", &builtin_type_int32 },
+  { "fop", &builtin_type_int32 },
+
+  /* %xmm0 is register number 38.  */
+  { "xmm0", &builtin_type_v4sf },
+  { "xmm1", &builtin_type_v4sf },
+  { "xmm2", &builtin_type_v4sf },
+  { "xmm3", &builtin_type_v4sf },
+  { "xmm4", &builtin_type_v4sf },
+  { "xmm5", &builtin_type_v4sf },
+  { "xmm6", &builtin_type_v4sf },
+  { "xmm7", &builtin_type_v4sf },
+  { "xmm8", &builtin_type_v4sf },
+  { "xmm9", &builtin_type_v4sf },
+  { "xmm10", &builtin_type_v4sf },
+  { "xmm11", &builtin_type_v4sf },
+  { "xmm12", &builtin_type_v4sf },
+  { "xmm13", &builtin_type_v4sf },
+  { "xmm14", &builtin_type_v4sf },
+  { "xmm15", &builtin_type_v4sf },
+  { "mxcsr", &builtin_type_int32 }
 };
 
-/* This array is a mapping from Dwarf-2 register 
-   numbering to GDB's one. Dwarf-2 numbering is 
-   defined in x86-64 ABI, section 3.6.  */
-static int x86_64_dwarf2gdb_regno_map[] = {
-  0, 3, 2, 1,			/* RAX, RDX, RCX, RBX */
-  4, 5, 6, 7,			/* RSI, RDI, RBP, RSP */
-  8, 9, 10, 11,			/* R8 - R11 */
-  12, 13, 14, 15,		/* R12 - R15 */
-  -1,				/* RA - not mapped */
-  XMM1_REGNUM - 1, XMM1_REGNUM,	/* XMM0 ... */
-  XMM1_REGNUM + 1, XMM1_REGNUM + 2,
-  XMM1_REGNUM + 3, XMM1_REGNUM + 4,
-  XMM1_REGNUM + 5, XMM1_REGNUM + 6,
-  XMM1_REGNUM + 7, XMM1_REGNUM + 8,
-  XMM1_REGNUM + 9, XMM1_REGNUM + 10,
-  XMM1_REGNUM + 11, XMM1_REGNUM + 12,
-  XMM1_REGNUM + 13, XMM1_REGNUM + 14,	/* ... XMM15 */
-  ST0_REGNUM + 0, ST0_REGNUM + 1,	/* ST0 ... */
-  ST0_REGNUM + 2, ST0_REGNUM + 3,
-  ST0_REGNUM + 4, ST0_REGNUM + 5,
-  ST0_REGNUM + 6, ST0_REGNUM + 7	/* ... ST7 */
-};
+/* Total number of registers.  */
+#define X86_64_NUM_REGS \
+  (sizeof (x86_64_register_info) / sizeof (x86_64_register_info[0]))
 
-static int x86_64_dwarf2gdb_regno_map_length =
-  sizeof (x86_64_dwarf2gdb_regno_map) /
-  sizeof (x86_64_dwarf2gdb_regno_map[0]);
+/* Return the name of register REGNUM.  */
 
-/* Number of all registers */
-#define X86_64_NUM_REGS (sizeof (x86_64_register_info_table) / \
-  sizeof (x86_64_register_info_table[0]))
-
-/* Number of general registers.  */
-#define X86_64_NUM_GREGS (22)
-
-int x86_64_num_regs = X86_64_NUM_REGS;
-int x86_64_num_gregs = X86_64_NUM_GREGS;
-
-/* Did we already print a note about frame pointer?  */
-int omit_fp_note_printed = 0;
-
-/* Number of bytes of storage in the actual machine representation for
-   register REGNO.  */
-int
-x86_64_register_raw_size (int regno)
+static const char *
+x86_64_register_name (int regnum)
 {
-  return x86_64_register_info_table[regno].size;
-}
+  if (regnum >= 0 && regnum < X86_64_NUM_REGS)
+    return x86_64_register_info[regnum].name;
 
-/* x86_64_register_byte_table[i] is the offset into the register file of the
-   start of register number i.  We initialize this from
-   x86_64_register_info_table.  */
-int x86_64_register_byte_table[X86_64_NUM_REGS];
-
-/* Index within `registers' of the first byte of the space for register REGNO.  */
-int
-x86_64_register_byte (int regno)
-{
-  return x86_64_register_byte_table[regno];
+  return NULL;
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register N. */
+   register REGNUM. */
+
 static struct type *
-x86_64_register_virtual_type (int regno)
+x86_64_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  return *x86_64_register_info_table[regno].type;
+  gdb_assert (regnum >= 0 && regnum < X86_64_NUM_REGS);
+
+  return *x86_64_register_info[regnum].type;
 }
 
-/* x86_64_register_convertible is true if register N's virtual format is
-   different from its raw format.  Note that this definition assumes
-   that the host supports IEEE 32-bit floats, since it doesn't say
-   that SSE registers need conversion.  Even if we can't find a
-   counterexample, this is still sloppy.  */
-int
-x86_64_register_convertible (int regno)
+/* DWARF Register Number Mapping as defined in the System V psABI,
+   section 3.6.  */
+
+static int x86_64_dwarf_regmap[] =
 {
-  return IS_FP_REGNUM (regno);
-}
+  /* General Purpose Registers RAX, RDX, RCX, RBX, RSI, RDI.  */
+  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 3, 2, 
+  4, X86_64_RDI_REGNUM,
 
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  In principle both
-   formats are identical except that the virtual format has two extra
-   bytes appended that aren't used.  We set these to zero.  */
-void
-x86_64_register_convert_to_virtual (int regnum, struct type *type,
-				    char *from, char *to)
+  /* Frame Pointer Register RBP.  */
+  X86_64_RBP_REGNUM,
+
+  /* Stack Pointer Register RSP.  */
+  X86_64_RSP_REGNUM,
+
+  /* Extended Integer Registers 8 - 15.  */
+  8, 9, 10, 11, 12, 13, 14, 15,
+
+  /* Return Address RA.  Not mapped.  */
+  -1,
+
+  /* SSE Registers 0 - 7.  */
+  X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
+  X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
+  X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
+  X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
+
+  /* Extended SSE Registers 8 - 15.  */
+  X86_64_XMM0_REGNUM + 8, X86_64_XMM0_REGNUM + 9,
+  X86_64_XMM0_REGNUM + 10, X86_64_XMM0_REGNUM + 11,
+  X86_64_XMM0_REGNUM + 12, X86_64_XMM0_REGNUM + 13,
+  X86_64_XMM0_REGNUM + 14, X86_64_XMM0_REGNUM + 15,
+
+  /* Floating Point Registers 0-7.  */
+  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,	
+  X86_64_ST0_REGNUM + 2, X86_64_ST0_REGNUM + 3,
+  X86_64_ST0_REGNUM + 4, X86_64_ST0_REGNUM + 5,
+  X86_64_ST0_REGNUM + 6, X86_64_ST0_REGNUM + 7
+};
+
+static const int x86_64_dwarf_regmap_len =
+  (sizeof (x86_64_dwarf_regmap) / sizeof (x86_64_dwarf_regmap[0]));
+
+/* Convert DWARF register number REG to the appropriate register
+   number used by GDB.  */
+
+static int
+x86_64_dwarf_reg_to_regnum (int reg)
 {
-  char buf[12];
+  int regnum = -1;
 
-  /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
-    {
-      warning ("Cannot convert floating-point register value "
-	       "to non-floating-point type.");
-      memset (to, 0, TYPE_LENGTH (type));
-      return;
-    }
-  /* First add the necessary padding.  */
-  memcpy (buf, from, FPU_REG_RAW_SIZE);
-  memset (buf + FPU_REG_RAW_SIZE, 0, sizeof buf - FPU_REG_RAW_SIZE);
-  /* Convert to TYPE.  This should be a no-op, if TYPE is equivalent
-     to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (to, type, buf,
-			  x86_64_register_virtual_type (regnum));
-}
+  if (reg >= 0 || reg < x86_64_dwarf_regmap_len)
+    regnum = x86_64_dwarf_regmap[reg];
 
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  Simply omit the two
-   unused bytes.  */
+  if (regnum == -1)
+    warning ("Unmapped DWARF Register #%d encountered\n", reg);
 
-void
-x86_64_register_convert_to_raw (struct type *type, int regnum,
-				char *from, char *to)
-{
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12);
-  /* Simply omit the two unused bytes.  */
-  memcpy (to, from, FPU_REG_RAW_SIZE);
-}
-
-/* Dwarf-2 <-> GDB register numbers mapping.  */
-int
-x86_64_dwarf2_reg_to_regnum (int dw_reg)
-{
-  if (dw_reg < 0 || dw_reg > x86_64_dwarf2gdb_regno_map_length)
-    {
-      warning ("Dwarf-2 uses unmapped register #%d\n", dw_reg);
-      return dw_reg;
-    }
-
-  return x86_64_dwarf2gdb_regno_map[dw_reg];
-}
-
-/* Push the return address (pointing to the call dummy) onto the stack
-   and return the new value for the stack pointer.  */
-
-static CORE_ADDR
-x86_64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  char buf[8];
-
-  store_unsigned_integer (buf, 8, CALL_DUMMY_ADDRESS ());
-  write_memory (sp - 8, buf, 8);
-  return sp - 8;
-}
-
-static void
-x86_64_pop_frame (void)
-{
-  generic_pop_current_frame (cfi_pop_frame);
+  return regnum;
 }
 
 
 /* The returning of values is done according to the special algorithm.
-   Some types are returned in registers an some (big structures) in memory.
-   See ABI for details.
- */
+   Some types are returned in registers an some (big structures) in
+   memory.  See the System V psABI for details.  */
 
 #define MAX_CLASSES 4
 
@@ -282,27 +231,27 @@ enum x86_64_reg_class
 };
 
 /* Return the union class of CLASS1 and CLASS2.
-   See the x86-64 ABI for details.  */
+   See the System V psABI for details.  */
 
 static enum x86_64_reg_class
 merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
 {
-  /* Rule #1: If both classes are equal, this is the resulting class.  */
+  /* Rule (a): If both classes are equal, this is the resulting class.  */
   if (class1 == class2)
     return class1;
 
-  /* Rule #2: If one of the classes is NO_CLASS, the resulting class
+  /* Rule (b): If one of the classes is NO_CLASS, the resulting class
      is the other class.  */
   if (class1 == X86_64_NO_CLASS)
     return class2;
   if (class2 == X86_64_NO_CLASS)
     return class1;
 
-  /* Rule #3: If one of the classes is MEMORY, the result is MEMORY.  */
+  /* Rule (c): If one of the classes is MEMORY, the result is MEMORY.  */
   if (class1 == X86_64_MEMORY_CLASS || class2 == X86_64_MEMORY_CLASS)
     return X86_64_MEMORY_CLASS;
 
-  /* Rule #4: If one of the classes is INTEGER, the result is INTEGER.  */
+  /* Rule (d): If one of the classes is INTEGER, the result is INTEGER.  */
   if ((class1 == X86_64_INTEGERSI_CLASS && class2 == X86_64_SSESF_CLASS)
       || (class2 == X86_64_INTEGERSI_CLASS && class1 == X86_64_SSESF_CLASS))
     return X86_64_INTEGERSI_CLASS;
@@ -310,12 +259,13 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
       || class2 == X86_64_INTEGER_CLASS || class2 == X86_64_INTEGERSI_CLASS)
     return X86_64_INTEGER_CLASS;
 
-  /* Rule #5: If one of the classes is X87 or X87UP class, MEMORY is used.  */
+  /* Rule (e): If one of the classes is X87 or X87UP class, MEMORY is
+     used as class.  */
   if (class1 == X86_64_X87_CLASS || class1 == X86_64_X87UP_CLASS
       || class2 == X86_64_X87_CLASS || class2 == X86_64_X87UP_CLASS)
     return X86_64_MEMORY_CLASS;
 
-  /* Rule #6: Otherwise class SSE is used.  */
+  /* Rule (f): Otherwise class SSE is used.  */
   return X86_64_SSE_CLASS;
 }
 
@@ -325,7 +275,7 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
    is returned.  As a special case for zero sized containers,
    classes[0] will be NO_CLASS and 1 is returned.
 
-   See the x86-64 psABI for details.  */
+   See the System V psABI for details.  */
 
 static int
 classify_argument (struct type *type,
@@ -533,7 +483,8 @@ examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
    memory. If this function returns 1, GDB will call
    STORE_STRUCT_RETURN and EXTRACT_STRUCT_VALUE_ADDRESS else
    STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE will be used.  */
-int
+
+static int
 x86_64_use_struct_convention (int gcc_p, struct type *value_type)
 {
   enum x86_64_reg_class class[MAX_CLASSES];
@@ -550,7 +501,7 @@ x86_64_use_struct_convention (int gcc_p, struct type *value_type)
    function return value of TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-void
+static void
 x86_64_extract_return_value (struct type *type, struct regcache *regcache,
 			     void *valbuf)
 {
@@ -561,15 +512,15 @@ x86_64_extract_return_value (struct type *type, struct regcache *regcache,
   int intreg = 0;
   int ssereg = 0;
   int offset = 0;
-  int ret_int_r[RET_INT_REGS] = { RAX_REGNUM, RDX_REGNUM };
-  int ret_sse_r[RET_SSE_REGS] = { XMM0_REGNUM, XMM1_REGNUM };
+  int ret_int_r[RET_INT_REGS] = { X86_64_RAX_REGNUM, X86_64_RDX_REGNUM };
+  int ret_sse_r[RET_SSE_REGS] = { X86_64_XMM0_REGNUM, X86_64_XMM1_REGNUM };
 
   if (!n ||
       !examine_argument (class, n, &needed_intregs, &needed_sseregs) ||
       needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS)
     {				/* memory class */
       CORE_ADDR addr;
-      regcache_cooked_read (regcache, RAX_REGNUM, &addr);
+      regcache_cooked_read (regcache, X86_64_RAX_REGNUM, &addr);
       read_memory (addr, valbuf, TYPE_LENGTH (type));
       return;
     }
@@ -610,12 +561,12 @@ x86_64_extract_return_value (struct type *type, struct regcache *regcache,
 	      ssereg++;
 	      break;
 	    case X86_64_X87_CLASS:
-	      regcache_cooked_read_part (regcache, FP0_REGNUM,
+	      regcache_cooked_read_part (regcache, X86_64_ST0_REGNUM,
 					 0, 8, (char *) valbuf + offset);
 	      offset += 8;
 	      break;
 	    case X86_64_X87UP_CLASS:
-	      regcache_cooked_read_part (regcache, FP0_REGNUM,
+	      regcache_cooked_read_part (regcache, X86_64_ST0_REGNUM,
 					 8, 2, (char *) valbuf + offset);
 	      offset += 8;
 	      break;
@@ -628,33 +579,29 @@ x86_64_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-static void
-x86_64_frame_init_saved_regs (struct frame_info *fi)
-{
-  /* Do nothing.  Everything is handled by the stack unwinding code.  */
-}
-
 #define INT_REGS 6
-#define SSE_REGS 16
+#define SSE_REGS 8
 
-CORE_ADDR
-x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
+static CORE_ADDR
+x86_64_push_arguments (struct regcache *regcache, int nargs,
+		       struct value **args, CORE_ADDR sp)
 {
   int intreg = 0;
   int ssereg = 0;
   int i;
-  static int int_parameter_registers[INT_REGS] = {
-    5 /* RDI */ , 4 /* RSI */ ,
-    3 /* RDX */ , 2 /* RCX */ ,
-    8 /* R8  */ , 9		/* R9  */
+  static int int_parameter_registers[INT_REGS] =
+  {
+    X86_64_RDI_REGNUM, 4,	/* %rdi, %rsi */
+    X86_64_RDX_REGNUM, 2,	/* %rdx, %rcx */
+    8, 9			/* %r8, %r9 */
   };
-  /* XMM0 - XMM15  */
-  static int sse_parameter_registers[SSE_REGS] = {
-    XMM1_REGNUM - 1, XMM1_REGNUM, XMM1_REGNUM + 1, XMM1_REGNUM + 2,
-    XMM1_REGNUM + 3, XMM1_REGNUM + 4, XMM1_REGNUM + 5, XMM1_REGNUM + 6,
-    XMM1_REGNUM + 7, XMM1_REGNUM + 8, XMM1_REGNUM + 9, XMM1_REGNUM + 10,
-    XMM1_REGNUM + 11, XMM1_REGNUM + 12, XMM1_REGNUM + 13, XMM1_REGNUM + 14
+  /* %xmm0 - %xmm7 */
+  static int sse_parameter_registers[SSE_REGS] =
+  {
+    X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
+    X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
+    X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
+    X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
   };
   int stack_values_count = 0;
   int *stack_values;
@@ -684,19 +631,18 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_NO_CLASS:
 		  break;
 		case X86_64_INTEGER_CLASS:
-		  deprecated_write_register_gen (int_parameter_registers
-						 [(intreg + 1) / 2],
-						 VALUE_CONTENTS_ALL (args[i]) + offset);
+		  regcache_cooked_write
+		    (regcache, int_parameter_registers[(intreg + 1) / 2],
+		     VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  intreg += 2;
 		  break;
 		case X86_64_INTEGERSI_CLASS:
 		  {
-		    LONGEST num
-		      = extract_signed_integer (VALUE_CONTENTS_ALL (args[i])
-						+ offset, 4);
-		    regcache_raw_write_signed (current_regcache,
-					       int_parameter_registers[intreg / 2],                                           num);
+		    LONGEST val = extract_signed_integer
+		      (VALUE_CONTENTS_ALL (args[i]) + offset, 4);
+		    regcache_cooked_write_signed
+		      (regcache, int_parameter_registers[intreg / 2], val);
 
 		    offset += 8;
 		    intreg++;
@@ -705,15 +651,16 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
-		  deprecated_write_register_gen (sse_parameter_registers
-						 [(ssereg + 1) / 2],
-						 VALUE_CONTENTS_ALL (args[i]) + offset);
+		  regcache_cooked_write
+		    (regcache, sse_parameter_registers[(ssereg + 1) / 2],
+		     VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg += 2;
 		  break;
 		case X86_64_SSEUP_CLASS:
-		  deprecated_write_register_gen (sse_parameter_registers[ssereg / 2],
-						 VALUE_CONTENTS_ALL (args[i]) + offset);
+		  regcache_cooked_write
+		    (regcache, sse_parameter_registers[ssereg / 2],
+		     VALUE_CONTENTS_ALL (args[i]) + offset);
 		  offset += 8;
 		  ssereg++;
 		  break;
@@ -732,21 +679,25 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    }
 	}
     }
+
+  /* Push any remaining arguments onto the stack.  */
   while (--stack_values_count >= 0)
     {
       struct value *arg = args[stack_values[stack_values_count]];
       int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-      len += 7;
-      len -= len % 8;
-      sp -= len;
+
+      /* Make sure the stack stays eightbyte-aligned.  */
+      sp -= (len + 7) & ~7;
       write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
     }
+
   return sp;
 }
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
-void
+
+static void
 x86_64_store_return_value (struct type *type, struct regcache *regcache,
 			   const void *valbuf)
 {
@@ -754,27 +705,32 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      /* Floating-point return values can be found in %st(0).  */
-      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
-	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
-	{
-	  /* Copy straight over.  */
-	  regcache_cooked_write (regcache, FP0_REGNUM, valbuf);
-	}
-      else
-	{
-	  char buf[FPU_REG_RAW_SIZE];
-	  DOUBLEST val;
+      ULONGEST fstat;
+      char buf[FPU_REG_RAW_SIZE];
 
-	  /* Convert the value found in VALBUF to the extended
-	     floating point format used by the FPU.  This is probably
-	     not exactly how it would happen on the target itself, but
-	     it is the best we can do.  */
-	  val = deprecated_extract_floating (valbuf, TYPE_LENGTH (type));
-	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
-	  regcache_cooked_write_part (regcache, FP0_REGNUM,
-			  	      0, FPU_REG_RAW_SIZE, buf);
-	}
+      /* Returning floating-point values is a bit tricky.  Apart from
+         storing the return value in %st(0), we have to simulate the
+         state of the FPU at function return point.  */
+
+      /* Convert the value found in VALBUF to the extended
+	 floating-point format used by the FPU.  This is probably
+	 not exactly how it would happen on the target itself, but
+	 it is the best we can do.  */
+      convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
+      regcache_raw_write (regcache, X86_64_ST0_REGNUM, buf);
+
+      /* Set the top of the floating-point register stack to 7.  The
+         actual value doesn't really matter, but 7 is what a normal
+         function return would end up with if the program started out
+         with a freshly initialized FPU.  */
+      regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
+      fstat |= (7 << 11);
+      regcache_raw_write_unsigned (regcache, FSTAT_REGNUM, fstat);
+
+      /* Mark %st(1) through %st(7) as empty.  Since we set the top of
+         the floating-point register stack to 7, the appropriate value
+         for the tag word is 0x3fff.  */
+      regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
     }
   else
     {
@@ -797,126 +753,388 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 }
 
 
-const char *
-x86_64_register_name (int reg_nr)
+static CORE_ADDR
+x86_64_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
+			CORE_ADDR dummy_addr, int nargs, struct value **args,
+			CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
-  if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
-    return NULL;
-  return x86_64_register_info_table[reg_nr].name;
-}
+  char buf[8];
 
-int
-x86_64_register_number (const char *name)
-{
-  int reg_nr;
+  /* Pass arguments.  */
+  sp = x86_64_push_arguments (regcache, nargs, args, sp);
 
-  for (reg_nr = 0; reg_nr < X86_64_NUM_REGS; reg_nr++)
-    if (strcmp (name, x86_64_register_info_table[reg_nr].name) == 0)
-      return reg_nr;
-  return -1;
+  /* Pass "hidden" argument".  */
+  if (struct_return)
+    {
+      store_unsigned_integer (buf, 8, struct_addr);
+      regcache_cooked_write (regcache, X86_64_RDI_REGNUM, buf);
+    }
+
+  /* Store return address.  */
+  sp -= 8;
+  store_unsigned_integer (buf, 8, dummy_addr);
+  write_memory (sp, buf, 8);
+
+  /* Finally, update the stack pointer...  */
+  store_unsigned_integer (buf, 8, sp);
+  regcache_cooked_write (regcache, X86_64_RSP_REGNUM, buf);
+
+  /* ...and fake a frame pointer.  */
+  regcache_cooked_write (regcache, X86_64_RBP_REGNUM, buf);
+
+  return sp;
 }
 
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-void
-x86_64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  write_register (RDI_REGNUM, addr);
-}
+/* The maximum number of saved registers.  This should include %rip.  */
+#define X86_64_NUM_SAVED_REGS	17
 
-int
-x86_64_frameless_function_invocation (struct frame_info *frame)
+struct x86_64_frame_cache
 {
-  return 0;
-}
+  /* Base address.  */
+  CORE_ADDR base;
+  CORE_ADDR sp_offset;
+  CORE_ADDR pc;
 
-/* We will handle only functions beginning with:
-   55          pushq %rbp
-   48 89 e5    movq %rsp,%rbp
-   Any function that doesn't start with this sequence
-   will be assumed to have no prologue and thus no valid
-   frame pointer in %rbp.  */
-#define PROLOG_BUFSIZE 4
-int
-x86_64_function_has_prologue (CORE_ADDR pc)
+  /* Saved registers.  */
+  CORE_ADDR saved_regs[X86_64_NUM_SAVED_REGS];
+  CORE_ADDR saved_sp;
+
+  /* Do we have a frame?  */
+  int frameless_p;
+};
+
+/* Allocate and initialize a frame cache.  */
+
+static struct x86_64_frame_cache *
+x86_64_alloc_frame_cache (void)
 {
+  struct x86_64_frame_cache *cache;
   int i;
-  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
-    prolog_buf[PROLOG_BUFSIZE];
 
-  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+  cache = FRAME_OBSTACK_ZALLOC (struct x86_64_frame_cache);
 
-  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
-  for (i = 0; i < PROLOG_BUFSIZE; i++)
-    if (prolog_expect[i] != prolog_buf[i])
-      return 0;		/* ... no, it doesn't. Nothing to skip.  */
-  
-  return 1;
+  /* Base address.  */
+  cache->base = 0;
+  cache->sp_offset = -8;
+  cache->pc = 0;
+
+  /* Saved registers.  We initialize these to -1 since zero is a valid
+     offset (that's where %rbp is supposed to be stored).  */
+  for (i = 0; i < X86_64_NUM_SAVED_REGS; i++)
+    cache->saved_regs[i] = -1;
+  cache->saved_sp = 0;
+
+  /* Frameless until proven otherwise.  */
+  cache->frameless_p = 1;
+
+  return cache;
 }
 
-/* If a function with debugging information and known beginning
-   is detected, we will return pc of the next line in the source 
-   code. With this approach we effectively skip the prolog.  */
+/* Do a limited analysis of the prologue at PC and update CACHE
+   accordingly.  Bail out early if CURRENT_PC is reached.  Return the
+   address where the analysis stopped.
 
-CORE_ADDR
-x86_64_skip_prologue (CORE_ADDR pc)
+   We will handle only functions beginning with:
+
+      pushq %rbp        0x55
+      movq %rsp, %rbp   0x48 0x89 0xe5
+
+   Any function that doesn't start with this sequence will be assumed
+   to have no prologue and thus no valid frame pointer in %rbp.  */
+
+static CORE_ADDR
+x86_64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+			 struct x86_64_frame_cache *cache)
 {
-  int i;
-  struct symtab_and_line v_sal;
-  struct symbol *v_function;
-  CORE_ADDR endaddr;
+  static unsigned char proto[3] = { 0x48, 0x89, 0xe5 };
+  unsigned char buf[3];
+  unsigned char op;
 
-  if (! x86_64_function_has_prologue (pc))
-    return pc;
+  if (current_pc <= pc)
+    return current_pc;
 
-  /* OK, we have found the prologue and want PC of the first
-     non-prologue instruction.  */
-  pc += PROLOG_BUFSIZE;
+  op = read_memory_unsigned_integer (pc, 1);
 
-  v_function = find_pc_function (pc);
-  v_sal = find_pc_line (pc, 0);
+  if (op == 0x55)		/* pushq %rbp */
+    {
+      /* Take into account that we've executed the `pushq %rbp' that
+         starts this instruction sequence.  */
+      cache->saved_regs[X86_64_RBP_REGNUM] = 0;
+      cache->sp_offset += 8;
 
-  /* If pc doesn't point to a function with debuginfo, some of the
-     following may be NULL.  */
-  if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
-    return pc;
+      /* If that's all, return now.  */
+      if (current_pc <= pc + 1)
+        return current_pc;
 
-  endaddr = BLOCK_END (SYMBOL_BLOCK_VALUE (v_function));
+      /* Check for `movq %rsp, %rbp'.  */
+      read_memory (pc + 1, buf, 3);
+      if (memcmp (buf, proto, 3) != 0)
+	return pc + 1;
 
-  for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
-    if (v_sal.symtab->linetable->item[i].pc >= pc
-	&& v_sal.symtab->linetable->item[i].pc < endaddr)
-      {
-	pc = v_sal.symtab->linetable->item[i].pc;
-	break;
-      }
+      /* OK, we actually have a frame.  */
+      cache->frameless_p = 0;
+      return pc + 4;
+    }
 
   return pc;
 }
 
+/* Return PC of first real instruction.  */
+
+static CORE_ADDR
+x86_64_skip_prologue (CORE_ADDR start_pc)
+{
+  struct x86_64_frame_cache cache;
+  CORE_ADDR pc;
+
+  pc = x86_64_analyze_prologue (start_pc, 0xffffffffffffffff, &cache);
+  if (cache.frameless_p)
+    return start_pc;
+
+  return pc;
+}
+
+
+/* Normal frames.  */
+
+static struct x86_64_frame_cache *
+x86_64_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct x86_64_frame_cache *cache;
+  char buf[8];
+  int i;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = x86_64_alloc_frame_cache ();
+  *this_cache = cache;
+
+  frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 8);
+  if (cache->base == 0)
+    return cache;
+
+  /* For normal frames, %rip is stored at 8(%rbp).  */
+  cache->saved_regs[X86_64_RIP_REGNUM] = 8;
+
+  cache->pc = frame_func_unwind (next_frame);
+  if (cache->pc != 0)
+    x86_64_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+
+  if (cache->frameless_p)
+    {
+      /* We didn't find a valid frame, which means that CACHE->base
+	 currently holds the frame pointer for our calling frame.  If
+	 we're at the start of a function, or somewhere half-way its
+	 prologue, the function's frame probably hasn't been fully
+	 setup yet.  Try to reconstruct the base address for the stack
+	 frame by looking at the stack pointer.  For truly "frameless"
+	 functions this might work too.  */
+
+      frame_unwind_register (next_frame, X86_64_RSP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
+    }
+
+  /* Now that we have the base address for the stack frame we can
+     calculate the value of %rsp in the calling frame.  */
+  cache->saved_sp = cache->base + 16;
+
+  /* Adjust all the saved registers such that they contain addresses
+     instead of offsets.  */
+  for (i = 0; i < X86_64_NUM_SAVED_REGS; i++)
+    if (cache->saved_regs[i] != -1)
+      cache->saved_regs[i] += cache->base;
+
+  return cache;
+}
+
+static void
+x86_64_frame_this_id (struct frame_info *next_frame, void **this_cache,
+		      struct frame_id *this_id)
+{
+  struct x86_64_frame_cache *cache =
+    x86_64_frame_cache (next_frame, this_cache);
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
+    return;
+
+  (*this_id) = frame_id_build (cache->base + 16, cache->pc);
+}
+
+static void
+x86_64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
+			    int regnum, int *optimizedp,
+			    enum lval_type *lvalp, CORE_ADDR *addrp,
+			    int *realnump, void *valuep)
+{
+  struct x86_64_frame_cache *cache =
+    x86_64_frame_cache (next_frame, this_cache);
+
+  gdb_assert (regnum >= 0);
+
+  if (regnum == SP_REGNUM && cache->saved_sp)
+    {
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Store the value.  */
+	  store_unsigned_integer (valuep, 8, cache->saved_sp);
+	}
+      return;
+    }
+
+  if (regnum < X86_64_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = cache->saved_regs[regnum];
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Read the value in from memory.  */
+	  read_memory (*addrp, valuep,
+		       register_size (current_gdbarch, regnum));
+	}
+      return;
+    }
+
+  frame_register_unwind (next_frame, regnum,
+			 optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind x86_64_frame_unwind =
+{
+  NORMAL_FRAME,
+  x86_64_frame_this_id,
+  x86_64_frame_prev_register
+};
+
+static const struct frame_unwind *
+x86_64_frame_p (CORE_ADDR pc)
+{
+  return &x86_64_frame_unwind;
+}
+
+
+/* Signal trampolines.  */
+
+/* FIXME: kettenis/20030419: Perhaps, we can unify the 32-bit and
+   64-bit variants.  This would require using identical frame caches
+   on both platforms.  */
+
+static struct x86_64_frame_cache *
+x86_64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct x86_64_frame_cache *cache;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR addr;
+  char buf[8];
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = x86_64_alloc_frame_cache ();
+
+  frame_unwind_register (next_frame, X86_64_RSP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 8) - 8;
+
+  addr = tdep->sigcontext_addr (next_frame);
+  cache->saved_regs[X86_64_RIP_REGNUM] = addr + tdep->sc_pc_offset;
+  cache->saved_regs[X86_64_RSP_REGNUM] = addr + tdep->sc_sp_offset;
+
+  *this_cache = cache;
+  return cache;
+}
+
+static void
+x86_64_sigtramp_frame_this_id (struct frame_info *next_frame,
+			       void **this_cache, struct frame_id *this_id)
+{
+  struct x86_64_frame_cache *cache =
+    x86_64_sigtramp_frame_cache (next_frame, this_cache);
+
+  (*this_id) = frame_id_build (cache->base + 16, frame_pc_unwind (next_frame));
+}
+
+static void
+x86_64_sigtramp_frame_prev_register (struct frame_info *next_frame,
+				     void **this_cache,
+				     int regnum, int *optimizedp,
+				     enum lval_type *lvalp, CORE_ADDR *addrp,
+				     int *realnump, void *valuep)
+{
+  /* Make sure we've initialized the cache.  */
+  x86_64_sigtramp_frame_cache (next_frame, this_cache);
+
+  x86_64_frame_prev_register (next_frame, this_cache, regnum,
+			      optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind x86_64_sigtramp_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  x86_64_sigtramp_frame_this_id,
+  x86_64_sigtramp_frame_prev_register
+};
+
+static const struct frame_unwind *
+x86_64_sigtramp_frame_p (CORE_ADDR pc)
+{
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (PC_IN_SIGTRAMP (pc, name))
+    return &x86_64_sigtramp_frame_unwind;
+
+  return NULL;
+}
+
+
+static CORE_ADDR
+x86_64_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{
+  struct x86_64_frame_cache *cache =
+    x86_64_frame_cache (next_frame, this_cache);
+
+  return cache->base;
+}
+
+static const struct frame_base x86_64_frame_base =
+{
+  &x86_64_frame_unwind,
+  x86_64_frame_base_address,
+  x86_64_frame_base_address,
+  x86_64_frame_base_address
+};
+
 static void
 x86_64_save_dummy_frame_tos (CORE_ADDR sp)
 {
-  /* We must add the size of the return address that is already 
-     put on the stack.  */
-  generic_save_dummy_frame_tos (sp + 
-				TYPE_LENGTH (builtin_type_void_func_ptr));
+  generic_save_dummy_frame_tos (sp + 16);
 }
 
 static struct frame_id
-x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *frame)
+x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  CORE_ADDR base;
-  frame_unwind_unsigned_register (frame, SP_REGNUM, &base);
-  return frame_id_build (base, frame_pc_unwind (frame));
+  char buf[8];
+  CORE_ADDR fp;
+
+  frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
+  fp = extract_unsigned_integer (buf, 8);
+
+  return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
 }
 
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int i, sum;
 
   /* The x86-64 has 16 SSE registers.  */
   tdep->num_xmm_regs = 16;
@@ -932,115 +1150,94 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 128);
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
+  set_gdbarch_register_name (gdbarch, x86_64_register_name);
+  set_gdbarch_register_type (gdbarch, x86_64_register_type);
 
   /* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
-  set_gdbarch_deprecated_fp_regnum (gdbarch, 6); /* %rbp */
-  set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
-  set_gdbarch_ps_regnum (gdbarch, 17); /* %eflags */
-  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
+  set_gdbarch_sp_regnum (gdbarch, X86_64_RSP_REGNUM); /* %rsp */
+  set_gdbarch_pc_regnum (gdbarch, X86_64_RIP_REGNUM); /* %rip */
+  set_gdbarch_ps_regnum (gdbarch, X86_64_EFLAGS_REGNUM); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_ST0_REGNUM); /* %st(0) */
 
   /* The "default" register numbering scheme for the x86-64 is
-     referred to as the "DWARF register number mapping" in the psABI.
-     The preferred debugging format for all known x86-64 targets is
-     actually DWARF2, and GCC doesn't seem to support DWARF (that is
-     DWARF-1), but we provide the same mapping just in case.  This
-     mapping is also used for stabs, which GCC does support.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+     referred to as the "DWARF Register Number Mapping" in the System
+     V psABI.  The preferred debugging format for all known x86-64
+     targets is actually DWARF2, and GCC doesn't seem to support DWARF
+     (that is DWARF-1), but we provide the same mapping just in case.
+     This mapping is also used for stabs, which GCC does support.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, x86_64_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, x86_64_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf_reg_to_regnum);
 
-  /* We don't override SDB_REG_RO_REGNUM, sice COFF doesn't seem to be
-     in use on any of the supported x86-64 targets.  */
+  /* We don't override SDB_REG_RO_REGNUM, since COFF doesn't seem to
+     be in use on any of the supported x86-64 targets.  */
 
-  set_gdbarch_register_name (gdbarch, x86_64_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 8);
-
-  /* Total amount of space needed to store our copies of the machine's
-     register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +
-     SIZEOF_SSE_REGS) */
-  for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
-    sum += x86_64_register_info_table[i].size;
-  set_gdbarch_deprecated_register_bytes (gdbarch, sum);
-
-  set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
-  set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
-  set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
-
-  set_gdbarch_register_convertible (gdbarch, x86_64_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch,
-					   x86_64_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch,
-				       x86_64_register_convert_to_raw);
-
-  /* Getting saved registers is handled by unwind information.  */
-  set_gdbarch_deprecated_get_saved_register (gdbarch, cfi_get_saved_register);
-
-  /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
-  set_gdbarch_deprecated_target_read_fp (gdbarch, cfi_read_fp);
+  /* Call dummy code.  */
+  set_gdbarch_push_dummy_call (gdbarch, x86_64_push_dummy_call);
 
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
-
-  set_gdbarch_deprecated_push_arguments (gdbarch, x86_64_push_arguments);
-  set_gdbarch_deprecated_push_return_address (gdbarch, x86_64_push_return_address);
-  set_gdbarch_deprecated_pop_frame (gdbarch, x86_64_pop_frame);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, x86_64_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
   set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
 
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
-  set_gdbarch_deprecated_frame_chain (gdbarch, x86_64_linux_frame_chain);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					 x86_64_frameless_function_invocation);
-  /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
-     should be moved elsewhere.  */
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
-
+  /* Avoid wiring in the MMX registers for now.  */
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
 
-  /* Build call frame information (CFI) from DWARF2 frame debug info.  */
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
-
-  /* Initialization of per-frame CFI.  */
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
-
-  /* Frame PC initialization is handled by using CFI.  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, x86_64_init_frame_pc);
-
-  /* Cons up virtual frame pointer for trace.  */
-  set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
+  set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
 
   /* FIXME: kettenis/20021026: This is ELF-specific.  Fine for now,
      since all supported x86-64 targets are ELF, but that might change
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-  
-  /* Dummy frame helper functions.  */
-  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
-  set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
+
+  frame_unwind_append_predicate (gdbarch, x86_64_sigtramp_frame_p);
+  frame_unwind_append_predicate (gdbarch, x86_64_frame_p);
+  frame_base_set_default (gdbarch, &x86_64_frame_base);
 }
+
+
+#define I387_FISEG_REGNUM FISEG_REGNUM
+#define I387_FOSEG_REGNUM FOSEG_REGNUM
+
+/* The 64-bit FXSAVE format differs from the 32-bit format in the
+   sense that the instruction pointer and data pointer are simply
+   64-bit offsets into the code segment and the data segment instead
+   of a selector offset pair.  The functions below store the upper 32
+   bits of these pointers (instead of just the 16-bits of the segment
+   selector).  */
+
+/* Fill GDB's register array with the floating-point and SSE register
+   values in *FXSAVE.  This function masks off any of the reserved
+   bits in *FXSAVE.  */
 
 void
-_initialize_x86_64_tdep (void)
+x86_64_supply_fxsave (char *fxsave)
 {
-  /* Initialize the table saying where each register starts in the
-     register file.  */
-  {
-    int i, offset;
+  i387_supply_fxsave (fxsave);
 
-    offset = 0;
-    for (i = 0; i < X86_64_NUM_REGS; i++)
-      {
-	x86_64_register_byte_table[i] = offset;
-	offset += x86_64_register_info_table[i].size;
-      }
-  }
+  if (fxsave)
+    {
+      supply_register (I387_FISEG_REGNUM, fxsave + 12);
+      supply_register (I387_FOSEG_REGNUM, fxsave + 20);
+    }
+}
+
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   this for all registers.  This function doesn't touch any of the
+   reserved bits in *FXSAVE.  */
+
+void
+x86_64_fill_fxsave (char *fxsave, int regnum)
+{
+  i387_fill_fxsave (fxsave, regnum);
+
+  if (regnum == -1 || regnum == I387_FISEG_REGNUM)
+    regcache_collect (regnum, fxsave + 12);
+  if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
+    regcache_collect (regnum, fxsave + 20);
 }

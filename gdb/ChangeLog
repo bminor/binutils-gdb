@@ -1,3 +1,141 @@
+2003-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.h (x86_64_num_regs, x86_64_num_gregs): Remove
+	variable declarations.
+	(x86_64_register_number, x86_64_register_name): Remove prototypes.
+	(x86_64_linux_frame_saved_pc, x86_64_linux+saved_pc_after_call,
+	x86_64_linux_in_sigtramp, x86_64_linux_frame_chain,
+	x86_64_init_frame_pc, x86_64_init_frame_pc,
+	x86_64_function_has_prologue): Remove prototypes.
+	(X86_64_NUM_GREGS): New define.
+	(x86_64_supply_fxsave, x86_64_fill_fxsave): New prototypes.
+	* x86-64-tdep.c: Don't include "dwarf2cfi.h".  Include
+	"dummy_frame.h", "frame.h", "frame-base.h", "frame-unwind.h".
+	(RAX_REGNUM, RDX_REGNUM, RDI_REGNUM, EFLAGS_REGNUM, ST0_REGNUM,
+	XMM1_REGNUM): Remove defines.
+	(X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, X86_64_RDI_REGNUM,
+	X86_64_RBP_REGNUM, X86_64_RSP_REGNUM, X86_64_RIP_REGNUM,
+	X86_64_EFLAGS_REGNUM, X86_64_ST0_REGNUM, X86_64_XMM0_REGNUM,
+	X86_64_XMM1_REGNUM): New defines.
+	(struct x86_64_register_info): Renamed from `struct
+	register_info'.  Remove `size' member.
+	(x86_64_register_info_table): Remove variable.
+	(x86_64_register_info): New variable.
+	(X86_64_NUM_REGS): New define.
+	(X86_64_NUM_GREGS): Remove define.
+	(x86_64_num_regs, x86_64_num_gregs): Remove variables.
+	(x86_64_dwarf2gdb_regno_map, x86_64_dwarf2gdb_regno_map_length):
+	Remove variables.
+	(x86_54_dwarf2_reg_to_regnum): Remove function.
+	(x86_64_dwarf_regmap, x86_64_dwarf_regmap_len): New variables.
+	(x86_64_dwarf_reg_to_regnum): New function.
+	(x86_64_register_name): Rewrite.
+	(x86_64_register_raw_size): Remove function.
+	(x86_64_register_byte_table): Remove variable.
+	(x86_64_register_byte): Remove function.
+	(x86_64_register_virtual_type): Remove function.
+	(x86_64_register_type): New function.
+	(x86_64_register_convertible, x86_64_register_convert_to_virtual,
+	x86_64_register_convert_to_raw): Remove functions.
+	(x86_64_push_return_address, x86_64_pop_frame): Remove functon.
+	(x86_64_use_struct_convention): Make static.  Adjust for renamed
+	defines.
+	(x86_64_frame_init_saved_regs): Remove function.
+	(x86_64_push_arguments): Make static.  Change to accept a regcache
+	as argument.
+	(x86_64_store_return_value, x86_64_extract_return_value): Make
+	static.  Rewrite based on i386 counterparts.
+	(x86_64_push_dummy_call): New function.
+	(X86_64_NUM_SAVED_REGS): New define.
+	(x86_64_register_number): Remove function.
+	(x86_64_store_struct_return): Remove function.
+	(x86_64_frameless_function_invocation,
+	x86_64_function_has_prologue): Remove functions.
+	(PROLOG_BUFSIZE): Remove define.
+	(struct x86_64_frame_cache): New structure.
+	(x86_64_alloc_frame_cache, x86_64_analyze_prologue,
+	x86_64_frame_cache, x86_64_frame_this_id,
+	x86_64_frame_prev_register, x86_64_frame_p,
+	x86_64_sigtramp_frame_cache, x86_64_sigtramp_frame_this_id,
+	x86_64_sigtramp_frame_prev_register, x86_sigtramp_frame_p): New
+	functions.
+	(x86_64_frame_unwind, x86_64_sigtramp_frame_unwind): New
+	variables.
+	(x86_64_skip_prologue): Rewrite in terms of
+	x86_64_analyze_prologue.
+	(x86_64_frame_base_address): New function.
+	(x86_64_frame_base): New variable.
+	(x86_64_save_dummy_frame_tos, x86_64_unwind_dummy_id): Rewrite.
+	(x86_64_init_abi): Set register_type and push_dummy_call.  Don't
+	set deprecated_fp_regnum, deprecated_register_size,
+	deprecated_register_bytes, register_raw_size, register_byte,
+	register_virtual_type, register_convertiable,
+	register_convert_to_virtual, convert_to_raw,
+	deprecated_get_saved_register, deprecated_target_read_fp,
+	deprecated_push_arguments, deprecated_push_return_address,
+	deprecated_pop_frame, deprecated_store_struct_return,
+	deprecated_frame_init_saved_regs, deprecated_frame_chain,
+	frameless_function_invocation, deprecated_frame_saved_pc,
+	deprecated_saved_pc_after_call, frame_num_args, pc_in_sigtramp,
+	dwarf2_build_frame_info, deprecated_init_extra_frame_info,
+	deprecated_init_frame_pc and virtual_frame_pointer.  Call
+	frame_unwind_append_predicate to register x86_64_sigtramp_frame_p
+	and x86_64_frame_p.  Call frame_base_set_default to register
+	x86_64_frame_base.
+	(I387_FISEG_REGNUM, I387_FOSEG_REGNUM): New defines.
+	(x86_64_supply_fxsave, x86_64_fill_fxsave): New functions.
+	(_initialize_x86_64_tdep): Remove function.
+	* x86-64-linux-tdep.c: Don't include "dwarf2cfi.h".
+	(LINUX_SIGINFO_SIZE, LINUX_UCONTEXT_SIGCONTEXT_OFFSET,
+	LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_FP_OFFSET): Don't
+	define.
+	(X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET): Define.
+	(x86_64_linux_sigcontext_addr): Rewrite.
+	(x86_64_linux_sigtramp_saved_pc, x86_64_linux_saved_pc_after_call,
+	x86_64_linux_frame_saved_pc): Remove functions.
+	(x86_64_linux_pc_in_sigtramp): Renamed from
+	x86_64_linux_in_sigtramp.  Try harder to recognize a signal
+	trampoline.
+	(x86_64_linux_frame_chain, x86_64_init_frame_pc):
+	Remove_functions.
+	(x86_64_linux_init_abi): Set pc_in_sigtramp.  Initialize
+	TDEP->sigcontext_addr, TDEP->sc_pc_offset and TDEP->sc_sp_offset.
+	* x86-64-linux-nat.c: Sync with i386-linux-tdep.c.
+	(x86_64_regmap): Rename to regmap.
+	(GETREGS_SUPPLIES): Use X86_64_NUM_GREGS instead of
+	x86_64_num_gregs.
+	(supply_gregset, fill_gregset): Likewise.  Use regmap instead of
+	x86_64_regmap.
+	(x86_64_fxsave_offset): Remove function.
+	(supply_fpregset): Simply call x86_64_supply_fxsave.
+	(fill_fpregset): Simply call x86_64_fill_fxsave.
+	(fetch_inferior_registers, store_inferior_registers): Avoid
+	asignment in if-statement.
+	(LINUX_SYSCALL_LEN, LINUX_SYSCALL_REGNUM, SYS_Sigreturn,
+	SYS_rt_sigreturn, LINUX_SIGCONTEXT_EFLAGS_OFFSET,
+	LINUX_UCONTEXT_SIGCONTEXT_OFFSET): Remove defines.
+	(fetch_core_registers): Remove function.
+	(linux_elf_core_fns): Remove.
+	(offsetoff): Don't define.
+	(_initialize_x86_64_linux_nat, kernel_u_size): Remove functions.
+	* config/i386/x86-64linux.mt (TDEPFILES): Add i386-linux-tdep.o.
+	* config/i386/x86-64linux.mh (NATDEPFILES): Remove core-aout.o,
+	add core-regset.o.
+	* config/i386/nm-x86-64linux.h: Use NM_X86_64_LINUX_H for
+	protection against multiple includes instead of NM_X86_64_h.  Add
+	various comments.  Include "config/nm-linux.h".  Don't include
+	<signal.h>.
+	(REGISTER_U_ADDR, KERNEL_U_SIZE, U_REGS_OFFSET, KERN_U_ADDR,
+	GET_THREAD_SIGNALS): Remove defines.
+	(x86_64_register_u_addr, kernel_u_size,
+	lin_thread_get_thread_signals): Remove prototypes.
+	(PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Define to `long'.
+	[HAVE_LINK_H]: Don't include "solib.h".
+	[HAVE_LINK_H] (SVR4_SHARED_LIBS): Remove define.
+	* config/i386/tm-x86-64linux.h: Fix comments.
+	* Makefile.in (x86-64-linux-nat.o, x86_64-linux-tdep.o,
+	x86-64-tdep.o): Update dependencies.
+
 2003-05-30  Andrew Cagney  <cagney@redhat.com>
 
 	* config/sparc/tm-sparc.h (sparc_extract_struct_value_address):
