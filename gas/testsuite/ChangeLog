@@ -1,3 +1,19 @@
+2002-09-08  Ben Elliston  <bje@redhat.com>
+
+	* gas/hppa/basic/basic.exp: Update DejaGnu mail address.
+	* gas/hppa/parse/parse.exp: Likewise.
+	* gas/hppa/reloc/reloc.exp: Likewise.
+	* gas/hppa/unsorted/unsorted.exp: Likewise.
+	* gas/mn10200/basic.exp: Likewise.
+	* gas/mn10300/basic.exp: Likewise.
+	* gas/sh/basic.exp: Likewise.
+	* gas/sh/sh64/sh64.exp: Likewise.
+	* gas/v850/basic.exp: Likewise.
+	* lib/gas-defs.exp: Likewise.
+
+	* gas/all/gas.exp: Removing limping support for DejaGnu 1.1.1.
+	* gasp/gasp.exp: Likewise.
+
 2002-09-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/absrel.s: New.
