@@ -176,16 +176,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
-/* ??? It's not clear whether we want to return 4 or 8 for fp regs.  */
 
 #undef  REGISTER_RAW_SIZE
-#define REGISTER_RAW_SIZE(N) 8
+#define REGISTER_RAW_SIZE(N) \
+  ((N) < 32 ? 8 : (N) < 64 ? 4 : 8)
 
 /* Number of bytes of storage in the program's representation
    for register N.  */
 
 #undef  REGISTER_VIRTUAL_SIZE
-#define REGISTER_VIRTUAL_SIZE(N) 8
+#define REGISTER_VIRTUAL_SIZE(N) \
+  ((N) < 32 ? 8 : (N) < 64 ? 4 : 8)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 /* tm-sparc.h defines this as 8, but play it safe.  */
@@ -204,8 +205,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #undef  REGISTER_VIRTUAL_TYPE
 #define REGISTER_VIRTUAL_TYPE(N) \
- ((N) < 32 ? builtin_type_long_long : (N) < 80 ? builtin_type_float : \
-  builtin_type_long_long)
+ ((N) < 32 ? builtin_type_long_long \
+  : (N) < 64 ? builtin_type_float \
+  : (N) < 80 ? builtin_type_double \
+  : builtin_type_long_long)
 
 /* We use to support both 32 bit and 64 bit pointers.
    We can't anymore because TARGET_PTR_BIT must now be a constant.  */
