@@ -132,6 +132,7 @@ enum strip_action
     STRIP_NONE,			/* don't strip */
     STRIP_DEBUG,		/* strip all debugger symbols */
     STRIP_UNNEEDED,		/* strip unnecessary symbols */
+    STRIP_NONDEBUG,		/* Strip everything but debug info.  */
     STRIP_ALL			/* strip all symbols */
   };
 
@@ -284,6 +285,7 @@ static char *prefix_alloc_sections_string = 0;
 #define OPTION_PREFIX_ALLOC_SECTIONS (OPTION_PREFIX_SECTIONS + 1)
 #define OPTION_FORMATS_INFO (OPTION_PREFIX_ALLOC_SECTIONS + 1)
 #define OPTION_ADD_GNU_DEBUGLINK (OPTION_FORMATS_INFO + 1)
+#define OPTION_ONLY_KEEP_DEBUG (OPTION_ADD_GNU_DEBUGLINK + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -297,6 +299,7 @@ static struct option strip_options[] =
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"keep-symbol", required_argument, 0, 'K'},
+  {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
   {"output-file", required_argument, 0, 'o'},
@@ -350,6 +353,7 @@ static struct option copy_options[] =
   {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"no-change-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
+  {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
   {"only-section", required_argument, 0, 'j'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
@@ -781,9 +785,12 @@ is_strip_section (abfd, sec)
 	  || discard_locals == LOCALS_ALL
 	  || convert_debugging)
 	return TRUE;
+
+      if (strip_symbols == STRIP_NONDEBUG)
+	return FALSE;
     }
 
-  return FALSE;
+  return strip_symbols == STRIP_NONDEBUG ? TRUE : FALSE;
 }
 
 /* Choose which symbol entries to copy; put the result in OSYMS.
@@ -1346,6 +1353,7 @@ copy_object (ibfd, obfd)
   if (strip_symbols == STRIP_DEBUG
       || strip_symbols == STRIP_ALL
       || strip_symbols == STRIP_UNNEEDED
+      || strip_symbols == STRIP_NONDEBUG
       || discard_locals != LOCALS_UNDEF
       || strip_specific_list != NULL
       || keep_specific_list != NULL
@@ -1451,7 +1459,12 @@ copy_object (ibfd, obfd)
      from the input BFD to the output BFD.  This is done last to
      permit the routine to look at the filtered symbol table, which is
      important for the ECOFF code at least.  */
-  if (! bfd_copy_private_bfd_data (ibfd, obfd))
+  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+      && strip_symbols == STRIP_NONDEBUG)
+    /* Do not copy the private data when creating an ELF format
+       debug info file.  We do not want the program headers.  */
+    ;
+  else if (! bfd_copy_private_bfd_data (ibfd, obfd))
     {
       non_fatal (_("%s: error copying private BFD data: %s"),
 		 bfd_get_filename (obfd),
@@ -1879,7 +1892,12 @@ setup_section (ibfd, isection, obfdarg)
 
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
-  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+      && strip_symbols == STRIP_NONDEBUG)
+    /* Do not copy the private data when creating an ELF format
+       debug info file.  We do not want the program headers.  */
+    ;
+  else if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
     {
       err = _("private data");
       goto loser;
@@ -2262,6 +2280,9 @@ strip_main (argc, argv)
 	case OPTION_FORMATS_INFO:
 	  formats_info = TRUE;
 	  break;
+	case OPTION_ONLY_KEEP_DEBUG:
+	  strip_symbols = STRIP_NONDEBUG;
+	  break;
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
@@ -2413,6 +2434,10 @@ copy_main (argc, argv)
 
 	case OPTION_STRIP_UNNEEDED:
 	  strip_symbols = STRIP_UNNEEDED;
+	  break;
+
+	case OPTION_ONLY_KEEP_DEBUG:
+	  strip_symbols = STRIP_NONDEBUG;
 	  break;
 
 	case OPTION_ADD_GNU_DEBUGLINK:

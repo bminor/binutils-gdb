@@ -1,5 +1,11 @@
 -*- text -*-
 
+* objcopy and strip now accept --only-keep-debug to create a file containing
+  those sections that would be stripped out by --strip-debug.  The idea is that
+  this can be used in conjunction with the --add-gnu-debuglink switch to create
+  a two part program distribution - one a stripped executable and the other the
+  debugging info.
+
 * objcopy now accepts --add-gnu-debuglink=<file> to insert a .gnu_debuglink
   section into a (presumably stripped) executable.  This allows the debug
   information for the file to be held in a seperate file.

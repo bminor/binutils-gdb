@@ -1,3 +1,19 @@
+2003-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy (enum strip_action): Add STRIP_NONDEBUG.
+        (OPTION_ONLY_KEEP_DEBUG): New.
+        (strip_options): Add --only-keep-debug.
+        (copy_options): Likewise.
+        (is_strip_section): Invert return value if STRIP_NONDEBUG is
+        active.
+        (copy_object): Do not copy private data when STRIP_NONDEBUG is
+        active.
+        (setup_section): Likewise.
+        (strip_main): Handle --only-keep-debug.
+        (copy_main): Likewise.
+	* NEWS: Mention new switch
+	* doc/binutils.texi: Document new switch.
+
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Correct spelling of "relocatable".

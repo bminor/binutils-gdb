@@ -934,7 +934,6 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-B} @var{bfdarch}|@option{--binary-architecture=}@var{bfdarch}]
         [@option{-S}|@option{--strip-all}]
         [@option{-g}|@option{--strip-debug}]
-        [@option{--add-gnu-debuglink=}@var{path-to-file}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
@@ -974,6 +973,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-symbols=}@var{string}]
         [@option{--prefix-sections=}@var{string}]
         [@option{--prefix-alloc-sections=}@var{string}]
+        [@option{--add-gnu-debuglink=}@var{path-to-file}]
+        [@option{--only-keep-debug}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]  
         [@option{--help}] [@option{--info}]
@@ -1078,10 +1079,6 @@ Do not copy debugging symbols or sections from the source file.
 
 @item --strip-unneeded
 Strip all symbols that are not needed for relocation processing.
-
-@item --add-gnu-debuglink=@var{path-to-file}
-Creates a .gnu_debuglink section which contains a reference to @var{path-to-file}
-and adds it to the output file.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
@@ -1352,6 +1349,47 @@ Prefix all section names in the output file with @var{string}.
 @item --prefix-alloc-sections=@var{string}
 Prefix all the names of all allocated sections in the output file with
 @var{string}.
+
+@item --add-gnu-debuglink=@var{path-to-file}
+Creates a .gnu_debuglink section which contains a reference to @var{path-to-file}
+and adds it to the output file.
+
+@item --only-keep-debug
+Strip a file, removing any sections that would be stripped by
+@option{--strip-debug} and leaving the debugging sections.
+
+The intention is that this option will be used in conjunction with
+@option{--add-gnu-debuglink} to create a two part executable.  One a
+stripped binary which will occupy less space in RAM and in a
+distribution and the second a debugging information file which is only
+needed if debugging abilities are required.  The suggested procedure
+to create these files is as follows:
+
+@enumerate
+@item Link the executable as normal.  Assuming that is is called
+@code{foo} then...
+@item Run @code{objcopy --only-keep-debug foo foo.dbg} to
+create a file containing the debugging info.
+@item Run @code{objcopy --strip-debug foo} to create a
+stripped executable.
+@item Run @code{objcopy --add-gnu-debuglink=foo.dbg foo}
+to add a link to the debugging info into the stripped executable.
+@end enumerate
+
+Note - the choice of @code{.dbg} as an extension for the debug info
+file is arbitrary.  Also the @code{--only-keep-debug} step is
+optional.  You could instead do this:
+
+@enumerate
+@item Link the executable as normal.
+@item Copy @code{foo} to  @code{foo.full}
+@item Run @code{objcopy --strip-debug foo}
+@item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
+@end enumerate
+
+ie the file pointed to by the @option{--add-gnu-debuglink} can be the
+full executable.  It does not have to be a file created by the
+@option{--only-keep-debug} switch.
 
 @item -V
 @itemx --version
@@ -2073,6 +2111,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
+      [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
       [@option{--help}] [@option{--info}]
       @var{objfile}@dots{}
@@ -2163,6 +2202,43 @@ Remove non-global symbols.
 @itemx --discard-locals
 Remove compiler-generated local symbols.
 (These usually start with @samp{L} or @samp{.}.)
+
+@item --only-keep-debug
+Strip a file, removing any sections that would be stripped by
+@option{--strip-debug} and leaving the debugging sections.
+
+The intention is that this option will be used in conjunction with
+@option{--add-gnu-debuglink} to create a two part executable.  One a
+stripped binary which will occupy less space in RAM and in a
+distribution and the second a debugging information file which is only
+needed if debugging abilities are required.  The suggested procedure
+to create these files is as follows:
+
+@enumerate
+@item Link the executable as normal.  Assuming that is is called
+@code{foo} then...
+@item Run @code{objcopy --only-keep-debug foo foo.dbg} to
+create a file containing the debugging info.
+@item Run @code{objcopy --strip-debug foo} to create a
+stripped executable.
+@item Run @code{objcopy --add-gnu-debuglink=foo.dbg foo}
+to add a link to the debugging info into the stripped executable.
+@end enumerate
+
+Note - the choice of @code{.dbg} as an extension for the debug info
+file is arbitrary.  Also the @code{--only-keep-debug} step is
+optional.  You could instead do this:
+
+@enumerate
+@item Link the executable as normal.
+@item Copy @code{foo} to  @code{foo.full}
+@item Run @code{strip --strip-debug foo}
+@item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
+@end enumerate
+
+ie the file pointed to by the @option{--add-gnu-debuglink} can be the
+full executable.  It does not have to be a file created by the
+@option{--only-keep-debug} switch.
 
 @item -V
 @itemx --version
