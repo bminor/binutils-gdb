@@ -1,5 +1,7 @@
 2005-01-20  Mark Mitchell  <mark@codesourcery.com>
 
+	* BRANCHES: Add binutils-2_15-branch.
+
 	* MAINTAINERS: Document branch policy.
 	* BRANCHES: New file.
 
