@@ -1,5 +1,15 @@
 2003-06-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (I386_EBX_REGNUM, I386_ECX_REGNUM, I386_ESI_REGNUM,
+	I386_EDI_REGNUM): New defines.
+	(i386_next_regnum, i386_convert_register_p,
+	i386_register_to_value, i386_value_to_register): New functions.
+	(i386_register_convertible, i386_register_convert_to_virtual,
+	i386_convert_to_raw): Remove functions.
+	(i386_gdbarch_init): Set convert_register_p, register_to_value and
+	value_to_register instead of register_convertible,
+	register_convert_to_virtual and register_convert_to_raw.
+
 	* mips-tdep.c (mips_value_to_register): Fix.
 
 2003-06-06  Andrew Cagney  <cagney@redhat.com>
