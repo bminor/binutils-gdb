@@ -309,7 +309,7 @@ yyerror PARAMS ((char *));
 
 /* Z.200, 5.3.1 */
 
-start	:	value
+start	:	value { }
 	|	mode_name
 			{ write_exp_elt_opcode(OP_TYPE);
 			  write_exp_elt_type($1.type);

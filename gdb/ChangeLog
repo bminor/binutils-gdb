@@ -1,3 +1,7 @@
+Mon May 10 13:14:46 1993  Fred Fish  (fnf@cygnus.com)
+
+	* ch-exp.y (start):  Apply work-around to avoid bison warning.
+
 Sun May  9 07:25:02 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (BISON):  Remove double quotes around BISON
