@@ -180,8 +180,14 @@ udi_create_inferior (execfile, args, env)
 static void
 udi_mourn()
 {
-        pop_target ();                /* Pop back to no-child state */
-        generic_mourn_inferior ();
+#if 0
+  /* Requiring "target udi" each time you run is a major pain.  I suspect
+     this was just blindy copied from remote.c, in which "target" and
+     "run" are combined.  Having a udi target without an inferior seems
+     to work between "target udi" and "run", so why not now?  */
+  pop_target ();                /* Pop back to no-child state */
+#endif
+  generic_mourn_inferior ();
 }
 
 /******************************************************************** UDI_OPEN

@@ -1,3 +1,7 @@
+Mon Sep 27 10:22:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-udi.c (udi_mourn): Don't pop target.
+
 Fri Sep 24 17:25:41 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* corelow.c:  Add multi thread/process support for core files with
