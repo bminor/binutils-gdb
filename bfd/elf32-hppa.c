@@ -3271,10 +3271,13 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
 	  else if (sym_sec == NULL && h != NULL
 		   && h->elf.root.type == bfd_link_hash_undefweak)
 	    {
-	      /* It's OK if undefined weak.  Make undefined weak
-		 branches go nowhere.  */
+	      /* It's OK if undefined weak.  Calls to undefined weak
+		 symbols behave as if the "called" function
+		 immediately returns.  We can thus call to a weak
+		 function without first checking whether the function
+		 is defined.  */
 	      value = location;
-	      addend = 0;
+	      addend = 8;
 	    }
 	  else
 	    return bfd_reloc_notsupported;

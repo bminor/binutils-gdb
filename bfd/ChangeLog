@@ -1,3 +1,8 @@
+2001-04-30  Alan Modra  <amodra@one.net.au>
+
+	* elf32-hppa.c (final_link_relocate): Branch to .+8 for
+	calls to undefined weak symbols.
+
 2001-04-19  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_plt0_entry): Fix instructions.
