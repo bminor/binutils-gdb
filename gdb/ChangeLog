@@ -1,3 +1,9 @@
+Wed May  4 06:56:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (HFILES_WITH_SRCDIR): List bfd.h.
+	(HFILES_NO_SRCDIR): List gdbcore.h not gdbcore_h, so as not to get
+	bfd.h.
+
 Tue May  3 07:41:33 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* procfs.c (procfs_wait): Reinstate code which deduces the signal
