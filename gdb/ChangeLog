@@ -1,5 +1,11 @@
 2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* go32-nat.c (go32_handle_nonaligned_watchpoint): Use a
+	two-dimensional array instead of faking it with index
+	arithmetics.
+
+2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* config/i386/xm-go32.h (HOST_LONG_DOUBLE_FORMAT): Define.
 
 	* config/i386/tm-go32.h (TARGET_LONG_DOUBLE_BIT): Remove

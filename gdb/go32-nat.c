@@ -859,20 +859,19 @@ go32_handle_nonaligned_watchpoint (wp_op what, CORE_ADDR waddr, CORE_ADDR addr,
   int size;
   int rv = 0, status = 0;
 
-  static int size_try_array[16] =
+  static int size_try_array[4][4] =
   {
-    1, 1, 1, 1,			/* trying size one */
-    2, 1, 2, 1,			/* trying size two */
-    2, 1, 2, 1,			/* trying size three */
-    4, 1, 2, 1			/* trying size four */
+    { 1, 1, 1, 1 },		/* trying size one */
+    { 2, 1, 2, 1 },		/* trying size two */
+    { 2, 1, 2, 1 },		/* trying size three */
+    { 4, 1, 2, 1 }		/* trying size four */
   };
 
   while (len > 0)
     {
       align = addr % 4;
-      /* Four is the maximum length for 386.  */
-      size = (len > 4) ? 3 : len - 1;
-      size = size_try_array[size * 4 + align];
+      /* Four is the maximum length a 386 debug register can watch.  */
+      size = size_try_array[len > 4 ? 3 : len - 1][align];
       if (what == wp_insert)
 	status = go32_insert_aligned_watchpoint (waddr, addr, size, rw);
       else if (what == wp_remove)
