@@ -1,3 +1,14 @@
+Mon Dec 16 10:03:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix restoring the PC for "ret" and "retf" instructions.
+
+Wed Dec 11 09:53:10 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gencode.c (write_opcodes): Also write out the format of the
+	opcode.
+	* mn10300_sim.h (simops): Add "format" field.
+	* interp.c (sim_resume): Deal with endianness issues here.
+
 Tue Dec 10 15:05:37 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c (REG0_4): Define.

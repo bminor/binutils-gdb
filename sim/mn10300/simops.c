@@ -2690,7 +2690,6 @@ void OP_DF0000 (insn, extension)
   unsigned long mask;
 
   State.regs[REG_SP] += insn & 0xff;
-  State.pc = State.regs[REG_MDR] - 3;
   sp = State.regs[REG_SP];
 
   mask = (insn & 0xff00) >> 8;
@@ -2737,6 +2736,14 @@ void OP_DF0000 (insn, extension)
       State.regs[REG_D0 + 2] = load_mem (sp, 4);
       sp += 4;
     }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] = sp;
+
+  /* Restore the PC value.  */
+  State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
+	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
+  State.pc -= 3;
 }
 
 /* retf reg_list,imm8 */
@@ -2748,9 +2755,7 @@ void OP_DE0000 (insn, extension)
 
   sp = State.regs[REG_SP] + (insn & 0xff);
   State.regs[REG_SP] = sp;
-  State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
-	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
-  State.pc -= 3;
+  State.pc = State.regs[REG_MDR] - 3;
 
   sp = State.regs[REG_SP];
 
@@ -2798,6 +2803,9 @@ void OP_DE0000 (insn, extension)
       State.regs[REG_D0 + 2] = load_mem (sp, 4);
       sp += 4;
     }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] = sp;
 }
 
 /* rets */
