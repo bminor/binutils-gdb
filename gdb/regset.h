@@ -52,7 +52,7 @@ struct regset
    pass NULL for COLLECT_REGSET.
 
    The object returned is allocated using xmalloc.  */
-extern struct regset *regset_xmalloc (void *descr,
+extern struct regset *regset_xmalloc (const void *descr,
                                       supply_regset_ftype *supply_regset,
                                       collect_regset_ftype *collect_regset);
 

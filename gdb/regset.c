@@ -25,7 +25,7 @@
 
 
 struct regset *
-regset_xmalloc (void *descr,
+regset_xmalloc (const void *descr,
                 supply_regset_ftype *supply_regset,
                 collect_regset_ftype *collect_regset)
 {
