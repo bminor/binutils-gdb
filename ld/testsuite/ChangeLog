@@ -1,3 +1,18 @@
+Mon Nov  6 14:39:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-shared/shared.exp: Run tests on rs6000*-*-aix* and
+	powerpc*-*-aix*.  Add code to create appropriate exports files,
+	and pass appropriate compilation flags, and test against
+	appropriate expected output.
+	* ld-shared/xcoff.dat: New file.
+	* ld-shared/main.c: Put #ifndef XCOFF_TEST around tests that can
+	not be linked using XCOFF.  Use shlib_shlibvar1 as a sample
+	function pointer, rather than shlib_mainvar.
+	* ld-shared/sh1.c: Likewise.
+	* ld-shared/shared.dat: Update for change from using shlib_mainvar
+	to using shlib_shlibvar1.
+	* ld-shared/sun4.dat: Likewise.
+
 Sat Oct 28 01:54:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/script.t: Put .pr in .text, and .rw in .data, for

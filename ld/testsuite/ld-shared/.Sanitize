@@ -29,6 +29,7 @@ sh2.c
 shared.dat
 shared.exp
 sun4.dat
+xcoff.dat
 
 Things-to-lose:
 
