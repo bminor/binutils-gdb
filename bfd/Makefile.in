@@ -22,7 +22,8 @@
 srcdir = .
 
 RANLIB = ranlib
-AR = 
+AR = ar
+AR_FLAGS = clq
 INCDIR = $(srcdir)/../include
 CSEARCH = -I$(INCDIR)
 DEP = mkdep
@@ -55,8 +56,8 @@ OFILES = $(BFD_LIBS) $(BFD_BACKENDS)
 
 $(TARGETLIB): $(OFILES)
 	 rm -f $(TARGETLIB)
-	 ar clq $(TARGETLIB) $(OFILES)
-	 ranlib $(TARGETLIB)
+	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
+	 $(RANLIB) $(TARGETLIB)
 
 stage1: force
 	- mkdir stage1
