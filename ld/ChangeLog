@@ -1,3 +1,22 @@
+2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emultempl/aix.em: Use include <> for generated headers.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* ldctor.c: Likewise.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldlex.c: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* mri.c: Likewise.
+	* pe-dll.c: Likewise.
+
 2002-10-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/elf32.em (place_orphan): Don't put non-allocated .rel*

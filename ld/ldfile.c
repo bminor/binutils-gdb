@@ -31,7 +31,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldmain.h"
-#include "ldgram.h"
+#include <ldgram.h>
 #include "ldlex.h"
 #include "ldemul.h"
 #include "libiberty.h"

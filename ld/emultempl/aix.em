@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 #include "ldctor.h"
-#include "ldgram.h"
+#include <ldgram.h>
 
 #include "coff/internal.h"
 #include "coff/xcoff.h"

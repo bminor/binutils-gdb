@@ -33,7 +33,7 @@
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldgram.h"
+#include <ldgram.h>
 #include "ldlex.h"
 #include "ldfile.h"
 #include "ldver.h"

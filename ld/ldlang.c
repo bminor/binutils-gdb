@@ -31,7 +31,7 @@
 #include "ldmain.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldgram.h"
+#include <ldgram.h>
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldctor.h"

@@ -32,7 +32,7 @@
 #include "ldlang.h"
 #include "ldwrite.h"
 #include "ldmisc.h"
-#include "ldgram.h"
+#include <ldgram.h>
 #include "ldmain.h"
 #include "ldfile.h"
 #include "ldemul.h"
