@@ -1,5 +1,29 @@
 2003-09-29  Elena Zannoni  <ezannoni@redhat.com>
 
+	* exec.c (exec_set_find_memory_regions): Update parameter list.
+	* defs.h (exec_set_find_memory_regions): Update parameter list.
+	* fbsd-proc.c (fbsd_find_memory_regions): Likewise. Update call to
+	function parameter.
+	* gcore.c (gcore_create_callback): Update paramter list.
+	(objfile_find_memory_regions): Update parameter list. Update calls
+	to function parameter.
+	* gnu-nat.c (gnu_find_memory_regions): Update parameter
+	list. Update calls to function parameter.
+	* inftarg.c (inftarg_set_find_memory_regions): Update parameter
+	list.
+	* linux-proc.c (read_mapping): Prune the leading whitespaces in
+	the filename.
+	(linux_find_memory_regions): Update parameter list. Update call to
+	function parameter.
+	* procfs.c (find_memory_regions_callback): Update paremeters and
+	calls.
+	(proc_find_memory_regions): Update parameters.
+	* sol-thread.c (sol_find_memory_regions): Update parameter list.
+	* target.h (struct target_ops): Update definition of
+	to_find_memory_regions field.
+
+2003-09-29  Elena Zannoni  <ezannoni@redhat.com>
+
 	* solib-svr4.c: Include gdbcmd.h.
 	(debug_solib): New variable.
 	(elf_locate_base): Add some debugging statements.

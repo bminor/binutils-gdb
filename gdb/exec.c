@@ -700,7 +700,7 @@ extern void
 exec_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
 						    unsigned long, 
 						    int, int, int, 
-						    void *),
+						    char *, void *),
 					   void *))
 {
   exec_ops.to_find_memory_regions = func;

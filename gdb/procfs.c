@@ -136,7 +136,7 @@ char *procfs_pid_to_str (ptid_t);
 static int proc_find_memory_regions (int (*) (CORE_ADDR, 
 					      unsigned long, 
 					      int, int, int, 
-					      void *), 
+					      char *, void *), 
 				     void *);
 
 static char * procfs_make_note_section (bfd *, int *);
@@ -5433,7 +5433,7 @@ proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
  *   int callback (CORE_ADDR vaddr, 
  *                 unsigned long size, 
  *                 int read, int write, int execute, 
- *                 void *data);
+ *                 char *filename, void *data);
  *
  * Returns the integer value returned by the callback.
  */
@@ -5443,7 +5443,7 @@ find_memory_regions_callback (struct prmap *map,
 			      int (*func) (CORE_ADDR, 
 					   unsigned long, 
 					   int, int, int, 
-					   void *),
+					   char *, void *),
 			      void *data)
 {
   return (*func) ((CORE_ADDR) map->pr_vaddr,
@@ -5451,6 +5451,7 @@ find_memory_regions_callback (struct prmap *map,
 		  (map->pr_mflags & MA_READ) != 0,
 		  (map->pr_mflags & MA_WRITE) != 0,
 		  (map->pr_mflags & MA_EXEC) != 0, 
+                  NULL,
 		  data);
 }
 
@@ -5463,7 +5464,8 @@ find_memory_regions_callback (struct prmap *map,
  *	unsigned long size, 
  *	int read, 	TRUE if region is readable by the child
  *	int write, 	TRUE if region is writable by the child
- *	int execute	TRUE if region is executable by the child.
+ *	int execute	TRUE if region is executable by the child
+ *      char *filename.
  * 
  * Stops iterating and returns the first non-zero value
  * returned by the callback.
@@ -5473,7 +5475,7 @@ static int
 proc_find_memory_regions (int (*func) (CORE_ADDR, 
 				       unsigned long, 
 				       int, int, int, 
-				       void *), 
+				       char *, void *), 
 			  void *data)
 {
   procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);

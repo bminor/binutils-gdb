@@ -75,7 +75,7 @@ static int
 fbsd_find_memory_regions (int (*func) (CORE_ADDR,
 				       unsigned long,
 				       int, int, int,
-				       void *),
+				       char *, void *),
 			  void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
@@ -114,7 +114,7 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR,
 	}
 
       /* Invoke the callback function to create the corefile segment. */
-      func (start, size, read, write, exec, obfd);
+      func (start, size, read, write, exec, NULL, obfd);
     }
 
   fclose (mapfile);

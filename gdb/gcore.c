@@ -338,7 +338,8 @@ make_mem_sec (bfd *obfd, bfd_vma addr, bfd_size_type size,
 
 static int
 gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
-		       int read, int write, int exec, void *data)
+		       int read, int write, int exec, char *filename,
+		       void *data)
 {
   flagword flags = 0;
 
@@ -360,7 +361,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 
 static int
 objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
-					  int, int, int, void *),
+					  int, int, int, char *, void *),
 			     void *obfd)
 {
   /* Use objfile data to create memory sections.  */
@@ -385,6 +386,7 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 			 1, /* All sections will be readable.  */
 			 (flags & SEC_READONLY) == 0, /* Writable.  */
 			 (flags & SEC_CODE) != 0, /* Executable.  */
+			 NULL,
 			 obfd);
 	  if (ret != 0)
 	    return ret;
@@ -397,6 +399,7 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 	     1, /* Stack section will be readable.  */
 	     1, /* Stack section will be writable.  */
 	     0, /* Stack section will not be executable.  */
+	     NULL,
 	     obfd);
 
   /* Make a heap segment. */
@@ -405,6 +408,7 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 	     1, /* Heap section will be readable.  */
 	     1, /* Heap section will be writable.  */
 	     0, /* Heap section will not be executable.  */
+	     NULL,
 	     obfd);
 
   return 0;

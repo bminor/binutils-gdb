@@ -607,7 +607,7 @@ extern void exec_set_section_offsets (bfd_signed_vma text_off,
 extern void exec_set_find_memory_regions (int (*) (int (*) (CORE_ADDR, 
 							    unsigned long, 
 							    int, int, int, 
-							    void *),
+							    char *, void *),
 						   void *));
 
 /* Possible lvalue types.  Like enum language, this should be in

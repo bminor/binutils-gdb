@@ -81,6 +81,8 @@ read_mapping (FILE *mapfile,
 	      long long *offset,
 	      char *device, long long *inode, char *filename)
 {
+  char tmp_filename[MAXPATHLEN];
+  char *p;
   int ret = fscanf (mapfile, "%llx-%llx %s %llx %s %llx",
 		    addr, endaddr, permissions, offset, device, inode);
 
@@ -93,7 +95,13 @@ read_mapping (FILE *mapfile,
          filename.
 
          Note the filename is used for informational purposes only.  */
-      ret += fscanf (mapfile, "%[^\n]\n", filename);
+      ret += fscanf (mapfile, "%[^\n]\n", tmp_filename);
+
+      /* Skip the spaces at the beginning of the filename.  */
+      p = tmp_filename;
+      while (*p == ' ')
+        p++;
+      strcpy (filename, p);
     }
   else
     {
@@ -112,7 +120,8 @@ read_mapping (FILE *mapfile,
 static int
 linux_find_memory_regions (int (*func) (CORE_ADDR,
 					unsigned long,
-					int, int, int, void *), void *obfd)
+					int, int, int, char *, void *),
+			   void *obfd)
 {
   long long pid = PIDGET (inferior_ptid);
   char mapsfilename[MAXPATHLEN];
@@ -155,7 +164,7 @@ linux_find_memory_regions (int (*func) (CORE_ADDR,
 	}
 
       /* Invoke the callback function to create the corefile segment. */
-      func (addr, size, read, write, exec, obfd);
+      func (addr, size, read, write, exec, filename, obfd);
     }
   fclose (mapsfile);
   return 0;

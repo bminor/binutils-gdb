@@ -623,7 +623,7 @@ extern void
 inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
 						       unsigned long, 
 						       int, int, int, 
-						       void *),
+						       char *, void *),
 					      void *))
 {
   child_ops.to_find_memory_regions = func;

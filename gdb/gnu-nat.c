@@ -2473,7 +2473,7 @@ static int
 gnu_find_memory_regions (int (*func) (CORE_ADDR,
 				      unsigned long,
 				      int, int, int,
-				      void *),
+				      char *, void *),
 			 void *data)
 {
   error_t err;
@@ -2531,6 +2531,7 @@ gnu_find_memory_regions (int (*func) (CORE_ADDR,
 		     last_protection & VM_PROT_READ,
 		     last_protection & VM_PROT_WRITE,
 		     last_protection & VM_PROT_EXECUTE,
+                     NULL,
 		     data);
 	  last_region_address = region_address;
 	  last_region_end = region_address += region_length;

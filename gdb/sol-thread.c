@@ -1517,7 +1517,7 @@ static int
 sol_find_memory_regions (int (*func) (CORE_ADDR, 
 				      unsigned long, 
 				      int, int, int, 
-				      void *), 
+				      char *, void *), 
 			 void *data)
 {
   return procfs_ops.to_find_memory_regions (func, data);

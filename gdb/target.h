@@ -320,7 +320,7 @@ struct target_ops
     int (*to_find_memory_regions) (int (*) (CORE_ADDR, 
 					    unsigned long, 
 					    int, int, int, 
-					    void *), 
+					    char *, void *), 
 				   void *);
     char * (*to_make_corefile_notes) (bfd *, int *);
 
