@@ -25,7 +25,6 @@
    sure if its right or not.  Could go either way.  I wish
    I really understood this stuff. */
 
-
 const int table_size_of_flonum_powers_of_ten = 13;
 
 static const LITTLENUM_TYPE zero[] =
@@ -204,6 +203,8 @@ const FLONUM_TYPE flonum_positive_powers_of_ten[] =
 };
 
 #ifdef VMS
-void dummy1 () { }
+void
+dummy1 ()
+{
+}
 #endif
-/* end of flonum_const.c */

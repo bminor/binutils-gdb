@@ -1,3 +1,7 @@
+2000-07-10  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-h8500.c: Fix formatting.
+
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (md_apply_fix): Check fmt 12 and 22 pc-rel
