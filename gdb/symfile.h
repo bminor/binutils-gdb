@@ -175,7 +175,10 @@ extern void add_symtab_fns (struct sym_fns *);
 extern void init_entry_point_info (struct objfile *);
 
 extern void
-syms_from_objfile (struct objfile *, struct section_addr_info *, int, int);
+syms_from_objfile (struct objfile *,
+                   struct section_addr_info *, 
+                   struct section_offsets *, int,
+                   int, int);
 
 extern void new_symfile_objfile (struct objfile *, int, int);
 

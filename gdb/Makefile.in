@@ -2207,7 +2207,8 @@ symfile.o: symfile.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(frame_h) $(target_h) $(value_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcmd_h) $(breakpoint_h) $(language_h) $(complaints_h) \
 	$(demangle_h) $(inferior_h) $(gdb_stabs_h) $(gdb_obstack_h) \
-	$(completer_h) $(bcache_h) $(gdb_string_h) $(gdb_stat_h) $(source_h)
+	$(completer_h) $(bcache_h) $(gdb_string_h) $(gdb_stat_h) $(source_h) \
+	$(gdb_assert_h)
 symm-nat.o: symm-nat.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(target_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h) $(gdbcore_h)
 symm-tdep.o: symm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \

@@ -1,5 +1,15 @@
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
+	* symfile.c: #include "gdb_assert.h".
+	(syms_from_objfile): Add the ability to pass in a section offset
+	table directly, as an alternative to the section_addr_info table.
+	Document arguments better.
+	(symbol_file_add): Pass extra arguments to syms_from_objfile.
+	* symfile.h (syms_from_objfile): Update declaration.
+	* rs6000-nat.c (objfile_symbol_add): Pass new arguments to
+	syms_from_objfile.
+	* Makefile.in (symfile.o): List dependency on $(gdb_assert_h).
+
 	* symfile.c (init_objfile_sect_indices): New function.
 	(default_symfile_offsets): Move the section-index-initializing
 	stuff into init_objfile_sect_indices, and call that.

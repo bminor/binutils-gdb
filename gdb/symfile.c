@@ -42,6 +42,7 @@
 #include "gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
+#include "gdb_assert.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -571,8 +572,26 @@ default_symfile_offsets (struct objfile *objfile,
 
    OBJFILE is where the symbols are to be read from.
 
-   ADDR is the address where the text segment was loaded, unless the
-   objfile is the main symbol file, in which case it is zero.
+   ADDRS is the list of section load addresses.  If the user has given
+   an 'add-symbol-file' command, then this is the list of offsets and
+   addresses he or she provided as arguments to the command; or, if
+   we're handling a shared library, these are the actual addresses the
+   sections are loaded at, according to the inferior's dynamic linker
+   (as gleaned by GDB's shared library code).  We convert each address
+   into an offset from the section VMA's as it appears in the object
+   file, and then call the file's sym_offsets function to convert this
+   into a format-specific offset table --- a `struct section_offsets'.
+   If ADDRS is non-zero, OFFSETS must be zero.
+
+   OFFSETS is a table of section offsets already in the right
+   format-specific representation.  NUM_OFFSETS is the number of
+   elements present in OFFSETS->offsets.  If OFFSETS is non-zero, we
+   assume this is the proper table the call to sym_offsets described
+   above would produce.  Instead of calling sym_offsets, we just dump
+   it right into objfile->section_offsets.  (When we're re-reading
+   symbols from an objfile, we don't have the original load address
+   list any more; all we have is the section offset table.)  If
+   OFFSETS is non-zero, ADDRS must be zero.
 
    MAINLINE is nonzero if this is the main symbol file, or zero if
    it's an extra symbol file such as dynamically loaded code.
@@ -581,8 +600,12 @@ default_symfile_offsets (struct objfile *objfile,
    the symbol reading (and complaints can be more terse about it).  */
 
 void
-syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
-		   int mainline, int verbo)
+syms_from_objfile (struct objfile *objfile,
+                   struct section_addr_info *addrs,
+                   struct section_offsets *offsets,
+                   int num_offsets,
+		   int mainline,
+                   int verbo)
 {
   asection *lower_sect;
   asection *sect;
@@ -591,15 +614,18 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
   struct cleanup *old_chain;
   int i;
 
-  /* If ADDRS is NULL, initialize the local section_addr_info struct and
-     point ADDRS to it.  We now establish the convention that an addr of
-     zero means no load address was specified. */
+  gdb_assert (! (addrs && offsets));
 
-  if (addrs == NULL)
+  /* If ADDRS and OFFSETS are both NULL, put together a dummy address
+     list.  We now establish the convention that an addr of zero means
+     no load address was specified. */
+  if (! addrs && ! offsets)
     {
       memset (&local_addr, 0, sizeof (local_addr));
       addrs = &local_addr;
     }
+
+  /* Now either addrs or offsets is non-zero.  */
 
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
@@ -673,30 +699,32 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
  	 this_offset = lower_offset = lower_addr - lower_orig_addr */
 
       /* Calculate offsets for sections. */
-      for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
-	{
-	  if (addrs->other[i].addr != 0)
- 	    {
- 	      sect = bfd_get_section_by_name (objfile->obfd,
-                                              addrs->other[i].name);
- 	      if (sect)
- 		{
- 		  addrs->other[i].addr
-                    -= bfd_section_vma (objfile->obfd, sect);
- 		  lower_offset = addrs->other[i].addr;
-		  /* This is the index used by BFD. */
-		  addrs->other[i].sectindex = sect->index ;
- 		}
- 	      else
-		{
-		  warning ("section %s not found in %s", addrs->other[i].name, 
-			   objfile->name);
-		  addrs->other[i].addr = 0;
-		}
- 	    }
- 	  else
- 	    addrs->other[i].addr = lower_offset;
-	}
+      if (addrs)
+        for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
+          {
+            if (addrs->other[i].addr != 0)
+              {
+                sect = bfd_get_section_by_name (objfile->obfd,
+                                                addrs->other[i].name);
+                if (sect)
+                  {
+                    addrs->other[i].addr
+                      -= bfd_section_vma (objfile->obfd, sect);
+                    lower_offset = addrs->other[i].addr;
+                    /* This is the index used by BFD. */
+                    addrs->other[i].sectindex = sect->index ;
+                  }
+                else
+                  {
+                    warning ("section %s not found in %s",
+                             addrs->other[i].name, 
+                             objfile->name);
+                    addrs->other[i].addr = 0;
+                  }
+              }
+            else
+              addrs->other[i].addr = lower_offset;
+          }
     }
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
@@ -706,7 +734,21 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
   (*objfile->sf->sym_init) (objfile);
   clear_complaints (&symfile_complaints, 1, verbo);
 
-  (*objfile->sf->sym_offsets) (objfile, addrs);
+  if (addrs)
+    (*objfile->sf->sym_offsets) (objfile, addrs);
+  else
+    {
+      size_t size = SIZEOF_N_SECTION_OFFSETS (num_offsets);
+
+      /* Just copy in the offset table directly as given to us.  */
+      objfile->num_sections = num_offsets;
+      objfile->section_offsets
+        = ((struct section_offsets *)
+           obstack_alloc (&objfile->psymbol_obstack, size));
+      memcpy (objfile->section_offsets, offsets, size);
+
+      init_objfile_sect_indices (objfile);
+    }
 
 #ifndef IBM6000_TARGET
   /* This is a SVR4/SunOS specific hack, I think.  In any event, it
@@ -887,7 +929,7 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 	      gdb_flush (gdb_stdout);
 	    }
 	}
-      syms_from_objfile (objfile, addrs, mainline, from_tty);
+      syms_from_objfile (objfile, addrs, 0, 0, mainline, from_tty);
     }
 
   /* We now have at least a partial symbol table.  Check to see if the
