@@ -981,7 +981,7 @@ void::function::do_shift:int Dest, unsigned32 source, int Merge, int i, int n, i
 	  default:
 	    sim_engine_abort (SD, CPU, cia,
 	                      "0x%lx: Invalid merge (%d) for shift",
-	                      cia.ip, source);
+	                      (long) cia.ip, (int) source);
 	    shiftmask = 0;
 	  }
 	/* and the composite mask */
@@ -1008,7 +1008,7 @@ void::function::do_shift:int Dest, unsigned32 source, int Merge, int i, int n, i
 	  default:
 	    sim_engine_abort (SD, CPU, cia,
 	                      "0x%lx: Invalid merge (%d)",
-	                      cia.ip, source);
+	                      (long) cia.ip, (int) source);
 
 	  }
 	TRACE_SHIFT (MY_INDEX, GPR (Dest), input, i, n, Merge, EndMask, Rotate);
@@ -1193,7 +1193,7 @@ void::function::do_trap:unsigned32 trap_number
 	          else
 	            sim_engine_abort (SD, CPU, cia,
 	                              "0x%lx: write to invalid fid %d",
-	                              (unsigned long) cia.ip, GPR(2));
+	                              (long) cia.ip, (int) GPR(2));
 	          GPR(2) = GPR(6);
 	          break;
 	        }
@@ -1225,7 +1225,7 @@ void::function::do_trap:unsigned32 trap_number
 		  }
 	        sim_engine_abort (SD, CPU, cia,
 	                          "0x%lx: unknown syscall %d",
-	                          (unsigned long) cia.ip, GPR(15));
+	                          (long) cia.ip, (int) GPR(15));
 	      }
 	    break;
 	  case 73:
@@ -1252,7 +1252,7 @@ void::function::do_trap:unsigned32 trap_number
 	  default:
 	    sim_engine_abort (SD, CPU, cia,
 	                      "0x%lx: unsupported trap %d",
-	                      (unsigned long) cia.ip, trap_number);
+	                      (long) cia.ip, (int) trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
 "trap <UTN>"
