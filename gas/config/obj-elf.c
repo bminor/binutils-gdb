@@ -614,8 +614,7 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
   asection *old_sec;
   segT sec;
   flagword flags;
-  int def_type;
-  int def_attr;
+  const struct bfd_elf_special_section *ssect;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -638,13 +637,13 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 
   old_sec = bfd_get_section_by_name (stdoutput, name);
   sec = subseg_new (name, 0);
+  ssect = _bfd_elf_get_sec_type_attr (stdoutput, name);
 
-  if (_bfd_elf_get_sec_type_attr (stdoutput, name, &def_type,
-				  &def_attr))
+  if (ssect != NULL)
     {
       if (type == SHT_NULL)
-	type = def_type;
-      else if (type != def_type)
+	type = ssect->type;
+      else if (type != ssect->type)
 	{
 	  if (old_sec == NULL
 	      /* FIXME: gcc, as of 2002-10-22, will emit
@@ -653,12 +652,12 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 
 		 for __attribute__ ((section (".init_array"))).
 		 "@progbits" is incorrect.  */
-	      && def_type != SHT_INIT_ARRAY
-	      && def_type != SHT_FINI_ARRAY
-	      && def_type != SHT_PREINIT_ARRAY)
+	      && ssect->type != SHT_INIT_ARRAY
+	      && ssect->type != SHT_FINI_ARRAY
+	      && ssect->type != SHT_PREINIT_ARRAY)
 	    {
 	      /* We allow to specify any type for a .note section.  */
-	      if (def_type != SHT_NOTE)
+	      if (ssect->type != SHT_NOTE)
 		as_warn (_("setting incorrect section type for %s"),
 			 name);
 	    }
@@ -666,22 +665,31 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 	    {
 	      as_warn (_("ignoring incorrect section type for %s"),
 		       name);
-	      type = def_type;
+	      type = ssect->type;
 	    }
 	}
 
-      if (old_sec == NULL && (attr &~ def_attr) != 0)
+      if (old_sec == NULL && (attr &~ ssect->attr) != 0)
 	{
 	  /* As a GNU extension, we permit a .note section to be
-	     allocatable.  If the linker sees an allocateable .note
+	     allocatable.  If the linker sees an allocatable .note
 	     section, it will create a PT_NOTE segment in the output
 	     file.  We also allow "x" for .note.GNU-stack.  */
-	  if (!(def_type == SHT_NOTE
-		&& (attr == SHF_ALLOC || attr == SHF_EXECINSTR)))
+	  if (ssect->type == SHT_NOTE
+	      && (attr == SHF_ALLOC || attr == SHF_EXECINSTR))
+	    ;
+	  /* Allow different SHF_MERGE and SHF_STRINGS if we have
+	     something like .rodata.str.  */
+	  else if (ssect->suffix_length == -2
+		   && name[ssect->prefix_length] == '.'
+		   && (attr &~ ssect->attr &~ SHF_MERGE &~ SHF_STRINGS) == 0)
+	    ;
+	  else
 	    as_warn (_("setting incorrect section attributes for %s"),
 		     name);
 	}
-      attr |= def_attr;
+      if (old_sec == NULL)
+	attr |= ssect->attr;
     }
 
   if (type != SHT_NULL)
