@@ -1,5 +1,5 @@
 /* a.out object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -116,7 +116,7 @@ obj_aout_frob_symbol (sym, punt)
     {
       if (type == (N_UNDF | N_EXT)
 	  && sec == &bfd_abs_section)
-	sym->bsym->section = sec = &bfd_und_section;
+	sym->bsym->section = sec = bfd_und_section_ptr;
 
       if ((type & N_TYPE) != N_INDR
 	  && (type & N_TYPE) != N_SETA
@@ -139,10 +139,29 @@ obj_aout_frob_symbol (sym, punt)
 	  /* Set the debugging flag for constructor symbols so that
 	     BFD leaves them alone.  */
 	  sym->bsym->flags |= BSF_DEBUGGING;
+
+	  /* You can't put a common symbol in a set.  The way a set
+	     element works is that the symbol has a definition and a
+	     name, and the linker adds the definition to the set of
+	     that name.  That does not work for a common symbol,
+	     because the linker can't tell which common symbol the
+	     user means.  FIXME: Using as_bad here may be
+	     inappropriate, since the user may want to force a
+	     particular type without regard to the semantics of sets;
+	     on the other hand, we certainly don't want anybody to be
+	     mislead into thinking that their code will work.  */
+	  if (S_IS_COMMON (sym))
+	    as_bad ("Attempt to put a common symbol into set %s",
+		    S_GET_NAME (sym));
+	  /* Similarly, you can't put an undefined symbol in a set.  */
+	  else if (! S_IS_DEFINED (sym))
+	    as_bad ("Attempt to put an undefined symbol into set %s",
+		    S_GET_NAME (sym));
+
 	  break;
 	case N_INDR:
 	  /* Put indirect symbols in the indirect section.  */
-	  sym->bsym->section = &bfd_ind_section;
+	  sym->bsym->section = bfd_ind_section_ptr;
 	  sym->bsym->flags |= BSF_INDIRECT;
 	  if (type & N_EXT)
 	    {
@@ -162,6 +181,14 @@ obj_aout_frob_symbol (sym, punt)
     }
 
   S_SET_TYPE (sym, type);
+
+  /* Double check weak symbols.  */
+  if (sym->bsym->flags & BSF_WEAK)
+    {
+      if (S_IS_COMMON (sym))
+	as_bad ("Symbol `%s' can not be both weak and common",
+		S_GET_NAME (sym));
+    }
 }
 
 void

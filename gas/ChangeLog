@@ -1,5 +1,8 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-aout.c (obj_aout_frob_symbol): Warn about an attempt
+	to put an undefined symbol into a set.
+
 	* Makefile.in: Remove @configure_input@; it's not needed in
 	files named Makefile.
 
