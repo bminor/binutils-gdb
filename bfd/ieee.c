@@ -3725,7 +3725,7 @@ ieee_make_empty_symbol (abfd)
      bfd *abfd;
 {
   ieee_symbol_type *new =
-    (ieee_symbol_type *) bfd_zmalloc (sizeof (ieee_symbol_type));
+    (ieee_symbol_type *) bfd_zalloc (sizeof (ieee_symbol_type));
   if (!new)
     return NULL;
   new->symbol.the_bfd = abfd;

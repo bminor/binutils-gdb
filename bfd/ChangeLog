@@ -1,3 +1,7 @@
+2000-10-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* ieee.c (ieee_make_empty_symbol): Use bfd_zalloc, not bfd_zmalloc.
+
 2000-10-10  Tom Rix <trix@redhat.com>
 
 	* section.c (bfd_make_section_anyway): Release newsect ptr when 
