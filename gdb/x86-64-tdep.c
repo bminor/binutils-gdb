@@ -822,7 +822,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 	{
 	  printf_filtered
 	    ("NOTE: This function doesn't seem to have a valid prologue.\n"
-	     "      Consider adding -fno-omit-frame-pointer to your gcc's CFLAGS.\n");
+	     "      Try to add -fno-omit-frame-pointer tou your gcc's CFLAGS.\n");
 	  omit_fp_note_printed++;
 	}
       return pc;
