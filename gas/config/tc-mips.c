@@ -203,6 +203,9 @@ static int mips_eabi64 = 0;
    mips3 or greater, then mark the object file 32BITMODE. */
 static int mips_32bitmode = 0;
 
+/* True if -mgp32 was passed. */
+static int mips_gp32 = 0;
+
 /* Some ISA's have delay slots for instructions which read or write
    from a coprocessor (eg. mips1-mips3); some don't (eg mips4).
    Return true if instructions marked INSN_LOAD_COPROC_DELAY, 
@@ -2498,7 +2501,8 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     {
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu)
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu, 
+			       mips_gp32)
 	  && (mips_cpu != 4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
@@ -7048,7 +7052,7 @@ mips_ip (str, ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_cpu))
+      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_cpu, mips_gp32))
 	ok = true;
       else 
 	ok = false;
@@ -8860,6 +8864,11 @@ struct option md_longopts[] = {
   {"64", no_argument, NULL, OPTION_64},
 #endif
 
+#define OPTION_GP32 (OPTION_MD_BASE + 41)
+#define OPTION_GP64 (OPTION_MD_BASE + 42)
+  {"mgp32", no_argument, NULL, OPTION_GP32},
+  {"mgp64", no_argument, NULL, OPTION_GP64},
+
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -9160,6 +9169,27 @@ md_parse_option (c, arg)
       }
       break;
 
+    case OPTION_GP32:
+      mips_gp32 = 1;
+      mips_64 = 0;
+
+      /* We deliberately don't allow "-gp32" to set the MIPS_32BITMODE
+	 flag in object files because to do so would make it
+	 impossible to link with libraries compiled without "-gp32".
+	 This is unnecessarily restrictive.  
+
+	 We could solve this problem by adding "-gp32" multilibs to
+	 gcc, but to set this flag before gcc is built with such
+	 multilibs will break too many systems. */
+
+/*    mips_32bitmode = 1; */
+      break;
+
+    case OPTION_GP64:
+      mips_gp32 = 0;
+      mips_64 = 1;
+/*    mips_32bitmode = 0; */
+      break;
 
     case OPTION_MABI:
       if (strcmp (arg,"32") == 0

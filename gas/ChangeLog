@@ -1,3 +1,11 @@
+1999-12-30  Andrew Haley  <aph@cygnus.com>
+
+	* config/tc-mips.c (mips_gp32): New variable.
+	(macro_build) Use mips_gp32.
+	(mips_ip): Ditto.
+	(md_longopts): Add "-mgp32" and "-mgp64".
+	(md_parse_option): Add OPTION_GP32 and OPTION_GP64.
+	
 2000-02-22  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* config/obj-coff.c (add_lineno): Accept non-positive lineno with
