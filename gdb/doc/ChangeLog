@@ -1,3 +1,7 @@
+Tue Jan 22 11:57:38 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo: Fix typo ``Remove' -> ``Remote''.
+
 2002-01-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Update copyright.
