@@ -1,5 +1,6 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -1148,6 +1149,13 @@ rcdata:
 	  id RCDATA suboptions BEG optrcdata_data END
 	  {
 	    define_rcdata ($1, &$3, $5.first);
+	    if (yychar != YYEMPTY)
+	      YYERROR;
+	    rcparse_discard_strings ();
+	  }
+	| id RCDATA suboptions file_name
+	  {
+	    define_rcdata_file ($1, &$3, $4);
 	    if (yychar != YYEMPTY)
 	      YYERROR;
 	    rcparse_discard_strings ();

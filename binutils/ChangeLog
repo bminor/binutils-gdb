@@ -1,3 +1,14 @@
+2005-01-17   Eugene Kotlyarov  <ekot@narod.ru>
+
+	PR binutils/647
+	* rcparse.y (RCDATA): Allow a filename to be supplied as the
+	parameter.  Parse it with define_rcdata_file().
+	* resrc.c (define_rcdata_file): New function.
+	* windres.h: Provide a prototype for the new function.
+
+	* resrc.c (define_user_file): Fix typo by replacing "font file"
+	with "file".
+
 2005-01-16  Jason Thorpe  <thorpej@netbsd.org>
 
 	* MAINTAINERS: Update my email address.
