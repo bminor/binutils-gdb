@@ -1,3 +1,7 @@
+Mon Aug 25 16:14:34 1997  Christopher Provenzano  <proven@cygnus.com>
+
+	* configure: Rebuild with latest devo autoconf for NT support
+
 Mon Aug 25 16:11:04 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-arm.c (compatible): If B is a default type, return A.
