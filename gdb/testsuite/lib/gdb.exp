@@ -37,10 +37,11 @@ if ![info exists GDBFLAGS] then {
     set GDBFLAGS "-nx"
 }
 
-# set the prompt if it doesn't exist
+# The variable prompt is a regexp which matches the gdb prompt.  Set it if it
+# is not already set.
 global prompt
 if ![info exists prompt] then {
-    set prompt "\[(\]gdb\[)\]"
+    set prompt "\\(gdb\\)"
 }
 
 global usestubs
@@ -62,7 +63,7 @@ proc default_gdb_version {} {
     global GDBFLAGS
     if {[which $GDB] != 0} then {
 	set tmp [exec echo "q" | $GDB -nw $GDBFLAGS]
-	regexp " \[0-9\.\]+" $tmp version
+	regexp " \[0-9.\]+" $tmp version
 	clone_output "[which $GDB] version$version -nw $GDBFLAGS \n"
     } else {
 	warning "$GDB does not exist"
@@ -308,7 +309,7 @@ proc gdb_test { args } {
 	    send "\n"
 	    perror "Window too small."
 	}
-	-re "\[(\]+y or n\[)\]+ " {
+	-re "\\(y or n\\) " {
 	    send "n\n"
 	    perror "Got interactive prompt."
 	}

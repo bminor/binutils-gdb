@@ -27,7 +27,7 @@ load_lib gdb.exp
 load_lib vxworks.exp
 
 set shell_prompt "->"
-set prompt "\[(\]vxgdb\[)\]"
+set prompt "\\(vxgdb\\)"
 
 #
 # gdb_version -- extract and print the version number of gcc

@@ -1,5 +1,7 @@
 Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/vx-gdb.exp, lib/gdb.exp: Regexp cleanups (\[(\] -> \\(, etc.).
+
 	* gdb.base/a1-selftest.exp: Don't check for # followed by a digit
 	somewhere between `read' and `main.c'.  I'm pretty sure the
 	pattern ".*#\[0-9\].*" was slowing down pattern matching a lot,
