@@ -1,4 +1,21 @@
+Mon Jun 24 17:19:02 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+	INSTALL_PROGRAM, INSTALL_DATA): Use autoconf set values.
+	(docdir): Removed.
+	* configure.in (AC_PREREQ): Autoconf 2.5 or higher.	
+
 Mon Jun 24 11:59:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (endian): New static variable.
+	(usage): Mention -EB/-EL/--endian.
+	(long_options): Add "endian".
+	(disassemble_data): If endianness was specified, replace
+	abfd->xvec with a copy of itself with the given endianness.
+	(main): Handle -EB/-EL/--endian.
+	* binutils.texi, objdump.1: Mention -EB/-EL/--endian.
+
+	* objdump.c: Make most variables and functions static.
 
 	* configure.in: On alpha*-*-osf*, link against libbfd.a if not
 	using shared libraries.
