@@ -1,0 +1,14 @@
+@echo off
+cd bfd
+call configdj
+cd ..\binutils
+call configdj
+cd ..\bison
+call configdj
+cd ..\gas
+call configdj
+cd ..\gcc
+call configdj
+cd ..\libiberty
+call configdj
+cd ..
