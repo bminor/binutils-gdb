@@ -63,7 +63,7 @@ nllookup( address )
 	    low = middle + 1;
 	}
     }
-    if(nl[middle+1].value == address) {
+    if(nl[middle+1].value <= address) {
 #	    ifdef DEBUG
       if (debug & LOOKUPDEBUG ) {
 	printf("[nllookup] %d (%d) probes, fall off\n", probes, nname-1);
