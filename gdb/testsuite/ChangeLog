@@ -1,3 +1,14 @@
+2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/store.c (charest): New typedef.
+	(add_char): Rename to add_charest, update.
+	(wack_char): Rename to wack_charest, update types.  Return l + r
+	to keep r live across the call.
+	(wack_short, wack_int, wack_long, wack_longest, wack_float)
+	(wack_double, wack_doublest): Return l + r to keep r live across
+	the call.
+	* gdb.base/store.exp: Accomodate store.c changes.
+
 2003-06-29  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/inherit.exp (test_print_svi_classes): Accept gdb
