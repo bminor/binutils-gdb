@@ -1,3 +1,7 @@
+2003-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Updated Turkish translation.
+
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Remove libintl.h.

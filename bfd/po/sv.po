@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:53+0930\n"
-"PO-Revision-Date: 2003-07-17 22:55+0200\n"
+"PO-Revision-Date: 2003-08-14 22:40+0200\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1750,7 +1750,7 @@ msgstr "%s: odefinierat symbolnamn med version %s"
 #: elflink.c:2142
 #, c-format
 msgid "%s: relocation size mismatch in %s section %s"
-msgstr "%s: omlokaliseringsstorleken stämmer inte överens i sektionen %s %s"
+msgstr "%s: omlokaliseringsstorleken stämmer inte överens i %s, sektion %s"
 
 #: elflink.c:2434
 #, c-format
@@ -1851,7 +1851,7 @@ msgstr "%s: ogiltigt sektionsnamn \"%s\""
 #: elfxx-mips.c:9025
 #, c-format
 msgid "%s: endianness incompatible with that of the selected emulation"
-msgstr "%s: endianess inkompatibel med den för den valda emuleringen"
+msgstr "%s: endianness inkompatibel med den för den valda emuleringen"
 
 #: elfxx-mips.c:9037
 #, c-format

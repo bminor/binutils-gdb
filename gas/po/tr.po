@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gas 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:57+0930\n"
-"PO-Revision-Date: 2003-07-13 23:26+0300\n"
+"PO-Revision-Date: 2003-08-17 12:43+0300\n"
 "Last-Translator: Deniz Akkus Kanca <deniz@arayan.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -10287,342 +10287,322 @@ msgstr "tanımlanmamış OP TYPE henüz desteklenmiyor"
 #: config/tc-xtensa.c:3810
 #, c-format
 msgid "found %d operands for '%s':  Expected %d"
-msgstr ""
+msgstr "'%2$s' için %1$d işlenen bulundu:  %3$d beklendi"
 
 #: config/tc-xtensa.c:3817
 #, c-format
 msgid "found too many (%d) operands for '%s':  Expected %d"
-msgstr ""
+msgstr "'%2$s' için çok fazla işlenen (%1$d) bulundu:  %3$d beklendi"
 
 #: config/tc-xtensa.c:4072
-#, fuzzy
 msgid "instruction fragment may contain data"
-msgstr "İşlem koşullu değil"
+msgstr "İşlem parçacığı veri içerebilir"
 
 #: config/tc-xtensa.c:4105
-#, fuzzy, c-format
+#, c-format
 msgid "invalid operand %d on '%s'"
-msgstr "Geçersiz işlenenler: %s"
+msgstr "'%2$s' için geçersiz %1$d işleneni"
 
 #: config/tc-xtensa.c:4116
-#, fuzzy, c-format
+#, c-format
 msgid "invalid expression for operand %d on '%s'"
-msgstr "İşlenende geçersiz ifade"
+msgstr "'%2$s' içinde %1$d işleneninde geçersiz ifade"
 
 #: config/tc-xtensa.c:4177
-#, fuzzy, c-format
+#, c-format
 msgid "invalid relocation operand %i on '%s'"
-msgstr "%s'i atayan işlem için geçersiz bölüm"
+msgstr "'%2$s' içinde geçersiz yer değişim işleneni %1$i"
 
 #: config/tc-xtensa.c:4186
-#, fuzzy, c-format
+#, c-format
 msgid "undefined symbol for opcode \"%s\"."
-msgstr "\"%s\" bilinmeyen sembol türü"
+msgstr "\"%s\" opkodu için tanımsız sembol"
 
 #: config/tc-xtensa.c:4280
 msgid "instruction with constant operands does not fit"
-msgstr ""
+msgstr "sabit işlenenli işlem sığmıyor"
 
 #: config/tc-xtensa.c:4289
 msgid "instruction with constant operands does not fit without widening"
-msgstr ""
+msgstr "sabit işlenenli işlem, genişletme olmadan sığmıyor"
 
 #: config/tc-xtensa.c:4379
 msgid "instruction's constant operands do not fit"
-msgstr ""
+msgstr "işlemin sabit işlenenleri sığmıyor"
 
 #: config/tc-xtensa.c:4718
-#, fuzzy
 msgid "opcode 'NOP.N' unavailable in this configuration"
-msgstr "öykünümler bu ayarlarda desteklenmemektedir"
+msgstr "'NOP.N' opkodu bu ayarlarda desteklenmemektedir"
 
 #: config/tc-xtensa.c:4727
-#, fuzzy
 msgid "opcode 'OR' unavailable in this configuration"
-msgstr "öykünümler bu ayarlarda desteklenmemektedir"
+msgstr "'OR' opkodu bu ayarlarda desteklenmemektedir"
 
 #: config/tc-xtensa.c:4737
-#, fuzzy, c-format
+#, c-format
 msgid "invalid %d-byte NOP requested"
-msgstr "geçersiz indeks yazmacı"
+msgstr "geçersiz %d baytlık NOP istendi"
 
 #: config/tc-xtensa.c:4757
 msgid "get_expanded_loop_offset: undefined opcode"
-msgstr ""
+msgstr "get_expanded_loop_offset: tanımsız opkod"
 
 #: config/tc-xtensa.c:4764
 msgid "get_expanded_loop_offset: invalid opcode"
-msgstr ""
+msgstr "get_expanded_loop_offset: geçersiz opkod"
 
 #: config/tc-xtensa.c:4880
-#, fuzzy
 msgid "invalid last instruction for a zero-overhead loop"
-msgstr "bu yapı için geçersiz işlem; gereken: "
+msgstr "sıfır-masraflı döngü için geçersiz son işlem"
 
 #: config/tc-xtensa.c:4935
 #, c-format
 msgid "cannot assemble '%s' into a literal fragment"
-msgstr ""
+msgstr "'%s' sabit parçacık haline getirilemedi"
 
 #: config/tc-xtensa.c:4937
 msgid "..."
-msgstr ""
+msgstr "..."
 
 #: config/tc-xtensa.c:5071
 msgid "entry instruction with stack decrement < 16"
-msgstr ""
+msgstr "yığıt azaltımı 16'dan küçük olan giriş işlemi"
 
 #: config/tc-xtensa.c:5075
 msgid "entry instruction with non-constant decrement"
-msgstr ""
+msgstr "sabit olmayan azaltımlı giriş işlemi"
 
 #: config/tc-xtensa.c:5152
 #, c-format
 msgid "undefined @ suffix '%s', expected '%s'"
-msgstr ""
+msgstr "tanımsız @ soneki '%s', '%s' beklendi"
 
 #: config/tc-xtensa.c:5242
-#, fuzzy, c-format
+#, c-format
 msgid "invalid operand relocation for '%s' instruction"
-msgstr "işlem için geçersiz yerdeğişim"
+msgstr "'%s' işlemi için geçersiz işlenen yerdeğişimi"
 
 #: config/tc-xtensa.c:5245
-#, fuzzy, c-format
+#, c-format
 msgid "invalid relocation for operand %d in '%s' instruction"
-msgstr "işlem için geçersiz yerdeğişim"
+msgstr "'%2$s' işleminin %1$d işleneni için geçersiz yerdeğişim"
 
 #: config/tc-xtensa.c:5252
-#, fuzzy, c-format
+#, c-format
 msgid "invalid relocation type %d for %s instruction"
-msgstr "işlem için geçersiz yerdeğişim"
+msgstr "%2$s işlemi için %1$d türü yerdeğişim geçersiz"
 
 #: config/tc-xtensa.c:5261
-#, fuzzy, c-format
+#, c-format
 msgid "invalid relocation for operand %d of '%s'"
-msgstr "Alan için geçersiz yerdeğişim"
+msgstr "'%2$s'nın %1$d işleneni için geçersiz yerdeğişim"
 
 #: config/tc-xtensa.c:5269
-#, fuzzy, c-format
+#, c-format
 msgid "non-PCREL relocation operand %d for '%s': %s"
-msgstr "Bilinmeyen yerdeğişim işleneni: !%s"
+msgstr "'%2$s' için PCREL olmayan yerdeğişim işleneni %1$d: %3$s"
 
 #: config/tc-xtensa.c:5328 config/tc-xtensa.c:5366
-#, fuzzy, c-format
+#, c-format
 msgid "unhandled local relocation fix %s"
-msgstr "desteklenmeyen yerdeğişim türü %s"
+msgstr "desteklenmeyen yerel yerdeğişim düzeltmesi %s"
 
 #: config/tc-xtensa.c:5350
 msgid "undecodable FIX"
-msgstr ""
+msgstr "anlaşılamayan FIX"
 
 #: config/tc-xtensa.c:5478
 msgid "emitting simplification relocation"
-msgstr ""
+msgstr "basitleştirme yerdeğişimi üretiliyor"
 
 #: config/tc-xtensa.c:5482
-#, fuzzy
 msgid "emitting unknown relocation"
-msgstr "Bilinmeyen yerdeğişim türü"
+msgstr "bilinmeyen yerdeğişim üretiliyor"
 
 #: config/tc-xtensa.c:5814
 #, c-format
 msgid "fr_var %lu < length %d; ignoring"
-msgstr ""
+msgstr "fr_var %lu < %d uzunluğu; yoksayıldı"
 
 #: config/tc-xtensa.c:6000 config/tc-xtensa.c:6044
-#, fuzzy
 msgid "undecodable instruction in instruction frag"
-msgstr "Makro işlemi birden fazla işlem olarak genişletildi"
+msgstr "işlem parçacığında anlaşılamayan işlem"
 
 #: config/tc-xtensa.c:6092
-#, fuzzy
 msgid "invalid empty loop"
-msgstr "geçersiz bölüm, \"%s\""
+msgstr "geçersiz boş döngü"
 
 #: config/tc-xtensa.c:6097
-#, fuzzy
 msgid "loop target does not follow loop instruction in section"
-msgstr ".uses hedefi aynı bölümde yerel bir sembole başvurmuyor"
+msgstr "döngü hedefi bölümde döngü işlemini takip etmiyor"
 
 #: config/tc-xtensa.c:6215
 msgid "get_text_align_power: argument too large"
-msgstr ""
+msgstr "get_text_align_power: argüman fazla büyük"
 
 #: config/tc-xtensa.c:6420 config/tc-xtensa.c:6566
 msgid "invalid opcode for RELAX_ALIGN_NEXT_OPCODE"
-msgstr ""
+msgstr "RELAX_ALIGN_NEXT_OPCODE için geçersiz opkod"
 
 #: config/tc-xtensa.c:6421 config/tc-xtensa.c:6567
-#, fuzzy
 msgid "cannot continue"
 msgstr "devam edilemez"
 
 #: config/tc-xtensa.c:6458
 msgid "expected loop opcode in relax align next target"
-msgstr ""
+msgstr "'gevşet, sonraki hedefi hizala' içinde döngü opkodu beklendi"
 
 #: config/tc-xtensa.c:6475
 msgid "expected align_code or RELAX_ALIGN_NEXT_OPCODE"
-msgstr ""
+msgstr "align_code veya RELAX_ALIGN_NEXT_OPCODE beklendi"
 
 #: config/tc-xtensa.c:6549 config/tc-xtensa.c:6587 config/tc-xtensa.c:6591
 #: config/tc-xtensa.c:6595
-#, fuzzy
 msgid "internal error aligning"
-msgstr "İç hata"
+msgstr "hizalamada iç hata"
 
 #: config/tc-xtensa.c:6676
-#, fuzzy
 msgid "bad relaxation state"
-msgstr "hatalı yerdeğişim türü: 0x%02x"
+msgstr "hatalı gevşeme durumu"
 
 #: config/tc-xtensa.c:6752
 #, c-format
 msgid "fr_var (%ld) < length (%d); ignoring"
-msgstr ""
+msgstr "fr_var (%ld) < length (%d); yoksayıldı"
 
 #: config/tc-xtensa.c:6928
-#, fuzzy
 msgid "internal error: relaxation failed"
-msgstr "iç hata: sorgu/al işlenenleri başarısız"
+msgstr "iç hata: gevşetme başarısız"
 
 #: config/tc-xtensa.c:6934
 msgid "internal error: relaxation requires too many steps"
-msgstr ""
+msgstr "iç hata: gevşetme çok fazla adım gerektiriyor"
 
 #: config/tc-xtensa.c:7055
-#, fuzzy
 msgid "invalid relaxation fragment result"
-msgstr "Alan için geçersiz yerdeğişim"
+msgstr "geçersiz gevşetme parçacık sonucu"
 
 #: config/tc-xtensa.c:7128
-#, fuzzy
 msgid "unable to widen instruction"
-msgstr "İşlemden sonra bozulma"
+msgstr "işlem genişletilemedi"
 
 #: config/tc-xtensa.c:7215
-#, fuzzy
 msgid "multiple literals in expansion"
-msgstr "birden fazla koşul tanımı"
+msgstr "açılımda birden fazla sabit"
 
 #: config/tc-xtensa.c:7219
-#, fuzzy
 msgid "no registered fragment for literal"
-msgstr "Geçersiz yazmaç: r0 ve r15 hatalı"
+msgstr "sabit için yazmaçlanmış parçacık yok"
 
 #: config/tc-xtensa.c:7221
 msgid "number of literal tokens != 1"
-msgstr ""
+msgstr "sabit dizgecik sayısı != 1"
 
 #: config/tc-xtensa.c:7298 config/tc-xtensa.c:7304
-#, fuzzy, c-format
+#, c-format
 msgid "unresolved loop target symbol: %s"
-msgstr "\"%s\" sembolü için değer çözümlenemedi"
+msgstr "çözümlenmemiş döngü hedef sembolü: %s"
 
 #: config/tc-xtensa.c:7401
 msgid "loop relaxation specification does not correspond"
-msgstr ""
+msgstr "döngü genişletme bildirimi eşleşmiyor"
 
 #: config/tc-xtensa.c:7428
-#, fuzzy
 msgid "loop too long for LOOP instruction"
-msgstr "işlenen değeri işlem için kapsam dışı"
+msgstr "döngü, LOOP işlemi için fazla uzun"
 
 #: config/tc-xtensa.c:7465
-#, fuzzy, c-format
+#, c-format
 msgid "invalid expression evaluation type %d"
-msgstr "İşlenende geçersiz ifade"
+msgstr "geçersiz ifade değerlendirme türü %d"
 
 #: config/tc-xtensa.c:7702
 #, c-format
 msgid "fixes not all moved from %s"
-msgstr ""
+msgstr "%s'den bütün düzeltmeler kaldırılmadı"
 
 #: config/tc-xtensa.c:7835
 msgid "inlining literal pool; specify location with .literal_position."
-msgstr ""
+msgstr "sabit havuz 'inline' haline getirildi; yerini .literal_position ile bildirin"
 
 #: config/tc-xtensa.c:8230
-#, fuzzy, c-format
+#, c-format
 msgid "could not create section %s"
 msgstr "%s bölümü oluşturulamıyor"
 
 #: config/tc-xtensa.c:8232
-#, fuzzy, c-format
+#, c-format
 msgid "invalid flag combination on section %s"
-msgstr "işlem için geçersiz yerdeğişim"
+msgstr "%s bölümünde geçersiz bayrak bileşimi"
 
 #: config/tc-xtensa.c:8481
-#, fuzzy, c-format
+#, c-format
 msgid "invalid symbolic operand %d on '%s'"
-msgstr "Geçersiz işlenenler: %s"
+msgstr "'%2$s' için geçersiz sembolik işlenen %1$d"
 
 #: config/tc-xtensa.c:8545
-#, fuzzy
 msgid "operand number mismatch"
-msgstr "işlenenler uyuşmuyor"
+msgstr "işlenen sayısı uyuşmuyor"
 
 #: config/tc-xtensa.c:8592
-#, fuzzy
 msgid "invalid opcode"
-msgstr "geçersiz opkod, \"%s\"."
+msgstr "geçersiz opkod"
 
 #: config/tc-xtensa.c:8598
-#, fuzzy
 msgid "too few operands"
-msgstr "çok fazla işlenen"
+msgstr "çok az işlenen"
 
 #: config/tc-xtensa.c:8817
 msgid "ignoring extra '-rename-section' delimiter ':'"
-msgstr ""
+msgstr "fazla '-rename-section' sınırlayıcısı ':' yoksayıldı"
 
 #: config/tc-xtensa.c:8822
-#, fuzzy, c-format
+#, c-format
 msgid "ignoring invalid '-rename-section' specification: '%s'"
-msgstr "%s için hatalı bölüm türü yoksayıldı"
+msgstr "geçersiz '-rename-section' bildirimi '%s' yoksayıldı"
 
 #: config/tc-xtensa.c:8845
 #, c-format
 msgid "section %s renamed multiple times"
-msgstr ""
+msgstr "%s bölümü birden fazla defa yeniden adlandırıldı"
 
 #: config/tc-xtensa.c:8847
-#, fuzzy, c-format
+#, c-format
 msgid "multiple sections remapped to output section %s"
-msgstr "birden fazla koşul tanımı"
+msgstr "birden fazla bölüm %s çıktı bölümüne eşlendi"
 
 #: config/tc-z8k.c:314
-#, fuzzy, c-format
+#, c-format
 msgid "register rr%d out of range"
 msgstr "rr%d yazmacı kapsam dışı"
 
 #: config/tc-z8k.c:316
-#, fuzzy, c-format
+#, c-format
 msgid "register rr%d does not exist"
-msgstr "'%s' yazmacı yok\n"
+msgstr "rr%d yazmacı yok"
 
 #: config/tc-z8k.c:326
-#, fuzzy, c-format
+#, c-format
 msgid "register rh%d out of range"
 msgstr "rh%d yazmacı kapsam dışı"
 
 #: config/tc-z8k.c:336
-#, fuzzy, c-format
+#, c-format
 msgid "register rl%d out of range"
 msgstr "rl%d yazmacı kapsam dışı"
 
 #: config/tc-z8k.c:347
-#, fuzzy, c-format
+#, c-format
 msgid "register rq%d out of range"
 msgstr "rq%d yazmacı kapsam dışı"
 
 #: config/tc-z8k.c:349
-#, fuzzy, c-format
+#, c-format
 msgid "register rq%d does not exist"
-msgstr "'%s' yazmacı yok\n"
+msgstr "rq%d yazmacı yok"
 
 #: config/tc-z8k.c:359
-#, fuzzy, c-format
+#, c-format
 msgid "register r%d out of range"
 msgstr "r%d yazmacı kapsam dışı"
 
@@ -10644,21 +10624,20 @@ msgstr "%s adresi için yazmaç yanlış boyda"
 #. No interrupt type specified, opcode won't do anything.
 #: config/tc-z8k.c:585
 msgid "opcode has no effect"
-msgstr ""
+msgstr "opkod etkisiz"
 
 #: config/tc-z8k.c:697
 msgid "Missing ) in ra(rb)"
 msgstr "ra(rb) içinde eksik )"
 
 #: config/tc-z8k.c:919 config/tc-z8k.c:925
-#, fuzzy
 msgid "invalid indirect register size"
-msgstr "geçersiz indeks yazmacı"
+msgstr "geçersiz dolaylı yazmaç boyu"
 
 #: config/tc-z8k.c:971
-#, fuzzy, c-format
+#, c-format
 msgid "operand %s0x%x out of range"
-msgstr "%s0x%x işleneni kapsam dışı."
+msgstr "%s0x%x işleneni kapsam dışı"
 
 #: config/tc-z8k.c:1099
 msgid "immediate must be 1 or 2"
@@ -10688,39 +10667,37 @@ msgid ""
 "  -z8002                  generate unsegmented code\n"
 "  -linkrelax              create linker relaxable code\n"
 msgstr ""
+" Z8K seçenekleri:\n"
+"  -z8001                  bölümlenmiş kod üretir\n"
+"  -z8002                  bölümlenmemiş kod üretir\n"
+"  -linkrelax              bağlayıcı tarafından genişletilebilen kod üretir\n"
 
 #: config/tc-z8k.c:1445
-#, fuzzy
 msgid "call to md_convert_frag\n"
 msgstr "md_convert_frag'e çağrı \n"
 
 #: config/tc-z8k.c:1476 config/tc-z8k.c:1487
-#, fuzzy
 msgid "cannot branch to odd address"
-msgstr "Tek sayılı adrese dal (%lx)"
+msgstr "Tek sayılı adrese dallanılamaz"
 
 #: config/tc-z8k.c:1479 config/tc-z8k.c:1490
-#, fuzzy
 msgid "relative jump out of range"
-msgstr "yerdeğişim kapsam dışı"
+msgstr "göreceli yerdeğişim kapsam dışı"
 
 #: config/tc-z8k.c:1497
-#, fuzzy
 msgid "relative call out of range"
-msgstr "yerdeğişim kapsam dışı"
+msgstr "göreceli çağrı kapsam dışı"
 
 #: config/tc-z8k.c:1523
-#, fuzzy
 msgid "relative address out of range"
-msgstr "yerdeğişim kapsam dışı"
+msgstr "göreceli adres kapsam dışı"
 
 #: config/tc-z8k.c:1543
-#, fuzzy, c-format
+#, c-format
 msgid "md_apply_fix3: unknown r_type 0x%x\n"
-msgstr "satır %d: bilinmeyen yerdeğişim türü: 0x%x"
+msgstr "md_apply_fix3: bilinmeyen r_type 0x%x\n"
 
 #: config/tc-z8k.c:1556
-#, fuzzy
 msgid "call to md_estimate_size_before_relax\n"
 msgstr "md_estimate_size_before_relax'e çağrı \n"
 
@@ -10740,36 +10717,33 @@ msgid "can't close `%s'"
 msgstr "`%s' kapatılamadı"
 
 #: dw2gencfi.c:262
-#, fuzzy, c-format
+#, c-format
 msgid "register save offset not a multiple of %u"
-msgstr "geçersiz işlenen; 8'in katı değil: %d"
+msgstr "yazmaç sakla görecesi %u'nun katı değil"
 
 #: dw2gencfi.c:388
-#, fuzzy
 msgid "missing separator"
-msgstr "eksik model parametresi"
+msgstr "eksik ayraç"
 
 #: dw2gencfi.c:410 dw2gencfi.c:428
-#, fuzzy
 msgid "bad register expression"
-msgstr "& ifadesinde geçersiz yazmaç"
+msgstr "geçersiz yazmaç ifadesi"
 
 #: dw2gencfi.c:450 dw2gencfi.c:547
 msgid "CFI instruction used without previous .cfi_startproc"
-msgstr ""
+msgstr "öncesinde .cfi_startproc olmadan CFI işlemi kullanılmış"
 
 #: dw2gencfi.c:579
 msgid "previous CFI entry not closed (missing .cfi_endproc)"
-msgstr ""
+msgstr "önceki CFI girdisi kapatılmamış (eksik .cfi_endproc)"
 
 #: dw2gencfi.c:612
-#, fuzzy
 msgid ".cfi_endproc without corresponding .cfi_startproc"
-msgstr ".section ile eşleşmeyen .previous; yoksayıldı"
+msgstr ".cfi_startproc ile eşleşmeyen .cfi_endproc"
 
 #: dw2gencfi.c:987
 msgid "open CFI at the end of file; missing .cfi_endproc directive"
-msgstr ""
+msgstr "dosyasonunda açık CFI; .cfi_endproc yönergesi eksik"
 
 #: dwarf2dbg.c:468 dwarf2dbg.c:498
 msgid "file number less than one"
@@ -10786,9 +10760,8 @@ msgid "unassigned file number %ld"
 msgstr "verilmemiş dosya numarası %ld"
 
 #: dwarf2dbg.c:1134 dwarf2dbg.c:1331
-#, fuzzy
 msgid "internal error: unknown dwarf2 format"
-msgstr "iç hata: düzeltme parça içinde değil"
+msgstr "iç hata: bilinmeyen dwarf2 biçemi"
 
 #: dwarf2dbg.c:1476 dwarf2dbg.c:1484 dwarf2dbg.c:1492 dwarf2dbg.c:1513
 msgid "dwarf2 is not supported for this object file format"
@@ -11520,7 +11493,7 @@ msgstr "kayan nokta sabiti fazla büyük"
 
 #: read.c:4581
 msgid "strings must be placed into a section"
-msgstr ""
+msgstr "dizgeler bir bölüm içine yerleştirilmeli"
 
 #: read.c:4631
 msgid "expected <nn>"
@@ -11621,9 +11594,9 @@ msgid "attempt to switch to nonexistent segment \"%s\""
 msgstr "Olmayan \"%s\" bölümüne geçiş denemesi"
 
 #: symbols.c:318
-#, fuzzy, c-format
+#, c-format
 msgid "cannot define symbol `%s' in absolute section"
-msgstr "işlemde tanımsız %s sembolü"
+msgstr "kesin bölüm içinde `%s' sembolü tanımlanamaz"
 
 #: symbols.c:452
 #, c-format
@@ -11641,14 +11614,14 @@ msgid "undefined symbol `%s' in operation"
 msgstr "işlemde tanımsız %s sembolü"
 
 #: symbols.c:885
-#, fuzzy, c-format
+#, c-format
 msgid "invalid sections for operation on `%s' and `%s'"
-msgstr "%s'i atayan işlem için geçersiz bölüm"
+msgstr "`%s' ve `%s' üzerinde işlem için geçersiz bölümler"
 
 #: symbols.c:889
-#, fuzzy, c-format
+#, c-format
 msgid "invalid section for operation on `%s'"
-msgstr "%s'i atayan işlem için geçersiz bölüm"
+msgstr "`%s' üzerinde işlem için geçersiz bölüm"
 
 #: symbols.c:897 symbols.c:900
 #, c-format
@@ -11656,14 +11629,14 @@ msgid "undefined symbol `%s' in operation setting `%s'"
 msgstr "işlemde tanımsız %s sembolü %s'i atıyor"
 
 #: symbols.c:907
-#, fuzzy, c-format
+#, c-format
 msgid "invalid sections for operation on `%s' and `%s' setting `%s'"
-msgstr "%s'i atayan işlem için geçersiz bölüm"
+msgstr "`%s' ve `%s' üzerinde ve `%s'i atayan işlem için geçersiz bölümler"
 
 #: symbols.c:911
-#, fuzzy, c-format
+#, c-format
 msgid "invalid section for operation on `%s' setting `%s'"
-msgstr "%s'i atayan işlem için geçersiz bölüm"
+msgstr "`%s' üzerinde `%s'i atayan işlem için geçersiz bölüm"
 
 #: symbols.c:964
 #, c-format
@@ -11697,12 +11670,12 @@ msgstr "bölüm sembolleri zaten evrensel"
 #: symbols.c:2014
 #, c-format
 msgid "Accessing function `%s' as thread-local object"
-msgstr ""
+msgstr "`%s' işlevine iplikçiğe yerel nesne olarak erişildi"
 
 #: symbols.c:2018
 #, c-format
 msgid "Accessing `%s' as thread-local object"
-msgstr ""
+msgstr "`%s'e iplikçiğe yerel nesne olarak erişildi"
 
 #: write.c:215
 #, c-format
@@ -11766,9 +11739,8 @@ msgid ".word %s-%s+%s didn't fit"
 msgstr ".word %s-%s+%s sığmadı"
 
 #: write.c:2446
-#, fuzzy
 msgid "attempt to move .org backwards"
-msgstr "Geriye .org denemesi yoksayıldı"
+msgstr ".org'u geriye taşıma denemesi"
 
 #: write.c:2474
 msgid ".space specifies non-absolute value"

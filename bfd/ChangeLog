@@ -1,3 +1,7 @@
+2003-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2003-08-20  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf64-mips.c (elf_backend_copy_indirect_symbol): Define.

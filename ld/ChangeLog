@@ -1,3 +1,7 @@
+2003-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Updated Turkish translation.
+
 2003-08-20  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c: Initialise the new fields in bfd_link_info to
