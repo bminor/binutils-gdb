@@ -1,6 +1,6 @@
 /* a.out object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -419,17 +419,9 @@ obj_aout_type (ignore)
 	{
 	  ++input_line_pointer;
 	  if (strncmp (input_line_pointer, "object", 6) == 0)
-#ifdef BFD_ASSEMBLER
-	    aout_symbol (symbol_get_bfdsym (sym))->other = 1;
-#else
-	  S_SET_OTHER (sym, 1);
-#endif
+	    S_SET_OTHER (sym, 1);
 	  else if (strncmp (input_line_pointer, "function", 8) == 0)
-#ifdef BFD_ASSEMBLER
-	    aout_symbol (symbol_get_bfdsym (sym))->other = 2;
-#else
-	  S_SET_OTHER (sym, 2);
-#endif
+	    S_SET_OTHER (sym, 2);
 	}
     }
 
