@@ -750,9 +750,6 @@ retrieve_tracebackinfo (abfd, textsec, cs)
 {
 #define TBTABLE_BUFSIZ  2000
 
-  /* Minimum buffer size to hold a traceback table.  */
-#define	MIN_TBTABSIZ	50
-				
   static TracebackInfo tbInfo;
   struct tbtable *ptb;
 
@@ -838,11 +835,19 @@ retrieve_tracebackinfo (abfd, textsec, cs)
       /* if we don't have the whole traceback table in the buffer, re-read
          the whole thing. */
 
+      /* This is how much to read to get the traceback table.
+	 8 bytes of the traceback table are always present, plus we
+	 look at parminfo.  */
+#define	MIN_TBTABSIZ	12
+				
       if ((char*)pinsn > (buffer + bufferbytes - MIN_TBTABSIZ)) {
 
 	/* In case if we are *very* close to the end of the text section
 	   and cannot read properly from that point on, abort by returning
 	   NULL.
+
+	   This could happen if the traceback table is only 8 bytes,
+	   but we try to read 12 bytes of it.
 	   Handle this case more graciously -- FIXME */
 
 	if (!bfd_get_section_contents (

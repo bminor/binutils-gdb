@@ -1,5 +1,7 @@
 Wed Mar 17 09:46:31 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffread.c (MIN_TBTABSIZ): Change to 12.
+
 	* xcoffread.c (xcoff_symfile_read): Only read stringtab and
 	debugsec if there are a non-zero number of symbols.
 
