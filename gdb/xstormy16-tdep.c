@@ -781,8 +781,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (!fi->extra_info)
     {
-      fi->extra_info = (struct frame_extra_info *)
-	frame_obstack_alloc (sizeof (struct frame_extra_info));
+      frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
       fi->extra_info->framesize = 0;
       fi->extra_info->frameless_p = 1;	/* Default frameless, detect framed */
 

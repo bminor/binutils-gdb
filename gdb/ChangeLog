@@ -1,3 +1,27 @@
+2003-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_init_extra_frame_info): Allocate
+	extra_info using frame_extra_info_zalloc.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Ditto.
+	* sh-tdep.c (sh_init_extra_frame_info): Ditto.
+	(sh64_init_extra_frame_info): Ditto.
+	* mn10300-tdep.c (mn10300_init_extra_frame_info): Ditto.
+	* s390-tdep.c (s390_init_extra_frame_info): Ditto.
+	* mips-tdep.c (mips_init_extra_frame_info): Ditto.
+	* mcore-tdep.c (mcore_init_extra_frame_info): Ditto.
+	* frv-tdep.c (frv_init_extra_frame_info): Ditto.
+	* m68hc11-tdep.c (m68hc11_init_extra_frame_info): Ditto.
+	* ia64-tdep.c (ia64_init_extra_frame_info): Ditto.
+	* h8300-tdep.c (h8300_init_extra_frame_info): Ditto.
+	* d10v-tdep.c (d10v_init_extra_frame_info): Ditto.
+	* cris-tdep.c (cris_init_extra_frame_info): Ditto.
+	* arm-tdep.c (arm_init_extra_frame_info): Ditto.
+	* alpha-tdep.c (alpha_init_extra_frame_info): Ditto.
+
+	* mn10300-tdep.c (analyze_dummy_frame): Use
+	deprecated_set_frame_extra_info_hack.
+	* mcore-tdep.c (analyze_dummy_frame): Ditto.
+
 2003-01-07  J. Brobecker  <brobecker@gnat.com>
 
 	* mdebugread.c (parse_symbol): Skip stProc entries which storage

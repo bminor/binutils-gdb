@@ -793,8 +793,7 @@ frv_saved_pc_after_call (struct frame_info *frame)
 static void
 frv_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
-  frame->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
   frame->extra_info->fp_to_callers_sp_offset = 0;
   frame->extra_info->lr_saved_on_stack = 0;
 }

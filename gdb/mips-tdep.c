@@ -2468,8 +2468,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
   mips_extra_func_info_t proc_desc =
     fci->next ? cached_proc_desc : find_proc_desc (get_frame_pc (fci), fci->next, 1);
 
-  fci->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
   fci->saved_regs = NULL;
   fci->extra_info->proc_desc =

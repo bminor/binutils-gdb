@@ -894,8 +894,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
 static void
 d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
   fi->extra_info->frameless = 0;

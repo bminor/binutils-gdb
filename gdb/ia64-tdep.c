@@ -1484,8 +1484,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
     && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame->next), frame->next->frame,
                                           frame->next->frame));
 
-  frame->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
 
   if (frame->next == 0)
     {

@@ -1206,8 +1206,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
     }
  
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
  
   fi->extra_info->return_pc = 0;
   fi->extra_info->leaf_function = 0;

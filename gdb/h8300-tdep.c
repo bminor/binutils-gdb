@@ -523,8 +523,7 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (!fi->extra_info)
     {
-      fi->extra_info = (struct frame_extra_info *)
-        frame_obstack_alloc (sizeof (struct frame_extra_info));
+      frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
       fi->extra_info->from_pc = 0;
       fi->extra_info->args_pointer = 0;		/* Unknown */
       fi->extra_info->locals_pointer = 0;	/* Unknown */

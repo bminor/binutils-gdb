@@ -289,10 +289,11 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 
   if (dummy == NULL)
     {
+      struct frame_extra_info *extra_info;
       dummy = deprecated_frame_xmalloc ();
       dummy->saved_regs = (CORE_ADDR *) xmalloc (SIZEOF_FRAME_SAVED_REGS);
-      dummy->extra_info =
-	(struct frame_extra_info *) xmalloc (sizeof (struct frame_extra_info));
+      extra_info = XMALLOC (struct frame_extra_info);
+      deprecated_set_frame_extra_info_hack (dummy, extra_info);
     }
 
   dummy->next = NULL;
@@ -1043,8 +1044,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   frame_saved_regs_zalloc (fi);
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   fi->extra_info->status = 0;
   fi->extra_info->framesize = 0;
 

@@ -1082,8 +1082,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
   fi->extra_info->framesize = 0;
   fi->extra_info->frameoffset = 0;

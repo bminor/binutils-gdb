@@ -904,7 +904,7 @@ s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
 void
 s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  fi->extra_info = frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   if (get_frame_pc (fi))
     s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			 fi->extra_info, fi, 1);

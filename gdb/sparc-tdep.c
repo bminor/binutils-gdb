@@ -292,8 +292,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   CORE_ADDR prologue_start, prologue_end;
   int insn;
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
   fi->extra_info->bottom =

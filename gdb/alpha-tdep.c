@@ -982,8 +982,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   alpha_extra_func_info_t proc_desc =
   frame->next ? cached_proc_desc : find_proc_desc (get_frame_pc (frame), frame->next);
 
-  frame->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
 
   /* NOTE: cagney/2003-01-03: No need to set saved_regs to NULL,
      always NULL by default.  */

@@ -1721,8 +1721,7 @@ static void
 sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
   if (fi->next)
     deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
@@ -1753,8 +1752,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   int media_mode = pc_is_isa32 (get_frame_pc (fi));
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
   if (fi->next) 
     deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
