@@ -1,3 +1,8 @@
+2003-06-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Clear gdb_arch_char_signed
+	as characters are unsigned.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	PR gdb/1179

@@ -1352,6 +1352,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_long_long_bit (gdbarch, 64);
 
+  /* Characters are unsigned.  */
+  set_gdbarch_char_signed (gdbarch, 0);
+
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
