@@ -1,10 +1,17 @@
 /* config.in.  Generated automatically from configure.in by autoheader.  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
 
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
+
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
 
 /* Define if you have the <stdlib.h> header file.  */
 #undef HAVE_STDLIB_H
@@ -14,6 +21,12 @@
 
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
+
+/* Define if you have the <sys/dir.h> header file.  */
+#undef HAVE_SYS_DIR_H
+
+/* Define if you have the <sys/ndir.h> header file.  */
+#undef HAVE_SYS_NDIR_H
 
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H
@@ -32,4 +45,3 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
-#endif
