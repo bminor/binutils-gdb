@@ -1,5 +1,7 @@
 Tue Jun 18 17:13:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (s_fill): Don't warn about a zero repeat count.
+
 	* config/tc-mips.c (mips_ip): Don't warn about using AT as a
 	coprocessor register.
 
