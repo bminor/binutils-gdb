@@ -98,9 +98,16 @@ main (ac, av)
 
   for (s = abfd->sections; s; s=s->next) 
     {
-      char *buffer = malloc(bfd_section_size(abfd,s));
-      bfd_get_section_contents(abfd, s, buffer, 0, bfd_section_size(abfd,s));
-      sim_write(s->vma, buffer, bfd_section_size(abfd,s));
+      char *buffer;
+
+      if (s->flags & SEC_LOAD)
+	{
+
+	  buffer = malloc(bfd_section_size(abfd,s));
+	  bfd_get_section_contents(abfd, s, buffer, 0,
+				   bfd_section_size (abfd, s));
+	  sim_write(s->vma, buffer, bfd_section_size (abfd, s));
+	}
     }
 
   start_address = bfd_get_start_address(abfd);

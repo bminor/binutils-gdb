@@ -823,7 +823,7 @@ mop (code, bsize, sign)
 
 }
 
-#define OSHIFTS(name, how) \
+#define ONOT(name, how) \
 case O(name, SB):				\
 {						\
   int t;					\
@@ -846,6 +846,53 @@ case O(name, SL):				\
   int hm = 0x80000000; 				\
   rd = GET_L_REG (code->src.reg);		\
   how; 						\
+  goto shift32;					\
+}
+
+#define OSHIFTS(name, how1, how2) \
+case O(name, SB):				\
+{						\
+  int t;					\
+  int hm = 0x80;				\
+  rd = GET_B_REG (code->src.reg);		\
+  if ((GET_MEMORY_B (pc + 1) & 0x40) == 0)	\
+    {						\
+      how1;					\
+    }						\
+  else						\
+    {						\
+      how2;					\
+    }						\
+  goto shift8;					\
+} 						\
+case O(name, SW):				\
+{ 						\
+  int t;					\
+  int hm = 0x8000;				\
+  rd = GET_W_REG (code->src.reg); 		\
+  if ((GET_MEMORY_B (pc + 1) & 0x40) == 0)	\
+    {						\
+      how1;					\
+    }						\
+  else						\
+    {						\
+      how2;					\
+    }						\
+  goto shift16;					\
+} 						\
+case O(name, SL):				\
+{						\
+  int t;					\
+  int hm = 0x80000000; 				\
+  rd = GET_L_REG (code->src.reg);		\
+  if ((GET_MEMORY_B (pc + 1) & 0x40) == 0)	\
+    {						\
+      how1;					\
+    }						\
+  else						\
+    {						\
+      how2;					\
+    }						\
   goto shift32;					\
 }
 
@@ -1204,38 +1251,31 @@ sim_resume (step, siggnal)
 	  printf ("%c", cpu.regs[2]);
 	  goto next;
 
-	  OSHIFTS (O_NOT, rd = ~rd; v = 0;);
-	  OSHIFTS (O_SHLL, c = rd & hm; v = 0;
-		   rd <<= 1);
-	  OSHIFTS (O_SHLR, c = rd & 1; v = 0;
-		   rd = (unsigned int) rd >> 1);
-	  OSHIFTS (O_SHAL, c = rd & hm;
-		   v = (rd & hm) != ((rd & (hm >> 1)) << 1);
-		   rd <<= 1);
-	  OSHIFTS (O_SHAR, t = rd & hm;
-		   c = rd & 1;
-		   v = 0;
-		   rd >>= 1;
-		   rd |= t;
-		   );
-	  OSHIFTS (O_ROTL, c = rd & hm;
-		   v = 0;
-		   rd <<= 1;
-		   rd |= C);
-	  OSHIFTS (O_ROTR, c = rd & 1;
-		   v = 0;
-		   rd = (unsigned int) rd >> 1;
-		   if (c) rd |= hm;);
-	  OSHIFTS (O_ROTXL, t = rd & hm;
-		   rd <<= 1;
-		   rd |= C;
-		   c = t;
-		   v = 0;
-		   );
-	  OSHIFTS (O_ROTXR, t = rd & 1;
-		   rd = (unsigned int) rd >> 1;
-		   if (C) rd |= hm; c = t;
-		   v = 0;);
+	  ONOT (O_NOT, rd = ~rd; v = 0;);
+	  OSHIFTS (O_SHLL,
+		   c = rd & hm; v = 0; rd <<= 1,
+		   c = rd & (hm >> 1); v = 0; rd <<= 2);
+	  OSHIFTS (O_SHLR,
+		   c = rd & 1; v = 0; rd = (unsigned int) rd >> 1,
+		   c = rd & 2; v = 0; rd = (unsigned int) rd >> 2);
+	  OSHIFTS (O_SHAL,
+		   c = rd & hm; v = (rd & hm) != ((rd & (hm >> 1)) << 1); rd <<= 1,
+		   c = rd & (hm >> 1); v = (rd & (hm >> 1)) != ((rd & (hm >> 2)) << 2); rd <<= 2);
+	  OSHIFTS (O_SHAR,
+		   t = rd & hm; c = rd & 1; v = 0; rd >>= 1; rd |= t,
+		   t = rd & hm; c = rd & 2; v = 0; rd >>= 2; rd |= t | t >> 1 );
+	  OSHIFTS (O_ROTL,
+		   c = rd & hm; v = 0; rd <<= 1; rd |= C,
+		   c = rd & (hm >> 1); v = 0; rd <<= 2; rd |= C);
+	  OSHIFTS (O_ROTR,
+		   c = rd & 1; v = 0; rd = (unsigned int) rd >> 1; if (c) rd |= hm,
+		   c = rd & 2; v = 0; rd = (unsigned int) rd >> 2; if (c) rd |= hm);
+	  OSHIFTS (O_ROTXL,
+		   t = rd & hm; rd <<= 1; rd |= C; c = t; v = 0,
+		   t = rd & (hm >> 1); rd <<= 2; rd |= C; c = t; v = 0);
+	  OSHIFTS (O_ROTXR,
+		   t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd |= hm; c = t; v = 0,
+		   t = rd & 2; rd = (unsigned int) rd >> 2; if (C) rd |= hm; c = t; v = 0);
 
 	case O (O_JMP, SB):
 	  {

@@ -1,3 +1,14 @@
+Tue Jul  2 23:08:45 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* run.c (main): Don't "load" sections which don't have
+	SEC_LOAD set.
+	* compile.c (sim_resume, case "O_NOT"): Use ONOT instead
+	of OSHIFTS.
+	(ONOT): Define.
+	(sim_resume, shift/rotate cases): Add support for shift/rotate
+	by two bits.
+	(OSHIFTS): Corresponding changes.
+
 start-sanitize-h8s 
 Tue Jul  2 01:37:27 1996  Jeffrey A Law  (law@cygnus.com)
 
