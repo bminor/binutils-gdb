@@ -3057,7 +3057,13 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 	         int a;
 	     and this object file from the archive includes
 	         int a = 5;
-	     In such a case we must include this object file.  */
+	     In such a case we must include this object file.
+
+	     FIXME: The SunOS 4.1.3 linker will pull in the archive
+	     element if the symbol is defined in the .data section,
+	     but not if it is defined in the .text section.  That
+	     seems a bit crazy to me, and I haven't implemented it.
+	     However, it might be correct.  */
 	  if (! (*info->callbacks->add_archive_element) (info, abfd, name))
 	    return false;
 	  *pneeded = true;
