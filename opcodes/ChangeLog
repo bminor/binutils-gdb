@@ -10,8 +10,8 @@ start-sanitize-sky
 	(vu_operands): New element UFLAGS.
 	(parse_uflags,print_uflags): New functions.
 	(vu_upper_opcodes): Add UFLAGS to all insns.
-end-sanitize-sky
 
+end-sanitize-sky
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Fix rac to accept only a0:
