@@ -1,3 +1,7 @@
+Tue Mar 10 15:54:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_stop): Delete, second attempt.
+
 Thu Feb 26 19:09:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_info): Delete.
