@@ -1,3 +1,8 @@
+Fri May  8 01:30:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (GASB_SUPPORT_DIRS): Remove intl; already included via
+	GAS_SUPPORT_DIRS.
+
 Thu May  7 17:27:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig, ltmain.sh: Avoid producing a version number if
