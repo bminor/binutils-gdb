@@ -24,9 +24,62 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "floatformat.h"
 #include "symtab.h"
+#include "gdbcmd.h"
 
+/* Current CPU, set with the "set cpu" command.  */
+char *arc_cpu_type;
+char *tmp_arc_cpu_type;
+
+/* Table of cpu names.  */
+struct {
+  char *name;
+  int value;
+} arc_cpu_type_table[] = {
+  { "base", bfd_mach_arc_base },
+  { "host", bfd_mach_arc_host },
+  { "graphics", bfd_mach_arc_graphics },
+  { "audio", bfd_mach_arc_audio },
+  { NULL, 0 }
+};
+
+/* Used by simulator.  */
+int display_pipeline_p;
+int cpu_timer;
+/* This one must have the same type as used in the emulator.
+   It's currently an enum so this should be ok for now.  */
+int debug_pipeline_p;
+
+#define ARC_CALL_SAVED_REG(r) ((r) >= 16 && (r) < 24)
+
+#define OPMASK	0xf8000000
+
+/* Instruction field accessor macros.  */
+#define X_OP(i) (((i) >> 27) & 0x1f)
+#define X_A(i) (((i) >> 21) & 0x3f)
+#define X_B(i) (((i) >> 15) & 0x3f)
+#define X_C(i) (((i) >> 9) & 0x3f)
+#define X_D(i) ((((i) & 0x1ff) ^ 0x100) - 0x100)
+#define X_L(i) (((((i) >> 5) & 0x3ffffc) ^ 0x200000) - 0x200000)
+#define X_N(i) (((i) >> 5) & 3)
+#define X_Q(i) ((i) & 0x1f)
+
+/* Return non-zero if X is a short immediate data indicator.  */
+#define SHIMM_P(x) ((x) == 61 || (x) == 63)
+
+/* Return non-zero if X is a "long" (32 bit) immediate data indicator.  */
+#define LIMM_P(x) ((x) == 62)
+
+/* Build a simple instruction.  */
+#define BUILD_INSN(op, a, b, c, d) \
+  ((((op) & 31) << 27) \
+   | (((a) & 63) << 21) \
+   | (((b) & 63) << 15) \
+   | (((c) & 63) << 9) \
+   | ((d) & 511))
+
+/* Codestream stuff.  */
 static void codestream_read PARAMS ((unsigned int *, int));
-static void codestream_seek PARAMS ((int));
+static void codestream_seek PARAMS ((CORE_ADDR));
 static unsigned int codestream_fill PARAMS ((int));
 
 #define CODESTREAM_BUFSIZ 16 
@@ -36,22 +89,28 @@ static unsigned int codestream_buf[CODESTREAM_BUFSIZ];
 static int codestream_off;
 static int codestream_cnt;
 
-#define codestream_tell() (codestream_addr + codestream_off)
-#define codestream_peek() (codestream_cnt == 0 ? \
-			   codestream_fill(1): codestream_buf[codestream_off])
-#define codestream_get() (codestream_cnt-- == 0 ? \
-			 codestream_fill(0) : codestream_buf[codestream_off++])
-#define OPMASK	0xf8000000
+#define codestream_tell() \
+  (codestream_addr + codestream_off * sizeof (codestream_buf[0]))
+#define codestream_peek() \
+  (codestream_cnt == 0 \
+   ? codestream_fill (1) \
+   : codestream_buf[codestream_off])
+#define codestream_get() \
+  (codestream_cnt-- == 0 \
+   ? codestream_fill (0) \
+   : codestream_buf[codestream_off++])
 
 static unsigned int 
 codestream_fill (peek_flag)
     int peek_flag;
 {
   codestream_addr = codestream_next_addr;
-  codestream_next_addr += CODESTREAM_BUFSIZ;
+  codestream_next_addr += CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]);
   codestream_off = 0;
   codestream_cnt = CODESTREAM_BUFSIZ;
-  read_memory (codestream_addr, (char *) codestream_buf, CODESTREAM_BUFSIZ);
+  /* FIXME: need to handle byte order differences.  */
+  read_memory (codestream_addr, (char *) codestream_buf,
+	       CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]));
   
   if (peek_flag)
     return (codestream_peek());
@@ -61,7 +120,7 @@ codestream_fill (peek_flag)
 
 static void
 codestream_seek (place)
-    int place;
+    CORE_ADDR place;
 {
   codestream_next_addr = place / CODESTREAM_BUFSIZ;
   codestream_next_addr *= CODESTREAM_BUFSIZ;
@@ -82,145 +141,171 @@ codestream_read (buf, count)
   for (i = 0; i < count; i++)
     *p++ = codestream_get ();
 }
+
+/* Set up prologue scanning and return the first insn,
+   not including the "sub sp,sp,32" of a stdarg function.  */
 
-/*
- * find & return amound a local space allocated, and advance codestream to
- * first register push (if any)
- * if entry sequence doesn't make sense, return -1, and leave 
- * codestream pointer random
- */
-
-static long
-arc_get_frame_setup (pc)
-     int pc;
+static unsigned int
+setup_prologue_scan (pc)
+     CORE_ADDR pc;
 {
-  unsigned int insn, n;
+  unsigned int insn;
 
   codestream_seek (pc);
   insn = codestream_get ();
 
-  if (insn & OPMASK == 0x10000000)		/* st fp,[sp] */
-    {	
-      insn = codestream_get ();
-      if (insn & OPMASK != 0x10000000)	        /* st blink,[sp,4] */
-	{
-	  if (insn & OPMASK != 0x60000000)      /* for leaf, no st blink */
-	    return -1;
-	}
-      else if (codestream_get () & OPMASK != 0x60000000)    /* mov fp,sp */
-	return (-1);
+  /* The authority for what appears here is the home-grown ABI.  */
 
-      /* check for stack adjustment sub sp,nnn,sp */
-      insn = codestream_peek ();
-      if (insn & OPMASK == 0x50000000)
-	{
-	  n = (insn & 0x000001ff ); 
-          codestream_get ();
+  /* First insn may be "sub sp,sp,32" if stdarg fn.  */
+  if (insn == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, SHIMM_REGNUM, 32))
+    insn = codestream_get ();
 
-	  /* this sequence is used to get the address of the return
-	   * buffer for a function that returns a structure
-	   */
-	  insn = codestream_peek ();
-	  if (insn & OPMASK == 0x60000000)
-	    codestream_get ();
-
-	  return n;
-	}
-      else
-	{
-	  return (0);
-	}
-    }
-  return (-1);
-}
-
-/* return pc of first real instruction */
-CORE_ADDR
-skip_prologue (pc)
-     int pc;
-{
-  unsigned int insn;
-  int i;
-  CORE_ADDR pos;
-  
-  if (arc_get_frame_setup (pc) < 0)
-    return (pc);
-  
-  /* skip over register saves */
-  for (i = 0; i < 10; i++)
-    {
-      insn = codestream_peek ();
-      if (insn & OPMASK != 0x10000000)       /* break if not st inst */
-	break;
-      codestream_get ();
-    }
-     
-  codestream_seek (pos);
-  return (codestream_tell ());
-}
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-int
-frame_num_args (fi)
-     struct frame_info *fi;
-{
-#if 1
-  return -1;
-#else
-  /* This loses because not only might the compiler not be popping the
-     args right after the function call, it might be popping args from both
-     this call and a previous one, and we would say there are more args
-     than there really are.  Is it true for ARC */
-
-  int retpc;						
-  unsigned char op;					
-  struct frame_info *pfi;
-
-  int frameless;
-
-  FRAMELESS_FUNCTION_INVOCATION (fi, frameless);
-  if (frameless)
-    /* In the absence of a frame pointer, GDB doesn't get correct values
-       for nameless arguments.  Return -1, so it doesn't print any
-       nameless arguments.  */
-    return -1;
-
-  pfi = get_prev_frame_info (fi);			
-  if (pfi == 0)
-    {
-      /* Note:  this can happen if we are looking at the frame for
-	 main, because FRAME_CHAIN_VALID won't let us go into
-	 start.  If we have debugging symbols, that's not really
-	 a big deal; it just means it will only show as many arguments
-	 to main as are declared.  */
-      return -1;
-    }
-  else
-    {
-      retpc = pfi->pc;					
-      op = read_memory_integer (retpc, 1);			
-      if (op == 0x59)					
-	/* pop %ecx */			       
-	return 1;				
-	}
-      else
-	{
-	  return 0;
-	}
-    }
-#endif
+  return insn;
 }
 
 /*
- * parse the first few instructions of the function to see
+ * Find & return amount a local space allocated, and advance codestream to
+ * first register push (if any).
+ * If entry sequence doesn't make sense, return -1, and leave 
+ * codestream pointer random.
+ */
+
+static long
+arc_get_frame_setup (pc)
+     CORE_ADDR pc;
+{
+  unsigned int insn;
+  /* Size of frame or -1 if unrecognizable prologue.  */
+  int n = -1;
+
+  insn = setup_prologue_scan (pc);
+
+  if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))	/* st blink,[sp,4] */
+      == BUILD_INSN (2, 0, SP_REGNUM, BLINK_REGNUM, 4))
+    {
+      insn = codestream_get ();
+      /* Frame may not be necessary, even though blink is saved.
+	 At least this is something we recognize.  */
+      n = 0;
+    }
+
+  if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))		/* st fp,[sp] */
+      == BUILD_INSN (2, 0, SP_REGNUM, FP_REGNUM, 0))
+    {	
+      insn = codestream_get ();
+      if ((insn & BUILD_INSN (-1, -1, -1, -1, 0))
+	       != BUILD_INSN (12, FP_REGNUM, SP_REGNUM, SP_REGNUM, 0))
+	return -1;
+
+      /* Check for stack adjustment sub sp,sp,nnn.  */
+      insn = codestream_peek ();
+      if ((insn & BUILD_INSN (-1, -1, -1, 0, 0))
+	  == BUILD_INSN (10, SP_REGNUM, SP_REGNUM, 0, 0))
+	{
+	  if (LIMM_P (X_C (insn)))
+	    n = codestream_get ();
+	  else if (SHIMM_P (X_C (insn)))
+	    n = X_D (insn);
+	  else
+	    return -1;
+	  if (n < 0)
+	    return -1;
+
+          codestream_get ();
+
+	  /* This sequence is used to get the address of the return
+	     buffer for a function that returns a structure.  */
+	  insn = codestream_peek ();
+	  if (insn & OPMASK == 0x60000000)
+	    codestream_get ();
+	}
+      /* Frameless fn.  */
+      else
+	{
+	  n = 0;
+	}
+    }
+
+  return n;
+}
+
+/* Given a pc value, skip it forward past the function prologue by
+   disassembling instructions that appear to be a prologue.
+
+   If FRAMELESS_P is set, we are only testing to see if the function
+   is frameless.  If it is a frameless function, return PC unchanged.
+   This allows a quicker answer.  */
+
+CORE_ADDR
+skip_prologue (pc, frameless_p)
+     CORE_ADDR pc;
+     int frameless_p;
+{
+  unsigned int insn;
+  int i, frame_size;
+
+  if ((frame_size = arc_get_frame_setup (pc)) < 0)
+    return (pc);
+
+  if (frameless_p)
+    return frame_size == 0 ? pc : codestream_tell ();
+
+  /* Skip over register saves.  */
+  for (i = 0; i < 8; i++)
+    {
+      insn = codestream_peek ();
+      if ((insn & BUILD_INSN (-1, 0, -1, 0, 0))
+	  != BUILD_INSN (2, 0, SP_REGNUM, 0, 0))
+	break; /* not st insn */
+      if (! ARC_CALL_SAVED_REG (X_C (insn)))
+	break;
+      codestream_get ();
+    }
+
+  return codestream_tell ();
+}
+
+/* Return the return address for a frame.
+   This is used to implement FRAME_SAVED_PC.
+   This is taken from frameless_look_for_prologue.  */
+
+CORE_ADDR
+arc_frame_saved_pc (frame)
+     struct frame_info *frame;
+{
+  CORE_ADDR func_start;
+  unsigned int insn;
+
+  func_start = get_pc_function_start (frame->pc) + FUNCTION_START_OFFSET;
+  if (func_start == 0)
+    {
+      /* Best guess.  */
+      return ARC_PC_TO_REAL_ADDRESS (read_memory_integer (FRAME_FP (frame) + 4, 4));
+    }
+
+  /* If the first insn is "st blink,[sp,4]" we can get blink from there.
+     Otherwise this is a leaf function and we can use blink.  Note that
+     this still allows for the case where a leaf function saves/clobbers/
+     restores blink.  */
+
+  insn = setup_prologue_scan (func_start);
+
+  if ((insn & BUILD_INSN (-1, 0, -1, -1, -1))	/* st blink,[sp,4] */
+      != BUILD_INSN (2, 0, SP_REGNUM, BLINK_REGNUM, 4))
+    return ARC_PC_TO_REAL_ADDRESS (read_register (BLINK_REGNUM));
+  else
+    return ARC_PC_TO_REAL_ADDRESS (read_memory_integer (FRAME_FP (frame) + 4, 4));
+}
+
+/*
+ * Parse the first few instructions of the function to see
  * what registers were stored.
  *
  * The startup sequence can be at the start of the function.
- * 'st fp,[sp], st blink,[sp+4], mov fp,sp' 
+ * 'st blink,[sp+4], st fp,[sp], mov fp,sp' 
  *
- * Local space is allocated just below by sub sp,nnn,sp
- * Next, the registers used by this function are stored.
+ * Local space is allocated just below by sub sp,sp,nnn.
+ * Next, the registers used by this function are stored (as offsets from sp).
  */
 
 void
@@ -233,15 +318,13 @@ frame_find_saved_regs (fip, fsrp)
   CORE_ADDR dummy_bottom;
   CORE_ADDR adr;
   int i, regnum, offset;
-  
+
   memset (fsrp, 0, sizeof *fsrp);
-  
-  /* if frame is the end of a dummy, compute where the
-   * beginning would be
-   */
+
+  /* If frame is the end of a dummy, compute where the beginning would be.  */
   dummy_bottom = fip->frame - 4 - REGISTER_BYTES - CALL_DUMMY_LENGTH;
-  
-  /* check if the PC is in the stack, in a dummy frame */
+
+  /* Check if the PC is in the stack, in a dummy frame.  */
   if (dummy_bottom <= fip->pc && fip->pc <= fip->frame) 
     {
       /* all regs were saved by push_call_dummy () */
@@ -253,23 +336,25 @@ frame_find_saved_regs (fip, fsrp)
 	}
       return;
     }
-  
+
   locals = arc_get_frame_setup (get_pc_function_start (fip->pc));
-  
+
   if (locals >= 0) 
     {
+      /* Set `adr' to the value of `sp'.  */
       adr = fip->frame - locals;
-      for (i = 0; i < 10; i++) 
+      for (i = 0; i < 8; i++)
 	{
 	  insn = codestream_get ();
-	  if (insn & 0xffff8000 != 0x100d8000)
+	  if ((insn & BUILD_INSN (-1, 0, -1, 0, 0))
+	       != BUILD_INSN (2, 0, SP_REGNUM, 0, 0))
 	    break;
-          regnum = (insn & 0x00007c00) >> 9;
-	  offset = (insn << 23) >> 23;
+          regnum = X_C (insn);
+	  offset = X_D (insn);
 	  fsrp->regs[regnum] = adr + offset;
 	}
     }
-  
+
   fsrp->regs[PC_REGNUM] = fip->frame + 4;
   fsrp->regs[FP_REGNUM] = fip->frame;
 }
@@ -322,7 +407,141 @@ pop_frame ()
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
 }
+
+/* Simulate single-step.  */
 
+typedef enum
+{
+  NORMAL4, /* a normal 4 byte insn */
+  NORMAL8, /* a normal 8 byte insn */
+  BRANCH4, /* a 4 byte branch insn, including ones without delay slots */
+  BRANCH8, /* an 8 byte branch insn, including ones with delay slots */
+} insn_type;
+
+/* Return the type of INSN and store in TARGET the destination address of a
+   branch if this is one.  */
+/* ??? Need to verify all cases are properly handled.  */
+
+static insn_type
+get_insn_type (insn, pc, target)
+     unsigned long insn;
+     CORE_ADDR pc, *target;
+{
+  unsigned long limm;
+
+  switch (insn >> 27)
+    {
+    case 0 : case 1 : case 2 : /* load/store insns */
+      if (LIMM_P (X_A (insn))
+	  || LIMM_P (X_B (insn))
+	  || LIMM_P (X_C (insn)))
+	return NORMAL8;
+      return NORMAL4;
+    case 4 : case 5 : case 6 : /* branch insns */
+      *target = pc + 4 + X_L (insn);
+      /* ??? It isn't clear that this is always the right answer.
+	 The problem occurs when the next insn is an 8 byte insn.  If the
+	 branch is conditional there's no worry as there shouldn't be an 8
+	 byte insn following.  The programmer may be cheating if s/he knows
+	 the branch will never be taken, but we don't deal with that.
+	 Note that the programmer is also allowed to play games by putting
+	 an insn with long immediate data in the delay slot and then duplicate
+	 the long immediate data at the branch target.  Ugh!  */
+      if (X_N (insn) == 0)
+	return BRANCH4;
+      return BRANCH8;
+    case 7 : /* jump insns */
+      if (LIMM_P (X_B (insn)))
+	{
+	  limm = read_memory_integer (pc + 4, 4);
+	  *target = ARC_PC_TO_REAL_ADDRESS (limm);
+	  return BRANCH8;
+	}
+      if (SHIMM_P (X_B (insn)))
+	*target = ARC_PC_TO_REAL_ADDRESS (X_D (insn));
+      else
+	*target = ARC_PC_TO_REAL_ADDRESS (read_register (X_B (insn)));
+      if (X_Q (insn) == 0 && X_N (insn) == 0)
+	return BRANCH4;
+      return BRANCH8;
+    default : /* arithmetic insns, etc. */
+      if (LIMM_P (X_A (insn))
+	  || LIMM_P (X_B (insn))
+	  || LIMM_P (X_C (insn)))
+	return NORMAL8;
+      return NORMAL4;
+    }
+}
+
+/* Non-zero if we just simulated a single-step.  This is needed because we
+   cannot remove the breakpoints in the inferior process until after the
+   `wait' in `wait_for_inferior'.  */
+
+int one_stepped;
+
+/* single_step() is called just before we want to resume the inferior, if we
+   want to single-step it but there is no hardware or kernel single-step
+   support.  We find all the possible targets of the coming instruction and
+   breakpoint them.
+
+   single_step is also called just after the inferior stops.  If we had
+   set up a simulated single-step, we undo our damage.  */
+
+void
+single_step (ignore)
+     int ignore; /* sig, but we don't need it */
+{
+  static CORE_ADDR next_pc, target;
+  static int brktrg_p;
+  typedef char binsn_quantum[BREAKPOINT_MAX];
+  static binsn_quantum break_mem[2];
+
+  if (!one_stepped)
+    {
+      insn_type type;
+      CORE_ADDR pc;
+      unsigned long insn;
+
+      pc = read_register (PC_REGNUM);
+      insn = read_memory_integer (pc, 4);
+      type = get_insn_type (insn, pc, &target);
+
+      /* Always set a breakpoint for the insn after the branch.  */
+      next_pc = pc + ((type == NORMAL8 || type == BRANCH8) ? 8 : 4);
+      target_insert_breakpoint (next_pc, break_mem[0]);
+
+      brktrg_p = 0;
+
+      if ((type == BRANCH4 || type == BRANCH8)
+	  /* Watch out for branches to the following location.
+	     We just stored a breakpoint there and another call to
+	     target_insert_breakpoint will think the real insn is the
+	     breakpoint we just stored there.  */
+	  && target != next_pc)
+	{
+	  brktrg_p = 1;
+	  target_insert_breakpoint (target, break_mem[1]);
+	}
+
+      /* We are ready to let it go.  */
+      one_stepped = 1;
+    }
+  else
+    {
+      /* Remove breakpoints.  */
+      target_remove_breakpoint (next_pc, break_mem[0]);
+
+      if (brktrg_p)
+	target_remove_breakpoint (target, break_mem[1]);
+
+      /* Fix the pc.  */
+      stop_pc -= DECR_PC_AFTER_BREAK;
+      write_pc (stop_pc);
+
+      one_stepped = 0;
+    }
+}
+
 #ifdef GET_LONGJMP_TARGET
 /* Figure out where the longjmp will land.  Slurp the args out of the stack.
    We expect the first arg to be a pointer to the jmp_buf structure from which
@@ -354,9 +573,113 @@ get_longjmp_target(pc)
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */
+
+/* Command to set cpu type.  */
 
+void
+arc_set_cpu_type_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int i;
+
+  if (tmp_arc_cpu_type == NULL || *tmp_arc_cpu_type == '\0')
+    {
+      printf_unfiltered ("The known ARC cpu types are as follows:\n");
+      for (i = 0; arc_cpu_type_table[i].name != NULL; ++i)
+	printf_unfiltered ("%s\n", arc_cpu_type_table[i].name);
+
+      /* Restore the value.  */
+      tmp_arc_cpu_type = strsave (arc_cpu_type);
+
+      return;
+    }
+  
+  if (!arc_set_cpu_type (tmp_arc_cpu_type))
+    {
+      error ("Unknown cpu type `%s'.", tmp_arc_cpu_type);
+      /* Restore its value.  */
+      tmp_arc_cpu_type = strsave (arc_cpu_type);
+    }
+}
+
+static void
+arc_show_cpu_type_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+}
+
+/* Modify the actual cpu type.
+   Result is a boolean indicating success.  */
+
+int
+arc_set_cpu_type (str)
+     char *str;
+{
+  int i, j;
+
+  if (str == NULL)
+    return 0;
+
+  for (i = 0; arc_cpu_type_table[i].name != NULL; ++i)
+    {
+      if (strcasecmp (str, arc_cpu_type_table[i].name) == 0)
+	{
+	  arc_cpu_type = str;
+	  tm_print_insn = arc_get_disassembler (arc_cpu_type_table[i].value,
+						TARGET_BYTE_ORDER == BIG_ENDIAN);
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
 void
 _initialize_arc_tdep ()
 {
-  tm_print_insn = arc_get_disassembler (bfd_mach_arc_host);
+  struct cmd_list_element *c;
+
+  c = add_set_cmd ("cpu", class_support, var_string_noescape,
+		   (char *) &tmp_arc_cpu_type,
+		   "Set the type of ARC cpu in use.\n\
+This command has two purposes.  In a multi-cpu system it lets one\n\
+change the cpu being debugged.  It also gives one access to\n\
+cpu-type-specific registers and recognize cpu-type-specific instructions.\
+",
+		   &setlist);
+  c->function.cfunc = arc_set_cpu_type_command;
+  c = add_show_from_set (c, &showlist);
+  c->function.cfunc = arc_show_cpu_type_command;
+
+  /* We have to use strsave here because the `set' command frees it before
+     setting a new value.  */
+  tmp_arc_cpu_type = strsave (DEFAULT_ARC_CPU_TYPE);
+  arc_set_cpu_type (tmp_arc_cpu_type);
+
+  c = add_set_cmd ("displaypipeline", class_support, var_zinteger,
+		   (char *) &display_pipeline_p,
+		   "Set pipeline display (simulator only).\n\
+When enabled, the state of the pipeline after each cycle is displayed.",
+		   &setlist);
+  c = add_show_from_set (c, &showlist);
+
+  c = add_set_cmd ("debugpipeline", class_support, var_zinteger,
+		   (char *) &debug_pipeline_p,
+		   "Set pipeline debug display (simulator only).\n\
+When enabled, debugging information about the pipeline is displayed.",
+		   &setlist);
+  c = add_show_from_set (c, &showlist);
+
+  c = add_set_cmd ("cputimer", class_support, var_zinteger,
+		   (char *) &cpu_timer,
+		   "Set maximum cycle count (simulator only).\n\
+Control will return to gdb if the timer expires.\n\
+A negative value disables the timer.",
+		   &setlist);
+  c = add_show_from_set (c, &showlist);
+
+  /* FIXME: must be done after for now.  */
+  tm_print_insn = arc_get_disassembler (bfd_mach_arc_base, 1 /*FIXME*/);
 }

@@ -894,20 +894,10 @@ arc_mourn ()
 }
 
 
-#ifdef REMOTE_BREAKPOINT
 
-/* On some machines, e.g. 68k, we may use a different breakpoint instruction
-   than other targets.  */
-static unsigned char break_insn[] = REMOTE_BREAKPOINT;
-
-/* Check that it fits in BREAKPOINT_MAX bytes.  */
-static unsigned char check_break_insn_size[BREAKPOINT_MAX] = REMOTE_BREAKPOINT;
-
-#else /* No REMOTE_BREAKPOINT.  */
-
-static unsigned char break_insn[] = BREAKPOINT;
-
-#endif /* No REMOTE_BREAKPOINT.  */
+static unsigned char big_break_insn[] = BIG_BREAKPOINT;
+static unsigned char little_break_insn[] = LITTLE_BREAKPOINT;
+#define BREAKPOINT_LEN (sizeof little_break_insn)
 
 /* Insert a breakpoint on targets that don't have any better breakpoint
    support.  We read the contents of the target location and stash it,
@@ -924,9 +914,16 @@ arc_insert_breakpoint (addr, contents_cache)
 {
   int val;
 
-  val = target_read_memory (addr, contents_cache, sizeof break_insn);
+  val = target_read_memory (addr, contents_cache, BREAKPOINT_LEN);
   if (val == 0)
-    val = target_write_memory (addr, (char *)break_insn, sizeof break_insn);
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	val = target_write_memory (addr, (char *) big_break_insn,
+				   BREAKPOINT_LEN);
+      else
+	val = target_write_memory (addr, (char *) little_break_insn,
+				   BREAKPOINT_LEN);
+    }
   return val;
 }
 
@@ -935,7 +932,7 @@ arc_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  return target_write_memory (addr, contents_cache, sizeof break_insn);
+  return target_write_memory (addr, contents_cache, BREAKPOINT_LEN);
 }
 
 /* switch_command
@@ -961,13 +958,16 @@ switch_command (args, fromtty)
   switch (proc)
     {
     case 0:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_audio);
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_audio,
+					    TARGET_BYTE_ORDER == BIG_ENDIAN);
       break;
     case 1:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_graphics);
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_graphics,
+					    TARGET_BYTE_ORDER == BIG_ENDIAN);
       break;
     case 2:
-      tm_print_insn = arc_get_disassembler (bfd_mach_arc_host);
+      tm_print_insn = arc_get_disassembler (bfd_mach_arc_host,
+					    TARGET_BYTE_ORDER == BIG_ENDIAN);
       break;
     }
 
@@ -1026,7 +1026,4 @@ void
 _initialize_remote_arc ()
 {
   add_target (&arc_ops);
-  add_com ("switch <processor>", class_obscure, switch_command,
-	   "Switch to debug a different processor, can be one of 'host', \
-'graphic' and 'audio'.");
 }
