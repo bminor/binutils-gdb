@@ -1,3 +1,11 @@
+Thu Nov  7 08:58:26 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* a29k-opcode.h: fixed encoding of mtacc
+
+Sun Nov  3 11:54:22 1991  Per Bothner  (bothner at cygnus.com)
+
+	* bfd.h: Updated from ../bfd/bfd-in.h (q.v).
+
 Fri Nov  1 11:13:53 1991  John Gilmore  (gnu at cygnus.com)
 
 	* internalcoff.h:  Add x_csect defines.

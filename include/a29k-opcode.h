@@ -206,7 +206,7 @@ static CONST struct a29k_opcode a29k_opcodes[] =
 { "mfacc", 0xe9000100, "c,d,f" },
 { "mfsr", 0xc6000000, "c,s" },
 { "mftlb", 0xb6000000, "c,a" },
-{ "mtacc", 0xe8010000, "c,d,f" },
+{ "mtacc", 0xe8010000, "a,d,f" },
 { "mtsr", 0xce000000, "s,b" },
 { "mtsrim", 0x04000000, "s,x" },
 { "mttlb", 0xbe000000, "a,b" },
@@ -287,7 +287,10 @@ CONST unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[
 
 /*
  * $Log$
- * Revision 1.4  1991/08/06 07:20:27  rich
+ * Revision 1.5  1991/11/07 16:59:19  sac
+ * Fixed encoding of mtacc instruction.
+ *
+ * Revision 1.4  1991/08/06  07:20:27  rich
  * Fixing CONST declarations.
  *
  * Revision 1.3  1991/08/05  22:31:05  rich
