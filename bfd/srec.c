@@ -42,7 +42,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.5  1991/04/23 22:44:14  steve
+ * Revision 1.6  1991/04/25 04:06:21  gnu
+ * Fix minor pointer type problems that "cc" complains about.
+ *
+ * Revision 1.5  1991/04/23  22:44:14  steve
  * *** empty log message ***
  *
  * Revision 1.4  1991/04/23  16:01:02  steve
@@ -283,8 +286,8 @@ void  *location;
 file_ptr offset;
 unsigned      int count;
 {
-  if (section->used_by_bfd == (bfd_byte *)NULL) {
-    section->used_by_bfd = (bfd_byte *)malloc(section->size);
+  if (section->used_by_bfd == (PTR)NULL) {
+    section->used_by_bfd = (PTR)malloc(section->size);
     pass_over(abfd, fillup, section);
   }
   (void) memcpy(location, (bfd_byte *)(section->used_by_bfd) + offset, count);

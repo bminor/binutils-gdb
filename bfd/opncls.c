@@ -296,7 +296,7 @@ DEFUN(PTR bfd_alloc, (abfd, size),
       bfd *abfd AND
       size_t size)
 {
-  PTR *res = obstack_alloc(&(abfd->memory),size);
+  PTR res = obstack_alloc(&(abfd->memory),size);
   return res;
 }
 

@@ -48,7 +48,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 static bfd_reloc_status_enum_type 
-DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data, input_section),
+DEFUN(howto_hvrt16,(abfd, reloc_entry, symbol_in, data, ignore_input_section),
 bfd *abfd AND
 arelent *reloc_entry AND
 asymbol *symbol_in AND
