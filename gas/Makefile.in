@@ -28,8 +28,7 @@ srcdir = .
 
 prefix = /usr/local
 
-program_prefix =
-program_suffix =
+program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -356,19 +355,18 @@ install:
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-rm -f $(bindir)/$(program_prefix)as$(program_suffix)
-	$(INSTALL_PROGRAM) as.new $(bindir)/$(program_prefix)as$(program_suffix)
-	-rm -f  $(tooldir)/as
-	ln $(bindir)/$(program_prefix)as$(program_suffix) $(tooldir)/as
-	-rm -f $(man1dir)/$(program_prefix)as$(program_suffix).1
-	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$(program_prefix)as$(program_suffix).1
+	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
+	rm -f $(bindir)/$$n; \
+	$(INSTALL_PROGRAM) as.new $(bindir)/$$n; \
+	rm -f $(tooldir)/as; \
+	ln $(bindir)/$$n $(tooldir)/as || cp $(bindir)/$$n $(tooldir)/as; \
+	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$$n.1
 
 # Cancel installation by deleting the installed files.
 uninstall:
-	-rm -rf $(libsubdir)
-	-rm -rf $(bindir)/as
-	-rm -rf $(mandir)/gas.$(manext)
-
+	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
+	rm -f $(bindir)/$$n; \
+	rm -f $(mandir)/$$n.1
 
 # These exist for maintenance purposes.
 
