@@ -1,3 +1,8 @@
+2001-07-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* memattr.h: Add copyright statement.
+	* memattr.c: Ditto.
+
 2001-07-04  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (struct partial_die_info): New member: has_pc_info.
