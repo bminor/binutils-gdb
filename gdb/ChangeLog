@@ -1,8 +1,9 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
-	* value.h (value_embedded_offset): Delete.
-	(value_embedded_offset): Declare.
+	* value.h (VALUE_EMBEDDED_OFFSET): Delete.
+	(value_embedded_offset, set_value_embedded_offset): Declare.
 	* value.c (value_embedded_offset): Define.
+	(set_value_embedded_offset): Define.
 	* valops.c, p-valprint.c, mi/mi-main.c, hpacc-abi.c: Update.
 	* gnu-v3-abi.c, eval.c, c-valprint.c, cp-valprint.c: Update.
 	* cp-abi.h: Update.
