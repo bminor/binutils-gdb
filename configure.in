@@ -148,6 +148,10 @@ fi
 #esac
 
 case "${target}" in
+  mips-dec-bsd*)
+# We do want to build gas in this case.  So don't use the mips-*-* case
+# for this target.
+    ;;
   mips-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/gas//'`
     ;;

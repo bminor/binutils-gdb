@@ -1,3 +1,7 @@
+Wed Mar  3 11:42:39 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* configure.in: Put back mips-dec-bsd* case.
+
 Tue Mar  2 21:15:58 1993  Fred Fish  (fnf@cygnus.com)
 
 	(Ultrix 2.2 support from Michael Rendell <michael@mercury.cs.mun.ca>)
