@@ -8290,7 +8290,9 @@ Print the names and data types of all defined functions
 whose names contain a match for regular expression @var{regexp}.
 Thus, @samp{info fun step} finds all functions whose names
 include @code{step}; @samp{info fun ^step} finds those whose names
-start with @code{step}.
+start with @code{step}.  If a function name contains characters 
+that conflict with the regular expression language (eg. 
+@samp{operator*()}), they may be quoted with a backslash.
 
 @kindex info variables
 @item info variables
