@@ -1,4 +1,37 @@
+Thu Jun  5 17:14:32 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_itrace_prefix): Move printing of insn prefix to
+ 	here.
+	(print_itrace_format): Drop printing of MY_NAME in instruction
+ 	trace.  Printing of insn prefix moved.
+	(print_itrace): Ditto.
+
+Fri May 30 11:27:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-icache.c (print_icache_function_header): Pass
+ 	table_line_entry instead of separate file and line.
+
+	* table.c (table_entry_read): Set assembler source file/line-nr to
+ 	the current not initial file.
+	(table_entry_read): Fix line numbering of source files.
+
+	table.h (table_line_entry): New structure.  Exactly specifies a
+ 	source file/line-nr.
+	(table_*_entry): Add this to all.
+	
+	table.c (table_entry_print_cpp_line_nr): Change to use values from
+ 	a table_line_entry struct.
+	(table_entry_read): Save table_line_entry in all structures read.
+
+	gen-icache.c, gen-support.c, gen-idecode.c, gen-semantics.c,
+ 	gen-model.c: Update all references.
+	
 Thu May 29 10:29:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_my_defines): Define MY_NAME - a string.  For
+ 	MY_PREFIX, undefine the name of the function incase some dumb
+ 	header defined it.  it.
+	(print_itrace): Use MY_NAME not MY_PREFIX.
 
 	* lf.c (lf_write): New function write an N character buffer to the
  	file.
