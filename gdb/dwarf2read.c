@@ -1,5 +1,5 @@
 /* DWARF 2 debugging format support for GDB.
-   Copyright 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract
@@ -2801,8 +2801,11 @@ read_subroutine_type (die, objfile)
     }
   type = die_type (die, objfile);
   ftype = lookup_function_type (type);
+
+  /* All functions in C++ have prototypes.  */
   attr = dwarf_attr (die, DW_AT_prototyped);
-  if (attr && (DW_UNSND (attr) != 0))
+  if ((attr && (DW_UNSND (attr) != 0))
+      || cu_language == language_cplus)
     TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 
   if (die->has_children)

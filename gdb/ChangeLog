@@ -1,3 +1,13 @@
+Sat May 23 02:23:09 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* dwarf2read.c (read_subroutine_type):  Set TYPE_FLAG_PROTOTYPED
+	on C++ functions.
+	* valops.c (value_arg_coerce):  Add new argument to indicate whether
+	the function has a prototype, handle integer and float promotions
+	accordingly.
+        (call_function_by_hand):  Always call value_arg_coerce, pass down
+	prototype information.
+
 Fri May 22 10:56:36 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* remote.c (_initialize_remote): Typo extended__remote
