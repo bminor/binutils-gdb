@@ -1,5 +1,8 @@
 2003-12-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (sparc_sol2_pc_in_sigtramp): New prototype.
+	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Make global.
+
 	* config/sparc/nm-sol2.h (TARGET_CAN_USE_HARDWARE_WATCHPOINT):
 	Remove define.  Adjust comment.
 

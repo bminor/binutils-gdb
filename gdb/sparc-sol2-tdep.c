@@ -66,7 +66,7 @@ const struct sparc_gregset sparc32_sol2_gregset =
    signal handler modifies the `struct sigcontext' we can safely
    ignore this.  */
 
-static int
+int
 sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   return (name && (strcmp (name, "sigacthandler") == 0
