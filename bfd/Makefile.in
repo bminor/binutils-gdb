@@ -125,6 +125,9 @@ ALL_MACHINES = \
 	cpu-i386.o \
 	cpu-i860.o \
 	cpu-i960.o \
+	$(start-sanitize-m32r) \
+	cpu-m32r.o \
+	$(end-sanitize-m32r) \
 	cpu-m68k.o \
 	cpu-m88k.o \
 	cpu-mips.o \
@@ -133,6 +136,9 @@ ALL_MACHINES = \
 	cpu-rs6000.o \
 	cpu-sh.o \
 	cpu-sparc.o \
+	$(start-sanitize-v850) \
+	cpu-v850.o \
+	$(end-sanitize-v850) \
 	cpu-vax.o \
 	cpu-we32k.o \
 	cpu-w65.o \
@@ -206,10 +212,14 @@ BFD32_BACKENDS = \
 	elf32-hppa.o \
 	elf32-i386.o \
 	elf32-i860.o \
+	$(start-sanitize-m32r) \
+	elf32-m32r.o \
+	$(end-sanitize-m32r) \
 	elf32-m68k.o \
 	elf32-m88k.o \
 	elf32-mips.o \
 	elf32-ppc.o \
+	elf32-sh.o \
 	elf32-sparc.o \
 	elf32.o \
 	elflink.o \
@@ -295,6 +305,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-m88k.c \
 	elf32-mips.c \
 	elf32-ppc.c \
+	elf32-sh.c \
 	elf32-sparc.c \
 	elf32.c \
 	elflink.c \
@@ -808,6 +819,19 @@ elf32-d10v.o: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/d10v.h elf32-target.h
 end-sanitize-d10v:
 
+start-sanitize-m32r:
+elf32-m32r.o: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/m32r.h elf32-target.h
+end-sanitize-m32r:
+
+start-sanitize-v850:
+cpu-v850.o: cpu-v850.c
+elf32-v850.o: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  elf32-target.h
+end-sanitize-v850:
+
 $(OFILES): stamp-picdir
 
 stamp-picdir:
@@ -875,6 +899,9 @@ aout-adobe.o: aout-adobe.c $(INCDIR)/aout/adobe.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def libaout.h $(INCDIR)/bfdlink.h
 aout-ns32k.o: aout-ns32k.c $(INCDIR)/aout/aout64.h \
   ns32k.h libaout.h $(INCDIR)/bfdlink.h
+aout-sparcle.o: aout-sparcle.c $(INCDIR)/bfdlink.h libaout.h aoutf1.h \
+  $(INCDIR)/aout/sun4.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
 aout0.o: aout0.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
@@ -981,6 +1008,9 @@ elf32-mips.o: elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
 elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
+elf32-sh.o: elf32-sh.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  elf32-target.h
 elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/sparc.h elf32-target.h
@@ -994,8 +1024,8 @@ hp300hpux.o: hp300hpux.c $(INCDIR)/aout/hp300hpux.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
 som.o: som.c
-i386aout.o: i386aout.c libaout.h $(INCDIR)/bfdlink.h \
-  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+i386aout.o: i386aout.c $(INCDIR)/aout/aout64.h libaout.h \
+  $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386bsd.o: i386bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
@@ -1109,8 +1139,8 @@ elf64-alpha.o: elf64-alpha.c elf-bfd.h $(INCDIR)/elf/common.h \
 elf64-gen.o: elf64-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf64-target.h
-elf64-mips.o: elf64-mips.c $(INCDIR)/bfdlink.h genlink.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+elf64-mips.o: elf64-mips.c $(INCDIR)/aout/ar.h $(INCDIR)/bfdlink.h \
+  genlink.h elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/mips.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h ecoffswap.h \

@@ -212,6 +212,15 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
       || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
     flags |= SEC_DEBUGGING;
 
+  /* As a GNU extension, if the name begins with .gnu.linkonce, we
+     only link a single copy of the section.  This is used to support
+     g++.  g++ will emit each template expansion in its own section.
+     The symbols will be defined as weak, so that multiple definitions
+     are permitted.  The GNU linker extension is to actually discard
+     all but one of the sections.  */
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+
   if (! bfd_set_section_flags (abfd, newsect, flags))
     return false;
 
@@ -1779,19 +1788,19 @@ map_sections_to_segments (abfd)
              segment.  */
 	  new_segment = true;
 	}
-      else if ((abfd->flags & D_PAGED) == 0)
-	{
-	  /* If the file is not demand paged, which means that we
-             don't require the sections to be correctly aligned in the
-             file, then there is no other reason for a new segment.  */
-	  new_segment = false;
-	}
       else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
 	       < hdr->lma)
 	{
 	  /* If putting this section in this segment would force us to
              skip a page in the segment, then we need a new segment.  */
 	  new_segment = true;
+	}
+      else if ((abfd->flags & D_PAGED) == 0)
+	{
+	  /* If the file is not demand paged, which means that we
+             don't require the sections to be correctly aligned in the
+             file, then there is no other reason for a new segment.  */
+	  new_segment = false;
 	}
       else if ((last_hdr->flags & SEC_LOAD) == 0
 	       && (hdr->flags & SEC_LOAD) != 0)
@@ -2487,16 +2496,29 @@ prep_headers (abfd)
     case bfd_arch_alpha:
       i_ehdrp->e_machine = EM_ALPHA;
       break;
+    case bfd_arch_sh:
+      i_ehdrp->e_machine = EM_SH;
+      break;
 /* start-sanitize-d10v */
     case bfd_arch_d10v:
       i_ehdrp->e_machine = EM_CYGNUS_D10V;
       break;
 /* end-sanitize-d10v */
+/* start-sanitize-v850 */
+    case bfd_arch_v850:
+      i_ehdrp->e_machine = EM_CYGNUS_V850;
+      break;
+/* end-sanitize-v850 */
 /* start-sanitize-arc */
     case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
 /* end-sanitize-arc */
+/* start-sanitize-m32r */
+    case bfd_arch_m32r:
+      i_ehdrp->e_machine = EM_CYGNUS_M32R;
+      break;
+/* end-sanitize-m32r */
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;

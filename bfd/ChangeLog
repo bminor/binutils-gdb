@@ -2,6 +2,7 @@ Mon Sep  9 12:31:22 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 start-sanitize-m32r
 	* config.bfd,configure.in,configure: Add m32r support.
+	* Makefile.in,archures.c,elf.c,targets.c: Likewise.
 end-sanitize-m32r
 	* config.bfd: Keep target list alphabetically sorted.
 

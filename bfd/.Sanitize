@@ -333,7 +333,7 @@ else
 	done
 fi
 
-m32r_files="ChangeLog config.bfd configure.in configure"
+m32r_files="ChangeLog Makefile.in archures.c config.bfd configure.in configure elf.c targets.c"
 if ( echo $* | grep keep\-m32r > /dev/null ) ; then
 	for i in $m32r_files ; do
 		if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
