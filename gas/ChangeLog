@@ -1,4 +1,13 @@
 start-sanitize-v850
+Tue Sep  3 11:57:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c: Remove commented out and #if 0'd code.
+	(v850_reloc_prefix): Provide prototype.
+	(postfix, get_reloc, build_insn): Remove prototypes for nonexistant
+	functions.
+	(md_begin, md_assemble, md_apply_fix3): Remove unused variables.
+	(md_assemble): Add default to case statement.
+
 Sat Aug 31 16:03:00 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_assemble): Compute size of the instrction
