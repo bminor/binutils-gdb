@@ -1,5 +1,9 @@
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* m68k-tdep.c, tm-sun3.h:  #ifdef around get_longjmp_target().
+	Change def of SAVED_PC_AFTER_CALL to call routine to see if we are
+	in a system call, and provide better backtrace if so.
+
 	* Makefile.in (HFILES):  Add xcoffsolib.h.
 	* rs6k-opcode.h:  Move to ../include/opcode/rs6k.h.
 	* rs6000-pinsn.c:  #include "opcode/rs6k.h"
