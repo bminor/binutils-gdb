@@ -14563,8 +14563,10 @@ of view, nothing actually happened.}
 @cindex @code{B} packet
 
 Set (@var{mode} is @samp{S}) or clear (@var{mode} is @samp{C}) a
-breakpoint at @var{addr}.  @emph{This has been replaced by the @samp{Z}
-and @samp{z} packets.}
+breakpoint at @var{addr}.
+
+This packet has been replaced by the @samp{Z} and @samp{z} packets
+(@pxref{insert breakpoint or watchpoint packet}).
 
 @item @code{c}@var{addr} --- continue
 @cindex @code{c} packet
@@ -14936,32 +14938,128 @@ Reserved for future use.
 
 Reserved for future use.
 
-@item @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- remove break or watchpoint @strong{(draft)}
-@cindex @code{z} packet
-
-@xref{insert breakpoint or watchpoint packet}.
-
-@item @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- insert break or watchpoint @strong{(draft)}
+@item @code{z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- remove breakpoint or watchpoint @strong{(draft)}
+@itemx @code{Z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- insert breakpoint or watchpoint @strong{(draft)}
 @anchor{insert breakpoint or watchpoint packet}
-@cindex @code{Z} packet
+@cindex @code{z} packet
+@cindex @code{Z} packets
 
-@var{t} is type: @samp{0} - software breakpoint, @samp{1} - hardware
-breakpoint, @samp{2} --- write watchpoint, @samp{3} - read watchpoint,
-@samp{4} - access watchpoint; @var{addr} is address; @var{length} is in
-bytes.  For a software breakpoint, @var{length} specifies the size of
-the instruction to be patched.  For hardware breakpoints and watchpoints
-@var{length} specifies the memory region to be monitored.  To avoid
-potential problems with duplicate packets, the operations should be
-implemented in an idempotent way.
+Insert (@code{Z}) or remove (@code{z}) a @var{type} breakpoint or
+watchpoint starting at address @var{address} and covering the next
+@var{length} bytes.
+
+Each breakpoint and watchpoint packet @var{type} is documented
+separately.
+
+@emph{Implementation notes: A remote target shall return @samp{} for an
+unrecognized breakpoint or watchpoint packet @var{type}.  A remote
+target shall support either both or neither of a given
+@code{Z}@var{type}@dots{} and @code{z}@var{type}@dots{} packet pair.  To
+avoid potential problems with duplicate packets, the operations should
+be implemented in an idempotent way.}
+
+@item @code{z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- remove memory breakpoint @strong{(draft)}
+@item @code{Z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- insert memory breakpoint @strong{(draft)}
+@cindex @code{z0} packet
+@cindex @code{Z0} packet
+
+Insert (@code{Z0}) or remove (@code{z0}) a memory breakpoint at address
+@code{addr} of size @code{length}.
+
+A memory breakpoint is implemented by replacing the instruction at
+@var{addr} with a software breakpoint or trap instruction.  The
+@code{length} is used by targets that indicates the size of the
+breakpoint (in bytes) that should be inserted (e.g., the @sc{arm} and
+@sc{mips} can insert either a 2 or 4 byte breakpoint).
+
+@emph{Implementation note: It is possible for a target to copy or move
+code that contains memory breakpoints (e.g., when implementing
+overlays).  The behavior of this packet, in the presence of such a
+target, is not defined.}
 
 Reply:
 @table @samp
+@item OK
+success
+@item
+not supported
 @item E@var{NN}
 for an error
+@end table
+
+@item @code{z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- remove hardware breakpoint @strong{(draft)}
+@item @code{Z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- insert hardware breakpoint @strong{(draft)}
+@cindex @code{z1} packet
+@cindex @code{Z1} packet
+
+Insert (@code{Z1}) or remove (@code{z1}) a hardware breakpoint at
+address @code{addr} of size @code{length}.
+
+A hardware breakpoint is implemented using a mechanism that is not
+dependant on being able to modify the target's memory.
+
+@emph{Implementation note: A hardware breakpoint is not affected by code
+movement.}
+
+Reply:
+@table @samp
 @item OK
-for success
-@item @samp{}
-If not supported.
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- remove write watchpoint @strong{(draft)}
+@item @code{Z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- insert write watchpoint @strong{(draft)}
+@cindex @code{z2} packet
+@cindex @code{Z2} packet
+
+Insert (@code{Z2}) or remove (@code{z2}) a write watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- remove read watchpoint @strong{(draft)}
+@item @code{Z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- insert read watchpoint @strong{(draft)}
+@cindex @code{z3} packet
+@cindex @code{Z3} packet
+
+Insert (@code{Z3}) or remove (@code{z3}) a write watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- remove read watchpoint @strong{(draft)}
+@item @code{Z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- insert read watchpoint @strong{(draft)}
+@cindex @code{z4} packet
+@cindex @code{Z4} packet
+
+Insert (@code{Z4}) or remove (@code{z4}) an access watchpoint.
+
+Reply:
+@table @samp
+@item OK
+success
+@item
+not supported
+@item E@var{NN}
+for an error
 @end table
 
 @end table

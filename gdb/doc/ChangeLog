@@ -1,5 +1,10 @@
 2002-09-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo (Packets): Revise `z' and `Z' packet documentation.
+	(Packets): Add cross reference from `b' packet to `z' packets.
+
+2002-09-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.texinfo (Maintenance Commands): Document ``maint
 	internal-error'' and ``maint internal-warning''.
 
