@@ -43,6 +43,23 @@ proc default_ld_relocate { ld target objects } {
     }
 }
 
+# Check to see if ld is being invoked with a non-endian output format
+
+proc is_endian_output_format { object_flags } {
+
+    if {[string match "*-oformat binary*" $object_flags] ||      \
+        [string match "*-oformat ieee*" $object_flags] ||        \
+	[string match "*-oformat ihex*" $object_flags] ||        \
+	[string match "*-oformat netbsd-core*" $object_flags] || \
+	[string match "*-oformat srec*" $object_flags] ||        \
+	[string match "*-oformat tekhex*" $object_flags] ||      \
+	[string match "*-oformat trad-core*" $object_flags] } then {
+        return 0
+    } else {
+	return 1
+    }
+}
+
 # Look for big-endian or little-endian switches in the multlib
 # options and translate these into a -EB or -EL switch.  Note
 # we cannot rely upon proc process_multilib_options to do this
@@ -59,11 +76,11 @@ proc big_or_little_endian {} {
 
 	foreach x $tmp_flags {
 	    case $x in {
-		{*big*endian eb EB} {
+		{*big*endian eb EB -eb -EB} {
 		    set flags " -EB"
 		    return $flags
 		}
-		{*little*endian el EL} {
+		{*little*endian el EL -el -EL} {
 		    set flags " -EL"
 		    return $flags
 		}
@@ -94,9 +111,12 @@ proc default_ld_link { ld target objects } {
 	perror "$ld does not exist"
 	return 0
     }
-    
-    set flags [big_or_little_endian]
-    
+
+    if [is_endian_output_format $objects] then {
+	set flags [big_or_little_endian]
+    } else {
+	set flags ""
+    }
     verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
     
     catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" link_output
@@ -122,7 +142,11 @@ proc default_ld_simple_link { ld target objects } {
 	return 0
     }
     
-    set flags [big_or_little_endian]
+    if [is_endian_output_format $objects] then {
+	set flags [big_or_little_endian]
+    } else {
+	set flags ""
+    }
     
     verbose -log "$ld $flags -o $target $objects"
     

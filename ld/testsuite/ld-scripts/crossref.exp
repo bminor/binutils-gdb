@@ -17,7 +17,7 @@ if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
     return
 }
 
-set flags ""
+set flags [big_or_little_endian]
 
 # The a29k compiled code calls V_SPILL and V_FILL.  Since we don't
 # need to run this code, but we don't have definitions for those

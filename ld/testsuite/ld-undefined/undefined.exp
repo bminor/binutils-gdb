@@ -39,12 +39,14 @@ if ![ld_compile "$CC -g" $srcdir/$subdir/undefined.c tmpdir/undefined.o] {
 
 catch "exec rm -f tmpdir/undefined" exec_output
 
+set flags [big_or_little_endian]
+
 # Using -e start prevents the SunOS linker from trying to build a
 # shared library.
-send_log "$ld -e start -o tmpdir/undefined tmpdir/undefined.o\n"
-verbose "$ld -e start -o tmpdir/undefined tmpdir/undefined.o"
+send_log "$ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o\n"
+verbose "$ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o"
 
-catch "exec $ld -e start -o tmpdir/undefined tmpdir/undefined.o" exec_output
+catch "exec $ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o" exec_output
 send_log "$exec_output\n"
 verbose "$exec_output"
 
