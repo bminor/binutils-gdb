@@ -109,7 +109,6 @@ the native maintainer when resolving ABI issues.
 
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf broken
-			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf ,-Werror
 

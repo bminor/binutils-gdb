@@ -1,3 +1,7 @@
+2005-01-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* MAINTAINERS: Remove self from sh/sh64 maintainership.
+
 2005-01-10  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: List Andrew Cagney and Kevin Buettner as can commit
