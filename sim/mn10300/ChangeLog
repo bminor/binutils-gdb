@@ -1,4 +1,8 @@
 start-sanitize-am30
+Tue June 16 09:36:21 1998  Joyce Janczyn  <janczyn@cygnus.com>
+	* dv-mn103int.c (mn103int_finish): Regular interrupts (not NMI or
+	reset) are not enabled on reset.
+	
 Sun June 14 17:04:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* dv-mn103iop.c (write_*_reg): Check for attempt to write r/o register bits.
 	* dv-mn103ser.c: Fill in methods for reading and writing to serial device registers.
