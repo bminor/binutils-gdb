@@ -1,3 +1,8 @@
+Tue Jan 28 10:46:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* coffcode.h (bfd_coff_relax_section): now static.
+	(bfd_coff_get_relocated_section_contents): various type lints.
+
 Mon Jan 27 19:44:08 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	New entry point in the transfer vector - bfd_relax_section.
