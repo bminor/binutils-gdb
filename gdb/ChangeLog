@@ -1,3 +1,11 @@
+2001-03-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Update list of targets. Mark arm-* and v850-elf as
+	broken.  Mark sh-*, ia64-linux and ns32k-netbsd as buildable.
+	Specify an m88k target.  Include sample GAWK script to generate
+	target list.  Delete non-existant romp target.
+	* TODO (GDB 5.1 - Cleanups): Update.
+
 2001-03-14  Keith Seitz  <keiths@cygnus.com>
 
 	* linespec.c (decode_line_1): Skip argptr over a leading

@@ -152,10 +152,17 @@ patch has been submitted.
 
 The following code cleanups will hopefully be applied to GDB 5.1.
 
--- 2001-03-08
+-- 2001-03-14
 
 Resolve the status of all broken targets as identified by the MAINTAINERS
 file.
+
+	o	arm-* vs NetBSD's lack of ``unix''
+	o	arm-* vs IRIX (see below)
+
+	o	delete TiC80
+
+	o	delete m88k?
 
 --
 
