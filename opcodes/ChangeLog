@@ -1,5 +1,11 @@
 Sat Feb  5 00:04:02 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa-dis.c (print_insn_hppa): No space before 'H' operand.
+	Floating point format for 'H' operand is backwards from normal
+	case (0 == double, 1 == single).  For '4', '6', '7', '9', and '8'
+	operands (fmpyadd and fmpysub), handle bizarre register
+	translation correctly for single precision format.
+
 	* hppa-dis.c (print_insn_hppa): Do not emit a space after 'F'
 	or 'I' operands if the next format specifier is 'M' (fcmp
 	condition completer).

@@ -377,7 +377,7 @@ print_insn_hppa (memaddr, info)
 	  
 	  (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
-	  if (!strchr ("cfCY<?!@-+&U>~nNZFIMadu|", opcode->args[0]))
+	  if (!strchr ("cfCY<?!@-+&U>~nHNZFIMadu|", opcode->args[0]))
 	    (*info->fprintf_func) (info->stream, " ");
 	  for (s = opcode->args; *s != '\0'; ++s)
 	    {
@@ -417,20 +417,45 @@ print_insn_hppa (memaddr, info)
 		  fput_fp_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
 		case '4':
-		  fput_fp_reg (GET_FIELD (insn, 6, 10), info);
-		  break;
+		  {
+		    int reg = GET_FIELD (insn, 6, 10);
+
+		    reg |= (GET_FIELD (insn, 26, 26) << 4);
+		    fput_fp_reg (reg, info);
+		    break;
+		  }
 		case '6':
-		  fput_fp_reg (GET_FIELD (insn, 11, 15), info);
-		  break;
+		  {
+		    int reg = GET_FIELD (insn, 11, 15);
+
+		    reg |= (GET_FIELD (insn, 26, 26) << 4);
+		    fput_fp_reg (reg, info);
+		    break;
+		  }
 		case '7':
-		  fput_fp_reg (GET_FIELD (insn, 27, 31), info);
-		  break;
+		  {
+		    int reg = GET_FIELD (insn, 27, 31);
+
+		    reg |= (GET_FIELD (insn, 26, 26) << 4);
+		    fput_fp_reg (reg, info);
+		    break;
+		  }
 		case '8':
-		  fput_fp_reg (GET_FIELD (insn, 16, 20), info);
-		  break;
+		  {
+		    int reg = GET_FIELD (insn, 16, 20);
+
+		    reg |= (GET_FIELD (insn, 26, 26) << 4);
+		    fput_fp_reg (reg, info);
+		    break;
+		  }
 		case '9':
-		  fput_fp_reg (GET_FIELD (insn, 21, 25), info);
-		  break;
+		  {
+		    int reg = GET_FIELD (insn, 21, 25);
+
+		    reg |= (GET_FIELD (insn, 26, 26) << 4);
+		    fput_fp_reg (reg, info);
+		    break;
+		  }
 		case '5':
 		  fput_const (extract_5_load (insn), info);
 		  break;
@@ -618,8 +643,12 @@ print_insn_hppa (memaddr, info)
 								  17, 18)]);
 		  break;
 		case 'H':
-		    fputs_filtered (float_format_names[GET_FIELD 
-                                                      (insn, 26, 26)], info);
+		  if (GET_FIELD (insn, 26, 26) == 1)
+		    (*info->fprintf_func) (info->stream, "%s ",
+				    float_format_names[0]);
+		  else
+		    (*info->fprintf_func) (info->stream, "%s ",
+				    float_format_names[1]);
 		  break;
 		case 'I':
 		  /* if no destination completer and not before a completer
