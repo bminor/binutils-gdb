@@ -49,16 +49,12 @@
 struct fix;
 struct alpha_reloc_tag;
 
-extern void alpha_validate_fix PARAMS ((struct fix *));
 extern int alpha_force_relocation PARAMS ((struct fix *));
 extern int alpha_fix_adjustable PARAMS ((struct fix *));
 
 extern unsigned long alpha_gprmask, alpha_fprmask;
 extern valueT alpha_gp_value;
 
-#ifdef OBJ_ELF
-#define TC_VALIDATE_FIX(FIX,SEGTYPE,SKIP) alpha_validate_fix (FIX)
-#endif
 #define TC_FORCE_RELOCATION(FIX)	alpha_force_relocation (FIX)
 #define tc_fix_adjustable(FIX)		alpha_fix_adjustable (FIX)
 #define RELOC_REQUIRES_SYMBOL
