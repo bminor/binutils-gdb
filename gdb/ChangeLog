@@ -1,3 +1,16 @@
+2002-07-02  Joel Brobecker  <brobecker@gnat.com>
+
+	* frame.h (frame_address_in_block): New function.
+
+	* blockframe.c (frame_address_in_block): New function extracted
+	from get_frame_block().
+	(get_frame_block): Use frame_address_in_block().
+	(block_innermost_frame): Use frame_address_in_block() to match
+	the frame pc address against the block boundaries rather than
+	the frame pc directly. This prevents a failure when a frame pc
+	is actually a return-address pointing immediately after the end
+	of the given block. 
+
 2002-07-02  Grace Sainsbury  <graces@redhat.com>
 
 	* MAINTAINERS: Add self under write after approval. 

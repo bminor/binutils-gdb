@@ -528,6 +528,26 @@ get_frame_pc (struct frame_info *frame)
   return frame->pc;
 }
 
+/* return the address of the PC for the given FRAME, ie the current PC value
+   if FRAME is the innermost frame, or the address adjusted to point to the
+   call instruction if not.  */
+
+CORE_ADDR
+frame_address_in_block (struct frame_info *frame)
+{
+  CORE_ADDR pc = frame->pc;
+
+  /* If we are not in the innermost frame, and we are not interrupted
+     by a signal, frame->pc points to the instruction following the
+     call. As a consequence, we need to get the address of the previous
+     instruction. Unfortunately, this is not straightforward to do, so
+     we just use the address minus one, which is a good enough
+     approximation.  */
+  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
+    --pc;
+
+  return pc;
+}
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated.  This is a compatibility function for targets
@@ -576,17 +596,7 @@ get_frame_saved_regs (struct frame_info *frame,
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  CORE_ADDR pc;
-
-  pc = frame->pc;
-  if (frame->next != 0 && frame->next->signal_handler_caller == 0)
-    /* We are not in the innermost frame and we were not interrupted
-       by a signal.  We need to subtract one to get the correct block,
-       in case the call instruction was the last instruction of the block.
-       If there are any machines on which the saved pc does not point to
-       after the call insn, we probably want to make frame->pc point after
-       the call insn anyway.  */
-    --pc;
+  const CORE_ADDR pc = frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -970,6 +980,7 @@ block_innermost_frame (struct block *block)
   struct frame_info *frame;
   register CORE_ADDR start;
   register CORE_ADDR end;
+  CORE_ADDR calling_pc;
 
   if (block == NULL)
     return NULL;
@@ -983,7 +994,8 @@ block_innermost_frame (struct block *block)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      if (frame->pc >= start && frame->pc < end)
+      calling_pc = frame_address_in_block (frame);
+      if (calling_pc >= start && calling_pc < end)
 	return frame;
     }
 }
