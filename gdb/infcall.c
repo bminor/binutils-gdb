@@ -182,7 +182,9 @@ find_function_addr (struct value *function, struct type **retval_type)
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
-	  funaddr = CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
+	  funaddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							funaddr,
+							&current_target);
 	  value_type = TYPE_TARGET_TYPE (ftype);
 	}
       else
@@ -562,7 +564,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	dummy_addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
       /* Make certain that the address points at real code, and not a
          function descriptor.  */
-      dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
+      dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+						       dummy_addr,
+						       &current_target);
       /* A call dummy always consists of just a single breakpoint, so
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
@@ -583,7 +587,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  dummy_addr = entry_point_address ();
 	/* Make certain that the address points at real code, and not
 	   a function descriptor.  */
-	dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
+	dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							 dummy_addr,
+							 &current_target);
 	/* A call dummy always consists of just a single breakpoint,
 	   so it's address is the same as the address of the dummy.  */
 	bp_addr = dummy_addr;

@@ -1,5 +1,22 @@
 2003-10-22  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (convert_from_func_ptr_addr): Convert to a pure
+	multi-arch method, add "targ" parameter.
+	(struct target_ops): Declare.	
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* Makefile.in (c-valprint.o): Update dependencies.
+	* arch-utils.h: Update copyright.
+	(convert_from_func_ptr_addr_identity): Declare.
+	* arch-utils.c (convert_from_func_ptr_addr_identity): New function.
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Update.
+	* rs6000-tdep.c (rs6000_convert_from_func_ptr_addr): Upate.
+	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): Update.
+	* infcall.c (find_function_addr, call_function_by_hand): Update.
+	* c-valprint.c: Include "target.h".
+	(print_function_pointer_address): Update.
+
+2003-10-22  Andrew Cagney  <cagney@redhat.com>
+
 	* target.c (target_close): New function.
 	(debug_to_close): Use "target_close".
 	(push_target): Use "target_close".

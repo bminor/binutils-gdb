@@ -2293,7 +2293,8 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
    so the user can see the function address rather than just the
    function descriptor.  */
 static CORE_ADDR
-ia64_convert_from_func_ptr_addr (CORE_ADDR addr)
+ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
+				 struct target_ops *targ)
 {
   struct obj_section *s;
 

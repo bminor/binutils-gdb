@@ -908,7 +908,8 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
 }
 
 
-/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR) on PPC64 GNU/Linux.
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG) on PPC64
+   GNU/Linux.
 
    Usually a function pointer's representation is simply the address
    of the function. On GNU/Linux on the 64-bit PowerPC however, a
@@ -931,7 +932,9 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
    random addresses such as occures when there is no symbol table.  */
 
 static CORE_ADDR
-ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
+ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+					CORE_ADDR addr,
+					struct target_ops *targ)
 {
   struct obj_section *s;
 

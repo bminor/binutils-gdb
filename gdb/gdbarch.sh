@@ -671,7 +671,7 @@ v:2:PARM_BOUNDARY:int:parm_boundary
 v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)::%s:(TARGET_FLOAT_FORMAT)->name
 v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)::%s:(TARGET_DOUBLE_FORMAT)->name
 v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::default_double_format (gdbarch)::%s:(TARGET_LONG_DOUBLE_FORMAT)->name
-f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr:addr:::core_addr_identity::0
+m:::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ:::convert_from_func_ptr_addr_identity::0
 # On some machines there are bits in addresses which are not really
 # part of the address, but are used by the kernel, the hardware, etc.
 # for special purposes.  ADDR_BITS_REMOVE takes out any such bits so
@@ -872,6 +872,7 @@ struct regcache;
 struct reggroup;
 struct regset;
 struct disassemble_info;
+struct target_ops;
 
 extern struct gdbarch *current_gdbarch;
 

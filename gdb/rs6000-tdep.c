@@ -2054,7 +2054,7 @@ rs6000_create_inferior (int pid)
     rs6000_set_host_arch_hook (pid);
 }
 
-/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR).
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG).
 
    Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
@@ -2074,7 +2074,9 @@ rs6000_create_inferior (int pid)
    space and is therefore a special function pointer.  */
 
 static CORE_ADDR
-rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
+rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+				   CORE_ADDR addr,
+				   struct target_ops *targ)
 {
   struct obj_section *s;
 
