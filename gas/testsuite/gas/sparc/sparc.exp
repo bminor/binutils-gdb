@@ -21,6 +21,7 @@ proc sparc_elf_setup { } {
     setup_xfail "sparc*-fujitsu-none" "sparc*-*-*n*bsd*"
     setup_xfail "sparc*-*-coff" "sparc*-*-lynxos*"
     clear_xfail "sparc64*-*-*n*bsd*"
+    clear_xfail "sparc*-*-netbsdelf*"
 }
 
 if [istarget sparc*-*-*] {

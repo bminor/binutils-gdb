@@ -1,3 +1,8 @@
+2003-01-21  Adrian Bunk <bunk@fs.tum.de>
+
+	* gas/sparc/sparc.exp (sparc_elf_setup): All NetBSD ELF targets
+	should pass these tests.
+
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* gas/s390/reloc.d: Add tests for the new gotoff, gotplt and pltoff
