@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "target.h"
 #include "obstack.h"
+#include "language.h"
 
 #include <errno.h>
 extern int sys_nerr;
@@ -250,7 +251,7 @@ print_floating (valaddr, type, stream)
   if (inv)
     fprintf_filtered (stream, "<invalid float value>");
   else
-    fprintf_filtered (stream, len <= sizeof(float) ? "%.6g" : "%.17g", doub);
+    fprintf_filtered (stream, len <= sizeof(float) ? "%.9g" : "%.17g", doub);
 }
 
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
@@ -450,6 +451,8 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
      struct type **dont_print;
 {
   int i, len, n_baseclasses;
+
+  check_stub_type (type);
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -1216,6 +1219,46 @@ val_print (type, valaddr, address, stream, format,
   return 0;
 }
 
+/* Print a description of a type in the format of a 
+   typedef for the current language.
+   NEW is the new name for a type TYPE. */
+void
+typedef_print (type, new, stream)
+   struct type *type;
+   struct symbol *new;
+   FILE *stream;
+{
+   switch (current_language->la_language)
+   {
+#ifdef _LANG_c
+   case language_c:
+      fprintf_filtered(stream, "typedef ");
+      type_print(type,"",stream,0);
+      if(TYPE_NAME ((SYMBOL_TYPE (new))) == 0
+	 || 0 != strcmp (TYPE_NAME ((SYMBOL_TYPE (new))),
+			 SYMBOL_NAME (new)))
+	 fprintf_filtered(stream,  " %s", SYMBOL_NAME(new));
+      break;
+#endif
+#ifdef _LANG_m2
+   case language_m2:
+      fprintf_filtered(stream, "TYPE ");
+      if(!TYPE_NAME(SYMBOL_TYPE(new)) ||
+	 strcmp (TYPE_NAME(SYMBOL_TYPE(new)),
+		    SYMBOL_NAME(new)))
+	 fprintf_filtered(stream, "%s = ", SYMBOL_NAME(new));
+      else
+	 fprintf_filtered(stream, "<builtin> = ");
+      type_print(type,"",stream,0);
+      break;
+#endif
+   default:
+      error("Language not supported.");
+   }
+   fprintf_filtered(stream, ";\n");
+}
+
+
 /* Print a description of a type TYPE
    in the form of a declaration of a variable named VARSTRING.
    (VARSTRING is demangled if necessary.)
