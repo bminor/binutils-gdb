@@ -21,9 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 #define UNDERSCORE_HACK 1
-/* I had to prepend o_ b/c this name conflicts with a macro in 
-   the iris 3.3 stddef.h... */
-#define o_offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
 #include <ansidecl.h>
 #include <sysdep.h>
 
@@ -158,6 +155,10 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	    dest->section = (asection *)NULL;
 	    dest->flags = BSF_FORT_COMM;
 	    break;
+	  default:
+	    dest = dest_defined--;
+	    BFD_ASSERT(0);
+	    break;
 	  }
 	  dest->name = string_ptr;
 	  dest->the_bfd = abfd;
@@ -182,7 +183,6 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
     }
   }
   return true;
-
 }
 
 static unsigned int
@@ -876,13 +876,13 @@ DEFUN(oasys_write_syms, (abfd),
       oasys_write_record(abfd, 	
 			 oasys_record_is_local_enum,
 			 (oasys_record_union_type *) &symbol,
-			 o_offsetof(oasys_symbol_record_type, name[0]) + l);
+			 offsetof(oasys_symbol_record_type, name[0]) + l);
     }
     else {
       oasys_write_record(abfd, 	
 			 oasys_record_is_symbol_enum,
 			 (oasys_record_union_type *) &symbol,
-			 o_offsetof(oasys_symbol_record_type, name[0]) + l);
+			 offsetof(oasys_symbol_record_type, name[0]) + l);
     }
     g->value = index-1;
   }
@@ -937,7 +937,7 @@ DEFUN(oasys_write_header, (abfd),
   oasys_write_record(abfd,
 		     oasys_record_is_header_enum,
 		     (oasys_record_union_type *)&r,
-		     o_offsetof(oasys_header_record_type, description[0]));
+		     offsetof(oasys_header_record_type, description[0]));
 
 
 
