@@ -76,9 +76,8 @@ static int rombug_is_open = 0;
 
 /* FIXME: Replace with sr_get_debug ().  */
 #define LOG_FILE "monitor.log"
-#if defined (LOG_FILE)
 FILE *log_file;
-#endif
+static int monitor_log = 0;
 
 static int timeout = 5;
 static int is_trace_mode = 0;
@@ -117,10 +116,8 @@ readchar(timeout)
   if (sr_get_debug())
     putchar(c & 0x7f);
 
-#ifdef LOG_FILE
-  if (isascii (c))
+  if (monitor_log && isascii(c))
     putc(c & 0x7f, log_file);
-#endif
 
   if (c >= 0)
     return c & 0x7f;
@@ -197,11 +194,11 @@ static void
 expect_prompt(discard)
      int discard;
 {
-#if defined (LOG_FILE)
+  if (monitor_log)
   /* This is a convenient place to do this.  The idea is to do it often
      enough that we never lose much data if we terminate abnormally.  */
-  fflush(log_file);
-#endif
+    fflush(log_file);
+
   if (is_trace_mode) {
     expect("trace", discard);
     is_trace_mode = 0;
@@ -290,7 +287,7 @@ rombug_create_inferior (execfile, args, env)
   int entry_pt;
 
   /* Nonzero value indicates that a process really is running.  */
-  inferior_pid = 42;
+  inferior_pid = 9000;
 
   if (args && *args)
     error("Can't pass arguments to remote ROMBUG process");
@@ -300,9 +297,9 @@ rombug_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-#ifdef LOG_FILE
-  fputs ("\nIn Create_inferior()", log_file);
-#endif
+  if (monitor_log)
+    fputs ("\nIn Create_inferior()", log_file);
+
 
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
@@ -314,7 +311,6 @@ rombug_create_inferior (execfile, args, env)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-static int baudrate = 9600;
 static char dev_name[100];
 
 static void
@@ -336,24 +332,21 @@ rombug_open(args, from_tty)
   if (monitor_desc == NULL)
     perror_with_name(dev_name);
 
-  /* The baud rate was specified when GDB was started. ***
+  /* if baud rate is set by 'set remotebaud' */
   if (SERIAL_SETBAUDRATE (monitor_desc, sr_get_baud_rate()))
     {
       SERIAL_CLOSE (monitor_desc);
       perror_with_name ("RomBug");
     }
-  */
   SERIAL_RAW(monitor_desc);
+
   rombug_is_open = 1;
 
-#if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
   if (log_file == NULL)
     perror_with_name (LOG_FILE);
-#endif
 
   push_monitor (&rombug_cmds);
-
   printf_monitor("\r");	/* CR wakes up monitor */
   expect_prompt(1);
 
@@ -363,6 +356,7 @@ rombug_open(args, from_tty)
 	   dev_name);
 
   attach_flag = 1;
+  inferior_pid = 9000;
   rombug_fetch_registers();
 }
 
@@ -380,7 +374,6 @@ rombug_close (quitting)
     rombug_is_open = 0;
   }
 
-#if defined (LOG_FILE)
   if (log_file) {
     if (ferror(log_file))
       fprintf(stderr, "Error writing log file.\n");
@@ -388,7 +381,6 @@ rombug_close (quitting)
       fprintf(stderr, "Error closing log file.\n");
     log_file = 0;
   }
-#endif
 }
 
 int
@@ -428,6 +420,7 @@ rombug_detach (from_tty)
   if (attach_flag) {
     printf_monitor (GO_CMD);
     attach_flag = 0;
+    inferior_pid = 0;
   }
   pop_target();		/* calls rombug_close to do the real work */
   if (from_tty)
@@ -442,9 +435,8 @@ rombug_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Resume (step=%d, sig=%d)\n", step, sig);
-#endif
+  if (monitor_log)
+    fprintf (log_file, "\nIn Resume (step=%d, sig=%d)\n", step, sig);
 
   if (step)
     {
@@ -476,9 +468,8 @@ rombug_wait (pid, status)
   CORE_ADDR addr, pc;
   struct obj_section *obj_sec;
 
-#ifdef LOG_FILE
-  fputs ("\nIn wait ()", log_file);
-#endif
+  if (monitor_log)
+    fputs ("\nIn wait ()", log_file);
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -492,25 +483,22 @@ rombug_wait (pid, status)
   rombug_fetch_registers();
   pc = read_register(PC_REGNUM);
   addr = read_register(DATABASE_REG);
-
   obj_sec = find_pc_section (pc);
   if (obj_sec != NULL)
-    new_symfile_objfile (obj_sec->objfile, 1, 0);
-
-  offs = ((struct section_offsets *)
+    {
+      if (obj_sec->objfile != symfile_objfile)
+        new_symfile_objfile(obj_sec->objfile, 1, 0);
+      offs = ((struct section_offsets *)
 	 alloca (sizeof (struct section_offsets)
 	 + (symfile_objfile->num_sections * sizeof (offs->offsets))));
-  memcpy (offs, symfile_objfile->section_offsets,
+      memcpy (offs, symfile_objfile->section_offsets,
          (sizeof (struct section_offsets) + 
 	 (symfile_objfile->num_sections * sizeof (offs->offsets))));
-  ANOFFSET (offs, SECT_OFF_DATA) = addr;
-  ANOFFSET (offs, SECT_OFF_BSS) = addr;
+      ANOFFSET (offs, SECT_OFF_DATA) = addr;
+      ANOFFSET (offs, SECT_OFF_BSS) = addr;
 
-  /* Because we only set offsets for DATA and BSS sections, and the other
-     offsets are unchanged from ->section_offsets, the other sections won't
-     get relocated.  */
-  objfile_relocate (symfile_objfile, offs);
-
+      objfile_relocate(symfile_objfile, offs);
+    }
   return 0;
 }
 
@@ -610,10 +598,10 @@ rombug_fetch_register (regno)
   int val, j;
   unsigned char b;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Fetch Register (reg=%s)\n", get_reg_name (regno));
-  fflush (log_file);
-#endif
+  if (monitor_log) {
+    fprintf (log_file, "\nIn Fetch Register (reg=%s)\n", get_reg_name (regno));
+    fflush (log_file);
+  }
 
   if (regno < 0)
     {
@@ -691,9 +679,9 @@ rombug_store_register (regno)
 {
 char *name;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Store_register (regno=%d)\n", regno);
-#endif
+  if (monitor_log)
+    fprintf (log_file, "\nIn Store_register (regno=%d)\n", regno);
+
   if (regno == -1)
     rombug_store_registers ();
   else
@@ -725,7 +713,7 @@ static void
 rombug_files_info ()
 {
   printf ("\tAttached to %s at %d baud.\n",
-	  dev_name, baudrate);
+	  dev_name, sr_get_baud_rate());
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -739,17 +727,18 @@ rombug_write_inferior_memory (memaddr, myaddr, len)
   int i;
   char buf[10];
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Write_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
-#endif
-  printf_monitor (MEM_SET_CMD, memaddr + i);
+  if (monitor_log)
+    fprintf (log_file, "\nIn Write_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
+
+  printf_monitor (MEM_SET_CMD, memaddr);
   for (i = 0; i < len; i++)
     {
       expect (CMD_DELIM, 1);
-      printf_monitor ("%x", myaddr[i]);
+      printf_monitor ("%x \r", myaddr[i]);
       if (sr_get_debug())
 	printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
     }
+  expect (CMD_DELIM, 1);
   if (CMD_END)
     printf_monitor (CMD_END);
   expect_prompt (1);
@@ -777,9 +766,8 @@ rombug_read_inferior_memory(memaddr, myaddr, len)
   /* Number of bytes to read in this pass.  */
   int len_this_pass;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Read_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
-#endif
+  if (monitor_log)
+    fprintf (log_file, "\nIn Read_inferior_memory (memaddr=%x, len=%d)\n", memaddr, len);
 
   /* Note that this code works correctly if startaddr is just less
      than UINT_MAX (well, really CORE_ADDR_MAX if there was such a
@@ -872,9 +860,9 @@ rombug_insert_breakpoint (addr, shadow)
 {
   int i;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Insert_breakpoint (addr=%x)\n", addr);
-#endif
+  if (monitor_log)
+    fprintf (log_file, "\nIn Insert_breakpoint (addr=%x)\n", addr);
+
   for (i = 0; i <= MAX_MONITOR_BREAKPOINTS; i++)
     if (breakaddr[i] == 0)
       {
@@ -901,18 +889,14 @@ rombug_remove_breakpoint (addr, shadow)
 {
   int i;
 
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn Remove_breakpoint (addr=%x)\n", addr);
-#endif
+  if (monitor_log)
+    fprintf (log_file, "\nIn Remove_breakpoint (addr=%x)\n", addr);
+
   for (i = 0; i < MAX_MONITOR_BREAKPOINTS; i++)
     if (breakaddr[i] == addr)
       {
 	breakaddr[i] = 0;
-	/* some monitors remove breakpoints based on the address */
-	if (strcasecmp (target_shortname, "bug") == 0)   
-	    printf_monitor(CLR_BREAK_CMD, addr);
-	  else
-	    printf_monitor(CLR_BREAK_CMD, i);
+	printf_monitor(CLR_BREAK_CMD, addr);
 	expect_prompt(1);
 	return 0;
       }
@@ -990,17 +974,17 @@ rombug_command (args, fromtty)
      char	*args;
      int	fromtty;
 {
-#ifdef LOG_FILE
-  fprintf (log_file, "\nIn command (args=%s)\n", args);
-#endif
   if (monitor_desc == NULL)
     error("monitor target not open.");
   
+  if (monitor_log)
+    fprintf (log_file, "\nIn command (args=%s)\n", args);
+
   if (!args)
     error("Missing command.");
 	
   printf_monitor("%s\r", args);
-  expect_prompt(0);
+  expect(CMD_DELIM, 0);
 }
 
 #if 0
@@ -1104,7 +1088,7 @@ connect_command (args, fromtty)
 struct monitor_ops rombug_cmds = {
   "g \r",				/* execute or usually GO command */
   "g \r",				/* continue command */
-  "gs \r",				/* single step */
+  "t \r",				/* single step */
   "b %x\r",				/* set a breakpoint */
   "k %x\r",				/* clear a breakpoint */
   "c %x\r",				/* set memory to a value */
@@ -1144,7 +1128,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   0,				/* Terminal handling */
   rombug_kill,
   rombug_load,			/* load */
-  rombug_link,			/* lookup_symbol */
+  rombug_link,				/* lookup_symbol */
   rombug_create_inferior,
   rombug_mourn_inferior,
   0,				/* can_run */
@@ -1176,6 +1160,13 @@ _initialize_remote_os9k ()
         add_set_cmd ("timeout", no_class, var_zinteger,
                  (char *) &timeout,
                  "Set timeout in seconds for remote MIPS serial I/O.",
+                 &setlist),
+        &showlist);
+
+  add_show_from_set (
+        add_set_cmd ("monitor_log", no_class, var_zinteger,
+                 (char *) &monitor_log,
+                 "Set monitor activity log on(=1) or off(=0).",
                  &setlist),
         &showlist);
 

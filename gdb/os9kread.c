@@ -272,6 +272,7 @@ char buf[64], buf1[128];
     if (ch == 0) break;
     ch = getc(fp);
   };
+  if (i%2) ch=getc(fp);
   hdr.name = &buf[0];
 
   fread(&hdr.fmtno, sizeof(hdr.fmtno), 1, fp);
@@ -439,13 +440,14 @@ os9k_symfile_finish (objfile)
 }
 
 
-struct dbghdr {
+struct st_dbghdr {
   int sync;
   short rev;
   int crc;
   short os;
   short cpu;
 };
+#define SYNC 		(int)0xefbefeca
 
 #define SWAP_DBGHDR(hdrp, abfd) \
   { \
@@ -471,7 +473,12 @@ struct internal_symstruct {
 };
 static struct internal_symstruct symbol;
 static struct internal_symstruct *symbuf = &symbol;
-static char strbuf[256];
+static char strbuf[4096];
+static struct st_dbghdr dbghdr;
+static short cmplrid;
+
+#define VER_PRE_ULTRAC	((short)4)
+#define VER_ULTRAC	((short)5)
 
 static int
 fill_sym (dbg_file, abfd)
@@ -479,9 +486,10 @@ fill_sym (dbg_file, abfd)
      bfd *abfd;
 {
 short id;
-short si;
+short si, nmask;
 long li;
 int ii;
+char *p;
 
   int nbytes = fread(&si, sizeof(si), 1, dbg_file);
   if (nbytes == 0)
@@ -498,6 +506,7 @@ int ii;
     case N_SYM_CMPLR:
       fread(&si, sizeof(si), 1, dbg_file);
       symbuf->n_desc = bfd_get_16(abfd, (unsigned char *)&si);
+      cmplrid = symbuf->n_desc & 0xff;
       break;
     case N_SYM_SLINE:
       fread(&li, sizeof(li), 1, dbg_file);
@@ -516,6 +525,15 @@ int ii;
 	strbuf[si++] = (char) ii;
       } while (ii != 0 || si % 2 != 0);
       symbuf->n_strx = strbuf;
+      p = (char *) strchr (strbuf, ':');
+      if (!p) break;
+      if ((p[1] == 'F' || p[1] == 'f') && cmplrid == VER_PRE_ULTRAC)
+	{
+	  fread(&si, sizeof(si), 1, dbg_file);
+	  nmask = bfd_get_16(abfd, (unsigned char *)&si);
+	  for (ii=0; ii<nmask; ii++)
+	    fread(&si, sizeof(si), 1, dbg_file);
+	}
       break;
     case N_SYM_LBRAC:
       fread(&li, sizeof(li), 1, dbg_file);
@@ -577,7 +595,6 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
   struct cleanup *back_to;
   bfd *abfd;
   FILE *fp;
-  struct dbghdr hdr;
 
   /* End of the text segment of the executable file.  */
   static CORE_ADDR end_of_text_addr;
@@ -617,12 +634,12 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
   abfd = objfile->obfd;
   fp = objfile->auxf2; 
 		
-  fread(&hdr.sync, sizeof(hdr.sync), 1, fp);
-  fread(&hdr.rev, sizeof(hdr.rev), 1, fp);
-  fread(&hdr.crc, sizeof(hdr.crc), 1, fp);
-  fread(&hdr.os, sizeof(hdr.os), 1, fp);
-  fread(&hdr.cpu, sizeof(hdr.cpu), 1, fp);
-  SWAP_DBGHDR(&hdr, abfd);      
+  fread(&dbghdr.sync, sizeof(dbghdr.sync), 1, fp);
+  fread(&dbghdr.rev, sizeof(dbghdr.rev), 1, fp);
+  fread(&dbghdr.crc, sizeof(dbghdr.crc), 1, fp);
+  fread(&dbghdr.os, sizeof(dbghdr.os), 1, fp);
+  fread(&dbghdr.cpu, sizeof(dbghdr.cpu), 1, fp);
+  SWAP_DBGHDR(&dbghdr, abfd);      
 
   symnum = 0;
   while(1)
@@ -888,6 +905,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 
 	    case 'p':
 	    case 'l':
+            case 's':
 	      continue;
 
 	    case ':':
@@ -1459,12 +1477,12 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_SYM_LBRAC:
       /* On most machines, the block addresses are relative to the
 	 N_SO, the linker did not relocate them (sigh).  */
-      valu += last_source_start_addr;
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT); 
       new = push_context (desc, valu);
       break;
 
     case N_SYM_RBRAC:
-      valu += last_source_start_addr;
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT); 
       new = pop_context();
 
 #if !defined (OS9K_VARIABLES_INSIDE_BLOCK)
@@ -1530,7 +1548,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 one line-number -- core-address correspondence.
 	 Enter it in the line list for this symbol table.  */
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
-      valu += last_source_start_addr;
+      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT); 
       record_line (current_subfile, (int)name, valu);
       break;
 

@@ -675,7 +675,27 @@ symbol_file_command (args, from_tty)
 	    }
 	  else
 	    {
-	      name = *argv;
+            char *p;
+
+              name = *argv;
+
+              /* this is for rombug remote only, to get the text relocation by
+              using link command */
+              p = strrchr(name, '/');
+              if (p != NULL) p++;
+              else p = name;
+
+              target_link(p, &text_relocation);
+
+              if (text_relocation == (CORE_ADDR)0)
+                return;
+              else if (text_relocation == (CORE_ADDR)-1)
+                symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readno
+w);
+              else
+                symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation, 0,
+mapped, readnow);
+              set_initial_language ();
 	    }
 	  argv++;
 	}
@@ -684,25 +704,6 @@ symbol_file_command (args, from_tty)
 	{
 	  error ("no symbol file name was specified");
 	}
-      else
-	{
-	  char *p;
-
-	  /* If target_link can find out where the file is,
-	     more power to it.  */
-	  p = strrchr (name, '/');
-	  if (p != NULL) p++;
-	  else p = name;
-
-	  target_link (p, &text_relocation);
-	  if (text_relocation == (CORE_ADDR)-1)
-	    text_relocation = 0;
-
-	  symbol_file_add (name, from_tty, text_relocation, 1, mapped,
-			   readnow);
-	  set_initial_language ();
-	}
-
       do_cleanups (cleanups);
     }
 }

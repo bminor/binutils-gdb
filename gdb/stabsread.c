@@ -805,6 +805,7 @@ define_symbol (valu, string, desc, type, objfile)
       /* This case is faked by a conditional above,
 	 when there is no code letter in the dbx data.
 	 Dbx data never actually contains 'l'.  */
+    case 's':
     case 'l':
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_LOCAL;

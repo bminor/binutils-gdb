@@ -1,3 +1,22 @@
+Wed Mar  9 18:56:36 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* os9kread.c (fill_sym): check compiler verion number for pre-
+	UltraC compiler.
+	* os9kread.c (os9k_process_one_symbol): address of symbol is
+	relative to section not module.
+	* stabsread.c (define_symbol): add symbol type 's' as local
+	symbol for os9k.
+	* remote-os9k.c: add command 'set monitor_log' to turn on or off
+	monitor logging.
+	* remote-os9k.c: fix bug in delete breakpoint, single step trace.
+	* remote-os9k.c: fix bug in 'set remotebaud' function.
+	* remote-os9k.c (rombug_link): minimize checking so to improve
+	speed.
+	* symfile.c (symfile_command): check if failed to link, also make
+	the command be able to accept more than one filenames.
+	* target.c (target_link): check if failed to link with rombug.
+	* config/i386/tm-i386os9k.h : add #define DECR_PC_AFTER_BREAK 0.
+
 Wed Mar  9 15:23:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-es.c (es1800_child_ops): Don't declare it static.
