@@ -1,3 +1,8 @@
+Wed Sep 20 13:14:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.
+
 Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Update all FSF addresses except those in COPYING* files.

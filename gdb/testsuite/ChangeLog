@@ -1,3 +1,14 @@
+Wed Sep 20 13:15:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.
+	* gdb.base/Makefile.in (maintainer-clean): Likewise.
+	* gdb.c++/Makefile.in (maintainer-clean): Likewise.
+	* gdb.chill/Makefile.in (maintainer-clean): Likewise.
+	* gdb.disasm/Makefile.in (maintainer-clean): Likewise.
+	* gdb.stabs/Makefile.in (maintainer-clean): Likewise.
+	* gdb.threads/Makefile.in (maintainer-clean): Likewise.
+
 Sun Sep 10 13:14:01 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/scope.exp (text_at_main):  Add "hppa*-*-hpux*"

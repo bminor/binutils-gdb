@@ -527,7 +527,7 @@ gdb.z:gdb.1
 install: all install-only
 install-only:
 	transformed_name=`t='$(program_transform_name)'; \
-			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
+			  echo gdb | sed -e $$t` ; \
 		if test "x$$transformed_name" = x; then \
 		  transformed_name=gdb ; \
 		else \
@@ -546,7 +546,7 @@ install-only:
 
 uninstall: force
 	transformed_name=`t='$(program_transform_name)'; \
-			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
+			  echo gdb | sed -e $$t` ; \
 		if test "x$$transformed_name" = x; then \
 		  transformed_name=gdb ; \
 		else \
@@ -732,8 +732,10 @@ distclean: clean
 	rm -f config.log config.cache
 	rm -f Makefile
 
-realclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
+maintainer-clean realclean: clean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f c-exp.tab.c f-exp.tab.c m2-exp.tab.c ch-exp.tab.c
 	rm -f TAGS $(INFOFILES)
 	rm -f nm.h tm.h xm.h config.status

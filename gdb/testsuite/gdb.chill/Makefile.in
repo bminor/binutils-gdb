@@ -176,7 +176,7 @@ just-check:
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x $(EXECUTABLES)
 
-distclean realclean: clean
+distclean maintainer-clean realclean: clean
 	-rm -f *~ core *.log *.plog *.sum *.psum site.*
 	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*

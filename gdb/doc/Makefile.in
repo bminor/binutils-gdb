@@ -148,7 +148,7 @@ distclean: clean
 
 # GDBvn.texi and refcard.dvi are distributed, so they should not be
 # removed by "clean" or "distclean".
-realclean: distclean clean-dvi clean-info
+maintainer-clean realclean: distclean clean-dvi clean-info
 	rm -f GDBvn.texi refcard.dvi
 
 # GDB QUICK REFERENCE (dvi output)

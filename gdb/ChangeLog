@@ -1,3 +1,11 @@
+Wed Sep 20 13:12:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (maintainer-clean): New target, synonym for
+	realclean.  Add GNU standard maintainer-clean echos.
+	* gdbserver/Makefile.in (maintainer-clean): New target, synonym
+	for realclean.
+	* nlm/Makefile.in (maintainer-clean): Likewise.
+
 Wed Sep 20 08:16:03 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* defs.h (xmalloc, xrealloc): Delete, they're declared in libiberty.h.

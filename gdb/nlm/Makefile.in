@@ -146,7 +146,7 @@ distclean: clean TAGS
 	rm -f config.log config.cache config.status
 	rm -f Makefile
 
-realclean: clean
+maintainer-clean realclean: clean
 	rm -f TAGS
 	rm -f config.log config.cache config.status
 	rm -f Makefile
