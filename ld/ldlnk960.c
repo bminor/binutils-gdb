@@ -246,9 +246,13 @@ lnk960_choose_target()
   char *from_outside = getenv(TARGET_ENVIRON);
   if (from_outside != (char *)NULL)
     return from_outside;
+#ifdef LNK960_LITTLE
+  return LNK960_TARGET_LITTLE
+#else
   return LNK960_TARGET;
-
 #endif
+#endif
+
 }
 
 /* The default script if none is offered */

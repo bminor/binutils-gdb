@@ -33,7 +33,7 @@
 #define EBMON29K_EMULATION_NAME "ebmon29k"
 #define GLDI386AOUT_EMULATION_NAME "gldi386aout"
 /* Otherwise default to this emulation */
-/* Otherwise default to this emulation */
+
 #ifndef DEFAULT_EMULATION
 #ifdef GNU960
 #define DEFAULT_EMULATION GLD960_EMULATION_NAME

@@ -38,6 +38,7 @@ configdos.bat
 configure.in
 ld.h
 ld.texinfo
+lderror.c
 ldemul.c
 ldemul.h
 ldctor.c
@@ -81,6 +82,7 @@ ldver.h
 ldwarn.h
 ldwrite.c
 ldwrite.h
+lexsup.c
 makefile.dos
 mkscript.c
 news.sc
@@ -92,7 +94,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.26  1992/01/24 22:35:55  sac
+# Revision 1.27  1992/01/29 16:44:08  sac
+# ldlnk960.c: Special #ifdef to choose little endian ony
+# ldgram.y: allow forward ref of section
+#
+# Revision 1.26  1992/01/24  22:35:55  sac
 # .Sanitize: added relax.c
 # ldsym.c ldlang.* more map stuff
 #
