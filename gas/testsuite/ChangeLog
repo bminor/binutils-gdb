@@ -1,3 +1,9 @@
+2000-10-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/elf/section0.s: Ensure section sizes are multiples of 16.
+	* gas/elf/section1.s: Likewise.
+	* gas/elf/section[01].d: Change to suit.
+
 2000-10-18  H.J. Lu <hjl@gnu.org>
 
 	* gas/i386/intel.d: Fix the support for 64bit BFD in the last
