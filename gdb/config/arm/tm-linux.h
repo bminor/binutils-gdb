@@ -29,10 +29,6 @@
 /* We've multi-arched this.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 
-/* On ARM GNU/Linux, a call to a library routine does not have to go
-   through any trampoline code.  */
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	0
-
 /* We've multi-arched this.  */
 #undef SKIP_TRAMPOLINE_CODE
 

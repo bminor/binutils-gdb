@@ -1,5 +1,13 @@
 2004-10-26  Andrew Cagney  <cagney@gnu.org>
 
+	* config/arm/tm-linux.h (IN_SOLIB_RETURN_TRAMPOLINE): Delete.
+	* config/mips/tm-nbsd.h, config/mips/tm-linux.h: Delete #undef
+	IN_SOLIB_RETURN_TRAMPOLINE.
+	* mips-tdep.c (mips_dump_tdep): Do not print
+	IN_SOLIB_RETURN_TRAMPOLINE.
+	(mips_in_solib_return_trampoline): Rename mips_in_return_stub.
+	(mips_gdbarch_init): Update.
+
 	* mips-tdep.h (mips_software_single_step): Move to here ...
 	* config/mips/tm-mips.h: ... from here.
 	* config/mips/tm-linux.h (SOFTWARE_SINGLE_STEP_P) 

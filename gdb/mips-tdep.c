@@ -5404,11 +5404,11 @@ mips_in_call_stub (CORE_ADDR pc, char *name)
 }
 
 
-/* Return non-zero if the PC is inside a return thunk (aka stub or trampoline).
-   This implements the IN_SOLIB_RETURN_TRAMPOLINE macro.  */
+/* Return non-zero if the PC is inside a return thunk (aka stub or
+   trampoline).  */
 
 static int
-mips_in_return_stub (CORE_ADDR pc, char *name)
+mips_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   CORE_ADDR start_addr;
 
@@ -5971,7 +5971,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (info.osabi == GDB_OSABI_UNKNOWN)
     {
       set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
-      set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub);
+      set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_solib_return_trampoline);
     }
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
@@ -6119,9 +6119,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IN_SOLIB_CALL_TRAMPOLINE # %s\n",
 		      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (PC, NAME)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: IN_SOLIB_RETURN_TRAMPOLINE # %s\n",
-		      XSTRING (IN_SOLIB_RETURN_TRAMPOLINE (PC, NAME)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
 		      LAST_EMBED_REGNUM);
