@@ -57,6 +57,7 @@ static void s_uacons PARAMS ((int));
 static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
 static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
 static void little PARAMS ((int));
+static void big PARAMS ((int));
 static bfd_reloc_code_real_type sh_elf_suffix
   PARAMS ((char **str_p, expressionS *, expressionS *new_exp_p));
 static int parse_reg PARAMS ((char *, int *, int *));
@@ -80,13 +81,25 @@ static void sh_elf_cons PARAMS ((int));
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 #endif
 
-int shl = 0;
+static void
+big (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  if (! target_big_endian)
+    as_bad (_("directive .big encountered when option -big required"));
+
+  /* Stop further messages.  */
+  target_big_endian = 1;
+}
 
 static void
 little (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  shl = 1;
+  if (target_big_endian)
+    as_bad (_("directive .little encountered when option -little required"));
+
+  /* Stop further messages.  */
   target_big_endian = 0;
 }
 
@@ -107,6 +120,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"int", cons, 4},
   {"word", cons, 2},
 #endif /* OBJ_ELF */
+  {"big", big, 0},
   {"form", listing_psize, 0},
   {"little", little, 0},
   {"heading", listing_title, 0},
@@ -438,14 +452,6 @@ md_begin ()
   sh_opcode_info *opcode;
   char *prev_name = "";
   int target_arch;
-
-#ifdef TE_PE
-  /* The WinCE OS only supports little endian executables.  */
-  target_big_endian = 0;
-#else
-  if (! shl)
-    target_big_endian = 1;
-#endif
 
   target_arch = arch_sh1_up & ~(sh_dsp ? arch_sh3e_up : arch_sh_dsp_up);
   valid_arch = target_arch;
@@ -2127,11 +2133,13 @@ CONST char *md_shortopts = "";
 struct option md_longopts[] =
 {
 #define OPTION_RELAX  (OPTION_MD_BASE)
-#define OPTION_LITTLE (OPTION_MD_BASE + 1)
+#define OPTION_BIG (OPTION_MD_BASE + 1)
+#define OPTION_LITTLE (OPTION_BIG + 1)
 #define OPTION_SMALL (OPTION_LITTLE + 1)
 #define OPTION_DSP (OPTION_SMALL + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
+  {"big", no_argument, NULL, OPTION_BIG},
   {"little", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
@@ -2150,8 +2158,11 @@ md_parse_option (c, arg)
       sh_relax = 1;
       break;
 
+    case OPTION_BIG:
+      target_big_endian = 1;
+      break;
+
     case OPTION_LITTLE:
-      shl = 1;
       target_big_endian = 0;
       break;
 
@@ -2177,6 +2188,7 @@ md_show_usage (stream)
   fprintf (stream, _("\
 SH options:\n\
 -little			generate little endian code\n\
+-big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));

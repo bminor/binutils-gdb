@@ -1,3 +1,23 @@
+2001-10-16  NIIBE Yutaka  <gniibe@m17n.org>,
+	    Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-sh.c (shl): Remove.
+ 	(big): New function.
+	(little): Remove shl handling.  Emit error for endian mismatch.
+	(md_show_usage): Add description of -big.
+	(md_parse_option): Handle OPTION_BIG.  Remove shl handling.
+	(OPTION_BIG): Add.
+	(md_pseudo_table): Add .big.
+	(md_longopts): Add -big.
+	(md_begin): Don't set target_big_endian here.
+	* config/tc-sh.h (TARGET_BYTES_BIG_ENDIAN): Remove.
+	(LISTING_HEADER, COFF_MAGIC, TARGET_FORMAT): Use target_big_endian.
+	(shl): Remove.
+	* configure.in (endian): Default is big.
+	(sh-*-pe*): Little endian.
+	(cpu_type): Set sh for target sh*.
+	* configure: Regenerate.
+
 2001-10-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (md_apply_fix): Preliminary handling of NewABI
