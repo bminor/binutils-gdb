@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef DEFAULT_MIPS_TYPE
 #define DEFAULT_MIPS_TYPE "r3051"
 
-<<<<<<< tm-tx39.h
 /* start-sanitize-gm */
 #ifdef GENERAL_MAGIC
 
@@ -63,5 +62,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #undef  USE_STRUCT_CONVENTION
 #define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 8)
-=======
->>>>>>> 1.1.2.2
