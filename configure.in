@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
+target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++ target-winsup"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -349,7 +349,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
 	;;
   i[345]86-*-win32)
-     noconfigdirs="tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
+     noconfigdirs="patch diff flex make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs"
     ;;
 esac
 
@@ -405,15 +405,13 @@ case "${target}" in
     ;;
 
   i[345]86-*-win32)
-    noconfigdirs="$noconfigdirs tk"
     # Can't build gdb for win32 if not native.
+    # make/glob's configure uses some AC_TRY_RUN type tests
     if [ x${is_cross_compiler} = xyes ]; then
-	    noconfigdirs="$noconfigdirs gdb"
+	    noconfigdirs="$noconfigdirs gdb tk make"
     fi
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
-    # and winsup
-    configdirs="$configdirs target-winsup" 
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
@@ -445,7 +443,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof cvs"
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe*)
-    noconfigdirs="$noconfigdirs ld gdb"
+    noconfigdirs="$noconfigdirs gdb"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000

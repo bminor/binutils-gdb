@@ -1,3 +1,9 @@
+Tue Nov 14 14:56:11 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (target_libs): add target-winsup.
+	(target==i386-win32): add patch diff flex make to $noconfigdirs.
+	(target==ppcle-pe): remove ld from $noconfigdirs.
+
 Tue Nov 14 01:25:50 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (CONFIGURE_TARGET_MODULES): Pass --with-target-subdir.
