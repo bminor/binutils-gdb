@@ -1,3 +1,7 @@
+Mon Jul 24 07:47:46 2000  Anthony Green  <green@redhat.com>
+
+	* TODO: Update.  Two of my java patches are in. 
+
 2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
          * gdbarch.sh: Add FETCH_PSEUDO_REGISTER and STORE_PSEUDO_REGISTER

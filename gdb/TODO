@@ -570,7 +570,8 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
 Java (Anthony Green, David Taylor)
 
 Anthony Green has a number of Java patches that did not make it into
-the 5.0 release.
+the 5.0 release.  The first two are in cvs now, but the third needs
+some fixing up before it can go in.
 
 Patch: java tests
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
