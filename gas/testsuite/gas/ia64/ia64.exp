@@ -46,7 +46,13 @@ if [istarget "ia64-*"] then {
     run_dump_test "align"
     run_dump_test "order"
     run_dump_test "global"
-    run_dump_test "secname"
-    run_dump_test "unwind"
-    run_dump_test "alias"
+    if [istarget "ia64-*-hpux*"] then {
+	run_dump_test "secname-ilp32"
+	run_dump_test "unwind-ilp32"
+	run_dump_test "alias-ilp32"
+    } else {
+	run_dump_test "secname"
+	run_dump_test "unwind"
+	run_dump_test "alias"
+    }
 }

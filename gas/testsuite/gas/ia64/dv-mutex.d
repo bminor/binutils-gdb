@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <start>:
+0+000 <start>:
    0:	20 20 08 00 00 a1 	\[MII\] \(p01\) mov r4=2
    6:	40 28 00 00 c2 81 	      \(p02\) mov r4=5
    c:	70 00 00 84       	      \(p03\) mov r4=7
