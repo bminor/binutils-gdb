@@ -528,9 +528,12 @@ write_file_locals (output_buffer)
 		    *output_buffer++ = p;
 		  }
 	      }
-	    else if (p->flags & BSF_CTOR)
+	    else if (p->flags & BSF_CONSTRUCTOR)
 	      {
-		/* Throw it away */
+		if (strip_symbols != STRIP_ALL)
+		  {
+		    *output_buffer++ = p;
+		  }
 	      }
 	    else
 	      {

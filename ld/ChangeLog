@@ -1,3 +1,8 @@
+Tue Jun  1 14:56:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldsym.c (write_file_locals):  Write BSF_CONSTRUCTOR
+	symbols, unless stripping.
+
 Tue May 25 15:34:25 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: configure looks for ####, so remove lines with many
