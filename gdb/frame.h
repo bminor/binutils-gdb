@@ -124,9 +124,9 @@ struct frame_id
   CORE_ADDR special_addr;
 
   /* Flags to indicate the above fields have valid contents.  */
-  int stack_addr_p : 1;
-  int code_addr_p : 1;
-  int special_addr_p : 1;
+  unsigned int stack_addr_p : 1;
+  unsigned int code_addr_p : 1;
+  unsigned int special_addr_p : 1;
 };
 
 /* Methods for constructing and comparing Frame IDs.
