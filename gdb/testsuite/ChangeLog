@@ -1,5 +1,16 @@
 2004-06-16  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/signull.c: Update copyright.  Include <string.h>.
+	(bowler): Replace data_pointer with data_read
+	and data_write cases.  Add code_descriptor case.
+	(zero, desc): New array and pointer.
+	(data, code): Change to simple pointers.
+	* gdb.base/signull.exp: Fix probe pattern matching a function
+	descriptor SIGSEGV.  Replace data_pointer with data_read and
+	data_write tests.
+
+2004-06-16  Andrew Cagney  <cagney@gnu.org>
+
 	* gdb.base/long_long.exp, gdb.base/long_long.c: Rewrite.
 
 2004-06-15  Michael Chastain  <mec.gnu@mindspring.com>

@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 1996, 1999, 2003 Free Software Foundation, Inc.
+   Copyright 1996, 1999, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@
 #include <signal.h>
 #include <setjmp.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum tests {
-  code_entry_point, code_descriptor, data_pointer
+  code_entry_point, code_descriptor, data_read, data_write
 };
 
 static volatile enum tests test;
@@ -31,8 +32,12 @@ static volatile enum tests test;
 
 typedef long data_t;
 typedef long code_t (void);
-static volatile data_t *data[10];
-static volatile code_t *code[10];
+data_t *volatile data;
+code_t *volatile code;
+/* "desc" is intentionally initialized to a data object.  This is
+   needed to test function descriptors on arches like ia64.  */
+data_t zero[10];
+code_t *volatile desc = (code_t *) (void *) zero;
 
 sigjmp_buf env;
 
@@ -47,12 +52,21 @@ bowler (void)
 {
   switch (test)
     {
-    case data_pointer:
-      return *data[0];
+    case data_read:
+      /* Try to read address zero.  */
+      return (*data);
+    case data_write:
+      /* Try to write (the assignment) to address zero.  */
+      return (*data) = 1;
     case code_entry_point:
-      return code[0] ();
+      /* For typical architectures, call a function at address
+	 zero.  */
+      return (*code) ();
     case code_descriptor:
-      return ((code_t *) &code) ();
+      /* For atypical architectures that use function descriptors,
+	 call a function descriptor, the code field of which is zero
+	 (which has the effect of jumping to address zero).  */
+      return (*desc) ();
     }
 }
 

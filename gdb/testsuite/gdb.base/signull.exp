@@ -79,7 +79,7 @@ gdb_test "set test = code_entry_point" "" "set for function pointer probe"
 set test "probe function pointer"
 set function_pointer code_entry_point
 gdb_test_multiple "continue" "$test" {
-    -re "Program received signal SIGSEGV.* bowler .$gdb_prompt $" {
+    -re "Program received signal SIGSEGV.*bowler .*$gdb_prompt $" {
 	set function_pointer code_descriptor
 	pass "$test (function descriptor)"
     }
@@ -109,7 +109,10 @@ proc test_segv { name tag bt_from_segv bt_from_keeper } {
     gdb_test backtrace $bt_from_keeper "backtrace keeper for ${name}"
 }
 
-test_segv data data_pointer \
+test_segv data-read data_read \
+    {#0 .* bowler .*#1  .* main .*} \
+    {#0 .* keeper .*#1  .* handler .*#2 .* bowler .*#3  .* main .*}
+test_segv data-write data_write \
     {#0 .* bowler .*#1  .* main .*} \
     {#0 .* keeper .*#1  .* handler .*#2 .* bowler .*#3  .* main .*}
 test_segv code $function_pointer \
