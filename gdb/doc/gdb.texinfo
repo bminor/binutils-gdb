@@ -80,7 +80,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Richard M. Stallman and Roland H. Pesch
+@author Richard M. Stallman, Roland H. Pesch and Stan Shebs
 @page
 @tex
 {\parskip=0pt
@@ -297,6 +297,7 @@ omitted from this list, we would like to add your names!
 So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
+Andrew Cagney (release 5.0);
 Jim Blandy (release 4.18);
 Jason Molenda (release 4.17);
 Stan Shebs (release 4.14);
