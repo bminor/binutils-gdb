@@ -172,7 +172,7 @@ proc gdb_exit {} {
 	    }
 	    close
 	}
-	    -re "The program is running.  Quit anyway? (y or n) $" {
+	    -re "The program is running.  Quit anyway.*? (y or n) $" {
 		send "y\n"
 		if $verbose>1 then {
 		    send_user "\t\tKilling program being debugged\n"
