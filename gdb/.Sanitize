@@ -124,7 +124,6 @@ fi
 
 Things-to-keep:
 
-.gdbinit
 29k-share
 COPYING
 ChangeLog
@@ -236,6 +235,7 @@ gdb.gdb
 gdba.el
 gdbcmd.h
 gdbcore.h
+gdbinit.in
 gdbserver
 gdbthread.h
 gdbtypes.c
