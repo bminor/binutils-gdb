@@ -1,24 +1,23 @@
 /* History.c -- standalone history library */
 
-/* Copyright (C) 1989 Free Software Foundation, Inc.
+/* Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (the Library), a set of
    routines for managing the text of previously typed lines.
 
    The Library is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-   The Library is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   The Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   675 Mass Ave, Cambridge, MA 02139, USA. */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* The goal is to make the implementation transparent, so that you
    don't have to know what data types are used, just what functions
@@ -33,18 +32,13 @@ static char *xmalloc (), *xrealloc ();
 
 #include "sysdep.h"
 #include <stdio.h>
+#include <errno.h>
 #include <sys/types.h>
+#ifndef	NO_SYS_FILE
 #include <sys/file.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#if defined (__GNUC__)
-#  define alloca __builtin_alloca
-#else
-#  if defined (sparc) || defined (HAVE_ALLOCA_H)
-#    include <alloca.h>
-#  endif /* sparc || HAVE_ALLOCA_H */
-#endif /* !__GNU_C__ */
 
 #include "history.h"
 
@@ -591,10 +585,9 @@ history_do_write (filename, nelements, overwrite)
      int nelements, overwrite;
 {
   extern int errno;
-  register int i;
+  register int i, j;
   char *output = history_filename (filename);
   int file, mode;
-  char cr = '\n';
 
   if (overwrite)
     mode = O_WRONLY | O_CREAT | O_TRUNC;
@@ -607,13 +600,30 @@ history_do_write (filename, nelements, overwrite)
   if (nelements > history_length)
     nelements = history_length;
 
-  for (i = history_length - nelements; i < history_length; i++)
-    {
-      if (write (file, the_history[i]->line, strlen (the_history[i]->line)) < 0)
-	break;
-      if (write (file, &cr, 1) < 0)
-	break;
-    }
+  /* Build a buffer of all the lines to write, and write them in one syscall.
+     Suggested by Peter Ho (peter@robosts.oxford.ac.uk). */
+  {
+    register int j = 0;
+    int buffer_size = 0;
+    char *buffer;
+
+    /* Calculate the total number of bytes to write. */
+    for (i = history_length - nelements; i < history_length; i++)
+      buffer_size += 1 + strlen (the_history[i]->line);
+
+    /* Allocate the buffer, and fill it. */
+    buffer = (char *)xmalloc (buffer_size);
+
+    for (i = history_length - nelements; i < history_length; i++)
+      {
+	strcpy (buffer + j, the_history[i]->line);
+	j += strlen (the_history[i]->line);
+	buffer[j++] = '\n';
+      }
+
+    write (file, buffer, buffer_size);
+    free (buffer);
+  }
 
   close (file);
   return (0);

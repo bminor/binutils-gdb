@@ -1,3 +1,11 @@
+Mon Feb 10 01:41:35 1992  Brian Fox  (bfox at gnuwest.fsf.org)
+
+	* history.c (history_do_write) Build a buffer of all of the lines
+	to write and write them in one fell swoop (lower overhead than
+	calling write () for each line).  Suggested by Peter Ho.
+
+	* vi_mode.c (rl_vi_subst) Don't forget to end the undo group.
+
 Sat Mar  7 00:15:36 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: remove FIXME's on info and install-info targets.
