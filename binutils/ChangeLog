@@ -1,3 +1,7 @@
+2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* MAINTAINERS: Add myself as the second AVR port maintainer.
+
 2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* MAINTAINERS: Update my email address.

@@ -54,6 +54,7 @@ responsibility among the other maintainers.
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
+  AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
