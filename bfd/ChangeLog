@@ -1,3 +1,7 @@
+Wed Sep 24 16:52:28 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * config.bfd (sh*-*-rtems*): New target, like sh-*-*elf*.
+
 Wed Sep 24 11:27:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (libbfd_a_SOURCES): Define.
