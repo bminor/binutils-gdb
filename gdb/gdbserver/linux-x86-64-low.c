@@ -74,6 +74,3 @@ struct regset_info target_regsets[] = {
     x86_64_fill_fpregset, x86_64_store_fpregset },
   { 0, 0, -1, NULL, NULL }
 };
-
-#endif /* HAVE_LINUX_REGSETS */
-

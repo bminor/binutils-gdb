@@ -36,15 +36,18 @@
 #include <unistd.h>
 
 #define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE int
+#define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS
 static int use_regsets_p = 1;
 #endif
 
 extern int errno;
+
+#ifdef HAVE_LINUX_USRREGS
 extern int num_regs;
 extern int regmap[];
+#endif
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
@@ -154,6 +157,9 @@ myresume (int step, int signal)
     perror_with_name ("ptrace");
 }
 
+
+#ifdef HAVE_LINUX_USRREGS
+
 #define REGISTER_RAW_SIZE(regno) register_size((regno))
 
 int
@@ -170,10 +176,6 @@ register_addr (int regnum)
 
   return addr;
 }
-
-
-
-#ifdef HAVE_LINUX_USRREGS
 
 /* Fetch one register.  */
 static void
@@ -242,7 +244,7 @@ usr_store_inferior_registers (int regno)
       if (regaddr == -1)
 	return;
       errno = 0;
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
 	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
