@@ -1,3 +1,8 @@
+2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* README: Update for 2.11.  Change bug reporting email address.
+	* MAINTAINERS: Tidy up.  Change bug reporting email address.
+
 2001-07-16  DJ Delorie  <dj@redhat.com>
 
 	* resres.c (write_res_header): Align header size.

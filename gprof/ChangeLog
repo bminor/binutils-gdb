@@ -1,3 +1,7 @@
+2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* NOTES: Rename to README for consistency with other binutils.
+
 2001-06-18  H.J. Lu <hjl@gnu.org>
 
         * Makefile.am (diststuff): Add $(MANS).

@@ -1,3 +1,7 @@
+2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* README: Add header for consistency with other README files.
+
 2001-07-14  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (output_prev_sec_find): Never return

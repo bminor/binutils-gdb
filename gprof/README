@@ -1,4 +1,8 @@
-Sun Feb  5 16:09:16 1995
+		README for GPROF
+
+This is the GNU profiler.  It is distributed with other "binary 
+utilities" which should be in ../binutils.  See ../binutils/README for 
+more general notes, including where to send bug reports.
 
 This file documents the changes and new features available with this
 version of GNU gprof.
@@ -111,7 +115,7 @@ Here are some examples:
 				you must use the colon notation explained
 				below to specify a function from a specific
 				source file.  Sometimes, functionnames contain
-				dots.  In such cases, it is necessar to
+				dots.  In such cases, it is necessary to
 				add a leading colon to the name.  For example,
 				":.mul" selects function ".mul".
 				
@@ -433,6 +437,6 @@ be used.
 IMPLEMENTATION NOTE: gcc -a can be used to instrument a program to
 record basic-block execution counts.  However, the __bb_exit_func()
 that is currently present in libgcc2.c does not generate a gmon.out
-file in a suiteable format.  This should be fixed for future releases
+file in a suitable format.  This should be fixed for future releases
 of gcc.  In the meantime, contact davidm@cs.arizona.edu for a version
 of __bb_exit_func() to is appropriate.
