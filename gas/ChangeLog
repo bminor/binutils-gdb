@@ -1,3 +1,7 @@
+Mon May 12 13:33:08 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* config/tc-i386.c (pi): Check for RegMMX.
+
 Thu May  8 11:10:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (expr): When subtracting values in the same frag,
