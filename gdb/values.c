@@ -457,19 +457,31 @@ set_internalvar (var, val)
      struct internalvar *var;
      value_ptr val;
 {
+  value_ptr newval;
+
 #ifdef IS_TRAPPED_INTERNALVAR
   if (IS_TRAPPED_INTERNALVAR (var->name))
     SET_TRAPPED_INTERNALVAR (var, val, 0, 0, 0);
 #endif
 
-  free ((PTR)var->value);
-  var->value = value_copy (val);
+  newval = value_copy (val);
+
   /* Force the value to be fetched from the target now, to avoid problems
      later when this internalvar is referenced and the target is gone or
      has changed.  */
-  if (VALUE_LAZY (var->value))
-    value_fetch_lazy (var->value);
-  release_value (var->value);
+  if (VALUE_LAZY (newval))
+    value_fetch_lazy (newval);
+
+  /* Begin code which must not call error().  If var->value points to
+     something free'd, an error() obviously leaves a dangling pointer.
+     But we also get a danling pointer if var->value points to
+     something in the value chain (i.e., before release_value is
+     called), because after the error free_all_values will get called before
+     long.  */
+  free ((PTR)var->value);
+  var->value = newval;
+  release_value (newval);
+  /* End code which must not call error().  */
 }
 
 char *

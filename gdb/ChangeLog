@@ -1,5 +1,8 @@
 Tue Mar 22 15:28:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* values.c (set_internalvar): Don't set var->value until we are
+	sure there won't be an error().
+
 	* remote.c (get_offsets): Reinstate comment which was in
 	remote_wait about use of SECT_OFF_TEXT and so on.
 
