@@ -1,4 +1,6 @@
-# Each directory to survive it's way into a release will need a file
+# .Sanitize for devo/gdb/config/h8300.
+
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -9,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -21,7 +23,7 @@ Do-first:
 
 Things-to-keep:
 
-h8300hms.mt
+h8300.mt
 tm-h8300.h
 
 Things-to-lose:
