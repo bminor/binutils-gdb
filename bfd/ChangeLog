@@ -1,5 +1,9 @@
 Fri Oct  4 13:49:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* dep-in.sed: Rework backslash loop a bit to avoid bug in sed on
+	HP/UX 10.20.
+	* Makefile.in: Rebuild dependencies.
+
 	* dep-in.sed: Remove ../bfd/sysdep.h, since it will appear when
 	som.h is included.
 
