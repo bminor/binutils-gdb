@@ -1,0 +1,403 @@
+%This file is TeX source for a reference card describing GDB, the GNU debugger.
+%Copyright (C) 1991 Free Software Foundation, Inc.
+%Permission is granted to make and distribute verbatim copies of
+%this reference provided the copyright notices and permission notices
+%are preserved on all copies.
+%
+%TeX markup is a programming language; accordingly this file is source
+%for a program to generate a reference.
+%
+%This program is free software; you can redistribute it and/or modify
+%it under the terms of the GNU General Public License as published by
+%the Free Software Foundation; either version 1, or (at your option)
+%any later version.
+%
+%This program is distributed in the hope that it will be useful, but
+%WITHOUT ANY WARRANTY; without even the implied warranty of
+%MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+%General Public License for more details.
+%
+%You can find a copy of the GNU General Public License in the GDB
+%manual; or write to the Free Software Foundation, Inc.,
+%675 Mass Ave, Cambridge, MA 02139, USA.
+%
+%You can contact the author as:  pesch@cygnus.com
+%
+%                                Roland Pesch
+%                                Cygnus Support
+%                                814 University Ave.
+%                                Palo Alto, CA 94301 USA
+%
+%                                +1 415 322 3811
+%
+%            Cygnus Support is an organization devoted to commercial
+%            support of free software.  For general information
+%            contact ``info@cygnus.com''
+%
+%
+\input threecol
+{%
+\def\$#1${{#1}}%   Kluge: collect RCS revision info without $...$
+\xdef\manvers{\$Revision$}%
+}
+\vsize=8in
+\hyphenpenalty=5000\tolerance=2000\raggedright
+%
+\font\bbf=cmbx10
+\font\vbbf=cmbx12
+\font\smrm=cmr6
+\font\brm=cmr10
+\font\rm=cmr8
+\font\it=cmti8
+\font\tt=cmtt8
+\normalbaselineskip=9pt\baselineskip=9pt
+%
+\parindent=0pt
+\parskip=0pt
+\footline={\vbox to0pt{\hss}}
+%
+\def\ctl#1{{\tt C-#1}}
+\def\opt#1{{\brm[{\rm #1}]}}
+\def\xtra#1{\noalign{\smallskip{\tt#1}}}
+%
+\long\def\sec#1;#2\endsec{\vskip 1pc
+\halign{%
+%COL 1 (of halign):
+\vtop{\hsize=1in\tt
+##\par\vskip 2pt
+}\quad
+%COL 2 (of halign):
+&\vtop{\hsize=2.1in\hangafter=1\hangindent=0.5em
+\rm ##\par\vskip 2pt}\cr
+%Tail of \long\def fills in halign body with \sec args:
+\noalign{{\bbf #1}\vskip 2pt}
+#2
+}
+}
+
+{\vbbf GDB QUICK REFERENCE}
+\vskip 5pt
+{\smrm GDB Version 4.00---Cygnus Support 1991}
+
+\sec Starting GDB;
+gdb&starts GDB, with no debugging files\cr
+gdb {\it program}&begin debugging {\it program}\cr
+gdb {\it program core}&debug coredump {\it core} produced by {\it program}\cr
+\endsec
+
+\sec Stopping GDB;
+quit&Exit GDB; abbreviate as {\tt q} or {\tt EOF}\par (eg \ctl{d})\cr
+INTERRUPT&(eg \ctl{c}) terminate current command\cr
+\endsec
+
+\sec Getting Help;
+help&List classes of commands\cr
+help {\it class}&One-line descriptions for commands in {\it class}\cr
+help {\it command}&Describe {\it command}\cr
+\endsec
+
+\sec Executing your Program;
+run {\it arglist}&start your program with {\it arglist}\cr
+run&start your program with current argument list\cr
+run $\ldots$ <{\it inf} >{\it outf}&start program with input, output
+redirected\cr
+\cr
+kill&Kill running program\cr
+\cr
+tty {\it dev}&Use {\it dev} as default i/o for next {\tt run}\cr
+set args {\it arglist}&specify {\it arglist} for next
+{\tt run}\cr
+set args&specify empty argument list\cr
+show args&display argument list\cr
+\cr
+show environment&show all environment variables\cr
+show env {\it var}&show value of environment variable {\it var}\cr
+set env {\it var} {\it expr}&set environment variable {\it var}\cr
+delete env {\it var}&Remove {\it var} from environment\cr
+\endsec
+
+\sec Shell Commands;
+cd {\it dir}&Change working directory to {\it dir}\cr
+pwd&Print working directory\cr
+make $\ldots$&Call ``{\tt make}''\cr
+shell {\it cmd}&Execute arbitrary shell command string\cr
+\endsec
+
+\vfill
+\centerline{\smrm \copyright 1991 Free Software Foundation, Inc.\qquad Permissions on back}
+\eject
+\sec Breakpoints and Watchpoints;
+break \opt{\it file\tt:}{\it line}&Set breakpoint at {\it line} number \opt{in \it file}\par 
+eg:\quad{\tt break main.c:37}\quad\cr
+break \opt{\it file\tt:}{\it fun}&Set breakpoint at {\it
+fun}() \opt{in \it file}\cr
+break +{\it offset}\par
+break -{\it offset}&Set break at offset from current stop\cr
+break *{\it addr}&Set breakpoint at address {\it addr}\cr
+break&Set breakpoint at next instruction\cr
+break $\ldots$ if {\it expr}&Break conditionally on nonzero {\it expr}\cr
+cond {\it bno} \opt{\it expr}&New conditional expression on breakpoint
+number {\it bno}; make unconditional if no {\it expr}\cr
+tbreak $\ldots$&Temporary break; disable when reached\cr
+rbreak {\it regex}&Break on all functions matching {\it regex}\cr
+watch {\it expr}&Set a watchpoint for expression {\it expr}\cr
+catch {\it x}&Set breakpoint at C++ handler for exception {\it x}\cr
+\cr
+info break&Show defined breakpoints\cr
+info watch&Show defined watchpoints\cr
+\cr
+clear&Delete breakpoints at next instruction\cr
+clear \opt{\it file\tt:}{\it fun}&Delete breakpoints at entry to {\it fun}()\cr
+clear \opt{\it file\tt:}{\it line}&Delete breakpoints on source line \cr
+delete \opt{{\it bnos}}&Delete breakpoints numbered {\it bnos};
+\opt{or all breakpoints}\cr
+\cr
+disable \opt{{\it bnos}}&Disable breakpoints {\it bnos} \opt{or all}\cr
+enable {\it bnos}&Enable breakpoints {\it bnos} \opt{or all}\cr
+enable once {\it bnos}&Enable breakpoints; disable again when
+reached\cr
+enable del {\it bnos}&Enable breakpoints; delete when reached\cr
+\cr
+ignore {\it bno} {\it count}&Ignore breakpoint number {\it bno}, {\it count}
+times\cr
+\cr
+commands {\it bno}\par
+\qquad {\it command list}&Execute GDB {\it command list} every time breakpoint {\it bno} is reached\cr
+end&(use only with {\tt commands}) End of {\it command list}\cr
+\endsec
+
+\sec Signals;
+handle {\it signal} {\it act}&Specify GDB actions when {\it signal} occurs:\cr
+\quad print&Announce when signal occurs\cr
+\quad noprint&Be silent when signal occurs\cr
+\quad stop&Halt execution on signal\cr
+\quad nostop&Do not halt execution\cr
+\quad pass&Allow your program to handle signal\cr
+\quad nopass&Do not allow your program to see signal\cr
+info signal&Show table of signals and GDB action for each\cr
+\endsec
+
+\vfill\eject
+\sec Execution Control;
+continue \opt{\it count}\par
+c \opt{\it count}&Continue running; if {\it count} specified, ignore
+this breakpoint next {\it count} times\cr
+\cr
+step \opt{\it count}\par
+s \opt{\it count}&Execute until another line reached; repeat {\it count} times if
+specified\cr
+\cr
+stepi \opt{\it count}\par
+si \opt{\it count}&Step by machine instructions rather than source
+lines\cr
+\cr
+next \opt{\it count}\par
+n \opt{\it count}&Execute next line, including any function calls.\cr
+\cr
+nexti \opt{\it count}\par
+ni \opt{\it count}&Next machine instruction rather than source
+line\cr
+\cr
+until \opt{\it location}&Run until next instruction (or {\it
+location}) reached\cr
+\cr
+finish&Run until selected stack frame returns\cr
+return \opt{\it expr}&Pop selected stack frame without executing,
+optionally setting return value\cr
+\cr
+signal {\it num}&Resume execution with signal {\it num} (none if {\tt 0})\cr
+jump {\it line}\par
+jump *{\it address}&Resume execution at specified {\it line} number or
+{\it address}\cr
+set var {\it expr}&Evaluate {\it expr} without displaying it; use for
+altering program variables\cr
+\endsec
+
+\sec Debugging Targets;
+target {\it type} {\it param}&Connect to target machine, process, or file\cr
+info targets&Display available targets\cr
+attach {\it param}&Connect to another target of same type\cr
+detach&Release target from GDB control\cr
+\endsec
+
+\sec Expressions;
+{\it expr}&An expression in C or C++ (including function calls), or:\cr
+{\it addr\/}@{\it len}&An array of {\it len} elements beginning at {\it
+addr}\cr
+{\it file}::{\it nm}&A variable or function {\it nm} defined in {\it
+file}\cr
+$\tt\{${\it type}$\tt\}${\it addr}&Read memory at {\it addr} as specified
+{\it type}\cr
+print \opt{\tt/{\it f}\/} {\it expr}\par
+p \opt{\tt/{\it f}\/} {\it expr}&Display the value of an expression\par 
+in format {\it f}:\cr
+\qquad x&hexadecimal\cr
+\qquad d&signed decimal\cr
+\qquad u&unsigned decimal\cr
+\qquad o&octal\cr
+\qquad a&address, absolute and relative\cr
+\qquad c&character constant\cr
+\qquad f&floating point\cr
+call \opt{\tt /{\it f}\/} {\it expr}&Like {\tt print} but does not display
+{\tt void}\cr
+\endsec
+
+\vfill\eject
+\sec Memory;
+x \opt{\tt/{\it Nuf}\/} {\it expr}&Examine memory at address {\it expr};
+optional format spec follows slash.\cr
+\quad {\it N}&Count of how many units to display;\cr
+\quad {\it u}&Unit size; one of\cr
+&{\tt\qquad b}\ individual bytes\cr
+&{\tt\qquad h}\ halfwords (two bytes)\cr
+&{\tt\qquad w}\ words (four bytes)\cr
+&{\tt\qquad g}\ giant words (eight bytes)\cr
+\quad {\it f}&Printing format.  Any {\tt print} format, or\cr
+&{\tt\qquad s}\ Null-terminated string\cr
+&{\tt\qquad i}\ Machine instructions\cr
+disassem \opt{\it addr}&Display range of memory as machine
+instructions; function surrounding {\it addr} or program counter, or range between two arguments\cr
+\endsec
+
+\sec Automatic Display;
+display \opt{\tt/\it f\/} {\it expr}&Show value of {\it expr} each time
+program stops \opt{according to format {\it f}\/}\cr
+display&Display all enabled expressions on list\cr
+undisplay {\it dnos}&Remove number(s) {\it dnos} from list of
+automatically displayed expressions\cr
+disable dis {\it dnos}&Disable display for expression(s) number {\it
+dnos}\cr
+enable dis {\it dnos}&Enable display for expression(s) number {\it
+dnos}\cr
+info display&Show numbered list of expressions to display\cr
+\endsec
+
+\sec Program Stack;
+backtrace \opt{\it n}\par
+bt \opt{\it n}&Print trace of all frames in stack; or of {\it n}
+frames---innermost if {\it n}{\tt >0}, outermost if {\it n}{\tt <0}\cr
+frame \opt{\it n}&Select frame number {\it n} or frame at address {\it
+n}; if no {\it n}, display current frame\cr
+up {\it n}&Select frame {\it n} frames up\cr
+down {\it n}&Select frame {\it n} frames down\cr
+info frame \opt{\it addr}&Description of selected frame, or frame at
+{\it addr}\cr
+info args&Arguments of selected frame\cr
+info locals&Local variables of selected frame\cr
+info catch&Exception handlers active in selected frame\cr
+\endsec
+
+\sec Symbol Table;
+info address {\it s}&Show where symbol {\it s} is stored\cr
+info func \opt{\it regex}&Show names, types of defined functions
+(all, or matching {\it regex})\cr
+info var \opt{\it regex}&Show names, types of global variables (all,
+or matching {\it regex})\cr
+info sources&Show all sources having debugging information\cr
+whatis {\it expr}\par
+ptype {\it expr}&Show data type of {\it expr} without evaluating; {\tt
+ptype} gives more detail\cr
+ptype {\it type}&Describe type, struct, union, or enum\cr
+\endsec
+
+\vfill\eject
+\sec Controlling GDB;
+set {\it param} {\it expr}&Set one of GDB's internal parameters,
+controlling its interaction with you\cr
+show {\it param}&Display current setting of a GDB parameter\cr
+\xtra{\rm Parameters understood by {\tt set} and {\tt show}:}
+\quad addressp {\it on/off}&print memory addresses in stacks,
+structs\cr
+\quad array-max {\it limit}&Number of elements to display from an
+array\cr
+\quad arraypr {\it off/on}&Compact or attractive format for
+arrays\cr
+\quad caution {\it on/off}&Enable or disable cautionary queries\cr
+\quad editing {\it on/off}&Control {\tt readline} command-line editing\cr
+\quad history&({\tt h}) covers a number of options:\cr
+\quad h exp {\it off/on}&Disable or enable {\tt readline} history expansion\cr
+\quad h file {\it filename}&File for recording GDB command history\cr
+\quad h size {\it size}&Number of commands kept in history list\cr
+\quad h write {\it off/on}&Control use of external file for
+command history\cr
+\cr
+\quad pretty {\it off/on}&Compact or indented format for struct
+display\cr
+\quad prompt {\it str}&Use {\it str} as GDB prompt\cr
+\quad radix {\it base}&Octal, decimal, or hex number representation\cr
+\quad screen-h {\it lpp}&Number of lines before pause in
+display\cr
+\quad screen-w {\it cpl}&Number of characters before line folded\cr
+\quad unionpr {\it on/off}&Enable or disable display of unions in
+structs\cr
+\quad verbose {\it on/off}&Control messages when loading
+symbol table\cr
+\quad vtblpr {\it off/on}&Display of C++ virtual function tables\cr
+info editing&Show last 10 commands\cr
+info editing {\it n}&Show 10 commands around number {\it n}\cr
+info editing +&Show next 10 commands\cr
+\endsec
+
+\sec Working Files;
+file {\it name}&Use {\it file} for symbols and executable\cr
+core {\it name}&Read {\it file} as coredump\cr
+exec {\it name}&Use {\it file} as executable only\cr
+symbol {\it name}&Use only symbol table from {\it file}\cr
+load {\it file} {\it addr}&Read additional symbols from {\it file},
+dynamically loaded at {\it addr}\cr
+info files&Display working files and targets in use\cr
+\cr
+share \opt{\it regex}&Add symbol information for shared libraries
+matching {\it regex}, or all shared libraries\cr
+info share&List names of shared libraries currently loaded\cr
+\endsec
+
+\vfill\eject
+\sec Source Files;
+dir {\it name}&Add directory {\it name} to front of source path\cr
+dir&Clear source path\cr
+info dir&Show current source path\cr
+\cr
+list&Show next ten lines of source\cr
+list -&Show previous ten lines\cr
+list {\it lines}&Display source centered around {\it lines}, 
+specified as one of:\cr
+\quad{\opt{\it file\tt:}\it num}&Line number \opt{in named file}\cr
+\quad{\opt{\it file\tt:}\it function}&Beginning of function \opt{in
+named file}\cr
+\quad{\tt +\it off}&{\it off} lines after last printed\cr
+\quad{\tt -\it off}&{\it off} lines previous to last printed\cr
+\quad{\tt*\it address}&Line containing {\it address}\cr
+list {\it f},{\it l}&from line {\it f} to line {\it l}\cr
+info line {\it num}&Show starting, ending addresses of compiled code for
+source line {\it num}\cr
+forw {\it regex}&Search following source lines for {\it regex}\cr
+rev {\it regex}&Search preceding source lines for {\it regex}\cr
+\endsec
+
+\sec GDB under GNU Emacs;
+M-x gdb&Run GDB under Emacs\cr
+\ctl{h} m&Describe GDB mode\cr
+M-s&Step one line ({\tt step})\cr
+M-n&Next line ({\tt next})\cr
+M-i&Step one instruction ({\tt stepi})\cr
+\ctl{c} \ctl{f}&Finish current stack frame ({\tt finish})\cr
+M-c&Continue ({\tt cont})\cr
+M-u&Up {\it arg} frames ({\tt up})\cr
+M-d&Down {\it arg} frames ({\tt down})\cr
+\ctl{x} SPC&(in source file) set break at point\cr
+\endsec
+
+
+\vfill
+{\smrm\parskip=6pt
+\centerline{Copyright \copyright 1991 Free Software Foundation, Inc.}
+\centerline{Roland Pesch (pesch@cygnus.com), January 1991---\manvers}
+
+This card may be freely distributed under the terms of the GNU
+General Public License.
+
+Please contribute to development of this card by annotating it.
+
+No author assumes any responsibility for any errors on this card.}
+\end
