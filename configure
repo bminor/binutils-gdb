@@ -92,14 +92,13 @@ NO_EDIT="This file was generated automatically by configure.  Do not edit."
 ## path.  Since PATH might include "." we also add `pwd` to the end of PATH.
 ##
 
-PWD=`pwd`
 progname=$0
 
 case "${progname}" in
 /*) ;;
 */*) ;;
 *)
-	PATH=$PATH:${PWD} ; export PATH
+	PATH=$PATH:${PWD=`pwd`} ; export PATH
 	;;
 esac
 
@@ -361,7 +360,7 @@ case "${srcdir}" in
 ".") ;;
 *)
 	if [ -f ${srcdir}/config.status ] ; then
-		echo '***' Cannot configure here in \"${PWD}\" when \"${srcdir}\" is currently configured. 1>&2
+		echo '***' Cannot configure here in \"${PWD=`pwd`}\" when \"${srcdir}\" is currently configured. 1>&2
 		exit 1
 	fi
 esac
@@ -417,7 +416,7 @@ fi
 # some sanity checks on configure.in
 case "${srctrigger}" in
 "")
-	echo '***' srctrigger not set in ${PWD}/configure.in.  1>&2
+	echo '***' srctrigger not set in ${PWD=`pwd`}/configure.in.  1>&2
 	exit 1
 	;;
 *) ;;
@@ -453,8 +452,8 @@ esac
 
 if [ ! -r ${srcdir}/${srctrigger} ] ; then
 	case "${srcdirdefaulted}" in
-	"") echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/${srcdir}" 1>&2 ;;
-	*)  echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/. or ${PWD}/.." 1>&2 ;;
+	"") echo '***' "${progname}: Can't find ${srcname} sources in ${PWD=`pwd`}/${srcdir}" 1>&2 ;;
+	*)  echo '***' "${progname}: Can't find ${srcname} sources in ${PWD=`pwd`}/. or ${PWD=`pwd`}/.." 1>&2 ;;
 	esac
 
 	echo '***' \(At least ${srctrigger} is missing.\) 1>&2
@@ -587,7 +586,7 @@ EOF
 			sed -e "/^####/  r ${host_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
 		else
 			echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
-			echo '***' is missing in ${PWD}. 1>&2
+			echo '***' is missing in ${PWD=`pwd`}. 1>&2
 			mv ${subdir}/Makefile.tem ${Makefile}
 		fi
 	esac
@@ -598,7 +597,9 @@ EOF
 	case "${target_makefile_frag}" in
 	"") mv ${Makefile} ${subdir}/Makefile.tem ;;
 	*)
-		target_makefile_frag=${srcdir}/${target_makefile_frag}
+		if [ ! -f ${target_makefile_frag} ] ; then
+			target_makefile_frag=${srcdir}/${target_makefile_frag}
+		fi
 		if [ -f ${target_makefile_frag} ] ; then
 			sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} > ${subdir}/Makefile.tem
 		else
@@ -624,12 +625,22 @@ target_cpu = ${target_cpu}
 target_vendor = ${target_vendor}
 target_os = ${target_os}
 EOF
-	if [ "${target_makefile_frag}" != "" ] ; then
-	    echo target_makefile_frag = ${invsubdir}${target_makefile_frag} >>${Makefile}
-	fi 
-	if [ "${host_makefile_frag}" != "" ] ; then
-	    echo host_makefile_frag = ${invsubdir}${host_makefile_frag} >>${Makefile}
-	fi 
+	case "${target_makefile_frag}" in
+	"") ;;
+	/*)
+  echo target_makefile_frag = ${target_makefile_frag} >>${Makefile} ;;
+	*)
+  echo target_makefile_frag = ${invsubdir}${target_makefile_frag} >>${Makefile} ;;
+	esac
+
+	case "${host_makefile_frag}" in
+	"") ;;
+	/*)
+  echo host_makefile_frag = ${host_makefile_frag} >>${Makefile} ;;
+	*)
+  echo host_makefile_frag = ${invsubdir}${host_makefile_frag} >>${Makefile} ;;
+	esac
+
 	if [ "${site_makefile_frag}" != "" ] ; then
 	    echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
 	fi 
@@ -689,7 +700,7 @@ EOF
 
 	newusing=`echo "${using}" | sed 's/and/using/'`
 	using=${newusing}
-	echo "Created \"${Makefile}\" in" ${PWD} ${using}
+	echo "Created \"${Makefile}\" in" ${PWD=`pwd`} ${using}
 
 	. ${tmpfile}.pos
 
@@ -706,13 +717,13 @@ EOF
 	if [ ${subdir} = . ] ; then
 	    echo "#!/bin/sh
 # ${NO_EDIT}
-# ${PWD} was configured as follows:
+# This directory was configured as follows:
 ${progname}" ${arguments}  "
 # ${using}" > ${subdir}/config.new
 	else
 	    echo "#!/bin/sh
 # ${NO_EDIT}
-# ${PWD}/${subdir} was configured as follows:
+# This directory was configured as follows:
 cd ${invsubdir}
 ${progname}" ${arguments}  "
 # ${using}" > ${subdir}/config.new
@@ -743,7 +754,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 				;;
 			esac
 
-			POPDIR=${PWD}
+			POPDIR=${PWD=`pwd`}
 			cd ${configdir} 
 
 ### figure out what to do with srcdir

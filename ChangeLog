@@ -1,3 +1,9 @@
+Mon Jun 22 18:30:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* configure: fix various problems with propogating
+	makefile_target_frag in subdirs.
+	* configure.in: config libgcc if its there
+
 Fri Jun 19 15:19:40 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* config.sub:  HPPA merge.
