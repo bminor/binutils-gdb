@@ -1177,7 +1177,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
 {
   char *p1;
   char *copy;
-  struct symtab *s;
+  struct symtab *file_symtab;
   
   p1 = p;
   while (p != *argptr && p[-1] == ' ')
@@ -1193,8 +1193,8 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
     copy[p - *argptr] = 0;
 
   /* Find that file's data.  */
-  s = lookup_symtab (copy);
-  if (s == 0)
+  file_symtab = lookup_symtab (copy);
+  if (file_symtab == 0)
     {
       if (!have_full_symbols () && !have_partial_symbols ())
 	error ("No symbol table is loaded.  Use the \"file\" command.");
@@ -1207,7 +1207,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
     p++;
   *argptr = p;
 
-  return s;
+  return file_symtab;
 }
 
 

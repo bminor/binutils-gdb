@@ -1,3 +1,8 @@
+2003-01-12  David Carlton  <carlton@bactrian.org>
+
+	* linespec.c (symtab_from_filename): Rename variable 's' to
+	'file_symtab'.
+
 2003-01-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* d10v-tdep.c (d10v_init_extra_frame_info): Remove checks for a
