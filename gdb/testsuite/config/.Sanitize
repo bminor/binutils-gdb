@@ -61,17 +61,6 @@ else
 			mv new $i
 		fi
 	done
-	echo Thawing the \"chill\" out of mt-unix...
-	cp mt-unix new
-	sed -e '
-	  /CHILL =/d
-	  /CHILLFLAGS =/d
-	' < mt-unix > new
-	if [ -n "${safe}" -a ! -f .Recover/mt-unix ] ; then
-		echo Caching mt-unix in .Recover...
-		mv mt-unix .Recover
-	fi
-	mv new mt-unix
 fi
 
 # eof
