@@ -1666,8 +1666,8 @@ NAME(aout,slurp_symbol_table) (abfd)
      with smaller amounts of VM?  (What effect does that have on the
      string table reductions?)
 
-   FIXME: This hash table code breaks dbx on SunOS 4.1.3.  There
-   should be some way to turn it off.  */
+   This hash table code breaks dbx on SunOS 4.1.3, so we don't do it
+   if BFD_TRADITIONAL_FORMAT is set.  */
 
 /* An entry in the strtab hash table.  */
 
