@@ -25,9 +25,15 @@ extern void EXFUN(bzero,(char *, int));
 #define NO_STDARG 1
 extern int  EXFUN(abort,(void));
 extern int  EXFUN(close,(int));
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern int  EXFUN(fcntl,(int des, int cmd, int e));
+#endif
 extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern int  EXFUN(fseek,(FILE*, int, int));
+#endif
 extern int  EXFUN(fclose,(FILE*));
 extern void EXFUN(bcopy,(char*,char*,int));
 extern int  EXFUN(bcmp,(char *, char *, int));
@@ -42,9 +48,15 @@ extern char * strchr();
 extern char *getenv();
 extern char *strrchr();
 extern int chmod();
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern int fread();
+#endif
 extern int fstat();
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern int fwrite();
+#endif
 extern int sscanf();
 extern int stat();
 extern int strtol();
@@ -53,7 +65,10 @@ extern char *strrchr();
 extern char *ctime();
 extern int _flsbuf();
 extern int fclose();
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern int time();
+#endif
 extern int utime();
 extern int vfprintf();
 extern long atol();

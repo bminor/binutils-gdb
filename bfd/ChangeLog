@@ -1,3 +1,8 @@
+Mon Jun 14 14:02:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* hosts/delta88.h: #if 0 out some declarations which conflict with
+	system headers.
+
 Mon Jun 14 17:08:18 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 
 	* Makefile.in (install): remove parentdir cruft
