@@ -760,10 +760,12 @@ Options:\n\
   --preprocessor PROGRAM      Program to use to preprocess rc file\n\
   --include-dir DIR           Include directory when preprocessing rc file\n\
   --define SYM[=VAL]          Define SYM when preprocessing rc file\n\
-  --language VAL              Set language when reading rc file\n\
+  --language VAL              Set language when reading rc file\n");
 #ifdef YYDEBUG
-  --yydebug                   Turn on parser debugging\n\
+  fprintf (stream, "\
+  --yydebug                   Turn on parser debugging\n");
 #endif
+  fprintf (stream, "\
   --help                      Print this help message\n\
   --version                   Print version information\n");
   fprintf (stream, "\
