@@ -1,3 +1,23 @@
+Thu Sep  8 17:14:43 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* remote.c (fromhex): Make error more explicit.
+	(read_frame): Don't print bad checksum information unless
+	remote_debugging.  Don't use repeat count unless it's > 0.
+	* remote-e7000.c (expect): When echoing, ignore multiple newlines.
+	(e7000_insert_breakpoint, e7000_remove_breakpoint, target_ops): Optionally
+	cope with BC style breakpoints.  
+	(e7000_command):  After command send directly to the E7000 mark
+	registers as changed. 
+	(why_stop, e7000_wait: Understand BC style stop condition.
+	* sh-tdep.c (sh_skip_prologue):  Understand more complicated
+	sequences.  (frame_find_saved_regs): Likewise.
+	* config/h8500/tm-h8500.h (target_write_pc, TARGET_WRITE_PC):
+	Handle extra arg.
+	* config/i386/xm-go32.h (GDBINIT_FILENAME): Set to gdb.ini.
+	(more work here to come)
+	* config/sh/tm-sh.h (EXTRA_FRAME_INFO): Add f_offset and leaf_function
+	fields.
+
 Thu Sep  8 16:15:34 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* sparclite/Makefile.in: Assorted stuff needed for eload.

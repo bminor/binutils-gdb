@@ -47,7 +47,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define GET_PUSHED_REG(x)  	(((x) >> 4) & 0xf)
 #define IS_MOV_SP_FP(x)  	((x) == 0x6ef3)
 #define IS_ADD_SP(x) 		(((x) & 0xff00) == 0x7f00)
-
+#define IS_MOV_R3(x) 		(((x) & 0xff00) == 0x1a00)
+#define IS_SHLL_R3(x)		((x) == 0x4300)
+#define IS_ADD_R3SP(x)		((x) == 0x3f3c)
 
 /* Skip any prologue before the guts of a function */
 
@@ -61,7 +63,11 @@ sh_skip_prologue (start_pc)
   w = read_memory_integer (start_pc, 2);
   while (IS_STS (w)
 	 || IS_PUSH (w)
-	 || IS_MOV_SP_FP (w))
+	 || IS_MOV_SP_FP (w)
+	 || IS_MOV_R3(w)
+	 || IS_ADD_R3SP(w)
+	 || IS_ADD_SP(w)
+	 || IS_SHLL_R3(w))
     {
       start_pc += 2;
       w = read_memory_integer (start_pc, 2);
@@ -94,7 +100,7 @@ sh_frame_chain (thisframe)
      FRAME thisframe;
 {
   if (!inside_entry_file (thisframe->pc))
-    return (read_memory_integer (FRAME_FP (thisframe), 4));
+    return (read_memory_integer (FRAME_FP (thisframe) + thisframe->f_offset, 4));
   else
     return 0;
 }
@@ -118,10 +124,15 @@ frame_find_saved_regs (fi, fsr)
   int pc;
   int opc;
   int insn;
+  int hadf;
+  int r3_val = 0;
 
   opc = pc = get_pc_function_start (fi->pc);
 
   insn = read_memory_integer (pc, 2);
+
+  fi->leaf_function = 1;
+  fi->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS; rn++)
     where[rn] = -1;
@@ -146,7 +157,27 @@ frame_find_saved_regs (fi, fsr)
 	  pc += 2;
 	  where[PR_REGNUM] = depth;
 	  insn = read_memory_integer (pc, 2);
+	  /* If we're storing the pr then this isn't a leaf */
+	  fi->leaf_function = 0;
 	  depth += 4;
+	}
+      else if (IS_MOV_R3 (insn))
+	{
+	  r3_val = (char)(insn & 0xff);
+	  pc+=2;
+	  insn = read_memory_integer (pc, 2);
+	}
+      else if (IS_SHLL_R3 (insn))
+	{
+	  r3_val <<=1;
+	  pc+=2;
+	  insn = read_memory_integer (pc, 2);
+	}
+      else if (IS_ADD_R3SP (insn))
+	{
+	  depth += -r3_val;
+	  pc+=2;
+	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_ADD_SP (insn))
 	{
@@ -184,18 +215,25 @@ frame_find_saved_regs (fi, fsr)
       fsr->regs[SP_REGNUM] = fi->frame - 4;
     }
 
-
+  fi->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
-
-  if (fsr->regs[PR_REGNUM])
-    {
-      fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4) + 4;
-    }
-  else
+  /* Just called, so dig out the real return */
+  if (fi->return_pc == 0)
     {
       fi->return_pc = read_register (PR_REGNUM) + 4;
     }
+  else {
+
+    if (fsr->regs[PR_REGNUM])
+      {
+	fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4) + 4;
+      }
+    else
+      {
+	fi->return_pc = read_register (PR_REGNUM) + 4;
+      }
+  }
 }
 
 /* initialize the extra info saved in a FRAME */
