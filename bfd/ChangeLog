@@ -1,3 +1,7 @@
+Tue Mar  1 13:06:53 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* configure.in : Add i396os9k_vec.
+
 Mon Feb 28 15:41:01 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* config.bfd : Add i386-os9k.

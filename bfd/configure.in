@@ -151,6 +151,7 @@ do
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o elf.o" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o elf.o" ;;
+    bfd_elf32_powerpc_vec)	tb="$tb elf32-powerpc.o elf32.o elf.o" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
@@ -180,6 +181,7 @@ do
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
     i386lynx_coff_vec)		tb="$tb cf-i386lynx.o lynx-core.o stab-syms.o" ;;
     i386mach3_vec)		tb="$tb i386mach3.o aout32.o stab-syms.o" ;;
+    i386os9k_vec)		tb="$tb i386os9k.o aout32.o stab-syms.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
@@ -189,14 +191,13 @@ do
     m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o lynx-core.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
-    nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
     nlm32_sparc_vec)		tb="$tb nlm32-sparc.o nlm32.o nlm.o" ;;
-    nlm32_little_generic_vec) 	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
-    nlm64_big_generic_vec)	tb="$tb nlm64-gen.o nlm64.o nlm.o"
+    nlm32_alpha_vec)		tb="$tb nlm32-alpha.o nlm32.o nlm.o"
 				target64=true ;;
-    nlm64_little_generic_vec) 	tb="$tb nlm64-gen.o nlm64.o nlm.o"
-				target64=true ;;
+#	start-sanitize-powerpc-netware
+    nlm32_powerpc_vec)		tb="$tb nlm32-powerpc.o nlm32.o nlm.o" ;;
+#	end-sanitize-powerpc-netware
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
