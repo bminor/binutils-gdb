@@ -29,6 +29,7 @@ configure.in
 all.texi
 as.1
 as.texinfo
+gasp.texi
 h8.texi
 
 Things-to-lose:
