@@ -184,15 +184,21 @@ static void s_alpha_data PARAMS((int));
 #ifndef OBJ_ELF
 static void s_alpha_comm PARAMS((int));
 #endif
+#ifdef OBJ_ECOFF
 static void s_alpha_rdata PARAMS((int));
 static void s_alpha_sdata PARAMS((int));
+#endif
+#ifdef OBJ_ELF
+static void s_alpha_section PARAMS((int));
+#endif
 static void s_alpha_gprel32 PARAMS((int));
 static void s_alpha_float_cons PARAMS((int));
 static void s_alpha_proc PARAMS((int));
 static void s_alpha_set PARAMS((int));
 static void s_alpha_base PARAMS((int));
 static void s_alpha_align PARAMS((int));
-static void s_alpha_cons PARAMS((int));
+static void s_alpha_stringer PARAMS((int));
+static void s_alpha_space PARAMS((int));
 
 static void create_literal_section PARAMS((const char *, segT*, symbolS**));
 #ifndef OBJ_ELF
@@ -308,17 +314,18 @@ static symbolS *alpha_insn_label;
    .align 0 will turn this off.  */
 static int alpha_auto_align_on = 1;
 
+/* The known current alignment of the current section.  */
+static int alpha_current_align;
+
 /* These are exported to ECOFF code.  */
 unsigned long alpha_gprmask, alpha_fprmask;
 
 
 /* Public interface functions */
 
-/*
- * This function is called once, at assembler startup time.  It sets up
- * all the tables, etc. that the MD part of the assembler will need,
- * that can be determined before arguments are parsed.
- */
+/* This function is called once, at assembler startup time.  It sets
+   up all the tables, etc. that the MD part of the assembler will
+   need, that can be determined before arguments are parsed.  */
 
 void
 md_begin ()
@@ -439,9 +446,7 @@ md_begin ()
   subseg_set(text_section, 0);
 }
 
-/*
- * The public interface to the instruction assembler.
- */
+/* The public interface to the instruction assembler.  */
 
 void
 md_assemble (str)
@@ -470,6 +475,8 @@ md_assemble (str)
   assemble_tokens (opname, tok, ntok, alpha_macros_on);
 }
 
+/* Round up a section's size to the appropriate boundary.  */
+
 valueT
 md_section_align (seg, size)
      segT seg;
@@ -481,12 +488,10 @@ md_section_align (seg, size)
   return (size + mask) & ~mask;
 }
 
-/*
- * Turn a string in input_line_pointer into a floating point constant
- * of type type, and store the appropriate bytes in *litP.  The number
- * of LITTLENUMS emitted is stored in *sizeP.  An error message is
- * returned, or NULL on OK. 
- */
+/* Turn a string in input_line_pointer into a floating point constant
+   of type type, and store the appropriate bytes in *litP.  The number
+   of LITTLENUMS emitted is stored in *sizeP.  An error message is
+   returned, or NULL on OK.  */
 
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
@@ -550,27 +555,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-void
-md_bignum_to_chars (buf, bignum, nchars)
-     char *buf;
-     LITTLENUM_TYPE *bignum;
-     int nchars;
-{
-  while (nchars)
-    {
-      LITTLENUM_TYPE work = *bignum++;
-      int nb = CHARS_PER_LITTLENUM;
-
-      do
-	{
-	  *buf++ = work & ((1 << BITS_PER_CHAR) - 1);
-	  if (--nchars == 0)
-	    return;
-	  work >>= BITS_PER_CHAR;
-	}
-      while (--nb);
-    }
-}
+/* Take care of the target-specific command-line options.  */
 
 int
 md_parse_option (c, arg)
@@ -631,6 +616,8 @@ md_parse_option (c, arg)
   return 1;
 }
 
+/* Print a description of the command-line options that we accept.  */
+
 void
 md_show_usage (stream)
      FILE *stream;
@@ -639,12 +626,14 @@ md_show_usage (stream)
 Alpha options:\n\
 -32addr			treat addresses as 32-bit values\n\
 -F			lack floating point instructions support\n\
--m21064 | -m21066 | -m21164 | -m21164a | -m21264\n\
+-m21064 | -m21066 | -m21164 | -m21164a\n\
+-mev4 | -mev45 | -mev5 | -mev56 | -mall\n\
 			specify variant of Alpha architecture\n",
 	stream);
 }
 
-/* FIXME (inherited): @@ Is this right?? */
+/* Decide from what point a pc-relative relocation is relative to,
+   relative to the pc-relative fixup.  Er, relatively speaking.  */
 
 long
 md_pcrel_from (fixP)
@@ -661,6 +650,16 @@ md_pcrel_from (fixP)
       return fixP->fx_size + addr;
     }
 }
+
+/* Attempt to simplify or even eliminate a fixup.  The return value is
+   ignored; perhaps it was once meaningful, but now it is historical.
+   To indicate that a fixup has been eliminated, set fixP->fx_done.
+
+   For ELF, here it is that we transform the GPDISP_HI16 reloc we used
+   internally into the GPDISP reloc used externally.  We had to do
+   this so that we'd have the GPDISP_LO16 reloc as a tag to compute
+   the distance to the "lda" instruction for setting the addend to
+   GPDISP.  */
 
 int
 md_apply_fix (fixP, valueP)
@@ -875,6 +874,8 @@ md_undefined_symbol(name)
 }
 
 #ifdef OBJ_ECOFF
+/* @@@ Magic ECOFF bits.  */
+
 void
 alpha_frob_ecoff_data ()
 {
@@ -885,11 +886,9 @@ alpha_frob_ecoff_data ()
 }
 #endif
 
-void
-alpha_flush_pending_output ()
-{
-  alpha_insn_label = NULL;
-}
+/* Hook to remember a recently defined label so that the auto-align
+   code can adjust the symbol after we know what alignment will be
+   required.  */
 
 void
 alpha_define_label (sym)
@@ -897,6 +896,9 @@ alpha_define_label (sym)
 {
   alpha_insn_label = sym;
 }
+
+/* Return true if we must always emit a reloc for a type and false if
+   there is some hope of resolving it a assembly time.  */
 
 int
 alpha_force_relocation (f)
@@ -925,6 +927,8 @@ alpha_force_relocation (f)
     }
 }
 
+/* Return true if we can partially resolve a relocation now.  */
+
 int
 alpha_fix_adjustable (f)
      fixS *f;
@@ -947,6 +951,9 @@ alpha_fix_adjustable (f)
   /*NOTREACHED*/
 }
 
+/* Generate the BFD reloc to be stuck in the object file from the
+   fixup used internally in the assembler.  */
+
 arelent *
 tc_gen_reloc (sec, fixp)
      asection *sec;
@@ -958,7 +965,10 @@ tc_gen_reloc (sec, fixp)
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
+  /* Make sure none of our internal relocations make it this far.
+     They'd better have been fully resolved by this point.  */
   assert (fixp->fx_r_type < BFD_RELOC_UNUSED);
+
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == NULL)
     {
@@ -1000,6 +1010,12 @@ tc_gen_reloc (sec, fixp)
   return reloc;
 }
 
+/* Parse a register name off of the input_line and return a register
+   number.  Gets md_undefined_symbol above to do the register name
+   matching for us.
+
+   Only called as a part of processing the ECOFF .frame directive.  */
+
 int
 tc_get_register (frame)
      int frame;
@@ -1010,12 +1026,12 @@ tc_get_register (frame)
   if (*input_line_pointer == '$')
     {
       char *s = input_line_pointer;
-      char c = get_symbol_end();
-      symbolS *sym = md_undefined_symbol(s);
+      char c = get_symbol_end ();
+      symbolS *sym = md_undefined_symbol (s);
 
       *strchr(s, '\0') = c;
-      if (sym && (framereg = S_GET_VALUE(sym)) <= 31)
-	  goto found;
+      if (sym && (framereg = S_GET_VALUE (sym)) <= 31)
+	goto found;
     }
   as_warn ("frame reg expected, using $%d.", framereg);
 
@@ -1025,9 +1041,7 @@ found:
 }
 
 
-/* 
- * Parse the arguments to an opcode 
- */
+/* Parse the arguments to an opcode.  */
 
 static int
 tokenize_arguments (str, tok, ntok)
@@ -1105,10 +1119,8 @@ err:
   return -1;
 }
 
-/*
- * Search forward through all variants of an opcode
- * looking for a syntax match.
- */
+/* Search forward through all variants of an opcode looking for a
+   syntax match.  */
 
 static const struct alpha_opcode *
 find_opcode_match(first_opcode, tok, pntok, pcpumatch)
@@ -1211,10 +1223,8 @@ find_opcode_match(first_opcode, tok, pntok, pcpumatch)
   return NULL;
 }
 
-/*
- * Search forward through all variants of a macro
- * looking for a syntax match.
- */
+/* Search forward through all variants of a macro looking for a syntax
+   match.  */
 
 static const struct alpha_macro *
 find_macro_match(first_macro, tok, pntok)
@@ -1296,9 +1306,7 @@ find_macro_match(first_macro, tok, pntok)
   return NULL;
 }
 
-/*
- * Insert an operand value into an instruction.
- */
+/* Insert an operand value into an instruction.  */
 
 static unsigned
 insert_operand(insn, operand, val, file, line)
@@ -1442,15 +1450,17 @@ assemble_insn(opcode, tok, ntok, insn)
  */
 
 static void
-emit_insn(insn)
+emit_insn (insn)
     struct alpha_insn *insn;
 {
   char *f;
   int i;
 
   /* Take care of alignment duties */
-  if (alpha_auto_align_on)
+  if (alpha_auto_align_on && alpha_current_align < 2)
     alpha_align (2, (char *) NULL, alpha_insn_label);
+  if (alpha_current_align > 2)
+    alpha_current_align = 2;
   alpha_insn_label = NULL;
 
   /* Write out the instruction.  */
@@ -1503,10 +1513,11 @@ emit_insn(insn)
     }
 }
 
-/*
- * Given an opcode name and a pre-tokenized set of arguments,
- * assemble the insn, but do not emit it. 
- */
+/* Given an opcode name and a pre-tokenized set of arguments, assemble
+   the insn, but do not emit it.
+
+   Note that this implies no macros allowed, since we can't store more
+   than one insn in an insn structure.  */
 
 static void
 assemble_tokens_to_insn(opname, tok, ntok, insn)
@@ -1538,10 +1549,8 @@ assemble_tokens_to_insn(opname, tok, ntok, insn)
     as_bad ("unknown opcode `%s'", opname);
 }
 
-/*
- * Given an opcode name and a pre-tokenized set of arguments,
- * take the opcode all the way through emission.
- */
+/* Given an opcode name and a pre-tokenized set of arguments, take the
+   opcode all the way through emission.  */
 
 static void
 assemble_tokens (opname, tok, ntok, local_macros_on)
@@ -1607,6 +1616,8 @@ static const char * const extXh_op[] = { NULL,    "extwh", "extlh", "extqh" };
 static const char * const mskXl_op[] = { "mskbl", "mskwl", "mskll", "mskql" };
 static const char * const mskXh_op[] = { NULL,    "mskwh", "msklh", "mskqh" };
 
+/* Implement the ldgp macro.  */
+
 static void 
 emit_ldgp (tok, ntok, unused)
      const expressionS *tok;
@@ -1666,6 +1677,23 @@ FIXME
   emit_insn (&insn);
 #endif /* OBJ_ECOFF || OBJ_ELF */
 }
+
+/* Load a (partial) expression into a target register.
+
+   If poffset is not null, after the call it will either contain
+   O_constant 0, or a 16-bit offset appropriate for any MEM format
+   instruction.  In addition, pbasereg will be modified to point to
+   the base register to use in that MEM format instruction.
+
+   In any case, *pbasereg should contain a base register to add to the
+   expression.  This will normally be either AXP_REG_ZERO or
+   alpha_gp_register.  Symbol addresses will always be loaded via $gp,
+   so "foo($0)" is interpreted as adding the address of foo to $0;
+   i.e. "ldq $targ, LIT($gp); addq $targ, $0, $targ".  Odd, perhaps,
+   but this is what OSF/1 does.
+
+   Finally, the return value is true if the calling macro may emit a
+   LITUSE reloc if otherwise appropriate.  */
 
 static int
 load_expression (targreg, exp, pbasereg, poffset)
@@ -1900,6 +1928,10 @@ load_expression (targreg, exp, pbasereg, poffset)
   return emit_lituse;
 }
 
+/* The lda macro differs from the lda instruction in that it handles
+   most simple expressions, particualrly symbol address loads and
+   large constants.  */
+
 static void
 emit_lda (tok, ntok, unused)
      const expressionS *tok;
@@ -1916,6 +1948,9 @@ emit_lda (tok, ntok, unused)
   (void) load_expression (tok[0].X_add_number, &tok[1], &basereg, NULL);
 }
 
+/* The ldah macro differs from the ldah instruction in that it has $31
+   as an implied base register.  */
+
 static void
 emit_ldah (tok, ntok, unused)
      const expressionS *tok;
@@ -1930,6 +1965,10 @@ emit_ldah (tok, ntok, unused)
 
   assemble_tokens ("ldah", newtok, 3, 0);
 }
+
+/* Handle all "simple" integer register loads -- ldq, ldq_l, ldq_u,
+   etc.  They differ from the real instructions in that they do simple
+   expressions like the lda macro.  */
 
 static void
 emit_ir_load (tok, ntok, opname)
@@ -1970,6 +2009,9 @@ emit_ir_load (tok, ntok, opname)
 
   emit_insn (&insn);
 }
+
+/* Handle fp register loads, and both integer and fp register stores.
+   Again, we handle simple expressions.  */
 
 static void
 emit_loadstore (tok, ntok, opname)
@@ -2021,6 +2063,8 @@ emit_loadstore (tok, ntok, opname)
   emit_insn (&insn);
 }
 
+/* Load a half-word or byte as an unsigned value.  */
+
 static void 
 emit_ldXu (tok, ntok, vlgsize)
      const expressionS *tok;
@@ -2052,6 +2096,8 @@ emit_ldXu (tok, ntok, vlgsize)
   assemble_tokens (extXl_op[(long)vlgsize], newtok, 3, 1);
 }
 
+/* Load a half-word or byte as a signed value.  */
+
 static void 
 emit_ldX (tok, ntok, vlgsize)
      const expressionS *tok;
@@ -2061,6 +2107,9 @@ emit_ldX (tok, ntok, vlgsize)
   emit_ldXu (tok, ntok, vlgsize);
   assemble_tokens (sextX_op[(long)vlgsize], tok, 1, 1);
 }
+
+/* Load an integral value from an unaligned address as an unsigned
+   value.  */
 
 static void
 emit_uldXu (tok, ntok, vlgsize)
@@ -2114,6 +2163,10 @@ emit_uldXu (tok, ntok, vlgsize)
   assemble_tokens ("or", newtok, 3, 1);
 }
   
+/* Load an integral value from an unaligned address as a signed value.
+   Note that quads should get funneled to the unsigned load since we
+   don't have to do the sign extension.  */
+
 static void
 emit_uldX (tok, ntok, vlgsize)
      const expressionS *tok;
@@ -2123,6 +2176,8 @@ emit_uldX (tok, ntok, vlgsize)
   emit_uldXu (tok, ntok, vlgsize);
   assemble_tokens (sextX_op[(long)vlgsize], tok, 1, 1);
 }
+
+/* Implement the ldil macro.  */
 
 static void
 emit_ldil (tok, ntok, unused)
@@ -2137,6 +2192,8 @@ emit_ldil (tok, ntok, unused)
 
   assemble_tokens ("lda", newtok, ntok, 1);
 }
+
+/* Store a half-word or byte.  */
 
 static void
 emit_stX (tok, ntok, vlgsize)
@@ -2186,6 +2243,8 @@ emit_stX (tok, ntok, vlgsize)
   set_tok_preg (newtok[2], AXP_REG_AT);
   assemble_tokens ("stq_u", newtok, 3, 1);
 }
+
+/* Store an integer to an unaligned address.  */
 
 static void
 emit_ustX (tok, ntok, vlgsize)
@@ -2267,6 +2326,9 @@ emit_ustX (tok, ntok, vlgsize)
   assemble_tokens ("stq_u", newtok, 3, 1);
 }
 
+/* Sign extend a half-word or byte.  The 32-bit sign extend is
+   implemented as "addl $31, $r, $t" in the opcode table.  */
+
 static void
 emit_sextX (tok, ntok, vlgsize)
      const expressionS *tok;
@@ -2288,6 +2350,8 @@ emit_sextX (tok, ntok, vlgsize)
   newtok[0] = newtok[2];
   assemble_tokens ("sra", newtok, 3, 1);
 }
+
+/* Implement the division and modulus macros.  */
 
 static void 
 emit_division (tok, ntok, symname)
@@ -2392,6 +2456,10 @@ FIXME
     }
 }
 
+/* The jsr and jmp macros differ from their instruction counterparts
+   in that they can load the target address and default most
+   everything.  */
+
 static void
 emit_jsrjmp (tok, ntok, vopname)
      const expressionS *tok;
@@ -2446,6 +2514,9 @@ emit_jsrjmp (tok, ntok, vopname)
   emit_insn (&insn);
 }
 
+/* The ret and jcr instructions differ from their instruction
+   counterparts in that everything can be defaulted.  */
+
 static void
 emit_retjcr (tok, ntok, vopname)
      const expressionS *tok;
@@ -2481,10 +2552,8 @@ emit_retjcr (tok, ntok, vopname)
 
 /* Assembler directives */
 
-/*
- * Handle the .text pseudo-op.  This is like the usual one, but it
- * clears alpha_insn_label and restores auto alignment.
- */
+/* Handle the .text pseudo-op.  This is like the usual one, but it
+   clears alpha_insn_label and restores auto alignment.  */
 
 static void
 s_alpha_text (i)
@@ -2494,12 +2563,11 @@ s_alpha_text (i)
   s_text (i);
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
+  alpha_current_align = 0;
 }  
 
-/*
- * Handle the .data pseudo-op.  This is like the usual one, but it
- * clears alpha_insn_label and restores auto alignment. 
- */
+/* Handle the .data pseudo-op.  This is like the usual one, but it
+   clears alpha_insn_label and restores auto alignment.  */
 
 static void
 s_alpha_data (i)
@@ -2508,9 +2576,12 @@ s_alpha_data (i)
   s_data (i);
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
+  alpha_current_align = 0;
 }  
 
 #ifndef OBJ_ELF
+
+/* Handle the OSF/1 .comm pseudo quirks.  */
 
 static void
 s_alpha_comm (ignore)
@@ -2572,7 +2643,12 @@ s_alpha_comm (ignore)
   demand_empty_rest_of_line ();
 }
 
-#endif
+#endif /* ! OBJ_ELF */
+
+#ifdef OBJ_ECOFF
+
+/* Handle the .rdata pseudo-op.  This is like the usual one, but it
+   clears alpha_insn_label and restores auto alignment.  */
 
 static void
 s_alpha_rdata (ignore)
@@ -2585,7 +2661,11 @@ s_alpha_rdata (ignore)
   demand_empty_rest_of_line ();
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
+  alpha_current_align = 0;
 }
+
+/* Handle the .sdata pseudo-op.  This is like the usual one, but it
+   clears alpha_insn_label and restores auto alignment.  */
 
 static void
 s_alpha_sdata (ignore)
@@ -2598,7 +2678,29 @@ s_alpha_sdata (ignore)
   demand_empty_rest_of_line ();
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
+  alpha_current_align = 0;
 }
+#endif
+
+#ifdef OBJ_ELF
+
+/* Handle the .section pseudo-op.  This is like the usual one, but it
+   clears alpha_insn_label and restores auto alignment.  */
+
+static void 
+s_alpha_section (ignore)
+     int ignore;
+{
+  obj_elf_section (ignore);
+
+  alpha_insn_label = NULL;
+  alpha_auto_align_on = 1;
+  alpha_current_align = 0;
+}
+
+#endif  
+
+/* Handle the .gprel32 pseudo op.  */
 
 static void
 s_alpha_gprel32 (ignore)
@@ -2637,8 +2739,10 @@ s_alpha_gprel32 (ignore)
     }
 #endif
 
-  if (alpha_auto_align_on)
+  if (alpha_auto_align_on && alpha_current_align < 2)
     alpha_align (2, (char *) NULL, alpha_insn_label);
+  if (alpha_current_align > 2)
+    alpha_current_align = 2;
   alpha_insn_label = NULL;
 
   p = frag_more (4);
@@ -2647,54 +2751,54 @@ s_alpha_gprel32 (ignore)
 	       &e, 0, BFD_RELOC_GPREL32);
 }
 
-/*
- * Handle floating point allocation pseudo-ops.  This is like the
- * generic vresion, but it makes sure the current label, if any, is
- * correctly aligned. 
- */
+/* Handle floating point allocation pseudo-ops.  This is like the
+   generic vresion, but it makes sure the current label, if any, is
+   correctly aligned.  */
 
 static void
 s_alpha_float_cons (type)
      int type;
 {
-  if (alpha_auto_align_on)
+  int log_size;
+
+  switch (type)
     {
-      int log_size;
+    default:
+    case 'f':
+    case 'F':
+      log_size = 2;
+      break;
 
-      switch (type)
-	{
-	default:
-	case 'f':
-	case 'F':
-	  log_size = 2;
-	  break;
+    case 'd':
+    case 'D':
+    case 'G':
+      log_size = 3;
+      break;
 
-	case 'd':
-	case 'D':
-	case 'G':
-	  log_size = 3;
-	  break;
-
-	case 'x':
-	case 'X':
-	case 'p':
-	case 'P':
-	  log_size = 4;
-	  break;
-	}
-
-      alpha_align (log_size, (char *) NULL, alpha_insn_label);
+    case 'x':
+    case 'X':
+    case 'p':
+    case 'P':
+      log_size = 4;
+      break;
     }
 
+  if (alpha_auto_align_on && alpha_current_align < log_size)
+    alpha_align (log_size, (char *) NULL, alpha_insn_label);
+  if (alpha_current_align > log_size)
+    alpha_current_align = log_size;
   alpha_insn_label = NULL;
+
   float_cons (type);
 }
+
+/* Handle the .proc pseudo op.  We don't really do much with it except
+   parse it.  */
 
 static void
 s_alpha_proc (is_static)
      int is_static;
 {
-  /* XXXX Align to cache linesize XXXXX */
   char *name;
   char c;
   char *p;
@@ -2725,6 +2829,9 @@ s_alpha_proc (is_static)
   as_warn ("unhandled: .proc %s,%d", name, temp);
   demand_empty_rest_of_line ();
 }
+
+/* Handle the .set pseudo op.  This is used to turn on and off most of
+   the assembler features.  */
 
 static void
 s_alpha_set (x)
@@ -2761,6 +2868,9 @@ s_alpha_set (x)
   demand_empty_rest_of_line ();
 }
 
+/* Handle the .base pseudo op.  This changes the assembler's notion of
+   the $gp register.  */
+
 static void
 s_alpha_base (ignore)
      int ignore;
@@ -2792,11 +2902,9 @@ s_alpha_base (ignore)
   demand_empty_rest_of_line ();
 }
 
-/*
- * Handle the .align pseudo-op.  This aligns to a power of two.  It
- * also adjusts any current instruction label.  We treat this the same
- * way the MIPS port does: .align 0 turns off auto alignment.
- */
+/* Handle the .align pseudo-op.  This aligns to a power of two.  It
+   also adjusts any current instruction label.  We treat this the same
+   way the MIPS port does: .align 0 turns off auto alignment.  */
 
 static void
 s_alpha_align (ignore)
@@ -2840,22 +2948,46 @@ s_alpha_align (ignore)
   demand_empty_rest_of_line ();
 }
 
-/*
- * Handle data allocation pseudo-ops.  This is like the generic
- * version, but it makes sure the current label, if any, is correctly
- * aligned.
- */
+/* Hook the normal string processor to reset known alignment.  */
 
 static void
-s_alpha_cons (log_size)
-     int log_size;
+s_alpha_stringer (terminate)
+     int terminate;
 {
-  if (alpha_auto_align_on && log_size > 0)
-    alpha_align (log_size, (char *) NULL, alpha_insn_label);
+  alpha_current_align = 0;
   alpha_insn_label = NULL;
-  cons (1 << log_size);
+  stringer (terminate);
 }
 
+/* Hook the normal space processing to reset known alignment.  */
+
+static void
+s_alpha_space (ignore)
+     int ignore;
+{
+  alpha_current_align = 0;
+  alpha_insn_label = NULL;
+  s_space (ignore);
+}
+
+/* Hook into cons for auto-alignment.  */
+
+void
+alpha_cons_align (size)
+     int size;
+{
+  int log_size;
+
+  log_size = 0;
+  while ((size >>= 1) != 0)
+    ++log_size;
+
+  if (alpha_auto_align_on && alpha_current_align < log_size)
+    alpha_align (log_size, (char *) NULL, alpha_insn_label);
+  if (alpha_current_align > log_size)
+    alpha_current_align = log_size;
+  alpha_insn_label = NULL;
+}
 
 /* The macro table */
 
@@ -3096,8 +3228,16 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
   {"text", s_alpha_text, 0},
   {"data", s_alpha_data, 0},
+#ifdef OBJ_ECOFF
   {"rdata", s_alpha_rdata, 0},
   {"sdata", s_alpha_sdata, 0},
+#endif
+#ifdef OBJ_ELF
+  {"section", s_alpha_section, 0},
+  {"section.s", s_alpha_section, 0},
+  {"sect", s_alpha_section, 0},
+  {"sect.s", s_alpha_section, 0},
+#endif
   {"gprel32", s_alpha_gprel32, 0},
   {"t_floating", s_alpha_float_cons, 'd'},
   {"s_floating", s_alpha_float_cons, 'f'},
@@ -3118,17 +3258,15 @@ const pseudo_typeS md_pseudo_table[] =
   {"eflag", s_ignore, 0},
 
   {"align", s_alpha_align, 0},
-  {"byte", s_alpha_cons, 0},
-  {"hword", s_alpha_cons, 1},
-  {"int", s_alpha_cons, 2},
-  {"long", s_alpha_cons, 2},
-  {"octa", s_alpha_cons, 4},
-  {"quad", s_alpha_cons, 3},
-  {"short", s_alpha_cons, 1},
-  {"word", s_alpha_cons, 1},
   {"double", s_alpha_float_cons, 'd'},
   {"float", s_alpha_float_cons, 'f'},
   {"single", s_alpha_float_cons, 'f'},
+  {"ascii", s_alpha_stringer, 0},
+  {"asciz", s_alpha_stringer, 1},
+  {"string", s_alpha_stringer, 1},
+  {"space", s_alpha_space, 0},
+  {"skip", s_alpha_space, 0},
+  {"zero", s_alpha_space, 0},
 
 /* We don't do any optimizing, so we can safely ignore these.  */
   {"noalias", s_ignore, 0},
@@ -3138,6 +3276,8 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 
+/* Build a BFD section with its flags set appropriately for the .lita,
+   .lit8, or .lit4 sections.  */
 
 static void
 create_literal_section (name, secp, symp)
@@ -3161,6 +3301,9 @@ create_literal_section (name, secp, symp)
 
 #ifndef OBJ_ELF
 
+/* @@@ GP selection voodoo.  All of this seems overly complicated and
+   unnecessary; which is the primary reason I nixed it for ELF.  */
+
 static inline void
 maybe_set_gp (sec)
      asection *sec;
@@ -3183,8 +3326,9 @@ select_gp_value ()
 
   /* Select the smallest VMA of these existing sections.  */
   maybe_set_gp (alpha_lita_section);
-/* maybe_set_gp (sdata);   Was disabled before -- should we use it?  */
 #if 0
+  /* These were disabled before -- should we use them?  */
+  maybe_set_gp (sdata);
   maybe_set_gp (lit8_sec);
   maybe_set_gp (lit4_sec);
 #endif
@@ -3202,12 +3346,20 @@ select_gp_value ()
 }
 #endif /* !OBJ_ELF */
 
+/* Called internally to handle all alignment needs.  This takes care
+   of eliding calls to frag_align if'n the cached current alignment
+   says we've already got it, as well as taking care of the auto-align
+   feature wrt labels.  */
+
 static void
 alpha_align (n, pfill, label)
      int n;
      char *pfill;
      symbolS *label;
 {
+  if (alpha_current_align >= n)
+    return;
+
   if (pfill == NULL)
     {
       if (n > 2
@@ -3220,7 +3372,8 @@ alpha_align (n, pfill, label)
 	     section.  The DEC assembler silently fills with unaligned
 	     no-op instructions.  This will zero-fill, then nop-fill
 	     with proper alignment.  */
-	  frag_align (2, 0);
+	  if (alpha_current_align < 2)
+	    frag_align (2, 0);
 	  frag_align_pattern (n, nop, sizeof nop);
 	}
       else
@@ -3228,6 +3381,8 @@ alpha_align (n, pfill, label)
     }
   else
     frag_align (n, *pfill);
+
+  alpha_current_align = n;
 
   if (label != NULL)
     {

@@ -1,3 +1,32 @@
+Mon Jul 22 12:46:55 1996  Richard Henderson  <rth@tamu.edu>
+
+	* tc-alpha.c: Patches to track current minimum alignment to reduce
+	the number of fragments created with frag_align.
+	(alpha_current_align): New static variable.
+	(s_alpha_text): Reset alignment to 0.
+	(s_alpha_data, s_alpha_rdata, s_alpha_sdata): Likewise.
+	(s_alpha_stringer, s_alpha_space): New functions.
+	(s_alpha_cons, alpha_flush_pending_output): Remove functions.
+	(alpha_cons_align): New function to replace both of them.
+	(emit_insn): Only align if alpha_current_align is less than 2;
+	reset alpha_current_align to 2.
+	(s_alpha_gprel32): Likewise.
+	(s_alpha_section): New function.  Basically duplicate the other
+	alpha section change hooks.  Only define for ELF.
+	(s_alpha_float_cons): Simplify alignment handling.
+	(md_pseudo_table): Only define "rdata" and "sdata" if OBJ_ECOFF.
+	If OBJ_ELF, define "section", "section.s", "sect", and "sect.s".
+	Don't define the s_alpha_cons pseudo-ops.  Do define
+	s_alpha_stringer and s_alpha_space pseudo-ops.
+	(alpha_align): Skip if less than current default alignment.  Set
+	default alignment.
+	* tc-alpha.h (md_flush_pending_output): Remove.
+	(md_cons_align): Add.
+
+	* tc-alpha.c: Add oodles of function description comments.
+	(md_bignum_to_chars): Remove; there are no callers.
+	(md_show_usage): Mention some more variants.
+
 Thu Jul 18 15:54:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Andrew Gierth <ANDREWG@microlise.co.uk>:
