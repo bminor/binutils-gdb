@@ -1,3 +1,7 @@
+Tue Nov  9 11:40:27 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* m68klynx.c (TARGET_IS_BIG_ENDIAN_P): Define.
+
 Tue Nov  9 11:26:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libelf.h: Added some comments.

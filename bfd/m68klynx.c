@@ -36,4 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libaout.h"
 #include "aout/aout64.h"
 
+#define TARGET_IS_BIG_ENDIAN_P
+
 #include "aout-target.h"
