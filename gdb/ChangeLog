@@ -1,5 +1,10 @@
 2005-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-fbsd.h: Update copyright year.
+	Don't include "config/nm-bsd.h".
+	(KERNEL_U_SIZE): Remove macro.
+	(kernel_u_size): Remove prototype.
+
 	* config/vax/nbsdaout.mh (NAT_FILE): Remove.
 	* config/vax/nm-nbsdaout.h: Remove file.
 

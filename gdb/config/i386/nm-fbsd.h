@@ -1,7 +1,7 @@
 /* Native-dependent definitions for FreeBSD/i386.
 
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1997, 2000, 2001, 2004
-   Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1997, 2000, 2001,
+   2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,18 +50,6 @@ extern void i386bsd_dr_reset_addr (int regnum);
 #define I386_DR_LOW_GET_STATUS() \
   i386bsd_dr_get_status ()
 extern unsigned long i386bsd_dr_get_status (void);
-
-
-/* Get generic BSD native definitions.  */
-#include "config/nm-bsd.h"
-
-
-/* Support for the user struct.  */
-
-/* Return the size of the user struct.  */
-
-#define KERNEL_U_SIZE kernel_u_size ()
-extern int kernel_u_size (void);
 
 
 /* Shared library support.  */
