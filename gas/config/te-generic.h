@@ -6,20 +6,13 @@
  * compile, and copying as an aid for testing and porting.  xoxorich.
  */
 
-#define TE_GENERIC 1
+/* Added these, because if we don't know what we're targetting we may
+   need an assembler version of libgcc, and that will use local
+   labels.  */
+#define LOCAL_LABELS_DOLLAR
+#define LOCAL_LABELS_FB
 
 /* these define interfaces */
 #include "obj-format.h"
-
-/* define this if you want gas to ignore the first underscore character of
-   each symbol */
-/* #define STRIP_UNDERSCORE */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of te-generic.h */

@@ -17,24 +17,9 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define TE_HP300	1
-
 #define LOCAL_LABELS_DOLLAR
 #define LOCAL_LABELS_FB
 
-/* Could also be :
-   #define S_LOCAL_NAME(s)	(S_GET_NAME(s)[0] == '.' &&
-   S_GET_NAME(s)[1] == 'L' ||
-   S_GET_NAME(s)[1] == '.')
-   */
-
 #include "obj-format.h"
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of te-hp300.h */

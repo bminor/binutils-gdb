@@ -1,3 +1,28 @@
+Tue May  2 00:17:04 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/te-generic.h (TE_GENERIC): Deleted unused macro.
+	* config/te-go32.h (TE_GO32): Ditto.
+	* config/te-hp300.h (TE_HP300): Ditto.
+	* config/te-ic960.h (TE_IC960): Ditto.
+	* config/te-nbsd532.h (TE_NETBSD532): Ditto.
+	* config/te-pc532mach.h (TE_PC532MACH): Ditto.
+	* config/te-ppcnw.h (TE_PPCNW): Ditto.
+
+Mon May  1 15:59:56 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* read.c (s_app_file): If obj_app_file is defined, call it with
+	string as argument.  Don't call c_dot_file_symbol or
+	elf_file_symbol.
+	* config/obj-coff.h (obj_app_file): Define as c_dot_file_symbol.
+	* config/obj-elf.h (obj_app_file): Define as elf_file_symbol.
+
+	* as.h (OUTPUT_FLAVOR): Don't define here.
+	* config/obj-aout.h (OUTPUT_FLAVOR) [BFD_ASSEMBLER]: Define.
+	* config/obj-bout.h (OUTPUT_FLAVOR): Define.
+	* config/obj-coff.h (OUTPUT_FLAVOR) [BFD_ASSEMBLER]: Define.
+	* config/obj-ecoff.h (OUTPUT_FLAVOR): Define.
+	* config/obj-elf.h (OUTPUT_FLAVOR): Define.
+
 start-sanitize-arc
 Sat Apr 29 21:44:57 1995  Doug Evans  <dje@chestnut.cygnus.com>
 

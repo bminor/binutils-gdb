@@ -23,8 +23,6 @@
  * specific differences.
  */
 
-#define TE_IC960 1
-
 #define OBJ_COFF_OMIT_OPTIONAL_HEADER
 #define LOCAL_LABEL(name) ((name[0] =='L') \
 			   || (name[0] =='.' \

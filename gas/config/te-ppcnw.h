@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define TE_PPCNW
-
 /* Added these, because if we don't know what we're targetting we may
    need an assembler version of libgcc, and that will use local
    labels.  */
