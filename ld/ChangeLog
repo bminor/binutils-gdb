@@ -1,10 +1,15 @@
+Mon Oct 17 14:53:16 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* scripttempl/nw.sc: Gather constructors and destructors and
+	  define __CTOR__LIST__ and __DTOR_LIST__ appropriately.
+
 Fri Oct 14 14:35:38 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* Makefile.in (ALL_EMULATIONS): Add ei386nw.o and eppcnw.o.
 	  (ei386nw.c, eppcnw.c): New targets.
 
 	* config/{i386,ppc}-nw.mt, emulparams/{i386,ppc}nw.sh,
-	  scripttmpl/nw.sc: New files, for i386 and powerpc netware.
+	  scripttempl/nw.sc: New files, for i386 and powerpc netware.
 	  
 	* configure.in: Changed netware ld_target name to be {i386,ppc}-nw
 	  instead of {i386,ppc}-elf.
