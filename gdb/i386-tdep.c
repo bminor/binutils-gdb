@@ -1352,7 +1352,28 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 
   if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
       && !i386_reg_struct_return_p (gdbarch, type))
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      /* The System V ABI says that:
+
+	 "A function that returns a structure or union also sets %eax
+	 to the value of the original address of the caller's area
+	 before it returns.  Thus when the caller receives control
+	 again, the address of the returned object resides in register
+	 %eax and can be used to access the object."
+
+	 So the ABI guarantees that we can always find the return
+	 value just after the function has returned.  */
+
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, I386_EAX_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   /* This special case is for structures consisting of a single
      `float' or `double' member.  These structures are returned in

@@ -1,5 +1,17 @@
 2004-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* defs.h (enum return_value_convention): Add
+	RETURN_VALUE_ABI_RETURNS_ADDRESS and
+	RETURN_VALUE_ABI_PRESERVES_ADDRESS.
+	* infcmd.c (legacy_return_value): New function.
+	(print_return_value): Rwerite to implement
+	RETURN_VALUE_ABI_RETURNS_ADDRESS.
+	* values.c (using_struct_return): Check for inequality to
+	RETURN_VALUE_REGISTER_CONVENTION instead of equality to
+	RETURN_VALUE_STRUCT_CONVENTION.
+	* i386-tdep.c (i386_return_value): Implement
+	RETURN_VALUE_ABI_RETURNS_ADDRESS.
+
 	* vax-tdep.c: Tweak comments.  Reorder include files.  Don't
 	include "symtab.h", "opcode/vax.h" and "inferior.h".
 	(vax_skip_prologue): Replace calls to read_memory_integer by calls

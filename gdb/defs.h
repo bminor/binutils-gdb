@@ -250,7 +250,19 @@ enum return_value_convention
      should be stored.  While typically, and historically, used for
      large structs, this is convention is applied to values of many
      different types.  */
-  RETURN_VALUE_STRUCT_CONVENTION
+  RETURN_VALUE_STRUCT_CONVENTION,
+  /* Like the "struct return convention" above, but where the ABI
+     guarantees that the called function stores the address at which
+     the value being returned is stored in a well-defined location,
+     such as a register or memory slot in the stack frame.  Don't use
+     this if the ABI doesn't explicitly guarantees this.  */
+  RETURN_VALUE_ABI_RETURNS_ADDRESS,
+  /* Like the "struct return convention" above, but where the ABI
+     guarantees that the address at which the value being returned is
+     stored will be available in a well-defined location, such as a
+     register or memory slot in the stack frame.  Don't use this if
+     the ABI doesn't explicitly guarantees this.  */
+  RETURN_VALUE_ABI_PRESERVES_ADDRESS,
 };
 
 /* the cleanup list records things that have to be undone
