@@ -64,18 +64,18 @@ rdl-apps.texi: ${READLINE_DIR}/inc-readline.texinfo \
 	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texi
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
-# Be sure to not create a bad gdb-all.texinfo if ${M4} is missing or aborts...
-gdb-all.texinfo: ${SFILES_DOCDIR}
+# Be sure to not create a bad gdb-all.texi if ${M4} is missing or aborts...
+gdb-all.texi: ${SFILES_DOCDIR}
 	rm -f foobus.texinfo
 	${M4} pretex.m4 none.m4 all.m4 gdb.texinfo  >foobus.texinfo
-	rm -f gdb-all.texinfo
-	mv foobus.texinfo gdb-all.texinfo
+	rm -f gdb-all.texi
+	mv foobus.texinfo gdb-all.texi
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : gdb-all.texinfo rdl-apps.texi
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
+gdb.dvi : gdb-all.texi rdl-apps.texi
+	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texi
 	texindex gdb-all.??
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
+	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texi
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
@@ -83,8 +83,8 @@ gdb.dvi : gdb-all.texinfo rdl-apps.texi
 # We're using texinfo2, and older makeinfo's may not be able to
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
-gdb.info: gdb-all.texinfo
-	${MAKEINFO} gdb-all.texinfo
+gdb.info: gdb-all.texi
+	${MAKEINFO} gdb-all.texi
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
