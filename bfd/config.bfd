@@ -785,11 +785,22 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_pjl_vec bfd_elf32_pj_vec bfd_elf32_i386_vec"
     ;;
 
+  powerpc-*-aix5*)
+    targ_defvec=rs6000coff_vec
+    targ_selvecs="aix5coff64_vec"
+    want64=true
+    ;;
+  powerpc64-*-aix5*)
+    targ_defvec=aix5coff64_vec
+    targ_selvecs="rs6000coff_vec"
+    want64=true
+    ;;
+
   powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
     targ64_selvecs=rs6000coff64_vec
     case "${targ}" in
-      *-*-aix4.[3456789]* | *-*-aix[56789]*)
+        *-*-aix4.[3456789]* | *-*-aix[56789]*)
 	want64=true;;
 	
 	*)

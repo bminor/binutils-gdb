@@ -384,6 +384,7 @@ changequote([,])dnl
       pj*)		    fmt=elf ;;
       ppc-*-pe | ppc-*-cygwin* | ppc-*-winnt*)
 		            fmt=coff em=pe ;;
+      ppc-*-aix5*)          fmt=coff em=aix5 ;;
       ppc-*-aix*)           fmt=coff ;;
       ppc-*-beos*)          fmt=coff ;;
       ppc-*-*bsd* | ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4*)

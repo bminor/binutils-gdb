@@ -71,6 +71,7 @@ CPU_TYPES = \
 	ppc \
 	s390 \
 	sh \
+	sh64 \
 	sparc \
 	tahoe \
 	tic30 \
@@ -79,7 +80,6 @@ CPU_TYPES = \
 	vax \
 	w65 \
 	v850 \
-	sh64 \
 	xstormy16 \
 	z8k
 
@@ -1796,6 +1796,17 @@ DEPOBJ_sh_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/aout/aout64.h
+DEPOBJ_sh64_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-sh64.h $(srcdir)/config/tc-sh.h \
+  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
+DEPOBJ_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/aout/aout64.h
 DEPOBJ_sparc_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-sparc.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
@@ -1882,17 +1893,6 @@ DEPOBJ_v850_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
 DEPOBJ_v850_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/aout/aout64.h
-DEPOBJ_sh64_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
-  $(srcdir)/config/tc-sh64.h $(srcdir)/config/tc-sh.h \
-  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
-DEPOBJ_sh64_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/aout/aout64.h
 DEPOBJ_xstormy16_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
@@ -2141,6 +2141,14 @@ DEP_sh_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh.h \
 DEP_sh_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh.h
+DEP_sh64_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh64.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_sh64_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
+  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
 DEP_sparc_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-sparc.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_sparc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sparc.h \
@@ -2199,14 +2207,6 @@ DEP_v850_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-v850.h \
 DEP_v850_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h
-DEP_sh64_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sh.h \
-  $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
-DEP_sh64_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-sh64.h \
-  $(srcdir)/config/tc-sh.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
 DEP_xstormy16_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-xstormy16.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h

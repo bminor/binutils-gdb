@@ -5596,6 +5596,26 @@ else
 fi
 
 
+# Emulation 
+for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
+do
+  # Canonicalize the secondary target names.
+ result=`$ac_config_sub $targ_alias 2>/dev/null`
+ if test -n "$result"; then
+   targ=$result
+ else
+   targ=$targ_alias
+ fi
+
+ . ${srcdir}/configure.tgt
+
+  EMULATION=$targ_emul
+  EMULATION_VECTOR=$targ_emul_vector	
+done
+
+
+
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -5807,6 +5827,8 @@ s%@BUILD_DLLWRAP@%$BUILD_DLLWRAP%g
 s%@BUILD_MISC@%$BUILD_MISC%g
 s%@OBJDUMP_DEFS@%$OBJDUMP_DEFS%g
 s%@UNDERSCORE@%$UNDERSCORE%g
+s%@EMULATION@%$EMULATION%g
+s%@EMULATION_VECTOR@%$EMULATION_VECTOR%g
 
 CEOF
 EOF

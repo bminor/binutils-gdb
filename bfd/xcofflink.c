@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -3141,37 +3141,42 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 
       csectpp = xcoff_data (sub)->csects;
 
-      symesz = bfd_coff_symesz (sub);
-      esym = (bfd_byte *) obj_coff_external_syms (sub);
-      esymend = esym + symcount * symesz;
-      while (esym < esymend)
+      /* Dynamic object do not have csectpp's.  */
+      if (NULL != csectpp) 
 	{
-	  struct internal_syment sym;
+	  symesz = bfd_coff_symesz (sub);
+	  esym = (bfd_byte *) obj_coff_external_syms (sub);
+	  esymend = esym + symcount * symesz;
 
-	  bfd_coff_swap_sym_in (sub, (PTR) esym, (PTR) &sym);
-
-	  *debug_index = (unsigned long) -1;
-
-	  if (sym._n._n_n._n_zeroes == 0
-	      && *csectpp != NULL
-	      && (! gc
-		  || ((*csectpp)->flags & SEC_MARK) != 0
-		  || *csectpp == bfd_abs_section_ptr)
-	      && bfd_coff_symname_in_debug (sub, &sym))
+	  while (esym < esymend)
 	    {
-	      char *name;
-	      bfd_size_type indx;
+	      struct internal_syment sym;
 
-	      name = (char *) debug_contents + sym._n._n_n._n_offset;
-	      indx = _bfd_stringtab_add (debug_strtab, name, true, true);
-	      if (indx == (bfd_size_type) -1)
-		goto error_return;
-	      *debug_index = indx;
+	      bfd_coff_swap_sym_in (sub, (PTR) esym, (PTR) &sym);
+
+	      *debug_index = (unsigned long) -1;
+
+	      if (sym._n._n_n._n_zeroes == 0
+		  && *csectpp != NULL
+		  && (! gc
+		      || ((*csectpp)->flags & SEC_MARK) != 0
+		      || *csectpp == bfd_abs_section_ptr)
+		  && bfd_coff_symname_in_debug (sub, &sym))
+		{
+		  char *name;
+		  bfd_size_type indx;
+
+		  name = (char *) debug_contents + sym._n._n_n._n_offset;
+		  indx = _bfd_stringtab_add (debug_strtab, name, true, true);
+		  if (indx == (bfd_size_type) -1)
+		    goto error_return;
+		  *debug_index = indx;
+		}
+
+	      esym += (sym.n_numaux + 1) * symesz;
+	      csectpp += sym.n_numaux + 1;
+	      debug_index += sym.n_numaux + 1;
 	    }
-
-	  esym += (sym.n_numaux + 1) * symesz;
-	  csectpp += sym.n_numaux + 1;
-	  debug_index += sym.n_numaux + 1;
 	}
 
       free (debug_contents);

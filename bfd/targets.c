@@ -631,6 +631,7 @@ extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target rs6000coff64_vec;
 extern const bfd_target rs6000coff_vec;
+extern const bfd_target aix5coff64_vec;
 extern const bfd_target shcoff_small_vec;
 extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_small_vec;

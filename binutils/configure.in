@@ -313,6 +313,26 @@ else
 fi
 AC_SUBST(UNDERSCORE)
 
+# Emulation 
+for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
+do
+  # Canonicalize the secondary target names.
+ result=`$ac_config_sub $targ_alias 2>/dev/null`
+ if test -n "$result"; then
+   targ=$result
+ else
+   targ=$targ_alias
+ fi
+
+ . ${srcdir}/configure.tgt
+
+  EMULATION=$targ_emul
+  EMULATION_VECTOR=$targ_emul_vector	
+done
+
+AC_SUBST(EMULATION)
+AC_SUBST(EMULATION_VECTOR)
+
 AC_OUTPUT(Makefile doc/Makefile po/Makefile.in:po/Make-in,
 [
 case "x$CONFIG_FILES" in

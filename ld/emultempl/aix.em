@@ -797,8 +797,8 @@ choose_target (argc, argv)
   static char *from_inside;
   static char *argv_to_target[][2] = { 
     {NULL,   "${OUTPUT_FORMAT}"},
-    {"-b32", "aixcoff-rs6000"},
-    {"-b64", "aixcoff64-rs6000"},
+    {"-b32", "${OUTPUT_FORMAT_32BIT}"},
+    {"-b64", "${OUTPUT_FORMAT_64BIT}"},
   };
 
   jmax = 3;

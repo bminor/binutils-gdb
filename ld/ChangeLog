@@ -1,3 +1,17 @@
+2002-03-18  Tom Rix  <trix@redhat.com>
+
+	* Makefile.am : Add eaix5ppc and eaix5rs6, AIX 5 support.
+	* configure.tgt : Same.
+	* emulparms/aix5ppc.sh : New file. For eaix5ppc.
+	* emulparms/aix5rs6.sh : New file. For eaix5rs6.
+	* emulparms/aixppc.sh : OUPUT_FORMAT_32BIT and OUTPUT_FORMAT_64BIT
+	emulation parameters for better -b32, -b64 support.
+	* emulparms/aixrs6.sh : Same.
+	* emulparms/ppcmacos.sh : Same.
+	* emultempl/aix.em (choose_target) : Use new emulation parameters
+	OUTPUT_FORMAT_32BIT and OUTPUT_FORMAT_64BIT.
+	* Makefile.in : Regenerate.
+
 2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/fr.po: Updated version.

@@ -1137,7 +1137,11 @@ ppc_target_format ()
 #elif TE_POWERMAC
   return "xcoff-powermac";
 #else
-  return ppc_xcoff64 ? "aixcoff64-rs6000" : "aixcoff-rs6000";
+#  ifdef TE_AIX5
+    return (ppc_xcoff64 ? "aix5coff64-rs6000" : "aixcoff-rs6000");
+#  else
+    return (ppc_xcoff64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
+#  endif
 #endif
 #endif
 #ifdef OBJ_ELF

@@ -749,6 +749,9 @@ extern boolean bfd_xcoff_size_dynamic_sections
 extern boolean bfd_xcoff_link_generate_rtinit
   PARAMS ((bfd *, const char *, const char *, boolean));
 
+/* XCOFF support routines for ar.  */
+extern boolean bfd_xcoff_ar_archive_set_magic PARAMS ((bfd *, char *));
+
 /* Externally visible COFF routines.  */
 
 #if defined(__STDC__) || defined(ALMOST_STDC)

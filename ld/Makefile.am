@@ -353,6 +353,12 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 ea29k.c: $(srcdir)/emulparams/a29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} a29k "$(tdir_a29k)"
+eaix5ppc.c: $(srcdir)/emulparams/aix5ppc.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aix5ppc "$(tdir_aixppc)"
+eaix5rs6.c: $(srcdir)/emulparams/aix5rs6.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aix5rs6 "$(tdir_aixrs6)"
 eaixppc.c: $(srcdir)/emulparams/aixppc.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aixppc "$(tdir_aixppc)"

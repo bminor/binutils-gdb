@@ -1,3 +1,37 @@
+2002-03-18  Tom Rix  <trix@redhat.com>
+
+	* aix5ppc.core.c : New file for AIX 5 64 bit core support.
+	* bfd-in.h : Add bfd_xcoff_ar_archive_set_magic declaration.
+	* coff-rs6000 (do_pad) : New function for archive padding.
+	(do_copy) : New function for object file copying in archives.
+	(do_shared_object_padding) : New function for padding shared
+	objects to their text section alignment in archives.
+	(bfd_xcoff_ar_achive_set_magic) : Stub.
+	(xcoff_write_armap_big) : Use do_copy and do_pad.
+	(xcoff_write_archive_contents_big) : Use do_shared_object_padding,
+	do_copy and do_pad.
+	* coff64-rs6000.c (xcoff64_write_ojbect_contents) : Use
+	bfd_xcoff_magic_number. 
+	(xcoff64_bad_format_hook) : New function for _bfd_bad_format_hook
+	fop.
+	(xcoff_backend_data_r) : Use xcoff64_bad_format_hook.
+	(bfd_xcoff_aix5_backend_data) : New Aix 5 backend data.
+	(aix5coff64_vec) : New Aix 5 target aix5coff64-rs6000.
+	* rs6000-core.c : Update copyright date.
+	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Check for NULL 
+	csectpp.
+	* coffcode.h (coff_new_section_hook) : Use new accessor macros.
+	(coff_set_arch_mach_hook) : Add Aix 5 U64_TOCMAGIC magic #.
+	(coff_set_flags) : Use bfd_xcoff_magic_number.
+	* libxcoff.h (bfd_xcoff_is_xcoff64): Add U64_TOCMAGIC.
+	* configure.in : Add powerpc-*-aix5 and rs6000-*-aix5 support.
+	* Makefile.am : Same.
+	* config.bfd : Same.
+	* targets.c : Same.
+	* configure : Regnerate.
+	* Makefile.in : Same.
+	* bfd-in2.h : Same.
+
 2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/fr.po: Updated version.

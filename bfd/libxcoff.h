@@ -1,22 +1,22 @@
 /* BFD XCOFF object file private structure.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002 Free Software Foundation, Inc.
    Written by Tom Rix, Redhat.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LIBXCOFF_H
 #define LIBXCOFF_H
@@ -31,14 +31,14 @@ struct xcoff_backend_data_rec
   /* COFF backend information.  */
   bfd_coff_backend_data coff;
 
-  /* Magic number */
+  /* Magic number.  */
   unsigned short _xcoff_magic_number;
 
-  /* Architecture and machine for coff_set_arch_mach_hook */
+  /* Architecture and machine for coff_set_arch_mach_hook.  */
   enum bfd_architecture _xcoff_architecture;
   long _xcoff_machine;
 
-  /* function pointers to xcoff specific swap routines */
+  /* Function pointers to xcoff specific swap routines.  */
   void (* _xcoff_swap_ldhdr_in)(bfd *, const PTR, struct internal_ldhdr *);
   void (* _xcoff_swap_ldhdr_out)(bfd *, const struct internal_ldhdr *, PTR);
   void (* _xcoff_swap_ldsym_in)(bfd *, const PTR, struct internal_ldsym *);
@@ -46,33 +46,34 @@ struct xcoff_backend_data_rec
   void (* _xcoff_swap_ldrel_in)(bfd *, const PTR, struct internal_ldrel *);
   void (* _xcoff_swap_ldrel_out)(bfd *, const struct internal_ldrel *, PTR);
 
-  /* size of the external struct */
+  /* Size of the external struct.  */
   unsigned int _xcoff_ldhdrsz;
   unsigned int _xcoff_ldsymsz;
   unsigned int _xcoff_ldrelsz;
 
-  /* size an entry in a descriptor section */
+  /* Size an entry in a descriptor section.  */
   unsigned int _xcoff_function_descriptor_size;
 
-  /* size of the small aout file header */
+  /* Size of the small aout file header.  */
   unsigned int _xcoff_small_aout_header_size;
 
   /* Loader version
      1 : XCOFF32
-     2 : XCOFF64 */
+     2 : XCOFF64.  */
   unsigned long _xcoff_ldhdr_version;
 
-  boolean (* _xcoff_put_symbol_name)(bfd *, struct bfd_strtab_hash *,
-				     struct internal_syment *,
-				     const char *);
+  boolean (* _xcoff_put_symbol_name)
+       PARAMS ((bfd *, struct bfd_strtab_hash *, struct internal_syment *,
+		const char *));
 
-  boolean (* _xcoff_put_ldsymbol_name)(bfd *, struct xcoff_loader_info *,
-				       struct internal_ldsym *,
-				       const char *);
+  boolean (* _xcoff_put_ldsymbol_name)
+       PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
+		const char *));
 
   reloc_howto_type *_xcoff_dynamic_reloc;
 
-  asection * (* _xcoff_create_csect_from_smclas) (bfd *, union internal_auxent *, const char *);
+  asection * (* _xcoff_create_csect_from_smclas)
+       PARAMS ((bfd *, union internal_auxent *, const char *));
 
   /* Line number and relocation overflow.
      XCOFF32 overflows to another section when the line number or the 
@@ -82,7 +83,7 @@ struct xcoff_backend_data_rec
 
   /* Loader section symbol and relocation table offset
      XCOFF32 is after the .loader header
-     XCOFF64 is offset in .loader header  */
+     XCOFF64 is offset in .loader header.  */
   bfd_vma (*_xcoff_loader_symbol_offset)(bfd *, struct internal_ldhdr *);
   bfd_vma (*_xcoff_loader_reloc_offset)(bfd *, struct internal_ldhdr *);
   
@@ -93,21 +94,19 @@ struct xcoff_backend_data_rec
   /* Size of the global link code in bytes of the xcoff_glink_code table.  */
   unsigned long _xcoff_glink_size;
 
-  /* rtinit */
+  /* rtinit.  */
   unsigned int _xcoff_rtinit_size;
   boolean (*_xcoff_generate_rtinit)(bfd *, const char *, const char *, 
 				    boolean);
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
-
 #define xcoff_link_hash_lookup(table, string, create, copy, follow) \
   ((struct xcoff_link_hash_entry *) \
    bfd_link_hash_lookup (&(table)->root, (string), (create), (copy),\
 			 (follow)))
 
 /* Traverse an XCOFF link hash table.  */
-
 #define xcoff_link_hash_traverse(table, func, info)			\
   (bfd_link_hash_traverse						\
    (&(table)->root,							\
@@ -116,7 +115,6 @@ struct xcoff_backend_data_rec
 
 /* Get the XCOFF link hash table from the info structure.  This is
    just a cast.  */
-
 #define xcoff_hash_table(p) ((struct xcoff_link_hash_table *) ((p)->hash))
 
 
@@ -186,13 +184,20 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_glink_code(a, b) ((xcoff_backend(a)->_xcoff_glink_code[(b)]))
 #define bfd_xcoff_glink_code_size(a) ((xcoff_backend(a)->_xcoff_glink_size))
 
-/* Check for the magic number U803XTOCMAGIC for 64 bit targets.  */
-#define bfd_xcoff_is_xcoff64(a) (0x01EF == (bfd_xcoff_magic_number(a)))
+/* Check for the magic number U803XTOCMAGIC or U64_TOCMAGIC for 64 bit 
+   targets.  */
+#define bfd_xcoff_is_xcoff64(a) \
+  (   (0x01EF == (bfd_xcoff_magic_number(a))) \
+   || (0x01F7 == (bfd_xcoff_magic_number(a))))
 
 /* Check for the magic number U802TOMAGIC for 32 bit targets.  */
 #define bfd_xcoff_is_xcoff32(a) (0x01DF == (bfd_xcoff_magic_number(a)))
 
 #define bfd_xcoff_rtinit_size(a) ((xcoff_backend(a)->_xcoff_rtinit_size))
 #define bfd_xcoff_generate_rtinit(a, b, c, d) ((xcoff_backend(a)->_xcoff_generate_rtinit ((a), (b), (c), (d))))
+
+/* Accessor macros for tdata.  */
+#define bfd_xcoff_text_align_power(a) ((xcoff_data (a)->text_align_power))
+#define bfd_xcoff_data_align_power(a) ((xcoff_data (a)->data_align_power))
 
 #endif /* LIBXCOFF_H */

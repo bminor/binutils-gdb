@@ -145,6 +145,9 @@ static bfd_vma xcoff_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static boolean xcoff_generate_rtinit 
   PARAMS((bfd *, const char *, const char *, boolean));
+static boolean do_pad PARAMS((bfd *, unsigned int));
+static boolean do_copy PARAMS((bfd *, bfd *));
+static boolean do_shared_object_padding PARAMS ((bfd *, bfd *, ufile_ptr *, int));
 
 /* We use our own tdata type.  Its first field is the COFF tdata type,
    so the COFF routines are compatible.  */
@@ -988,7 +991,17 @@ _bfd_xcoff_reloc_type_lookup (abfd, code)
 /* XCOFF archives use this as a magic string.  Note that both strings
    have the same length.  */
 
+/* Set the magic for archive.  */
 
+boolean
+bfd_xcoff_ar_archive_set_magic (abfd, magic)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     char *magic ATTRIBUTE_UNUSED;
+{
+  /* Not supported yet.  */
+  return false;
+ /* bfd_xcoff_archive_set_magic (abfd, magic); */
+}
 
 /* Read in the armap of an XCOFF archive.  */
 
@@ -1573,6 +1586,85 @@ static char buff20[XCOFFARMAGBIG_ELEMENT_SIZE + 1];
   (v) = bfd_scan_vma (buff20, (const char **) NULL, 10)
 
 static boolean
+do_pad (abfd, number)
+     bfd *abfd;
+     unsigned int number;
+{
+  bfd_byte b = 0;
+
+  /* Limit pad to <= 4096.  */
+  if (number > 4096)
+    return false;
+
+  while (number--)
+    if (bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
+      return false;
+
+  return true;
+}
+
+static boolean
+do_copy (out_bfd, in_bfd)
+     bfd *out_bfd;
+     bfd *in_bfd;
+{
+  bfd_size_type remaining;
+  bfd_byte buffer[DEFAULT_BUFFERSIZE];
+
+  if (bfd_seek (in_bfd, (file_ptr) 0, SEEK_SET) != 0)
+    return false;
+
+  remaining = arelt_size (in_bfd);
+
+  while (remaining >= DEFAULT_BUFFERSIZE)
+    {
+      if (bfd_bread (buffer, DEFAULT_BUFFERSIZE, in_bfd) != DEFAULT_BUFFERSIZE
+	  || bfd_bwrite (buffer, DEFAULT_BUFFERSIZE, out_bfd) != DEFAULT_BUFFERSIZE)
+	return false;
+
+      remaining -= DEFAULT_BUFFERSIZE;
+    }
+
+  if (remaining)
+    {
+      if (bfd_bread (buffer, remaining, in_bfd) != remaining 
+	  || bfd_bwrite (buffer, remaining, out_bfd) != remaining)
+	return false;
+    }
+
+  return true;
+}
+
+static boolean 
+do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
+     bfd *out_bfd;
+     bfd *in_bfd;
+     ufile_ptr *offset;
+     int ar_header_size;
+{
+  if (bfd_check_format (in_bfd, bfd_object)
+      && bfd_get_flavour (in_bfd) == bfd_target_xcoff_flavour
+      && (in_bfd->flags & DYNAMIC) != 0)
+    {
+      bfd_size_type pad = 0;
+      int text_align_power;
+
+      text_align_power = bfd_xcoff_text_align_power (in_bfd);
+      BFD_ASSERT (2 < text_align_power);
+
+      pad = 1 << text_align_power;
+      pad -= (*offset + ar_header_size) & (pad - 1);
+
+      if (! do_pad (out_bfd, pad))
+	return false;
+
+      *offset += pad;
+    }
+
+  return true;
+}
+
+static boolean
 xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
      unsigned int elength ATTRIBUTE_UNUSED;
@@ -2001,28 +2093,12 @@ xcoff_write_archive_contents_old (abfd)
 
       if (bfd_seek (sub, (file_ptr) 0, SEEK_SET) != 0)
 	return false;
-      while (remaining != 0)
-	{
-	  bfd_size_type amt;
-	  bfd_byte buffer[DEFAULT_BUFFERSIZE];
 
-	  amt = sizeof buffer;
-	  if (amt > remaining)
-	    amt = remaining;
-	  if (bfd_bread (buffer, amt, sub) != amt
-	      || bfd_bwrite (buffer, amt, abfd) != amt)
-	    return false;
-	  remaining -= amt;
-	}
-
-      if ((size & 1) != 0)
-	{
-	  bfd_byte b;
-
-	  b = '\0';
-	  if (bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
-	    return false;
-	}
+      if (! do_copy (abfd, sub))
+	return false;
+      
+      if (! do_pad (abfd, size & 1))
+	return false;
     }
 
   sprintf (fhdr.lastmemoff, "%ld", (long) prevoff);
@@ -2089,14 +2165,9 @@ xcoff_write_archive_contents_old (abfd)
       if (bfd_bwrite ((PTR) name, namlen + 1, abfd) != namlen + 1)
 	return false;
     }
-  if ((size & 1) != 0)
-    {
-      bfd_byte b;
 
-      b = '\0';
-      if (bfd_bwrite ((PTR) &b, (bfd_size_type) 1, abfd) != 1)
-	return false;
-    }
+  if (! do_pad (abfd, size & 1))
+    return false;
 
   /* Write out the armap, if appropriate.  */
   if (! makemap || ! hasobjects)
@@ -2143,15 +2214,26 @@ xcoff_write_archive_contents_big (abfd)
   bfd_byte *member_table, *mt;
   bfd_vma member_table_size;
 
+  memset (&fhdr, 0, SIZEOF_AR_FILE_HDR_BIG);
   memcpy (fhdr.magic, XCOFFARMAGBIG, SXCOFFARMAG);
-  PRINT20 (fhdr.firstmemoff, SIZEOF_AR_FILE_HDR_BIG);
-  PRINT20 (fhdr.freeoff, 0);
 
-  /* Calculate count and total_namlen */
+  if (bfd_seek (abfd, (file_ptr) SIZEOF_AR_FILE_HDR_BIG, SEEK_SET) != 0)
+    return false;
+  
+  /* Calculate count and total_namlen.  */
+  makemap = bfd_has_map (abfd);
+  hasobjects = false;
   for (current_bfd = abfd->archive_head, count = 0, total_namlen = 0; 
        current_bfd != NULL; 
        current_bfd = current_bfd->next, count++)
-    total_namlen += strlen (normalize_filename (current_bfd)) + 1;
+    {
+      total_namlen += strlen (normalize_filename (current_bfd)) + 1;
+
+      if (makemap
+	  && ! hasobjects
+	  && bfd_check_format (current_bfd, bfd_object))
+	hasobjects = true;
+    }
 
   offsets = NULL;
   if (count)
@@ -2160,11 +2242,7 @@ xcoff_write_archive_contents_big (abfd)
       if (offsets == NULL)
 	return false;
     }
-  if (bfd_seek (abfd, (file_ptr) SIZEOF_AR_FILE_HDR_BIG, SEEK_SET) != 0)
-    return false;
 
-  makemap = bfd_has_map (abfd);
-  hasobjects = false;
   prevoff = 0;
   nextoff = SIZEOF_AR_FILE_HDR_BIG;
   for (current_bfd = abfd->archive_head, i = 0; 
@@ -2175,12 +2253,6 @@ xcoff_write_archive_contents_big (abfd)
       bfd_size_type namlen;
       struct xcoff_ar_hdr_big *ahdrp;
       bfd_size_type remaining;
-
-      if (makemap && ! hasobjects)
-	{
-	  if (bfd_check_format (current_bfd, bfd_object))
-	    hasobjects = true;
-	}
 
       name = normalize_filename (current_bfd);
       namlen = strlen (name);
@@ -2236,6 +2308,14 @@ xcoff_write_archive_contents_big (abfd)
 
       BFD_ASSERT (nextoff == bfd_tell (abfd));
 
+      /* Check for xcoff shared objects.
+	 Their text section needs to be aligned wrt the archive file position.
+	 This requires extra padding before the archive header.  */
+      if (! do_shared_object_padding (abfd, current_bfd, & nextoff,
+				      SIZEOF_AR_HDR_BIG + namlen 
+				      + SXCOFFARFMAG))
+	return false;
+
       offsets[i] = nextoff;
 
       prevoff = nextoff;
@@ -2252,31 +2332,19 @@ xcoff_write_archive_contents_big (abfd)
 
       if (bfd_seek (current_bfd, (file_ptr) 0, SEEK_SET) != 0)
 	return false;
-      while (remaining != 0)
-	{
-	  bfd_size_type amt;
-	  bfd_byte buffer[DEFAULT_BUFFERSIZE];
 
-	  amt = sizeof buffer;
-	  if (amt > remaining)
-	    amt = remaining;
-	  if (bfd_bread (buffer, amt, current_bfd) != amt
-	      || bfd_bwrite (buffer, amt, abfd) != amt)
-	    return false;
-	  remaining -= amt;
-	}
-
-      if ((size & 1) != 0)
-	{
-	  bfd_byte b;
-
-	  b = '\0';
-	  if (bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
-	    return false;
-	}
+      if (! do_copy (abfd, current_bfd))
+  	return false;
+  
+      if (! do_pad (abfd, size & 1))
+	return false;
     }
 
-  PRINT20 (fhdr.lastmemoff, prevoff);
+  if (count)
+    {
+      PRINT20 (fhdr.firstmemoff, offsets[0]);
+      PRINT20 (fhdr.lastmemoff, prevoff);
+    }
 
   /* Write out the member table.  
      Layout : 
@@ -3455,14 +3523,11 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
     SMALL_AOUTSZ,                       /* _xcoff_small_aout_header_size */
 
   /* Versions. */
-    1,                                    /* _xcoff_ldhdr_version */
+    1,                                   /* _xcoff_ldhdr_version */
 
-    /* Xcoff vs xcoff64 putting symbol names.  */
     _bfd_xcoff_put_symbol_name,          /* _xcoff_put_symbol_name */
-    _bfd_xcoff_put_ldsymbol_name,          /* _xcoff_put_ldsymbol_name */
-
-    & xcoff_dynamic_reloc,                  /* dynamic reloc howto */
-
+    _bfd_xcoff_put_ldsymbol_name,        /* _xcoff_put_ldsymbol_name */
+    & xcoff_dynamic_reloc,               /* dynamic reloc howto */
     xcoff_create_csect_from_smclas,      /* _xcoff_create_csect_from_smclas */
 
     /* Lineno and reloc count overflow.  */
@@ -3481,7 +3546,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
     xcoff_generate_rtinit,  /* _xcoff_generate_rtinit */
 };
 
-/* The transfer vector that leads the outside world to all of the above. */
+/* The transfer vector that leads the outside world to all of the above.  */
 const bfd_target rs6000coff_vec =
 {
   "aixcoff-rs6000",

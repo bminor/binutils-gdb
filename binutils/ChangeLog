@@ -1,3 +1,19 @@
+2002-03-18  Tom Rix  <trix@redhat.com>
+
+	* Makefile.am: Add binutils emulation support.
+	* configure.in: Same.
+	* configure.tgt: New file.  Same.
+	* ar.c (main): Use ar_emul_parse_arg.
+	(usage): Use ar_emul_usage.
+	(replace_members): Use ar_emul_replace, ar_emul_append.
+	* binemul.c: New file.  Define the binutils emulation
+	layer. Define default methods.
+	* binemul.h: New file.  Binutils emulation layer header file.
+	* emul_aix.c: New file.  AIX binutils emulation.
+	* emul_vanilla.c: New file. Default binutils emulation.
+	* Makefile.in: Regenerate.
+	* configure: Same.
+
 2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/fr.po: Updated version.

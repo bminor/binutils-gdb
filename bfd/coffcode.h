@@ -1493,12 +1493,12 @@ coff_new_section_hook (abfd, section)
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
 #ifdef RS6000COFF_C
-  if (xcoff_data (abfd)->text_align_power != 0
+  if (bfd_xcoff_text_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".text") == 0)
-    section->alignment_power = xcoff_data (abfd)->text_align_power;
-  if (xcoff_data (abfd)->data_align_power != 0
+    section->alignment_power = bfd_xcoff_text_align_power (abfd);
+  if (bfd_xcoff_data_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".data") == 0)
-    section->alignment_power = xcoff_data (abfd)->data_align_power;
+    section->alignment_power = bfd_xcoff_data_align_power (abfd);
 #endif
 
   /* Allocate aux records for section symbols, to store size and
@@ -1964,6 +1964,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 
 #ifdef RS6000COFF_C
 #ifdef XCOFF64
+    case U64_TOCMAGIC:
     case U803XTOCMAGIC:
 #else
     case U802ROMAGIC:
@@ -2768,14 +2769,8 @@ coff_set_flags (abfd, magicp, flagsp)
 #ifndef PPCMAGIC
     case bfd_arch_powerpc:
 #endif
-#ifdef XCOFF64
-      if (bfd_get_mach (abfd) == bfd_mach_ppc_620
-	  && !strncmp (abfd->xvec->name,"aix", 3))
-	*magicp = U803XTOCMAGIC;
-      else
-#else
-    	*magicp = U802TOCMAGIC;
-#endif
+      BFD_ASSERT (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
+      *magicp = bfd_xcoff_magic_number (abfd);
       return true;
       break;
 #endif
@@ -4447,7 +4442,7 @@ coff_slurp_symbol_table (abfd)
 
 	      if (src->u.syment.n_sclass == C_SECTION
 		  && src->u.syment.n_scnum > 0)
-		  dst->symbol.flags = BSF_LOCAL;
+		dst->symbol.flags = BSF_LOCAL;
 #endif
 	      if (src->u.syment.n_sclass == C_WEAKEXT)
 		dst->symbol.flags |= BSF_WEAK;

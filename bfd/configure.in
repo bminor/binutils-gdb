@@ -308,8 +308,11 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/m68kaux.h"'
 	;;
-  m88*-*-sysv4*)	;;
-  m88*-motorola-sysv*)	COREFILE=ptrace-core.lo ;;
+  m88*-*-sysv4*)
+	;;
+  m88*-motorola-sysv*)
+	COREFILE=ptrace-core.lo
+	;;
   m88*-*-mach3*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/m88kmach3.h"'
@@ -321,7 +324,13 @@ changequote([,])dnl
   ns32k-*-netbsd* | ns32k-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  rs6000-*-lynx*)	COREFILE=lynx-core.lo ;;
+  rs6000-*-lynx*)
+  	COREFILE=lynx-core.lo
+	;;
+  rs6000-*-aix5.* | powerpc-*-aix5.*)
+        COREFILE=rs6000-core.lo
+	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
+	;;
 changequote(,)dnl
   rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
 changequote([,])dnl
@@ -514,17 +523,6 @@ do
     # This list is alphabetized to make it easy to compare
     # with the two vector lists in targets.c.  For the same reason,
     # use one entry per line, even though this leads to long lines.
-    # FIXME: We include cofflink.lo not because it's needed for
-    # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
-    # which needs it but does not list it.  Should be fixed in right place.
-    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo"
-				target_size=64 ;;
-    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo"
-				target_size=64 ;;
-    bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf"
-				target_size=64 ;;
-    bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf"
-				target_size=64 ;;
     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
@@ -595,6 +593,13 @@ do
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh-lin.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    # FIXME: We include cofflink.lo not because it's needed for
+    # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
+    # which needs it but does not list it.  Should be fixed in right place.
+    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elf32.lo $elf ecofflink.lo" ;;
@@ -687,7 +692,8 @@ do
     pmac_xcoff_vec)		tb="$tb coff-rs6000.lo xcofflink.lo" ;;
     ppcboot_vec)		tb="$tb ppcboot.lo" ;;
     riscix_vec)			tb="$tb aout32.lo riscix.lo" ;;
-    rs6000coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo"; target_size=64 ;;
+    rs6000coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
+    aix5coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.lo xcofflink.lo" ;;
     shcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     shcoff_vec)			tb="$tb coff-sh.lo cofflink.lo" ;;
