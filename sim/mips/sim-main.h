@@ -168,6 +168,16 @@ convert (SD, CPU, cia, rm, op, from, to)
 #define FP_RM_TOMINF  (3) /* Round to Minus infinity (Floor) */
 #define GETRM()       (int)((FCSR >> FP_SH_RM) & FP_MASK_RM)
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
+#include "wf.h"
+#endif
+#endif
+/* end-sanitize-sky */
+
+
+
 
 
 /* HI/LO register accesses */
@@ -558,7 +568,16 @@ struct _sim_cpu {
 #define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
 #endif /* no tm-txvu.h */
 #endif
+
+enum float_operation
+/* start-sanitize-sky */
+/* NOTE: THE VALUES of THESE CONSTANTS MUST BE IN SYNC WITH THOSE IN WF.H */
 /* end-sanitize-sky */
+  {
+    FLOP_ADD,    FLOP_SUB,    FLOP_MUL,    FLOP_MADD,
+    FLOP_MSUB,   FLOP_MAX=10, FLOP_MIN,    FLOP_ABS,
+    FLOP_ITOF0=14, FLOP_FTOI0=18, FLOP_NEG=23
+  };
 
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses
