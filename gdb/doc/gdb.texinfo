@@ -4206,26 +4206,24 @@ You can customize @value{GDBN} to use any editor you want
 @footnote{
 The only restriction is that your editor (say @code{ex}), recognizes the
 following command-line syntax:
-@example
+@smallexample
 ex +@var{number} file
-@end example
-The optional numeric value +@var{number} designates the active line in the file.
-}.
-By default, it is @value{EDITOR}, but you can change this by setting the
-environment variable @code{EDITOR} before using
-@value{GDBN}.
-For example, to configure @value{GDBN} to use the @code{vi} editor, you
-could use these commands with the @code{sh} shell:
-@example
+@end smallexample
+The optional numeric value +@var{number} designates the active line in
+the file.}.  By default, it is @value{EDITOR}, but you can change this
+by setting the environment variable @code{EDITOR} before using
+@value{GDBN}.  For example, to configure @value{GDBN} to use the
+@code{vi} editor, you could use these commands with the @code{sh} shell:
+@smallexample
 EDITOR=/usr/bin/vi
 export EDITOR
 gdb ...
-@end example
+@end smallexample
 or in the @code{csh} shell,
-@example
+@smallexample
 setenv EDITOR /usr/bin/vi
 gdb ...
-@end example
+@end smallexample
 
 @node Search
 @section Searching source files
@@ -6007,7 +6005,7 @@ main ()
 @{
   printf ("Hello, world!\n");
 @}
-@end example
+@end smallexample
 
 In this program, @code{ascii_hello} and @code{ibm1047_hello} are arrays
 containing the string @samp{Hello, world!} followed by a newline,
@@ -6022,7 +6020,7 @@ GNU gdb 2001-12-19-cvs
 Copyright 2001 Free Software Foundation, Inc.
 @dots{}
 (gdb) 
-@end example
+@end smallexample
 
 We can use the @code{show charset} command to see what character sets
 @value{GDBN} is currently using to interpret and display characters and
@@ -6032,7 +6030,7 @@ strings:
 (gdb) show charset
 The current host and target character set is `iso-8859-1'.
 (gdb) 
-@end example
+@end smallexample
 
 For the sake of printing this manual, let's use @sc{ascii} as our
 initial character set:
@@ -6041,7 +6039,7 @@ initial character set:
 (gdb) show charset
 The current host and target character set is `ascii'.
 (gdb) 
-@end example
+@end smallexample
 
 Let's assume that @sc{ascii} is indeed the correct character set for our
 host system --- in other words, let's assume that if @value{GDBN} prints
@@ -6055,7 +6053,7 @@ $1 = 0x401698 "Hello, world!\n"
 (gdb) print ascii_hello[0]
 $2 = 72 'H'
 (gdb) 
-@end example
+@end smallexample
 
 @value{GDBN} uses the target character set for character and string
 literals you use in expressions:
@@ -6064,7 +6062,7 @@ literals you use in expressions:
 (gdb) print '+'
 $3 = 43 '+'
 (gdb) 
-@end example
+@end smallexample
 
 The @sc{ascii} character set uses the number 43 to encode the @samp{+}
 character.
@@ -6079,7 +6077,7 @@ $4 = 0x4016a8 "\310\205\223\223\226k@@\246\226\231\223\204Z%"
 (gdb) print ibm1047_hello[0]
 $5 = 200 '\310'
 (gdb) 
-@end example
+@end smallexample
 
 If we invoke the @code{set target-charset} command without an argument,
 @value{GDBN} tells us the character sets it supports:
@@ -6092,7 +6090,7 @@ Valid character sets are:
   ebcdic-us  
   ibm1047  
 * - can be used as a host character set
-@end example
+@end smallexample
 
 We can select @sc{ibm1047} as our target character set, and examine the
 program's strings again.  Now the @sc{ascii} string is wrong, but
@@ -6114,7 +6112,7 @@ $8 = 0x4016a8 "Hello, world!\n"
 (gdb) print ibm1047_hello[0]
 $9 = 200 'H'
 (gdb)
-@end example
+@end smallexample
 
 As above, @value{GDBN} uses the target character set for character and
 string literals you use in expressions:
@@ -6123,7 +6121,7 @@ string literals you use in expressions:
 (gdb) print '+'
 $10 = 78 '+'
 (gdb) 
-@end example
+@end smallexample
 
 The IBM1047 character set uses the number 78 to encode the @samp{+}
 character.
