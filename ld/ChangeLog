@@ -1,3 +1,33 @@
+Thu Sep 30 17:00:36 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* ldlang.c (lang_add_input_file): If it's a library brought in by
+	INPUT(), then change the file type to lang_input_file_is_l_enum.
+	* ldgram.y: In input_list, change lang_input_file_is_file_enum to
+	lang_input_file_is_search_file_enum so objects brought in using
+	INPUT() do a path lookup.
+
+Tue Sep 28 13:31:23 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: Change Lynx ld_target to be {i386,m68k}-lynx
+	instead of {i386,m68k}-coff.
+	* Makefile.in (em_i386lynx.c, em_m68klynx.c): New targets.
+	* config/i386-lynx.mt: New file.
+	* config/m68k-lynx.mt: New file.
+	* emulparams/i386lynx.sh: New file.
+	* emulparams/m68klynx.sh: New file.
+
+	* scripttempl/i386coff.sc: Make ENTRY get its value from ${ENTRY},
+	but defaulting to _start.
+
+	* ldemul.c, ldfile.c, ldlang.c, ldmain.c, ldmisc.c, ldmisc.h,
+	ldsym.c, ldwarn.c: Rename info to info_msg, to avoid conflict with
+	LynxOS libc.
+
+Thu Sep 23 14:51:03 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/solaris2.mh: New file.  Define HOSTING_CRT0 and
+	HOSTING_LIBS for testing.
+
 Fri Sep 17 17:52:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Finish up support for i386-sysv4 (without shared libraries):

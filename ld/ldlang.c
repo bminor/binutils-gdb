@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -32,10 +32,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldindr.h"
 #include "ldctor.h"
-
-#define BYTE_SIZE	(1)
-#define SHORT_SIZE	(2)
-#define LONG_SIZE	(4)
 
 /* FORWARDS */
 static void print_statements PARAMS ((void));
@@ -328,6 +324,13 @@ lang_add_input_file (name, file_type, target)
 {
   /* Look it up or build a new one */
   lang_has_input_file = true;
+
+  if (name) {
+    if ((*(name+strlen(name)-1) == '.') && (*(name+strlen(name)) == 'a')) {
+      file_type=lang_input_file_is_l_enum;
+    }
+  }
+
 #if 0
   lang_input_statement_type *p;
 
@@ -353,10 +356,10 @@ lang_add_keepsyms_file (filename)
 {
   extern strip_symbols_type strip_symbols;
   if (keepsyms_file != 0)
-    info ("%X%P: error: duplicated keep-symbols-file value\n");
+    info_msg ("%X%P: error: duplicated keep-symbols-file value\n");
   keepsyms_file = filename;
   if (strip_symbols != STRIP_NONE)
-    info ("%P: `-keep-only-symbols-file' overrides `-s' and `-S'\n");
+    info_msg ("%P: `-keep-only-symbols-file' overrides `-s' and `-S'\n");
   strip_symbols = STRIP_SOME;
 }
 
@@ -1194,6 +1197,8 @@ print_symbol (q)
   fprintf (config.map_file, " ");
   print_address (outside_symbol_address (q));
   fprintf (config.map_file, "              %s", q->name ? q->name : " ");
+  if (q->flags & BSF_WEAK)
+    fprintf (config.map_file, " *weak*");
   print_nl ();
 }
 
@@ -1255,7 +1260,8 @@ print_input_section (in)
 		    {
 		      asymbol *q = *p;
 
-		      if (bfd_get_section (q) == i && q->flags & BSF_GLOBAL)
+		      if (bfd_get_section (q) == i
+			  && (q->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
 			{
 			  print_symbol (q);
 			}
@@ -2029,7 +2035,7 @@ lang_check ()
       else
 	{
 
-	  info ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
+	  info_msg ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
 		bfd_printable_name (input_bfd), input_bfd,
 		bfd_printable_name (output_bfd));
 
@@ -2210,7 +2216,7 @@ lang_place_orphans ()
 		      if (default_common_section ==
 			  (lang_output_section_statement_type *) NULL)
 			{
-			  info ("%P: no [COMMON] command, defaulting to .bss\n");
+			  info_msg ("%P: no [COMMON] command, defaulting to .bss\n");
 
 			  default_common_section =
 			    lang_output_section_statement_lookup (".bss");
