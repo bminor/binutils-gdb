@@ -35,6 +35,7 @@ h-hp300bsd.h
 h-hp9000.h
 h-i386mach.h
 h-i386v.h
+h-i386v4.h
 h-irix3.h
 h-news.h
 h-rs6000.h
