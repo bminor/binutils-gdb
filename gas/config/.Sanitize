@@ -111,7 +111,7 @@ te-linux.h
 te-lynx.h
 te-mach.h
 te-netbsd.h
-te-netbsd532.h
+te-nbsd532.h
 te-pc532mach.h
 te-sco386.h
 te-sun3.h
