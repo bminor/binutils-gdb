@@ -733,7 +733,7 @@ SECTION
 
 SYNOPSIS
 	CONST struct reloc_howto_struct *
-	bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_type code);
+	bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code);
 
 DESCRIPTION
 	This routine returns a pointer to a howto struct which when
@@ -744,9 +744,9 @@ DESCRIPTION
 
 
 CONST struct reloc_howto_struct *
-DEFUN(bfd_reloc_type_lookup,(arch, code),
+DEFUN(bfd_reloc_type_lookup,(abfd, code),
       bfd *abfd AND
-      bfd_reloc_code_type code)
+      bfd_reloc_code_real_type code)
 {
   return BFD_SEND (abfd, reloc_type_lookup, (abfd, code));
 }
@@ -762,7 +762,7 @@ INTERNAL_FUNCTION
 SYNOPSIS
 	CONST struct reloc_howto_struct *bfd_default_reloc_type_lookup
 	(CONST struct bfd_arch_info *,
-         bfd_reloc_code_type  code);
+         bfd_reloc_code_real_type  code);
 
 DESCRIPTION
 	Provides a default relocation lookuperer for any architectue 
@@ -772,7 +772,7 @@ DESCRIPTION
 CONST struct reloc_howto_struct *
 DEFUN(bfd_default_reloc_type_lookup,(arch,  code),
      CONST struct bfd_arch_info *arch AND
-      bfd_reloc_code_type  code)
+      bfd_reloc_code_real_type  code)
 {
     switch (code) 
     {

@@ -212,7 +212,7 @@ void EXFUN(bfd_constructor_entry, (bfd *abfd,
     CONST char*type));
 CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup
     , (CONST struct bfd_arch_info *,
-    bfd_reloc_code_type  code));
+    bfd_reloc_code_real_type  code));
 boolean EXFUN(bfd_generic_relax_section
     , (bfd *abfd,
     asection *section,
@@ -233,4 +233,3 @@ CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
     , (CONST bfd_arch_info_type *a,
     CONST bfd_arch_info_type *b));
 boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
-struct elf_internal_shdr *EXFUN(bfd_elf_find_section , (bfd *abfd, char *name));

@@ -22,10 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com 
 */
-
-#include <assert.h>
-#include <stdio.h>
-
 /*
 
 SECTION
@@ -903,8 +899,8 @@ DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
 */
 
 static          boolean
-DEFUN(coff_new_section_hook,(abfd, section),
-      bfd            *abfd AND
+DEFUN(coff_new_section_hook,(abfd_ignore, section),
+      bfd            *abfd_ignore AND
       asection       *section)
 {
   section->alignment_power = abfd->xvec->align_power_min;
@@ -1633,7 +1629,7 @@ coff_symbol_type *symbol AND
 unsigned int written)
 {
   /*
-    Does this symbol have an associated line number - if so then
+    Does this symbol have an ascociated line number - if so then
     make it remember this symbol index. Also tag the auxent of
     this symbol to point to the right place in the lineno table
     */
@@ -1793,13 +1789,6 @@ DEFUN(coff_write_relocs,(abfd),
       struct internal_reloc    n;
       arelent        *q = p[i];
       memset((PTR)&n, 0, sizeof(n));
-
-      /* @@FIXME COFF relocs don't support addends.  Code should probably be
-	 in the target-independent code, using a target flag to decide whether
-	 to fold the addend into the section contents.  */
-      if (q->addend != 0)
-	abort ();
-
       n.r_vaddr = q->address + s->vma;
       /* The 29k const/consth reloc pair is a real kludge - the consth
 	 part doesn't have a symbol - it has an offset. So rebuilt
