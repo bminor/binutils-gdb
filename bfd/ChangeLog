@@ -1,5 +1,11 @@
 Thu Aug  8 16:24:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_input_bfd): If we already called the
+	undefined_symbol callback for a symbol, then don't issue any more
+	warnings about loader relocs.
+	(_bfd_ppc_xcoff_relocate_section): Don't do any further processing
+	after calling the undefined_symbol callback.
+
 	* xcofflink.c (XCOFF_MULTIPLY_DEFINED): Define.
 	(xcoff_link_add_symbols): Permit multiple definitions of a symbol
 	as the AIX linker seems to do.

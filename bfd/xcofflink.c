@@ -5185,6 +5185,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	    {
 	      struct xcoff_link_hash_entry *h = NULL;
 	      struct internal_ldrel ldrel;
+	      boolean quiet;
 
 	      *rel_hash = NULL;
 
@@ -5310,6 +5311,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		    }
 		}
 
+	      quiet = false;
 	      switch (irel->r_type)
 		{
 		default:
@@ -5361,7 +5363,17 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		    }
 		  else
 		    {
-		      if (h->ldindx < 0)
+		      if (! finfo->info->relocateable
+			  && (h->flags & XCOFF_DEF_DYNAMIC) == 0
+			  && (h->flags & XCOFF_IMPORT) == 0)
+			{
+			  /* We already called the undefined_symbol
+			     callback for this relocation, in
+			     _bfd_ppc_xcoff_relocate_section.  Don't
+			     issue any more warnings.  */
+			  quiet = true;
+			}
+		      if (h->ldindx < 0 && ! quiet)
 			{
 			  (*_bfd_error_handler)
 			    ("%s: `%s' in loader reloc but not loader sym",
@@ -5375,7 +5387,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		  ldrel.l_rtype = (irel->r_size << 8) | irel->r_type;
 		  ldrel.l_rsecnm = o->output_section->target_index;
 		  if (xcoff_hash_table (finfo->info)->textro
-		      && strcmp (o->output_section->name, ".text") == 0)
+		      && strcmp (o->output_section->name, ".text") == 0
+		      && ! quiet)
 		    {
 		      (*_bfd_error_handler)
 			("%s: loader reloc in read-only section %s",
@@ -6152,6 +6165,10 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 		     (info, h->root.root.string, input_bfd, input_section,
 		      rel->r_vaddr - input_section->vma)))
 		return false;
+
+	      /* Don't try to process the reloc.  It can't help, and
+                 it may generate another error.  */
+	      continue;
 	    }
 	}
 
