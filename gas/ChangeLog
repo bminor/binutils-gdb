@@ -1,5 +1,7 @@
 Sat Nov 22 15:50:09 1997  Klaus Kaempf  <kkaempf@progis.de>
 
+	* config/tc-alpha.c (s_alpha_section): Remove ".lcomm" handling.
+
 	* config/tc-alpha.c (alpha_basereg_clobbered): Remove variable and
 	all corresponding code.
 

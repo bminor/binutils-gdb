@@ -3467,9 +3467,9 @@ s_alpha_section (secid)
      int secid;
 {
   int temp;
-#define EVAX_SECTION_COUNT 6
+#define EVAX_SECTION_COUNT 5
   static char *section_name[EVAX_SECTION_COUNT+1] =
-    { "NULL", ".rdata", ".comm", ".link", ".ctors", ".dtors", ".lcomm" };
+    { "NULL", ".rdata", ".comm", ".link", ".ctors", ".dtors" };
 
   if ((secid <= 0) || (secid > EVAX_SECTION_COUNT))
     {
@@ -4316,7 +4316,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "link", s_alpha_section, 3},
   { "ctors", s_alpha_section, 4},
   { "dtors", s_alpha_section, 5},
-  { "lcomm", s_alpha_section, 6},
 #endif
   {"gprel32", s_alpha_gprel32, 0},
   {"t_floating", s_alpha_float_cons, 'd'},
