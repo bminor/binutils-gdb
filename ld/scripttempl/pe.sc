@@ -21,6 +21,7 @@ SECTIONS
             ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
 				LONG (-1); *(.dtors); *(.dtor);  LONG (0); }
 	    ${RELOCATING+ *(.fini);}
+	    ${RELOCATING+ *(.gcc_exc);}
 	    ${RELOCATING+ etext  =  .};
 	  }
 
@@ -51,8 +52,8 @@ SECTIONS
     *(.edata)   ;
   }
 
-  /* See coffcode.h.  These are discarded.  */
-  .junk BLOCK(__section_alignment__) : {
+
+  /DISCARD/ BLOCK(__section_alignment__) : {
     *(.debug\$S)
     *(.debug\$T)
     *(.debug\$F)
