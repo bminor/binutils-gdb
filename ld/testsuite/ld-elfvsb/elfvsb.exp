@@ -34,6 +34,7 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget alpha*-*-linux*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget s390*-*-linux*] \
+     && ![istarget sh\[34\]*-*-linux*] \
      && ![istarget x86_64-*-linux*] } {
     return
 }

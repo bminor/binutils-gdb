@@ -1,3 +1,9 @@
+2003-05-13  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-elfvers/vers.exp: Run on sh[34]*-*-linux*.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+
 2003-05-12  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/b-fixo2.d, ld-mmix/bpo-18.d, ld-mmix/bpo-18m.d,
