@@ -17,17 +17,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-srcdir = .
+srcdir = @srcdir@
+VPATH = @srcdir@
 
-prefix = /usr/local
+prefix = @prefix@
 
-infodir = $(prefix)/info
+infodir = @infodir@
 
 SHELL = /bin/sh
 
-INSTALL = install -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
 # main GDB source directory
 gdbdir = $(srcdir)/..
