@@ -1,3 +1,7 @@
+Thu Feb 24 08:30:33 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* defs.h: Revert Kung change regarding FORCE_LONG_LONG.
+
 Thu Feb 24 08:06:52 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-osf*): New configuration.
