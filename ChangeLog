@@ -1,3 +1,7 @@
+Sun Mar 21 12:11:58 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* configure: Must use both --host and --target in recursive calls.
+
 Thu Mar 18 12:31:35 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: Change deja-gnu to dejagnu.

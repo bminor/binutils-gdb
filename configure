@@ -864,7 +864,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			fi
 
 ### The recursion line is here.
-			if eval ${recprog} ${verbose} ${host_alias} -target=${target_alias} \
+			if eval ${recprog} ${verbose} --host=${host_alias} --target=${target_alias} \
 				${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
 				${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${removing} ${redirect} ; then
 				true
