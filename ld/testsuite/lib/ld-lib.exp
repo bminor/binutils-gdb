@@ -85,6 +85,7 @@ proc default_ld_link { ld target objects } {
     global HOSTING_LIBS
     global LIBS
     global host_triplet
+    global link_output
     
     set objs "$HOSTING_CRT0 $objects"
     set libs "$LIBS $HOSTING_LIBS"
@@ -98,12 +99,12 @@ proc default_ld_link { ld target objects } {
     
     verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
     
-    catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" exec_output
-    set exec_output [prune_warnings $exec_output]
-    if [string match "" $exec_output] then {
+    catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" link_output
+    set exec_output [prune_warnings $link_output]
+    if [string match "" $link_output] then {
 	return 1
     } else {
-	verbose -log "$exec_output"
+	verbose -log "$link_output"
 	return 0
     }
 }

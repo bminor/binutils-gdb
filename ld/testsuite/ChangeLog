@@ -1,3 +1,16 @@
+2000-05-13  H.J. Lu  (hjl@gnu.org)
+
+	* lib/ld-lib.exp (default_ld_link): Redirect the linker output
+	to link_output and make it global.
+
+	* ld-elfvsb/elf-offset.ld: New. ELF visibility fearture
+	tests.
+	* ld-elfvsb/elfvsb.dat: Likewise.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfvsb/main.c: Likewise.
+	* ld-elfvsb/sh1.c: Likewise.
+	* ld-elfvsb/sh2.c: Likewise.
+
 Fri Apr 21 15:16:07 2000  Richard Henderson  <rth@cygnus.com>
 
 	* testsuite/ld-scripts/phdrs.exp: IA-64 is 64-bit ELF too.
