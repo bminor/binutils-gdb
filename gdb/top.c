@@ -162,11 +162,13 @@ static void source_cleanup PARAMS ((FILE *));
 #define	GDBINIT_FILENAME	".gdbinit"
 #endif
 char gdbinit[] = GDBINIT_FILENAME;
+
 int inhibit_gdbinit = 0;
 
-/* Disable windows if non-zero */
+/* If nonzero, and GDB has been configured to be able to use windows,
+   attempt to open them upon startup.  */
 
-int use_windows = 1;		/* Defaults to on for now */
+int use_windows = 1;
 
 /* Version number of GDB, as a string.  */
 
@@ -186,9 +188,7 @@ extern char lang_frame_mismatch_warn[];		/* language.c */
 
 int caution = 1;			/* Default is yes, sigh. */
 
-/*
- * Define all cmd_list_element's
- */
+/* Define all cmd_list_elements.  */
 
 /* Chain containing all defined commands.  */
 

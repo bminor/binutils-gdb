@@ -1,5 +1,7 @@
 Fri Jan 27 17:08:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* top.c (use_windows): Clarify comments.
+
 	* convex-tdep.c (xfer_core_file): Comment out.
 	* config/convex/tm-convex.h (XFER_CORE_FILE): Remove.
 	* remote.c, remote-pa.c (remote_fetch_word): Change xfer_core_file
