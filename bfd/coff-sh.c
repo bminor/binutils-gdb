@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi Super-H COFF binaries.
-   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
    Relaxing code written by Ian Lance Taylor, <ian@cygnus.com>.
@@ -58,16 +58,16 @@ static bfd_byte *sh_coff_get_relocated_section_contents
    in coff/internal.h which we do not expect to ever see.  */
 static reloc_howto_type sh_coff_howtos[] =
 {
-  { 0 },
-  { 1 },
-  { 2 },
-  { 3 }, /* R_SH_PCREL8 */
-  { 4 }, /* R_SH_PCREL16 */
-  { 5 }, /* R_SH_HIGH8 */
-  { 6 }, /* R_SH_IMM24 */
-  { 7 }, /* R_SH_LOW16 */
-  { 8 },
-  { 9 }, /* R_SH_PCDISP8BY4 */
+  EMPTY_HOWTO (0),
+  EMPTY_HOWTO (1),
+  EMPTY_HOWTO (2),
+  EMPTY_HOWTO (3), /* R_SH_PCREL8 */
+  EMPTY_HOWTO (4), /* R_SH_PCREL16 */
+  EMPTY_HOWTO (5), /* R_SH_HIGH8 */
+  EMPTY_HOWTO (6), /* R_SH_IMM24 */
+  EMPTY_HOWTO (7), /* R_SH_LOW16 */
+  EMPTY_HOWTO (8),
+  EMPTY_HOWTO (9), /* R_SH_PCDISP8BY4 */
 
   HOWTO (R_SH_PCDISP8BY2,	/* type */
 	 1,			/* rightshift */
@@ -83,7 +83,7 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 11 }, /* R_SH_PCDISP8 */
+  EMPTY_HOWTO (11), /* R_SH_PCDISP8 */
 
   HOWTO (R_SH_PCDISP,		/* type */
 	 1,			/* rightshift */
@@ -99,7 +99,7 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xfff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 13 },
+  EMPTY_HOWTO (13),
 
   HOWTO (R_SH_IMM32,		/* type */
 	 0,			/* rightshift */
@@ -115,13 +115,13 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  { 15 },
-  { 16 }, /* R_SH_IMM8 */
-  { 17 }, /* R_SH_IMM8BY2 */
-  { 18 }, /* R_SH_IMM8BY4 */
-  { 19 }, /* R_SH_IMM4 */
-  { 20 }, /* R_SH_IMM4BY2 */
-  { 21 }, /* R_SH_IMM4BY4 */
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16), /* R_SH_IMM8 */
+  EMPTY_HOWTO (17), /* R_SH_IMM8BY2 */
+  EMPTY_HOWTO (18), /* R_SH_IMM8BY4 */
+  EMPTY_HOWTO (19), /* R_SH_IMM4 */
+  EMPTY_HOWTO (20), /* R_SH_IMM4BY2 */
+  EMPTY_HOWTO (21), /* R_SH_IMM4BY4 */
 
   HOWTO (R_SH_PCRELIMM8BY2,	/* type */
 	 1,			/* rightshift */
@@ -381,7 +381,7 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   unsigned long insn;
   bfd_vma sym_value;
@@ -2412,7 +2412,7 @@ sh_swap_insns (abfd, sec, relocs, contents, addr)
 static boolean
 sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
 		     relocs, syms, sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;

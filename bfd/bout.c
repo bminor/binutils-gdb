@@ -1,5 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -494,7 +495,7 @@ static reloc_howto_type howto_done_align_table[] = {
 
 static reloc_howto_type *
 b_out_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -1001,8 +1002,8 @@ b_out_set_arch_mach (abfd, arch, machine)
 
 static int
 b_out_sizeof_headers (ignore_abfd, ignore)
-     bfd *ignore_abfd;
-     boolean ignore;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+     boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof(struct internal_exec);
 }

@@ -354,7 +354,7 @@ find_howto (r_type)
 
 static void
 elf32_arm_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
      Elf32_Internal_Rela *elf_reloc;
 {
@@ -395,7 +395,7 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
 
 static reloc_howto_type *
 elf32_arm_reloc_type_lookup (abfd, code)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;

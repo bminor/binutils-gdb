@@ -1,5 +1,5 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright (C) 1994, 1995, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1997, 1999 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -118,7 +118,7 @@ static const struct arc_reloc_map arc_reloc_map[] =
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -138,7 +138,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 arc_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -178,7 +178,7 @@ arc_elf_object_p (abfd)
 static void
 arc_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   int mach;
   unsigned long val;

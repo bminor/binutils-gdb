@@ -1,5 +1,6 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -174,7 +175,7 @@ static
 #endif
 reloc_howto_type *
 m68k_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -215,11 +216,11 @@ static reloc_howto_type *m68kcoff_rtype_to_howto
 /*ARGSUSED*/
 static reloc_howto_type *
 m68kcoff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
   arelent relent;
@@ -257,9 +258,9 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
 
@@ -376,7 +377,7 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
 /*ARGSUSED*/
 static reloc_howto_type *
 m68kcoff_common_addend_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
      struct coff_link_hash_entry *h;

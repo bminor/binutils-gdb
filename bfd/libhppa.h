@@ -1,5 +1,6 @@
 /* HP PA-RISC SOM object file format:  definitions internal to BFD.
-   Copyright (C) 1990, 91, 92, 93, 94 , 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 98, 1999
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -610,7 +611,7 @@ bfd_hppa_insn2fmt (insn)
    
 static INLINE unsigned long
 hppa_rebuild_insn (abfd, insn, value, r_format)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      unsigned long insn;
      unsigned long value;
      unsigned long r_format;

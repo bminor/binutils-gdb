@@ -1570,6 +1570,9 @@ struct reloc_howto_struct
   {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 
+#define EMPTY_HOWTO(C) \
+  HOWTO((C),0,0,0,false,0,complain_overflow_dont,NULL,NULL,false,0,0,false)
+
 #define HOWTO_PREPARE(relocation, symbol)      \
   {                                            \
   if (symbol != (asymbol *)NULL) {             \

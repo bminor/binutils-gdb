@@ -61,7 +61,7 @@ check_section (abfd, size)
   int offset;
 
   offset = PRIV(image_ptr) - PRIV(image_section)->contents;
-  if ((offset + size) > PRIV(image_section)->_raw_size)
+  if ((bfd_size_type) (offset + size) > PRIV(image_section)->_raw_size)
     {
       PRIV(image_section)->contents = bfd_realloc (PRIV(image_section)->contents, offset + size);
       if (PRIV(image_section)->contents == 0)
@@ -121,7 +121,7 @@ image_dump (abfd, ptr, size, offset)
     bfd *abfd;
     unsigned char *ptr;
     int size;
-    int offset;
+    int offset ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (8, "image_dump from (%p, %d) to (%p)\n", ptr, size, PRIV(image_ptr));
@@ -301,7 +301,7 @@ etir_sta (abfd, cmd, ptr)
       case ETIR_S_C_STA_PQ:
   	{
 	  uquad dummy;
-	  int psect;
+	  unsigned int psect;
 
 	  psect = bfd_getl32 (ptr);
 	  if (psect >= PRIV(section_count))
@@ -559,7 +559,7 @@ static boolean
 etir_opr (abfd, cmd, ptr)
      bfd *abfd;
      int cmd;
-     unsigned char *ptr;
+     unsigned char *ptr ATTRIBUTE_UNUSED;
 {
   long op1, op2;
 
@@ -791,7 +791,7 @@ static boolean
 etir_stc (abfd, cmd, ptr)
      bfd *abfd;
      int cmd;
-     unsigned char *ptr;
+     unsigned char *ptr ATTRIBUTE_UNUSED;
 {
 
 #if VMS_DEBUG
@@ -907,7 +907,7 @@ etir_stc (abfd, cmd, ptr)
 
 static asection *
 new_section (abfd, idx)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      int idx;
 {
   asection *section;
@@ -947,7 +947,7 @@ new_section (abfd, idx)
 static int
 alloc_section (abfd, idx)
      bfd *abfd;
-     int idx;
+     unsigned int idx;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (4,  "alloc_section %d\n", idx);
@@ -1058,7 +1058,7 @@ tir_sta (bfd *abfd, unsigned char *ptr)
 	 */
   	{
 	  unsigned long dummy;
-	  int psect;
+	  unsigned int psect;
 
 	  if (cmd == TIR_S_C_STA_PB)
 	    psect = *ptr++;
@@ -1090,7 +1090,7 @@ tir_sta (bfd *abfd, unsigned char *ptr)
 	 */
   	{
 	  unsigned long dummy;
-	  int psect;
+	  unsigned int psect;
 
 	  if (cmd == TIR_S_C_STA_PW)
 	    psect = *ptr++;
@@ -1122,7 +1122,7 @@ tir_sta (bfd *abfd, unsigned char *ptr)
 	 */
   	{
 	  unsigned long dummy;
-	  int psect;
+	  unsigned int psect;
 
 	  if (cmd == TIR_S_C_STA_PL)
 	    psect = *ptr++;
@@ -1670,7 +1670,7 @@ tir_ctl (bfd *abfd, unsigned char *ptr)
  */
 {
   unsigned long dummy;
-  int psect;
+  unsigned int psect;
 
 #if VMS_DEBUG
   _bfd_vms_debug (5, "tir_ctl %d\n", *ptr);
@@ -1940,7 +1940,7 @@ _bfd_vms_slurp_tir (abfd, objtype)
 int
 _bfd_vms_slurp_dbg (abfd, objtype)
      bfd *abfd;
-     int objtype;
+     int objtype ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (2, "DBG/EDBG\n");
@@ -1958,8 +1958,8 @@ _bfd_vms_slurp_dbg (abfd, objtype)
 
 int
 _bfd_vms_slurp_tbt (abfd, objtype)
-     bfd *abfd;
-     int objtype;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     int objtype ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (2, "TBT/ETBT\n");
@@ -1976,8 +1976,8 @@ _bfd_vms_slurp_tbt (abfd, objtype)
 
 int
 _bfd_vms_slurp_lnk (abfd, objtype)
-     bfd *abfd;
-     int objtype;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     int objtype ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (2, "LNK\n");
@@ -2092,7 +2092,7 @@ end_etir_record (abfd)
 int
 _bfd_vms_write_tir (abfd, objtype)
      bfd *abfd;
-     int objtype;
+     int objtype ATTRIBUTE_UNUSED;
 {
   asection *section;
   vms_section *sptr;
@@ -2175,10 +2175,10 @@ _bfd_vms_write_tir (abfd, objtype)
 		  for (;;)
 		    {
 		      bfd_size_type addr = (*rptr)->address;
-		      int len = bfd_get_reloc_size ((*rptr)->howto);
+		      bfd_size_type len = bfd_get_reloc_size ((*rptr)->howto);
 		      if (sptr->offset < addr)		/* sptr starts before reloc */
 			{
-			  int before = addr - sptr->offset;
+			  bfd_size_type before = addr - sptr->offset;
 			  if (sptr->size <= before)		/* complete before */
 			    {
 			      sto_imm (abfd, sptr, vaddr, section->index);
@@ -2461,8 +2461,8 @@ _bfd_vms_write_tir (abfd, objtype)
 
 int
 _bfd_vms_write_tbt (abfd, objtype)
-     bfd *abfd;
-     int objtype;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     int objtype ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (2, "vms_write_tbt (%p, %d)\n", abfd, objtype);
@@ -2476,8 +2476,8 @@ _bfd_vms_write_tbt (abfd, objtype)
 
 int
 _bfd_vms_write_dbg (abfd, objtype)
-     bfd *abfd;
-     int objtype;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     int objtype ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   _bfd_vms_debug (2, "vms_write_dbg (%p, objtype)\n", abfd, objtype);

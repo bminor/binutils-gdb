@@ -1,5 +1,6 @@
 /* Generic COFF swapping routines, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -527,8 +528,8 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      PTR 	inp;
      int   type;
      int   class;
-     int   indx;
-     int   numaux;
+     int   indx ATTRIBUTE_UNUSED;
+     int   numaux ATTRIBUTE_UNUSED;
      PTR	extp;
 {
   union internal_auxent *in = (union internal_auxent *)inp;

@@ -237,7 +237,7 @@ mcore_elf_howto_init ()
 
 static reloc_howto_type *
 mcore_elf_reloc_type_lookup (abfd, code)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   enum elf_mcore_reloc_type mcore_reloc = R_MCORE_NONE;
@@ -267,7 +267,7 @@ mcore_elf_reloc_type_lookup (abfd, code)
 /* Set the howto pointer for a RCE ELF reloc.  */
 static void
 mcore_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
      Elf32_Internal_Rela * dst;
 {
@@ -349,7 +349,11 @@ mcore_elf_merge_private_bfd_data (ibfd, obfd)
     }
   else if (new_flags == old_flags)	/* Compatible flags are ok */
     ;
-  
+  else
+    {
+      /* FIXME */
+    }
+
   return true;
 }
 
@@ -362,11 +366,11 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 			   output_bfd, error_message)
      bfd * abfd;
      arelent * reloc_entry;
-     asymbol * symbol;
-     PTR data;
-     asection * input_section;
-     bfd * output_bfd;
-     char ** error_message;
+     asymbol * symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection * input_section ATTRIBUTE_UNUSED;
+     bfd * output_bfd ATTRIBUTE_UNUSED;
+     char ** error_message ATTRIBUTE_UNUSED;
 {
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
   
@@ -411,7 +415,7 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 static boolean
 mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  contents, relocs, local_syms, local_sections)
-     bfd * output_bfd;
+     bfd * output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info * info;
      bfd * input_bfd;
      asection * input_section;
@@ -619,7 +623,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 static asection *
 mcore_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *                        abfd;
-     struct bfd_link_info *       info;
+     struct bfd_link_info *       info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *          rel;
      struct elf_link_hash_entry * h;
      Elf_Internal_Sym *           sym;
@@ -665,10 +669,10 @@ mcore_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 mcore_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *                     abfd;
-     struct bfd_link_info *    info;
-     asection *                sec;
-     const Elf_Internal_Rela * relocs;
+     bfd *                     abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *    info ATTRIBUTE_UNUSED;
+     asection *                sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED;
 {
   return true;
 }

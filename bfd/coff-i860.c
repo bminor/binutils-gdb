@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 860 COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 97, 1999 Free Software Foundation, Inc.
    Created mostly by substituting "860" for "386" in coff-i386.c
    Harry Dolan <dolan@ssd.intel.com>, October 1995
 
@@ -57,9 +57,9 @@ coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
 
@@ -141,12 +141,12 @@ coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 
 static reloc_howto_type howto_table[] = 
 {
-  {0},
-  {1},
-  {2},
-  {3},
-  {4},
-  {5},
+  EMPTY_HOWTO (0),
+  EMPTY_HOWTO (1),
+  EMPTY_HOWTO (2),
+  EMPTY_HOWTO (3),
+  EMPTY_HOWTO (4),
+  EMPTY_HOWTO (5),
   HOWTO (R_DIR32,               /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
@@ -174,13 +174,13 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
 	 false),                /* pcrel_offset */
-  {010},
-  {011},
-  {012},
-  {013},
-  {014},
-  {015},
-  {016},
+  EMPTY_HOWTO (010),
+  EMPTY_HOWTO (011),
+  EMPTY_HOWTO (012),
+  EMPTY_HOWTO (013),
+  EMPTY_HOWTO (014),
+  EMPTY_HOWTO (015),
+  EMPTY_HOWTO (016),
   HOWTO (R_RELBYTE,		/* type */                                 
 	 0,			/* rightshift */                           
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -313,7 +313,7 @@ static reloc_howto_type howto_table[] =
 
 static reloc_howto_type *
 coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
      struct coff_link_hash_entry *h;

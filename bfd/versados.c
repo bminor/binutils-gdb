@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -690,11 +690,11 @@ versados_get_section_contents (abfd, section, location, offset, count)
 
 static boolean
 versados_set_section_contents (abfd, section, location, offset, bytes_to_do)
-     bfd *abfd;
-     sec_ptr section;
-     PTR location;
-     file_ptr offset;
-     bfd_size_type bytes_to_do;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     sec_ptr section ATTRIBUTE_UNUSED;
+     PTR location ATTRIBUTE_UNUSED;
+     file_ptr offset ATTRIBUTE_UNUSED;
+     bfd_size_type bytes_to_do ATTRIBUTE_UNUSED;
 {
   return false;
 }
@@ -703,8 +703,8 @@ versados_set_section_contents (abfd, section, location, offset, bytes_to_do)
 /*ARGSUSED */
 static int
 versados_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -756,7 +756,7 @@ versados_get_symtab (abfd, alocation)
 /*ARGSUSED */
 void
 versados_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -766,7 +766,7 @@ versados_get_symbol_info (ignore_abfd, symbol, ret)
 /*ARGSUSED */
 void
 versados_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -788,7 +788,7 @@ versados_print_symbol (ignore_abfd, afile, symbol, how)
 
 long
 versados_get_reloc_upper_bound (abfd, asect)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr asect;
 {
   return (asect->reloc_count + 1) * sizeof (arelent *);

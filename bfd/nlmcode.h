@@ -1,5 +1,5 @@
 /* NLM (NetWare Loadable Module) executable support for BFD.
-   Copyright (C) 1993, 94, 95, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 98, 1999 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, using ELF support as the
    template.
@@ -971,7 +971,7 @@ nlm_make_empty_symbol (abfd)
 
 void
 nlm_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -982,7 +982,7 @@ nlm_get_symbol_info (ignore_abfd, symbol, ret)
 
 void
 nlm_print_symbol (abfd, afile, symbol, how)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;

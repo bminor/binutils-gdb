@@ -1,5 +1,5 @@
 /* BFD backend for MIPS BSD (a.out) binaries.
-   Copyright (C) 1993, 94, 95, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 97, 98, 1999 Free Software Foundation, Inc.
    Written by Ralph Campbell.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -187,10 +187,10 @@ MY(write_object_contents) (abfd)
  */
 static bfd_reloc_status_type
 mips_fix_jmp_addr (abfd,reloc_entry,symbol,data,input_section,output_bfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      struct symbol_cache_entry *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
 {
@@ -240,13 +240,13 @@ mips_fix_hi16_s PARAMS ((bfd *, arelent *, asymbol *, PTR,
 static bfd_reloc_status_type
 mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
 		 output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
  

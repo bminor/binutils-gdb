@@ -301,7 +301,7 @@ m32r_elf_10_pcrel_reloc (abfd, reloc_entry, symbol, data,
      PTR data;
      asection * input_section;
      bfd * output_bfd;
-     char ** error_message;
+     char ** error_message ATTRIBUTE_UNUSED;
 {
   /* This part is from bfd_elf_generic_reloc.  */
   if (output_bfd != (bfd *) NULL
@@ -339,7 +339,7 @@ m32r_elf_do_10_pcrel_reloc (abfd, howto, input_section, data, offset,
      asection *input_section;
      bfd_byte *data;
      bfd_vma offset;
-     asection *symbol_section;
+     asection *symbol_section ATTRIBUTE_UNUSED;
      bfd_vma symbol_value;
      bfd_vma addend;
 {
@@ -403,13 +403,13 @@ static struct m32r_hi16 *m32r_hi16_list;
 static bfd_reloc_status_type
 m32r_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
 		     input_section, output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
@@ -558,13 +558,13 @@ m32r_elf_lo16_reloc (abfd, reloc_entry, symbol, data,
 static bfd_reloc_status_type
 m32r_elf_sda16_reloc (abfd, reloc_entry, symbol, data,
 		      input_section, output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* This part is from bfd_elf_generic_reloc.  */
   if (output_bfd != (bfd *) NULL
@@ -614,7 +614,7 @@ static const struct m32r_reloc_map m32r_reloc_map[] =
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -634,7 +634,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 m32r_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -650,8 +650,8 @@ m32r_info_to_howto_rel (abfd, cache_ptr, dst)
 
 boolean
 _bfd_m32r_elf_section_from_bfd_section (abfd, hdr, sec, retval)
-     bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
 {
@@ -677,7 +677,7 @@ static asymbol *m32r_elf_scom_symbol_ptr;
 
 void
 _bfd_m32r_elf_symbol_processing (abfd, asym)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *asym;
 {
   elf_symbol_type *elfsym;
@@ -717,7 +717,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      struct bfd_link_info *info;
      const Elf_Internal_Sym *sym;
      const char **namep;
-     flagword *flagsp;
+     flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
      bfd_vma *valp;
 {
@@ -850,7 +850,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
 static boolean
 m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -1801,7 +1801,7 @@ m32r_elf_object_p (abfd)
 static void
 m32r_elf_final_write_processing (abfd, linker)
      bfd *   abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
 
@@ -1936,7 +1936,7 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
 asection *
 m32r_elf_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -1979,10 +1979,10 @@ m32r_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* we don't use got and plt entries for m32r */
   return true;

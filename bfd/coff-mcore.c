@@ -254,11 +254,11 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 			   output_bfd, error_message)
      bfd * abfd;
      arelent * reloc_entry;
-     asymbol * symbol;
-     PTR data;
-     asection * input_section;
-     bfd * output_bfd;
-     char ** error_message;
+     asymbol * symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection * input_section ATTRIBUTE_UNUSED;
+     bfd * output_bfd ATTRIBUTE_UNUSED;
+     char ** error_message ATTRIBUTE_UNUSED;
 {
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
   
@@ -277,7 +277,7 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
 static reloc_howto_type *
 mcore_coff_reloc_type_lookup (abfd, code)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -302,10 +302,10 @@ mcore_coff_reloc_type_lookup (abfd, code)
 
 static reloc_howto_type *
 coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      asection * sec;
      struct internal_reloc * rel;
-     struct coff_link_hash_entry * h;
+     struct coff_link_hash_entry * h ATTRIBUTE_UNUSED;
      struct internal_syment * sym;
      bfd_vma * addendp;
 {
@@ -343,7 +343,7 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
    This function is referenced in pe_mkobject in peicode.h.  */
 static boolean
 in_reloc_p (abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type * howto;
 {
   return ! howto->pc_relative && howto->type != IMAGE_REL_MCORE_RVA;

@@ -1,5 +1,5 @@
 /* BFD back-end for PPCbug boot records.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Michael Meissner, Cygnus Support, <meissner@cygnus.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -225,7 +225,7 @@ ppcboot_object_p (abfd)
 static boolean
 ppcboot_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      PTR location;
      file_ptr offset;
      bfd_size_type count;
@@ -241,7 +241,7 @@ ppcboot_get_section_contents (abfd, section, location, offset, count)
 
 static long
 ppcboot_get_symtab_upper_bound (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return (PPCBOOT_SYMS + 1) * sizeof (asymbol *);
 }
@@ -340,7 +340,7 @@ ppcboot_make_empty_symbol (abfd)
 
 static void
 ppcboot_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -395,8 +395,8 @@ ppcboot_set_section_contents (abfd, sec, data, offset, size)
 
 static int
 ppcboot_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return sizeof (ppcboot_hdr_t);
 }

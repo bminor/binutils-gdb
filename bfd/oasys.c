@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
@@ -515,7 +515,7 @@ fail:
 
 static void
 oasys_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -526,7 +526,7 @@ oasys_get_symbol_info (ignore_abfd, symbol, ret)
 
 static void
 oasys_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -844,10 +844,10 @@ oasys_get_section_contents (abfd, section, location, offset, count)
 
 long
 oasys_canonicalize_reloc (ignore_abfd, section, relptr, symbols)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      sec_ptr section;
      arelent **relptr;
-     asymbol **symbols;
+     asymbol **symbols ATTRIBUTE_UNUSED;
 {
   unsigned int reloc_count = 0;
   oasys_reloc_type *src = (oasys_reloc_type *) (section->relocation);
@@ -1403,13 +1403,13 @@ oasys_find_nearest_line (abfd,
 			 filename_ptr,
 			 functionname_ptr,
 			 line_ptr)
-     bfd *abfd;
-     asection *section;
-     asymbol **symbols;
-     bfd_vma offset;
-     char **filename_ptr;
-     char **functionname_ptr;
-     unsigned int *line_ptr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     asymbol **symbols ATTRIBUTE_UNUSED;
+     bfd_vma offset ATTRIBUTE_UNUSED;
+     char **filename_ptr ATTRIBUTE_UNUSED;
+     char **functionname_ptr ATTRIBUTE_UNUSED;
+     unsigned int *line_ptr ATTRIBUTE_UNUSED;
 {
   return false;
 
@@ -1436,8 +1436,8 @@ oasys_generic_stat_arch_elt (abfd, buf)
 
 static int
 oasys_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }

@@ -1,5 +1,5 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -72,7 +72,12 @@ static unsigned int ecoff_armap_hash PARAMS ((CONST char *s,
 
 /* This stuff is somewhat copied from coffcode.h.  */
 
-static asection bfd_debug_section = { "*DEBUG*" };
+static asection bfd_debug_section =
+{
+  "*DEBUG*", 0, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, NULL, NULL,
+   0, 0, 0, 0, NULL, NULL, NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL
+};
 
 /* Create an ECOFF object.  */
 
@@ -138,7 +143,7 @@ _bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
 
 boolean
 _bfd_ecoff_new_section_hook (abfd, section)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *section;
 {
   section->alignment_power = 4;
@@ -350,9 +355,9 @@ ecoff_sec_to_styp_flags (name, flags)
 /*ARGSUSED*/
 flagword
 _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
-     const char *name;
+     const char *name ATTRIBUTE_UNUSED;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -496,7 +501,7 @@ ecoff_slurp_symbolic_header (abfd)
 boolean
 _bfd_ecoff_slurp_symbolic_info (abfd, ignore, debug)
      bfd *abfd;
-     asection *ignore;
+     asection *ignore ATTRIBUTE_UNUSED;
      struct ecoff_debug_info *debug;
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
@@ -1433,7 +1438,7 @@ ecoff_type_to_string (abfd, fdr, indx)
 /*ARGSUSED*/
 void
 _bfd_ecoff_get_symbol_info (abfd, symbol, ret)
-     bfd *abfd;			/* Ignored.  */
+     bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -1445,7 +1450,7 @@ _bfd_ecoff_get_symbol_info (abfd, symbol, ret)
 /*ARGSUSED*/
 boolean
 _bfd_ecoff_bfd_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return name[0] == '$';
@@ -1801,7 +1806,7 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 			      filename_ptr, functionname_ptr, retline_ptr)
      bfd *abfd;
      asection *section;
-     asymbol **ignore_symbols;
+     asymbol **ignore_symbols ATTRIBUTE_UNUSED;
      bfd_vma offset;
      CONST char **filename_ptr;
      CONST char **functionname_ptr;
@@ -1971,7 +1976,7 @@ _bfd_ecoff_set_arch_mach (abfd, arch, machine)
 int
 _bfd_ecoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
-     boolean reloc;
+     boolean reloc ATTRIBUTE_UNUSED;
 {
   asection *current;
   int c;

@@ -128,11 +128,11 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     asymbol *symbol;
+     asymbol *symbol ATTRIBUTE_UNUSED;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
   if (output_bfd == (bfd *) NULL)
@@ -321,7 +321,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	0x0,
 	false),
   /* 8 is unused */
-  {-1},
+  EMPTY_HOWTO (-1),
   HOWTO( ARM_NEG16,
 	0,
 	-1,
@@ -408,7 +408,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 
 static boolean
 in_reloc_p (abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type * howto;
 {
   return !howto->pc_relative && howto->type != ARM_RVA32;
@@ -423,11 +423,11 @@ in_reloc_p (abfd, howto)
 
 static reloc_howto_type *
 coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
   reloc_howto_type *howto;
@@ -447,13 +447,13 @@ coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 static bfd_reloc_status_type
 aoutarm_fix_pcrel_26_done (abfd, reloc_entry, symbol, data, input_section,
 			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* This is dead simple at present.  */
   return bfd_reloc_ok;
@@ -470,7 +470,7 @@ aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;
@@ -530,7 +530,7 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
      thumb_pcrel_branchtype btype;
 {
   bfd_vma relocation = 0;
@@ -1977,8 +1977,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
 static boolean
 coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
-     bfd *obfd;
-     struct bfd_link_info *info;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *ibfd;
      asection *sec;
      struct internal_reloc *irel;
@@ -2289,7 +2289,7 @@ coff_arm_copy_private_bfd_data (src, dest)
 
 static boolean
 coff_arm_is_local_label_name (abfd, name)
-     bfd *        abfd;
+     bfd *        abfd ATTRIBUTE_UNUSED;
      const char * name;
 {
 #ifdef LOCAL_LABEL_PREFIX
@@ -2342,7 +2342,7 @@ coff_arm_link_output_has_begun (sub, info)
 
 static boolean
 coff_arm_final_link_postscript (abfd, pfinfo)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      struct coff_final_link_info * pfinfo;
 {
   struct coff_arm_link_hash_table * globals;

@@ -1,5 +1,6 @@
 /* BFD back-end for linux flavored m68k a.out binaries.
-   Copyright (C) 1992, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 

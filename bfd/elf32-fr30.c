@@ -250,7 +250,7 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
      PTR        data;
      asection * input_section;
      bfd *      output_bfd;
-     char **    error_message;
+     char **    error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma       relocation;
   unsigned long x;
@@ -297,7 +297,7 @@ fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
      PTR        data;
      asection * input_section;
      bfd *      output_bfd;
-     char **    error_message;
+     char **    error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma       relocation;
 
@@ -353,7 +353,7 @@ static const struct fr30_reloc_map fr30_reloc_map [] =
 
 static reloc_howto_type *
 fr30_reloc_type_lookup (abfd, code)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -370,7 +370,7 @@ fr30_reloc_type_lookup (abfd, code)
 
 static void
 fr30_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
      Elf32_Internal_Rela * dst;
 {
@@ -499,7 +499,7 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 static boolean
 fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   contents, relocs, local_syms, local_sections)
-     bfd *                   output_bfd;
+     bfd *                   output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *  info;
      bfd *                   input_bfd;
      asection *              input_section;
@@ -681,7 +681,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 static asection *
 fr30_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *                        abfd;
-     struct bfd_link_info *       info;
+     struct bfd_link_info *       info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *          rel;
      struct elf_link_hash_entry * h;
      Elf_Internal_Sym *           sym;
@@ -727,10 +727,10 @@ fr30_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 fr30_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *                     abfd;
-     struct bfd_link_info *    info;
-     asection *                sec;
-     const Elf_Internal_Rela * relocs;
+     bfd *                     abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *    info ATTRIBUTE_UNUSED;
+     asection *                sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED;
 {
   return true;
 }

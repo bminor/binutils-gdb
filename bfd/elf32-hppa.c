@@ -533,7 +533,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 				    addend, info, sym_sec, sym_name, is_local)
      reloc_howto_type *howto;
      bfd *input_bfd;
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd_byte *contents;
      bfd_vma offset;
@@ -796,7 +796,7 @@ do_basic_type_1:
 
 static boolean
 hppa_elf_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return (name[0] == 'L' && name[1] == '$');
@@ -807,11 +807,11 @@ hppa_elf_is_local_label_name (abfd, name)
 
 static boolean
 elf32_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
-     const char **namep;
-     flagword *flagsp;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     const Elf_Internal_Sym *sym ATTRIBUTE_UNUSED;
+     const char **namep ATTRIBUTE_UNUSED;
+     flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
      bfd_vma *valp;
 {
@@ -825,7 +825,8 @@ elf32_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
 static void
 elf32_hppa_name_of_stub (location, destination, stub_name)
-     bfd_vma location, destination;
+     bfd_vma location ATTRIBUTE_UNUSED;
+     bfd_vma destination ATTRIBUTE_UNUSED;
      char *stub_name;
 {
   strcpy (stub_name, "_____long_branch_stub_");
@@ -980,7 +981,7 @@ elf32_hppa_build_stubs (stub_bfd, info)
 boolean
 elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
      bfd *stub_bfd;
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *link_info;
 {
   bfd *input_bfd;

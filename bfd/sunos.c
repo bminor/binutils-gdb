@@ -1,5 +1,5 @@
 /* BFD backend for SunOS binaries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1257,7 +1257,7 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 /*ARGSUSED*/
 struct bfd_link_needed_list *
 bfd_sunos_get_needed_list (abfd, info)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   if (info->hash->creator != &MY(vec))
@@ -1607,7 +1607,7 @@ static boolean
 sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
      struct bfd_link_info *info;
      bfd *abfd;
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
      const struct reloc_std_external *relocs;
      bfd_size_type rel_size;
 {
@@ -1767,7 +1767,7 @@ static boolean
 sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
      struct bfd_link_info *info;
      bfd *abfd;
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
      const struct reloc_ext_external *relocs;
      bfd_size_type rel_size;
 {
@@ -2173,8 +2173,8 @@ sunos_scan_dynamic_symbol (h, data)
 /*ARGSUSED*/
 static boolean
 sunos_link_dynamic_object (info, abfd)
-     struct bfd_link_info *info;
-     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -2427,7 +2427,7 @@ sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
      asection *input_section;
      struct aout_link_hash_entry *harg;
      PTR reloc;
-     bfd_byte *contents;
+     bfd_byte *contents ATTRIBUTE_UNUSED;
      boolean *skip;
      bfd_vma *relocationp;
 {

@@ -1,5 +1,6 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
    them with octal escapes), and isn't useful without an understanding of what
@@ -139,8 +140,8 @@ xcoff_copy_private_bfd_data (ibfd, obfd)
 
 static boolean
 xcoff_is_local_label_name (abfd, name)
-     bfd *abfd;
-     const char *name;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
 {
   return false;
 }
@@ -258,7 +259,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0xffff,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
   
-  { 7 },
+  EMPTY_HOWTO (7),
   
   /* Non modifiable absolute branch.  */
   HOWTO (8,	                /* type */                                 
@@ -275,7 +276,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0x3fffffc,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
   
-  { 9 },
+  EMPTY_HOWTO (9),
 
   /* Non modifiable relative branch.  */
   HOWTO (0xa,	                /* type */                                 
@@ -292,7 +293,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0x3fffffc,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
   
-  { 0xb },
+  EMPTY_HOWTO (0xb),
 
   /* Indirect load.  */
   HOWTO (0xc,	                /* type */                                 
@@ -324,7 +325,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0xffff,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
   
-  { 0xe },
+  EMPTY_HOWTO (0xe),
   
   /* Non-relocating reference.  */
   HOWTO (0xf,	                /* type */                                 
@@ -341,8 +342,8 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0,     	   	/* dst_mask */                             
 	 false),                /* pcrel_offset */
   
-  { 0x10 },
-  { 0x11 },
+  EMPTY_HOWTO (0x10),
+  EMPTY_HOWTO (0x11),
   
   /* TOC relative indirect load.  */
   HOWTO (0x12,	                /* type */                                 
@@ -518,7 +519,7 @@ xcoff_rtype2howto (relent, internal)
 
 static reloc_howto_type *
 xcoff_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -956,7 +957,7 @@ normalize_filename (abfd)
 static boolean
 xcoff_write_armap (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
-     unsigned int elength;
+     unsigned int elength ATTRIBUTE_UNUSED;
      struct orl *map;
      unsigned int orl_count;
      int stridx;
@@ -1293,7 +1294,7 @@ xcoff_write_archive_contents (abfd)
 static int
 _bfd_xcoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
-     boolean reloc;
+     boolean reloc ATTRIBUTE_UNUSED;
 {
   int size;
 

@@ -1,5 +1,5 @@
 /* BFD back-end for os9000 i386 binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 98, 1999 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -305,8 +305,8 @@ os9k_set_section_contents (abfd, section, location, offset, count)
 
 static int
 os9k_sizeof_headers (ignore_abfd, ignore)
-     bfd *ignore_abfd;
-     boolean ignore;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+     boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof (struct internal_exec);
 }

@@ -211,7 +211,7 @@ struct d10v_reloc_map
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -231,7 +231,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 d10v_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -245,7 +245,7 @@ d10v_info_to_howto_rel (abfd, cache_ptr, dst)
 static asection *
 elf32_d10v_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -288,10 +288,10 @@ elf32_d10v_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 elf32_d10v_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* we don't use got and plt entries for d10v */
   return true;
@@ -359,7 +359,7 @@ elf32_d10v_check_relocs (abfd, info, sec, relocs)
 static boolean
 elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 			    contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;

@@ -1,5 +1,6 @@
 /* BFD back-end for MS-DOS executables.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Bryan Ford of the University of Utah.
 
    Contributed by the Center for Software Science at the
@@ -58,8 +59,8 @@ struct exe_header
 
 static int
 msdos_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }

@@ -1,5 +1,5 @@
 /* BFD back-end for Texas Instruments TMS320C80 Multimedia Video Processor (MVP).
-   Copyright 1996, 1997, 1999 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    Written by Fred Fish (fnf@cygnus.com)
 
@@ -359,13 +359,13 @@ static reloc_howto_type tic80_howto_table[] =
 static bfd_reloc_status_type
 ppbase_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol_in ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   abort ();
@@ -376,13 +376,13 @@ ppbase_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static bfd_reloc_status_type
 glob15_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol_in ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   abort ();
@@ -393,13 +393,13 @@ glob15_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static bfd_reloc_status_type
 glob16_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol_in ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   abort ();
@@ -410,13 +410,13 @@ glob16_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static bfd_reloc_status_type
 local16_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol_in ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   abort ();
@@ -452,11 +452,11 @@ rtype2howto (cache_ptr, dst)
 
 static reloc_howto_type *
 coff_tic80_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
   arelent genrel;

@@ -3061,7 +3061,7 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
      bfd *output_bfd;
      struct bfd_link_info *info;
      struct bfd_link_hash_entry *harg;
-     boolean syscall;
+     boolean syscall ATTRIBUTE_UNUSED;
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 

@@ -282,7 +282,7 @@ _bfd_vms_slurp_gsd (abfd, objtype)
   vms_symbol_entry *entry;
   unsigned long base_addr;
   unsigned long align_addr;
-  static int psect_idx = 0;
+  static unsigned int psect_idx = 0;
 
 #if VMS_DEBUG
   vms_debug (2, "GSD/EGSD (%d/%x)\n", objtype, objtype);
@@ -724,11 +724,11 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 int
 _bfd_vms_write_gsd (abfd, objtype)
      bfd *abfd;
-     int objtype;
+     int objtype ATTRIBUTE_UNUSED;
 {
   asection *section;
   asymbol *symbol;
-  int symnum;
+  unsigned int symnum;
   int last_index = -1;
   char dummy_name[10];
   char *sname;

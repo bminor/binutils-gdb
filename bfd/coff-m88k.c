@@ -1,5 +1,6 @@
 /* BFD back-end for Motorola 88000 COFF "Binary Compatability Standard" files.
-   Copyright 1990, 91, 92, 93, 94, 95, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -44,7 +45,7 @@ static void reloc_processing
 
 static boolean
 m88k_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return name[0] == '@';
@@ -59,7 +60,7 @@ m88k_special_reloc (abfd, reloc_entry, symbol, data,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   reloc_howto_type *howto = reloc_entry->howto;
 

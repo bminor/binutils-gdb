@@ -1,5 +1,5 @@
 /* BFD backend for hp-ux 9000/300
-   Copyright (C) 1990, 1991, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 94, 95, 97, 1999 Free Software Foundation, Inc.
    Written by Glenn Engel.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -336,9 +336,9 @@ MY (write_object_contents) (abfd)
 
 static void
 convert_sym_type (sym_pointer, cache_ptr, abfd)
-     struct external_nlist *sym_pointer;
+     struct external_nlist *sym_pointer ATTRIBUTE_UNUSED;
      aout_symbol_type *cache_ptr;
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   int name_type;
   int new_type;
@@ -626,7 +626,7 @@ MY (swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      struct hp300hpux_reloc *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
-     bfd_size_type symcount;
+     bfd_size_type symcount ATTRIBUTE_UNUSED;
 {
   int r_index;
   int r_extern = 0;

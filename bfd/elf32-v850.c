@@ -509,7 +509,7 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 /* Map a bfd relocation into the appropriate howto structure */
 static reloc_howto_type *
 v850_elf_reloc_type_lookup (abfd, code)
-     bfd *                     abfd;
+     bfd *                     abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type  code;
 {
   unsigned int i;
@@ -533,7 +533,7 @@ v850_elf_reloc_type_lookup (abfd, code)
 /* Set the howto pointer for an V850 ELF reloc.  */
 static void
 v850_elf_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *                 abfd;
+     bfd *                 abfd ATTRIBUTE_UNUSED;
      arelent *             cache_ptr;
      Elf32_Internal_Rel *  dst;
 {
@@ -547,7 +547,7 @@ v850_elf_info_to_howto_rel (abfd, cache_ptr, dst)
 /* Set the howto pointer for a V850 ELF reloc (type RELA). */
 static void
 v850_elf_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd *                 abfd;
+     bfd *                 abfd ATTRIBUTE_UNUSED;
      arelent *             cache_ptr;
      Elf32_Internal_Rela   *dst;
 {
@@ -1252,13 +1252,13 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 /* Insert the addend into the instruction.  */
 static bfd_reloc_status_type
 v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
-     bfd *       abfd;
+     bfd *       abfd ATTRIBUTE_UNUSED;
      arelent *   reloc;
      asymbol *   symbol;
-     PTR         data;
+     PTR         data ATTRIBUTE_UNUSED;
      asection *  isection;
      bfd *       obfd;
-     char **     err;
+     char **     err ATTRIBUTE_UNUSED;
 {
   long relocation;
   
@@ -1326,7 +1326,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 /*ARGSUSED*/
 static boolean
 v850_elf_is_local_label_name (abfd, name)
-     bfd *         abfd;
+     bfd *         abfd ATTRIBUTE_UNUSED;
      const char *  name;
 {
   return (   (name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
@@ -1341,7 +1341,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 				    addend, info, sym_sec, is_local)
      reloc_howto_type *      howto;
      bfd *                   input_bfd;
-     bfd *                   output_bfd;
+     bfd *                   output_bfd ATTRIBUTE_UNUSED;
      asection *              input_section;
      bfd_byte *              contents;
      bfd_vma                 offset;
@@ -1349,7 +1349,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
      bfd_vma                 addend;
      struct bfd_link_info *  info;
      asection *              sym_sec;
-     int                     is_local;
+     int                     is_local ATTRIBUTE_UNUSED;
 {
   unsigned long  r_type   = howto->type;
   bfd_byte *     hit_data = contents + offset;
@@ -1716,10 +1716,10 @@ fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
 
 static boolean
 v850_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* No got and plt entries for v850-elf */
   return true;
@@ -1728,7 +1728,7 @@ v850_elf_gc_sweep_hook (abfd, info, sec, relocs)
 static asection *
 v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -1787,7 +1787,7 @@ v850_elf_object_p (abfd)
 static void
 v850_elf_final_write_processing (abfd, linker)
      bfd *   abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
 
@@ -1940,8 +1940,8 @@ static asymbol * v850_elf_zcom_symbol_ptr;
 
 static boolean
 v850_elf_section_from_bfd_section (abfd, hdr, sec, retval)
-     bfd *                 abfd;
-     Elf32_Internal_Shdr * hdr;
+     bfd *                 abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr * hdr ATTRIBUTE_UNUSED;
      asection *            sec;
      int *                 retval;
 {
@@ -2059,10 +2059,10 @@ v850_elf_symbol_processing (abfd, asym)
 static boolean
 v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *                    abfd;
-     struct bfd_link_info *   info;
+     struct bfd_link_info *   info ATTRIBUTE_UNUSED;
      const Elf_Internal_Sym * sym;
-     const char **            namep;
-     flagword *               flagsp;
+     const char **            namep ATTRIBUTE_UNUSED;
+     flagword *               flagsp ATTRIBUTE_UNUSED;
      asection **              secp;
      bfd_vma *                valp;
 {
@@ -2120,9 +2120,9 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 /*ARGSIGNORED*/
 static boolean
 v850_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *                  abfd;
-     struct bfd_link_info * info;
-     const char *           name;
+     bfd *                  abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info * info ATTRIBUTE_UNUSED;
+     const char *           name ATTRIBUTE_UNUSED;
      Elf_Internal_Sym *     sym;
      asection *             input_sec;
 {
@@ -2175,7 +2175,7 @@ v850_elf_section_from_shdr (abfd, hdr, name)
    section name, which is a hack, but ought to work.  */
 static boolean
 v850_elf_fake_sections (abfd, hdr, sec)
-     bfd *                 abfd;
+     bfd *                 abfd ATTRIBUTE_UNUSED;
      Elf32_Internal_Shdr * hdr;
      asection *            sec;
 {

@@ -182,7 +182,7 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
 
 static reloc_howto_type *
 elf32_sparc_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -211,7 +211,7 @@ elf32_sparc_reloc_type_lookup (abfd, code)
 
 static void
 elf32_sparc_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
@@ -241,13 +241,13 @@ sparc_elf_notsupported_reloc (abfd,
 			     input_section,
 			     output_bfd,
 			     error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   return bfd_reloc_notsupported;
 }
@@ -268,7 +268,7 @@ sparc_elf_wdisp16_reloc (abfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_vma x;
@@ -608,7 +608,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 static asection *
 elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -655,7 +655,7 @@ elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
 static boolean
 elf32_sparc_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      const Elf_Internal_Rela *relocs;
 {
@@ -1913,7 +1913,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
      bfd *obfd;
 {
   boolean error;
-  static int previous_ibfd_e_flags = -1;
+  /* FIXME: This should not be static.  */
+  static unsigned long previous_ibfd_e_flags = (unsigned long) -1;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -1961,7 +1962,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 
   if (((elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA)
        != previous_ibfd_e_flags)
-      && previous_ibfd_e_flags >= 0)
+      && previous_ibfd_e_flags != (unsigned long) -1)
     {
       (*_bfd_error_handler)
 	(_("%s: linking little endian files with big endian files"),
@@ -2009,7 +2010,7 @@ elf32_sparc_object_p (abfd)
 static void
 elf32_sparc_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   switch (bfd_get_mach (abfd))
     {

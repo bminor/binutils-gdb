@@ -207,21 +207,21 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 0xff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 10 },
-  { 11 },
-  { 12 },
-  { 13 },
-  { 14 },
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
-  { 20 },
-  { 21 },
-  { 22 },
-  { 23 },
-  { 24 },
+  EMPTY_HOWTO (10),
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  EMPTY_HOWTO (20),
+  EMPTY_HOWTO (21),
+  EMPTY_HOWTO (22),
+  EMPTY_HOWTO (23),
+  EMPTY_HOWTO (24),
 
   /* The remaining relocs are a GNU extension used for relaxing.  The
      final pass of the linker never needs to do anything with any of
@@ -426,7 +426,7 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   unsigned long insn;
   bfd_vma sym_value;
@@ -497,13 +497,13 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static bfd_reloc_status_type
 sh_elf_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
 		     output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != NULL)
     reloc_entry->address += input_section->output_offset;
@@ -548,7 +548,7 @@ static const struct elf_reloc_map sh_reloc_map[] =
 
 static reloc_howto_type *
 sh_elf_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -566,7 +566,7 @@ sh_elf_reloc_type_lookup (abfd, code)
 
 static void
 sh_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
@@ -1671,7 +1671,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 static boolean
 sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			 contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -1977,7 +1977,7 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 static asection *
 sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -2020,10 +2020,10 @@ sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* we don't use got and plt entries for sh. */
   return true;

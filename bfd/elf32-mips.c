@@ -642,9 +642,9 @@ static reloc_howto_type elf_mips_howto_table[] =
 
     /* The remaining relocs are defined on Irix 5, although they are
        not defined by the ABI.  */
-    { 13 },
-    { 14 },
-    { 15 },
+    EMPTY_HOWTO (13),
+    EMPTY_HOWTO (14),
+    EMPTY_HOWTO (15),
 
   /* A 5 bit shift field.  */
   HOWTO (R_MIPS_SHIFT5,		/* type */
@@ -787,9 +787,9 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false),		/* pcrel_offset */
 
   /* Used to cause the linker to insert and delete instructions?  */
-  { R_MIPS_INSERT_A },
-  { R_MIPS_INSERT_B },
-  { R_MIPS_DELETE },
+  EMPTY_HOWTO (R_MIPS_INSERT_A),
+  EMPTY_HOWTO (R_MIPS_INSERT_B),
+  EMPTY_HOWTO (R_MIPS_DELETE),
 
   /* Get the higher value of a 64 bit addend.  */
   HOWTO (R_MIPS_HIGHER,		/* type */
@@ -866,10 +866,10 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  { R_MIPS_REL16 },
-  { R_MIPS_ADD_IMMEDIATE },
-  { R_MIPS_PJUMP },
-  { R_MIPS_RELGOT },
+  EMPTY_HOWTO (R_MIPS_REL16),
+  EMPTY_HOWTO (R_MIPS_ADD_IMMEDIATE),
+  EMPTY_HOWTO (R_MIPS_PJUMP),
+  EMPTY_HOWTO (R_MIPS_RELGOT),
 
   /* Protected jump conversion.  This is an optimization hint.  No 
      relocation is required for correctness.  */
@@ -1004,7 +1004,7 @@ _bfd_mips_elf_hi16_reloc (abfd,
 		     input_section,
 		     output_bfd,
 		     error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
@@ -1607,13 +1607,13 @@ mips32_64bit_reloc (abfd, reloc_entry, symbol, data, input_section,
 static bfd_reloc_status_type
 mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
 		   output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -2143,7 +2143,7 @@ bfd_mips_elf_swap_msym_out (abfd, in, ex)
 /*ARGSUSED*/
 static boolean
 mips_elf_sym_is_global (abfd, sym)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *sym;
 {
   return (sym->flags & BSF_SECTION_SYM) == 0 ? true : false;
@@ -2174,7 +2174,7 @@ _bfd_mips_elf_object_p (abfd)
 void
 _bfd_mips_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
   unsigned int i;
@@ -2859,8 +2859,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 
 boolean
 _bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
-     bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
 {
@@ -3821,7 +3821,7 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      struct bfd_link_info *info;
      const Elf_Internal_Sym *sym;
      const char **namep;
-     flagword *flagsp;
+     flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
      bfd_vma *valp;
 {
@@ -5165,7 +5165,7 @@ mips_elf_high (value)
 
 static bfd_vma
 mips_elf_higher (value)
-     bfd_vma value;
+     bfd_vma value ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   return ((value + (bfd_vma) 0x80008000) >> 32) & 0xffff;
@@ -5179,7 +5179,7 @@ mips_elf_higher (value)
 
 static bfd_vma 
 mips_elf_highest (value)
-     bfd_vma value;
+     bfd_vma value ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   return ((value + (bfd_vma) 0x800080008000) > 48) & 0xffff;
@@ -5240,7 +5240,7 @@ static boolean
 mips_elf_record_global_got_symbol (h, info, g)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
-     struct mips_got_info *g;
+     struct mips_got_info *g ATTRIBUTE_UNUSED;
 {
   /* A global symbol in the GOT must also be in the dynamic symbol
      table.  */
@@ -6191,7 +6191,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     this is, we depend on the fact that the INPUT_SECTION's
 	     REL_HDR is read before its REL_HDR2.  */
 	  rel_hdr = &elf_section_data (input_section)->rel_hdr;
-	  if (rel - relocs 
+	  if ((size_t) (rel - relocs)
 	      >= (rel_hdr->sh_size / rel_hdr->sh_entsize
 		  * bed->s->int_rels_per_ext_rel))
 	    rel_hdr = elf_section_data (input_section)->rel_hdr2;
@@ -6318,9 +6318,9 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 /*ARGSIGNORED*/
 boolean
 _bfd_mips_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     const char *name;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
      Elf_Internal_Sym *sym;
      asection *input_sec;
 {
@@ -6500,7 +6500,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 static boolean
 mips_elf_create_compact_rel_section (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   flagword flags;
   register asection *s;
@@ -7067,7 +7067,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 asection *
 _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -7115,10 +7115,10 @@ _bfd_mips_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 boolean
 _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
 #if 0
   Elf_Internal_Shdr *symtab_hdr;
@@ -7281,7 +7281,7 @@ _bfd_mips_elf_always_size_sections (output_bfd, info)
 static boolean
 mips_elf_check_mips16_stubs (h, data)
      struct mips_elf_link_hash_entry *h;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
 {
   if (h->fn_stub != NULL
       && ! h->need_fn_stub)
@@ -7652,7 +7652,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 
 static void
 mips_elf_irix6_finish_dynamic_symbol (abfd, name, sym)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
      Elf_Internal_Sym *sym;
 {

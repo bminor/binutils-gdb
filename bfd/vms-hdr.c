@@ -249,7 +249,7 @@ _bfd_vms_write_hdr (abfd, objtype)
      int objtype;
 {
   asymbol *symbol;
-  int symnum;
+  unsigned int symnum;
   int had_case = 0;
   int had_file = 0;
 

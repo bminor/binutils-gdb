@@ -2044,7 +2044,7 @@ elf32_arm_get_symbol_type (elf_sym, type)
 static asection *
 elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -2089,10 +2089,10 @@ elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* We don't support garbage collection of GOT and PLT relocs yet.  */
   return true;
@@ -2830,7 +2830,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 static boolean
 elf32_arm_discard_copies (h, ignore)
      struct elf32_arm_link_hash_entry * h;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf32_arm_pcrel_relocs_copied * s;
 
@@ -3109,7 +3109,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 static void
 elf32_arm_post_process_headers (abfd, link_info)
      bfd * abfd;
-     struct bfd_link_info * link_info;
+     struct bfd_link_info * link_info ATTRIBUTE_UNUSED;
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* Elf file header, internal form */
 

@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -456,7 +456,7 @@ sec_to_styp_flags (sec_name, sec_flags)
  */
 static flagword
 styp_to_sec_flags (abfd, hdr, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
      const char *name;
 {
@@ -1017,7 +1017,7 @@ dependent COFF routines:
 
 static boolean
 coff_bad_format_hook (abfd, filehdr)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
@@ -1114,7 +1114,7 @@ static void coff_set_alignment_hook PARAMS ((bfd *, asection *, PTR));
 
 static void
 coff_set_alignment_hook (abfd, section, scnhdr)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      asection * section;
      PTR scnhdr;
 {
@@ -1154,7 +1154,7 @@ static void coff_set_alignment_hook PARAMS ((bfd *, asection *, PTR));
 
 static void
 coff_set_alignment_hook (abfd, section, scnhdr)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      asection * section;
      PTR scnhdr;
 {
@@ -1316,7 +1316,7 @@ static PTR
 coff_mkobject_hook (abfd, filehdr, aouthdr)
      bfd * abfd;
      PTR filehdr;
-     PTR aouthdr;
+     PTR aouthdr ATTRIBUTE_UNUSED;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   coff_data_type *coff;
@@ -1678,7 +1678,7 @@ static boolean symname_in_debug_hook
 
 static boolean
 symname_in_debug_hook (abfd, sym)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      struct internal_syment *sym;
 {
   return SYMNAME_IN_DEBUG (sym) ? true : false;
@@ -1702,7 +1702,7 @@ static boolean coff_pointerize_aux_hook
 /*ARGSUSED*/
 static boolean
 coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      combined_entry_type *table_base;
      combined_entry_type *symbol;
      unsigned int indaux;
@@ -1742,11 +1742,11 @@ static boolean coff_pointerize_aux_hook
 /*ARGSUSED*/
 static boolean
 coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
-     bfd *abfd;
-     combined_entry_type *table_base;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     combined_entry_type *table_base ATTRIBUTE_UNUSED;
      combined_entry_type *symbol;
      unsigned int indaux;
-     combined_entry_type *aux;
+     combined_entry_type *aux ATTRIBUTE_UNUSED;
 {
   /* Return true if we don't want to pointerize this aux entry, which
      is the case for the lastfirst aux entry for a C_LEAFPROC symbol.  */
@@ -1771,12 +1771,12 @@ static boolean coff_print_aux
 
 static boolean
 coff_print_aux (abfd, file, table_base, symbol, aux, indaux)
-     bfd *abfd;
-     FILE *file;
-     combined_entry_type *table_base;
-     combined_entry_type *symbol;
-     combined_entry_type *aux;
-     unsigned int indaux;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     FILE *file ATTRIBUTE_UNUSED;
+     combined_entry_type *table_base ATTRIBUTE_UNUSED;
+     combined_entry_type *symbol ATTRIBUTE_UNUSED;
+     combined_entry_type *aux ATTRIBUTE_UNUSED;
+     unsigned int indaux ATTRIBUTE_UNUSED;
 {
 #ifdef RS6000COFF_C
   if ((symbol->u.syment.n_sclass == C_EXT
@@ -1966,8 +1966,8 @@ coff_write_relocs (abfd, first_undef)
 static boolean
 coff_set_flags (abfd, magicp, flagsp)
      bfd * abfd;
-     unsigned int *magicp;
-     unsigned short *flagsp;
+     unsigned int *magicp ATTRIBUTE_UNUSED;
+     unsigned short *flagsp ATTRIBUTE_UNUSED;
 {
   switch (bfd_get_arch (abfd))
     {
@@ -3844,7 +3844,7 @@ static boolean coff_sym_is_global PARAMS ((bfd *, struct internal_syment *));
 
 static boolean
 coff_sym_is_global (abfd, syment)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      struct internal_syment * syment;
 {
   return (syment->n_sclass == OTHER_GLOBAL_CLASS);
@@ -4031,12 +4031,12 @@ static reloc_howto_type *coff_rtype_to_howto
 /*ARGSUSED*/
 static reloc_howto_type *
 coff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
-     asection *sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
-     bfd_vma *addendp;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
+     bfd_vma *addendp ATTRIBUTE_UNUSED;
 {
   arelent genrel;
 
@@ -4110,11 +4110,11 @@ static int dummy_reloc16_estimate
 
 static int
 dummy_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
-     bfd *abfd;
-     asection *input_section;
-     arelent *reloc;
-     unsigned int shrink;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     arelent *reloc ATTRIBUTE_UNUSED;
+     unsigned int shrink ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -4134,13 +4134,13 @@ static void dummy_reloc16_extra_cases
 static void
 dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 			   dst_ptr)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
-     struct bfd_link_order *link_order;
-     arelent *reloc;
-     bfd_byte *data;
-     unsigned int *src_ptr;
-     unsigned int *dst_ptr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     struct bfd_link_order *link_order ATTRIBUTE_UNUSED;
+     arelent *reloc ATTRIBUTE_UNUSED;
+     bfd_byte *data ATTRIBUTE_UNUSED;
+     unsigned int *src_ptr ATTRIBUTE_UNUSED;
+     unsigned int *dst_ptr ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -4191,7 +4191,7 @@ static boolean coff_link_output_has_begun
 static boolean
 coff_link_output_has_begun (abfd, info)
      bfd * abfd;
-     struct coff_final_link_info * info;
+     struct coff_final_link_info * info ATTRIBUTE_UNUSED;
 {
   return abfd->output_has_begun;
 }
@@ -4204,8 +4204,8 @@ static boolean coff_final_link_postscript
 
 static boolean
 coff_final_link_postscript (abfd, pfinfo)
-     bfd * abfd;
-     struct coff_final_link_info * pfinfo;
+     bfd * abfd ATTRIBUTE_UNUSED;
+     struct coff_final_link_info * pfinfo ATTRIBUTE_UNUSED;
 {
   return true;
 }

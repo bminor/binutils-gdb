@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993-1998, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94-98, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -67,15 +67,15 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
-  { 11, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 12, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 13, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 14, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 15, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 16, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 17, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 18, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
-  { 19, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
   /* The remaining relocs are a GNU extension.  */
   HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
   HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),

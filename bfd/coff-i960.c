@@ -1,5 +1,6 @@
 /* BFD back-end for Intel 960 COFF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -60,7 +61,7 @@ static boolean coff_i960_adjust_symndx
 
 static boolean
 coff_i960_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return (name[0] == 'L'
@@ -106,7 +107,7 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
      asymbol *symbol_in;
      PTR data;
      asection *input_section;
-     bfd *ignore_bfd;
+     bfd *ignore_bfd ATTRIBUTE_UNUSED;
      char **error_message;
 {
   /* This item has already been relocated correctly, but we may be
@@ -193,10 +194,10 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   asection *osec;
 
@@ -277,7 +278,7 @@ static reloc_howto_type howto_optcall =
 
 static reloc_howto_type *
 coff_i960_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -368,7 +369,7 @@ coff_i960_start_final_link (abfd, info)
 static boolean
 coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 			    contents, relocs, syms, sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -580,10 +581,10 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 /*ARGSUSED*/
 static boolean
 coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
-     bfd *obfd;
-     struct bfd_link_info *info;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *ibfd;
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
      struct internal_reloc *irel;
      boolean *adjustedp;
 {

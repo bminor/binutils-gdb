@@ -1,5 +1,6 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -203,13 +204,13 @@ h8300_coff_link_hash_table_create (abfd)
 static bfd_reloc_status_type
 special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
@@ -1060,13 +1061,13 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	symbol = *(reloc->sym_ptr_ptr);
 	value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 	if (symbol == bfd_abs_section_ptr->symbol
-	    || (value >= 0 && value <= 0xff))
+	    || value <= 0xff)
 	  {
 	    /* This should be handled in a manner very similar to
 	       R_RELBYTES.   If the value is in range, then just slam
 	       the value into the right location.  Else trigger a
 	       reloc overflow callback.  */
-	    if (value >= 0 && value <= 0xff)
+	    if (value <= 0xff)
 	      {
 		bfd_put_8 (abfd, value, data + dst_address);
 		dst_address += 1;

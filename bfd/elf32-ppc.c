@@ -1231,7 +1231,7 @@ error_return:
 
 static reloc_howto_type *
 ppc_elf_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   enum elf_ppc_reloc_type ppc_reloc = R_PPC_NONE;
@@ -1307,7 +1307,7 @@ ppc_elf_reloc_type_lookup (abfd, code)
 
 static void
 ppc_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
 {
@@ -1323,13 +1323,13 @@ ppc_elf_info_to_howto (abfd, cache_ptr, dst)
 static bfd_reloc_status_type
 ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
 			 output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
 
@@ -1523,7 +1523,7 @@ ppc_elf_section_from_shdr (abfd, hdr, name)
 
 static boolean
 ppc_elf_fake_sections (abfd, shdr, asect)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      Elf32_Internal_Shdr *shdr;
      asection *asect;
 {
@@ -1640,7 +1640,7 @@ ppc_elf_additional_program_headers (abfd)
 
 static boolean
 ppc_elf_modify_segment_map (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -2523,7 +2523,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 static asection *
 ppc_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -2570,7 +2570,7 @@ ppc_elf_gc_mark_hook (abfd, info, rel, h, sym)
 static boolean
 ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      const Elf_Internal_Rela *relocs;
 {
@@ -2637,8 +2637,8 @@ ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
      const Elf_Internal_Sym *sym;
-     const char **namep;
-     flagword *flagsp;
+     const char **namep ATTRIBUTE_UNUSED;
+     flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
      bfd_vma *valp;
 {

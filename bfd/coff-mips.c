@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -273,10 +273,10 @@ static reloc_howto_type mips_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  { 8 },
-  { 9 },
-  { 10 },
-  { 11 },
+  EMPTY_HOWTO (8),
+  EMPTY_HOWTO (9),
+  EMPTY_HOWTO (10),
+  EMPTY_HOWTO (11),
 
   /* This reloc is a Cygnus extension used when generating position
      independent code for embedded systems.  It represents a 16 bit PC
@@ -334,13 +334,13 @@ static reloc_howto_type mips_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
-  { 20 },
-  { 21 },
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  EMPTY_HOWTO (20),
+  EMPTY_HOWTO (21),
 
   /* This reloc is a Cygnus extension used when generating position
      independent code for embedded systems.  It represents an entry in
@@ -569,7 +569,7 @@ mips_adjust_reloc_in (abfd, intern, rptr)
 
 static void
 mips_adjust_reloc_out (abfd, rel, intern)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const arelent *rel;
      struct internal_reloc *intern;
 {
@@ -604,13 +604,13 @@ mips_generic_reloc (abfd,
 		    input_section,
 		    output_bfd,
 		    error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -651,13 +651,13 @@ mips_refhi_reloc (abfd,
 		  input_section,
 		  output_bfd,
 		  error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
@@ -933,13 +933,13 @@ mips_relhi_reloc (abfd,
 		  input_section,
 		  output_bfd,
 		  error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
@@ -1109,13 +1109,13 @@ mips_switch_reloc (abfd,
 		   input_section,
 		   output_bfd,
 		   error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   return bfd_reloc_ok;
 }
@@ -1124,7 +1124,7 @@ mips_switch_reloc (abfd,
 
 static reloc_howto_type *
 mips_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   int mips_type;
@@ -2329,9 +2329,9 @@ mips_relax_section (abfd, sec, info, again)
 
 static boolean
 mips_relax_pcrel16 (info, input_bfd, input_section, h, location, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *input_bfd;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      struct ecoff_link_hash_entry *h;
      bfd_byte *location;
      bfd_vma address;
@@ -2511,7 +2511,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     mips_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,

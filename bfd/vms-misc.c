@@ -220,7 +220,7 @@ _bfd_vms_hash_newfunc (entry, table, string)
 
 void
 _bfd_vms_get_header_values (abfd, buf, type, length)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      unsigned char *buf;
      int *type;
      int *length;
@@ -344,7 +344,8 @@ _bfd_vms_get_record (abfd)
   /* read the record header on Alpha.  */
 
   if ((test_len != 0)
-      && (bfd_read (PRIV(vms_buf), 1, test_len, abfd) != test_len))
+      && (bfd_read (PRIV(vms_buf), 1, test_len, abfd)
+	  != (bfd_size_type) test_len))
     {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
@@ -419,7 +420,8 @@ _bfd_vms_get_record (abfd)
 #if VMS_DEBUG
       vms_debug (10, "bfd_read remaining %d\n", remaining);
 #endif
-      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) != remaining)
+      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) !=
+	  (bfd_size_type) remaining)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;

@@ -1,5 +1,6 @@
 /* BFD back-end for Sparc COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -77,13 +78,13 @@ bfd_coff_generic_reloc PARAMS ((bfd *, arelent *, asymbol *, PTR,
 static bfd_reloc_status_type
 bfd_coff_generic_reloc (abfd, reloc_entry, symbol, data, input_section,
 			output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0)
@@ -158,7 +159,7 @@ static CONST struct coff_reloc_map sparc_reloc_map[] =
 
 static reloc_howto_type *
 coff_sparc_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;

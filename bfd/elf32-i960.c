@@ -39,17 +39,17 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_960_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield,
 	elf32_i960_relocate, "R_960_NONE", true,
 	0x00000000, 0x00000000, false),
-  { 1 },
+  EMPTY_HOWTO (1),
   HOWTO (R_960_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
 	elf32_i960_relocate, "R_960_32", true,
 	0xffffffff, 0xffffffff, false),
   HOWTO (R_960_IP24, 0, 2, 24, true, 0, complain_overflow_signed,
 	elf32_i960_relocate, "R_960_IP24 ", true,
 	0x00ffffff, 0x00ffffff, false),
-  { 4 },
-  { 5 },
-  { 6 },
-  { 7 }
+  EMPTY_HOWTO (4),
+  EMPTY_HOWTO (5),
+  EMPTY_HOWTO (6),
+  EMPTY_HOWTO (7)
 };
 
 static enum elf_i960_reloc_type
@@ -71,16 +71,16 @@ elf32_i960_bfd_to_reloc_type (bfd_reloc_code_real_type code)
 
 static void
 elf32_i960_info_to_howto (abfd, cache_ptr, dst)
-     bfd		*abfd;
-     arelent		*cache_ptr;
-     Elf32_Internal_Rela *dst;
+     bfd		*abfd ATTRIBUTE_UNUSED;
+     arelent		*cache_ptr ATTRIBUTE_UNUSED;
+     Elf32_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
 
 static void
 elf32_i960_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -111,13 +111,13 @@ elf32_i960_relocate (abfd,
 		       input_section,
 		       output_bfd,
 		       error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* HACK: I think this first condition is necessary when producing
      relocatable output.  After the end of HACK, the code is identical
@@ -153,7 +153,7 @@ elf32_i960_relocate (abfd,
 
 static reloc_howto_type *
 elf32_i960_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   return elf_howto_table + elf32_i960_bfd_to_reloc_type (code);

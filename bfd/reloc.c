@@ -389,6 +389,14 @@ DESCRIPTION
 
 .#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 .
+
+DESCRIPTION
+	This is used to fill in an empty howto entry in an array.
+
+.#define EMPTY_HOWTO(C) \
+.  HOWTO((C),0,0,0,false,0,complain_overflow_dont,NULL,NULL,false,0,0,false)
+.
+
 DESCRIPTION
 	Helper routine to turn a symbol into a relocation value.
 

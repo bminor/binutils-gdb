@@ -1,3 +1,25 @@
+1999-07-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Use EMPTY_HOWTO as appropriate.  Fill in
+	structure initializations.  Add casts.
+	* reloc.c (EMPTY_HOWTO): Define.
+	* bfd-in2.h: Rebuild.
+	* coff-h8300.c (h8300_reloc16_extra_cases): Remove useless
+	comparisons against 0.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Change
+	previous_ibfd_e_flags to unsigned long.
+	* vms.h (struct vms_private_data_struct): Change section_count to
+	unsigned.
+	* vms-gsd.c (_bfd_vms_slurp_gsd): Change psect_idx to unsigned.
+	(_bfd_vms_write_gsd): Change symnum to unsigned.
+	* vms-hdr.c (_bfd_vms_write_hdr): Change symnum to unsigned.
+	* vms-tir.c (etir_sta): Change psect to unsigned.
+	(alloc_section): Change idx to unsigned.
+	(tir_sta, tir_ctl): Change psect to unsigned.
+	(_bfd_vms_write_tir): Change len and before to bfd_size_type.
+	* vms.c (priv_section_count): Change to unsigned.
+
 1999-07-12  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c: Add some ATTRIBUTE_UNUSED.

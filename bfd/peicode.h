@@ -618,8 +618,8 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
      PTR 	      ext1;
      int             type;
      int             class;
-     int	      indx;
-     int	      numaux;
+     int	      indx ATTRIBUTE_UNUSED;
+     int	      numaux ATTRIBUTE_UNUSED;
      PTR 	      in1;
 {
   AUXENT    *ext = (AUXENT *)ext1;
@@ -701,8 +701,8 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      PTR 	inp;
      int   type;
      int   class;
-     int   indx;
-     int   numaux;
+     int   indx ATTRIBUTE_UNUSED;
+     int   numaux ATTRIBUTE_UNUSED;
      PTR	extp;
 {
   union internal_auxent *in = (union internal_auxent *)inp;
@@ -2074,7 +2074,7 @@ static PTR
 pe_mkobject_hook (abfd, filehdr, aouthdr)
      bfd * abfd;
      PTR filehdr;
-     PTR aouthdr;
+     PTR aouthdr ATTRIBUTE_UNUSED;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   pe_data_type *pe;
