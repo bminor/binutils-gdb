@@ -69,12 +69,17 @@ Sat Mar 28 22:28:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-sparc.c (sparc_memory_model): Only define if OBJ_ELF.
 	* config/tc-sparc.c (tc_gen_reloc): Add return to default case.
 
+
 Fri Mar 27 12:46:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Check legal addressing modes for
  	mcf5200 just as we do for m68000.
 	(m68k_init_after_args): Likewise.
 	(md_estimate_size_before_relax): Likewise.
+
+Fri Mar 27 10:30:01 1998  Catherine Moore  <clm@cygnus.com>
+        * config/tc-v850.c (md_assemble):  Store relocation
+        addend in fixup instead of instruction.
 
 Thu Mar 26 23:07:18 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
