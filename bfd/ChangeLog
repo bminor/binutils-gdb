@@ -1,3 +1,8 @@
+1999-05-25  Catherine Moore  <clm@cygnus.com>
+ 
+        * coff-arm.c (coff_arm_relocate_section): Don't emit
+        base file entries for pc-relative values.
+        
 1999-05-25  DJ Delorie  <dj@cygnus.com>
 
 	* peicode.h (coff_swap_sym_in): When we create the actual section
