@@ -39,6 +39,8 @@ littlemips.mt
 mipsel64.mt
 mipsm3.mh
 mipsm3.mt
+mipsv4.mh
+mipsv4.mt
 news-mips.mh
 nm-irix3.h
 nm-irix4.h
@@ -58,12 +60,14 @@ tm-irix5.h
 tm-mips.h
 tm-mips64.h
 tm-mipsm3.h
+tm-mipsv4.h
 xm-irix3.h
 xm-irix4.h
 xm-irix5.h
 xm-makeva.h
 xm-mips.h
 xm-mipsm3.h
+xm-mipsv4.h
 xm-news-mips.h
 xm-riscos.h
 

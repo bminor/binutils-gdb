@@ -1,0 +1,5 @@
+# Host: Mips running SVR4
+XM_FILE= xm-mipsv4.h
+NAT_FILE= nm-sysv4.h
+NATDEPFILES= fork-child.o procfs.o mipsv4-nat.o corelow.o core-svr4.o solib.o
+INSTALL = cp
