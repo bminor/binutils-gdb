@@ -25,4 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "coff-solib.h"		/* COFF shared library support */
 
+/* Lynx's signal.h doesn't seem to have any macros for what signal numbers
+   the real-time events are.  */
+#define REALTIME_LO 33
+/* One more than the last one.  */
+#define REALTIME_HI 64
+
 #endif /* TM_LYNX_H */

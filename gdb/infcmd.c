@@ -1,4 +1,4 @@
-/* Memory-access and commands for "inferior" (child) process, for GDB.
+/* Memory-access and commands for "inferior" process, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -32,80 +32,55 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "language.h"
 
-static void
-continue_command PARAMS ((char *, int));
+static void continue_command PARAMS ((char *, int));
 
-static void
-until_next_command PARAMS ((int));
+static void until_next_command PARAMS ((int));
 
-static void 
-until_command PARAMS ((char *, int));
+static void until_command PARAMS ((char *, int));
 
-static void
-path_info PARAMS ((char *, int));
+static void path_info PARAMS ((char *, int));
 
-static void
-path_command PARAMS ((char *, int));
+static void path_command PARAMS ((char *, int));
 
-static void
-unset_command PARAMS ((char *, int));
+static void unset_command PARAMS ((char *, int));
 
-static void
-float_info PARAMS ((char *, int));
+static void float_info PARAMS ((char *, int));
 
-static void
-detach_command PARAMS ((char *, int));
+static void detach_command PARAMS ((char *, int));
 
-static void
-nofp_registers_info PARAMS ((char *, int));
+static void nofp_registers_info PARAMS ((char *, int));
 
-static void
-all_registers_info PARAMS ((char *, int));
+static void all_registers_info PARAMS ((char *, int));
 
-static void
-registers_info PARAMS ((char *, int));
+static void registers_info PARAMS ((char *, int));
 
-static void
-do_registers_info PARAMS ((int, int));
+static void do_registers_info PARAMS ((int, int));
 
-static void
-unset_environment_command PARAMS ((char *, int));
+static void unset_environment_command PARAMS ((char *, int));
 
-static void
-set_environment_command PARAMS ((char *, int));
+static void set_environment_command PARAMS ((char *, int));
 
-static void
-environment_info PARAMS ((char *, int));
+static void environment_info PARAMS ((char *, int));
 
-static void
-program_info PARAMS ((char *, int));
+static void program_info PARAMS ((char *, int));
 
-static void
-finish_command PARAMS ((char *, int));
+static void finish_command PARAMS ((char *, int));
 
-static void
-signal_command PARAMS ((char *, int));
+static void signal_command PARAMS ((char *, int));
 
-static void
-jump_command PARAMS ((char *, int));
+static void jump_command PARAMS ((char *, int));
 
-static void
-step_1 PARAMS ((int, int, char *));
+static void step_1 PARAMS ((int, int, char *));
 
-static void
-nexti_command PARAMS ((char *, int));
+static void nexti_command PARAMS ((char *, int));
 
-static void
-stepi_command PARAMS ((char *, int));
+static void stepi_command PARAMS ((char *, int));
 
-static void
-next_command PARAMS ((char *, int));
+static void next_command PARAMS ((char *, int));
 
-static void
-step_command PARAMS ((char *, int));
+static void step_command PARAMS ((char *, int));
 
-static void
-run_command PARAMS ((char *, int));
+static void run_command PARAMS ((char *, int));
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -167,7 +142,7 @@ CORE_ADDR step_range_end; /* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-FRAME_ADDR step_frame_address;
+CORE_ADDR step_frame_address;
 
 /* Our notion of the current stack pointer.  */
 
@@ -348,7 +323,7 @@ step_1 (skip_subroutines, single_inst, count_string)
      char *count_string;
 {
   register int count = 1;
-  FRAME fr;
+  struct frame_info *frame;
   struct cleanup *cleanups = 0;
 
   ERROR_NO_INFERIOR;
@@ -364,10 +339,10 @@ step_1 (skip_subroutines, single_inst, count_string)
     {
       clear_proceed_status ();
 
-      fr = get_current_frame ();
-      if (!fr)				/* Avoid coredump here.  Why tho? */
+      frame = get_current_frame ();
+      if (!frame)			/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
-      step_frame_address = FRAME_FP (fr);
+      step_frame_address = FRAME_FP (frame);
       step_sp = read_sp ();
 
       if (! single_inst)
@@ -498,19 +473,9 @@ signal_command (signum_exp, from_tty)
 
   if (oursig == TARGET_SIGNAL_UNKNOWN)
     {
-      /* Not found as a name, try it as an expression.  */
-      /* The numeric signal refers to our own internal signal numbering
-	 from target.h, not to host/target signal number.  This is a
-	 feature; users really should be using symbolic names anyway,
-	 and the common ones like SIGHUP, SIGINT, SIGALRM, etc.  will
-	 work right anyway.  */
-      int signum = parse_and_eval_address (signum_exp);
-      if (signum < 0
-	  || signum >= (int)TARGET_SIGNAL_LAST
-	  || signum == (int)TARGET_SIGNAL_UNKNOWN
-	  || signum == (int)TARGET_SIGNAL_DEFAULT)
-	error ("Invalid signal number %d.", signum);
-      oursig = signum;
+      /* No, try numeric.  */
+      oursig =
+	target_signal_from_command (parse_and_eval_address (signum_exp));
     }
 
   if (from_tty)
@@ -587,6 +552,7 @@ run_stack_dummy (addr, buffer)
        frame in case there is only one copy of the dummy (e.g.
        CALL_DUMMY_LOCATION == AFTER_TEXT_END).  */
     flush_cached_frames ();
+    set_current_frame (create_new_frame (read_fp (), sal.pc));
 
     /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to put
        a breakpoint instruction.  If not, the call dummy already has the
@@ -633,7 +599,7 @@ static void
 until_next_command (from_tty)
      int from_tty;
 {
-  FRAME frame;
+  struct frame_info *frame;
   CORE_ADDR pc;
   struct symbol *func;
   struct symtab_and_line sal;
@@ -698,8 +664,7 @@ finish_command (arg, from_tty)
      int from_tty;
 {
   struct symtab_and_line sal;
-  register FRAME frame;
-  struct frame_info *fi;
+  register struct frame_info *frame;
   register struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
@@ -717,9 +682,8 @@ finish_command (arg, from_tty)
 
   clear_proceed_status ();
 
-  fi = get_frame_info (frame);
-  sal = find_pc_line (fi->pc, 0);
-  sal.pc = fi->pc;
+  sal = find_pc_line (frame->pc, 0);
+  sal.pc = frame->pc;
 
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
@@ -727,8 +691,7 @@ finish_command (arg, from_tty)
 
   /* Find the function we will return from.  */
 
-  fi = get_frame_info (selected_frame);
-  function = find_pc_function (fi->pc);
+  function = find_pc_function (selected_frame->pc);
 
   /* Print info on the selected frame, including level number
      but not source.  */
@@ -962,7 +925,9 @@ path_command (dirname, from_tty)
     path_info ((char *)NULL, from_tty);
 }
 
-const char * const reg_names[] = REGISTER_NAMES;
+/* The array of register names.  */
+
+char *reg_names[] = REGISTER_NAMES;
 
 /* Print out the machine register regnum. If regnum is -1,
    print all registers (fpregs == 1) or all non-float registers
@@ -1310,7 +1275,8 @@ If a process, it is no longer traced, and it continues its execution.  If you\n\
 were debugging a file, the file is closed and gdb no longer accesses it.");
 
   add_com ("signal", class_run, signal_command,
-	   "Continue program giving it signal number SIGNUMBER.");
+	   "Continue program giving it signal specified by the argument.\n\
+An argument of \"0\" means continue program without giving it a signal.");
 
   add_com ("stepi", class_run, stepi_command,
 	   "Step one instruction exactly.\n\

@@ -1,3 +1,15 @@
+Sun Jan  8 12:45:34 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* target.c, target.h (target_signal_from_command): New function.
+	* infrun.c (handle_command, signals_info), infcmd.c
+	(signal_command): Use it.
+	* infrun.c, infcmd.c: Update docstrings for these commands.
+
+	* target.h (enum target_signal), target.c (signals), target.c
+	(target_signal_from_host, target_signal_to_host): Add
+	TARGET_SIGNAL_REALTIME_* and TARGET_SIGNAL_PRIO for lynx.
+	* config/tm-lynx.h: Define signal numbers for realtime events.
+
 Sat Jan  7 07:23:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c (process_one_symbol):  Handle N_FUN symbols
