@@ -1,3 +1,8 @@
+2003-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_store_return_value): Use
+	regcache_cooked_write_part instead of regcache_cooked_write.
+
 2003-07-11  Theodore A. Roth  <troth@openavr.org>
 
 	* Makefile.in (install-only): Quote sed expression when generating

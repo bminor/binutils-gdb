@@ -799,7 +799,8 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   else if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       /* Handle double and float variables.  */
-      regcache_cooked_write (regcache,  X86_64_XMM0_REGNUM, valbuf);
+      regcache_cooked_write_part (regcache, X86_64_XMM0_REGNUM,
+				  0, len, valbuf);
     }
   /* XXX: What about complex floating point types?  */
   else
