@@ -1,3 +1,10 @@
+2000-09-07  J.T. Conklin  <jtc@redback.com>
+
+	* config/i386/nbsd.mt (TDEPFILES): Add i386nbsd-tdep.o.
+	* i386nbsd-nat.c (i386nbsd_use_struct_convention): Moved from here.
+	* i386nbsd-tdep.c (i386nbsd_use_struct_convention): To here.
+	* i386nbsd-tdep.c: New file.
+
 2000-09-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* i386mach-nat.c (fetch_inferior_registers, fetch_core_registers):
