@@ -31,6 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define GDB_PTRACE_REGS64
 
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 #endif TM_SPARC_LIN64_H

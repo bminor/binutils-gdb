@@ -22,7 +22,7 @@
 #define DELTA88
 
 #include "m88k/tm-m88k.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* If we don't define this, backtraces go on forever.  */
 #define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)

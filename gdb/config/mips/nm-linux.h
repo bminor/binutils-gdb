@@ -24,7 +24,7 @@
 
 #define MIPS_GNULINUX_TARGET
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* Return sizeof user struct to callers in less machine dependent
    routines.  Hard coded for cross-compilation friendliness. */

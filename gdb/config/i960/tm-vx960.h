@@ -21,7 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "i960/tm-i960.h"
-#include "tm-vxworks.h"
+#include "config/tm-vxworks.h"
 
 /* Under VxWorks the IP isn't filled in.  Skip it, go with RIP, which has
    the real value.  */

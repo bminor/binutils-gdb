@@ -1,3 +1,47 @@
+2002-06-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/alpha/nm-linux.h: Add "config/" prefix to tm, nm and xm
+	includes.
+	* config/tm-linux.h: Ditto.
+	* config/alpha/tm-alphalinux.h: Ditto.
+	* config/arm/nm-linux.h, config/arm/tm-linux.h: Ditto.
+	* config/arm/xm-nbsd.h, config/i386/nm-gnu.h: Ditto.
+	* config/i386/nm-i386lynx.h, config/i386/nm-i386sol2.h: Ditto.
+	* config/i386/nm-i386v4.h, config/i386/nm-i386v42mp.h: Ditto.
+	* config/i386/nm-linux.h, config/i386/nm-m3.h: Ditto.
+	* config/i386/nm-ptx4.h, config/i386/nm-x86-64.h: Ditto.
+	* config/i386/tm-i386gnu.h, config/i386/tm-i386lynx.h: Ditto.
+	* config/i386/tm-i386m3.h, config/i386/tm-i386sco5.h: Ditto.
+	* config/i386/tm-i386v4.h, config/i386/tm-linux.h: Ditto.
+	* config/i386/tm-ptx4.h, config/i386/tm-vxworks.h: Ditto.
+	* config/i386/xm-i386v4.h, config/i386/xm-nbsd.h: Ditto.
+	* config/i386/xm-ptx.h, config/i386/xm-ptx4.h: Ditto.
+	* config/i960/tm-vx960.h, config/ia64/nm-aix.h: Ditto.
+	* config/ia64/nm-linux.h, config/ia64/tm-aix.h: Ditto.
+	* config/ia64/tm-linux.h, config/ia64/xm-aix.h: Ditto.
+	* config/m68k/nm-linux.h, config/m68k/nm-m68klynx.h: Ditto.
+	* config/m68k/nm-sysv4.h, config/m68k/tm-linux.h: Ditto.
+	* config/m68k/tm-m68klynx.h, config/m68k/tm-m68kv4.h: Ditto.
+	* config/m68k/tm-sun2os4.h, config/m68k/tm-sun3os4.h: Ditto.
+	* config/m68k/tm-vx68.h, config/m68k/xm-m68kv4.h: Ditto.
+	* config/m68k/xm-nbsd.h, config/m88k/nm-delta88v4.h: Ditto.
+	* config/m88k/tm-delta88v4.h, config/m88k/xm-delta88v4.h: Ditto.
+	* config/mips/nm-irix5.h, config/mips/nm-linux.h: Ditto.
+	* config/mips/tm-linux.h, config/mips/tm-mips64.h: Ditto.
+	* config/mips/tm-mipsm3.h, config/mips/tm-mipsv4.h: Ditto.
+	* config/mips/tm-vxmips.h, config/mips/xm-irix5.h: Ditto.
+	* config/mips/xm-mipsv4.h, config/ns32k/xm-nbsd.h: Ditto.
+	* config/pa/nm-hppao.h, config/powerpc/nm-linux.h: Ditto.
+	* config/powerpc/tm-linux.h, config/powerpc/tm-vxworks.h: Ditto.
+	* config/powerpc/xm-aix.h, config/rs6000/nm-rs6000ly.h: Ditto.
+	* config/rs6000/tm-rs6000ly.h, config/rs6000/xm-aix4.h: Ditto.
+	* config/sh/tm-linux.h, config/sparc/nm-linux.h: Ditto.
+	* config/sparc/nm-sparclynx.h, config/sparc/nm-sun4sol2.h: Ditto.
+	* config/sparc/tm-linux.h, config/sparc/tm-sp64linux.h: Ditto.
+	* config/sparc/tm-sp64sim.h, config/sparc/tm-sparclynx.h: Ditto.
+	* config/sparc/tm-sun4os4.h, config/sparc/tm-sun4sol2.h: Ditto.
+	* config/sparc/tm-vxsparc.h, config/sparc/xm-sun4sol2.h: Ditto.
+
 2002-05-04  Aidan Skinner <aidan@velvet.net>
 
 	* ada-exp.tab.c: New file

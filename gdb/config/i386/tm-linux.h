@@ -31,7 +31,7 @@
 #endif
 
 #include "i386/tm-i386.h"
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 /* Register number for the "orig_eax" pseudo-register.  If this
    pseudo-register contains a value >= 0 it is interpreted as the

@@ -21,6 +21,6 @@
 #ifndef NM_RS6000LYNX_H
 #define NM_RS6000LYNX_H
 
-#include "nm-lynx.h"
+#include "config/nm-lynx.h"
 
 #endif /* NM_RS6000LYNX_H */

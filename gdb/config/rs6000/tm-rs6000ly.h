@@ -21,7 +21,7 @@
 #ifndef TM_RS6000LYNX_H
 #define TM_RS6000LYNX_H
 
-#include "tm-lynx.h"
+#include "config/tm-lynx.h"
 
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"

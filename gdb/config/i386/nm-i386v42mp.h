@@ -20,4 +20,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"

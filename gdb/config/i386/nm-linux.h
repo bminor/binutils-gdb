@@ -27,7 +27,7 @@
 #define I386_USE_GENERIC_WATCHPOINTS
 
 #include "i386/nm-i386.h"
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* Support for the user area.  */
 

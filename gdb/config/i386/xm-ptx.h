@@ -23,7 +23,7 @@
 /* Symmetry version by Jay Vosburgh (fubar@sequent.com) */
 
 #ifdef _SEQUENT_PTX4_
-#include "xm-sysv4.h"
+#include "config/xm-sysv4.h"
 #endif /* _SEQUENT_PTX4_ */
 
 /* This machine doesn't have the siginterrupt call.  */

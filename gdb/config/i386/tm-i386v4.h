@@ -29,7 +29,7 @@
 
 /* Pick up more stuff from the generic SVR4 host include file. */
 
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* Use the alternate method of determining valid frame chains. */
 

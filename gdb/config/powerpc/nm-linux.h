@@ -19,7 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef NM_LINUX_H
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 #define NM_LINUX_H
 

@@ -25,7 +25,7 @@
  */
 
 /* Include common definitions for Mach3 systems */
-#include "nm-m3.h"
+#include "config/nm-m3.h"
 
 /* Define offsets to access CPROC stack when it does not have
  * a kernel thread.
