@@ -1,3 +1,8 @@
+2002-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (section_already_linked): Call bfd_link_just_syms.
+	(lang_place_orphans): Abort if just_syms_flag.
+
 2002-05-10  Tom Rix  <trix@redhat.com>
 
 	* emultempl/aix.em: (gld*_set_output_arch): New function. Use 

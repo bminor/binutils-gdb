@@ -959,8 +959,7 @@ section_already_linked (abfd, sec, data)
      discard all sections.  */
   if (entry->just_syms_flag)
     {
-      sec->output_section = bfd_abs_section_ptr;
-      sec->output_offset = sec->vma;
+      bfd_link_just_syms (sec, &link_info);
       return;
     }
 
@@ -3803,11 +3802,7 @@ lang_place_orphans ()
 
 	      if (file->just_syms_flag)
 		{
-		  /* We are only retrieving symbol values from this
-                     file.  We want the symbols to act as though the
-                     values in the file are absolute.  */
-		  s->output_section = bfd_abs_section_ptr;
-		  s->output_offset = s->vma;
+		  abort ();
 		}
 	      else if (strcmp (s->name, "COMMON") == 0)
 		{
