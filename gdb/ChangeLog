@@ -1,3 +1,9 @@
+2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (target_is_thumb, caller_is_thumb)
+	(arm_pc_is_thumb_dummy): Remove.
+	(arm_breakpoint_from_pc): Don't call arm_pc_is_thumb_dummy.
+
 2005-03-25  Anthony Green  <green@redhat.com>
 
 	* remote.c (remote_store_registers): Fix memset usage.
