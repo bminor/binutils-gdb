@@ -1,5 +1,16 @@
 2003-10-09  Andrew Cagney  <cagney@redhat.com>
 
+	Changes from 2003-09-09 Jimi Xenidis <jimix@watson.ibm.com>:
+	* config/rs6000/tm-rs6000.h (SOFTWARE_SINGLE_STEP): Delete macro.
+	(SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/powerpc/tm-ppc-eabi.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/powerpc/tm-linux.h (SOFTWARE_SINGLE_STEP): Ditto.
+	(SOFTWARE_SINGLE_STEP_P): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): When AIX, set
+	software_single_step to rs6000_software_single_step.
+	
+2003-10-09  Andrew Cagney  <cagney@redhat.com>
+
 	* MAINTAINERS: Mark m32r-elf as buildable with -Werror.
 
 2003-10-09  Michael Snyder  <msnyder@redhat.com>

@@ -24,9 +24,6 @@
 
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
-/* except we want to allow single stepping */
-#undef SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P() 0
 
 #undef PROCESS_LINENUMBER_HOOK
 

@@ -84,12 +84,6 @@ extern void aix_process_linenos (void);
   (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
 
-/* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
-
-#define SOFTWARE_SINGLE_STEP_P() 1
-extern void rs6000_software_single_step (enum target_signal, int);
-#define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
-
 /* Notice when a new child process is started. */
 
 #define TARGET_CREATE_INFERIOR_HOOK rs6000_create_inferior

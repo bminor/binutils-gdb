@@ -3008,6 +3008,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
+  if (from_xcoff_exec)
+    {
+      /* NOTE: jimix/2003-06-09: This test should really check for
+	 GDB_OSABI_AIX when that is defined and becomes
+	 available. (Actually, once things are properly split apart,
+	 the test goes away.) */
+       /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
+       set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
+    }
+
   return gdbarch;
 }
 
