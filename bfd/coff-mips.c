@@ -122,6 +122,12 @@ typedef struct ecoff_symbol_struct
 /* The page boundary used to align sections in the executable file.  */
 #define PAGE_SIZE 0x2000
 
+/* The linker needs a section to hold small common variables while
+   linking.  There is no convenient way to create it when the linker
+   needs it, so we always create one for each BFD.  We then avoid
+   writing it out.  */
+#define SCOMMON ".scommon"
+
 /* MIPS ECOFF has COFF sections, but the debugging information is
    stored in a completely different format.  This files uses the some
    of the swapping routines from coffswap.h, and some of the generic
@@ -215,6 +221,10 @@ DEFUN (ecoff_mkobject, (abfd),
       return false;
     }
 
+  /* Always create a .scommon section for every BFD.  This is a hack so
+     that the linker has something to attach scSCommon symbols to.  */
+  bfd_make_section (abfd, SCOMMON);
+
   return true;
 }
 
@@ -242,7 +252,7 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
 
       ecoff->gp = internal_a->gp_value;
       ecoff->gprmask = internal_a->gprmask;
-      for (i = 0; i < 3; i++)
+      for (i = 0; i < 4; i++)
 	ecoff->cprmask[i] = internal_a->cprmask[i];
     }
 
@@ -661,18 +671,27 @@ DEFUN (ecoff_set_symbol_info, (abfd, ecoff_sym, asym, ext),
       asym->flags = BSF_DEBUGGING;
       break;
     case scCommon:
-      asym->section = &bfd_com_section;
-      break;
+      /* FIXME: We should take a -G argument, which gives the maximum
+	 size of objects to be put in the small common section.  Until
+	 we do, we put objects of sizes up to 8 in the small common
+	 section.  The assembler should do this for us, but the native
+	 assembler seems to get confused.  */
+      if (asym->value > 8)
+	{
+	  asym->section = &bfd_com_section;
+	  break;
+	}
+      /* Fall through.  */
     case scSCommon:
       if (ecoff_scom_section.name == NULL)
 	{
 	  /* Initialize the small common section.  */
-	  ecoff_scom_section.name = "*SCOM*";
+	  ecoff_scom_section.name = SCOMMON;
 	  ecoff_scom_section.flags = SEC_IS_COMMON;
 	  ecoff_scom_section.output_section = &ecoff_scom_section;
 	  ecoff_scom_section.symbol = &ecoff_scom_symbol;
 	  ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
-	  ecoff_scom_symbol.name = "*SCOM*";
+	  ecoff_scom_symbol.name = SCOMMON;
 	  ecoff_scom_symbol.flags = BSF_SECTION_SYM;
 	  ecoff_scom_symbol.section = &ecoff_scom_section;
 	  ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
@@ -2337,10 +2356,11 @@ DEFUN (ecoff_add_string, (output_bfd, fdr, string, external),
 /* Accumulate the debugging information from an input section.  */
 
 static boolean
-DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
+DEFUN (ecoff_get_debug, (output_bfd, seclet, section, relocateable),
        bfd *output_bfd AND
        bfd_seclet_type *seclet AND
-       asection *section)
+       asection *section AND
+       boolean relocateable)
 {
   bfd *input_bfd;
   HDRR *output_symhdr;
@@ -2410,7 +2430,14 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
 					       &fdr,
 					       (*sym_ptr)->name,
 					       false);
-	  internal_sym.value = (*sym_ptr)->value;
+
+	  if (bfd_is_com_section ((*sym_ptr)->section)
+	      || (*sym_ptr)->section == &bfd_und_section)
+	    internal_sym.value = (*sym_ptr)->value;
+	  else
+	    internal_sym.value = ((*sym_ptr)->value
+				  + (*sym_ptr)->section->output_offset
+				  + (*sym_ptr)->section->output_section->vma);
 	  internal_sym.st = stNil;
 	  internal_sym.sc = scUndefined;
 	  internal_sym.index = indexNil;
@@ -2461,6 +2488,17 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
 	  SYMR sym;
 
 	  ecoff_swap_sym_in (input_bfd, esym_ptr->native.lnative, &sym);
+
+	  /* If we're producing an executable, move common symbols
+	     into bss.  */
+	  if (relocateable == false)
+	    {
+	      if (sym.sc == scCommon)
+		sym.sc = scBss;
+	      else if (sym.sc == scSCommon)
+		sym.sc = scSBss;
+	    }
+
 	  if (! bfd_is_com_section (esym_ptr->symbol.section)
 	      && (esym_ptr->symbol.flags & BSF_DEBUGGING) == 0
 	      && esym_ptr->symbol.section != &bfd_und_section)
@@ -2638,7 +2676,7 @@ DEFUN (ecoff_get_debug, (output_bfd, seclet, section),
     int i;
 
     output_ecoff->gprmask |= input_ecoff->gprmask;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < 4; i++)
       output_ecoff->cprmask[i] |= input_ecoff->cprmask[i];
   }
 
@@ -2830,7 +2868,7 @@ DEFUN (ecoff_bfd_seclet_link, (abfd, data, relocateable),
 	    {
 	      if (p->type == bfd_indirect_seclet)
 		{
-		  if (ecoff_get_debug (abfd, p, o) == false)
+		  if (ecoff_get_debug (abfd, p, o, relocateable) == false)
 		    return false;
 		}
 	    }
@@ -2883,6 +2921,16 @@ DEFUN (ecoff_bfd_seclet_link, (abfd, data, relocateable),
 		abort ();
 	      ecoff_swap_ext_in (abfd, ecoff_sym_ptr->native.enative, &esym);
 
+	      /* If we're producing an executable, move common symbols
+		 into bss.  */
+	      if (relocateable == false)
+		{
+		  if (esym.asym.sc == scCommon)
+		    esym.asym.sc = scBss;
+		  else if (esym.asym.sc == scSCommon)
+		    esym.asym.sc = scSBss;
+		}
+
 	      /* Adjust the FDR index for the symbol by that used for
 		 the input BFD.  */
 	      esym.ifd += ecoff_data (bfd_asymbol_bfd (sym_ptr))->ifdbase;
@@ -2931,6 +2979,17 @@ DEFUN (ecoff_set_arch_mach, (abfd, arch, machine),
   return arch == bfd_arch_mips;
 }
 
+/* Get the size of the section headers.  We do not output the .scommon
+   section which we created in ecoff_mkobject.  */
+
+static int
+ecoff_sizeof_headers (abfd, reloc)
+     bfd *abfd;
+     boolean reloc;
+{
+  return FILHSZ + AOUTSZ + (abfd->section_count - 1) * SCNHSZ;
+}
+
 /* Calculate the file position for each section, and set
    reloc_filepos.  */
 
@@ -2943,15 +3002,10 @@ DEFUN (ecoff_compute_section_file_positions, (abfd),
   file_ptr old_sofar;
   boolean first_data;
 
-  sofar = FILHSZ;
-
   if (bfd_get_start_address (abfd)) 
     abfd->flags |= EXEC_P;
 
-  /* Unlike normal COFF, ECOFF always use the ``optional'' header.  */
-  sofar += AOUTSZ;
-
-  sofar += abfd->section_count * SCNHSZ;
+  sofar = ecoff_sizeof_headers (abfd, false);
 
   first_data = true;
   for (current = abfd->sections;
@@ -2959,7 +3013,8 @@ DEFUN (ecoff_compute_section_file_positions, (abfd),
        current = current->next)
     {
       /* Only deal with sections which have contents */
-      if (! (current->flags & SEC_HAS_CONTENTS))
+      if (! (current->flags & SEC_HAS_CONTENTS)
+	  || strcmp (current->name, SCOMMON) == 0)
 	continue;
 
       /* On Ultrix, the data sections in an executable file must be
@@ -3051,6 +3106,8 @@ DEFUN (ecoff_write_object_contents, (abfd),
        current != (asection *)NULL; 
        current = current->next) 
     {
+      if (strcmp (current->name, SCOMMON) == 0)
+	continue;
       current->target_index = count;
       ++count;
       if (current->reloc_count != 0)
@@ -3076,7 +3133,7 @@ DEFUN (ecoff_write_object_contents, (abfd),
 
   ecoff_data (abfd)->sym_filepos = sym_base;
 
-  text_size = FILHSZ + AOUTSZ + abfd->section_count * SCNHSZ;
+  text_size = ecoff_sizeof_headers (abfd, false);
   text_start = 0;
   data_size = 0;
   data_start = 0;
@@ -3093,6 +3150,13 @@ DEFUN (ecoff_write_object_contents, (abfd),
     {
       struct internal_scnhdr section;
       bfd_vma vma;
+
+      if (strcmp (current->name, SCOMMON) == 0)
+	{
+	  BFD_ASSERT (bfd_get_section_size_before_reloc (current) == 0
+		      && current->reloc_count == 0);
+	  continue;
+	}
 
       ++internal_f.f_nscns;
 
@@ -3230,7 +3294,7 @@ DEFUN (ecoff_write_object_contents, (abfd),
   internal_a.gp_value = ecoff_data (abfd)->gp;
 
   internal_a.gprmask = ecoff_data (abfd)->gprmask;
-  for (i = 0; i < 3; i++)
+  for (i = 0; i < 4; i++)
     internal_a.cprmask[i] = ecoff_data (abfd)->cprmask[i];
 
   /* Write out the file header and the optional header.  */
@@ -3841,7 +3905,6 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 #define	ecoff_get_section_contents	bfd_generic_get_section_contents
 #define ecoff_get_reloc_upper_bound	coff_get_reloc_upper_bound
 #define	ecoff_close_and_cleanup		bfd_generic_close_and_cleanup
-#define ecoff_sizeof_headers		coff_sizeof_headers
 #define ecoff_bfd_debug_info_start	bfd_void
 #define ecoff_bfd_debug_info_end	bfd_void
 #define ecoff_bfd_debug_info_accumulate	\

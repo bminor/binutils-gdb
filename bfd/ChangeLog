@@ -1,3 +1,7 @@
+Tue Feb  2 11:41:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c: Completed support for linker and binutils.
+
 Thu Jan 28 21:01:37 1993  John Gilmore  (gnu@cygnus.com)
 
 	Fix minor bugs reported by Carl Greco, <cgreco@parrot.creighton.edu>:
