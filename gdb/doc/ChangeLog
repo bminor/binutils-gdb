@@ -1,5 +1,7 @@
 Mon Feb  1 15:35:47 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* gdbinv-s.texi: z8000 simulator target name is just "sim"
+
 	* gdbinv-s.texi:  Mention that Z8000 simulator can simulate Z8001
 	as well as Z8002.
 

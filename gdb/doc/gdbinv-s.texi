@@ -947,23 +947,25 @@ H8/300 board as a ``normal exit'' of your program.
 
 @cindex simulator, Z8000
 @cindex Zilog Z8000 simulator
-When configured for debugging Zilog Z8000 targets, @value{GDBN} includes a Z8000
-simulator. 
+When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
+a Z8000 simulator.
 
 @table @code
-@item target z8ksim
-@kindex z8ksim
-This debugging target is a simulator for the Z8002 (the unsegmented
-variant of the Z8000 architecture) and the Z8001 (the segmented
-variant).  The simulator recognizes which architecture is appropriate by
-inspecting the object code.
+@item target sim
+@kindex sim
+@kindex target sim
+This debugging target is a machine simulator; when @value{GDBN} is
+configured for the Z8000 family, @samp{target sim} simulates either the
+Z8002 (the unsegmented variant of the Z8000 architecture) or the Z8001
+(the segmented variant).  The simulator recognizes which architecture is
+appropriate by inspecting the object code.
 @end table
 
 @noindent
-After this point, you can debug Z8000 programs in the same style as
-programs for your host computer; use the @code{file} command to load a
-new program image, the @code{run} command to run your program, and so
-on.
+After specifying this target, you can debug Z8000 programs in the same
+style as programs for your host computer; use the @code{file} command to
+load a new program image, the @code{run} command to run your program,
+and so on.
 
 As well as making available all the usual Z8000 registers (see
 @code{info reg}), this debugging target provides three additional items
