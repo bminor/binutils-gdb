@@ -393,11 +393,9 @@ proc misc_tests { } {
     global hex
     global decimal
 
-    setup_xfail mn10200*-*-*
     send_gdb "x/9 misc_tests\n"
     expect {
 	-re "
-.*beq	0x\[0-9a-f]+ <bCC_tests>.*
 .*jmp	0x\[0-9a-f]+ <main>.*
 .*jmp	0x\[0-9a-f]+ <start>.*
 .*jmp	\\(a2\\).*
