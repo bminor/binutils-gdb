@@ -1,4 +1,15 @@
-ss: MODULE  /* This is Cynus PR chill/5696. */
+ss: MODULE
+
+/* These declarations are from Cygnus PR chill/9078. */
+  SYNMODE m_char20 = CHARS(20) VARYING;
+
+  DCL foo m_char20 INIT := "Moser ";
+  DCL bar m_char20 INIT := "Wilfried";
+
+  DCL foo1 CHARS(5) INIT := "12345";
+  DCL bar1 CHARS(5) INIT := "abcde";
+
+/* This is Cynus PR chill/5696. */
 
 DCL s20 CHARS(20) VARYING;
 
