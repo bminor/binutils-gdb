@@ -1,5 +1,8 @@
 Thu Jan  6 07:17:53 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* remote-bug.c: At the start of each section, reset srec_frame
+	back to 160.
+
 	* target.h: Add TARGET_WAITKIND_LOADED and TARGET_WAITKIND_SPURIOUS.
 	* target.c (store_waitstatus): Add CHILD_SPECIAL_WAITSTATUS hook.
 	* infrun.c (wait_for_inferior): Replace SIGTRAP_STOP_AFTER_LOAD with

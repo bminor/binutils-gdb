@@ -66,7 +66,8 @@ static int srec_max_retries = 3;
    record.  I call this download a "frame".  Srec_frame says how many
    bytes will be represented in each frame.  */
 
-static int srec_frame = 160;
+#define SREC_SIZE 160
+static int srec_frame = SREC_SIZE;
 
 /* This variable determines how many bytes will be represented in each
    S3 s-record.  */
@@ -138,6 +139,7 @@ bug_load (args, fromtty)
   s = abfd->sections;
   while (s != (asection *) NULL)
     {
+      srec_frame = SREC_SIZE;
       if (s->flags & SEC_LOAD)
 	{
 	  int i;
@@ -1007,6 +1009,9 @@ This affects the communication protocol with the remote target.",
 		  &setlist),
      &showlist);
 
+#if 0
+  /* This needs to set SREC_SIZE, not srec_frame which gets changed at the
+     end of a download.  But do we need the option at all?  */
   add_show_from_set
     (add_set_cmd ("srec-frame", class_support, var_uinteger,
 		  (char *) &srec_frame,
@@ -1015,6 +1020,7 @@ Set the number of bytes in an S-record frame.\n\
 This affects the communication protocol with the remote target.",
 		  &setlist),
      &showlist);
+#endif /* 0 */
 
   add_show_from_set
     (add_set_cmd ("srec-noise", class_support, var_zinteger,
