@@ -1,3 +1,17 @@
+Tue Jan 17 10:58:06 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (mips_4650): New static variable.
+	(md_begin): Handle a cpu string of "4650".  If mips_4650 was not
+	initialized, set it to 0.
+	(append_insn): Don't insert nops around HI and LO on a 4650.
+	(mips_emit_delays): Likewise.
+	(mips_ip): Use INSN_ISA mask to check ISA of instruction.  Check
+	for INSN_4650.
+	(md_longopts): Add m4650 and no-m4650.
+	(md_parse_option): Handle mips-cpu=4650.  Handle -m4650 and
+	-no-m4650.
+	* doc/as.texinfo: Document new MIPS options.
+
 Sat Jan 14 23:48:13 1995  Steve Chamberlain  <sac@jonny>
 
 	* config/tc-w65.c, config/tc-w65.h, config/w65.mt: Newfiles.
