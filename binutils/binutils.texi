@@ -24,14 +24,13 @@ END-INFO-DIR-ENTRY
 @c General Public License.
 @c
 @c $Id$
-@iftex
-@finalout
-@c @smallbook
-@end iftex
-@c @cropmarks
+
 @setchapternewpage odd
 @settitle GNU Binary Utilities
 @titlepage
+@finalout
+@c @smallbook
+@c @cropmarks
 @title The GNU Binary Utilities
 @subtitle Version 1.90
 @sp 1
@@ -546,7 +545,7 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @cindex linker
 @kindex ld
 The GNU linker @code{ld} is now described in a separate manual.
-@xref{Top,, Overview,, GLD: the GNU linker}.
+@xref{Top,, Overview,, Using LD: the GNU linker}.
 
 @node nm, objdump, ld, Top
 @chapter nm
