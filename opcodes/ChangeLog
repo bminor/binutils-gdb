@@ -1,3 +1,7 @@
+2002-01-18  Keith Walker  <keith.walker@arm.com>
+
+	* arm-opc.h (arm_opcodes): Add bxj instruction.
+
 2002-01-17  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/opcodes.pot: Regenerate.

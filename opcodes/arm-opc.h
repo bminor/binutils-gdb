@@ -91,6 +91,9 @@ static struct arm_opcode arm_opcodes[] =
     {0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
     {0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
 
+    /* V5J instruction.  */
+    {0x012fff20, 0x0ffffff0, "bxj%c\t%0-3r"},
+
     /* XScale instructions.  */
     {0x0e200010, 0x0fff0ff0, "mia%c\tacc0, %0-3r, %12-15r"},
     {0x0e280010, 0x0fff0ff0, "miaph%c\tacc0, %0-3r, %12-15r"},
