@@ -75,6 +75,8 @@ enum reloc_type
   R_V850_TDA_4_4_OFFSET,		/* For sld.bu */
   R_V850_SDA_16_16_SPLIT_OFFSET,	/* For ld.bu */
   R_V850_ZDA_16_16_SPLIT_OFFSET,	/* For ld.bu */
+  R_V850_CALLT_6_7_OFFSET,		/* For callt */
+  R_V850_CALLT_16_16_OFFSET,		/* For callt */
 /* end-sanitize-v850e */
   R_V850_max
 };
