@@ -619,13 +619,97 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      if (readbuf)
-	return inf_ptrace_xfer_memory (offset, readbuf, len, 0 /*write */ ,
-				       NULL, ops);
-      if (writebuf)
-	return inf_ptrace_xfer_memory (offset, readbuf, len, 1 /*write */ ,
-				       NULL, ops);
-      return -1;
+#ifdef PT_IO
+      /* OpenBSD 3.1, NetBSD 1.6 and FreeBSD 5.0 have a new PT_IO
+	 request that promises to be much more efficient in reading
+	 and writing data in the traced process's address space.  */
+      {
+	struct ptrace_io_desc piod;
+	
+	/* NOTE: We assume that there are no distinct address spaces
+	   for instruction and data.  */
+	piod.piod_op = writebuf ? PIOD_WRITE_D : PIOD_READ_D;
+	piod.piod_addr = writebuf ? (void *) writebuf : readbuf;
+	piod.piod_offs = (void *) (long) offset;
+	piod.piod_len = len;
+
+	errno = 0;
+	if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) &piod, 0) == 0)
+	  /* Return the actual number of bytes read or written.  */
+	  return piod.piod_len;
+	/* If the PT_IO request is somehow not supported, fallback on
+	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
+	   to indicate failure.  */
+	if (errno != EINVAL)
+	  return 0;
+      }
+#endif
+      {
+	union
+	{
+	  PTRACE_TYPE_RET word;
+	  unsigned char byte[sizeof (PTRACE_TYPE_RET)];
+	} buffer;
+	ULONGEST rounded_offset;
+	LONGEST partial_len;
+	
+	/* Round the start address down to the next long word boundary.  */
+	rounded_offset = offset & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
+	
+	/* Truncate the length so that at max a single word will be
+	   transfered.  Remember, this function is required to perform
+	   only a partial read so no more than one word should be
+	   transfered).  */
+	if (rounded_offset + sizeof (PTRACE_TYPE_RET) < offset + len)
+	  partial_len = sizeof (PTRACE_TYPE_RET) - (offset - rounded_offset);
+	else
+	  partial_len = len;
+	
+	if (writebuf)
+	  {
+	    /* Fill start and end extra bytes of buffer with existing
+	       memory data.  */
+	    if (rounded_offset < offset
+		|| (partial_len + (offset - rounded_offset)
+		    < sizeof (PTRACE_TYPE_RET)))
+	      /* Need part of initial word -- fetch it.  */
+	      buffer.word = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+				    (PTRACE_TYPE_ARG3) (long) rounded_offset,
+				    0);
+	    
+	    /* Copy data to be written over corresponding part of
+	       buffer.  */
+	    memcpy (buffer.byte + (offset - rounded_offset), writebuf, partial_len);
+	    
+	    errno = 0;
+	    ptrace (PT_WRITE_D, PIDGET (inferior_ptid),
+		    (PTRACE_TYPE_ARG3) (long) rounded_offset,
+		    (int) buffer.byte);
+	    if (errno)
+	      {
+		/* Using the appropriate one (I or D) is necessary for
+		   Gould NP1, at least.  */
+		errno = 0;
+		ptrace (PT_WRITE_I, PIDGET (inferior_ptid),
+			(PTRACE_TYPE_ARG3) (long) rounded_offset,
+			(int) buffer.byte);
+		if (errno)
+		  return 0;
+	      }
+	  }
+	if (readbuf)
+	  {
+	    errno = 0;
+	    buffer.word = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+				  (PTRACE_TYPE_ARG3) (long) rounded_offset, 0);
+	    if (errno)
+	      return 0;
+	    /* Copy appropriate bytes out of the buffer.  */
+	    memcpy (readbuf, buffer.byte + (offset - rounded_offset),
+		    partial_len);
+	  }
+	return partial_len;
+      }
 
     case TARGET_OBJECT_UNWIND_TABLE:
       return -1;

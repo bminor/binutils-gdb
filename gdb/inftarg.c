@@ -540,7 +540,7 @@ child_xfer_partial (struct target_ops *ops, enum target_object object,
 	return child_xfer_memory (offset, readbuf, len, 0/*write*/,
 				  NULL, ops);
       if (writebuf)
-	return child_xfer_memory (offset, readbuf, len, 1/*write*/,
+	return child_xfer_memory (offset, (void *) writebuf, len, 1/*write*/,
 				  NULL, ops);
       return -1;
 
