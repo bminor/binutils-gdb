@@ -4,7 +4,7 @@
 
 2004-10-13  Daniel Jacobowitz  <dan@debian.org>
 
-	* dw2-intercu.S, dw2-intercu.exp: New files.
+	* gdb.dwarf2/dw2-intercu.S, gdb.dwarf2/dw2-intercu.exp: New files.
 
 2004-10-12  Jeff Johnston  <jjohnstn@redhat.com>
 
