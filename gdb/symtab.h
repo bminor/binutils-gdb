@@ -476,7 +476,9 @@ enum address_class
 
   LOC_ARG,
 
-  /* Value address is at spec'd offset in arglist. */
+  /* Value address is at spec'd offset in arglist.  Currently this is used
+     for C++ references (and presumably will be used for Pascal VAR
+     parameters), and is only dereferenced in certain contexts.  */
 
   LOC_REF_ARG,
 
