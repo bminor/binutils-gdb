@@ -96,8 +96,10 @@ const CGEN_INSN *
 		 extract handler.  */
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
+		  /* ??? 0 is passed for `pc' */
 		  int elength = (*CGEN_EXTRACT_FN (insn)) (insn, NULL,
-							   insn_value, fields);
+							   insn_value, fields,
+							   (bfd_vma) 0);
 		  if (elength > 0)
 		    {
 		      /* sanity check */
@@ -121,7 +123,9 @@ const CGEN_INSN *
       if (length != CGEN_INSN_BITSIZE (insn))
 	abort ();
 
-      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+      /* ??? 0 is passed for `pc' */
+      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields,
+					  (bfd_vma) 0);
       /* Sanity check: must succeed.
 	 Could relax this later if it ever proves useful.  */
       if (length == 0)
@@ -154,7 +158,8 @@ void
       if (op == NULL)
 	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
       else
-	indices[i] = @arch@_cgen_get_operand (CGEN_OPERAND_INDEX (op), fields);
+	indices[i] = @arch@_cgen_get_int_operand (CGEN_OPERAND_INDEX (op),
+						  fields);
     }
 }
 

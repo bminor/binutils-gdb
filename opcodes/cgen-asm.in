@@ -1,7 +1,7 @@
 /* Assembler interface for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-This file is used to generate @arch@-asm.c.
+THIS FILE IS USED TO GENERATE @prefix@-asm.c.
 
 Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
@@ -18,8 +18,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include <ctype.h>
@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ansidecl.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "@arch@-opc.h"
+#include "@prefix@-opc.h"
 #include "opintl.h"
 
 /* ??? The layout of this stuff is still work in progress.
@@ -42,7 +42,7 @@ static const char * insert_normal
 static const char * parse_insn_normal
      PARAMS ((const CGEN_INSN *, const char **, CGEN_FIELDS *));
 static const char * insert_insn_normal
-     PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *));
+     PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *, bfd_vma));
 
 /* -- assembler routines inserted here */
 
@@ -70,13 +70,21 @@ insert_normal (value, attrs, start, length, total_length, buffer)
 {
   bfd_vma x;
   static char buf[100];
+  /* Written this way to avoid undefined behaviour.
+     Yes, `long' will be bfd_vma but not yet.  */
+  long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+
+  /* If LENGTH is zero, this operand doesn't contribute to the value.  */
+  if (length == 0)
+    return NULL;
 
   /* Ensure VALUE will fit.  */
-  if ((attrs & (1 << CGEN_OPERAND_UNSIGNED)) != 0)
+  if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
     {
-      unsigned long max = (1 << length) - 1;
+      unsigned long max = mask;
       if ((unsigned long) value > max)
 	{
+	  /* xgettext:c-format */
 	  sprintf (buf, _("operand out of range (%lu not between 0 and %lu)"),
 		   value, max);
 	  return buf;
@@ -84,17 +92,20 @@ insert_normal (value, attrs, start, length, total_length, buffer)
     }
   else
     {
-      long min = - (1 << (length - 1));
-      long max = (1 << (length - 1)) - 1;
+      long min = - (1L << (length - 1));
+      long max = (1L << (length - 1)) - 1;
       if (value < min || value > max)
-	return sprintf
-	  (buf, _("operand out of range (%ld not between %ld and %ld)"),
-	   value, min, max);
+	{
+	  sprintf
+	    /* xgettext:c-format */
+	    (buf, _("operand out of range (%ld not between %ld and %ld)"),
+	     value, min, max);
+	  return buf;
+	}
     }
 
 #if 0 /*def CGEN_INT_INSN*/
-  *buffer |= ((value & ((1 << length) - 1))
-	      << (total_length - (start + length)));
+  *buffer |= (value & mask) << (total_length - (start + length));
 #else
   switch (total_length)
     {
@@ -117,8 +128,7 @@ insert_normal (value, attrs, start, length, total_length, buffer)
       abort ();
     }
 
-  x |= ((value & ((1 << length) - 1))
-	<< (total_length - (start + length)));
+  x |= (value & mask) << (total_length - (start + length));
 
   switch (total_length)
     {
@@ -171,6 +181,7 @@ parse_insn_normal (insn, strp, fields)
   const char * p;
   const unsigned char * syn;
 #ifdef CGEN_MNEMONIC_OPERANDS
+  /* FIXME: wip */
   int past_opcode_p;
 #endif
 
@@ -202,7 +213,6 @@ parse_insn_normal (insn, strp, fields)
   while (* syn != 0)
     {
       /* Non operand chars must match exactly.  */
-      /* FIXME: Need to better handle whitespace.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
@@ -260,10 +270,11 @@ parse_insn_normal (insn, strp, fields)
 /* FIXME: change buffer to char *?  */
 
 static const char *
-insert_insn_normal (insn, fields, buffer)
+insert_insn_normal (insn, fields, buffer, pc)
      const CGEN_INSN * insn;
      CGEN_FIELDS * fields;
      cgen_insn_t * buffer;
+     bfd_vma pc;
 {
   const CGEN_SYNTAX * syntax = CGEN_INSN_SYNTAX (insn);
   bfd_vma value;
@@ -312,7 +323,7 @@ insert_insn_normal (insn, fields, buffer)
 	continue;
 
       errmsg = @arch@_cgen_insert_operand (CGEN_SYNTAX_FIELD (*syn), fields,
-					   (char *) buffer);
+					   (char *) buffer, pc);
       if (errmsg)
 	return errmsg;
     }
@@ -364,13 +375,11 @@ const CGEN_INSN *
 	continue;
 #endif
 
-#if 1 /* FIXME: wip */
       /* If the RELAX attribute is set, this is an insn that shouldn't be
 	 chosen immediately.  Instead, it is used during assembler/linker
 	 relaxation if possible.  */
       if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX) != 0)
 	continue;
-#endif
 
       str = start;
 
@@ -381,7 +390,8 @@ const CGEN_INSN *
 
       if (! CGEN_PARSE_FN (insn) (insn, & str, fields))
 	{
-	  if (CGEN_INSERT_FN (insn) (insn, fields, buf) != NULL)
+	  /* ??? 0 is passed for `pc' */
+	  if (CGEN_INSERT_FN (insn) (insn, fields, buf, (bfd_vma) 0) != NULL)
 	    continue;
 	  /* It is up to the caller to actually output the insn and any
 	     queued relocs.  */
@@ -395,10 +405,11 @@ const CGEN_INSN *
      Need to track why it failed and pick the right one.  */
   {
     static char errbuf[100];
-    /* xgettext:c-format */
     if (strlen (start) > 50)
+      /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s...'"), start);
-    else
+    else 
+      /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s'"), start);
       
     *errmsg = errbuf;

@@ -1,4 +1,26 @@
+Tue Jul 21 13:41:07 1998  Doug Evans  <devans@seba.cygnus.com>
+
+start-sanitize-cygnus
+	* cgen-opc.in (@arch@_cgen_lookup_insn): Update call to
+	CGEN_EXTRACT_FN.
+	(@arch@_cgen_get_insn_operands): @arch@_cgen_get_operand renamed to
+	@arch_cgen_get_int_operand.
+	* cgen-asm.in (insert_insn_normal): New arg `pc', callers updated.
+	Update call to @arch@_cgen_insert_operand.
+	(@arch@_cgen_assemble_insn): Update call to CGEN_INSERT_FN.
+	* cgen-dis.in (print_normal): Delete use of CGEN_PCREL_OFFSET.
+	(extract_insn_normal): New arg `pc', callers updated.
+	Update call to @arch@_cgen_extract_operand.
+	(print_insn): Update call to CGEN_EXTRACT_FN.
+end-sanitize-cygnus
+	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
+
 start-sanitize-am33
+Mon Jul 20 12:10:37 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Fix load to sp and store from sp for the am33.
+	Add more multimedia instructions.
+
 Thu Jul 16 18:04:46 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c (mn10300_opcodes): Fix opcode for 4 operand "mul" and

@@ -1,7 +1,7 @@
 /* Assembler interface for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-This file is used to generate m32r-asm.c.
+THIS FILE IS USED TO GENERATE m32r-asm.c.
 
 Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
@@ -18,8 +18,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include <ctype.h>
@@ -42,7 +42,7 @@ static const char * insert_normal
 static const char * parse_insn_normal
      PARAMS ((const CGEN_INSN *, const char **, CGEN_FIELDS *));
 static const char * insert_insn_normal
-     PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *));
+     PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *, bfd_vma));
 
 /* -- assembler routines inserted here */
 /* -- asm.c */
@@ -309,10 +309,11 @@ m32r_cgen_parse_operand (opindex, strp, fields)
 */
 
 const char *
-m32r_cgen_insert_operand (opindex, fields, buffer)
+m32r_cgen_insert_operand (opindex, fields, buffer, pc)
      int opindex;
      CGEN_FIELDS * fields;
      char * buffer;
+     bfd_vma pc;
 {
   const char * errmsg;
 
@@ -354,7 +355,8 @@ m32r_cgen_insert_operand (opindex, fields, buffer)
 /* start-sanitize-m32rx */
     case M32R_OPERAND_IMM1 :
       {
-        long value = ((fields->f_imm1) - (1));
+        long value = fields->f_imm1;
+        value = ((value) - (1));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 15, 1, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
@@ -391,19 +393,22 @@ m32r_cgen_insert_operand (opindex, fields, buffer)
       break;
     case M32R_OPERAND_DISP8 :
       {
-        long value = ((fields->f_disp8) >> (2));
+        long value = fields->f_disp8;
+        value = ((((value) - (((pc) & (-4))))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case M32R_OPERAND_DISP16 :
       {
-        long value = ((fields->f_disp16) >> (2));
+        long value = fields->f_disp16;
+        value = ((((value) - (pc))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case M32R_OPERAND_DISP24 :
       {
-        long value = ((fields->f_disp24) >> (2));
+        long value = fields->f_disp24;
+        value = ((((value) - (pc))) >> (2));
         errmsg = insert_normal (value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
@@ -576,6 +581,7 @@ parse_insn_normal (insn, strp, fields)
   const char * p;
   const unsigned char * syn;
 #ifdef CGEN_MNEMONIC_OPERANDS
+  /* FIXME: wip */
   int past_opcode_p;
 #endif
 
@@ -607,7 +613,6 @@ parse_insn_normal (insn, strp, fields)
   while (* syn != 0)
     {
       /* Non operand chars must match exactly.  */
-      /* FIXME: Need to better handle whitespace.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
@@ -665,10 +670,11 @@ parse_insn_normal (insn, strp, fields)
 /* FIXME: change buffer to char *?  */
 
 static const char *
-insert_insn_normal (insn, fields, buffer)
+insert_insn_normal (insn, fields, buffer, pc)
      const CGEN_INSN * insn;
      CGEN_FIELDS * fields;
      cgen_insn_t * buffer;
+     bfd_vma pc;
 {
   const CGEN_SYNTAX * syntax = CGEN_INSN_SYNTAX (insn);
   bfd_vma value;
@@ -717,7 +723,7 @@ insert_insn_normal (insn, fields, buffer)
 	continue;
 
       errmsg = m32r_cgen_insert_operand (CGEN_SYNTAX_FIELD (*syn), fields,
-					   (char *) buffer);
+					   (char *) buffer, pc);
       if (errmsg)
 	return errmsg;
     }
@@ -769,13 +775,11 @@ m32r_cgen_assemble_insn (str, fields, buf, errmsg)
 	continue;
 #endif
 
-#if 1 /* FIXME: wip */
       /* If the RELAX attribute is set, this is an insn that shouldn't be
 	 chosen immediately.  Instead, it is used during assembler/linker
 	 relaxation if possible.  */
       if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX) != 0)
 	continue;
-#endif
 
       str = start;
 
@@ -786,7 +790,8 @@ m32r_cgen_assemble_insn (str, fields, buf, errmsg)
 
       if (! CGEN_PARSE_FN (insn) (insn, & str, fields))
 	{
-	  if (CGEN_INSERT_FN (insn) (insn, fields, buf) != NULL)
+	  /* ??? 0 is passed for `pc' */
+	  if (CGEN_INSERT_FN (insn) (insn, fields, buf, (bfd_vma) 0) != NULL)
 	    continue;
 	  /* It is up to the caller to actually output the insn and any
 	     queued relocs.  */

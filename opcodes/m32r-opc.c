@@ -1,7 +1,7 @@
 /* Generic opcode table support for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-This file is used to generate m32r-opc.c.
+THIS FILE IS USED TO GENERATE m32r-opc.c.
 
 Copyright (C) 1998 Free Software Foundation, Inc.
 
@@ -18,8 +18,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include <stdio.h>
@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "symcat.h"
 #include "m32r-opc.h"
+#include "opintl.h"
 
 /* Look up instruction INSN_VALUE and extract its fields.
    INSN, if non-null, is the insn table entry.
@@ -95,8 +96,10 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
 		 extract handler.  */
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
+		  /* ??? 0 is passed for `pc' */
 		  int elength = (*CGEN_EXTRACT_FN (insn)) (insn, NULL,
-							   insn_value, fields);
+							   insn_value, fields,
+							   (bfd_vma) 0);
 		  if (elength > 0)
 		    {
 		      /* sanity check */
@@ -120,7 +123,9 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
       if (length != CGEN_INSN_BITSIZE (insn))
 	abort ();
 
-      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+      /* ??? 0 is passed for `pc' */
+      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields,
+					  (bfd_vma) 0);
       /* Sanity check: must succeed.
 	 Could relax this later if it ever proves useful.  */
       if (length == 0)
@@ -153,7 +158,7 @@ m32r_cgen_get_insn_operands (insn, fields, indices)
       if (op == NULL)
 	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
       else
-	indices[i] = m32r_cgen_get_operand (CGEN_OPERAND_INDEX (op), fields);
+	indices[i] = m32r_cgen_get_int_operand (CGEN_OPERAND_INDEX (op), fields);
     }
 }
 
@@ -213,7 +218,6 @@ const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[] =
   { "FAKE", NULL },
   { "HASH-PREFIX", NULL },
   { "NEGATIVE", NULL },
-  { "PC", NULL },
   { "PCREL-ADDR", NULL },
   { "RELAX", NULL },
   { "RELOC", NULL },
@@ -235,6 +239,7 @@ const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[] =
   { "PARALLEL", NULL },
   { "RELAX", NULL },
   { "RELAXABLE", NULL },
+  { "SPECIAL", NULL },
   { "UNCOND-CTI", NULL },
   { 0, 0 }
 };
@@ -334,9 +339,6 @@ static const CGEN_HW_ENTRY m32r_cgen_hw_entries[] =
 /* start-sanitize-m32rx */
   { HW_H_ACCUMS, & HW_ENT (HW_H_ACCUMS + 1), "h-accums", CGEN_ASM_KEYWORD, (PTR) & m32r_cgen_opval_h_accums },
 /* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-  { HW_H_ABORT, & HW_ENT (HW_H_ABORT + 1), "h-abort", CGEN_ASM_KEYWORD, (PTR) 0 },
-/* end-sanitize-m32rx */
   { HW_H_COND, & HW_ENT (HW_H_COND + 1), "h-cond", CGEN_ASM_KEYWORD, (PTR) 0 },
   { HW_H_SM, & HW_ENT (HW_H_SM + 1), "h-sm", CGEN_ASM_KEYWORD, (PTR) 0 },
   { HW_H_BSM, & HW_ENT (HW_H_BSM + 1), "h-bsm", CGEN_ASM_KEYWORD, (PTR) 0 },
@@ -357,7 +359,7 @@ const CGEN_OPERAND m32r_cgen_operand_table[MAX_OPERANDS] =
 {
 /* pc: program counter */
   { "pc", & HW_ENT (HW_H_PC), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE)|(1<<CGEN_OPERAND_PC), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
 /* sr: source register */
   { "sr", & HW_ENT (HW_H_GR), 12, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
@@ -456,8 +458,8 @@ static const CGEN_OPERAND_INSTANCE fmt_add_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_add3_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -486,80 +488,80 @@ static const CGEN_OPERAND_INSTANCE fmt_addi_ops[] = {
 static const CGEN_OPERAND_INSTANCE fmt_addv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addv3_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_addx_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_bc8_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_bc24_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_beq_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP16), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_beqz_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP16), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_bl8_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_bl24_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 /* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_bcl8_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
@@ -567,22 +569,22 @@ static const CGEN_OPERAND_INSTANCE fmt_bcl8_ops[] = {
 /* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_bcl24_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 /* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_bra8_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_bra24_ops[] = {
-  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
+  { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_USI, & OP_ENT (DISP24), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
@@ -595,8 +597,8 @@ static const CGEN_OPERAND_INSTANCE fmt_cmp_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_cmpi_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
@@ -628,8 +630,8 @@ static const CGEN_OPERAND_INSTANCE fmt_jc_ops[] = {
 static const CGEN_OPERAND_INSTANCE fmt_jl_ops[] = {
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { 0 }
 };
 
@@ -641,45 +643,45 @@ static const CGEN_OPERAND_INSTANCE fmt_jmp_ops[] = {
 
 static const CGEN_OPERAND_INSTANCE fmt_ld_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ld_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ldb_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ldb_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ldh_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ldh_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -693,7 +695,7 @@ static const CGEN_OPERAND_INSTANCE fmt_ld_plus_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_ld24_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ADDR), CGEN_MODE_VM, & OP_ENT (UIMM24), 0 },
+  { INPUT, & HW_ENT (HW_H_ADDR), CGEN_MODE_USI, & OP_ENT (UIMM24), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -712,9 +714,9 @@ static const CGEN_OPERAND_INSTANCE fmt_ldi16_ops[] = {
 
 static const CGEN_OPERAND_INSTANCE fmt_lock_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_LOCK), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
@@ -816,26 +818,26 @@ static const CGEN_OPERAND_INSTANCE fmt_rac_dsi_ops[] = {
 
 /* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_rte_ops[] = {
-  { INPUT, & HW_ENT (HW_H_BCOND), CGEN_MODE_VM, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_BIE), CGEN_MODE_VM, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_BPC), CGEN_MODE_VM, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_BSM), CGEN_MODE_VM, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_BSM), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_BIE), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_BCOND), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_BPC), CGEN_MODE_SI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_SM), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_IE), CGEN_MODE_UBI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_IE), CGEN_MODE_VM, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_SM), CGEN_MODE_VM, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_seth_ops[] = {
-  { INPUT, & HW_ENT (HW_H_HI16), CGEN_MODE_UHI, & OP_ENT (HI16), 0 },
+  { INPUT, & HW_ENT (HW_H_HI16), CGEN_MODE_SI, & OP_ENT (HI16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_sll3_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
@@ -848,53 +850,53 @@ static const CGEN_OPERAND_INSTANCE fmt_slli_ops[] = {
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_st_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SRC2), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_st_d_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_stb_ops[] = {
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_QI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_stb_d_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_QI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_sth_ops[] = {
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_HI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_sth_d_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_HI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_st_plus_ops[] = {
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { 0 }
@@ -902,18 +904,18 @@ static const CGEN_OPERAND_INSTANCE fmt_st_plus_ops[] = {
 
 static const CGEN_OPERAND_INSTANCE fmt_trap_ops[] = {
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, 0, 0 },
-  { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM4), 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, 0, 6 },
+  { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_SI, & OP_ENT (UIMM4), 0 },
+  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, 0, 6 },
+  { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_SI, 0, 0 },
   { 0 }
 };
 
 static const CGEN_OPERAND_INSTANCE fmt_unlock_ops[] = {
   { INPUT, & HW_ENT (HW_H_LOCK), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_USI, & OP_ENT (SRC2), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_LOCK), CGEN_MODE_UBI, 0, 0 },
   { 0 }
@@ -938,8 +940,8 @@ static const CGEN_OPERAND_INSTANCE fmt_sat_ops[] = {
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_sadd_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
+  { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { 0 }
 };
@@ -1397,7 +1399,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1cc0,
     (PTR) & fmt_jc_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -1408,7 +1410,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, ' ', OP (SR), 0 },
     { 16, 16, 0xfff0 }, 0x1dc0,
     (PTR) & fmt_jc_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* jl $sr */
@@ -2129,7 +2131,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
     { 32, 32, 0xf0f0ffff }, 0x80600000,
     (PTR) & fmt_sat_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL), { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -2140,7 +2142,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, ' ', OP (SRC2), 0 },
     { 16, 16, 0xfff0 }, 0x370,
     (PTR) & fmt_cmpz_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_OS } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL), { (1<<MACH_M32RX), PIPE_OS } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -2206,7 +2208,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x7401,
     (PTR) & fmt_sc_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_O } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
@@ -2217,7 +2219,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { MNEM, 0 },
     { 16, 16, 0xffff }, 0x7501,
     (PTR) & fmt_sc_ops[0],
-    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_O } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(SPECIAL), { (1<<MACH_M32RX), PIPE_O } }
   },
 /* end-sanitize-m32rx */
 };
@@ -2646,109 +2648,17 @@ m32r_cgen_init_tables (mach)
 {
 }
 
-/* Main entry point for stuffing values in cgen_fields.  */
+/* Getting values from cgen_fields is handled by a collection of functions.
+   They are distinguished by the type of the VALUE argument they return.
+   TODO: floating point, inlining support, remove cases where result type
+   not appropriate.  */
 
-void
-m32r_cgen_set_operand (opindex, valuep, fields)
-     int opindex;
-     const long * valuep;
-     CGEN_FIELDS * fields;
-{
-  switch (opindex)
-    {
-    case M32R_OPERAND_SR :
-      fields->f_r2 = * valuep;
-      break;
-    case M32R_OPERAND_DR :
-      fields->f_r1 = * valuep;
-      break;
-    case M32R_OPERAND_SRC1 :
-      fields->f_r1 = * valuep;
-      break;
-    case M32R_OPERAND_SRC2 :
-      fields->f_r2 = * valuep;
-      break;
-    case M32R_OPERAND_SCR :
-      fields->f_r2 = * valuep;
-      break;
-    case M32R_OPERAND_DCR :
-      fields->f_r1 = * valuep;
-      break;
-    case M32R_OPERAND_SIMM8 :
-      fields->f_simm8 = * valuep;
-      break;
-    case M32R_OPERAND_SIMM16 :
-      fields->f_simm16 = * valuep;
-      break;
-    case M32R_OPERAND_UIMM4 :
-      fields->f_uimm4 = * valuep;
-      break;
-    case M32R_OPERAND_UIMM5 :
-      fields->f_uimm5 = * valuep;
-      break;
-    case M32R_OPERAND_UIMM16 :
-      fields->f_uimm16 = * valuep;
-      break;
-/* start-sanitize-m32rx */
-    case M32R_OPERAND_IMM1 :
-      fields->f_imm1 = * valuep;
-      break;
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-    case M32R_OPERAND_ACCD :
-      fields->f_accd = * valuep;
-      break;
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-    case M32R_OPERAND_ACCS :
-      fields->f_accs = * valuep;
-      break;
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
-    case M32R_OPERAND_ACC :
-      fields->f_acc = * valuep;
-      break;
-/* end-sanitize-m32rx */
-    case M32R_OPERAND_HASH :
-      fields->f_nil = * valuep;
-      break;
-    case M32R_OPERAND_HI16 :
-      fields->f_hi16 = * valuep;
-      break;
-    case M32R_OPERAND_SLO16 :
-      fields->f_simm16 = * valuep;
-      break;
-    case M32R_OPERAND_ULO16 :
-      fields->f_uimm16 = * valuep;
-      break;
-    case M32R_OPERAND_UIMM24 :
-      fields->f_uimm24 = * valuep;
-      break;
-    case M32R_OPERAND_DISP8 :
-      fields->f_disp8 = * valuep;
-      break;
-    case M32R_OPERAND_DISP16 :
-      fields->f_disp16 = * valuep;
-      break;
-    case M32R_OPERAND_DISP24 :
-      fields->f_disp24 = * valuep;
-      break;
-
-    default :
-      fprintf (stderr, "Unrecognized field %d while setting operand.\n",
-		       opindex);
-      abort ();
-  }
-}
-
-/* Main entry point for getting values from cgen_fields.  */
-
-long
-m32r_cgen_get_operand (opindex, fields)
+int
+m32r_cgen_get_int_operand (opindex, fields)
      int opindex;
      const CGEN_FIELDS * fields;
 {
-  long value;
+  int value;
 
   switch (opindex)
     {
@@ -2831,11 +2741,302 @@ m32r_cgen_get_operand (opindex, fields)
       break;
 
     default :
-      fprintf (stderr, "Unrecognized field %d while getting operand.\n",
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while getting int operand.\n"),
 		       opindex);
       abort ();
   }
 
   return value;
+}
+
+bfd_vma
+m32r_cgen_get_vma_operand (opindex, fields)
+     int opindex;
+     const CGEN_FIELDS * fields;
+{
+  bfd_vma value;
+
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      value = fields->f_r2;
+      break;
+    case M32R_OPERAND_DR :
+      value = fields->f_r1;
+      break;
+    case M32R_OPERAND_SRC1 :
+      value = fields->f_r1;
+      break;
+    case M32R_OPERAND_SRC2 :
+      value = fields->f_r2;
+      break;
+    case M32R_OPERAND_SCR :
+      value = fields->f_r2;
+      break;
+    case M32R_OPERAND_DCR :
+      value = fields->f_r1;
+      break;
+    case M32R_OPERAND_SIMM8 :
+      value = fields->f_simm8;
+      break;
+    case M32R_OPERAND_SIMM16 :
+      value = fields->f_simm16;
+      break;
+    case M32R_OPERAND_UIMM4 :
+      value = fields->f_uimm4;
+      break;
+    case M32R_OPERAND_UIMM5 :
+      value = fields->f_uimm5;
+      break;
+    case M32R_OPERAND_UIMM16 :
+      value = fields->f_uimm16;
+      break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      value = fields->f_imm1;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      value = fields->f_accd;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      value = fields->f_accs;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      value = fields->f_acc;
+      break;
+/* end-sanitize-m32rx */
+    case M32R_OPERAND_HASH :
+      value = fields->f_nil;
+      break;
+    case M32R_OPERAND_HI16 :
+      value = fields->f_hi16;
+      break;
+    case M32R_OPERAND_SLO16 :
+      value = fields->f_simm16;
+      break;
+    case M32R_OPERAND_ULO16 :
+      value = fields->f_uimm16;
+      break;
+    case M32R_OPERAND_UIMM24 :
+      value = fields->f_uimm24;
+      break;
+    case M32R_OPERAND_DISP8 :
+      value = fields->f_disp8;
+      break;
+    case M32R_OPERAND_DISP16 :
+      value = fields->f_disp16;
+      break;
+    case M32R_OPERAND_DISP24 :
+      value = fields->f_disp24;
+      break;
+
+    default :
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while getting vma operand.\n"),
+		       opindex);
+      abort ();
+  }
+
+  return value;
+}
+
+/* Stuffing values in cgen_fields is handled by a collection of functions.
+   They are distinguished by the type of the VALUE argument they accept.
+   TODO: floating point, inlining support, remove cases where argument type
+   not appropriate.  */
+
+void
+m32r_cgen_set_int_operand (opindex, fields, value)
+     int opindex;
+     CGEN_FIELDS * fields;
+     int value;
+{
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_DR :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SRC1 :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SRC2 :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_SCR :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_DCR :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SIMM8 :
+      fields->f_simm8 = value;
+      break;
+    case M32R_OPERAND_SIMM16 :
+      fields->f_simm16 = value;
+      break;
+    case M32R_OPERAND_UIMM4 :
+      fields->f_uimm4 = value;
+      break;
+    case M32R_OPERAND_UIMM5 :
+      fields->f_uimm5 = value;
+      break;
+    case M32R_OPERAND_UIMM16 :
+      fields->f_uimm16 = value;
+      break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      fields->f_imm1 = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      fields->f_accd = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      fields->f_accs = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      fields->f_acc = value;
+      break;
+/* end-sanitize-m32rx */
+    case M32R_OPERAND_HASH :
+      fields->f_nil = value;
+      break;
+    case M32R_OPERAND_HI16 :
+      fields->f_hi16 = value;
+      break;
+    case M32R_OPERAND_SLO16 :
+      fields->f_simm16 = value;
+      break;
+    case M32R_OPERAND_ULO16 :
+      fields->f_uimm16 = value;
+      break;
+    case M32R_OPERAND_UIMM24 :
+      fields->f_uimm24 = value;
+      break;
+    case M32R_OPERAND_DISP8 :
+      fields->f_disp8 = value;
+      break;
+    case M32R_OPERAND_DISP16 :
+      fields->f_disp16 = value;
+      break;
+    case M32R_OPERAND_DISP24 :
+      fields->f_disp24 = value;
+      break;
+
+    default :
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while setting int operand.\n"),
+		       opindex);
+      abort ();
+  }
+}
+
+void
+m32r_cgen_set_vma_operand (opindex, fields, value)
+     int opindex;
+     CGEN_FIELDS * fields;
+     bfd_vma value;
+{
+  switch (opindex)
+    {
+    case M32R_OPERAND_SR :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_DR :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SRC1 :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SRC2 :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_SCR :
+      fields->f_r2 = value;
+      break;
+    case M32R_OPERAND_DCR :
+      fields->f_r1 = value;
+      break;
+    case M32R_OPERAND_SIMM8 :
+      fields->f_simm8 = value;
+      break;
+    case M32R_OPERAND_SIMM16 :
+      fields->f_simm16 = value;
+      break;
+    case M32R_OPERAND_UIMM4 :
+      fields->f_uimm4 = value;
+      break;
+    case M32R_OPERAND_UIMM5 :
+      fields->f_uimm5 = value;
+      break;
+    case M32R_OPERAND_UIMM16 :
+      fields->f_uimm16 = value;
+      break;
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_IMM1 :
+      fields->f_imm1 = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCD :
+      fields->f_accd = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACCS :
+      fields->f_accs = value;
+      break;
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+    case M32R_OPERAND_ACC :
+      fields->f_acc = value;
+      break;
+/* end-sanitize-m32rx */
+    case M32R_OPERAND_HASH :
+      fields->f_nil = value;
+      break;
+    case M32R_OPERAND_HI16 :
+      fields->f_hi16 = value;
+      break;
+    case M32R_OPERAND_SLO16 :
+      fields->f_simm16 = value;
+      break;
+    case M32R_OPERAND_ULO16 :
+      fields->f_uimm16 = value;
+      break;
+    case M32R_OPERAND_UIMM24 :
+      fields->f_uimm24 = value;
+      break;
+    case M32R_OPERAND_DISP8 :
+      fields->f_disp8 = value;
+      break;
+    case M32R_OPERAND_DISP16 :
+      fields->f_disp16 = value;
+      break;
+    case M32R_OPERAND_DISP24 :
+      fields->f_disp24 = value;
+      break;
+
+    default :
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while setting vma operand.\n"),
+		       opindex);
+      abort ();
+  }
 }
 
