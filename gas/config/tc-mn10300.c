@@ -387,7 +387,7 @@ md_begin ()
      on the operands.  This hash table then provides a quick index to
      the first opcode with a particular name in the opcode table.  */
 
-  op     = mn10300_opcodes;
+  op = mn10300_opcodes;
   while (op->name)
     {
       if (strcmp (prev_name, op->name)) 
@@ -397,6 +397,11 @@ md_begin ()
 	}
       op++;
     }
+
+  /* This is both a simplification (we don't have to write md_apply_fix)
+     and support for future optimizations (branch shortening and similar
+     stuff in the linker.  */
+  linkrelax = 1;
 }
 
 void
@@ -780,6 +785,110 @@ keep_going:
   number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
   if (size > 4)
     number_to_chars_bigendian (f + 4, extension, size - 4);
+
+  /* Create any fixups.  */
+  for (i = 0; i < fc; i++)
+    {
+      const struct mn10300_operand *operand;
+
+      operand = &mn10300_operands[fixups[i].opindex];
+      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto;
+	  int size;
+	  int offset;
+	  fixS *fixP;
+
+	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+
+	  if (!reloc_howto)
+	    abort();
+	  
+	  size = bfd_get_reloc_size (reloc_howto);
+
+	  if (size < 1 || size > 4)
+	    abort();
+
+	  offset = 4 - size;
+	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
+			      &fixups[i].exp, 
+			      reloc_howto->pc_relative,
+			      fixups[i].reloc);
+	}
+      else
+	{
+	  int reloc, pcrel, reloc_size, offset;
+
+	  /* How big is the reloc?  Remember SPLIT relocs are
+	     implicitly 32bits.  */
+	  if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
+	    reloc_size = 32;
+	  else
+	    reloc_size = operand->bits;
+
+	  /* Is the reloc pc-relative?  */
+	  pcrel = (operand->flags & MN10300_OPERAND_PCREL) != 0;
+
+ 	  /* Gross.  This disgusting hack is to make sure we
+	     get the right offset for the 16/32 bit reloc in 
+	     "call" instructions.  Basically they're a pain
+	     because the reloc isn't at the end of the instruction.  */
+	  if ((size == 5 || size == 7)
+	      && (((insn >> 24) & 0xff) == 0xcd
+		  || ((insn >> 24) & 0xff) == 0xdd))
+	    size -= 2;
+
+	  /* Similarly for certain bit instructions which don't
+	     hav their 32bit reloc at the tail of the instruction.  */
+	  if (size == 7
+	      && (((insn >> 16) & 0xffff) == 0xfe00
+		  || ((insn >> 16) & 0xffff) == 0xfe01
+		  || ((insn >> 16) & 0xffff) == 0xfe02))
+	    size -= 1;
+	
+	  /* Determine offset from start of this insn to insert the
+	     reloc.  Except for a few exceptions we insert the reloc
+	     at the tail of the instruction.  */
+	  offset = size - reloc_size / 8;
+
+	  /* Choose a proper BFD relocation type.  */
+	  if (pcrel)
+	    {
+	      if (reloc_size == 32)
+		reloc = BFD_RELOC_32_PCREL;
+	      else if (reloc_size == 16)
+		reloc = BFD_RELOC_16_PCREL;
+	      else if (reloc_size == 8)
+		reloc = BFD_RELOC_8_PCREL;
+	      else
+		abort ();
+	    }
+	  else
+	    {
+	      if (reloc_size == 32)
+		reloc = BFD_RELOC_32;
+	      else if (reloc_size == 16)
+		reloc = BFD_RELOC_16;
+	      else if (reloc_size == 8)
+		reloc = BFD_RELOC_8;
+	      else
+		abort ();
+	    }
+
+	  /* Convert the size of the reloc into what fix_new_exp wants.  */
+	  reloc_size = reloc_size / 8;
+	  if (reloc_size == 8)
+	    reloc_size = 0;
+	  else if (reloc_size == 16)
+	    reloc_size = 1;
+	  else if (reloc_size == 32)
+	    reloc_size = 2;
+
+	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, reloc_size,
+		       &fixups[i].exp, pcrel,
+		       ((bfd_reloc_code_real_type) reloc));
+	}
+    }
 }
 
 
@@ -833,91 +942,10 @@ md_apply_fix3 (fixp, valuep, seg)
      valueT *valuep;
      segT seg;
 {
-  valueT value;
-  char *where;
-
+  /* We shouldn't ever get here because linkrelax is nonzero.  */
+  abort ();
   fixp->fx_done = 1;
   return 0;
-
-  if (fixp->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valuep;
-      fixp->fx_done = 1;
-    }
-  else if (fixp->fx_pcrel)
-    value = *valuep;
-  else
-    {
-      value = fixp->fx_offset;
-      if (fixp->fx_subsy != (symbolS *) NULL)
-	{
-	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixp->fx_subsy);
-	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    "expression too complex");
-	    }
-	}
-    }
-
-  /* printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type); */
-
-  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
-    {
-      int opindex;
-      const struct mn10300_operand *operand;
-      char *where;
-      unsigned long insn, extension;
-
-      opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
-      operand = &mn10300_operands[opindex];
-
-      /* Fetch the instruction, insert the fully resolved operand
-         value, and stuff the instruction back again.
-
-	 Note the instruction has been stored in little endian
-	 format!  */
-      where = fixp->fx_frag->fr_literal + fixp->fx_where;
-
-      insn = bfd_getl32((unsigned char *) where);
-      extension = 0;
-      mn10300_insert_operand (&insn, &extension, operand,
-			      (offsetT) value, fixp->fx_file,
-			      fixp->fx_line, 0);
-      bfd_putl32((bfd_vma) insn, (unsigned char *) where);
-
-      if (fixp->fx_done)
-	{
-	  /* Nothing else to do here. */
-	  return 1;
-	}
-
-      /* Determine a BFD reloc value based on the operand information.  
-	 We are only prepared to turn a few of the operands into relocs. */
-
-	{
-	  as_bad_where(fixp->fx_file, fixp->fx_line,
-		       "unresolved expression that must be resolved");
-	  fixp->fx_done = 1;
-	  return 1;
-	}
-    }
-  else if (fixp->fx_done)
-    {
-      /* We still have to insert the value into memory!  */
-      where = fixp->fx_frag->fr_literal + fixp->fx_where;
-      if (fixp->fx_size == 1)
-	*where = value & 0xff;
-      if (fixp->fx_size == 2)
-	bfd_putl16(value & 0xffff, (unsigned char *) where);
-      if (fixp->fx_size == 4)
-	bfd_putl32(value, (unsigned char *) where);
-    }
-
-  fixp->fx_addnumber = value;
-  return 1;
 }
 
 /* Insert an operand value into an instruction.  */
