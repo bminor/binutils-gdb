@@ -1,3 +1,9 @@
+2000-11-20  Ben Elliston  <bje@redhat.com>
+
+	* cgen-ops.h (SUBBI): New macro.
+	(SUBWORDSIQI, SUBWORDSIHI, SUBWORDSIUQI): New functions.
+	(SUBWORDDIHI, SUBWORDDIUQI, SUBWORDDIDF): Likewise.
+
 2000-11-16  Ben Elliston  <bje@redhat.com>
 
 	* cgen-types.h (VOID): New type.

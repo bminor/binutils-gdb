@@ -23,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_SEM_OPS_H
 #define CGEN_SEM_OPS_H
 
+#include <assert.h>
+
 #if defined (__GNUC__) && ! defined (SEMOPS_DEFINE_INLINE)
 #define SEMOPS_DEFINE_INLINE
 #define SEMOPS_INLINE extern inline
@@ -39,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ANDIF(x, y) ((x) && (y))
 #define ORIF(x, y) ((x) || (y))
 
+#define SUBBI(x, y) ((x) - (y))
 #define ANDBI(x, y) ((x) & (y))
 #define ORBI(x, y) ((x) | (y))
 #define XORBI(x, y) ((x) ^ (y))
@@ -308,12 +311,57 @@ SUBWORDSISF (SI in)
   return x.out;
 }
 
+SEMOPS_INLINE DF
+SUBWORDDIDF (DI in)
+{
+  union { DI in; DF out; } x;
+  x.in = in;
+  return x.out;
+}
+
+SEMOPS_INLINE QI
+SUBWORDSIQI (SI in, int byte)
+{
+  assert (byte >= 0 && byte <= 3);
+  return (UQI) (in >> (8 * (3 - byte)));
+}
+
+SEMOPS_INLINE UQI
+SUBWORDSIUQI (SI in, int byte)
+{
+  assert (byte >= 0 && byte <= 3);
+  return (UQI) (in >> (8 * (3 - byte)));
+}
+
+SEMOPS_INLINE HI
+SUBWORDDIHI (DI in, int word)
+{
+  assert (word >= 0 && word <= 3);
+  return (UHI) (in >> (16 * (3 - word)));
+}
+
+SEMOPS_INLINE HI
+SUBWORDSIHI (SI in, int word)
+{
+  if (word == 0)
+    return (USI) in >> 16;
+  else
+    return in;
+}
+
 SEMOPS_INLINE SI
 SUBWORDSFSI (SF in)
 {
   union { SF in; SI out; } x;
   x.in = in;
   return x.out;
+}
+
+SEMOPS_INLINE UQI
+SUBWORDDIUQI (DI in, int byte)
+{
+  assert (byte >= 0 && byte <= 7);
+  return (UQI) (in >> (8 * (7 - byte)));
 }
 
 SEMOPS_INLINE SI
@@ -397,12 +445,19 @@ JOINSITF (SI x0, SI x1, SI x2, SI x3)
 
 #else
 
-SF SUBWORDSISF (SI);
+QI SUBWORDSIQI (SI);
+HI SUBWORDSIHI (HI);
 SI SUBWORDSFSI (SF);
+SF SUBWORDSISF (SI);
+DF SUBWORDDIDF (DI);
+HI SUBWORDDIHI (DI, int);
 SI SUBWORDDISI (DI, int);
 SI SUBWORDDFSI (DF, int);
 SI SUBWORDXFSI (XF, int);
 SI SUBWORDTFSI (TF, int);
+
+UQI SUBWORDSIUQI (SI);
+UQI SUBWORDDIUQI (DI);
 
 DI JOINSIDI (SI, SI);
 DF JOINSIDF (SI, SI);
