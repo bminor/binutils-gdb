@@ -1,3 +1,13 @@
+Wed Apr 15 18:31:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (DSRAV): Use function do_dsrav.
+	(SRAV): Use new function do_srav.
+
+	* m16.igen (BEQZ, BNEZ): Compare GPR[TRX] not GPR[RX].
+	(B): Sign extend 11 bit immediate.
+	(EXT-B*): Shift 16 bit immediate left by 1.
+	(ADDIU*): Don't sign extend immediate value.
+
 Wed Apr 15 10:32:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* m16run.c (sim_engine_run): Restore CIA after handling an event.

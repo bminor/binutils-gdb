@@ -1287,7 +1287,7 @@
 }
 
 
-:function:::void:do_srav:int rs, int rt, int rd
+:function:::void:do_dsrav:int rs, int rt, int rd
 {
   int s = MASKED64 (GPR[rs], 5, 0);
   TRACE_ALU_INPUT2 (GPR[rt], s);
@@ -1313,12 +1313,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  do_srav (SD_, RS, RT, RD);
+  do_dsrav (SD_, RS, RT, RD);
 }
 
 
 00000000000,5.RT,5.RD,5.SHIFT,111010:SPECIAL:64::DSRL
-"dsrav r<RD>, r<RT>, <SHIFT>"
+"dsrl r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
 *vr5000:
@@ -2857,6 +2857,16 @@
 }
 
 
+
+:function:::void:do_srav:int rs, int rt, int rd
+{
+  int s = MASKED (GPR[rs], 4, 0);
+  signed32 temp = (signed32) GPR[rt] >> s;
+  TRACE_ALU_INPUT2 (GPR[rt], s);
+  GPR[rd] = EXTEND32 (temp);
+  TRACE_ALU_RESULT (GPR[rd]);
+}
+
 000000,5.RS,5.RT,5.RD,00000000111:SPECIAL:32::SRAV
 "srav r<RD>, r<RT>, r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2875,10 +2885,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR[RS], 4, 0);
-  signed32 temp = (signed32) GPR[RT] >> s;
-  GPR[RD] = EXTEND32 (temp);
+  do_srav (SD_, RS, RT, RD);
 }
+
 
 
 :function:::void:do_srl:int rt, int rd, int shift
