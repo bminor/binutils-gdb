@@ -1,3 +1,19 @@
+Tue Apr 21 16:18:12 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AM_PROG_LEX rather than AC_PROG_LEX and
+	AC_DECL_YYTEXT.
+	* configure: Rebuild with new automake and libtool.
+	* aclocal.m4, Makefile.in: Likewise.
+
+	* doc/Makefile.am (as.dvi): New target.
+	* doc/Makefile.in: Rebuild.
+
+start-sanitize-sky
+Mon Apr 20 12:49:33 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (VU_LABEL_PREFIX): Make "_$".
+
+end-sanitize-sky
 Sat Apr 18 01:21:04 1998  Stan Cox  <scox@cygnus.com>
 
 	* configure.in: Added sparc86x support.

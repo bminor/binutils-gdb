@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.2e from Makefile.am
+# Makefile.in generated automatically by automake 1.3 from Makefile.am
 
 # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -32,6 +32,8 @@ mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
 
+DISTDIR =
+
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -62,8 +64,10 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 ALL_OBJ_DEPS = @ALL_OBJ_DEPS@
+AS = @AS@
 BFDLIB = @BFDLIB@
 CC = @CC@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 LD = @LD@
 LIBTOOL = @LIBTOOL@
@@ -502,7 +506,6 @@ against=stage2
 DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES)
 
-# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 TCDEP_a29k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/opcode/a29k.h
 TCDEP_a29k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-a29k.h \
@@ -604,12 +607,12 @@ TCDEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/opcode/i960.h
 TCDEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
-  $(INCDIR)/opcode/cgen.h
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/symcat.h cgen-opc.h \
+  $(srcdir)/../opcodes/m32r-opc.h $(INCDIR)/opcode/cgen.h
 TCDEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
-  $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
+  $(INCDIR)/obstack.h $(INCDIR)/symcat.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
   $(INCDIR)/opcode/cgen.h
 TCDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
@@ -776,7 +779,7 @@ OBJDEP_alpha_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-alpha.h subsegs.h \
   $(INCDIR)/obstack.h ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/aout/aout64.h
+  $(INCDIR)/elf/alpha.h $(INCDIR)/aout/aout64.h
 OBJDEP_alpha_evax = $(srcdir)/config/obj-evax.h $(srcdir)/config/tc-alpha.h
 OBJDEP_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
@@ -1236,14 +1239,14 @@ GZIP = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES) $(gasp_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS) $(gasp_new_OBJECTS)
 
-default: all
+all: all-recursive-am all-am
 
 .SUFFIXES:
 .SUFFIXES: .S .c .l .lo .o .s .y
-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
@@ -1506,8 +1509,6 @@ install: install-recursive install-exec-am
 
 uninstall: uninstall-recursive
 
-all: all-recursive-am all-am
-
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
@@ -1557,13 +1558,13 @@ maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f config.status
 
-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
-maintainer-clean-hdr mostlyclean-noinstPROGRAMS \
-distclean-noinstPROGRAMS clean-noinstPROGRAMS \
-maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
-clean-compile maintainer-clean-compile mostlyclean-libtool \
-distclean-libtool clean-libtool maintainer-clean-libtool \
-install-data-recursive uninstall-data-recursive install-exec-recursive \
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
+clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool install-data-recursive \
+uninstall-data-recursive install-exec-recursive \
 uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
 all-recursive check-recursive installcheck-recursive info-recursive \
 dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
@@ -1811,7 +1812,8 @@ de-stage3:
 	echo '' > itbl-cpu.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
 	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $?
-	mv -f .depdir/.dep .dep1
+	sed -e '/IF YOU PUT ANYTHING/,$$d' < .depdir/.dep > .dep1
+	rm -f .depdir/.dep
 
 # Work out the special dependencies for the tc-*.c files.
 .tcdep: $(TARGET_CPU_CFILES)
@@ -1840,9 +1842,9 @@ de-stage3:
 	    else true; fi; \
 	  done; \
 	done
-	echo 'TCDEP_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .tcdepa
-	echo '  $(INCDIR)/opcode/hppa.h $(BFDDIR)/som.h' >> .tcdepa
+	echo 'TCDEP_hppa_som = $$(srcdir)/config/tc-hppa.h subsegs.h \' >> .tcdepa
+	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> .tcdepa
+	echo '  $$(INCDIR)/opcode/hppa.h $$(BFDDIR)/som.h' >> .tcdepa
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -1885,10 +1887,10 @@ de-stage3:
 	    else true; fi; \
 	  done; \
 	done
-	echo 'OBJDEP_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
-	echo '  $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \' >> .objdepa
-	echo '  $(BFDDIR)/som.h  $(INCDIR)/aout/stab_gnu.h \' >> .objdepa
-	echo '  $(INCDIR)/aout/stab.def' >> .objdepa
+	echo 'OBJDEP_hppa_som = $$(srcdir)/config/obj-som.h subsegs.h \' >> .objdepa
+	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> .objdepa
+	echo '  $$(BFDDIR)/som.h  $$(INCDIR)/aout/stab_gnu.h \' >> .objdepa
+	echo '  $$(INCDIR)/aout/stab.def' >> .objdepa
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -1927,7 +1929,7 @@ de-stage3:
 	    else true; fi; \
 	  done; \
 	done
-	echo 'DEP_hppa_som = $(srcdir)/../bfd/som.h' >> .dep2a
+	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> .dep2a
 	# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
@@ -1945,10 +1947,11 @@ de-stage3:
 	mv -f .dep2a .dep2
 
 dep.sed: dep-in.sed config.status
+	srcdir=`cd $(srcdir); pwd`; \
 	sed <$(srcdir)/dep-in.sed >dep.sed \
-		-e 's!@INCDIR@!$(INCDIR)!' \
-		-e 's!@BFDDIR@!$(BFDDIR)!' \
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e "s!@INCDIR@!$${srcdir}/../include!" \
+		-e "s!@BFDDIR@!$${srcdir}/../bfd!" \
+		-e "s!@SRCDIR@!$${srcdir}!"
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
