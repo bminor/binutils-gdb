@@ -85,7 +85,7 @@ static void ppc_toc PARAMS ((int));
 #endif
 
 #ifdef OBJ_ELF
-static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
+static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **, expressionS *));
 static void ppc_elf_cons PARAMS ((int));
 static void ppc_elf_rdata PARAMS ((int));
 static void ppc_elf_lcomm PARAMS ((int));
@@ -584,9 +584,8 @@ static struct hash_control *ppc_hash;
 static struct hash_control *ppc_macro_hash;
 
 #ifdef OBJ_ELF
-/* Whether to warn about non PC relative relocations that aren't
-   in the .got2 section. */
-static boolean mrelocatable = false;
+/* What type of shared library support to use */
+static enum { SHLIB_NONE, SHLIB_PIC, SHILB_MRELOCATABLE } shlib = SHLIB_NONE;
 
 /* Flags to set in the elf header */
 static flagword ppc_flags = 0;
@@ -723,7 +722,7 @@ md_parse_option (c, arg)
       /* Recognize -K PIC */
       if (strcmp (arg, "PIC") == 0 || strcmp (arg, "pic") == 0)
 	{
-	  mrelocatable = true;
+	  shlib = SHLIB_PIC;
 	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
 	}
       else
@@ -778,13 +777,13 @@ md_parse_option (c, arg)
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
 	{
-	  mrelocatable = true;
+	  shlib = SHILB_MRELOCATABLE;
 	  ppc_flags |= EF_PPC_RELOCATABLE;
 	}
 
       else if (strcmp (arg, "relocatable-lib") == 0)
 	{
-	  mrelocatable = true;
+	  shlib = SHILB_MRELOCATABLE;
 	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
 	}
 
@@ -1101,8 +1100,9 @@ ppc_insert_operand (insn, operand, val, file, line)
 #ifdef OBJ_ELF
 /* Parse @got, etc. and return the desired relocation.  */
 static bfd_reloc_code_real_type
-ppc_elf_suffix (str_p)
+ppc_elf_suffix (str_p, exp_p)
      char **str_p;
+     expressionS *exp_p;
 {
   struct map_bfd {
     char *string;
@@ -1184,6 +1184,24 @@ ppc_elf_suffix (str_p)
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
     if (ch == ptr->string[0] && len == ptr->length && memcmp (ident, ptr->string, ptr->length) == 0)
       {
+	/* Now check for identifier@suffix+constant */
+	if (*str == '-' || *str == '+')
+	  {
+	    char *orig_line = input_line_pointer;
+	    expressionS new_exp;
+
+	    input_line_pointer = str;
+	    expression (&new_exp);
+	    if (new_exp.X_op == O_constant)
+	      {
+		exp_p->X_add_number += new_exp.X_add_number;
+		str = input_line_pointer;
+	      }
+
+	    if (&input_line_pointer != str_p)
+	      input_line_pointer = orig_line;
+	  }
+
 	*str_p = str;
 	return ptr->reloc;
       }
@@ -1212,7 +1230,7 @@ ppc_elf_cons (nbytes)
       expression (&exp);
       if (exp.X_op == O_symbol
 	  && *input_line_pointer == '@'
-	  && (reloc = ppc_elf_suffix (&input_line_pointer)) != BFD_RELOC_UNUSED)
+	  && (reloc = ppc_elf_suffix (&input_line_pointer, &exp)) != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
 	  int size = bfd_get_reloc_size (reloc_howto);
@@ -1369,32 +1387,41 @@ ppc_elf_validate_fix (fixp, seg)
      fixS *fixp;
      segT seg;
 {
-  if (mrelocatable
-      && !fixp->fx_done
-      && !fixp->fx_pcrel
-      && fixp->fx_r_type <= BFD_RELOC_UNUSED
-      && fixp->fx_r_type != BFD_RELOC_16_GOTOFF
-      && fixp->fx_r_type != BFD_RELOC_HI16_GOTOFF
-      && fixp->fx_r_type != BFD_RELOC_LO16_GOTOFF
-      && fixp->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
-      && fixp->fx_r_type != BFD_RELOC_32_BASEREL
-      && fixp->fx_r_type != BFD_RELOC_LO16_BASEREL
-      && fixp->fx_r_type != BFD_RELOC_HI16_BASEREL
-      && fixp->fx_r_type != BFD_RELOC_HI16_S_BASEREL
-      && strcmp (segment_name (seg), ".got2") != 0
-      && strcmp (segment_name (seg), ".dtors") != 0
-      && strcmp (segment_name (seg), ".ctors") != 0
-      && strcmp (segment_name (seg), ".fixup") != 0
-      && strcmp (segment_name (seg), ".stab") != 0
-      && strcmp (segment_name (seg), ".gcc_except_table") != 0
-      && strcmp (segment_name (seg), ".ex_shared") != 0)
+  if (fixp->fx_done || fixp->fx_pcrel)
+    return;
+
+  switch (shlib)
     {
-      if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
-	  || fixp->fx_r_type != BFD_RELOC_CTOR)
+    case SHLIB_NONE:
+    case SHLIB_PIC:
+      return;
+
+    case SHILB_MRELOCATABLE:
+      if (fixp->fx_r_type <= BFD_RELOC_UNUSED
+	  && fixp->fx_r_type != BFD_RELOC_16_GOTOFF
+	  && fixp->fx_r_type != BFD_RELOC_HI16_GOTOFF
+	  && fixp->fx_r_type != BFD_RELOC_LO16_GOTOFF
+	  && fixp->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
+	  && fixp->fx_r_type != BFD_RELOC_32_BASEREL
+	  && fixp->fx_r_type != BFD_RELOC_LO16_BASEREL
+	  && fixp->fx_r_type != BFD_RELOC_HI16_BASEREL
+	  && fixp->fx_r_type != BFD_RELOC_HI16_S_BASEREL
+	  && strcmp (segment_name (seg), ".got2") != 0
+	  && strcmp (segment_name (seg), ".dtors") != 0
+	  && strcmp (segment_name (seg), ".ctors") != 0
+	  && strcmp (segment_name (seg), ".fixup") != 0
+	  && strcmp (segment_name (seg), ".stab") != 0
+	  && strcmp (segment_name (seg), ".gcc_except_table") != 0
+	  && strcmp (segment_name (seg), ".ex_shared") != 0)
 	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"Relocation cannot be done when using -mrelocatable");
+	  if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
+	      || fixp->fx_r_type != BFD_RELOC_CTOR)
+	    {
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
+			    "Relocation cannot be done when using -mrelocatable");
+	    }
 	}
+      return;
     }
 }
 #endif /* OBJ_ELF */
@@ -1794,7 +1821,7 @@ md_assemble (str)
 	  /* Allow @HA, @L, @H on constants. */
 	  char *orig_str = str;
 
-	  if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
+	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
 	    switch (reloc)
 	      {
 	      default:
@@ -1824,7 +1851,7 @@ md_assemble (str)
 				     (char *) NULL, 0);
 	}
 #ifdef OBJ_ELF
-      else if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
+      else if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
 	{
 	  /* For the absoulte forms of branchs, convert the PC relative form back into
 	     the absolute.  */

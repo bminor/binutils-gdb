@@ -1,3 +1,16 @@
+Wed Dec  4 10:35:33 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Take expressionS pointer
+	argument, and check for +/- constant following the suffix, folding
+	it into the expression.
+	(ppc_elf_cons): Change ppc_elf_suffix calls.
+	(md_assemble): Ditto.
+	(shlib): Replace boolean mrelocatable with enumeration shlib.
+	(md_parse_option): Discriminate between PIC style shared libraries
+	and -mrelocatable.
+	(ppc_elf_validate_fix): Don't report warnings for PIC style shared
+	libraries.
+
 Tue Dec  3 23:18:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.h ({tc,ppc}_comment_chars): Define, so that we can
