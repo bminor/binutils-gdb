@@ -1,3 +1,12 @@
+Fri Mar 20 11:25:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (coff_arm_relocate_section): Better error messages
+	when interowrking conflucts occur.  Courtesy of Jonathan Walton
+	and Tony Thompson.  PR 15357.
+	(aoutarm_std_reloc_howto): Fixed bitsize fields of rightshifted
+	relocations.  Patch courtesy of Jonathan Walton and Tony
+	Thompson.  PR 15373.
+
 Fri Mar 20 02:26:43 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Revert
