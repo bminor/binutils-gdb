@@ -341,25 +341,8 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	typeprint.c utils.c valarith.c valops.c \
 	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c
 
-# Files that are not source code, but need to go into
-# gdb-$(VERSION).tar.Z.
-
-NONSRC = Makefile.in configure.in ChangeLog ChangeLog-9091 \
-	ChangeLog-92 ChangeLog-93 ChangeLog-3.x \
-	gdb.1 refcard.ps README TODO TAGS NEWS \
-	Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
-	saber.suppress standalone.c stuff.c kdb-start.c gcc.patch \
-	nindy-share/Makefile nindy-share/VERSION nindy-share/README \
-	vx-share/README 29k-share/README config/convex/Convex.notes \
-	i386-nlmstub.c
-
 # All source files that lint should look at
 LINTFILES = $(SFILES) $(YYFILES) init.c
-
-# Any additional files specified on these lines should also be added to
-# the NONSRC definition, so they go in the tar files.
-SFILES_STAND = $(SFILES) standalone.c
-SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # "system" headers.  Using these in dependencies is a rather personal
 # choice. (-rich, summer 1993)
@@ -418,12 +401,6 @@ HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
-	config/m68k/tm-m68k.h config/pa/tm-hppa.h config/i960/tm-i960.h \
-	config/sparc/tm-sparc.h config/tm-lynx.h config/tm-sunos.h \
-	config/tm-sysv4.h \
-	config/m68k/xm-m68k.h config/sparc/xm-sparc.h \
-	config/xm-lynx.h config/xm-sysv4.h \
-	config/vax/xm-vax.h config/nm-m3.h config/nm-trash.h \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
 	nindy-share/block_io.h nindy-share/coff.h \
 	nindy-share/env.h nindy-share/stop.h \
@@ -461,13 +438,8 @@ SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
-	$(ALLPARAM) $(POSSLIBS)
+	$(POSSLIBS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
-
-TARFILES = $(SFILES) $(HFILES_NO_SRCDIR) $(HFILES_WITH_SRCDIR) \
-	$(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
-	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
-
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
@@ -712,7 +684,8 @@ TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
 		echo $$i ; \
-	done) | sed -e 's/\.o$$/\.c/'`
+	done) | sed -e 's/\.o$$/\.c/'` \
+	`find $(srcdir)/config -name '*.h' -print`
 
 tags: TAGS
 
@@ -917,102 +890,6 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	vax-pinsn.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
-
-ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
-	config/a29k/tm-ultra3.h config/a29k/xm-ultra3.h \
-	config/alpha/nm-alpha.h config/alpha/tm-alpha.h \
-	config/alpha/xm-alpha.h config/arm/tm-arm.h \
-	config/arm/xm-arm.h config/convex/tm-convex.h \
-	config/convex/xm-convex.h config/gould/tm-np1.h config/gould/tm-pn.h \
-	config/gould/xm-np1.h config/gould/xm-pn.h config/h8300/tm-h8300.h \
-	config/h8500/tm-h8500.h config/i386/nm-i386aix.h \
-	config/i386/nm-i386bsd.h config/i386/nm-i386lynx.h \
-	config/i386/nm-i386mach.h config/i386/nm-i386sco.h \
-	config/i386/nm-i386sco4.h config/i386/nm-i386v.h \
-	config/i386/nm-i386v4.h config/i386/nm-linux.h \
-	config/i386/nm-sun386.h config/i386/nm-symmetry.h \
-	config/i386/tm-i386aix.h config/i386/tm-i386bsd.h \
-	config/i386/tm-i386lynx.h config/i386/tm-i386m3.h \
-	config/i386/tm-i386mk.h config/i386/tm-i386nw.h \
-	config/i386/tm-i386v.h \
-	config/i386/tm-i386v4.h config/i386/tm-linux.h \
-	config/i386/tm-sun386.h \
-	config/i386/tm-symmetry.h config/i386/xm-go32.h \
-	config/i386/xm-i386aix.h config/i386/xm-i386bsd.h \
-	config/i386/xm-i386lynx.h config/i386/xm-i386mach.h \
-	config/i386/xm-i386m3.h config/i386/xm-i386mk.h \
-	config/i386/xm-i386sco.h config/i386/xm-i386v.h \
-	config/i386/xm-i386v32.h config/i386/xm-i386v4.h \
-	config/i386/xm-linux.h config/i386/xm-sun386.h \
-	config/i386/xm-symmetry.h config/i960/tm-nindy960.h \
-	config/i960/tm-vx960.h config/m68k/nm-apollo68b.h \
-	config/m68k/nm-apollo68v.h config/m68k/nm-delta68.h \
-	config/m68k/nm-dpx2.h config/m68k/nm-hp300bsd.h \
-	config/m68k/nm-hp300hpux.h config/m68k/nm-news.h \
-	config/m68k/nm-m68klynx.h \
-	config/m68k/nm-sun2.h \
-	config/m68k/nm-sun3.h config/m68k/tm-3b1.h config/m68k/tm-altos.h \
-	config/m68k/tm-apollo68b.h \
-	config/m68k/tm-amix.h \
-	config/m68k/tm-cisco.h config/m68k/tm-delta68.h \
-	config/m68k/tm-dpx2.h config/m68k/tm-es1800.h \
-	config/m68k/tm-hp300bsd.h config/m68k/tm-hp300hpux.h \
-	config/m68k/tm-isi.h config/m68k/tm-m68klynx.h \
-	config/m68k/tm-monitor.h \
-	config/m68k/tm-news.h config/m68k/tm-os68k.h config/m68k/tm-st2000.h \
-	config/m68k/tm-sun2.h config/m68k/tm-sun2os4.h config/m68k/tm-sun3.h \
-	config/m68k/tm-sun3os4.h config/m68k/tm-vx68.h config/m68k/xm-3b1.h \
-	config/m68k/xm-altos.h config/m68k/xm-amix.h \
-	config/m68k/xm-apollo68b.h config/m68k/xm-apollo68v.h \
-	config/m68k/xm-delta68.h config/m68k/xm-dpx2.h \
-	config/m68k/xm-hp300bsd.h config/m68k/xm-hp300hpux.h \
-	config/m68k/xm-isi.h config/m68k/xm-m68klynx.h \
-	config/m68k/xm-news.h config/m68k/xm-news1000.h \
-	config/m68k/xm-sun2.h config/m68k/xm-sun3.h config/m68k/xm-sun3os4.h \
-	config/m88k/nm-delta88v4.h config/m88k/nm-m88k.h \
-	config/m88k/tm-delta88.h \
-	config/m88k/tm-delta88v4.h config/m88k/tm-m88k.h \
-	config/m88k/xm-delta88.h config/m88k/xm-delta88v4.h \
-	config/m88k/xm-dgux.h config/m88k/xm-m88k.h \
-	config/mips/nm-irix3.h \
-	config/mips/nm-irix4.h config/mips/nm-irix5.h \
-	config/mips/nm-mips.h config/mips/nm-riscos.h \
-	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
-	config/mips/tm-bigmips64.h \
-	config/mips/tm-idt.h config/mips/tm-idtl.h \
-	config/mips/tm-idt64.h config/mips/tm-idtl64.h \
-	config/mips/tm-irix3.h config/mips/tm-irix5.h \
-	config/mips/tm-mips.h config/mips/tm-mips64.h \
-	config/mips/tm-mipsm3.h config/mips/tm-mipsv4.h \
-	config/mips/xm-irix3.h \
-	config/mips/xm-irix4.h config/mips/xm-irix5.h \
-	config/mips/xm-mips.h \
-	config/mips/xm-mipsm3.h config/mips/xm-mipsv4.h \
-	config/mips/xm-riscos.h config/mips/xm-news-mips.h \
-	config/nm-lynx.h config/nm-sysv4.h \
-	config/none/nm-none.h config/none/tm-none.h config/none/xm-none.h \
-	config/ns32k/nm-umax.h \
-	config/ns32k/tm-ns32km3.h \
-	config/ns32k/tm-merlin.h config/ns32k/tm-umax.h \
-	config/ns32k/xm-ns32km3.h \
-	config/ns32k/xm-merlin.h config/ns32k/xm-umax.h \
-	config/pa/nm-hppab.h \
-	config/pa/nm-hppah.h config/pa/tm-hppab.h config/pa/tm-hppah.h \
-	config/pa/xm-hppab.h config/pa/xm-hppah.h config/pa/xm-pa.h \
-	config/pyr/tm-pyr.h \
-	config/pyr/xm-pyr.h config/romp/xm-rtbsd.h config/rs6000/nm-rs6000.h \
-	config/rs6000/tm-rs6000ly.h config/rs6000/xm-rs6000ly.h \
-	config/rs6000/nm-rs6000ly.h \
-	config/rs6000/tm-rs6000.h config/rs6000/xm-rs6000.h config/sh/tm-sh.h \
-	config/sparc/nm-sun4os4.h config/sparc/nm-sparclynx.h \
-	config/sparc/tm-sparclite.h config/sparc/tm-sparclynx.h \
-	config/sparc/tm-spc-em.h config/sparc/tm-sun4os4.h \
-	config/sparc/tm-sun4sol2.h config/sparc/tm-vxsparc.h \
-	config/sparc/xm-sparclynx.h \
-	config/sparc/xm-sun4os4.h config/sparc/xm-sun4sol2.h \
-	config/tahoe/tm-tahoe.h config/tahoe/xm-tahoe.h config/vax/nm-vax.h \
-	config/vax/tm-vax.h config/vax/xm-vaxbsd.h config/vax/xm-vaxult.h \
-	config/vax/xm-vaxult2.h config/z8k/tm-z8k.h
 
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \

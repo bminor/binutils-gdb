@@ -1,3 +1,12 @@
+Tue Aug 16 15:24:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (TARFILES, NONSRC, SFILES_STAND, SFILES_KGDB):
+	Remove; unused.
+	(TAGFILES_NO_SRCDIR): Remove ALLPARAM.
+	(HFILES_NO_SRCDIR): Remove all files in config sub-directory.
+	(TAGS): Also pass result of find on config sub-directory to etags.
+	(ALLPARAM): Remove; now unused.
+
 Sun Aug 14 13:05:26 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.13.1
