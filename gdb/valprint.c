@@ -177,7 +177,7 @@ value_print (struct value *val, struct ui_file *stream, int format,
    value.  STREAM is where to print the value.  */
 
 void
-val_print_type_code_int (struct type *type, char *valaddr,
+val_print_type_code_int (struct type *type, const bfd_byte *valaddr,
 			 struct ui_file *stream)
 {
   if (TYPE_LENGTH (type) > sizeof (LONGEST))

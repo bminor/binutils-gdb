@@ -54,7 +54,7 @@ extern void val_print_array_elements (struct type *, char *, CORE_ADDR,
 				      struct ui_file *, int, int, int,
 				      enum val_prettyprint, unsigned int);
 
-extern void val_print_type_code_int (struct type *, char *,
+extern void val_print_type_code_int (struct type *, const bfd_byte *,
 				     struct ui_file *);
 
 extern void print_binary_chars (struct ui_file *, const bfd_byte *,

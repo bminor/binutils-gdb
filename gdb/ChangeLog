@@ -1,5 +1,8 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* valprint.c (val_print_type_code_int): Make buffer a const bfd_byte.
+	* valprint.h (val_print_type_code_int): Ditto.
+
 	* objc-lang.h (c_val_print, c_value_print): Delete declarations.
 
 	* cp-valprint.c (cp_print_class_method)
