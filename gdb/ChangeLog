@@ -1,5 +1,8 @@
 2001-11-14  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_get_frame_info): Initialize SP's element of
+	the frame's saved_regs array correctly.
+
 	* symfile.c (simple_read_overlay_table): Make sure we can find
 	both `_novlys' and `_ovly_table' before we try anything else;
 	print a helpful error message.

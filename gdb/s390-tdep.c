@@ -596,6 +596,10 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
       fextra_info->skip_prologue_function_start =
 	(good_prologue ? test_pc : pc);
     }
+  if (saved_regs)
+    /* The SP's element of the saved_regs array holds the old SP,
+       not the address at which it is saved.  */
+    saved_regs[S390_SP_REGNUM] = orig_sp;
   return err;
 }
 
