@@ -1,3 +1,7 @@
+Fri Jun  4 10:05:11 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* elf.c (elf_fake_sections): Undo change of 1999-05-10.
+
 Fri Jun  4 03:10:49 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Fix setting of

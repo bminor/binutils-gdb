@@ -1499,13 +1499,13 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_DYNAMIC;
       this_hdr->sh_entsize = bed->s->sizeof_dyn;
     }
-  else if (strncmp (asect->name, ".rela.", 6) == 0
+  else if (strncmp (asect->name, ".rela", 5) == 0
 	   && get_elf_backend_data (abfd)->may_use_rela_p)
     {
       this_hdr->sh_type = SHT_RELA;
       this_hdr->sh_entsize = bed->s->sizeof_rela;
     }
-  else if (strncmp (asect->name, ".rel.", 5) == 0
+  else if (strncmp (asect->name, ".rel", 4) == 0
 	   && get_elf_backend_data (abfd)->may_use_rel_p)
     {
       this_hdr->sh_type = SHT_REL;
