@@ -37,8 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    too messy, particularly when such includes can be inserted at random
    times by the parser generator.  */
 
-/* FIXME: there are still 21 shift/reduce conflicts
-   Other known bugs or limitations:
+/* Known bugs or limitations:
     - pascal string operations are not supported at all.
     - there are some problems with boolean types.
     - Pascal type hexadecimal constants are not supported
@@ -212,6 +211,7 @@ parse_number (char *, int, int, YYSTYPE *);
 %left '*' '/'
 %right UNARY INCREMENT DECREMENT
 %right ARROW '.' '[' '('
+%left '^'
 %token <ssym> BLOCKNAME
 %type <bval> block
 %left COLONCOLON

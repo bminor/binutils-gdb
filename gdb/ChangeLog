@@ -1,3 +1,9 @@
+2002-04-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y: Add precedence rule for '^' token.
+	This removes the shift/reduce conflicts.
+	Remove the comment concerning these shift/reduce conflicts.
+
 2002-04-18  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (COMMON_UISA_NOFP_REGS): New macro.
