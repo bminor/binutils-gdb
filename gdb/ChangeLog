@@ -1,3 +1,8 @@
+Fri Jan 12 21:41:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* symtab.c (find_pc_symtab): Don't lose if OBJF_REORDERED
+	is set but there are no psymtabs.
+
 Fri Jan 12 15:56:12 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* dsrec.c (load_srec): Remove unused variable.
