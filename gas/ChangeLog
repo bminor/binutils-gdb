@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Mon Jun 22 11:08:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Allow VU vi and vf registers
+	to be named with a `$' prefix.  Likewise, allow CFC2/CTC2 to
+	refer to "$viNN" registers.
+
+end-sanitize-r5900
 Sun Jun 21 21:27:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (md_apply_fix): Handle weak symbols correctly if

@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses -mmips:5900
+#objdump: -d --prefix-addresses -mmips:5900
 #name: MIPS VU
 #as: -mcpu=r5900
 
@@ -239,8 +239,8 @@ Disassembly of section \.text:
 0+0398 <[^>]*> vaddaz.wyz	ACC,vf2,vf3z
 0+039c <[^>]*> vaddaz.xyz	ACC,vf2,vf3z
 0+03a0 <[^>]*> vaddaz.wxyz	ACC,vf2,vf3z
-0+03a4 <[^>]*> .*
-0+03a8 <[^>]*> vcallmsr	vi19
+0+03a4 <[^>]*> vcallms.*
+0+03a8 <[^>]*> vcallmsr	vi27
 0+03ac <[^>]*> vclip	vf4
 0+03b0 <[^>]*> vdiv	Q,vf4z,vf8w
 0+03b4 <[^>]*> vdiv	Q,vf4y,vf8x
@@ -1291,12 +1291,12 @@ Disassembly of section \.text:
 0+1408 <[^>]*> vnop
 0+140c <[^>]*> vnop
 0+1410 <[^>]*> vopmula.xyz	ACC,vf2,vf3
-0+1414 <[^>]*> vnop
+0+1414 <[^>]*> vopmula.xyz	ACC,vf2,vf3
 0+1418 <[^>]*> vnop
 0+141c <[^>]*> vnop
 0+1420 <[^>]*> vnop
 0+1424 <[^>]*> vnop
-0+1428 <[^>]*> vnop
+0+1428 <[^>]*> vopmsub.xyz	vf1,vf2,vf3
 0+142c <[^>]*> vopmsub.xyz	vf1,vf2,vf3
 0+1430 <[^>]*> vrget	vf2,R
 0+1434 <[^>]*> vrinit	R,vf2y
@@ -1545,3 +1545,18 @@ Disassembly of section \.text:
 0+1800 <[^>]*> vsubaz.xyz	ACC,vf2,vf3z
 0+1804 <[^>]*> vsubaz.wxyz	ACC,vf2,vf3z
 0+1808 <[^>]*> vwaitq
+0+180c <[^>]*> bc2f.*
+0+1810 <[^>]*> nop
+0+1814 <[^>]*> bc2fl.*
+0+1818 <[^>]*> nop
+0+181c <[^>]*> bc2t.*
+0+1820 <[^>]*> nop
+0+1824 <[^>]*> bc2tl.*
+0+1828 <[^>]*> nop
+0+182c <[^>]*> cfc2.ni	\$a1,\$3
+0+1830 <[^>]*> cfc2.i	\$a1,\$3
+0+1834 <[^>]*> cfc2.ni	\$a1,\$3
+0+1838 <[^>]*> ctc2.ni	\$a1,\$3
+0+183c <[^>]*> ctc2.i	\$a1,\$3
+0+1840 <[^>]*> ctc2.ni	\$a1,\$3
+0+1844 <[^>]*> vcallmsr	vi27
