@@ -5335,19 +5335,20 @@ tic54x_cons_fix_new (fragS *frag, int where, int octets, expressionS *exp)
 
    If fixp->fx_addsy is non-NULL, we'll have to generate a reloc entry.   */
 
-int
-md_apply_fix (fixP, valP)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT *valP;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  valueT val = *valP;
+  valueT val = * valP;
 
   switch (fixP->fx_r_type)
     {
     default:
       as_fatal ("Bad relocation type: 0x%02x", fixP->fx_r_type);
-      return 0;
+      return;
     case BFD_RELOC_TIC54X_MS7_OF_23:
       val = (val >> 16) & 0x7F;
       /* Fall through.  */
@@ -5381,7 +5382,8 @@ md_apply_fix (fixP, valP)
       break;
     }
 
-  return 0; /* Return value is ignored.  */
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* This is our chance to record section alignment

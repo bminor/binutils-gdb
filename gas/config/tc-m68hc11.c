@@ -2729,43 +2729,38 @@ md_estimate_size_before_relax (fragP, segment)
   return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
-int
-md_apply_fix (fixp, valuep)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT *valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
-  long value;
+  long value = * valP;
   int op_type;
 
-  if (fixp->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valuep;
-      fixp->fx_done = 1;
-    }
-  else if (fixp->fx_pcrel)
-    {
-      value = *valuep;
-    }
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_done = 1;
+
+  else if (fixP->fx_pcrel)
+    ;
+
   else
     {
-      value = fixp->fx_offset;
-      if (fixp->fx_subsy != (symbolS *) NULL)
+      value = fixP->fx_offset;
+
+      if (fixP->fx_subsy != (symbolS *) NULL)
 	{
-	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
-	    {
-	      value -= S_GET_VALUE (fixp->fx_subsy);
-	    }
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
+	    value -= S_GET_VALUE (fixP->fx_subsy);
 	  else
-	    {
-	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    _("Expression too complex."));
-	    }
+	    /* We don't actually support subtracting a symbol.  */
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("Expression too complex."));
 	}
     }
 
-  op_type = fixp->fx_r_type;
+  op_type = fixP->fx_r_type;
 
   /* Patch the instruction with the resolved operand.  Elf relocation
      info will also be generated to take care of linker/loader fixups.
@@ -2776,9 +2771,9 @@ md_apply_fix (fixp, valuep)
      relax table, bcc, bra, bsr transformations)
 
      The BFD_RELOC_32 is necessary for the support of --gstabs.  */
-  where = fixp->fx_frag->fr_literal + fixp->fx_where;
+  where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-  switch (fixp->fx_r_type)
+  switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
@@ -2788,7 +2783,7 @@ md_apply_fix (fixp, valuep)
     case BFD_RELOC_16_PCREL:
       bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       if (value < -65537 || value > 65535)
-	as_bad_where (fixp->fx_file, fixp->fx_line,
+	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value out of 16-bit range."));
       break;
 
@@ -2811,14 +2806,14 @@ md_apply_fix (fixp, valuep)
       ((bfd_byte *) where)[0] = (bfd_byte) value;
 
       if (value < -128 || value > 127)
-	as_bad_where (fixp->fx_file, fixp->fx_line,
+	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value %ld too large for 8-bit PC-relative branch."),
 		      value);
       break;
 
     case BFD_RELOC_M68HC11_3B:
       if (value <= 0 || value > 8)
-	as_bad_where (fixp->fx_file, fixp->fx_line,
+	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Auto increment/decrement offset '%ld' is out of range."),
 		      value);
       if (where[0] & 0x8)
@@ -2831,8 +2826,6 @@ md_apply_fix (fixp, valuep)
 
     default:
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
-		fixp->fx_line, fixp->fx_r_type);
+		fixP->fx_line, fixP->fx_r_type);
     }
-
-  return 0;
 }

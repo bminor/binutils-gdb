@@ -1488,22 +1488,14 @@ md_section_align (seg, size)
 #endif
 
 
-#ifdef BFD_ASSEMBLER
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-#else
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     long val;
-#endif
+     valueT *valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-#ifdef BFD_ASSEMBLER
-  long val = *valp;
-#endif
+  long val = * (long *) valP;
 
   switch (fixP->fx_size)
     {
@@ -1523,6 +1515,9 @@ md_apply_fix (fixP, val)
     default:
       abort ();
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 int

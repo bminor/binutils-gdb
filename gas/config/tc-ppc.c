@@ -2312,7 +2312,7 @@ md_assemble (str)
      BFD_RELOC_UNUSED plus the operand index.  This lets us easily
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix.  */
+     md_apply_fix3.  */
   for (i = 0; i < fc; i++)
     {
       const struct powerpc_operand *operand;
@@ -5080,36 +5080,33 @@ ppc_fix_adjustable (fix)
    that, we determine the correct reloc code and put it back in the
    fixup.  */
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  valueT value;
+  valueT value = * valP;
 
 #ifdef OBJ_ELF
-  value = *valuep;
-  if (fixp->fx_addsy != NULL)
+  if (fixP->fx_addsy != NULL)
     {
       /* `*valuep' may contain the value of the symbol on which the reloc
 	 will be based; we have to remove it.  */
-      if (symbol_used_in_reloc_p (fixp->fx_addsy)
-	  && S_GET_SEGMENT (fixp->fx_addsy) != absolute_section
-	  && S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
-	  && ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
-	value -= S_GET_VALUE (fixp->fx_addsy);
+      if (symbol_used_in_reloc_p (fixP->fx_addsy)
+	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
+	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
+	  && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
+	value -= S_GET_VALUE (fixP->fx_addsy);
 
       /* FIXME: Why '+'?  Better yet, what exactly is '*valuep'
 	 supposed to be?  I think this is related to various similar
 	 FIXMEs in tc-i386.c and tc-sparc.c.  */
-      if (fixp->fx_pcrel)
-	value += fixp->fx_frag->fr_address + fixp->fx_where;
+      if (fixP->fx_pcrel)
+	value += fixP->fx_frag->fr_address + fixP->fx_where;
     }
   else
-    {
-      fixp->fx_done = 1;
-    }
+    fixP->fx_done = 1;
 #else
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
@@ -5121,38 +5118,37 @@ md_apply_fix3 (fixp, valuep, seg)
      *valuep, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valuep since it includes the
      result of md_pcrel_from.  This is confusing.  */
-  if (fixp->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valuep;
-      fixp->fx_done = 1;
-    }
-  else if (fixp->fx_pcrel)
-    value = *valuep;
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_done = 1;
+
+  else if (fixP->fx_pcrel)
+    ;
+
   else
     {
-      value = fixp->fx_offset;
-      if (fixp->fx_subsy != (symbolS *) NULL)
+      value = fixP->fx_offset;
+      if (fixP->fx_subsy != (symbolS *) NULL)
 	{
-	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixp->fx_subsy);
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
+	    value -= S_GET_VALUE (fixP->fx_subsy);
 	  else
 	    {
 	      /* We can't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("expression too complex"));
 	    }
 	}
     }
 #endif
 
-  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
       int opindex;
       const struct powerpc_operand *operand;
       char *where;
       unsigned long insn;
 
-      opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
+      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
 
       operand = &powerpc_operands[opindex];
 
@@ -5165,38 +5161,36 @@ md_apply_fix3 (fixp, valuep, seg)
 	  && operand->bits == 16
 	  && operand->shift == 0
 	  && operand->insert == NULL
-	  && fixp->fx_addsy != NULL
-	  && symbol_get_tc (fixp->fx_addsy)->subseg != 0
-	  && symbol_get_tc (fixp->fx_addsy)->class != XMC_TC
-	  && symbol_get_tc (fixp->fx_addsy)->class != XMC_TC0
-	  && S_GET_SEGMENT (fixp->fx_addsy) != bss_section)
+	  && fixP->fx_addsy != NULL
+	  && symbol_get_tc (fixP->fx_addsy)->subseg != 0
+	  && symbol_get_tc (fixP->fx_addsy)->class != XMC_TC
+	  && symbol_get_tc (fixP->fx_addsy)->class != XMC_TC0
+	  && S_GET_SEGMENT (fixP->fx_addsy) != bss_section)
 	{
-	  value = fixp->fx_offset;
-	  fixp->fx_done = 1;
+	  value = fixP->fx_offset;
+	  fixP->fx_done = 1;
 	}
 #endif
 
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
-      where = fixp->fx_frag->fr_literal + fixp->fx_where;
+      where = fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
 	insn = bfd_getb32 ((unsigned char *) where);
       else
 	insn = bfd_getl32 ((unsigned char *) where);
       insn = ppc_insert_operand (insn, operand, (offsetT) value,
-				 fixp->fx_file, fixp->fx_line);
+				 fixP->fx_file, fixP->fx_line);
       if (target_big_endian)
 	bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       else
 	bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
 
-      if (fixp->fx_done)
-	{
-	  /* Nothing else to do here.  */
-	  return 1;
-	}
+      if (fixP->fx_done)
+	/* Nothing else to do here.  */
+	return;
 
-      assert (fixp->fx_addsy != NULL);
+      assert (fixP->fx_addsy != NULL);
 
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into
@@ -5204,35 +5198,35 @@ md_apply_fix3 (fixp, valuep, seg)
       if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 26
 	  && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_B26;
+	fixP->fx_r_type = BFD_RELOC_PPC_B26;
       else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 16
 	  && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_B16;
+	fixP->fx_r_type = BFD_RELOC_PPC_B16;
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 26
 	       && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_BA26;
+	fixP->fx_r_type = BFD_RELOC_PPC_BA26;
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0)
-	fixp->fx_r_type = BFD_RELOC_PPC_BA16;
+	fixP->fx_r_type = BFD_RELOC_PPC_BA16;
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0
-	       && ppc_is_toc_sym (fixp->fx_addsy))
+	       && ppc_is_toc_sym (fixP->fx_addsy))
 	{
-	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
+	  fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
 #ifdef OBJ_ELF
 	  if (BFD_DEFAULT_TARGET_SIZE == 64
 	      && ppc_size == PPC_OPCODE_64
 	      && (operand->flags & PPC_OPERAND_DS) != 0)
-	    fixp->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
+	    fixP->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
 #endif
-	  fixp->fx_size = 2;
+	  fixP->fx_size = 2;
 	  if (target_big_endian)
-	    fixp->fx_where += 2;
+	    fixP->fx_where += 2;
 	}
 #endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
       else
@@ -5242,23 +5236,23 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  /* Use expr_symbol_where to see if this is an expression
 	     symbol.  */
-	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	  if (expr_symbol_where (fixP->fx_addsy, &sfile, &sline))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("unresolved expression that must be resolved"));
 	  else
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("unsupported relocation against %s"),
-			  S_GET_NAME (fixp->fx_addsy));
-	  fixp->fx_done = 1;
-	  return 1;
+			  S_GET_NAME (fixP->fx_addsy));
+	  fixP->fx_done = 1;
+	  return;
 	}
     }
   else
     {
 #ifdef OBJ_ELF
-      ppc_elf_validate_fix (fixp, seg);
+      ppc_elf_validate_fix (fixP, seg);
 #endif
-      switch (fixp->fx_r_type)
+      switch (fixP->fx_r_type)
 	{
 	case BFD_RELOC_CTOR:
 	  if (BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64)
@@ -5266,26 +5260,26 @@ md_apply_fix3 (fixp, valuep, seg)
 	  /* fall through */
 
 	case BFD_RELOC_32:
-	  if (fixp->fx_pcrel)
-	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_32_PCREL;
 	  /* fall through */
 
 	case BFD_RELOC_RVA:
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_32_BASEREL:
 	case BFD_RELOC_PPC_EMB_NADDR32:
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 4);
 	  break;
 
 	case BFD_RELOC_64:
 	ctor64:
-	  if (fixp->fx_pcrel)
-	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_64_PCREL;
 	  /* fall through */
 
 	case BFD_RELOC_64_PCREL:
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 8);
 	  break;
 
@@ -5320,20 +5314,20 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC64_TOC16_HA:
 #endif
 #endif
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    {
-	      if (fixp->fx_addsy != NULL)
-		as_bad_where (fixp->fx_file, fixp->fx_line,
+	      if (fixP->fx_addsy != NULL)
+		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("cannot emit PC relative %s relocation against %s"),
-			      bfd_get_reloc_code_name (fixp->fx_r_type),
-			      S_GET_NAME (fixp->fx_addsy));
+			      bfd_get_reloc_code_name (fixP->fx_r_type),
+			      S_GET_NAME (fixP->fx_addsy));
 	      else
-		as_bad_where (fixp->fx_file, fixp->fx_line,
+		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("cannot emit PC relative %s relocation"),
-			      bfd_get_reloc_code_name (fixp->fx_r_type));
+			      bfd_get_reloc_code_name (fixP->fx_r_type));
 	    }
 
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 2);
 	  break;
 
@@ -5341,46 +5335,46 @@ md_apply_fix3 (fixp, valuep, seg)
 	     lis %r3,(L1-L2)@ha
 	     where L1 and L2 are defined later.  */
 	case BFD_RELOC_HI16:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HI (value), 2);
 	  break;
 
 	case BFD_RELOC_HI16_S:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HA (value), 2);
 	  break;
 
 #ifdef OBJ_ELF
 #if BFD_DEFAULT_TARGET_SIZE == 64
 	case BFD_RELOC_PPC64_HIGHER:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HIGHER (value), 2);
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHER_S:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HIGHERA (value), 2);
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHEST:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HIGHEST (value), 2);
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHEST_S:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HIGHESTA (value), 2);
 	  break;
 
@@ -5395,10 +5389,10 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC64_TOC16_LO_DS:
 	case BFD_RELOC_PPC64_PLTGOT16_DS:
 	case BFD_RELOC_PPC64_PLTGOT16_LO_DS:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
 	  {
-	    unsigned char *where = fixp->fx_frag->fr_literal + fixp->fx_where;
+	    unsigned char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
 	    unsigned long val;
 
 	    if (target_big_endian)
@@ -5417,45 +5411,45 @@ md_apply_fix3 (fixp, valuep, seg)
 	  /* Because SDA21 modifies the register field, the size is set to 4
 	     bytes, rather than 2, so offset it here appropriately.  */
 	case BFD_RELOC_PPC_EMB_SDA21:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
 
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where
 			      + ((target_big_endian) ? 2 : 0),
 			      value, 2);
 	  break;
 
 	case BFD_RELOC_8:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
 
-	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 1);
 	  break;
 
 	case BFD_RELOC_24_PLT_PCREL:
 	case BFD_RELOC_PPC_LOCAL24PC:
-	  if (!fixp->fx_pcrel && !fixp->fx_done)
+	  if (!fixP->fx_pcrel && !fixP->fx_done)
 	    abort ();
 
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    {
 	      char *where;
 	      unsigned long insn;
 
 	      /* Fetch the instruction, insert the fully resolved operand
 		 value, and stuff the instruction back again.  */
-	      where = fixp->fx_frag->fr_literal + fixp->fx_where;
+	      where = fixP->fx_frag->fr_literal + fixP->fx_where;
 	      if (target_big_endian)
 		insn = bfd_getb32 ((unsigned char *) where);
 	      else
 		insn = bfd_getl32 ((unsigned char *) where);
 	      if ((value & 3) != 0)
-		as_bad_where (fixp->fx_file, fixp->fx_line,
+		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("must branch to an address a multiple of 4"));
 	      if ((offsetT) value < -0x40000000
 		  || (offsetT) value >= 0x40000000)
-		as_bad_where (fixp->fx_file, fixp->fx_line,
+		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("@local or @plt branch destination is too far away, %ld bytes"),
 			      (long) value);
 	      insn = insn | (value & 0x03fffffc);
@@ -5467,15 +5461,15 @@ md_apply_fix3 (fixp, valuep, seg)
 	  break;
 
 	case BFD_RELOC_VTABLE_INHERIT:
-	  fixp->fx_done = 0;
-	  if (fixp->fx_addsy
-	      && !S_IS_DEFINED (fixp->fx_addsy)
-	      && !S_IS_WEAK (fixp->fx_addsy))
-	    S_SET_WEAK (fixp->fx_addsy);
+	  fixP->fx_done = 0;
+	  if (fixP->fx_addsy
+	      && !S_IS_DEFINED (fixP->fx_addsy)
+	      && !S_IS_WEAK (fixP->fx_addsy))
+	    S_SET_WEAK (fixP->fx_addsy);
 	  break;
 
 	case BFD_RELOC_VTABLE_ENTRY:
-	  fixp->fx_done = 0;
+	  fixP->fx_done = 0;
 	  break;
 
 #ifdef OBJ_ELF
@@ -5483,37 +5477,35 @@ md_apply_fix3 (fixp, valuep, seg)
 	  /* Generated by reference to `sym@tocbase'.  The sym is
 	     ignored by the linker.  */
 	case BFD_RELOC_PPC64_TOC:
-	  fixp->fx_done = 0;
+	  fixP->fx_done = 0;
 	  break;
 #endif
 #endif
 	default:
 	  fprintf (stderr,
-		   _("Gas failure, reloc value %d\n"), fixp->fx_r_type);
+		   _("Gas failure, reloc value %d\n"), fixP->fx_r_type);
 	  fflush (stderr);
 	  abort ();
 	}
     }
 
 #ifdef OBJ_ELF
-  fixp->fx_addnumber = value;
+  fixP->fx_addnumber = value;
 #else
-  if (fixp->fx_r_type != BFD_RELOC_PPC_TOC16)
-    fixp->fx_addnumber = 0;
+  if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16)
+    fixP->fx_addnumber = 0;
   else
     {
 #ifdef TE_PE
-      fixp->fx_addnumber = 0;
+      fixP->fx_addnumber = 0;
 #else
       /* We want to use the offset within the data segment of the
 	 symbol, not the actual VMA of the symbol.  */
-      fixp->fx_addnumber =
-	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixp->fx_addsy));
+      fixP->fx_addnumber =
+	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixP->fx_addsy));
 #endif
     }
 #endif
-
-  return 1;
 }
 
 /* Generate a reloc for a fixup.  */

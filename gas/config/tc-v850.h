@@ -34,7 +34,6 @@
 /* The target BFD format.  */
 #define TARGET_FORMAT 		"elf32-v850"
 
-#define MD_APPLY_FIX3
 #define md_operand(x)
 
 #define obj_fix_adjustable(fixP) v850_fix_adjustable(fixP)

@@ -1908,21 +1908,21 @@ md_pcrel_from (fixp)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS * fixP;
+     valueT * valP;
      segT seg;
 {
-  char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
+  char * fixpos = fixP->fx_where + fixP->fx_frag->fr_literal;
   int size = 0;
-  int value;
+  int value = (int) * valP;
 
-  assert (fixp->fx_r_type < BFD_RELOC_UNUSED);
+  assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
   /* This should never happen.  */
   if (seg->flags & SEC_ALLOC)
-      abort ();
+    abort ();
 
   /* The value we are passed in *valuep includes the symbol values.
      Since we are using BFD_ASSEMBLER, if we are doing this relocation
@@ -1935,22 +1935,20 @@ md_apply_fix3 (fixp, valuep, seg)
      *valuep, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valuep since it includes the
      result of md_pcrel_from.  */
-  if (fixp->fx_addsy == (symbolS *) NULL || fixp->fx_pcrel)
-    value = *valuep;
-  else
-    value = fixp->fx_offset;
+  if (fixP->fx_addsy != (symbolS *) NULL && ! fixP->fx_pcrel)
+    value = fixP->fx_offset;
 
   /* If the fix is relative to a symbol which is not defined, or not
      in the same segment as the fix, we cannot resolve it here.  */
-  if (fixp->fx_addsy != NULL
-      && (! S_IS_DEFINED (fixp->fx_addsy)
-	  || (S_GET_SEGMENT (fixp->fx_addsy) != seg)))
+  if (fixP->fx_addsy != NULL
+      && (! S_IS_DEFINED (fixP->fx_addsy)
+	  || (S_GET_SEGMENT (fixP->fx_addsy) != seg)))
     {
-      fixp->fx_done = 0;
-      return 0;
+      fixP->fx_done = 0;
+      return;
     }
 
-  switch (fixp->fx_r_type)
+  switch (fixP->fx_r_type)
     {
     case BFD_RELOC_8:
     case BFD_RELOC_8_PCREL:
@@ -1969,22 +1967,20 @@ md_apply_fix3 (fixp, valuep, seg)
 
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
-      fixp->fx_done = 0;
-      return 1;
+      fixP->fx_done = 0;
+      return;
 
     case BFD_RELOC_NONE:
     default:
-      as_bad_where (fixp->fx_file, fixp->fx_line,
-                   _("Bad relocation fixup type (%d)"), fixp->fx_r_type);
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+                   _("Bad relocation fixup type (%d)"), fixP->fx_r_type);
     }
 
   md_number_to_chars (fixpos, value, size);
 
   /* If a symbol remains, pass the fixup, as a reloc, onto the linker.  */
-  if (fixp->fx_addsy == NULL)
-    fixp->fx_done = 1;
-
-  return 0;
+  if (fixP->fx_addsy == NULL)
+    fixP->fx_done = 1;
 }
 
 /* Return nonzero if the fixup in FIXP will require a relocation,

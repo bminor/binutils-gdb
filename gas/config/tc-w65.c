@@ -978,10 +978,12 @@ md_section_align (seg, size)
 }
 
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     long val;
+     vauleT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int addr = fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -1030,9 +1032,12 @@ md_apply_fix (fixP, val)
     default:
       abort ();
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
-/* Put number into target byte order */
+/* Put number into target byte order.  */
 
 void
 md_number_to_chars (ptr, use, nbytes)

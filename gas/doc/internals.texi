@@ -512,7 +512,7 @@ A number which is added into the fixup.
 
 @item fx_addnumber
 Some CPU backends use this field to convey information between
-@code{md_apply_fix} and @code{tc_gen_reloc}.  The machine independent code does
+@code{md_apply_fix3} and @code{tc_gen_reloc}.  The machine independent code does
 not use it.
 
 @item fx_next
@@ -1235,17 +1235,17 @@ information removed.  Depending upon the processing performed by
 @code{md_convert_frag} the frag information may or may not be necessary, as may
 the resolved values of the symbols.  The default value is 1.
 
-@item md_apply_fix
-@cindex md_apply_fix
+@item md_apply_fix3
+@cindex md_apply_fix3
 GAS will call this for each fixup.  It should store the correct value in the
 object file.  @code{fixup_segment} performs a generic overflow check on the
-@code{valueT *val} argument after @code{md_apply_fix} returns.  If the overflow
-check is relevant for the target machine, then @code{md_apply_fix} should
+@code{valueT *val} argument after @code{md_apply_fix3} returns.  If the overflow
+check is relevant for the target machine, then @code{md_apply_fix3} should
 modify @code{valueT *val}, typically to the value stored in the object file.
 
 @item TC_HANDLES_FX_DONE
 @cindex TC_HANDLES_FX_DONE
-If this macro is defined, it means that @code{md_apply_fix} correctly sets the
+If this macro is defined, it means that @code{md_apply_fix3} correctly sets the
 @code{fx_done} field in the fixup.
 
 @item tc_gen_reloc

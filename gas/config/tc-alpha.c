@@ -1118,14 +1118,14 @@ md_pcrel_from (fixP)
    the distance to the "lda" instruction for setting the addend to
    GPDISP.  */
 
-int
+void
 md_apply_fix3 (fixP, valueP, seg)
      fixS *fixP;
-     valueT *valueP;
+     valueT * valP;
      segT seg;
 {
   char * const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT value = *valueP;
+  valueT value = * valP;
   unsigned image, size;
 
   switch (fixP->fx_r_type)
@@ -1184,7 +1184,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  md_number_to_chars (fixpos, value, size);
 	  goto done;
 	}
-      return 1;
+      return;
 
 #ifdef OBJ_ECOFF
     case BFD_RELOC_GPREL32:
@@ -1199,7 +1199,7 @@ md_apply_fix3 (fixP, valueP, seg)
     case BFD_RELOC_GPREL16:
     case BFD_RELOC_ALPHA_GPREL_HI16:
     case BFD_RELOC_ALPHA_GPREL_LO16:
-      return 1;
+      return;
 
     case BFD_RELOC_23_PCREL_S2:
       if (fixP->fx_pcrel == 0 && fixP->fx_addsy == 0)
@@ -1208,7 +1208,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  image = (image & ~0x1FFFFF) | ((value >> 2) & 0x1FFFFF);
 	  goto write_done;
 	}
-      return 1;
+      return;
 
     case BFD_RELOC_ALPHA_HINT:
       if (fixP->fx_pcrel == 0 && fixP->fx_addsy == 0)
@@ -1217,22 +1217,22 @@ md_apply_fix3 (fixP, valueP, seg)
 	  image = (image & ~0x3FFF) | ((value >> 2) & 0x3FFF);
 	  goto write_done;
 	}
-      return 1;
+      return;
 
 #ifdef OBJ_ECOFF
     case BFD_RELOC_ALPHA_LITERAL:
       md_number_to_chars (fixpos, value, 2);
-      return 1;
+      return;
 #endif
     case BFD_RELOC_ALPHA_ELF_LITERAL:
     case BFD_RELOC_ALPHA_LITUSE:
     case BFD_RELOC_ALPHA_LINKAGE:
     case BFD_RELOC_ALPHA_CODEADDR:
-      return 1;
+      return;
 
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
-      return 1;
+      return;
 
     default:
       {
@@ -1262,7 +1262,7 @@ md_apply_fix3 (fixP, valueP, seg)
     }
 
   if (fixP->fx_addsy != 0 || fixP->fx_pcrel != 0)
-    return 1;
+    return;
   else
     {
       as_warn_where (fixP->fx_file, fixP->fx_line,
@@ -1275,12 +1275,9 @@ write_done:
 
 done:
   fixP->fx_done = 1;
-  return 0;
 }
 
-/*
- * Look for a register name in the given symbol.
- */
+/* Look for a register name in the given symbol.  */
 
 symbolS *
 md_undefined_symbol (name)

@@ -531,9 +531,6 @@ if (fragP->fr_type == rs_align_code) 					\
 			   - fragP->fr_address				\
 			   - fragP->fr_fix));
 
-/* call md_apply_fix3 with segment instead of md_apply_fix */
-#define MD_APPLY_FIX3
-
 void i386_print_statistics PARAMS ((FILE *));
 #define tc_print_statistics i386_print_statistics
 

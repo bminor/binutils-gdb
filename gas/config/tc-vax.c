@@ -289,12 +289,18 @@ md_number_to_chars (con, value, nbytes)
    that they reference.  */
 
 void				/* Knows about order of bytes in address.  */
-md_apply_fix (fixP, value)
-     fixS *fixP;
-     long value;
+md_apply_fix3 (fixP, valueP, seg)
+     fixS * fixP;
+     valueT * valueP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  valueT value = * valueP;
+
   number_to_chars_littleendian (fixP->fx_where + fixP->fx_frag->fr_literal,
-				(valueT) value, fixP->fx_size);
+				value, fixP->fx_size);
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 long

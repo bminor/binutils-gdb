@@ -2088,17 +2088,18 @@ md_convert_frag (abfd, sec, fragP)
 
 /* Applies the desired value to the specified location.
    Also sets up addends for 'rela' type relocations.  */
-int
-md_apply_fix3 (fixP, valp, segment)
+
+void
+md_apply_fix3 (fixP, valP, segment)
      fixS *   fixP;
-     valueT * valp;
+     valueT * valP;
      segT     segment;
 {
   char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
-  offsetT      val  = (offsetT) * valp;
+  offsetT      val  = * (offsetT *)  valP;
 
   symname = fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : _("<unknown>");
   /* Save this for the addend in the relocation record.  */
@@ -2115,7 +2116,7 @@ md_apply_fix3 (fixP, valp, segment)
       /* For ELF we can just return and let the reloc that will be generated
 	 take care of everything.  For COFF we still have to insert 'val'
 	 into the insn since the addend field will be ignored.  */
-      return 0;
+      return;
 #endif
     }
   else
@@ -2214,8 +2215,6 @@ md_apply_fix3 (fixP, valp, segment)
 	}
       break;
     }
-
-  return 0; /* Return value is ignored.  */
 }
 
 void

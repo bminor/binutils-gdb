@@ -2972,14 +2972,13 @@ md_show_usage (stream)
 /* Apply a fixS (fixup of an instruction or data that we didn't have
    enough info to complete immediately) to the data in a frag.  */
 
-int
+void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
      segT seg;
 {
-  long val = *valP;
-
+  long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
@@ -2999,17 +2998,13 @@ md_apply_fix3 (fixP, valP, seg)
 	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
 	    val -= S_GET_VALUE (fixP->fx_subsy);
 	  else
-	    {
-	      /* We can't actually support subtracting a symbol.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("expression too complex"));
-	    }
+	    /* We can't actually support subtracting a symbol.  */
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("expression too complex"));
 	}
 
       cris_number_to_imm (buf, val, fixP->fx_size, fixP, seg);
     }
-
-  return 1;
 }
 
 /* All relocations are relative to the location just after the fixup;

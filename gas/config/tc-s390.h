@@ -85,9 +85,6 @@ extern int target_big_endian;
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-/* We set the fx_done field appropriately in md_apply_fix.  */
-#define TC_HANDLES_FX_DONE
-
 #define md_number_to_chars           number_to_chars_bigendian
 
 #define md_do_align(n, fill, len, max, around)                          \
@@ -107,9 +104,6 @@ if (fragP->fr_type == rs_align_code)					\
   s390_align_code (fragP, (fragP->fr_next->fr_address			\
 			   - fragP->fr_address				\
 			   - fragP->fr_fix));
-
-/* call md_apply_fix3 with segment instead of md_apply_fix */
-#define MD_APPLY_FIX3
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)

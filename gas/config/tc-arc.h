@@ -53,10 +53,6 @@ extern const char *arc_target_format;
 
 #define LISTING_HEADER "ARC GAS "
 
-#define TC_HANDLES_FX_DONE
-
-#define MD_APPLY_FIX3
-
 /* The ARC needs to parse reloc specifiers in .word.  */
 
 extern void arc_parse_cons_expression PARAMS ((struct expressionS *, unsigned));

@@ -1405,10 +1405,12 @@ md_section_align (seg, size)
 }
 
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, segment)
      fixS *fixP;
-     long val;
+     valueT * valP;
+     segT segment ATTRIBUTE_UNUSED;
 {
+  long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   switch (fixP->fx_r_type)
@@ -1464,6 +1466,9 @@ md_apply_fix (fixP, val)
     default:
       abort ();
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 int

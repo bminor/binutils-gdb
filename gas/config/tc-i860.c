@@ -1228,15 +1228,15 @@ obtain_reloc_for_imm16 (fix, val)
 /* Attempt to simplify or eliminate a fixup. To indicate that a fixup
    has been eliminated, set fix->fx_done. If fix->fx_addsy is non-NULL,
    we will have to generate a reloc entry.  */
-int
-md_apply_fix3 (fix, valuep, seg)
-     fixS *fix;
-     valueT *valuep;
+
+void
+md_apply_fix3 (fix, valP, seg)
+     fixS * fix;
+     valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-
   char *buf;
-  long val = (long) (*valuep);
+  long val = * (long *) valP
   unsigned long insn;
   valueT fup;
 
@@ -1280,9 +1280,8 @@ md_apply_fix3 (fix, valuep, seg)
 	}
     }
   else if (fup & OP_IMM_U16)
-    {
-      abort ();
-    }
+    abort ();
+
   else if (fup & OP_IMM_SPLIT16)
     {
       fix->fx_r_type = obtain_reloc_for_imm16 (fix, &val);
@@ -1367,9 +1366,6 @@ md_apply_fix3 (fix, valuep, seg)
 	  fix->fx_done = 1;
 	}
     }
-
-  /* Return value ignored.  */
-  return 0;
 }
 
 /* Generate a machine dependent reloc from a fixup.  */

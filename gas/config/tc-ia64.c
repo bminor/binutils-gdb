@@ -9879,7 +9879,7 @@ ia64_cons_fix_new (f, where, nbytes, exp)
   fix = fix_new_exp (f, where, nbytes, exp, 0, code);
   /* We need to store the byte order in effect in case we're going
      to fix an 8 or 16 bit relocation (for which there no real
-     relocs available).  See md_apply_fix().  */
+     relocs available).  See md_apply_fix3().  */
   fix->tc_fix_data.bigendian = target_big_endian;
 }
 
@@ -10102,14 +10102,15 @@ fix_insn (fix, odesc, value)
 
    If fixp->fx_addsy is non-NULL, we'll have to generate a reloc entry
    (if possible).  */
-int
-md_apply_fix3 (fix, valuep, seg)
+
+void
+md_apply_fix3 (fix, valP, seg)
      fixS *fix;
-     valueT *valuep;
+     valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   char *fixpos;
-  valueT value = *valuep;
+  valueT value = * valP;
   int adjust = 0;
 
   fixpos = fix->fx_frag->fr_literal + fix->fx_where;
@@ -10152,7 +10153,7 @@ md_apply_fix3 (fix, valuep, seg)
 			"%s must have a constant value",
 			elf64_ia64_operands[fix->tc_fix_data.opnd].desc);
 	  fix->fx_done = 1;
-	  return 1;
+	  return;
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs
@@ -10167,15 +10168,12 @@ md_apply_fix3 (fix, valuep, seg)
       else
 	number_to_chars_littleendian (fixpos, value, fix->fx_size);
       fix->fx_done = 1;
-      return 1;
     }
   else
     {
       fix_insn (fix, elf64_ia64_operands + fix->tc_fix_data.opnd, value);
       fix->fx_done = 1;
-      return 1;
     }
-  return 1;
 }
 
 /* Generate the BFD reloc to be stuck in the object file from the

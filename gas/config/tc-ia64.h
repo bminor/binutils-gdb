@@ -46,7 +46,6 @@ extern const char *ia64_target_format PARAMS ((void));
 
 #define TARGET_ARCH			bfd_arch_ia64
 #define DOUBLESLASH_LINE_COMMENTS	/* allow //-style comments */
-#define TC_HANDLES_FX_DONE
 
 #define NEED_LITERAL_POOL		/* need gp literal pool */
 #define RELOC_REQUIRES_SYMBOL
@@ -117,9 +116,6 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 #define md_elf_section_type(str,len)	ia64_elf_section_type (str, len)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
-
-/* Call md_apply_fix3 with segment instead of md_apply_fix.  */
-#define MD_APPLY_FIX3
 
 #define WORKING_DOT_WORD	/* don't do broken word processing for now */
 

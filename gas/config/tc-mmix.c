@@ -2369,15 +2369,15 @@ md_convert_frag (abfd, sec, fragP)
 
    Note that this function isn't called when linkrelax != 0.  */
 
-int
-md_apply_fix3 (fixP, valp, segment)
+void
+md_apply_fix3 (fixP, valP, segment)
      fixS *   fixP;
-     valueT * valp;
+     valueT * valP;
      segT     segment;
 {
   char *buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
-  offsetT val  = (offsetT) * valp;
+  offsetT val  = (offsetT) * valP;
   segT symsec
     = (fixP->fx_addsy == NULL
        ? absolute_section : S_GET_SEGMENT (fixP->fx_addsy));
@@ -2397,7 +2397,7 @@ md_apply_fix3 (fixP, valp, segment)
 		      && symsec != real_reg_section)))))
     {
       fixP->fx_done = 0;
-      return 0;
+      return;
     }
   else if (fixP->fx_r_type == BFD_RELOC_MMIX_LOCAL
 	   || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
@@ -2405,7 +2405,7 @@ md_apply_fix3 (fixP, valp, segment)
     {
       /* These are never "fixed".  */
       fixP->fx_done = 0;
-      return 0;
+      return;
     }
   else
     /* We assume every other relocation is "fixed".  */
@@ -2517,7 +2517,7 @@ md_apply_fix3 (fixP, valp, segment)
     case BFD_RELOC_MMIX_BASE_PLUS_OFFSET:
       /* These are never "fixed".  */
       fixP->fx_done = 0;
-      return 0;
+      return;
 
     case BFD_RELOC_MMIX_PUSHJ_1:
     case BFD_RELOC_MMIX_PUSHJ_2:
@@ -2541,8 +2541,6 @@ md_apply_fix3 (fixP, valp, segment)
     /* Make sure that for completed fixups we have the value around for
        use by e.g. mmix_frob_file.  */
     fixP->fx_offset = val;
-
-  return 0; /* Return value is ignored.  */
 }
 
 /* A bsearch function for looking up a value against offsets for GREG

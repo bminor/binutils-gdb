@@ -470,11 +470,12 @@ md_number_to_imm (con, value, nbytes)
 #endif /* comment */
 
 void
-tc_apply_fix (fixP, val)
-     fixS *fixP;
-     long val;
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP ATTRIBUTE_UNUSED;
+     valueT * valP ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED:
 {
-  /* should never be called */
+  /* Should never be called.  */
   know (0);
 }
 

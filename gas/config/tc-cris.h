@@ -75,12 +75,8 @@ extern const int md_long_jump_size;
 extern const struct relax_type md_cris_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_cris_relax_table
 
-#define TC_HANDLES_FX_DONE
-
 #define TC_FORCE_RELOCATION(fixp) md_cris_force_relocation (fixp)
 extern int md_cris_force_relocation PARAMS ((struct fix *));
-
-#define MD_APPLY_FIX3
 
 #define IS_CRIS_PIC_RELOC(X)			\
   ((X) == BFD_RELOC_CRIS_16_GOT			\

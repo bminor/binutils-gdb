@@ -1528,67 +1528,67 @@ md_pcrel_from_section (fixp, sec)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT * valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
   unsigned long insn;
-  long value;
+  long value = * (long *) valP;
   int op_type;
   int left = 0;
 
-  if (fixp->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valuep;
-      fixp->fx_done = 1;
-    }
-  else if (fixp->fx_pcrel)
-    value = *valuep;
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_done = 1;
+
+  else if (fixP->fx_pcrel)
+    ;
+
   else
     {
-      value = fixp->fx_offset;
-      if (fixp->fx_subsy != (symbolS *) NULL)
+      value = fixP->fx_offset;
+
+      if (fixP->fx_subsy != (symbolS *) NULL)
 	{
-	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
-	    value -= S_GET_VALUE (fixp->fx_subsy);
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
+	    value -= S_GET_VALUE (fixP->fx_subsy);
 	  else
 	    {
 	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("expression too complex"));
 	    }
 	}
     }
 
-  op_type = fixp->fx_r_type;
+  op_type = fixP->fx_r_type;
   if (op_type & 2048)
     {
       op_type -= 2048;
       if (op_type & 1024)
 	{
 	  op_type -= 1024;
-	  fixp->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
+	  fixP->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
 	  left = 1;
 	}
       else if (op_type & 4096)
 	{
 	  op_type -= 4096;
-	  fixp->fx_r_type = BFD_RELOC_D10V_18;
+	  fixP->fx_r_type = BFD_RELOC_D10V_18;
 	}
       else
-	fixp->fx_r_type =
+	fixP->fx_r_type =
 	  get_reloc ((struct d10v_operand *) &d10v_operands[op_type]);
     }
 
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */
-  where = fixp->fx_frag->fr_literal + fixp->fx_where;
+  where = fixP->fx_frag->fr_literal + fixP->fx_where;
   insn = bfd_getb32 ((unsigned char *) where);
 
-  switch (fixp->fx_r_type)
+  switch (fixP->fx_r_type)
     {
     case BFD_RELOC_D10V_10_PCREL_L:
     case BFD_RELOC_D10V_10_PCREL_R:
@@ -1596,7 +1596,7 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_D10V_18:
       /* Instruction addresses are always right-shifted by 2.  */
       value >>= AT_WORD_RIGHT_SHIFT;
-      if (fixp->fx_size == 2)
+      if (fixP->fx_size == 2)
 	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       else
 	{
@@ -1610,9 +1610,9 @@ md_apply_fix3 (fixp, valuep, seg)
 	      && value < 4)
 	    as_fatal
 	      (_("line %d: rep or repi must include at least 4 instructions"),
-	       fixp->fx_line);
+	       fixP->fx_line);
 	  insn =
-	    d10v_insert_operand (insn, op_type, (offsetT) value, left, fixp);
+	    d10v_insert_operand (insn, op_type, (offsetT) value, left, fixP);
 	  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
 	}
       break;
@@ -1625,14 +1625,13 @@ md_apply_fix3 (fixp, valuep, seg)
 
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
-      fixp->fx_done = 0;
-      return 1;
+      fixP->fx_done = 0;
+      return;
 
     default:
       as_fatal (_("line %d: unknown relocation type: 0x%x"),
-		fixp->fx_line, fixp->fx_r_type);
+		fixP->fx_line, fixP->fx_r_type);
     }
-  return 0;
 }
 
 /* d10v_cleanup() is called after the assembler has finished parsing

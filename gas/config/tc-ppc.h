@@ -82,9 +82,6 @@ extern char *ppc_target_format PARAMS ((void));
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-/* We set the fx_done field appropriately in md_apply_fix.  */
-#define TC_HANDLES_FX_DONE
-
 #define MAX_MEM_FOR_RS_ALIGN_CODE 4
 #define HANDLE_ALIGN(FRAGP)						\
   if ((FRAGP)->fr_type == rs_align_code) 				\
@@ -291,9 +288,6 @@ extern int ppc_elf_frob_symbol PARAMS ((symbolS *));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */
-
-/* call md_apply_fix3 with segment instead of md_apply_fix */
-#define MD_APPLY_FIX3
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)

@@ -221,7 +221,7 @@ gas_cgen_swap_fixups (i)
    At this point we do not use a bfd_reloc_code_real_type for
    operands residing in the insn, but instead just use the
    operand index.  This lets us easily handle fixups for any
-   operand type.  We pick a BFD reloc type in md_apply_fix.  */
+   operand type.  We pick a BFD reloc type in md_apply_fix3.  */
 
 fixS *
 gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offset)
@@ -261,7 +261,7 @@ gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offse
    At this point we do not use a bfd_reloc_code_real_type for
    operands residing in the insn, but instead just use the
    operand index.  This lets us easily handle fixups for any
-   operand type.  We pick a BFD reloc type in md_apply_fix.  */
+   operand type.  We pick a BFD reloc type in md_apply_fix3.  */
 
 fixS *
 gas_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
@@ -566,14 +566,14 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
    handles the rest.  bfd_install_relocation (or some other bfd function)
    should handle them all.  */
 
-int
-gas_cgen_md_apply_fix3 (fixP, valueP, seg)
+void
+gas_cgen_md_apply_fix3 (fixP, valP, seg)
      fixS *   fixP;
-     valueT * valueP;
+     valueT * valP;
      segT     seg ATTRIBUTE_UNUSED;
 {
   char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT value;
+  valueT value = * valP;
   /* Canonical name, since used a lot.  */
   CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
 
@@ -589,15 +589,15 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
      result of md_pcrel_from.  This is confusing.  */
 
   if (fixP->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valueP;
-      fixP->fx_done = 1;
-    }
+    fixP->fx_done = 1;
+
   else if (fixP->fx_pcrel)
-    value = *valueP;
+    ;
+
   else
     {
       value = fixP->fx_offset;
+
       if (fixP->fx_subsy != (symbolS *) NULL)
 	{
 	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
@@ -651,7 +651,7 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
 	}
 
       if (fixP->fx_done)
-	return 1;
+	return;
 
       /* The operand isn't fully resolved.  Determine a BFD reloc value
 	 based on the operand information and leave it to
@@ -659,16 +659,15 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
 	 partial_inplace == false.  */
 
       reloc_type = md_cgen_lookup_reloc (insn, operand, fixP);
+
       if (reloc_type != BFD_RELOC_NONE)
-	{
-	  fixP->fx_r_type = reloc_type;
-	}
+	fixP->fx_r_type = reloc_type;
       else
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("unresolved expression that must be resolved"));
 	  fixP->fx_done = 1;
-	  return 1;
+	  return;
 	}
     }
   else if (fixP->fx_done)
@@ -703,8 +702,6 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
      See the comment describing fx_addnumber in write.h.
      This field is misnamed (or misused :-).  */
   fixP->fx_addnumber = value;
-
-  return 1;
 }
 
 /* Translate internal representation of relocation info to BFD target format.

@@ -2377,7 +2377,7 @@ sh_frob_file ()
 }
 
 /* Called after relaxing.  Set the correct sizes of the fragments, and
-   create relocs so that md_apply_fix will fill in the correct values.  */
+   create relocs so that md_apply_fix3 will fill in the correct values.  */
 
 void
 md_convert_frag (headers, seg, fragP)
@@ -2769,24 +2769,16 @@ sh_elf_final_processing ()
 
 /* Apply a fixup to the object file.  */
 
-#ifdef BFD_ASSEMBLER
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-#else
 void
-md_apply_fix (fixP, val)
-     fixS *fixP;
-     long val;
-#endif
+md_apply_fix3 (fixP, valP, seg)
+     fixS * fixP;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int lowbyte = target_big_endian ? 1 : 0;
   int highbyte = target_big_endian ? 0 : 1;
-#ifdef BFD_ASSEMBLER
-  long val = *valp;
-#endif
+  long val = * (long *) valP;
   long max, min;
   int shift;
 
@@ -2812,11 +2804,11 @@ md_apply_fix (fixP, val)
 	     we need.  FIXME.  */
 	case BFD_RELOC_16:
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return;
 
 	case BFD_RELOC_8:
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return;
 	}
     }
 
@@ -2966,17 +2958,13 @@ md_apply_fix (fixP, val)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
-#ifdef BFD_ASSEMBLER
-      return 0;
-#else
       return;
-#endif
 
 #ifdef OBJ_ELF
     case BFD_RELOC_32_PLT_PCREL:
       /* Make the jump instruction point to the address of the operand.  At
 	 runtime we merely add the offset to the actual PLT entry.  */
-      *valp = 0xfffffffc;
+      * valP = 0xfffffffc;
       break;
 
     case BFD_RELOC_SH_GOTPC:
@@ -2996,12 +2984,12 @@ md_apply_fix (fixP, val)
          earlier versions of the PIC patches, the pcrel_adjust field
          was used to store the correction, but since the expression is
          not pcrel, I felt it would be confusing to do it this way.  */
-      *valp -= 1;
+      * valP -= 1;
       md_number_to_chars (buf, val, 4);
       break;
 
     case BFD_RELOC_32_GOT_PCREL:
-      *valp = 0; /* Fully resolved at runtime.  No addend.  */
+      * valP = 0; /* Fully resolved at runtime.  No addend.  */
       md_number_to_chars (buf, 0, 4);
       break;
 
@@ -3026,9 +3014,8 @@ md_apply_fix (fixP, val)
   if (max != 0 && (val < min || val > max))
     as_bad_where (fixP->fx_file, fixP->fx_line, _("offset out of range"));
 
-#ifdef BFD_ASSEMBLER
-  return 0;
-#endif
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* Called just before address relaxation.  Return the length
@@ -3259,7 +3246,7 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
     {
       /* We can't store the offset in the object file, since this
 	 reloc does not take up any space, so we store it in r_offset.
-	 The fx_addnumber field was set in md_apply_fix.  */
+	 The fx_addnumber field was set in md_apply_fix3.  */
       intr->r_offset = fix->fx_addnumber;
     }
   else if (fix->fx_r_type == BFD_RELOC_SH_COUNT)

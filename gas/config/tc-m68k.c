@@ -348,7 +348,6 @@ static void s_mri_repeat PARAMS ((int));
 static void s_mri_until PARAMS ((int));
 static void s_mri_while PARAMS ((int));
 static void s_mri_endw PARAMS ((int));
-static void md_apply_fix_2 PARAMS ((fixS *, offsetT));
 static void md_convert_frag_1 PARAMS ((fragS *));
 
 static int current_architecture;
@@ -3779,11 +3778,10 @@ md_begin ()
      my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
      names.  */
 
-  register const struct m68k_opcode *ins;
-  register struct m68k_incant *hack, *slak;
-  register const char *retval = 0;	/* empty string, or error msg text */
-  register int i;
-  register char c;
+  const struct m68k_opcode *ins;
+  struct m68k_incant *hack, *slak;
+  const char *retval = 0;	/* empty string, or error msg text */
+  int i;
 
   if (flag_mri)
     {
@@ -4223,11 +4221,13 @@ md_number_to_chars (buf, val, n)
   number_to_chars_bigendian (buf, val, n);
 }
 
-static void
-md_apply_fix_2 (fixP, val)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     offsetT val;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  valueT val = * valP;
   addressT upper_limit;
   offsetT lower_limit;
 
@@ -4238,6 +4238,9 @@ md_apply_fix_2 (fixP, val)
   /* end ibm compiler workaround */
 
   val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 
 #ifdef OBJ_ELF
   if (fixP->fx_addsy)
@@ -4261,8 +4264,8 @@ md_apply_fix_2 (fixP, val)
 
   switch (fixP->fx_size)
     {
-      /* The cast to offsetT below are necessary to make code correct for
-	 machines where ints are smaller than offsetT */
+      /* The cast to offsetT below are necessary to make code
+	 correct for machines where ints are smaller than offsetT.  */
     case 1:
       *buf++ = val;
       upper_limit = 0x7f;
@@ -4321,24 +4324,6 @@ md_apply_fix_2 (fixP, val)
       && (val == 0 || val == -1))
     as_bad_where (fixP->fx_file, fixP->fx_line, _("invalid byte branch offset"));
 }
-
-#ifdef BFD_ASSEMBLER
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-{
-  md_apply_fix_2 (fixP, (addressT) *valp);
-  return 1;
-}
-#else
-void md_apply_fix (fixP, val)
-     fixS *fixP;
-     long val;
-{
-  md_apply_fix_2 (fixP, (addressT) val);
-}
-#endif
 
 /* *fragP has been relaxed to its final size, and now needs to have
    the bytes inside it modified to conform to the new size  There is UGLY

@@ -1954,52 +1954,43 @@ md_fix_pcrel_adjust (fixP)
    out separate functions for each kind of thing we could be fixing.
    They all get called from here.  */
 
-#ifdef BFD_ASSEMBLER
-int
-md_apply_fix (fixP, valp)
-     fixS *fixP;
-     valueT *valp;
-#else
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     long val;
-#endif
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
-#ifdef BFD_ASSEMBLER
-  long val = *valp;
-#endif
+  long val = * (long *) valP;
   fragS *fragP = fixP->fx_frag;
-
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (fix_bit_fixP (fixP))
-    {				/* Bitfields to fix, sigh.  */
-      md_number_to_field (buf, val, fix_bit_fixP (fixP));
+    /* Bitfields to fix, sigh.  */
+    md_number_to_field (buf, val, fix_bit_fixP (fixP));
+
+  else switch (fix_im_disp (fixP))
+    {
+    case 0:
+      /* Immediate field.  */
+      md_number_to_imm (buf, val, fixP->fx_size);
+      break;
+
+    case 1:
+      /* Displacement field.  */
+      /* Calculate offset */
+      md_number_to_disp (buf,
+			 (fixP->fx_pcrel ? val + md_fix_pcrel_adjust (fixP)
+			  : val), fixP->fx_size);
+      break;
+
+    case 2:
+      /* Pointer in a data object.  */
+      md_number_to_chars (buf, val, fixP->fx_size);
+      break;
     }
-  else
-    switch (fix_im_disp (fixP))
-      {
-      case 0:			/* Immediate field.  */
-	md_number_to_imm (buf, val, fixP->fx_size);
-	break;
 
-      case 1:			/* Displacement field.  */
-	/* Calculate offset */
-	{
-	  md_number_to_disp (buf,
-			     (fixP->fx_pcrel ? val + md_fix_pcrel_adjust (fixP)
-			      : val), fixP->fx_size);
-	}
-	break;
-
-      case 2:			/* Pointer in a data object.  */
-	md_number_to_chars (buf, val, fixP->fx_size);
-	break;
-      }
-#ifdef BSD_ASSEMBLER
-  return 1;
-#endif
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* Convert a relaxed displacement to ditto in final output */

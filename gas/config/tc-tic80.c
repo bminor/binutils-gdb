@@ -960,10 +960,12 @@ TIc80 options:\n\
    To indicate that a fixup has been eliminated, set fixP->fx_done.  */
 
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     long val;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  long val = * (long *) valP;
   char *dest = fixP->fx_frag->fr_literal + fixP->fx_where;
   int overflow;
 
@@ -1001,6 +1003,9 @@ md_apply_fix (fixP, val)
 			fixP->fx_r_type);
       break;
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* Functions concerning relocs.  */

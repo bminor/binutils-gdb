@@ -1,6 +1,6 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000 Free Software Foundation, Inc.
+   1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -109,9 +109,6 @@ extern void sparc_handle_align PARAMS ((struct frag *));
 #define TC_FORCE_RELOCATION(fixp) elf32_sparc_force_relocation(fixp)
 extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
 #endif
-
-#define MD_APPLY_FIX3
-#define TC_HANDLES_FX_DONE
 
 #ifdef OBJ_ELF
 /* Keep relocations against global symbols.  Don't turn them into

@@ -4496,11 +4496,7 @@ fixup_segment (segP, this_segment_type)
 #endif
 	}			/* if pcrel */
 
-#ifdef MD_APPLY_FIX3
-      md_apply_fix3 (fixP, (valueT *) &add_number, this_segment_type);
-#else
-      md_apply_fix (fixP, add_number);
-#endif
+      md_apply_fix3 (fixP, (valueT *) & add_number, this_segment_type);
 
       if (!fixP->fx_bit_fixP && ! fixP->fx_no_overflow)
 	{

@@ -819,57 +819,53 @@ md_pcrel_from_section (fixp, sec)
 /* GAS will call this for each fixup.  It should store the correct
    value in the object file.  */
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT * valP;
      segT seg;
 {
   unsigned char *where;
   unsigned long insn;
-  long value;
+  long value = * (long *) valP;
 
-  if (fixp->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valuep;
-      fixp->fx_done = 1;
-    }
-  else if (fixp->fx_pcrel)
-    {
-      segT s = S_GET_SEGMENT (fixp->fx_addsy);
+  if (fixP->fx_addsy == (symbolS *) NULL)
+    fixP->fx_done = 1;
 
-      if (fixp->fx_addsy && (s == seg || s == absolute_section))
+  else if (fixP->fx_pcrel)
+    {
+      segT s = S_GET_SEGMENT (fixP->fx_addsy);
+
+      if (fixP->fx_addsy && (s == seg || s == absolute_section))
 	{
-	  value = S_GET_VALUE (fixp->fx_addsy) + *valuep;
-	  fixp->fx_done = 1;
+	  value = S_GET_VALUE (fixP->fx_addsy) + *valuep;
+	  fixP->fx_done = 1;
 	}
-      else
-	value = *valuep;
     }
   else
     {
-      value = fixp->fx_offset;
+      value = fixP->fx_offset;
 
-      if (fixp->fx_subsy != (symbolS *) NULL)
+      if (fixP->fx_subsy != (symbolS *) NULL)
 	{
-	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
 	    {
-	      value -= S_GET_VALUE (fixp->fx_subsy);
-	      fixp->fx_done = 1;
+	      value -= S_GET_VALUE (fixP->fx_subsy);
+	      fixP->fx_done = 1;
 	    }
 	  else
 	    {
 	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("expression too complex"));
 	    }
 	}
     }
 
-  switch (fixp->fx_r_type)
+  switch (fixP->fx_r_type)
     {
     default:
-      fixp->fx_no_overflow = 1;
+      fixP->fx_no_overflow = 1;
       break;
     case BFD_RELOC_AVR_7_PCREL:
     case BFD_RELOC_AVR_13_PCREL:
@@ -879,18 +875,18 @@ md_apply_fix3 (fixp, valuep, seg)
       break;
     }
 
-  if (fixp->fx_done)
+  if (fixP->fx_done)
     {
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
-      where = fixp->fx_frag->fr_literal + fixp->fx_where;
+      where = fixP->fx_frag->fr_literal + fixP->fx_where;
       insn = bfd_getl16 (where);
 
-      switch (fixp->fx_r_type)
+      switch (fixP->fx_r_type)
 	{
 	case BFD_RELOC_AVR_7_PCREL:
 	  if (value & 1)
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("odd address operand: %ld"), value);
 
 	  /* Instruction addresses are always right-shifted by 1.  */
@@ -898,7 +894,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  --value;			/* Correct PC.  */
 
 	  if (value < -64 || value > 63)
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
 	  value = (value << 3) & 0x3f8;
 	  bfd_putl16 ((bfd_vma) (value | insn), where);
@@ -906,7 +902,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	case BFD_RELOC_AVR_13_PCREL:
 	  if (value & 1)
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("odd address operand: %ld"), value);
 
 	  /* Instruction addresses are always right-shifted by 1.  */
@@ -917,7 +913,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    {
 	      /* No wrap for devices with >8K of program memory.  */
 	      if ((avr_mcu->isa & AVR_ISA_MEGA) || avr_opt.no_wrap)
-		as_bad_where (fixp->fx_file, fixp->fx_line,
+		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("operand out of range: %ld"), value);
 	    }
 
@@ -1007,7 +1003,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	    x = bfd_getl16 (where);
 	    if (value & 1)
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("odd address operand: %ld"), value);
 	    value >>= 1;
 	    x |= ((value & 0x10000) | ((value << 3) & 0x1f00000)) >> 16;
@@ -1018,28 +1014,27 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	default:
 	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
-		    fixp->fx_line, fixp->fx_r_type);
+		    fixP->fx_line, fixP->fx_r_type);
 	  break;
 	}
     }
   else
     {
-      switch (fixp->fx_r_type)
+      switch (fixP->fx_r_type)
 	{
 	case -BFD_RELOC_AVR_HI8_LDI_NEG:
 	case -BFD_RELOC_AVR_HI8_LDI:
 	case -BFD_RELOC_AVR_LO8_LDI_NEG:
 	case -BFD_RELOC_AVR_LO8_LDI:
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("only constant expression allowed"));
-	  fixp->fx_done = 1;
+	  fixP->fx_done = 1;
 	  break;
 	default:
 	  break;
 	}
-      fixp->fx_addnumber = value;
+      fixP->fx_addnumber = value;
     }
-  return 0;
 }
 
 /* A `BFD_ASSEMBLER' GAS will call this to generate a reloc.  GAS

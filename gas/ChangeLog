@@ -1,3 +1,15 @@
+2001-11-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* write.c (fixup_segment): Remove referrences to md_apply_fix and
+	TC_HANDLE_FX_DONE.
+	* cgen.c, config/obj-coff.c, config/tc-*.c: Update all occurances
+	of md_apply_fix to md_apply_fix3.
+	Make all md_apply_fix3 functions void.
+	* cgen.h, config/obj-coff.h, tc-*.h: Remove all definitions of
+	MD_APPLY_FIX3 and TC_HANDLE_FX_DONE.
+	* doc/internals.texi: Update references to md_apply_fix3.
+	* tc.h: Update prototype for md_apply_fix3.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.h (md_end): Define.

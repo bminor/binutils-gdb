@@ -7581,13 +7581,13 @@ arm_reg_parse (ccp)
   return FAIL;
 }
 
-int
-md_apply_fix3 (fixP, val, seg)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *   fixP;
-     valueT * val;
+     valueT * valP;
      segT     seg;
 {
-  offsetT        value = * val;
+  offsetT        value = * valP;
   offsetT        newval;
   unsigned int   newimm;
   unsigned long  temp;
@@ -7847,7 +7847,7 @@ md_apply_fix3 (fixP, val, seg)
 	      && S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	    {
 	      /* Get pc relative value to go into the branch.  */
-	      value = * val;
+	      value = * valP;
 
 	      /* Permit a backward branch provided that enough bits
 		 are set.  Allow a forwards branch, provided that
@@ -8183,15 +8183,13 @@ md_apply_fix3 (fixP, val, seg)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
-      return 1;
+      return;
 
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("Bad relocation fixup type (%d)"), fixP->fx_r_type);
     }
-
-  return 1;
 }
 
 /* Translate internal representation of relocation info to BFD target

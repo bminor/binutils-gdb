@@ -834,7 +834,7 @@ md_assemble (str)
 		 operands residing in the insn, but instead just use the
 		 operand index.  This lets us easily handle fixups for any
 		 operand type, although that is admittedly not a very exciting
-		 feature.  We pick a BFD reloc type in md_apply_fix.
+		 feature.  We pick a BFD reloc type in md_apply_fix3.
 
 		 Limm values (4 byte immediate "constants") must be treated
 		 normally because they're not part of the actual insn word
@@ -1880,16 +1880,16 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
    and we attempt to completely resolve the reloc.  If we can not do
    that, we determine the correct reloc code and put it back in the fixup.  */
 
-int
-md_apply_fix3 (fixP, valueP, seg)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT *valueP;
+     valueT * valP;
      segT seg;
 {
 #if 0
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 #endif
-  valueT value;
+  valueT value = * valP;
 
   /* FIXME FIXME FIXME: The value we are passed in *valueP includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
@@ -1903,13 +1903,10 @@ md_apply_fix3 (fixP, valueP, seg)
      result of md_pcrel_from.  This is confusing.  */
 
   if (fixP->fx_addsy == (symbolS *) NULL)
-    {
-      value = *valueP;
-      fixP->fx_done = 1;
-    }
+    fixP->fx_done = 1;
+
   else if (fixP->fx_pcrel)
     {
-      value = *valueP;
       /* ELF relocations are against symbols.
 	 If this symbol is in a different section then we need to leave it for
 	 the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
@@ -1962,7 +1959,7 @@ md_apply_fix3 (fixP, valueP, seg)
       if (fixP->fx_done)
 	{
 	  /* Nothing else to do here.  */
-	  return 1;
+	  return;
 	}
 
       /* Determine a BFD reloc value based on the operand information.
@@ -1997,7 +1994,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			"unresolved expression that must be resolved");
 	  fixP->fx_done = 1;
-	  return 1;
+	  return;
 	}
     }
   else
@@ -2037,8 +2034,6 @@ md_apply_fix3 (fixP, valueP, seg)
     }
 
   fixP->fx_addnumber = value;
-
-  return 1;
 }
 
 /* Translate internal representation of relocation info to BFD target

@@ -4211,19 +4211,17 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
    the same (little-endian) format, so we don't need to care about which
    we are handling.  */
 
-int
-md_apply_fix3 (fixP, valp, seg)
+void
+md_apply_fix3 (fixP, valP, seg)
      /* The fix we're to put in.  */
      fixS *fixP;
-
      /* Pointer to the value of the bits.  */
-     valueT *valp;
-
+     valueT * valP;
      /* Segment fix is from.  */
      segT seg ATTRIBUTE_UNUSED;
 {
-  register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
-  valueT value = *valp;
+  char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
+  valueT value = * valP;
 
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   if (fixP->fx_pcrel)
@@ -4357,30 +4355,26 @@ md_apply_fix3 (fixP, valp, seg)
       case BFD_RELOC_VTABLE_INHERIT:
       case BFD_RELOC_VTABLE_ENTRY:
 	fixP->fx_done = 0;
-	return 1;
+	return;
 
       default:
 	break;
       }
 #endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)  */
-  *valp = value;
+  * valP = value;
 #endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach)  */
 
-#ifndef BFD_ASSEMBLER
-  md_number_to_chars (p, value, fixP->fx_size);
-#else
   /* Are we finished with this relocation now?  */
-  if (fixP->fx_addsy == 0 && fixP->fx_pcrel == 0)
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     fixP->fx_done = 1;
+#ifdef BFD_ASSEMBLER
   else if (use_rela_relocations)
     {
       fixP->fx_no_overflow = 1;
       value = 0;
     }
-  md_number_to_chars (p, value, fixP->fx_size);
 #endif
-
-  return 1;
+  md_number_to_chars (p, value, fixP->fx_size);
 }
 
 #define MAX_LITTLENUMS 6

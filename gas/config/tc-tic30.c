@@ -1559,10 +1559,11 @@ md_convert_frag (abfd, sec, fragP)
   debug ("In md_convert_frag()\n");
 }
 
-int
-md_apply_fix (fixP, valP)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   valueT value = *valP;
 
@@ -1574,15 +1575,18 @@ md_apply_fix (fixP, valP)
   debug ("fx_offset = %d\n", (int) fixP->fx_offset);
   {
     char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+
     value /= INSN_SIZE;
     if (fixP->fx_size == 1)
-      {				/* Special fix for LDP instruction.  */
-	value = (value & 0x00FF0000) >> 16;
-      }
+      /* Special fix for LDP instruction.  */
+      value = (value & 0x00FF0000) >> 16;
+
     debug ("new value = %ld\n", (long) value);
     md_number_to_chars (buf, value, fixP->fx_size);
   }
-  return 1;
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 int

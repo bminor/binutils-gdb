@@ -2881,17 +2881,15 @@ md_number_to_chars (buf, val, n)
 /* Apply a fixS to the frags, now that we know the value it ought to
    hold.  */
 
-int
-md_apply_fix3 (fixP, value, segment)
+void
+md_apply_fix3 (fixP, valP, segment)
      fixS *fixP;
-     valueT *value;
+     valueT *valP;
      segT segment;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  offsetT val;
+  offsetT val = * (offsetT *) valP;
   long insn;
-
-  val = *value;
 
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
@@ -2928,7 +2926,7 @@ md_apply_fix3 (fixP, value, segment)
 	  && ! bfd_is_com_section (seg))
 	fixP->fx_addnumber -= S_GET_VALUE (sym);
 
-      return 1;
+      return;
     }
 #endif
 
@@ -2999,7 +2997,7 @@ md_apply_fix3 (fixP, value, segment)
            || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     {
       fixP->fx_done = 0;
-      return 1;
+      return;
     }
   else
     {
@@ -3171,14 +3169,10 @@ md_apply_fix3 (fixP, value, segment)
 	case BFD_RELOC_SPARC_LM22:
 	case BFD_RELOC_HI22:
 	  if (!fixP->fx_addsy)
-	    {
-	      insn |= (val >> 10) & 0x3fffff;
-	    }
+	    insn |= (val >> 10) & 0x3fffff;
 	  else
-	    {
-	      /* FIXME: Need comment explaining why we do this.  */
-	      insn &= ~0xffff;
-	    }
+	    /* FIXME: Need comment explaining why we do this.  */
+	    insn &= ~0xffff;
 	  break;
 
 	case BFD_RELOC_SPARC22:
@@ -3194,14 +3188,10 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_LO10:
 	  if (!fixP->fx_addsy)
-	    {
-	      insn |= val & 0x3ff;
-	    }
+	    insn |= val & 0x3ff;
 	  else
-	    {
-	      /* FIXME: Need comment explaining why we do this.  */
-	      insn &= ~0xff;
-	    }
+	    /* FIXME: Need comment explaining why we do this.  */
+	    insn &= ~0xff;
 	  break;
 
 	case BFD_RELOC_SPARC_OLO10:
@@ -3272,8 +3262,6 @@ md_apply_fix3 (fixP, value, segment)
   /* Are we finished with this relocation now?  */
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
     fixP->fx_done = 1;
-
-  return 1;
 }
 
 /* Translate internal representation of relocation info to BFD target

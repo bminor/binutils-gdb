@@ -1680,112 +1680,110 @@ tc_s390_force_relocation (fixp)
    that, we determine the correct reloc code and put it back in the
    fixup.  */
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT *valP;
      segT seg;
 {
   char *where;
-  valueT value;
+  valueT value = * valP;
 
-  value = *valuep;
-  where = fixp->fx_frag->fr_literal + fixp->fx_where;
+  where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-  if (fixp->fx_subsy != NULL) 
+  if (fixP->fx_subsy != NULL) 
     {
-      if ((fixp->fx_addsy != NULL
-	   && S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy)
-	   && SEG_NORMAL (S_GET_SEGMENT (fixp->fx_addsy)))
-	  || (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section))
-	value += S_GET_VALUE (fixp->fx_subsy);
-      if (!S_IS_DEFINED (fixp->fx_subsy))
-	as_bad_where (fixp->fx_file, fixp->fx_line,
+      if ((fixP->fx_addsy != NULL
+	   && S_GET_SEGMENT (fixP->fx_addsy) == S_GET_SEGMENT (fixP->fx_subsy)
+	   && SEG_NORMAL (S_GET_SEGMENT (fixP->fx_addsy)))
+	  || (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section))
+	value += S_GET_VALUE (fixP->fx_subsy);
+      if (!S_IS_DEFINED (fixP->fx_subsy))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("unresolved fx_subsy symbol that must be resolved"));
-      value -= S_GET_VALUE(fixp->fx_subsy);
+      value -= S_GET_VALUE(fixP->fx_subsy);
 
-      if (S_GET_SEGMENT (fixp->fx_subsy) == seg && ! fixp->fx_pcrel)
-	value += MD_PCREL_FROM_SECTION (fixp, seg);
+      if (S_GET_SEGMENT (fixP->fx_subsy) == seg && ! fixP->fx_pcrel)
+	value += MD_PCREL_FROM_SECTION (fixP, seg);
     }
   
-  if (fixp->fx_addsy != NULL) 
+  if (fixP->fx_addsy != NULL) 
     {
-      if ((fixp->fx_subsy != NULL
-	   && S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy)
-	   && SEG_NORMAL (S_GET_SEGMENT(fixp->fx_addsy)))
-	  || (S_GET_SEGMENT (fixp->fx_addsy) == seg
-	      && fixp->fx_pcrel && TC_RELOC_RTSYM_LOC_FIXUP (fixp))
-	  || (!fixp->fx_pcrel 
-	      && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section)
-	  || (S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
-	      && !bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy))
-	      && TC_FIX_ADJUSTABLE(fixp)))
-	value -= S_GET_VALUE (fixp->fx_addsy);
+      if ((fixP->fx_subsy != NULL
+	   && S_GET_SEGMENT (fixP->fx_addsy) == S_GET_SEGMENT (fixP->fx_subsy)
+	   && SEG_NORMAL (S_GET_SEGMENT(fixP->fx_addsy)))
+	  || (S_GET_SEGMENT (fixP->fx_addsy) == seg
+	      && fixP->fx_pcrel && TC_RELOC_RTSYM_LOC_FIXUP (fixP))
+	  || (!fixP->fx_pcrel 
+	      && S_GET_SEGMENT (fixP->fx_addsy) == absolute_section)
+	  || (S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
+	      && !bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy))
+	      && TC_FIX_ADJUSTABLE(fixP)))
+	value -= S_GET_VALUE (fixP->fx_addsy);
 
-      if (fixp->fx_pcrel)
-	value += fixp->fx_frag->fr_address + fixp->fx_where;
+      if (fixP->fx_pcrel)
+	value += fixP->fx_frag->fr_address + fixP->fx_where;
     }
   else
-    fixp->fx_done = 1;
+    fixP->fx_done = 1;
 
-  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
       const struct s390_operand *operand;
       int opindex;
 
-      opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
+      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
       operand = &s390_operands[opindex];
 
-      if (fixp->fx_done)
+      if (fixP->fx_done)
 	{
 	  /* Insert the fully resolved operand value.  */
 	  s390_insert_operand (where, operand, (offsetT) value,
-			       fixp->fx_file, fixp->fx_line);
-
-	  return 1;
+			       fixP->fx_file, fixP->fx_line);
+	  return;
 	}
 
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into
 	 relocs.  */
-      fixp->fx_offset = value;
+      fixP->fx_offset = value;
       if (operand->bits == 12 && operand->shift == 20)
 	{
-	  fixp->fx_size = 2;
-	  fixp->fx_where += 2;
-	  fixp->fx_r_type = BFD_RELOC_390_12;
+	  fixP->fx_size = 2;
+	  fixP->fx_where += 2;
+	  fixP->fx_r_type = BFD_RELOC_390_12;
 	}
       else if (operand->bits == 12 && operand->shift == 36)
 	{
-	  fixp->fx_size = 2;
-	  fixp->fx_where += 4;
-	  fixp->fx_r_type = BFD_RELOC_390_12;
+	  fixP->fx_size = 2;
+	  fixP->fx_where += 4;
+	  fixP->fx_r_type = BFD_RELOC_390_12;
 	}
       else if (operand->bits == 8 && operand->shift == 8)
 	{
-	  fixp->fx_size = 1;
-	  fixp->fx_where += 1;
-	  fixp->fx_r_type = BFD_RELOC_8;
+	  fixP->fx_size = 1;
+	  fixP->fx_where += 1;
+	  fixP->fx_r_type = BFD_RELOC_8;
 	}
       else if (operand->bits == 16 && operand->shift == 16)
 	{
-	  fixp->fx_size = 2;
-	  fixp->fx_where += 2;
+	  fixP->fx_size = 2;
+	  fixP->fx_where += 2;
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
-	      fixp->fx_r_type = BFD_RELOC_390_PC16DBL;
-	      fixp->fx_offset += 2;
+	      fixP->fx_r_type = BFD_RELOC_390_PC16DBL;
+	      fixP->fx_offset += 2;
 	    }
 	  else
-	    fixp->fx_r_type = BFD_RELOC_16;
+	    fixP->fx_r_type = BFD_RELOC_16;
 	}
       else if (operand->bits == 32 && operand->shift == 16
 	       && (operand->flags & S390_OPERAND_PCREL))
 	{
-	  fixp->fx_size = 4;
-	  fixp->fx_where += 2;
-	  fixp->fx_offset += 2;
-	  fixp->fx_r_type = BFD_RELOC_390_PC32DBL;
+	  fixP->fx_size = 4;
+	  fixP->fx_where += 2;
+	  fixP->fx_offset += 2;
+	  fixP->fx_r_type = BFD_RELOC_390_PC32DBL;
 	}
       else
 	{
@@ -1794,29 +1792,29 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  /* Use expr_symbol_where to see if this is an expression
 	     symbol.  */
-	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	  if (expr_symbol_where (fixP->fx_addsy, &sfile, &sline))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("unresolved expression that must be resolved"));
 	  else
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("unsupported relocation type"));
-	  fixp->fx_done = 1;
-	  return 1;
+	  fixP->fx_done = 1;
+	  return;
 	}
     }
   else
     {
-      switch (fixp->fx_r_type)
+      switch (fixP->fx_r_type)
 	{
 	case BFD_RELOC_8:
-	  if (fixp->fx_pcrel)
+	  if (fixP->fx_pcrel)
 	    abort ();
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 1);
 	  break;
 	case BFD_RELOC_390_12:
 	case BFD_RELOC_390_GOT12:
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    {
 	      unsigned short mop;
 
@@ -1830,45 +1828,45 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_GPREL16:
 	case BFD_RELOC_16_GOT_PCREL:
 	case BFD_RELOC_16_GOTOFF:
-	  if (fixp->fx_pcrel)
-	    as_bad_where (fixp->fx_file, fixp->fx_line,
+	  if (fixP->fx_pcrel)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "cannot emit PC relative %s relocation%s%s",
-			  bfd_get_reloc_code_name (fixp->fx_r_type),
-			  fixp->fx_addsy != NULL ? " against " : "",
-			  (fixp->fx_addsy != NULL
-			   ? S_GET_NAME (fixp->fx_addsy)
+			  bfd_get_reloc_code_name (fixP->fx_r_type),
+			  fixP->fx_addsy != NULL ? " against " : "",
+			  (fixP->fx_addsy != NULL
+			   ? S_GET_NAME (fixP->fx_addsy)
 			   : ""));
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 2);
 	  break;
 	case BFD_RELOC_390_GOT16:
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 2);
 	  break;
 	case BFD_RELOC_390_PC16DBL:
 	case BFD_RELOC_390_PLT16DBL:
 	  value += 2;
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, (offsetT) value >> 1, 2);
 	  break;
 
 	case BFD_RELOC_32:
-	  if (fixp->fx_pcrel)
-	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_32_PCREL;
 	  else
-	    fixp->fx_r_type = BFD_RELOC_32;
-	  if (fixp->fx_done)
+	    fixP->fx_r_type = BFD_RELOC_32;
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 4);
 	  break;
 	case BFD_RELOC_32_PCREL:
 	case BFD_RELOC_32_BASEREL:
-	  fixp->fx_r_type = BFD_RELOC_32_PCREL;
-	  if (fixp->fx_done)
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 4);
 	  break;
 	case BFD_RELOC_32_GOT_PCREL:
 	case BFD_RELOC_390_PLT32:
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 4);
 	  break;
 	case BFD_RELOC_390_PC32DBL:
@@ -1876,58 +1874,56 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_390_GOTPCDBL:
 	case BFD_RELOC_390_GOTENT:
 	  value += 2;
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, (offsetT) value >> 1, 4);
 	  break;
 
 	case BFD_RELOC_32_GOTOFF:
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, sizeof (int));
 	  break;
 
 	case BFD_RELOC_390_GOT64:
 	case BFD_RELOC_390_PLT64:
-	  if (fixp->fx_done)
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 8);
 	  break;
 
 	case BFD_RELOC_64:
-	  if (fixp->fx_pcrel)
-	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_64_PCREL;
 	  else
-	    fixp->fx_r_type = BFD_RELOC_64;
-	  if (fixp->fx_done)
+	    fixP->fx_r_type = BFD_RELOC_64;
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 8);
 	  break;
 
 	case BFD_RELOC_64_PCREL:
-	  fixp->fx_r_type = BFD_RELOC_64_PCREL;
-	  if (fixp->fx_done)
+	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
+	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 8);
 	  break;
 
 	case BFD_RELOC_VTABLE_INHERIT:
 	case BFD_RELOC_VTABLE_ENTRY:
-	  fixp->fx_done = 0;
-	  return 1;
+	  fixP->fx_done = 0;
+	  return;
 
 	default:
 	  {
-	    const char *reloc_name = bfd_get_reloc_code_name (fixp->fx_r_type);
+	    const char *reloc_name = bfd_get_reloc_code_name (fixP->fx_r_type);
 
 	    if (reloc_name != NULL)
 	      fprintf (stderr, "Gas failure, reloc type %s\n", reloc_name);
 	    else
-	      fprintf (stderr, "Gas failure, reloc type #%i\n", fixp->fx_r_type);
+	      fprintf (stderr, "Gas failure, reloc type #%i\n", fixP->fx_r_type);
 	    fflush (stderr);
 	    abort ();
 	  }
 	}
 
-      fixp->fx_offset = value;
+      fixP->fx_offset = value;
     }
-
-  return 1;
 }
 
 /* Generate a reloc for a fixup.  */

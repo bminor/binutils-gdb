@@ -2558,7 +2558,7 @@ relax_segment (segment_frag_root, segment)
    Go through all the fixS's in a segment and see which ones can be
    handled now.  (These consist of fixS where we have since discovered
    the value of a symbol, or the address of the frag involved.)
-   For each one, call md_apply_fix to put the fix into the frag data.
+   For each one, call md_apply_fix3 to put the fix into the frag data.
 
    Result is a count of how many relocation structs will be needed to
    handle the remaining fixS's that we couldn't completely handle here.
@@ -2869,25 +2869,7 @@ fixup_segment (fixP, this_segment_type)
 	}
 
       if (!fixP->fx_done)
-	{
-#ifdef MD_APPLY_FIX3
-	  md_apply_fix3 (fixP, &add_number, this_segment_type);
-#else
-#ifdef BFD_ASSEMBLER
-	  md_apply_fix (fixP, &add_number);
-#else
-	  md_apply_fix (fixP, add_number);
-#endif
-#endif
-
-#ifndef TC_HANDLES_FX_DONE
-	  /* If the tc-* files haven't been converted, assume it's handling
-	     it the old way, where a null fx_addsy means that the fix has
-	     been applied completely, and no further work is needed.  */
-	  if (fixP->fx_addsy == 0 && fixP->fx_pcrel == 0)
-	    fixP->fx_done = 1;
-#endif
-	}
+	md_apply_fix3 (fixP, & add_number, this_segment_type);
 
       if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
 	{

@@ -782,26 +782,25 @@ md_number_to_chars (buf, val, n)
 }
 
 void
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     long val;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
-  fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
+  fixP->fx_addnumber = val;	/* Remember value for emit_reloc.  */
 
   know (fixP->fx_size == 4);
   know (fixP->fx_r_type < NO_RELOC);
 
   /* This is a hack.  There should be a better way to handle this.  */
   if (fixP->fx_r_type == RELOC_WDISP30 && fixP->fx_addsy)
-    {
-      val += fixP->fx_where + fixP->fx_frag->fr_address;
-    }
+    val += fixP->fx_where + fixP->fx_frag->fr_address;
 
   switch (fixP->fx_r_type)
     {
-
     case RELOC_32:
       buf[0] = val >> 24;
       buf[1] = val >> 16;
@@ -863,12 +862,13 @@ md_apply_fix (fixP, val)
       else if (fixP->fx_pcrel)
 	{
 	  long v = val >> 17;
+
 	  if (v != 0 && v != -1)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "call/jmp target out of range");
 	}
       else
-	/* this case was supposed to be handled in machine_ip */
+	/* This case was supposed to be handled in machine_ip.  */
 	abort ();
       buf[1] = val >> 10;	/* Holds bits 0003FFFC of address */
       buf[3] = val >> 2;
@@ -889,6 +889,9 @@ md_apply_fix (fixP, val)
       as_bad (_("bad relocation type: 0x%02x"), fixP->fx_r_type);
       break;
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 #ifdef OBJ_COFF

@@ -80,7 +80,7 @@ extern fixS * gas_cgen_record_fixup_exp PARAMS ((fragS *, int, const CGEN_INSN *
 						 expressionS *));
 
 /* md_apply_fix3 handler */
-extern int gas_cgen_md_apply_fix3 PARAMS ((fixS *, valueT *, segT));
+extern void gas_cgen_md_apply_fix3 PARAMS ((fixS *, valueT *, segT));
 
 /* tc_gen_reloc handler */
 extern arelent *gas_cgen_tc_gen_reloc PARAMS ((asection *, fixS *));

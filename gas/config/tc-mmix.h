@@ -171,10 +171,6 @@ extern int mmix_force_relocation PARAMS ((struct fix *));
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
-#define MD_APPLY_FIX3
-
-#define TC_HANDLES_FX_DONE
-
 #define md_section_align(seg, size) (size)
 
 #define LISTING_HEADER "GAS for MMIX"

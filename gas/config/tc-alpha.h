@@ -1,5 +1,5 @@
 /* This file is tc-alpha.h
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Ken Raeburn <raeburn@cygnus.com>.
 
@@ -37,7 +37,6 @@
 		       : "unknown-format")
 
 #define NEED_LITERAL_POOL
-#define TC_HANDLES_FX_DONE
 #define REPEAT_CONS_EXPRESSIONS
 
 extern int alpha_force_relocation PARAMS ((struct fix *));
@@ -49,7 +48,6 @@ extern valueT alpha_gp_value;
 #define TC_FORCE_RELOCATION(FIXP)	alpha_force_relocation (FIXP)
 #define tc_fix_adjustable(FIXP)		alpha_fix_adjustable (FIXP)
 #define RELOC_REQUIRES_SYMBOL
-#define MD_APPLY_FIX3
 
 /* This expression evaluates to false if the relocation is for a local
    object for which we still want to do the relocation at runtime.

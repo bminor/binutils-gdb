@@ -1158,7 +1158,7 @@ static struct default_space_dict pa_def_spaces[] =
       } \
   }
 
-/* Variant of CHECK_FIELD for use in md_apply_fix and other places where
+/* Variant of CHECK_FIELD for use in md_apply_fix3 and other places where
    the current file and line number are not valid.  */
 
 #define CHECK_FIELD_WHERE(FIELD, HIGH, LOW, FILENAME, LINE) \
@@ -4403,15 +4403,19 @@ md_undefined_symbol (name)
 
 /* Apply a fixup to an instruction.  */
 
-int
-md_apply_fix (fixP, valp)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT *valp;
+     segT seg ATTRIBUTE_UNUSED;
 {
   unsigned char *buf;
   struct hppa_fix_struct *hppa_fixP;
   offsetT new_val;
   int insn, val, fmt;
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
      never be "applied" (they are just markers).  Likewise for
@@ -4422,21 +4426,21 @@ md_apply_fix (fixP, valp)
       || fixP->fx_r_type == R_HPPA_BEGIN_BRTAB
       || fixP->fx_r_type == R_HPPA_END_BRTAB
       || fixP->fx_r_type == R_HPPA_BEGIN_TRY)
-    return 1;
+    return;
 
   /* Disgusting.  We must set fx_offset ourselves -- R_HPPA_END_TRY
      fixups are considered not adjustable, which in turn causes
      adjust_reloc_syms to not set fx_offset.  Ugh.  */
   if (fixP->fx_r_type == R_HPPA_END_TRY)
     {
-      fixP->fx_offset = *valp;
-      return 1;
+      fixP->fx_offset = * valP;
+      return;
     }
 #endif
 #ifdef OBJ_ELF
   if (fixP->fx_r_type == (int) R_PARISC_GNU_VTENTRY
       || fixP->fx_r_type == (int) R_PARISC_GNU_VTINHERIT)
-    return 1;
+    return;
 #endif
 
   /* There should have been an HPPA specific fixup associated
@@ -4447,7 +4451,7 @@ md_apply_fix (fixP, valp)
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("no hppa_fixup entry for fixup type 0x%x"),
 		    fixP->fx_r_type);
-      return 0;
+      return;
     }
 
   buf = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -4479,11 +4483,11 @@ md_apply_fix (fixP, valp)
   else if (fmt == 32
 	   && fixP->fx_addsy != NULL
 	   && S_GET_SEGMENT (fixP->fx_addsy) != bfd_com_section_ptr)
-    new_val = hppa_field_adjust (*valp - S_GET_VALUE (fixP->fx_addsy),
+    new_val = hppa_field_adjust (* valP - S_GET_VALUE (fixP->fx_addsy),
 				 0, hppa_fixP->fx_r_field);
 #endif
   else
-    new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
+    new_val = hppa_field_adjust (* valP, 0, hppa_fixP->fx_r_field);
 
   /* Handle pc-relative exceptions from above.  */
   if ((fmt == 12 || fmt == 17 || fmt == 22)
@@ -4492,13 +4496,13 @@ md_apply_fix (fixP, valp)
       && !arg_reloc_stub_needed (symbol_arg_reloc_info (fixP->fx_addsy),
 				 hppa_fixP->fx_arg_reloc)
 #ifdef OBJ_ELF
-      && (*valp - 8 + 8192 < 16384
-	  || (fmt == 17 && *valp - 8 + 262144 < 524288)
-	  || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+      && (* valP - 8 + 8192 < 16384
+	  || (fmt == 17 && * valP - 8 + 262144 < 524288)
+	  || (fmt == 22 && * valP - 8 + 8388608 < 16777216))
 #endif
 #ifdef OBJ_SOM
-      && (*valp - 8 + 262144 < 524288
-	  || (fmt == 22 && *valp - 8 + 8388608 < 16777216))
+      && (* valP - 8 + 262144 < 524288
+	  || (fmt == 22 && * valP - 8 + 8388608 < 16777216))
 #endif
       && !S_IS_EXTERNAL (fixP->fx_addsy)
       && !S_IS_WEAK (fixP->fx_addsy)
@@ -4506,7 +4510,7 @@ md_apply_fix (fixP, valp)
       && !(fixP->fx_subsy
 	   && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
     {
-      new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
+      new_val = hppa_field_adjust (* valP, 0, hppa_fixP->fx_r_field);
     }
 
   switch (fmt)
@@ -4566,7 +4570,7 @@ md_apply_fix (fixP, valp)
       /* Handle some of the opcodes with the 'W' operand type.  */
     case 17:
       {
-	offsetT distance = *valp;
+	offsetT distance = * valP;
 
 	/* If this is an absolute branch (ie no link) with an out of
 	   range target, then we want to complain.  */
@@ -4585,7 +4589,7 @@ md_apply_fix (fixP, valp)
 
     case 22:
       {
-	offsetT distance = *valp;
+	offsetT distance = * valP;
 
 	/* If this is an absolute branch (ie no link) with an out of
 	   range target, then we want to complain.  */
@@ -4624,12 +4628,11 @@ md_apply_fix (fixP, valp)
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("Unknown relocation encountered in md_apply_fix."));
-      return 0;
+      return;
     }
 
   /* Insert the relocation.  */
   bfd_put_32 (stdoutput, insn, buf);
-  return 1;
 }
 
 /* Exactly what point is a PC-relative offset relative TO?

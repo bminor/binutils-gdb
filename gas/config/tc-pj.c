@@ -427,13 +427,14 @@ PJ options:\n\
 
 /* Apply a fixup to the object file.  */
 
-int
-md_apply_fix (fixP, valp)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT *valp;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  long val = *valp;
+  long val = * (long *) valP;
   long max, min;
   int shift;
 
@@ -452,7 +453,7 @@ md_apply_fix (fixP, valp)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
-      return 0;
+      return;
 
     case BFD_RELOC_PJ_CODE_REL16:
       if (val < -0x8000 || val >= 0x7fff)
@@ -526,7 +527,8 @@ md_apply_fix (fixP, valp)
   if (max != 0 && (val < min || val > max))
     as_bad_where (fixP->fx_file, fixP->fx_line, _("offset out of range"));
 
-  return 0;
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* Put number into target byte order.  Always put values in an

@@ -1,5 +1,5 @@
 /* tc-d10v.h -- Header file for tc-d10v.c.
-   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,9 +34,7 @@
 
 #define TARGET_FORMAT "elf32-d10v"
 
-#define MD_APPLY_FIX3
-
-/* call md_pcrel_from_section, not md_pcrel_from */
+/* Call md_pcrel_from_section, not md_pcrel_from.  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 long md_pcrel_from_section PARAMS ((fixS *, segT));
 

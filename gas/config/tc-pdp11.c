@@ -163,15 +163,17 @@ md_number_to_chars (con, value, nbytes)
 }
 
 /* Fix up some data or instructions after we find out the value of a symbol
-   that they reference.  */
+   that they reference.  Knows about order of bytes in address.  */
 
-int				/* Knows about order of bytes in address.  */
-md_apply_fix (fixP, value)
+void
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT *value;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
   valueT code;
   valueT mask;
+  valueT val = * valP;
   char *buf;
   int shift;
   int size;
@@ -200,13 +202,15 @@ md_apply_fix (fixP, value)
     }
 
   if (fixP->fx_addsy != NULL)
-    *value += symbol_get_bfdsym (fixP->fx_addsy)->section->vma;
+    val += symbol_get_bfdsym (fixP->fx_addsy)->section->vma;
     /* *value += fixP->fx_addsy->bsym->section->vma; */
 
   code &= ~mask;
-  code |= (*value >> shift) & mask;
+  code |= (val >> shift) & mask;
   number_to_chars_littleendian (buf, code, size);
-  return 0;
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 long
@@ -1553,7 +1557,7 @@ tc_gen_reloc (section, fixp)
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-  /* this is taken account for in md_apply_fix() */
+  /* This is taken account for in md_apply_fix3().  */
   reloc->addend = -symbol_get_bfdsym (fixp->fx_addsy)->section->vma;
 
   switch (fixp->fx_r_type)

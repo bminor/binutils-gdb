@@ -111,7 +111,7 @@ extern int mips_fix_adjustable PARAMS ((struct fix *));
 #define TC_FORCE_RELOCATION(fixp) mips_force_relocation (fixp)
 extern int mips_force_relocation PARAMS ((struct fix *));
 
-/* md_apply_fix sets fx_done correctly.  */
+/* md_apply_fix3 sets fx_done correctly.  */
 #define TC_HANDLE_FX_DONE 1
 
 /* Register mask variables.  These are set by the MIPS assembly code

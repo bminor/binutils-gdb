@@ -760,7 +760,7 @@ md_begin ()
       op++;
     }
 
-  /* This is both a simplification (we don't have to write md_apply_fix)
+  /* This is both a simplification (we don't have to write md_apply_fix3)
      and support for future optimizations (branch shortening and similar
      stuff in the linker.  */
   linkrelax = 1;
@@ -1300,16 +1300,15 @@ md_pcrel_from (fixp)
 #endif
 }
 
-int
-md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
-     segT seg;
+void
+md_apply_fix3 (fixP, valP, seg)
+     fixS * fixP;
+     valueT * valP ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED;
 {
   /* We shouldn't ever get here because linkrelax is nonzero.  */
   abort ();
-  fixp->fx_done = 1;
-  return 0;
+  fixP->fx_done = 1;
 }
 
 /* Insert an operand value into an instruction.  */

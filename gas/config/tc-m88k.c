@@ -1117,31 +1117,33 @@ tc_coff_fix2rtype (fixp)
    file itself.  */
 
 void
-md_apply_fix (fixp, val)
-     fixS *fixp;
-     long val;
+md_apply_fix3 (fixP, valP, seg)
+     fixS *fixP;
+     valueT * valP;
+     segT seg ATTRIBUTE_UNUSED;
 {
+  long value = * (long *) valP;
   char *buf;
 
-  buf = fixp->fx_frag->fr_literal + fixp->fx_where;
-  fixp->fx_offset = 0;
+  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+  fixP->fx_offset = 0;
 
-  switch (fixp->fx_r_type)
+  switch (fixP->fx_r_type)
     {
     case RELOC_IW16:
-      fixp->fx_offset = val >> 16;
+      fixP->fx_offset = val >> 16;
       buf[2] = val >> 8;
       buf[3] = val;
       break;
 
     case RELOC_LO16:
-      fixp->fx_offset = val >> 16;
+      fixP->fx_offset = val >> 16;
       buf[0] = val >> 8;
       buf[1] = val;
       break;
 
     case RELOC_HI16:
-      fixp->fx_offset = val >> 16;
+      fixP->fx_offset = val >> 16;
       buf[0] = val >> 8;
       buf[1] = val;
       break;
@@ -1168,6 +1170,9 @@ md_apply_fix (fixp, val)
     default:
       abort ();
     }
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 }
 
 /* Where a PC relative offset is calculated from.  On the m88k they
