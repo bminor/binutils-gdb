@@ -1,5 +1,13 @@
 Fri Apr 22 11:14:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* objdump.c: Include libiberty.h.
+	(display_target_list): If a format fails, just go on to the next
+	one.  Check return value of bfd_set_format.
+	(display_info_table): Likewise.  Don't increment loop variable in
+	for loop test, since that skips the first element.
+	(display_target_tables): Rewrite loop for clarity.  Ensure that it
+	always prints at least one element.
+
 	* nlmconv.c (main): Use CyGnUsEx rather than CyGnUsSeCs for
 	sections header.  Rename from cygnus_sections to cygnus_ext.
 
