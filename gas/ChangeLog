@@ -87,12 +87,12 @@ Mon Feb  1 12:24:58 1999  Catherine Moore  <clm@cygnus.com>
 	* config/obj-coff.h (obj_adjust_symtab): Prevent accidental
 	redefinition of this macro.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 1999-01-06  Doug Evans  <devans@casey.cygnus.com>
 
 	* config/tc-m32r.c (OPERAND_IS_COND_BIT): Add check for psw.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue Jan  5 21:58:03 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-mips.c (mips_frob_file): Disable "Unmatched %hi reloc"
@@ -1966,11 +1966,11 @@ Thu May  7 02:19:14 1998  Doug Evans  <devans@charmed.cygnus.com>
 	All callers updated.
 	* config/tc-m32r.c: Include cgen.h.
 	(m23r_insn): New members num_fixups,fixups.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	(assemble_parallel_insn): Initialize debug_sym_link for each insn.
 	(md_assemble): Simplify code to pack two insns in parallel.
 	When swapping two insns, update their fixups.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 start-sanitize-sky
 Wed May  6 16:26:57 1998  Doug Evans  <devans@canuck.cygnus.com>
@@ -2084,13 +2084,13 @@ Mon Apr 27 15:58:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 Mon Apr 27 12:07:33 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c (cgen_asm_finish_insn): New arg relax_p.  All callers updated.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* config/tc-m32r.c (assemble_parallel_insn): No need to try
 	non-relaxable variant any more.  Simplify test for nop insn.
 	(md_assemble): Only scan operands if m32rx.  Set orig_insn in case
 	scan of operands yields an insn different from original (e.g. a macro).
 	Fix call to can_make_parallel.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 Mon Apr 27 15:16:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2779,7 +2779,7 @@ Fri Feb 27 10:06:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 	inserted binary files.
 
 end-sanitize-sky
-start-sanitize-phase2-m32rx
+start-sanitize-cygnus
 Wed Feb 25 11:43:45 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (optimize): New static local.
@@ -2788,13 +2788,13 @@ Wed Feb 25 11:43:45 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(md_show_usage): Document it.
 	(md_assemble): Don't try to combine insns in parallel if !optimize.
 
-end-sanitize-phase2-m32rx
-start-sanitize-m32rx
+end-sanitize-cygnus
+start-sanitize-cygnus
 Tue Feb 24 18:03:25 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (first_writes_to_seconds_operands):
 	Reinitialise b_operands for each pass of the inner loop.
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Tue Feb 24 11:01:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -2912,13 +2912,13 @@ Wed Feb 18 23:39:46 1998  Richard Henderson  <rth@cygnus.com>
 	* Makefile.am (install-exec-local): Install properly when ln
 	fails or tooldir == prefix.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Wed Feb 18 18:11:42 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (first_writes_to_seconds_operands): Special
 	handling of updates to the condition bit as this is shadow by
 	several registers.
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Wed Feb 18 15:49:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -2929,7 +2929,7 @@ Wed Feb 18 15:49:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 	handler.
 
 end-sanitize-sky
-start-sanitize-m32rx
+start-sanitize-cygnus
 Wed Feb 18 14:30:26 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-m32r.texi (M32R-Opts): Add --Wp and --Wnp.
@@ -2946,13 +2946,13 @@ Wed Feb 18 11:00:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* app.c: Parse || as a seperator between assembler statements.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue Feb 17 18:58:51 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c (cgen_md_apply_fix3): Delete call to validate_operand.
 	Test result of insert_operand for error.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Feb 16 12:28:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_assemble): Only parallelise instructions
@@ -2964,7 +2964,7 @@ Fri Feb 13 14:42:16 1998  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-m32r.c (first_writes_to_seconds_operands): Do not
 	bother checking insn which have no operands.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Fri Feb 13 16:41:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Add cygnus.
@@ -2972,7 +2972,7 @@ Fri Feb 13 16:41:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* doc/Makefile.am (AUTOMAKE_OPTIONS): Define.
 	* doc/Makefile.in: Rebuild.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Fri Feb 13 09:57:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (first_writes_to_seconds_operands): New
@@ -2980,7 +2980,7 @@ Fri Feb 13 09:57:11 1998  Nick Clifton  <nickc@cygnus.com>
 	reads_from_src_reg().  Uses new insn operand features of cgen.
 	(writes_to_pc): New function., but with new code suppressed for now.
 	(md_assemble): Call first_writes_to_seconds_operands().
-end-sanitize-m32rx
+end-sanitize-cygnus
 Fri Feb 13 00:47:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Handle operand type 'C'.
@@ -3032,7 +3032,7 @@ Wed Feb 11 16:28:13 1998  Richard Henderson  <rth@cygnus.com>
 	* read.c (s_fill): Handle non-constant repeat counts by creating
 	an rs_space fragment.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Wed Feb 11 10:32:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-m32r.texi: Document warning and error messages.  Add
@@ -3040,7 +3040,7 @@ Wed Feb 11 10:32:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/as.texinfo: Add more m32rx command line options.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Tue Feb 10 18:31:31 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Change error added Jan 2 1998
@@ -3077,14 +3077,14 @@ Tue Feb 10 14:43:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* app.c (do_scrub_begin): Treat \r as whitespace.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Feb  9 16:23:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (get_src_reg): Use m32r_cgen_get_operand()
 	rather than parsing syntax string manually.
 	(assemble_parallel_insn): Check for both forms of parallel
 	conflict. 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Mon Feb  9 14:16:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Update dependencies.
@@ -3234,13 +3234,13 @@ Fri Jan 30 11:47:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/vms-conf.h: Don't undef VERSION.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Thu Jan 29 13:36:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (allow_m32rx): Must compile with K&R C.
 	(m32rx support): only include #ifdef HAVE_CPU_M32RX.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Thu Jan 29 14:42:44 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 	* Makefile.am (CONFIG_OBJS): New variable, containing part of old
@@ -3265,13 +3265,13 @@ Thu Jan 29 18:48:19 1998  Bill Moyer  <billm@cygnus.com>
 	* config/tc-d30v.c (do_assemble): Added flag_explicitly_parallel.
 	(parallel_ok): Relaxed parallel subinstruction dependency check.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Wed Jan 28 16:27:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_assemble): Fix determination of when
 	instructions can be combined in parallel.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Wed Jan 28 14:35:00 1998  Bill Moyer <billm@cygnus.com>
 
 	* as.h (flag_warn_suppress_instructionswap): added new flag.
@@ -3367,7 +3367,7 @@ Mon Jan 26 13:07:41 1998  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-m32r.c: Detect if explicitly parallel instructions
 	might have an io conflict and issue a warning message. 
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Jan 26 12:38:54 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (reads_from_src_reg): Change second parameter
@@ -3375,13 +3375,13 @@ Mon Jan 26 12:38:54 1998  Nick Clifton  <nickc@cygnus.com>
 	(can_make_parallel): Pass count of number of matches to skip to
 	reads_from_src_reg().
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Thu Jan 22 17:51:44 1998  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* config/tc-m32r.c: Add support for swapping fixups of swap
 	instructions. 
-end-sanitize-m32rx
+end-sanitize-cygnus
 	* cgen.c (cgen_save_fixups, cgen_restore_fixups,
 	cgen_swap_fixups): Functions to save, restore and swap the fixup
 	chain with a backup copy.
@@ -3398,7 +3398,7 @@ Wed Jan 21 16:49:10 1998  Richard Henderson  <rth@cygnus.com>
 	(listing_listing): Likewise.
 	(listing_print): Close the file in the cache, if any.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Tue Jan 20 17:08:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_assemble): Add code to swap explicitly
@@ -3407,7 +3407,7 @@ Tue Jan 20 17:08:53 1998  Nick Clifton  <nickc@cygnus.com>
 	make_parallel): New functions to support opportunistic
 	parallelisation of adjacent instructions.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Fri Jan 16 14:51:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (dwarf_file_string): New file static variable.
@@ -3435,10 +3435,10 @@ Thu Jan 15 13:46:48 1998  Richard Henderson  <rth@cygnus.com>
 
 Wed Jan 14 17:52:33 1998  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* config/tc-m32r.c (md_assemble): Add support for parsing parallel
 	instructions.
-end-sanitize-m32rx
+end-sanitize-cygnus
 	* cgen.c: Formatting changes to improve readability.
 
 Wed Jan 14 15:41:41 1998  Jeffrey A Law  (law@cygnus.com)
