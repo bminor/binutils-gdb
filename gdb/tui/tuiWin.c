@@ -46,6 +46,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <readline/readline.h>
 #include "defs.h"
 #include "command.h"
 #include "symtab.h"
@@ -417,8 +418,9 @@ void
 tui_update_gdb_sizes ()
 {
   char cmd[50];
-  extern int screenheight, screenwidth;		/* in readline */
+  int screenheight, screenwidth;
 
+  rl_get_screen_size (&screenheight, &screenwidth);
   /* Set to TUI command window dimension or use readline values.  */
   sprintf (cmd, "set width %d",
            tui_active ? cmdWin->generic.width : screenwidth);
@@ -634,8 +636,9 @@ void
 tuiResizeAll (void)
 {
   int heightDiff, widthDiff;
-  extern int screenheight, screenwidth;		/* in readline */
+  int screenheight, screenwidth;
 
+  rl_get_screen_size (&screenheight, &screenwidth);
   widthDiff = screenwidth - termWidth ();
   heightDiff = screenheight - termHeight ();
   if (heightDiff || widthDiff)

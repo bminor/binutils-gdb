@@ -614,10 +614,6 @@ enum lval_type
 
 struct frame_info;
 
-/* From readline (but not in any readline .h files).  */
-
-extern char *tilde_expand (char *);
-
 /* Control types for commands */
 
 enum misc_command_type

@@ -1,3 +1,11 @@
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
+       Import of readline 4.3.
+       Fix PR gdb/675
+       * tuiWin.c: Include readline/readline.h.
+       (tui_update_gdb_sizes): Use accessor function rl_get_screen_size.
+       (tuiResizeAll): Ditto.
+
 2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tuiStack.c (tuiShowFrameInfo): Fix typo.

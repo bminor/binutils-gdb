@@ -1,5 +1,13 @@
 2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
 
+        Import of readline 4.3:
+        * cli/cli-cmds.c: Include readline/tilde.h.
+        * cli/cli-setshow.c: Ditto.
+        * defs.h: Don't declare tilde_expand anymore, since readline
+        exports it.
+
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
 	* Makefile.in (thread-db.o): Add explicit rule to ignore the use of
 	-Werror on this file.
 
