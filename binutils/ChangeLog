@@ -1,3 +1,7 @@
+2003-07-05  Christopher Faylor  <cgf@redhat.com>
+
+	* dlltool.c (prefix_encode): Use a fixed length for alpha.
+
 2003-07-04  Christopher Faylor  <cgf@redhat.com>
 
 	* dlltool.c (prefix_encode): New function.  Encode temp file prefix

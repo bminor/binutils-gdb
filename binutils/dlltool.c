@@ -753,7 +753,7 @@ static void inform
 static char *
 prefix_encode PARAMS ((char *start, unsigned code))
 {
-  static char alpha[] = "abcdefghijklmnopqrstuvwxyz";
+  static char alpha[26] = "abcdefghijklmnopqrstuvwxyz";
   static char buf[32];
   char *p;
   strcpy (buf, start);
