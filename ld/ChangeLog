@@ -1,3 +1,14 @@
+Fri Apr  3 00:56:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo: Completely rewrite linker script documentation.
+
+Mon Mar 30 12:47:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set version to 2.9.1.
+	* configure: Rebuild.
+
+	* Branched binutils 2.9.
+
 Sat Mar 28 16:48:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (MOSTLYCLEANFILES): Remove tmpdir.
