@@ -109,16 +109,20 @@ AC_MSG_RESULT($gdb_cv_hpux_sswide)
 # Also detect which type of /proc is in use, such as for Unixware.
 
 if test "${target}" = "${host}"; then
+  gdb_cv_hostos_is_solaris=no
   case "${host}" in
   i[[3456]]86-*-linux*)
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
+  *-*-solaris*)
+	gdb_cv_hostos_is_solaris=yes ;;
   esac
   AC_MSG_CHECKING(for directory proc entries)
 # The [gdb_host != sun4sol2] hack is because Solaris does provide the
 # multiple procfs files as of Solaris 2.6, but GDB can't use it right now.
-  if test "$ac_cv_header_sys_procfs_h" = yes -a "$gdb_host" != sun4sol2 \
+  if test "$ac_cv_header_sys_procfs_h" = yes -a \
+          "$gdb_cv_hostos_is_solaris" = no \
   -a -d /proc/$$ \
   -a -f /proc/$$/ctl \
   -a -f /proc/$$/as \

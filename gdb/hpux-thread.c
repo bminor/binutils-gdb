@@ -620,7 +620,7 @@ init_hpux_thread_ops ()
   hpux_thread_ops.to_mourn_inferior = hpux_thread_mourn_inferior;
   hpux_thread_ops.to_can_run = hpux_thread_can_run;
   hpux_thread_ops.to_notice_signals = hpux_thread_notice_signals;
-  hpux_thread_ops.to_thread_alive = hpux_thread_thread_alive;
+  hpux_thread_ops.to_thread_alive = hpux_thread_alive;
   hpux_thread_ops.to_stop = hpux_thread_stop;
   hpux_thread_ops.to_stratum = process_stratum;
   hpux_thread_ops.to_has_all_memory = 1;

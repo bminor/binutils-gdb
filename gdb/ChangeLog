@@ -1,3 +1,15 @@
+1999-04-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Fix from Dave Holcomb.
+	* hpux-thread.c (init_hpux_thread_ops): Use the right function
+	name when initializing hpux_thread_ops.to_thread_alive.
+
+1999-04-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * configure.in (HAVE_MULTIPLE_PROC_FDS): Don't define if we're
+        on a Solaris host (of any architecture).
+        * configure: Regenerated.
+
 1999-04-07  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* GDB 4.18 released.
