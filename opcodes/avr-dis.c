@@ -26,7 +26,6 @@ typedef unsigned short u16;
 typedef unsigned long u32;
 
 #define IFMASK(a,b)     ((opcode & (a)) == (b))
-#define CODE_MAX        65537
 
 static char* SREG_flags = "CZNVSHTI";
 static char* sect94[] = {"COM","NEG","SWAP","INC","NULL","ASR","LSR","ROR",
@@ -38,8 +37,8 @@ static char* branchs[] = {
   "BRCC","BRNE","BRPL","BRVC",
   "BRGE","BRHC","BRTC","BRID"
 };
-static char* last4[] = {"BLD","BST","SBRC","SBRS"};
 
+static char* last4[] = {"BLD","BST","SBRC","SBRS"};
 
 
 static void dispLDD PARAMS ((u16, char *));
@@ -147,8 +146,8 @@ add0fff (op, dest, pc)
      char *dest;
      int pc;
 {
-  int opcode = op & 0x0fff;
-  sprintf(dest, ".%+-8d ; 0x%06X", opcode * 2, pc + 2 + opcode * 2);
+  int rel_addr = (((op & 0xfff) ^ 0x800) - 0x800) * 2;
+  sprintf(dest, ".%+-8d ; 0x%06X", rel_addr, pc + 2 + rel_addr);
 }
 
 
@@ -160,8 +159,8 @@ add03f8 (op, dest, pc)
      char *dest;
      int pc;
 {
-  int opcode = (op >> 3) & 0x7f;
-  sprintf(dest, ".%+-8d ; 0x%06X", opcode * 2, pc + 2 + opcode * 2);
+  int rel_addr = ((((op >> 3) & 0x7f) ^ 0x40) - 0x40) * 2;
+  sprintf(dest, ".%+-8d ; 0x%06X", rel_addr, pc + 2 + rel_addr);
 }
 
 
@@ -331,49 +330,31 @@ print_insn_avr(addr, info)
 		      }
 		      break;
 		    case 0x1:
-		      {
-			(*prin) (stream, "    LD      %s,Z+", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,Z+", rd);
 		      break;
 		    case 0x2:
-		      {
-			(*prin) (stream, "    LD      %s,-Z", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,-Z", rd);
 		      break;
 		    case 0x9:
-		      {
-			(*prin) (stream, "    LD      %s,Y+", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,Y+", rd);
 		      break;
 		    case 0xa:
-		      {
-			(*prin) (stream, "    LD      %s,-Y", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,-Y", rd);
 		      break;
 		    case 0xc:
-		      {
-			(*prin) (stream, "    LD      %s,X", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,X", rd);
 		      break;
 		    case 0xd:
-		      {
-			(*prin) (stream, "    LD      %s,X+", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,X+", rd);
 		      break;
 		    case 0xe:
-		      {
-			(*prin) (stream, "    LD      %s,-X", rd);
-		      }
+		      (*prin) (stream, "    LD      %s,-X", rd);
 		      break;
 		    case 0xf:
-		      {
-			(*prin) (stream, "    POP     %s", rd);
-		      }
+		      (*prin) (stream, "    POP     %s", rd);
 		      break;
 		    default:
-		      {
-			(*prin) (stream, "    ????");
-		      }
+		      (*prin) (stream, "    ????");
 		      break;
 		    }
 		}
@@ -391,49 +372,31 @@ print_insn_avr(addr, info)
 		      }
 		      break;
 		    case 0x1:
-		      {
-			(*prin) (stream, "    ST      Z+,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      Z+,%s", rd);
 		      break;
 		    case 0x2:
-		      {
-			(*prin) (stream, "    ST      -Z,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      -Z,%s", rd);
 		      break;
 		    case 0x9:
-		      {
-			(*prin) (stream, "    ST      Y+,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      Y+,%s", rd);
 		      break;
 		    case 0xa:
-		      {
-			(*prin) (stream, "    ST      -Y,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      -Y,%s", rd);
 		      break;
 		    case 0xc:
-		      {
-			(*prin) (stream, "    ST      X,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      X,%s", rd);
 		      break;
 		    case 0xd:
-		      {
-			(*prin) (stream, "    ST      X+,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      X+,%s", rd);
 		      break;
 		    case 0xe:
-		      {
-			(*prin) (stream, "    ST      -X,%s", rd);
-		      }
+		      (*prin) (stream, "    ST      -X,%s", rd);
 		      break;
 		    case 0xf:
-		      {
-			(*prin) (stream, "    PUSH    %s", rd);
-		      }
+		      (*prin) (stream, "    PUSH    %s", rd);
 		      break;
 		    default:
-		      {
-			(*prin) (stream, "    ????");
-		      }
+		      (*prin) (stream, "    ????");
 		      break;
 		    }
 		}
