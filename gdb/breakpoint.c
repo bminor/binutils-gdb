@@ -1,8 +1,8 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -243,16 +243,6 @@ static int overlay_events_enabled;
 	for (B = bp_location_chain;	\
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
-
-/* True if SHIFT_INST_REGS defined, false otherwise.  */
-
-int must_shift_inst_regs =
-#if defined(SHIFT_INST_REGS)
-1
-#else
-0
-#endif
- ;
 
 /* True if breakpoint hit counts should be displayed in breakpoint info.  */
 
@@ -2622,7 +2612,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
     if (b->type == bp_hardware_breakpoint)
       {
-	if (b->loc->address != (*pc - DECR_PC_AFTER_HW_BREAK))
+	if (b->loc->address != *pc)
 	  continue;
 	if (overlay_debugging		/* unmapped overlay section */
 	    && section_is_overlay (b->loc->section) 
@@ -2882,24 +2872,12 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
   if (real_breakpoint && bs)
     {
-      if (bs->breakpoint_at->type == bp_hardware_breakpoint)
+      if (bs->breakpoint_at->type != bp_hardware_breakpoint)
 	{
-	  if (DECR_PC_AFTER_HW_BREAK != 0)
-	    {
-	      *pc = *pc - DECR_PC_AFTER_HW_BREAK;
-	      write_pc (*pc);
-	    }
-	}
-      else
-	{
-	  if (DECR_PC_AFTER_BREAK != 0 || must_shift_inst_regs)
+	  if (DECR_PC_AFTER_BREAK != 0)
 	    {
 	      *pc = bp_addr;
-#if defined (SHIFT_INST_REGS)
-	      SHIFT_INST_REGS ();
-#else /* No SHIFT_INST_REGS.  */
 	      write_pc (bp_addr);
-#endif /* No SHIFT_INST_REGS.  */
 	    }
 	}
     }

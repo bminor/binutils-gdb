@@ -2943,17 +2943,6 @@ keep_going (struct execution_control_state *ecs)
       if (stop_signal == TARGET_SIGNAL_TRAP && !signal_program[stop_signal])
 	stop_signal = TARGET_SIGNAL_0;
 
-#ifdef SHIFT_INST_REGS
-      /* I'm not sure when this following segment applies.  I do know,
-         now, that we shouldn't rewrite the regs when we were stopped
-         by a random signal from the inferior process.  */
-      /* FIXME: Shouldn't this be based on the valid bit of the SXIP?
-         (this is only used on the 88k).  */
-
-      if (!bpstat_explains_signal (stop_bpstat)
-	  && (stop_signal != TARGET_SIGNAL_CHLD) && !stopped_by_random_signal)
-	SHIFT_INST_REGS ();
-#endif /* SHIFT_INST_REGS */
 
       resume (currently_stepping (ecs), stop_signal);
     }

@@ -1,3 +1,14 @@
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (must_shift_inst_regs): Delete.
+	(bpstat_stop_status): Delete references to DECR_PC_AFTER_HW_BREAK
+	and SHIFT_INST_REGS.
+	* infcmd.c (step_1, step_1_continuation): Delete references to
+	SHIFT_INST_REGS.
+	* infrun.c (keep_going): Likewise.
+	* target.h (DECR_PC_AFTER_HW_BREAK): Don't define.
+	* config/i386/nm-i386.h (DECR_PC_AFTER_HW_BREAK): Likewise.
+
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Delete.
