@@ -191,6 +191,7 @@ rs6000-pinsn.c
 rs6000-tdep.c
 saber.suppress
 ser-go32.c
+ser-tcp.c
 ser-unix.c
 serial.c
 serial.h
