@@ -60,6 +60,8 @@ config/tc-dlx.c
 config/tc-dlx.h
 config/tc-fr30.c
 config/tc-fr30.h
+config/tc-frv.c
+config/tc-frv.h
 config/tc-h8300.c
 config/tc-h8300.h
 config/tc-h8500.c

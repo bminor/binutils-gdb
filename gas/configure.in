@@ -217,6 +217,7 @@ changequote([,])dnl
 
 
       fr30-*-*)		    fmt=elf bfd_gas=yes ;;
+      frv-*-*)		    fmt=elf bfd_gas=yes ;;
 
       hppa-*-linux-gnu*)    case ${cpu} in
 				hppa*64*)
@@ -574,6 +575,9 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
 
+      frv)
+	using_cgen=yes
+	;;
       m68k)
 	case ${extra_objects} in
 	*m68k-parse.o*) ;;

@@ -1,3 +1,20 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	From Catherine Moore, Michael Meissner, Richard Sandiford, Dave Brolley:
+	* po/POTFILES.in: Add tc-frv.c, tc-frv.h.
+	* configure.in: Support frv-*-*.
+	* Makefile.am (CPU_TYPES): Add frv.
+	(TARGET_CPU_CFILES): Add tc-frv.c.
+	(TARGET_CPU_HFILES): Add tc-frv.h.
+	(DEPTC_frv_coff): New variable.
+	(DEPTC_frv_elf): New variable.
+	(DEPOBJ_frv_coff): New variable.
+	(DEPOBJ_frv_elf): New variable.
+	(DEP_frv_coff): New variable.
+	(DEP_frv_elf): New variable.
+	* tc-frv.c: New file.
+	* tc-frv.h: New file.
+
 2002-06-17  Catherine Moore <clm@redhat.com>
 
         * config/obj-elf.h (TARGET_SYMBOL_FIELDS): Conditionally define.
