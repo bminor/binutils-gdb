@@ -3441,5 +3441,5 @@ sparc_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file, "sparc_dump_tdep: call_dummy_call_offset = %d\n",
 		      tdep->call_dummy_call_offset);
   fprintf_unfiltered (file, "sparc_dump_tdep: print_insn_match = %d\n",
-		      tdep->print_insn_match);
+		      tdep->print_insn_mach);
 }
