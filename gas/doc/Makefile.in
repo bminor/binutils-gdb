@@ -78,13 +78,13 @@ install:
 info: as.info gasp.info
 dvi: as.dvi gasp.dvi
 
-asdoc-config.texi: $(CONFIG).texi
-	rm -f asdoc-config.texi
-	ln -s $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
-	ln $(srcdir)/$(CONFIG).texi ./asdoc-config.texi || \
-	cp $(srcdir)/$(CONFIG).texi ./asdoc-config.texi
+asconfig.texi: $(CONFIG).texi
+	rm -f asconfig.texi
+	ln -s $(srcdir)/$(CONFIG).texi ./asconfig.texi || \
+	ln $(srcdir)/$(CONFIG).texi ./asconfig.texi || \
+	cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
 
-as.info: $(srcdir)/as.texinfo asdoc-config.texi
+as.info: $(srcdir)/as.texinfo asconfig.texi
 	$(MAKEINFO) -I$(TEXIDIR) -o as.info $(srcdir)/as.texinfo
 
 gasp.info: $(srcdir)/gasp.texi
@@ -97,8 +97,8 @@ install-info-as: as.info
 	else \
 	  dir=$(srcdir) ; \
 	fi ; \
-	for i in $$dir/as.info* ; do \
-		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+	for i in `cd $$dir ; echo as.info*` ; do \
+		$(INSTALL_DATA) $$dir/$$i $(infodir)/$$i ; \
 	done
 install-info-gasp: gasp.info
 	if [ -r gasp.info ]; then \
@@ -106,11 +106,11 @@ install-info-gasp: gasp.info
 	else \
 	  dir=$(srcdir) ; \
 	fi ; \
-	for i in $$dir/gasp.info* ; do \
+	for i in `cd $$dir ; echo gasp.info*` ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
-as.dvi:	$(srcdir)/as.texinfo asdoc-config.texi
+as.dvi:	$(srcdir)/as.texinfo asconfig.texi
 	$(TEXI2DVI) $(srcdir)/as.texinfo
 
 gasp.dvi: $(srcdir)/gasp.texi
@@ -121,7 +121,7 @@ gasp.dvi: $(srcdir)/gasp.texi
 # a var in the target name right).
 # roff output (-ms)
 # THESE ARE PROBABLY BROKEN until texi2roff extended for Texinfo conditionals
-as.ms: $(srcdir)/as.texinfo asdoc-config.texi
+as.ms: $(srcdir)/as.texinfo asconfig.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
@@ -129,7 +129,7 @@ as.ms: $(srcdir)/as.texinfo asdoc-config.texi
 	texi2roff -ms >as.ms 
 
 # roff output (-mm)
-as.mm: $(srcdir)/as.texinfo asdoc-config.texi
+as.mm: $(srcdir)/as.texinfo asconfig.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
@@ -140,7 +140,7 @@ as.mm: $(srcdir)/as.texinfo asdoc-config.texi
 	>as.mm 
 
 # roff output (-me)
-as.me: $(srcdir)/as.texinfo asdoc-config.texi
+as.me: $(srcdir)/as.texinfo asconfig.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
