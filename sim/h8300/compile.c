@@ -1134,20 +1134,20 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 		  op;\
 		    if(s) store(&code->dst,ea); goto next;\
 		    }
-      OBITOP(O_BNOT,1,1,ea ^= m);
-      OBITOP(O_BTST,1,0,nz = ea & m);
+      OBITOP(O_BNOT,1,1,ea ^= m); /*FIXME: m can come from reg*/
+      OBITOP(O_BTST,1,0,nz = ea & m); /*FIXME: m can come from reg*/
       OBITOP(O_BLD,1,0, c = ea & m);
       OBITOP(O_BILD,1,0, c = !(ea & m));
       OBITOP(O_BST,1,1, ea &= ~m; if (C) ea |=m);
       OBITOP(O_BIST,1,1, ea &= ~m; if (!C) ea |=m);	  
-      OBITOP(O_BAND,1,1, b = (ea & m) && C; ea &= ~m; if (b) ea |=m);
-      OBITOP(O_BIAND,1,1, b = (ea & m) && C; ea &= ~m; if (!b) ea |=m);
-      OBITOP(O_BOR,1,1, b = (ea & m) || C; ea &= ~m; if (b) ea |=m);
-      OBITOP(O_BIOR,1,1, b = (ea & m) || C; ea &= ~m; if (!b) ea |=m);
-      OBITOP(O_BXOR,1,1, b = (ea & m) != C; ea &= ~m; if (b) ea |=m);
-      OBITOP(O_BIXOR,1,1, b = (ea & m) != C; ea &= ~m; if (!b) ea |=m);
-      OBITOP(O_BCLR,1,1, ea &= ~m; );
-      OBITOP(O_BSET,1,1, ea |= m; );
+      OBITOP(O_BAND,1,0, c = (ea & m) && C);
+      OBITOP(O_BIAND,1,0, c = !(ea & m) && C);
+      OBITOP(O_BOR,1,0, c = (ea & m) || C);
+      OBITOP(O_BIOR,1,0, c = !(ea & m) || C);
+      OBITOP(O_BXOR,1,0, c = (ea & m) != C);
+      OBITOP(O_BIXOR,1,0, c = !(ea & m) != C);
+      OBITOP(O_BCLR,1,1, ea &= ~m); /*FIXME: m can come from reg*/
+      OBITOP(O_BSET,1,1, ea |= m); /*FIXME: m can come from reg*/
 
 
 #define MOP(bsize, signed)	  						\
