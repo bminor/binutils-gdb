@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2002 Free Software Foundation, Inc.
+#   Copyright 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -101,7 +101,20 @@ ppc_before_allocation ()
       return;
     }
 
+  /* Size the sections.  This is premature, but we want to know the
+     TLS segment layout so that certain optimizations can be done.  */
+  lang_size_sections (stat_ptr->head, abs_output_section,
+		      &stat_ptr->head, 0, (bfd_vma) 0, NULL);
+
+  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+    {
+      einfo ("%X%P: TLS problem %E\n");
+      return;
+    }
+
   gld${EMULATION_NAME}_before_allocation ();
+
+  lang_reset_memory_regions ();
 }
 
 struct hook_stub_info

@@ -1,3 +1,8 @@
+2003-02-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (ppc_before_allocation): Size sections then
+	call ppc64_elf_tls_optimize.
+
 2003-02-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* emultempl/elf32.em: Move gld${EMULATION_NAME}_add_sysroot
