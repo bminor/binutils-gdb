@@ -41,8 +41,11 @@ keymaps.c
 keymaps.h
 readline.c
 readline.h
-sysdep-norm.h
 sysdep-aix.h
+sysdep-irix.h
+sysdep-newsos.h
+sysdep-norm.h
+sysdep-sco.h
 vi_keymap.c
 vi_mode.c
 

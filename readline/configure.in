@@ -14,7 +14,7 @@ files=sysdep-norm.h
 links=sysdep.h
 
 case "${host_os}" in
-m88kbcs | sysv* | irix*)
+m88kbcs | sysv*)
 	host_makefile_frag=config/hm-sysv
 	;;
 
@@ -24,11 +24,21 @@ aix*)
 	rs6000)	files=sysdep-aix.h
 	esac
 	;;
+
+irix*)
+	host_makefile_frag=config/hm-sysv
+	files=sysdep-irix.h
+	;;
+
+newsos*)
+	files=sysdep-newsos.h
+	;;
 esac
 
 case "${host_vendor}" in
 sco* )
 	host_makefile_frag=config/hm-sco
+	files=sysdep-sco.h
 	;;
 esac
 
