@@ -1,3 +1,21 @@
+Wed Feb 10 18:31:20 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* findvar.c (read_var_value):  If REG_STRUCT_HAS_ADDR, then set
+	VALUE_LVAL to be lval_memory so that we don't try to modify wild
+	register numbers when user tries to modify elements in structs
+	passed as arguments.
+	* inflow.c (child_terminal_info):  Move banner outside of system
+	specific #ifdefs.
+	* tm-hppa.h (REG_STRUCT_HAS_ADDR):  Define this for HPPA, which
+	passes struct/union arguments by address.
+
+Wed Feb 10 15:34:46 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Based on patch from Martin Walker <maw@netcom.com>:
+	* nm-i386sco4.h: New file.  Like nm-i386sco.h, but define
+	ATTACH_DETACH, PTRACE_ATTACH and PTRACE_DETACH.
+	* config/i386sco4.mh (NAT_FILE): Use nm-i386sco4.h.
+
 Tue Feb  9 20:07:18 1993  John Gilmore  (gnu@cygnus.com)
 
 	* remote-udi.c (FREEZE_MODE):  Fix && for & typo.  Found and

@@ -41,6 +41,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define IEEE_FLOAT
 
+/* When passing a structure to a function, GCC passes the address
+   in a register, not the structure itself. */
+
+#define REG_STRUCT_HAS_ADDR(gcc_p) (1)
+
 /* Groan */
 
 #define	ARGS_GROW_DOWN
