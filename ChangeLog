@@ -1,4 +1,11 @@
+Fri Mar 13 18:44:18 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: add stmp dependencies for a few more things.
+
 Thu Mar 12 04:56:24 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure: adjusted error message on objdir/srcdir configure
+	  collision, per john's suggestion.
 
 	* Makefile.in: add libiberty stmp to all and all.cross.
 

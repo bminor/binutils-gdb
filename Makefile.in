@@ -111,12 +111,12 @@ install-dir.info:
 
 # clib send_pr
 #	all-libgcc
-all.normal: .stmp-texinfo .stmp-bison .stmp-byacc .stmp-ld \
-	.stmp-gas .stmp-gcc .stmp-binutils \
-	.stmp-libg++ .stmp-gdb .stmp-make .stmp-cvs .stmp-grep .stmp-patch .stmp-emacs \
-	.stmp-ispell .stmp-fileutils \
+all.normal: .stmp-libiberty .stmp-texinfo .stmp-bison .stmp-byacc
+	.stmp-bfd .stmp-ld .stmp-gas .stmp-gcc .stmp-binutils \
+	.stmp-libg++ .stmp-readline .stmp-gdb .stmp-make .stmp-cvs \
+	.stmp-grep .stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
 	.stmp-newlib 
-all.cross: .stmp-bison .stmp-ld .stmp-libgcc .stmp-gdb
+all.cross: .stmp-libiberty .stmp-gas .stmp-bison .stmp-ld .stmp-libgcc .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-stamps clean-libiberty clean-texinfo clean-bfd clean-newlib clean-binutils \
