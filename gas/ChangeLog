@@ -1,3 +1,8 @@
+2000-12-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* dwarf2dbg.c: If we don't have <limits.h>, try including <sys/param.h>
+	if we have it.
+
 2000-12-13  Kazu Hirata  <kazu@hxi.com>
 
 	* as.h: Fix formatting.
