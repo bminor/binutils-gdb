@@ -1,4 +1,7 @@
-Tue Apr 19 20:27:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+Wed Apr 20 18:46:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-sparc.c (md_section_align): Always round up to
+	multiple of alignment power specified in bfd target vector.
 
 	* gasp.c: Include ctype.h.
 
