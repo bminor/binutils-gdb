@@ -23,17 +23,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ARCH 32
 #define BYTES_IN_WORD 4
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "aout64.h"
-
-/**From: bothner@cs.wisc.edu***********************************************/
-#undef N_TXTOFF
-#define N_TXTOFF(x)   ( (N_MAGIC((x)) == ZMAGIC) ? PAGE_SIZE : EXEC_BYTES_SIZE)
-/**************************************************************************/
-
 #include "stab.gnu.h"
 #include "ar.h"
 #include "libaout.h"           /* BFD a.out internal data structures */
