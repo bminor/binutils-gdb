@@ -1,3 +1,10 @@
+Tue Jun 16 14:38:40 1998  Ron Unrau  (runrau@cygnus.com)
+
+	* dbxread.c: reset function_start_offset after a finishing N_FUN 
+	  is seen.
+	* remote-sim.c: allow TARGET_REDEFINE_DEFAULT_OPS to override
+	  target vectors as needed.
+
 Sun Jun 14 08:46:25 1998  Ron Unrau  (runrau@cygnus.com)
 
 	* partial-stab.h: 'F' and 'f' type N_FUN psymbols should pass

@@ -958,12 +958,17 @@ static void init_gdbsim_ops(void)
   gdbsim_ops.to_sections =   NULL;	
   gdbsim_ops.to_sections_end =   NULL;	
   gdbsim_ops.to_magic =   OPS_MAGIC;	
+
+#ifdef TARGET_REDEFINE_DEFAULT_OPS
+  TARGET_REDEFINE_DEFAULT_OPS (&gdbsim_ops);
+#endif
 }
 
 void
 _initialize_remote_sim ()
 {
   init_gdbsim_ops() ;
+
   add_target (&gdbsim_ops);
 
   add_com ("sim <command>", class_obscure, simulator_command,
