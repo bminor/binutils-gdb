@@ -1,3 +1,9 @@
+2002-11-06  Richard Henderson  <rth@redhat.com>
+
+        * config/tc-alpha.c (alpha_validate_fix): Move code ...
+        (alpha_fix_adjustable): ... here.
+        * config/tc-alpha.h (TC_VALIDATE_FIX): Remove.
+
 2002-11-05  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-mips.c (support_64bit_objects): Check *l before it
