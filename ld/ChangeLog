@@ -1,5 +1,7 @@
 2001-08-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em (output_prev_sec_find): Add missing prototype.
+
 	* scripttempl/elf.sc: Move non-text .dynamic section before
 	.plt/.got/.sdata* group.
 	(OTHER_GOT_SECTIONS): Move to immediately after .got.

@@ -71,6 +71,8 @@ static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static boolean gld${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
 static lang_output_section_statement_type *output_rel_find PARAMS ((void));
+static asection *output_prev_sec_find
+  PARAMS ((lang_output_section_statement_type *));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
