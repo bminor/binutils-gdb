@@ -1,5 +1,11 @@
 2005-01-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* bsd-uthread.h: New file.
+	* bsd-uthread.c: New file.
+	* Makefile.in (bsd_uthread_h): New variable.
+	(ALLDEPFILES): Add bsd-uthread.c.
+	(bsd-uthread.o): New dependency.
+
 	* solib.h Update copyright year.
 	(struct so_list): Forward declaration.
 	(solib_read_symbols): New prototype.
