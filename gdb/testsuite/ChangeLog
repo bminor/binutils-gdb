@@ -1,3 +1,8 @@
+2003-11-19  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/callfuncs.exp: Change the XFAILed descriptor test to a
+	KFAIL.
+
 2003-11-17  Mark Kettenis  <kettenis@gnu.org>
 
 	New testcase for PR backtrace/1435.
