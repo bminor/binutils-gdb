@@ -10,7 +10,7 @@ Mon Nov 15 14:32:29 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 	download to target.
 	* h8300-tdep.c, h8500-tdep.c, remote-z8k.c, sh-tdep.c z8k-tdep.c
 	(sim_load): delete.
-	* remote-sim.c (gr_sim_load): Use gd_load_image, rather than
+	* remote-sim.c (gdbsim_load): Use gr_load_image, rather than
 	sim_load.
 	* config/sh/sh.mt: Add remote-e7000
 
