@@ -1641,11 +1641,6 @@ process_coff_symbol (struct coff_symbol *cs,
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
 		  concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
 	    }
-#ifdef CXUX_TARGET
-	  /* Ignore vendor section for Harris CX/UX targets. */
-	  else if (cs->c_name[0] == '$')
-	    break;
-#endif /* CXUX_TARGET */
 
 	  /* Keep track of any type which points to empty structured type,
 	     so it can be filled from a definition from another file.  A
@@ -1797,15 +1792,6 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
     case T_NULL:
       /* shows up with "void (*foo)();" structure members */
       return lookup_fundamental_type (current_objfile, FT_VOID);
-
-#if 0
-/* DGUX actually defines both T_ARG and T_VOID to the same value.  */
-#ifdef T_ARG
-    case T_ARG:
-      /* Shows up in DGUX, I think.  Not sure where.  */
-      return lookup_fundamental_type (current_objfile, FT_VOID);	/* shouldn't show up here */
-#endif
-#endif /* 0 */
 
 #ifdef T_VOID
     case T_VOID:
