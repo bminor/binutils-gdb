@@ -1,7 +1,12 @@
 Thu Apr 10 14:35:00 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen.h (<cpu>_cgen_assemble_insn): New arg for errmsg.
-	(cgen_asm_parse_operand_fn): Declare.
+	(cgen_parse_operand_fn): Declare.
+	(cgen_init_parse_operand): Declare.
+	(cgen_parse_operand): Renamed from cgen_asm_parse_operand,
+	new argument `want'.
+	(enum cgen_parse_operand_result): Renamed from cgen_asm_result.
+	(enum cgen_parse_operand_type): New enum.
 
 Sat Apr  5 13:14:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
