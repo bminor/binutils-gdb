@@ -1,3 +1,11 @@
+2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/weakref1.d, ld-cris/libdso-1.d, ld-cris/gotrel2.s,
+	ld-cris/expdyn1.d, ld-cris/expdyn1.s, ld-cris/dso-1.s: New tests.
+	* ld-cris/cris.exp: Split run_dump_tests in two parts, executing
+	tests named *dso-*.d first and copying their tmpdir/dump to files
+	named as the .d-file.
+
 2002-01-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/crossref.exp: Allow foo to have a leading dot.
