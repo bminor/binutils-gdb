@@ -1,4 +1,37 @@
 2000-12-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* defs.h, utils.c (xfree): New function.
+	* alpha-tdep.c, altos-xdep.c, arch-utils.c, arm-xdep.c,
+	ax-general.c, bcache.c, blockframe.c, breakpoint.c,
+	buildsym.c, c-typeprint.c, coffread.c, completer.c,
+	convex-tdep.c, convex-xdep.c, corefile.c, corelow.c,
+	cp-valprint.c, cxux-nat.c, d10v-tdep.c, d30v-tdep.c,
+	dbxread.c, dcache.c, defs.h, demangle.c, dstread.c,
+	dve3900-rom.c, dwarf2read.c, dwarfread.c, elfread.c,
+	environ.c, event-loop.c, event-top.c, exec.c, f-lang.c,
+	gdb-events.c, gdbarch.c, gdbtypes.c, gnu-nat.c, h8500-tdep.c,
+	hp-psymtab-read.c, hppah-nat.c, infcmd.c, inflow.c, infrun.c,
+	infttrace.c, irix5-nat.c, jv-typeprint.c, kod-cisco.c, kod.c,
+	language.c, lin-lwp.c, lin-thread.c, linespec.c,
+	linux-thread.c, main.c, maint.c, mdebugread.c, minsyms.c,
+	mips-tdep.c, monitor.c, nlmread.c, objfiles.c, osfsolib.c,
+	p-valprint.c, pa64solib.c, parse.c, printcmd.c,
+	proc-service.c, procfs.c, pyr-xdep.c, remote-adapt.c,
+	remote-bug.c, remote-eb.c, remote-es.c, remote-mips.c,
+	remote-mm.c, remote-nindy.c, remote-rdi.c, remote-rdp.c,
+	remote-udi.c, remote-vx.c, remote.c, rs6000-nat.c, ser-pipe.c,
+	serial.c, solib-svr4.c, solib.c, somread.c, somsolib.c,
+	source.c, sparcl-tdep.c, stabsread.c, stack.c, sun386-nat.c,
+	symfile.c, symmisc.c, symtab.c, target.c, thread-db.c,
+	thread.c, top.c, tracepoint.c, ui-file.c, ui-out.c,
+	umax-xdep.c, utils.c, valops.c, valprint.c, values.c,
+	varobj.c, win32-nat.c, wince.c, xcoffread.c, cli/cli-cmds.c,
+	cli/cli-decode.c, cli/cli-script.c, cli/cli-setshow.c,
+	mi/mi-cmd-disas.c, mi/mi-cmd-var.c, mi/mi-console.c,
+	mi/mi-main.c, mi/mi-parse.c, tui/tui-file.c, tui/tui.c,
+	tui/tuiData.c, tui/tuiLayout.c: Replace occurrences of free()
+	with xfree().
+
 2000-12-14  J.T. Conklin  <jtc@redback.com>
 
 	* configure.tgt (hppa*-*-bsd*, hppa*-*-osf*, m68*-*-sunos4*,
