@@ -1,4 +1,14 @@
+start-sanitize-d30v
+Thu Mar 27 00:45:57 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* elf32-d30v.c (elf_d30v_howto_table): Fix a typo in the 
+	21-bit absolute that made it act as a relative. 
+
+end-sanitize-d30v	
 Wed Mar 26 14:50:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.c (_bfd_elf_create_linker_section): Don't set
+	bss_section and rel_section from existing sections.
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Only create the got section
 	if it is needed.
