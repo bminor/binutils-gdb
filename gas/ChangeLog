@@ -1,3 +1,11 @@
+start-sanitize-v850
+Tue Dec 31 15:12:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-v850.c (md_assemble): If this is sst.{h,w} or
+	sld.{h,w} and the operand is relocatable, adjust the adend by
+	shifting it right one bit.
+
+end-sanitize-v850
 Tue Dec 31 12:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.c (md_apply_fix3): Rename from md_apply_fix, and
