@@ -37,12 +37,15 @@
 #define MD_APPLY_FIX3
 #define md_operand(x)
 
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_DONT_FIX_NON_ADJUSTABLE 1
-
 #define obj_fix_adjustable(fixP) v850_fix_adjustable(fixP)
 #define TC_FORCE_RELOCATION(fixp) v850_force_relocation(fixp)
+
+#ifdef OBJ_ELF
+/* This arranges for gas/write.c to not apply a relocation if
+   obj_fix_adjustable() says it is not adjustable.  */
+#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
+#endif
+
 extern int v850_force_relocation PARAMS ((struct fix *));
 
 /* Permit temporary numeric labels.  */

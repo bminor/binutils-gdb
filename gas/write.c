@@ -48,10 +48,18 @@
 #define TC_FORCE_RELOCATION_SECTION(FIXP,SEG) TC_FORCE_RELOCATION(FIXP)
 #endif
 
+#ifndef TC_FIX_ADJUSTABLE
+#define TC_FIX_ADJUSTABLE(fix) 1
+#endif
+		  
 #ifndef TC_LINKRELAX_FIXUP
 #define TC_LINKRELAX_FIXUP(SEG) 1
 #endif
 
+#ifndef TC_FIX_ADJUSTABLE
+#define TC_FIX_ADJUSTABLE(fix) 1
+#endif
+		  
 #ifndef	MD_PCREL_FROM_SECTION
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from(FIXP)
 #endif
@@ -2710,16 +2718,7 @@ fixup_segment (fixP, this_segment_type)
 	      else
 		{
 		  seg_reloc_count++;
-#ifdef TC_DONT_FIX_NON_ADJUSTABLE
-		  if (1
-#ifdef obj_fix_adjustable
-		      && obj_fix_adjustable (fixP)
-#endif
-#ifdef tc_fix_adjustable
-		      && tc_fix_adjustable (fixP)
-#endif
-		      )
-#endif
+		  if (TC_FIX_ADJUSTABLE (fixP))
 		    add_number += S_GET_VALUE (add_symbolP);
 		}
 	    }

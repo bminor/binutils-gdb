@@ -1,3 +1,14 @@
+2000-08-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* write.c (TC_FIX_ADJUSTABLE): Define to 1, if not defined.
+	(fixup_segment) Use it instead of TC_DONT_FIX_NON_ADJUSTABLE.
+	* config/tc-i386.h (TC_DONT_FIX_NON_ADJUSTABLE): Remove.
+	<OBJ_ELF, OBJ_COFF, TE_PE> (TC_FIX_ADJUSTABLE): Define.
+	* config/tc-arm.h (TC_DONT_FIX_NON_ADJUSTABLE): Remove.
+	<OBJ_ELF> (TC_FIX_ADJUSTABLE): Define.
+	* config/tc-i960.h, config/tc-m68k.h, config/tc-v850.h:
+	Likewise.
+
 2000-08-22  Eric Christopher  <echristo@cygnus.com>
 
 	* config/tc-mn10300.c: (md_apply_fix): New function.

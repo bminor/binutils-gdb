@@ -38,12 +38,14 @@ struct fix;
    type.  The idea is that if the original type is already some kind of PIC
    relocation, we leave it alone, otherwise we give it the desired type */
 
-/* This arranges for gas/write.c to not apply a relocation if
-   tc_fix_adjustable() says it is not adjustable.  */
-#define TC_DONT_FIX_NON_ADJUSTABLE 1
-
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
+
+#if defined (OBJ_ELF) || defined (OBJ_COFF) || defined (TE_PE)
+/* This arranges for gas/write.c to not apply a relocation if
+   tc_fix_adjustable() says it is not adjustable.  */
+#define TC_FIX_ADJUSTABLE(fixP) tc_fix_adjustable (fixP)
+#endif
 
 /* This is the relocation type for direct references to GLOBAL_OFFSET_TABLE.
  * It comes up in complicated expressions such as 
