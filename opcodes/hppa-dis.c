@@ -902,6 +902,55 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+		/* ?!? FIXME */
+		case '_':
+		case '{':
+		  fputs_filtered ("Disassembler botch.\n", info);
+		  break;
+
+		case 'm':
+		  {
+		    int y = GET_FIELD (insn, 16, 18);
+
+		    if (y != 1)
+		      fput_const ((y ^ 1) - 1, info);
+		  }
+		  break;
+
+		case 'h':
+		  {
+		    int cbit;
+
+		    cbit = GET_FIELD (insn, 16, 18);
+
+		    if (cbit > 0)
+		      (*info->fprintf_func) (info->stream, ",%d", cbit - 1);
+		    break;
+		  }
+
+		case '=':
+		  {
+		    int cond = GET_FIELD (insn, 27, 31);
+
+		    if (cond == 0)
+		      fputs_filtered (" ", info);
+		    else if (cond == 1)
+		      fputs_filtered ("acc ", info);
+		    else if (cond == 2)
+		      fputs_filtered ("rej ", info);
+		    else if (cond == 5)
+		      fputs_filtered ("acc8 ", info);
+		    else if (cond == 6)
+		      fputs_filtered ("rej8 ", info);
+		    else if (cond == 9)
+		      fputs_filtered ("acc6 ", info);
+		    else if (cond == 13)
+		      fputs_filtered ("acc4 ", info);
+		    else if (cond == 17)
+		      fputs_filtered ("acc2 ", info);
+		    break;
+		  }
+
 		case 'X':
 		  (*info->print_address_func) ((memaddr + 8 
 						+ extract_22 (insn)),
