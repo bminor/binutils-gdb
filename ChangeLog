@@ -1,3 +1,7 @@
+Sat Mar 19 11:50:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.sub: Recognize cisco.
+
 Fri Mar 18 16:42:32 1994  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* Makefile.in (CXXFLAGS): Add -fexternal-templates.
