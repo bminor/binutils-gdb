@@ -186,11 +186,7 @@ struct internal_lineno {
 		long l_symndx;	/* function name symbol index, iff l_lnno == 0*/
 		long l_paddr;	/* (physical) address of line number	*/
 	} l_addr;
-#ifdef M88
 	unsigned long	l_lnno;	/* line number		*/
-#else
-	unsigned short	l_lnno;	/* line number		*/
-#endif
 };
 
 

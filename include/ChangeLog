@@ -1,5 +1,9 @@
 Thu Nov  7 08:58:26 1991  Steve Chamberlain  (sac at cygnus.com)
 
+	* internalcoff.h: took out the M88 dependency in the lineno
+	struct.
+	* coff-m88k.h: defines GET_LINENO_LNNO and PUT_LINENO_LNNO to use
+	32bit linno entries.
 	* a29k-opcode.h: fixed encoding of mtacc
 
 Sun Nov  3 11:54:22 1991  Per Bothner  (bothner at cygnus.com)
