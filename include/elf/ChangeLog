@@ -1,6 +1,7 @@
 1998-07-19 15:24  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mips.h (PT_MIPS_OPTIONS): New symbol.
+	Add lots of DT_MIPS_* symbols.
 
 Fri Jun 26 10:46:35 1998  Jeffrey A Law  (law@cygnus.com)
 

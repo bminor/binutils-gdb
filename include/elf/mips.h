@@ -317,6 +317,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 /* Base address of the segment.  */
 #define DT_MIPS_BASE_ADDRESS	0x70000006
 
+/* ??? */
+#define DT_MIPS_MSYM		0x70000007
+
 /* Address of .conflict section.  */
 #define DT_MIPS_CONFLICT	0x70000008
 
@@ -346,6 +349,84 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Address of run time loader map, used for debugging.  */
 #define DT_MIPS_RLD_MAP		0x70000016
+
+/* Delta C++ class definition.  */
+#define DT_MIPS_DELTA_CLASS	0x70000017
+
+/* Number of entries in DT_MIPS_DELTA_CLASS.  */
+#define DT_MIPS_DELTA_CLASS_NO	0x70000018
+
+/* Delta C++ class instances.  */
+#define DT_MIPS_DELTA_INSTANCE	0x70000019
+
+/* Number of entries in DT_MIPS_DELTA_INSTANCE.  */
+#define DT_MIPS_DELTA_INSTANCE_NO	0x7000001a
+
+/* Delta relocations.  */
+#define DT_MIPS_DELTA_RELOC	0x7000001b
+
+/* Number of entries in DT_MIPS_DELTA_RELOC.  */
+#define DT_MIPS_DELTA_RELOC_NO	0x7000001c
+
+/* Delta symbols that Delta relocations refer to.  */
+#define DT_MIPS_DELTA_SYM	0x7000001d
+
+/* Number of entries in DT_MIPS_DELTA_SYM.  */
+#define DT_MIPS_DELTA_SYM_NO	0x7000001e
+
+/* Delta symbols that hold class declarations.  */
+#define DT_MIPS_DELTA_CLASSSYM	0x70000020
+
+/* Number of entries in DT_MIPS_DELTA_CLASSSYM.  */
+#define DT_MIPS_DELTA_CLASSSYM_NO	0x70000021
+
+/* Flags indicating information about C++ flavor.  */
+#define DT_MIPS_CXX_FLAGS	0x70000022
+
+/* Pixie information (???).  */
+#define DT_MIPS_PIXIE_INIT	0x70000023
+
+/* ??? */
+#define DT_MIPS_SYMBOL_LIB	0x70000024
+
+/* ??? */
+#define DT_MIPS_LOCALPAGE_GOTIDX	0x70000025
+
+/* ??? */
+#define DT_MIPS_LOCAL_GOTIDX	0x70000026
+
+/* ??? */
+#define DT_MIPS_HIDDEN_GOTIDX	0x70000027
+
+/* ??? */
+#define DT_MIPS_PROTECTED_GOTIDX	0x70000028
+
+/* Address of `.MIPS.options'.  */
+#define DT_MIPS_OPTIONS		0x70000029
+
+/* Address of `.interface'.  */
+#define DT_MIPS_INTERFACE	0x7000002a
+
+/* ??? */
+#define DT_MIPS_DYNSTR_ALIGN	0x7000002b
+
+/* Size of the .interface section.  */
+#define DT_MIPS_INTERFACE_SIZE	0x7000002c
+
+/* Size of rld_text_resolve function stored in the GOT.  */
+#define DT_MIPS_RLD_TEXT_RESOLVE_ADDR	0x7000002d
+
+/* Default suffix of DSO to be added by rld on dlopen() calls.  */
+#define DT_MIPS_PERF_SUFFIX	0x7000002e
+
+/* Size of compact relocation section (O32).  */
+#define DT_MIPS_COMPACT_SIZE	0x7000002f
+
+/* GP value for auxiliary GOTs.  */
+#define DT_MIPS_GP_VALUE	0x70000030
+
+/* Address of auxiliary .dynamic.  */
+#define DT_MIPS_AUX_DYNAMIC	0x70000031
 
 /* Flags which may appear in a DT_MIPS_FLAGS entry.  */
 
