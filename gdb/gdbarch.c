@@ -226,6 +226,7 @@ struct gdbarch
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
   CORE_ADDR decr_pc_after_break;
+  gdbarch_prepare_to_proceed_ftype *prepare_to_proceed;
   CORE_ADDR function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
   CORE_ADDR frame_args_skip;
@@ -380,6 +381,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   /* startup_gdbarch() */
 };
 
@@ -457,6 +459,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->decr_pc_after_break = -1;
+  gdbarch->prepare_to_proceed = default_prepare_to_proceed;
   gdbarch->function_start_offset = -1;
   gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   gdbarch->frame_args_skip = -1;
@@ -710,6 +713,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->decr_pc_after_break == -1))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: decr_pc_after_break invalid");
+  /* Skip verify of prepare_to_proceed, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->function_start_offset == -1))
     internal_error (__FILE__, __LINE__,
@@ -1319,6 +1323,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK # %s\n",
                       XSTRING (DECR_PC_AFTER_BREAK));
+#endif
+#ifdef PREPARE_TO_PROCEED
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PREPARE_TO_PROCEED(select_it)",
+                      XSTRING (PREPARE_TO_PROCEED (select_it)));
 #endif
 #ifdef FUNCTION_START_OFFSET
   fprintf_unfiltered (file,
@@ -2033,6 +2043,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
+#endif
+#ifdef PREPARE_TO_PROCEED
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PREPARE_TO_PROCEED = 0x%08lx\n",
+                        (long) current_gdbarch->prepare_to_proceed
+                        /*PREPARE_TO_PROCEED ()*/);
 #endif
 #ifdef FUNCTION_START_OFFSET
   fprintf_unfiltered (file,
@@ -3866,6 +3883,24 @@ set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch,
                                  CORE_ADDR decr_pc_after_break)
 {
   gdbarch->decr_pc_after_break = decr_pc_after_break;
+}
+
+int
+gdbarch_prepare_to_proceed (struct gdbarch *gdbarch, int select_it)
+{
+  if (gdbarch->prepare_to_proceed == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_prepare_to_proceed invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_prepare_to_proceed called\n");
+  return gdbarch->prepare_to_proceed (select_it);
+}
+
+void
+set_gdbarch_prepare_to_proceed (struct gdbarch *gdbarch,
+                                gdbarch_prepare_to_proceed_ftype prepare_to_proceed)
+{
+  gdbarch->prepare_to_proceed = prepare_to_proceed;
 }
 
 CORE_ADDR

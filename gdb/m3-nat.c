@@ -1573,6 +1573,8 @@ mach_thread_output_id (int mid)
  *  if SELECT_IT is nonzero, reselect the thread that was active when
  *  we stopped at a breakpoint.
  *
+ * Note that this implementation is potentially redundant now that
+ * default_prepare_to_proceed() has been added.  
  */
 
 mach3_prepare_to_proceed (int select_it)

@@ -4591,7 +4591,10 @@ unwind_command (char *exp, int from_tty)
    For these reasons, we have to violate information hiding and
    call "breakpoint_here_p".  If core gdb thinks there is a bpt
    here, that's what counts, as core gdb is the one which is
-   putting the BPT instruction in and taking it out. */
+   putting the BPT instruction in and taking it out.
+
+   Note that this implementation is potentially redundant now that
+   default_prepare_to_proceed() has been added.  */
 int
 hppa_prepare_to_proceed (void)
 {

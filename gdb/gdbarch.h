@@ -1215,6 +1215,20 @@ extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR 
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PREPARE_TO_PROCEED)
+#define PREPARE_TO_PROCEED(select_it) (default_prepare_to_proceed (select_it))
+#endif
+
+typedef int (gdbarch_prepare_to_proceed_ftype) (int select_it);
+extern int gdbarch_prepare_to_proceed (struct gdbarch *gdbarch, int select_it);
+extern void set_gdbarch_prepare_to_proceed (struct gdbarch *gdbarch, gdbarch_prepare_to_proceed_ftype *prepare_to_proceed);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PREPARE_TO_PROCEED)
+#define PREPARE_TO_PROCEED(select_it) (gdbarch_prepare_to_proceed (current_gdbarch, select_it))
+#endif
+#endif
+
 extern CORE_ADDR gdbarch_function_start_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_function_start_offset (struct gdbarch *gdbarch, CORE_ADDR function_start_offset);
 #if GDB_MULTI_ARCH

@@ -283,7 +283,11 @@ save_inferior_pid (void)
 }
 
 
-/* Implementation of the PREPARE_TO_PROCEED hook for the Linux LWP layer.  */
+/* Implementation of the PREPARE_TO_PROCEED hook for the Linux LWP
+   layer.
+
+   Note that this implementation is potentially redundant now that
+   default_prepare_to_proceed() has been added.  */
 
 int
 lin_lwp_prepare_to_proceed (void)

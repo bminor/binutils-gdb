@@ -1,3 +1,24 @@
+2001-04-06  David Smith  <dsmith@redhat.com>
+
+	* arch-utils.c (default_prepare_to_proceed)
+	(generic_prepare_to_proceed): Added new functions.
+	* arch-utils.h: New function declarations for
+	default_prepare_to_proceed() and generic_prepare_to_proceed().
+	* gdbarch.sh: Added PREPARE_TO_PROCEED.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* inferior.h: Added get_last_target_status() declaration.
+	* infrun.c (get_last_target_status): Added new function.
+	(handle_inferior_event): Saves last pid and waitstatus, which will
+	get returned by get_last_target_status(). 
+
+	* hppa-tdep.c (prepare_to_proceed):  Added comment stating that
+	prepare_to_proceed() is potentially redundant since
+	default_prepare_to_proceed() has been added.
+	* linux-thread.c (prepare_to_proceed): Ditto.
+	* lin-lwp.c (prepare_to_proceed): Ditto.
+	* m3-nat.c (prepare_to_proceed): Ditto.
+	
 2001-04-05  Andrew Cagney  <ac131313@redhat.com>
 
 	Obsolete powerpcle-*-cygwin* and powerpcle-*-solaris* platforms

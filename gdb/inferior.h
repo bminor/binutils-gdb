@@ -261,6 +261,8 @@ extern int signal_print_update (int, int);
 
 extern int signal_pass_update (int, int);
 
+extern void get_last_target_status(int *pid, struct target_waitstatus *status);
+
 /* From infcmd.c */
 
 extern void tty_command (char *, int);

@@ -1051,7 +1051,10 @@ quit:
 }
 
 /* If we have switched threads from a one that stopped at breakpoint,
-   return 1 otherwise 0.  */
+   return 1 otherwise 0.
+
+   Note that this implementation is potentially redundant now that
+   default_prepare_to_proceed() has been added.  */
 
 int
 linuxthreads_prepare_to_proceed (int step)

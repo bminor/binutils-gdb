@@ -406,6 +406,12 @@ static struct breakpoint *through_sigtramp_breakpoint = NULL;
    currently be running in a syscall. */
 static int number_of_threads_in_syscalls;
 
+/* This is a cached copy of the pid/waitstatus of the last event
+   returned by target_wait()/target_wait_hook().  This information is
+   returned by get_last_target_status(). */
+static int target_last_wait_pid = -1;
+static struct target_waitstatus target_last_waitstatus;
+
 /* This is used to remember when a fork, vfork or exec event
    was caught by a catchpoint, and thus the event is to be
    followed at the next resume of the inferior, and not
@@ -1407,6 +1413,18 @@ check_for_old_step_resume_breakpoint (void)
     warning ("GDB bug: infrun.c (wait_for_inferior): dropping old step_resume breakpoint");
 }
 
+/* Return the cached copy of the last pid/waitstatus returned by
+   target_wait()/target_wait_hook().  The data is actually cached by
+   handle_inferior_event(), which gets called immediately after
+   target_wait()/target_wait_hook().  */
+
+void
+get_last_target_status(int *pid, struct target_waitstatus *status)
+{
+  *pid = target_last_wait_pid;
+  *status = target_last_waitstatus;
+}
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1416,6 +1434,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR tmp;
   int stepped_after_stopped_by_watchpoint;
+
+  /* Cache the last pid/waitstatus. */
+  target_last_wait_pid = ecs->pid;
+  target_last_waitstatus = *ecs->wp;
 
   /* Keep this extra brace for now, minimizes diffs.  */
   {

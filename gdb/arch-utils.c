@@ -239,6 +239,61 @@ default_frame_address (struct frame_info *fi)
   return fi->frame;
 }
 
+/* Default prepare_to_procced().  */
+int
+default_prepare_to_proceed (int select_it)
+{
+  return 0;
+}
+
+/* Generic prepare_to_proceed().  This one should be suitable for most
+   targets that support threads. */
+int
+generic_prepare_to_proceed (int select_it)
+{
+  int wait_pid;
+  struct target_waitstatus wait_status;
+
+  /* Get the last target status returned by target_wait().  */
+  get_last_target_status (&wait_pid, &wait_status);
+
+  /* Make sure we were stopped at a breakpoint.  */
+  if (wait_status.kind != TARGET_WAITKIND_STOPPED
+      || wait_status.value.sig != TARGET_SIGNAL_TRAP)
+    {
+      return 0;
+    }
+
+  if (wait_pid != -1 && inferior_pid != wait_pid)
+    {
+      /* Switched over from WAIT_PID.  */
+      CORE_ADDR wait_pc = read_pc_pid (wait_pid);
+
+      /* Avoid switching where it wouldn't do any good, i.e. if both
+         threads are at the same breakpoint.  */
+      if (wait_pc != read_pc () && breakpoint_here_p (wait_pc))
+	{
+	  if (select_it)
+	    {
+	      /* User hasn't deleted the breakpoint.  Switch back to
+		 WAIT_PID and return non-zero.  */
+	      inferior_pid = wait_pid;
+
+	      /* FIXME: This stuff came from switch_to_thread() in
+		 thread.c (which should probably be a public function).  */
+	      flush_cached_frames ();
+	      registers_changed ();
+	      stop_pc = wait_pc;
+	      select_frame (get_current_frame (), 0);
+	    }
+
+	  return 1;
+	}
+    }
+  return 0;
+  
+}
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
