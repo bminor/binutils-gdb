@@ -169,7 +169,7 @@ mips-xdep.o : mips-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   expression.h gdbcore.h ${srcdir}/../include/bfd.h 
 mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm-mips.h \
   symtab.h ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h \
-  symfile.h buildsym.h symconst.h sym.h ${srcdir}/../include/coff/mips.h \
+  symfile.h buildsym.h ${srcdir}/../include/coff/mips.h \
   ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h \
   ${srcdir}/../include/aout/stab.def ${srcdir}/../include/coff/ecoff-ext.h partial-stab.h 
 mmap-alloc.o : mmap-alloc.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status 
