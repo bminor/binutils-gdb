@@ -1,3 +1,7 @@
+Thu Mar 27 17:15:23 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gprof.c (main): Correct copyright message.
+
 Mon Mar 24 11:12:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (.c.o): Define TARGET_$(MY_TARGET) when compiling.
