@@ -1,3 +1,10 @@
+2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/m68hc11/opers12.s: Add test for disassembler bug with movb
+	instruction.
+	* gas/m68hc11/opers12.d: Likewise.
+	* gas/m68hc11/opers12-dwarf2.d: Likewise.
+
 2001-10-31  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/empic.s: Undo damage inflicted on 2000-12-02.
