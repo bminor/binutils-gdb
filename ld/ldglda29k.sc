@@ -1,8 +1,8 @@
 OUTPUT_FORMAT("coff-a29k-big")
 INPUT(/lab3/u3/sym1/tools/usr/lib/segments.o) /* Has .rstack/.mstack */ 
-SEARCH_DIR(/lab3/u3/sym1/tools/lib)
-SEARCH_DIR(/lab3/u3/sym1/tools/usr/lib)
-SEARCH_DIR(/lab3/u3/sym1/tools/usr/local/lib)
+SEARCH_DIR(/lib)
+SEARCH_DIR(/usr/lib)
+SEARCH_DIR(/usr/local/lib)
 MEMORY {
 	text   	: ORIGIN = 0x1000000, LENGTH = 0x1000000
 	talias 	: ORIGIN = 0x2000000, LENGTH = 0x1000000

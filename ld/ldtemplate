@@ -61,9 +61,6 @@ static void gld<target>_before_parse()
   extern char lprefix;
   lprefix = '@';
 #else
-  ldfile_add_library_path("/lib");
-  ldfile_add_library_path("/usr/lib");
-  ldfile_add_library_path("/usr/local/lib");
 #ifndef TARGET_ /* I.e., if not generic */
   ldfile_output_architecture = bfd_arch_<arch>;
 #endif

@@ -14,6 +14,12 @@ bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 libsubdir = $(libdir)/gcc/$(target)/$(version)
 
+# Seach path to override the default search path for -lfoo libraries.
+# If LIB_PATH is empty, the ones in the script (if any) are left alone.
+# Otherwise, they are replaced with the ones given in LIB_PATH,
+# which may have the form: LIB_PATH=/lib:/usr/local/lib
+LIB_PATH =
+
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_FILE = $(INSTALL)
@@ -68,7 +74,12 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 # Each .sc .scr or .scu script is filtered by mkscript
 # into a string literal that can be included in a .c program.
 .sc.x:
-	./mkscript < $< >$*.x 
+	if [ "x"$(LIB_PATH) = "x" ]; then ./mkscript < $< >$*.x ; \
+	else \
+	  (sed <$< -e '/SEARCH_DIR(.*)/d' ; \
+	  echo $(LIB_PATH) | tr ':' ' ' | sed -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\1);/g';) | ./mkscript >$*.x;\
+	fi
+#	./mkscript < $< >$*.x 
 .scu.xu:
 	./mkscript < $< >$*.xu
 .scr.xr:
@@ -120,21 +131,21 @@ ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c
 
 
-ldgld.c: ldtemplate
+ldgld.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"//g -e s/"<TARGET>"//g < ldtemplate > ldgld.c
-news.c: ldtemplate
+	-e s/"<target>"//g -e s/"<TARGET>"//g <$< >$@
+news.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/news/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g < ldtemplate > news.c
-ldgld68k.c: ldtemplate
+	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$< >$@
+ldgld68k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld68k/g -e s/"<arch>"/m68k/g \
-	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g < ldtemplate > ldgld68k.c
-ldglda29k.c: ldtemplate
+	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$< >$@
+ldglda29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldglda29k/g -e s/"<arch>"/a29k/g \
-	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g < ldtemplate > ldglda29k.c
-ldm88k.c: ldtemplate
+	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g <$< >$@
+ldm88k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldm88k/g -e s/"<arch>"/m88k/g \
-	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g < ldtemplate > ldm88k.c
+	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$< >$@
 
 # The .c files for these are generated from ldtemplete.
 ldgld.o: ./mkscript ldgld.x ldgld.xr ldgld.xu
