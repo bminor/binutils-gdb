@@ -3732,15 +3732,24 @@ int ok;
 		}
 		break;
 	case SEG_BIG:
-		if(ok==80 && offs(exp)<0) {	/* HACK! Turn it into a long */
-			LITTLENUM_TYPE words[6];
+		if (offs (exp) < 0 /* flonum */
+		    && (ok == 80 /* no bignums */
+			|| (ok > 10 /* small-int ranges including 0 ok */
+			    /* If we have a flonum zero, a zero integer should
+			       do as well (e.g., in moveq).  */
+			    && generic_floating_point_number.exponent == 0
+			    && generic_floating_point_number.low[0] == 0)))
+		  {
+		    /* HACK! Turn it into a long */
+		    LITTLENUM_TYPE words[6];
 
-			gen_to_words(words,2,8L);/* These numbers are magic! */
-			seg(exp)=SEG_ABSOLUTE;
-			adds(exp)=0;
-			subs(exp)=0;
-			offs(exp)=words[1]|(words[0]<<16);
-		} else if(ok!=0) {
+		    gen_to_words(words,2,8L);/* These numbers are magic! */
+		    seg(exp)=SEG_ABSOLUTE;
+		    adds(exp)=0;
+		    subs(exp)=0;
+		    offs(exp)=words[1]|(words[0]<<16);
+		  }
+		else if(ok!=0) {
 			seg(exp)=SEG_ABSOLUTE;
 			adds(exp)=0;
 			subs(exp)=0;
