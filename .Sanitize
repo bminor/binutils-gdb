@@ -47,7 +47,7 @@
 Do-first:
 
 keep_these_too="${keep_these_too} .cvsignore autoconf automake
-	apache bash 
+	apache ash bash 
 	bfd binutils bison byacc cvs deja-gnu dejagnu diff dosrel dvips
 	emacs emacs19 examples expect fileutils findutils flex
 	gas gawk gcc gdb gdbm gdbtest glob gperf gprof grep grez groff
