@@ -1,3 +1,7 @@
+2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/arm.exp: Pass -mfpu=fpa option to the FPA instruction test.
+
 2003-06-12  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel15.[sd]: New test.
