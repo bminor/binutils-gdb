@@ -47,8 +47,8 @@ DESCRIPTION
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "ar.h"
-#include "ranlib.h"
+#include "aout/ar.h"
+#include "aout/ranlib.h"
 
 #ifdef GNU960
 #define BFD_GNU960_ARMAG(abfd)	(BFD_COFF_FILE_P((abfd)) ? ARMAG : ARMAGB)

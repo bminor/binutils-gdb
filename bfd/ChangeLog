@@ -1,3 +1,11 @@
+Sat Nov 30 21:19:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* aout-encap.c, aoutf1.h, aoutx.h, archive.c, bout.c, coff-a29k.c,
+	coff-h8300.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c,
+	coff-mips.c, coff-rs6000.c, cpu-h300.c, elf.c, i386aout.c,
+	newos3.c, stab-syms.c, syms.c: All these files have had their
+	#includes altered to point to the new places.
+
 Fri Nov 29 20:04:49 1991  Fred Fish  (fnf at cygnus.com)
 
 	* config/mh-i386v4, config/mh-i386-elf, hosts/h-i386v4.h:  New files.

@@ -26,8 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "coff-a29k.h"
-#include "internalcoff.h"
+#include "coff/a29k.h"
+#include "coff/internal.h"
 #include "libcoff.h"
 
 #define INSERT_HWORD(WORD,HWORD)	\

@@ -116,9 +116,9 @@ selected.
 struct external_exec;
 #include "libaout.h"
 #include "libbfd.h"
-#include "aout64.h"
-#include "stab.gnu.h"
-#include "ar.h"
+#include "aout/aout64.h"
+#include "aout/stab_gnu.h"
+#include "aout/ar.h"
 
 void (*bfd_error_trap)();
 

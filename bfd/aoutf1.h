@@ -22,12 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-#include <a.out.sun4.h>
-#include "libaout.h"           
+#include "aout/sun4.h"
+#include "libaout.h"           /* BFD a.out internal data structures */
 
-#include "aout64.h"
-#include "stab.gnu.h"
-#include "ar.h"
+#include "aout/aout64.h"
+#include "aout/stab_gnu.h"
+#include "aout/ar.h"
 
 /*
 The file @code{aoutf1.h} contains the code for BFD's
@@ -113,8 +113,10 @@ sunos4_callback (abfd)
   switch (N_MACHTYPE (*exec_hdr (abfd))) {
 
   case M_UNKNOWN:
-    arch = bfd_arch_unknown;
-    machine = 0;
+      /* Some Sun3s make magic numbers without cpu types in them, so
+	 we'll default to the 68020. */
+    arch = bfd_arch_m68k;
+    machine = 68020;
     break;
     
   case M_68010:
@@ -168,27 +170,11 @@ sunos4_callback (abfd)
 }
 
 
-static boolean
-DEFUN(sunos_mkobject,(abfd),
-      bfd *abfd)
-{
-    if (NAME(aout,mkobject)(abfd) == false)
-	return false;
-    adata(abfd)->page_size = PAGE_SIZE;
-#ifdef SEGMENT_SIZE
-  adata(abfd)->page_size = SEGMENT_SIZE;
-#else
-  adata(abfd)->segment_size = PAGE_SIZE;
-#endif
-    adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
-    return true;
-}
-
 /* Write an object file in SunOS format.
   Section contents have already been written.  We write the
   file header, symbols, and relocation.  */
 
-boolean
+static boolean
 DEFUN(NAME(aout,sunos4_write_object_contents),
       (abfd),
       bfd *abfd)
@@ -580,68 +566,17 @@ DEFUN(sunos4_core_file_matches_executable_p, (core_bfd, exec_bfd),
 		sizeof (struct internal_exec)) == 0) ? true : false;
 }
 
-/* We use BFD generic archive files.  */
-#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_32_generic_stat_arch_elt		bfd_generic_stat_arch_elt
-#define	aout_32_slurp_armap			bfd_slurp_bsd_armap
-#define	aout_32_slurp_extended_name_table	bfd_true
-#define	aout_32_write_armap			bsd_write_armap
-#define	aout_32_truncate_arname			bfd_bsd_truncate_arname
-#define aout_32_machine_type 			sunos_machine_type
+#define	MY_core_file_failing_command 	sunos4_core_file_failing_command
+#define	MY_core_file_failing_signal	sunos4_core_file_failing_signal
+#define	MY_core_file_matches_executable_p sunos4_core_file_matches_executable_p
 
-#define	aout_32_core_file_failing_command 	sunos4_core_file_failing_command
-#define	aout_32_core_file_failing_signal	sunos4_core_file_failing_signal
-#define	aout_32_core_file_matches_executable_p	sunos4_core_file_matches_executable_p
+#define MY_bfd_debug_info_start		bfd_void
+#define MY_bfd_debug_info_end		bfd_void
+#define MY_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define MY_object_p NAME(sunos,object_p)
+#define MY_core_file_p sunos4_core_file_p
+#define MY_write_object_contents NAME(aout,sunos4_write_object_contents)
 
+#define TARGET_IS_BIG_ENDIAN_P
 
-#define	aout_64_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_64_generic_stat_arch_elt		bfd_generic_stat_arch_elt
-#define	aout_64_slurp_armap			bfd_slurp_bsd_armap
-#define	aout_64_slurp_extended_name_table	bfd_true
-#define	aout_64_write_armap			bsd_write_armap
-#define	aout_64_truncate_arname			bfd_bsd_truncate_arname
-#define aout_64_machine_type 			sunos_machine_type
-
-#define	aout_64_core_file_failing_command 	sunos4_core_file_failing_command
-#define	aout_64_core_file_failing_signal	sunos4_core_file_failing_signal
-#define	aout_64_core_file_matches_executable_p	sunos4_core_file_matches_executable_p
-
-#define aout_64_bfd_debug_info_start		bfd_void
-#define aout_64_bfd_debug_info_end		bfd_void
-#define aout_64_bfd_debug_info_accumulate	bfd_void
-
-#define aout_32_bfd_debug_info_start		bfd_void
-#define aout_32_bfd_debug_info_end		bfd_void
-#define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-
-
-
-/* We implement these routines ourselves, rather than using the generic
-a.out versions.  */
-#define	aout_write_object_contents	sunos4_write_object_contents
-
-bfd_target VECNAME =
-  {
-    TARGETNAME,
-    bfd_target_aout_flavour,
-    true,			/* target byte order */
-    true,			/* target headers byte order */
-    (HAS_RELOC | EXEC_P |	/* object flags */
-     HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    ' ',						   /* ar_pad_char */
-    16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
-    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
-    
-      {_bfd_dummy_target, NAME(sunos,object_p),
-       bfd_generic_archive_p, sunos4_core_file_p},
-      {bfd_false, sunos_mkobject,
-       _bfd_generic_mkarchive, bfd_false},
-      {bfd_false, NAME(aout,sunos4_write_object_contents), /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
-    
-    JUMP_TABLE(JNAME(aout))
-    };
+#include "aout-target.h"

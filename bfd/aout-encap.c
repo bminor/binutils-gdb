@@ -37,8 +37,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define N_TXTOFF(x)   ( (N_MAGIC((x)) == ZMAGIC) ? PAGE_SIZE : EXEC_BYTES_SIZE)
 /**************************************************************************/
 
-#include "stab.gnu.h"
-#include "ar.h"
+#include "aout/stab_gnu.h"
+#include "aout/ar.h"
 #include "libaout.h"           /* BFD a.out internal data structures */
 
 bfd_target *encap_callback ();

@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 
 #define DEFINE_TABLE 
-#include "h8300-opcode.h"
+#include "opcode/h8300.h"
 
 #define MAXSAME 14
 

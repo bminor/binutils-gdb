@@ -72,9 +72,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "elf-common.h"
-#include "elf-internal.h"
-#include "elf-external.h"
+#include "elf/common.h"
+#include "elf/internal.h"
+#include "elf/external.h"
 
 #ifdef HAVE_PROCFS	/* Some core file support requires host /proc files */
 #include <sys/procfs.h>

@@ -26,14 +26,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bout.h"
 
-#include "stab.gnu.h"
+#include "aout/stab_gnu.h"
 #include "libaout.h"		/* BFD a.out internal data structures */
-
-/* Align an address by rounding it up to a power of two.  It leaves the
-   address unchanged if align == 0 (2^0 = alignment of 1 byte) */
-#define	i960_align(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
-
 
 PROTO (static boolean, b_out_squirt_out_relocs,(bfd *abfd, asection *section));
 PROTO (static bfd_target *, b_out_callback, (bfd *));
@@ -160,7 +154,7 @@ b_out_callback (abfd)
   obj_textsec (abfd)->vma = execp->a_tload;
   obj_datasec (abfd)->vma = execp->a_dload;
   bss_start = execp->a_dload + execp->a_data; /* BSS = end of data section */
-  obj_bsssec (abfd)->vma = i960_align (bss_start, execp->a_balign);
+  obj_bsssec (abfd)->vma = align_power (bss_start, execp->a_balign);
 
   /* The file positions of the sections */
   obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
@@ -169,6 +163,10 @@ b_out_callback (abfd)
   /* The file positions of the relocation info */
   obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
   obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);
+
+  adata(abfd)->page_size = 1; /* Not applicable. */
+  adata(abfd)->segment_size = 1; /* Not applicable. */
+  adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
   return abfd->xvec;
 }
@@ -345,12 +343,12 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   bfd_seek (abfd, (long)(asect->rel_filepos), SEEK_SET);
   count = reloc_size / sizeof (struct relocation_info);
 
-  relocs = (struct relocation_info *) malloc (reloc_size);
+  relocs = (struct relocation_info *) bfd_xmalloc (reloc_size);
   if (!relocs) {
     bfd_error = no_memory;
     return false;
   }
-  reloc_cache = (arelent *) malloc ((count+1) * sizeof (arelent));
+  reloc_cache = (arelent *) bfd_xmalloc ((count+1) * sizeof (arelent));
   if (!reloc_cache) {
     free ((char*)relocs);
     bfd_error = no_memory;
@@ -468,7 +466,7 @@ b_out_squirt_out_relocs (abfd, section)
   int extern_mask, pcrel_mask,  len_2, callj_mask;
   if (count == 0) return true;
   generic   = section->orelocation;
-  native = ((struct relocation_info *) malloc (natsize));
+  native = ((struct relocation_info *) bfd_xmalloc (natsize));
   if (!native) {
     bfd_error = no_memory;
     return false;
@@ -679,8 +677,8 @@ DEFUN(b_out_sizeof_headers,(ignore_abfd, ignore),
 /* Build the transfer vectors for Big and Little-Endian B.OUT files.  */
 
 /* We don't have core files.  */
-#define	aout_32_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define	aout_32_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define	aout_32_core_file_failing_command _bfd_dummy_core_file_failing_command
+#define	aout_32_core_file_failing_signal _bfd_dummy_core_file_failing_signal
 #define	aout_32_core_file_matches_executable_p	\
 				_bfd_dummy_core_file_matches_executable_p
 
