@@ -1,3 +1,33 @@
+Wed Sep  7 19:01:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* coff-go32.c (RTYPE2HOWTO): Fully parenthesize arguments.
+	* coff-i960.c (RTYPE2HOWTO): Likewise.
+	* coff-m88k.c (RTYPE2HOWTO): Likewise.
+	* coff-we32k.c (RTYPE2HOWTO): Likewise.
+
+	Make i386 COFF use new COFF backend linker.
+	* coff-i386.c (RTYPE2HOWTO): Fully parenthesize arguments.
+	(coff_relocate_section): Define.
+	(coff_i386_rtype_to_howto): New function.
+	* configure.in (i386coff_vec): Use cofflink.o.
+	(i386lynx_coff_vec): Likewise.
+
+	* coffcode.h (bfd_coff_backend_data): Add new field
+	_bfd_coff_rtype_to_howto.
+	(bfd_coff_rtype_to_howto): Define.
+	(coff_rtype_to_howto): Define to use RTYPE2HOWTO, if not already
+	defined.
+	(bfd_coff_std_swap_table): Initialize new field.
+	* cofflink.c (_bfd_coff_final_link): Allocate section_count + 1
+	section_info structures, since the target_index is 1 based.
+	(coff_link_input_bfd): Set *secpp to bfd_com_section_ptr for a
+	common symbol.  Adjust rel_hash by the output reloc count.
+	(_bfd_coff_generic_relocate_section): New function.
+	* libcoff-in.h (_bfd_coff_generic_relocate_section): Declare.
+	* libcoff.h: Rebuild.
+	* coff-alpha.c (alpha_ecoff_backend_data): Initialize new field.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+
 Tue Sep  6 23:28:52 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_bfd_derive_misc_symbol_info): Treat undefined code
