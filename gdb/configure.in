@@ -234,24 +234,26 @@ case "$host" in
 if test "${enable_gdbtk}" = "yes"; then
 
     CY_AC_PATH_TCLCONFIG
-    CY_AC_LOAD_TCLCONFIG
-    CY_AC_PATH_TKCONFIG
+    if test -z "${no_tcl}"; then
+	CY_AC_LOAD_TCLCONFIG
+	CY_AC_PATH_TKCONFIG
 
-    # If $no_tk is nonempty, then we can't do Tk, and there is no
-    # point to doing Tcl.
-    if test -z "${no_tk}"; then
-       CY_AC_LOAD_TKCONFIG
-       CY_AC_PATH_TCLH
-       CY_AC_PATH_TKH
+	# If $no_tk is nonempty, then we can't do Tk, and there is no
+	# point to doing Tcl.
+	if test -z "${no_tk}"; then
+	   CY_AC_LOAD_TKCONFIG
+	   CY_AC_PATH_TCLH
+	   CY_AC_PATH_TKH
 
-       # Include some libraries that Tcl and Tk want.
-       LIBS="$LIBS $TK_LIBS"
+	   # Include some libraries that Tcl and Tk want.
+	   LIBS="$LIBS $TK_LIBS"
 
-       ENABLE_GDBTK=1
+	   ENABLE_GDBTK=1
 
-       TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
-       ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
-       ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+	   TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
+	   ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
+	   ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+	fi
     fi
 fi
 

@@ -1,3 +1,14 @@
+Wed Aug 28 13:11:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: If CY_AC_PATH_TCLCONFIG can't find TCL, don't run
+	CY_AC_LOAD_TCLCONFIG.
+	* configure: Rebuild.
+
+Tue Aug 27 12:40:40 1996  Fred Fish  <fnf@cygnus.com>
+
+	* infrun.c (wait_for_inferior): Initialize stop_func_end before calling
+	find_pc_partial_function.
+
 Tue Aug 27 10:17:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure: Regenerate again.

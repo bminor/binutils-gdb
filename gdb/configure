@@ -2199,7 +2199,8 @@ fi
   fi
 fi
 
-    
+    if test -z "${no_tcl}"; then
+	
     . $TCLCONFIG
 
     
@@ -2226,7 +2227,7 @@ fi
 
 
 
-    
+	
 #
 # Ok, lets find the tk configuration
 # First, look for one uninstalled.  
@@ -2307,10 +2308,10 @@ fi
 
 
 
-    # If $no_tk is nonempty, then we can't do Tk, and there is no
-    # point to doing Tcl.
-    if test -z "${no_tk}"; then
-       
+	# If $no_tk is nonempty, then we can't do Tk, and there is no
+	# point to doing Tcl.
+	if test -z "${no_tk}"; then
+	   
     if test -f "$TKCONFIG" ; then
       . $TKCONFIG
     fi
@@ -2326,7 +2327,7 @@ fi
     
     
 
-       
+	   
 #
 # Ok, lets find the tcl source trees so we can use the headers
 # Warning: transition of version 9 to 10 will break this algorithm
@@ -2405,12 +2406,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2409 "configure"
+#line 2410 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2414: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2415: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2452,7 +2453,7 @@ fi
 
 
 
-       
+	   
 #
 # Ok, lets find the tk source trees so we can use the headers
 # If the directory (presumably symlink) named "tk" exists, use that one
@@ -2537,12 +2538,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2541 "configure"
+#line 2542 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2546: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2547: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2585,14 +2586,15 @@ fi
 
 
 
-       # Include some libraries that Tcl and Tk want.
-       LIBS="$LIBS $TK_LIBS"
+	   # Include some libraries that Tcl and Tk want.
+	   LIBS="$LIBS $TK_LIBS"
 
-       ENABLE_GDBTK=1
+	   ENABLE_GDBTK=1
 
-       TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
-       ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
-       ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+	   TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
+	   ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
+	   ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+	fi
     fi
 fi
 
