@@ -700,7 +700,7 @@ dbx_symfile_init (struct objfile *objfile)
 	perror_with_name (name);
 
       memset ((PTR) size_temp, 0, sizeof (size_temp));
-      val = bfd_read ((PTR) size_temp, sizeof (size_temp), 1, sym_bfd);
+      val = bfd_bread ((PTR) size_temp, sizeof (size_temp), sym_bfd);
       if (val < 0)
 	{
 	  perror_with_name (name);
@@ -739,8 +739,9 @@ dbx_symfile_init (struct objfile *objfile)
 	  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, SEEK_SET);
 	  if (val < 0)
 	    perror_with_name (name);
-	  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
-			  sym_bfd);
+	  val = bfd_bread (DBX_STRINGTAB (objfile),
+			   DBX_STRINGTAB_SIZE (objfile),
+			   sym_bfd);
 	  if (val != DBX_STRINGTAB_SIZE (objfile))
 	    perror_with_name (name);
 	}
@@ -931,7 +932,7 @@ fill_symbuf (bfd *sym_bfd)
 	count = sizeof (symbuf);
     }
 
-  nbytes = bfd_read ((PTR) symbuf, count, 1, sym_bfd);
+  nbytes = bfd_bread ((PTR) symbuf, count, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
@@ -2501,7 +2502,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
   val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
   if (val < 0)
     perror_with_name (name);
-  val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, 1, sym_bfd);
+  val = bfd_bread (DBX_STRINGTAB (objfile), stabstrsize, sym_bfd);
   if (val != stabstrsize)
     perror_with_name (name);
 
@@ -2597,7 +2598,7 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
   val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
   if (val < 0)
     perror_with_name (name);
-  val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, 1, sym_bfd);
+  val = bfd_bread (DBX_STRINGTAB (objfile), stabstrsize, sym_bfd);
   if (val != stabstrsize)
     perror_with_name (name);
 

@@ -1,3 +1,13 @@
+2001-09-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* coffread.c: Replace all occurrences of bfd_read with bfd_bread.
+	* dbxread.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* dwarfread.c: Likewise.
+	* somread.c: Likewise.
+	* ultra3-nat.c: Likewise.
+	* xcoffread.c: Likewise.
+
 2001-09-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* cris-tdep.c (cris_get_signed_offset): Change return type to an

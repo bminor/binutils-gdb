@@ -1,5 +1,5 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
@@ -101,13 +101,13 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 
   buf = alloca (symsize * number_of_symbols);
   bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
-  val = bfd_read (buf, symsize * number_of_symbols, 1, abfd);
+  val = bfd_bread (buf, symsize * number_of_symbols, abfd);
   if (val != symsize * number_of_symbols)
     error ("Couldn't read symbol dictionary!");
 
   stringtab = alloca (obj_som_stringtab_size (abfd));
   bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET);
-  val = bfd_read (stringtab, obj_som_stringtab_size (abfd), 1, abfd);
+  val = bfd_bread (stringtab, obj_som_stringtab_size (abfd), abfd);
   if (val != obj_som_stringtab_size (abfd))
     error ("Can't read in HP string table.");
 

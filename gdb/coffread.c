@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000
+   1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -1154,18 +1154,18 @@ read_one_sym (register struct coff_symbol *cs,
   int i;
 
   cs->c_symnum = symnum;
-  bfd_read (temp_sym, local_symesz, 1, nlist_bfd_global);
+  bfd_bread (temp_sym, local_symesz, nlist_bfd_global);
   bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *) sym);
   cs->c_naux = sym->n_numaux & 0xff;
   if (cs->c_naux >= 1)
     {
-      bfd_read (temp_aux, local_auxesz, 1, nlist_bfd_global);
+      bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
       bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass,
 			    0, cs->c_naux, (char *) aux);
       /* If more than one aux entry, read past it (only the first aux
          is important). */
       for (i = 1; i < cs->c_naux; i++)
-	bfd_read (temp_aux, local_auxesz, 1, nlist_bfd_global);
+	bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
     }
   cs->c_name = getsymname (sym);
   cs->c_value = sym->n_value;
@@ -1232,7 +1232,7 @@ init_stringtab (bfd *abfd, long offset)
   if (bfd_seek (abfd, offset, 0) < 0)
     return -1;
 
-  val = bfd_read ((char *) lengthbuf, sizeof lengthbuf, 1, abfd);
+  val = bfd_bread ((char *) lengthbuf, sizeof lengthbuf, abfd);
   length = bfd_h_get_32 (symfile_bfd, lengthbuf);
 
   /* If no string table is needed, then the file may end immediately
@@ -1247,7 +1247,8 @@ init_stringtab (bfd *abfd, long offset)
   if (length == sizeof length)	/* Empty table -- just the count */
     return 0;
 
-  val = bfd_read (stringtab + sizeof lengthbuf, length - sizeof lengthbuf, 1, abfd);
+  val = bfd_bread (stringtab + sizeof lengthbuf, length - sizeof lengthbuf,
+		   abfd);
   if (val != length - sizeof lengthbuf || stringtab[length - 1] != '\0')
     return -1;
 
@@ -1346,7 +1347,7 @@ init_lineno (bfd *abfd, long offset, int size)
   /* Allocate the desired table, plus a sentinel */
   linetab = (char *) xmalloc (size + local_linesz);
 
-  val = bfd_read (linetab, size, 1, abfd);
+  val = bfd_bread (linetab, size, abfd);
   if (val != size)
     return -1;
 

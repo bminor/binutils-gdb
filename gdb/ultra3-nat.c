@@ -273,7 +273,7 @@
 /* OBSOLETE       if (!CANNOT_FETCH_REGISTER (regno)) */
 /* OBSOLETE 	{ */
 /* OBSOLETE 	  val = bfd_seek (core_bfd, (file_ptr) register_addr (regno, 0), SEEK_SET); */
-/* OBSOLETE 	  if (val < 0 || (val = bfd_read (buf, sizeof buf, 1, core_bfd)) < 0) */
+/* OBSOLETE 	  if (val != 0 || (val = bfd_bread (buf, sizeof buf, core_bfd)) != sizeof buf) */
 /* OBSOLETE 	    { */
 /* OBSOLETE 	      char *buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) + 35); */
 /* OBSOLETE 	      strcpy (buffer, "Reading core register "); */

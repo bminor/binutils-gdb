@@ -695,7 +695,7 @@ dwarf_build_psymtabs (struct objfile *objfile, int mainline, file_ptr dbfoff,
   dbbase = xmalloc (dbsize);
   dbroff = 0;
   if ((bfd_seek (abfd, dbfoff, SEEK_SET) != 0) ||
-      (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
+      (bfd_bread (dbbase, dbsize, abfd) != dbsize))
     {
       xfree (dbbase);
       error ("can't read DWARF data from '%s'", bfd_get_filename (abfd));
@@ -2269,7 +2269,7 @@ read_ofile_symtab (struct partial_symtab *pst)
   base_section_offsets = pst->section_offsets;
   baseaddr = ANOFFSET (pst->section_offsets, 0);
   if (bfd_seek (abfd, foffset, SEEK_SET) ||
-      (bfd_read (dbbase, dbsize, 1, abfd) != dbsize))
+      (bfd_bread (dbbase, dbsize, abfd) != dbsize))
     {
       xfree (dbbase);
       error ("can't read DWARF data");
@@ -2285,8 +2285,8 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (LNFOFF (pst))
     {
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
-	  (bfd_read ((PTR) lnsizedata, sizeof (lnsizedata), 1, abfd) !=
-	   sizeof (lnsizedata)))
+	  (bfd_bread ((PTR) lnsizedata, sizeof (lnsizedata), abfd)
+	   != sizeof (lnsizedata)))
 	{
 	  error ("can't read DWARF line number table size");
 	}
@@ -2294,7 +2294,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 			       GET_UNSIGNED, pst->objfile);
       lnbase = xmalloc (lnsize);
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
-	  (bfd_read (lnbase, lnsize, 1, abfd) != lnsize))
+	  (bfd_bread (lnbase, lnsize, abfd) != lnsize))
 	{
 	  xfree (lnbase);
 	  error ("can't read DWARF line numbers");

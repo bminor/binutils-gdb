@@ -3030,7 +3030,7 @@ dwarf2_read_section (struct objfile *objfile, file_ptr offset,
 
   buf = (char *) obstack_alloc (&objfile->psymbol_obstack, size);
   if ((bfd_seek (abfd, offset, SEEK_SET) != 0) ||
-      (bfd_read (buf, size, 1, abfd) != size))
+      (bfd_bread (buf, size, abfd) != size))
     {
       buf = NULL;
       error ("Dwarf Error: Can't read DWARF data from '%s'",

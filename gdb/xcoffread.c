@@ -1,6 +1,6 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000
+   1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -817,7 +817,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
   while (curoffset <= limit_offset)
     {
       bfd_seek (abfd, curoffset, SEEK_SET);
-      bfd_read (ext_lnno, linesz, 1, abfd);
+      bfd_bread (ext_lnno, linesz, abfd);
       bfd_coff_swap_lineno_in (abfd, ext_lnno, &int_lnno);
 
       /* Find the address this line represents.  */
@@ -1923,7 +1923,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
     error ("cannot seek to string table in %s: %s",
 	   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
 
-  val = bfd_read ((char *) lengthbuf, 1, sizeof lengthbuf, abfd);
+  val = bfd_bread ((char *) lengthbuf, sizeof lengthbuf, abfd);
   length = bfd_h_get_32 (abfd, lengthbuf);
 
   /* If no string table is needed, then the file may end immediately
@@ -1944,8 +1944,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   if (length == sizeof lengthbuf)
     return;
 
-  val = bfd_read (strtbl + sizeof lengthbuf, 1, length - sizeof lengthbuf,
-		  abfd);
+  val = bfd_bread (strtbl + sizeof lengthbuf, length - sizeof lengthbuf, abfd);
 
   if (val != length - sizeof lengthbuf)
     error ("cannot read string table from %s: %s",
@@ -2677,8 +2676,8 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
   ((struct coff_symfile_info *) objfile->sym_private)->symtbl_num_syms =
     num_symbols;
 
-  val = bfd_read (((struct coff_symfile_info *) objfile->sym_private)->symtbl,
-		  size, 1, abfd);
+  val = bfd_bread (((struct coff_symfile_info *) objfile->sym_private)->symtbl,
+		   size, abfd);
   if (val != size)
     perror_with_name ("reading symbol table");
 
