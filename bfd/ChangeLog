@@ -1,3 +1,9 @@
+Tue Feb  2 21:38:28 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* format.c (bfd_check_format_matches): If the target was
+	previously specified, don't check other targets when checking for
+	an archive file.
+
 Tue Feb  2 18:16:43 1999  Catherine Moore  <clm@cygnus.com>
 
         * elf32-arm.h (elf32_arm_reloc_map):  Removed.
