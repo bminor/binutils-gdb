@@ -1,5 +1,18 @@
 2002-07-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frameless_function_invocation,
+	i386_frame_num_args, i386_frame_init_saved_regs,
+	i386_skip_prologue, i386_push_dummy_frame, i386_fix_call_dummy,
+	i386_pop_frame, i386_push_arguments, i386_store_struct_return,
+	i386_extract_return_value, i386_store_return_value,
+	i386_extract_struct_value_address, i386_register_virtual_type,
+	i386_register_convertible, i386_register_convert_to_virtual,
+	i386_register_convert_to_raw, i386_svr4_sigtramp_saved_pc,
+	i386_go32_init_abi, i386_nw_init_abi, i386_gdbarch_init): Make
+	static.
+
+2002-07-01  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386bsd-tdep.c (i386bsd_frame_saved_pc): Removed.
 
 	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Removed.
