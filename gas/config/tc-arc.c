@@ -31,6 +31,7 @@ static arc_insn arc_insert_operand PARAMS ((arc_insn,
 					    const struct arc_operand *, int,
 					    const struct arc_operand_value *,
 					    offsetT, char *, unsigned int));
+static int delay_slot_type PARAMS ((arc_insn));
 static void arc_common PARAMS ((int));
 static void arc_cpu PARAMS ((int));
 /*static void arc_rename PARAMS ((int));*/
@@ -277,6 +278,18 @@ arc_insert_operand (insn, operand, mods, reg, val, file, line)
   return insn;
 }
 
+/* Return the delay slot type for INSN (or -1 if it isn't a branch).  */
+/* ??? This is a quick hack.  May wish to later generalize this concept
+   to record all suffixes the insn contains (for various warnings, etc.).  */
+
+static int
+delay_slot_type (arc_insn insn)
+{
+  if ((insn >> 27) >= 4 && (insn >> 27) <= 7)
+    return (insn & 0x60) >> 5;
+  return -1;
+}
+
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
@@ -296,7 +309,7 @@ void
 md_assemble (str)
      char *str;
 {
-  const struct arc_opcode *opcode,*opcode_end;
+  const struct arc_opcode *opcode;
   char *start;
   arc_insn insn;
   static int init_tables_p = 0;
@@ -313,23 +326,15 @@ md_assemble (str)
   while (isspace (*str))
     str++;
 
-  /* The instructions are sorted by the first letter.  Scan the opcode table
-     until we find the right one.  */
-  opcode_end = arc_opcodes + arc_opcodes_count;
-  for (opcode = arc_opcodes; opcode < opcode_end; opcode++)
-    if (*opcode->syntax == *str)
-      break;
-  if (opcode == opcode_end)
-    {
-      as_bad ("bad instruction `%s'", str);
-      return;
-    }
+  /* The instructions are stored in lists hashed by the first letter (though
+     we needn't care how they're hashed).  Get the first in the list.  */
 
-  /* Keep looking until we find a match.  If we haven't found a match, and the
-     first character no longer matches, we needn't look any further.  */
+  opcode = arc_opcode_asm_list (str);
+
+  /* Keep looking until we find a match.  */
 
   start = str;
-  for ( ; opcode < opcode_end && *opcode->syntax == *start; ++opcode)
+  for ( ; opcode != NULL; opcode = ARC_OPCODE_NEXT_ASM (opcode))
     {
       int past_opcode_p;
       char *syn;
@@ -604,11 +609,12 @@ md_assemble (str)
 	{
 	  int i;
 	  char *f;
-	  long limm;
+	  long limm, limm_p;
 
-	  /* ??? For the moment we assume a valid `str' can only contain blanks
+	  /* For the moment we assume a valid `str' can only contain blanks
 	     now.  IE: We needn't try again with a longer version of the
-	     insn.  */
+	     insn and it is assumed that longer versions of insns appear
+	     before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
 
 	  while (isspace (*str))
 	    ++str;
@@ -616,11 +622,28 @@ md_assemble (str)
 	  if (*str != '\0')
 	    as_bad ("junk at end of line: `%s'", str);
 
+	  /* Is there a limm value?  */
+	  limm_p = arc_opcode_limm_p (&limm);
+
+	  /* Putting an insn with a limm value in a delay slot is supposed to
+	     be legal, but let's warn the user anyway.  Ditto for 8 byte jumps
+	     with delay slots.  */
+	  {
+	    static int in_delay_slot_p = 0;
+	    int this_insn_delay_slot_type = delay_slot_type (insn);
+
+	    if (in_delay_slot_p && limm_p)
+	      as_warn ("8 byte instruction in delay slot");
+	    if (this_insn_delay_slot_type > 0 && limm_p)
+	      as_warn ("8 byte jump instruction with delay slot");
+	    in_delay_slot_p = (this_insn_delay_slot_type > 0) && !limm_p;
+	  }
+
 	  /* Write out the instruction.
 	     It is important to fetch enough space in one call to `frag_more'.
 	     We use (f - frag_now->fr_literal) to compute where we are and we
 	     don't want frag_now to change between calls.  */
-	  if (arc_opcode_limm_p (&limm))
+	  if (limm_p)
 	    {
 	      f = frag_more (8);
 	      md_number_to_chars (f, insn, 4);
@@ -1036,8 +1059,6 @@ md_operand (expressionP)
 
   if (*p == '%' && strncmp (p, "%st(", 4) == 0)
     {
-      expressionS two;
-
       input_line_pointer += 4;
       expression (expressionP);
       if (*input_line_pointer != ')')
@@ -1046,17 +1067,39 @@ md_operand (expressionP)
 	  return;
 	}
       ++input_line_pointer;
-      if (expressionP->X_op != O_symbol
-	  || expressionP->X_add_number != 0)
+      if (expressionP->X_op == O_symbol
+	  && expressionP->X_add_number == 0
+	  /* I think this test is unnecessary but just as a sanity check... */
+	  && expressionP->X_op_symbol == NULL)
 	{
-	  as_bad ("expression too complex for %st");
+	  expressionS two;
+
+	  expressionP->X_op = O_right_shift;
+	  two.X_op = O_constant;
+	  two.X_add_symbol = two.X_op_symbol = NULL;
+	  two.X_add_number = 2;
+	  expressionP->X_op_symbol = make_expr_symbol (&two);
+	}
+      /* allow %st(sym1-sym2) */
+      else if (expressionP->X_op == O_subtract
+	       && expressionP->X_add_symbol != NULL
+	       && expressionP->X_op_symbol != NULL
+	       && expressionP->X_add_number == 0)
+	{
+	  expressionS two;
+
+	  expressionP->X_add_symbol = make_expr_symbol (expressionP);
+	  expressionP->X_op = O_right_shift;
+	  two.X_op = O_constant;
+	  two.X_add_symbol = two.X_op_symbol = NULL;
+	  two.X_add_number = 2;
+	  expressionP->X_op_symbol = make_expr_symbol (&two);
+	}
+      else
+	{
+	  as_bad ("expression too complex for %%st");
 	  return;
 	}
-      expressionP->X_op = O_right_shift;
-      two.X_op = O_constant;
-      two.X_add_symbol = two.X_op_symbol = NULL;
-      two.X_add_number = 2;
-      expressionP->X_op_symbol = make_expr_symbol (&two);
     }
 }
 
@@ -1160,23 +1203,29 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
      expressionS *expnew;
 {
   /* If the expression is "symbol >> 2" we must change it to just "symbol",
-     as fix_new_exp can't handle it.  That's ok though.  What's really going
-     on here is that we're using ">> 2" as a special syntax for specifying
-     BFD_RELOC_ARC_B26.  */
+     as fix_new_exp can't handle it.  Similarily for (symbol - symbol) >> 2.
+     That's ok though.  What's really going on here is that we're using
+     ">> 2" as a special syntax for specifying BFD_RELOC_ARC_B26.  */
 
-  if (exp->X_op == O_right_shift)
+  if (exp->X_op == O_right_shift
+      && exp->X_op_symbol != NULL
+      && exp->X_op_symbol->sy_value.X_op == O_constant
+      && exp->X_op_symbol->sy_value.X_add_number == 2
+      && exp->X_add_number == 0)
     {
       if (exp->X_add_symbol != NULL
 	  && (exp->X_add_symbol->sy_value.X_op == O_constant
-	      || exp->X_add_symbol->sy_value.X_op == O_symbol)
-	  && exp->X_op_symbol != NULL
-	  && exp->X_op_symbol->sy_value.X_op == O_constant
-	  && exp->X_op_symbol->sy_value.X_add_number == 2
-	  && exp->X_add_number == 0)
+	      || exp->X_add_symbol->sy_value.X_op == O_symbol))
 	{
 	  *expnew = *exp;
 	  expnew->X_op = O_symbol;
 	  expnew->X_op_symbol = NULL;
+	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
+	}
+      else if (exp->X_add_symbol != NULL
+	       && exp->X_add_symbol->sy_value.X_op == O_subtract)
+	{
+	  *expnew = exp->X_add_symbol->sy_value;
 	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
 	}
     }
@@ -1314,7 +1363,6 @@ md_apply_fix (fixP, valueP)
 			      value, 2);
 	  break;
 	case BFD_RELOC_32:
-	case BFD_RELOC_ARC_B26:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      value, 4);
 	  break;
@@ -1324,6 +1372,15 @@ md_apply_fix (fixP, valueP)
 			      value, 8);
 	  break;
 #endif
+	case BFD_RELOC_ARC_B26:
+	  /* If !fixP->fx_done then `value' is an implicit addend.
+	     We must shift it right by 2 in this case as well because the
+	     linker performs the relocation and then adds this in (as opposed
+	     to adding this in and then shifting right by 2).  */
+	  value >>= 2;
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			      value, 4);
+	  break;
 	default:
 	  abort ();
 	}
