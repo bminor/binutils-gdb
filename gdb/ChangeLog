@@ -44,10 +44,12 @@ Tue Jun  6 15:07:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
 
-	* symtab.h (VTBL_PREFIX_P): Add newer g++ vtbl prefix to prefix list.
+	* symtab.h (VTBL_PREFIX_P): Add newer g++ vtbl prefix to prefix
+	list.
 
-	* symtab.c (lookup_partial_symbol): Change to stop forcing linear searches
-	on C++ when we fail the binary search, by doing the binary search right.
+	* symtab.c (lookup_partial_symbol): Change to stop forcing linear
+	searches on C++ when we fail the binary search, by doing the
+	binary search right.
 
 2000-05-30  Daniel Berlin  <dan@cgsoftware.com>
 
