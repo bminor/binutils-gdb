@@ -1,3 +1,12 @@
+Fri Nov  1 10:50:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/linux.mh (NATDEPFILES): Fix up things so that it
+	links.
+	(GDBSERVER_DEPFILES,TERMCAP): Ditto.
+
+	* monitor.c (dev_name,targ_ops): Move static variables before
+	first use, to avoid compiler warnings.
+
 start-sanitize-m32r
 Thu Oct 31 16:37:17 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 

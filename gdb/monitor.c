@@ -59,6 +59,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dcache.h"
 #include "srec.h"
 
+static char *dev_name;
+static struct target_ops *targ_ops;
+
 static int readchar PARAMS ((int timeout));
 
 static void monitor_command PARAMS ((char *args, int fromtty));
@@ -526,9 +529,6 @@ compile_pattern (pattern, compiled_pattern, fastmap)
 
 /* Open a connection to a remote debugger. NAME is the filename used
    for communication.  */
-
-static char *dev_name;
-static struct target_ops *targ_ops;
 
 void
 monitor_open (args, mon_ops, from_tty)
