@@ -1,0 +1,82 @@
+# This file is a shell script fragment that supplies the information
+# necessary to tailor a template configure script into the configure
+# script appropriate for this directory.  For more information, check
+# any existing configure script.
+
+srctrigger=ldmain.c
+srcname="linker"
+
+# per-host:
+
+if [ "${host_os}" = "posix" ] ; then
+	my_host=posix
+else
+	case "${host_cpu}" in
+	rs6000)	my_host=aix ;;
+	mips)
+		case "${host_vendor}" in
+		dec)	my_host=dec3100 ;;
+		esac
+		;;
+	m88k)
+		case "${host_vendor}" in
+		*)
+			case "${host_os}" in
+			dgux)	my_host=dgux ;;
+			esac
+			;;
+		esac
+		;;
+
+	m68k)
+		case "${host_vendor}" in
+		hp)	my_host=hp9000 ;;
+		sony)	my_host=news ;;
+		sun)	my_host=sun3 ;;
+		esac
+		;;
+
+	i386)
+		case "${host_vendor}" in
+		*)
+			case "${host_os}" in
+			sysv)	my_host=i386v ;;
+			esac
+			;;
+		esac
+		;;
+
+	sparc)
+		case "${host_vendor}" in
+		sun)	my_host=sun4 ;;
+		esac
+		;;
+
+	rtpc)	my_host=rtbsd ;;
+	tahoe | vax)	my_host=${host_cpu} ;;
+	esac
+fi
+
+if [ ! -f config/hmake-${my_host} ] ; then
+	echo '***' The linker do not support host ${host}
+	exit 1
+fi
+
+host_makefile_frag=config/hmake-${my_host}
+
+# per-target:
+
+case ${target_cpu} in
+sparc)
+	case ${target_vendor} in
+	sun) my_target=sun4 ;;
+	esac
+	;;
+m88k)	my_target=m88k-bcs ;;
+a29k)	my_target=coff-a29k ;;
+esac
+
+target_makefile_frag=config/tmake-${my_target}
+
+files=
+links=
