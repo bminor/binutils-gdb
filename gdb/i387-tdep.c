@@ -168,7 +168,7 @@ print_i387_value (char *raw)
   gdb_assert (TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext);
 
   /* Take care of the padding.  FP reg is 80 bits.  The same value in
-     memory is 96 bits. */
+     memory is 96 bits.  */
   gdb_assert (FPU_REG_RAW_SIZE < len);
   memcpy (&tmp, raw, FPU_REG_RAW_SIZE);
   memset (&tmp + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
