@@ -1,3 +1,9 @@
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/structs.exp: Remove ${testfile} from "zed L<n> for
+	return ${tests}" test.  The ${tests} already mentions the
+	filename.
+
 2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/local.exp: Accept gcc abi 2.

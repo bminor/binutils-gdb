@@ -285,7 +285,7 @@ proc test_struct_returns { n } {
 
     # Check that the program invalidated the relevant global.
     setup_kfails structs-tld i*86-*-* gdb/1447
-    gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for return; ${tests} .${testfile}."
+    gdb_test "p/c L${n}" " = [zed $n]" "zed L<n> for return; ${tests}"
 
     # Force the "return".  This checks that the return is always
     # performed, and that GDB correctly reported this to the user.
