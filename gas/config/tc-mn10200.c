@@ -888,7 +888,8 @@ mn10200_insert_operand (insnp, extensionp, operand, val, file, line, shift)
      unsigned int shift;
 {
   /* No need to check 24 or 32bit operands for a bit.  */
-  if (operand->bits < 24)
+  if (operand->bits < 24
+      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
     {
       long min, max;
       offsetT test;
@@ -944,7 +945,8 @@ check_operand (insn, operand, val)
      offsetT val;
 {
   /* No need to check 24bit or 32bit operands for a bit.  */
-  if (operand->bits < 24)
+  if (operand->bits < 24
+      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
     {
       long min, max;
       offsetT test;
