@@ -240,7 +240,7 @@ thread_db_state_str (td_thr_state_e state)
 }
 
 /* A callback function for td_ta_thr_iter, which we use to map all
-   threads to LWPs.  
+   threads to LWPs.
 
    THP is a handle to the current thread; if INFOP is not NULL, the
    struct thread_info associated with this thread is returned in
@@ -465,16 +465,16 @@ thread_db_load (void)
   return 1;
 }
 
-static int
+static td_err_e
 enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
 {
   td_notify_t notify;
-  int err;
+  td_err_e err;
 
   /* Get the breakpoint address for thread EVENT.  */
   err = td_ta_event_addr_p (thread_agent, event, &notify);
   if (err != TD_OK)
-    return 0;
+    return err;
 
   /* Set up the breakpoint.  */
   (*bp) = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
@@ -482,7 +482,7 @@ enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
 					      &current_target);
   create_thread_event_breakpoint ((*bp));
 
-  return 1;
+  return TD_OK;
 }
 
 static void
@@ -522,7 +522,8 @@ enable_thread_event_reporting (void)
   td_death_bp_addr = 0;
 
   /* Set up the thread creation event.  */
-  if (!enable_thread_event (thread_agent, TD_CREATE, &td_create_bp_addr))
+  err = enable_thread_event (thread_agent, TD_CREATE, &td_create_bp_addr);
+  if (err != TD_OK)
     {
       warning ("Unable to get location for thread creation breakpoint: %s",
 	       thread_db_err_str (err));
@@ -530,7 +531,8 @@ enable_thread_event_reporting (void)
     }
 
   /* Set up the thread death event.  */
-  if (!enable_thread_event (thread_agent, TD_DEATH, &td_death_bp_addr))
+  err = enable_thread_event (thread_agent, TD_DEATH, &td_death_bp_addr);
+  if (err != TD_OK)
     {
       warning ("Unable to get location for thread death breakpoint: %s",
 	       thread_db_err_str (err));
@@ -833,10 +835,10 @@ check_event (ptid_t ptid)
      was created and cannot specifically locate the event message for it.
      We have to call td_ta_event_getmsg() to get
      the latest message.  Since we have no way of correlating whether
-     the event message we get back corresponds to our breakpoint, we must 
+     the event message we get back corresponds to our breakpoint, we must
      loop and read all event messages, processing them appropriately.
-     This guarantees we will process the correct message before continuing 
-     from the breakpoint.  
+     This guarantees we will process the correct message before continuing
+     from the breakpoint.
 
      Currently, death events are not enabled.  If they are enabled,
      the death event can use the td_thr_event_getmsg() interface to
