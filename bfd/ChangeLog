@@ -1,3 +1,14 @@
+Wed Feb  7 13:56:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: When making a shared library, set HLDFLAGS to
+	pass an appropriate -rpath option.  Use the make variable SONAME
+	as the shared library soname, rather than computing it here.  On
+	SunOS, build stamp-tshlink in place of $(SHLINK).
+	* Makefile.in (SONAME): New variable.
+	($(SHLINK)): Make a link to the transformed name, as well.
+	(stamp-tshlink): New target.
+	(install): Skip stamp-tshlink during install.
+
 Wed Feb  7 13:37:39 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf.c (make_mapping): Add an additional argument to suppress
