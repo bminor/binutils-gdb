@@ -1,3 +1,7 @@
+Tue Jun  1 17:48:42 1993  Rob Savoye  (rob at darkstar.cygnus.com)
+
+	* config.sub: Add support for rom68k and bug boot monitors.
+
 Mon May 31 09:36:37 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in: Make all-opcodes depend on all-bfd.

@@ -95,6 +95,9 @@ case $os in
 		os=-isc2.2
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
+	-clix*)
+		basic_machine=clipper-intergraph
+		;;
 	-isc*)
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
@@ -363,7 +366,7 @@ case $basic_machine in
 		basic_machine=m68k-altos
 		;;
 	miniframe)
-		basic_machine=m68000-convergent
+		basic_machine=m68010-convergent
 		;;
 	tower | tower-32)
 		basic_machine=m68k-ncr
@@ -375,6 +378,18 @@ case $basic_machine in
 	st2000)						# CYGNUS LOCAL
 		basic_machine=m68k-tandem
 		;;
+        *bug)                                           # CYGNUS LOCAL
+                basic_machine=m68k-bug
+		os=-coff
+                ;;
+        rom68k)                                         # CYGNUS LOCAL
+                basic_machine=m68k-rom68k
+		os=-coff
+                ;;
+        monitor)                                         # CYGNUS LOCAL
+                basic_machine=m68k-rom68k
+		os=-coff
+                ;;
 	decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
 		basic_machine=mips-dec
 		;;
@@ -629,7 +644,7 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
-	      | -abug | -ecoff)
+	      | -ecoff | -lynx )
 				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
@@ -770,6 +785,12 @@ case $basic_machine in
 		;;
 	*-masscomp)
 		os=-rtu
+		;;
+	*-rom68k)					# CYGNUS LOCAL
+		os=-coff
+		;;
+	*-*bug)						# CYGNUS LOCAL
+		os=-coff
 		;;
 	*)
 		os=-none
