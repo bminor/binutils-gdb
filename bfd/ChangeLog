@@ -1,5 +1,8 @@
 Tue Oct  4 11:23:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* ecoff.c (_bfd_ecoff_new_section_hook): Default section alignment
+	power to 4, rather than using align_power_min.
+
 	* coffcode.h (coff_new_section_hook): Don't use align_power_min;
 	use COFF_DEFAULT_SECTION_ALIGNMENT_POWER instead.  Force the .stab
 	and .stabstr sections to be aligned to no more than 2.  Remove
