@@ -1,3 +1,12 @@
+2003-04-30  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.objc
+	* configure.in (AC_OUTPUT): Add gdb.objc/Makefile
+	* gdb.objc/Makefile.in, gdb.objc/basicclass.exp,
+	gdb.objc/basicclass.m: : New files
+
+	* lib/gdb.exp (gdb_compile_objc): New procedure.
+
 2003-04-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/signals.exp: Make backtrace tests more specific.
