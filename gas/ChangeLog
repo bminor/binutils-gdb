@@ -1,3 +1,7 @@
+2001-06-06  Tracy Kuhrt <Tracy.Kuhrt@microchip.com>
+
+	* as.c (parse_args): Correct option name "listing-lhs-width2".
+
 2001-05-30  Richard Henderson  <rth@redhat.com>
 
 	* read.c (emit_leb128_expr): Call md_cons_align.
