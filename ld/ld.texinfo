@@ -840,7 +840,8 @@ for Solaris compatibility.
 @item -z @var{keyword}
 The recognized keywords are @code{initfirst}, @code{interpose},
 @code{loadfltr}, @code{nodefaultlib}, @code{nodelete}, @code{nodlopen},
-@code{nodump}, @code{now} and @code{origin}. The other keywords are
+@code{nodump}, @code{now}, @code{origin}, @code{combreloc} and
+@code{nocombreloc}. The other keywords are
 ignored for Solaris compatibility. @code{initfirst} marks the object
 to be initialized first at runtime before any other objects.
 @code{interpose} marks the object that its symbol table interposes
@@ -854,6 +855,9 @@ of this object will ignore any default library search paths.
 @code{now} marks the object with the non-lazy runtime binding.
 @code{origin} marks the object may contain $ORIGIN.
 @code{defs} disallows undefined symbols.
+@code{combreloc} combines multiple reloc sections and sorts them
+to make dynamic symbol lookup caching possible.
+@code{nocombreloc} disables multiple reloc sections combining.
 
 @kindex -(
 @cindex groups of archives

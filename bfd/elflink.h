@@ -67,6 +67,12 @@ static boolean elf_link_size_reloc_section
 static void elf_link_adjust_relocs
   PARAMS ((bfd *, Elf_Internal_Shdr *, unsigned int,
 	   struct elf_link_hash_entry **));
+static int elf_link_sort_cmp1
+  PARAMS ((const void *, const void *));
+static int elf_link_sort_cmp2
+  PARAMS ((const void *, const void *));
+static size_t elf_link_sort_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection **));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -3065,6 +3071,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       asection *s;
       size_t bucketcount = 0;
       size_t hash_entry_size;
+      unsigned int dtagcount;
 
       /* Set up the version definition section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
@@ -3439,8 +3446,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       BFD_ASSERT (s != NULL);
       s->_raw_size = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
 
-      if (! elf_add_dynamic_entry (info, DT_NULL, 0))
-	return false;
+      for (dtagcount = 0; dtagcount <= info->spare_dynamic_tags; ++dtagcount)
+	if (! elf_add_dynamic_entry (info, DT_NULL, 0))
+	  return false;
     }
 
   return true;
@@ -4270,6 +4278,210 @@ elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
   free (irela);
 }
 
+struct elf_link_sort_rela {
+  bfd_vma offset;
+  enum elf_reloc_type_class type;
+  union {
+    Elf_Internal_Rel rel;
+    Elf_Internal_Rela rela;
+  } u;
+};
+
+static int
+elf_link_sort_cmp1 (A, B)
+     const PTR A;
+     const PTR B;
+{
+  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *)A;
+  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *)B;
+  int relativea, relativeb;
+
+  relativea = a->type == reloc_class_relative;
+  relativeb = b->type == reloc_class_relative;
+
+  if (relativea < relativeb)
+    return -1;
+  if (relativea > relativeb)
+    return 1;
+  if (ELF_R_SYM (a->u.rel.r_info) < ELF_R_SYM (b->u.rel.r_info))
+    return -1;
+  if (ELF_R_SYM (a->u.rel.r_info) > ELF_R_SYM (b->u.rel.r_info))
+    return 1;
+  if (a->u.rel.r_offset < b->u.rel.r_offset)
+    return -1;
+  if (a->u.rel.r_offset > b->u.rel.r_offset)
+    return 1;
+  return 0;
+}
+
+static int
+elf_link_sort_cmp2 (A, B)
+     const PTR A;
+     const PTR B;
+{
+  struct elf_link_sort_rela *a = (struct elf_link_sort_rela *)A;
+  struct elf_link_sort_rela *b = (struct elf_link_sort_rela *)B;
+  int copya, copyb;
+
+  if (a->offset < b->offset)
+    return -1;
+  if (a->offset > b->offset)
+    return 1;
+  copya = a->type == reloc_class_copy;
+  copyb = b->type == reloc_class_copy;
+  if (copya < copyb)
+    return -1;
+  if (copya > copyb)
+    return 1;
+  if (a->u.rel.r_offset < b->u.rel.r_offset)
+    return -1;
+  if (a->u.rel.r_offset > b->u.rel.r_offset)
+    return 1;
+  return 0;
+}
+
+static size_t
+elf_link_sort_relocs (abfd, info, psec)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection **psec;
+{
+  bfd *dynobj = elf_hash_table (info)->dynobj;
+  asection *reldyn, *o;
+  boolean rel = false;
+  size_t count, size, i, j, ret;
+  struct elf_link_sort_rela *rela;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  reldyn = bfd_get_section_by_name (abfd, ".rela.dyn");
+  if (reldyn == NULL || reldyn->_raw_size == 0)
+    {
+      reldyn = bfd_get_section_by_name (abfd, ".rel.dyn");
+      if (reldyn == NULL || reldyn->_raw_size == 0)
+	return 0;
+      rel = true;
+      count = reldyn->_raw_size / sizeof (Elf_External_Rel);
+    }
+  else
+    count = reldyn->_raw_size / sizeof (Elf_External_Rela);
+
+  size = 0;
+  for (o = dynobj->sections; o != NULL; o = o->next)
+    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
+	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
+	&& o->output_section == reldyn)
+      size += o->_raw_size;
+
+  if (size != reldyn->_raw_size)
+    return 0;
+
+  rela = (struct elf_link_sort_rela *) calloc (sizeof (*rela), count);
+  if (rela == NULL)
+    {
+      (*info->callbacks->warning)
+	(info, _("Not enough memory to sort relocations"), 0, abfd, 0, 0);
+      return 0;
+    }
+
+  for (o = dynobj->sections; o != NULL; o = o->next)
+    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
+	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
+	&& o->output_section == reldyn)
+      {
+	if (rel)
+	  {
+	    Elf_External_Rel *erel, *erelend;
+	    struct elf_link_sort_rela *s;
+
+	    erel = (Elf_External_Rel *) o->contents;
+	    erelend = (Elf_External_Rel *) ((PTR) o->contents + o->_raw_size);
+	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
+	    for (; erel < erelend; erel++, s++)
+	      {
+		if (bed->s->swap_reloc_in)
+		  (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, &s->u.rel);
+		else
+		  elf_swap_reloc_in (abfd, erel, &s->u.rel);
+
+		s->type = (*bed->elf_backend_reloc_type_class)
+			    (ELF_R_TYPE (s->u.rel.r_info));
+	      }	    
+	  }
+	else
+	  {
+	    Elf_External_Rela *erela, *erelaend;
+	    struct elf_link_sort_rela *s;
+
+	    erela = (Elf_External_Rela *) o->contents;
+	    erelaend = (Elf_External_Rela *) ((PTR) o->contents + o->_raw_size);
+	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
+	    for (; erela < erelaend; erela++, s++)
+	      {
+		if (bed->s->swap_reloca_in)
+		  (*bed->s->swap_reloca_in) (dynobj, (bfd_byte *) erela, &s->u.rela);
+		else
+		  elf_swap_reloca_in (dynobj, erela, &s->u.rela);
+
+		s->type = (*bed->elf_backend_reloc_type_class)
+			    (ELF_R_TYPE (s->u.rel.r_info));
+	      }	    
+	  }
+      }
+
+  qsort (rela, count, sizeof (*rela), elf_link_sort_cmp1);
+  for (i = 0, j = 0; i < count && rela[i].type != reloc_class_relative; i++)
+    {
+      if (ELF_R_SYM (rela[i].u.rel.r_info) != ELF_R_SYM (rela[j].u.rel.r_info))
+	j = i;
+      rela[i].offset = rela[j].u.rel.r_offset;
+    }
+  ret = count - i;
+  qsort (rela, i, sizeof (*rela), elf_link_sort_cmp2);
+  
+  for (o = dynobj->sections; o != NULL; o = o->next)
+    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
+	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
+	&& o->output_section == reldyn)
+      {
+	if (rel)
+	  {
+	    Elf_External_Rel *erel, *erelend;
+	    struct elf_link_sort_rela *s;
+
+	    erel = (Elf_External_Rel *) o->contents;
+	    erelend = (Elf_External_Rel *) ((PTR) o->contents + o->_raw_size);
+	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
+	    for (; erel < erelend; erel++, s++)
+	      {
+		if (bed->s->swap_reloc_out)
+		  (*bed->s->swap_reloc_out) (abfd, &s->u.rel, (bfd_byte *) erel);
+		else
+		  elf_swap_reloc_out (abfd, &s->u.rel, erel);
+	      }
+	  }
+	else
+	  {
+	    Elf_External_Rela *erela, *erelaend;
+	    struct elf_link_sort_rela *s;
+
+	    erela = (Elf_External_Rela *) o->contents;
+	    erelaend = (Elf_External_Rela *) ((PTR) o->contents + o->_raw_size);
+	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
+	    for (; erela < erelaend; erela++, s++)
+	      {
+		if (bed->s->swap_reloca_out)
+		  (*bed->s->swap_reloca_out) (dynobj, &s->u.rela, (bfd_byte *) erela);
+		else
+		  elf_swap_reloca_out (dynobj, &s->u.rela, erela);
+	      }	    
+	  }
+      }
+
+  free (rela);
+  *psec = reldyn;
+  return ret;
+}
+
 /* Do the final step of an ELF link.  */
 
 boolean
@@ -4296,6 +4508,8 @@ elf_bfd_final_link (abfd, info)
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
   boolean merged;
+  size_t relativecount = 0;
+  asection *reldyn = 0;
 
   if (info->shared)
     abfd->flags |= DYNAMIC;
@@ -4866,6 +5080,9 @@ elf_bfd_final_link (abfd, info)
       o->reloc_count = 0;
     }
 
+  if (dynamic && info->combreloc && dynobj != NULL)
+    relativecount = elf_link_sort_relocs (abfd, info, &reldyn);
+
   /* If we are linking against a dynamic object, or generating a
      shared library, finish up the dynamic linking information.  */
   if (dynamic)
@@ -4889,6 +5106,23 @@ elf_bfd_final_link (abfd, info)
 	  switch (dyn.d_tag)
 	    {
 	    default:
+	      break;
+	    case DT_NULL:
+	      if (relativecount > 0 && dyncon + 1 < dynconend)
+		{
+		  switch (elf_section_data (reldyn)->this_hdr.sh_type)
+		    {
+		    case SHT_REL: dyn.d_tag = DT_RELCOUNT; break;
+		    case SHT_RELA: dyn.d_tag = DT_RELACOUNT; break;
+		    default: break;
+		    }
+		  if (dyn.d_tag != DT_NULL)
+		    {
+		      dyn.d_un.d_val = relativecount;
+		      elf_swap_dyn_out (dynobj, &dyn, dyncon);
+		      relativecount = 0;
+		    }
+		}
 	      break;
 	    case DT_INIT:
 	      name = info->init_function;

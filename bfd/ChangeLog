@@ -1,3 +1,44 @@
+2001-08-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (enum elf_reloc_type_class): New.
+	(struct elf_backend_data): Add elf_backend_reloc_type_class.
+	(_bfd_elf_reloc_type_class): New.
+	* elfxx-target.h (elf_backend_reloc_type_class): Define.
+	(elfNN_bed): Add elf_backend_reloc_type_class.
+	* elf.c (_bfd_elf_reloc_type_class): New.
+	* elf32-i386.c (elf_i386_check_relocs): Set DF_TEXTREL if the reloc
+	is against read-only section.
+	(elf_i386_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf_i386_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(elf32_sparc_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(elf32_sparc_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+	* elf64-sparc.c (sparc64_elf_check_relocs): Set DF_TEXTREL if the
+	reloc is against read-only section.
+	(sparc64_elf_size_dynamic_sections): Use DF_TEXTREL flag instead of
+	looking up section names for DT_TEXTREL.
+	(sparc64_elf_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+	* elfxx-ia64.c (struct elfNN_ia64_link_hash_table): Add reltext field.
+	(elfNN_ia64_hash_table_create): Clear ia64_info.
+	(get_reloc_section): Set DF_TEXTREL if the reloc is against read-only
+	section.
+	(elfNN_ia64_size_dynamic_sections): Use ia64_info->reltext flag
+	instead of looking up section names for DT_TEXTREL.
+	(elfNN_ia64_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+	* elflink.h (size_dynamic_sections): Add spare DT_NULL tags.
+	(struct elf_link_sort_rela): New.
+	(elf_link_sort_cmp1, elf_link_sort_cmp2, elf_link_sort_relocs): New.
+	(elf_bfd_final_link): Call elf_link_sort_relocs.
+	Convert one spare DT_NULL into DT_RELCOUNT resp. DT_RELACOUNT if
+	necessary.
+
 2001-08-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (x86-bsdi): No corefile support.

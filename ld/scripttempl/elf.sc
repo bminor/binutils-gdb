@@ -145,6 +145,13 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
 
+EOF
+if [ "x$COMBRELOC" = x ]; then
+  COMBRELOCCAT=cat
+else
+  COMBRELOCCAT="cat > $COMBRELOC"
+fi
+eval $COMBRELOCCAT <<EOF
   .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
   .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
@@ -215,7 +222,7 @@ SECTIONS
     {
       *(.rela.sbss)
       ${RELOCATING+*(.rela.sbss.*)}
-      ${RELOCATING+*(.rel.gnu.linkonce.sb.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.sb.*)}
     }
   .rel.sdata2  ${RELOCATING-0} : 
     { 
@@ -253,6 +260,24 @@ SECTIONS
       ${RELOCATING+*(.rela.bss.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.b.*)}
     }
+EOF
+if [ -n "$COMBRELOC" ]; then
+cat <<EOF
+  .rel.dyn	 :
+    {
+EOF
+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC
+cat <<EOF
+    }
+  .rela.dyn	 :
+    {
+EOF
+sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC
+cat <<EOF
+    }
+EOF
+fi
+cat <<EOF
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
   ${OTHER_PLT_RELOC_SECTIONS}

@@ -1135,7 +1135,25 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   else if (strncmp (secname, ".rel", 4) == 0
 	   && (hold_rel.os != NULL
 	       || (hold_rel.os = output_rel_find ()) != NULL))
-    place = &hold_rel;
+    {
+      if (! link_info.relocateable && link_info.combreloc)
+	{
+	  if (strncmp (secname, ".rela", 5) == 0)
+	    os = lang_output_section_find (".rela.dyn");
+	  else
+	    os = lang_output_section_find (".rel.dyn");
+
+	  if (os != NULL
+	      && os->bfd_section != NULL
+	      && ((s->flags ^ os->bfd_section->flags)
+		  & (SEC_LOAD | SEC_ALLOC)) == 0)
+	    {
+	      lang_add_section (&os->children, s, os, file);
+	      return true;
+	    }
+	}
+      place = &hold_rel;
+    }
   else if ((s->flags & (SEC_CODE | SEC_READONLY)) == SEC_READONLY
 	   && HAVE_SECTION (hold_rodata, ".rodata"))
     place = &hold_rodata;
@@ -1332,14 +1350,18 @@ echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}
 sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
+if ! cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then
 echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
-
+fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsc                    >> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.shared) return'		   >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs                     >> e${EMULATION_NAME}.c
 fi
-
+echo '  ; else if (link_info.combreloc) return'            >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xc                     >> e${EMULATION_NAME}.c
 echo '  ; else return'                                     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
 echo '; }'                                                 >> e${EMULATION_NAME}.c
@@ -1492,6 +1514,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	}
       else if (strcmp (optarg, "defs") == 0)
 	link_info.no_undefined = true;
+      else if (strcmp (optarg, "combreloc") == 0)
+	link_info.combreloc = true;
+      else if (strcmp (optarg, "nocombreloc") == 0)
+	link_info.combreloc = false;
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF

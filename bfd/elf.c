@@ -6053,3 +6053,10 @@ _bfd_elf_fprintf_vma (abfd, stream, value)
   fprintf_vma ((FILE *) stream, value);
 #endif
 }
+
+enum elf_reloc_type_class
+_bfd_elf_reloc_type_class (type)
+     int type;
+{
+  return reloc_class_normal;
+}

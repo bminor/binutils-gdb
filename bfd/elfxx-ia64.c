@@ -138,6 +138,7 @@ struct elfNN_ia64_link_hash_table
   asection *rel_pltoff_sec;	/* dynamic relocation section for same */
 
   bfd_size_type minplt_entries;	/* number of minplt entries */
+  unsigned reltext : 1;		/* are there relocs against readonly sections? */
 
   struct elfNN_ia64_local_hash_table loc_hash_table;
 };
@@ -299,6 +300,8 @@ static boolean elfNN_ia64_merge_private_bfd_data
   PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean elfNN_ia64_print_private_bfd_data
   PARAMS ((bfd *abfd, PTR ptr));
+static enum elf_reloc_type_class elfNN_ia64_reloc_type_class
+  PARAMS ((int));
 
 /* ia64-specific relocation */
 
@@ -1571,7 +1574,7 @@ elfNN_ia64_hash_table_create (abfd)
 {
   struct elfNN_ia64_link_hash_table *ret;
 
-  ret = bfd_alloc (abfd, sizeof (*ret));
+  ret = bfd_zalloc (abfd, sizeof (*ret));
   if (!ret)
     return 0;
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
@@ -1915,6 +1918,9 @@ get_reloc_section (abfd, ia64_info, sec, create)
 	  || !bfd_set_section_alignment (dynobj, srel, 3))
 	return NULL;
     }
+
+  if (sec->flags & SEC_READONLY)
+    ia64_info->reltext = 1;
 
   return srel;
 }
@@ -2535,7 +2541,6 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
   struct elfNN_ia64_link_hash_table *ia64_info;
   asection *sec;
   bfd *dynobj;
-  boolean reltext = false;
   boolean relplt = false;
 
   dynobj = elf_hash_table(info)->dynobj;
@@ -2692,24 +2697,6 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	    {
 	      if (!strip)
 		{
-		  const char *outname;
-		  asection *target;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL entry.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  sec->output_section);
-		  if (outname[4] == 'a')
-		    outname += 5;
-		  else
-		    outname += 4;
-
-		  target = bfd_get_section_by_name (output_bfd, outname);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-
 		  /* We use the reloc_count field as a counter if we need to
 		     copy relocs into the output file.  */
 		  sec->reloc_count = 0;
@@ -2763,7 +2750,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 					    sizeof (ElfNN_External_Rela)))
 	return false;
 
-      if (reltext)
+      if (ia64_info->reltext)
 	{
 	  if (! bfd_elfNN_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
@@ -4324,6 +4311,27 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
   _bfd_elf_print_private_bfd_data (abfd, ptr);
   return true;
 }
+
+static enum elf_reloc_type_class
+elfNN_ia64_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_IA64_REL32MSB:
+    case R_IA64_REL32LSB:
+    case R_IA64_REL64MSB:
+    case R_IA64_REL64LSB:
+      return reloc_class_relative;
+    case R_IA64_IPLTMSB:
+    case R_IA64_IPLTLSB:
+      return reloc_class_plt;
+    case R_IA64_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -4400,6 +4408,7 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
 #define elf_backend_want_dynbss		0
 #define elf_backend_copy_indirect_symbol elfNN_ia64_hash_copy_indirect
 #define elf_backend_hide_symbol		elfNN_ia64_hash_hide_symbol
+#define elf_backend_reloc_type_class	elfNN_ia64_reloc_type_class
 
 #include "elfNN-target.h"
 

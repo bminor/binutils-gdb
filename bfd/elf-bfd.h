@@ -331,6 +331,13 @@ struct elf_size_info {
 	 ? (elf_symbol_type *) (S) \
 	 : 0)
 
+enum elf_reloc_type_class {
+  reloc_class_normal,
+  reloc_class_relative,
+  reloc_class_plt,
+  reloc_class_copy
+};
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -636,9 +643,12 @@ struct elf_backend_data
      note is found in a core file. */
   boolean (*elf_backend_grok_psinfo) PARAMS ((bfd *, Elf_Internal_Note *));
 
-    /* Functions to print VMAs.  Special code to handle 64 bit ELF files.  */
+  /* Functions to print VMAs.  Special code to handle 64 bit ELF files.  */
   void (* elf_backend_sprintf_vma) PARAMS ((bfd *, char *, bfd_vma));
   void (* elf_backend_fprintf_vma) PARAMS ((bfd *, PTR, bfd_vma));
+
+  /* This function returns class of a reloc type.  */
+  enum elf_reloc_type_class (* elf_backend_reloc_type_class) PARAMS ((int));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -1007,6 +1017,8 @@ extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 
 extern void _bfd_elf_sprintf_vma PARAMS ((bfd *, char *, bfd_vma));
 extern void _bfd_elf_fprintf_vma PARAMS ((bfd *, PTR, bfd_vma));
+
+extern enum elf_reloc_type_class _bfd_elf_reloc_type_class PARAMS ((int));
 
 extern unsigned long bfd_elf_hash PARAMS ((const char *));
 

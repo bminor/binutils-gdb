@@ -96,6 +96,7 @@ static boolean sparc64_elf_slurp_reloc_table
 static long sparc64_elf_canonicalize_dynamic_reloc
   PARAMS ((bfd *, arelent **, asymbol **));
 static void sparc64_elf_write_relocs PARAMS ((bfd *, asection *, PTR));
+static enum elf_reloc_type_class sparc64_elf_reloc_type_class PARAMS ((int));
 
 /* The relocation "howto" table.  */
 
@@ -1248,6 +1249,8 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
@@ -1666,7 +1669,6 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 {
   bfd *dynobj;
   asection *s;
-  boolean reltext;
   boolean relplt;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1698,7 +1700,6 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  reltext = false;
   relplt = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
@@ -1731,18 +1732,6 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      const char *outname;
-	      asection *target;
-
-	      /* If this relocation section applies to a read only
-		 section, then we probably need a DT_TEXTREL entry.  */
-	      outname = bfd_get_section_name (output_bfd,
-					      s->output_section);
-	      target = bfd_get_section_by_name (output_bfd, outname + 5);
-	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0)
-		reltext = true;
-
 	      if (strcmp (name, ".rela.plt") == 0)
 		relplt = true;
 
@@ -1805,11 +1794,10 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 					    sizeof (Elf64_External_Rela)))
 	return false;
 
-      if (reltext)
+      if (info->flags & DF_TEXTREL)
 	{
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
 
       /* Add dynamic STT_REGISTER symbols and corresponding DT_SPARC_REGISTER
@@ -2909,6 +2897,23 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 
   return true;
 }
+
+static enum elf_reloc_type_class
+sparc64_elf_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_SPARC_RELATIVE:
+      return reloc_class_relative;
+    case R_SPARC_JMP_SLOT:
+      return reloc_class_plt;
+    case R_SPARC_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 /* Functions for dealing with the e_flags field.  */
 
@@ -3160,6 +3165,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_size_info
 #define elf_backend_object_p \
   sparc64_elf_object_p
+#define elf_backend_reloc_type_class \
+  sparc64_elf_reloc_type_class
 
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0

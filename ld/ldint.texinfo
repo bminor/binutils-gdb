@@ -239,7 +239,7 @@ If @code{SCRIPT_NAME} is set to @var{script}, @code{genscripts.sh} will
 invoke @file{scripttempl/@var{script}.sc}.
 
 The @file{genscripts.sh} script will invoke the @file{scripttempl}
-script 5 or 6 times.  Each time it will set the shell variable
+script 5 to 8 times.  Each time it will set the shell variable
 @code{LD_FLAG} to a different value.  When the linker is run, the
 options used will direct it to select a particular script.  (Script
 selection is controlled by the @code{get_script} emulation entry point;
@@ -278,6 +278,22 @@ this value if @code{GENERATE_SHLIB_SCRIPT} is defined in the
 this script at the appropriate time, normally when the linker is invoked
 with the @code{-shared} option.  The output has an extension of
 @file{.xs}.
+@item c
+The @file{scripttempl} script is only invoked with @code{LD_FLAG} set to
+this value if @code{GENERATE_COMBRELOC_SCRIPT} is defined in the
+@file{emulparams} file or if @code{SCRIPT_NAME} is @code{elf}. The
+@file{emultempl} script must arrange to use this script at the appropriate
+time, normally when the linker is invoked with the @code{-z combreloc}
+option.  The output has an extension of
+@file{.xc}.
+@item cshared
+The @file{scripttempl} script is only invoked with @code{LD_FLAG} set to
+this value if @code{GENERATE_COMBRELOC_SCRIPT} is defined in the
+@file{emulparams} file or if @code{SCRIPT_NAME} is @code{elf} and
+@code{GENERATE_SHLIB_SCRIPT} is defined in the @file{emulparms} file.
+The @file{emultempl} script must arrange to use this script at the
+appropriate time, normally when the linker is invoked with the @code{-shared
+-z combreloc} option.  The output has an extension of @file{.xsc}.
 @end table
 
 Besides the shell variables set by the @file{emulparams} script, and the
@@ -301,6 +317,10 @@ page aligned, or to @samp{.} when generating the @code{-N} script.
 @item CREATE_SHLIB
 This will be set to a non-empty string when generating a @code{-shared}
 script.
+
+@item COMBRELOC
+This will be set to a non-empty string when generating @code{-z combreloc}
+scripts to a temporary file name which can be used during script generation.
 @end table
 
 The conventional way to write a @file{scripttempl} script is to first

@@ -63,6 +63,7 @@ static boolean elf_i386_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_i386_fake_sections
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+static enum elf_reloc_type_class elf_i386_reloc_type_class PARAMS ((int));
 
 #define USE_REL	1		/* 386 uses REL relocations instead of RELA */
 
@@ -767,6 +768,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rel);
@@ -1243,14 +1246,13 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
 
 static boolean
 elf_i386_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   struct elf_i386_link_hash_table *htab;
   bfd *dynobj;
   asection *s;
   boolean relocs;
-  boolean reltext;
   bfd *i;
 
   htab = elf_i386_hash_table (info);
@@ -1315,7 +1317,6 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = false;
-  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LINKER_CREATED) == 0)
@@ -1344,29 +1345,8 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
-	      /* Remember whether there are any reloc sections other
-		 than .rel.plt.  */
 	      if (s != htab->srelplt)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rel.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 4);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1426,11 +1406,10 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -2215,6 +2194,22 @@ elf_i386_fake_sections (abfd, hdr, sec)
   return true;
 }
 
+static enum elf_reloc_type_class
+elf_i386_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_386_RELATIVE:
+      return reloc_class_relative;
+    case R_386_JUMP_SLOT:
+      return reloc_class_plt;
+    case R_386_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
@@ -2246,5 +2241,6 @@ elf_i386_fake_sections (abfd, hdr, sec)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 #define elf_backend_fake_sections	      elf_i386_fake_sections
+#define elf_backend_reloc_type_class	      elf_i386_reloc_type_class
 
 #include "elf32-target.h"

@@ -131,6 +131,7 @@ int parsing_defsym = 0;
 #define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
 #define OPTION_DISCARD_NONE		(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
+#define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -347,6 +348,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Sort common symbols by size"), TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
       '\0', NULL, NULL, NO_HELP },
+  { {"spare-dynamic-tags", required_argument, NULL, OPTION_SPARE_DYNAMIC_TAGS},
+      '\0', N_("COUNT"), N_("How many tags to reserve in .dynamic section"), TWO_DASHES },
   { {"split-by-file", optional_argument, NULL, OPTION_SPLIT_BY_FILE},
       '\0', N_("[=SIZE]"), N_("Split output sections every SIZE octets"), TWO_DASHES },
   { {"split-by-reloc", optional_argument, NULL, OPTION_SPLIT_BY_RELOC},
@@ -1072,6 +1075,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 	case 'y':
 	  add_ysym (optarg);
+	  break;
+	case OPTION_SPARE_DYNAMIC_TAGS:
+	  link_info.spare_dynamic_tags = strtoul (optarg, NULL, 0);
 	  break;
 	case OPTION_SPLIT_BY_RELOC:
 	  if (optarg != NULL)

@@ -52,6 +52,8 @@ static boolean elf32_sparc_object_p
   PARAMS ((bfd *));
 static void elf32_sparc_final_write_processing
   PARAMS ((bfd *, boolean));
+static enum elf_reloc_type_class elf32_sparc_reloc_type_class
+  PARAMS ((int));
 
 /* The relocation "howto" table.  */
 
@@ -592,6 +594,8 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
@@ -909,12 +913,11 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 
 static boolean
 elf32_sparc_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
-  boolean reltext;
   boolean relplt;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -952,7 +955,6 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  reltext = false;
   relplt = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
@@ -985,19 +987,6 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      const char *outname;
-	      asection *target;
-
-	      /* If this relocation section applies to a read only
-		 section, then we probably need a DT_TEXTREL entry.  */
-	      outname = bfd_get_section_name (output_bfd,
-					      s->output_section);
-	      target = bfd_get_section_by_name (output_bfd, outname + 5);
-	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0
-		  && (target->flags & SEC_ALLOC) != 0)
-		reltext = true;
-
 	      if (strcmp (name, ".rela.plt") == 0)
 		relplt = true;
 
@@ -1058,11 +1047,10 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 					    sizeof (Elf32_External_Rela)))
 	return false;
 
-      if (reltext)
+      if (info->flags & DF_TEXTREL)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -2081,6 +2069,23 @@ elf32_sparc_final_write_processing (abfd, linker)
       break;
     }
 }
+
+static enum elf_reloc_type_class
+elf32_sparc_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_SPARC_RELATIVE:
+      return reloc_class_relative;
+    case R_SPARC_JMP_SLOT:
+      return reloc_class_plt;
+    case R_SPARC_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 #define TARGET_BIG_SYM	bfd_elf32_sparc_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
@@ -2111,6 +2116,7 @@ elf32_sparc_final_write_processing (abfd, linker)
 					elf32_sparc_final_write_processing
 #define elf_backend_gc_mark_hook        elf32_sparc_gc_mark_hook
 #define elf_backend_gc_sweep_hook       elf32_sparc_gc_sweep_hook
+#define elf_backend_reloc_type_class	elf32_sparc_reloc_type_class
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_want_got_plt 0

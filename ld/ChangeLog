@@ -1,3 +1,27 @@
+2001-08-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/elf32.em (place_orphan): Place orphan .rel* sections
+	into .rel.dyn resp. .rela.dyn if combreloc.
+	(get_script): If .x linker script is equal to .xn, only put it
+	once into the binary.
+	Add .xc and .xsc scripts.
+	(parse_args): Handle -z combreloc and -z nocombreloc.
+	* scripttempl/elf.sc (.rela.sbss): Fix a typo.
+	For .xc and .xsc scripts put all .rel* or .rela* input sections
+	but .rel*.plt and PLT-like sections into .rel.dyn resp. .rela.dyn.
+	* genscripts.sh (GENERATE_COMBRELOC_SCRIPT): Set if SCRIPT_NAME
+	is elf.
+	Strip trailing whitespace from script.
+	Generate .xc and .xsc scripts if requested.
+	* ldmain.c (main): Initialize link_info.combreloc and
+	link_info.spare_dynamic_tags.
+	* lexsup.c (OPTION_SPARE_DYNAMIC_TAGS): Define.
+	(ld_options): Add --spare-dynamic-tags option.
+	(parse_args): Likewise.
+	* ld.texinfo: Document -z combreloc and -z nocombreloc.
+	* ldint.texinfo: Document .xc and .xsc linker scripts.
+	* NEWS: Add notes about -z combreloc and SHF_MERGE.
+
 2001-08-22  H.J. Lu  <hjl@gnu.org>
 
 	* emulparams/elf32fr30.sh: Add a newline.

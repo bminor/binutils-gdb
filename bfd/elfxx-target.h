@@ -339,6 +339,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_fprintf_vma
 #define elf_backend_fprintf_vma			_bfd_elf_fprintf_vma
 #endif
+#ifndef elf_backend_reloc_type_class
+#define elf_backend_reloc_type_class		_bfd_elf_reloc_type_class
+#endif
 
 /* Previously, backends could only use SHT_REL or SHT_RELA relocation
    sections, but not both.  They defined USE_REL to indicate SHT_REL
@@ -426,6 +429,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_grok_psinfo,
   elf_backend_sprintf_vma,
   elf_backend_fprintf_vma,
+  elf_backend_reloc_type_class,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
