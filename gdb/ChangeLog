@@ -1,3 +1,11 @@
+2003-03-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_type): Renamed from
+	i386_register_virtual_type.  Adjust function signature.
+	(i386_gdbarch_init): Set register_type instead of
+	deprecated_max_register_raw_size,
+	deprecated_max_register_virtual_size and register_virtual_type.
+
 2003-03-14  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_prev_frame): When a legacy frame, always call

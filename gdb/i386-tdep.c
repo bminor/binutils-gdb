@@ -1129,7 +1129,7 @@ i386_use_struct_convention (int gcc_p, struct type *type)
    potentially they could be used for things other than address.  */
 
 static struct type *
-i386_register_virtual_type (int regnum)
+i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
@@ -1558,9 +1558,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, i386_register_type);
 
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
 
