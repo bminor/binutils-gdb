@@ -1,3 +1,10 @@
+2004-07-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.ada/gnat_ada.gpr.in: Rename from here ...
+	* gdb.ada/gnat_ada.gin: ... to here.
+	* configure.in: Use gnat_ada.gin.
+	* configure: Regenerate.
+
 2004-07-16  Andrew Cagney  <cagney@redhat.com>
 
 	* lib/insight-support.exp: Delete file.
