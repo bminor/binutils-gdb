@@ -412,11 +412,6 @@ pa_symfile_init (objfile)
 
   memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
-  if (!stabsect)
-    return;
-
-  if (!stringsect)
-    error ("Found stabs, but not string section");
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 #define	STRING_TABLE_OFFSET	(stringsect->filepos)
@@ -429,6 +424,12 @@ pa_symfile_init (objfile)
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find $TEXT$ section in symbol file");
 
+  if (!stabsect)
+    return;
+
+  if (!stringsect)
+    error ("Found stabs, but not string section");
+  
   /* FIXME: I suspect this should be external_nlist.  The size of host
      types like long and bfd_vma should not affect how we read the
      file.  */

@@ -1,3 +1,8 @@
+Mon Dec 13 06:42:37 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* paread.c (pa_symfile_init): Check for the existance of stabs
+	after DBX_TEXT_SECT has been initialized.
+
 Tue Nov 23 17:29:28 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
         * config/h8300/tm-h8300.h (BREAKPOINT): Insn changed to sleep.
