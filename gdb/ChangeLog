@@ -1,5 +1,9 @@
 2002-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* go32-nat.c: add i386-tdep.h include to import FP_REGNUM_P macro.
+
+2002-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* win32-nat.c (display_selector): New function. Displays information
 	about the information returned by GetThreadSelectorEntry API function.
 	(display_selectors): New function. Displays the infomation of

@@ -30,6 +30,7 @@
 #include "floatformat.h"
 #include "buildsym.h"
 #include "i387-nat.h"
+#include "i386-tdep.h"
 #include "value.h"
 #include "regcache.h"
 #include "gdb_string.h"
