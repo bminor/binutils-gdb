@@ -32,6 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dis-asm.h"
 #include "../opcodes/sh-opc.h"
 
+
+
 /* Prologue looks like
    [mov.l	<regs>,@-r15]...
    [sts.l	pr,@-r15]
@@ -60,10 +62,10 @@ sh_skip_prologue (start_pc)
   while (IS_STS (w)
 	 || IS_PUSH (w)
 	 || IS_MOV_SP_FP (w)
-	 || IS_MOV_R3(w)
-	 || IS_ADD_R3SP(w)
-	 || IS_ADD_SP(w)
-	 || IS_SHLL_R3(w))
+	 || IS_MOV_R3 (w)
+	 || IS_ADD_R3SP (w)
+	 || IS_ADD_SP (w)
+	 || IS_SHLL_R3 (w))
     {
       start_pc += 2;
       w = read_memory_integer (start_pc, 2);
@@ -83,9 +85,11 @@ print_insn (memaddr, stream)
 
   GDB_INIT_DISASSEMBLE_INFO (info, stream);
 
-  return print_insn_sh (memaddr, &info);
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return print_insn_sh (memaddr, &info);
+  else
+    return print_insn_shl (memaddr, &info);
 }
-
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
@@ -161,20 +165,20 @@ frame_find_saved_regs (fi, fsr)
 	}
       else if (IS_MOV_R3 (insn))
 	{
-	  r3_val = (char)(insn & 0xff);
-	  pc+=2;
+	  r3_val = (char) (insn & 0xff);
+	  pc += 2;
 	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_SHLL_R3 (insn))
 	{
-	  r3_val <<=1;
-	  pc+=2;
+	  r3_val <<= 1;
+	  pc += 2;
 	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_ADD_R3SP (insn))
 	{
 	  depth += -r3_val;
-	  pc+=2;
+	  pc += 2;
 	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_ADD_SP (insn))
@@ -221,17 +225,18 @@ frame_find_saved_regs (fi, fsr)
     {
       fi->return_pc = read_register (PR_REGNUM) + 4;
     }
-  else {
+  else
+    {
 
-    if (fsr->regs[PR_REGNUM])
-      {
-	fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4) + 4;
-      }
-    else
-      {
-	fi->return_pc = read_register (PR_REGNUM) + 4;
-      }
-  }
+      if (fsr->regs[PR_REGNUM])
+	{
+	  fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4) + 4;
+	}
+      else
+	{
+	  fi->return_pc = read_register (PR_REGNUM) + 4;
+	}
+    }
 }
 
 /* initialize the extra info saved in a FRAME */
@@ -269,7 +274,7 @@ pop_frame ()
 	}
     }
 
-  write_register (PC_REGNUM, fi->return_pc);
+  write_register (PC_REGNUM, frame->return_pc);
   write_register (SP_REGNUM, fp + 4);
   flush_cached_frames ();
 }
@@ -281,31 +286,31 @@ show_regs (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_filtered("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
-		  read_register(PC_REGNUM),
-		  read_register(SR_REGNUM),
-		  read_register(PR_REGNUM),
-		  read_register(MACH_REGNUM),
-		  read_register(MACL_REGNUM));
+  printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
+		   read_register (PC_REGNUM),
+		   read_register (SR_REGNUM),
+		   read_register (PR_REGNUM),
+		   read_register (MACH_REGNUM),
+		   read_register (MACL_REGNUM));
 
-  printf_filtered("R0-R7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		  read_register(0),
-		  read_register(1),
-		  read_register(2),
-		  read_register(3),
-		  read_register(4),
-		  read_register(5),
-		  read_register(6),
-		  read_register(7));
-  printf_filtered("R8-R15 %08x %08x %08x %08x %08x %08x %08x %08x\n",
-		  read_register(8),
-		  read_register(9),
-		  read_register(10),
-		  read_register(11),
-		  read_register(12),
-		  read_register(13),
-		  read_register(14),
-		  read_register(15));
+  printf_filtered ("R0-R7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
+		   read_register (0),
+		   read_register (1),
+		   read_register (2),
+		   read_register (3),
+		   read_register (4),
+		   read_register (5),
+		   read_register (6),
+		   read_register (7));
+  printf_filtered ("R8-R15 %08x %08x %08x %08x %08x %08x %08x %08x\n",
+		   read_register (8),
+		   read_register (9),
+		   read_register (10),
+		   read_register (11),
+		   read_register (12),
+		   read_register (13),
+		   read_register (14),
+		   read_register (15));
 }
 
 
@@ -320,5 +325,5 @@ _initialize_sh_tdep ()
 		"Set simulated memory size of simulator target.", &setlist),
      &showlist);
 
-  add_com("regs", class_vars, show_regs, "Print all registers");
+  add_com ("regs", class_vars, show_regs, "Print all registers");
 }

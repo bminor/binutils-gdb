@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Define the bit, byte, and word ordering of the machine.  */
 
-#define TARGET_BYTE_ORDER BIG_ENDIAN
+#define TARGET_BYTE_ORDER_SELECTABLE
 
 
 /* Offset from address of function to start of its code.
@@ -58,9 +58,8 @@ extern CORE_ADDR sh_skip_prologue ();
 /* Illegal instruction - used by the simulator for breakpoint
    detection */
 
-#define BREAKPOINT {0xc3, 0xff}  /* 0xc3ff is trapa #ff */
-#undef BREAKPOINT
-#define BREAKPOINT {0x00, 0x1b} /* SLEEP */
+#define BREAKPOINT {0xc3, 0xc3}  /* 0xc3c3 is trapa #c3, and it works in big 
+				    and little endian modes  */
 #define REMOTE_BREAKPOINT { 0xc3, 0x20}
 
 /* If your kernel resets the pc after the trap happens you may need to
