@@ -2183,6 +2183,11 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  case 0x91:
 		  case 0x92:
 		  case 0x93:
+		    /* sp-based offsets are zero-extended.  */
+		    if (code >= 0x90 && code <= 0x93
+			&& (long)value < 0)
+		      continue;
+
 		    /* Note that we've changed the relocation contents, etc.  */
 		    elf_section_data (sec)->relocs = internal_relocs;
 		    free_relocs = NULL;
@@ -2231,6 +2236,11 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			&& (value & 0x8000))
 		      continue;
 
+		    /* mov imm16, an zero-extends the immediate.  */
+		    if (code == 0xdc
+			&& (long)value < 0)
+		      continue;
+
 		    /* Note that we've changed the relocation contents, etc.  */
 		    elf_section_data (sec)->relocs = internal_relocs;
 		    free_relocs = NULL;
@@ -2276,18 +2286,18 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    break;
 
 		  /* mov (abs32),an    -> mov (abs16),an
-		     mov (d32,sp),an   -> mov (d32,sp),an
-		     mov (d32,sp),dn   -> mov (d32,sp),dn
-		     movbu (d32,sp),dn -> movbu (d32,sp),dn
-		     movhu (d32,sp),dn -> movhu (d32,sp),dn
+		     mov (d32,sp),an   -> mov (d16,sp),an
+		     mov (d32,sp),dn   -> mov (d16,sp),dn
+		     movbu (d32,sp),dn -> movbu (d16,sp),dn
+		     movhu (d32,sp),dn -> movhu (d16,sp),dn
 		     add imm32,dn      -> add imm16,dn
 		     cmp imm32,dn      -> cmp imm16,dn
 		     add imm32,an      -> add imm16,an
 		     cmp imm32,an      -> cmp imm16,an
-		     and imm32,dn      -> and imm32,dn
-		     or imm32,dn       -> or imm32,dn
-		     xor imm32,dn      -> xor imm32,dn
-		     btst imm32,dn     -> btst imm32,dn */
+		     and imm32,dn      -> and imm16,dn
+		     or imm32,dn       -> or imm16,dn
+		     xor imm32,dn      -> xor imm16,dn
+		     btst imm32,dn     -> btst imm16,dn */
 
 		  case 0xa0:
 		  case 0xb0:
@@ -2303,6 +2313,16 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  case 0xe1:
 		  case 0xe2:
 		  case 0xe3:
+		    /* cmp imm16, an zero-extends the immediate.  */
+		    if (code == 0xdc
+			&& (long)value < 0)
+		      continue;
+
+		    /* So do sp-based offsets.  */
+		    if (code >= 0xb0 && code <= 0xb3
+			&& (long)value < 0)
+		      continue;
+
 		    /* Note that we've changed the relocation contents, etc.  */
 		    elf_section_data (sec)->relocs = internal_relocs;
 		    free_relocs = NULL;
