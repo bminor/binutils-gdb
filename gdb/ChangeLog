@@ -1,3 +1,12 @@
+Fri Nov  8 23:38:48 1991  John Gilmore  (gnu at cygnus.com)
+
+	* command.c:  Include param.h.
+	* defs.h (warning_setup, warning):  Declare.
+	* expprint.c (print_subexp, UNOP_MEMVAL case):  Lint.
+	* inflow.c (new_tty):  Use USE_O_NOCTTY #define.
+	* language.c, printcmd.c (print_scalar_formatted), signame.c,
+	stack.c:  lint.
+
 Thu Nov  7 18:26:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* Makefile.in: link with libiberty after libreadline, since

@@ -41,6 +41,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "parser-defs.h"
 
+extern volatile void return_to_top_level ();
+
 /* Forward function declarations */
 static void set_type_range ();
 

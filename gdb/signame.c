@@ -54,6 +54,7 @@ static num_abbrev sig_table[NSIG*2];
 static int sig_table_nelts = 0;
 
 /* Enter signal number NUMBER into the tables with ABBREV and NAME.  */
+/* ARGSUSED */
 static void
 init_sig (number, abbrev, name)
      int number;

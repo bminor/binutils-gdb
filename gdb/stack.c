@@ -584,7 +584,6 @@ print_block_frame_locals (b, frame, stream)
 	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, frame, stream);
 	  fprintf_filtered (stream, "\n");
-	  fflush (stream);
 	}
     }
   return values_printed;
@@ -625,7 +624,6 @@ print_block_frame_labels (b, have_default, stream)
 			      local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);
-	  fflush (stream);
 	}
     }
   return values_printed;
@@ -639,7 +637,7 @@ print_block_frame_labels (b, have_default, stream)
    or 0 if nothing was printed because we have no info
    on the function running in FRAME.  */
 
-static int
+static void
 print_frame_local_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
@@ -650,8 +648,7 @@ print_frame_local_vars (frame, stream)
   if (block == 0)
     {
       fprintf_filtered (stream, "No symbol table info available.\n");
-      fflush (stream);
-      return 0;
+      return;
     }
   
   while (block != 0)
@@ -669,15 +666,12 @@ print_frame_local_vars (frame, stream)
   if (!values_printed)
     {
       fprintf_filtered (stream, "No locals.\n");
-      fflush (stream);
     }
-  
-  return 1;
 }
 
 /* Same, but print labels.  */
 
-static int
+static void
 print_frame_label_vars (frame, this_level_only, stream)
      register FRAME frame;
      int this_level_only;
@@ -695,8 +689,7 @@ print_frame_label_vars (frame, this_level_only, stream)
   if (block == 0)
     {
       fprintf_filtered (stream, "No symbol table info available.\n");
-      fflush (stream);
-      return 0;
+      return;
     }
 
   bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
@@ -732,9 +725,9 @@ print_frame_label_vars (frame, this_level_only, stream)
 	  index++;
 	}
       if (have_default)
-	return 1;
+	return;
       if (values_printed && this_level_only)
-	return 1;
+	return;
 
       /* After handling the function's top-level block, stop.
 	 Don't continue to its superblock, the block of
@@ -747,10 +740,7 @@ print_frame_label_vars (frame, this_level_only, stream)
   if (!values_printed && !this_level_only)
     {
       fprintf_filtered (stream, "No catches.\n");
-      fflush (stream);
     }
-  
-  return values_printed;
 }
 
 /* ARGSUSED */
@@ -772,7 +762,7 @@ catch_info ()
   print_frame_label_vars (selected_frame, 0, stdout);
 }
 
-static int
+static void
 print_frame_arg_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
@@ -787,8 +777,7 @@ print_frame_arg_vars (frame, stream)
   if (func == 0)
     {
       fprintf_filtered (stream, "No symbol table info available.\n");
-      fflush (stream);
-      return 0;
+      return;
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
@@ -813,17 +802,13 @@ print_frame_arg_vars (frame, stream)
 			b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 	  print_variable_value (sym2, frame, stream);
 	  fprintf_filtered (stream, "\n");
-	  fflush (stream);
 	}
     }
 
   if (!values_printed)
     {
       fprintf_filtered (stream, "No arguments.\n");
-      fflush (stream);
     }
-
-  return 1;
 }
 
 static void
@@ -928,14 +913,15 @@ find_relative_frame (frame, level_offset_ptr)
   return frame;
 }
 
-/* The "frame_select" command.  With no arg, NOP.
+/* The "select_frame" command.  With no arg, NOP.
    With arg LEVEL_EXP, select the frame at level LEVEL if it is a
    valid level.  Otherwise, treat level_exp as an address expression
    and select it.  See parse_frame_specification for more info on proper
    frame expressions. */
 
+/* ARGSUSED */
 static void
-frame_select_command (level_exp, from_tty)
+select_frame_command (level_exp, from_tty)
      char *level_exp;
      int from_tty;
 {
@@ -964,7 +950,7 @@ frame_select_command (level_exp, from_tty)
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
-   With arg, behaves like frame_select and then prints the selected
+   With arg, behaves like select_frame and then prints the selected
    frame.  */
 
 static void
@@ -972,7 +958,7 @@ frame_command (level_exp, from_tty)
      char *level_exp;
      int from_tty;
 {
-  frame_select_command (level_exp, from_tty);
+  select_frame_command (level_exp, from_tty);
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
@@ -1159,7 +1145,7 @@ a command file or a user-defined command.");
 
   add_com_alias ("f", "frame", class_stack, 1);
 
-  add_com ("frame-select", class_stack, frame_select_command,
+  add_com ("select-frame", class_stack, select_frame_command,
 	   "Select a stack frame without printing anything.\n\
 An argument specifies the frame to select.\n\
 It can be a stack frame number or the address of the frame.\n");
