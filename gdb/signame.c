@@ -198,6 +198,12 @@ static void init_sigs ()
 #if defined (SIGLOST)
   init_sig (SIGLOST, "LOST", "Resource lost");
 #endif
+#if defined (SIGWAITING)
+  init_sig (SIGWAITING, "WAITING", "Process's LWPs are blocked");  /* FIXME */
+#endif
+#if defined (SIGLWP)
+  init_sig (SIGLWP, "LWP", "Signal LWP");		/* FIXME description */
+#endif
 }
 
 /* Return the abbreviation for signal NUMBER.  */
