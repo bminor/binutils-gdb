@@ -13291,6 +13291,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
   {"arm9e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
   {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
+  {"arm926ejs",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
   {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
   {"arm946e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
   {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
@@ -13300,6 +13301,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
   {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
+  {"arm1026ejs",	ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1136js",		ARM_ARCH_V6,     FPU_NONE},
   {"arm1136jfs",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
