@@ -1,5 +1,12 @@
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (frame_saved_regs_pop): Assert POP_FRAME_P.
+	* gdbarch.sh (POP_FRAME): Change to function with predicate.
+	Suppress actual parameters when `-'.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* d10v-tdep.c (d10v_frame_saved_pc, d10v_frame_chain): Restore
 	code handling dummy frames.
 

@@ -731,6 +731,7 @@ static void
 frame_saved_regs_pop (struct frame_info *fi, void **cache,
 		      struct regcache *regcache)
 {
+  gdb_assert (POP_FRAME_P ());
   POP_FRAME;
 }
 
