@@ -55,7 +55,7 @@ L1:	ldy	,x
 	ldd	\[32768,pc\]
   39:	ec fb 80 00 	ldd	\[32768,PC\]
 	ldd	L1,pc
-  3d:	ec f8 09    	ldd	9,PC
+  3d:	ec f9 ca    	ldd	-54,PC \{9 <L1>\}
 	std	a,x		; Two\-reg index
   40:	6c e4       	std	A,X
 	ldx	b,x
@@ -199,43 +199,43 @@ t2:
 	leax	t2\-t1,y
   f5:	1a 44       	leax	4,Y
 	leax	toto,x
-  f7:	1a e2 00 64 	leax	100,X
+  f7:	1a e0 64    	leax	100,X
 	leas	toto\+titi,sp
-  fb:	1b f2 00 6e 	leas	110,SP
+  fa:	1b f0 6e    	leas	110,SP
 	leay	titi,x
-  ff:	19 e2 00 0a 	leay	10,X
+  fd:	19 0a       	leay	10,X
 	leas	bb,y
- 103:	1b ea 28 00 	leas	10240,Y
+  ff:	1b ea 28 00 	leas	10240,Y
 	leas	min5b,pc
- 107:	1b fa 00 ff 	leas	255,PC
+ 103:	1b d0       	leas	-16,PC \{f5 <t2>\}
 	leas	max5b,pc
- 10b:	1b fa 00 00 	leas	0,PC
+ 105:	1b cf       	leas	15,PC \{116 <t2\+0x21>\}
 	leas	min9b,pc
- 10f:	1b fa 00 ff 	leas	255,PC
+ 107:	1b f9 00    	leas	-256,PC \{9 <L1>\}
 	leas	max9b,pc
- 113:	1b fa 00 00 	leas	0,PC
+ 10a:	1b f8 ff    	leas	255,PC \{20b <.L0\+0xd8>\}
 
 ;;
 ;; Disassembler bug with movb
 ;;
 	movb	#23,0x2345
- 117:	18 0b 17 23 	movb	#23, 2345 <.L0\+0x2208>
- 11b:	45 
+ 10d:	18 0b 17 23 	movb	#23, 2345 <.L0\+0x2212>
+ 111:	45 
 	movb	#40,12,sp
- 11c:	18 08 8c 28 	movb	#40, 12,SP
+ 112:	18 08 8c 28 	movb	#40, 12,SP
 	movb	#39,3,\+sp
- 120:	18 08 a2 27 	movb	#39, 3,\+SP
+ 116:	18 08 a2 27 	movb	#39, 3,\+SP
 	movb	#20,14,sp
- 124:	18 08 8e 14 	movb	#20, 14,SP
+ 11a:	18 08 8e 14 	movb	#20, 14,SP
 	movw	#0x3210,0x3456
- 128:	18 03 32 10 	movw	#3210 <bb\+0xa10>, 3456 <bb\+0xc56>
- 12c:	34 56 
+ 11e:	18 03 32 10 	movw	#3210 <bb\+0xa10>, 3456 <bb\+0xc56>
+ 122:	34 56 
 	movw	#0x4040,12,sp
- 12e:	18 00 8c 40 	movw	#4040 <bb\+0x1840>, 12,SP
- 132:	40 
+ 124:	18 00 8c 40 	movw	#4040 <bb\+0x1840>, 12,SP
+ 128:	40 
 	movw	#0x3900,3,\+sp
- 133:	18 00 a2 39 	movw	#3900 <bb\+0x1100>, 3,\+SP
- 137:	00 
+ 129:	18 00 a2 39 	movw	#3900 <bb\+0x1100>, 3,\+SP
+ 12d:	00 
 	movw	#0x2000,14,sp
- 138:	18 00 8e 20 	movw	#2000 <.L0\+0x1ec3>, 14,SP
- 13c:	00 
+ 12e:	18 00 8e 20 	movw	#2000 <.L0\+0x1ecd>, 14,SP
+ 132:	00 

@@ -15,7 +15,7 @@ Disassembly of section .text:
 
 _start:
 	lds #stack\+1024
-   0:	8e 04 00    	lds	#400 <.L0\+0x3a4>
+   0:	8e 04 00    	lds	#400 <stack_end>
 	ldx #1
    3:	ce 00 01    	ldx	#1 <_start\+0x1>
 
@@ -87,7 +87,7 @@ test2:
 	brclr \*ZD2\+2, #40, test2
   3d:	13 02 28 d6 	brclr	\*2 <_start\+0x2> #\$28 17 <test2>
 	ldy #24\+_start-44
-  41:	18 ce ff ec 	ldy	#ffec <.L0\+0xff90>
+  41:	18 ce ff ec 	ldy	#ffec <stack_end\+0xfbec>
 	ldd B_low,y
   45:	18 ec 0c    	ldd	12,y
 	addd A_low,y

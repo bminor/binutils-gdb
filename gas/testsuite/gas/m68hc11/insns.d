@@ -7,7 +7,7 @@
 .*: +file format elf32\-m68hc11
 
 Disassembly of section .text:
-0+0+ <_start> lds	#0+0400 <L1\+0x3a9>
+0+0+ <_start> lds	#0+0400 <stack_end>
 [	]+1: R_M68HC11_16	stack
 0+0003 <_start\+0x3> ldx	#0+0001 <_start\+0x1>
 0+0006 <Loop> jsr	0+0+ <_start>
@@ -48,7 +48,7 @@ Disassembly of section .text:
 0+003d <test2\+0x26> brclr	\*0+0002 <_start\+0x2> #\$28 0+0017 <test2>
 [	]+3d: R_M68HC11_RL_JUMP	\*ABS\*
 [	]+3e: R_M68HC11_8	ZD2
-0+0041 <test2\+0x2a> ldy	#0+ffec <L1\+0xff95>
+0+0041 <test2\+0x2a> ldy	#0+ffec <stack_end\+0xfbec>
 [	]+43: R_M68HC11_16	_start
 0+0045 <test2\+0x2e> ldd	12,y
 0+0048 <test2\+0x31> addd	44,y

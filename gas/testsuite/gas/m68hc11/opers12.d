@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --reloc
 #as: -m68hc12
-#name: opers
+#name: 68HC12 specific addressing modes (opers12)
 
 .*: +file format elf32\-m68hc12
 
@@ -26,8 +26,7 @@ Disassembly of section .text:
 0+0031 <L1\+0x28> ldaa	\[257,Y\]
 0+0035 <L1\+0x2c> ldab	\[32767,SP\]
 0+0039 <L1\+0x30> ldd	\[32768,PC\]
-0+003d <L1\+0x34> ldd	9,PC
-[	]+3f: R_M68HC12_8	\.text
+0+003d <L1\+0x34> ldd	\-54,PC \{0+9 <L1>\}
 0+0040 <L1\+0x37> std	A,X
 0+0042 <L1\+0x39> ldx	B,X
 0+0044 <L1\+0x3b> stx	D,Y
@@ -97,18 +96,18 @@ Disassembly of section .text:
 [	]+f3: R_M68HC12_16	abort
 0+00f5 <t2> leax	4,Y
 0+00f7 <t2\+0x2> leax	100,X
-0+00fb <t2\+0x6> leas	110,SP
-0+00ff <t2\+0xa> leay	10,X
-0+0103 <t2\+0xe> leas	10240,Y
-0+0107 <t2\+0x12> leas	255,PC
-0+010b <t2\+0x16> leas	0,PC
-0+010f <t2\+0x1a> leas	255,PC
-0+0113 <t2\+0x1e> leas	0,PC
-0+0117 <t2\+0x22> movb	#23, 0+2345 <max9b\+0x2246>
-0+011c <t2\+0x27> movb	#40, 12,SP
-0+0120 <t2\+0x2b> movb	#39, 3,\+SP
-0+0124 <t2\+0x2f> movb	#20, 14,SP
-0+0128 <t2\+0x33> movw	#0+3210 <bb\+0xa10>, 0+3456 <bb\+0xc56>
-0+012e <t2\+0x39> movw	#0+4040 <bb\+0x1840>, 12,SP
-0+0133 <t2\+0x3e> movw	#0+3900 <bb\+0x1100>, 3,\+SP
-0+0138 <t2\+0x43> movw	#0+2000 <max9b\+0x1f01>, 14,SP
+0+00fa <t2\+0x5> leas	110,SP
+0+00fd <t2\+0x8> leay	10,X
+0+00ff <t2\+0xa> leas	10240,Y
+0+0103 <t2\+0xe> leas	-16,PC \{0+f5 <t2>\}
+0+0105 <t2\+0x10> leas	15,PC \{0+116 <t2\+0x21>\}
+0+0107 <t2\+0x12> leas	-256,PC \{0+9 <L1>\}
+0+010a <t2\+0x15> leas	255,PC \{0+20b <max9b\+0x10c>\}
+0+010d <t2\+0x18> movb	#23, 0+2345 <max9b\+0x2246>
+0+0112 <t2\+0x1d> movb	#40, 12,SP
+0+0116 <t2\+0x21> movb	#39, 3,\+SP
+0+011a <t2\+0x25> movb	#20, 14,SP
+0+011e <t2\+0x29> movw	#0+3210 <bb\+0xa10>, 0+3456 <bb\+0xc56>
+0+0124 <t2\+0x2f> movw	#0+4040 <bb\+0x1840>, 12,SP
+0+0129 <t2\+0x34> movw	#0+3900 <bb\+0x1100>, 3,\+SP
+0+012e <t2\+0x39> movw	#0+2000 <max9b\+0x1f01>, 14,SP

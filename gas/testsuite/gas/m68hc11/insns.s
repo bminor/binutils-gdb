@@ -57,4 +57,7 @@ L1:
 
 	.sect .data
 
-.comm stack, 1024
+	.sect .bss
+stack:
+	.space	1024
+stack_end:
