@@ -480,10 +480,11 @@ proc build_vers_lib { test source libname other mapfile verexp versymexp symexp 
 	return
     }
 
-    if [string match "" $other] then {
-	set other_lib ""
-    } else {
-	set other_lib $tmpdir/$other
+    set other_lib ""
+    if ![string match "" $other] then {
+	foreach o $other {
+	    set other_lib "$tmpdir/$o $other_lib"
+	}
     }
 
     if [string match "" $mapfile] then {
@@ -816,3 +817,7 @@ build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
 build_vers_lib "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
 build_vers_lib "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
 build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym ""
+
+build_vers_lib "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
+exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
+build_vers_lib "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""

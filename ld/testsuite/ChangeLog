@@ -1,3 +1,15 @@
+2001-11-29  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp (build_vers_lib): Support linking against
+	more than one libraries.
+	Add "vers20a" and "vers20" tests for common symbols.
+
+	* ld-elfvers/vers20.c: New.
+	* ld-elfvers/vers20.dsym: New.
+	* ld-elfvers/vers20.map: New.
+	* ld-elfvers/vers20.ver: New.
+	* ld-elfvers/vers20a.ver: New.
+
 2001-11-19  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvsb/define.s: Mark all global lables as object.
