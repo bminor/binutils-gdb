@@ -1,3 +1,10 @@
+Wed Jan 11 17:53:26 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* array-rom.c: Add support for most commands.
+	
+	* monitor.c: Add GDB remote protocol for the hybrid environment on
+	the Array board. 
+
 Wed Jan 11 00:44:01 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* command.c (show_user_1): Use print_command_line to show a user

@@ -1,5 +1,4 @@
-/* Remote target glue for the WinBond ROM monitor running on the "Cougar"
-Array eval board.
+/* Remote target code for the Array Tech LSI33k based RAID disk controller board.
 
    Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -28,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int baud_rate;
 
 void array_open();
+void gdb_open();
 void monitor_open();
 
 /*
@@ -146,6 +146,108 @@ struct monitor_ops array_cmds = {
   array_regnames			/* registers names */
 };
 
+struct target_ops gdb_ops = {
+  "gdb",
+  "Debug using the standard GDB remote protocol for the Array Tech target.",
+  "Debug using the standard GDB remote protocol for the Array Tech target.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
+  gdb_open,
+  monitor_close, 
+  monitor_attach,
+  monitor_detach,
+  monitor_resume,
+  monitor_wait,
+  monitor_fetch_registers,
+  monitor_store_registers,
+  monitor_prepare_to_store,
+  monitor_xfer_inferior_memory,
+  monitor_files_info,
+  monitor_insert_breakpoint,
+  monitor_remove_breakpoint,	/* Breakpoints */
+  0,
+  0,
+  0,
+  0,
+  0,				/* Terminal handling */
+  monitor_kill,
+  monitor_load,			/* load */
+  0,				/* lookup_symbol */
+  monitor_create_inferior,
+  monitor_mourn_inferior,
+
+  0,				/* can_run */
+  0, 				/* notice_signals */
+  0,				/* to_stop */
+  process_stratum,
+  0,				/* next */
+  1,
+  1,
+  1,
+  1,
+  1,				/* all mem, mem, stack, regs, exec */
+  0,
+  0,				/* Section pointers */
+  OPS_MAGIC,			/* Always the last thing */
+};
+
+struct monitor_ops gdb_cmds = {
+  0,					/* 1 for ASCII, 0 for binary */
+  "$?#b8+\n",				/* monitor init string */
+  "go %x",				/* execute or usually GO command */
+  "c",					/* continue command */
+  "s",					/* single step */
+  "brk %x",				/* set a breakpoint */
+  "unbrk %x",				/* clear a breakpoint */
+  0,					/* 0 for number, 1 for address */
+  {
+    "M%8x,%4x:%8x",			/* set memory */
+    "",				        /* delimiter */
+    "",					/* the result */
+  },
+  {
+    "m%8x,%4x",				/* get memory */
+    "",				        /* delimiter */
+    "",					/* the result */
+  },
+  {
+    "G%8x",			        /* set registers */
+    "",				        /* delimiter between registers */
+    "",					/* the result */
+  },
+  {
+    "g",				/* get registers */
+    "",				        /* delimiter between registers */
+    "",					/* the result */
+  },
+  "sload -a tty(0)\r\n",		/* download command */
+  ">> ",				/* monitor command prompt */
+  "",					/* end-of-command delimitor */
+  "",					/* optional command terminator */
+  &gdb_ops,				/* target operations */
+  "none,srec,default",			/* load types */
+  "none",				/* load protocols */
+  "4800",				/* supported baud rates */
+  2,					/* number of stop bits */
+  array_regnames			/* registers names */
+};
+
+void
+gdb_open(args, from_tty)
+     char *args;
+     int from_tty;
+{
+  target_preopen(from_tty);
+  push_target  (&gdb_ops);
+  push_monitor (&gdb_cmds);
+  monitor_open (args, "gdb", from_tty);
+}
+
+void
+_initialize_gdb_proto ()
+{
+  add_target (&gdb_ops);
+}
+
 void
 array_open(args, from_tty)
      char *args;
@@ -165,3 +267,8 @@ _initialize_array ()
   /* this is the default, since it's the only baud rate supported by the hardware */
   baud_rate = 4800;
 }
+
+
+
+
+
