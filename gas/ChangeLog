@@ -1,3 +1,13 @@
+Mon Mar  6 09:58:34 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c: Change all occurences of pa-89 with pa-11 to
+	be consistent with current naming conventions.
+	(md_begin): Set a default architecture and machine type.
+	(pa_ip): If the current instruction specifies a newer machine type
+	than the current machine type, then update the current machine
+	type.
+	(need_pa11_opcode): Likewise.
+
 Sun Mar  5 19:38:09 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip, case 'z'): Don't lose argument
