@@ -235,11 +235,9 @@ proc run_srec_test { test objs } {
     if [istarget arm-*-pe] {
 	set flags "$flags --defsym ___gccmain=0"
     }
-    # start-sanitize-armelf
     if [istarget arm-*-elf] {
 	set flags "$flags --defsym ___gccmain=0"
     }
-    # end-sanitize-armelf
     
     # Thumb targets call __gccmain
     if [istarget thumb-*-coff] {
@@ -248,11 +246,9 @@ proc run_srec_test { test objs } {
     if [istarget thumb-*-pe] {
 	set flags "$flags --defsym ___gccmain=0"
     }
-    # start-sanitize-armelf
     if [istarget thumb-*-*] {
 	set flags "$flags --defsym ___gccmain=0"
     }
-    # end-sanitize-armelf
 
     # PowerPC EABI code calls __eabi.
     if [istarget powerpc*-*-eabi*] {
@@ -339,14 +335,10 @@ setup_xfail "*-*-aix*" "*-*-xcoff*"
 # The S-record linker doesn't build ARM/Thumb stubs.
 setup_xfail "arm-*-coff*"
 setup_xfail "arm-*-pe*"
-# start-sanitize-armelf
 setup_xfail "arm-*elf*"
-# end-sanitize-armelf
 setup_xfail "thumb-*-coff*"
 setup_xfail "thumb-*-pe*"
-# start-sanitize-armelf
 setup_xfail "thumb-*-elf*"
-# end-sanitize-armelf
 
 # The S-record linker doesn't build special EABI sections.
 setup_xfail "powerpc*-*-eabi*"
@@ -383,14 +375,10 @@ setup_xfail "mips*-*-irix5*" "mips*-*-irix6*"
 setup_xfail "*-*-aix*" "*-*-xcoff*"
 setup_xfail "arm-*-coff*"
 setup_xfail "arm-*-pe*"
-# start-sanitize-armelf
 setup_xfail "arm-*-elf*"
-# end-sanitize-armelf
 setup_xfail "thumb-*-coff*"
 setup_xfail "thumb-*-pe*"
-# start-sanitize-armelf
 setup_xfail "thumb-*-elf*"
-# end-sanitize-armelf
 setup_xfail "powerpc*-*-eabi*"
 setup_xfail "powerpc*-*-linux*"
 setup_xfail "v850*-*-elf"
