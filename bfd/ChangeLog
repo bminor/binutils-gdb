@@ -1,3 +1,8 @@
+2003-06-29  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c: Convert to ISO C90 prototypes, remove
+	unnecessary prototypes.  Replace PTR with void *.
+
 2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c: Allow lazy binding for R_MIPS_JALR.
