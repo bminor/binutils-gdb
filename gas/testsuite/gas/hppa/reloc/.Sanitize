@@ -29,6 +29,7 @@ Things-to-keep:
 blebug.s
 blebug2.s
 exitbug.s
+fixupbug.s
 labelopbug.s
 plabelbug.s
 reloc.exp

@@ -240,6 +240,40 @@ proc do_exit_relocation_test {} {
     }
 }
 
+proc do_cross_space_fixup_test {} {
+    set testname "fixupbug.s: Test cross space jump/call fixup bug (part 2)"
+    set x 0
+
+    # ELF (osf) doesn't really handle extra sections too well...
+    if [istarget hppa*-*-osf*] then {
+	return;
+    }
+
+    if [gas_test_old "fixupbug.s" "" "Test cross sapce jump/call fixup bug (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Make sure GAS generated a fixup/relocation for the cross-space
+	# branch/call
+	setup_xfail hppa*-*-*
+	while 1 {
+	    expect {
+	        -re "^00000000\[^\n\]*PCREL_CALL\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ error "timeout\n"; break }
+	        eof				{ break }
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==1] then { pass $testname } else { fail $testname }
+    }
+}
+
 if [istarget hppa*-*-*] then {
     # Make sure we put the right relocation entry on a BLE instruction.
     do_ble_relocation_test
@@ -267,4 +301,8 @@ if [istarget hppa*-*-*] then {
     # GAS2 incorrectly generated R_EXIT relocations when .exit directives
     # were not in the source code.
     do_exit_relocation_test
+
+    # GAS2 incorrectly thought it could apply a fixup for a pc-relative
+    # branch/call which crossed different subspaces.
+    do_cross_space_fixup_test
 }
