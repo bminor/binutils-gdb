@@ -1,6 +1,6 @@
 2005-02-11  Paul Brook  <paul@codesourcery.com>
 
-	* ld-elf/symbol1w.s: Avoid usung @function syntax.
+	* ld-elf/symbol1w.s: Avoid using @function syntax.
 
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
