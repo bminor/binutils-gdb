@@ -14,4 +14,4 @@ SYMBOL TABLE:
 Contents of section \.text:
  1000 fd030303 e3fd0001                    .*
 Contents of section \.data:
- 0004 00001030                             .*
+ 2000000000000004 00001030                             .*

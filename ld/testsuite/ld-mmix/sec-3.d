@@ -28,9 +28,9 @@ Contents of section secname:
 Contents of section \.a\.fourth\.section:
  0020 00000000 0087a238 00000000 302a55a8  .*
 Contents of section \.data:
- 0004 0000002c                             .*
+ 2000000000000004 0000002c                             .*
 Contents of section anothersec:
- 0008 0000000a 00000009 00000008 00000007  .*
- 0018 252729                               .*
+ 2000000000000008 0000000a 00000009 00000008 00000007  .*
+ 2000000000000018 252729                               .*
 Contents of section thirdsec:
- 001c 00030d41 000186a2 2628               .*
+ 200000000000001c 00030d41 000186a2 2628               .*

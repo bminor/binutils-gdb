@@ -1,3 +1,14 @@
+2003-05-12  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/b-fixo2.d, ld-mmix/bpo-18.d, ld-mmix/bpo-18m.d,
+	ld-mmix/loc4.d, ld-mmix/loc4m.d, ld-mmix/loc6.d, ld-mmix/loc6m.d,
+	ld-mmix/locdo-1.d, ld-mmix/sec-1.d, ld-mmix/sec-2.d,
+	ld-mmix/sec-3.d, ld-mmix/sec-4.d, ld-mmix/sec-5.d,
+	ld-mmix/sec-7m.d, ld-mmix/sec-8m.d, ld-mmix/spec802.d,
+	ld-mmix/spec803.d, ld-mmix/spec804.d, ld-mmix/spec805.d,
+	ld-mmix/spec806.d, ld-mmix/spec807.d, ld-mmix/spec808.d: Tweak for
+	objdump no longer truncating dump addresses.
+
 2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* ld-elfvsb/elf-offset.ld: Add .rel.eh_frame and .rela.eh_frame
