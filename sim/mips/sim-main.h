@@ -254,10 +254,10 @@ memset (&(CPU)->pending, 0, sizeof ((CPU)->pending))
 /* For backward compatibility */
 #define PENDING_FILL(R,VAL) 						\
 do {									\
-  if ((R) >= FGRIDX && (R) < FGRIDX + NR_FGR)				\
+  if ((R) >= FGR_BASE && (R) < FGR_BASE + NR_FGR)			\
     {									\
-      PENDING_SCHED(FGR[(R) - FGRIDX], VAL, 1, -1);			\
-      PENDING_SCHED(FPR_STATE[(R) - FGRIDX], fmt_uninterpreted, 1, -1);	\
+      PENDING_SCHED(FGR[(R) - FGR_BASE], VAL, 1, -1);			\
+      PENDING_SCHED(FPR_STATE[(R) - FGR_BASE], fmt_uninterpreted, 1, -1); \
     }									\
   else									\
     PENDING_SCHED(GPR[(R)], VAL, 1, -1);				\
@@ -350,7 +350,9 @@ struct _sim_cpu {
 #define LAST_EMBED_REGNUM (89)
 #define NUM_REGS (LAST_EMBED_REGNUM + 1)
 
-
+#define FP0_REGNUM 38           /* Floating point register 0 (single float) */
+#define FCRCS_REGNUM 70         /* FP control/status */
+#define FCRIR_REGNUM 71         /* FP implementation/revision */
 #endif
 
 
@@ -365,15 +367,6 @@ struct _sim_cpu {
 
 #define GPR     (&REGISTERS[0])
 #define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
-
-  /* While space is allocated for the floating point registers in the
-     main registers array, they are stored separatly.  This is because
-     their size may not necessarily match the size of either the
-     general-purpose or system specific registers */
-#define NR_FGR  (32)
-#define FGRIDX  (38)
-  fp_word fgr[NR_FGR];
-#define FGR     ((CPU)->fgr)
 
 #define LO      (REGISTERS[33])
 #define HI      (REGISTERS[34])
@@ -426,6 +419,15 @@ struct _sim_cpu {
   unsigned_word cop0_gpr[NR_COP0_GPR];
 #define COP0_GPR	((CPU)->cop0_gpr)
 #define COP0_BADVADDR ((unsigned32)(COP0_GPR[8]))
+
+  /* While space is allocated for the floating point registers in the
+     main registers array, they are stored separatly.  This is because
+     their size may not necessarily match the size of either the
+     general-purpose or system specific registers.  */
+#define NR_FGR    (32)
+#define FGR_BASE  FP0_REGNUM
+  fp_word fgr[NR_FGR];
+#define FGR       ((CPU)->fgr)
 
   /* Keep the current format state for each register: */
   FP_formats fpr_state[32];

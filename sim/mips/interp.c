@@ -575,7 +575,7 @@ sim_open (kind, cb, abfd, argv)
       {
 	if (rn < 32)
 	  cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
-	else if ((rn >= FGRIDX) && (rn < (FGRIDX + NR_FGR)))
+	else if ((rn >= FGR_BASE) && (rn < (FGR_BASE + NR_FGR)))
 	  cpu->register_widths[rn] = WITH_TARGET_FLOATING_POINT_BITSIZE;
 	else if ((rn >= 33) && (rn <= 37))
 	  cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
@@ -849,26 +849,26 @@ sim_store_register (sd,rn,memory,length)
 
 
 
-  if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+  if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)
     {
-      cpu->fpr_state[rn - FGRIDX] = fmt_uninterpreted;
+      cpu->fpr_state[rn - FGR_BASE] = fmt_uninterpreted;
       if (cpu->register_widths[rn] == 32)
 	{
 	  if (length == 8)
 	    {
-	      cpu->fgr[rn - FGRIDX] = 
+	      cpu->fgr[rn - FGR_BASE] = 
 		(unsigned32) T2H_8 (*(unsigned64*)memory);
 	      return 8;
 	    }
 	  else
 	    {
-	      cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
+	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(unsigned32*)memory);
 	      return 4;
 	    }
 	}
       else
 	{
-	  cpu->fgr[rn - FGRIDX] = T2H_8 (*(unsigned64*)memory);
+	  cpu->fgr[rn - FGR_BASE] = T2H_8 (*(unsigned64*)memory);
 	  return 8;
 	}
     }
@@ -921,25 +921,25 @@ sim_fetch_register (sd,rn,memory,length)
 
 
   /* Any floating point register */
-  if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+  if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)
     {
       if (cpu->register_widths[rn] == 32)
 	{
 	  if (length == 8)
 	    {
 	      *(unsigned64*)memory =
-		H2T_8 ((unsigned32) (cpu->fgr[rn - FGRIDX]));
+		H2T_8 ((unsigned32) (cpu->fgr[rn - FGR_BASE]));
 	      return 8;
 	    }
 	  else
 	    {
-	      *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
+	      *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGR_BASE]);
 	      return 4;
 	    }
 	}
       else
 	{
-	  *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGRIDX]);
+	  *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGR_BASE]);
 	  return 8;
 	}
     }

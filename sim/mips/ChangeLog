@@ -1,5 +1,15 @@
 2002-06-04  Chris Demetriou  <cgd@broadcom.com>
 
+	* sim-main.h (FGRIDX): Remove, replace all uses with...
+	(FGR_BASE): New macro.
+	(FP0_REGNUM, FCRCS_REGNUM, FCRIR_REGNUM): New macros.
+	(_sim_cpu): Move 'fgr' member to be right before 'fpr_state' member.
+	(NR_FGR, FGR): Likewise.
+	* interp.c: Replace all uses of FGRIDX with FGR_BASE.
+	* mips.igen: Likewise.
+
+2002-06-04  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c: Add an FSF Copyright notice to this file.
 
 2002-06-04  Chris Demetriou  <cgd@broadcom.com>

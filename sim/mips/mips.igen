@@ -4058,11 +4058,11 @@
   if (X)
     {
       if (SizeFGR() == 64)
-	PENDING_FILL((FS + FGRIDX),GPR[RT]);
+	PENDING_FILL((FS + FGR_BASE),GPR[RT]);
       else if ((FS & 0x1) == 0)
 	{
-	  PENDING_FILL(((FS + 1) + FGRIDX),VH4_8(GPR[RT]));
-	  PENDING_FILL((FS + FGRIDX),VL4_8(GPR[RT]));
+	  PENDING_FILL(((FS + 1) + FGR_BASE),VH4_8(GPR[RT]));
+	  PENDING_FILL((FS + FGR_BASE),VL4_8(GPR[RT]));
 	}
     }
   else
@@ -4264,10 +4264,10 @@
 	    sim_io_eprintf (SD,
 			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
 			    (long) CIA);
-	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
+	  PENDING_FILL ((FS + FGR_BASE), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
 	}
       else
-	PENDING_FILL ((FS + FGRIDX), VL4_8(GPR[RT]));
+	PENDING_FILL ((FS + FGR_BASE), VL4_8(GPR[RT]));
     }
   else /*MFC1*/
     PENDING_FILL (RT, EXTEND32 (FGR[FS]));
