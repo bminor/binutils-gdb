@@ -222,8 +222,8 @@ buffer_and_nest (from, to, ptr, get_line)
 	    }
 	}
 
-      /* Add a CR to the end and keep running.  */
-      sb_add_char (ptr, '\n');
+      /* Add the original end-of-line char to the end and keep running.  */
+      sb_add_char (ptr, more);
       line_start = ptr->len;
       more = get_line (ptr);
     }

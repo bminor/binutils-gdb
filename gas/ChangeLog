@@ -1,3 +1,9 @@
+2003-03-09  James E Wilson  <wilson@tuliptree.org>
+
+	* macro.c (buffer_and_nest): Store more to sb instead of '\n'.
+	* read.c (get_line_sb): Return end of line character or '\n' if
+	it is zero or non-existent.
+
 2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (mips_validate_fix): New function.

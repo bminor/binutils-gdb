@@ -2235,13 +2235,15 @@ s_lsym (ignore)
   demand_empty_rest_of_line ();
 }
 
-/* Read a line into an sb.  */
+/* Read a line into an sb.  Returns the character that ended the line
+   or zero if there are no more lines.  */
 
 static int
 get_line_sb (line)
      sb *line;
 {
   char quote1, quote2, inquote;
+  unsigned char c;
 
   if (input_line_pointer[-1] == '\n')
     bump_line_counters ();
@@ -2269,31 +2271,29 @@ get_line_sb (line)
 
   inquote = '\0';
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer]
-	 || (inquote != '\0' && *input_line_pointer != '\n'))
+  while ((c = * input_line_pointer ++) != 0
+	 && (!is_end_of_line[c]
+	     || (inquote != '\0' && c != '\n')))
     {
-      if (inquote == *input_line_pointer)
+      if (inquote == c)
 	inquote = '\0';
       else if (inquote == '\0')
 	{
-	  if (*input_line_pointer == quote1)
+	  if (c == quote1)
 	    inquote = quote1;
-	  else if (*input_line_pointer == quote2)
+	  else if (c == quote2)
 	    inquote = quote2;
 	}
 
-      sb_add_char (line, *input_line_pointer++);
+      sb_add_char (line, c);
     }
 
-  while (input_line_pointer < buffer_limit
-	 && is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      if (input_line_pointer[-1] == '\n')
-	bump_line_counters ();
-      ++input_line_pointer;
-    }
-
-  return 1;
+  /* Don't skip multiple end-of-line characters, because that breaks support
+     for the IA-64 stop bit (;;) which looks like two consecutive end-of-line
+     characters but isn't.  Instead just skip one end of line character and
+     return the character skipped so that the caller can re-insert it if
+     necessary.   */
+  return c;
 }
 
 /* Define a macro.  This is an interface to macro.c.  */
