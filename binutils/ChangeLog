@@ -1,3 +1,9 @@
+Sat Nov 13 07:14:05 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* ar.1 c++filt.1 nm.1 objcopy.1 objdump.1 ranlib.1 size.1
+	strings.1 strip.1: Replace \(em in NAME section with \- so
+	makewhatis can grok it.
+
 Tue Nov  9 15:22:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (i386_mangle_relocs): Adjust reloc address by
