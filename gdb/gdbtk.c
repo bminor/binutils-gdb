@@ -1217,10 +1217,14 @@ gdb_listfiles (clientData, interp, objc, objv)
   struct objfile *objfile;
   struct partial_symtab *psymtab;
   struct symtab *symtab;
-  char *lastfile, *pathname, *files[1000];
+  char *lastfile, *pathname, **files;
+  int files_size;
   int i, numfiles = 0, len = 0;
   Tcl_Obj *mylist;
   
+  files_size = 1000;
+  files = (char **) xmalloc (sizeof (char **) * files_size);
+
   if (objc > 2)
     {
       Tcl_WrongNumArgs (interp, 1, objv, "Usage: gdb_listfiles ?pathname?");
@@ -1233,6 +1237,11 @@ gdb_listfiles (clientData, interp, objc, objv)
 
   ALL_PSYMTABS (objfile, psymtab)
     {
+      if (numfiles == files_size)
+        {
+           files_size = files_size * 2;
+           files = (char **) xrealloc (files, sizeof (char **) * files_size);
+        }
       if (len == 0)
 	{
 	  if (psymtab->filename)
@@ -1246,6 +1255,11 @@ gdb_listfiles (clientData, interp, objc, objv)
 
   ALL_SYMTABS (objfile, symtab)
     {
+      if (numfiles == files_size)
+        {
+           files_size = files_size * 2;
+           files = (char **) xrealloc (files, sizeof (char **) * files_size);
+        }
       if (len == 0)
 	{
 	  if (symtab->filename)
@@ -1267,6 +1281,7 @@ gdb_listfiles (clientData, interp, objc, objv)
       lastfile = files[i];
     }
   Tcl_SetObjResult (interp, mylist);
+  free (files);
   return TCL_OK;
 }
 
