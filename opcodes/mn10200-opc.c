@@ -99,7 +99,7 @@ const struct mn10200_operand mn10200_operands[] = {
 
 /* Index register.  */
 #define DI (MDR+1)
-  {2, 2, MN10200_OPERAND_DREG},
+  {2, 4, MN10200_OPERAND_DREG},
 
 /* 8 bit signed displacement, may promote to 16bit signed dispacement.  */
 #define SD8    (DI+1)
