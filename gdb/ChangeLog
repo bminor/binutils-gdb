@@ -1,5 +1,10 @@
 2001-07-19  Andrew Cagney  <ac131313@redhat.com>
 
+	From Stephen Smith:
+	* configure.tgt (i*86-*-pe*): New target.
+
+2001-07-19  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2001-07-16 Rodney Brown <rbrown64@csc.com.au>:
 	* infttrace.c (child_thread_alive): Fix gdb_tid typo.
 	* somsolib.c (no_shared_libraries): Provide stub.

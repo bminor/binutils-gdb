@@ -125,6 +125,7 @@ i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
+i[3456]86-*-pe*)	gdb_target=embed  ;;
 i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
