@@ -1998,7 +1998,7 @@ static const struct reg registers_7400[] =
 {
   /* gpr0-gpr31, fpr0-fpr31 */
   COMMON_UISA_REGS,
-  /* ctr, xre, lr, cr */
+  /* cr, lr, ctr, xer, fpscr */
   PPC_UISA_SPRS,
   /* sr0-sr15 */
   PPC_SEGMENT_REGS,
@@ -2019,7 +2019,7 @@ static const struct reg registers_e500[] =
   R8(acc), R(spefscr),
   /* NOTE: Add new registers here the end of the raw register
      list and just before the first pseudo register.  */
-  /* 39...70 */
+  /* 41...72 */
   PPC_GPRS_PSEUDO_REGS
 };
 

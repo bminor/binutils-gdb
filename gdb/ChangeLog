@@ -1,3 +1,7 @@
+2004-04-21  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (registers_e500, registers_7400): Doc fixes.
+
 2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf2_tmp_obstack, dwarf2_free_tmp_obstack):
