@@ -1,3 +1,7 @@
+2003-09-07  Mark Kettenis  <m.kettenis@osp.nl>
+
+	* gdb.arch/i386-prologue.exp: Add checks for saved registers.
+
 2003-08-30  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/selftest.exp: Remove support for m68k*-*-hpux.

@@ -61,6 +61,10 @@ gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1253.*\r\n#1\[ \t\]*$hex in main.*" \
 	"backtrace in gdb1253"
 
+gdb_test "info frame" \
+	".*Saved registers:.*ebp at.*edi at.*eip at.*" \
+	"saved registers in gdb1253"
+
 # Testcase from backtrace/1338.
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1338"
@@ -68,3 +72,7 @@ gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1338"
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1338.*\r\n#1\[ \t\]*$hex in main.*" \
 	"backtrace in gdb1338"
+
+gdb_test "info frame" \
+	".*Saved registers:.*ebx at.*esi at.*edi at.*eip at.*" \
+	"saved registers in gdb1338"
