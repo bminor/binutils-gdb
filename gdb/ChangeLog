@@ -1,3 +1,17 @@
+Tue Nov 22 19:13:39 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Maintenance commands to report time and space usage.
+	* main.c (display_time, display_space): New globals.
+	(main): Add argument --statistics to enable reporting, display
+	time and space after startup is done.
+	* maint.c (maintenance_time_display, maintenance_space_display):
+	New commands.
+	* top.c (command_loop): Display time and space after command
+	execution.
+
+	* top.c (pre_init_ui_hook): New global.
+	(gdb_init): If pre_init_ui_hook set, call before all other init.
+
 Tue Nov 22 10:25:59 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* a29k-tdep.c (examine_tag): Fix a bug in stack frame size.

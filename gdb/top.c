@@ -557,9 +557,14 @@ read_command_file (stream)
 
 extern void init_proc ();
 
+void (*pre_init_ui_hook) PARAMS ((void));
+
 void
 gdb_init ()
 {
+  if (pre_init_ui_hook)
+    pre_init_ui_hook ();
+
   /* Run the init function of each source file */
 
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
@@ -890,17 +895,18 @@ execute_command (p, from_tty)
      actually running the program, i.e. there is a stack. */
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
+
   if (target_has_stack)
-  {
-    flang = get_frame_language ();
-    if (!warned
-        && flang != language_unknown
-	&& flang != current_language->la_language)
     {
-      printf_filtered ("%s\n", lang_frame_mismatch_warn);
-      warned = 1;
+      flang = get_frame_language ();
+      if (!warned
+	  && flang != language_unknown
+	  && flang != current_language->la_language)
+	{
+	  printf_filtered ("%s\n", lang_frame_mismatch_warn);
+	  warned = 1;
+	}
     }
-  }
 }
 
 /* ARGSUSED */
@@ -912,12 +918,16 @@ command_loop_marker (foo)
 
 /* Read commands from `instream' and execute them
    until end of file or error reading instream.  */
+
 void
 command_loop ()
 {
   struct cleanup *old_chain;
   char *command;
   int stdin_is_tty = ISATTY (stdin);
+  long time_at_cmd_start;
+  extern int display_time;
+  extern int display_space;
 
   while (!feof (instream))
     {
@@ -932,10 +942,30 @@ command_loop ()
 				    instream == stdin, "prompt");
       if (command == 0)
 	return;
+
+      time_at_cmd_start = get_run_time ();
+
       execute_command (command, instream == stdin);
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions (&stop_bpstat);
       do_cleanups (old_chain);
+
+      if (display_time)
+	{
+	  long cmd_time = get_run_time () - time_at_cmd_start;
+
+	  printf_unfiltered ("Command execution time: %ld.%06ld\n",
+			     cmd_time / 1000000, cmd_time % 1000000);
+	}
+
+      if (display_space)
+	{
+	  extern char **environ;
+	  char *lim = (char *) sbrk (0);
+
+	  printf_unfiltered ("Post-command data size: %ld\n",
+			     (long) (lim - (char *) &environ));
+	}
     }
 }
 

@@ -1,5 +1,5 @@
 /* Support for GDB maintenance commands.
-   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -33,14 +33,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h" /* For language.h */
 #include "language.h"
 
-static void
-maintenance_command PARAMS ((char *, int));
+static void maintenance_command PARAMS ((char *, int));
 
-static void
-maintenance_dump_me PARAMS ((char *, int));
+static void maintenance_dump_me PARAMS ((char *, int));
 
-static void
-maintenance_demangle PARAMS ((char *, int));
+static void maintenance_demangle PARAMS ((char *, int));
+
+static void maintenance_time_display PARAMS ((char *, int));
+
+static void maintenance_space_display PARAMS ((char *, int));
 
 /*
 
@@ -111,6 +112,32 @@ maintenance_demangle (args, from_tty)
 	  printf_unfiltered ("Can't demangle \"%s\"\n", args);
 	}
     }
+}
+
+static void
+maintenance_time_display (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  extern int display_time;
+
+  if (args == NULL || *args == '\0')
+    printf_unfiltered ("\"maintenance time\" takes a numeric argument.\n");
+  else
+    display_time = strtol (args, NULL, 10);
+}
+
+static void
+maintenance_space_display (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  extern int display_space;
+
+  if (args == NULL || *args == '\0')
+    printf_unfiltered ("\"maintenance space\" takes a numeric argument.\n");
+  else
+    display_space = strtol (args, NULL, 10);
 }
 
 /* The "maintenance info" command is defined as a prefix, with allow_unknown 0.
@@ -258,6 +285,18 @@ itself a SIGQUIT signal.",
 	   "Demangle a C++ mangled name.\n\
 Call internal GDB demangler routine to demangle a C++ link name\n\
 and prints the result.",
+	   &maintenancelist);
+
+  add_cmd ("time", class_maintenance, maintenance_time_display,
+	   "Set the display of time usage.\n\
+If nonzero, will cause the execution time for each command to be\n\
+displayed, following the command's output.",
+	   &maintenancelist);
+
+  add_cmd ("space", class_maintenance, maintenance_space_display,
+	   "Set the display of space usage.\n\
+If nonzero, will cause the execution space for each command to be\n\
+displayed, following the command's output.",
 	   &maintenancelist);
 
   add_cmd ("type", class_maintenance, maintenance_print_type,
