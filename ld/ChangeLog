@@ -1,4 +1,21 @@
+start-sanitize-m32r
+Mon Sep 30 12:14:43 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (em32relf.c): Add rule for.
+	* configure.tgt (m32r-*-*): Recognize.
+	* emulparams/m32relf.sh: New file.
+end-sanitize-m32r
+
+Thu Sep 26 13:58:47 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Add symbolic doublequoting to ldmain compile edit.
+	* mpw-config.in: Add mips-*-* case as mips-elf, and use more
+	wildcards in matching.
+	* mpw-emipself.c: New file, pregenerated mips elf emulation.
+
 Tue Sep 17 12:18:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldint.texinfo: Rewrote.
 
 	* configure.tgt: Add cases for MIPS 5000 like MIPS 4300.
 

@@ -64,6 +64,7 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 HLDFLAGS = @HLDFLAGS@
+HLDENV = @HLDENV@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
@@ -269,6 +270,8 @@ ALL_EMULATIONS = \
 	eriscix.o \
 	esa29200.o \
 	esh.o \
+	eshelf.o \
+	eshlelf.o \
 	eshl.o \
 	esparcaout.o \
 	esparclynx.o \
@@ -390,6 +393,11 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
 eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"
+# start-sanitize-m32r
+em32relf.c: $(srcdir)/emulparams/m32relf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m32relf "$(tdir_m32r)"
+# end-sanitize-m32r
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
@@ -579,6 +587,12 @@ esa29200.c: $(srcdir)/emulparams/sa29200.sh \
 esh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sh "$(tdir_sh)"
+eshelf.c: $(srcdir)/emulparams/shelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf "$(tdir_shelf)"
+eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf "$(tdir_shlelf)"
 eshl.c: $(srcdir)/emulparams/shl.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shl "$(tdir_shl)"
@@ -625,7 +639,7 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 	${GENSCRIPTS} z8002 "$(tdir_z8002)"
 
 $(LD_PROG): $(OFILES) $(BFDDEP) $(LIBIBERTY)
-	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \

@@ -23,6 +23,7 @@ sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
 sparclite*-*-coff)	targ_emul=coff_sparc ;;
 sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
+sparclet*-*-aout)	targ_emul=sparcaout targ_extra_emuls=sparclaout ;;
 sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
@@ -38,6 +39,9 @@ i960-wrs-vxworks*)	targ_emul=gld960 ;;
 i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-rtems*)		targ_emul=gld960coff ;;
+# start-sanitize-m32r
+m32r-*-*)		targ_emul=m32relf ;;
+# end-sanitize-m32r
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
@@ -133,6 +137,8 @@ mips*vr4300el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4300-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
+mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
+mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
