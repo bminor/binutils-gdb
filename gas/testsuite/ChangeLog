@@ -1,5 +1,10 @@
 2001-10-24  Chris Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/ld-empic.d: Remove extra whitespace at beginning of
+	file introduced in the change on 2001-05-15.
+
+2001-10-24  Chris Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/mips-abi32-pic.s: Use ".word" rather than ".4byte".
 	Delete use of ".size".
 	* gas/mips/mips-abi32.s: Likewise.
