@@ -23,22 +23,6 @@ else
 	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-v850_files="v850.h"
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-else
- if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
- else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-  else
-	lose_these_too="${v850_files} ${lose_these_too}"
-  fi
- fi
-fi
-
 tic80_files="tic80.h"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -81,6 +65,7 @@ ppc.h
 pyr.h
 sparc.h
 tahoe.h
+v850.h
 vax.h
 
 Things-to-lose:
@@ -160,34 +145,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-v850_files="ChangeLog"
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test -f $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850_files ; do
-		if test -f $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
