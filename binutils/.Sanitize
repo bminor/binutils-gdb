@@ -32,6 +32,12 @@ Makefile.in
 TODO
 alloca.c
 ar.c
+ar.1
+nm.1
+objdump.1
+ranlib.1
+size.1
+strip.1
 is-ranlib.c
 not-ranlib.c
 maybe-ranlib.c
@@ -62,7 +68,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/11/05 20:53:19  sac
+# Revision 1.9  1991/11/06 09:06:02  sac
+# Added nm.1, objdump.1, ranlib.1, size.1 and strip.1
+#
+# Revision 1.8  1991/11/05  20:53:19  sac
 # Added README to .Sanitize
 # Made Makefile.in install using ddestdir
 #
