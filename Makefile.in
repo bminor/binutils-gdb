@@ -1445,9 +1445,13 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	    <configure.in >proto-toplev/configure.in
 	#
 	mkdir proto-toplev/texinfo
-	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
-	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
-	ln -s ../../texinfo/lgpl.texinfo proto-toplev/texinfo/
+	ln -s ../../texinfo/texinfo.tex		proto-toplev/texinfo/
+	ln -s ../../texinfo/gpl.texinfo		proto-toplev/texinfo/
+	ln -s ../../texinfo/lgpl.texinfo	proto-toplev/texinfo/
+	if test -r texinfo/util/tex3patch ; then \
+	  mkdir proto-toplev/texinfo/util && \
+	  ln -s ../../../texinfo/util/tex3patch	proto-toplev/texinfo/util ; \
+	else true; fi
 	chmod og=u `find . -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
