@@ -5,6 +5,11 @@ Fri Mar  6 11:36:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 	insufficient data present.  Fix insertion of computed nloop value.
 	(install_vif_length): Second pass at unpack len calcs.
 	(s_endunpack): Round data up to word boundary.
+	(insert_mpg_marker): New function.
+	(insert_file): New args insert_marker, size.  All callers updated.
+	(assemble_vif): Rewrite varlen insn handling.
+	(assemble_vu): Call insert_mpg_marker when 256th insn reached.
+	(s_enddirect,s_endunpack): Rename arg to internal_p.
 
 end-sanitize-sky
 start-sanitize-vr4320

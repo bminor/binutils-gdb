@@ -35,6 +35,8 @@
 #include <varargs.h>
 #endif
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 /* Compute DMA operand index number of OP.  */
 #define DMA_OPERAND_INDEX(op) ((op) - dma_operands)
 
@@ -61,7 +63,8 @@ static void insert_operand_final
      PARAMS ((dvp_cpu, const dvp_operand *, int,
 	      DVP_INSN *, offsetT, char *, unsigned int));
 
-static int insert_file PARAMS ((const char *));
+static void insert_mpg_marker PARAMS ((void));
+static int insert_file PARAMS ((const char *, void (*) (), int));
 
 static int cur_vif_insn_length PARAMS ((void));
 static void install_vif_length PARAMS ((char *, int));
@@ -514,29 +517,46 @@ assemble_vif (str)
       file = NULL;
       data_len = 0;
       vif_get_var_data (&file, &data_len);
+
+      cur_varlen_frag = frag_now;
+      cur_varlen_insn = f;
+      cur_varlen_value = data_len;
+
       if (file)
 	{
 	  int byte_len;
 
-	  /* Emit a label to set the mach type for the data we're
-	     inserting.  */
-	  if (opcode->flags & VIF_OPCODE_MPG)
-	    record_mach (DVP_VUUP, 1);
-	  else if (opcode->flags & VIF_OPCODE_DIRECT)
-	    record_mach (DVP_GIF, 1);
-	  else if (opcode->flags & VIF_OPCODE_UNPACK)
-	    ; /* nothing to do */
-	  else
-	    as_fatal ("unknown cpu type for variable length vif insn");
+	  /* Indicate length must be computed.  */
+	  cur_varlen_value = -1;
 
-	  byte_len = insert_file (file);
-	  if (output_vif)
-	    install_vif_length (f, byte_len);
+	  /* The handling for each of mpg,direct,unpack is basically the same:
+	     - emit a label to set the mach type for the data we're inserting
+	     - switch to the new assembler state
+	     - insert the file
+	     - call the `end' handler  */
+
 	  if (opcode->flags & VIF_OPCODE_MPG)
 	    {
-	      /* Update $.MpgLoc.  */
-	      vif_set_mpgloc (vif_get_mpgloc () + byte_len);
+	      record_mach (DVP_VUUP, 1);
+	      set_asm_state (ASM_MPG);
+	      byte_len = insert_file (file, insert_mpg_marker, 256 * 8);
+	      s_endmpg (1);
 	    }
+	  else if (opcode->flags & VIF_OPCODE_DIRECT)
+	    {
+	      record_mach (DVP_GIF, 1);
+	      set_asm_state (ASM_DIRECT);
+	      byte_len = insert_file (file, NULL, 0);
+	      s_enddirect (1);
+	    }
+	  else if (opcode->flags & VIF_OPCODE_UNPACK)
+	    {
+	      set_asm_state (ASM_UNPACK);
+	      byte_len = insert_file (file, NULL, 0);
+	      s_endunpack (1);
+	    }
+	  else
+	    as_fatal ("unknown cpu type for variable length vif insn");
 	}
       else
 	{
@@ -544,9 +564,7 @@ assemble_vif (str)
 	     the data.  */
 	  if (data_len == 0 || data_len < -2)
 	    as_bad ("invalid data length");
-	  cur_varlen_frag = frag_now;
-	  cur_varlen_insn = f;
-	  cur_varlen_value = data_len;
+
 	  if (opcode->flags & VIF_OPCODE_MPG)
 	    {
 	      set_asm_state (ASM_MPG);
@@ -623,10 +641,7 @@ assemble_vu (str)
   /* Handle automatic mpg insertion if enabled.  */
   if (CUR_ASM_STATE == ASM_MPG
       && vu_count == 256)
-    {
-      s_endmpg (1);
-      md_assemble ("mpg *,*");
-    }
+    insert_mpg_marker ();
 
   /* Do an implicit alignment to a 8 byte boundary.  */
   frag_align (3, 0, 0);
@@ -1762,18 +1777,34 @@ install_vif_length (buf, len)
     as_fatal ("bad call to install_vif_length");
 }
 
+/* Finish off the current set of mpg insns, and start a new set.  */
+
+static void
+insert_mpg_marker ()
+{
+  s_endmpg (1);
+  md_assemble ("mpg *,*");
+  /* Record the cpu type in case we're in the middle of reading binary
+     data.  */
+  record_mach (DVP_VUUP, 0);
+}
+
 /* Insert a file into the output.
-   -I is used to specify where to find the file.
+   The -I arg passed to GAS is used to specify where to find the file.
+   INSERT_MARKER if non-NULL is called every SIZE bytes.  This is used
+   by the mpg insn to insert mpg's every 256 insns.
    The result is the number of bytes inserted.
    If an error occurs an error message is printed and zero is returned.  */
 
 static int
-insert_file (file)
+insert_file (file, insert_marker, size)
      const char *file;
+     void (*insert_marker) ();
+     int size;
 {
   FILE *f;
   char buf[256];
-  int i, n, total;
+  int i, n, total, left_before_marker;
   char *path;
 
   path = xmalloc (strlen (file) + include_dir_maxlen + 5 /*slop*/);
@@ -1796,19 +1827,36 @@ insert_file (file)
     }
 
   total = 0;
+  left_before_marker = 0;
   do {
-    n = fread (buf, 1, sizeof (buf), f);
+    int bytes;
+    if (insert_marker)
+      bytes = MIN (size - left_before_marker, sizeof (buf));
+    else
+      bytes = sizeof (buf);
+    n = fread (buf, 1, bytes, f);
     if (n > 0)
       {
 	char *fr = frag_more (n);
 	memcpy (fr, buf, n);
 	total += n;
+	if (insert_marker)
+	  {
+	    left_before_marker += n;
+	    if (left_before_marker > size)
+	      as_fatal ("file insertion sanity checky failed");
+	    if (left_before_marker == size)
+	      {
+		(*insert_marker) ();
+		left_before_marker = 0;
+	      }
+	  }
       }
   } while (n > 0);
 
   fclose (f);
   /* We assume the file is smaller than 2^31 bytes.
-     Ok, we shouldn't make any assumptions.  Later.  */
+     Ok, we shouldn't make any assumptions.  */
   return total;
 }
 
@@ -2017,9 +2065,12 @@ s_dmapackvif (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* INTERNAL_P is non-zero if invoked internally by this file rather than
+   by the user.  In this case we don't touch the input stream.  */
+
 static void
-s_enddirect (ignore)
-     int ignore;
+s_enddirect (internal_p)
+     int internal_p;
 {
   int byte_len;
 
@@ -2043,7 +2094,8 @@ s_enddirect (ignore)
   cur_varlen_insn = NULL;
   cur_varlen_value = 0;
 
-  demand_empty_rest_of_line ();
+  if (! internal_p)
+    demand_empty_rest_of_line ();
 }
 
 /* INTERNAL_P is non-zero if invoked internally by this file rather than
@@ -2085,9 +2137,12 @@ s_endmpg (internal_p)
     demand_empty_rest_of_line ();
 }
 
+/* INTERNAL_P is non-zero if invoked internally by this file rather than
+   by the user.  In this case we don't touch the input stream.  */
+
 static void
-s_endunpack (ignore)
-     int ignore;
+s_endunpack (internal_p)
+     int internal_p;
 {
   int byte_len;
 
@@ -2120,7 +2175,8 @@ s_endunpack (ignore)
   /* Update $.UnpackLoc.  */
   vif_set_unpackloc (vif_get_unpackloc () + byte_len);
 
-  demand_empty_rest_of_line ();
+  if (! internal_p)
+    demand_empty_rest_of_line ();
 }
 
 static void
