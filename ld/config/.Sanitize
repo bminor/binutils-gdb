@@ -15,6 +15,14 @@
 
 Do-first:
 
+arc_files="arc-elf.mt"
+
+if ( echo $* | grep keep\-arc > /dev/null ) ; then
+	keep_these_too="${arc_files} ${keep_these_too}"
+else
+	lose_these_too="${arc_files} ${lose_these_too}"
+fi
+
 rce_files="rce-aout.mt"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
