@@ -1,3 +1,8 @@
+2001-10-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ld.1: Remove .TP macro from SYNOPSIS section - it prevents
+	successful translation to DocBook format.
+
 2001-09-30  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	Report 2001-08-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>

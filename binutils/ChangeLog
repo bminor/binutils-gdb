@@ -1,3 +1,14 @@
+2001-10-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* addr2line.1: Remove .TP macro from SYNOPSIS section - it
+	prevents successful translation to DocBook format.
+	* nlmconv.1: As above.
+	* nm.1: As above.
+	* objdump.1: As above.
+	* size.1: As above.
+	* strings.1: As above.
+	* strip.1: As above.
+
 2001-10-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c (display_debug_line, display_debug_pubnames,
