@@ -675,8 +675,11 @@ vx_add_symbols (char *name, int from_tty, CORE_ADDR text_addr,
      free_objfile it.  */
   objfile_to_front (objfile);
 
-  offs = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
-  memcpy (offs, objfile->section_offsets, SIZEOF_SECTION_OFFSETS);
+  offs =
+    (struct section_offsets *)
+    alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+  memcpy (offs, objfile->section_offsets,
+          SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   ss.text_start = 0;
   ss.data_start = 0;
