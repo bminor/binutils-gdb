@@ -1,3 +1,22 @@
+Fri Feb  6 14:13:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/m32rovly.c: Force variable _novlys into .data section.
+
+	* gdb.base/bar.c (barx, bar): Change variable to small array so
+ 	that it won't be put into the .sdata - small data -
+ 	section. Update reference.
+	* gdb.base/baz.c (bazx, baz): Ditto.
+	* gdb.base/foo.c (foox, foo): Ditto.
+	* gdb.base/grbx.c (grbxx, grbx): Ditto.
+
+	* gdb.base/overlays.exp: Expect variables barx, bazx, foox, grbxx
+ 	to be arrays.
+	
+Thu Jan 29 14:48:19 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+ 
+        * gdb.base/overlays.exp: fix up and get working again.
+        Add tests for backtraces from an overlay function.
+ 
 Fri Jan 23 07:52:45 1998  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/watchpoint.exp: Set "d10v*-*-*" clear_xfail for
