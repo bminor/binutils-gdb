@@ -468,7 +468,7 @@ case "${target}" in
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl expect"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
