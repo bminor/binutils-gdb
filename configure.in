@@ -53,7 +53,7 @@ fi
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
 # know that we are building the simulator.
-host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvssrc fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn libtool"
+host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf automake ispell grep diff rcs cvssrc fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils snavigator libtool"
 # start-sanitize-ide
 host_tools="${host_tools} ilu vmake jstools"
 # end-sanitize-ide
@@ -85,7 +85,7 @@ target_tools="target-examples target-groff target-gperf"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf automake cvssrc emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf libtool"
+native_only="autoconf automake cvssrc emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms snavigator gnuserv target-gperf libtool"
 
 # directories to be built in a cross environment only
 #
@@ -491,19 +491,19 @@ noconfigdirs=""
 
 case "${host}" in
   i[3456]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
     ;;
   i[3456]86-*-go32* | i[3456]86-*-msdosdjgpp*)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
 	;;
   i[3456]86-*-mingw32*)
-    # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
+    # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv"
      noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet libtool"
 	;;
   *-*-cygwin32)
@@ -519,7 +519,7 @@ case "${host}" in
     noconfigdirs="rcs"
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvssrc autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvssrc autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db snavigator gnuserv"
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
@@ -607,7 +607,7 @@ case "${target}" in
     # Can't build gdb for mingw32 if not native.
     case "${host}" in
       i[3456]86-*-mingw32) ;; # keep gdb tcl tk expect etc.
-      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db sn gnuserv"
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db snavigator gnuserv"
          ;;
     esac
     ;;    
@@ -620,7 +620,7 @@ case "${target}" in
     # Can't build gdb for cygwin32 if not native.
     case "${host}" in
       *-*-cygwin32*) ;; # keep gdb tcl tk expect etc.
-      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix libgui db sn gnuserv"
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix libgui db snavigator gnuserv"
 # start-sanitize-ide
          noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
@@ -667,7 +667,7 @@ case "${target}" in
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl tix db sn gnuserv"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl tix db snavigator gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide
@@ -676,7 +676,7 @@ case "${target}" in
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl tix db sn gnuserv"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl tix db snavigator gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide

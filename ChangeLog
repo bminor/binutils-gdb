@@ -1,3 +1,7 @@
+Tue Mar 17 16:59:00 1998  Syd Polk <spolk@cygnus.com>
+	* Makefile.in - changed sn targets to snavigator
+	* configure.in - changed sn targets to snavigator
+
 Fri Mar  6 01:02:03 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config.sub: Accept alphapca56 and alphaev6 properly.
@@ -8,6 +12,7 @@ Tue Mar  3 11:01:52 1998  Gavin Koch  <gavin@cygnus.com>
 	* config.sub (mips64vr4320-unknown-elf) : Added.
 
 end-sanitize-vr4320
+
 Mon Feb 23 14:46:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL_MODULES): Move install-tcl before
