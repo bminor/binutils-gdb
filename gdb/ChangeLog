@@ -1,3 +1,9 @@
+2004-01-03  J. Brobecker  <brobecker@gnat.com>
+
+	* infrun.c (handle_step_into_function): New function.
+	(handle_inferior_event): Extract out some code into the new
+	function above.
+
 2004-01-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (ALLDEPFILES): Remove sparc-linux-nat.c and
