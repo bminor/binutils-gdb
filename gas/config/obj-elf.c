@@ -46,6 +46,10 @@
 #include "elf/ppc.h"
 #endif
 
+#ifdef TC_I370
+#include "elf/i370.h"
+#endif
+
 static bfd_vma elf_s_get_size PARAMS ((symbolS *));
 static void elf_s_set_size PARAMS ((symbolS *, bfd_vma));
 static bfd_vma elf_s_get_align PARAMS ((symbolS *));
@@ -792,6 +796,7 @@ obj_elf_section (push)
   char *name, *beg, *end;
   int type, attr, dummy;
 
+#ifndef TC_I370
   if (flag_mri)
     {
       char mri_type;
@@ -811,6 +816,7 @@ obj_elf_section (push)
 
       return;
     }
+#endif /* ! defined (TC_I370) */
 
   /* Get name of section.  */
   SKIP_WHITESPACE ();

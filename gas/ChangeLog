@@ -1,3 +1,21 @@
+2000-02-23  Linas Vepstas <linas@linas.org>
+
+	* config/tc-i370.c, config/tc-i370.h: New files.
+	* Makefile.am: Add support for Linux/IBM 370.
+	* configure.in: Likewise.
+	* app.c (do_scrub_begin): Don't lex single quote when TC_I370.
+	* config/obj-elf.c: Include elf/i370.h
+	(obj_elf_section): Don't do anything special for flag_mri if TC_I370.
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+	* doc/c-i370.texi: New file.
+	* doc/all.texi: Include it.
+	* doc/as.texinfo: And here.
+	* doc/Makefile.am(CPU_DOCS): Add c-i370.texi. 
+	* doc/Makefile.in: Regenerate.
+
 2000-02-19  Michael Meissner  <meissner@redhat.com>
 
 	* config/tc-d30v.c (parallel_ok): Use FLAG_NOT_WITH_ADDSUBppp to

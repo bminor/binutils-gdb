@@ -126,6 +126,7 @@ CPU_DOCS = \
 	c-h8300.texi \
 	c-h8500.texi \
 	c-hppa.texi \
+	c-i370.texi \
 	c-i386.texi \
 	c-i960.texi \
 	c-m68k.texi \

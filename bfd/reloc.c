@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -2202,6 +2202,11 @@ ENUMX
   BFD_RELOC_PPC_EMB_RELSDA
 ENUMDOC
   Power(rs6000) and PowerPC relocations.
+
+ENUM
+  BFD_RELOC_I370_D12
+ENUMDOC
+  IBM 370/390 relocations
 
 ENUM
   BFD_RELOC_CTOR

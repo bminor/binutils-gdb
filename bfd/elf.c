@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -3230,6 +3230,9 @@ prep_headers (abfd)
 	i_ehdrp->e_machine = EM_SPARCV9;
       else
 	i_ehdrp->e_machine = EM_SPARC;
+      break;
+    case bfd_arch_i370:
+      i_ehdrp->e_machine = EM_S370;
       break;
     case bfd_arch_i386:
       i_ehdrp->e_machine = EM_386;

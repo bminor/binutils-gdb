@@ -135,6 +135,7 @@ DESCRIPTION
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
+.  bfd_arch_i370,      {* IBM 360/370 Mainframes *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT *}
 .  bfd_arch_alliant,   {* Alliant *}
 .  bfd_arch_convex,    {* Convex *}
@@ -245,6 +246,7 @@ extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
+extern const bfd_arch_info_type bfd_i370_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
@@ -284,6 +286,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_h8300_arch,
   &bfd_h8500_arch,
   &bfd_hppa_arch,
+  &bfd_i370_arch,
   &bfd_i386_arch,
   &bfd_i860_arch,
   &bfd_i960_arch,

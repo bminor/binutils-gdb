@@ -35,6 +35,7 @@ thumb*)	targ_archs=bfd_arm_arch ;;
 c30*)	targ_archs=bfd_tic30_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
+i370)   targ_archs=bfd_i370_arch ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
 m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
@@ -221,6 +222,10 @@ case "${targ}" in
 #endif
 #endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 
+  i370-*-*) 
+    targ_defvec=bfd_elf32_i370_vec
+    targ_selvecs="bfd_elf32_i370_vec"
+    ;;
   i[3456]86-*-sco3.2v5*coff)
     targ_defvec=i386coff_vec
     targ_selvecs=bfd_elf32_i386_vec

@@ -106,7 +106,8 @@ do_scrub_begin (m68k_mri)
     {
       lex['"'] = LEX_IS_STRINGQUOTE;
 
-#ifndef TC_HPPA
+#if ! defined (TC_HPPA) && ! defined (TC_I370)
+      /* I370 uses single-quotes to delimit integer, float constants */
       lex['\''] = LEX_IS_ONECHAR_QUOTE;
 #endif
 

@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -518,6 +518,7 @@ extern const bfd_target bfd_elf64_bigmips_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
+extern const bfd_target bfd_elf32_i370_vec;
 extern const bfd_target bfd_elf32_i386_vec;
 extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_i960_vec;
@@ -697,6 +698,7 @@ const bfd_target * const bfd_target_vector[] = {
 #if 0
 	&bfd_elf32_hppa_vec,
 #endif
+	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_i960_vec,

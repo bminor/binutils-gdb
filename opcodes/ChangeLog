@@ -1,3 +1,16 @@
+2000-02-23  Linas Vepstas <linas@linas.org>
+
+	* i370-dis.c, i370-opc.c: New.
+
+	* disassemble.c (ARCH_i370): Define.
+	(disassembler): Handle it.
+
+	* Makefile.am: Add support for Linux/IBM 370.
+	* configure.in: Likewise.
+
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
 2000-02-22  Chandra Chavva   <cchavva@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_tab) : Added FLAG_NOT_WITH_ADDSUBppp to

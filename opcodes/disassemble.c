@@ -1,5 +1,6 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
+#define ARCH_i370
 #define ARCH_i386
 #define ARCH_i960
 #define ARCH_fr30
@@ -119,6 +121,11 @@ disassembler (abfd)
 #ifdef ARCH_hppa
     case bfd_arch_hppa:
       disassemble = print_insn_hppa;
+      break;
+#endif
+#ifdef ARCH_i370
+    case bfd_arch_i370:
+      disassemble = print_insn_i370;
       break;
 #endif
 #ifdef ARCH_i386

@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -1341,6 +1341,7 @@ enum bfd_architecture
   bfd_arch_we32k,      /* AT&T WE32xxx */
   bfd_arch_tahoe,      /* CCI/Harris Tahoe */
   bfd_arch_i860,       /* Intel 860 */
+  bfd_arch_i370,       /* IBM 360/370 Mainframes */
   bfd_arch_romp,       /* IBM ROMP PC/RT */
   bfd_arch_alliant,    /* Alliant */
   bfd_arch_convex,     /* Convex */
@@ -1996,6 +1997,9 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_PPC_EMB_RELST_HA,
   BFD_RELOC_PPC_EMB_BIT_FLD,
   BFD_RELOC_PPC_EMB_RELSDA,
+
+/* IBM 370/390 relocations */
+  BFD_RELOC_I370_D12,
 
 /* The type of reloc used to build a contructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.

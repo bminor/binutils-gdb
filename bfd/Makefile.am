@@ -47,6 +47,7 @@ ALL_MACHINES = \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
+	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
@@ -82,6 +83,7 @@ ALL_MACHINES_CFILES = \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
+	cpu-i370.c \
 	cpu-i386.c \
 	cpu-i860.c \
 	cpu-i960.c \
@@ -159,6 +161,7 @@ BFD32_BACKENDS = \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
+	elf32-i370.lo \
 	elf32-i386.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
@@ -283,6 +286,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-d30v.c \
 	elf32-fr30.c \
 	elf32-gen.c \
+	elf32-i370.c \
 	elf32-i386.c \
 	elf32-i860.c \
 	elf32-i960.c \
@@ -848,6 +852,9 @@ elf32-fr30.lo: elf32-fr30.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/fr30.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-gen.lo: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
+elf32-i370.lo: elf32-i370.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
 elf32-i386.lo: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \

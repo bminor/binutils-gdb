@@ -1,3 +1,12 @@
+2000-02-23  Linas Vepstas (linas@linas.org)
+
+	* emulparams/elf32i370.sh, scripttempl/elfi370.sc: New.
+
+	* Makefile.am: Add support for Linux/IBM 370.
+	* configure.tgt: Likewise.
+
+	* Makefile.in: Regenerate.
+
 2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* ldlang.c (print_input_section, print_data_statement,

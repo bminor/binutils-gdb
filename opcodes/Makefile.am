@@ -50,6 +50,8 @@ CFILES = \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
+	i370-dis.c \
+	i370-opc.c \
 	i386-dis.c \
 	i960-dis.c \
 	m32r-asm.c \
@@ -110,6 +112,8 @@ ALL_MACHINES = \
 	h8500-dis.lo \
 	hppa-dis.lo \
 	i386-dis.lo \
+	i370-dis.lo \
+	i370-opc.lo \
 	i960-dis.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \

@@ -1,3 +1,26 @@
+2000-02-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* bfd-in.h: Update copyright date.
+
+2000-02-23  Linas Vepstas <linas@linas.org>
+
+	* cpu-i370.c: New file.
+	* elf32-i370.c:  New file.
+	* archures.c (enum bfd_architecture): Add bfd_arch_i370.
+	(bfd_i370_arch): New.
+	(bfd_archures_list): Add bfd_i370_arch.
+	* elf.c (prep_headers): Add bfd_arch_i370.
+	* Makefile.am: Add support for IBM 370 elf.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* libbfd.h (bfd_reloc_code_real_names): Likewise.
+	* reloc.c (bfd_reloc_code_type): Likewise.
+	* targets.c: Likewise.
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2000-02-22  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-i386.c (elf_i386_info_to_howto_rel): Give a warning for
