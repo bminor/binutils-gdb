@@ -151,8 +151,11 @@ case "${targ}" in
     ;;
 #endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 
+  i[3456]86-*-sco3.2v5*coff)
+    targ_defvec=i386coff_vec
+    ;;
   i[3456]86-*-sysv4* | i[3456]86-*-unixware | i[3456]86-*-solaris2* | \
-  i[3456]86-*-elf | i[3456]86-*-sco*elf* | i[3456]86-*-freebsdelf* | \
+  i[3456]86-*-elf | i[3456]86-*-sco3.2v5* | i[3456]86-*-freebsdelf* | \
   i[3456]86-*-dgux*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec

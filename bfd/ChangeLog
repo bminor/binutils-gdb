@@ -1,3 +1,8 @@
+Tue Jan 27 12:47:27 1998  Robert Lipe  <robertl@dgii.com>
+
+	* config.bfd (i[3456]86-sco3.2v5*) ELF now the default. 
+	(i[3456]86sco3.2v5*coff) New target.
+
 Mon Jan 26 15:41:30 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd-in2.h: Rebuild with changes to chew--tab expansion.
