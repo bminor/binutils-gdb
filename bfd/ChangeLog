@@ -1,3 +1,8 @@
+2003-06-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_relocation_section): Ensure
+	*r_offset == r_addend for RELATIVE relocs against .got.
+
 2003-06-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Optimize unaligned relocs.

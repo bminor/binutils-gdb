@@ -7970,7 +7970,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			/* Write the .got section contents for the sake
 			   of prelink.  */
 			loc = htab->sgot->contents + off;
-			bfd_put_64 (output_bfd, outrel.r_addend, loc);
+			bfd_put_64 (output_bfd, outrel.r_addend + relocation,
+				    loc);
 		      }
 		    else
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_GLOB_DAT);
