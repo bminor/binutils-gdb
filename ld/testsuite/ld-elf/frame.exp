@@ -30,6 +30,11 @@ if { [istarget "mcore-*-*"] } {
     return
 }
 
+# Too small MAXPAGESIZE on this target.
+if { [istarget "sh*-*-elf*"] } {
+    return
+}
+
 set test1	"read-only .eh_frame section"
 set test2	"read-only .gcc_except_table section"
 

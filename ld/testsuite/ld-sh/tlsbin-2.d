@@ -20,8 +20,7 @@ Section Headers:
   \[ 8\] \.text +PROGBITS +0+401000 .*
   \[ 9\] \.tdata +PROGBITS +0+413000 [0-9a-f]+ 0+018 00 WAT  0   0  4
   \[10\] \.tbss +NOBITS +0+413018 [0-9a-f]+ 0+010 00 WAT  0   0  1
-  \[11\] \.dynamic +DYNAMIC +0+413018 .*
-  \[12\] \.data +.*
+#...
   \[[0-9a-f]+\] \.got +PROGBITS +0+414000 .*
   \[[0-9a-f]+\] \.sbss +.*
   \[[0-9a-f]+\] \.bss +.*
@@ -80,50 +79,4 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
 #...
 
-Symbol table '\.symtab' contains [0-9]+ entries:
- +Num: +Value +Size Type +Bind +Vis +Ndx Name
- +0: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +1: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *
- +2: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +2 *
- +3: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +3 *
- +4: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +4 *
- +5: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +5 *
- +6: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +6 *
- +7: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
- +8: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
- +9: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
- +10: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +10 *
- +11: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +11 *
- +12: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +12 *
- +13: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +13 *
- +14: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +14 *
- +15: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +15 *
- +16: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +16 *
- +17: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +17 *
- +18: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +18 *
- +[0-9]+: 00000008 +0 TLS +LOCAL  DEFAULT +9 sl1
- +[0-9]+: 0000000c +0 TLS +LOCAL  DEFAULT +9 sl2
- +[0-9]+: 00000020 +0 TLS +LOCAL  DEFAULT +10 bl1
- +[0-9]+: 00000024 +0 TLS +LOCAL  DEFAULT +10 bl2
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG2
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG4
- +[0-9]+: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT  UND __tls_get_addr
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +9 sg1
- +[0-9]+: 0+402000 +0 FUNC +GLOBAL DEFAULT +8 _start
-#...
- +[0-9]+: 0+401000 +0 FUNC +GLOBAL DEFAULT +8 fn2
-#...
- +[0-9]+: 00000004 +0 TLS +GLOBAL DEFAULT +9 sg2
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
- +[0-9]+: 00000010 +0 TLS +GLOBAL HIDDEN +9 sh1
- +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
- +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
- +[0-9]+: 00000014 +0 TLS +GLOBAL HIDDEN +9 sh2
- +[0-9]+: 0000001c +0 TLS +GLOBAL DEFAULT +10 bg2
- +[0-9]+: 00000018 +0 TLS +GLOBAL DEFAULT +10 bg1
-#...
- +[0-9]+: .*
 #pass

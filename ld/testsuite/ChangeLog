@@ -1,3 +1,27 @@
+2004-07-02  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-elf/frame.exp: Don't run on sh*-*-elf*.
+	* ld-sh/shared-1.d: Adjust for section reordering changes.
+	* ld-sh/shared-2.d: Likewise.
+	* ld-sh/tlsbin-2.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-sh/sh64/abi32.xd: Likewise.
+	* ld-sh/sh64/abi64.xd: Likewise.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/crange1.rd: Likewise.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/gotplt.d: Likewise.
+	* ld-sh/sh64/init-cmpct.d: Likewise.
+	* ld-sh/sh64/init-media.d: Likewise.
+	* ld-sh/sh64/init64.d: Likewise.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix2.xd: Likewise.
+	* ld-sh/sh64/shdl32.xd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+
 2004-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-discard/static.d: Accept both original sym and section sym.
