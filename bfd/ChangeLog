@@ -1,3 +1,22 @@
+Mon Mar 23 14:23:36 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c: Add interworking functions to pe backends.
+
+start-sanitize-r5900
+Sun Mar 22 13:05:08 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mips.c (R_MIPS15_S3): New relocation type.
+	(elf_mips_howto_table): Add R_MIPS15_S3.
+	(mips_reloc_map): Map BFD_RELOC_MIPS15_S3 to R_MIPS15_S3.
+	* reloc.c (BFD_RELOC_MIPS15_S3): New relocation type.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
+end-sanitize-r5900
+Fri Mar 20 18:47:20 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use AM_DISABLE_SHARED.
+	* aclocal.m4, configure: Rebuild with libtool 1.2.
+
 Fri Mar 20 11:25:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Better error messages
