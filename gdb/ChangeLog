@@ -1,3 +1,11 @@
+Tue Aug  6 17:16:15 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* doc/Makefile: GDB documentation now has its own Makefile
+	  doc/refcard.tex: renamed from "gdbrc.tex"
+	  doc/.Sanitize: add Makefile; recognize renamed refcard.tex
+	  doc/gdbint.texinfo: add markup in "Cleanups" chapter
+
+
 Fri Aug  2 00:13:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* values.c (basetype_addr):  When reading target memory, use the
