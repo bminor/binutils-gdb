@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
+#include <fcntl.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"  /* required by inferior.h */
@@ -79,9 +80,9 @@ core_close (quitting)
 
 int 
 solib_add_stub (from_tty)
-     int from_tty;
+     char *from_tty;
 {
-    SOLIB_ADD (NULL, from_tty, &core_ops);
+    SOLIB_ADD (NULL, (int)from_tty, &core_ops);
     return 0;
 }
 #endif /* SOLIB_ADD */
@@ -99,6 +100,7 @@ core_open (filename, from_tty)
   char *temp;
   bfd *temp_bfd;
   int ontop;
+  int scratch_chan;
 
   target_preopen (from_tty);
   if (!filename)
@@ -116,7 +118,12 @@ core_open (filename, from_tty)
   }
 
   old_chain = make_cleanup (free, filename);
-  temp_bfd = bfd_openr (filename, NULL);
+
+  scratch_chan = open (filename, write_files? O_RDWR: O_RDONLY, 0);
+  if (scratch_chan < 0)
+    perror_with_name (filename);
+
+  temp_bfd = bfd_fdopenr (filename, NULL, scratch_chan);
   if (temp_bfd == NULL)
     {
       perror_with_name (filename);
@@ -161,7 +168,7 @@ core_open (filename, from_tty)
 
     /* Add symbols and section mappings for any shared libraries */
 #ifdef SOLIB_ADD
-    (void) catch_errors (solib_add_stub, from_tty, (char *)0);
+    (void) catch_errors (solib_add_stub, (char *)from_tty, (char *)0);
 #endif
     /* Now, set up the frame cache, and print the top of stack */
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
@@ -242,8 +249,8 @@ validate_files ()
 {
   if (exec_bfd && core_bfd)
     {
-      if (core_file_matches_executable_p (core_bfd, exec_bfd))
-	printf ("Warning: core file does not match specified executable file.\n");
+      if (!core_file_matches_executable_p (core_bfd, exec_bfd))
+	printf ("Warning: core file may not match specified executable file.\n");
       else if (bfd_get_mtime(exec_bfd) > bfd_get_mtime(core_bfd))
 	printf ("Warning: exec file is newer than core file.\n");
     }

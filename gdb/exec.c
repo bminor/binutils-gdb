@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -23,6 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdbcmd.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -30,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/param.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "gdbcore.h"
 
@@ -44,21 +46,21 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char *getenv();
 extern void child_create_inferior (), child_attach ();
-extern void add_syms_addr_command ();
 extern void symbol_file_command ();
 
 /* The Binary File Descriptor handle for the executable file.  */
 
 bfd *exec_bfd = NULL;
 
-/* The base and bounds of the table of the exec file's sections.  */
+/* Whether to open exec and core files read-only or read-write.  */
 
-struct section_table *exec_sections, *exec_sections_end;
+int write_files = 0;
 
 /* Forward decl */
 
 extern struct target_ops exec_ops;
 
+/* ARGSUSED */
 void
 exec_close (quitting)
      int quitting;
@@ -66,6 +68,11 @@ exec_close (quitting)
   if (exec_bfd) {
     bfd_close (exec_bfd);
     exec_bfd = NULL;
+  }
+  if (exec_ops.sections) {
+    free (exec_ops.sections);
+    exec_ops.sections = NULL;
+    exec_ops.sections_end = NULL;
   }
 }
 
@@ -89,8 +96,8 @@ exec_file_command (filename, from_tty)
       filename = tilde_expand (filename);
       make_cleanup (free, filename);
       
-/* FIXME, if writeable is set, open for read/write. */
-      scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
+      scratch_chan = openp (getenv ("PATH"), 1, filename, 
+			    write_files? O_RDWR: O_RDONLY, 0,
 			    &scratch_pathname);
       if (scratch_chan < 0)
 	perror_with_name (filename);
@@ -131,7 +138,8 @@ exec_file_command (filename, from_tty)
 	}
 #endif FIXME
 
-      if (build_section_table (exec_bfd, &exec_sections, &exec_sections_end))
+      if (build_section_table (exec_bfd, &exec_ops.sections,
+				&exec_ops.sections_end))
 	error ("Can't find the file sections in `%s': %s", 
 		exec_bfd->filename, bfd_errmsg (bfd_error));
 
@@ -163,20 +171,24 @@ file_command (arg, from_tty)
 }
 
 
-/* Locate all mappable sections of a BFD file.  */
+/* Locate all mappable sections of a BFD file. 
+   table_pp_char is a char * to get it through bfd_map_over_sections;
+   we cast it back to its proper type.  */
 
 void
-add_to_section_table (abfd, asect, table_pp)
+add_to_section_table (abfd, asect, table_pp_char)
      bfd *abfd;
      sec_ptr asect;
-     struct section_table **table_pp;
+     char *table_pp_char;
 {
+  struct section_table **table_pp = (struct section_table **)table_pp_char;
   flagword aflag;
 
   aflag = bfd_get_section_flags (abfd, asect);
   /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
   if (!(aflag & SEC_LOAD))
     return;
+  (*table_pp)->bfd = abfd;
   (*table_pp)->sec_ptr = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
   (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
@@ -197,7 +209,7 @@ build_section_table (some_bfd, start, end)
     free (*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
-  bfd_map_over_sections (some_bfd, add_to_section_table, end);
+  bfd_map_over_sections (some_bfd, add_to_section_table, (char *)end);
   if (*end > *start + count)
     abort();
   /* We could realloc the table, but it probably loses for most files.  */
@@ -206,7 +218,7 @@ build_section_table (some_bfd, start, end)
 
 /* Read or write the exec file.
 
-   Args are address within exec file, address within gdb address-space,
+   Args are address within a BFD file, address within gdb address-space,
    length, and a flag indicating whether to read or write.
 
    Result is a length:
@@ -223,13 +235,12 @@ build_section_table (some_bfd, start, end)
     we just tail-call it with more arguments to select between them.  */
 
 int
-xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
+xfer_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
-     bfd *abfd;
-     struct section_table *sections, *sections_end;
+     struct target_ops *target;
 {
   boolean res;
   struct section_table *p;
@@ -243,13 +254,13 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
   xfer_fn = write? bfd_set_section_contents: bfd_get_section_contents;
   nextsectaddr = memend;
 
-  for (p = sections; p < sections_end; p++)
+  for (p = target->sections; p < target->sections_end; p++)
     {
       if (p->addr <= memaddr)
 	if (p->endaddr >= memend)
 	  {
 	    /* Entire transfer is within this section.  */
-	    res = xfer_fn (abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
 	else if (p->endaddr <= memaddr)
@@ -261,7 +272,7 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
 	  {
 	    /* This section overlaps the transfer.  Just do half.  */
 	    len = p->endaddr - memaddr;
-	    res = xfer_fn (abfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
       else if (p->addr < nextsectaddr)
@@ -273,20 +284,6 @@ xfer_memory (memaddr, myaddr, len, write, abfd, sections, sections_end)
   else
     return - (nextsectaddr - memaddr);	/* Next boundary where we can help */
 }
-
-/* The function called by target_xfer_memory via our target_ops */
-
-int
-exec_xfer_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-{
-  return xfer_memory (memaddr, myaddr, len, write,
-		      exec_bfd, exec_sections, exec_sections_end);
-}
-
 
 #ifdef FIXME
 #ifdef REG_STACK_SEGMENT
@@ -310,7 +307,7 @@ exec_files_info ()
 
   printf ("\tExecutable file `%s'.\n", bfd_get_filename(exec_bfd));
 
-  for (p = exec_sections; p < exec_sections_end; p++)
+  for (p = exec_ops.sections; p < exec_ops.sections_end; p++)
     printf("\texecutable from 0x%08x to 0x%08x is %s\n",
 	p->addr, p->endaddr,
 	bfd_section_name (exec_bfd, p->sec_ptr));
@@ -338,7 +335,7 @@ set_section_command (args, from_tty)
   /* Parse out new virtual address */
   secaddr = parse_and_eval_address (args);
 
-  for (p = exec_sections; p < exec_sections_end; p++) {
+  for (p = exec_ops.sections; p < exec_ops.sections_end; p++) {
     if (!strncmp (secname, bfd_section_name (exec_bfd, p->sec_ptr), seclen)
 	&& bfd_section_name (exec_bfd, p->sec_ptr)[seclen] == '\0') {
       offset = secaddr - p->addr;
@@ -363,16 +360,16 @@ Specify the filename of the executable file.",
 	child_attach, 0, 0, 0, /* attach, detach, resume, wait, */
 	0, 0, /* fetch_registers, store_registers, */
 	0, 0, 0, /* prepare_to_store, conv_to, conv_from, */
-	exec_xfer_memory, exec_files_info,
+	xfer_memory, exec_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
-	add_syms_addr_command,
 	0, 0, /* call fn, lookup sym */
 	child_create_inferior,
 	0, /* mourn_inferior */
 	file_stratum, 0, /* next */
 	0, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
+	0, 0,			/* section pointers */
 	OPS_MAGIC,		/* Always the last thing */
 };
 
@@ -401,5 +398,11 @@ This can be used if the exec file does not contain section addresses,\n\
 file itself are wrong.  Each section must be changed separately.  The\n\
 ``info files'' command lists all the sections and their addresses.");
 
+  add_show_from_set
+    (add_set_cmd ("write", class_support, var_boolean, (char *)&write_files,
+		  "Set writing into executable and core files.",
+		  &setlist),
+     &showlist);
+  
   add_target (&exec_ops);
 }

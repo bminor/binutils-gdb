@@ -918,6 +918,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
   /* If user wants to see raw output, no problem.  */
   if (!demangle) {
     fputs_filtered (linebuffer, stream);
+    return;
   }
 
   p = linebuffer;
@@ -1211,8 +1212,9 @@ struct queue *item;
 }
 #endif /* QUEUE_MISSING */
 
+#ifndef HAVE_STRSTR
 /* Simple implementation of strstr, since some implementations lack it. */
-char *
+const char *
 strstr (in, find)
      const char *in, *find;
 {
@@ -1220,10 +1222,11 @@ strstr (in, find)
 
   while (0 != (p = strchr (p+1, *find))) {
     if (strcmp (p, find))
-      return (char *)p;
+      return p;
   }
   return 0;
 }
+#endif /* do not HAVE_STRSTR */
 
 void
 _initialize_utils ()

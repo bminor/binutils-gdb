@@ -1340,16 +1340,15 @@ vx_wait (status)
 
 static int
 symbol_stub (arg)
-     int arg;
+     char *arg;
 {
-  char *bootFile = (char *)arg;
-  symbol_file_command (bootFile, 0);
+  symbol_file_command (arg, 0);
   return 1;
 }
 
 static int
 add_symbol_stub (arg)
-     int arg;
+     char *arg;
 {
   struct ldfile *pLoadFile = (struct ldfile *)arg;
 
@@ -1413,7 +1412,7 @@ vx_open (args, from_tty)
     {
       if (*bootFile) {
 	printf_filtered ("\t%s: ", bootFile);
-	if (catch_errors (symbol_stub, (int)bootFile,
+	if (catch_errors (symbol_stub, bootFile,
 		"Error reading symbols from boot file"))
 	  puts_filtered ("ok\n");
       } else if (from_tty)
@@ -1450,7 +1449,7 @@ vx_open (args, from_tty)
       /* Botches, FIXME:
 	 (1)  Searches the PATH, not the source path.
 	 (2)  data and bss are assumed to be at the usual offsets from text.  */
-      catch_errors (add_symbol_stub, (int)pLoadFile, (char *)0);
+      catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0);
 #endif
     }
   printf_filtered ("Done.\n");

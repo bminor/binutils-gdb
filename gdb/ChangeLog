@@ -1,3 +1,56 @@
+Tue Sep  3 18:37:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Make writing to files work properly.  (Fixes to BFD are also needed.)
+
+	* core.c (core_open):  Open file ourselves, read or r/w, depending on
+	write_files.  Use bfd_fdopenr.  
+	* gdbcore.h (write_files):  New variable.
+	* exec.c (write_files):  Define variable, add set&show for it.
+	(exec_file_command):  Use write_files to open for read or r/write.
+
+	Make shared library reading happen automatically.  These changes
+	are mostly from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>.
+
+	* inferior.h (stop_soon_quietly):  Add to exported variables.
+	* infrun.c (child_create_inferior):  call solib hook, if defined.
+	(child_attach):  call solib hook, if defined.
+	* solib.c:  Include inferior.h.  Add from_tty to so_list as kludge.
+	(find_solib):  Use lookup_misc_func rather than hand-rolled.
+	(symbol_add_stub):  New stub for catch_errors.
+	(solib_add):  Avoid output if !from_tty.  Catch errors rather
+	than just calling symbol_file_add and bombing.
+	(solib_create_inferior_hook):  Interface with the target process
+	to let it read and alloc shared libs, then figure out what it did.
+
+	* core.c (validate_files):  Fix typo, soften warning.  
+	(Fix from Hiroto Kagotani <kagotani@cs.titech.ac.jp>.)
+
+	* utils.c (fputs_demangled):  Avoid duplicate printing if
+	demangling is off.  (Fix from J.T. Conklin <jtc@cayenne.com>.)
+
+	* infrun.c (proceed):  Cast -1 to (CORE_ADDR) before comparing.
+	(Fix from pierre@la.tce.com (Pierre Willard).)
+
+	* main.c (catch_errors):  Change argument to a char * from an int,
+	since a char * can point to a struct full of glop, but an int
+	is not guaranteed to be able to hold a pointer.
+	* breakpoint.c (breakpoint_cond_eval, bpstat_stop_status,
+	breakpoint_re_set_one, breakpoint_re_set):  Adapt.
+	* core.c (core_open, solib_add_stub):  Adapt.
+	* remote-vx.c (symbol_stub, add_symbol_stub, callers):  Adapt.
+
+Wed Aug 28 18:18:05 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Makefile.in:  Update VERSION to 4.0.1.  Evade GNU Make bug
+	by adding .NOEXPORT target.
+
+Fri Aug 23 17:14:25 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* GDB-4.0 release!
+	* Update README.
+	* Makefile.in (VERSION):  Roll to 4.0.
+	(gdb.tar.Z):  Make refcard.ps as well, for shipment.
+
 Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/gdb.texinfo: minor rewordings, crossref to ptype from print,
@@ -16,12 +69,6 @@ Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 	* doc/gdb.texinfo: update New Features, Installing
 
 	* doc/gdbint.texinfo: add short description of configure +template
-
-Fri Aug 23 13:46:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
-
-	* GDB-4.0 release!
-	* Makefile.in (VERSION):  Roll to 4.0.
-	(gdb.tar.Z):  Make refcard.ps as well, for shipment.
 
 Fri Aug 23 11:46:08 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 

@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -255,6 +255,7 @@ condition_command (arg, from_tty)
   error ("No breakpoint number %d.", bnum);
 }
 
+/* ARGSUSED */
 static void
 commands_command (arg, from_tty)
      char *arg;
@@ -280,7 +281,7 @@ commands_command (arg, from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	if (input_from_terminal_p ())
+	if (from_tty && input_from_terminal_p ())
 	  {
 	    printf ("Type commands for when breakpoint %d is hit, one per line.\n\
 End with a line saying just \"end\".\n", bnum);
@@ -566,6 +567,15 @@ bpstat_clear_actions (bs)
     }
 }
 
+/* Stub for cleaning up our state if we error-out of a breakpoint command */
+/* ARGSUSED */
+static void
+cleanup_executing_breakpoints (ignore)
+     int ignore;
+{
+  executing_breakpoint_commands = 0;
+}
+
 /* Execute all the commands associated with all the breakpoints at this
    location.  Any of these commands could cause the process to proceed
    beyond this point, etc.  We look out for such changes by checking
@@ -575,11 +585,14 @@ bpstat_do_actions (bsp)
      bpstat *bsp;
 {
   bpstat bs;
+  struct cleanup *old_chain;
+
+  executing_breakpoint_commands = 1;
+  old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
 
 top:
   bs = *bsp;
 
-  executing_breakpoint_commands = 1;
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
@@ -599,6 +612,7 @@ top:
   clear_momentary_breakpoints ();
 
   executing_breakpoint_commands = 0;
+  discard_cleanups (old_chain);
 }
 
 int
@@ -656,12 +670,12 @@ bpstat_print (bs)
 
 /* Evaluate the expression EXP and return 1 if value is zero.
    This is used inside a catch_errors to evaluate the breakpoint condition. 
-   The argument is a "struct expression *" that has been cast to int to 
+   The argument is a "struct expression *" that has been cast to char * to 
    make it pass through catch_errors.  */
 
 static int
 breakpoint_cond_eval (exp)
-     int exp;
+     char *exp;
 {
   return value_zerop (evaluate_expression ((struct expression *)exp));
 }
@@ -713,8 +727,10 @@ bpstat_stop_status (pc, frame_address)
   int stop = 0;
   int print = 0;
   CORE_ADDR bp_addr;
+#if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
   int real_breakpoint = 0;
+#endif
   /* Root of the chain of bpstat's */
   struct bpstat__struct root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
@@ -790,26 +806,28 @@ which its expression is valid.\n", b->number);
 	      continue;
 	    }
 	}
+#if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
       else
 	real_breakpoint = 1;
+#endif
 
       if (b->frame && b->frame != frame_address)
 	this_bp_stop = 0;
       else
 	{
-	  int value_zero;
+	  int value_is_zero;
 
 	  if (b->cond)
 	    {
 	      /* Need to select the frame, with all that implies
 		 so that the conditions will have the right context.  */
 	      select_frame (get_current_frame (), 0);
-	      value_zero
-		= catch_errors (breakpoint_cond_eval, (int)(b->cond),
+	      value_is_zero
+		= catch_errors (breakpoint_cond_eval, (char *)(b->cond),
 				"Error occurred in testing breakpoint condition.");
 	      free_all_values ();
 	    }
-	  if (b->cond && value_zero)
+	  if (b->cond && value_is_zero)
 	    {
 	      this_bp_stop = 0;
 	    }
@@ -942,7 +960,7 @@ breakpoint_1 (bnum, watchpoints)
 		printf_filtered (":%d", b->line_number);
 	      }
 	    else
-	      print_address_symbolic (b->address, stdout, demangle);
+	      print_address_symbolic (b->address, stdout, demangle, " ");
 	  }
 
 	printf_filtered ("\n");
@@ -982,6 +1000,7 @@ breakpoint_1 (bnum, watchpoints)
     set_next_address (last_addr);
 }
 
+/* ARGSUSED */
 static void
 breakpoints_info (bnum_exp, from_tty)
      char *bnum_exp;
@@ -995,6 +1014,7 @@ breakpoints_info (bnum_exp, from_tty)
   breakpoint_1 (bnum, 0);
 }
 
+/* ARGSUSED */
 static void
 watchpoints_info (bnum_exp, from_tty)
      char *bnum_exp;
@@ -1356,6 +1376,7 @@ tbreak_command (arg, from_tty)
   break_command_1 (arg, 1, from_tty);
 }
 
+/* ARGSUSED */
 static void
 watch_command (arg, from_tty)
      char *arg;
@@ -1394,6 +1415,7 @@ watch_command (arg, from_tty)
  * Helper routine for the until_command routine in infcmd.c.  Here
  * because it uses the mechanisms of breakpoints.
  */
+/* ARGSUSED */
 void
 until_break_command (arg, from_tty)
      char *arg;
@@ -1446,6 +1468,8 @@ until_break_command (arg, from_tty)
   proceed (-1, -1, 0);
 }
 
+#if 0
+/* These aren't used; I don't konw what they were for.  */
 /* Set a breakpoint at the catch clause for NAME.  */
 static int
 catch_breakpoint (name)
@@ -1467,6 +1491,7 @@ static int
 enable_catch_breakpoint ()
 {
 }
+#endif /* 0 */
 
 struct sal_chain
 {
@@ -1474,6 +1499,8 @@ struct sal_chain
   struct symtab_and_line sal;
 };
 
+#if 0
+/* This isn't used; I don't know what it was for.  */
 /* For each catch clause identified in ARGS, run FUNCTION
    with that clause as an argument.  */
 static struct symtabs_and_lines
@@ -1484,7 +1511,9 @@ map_catch_names (args, function)
   register char *p = args;
   register char *p1;
   struct symtabs_and_lines sals;
+#if 0
   struct sal_chain *sal_chain = 0;
+#endif
 
   if (p == 0)
     error_no_arg ("one or more catch names");
@@ -1523,11 +1552,14 @@ map_catch_names (args, function)
 	}
 #endif
       printf ("No catch clause for exception %s.\n", p);
+#if 0
     win:
+#endif
       p = p1;
       while (*p == ' ' || *p == '\t') p++;
     }
 }
+#endif /* 0 */
 
 /* This shares a lot of code with `print_frame_label_vars' from stack.c.  */
 
@@ -1681,7 +1713,10 @@ catch_command_1 (arg, tempflag, from_tty)
     {
       /* Grab selected catch clauses.  */
       error ("catch NAME not implemeneted");
+#if 0
+      /* This isn't used; I don't know what it was for.  */
       sals = map_catch_names (arg, catch_breakpoint);
+#endif
     }
 
   if (! sals.nelts) 
@@ -1741,6 +1776,8 @@ catch_command_1 (arg, tempflag, from_tty)
   free (sals.sals);
 }
 
+#if 0
+/* These aren't used; I don't know what they were for.  */
 /* Disable breakpoints on all catch clauses described in ARGS.  */
 static void
 disable_catch (args)
@@ -1764,6 +1801,7 @@ delete_catch (args)
 {
   /* Map the delete command to catch clauses described in ARGS.  */
 }
+#endif /* 0 */
 
 static void
 catch_command (arg, from_tty)
@@ -1931,9 +1969,13 @@ delete_command (arg, from_tty)
     map_breakpoint_numbers (arg, delete_breakpoint);
 }
 
-static void
+/* Reset a breakpoint given it's struct breakpoint * BINT.
+   The value we return ends up being the return value from catch_errors.
+   Unused in this case.  */
+
+static int
 breakpoint_re_set_one (bint)
-     int bint;
+     char *bint;
 {
   struct breakpoint *b = (struct breakpoint *)bint;  /* get past catch_errs */
   int i;
@@ -1977,6 +2019,7 @@ breakpoint_re_set_one (bint)
       /* Anything without a string can't be re-set. */
       delete_breakpoint (b);
     }
+  return 0;
 }
 
 /* Re-set all breakpoints after symbols have been re-loaded.  */
@@ -1988,7 +2031,7 @@ breakpoint_re_set ()
   ALL_BREAKPOINTS (b)
     {
       b->symtab = 0;		/* Be sure we don't point to old dead symtab */
-      (void) catch_errors (breakpoint_re_set_one, (int) b, 
+      (void) catch_errors (breakpoint_re_set_one, (char *) b, 
 			   "Error in re-setting breakpoint");
     }
 
@@ -2056,7 +2099,9 @@ ignore_command (args, from_tty)
   if (*p == 0)
     error ("Second argument (specified ignore-count) is missing.");
 
-  set_ignore_count (num, parse_and_eval_address (p), from_tty);
+  set_ignore_count (num,
+		    longest_to_int (value_as_long (parse_and_eval (p))),
+		    from_tty);
   printf ("\n");
 }
 
@@ -2122,6 +2167,7 @@ is valid is not currently in scope.\n", bpt->number);
     }
 }
 
+/* ARGSUSED */
 static void
 enable_command (args, from_tty)
      char *args;
@@ -2147,6 +2193,7 @@ disable_breakpoint (bpt)
   check_duplicates (bpt->address);
 }
 
+/* ARGSUSED */
 static void
 disable_command (args, from_tty)
      char *args;
@@ -2169,6 +2216,7 @@ enable_once_breakpoint (bpt)
   check_duplicates (bpt->address);
 }
 
+/* ARGSUSED */
 static void
 enable_once_command (args, from_tty)
      char *args;
@@ -2186,6 +2234,7 @@ enable_delete_breakpoint (bpt)
   check_duplicates (bpt->address);
 }
 
+/* ARGSUSED */
 static void
 enable_delete_command (args, from_tty)
      char *args;

@@ -152,10 +152,6 @@ extern char **environ;
 
 extern struct target_ops child_ops;	/* In inftarg.c */
 
-/* Copy of inferior_io_terminal when inferior was last started.  */
-
-extern char *inferior_thisrun_terminal;
-
 
 /* Sigtramp is a routine that the kernel calls (which then calls the
    signal handler).  On most machines it is a library routine that
@@ -298,6 +294,11 @@ resume (step, sig)
   }
 #endif
 
+  /* Handle any optimized stores to the inferior NOW...  */
+#ifdef DO_DEFERRED_STORES
+  DO_DEFERRED_STORES;
+#endif
+
   target_resume (step, sig);
   discard_cleanups (old_cleanups);
 }
@@ -349,7 +350,7 @@ proceed (addr, siggnal, step)
   if (step < 0)
     stop_after_trap = 1;
 
-  if (addr == -1)
+  if (addr == (CORE_ADDR)-1)
     {
       /* If there is a breakpoint at the address we will resume at,
 	 step one instruction before inserting breakpoints
@@ -404,11 +405,6 @@ The same program may be running in another process.");
      give it zero.  Used for debugging signals.  */
   else if (stop_signal < NSIG && !signal_program[stop_signal])
     stop_signal= 0;
-
-  /* Handle any optimized stores to the inferior NOW...  */
-#ifdef DO_DEFERRED_STORES
-  DO_DEFERRED_STORES;
-#endif
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
@@ -507,6 +503,11 @@ child_create_inferior (exec_file, allargs, env)
      restore it.  */
   save_our_env = environ;
 
+  /* Tell the terminal handling subsystem what tty we plan to run on;
+     it will just record the information for later.  */
+
+  new_tty_prefork (inferior_io_terminal);
+
 #if defined(USG) && !defined(HAVE_VFORK)
   pid = fork ();
 #else
@@ -542,10 +543,10 @@ child_create_inferior (exec_file, allargs, env)
       }
 #endif /* SET_STACK_LIMIT_HUGE */
 
-      /* Tell the terminal handling subsystem what tty we plan to run on;
-	 it will now switch to that one if non-null.  */
+      /* Ask the tty subsystem to switch to the one we specified earlier
+	 (or to share the current terminal, if none was specified).  */
 
-      new_tty (inferior_io_terminal);
+      new_tty ();
 
       /* Changing the signal handlers for the inferior after
 	 a vfork can also change them for the superior, so we don't mess
@@ -629,6 +630,13 @@ child_create_inferior (exec_file, allargs, env)
 	}
     }
   stop_soon_quietly = 0;
+
+  /* We are now in the child process of interest, having exec'd the
+     correct program, and are poised at the first instruction of the
+     new program.  */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  SOLIB_CREATE_INFERIOR_HOOK ();
+#endif
 
   /* Should this perhaps just be a "proceed" call?  FIXME */
   insert_step_breakpoint ();
@@ -725,6 +733,9 @@ child_attach (args, from_tty)
   /*proceed (-1, 0, -2);*/
   target_terminal_inferior ();
   wait_for_inferior ();
+#ifdef SOLIB_ADD
+  solib_add (NULL, 0);
+#endif
   normal_stop ();
 #endif  /* ATTACH_DETACH */
 }

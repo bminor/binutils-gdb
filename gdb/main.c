@@ -231,7 +231,7 @@ return_to_top_level ()
 int
 catch_errors (func, args, errstring)
      int (*func) ();
-     int args;
+     char *args;
      char *errstring;
 {
   jmp_buf saved;
@@ -392,6 +392,7 @@ main (argc, argv)
 #ifdef ADDITIONAL_OPTIONS
 	ADDITIONAL_OPTIONS
 #endif
+	{0, 0, 0, 0},
       };
 
     while (1)
@@ -785,17 +786,13 @@ dont_repeat ()
 /* Read a line from the stream "instream" without command line editing.
 
    It prints PRROMPT once at the start.
+   Action is compatible with "readline", e.g. space for the result is 
+   malloc'd and should be freed by the caller.
 
-   If RETURN_RESULT is set it allocates
-   space for whatever the user types and returns the result.
-   If not, it just discards what the user types and returns a garbage
-   non-NULL value.
-
-   No matter what return_result is, a NULL return means end of file.  */
+   A NULL return means end of file.  */
 char *
-gdb_readline (prrompt, return_result)
+gdb_readline (prrompt)
      char *prrompt;
-     int return_result;
 {
   int c;
   char *result;
@@ -808,42 +805,33 @@ gdb_readline (prrompt, return_result)
       fflush (stdout);
     }
   
-  if (return_result)
-    result = (char *) xmalloc (result_size);
+  result = (char *) xmalloc (result_size);
 
   while (1)
     {
       /* Read from stdin if we are executing a user defined command.
 	 This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (instream ? instream : stdin);
-      if (c == EOF || c == '\n')
-	break;
-      if (return_result)
+
+      if (c == EOF)
 	{
-	  result[input_index++] = c;
-	  while (input_index >= result_size)
-	    {
-	      result_size *= 2;
-	      result = (char *) xrealloc (result, result_size);
-	    }
+	  free (result);
+	  return NULL;
+	}
+
+      if (c == '\n')
+	break;
+
+      result[input_index++] = c;
+      while (input_index >= result_size)
+	{
+	  result_size *= 2;
+	  result = (char *) xrealloc (result, result_size);
 	}
     }
 
-  if (c == EOF)
-    {
-      if (return_result)
-	free (result);
-      return NULL;
-    }
-
-  if (return_result)
-    {
-      result[input_index++] = '\0';
-      return result;
-    }
-  else
-    /* Return any old non-NULL pointer.  */
-    return (char *) "non-NULL";
+  result[input_index++] = '\0';
+  return result;
 }
 
 /* Declaration for fancy readline with command line editing.  */
@@ -1031,54 +1019,6 @@ stop_sig ()
 }
 #endif /* STOP_SIGNAL */
 
-#if 0
-Writing the history file upon a terminating signal is not useful,
-  because the info is rarely relevant and is in the core dump anyway.
-  It is an annoyance to have the file cluttering up the place.
-/* The list of signals that would terminate us if not caught.
-   We catch them, but just so that we can write the history file,
-   and so forth. */
-int terminating_signals[] = {
-  SIGHUP, SIGINT, SIGILL, SIGTRAP, SIGIOT,
-  SIGEMT, SIGFPE, SIGKILL, SIGBUS, SIGSEGV, SIGSYS,
-  SIGPIPE, SIGALRM, SIGTERM,
-#ifdef SIGXCPU
-  SIGXCPU,
-#endif
-#ifdef SIGXFSZ
-  SIGXFSZ,
-#endif
-#ifdef SIGVTALRM
-  SIGVTALRM,
-#endif
-#ifdef SIGPROF
-  SIGPROF,
-#endif
-#ifdef SIGLOST
-  SIGLOST,
-#endif
-#ifdef SIGUSR1
-  SIGUSR1, SIGUSR2
-#endif
-    };
-
-#define TERMSIGS_LENGTH (sizeof (terminating_signals) / sizeof (int))
-
-static void
-catch_termination (sig)
-     int sig;
-{
-  /* We are probably here because GDB has a bug.  Write out the history
-     so that we might have a better chance of reproducing it.  */
-  /* Tell the user what we are doing so he can delete the file if
-     it is unwanted.  */
-  write_history (history_filename);
-  printf ("\n%s written.\n", history_filename);
-  signal (sig, SIG_DFL);
-  kill (getpid (), sig);
-}
-#endif
-
 /* Initialize signal handlers. */
 static void
 do_nothing ()
@@ -1089,21 +1029,15 @@ static void
 init_signals ()
 {
   extern void request_quit ();
-#if 0
-  register int i;
-
-  for (i = 0; i < TERMSIGS_LENGTH; i++)
-    signal (terminating_signals[i], catch_termination);
-#endif
 
   signal (SIGINT, request_quit);
 
   /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
      passed to the inferior, which we don't want.  It would be
      possible to do a "signal (SIGQUIT, SIG_DFL)" after we fork, but
-     on BSD4.3 systems using vfork, that will (apparently) affect the
+     on BSD4.3 systems using vfork, that can affect the
      GDB process as well as the inferior (the signal handling tables
-     being shared between the two, apparently).  Since we establish
+     might be in memory, shared between the two).  Since we establish
      a handler for SIGQUIT, when we call exec it will set the signal
      to SIG_DFL for us.  */
   signal (SIGQUIT, do_nothing);
@@ -1171,7 +1105,7 @@ command_line_input (prrompt, repeat)
 	  && ISATTY (instream))
 	rl = readline (local_prompt);
       else
-	rl = gdb_readline (local_prompt, 1);
+	rl = gdb_readline (local_prompt);
 
       if (!rl || rl == (char *) EOF)
 	{
