@@ -1,3 +1,7 @@
+Thu Nov 11 12:03:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize Sony news mips running newsos.
+
 Wed Nov 10 16:57:00 1993  Mark Eichin  (eichin@cygnus.com)
 
 	* Makefile.in (all-cygnus, build-cygnus): "fi else" needs to be
