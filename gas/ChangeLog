@@ -1,4 +1,20 @@
+Tue Apr  7 15:12:15 1992  Sean Eric Fagan  (sef@cygnus.com)
+
+	* Makefile.in:  Changed some lines to be less confusing for some
+	makes.
+
+	* input-file.c:  Conditionalize on _IOFBF, not VMS.
+
+	* read.c, write.c:  Change a series of ifdef/elif to
+	ifdef/else/ifdef etc.
+
+Fri Mar 27 12:21:16 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* symbols.c (fb_label_init): fix sizeof to memset.
+
 Fri Mar 13 15:45:44 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: install the man page.
 
 	* Makefile.in: pass down MAKEINFO explicitly on info.
 
