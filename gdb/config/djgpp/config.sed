@@ -22,7 +22,8 @@ s|\.gdbinit|gdb.ini|g
 
 /^ac_given_srcdir=/,/^CEOF/ {
   /^s%@TOPLEVEL_CONFIGURE_ARGUMENTS@%/a\
-  /@test ! -f /s,\\(.\\)\$, export am_cv_exeext=.exe; export lt_cv_sys_max_cmd_len=12288; \\1,
+  /@test ! -f /s,\\(.\\)\$, export am_cv_exeext=.exe; export lt_cv_sys_max_cmd_len=12288; \\1,\
+  /@test -f stage_last /s,\\(.\\)\$, export am_cv_exeext=.exe; export lt_cv_sys_max_cmd_len=12288; \\1,
 
 }
 

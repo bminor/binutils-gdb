@@ -51,17 +51,22 @@ fi
 
 # Make sure they don't have some file names mangled by untarring.
 echo -n "Checking the unpacked distribution..."
-if ( ! test -f ${srcdir}/intl/po2tblsed.in || \
-     ! test -f ${srcdir}/gdb/ChangeLog.002 || \
+if ( ! test -f ${srcdir}/bfd/ChangeLog.0203      || \
+     ! test -f ${srcdir}/gdb/ChangeLog.002       || \
+     ! test -f ${srcdir}/opcodes/ChangeLog.0203  || \
      ! test -f ${srcdir}/readline/config.h-in ) ; then
-  if ( ! test -f ${srcdir}/intl/po2tblsed.in ) ; then
-    notfound=${srcdir}/intl/po2tblsed.in
+  if ( ! test -f ${srcdir}/bfd/ChangeLog.0203 ) ; then
+    notfound=${srcdir}/bfd/ChangeLog.0203
   else
-    if ( ! test -d ${srcdir}/gdb/testsuite/cxx) ; then
+    if ( ! test -f ${srcdir}/gdb/ChangeLog.002) ; then
       notfound=${srcdir}/gdb/ChangeLog.002
     else
       if ( ! test -f ${srcdir}/readline/config.h-in ) ; then
         notfound=${srcdir}/readline/config.h-in
+      else
+        if ( ! test -f ${srcdir}/opcodes/ChangeLog.0203 ) ; then
+          notfound=${srcdir}/opcodes/ChangeLog.0203
+        fi
       fi
     fi
   fi

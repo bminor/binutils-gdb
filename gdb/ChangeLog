@@ -1,3 +1,16 @@
+2004-11-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Group renames for opcode directory
+	together.
+
+	* config/djgpp/djconfig.sh: Replace file names that don't exist
+	anymore with existing files, for checking the unpacked
+	distribution.
+
+	* config/djgpp/config.sed (am_cv_exeext, lt_cv_sys_max_cmd_len):
+	Export pre-cooked values in configure-* targets that begin with
+	"@test -f stage_last".
+
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (enum lval_type): Delete lval_reg_frame_relative.
