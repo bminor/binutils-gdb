@@ -168,3 +168,71 @@ by the binutils group.  Instead they should be submitted to the config
 maintainer at:
 
 	config-patches@gnu.org
+
+    --------- Creating Branches ---------
+
+Anyone with at least write-after-approval access may create a branch
+to use for their own development purposes.  In keeping with FSF
+policies, all patches applied to such a branch must come from people
+with appropriate copyright assignments on file.  All legal
+requirements that would apply to any other contribution apply equally
+to contributions on a branch.
+
+Before creating the branch, you should select a name for the branch of
+the form:
+
+  binutils-<org>-<name> 
+
+where "org" is the initials of your organization, or your own initials
+if you are acting as an individual.  For example, for a branch created
+by The GNUDist Company, "tgc" would be an appropriate choice for
+"org".  It's up to each organization to select an appropriate choice
+for "name"; some organizations may use more structure than others, so
+"name" may contain additional hyphens.
+
+Suppose that The GNUDist Company was creating a branch to develop a
+port of Binutils to the FullMonty processor.  Then, an appropriate
+choice of branch name would be:
+
+  binutils-tgc-fm
+
+A data stamp is not required as part of the name field, but some
+organizations like to have one.  If you do include the date, you
+should follow these rules:
+
+1. The date should be the date that the branch was created.
+
+2. The date should be numerical and in the form YYYYMMDD.
+
+For example:
+
+  binutils-tgc-fm_20050101
+
+would be appropriate if the branch was created on January 1st, 2005.
+
+Having selected the branch name, create the branch as follows:
+
+1. Check out binutils, so that you have a CVS checkout corresponding
+   to the initial state of your branch.
+
+2. Create a tag:
+
+     cvs tag binutils-<org>-<name>-branchpoint
+
+   That tag will allow you, and others, to easily determine what's
+   changed on the branch relative to the initial state.
+
+3. Create the branch:
+
+     cvs rtag -b -r binutils-<org>-<name>-branchpoint \
+       binutils-<org>-<name>-branch 
+
+4. Document the branch:
+
+     Add a description of the branch to binutils/BRANCHES, and check
+     that file in.  All branch descriptions should be added to the
+     HEAD revision of the file; it doesn't help to modify
+     binutils/BRANCHES on a branch!
+
+Please do not commit any patches to a branch you did not create
+without the explicit permission of the person who created the branch.

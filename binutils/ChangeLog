@@ -1,3 +1,8 @@
+2005-01-20  Mark Mitchell  <mark@codesourcery.com>
+
+	* MAINTAINERS: Document branch policy.
+	* BRANCHES: New file.
+
 2005-01-19  Fred Fish  <fnf@specifixinc.com>
 
 	* NEWS: Make note of the new MIPS disassembly option "no-aliases".
