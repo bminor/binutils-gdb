@@ -155,6 +155,7 @@ newsos3.c
 netbsd386.c
 nlm-target.h
 nlm.c
+nlm32-alpha.c
 nlm32-gen.c
 nlm32-i386.c
 nlm32-sparc.c
