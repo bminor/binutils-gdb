@@ -1,3 +1,9 @@
+Fri Jul 16 18:48:52 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* symtab.c (find_pc_symtab): Call warning, not printf directly.
+
+	* solib.c (solib_add): Use x{re,m}alloc, not {re,m}alloc.
+
 Fri Jul 16 09:56:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsread.c: No longer need to undefine ZMAGIC.

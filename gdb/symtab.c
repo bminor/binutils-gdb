@@ -958,7 +958,11 @@ find_pc_symtab (pc)
   if (ps)
     {
       if (ps->readin)
-	printf_filtered ("(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
+	/* Might want to error() here (in case symtab is corrupt and
+	   will cause a core dump), but maybe we can successfully
+	   continue, so let's not.  */
+	warning ("\
+(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
       s = PSYMTAB_TO_SYMTAB (ps);
     }
   return (s);
