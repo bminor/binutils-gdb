@@ -108,6 +108,8 @@ static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
+static asection *output_prev_sec_find
+  PARAMS ((lang_output_section_statement_type *));
 static boolean gld_${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
@@ -1405,6 +1407,32 @@ gld_${EMULATION_NAME}_finish ()
 }
 
 
+/* Find the last output section before given output statement.
+   Used by place_orphan.  */
+
+static asection *
+output_prev_sec_find (os)
+     lang_output_section_statement_type *os;
+{
+  asection *s = (asection *) NULL;
+  lang_statement_union_type *u;
+  lang_output_section_statement_type *lookup;
+
+  for (u = lang_output_section_statement.head;
+       u != (lang_statement_union_type *) NULL;
+       u = lookup->next)
+    {
+      lookup = &u->output_section_statement;
+      if (lookup == os)
+	return s;
+
+      if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
+	s = lookup->bfd_section;
+    }
+
+  return NULL;
+}
+
 /* Place an orphan section.
 
    We use this to put sections in a reasonable place in the file, and
@@ -1455,9 +1483,12 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   lang_list_init (&add_child);
 
   if (os != NULL
-      && os->bfd_section != NULL
-      && ((s->flags ^ os->bfd_section->flags) & (SEC_LOAD | SEC_ALLOC)) == 0)
+      && (os->bfd_section == NULL
+	  || ((s->flags ^ os->bfd_section->flags)
+	      & (SEC_LOAD | SEC_ALLOC)) == 0))
     {
+      /* We already have an output section statement with this
+	 name, and its bfd section, if any, has compatible flags.  */
       lang_add_section (&add_child, s, os, file);
     }
   else
@@ -1498,7 +1529,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
       /* Choose a unique name for the section.  This will be needed if
 	 the same section name appears in the input file with
-	 different loadable or allocateable characteristics.  */
+	 different loadable or allocatable characteristics.  */
       outsecname = xstrdup (hold_section_name);
       if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
 	{
@@ -1590,28 +1621,30 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	  asection *snew, **pps;
 
 	  snew = os->bfd_section;
-	  if (place->os->bfd_section != NULL || place->section != NULL)
-	    {
-	      /* Shuffle the section to make the output file look neater.  */
-	      if (place->section == NULL)
-		{
-#if 0
-		  /* Finding the end of the list is a little tricky.  We
-		     make a wild stab at it by comparing section flags.  */
-		  flagword first_flags = place->os->bfd_section->flags;
-		  for (pps = &place->os->bfd_section->next;
-		       *pps != NULL && (*pps)->flags == first_flags;
-		       pps = &(*pps)->next)
-		    ;
-		  place->section = pps;
-#else
-		  /* Put orphans after the first section on the list.  */
-		  place->section = &place->os->bfd_section->next;
-#endif
-		}
 
+	  /* Shuffle the bfd section list to make the output file look
+	     neater.  This is really only cosmetic.  */
+	  if (place->section == NULL)
+	    {
+	      asection *bfd_section = place->os->bfd_section;
+
+	      /* If the output statement hasn't been used to place
+		 any input sections (and thus doesn't have an output
+		 bfd_section), look for the closest prior output statement
+		 having an output section.  */
+	      if (bfd_section == NULL)
+		bfd_section = output_prev_sec_find (place->os);
+
+	      if (bfd_section != NULL && bfd_section != snew)
+		place->section = &bfd_section->next;
+	    }
+
+	  if (place->section != NULL)
+	    {
 	      /*  Unlink the section.  */
-	      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
+	      for (pps = &output_bfd->sections;
+		   *pps != snew;
+		   pps = &(*pps)->next)
 		;
 	      *pps = snew->next;
 
@@ -1619,21 +1652,43 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	      snew->next = *place->section;
 	      *place->section = snew;
 	    }
-	  place->section = &snew->next;	/* Save the end of this list.  */
 
-	  if (place->stmt == NULL)
+	  /* Save the end of this list.  Further ophans of this type will
+	     follow the one we've just added.  */
+	  place->section = &snew->next;
+
+	  /* The following is non-cosmetic.  We try to put the output
+	     statements in some sort of reasonable order here, because
+	     they determine the final load addresses of the orphan
+	     sections.  In addition, placing output statements in the
+	     wrong order may require extra segments.  For instance,
+	     given a typical situation of all read-only sections placed
+	     in one segment and following that a segment containing all
+	     the read-write sections, we wouldn't want to place an orphan
+	     read/write section before or amongst the read-only ones.  */
+	  if (add.head != NULL)
 	    {
-	      /* Put the new statement list right at the head.  */
-	      *add.tail = place->os->header.next;
-	      place->os->header.next = add.head;
+	      if (place->stmt == NULL)
+		{
+		  /* Put the new statement list right at the head.  */
+		  *add.tail = place->os->header.next;
+		  place->os->header.next = add.head;
+		}
+	      else
+		{
+		  /* Put it after the last orphan statement we added.  */
+		  *add.tail = *place->stmt;
+		  *place->stmt = add.head;
+		}
+
+	      /* Fix the global list pointer if we happened to tack our
+		 new list at the tail.  */
+	      if (*old->tail == add.head)
+		old->tail = add.tail;
+
+	      /* Save the end of this list.  */
+	      place->stmt = add.tail;
 	    }
-	  else
-	    {
-	      /* Put it after the last orphan statement we added.  */
-	      *add.tail = *place->stmt;
-	      *place->stmt = add.head;
-	    }
-	  place->stmt = add.tail;	/* Save the end of this list.  */
 	}
     }
 

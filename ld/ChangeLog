@@ -1,3 +1,11 @@
+2001-08-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* pe-dll.c (pe_dll_fill_sections): Correct type of "relax" param
+	passed to lang_size_sections.
+	(pe_exe_fill_sections): Likewise.
+	* emultempl/pe.em (output_prev_sec_find): Copied from elf32.em.
+	(gld_${EMULATION_NAME}_place_orphan): Merge from elf32.em.
+
 2001-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/aix.em: Formatting fixes.
