@@ -1,3 +1,8 @@
+2004-09-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c  (assign_file_positions_except_relocs): Assign relocs
+	stored in a bfd section.
+
 2004-09-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_adjust_gotplt_to_got): Reset

@@ -4423,10 +4423,13 @@ get_program_header_size (bfd *abfd)
    _bfd_elf_compute_section_file_positions.  All the section sizes and
    VMAs must be known before this is called.
 
-   We do not consider reloc sections at this point, unless they form
-   part of the loadable image.  Reloc sections are assigned file
-   positions in assign_file_positions_for_relocs, which is called by
-   write_object_contents and final_link.
+   Reloc sections come in two flavours: Those processed specially as
+   "side-channel" data attached to a section to which they apply, and
+   those that bfd doesn't process as relocations.  The latter sort are
+   stored in a normal bfd section by bfd_section_from_shdr.   We don't
+   consider the former sort here, unless they form part of the loadable
+   image.  Reloc sections not assigned here will be handled later by
+   assign_file_positions_for_relocs.
 
    We also don't set the positions of the .symtab and .strtab here.  */
 
@@ -4458,8 +4461,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  Elf_Internal_Shdr *hdr;
 
 	  hdr = *hdrpp;
-	  if (hdr->sh_type == SHT_REL
-	      || hdr->sh_type == SHT_RELA
+	  if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
+	       && hdr->bfd_section == NULL)
 	      || i == tdata->symtab_section
 	      || i == tdata->symtab_shndx_section
 	      || i == tdata->strtab_section)
@@ -4514,8 +4517,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							       FALSE);
 	    }
-	  else if (hdr->sh_type == SHT_REL
-		   || hdr->sh_type == SHT_RELA
+	  else if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
+		    && hdr->bfd_section == NULL)
 		   || hdr == i_shdrpp[tdata->symtab_section]
 		   || hdr == i_shdrpp[tdata->symtab_shndx_section]
 		   || hdr == i_shdrpp[tdata->strtab_section])
