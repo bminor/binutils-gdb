@@ -101,6 +101,7 @@ ALL_MACHINES = \
 	cpu-m68k.o \
 	cpu-m88k.o \
 	cpu-mips.o \
+	cpu-powerpc.o \
 	cpu-rs6000.o \
 	cpu-sh.o \
 	cpu-sparc.o \
@@ -138,6 +139,7 @@ BFD32_BACKENDS = \
 	elf32-m68k.o \
 	elf32-m88k.o \
 	elf32-mips.o \
+	elf32-powerpc.o \
 	elf32-sparc.o \
 	elf32.o \
 	hp300hpux.o \
@@ -155,6 +157,9 @@ BFD32_BACKENDS = \
 	nlm.o \
 	nlm32-i386.o \
 	nlm32-sparc.o \
+	$(start-sanitize-powerpc-netware) \
+	nlm32-powerpc.o \
+	$(end-sanitize-powerpc-netware) \
 	nlm32.o \
 	oasys.o \
 	reloc16.o \
@@ -221,11 +226,11 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
 	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
-	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
+	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
+	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c elf32-powerpc.c \
 	 elf64.c elf64-gen.c \
 	 nlm.c nlm32.c nlm32-i386.c nlm32-sparc.c nlm32-alpha.c \
 	 nlm64.c coff-alpha.c cpu-alpha.c \
@@ -468,7 +473,7 @@ $(BFD_H): stmp-bfd.h ; @true
 # If the file is still there, kill it.
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
 	rm -f bfd.h-new 64 ../include/bfd.h
-	-grep HOST_64_BIT sysdep.h > 64
+	-grep BFD_HOST_64_BIT sysdep.h > 64
 	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' -e '/64-bit.*sysdep.h/ r 64' < $(srcdir)/bfd-in2.h > bfd.h-new
 	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
 	rm -f 64
@@ -595,6 +600,7 @@ cpu-vax.o : cpu-vax.c
 cpu-mips.o : cpu-mips.c
 cpu-a29k.o : cpu-a29k.c
 cpu-i386.o : cpu-i386.c
+cpu-powerpc.o : cpu-powerpc.c
 cpu-rs6000.o : cpu-rs6000.c
 coff-h8300.o : coff-h8300.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/h8300.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
@@ -631,6 +637,8 @@ elf32-mips.o : elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h ecoffswap.h \
   elf32-target.h
 elf32-gen.o : elf32-gen.c libelf.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
+elf32-powerpc.o : elf32-powerpc.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
 elf64.o : elf64.c elfcode.h libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h

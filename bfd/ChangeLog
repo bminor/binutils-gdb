@@ -1,3 +1,31 @@
+Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	start-sanitize-powerpc-netware
+	Support for PowerPC NetWare.
+	* config.bfd (powerpc-*-netware*): New target; use ppc-nlm.
+	* config/ppc-nlm.mt: New file.
+	* configure.in (nlm32_powerpc_vec): New target vector; use
+	nlm32-powerpc.o, nlm32.o, nlm.o.
+	* targets.c (nlm32_powerpc_vec): Declare.
+	* Makefile.in (BFD32_BACKENDS): Add nlm32-powerpc.o.
+	(CFILES): Should add nlm32-powerpc.c, but didn't, because the
+	dependencies can't be sanitized.
+	end-sanitize-powerpc-netware
+
+	Initial support for PowerPC ELF.  Done without an ABI, and
+	probably to be changed when I get an ABI.
+	* config.bfd (powerpc-*-sysv4*): New target; use ppc-elf.
+	* config/ppc-elf.mt: New file.
+	* configure.in (bfd_elf32_powerpc_vec): New target vector; use
+	elf32-powerpc.o, elf32.o, elf.o.
+	* elf32-powerpc.c: New file.
+	* elfcode.h (prep_headers): Add bfd_arch_powerpc case.
+	(elf_set_arch_mach): Likewise.
+	* targets.c (bfd_elf32_powerpc_vec): Declare.
+	* Makefile.in (BFD32_BACKENDS): Add elf32-powerpc.o.
+	(CFILES): Add elf32-powerpc.c.
+	Rebuilt dependencies.
+
 Thu Feb 17 15:29:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coffgen.c (coff_write_linenumbers): Always return a value.

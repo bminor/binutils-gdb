@@ -2061,6 +2061,9 @@ prep_headers (abfd)
     case bfd_arch_hppa:
       i_ehdrp->e_machine = EM_HPPA;
       break;
+    case bfd_arch_powerpc:
+      i_ehdrp->e_machine = EM_CYGNUS_POWERPC;
+      break;
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;
@@ -3161,6 +3164,7 @@ DEFUN (elf_set_arch_mach, (abfd, arch, machine),
     case bfd_arch_i860:		/* EM_860 */
     case bfd_arch_mips:		/* EM_MIPS (MIPS R3000) */
     case bfd_arch_hppa:		/* EM_HPPA (HP PA_RISC) */
+    case bfd_arch_powerpc:	/* EM_CYGNUS_POWERPC */
       return bfd_default_set_arch_mach (abfd, arch, machine);
     default:
       return false;
