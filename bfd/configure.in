@@ -52,6 +52,11 @@ m68k)
 		;;
 	sony)	my_host=news ;;
 	sun)	my_host=sun3 ;;
+	apollo*)
+		case "${host_os}" in
+		sysv*)	my_host=apollo68v ;;
+		esac
+		;;
 	esac
 	;;
 
@@ -90,7 +95,7 @@ tahoe)
 
 vax)
 	case "${host_os}" in
-	ultrix) my_host=vaxult ;;
+	ultrix*) my_host=vaxult ;;
 	*) my_host=vaxbsd ;;
 	esac
 	;;
@@ -187,8 +192,22 @@ sgi)
 		bfd_target=irix3 ;;
 	esac
 	;;
+big)
+	case "${target_cpu}" in
+	mips)
+		bfd_target=irix3 ;;
+	esac
+	;;
+tandem)
+	bfd_target=m68k-aout 
+	;;
+
 none|nyu|sco)
 	case "${target_cpu}" in
+	m68k) case "${target_os}" in
+		os68k) bfd_target=m68k-aout ;;
+	      esac
+	      ;;
 	i386) bfd_target=i386-coff ;;
 	a29k) case "${target_os}" in
 		aout) bfd_target=a29k-aout ;;

@@ -1,9 +1,13 @@
 Sat Mar  7 10:33:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* coff-i960.c (icoff_little_vec): add COFF_SWAP_TABLE so we can run gdb on little
-	endian 960 code. 
+	* coff-i960.c (icoff_little_vec): add COFF_SWAP_TABLE so we can run
+	gdb on little-endian 960 code. 
 	* archive.c (compute_and_write_armap): indirect symbols should go
 	into the archive header too.
+
+Fri Mar  6 21:55:16 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
 
 Thu Mar  5 23:51:42 1992  John Gilmore  (gnu at cygnus.com)
 
@@ -12,6 +16,10 @@ Thu Mar  5 23:51:42 1992  John Gilmore  (gnu at cygnus.com)
 	* config/mh-decstation, config/mh-irix3:  Add coff-msym.o
 	to the files built on MIPS-based hosts.
 	* Makefile.in:  Add rule for coff-msym.
+
+Thu Mar  5 21:36:05 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added clean-info target.  MINIMIZE=1.
 
 Sun Mar  1 22:32:58 1992  Per Bothner  (bothner@cygnus.com)
 
@@ -31,12 +39,22 @@ Thu Feb 27 22:19:55 1992  Per Bothner  (bothner@cygnus.com)
 	* hosts/h-sparc.h:  Removed prototype for bogus function
 	'emset' (presumably should have been 'memset' - which is there).
 
+Thu Feb 27 11:46:33 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in (mips-big-* target):  Same is Iris.
+
 Thu Feb 27 09:24:56 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 	* aoutx.h (translate_from_native_sym_flags): when creating an
 	alias symbol, fill in the section as undefined, rather than
 	leaving it blank. If an output section can't be found for a
 	symbol, then don't core dump.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
 
 Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
