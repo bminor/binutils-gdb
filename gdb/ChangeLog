@@ -1,3 +1,12 @@
+Tue Dec 31 06:51:43 1996  Mark Alexander  <marka@cygnus.com>
+
+	* config/i386/xm-windows.h: Undo previous change to SIGTRAP
+	and SIGQUIT values; it messed up non-MIPS targets.
+	* config/mips/tm-mips.h: Undefine BREAKPOINT, replace
+	with separate LITTLE_BREAKPOINT and BIG_BREAKPOINT definitions;
+	this fixes problem with setting breakpoints in little-endian
+	programs in the simulator.
+
 Mon Dec 30 00:14:06 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* remote-sim.c (gdbsim_open_p): New static local.
