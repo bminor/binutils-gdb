@@ -26,6 +26,7 @@ Things-to-keep:
 Makefile.am
 Makefile.in
 bfd.texinfo
+bfdint.texi
 bfdsumm.texi
 chew.c
 makefile.vms

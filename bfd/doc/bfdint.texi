@@ -1,0 +1,399 @@
+\input texinfo
+@setfilename bfdint.info
+@node Top
+@top BFD Internals
+@raisesections
+@cindex bfd internals
+
+This document describes some BFD internal information which may be
+helpful when working on BFD.  It is very incomplete.
+
+This document is not updated regularly, and may be out of date.  It was
+last modified on $Date$.
+
+The initial version of this document was written by Ian Lance Taylor
+@email{ian@@cygnus.com}.
+
+@menu
+* BFD glossary::		BFD glossary
+* BFD guidelines::		BFD programming guidelines
+* BFD generated files::		BFD generated files
+* BFD multiple compilations::	Files compiled multiple times in BFD
+* Index::			Index
+@end menu
+
+@node BFD glossary
+@section BFD glossary
+@cindex glossary for bfd
+@cindex bfd glossary
+
+This is a short glossary of some BFD terms.
+
+@table @asis
+@item a.out
+The a.out object file format.  The original Unix object file format.
+Still used on SunOS, though not Solaris.  Supports only three sections.
+
+@item archive
+A collection of object files produced and manipulated by the @samp{ar}
+program.
+
+@item BFD
+The BFD library itself.  Also, each object file, archive, or exectable
+opened by the BFD library has the type @samp{bfd *}, and is sometimes
+referred to as a bfd.
+
+@item COFF
+The Common Object File Format.  Used on Unix SVR3.  Used by some
+embedded targets, although ELF is normally better.
+
+@item DLL
+A shared library on Windows.
+
+@item dynamic linker
+When a program linked against a shared library is run, the dynamic
+linker will locate the appropriate shared library and arrange to somehow
+include it in the running image.
+
+@item dynamic object
+Another name for an ELF shared library.
+
+@item ECOFF
+The Extended Common Object File Format.  Used on Alpha Digital Unix
+(formerly OSF/1), as well as Ultrix and Irix 4.  A variant of COFF.
+
+@item ELF
+The Executable and Linking Format.  The object file format used on most
+modern Unix systems, including GNU/Linux, Solaris, Irix, and SVR4.  Also
+used on many embedded systems.
+
+@item executable
+A program, with instructions and symbols, and perhaps dynamic linking
+information.  Normally produced by a linker.
+
+@item NLM
+NetWare Loadable Module.  Used to describe the format of an object which
+be loaded into NetWare, which is some kind of PC based network server
+program.
+
+@item object file
+A binary file including machine instructions, symbols, and relocation
+information.  Normally produced by an assembler.
+
+@item object file format
+The format of an object file.  Typically object files and executables
+for a particular system are in the same format, although executables
+will not contain any relocation information.
+
+@item PE
+The Portable Executable format.  This is the object file format used for
+Windows (specifically, Win32) object files.  It is based closely on
+COFF, but has a few significant differences.
+
+@item PEI
+The Portable Executable Image format.  This is the object file format
+used for Windows (specifically, Win32) executables.  It is very similar
+to PE, but includes some additional header information.
+
+@item relocations
+Information used by the linker to adjust section contents.
+
+@item section
+Object files and executable are composed of sections.  Sections have
+optional data and optional relocation information.
+
+@item shared library
+A library of functions which may be used by many executables without
+actually being linked into each executable.  There are several different
+implementations of shared libraries, each having slightly different
+features.
+
+@item symbol
+Each object file and executable may have a list of symbols, often
+referred to as the symbol table.  A symbol is basically a name and an
+address.  There may also be some additional information like the type of
+symbol, although the type of a symbol is normally something simple like
+function or object, and should be confused with the more complex C
+notion of type.  Typically every global function and variable in a C
+program will have an associated symbol.
+
+@item Win32
+The current Windows API, implemented by Windows 95 and later and Windows
+NT 3.51 and later, but not by Windows 3.1.
+
+@item XCOFF
+The eXtended Common Object File Format.  Used on AIX.  A variant of
+COFF, with a completely different symbol table implementation.
+@end table
+
+@node BFD guidelines
+@section BFD programming guidelines
+@cindex bfd programming guidelines
+@cindex programming guidelines for bfd
+@cindex guidelines, bfd programming
+
+There is a lot of poorly written and confusing code in BFD.  New BFD
+code should be written to a higher standard.  Merely because some BFD
+code is written in a particular manner does not mean that you should
+emulate it.
+
+Here are some general BFD programming guidelines:
+
+@itemize @bullet
+@item
+Avoid global variables.  We ideally want BFD to be fully reentrant, so
+that it can be used in multiple threads.  All uses of global or static
+variables interfere with that.  Initialized constant variables are OK,
+and they should be explicitly marked with const.  Instead of global
+variables, use data attached to a BFD or to a linker hash table.
+
+@item
+All externally visible functions should have names which start with
+@samp{bfd_}.  All such functions should be declared in some header file,
+typically @file{bfd.h}.  See, for example, the various declarations near
+the end of @file{bfd-in.h}, which mostly declare functions required by
+specific linker emulations.
+
+@item
+All functions which need to be visible from one file to another within
+BFD, but should not be visible outside of BFD, should start with
+@samp{_bfd_}.  Although external names beginning with @samp{_} are
+prohibited by the ANSI standard, in practice this usage will always
+work, and it is required by the GNU coding standards.
+
+@item
+Always remember that people can compile using --enable-targets to build
+several, or all, targets at once.  It must be possible to link together
+the files for all targets.
+
+@item
+BFD code should compile with few or no warnings using @samp{gcc -Wall}.
+Some warnings are OK, like the absence of certain function declarations
+which may or may not be declared in system header files.  Warnings about
+ambiguous expressions and the like should always be fixed.
+@end itemize
+
+@node BFD generated files
+@section BFD generated files
+@cindex generated files in bfd
+@cindex bfd generated files
+
+BFD contains several automatically generated files.  This section
+describes them.  Some files are created at configure time, when you
+configure BFD.  Some files are created at make time, when you build
+time.  Some files are automatically rebuilt at make time, but only if
+you configure with the @samp{--enable-maintainer-mode} option.  Some
+files live in the object directory---the directory from which you run
+configure---and some live in the source directory.  All files that live
+in the source directory are checked into the CVS repository.
+
+@table @file
+@item bfd.h
+@cindex @file{bfd.h}
+@cindex @file{bfd-in3.h}
+Lives in the object directory.  Created at make time from
+@file{bfd-in2.h} via @file{bfd-in3.h}.  @file{bfd-in3.h} is created at
+configure time from @file{bfd-in2.h}.  There are automatic dependencies
+to rebuild @file{bfd-in3.h} and hence @file{bfd.h} if @file{bfd-in2.h}
+changes, so you can normally ignore @file{bfd-in3.h}, and just think
+about @file{bfd-in2.h} and @file{bfd.h}.
+
+@file{bfd.h} is built by replacing a few strings in @file{bfd-in2.h}.
+To see them, search for @samp{@@} in @file{bfd-in2.h}.  They mainly
+control whether BFD is built for a 32 bit target or a 64 bit target.
+
+@item bfd-in2.h
+@cindex @file{bfd-in2.h}
+Lives in the source directory.  Created from @file{bfd-in.h} and several
+other BFD source files.  If you configure with the
+@samp{--enable-maintainer-mode} option, @file{bfd-in2.h} is rebuilt
+automatically when a source file changes.
+
+@item elf32-target.h
+@itemx elf64-target.h
+@cindex @file{elf32-target.h}
+@cindex @file{elf64-target.h}
+Live in the object directory.  Created from @file{elfxx-target.h}.
+These files are versions of @file{elfxx-target.h} customized for either
+a 32 bit ELF target or a 64 bit ELF target.
+
+@item libbfd.h
+@cindex @file{libbfd.h}
+Lives in the source directory.  Created from @file{libbfd-in.h} and
+several other BFD source files.  If you configure with the
+@samp{--enable-maintainer-mode} option, @file{libbfd.h} is rebuilt
+automatically when a source file changes.
+
+@item libcoff.h
+@cindex @file{libcoff.h}
+Lives in the source directory.  Created from @file{libcoff-in.h} and
+@file{coffcode.h}.  If you configure with the
+@samp{--enable-maintainer-mode} option, @file{libcoff.h} is rebuilt
+automatically when a source file changes.
+
+@item targmatch.h
+@cindex @file{targmatch.h}
+Lives in the object directory.  Created at make time from
+@file{config.bfd}.  This file is used to map configuration triplets into
+BFD target vector variable names at run time.
+@end table
+
+@node BFD multiple compilations
+@section Files compiled multiple times in BFD
+Several files in BFD are compiled multiple times.  By this I mean that
+there are header files which contain function definitions.  These header
+filesare included by other files, and thus the functions are compiled
+once per file which includes them.
+
+Preprocessor macros are used to control the compilation, so that each
+time the files are compiled the resulting functions are slightly
+different.  Naturally, if they weren't different, there would be no
+reason to compile them multiple times.
+
+This is a not a particularly good programming technique, and future BFD
+work should avoid it.
+
+@itemize @bullet
+@item
+Since this technique is rarely used, even experienced C programmers find
+it confusing.
+
+@item
+It is difficult to debug programs which use BFD, since there is no way
+to describe which version of a particular function you are looking at.
+
+@item
+Programs which use BFD wind up incorporating two or more slightly
+different versions of the same function, which wastes space in the
+executable.
+
+@item
+This technique is never required nor is it especially efficient.  It is
+always possible to use statically initialized structures holding
+function pointers and magic constants instead.
+@end itemize
+
+The following a list of the files which are compiled multiple times.
+
+@table @file
+@item aout-target.h
+@cindex @file{aout-target.h}
+Describes a few functions and the target vector for a.out targets.  This
+is used by individual a.out targets with different definitions of
+@samp{N_TXTADDR} and similar a.out macros.
+
+@item aoutf1.h
+@cindex @file{aoutf1.h}
+Implements standard SunOS a.out files.  In principle it supports 64 bit
+a.out targets based on the preprocessor macro @samp{ARCH_SIZE}, but
+since all known a.out targets are 32 bits, this code may or may not
+work.  This file is only included by a few other files, and it is
+difficult to justify its existence.
+
+@item aoutx.h
+@cindex @file{aoutx.h}
+Implements basic a.out support routines.  This file can be compiled for
+either 32 or 64 bit support.  Since all known a.out targets are 32 bits,
+the 64 bit support may or may not work.  I believe the original
+intention was that this file would only be included by @samp{aout32.c}
+and @samp{aout64.c}, and that other a.out targets would simply refer to
+the functions it defined.  Unfortunately, some other a.out targets
+started including it directly, leading to a somewhat confused state of
+affairs.
+
+@item coffcode.h
+@cindex @file{coffcode.h}
+Implements basic COFF support routines.  This file is included by every
+COFF target.  It implements code which handles COFF magic numbers as
+well as various hook functions called by the generic COFF functions in
+@file{coffgen.c}.  This file is controlled by a number of different
+macros, and more are added regularly.
+
+@item coffswap.h
+@cindex @file{coffswap.h}
+Implements COFF swapping routines.  This file is included by
+@file{coffcode.h}, and thus by every COFF target.  It implements the
+routines which swap COFF structures between internal and external
+format.  The main control for this file is the external structure
+definitions in the files in the @file{include/coff} directory.  A COFF
+target file will include one of those files before including
+@file{coffcode.h} and thus @file{coffswap.h}.  There are a few other
+macros which affect @file{coffswap.h} as well, mostly describing whether
+certain fields are present in the external structures.
+
+@item ecoffswap.h
+@cindex @file{ecoffswap.h}
+Implements ECOFF swapping routines.  This is like @file{coffswap.h}, but
+for ECOFF.  It is included by the ECOFF target files (of which there are
+only two).  The control is the preprocessor macro @samp{ECOFF_32} or
+@samp{ECOFF_64}.
+
+@item elfcode.h
+@cindex @file{elfcode.h}
+Implements ELF functions that use external structure definitions.  This
+file is included by two other files: @file{elf32.c} and @file{elf64.c}.
+It is controlled by the @samp{ARCH_SIZE} macro which is defined to be
+@samp{32} or @samp{64} before including it.  The @samp{NAME} macro is
+used internally to give the functions different names for the two target
+sizes.
+
+@item elfcore.h
+@cindex @file{elfcore.h}
+Like @file{elfcode.h}, but for functions that are specific to ELF core
+files.  This is included only by @file{elfcode.h}.
+
+@item elflink.h
+@cindex @file{elflink.h}
+Like @file{elfcode.h}, but for functions used by the ELF linker.  This
+is included only by @file{elfcode.h}.
+
+@item elfxx-target.h
+@cindex @file{elfxx-target.h}
+This file is the source for the generated files @file{elf32-target.h}
+and @file{elf64-target.h}, one of which is included by every ELF target.
+It defines the ELF target vector.
+
+@item freebsd.h
+@cindex @file{freebsd.h}
+Presumably intended to be included by all FreeBSD targets, but in fact
+there is only one such target, @samp{i386-freebsd}.  This defines a
+function used to set the right magic number for FreeBSD, as well as
+various macros, and includes @file{aout-target.h}.
+
+@item netbsd.h
+@cindex @file{netbsd.h}
+Like @file{freebsd.h}, except that there are several files which include
+it.
+
+@item nlm-target.h
+@cindex @file{nlm-target.h}
+Defines the target vector for a standard NLM target.
+
+@item nlmcode.h
+@cindex @file{nlmcode.h}
+Like @file{elfcode.h}, but for NLM targets.  This is only included by
+@file{nlm32.c} and @file{nlm64.c}, both of which define the macro
+@samp{ARCH_SIZE} to an appropriate value.  There are no 64 bit NLM
+targets anyhow, so this is sort of useless.
+
+@item nlmswap.h
+@cindex @file{nlmswap.h}
+Like @file{coffswap.h}, but for NLM targets.  This is included by each
+NLM target, but I think it winds up compiling to the exact same code for
+every target, and as such is fairly useless.
+
+@item peicode.h
+@cindex @file{peicode.h}
+Provides swapping routines and other hooks for PE targets.
+@file{coffcode.h} will include this rather than @file{coffswap.h} for a
+PE target.  This defines PE specific versions of the COFF swapping
+routines, and also defines some macros which control @file{coffcode.h}
+itself.
+@end table
+
+@node Index
+@unnumberedsec Index
+@printindex cp
+
+@contents
+@bye
