@@ -1,3 +1,34 @@
+Sat Jul 25 16:03:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr.igen: New file.
+	(MAC/MADD16, DMAC/DMADD16): Implement using code from gencode.c.
+	* mips.igen: Define vr4100 model. Include vr.igen.
+	
+start-sanitize-r5900
+Tue Jul 14 16:10:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen (r59fp_overflow): Replace argument ANS with argument
+ 	SIGN_P.
+	(r59fp_zero): Ditto.
+	(r59fp_store): Update calls.
+	(DIV.S): Compute 0/0 sign from inputs. Ditto for X/0.
+
+end-sanitize-r5900
+start-sanitize-branchbug4011
+Mon Jun 29 09:31:27 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* interp.c (OPTION_BRANCH_BUG_4011): Add.
+	(mips_option_handler): Handle OPTION_BRANCH_BUG_4011.
+	(mips_options): Define the option.
+	* mips.igen (check_4011_branch_bug): New.
+	(mark_4011_branch_bug): New.
+	(all branch insn): Call mark_branch_bug, and check_branch_bug.
+	* sim-main.h (branchbug4011_option, branchbug4011_last_target, 
+	branchbug4011_last_cia, BRANCHBUG4011_OPTION, 
+	BRANCHBUG4011_LAST_TARGET, BRANCHBUG4011_LAST_CIA,
+	check_branch_bug, mark_branch_bug): Define.
+
+end-sanitize-branchbug4011
 Mon Jun 29 09:21:07 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips.igen (check_mf_hilo): Correct check.

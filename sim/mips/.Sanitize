@@ -86,6 +86,7 @@ m16.dc
 m16run.c
 mips.dc
 tx.igen
+vr.igen
 
 Things-to-lose:
 
@@ -212,7 +213,7 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen mdmx.igen"
+vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc vr5400.igen mdmx.igen vr.igen"
 
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
@@ -241,7 +242,7 @@ else
 	done
 fi
 
-vr4320_files="ChangeLog Makefile.in configure configure.in mips.igen"
+vr4320_files="ChangeLog Makefile.in configure configure.in mips.igen vr.igen vr4320.igen"
 
 if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
 	for i in $vr4320_files ; do
@@ -259,6 +260,36 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-vr4320/,/end-\sanitize\-vr4320/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+
+vrXXXX_files="vr.igen"
+
+if ( echo $* | grep keep\-vr > /dev/null ) ; then
+	for i in $vrXXXX_files ; do
+		if test ! -d $i && (grep sanitize-vrXXXX $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vrXXXX stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vrXXXX $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vrXXXX\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vrXXXX/,/end-\sanitize\-vrXXXX/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
