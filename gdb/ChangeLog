@@ -1,3 +1,12 @@
+2004-04-28  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+	    Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in (mips-sgi-irix5*): Define _KMEMUSER for
+	<sys/proc.h>.
+	* acconfig.h: Provide default _KMEMUSER value.
+	* config.in, configure: Re-generate.
+	* NEWS: Mention fix.
+
 2004-04-28  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention GDB 6.1.1.  Mention gdb/gdbserver/configure

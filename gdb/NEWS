@@ -3,6 +3,11 @@
 
 *** Changes in GDB 6.1.1:
 
+* Fixed build problem on IRIX 5
+
+Due to header problems with <sys/proc.h>, the file gdb/proc-api.c
+wasn't able to compile compile on an IRIX 5 system.
+
 * Added execute permission to gdb/gdbserver/configure
 
 The shell script gdb/testsuite/gdb.stabs/configure lacked execute

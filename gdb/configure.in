@@ -622,6 +622,10 @@ if test "${target}" = "${host}"; then
   *-*-solaris2.[[6789]])
       AC_DEFINE(NEW_PROC_API)
       ;;
+  mips-sgi-irix5*)
+      # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
+      AC_DEFINE([_KMEMUSER], 1)
+      ;;
   esac
 fi
 
