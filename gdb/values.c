@@ -910,31 +910,15 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
 
   /* The virtual function table is now an array of structures
      which have the form { int16 offset, delta; void *pfn; }.  */
-  vtbl = value_primitive_field (arg1, 0, TYPE_VPTR_FIELDNO (context),
-					 TYPE_VPTR_BASETYPE (context));
+  vtbl = value_ind (value_primitive_field (arg1, 0, 
+					   TYPE_VPTR_FIELDNO (context),
+					   TYPE_VPTR_BASETYPE (context)));
 
-  /* With older versions of g++, the vtbl field pointed to an array
-     of structures.  Nowadays it points directly to the structure. */
-  if (TYPE_CODE (VALUE_TYPE (vtbl)) == TYPE_CODE_PTR
-      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (vtbl))) == TYPE_CODE_ARRAY)
-    {
-      /* Handle the case where the vtbl field points to an
-         array of structures. */
-      vtbl = value_ind (vtbl);
-
-      /* Index into the virtual function table.  This is hard-coded because
-	 looking up a field is not cheap, and it may be important to save
-	 time, e.g. if the user has set a conditional breakpoint calling
-	 a virtual function.  */
-      entry = value_subscript (vtbl, vi);
-    }
-  else
-    {
-      /* Handle the case where the vtbl field points directly to a structure. */
-      vtbl = value_add (vtbl, vi);
-      entry = value_ind (vtbl);
-    }
-
+  /* Index into the virtual function table.  This is hard-coded because
+     looking up a field is not cheap, and it may be important to save
+     time, e.g. if the user has set a conditional breakpoint calling
+     a virtual function.  */
+  entry = value_subscript (vtbl, vi);
   entry_type = check_typedef (VALUE_TYPE (entry));
 
   if (TYPE_CODE (entry_type) == TYPE_CODE_STRUCT)
