@@ -979,6 +979,7 @@ check_stub_method (type, i, j)
   argtypes = (struct type **)
     TYPE_ALLOC (type, (argcount + 2) * sizeof (struct type *));
   p = argtypetext;
+  /* FIXME: This is wrong for static member functions.  */
   argtypes[0] = lookup_pointer_type (type);
   argcount = 1;
 

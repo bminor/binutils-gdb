@@ -411,7 +411,8 @@ struct cplus_struct_type
 
 	  /* The argument list.  Only valid if is_stub is clear.  Contains
 	     the type of each argument, including `this', and ending with
-	     a NULL pointer after the last argument.  */
+	     a NULL pointer after the last argument.  Should not contain
+	     a `this' pointer for static member functions.  */
 
 	  struct type **args;
 
