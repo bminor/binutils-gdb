@@ -132,7 +132,7 @@ struct linked_proc_info
 } *linked_proc_desc_table = NULL;
 
 
-/* Guaranteed to set fci->saved_regs to some values (it never leaves it
+/* Guaranteed to set frame->saved_regs to some values (it never leaves it
    NULL).  */
 
 void
@@ -652,11 +652,22 @@ init_extra_frame_info (frame)
 
       if (proc_desc == &temp_proc_desc)
 	{
-	  frame->saved_regs = (struct frame_saved_regs*)
-	    obstack_alloc (&frame_cache_obstack,
-			   sizeof (struct frame_saved_regs));
-	  *frame->saved_regs = temp_saved_regs;
-	  frame->saved_regs->regs[PC_REGNUM] = frame->saved_regs->regs[RA_REGNUM];
+	  char *name;
+
+	  /* Do not set the saved registers for a sigtramp frame,
+	     alpha_find_saved_registers will do that for us.
+	     We can't use frame->signal_handler_caller, it is not yet set.  */
+	  find_pc_partial_function (frame->pc, &name,
+				    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+	  if (!IN_SIGTRAMP (frame->pc, name))
+	    {
+	      frame->saved_regs = (struct frame_saved_regs*)
+		obstack_alloc (&frame_cache_obstack,
+			       sizeof (struct frame_saved_regs));
+	      *frame->saved_regs = temp_saved_regs;
+	      frame->saved_regs->regs[PC_REGNUM]
+		= frame->saved_regs->regs[RA_REGNUM];
+	    }
 	}
     }
 }

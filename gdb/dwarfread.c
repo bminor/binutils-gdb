@@ -1689,6 +1689,7 @@ enum_type (dip, objfile)
   unsigned short blocksz;
   struct symbol *sym;
   int nbytes;
+  int unsigned_enum = 1;
   
   if ((type = lookup_utype (dip -> die_ref)) == NULL)
     {
@@ -1749,6 +1750,8 @@ enum_type (dip, objfile)
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
 	  SYMBOL_VALUE (sym) = list -> field.bitpos;
+	  if (SYMBOL_VALUE (sym) < 0)
+	    unsigned_enum = 0;
 	  add_symbol_to_list (sym, list_in_scope);
 	}
       /* Now create the vector of fields, and record how big it is. This is
@@ -1758,6 +1761,8 @@ enum_type (dip, objfile)
 	 vector. */
       if (nfields > 0)
 	{
+	  if (unsigned_enum)
+	    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
 	  TYPE_NFIELDS (type) = nfields;
 	  TYPE_FIELDS (type) = (struct field *)
 	    obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) * nfields);

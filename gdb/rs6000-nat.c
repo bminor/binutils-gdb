@@ -742,7 +742,7 @@ xcoff_relocate_core (target)
 
 	  /* We must update the to_sections field in the core_ops structure
 	     now to avoid dangling pointer dereferences.  */
-	  update_coreops = core_ops.to_sections === target->to_sections;
+	  update_coreops = core_ops.to_sections == target->to_sections;
 	  
 	  count = target->to_sections_end - target->to_sections;
 	  count += 2;

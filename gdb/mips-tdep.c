@@ -18,9 +18,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
@@ -665,11 +666,22 @@ init_extra_frame_info(fci)
 
       if (proc_desc == &temp_proc_desc)
 	{
-	  fci->saved_regs = (struct frame_saved_regs*)
-	    obstack_alloc (&frame_cache_obstack,
-			   sizeof (struct frame_saved_regs));
-	  *fci->saved_regs = temp_saved_regs;
-	  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
+	  char *name;
+
+	  /* Do not set the saved registers for a sigtramp frame,
+	     mips_find_saved_registers will do that for us.
+	     We can't use fci->signal_handler_caller, it is not yet set.  */
+	  find_pc_partial_function (fci->pc, &name,
+				    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+	  if (!IN_SIGTRAMP (fci->pc, name))
+	    {
+	      fci->saved_regs = (struct frame_saved_regs*)
+		obstack_alloc (&frame_cache_obstack,
+			       sizeof (struct frame_saved_regs));
+	      *fci->saved_regs = temp_saved_regs;
+	      fci->saved_regs->regs[PC_REGNUM]
+		= fci->saved_regs->regs[RA_REGNUM];
+	    }
 	}
 
       /* hack: if argument regs are saved, guess these contain args */
@@ -1026,7 +1038,7 @@ mips_do_registers_info (regnum, fpregs)
     }
   else
     {
-      int did_newline;
+      int did_newline = 0;
 
       for (regnum = 0; regnum < NUM_REGS; )
 	{

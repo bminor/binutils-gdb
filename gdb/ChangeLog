@@ -1,3 +1,22 @@
+Sat Oct 21 06:11:49 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-tdep.c, mips-tdep.c (init_extra_frame_info):
+	Do not set saved registers from heuristics for a sigtramp frame.
+
+	* dwarfread.c (enum_type):  Determine signedness of enum type
+	from enumerators.
+
+	* mips-tdep.c:  Include gdb_string.h, gcc -Wall lint.
+
+	* rs6000-nat.c (xcoff_relocate_core):  Fix typo.
+
+	* valops.c (value_repeat):  Fix length of memory transfer to
+	match recent allocate_repeat_value change.
+
+Thu Oct 19 19:04:35 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdbtypes.c (get_discrete_bounds):  Fix typo.
+
 Thu Oct 19 12:15:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* defs.h (SEEK_SET, SEEK_CUR): Add default definitions.
@@ -110,7 +129,7 @@ Thu Oct 12 13:36:15 1995  Jeffrey A Law  (law@cygnus.com)
 	* irix5-nat.c (solib_add): Update the to_sections and
 	to_sections_end fields in core_ops here if needed.
 	* osfsolib.c (solib_add): Likewise.
-	* rs6000-nat.c (xcoff_reload_core): Likewise.
+	* rs6000-nat.c (xcoff_relocate_core): Likewise.
 	* solib.c (solib_add): Likewise.
 	* somsolib.c (solib_add): Likewise.
 
@@ -195,7 +214,7 @@ Fri Oct  6 11:56:49 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 Thu Oct  5 17:28:09 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
-	* values.c allocate_repeat_value):  Allocate an array type, and
+	* values.c (allocate_repeat_value):  Allocate an array type, and
 	a value of that type; use that instead of setting VALUE_REPEATED.
 	* value.h (struct value):  Remove fields repetitions and repeated.
 	(VALUE_REPEATED, VALUE_REPETITIONS):  Removed, no longer used.

@@ -56,47 +56,52 @@ static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
 
-/* Allocate NBYTES of space in the inferior using the inferior's malloc
-   and return a value that is a pointer to the allocated space. */
+/* Find the address of function name NAME in the inferior.  */
 
-static CORE_ADDR
-allocate_space_in_inferior (len)
-     int len;
+value_ptr
+find_function_in_inferior (name)
+     char *name;
 {
-  register value_ptr val;
   register struct symbol *sym;
-  struct minimal_symbol *msymbol;
-  struct type *type;
-  value_ptr blocklen;
-  LONGEST maddr;
-
-  /* Find the address of malloc in the inferior.  */
-
-  sym = lookup_symbol ("malloc", 0, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
   if (sym != NULL)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)
 	{
-	  error ("\"malloc\" exists in this program but is not a function.");
+	  error ("\"%s\" exists in this program but is not a function.",
+		 name);
 	}
-      val = value_of_variable (sym, NULL);
+      return value_of_variable (sym, NULL);
     }
   else
     {
-      msymbol = lookup_minimal_symbol ("malloc", NULL, NULL);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol(name, NULL, NULL);
       if (msymbol != NULL)
 	{
+	  struct type *type;
+	  LONGEST maddr;
 	  type = lookup_pointer_type (builtin_type_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
 	  maddr = (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol);
-	  val = value_from_longest (type, maddr);
+	  return value_from_longest (type, maddr);
 	}
       else
 	{
-	  error ("evaluation of this expression requires the program to have a function \"malloc\".");
+	  error ("evaluation of this expression requires the program to have a function \"%s\".", name);
 	}
     }
+}
+
+/* Allocate NBYTES of space in the inferior using the inferior's malloc
+   and return a value that is a pointer to the allocated space. */
+
+value_ptr
+value_allocate_space_in_inferior (len)
+     int len;
+{
+  value_ptr blocklen;
+  register value_ptr val = find_function_in_inferior ("malloc");
 
   blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
   val = call_function_by_hand (val, 1, &blocklen);
@@ -104,7 +109,14 @@ allocate_space_in_inferior (len)
     {
       error ("No memory available to program.");
     }
-  return (value_as_long (val));
+  return val;
+}
+
+static CORE_ADDR
+allocate_space_in_inferior (len)
+     int len;
+{
+  return value_as_long (value_allocate_space_in_inferior (len));
 }
 
 /* Cast value ARG2 to type TYPE and return as a value.
@@ -151,8 +163,7 @@ value_cast (type, arg2)
     }
 
   if (current_language->c_style_arrays
-      && (VALUE_REPEATED (arg2)
-	  || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_ARRAY))
+      && TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_ARRAY)
     arg2 = value_coerce_array (arg2);
 
   if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_FUNC)
@@ -622,14 +633,12 @@ value_repeat (arg1, count)
     error ("Only values in memory can be extended with '@'.");
   if (count < 1)
     error ("Invalid number %d of repetitions.", count);
-  if (VALUE_REPEATED (arg1))
-    error ("Cannot create artificial arrays of artificial arrays.");
 
   val = allocate_repeat_value (VALUE_TYPE (arg1), count);
 
   read_memory (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1),
 	       VALUE_CONTENTS_RAW (val),
-	       TYPE_LENGTH (VALUE_TYPE (val)) * count);
+	       TYPE_LENGTH (VALUE_TYPE (val)));
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1);
 
@@ -854,8 +863,7 @@ value_arg_coerce (arg, param_type)
 
 #if 1	/* FIXME:  This is only a temporary patch.  -fnf */
   if (current_language->c_style_arrays
-      && (VALUE_REPEATED (arg)
-	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))
+      && TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
     arg = value_coerce_array (arg);
 #endif
 
@@ -1464,7 +1472,7 @@ typecmp (staticp, t1, t2)
 	  /* We should be doing hairy argument matching, as below.  */
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (tt1)) == TYPE_CODE (tt2)))
 	{
-	  if (TYPE_CODE (tt2) == TYPE_CODE_ARRAY || VALUE_REPEATED (t2[i]))
+	  if (TYPE_CODE (tt2) == TYPE_CODE_ARRAY)
 	    t2[i] = value_coerce_array (t2[i]);
 	  else
 	    t2[i] = value_addr (t2[i]);
