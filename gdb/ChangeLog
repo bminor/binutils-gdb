@@ -1,3 +1,7 @@
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: update file list for testsuite/gdb.c++.
+
 2003-01-07  Corinna Vinschen  <vinschen@redhat.com>
 
 	* win32-nat.c (set_process_privilege): New function.
