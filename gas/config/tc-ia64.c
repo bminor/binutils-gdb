@@ -3057,6 +3057,9 @@ generate_unwind_image ()
       expressionS exp;
       set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND_INFO]);
 
+      /* Make sure the section has 8 byte alignment.  */
+      record_alignment (now_seg, 3);
+
       /* Set expression which points to start of unwind descriptor area.  */
       unwind.info = expr_build_dot ();
 
@@ -3684,6 +3687,10 @@ dot_endp (dummy)
   unwind.proc_end = expr_build_dot ();
 
   set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND]);
+
+  /* Make sure the section has 8 byte alignment.  */
+  record_alignment (now_seg, 3);
+
   ptr = frag_more (24);
   where = frag_now_fix () - 24;
   bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;

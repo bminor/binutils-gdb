@@ -1,5 +1,9 @@
 2000-11-21  Jim Wilson  <wilson@redhat.com>
 
+	* config/tc-ia64.c (generate_unwind_image): Call record_alignment
+	for unwind info section.
+	(dot_endp): Likewise for unwind section.
+
 	* config/tc-ia64.c (emit_one_bundle): Pass size of 8 not 4 to
 	fix_new_exp.
 
