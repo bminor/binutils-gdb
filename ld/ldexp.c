@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-Copyright (C) 1991 Free Software Foundation, Inc.
+Copyright (C) 1991, 1993 Free Software Foundation, Inc.
 Written by Steve Chamberlain of Cygnus Support (sac@cygnus.com).
 
 This file is part of GLD, the Gnu Linker.
@@ -30,68 +30,89 @@ contains a value, a section to which it is relative and a valid bit.
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 
 #include "ld.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldgram.h"
 #include "ldlang.h"
 
+static void exp_print_token PARAMS ((token_code_type code));
+static void make_abs PARAMS ((etree_value_type *ptr));
+static etree_value_type new_abs PARAMS ((bfd_vma value));
+static void check PARAMS ((lang_output_section_statement_type *os,
+			   const char *name, const char *op));
+static etree_value_type new_rel
+  PARAMS ((bfd_vma value, lang_output_section_statement_type *section));
+static etree_value_type new_rel_from_section
+  PARAMS ((bfd_vma value, lang_output_section_statement_type *section));
+static etree_value_type fold_binary
+  PARAMS ((etree_type *tree,
+	   lang_output_section_statement_type *current_section,
+	   lang_phase_type allocation_done,
+	   bfd_vma dot, bfd_vma *dotp));
+static etree_value_type fold_name
+  PARAMS ((etree_type *tree,
+	   lang_output_section_statement_type *current_section,
+	   lang_phase_type allocation_done,
+	   bfd_vma dot));
+static etree_value_type exp_fold_tree_no_dot
+  PARAMS ((etree_type *tree,
+	   lang_output_section_statement_type *current_section,
+	   lang_phase_type allocation_done));
+
 static void
 exp_print_token (code)
      token_code_type code;
 {
-  static CONST struct  {
-    token_code_type code;
-    char *name;
-  } table[] =
+  static CONST struct
+    {
+      token_code_type code;
+      char *name;
+    } table[] =
       {
-	INT,	"int",
-	NAME,"NAME",
-	PLUSEQ,"+=",
-	MINUSEQ,"-=",
-	MULTEQ,"*=",
-	DIVEQ,"/=",
-	LSHIFTEQ,"<<=",
-	RSHIFTEQ,">>=",
-	ANDEQ,"&=",
-	OREQ,"|=",
-	OROR,"||",
-	ANDAND,"&&",
-	EQ,"==",
-	NE,"!=",
-	LE,"<=",
-	GE,">=",
-	LSHIFT,"<<",
-	RSHIFT,">>=",
-	ALIGN_K,"ALIGN",
-	BLOCK,"BLOCK",
-	SECTIONS,"SECTIONS",
-	SIZEOF_HEADERS,"SIZEOF_HEADERS",
-	NEXT,"NEXT",
-	SIZEOF,"SIZEOF",
-	ADDR,"ADDR",
-	MEMORY,"MEMORY",
-
-
-
-
-
-	DEFINED,"DEFINED",
-	TARGET_K,"TARGET",
-	SEARCH_DIR,"SEARCH_DIR",
-	MAP,"MAP",
-	LONG,"LONG",
-	SHORT,"SHORT",
-	BYTE,"BYTE",
-	ENTRY,"ENTRY",
-	0,(char *)NULL} ;
-
-
-
+	{ INT,	"int" },
+	{ REL, "relocateable" },
+	{ NAME,"NAME" },
+	{ PLUSEQ,"+=" },
+	{ MINUSEQ,"-=" },
+	{ MULTEQ,"*=" },
+	{ DIVEQ,"/=" },
+	{ LSHIFTEQ,"<<=" },
+	{ RSHIFTEQ,">>=" },
+	{ ANDEQ,"&=" },
+	{ OREQ,"|=" },
+	{ OROR,"||" },
+	{ ANDAND,"&&" },
+	{ EQ,"==" },
+	{ NE,"!=" },
+	{ LE,"<=" },
+	{ GE,">=" },
+	{ LSHIFT,"<<" },
+	{ RSHIFT,">>=" },
+	{ ALIGN_K,"ALIGN" },
+	{ BLOCK,"BLOCK" },
+	{ SECTIONS,"SECTIONS" },
+	{ SIZEOF_HEADERS,"SIZEOF_HEADERS" },
+	{ NEXT,"NEXT" },
+	{ SIZEOF,"SIZEOF" },
+	{ ADDR,"ADDR" },
+	{ MEMORY,"MEMORY" },
+	{ DEFINED,"DEFINED" },
+	{ TARGET_K,"TARGET" },
+	{ SEARCH_DIR,"SEARCH_DIR" },
+	{ MAP,"MAP" },
+	{ QUAD,"QUAD" },
+	{ LONG,"LONG" },
+	{ SHORT,"SHORT" },
+	{ BYTE,"BYTE" },
+	{ ENTRY,"ENTRY" },
+	{ 0,(char *)NULL }
+      };
   unsigned int idx;
+
   for (idx = 0; table[idx].name != (char*)NULL; idx++) {
     if (table[idx].code == code) {
       fprintf(config.map_file, "%s", table[idx].name);
@@ -148,6 +169,20 @@ exp_intop (value)
 
 }
 
+/* Build an expression representing an unnamed relocateable value.  */
+
+etree_type *
+exp_relop (section, value)
+     asection *section;
+     bfd_vma value;
+{
+  etree_type *new = (etree_type *) stat_alloc (sizeof (new->rel));
+  new->type.node_code = REL;
+  new->type.node_class = etree_rel;
+  new->rel.section = section;
+  new->rel.value = value;
+  return new;
+}
 
 static etree_value_type
 new_rel (value, section)
@@ -254,7 +289,7 @@ invalid ()
   return new;
 }
 
-etree_value_type 
+static etree_value_type 
 fold_name (tree, current_section, allocation_done, dot)
      etree_type *tree;
      lang_output_section_statement_type *current_section;
@@ -266,75 +301,62 @@ fold_name (tree, current_section, allocation_done, dot)
       {
       case SIZEOF_HEADERS:
 	if (allocation_done != lang_first_phase_enum) 
-	    {
-	      result = new_abs(bfd_sizeof_headers(output_bfd,
-						config.relocateable_output));
-
-	    }
-	else {
-	  result.valid = false;
-	}
+	  {
+	    result = new_abs ((bfd_vma)
+			      bfd_sizeof_headers (output_bfd,
+						  link_info.relocateable));
+	  }
+	else
+	  {
+	    result.valid = false;
+	  }
 	break;
       case DEFINED:
-	result.value =
-	  ldsym_get_soft(tree->name.name) != (ldsym_type *)NULL;
-	result.section = 0;
-	result.valid = true;
+	{
+	  struct bfd_link_hash_entry *h;
+
+	  h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
+				    false, false, true);
+	  result.value = (h != (struct bfd_link_hash_entry *) NULL
+			  && (h->type == bfd_link_hash_defined
+			      || h->type == bfd_link_hash_common));
+	  result.section = 0;
+	  result.valid = true;
+	}
 	break;
       case NAME:
 	result.valid = false;
-	if (tree->name.name[0] == '.' && tree->name.name[1] == 0) {
-
-	  if (allocation_done != lang_first_phase_enum) {
-	    result = new_rel_from_section(dot, current_section);
+	if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
+	  {
+	    if (allocation_done != lang_first_phase_enum)
+	      result = new_rel_from_section(dot, current_section);
+	    else
+	      result = invalid();
 	  }
-	  else {
-	    result = invalid();
-	  }
-	}
-	else {
-	  if (allocation_done == lang_final_phase_enum) {
-	    ldsym_type *sy = ldsym_get_soft(tree->name.name);
-	  
-	    if (sy) {
-	      asymbol **sdefp = sy->sdefs_chain;
+	else if (allocation_done == lang_final_phase_enum)
+	  {
+	    struct bfd_link_hash_entry *h;
 
-	      if (sdefp) {
-		asymbol *sdef = *sdefp;
-#if 0
-		if (sdef->section == (asection *)NULL) {
-		  /* This is an absolute symbol */
-		  result = new_abs(sdef->value);
-		}
-		else
-#endif
- {
-		  lang_output_section_statement_type *os =
-		    lang_output_section_statement_lookup(
-							 sdef->section->output_section->name);
-		  /* If the symbol is from a file which we are not
-		     relocating (-R) then return an absolute for its
-		     value */
-		  if (bfd_asymbol_bfd(sdef)->usrdata && 
-		      ((lang_input_statement_type*)(bfd_asymbol_bfd(sdef)->usrdata))->just_syms_flag == true) 
-		      {
-			result = new_abs(sdef->value +sdef->section->vma);
+	    h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
+				      false, false, true);
+	    if (h != (struct bfd_link_hash_entry *) NULL
+		&& h->type == bfd_link_hash_defined)
+	      {
+		lang_output_section_statement_type *os;
+		
+		os = (lang_output_section_statement_lookup
+		      (h->u.def.section->output_section->name));
 
-		      }
-		  else {
-		    result = new_rel(sdef->value + sdef->section->output_offset, os);
-		  }
-		}
+		/* FIXME: Is this correct if this section is being
+		   linked with -R?  */
+		result = new_rel ((h->u.def.value
+				   + h->u.def.section->output_offset),
+				  os);
 	      }
-	    }
-	    if (result.valid == false) {
+	    if (result.valid == false)
 	      einfo("%F%S: undefined symbol `%s' referenced in expression\n",
-		   tree->name.name);
-	    }
-
+		    tree->name.name);
 	  }
-	}
-
 	break;
 
       case ADDR:
@@ -386,6 +408,15 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
     {
      case etree_value:
       result = new_rel(tree->value.value, current_section);
+      break;
+    case etree_rel:
+      if (allocation_done != lang_final_phase_enum)
+	result.valid = false;
+      else
+	result = new_rel ((tree->rel.value
+			   + tree->rel.section->output_section->vma
+			   + tree->rel.section->output_offset),
+			  current_section);
       break;
      case etree_unary:
       result = exp_fold_tree(tree->unary.child,
@@ -476,8 +507,11 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 			   dot, dotp);
       break;
      case etree_assign:
+     case etree_provide:
       if (tree->assign.dst[0] == '.' && tree->assign.dst[1] == 0) {
 	/* Assignment to dot can only be done during allocation */
+	if (tree->type.node_class == etree_provide)
+	  einfo ("%F%S can not PROVIDE assignment to location counter\n");
 	if (allocation_done == lang_allocating_phase_enum) {
 	  result = exp_fold_tree(tree->assign.src,
 				 current_section,
@@ -503,54 +537,42 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	  }
 	}
       }
-      else {
-	ldsym_type *sy = ldsym_get(tree->assign.dst);
-
-	/* If this symbol has just been created then we'll place it into 
-	 * a section of our choice
-	 */
-	result = exp_fold_tree(tree->assign.src,
-			       current_section, allocation_done,
-			       dot, dotp);
-	if (result.valid)
+      else
 	{
-	  asymbol *def;
-	  asymbol **def_ptr ;
-	  /* Add this definition to script file */
-	  if (sy->sdefs_chain) 
-	  {
-	    def_ptr = sy->sdefs_chain;
-	    def = *def_ptr;
-		    
-	  }
-	  else 
-	  {
-	    def_ptr = (asymbol **)stat_alloc((bfd_size_type)(sizeof(asymbol **)));
-	    def = (asymbol   *)bfd_make_empty_symbol(script_file->the_bfd);
+	  result = exp_fold_tree (tree->assign.src,
+				  current_section, allocation_done,
+				  dot, dotp);
+	  if (result.valid)
+	    {
+	      struct bfd_link_hash_entry *h;
 
-		  
-	    def->flags = 0;
-		
-	    sy->sdefs_chain = def_ptr;
-	    *def_ptr = def;
-	  }
-
-	  def->value = result.value;
-
-	  def->section = result.section->bfd_section;
-	  def->flags |= BSF_GLOBAL | BSF_EXPORT;
-
-
-	  def->udata = (PTR)NULL;
-	  def->name = sy->name;
-
-	  if (sy->sdefs_chain == 0)
-	   enter_global_ref(def_ptr, sy->name);
-	}
-
-      }
-
-  
+	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
+					(tree->type.node_class == etree_assign
+					 ? true : false),
+					false, false);
+	      if (h == (struct bfd_link_hash_entry *) NULL)
+		{
+		  if (tree->type.node_class == etree_assign)
+		    einfo ("%P%F:%s: hash creation failed\n",
+			   tree->assign.dst);
+		}
+	      else if (tree->type.node_class == etree_provide
+		       && h->type != bfd_link_hash_undefined
+		       && h->type != bfd_link_hash_common)
+		{
+		  /* Do nothing.  The symbol was defined by some
+                     object.  */
+		}
+	      else
+		{
+		  /* FIXME: Should we worry if the symbol is already
+		     defined?  */
+		  h->type = bfd_link_hash_defined;
+		  h->u.def.value = result.value;
+		  h->u.def.section = result.section->bfd_section;
+		}
+	    }
+	}  
       break;
      case etree_name:
       result = fold_name(tree, current_section, allocation_done, dot);
@@ -565,7 +587,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 }
 
 
-etree_value_type 
+static etree_value_type 
 exp_fold_tree_no_dot (tree, current_section, allocation_done)
      etree_type *tree;
      lang_output_section_statement_type *current_section;
@@ -699,6 +721,23 @@ exp_assop (code, dst, src)
   return new;
 }
 
+/* Handle PROVIDE.  */
+
+etree_type *
+exp_provide (dst, src)
+     const char *dst;
+     etree_type *src;
+{
+  etree_type *n;
+
+  n = (etree_type *) stat_alloc (sizeof (n->assign));
+  n->assign.type.node_code = '=';
+  n->assign.type.node_class = etree_provide;
+  n->assign.src = src;
+  n->assign.dst = dst;
+  return n;
+}
+
 void 
 exp_print_tree (tree)
      etree_type *tree;
@@ -707,7 +746,13 @@ exp_print_tree (tree)
   case etree_value:
     print_address(tree->value.value);
     return;
-
+  case etree_rel:
+    if (tree->rel.section->owner != NULL)
+      fprintf (config.map_file, "%s:",
+	       bfd_get_filename (tree->rel.section->owner));
+    fprintf (config.map_file, "%s+", tree->rel.section->name);
+    print_address (tree->rel.value);
+    return;
   case etree_assign:
 #if 0
     if (tree->assign.dst->sdefs != (asymbol *)NULL){
@@ -721,6 +766,11 @@ exp_print_tree (tree)
     fprintf(config.map_file,"%s ",tree->assign.dst);
     exp_print_token(tree->type.node_code);
     exp_print_tree(tree->assign.src);
+    break;
+  case etree_provide:
+    fprintf (config.map_file, "PROVIDE (%s, ", tree->assign.dst);
+    exp_print_tree (tree->assign.src);
+    fprintf (config.map_file, ")");
     break;
   case etree_binary:
     fprintf(config.map_file,"(");

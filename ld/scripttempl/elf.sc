@@ -6,6 +6,7 @@
 #		(e.g., .PARISC.milli)
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .sdata ...
 #		(e.g., .PARISC.global)
+#	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
 #	TEXT_START_SYMBOLS - symbols that appear at the start of the
@@ -19,6 +20,7 @@
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
 #
+INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
@@ -35,8 +37,9 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
-  ${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}
-  .interp   ${RELOCATING-0} : { *(.interp) 	}
+  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
+  ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
+  ${CREATE_SHLIB-${INTERP}}
   .hash     ${RELOCATING-0} : { *(.hash)	}
   .dynsym   ${RELOCATING-0} : { *(.dynsym)	}
   .dynstr   ${RELOCATING-0} : { *(.dynstr)	}
@@ -52,6 +55,7 @@ SECTIONS
     *(.text)
   }
   ${RELOCATING+_etext = .;}
+  ${RELOCATING+PROVIDE (etext = .);}
   .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
   .ctors   ${RELOCATING-0} : { *(.ctors)   }
   .dtors   ${RELOCATING-0} : { *(.dtors)   }
@@ -77,6 +81,7 @@ SECTIONS
      we can shorten the on-disk segment size.  */
   .sdata   ${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
+  ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
@@ -87,6 +92,14 @@ SECTIONS
    *(COMMON)
   }
   ${RELOCATING+_end = . ;}
-  ${RELOCATING+end = . ;}
+  ${RELOCATING+PROVIDE (end = .);}
+
+  /* These are needed for ELF backends which have not yet been
+     converted to the new style linker.  */
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+
+  /* These must appear regardless of ${RELOCATING}.  */
+  ${OTHER_SECTIONS}
 }
 EOF

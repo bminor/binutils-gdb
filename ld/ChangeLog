@@ -1,5 +1,19 @@
 Fri Jul 22 12:15:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* scripttempl/elf.sc: Use PROVIDE to define etext, edata, and end.
+
+	Add a new script operator, PROVIDE, to define a symbol only if it
+	is needed.
+	* ldgram.y (PROVIDE): New token.
+	(assignment): Accept PROVIDE.
+	* ldlex.l (PROVIDE): New token.
+	* ldexp.h (node_type): Add etree_provide to node_class enum.
+	(exp_provide): Declare.
+	* ldexp.c (exp_fold_tree): Handle etree_provide.
+	(exp_provide): New function.
+	(exp_print_tree): Handle etree_provide.
+	* ld.texinfo: Document PROVIDE.
+
 	* ldlang.c (lang_common): Pass desired alignment to
         lang_one_common as power of two.
 	(lang_one_common): Get common symbol alignment from linker hash

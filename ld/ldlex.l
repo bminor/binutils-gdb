@@ -100,7 +100,7 @@ FILENAMECHAR1	[_a-zA-Z\/\.\\\$\_\~]
 SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
 FILENAME	{FILENAMECHAR}+
-WHITE		[ \t\n]+ 
+WHITE		[ \t\n\r]+ 
 
 NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
@@ -117,7 +117,13 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
       /* The first token of the input determines the initial parser state.  */
       input_type t = parser_input;
       parser_input = input_selected;
-      return t;
+      switch (t)
+	{
+	case input_script: return INPUT_SCRIPT; break;
+	case input_mri_script: return INPUT_MRI_SCRIPT; break;
+	case input_defsym: return INPUT_DEFSYM; break;
+	default: abort ();
+	}
     }
 
 <BOTH,SCRIPT,EXPRESSION>"/*"	{ comment(); }
@@ -248,7 +254,9 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"INCLUDE"			{ RTOKEN(INCLUDE);}
 <EXPRESSION,BOTH,SCRIPT>"AT"			{ RTOKEN(AT);}
+<BOTH,SCRIPT>"PROVIDE"			{ RTOKEN(PROVIDE); }
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
+<MRI>"\r"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"*".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
 <MRI>"ALIGNMOD"		{ RTOKEN(ALIGNMOD);}
@@ -299,6 +307,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 					return NAME;
 				}
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
+<BOTH,SCRIPT,EXPRESSION>"\r"		{ lineno++;}
 <MRI,BOTH,SCRIPT,EXPRESSION>[ \t]
 
 <<EOF>> {
@@ -479,7 +488,7 @@ comment ()
     c = input();
     while (c != '*' && c != EOF) 
     {
-      if (c == '\n')
+      if (c == '\n' || c == '\r')
 	lineno++;
       c = input();
     }
@@ -493,7 +502,7 @@ comment ()
        break;			/* found the end */
     }
 
-    if (c == '\n')
+    if (c == '\n' || c == '\r')
       lineno++;
 
     if (c == EOF)
