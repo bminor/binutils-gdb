@@ -1,5 +1,8 @@
 Wed Apr 24 11:28:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Prevent attempts to use long offsets
+ 	in 68000 mode.
+
 	* config/obj-coff.c (obj_coff_section): BFD_ASSEMBLER version:
 	call demand_empty_rest_of_line.  Non BFD_ASSEMBLER version:
 	correct handling of input line pointer, and call

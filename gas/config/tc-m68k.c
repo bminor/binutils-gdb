@@ -1743,6 +1743,9 @@ m68k_ip (instring)
 			   && cpu_of_arch (current_architecture) >= m68020)
 			  || opP->disp.size == SIZE_LONG)))
 		{
+		  if (cpu_of_arch (current_architecture) < m68020)
+		    opP->error =
+		      "displacement too large for this architecture; needs 68020 or higher";
 		  if (opP->reg == PC)
 		    tmpreg = 0x3B;	/* 7.3 */
 		  else
