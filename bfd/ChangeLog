@@ -1,3 +1,12 @@
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* elfxx-target.h (ELF_MAXPAGESIZE): Produce an error message
+	if not defined.
+	* elf32-gen.c (ELF_MAXPAGESIZE): Define.
+	* elf32-i860.c (ELF_MAXPAGESIZE): Define.
+	* elf32-i960.c (ELF_MAXPAGESIZE): Define.
+	* elf64-gen.c (ELF_MAXPAGESIZE): Define.
+
 1999-06-04  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Rebuild dependencies.

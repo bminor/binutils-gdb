@@ -201,9 +201,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_info_to_howto_rel 0
 #endif
 
-/* The default here used to 1, but that is silly.  Set it to 0x1000 instead.  */
 #ifndef ELF_MAXPAGESIZE
-#define ELF_MAXPAGESIZE 0x1000
+  #error ELF_MAXPAGESIZE is not defined
+#define ELF_MAXPAGESIZE 1
 #endif
 
 #ifndef elf_backend_collect

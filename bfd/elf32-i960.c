@@ -163,5 +163,6 @@ elf32_i960_reloc_type_lookup (abfd, code)
 #define TARGET_LITTLE_NAME	"elf32-i960"
 #define ELF_ARCH		bfd_arch_i960
 #define ELF_MACHINE_CODE	EM_960
+#define ELF_MAXPAGESIZE  	1 /* FIXME: This number is wrong,  It should be the page size in bytes.  */
 
 #include "elf32-target.h"
