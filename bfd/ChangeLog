@@ -3,6 +3,8 @@ Tue Sep 29 13:24:09 1992  Ken Raeburn  (raeburn@cygnus.com)
 	* coffcode.h (coff_section_symbol): Create section if it doesn't
 	already exist.
 
+	* bout.c: Removed some unused variables.
+
 Tue Sep 29 08:30:21 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Portability fixes from p3:
