@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "gdb-stabs.h"
 #include "gdbthread.h"
-
+#include "gdbcore.h"
 #include "dcache.h"
 
 #ifdef USG
@@ -72,9 +72,9 @@ static void sds_store_registers PARAMS ((int));
 
 static void sds_mourn PARAMS ((void));
 
-static void sds_restart PARAMS ((void));
-
 static void sds_create_inferior PARAMS ((char *, char *, char **));
+
+extern void sds_load PARAMS ((char *, int));
 
 static int getmessage PARAMS ((unsigned char *, int));
 
@@ -138,13 +138,6 @@ static int just_started;
 
 static int message_pending;
 
-
-/*  Restart the remote side; this is an extended protocol operation.  */
-
-static void
-sds_restart ()
-{
-}
 
 /* Clean up connection to a remote debugger.  */
 
@@ -238,15 +231,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered ("\n");
     }
   push_target (&sds_ops);	/* Switch to using remote target now */
-
-  /* Without this, some commands which require an active target (such
-     as kill) won't work.  This variable serves (at least) double duty
-     as both the pid of the target process (if it has such), and as a
-     flag indicating that a target is active.  These functions should
-     be split out into seperate variables, especially since GDB will
-     someday have a notion of debugging several processes.  */
-
-  inferior_pid = 42000;
 
   just_started = 1;
 
@@ -1049,24 +1033,7 @@ getmessage (buf, forever)
 static void
 sds_kill ()
 {
-  /* For some mysterious reason, wait_for_inferior calls kill instead of
-     mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
-  if (kill_kludge)
-    {
-      kill_kludge = 0;
-      target_mourn_inferior ();
-      return;
-    }
-
-#if 0 /* fix to use 1-arg fn */
-  /* Use catch_errors so the user can quit from gdb even when we aren't on
-     speaking terms with the remote system.  */
-  catch_errors (putmessage, "k", "", RETURN_MASK_ERROR);
-#endif
-
-  /* Don't wait for it to die.  I'm not really sure it matters whether
-     we do or not.  For the existing stubs, kill is a noop.  */
-  target_mourn_inferior ();
+  /* Don't try to do anything to the target.  */
 }
 
 static void
@@ -1082,24 +1049,24 @@ sds_create_inferior (exec_file, args, env)
      char *args;
      char **env;
 {
-  /* Rip out the breakpoints; we'll reinsert them after restarting
-     the remote server.  */
-  remove_breakpoints ();
-
-  /* Now restart the remote server.  */
-  sds_restart ();
-
-  /* Now put the breakpoints back in.  This way we're safe if the
-     restart function works via a unix fork on the remote side.  */
-  insert_breakpoints ();
+  inferior_pid = 42000;
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
 
   /* Let the remote process run.  */
-  proceed (-1, TARGET_SIGNAL_0, 0);
+  proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
 }
 
+static void
+sds_load (filename, from_tty)
+    char *filename;
+    int from_tty;
+{
+  generic_load (filename, from_tty);
+
+  inferior_pid = 0;
+}
 
 /* The SDS monitor has commands for breakpoint insertion, although it
    it doesn't actually manage the breakpoints, it just returns the
@@ -1179,7 +1146,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
   sds_kill,			/* to_kill */
-  generic_load,			/* to_load */
+  sds_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   sds_create_inferior,		/* to_create_inferior */
   sds_mourn,			/* to_mourn_inferior */

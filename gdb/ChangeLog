@@ -1,3 +1,13 @@
+Tue Sep 16 16:00:01 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-sds.c (sds_load): New function.
+	(sds_ops): Use it.
+	(sds_open): Don't set inferior_pid yet.
+	(sds_kill): Remove contents.
+	(sds_create_inferior): Rewrite to work more like monitor
+ 	interfaces.
+	(sds_restart): Remove, no longer used.
+
 Tue Sep 16 10:08:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/v850/tm-v850.h (BREAKPOINT): Set to a truely illegal
