@@ -25,6 +25,8 @@ asection *ppc64_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_tls_optimize
   (bfd *, struct bfd_link_info *);
+bfd_boolean ppc64_elf_edit_toc
+  (bfd *, struct bfd_link_info *);
 bfd_vma ppc64_elf_toc
   (bfd *);
 int ppc64_elf_setup_section_lists

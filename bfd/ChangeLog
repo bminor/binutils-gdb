@@ -1,3 +1,11 @@
+2004-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.h (ppc64_elf_edit_toc): Declare.
+	* elf64-ppc.c (struct ppc_link_hash_entry <adjust_done>): Update
+	comment.
+	(struct adjust_toc_info): New.
+	(adjust_toc_syms, ppc64_elf_edit_toc): New functions.
+
 2004-11-03  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf.c (assign_file_positions_for_segments): Set next_file_pos even

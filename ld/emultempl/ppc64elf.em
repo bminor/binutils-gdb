@@ -44,7 +44,13 @@ static bfd_signed_vma group_size = 1;
 static int dotsyms = 1;
 
 /* Whether to run tls optimization.  */
-static int notlsopt = 0;
+static int no_tls_opt = 0;
+
+/* Whether to run opd optimization.  */
+static int no_opd_opt = 0;
+
+/* Whether to run toc optimization.  */
+static int no_toc_opt = 0;
 
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = 0;
@@ -92,13 +98,14 @@ ppc_before_allocation (void)
 {
   if (stub_file != NULL)
     {
-      if (!ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
+      if (!no_opd_opt
+	  && !ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
 	{
-	  einfo ("%X%P: can not edit opd %E\n");
+	  einfo ("%X%P: can not edit %s %E\n", "opd");
 	  return;
 	}
 
-      if (ppc64_elf_tls_setup (output_bfd, &link_info) && !notlsopt)
+      if (ppc64_elf_tls_setup (output_bfd, &link_info) && !no_tls_opt)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
@@ -114,6 +121,14 @@ ppc_before_allocation (void)
 	  /* We must not cache anything from the preliminary sizing.  */
 	  elf_tdata (output_bfd)->program_header_size = 0;
 	  lang_reset_memory_regions ();
+	}
+
+      if (!no_toc_opt
+	  && !link_info.relocatable
+	  && !ppc64_elf_edit_toc (output_bfd, &link_info))
+	{
+	  einfo ("%X%P: can not edit %s %E\n", "toc");
+	  return;
 	}
     }
 
@@ -467,7 +482,9 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_DOTSYMS			(OPTION_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
-#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NO_TOC_OPT		(OPTION_NO_OPD_OPT + 1)
+#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TOC_OPT + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -476,6 +493,8 @@ PARSE_AND_LIST_LONGOPTS='
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
+  { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
   { "non-overlapping-opd", no_argument, NULL, OPTION_NON_OVERLAPPING_OPD },
 '
 
@@ -503,6 +522,12 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
   fprintf (file, _("\
   --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n"
+		   ));
+  fprintf (file, _("\
+  --no-opd-optimize     Don'\''t optimize the OPD section.\n"
+		   ));
+  fprintf (file, _("\
+  --no-toc-optimize     Don'\''t optimize the TOC section.\n"
 		   ));
   fprintf (file, _("\
   --non-overlapping-opd Canonicalize .opd, so that there are no overlapping\n\
@@ -533,7 +558,15 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 
     case OPTION_NO_TLS_OPT:
-      notlsopt = 1;
+      no_tls_opt = 1;
+      break;
+
+    case OPTION_NO_OPD_OPT:
+      no_opd_opt = 1;
+      break;
+
+    case OPTION_NO_TOC_OPT:
+      no_toc_opt = 1;
       break;
 
     case OPTION_NON_OVERLAPPING_OPD:

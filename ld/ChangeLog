@@ -1,9 +1,20 @@
+2004-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (no_tls_opt): Rename from notlsopt.
+	(no_opd_opt, no_toc_opt): New static vars.
+	(ppc_before_allocation): Don't edit opt if no_opd_opt.  Call
+	ppc64_elf_edit_toc.
+	(OPTION_NO_OPD_OPT, OPTION_NO_TOC_OPT): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add no-opd-optimize and no-toc-optimize.
+	(PARSE_AND_LIST_OPTIONS): Describe new options.
+	(PARSE_AND_LIST_ARGS_CASES): Handle them.
+
 2004-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/alphaelf.em (alpha_after_parse): Add extra, NULL,
 	parameter to invocation of lang_section_start.
 	* emultempl/aix.em (_handle_option): Likewise.
-	
+
 	* Makefile.am (eelf64alpha.c, eelf64alpha_fbsd.c,
 	eelf64alpha_nbsd.c): Add dependency upon emultempl/alphaelf.em.
 	* Makefile.in: Regenerate.

@@ -3206,9 +3206,9 @@ struct ppc_link_hash_entry
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
 
-  /* Whether global opd sym has been adjusted or not.
-     After ppc64_elf_edit_opd has run, this flag should be set for all
-     globals defined in any opd section.  */
+  /* Whether global opd/toc sym has been adjusted or not.
+     After ppc64_elf_edit_opd/ppc64_elf_edit_toc has run, this flag
+     should be set for all globals defined in any opd/toc section.  */
   unsigned int adjust_done:1;
 
   /* Set if we twiddled this symbol to weak at some stage.  */
@@ -6642,6 +6642,445 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	    elf_tdata (ibfd)->symtab_hdr.contents = (unsigned char *) locsyms;
 	}
     }
+  return TRUE;
+}
+
+/* Called via elf_link_hash_traverse from ppc64_elf_edit_toc to adjust
+   the values of any global symbols in a toc section that has been
+   edited.  Globals in toc sections should be a rarity, so this function
+   sets a flag if any are found in toc sections other than the one just
+   edited, so that futher hash table traversals can be avoided.  */
+
+struct adjust_toc_info
+{
+  asection *toc;
+  unsigned long *skip;
+  bfd_boolean global_toc_syms;
+};
+
+static bfd_boolean
+adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
+{
+  struct ppc_link_hash_entry *eh;
+  struct adjust_toc_info *toc_inf = (struct adjust_toc_info *) inf;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->root.type != bfd_link_hash_defined
+      && h->root.type != bfd_link_hash_defweak)
+    return TRUE;
+
+  eh = (struct ppc_link_hash_entry *) h;
+  if (eh->adjust_done)
+    return TRUE;
+
+  if (eh->elf.root.u.def.section == toc_inf->toc)
+    {
+      unsigned long skip = toc_inf->skip[eh->elf.root.u.def.value >> 3];
+      if (skip != (unsigned long) -1)
+	eh->elf.root.u.def.value -= skip;
+      else
+	{
+	  (*_bfd_error_handler)
+	    (_("%s defined in removed toc entry"), eh->elf.root.root.string);
+	  eh->elf.root.u.def.section = &bfd_abs_section;
+	  eh->elf.root.u.def.value = 0;
+	}
+      eh->adjust_done = 1;
+    }
+  else if (strcmp (eh->elf.root.u.def.section->name, ".toc") == 0)
+    toc_inf->global_toc_syms = TRUE;
+
+  return TRUE;
+}
+
+/* Examine all relocs referencing .toc sections in order to remove
+   unused .toc entries.  */
+
+bfd_boolean
+ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
+{
+  bfd *ibfd;
+  struct adjust_toc_info toc_inf;
+
+  toc_inf.global_toc_syms = TRUE;
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    {
+      asection *toc, *sec;
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
+      struct elf_link_hash_entry **sym_hashes;
+      Elf_Internal_Rela *relstart, *rel, *wrel;
+      unsigned long *skip, *drop;
+      unsigned char *used;
+      unsigned char *keep, last, some_unused;
+
+      toc = bfd_get_section_by_name (ibfd, ".toc");
+      if (toc == NULL
+	  || toc->sec_info_type == ELF_INFO_TYPE_JUST_SYMS
+	  || elf_discarded_section (toc))
+	continue;
+
+      local_syms = NULL;
+      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      sym_hashes = elf_sym_hashes (ibfd);
+
+      /* Look at sections dropped from the final link.  */
+      skip = NULL;
+      relstart = NULL;
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	{
+	  if (sec->reloc_count == 0
+	      || !elf_discarded_section (sec)
+	      || get_opd_info (sec)
+	      || (sec->flags & SEC_ALLOC) == 0
+	      || (sec->flags & SEC_DEBUGGING) != 0)
+	    continue;
+
+	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL, FALSE);
+	  if (relstart == NULL)
+	    goto error_ret;
+
+	  /* Run through the relocs to see which toc entries might be
+	     unused.  */
+	  for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+	    {
+	      enum elf_ppc64_reloc_type r_type;
+	      unsigned long r_symndx;
+	      asection *sym_sec;
+	      struct elf_link_hash_entry *h;
+	      Elf_Internal_Sym *sym;
+	      bfd_vma val;
+
+	      r_type = ELF64_R_TYPE (rel->r_info);
+	      switch (r_type)
+		{
+		default:
+		  continue;
+
+		case R_PPC64_TOC16:
+		case R_PPC64_TOC16_LO:
+		case R_PPC64_TOC16_HI:
+		case R_PPC64_TOC16_HA:
+		case R_PPC64_TOC16_DS:
+		case R_PPC64_TOC16_LO_DS:
+		  break;
+		}
+
+	      r_symndx = ELF64_R_SYM (rel->r_info);
+	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+			      r_symndx, ibfd))
+		goto error_ret;
+
+	      if (sym_sec != toc)
+		continue;
+
+	      if (h != NULL)
+		val = h->root.u.def.value;
+	      else
+		val = sym->st_value;
+	      val += rel->r_addend;
+
+	      if (val >= toc->size)
+		continue;
+
+	      /* Anything in the toc ought to be aligned to 8 bytes.
+		 If not, don't mark as unused.  */
+	      if (val & 7)
+		continue;
+
+	      if (skip == NULL)
+		{
+		  skip = bfd_zmalloc (sizeof (*skip) * (toc->size + 7) / 8);
+		  if (skip == NULL)
+		    goto error_ret;
+		}
+
+	      skip[val >> 3] = 1;
+	    }
+
+	  if (elf_section_data (sec)->relocs != relstart)
+	    free (relstart);
+	}
+
+      if (skip == NULL)
+	continue;
+
+      used = bfd_zmalloc (sizeof (*used) * (toc->size + 7) / 8);
+      if (used == NULL)
+	{
+	error_ret:
+	  if (local_syms != NULL
+	      && symtab_hdr->contents != (unsigned char *) local_syms)
+	    free (local_syms);
+	  if (sec != NULL
+	      && relstart != NULL
+	      && elf_section_data (sec)->relocs != relstart)
+	    free (relstart);
+	  if (skip != NULL)
+	    free (skip);
+	  return FALSE;
+	}
+
+      /* Now check all kept sections that might reference the toc.  */
+      for (sec = ibfd->sections;
+	   sec != NULL;
+	   /* Check the toc itself last.  */
+	   sec = (sec == toc ? NULL
+		  : sec->next == toc && sec->next->next ? sec->next->next
+		  : sec->next == NULL ? toc
+		  : sec->next))
+	{
+	  int repeat;
+
+	  if (sec->reloc_count == 0
+	      || elf_discarded_section (sec)
+	      || get_opd_info (sec)
+	      || (sec->flags & SEC_ALLOC) == 0
+	      || (sec->flags & SEC_DEBUGGING) != 0)
+	    continue;
+
+	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL, TRUE);
+	  if (relstart == NULL)
+	    goto error_ret;
+
+	  /* Mark toc entries referenced as used.  */
+	  repeat = 0;
+	  do
+	    for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+	      {
+		enum elf_ppc64_reloc_type r_type;
+		unsigned long r_symndx;
+		asection *sym_sec;
+		struct elf_link_hash_entry *h;
+		Elf_Internal_Sym *sym;
+		bfd_vma val;
+
+		r_type = ELF64_R_TYPE (rel->r_info);
+		switch (r_type)
+		  {
+		  case R_PPC64_TOC16:
+		  case R_PPC64_TOC16_LO:
+		  case R_PPC64_TOC16_HI:
+		  case R_PPC64_TOC16_HA:
+		  case R_PPC64_TOC16_DS:
+		  case R_PPC64_TOC16_LO_DS:
+		    /* In case we're taking addresses of toc entries.  */
+		  case R_PPC64_ADDR64:
+		    break;
+
+		  default:
+		    continue;
+		  }
+
+		r_symndx = ELF64_R_SYM (rel->r_info);
+		if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+				r_symndx, ibfd))
+		  {
+		    free (used);
+		    goto error_ret;
+		  }
+
+		if (sym_sec != toc)
+		  continue;
+
+		if (h != NULL)
+		  val = h->root.u.def.value;
+		else
+		  val = sym->st_value;
+		val += rel->r_addend;
+
+		if (val >= toc->size)
+		  continue;
+
+		/* For the toc section, we only mark as used if
+		   this entry itself isn't unused.  */
+		if (sec == toc
+		    && !used[val >> 3]
+		    && (used[rel->r_offset >> 3]
+			|| !skip[rel->r_offset >> 3]))
+		  /* Do all the relocs again, to catch reference
+		     chains.  */
+		  repeat = 1;
+
+		used[val >> 3] = 1;
+	      }
+	  while (repeat);
+	}
+
+      /* Merge the used and skip arrays.  Assume that TOC
+	 doublewords not appearing as either used or unused belong
+	 to to an entry more than one doubleword in size.  */
+      for (drop = skip, keep = used, last = 0, some_unused = 0;
+	   drop < skip + (toc->size + 7) / 8;
+	   ++drop, ++keep)
+	{
+	  if (*keep)
+	    {
+	      *drop = 0;
+	      last = 0;
+	    }
+	  else if (*drop)
+	    {
+	      some_unused = 1;
+	      last = 1;
+	    }
+	  else
+	    *drop = last;
+	}
+
+      free (used);
+
+      if (some_unused)
+	{
+	  bfd_byte *contents, *src;
+	  unsigned long off;
+
+	  /* Shuffle the toc contents, and at the same time convert the
+	     skip array from booleans into offsets.  */
+	  if (!bfd_malloc_and_get_section (ibfd, toc, &contents))
+	    goto error_ret;
+
+	  elf_section_data (toc)->this_hdr.contents = contents;
+
+	  for (src = contents, off = 0, drop = skip;
+	       src < contents + toc->size;
+	       src += 8, ++drop)
+	    {
+	      if (*drop)
+		{
+		  *drop = (unsigned long) -1;
+		  off += 8;
+		}
+	      else if (off != 0)
+		{
+		  *drop = off;
+		  memcpy (src - off, src, 8);
+		}
+	    }
+	  toc->rawsize = toc->size;
+	  toc->size = src - contents - off;
+
+	  /* Read toc relocs.  */
+	  relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL, TRUE);
+	  if (relstart == NULL)
+	    goto error_ret;
+
+	  /* Remove unused toc relocs, and adjust those we keep.  */
+	  wrel = relstart;
+	  for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
+	    if (skip[rel->r_offset >> 3] != (unsigned long) -1)
+	      {
+		wrel->r_offset = rel->r_offset - skip[rel->r_offset >> 3];
+		wrel->r_info = rel->r_info;
+		wrel->r_addend = rel->r_addend;
+		++wrel;
+	      }
+	  toc->reloc_count = wrel - relstart;
+
+	  /* Adjust addends for relocs against the toc section sym.  */
+	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	    {
+	      if (sec->reloc_count == 0
+		  || elf_discarded_section (sec))
+		continue;
+
+	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
+						    TRUE);
+	      if (relstart == NULL)
+		goto error_ret;
+
+	      for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+		{
+		  enum elf_ppc64_reloc_type r_type;
+		  unsigned long r_symndx;
+		  asection *sym_sec;
+		  struct elf_link_hash_entry *h;
+		  Elf_Internal_Sym *sym;
+
+		  r_type = ELF64_R_TYPE (rel->r_info);
+		  switch (r_type)
+		    {
+		    default:
+		      continue;
+
+		    case R_PPC64_TOC16:
+		    case R_PPC64_TOC16_LO:
+		    case R_PPC64_TOC16_HI:
+		    case R_PPC64_TOC16_HA:
+		    case R_PPC64_TOC16_DS:
+		    case R_PPC64_TOC16_LO_DS:
+		    case R_PPC64_ADDR64:
+		      break;
+		    }
+
+		  r_symndx = ELF64_R_SYM (rel->r_info);
+		  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+				  r_symndx, ibfd))
+		    goto error_ret;
+
+		  if (sym_sec != toc || h != NULL || sym->st_value != 0)
+		    continue;
+
+		  rel->r_addend -= skip[rel->r_addend >> 3];
+		}
+	    }
+
+	  /* We shouldn't have local or global symbols defined in the TOC,
+	     but handle them anyway.  */
+	  if (local_syms != NULL)
+	    {
+	      Elf_Internal_Sym *sym;
+
+	      for (sym = local_syms;
+		   sym < local_syms + symtab_hdr->sh_info;
+		   ++sym)
+		if (sym->st_shndx != SHN_UNDEF
+		    && (sym->st_shndx < SHN_LORESERVE
+			|| sym->st_shndx > SHN_HIRESERVE)
+		    && sym->st_value != 0
+		    && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
+		  {
+		    if (skip[sym->st_value >> 3] != (unsigned long) -1)
+		      sym->st_value -= skip[sym->st_value >> 3];
+		    else
+		      {
+			(*_bfd_error_handler)
+			  (_("%s defined in removed toc entry"),
+			   bfd_elf_local_sym_name (ibfd, sym));
+			sym->st_value = 0;
+			sym->st_shndx = SHN_ABS;
+		      }
+		    symtab_hdr->contents = (unsigned char *) local_syms;
+		  }
+	    }
+
+	  /* Finally, adjust any global syms defined in the toc.  */
+	  if (toc_inf.global_toc_syms)
+	    {
+	      toc_inf.toc = toc;
+	      toc_inf.skip = skip;
+	      toc_inf.global_toc_syms = FALSE;
+	      elf_link_hash_traverse (elf_hash_table (info), adjust_toc_syms,
+				      &toc_inf);
+	    }
+	}
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
+	}
+      free (skip);
+    }
+
   return TRUE;
 }
 
