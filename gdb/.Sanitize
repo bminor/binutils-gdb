@@ -85,7 +85,7 @@ else
 	fi
 fi
 
-carp_files=""
+carp_files="carp-tdep.c"
 
 if ( echo $* | grep keep\-carp > /dev/null ) ; then
 	keep_these_too="${carp_files} ${keep_these_too}"
