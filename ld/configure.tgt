@@ -387,6 +387,7 @@ mips*-dec-osf*)		targ_emul=mipslit ;;
 mips*-sgi-irix5*)	targ_emul=elf32bsmip ;;
 mips*-sgi-irix6*)	targ_emul=elf32bmipn32
 	                targ_extra_emuls="elf32bsmip elf64bmip"
+			targ_extra_libpath=$targ_extra_emuls
 	                ;;
 mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
