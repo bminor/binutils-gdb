@@ -1,5 +1,7 @@
 Thu Jul 16 16:05:28 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* Makefile.in: a number of changes merged in from progressive.
+
 	* configure.in: add libm.
 
 	* .cvsignore: ignore some stuff that comes from test-build.mk.
