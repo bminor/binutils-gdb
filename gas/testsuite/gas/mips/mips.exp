@@ -2,10 +2,16 @@
 # Some generic MIPS tests
 #
 if [istarget mips*-*-*] then {
-    set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] ]
+    set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] ]
     set empic [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
-    set aout [expr [istarget *-*-bsd*] || [istarget *-*-netbsd*] || {istarget *-*-openbsd*]]
-    set ilocks [expr [istarget mips64vr4300*-*-*] || [istarget mips64vr4100*-*-*]]
+    set aout [expr [istarget *-*-bsd*] || [istarget *-*-netbsd*] || [istarget *-*-openbsd*]]
+    set ilocks [expr [istarget mips64vr4300*-*-*] || [istarget mips64vr4100*-*-*] || [istarget mipstx39*-*-*]]
+    set gpr_ilocks [expr [istarget mipstx39*-*-*]]
+
+# start-sanitize-tx19
+    set ilocks [expr ilocks || [istarget mipstx19*-*-*]]
+    set gpr_ilocks [expr gpr_ilocks || [istarget mipstx19*-*-*]]
+# end-sanitize-tx19
 
     run_dump_test "abs"
     run_dump_test "add"
@@ -29,7 +35,7 @@ if [istarget mips*-*-*] then {
     if $svr4pic { run_dump_test "lb-svr4pic" }
     if $svr4pic { run_dump_test "lb-xgot" }
     if $empic { run_dump_test "lb-empic" }
-    if !$aout { run_dump_test "ld" }
+    if !$aout { if !$gpr_ilocks { run_dump_test "ld" } else { run_dump_test "ld-ilocks" } } 
     if $svr4pic { run_dump_test "ld-svr4pic" }
     if $svr4pic { run_dump_test "ld-xgot" }
     if $empic { run_dump_test "ld-empic" }

@@ -100,4 +100,32 @@ else
 	done
 fi
 
+tx19_files="ChangeLog"
+if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
+	for i in $tx19_files ; do
+		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx19 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $tx19_files ; do
+		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx19\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx19/,/end-\sanitize\-tx19/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 # End of file.
