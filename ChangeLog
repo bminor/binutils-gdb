@@ -1,3 +1,13 @@
+Fri Jul  4 13:25:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL_PROGRAM_ARGS): New variable.
+	(INSTALL_PROGRAM): Use $(INSTALL_PROGRAM_ARGS).
+	(INSTALL_SCRIPT): New variable.
+	(BASE_FLAGS_TO_PASS): Pass down INSTALL_SCRIPT.
+	* configure.in: If host is *-*-cygwin32*, set INSTALL_PROGRAM_ARGS
+	to -x.
+	* install-sh: Add support for -x option.
+
 Mon Jun 30 15:51:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in, Makefile.in: Treat tix like itcl.
