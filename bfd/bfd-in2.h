@@ -2057,6 +2057,9 @@ bfd_target_list PARAMS ((void));
 boolean 
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
+char **
+bfd_matching_formats PARAMS (());
+
 boolean 
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 

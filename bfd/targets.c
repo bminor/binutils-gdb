@@ -185,26 +185,26 @@ Entries for byte swapping for data. These are different from the other
 entry points, since they don't take a BFD asthe first argument.
 Certain other handlers could do the same.
 
-.  bfd_vma      (*bfd_getx64) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_getx64) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((const bfd_byte *));
 .  void         (*bfd_putx64) PARAMS ((bfd_vma, bfd_byte *));
-.  bfd_vma      (*bfd_getx32) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_getx_signed_32) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_getx32) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_getx_signed_32) PARAMS ((const bfd_byte *));
 .  void         (*bfd_putx32) PARAMS ((bfd_vma, bfd_byte *));
-.  bfd_vma      (*bfd_getx16) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_getx_signed_16) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_getx16) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_getx_signed_16) PARAMS ((const bfd_byte *));
 .  void         (*bfd_putx16) PARAMS ((bfd_vma, bfd_byte *));
 
 Byte swapping for the headers
 
-.  bfd_vma      (*bfd_h_getx64) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_h_getx_signed_64) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_h_getx64) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_h_getx_signed_64) PARAMS ((const bfd_byte *));
 .  void         (*bfd_h_putx64) PARAMS ((bfd_vma, bfd_byte *));
-.  bfd_vma      (*bfd_h_getx32) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_h_getx_signed_32) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_h_getx32) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_h_getx_signed_32) PARAMS ((const bfd_byte *));
 .  void         (*bfd_h_putx32) PARAMS ((bfd_vma, bfd_byte *));
-.  bfd_vma      (*bfd_h_getx16) PARAMS ((bfd_byte *));
-.  bfd_signed_vma (*bfd_h_getx_signed_16) PARAMS ((bfd_byte *));
+.  bfd_vma      (*bfd_h_getx16) PARAMS ((const bfd_byte *));
+.  bfd_signed_vma (*bfd_h_getx_signed_16) PARAMS ((const bfd_byte *));
 .  void         (*bfd_h_putx16) PARAMS ((bfd_vma, bfd_byte *));
 
 Format dependent routines: these are vectors of entry points
@@ -386,13 +386,9 @@ extern bfd_target m68klynx_aout_vec;
 extern bfd_target m68klynx_coff_vec;
 extern bfd_target m88kbcs_vec;
 extern bfd_target newsos3_vec;
-extern bfd_target nlm32_big_generic_vec;
 extern bfd_target nlm32_i386_vec;
 extern bfd_target nlm32_sparc_vec;
 extern bfd_target nlm32_alpha_vec;
-extern bfd_target nlm32_little_generic_vec;
-extern bfd_target nlm64_big_generic_vec;
-extern bfd_target nlm64_little_generic_vec;
 extern bfd_target oasys_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target shcoff_vec;
@@ -509,12 +505,10 @@ bfd_target *target_vector[] = {
 	&m68klynx_coff_vec,
 	&m88kbcs_vec,
 	&newsos3_vec,
-	&nlm32_big_generic_vec,
 	&nlm32_i386_vec,
 	&nlm32_sparc_vec,
 #ifdef BFD64
-	&nlm64_big_generic_vec,
-	&nlm64_little_generic_vec,
+	&nlm32_alpha_vec,
 #endif
 #if 0
 	/* We have no oasys tools anymore, so we can't test any of this
@@ -579,7 +573,11 @@ bfd_target *default_vector[] = {
 	NULL
 };
 
-
+/* When there is an ambiguous match, bfd_check_format puts the names
+   of the matching targets in this array.
+   It is declared here so we can give it the same number of entries
+   (+ a terminating NULL) as the number of possible targets.  */
+char *matching_vector[sizeof(target_vector)/sizeof(*target_vector) + 1];
 
 
 /*

@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
 SECTION
-	File Formats
+	File formats
 
 	A format is a BFD concept of high level file contents type. The
 	formats supported by BFD are: 
@@ -44,9 +44,8 @@ SECTION
 #include "sysdep.h"
 #include "libbfd.h"
 
-extern bfd_target *target_vector[];
-extern bfd_target *default_vector[];
-
+/* IMPORT from targets.c.  */
+extern char *matching_vector[];
 
 /*
 FUNCTION
@@ -71,18 +70,18 @@ DESCRIPTION
 	The function returns <<true>> on success, otherwise <<false>>
 	with one of the following error codes:  
 
-	o invalid_operation -
+	o <<invalid_operation>> -
 	if <<format>> is not one of <<bfd_object>>, <<bfd_archive>> or
 	<<bfd_core>>.
 
-	o system_call_error -
+	o <<system_call_error>> -
 	if an error occured during a read - even some file mismatches
 	can cause system_call_errors.
 
-	o file_not_recognised -
+	o <<file_not_recognised>> -
 	none of the backends recognised the file format.
 
-	o file_ambiguously_recognized -
+	o <<file_ambiguously_recognized>> -
 	more than one backend recognised the file format.
 
 */
@@ -111,6 +110,7 @@ DEFUN(bfd_check_format,(abfd, format),
 
   save_targ = abfd->xvec;
   match_count = 0;
+  matching_vector[0] = NULL;
   right_targ = 0;
 
 
@@ -141,13 +141,16 @@ DEFUN(bfd_check_format,(abfd, format),
     temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
-      match_count++;
+      matching_vector[match_count++] = temp->name;
+      matching_vector[match_count] = NULL;
       /* If this is the default target, accept it, even if other targets
 	 might match.  People who want those other targets have to set 
 	 the GNUTARGET variable.  */
       if (temp == default_vector[0])
 	{
 	  match_count = 1;
+	  matching_vector[0] = temp->name;
+	  matching_vector[1] = NULL;
 	  break;
 	}
 #ifdef GNU960
@@ -178,6 +181,25 @@ DEFUN(bfd_check_format,(abfd, format),
   return false;
 }
 
+/*
+FUNCTION
+	bfd_matching_formats
+
+SYNOPSIS
+	char **bfd_matching_formats();
+
+DESCRIPTION
+	If a call to <<bfd_check_format>> returns
+	<<file_ambiguously_recognized>>, you can call this function
+	afterward to return a NULL-terminated list of the names of
+	the formats that matched.
+	Then you can choose one and try again.  */
+
+char **
+bfd_matching_formats ()
+{
+  return &matching_vector[0];
+}
 
 /*
 FUNCTION

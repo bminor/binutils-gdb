@@ -1,5 +1,10 @@
 Fri Jan 21 16:25:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* targets.c: Add a vector of matching format names.
+	* format.c (bfd_matching_formats): New function to return it.
+	(bfd_check_format): Set it.
+	* bfd-in2.h: Regenerated.
+
 	* bfd-in.h: Remove decls of bfd_ec type and error printing functions.
 	Remove decl of type symclass; wasn't used.
 	* bfd.c: Document error handling, including code fragments
