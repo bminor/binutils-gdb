@@ -3787,12 +3787,6 @@ vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
   return ((vma - off) % maxpagesize);
 }
 
-/* We check SEC_HAS_CONTENTS here because if NOLOAD is used in a linker
-   script we may have a section with SEC_LOAD clear but which is
-   supposed to have contents.  */
-#define IS_LOADED(FLAGS) \
-  (((FLAGS) & SEC_LOAD) != 0 || ((FLAGS) & SEC_HAS_CONTENTS) != 0)
-
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header, and writes out the program headers.  */
@@ -3959,7 +3953,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		 .tbss, we need to look at the next section to decide
 		 whether the segment has any loadable sections.  */
 	      i = 0;
-	      while (!IS_LOADED (m->sections[i]->flags))
+	      while ((m->sections[i]->flags & SEC_LOAD) == 0)
 		{
 		  if ((m->sections[i]->flags & SEC_THREAD_LOCAL) == 0
 		      || ++i >= m->count)
@@ -4107,7 +4101,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	    {
 	      bfd_signed_vma adjust;
 
-	      if (IS_LOADED (flags))
+	      if ((flags & SEC_LOAD) != 0)
 		{
 		  adjust = sec->lma - (p->p_paddr + p->p_filesz);
 		  if (adjust < 0)
@@ -4164,11 +4158,26 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	      if (p->p_type == PT_LOAD)
 		{
 		  sec->filepos = off;
-		  if (IS_LOADED (flags))
+		  /* FIXME: The SEC_HAS_CONTENTS test here dates back to
+		     1997, and the exact reason for it isn't clear.  One
+		     plausible explanation is that it is to work around
+		     a problem we have with linker scripts using data
+		     statements in NOLOAD sections.  I don't think it
+		     makes a great deal of sense to have such a section
+		     assigned to a PT_LOAD segment, but apparently
+		     people do this.  The data statement results in a
+		     bfd_data_link_order being built, and these need
+		     section contents to write into.  Eventually, we get
+		     to _bfd_elf_write_object_contents which writes any
+		     section with contents to the output.  Make room
+		     here for the write, so that following segments are
+		     not trashed.  */
+		  if ((flags & SEC_LOAD) != 0
+		      || (flags & SEC_HAS_CONTENTS) != 0)
 		    off += sec->size;
 		}
 
-	      if (IS_LOADED (flags))
+	      if ((flags & SEC_LOAD) != 0)
 		{
 		  p->p_filesz += sec->size;
 		  p->p_memsz += sec->size;
