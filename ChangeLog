@@ -1,5 +1,7 @@
 Tue Jul 22 14:50:42 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
+	* configure: Treat msdosdjgpp like go32.
+
 	* configure: Change Makefile.tem2 to Makefile.tm2.
 
 Mon Jul 21 10:31:26 1997  Stephen Peters  <speters@cygnus.com>
