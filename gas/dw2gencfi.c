@@ -576,7 +576,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
       offset = insn->u.ri.offset / DWARF2_CIE_DATA_ALIGNMENT;
       if (offset < 0)
 	{
-	  out_one (DW_CFA_offset_extended);
+	  out_one (DW_CFA_offset_extended_sf);
 	  out_uleb128 (regno);
 	  out_sleb128 (offset);
 	}
