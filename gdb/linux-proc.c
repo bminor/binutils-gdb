@@ -148,9 +148,6 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 {
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
-#ifdef HAVE_PTRACE_GETFPXREGS
-  gdb_fpxregset_t fpxregs;
-#endif
   unsigned long merged_pid = ptid_get_tid (ptid) << 16 | ptid_get_pid (ptid);
 
   fill_gregset (&gregs, -1);
@@ -167,14 +164,6 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 					      note_size, 
 					      &fpregs, 
 					      sizeof (fpregs));
-#ifdef HAVE_PTRACE_GETFPXREGS
-  fill_fpxregset (&fpxregs, -1);
-  note_data = (char *) elfcore_write_prxfpreg (obfd, 
-					       note_data, 
-					       note_size, 
-					       &fpxregs, 
-					       sizeof (fpxregs));
-#endif
   return note_data;
 }
 

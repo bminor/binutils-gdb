@@ -40,7 +40,7 @@ gcore_command (char *args, int from_tty)
 {
   struct cleanup *old_chain;
   char *corefilename, corefilename_buffer[40];
-  asection *note_sec;
+  asection *note_sec = NULL;
   bfd *obfd;
   void *note_data = NULL;
   int note_size = 0;

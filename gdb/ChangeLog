@@ -1,3 +1,10 @@
+2002-01-14  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-proc.c (linux_do_thread_registers): Ignore fpxregs
+	until we can resolve portability issues.
+	* gregset.h: Remove references to fpxregs.
+	* gcore.c (gcore_command): Initialize note_sec to NULL.
+
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* signals.c (target_signal_to_name): Rewrite.  Only use
