@@ -176,60 +176,19 @@ avr_register_name (int regnum)
   return register_names[regnum];
 }
 
-/* Index within `registers' of the first byte of the space for
-   register REGNUM.  */
-
-static int
-avr_register_byte (int regnum)
-{
-  if (regnum < AVR_PC_REGNUM)
-    return regnum;
-  else
-    return AVR_PC_REG_INDEX;
-}
-
-/* Number of bytes of storage in the actual machine representation for
-   register REGNUM.  */
-
-static int
-avr_register_raw_size (int regnum)
-{
-  switch (regnum)
-    {
-    case AVR_PC_REGNUM:
-      return 4;
-    case AVR_SP_REGNUM:
-    case AVR_FP_REGNUM:
-      return 2;
-    default:
-      return 1;
-    }
-}
-
-/* Number of bytes of storage in the program's representation
-   for register N.  */
-
-static int
-avr_register_virtual_size (int regnum)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
 static struct type *
-avr_register_virtual_type (int regnum)
+avr_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  switch (regnum)
-    {
-    case AVR_PC_REGNUM:
-      return builtin_type_unsigned_long;
-    case AVR_SP_REGNUM:
-      return builtin_type_unsigned_short;
-    default:
-      return builtin_type_unsigned_char;
-    }
+  if (reg_nr == AVR_PC_REGNUM)
+    return builtin_type_uint32;
+
+  if (reg_nr == AVR_SP_REGNUM)
+    return builtin_type_void_data_ptr;
+  else
+    return builtin_type_uint8;
 }
 
 /* Instruction address checks and convertions. */
@@ -326,14 +285,6 @@ avr_pointer_to_address (struct type *type, const void *buf)
 {
   CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 
-  if (TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
-    {
-      fprintf_unfiltered (gdb_stderr, "CODE_SPACE ---->> ptr->addr: 0x%lx\n",
-			  addr);
-      fprintf_unfiltered (gdb_stderr,
-			  "+++ If you see this, please send me an email <troth@openavr.org>\n");
-    }
-
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
@@ -384,7 +335,12 @@ avr_write_sp (CORE_ADDR val)
 static CORE_ADDR
 avr_read_fp (void)
 {
-  return (avr_make_saddr (read_register (AVR_FP_REGNUM)));
+  CORE_ADDR fp;
+
+  fp = read_register (AVR_FP_REGNUM);
+  fp += (read_register (AVR_FP_REGNUM+1) << 8);
+
+  return (avr_make_saddr (fp));
 }
 
 /* avr_scan_prologue is also used as the
@@ -1131,14 +1087,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, AVR_PC_REGNUM);
 
   set_gdbarch_register_name (gdbarch, avr_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 1);
-  set_gdbarch_deprecated_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
-  set_gdbarch_deprecated_register_byte (gdbarch, avr_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, avr_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, avr_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, avr_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, avr_register_type);
 
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 

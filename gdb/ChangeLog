@@ -1,3 +1,23 @@
+2003-06-15  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_register_byte): Delete function.
+	(avr_register_raw_size): Delete function.
+	(avr_register_virtual_size): Delete function.
+	(avr_register_virtual_type): Delete function.
+	(avr_register_type): New function.
+	(avr_address_to_pointer): Remove unused code.
+	(avr_read_fp): Need to read FP as two separate bytes due to change to
+	avr_register_type() usage.
+	(avr_gdbarch_init): Don't set deprecated_register_size.
+	Don't set deprecated_register_bytes.
+	Don't set deprecated_register_byte.
+	Don't set deprecated_register_raw_size.
+	Don't set deprecated_max_register_raw_size.
+	Don't set deprecated_register_virtual_size.
+	Don't set deprecated_max_register_virtual_size.
+	Don't set deprecated_register_virtual_type.
+	Set register_type method.
+
 2003-06-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (linux-nat.o): Add rule.
