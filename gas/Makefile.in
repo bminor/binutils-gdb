@@ -1,6 +1,6 @@
 # Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994-99, 2000 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -81,14 +81,13 @@ INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
 INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLOBJS = @INTLOBJS@
-LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
+OBJDUMP = @OBJDUMP@
 OPCODES_LIB = @OPCODES_LIB@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
@@ -96,7 +95,6 @@ POSUB = @POSUB@
 RANLIB = @RANLIB@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
-USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
 VERSION = @VERSION@
 atof = @atof@
 cgen_cpu_prefix = @cgen_cpu_prefix@

@@ -13,6 +13,7 @@ bit_fix.h
 cgen.h
 cond.c
 cond.c
+config/e-i386aout.c
 config/e-i386coff.c
 config/e-i386elf.c
 config/e-mipsecoff.c
@@ -49,12 +50,16 @@ config/tc-d10v.c
 config/tc-d10v.h
 config/tc-d30v.c
 config/tc-d30v.h
+config/tc-fr30.c
+config/tc-fr30.h
 config/tc-h8300.c
 config/tc-h8300.h
 config/tc-h8500.c
 config/tc-h8500.h
 config/tc-hppa.c
 config/tc-hppa.h
+config/tc-i370.c
+config/tc-i370.h
 config/tc-i386.c
 config/tc-i386.h
 config/tc-i860.c
@@ -77,6 +82,8 @@ config/tc-mn10300.c
 config/tc-mn10300.h
 config/tc-ns32k.c
 config/tc-ns32k.h
+config/tc-pj.c
+config/tc-pj.h
 config/tc-ppc.c
 config/tc-ppc.h
 config/tc-sh.c

@@ -25,6 +25,8 @@ h8300-dis.c
 h8500-dis.c
 h8500-opc.h
 hppa-dis.c
+i370-dis.c
+i370-opc.c
 i386-dis.c
 i960-dis.c
 m10200-dis.c
@@ -48,6 +50,8 @@ mips-dis.c
 mips-opc.c
 mips16-opc.c
 ns32k-dis.c
+pj-dis.c
+pj-opc.c
 ppc-dis.c
 ppc-opc.c
 sh-dis.c

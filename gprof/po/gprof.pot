@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1999-07-01 01:36-0400\n"
+"POT-Creation-Date: 2000-02-22 02:24-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -235,12 +235,12 @@ msgstr ""
 msgid "%s: -c not supported on architecture %s\n"
 msgstr ""
 
-#: corefile.c:432
+#: corefile.c:433
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr ""
 
-#: corefile.c:753
+#: corefile.c:755
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr ""
@@ -280,36 +280,41 @@ msgstr ""
 msgid "%s: incompatible with first gmon file\n"
 msgstr ""
 
-#: gmon_io.c:271
+#: gmon_io.c:258
+#, c-format
+msgid "%s: file '%s' does not appear to be in gmon.out format\n"
+msgstr ""
+
+#: gmon_io.c:280
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr ""
 
-#: gmon_io.c:306
+#: gmon_io.c:315
 msgid "time is in ticks, not seconds\n"
 msgstr ""
 
-#: gmon_io.c:312 gmon_io.c:452
+#: gmon_io.c:321 gmon_io.c:461
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr ""
 
-#: gmon_io.c:319
+#: gmon_io.c:328
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr ""
 
-#: gmon_io.c:321
+#: gmon_io.c:330
 #, c-format
 msgid "\t%d histogram record%s\n"
 msgstr ""
 
-#: gmon_io.c:323
+#: gmon_io.c:332
 #, c-format
 msgid "\t%d call-graph record%s\n"
 msgstr ""
 
-#: gmon_io.c:325
+#: gmon_io.c:334
 #, c-format
 msgid "\t%d basic-block count record%s\n"
 msgstr ""

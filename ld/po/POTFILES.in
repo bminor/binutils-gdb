@@ -26,3 +26,4 @@ lexsup.c
 mri.c
 mri.h
 pe-dll.c
+pe-dll.h
