@@ -1,3 +1,8 @@
+2001-07-11  Keith Seitz  <keiths@redhat.com>
+
+	* infrun.c (print_stop_reason): Add missing uiout field
+	"reason" for SIGNAL_RECEIVED case.
+
 2001-07-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/nm-linux.h (TARGET_ELF64, PSIGNAL_IN_SIGNAL_H):

@@ -3382,6 +3382,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_signal ();
       ui_out_text (uiout, "\nProgram received signal ");
       annotate_signal_name ();
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "reason", "signal-received");
       ui_out_field_string (uiout, "signal-name", target_signal_to_name (stop_info));
       annotate_signal_name_end ();
       ui_out_text (uiout, ", ");
