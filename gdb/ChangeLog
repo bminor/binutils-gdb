@@ -1,3 +1,43 @@
+2003-09-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frame-unwind.h, frame-base.h): Include.
+	(frame_extra_info): Rename this struct to frv_unwind_cache.
+	Delete fields ``fp_to_callers_sp_offset'' and ``lr_saved_on_stack''.
+	Add fields ``prev_sp'' and ``base''.
+	(frv_frame_chain, frv_frame_saved_pc, frv_frame_init_saved_regs)
+	(frv_saved_pc_after_call, frv_init_extra_frame_info)
+	(frv_push_return_address, frv_pop_frame, frv_pop_frame_regular):
+	Delete.
+	(frv_analyze_prologue): Add ``struct frv_unwind_cache *'' argument.
+	Revise all callers.  Fill in the unwind cache argument and make
+	other adjustments to account for new frame mechanisms.
+	(frv_frame_unwind_cache, frv_frame_align, frv_unwind_pc)
+	(frv_frame_this_id, frv_frame_prev_register, frv_frame_sniffer)
+	(frv_frame_base_address, frv_unwind_dummy_id): New functions.
+	(frv_frame_unwind, frv_frame_base): New structs.
+	(frv_push_arguments): Change name to frv_push_dummy_call().  Add
+	additional arguments expected by this method and adjust function
+	body accordingly.
+	(frv_gdbarch_init): Remove calls to the following functions:
+	set_gdbarch_deprecated_init_frame_pc(),
+	set_gdbarch_deprecated_saved_pc_after_call(),
+	set_gdbarch_deprecated_frame_chain(),
+	set_gdbarch_deprecated_frame_saved_pc(),
+	set_gdbarch_deprecated_frame_init_saved_regs(),
+	set_gdbarch_deprecated_push_arguments(),
+	set_gdbarch_deprecated_push_return_address(),
+	set_gdbarch_deprecated_pop_frame(),
+	set_gdbarch_deprecated_call_dummy_words(),
+	set_gdbarch_deprecated_sizeof_call_dummy_words(),
+	set_gdbarch_deprecated_init_extra_frame_info(),
+	set_gdbarch_deprecated_dummy_write_sp(), and
+	set_gdbarch_deprecated_pc_in_call_dummy().
+	Add calls to the following functions:
+	set_gdbarch_unwind_pc(), set_gdbarch_unwind_sp(),
+	set_gdbarch_frame_align(), frame_unwind_append_sniffer(), and
+	frame_base_set_default().
+	* Makefile.in (frv-tdep.o): Update dependencies.
+	
 2003-09-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (read_encoded_value): Add support for
