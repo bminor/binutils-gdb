@@ -352,8 +352,10 @@ md_cgen_lookup_reloc (insn, operand, fixP)
     case XSTORMY16_OPERAND_ABS24:
       return BFD_RELOC_XSTORMY16_24;
 
-    case XSTORMY16_OPERAND_REL8_2:
     case XSTORMY16_OPERAND_REL8_4:
+      fixP->fx_addnumber -= 2;
+    case XSTORMY16_OPERAND_REL8_2:
+      fixP->fx_addnumber -= 2;
       fixP->fx_pcrel = 1;
       return BFD_RELOC_8_PCREL;
 
@@ -361,6 +363,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
       fixP->fx_where += 2;
       /* Fall through...  */
     case XSTORMY16_OPERAND_REL12A:
+      fixP->fx_addnumber -= 2;
       fixP->fx_pcrel = 1;
       return BFD_RELOC_XSTORMY16_REL_12;
 
@@ -422,6 +425,12 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
   valueT value = *valueP;
   /* Canonical name, since used a lot.  */
   CGEN_CPU_DESC cd = gas_cgen_cpu_desc;
+
+  /* md_cgen_lookup_reloc() will adjust this to compensate for where
+     in the opcode the relocation happens, for pcrel relocations.  We
+     have no other way of keeping track of what this offset needs to
+     be.  */
+  fixP->fx_addnumber = 0;
 
   /* This port has pc-relative relocs and DIFF_EXPR_OK defined, so
      it must deal with turning a BFD_RELOC_{8,16,32,64} into a
@@ -556,7 +565,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
   /* Tuck `value' away for use by tc_gen_reloc.
      See the comment describing fx_addnumber in write.h.
      This field is misnamed (or misused :-).  */
-  fixP->fx_addnumber = value;
+  fixP->fx_addnumber += value;
 }
 
 
