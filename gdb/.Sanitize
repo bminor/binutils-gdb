@@ -132,7 +132,6 @@ i386-tdep.c
 i386aix-nat.c
 i386b-nat.c
 i386ly-tdep.c
-i386ly-nat.c
 i386m3-nat.c
 i386mach-nat.c
 i386v-nat.c
@@ -151,6 +150,7 @@ isi-xdep.c
 kdb-start.c
 language.c
 language.h
+lynx-nat.c
 m2-exp.y
 m2-lang.c
 m2-lang.h
@@ -163,7 +163,6 @@ m68k-tdep.c
 m88k-nat.c
 m88k-pinsn.c
 m88k-tdep.c
-m68kly-nat.c
 main.c
 maint.c
 mem-break.c

@@ -1,4 +1,24 @@
+Tue Nov 16 17:15:03 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* i386ly-nat.c, i386lynx-nat.c, m68kly-nat.c:  Remove.  Move
+	common code into lynx-nat.c.
+	* lynx-nat.c:  New module.  Contains portable code for Lynx native
+	stuff (mostly ptrace related).
+	* config/i386/i386lynx.mh (NATDEPFILES):  i386ly-nat.o -> lynx-nat.o
+	* config/m68k/m68klynx.mh (NATDEPFILES):  i386ly-nat.o -> lynx-nat.o
+
+	* config/nm-lynx.h, config/tm-lynx.h:  New files to contain
+	non-architecture specific native and target defs.
+	* config/i386/nm-i386lynx.h, config/i386/tm-i386lynx.h,
+	config/m68k/nm-m68klynx.h, config/m68k/tm-m68klynx.h:  Move all
+	(arch) portable stuff into ../{tm nm}-lynx.h.
+
 Tue Nov 16 13:33:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.c (gdb_mangle_name): If we detect something as a
+	constructor because the field name equals the class name, the
+	physname is just the args, not the whole mangled name.  Needed for
+	testsuite to work with GCC 2.4.5.
 
 	* a68v-nat.c: Replace with new version from Troy Rollo.  The
 	version	I am replacing appears to be an old copy of sun3-nat.c.
