@@ -424,7 +424,7 @@ md_pcrel_from_section (fixP, sec)
       return 0;
     }
 
-  return (fixP->fx_frag->fr_address + fixP->fx_where + 2) & ~1;
+  return (fixP->fx_frag->fr_address + fixP->fx_where) & ~1;
 }
 
 /* Return the bfd reloc type for OPERAND of INSN at fixup FIXP.
