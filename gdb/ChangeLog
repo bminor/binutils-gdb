@@ -1,3 +1,31 @@
+2001-06-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (table_begin_ftype): Make string parameters constant.
+	(table_header_ftype): Ditto.
+	(field_int_ftype): Ditto.
+	(field_skip_ftype): Ditto.
+	(field_string_ftype): Ditto.
+	(field_fmt_ftype): Ditto.
+	(text_ftype): Ditto.
+	(message_ftype): Ditto.
+	* cli-out.c (cli_table_begin): Ditto.
+	(cli_table_header): Ditto.
+	(cli_field_int): Ditto.
+	(cli_field_skip): Ditto.
+	(cli_field_string): Ditto.
+	(cli_field_fmt): Ditto.
+	(cli_text): Ditto.
+	(cli_message): Ditto.
+	(out_field_fmt): Ditto.
+	* ui-out.c (default_table_begin): Ditto.
+	(default_table_header): Ditto.
+	(default_field_int): Ditto.
+	(default_field_skip): Ditto.
+	(default_field_string): Ditto.
+	(default_field_fmt): Ditto.
+	(default_text): Ditto.
+	(default_message): Ditto.
+
 2001-06-08  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.c (delete_breakpoint): Pass mark_inserted to 

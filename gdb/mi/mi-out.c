@@ -38,28 +38,31 @@ struct ui_out_data
 
 /* These are the MI output functions */
 
-static void mi_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid);
+static void mi_table_begin (struct ui_out *uiout, int nbrofcols,
+			    const char *tblid);
 static void mi_table_body (struct ui_out *uiout);
 static void mi_table_end (struct ui_out *uiout);
 static void mi_table_header (struct ui_out *uiout, int width,
-			     enum ui_align alig, char *colhdr);
+			     enum ui_align alig,
+			     const char *colhdr);
 static void mi_begin (struct ui_out *uiout, enum ui_out_type type,
 		      int level, const char *id);
 static void mi_end (struct ui_out *uiout, enum ui_out_type type, int level);
 static void mi_field_int (struct ui_out *uiout, int fldno, int width,
-			  enum ui_align alig, char *fldname, int value);
+			  enum ui_align alig, const char *fldname, int value);
 static void mi_field_skip (struct ui_out *uiout, int fldno, int width,
-			   enum ui_align alig, char *fldname);
+			   enum ui_align alig, const char *fldname);
 static void mi_field_string (struct ui_out *uiout, int fldno, int width,
-			     enum ui_align alig, char *fldname,
+			     enum ui_align alig, const char *fldname,
 			     const char *string);
 static void mi_field_fmt (struct ui_out *uiout, int fldno,
 			  int width, enum ui_align align,
-			  char *fldname, char *format, va_list args);
+			  const char *fldname, const char *format,
+			  va_list args);
 static void mi_spaces (struct ui_out *uiout, int numspaces);
-static void mi_text (struct ui_out *uiout, char *string);
-static void mi_message (struct ui_out *uiout, int verbosity, char *format,
-			va_list args);
+static void mi_text (struct ui_out *uiout, const char *string);
+static void mi_message (struct ui_out *uiout, int verbosity,
+			const char *format, va_list args);
 static void mi_wrap_hint (struct ui_out *uiout, char *identstring);
 static void mi_flush (struct ui_out *uiout);
 
@@ -100,7 +103,8 @@ static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 /* Mark beginning of a table */
 
 void
-mi_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
+mi_table_begin (struct ui_out *uiout, int nbrofcols,
+		const char *tblid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
@@ -136,7 +140,8 @@ mi_table_end (struct ui_out *uiout)
 /* Specify table header */
 
 void
-mi_table_header (struct ui_out *uiout, int width, int alignment, char *colhdr)
+mi_table_header (struct ui_out *uiout, int width, int alignment,
+		 const char *colhdr)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   if (!data->first_header++)
@@ -180,7 +185,7 @@ mi_end (struct ui_out *uiout,
 
 void
 mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
-	      char *fldname, int value)
+	      const char *fldname, int value)
 {
   char buffer[20];		/* FIXME: how many chars long a %d can become? */
 
@@ -192,7 +197,7 @@ mi_field_int (struct ui_out *uiout, int fldno, int width, int alignment,
 
 void
 mi_field_skip (struct ui_out *uiout, int fldno, int width, int alignment,
-	       char *fldname)
+	       const char *fldname)
 {
   mi_field_string (uiout, fldno, width, alignment, fldname, "");
 }
@@ -205,7 +210,7 @@ mi_field_string (struct ui_out *uiout,
 		 int fldno,
 		 int width,
 		 int align,
-		 char *fldname,
+		 const char *fldname,
 		 const char *string)
 {
   struct ui_out_data *data = ui_out_data (uiout);
@@ -223,7 +228,9 @@ mi_field_string (struct ui_out *uiout,
 void
 mi_field_fmt (struct ui_out *uiout, int fldno,
 	      int width, enum ui_align align,
-	      char *fldname, char *format, va_list args)
+	      const char *fldname,
+	      const char *format,
+	      va_list args)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
@@ -241,12 +248,14 @@ mi_spaces (struct ui_out *uiout, int numspaces)
 }
 
 void
-mi_text (struct ui_out *uiout, char *string)
+mi_text (struct ui_out *uiout, const char *string)
 {
 }
 
 void
-mi_message (struct ui_out *uiout, int verbosity, char *format, va_list args)
+mi_message (struct ui_out *uiout, int verbosity,
+	    const char *format,
+	    va_list args)
 {
 }
 

@@ -190,11 +190,12 @@ extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
 /* Type definition of all implementation functions. */
 
 typedef void (table_begin_ftype) (struct ui_out * uiout,
-				  int nbrofcols, char *tblid);
+				  int nbrofcols, const char *tblid);
 typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,
-				   enum ui_align align, char *colhdr);
+				   enum ui_align align,
+				   const char *colhdr);
 /* Note: level 0 is the top-level so LEVEL is always greater than
    zero. */
 typedef void (ui_out_begin_ftype) (struct ui_out *uiout,
@@ -204,19 +205,25 @@ typedef void (ui_out_end_ftype) (struct ui_out *uiout,
 				 enum ui_out_type type,
 				 int level);
 typedef void (field_int_ftype) (struct ui_out * uiout, int fldno, int width,
-			     enum ui_align align, char *fldname, int value);
+				enum ui_align align,
+				const char *fldname, int value);
 typedef void (field_skip_ftype) (struct ui_out * uiout, int fldno, int width,
-				 enum ui_align align, char *fldname);
+				 enum ui_align align,
+				 const char *fldname);
 typedef void (field_string_ftype) (struct ui_out * uiout, int fldno, int width,
-				   enum ui_align align, char *fldname,
+				   enum ui_align align,
+				   const char *fldname,
 				   const char *string);
 typedef void (field_fmt_ftype) (struct ui_out * uiout, int fldno, int width,
-				enum ui_align align, char *fldname,
-				char *format, va_list args);
+				enum ui_align align,
+				const char *fldname,
+				const char *format,
+				va_list args);
 typedef void (spaces_ftype) (struct ui_out * uiout, int numspaces);
-typedef void (text_ftype) (struct ui_out * uiout, char *string);
+typedef void (text_ftype) (struct ui_out * uiout,
+			   const char *string);
 typedef void (message_ftype) (struct ui_out * uiout, int verbosity,
-			      char *format, va_list args);
+			      const char *format, va_list args);
 typedef void (wrap_hint_ftype) (struct ui_out * uiout, char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
 

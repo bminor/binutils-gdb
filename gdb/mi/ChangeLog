@@ -1,3 +1,14 @@
+2001-06-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_table_begin): 
+	(mi_table_header): 
+	(mi_field_int): 
+	(mi_field_skip): 
+	(mi_field_string): 
+	(mi_field_fmt): 
+	(mi_text): 
+	(mi_message): 
+
 2001-05-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.c (mi_close, mi_open): Output ``[]'' when a list.

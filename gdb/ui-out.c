@@ -135,11 +135,12 @@ pop_level (struct ui_out *uiout,
 /* These are the default implementation functions */
 
 static void default_table_begin (struct ui_out *uiout, int nbrofcols,
-				 char *tblid);
+				 const char *tblid);
 static void default_table_body (struct ui_out *uiout);
 static void default_table_end (struct ui_out *uiout);
 static void default_table_header (struct ui_out *uiout, int width,
-				  enum ui_align alig, char *colhdr);
+				  enum ui_align alig,
+				  const char *colhdr);
 static void default_begin (struct ui_out *uiout,
 			   enum ui_out_type type,
 			   int level, const char *id);
@@ -147,18 +148,25 @@ static void default_end (struct ui_out *uiout,
 			 enum ui_out_type type,
 			 int level);
 static void default_field_int (struct ui_out *uiout, int fldno, int width,
-			       enum ui_align alig, char *fldname, int value);
+			       enum ui_align alig,
+			       const char *fldname,
+			       int value);
 static void default_field_skip (struct ui_out *uiout, int fldno, int width,
-				enum ui_align alig, char *fldname);
+				enum ui_align alig,
+				const char *fldname);
 static void default_field_string (struct ui_out *uiout, int fldno, int width,
-				  enum ui_align align, char *fldname,
+				  enum ui_align align,
+				  const char *fldname,
 				  const char *string);
 static void default_field_fmt (struct ui_out *uiout, int fldno,
 			       int width, enum ui_align align,
-			       char *fldname, char *format, va_list args);
+			       const char *fldname,
+			       const char *format,
+			       va_list args);
 static void default_spaces (struct ui_out *uiout, int numspaces);
-static void default_text (struct ui_out *uiout, char *string);
-static void default_message (struct ui_out *uiout, int verbosity, char *format,
+static void default_text (struct ui_out *uiout, const char *string);
+static void default_message (struct ui_out *uiout, int verbosity,
+			     const char *format,
 			     va_list args);
 static void default_wrap_hint (struct ui_out *uiout, char *identstring);
 static void default_flush (struct ui_out *uiout);
@@ -684,7 +692,7 @@ gdb_query (struct ui_out *uiout, int qflags, char *qprompt)
 /* default gdb-out hook functions */
 
 static void
-default_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
+default_table_begin (struct ui_out *uiout, int nbrofcols, const char *tblid)
 {
 }
 
@@ -700,7 +708,7 @@ default_table_end (struct ui_out *uiout)
 
 static void
 default_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
-		      char *colhdr)
+		      const char *colhdr)
 {
 }
 
@@ -721,13 +729,14 @@ default_end (struct ui_out *uiout,
 
 static void
 default_field_int (struct ui_out *uiout, int fldno, int width,
-		   enum ui_align align, char *fldname, int value)
+		   enum ui_align align,
+		   const char *fldname, int value)
 {
 }
 
 static void
 default_field_skip (struct ui_out *uiout, int fldno, int width,
-		    enum ui_align align, char *fldname)
+		    enum ui_align align, const char *fldname)
 {
 }
 
@@ -736,14 +745,16 @@ default_field_string (struct ui_out *uiout,
 		      int fldno,
 		      int width,
 		      enum ui_align align,
-		      char *fldname,
+		      const char *fldname,
 		      const char *string)
 {
 }
 
 static void
 default_field_fmt (struct ui_out *uiout, int fldno, int width,
-		   enum ui_align align, char *fldname, char *format,
+		   enum ui_align align,
+		   const char *fldname,
+		   const char *format,
 		   va_list args)
 {
 }
@@ -754,12 +765,13 @@ default_spaces (struct ui_out *uiout, int numspaces)
 }
 
 static void
-default_text (struct ui_out *uiout, char *string)
+default_text (struct ui_out *uiout, const char *string)
 {
 }
 
 static void
-default_message (struct ui_out *uiout, int verbosity, char *format,
+default_message (struct ui_out *uiout, int verbosity,
+		 const char *format,
 		 va_list args)
 {
 }
