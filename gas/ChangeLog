@@ -8,7 +8,7 @@
 	* config/tc-i386.c (tc_i386_fix_adjustable): Fix GOTPCREL GOT
 	entry.
 
-001-02-18  David O'Brien  <obrien@FreeBSD.org>
+2001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in (cpu_type, arch): Add a generic FreeBSD specification as
 	all FreeBSD platforms should look the same at this level.
