@@ -1,3 +1,9 @@
+Mon Dec 27 18:42:14 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* stabsread.c (read_type): fix problem when reading static member
+	of a class. caused by change to allow :: inside template
+	instantiated name.
+
 Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbtypes.h: Expand on comments for TYPE_CODE_BITSTRING and

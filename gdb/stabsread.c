@@ -1315,7 +1315,7 @@ read_type (pp, objfile)
 	char *type_name;
 	
 	{
-	  char *from, *to, *p;
+	  char *from, *to, *p, *q1, *q2;
 	  
 	  /* Set the type code according to the following letter.  */
 	  switch ((*pp)[0])
@@ -1341,11 +1341,15 @@ read_type (pp, objfile)
 	      }
 	    }
 	   
+	  q1 = strchr(*pp, '<');
 	  p = strchr(*pp, ':');
 	  if (p == NULL)
 	    return error_type (pp);
-	  while (p[1] == ':')
+	  while (q1 && p > q1 && p[1] == ':')
 	    {
+	       q2 = strchr(q1, '>');
+	       if (!q2 || q2 < p)
+		 break;
 	       p += 2;
 	       p = strchr(p, ':');
 	       if (p == NULL)
