@@ -1,3 +1,7 @@
+2004-03-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept more template types.
+
 2004-03-09  Michael Chastain  <mec.gnu@mindspring.com>
 
 	From Corinna Vinschen with modifications.
