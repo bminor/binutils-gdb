@@ -295,7 +295,8 @@ CODE_FRAGMENT
 .					     arelent *reloc_entry,
 .                                            struct symbol_cache_entry *symbol,
 .                                            PTR data,
-.                                            asection *input_section));
+.                                            asection *input_section, 
+.                                            bfd *output_bfd     ));
 .
 .       {* The textual name of the relocation type. *}
 .  char *name;
@@ -450,13 +451,14 @@ DEFUN(bfd_perform_relocation,(abfd,
     flag = bfd_reloc_undefined;
   }
 
-  if (howto->special_function){
+  if (howto->special_function) {
     bfd_reloc_status_type cont;
     cont = howto->special_function(abfd,
 				   reloc_entry,
 				   symbol,
 				   data,
-				   input_section);
+				   input_section,
+				   output_bfd);
     if (cont != bfd_reloc_continue) return cont;
   }
 
@@ -676,7 +678,50 @@ CODE_FRAGMENT
 .          moment probably a 32 bit wide abs address, but the cpu can
 .          choose. *}
 .
-.  BFD_RELOC_CTOR
+.  BFD_RELOC_CTOR,
+.
+.       {* 32 bits wide, simple reloc *}
+.  BFD_RELOC_32,
+.	{* 32 bits, PC-relative *}
+.  BFD_RELOC_32_PCREL,
+.
+.	{* High 22 bits of 32-bit value; simple reloc.  *}
+.  BFD_RELOC_HI22,
+.	{* Low 10 bits.  *}
+.  BFD_RELOC_LO10,
+.
+.	{* Reloc types used for i960/b.out.  *}
+.  BFD_RELOC_24_PCREL,
+.  BFD_RELOC_I960_CALLJ,
+.
+.  BFD_RELOC_16_PCREL,
+.	{* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
+.	   word displacement, e.g. for SPARC) *}
+.  BFD_RELOC_32_PCREL_S2,
+.
+.  {* now for the sparc/elf codes *}
+.  BFD_RELOC_NONE,		{* actually used *}
+.  BFD_RELOC_SPARC_WDISP22,
+.  BFD_RELOC_SPARC22,
+.  BFD_RELOC_SPARC13,
+.  BFD_RELOC_SPARC_BASE13,
+.  BFD_RELOC_SPARC_GOT10,
+.  BFD_RELOC_SPARC_GOT13,
+.  BFD_RELOC_SPARC_GOT22,
+.  BFD_RELOC_SPARC_PC10,
+.  BFD_RELOC_SPARC_PC22,
+.  BFD_RELOC_SPARC_WPLT30,
+.  BFD_RELOC_SPARC_COPY,
+.  BFD_RELOC_SPARC_GLOB_DAT,
+.  BFD_RELOC_SPARC_JMP_SLOT,
+.  BFD_RELOC_SPARC_RELATIVE,
+.  BFD_RELOC_SPARC_UA32,
+.
+.  {* this one is a.out specific? *}
+.  BFD_RELOC_SPARC_BASE22,
+.
+.  {* this must be the highest numeric value *}
+.  BFD_RELOC_UNUSED
 . } bfd_reloc_code_real_type;
 */
 
@@ -688,8 +733,7 @@ SECTION
 
 SYNOPSIS
 	CONST struct reloc_howto_struct *
-	bfd_reloc_type_lookup
-	(CONST bfd_arch_info_type *arch, bfd_reloc_code_type code);
+	bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_type code);
 
 DESCRIPTION
 	This routine returns a pointer to a howto struct which when
@@ -701,10 +745,10 @@ DESCRIPTION
 
 CONST struct reloc_howto_struct *
 DEFUN(bfd_reloc_type_lookup,(arch, code),
-	CONST bfd_arch_info_type *arch  AND
-	bfd_reloc_code_type code)
+      bfd *abfd AND
+      bfd_reloc_code_type code)
 {
-  return arch->reloc_type_lookup(arch, code);
+  return BFD_SEND (abfd, reloc_type_lookup, (abfd, code));
 }
 
 static reloc_howto_type bfd_howto_32 =
@@ -764,7 +808,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do relaxing - ie does nothing 
+	don't do relaxing -- i.e., does nothing.
 */
 
 boolean
@@ -786,7 +830,8 @@ INTERNAL_FUNCTION
 SYNOPSIS
 	bfd_byte *
 	   bfd_generic_get_relocated_section_contents(bfd *abfd,
-	     struct bfd_seclet_struct  *seclet)
+	     struct bfd_seclet_struct  *seclet,
+	     bfd_byte *data)
 
 DESCRIPTION
 	Provides default handling of relocation effort for back ends
@@ -795,9 +840,10 @@ DESCRIPTION
 */
 
 bfd_byte *
-DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet),
+DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet, data),
       bfd *abfd AND
-      struct bfd_seclet_struct *seclet)
+      struct bfd_seclet_struct *seclet AND
+      bfd_byte *data)
 {
   extern bfd_error_vector_type bfd_error_vector;
 
@@ -805,11 +851,11 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet),
   bfd *input_bfd = seclet->u.indirect.section->owner;
   asection *input_section = seclet->u.indirect.section;
 
-  bfd_byte *data = (bfd_byte *) bfd_xmalloc(input_section->_raw_size);
+
 
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
-  arelent **reloc_vector = (arelent **) bfd_xmalloc(reloc_size);
+  arelent **reloc_vector = (arelent **) alloca(reloc_size);
   
   /* read in the section */
   bfd_get_section_contents(input_bfd,
@@ -862,7 +908,7 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd, seclet),
     }    
   }
 
-  free((char *)reloc_vector);
+
   return data;
 
   

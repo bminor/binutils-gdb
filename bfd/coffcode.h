@@ -22,6 +22,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com 
 */
+
+#include <assert.h>
+#include <stdio.h>
+
 /*
 
 SECTION
@@ -377,23 +381,34 @@ static flagword
 DEFUN(styp_to_sec_flags, (styp_flags),
 	long	styp_flags)
 {
-    flagword	sec_flags=0;
+  flagword	sec_flags=0;
 
-    if ((styp_flags & STYP_TEXT) || (styp_flags & STYP_DATA))
-	sec_flags = (SEC_LOAD | SEC_ALLOC);
-    else if (styp_flags & STYP_BSS)
-	sec_flags = SEC_ALLOC;
+  if ((styp_flags & STYP_TEXT) || (styp_flags & STYP_DATA)) 
+  {
+    sec_flags = SEC_LOAD | SEC_ALLOC;
+  }
+  else if (styp_flags & STYP_BSS) 
+  {
+    sec_flags = SEC_ALLOC;
+  }
+  else
+  {
+    sec_flags = SEC_ALLOC | SEC_LOAD;
+  }
+#ifdef STYP_LIT			/* A29k readonly text/data section type */
+  if ((styp_flags & STYP_LIT) == STYP_LIT)
+  {
+    sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+  }
+#endif				/* STYP_LIT */
+#ifdef STYP_OTHER_LOAD		/* Other loaded sections */
+  if (styp_flags & STYP_OTHER_LOAD)
+  {
+    sec_flags = (SEC_LOAD | SEC_ALLOC);
+  }
+#endif				/* STYP_SDATA */
 
-#ifdef STYP_LIT		/* A29k readonly text/data section type */
-    if ((styp_flags & STYP_LIT) == STYP_LIT)
-	sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
-#endif  /* STYP_LIT */
-#ifdef STYP_OTHER_LOAD	/* Other loaded sections */
-    if (styp_flags & STYP_OTHER_LOAD)
-	sec_flags = (SEC_LOAD | SEC_ALLOC);
-#endif  /* STYP_SDATA */
-
-    return(sec_flags);
+  return(sec_flags);
 }
 
 #define	get_index(symbol)	((int) (symbol)->udata)
@@ -884,27 +899,22 @@ DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
 */
 
 static          boolean
-DEFUN(coff_new_section_hook,(abfd_ignore, section),
-      bfd            *abfd_ignore AND
+DEFUN(coff_new_section_hook,(abfd, section),
+      bfd            *abfd AND
       asection       *section)
 {
-  section->alignment_power = abfd_ignore->xvec->align_power_min;
+  section->alignment_power = abfd->xvec->align_power_min;
+  /* Allocate aux records for section symbols, to store size and
+     related info.
+
+     @@ Shouldn't use constant multiplier here!  */
+  coffsymbol (section->symbol)->native =
+    (combined_entry_type *) bfd_zalloc (abfd,
+					sizeof (combined_entry_type) * 10);
   return true;
 }
 
-static asection bfd_debug_section = 
-{ "*DEBUG*" };
-
-
-
-static void
-DEFUN(make_abs_section,(abfd),
-      bfd *abfd)
-{
-    
-
-  
-}
+static asection bfd_debug_section = { "*DEBUG*" };
 
 /* Take a section header read from a coff file (in HOST byte order),
    and make a BFD "section" out of it.  */
@@ -1336,6 +1346,30 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
   unsigned int native_index = 0;
   struct internal_syment *last_file = (struct internal_syment *)NULL;
   unsigned int symbol_index;
+
+  /* COFF demands that undefined symbols come after all other symbols.
+     Since we don't need to impose this extra knowledge on all our client
+     programs, deal with that here.  Sort the symbol table; just move the
+     undefined symbols to the end, leaving the rest alone.  */
+  /* @@ Do we have some condition we could test for, so we don't always
+     have to do this?  I don't think relocatability is quite right, but
+     I'm not certain.  [raeburn:19920508.1711EST]  */
+  {
+    asymbol **newsyms;
+    int i;
+
+    newsyms = (asymbol **) bfd_alloc_by_size_t (bfd_ptr,
+						sizeof (asymbol *) * symbol_count);
+    bfd_ptr->outsymbols = newsyms;
+    for (i = 0; i < symbol_count; i++)
+      if (symbol_ptr_ptr[i]->section != &bfd_und_section)
+	*newsyms++ = symbol_ptr_ptr[i];
+    for (i = 0; i < symbol_count; i++)
+      if (symbol_ptr_ptr[i]->section == &bfd_und_section)
+	*newsyms++ = symbol_ptr_ptr[i];
+    symbol_ptr_ptr = bfd_ptr->outsymbols;
+  }
+
   for (symbol_index = 0; symbol_index < symbol_count; symbol_index++)
       {
 	coff_symbol_type *coff_symbol_ptr = coff_symbol_from(bfd_ptr, symbol_ptr_ptr[symbol_index]);
@@ -1365,6 +1399,7 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
 	  native_index++;
 	}
       }
+  obj_conv_table_size (bfd_ptr) = native_index;
 }
 
 
@@ -1475,6 +1510,12 @@ unsigned int written)
   int             class =  native->u.syment.n_sclass;
   SYMENT buf;
   unsigned int j;
+
+  /* @@ bfd_debug_section isn't accessible outside this file, but we know
+     that C_FILE symbols belong there.  So move them.  */
+  if (native->u.syment.n_sclass == C_FILE)
+    symbol->section = &bfd_debug_section;
+
   if (symbol->section == &bfd_abs_section) 
   {
     native->u.syment.n_scnum = N_ABS;
@@ -1588,7 +1629,7 @@ coff_symbol_type *symbol AND
 unsigned int written)
 {
   /*
-    Does this symbol have an ascociated line number - if so then
+    Does this symbol have an associated line number - if so then
     make it remember this symbol index. Also tag the auxent of
     this symbol to point to the right place in the lineno table
     */
@@ -1748,9 +1789,20 @@ DEFUN(coff_write_relocs,(abfd),
       struct internal_reloc    n;
       arelent        *q = p[i];
       memset((PTR)&n, 0, sizeof(n));
+
+      /* @@FIXME COFF relocs don't support addends.  Code should probably be
+	 in the target-independent code, using a target flag to decide whether
+	 to fold the addend into the section contents.  */
+      if (q->addend != 0)
+	abort ();
+
       n.r_vaddr = q->address + s->vma;
       if (q->sym_ptr_ptr) {
 	n.r_symndx = get_index((*(q->sym_ptr_ptr)));
+	/* Take notice if the symbol reloc points to a symbol we don't have
+	   in our symbol table.  What should we do for this??  */
+	if (n.r_symndx > obj_conv_table_size (abfd))
+	  abort ();
       }
 #ifdef SELECT_RELOC
       /* Work out reloc type from what is required */
@@ -1823,6 +1875,7 @@ bfd            *abfd;
     bfd_error = no_memory;
     return (NULL);
   }				/* on error */
+  new->symbol.section = 0;
   new->native = 0;
   new->lineno = (alent *) NULL;
   new->done_lineno = false;
@@ -1831,6 +1884,26 @@ bfd            *abfd;
 }
 
 #ifndef NO_COFF_SYMBOLS
+
+static asymbol *
+DEFUN (coff_make_debug_symbol, (abfd, ptr, sz),
+       bfd *abfd AND
+       PTR ptr AND
+       unsigned long sz)
+{
+  coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
+  if (new == NULL) {
+    bfd_error = no_memory;
+    return (NULL);
+  }				/* on error */
+  /* @@ This shouldn't be using a constant multiplier.  */
+  new->native = (combined_entry_type *) bfd_zalloc (abfd, sizeof (combined_entry_type) * 10);
+  new->symbol.section = &bfd_debug_section;
+  new->lineno = (alent *) NULL;
+  new->done_lineno = false;
+  new->symbol.the_bfd = abfd;
+  return &new->symbol;
+}
 
 static void
 DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
@@ -2128,8 +2201,115 @@ DEFUN(coff_compute_section_file_positions,(abfd),
   obj_relocbase(abfd) = sofar;
 }
 
+#ifndef NO_COFF_SYMBOLS
+static asymbol *
+coff_section_symbol (abfd, name)
+     bfd *abfd;
+     char *name;
+{
+  asection *sec = bfd_get_section_by_name (abfd, name);
+  asymbol *sym;
+  combined_entry_type *csym;
 
+  if (!sec)
+    {
+      /* create empty symbol */
+      abort ();
+    }
+  sym = sec->symbol;
+  if (coff_symbol_from (abfd, sym))
+    csym = coff_symbol_from (abfd, sym)->native;
+  else
+    csym = 0;
+  /* Make sure back-end COFF stuff is there.  */
+  if (csym == 0)
+    {
+      struct foo {
+	coff_symbol_type sym;
+	/* @@FIXME This shouldn't use a fixed size!!  */
+	combined_entry_type e[10];
+      };
+      struct foo *f;
+      f = (struct foo *) bfd_alloc_by_size_t (abfd, sizeof (*f));
+      bzero ((char *) f, sizeof (*f));
+      coff_symbol_from (abfd, sym)->native = csym = f->e;
+    }
+  csym[0].u.syment.n_sclass = C_STAT;
+  csym[0].u.syment.n_numaux = 1;
+/*  SF_SET_STATICS (sym);	@@ ??? */
+  if (sec)
+    {
+      csym[1].u.auxent.x_scn.x_scnlen = sec->_raw_size;
+      csym[1].u.auxent.x_scn.x_nreloc = sec->reloc_count;
+      csym[1].u.auxent.x_scn.x_nlinno = sec->lineno_count;
+    }
+  else
+    {
+      csym[1].u.auxent.x_scn.x_scnlen = 0;
+      csym[1].u.auxent.x_scn.x_nreloc = 0;
+      csym[1].u.auxent.x_scn.x_nlinno = 0;
+    }
+  return sym;
+}
 
+/* If .file, .text, .data, .bss symbols are missing, add them.  */
+/* @@ Should we only be adding missing symbols, or overriding the aux
+   values for existing section symbols?  */
+static void
+coff_add_missing_symbols (abfd)
+     bfd *abfd;
+{
+  unsigned int nsyms = bfd_get_symcount (abfd);
+  asymbol **sympp = abfd->outsymbols;
+  asymbol **sympp2;
+  unsigned int i;
+  int need_text = 1, need_data = 1, need_bss = 1, need_file = 1;
+  coff_data_type *cdata = coff_data (abfd);
+
+  for (i = 0; i < nsyms; i++)
+    {
+      coff_symbol_type *csym = coff_symbol_from (abfd, sympp[i]);
+      CONST char *name;
+
+      if (csym->native->u.syment.n_sclass == C_FILE)
+	{
+	  need_file = 0;
+	  continue;
+	}
+      name = csym->symbol.name;
+      if (!name)
+	continue;
+      if (!strcmp (name, _TEXT))
+	need_text = 0;
+      else if (!strcmp (name, _DATA))
+	need_data = 0;
+      else if (!strcmp (name, _BSS))
+	need_bss = 0;
+    }
+  /* Now i == bfd_get_symcount (abfd).  */
+  /* @@ For now, don't deal with .file symbol.  */
+  need_file = 0;
+
+  if (!need_text && !need_data && !need_bss && !need_file)
+    return;
+  nsyms += need_text + need_data + need_bss + need_file;
+  sympp2 = (asymbol**) bfd_alloc_by_size_t (abfd, nsyms * sizeof (asymbol *));
+  memcpy (sympp2, sympp, i * sizeof (asymbol *));
+  if (need_file)
+    {
+      /* @@ Generate fake .file symbol, in sympp2[i], and increment i.  */
+      abort ();
+    }
+  if (need_text)
+    sympp2[i++] = coff_section_symbol (abfd, _TEXT);
+  if (need_data)
+    sympp2[i++] = coff_section_symbol (abfd, _DATA);
+  if (need_bss)
+    sympp2[i++] = coff_section_symbol (abfd, _BSS);
+  assert (i == nsyms);
+  bfd_set_symtab (abfd, sympp2, nsyms);
+}
+#endif /* NO_COFF_SYMBOLS */
 
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
@@ -2159,12 +2339,15 @@ DEFUN(coff_write_object_contents,(abfd),
 
   bfd_error = system_call_error;
   /* Number the output sections, starting from one on the first section
-     with a name which doesn't start with a * */
+     with a name which doesn't start with a *.
+     @@ The code doesn't make this check.  Is it supposed to be done,
+     or isn't it??  */
   count = 1;
   for (current = abfd->sections; current != (asection *)NULL; 
        current = current->next) 
   {
       current->target_index = count;
+      count++;
   }
   
     
@@ -2424,6 +2607,7 @@ DEFUN(coff_write_object_contents,(abfd),
 
 #ifndef NO_COFF_SYMBOLS
   if (bfd_get_symcount(abfd) != 0) {
+      coff_add_missing_symbols (abfd);
       coff_renumber_symbols(abfd);
       coff_mangle_symbols(abfd);
       coff_write_symbols(abfd);
@@ -3149,6 +3333,7 @@ DEFUN(coff_slurp_symbol_table,(abfd),
   obj_symbols(abfd) = cached_area;
   obj_raw_syments(abfd) = native_symbols;
 
+  obj_conv_table_size (abfd) = bfd_get_symcount (abfd);
   bfd_get_symcount(abfd) = number_of_symbols;
   obj_convert(abfd) = table_ptr;
   /* Slurp the line tables for each section too */
@@ -3324,16 +3509,18 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
       cache_ptr->address = dst.r_vaddr;
 
       if (dst.r_symndx != -1) 
-      {
+	{
+	  /* @@ Should never be greater than count of symbols!  */
+	  if (dst.r_symndx >= obj_conv_table_size (abfd))
+	    abort ();
 	  cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
 	  ptr = *(cache_ptr->sym_ptr_ptr);
-      }
+	}
       else 
-      {
-	cache_ptr->sym_ptr_ptr= bfd_abs_section.symbol_ptr_ptr;
-        ptr = 0;
-	      
-      }
+	{
+	  cache_ptr->sym_ptr_ptr= bfd_abs_section.symbol_ptr_ptr;
+	  ptr = 0;
+	}
 
       /*
 	The symbols definitions that we have read in have been
@@ -3723,15 +3910,15 @@ DEFUN(bfd_coff_relax_section,(abfd, i, symbols),
 }
 
 static bfd_byte *
-DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet),
+DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
       bfd *in_abfd AND
-      bfd_seclet_type *seclet)
+      bfd_seclet_type *seclet AND
+      bfd_byte *data)
 
 {
   /* Get enough memory to hold the stuff */
   bfd *input_bfd = seclet->u.indirect.section->owner;
   asection *input_section = seclet->u.indirect.section;
-  bfd_byte  *data = (bfd_byte *)malloc(input_section->_raw_size);
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
   arelent **reloc_vector = (arelent **)bfd_xmalloc(reloc_size);
