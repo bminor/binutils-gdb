@@ -1,3 +1,19 @@
+Wed May 20 04:37:57 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-trace.c (first_insn_p): New static local.
+	(trace_insn_init): Set it.
+	(trace_insn_fini): Use TRACE_PREFIX.
+	(trace_insn): Rewrite to use trace_prefix.
+	* sim-trace.c (trace_prefix): Don't print filename arg if NULL.
+	Adjust width accordingly.
+
+	* sim-profile.h (PROFILE_DATA): New member profile_any_p.
+	(PROFILE_ANY_P,PROFILE_INSN_P,PROFILE_MEMORY): New macros.
+	(PROFILE_SCACHE_P,PROFILE_PC_P,PROFILE_CORE_P): New macros.
+	(PROFILE_COUNT_INSN,PROFILE_COUNT_READ,PROFILE_COUNT_WRITE): Simplify.
+	(PROFILE_COUNT_CORE): Simplify.
+	* sim-profile.c (profile_option_handler): Compute profile_any_p.
+
 Tue May 19 23:55:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-ops.h (ADDCFSI): Fix typo.
