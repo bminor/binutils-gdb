@@ -393,28 +393,33 @@ void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   int reg;
+  long l;
 
   /* Supply the floating-point registers.  */
   for (reg = 0; reg < 8; reg++)
     supply_register (FP0_REGNUM + reg, FPREG_ADDR (fpregsetp, reg));
 
-  supply_register (FCTRL_REGNUM, (char *) &fpregsetp->cwd);
-  supply_register (FSTAT_REGNUM, (char *) &fpregsetp->swd);
-  supply_register (FTAG_REGNUM,  (char *) &fpregsetp->twd);
+  /* We have to mask off the reserved bits in *FPREGSETP before
+     storing the values in GDB's register file.  */
+#define supply(REGNO, MEMBER)                                           \
+  l = fpregsetp->MEMBER & 0xffff;                                       \
+  supply_register (REGNO, (char *) &l)
+
+  supply (FCTRL_REGNUM, cwd);
+  supply (FSTAT_REGNUM, swd);
+  supply (FTAG_REGNUM, twd);
   supply_register (FCOFF_REGNUM, (char *) &fpregsetp->fip);
-  supply_register (FDS_REGNUM,   (char *) &fpregsetp->fos);
+  supply (FDS_REGNUM, fos);
   supply_register (FDOFF_REGNUM, (char *) &fpregsetp->foo);
-  
+
+#undef supply
+
   /* Extract the code segment and opcode from the  "fcs" member.  */
-  {
-    long l;
+  l = fpregsetp->fcs & 0xffff;
+  supply_register (FCS_REGNUM, (char *) &l);
 
-    l = fpregsetp->fcs & 0xffff;
-    supply_register (FCS_REGNUM, (char *) &l);
-
-    l = (fpregsetp->fcs >> 16) & ((1 << 11) - 1);
-    supply_register (FOP_REGNUM, (char *) &l);
-  }
+  l = (fpregsetp->fcs >> 16) & ((1 << 11) - 1);
+  supply_register (FOP_REGNUM, (char *) &l);
 }
 
 /* Convert the valid floating-point register values in GDB's register
@@ -434,19 +439,28 @@ convert_to_fpregset (elf_fpregset_t *fpregsetp, signed char *valid)
 	      &registers[REGISTER_BYTE (FP0_REGNUM + reg)],
 	      REGISTER_RAW_SIZE(FP0_REGNUM + reg));
 
+  /* We're not supposed to touch the reserved bits in *FPREGSETP.  */
+
 #define fill(MEMBER, REGNO)						\
   if (! valid || valid[(REGNO)])					\
-    memcpy (&fpregsetp->MEMBER, &registers[REGISTER_BYTE (REGNO)],	\
-	    sizeof (fpregsetp->MEMBER))
+    fpregsetp->MEMBER                                                   \
+      = ((fpregsetp->MEMBER & ~0xffff)                                  \
+         | (* (int *) &registers[REGISTER_BYTE (REGNO)] & 0xffff))
+
+#define fill_register(MEMBER, REGNO)                                    \
+  if (! valid || valid[(REGNO)])                                        \
+    memcpy (&fpregsetp->MEMBER, &registers[REGISTER_BYTE (REGNO)],      \
+            sizeof (fpregsetp->MEMBER))
 
   fill (cwd, FCTRL_REGNUM);
   fill (swd, FSTAT_REGNUM);
   fill (twd, FTAG_REGNUM);
-  fill (fip, FCOFF_REGNUM);
+  fill_register (fip, FCOFF_REGNUM);
   fill (foo, FDOFF_REGNUM);
-  fill (fos, FDS_REGNUM);
+  fill_register (fos, FDS_REGNUM);
 
 #undef fill
+#undef fill_register
 
   if (! valid || valid[FCS_REGNUM])
     fpregsetp->fcs
