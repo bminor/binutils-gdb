@@ -6782,13 +6782,14 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry **sym_hashes;
-      Elf_Internal_Rela *relstart, *rel, *wrel;
+      Elf_Internal_Rela *relstart, *rel;
       unsigned long *skip, *drop;
       unsigned char *used;
       unsigned char *keep, last, some_unused;
 
       toc = bfd_get_section_by_name (ibfd, ".toc");
       if (toc == NULL
+	  || toc->size == 0
 	  || toc->sec_info_type == ELF_INFO_TYPE_JUST_SYMS
 	  || elf_discarded_section (toc))
 	continue;
@@ -7033,25 +7034,32 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  toc->rawsize = toc->size;
 	  toc->size = src - contents - off;
 
-	  /* Read toc relocs.  */
-	  relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL, TRUE);
-	  if (relstart == NULL)
-	    goto error_ret;
+	  if (toc->reloc_count != 0)
+	    {
+	      Elf_Internal_Rela *wrel;
+	      bfd_size_type sz;
 
-	  /* Remove unused toc relocs, and adjust those we keep.  */
-	  wrel = relstart;
-	  for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
-	    if (skip[rel->r_offset >> 3] != (unsigned long) -1)
-	      {
-		wrel->r_offset = rel->r_offset - skip[rel->r_offset >> 3];
-		wrel->r_info = rel->r_info;
-		wrel->r_addend = rel->r_addend;
-		++wrel;
-	      }
-	  toc->reloc_count = wrel - relstart;
-	  elf_section_data (toc)->rel_hdr.sh_size
-	    = toc->reloc_count * elf_section_data (toc)->rel_hdr.sh_entsize;
-	  BFD_ASSERT (elf_section_data (toc)->rel_hdr2 == NULL);
+	      /* Read toc relocs.  */
+	      relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
+						    TRUE);
+	      if (relstart == NULL)
+		goto error_ret;
+
+	      /* Remove unused toc relocs, and adjust those we keep.  */
+	      wrel = relstart;
+	      for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
+		if (skip[rel->r_offset >> 3] != (unsigned long) -1)
+		  {
+		    wrel->r_offset = rel->r_offset - skip[rel->r_offset >> 3];
+		    wrel->r_info = rel->r_info;
+		    wrel->r_addend = rel->r_addend;
+		    ++wrel;
+		  }
+	      toc->reloc_count = wrel - relstart;
+	      sz = elf_section_data (toc)->rel_hdr.sh_entsize;
+	      elf_section_data (toc)->rel_hdr.sh_size = toc->reloc_count * sz;
+	      BFD_ASSERT (elf_section_data (toc)->rel_hdr2 == NULL);
+	    }
 
 	  /* Adjust addends for relocs against the toc section sym.  */
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)

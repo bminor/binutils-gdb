@@ -88,7 +88,7 @@ ppc_create_output_section_statements (void)
 			     bfd_get_arch (output_bfd),
 			     bfd_get_mach (output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo ("%F%P: can not create BFD %E\n");
       return;
     }
 
@@ -104,10 +104,7 @@ ppc_before_allocation (void)
     {
       if (!no_opd_opt
 	  && !ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
-	{
-	  einfo ("%X%P: can not edit %s %E\n", "opd");
-	  return;
-	}
+	einfo ("%X%P: can not edit %s %E\n", "opd");
 
       if (ppc64_elf_tls_setup (output_bfd, &link_info) && !no_tls_opt)
 	{
@@ -117,10 +114,7 @@ ppc_before_allocation (void)
 			      &stat_ptr->head, 0, 0, NULL, TRUE);
 
 	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
-	    {
-	      einfo ("%X%P: TLS problem %E\n");
-	      return;
-	    }
+	    einfo ("%X%P: TLS problem %E\n");
 
 	  /* We must not cache anything from the preliminary sizing.  */
 	  elf_tdata (output_bfd)->program_header_size = 0;
@@ -130,10 +124,7 @@ ppc_before_allocation (void)
       if (!no_toc_opt
 	  && !link_info.relocatable
 	  && !ppc64_elf_edit_toc (output_bfd, &link_info))
-	{
-	  einfo ("%X%P: can not edit %s %E\n", "toc");
-	  return;
-	}
+	einfo ("%X%P: can not edit %s %E\n", "toc");
     }
 
   gld${EMULATION_NAME}_before_allocation ();
@@ -343,14 +334,10 @@ gld${EMULATION_NAME}_finish (void)
     {
       int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info,
 					       no_multi_toc);
-      if (ret != 0)
+      if (ret < 0)
+	einfo ("%X%P: can not size stub section: %E\n");
+      else if (ret > 0)
 	{
-	  if (ret < 0)
-	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
-	      return;
-	    }
-
 	  toc_section = bfd_get_section_by_name (output_bfd, ".got");
 	  if (toc_section != NULL)
 	    lang_for_each_statement (build_toc_list);
@@ -365,10 +352,7 @@ gld${EMULATION_NAME}_finish (void)
 				     group_size,
 				     &ppc_add_stub_section,
 				     &ppc_layout_sections_again))
-	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
-	      return;
-	    }
+	    einfo ("%X%P: can not size stub section: %E\n");
 	}
     }
 

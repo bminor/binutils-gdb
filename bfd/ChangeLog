@@ -1,3 +1,8 @@
+2005-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_edit_toc): Skip toc if size is zero.
+	Skip toc reloc adjust if reloc_count is zero.
+
 2005-02-15  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

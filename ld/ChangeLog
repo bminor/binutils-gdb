@@ -1,3 +1,10 @@
+2005-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Make
+	an error creating fake bfd fatal.
+	(ppc_before_allocation): Continue on after errors.
+	(gld${EMULATION_NAME}_finish): Likewise.
+
 2005-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* ldlex.l (YY_NO_UNPUT): Define so that the yy_unput function is
