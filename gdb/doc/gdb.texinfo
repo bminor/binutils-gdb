@@ -82,7 +82,7 @@ _fi__(!_GENERIC__)
 @c Maybe crank this up to "Fourth Edition" when released at FSF
 @c @subtitle Third Edition---_GDBN__ version 4.0
 @subtitle _GDBN__ version 4.0
-@subtitle May 1991
+@subtitle July 1991
 @author{Richard M. Stallman@qquad @hfill Free Software Foundation}
 @author{Roland H. Pesch@qquad @hfill Cygnus Support}
 @page
@@ -181,8 +181,7 @@ Running Programs Under _GDBN__
 Stopping and Continuing
 
 * Breakpoints::			Breakpoints, Watchpoints, and Exceptions
-* Stepping::			Stepping
-* Continuing::			Continuing
+* Stepping and Continuing::	Resuming Execution
 * Signals::			Signals
 
 Breakpoints, Watchpoints, and Exceptions
@@ -1505,11 +1504,11 @@ running or not, what process it is, and why it stopped.
 
 @menu
 * Breakpoints::			Breakpoints, Watchpoints, and Exceptions
-* Stepping and Continuing::	Stepping and Continuing
+* Stepping and Continuing::	Resuming Execution
 * Signals::			Signals
 @end menu
 
-@node Breakpoints, Stepping, Stopping, Stopping
+@node Breakpoints, Stepping and Continuing, Stopping, Stopping
 @section Breakpoints, Watchpoints, and Exceptions
 
 @cindex breakpoints
@@ -1853,7 +1852,7 @@ breakpoints that you set are initially enabled; subsequently, they become
 disabled or enabled only when you use one of the commands above.  (The
 command @code{until} can set and delete a breakpoint of its own, but it
 will not change the state of your other breakpoints;
-@pxref{Stepping}.)
+@pxref{Stepping and Continuing}.)
 
 @node Conditions, Break Commands, Disabling, Breakpoints
 @subsection Break Conditions
@@ -2135,7 +2134,7 @@ to nonsharable executables.
 @cindex continuing
 @cindex resuming execution
 @dfn{Stepping} means resuming program execution for a very limited time:
-one line of source code, or one machine instruction.  @dfn {Continuing}
+one line of source code, or one machine instruction.  @dfn{Continuing}
 means resuming program execution until the program completes normally.
 In either case, the program may stop even sooner, due to a breakpoint or
 to a signal.  (If due to a signal, you may want to use @code{handle}, or
@@ -4116,7 +4115,7 @@ set $pc = 0x485
 @noindent
 causes the next @code{continue} command or stepping command to execute at
 address 0x485, rather than at the address where the program stopped.
-@xref{Stepping}.
+@xref{Stepping and Continuing}.
 
 The most common occasion to use the @code{jump} command is to back up,
 perhaps with more breakpoints set, over a portion of a program that has
@@ -4169,8 +4168,9 @@ the registers used for returning values of functions.
 
 The @code{return} command does not resume execution; it leaves the
 program stopped in the state that would exist if the function had just
-returned.  In contrast, the @code{finish} command (@pxref{Stepping})
-resumes execution until the selected stack frame returns naturally.
+returned.  In contrast, the @code{finish} command (@pxref{Stepping and
+Continuing}) resumes execution until the selected stack frame returns
+naturally.
 
 @node     Calling,  , Returning, Altering
 @section Calling your Program's Functions
@@ -5709,8 +5709,8 @@ Here is a summary of all the @code{configure} options and arguments that
 you might use for building _GDBN__:
 
 @example
-configure @rm{[}+destdir=@var{dir}@rm{]} @rm{[}+forcesubdirs@rm{]} @rm{[}+norecur@rm{]} @rm{[}+rm@rm{]}
-          @rm{[}+target=@var{machine}@dots{}@rm{]} @var{host}@dots{}
+configure @r{[}+destdir=@var{dir}@r{]} @r{[}+forcesubdirs@r{]} @r{[}+norecur@r{]} @r{[}+rm@r{]}
+          @r{[}+target=@var{machine}@dots{}@r{]} @var{host}@dots{}
 @end example
 
 You may introduce options with the character @samp{-} rather than
@@ -6081,7 +6081,7 @@ POSSIBILITY OF SUCH DAMAGES.
 @end ifinfo
 
 @page
-@unnumberedsec Appendix: How to Apply These Terms to Your New Programs
+@unnumberedsec Applying These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it
