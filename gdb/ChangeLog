@@ -1,3 +1,7 @@
+2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* NEWS: Note that Alpha targets are now multi-arch.
+
 2002-04-24  Michael Snyder  <msnyder@redhat.com>
 
 	* parser-defs.h (prev_lexptr): New external variable.

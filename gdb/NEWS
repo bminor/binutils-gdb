@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.2:
 
+* Changes in Alpha configurations. 
+
+Multi-arch support is enabled for all Alpha configurations.
+
 * New command "set max-user-call-depth <nnn>"
 
 This command allows the user to limit the call depth of user-defined
