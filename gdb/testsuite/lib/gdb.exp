@@ -123,7 +123,10 @@ proc gdb_run_cmd {} {
 	    exp_continue
 	}
 
-	-re "Starting program: .*$" {}
+	# The following pattern matches up to to the first newline *only*.
+	# Using ``.*$'' could swallow up output that we attempt to match
+	# elsewhere.
+	-re "Starting program: \[^\n\]*" {}
     }
 }
 
