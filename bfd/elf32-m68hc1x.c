@@ -1000,7 +1000,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
-  const char *name;
+  const char *name = NULL;
   struct m68hc11_page_info *pinfo;
   const struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
 
@@ -1021,13 +1021,13 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       unsigned long r_symndx;
       Elf_Internal_Sym *sym;
       asection *sec;
-      bfd_vma relocation;
+      bfd_vma relocation = 0;
       bfd_reloc_status_type r = bfd_reloc_undefined;
       bfd_vma phys_page;
       bfd_vma phys_addr;
       bfd_vma insn_addr;
       bfd_vma insn_page;
-      bfd_boolean is_far;
+      bfd_boolean is_far = FALSE;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
