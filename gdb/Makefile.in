@@ -705,7 +705,7 @@ make-proto-testsuite.dir: force_update
 	find proto-testsuite.dir -name Makefile -exec rm {} \;
 	find proto-testsuite.dir -name config.status -exec rm {} \;
 
-clean:
+clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c

@@ -1,3 +1,7 @@
+Sun Jan 16 12:46:01 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add mostlyclean target.
+
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Version 4.11.4.
