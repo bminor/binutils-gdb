@@ -5,6 +5,13 @@
 	of i386_saved_pc_after_call.
 	(i386_saved_pc_after_call): New prototype.
 
+2001-04-17  Michael Snyder  <msnyder@redhat.com>
+
+	* solib.c (no_shared_libraries): New function.  Discard all symbols
+	from shared libraries.
+	(_initialize_solib): Add command "nosharedlibrary" as complement
+	to the command "sharedlibrary".  Unloads symbols for all solibs.
+
 2001-04-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.host (m68030-sony-*, m68*-isi-*, m68*-sony-*):

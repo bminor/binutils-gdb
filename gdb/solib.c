@@ -809,6 +809,12 @@ sharedlibrary_command (char *args, int from_tty)
   solib_add (args, from_tty, (struct target_ops *) 0);
 }
 
+void
+no_shared_libraries (char *ignored, int from_tty)
+{
+  objfile_purge_solibs ();
+  do_clear_solib (NULL);
+}
 
 void
 _initialize_solib (void)
@@ -819,6 +825,8 @@ _initialize_solib (void)
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", info_sharedlibrary_command,
 	    "Status of loaded shared object libraries.");
+  add_com ("nosharedlibrary", class_files, no_shared_libraries,
+	   "Unload all shared object library symbols except .");
 
   add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
