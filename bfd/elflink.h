@@ -357,7 +357,6 @@ elf_link_add_archive_symbols (abfd, info)
 	    }
 
 	  /* We need to include this archive member.  */
-
 	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
 	  if (element == (bfd *) NULL)
 	    goto error_return;
@@ -4104,7 +4103,7 @@ elf_bfd_final_link (abfd, info)
 		 the linker has decided to not include.  */
 	      sec->linker_mark = true;
 
-	      if (info->relocateable)
+	      if (info->relocateable || info->emitrelocations)
 		o->reloc_count += sec->reloc_count;
 
 	      if (sec->_raw_size > max_contents_size)
@@ -4172,7 +4171,7 @@ elf_bfd_final_link (abfd, info)
   /* Figure out how many relocations we will have in each section.
      Just using RELOC_COUNT isn't good enough since that doesn't
      maintain a separate value for REL vs. RELA relocations.  */
-  if (info->relocateable)
+  if (info->relocateable || info->emitrelocations)
     for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
@@ -4280,7 +4279,7 @@ elf_bfd_final_link (abfd, info)
 
   /* Start writing out the symbol table.  The first symbol is always a
      dummy symbol.  */
-  if (info->strip != strip_all || info->relocateable)
+  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
     {
       elfsym.st_value = 0;
       elfsym.st_size = 0;
@@ -4313,7 +4312,7 @@ elf_bfd_final_link (abfd, info)
      symbols have no names.  We store the index of each one in the
      index field of the section, so that we can find it again when
      outputting relocs.  */
-  if (info->strip != strip_all || info->relocateable)
+  if (info->strip != strip_all || info->relocateable || info->emitrelocations)
     {
       elfsym.st_size = 0;
       elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
@@ -4324,7 +4323,7 @@ elf_bfd_final_link (abfd, info)
 	  if (o != NULL)
 	    o->target_index = bfd_get_symcount (abfd);
 	  elfsym.st_shndx = i;
-	  if (info->relocateable || o == NULL)
+	  if (info->relocateable || info->emitrelocations || o == NULL)
 	    elfsym.st_value = 0;
 	  else
 	    elfsym.st_value = o->vma;
@@ -5492,7 +5491,7 @@ elf_link_input_bfd (finfo, input_bfd)
 				     finfo->sections))
 	    return false;
 
-	  if (finfo->info->relocateable)
+	  if (finfo->info->relocateable || finfo->info->emitrelocations)
 	    {
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;

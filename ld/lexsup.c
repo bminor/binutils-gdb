@@ -205,6 +205,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"relocateable", no_argument, NULL, 'r'},
       'r', NULL, N_("Generate relocateable output"), TWO_DASHES },
+  { {"emit-relocs", no_argument, NULL, 'q'},
+      'q', NULL, "Generate relocations in final output", TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
       'i', NULL, NULL, ONE_DASH },
   { {"just-symbols", required_argument, NULL, 'R'},
@@ -717,6 +719,9 @@ parse_args (argc, argv)
 	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
 	  break;
 	case 'i':
+	case 'q':
+	  link_info.emitrelocations = true;
+	  break;
 	case 'r':
 	  link_info.relocateable = true;
 	  config.build_constructors = false;

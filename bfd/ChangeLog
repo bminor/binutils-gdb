@@ -1,3 +1,13 @@
+2000-05-17  S. Bharadwaj Yadavalli  <sby@scrugs.lkg.dec.com>
+	    Rick Gorton	            <gorton@scrugs.lkg.dec.com>
+	
+	* elflink.h: Add emitrelocations support: when enabled, relocation 
+	information and relocation sections are put into final output
+	executables.  If the emitrelocations flag is set, do the following:
+	(elf_bfd_final_link): Emit relocation sections.
+	(elf_link_input_bfd): Compute relocation section contents.
+	(elf_gc_sections): Don't clean relocation sections.
+
 2000-05-16  Catherine Moore  <clm@cygnux.com>
 
 	* som.c (som_decode_symclass):  Recognize weak symbols.
@@ -1246,7 +1256,7 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 2000-02-08 Mark Elbrecht <snowball3@bigfoot.com>
 	
 	* coff-go32.c: Update comment. Update copyright.
- 
+
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * syms.c (bfd_decode_symclass)
@@ -2603,8 +2613,8 @@ Mon Jul 19 14:03:44 1999  Mark P. Mitchell  <mark@codesourcery.com>
 	* coffcode.h (CREATE_BIG_COFF_TARGET_VEC): New macro.
 	(CREATE_LITTLE_COFF_TARGET_VEC): New macro.
 	
-	* aix386-core.c: Initialise new field of bfd_target structure. 
-	* aout-adobe.c: Initialise new field of bfd_target structure. 
+	* aix386-core.c: Initialise new field of bfd_target structure.
+	* aout-adobe.c: Initialise new field of bfd_target structure.
 	* aout-arm.c: Initialise new field of bfd_target structure. 
 	* aout-target.h: Initialise new field of bfd_target structure. 
 	* aout-tic30.c: Initialise new field of bfd_target structure. 

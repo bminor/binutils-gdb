@@ -1,3 +1,12 @@
+2000-05-17 S. Bharadwaj Yadavalli  <sby@scrugs.lkg.dec.com>
+	      Rick Gorton	   <gorton@scrugs.lkg.dec.com>
+	      
+	Add support for '-q' == '--emit-relocs' switch.
+	* ldmain.c (main): Default to false.
+	* lexsup.c (parse_args): Turn on emitrelocations flag if set.
+	* NEWS: Describe the emitrelocations switch.
+	* ld.texinfo: Describe the emitrelocations switch.
+
 2000-05-16  Charles Wilson <cwilson@ece.gatech.edu>
 
 	* ld/emultempl/pe.em (_open_dynamic_archive): New function: Search

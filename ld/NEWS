@@ -2,6 +2,12 @@
 
 Changes in version 2.10:
 
+* Added ability to emit full relocation information in linked executables,
+  enabled by --emit-relocs.  Some post-linkage optimization tools need
+  this information in order to be able to correctly identify and perform
+  symbol relative addressing in the event of changes in section contents
+  (instructions being added or deleted, extending data sections, etc.)
+
 * Added AT> to the linker script language to allow load-time allocation of 
   sections into regions.
 

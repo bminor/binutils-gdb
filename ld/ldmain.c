@@ -214,6 +214,7 @@ main (argc, argv)
 
   link_info.callbacks = &link_callbacks;
   link_info.relocateable = false;
+  link_info.emitrelocations = false;
   link_info.shared = false;
   link_info.symbolic = false;
   link_info.static_link = false;
@@ -1150,7 +1151,7 @@ undefined_symbol (info, name, abfd, section, address, fatal)
      bfd *abfd;
      asection *section;
      bfd_vma address;
-     boolean fatal;
+     boolean fatal ATTRIBUTE_UNUSED;
 {
   static char *error_name;
   static unsigned int error_count;

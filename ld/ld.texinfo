@@ -588,6 +588,16 @@ If @var{level} is a numeric values greater than zero @code{ld} optimizes
 the output.  This might take significantly longer and therefore probably
 should only be enabled for the final binary.
 
+@kindex -q
+@kindex --emit-relocs
+@cindex retain relocations in final executable
+@item -q
+@itemx --emit-relocs
+Leave relocation sections and contents in fully linked exececutables.
+Post link analysis and optimization tools may need this information in
+order to perform correct modifications of executables.  This results
+in larger executables.
+
 @cindex partial link
 @cindex relocatable output
 @kindex -r
