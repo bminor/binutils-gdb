@@ -24,7 +24,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-strip\-unneeded\fR "\|]" 
 .RB "[\|" \-K\ \fIsymbolname\fR\ |\ \fB\-\-keep\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-N\ \fIsymbolname\fR\ |\ \fB\-\-strip\-symbol=\fIsymbolname\fR "\|]" 
-.RB "[\|" \-P\ \fIsymbolname\fR\ |\ \fB\-\-privatize\-symbol=\fIsymbolname\fR "\|]" 
+.RB "[\|" \-L\ \fIsymbolname\fR\ |\ \fB\-\-localize\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-W\ \fIsymbolname\fR\ |\ \fB\-\-weaken\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-x\fR\ |\ \fB\-\-discard\-all\fR "\|]" 
 .RB "[\|" \-X\fR\ |\ \fB\-\-discard\-locals\fR "\|]" 
@@ -143,7 +143,7 @@ may be given more than once.
 Do not copy symbol \fIsymbolname\fP from the source file. This option
 may be given more than once.
 .TP
-.B \-P \fIsymbolname\fR, \fB\-\-privatize\-symbol=\fIsymbolname
+.B \-L \fIsymbolname\fR, \fB\-\-localize\-symbol=\fIsymbolname
 Make symbol \fIsymbolname\fP local to the file, so that it is not
 visible externally.  This option may be given more than once.
 .TP

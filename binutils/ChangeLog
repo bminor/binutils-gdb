@@ -1,3 +1,8 @@
+Fri Oct 10 14:13:09 1997  Ricahrd Henderson  <rth@cygnus.com>
+
+	* objcopy.c, objcopy.1, binutils.texi: "localize" is a better name
+	than "privatize".  Update all references.
+
 Thu Oct  9 15:57:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils.texi (strip): Remove duplicate --target.  From Marty

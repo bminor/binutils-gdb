@@ -235,7 +235,7 @@ static struct option copy_options[] =
   {"output-target", required_argument, 0, 'O'},
   {"pad-to", required_argument, 0, OPTION_PAD_TO},
   {"preserve-dates", no_argument, 0, 'p'},
-  {"privatize-symbol", required_argument, 0, 'P'},
+  {"localize-symbol", required_argument, 0, 'L'},
   {"remove-leading-char", no_argument, 0, OPTION_REMOVE_LEADING_CHAR},
   {"remove-section", required_argument, 0, 'R'},
   {"set-section-flags", required_argument, 0, OPTION_SET_SECTION_FLAGS},
@@ -280,7 +280,7 @@ Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [--adjust-warnings] [--no-adjust-warnings]\n\
        [--set-section-flags=section=flags] [--add-section=sectionname=filename]\n\
        [--keep-symbol symbol] [-K symbol] [--strip-symbol symbol] [-N symbol]\n\
-       [--privatize-symbol symbol] [-P symbol] [--weaken-symbol symbol]\n\
+       [--localize-symbol symbol] [-L symbol] [--weaken-symbol symbol]\n\
        [-W symbol] [--change-leading-char] [--remove-leading-char] [--weaken]\n\
        [--verbose] [--version] [--help] in-file [out-file]\n");
   list_supported_targets (program_name, stream);
@@ -390,11 +390,11 @@ struct symlist
   struct symlist *next;
 };
 
-/* List of symbols to strip, keep, privatize, and weaken.  */
+/* List of symbols to strip, keep, localize, and weaken.  */
 
 static struct symlist *strip_specific_list = NULL;
 static struct symlist *keep_specific_list = NULL;
-static struct symlist *privatize_specific_list = NULL;
+static struct symlist *localize_specific_list = NULL;
 static struct symlist *weaken_specific_list = NULL;
 
 /* If this is true, we weaken global symbols (set BSF_WEAK).  */
@@ -539,7 +539,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	  sym->flags |= BSF_WEAK;
 	}
       if (keep && (flags & (BSF_GLOBAL | BSF_WEAK))
-	  && is_specified_symbol (name, privatize_specific_list))
+	  && is_specified_symbol (name, localize_specific_list))
 	{
 	  sym->flags &= ~(BSF_GLOBAL | BSF_WEAK);
 	  sym->flags |= BSF_LOCAL;
@@ -791,7 +791,7 @@ copy_object (ibfd, obfd)
 	  || discard_locals != locals_undef
 	  || strip_specific_list != NULL
 	  || keep_specific_list != NULL
-	  || privatize_specific_list != NULL
+	  || localize_specific_list != NULL
 	  || weaken_specific_list != NULL
 	  || sections_removed
 	  || convert_debugging
@@ -1756,7 +1756,7 @@ copy_main (argc, argv)
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:K:N:s:O:d:F:P:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:i:I:K:N:s:O:d:F:L:R:SpgxXVvW:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1810,8 +1810,8 @@ copy_main (argc, argv)
 	case 'N':
 	  add_specific_symbol (optarg, &strip_specific_list);
 	  break;
-	case 'P':
-	  add_specific_symbol (optarg, &privatize_specific_list);
+	case 'L':
+	  add_specific_symbol (optarg, &localize_specific_list);
 	  break;
 	case 'W':
 	  add_specific_symbol (optarg, &weaken_specific_list);
