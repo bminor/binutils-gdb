@@ -22,18 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#ifdef HAVE_TERM_H
-#include <term.h>
-#endif
-#include <signal.h>
-#include <fcntl.h>
-#if 0
-#include <termio.h>
-#endif
-#include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
 #include "tui/tui.h"
@@ -53,6 +41,19 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "source.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
+#include <signal.h>
+#include <fcntl.h>
+#if 0
+#include <termio.h>
+#endif
+#include <setjmp.h>
 
 #include "gdb_curses.h"
 

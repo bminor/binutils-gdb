@@ -1,5 +1,11 @@
 2004-02-25  J. Brobecker  <brobecker@gnat.com>
 
+	From Peter Schauer <schauer@pdf.de>:
+	* tui/tui.c: Move system header includes after local includes.
+	Fixes a build failure on solaris systems.
+
+2004-02-25  J. Brobecker  <brobecker@gnat.com>
+
 	* configure.in: Refine the previous change.
 	* configure: Regenerate.
 
