@@ -1,3 +1,7 @@
+Fri Mar 17 05:43:28 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp: Skip CHILL for AIX.
+
 Thu Mar 16 16:27:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/nodebug.exp: It is OK if GDB thinks top and middle have
