@@ -1,3 +1,16 @@
+2003-08-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_supply_fxsave): Add `regnum' argument.
+	Update comments.
+	* x86-64-tdep.h (x86_64_supply_fxsave): Adjust prototype.  Update
+	comments.
+	* x86-64-linux-tdep.c (fetch_core_registers): Adjust call to
+	x86_64_supply_fxsave.
+	* x86-64-linux-nat.c (supply_fpregset): Adjust call to
+	x86_64_supply_fxsave.
+	* amd64fbsd-nat.c (supply_fpregset): Adjust call to
+	x86_64_supply_fxsave.
+
 2003-08-23  Andreas Jaeger  <aj@suse.de>
 
         * x86-64-tdep.c (x86_64_supply_fxsave): Adjust call to

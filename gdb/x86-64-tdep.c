@@ -1288,24 +1288,27 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
    bits of these pointers (instead of just the 16-bits of the segment
    selector).  */
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FXSAVE.  This function masks off any of the reserved
-   bits in *FXSAVE.  */
+/* Fill register REGNUM in GDB's register cache with the appropriate
+   floating-point or SSE register value from *FXSAVE.  If REGNUM is
+   -1, do this for all registers.  This function masks off any of the
+   reserved bits in *FXSAVE.  */
 
 void
-x86_64_supply_fxsave (char *fxsave)
+x86_64_supply_fxsave (const char *fxsave, int regnum)
 {
-  i387_supply_fxsave (fxsave, -1);
+  i387_supply_fxsave (fxsave, regnum);
 
   if (fxsave)
     {
-      supply_register (I387_FISEG_REGNUM, fxsave + 12);
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM)
+	supply_register (I387_FISEG_REGNUM, fxsave + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
       supply_register (I387_FOSEG_REGNUM, fxsave + 20);
     }
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
-   *FXSAVE with the value in GDB's register array.  If REGNUM is -1, do
+   *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 

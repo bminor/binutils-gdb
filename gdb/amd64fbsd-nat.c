@@ -124,7 +124,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((char *) fpregsetp);
+  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -201,7 +201,7 @@ store_inferior_registers (int regno)
 	perror_with_name ("Couldn't get floating point status");
 
       fill_fpregset (&fpregs, regno);
-  
+
       if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");

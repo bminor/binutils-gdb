@@ -123,7 +123,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != 512)
 	warning ("Wrong size XMM register set in core file.");
       else
-	x86_64_supply_fxsave (core_reg_sect);
+	x86_64_supply_fxsave (core_reg_sect, -1);
       break;
 
     default:

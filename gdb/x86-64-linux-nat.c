@@ -123,7 +123,7 @@ store_regs (int tid, int regno)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((char *) fpregsetp);
+  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
