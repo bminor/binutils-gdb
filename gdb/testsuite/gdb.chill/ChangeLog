@@ -1,3 +1,12 @@
+Wed Nov 29 19:28:13 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in:  Add .exp.check rule.
+	* callch.ch:  Add missing "%." to format strings.
+	* callch.exp:  Fix argument to gdb_load.
+	* chexp.exp:  Add specific error messages to test_print_reject calls.
+	* misc.exp:  Add a test for PR 8496.
+	* pr-6632.exp, pr-8136.exp:  Link executables from two .o files.
+
 Sat Nov 25 20:49:27 1995  Fred Fish  <fnf@phydeaux.cygnus.com>
 
 	* pr-5016.exp: xfail "whatis i" for alpha-osf-dec-osf2*, same as linux.

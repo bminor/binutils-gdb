@@ -162,18 +162,18 @@ proc test_integer_literals_rejected {} {
 
     # Test various binary values.
 
-    test_print_reject "p B'2" 
-    test_print_reject "p B'12" 
+    test_print_reject "p B'2" "Too-large digit in bitstring or integer."
+    test_print_reject "p B'12"  "Too-large digit in bitstring or integer."
 
     # Test various octal values.
 
-    test_print_reject "p O'9" 
-    test_print_reject "p O'79" 
+    test_print_reject "p O'9"  "Too-large digit in bitstring or integer."
+    test_print_reject "p O'79"  "Too-large digit in bitstring or integer."
 
     # Test various hexadecimal values.
 
-    test_print_reject "p H'G" 
-    test_print_reject "p H'AG" 
+    test_print_reject "p H'G" "Invalid character in bitstring or integer."
+    test_print_reject "p H'AG" "Invalid character in bitstring or integer."
 }
 
 proc test_boolean_literals_accepted {} {

@@ -22,14 +22,14 @@ king : proc (p otto loc, x otto in);
   p := [[h'ff,h'ff],[h'ff,h'ff]];
   do for i:= lower(bool) to upper(bool);
     do for j:= lower(bool) to upper(bool);
-      writetext(stdout, "x(%C, %C) = %C.%/", i, j, x(i, j));
-      writetext(stdout, "p(%C, %C) = %C.%/", i, j, p(i, j));
+      writetext(stdout, "x(%C, %C) = %C%..%/", i, j, x(i, j));
+      writetext(stdout, "p(%C, %C) = %C%..%/", i, j, p(i, j));
     od;
   od;
 end king;
 
 ralph : proc (x str1 in);
-  writetext(stdout, "x.f1 = %C, x.f2 = %C.%/", x.f1, x.f2);
+  writetext(stdout, "x.f1 = %C, x.f2 = %C%..%/", x.f1, x.f2);
 end ralph;
 
 whitney : proc (x str2 in);
@@ -37,7 +37,7 @@ whitney : proc (x str2 in);
 
   do for i:= lower(bool) to upper(bool);
     do for j:= lower(bool) to upper(bool);
-      writetext(stdout, "x.f1(%C, %C) = %C.%/", i, j, x.f1(i, j));
+      writetext(stdout, "x.f1(%C, %C) = %C%..%/", i, j, x.f1(i, j));
      od;
   od;
 

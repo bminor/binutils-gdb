@@ -28,7 +28,8 @@ if [skip_chill_tests] then { continue }
 
 set testfile2 "pr-6632-grt"
 set srcfile2 ${srcdir}/$subdir/${testfile2}.ch
-if  { [compile "${srcfile2} -g -c"] != "" } {
+set objfile2 ${objdir}/$subdir/${testfile2}.o
+if  { [compile "${srcfile2} -g -c -o ${objfile2}"] != "" } {
     perror "Couldn't compile ${srcfile2}"
     return -1
 }
@@ -36,7 +37,7 @@ if  { [compile "${srcfile2} -g -c"] != "" } {
 set testfile "pr-6632"
 set srcfile ${srcdir}/$subdir/${testfile}.ch
 set binfile ${objdir}/${subdir}/${testfile}.exe
-if  { [compile "${srcfile} -g -o ${binfile} ${CHILL_RT0} ${CHILL_LIB}"] != "" } {
+if  { [compile "${srcfile} ${objfile2} -g -o ${binfile} ${CHILL_RT0} ${CHILL_LIB}"] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }

@@ -1,4 +1,5 @@
 srcdir = @srcdir@
+VPATH = @srcdir@
 
 PROGS = callch.exe chillvars.exe misc.exe result.exe string.exe tuples.exe \
 	pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe \
@@ -8,6 +9,16 @@ all:
 	@echo "Nothing to be done for all..."
 
 #### host, target, and site specific Makefile frags come in here.
+
+.SUFFIXES: .ch .o .exe .exp .check
+
+# Do 'make chillvars.check' to run just the chillvars.{ch,exp} test.
+
+.exp.check:
+	rootme=`pwd`/; export rootme; \
+	cd .. ; \
+	$(MAKE) just-check RUNTESTFLAGS="${RUNTESTFLAGS} $*.exp" \
+	  EXPECT=${EXPECT}
 
 clean mostlyclean:
 	-rm -f *.o $OBJS} ${PROGS} *~ core 

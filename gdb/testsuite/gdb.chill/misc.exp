@@ -77,6 +77,9 @@ if ![set_lang_chill] then {
     gdb_test "print OTto" " = 42"
     gdb_test "print NULL" " = NULL" "print emptiness literal"
 
+    # This tests PR 8496.
+    gdb_test {printf "%d %d.\n",  3+4,2} "7 2." "printf with 2 arguments"
+
     # Linux thinks this is at line 6, but is otherwise ok.
     setup_xfail "i*86-*-linux*"
     gdb_test "info line" \
