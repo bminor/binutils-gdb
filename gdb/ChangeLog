@@ -1,3 +1,9 @@
+2002-01-23  GDB Administrator  <gdbadmin@sources.redhat.com>
+
+	* version.in: Bump version to 5.1.1
+	* README: Update to 5.1.1.
+	* NEWS: Mention problems fixed in 5.1.1
+
 2002-01-20  Michael Chastain  <mec@shout.net>
 
 	* top.c (print_gdb_version): Bump copyright year to 2002.
