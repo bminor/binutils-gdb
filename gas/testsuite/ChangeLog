@@ -1,3 +1,8 @@
+2005-02-13  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/pound.[ls]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-02-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/ia64.exp: Add "operand-or".

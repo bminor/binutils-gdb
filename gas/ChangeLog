@@ -1,3 +1,18 @@
+2005-02-13  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (dot_rot): Add comment that name strings should
+	be freed when wiping out previous state. Canonicalize names before
+	use. Free name string when detecting redefinition.
+	(dot_pred_rel): Call generic expression parser to process arguments.
+	Handle O_register case for individual predicates and O_subtract for
+	ranges.
+	(ia64_parse_name): Canonicalize name before looking it up in dynamic
+	register hash.
+	(ia64_canonicalize_symbol_name): Strip off all trailing # characters.
+	Warn if multiple found, issue error if resulting symbol name has zero
+	length.
+	(dot_alias): Canonicalize name before use.
+
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (unwind_diagnostic): Return -1 for warning

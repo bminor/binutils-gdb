@@ -4560,6 +4560,7 @@ dot_rot (type)
   for (dr = md.dynreg[type]; dr && dr->num_regs; dr = dr->next)
     {
       hash_delete (md.dynreg_hash, dr->name);
+      /* FIXME: Free dr->name.  */
       dr->num_regs = 0;
     }
 
@@ -4568,8 +4569,8 @@ dot_rot (type)
     {
       start = input_line_pointer;
       ch = get_symbol_end ();
+      len = strlen (ia64_canonicalize_symbol_name (start));
       *input_line_pointer = ch;
-      len = (input_line_pointer - start);
 
       SKIP_WHITESPACE ();
       if (*input_line_pointer != '[')
@@ -4618,15 +4619,15 @@ dot_rot (type)
 	  break;
 	}
 
-      name = obstack_alloc (&notes, len + 1);
-      memcpy (name, start, len);
-      name[len] = '\0';
-
       if (!*drpp)
 	{
 	  *drpp = obstack_alloc (&notes, sizeof (*dr));
 	  memset (*drpp, 0, sizeof (*dr));
 	}
+
+      name = obstack_alloc (&notes, len + 1);
+      memcpy (name, start, len);
+      name[len] = '\0';
 
       dr = *drpp;
       dr->name = name;
@@ -4638,6 +4639,7 @@ dot_rot (type)
       if (hash_insert (md.dynreg_hash, name, dr))
 	{
 	  as_bad ("Attempt to redefine register set `%s'", name);
+	  obstack_free (&notes, name);
 	  goto err;
 	}
 
@@ -5060,59 +5062,57 @@ dot_pred_rel (type)
   SKIP_WHITESPACE ();
   while (1)
     {
-      valueT bit = 1;
+      valueT bits = 1;
       int regno;
+      expressionS pr, *pr1, *pr2;
 
-      if (TOUPPER (*input_line_pointer) != 'P'
-	  || (regno = atoi (++input_line_pointer)) < 0
-	  || regno > 63)
+      expression (&pr);
+      if (pr.X_op == O_register
+	  && pr.X_add_number >= REG_P
+	  && pr.X_add_number <= REG_P + 63)
 	{
-	  as_bad (_("Predicate register expected"));
-	  ignore_rest_of_line ();
-	  return;
+	  regno = pr.X_add_number - REG_P;
+	  bits <<= regno;
+	  count++;
+	  if (p1 == -1)
+	    p1 = regno;
+	  else if (p2 == -1)
+	    p2 = regno;
 	}
-      while (ISDIGIT (*input_line_pointer))
-	++input_line_pointer;
-      if (p1 == -1)
-	p1 = regno;
-      else if (p2 == -1)
-	p2 = regno;
-      bit <<= regno;
-      if (mask & bit)
-	as_warn (_("Duplicate predicate register ignored"));
-      mask |= bit;
-      count++;
-      /* See if it's a range.  */
-      if (*input_line_pointer == '-')
+      else if (type != 'i'
+	  && pr.X_op == O_subtract
+	  && (pr1 = symbol_get_value_expression (pr.X_add_symbol))
+	  && pr1->X_op == O_register
+	  && pr1->X_add_number >= REG_P
+	  && pr1->X_add_number <= REG_P + 63
+	  && (pr2 = symbol_get_value_expression (pr.X_op_symbol))
+	  && pr2->X_op == O_register
+	  && pr2->X_add_number >= REG_P
+	  && pr2->X_add_number <= REG_P + 63)
 	{
-	  valueT stop = 1;
-	  ++input_line_pointer;
+	  /* It's a range.  */
+	  int stop;
 
-	  if (TOUPPER (*input_line_pointer) != 'P'
-	      || (regno = atoi (++input_line_pointer)) < 0
-	      || regno > 63)
-	    {
-	      as_bad (_("Predicate register expected"));
-	      ignore_rest_of_line ();
-	      return;
-	    }
-	  while (ISDIGIT (*input_line_pointer))
-	    ++input_line_pointer;
-	  stop <<= regno;
-	  if (bit >= stop)
+	  regno = pr1->X_add_number - REG_P;
+	  stop = pr2->X_add_number - REG_P;
+	  if (regno >= stop)
 	    {
 	      as_bad (_("Bad register range"));
 	      ignore_rest_of_line ();
 	      return;
 	    }
-	  while (bit < stop)
-	    {
-	      bit <<= 1;
-	      mask |= bit;
-	      count++;
-	    }
-	  SKIP_WHITESPACE ();
+	  bits = ((bits << stop) << 1) - (bits << regno);
+	  count += stop - regno + 1;
 	}
+      else
+	{
+	  as_bad (_("Predicate register expected"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      if (mask & bits)
+	as_warn (_("Duplicate predicate register ignored"));
+      mask |= bits;
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
@@ -7728,6 +7728,9 @@ ia64_parse_name (name, e, nextcharP)
 	}
     }
 
+  end = alloca (strlen (name) + 1);
+  strcpy (end, name);
+  name = ia64_canonicalize_symbol_name (end);
   if ((dr = hash_find (md.dynreg_hash, name)))
     {
       /* We've got ourselves the name of a rotating register set.
@@ -7747,9 +7750,20 @@ char *
 ia64_canonicalize_symbol_name (name)
      char *name;
 {
-  size_t len = strlen (name);
-  if (len > 1 && name[len - 1] == '#')
-    name[len - 1] = '\0';
+  size_t len = strlen (name), full = len;
+
+  while (len > 0 && name[len - 1] == '#')
+    --len;
+  if (len <= 0)
+    {
+      if (full > 0)
+	as_bad ("Standalone `#' is illegal");
+      else
+	as_bad ("Zero-length symbol is illegal");
+    }
+  else if (len < full - 1)
+    as_warn ("Redundant `#' suffix operators");
+  name[len] = '\0';
   return name;
 }
 
@@ -11318,6 +11332,7 @@ dot_alias (int section)
 
   input_line_pointer++;
   *end_name = 0;
+  ia64_canonicalize_symbol_name (name);
 
   /* We call demand_copy_C_string to check if alias string is valid.
      There should be a closing `"' and no `\0' in the string.  */
