@@ -1,3 +1,8 @@
+2001-01-04  Nicholas Duffek  <nsd@redhat.com>
+
+	* config/i386/tm-i386.h (REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Delete trailing semicolon.
+
 2001-01-03  J.T. Conklin  <jtc@redback.com>
 
 	* alphabsd-nat.c, i386-linux-nat.c, i386bsd-nat.c: Fix typo in

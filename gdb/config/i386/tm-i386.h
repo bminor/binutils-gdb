@@ -259,7 +259,7 @@ extern int i386_register_virtual_size[];
    virtual format with type TYPE in buffer TO.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) \
-  i386_register_convert_to_virtual ((regnum), (type), (from), (to));
+  i386_register_convert_to_virtual ((regnum), (type), (from), (to))
 extern void i386_register_convert_to_virtual (int regnum, struct type *type,
 					      char *from, char *to);
 
@@ -267,7 +267,7 @@ extern void i386_register_convert_to_virtual (int regnum, struct type *type,
    raw format for register REGNUM in buffer TO.  */
 
 #define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) \
-  i386_register_convert_to_raw ((type), (regnum), (from), (to));
+  i386_register_convert_to_raw ((type), (regnum), (from), (to))
 extern void i386_register_convert_to_raw (struct type *type, int regnum,
 					  char *from, char *to);
 
