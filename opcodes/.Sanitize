@@ -35,7 +35,7 @@ ChangeLog
 Makefile.in
 aclocal.m4
 alpha-dis.c
-alpha-opc.h
+alpha-opc.c
 arm-dis.c
 arm-opc.h
 a29k-dis.c
