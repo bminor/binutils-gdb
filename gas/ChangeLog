@@ -1,3 +1,8 @@
+2001-02-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* symbols.c (decode_local_label_name): Initialize message_format
+	only when an error is reported (perf pb due to I18N).
+
 2001-02-23  H.J. Lu  <hjl@gnu.org>
 
 	* dwarf2dbg.c (dwarf2_directive_file): Call s_app_file (0) if
