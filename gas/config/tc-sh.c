@@ -123,7 +123,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 #define C(a,b) ENCODE_RELAX(a,b)
 
-#define JREG 14			/* Register used as a temp when relaxing */
 #define ENCODE_RELAX(what,length) (((what) << 4) + (length))
 #define GET_WHAT(x) ((x>>4))
 
@@ -2417,47 +2416,6 @@ md_convert_frag (headers, seg, fragP)
 		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
 
-#if 0
-      /* This code works, but generates poor code and the compiler
-	 should never produce a sequence that requires it to be used.  */
-
-      /* A jump wont fit in 12 bits, make code which looks like
-	 bra foo
-	 mov.w @(0, PC), r14
-	 .long disp
-	 foo: bra @r14
-	 */
-      int t = buffer[0] & 0x10;
-
-      buffer[highbyte     ] = 0xa0;	/* branch over move and disp */
-      buffer[lowbyte      ] = 3;
-      buffer[highbyte +  2] = 0xd0 | JREG;	/* Build mov insn */
-      buffer[lowbyte  +  2] = 0x00;
-
-      buffer[highbyte +  4] = 0;	/* space for 32 bit jump disp */
-      buffer[lowbyte  +  4] = 0;
-      buffer[highbyte +  6] = 0;
-      buffer[lowbyte  +  6] = 0;
-
-      buffer[highbyte +  8] = 0x40 | JREG;	/* Build jmp @JREG */
-      buffer[lowbyte  +  8] = t ? 0xb : 0x2b;
-
-      buffer[highbyte + 10] = 0x20; /* build nop */
-      buffer[lowbyte  + 10] = 0x0b;
-
-      /* Make reloc for the long disp.  */
-      fix_new (fragP,
-	       fragP->fr_fix + 4,
-	       4,
-	       fragP->fr_symbol,
-	       fragP->fr_offset,
-	       0,
-	       BFD_RELOC_32);
-      fragP->fr_fix += UNCOND32_LENGTH;
-      fragP->fr_var = 0;
-      donerelax = 1;
-#endif
-
       break;
 
     case C (COND_JUMP, COND12):
@@ -2540,49 +2498,6 @@ md_convert_frag (headers, seg, fragP)
 	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 8-bit field "),
 		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
-
-#if 0
-      /* This code works, but generates poor code, and the compiler
-	 should never produce a sequence that requires it to be used.  */
-
-      /* A bcond won't fit and it won't go into a 12 bit
-	 displacement either, the code sequence looks like:
-	 b!cond foop
-	 mov.w @(n, PC), r14
-	 jmp  @r14
-	 nop
-	 .long where
-	 foop:
-	 */
-
-      buffer[0] ^= 0x2;		/* Toggle T/F bit */
-#define JREG 14
-      buffer[1] = 5;		/* branch over mov, jump, nop and ptr */
-      buffer[2] = 0xd0 | JREG;	/* Build mov insn */
-      buffer[3] = 0x2;
-      buffer[4] = 0x40 | JREG;	/* Build jmp @JREG */
-      buffer[5] = 0x0b;
-      buffer[6] = 0x20;		/* build nop */
-      buffer[7] = 0x0b;
-      buffer[8] = 0;		/* space for 32 bit jump disp */
-      buffer[9] = 0;
-      buffer[10] = 0;
-      buffer[11] = 0;
-      buffer[12] = 0;
-      buffer[13] = 0;
-      /* Make reloc for the long disp */
-      fix_new (fragP,
-	       fragP->fr_fix + 8,
-	       4,
-	       fragP->fr_symbol,
-	       fragP->fr_offset,
-	       0,
-	       BFD_RELOC_32);
-      fragP->fr_fix += COND32_LENGTH;
-      fragP->fr_var = 0;
-      donerelax = 1;
-#endif
-
       break;
 
     default:

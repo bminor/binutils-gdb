@@ -1,3 +1,8 @@
+2000-10-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-sh.c (JREG): Remove.
+	(md_convert_frag): Remove #if 0:d code using JREG.
+
 2000-10-15  Diego Novillo  <dnovillo@cygnus.com>
 
 	* config/tc-i386.c (i386_operand_modifier): Only match
