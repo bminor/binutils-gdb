@@ -1,3 +1,7 @@
+Mon Jul 21 20:10:16 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+
+	* configure.host: Set gdb_host_cpu=arm when host_cpu=xscale
+
 Fri Aug  8 00:28:38 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 
 	* MAINTAINERS (write after approval): Added self
