@@ -1,5 +1,9 @@
 Thu Feb 12 14:06:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.h (flag_warn_suppress_instructionswap): Move from here...
+	* config/tc-d10v.c (flag_warn_suppress_instructionswap): ...to
+	here, and make static.
+
 	* ehopt.c (eh_frame_code_alignment): Only use seg_info if
 	BFD_ASSEMBLER or MANY_SEGMENTS.
 
