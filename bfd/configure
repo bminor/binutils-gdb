@@ -1366,6 +1366,7 @@ do
     nlm32_powerpc_vec)		tb="$tb nlm32-ppc.o nlm32.o nlm.o" ;;
     pc532netbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
+    pmac_xcoff_vec)		tb="$tb coff-pmac.o cofflink.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     bfd_powerpc_pe_vec)         tb="$tb pe-ppc.o cofflink.o" ;;  
     bfd_powerpcle_pe_vec)       tb="$tb pe-ppc.o cofflink.o" ;;  
