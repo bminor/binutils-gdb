@@ -1,3 +1,9 @@
+Tue Apr 23 12:56:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (compare_symbols): Sort symbols whose names start with
+ 	`.' after other symbols.  If no other decision can be made, sort
+	symbols by name.
+
 Thu Apr 18 16:02:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dep-in.sed: Substitute $(BFDDIR) for @BFDDIR@.

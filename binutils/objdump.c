@@ -432,8 +432,8 @@ compare_symbols (ap, bp)
   if (! af && bf)
     return -1;
 
-  /* Finally, try to sort global symbols before local symbols before
-     debugging symbols.  */
+  /* Try to sort global symbols before local symbols before debugging
+     symbols.  */
 
   aflags = a->flags;
   bflags = b->flags;
@@ -452,8 +452,24 @@ compare_symbols (ap, bp)
       else
 	return -1;
     }
+  if ((aflags & BSF_GLOBAL) != (bflags & BSF_GLOBAL))
+    {
+      if ((aflags & BSF_GLOBAL) != 0)
+	return -1;
+      else
+	return 1;
+    }
 
-  return 0;
+  /* Symbols that start with '.' might be section names, so sort them
+     after symbols that don't start with '.'.  */
+  if (an[0] == '.' && bn[0] != '.')
+    return 1;
+  if (an[0] != '.' && bn[0] == '.')
+    return -1;
+
+  /* Finally, if we can't distinguish them in any other way, try to
+     get consistent results by sorting the symbols by name.  */
+  return strcmp (an, bn);
 }
 
 /* Sort relocs into address order.  */
