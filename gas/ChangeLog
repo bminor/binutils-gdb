@@ -1,3 +1,8 @@
+2001-06-24  Ben Elliston  <bje@redhat.com>
+
+	* config/tc-m88k.c (md_pseudo_table): Properly terminate the table
+	to allay a possible compiler warning.
+
 2001-06-22  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/internals.texi (CPU backend): Document md_atof.

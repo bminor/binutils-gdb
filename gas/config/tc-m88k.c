@@ -179,7 +179,7 @@ const pseudo_typeS md_pseudo_table[] =
   /* Force set to be treated as an instruction.  */
   {"set", NULL, 0},
   {".set", s_set, 0},
-  {0}
+  {NULL, NULL, 0}
 };
 
 void
