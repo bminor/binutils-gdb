@@ -1,3 +1,8 @@
+2004-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sigaltstack.c: New file.
+	* gdb.base/sigaltstack.exp: New file.
+
 2004-04-04  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.base/foll-fork.exp: Update the expected output for
