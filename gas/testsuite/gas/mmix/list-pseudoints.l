@@ -8,8 +8,7 @@ GAS for MMIX .*/list-pseudoints.s 			page 1
    4      DE004500 
    4      7821329E 
    5 0010 07D9     	 wyde 2009
-   6 0012 99000000 	 byte 0x99
-   6      0000
+   6 0012 99       	 byte 0x99
 GAS for MMIX .*/list-pseudoints.s 			page 2
 
 
