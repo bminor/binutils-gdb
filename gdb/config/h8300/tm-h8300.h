@@ -47,11 +47,9 @@ extern void init_extra_frame_info ();
 #define IEEE_FLOAT
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
-#undef TARGET_INT_BIT
+
 #define TARGET_INT_BIT  16
-#undef TARGET_LONG_BIT
 #define TARGET_LONG_BIT  32
-#undef TARGET_PTR_BIT
 #define TARGET_PTR_BIT  (h8300hmode ? 32:16)
 
 /* Offset from address of function to start of its code.

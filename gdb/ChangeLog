@@ -1,5 +1,14 @@
 Sat Dec 25 09:50:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* defs.h: Move definitions of TARGET_*_BIT after include of tm.h.
+	The old way (using #undef in tm.h) was ugly and asking for
+	trouble, because it makes it possible for some file to use the
+	wrong definition.  Move definition of HOST_CHAR_BIT after definition
+	of TARGET_CHAR_BIT.
+	* config/alpha/tm-alpha.h, config/h8300/tm-h8300.h,
+	config/h8500/tm-h8500.h, config/z8k/tm-z8k.h: Don't undef TARGET_*_BIT
+	before defining them.
+
 	* mdebugread.c: Change the builtin_type_* in this file to
 	mdebug_type_* and make them static.  Use TYPE_CODE_ERROR for
 	complex and float decimal.

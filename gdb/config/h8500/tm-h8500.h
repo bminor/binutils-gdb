@@ -27,13 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
-#undef TARGET_INT_BIT
 #define TARGET_INT_BIT 16
-
-#undef TARGET_LONG_BIT
 #define TARGET_LONG_BIT 32
-
-#undef TARGET_PTR_BIT
 #define TARGET_PTR_BIT (minimum_mode ? 16 : 32)
 
 

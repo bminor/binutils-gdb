@@ -19,11 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define IEEE_FLOAT 1
 
-#undef TARGET_INT_BIT
-#undef TARGET_LONG_BIT
-#undef TARGET_SHORT_BIT
-#undef TARGET_PTR_BIT
-
 #define TARGET_SHORT_BIT 16
 #define TARGET_INT_BIT 16
 #define TARGET_LONG_BIT 32
