@@ -736,7 +736,7 @@ static const struct dis386 dis386[] = {
   { "outS",		indirDX, eAX, XX },
   /* f0 */
   { "(bad)",		XX, XX, XX },	/* lock prefix */
-  { "(bad)",		XX, XX, XX },
+  { "icebp",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },	/* repne */
   { "(bad)",		XX, XX, XX },	/* repz */
   { "hlt",		XX, XX, XX },
