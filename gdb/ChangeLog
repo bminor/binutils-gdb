@@ -1,3 +1,10 @@
+2002-08-14  Keith Seitz  <keiths@redhat.com>
+
+	* configure.in: Move SUBDIRS to near top of the file so that
+	--enable options may add things to it.
+	If gdbtk is enabled, add gdbtk directory to SUBDIRS and configdirs.
+	* configure: Regenerate.
+
 2002-08-13  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_o32o64_push_arguments):  New function, 
