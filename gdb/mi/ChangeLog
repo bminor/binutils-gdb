@@ -1,3 +1,13 @@
+2001-05-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_open, mi_close): Replace list_open and list_close.
+	(mi_table_begin): Update.
+	(mi_table_header): Update.
+	(mi_begin): Update.
+	(mi_table_body): Update.
+	(mi_table_end): Update.
+	(mi_end): Update.
+
 Thu May 10 16:28:13 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-main.c (mi_execute_async_cli_command): Always initialize

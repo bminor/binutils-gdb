@@ -91,8 +91,8 @@ struct ui_out_impl mi_ui_out_impl =
 
 extern void _initialize_mi_out (void);
 static void field_separator (struct ui_out *uiout);
-static void list_open (struct ui_out *uiout);
-static void list_close (struct ui_out *uiout);
+static void mi_open (struct ui_out *uiout, enum ui_out_type type);
+static void mi_close (struct ui_out *uiout, enum ui_out_type type);
 
 static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 			   char *format,...);
@@ -106,7 +106,7 @@ mi_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
   field_separator (uiout);
   if (tblid)
     fprintf_unfiltered (data->buffer, "%s=", tblid);
-  list_open (uiout);
+  mi_open (uiout, ui_out_type_tupple);
   data->first_header = 0;
   data->supress_field_separator = 1;
 }
@@ -119,7 +119,7 @@ mi_table_body (struct ui_out *uiout)
   struct ui_out_data *data = ui_out_data (uiout);
   /* close the table header line if there were any headers */
   if (data->first_header)
-    list_close (uiout);
+    mi_close (uiout, ui_out_type_tupple);
 }
 
 /* Mark end of a table */
@@ -128,7 +128,7 @@ void
 mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  list_close (uiout);
+  mi_close (uiout, ui_out_type_tupple);
   /* If table was empty this flag did not get reset yet */
   data->supress_field_separator = 0;
 }
@@ -142,7 +142,7 @@ mi_table_header (struct ui_out *uiout, int width, int alignment, char *colhdr)
   if (!data->first_header++)
     {
       fputs_unfiltered ("hdr=", data->buffer);
-      list_open (uiout);
+      mi_open (uiout, ui_out_type_tupple);
     }
   mi_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
@@ -153,14 +153,14 @@ void
 mi_begin (struct ui_out *uiout,
 	  enum ui_out_type type,
 	  int level,
-	  const char *lstid)
+	  const char *id)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
   data->supress_field_separator = 1;
-  if (lstid)
-    fprintf_unfiltered (data->buffer, "%s=", lstid);
-  list_open (uiout);
+  if (id)
+    fprintf_unfiltered (data->buffer, "%s=", id);
+  mi_open (uiout, type);
 }
 
 /* Mark end of a list */
@@ -171,7 +171,7 @@ mi_end (struct ui_out *uiout,
 	int level)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  list_close (uiout);
+  mi_close (uiout, type);
   /* If list was empty this flag did not get reset yet */
   data->supress_field_separator = 0;
 }
@@ -303,14 +303,16 @@ field_separator (struct ui_out *uiout)
 }
 
 static void
-list_open (struct ui_out *uiout)
+mi_open (struct ui_out *uiout,
+	 enum ui_out_type type)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   fputc_unfiltered ('{', data->buffer);
 }
 
 static void
-list_close (struct ui_out *uiout)
+mi_close (struct ui_out *uiout,
+	  enum ui_out_type type)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   fputc_unfiltered ('}', data->buffer);
