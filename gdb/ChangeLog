@@ -1,3 +1,9 @@
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hppam3-nat.c: Delete obsolete file.
+	* hppab-nat.c: Delete obsolete file.
+	* Makefile.in: Remove references.
+
 2003-12-17  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* symtab.c (decode_line_spec): Change call to decode_line_1.
