@@ -990,16 +990,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     trap_expected = 1;
   else
     {
-      int temp = insert_breakpoints ();
-      if (temp)
-	{
-	  print_sys_errmsg ("insert_breakpoints", temp);
-	  error ("Cannot insert breakpoints.\n\
-The same program may be running in another process,\n\
-or you may have requested too many hardware\n\
-breakpoints and/or watchpoints.\n");
-	}
-
+      insert_breakpoints ();
+      /* If we get here there was no call to error() in 
+	 insert breakpoints -- so they were inserted.  */
       breakpoints_inserted = 1;
     }
 
@@ -3378,16 +3371,6 @@ normal_stop (void)
      DECR_PC_AFTER_BREAK */
   if (target_has_execution && get_current_frame ())
     (get_current_frame ())->pc = read_pc ();
-
-  if (breakpoints_failed)
-    {
-      target_terminal_ours_for_output ();
-      print_sys_errmsg ("While inserting breakpoints", breakpoints_failed);
-      printf_filtered ("Stopped; cannot insert breakpoints.\n\
-The same program may be running in another process,\n\
-or you may have requested too many hardware breakpoints\n\
-and/or watchpoints.\n");
-    }
 
   if (target_has_execution && breakpoints_inserted)
     {
