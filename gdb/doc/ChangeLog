@@ -1,3 +1,7 @@
+2001-11-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (COERCE_FLOAT_TO_DOUBLE): Clarify.
+
 2001-11-06  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.texinfo (gdbarch_in_function_epilogue_p): Add documentation.

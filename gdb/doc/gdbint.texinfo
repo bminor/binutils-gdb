@@ -2815,30 +2815,46 @@ Currently only implemented correctly for native Sparc configurations?
 @item COERCE_FLOAT_TO_DOUBLE (@var{formal}, @var{actual})
 @findex COERCE_FLOAT_TO_DOUBLE
 @cindex promotion to @code{double}
-If we are calling a function by hand, and the function was declared
-(according to the debug info) without a prototype, should we
-automatically promote @code{float}s to @code{double}s?  This macro
-must evaluate to non-zero if we should, or zero if we should leave the
-value alone.
+@cindex @code{float} arguments
+@cindex prototyped functions, passing arguments to
+@cindex passing arguments to prototyped functions
+Return non-zero if GDB should promote @code{float} values to
+@code{double} when calling a non-prototyped function.  The argument
+@var{actual} is the type of the value we want to pass to the function.
+The argument @var{formal} is the type of this argument, as it appears in
+the function's definition.  Note that @var{formal} may be zero if we
+have no debugging information for the function, or if we're passing more
+arguments than are officially declared (for example, varargs).  This
+macro is never invoked if the function definitely has a prototype.
 
-The argument @var{actual} is the type of the value we want to pass to
-the function.  The argument @var{formal} is the type of this argument,
-as it appears in the function's definition.  Note that @var{formal} may
-be zero if we have no debugging information for the function, or if
-we're passing more arguments than are officially declared (for example,
-varargs).  This macro is never invoked if the function definitely has a
-prototype.
+How you should pass arguments to a function depends on whether it was
+defined in K&R style or prototype style.  If you define a function using
+the K&R syntax that takes a @code{float} argument, then callers must
+pass that argument as a @code{double}.  If you define the function using
+the prototype syntax, then you must pass the argument as a @code{float},
+with no promotion.
 
-@findex set_gdbarch_coerce_float_to_double
+Unfortunately, on certain older platforms, the debug info doesn't
+indicate reliably how each function was defined.  A function type's
+@code{TYPE_FLAG_PROTOTYPED} flag may be unset, even if the function was
+defined in prototype style.  When calling a function whose
+@code{TYPE_FLAG_PROTOTYPED} flag is unset, GDB consults the
+@code{COERCE_FLOAT_TO_DOUBLE} macro to decide what to do.
+
 @findex standard_coerce_float_to_double
-The default behavior is to promote only when we have no type information
-for the formal parameter.  This is different from the obvious behavior,
-which would be to promote whenever we have no prototype, just as the
-compiler does.  It's annoying, but some older targets rely on this.  If
-you want @value{GDBN} to follow the typical compiler behavior---to always
-promote when there is no prototype in scope---your gdbarch @code{init}
-function can call @code{set_gdbarch_coerce_float_to_double} and select
-the @code{standard_coerce_float_to_double} function.
+For modern targets, it is proper to assume that, if the prototype flag
+is unset, that can be trusted: @code{float} arguments should be promoted
+to @code{double}.  You should use the function
+@code{standard_coerce_float_to_double} to get this behavior.
+
+@findex default_coerce_float_to_double
+For some older targets, if the prototype flag is unset, that doesn't
+tell us anything.  So we guess that, if we don't have a type for the
+formal parameter (@i{i.e.}, the first argument to
+@code{COERCE_FLOAT_TO_DOUBLE} is null), then we should promote it;
+otherwise, we should leave it alone.  The function
+@code{default_coerce_float_to_double} provides this behavior; it is the
+default value, for compatibility with older configurations.
 
 @item CPLUS_MARKER
 @findex CPLUS_MARKERz
