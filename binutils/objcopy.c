@@ -391,6 +391,7 @@ copy_usage (FILE *stream, int exit_status)
   -g --strip-debug                 Remove all debugging symbols & sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
   -N --strip-symbol <name>         Do not copy symbol <name>\n\
+     --only-keep-debug             Strip everything but the debug information\n\
   -K --keep-symbol <name>          Only copy symbol <name>\n\
   -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
   -G --keep-global-symbol <name>   Localize all symbols except <name>\n\
@@ -464,6 +465,7 @@ strip_usage (FILE *stream, int exit_status)
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
+     --only-keep-debug             Strip everything but the debug information\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Only copy symbol <name>\n\
   -w --wildcard                    Permit wildcard in symbol comparasion\n\

@@ -1,3 +1,8 @@
+2003-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (strip_usage): Add --only-keep-debug.
+	(copy_usage): Likewise.
+
 2003-12-04  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Do not copy the object if the
