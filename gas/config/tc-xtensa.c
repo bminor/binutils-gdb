@@ -1033,8 +1033,9 @@ use_transform (void)
 static bfd_boolean
 do_align_targets (void)
 {
-  /* After md_end, you should be checking frag by frag, rather
-     than state directives.  */
+  /* Do not use this function after md_end; just look at align_targets
+     instead.  There is no target-align directive, so alignment is either
+     enabled for all frags or not done at all.  */
   assert (!past_xtensa_end);
   return align_targets && use_transform ();
 }
@@ -4525,7 +4526,7 @@ update_next_frag_state (fragS *fragP)
   fragS *next_fragP = fragP->fr_next;
   fragS *new_target = NULL;
 
-  if (align_targets) 
+  if (align_targets)
     {
       /* We are guaranteed there will be one of these...   */
       while (!(next_fragP->fr_type == rs_machine_dependent
@@ -5077,6 +5078,8 @@ xtensa_init_fix_data (fixS *x)
 void
 xtensa_frob_label (symbolS *sym)
 {
+  float freq = get_subseg_target_freq (now_seg, now_subseg);
+
   /* Since the label was already attached to a frag associated with the
      previous basic block, it now needs to be reset to the current frag.  */
   symbol_set_frag (sym, frag_now);
@@ -5087,10 +5090,19 @@ xtensa_frob_label (symbolS *sym)
   else
     xtensa_add_insn_label (sym);
 
-  if (symbol_get_tc (sym)->is_loop_target
-      && (get_last_insn_flags (now_seg, now_subseg)
+  if (symbol_get_tc (sym)->is_loop_target)
+    {
+      if ((get_last_insn_flags (now_seg, now_subseg)
 	  & FLAG_IS_BAD_LOOPEND) != 0)
-    as_bad (_("invalid last instruction for a zero-overhead loop"));
+	as_bad (_("invalid last instruction for a zero-overhead loop"));
+
+      xtensa_set_frag_assembly_state (frag_now);
+      frag_var (rs_machine_dependent, 4, 4, RELAX_LOOP_END,
+		frag_now->fr_symbol, frag_now->fr_offset, NULL);
+
+      xtensa_set_frag_assembly_state (frag_now);
+      xtensa_move_labels (frag_now, 0, TRUE);
+  }
 
   /* No target aligning in the absolute section.  */
   if (now_seg != absolute_section
@@ -5098,26 +5110,10 @@ xtensa_frob_label (symbolS *sym)
       && !is_unaligned_label (sym)
       && !generating_literals)
     {
-      float freq = get_subseg_target_freq (now_seg, now_subseg);
       xtensa_set_frag_assembly_state (frag_now);
 
-      /* The only time this type of frag grows is when there is a
-	 negatable branch that needs to be relaxed as the last
-	 instruction in a zero-overhead loop.  Because alignment frags
-	 are so common, marking them all as possibly growing four
-	 bytes makes any worst-case analysis appear much worse than it
-	 is.  So, we make fr_var not actually reflect the amount of
-	 memory allocated at the end of this frag, but rather the
-	 amount of memory this frag might grow.  The "4, 0" below
-	 allocates four bytes at the end of the frag for room to grow
-	 if we need to relax a loop end with a NOP.  Frags prior to
-	 this one might grow to align this one, but the frag itself
-	 won't grow unless it meets the condition above.  */
-
-#define RELAX_LOOP_END_BYTES 4
-
       frag_var (rs_machine_dependent,
-		RELAX_LOOP_END_BYTES, (int) freq,
+		0, (int) freq,
 		RELAX_DESIRE_ALIGN_IF_TARGET,
 		frag_now->fr_symbol, frag_now->fr_offset, NULL);
       xtensa_set_frag_assembly_state (frag_now);
@@ -6937,7 +6933,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 		    frag_now->fr_symbol, frag_now->fr_offset, NULL);
 	  xtensa_set_frag_assembly_state (frag_now);
 	}
-      else if (is_branch && align_targets)
+      else if (is_branch && do_align_targets ())
 	{
 	  assert (finish_frag);
 	  frag_var (rs_machine_dependent,
@@ -7064,11 +7060,7 @@ xtensa_cleanup_align_frags (void)
 /* Re-process all of the fragments looking to convert all of the
    RELAX_DESIRE_ALIGN_IF_TARGET fragments.  If there is a branch
    target in the next fragment, convert this to RELAX_DESIRE_ALIGN.
-   If the next fragment starts with a loop target, AND the previous
-   fragment can be expanded to negate the branch, convert this to a
-   RELAX_LOOP_END.  Otherwise, convert to a .fill 0.  */
-
-static bfd_boolean frag_can_negate_branch (fragS *);
+   Otherwise, convert to a .fill 0.  */
 
 static void
 xtensa_fix_target_frags (void)
@@ -7079,7 +7071,6 @@ xtensa_fix_target_frags (void)
      so we walk over subsections instead of sections.  */
   for (frchP = frchain_root; frchP; frchP = frchP->frch_next)
     {
-      bfd_boolean prev_frag_can_negate_branch = FALSE;
       fragS *fragP;
 
       /* Walk over all of the fragments in a subsection.  */
@@ -7088,58 +7079,13 @@ xtensa_fix_target_frags (void)
 	  if (fragP->fr_type == rs_machine_dependent
 	      && fragP->fr_subtype == RELAX_DESIRE_ALIGN_IF_TARGET)
 	    {
-	      if (next_frag_is_loop_target (fragP))
-		{
-		  if (prev_frag_can_negate_branch)
-		    {
-		      fragP->fr_subtype = RELAX_LOOP_END;
-		      /* See the comment near the frag_var with a
-			 RELAX_DESIRE_ALIGN to see why we do this.  */
-		      fragP->fr_var = RELAX_LOOP_END_BYTES;
-		    }
-		  else
-		    {
-		      if (next_frag_is_branch_target (fragP))
-			fragP->fr_subtype = RELAX_DESIRE_ALIGN;
-		      else
-			frag_wane (fragP);
-		    }
-		}
-	      else if (next_frag_is_branch_target (fragP))
+	      if (next_frag_is_branch_target (fragP))
 		fragP->fr_subtype = RELAX_DESIRE_ALIGN;
 	      else
 		frag_wane (fragP);
 	    }
-	  if (fragP->fr_fix != 0)
-	    prev_frag_can_negate_branch = FALSE;
-	  if (frag_can_negate_branch (fragP))
-	    prev_frag_can_negate_branch = TRUE;
 	}
     }
-}
-
-
-static bfd_boolean
-frag_can_negate_branch (fragS *fragP)
-{
-  xtensa_isa isa = xtensa_default_isa;
-  vliw_insn vinsn;
-  int slot;
-
-  if (fragP->fr_type != rs_machine_dependent
-      || fragP->fr_subtype != RELAX_SLOTS)
-    return FALSE;
-
-  vinsn_from_chars (&vinsn, fragP->fr_opcode);
-
-  for (slot = 0; slot < xtensa_format_num_slots (isa, vinsn.format); slot++)
-    {
-      if ((fragP->tc_frag_data.slot_subtypes[slot] == RELAX_IMMED)
-	  && xtensa_opcode_is_branch (isa, vinsn.slots[slot].opcode) == 1)
-	return TRUE;
-    }
-
-  return FALSE;
 }
 
 
