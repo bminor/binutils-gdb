@@ -280,6 +280,36 @@ static int mips_need_reply = 0;
 /* Handle used to access serial I/O stream.  */
 static serial_t mips_desc;
 
+/* Handle low-level error that we can't recover from.  Note that just
+   error()ing out from target_wait or some such low-level place will cause
+   all hell to break loose--the rest of GDB will tend to get left in an
+   inconsistent state.  */
+
+static void NORETURN
+mips_error (va_alist)
+     va_dcl
+{
+  va_list args;
+  char *string;
+
+  va_start (args);
+  target_terminal_ours ();
+  wrap_here("");			/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  if (error_pre_print)
+    fprintf_filtered (gdb_stderr, error_pre_print);
+  string = va_arg (args, char *);
+  vfprintf_filtered (gdb_stderr, string, args);
+  fprintf_filtered (gdb_stderr, "\n");
+  va_end (args);
+
+  /* We probably should print "ending remote debugging" here, but that would
+     appear to be a problem for mips_initialize and its catch_errors.  */
+  target_mourn_inferior ();
+
+  return_to_top_level (RETURN_ERROR);
+}
+
 /* Read a character from the remote, aborting on error.  Returns
    SERIAL_TIMEOUT on timeout (since that's what SERIAL_READCHAR
    returns).  FIXME: If we see the string "<IDT>" from the board, then
@@ -304,9 +334,9 @@ mips_readchar (timeout)
 
   ch = SERIAL_READCHAR (mips_desc, timeout);
   if (ch == SERIAL_EOF)
-    error ("End of file from remote");
+    mips_error ("End of file from remote");
   if (ch == SERIAL_ERROR)
-    error ("Error reading from remote: %s", safe_strerror (errno));
+    mips_error ("Error reading from remote: %s", safe_strerror (errno));
   if (sr_get_debug () > 1)
     {
       if (ch != SERIAL_TIMEOUT)
@@ -334,7 +364,7 @@ mips_readchar (timeout)
 
       state = 0;
 
-      error ("Remote board reset");
+      mips_error ("Remote board reset");
     }
 
   if (ch == nextstate[state])
@@ -384,7 +414,7 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 
 	      ++*pgarbage;
 	      if (*pgarbage > mips_syn_garbage)
-		error ("Remote debugging protocol failure");
+		mips_error ("Remote debugging protocol failure");
 	    }
 	}
 
@@ -480,7 +510,7 @@ mips_send_packet (s, get_ack)
 
   len = strlen (s);
   if (len > DATA_MAXLEN)
-    error ("MIPS protocol data packet too long: %s", s);
+    mips_error ("MIPS protocol data packet too long: %s", s);
 
   packet = (unsigned char *) alloca (HDR_LENGTH + len + TRLR_LENGTH + 1);
 
@@ -519,7 +549,7 @@ mips_send_packet (s, get_ack)
 
       if (SERIAL_WRITE (mips_desc, packet,
 			HDR_LENGTH + len + TRLR_LENGTH) != 0)
-	error ("write to target failed: %s", safe_strerror (errno));
+	mips_error ("write to target failed: %s", safe_strerror (errno));
 
       garbage = 0;
       ch = 0;
@@ -592,7 +622,7 @@ mips_send_packet (s, get_ack)
 	}
     }
 
-  error ("Remote did not acknowledge packet");
+  mips_error ("Remote did not acknowledge packet");
 }
 
 /* Receive and acknowledge a packet, returning the data in BUFF (which
@@ -621,7 +651,7 @@ mips_receive_packet (buff)
       int err;
 
       if (mips_receive_header (hdr, &garbage, ch, mips_receive_wait) != 0)
-	error ("Timed out waiting for remote packet");
+	mips_error ("Timed out waiting for remote packet");
 
       ch = 0;
 
@@ -655,7 +685,7 @@ mips_receive_packet (buff)
 	      break;
 	    }
 	  if (rch == SERIAL_TIMEOUT)
-	    error ("Timed out waiting for remote packet");
+	    mips_error ("Timed out waiting for remote packet");
 	  buff[i] = rch;
 	}
 
@@ -669,7 +699,7 @@ mips_receive_packet (buff)
 
       err = mips_receive_trailer (trlr, &garbage, &ch, mips_receive_wait);
       if (err == -1)
-	error ("Timed out waiting for packet");
+	mips_error ("Timed out waiting for packet");
       if (err == -2)
 	{
 	  if (sr_get_debug () > 0)
@@ -706,7 +736,7 @@ mips_receive_packet (buff)
 	}
 
       if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
-	error ("write to target failed: %s", safe_strerror (errno));
+	mips_error ("write to target failed: %s", safe_strerror (errno));
     }
 
   if (sr_get_debug () > 0)
@@ -737,7 +767,7 @@ mips_receive_packet (buff)
     }
 
   if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
-    error ("write to target failed: %s", safe_strerror (errno));
+    mips_error ("write to target failed: %s", safe_strerror (errno));
 
   return len;
 }
@@ -804,7 +834,7 @@ mips_request (cmd, addr, data, perr)
   if (sscanf (buff, "0x%x %c 0x%x 0x%x",
 	      &rpid, &rcmd, &rerrflg, &rresponse) != 4
       || (cmd != '\0' && rcmd != cmd))
-    error ("Bad response from remote board");
+    mips_error ("Bad response from remote board");
 
   if (rerrflg != 0)
     {
@@ -860,7 +890,7 @@ mips_initialize ()
       char cc;
 
       if (tries > 0)
-	error ("Could not connect to target");
+	mips_error ("Could not connect to target");
       ++tries;
 
       /* We did not receive the packet we expected; try resetting the
@@ -959,7 +989,7 @@ mips_resume (pid, step, siggnal)
      int pid, step, siggnal;
 {
   if (siggnal)
-    error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
+    mips_error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
 	   siggnal);
 
   mips_request (step ? 's' : 'c',
@@ -989,7 +1019,7 @@ mips_wait (pid, status)
 
   rstatus = mips_request ('\0', (unsigned int) 0, (unsigned int) 0, &err);
   if (err)
-    error ("Remote failure: %s", safe_strerror (errno));
+    mips_error ("Remote failure: %s", safe_strerror (errno));
 
   /* FIXME: The target board uses numeric signal values which are
      those used on MIPS systems.  If the host uses different signal
@@ -1058,7 +1088,7 @@ mips_fetch_registers (regno)
   val = mips_request ('r', (unsigned int) mips_map_regno (regno),
 		      (unsigned int) 0, &err);
   if (err)
-    error ("Can't read register %d: %s", regno, safe_strerror (errno));
+    mips_error ("Can't read register %d: %s", regno, safe_strerror (errno));
 
   {
     char buf[MAX_REGISTER_RAW_SIZE];
@@ -1097,7 +1127,7 @@ mips_store_registers (regno)
 		(unsigned int) read_register (regno),
 		&err);
   if (err)
-    error ("Can't write register %d: %s", regno, safe_strerror (errno));
+    mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
 }
 
 /* Fetch a word from the target board.  */
@@ -1115,7 +1145,7 @@ mips_fetch_word (addr)
       /* Data space failed; try instruction space.  */
       val = mips_request ('i', (unsigned int) addr, (unsigned int) 0, &err);
       if (err)
-	error ("Can't read address 0x%x: %s", addr, safe_strerror (errno));
+	mips_error ("Can't read address 0x%x: %s", addr, safe_strerror (errno));
     }
   return val;
 }
@@ -1135,7 +1165,7 @@ mips_store_word (addr, val)
       /* Data space failed; try instruction space.  */
       mips_request ('I', (unsigned int) addr, (unsigned int) val, &err);
       if (err)
-	error ("Can't write address 0x%x: %s", addr, safe_strerror (errno));
+	mips_error ("Can't write address 0x%x: %s", addr, safe_strerror (errno));
     }
 }
 
@@ -1248,10 +1278,10 @@ mips_create_inferior (execfile, args, env)
   CORE_ADDR entry_pt;
 
   if (args && *args)
-    error ("Can't pass arguments to remote MIPS board.");
+    mips_error ("Can't pass arguments to remote MIPS board.");
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No exec file specified");
+    mips_error ("No exec file specified");
 
   entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 

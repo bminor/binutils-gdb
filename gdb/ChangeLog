@@ -1,5 +1,8 @@
 Thu Dec 30 10:16:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-mips.c (mips_error): New function.
+	* remote-mips.c: Use it instead of error() most places.
+
 	* breakpoint.c (breakpoint_chain): Make static.
 	* breakpoint.c, breakpoint.h (frame_in_dummy): New function.
 	* stack.c (print_frame_info): Use it.
