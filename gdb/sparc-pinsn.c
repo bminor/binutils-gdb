@@ -34,29 +34,29 @@ union sparc_insn
     unsigned long int code;
     struct
       {
-	unsigned int OP:2;
-#define	op	ldst.OP
-	unsigned int RD:5;
-#define	rd	ldst.RD
+	unsigned int anop:2;
+#define	op	ldst.anop
+	unsigned int anrd:5;
+#define	rd	ldst.anrd
 	unsigned int op3:6;
-	unsigned int RS1:5;
-#define	rs1	ldst.RS1
+	unsigned int anrs1:5;
+#define	rs1	ldst.anrs1
 	unsigned int i:1;
-	unsigned int ASI:8;
-#define	asi	ldst.ASI
-	unsigned int RS2:5;
-#define	rs2	ldst.RS2
+	unsigned int anasi:8;
+#define	asi	ldst.anasi
+	unsigned int anrs2:5;
+#define	rs2	ldst.anrs2
 #define	shcnt	rs2
       } ldst;
     struct
       {
-	unsigned int OP:2, RD:5, op3:6, RS1:5, i:1;
+	unsigned int anop:2, anrd:5, op3:6, anrs1:5, i:1;
 	unsigned int IMM13:13;
 #define	imm13	IMM13.IMM13
       } IMM13;
     struct
       {
-	unsigned int OP:2;
+	unsigned int anop:2;
 	unsigned int a:1;
 	unsigned int cond:4;
 	unsigned int op2:3;
@@ -66,9 +66,9 @@ union sparc_insn
 #define	imm22	disp22
     struct
       {
-	unsigned int OP:2;
-	unsigned int DISP30:30;
-#define	disp30	call.DISP30
+	unsigned int anop:2;
+	unsigned int adisp30:30;
+#define	disp30	call.adisp30
       } call;
   };
 
