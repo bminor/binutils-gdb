@@ -657,7 +657,6 @@ resolve_symbol_value (symp)
 	  break;
 
 	case O_add:
-#if 1
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 	  resolve_symbol_value (symp->sy_value.X_op_symbol);
 	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
@@ -688,7 +687,6 @@ resolve_symbol_value (symp)
 		goto reduce;
 	      }
 	  }
-#endif
 	  /* fall through */
 
 	case O_multiply:
