@@ -5803,7 +5803,15 @@ elf_gc_common_finalize_got_offsets (abfd, info)
      struct bfd_link_info *info;
 {
   bfd *i;
-  bfd_vma gotoff = get_elf_backend_data (abfd)->got_header_size;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_vma gotoff;
+
+  /* The GOT offset is relative to the .got section, but the GOT header is
+     put into the .got.plt section, if the backend uses it.  */
+  if (bed->want_got_plt)
+    gotoff = 0;
+  else
+    gotoff = bed->got_header_size;
 
   /* Do the local .got entries first.  */
   for (i = info->input_bfds; i; i = i->link_next)

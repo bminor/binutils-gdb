@@ -1,3 +1,8 @@
+Mon Aug 10 15:31:39 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elflink.h (elf_gc_common_finalize_got_offsets): For backends
+	that use a .got.plt section start the got offset at zero.
+
 Mon Aug 10 17:31:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_write_processor): Correct the processor ID written
