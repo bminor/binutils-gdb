@@ -43,11 +43,12 @@ extern boolean trace_file_tries;
 extern boolean trace_files;
 extern boolean write_map;
 extern int g_switch_value;
-boolean hex_mode;
+extern int hex_mode;
 static int typebits;
 strip_symbols_type strip_symbols=STRIP_NONE;
 discard_locals_type discard_locals=DISCARD_NONE;
 
+static char *dirlist_ptr;
 
 lang_memory_region_type *region;
 
@@ -137,7 +138,7 @@ static int error_index;
 %token MEMORY  DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
-%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
+%token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common OPTION_warn_common
 %token OPTION_EB OPTION_EL OPTION_G OPTION_Gval OPTION_help
 %token OPTION_format OPTION_oformat  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
@@ -151,6 +152,8 @@ static int error_index;
 %token ORIGIN FILL OPTION_g
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
 %token OPTION_RETAIN_SYMBOLS_FILE ALIGNMOD AT
+%token OPTION_Qy OPTION_Y OPTION_dn OPTION_call_shared OPTION_non_shared
+%token <name> OPTION_YP
 
 %type <token> assign_op 
 
@@ -161,7 +164,7 @@ static int error_index;
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE
 
 %{
-ld_config_type config;
+extern ld_config_type config;
 %}
 
 %%
@@ -249,7 +252,7 @@ command_line_option:
 		      }	            
 	|	OPTION_o filename
 			{
-			lang_add_output($2); 
+			lang_add_output($2, 0); 
 			}
 	|	OPTION_e NAME
 			{ lang_add_entry($2); 
@@ -268,6 +271,10 @@ command_line_option:
         |      OPTION_sort_common
 			{
 			config.sort_common = true;
+			}
+        |      OPTION_warn_common
+			{
+			config.warn_common = true;
 			}
     	|      OPTION_d {
 			  command_line.force_common_definition = true;
@@ -380,6 +387,40 @@ command_line_option:
 		{
 		  g_switch_value = yylval.integer;
 		}
+	|	OPTION_Qy
+	|	OPTION_dn
+	|	OPTION_non_shared
+	|	OPTION_call_shared
+	|	OPTION_YP
+		{
+		  dirlist_ptr = $1;
+		  goto set_default_dirlist;
+		}
+	|	OPTION_Y NAME
+		{
+		  if (strncmp ($2, "P,", 2))
+		    einfo ("%P%F: unknown -Y option -- %s\n", $2);
+		  else
+		    {
+		      char *p = "";
+		      dirlist_ptr = $2;
+		    set_default_dirlist:
+		      while (p != 0)
+			{
+			  p = strchr (dirlist_ptr, ':');
+			  if (p)
+			    *p = 0;
+			  if (*dirlist_ptr)
+			    ldfile_add_library_path (dirlist_ptr);
+			  if (p)
+			    {
+			      *p = ':';
+			      dirlist_ptr = p + 1;
+			    }
+			}
+		    }
+		}
+	|	'{' script_file '}' { /* This parses compiled-in scripts.  */ }
         | 	NAME
 		{
 		  if (*$1 == '-')
@@ -503,10 +544,10 @@ ifile_p1:
 	|	SEARCH_DIR '(' filename ')'
 		{ ldfile_add_library_path($3); }
 	|	OUTPUT '(' filename ')'
-		{ lang_add_output($3); }
-        | OUTPUT_FORMAT '(' NAME ')'
+		{ lang_add_output($3, 1); }
+        |	OUTPUT_FORMAT '(' NAME ')'
 		  { lang_add_output_format($3, 1); }
-        | OUTPUT_ARCH '(' NAME ')'
+        |	OUTPUT_ARCH '(' NAME ')'
 		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
 		{ command_line.force_common_definition = true ; }
@@ -519,14 +560,13 @@ ifile_p1:
 
 input_list:
 		NAME
-		{ lang_add_input_file($1,lang_input_file_is_file_enum,
+		{ lang_add_input_file($1,lang_input_file_is_search_file_enum,
 				 (char *)NULL); }
 	|	input_list ',' NAME
-		{ lang_add_input_file($3,lang_input_file_is_file_enum,
+		{ lang_add_input_file($3,lang_input_file_is_search_file_enum,
 				 (char *)NULL); }
 	|	input_list NAME
-		{ lang_add_input_file($2,
-lang_input_file_is_file_enum,
+		{ lang_add_input_file($2,lang_input_file_is_search_file_enum,
 				 (char *)NULL); }
 	;
 

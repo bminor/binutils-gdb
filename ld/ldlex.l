@@ -212,9 +212,11 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 					yylval.name = buystring (yytext+4);
 					return OPTION_YP;
 				}
+<COMMAND>"-non_shared"		{	return OPTION_non_shared; }
+<COMMAND>"-call_shared"		{	return OPTION_call_shared; }
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
-  				yylval.integer = strtoul(yytext+1, 0,16);
+  				yylval.integer = bfd_scan_vma (yytext+1, 0,16);
 				return INT;
 			}
 
@@ -234,11 +236,13 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				    default:
 				     base = 10;
 				   }
-				   yylval.integer = strtoul(yytext+1, 0, base);	
+				   yylval.integer = bfd_scan_vma (yytext+1, 0,
+								  base);
 				   return INT;
 				 }
 <SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
-				  yylval.integer = strtoul(yytext,0,hex_mode);
+				  yylval.integer = bfd_scan_vma (yytext, 0,
+								 hex_mode);
 				  if (yytext[yyleng-1]=='M'
 					|| yytext[yyleng-1] == 'm') {
 				      yylval.integer *= 1024*1024;

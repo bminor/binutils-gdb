@@ -1,3 +1,15 @@
+Wed Dec  1 12:19:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldgram.y (OPTION_call_shared, OPTION_non_shared): New tokens.
+	(command_line_option): Accept and ignore them (for now).
+	* ldlex.l (<COMMAND>): Handle -non_shared and -call_shared.
+
+Mon Nov 22 14:14:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmain.c (subfile_wanted_p): If merging a common symbol which is
+	not in bfd_com_section, create the section in the BFD so that it
+	can be placed in the right output section.
+
 Fri Nov 19 14:12:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (mips*-sgi-irix5*): New target.  Use mipsb-elf32.
