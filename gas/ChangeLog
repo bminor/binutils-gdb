@@ -1,3 +1,15 @@
+Tue Feb 25 14:17:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* as.h: include bfd.h if using many sections
+	* expr.c: LOCAL_LABELS_FB had been changed to lower case - so
+	local labels didn't work.
+	* listing.c (list_symbol_table): don't core dump when there's no
+	symbol there.
+	* write.c, write.h: call fix_new with the right number of args on
+	the H8.
+	* config/tc-h8300.[ch] : fix bugs reported by HMSI, and make
+	errors nices
+
 Sat Feb 22 12:26:28 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* app.c: MRI compatibility - allow single quote to start a string.

@@ -228,10 +228,10 @@ expressionS *expressionP;
     if (number<10)
     {
       if (0
-#ifdef local_labels_fb
+#ifdef LOCAL_LABELS_FB
 	  || c=='b'
 #endif
-#ifdef local_labels_dollar
+#ifdef LOCAL_LABELS_DOLLAR
 	  || (c=='$' && local_label_defined[number])
 #endif
 	  )
@@ -265,10 +265,10 @@ expressionS *expressionP;
       else
       {
 	if (0
-#ifdef local_labels_fb
+#ifdef LOCAL_LABELS_FB
 	    || c == 'f'
 #endif
-#ifdef local_labels_dollar
+#ifdef LOCAL_LABELS_DOLLAR
 	    || (c=='$' && !local_label_defined[number])
 #endif
 	    )
