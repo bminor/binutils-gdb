@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed Apr 22 16:49:48 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim-base.h: Move target specific stuff to sim/mips/sim-main.h
+
+end-sanitize-sky
 Wed Apr 22 14:14:19 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* Make-common.in (CSEARCH): Add -I to intl directories.
@@ -7,6 +13,7 @@ Wed Apr 22 14:14:19 1998  Michael Meissner  <meissner@cygnus.com>
 
 start-sanitize-sky
 Tue Apr 21 17:29:48 1998  Jim Lemke  <jlemke@cygnus.com>
+
 	* sim-base.h: Add configure option --with-sim-funit.
 
 end-sanitize-sky

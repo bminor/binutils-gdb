@@ -669,6 +669,17 @@ enum float_operation
   unsigned8 acc[3 * 8];
   /* end-sanitize-vr5400 */
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
+  /* Record of option for floating point implementation type. */
+  int fp_type_opt;
+#define STATE_FP_TYPE_OPT(sd) ((sd)->base.fp_type_opt)
+#define STATE_FP_TYPE_OPT_TARGET 0x80000000
+#endif
+#endif
+/* end-sanitize-sky */
+
   sim_cpu_base base;
 };
 
