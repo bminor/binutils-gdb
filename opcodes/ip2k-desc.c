@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -348,39 +348,39 @@ const CGEN_OPERAND ip2k_cgen_operand_table[] =
 {
 /* pc: program counter */
   { "pc", IP2K_OPERAND_PC, HW_H_PC, 0, 0,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[0] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_NIL] } }, 
     { 0|A(SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* addr16cjp: 13-bit address */
   { "addr16cjp", IP2K_OPERAND_ADDR16CJP, HW_H_UINT, 12, 13,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[4] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_ADDR16CJP] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* fr: register */
   { "fr", IP2K_OPERAND_FR, HW_H_REGISTERS, 8, 9,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[3] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_REG] } }, 
     { 0|A(ABS_ADDR), { (1<<MACH_BASE) } }  },
 /* lit8: 8-bit signed literal */
   { "lit8", IP2K_OPERAND_LIT8, HW_H_SINT, 7, 8,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[2] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* bitno: bit number */
   { "bitno", IP2K_OPERAND_BITNO, HW_H_UINT, 11, 3,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[6] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_BITNO] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16p: page number */
   { "addr16p", IP2K_OPERAND_ADDR16P, HW_H_UINT, 2, 3,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[16] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_PAGE3] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16h: high 8 bits of address */
   { "addr16h", IP2K_OPERAND_ADDR16H, HW_H_UINT, 7, 8,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[2] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* addr16l: low 8 bits of address */
   { "addr16l", IP2K_OPERAND_ADDR16L, HW_H_UINT, 7, 8,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[2] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_IMM8] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* reti3: reti flags */
   { "reti3", IP2K_OPERAND_RETI3, HW_H_UINT, 2, 3,
-    { 0, { (const PTR) &ip2k_cgen_ifld_table[14] } }, 
+    { 0, { (const PTR) &ip2k_cgen_ifld_table[IP2K_F_RETI3] } }, 
     { 0, { (1<<MACH_BASE) } }  },
 /* pabits: page bits */
   { "pabits", IP2K_OPERAND_PABITS, HW_H_PABITS, 0, 0,
