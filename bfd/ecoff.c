@@ -3142,7 +3142,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
 
   hdr.ar_fmag[0] = '`';
-  hdr.ar_fmag[1] = '\n';
+  hdr.ar_fmag[1] = '\012';
 
   /* Turn all null bytes in the header into spaces.  */
   for (i = 0; i < sizeof (struct ar_hdr); i++)
@@ -3331,7 +3331,12 @@ ecoff_bfd_link_hash_table_create (abfd)
   struct ecoff_link_hash_table *ret;
 
   ret = ((struct ecoff_link_hash_table *)
-	 bfd_xmalloc (sizeof (struct ecoff_link_hash_table)));
+	 malloc (sizeof (struct ecoff_link_hash_table)));
+  if (!ret)
+      {
+	bfd_error = no_memory;
+	return NULL;
+      }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
 				   ecoff_link_hash_newfunc))
     {

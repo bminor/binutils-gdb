@@ -1,4 +1,23 @@
+Fri Feb 11 13:10:42 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* archive.c: Change all references to '\n' in archive magic
+	to '\012', for greater portability.
+	* ecoff.c (ecoff_write_armap): Ditto.
+
+Thu Feb 10 12:58:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (aout_link_write_other_symbol): Check strip settings to
+	see whether symbol should be output.
+	* genlink.h (struct generic_write_global_symbol_info): Added info
+	field.
+	* linker.c (_bfd_generic_final_link): Initialize wginfo.info.
+	(_bfd_generic_link_write_global_symbol): Check strip settings to
+	see whether symbol should be output.
+	* elf32-mips.c (mips_elf_final_link): Initialize wginfo.info.
+
 Wed Feb  9 21:34:58 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_reloc_queue_find): Do not examine a NULL queue entry.
 
 	* som.c: Cast return values from BFD memory allocation routines to
 	avoid warnings from the HP compiler.
