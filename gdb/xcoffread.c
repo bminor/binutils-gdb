@@ -3034,7 +3034,7 @@ xcoff_symfile_offsets (objfile, addr)
      parameter and use 0.  rs6000-nat.c will set the correct section
      offsets via objfile_relocate.  */
   for (i = 0; i < objfile->num_sections; ++i)
-    ANOFFSET (section_offsets, i) = addr;
+    ANOFFSET (section_offsets, i) = 0;
 
   return section_offsets;
 }

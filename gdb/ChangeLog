@@ -1,3 +1,8 @@
+Wed Aug  9 14:51:36 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* xcoffread.x (xcoff_symfile_offset): Revert an unwanted change gets
+	in accidentally from Aug 1 checkin.
+
 Sat Aug  5 09:07:28 1995  steve chamberlain  <sac@slash.cygnus.com>
  
  	* remote-hms.c (hms_cmds): Get reg term right.
