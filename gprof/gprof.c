@@ -56,8 +56,8 @@ File_Format file_format = FF_AUTO;
 bool first_output = TRUE;
 
 char copyright[] =
- N_("@(#) Copyright (c) 1983 Regents of the University of California.\n\
- All rights reserved.\n");
+ "@(#) Copyright (c) 1983 Regents of the University of California.\n\
+ All rights reserved.\n";
 
 static char *gmon_name = GMONNAME;	/* profile filename */
 
