@@ -810,6 +810,55 @@ gdbsim_mourn_inferior ()
   generic_mourn_inferior ();
 }
 
+static int
+gdbsim_insert_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+#ifdef SIM_HAS_BREAKPOINTS
+  SIM_RC retcode;
+
+  retcode = sim_set_breakpoint (gdbsim_desc, addr);
+
+  switch (retcode)
+    {
+    case SIM_RC_OK:
+      return 0;
+    case SIM_RC_INSUFFICIENT_RESOURCES:
+      return ENOMEM;
+    default:
+      return EIO;
+    }
+#else
+  return memory_insert_breakpoint (addr, contents_cache);
+#endif
+}
+
+static int
+gdbsim_remove_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+#ifdef SIM_HAS_BREAKPOINTS
+  SIM_RC retcode;
+
+  retcode = sim_clear_breakpoint (gdbsim_desc, addr);
+
+  switch (retcode)
+    {
+    case SIM_RC_OK:
+    case SIM_RC_UNKNOWN_BREAKPOINT:
+      return 0;
+    case SIM_RC_INSUFFICIENT_RESOURCES:
+      return ENOMEM;
+    default:
+      return EIO;
+    }
+#else
+  return memory_remove_breakpoint (addr, contents_cache);
+#endif
+}
+
 /* Pass the command argument through to the simulator verbatim.  The
    simulator must do any command interpretation work.  */
 
@@ -854,8 +903,8 @@ struct target_ops gdbsim_ops = {
   gdbsim_prepare_to_store,	/* to_prepare_to_store */
   gdbsim_xfer_inferior_memory,	/* to_xfer_memory */
   gdbsim_files_info,		/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
+  gdbsim_insert_breakpoint,	/* to_insert_breakpoint */
+  gdbsim_remove_breakpoint,	/* to_remove_breakpoint */
   NULL,				/* to_terminal_init */
   NULL,				/* to_terminal_inferior */
   NULL,				/* to_terminal_ours_for_output */

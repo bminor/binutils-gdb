@@ -1,3 +1,22 @@
+Wed Sep 24 18:12:47 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* The following block of changes add support for debugging assembly
+	source files.
+	* breakpoint.c (resolve_sal_pc):  Prevent crash when pc isn't
+	associated with a function.
+	* buildsym.c (record_line start_symtab end_symtab):  Don't delete
+	symtabs which only have line numbers (but no other debug symbols).
+	* dbxread.c (read_dbx_symtab end_psymtab):  Ditto.
+
+	* remote-sim.c:  New functions gdbsim_insert/remove_breakpoint.  Use
+	intrinsic simulator breakpoints if available, otherwise do it the
+ 	hard way.
+start-sanitize-d30v
+	* configure.tgt:  Add d30v.
+	* d30v-tdep.c:  New file.
+	* config/d30v/d30v.mt, config/d30v/tm-d30v.h:  New files.
+end-sanitize-d30v
+
 Tue Sep 23 11:24:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (ALLCONFIG): Remove, inaccurate and never used.

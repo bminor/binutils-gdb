@@ -55,6 +55,10 @@ static struct pending_block *pending_blocks = NULL;
 
 static struct pending *free_pendings;
 
+/* Non-zero if symtab has line number info.  This prevents an otherwise empty
+   symtab from being tossed.  */
+
+static int have_line_numbers;
 
 static int
 compare_line_numbers PARAMS ((const void *, const void *));
@@ -714,6 +718,7 @@ record_line (subfile, line, pc)
 	xmalloc (sizeof (struct linetable)
 	  + subfile->line_vector_length * sizeof (struct linetable_entry));
       subfile->line_vector->nitems = 0;
+      have_line_numbers = 1;
     }
 
   if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
@@ -770,6 +775,7 @@ start_symtab (name, dirname, start_addr)
   file_symbols = NULL;
   global_symbols = NULL;
   within_function = 0;
+  have_line_numbers = 0;
 
   /* Context stack is initially empty.  Allocate first one with room for
      10 levels; reuse it forever afterward.  */
@@ -886,7 +892,8 @@ end_symtab (end_addr, objfile, section)
 
   if (pending_blocks == NULL
       && file_symbols == NULL
-      && global_symbols == NULL)
+      && global_symbols == NULL
+      && have_line_numbers == 0)
     {
       /* Ignore symtabs that have no functions with real debugging info */
       blockvector = NULL;
