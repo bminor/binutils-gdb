@@ -56,8 +56,8 @@ tmp-gencode: gencode
 	touch tmp-gencode
 gencode.o: gencode.c
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
-gencode: gencode.o ../../opcodes/libopcodes.a
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o ../../opcodes/libopcodes.a
+gencode: gencode.o ../../opcodes/libopcodes.a ../../intl/libintl.a
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o ../../opcodes/libopcodes.a ../../intl/libintl.a
 
 
 
