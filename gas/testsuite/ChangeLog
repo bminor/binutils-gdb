@@ -1,4 +1,9 @@
-start-sanitize-m32rx
+start-sanitize-cygnus
+Fri Feb  5 19:53:52 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/relax-2.[sd]: New testcase.
+	* gas/m32r/m32rx.exp: Run it.
+
 Thu Feb  4 14:13:32 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/outofrange.s: New testcase.
@@ -9,7 +14,7 @@ Thu Feb  4 14:13:32 1999  Doug Evans  <devans@canuck.cygnus.com>
 	* gas/m32r/interfere.s: New testcase.
 	* gas/m32r/error.exp: Run it.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-r5900
 1999-01-06  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -98,14 +103,14 @@ Mon Nov  2 20:16:50 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/fslot.[sd]: New testcase.
 	* gas/m32r/m32r.exp: Run it.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* gas/m32r/fslotx.[sd]: New testcase.
 	* gas/m32r/m32rx.exp: Run it.
 	* gas/m32r/m32rx.[sd]: Update.
 
 	* gas/m32r/error.exp: New error testcase driver.
 	* gas/m32r/wrongsize.s: New testcase.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 start-sanitize-r5900
 Fri Oct 23 13:01:24 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
@@ -164,13 +169,13 @@ Wed Aug 12 13:25:38 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/white.l: Expect warning for stand-alone ss prefix.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Tue Jul 28 10:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/m32rx.s: Test new insns.
 	* gas/m32r/m32rx.d: Ditto.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-cygnus
 Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -366,9 +371,9 @@ Fri May 22 15:56:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/allinsn.d: Handle 64 bit bfd_vma.
 	* gas/m32r/uppercase.d: Likewise.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* gas/m32r/m32rx.d: Likewise.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 start-sanitize-sky
 Thu May 21 15:14:35 1998  Doug Evans  <devans@canuck.cygnus.com>
@@ -411,9 +416,9 @@ Fri May 15 14:51:01 1998  Gavin Koch  <gavin@cygnus.com>
 Wed May 13 15:06:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/uppercase.[sd]: Test for HIGH,SHIGH,LOW,SDA.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* gas/m32r/m32rx.d: Pass --enable-special to gas.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 start-sanitize-sky
 Mon May 11 13:04:58 1998  Frank Ch. Eigler  <fche@cygnus.com>
@@ -479,7 +484,7 @@ Fri Apr  3 12:19:33 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* gas/dvp/dvp.exp: Run it.
 
 end-sanitize-sky
-start-sanitize-m32rx
+start-sanitize-cygnus
 Thu Apr  2 16:49:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: Fix SATB and SAT bit patterns.
@@ -493,7 +498,7 @@ Sun Mar 29 13:05:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: Fix expected results for parallel lock.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Wed Mar 25 14:27:46 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -516,12 +521,12 @@ Mon Mar 23 13:26:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* gas/dvp/dvp.exp: Run new test mpg-1.s.
 
 end-sanitize-sky
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Mar 23 11:34:00 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.d: Fix sath bit pattern (PR15418).
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Mon Mar 23 10:47:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/all/align.s: Back out ".section text" change below;
@@ -607,13 +612,13 @@ Fri Feb 20 01:29:16 1998  Jeffrey A Law  (law@cygnus.com)
 	* gas/mips/r5900.s, gas/mips/r5900.d: Update for "mula.s" change.
 
 end-sanitize-r5900
-start-sanitize-m32rx
+start-sanitize-cygnus
 Thu Feb 19 10:35:48 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.s (mvtc__subv): Avoid register conflict.
 
 	* gas/m32r/m32rx.d: Updated to match latest assembler output.
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Tue Feb 17 18:44:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -621,13 +626,13 @@ Tue Feb 17 18:44:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 	spec on operands.
 
 end-sanitize-sky
-start-sanitize-m32rx
+start-sanitize-cygnus
 Fri Feb 13 14:44:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.s (rte__subx): Do not perform RTE and SUBX in
 	parallel since they both write to the C bit.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 start-sanitize-sky
 Thu Feb 12 17:42:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -651,12 +656,12 @@ Tue Feb 10 15:32:22 1998  Ian Carmichael  <iancarm@cygnus.com>
 	* gas/dvp/{error.exp,bignum-1.[sd],bignum_d.s}: New files.
 
 end-sanitize-sky
-start-sanitize-m32rx
+start-sanitize-cygnus
 Mon Feb  9 17:19:05 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.s: Add tests for DIVH and new versions of RAC and
 	RACH instructions.  Rename MACHL1 ro MACLH1.
-end-sanitize-m32rx
+end-sanitize-cygnus
 Wed Feb  4 15:27:44 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/arm/arm7t.d: Update to match latest assembler output.
@@ -718,25 +723,25 @@ Tue Jan 27 05:35:02 1998  Richard Henderson  <rth@cygnus.com>
 
 	* gas/m68k/mri_moveml.[sd]: New testcase.
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 Fri Jan 23 10:30:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/m32rx.s: Use 'label' as desitnation of branches.
 	* gas/m32r/m32rx.d: Update to match latest disassembly.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 Thu Jan 22 17:29:07 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/high-1.d: Add hash prefix to constants.
 
 	* gas/m32r/allinsn.s: Add hash prefix to some constants.
 	* gas/m32r/allinsn.d: Add hash prefix to constants.
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* gas/m32r/m32rx.s: Add tests for automatic parallelisation.
 	* gas/m32r/m32rx.d: Add results of automatic parallelisation.
 	* gas/m32r/relax-1.d: Add results of automatic parallelisation.
 	* gas/m32r/uppercase.d: Add results of automatic parallelisation.
-end-sanitize-m32rx
+end-sanitize-cygnus
 
 Wed Jan 21 21:24:08 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
@@ -746,10 +751,10 @@ Wed Jan 14 17:49:22 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/uppercase.d: Fix white space matching.
 	* gas/m32r/relax-1.d: Fix white space matching.
-start-sanitize-m32rx	
+start-sanitize-cygnus	
 	* gas/m32r/m32rx.d: Add expected results.
 	* gas/m32r/m32rx.s: Correct typos in test cases.
-end-sanitize-m32rx	
+end-sanitize-cygnus	
 
 Wed Jan 14 15:44:32 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -768,12 +773,12 @@ Mon Dec 22 12:47:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 end-sanitize-r5900
 Thu Dec 18 11:10:42 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-m32rx
+start-sanitize-cygnus
 	* gas/m32r/m32rx.d: New file.
 	* gas/m32r/m32rx.s: New file.
 	* gas/m32r/m32rx.exp: New file.
 
-end-sanitize-m32rx
+end-sanitize-cygnus
 	* gas/arm/inst.d: Updated to match latest disassembler changes.
 
 	* gas/arm/arm7t.d: Updated to match latest disassembler changes.

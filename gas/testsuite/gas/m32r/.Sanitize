@@ -15,7 +15,7 @@
 
 Do-first:
 
-cygnus_files="fslotx.s fslotx.d m32rx.s m32rx.d m32rx.exp error.exp interfere.s wrongsize.s"
+cygnus_files="fslotx.s fslotx.d m32rx.s m32rx.d relax-2.s relax-2.d m32rx.exp error.exp interfere.s wrongsize.s"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
         keep_these_too="${cygnus_files} ${keep_these_too}"
 else
