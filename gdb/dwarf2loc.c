@@ -124,7 +124,9 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 
   frame_register (debaton->frame, regnum, &optimized, &lval_type, &save_addr,
 		  &realnum, buf);
-  result = extract_address (buf, regsize);
+  /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
+     address is always unsigned.  That may or may not be true.  */
+  result = extract_unsigned_integer (buf, regsize);
 
   return result;
 }

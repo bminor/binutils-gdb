@@ -1,3 +1,13 @@
+2003-05-22  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (frame_info): Inline extract_address, replacing it with
+	extract_unsigned_integer.
+	* findvar.c (unsigned_pointer_to_address): Ditto.
+	* dwarf2loc.c (dwarf_expr_read_reg): Ditto.
+	* dwarf2expr.c (dwarf2_read_address): Ditto.
+	* frame.c (frame_pc_unwind): Update comment.
+	* dummy-frame.c (deprecated_read_register_dummy): Update comment.
+
 2003-05-22  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* infptrace.c (detach): Call print_sys_errmsg rather than

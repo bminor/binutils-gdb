@@ -333,7 +333,7 @@ value_of_register (int regnum, struct frame_info *frame)
 CORE_ADDR
 unsigned_pointer_to_address (struct type *type, const void *buf)
 {
-  return extract_address (buf, TYPE_LENGTH (type));
+  return extract_unsigned_integer (buf, TYPE_LENGTH (type));
 }
 
 CORE_ADDR
