@@ -48,6 +48,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include "inflow.h"
+#include "auxv.h"
 
 /*
  * PROCFS.C
@@ -128,6 +129,11 @@ static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
 static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
+static LONGEST procfs_xfer_partial (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex,
+				    void *readbuf, const void *writebuf,
+				    ULONGEST offset, LONGEST len);
 
 static int procfs_thread_alive (ptid_t);
 
@@ -165,6 +171,7 @@ init_procfs_ops (void)
   procfs_ops.to_prepare_to_store    = procfs_prepare_to_store;
   procfs_ops.to_fetch_registers     = procfs_fetch_registers;
   procfs_ops.to_store_registers     = procfs_store_registers;
+  procfs_ops.to_xfer_partial        = procfs_xfer_partial;
   procfs_ops.to_xfer_memory         = procfs_xfer_memory;
   procfs_ops.to_insert_breakpoint   =  memory_insert_breakpoint;
   procfs_ops.to_remove_breakpoint   =  memory_remove_breakpoint;
@@ -4268,6 +4275,40 @@ wait_again:
   return retval;
 }
 
+/* Perform a partial transfer to/from the specified object.  For
+   memory transfers, fall back to the old memory xfer functions.  */
+
+static LONGEST
+procfs_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, void *readbuf,
+		     const void *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      if (readbuf)
+	return (*ops->to_xfer_memory) (offset, readbuf, len, 0/*write*/,
+				       NULL, ops);
+      if (writebuf)
+	return (*ops->to_xfer_memory) (offset, readbuf, len, 1/*write*/,
+				       NULL, ops);
+      return -1;
+
+#ifdef NEW_PROC_API
+    case TARGET_OBJECT_AUXV:
+      return procfs_xfer_auxv (ops, object, annex, readbuf, writebuf,
+			       offset, len);
+#endif
+
+    default:
+      if (ops->beneath != NULL)
+	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					      readbuf, writebuf, offset, len);
+      return -1;
+    }
+}
+
+
 /* Transfer LEN bytes between GDB address MYADDR and target address
    MEMADDR.  If DOWRITE is non-zero, transfer them to the target,
    otherwise transfer them from the target.  TARGET is unused.
@@ -5850,6 +5891,8 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   char *note_data = NULL;
   char *inf_args;
   struct procfs_corefile_thread_data thread_args;
+  char *auxv;
+  int auxv_len;
 
   if (get_exec_file (0))
     {
@@ -5896,6 +5939,14 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   else
     {
       note_data = thread_args.note_data;
+    }
+
+  auxv_len = target_auxv_read (&current_target, &auxv);
+  if (auxv_len > 0)
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size,
+				      "CORE", NT_AUXV, auxv, auxv_len);
+      xfree (auxv);
     }
 
   make_cleanup (xfree, note_data);
