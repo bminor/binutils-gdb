@@ -859,6 +859,9 @@ parallel_ok (op1, insn1, op2, insn2)
 	  ins = insn2;
 	}
       mod[j] = used[j] = 0;
+      if (op->exec_type & BRANCH_LINK)
+	mod[j] |= 1 << 13;
+
       for (i = 0; op->operands[i]; i++)
 	{
 	  flags = d10v_operands[op->operands[i]].flags;

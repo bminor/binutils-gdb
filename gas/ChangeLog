@@ -1,4 +1,9 @@
 start-sanitize-d10v
+Mon Nov 18 15:22:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-d10v.c (parallel_ok): Branch and link instructions
+	modify r13.
+
 Thu Nov 14 11:17:49 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (write_2_short): Fix bug that wouldn't
