@@ -81,6 +81,7 @@ GDB as you discover it (or as you design changes to GDB).
 * Cleanups::			Cleanups
 * Wrapping::			Wrapping Output Lines
 * Frames::			Keeping track of function calls
+* Remote Stubs::		Code that runs in targets and talks to GDB
 * Coding Style::		Strunk and White for GDB maintainers
 * Clean Design::		Frank Lloyd Wright for GDB maintainers
 * Submitting Patches::		How to get your changes into GDB releases
@@ -1018,6 +1019,47 @@ frame.  This will be used to create a new GDB frame struct, and then
 the new frame.
 @end table
 
+@node Remote Stubs
+@chapter Remote Stubs
+
+GDB's file @file{remote.c} talks a serial protocol to code that runs
+in the target system.  GDB provides several sample ``stubs'' that can
+be integrated into target programs or operating systems for this purpose;
+they are named @file{*-stub.c}.
+
+The GDB user's manual describes how to put such a stub into your target
+code.  What follows is a discussion of integrating the SPARC stub
+into a complicated operating system (rather than a simple program),
+by Stu Grossman, the author of this stub.
+
+The trap handling code in the stub assumes the following upon entry to
+trap_low:
+
+@enumerate
+@item %l1 and %l2 contain pc and npc respectively at the time of the trap
+@item traps are disabled
+@item you are in the correct trap window
+@end enumerate
+
+As long as your trap handler can guarantee those conditions, then there is no
+reason why you shouldn't be able to `share' traps with the stub.  The stub has
+no requirement that it be jumped to directly from the hardware trap vector.
+That is why it calls @code{exceptionHandler()}, which is provided by the external
+environment.  For instance, this could setup the hardware traps to actually
+execute code which calls the stub first, and then transfers to its own trap
+handler.
+
+For the most point, there probably won't be much of an issue with `sharing'
+traps, as the traps we use are usually not used by the kernel, and often
+indicate unrecoverable error conditions.  Anyway, this is all controlled by a
+table, and is trivial to modify.
+The most important trap for us is for @code{ta 1}.  Without that, we
+can't single step or do breakpoints.  Everything else is unnecessary
+for the proper operation of the debugger/stub.
+
+From reading the stub, it's probably not obvious how breakpoints work.  They
+are simply done by deposit/examine operations from GDB.
+
 @node Coding Style
 @chapter Coding Style
 
@@ -1072,7 +1114,7 @@ trouble.  In particular:
 @item
 You can't assume the byte order of anything that comes from a
 target (including @var{value}s, object files, and instructions).  Such
-things must be byte-swapped using @code{SWAP_HOST_AND_TARGET} in GDB,
+things must be byte-swapped using @code{SWAP_TARGET_AND_HOST} in GDB,
 or one of the swap routines defined in @file{bfd.h}, such as @code{bfd_get_32}.
 
 @item
@@ -1089,7 +1131,8 @@ own header files -- written from scratch or explicitly donated by their
 owner, to avoid copyright problems.
 
 @item
-Insertion of new @code{#ifdef}'s will be frowned upon.
+Insertion of new @code{#ifdef}'s will be frowned upon.  It's much better
+to write the code portably than to conditionalize it for various systems.
 
 @item
 New @code{#ifdef}'s which test for specific compilers or manufacturers
@@ -1147,7 +1190,7 @@ You may not always agree on what is clean design.
 If the maintainers don't have time to put the patch in when it
 arrives, or if there is any question about a patch, it
 goes into a large queue with everyone else's patches and
-bug reports
+bug reports.
 @end table
 
 I don't know how to get past these problems except by continuing to try.
@@ -1157,7 +1200,7 @@ There are two issues here -- technical and legal.
 The legal issue is that to incorporate substantial changes requires a
 copyright assignment from you and/or your employer, granting ownership of the changes to
 the Free Software Foundation.  You can get the standard document for
-doing this by sending mail to @code{gnu@prep.ai.mit.edu} and asking for it.
+doing this by sending mail to @code{gnu@@prep.ai.mit.edu} and asking for it.
 I recommend that people write in "All programs owned by the
 Free Software Foundation" as "NAME OF PROGRAM", so that changes in
 many programs (not just GDB, but GAS, Emacs, GCC, etc) can be
@@ -1224,7 +1267,10 @@ main.c
 @item KERNELDEBUG
 tm-hppa.h
 @item MEM_FNS_DECLARED
-defs.h
+Your host config file defines this if it includes 
+declarations of @code{memcpy} and @code{memset}.  Define this
+to avoid conflicts between the native include
+files and the declarations in @file{defs.h}.
 @item NO_SYS_FILE
 dbxread.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
@@ -1548,8 +1594,6 @@ when using HAVE_MMAP, this is the increment between mappings.
 ser-go32.c
 @item MOTOROLA
 xm-altos.h
-@item NAMES_HAVE_UNDERSCORE
-coffread.c
 @item NBPG
 altos-xdep.c
 @item NEED_POSIX_SETPGID
@@ -1701,8 +1745,6 @@ infrun.c
 core.c
 @item SOLIB_CREATE_INFERIOR_HOOK
 infrun.c
-@item SOME_NAMES_HAVE_DOT
-minsyms.c
 @item SP_REGNUM
 parse.c
 @item STAB_REG_TO_REGNUM
@@ -1860,8 +1902,6 @@ dbxread.c
 main.c
 @item KERNELDEBUG
 tm-hppa.h
-@item MEM_FNS_DECLARED
-defs.h
 @item NO_SYS_FILE
 dbxread.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
@@ -2151,8 +2191,6 @@ maint.c
 mips-tdep.c
 @item MOTOROLA
 xm-altos.h
-@item NAMES_HAVE_UNDERSCORE
-coffread.c
 @item NBPG
 altos-xdep.c
 @item NEED_POSIX_SETPGID
@@ -2283,8 +2321,6 @@ infrun.c
 core.c
 @item SOLIB_CREATE_INFERIOR_HOOK
 infrun.c
-@item SOME_NAMES_HAVE_DOT
-minsyms.c
 @item SP_REGNUM
 parse.c
 @item STAB_REG_TO_REGNUM
