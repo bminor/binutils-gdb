@@ -168,7 +168,7 @@ struct forward_ref *f_ref_root =
  * This variable is used to keep track of the name of the symbol we are
  * working on while we are parsing the stabs directives.
  */
-static char *symbol_name;
+static const char *symbol_name;
 
 /* We use this counter to assign numbers to all of the structures, unions
  * and enums that we define.  When we actually declare a variable to the
@@ -272,7 +272,7 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
 #define	PUT_CHAR(val)	Object_Record_Buffer[Object_Record_Offset++] = val
 
 #define	PUT_COUNTED_STRING(cp) {\
-			register char *p = cp; \
+			register const char *p = cp; \
 			PUT_CHAR(strlen(p)); \
 			while (*p) PUT_CHAR(*p++);}
 
@@ -1589,7 +1589,7 @@ get_struct_name (str)
   while ((*pnt != ':') && (*pnt != '\0'))
     pnt--;
   if (*pnt == '\0')
-    return symbol_name;
+    return (char *) symbol_name;
   *pnt-- = '\0';
   while ((*pnt != ';') && (*pnt != '='))
     pnt--;
@@ -2438,7 +2438,7 @@ VMS_typedef_parse (str)
 {
   char *pnt;
   char *pnt1;
-  char *pnt2;
+  const char *pnt2;
   int i;
   int dtype;
   struct forward_ref *fpnt;
@@ -3129,7 +3129,8 @@ get_VMS_time_on_unix (Now)
 static void
 Write_VMS_MHD_Records ()
 {
-  register char *cp, *cp1;
+  register const char *cp;
+  register char *cp1;
   register int i;
   struct
   {
@@ -3510,9 +3511,9 @@ VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
   register int i;
   register char *cp;
   int Negate;
-  static struct
+  static const struct
   {
-    char *Name;
+    const char *Name;
     int Value;
   } Attributes[] =
   {

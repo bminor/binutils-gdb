@@ -1,3 +1,40 @@
+Tue Jan 24 16:44:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-vax.c (vip): Introduce new ptr-to-const local variable
+	for scanning operand string.
+
+	Sat Jan 21 17:50:38 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/vax-inst.h (struct vop, fields `vop_warn', `vop_error'):
+	make them pointers to const char;
+	(struct vit, field `vit_error'):  ditto.
+	* config/atof-vax.c (md_atof):  rename local `littlenum_pointer'
+	to `littlenumP' to avoid shadowing file scope variable.
+	* config/tc-vax.c (vip_begin, vip_op_defaults, vip_op_1):  make
+	string arguments be pointers to const char;
+	(vip):  make `alloperr' const char *;
+	(vip_op): make `err' and `wrn' const char *; rename `access' to
+	`access_mode' to avoid shadowing library function.
+	* config/obj-vms.c (`symbol_name'):  make it const char *;
+	(get_struct_name):  cast one use of `symbol_name' to char *
+	[caller guarantees that it won't modify the pointer's target];
+	(PUT_COUNTED_STRING):  use pointer to const char;
+	(VMS_typedef_parse):  make `pnt2' const char *;
+	(Write_VMS_MHD_Records):  make `cp' const char *;
+	(VMS_Modify_Psect_Attributes, array `Attributes'):  make const,
+	and make field `Name' pointer to const char;
+
+	* as.h (`seg_name[]' declaration):  pointers to const char;
+	(struct _pseudo_type, field `poc_name'):  pointer to const char.
+	* subsegs.c (`seg_name[]' definition):  ditto;
+	* hash.c (hash_ask):  rename argument `access' to `access_type'
+	to avoid shadowing library function.
+	* write.c (variable `the_object_file'):  move from file scope
+	to block scope within write_object_file(); free it after use;
+	(fixup_segment):  conditionally exclude it for OBJ_VMS.
+	(cvt_frag_to_fill):  rename argument `headers' to `headersP'
+	to avoid shadowing file scope variable.
+
 Mon Jan 23 21:42:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip, case 'D'): Fix typo which caused
