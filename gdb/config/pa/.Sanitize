@@ -28,8 +28,13 @@ hppahpux.mt
 hppaosf.mh
 hppaosf.mt
 hppapro.mt
+hpux1020.mh
+hpux1020.mt
+hpux1100.mh
+hpux1100.mt
 nm-hppab.h
 nm-hppah.h
+nm-hppah11.h
 nm-hppao.h
 tm-hppa.h
 tm-hppab.h

@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "somsolib.h"
-
 #define U_REGS_OFFSET 0
 
 #define KERNEL_U_ADDR 0
@@ -50,17 +48,83 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
                    ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
                    ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
-/* fetch_inferior_registers is in hppah-nat.c.  */
+/* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS
-
-/* child_xfer_memory is in hppah-nat.c.  */
 #define CHILD_XFER_MEMORY
+#define CHILD_POST_FOLLOW_INFERIOR_BY_CLONE
+#define CHILD_POST_FOLLOW_VFORK
+
+/* While this is for use by threaded programs, it doesn't appear
+ * to hurt non-threaded ones.  This is used in infrun.c: */
+#define PREPARE_TO_PROCEED() hppa_prepare_to_proceed()
+extern int hppa_prepare_to_proceed PARAMS(( void ));
+
+/* In infptrace.c or infttrace.c: */
+#define CHILD_PID_TO_EXEC_FILE
+#define CHILD_POST_STARTUP_INFERIOR
+#define CHILD_ACKNOWLEDGE_CREATED_INFERIOR
+#define CHILD_INSERT_FORK_CATCHPOINT
+#define CHILD_REMOVE_FORK_CATCHPOINT
+#define CHILD_INSERT_VFORK_CATCHPOINT
+#define CHILD_REMOVE_VFORK_CATCHPOINT
+#define CHILD_HAS_FORKED
+#define CHILD_HAS_VFORKED
+#define CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC
+#define CHILD_INSERT_EXEC_CATCHPOINT
+#define CHILD_REMOVE_EXEC_CATCHPOINT
+#define CHILD_HAS_EXECD
+#define CHILD_REPORTED_EXEC_EVENTS_PER_EXEC_CALL
+#define CHILD_HAS_SYSCALL_EVENT
+#define CHILD_POST_ATTACH
+#define CHILD_THREAD_ALIVE
+
+#define REQUIRE_ATTACH(pid) hppa_require_attach(pid)
+extern int hppa_require_attach PARAMS ((int));
+
+#define REQUIRE_DETACH(pid,signal) hppa_require_detach(pid,signal)
+extern int hppa_require_detach PARAMS ((int,int));
+
+/* In infptrace.c or infttrace.c: */
+
+#define HPPA_GET_PROCESS_EVENTS
+
+/* These types and function provide an interface that is independent
+   of ptrace or ttrace, and that may be used to determine the most
+   recent event returned by a waited process.
+
+   hppa_get_process_events may return multiple event kinds from a single
+   call, by returning a bit-vector of event kinds.  (However, no single
+   event may be represented more than once in a single call.  E.g., a
+   call may indicate that both a fork and a signal occurred, but cannot
+   indicate that two signals occurred.)
+
+   Also, this function returns an indication (third parameter set to
+   non-zero) of whether the query mandates that the process be continued
+   afterwards.  (This is required when using ptrace PT_GET_PROCESS_STATE;
+   not continuing the process afterwards will cause subsequent waits to
+   return the same event, ad infinitum.  Sigh.) */
+typedef enum {
+  PEVT_NONE = 0,
+  PEVT_SIGNAL = 0x01,
+  PEVT_FORK   = 0x02,
+  PEVT_VFORK  = 0x04,
+  PEVT_EXEC   = 0x08,
+  PEVT_EXIT   = 0x10
+} process_event_kind;
+
+typedef int  process_event_vector;
+
+extern process_event_vector  hppa_get_process_events PARAMS ((int, int, int *));
+
 
 /* So we can cleanly use code in infptrace.c.  */
 #define PT_KILL		PT_EXIT
 #define PT_STEP		PT_SINGLE
 #define PT_CONTINUE	PT_CONTIN
-#define PT_READ_U	PT_RDUAREA
+
+/* FIXME HP MERGE : Previously, PT_RDUAREA. this is actually fixed
+   in gdb-hp-snapshot-980509  */
+#define PT_READ_U	PT_RUAREA
 #define PT_WRITE_U	PT_WUAREA
 #define PT_READ_I	PT_RIUSER
 #define PT_READ_D	PT_RDUSER
@@ -76,6 +140,163 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define ATTACH_DETACH
 
+/* In infptrace or infttrace.c: */
+
+/* Starting with HP-UX 10.30, support is provided (in the form of
+   ttrace requests) for memory-protection-based hardware watchpoints.
+
+   The 10.30 implementation of these functions reside in infttrace.c.
+
+   Stubs of these functions will be provided in infptrace.c, so that
+   10.20 will at least link.  However, the "can I use a fast watchpoint?"
+   query will always return "No" for 10.20. */
+
+#define TARGET_HAS_HARDWARE_WATCHPOINTS
+
+/* The PA can watch any number of locations (generic routines already check
+   that all intermediates are in watchable memory locations). */
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
+        hppa_can_use_hw_watchpoint(type, cnt, ot)
+
+/* The PA can also watch memory regions of arbitrary size, since we're using
+   a page-protection scheme.  (On some targets, apparently watch registers
+   are used, which can only accomodate regions of REGISTER_SIZE.) */
+#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(byte_count) \
+        (1)
+
+/* However, some addresses may not be profitable to use hardware to watch,
+   or may be difficult to understand when the addressed object is out of
+   scope, and hence should be unwatched.  On some targets, this may have
+   severe performance penalties, such that we might as well use regular
+   watchpoints, and save (possibly precious) hardware watchpoints for other
+   locations.
+
+   On HP-UX, we choose not to watch stack-based addresses, because
+
+   [1] Our implementation relies on page protection traps.  The granularity
+   of these is large and so can generate many false hits, which are expensive
+   to respond to.
+
+   [2] Watches of "*p" where we may not know the symbol that p points to,
+   make it difficult to know when the addressed object is out of scope, and
+   hence shouldn't be watched.  Page protection that isn't removed when the
+   addressed object is out of scope will either degrade execution speed
+   (false hits) or give false triggers (when the address is recycled by
+   other calls).
+
+   Since either of these points results in a slow-running inferior, we might
+   as well use normal watchpoints, aka single-step & test. */
+#define TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT(pid,start,len) \
+        hppa_range_profitable_for_hw_watchpoint(pid, start, (LONGEST)(len))
+
+/* On HP-UX, we're using page-protection to implement hardware watchpoints.
+   When an instruction attempts to write to a write-protected memory page,
+   a SIGBUS is raised.  At that point, the write has not actually occurred.
+
+   We must therefore remove page-protections; single-step the inferior (to
+   allow the write to happen); restore page-protections; and check whether
+   any watchpoint triggered.
+
+   If none did, then the write was to a "nearby" location that just happens
+   to fall on the same page as a watched location, and so can be ignored.
+
+   The only intended client of this macro is wait_for_inferior(), in infrun.c.
+   When HAVE_NONSTEPPABLE_WATCHPOINT is true, that function will take care
+   of the stepping & etc. */
+
+#define STOPPED_BY_WATCHPOINT(W) \
+        ((W.kind == TARGET_WAITKIND_STOPPED) && \
+         (stop_signal == TARGET_SIGNAL_BUS) && \
+         ! stepped_after_stopped_by_watchpoint && \
+         bpstat_have_active_hw_watchpoints ())
+
+/* When a hardware watchpoint triggers, we'll move the inferior past it
+   by removing all eventpoints; stepping past the instruction that caused
+   the trigger; reinserting eventpoints; and checking whether any watched
+   location changed. */
+#define HAVE_NONSTEPPABLE_WATCHPOINT
+
+/* Our implementation of "hardware" watchpoints uses memory page-protection
+   faults.  However, HP-UX has unfortunate interactions between these and
+   system calls; basically, it's unsafe to have page protections on when a
+   syscall is running.  Therefore, we also ask for notification of syscall
+   entries and returns.  When the inferior enters a syscall, we disable
+   h/w watchpoints.  When the inferior returns from a syscall, we reenable
+   h/w watchpoints.
+
+   infptrace.c supplies dummy versions of these; infttrace.c is where the
+   meaningful implementations are.
+   */
+#define TARGET_ENABLE_HW_WATCHPOINTS(pid) \
+        hppa_enable_page_protection_events (pid)
+extern void  hppa_enable_hw_watchpoints PARAMS ((int));
+
+#define TARGET_DISABLE_HW_WATCHPOINTS(pid) \
+        hppa_disable_page_protection_events (pid)
+extern void  hppa_disable_hw_watchpoints PARAMS ((int));
+
+/* Use these macros for watchpoint insertion/deletion.  */
+#define target_insert_watchpoint(addr, len, type) \
+        hppa_insert_hw_watchpoint (inferior_pid, addr, (LONGEST)(len), type)
+
+#define target_remove_watchpoint(addr, len, type) \
+        hppa_remove_hw_watchpoint (inferior_pid, addr, (LONGEST)(len), type)
+
+/* We call our k-thread processes "threads", rather
+ * than processes.  So we need a new way to print
+ * the string.  Code is in hppah-nat.c.
+ */
+#define target_pid_to_str( pid ) \
+        hppa_pid_to_str( pid )
+extern char * hppa_pid_to_str PARAMS ((pid_t));
+
+#define target_tid_to_str( pid ) \
+        hppa_tid_to_str( pid )
+extern char * hppa_tid_to_str PARAMS ((pid_t));
+
+/* For this, ID can be either a process or thread ID, and the function
+   will describe it appropriately, returning the description as a printable
+   string.
+
+   The function that implements this macro is defined in infptrace.c and
+   infttrace.c.
+   */
+#define target_pid_or_tid_to_str(ID) \
+        hppa_pid_or_tid_to_str (ID)
+extern char * hppa_pid_or_tid_to_str PARAMS ((pid_t));
+
+/* This is used when handling events caused by a call to vfork().  On ptrace-
+   based HP-UXs, when you resume the vforked child, the parent automagically
+   begins running again.  To prevent this runaway, this function is used.
+
+   Note that for vfork on HP-UX, we receive three events of interest:
+
+   1. the vfork event for the new child process
+   2. the exit or exec event of the new child process (actually, you get
+      two exec events on ptrace-based HP-UXs)
+   3. the vfork event for the original parent process
+
+   The first is always received first.  The other two may be received in any
+   order; HP-UX doesn't guarantee an order.
+   */
+#define ENSURE_VFORKING_PARENT_REMAINS_STOPPED(PID) \
+        hppa_ensure_vforking_parent_remains_stopped (PID)
+extern void  hppa_ensure_vforking_parent_remains_stopped PARAMS((int));
+
+/* This is used when handling events caused by a call to vfork().
+
+   On ttrace-based HP-UXs, the parent vfork and child exec arrive more or less
+   together.  That is, you could do two wait()s without resuming either parent
+   or child, and get both events.
+
+   On ptrace-based HP-UXs, you must resume the child after its exec event is
+   delivered or you won't get the parent's vfork.  I.e., you can't just wait()
+   and get the parent vfork, after receiving the child exec.
+   */
+#define RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK() \
+        hppa_resume_execd_vforking_child_to_get_parent_vfork ()
+extern int  hppa_resume_execd_vforking_child_to_get_parent_vfork PARAMS ((void));
+
 #ifdef HAVE_HPUX_THREAD_SUPPORT
 
 #ifdef __STDC__
@@ -89,3 +310,5 @@ extern char *hpux_pid_to_str PARAMS ((int pid));
 #define target_pid_to_str(PID) hpux_pid_to_str (PID)
 
 #endif /* HAVE_HPUX_THREAD_SUPPORT */
+
+#define HPUXHPPA

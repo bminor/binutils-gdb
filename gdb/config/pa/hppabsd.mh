@@ -2,6 +2,6 @@
 XDEPFILES=  ser-tcp.o
 XM_FILE= xm-hppab.h
 NAT_FILE= nm-hppab.h
-NATDEPFILES= hppab-nat.o corelow.o core-aout.o inftarg.o fork-child.o somread.o infptrace.o hpread.o somsolib.o
+NATDEPFILES= hppab-nat.o corelow.o core-aout.o inftarg.o fork-child.o somread.o infptrace.o hp-psymtab-read.o hp-symtab-read.o somsolib.o
 
 GDBSERVER_DEPFILES= low-hppabsd.o
