@@ -7252,7 +7252,12 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     return TRUE;
 
   if (seen_other && seen_linkorder)
-    return FALSE;
+    {
+      (*_bfd_error_handler) ("%s: has both ordered and unordered sections",
+			     o->name);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
   
   sections = (struct bfd_link_order **)
     xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));

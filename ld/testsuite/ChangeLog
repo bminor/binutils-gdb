@@ -1,3 +1,7 @@
+2004-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/crossref.exp: XFAIL ia64-*-* on the first test.
+
 2004-07-13  Nitin Yewale <nitiny@kpitcummins.com>
 
 	* ld-h8300/h8300.exp: Addition of gcsection test case.

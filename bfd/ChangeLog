@@ -1,3 +1,8 @@
+2004-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_fixup_link_order): Issue a warning and flag
+	an error if failed.
+
 2004-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aout-adobe.c (aout_32_section_already_linked): Defined.
