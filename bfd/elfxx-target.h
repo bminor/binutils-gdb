@@ -324,6 +324,9 @@
 #ifndef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections 0
 #endif
+#ifndef elf_backend_omit_section_dynsym
+#define elf_backend_omit_section_dynsym _bfd_elf_link_omit_section_dynsym
+#endif
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
 #endif
@@ -505,6 +508,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_add_symbol_hook,
   elf_backend_link_output_symbol_hook,
   elf_backend_create_dynamic_sections,
+  elf_backend_omit_section_dynsym,
   elf_backend_check_relocs,
   elf_backend_adjust_dynamic_symbol,
   elf_backend_always_size_sections,

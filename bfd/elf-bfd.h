@@ -646,6 +646,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_create_dynamic_sections)
     (bfd *abfd, struct bfd_link_info *info);
 
+  /* When creating a shared library, determine whether to omit the
+     dynamic symbol for the section.  */
+  bfd_boolean (*elf_backend_omit_section_dynsym)
+    (bfd *output_bfd, struct bfd_link_info *info, asection *osec);
+
   /* The CHECK_RELOCS function is called by the add_symbols phase of
      the ELF backend linker.  It is called once for each section with
      relocs of an object file, just after the symbols for the object
@@ -1520,6 +1525,8 @@ extern bfd_boolean _bfd_elf_validate_reloc
 
 extern bfd_boolean _bfd_elf_link_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_link_omit_section_dynsym
+  (bfd *, struct bfd_link_info *, asection *);
 extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section

@@ -608,6 +608,43 @@ elf_link_renumber_hash_table_dynsyms (struct elf_link_hash_entry *h,
   return TRUE;
 }
 
+/* Return true if the dynamic symbol for a given section should be
+   omitted when creating a shared library.  */
+bfd_boolean
+_bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
+				   struct bfd_link_info *info,
+				   asection *p)
+{
+  switch (elf_section_data (p)->this_hdr.sh_type)
+    {
+    case SHT_PROGBITS:
+    case SHT_NOBITS:
+      /* If sh_type is yet undecided, assume it could be
+	 SHT_PROGBITS/SHT_NOBITS.  */
+    case SHT_NULL:
+      if (strcmp (p->name, ".got") == 0
+	  || strcmp (p->name, ".got.plt") == 0
+	  || strcmp (p->name, ".plt") == 0)
+	{
+	  asection *ip;
+	  bfd *dynobj = elf_hash_table (info)->dynobj;
+
+	  if (dynobj != NULL
+	      && (ip = bfd_get_section_by_name (dynobj, p->name))
+	      != NULL
+	      && (ip->flags & SEC_LINKER_CREATED)
+	      && ip->output_section == p)
+	    return TRUE;
+	}
+      return FALSE;
+
+      /* There shouldn't be section relative relocations
+	 against any other section.  */
+    default:
+      return TRUE;
+    }
+}
+
 /* Assign dynsym indices.  In a shared library we generate a section
    symbol for each output section, which come first.  Next come all of
    the back-end allocated local dynamic syms, followed by the rest of
@@ -620,38 +657,13 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
 
   if (info->shared)
     {
+      const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
       asection *p;
       for (p = output_bfd->sections; p ; p = p->next)
 	if ((p->flags & SEC_EXCLUDE) == 0
-	    && (p->flags & SEC_ALLOC) != 0)
-	  switch (elf_section_data (p)->this_hdr.sh_type)
-	    {
-	    case SHT_PROGBITS:
-	    case SHT_NOBITS:
-	      /* If sh_type is yet undecided, assume it could be
-		 SHT_PROGBITS/SHT_NOBITS.  */
-	    case SHT_NULL:
-	      if (strcmp (p->name, ".got") == 0
-		  || strcmp (p->name, ".got.plt") == 0
-		  || strcmp (p->name, ".plt") == 0)
-		{
-		  asection *ip;
-		  bfd *dynobj = elf_hash_table (info)->dynobj;
-
-		  if (dynobj != NULL
-		      && (ip = bfd_get_section_by_name (dynobj, p->name))
-			 != NULL
-		      && (ip->flags & SEC_LINKER_CREATED)
-		      && ip->output_section == p)
-		    continue;
-		}
-	      elf_section_data (p)->dynindx = ++dynsymcount;
-	      break;
-	      /* There shouldn't be section relative relocations
-		 against any other section.  */
-	    default:
-	      break;
-	    }
+	    && (p->flags & SEC_ALLOC) != 0
+	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
+	  elf_section_data (p)->dynindx = ++dynsymcount;
     }
 
   if (elf_hash_table (info)->dynlocal)

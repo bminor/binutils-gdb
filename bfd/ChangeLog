@@ -1,3 +1,16 @@
+2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Added
+	elf_backend_omit_section_dynsym.
+	(_bfd_elf_link_omit_section_dynsym): Declare.
+	* elf32-frv.c (_frvfdpic_link_omit_section_dynsym): New.
+	(elf_backend_omit_section_dynsym): Use it for frvfdpic.
+	* elflink.c (_bfd_elf_link_omit_section_dynsym): Split out of...
+	(_bfd_elf_link_renumber_dynsyms): ... this function.
+	* elfxx-target.h (elf_backend_omit_section_dynsym): Default to
+	_bfd_elf_link_omit_section_dynsym).
+	(elfNN_bed): Added elf_backend_omit_section_dynsym.
+
 2004-06-21  Nick Clifton  <nickc@redhat.com>
 
 	* coffcode.h (styp_to_sec_flags): Ignore IMAGE_SCN_MEM_NOT_PAGED

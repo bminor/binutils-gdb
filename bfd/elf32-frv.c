@@ -2685,6 +2685,30 @@ elf32_frv_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   return TRUE;
 }
 
+/* We need dynamic symbols for every section, since segments can
+   relocate independently.  */
+static bfd_boolean
+_frvfdpic_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
+				    struct bfd_link_info *info
+				    ATTRIBUTE_UNUSED,
+				    asection *p ATTRIBUTE_UNUSED)
+{
+  switch (elf_section_data (p)->this_hdr.sh_type)
+    {
+    case SHT_PROGBITS:
+    case SHT_NOBITS:
+      /* If sh_type is yet undecided, assume it could be
+	 SHT_PROGBITS/SHT_NOBITS.  */
+    case SHT_NULL:
+      return FALSE;
+
+      /* There shouldn't be section relative relocations
+	 against any other section.  */
+    default:
+      return TRUE;
+    }
+}
+
 /* Create  a .got section, as well as its additional info field.  This
    is almost entirely copied from
    elflink.c:_bfd_elf_create_got_section().  */
@@ -4824,5 +4848,8 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 /* We use REL for dynamic relocations only.  */
 #undef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p  1
+
+#undef elf_backend_omit_section_dynsym
+#define elf_backend_omit_section_dynsym _frvfdpic_link_omit_section_dynsym
 
 #include "elf32-target.h"

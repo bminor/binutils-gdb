@@ -1,3 +1,7 @@
+2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frvfd.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
 2004-06-18  Adam Nemet  <anemet@lnxw.com> 
 
 	* configure.in: Set EXTRA_SHLIB_EXTENSION to .a for LynxOS. 
