@@ -1710,15 +1710,6 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	      continue;
 	    }
 	}
-      else
-	{
-	  if (r_index >= bfd_get_symcount (abfd))
-	    {
-	      /* This is abnormal, but should be caught in the
-                 relocation phase.  */
-	      continue;
-	    }
-	}
 
       /* If this is a base relative reloc, we need to make an entry in
          the .got section.  */
@@ -1746,6 +1737,13 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	    }
 	  else
 	    {
+	      if (r_index >= bfd_get_symcount (abfd))
+		{
+		  /* This is abnormal, but should be caught in the
+		     relocation phase.  */
+		  continue;
+		}
+
 	      if (adata (abfd).local_got_offsets == NULL)
 		{
 		  adata (abfd).local_got_offsets =
