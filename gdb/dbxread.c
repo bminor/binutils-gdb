@@ -1933,17 +1933,12 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		  if (m && STREQN (SYMBOL_NAME (m), name, l))
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
+		  else if (m && STREQN (SYMBOL_NAME (m+1), name, l))
+		    /* last_pc_address was in last function */
+		    valu = SYMBOL_VALUE (m+1);
 		  else
-		    {
-		      m = lookup_next_minimal_symbol (last_pc_address);
-		      if (m && STREQN (SYMBOL_NAME (m), name, l))
-			/* last_pc_address was in last function */
-			valu = SYMBOL_VALUE (m);
-		      else
-			/* Not found.
-			   Use last_pc_address (for finish_block).  */
-			valu = last_pc_address;
-		    }
+		    /* Not found - use last_pc_address (for finish_block) */
+		    valu = last_pc_address;
 		}
 
 	      last_pc_address = valu;	/* Save for SunOS bug circumcision */
