@@ -1,3 +1,12 @@
+Sat May  1 16:05:24 1993  Fred Fish  (fnf@cygnus.com)
+
+	* valprint.c (print_longest):  Change format parameter from a
+	'char' to an 'int'.  We can't have 'char' parameters with the
+	current coding style, where we mix prototypes with pre-ANSI
+	style declarations.
+	* value.h (print_longest):  Change format parameter in prototype
+	from a 'char' to an 'int'.	
+
 Sat May  1 02:47:20 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-mips.h (STAB_REG_TO_REGNUM): Match it with the gcc
