@@ -1,5 +1,10 @@
 2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* ldexp.c (exp_print_tree): Use stderr if config.map_file is not
+	available.  Do not print NULL trees.
+	(exp_print_token): Print unknown tokens with values > 126 as
+	decimal values not ASCII characters.
+
 	* ldlang.c (lang_leave_overlay): If a region is specified assign
 	it to all sections inside the overlay unless they have been
 	assigned to the own, non-default, memory region.
