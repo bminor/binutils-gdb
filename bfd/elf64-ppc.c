@@ -3807,8 +3807,7 @@ edit_opd (obfd, info)
 			     for the function descriptor sym which we
 			     don't have at the moment.  So keep an
 			     array of adjustments.  */ 
-			  adjust[(rel->r_offset + wptr - rptr) / 24]
-			    = wptr - rptr;
+			  adjust[rel->r_offset / 24] = wptr - rptr;
 			}
 
 		      if (wptr != rptr)
