@@ -1,3 +1,13 @@
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c: Update copyright years.
+	(ns32k_register_name_32082): New function.
+	(ns32k_register_name_32382): Ditto.
+	* config/ns32k/tm-nbsd.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define as ns32k_register_name_32382.
+	* config/ns32k/tm-umax.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define as ns32k_register_name_32082.
+
 2002-05-24  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (free_line_header): Use xfree, not free.

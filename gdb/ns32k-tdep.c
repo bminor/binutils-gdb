@@ -1,6 +1,6 @@
 /* Print NS 32000 instructions for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,10 +25,43 @@
 
 static int sign_extend (int value, int bits);
 
-void
-_initialize_ns32k_tdep (void)
+char *
+ns32k_register_name_32082 (int regno)
 {
-  tm_print_insn = print_insn_ns32k;
+  static char *register_names[] =
+  {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+    "sp", "fp", "pc", "ps",
+    "l0", "l1", "l2", "l3", "xx",
+  };
+
+  if (regno < 0)
+    return NULL;
+  if (regno >= sizeof (register_names) / sizeof (*register_names))
+    return NULL;
+
+  return (register_names[regno]);
+}
+
+char *
+ns32k_register_name_32382 (int regno)
+{
+  static char *register_names[] =
+  {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+    "sp", "fp", "pc", "ps",
+    "fsr",
+    "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "xx",
+  };
+
+  if (regno < 0)
+    return NULL;
+  if (regno >= sizeof (register_names) / sizeof (*register_names))
+    return NULL;
+
+  return (register_names[regno]);
 }
 
 /* Advance PC across any function entry prologue instructions
@@ -187,4 +220,10 @@ ns32k_get_enter_addr (CORE_ADDR pc)
     return 0;			/* function has no enter/exit */
 
   return enter_addr;		/* pc is between enter and exit */
+}
+
+void
+_initialize_ns32k_tdep (void)
+{
+  tm_print_insn = print_insn_ns32k;
 }

@@ -76,15 +76,10 @@ extern CORE_ADDR umax_skip_prologue (CORE_ADDR);
 
 #define NUM_GENERAL_REGS	8
 
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
+extern char *ns32k_register_name_32082 (int);
+extern char *ns32k_register_name_32382 (int);
 
-#define REGISTER_NAMES {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",	\
- 			"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",	\
-			"sp", "fp", "pc", "ps",				\
- 			"fsr",						\
-			"l0", "l1", "l2", "l3", "xx",			\
- 			}
+#define REGISTER_NAME(REGNUM) ns32k_register_name_32082(REGNUM)
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
