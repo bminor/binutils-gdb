@@ -1,4 +1,9 @@
-Tue Nov 26 13:36:01 1996  Jeffrey A Law  (law@cygnus.com)
+Tue Nov 26 15:43:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300_sim.h (PSW_*): Define for CC status tracking.
+	(REG_D0, REG_A0, REG_SP): Define.
+	* simops.c: Implement "add", "addc" and a few other random
+	instructions.
 
 	* gencode.c, interp.c: Snapshot current simulator code.
 

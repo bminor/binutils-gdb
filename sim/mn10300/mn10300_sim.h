@@ -68,10 +68,19 @@ struct _state
 
 extern uint32 OP[4];
 extern struct simops Simops[];
+extern unsigned long insn, extension;
 
 #define PC	(State.pc)
 
 #define PSW (State.sregs[0])
+#define PSW_V 0x1
+#define PSW_C 0x2
+#define PSW_N 0x4
+#define PSW_Z 0x8
+
+#define REG_D0 0
+#define REG_A0 4
+#define REG_SP 8
 
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 
