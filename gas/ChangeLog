@@ -1,5 +1,11 @@
 2001-06-24  Ben Elliston  <bje@redhat.com>
 
+	* config/tc-m88k.c (md_number_to_imm): Remove; unused since 1993.
+	(emit_relocations): Ditto.
+	(s_bss): Ditto.
+	(md_begin): Reformat comments to conform to the GNU standards.
+	(md_assemble): Ditto.
+
 	* config/tc-m88k.c (get_reg): Adjust type of `reg_prefix' to char.
 	(md_parse_option): Mark parameters as unused.
 	(md_show_usage): Ditto.
@@ -9,7 +15,7 @@
 	(md_create_short_jump): Mark from_addr, to_addr params as unused.
 	(md_create_long_jump): Ditto.
 	(md_estimate_size_before_relax): Mark parameters as unused.
-	
+
 	* config/tc-m88k.c (md_pseudo_table): Properly terminate the table
 	to allay a possible compiler warning.
 

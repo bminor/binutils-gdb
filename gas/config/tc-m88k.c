@@ -146,7 +146,7 @@ static struct hash_control *op_hash = NULL;
 int md_seg_align = 7;
 
 /* These chars start a comment anywhere in a source file (except inside
-   another comment */
+   another comment.  */
 const char comment_chars[] = ";";
 
 /* These chars only start a comment at the beginning of a line.  */
@@ -188,26 +188,21 @@ md_begin ()
   const char *retval = NULL;
   unsigned int i = 0;
 
-  /* initialize hash table */
-
+  /* Initialize hash table.  */
   op_hash = hash_new ();
-
-  /* loop until you see the end of the list */
 
   while (*m88k_opcodes[i].name)
     {
       char *name = m88k_opcodes[i].name;
 
-      /* hash each mnemonic and record its position */
-
+      /* Hash each mnemonic and record its position.  */
       retval = hash_insert (op_hash, name, &m88k_opcodes[i]);
 
       if (retval != NULL)
 	as_fatal (_("Can't hash instruction '%s':%s"),
 		  m88k_opcodes[i].name, retval);
 
-      /* skip to next unique mnemonic or end of list */
-
+      /* Skip to next unique mnemonic or end of list.  */
       for (i++; !strcmp (m88k_opcodes[i].name, name); i++)
 	;
     }
@@ -244,23 +239,20 @@ md_assemble (op)
 
   assert (op);
 
-  /* skip over instruction to find parameters */
-
+  /* Skip over instruction to find parameters.  */
   for (param = op; *param != 0 && !isspace (*param); param++)
     ;
   c = *param;
   *param++ = '\0';
 
-  /* try to find the instruction in the hash table */
-
+  /* Try to find the instruction in the hash table.  */
   if ((format = (struct m88k_opcode *) hash_find (op_hash, op)) == NULL)
     {
       as_bad (_("Invalid mnemonic '%s'"), op);
       return;
     }
 
-  /* try parsing this instruction into insn */
-
+  /* Try parsing this instruction into insn.  */
   insn.exp.X_add_symbol = 0;
   insn.exp.X_op_symbol = 0;
   insn.exp.X_add_number = 0;
@@ -269,8 +261,7 @@ md_assemble (op)
 
   while (!calcop (format, param, &insn))
     {
-      /* if it doesn't parse try the next instruction */
-
+      /* If it doesn't parse try the next instruction.  */
       if (!strcmp (format[0].name, format[1].name))
 	format++;
       else
@@ -280,13 +271,11 @@ md_assemble (op)
 	}
     }
 
-  /* grow the current frag and plop in the opcode */
-
+  /* Grow the current frag and plop in the opcode.  */
   thisfrag = frag_more (4);
   md_number_to_chars (thisfrag, insn.opcode, 4);
 
-  /* if this instruction requires labels mark it for later */
-
+  /* If this instruction requires labels mark it for later.  */
   switch (insn.reloc)
     {
     case NO_RELOC:
@@ -960,84 +949,6 @@ md_number_to_chars (buf, val, nbytes)
   number_to_chars_bigendian (buf, val, nbytes);
 }
 
-#if 0
-
-/* This routine is never called.  What is it for?
-   Ian Taylor, Cygnus Support 13 Jul 1993 */
-
-void
-md_number_to_imm (buf, val, nbytes, fixP, seg_type)
-     unsigned char *buf;
-     unsigned int val;
-     int nbytes;
-     fixS *fixP;
-     int seg_type;
-{
-  if (seg_type != N_TEXT || fixP->fx_r_type == NO_RELOC)
-    {
-      switch (nbytes)
-	{
-	case 4:
-	  *buf++ = val >> 24;
-	  *buf++ = val >> 16;
-	case 2:
-	  *buf++ = val >> 8;
-	case 1:
-	  *buf = val;
-	  break;
-
-	default:
-	  abort ();
-	}
-      return;
-    }
-
-  switch (fixP->fx_r_type)
-    {
-    case RELOC_IW16:
-      buf[2] = val >> 8;
-      buf[3] = val;
-      break;
-
-    case RELOC_LO16:
-      buf[0] = val >> 8;
-      buf[1] = val;
-      break;
-
-    case RELOC_HI16:
-      buf[0] = val >> 24;
-      buf[1] = val >> 16;
-      break;
-
-    case RELOC_PC16:
-      val += 4;
-      buf[0] = val >> 10;
-      buf[1] = val >> 2;
-      break;
-
-    case RELOC_PC26:
-      val += 4;
-      buf[0] |= (val >> 26) & 0x03;
-      buf[1] = val >> 18;
-      buf[2] = val >> 10;
-      buf[3] = val >> 2;
-      break;
-
-    case RELOC_32:
-      buf[0] = val >> 24;
-      buf[1] = val >> 16;
-      buf[2] = val >> 8;
-      buf[3] = val;
-      break;
-
-    default:
-      as_fatal (_("Bad relocation type"));
-      break;
-    }
-}
-
-#endif /* 0 */
-
 void
 md_number_to_disp (buf, val, nbytes)
      char *buf;
@@ -1172,152 +1083,6 @@ md_estimate_size_before_relax (fragP, segment_type)
   as_fatal (_("Relaxation should never occur"));
   return (-1);
 }
-
-#if 0
-
-/* As far as I can tell, this routine is never called.  What is it
-   doing here?
-   Ian Taylor, Cygnus Support 13 Jul 1993 */
-
-/*
- * Risc relocations are completely different, so it needs
- * this machine dependent routine to emit them.
- */
-void
-emit_relocations (fixP, segment_address_in_file)
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
-{
-  struct reloc_info_m88k ri;
-  symbolS *symbolP;
-  extern char *next_object_file_charP;
-
-  bzero ((char *) &ri, sizeof (ri));
-  for (; fixP; fixP = fixP->fx_next)
-    {
-      if (fixP->fx_r_type >= NO_RELOC)
-	{
-	  fprintf (stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
-	  abort ();
-	}
-
-      if ((symbolP = fixP->fx_addsy) != NULL)
-	{
-	  ri.r_address = fixP->fx_frag->fr_address +
-	    fixP->fx_where - segment_address_in_file;
-	  if ((symbolP->sy_type & N_TYPE) == N_UNDF)
-	    {
-	      ri.r_extern = 1;
-	      ri.r_symbolnum = symbolP->sy_number;
-	    }
-	  else
-	    {
-	      ri.r_extern = 0;
-	      ri.r_symbolnum = symbolP->sy_type & N_TYPE;
-	    }
-	  if (symbolP && symbol_get_frag (symbolP))
-	    {
-	      ri.r_addend = symbol_get_frag (symbolP)->fr_address;
-	    }
-	  ri.r_type = fixP->fx_r_type;
-	  if (fixP->fx_pcrel)
-	    {
-	      ri.r_addend -= ri.r_address;
-	    }
-	  else
-	    {
-	      ri.r_addend = fixP->fx_addnumber;
-	    }
-
-	  append (&next_object_file_charP, (char *) &ri, sizeof (ri));
-	}
-    }
-}
-
-#endif /* 0 */
-
-#if 0
-
-/* This routine can be subsumed by s_lcomm in read.c.
-   Ian Taylor, Cygnus Support 13 Jul 1993 */
-
-static void
-s_bss ()
-{
-  char *name;
-  char c;
-  char *p;
-  int temp, bss_align;
-  symbolS *symbolP;
-
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_warn (_("Expected comma after name"));
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++;
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_warn (_("BSS length (%d.) <0! Ignored."), temp);
-      ignore_rest_of_line ();
-      return;
-    }
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-  if (*input_line_pointer == ',')
-    {
-      input_line_pointer++;
-      bss_align = get_absolute_expression ();
-    }
-  else
-    bss_align = 0;
-
-  if (!S_IS_DEFINED(symbolP)
-      || S_GET_SEGMENT(symbolP) == SEG_BSS)
-    {
-      if (! need_pass_2)
-	{
-	  char *p;
-	  segT current_seg = now_seg;
-	  subsegT current_subseg = now_subseg;
-
-	  subseg_set (SEG_BSS, 1); /* switch to bss	*/
-
-	  if (bss_align)
-	    frag_align (bss_align, 0, 0);
-
-	  /* detach from old frag */
-	  if (symbolP->sy_type == N_BSS && symbol_get_frag (symbolP) != NULL)
-	    symbol_get_frag (symbolP)->fr_symbol = NULL;
-
-	  symbol_set_frag (symbolP, frag_now);
-	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			(offsetT) temp, (char *)0);
-	  *p = 0;
-	  S_SET_SEGMENT (symbolP, SEG_BSS);
-
-	  subseg_set (current_seg, current_subseg);
-	}
-    }
-  else
-    {
-      as_warn (_("Ignoring attempt to re-define symbol %s."), name);
-    }
-
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      input_line_pointer++;
-    }
-}
-
-#endif /* 0 */
 
 #ifdef M88KCOFF
 
