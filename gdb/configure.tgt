@@ -233,7 +233,6 @@ powerpc-*-macos*)	gdb_target=macos ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
-powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
 powerpcle-*-cygwin32)	gdb_target=cygwin32 ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;

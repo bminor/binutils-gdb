@@ -1,3 +1,14 @@
+Fri Jan 23 17:26:22 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.host (i[3456]86-*-osf1mk*, mips-*-mach3*,
+	ns32k-*-mach3*): Fix file names.
+	(i[3456]86-*-os9k, m88*-*-mach3*, w65-*-*): Remove config
+	recognition, no source files for these.
+	* configure.tgt (powerpc-*-aix4*): Remove config, now identical
+	to powerpc-*-aix*.
+	* config/powerpc/{aix4.mh,aix4.mt,tm-ppc-aix4.h}: Remove files,
+	no longer needed.
+
 Fri Jan 23 16:49:41 1998  Mark Alexander  <marka@cygnus.com>
 
 	* monitor.c (monitor_write, monitor_readchar): New functions.
@@ -29,7 +40,7 @@ Tue Jan 20 18:53:18 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.tgt (i386-*-mach*, m88*-*-mach3*): Remove config
 	recognition, no source files for these (note that the i386 Mach
-	is pre-Mach 3).
+	config is for pre-Mach 3).
 	(mips*-*-mach3*, ns32k-*-mach3*): Fix file names.
 	* config/mips/mipsel64.mt: Remove, never referenced.
 
