@@ -1,5 +1,9 @@
 Mon Dec 19 13:49:07 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* configure.in: Recognize mips-sony-bsd and mips-dec-bsd, but
+	reject other vendors until we can be sure we're consistent with
+	bfd.
+
 	* config/obj-vms.c (Create_VMS_Object_File): Instead of formatting
 	a buffer to pass to `error', just call `as_fatal' directly.
 	(VMS_Psect_Spec): Ditto.

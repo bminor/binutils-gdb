@@ -127,9 +127,10 @@ case ${generic_target} in
 
   m88k-*-coff*)		obj_format=coff gas_target=m88kcoff ;;
 
-  mips-sony-bsd*)	obj_format=ecoff gas_target=mips-big ;;
   # don't change emulation like *-*-bsd does
-  mips-*-bsd*)		obj_format=aout gas_target=mips-lit ;;
+  mips-dec-bsd*)	obj_format=aout gas_target=mips-lit ;;
+  mips-sony-bsd*)	obj_format=ecoff gas_target=mips-big ;;
+  mips-*-bsd*)		AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
   mips-*-ecoff*)	obj_format=ecoff 
 			case "$endian" in
@@ -138,6 +139,12 @@ case ${generic_target} in
 			esac
 			;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
+  mips-*-gnu*)		obj_format=aout
+			case "$endian" in
+			big) gas_target=mips-big ;;
+			*)   gas_target=mips-lit ;;
+			esac
+			;;
   mips-*-irix5*)	obj_format=elf gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big ;;
   mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
