@@ -1,3 +1,12 @@
+Mon Mar 14 14:53:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* m68k-dis.c (ext_format_68881): Don't declare.
+	(print_insn_m68k): If an instruction uses place 'i', it uses at
+	least four fixed bytes.
+	(print_insn_arg): Don't bump p by 2 for case 'I', place 'i'.  For
+	extended float, convert to double using floatformat_to_double, not
+	ieee_extended_to_double, and fetch the data before converting it.
+
 Tue Mar  8 18:12:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: It's sqrt.s, not sqrt.w.  From
