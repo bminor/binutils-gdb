@@ -1,3 +1,7 @@
+Mon Sep 20 14:53:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* README: Say using bfd from another release doesn't generally work.
+
 Sat Sep 18 10:13:18 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
 	* mipsread.c (parse_type): Don't complain() if we guessed struct
