@@ -8,6 +8,6 @@
 # the upage.
 
 TM_FILE= tm-ultra3.h
-TDEPFILES= exec.o a29k-pinsn.o a29k-tdep.o remote-mm.o remote-adapt.o
+TDEPFILES= a29k-pinsn.o a29k-tdep.o remote-mm.o remote-adapt.o
 
 MT_CFLAGS = -DKERNEL_DEBUGGING -DNO_HIF_SUPPORT

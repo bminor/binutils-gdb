@@ -4,5 +4,5 @@ XM_FILE= xm-delta88v4.h
 XDEPFILES= 
 
 NAT_FILE= nm-delta88v4.h
-NATDEPFILES= exec.o fork-child.o m88k-nat.o corelow.o \
+NATDEPFILES= fork-child.o m88k-nat.o corelow.o \
 	core-svr4.o procfs.o solib.o

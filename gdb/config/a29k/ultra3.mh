@@ -9,5 +9,5 @@ MH_CFLAGS = -DSYM1
 XM_CLIBS = -lsysv -ljobs -ltermlib 
 
 NAT_FILE= nm-ultra3.h
-NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o ultra3-nat.o
+NATDEPFILES= infptrace.o inftarg.o fork-child.o ultra3-nat.o
 

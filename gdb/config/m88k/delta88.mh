@@ -4,5 +4,5 @@ XM_FILE= xm-delta88.h
 XDEPFILES= 
 
 NAT_FILE= nm-m88k.h
-NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o m88k-nat.o \
+NATDEPFILES= infptrace.o inftarg.o fork-child.o m88k-nat.o \
 	corelow.o coredep.o

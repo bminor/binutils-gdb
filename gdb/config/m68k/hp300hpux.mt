@@ -4,5 +4,5 @@
 #msg compiled with GCC using GAS.
 #msg
 
-TDEPFILES= exec.o m68k-pinsn.o m68k-tdep.o
+TDEPFILES= m68k-pinsn.o m68k-tdep.o
 TM_FILE= tm-hp300hpux.h

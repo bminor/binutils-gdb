@@ -4,5 +4,5 @@
 #msg If you compile your program with GCC, use the GNU assembler.
 #msg
 
-TDEPFILES= exec.o m68k-pinsn.o m68k-tdep.o
+TDEPFILES= m68k-pinsn.o m68k-tdep.o
 TM_FILE= tm-sun2.h

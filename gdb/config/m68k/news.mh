@@ -2,4 +2,4 @@
 XDEPFILES= news-xdep.o
 XM_FILE= xm-news.h
 NAT_FILE= nm-news.h
-NATDEPFILES= exec.o inftarg.o fork-child.o coredep.o corelow.o infptrace.o 
+NATDEPFILES= inftarg.o fork-child.o coredep.o corelow.o infptrace.o 

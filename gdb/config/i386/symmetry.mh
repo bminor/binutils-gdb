@@ -2,4 +2,4 @@
 XDEPFILES=
 XM_FILE= xm-symmetry.h
 NAT_FILE= nm-symmetry.h
-NATDEPFILES= exec.o inftarg.o fork-child.o coredep.o corelow.o symm-nat.o
+NATDEPFILES= inftarg.o fork-child.o coredep.o corelow.o symm-nat.o
