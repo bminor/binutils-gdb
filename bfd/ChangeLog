@@ -1,5 +1,10 @@
 2001-10-24  Richard Henderson  <rth@redhat.com>
 
+	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Copy
+	timestamp to time_t for ctime.
+
+2001-10-24  Richard Henderson  <rth@redhat.com>
+
 	2001-08-23  Jakub Jelinek  <jakub@redhat.com>
 	* elfxx-ia64.c (elfNN_ia64_hash_table_create): Clear ia64_info.
 
