@@ -7348,7 +7348,7 @@ decode_location_expression (data, pointer_size, length)
 	  printf ("DW_OP_nop");
 	  break;
 
-	  /* DWARF 2.1 extensions.  */
+	  /* DWARF 3 extensions.  */
 	case DW_OP_push_object_address:
 	  printf ("DW_OP_push_object_address");
 	  break;
@@ -7360,8 +7360,13 @@ decode_location_expression (data, pointer_size, length)
 	  printf ("DW_OP_call4: <%lx>", (long) byte_get (data, 4));
 	  data += 4;
 	  break;
-	case DW_OP_calli:
-	  printf ("DW_OP_calli");
+	case DW_OP_call_ref:
+	  printf ("DW_OP_call_ref");
+	  break;
+
+	  /* GNU extensions.  */
+	case DW_OP_GNU_push_tls_address:
+	  printf ("DW_OP_GNU_push_tls_address");
 	  break;
 
 	default:
@@ -7436,13 +7441,16 @@ display_debug_loc (section, start, file)
   addr = section->sh_addr;
   bytes = section->sh_size;
   section_end = start + bytes;
+
   if (bytes == 0)
     {
       printf (_("\nThe .debug_loc section is empty.\n"));
       return 0;
     }
+
   printf (_("Contents of the .debug_loc section:\n\n"));
   printf (_("\n    Offset   Begin    End      Expression\n"));
+
   while (start < section_end)
     {
       unsigned long begin;
@@ -7541,7 +7549,6 @@ fetch_indirect_string (offset)
   return debug_str_contents + offset;
 }
 
-
 static int
 display_debug_str (section, start, file)
      Elf32_Internal_Shdr * section;
@@ -7601,7 +7608,6 @@ display_debug_str (section, start, file)
 
   return 1;
 }
-
 
 static unsigned char *
 read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
@@ -7956,8 +7962,8 @@ display_debug_info (section, start, file)
 	  break;
 	}
 
-      /* Check for RELA relocations in the abbrev_offset address, and
-         apply them.  */
+      /* Check for RELA relocations in the
+	 abbrev_offset address, and apply them.  */
       for (relsec = section_headers;
 	   relsec < section_headers + elf_header.e_shnum;
 	   ++relsec)
@@ -8036,7 +8042,6 @@ display_debug_info (section, start, file)
       free_abbrevs ();
 
       /* Read in the abbrevs used by this compilation unit.  */
-
       {
 	Elf32_Internal_Shdr * sec;
 	unsigned char *       begin;

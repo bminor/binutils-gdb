@@ -1,3 +1,8 @@
+2002-09-12  Roland McGrath  <roland@redhat.com>
+
+	* readelf.c (decode_location_expression): DW_OP_calli -> DW_OP_call_ref
+	Handle DW_OP_GNU_push_tls_address.
+
 2002-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.
