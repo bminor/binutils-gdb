@@ -1,3 +1,10 @@
+Wed Apr 10 14:41:53 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/h8300.sc: Add the "8-bit area" in the upper 256
+	bytes of the address space.  Put data from the ".eight" sections
+	into the 8-bit area.
+	* scripttempl/h8300h.sc: Likewise.
+
 Tue Apr  9 14:10:42 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emultempl/generic.em (gld${EMULATION_NAME}_before_parse):
