@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 
-#ifdef HOST_HPPAHPUX
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 
 #include "libbfd.h"
 #include "libhppa.h"
@@ -694,4 +694,4 @@ _do_getb64, _do_getb_signed_64, _do_putb64,
   (PTR) 0
 };
 
-#endif /* HOST_HPPAHPUX */
+#endif /* HOST_HPPAHPUX || HOST_HPPABSD */
