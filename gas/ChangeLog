@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Tue Jul 15 10:15:39 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Default the r5900 to little endian.
+	* configure: Rebuilt.
+
+end-sanitize-r5900
 start-sanitize-tic80
 Mon Jul 14 19:30:55 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -88,6 +88,7 @@ changequote(,)dnl
 changequote([,])dnl
       m8*)		cpu_type=m88k ;;
       mips*el)		cpu_type=mips endian=little ;;
+      mips*5900*)       cpu_type=mips endian=little ;;
       mips*)		cpu_type=mips endian=big ;;
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
