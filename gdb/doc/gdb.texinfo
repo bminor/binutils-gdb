@@ -14751,10 +14751,11 @@ conventions is used.
 @var{AA} = two hex digit signal number; @var{n...} = register number
 (hex), @var{r...}  = target byte ordered register contents, size defined
 by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
-thread process ID, this is a hex integer; @var{n...} = other string not
-starting with valid hex digit.  @value{GDBN} should ignore this
-@var{n...}, @var{r...} pair and go on to the next.  This way we can
-extend the protocol.
+thread process ID, this is a hex integer; @var{n...} = (@samp{watch} | 
+@samp{rwatch} | @samp{awatch}, @var{r...} = data address, this is a hex
+integer; @var{n...} = other string not starting with valid hex digit.
+@value{GDBN} should ignore this @var{n...}, @var{r...} pair and go on
+to the next.  This way we can extend the protocol.
 
 @item @code{W}@var{AA}
 @tab
