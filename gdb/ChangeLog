@@ -77,7 +77,7 @@ Tue Sep 28 09:45:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	* coffread.c (read_coff_symtab):  Remove superfluous cast for
 	complaint output.
 	* dbxread.c (end_psymtab):  Cast MSYMBOL_INFO to long, not int.
-	* findvar.c, value.h (write_register):  Change register value to long.
+	* findvar.c, value.h (write_register):  Change val to LONGEST.
 	* gdbtypes.h (struct type):  Change `bitsize' to long as
 	TYPE_FIELD_STATIC_PHYSNAME uses this field as a pointer.
 	* inferior.h (struct inferior_status):  Change type of stop_pc to
