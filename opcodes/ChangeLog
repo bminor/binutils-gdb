@@ -1,3 +1,11 @@
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/pr_BR.po: Updated Brazilian Portuguese translation.
+	* po/tr.po: Updated Turkish translation.
+	* po/fr.po: Updated French translation.
+
 2002-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
@@ -138,7 +146,7 @@
 	* arc-dis.c: Use #include "" instead of <> for local header files.
 	* m68k-dis.c: Likewise.
 
-Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-05-22  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* Makefile.am (sh-dis.lo): Compile with @archdefs@.
 	* Makefile.in: regenerate.
@@ -150,7 +158,7 @@ Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add drol, dror macros.
 
-Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-05-17  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* disassemble.c (disassembler): Just use print_insn_sh for bfd_arch_sh.
 	* sh-dis.c (LITTLE_BIT): Delete.
@@ -276,7 +284,7 @@ Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* ppc-opc.c: Add optional field to mtmsrd.
 	(MTMSRD_L, XRLARB_MASK): Define.
 
-Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
+2002-03-18  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_name): Fix handling of 32bit address prefix
 	in 64bit mode.
@@ -1766,7 +1774,7 @@ Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
 	* ia64-ic.tbl: Update from Intel.  Add setf to fr-writers.
 	* ia64-asmtab.c: Regenerate.
 
-Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-12  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_user_t): Add 'Y' to SSE ineger converison
 	instructions.
@@ -1805,7 +1813,7 @@ Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
 	* fr30-desc.h: Regenerate with CGEN_MAX_SYNTAX_ELEMENTS.
 	* m32r-desc.h: Regenerate.
 
-Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-01  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (dis386_att, grps): Use 'T' for push/pop
 	(putop): Handle 'T', alphabetize order, fix 'I' handling in Intel syntax
@@ -1818,7 +1826,7 @@ Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* disassemble.c: Remove spurious white space.
 
-Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-13  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (dis386_att, disx86_64_att): Fix ret, lret and iret
 	templates.

@@ -1,3 +1,9 @@
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/fr.po: Updated French translation.
+
 2002-07-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (_bfd_elf32_link_record_local_dynamic_symbol): Define

@@ -1,3 +1,9 @@
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/fr.po: Updated French translation.
+
 2002-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
@@ -120,7 +126,7 @@
 	* emulparams/hppa64linux.sh (OTHER_GOT_RELOC_SECTIONS): Add rela.opd
 	section.  Add ${RELOCATING-0}.
 
-Wed Jun 26 16:33:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-26  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* emulparams/shelf.sh (STACK_ADDR): Don't define.
 	(OTHER_SECTIONS): Define.
@@ -172,7 +178,7 @@ Wed Jun 26 16:33:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* scripttempl/elfd10v.sc : Fix STACK and INSN.
 	* emulparams/d10velf.sh : Fix TEXT_START_ADDR.
 
-Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-13  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* configure.tgt: Add support for sh[1234]*le*-*-elf, sh[1234]*-*-elf.
 
@@ -603,7 +609,7 @@ Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* mpw-esh.c: Delete.
 	* mpw-idtmips.c: Delete.
 
-Wed Apr 17 19:23:14 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-04-17  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* emulparams/shelf32.sh (MACHINE): Now sh5.
 
@@ -676,9 +682,9 @@ Wed Apr 17 19:23:14 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	the contents of the buffer returned from basename function will are
 	getting overwritten while still being used.
 
-Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
-			      Andreas Jaeger  <aj@suse.de>
-			      Andreas Schwab  <schwab@suse.de>
+2002-03-18  Jan Hubicka  <jh@suse.cz>
+	    Andreas Jaeger  <aj@suse.de>
+	    Andreas Schwab  <schwab@suse.de>
 
 	* configure.tgt (x86_64-*-linux-gnu*): Configure i386 as native.
 	* elf_x86_64.sh (ARCH): Set to i386:x86-64

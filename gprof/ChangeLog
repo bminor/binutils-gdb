@@ -1,3 +1,8 @@
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+	* po/fr.po: Updated French translation.
+
 2002-07-24  Dave Brolley  <brolley@redhat.com>
 
 	* corefile.c (core_create_function_syms): Use the end of the section
@@ -579,7 +584,7 @@
 	[HAVE_SETITIMER]: If they define both HAVE_SETITIMER and
 	HAVE_SYSCONF, try setitimer and fall back on sysconf.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
  
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
  	--enable-build-warnings option.
@@ -668,7 +673,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* Makefile.am ($(OBJECTS)): Add gmon.h.
 	* Makefile.in: Rebuild.
 
-Mon Jun 14 10:35:28 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+1999-06-14  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* gprof.texi: Fix typo.
 
@@ -720,12 +725,12 @@ Tue Feb 16 17:01:33 1999  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in: Rebuild.
 	* gconfig.in: Rebuild.
 
-Sun Dec  6 21:57:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+1998-12-06  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gprof.texi (Symspecs): Mention that you have to add any
 	underscore yourself when naming a symbol.
 
-Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
+1998-11-02  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*
         * configure: regenerate

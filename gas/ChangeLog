@@ -1,3 +1,8 @@
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+	* po/fr.po: Updated French translation.
+
 2002-07-25  Richard Sandiford  <rsandifo@redhat.com>
 
 	* doc/c-mips.texi: Remove -mcpu.  Document -mabi.
