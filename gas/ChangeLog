@@ -1,5 +1,10 @@
 Thu May  5 19:14:43 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* symbols.c (symbol_new) [BFD_ASSEMBLER]: Don't permit additions
+	to the symbol table if it's already been set in the output bfd.
+	(symbol_begin) [! EMIT_SECTION_SYMBOLS] [RELOC_REQUIRES_SYMBOL]:
+	Don't use bfd_abs_section.symbol for gas absolute symbol.
+
 	* doc/Makefile.in (distclean, clean-dvi, clean-info): Delete gasp
 	files too.
 
