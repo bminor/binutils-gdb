@@ -601,9 +601,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);
 
-  /* Misc info */
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 

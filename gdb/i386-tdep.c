@@ -2005,7 +2005,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
-  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);

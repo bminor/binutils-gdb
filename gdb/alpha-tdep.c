@@ -1555,7 +1555,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
 
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */

@@ -4285,9 +4285,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      handler takes care of that.)  */
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   
-  /* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);  
-  
   /* The number of bytes at the start of arglist that are not really args,
      0 in the CRIS ABI.  */
   set_gdbarch_frame_args_skip (gdbarch, 0);

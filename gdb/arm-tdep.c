@@ -2866,9 +2866,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_smash_text_address (gdbarch, arm_smash_text_address);
   set_gdbarch_addr_bits_remove (gdbarch, arm_addr_bits_remove);
 
-  /* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 

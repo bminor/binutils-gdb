@@ -6050,8 +6050,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
 
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   set_gdbarch_register_type (gdbarch, mips_register_type);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);

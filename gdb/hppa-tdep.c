@@ -5189,7 +5189,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
   set_gdbarch_in_solib_call_trampoline (gdbarch, hppa_in_solib_call_trampoline);
