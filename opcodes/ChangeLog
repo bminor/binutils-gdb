@@ -1,3 +1,7 @@
+1999-10-27  Scott Bambrough  <scottb@netwinder.org>
+
+	* arm-dis.c: Include sysdep.h to prevent compile time warnings.
+
 1999-10-18  Michael Meissner  <meissner@cygnus.com>
 
 	* alpha-opc.c (alpha_operands): Fill in missing initializer.
