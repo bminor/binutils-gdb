@@ -160,24 +160,37 @@ alpha_register_virtual_size (int regno)
    registers is different. */
 
 static void
+alpha_convert_flt_dbl (void *out, const void *in)
+{
+  DOUBLEST d = extract_typed_floating (in, builtin_type_ieee_single_little);
+  store_typed_floating (out, builtin_type_ieee_double_little, d);
+}
+
+static void
+alpha_convert_dbl_flt (void *out, const void *in)
+{
+  DOUBLEST d = extract_typed_floating (in, builtin_type_ieee_double_little);
+  store_typed_floating (out, builtin_type_ieee_single_little, d);
+}
+
+static void
 alpha_register_convert_to_virtual (int regnum, struct type *valtype,
 				   char *raw_buffer, char *virtual_buffer)
 {
-  if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
+  if (TYPE_LENGTH (valtype) >= ALPHA_REGISTER_SIZE)
     {
-      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
+      memcpy (virtual_buffer, raw_buffer, ALPHA_REGISTER_SIZE);
       return;
     }
 
+  /* Note that everything below is less than 8 bytes long.  */
+
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    {
-      double d = deprecated_extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
-      deprecated_store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
-    }
-  else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
+    alpha_convert_dbl_flt (virtual_buffer, raw_buffer);
+  else if (TYPE_CODE (valtype) == TYPE_CODE_INT)
     {
       ULONGEST l;
-      l = extract_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      l = extract_unsigned_integer (raw_buffer, ALPHA_REGISTER_SIZE);
       l = ((l >> 32) & 0xc0000000) | ((l >> 29) & 0x3fffffff);
       store_unsigned_integer (virtual_buffer, TYPE_LENGTH (valtype), l);
     }
@@ -189,26 +202,21 @@ static void
 alpha_register_convert_to_raw (struct type *valtype, int regnum,
 			       char *virtual_buffer, char *raw_buffer)
 {
-  if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
+  if (TYPE_LENGTH (valtype) >= ALPHA_REGISTER_SIZE)
     {
-      memcpy (raw_buffer, virtual_buffer, REGISTER_RAW_SIZE (regnum));
+      memcpy (raw_buffer, virtual_buffer, ALPHA_REGISTER_SIZE);
       return;
     }
 
+  /* Note that everything below is less than 8 bytes long.  */
+
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    alpha_convert_flt_dbl (raw_buffer, virtual_buffer);
+  else if (TYPE_CODE (valtype) == TYPE_CODE_INT)
     {
-      double d = deprecated_extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
-      deprecated_store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
-    }
-  else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
-    {
-      ULONGEST l;
-      if (TYPE_UNSIGNED (valtype))
-	l = extract_unsigned_integer (virtual_buffer, TYPE_LENGTH (valtype));
-      else
-	l = extract_signed_integer (virtual_buffer, TYPE_LENGTH (valtype));
+      ULONGEST l = unpack_long (valtype, virtual_buffer);
       l = ((l & 0xc0000000) << 32) | ((l & 0x3fffffff) << 29);
-      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), l);
+      store_unsigned_integer (raw_buffer, ALPHA_REGISTER_SIZE, l);
     }
   else
     error ("Cannot store value in floating point register");
