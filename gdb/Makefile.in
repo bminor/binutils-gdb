@@ -185,14 +185,15 @@ SUBDIR_MI_UNINSTALL=
 SUBDIR_TUI_OBS = \
 	tui-file.o tui.o tuiData.o tuiSource.o tuiStack.o tuiIO.o \
 	tuiGeneralWin.o tuiLayout.o tuiWin.o tuiCommand.o \
-	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o
+	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o \
+	tui-out.o tui-hooks.o
 SUBDIR_TUI_SRCS = \
 	tui/tui-file.c tui/tui.c tui/tuiData.c tui/tuiSource.c \
 	tui/tuiStack.c tui/tuiIO.c \
 	tui/tuiGeneralWin.c tui/tuiLayout.c \
 	tui/tuiWin.c tui/tuiCommand.c \
 	tui/tuiDisassem.c tui/tuiSourceWin.c \
-	tui/tuiRegs.c tui/tuiDataWin.c
+	tui/tuiRegs.c tui/tuiDataWin.c tui/tui-out.c tui/tui-hooks.c
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_INITS = \
 	$(SUBDIR_TUI_SRCS)
@@ -538,7 +539,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tuiLayout.h tui/tuiRegs.c tui/tuiRegs.h tui/tuiSource.c \
 	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
-	tui/tui-file.h tui/tui-file.c \
+	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-file.h ui-file.c \
 	frame.c \
 	gnu-v2-abi.c gnu-v3-abi.c hpacc-abi.c cp-abi.c
@@ -2228,6 +2229,12 @@ tui.o: $(srcdir)/tui/tui.c \
 		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiIO.h \
 		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiWin.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui.c
+tui-out.o: $(srcdir)/tui/tui-out.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-out.c
+tui-hooks.o: $(srcdir)/tui/tui-hooks.c \
+		$(srcdir)/tui/tui.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-hooks.c
 tuiCommand.o: $(srcdir)/tui/tuiCommand.c \
 		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
 		$(srcdir)/tui/tuiWin.h $(srcdir)/tui/tuiIO.h

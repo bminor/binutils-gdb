@@ -1,3 +1,11 @@
+2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* Makefile.in (SUBDIR_TUI_OBS): Add tui-out.o, tui-hooks.o.
+	(SUBDIR_TUI_SRCS): Add tui-out.c tui-hooks.c
+	(SFILES): Likewise.
+	(tui-out.o): Define dependencies.
+	(tui-hooks.o): Likewise.
+
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Update e-mail address of active @cygnus.com
