@@ -1639,7 +1639,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	    {
 	      tmp_var->obj_name = 
 		savestring (var->obj_name, strlen (var->obj_name));
-	      uninstall_variable (var);
+	      varobj_delete (var, NULL, 0);
 	    }
 	  else
 	    {

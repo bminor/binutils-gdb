@@ -1,5 +1,10 @@
 2001-05-10  Fernando Nasser  <fnasser@redhat.com>
 
+	* varobj.c (c_number_of_children): Fix memory leak. Delete unwanted old
+	variables, not just unregister them.
+
+2001-05-10  Fernando Nasser  <fnasser@redhat.com>
+
 	* varobj.c (c_number_of_children): Check for target type of void*,
 	not the target type name.  Allow dereferencing char*.
 
