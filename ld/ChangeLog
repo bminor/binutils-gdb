@@ -1,3 +1,8 @@
+2002-06-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* emultempl/mipself.em (mips_elf${ELFSIZE}_check_sections): Fix
+	format specifier used to print BFD name.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	From Catherine Moore, Michael Meissner, Jim Blandy:
