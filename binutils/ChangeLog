@@ -1,3 +1,12 @@
+2001-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (process_file_header): Print extended e_shnum and
+	e_shdtrndx values.  Set elf_header values for same.
+	(get_32bit_section_headers): Add "num" arg to read "num" headers.
+	(get_64bit_section_headers): Likewise.
+	(process_section_headers): Update calls.
+	(get_file_header): Call get_32bit_section_headers or 64bit variant.
+
 2001-12-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* objcopy.c (setup_section): Copy entsize.

@@ -197,8 +197,8 @@ static int                process_file                PARAMS ((char *));
 static int                process_relocs              PARAMS ((FILE *));
 static int                process_version_sections    PARAMS ((FILE *));
 static char *             get_ver_flags               PARAMS ((unsigned int));
-static int                get_32bit_section_headers   PARAMS ((FILE *));
-static int                get_64bit_section_headers   PARAMS ((FILE *));
+static int                get_32bit_section_headers   PARAMS ((FILE *, unsigned int));
+static int                get_64bit_section_headers   PARAMS ((FILE *, unsigned int));
 static int		  get_32bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
 static int		  get_64bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
 static int                get_file_header             PARAMS ((FILE *));
@@ -2442,10 +2442,26 @@ process_file_header ()
 	      (long) elf_header.e_phnum);
       printf (_("  Size of section headers:           %ld (bytes)\n"),
 	      (long) elf_header.e_shentsize);
-      printf (_("  Number of section headers:         %ld\n"),
+      printf (_("  Number of section headers:         %ld"),
 	      (long) elf_header.e_shnum);
-      printf (_("  Section header string table index: %ld\n"),
+      if (section_headers != NULL && elf_header.e_shnum == 0)
+	printf (" (%ld)", (long) section_headers[0].sh_size);
+      putc ('\n', stdout);
+      printf (_("  Section header string table index: %ld"),
 	      (long) elf_header.e_shstrndx);
+      if (section_headers != NULL && elf_header.e_shstrndx == SHN_XINDEX)
+	printf (" (%ld)", (long) section_headers[0].sh_link);
+      putc ('\n', stdout);
+    }
+
+  if (section_headers != NULL)
+    {
+      if (elf_header.e_shnum == 0)
+	elf_header.e_shnum = section_headers[0].sh_size;
+      if (elf_header.e_shstrndx == SHN_XINDEX)
+	elf_header.e_shstrndx = section_headers[0].sh_link;
+      free (section_headers);
+      section_headers = NULL;
     }
 
   return 1;
@@ -2760,8 +2776,9 @@ process_program_headers (file)
 
 
 static int
-get_32bit_section_headers (file)
+get_32bit_section_headers (file, num)
      FILE * file;
+     unsigned int num;
 {
   Elf32_External_Shdr * shdrs;
   Elf32_Internal_Shdr * internal;
@@ -2769,13 +2786,13 @@ get_32bit_section_headers (file)
 
   shdrs = ((Elf32_External_Shdr *)
 	   get_data (NULL, file, elf_header.e_shoff,
-		     elf_header.e_shentsize * elf_header.e_shnum,
+		     elf_header.e_shentsize * num,
 		     _("section headers")));
   if (!shdrs)
     return 0;
 
-  section_headers = (Elf_Internal_Shdr *) malloc
-    (elf_header.e_shnum * sizeof (Elf_Internal_Shdr));
+  section_headers = ((Elf_Internal_Shdr *)
+		     malloc (num * sizeof (Elf_Internal_Shdr)));
 
   if (section_headers == NULL)
     {
@@ -2784,7 +2801,7 @@ get_32bit_section_headers (file)
     }
 
   for (i = 0, internal = section_headers;
-       i < elf_header.e_shnum;
+       i < num;
        i ++, internal ++)
     {
       internal->sh_name      = BYTE_GET (shdrs[i].sh_name);
@@ -2805,8 +2822,9 @@ get_32bit_section_headers (file)
 }
 
 static int
-get_64bit_section_headers (file)
+get_64bit_section_headers (file, num)
      FILE * file;
+     unsigned int num;
 {
   Elf64_External_Shdr * shdrs;
   Elf64_Internal_Shdr * internal;
@@ -2814,13 +2832,13 @@ get_64bit_section_headers (file)
 
   shdrs = ((Elf64_External_Shdr *)
 	   get_data (NULL, file, elf_header.e_shoff,
-		     elf_header.e_shentsize * elf_header.e_shnum,
+		     elf_header.e_shentsize * num,
 		     _("section headers")));
   if (!shdrs)
     return 0;
 
-  section_headers = (Elf_Internal_Shdr *) malloc
-    (elf_header.e_shnum * sizeof (Elf_Internal_Shdr));
+  section_headers = ((Elf_Internal_Shdr *)
+		     malloc (num * sizeof (Elf_Internal_Shdr)));
 
   if (section_headers == NULL)
     {
@@ -2829,7 +2847,7 @@ get_64bit_section_headers (file)
     }
 
   for (i = 0, internal = section_headers;
-       i < elf_header.e_shnum;
+       i < num;
        i ++, internal ++)
     {
       internal->sh_name      = BYTE_GET (shdrs[i].sh_name);
@@ -3007,10 +3025,10 @@ process_section_headers (file)
 
   if (is_32bit_elf)
     {
-      if (! get_32bit_section_headers (file))
+      if (! get_32bit_section_headers (file, elf_header.e_shnum))
 	return 0;
     }
-  else if (! get_64bit_section_headers (file))
+  else if (! get_64bit_section_headers (file, elf_header.e_shnum))
     return 0;
 
   /* Read in the string table, so that we have names to display.  */
@@ -9185,6 +9203,13 @@ get_file_header (file)
       elf_header.e_shnum     = BYTE_GET (ehdr64.e_shnum);
       elf_header.e_shstrndx  = BYTE_GET (ehdr64.e_shstrndx);
     }
+
+  /* There may be some extensions in the first section header.  Don't
+     bomb if we can't read it.  */
+  if (is_32bit_elf)
+    get_32bit_section_headers (file, 1);
+  else
+    get_64bit_section_headers (file, 1);
 
   return 1;
 }
