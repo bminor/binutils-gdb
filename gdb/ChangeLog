@@ -1,3 +1,8 @@
+2002-05-11 Daniel Jacobowitz  <drow@mvista.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>:
+	* linespec.c (find_methods): Handle GCC 3.x template constructors.
+
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* nbsd-tdep.c: Fix comment.

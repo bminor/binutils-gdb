@@ -130,6 +130,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 			 (struct symtab **) NULL)))
     {
       int method_counter;
+      int name_len = strlen (name);
 
       CHECK_TYPEDEF (t);
 
@@ -202,7 +203,9 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		     */
 		  }
 	      }
-	  else if (strcmp_iw (class_name, name) == 0)
+	  else if (strncmp (class_name, name, name_len) == 0
+		   && (class_name[name_len] == '\0'
+		       || class_name[name_len] == '<'))
 	    {
 	      /* For GCC 3.x and stabs, constructors and destructors have names
 		 like __base_ctor and __complete_dtor.  Check the physname for now
