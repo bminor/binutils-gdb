@@ -1,3 +1,18 @@
+Thu Feb  3 23:07:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-ecoff.h (TARGET_SYMBOL_FIELDS): Changed
+	ecoff_undefined to ecoff_extern_size.
+	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): Likewise.
+	* config/tc-mips.c (s_extern): Set ecoff_extern_size to the
+	external symbol size, rathern than setting the symbol value.
+	(md_estimate_size_before_relax): Check both ecoff_extern_size and
+	symbol value to see if GP referencing can be used.
+	* ecoff.c (ecoff_symbol_new_hook): Clear ecoff_extern_size, not
+	ecoff_undefined.
+	(ecoff_frob_symbol): Don't check ecoff_undefined.
+	(ecoff_build_symbols): Get size of an undefined symbol from
+	sym->ecoff_extern_size, not S_GET_VALUE (sym).
+
 Wed Feb  2 13:55:08 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in:  Avoid bug in losing hpux sed.

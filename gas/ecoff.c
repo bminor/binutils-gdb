@@ -1501,7 +1501,7 @@ ecoff_symbol_new_hook (symbolP)
     add_file ((const char *) NULL, 0);
   symbolP->ecoff_file = cur_file_ptr;
   symbolP->ecoff_symbol = NULL;
-  symbolP->ecoff_undefined = 0;
+  symbolP->ecoff_extern_size = 0;
 }
 
 /* Add a page to a varray object.  */
@@ -3421,17 +3421,14 @@ ecoff_stab (what, string, type, other, desc)
   cur_file_ptr = save_file_ptr;
 }
 
-/* Frob an ECOFF symbol.  A .extern symbol will have a value, but is
-   not common.  Small common symbols go into a special .scommon
-   section rather than bfd_com_section.  */
+/* Frob an ECOFF symbol.  Small common symbols go into a special
+   .scommon section rather than bfd_com_section.  */
 
 void
 ecoff_frob_symbol (sym)
      symbolS *sym;
 {
-  if (sym->ecoff_undefined)
-    S_SET_SEGMENT (sym, undefined_section);
-  else if (S_IS_COMMON (sym)
+  if (S_IS_COMMON (sym)
 	   && S_GET_VALUE (sym) > 0
 	   && S_GET_VALUE (sym) <= bfd_get_gp_size (stdoutput))
     {
@@ -3835,15 +3832,18 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  else
 			    st = st_Static;
 
-			  if (! S_IS_DEFINED (as_sym)
-			      || as_sym->ecoff_undefined)
+			  if (! S_IS_DEFINED (as_sym))
 			    {
-			      if (S_GET_VALUE (as_sym) > 0
-				  && (S_GET_VALUE (as_sym)
-				      <= bfd_get_gp_size (stdoutput)))
-				sc = sc_SUndefined;
-			      else
+			      if (as_sym->ecoff_extern_size == 0
+				  || (as_sym->ecoff_extern_size
+				      > bfd_get_gp_size (stdoutput)))
 				sc = sc_Undefined;
+			      else
+				{
+				  sc = sc_SUndefined;
+				  sym_ptr->ecoff_sym.asym.value =
+				    as_sym->ecoff_extern_size;
+				}
 			    }
 			  else if (S_IS_COMMON (as_sym))
 			    {
