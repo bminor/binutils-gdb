@@ -1,3 +1,29 @@
+2002-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_pseudo_table): Warning fix.
+	(ppc_cpu): Make it unsigned long to agree with struct powerpc_opcode
+	flags.
+	(ppc_size): Delete.
+	(ppc_xcoff64): Rename to ppc_obj64.
+	(md_parse_option <m>): Encode old ppc_size value in ppc_cpu.
+	(ppc_set_cpu): Set PPC_OPCODE_32 too.
+	(ppc_arch): Use ppc_obj64 instead of ppc_size to select bfd_mach_ppc64
+	or bfd_mach_ppc.
+	(ppc_target_format): Use ppc_obj64 to select format.
+	(md_begin): Adjust for PPC_OPCODE_32/64 in ppc_cpu.
+	(ppc_insert_operand): Use ppc_obj64 instead of ppc_size.
+	(ppc_elf_suffix): Likewise.  Don't depend on BFD_DEFAULT_TARGET_SIZE.
+	(tc_frob_symbol): Likewise.
+	(md_assemble): Use ppc_obj64 instead of ppc_size.  Don't depend on
+	BFD_DEFAULT_TARGET_SIZE.
+	(ppc_tc): Likewise.
+	(ppc_is_toc_sym): Likewise.
+	(md_apply_fix3): Likewise.
+	* config/tc-ppc.h (TC_FORCE_RELOCATION): Don't depend on
+	BFD_DEFAULT_TARGET_SIZE.
+	(ELF_TC_SPECIAL_SECTIONS): Likewise.
+	(tc_frob_symbol): Likewise.
+
 2002-07-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build): Handle MIPS16 insns.

@@ -232,7 +232,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
-  { "file",	dwarf2_directive_file, 0 },
+  { "file",	(void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc",	dwarf2_directive_loc, 0 },
 #endif
 
@@ -695,16 +695,10 @@ ppc_parse_name (name, expr)
 
 /* The type of processor we are assembling for.  This is one or more
    of the PPC_OPCODE flags defined in opcode/ppc.h.  */
-static int ppc_cpu = 0;
+static unsigned long ppc_cpu = 0;
 
-/* The size of the processor we are assembling for.  This is either
-   PPC_OPCODE_32 or PPC_OPCODE_64.  */
-static unsigned long ppc_size = (BFD_DEFAULT_TARGET_SIZE == 64
-				 ? PPC_OPCODE_64
-				 : PPC_OPCODE_32);
-
-/* Whether to target xcoff64.  */
-static int ppc_xcoff64 = 0;
+/* Whether to target xcoff64/elf64.  */
+static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 
 /* Opcode hash table.  */
 static struct hash_control *ppc_hash;
@@ -858,44 +852,41 @@ md_parse_option (c, arg)
       /* a64 and a32 determine whether to use XCOFF64 or XCOFF32.  */
     case 'a':
       if (strcmp (arg, "64") == 0)
-	ppc_xcoff64 = 1;
+	ppc_obj64 = 1;
       else if (strcmp (arg, "32") == 0)
-	ppc_xcoff64 = 0;
+	ppc_obj64 = 0;
       else
 	return 0;
       break;
 
     case 'm':
-      /* Most CPU's are 32 bit.  Exceptions are listed below.  */
-      ppc_size = PPC_OPCODE_32;
-
       /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
 	 (RIOS2).  */
       if (strcmp (arg, "pwrx") == 0 || strcmp (arg, "pwr2") == 0)
-	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2;
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_32;
       /* -mpwr means to assemble for the IBM POWER (RIOS1).  */
       else if (strcmp (arg, "pwr") == 0)
-	ppc_cpu = PPC_OPCODE_POWER;
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
       /* -m601 means to assemble for the PowerPC 601, which includes
 	 instructions that are holdovers from the Power.  */
       else if (strcmp (arg, "601") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601 | PPC_OPCODE_32;
       /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
 	 PowerPC 603/604.  */
       else if (strcmp (arg, "ppc") == 0
 	       || strcmp (arg, "ppc32") == 0
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
-	ppc_cpu = PPC_OPCODE_PPC;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_32;
       /* -m403 and -m405 mean to assemble for the PowerPC 403/405.  */
       else if (strcmp (arg, "403") == 0
                || strcmp (arg, "405") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_403;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_403 | PPC_OPCODE_32;
       else if (strcmp (arg, "7400") == 0
                || strcmp (arg, "7410") == 0
                || strcmp (arg, "7450") == 0
                || strcmp (arg, "7455") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32;
       else if (strcmp (arg, "altivec") == 0)
         {
           if (ppc_cpu == 0)
@@ -908,36 +899,32 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "ppc64") == 0 || strcmp (arg, "620") == 0)
 	{
 	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64;
-	  ppc_size = PPC_OPCODE_64;
 	}
       else if (strcmp (arg, "ppc64bridge") == 0)
 	{
 	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64;
-	  ppc_size = PPC_OPCODE_64;
 	}
       /* -mbooke/-mbooke32 mean enable 32-bit BookE support.  */
       else if (strcmp (arg, "booke") == 0 || strcmp (arg, "booke32") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32;
       /* -mbooke64 means enable 64-bit BookE support.  */
       else if (strcmp (arg, "booke64") == 0)
 	{
 	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE |
 		    PPC_OPCODE_BOOKE64 | PPC_OPCODE_64;
-	  ppc_size = PPC_OPCODE_64;
 	}
       else if (strcmp (arg, "power4") == 0)
 	{
 	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64 | PPC_OPCODE_POWER4;
-	  ppc_size = PPC_OPCODE_64;
 	}
       /* -mcom means assemble for the common intersection between Power
 	 and PowerPC.  At present, we just allow the union, rather
 	 than the intersection.  */
       else if (strcmp (arg, "com") == 0)
-	ppc_cpu = PPC_OPCODE_COMMON;
+	ppc_cpu = PPC_OPCODE_COMMON | PPC_OPCODE_32;
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
-	ppc_cpu = PPC_OPCODE_ANY;
+	ppc_cpu = PPC_OPCODE_ANY | PPC_OPCODE_32;
 
       else if (strcmp (arg, "regnames") == 0)
 	reg_names_p = true;
@@ -1077,13 +1064,13 @@ ppc_set_cpu ()
     {
       if (strncmp (default_os, "aix", 3) == 0
 	  && default_os[3] >= '4' && default_os[3] <= '9')
-	ppc_cpu = PPC_OPCODE_COMMON;
+	ppc_cpu = PPC_OPCODE_COMMON | PPC_OPCODE_32;
       else if (strncmp (default_os, "aix3", 4) == 0)
-	ppc_cpu = PPC_OPCODE_POWER;
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strcmp (default_cpu, "rs6000") == 0)
-	ppc_cpu = PPC_OPCODE_POWER;
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strncmp (default_cpu, "powerpc", 7) == 0)
-	ppc_cpu = PPC_OPCODE_PPC;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_32;
       else
 	as_fatal (_("Unknown default cpu = %s, os = %s"),
 		  default_cpu, default_os);
@@ -1117,7 +1104,7 @@ ppc_arch ()
 unsigned long
 ppc_mach ()
 {
-  return ppc_size == PPC_OPCODE_64 ? 620 : 0;
+  return ppc_obj64 ? bfd_mach_ppc64 : bfd_mach_ppc;
 }
 
 extern char*
@@ -1130,18 +1117,16 @@ ppc_target_format ()
   return "xcoff-powermac";
 #else
 #  ifdef TE_AIX5
-    return (ppc_xcoff64 ? "aix5coff64-rs6000" : "aixcoff-rs6000");
+    return (ppc_obj64 ? "aix5coff64-rs6000" : "aixcoff-rs6000");
 #  else
-    return (ppc_xcoff64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
+    return (ppc_obj64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
 #  endif
 #endif
 #endif
 #ifdef OBJ_ELF
-  boolean is64 = BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64;
-
   return (target_big_endian
-	  ? (is64 ? "elf64-powerpc" : "elf32-powerpc")
-	  : (is64 ? "elf64-powerpcle" : "elf32-powerpcle"));
+	  ? (ppc_obj64 ? "elf64-powerpc" : "elf32-powerpc")
+	  : (ppc_obj64 ? "elf64-powerpcle" : "elf32-powerpcle"));
 #endif
 }
 
@@ -1174,9 +1159,10 @@ md_begin ()
     {
       know ((op->opcode & op->mask) == op->opcode);
 
-      if ((op->flags & ppc_cpu) != 0
+      if ((op->flags & ppc_cpu & ~(PPC_OPCODE_32 | PPC_OPCODE_64)) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
-	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size
+	      || ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64))
+		  == (ppc_cpu & (PPC_OPCODE_32 | PPC_OPCODE_64)))
 	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0)
 	  && ((op->flags & (PPC_OPCODE_POWER4 | PPC_OPCODE_NOPOWER4)) == 0
 	      || ((op->flags & PPC_OPCODE_POWER4)
@@ -1272,7 +1258,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 	    max = (1 << (operand->bits - 1)) - 1;
 	  min = - (1 << (operand->bits - 1));
 
-	  if (ppc_size == PPC_OPCODE_32)
+	  if (!ppc_obj64)
 	    {
 	      /* Some people write 32 bit hex constants with the sign
 		 extension done by hand.  This shouldn't really be
@@ -1314,7 +1300,7 @@ ppc_insert_operand (insn, operand, val, file, line)
       const char *errmsg;
 
       errmsg = NULL;
-      insn = (*operand->insert) (insn, (long) val, ppc_cpu | ppc_size, &errmsg);
+      insn = (*operand->insert) (insn, (long) val, ppc_cpu, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, errmsg);
     }
@@ -1391,7 +1377,8 @@ ppc_elf_suffix (str_p, exp_p)
     MAP ("bitfld",	(int) BFD_RELOC_PPC_EMB_BIT_FLD),
     MAP ("relsda",	(int) BFD_RELOC_PPC_EMB_RELSDA),
     MAP ("xgot",	(int) BFD_RELOC_PPC_TOC16),
-#if BFD_DEFAULT_TARGET_SIZE == 64
+    /* The following are only valid for ppc64.  Negative values are
+       used instead of a flag.  */
     MAP ("higher",	- (int) BFD_RELOC_PPC64_HIGHER),
     MAP ("highera",	- (int) BFD_RELOC_PPC64_HIGHER_S),
     MAP ("highest",	- (int) BFD_RELOC_PPC64_HIGHEST),
@@ -1401,7 +1388,6 @@ ppc_elf_suffix (str_p, exp_p)
     MAP ("toc@l",	- (int) BFD_RELOC_PPC64_TOC16_LO),
     MAP ("toc@h",	- (int) BFD_RELOC_PPC64_TOC16_HI),
     MAP ("toc@ha",	- (int) BFD_RELOC_PPC64_TOC16_HA),
-#endif
     { (char *) 0, 0,	(int) BFD_RELOC_UNUSED }
   };
 
@@ -1427,9 +1413,9 @@ ppc_elf_suffix (str_p, exp_p)
       {
 	int reloc = ptr->reloc;
 
-	if (BFD_DEFAULT_TARGET_SIZE == 64 && reloc < 0)
+	if (reloc < 0)
 	  {
-	    if (ppc_size != PPC_OPCODE_64)
+	    if (!ppc_obj64)
 	      return BFD_RELOC_UNUSED;
 	    reloc = -reloc;
 	  }
@@ -1460,8 +1446,7 @@ ppc_elf_suffix (str_p, exp_p)
 	  }
 	*str_p = str;
 
-	if (BFD_DEFAULT_TARGET_SIZE == 64
-	    && reloc == (int) BFD_RELOC_PPC64_TOC
+	if (reloc == (int) BFD_RELOC_PPC64_TOC
 	    && exp_p->X_op == O_symbol)
 	  {
 	    /* This reloc type ignores the symbol.  Change the symbol
@@ -1703,7 +1688,6 @@ ppc_elf_validate_fix (fixp, seg)
     }
 }
 
-#if BFD_DEFAULT_TARGET_SIZE == 64
 /* Don't emit .TOC. symbol.  */
 int
 ppc_elf_frob_symbol (sym)
@@ -1720,7 +1704,6 @@ ppc_elf_frob_symbol (sym)
 
   return 0;
 }
-#endif
 #endif /* OBJ_ELF */
 
 #ifdef TE_PE
@@ -1952,7 +1935,7 @@ md_assemble (str)
 	 from the input.  */
       if ((operand->flags & PPC_OPERAND_FAKE) != 0)
 	{
-	  insn = (*operand->insert) (insn, 0L, ppc_cpu | ppc_size, &errmsg);
+	  insn = (*operand->insert) (insn, 0L, ppc_cpu, &errmsg);
 	  if (errmsg != (const char *) NULL)
 	    as_bad (errmsg);
 	  continue;
@@ -1965,7 +1948,7 @@ md_assemble (str)
 	{
 	  if (operand->insert)
 	    {
-	      insn = (*operand->insert) (insn, 0L, ppc_cpu | ppc_size, &errmsg);
+	      insn = (*operand->insert) (insn, 0L, ppc_cpu, &errmsg);
 	      if (errmsg != (const char *) NULL)
 		as_bad (errmsg);
 	    }
@@ -2151,7 +2134,6 @@ md_assemble (str)
 		  ex.X_add_number = SEX16 (PPC_HA (ex.X_add_number));
 		break;
 
-#if BFD_DEFAULT_TARGET_SIZE == 64
 	      case BFD_RELOC_PPC64_HIGHER:
 		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
 		  ex.X_add_number = PPC_HIGHER (ex.X_add_number);
@@ -2179,7 +2161,6 @@ md_assemble (str)
 		else
 		  ex.X_add_number = SEX16 (PPC_HIGHESTA (ex.X_add_number));
 		break;
-#endif /* BFD_DEFAULT_TARGET_SIZE == 64 */
 	      }
 #endif /* OBJ_ELF */
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
@@ -2211,8 +2192,7 @@ md_assemble (str)
 		}
 	    }
 
-	  if (BFD_DEFAULT_TARGET_SIZE == 64
-	      && ppc_size == PPC_OPCODE_64
+	  if (ppc_obj64
 	      && (operand->flags & PPC_OPERAND_DS) != 0)
 	    {
 	      switch (reloc)
@@ -2362,12 +2342,10 @@ md_assemble (str)
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
 #ifdef OBJ_ELF
-#if BFD_DEFAULT_TARGET_SIZE == 64
 	    case BFD_RELOC_PPC64_HIGHER:
 	    case BFD_RELOC_PPC64_HIGHER_S:
 	    case BFD_RELOC_PPC64_HIGHEST:
 	    case BFD_RELOC_PPC64_HIGHEST_S:
-#endif
 #endif
 	      fixP->fx_no_overflow = 1;
 	      break;
@@ -3652,7 +3630,7 @@ ppc_tc (ignore)
     ++input_line_pointer;
 
   /* Align to a four/eight byte boundary.  */
-  align = BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64 ? 3 : 2;
+  align = ppc_obj64 ? 3 : 2;
   frag_align (align, 0, 0);
   record_alignment (now_seg, align);
 #endif /* OBJ_ELF */
@@ -3662,13 +3640,13 @@ ppc_tc (ignore)
   else
     {
       ++input_line_pointer;
-      cons ((ppc_size == PPC_OPCODE_64) ? 8 : 4);
+      cons (ppc_obj64 ? 8 : 4);
     }
 }
 
 /* Pseudo-op .machine.  */
 /* FIXME: `.machine' is a nop for the moment.  It would be nice to
-   accept this directive on the first line of input and set ppc_size
+   accept this directive on the first line of input and set ppc_obj64
    and the target format accordingly.  Unfortunately, the target
    format is selected in output-file.c:output_file_create before we
    even get to md_begin, so it's not possible without changing
@@ -3692,7 +3670,7 @@ ppc_is_toc_sym (sym)
 #endif
 #ifdef OBJ_ELF
   const char *sname = segment_name (S_GET_SEGMENT (sym));
-  if (BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64)
+  if (ppc_obj64)
     return strcmp (sname, ".toc") == 0;
   else
     return strcmp (sname, ".got") == 0;
@@ -5170,7 +5148,7 @@ md_apply_fix3 (fixP, valP, seg)
       if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	  && operand->bits == 16
 	  && operand->shift == 0
-	  && (operand->insert == NULL || ppc_xcoff64)
+	  && (operand->insert == NULL || ppc_obj64)
 	  && fixP->fx_addsy != NULL
 	  && symbol_get_tc (fixP->fx_addsy)->subseg != 0
 	  && symbol_get_tc (fixP->fx_addsy)->class != XMC_TC
@@ -5229,8 +5207,7 @@ md_apply_fix3 (fixP, valP, seg)
 	{
 	  fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
 #ifdef OBJ_ELF
-	  if (BFD_DEFAULT_TARGET_SIZE == 64
-	      && ppc_size == PPC_OPCODE_64
+	  if (ppc_obj64
 	      && (operand->flags & PPC_OPERAND_DS) != 0)
 	    fixP->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
 #endif
@@ -5265,7 +5242,7 @@ md_apply_fix3 (fixP, valP, seg)
       switch (fixP->fx_r_type)
 	{
 	case BFD_RELOC_CTOR:
-	  if (BFD_DEFAULT_TARGET_SIZE == 64 && ppc_size == PPC_OPCODE_64)
+	  if (ppc_obj64)
 	    goto ctor64;
 	  /* fall through */
 
@@ -5318,11 +5295,9 @@ md_apply_fix3 (fixP, valP, seg)
 	case BFD_RELOC_PPC_EMB_RELSDA:
 	case BFD_RELOC_PPC_TOC16:
 #ifdef OBJ_ELF
-#if BFD_DEFAULT_TARGET_SIZE == 64
 	case BFD_RELOC_PPC64_TOC16_LO:
 	case BFD_RELOC_PPC64_TOC16_HI:
 	case BFD_RELOC_PPC64_TOC16_HA:
-#endif
 #endif
 	  if (fixP->fx_pcrel)
 	    {
@@ -5359,7 +5334,6 @@ md_apply_fix3 (fixP, valP, seg)
 	  break;
 
 #ifdef OBJ_ELF
-#if BFD_DEFAULT_TARGET_SIZE == 64
 	case BFD_RELOC_PPC64_HIGHER:
 	  if (fixP->fx_pcrel)
 	    abort ();
@@ -5416,7 +5390,6 @@ md_apply_fix3 (fixP, valP, seg)
 	      bfd_putl16 ((bfd_vma) val, where);
 	  }
 	  break;
-#endif
 #endif
 	  /* Because SDA21 modifies the register field, the size is set to 4
 	     bytes, rather than 2, so offset it here appropriately.  */
@@ -5483,13 +5456,11 @@ md_apply_fix3 (fixP, valP, seg)
 	  break;
 
 #ifdef OBJ_ELF
-#if BFD_DEFAULT_TARGET_SIZE == 64
 	  /* Generated by reference to `sym@tocbase'.  The sym is
 	     ignored by the linker.  */
 	case BFD_RELOC_PPC64_TOC:
 	  fixP->fx_done = 0;
 	  break;
-#endif
 #endif
 	default:
 	  fprintf (stderr,
