@@ -1,3 +1,8 @@
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* readelf.c: Include "elf/i960.h".
+	(dump_relocations): Handle EM_960.
+
 Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* objcopy.c (copy_archive): Preserve dates of archive members if

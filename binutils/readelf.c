@@ -58,6 +58,7 @@
 #include "elf/arc.h"
 #include "elf/fr30.h"
 #include "elf/mcore.h"
+#include "elf/i960.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -351,6 +352,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_ARM:
     case EM_386:
     case EM_486:
+    case EM_960:
     case EM_CYGNUS_M32R:
     case EM_CYGNUS_D10V:
     case EM_MIPS:
@@ -465,6 +467,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
 	case EM_68K:
 	  rtype = elf_m68k_reloc_type (ELF32_R_TYPE (info));
+	  break;
+
+	case EM_960:
+	  rtype = elf_i960_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_SPARC:
