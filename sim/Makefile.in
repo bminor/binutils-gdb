@@ -1,0 +1,138 @@
+#    Makefile template for Configure for the sim library.
+#    Copyright (C) 1993 Free Software Foundation, Inc.
+#    Written by Cygnus Support.
+# 
+# This file is part of BFD, the Binary File Descriptor library.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+srcdir = .
+
+prefix = /usr/local
+
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
+datadir = $(prefix)/lib
+mandir = $(prefix)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+oldincludedir =
+docdir = doc
+
+SHELL = /bin/sh
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = rc
+CFLAGS = -g
+BISON = bison
+MAKEINFO = makeinfo
+RANLIB = ranlib
+
+INCDIR = $(srcdir)/../include
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
+DEP = mkdep
+
+SUBDIRS = " this is set by configire, don't change this "
+
+#### host and target dependent Makefile fragments come in here.
+###
+
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"against=$(against)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"BISON=$(BISON)"
+
+
+STAGESTUFF = $(TARGETLIB) $(OFILES)
+
+
+all:	endian.h $(ALL)
+	
+
+
+endian.h: endian
+	./endian > endian.h
+
+### z8k
+
+all-z8k: force
+	if [ -f ./z8k/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-z8k: force
+	if [ -f ./z8k/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+
+### h8300
+
+all-h8300: force
+	if [ -f ./h8300/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-h8300: force
+	if [ -f ./h8300/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+###
+
+force:
+
+
+# with the gnu make, this is done automatically.
+
+Makefile: $(srcdir)/Makefile.in $(target_makefile_frag)
+	$(SHELL) ./config.status
