@@ -18,231 +18,249 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*doc*
-@section coff backends
+/*
 
-BFD supports a number of different flavours of coff format. The major
-difference between formats are the sizes and alignments of fields in
-structures on disk, and the occasional extra field.
+SECTION
+	coff backends
 
-Coff in all its varieties is implimented with a few common files and a
-number of implementation specific files. For example, The 88k bcs coff
-format is implemented in the file @code{coff-m88k.c}. This file
-@code{#include}s @code{coff-m88k.h} which defines the external
-structure of the coff format for the 88k, and @code{internalcoff.h}
-which defines the internal structure. @code{coff-m88k.c} also defines
-the relocations used by the 88k format @xref{Relocations}. Then the
-major portion of coff code is included (@code{coffcode.h}) which
-defines the methods used to act upon the types defined in
-@code{coff-m88k.h} and @code{internalcoff.h}.
+DESCRIPTION
+	BFD supports a number of different flavours of coff format.
+	The major difference between formats are the sizes and
+	alignments of fields in structures on disk, and the occasional
+	extra field.  
 
-The Intel i960 processor version of coff is implemented in
-@code{coff-i960.c}. This file has the same structure as
-@code{coff-m88k.c}, except that it includes @code{coff-i960.h} rather
-than @code{coff-m88k.h}.
+	Coff in all its varieties is implimented with a few common
+	files and a number of implementation specific files. For
+	example, The 88k bcs coff format is implemented in the file
+	@code{coff-m88k.c}. This file @code{#include}s
+	@code{coff-m88k.h} which defines the external structure of the
+	coff format for the 88k, and @code{internalcoff.h} which
+	defines the internal structure. @code{coff-m88k.c} also
+	defines pthe relocations used by the 88k format
+	@xref{Relocations}. Then the major portion of coff code is
+	included (@code{coffcode.h}) which defines the methods used to
+	act upon the types defined in @code{coff-m88k.h} and
+	@code{internalcoff.h}.
 
-@subsection Porting To A New Version of Coff
 
-The recommended method is to select from the existing implimentations
-the version of coff which is most like the one you want to use, for
-our purposes, we'll say that i386 coff is the one you select, and that
-your coff flavour is called foo. Copy the @code{i386coff.c} to @code{foocoff.c},
-copy @code{../include/i386coff.h} to @code{../include/foocoff.h} and
-add the lines to @code{targets.c} and @code{Makefile.in} so that your
-new back end is used.
+	The Intel i960 processor version of coff is implemented in
+	@code{coff-i960.c}. This file has the same structure as
+	@code{coff-m88k.c}, except that it includes @code{coff-i960.h}
+	rather than @code{coff-m88k.h}. 
 
-Alter the shapes of the structures in @code{../include/foocoff.h} so
-that they match what you need. You will probably also have to add
-@code{#ifdef}s to the code in @code{internalcoff.h} and
-@code{coffcode.h} if your version of coff is too wild.
+SUBSECTION
+	Porting To A New Version of Coff
 
-You can verify that your new BFD backend works quite simply by
-building @code{objdump} from the @code{binutils} directory, and
-making sure that its version of what's going on at your host systems
-idea (assuming it has the pretty standard coff dump utility (usually
-called @code{att-dump} or just @code{dump})) are the same.
+DESCRIPTION
+	The recommended method is to select from the existing
+	implimentations the version of coff which is most like the one
+	you want to use, for our purposes, we'll say that i386 coff is
+	the one you select, and that your coff flavour is called foo.
+	Copy the @code{i386coff.c} to @code{foocoff.c}, copy
+	@code{../include/i386coff.h} to @code{../include/foocoff.h}
+	and add the lines to @code{targets.c} and @code{Makefile.in}
+	so that your new back end is used. Alter the shapes of the
+	structures in @code{../include/foocoff.h} so that they match
+	what you need. You will probably also have to add
+	@code{#ifdef}s to the code in @code{internalcoff.h} and
+	@code{coffcode.h} if your version of coff is too wild. 
 
-Then clean up your code, and send what you've done to Cygnus. Then your stuff
-will be in the next release, and you won't have to keep integrating
-it.
+	You can verify that your new BFD backend works quite simply by
+	building @code{objdump} from the @code{binutils} directory,
+	and making sure that its version of what's going on at your
+	host systems idea (assuming it has the pretty standard coff
+	dump utility (usually called @code{att-dump} or just
+	@code{dump})) are the same.  Then clean up your code, and send
+	what you've done to Cygnus. Then your stuff will be in the
+	next release, and you won't have to keep integrating it.
 
-@subsection How The Coff Backend Works
+SUBSECTION
+	How The Coff Backend Works
 
-@subsubsection Bit Twiddling
-Each flavour of coff supported in BFD has its own header file
-descibing the external layout of the structures. There is also an
-internal description of the coff layout (in @code{internalcoff.h})
-file (@code{}). A major function of the coff backend is swapping the
-bytes and twiddling the bits to translate the external form of the
-structures into the normal internal form. This is all performed in the
-@code{bfd_swap}_@i{thing}_@i{direction} routines. Some elements are
-different sizes between different versions of coff, it is the duty of
-the coff version specific include file to override the definitions of
-various packing routines in @code{coffcode.h}. Eg the size of line
-number entry in coff is sometimes 16 bits, and sometimes 32 bits.
-@code{#define}ing @code{PUT_LNSZ_LNNO} and @code{GET_LNSZ_LNNO} will
-select the correct one. No doubt, some day someone will find a version
-of coff which has a varying field size not catered for at the moment.
-To port BFD, that person will have to add more @code{#defines}.
+SUBSUBSECTION
+	Bit Twiddling
 
-Three of the bit twiddling routines are exported to @code{gdb};
-@code{coff_swap_aux_in}, @code{coff_swap_sym_in} and
-@code{coff_swap_linno_in}. @code{GDB} reads the symbol table on its
-own, but uses BFD to fix things up.
+DESCRIPTION
+	Each flavour of coff supported in BFD has its own header file
+	descibing the external layout of the structures. There is also
+	an internal description of the coff layout (in
+	@code{internalcoff.h}) file (@code{}). A major function of the
+	coff backend is swapping the bytes and twiddling the bits to
+	translate the external form of the structures into the normal
+	internal form. This is all performed in the
+	@code{bfd_swap}_@i{thing}_@i{direction} routines. Some
+	elements are different sizes between different versions of
+	coff, it is the duty of the coff version specific include file
+	to override the definitions of various packing routines in
+	@code{coffcode.h}. Eg the size of line number entry in coff is
+	sometimes 16 bits, and sometimes 32 bits. @code{#define}ing
+	@code{PUT_LNSZ_LNNO} and @code{GET_LNSZ_LNNO} will select the
+	correct one. No doubt, some day someone will find a version of
+	coff which has a varying field size not catered for at the
+	moment. To port BFD, that person will have to add more @code{#defines}.  
+	Three of the bit twiddling routines are exported to
+	@code{gdb}; @code{coff_swap_aux_in}, @code{coff_swap_sym_in}
+	and @code{coff_swap_linno_in}. @code{GDB} reads the symbol
+	table on its own, but uses BFD to fix things up.  More of the
+	bit twiddlers are exported for @code{gas};
+	@code{coff_swap_aux_out}, @code{coff_swap_sym_out},
+	@code{coff_swap_lineno_out}, @code{coff_swap_reloc_out},
+	@code{coff_swap_filehdr_out}, @code{coff_swap_aouthdr_out},
+	@code{coff_swap_scnhdr_out}. @code{Gas} currently keeps track
+	of all the symbol table and reloc drudgery itself, thereby
+	saving the internal BFD overhead, but uses BFD to swap things
+	on the way out, making cross ports much safer.  This also
+	allows BFD (and thus the linker) to use the same header files
+	as @code{gas}, which makes one avenue to disaster disappear.
 
-More of the bit twiddlers are exported for @code{gas};
-@code{coff_swap_aux_out}, @code{coff_swap_sym_out},
-@code{coff_swap_lineno_out}, @code{coff_swap_reloc_out},
-@code{coff_swap_filehdr_out}, @code{coff_swap_aouthdr_out},
-@code{coff_swap_scnhdr_out}. @code{Gas} currently keeps track of all
-the symbol table and reloc drudgery itself, thereby saving the
-internal BFD overhead, but uses BFD to swap things on the way out,
-making cross ports much safer.  This also allows BFD (and thus the
-linker) to use the same header files as @code{gas}, which makes one
-avenue to disaster disappear.
+SUBSUBSECTION
+	Symbol Reading
 
-@subsubsection Symbol Reading
-The simple canonical form for symbols used by BFD is not rich enough
-to keep all the information available in a coff symbol table. The back
-end gets around this by keeping the original symbol table around,
-"behind the scenes".
+DESCRIPTION
+	The simple canonical form for symbols used by BFD is not rich
+	enough to keep all the information available in a coff symbol
+	table. The back end gets around this by keeping the original
+	symbol table around, "behind the scenes". 
 
-When a symbol table is requested (through a call to
-@code{bfd_canonicalize_symtab}, a request gets through to
-@code{get_normalized_symtab}. This reads the symbol table from the
-coff file and swaps all the structures inside into the internal form.
-It also fixes up all the pointers in the table (represented in the file
-by offsets from the first symbol in the table) into physical pointers
-to elements in the new internal table. This involves some work since
-the meanings of fields changes depending upon context; a field that is a
-pointer to another structure in the symbol table at one moment may be
-the size in bytes of a structure in the next.
+	When a symbol table is requested (through a call to
+	@code{bfd_canonicalize_symtab}, a request gets through to
+	@code{get_normalized_symtab}. This reads the symbol table from
+	the coff file and swaps all the structures inside into the
+	internal form. It also fixes up all the pointers in the table
+	(represented in the file by offsets from the first symbol in
+	the table) into physical pointers to elements in the new
+	internal table. This involves some work since the meanings of
+	fields changes depending upon context; a field that is a
+	pointer to another structure in the symbol table at one moment
+	may be the size in bytes of a structure in the next.  Another
+	pass is made over the table. All symbols which mark file names
+	(@code{C_FILE} symbols) are modified so that the internal
+	string points to the value in the auxent (the real filename)
+	rather than the normal text associated with the symbol
+	(@code{".file"}). 
 
-Another pass is made over the table. All symbols which mark file names
-(@code{C_FILE} symbols) are modified so that the internal string
-points to the value in the auxent (the real filename) rather than the
-normal text associated with the symbol (@code{".file"}).
+	At this time the symbol names are moved around. Coff stores
+	all symbols less than nine characters long physically
+	within the symbol table, longer strings are kept at the end of
+	the file in the string 	table. This pass moves all strings
+	into memory, and replaces them with pointers to the strings.
 
-At this time the symbol names are moved around. Coff stores all
-symbols less than nine characters long physically within the symbol
-table, longer strings are kept at the end of the file in the string
-table. This pass moves all strings into memory, and replaces them with
-pointers to the strings.
 
-The symbol table is massaged once again, this time to create the
-canonical table used by the BFD application. Each symbol is inspected
-in turn, and a decision made (using the @code{sclass} field) about the
-various flags to set in the @code{asymbol} @xref{Symbols}. The
-generated canonical table shares strings with the hidden internal
-symbol table.
+	The symbol table is massaged once again, this time to create
+	the canonical table used by the BFD application. Each symbol
+	is inspected in turn, and a decision made (using the
+	@code{sclass} field) about the various flags to set in the
+	@code{asymbol} @xref{Symbols}. The generated canonical table
+	shares strings with the hidden internal symbol table. 
 
-Any linenumbers are read from the coff file too, and attached to the
-symbols which own the functions the linenumbers belong to.
+	Any linenumbers are read from the coff file too, and attached
+	to the symbols which own the functions the linenumbers belong to. 
 
-@subsubsection Symbol Writing
-Writing a symbol to a coff file which didn't come from a coff file
-will lose any debugging information. The @code{asymbol} structure
-remembers the BFD from which was born, and on output the back end
-makes sure that the same destination target as source target is
-present.
+SUBSUBSECTION
+	Symbol Writing
 
-When the symbols have come from a coff file then all the debugging
-information is preserved.
 
-Symbol tables are provided for writing to the back end in a vector of
-pointers to pointers. This allows applications like the linker to
-accumulate and output large symbol tables without having to do too
-much byte copying.
+DESCRIPTION
+	Writing a symbol to a coff file which didn't come from a coff
+	file will lose any debugging information. The @code{asymbol}
+	structure remembers the BFD from which was born, and on output
+	the back end makes sure that the same destination target as
+	source target is present.
 
-The symbol table is not output to a writable BFD until it is closed.
-The order of operations on the canonical symbol table at that point
-are:
-@table @code
-@item coff_renumber_symbols
-This function runs through the provided symbol table and patches each
-symbol marked as a file place holder (@code{C_FILE}) to point to the
-next file place holder in the list. It also marks each @code{offset}
-field in the list with the offset from the first symbol of the current
-symbol.
+	When the symbols have come from a coff file then all the
+	debugging information is preserved.
 
-Another function of this procedure is to turn the canonical value form
-of BFD into the form used by coff. Internally, BFD expects symbol
-values to be offsets from a section base; so a symbol physically at
-0x120, but in a section starting at 0x100, would have the value 0x20.
-Coff expects symbols to contain their final value, so symbols have
-their values changed at this point to reflect their sum with their
-owning section. Note that this transformation uses the
-@code{output_section} field of the @code{asymbol}'s @code{asection}
-@xref{Sections}.
-@item coff_mangle_symbols
-This routine runs though the provided symbol table and uses the
-offsets generated by the previous pass and the pointers generated when
-the symbol table was read in to create the structured hierachy
-required by coff. It changes each pointer to a symbol to an index into
-the symbol table of the symbol being referenced.
-@item coff_write_symbols
-This routine runs through the symbol table and patches up the symbols
-from their internal form into the coff way, calls the bit twiddlers
-and writes out the tabel to the file.
-@end table
+	Symbol tables are provided for writing to the back end in a
+	vector of pointers to pointers. This allows applications like
+	the linker to accumulate and output large symbol tables
+	without having to do too much byte copying.
+
+
+
+	This function runs through the provided symbol table and
+	patches each symbol marked as a file place holder
+	(@code{C_FILE}) to point to the next file place holder in the
+	list. It also marks each @code{offset} field in the list with
+	the offset from the first symbol of the current symbol.
+
+	Another function of this procedure is to turn the canonical
+	value form of BFD into the form used by coff. Internally, BFD
+	expects symbol values to be offsets from a section base; so a
+	symbol physically at 0x120, but in a section starting at
+	0x100, would have the value 0x20. Coff expects symbols to
+	contain their final value, so symbols have their values
+	changed at this point to reflect their sum with their owning
+	section. Note that this transformation uses the
+	<<output_section>> field of the @code{asymbol}'s
+	@code{asection} @xref{Sections}. 
+
+	o coff_mangle_symbols
+	This routine runs though the provided symbol table and uses
+	the offsets generated by the previous pass and the pointers
+	generated when the symbol table was read in to create the
+	structured hierachy required by coff. It changes each pointer
+	to a symbol to an index into the symbol table of the symbol
+	being referenced. 
+
+	o coff_write_symbols
+	This routine runs through the symbol table and patches up the
+	symbols from their internal form into the coff way, calls the
+	bit twiddlers and writes out the tabel to the file. 
+
 */
 
-/*proto*
+/*
+INTERNAL
 
-The hidden information for an asymbol is:
 
-*+++
+	The hidden information for an asymbol is described in a
+	coff_ptr_struct, which is typedefed to a combined_entry_type
 
-$ typedef struct coff_ptr_struct
-$ {
+	.typedef struct coff_ptr_struct 
+	.{
 
-Remembers the offset from the first symbol in the file for this
-symbol. Generated by @code{coff_renumber_symbols}.
+	Remembers the offset from the first symbol in the file for
+	this symbol. Generated by @code{coff_renumber_symbols}.
 
-$   unsigned int offset;
+	.unsigned int offset;
 
-Should the tag field of this symbol be renumbered.
-Created by @code{coff_pointerize_aux}.
+	Should the tag field of this symbol be renumbered.
+	Created by @code{coff_pointerize_aux}.
 
-$   char fix_tag;
+	.char fix_tag;
 
-Should the endidx field of this symbol be renumbered.
-Created by @code{coff_pointerize_aux}.
+	Should the endidx field of this symbol be renumbered.
+	Created by @code{coff_pointerize_aux}.
 
-$   char fix_end;
+	.char fix_end;
 
-The container for the symbol structure as read and translated from the file.
+	The container for the symbol structure as read and translated
+	from the file.
 
-$   union {
-$     union internal_auxent auxent;
-$     struct internal_syment syment;
-$   } u;
-$ } combined_entry_type;
-$
+	.union {
+	.   union internal_auxent auxent;
+	.   struct internal_syment syment;
+	. } u;
+	.} combined_entry_type;
 
-*---
+	Each canonical asymbol really looks like this:
 
-Each canonical asymbol really looks like this:
+	.typedef struct coff_symbol_struct
+	.{
 
-*+++
+	The actual symbol which the rest of BFD works with
 
-$ typedef struct coff_symbol_struct
-$ {
+	.asymbol symbol;
 
-The actual symbol which the rest of BFD works with
+	A pointer to the hidden information for this symbol
 
-$   asymbol symbol;
+	.combined_entry_type *native;
 
-A pointer to the hidden information for this symbol
+	A pointer to the linenumber information for this symbol
 
-$   combined_entry_type *native;
+	.struct lineno_cache_entry *lineno;
+	.} coff_symbol_type;
 
-A pointer to the linenumber information for this symbol
-
-$   struct lineno_cache_entry *lineno;
-$ } coff_symbol_type;
-
-*---
 
 */
 
@@ -1635,17 +1653,21 @@ DEFUN(coff_write_symbols,(abfd),
   }
 }
 
-/*doc*
-@subsubsection Writing Relocations
-To write a relocations, all the back end does is step though the
-canonical relocation table, and create an @code{internal_reloc}. The
-symbol index to use is removed from the @code{offset} field in the
-symbol table supplied, the address comes directly from the sum of the
-section base address and the relocation offset and the type is dug
-directly from the howto field.
+/*
+SUBSUBSECTION
+	Writing Relocations
 
-Then the @code{internal_reloc} is swapped into the shape of an
-@code{external_reloc} and written out to disk.
+DESCRIPTION
+	To write relocations, all the back end does is step though the
+	canonical relocation table, and create an
+	@code{internal_reloc}. The symbol index to use is removed from
+	the @code{offset} field in the symbol table supplied, the
+	address comes directly from the sum of the section base
+	address and the relocation offset and the type is dug directly
+	from the howto field.  Then the @code{internal_reloc} is
+	swapped into the shape of an @code{external_reloc} and written
+	out to disk. 
+
 */
 
 static void
@@ -2693,21 +2715,25 @@ DEFUN(section_from_bfd_index,(abfd, index),
 
 #ifndef NO_COFF_LINENOS
 
-/*doc*
-@subsubsection Reading Linenumbers
-Createing the linenumber table is done by reading in the entire coff
-linenumber table, and creating another table for internal use.
+/*
+SUBSUBSECTION 
+	Reading Linenumbers
 
-A coff line number table is structured so that each
-function is marked as having a line number of 0. Each line within the
-function is an offset from the first line in the function. The base of
-the line number information for the table is stored in the symbol
-associated with the function.
+DESCRIPTION
+	Creating the linenumber table is done by reading in the entire
+	coff linenumber table, and creating another table for internal use.
 
-The information is copied from the external to the internal table, and
-each symbol which marks a function is marked by pointing its...
+	A coff line number table is structured so that each function
+	is marked as having a line number of 0. Each line within the
+	function is an offset from the first line in the function. The
+	base of the line number information for the table is stored in
+	the symbol associated with the function. 
 
-**How does this work ?**
+	The information is copied from the external to the internal
+	table, and each symbol which marks a function is marked by
+	pointing its...
+
+	How does this work ?
 
 */
 
@@ -3050,31 +3076,34 @@ sec_ptr         asect;
     return (asect->reloc_count + 1) * sizeof(arelent *);
   }
 
-/*doc*
-@subsubsection Reading Relocations
-Coff relocations are easily transformed into the internal BFD form
-(@code{arelent}).
+/*
+SUBSUBSECTION 
+	Reading Relocations
 
-Reading a coff relocation table is done in the following stages:
-@itemize @bullet
-@item
-The entire coff relocation table is read into memory.
-@item
-Each relocation is processed in turn, first it is swapped from the
-external to the internal form.
-@item
-The symbol referenced in the relocation's symbol index is turned into
-a pointer into the canonical symbol table. Note that this table is the
-same as the one returned by a call to @code{bfd_canonicalize_symtab}.
-The back end will call the routine and save the result if a
-canonicalization hasn't been done.
-@item
-The reloc index is turned into a pointer to a howto structure, in a
-back end specific way. For instance, the 386 and 960 use the
-@code{r_type} to directly produce an index into a howto table vector;
-the 88k subtracts a number from the @code{r_type} field and creates an
-addend field.
-@end itemize
+DESCRIPTION
+	Coff relocations are easily transformed into the internal BFD form
+	(@code{arelent}).
+
+	Reading a coff relocation table is done in the following stages:
+
+	o The entire coff relocation table is read into memory.
+
+	o Each relocation is processed in turn, first it is swapped from the
+	external to the internal form.
+
+	o The symbol referenced in the relocation's symbol index is
+	turned intoa pointer into the canonical symbol table. Note
+	that this table is the same as the one returned by a call to
+	@code{bfd_canonicalize_symtab}. The back end will call the
+	routine and save the result if a canonicalization hasn't been done.
+
+	o The reloc index is turned into a pointer to a howto
+	structure, in a back end specific way. For instance, the 386
+	and 960 use the @code{r_type} to directly produce an index
+	into a howto table vector; the 88k subtracts a number from the
+	@code{r_type} field and creates an addend field.
+
+
 */
 
 #ifndef CALC_ADDEND
