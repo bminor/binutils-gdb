@@ -1,3 +1,16 @@
+2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (s390_tls_suffix): New function.
+	(elf_suffix_type): Add suffix enums for TLS relocations.
+	(s390_elf_suffix): Add suffix strings for TLS relocations.
+	(s390_elf_cons): Map new lenght/elf suffix combinations for TLS to
+	bfd relocations.
+	(md_gather_operands): Map new instruction operand/elf suffix
+	combinations for TLS to bfd relocations.
+	(tc_s390_fix_adjustable): Add new TLS relocations.
+	(tc_s390_force_relocation): Likewise.
+	(md_apply_fix3): Likewise.
+
 2003-01-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* as.h: Update copyright date.

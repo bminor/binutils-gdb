@@ -600,6 +600,67 @@ s390_insert_operand (insn, operand, val, file, line)
     }
 }
 
+struct map_tls
+  {
+    char *string;
+    int length;
+    bfd_reloc_code_real_type reloc;
+  };
+
+static bfd_reloc_code_real_type s390_tls_suffix
+  PARAMS ((char **, expressionS *));
+
+/* Parse tls marker and return the desired relocation.  */
+static bfd_reloc_code_real_type
+s390_tls_suffix (str_p, exp_p)
+     char **str_p;
+     expressionS *exp_p;
+{
+  static struct map_tls mapping[] =
+  {
+    { "tls_load", 8, BFD_RELOC_390_TLS_LOAD },
+    { "tls_gdcall", 10, BFD_RELOC_390_TLS_GDCALL  },
+    { "tls_ldcall", 10, BFD_RELOC_390_TLS_LDCALL  },
+    { NULL,  0, BFD_RELOC_UNUSED }
+  };
+  struct map_tls *ptr;
+  char *orig_line;
+  char *str;
+  char *ident;
+  int len;
+
+  str = *str_p;
+  if (*str++ != ':')
+    return BFD_RELOC_UNUSED;
+
+  ident = str;
+  while (ISIDNUM (*str))
+    str++;
+  len = str - ident;
+  if (*str++ != ':')
+    return BFD_RELOC_UNUSED;
+
+  orig_line = input_line_pointer;
+  input_line_pointer = str;
+  expression (exp_p);
+  str = input_line_pointer;
+  if (&input_line_pointer != str_p)
+    input_line_pointer = orig_line;
+
+  if (exp_p->X_op != O_symbol)
+    return BFD_RELOC_UNUSED;
+
+  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
+    if (len == ptr->length
+	&& strncasecmp (ident, ptr->string, ptr->length) == 0)
+      {
+	/* Found a matching tls suffix.  */
+	*str_p = str;
+	return ptr->reloc;
+      }
+  return BFD_RELOC_UNUSED;
+}
+
 /* Structure used to hold suffixes.  */
 typedef enum
   {
@@ -609,7 +670,13 @@ typedef enum
     ELF_SUFFIX_GOTENT,
     ELF_SUFFIX_GOTOFF,
     ELF_SUFFIX_GOTPLT,
-    ELF_SUFFIX_PLTOFF
+    ELF_SUFFIX_PLTOFF,
+    ELF_SUFFIX_TLS_GD,
+    ELF_SUFFIX_TLS_GOTIE,
+    ELF_SUFFIX_TLS_IE,
+    ELF_SUFFIX_TLS_LDM,
+    ELF_SUFFIX_TLS_LDO,
+    ELF_SUFFIX_TLS_LE
   }
 elf_suffix_type;
 
@@ -641,6 +708,12 @@ s390_elf_suffix (str_p, exp_p)
     { "gotoff", 6, ELF_SUFFIX_GOTOFF },
     { "gotplt", 6, ELF_SUFFIX_GOTPLT },
     { "pltoff", 6, ELF_SUFFIX_PLTOFF },
+    { "tlsgd", 5, ELF_SUFFIX_TLS_GD },
+    { "gotntpoff", 9, ELF_SUFFIX_TLS_GOTIE },
+    { "indntpoff", 9, ELF_SUFFIX_TLS_IE },
+    { "tlsldm", 6, ELF_SUFFIX_TLS_LDM },
+    { "dtpoff", 6, ELF_SUFFIX_TLS_LDO },
+    { "ntpoff", 6, ELF_SUFFIX_TLS_LE },
     { NULL,  0, ELF_SUFFIX_NONE }
   };
 
@@ -956,38 +1029,72 @@ s390_elf_cons (nbytes)
 	  int size;
 	  char *where;
 
-	  if (nbytes == 2 && suffix == ELF_SUFFIX_GOT)
-	    reloc = BFD_RELOC_390_GOT16;
-	  else if (nbytes == 4 && suffix == ELF_SUFFIX_GOT)
-	    reloc = BFD_RELOC_32_GOT_PCREL;
-	  else if (nbytes == 8 && suffix == ELF_SUFFIX_GOT)
-	    reloc = BFD_RELOC_390_GOT64;
-	  else if (nbytes == 2 && suffix == ELF_SUFFIX_GOTOFF)
-	    reloc = BFD_RELOC_16_GOTOFF;
-	  else if (nbytes == 4 && suffix == ELF_SUFFIX_GOTOFF)
-	    reloc = BFD_RELOC_32_GOTOFF;
-	  else if (nbytes == 8 && suffix == ELF_SUFFIX_GOTOFF)
-	    reloc = BFD_RELOC_390_GOTOFF64;
-	  else if (nbytes == 2 && suffix == ELF_SUFFIX_PLTOFF)
-	    reloc = BFD_RELOC_390_PLTOFF16;
-	  else if (nbytes == 4 && suffix == ELF_SUFFIX_PLTOFF)
-	    reloc = BFD_RELOC_390_PLTOFF32;
-	  else if (nbytes == 8 && suffix == ELF_SUFFIX_PLTOFF)
-	    reloc = BFD_RELOC_390_PLTOFF64;
-	  else if (nbytes == 4 && suffix == ELF_SUFFIX_PLT)
-	    reloc = BFD_RELOC_390_PLT32;
-	  else if (nbytes == 8 && suffix == ELF_SUFFIX_PLT)
-	    reloc = BFD_RELOC_390_PLT64;
-	  else if (nbytes == 4 && suffix == ELF_SUFFIX_GOTPLT)
-	    reloc = BFD_RELOC_390_GOTPLT32;
-	  else if (nbytes == 8 && suffix == ELF_SUFFIX_GOTPLT)
-	    reloc = BFD_RELOC_390_GOTPLT64;
+	  if (nbytes == 2)
+	    {
+	      static bfd_reloc_code_real_type tab2[] =
+		{
+		  [ELF_SUFFIX_NONE] BFD_RELOC_UNUSED ,
+		  [ELF_SUFFIX_GOT] BFD_RELOC_390_GOT16,
+		  [ELF_SUFFIX_PLT] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_GOTENT] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_GOTOFF] BFD_RELOC_16_GOTOFF,
+		  [ELF_SUFFIX_GOTPLT] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_PLTOFF] BFD_RELOC_390_PLTOFF16,
+		  [ELF_SUFFIX_TLS_GD] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_TLS_GOTIE] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_TLS_IE] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_TLS_LDM] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_TLS_LDO] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_TLS_LE] BFD_RELOC_UNUSED,
+		};
+	      reloc = tab2[suffix];
+	    }
+	  else if (nbytes == 4)
+	    {
+	      static bfd_reloc_code_real_type tab4[] =
+		{
+		  [ELF_SUFFIX_NONE] BFD_RELOC_UNUSED ,
+		  [ELF_SUFFIX_GOT] BFD_RELOC_32_GOT_PCREL,
+		  [ELF_SUFFIX_PLT] BFD_RELOC_390_PLT32,
+		  [ELF_SUFFIX_GOTENT] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_GOTOFF] BFD_RELOC_32_GOTOFF,
+		  [ELF_SUFFIX_GOTPLT] BFD_RELOC_390_GOTPLT32,
+		  [ELF_SUFFIX_PLTOFF] BFD_RELOC_390_PLTOFF32,
+		  [ELF_SUFFIX_TLS_GD] BFD_RELOC_390_TLS_GD32,
+		  [ELF_SUFFIX_TLS_GOTIE] BFD_RELOC_390_TLS_GOTIE32,
+		  [ELF_SUFFIX_TLS_IE] BFD_RELOC_390_TLS_IE32,
+		  [ELF_SUFFIX_TLS_LDM] BFD_RELOC_390_TLS_LDM32,
+		  [ELF_SUFFIX_TLS_LDO] BFD_RELOC_390_TLS_LDO32,
+		  [ELF_SUFFIX_TLS_LE] BFD_RELOC_390_TLS_LE32,
+		};
+	      reloc = tab4[suffix];
+	    }
+	  else if (nbytes == 8)
+	    {
+	      static bfd_reloc_code_real_type tab8[] =
+		{
+		  [ELF_SUFFIX_NONE] BFD_RELOC_UNUSED ,
+		  [ELF_SUFFIX_GOT] BFD_RELOC_390_GOT64,
+		  [ELF_SUFFIX_PLT] BFD_RELOC_390_PLT64,
+		  [ELF_SUFFIX_GOTENT] BFD_RELOC_UNUSED,
+		  [ELF_SUFFIX_GOTOFF] BFD_RELOC_390_GOTOFF64,
+		  [ELF_SUFFIX_GOTPLT] BFD_RELOC_390_GOTPLT64,
+		  [ELF_SUFFIX_PLTOFF] BFD_RELOC_390_PLTOFF64,
+		  [ELF_SUFFIX_TLS_GD] BFD_RELOC_390_TLS_GD64,
+		  [ELF_SUFFIX_TLS_GOTIE] BFD_RELOC_390_TLS_GOTIE64,
+		  [ELF_SUFFIX_TLS_IE] BFD_RELOC_390_TLS_IE64,
+		  [ELF_SUFFIX_TLS_LDM] BFD_RELOC_390_TLS_LDM64,
+		  [ELF_SUFFIX_TLS_LDO] BFD_RELOC_390_TLS_LDO64,
+		  [ELF_SUFFIX_TLS_LE] BFD_RELOC_390_TLS_LE64,
+		};
+	      reloc = tab8[suffix];
+	    }
 	  else
 	    reloc = BFD_RELOC_UNUSED;
 
-	  if (reloc != BFD_RELOC_UNUSED)
+	  if (reloc != BFD_RELOC_UNUSED
+	      && (reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc)))
 	    {
-	      reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
 	      size = bfd_get_reloc_size (reloc_howto);
 	      if (size > nbytes)
 		as_bad (_("%s relocations do not fit in %d bytes"),
@@ -1035,6 +1142,7 @@ md_gather_operands (str, insn, opcode)
   struct s390_fixup fixups[MAX_INSN_FIXUPS];
   const struct s390_operand *operand;
   const unsigned char *opindex_ptr;
+  expressionS ex;
   elf_suffix_type suffix;
   bfd_reloc_code_real_type reloc;
   int skip_optional;
@@ -1052,7 +1160,6 @@ md_gather_operands (str, insn, opcode)
   fc = 0;
   for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
     {
-      expressionS ex;
       char *hold;
 
       operand = s390_operands + *opindex_ptr;
@@ -1167,6 +1274,18 @@ md_gather_operands (str, insn, opcode)
 		       && (operand->bits == 32))
 		reloc = BFD_RELOC_390_GOTPLTENT;
 	    }
+	  else if (suffix == ELF_SUFFIX_TLS_GOTIE)
+	    {
+	      if ((operand->flags & S390_OPERAND_DISP)
+		  && (operand->bits == 12))
+		reloc = BFD_RELOC_390_TLS_GOTIE12;
+	    }
+	  else if (suffix == ELF_SUFFIX_TLS_IE)
+	    {
+	      if ((operand->flags & S390_OPERAND_PCREL)
+		       && (operand->bits == 32))
+		reloc = BFD_RELOC_390_TLS_IEENT;
+	    }
 
 	  if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
 	    as_bad (_("invalid operand suffix"));
@@ -1262,6 +1381,20 @@ md_gather_operands (str, insn, opcode)
   while (ISSPACE (*str))
     ++str;
 
+  /* Check for tls instruction marker.  */
+  reloc = s390_tls_suffix (&str, &ex);
+  if (reloc != BFD_RELOC_UNUSED)
+    {
+      /* We need to generate a fixup of type 'reloc' for this
+	 instruction.  */
+      if (fc >= MAX_INSN_FIXUPS)
+	as_fatal (_("too many fixups"));
+      fixups[fc].exp = ex;
+      fixups[fc].opindex = -1;
+      fixups[fc].reloc = reloc;
+      ++fc;
+    }
+
   if (*str != '\0')
     {
       char *linefeed;
@@ -1286,6 +1419,15 @@ md_gather_operands (str, insn, opcode)
      md_apply_fix3.  */
   for (i = 0; i < fc; i++)
     {
+
+      if (fixups[i].opindex < 0)
+	{
+	  /* Create tls instruction marker relocation.  */
+	  fix_new_exp (frag_now, f - frag_now->fr_literal, opcode->oplen,
+		       &fixups[i].exp, 0, fixups[i].reloc);
+	  continue;
+	}
+
       operand = s390_operands + fixups[i].opindex;
 
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
@@ -1699,6 +1841,26 @@ tc_s390_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT32
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT64
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLTENT
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LOAD
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GDCALL
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LDCALL
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GD32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GD64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE12
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LDM32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LDM64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_IE32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_IE64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_IEENT
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LE32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LE64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LDO32
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_LDO64
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_DTPMOD
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_DTPOFF
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_TPOFF
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -1972,6 +2134,32 @@ md_apply_fix3 (fixP, valP, seg)
 	case BFD_RELOC_VTABLE_ENTRY:
 	  fixP->fx_done = 0;
 	  return;
+
+	case BFD_RELOC_390_TLS_LOAD:
+	case BFD_RELOC_390_TLS_GDCALL:
+	case BFD_RELOC_390_TLS_LDCALL:
+	case BFD_RELOC_390_TLS_GD32:
+	case BFD_RELOC_390_TLS_GD64:
+	case BFD_RELOC_390_TLS_GOTIE12:
+	case BFD_RELOC_390_TLS_GOTIE32:
+	case BFD_RELOC_390_TLS_GOTIE64:
+	case BFD_RELOC_390_TLS_LDM32:
+	case BFD_RELOC_390_TLS_LDM64:
+	case BFD_RELOC_390_TLS_IE32:
+	case BFD_RELOC_390_TLS_IE64:
+	case BFD_RELOC_390_TLS_LE32:
+	case BFD_RELOC_390_TLS_LE64:
+	case BFD_RELOC_390_TLS_LDO32:
+	case BFD_RELOC_390_TLS_LDO64:
+	case BFD_RELOC_390_TLS_DTPMOD:
+	case BFD_RELOC_390_TLS_DTPOFF:
+	case BFD_RELOC_390_TLS_TPOFF:
+	  /* Fully resolved at link time.  */
+	  break;
+	case BFD_RELOC_390_TLS_IEENT:
+	  /* Fully resolved at link time.  */
+	  value += 2;
+	  break;
 
 	default:
 	  {
