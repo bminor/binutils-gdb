@@ -1,6 +1,7 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -327,7 +328,7 @@ coff_lookup_type (index)
       int old_vector_length = type_vector_length;
 
       type_vector_length *= 2;
-      if (type_vector_length < index) {
+      if (index /* is still */ >= type_vector_length) {
 	type_vector_length = index * 2;
       }
       type_vector = (struct type **)
@@ -912,6 +913,11 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   stream = bfd_cache_lookup(objfile->obfd);
   if (!stream)
    perror_with_name(objfile->name);
+
+  /* Work around a stdio bug in SunOS4.1.1 (this makes me nervous....
+     it's hard to know I've really worked around it.  This should be
+     harmless, anyway).  */
+  rewind (stream);
 
   /* Position to read the symbol table. */
   val = fseek (stream, (long)symtab_offset, 0);
@@ -1657,17 +1663,17 @@ process_coff_symbol (cs, aux, objfile)
 	    add_param_to_type(&in_function_type,sym);
 #endif
 	    coff_add_symbol_to_list (sym, &coff_local_symbols);
-#if !defined (BELIEVE_PCC_PROMOTION)
+#if !defined (BELIEVE_PCC_PROMOTION) && (TARGET_BYTE_ORDER == BIG_ENDIAN)
 	    /* If PCC says a parameter is a short or a char,
-	       it is really an int.  */
+	       aligned on an int boundary, realign it to the "little end"
+	       of the int.  */
 	    temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
 	    if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (temptype)
-		&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
+		&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT
+		&& 0 == SYMBOL_VALUE (sym) % TYPE_LENGTH (temptype))
 		{
-		    SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))
-			? lookup_fundamental_type (current_objfile,
-						   FT_UNSIGNED_INTEGER)
-			    : temptype;
+		    SYMBOL_VALUE (sym) += TYPE_LENGTH (temptype)
+				        - TYPE_LENGTH (SYMBOL_TYPE (sym));
 		}
 #endif
 	    break;
@@ -1677,6 +1683,8 @@ process_coff_symbol (cs, aux, objfile)
 	    SYMBOL_VALUE (sym) = SDB_REG_TO_REGNUM(cs->c_value);
 	    coff_add_symbol_to_list (sym, &coff_local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION)
+	/* FIXME:  This should retain the current type, since it's just
+	   a register value.  gnu@adobe, 26Feb93 */
 	    /* If PCC says a parameter is a short or a char,
 	       it is really an int.  */
 	    temptype = lookup_fundamental_type (current_objfile, FT_INTEGER);
@@ -2047,7 +2055,6 @@ coff_read_struct_type (index, length, lastsym)
 /* Read a definition of an enumeration type,
    and create and return a suitable type object.
    Also defines the symbols that represent the values of the type.  */
-/* Currently assumes it's sizeof (int) and doesn't use length.  */
 
 /* ARGSUSED */
 static struct type *
@@ -2107,7 +2114,10 @@ coff_read_enum_type (index, length, lastsym)
 
   /* Now fill in the fields of the type-structure.  */
 
-  TYPE_LENGTH (type) =  TARGET_INT_BIT / TARGET_CHAR_BIT;
+  if (length > 0)
+    TYPE_LENGTH (type) =  length;
+  else
+    TYPE_LENGTH (type) =  TARGET_INT_BIT / TARGET_CHAR_BIT;	/* Assume ints */
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)

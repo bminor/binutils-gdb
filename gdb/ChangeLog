@@ -1,3 +1,7 @@
+Wed Apr 21 14:29:57 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* coffread.c (read_coff_symtab): Use rewind before fseek.
+
 Wed Apr 21 14:24:19 1993  Per Bothner  (bothner@cygnus.com)
 
 	* ch-exp.y:  Removed unused structure_primitive_value and FIXME_23.
