@@ -3407,7 +3407,7 @@ for ac_hdr in ctype.h endian.h nlist.h link.h thread_db.h proc_service.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \
-	dirent.h sys/ndir.h sys/dir.h ndir.h \
+	dirent.h sys/ndir.h sys/dir.h ndir.h sys/filio.h \
 	curses.h ncurses.h \
 	poll.h sys/poll.h
 do

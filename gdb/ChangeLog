@@ -1,3 +1,10 @@
+2001-12-07  Martin M. Hunt  <hunt@redhat.com>
+
+	* configure.in: Check for sys/filio.h
+	* configure: Rebuild.
+	* config.in: Add HAVE_SYS_FILIO_H
+	* ser-tcp.c: Conditionally include sys/filio.h.
+	
 2001-12-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.c (ui_out_table_begin): Initialize body_flag.

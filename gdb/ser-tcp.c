@@ -24,7 +24,14 @@
 #include "ser-unix.h"
 
 #include <sys/types.h>
-#include <sys/ioctl.h>
+
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>  /* For FIONBIO. */
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>  /* For FIONBIO. */
+#endif
+
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
