@@ -139,7 +139,6 @@ static ARMword softvectorcode[] =
   0xe1a0f00e			/* Default handler */
 };
 
-
 /* Set to prevent aborts when emulating SWI routines.  */
 static int in_SWI_handler = 0;
 
@@ -542,6 +541,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	case AngelSWI_Reason_WriteC:
 	  (void) fputc ((int) ARMul_ReadByte (state, addr), stdout);
 	  OSptr->ErrorNo = errno;
+	  /* Fall thgrough.  */
 
 	case AngelSWI_Reason_Write0:
 	  SWIWrite0 (state, addr);
@@ -634,7 +634,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       
     default:
       in_SWI_handler = 0;
-      
+
       /* If there is a SWI vector installed use it.  */
       if (state->is_XScale && saved_number != -1)
 	number = saved_number;
@@ -643,16 +643,16 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	{
 	  ARMword cpsr;
 	  ARMword i_size;
-	    
+
 	  cpsr = ARMul_GetCPSR (state);
 	  i_size = INSN_SIZE;
-	    
+
 	  ARMul_SetSPSR (state, SVC32MODE, cpsr);
-	    
+
 	  cpsr &= ~0xbf;
 	  cpsr |= SVC32MODE | 0x80;
 	  ARMul_SetCPSR (state, cpsr);
-	    
+
 	  state->RegBank[SVCBANK][14] = state->Reg[14] = state->Reg[15] - i_size;
 	  state->NextInstr            = RESUME;
 	  state->Reg[15]              = state->pc = ARMSWIV;
