@@ -1,3 +1,12 @@
+Tue Oct 25 11:44:38 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* linker.c (enum link_action): Add CIND.
+	(link_action): Change COMMON_ROW\indr from MDEF to CREF.  Change
+	INDR_ROW\common from MDEF to CIND.
+	(_bfd_generic_link_add_one_symbol): In CREF case, handle an
+	existing symbol which is indirect rather than defined.  Add new
+	CIND case.
+
 Mon Oct 24 15:33:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	Change S-record backend to use multiple sections to handle gaps in
