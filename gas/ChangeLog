@@ -1,3 +1,8 @@
+Mon Jan 26 13:07:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c: Detect if explicitly parallel instructions
+	might have an io conflict and issue a warning message. 
+
 start-sanitize-m32rx
 Mon Jan 26 12:38:54 1998  Nick Clifton  <nickc@cygnus.com>
 

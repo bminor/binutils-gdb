@@ -445,14 +445,35 @@ get_src_reg (syntax_field, fields)
     }
 }
 
+/* Returns zero iff the output register of instruction 'a'
+   is an input register to instruction 'b'.  */
+static int
+check_parallel_io_clash (a, b)
+     m32r_insn * a;
+     m32r_insn * b;
+{     
+  if (writes_to_dest_reg (a->insn))
+    {
+      unsigned char syntax_field;
+      int           skip = 0;
+      
+      while (syntax_field = reads_from_src_reg (b->insn, skip ++))
+	{
+	  if (get_src_reg (syntax_field, & b->fields) == get_dest_reg (a->fields))
+	    return 0;
+	}
+    }
+
+  return 1;
+}
+
+
 /* Returns NULL if the two 16 bit insns can be executed in parallel,
    otherwise it returns a pointer to an error message explaining why not.  */
 static const char *
-can_make_parallel (a, b, test_a_inputs, test_b_inputs)
+can_make_parallel (a, b)
      m32r_insn * a;
      m32r_insn * b;
-     int         test_a_inputs;
-     int         test_b_inputs;
 {
   PIPE_ATTR a_pipe;
   PIPE_ATTR b_pipe;
@@ -479,34 +500,6 @@ can_make_parallel (a, b, test_a_inputs, test_b_inputs)
       && (get_dest_reg (a->fields) == get_dest_reg (b->fields)))
     return "Instructions write to the same destination register.";
 
-  /* If requested, make sure that the first instruction does not
-     overwrite the inputs of the second instruction.  */
-  if (test_b_inputs && writes_to_dest_reg (a->insn))
-    {
-      unsigned char syntax_field;
-      int           skip = 0;
-      
-      while (syntax_field = reads_from_src_reg (b->insn, skip ++))
-	{
-	  if (get_src_reg (syntax_field, & b->fields) == get_dest_reg (a->fields))
-	    return "First instruction writes to register read by the second instruction";
-	}
-    }
-  
-  /* Similarly, if requested, make sure that the second instruction
-     does not overwrite the inputs of the first instruction.  */
-  if (test_a_inputs && writes_to_dest_reg (b->insn))
-    {
-      unsigned char syntax_field;
-      int           skip = 0;
-      
-      while (syntax_field = reads_from_src_reg (a->insn, skip ++))
-	{
-	  if (get_src_reg (syntax_field, & a->fields) == get_dest_reg (b->fields))
-	    return "Second instruction writes to register read by the first instruction";
-	}
-    }
-  
   return NULL;
 }
 
@@ -620,13 +613,17 @@ assemble_parallel_insn (str, str2)
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
      this to happen, (after all they have explicitly requested that these
-     two instructions be executed in parallel).  Similarly we assume that
-     parallel branch and jump instructions are deliberate and should not
-     produce errors.  If warn_explicit_parallel is defined however, we do
-     generate warning messages.  */
+     two instructions be executed in parallel).  Although if the global
+     variable warn_explicit_parallel_conflicts is true then we do generate
+     a warning message.  Similarly we assume that parallel branch and jump
+     instructions are deliberate and should not  produce errors.  */
   
-  if (can_make_parallel (& first, & second, false, false) == NULL)
+  if (can_make_parallel (& first, & second) == NULL)
     {
+      if (warn_explicit_parallel_conflicts
+	  && (! check_parallel_io_clash (& first, & second)))
+	as_warn ("%s: output of first instruction fails to overwrite input of second instruction.", str2);
+      
       /* Get the fixups for the first instruction.  */
       cgen_swap_fixups ();
 
@@ -647,6 +644,10 @@ assemble_parallel_insn (str, str2)
   else if ((errmsg = (char *) can_make_parallel (& second, & first,
 						 false, false)) == NULL)
     {
+      if (warn_explicit_parallel_conflicts
+	  && (! check_parallel_io_clash (& second, & first)))
+	as_warn ("%s: output of second instruction fails to overwrite input of first instruction.", str2);
+      
       /* Write out the second instruction first.  */
       (void) cgen_asm_finish_insn (second.insn, second.buffer,
 				   CGEN_FIELDS_BITSIZE (& second.fields));
@@ -750,11 +751,13 @@ md_assemble (str)
 	  if (   ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_COND_CTI)
 	      && ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_UNCOND_CTI))
 	    {
-	      if (can_make_parallel (& prev_insn, & insn, false, true) == NULL)
+	      if (can_make_parallel (& prev_insn, & insn) == NULL
+		  && check_parallel_io_clash (& prev_insn, &insn))
 		{
 		  make_parallel (insn.buffer);
 		}
-	      else if (can_make_parallel (& insn, & prev_insn.insn, true, false) == NULL)
+	      else if (can_make_parallel (& insn, & prev_insn.insn) == NULL
+		       && check_parallel_io_clash (& insn, & prev_insn))
 		{
 		  swap = true;
 		}
