@@ -29,6 +29,7 @@ COPYING
 ChangeLog
 ansidecl.h
 aout
+bfdlink.h
 bout.h
 coff
 demangle.h
