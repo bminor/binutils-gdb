@@ -1,3 +1,19 @@
+2001-09-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (enum return_reason): Renumber so that all values are
+	negative.
+	(RETURN_MASK): Negate reason.
+	(catch_exception_ftype): Declare.
+	(catch_exceptions): Declare.
+	* top.c (catcher): New function, based on catch_errors.  Add in
+	parameter func_uiout and out parameters func_val, func_caught and
+	func_cleanup.  Change type of func to catch_exceptions_ftype.
+	Save/restore uiout.
+	(struct catch_errors_args): Define.
+	(do_catch_errors): New function.
+	(catch_errors): Rewrite, use do_catch_errors and catcher.
+	(catch_exceptions): New function, use catcher.
+
 2001-09-07  Jim Blandy  <jimb@redhat.com>
 
 	Correctly parse register values provided by the monitor.

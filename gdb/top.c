@@ -41,6 +41,7 @@
 #include "version.h"
 #include "serial.h"
 #include "doublest.h"
+#include "gdb_assert.h"
 
 /* readline include files */
 #include <readline/readline.h>
@@ -334,10 +335,11 @@ return_to_top_level (enum return_reason reason)
   (NORETURN void) SIGLONGJMP (*catch_return, (int) reason);
 }
 
-/* Call FUNC with arg ARGS, catching any errors.  If there is no
-   error, return the value returned by FUNC.  If there is an error,
-   print ERRSTRING, print the specific error message, then return
-   zero.
+/* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
+   errors.  Set FUNC_CAUGHT to an ``enum return_reason'' if the
+   function is aborted (using return_to_top_level() or zero if the
+   function returns normally.  Set FUNC_VAL to the value returned by
+   the function or 0 if the function was aborted.
 
    Must not be called with immediate_quit in effect (bad things might
    happen, say we got a signal in the middle of a memcpy to quit_return).
@@ -365,20 +367,29 @@ return_to_top_level (enum return_reason reason)
    be consolidated into a single file instead of being distributed
    between utils.c and top.c? */
 
-int
-catch_errors (catch_errors_ftype *func, void * args, char *errstring,
-	      return_mask mask)
+static void
+catcher (catch_exceptions_ftype *func,
+	 struct ui_out *func_uiout,
+	 void *func_args,
+	 int *func_val,
+	 enum return_reason *func_caught,
+	 char *errstring,
+	 return_mask mask)
 {
   SIGJMP_BUF *saved_catch;
   SIGJMP_BUF catch;
-  int val;
   struct cleanup *saved_cleanup_chain;
   char *saved_error_pre_print;
   char *saved_quit_pre_print;
+  struct ui_out *saved_uiout;
 
   /* Return value from SIGSETJMP(): enum return_reason if error or
      quit caught, 0 otherwise. */
   int caught;
+
+  /* Return value from FUNC(): Hopefully non-zero. Explicitly set to
+     zero if an error quit was caught.  */
+  int val;
 
   /* Override error/quit messages during FUNC. */
 
@@ -389,6 +400,11 @@ catch_errors (catch_errors_ftype *func, void * args, char *errstring,
     error_pre_print = errstring;
   if (mask & RETURN_MASK_QUIT)
     quit_pre_print = errstring;
+
+  /* Override the global ``struct ui_out'' builder.  */
+
+  saved_uiout = uiout;
+  uiout = func_uiout;
 
   /* Prevent error/quit during FUNC from calling cleanups established
      prior to here. */
@@ -401,7 +417,7 @@ catch_errors (catch_errors_ftype *func, void * args, char *errstring,
   catch_return = &catch;
   caught = SIGSETJMP (catch);
   if (!caught)
-    val = (*func) (args);
+    val = (*func) (func_uiout, func_args);
   else
     val = 0;
   catch_return = saved_catch;
@@ -413,47 +429,78 @@ catch_errors (catch_errors_ftype *func, void * args, char *errstring,
      do_cleanups call (to cover the problem) or an assertion check to
      detect bad FUNCs code. */
 
-  /* Restore the cleanup chain and error/quit messages to their
-     original states. */
+  /* Restore the cleanup chain, the error/quit messages, and the uiout
+     builder, to their original states. */
 
   restore_cleanups (saved_cleanup_chain);
+
+  uiout = saved_uiout;
 
   if (mask & RETURN_MASK_QUIT)
     quit_pre_print = saved_quit_pre_print;
   if (mask & RETURN_MASK_ERROR)
     error_pre_print = saved_error_pre_print;
 
-  /* Return normally if no error/quit event occurred. */
+  /* Return normally if no error/quit event occurred or this catcher
+     can handle this exception.  The caller analyses the func return
+     values.  */
 
-  if (!caught)
-    return val;
+  if (!caught || (mask & RETURN_MASK (caught)))
+    {
+      *func_val = val;
+      *func_caught = caught;
+      return;
+    }
 
-  /* If the caller didn't request that the event be caught, relay the
+  /* The caller didn't request that the event be caught, relay the
      event to the next containing catch_errors(). */
 
-  if (!(mask & RETURN_MASK (caught)))
-    return_to_top_level (caught);
+  return_to_top_level (caught);
+}
 
-  /* Tell the caller that an event was caught.
+int
+catch_exceptions (struct ui_out *uiout,
+		  catch_exceptions_ftype *func,
+		  void *func_args,
+		  char *errstring,
+		  return_mask mask)
+{
+  int val;
+  enum return_reason caught;
+  catcher (func, uiout, func_args, &val, &caught, errstring, mask);
+  gdb_assert (val >= 0);
+  gdb_assert (caught <= 0);
+  if (caught < 0)
+    return caught;
+  return val;
+}
 
-     FIXME: nsd/2000-02-22: When MASK is RETURN_MASK_ALL, the caller
-     can't tell what type of event occurred.
+struct catch_errors_args
+{
+  catch_errors_ftype *func;
+  void *func_args;
+};
 
-     A possible fix is to add a new interface, catch_event(), that
-     returns enum return_reason after catching an error or a quit.
+int
+do_catch_errors (struct ui_out *uiout, void *data)
+{
+  struct catch_errors_args *args = data;
+  return args->func (args->func_args);
+}
 
-     When returning normally, i.e. without catching an error or a
-     quit, catch_event() could return RETURN_NORMAL, which would be
-     added to enum return_reason.  FUNC would return information
-     exclusively via ARGS.
-
-     Alternatively, normal catch_event() could return FUNC's return
-     value.  The caller would need to be aware of potential overlap
-     with enum return_reason, which could be publicly restricted to
-     negative values to simplify return value processing in FUNC and
-     in the caller. */
-
-  return 0;
+int
+catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
+	      return_mask mask)
+{
+  int val;
+  enum return_reason caught;
+  struct catch_errors_args args;
+  args.func = func;
+  args.func_args = func_args;
+  catcher (do_catch_errors, uiout, &args, &val, &caught, errstring, mask);
+  if (caught != 0)
+    return 0;
+  return val;
 }
 
 struct captured_command_args

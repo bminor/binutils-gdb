@@ -1084,21 +1084,23 @@ extern NORETURN void internal_error (const char *file, int line,
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
-/* Reasons for calling return_to_top_level.  Note: enum value 0 is
-   reserved for internal use as the return value from an initial
-   setjmp().  */
+/* Reasons for calling return_to_top_level.  NOTE: all reason values
+   must be less than zero.  enum value 0 is reserved for internal use
+   as the return value from an initial setjmp().  The function
+   catch_exceptions() reserves values >= 0 as legal results from its
+   wrapped function.  */
 
 enum return_reason
   {
     /* User interrupt.  */
-    RETURN_QUIT = 1,
+    RETURN_QUIT = -2,
     /* Any other error.  */
     RETURN_ERROR
   };
 
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
-#define RETURN_MASK(reason)	(1 << (int)(reason))
+#define RETURN_MASK(reason)	(1 << (int)(-reason))
 #define RETURN_MASK_QUIT	RETURN_MASK (RETURN_QUIT)
 #define RETURN_MASK_ERROR	RETURN_MASK (RETURN_ERROR)
 #define RETURN_MASK_ALL		(RETURN_MASK_QUIT | RETURN_MASK_ERROR)
@@ -1106,12 +1108,41 @@ typedef int return_mask;
 
 extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;
 
+/* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
+   handler.  If an exception (enum return_reason) is thrown using
+   return_to_top_level() than all cleanups installed since
+   catch_exceptions() was entered are invoked, the (-ve) exception
+   value is then returned by catch_exceptions.  If FUNC() returns
+   normally (with a postive or zero return value) then that value is
+   returned by catch_exceptions().  It is an internal_error() for
+   FUNC() to return a negative value.
+
+   For the period of the FUNC() call: UIOUT is installed as the output
+   builder; ERRSTRING is installed as the error/quit message; and a
+   new cleanup_chain is established.  The old values are restored
+   before catch_exceptions() returns.
+
+   FIXME; cagney/2001-08-13: The need to override the global UIOUT
+   builder variable should just go away.
+
+   This function superseeds catch_errors().
+
+   This function uses SETJMP() and LONGJUMP().  */
+
+struct ui_out;
+typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
+extern int catch_exceptions (struct ui_out *uiout,
+			     catch_exceptions_ftype *func, void *func_args,
+			     char *errstring, return_mask mask);
+
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is
    probably useful for CATCH_ERRORS_FTYPE to always return a non-zero
    value. It's unfortunate that, catch_errors() does not return an
    indication of the exact exception that it caught - quit_flag might
-   help. */
+   help.
+
+   This function is superseeded by catch_exceptions().  */
 
 typedef int (catch_errors_ftype) (PTR);
 extern int catch_errors (catch_errors_ftype *, PTR, char *, return_mask);
