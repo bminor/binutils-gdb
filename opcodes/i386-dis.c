@@ -1854,7 +1854,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "psrlw", MX, EM, XX },
   { "psrld", MX, EM, XX },
   { "psrlq", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { "paddq", MX, EM, XX },
   { "pmullw", MX, EM, XX },
   { PREGRP21 },
   { "pmovmskb", Ev, MX, XX },
@@ -1898,7 +1898,7 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "psubb", MX, EM, XX },
   { "psubw", MX, EM, XX },
   { "psubd", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { "psubq", MX, EM, XX },
   { "paddb", MX, EM, XX },
   { "paddw", MX, EM, XX },
   { "paddd", MX, EM, XX },
@@ -2146,7 +2146,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "psrlw", MX, EM, XX },
   { "psrld", MX, EM, XX },
   { "psrlq", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { "paddq", MX, EM, XX },
   { "pmullw", MX, EM, XX },
   { PREGRP21 },
   { "pmovmskb", Ev, MX, XX },
@@ -2190,7 +2190,7 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "psubb", MX, EM, XX },
   { "psubw", MX, EM, XX },
   { "psubd", MX, EM, XX },
-  { "(bad)", XX, XX, XX },
+  { "psubq", MX, EM, XX },
   { "paddb", MX, EM, XX },
   { "paddw", MX, EM, XX },
   { "paddd", MX, EM, XX },
@@ -2236,9 +2236,9 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1, /* df */
+  /* d0 */ 0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* df */
   /* e0 */ 1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* ef */
-  /* f0 */ 0,1,1,1,0,1,1,1,1,1,1,0,1,1,1,0  /* ff */
+  /* f0 */ 0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0  /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
