@@ -48,10 +48,6 @@ struct regcache_descr
   /* The architecture this descriptor belongs to.  */
   struct gdbarch *gdbarch;
 
-  /* Is this a ``legacy'' register cache?  Such caches reserve space
-     for raw and pseudo registers and allow access to both.  */
-  int legacy_p;
-
   /* The raw register cache.  Each raw (or hard) register is supplied
      by the target interface.  The raw cache should not contain
      redundant information - if the PC is constructed from two
@@ -84,66 +80,6 @@ struct regcache_descr
   struct type **register_type;
 };
 
-static void
-init_legacy_regcache_descr (struct gdbarch *gdbarch,
-			    struct regcache_descr *descr)
-{
-  int i;
-  /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
-     ``gdbarch'' as a parameter.  */
-  gdb_assert (gdbarch != NULL);
-
-  /* Compute the offset of each register.  Legacy architectures define
-     DEPRECATED_REGISTER_BYTE() so use that.  */
-  /* FIXME: cagney/2002-11-07: Instead of using
-     DEPRECATED_REGISTER_BYTE() this code should, as is done in
-     init_regcache_descr(), compute the offets at runtime.  This
-     currently isn't possible as some ISAs define overlapping register
-     regions - see the mess in read_register_bytes() and
-     write_register_bytes() registers.  */
-  descr->sizeof_register
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
-  descr->register_offset
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
-  for (i = 0; i < descr->nr_cooked_registers; i++)
-    {
-      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
-         DEPRECATED_REGISTER_BYTE().  Unfortunately, legacy code likes
-         to lay the buffer out so that certain registers just happen
-         to overlap.  Ulgh!  New targets use gdbarch's register
-         read/write and entirely avoid this uglyness.  */
-      descr->register_offset[i] = DEPRECATED_REGISTER_BYTE (i);
-      descr->sizeof_register[i] = DEPRECATED_REGISTER_RAW_SIZE (i);
-      gdb_assert (MAX_REGISTER_SIZE >= DEPRECATED_REGISTER_RAW_SIZE (i));
-      gdb_assert (MAX_REGISTER_SIZE >= DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
-    }
-
-  /* Compute the real size of the register buffer.  Start out by
-     trusting DEPRECATED_REGISTER_BYTES, but then adjust it upwards
-     should that be found to not be sufficient.  */
-  /* FIXME: cagney/2002-11-05: Instead of using the macro
-     DEPRECATED_REGISTER_BYTES, this code should, as is done in
-     init_regcache_descr(), compute the total number of register bytes
-     using the accumulated offsets.  */
-  descr->sizeof_cooked_registers = DEPRECATED_REGISTER_BYTES; /* OK */
-  for (i = 0; i < descr->nr_cooked_registers; i++)
-    {
-      long regend;
-      /* Keep extending the buffer so that there is always enough
-         space for all registers.  The comparison is necessary since
-         legacy code is free to put registers in random places in the
-         buffer separated by holes.  Once DEPRECATED_REGISTER_BYTE()
-         is killed this can be greatly simplified.  */
-      regend = descr->register_offset[i] + descr->sizeof_register[i];
-      if (descr->sizeof_cooked_registers < regend)
-	descr->sizeof_cooked_registers = regend;
-    }
-  /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
-     in the register cache.  Unfortunately some architectures still
-     rely on this and the pseudo_register_write() method.  */
-  descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
-}
-
 static void *
 init_regcache_descr (struct gdbarch *gdbarch)
 {
@@ -165,15 +101,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   descr->register_type
     = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, struct type *);
   for (i = 0; i < descr->nr_cooked_registers; i++)
-    {
-      if (gdbarch_register_type_p (gdbarch))
-	{
-	  gdb_assert (!DEPRECATED_REGISTER_VIRTUAL_TYPE_P ()); /* OK */
-	  descr->register_type[i] = gdbarch_register_type (gdbarch, i);
-	}
-      else
-	descr->register_type[i] = DEPRECATED_REGISTER_VIRTUAL_TYPE (i); /* OK */
-    }
+    descr->register_type[i] = gdbarch_register_type (gdbarch, i);
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
@@ -184,26 +112,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
      of the global register_valid_p[] array in the range [NUM_REGS
      .. NUM_REGS + NUM_PSEUDO_REGS).  */
   descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
-
-  /* If an old style architecture, fill in the remainder of the
-     register cache descriptor using the register macros.  */
-  /* NOTE: cagney/2003-06-29: If either of DEPRECATED_REGISTER_BYTE or
-     DEPRECATED_REGISTER_RAW_SIZE are still present, things are most likely
-     totally screwed.  Ex: an architecture with raw register sizes
-     smaller than what DEPRECATED_REGISTER_BYTE indicates; non
-     monotonic DEPRECATED_REGISTER_BYTE values.  For GDB 6 check for
-     these nasty methods and fall back to legacy code when present.
-     Sigh!  */
-  if ((!gdbarch_pseudo_register_read_p (gdbarch)
-       && !gdbarch_pseudo_register_write_p (gdbarch)
-       && !gdbarch_register_type_p (gdbarch))
-      || DEPRECATED_REGISTER_BYTE_P ()
-      || DEPRECATED_REGISTER_RAW_SIZE_P ())
-    {
-      descr->legacy_p = 1;
-      init_legacy_regcache_descr (gdbarch, descr);
-      return descr;
-    }
 
   /* Lay out the register cache.
 
@@ -280,11 +188,6 @@ register_size (struct gdbarch *gdbarch, int regnum)
   int size;
   gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
   size = descr->sizeof_register[regnum];
-  /* NB: The deprecated DEPRECATED_REGISTER_RAW_SIZE, if not provided, defaults
-     to the size of the register's type.  */
-  gdb_assert (size == DEPRECATED_REGISTER_RAW_SIZE (regnum)); /* OK */
-  /* NB: Don't check the register's virtual size.  It, in say the case
-     of the MIPS, may not match the raw size!  */
   return size;
 }
 
@@ -741,16 +644,6 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
-  if (regcache->descr->legacy_p
-      && !regcache->readonly_p)
-    {
-      gdb_assert (regcache == current_regcache);
-      /* For moment, just use underlying legacy code.  Ulgh!!! This
-	 silently and very indirectly updates the regcache's regcache
-	 via the global deprecated_register_valid[].  */
-      legacy_read_register_gen (regnum, buf);
-      return;
-    }
   /* Make certain that the register cache is up-to-date with respect
      to the current thread.  This switching shouldn't be necessary
      only there is still only one target side register cache.  Sigh!
@@ -824,11 +717,6 @@ deprecated_read_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
-  if (current_regcache->descr->legacy_p)
-    {
-      legacy_read_register_gen (regnum, buf);
-      return;
-    }
   regcache_cooked_read (current_regcache, regnum, buf);
 }
 
@@ -947,16 +835,6 @@ regcache_raw_write (struct regcache *regcache, int regnum, const void *buf)
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
   gdb_assert (!regcache->readonly_p);
 
-  if (regcache->descr->legacy_p)
-    {
-      /* For moment, just use underlying legacy code.  Ulgh!!! This
-	 silently and very indirectly updates the regcache's buffers
-	 via the globals deprecated_register_valid[] and registers[].  */
-      gdb_assert (regcache == current_regcache);
-      legacy_write_register_gen (regnum, buf);
-      return;
-    }
-
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
   if (CANNOT_STORE_REGISTER (regnum))
@@ -989,11 +867,6 @@ deprecated_write_register_gen (int regnum, char *buf)
 {
   gdb_assert (current_regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == current_gdbarch);
-  if (current_regcache->descr->legacy_p)
-    {
-      legacy_write_register_gen (regnum, buf);
-      return;
-    }
   regcache_cooked_write (current_regcache, regnum, buf);
 }
 
@@ -1435,7 +1308,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
   unsigned char buf[MAX_REGISTER_SIZE];
 
 #if 0
-  fprintf_unfiltered (file, "legacy_p %d\n", regcache->descr->legacy_p);
   fprintf_unfiltered (file, "nr_raw_registers %d\n",
 		      regcache->descr->nr_raw_registers);
   fprintf_unfiltered (file, "nr_cooked_registers %d\n",
