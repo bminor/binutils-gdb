@@ -1,3 +1,12 @@
+Tue May 25 11:59:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-bout.h (S_GET_VALUE): Removed unnecessary cast.
+
+Thu May 20 19:14:24 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (md_apply_fix_2): Straighten out check for
+	invalid values.
+
 Wed May 19 07:33:17 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* config/tc-h5000.c (build_bytes): Understand @rd mode and build

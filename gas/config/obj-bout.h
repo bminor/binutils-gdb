@@ -200,7 +200,7 @@ struct relocation_info
 
 /* Accessors */
 /* The value of the symbol */
-#define S_GET_VALUE(s)		((unsigned long) ((s)->sy_symbol.n_value))
+#define S_GET_VALUE(s)		((s)->sy_symbol.n_value)
 /* The name of the symbol */
 #define S_GET_NAME(s)		((s)->sy_symbol.n_un.n_name)
 /* The pointer to the string table */
