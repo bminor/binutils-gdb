@@ -1,3 +1,9 @@
+2001-08-31  Eric Christopher  <echristo@redhat.com>
+	    Jason Eckhardt  <jle@redhat.com>
+
+	* config/tc-mips.c (mips_cpu_info): Add support for mipsisa32,
+	5kc, and 20kc.  Clean up old entries.
+
 Fri Aug 31 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 			  Jeff Law <law@redhat.com>
 
@@ -17,13 +23,13 @@ Thu Aug 30 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
 
-	* config/tc-h8300.c (h8300hmode): Record the machine type 
+	* config/tc-h8300.c (h8300hmode): Record the machine type
 	if BFD_ASSEMBLER is defined.
 	(h8300smode, md_begin): Similarly.
 
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
-	* configure.in (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
+	* configure.in (i[3456]86-*-rtems*, m68*-*-rtems*): Change
 	default from coff to elf.
 	* configure: Regenerate.
 

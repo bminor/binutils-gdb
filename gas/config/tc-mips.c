@@ -9372,7 +9372,6 @@ MIPS options:\n\
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
   show (stream, "12000", &column, &first);
-  show (stream, "mips32-4k", &column, &first);
   show (stream, "sb-1", &column, &first);
   fputc ('\n', stream);
 
@@ -12068,17 +12067,20 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 
   /* MIPS32 ISA */
   { "MIPS32",         1,      ISA_MIPS32,     CPU_MIPS32, },
+  { "mipsisa32",      0,      ISA_MIPS32,     CPU_MIPS32, },
   { "Generic-MIPS32", 0,      ISA_MIPS32,     CPU_MIPS32, },
+  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32, },
+  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32, },
+  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32, },
 
-#if 1
-  /* XXX for now, MIPS64 -> MIPS3 because of history */
-  { "MIPS64",         1,      ISA_MIPS3,      CPU_R4000 }, /* XXX! */
-#else
+  /* For historical reasons.  */
+  { "MIPS64",         1,      ISA_MIPS3,      CPU_R4000, },
+
   /* MIPS64 ISA */
-  { "MIPS64",         1,      ISA_MIPS64,     CPU_MIPS64 },
-#endif
-  { "mips64isa",      1,      ISA_MIPS64,     CPU_MIPS64 },
+  { "mipsisa64",      1,      ISA_MIPS64,     CPU_MIPS64, },
   { "Generic-MIPS64", 0,      ISA_MIPS64,     CPU_MIPS64, },
+  { "5kc",            0,      ISA_MIPS64,     CPU_MIPS64, },
+  { "20kc",           0,      ISA_MIPS64,     CPU_MIPS64, },
 
   /* R2000 CPU */
   { "R2000",          0,      ISA_MIPS1,      CPU_R2000, },
@@ -12181,15 +12183,6 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "rm5721",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5k",            0,      ISA_MIPS4,      CPU_R5000, },
   { "r7000",          0,      ISA_MIPS4,      CPU_R5000, },
-
-  /* MIPS32 4K CPU */
-  { "MIPS32-4K",      0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "mips32-4kc",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "mips32-4km",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
-  { "mips32-4kp",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
 
   /* SiByte SB-1 CPU */
   { "SB-1",           0,      ISA_MIPS64,     CPU_SB1, },
