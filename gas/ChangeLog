@@ -1,3 +1,8 @@
+2001-01-16  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Build unwind
+	depending on section flags, not just for .text.
+
 2001-01-15  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (ia64_flush_insns): Handle unwind directives

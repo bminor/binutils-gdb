@@ -6053,7 +6053,9 @@ pa_build_unwind_subspace (call_info)
   int reloc;
   char c, *p;
 
-  if (now_seg != text_section)
+  if ((bfd_get_section_flags (stdoutput, now_seg)
+       & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+      != (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
     return;
 
   reloc = R_PARISC_SEGREL32;
