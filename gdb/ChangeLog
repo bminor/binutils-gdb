@@ -1,3 +1,15 @@
+Thu Jan 16 14:10:41 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* config/mn10300/tm-mn10300.h: fix BREAKPOINT definition
+
+Tue Jan 14 16:01:06 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mn10300-tdep.c: made a lot more generic, ripping out code
+	from copied target (no more mn10300_scan_prologue,
+	init_extra_frame_info, and mn10300_fix_call_dummy calls)
+	* config/mn10300/tm-mn10300.h: undefine INIT_EXTRA_FRAME_INFO
+	and INIT_FRAME_PC macros
+
 Thu Jan  9 11:44:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sparc-tdep.c (sparc_frame_find_saved_regs): Don't use 

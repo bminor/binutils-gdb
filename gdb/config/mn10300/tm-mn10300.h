@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 
-#define BREAKPOINT {0xff, 0xff}
+#define BREAKPOINT {0xff}
 
 #define FUNCTION_START_OFFSET 0
 
