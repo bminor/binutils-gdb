@@ -39,18 +39,6 @@ extern thread_t current_thread;
  */
 extern int must_suspend_thread;
 
-/* Get relevant ports when creating a new inferior */
-
-#define CREATE_INFERIOR_HOOK(pid)	mach_create_inferior_hook(pid)
-
-/* wait for the inferior to change state */
-
-#define INFERIOR_WAIT_HOOK(w)	mach_really_wait(w)
-
-/* After fork() call this before exec() in the inferior task */
-
-#define PREPARE_INFERIOR prepare_inferior_task
-
 /* Startup the inferior task and suspend it after the correct code is loaded */
 
 #define STARTUP_INFERIOR(x)	intercept_exec_calls(x)

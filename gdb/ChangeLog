@@ -1,5 +1,8 @@
 Mon Oct 11 14:27:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* m3-nat.c, config/nm-m3.h: Add a target_ops struct and other
+	various things to try to get this to work.
+
 	* symtab.h: Fix comments re headers, sharing blockvectors, etc.
 
 Mon Oct 11 11:46:06 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
