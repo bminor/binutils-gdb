@@ -757,7 +757,7 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
   discard_cleanups (old_chain);
 
   /* Call this after reading in a new symbol table to give target
-     dependant code a crack at the new symbols.  For instance, this
+     dependent code a crack at the new symbols.  For instance, this
      could be used to update the values of target-specific symbols GDB
      needs to keep track of (such as _sigtramp, or whatever).  */
 
@@ -1742,7 +1742,7 @@ reread_symbols (void)
 	      reread_one = 1;
 
 	      /* Call this after reading in a new symbol table to give target
-	         dependant code a crack at the new symbols.  For instance, this
+	         dependent code a crack at the new symbols.  For instance, this
 	         could be used to update the values of target-specific symbols GDB
 	         needs to keep track of (such as _sigtramp, or whatever).  */
 
