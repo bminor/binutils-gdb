@@ -1,3 +1,18 @@
+Thu May  7 02:19:14 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	* cgen.h: New file.
+	* cgen.c: Include it.
+	(MAX_FIXUPS): Renamed to CGEN_MAX_FIXUPS.
+	(cgen_asm_finish_insn): Result is now void.  New arg `result'.
+	All callers updated.
+	* config/tc-m32r.c: Include cgen.h.
+	(m23r_insn): New members num_fixups,fixups.
+start-sanitize-m32rx
+	(assemble_parallel_insn): Initialize debug_sym_link for each insn.
+	(md_assemble): Simplify code to pack two insns in parallel.
+	When swapping two insns, update their fixups.
+end-sanitize-m32rx
+
 start-sanitize-sky
 Wed May  6 16:26:57 1998  Doug Evans  <devans@canuck.cygnus.com>
 

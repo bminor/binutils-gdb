@@ -24,6 +24,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "cgen-opc.h"
 #include "as.h"
 #include "subsegs.h"
+#include "cgen.h"
 
 /* Callback to insert a register into the symbol table.
    A target may choose to let GAS parse the registers.
@@ -32,7 +33,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 cgen_asm_record_register (name, number)
      char * name;
-     int    number;
+     int number;
 {
   /* Use symbol_create here instead of symbol_new so we don't try to
      output registers into the object file's symbol table.  */
@@ -53,15 +54,13 @@ cgen_asm_record_register (name, number)
 
 struct fixup
 {
-  int         opindex;
-  int         opinfo;
+  int opindex;
+  int opinfo;
   expressionS exp;
 };
 
-#define MAX_FIXUPS 5
-
-static struct fixup fixups [MAX_FIXUPS];
-static int          num_fixups;
+static struct fixup fixups [CGEN_MAX_FIXUPS];
+static int num_fixups;
 
 /* Prepare to parse an instruction.
    ??? May wish to make this static and delete calls in md_assemble.  */
@@ -80,7 +79,7 @@ cgen_queue_fixup (opindex, opinfo, expP)
      expressionS * expP;
 {
   /* We need to generate a fixup for this expression.  */
-  if (num_fixups >= MAX_FIXUPS)
+  if (num_fixups >= CGEN_MAX_FIXUPS)
     as_fatal (_("too many fixups"));
   fixups[num_fixups].exp     = * expP;
   fixups[num_fixups].opindex = opindex;
@@ -92,8 +91,8 @@ cgen_queue_fixup (opindex, opinfo, expP)
    and to have this backup be swapped with the current chain.  This allows
    certain ports, eg the m32r, to swap two instructions and swap their fixups
    at the same time.  */
-static struct fixup saved_fixups [MAX_FIXUPS];
-static int          saved_num_fixups;
+static struct fixup saved_fixups [CGEN_MAX_FIXUPS];
+static int saved_num_fixups;
 
 void
 cgen_save_fixups ()
@@ -118,7 +117,7 @@ cgen_restore_fixups ()
 void
 cgen_swap_fixups ()
 {
-  int          tmp;
+  int tmp;
   struct fixup tmp_fixup;
 
   if (num_fixups == 0)
@@ -135,7 +134,7 @@ cgen_swap_fixups ()
       saved_num_fixups = num_fixups;
       num_fixups = tmp;
       
-      for (tmp = MAX_FIXUPS; tmp--;)
+      for (tmp = CGEN_MAX_FIXUPS; tmp--;)
 	{
 	  tmp_fixup          = saved_fixups [tmp];
 	  saved_fixups [tmp] = fixups [tmp];
@@ -235,23 +234,23 @@ static jmp_buf expr_jmp_buf;
 
 const char *
 cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
-     enum cgen_parse_operand_type     want;
-     const char **                    strP;
-     int                              opindex;
-     int                              opinfo;
+     enum cgen_parse_operand_type want;
+     const char ** strP;
+     int opindex;
+     int opinfo;
      enum cgen_parse_operand_result * resultP;
-     bfd_vma *                        valueP;
+     bfd_vma * valueP;
 {
 #ifdef __STDC__
-  /* These is volatile to survive the setjmp.  */
-  char * volatile                           hold;
+  /* These are volatile to survive the setjmp.  */
+  char * volatile hold;
   enum cgen_parse_operand_result * volatile resultP_1;
 #else
-  static char *                             hold;
-  static enum cgen_parse_operand_result *   resultP_1;
+  static char * hold;
+  static enum cgen_parse_operand_result * resultP_1;
 #endif
-  const char *                              errmsg = NULL;
-  expressionS                               exp;
+  const char * errmsg = NULL;
+  expressionS exp;
 
   if (want == CGEN_PARSE_OPERAND_INIT)
     {
@@ -322,18 +321,23 @@ cgen_md_operand (expressionP)
 /* Finish assembling instruction INSN.
    BUF contains what we've built up so far.
    LENGTH is the size of the insn in bits.
+   RELAX_P is non-zero if relaxable insns should be emitted as such.
+   Otherwise they're emitted in non-relaxable forms.
+   The "result" is stored in RESULT if non-NULL.
    Returns the address of the buffer containing the assembled instruction,
    in case the caller needs to modify it for some reason. */
 
-char *
-cgen_asm_finish_insn (insn, buf, length)
+void
+cgen_asm_finish_insn (insn, buf, length, relax_p, result)
      const CGEN_INSN * insn;
-     cgen_insn_t *     buf;
-     unsigned int      length;
+     cgen_insn_t * buf;
+     unsigned int length;
+     int relax_p;
+     finished_insn * result;
 {
-  int          i;
-  int          relax_operand;
-  char *       f;
+  int i;
+  int relax_operand;
+  char * f;
   unsigned int byte_len = length / 8;
 
   /* ??? Target foo issues various warnings here, so one might want to provide
@@ -354,7 +358,7 @@ cgen_asm_finish_insn (insn, buf, length)
   /* Is there a relaxable insn with the relaxable operand needing a fixup?  */
 
   relax_operand = -1;
-  if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0)
+  if (relax_p && CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0)
     {
       /* Scan the fixups for the operand affected by relaxing
 	 (i.e. the branch address).  */
@@ -372,7 +376,7 @@ cgen_asm_finish_insn (insn, buf, length)
 
   if (relax_operand != -1)
     {
-      int     max_len;
+      int max_len;
       fragS * old_frag;
 
 #ifdef TC_CGEN_MAX_RELAX
@@ -405,9 +409,15 @@ cgen_asm_finish_insn (insn, buf, length)
       old_frag->fr_cgen.insn    = insn;
       old_frag->fr_cgen.opindex = fixups[relax_operand].opindex;
       old_frag->fr_cgen.opinfo  = fixups[relax_operand].opinfo;
+      if (result)
+	result->frag = old_frag;
     }
   else
-    f = frag_more (byte_len);
+    {
+      f = frag_more (byte_len);
+      if (result)
+	result->frag = frag_now;
+    }
 
   /* If we're recording insns as numbers (rather than a string of bytes),
      target byte order handling is deferred until now.  */
@@ -436,10 +446,13 @@ cgen_asm_finish_insn (insn, buf, length)
   /* Create any fixups.  */
   for (i = 0; i < num_fixups; ++i)
     {
+      fixS * fixP;
+
       /* Don't create fixups for these.  That's done during relaxation.
 	 We don't need to test for CGEN_INSN_RELAX as they can't get here
 	 (see above).  */
-      if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0
+      if (relax_p
+	  && CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0
 	  && CGEN_OPERAND_ATTR (& CGEN_SYM (operand_table) [fixups[i].opindex],
 				CGEN_OPERAND_RELAX) != 0)
 	continue;
@@ -448,14 +461,20 @@ cgen_asm_finish_insn (insn, buf, length)
 #define md_cgen_record_fixup_exp cgen_record_fixup_exp
 #endif
 
-      md_cgen_record_fixup_exp (frag_now, f - frag_now->fr_literal,
-				insn, length,
-				& CGEN_SYM (operand_table) [fixups[i].opindex],
-				fixups[i].opinfo,
-				& fixups[i].exp);
+	fixP = md_cgen_record_fixup_exp (frag_now, f - frag_now->fr_literal,
+					 insn, length,
+					 & CGEN_SYM (operand_table) [fixups[i].opindex],
+					 fixups[i].opinfo,
+					 & fixups[i].exp);
+	if (result)
+	  result->fixups[i] = fixP;
     }
 
-  return f;
+  if (result)
+    {
+      result->num_fixups = num_fixups;
+      result->addr = f;
+    }
 }
 
 /* Apply a fixup to the object code.  This is called for all the
