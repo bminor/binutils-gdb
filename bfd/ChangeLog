@@ -1,3 +1,9 @@
+Fri Mar 28 11:56:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfd.c: Include "libiberty.h".
+	(strerror): Don't declare.
+	(bfd_errmsg): Call xstrerror rather than strerror.
+
 Thu Mar 27 12:55:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Generate a COPY
