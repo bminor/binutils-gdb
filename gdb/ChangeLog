@@ -1,5 +1,9 @@
 2003-04-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (gdb_print_insn_x86_64): Removed.
+
+2003-04-13  Mark Kettenis  <kettenis@gnu.org>
+
 	* x86-64-tdep.c (x86_64_breakpoint_from_pc): Removed.
 
 2003-04-12  Andrew Cagney  <cagney@redhat.com>

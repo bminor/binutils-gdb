@@ -828,23 +828,6 @@ x86_64_register_number (const char *name)
 }
 
 
-
-/* We have two flavours of disassembly.  The machinery on this page
-   deals with switching between those.  */
-
-static int
-gdb_print_insn_x86_64 (bfd_vma memaddr, disassemble_info * info)
-{
-  if (disassembly_flavour == att_flavour)
-    return print_insn_i386_att (memaddr, info);
-  else if (disassembly_flavour == intel_flavour)
-    return print_insn_i386_intel (memaddr, info);
-  /* Never reached -- disassembly_flavour is always either att_flavour
-     or intel_flavour.  */
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
-
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 void
