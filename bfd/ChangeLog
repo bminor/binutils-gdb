@@ -7,6 +7,11 @@ Tue Jun 22 16:36:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/std-host.h: Return value of puts and fputs is int not void.
 
+Tue Jun 22 14:25:58 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (howto_table_ext): Comment the field names.
+	* reloc.c (bfd_perform_relocation): Fix max and min values.
+
 Mon Jun 21 18:19:14 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* elf32-target.h, elf32-hppa.c, elfcode.h: Use new
