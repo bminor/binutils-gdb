@@ -856,7 +856,27 @@ struct_type (dip, thisdie, enddie, objfile)
 	  list -> field.name = savestring (mbr.at_name, strlen (mbr.at_name));
 	  list -> field.type = decode_die_type (&mbr);
 	  list -> field.bitpos = 8 * locval (mbr.at_location);
-	  list -> field.bitsize = 0;
+	  /* Handle bit fields. */
+	  list -> field.bitsize = mbr.at_bit_size;
+#if BITS_BIG_ENDIAN
+	  /* For big endian bits, the at_bit_offset gives the additional
+	     bit offset from the MSB of the containing anonymous object to
+	     the MSB of the field.  We don't have to do anything special
+	     since we don't need to know the size of the anonymous object. */
+	  list -> field.bitpos += mbr.at_bit_offset;
+#else
+	  /* For little endian bits, we need to have a non-zero at_bit_size,
+	     so that we know we are in fact dealing with a bitfield.  Compute
+	     the bit offset to the MSB of the anonymous object, subtract off
+	     the number of bits from the MSB of the field to the MSB of the
+	     object, and then subtract off the number of bits of the field
+	     itself.  The result is the bit offset of the LSB of the field. */
+	  if (mbr.at_bit_size > 0)
+	    {
+	      list -> field.bitpos +=
+		mbr.at_byte_size * 8 - mbr.at_bit_offset - mbr.at_bit_size;
+	    }
+#endif
 	  nfields++;
 	  break;
 	default:

@@ -1,3 +1,19 @@
+Sun May  3 15:47:45 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.5.2.
+	* Makefile.in (DEMANGLE_OPTS):  Add, default to -Dnounderscore.
+	* configure.in:  Simplify ncr3000 gdb_host logic, add gdb_target.
+	* dwarfread.c (struct_type):  Apply fix from Peggy Fieland for
+	proper handling of bit fields.
+	* gdbtypes.h (struct type):  Clarify use of field.bitpos.
+	* symtab.h:  Fix couple of misspellings in comments.
+	* value.h (struct value):  Clarify use of bitpos.
+	* value.h (unpack_field_as_long):  Change prototype, returns
+	LONGEST.
+	* values.c (unpack_field_as_long):  Change return type to LONGEST,
+	sign extend unpacked fields that are signed, other rewriting.
+	* config/ncr3000.mt:  New target config file.
+
 Fri May  1 01:53:26 1992  John Gilmore  (gnu at cygnus.com)
 
 	* utils.c (printchar):  Print 0x7F and 0x80-0x9F in \nnn notation

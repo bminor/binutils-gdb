@@ -1190,29 +1190,60 @@ baseclass_addr (type, index, valaddr, valuep, errp)
   return valaddr + TYPE_BASECLASS_BITPOS (type, index) / 8;
 }
 
-long
+/* Unpack a field FIELDNO of the specified TYPE, from the anonymous object at
+   VALADDR.
+
+   Extracting bits depends on endianness of the machine.  Compute the
+   number of least significant bits to discard.  For big endian machines,
+   we compute the total number of bits in the anonymous object, subtract
+   off the bit count from the MSB of the object to the MSB of the
+   bitfield, then the size of the bitfield, which leaves the LSB discard
+   count.  For little endian machines, the discard count is simply the
+   number of bits from the LSB of the anonymous object to the LSB of the
+   bitfield.
+
+   If the field is signed, we also do sign extension. */
+
+LONGEST
 unpack_field_as_long (type, valaddr, fieldno)
      struct type *type;
      char *valaddr;
      int fieldno;
 {
-  unsigned long val;
+  unsigned LONGEST val;
+  unsigned LONGEST valmask;
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
+  int lsbcount;
 
-  bcopy (valaddr + bitpos / 8, &val, sizeof val);
-  SWAP_TARGET_AND_HOST (&val, sizeof val);
+  bcopy (valaddr + bitpos / 8, &val, sizeof (val));
+  SWAP_TARGET_AND_HOST (&val, sizeof (val));
 
-  /* Extracting bits depends on endianness of the machine.  */
+  /* Extract bits.  See comment above. */
+
 #if BITS_BIG_ENDIAN
-  val = val >> (sizeof val * 8 - bitpos % 8 - bitsize);
+  lsbcount = (sizeof val * 8 - bitpos % 8 - bitsize);
 #else
-  val = val >> (bitpos % 8);
+  lsbcount = (bitpos % 8);
 #endif
+  val >>= lsbcount;
 
-  if (bitsize < 8 * sizeof (val))
-    val &= (((unsigned long)1) << bitsize) - 1;
-  return val;
+  /* If the field does not entirely fill a LONGEST, then zero the sign bits.
+     If the field is signed, and is negative, then sign extend. */
+
+  if ((bitsize > 0) && (bitsize < 8 * sizeof (val)))
+    {
+      valmask = (((unsigned LONGEST) 1) << bitsize) - 1;
+      val &= valmask;
+      if (!TYPE_UNSIGNED (TYPE_FIELD_TYPE (type, fieldno)))
+	{
+	  if (val & (valmask ^ (valmask >> 1)))
+	    {
+	      val |= ~valmask;
+	    }
+	}
+    }
+  return (val);
 }
 
 /* Modify the value of a bitfield.  ADDR points to a block of memory in

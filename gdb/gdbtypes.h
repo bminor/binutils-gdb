@@ -183,7 +183,9 @@ struct type
       /* Position of this field, counting in bits from start of
 	 containing structure.  For a function type, this is the
 	 position in the argument list of this argument.
-	 For a range bound or enum value, this is the value itself.  */
+	 For a range bound or enum value, this is the value itself.
+	 For BITS_BIG_ENDIAN=1 targets, it is the bit offset to the MSB.
+	 For BITS_BIG_ENDIAN=0 targets, it is the bit offset to the LSB. */
 
       int bitpos;
 

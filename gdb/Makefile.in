@@ -165,11 +165,18 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.5.1
+VERSION = 4.5.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
+
+# Select options to use when compiling cplus-dem.c.  The default is to
+# use -Dnounderscore, which is correct for most targets, and also
+# defaults to g++ style demangling.  For other demangling styles, such
+# as the Annotated C++ Reference Manual (section 7.2.1c) style, set
+# this define in the target-dependent makefile fragment.
+DEMANGLE_OPTS=-Dnounderscore
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -721,7 +728,7 @@ force_update:
 # -Dnounderscore.  
 
 cplus-dem.o: cplus-dem.c
-	${CC} -c ${INTERNAL_CFLAGS} -Dnounderscore \
+	${CC} -c ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
 	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables

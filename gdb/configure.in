@@ -99,11 +99,7 @@ i386)
 	sun)	gdb_host=sun386 ;;
 	sco)	gdb_host=i386sco ;;
 	sequent)	gdb_host=symmetry ;;
-	ncr)
-		case "${host_os}" in
-		sysv4*)	gdb_host=ncr3000 ;;
-		esac
-		;;
+	ncr)	gdb_host=ncr3000 ;;
 	*)
 		case "${host_os}" in
 		sysv32)	gdb_host=i386v32 ;;
@@ -283,6 +279,7 @@ i386)
 	sco)	gdb_target=i386sco ;;
 	sun)	gdb_target=sun386 ;;
 	sequent)	gdb_target=symmetry ;;
+	ncr)	gdb_target=ncr3000 ;;
 	*)
 		case "${target_os}" in
 		sysv32)	gdb_target=i386v32 ;;
