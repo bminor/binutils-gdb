@@ -1,3 +1,8 @@
+2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/elf/elf.exp (run_list_test): Use section2.e-mips script for
+	v850-elf toolchain.
+
 2002-01-14   Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/armv1.s, arm/armv1.d, arm/fpa-mem.s, arm/fpa-mem.d
