@@ -46,6 +46,7 @@
 /* Added void* version for STDC case.  This is to be compatible with
    the declaration in bison.simple, used for m68k operand parsing.
    --KR 1995.08.08 */
+/* Force void* decl for hpux.  This is what Bison uses.  --KR 1995.08.16 */
 
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
@@ -59,14 +60,14 @@
  #pragma alloca
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
-#    ifndef __STDC__
+#    if !defined (__STDC__) && !defined (__hpux)
 char *alloca ();
 #    else
 void *alloca ();
-#    endif
-#   endif
-#  endif
-# endif
+#    endif /* __STDC__, __hpux */
+#   endif /* alloca */
+#  endif /* _AIX */
+# endif /* HAVE_ALLOCA_H */
 #endif
 
 /* Now, tend to the rest of the configuration.  */
@@ -485,7 +486,7 @@ COMMON unsigned char flag_warn_displacement; /* -K */
 #endif
 
 /* True if local symbols should be retained.  */
-COMMON unsigned char flag_keep_locals; /* -L */
+COMMON int flag_keep_locals; /* -L */
 
 /* True if we are assembling using MRI syntax.  */
 COMMON int flag_mri;
@@ -495,7 +496,7 @@ COMMON int flag_mri;
 COMMON unsigned char flag_readonly_data_in_text; /* -R */
 
 /* True if warnings should be inhibited.  */
-COMMON unsigned char flag_no_warnings; /* -W */
+COMMON int flag_no_warnings; /* -W */
 
 /* True if we should attempt to generate output even if non-fatal errors
    are detected.  */
