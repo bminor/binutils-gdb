@@ -168,7 +168,7 @@ if [ x${enable_shared} = xyes ]; then
   case "${host}" in
     hppa*-*-*)		waugh=config/mh-papic ;;
     i[345]86-*-*)	waugh=config/mh-x86pic ;;
-    *-*-*)		waugh=config/mh-${target_cpu}pic ;;
+    *-*-*)		waugh=config/mh-${host_cpu}pic ;;
   esac
   if [ -n "${host_makefile_frag}" ] && [ -f ${srcdir}/${waugh} ]; then
     cat ${srcdir}/${host_makefile_frag} > mh-frag
