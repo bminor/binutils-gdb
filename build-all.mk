@@ -47,9 +47,10 @@ endif
 
 NATIVE  = native
 
-GCC	 = gcc -O2 
+GCC	 = gcc
 CFLAGS	 = -g
-CXXFLAGS = -g -O2 -fexternal-templates
+GNUCFLAGS= -g -O2
+CXXFLAGS = -g -O2
 MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
@@ -108,6 +109,24 @@ canonhost := sparc-lynx
 endif
 ifeq ($(canonhost),rs6000-lynx-lynxos)
 canonhost := rs6000-lynx
+endif
+ifeq ($(canonhost),i386-unknown-linux)
+canonhost := i386-linux
+endif
+ifeq ($(canonhost),i486-unknown-linux)
+canonhost := i486-linux
+endif
+ifeq ($(canonhost),i586-unknown-linux)
+canonhost := i486-linux
+endif
+ifeq ($(canonhost),i386-unknown-linuxelf)
+canonhost := i386-linuxelf
+endif
+ifeq ($(canonhost),i486-unknown-linuxelf)
+canonhost := i486-linuxelf
+endif
+ifeq ($(canonhost),i586-unknown-linuxelf)
+canonhost := i486-linuxelf
 endif
 
 #
@@ -172,7 +191,7 @@ CC = cc -Wf,-XNg1000
 all: all-cygnus
 endif
 
-ifeq ($(canonhost),alpha-dec-osf1.3)
+ifeq ($(patsubst alpha-dec-osf%,alpha,$(canonhost)),alpha)
 TARGETS = $(NATIVE)
 CC = cc
 all: all-cygnus
@@ -278,10 +297,16 @@ all: all-cygnus
 SHELL=/bin/bash
 endif
 
+ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxelf,linux,$(canonhost))),linux)
+TARGETS = $(NATIVE)
+all: all-cygnus
+endif
+
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"GNUCFLAGS=$(GNUCFLAGS)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"host=$(canonhost)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
@@ -291,6 +316,10 @@ FLAGS_TO_PASS := \
 # set GNU_MAKE and CONFIG_SHELL correctly in sub-builds
 ifeq ($(patsubst %-lynx,lynx,$(canonhost)),lynx)
 FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)" "CONFIG_SHELL=/bin/bash"
+endif
+
+ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxelf,linux,$(canonhost))),linux)
+FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)"
 endif
 
 all-emacs:
