@@ -95,7 +95,11 @@ extern void arm_frob_label PARAMS ((struct symbol *));
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
+#ifdef OBJ_ELF
+#define obj_fix_adjustable(fixP) arm_fix_adjustable(fixP)
+#else
 #define obj_fix_adjustable(fixP) 0
+#endif
 
 /* We need to keep some local information on symbols.  */
 
@@ -137,6 +141,10 @@ char *arm_canonicalize_symbol_name PARAMS ((char *));
 	  }}
 #endif 
 
+#ifdef OBJ_ELF
+#define obj_frob_symbol(sym, punt)  armelf_frob_symbol (sym, punt)
+#endif
+
 /* Finish processing the entire symbol table:  */
 #define tc_adjust_symtab() arm_adjust_symtab ()
 extern void arm_adjust_symtab PARAMS ((void));
@@ -158,6 +166,8 @@ extern void arm_adjust_symtab PARAMS ((void));
 
 #define MD_APPLY_FIX3
 
+#define LOCAL_LABEL(name) (name[0] == '.' \
+                           && (name[1] == 'L'))
 #define LOCAL_LABELS_FB  1
 
 /* end of tc-arm.h */

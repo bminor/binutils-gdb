@@ -6408,6 +6408,14 @@ arm_canonicalize_symbol_name (name)
 }
 
 boolean
+arm_fix_adjustable(fixP)
+  fixS *fixP;
+{
+  return 1;
+}
+
+
+boolean
 arm_validate_fix (fixP)
      fixS * fixP;
 {

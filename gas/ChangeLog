@@ -1,3 +1,10 @@
+start-sanitize-armelf
+Tue Aug 18 11:59:43 1998  Catherine Moore  <clm@cygnus.com>
+
+       * tc-arm.h: Define obj_fix_adjustable for OBJ_ELF.
+       * tc-arm.c (arm_fix_adjustable): New routine.
+
+end-sanitize-armelf
 1998-08-13  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* read.c (s_align, s_comm, s_mri_common, s_fail, s_globl, s_space,
