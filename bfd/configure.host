@@ -8,7 +8,7 @@
 
 # This sets the following shell variables:
 #  HDEFINES		host specific compiler options
-#  host64		set to true if this is a 64 bit host
+#  host64		set to true if 64 bit types are as fast as 32 bit
 #  HOST_64BIT_TYPE	host 64 bit type
 #  HOST_U_64BIT_TYPE	unsigned 64 bit type (not needed if 64BIT_TYPE is long)
 #  SHLIB_CC		compiler to use when building shared library
@@ -42,17 +42,20 @@ mips-dec-netbsd*)	;;
 mips-dec-*)		HDEFINES="-G 4"	;;
 mips-sgi-irix3*)	HDEFINES="-G 4" ;;
 mips-sgi-irix4*)	HDEFINES="-G 4" ;;
-mips-sgi-irix6*)	# We can use __int64_t here because bfd.h
-			# includes obstack.h which includes stddef.h.
-			host64=true
-			HOST_64BIT_TYPE=__int64_t
-			HOST_U_64BIT_TYPE=__uint64_t
+mips-sgi-irix6*)	host64=true
+			HOST_64BIT_TYPE="long long";
+			HOST_U_64BIT_TYPE="unsigned long long";
 			;;
 mips-*-sysv4*)		;;
 mips-*-sysv*)		HDEFINES="-G 4" ;;
 mips-*-riscos*)		HDEFINES="-G 4" ;;
 
 m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
+
+*-*-solaris*)		HOST_64BIT_TYPE="long long"
+			HOST_U_64BIT_TYPE="unsigned long long"
+			;;
+
 *-*-windows*)
 			host64=true
 			HOST_64BIT_TYPE=__int64
@@ -62,7 +65,7 @@ m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
 # Note that this file is never run through autoconf, so we can't use any
 # autoconf macros here.  Because of this, we have to muck with autoconf
 # variables explicitly.
-			ac_cv_func_mmap=no
+			ac_cv_func_mmap_fixed_mapped=no
 			ac_cv_header_time=no
 			ac_cv_func_getpagesize=no
 			ac_cv_func_madvise=no
