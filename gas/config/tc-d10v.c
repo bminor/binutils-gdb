@@ -1518,8 +1518,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
 	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
-	      && (repi != NULL && (insn & repi->mask) == repi->opcode
-		  || rep != NULL && (insn & rep->mask) == rep->opcode)
+	      && ((repi != NULL && (insn & repi->mask) == repi->opcode)
+		  || (rep != NULL && (insn & rep->mask) == rep->opcode))
 	      && value < 4)
 	    as_fatal
 	      (_("line %d: rep or repi must include at least 4 instructions"),

@@ -19,6 +19,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA. */
 
+#include "write.h" /* For the definition of fixS.  */
+
 #define TC_D10V
 
 #define TARGET_BYTES_BIG_ENDIAN 0
@@ -36,6 +38,7 @@
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)   
+long md_pcrel_from_section PARAMS ((fixS *, segT));
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -57,7 +60,8 @@ int d10v_cleanup PARAMS ((void));
 } while (0)
 
 #define obj_fix_adjustable(fixP) d10v_fix_adjustable(fixP)
+boolean d10v_fix_adjustable PARAMS ((fixS *));
 #define TC_FORCE_RELOCATION(fixp) d10v_force_relocation(fixp)
-extern int d10v_force_relocation PARAMS ((struct fix *));
+extern int d10v_force_relocation PARAMS ((fixS *));
 
 #define md_flush_pending_output  d10v_cleanup

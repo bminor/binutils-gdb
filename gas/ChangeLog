@@ -1,3 +1,12 @@
+2000-04-12  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-d10v.h: Include "write.h" to get definition of fixS.
+	(md_pcrel_from_section): Add prototype.
+	(d10v_fix_adjustable): Add prototype.
+	(d10v_force_relocation): Replace 'struct fix' with 'fixS'.
+
+	* config/tc-d10v.c (md_apply_fix3): Add paren around &&.
+
 2000-04-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (fits_in_signed_byte): Change arg to offsetT.
