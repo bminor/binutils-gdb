@@ -15,14 +15,6 @@
 
 Do-first:
 
-mpw_files="mpw-make.in mpw-config.in mpw-emipsidt.c ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files} ${keep_these_too}"
-else
-	lose_these_too="${mpw_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -72,6 +64,9 @@ ldver.h
 ldwrite.c
 ldwrite.h
 lexsup.c
+mpw-config.in
+mpw-emipsidt.c
+mpw-make.in
 mri.c
 mri.h
 scripttempl
@@ -80,31 +75,6 @@ testsuite
 Things-to-lose:
 
 Do-last:
-
-echo Looking for traces of \"mpw\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			echo Keeping mpw traces in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			echo Removing traces of \"mpw\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 rce_files="configure.in Makefile.in"
 
