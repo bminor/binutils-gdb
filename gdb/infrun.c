@@ -935,9 +935,9 @@ void init_execution_control_state (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
 static void step_into_function (struct execution_control_state *ecs);
-static void insert_step_resume_breakpoint (struct frame_info *step_frame,
-					   struct execution_control_state
-					   *ecs);
+static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
+static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
+						  struct frame_id sr_id);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
@@ -1079,18 +1079,6 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->infwait_state = infwait_normal_state;
   ecs->waiton_ptid = pid_to_ptid (-1);
   ecs->wp = &(ecs->ws);
-}
-
-/* Call this function before setting step_resume_breakpoint, as a
-   sanity check.  There should never be more than one step-resume
-   breakpoint per thread, so we should never be setting a new
-   step_resume_breakpoint when one is already active.  */
-static void
-check_for_old_step_resume_breakpoint (void)
-{
-  if (step_resume_breakpoint)
-    warning
-      ("GDB bug: infrun.c (wait_for_inferior): dropping old step_resume breakpoint");
 }
 
 /* Return the cached copy of the last pid/waitstatus returned by
@@ -1947,7 +1935,7 @@ process_event_stop_test:
 	     code paths as single-step - set a breakpoint at the
 	     signal return address and then, once hit, step off that
 	     breakpoint.  */
-	  insert_step_resume_breakpoint (get_current_frame (), ecs);
+	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	  ecs->step_after_step_resume_breakpoint = 1;
 	}
       else if (step_range_end != 0
@@ -1965,7 +1953,7 @@ process_event_stop_test:
 	     Note that this is only needed for a signal delivered
 	     while in the single-step range.  Nested signals aren't a
 	     problem as they eventually all return.  */
-	  insert_step_resume_breakpoint (get_current_frame (), ecs);
+	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	}
       keep_going (ecs);
       return;
@@ -2273,11 +2261,7 @@ process_event_stop_test:
 	  init_sal (&sr_sal);
 	  sr_sal.pc = pc_after_resolver;
 
-	  check_for_old_step_resume_breakpoint ();
-	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
+	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	}
 
       keep_going (ecs);
@@ -2335,8 +2319,7 @@ process_event_stop_test:
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
 	     resume).  */
-	  insert_step_resume_breakpoint (get_prev_frame
-					 (get_current_frame ()), ecs);
+	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
 	  keep_going (ecs);
 	  return;
 	}
@@ -2346,8 +2329,7 @@ process_event_stop_test:
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
 	     resume).  */
-	  insert_step_resume_breakpoint (get_prev_frame
-					 (get_current_frame ()), ecs);
+	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
 	  keep_going (ecs);
 	  return;
 	}
@@ -2369,12 +2351,7 @@ process_event_stop_test:
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 
-	  check_for_old_step_resume_breakpoint ();
-	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
-
+	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	  keep_going (ecs);
 	  return;
 	}
@@ -2409,8 +2386,7 @@ process_event_stop_test:
 
       /* Set a breakpoint at callee's return address (the address at
          which the caller will resume).  */
-      insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
-				     ecs);
+      insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
       keep_going (ecs);
       return;
     }
@@ -2431,14 +2407,11 @@ process_event_stop_test:
 	  init_sal (&sr_sal);	/* initialize to zeroes */
 	  sr_sal.pc = real_stop_pc;
 	  sr_sal.section = find_pc_overlay (sr_sal.pc);
-	  /* Do not specify what the fp should be when we stop
-	     since on some machines the prologue
-	     is where the new fp value is established.  */
-	  check_for_old_step_resume_breakpoint ();
-	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
+
+	  /* Do not specify what the fp should be when we stop since
+	     on some machines the prologue is where the new fp value
+	     is established.  */
+	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 
 	  /* Restart without fiddling with the step ranges or
 	     other state.  */
@@ -2473,8 +2446,7 @@ process_event_stop_test:
 	{
 	  /* Set a breakpoint at callee's return address (the address
 	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint (get_prev_frame
-					 (get_current_frame ()), ecs);
+	  insert_step_resume_breakpoint_at_frame (get_prev_frame (get_current_frame ()));
 	  keep_going (ecs);
 	  return;
 	}
@@ -2645,14 +2617,11 @@ step_into_function (struct execution_control_state *ecs)
       init_sal (&sr_sal);	/* initialize to zeroes */
       sr_sal.pc = ecs->stop_func_start;
       sr_sal.section = find_pc_overlay (ecs->stop_func_start);
+
       /* Do not specify what the fp should be when we stop since on
          some machines the prologue is where the new fp value is
          established.  */
-      check_for_old_step_resume_breakpoint ();
-      step_resume_breakpoint =
-	set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
-      if (breakpoints_inserted)
-	insert_breakpoints ();
+      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 
       /* And make sure stepping stops right away then.  */
       step_range_end = step_range_start;
@@ -2660,6 +2629,23 @@ step_into_function (struct execution_control_state *ecs)
   keep_going (ecs);
 }
 
+/* Insert a "step resume breakpoint" at SR_SAL with frame ID SR_ID.
+   This is used to both functions and to skip over code.  */
+
+static void
+insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
+				      struct frame_id sr_id)
+{
+  /* There should never be more than one step-resume breakpoint per
+     thread, so we should never be setting a new
+     step_resume_breakpoint when one is already active.  */
+  gdb_assert (step_resume_breakpoint == NULL);
+  step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id,
+						     bp_step_resume);
+  if (breakpoints_inserted)
+    insert_breakpoints ();
+}
+				      
 /* Insert a "step resume breakpoint" at RETURN_FRAME.pc.  This is used
    to skip a function (next, skip-no-debug) or signal.  It's assumed
    that the function/signal handler being skipped eventually returns
@@ -2675,8 +2661,7 @@ step_into_function (struct execution_control_state *ecs)
    the interrupted function at RETURN_FRAME.pc.  */
 
 static void
-insert_step_resume_breakpoint (struct frame_info *return_frame,
-			       struct execution_control_state *ecs)
+insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 {
   struct symtab_and_line sr_sal;
 
@@ -2685,14 +2670,7 @@ insert_step_resume_breakpoint (struct frame_info *return_frame,
   sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-  check_for_old_step_resume_breakpoint ();
-
-  step_resume_breakpoint
-    = set_momentary_breakpoint (sr_sal, get_frame_id (return_frame),
-				bp_step_resume);
-
-  if (breakpoints_inserted)
-    insert_breakpoints ();
+  insert_step_resume_breakpoint_at_sal (sr_sal, get_frame_id (return_frame));
 }
 
 static void

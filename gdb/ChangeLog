@@ -1,5 +1,12 @@
 2004-09-27  Andrew Cagney  <cagney@gnu.org>
 
+	* infrun.c (check_for_old_step_resume_breakpoint): Delete.
+	(insert_step_resume_breakpoint): Delete.
+	(insert_step_resume_breakpoint_at_frame): New function.
+	(insert_step_resume_breakpoint_at_sal): New function.
+	(handle_inferior_event, step_into_function)
+	(insert_step_resume_breakpoint): Simplify by using same.
+
 	* gdb_indent.sh (types): Add caddr_t to list of predefined types.
 
 2004-09-26  Mark Kettenis  <kettenis@gnu.org>
