@@ -446,18 +446,20 @@ extern bfd *bfd_last_cache;
 extern const bfd_target * const bfd_target_vector[];
 extern const bfd_target * const bfd_default_vector[];
 
-/* A function shared by the ECOFF and MIPS ELF backends, which have no
+/* Functions shared by the ECOFF and MIPS ELF backends, which have no
    other common header files.  */
 
 #if defined(__STDC__) || defined(ALMOST_STDC)
 struct ecoff_find_line;
 #endif
 
-extern boolean
-_bfd_ecoff_locate_line
+extern boolean _bfd_ecoff_locate_line
   PARAMS ((bfd *, asection *, bfd_vma, struct ecoff_debug_info * const,
 	   const struct ecoff_debug_swap * const, struct ecoff_find_line *,
 	   const char **, const char **, unsigned int *));
+extern boolean _bfd_ecoff_get_accumulated_pdr PARAMS ((PTR, bfd_byte *));
+extern boolean _bfd_ecoff_get_accumulated_sym PARAMS ((PTR, bfd_byte *));
+extern boolean _bfd_ecoff_get_accumulated_ss PARAMS ((PTR, bfd_byte *));
 
 /* And more follows */
 
@@ -510,18 +512,28 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_8_GOT_PCREL",
   "BFD_RELOC_32_GOTOFF",
   "BFD_RELOC_16_GOTOFF",
+  "BFD_RELOC_LO16_GOTOFF",
+  "BFD_RELOC_HI16_GOTOFF",
+  "BFD_RELOC_HI16_S_GOTOFF",
   "BFD_RELOC_8_GOTOFF",
   "BFD_RELOC_32_PLT_PCREL",
+  "BFD_RELOC_24_PLT_PCREL",
   "BFD_RELOC_16_PLT_PCREL",
   "BFD_RELOC_8_PLT_PCREL",
   "BFD_RELOC_32_PLTOFF",
   "BFD_RELOC_16_PLTOFF",
+  "BFD_RELOC_LO16_PLTOFF",
+  "BFD_RELOC_HI16_PLTOFF",
+  "BFD_RELOC_HI16_S_PLTOFF",
   "BFD_RELOC_8_PLTOFF",
   "BFD_RELOC_68K_GLOB_DAT",
   "BFD_RELOC_68K_JMP_SLOT",
   "BFD_RELOC_68K_RELATIVE",
   "BFD_RELOC_32_BASEREL",
   "BFD_RELOC_16_BASEREL",
+  "BFD_RELOC_LO16_BASEREL",
+  "BFD_RELOC_HI16_BASEREL",
+  "BFD_RELOC_HI16_S_BASEREL",
   "BFD_RELOC_8_BASEREL",
   "BFD_RELOC_RVA",
   "BFD_RELOC_8_FFnn",
@@ -600,6 +612,17 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_PPC_B26",
   "BFD_RELOC_PPC_BA26",
   "BFD_RELOC_PPC_TOC16",
+  "BFD_RELOC_PPC_B16",
+  "BFD_RELOC_PPC_B16_BRTAKEN",
+  "BFD_RELOC_PPC_B16_BRNTAKEN",
+  "BFD_RELOC_PPC_BA16",
+  "BFD_RELOC_PPC_BA16_BRTAKEN",
+  "BFD_RELOC_PPC_BA16_BRNTAKEN",
+  "BFD_RELOC_PPC_COPY",
+  "BFD_RELOC_PPC_GLOB_DAT",
+  "BFD_RELOC_PPC_JMP_SLOT",
+  "BFD_RELOC_PPC_RELATIVE",
+  "BFD_RELOC_PPC_LOCAL24PC",
   "BFD_RELOC_CTOR",
   "BFD_RELOC_ARM_PCREL_BRANCH",
   "BFD_RELOC_ARM_IMMEDIATE",

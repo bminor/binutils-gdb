@@ -1,3 +1,16 @@
+Fri Sep 22 16:23:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* reloc.c (bfd_reloc_code_type): Add relocations to support all of
+	PowerPC V.4.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+	* elf32-ppc.c (reloc_type): Update names to match current draft.
+	(ppc_elf_howto_raw): Mark 14 bit relocs as short sized and PC
+	relative.  Update names to current V.4 draft.
+	(ppc_elf_reloc_type_lookup): Add support for more relocations.
+	(ppc_elf_relocate_section): Rename relocations to match draft.
+
 Thu Sep 21 21:53:18 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Allow modules

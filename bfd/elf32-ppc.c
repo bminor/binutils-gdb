@@ -81,9 +81,9 @@ enum reloc_type
   R_PPC_GOT16_LO,			/*  15 */
   R_PPC_GOT16_HI,			/*  16 */
   R_PPC_GOT16_HA,			/*  17 */
-  R_PPC_PLT24,				/*  18 */
+  R_PPC_PLTREL24,			/*  18 */
   R_PPC_COPY,				/*  19 */
-  R_PPC_GLOB_DAT,			/*  20 -- not in final System V spec */
+  R_PPC_GLOB_DAT,			/*  20 */
   R_PPC_JMP_SLOT,			/*  21 */
   R_PPC_RELATIVE,			/*  22 */
   R_PPC_LOCAL24PC,			/*  23 */
@@ -95,7 +95,7 @@ enum reloc_type
   R_PPC_PLT16_LO,			/*  29 */
   R_PPC_PLT16_HI,			/*  30 */
   R_PPC_PLT16_HA,			/*  31 */
-  R_PPC_SDAREL,				/*  32 */
+  R_PPC_SDAREL16,			/*  32 */
 
   /* Relocations added by Sun. */
   R_PPC_SECTOFF,			/*  33 */
@@ -240,7 +240,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      FIXME: we don't check that, we just clear them.  */
   HOWTO (R_PPC_ADDR14,          /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -257,7 +257,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      bits must be zero.  */
   HOWTO (R_PPC_ADDR14_BRTAKEN,  /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -274,7 +274,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      two bits must be zero.  */
   HOWTO (R_PPC_ADDR14_BRNTAKEN, /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -304,7 +304,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
   /* A relative 16 bit branch; the lower two bits must be zero.  */
   HOWTO (R_PPC_REL14,           /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -321,12 +321,12 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      zero.  */
   HOWTO (R_PPC_REL14_BRTAKEN,   /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_REL14_BRTAKEN",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -338,12 +338,12 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      be zero.  */
   HOWTO (R_PPC_REL14_BRNTAKEN,  /* type */
 	 0,	                /* rightshift */
-	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
-	 false,	                /* pc_relative */
+	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_elf_unsupported_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_REL14_BRNTAKEN",/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -416,7 +416,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 
   /* Like R_PPC_REL24, but referring to the procedure linkage table
      entry for the symbol.  FIXME: Not supported.  */
-  HOWTO (R_PPC_PLT24,           /* type */
+  HOWTO (R_PPC_PLTREL24,	/* type */
 	 0,	                /* rightshift */
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 26,	                /* bitsize */
@@ -424,7 +424,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_elf_std_reloc,	/* special_function */
-	 "R_PPC_PLT24",		/* name */
+	 "R_PPC_PLTREL24",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
 	 0x3fffffc,    		/* dst_mask */
@@ -641,7 +641,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 
   /* A sign-extended 16 bit value relative to _SDA_BASE, for use with
      small data items.  */
-  HOWTO (R_PPC_SDAREL,		/* type */
+  HOWTO (R_PPC_SDAREL16,	/* type */
 	 0,	                /* rightshift */
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
@@ -649,7 +649,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_elf_got16_reloc,	/* special_function */
-	 "R_PPC_SDAREL",	/* name */
+	 "R_PPC_SDAREL16",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
 	 0xffff,    		/* dst_mask */
@@ -819,25 +819,53 @@ ppc_elf_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
+  enum reloc_type ppc_reloc = R_PPC_NONE;
+
   if (!ppc_elf_howto_table[ R_PPC_ADDR32 ])	/* Initialize howto table if needed */
     ppc_elf_howto_init ();
 
   switch ((int)code)
     {
-    case BFD_RELOC_NONE:	return ppc_elf_howto_table[ (int) R_PPC_NONE ];
-    case BFD_RELOC_32:		return ppc_elf_howto_table[ (int) R_PPC_ADDR32 ];
-    case BFD_RELOC_32_PCREL:	return ppc_elf_howto_table[ (int) R_PPC_REL32 ];
-    case BFD_RELOC_CTOR:	return ppc_elf_howto_table[ (int) R_PPC_ADDR32 ];
-    case BFD_RELOC_PPC_B26:	return ppc_elf_howto_table[ (int) R_PPC_REL24 ];
-    case BFD_RELOC_PPC_BA26:	return ppc_elf_howto_table[ (int) R_PPC_ADDR24 ];
-    case BFD_RELOC_PPC_TOC16:	return ppc_elf_howto_table[ (int) R_PPC_GOT16 ];
-    case BFD_RELOC_LO16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_LO ];
-    case BFD_RELOC_HI16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HI ];
-    case BFD_RELOC_HI16_S:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HA ];
-    case BFD_RELOC_GPREL16:	return ppc_elf_howto_table[ (int) R_PPC_SDAREL ];
+    default:
+      return (reloc_howto_type *)NULL;
+
+    case BFD_RELOC_NONE:		ppc_reloc = R_PPC_NONE;			break;
+    case BFD_RELOC_32:			ppc_reloc = R_PPC_ADDR32;		break;
+    case BFD_RELOC_PPC_BA26:		ppc_reloc = R_PPC_ADDR24;		break;
+    case BFD_RELOC_16:			ppc_reloc = R_PPC_ADDR16;		break;
+    case BFD_RELOC_LO16:		ppc_reloc = R_PPC_ADDR16_LO;		break;
+    case BFD_RELOC_HI16:		ppc_reloc = R_PPC_ADDR16_HI;		break;
+    case BFD_RELOC_HI16_S:		ppc_reloc = R_PPC_ADDR16_HA;		break;
+    case BFD_RELOC_PPC_BA16:		ppc_reloc = R_PPC_ADDR14;		break;
+    case BFD_RELOC_PPC_BA16_BRTAKEN:	ppc_reloc = R_PPC_ADDR14_BRTAKEN;	break;
+    case BFD_RELOC_PPC_BA16_BRNTAKEN:	ppc_reloc = R_PPC_ADDR14_BRNTAKEN;	break;
+    case BFD_RELOC_PPC_B26:		ppc_reloc = R_PPC_REL24;		break;
+    case BFD_RELOC_PPC_B16:		ppc_reloc = R_PPC_REL14;		break;
+    case BFD_RELOC_PPC_B16_BRTAKEN:	ppc_reloc = R_PPC_REL14_BRTAKEN;	break;
+    case BFD_RELOC_PPC_B16_BRNTAKEN:	ppc_reloc = R_PPC_REL14_BRNTAKEN;	break;
+    case BFD_RELOC_PPC_TOC16:		ppc_reloc = R_PPC_GOT16;		break;
+    case BFD_RELOC_LO16_GOTOFF:		ppc_reloc = R_PPC_GOT16_LO;		break;
+    case BFD_RELOC_HI16_GOTOFF:		ppc_reloc = R_PPC_GOT16_HI;		break;
+    case BFD_RELOC_HI16_S_GOTOFF:	ppc_reloc = R_PPC_GOT16_HA;		break;
+    case BFD_RELOC_24_PLT_PCREL:	ppc_reloc = R_PPC_PLTREL24;		break;
+    case BFD_RELOC_PPC_COPY:		ppc_reloc = R_PPC_COPY;			break;
+    case BFD_RELOC_PPC_GLOB_DAT:	ppc_reloc = R_PPC_GLOB_DAT;		break;
+    case BFD_RELOC_PPC_LOCAL24PC:	ppc_reloc = R_PPC_LOCAL24PC;		break;
+    case BFD_RELOC_32_PCREL:		ppc_reloc = R_PPC_REL32;		break;
+    case BFD_RELOC_32_PLTOFF:		ppc_reloc = R_PPC_PLT32;		break;
+    case BFD_RELOC_32_PLT_PCREL:	ppc_reloc = R_PPC_PLTREL32;		break;
+    case BFD_RELOC_LO16_PLTOFF:		ppc_reloc = R_PPC_PLT16_LO;		break;
+    case BFD_RELOC_HI16_PLTOFF:		ppc_reloc = R_PPC_PLT16_HI;		break;
+    case BFD_RELOC_HI16_S_PLTOFF:	ppc_reloc = R_PPC_PLT16_HA;		break;
+    case BFD_RELOC_GPREL16:		ppc_reloc = R_PPC_SDAREL16;		break;
+    case BFD_RELOC_32_BASEREL:		ppc_reloc = R_PPC_SECTOFF;		break;
+    case BFD_RELOC_LO16_BASEREL:	ppc_reloc = R_PPC_SECTOFF_LO;		break;
+    case BFD_RELOC_HI16_BASEREL:	ppc_reloc = R_PPC_SECTOFF_HI;		break;
+    case BFD_RELOC_HI16_S_BASEREL:	ppc_reloc = R_PPC_SECTOFF_HA;		break;
+    case BFD_RELOC_CTOR:		ppc_reloc = R_PPC_ADDR32;		break;
     }
 
-  return (reloc_howto_type *)NULL;
+  return ppc_elf_howto_table[ (int)ppc_reloc ];
 };
 
 /* Set the howto pointer for a PowerPC ELF reloc.  */
@@ -1307,7 +1335,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_GOT16:		/* GOT16 relocations */
 	case (int)R_PPC_GOT16_LO:
 	case (int)R_PPC_GOT16_HI:
-	case (int)R_PPC_SDAREL:
+	case (int)R_PPC_SDAREL16:
 	  BFD_ASSERT (sec != (asection *)0);
 	  addend += ppc_elf_got16_inner (sec);
 	  break;

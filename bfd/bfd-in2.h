@@ -1355,12 +1355,19 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_8_GOT_PCREL,
   BFD_RELOC_32_GOTOFF,
   BFD_RELOC_16_GOTOFF,
+  BFD_RELOC_LO16_GOTOFF,
+  BFD_RELOC_HI16_GOTOFF,
+  BFD_RELOC_HI16_S_GOTOFF,
   BFD_RELOC_8_GOTOFF,
   BFD_RELOC_32_PLT_PCREL,
+  BFD_RELOC_24_PLT_PCREL,
   BFD_RELOC_16_PLT_PCREL,
   BFD_RELOC_8_PLT_PCREL,
   BFD_RELOC_32_PLTOFF,
   BFD_RELOC_16_PLTOFF,
+  BFD_RELOC_LO16_PLTOFF,
+  BFD_RELOC_HI16_PLTOFF,
+  BFD_RELOC_HI16_S_PLTOFF,
   BFD_RELOC_8_PLTOFF,
 
 /* Relocations used by 68K ELF. */
@@ -1371,6 +1378,9 @@ The 24-bit relocation is used in some Intel 960 configurations. */
 /* Linkage-table relative. */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
+  BFD_RELOC_LO16_BASEREL,
+  BFD_RELOC_HI16_BASEREL,
+  BFD_RELOC_HI16_S_BASEREL,
   BFD_RELOC_8_BASEREL,
   BFD_RELOC_RVA,
 
@@ -1538,16 +1548,21 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
 
-/* PowerPC/POWER (RS/6000) relocs.
-26 bit relative branch.  Low two bits must be zero.  High 24
-bits installed in bits 6 through 29 of instruction. */
+/* Power(rs6000) and PowerPC relocations. */
   BFD_RELOC_PPC_B26,
-
-/* 26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute. */
   BFD_RELOC_PPC_BA26,
-
-/* 16 bit TOC relative reference. */
   BFD_RELOC_PPC_TOC16,
+  BFD_RELOC_PPC_B16,
+  BFD_RELOC_PPC_B16_BRTAKEN,
+  BFD_RELOC_PPC_B16_BRNTAKEN,
+  BFD_RELOC_PPC_BA16,
+  BFD_RELOC_PPC_BA16_BRTAKEN,
+  BFD_RELOC_PPC_BA16_BRNTAKEN,
+  BFD_RELOC_PPC_COPY,
+  BFD_RELOC_PPC_GLOB_DAT,
+  BFD_RELOC_PPC_JMP_SLOT,
+  BFD_RELOC_PPC_RELATIVE,
+  BFD_RELOC_PPC_LOCAL24PC,
 
 /* The type of reloc used to build a contructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
