@@ -165,7 +165,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 	                            sizeof (ext_ldmbuf->segs[seg].p_memsz));
     }
 
-  free (ext_ldmbuf);
+  xfree (ext_ldmbuf);
   return int_ldmbuf;
 }
 
