@@ -467,6 +467,16 @@ print_insn_little_mips (memaddr, info)
   bfd_byte buffer[4];
   int status;
 
+  /* start-sanitize-sky */
+#ifdef ARCH_dvp
+  if (bfd_mach_dvp_p (info->mach)
+      || (info->flavour == bfd_target_elf_flavour
+	  && info->symbol != NULL
+	  && MIPS_STO_DVP_P (((elf_symbol_type *) info->symbol)->internal_elf_sym.st_other)))
+    return print_insn_dvp (memaddr, info);
+#endif
+  /* end-sanitize-sky */
+
   if (info->mach == 16
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbol != NULL

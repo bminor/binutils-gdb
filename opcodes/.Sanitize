@@ -39,7 +39,7 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-sky_files="txvu-opc.c txvu-dis.c"
+sky_files="dvp-opc.c dvp-dis.c"
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	keep_these_too="${sky_files} ${keep_these_too}"
@@ -409,7 +409,7 @@ else
 	done
 fi
 
-sky_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c"
+sky_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c mips-dis.c"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do
 		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then

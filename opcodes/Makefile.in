@@ -174,8 +174,8 @@ ALL_MACHINES = \
 	tic80-opc.lo \
 	$(end-sanitize-tic80) \
 	$(start-sanitize-sky) \
-	txvu-dis.lo \
-	txvu-opc.lo \
+	dvp-dis.lo \
+	dvp-opc.lo \
 	$(end-sanitize-sky) \
 	v850-dis.lo \
 	v850-opc.lo \
@@ -540,9 +540,12 @@ tic80-opc.lo: tic80-opc.c $(INCDIR)/opcode/tic80.h
 # end-sanitize-tic80
 
 # start-sanitize-sky
-txvu-dis.lo: txvu-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
-	$(INCDIR)/opcode/txvu.h
-txvu-opc.lo: txvu-opc.c $(INCDIR)/opcode/txvu.h
+dvp-dis.lo: txvu-dvp.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+	$(INCDIR)/opcode/dvp.h
+dvp-opc.lo: dvp-opc.c $(INCDIR)/opcode/dvp.h
+
+mips-dis.lo: mips-dis.c
+	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/mips-dis.c
 # end-sanitize-sky
 
 # This dependency stuff is copied from BFD.

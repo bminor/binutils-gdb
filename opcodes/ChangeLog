@@ -1,3 +1,16 @@
+start-sanitize-sky
+Wed Jan 28 13:46:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c, dvp-opc.c: New files.
+	* configure.in: Compile them if bfd_dvp_arch, as well as mips.
+	* configure: Regenerate.
+	* Makefile.am (ALL_MACHINES): Add dvp-{dis,opc}.lo.
+	(dvp-dis.lo,dvp-opc.lo): Add rules for.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Define ARCH_mips ifdef ARCH_dvp.
+	* mips-dis.c (print_insn_little_mips): Check for DVP insns.
+
+end-sanitize-sky
 Wed Jan 28 09:55:03 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (insertion routines): If both alignment and size is
@@ -8,42 +21,6 @@ Tue Jan 27 21:52:59 1998  Jeffrey A Law  (law@cygnus.com)
 	* mips-dis.c (_print_insn_mips): Set target_processor as appropriate.
 	Only recognize instructions for the current target_processor.
 
-start-sanitize-sky
-Tue Jan 27 14:11:04 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* txvu-dis.c (*): Update to use new arguments in
-	parse/insert/extract/print fns.
-	* txvu-opc.c (*): Likewise.
-
-Mon Jan 26 16:25:51 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* txvu-dis.c (print_insn): Extract/print fns take pointer to
-	insn now and not insn itself.
-	* txvu-opc.c: insert/extract/print fns take pointer to
-	insn now and not insn itself.  Add initial dma,pke,gpuif support.
-	Parse fn no longer needs to set errmsg = NULL for success.
-	(lookup_keyword_{value,name}): New functions.
-	(scan_symbol): New function.
-	(issymchar,SKIP_BLANKS): New macros.
-
-Fri Jan 23 01:49:24 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* txvu-opc.c (txvu_operands, UBC): Add extract entry.
- 	(txvu_operands, UACCDEST): Not a fake operand.
-	(txvu_operands, UXYZ): Move parse entry to insert entry.
-	(txvu_operands, LVI01): Not a fake operand.
-	(txvu_upper_opcodes): Fix spelling of minii instruction.
-	(printf_vfreg): Print register number with "%02ld".
-	(print_bcftreg): Likewise.
-	(print_accdest): Pass `dest' to _print_dest.
-	(insert_xyz): Renamed from parse_xyz.
-	(parse_dest1,insert_luimm12up6): New functions.
-	(txvu_operands): New operands LUIMM12UP6, LDEST1.
-	(txvu_lower_opcodes): Clean up pass over table.
-	(parse_dotdest1): Fix dest calculation.
-	(_parse_sdest): Fix typo.
-
-end-sanitize-sky
 Thu Jan 22 16:20:17 1998  Fred Fish  <fnf@cygnus.com>
 
 	* d10v-dis.c (PC_MASK): Correct value.
@@ -91,28 +68,6 @@ start-sanitize-cygnus
 	* cgen.sh, cgen-asm.in, cgen-dis.in: New files.
 end-sanitize-cygnus
 
-start-sanitize-sky
-Tue Jan  6 13:08:14 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* txvu-dis.c (print_insn_txvu): Handle no separator between
-	upper and lower insn #ifndef VERTICAL_BAR_SEPARATOR.
-
-Mon Jan  5 13:41:07 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* txvu-dis.c, txvu-opc.c: New files.
-	* configure.in: Compile them.
-	* configure: Regenerate.
-	* Makefile.am (ALL_MACHINES): Add txvu-{dis,opc}.lo.
-	(txvu-dis.lo,txvu-opc.lo): Add rules for.
-	* Makefile.in: Regenerate.
-
-Mon Dec 22 17:17:03 1997  Doug Evans  <devans@canuck.cygnus.com>
-
-	* configure.in: Add txvu support.
-	* configure: Regenerate.
-	* disassemble.c: Add txvu support.
-
-end-sanitize-sky
 Mon Dec 22 12:37:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add FP_D to s.d instruction flags.
