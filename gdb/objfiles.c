@@ -520,7 +520,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
     int something_changed = 0;
     for (i = 0; i < objfile->num_sections; ++i)
       {
-	ANOFFSET (delta, i) =
+	delta->offsets[i] =
 	  ANOFFSET (new_offsets, i) - ANOFFSET (objfile->section_offsets, i);
 	if (ANOFFSET (delta, i) != 0)
 	  something_changed = 1;
@@ -639,7 +639,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
   {
     int i;
     for (i = 0; i < objfile->num_sections; ++i)
-      ANOFFSET (objfile->section_offsets, i) = ANOFFSET (new_offsets, i);
+      (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
   }
 
   {

@@ -347,7 +347,8 @@ cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
       else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
 	off = SECT_OFF_DATA (objfile);
       else
-	off = SECT_OFF_BSS (objfile);
+	/* Just return the bfd section index. */
+	off = sect->index;
     }
   return off;
 }

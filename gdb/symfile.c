@@ -521,7 +521,7 @@ default_symfile_offsets (struct objfile *objfile,
       /* Record all sections in offsets */
       /* The section_offsets in the objfile are here filled in using
          the BFD index. */
-      ANOFFSET (objfile->section_offsets, osp->sectindex) = osp->addr;
+      (objfile->section_offsets)->offsets[osp->sectindex] = osp->addr;
     }
 
   /* Remember the bfd indexes for the .text, .data, .bss and

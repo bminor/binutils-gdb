@@ -829,7 +829,9 @@ struct section_offsets
     CORE_ADDR offsets[1];	/* As many as needed. */
   };
 
-#define	ANOFFSET(secoff, whichone)	(secoff->offsets[whichone])
+#define	ANOFFSET(secoff, whichone) \
+   ((whichone == -1) ? \
+    (internal_error ("Section index is uninitialized"), -1) : secoff->offsets[whichone])
 
 /* The maximum possible size of a section_offsets table.  */
 

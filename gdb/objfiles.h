@@ -597,8 +597,9 @@ extern int is_in_import_list (char *, struct objfile *);
      ((objfile->sect_index_text == -1) ? \
       (internal_error ("sect_index_text not initialized"), -1) : objfile->sect_index_text)
 
-#define SECT_OFF_BSS(objfile) \
-     ((objfile->sect_index_bss == -1) ? \
-      (internal_error ("sect_index_bss not initialized"), -1) : objfile->sect_index_bss)
+/* Sometimes the .bss section is missing from the objfile, so we don't
+   want to die here. Let the users of SECT_OFF_BSS deal with an
+   uninitialized section index. */
+#define SECT_OFF_BSS(objfile) (objfile)->sect_index_bss
 
 #endif /* !defined (OBJFILES_H) */

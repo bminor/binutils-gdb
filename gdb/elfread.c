@@ -474,11 +474,16 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				    (char *) filesym->name;
 				}
 			    }
-			  if (sectinfo->sections[index] != 0)
-			    {
-			      complain (&section_info_dup_complaint,
-					sectinfo->filename);
+			  if (index != -1)
+			    { 
+			      if (sectinfo->sections[index] != 0)
+				{
+				  complain (&section_info_dup_complaint,
+					    sectinfo->filename);
+				}
 			    }
+			  else
+			    internal_error ("Section index uninitialized.");
 			  /* Bfd symbols are section relative. */
 			  symaddr = sym->value + sym->section->vma;
 			  /* Relocate non-absolute symbols by the section offset. */
@@ -486,7 +491,10 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 			    {
 			      symaddr += offset;
 			    }
-			  sectinfo->sections[index] = symaddr;
+			  if (index != -1)
+			    sectinfo->sections[index] = symaddr;
+			  else
+			    internal_error ("Section index uninitialized.");
 			  /* The special local symbols don't go in the
 			     minimal symbol table, so ignore this one. */
 			  continue;
@@ -790,7 +798,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
       pst->section_offsets = (struct section_offsets *)
 	obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (pst->section_offsets, i) = maybe->sections[i];
+	(pst->section_offsets)->offsets[i] = maybe->sections[i];
       return;
     }
 

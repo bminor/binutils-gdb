@@ -1,3 +1,23 @@
+2000-08-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* objfiles.h (SECT_OFF_BSS): Don't detect invalid sect_index_bss
+ 	here, let the users of the macro do it.
+	* symtab.h (ANOFFSET): Detect here if the section index is not
+ 	initialized.
+	* xcoffread.c (find_targ_sec): Don't treat .bss as special,
+ 	because some objfiles may not have that section at all.
+	* coffread.c (cs_to_section): Ditto.
+	* elfread.c (elf_symtab_read): Detect an uninitialized index
+ 	value.
+	(elfstab_offset_sections): The macro ANOFFSET cannot be used as an
+ 	lvalue anymore.
+	* remote.c (get_offsets, remote_cisco_objfile_relocate): Don't use
+ 	ANOFFSET as an lvalue.
+	* objfiles.c (objfile_relocate, objfile_relocate): Don't use
+ 	ANOFFSET as an lvalue.
+	* symfile.c (default_symfile_offsets): Don't use ANOFFSET as an
+ 	lvalue.
+
 Mon Aug  7 10:24:30 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* parse.c (build_parse): don't write off the end of the std_regs
