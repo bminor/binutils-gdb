@@ -1,3 +1,13 @@
+Fri Oct 18 13:37:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET): Check for xgcc, not Makefile.
+	(CXX_FOR_TARGET): Likewise.
+	(GCC_FOR_TARGET): Define.
+	(BASE_FLAGS_TO_PASS): Remove GCC_FOR_TARGET.
+	(EXTRA_GCC_FLAGS): Define GCC_FOR_TARGET based on whether
+	CC_FOR_TARGET was specified on the command line.
+	(MAKEOVERRIDES): Don't define.
+
 start-sanitize-m32r
 Thu Oct 17 10:27:56 1996  Doug Evans  <dje@canuck.cygnus.com>
 

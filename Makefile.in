@@ -170,7 +170,7 @@ INSTALL_TARGET = install-dirs \
 
 
 CC_FOR_TARGET = ` \
-  if [ -f $$r/gcc/Makefile ] ; then \
+  if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
         echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
@@ -188,9 +188,15 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
+# If CC_FOR_TARGET is not overriden on the command line, then this
+# variable is passed down to the gcc Makefile, where it is used to
+# build libgcc2.a.  We define it here so that it can itself be
+# overridden on the command line.
+GCC_FOR_TARGET = $$r/gcc/xgcc -B$$r/gcc/
+
 # start-sanitize-chill
 CHILL_FOR_TARGET = ` \
-  if [ -f $$r/gcc/Makefile ] ; then \
+  if [ -f $$r/gcc/xgcc ] ; then \
     echo $$r/gcc/xgcc -B$$r/gcc/ -L$$r/gcc/ch/runtime/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
@@ -203,7 +209,7 @@ CHILL_FOR_TARGET = ` \
 # end-sanitize-chill
 
 CXX_FOR_TARGET = ` \
-  if [ -f $$r/gcc/Makefile ] ; then \
+  if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
         echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
@@ -311,7 +317,6 @@ BASE_FLAGS_TO_PASS = \
 	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"DLLTOOL_FOR_TARGET=$(DLLTOOL_FOR_TARGET)" \
-	"GCC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -393,6 +398,15 @@ TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 # If any variables are added here, they must be added to do-*, below.
 # The HOST_* variables are a special case, which are used for the gcc
 # cross-building scheme.
+# The condition for setting GCC_FOR_TARGET is so that if CC_FOR_TARGET
+# is overridden on the command line we use that value for
+# GCC_FOR_TARGET, and, if it is not, we use the value of
+# GCC_FOR_TARGET.  We do this because the default value of
+# CC_FOR_TARGET depends on gcc/xgcc, which won't exist when we first
+# go into the gcc directory.  FIXME: The test won't work correctly for
+# older non-Posix make programs that do not set MAKEFLAGS; in that
+# case, overriding CC_FOR_TARGET on the command line will not affect
+# GCC_FOR_TARGET.
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$(AS)' \
@@ -404,6 +418,11 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	"GCC_FOR_TARGET=`if echo '$(MAKEFLAGS)' | grep CC_FOR_TARGET >/dev/null 2>&1; then \
+	  echo '$$(CC_FOR_TARGET)'; \
+	else \
+	  echo $(GCC_FOR_TARGET); \
+	fi`" \
 	`if test x"$(LANGUAGES)" != x; then echo "LANGUAGES=$(LANGUAGES)"; fi` \
 	`if test x"$(STMP_FIXPROTO)" != x; then echo "STMP_FIXPROTO=$(STMP_FIXPROTO)"; fi` \
 	`if test x"$(LIMITS_H_TEST)" != x; then echo "LIMITS_H_TEST=$(LIMITS_H_TEST)"; fi` \
@@ -1552,7 +1571,6 @@ newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
 		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" newlib
 
 .NOEXPORT:
-MAKEOVERRIDES=
 
 # start-sanitize-chill
 ## This is ugly, but I don't want GNU make to put these variables in
