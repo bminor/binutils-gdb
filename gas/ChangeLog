@@ -1,3 +1,9 @@
+Thu Feb 12 14:06:59 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.c (show_usage): Update bug-gnu-utils address.
+	* gasp.c (show_usage): Likewise.
+	* doc/as.texinfo (Bug Reporting): Likewise.
+
 Wed Feb 11 23:26:28 1998  Jeffrey A Law  (law@cygnus.com)
 
         * config/tc-mips.c (load_address): Don't use mips III or mips IV

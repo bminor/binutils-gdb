@@ -1,5 +1,5 @@
 /* gasp.c - Gnu assembler preprocessor main program.
-   Copyright (C) 1994, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -3579,7 +3579,7 @@ Usage: %s \n\
   [-Ipath]                        add to include path list\n\
   [in-file]\n");
   if (status == 0)
-    printf ("\nReport bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    printf ("\nReport bugs to bug-gnu-utils@gnu.org\n");
   exit (status);
 }
 
