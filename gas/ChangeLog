@@ -5,6 +5,14 @@ Fri Jan 31 13:15:05 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 Fri Jan 31 10:46:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (enforce_aligned_data): New static variable.
+	(sparc_cons_align): Don't do anything unless enforce_aligned_data
+	is set.
+	(md_longopts): Add "enforce-aligned-data".
+	(md_show_usage): Mention --enforce-aligned-data.
+	* doc/c-sparc.texi (Sparc-Aligned-Data): New node; document
+	enforce-aligned-data.
+
 	* config/tc-ppc.c (md_pseudo_table): If OBJ_XCOFF, add "long",
  	"word", and "short".
 	(ppc_xcoff_cons): New static function.
