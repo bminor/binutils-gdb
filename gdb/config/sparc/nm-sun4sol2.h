@@ -30,6 +30,13 @@
 
 #define PRSVADDR_BROKEN
 
+/* gdb wants to use the prgregset_t interface rather than
+   the gregset_t interface, partly because that's what's
+   used in core-sol2.c */
+
+#define GDB_GREGSET_T prgregset_t
+#define GDB_FPREGSET_T prfpregset_t
+
 #ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS

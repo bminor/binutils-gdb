@@ -1,3 +1,10 @@
+Mon May 29 22:47:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/sparc/nm-sun4sol2.h (GDB_GREGSET_T, GDB_FPREGSET_T):
+ 	Define.
+	* config/sparc/xm-sun4sol2.h: (GDB_GREGSET_TYPE,
+ 	GDB_FPREGSET_TYPE): Delete.
+
 Mon May 29 15:41:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* symtab.h (make_cleanup_free_search_symbols): Add declaration.
