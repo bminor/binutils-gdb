@@ -1,3 +1,13 @@
+Fri Sep 20 16:10:58 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/sh/tm-sh.h (REGISTER_NAMES): Move fp registers to
+	be consistent with GCC.
+	(FPUL_REGNUM, etc): Renumber to match list changes.
+	(ADDR_BITS_REMOVE): Delete.
+	* sh-tdep.c (sh_reg_names, sh3_reg_names, sh3e_reg_names):
+	Rearrange to match REGISTER_NAMES.
+	* sh3-rom.c (sh3_regnames, sh3e_regnames): Ditto.
+
 start-sanitize-d10v
 Thu Sep 19 16:19:01 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

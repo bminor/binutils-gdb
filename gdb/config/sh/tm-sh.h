@@ -109,25 +109,25 @@ extern CORE_ADDR sh_skip_prologue ();
    Entries beyond the first NUM_REGS are ignored.  */
 
 #define REGISTER_NAMES \
-  {"r0", "r1", "r2", "r3", "r4",  "r5",  "r6", "r7", \
-   "r8", "r9", "r10","r11","r12", "r13", "r14","r15",\
-   "pc", "pr", "gbr","vbr","mach","macl","sr", \
-   "ssr", "spc", \
-   "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0", \
-   "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1", \
-   "fpul","fpscr", \
-   "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7", \
-   "fr8", "fr9", "fr10","fr11","fr12","fr13","fr14","fr15"\
+  { "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",  \
+    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15", \
+    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr", \
+    "fpul", "fpscr", \
+    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7", \
+    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15" \
+    "ssr",  "spc", \
+    "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0", \
+    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1", \
   }
 
 #define NUM_REGS 59
 
-/* Register numbers of various important registers.
-   Note that some of these values are "real" register numbers,
-   and correspond to the general registers of the machine,
-   and some are "phony" register numbers which are too large
-   to be actual register numbers as far as the user is concerned
-   but do serve to get the desired values when passed to read_register.  */
+/* Register numbers of various important registers.  Note that some of
+   these values are "real" register numbers, and correspond to the
+   general registers of the machine, and some are "phony" register
+   numbers which are too large to be actual register numbers as far as
+   the user is concerned but do serve to get the desired values when
+   passed to read_register.  */
 
 #define R0_REGNUM	0
 #define FP_REGNUM 	14
@@ -139,12 +139,15 @@ extern CORE_ADDR sh_skip_prologue ();
 #define MACH_REGNUM 	20
 #define MACL_REGNUM 	21
 #define SR_REGNUM 	22
-#define NUM_REALREGS    23
-#define FPUL_REGNUM	41
-#define FP0_REGNUM	43
-#define FP15_REGNUM	58
-#undef  NUM_REALREGS
-#define NUM_REALREGS    59
+#define FPUL_REGNUM	23
+#define FP0_REGNUM	25
+#define FP15_REGNUM	40
+#define SSR_REGNUM	41
+#define SPC_REGNUM	42
+#define R0B0_REGNUM	43
+#define R0B1_REGNUM	51
+
+#define NUM_REALREGS	59
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
@@ -161,7 +164,6 @@ extern CORE_ADDR sh_skip_prologue ();
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   memcpy (VALBUF, (char *)(REGBUF), TYPE_LENGTH(TYPE))
 
-
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  
 
@@ -169,7 +171,6 @@ extern CORE_ADDR sh_skip_prologue ();
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (REGISTER_BYTE(4), VALBUF, TYPE_LENGTH (TYPE))
-
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -226,15 +227,12 @@ extern CORE_ADDR sh_skip_prologue ();
 
 typedef unsigned short INSN_WORD;
 
-#define ADDR_BITS_REMOVE(addr) ((addr))
-
 #define CALL_DUMMY_LENGTH 10
 
-/* Discard from the stack the innermost frame,
-   restoring all saved registers.  */
+/* Discard from the stack the innermost frame, restoring all saved
+   registers.  */
 
 #define POP_FRAME pop_frame();
-
 
 #define NOP   {0x20, 0x0b}
 
