@@ -1,3 +1,19 @@
+2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/rd-sh.exp: If the test matches *-dso.d, copy the output
+	of linker to the file tmpdir/*-dso.so.
+	* ld-sh/tlsbin.s, ld-sh/tlsbinpic.s, ld-sh/tlslib.s: New.
+	* ld-sh/tlsbin-0-dso.d: New.
+	* ld-sh/tlsbin-1.d: New.
+	* ld-sh/tlsbin-2.d: New.
+	* ld-sh/tlsbin-3.d: New.
+	* ld-sh/tlsbin-4.d: New.
+	* ld-sh/tlspic1.s, ld-sh/tlspic2.s: New.
+	* ld-sh/tlspic-1.d: New.
+	* ld-sh/tlspic-2.d: New.
+	* ld-sh/tlspic-3.d: New.
+	* ld-sh/tlspic-4.d: New.
+
 2002-10-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-i386/combreloc.s: New test.
