@@ -1,3 +1,7 @@
+Thu Jul 27 21:27:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure, config.in: Regenerate.
+
 2000-06-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in (SIM_RUN_OBJS): Define to use nrun.c

@@ -65,6 +65,7 @@ case "${target}" in
   h8500-*-*)		sim_target=h8500 ;;
   i960-*-*)		sim_target=i960 ;;
   m32r-*-*)		sim_target=m32r ;;
+  m68hc11-*-*|m6811-*-*) sim_target=m68hc11 ;;
   mcore-*-*)		sim_target=mcore ;;
   mips*-*-*)
 	# The MIPS simulator can only be compiled by gcc.
