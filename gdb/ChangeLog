@@ -1,3 +1,8 @@
+2004-08-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* xcoff_symfile_finish: Replace last call to xmfree by call
+	to xfree.
+
 2004-08-10  Andrew Cagney  <cagney@gnu.org>
 
 	* main.c (captured_main): Delete call to init_malloc.
