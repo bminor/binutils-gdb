@@ -61,8 +61,10 @@ DEP = mkdep
 
 TARGETLIB = libopcodes.a
 
-
-DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o dis-buf.o
+# To circumvent a Sun make VPATH bug, each file listed here
+# should also have a foo.o: foo.c line further along in this file.
+DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o dis-buf.o \
+	sparc-dis.o
 
 OFILES = $(DIS_LIBS) sparc-opc.o m68881-ext.o
 #### host and target dependent Makefile fragments come in here.
@@ -114,6 +116,7 @@ $(TARGETLIB): $(OFILES)
 sparc-opc.o: sparc-opc.c
 m68881-ext.o: m68881-ext.c
 h8500-dis.o: h8500-dis.c
+sparc-dis.o: sparc-dis.c
 
 tags etags: TAGS
 

@@ -1,3 +1,7 @@
+Wed Mar 31 17:40:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dis-asm.h: Add print_insn_sparc.
+
 Wed Mar 31 17:51:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* bfd.h: Updated for BFD_RELOC_MIPS_GPREL and bfd_[gs]et_gp_size
@@ -11,7 +15,7 @@ Wed Mar 31 16:35:12 1993  Stu Grossman  (grossman@cygnus.com)
 Tue Mar 30 19:09:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dis-asm.h (disassembler_info): Add read_memory_func,
-	memory_error_func, buffer, buffer_length, and buffer_vma.
+	memory_error_func, buffer, and length.
 	({GDB_,}INIT_DISASSEMBLE_INFO): Set them.
 	print_insn_*: Remove second argument.
 

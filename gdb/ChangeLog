@@ -1,3 +1,7 @@
+Wed Mar 31 12:52:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sparc-pinsn.c: Much abridged, just calls version in libopcodes.a.
+
 Wed Mar 31 21:23:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* core.c (dis_asm_read_memory): drop fourth arg which conflicts

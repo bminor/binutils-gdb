@@ -1,3 +1,25 @@
+Wed Mar 31 10:07:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add sparc-dis.c.
+	sparc-dis.c: New file, merges binutils and gdb versions as follows:
+	From GDB:
+	    Add `add' instruction to the set that get checked
+	    for a preceding `sethi' in order to print an absolute address.
+	    * (print_insn):  Disassembly prefers real instructions.
+	    (is_delayed_branch):  Speed up.
+	    * sparc-opcode.h: Add ALIAS bit to aliases.  Fix up opcode tables.
+	    Still missing some float ops, and needs testing.
+	    * sparc-pinsn.c (print_insn): Eliminate 'set' test, subsumed by
+	    F_ALIAS.  Use printf, not fprintf, when not passing a file
+	    pointer...
+	    (compare_opcodes): Check that identical instructions have
+	    identical opcodes, complain otherwise.
+	From binutils:
+	    * New 'm' arg.
+	    * Include reg_names.
+	From neither:
+	    Use dis-asm.h/read_memory_func interface.
+
 Wed Mar 31 20:49:06 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* h8500-dis.c, i386-dis.c, m68k-dis.c, z8k-dis.c (fetch_data):

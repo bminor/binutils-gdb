@@ -311,7 +311,6 @@ disassemble_data (abfd)
   disassembler_ftype disassemble = 0; /* New style */
   unsigned int print_insn_a29k ();
   unsigned int print_insn_i960 ();
-  unsigned int print_insn_sparc ();
   unsigned int print_insn_h8300 ();
   enum bfd_architecture a;
   struct disassemble_info disasm_info;
@@ -378,7 +377,7 @@ disassemble_data (abfd)
       switch (a)
 	{
 	case bfd_arch_sparc:
-	  print = print_insn_sparc;
+	  disassemble = print_insn_sparc;
 	  break;
         case bfd_arch_z8k:
 	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
