@@ -1,0 +1,329 @@
+Fri May  2 16:30:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mem-ops.h: Stub additional core read/write arguments.
+
+	* sim-main.h: Declare sim_cia - type SI.
+	(struct _sim_cpu): Move base type to end per common.
+	(struct _sim_state): Ditto.
+
+Thu May  1 11:15:34 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	Merge from branch into devo.  CGEN generic files moved to common
+	directory.  K&R C support is no longer provided.
+
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sat Apr 12 12:57:33 1997  Felix Lee  <flee@yin.cygnus.com>
+
+	* Makefile.in, seman-cache.c: new file, for wingdb build.
+	* sim-alloca.h: fixed for wingdb.
+	
+Mon Apr  7 13:33:29 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* decode.c (*): m32r_cgen_insn_table renamed to ..._entries.
+	* mainloop.in: Use CGEN_INSN_INDEX instead of CGEN_INSN_TYPE.
+	* simdefs.h (INSN_NAME): m32r_cgen_insn_table renamed to ..._entries.
+
+Fri Apr  4 19:23:12 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen-utils.in (ex_illegal): Fill in abuf->length, abuf->addr.
+	(exc_illegal): Likewise.
+	* decode.c (decode_vars): Add decode_illegal.
+	* genmloop.sh: #include "cpu-opc.h".
+	* sem-switch.c (case_INSN_ILLEGAL): Declare.
+	(labels): Add case_INSN_ILLEGAL.
+	(SWITCH): Add INSN_ILLEGAL case.
+
+Wed Mar 26 12:34:00 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* model.c (model_module): Use 0 not NULL.
+
+	* genmloop.sh (sim_main_loop): Handle k&r c.
+
+	* sem-switch.c: Regenerate to get k&r c support.
+	* semantics.c: Likewise.
+
+	* m32r.c (ADD_{OV,CA}_SI,SUB_{OV,CA}_SI): Renamed to {ADD,SUB}[OC]FSI.
+	(ADDCSI,SUBCSI): New functions.
+	* sem-switch.c (addv,addv3,addx,subv,subx): Fix carry bit handling.
+	* semantics.c (addv,addv3,addx,subv,subx): Fix carry bit handling.
+
+	* simcache.c (simcache_{install,init,uninstall}): Use
+	DECLARE_MODULE_INSTALL_HANDLER.
+	(simcache_option_handler): Use DECLARE_OPTION_HANDLER.
+
+	* utils.c: #include "semops.h".
+
+Tue Mar 11 14:30:26 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* profile.c (profile_print_simcache): Fix thinko in printf text.
+
+	* simdefs.h (struct argbuf): Add member to fmt_20 so it's not empty.
+
+Mon Mar 10 11:06:29 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* m32r.c (h_cr_get): Rewrite.
+	(h_cr_set): Rewrite.
+	* sem-switch.c (rte): bcarry renamed to bcond.
+	* semantics.c (rte): Likewise.
+	* simdefs.h (CPU_STATE): Likewise.
+
+	* config.in (HAVE_SYS_TIME_H): Add.
+	* configure.in: Check for sys/time.h.
+	* configure: Regenerated.
+	* utils.c: Include sys/time.h if present.
+
+	* common.c (sim_parse_args): Account for NULL terminating entry
+	in long_options table.
+
+	* genmloop.sh (RUN_FAST_P): Don't run fast if tracing.
+	Always use cache if configured in.
+	* mainloop.in (do_extract_insn{16,32}): New functions.
+	(normal,fast): Call them.  Handle starting in left slot.
+	* simcache.c (simcache_option_handler): Disallow -c0.
+	* sem-switch.c (TRACE_RESULT): Redefine so no tracing.
+
+	* profile.c (profile_print_simcache): Fix percentage calc.
+
+	* Makefile.in (INCLUDE_DEPS): Delete simcommon.h.
+
+Sun Mar  9 20:42:17 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* Makefile.in (COMMON_{PRE,POST}_CONFIG_FRAG): Add delimiters for.
+	(M32R_INCLUDE_DEPS): Use cpu-sim.h instead of m32r-sim.h.
+	Add mod-list.h.
+	(mrun.o): Don't depend on M32R_INCLUDE_DEPS.
+	(sim-if.o,m32r.o,utils.o): Likewise.
+	(common.o): Don't explicitly depend on mod-list.h.
+	(mainloop.c): Pass CPU to genmloop.sh.
+	(stamp-modules): Depend on configure.
+	(decode.o): Depend on decode,h, memops.h, semops.h, cpu-opc.h.
+	(extract.o): Depend on decode.h, memops.h, semops.h.
+	(semantics.o,seman-cache.o): Likewise.
+	(model.o,ops.o): Depend on memops.h.
+	(extr-cache.o): Disable building for the moment.
+
+	* simcommon.h: Delete, move contents into cgen-sim.h.
+	* cgen-sim.h: Don't include ansidecl.h,bfd.h,simfns.h.
+	(UINT,CGEN_CAT3): Define.
+	({extract,semantic}_fn_t): Renamed to {EXTRACT,SEMANTIC}_FN.
+	(decode_t): Renamed to DECODE.
+
+	* simfns.h: Delete, contents moved to memops.h,semops.h.
+	* memops.h: New file.
+	* semops.h: New file.
+	* decode.h: Renamed from semantics.h.
+
+	* sim-argv.h: New file.
+	* Makefile.in (memory.o,trace.o,profile.o,simcache.o,common): Add
+	dependency of sim-argv.h.
+
+	* sim-alloca.h: New file.
+	* common.c: Include it.
+	* Makefile.in (common.o): Add dependency.
+
+	* config.in (HAVE_TIME_H,HAVE_SYS_RESOURCE_H): Add.
+	(HAVE_GETRUSAGE,HAVE_TIME): Add.
+	* configure.in: sinclude ../common/aclocal.m4.
+	Check for headers time.h, sys/resource.h.
+	Check for functions time, getrusage.
+	(sim_link_{files,links}): Add link cpu-opc.h.
+	(sim_profile): Add simcache.
+	(SIM_AC_PROFILE): Add simcache, profile.o.
+	(simcache module): Delete extr-cache.o for now.
+	(--enable-sim-cache): Allow specification of default cache size.
+	* configure: Regenerated.
+
+	* decode.c: #include cgen-sim.h,memops.h,semops.h,decode.h,
+	cpu-sim.h,cpu-opc.h.  Don't include m32r-sim.h.
+	Regenerate.
+
+	* extract.c: #include cgen-sim.h,decode.h,cpu-sim.h.
+	Don't include m32r-sim.h.
+	(*): Define/Undef FLD macro.  Use it to reference ARGBUF.
+	Simplify profiling test with PROFILE_MODEL_P.
+	(mvfc,mvtc): Fix access of control registers.
+	* semantic.c: #include cgen-sim.h,memops.h,semops.h,decode.h,cpu-sim.h.
+	Don't include m32r-sim.h.
+	(*): Define/Undef FLD macro.  Use it to reference ARGBUF.
+	Simplify profiling test with PROFILE_MODEL_P.
+	(mvfc,mvtc): Fix access of control registers.
+
+	* sem-switch.c: New file, for GCC computed goto support.
+
+	* genmloop.sh: Add #include's of bfd.h,callback.h,cgen-sim.h,
+	memops.h,semops.h,trace.h,cpu-sim.h.
+	(RUN_FAST_P): Change default to run fast if cache size > 0
+	and not profiling.
+	(sim_main_loop): Record execution time.
+	Record instruction count even in fast mode.
+	(init): Allow cpu to provide init code in mainloop.in.
+	(FAST): Define as 0 or 1 depending on fast mode.
+	* mainloop.in (normal): Combine with fast case.
+	Add support for GCC computed gotos.  Count simcache hits/misses.
+	(init): Initialize "switch" labels if GNUC.
+
+	* cgen-utils.in: Don't include opcode/cgen.h.
+	Include cgen-sim.h, cpu-opc.h.
+	* common.c: Don't include simcommon.h,mod-list.h.  Include cgen-sim.h.
+	* m32r-sim.h: Don't include mod-list.h
+	(RUN_FAST_P): Delete.
+	* m32r.c: Don't include profile.h.  #include ansidecl.h,cgen-sim.h,
+	semops.h,memory.h,trace.h
+	(h_cr_get,h_cr_set): New functions.
+	* memory.c: #include cgen-sim.h,callback.h.
+	* ops.c: Don't include profile.h,m32r-sim.h.
+	Include cgen-sim.h,memops.h,cpu-sim.h.
+	(MEMOPS_DEFINE_INLINE): Renamed from SIMFNS_DEFINE_INLINE.
+	* trace.c: Include cgen-sim.h,cpu-opc.h.
+	* trace.h (trace_insn_{init,fini}): Declare.
+
+	* model.c: Don't include signal.h,stdlib.h,m32r-sim.h.
+	Include cgen-sim.h,cpu-sim.h,cpu-opc.h.
+	Regenerate to get new insn aliases.
+
+	* mrun.c: #include "ansidecl.h".
+	(STATE): Use struct sim_state instead.
+
+	* profile.c: Surround #include <stdlib.h> with HAVE_STDLIB_H.
+	Don't include simcommon.h.  Include cgen-sim.h,cpu-opc.h.
+	(PROFILE_{READ,WRITE}_MASK): Replace with PROFILE_MEMORY_MASK.
+	(profile_print_simcache): New function.
+	(profile_print): Call it.  Print simulator speed stats.
+	* profile.h (PROFILE_{READ,WRITE}_MASK): Replace with
+	PROFILE_MEMORY_MASK.
+	(MODULE_PROFILE_SIMCACHE_P): Define.
+	(PROFILE_SIMCACHE_MASK): Define.
+	(PROFILE_COUNT): New members total_insn_count,exec_time.
+	New members simcache_hits,simcache_misses.
+	(PROFILE_SIMCACHE_{HITS,MISSES}): Define.
+	(PROFILE_MODEL_P): New macro.
+	(PROFILE_COUNT_SIMCACHE_{HIT,MISS}): New macros.
+
+	* sim-if.c: Surround #include <stdlib.h> with HAVE_STDLIB_H.
+	Don't include simcommon.h,m32r-sim.h.  Include cgen-sim.h,cpu-sim.h.
+	(sim_resume): Use USING_SIMCACHE_P instead of RUN_FAST_P.
+	(sim_info): Pass verbose to profile_print.
+
+	* simcache.c: Include cgen-sim.h,callback.h.
+	(USING_SIMCACHE_P): Replace with SIMCACHE_P.
+	(simcache_option_handler): Ensure cache size at least 2.
+	Allow config time specification of default cache size.
+	* simcache.h (struct simcache): Support GCC computed gotos.
+	(SIMCACHE_DEFAULT_CACHE_SIZE): USe CONFIG_SIM_CACHE_SIZE if defined.
+	(USING_SIMCACHE_P): New macro.
+
+	* simdefs.h: Don't include m32r-opc.h.
+	(CGEN_MAX_SIM_INSNS): Define.
+	(CPU_STATE): Regenerate.
+	(ARGBUF): Regenerate.
+	(extract,semantic handler decls): Delete, moved to decode.h.
+
+	* tconfig.in: Don't include cgen-sim.h,m32r-sim.h.
+	(USE_SEM_SWITCH): Define.
+
+	* utils.c: Include bfd.h,time.h,sys/resource.h.
+	(sim_time_get,sim_time_elapsed): New functions.
+	* cgen-sim.h (SIM_TIME,sim_time_get,sim_time_elapsed): Declare.
+
+Fri Jan 31 20:25:06 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Handle i386-windows.
+	* configure: Regenerated.
+	* model.c: #include <stdlib.h>.
+	* simcache.c: #include "libiberty.h".
+	* simcommon.h (alloca): Handle i386-windows.
+
+	* common.c: #include libiberty.h.
+	(sim_signal_to_host): Return 5 if wingdb.
+
+Mon Jan 27 15:22:49 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* configure.in (sim_cache): Enabled by default now, pass default
+	cache size to --enable-sim-cache.
+	* simcache.c (simcache_option_handler): Allow -c 0.
+
+	* simdefs.h,simfns.h: Regenerate
+	* decode.c,extract.c,model.c,ops.c,semantics.c: Regenerate.
+
+Tue Jan 21 16:21:01 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	Add model profiling support.
+	* configure.in: Handle --enable-sim-model.
+	(sim_profile): Add model.
+	* Makefile.in (model.o): Add rule.
+	* cgen-sim.h (UNIT,INSN_TIMING,MACH,MODEL): New types.
+	* extract.c (*): Add model profiling support.
+	* m32r.c (model_mark_{get,set}_h_gr): New functions.
+	(model_mark_{busy,unbusy}_reg): New functions.
+	* profile.c (profile_option_handler): Recognize --profile model.
+	(profile_print_model): New function.
+	(profile_print): Call it.
+	* profile.h (MODULE_profile_model,MODULE_PROFILE_MODEL_P): Define.
+	(PROFILE_MODEL_MASK,PROFILE_LABEL_WIDTH): Define.
+	(PROFILE_COUNT): New members cycle_count,cti_stall_count,
+	load_stall_count,taken_count,untaken_count.
+	* semantics.c (*): Add model profiling support.
+	* simcommon.h (struct sim_state): New members mach,model.
+	* simdefs.h (CPU_PROFILE,MODEL_TYPE,UNIT_TYPE): New type.
+	(MAX_MODELS,MAX_UNITS): Define.
+	* tconfig.in (STATE_EXTRA_MEMBERS): Add cpu_profile.
+
+	* Makefile.in (INCLUDE_DEPS): Add $(SIM_MODULES_HDRS).
+	(stamp-modules): Depend on genmodlist.sh.
+	* common.c (standard_options): Add --max-insns.
+	(copy_argv): New function.
+	* tconfig.in (SIM_HAVE_MAX_INSNS): Define.
+	* genmloop.sh: Allow mainloop.in to contain support code.
+	* mainloop.in: Move do_insn16,do_insn32 here.
+	* m32r.c (do_trap): Handle SYS_argvlen,SYS_argv,SYS_read.
+	* sim-if.c (sim_open): Don't set max insn count.
+	(sim_create_inferior): Save argv,envp.
+	* simcommon.h (struct sim_state): New members argv,envp.
+	* simdefs.h ([GS]ETTWI,[GS]ETTUWI,[GS]ETTAI): Define.
+	([GS]ETMEMWI,[GS]ETMEMUWI,[GS]ETMEMAI): Define.
+	(ARGBUF): New members h_gr_get, h_gr_set.
+	* trace.c (trace_insn_init,trace_insn_fini): New functions.
+	(trace_printf): Print to buffer, output later by trace_insn_fini.
+	* trace.h (TRACE_INSN_{INIT,FINI}): Define.
+
+Thu Dec 19 16:01:59 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (AC_FUNC_ALLOCA): Call.
+	* configure: Regenerate.
+	* config.h (HAVE_ALLOCA_H): Add.
+	* simcommon.h: Add alloca support.
+	(DECLARE_MODULE_INSTALL_HANDLER): Define.
+	(DECLARE_OPTION_HANDLER): Define.
+	(MEM_FN): Declare using PARAMS.
+	(DECLARE_MEM_FN): Define.
+	* trace.c (trace_result): Tweak for !STDC.
+	* cgen-sim.h (UDI_FN_SUPPORT): Define if ! HAVE_LONGLONG.
+	* cgen-utils.in (disasm_sprintf): Fix va_arg call in !STDC case.
+	* common.c (sim_print_help_fn): Use PARAMS.
+	(standard_option_handler): Fix decl for !STDC systems.
+	* memory.c: #include <stdio.h>
+	(mem_flat_{install,init,uninstall}): Fix decl for !STDC systems.
+	(mem_flat_{read,write},mem_flat_option_handler): Likewise.
+	* profile.c (profile_install): Likewise.
+	(profile_option_handler): Likewise.
+
+Thu Dec 19 11:06:19 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* semantics.c (*): Don't suffix big unsigned numbers with "U".
+	Prefix them with 0x instead.
+
+	* cgen-sim.h (DI_FN_SUPPORT): Define if ! HAVE_LONGLONG.
+	(SLADI,SRADI,CONVSIDI,CONVDISI): Delete, moved to simfns.h.
+	* semantics.c (machi,maclo,macwhi,macwlo,mulhi,mullo): Implement.
+	(mulwhi,mulwlo,mvtachi,mvtaclo,rac,rach): Implement.
+	* simfns.h: Add decls for functional DI,UDI,SF,DF,XF,TF support.
+	Add support for boolean and/or.
+	* utils.c: Redo naming of DI functional support.
+	(ANDDI,ORDI,ADDDI,MULDI,GEDI,LEDI,CONVHIDI): New functions.
+
+Tue Dec 17 12:57:48 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* Directory created.

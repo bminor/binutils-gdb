@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sim-main.h"
+#include <signal.h>
 #include "dis-asm.h"
 #include "cpu-opc.h"
 #include "decode.h"
@@ -237,13 +238,13 @@ sim_disassemble_insn (SIM_CPU *cpu, const struct cgen_insn *insn,
   switch (abuf->length)
     {
     case 1 :
-      insn_value = sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, pc);
+      insn_value = sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
       break;
     case 2 :
-      insn_value = sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, pc);
+      insn_value = sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
       break;
     case 4 :
-      insn_value = sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, pc);
+      insn_value = sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, pc, NULL, NULL_CIA);
       break;
     default:
       abort ();

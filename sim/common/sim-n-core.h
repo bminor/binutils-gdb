@@ -23,67 +23,91 @@
 #error "N must be #defined"
 #endif
 
+#include "sim-xcat.h"
+
 /* NOTE: see end of file for #undef of these macros */
 #define unsigned_N XCONCAT2(unsigned_,N)
 #define T2H_N XCONCAT2(T2H_,N)
 #define H2T_N XCONCAT2(H2T_,N)
 
-#define core_map_read_N XCONCAT2(core_map_read_,N)
-#define core_map_write_N XCONCAT2(core_map_write_,N)
+#define sim_core_read_N XCONCAT2(sim_core_read_,N)
+#define sim_core_write_N XCONCAT2(sim_core_write_,N)
 
 
 INLINE_SIM_CORE(unsigned_N)
-core_map_read_N(engine *system,
-		core_maps map,
-		unsigned_word addr)
+sim_core_read_N(SIM_DESC sd,
+		sim_core_maps map,
+		unsigned_word addr,
+		sim_cpu *cpu,
+		sim_cia cia)
 {
-  core_mapping *mapping = core_map_find_mapping(system, map,
-						addr,
-						sizeof(unsigned_N),
-						1); /*abort*/
+  unsigned_N val;
+  sim_core_mapping *mapping = sim_core_find_mapping (sd, map,
+						     addr,
+						     sizeof (unsigned_N),
+						     1,
+						     cpu, cia); /*abort*/
 #if (WITH_DEVICES)
   if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_N data;
-    if (device_io_read_buffer(mapping->device,
-			      &data,
-			      mapping->space,
-			      addr,
-			      sizeof(unsigned_N)) != sizeof(unsigned_N))
-      device_error(mapping->device, "internal error - core_read_N() - io_read_buffer should not fail");
-    return T2H_N(data);
+    if (device_io_read_buffer (mapping->device,
+			       &data,
+			       mapping->space,
+			       addr,
+			       sizeof (unsigned_N)) != sizeof (unsigned_N))
+      device_error (mapping->device, "internal error - sim_core_read_N() - io_read_buffer should not fail");
+    val = T2H_N (data);
   }
   else
 #endif
-    return T2H_N(*(unsigned_N*)core_translate(mapping, addr));
+    val = T2H_N (*(unsigned_N*) sim_core_translate (mapping, addr));
+  if (STATE_CORE (sd)->trace)
+    trace_printf (sd, cpu, "sim-n-core.c:%d: read-%d %s:0x%08lx -> 0x%lx\n",
+		  __LINE__,
+		  sizeof (unsigned_N),
+		  sim_core_map_to_str (map),
+		  (unsigned long) addr,
+		  (unsigned long) val);
+  return val;
 }
 
 
 
 INLINE_SIM_CORE(void)
-core_map_write_N(engine *system,
-		 core_maps map,
+sim_core_write_N(SIM_DESC sd,
+		 sim_core_maps map,
 		 unsigned_word addr,
-		 unsigned_N val)
+		 unsigned_N val,
+		 sim_cpu *cpu,
+		 sim_cia cia)
 {
-  core_mapping *mapping = core_map_find_mapping(system, map,
-						addr,
-						sizeof(unsigned_N),
-						1); /*abort*/
+  sim_core_mapping *mapping = sim_core_find_mapping(sd, map,
+						    addr,
+						    sizeof (unsigned_N),
+						    1,
+						    cpu, cia); /*abort*/
 #if (WITH_DEVICES)
   if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
-    unsigned_N data = H2T_N(val);
-    if (device_io_write_buffer(mapping->device,
-			       &data,
-			       mapping->space,
-			       addr,
-			       sizeof(unsigned_N), /* nr_bytes */
-			       processor,
-			       cia) != sizeof(unsigned_N))
-      device_error(mapping->device, "internal error - core_write_N() - io_write_buffer should not fail");
+    unsigned_N data = H2T_N (val);
+    if (device_io_write_buffer (mapping->device,
+				&data,
+				mapping->space,
+				addr,
+				sizeof (unsigned_N), /* nr_bytes */
+				cpu,
+				cia) != sizeof (unsigned_N))
+      device_error (mapping->device, "internal error - sim_core_write_N() - io_write_buffer should not fail");
   }
   else
 #endif
-    *(unsigned_N*)core_translate(mapping, addr) = H2T_N(val);
+    *(unsigned_N*) sim_core_translate (mapping, addr) = H2T_N (val);
+  if (STATE_CORE (sd)->trace)
+    trace_printf (sd, cpu, "sim-n-core.c:%d: write-%d %s:0x%08lx <- 0x%lx\n",
+		  __LINE__,
+		  sizeof (unsigned_N),
+		  sim_core_map_to_str (map),
+		  (unsigned long) addr,
+		  (unsigned long) val);
 }
 
 
@@ -91,5 +115,5 @@ core_map_write_N(engine *system,
 #undef unsigned_N
 #undef T2H_N
 #undef H2T_N
-#undef core_map_read_N
-#undef core_map_write_N
+#undef sim_core_read_N
+#undef sim_core_write_N

@@ -54,7 +54,7 @@ EXTERN_SIM_CORE\
 (SIM_RC)
 sim_core_init (SIM_DESC sd)
 {
-  sim_core *memory = &sd->core;
+  sim_core *memory = STATE_CORE(sd);
   sim_core_maps map;
   for (map = 0;
        map < nr_sim_core_maps;
@@ -75,6 +75,20 @@ sim_core_init (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
+
+
+STATIC_INLINE_SIM_CORE\
+(const char *)
+sim_core_map_to_str (sim_core_maps map)
+{
+  switch (map)
+    {
+    case sim_core_read_map: return "read";
+    case sim_core_write_map: return "write";
+    case sim_core_execute_map: return "exec";
+    default: return "(invalid-map)";
+    }
+}
 
 
 STATIC_INLINE_SIM_CORE\
@@ -186,7 +200,7 @@ sim_core_attach(SIM_DESC sd,
 	    device *client,
 	    void *optional_buffer)
 {
-  sim_core *memory = &sd->core;
+  sim_core *memory = STATE_CORE(sd);
   sim_core_maps map;
   void *buffer;
   int buffer_freed;
@@ -265,9 +279,11 @@ sim_core_find_mapping(SIM_DESC sd,
 		      sim_core_maps map,
 		      unsigned_word addr,
 		      unsigned nr_bytes,
-		      int abort) /*either 0 or 1 - helps inline */
+		      int abort, /*either 0 or 1 - helps inline */
+		      sim_cpu *cpu,
+		      sim_cia cia)
 {
-  sim_core_mapping *mapping = sd->core.map[map].first;
+  sim_core_mapping *mapping = STATE_CORE (sd)->map[map].first;
   SIM_ASSERT((addr & (nr_bytes - 1)) == 0); /* must be aligned */
   SIM_ASSERT((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
   while (mapping != NULL) {
@@ -277,8 +293,8 @@ sim_core_find_mapping(SIM_DESC sd,
     mapping = mapping->next;
   }
   if (abort)
-    sim_io_error (sd, "access to unmaped address 0x%x (%d bytes)\n",
-		 addr, nr_bytes);
+    sim_io_error (sd, "access to unmaped address 0x%lx (%d bytes)\n",
+		  (unsigned long) addr, nr_bytes);
   return NULL;
 }
 
@@ -306,7 +322,7 @@ sim_core_read_buffer(SIM_DESC sd,
     sim_core_mapping *mapping =
       sim_core_find_mapping(sd, map,
 			    raddr, 1,
-			    0); /*dont-abort*/
+			    0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)
       break;
 #if (WITH_DEVICES)
@@ -347,7 +363,7 @@ sim_core_write_buffer(SIM_DESC sd,
     unsigned_word raddr = addr + count;
     sim_core_mapping *mapping = sim_core_find_mapping(sd, map,
 						      raddr, 1,
-						      0); /*dont-abort*/
+						      0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)
       break;
 #if (WITH_DEVICES)

@@ -1,3 +1,74 @@
+Fri May  2 17:59:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c (sim_core_map_to_str): New function ascii equivalent
+ 	to map type.
+	
+	* sim-n-core.h (sim_core_read_N, sim_core_write_N): Use in trace
+ 	statement.
+
+Fri May  2 17:28:02 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* cgen-trace.c: Prepend additional trace_printf argument.
+
+	* cgen-utils.c (sim_disassemble_insn): Add additional core
+ 	arguments.
+
+Fri May  2 11:40:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* nrun.c (main): Catch/report errorenous simulator states.
+
+	* sim-module.c: #include "libiberty.h" so that xmalloc is defined.
+  	* sim-trace.c: #include string.h/strings.h so that memset is
+ 	defined.
+	* sim-utils.c: Ditto.
+	* sim-profile.c: Ditto. And stdlib.h.
+	(print_bar): Only define when used by instruction or memory profiler.
+
+	* sim-options.c (standard_option_handler): Make ul more local.
+	
+	* sim-load.c (sim_load_file): Make the name constant.
+	(sim_load_file): Passify gcc.
+
+	* sim-utils.h: New file, pre-declare utilites in corresponding .c
+ 	file.
+	* sim-utils.c, sim-load.c: Include sim-utils.h.
+	
+	* sim-base.h (sim_cpu): Pre define here so available to all.
+
+	* sim-core.h (DECLARE_SIM_CORE_WRITE_N, DECLARE_SIM_CORE_READ_N):
+ 	Restore the sim_cpu and instruction_address arguments so that full
+ 	information is available to the abort function.
+	* sim-core.c (sim_core_find_mapping, sim_core_write_buffer): Ditto.
+	* sim-n-core.h (sim_core_write_N, sim_core_read_N): Update.
+
+	* sim-trace.h, sim-trace.c (trace_option_handler): Add interim
+ 	tracing support for sim-events and sim-core.
+	(trace_option_handler): Convert #if to if where possible so always
+ 	compiled/checked by C compiler.
+	* sim-n-core.h (sim_core_write_N, sim_core_read_N): Update.
+	
+	* sim-base.h: Adjust comment documenting how to define the cpu
+ 	structure.
+	(sim_state_base): Add sim_core and sim_events to simulator base
+ 	object.
+
+	* sim-trace.h, sim-trace.c (trace_printf): Add SIM_DESC argument.
+	* sim-core.c (sim_core_init, sim_core_attach,
+ 	sim_core_find_mapping): Update.
+	* sim-events.c (ETRACE, sim_events_init, sim_events_time,
+ 	update_time_from_event, insert_sim_event,
+ 	sim_events_schedule_after_signal, sim_events_deschedule,
+ 	sim_events_tick): Ditto.
+	
+	* sim-basics.h (sim-module.h, sim-trace.h, sim-profile.h,
+ 	sim-model.h): Move #includes from here.
+	* sim-base.h: To here.
+	(sim-core.h, sim-events.h, sim-io.h): Include also
+	
+Wed Apr 30 15:37:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* callback.c (default_callback): Missing initialisers.
+
 Thu May  1 10:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-utils.c (sim_add_commas): New function.
