@@ -1,5 +1,9 @@
 Tue Feb  2 00:19:08 1993  John Gilmore  (gnu@cygnus.com)
 
+	* infrun.c (wait_for_inferior):  When rolling back the PC after
+	a breakpoint, call write_pc so that NPC gets rolled back as well
+	(for the 29K).
+
 	* blockframe.c (inside_entry_file, inside_main_func,
 	inside_entry_func):  PC of zero is always "bottom of stack".
 
