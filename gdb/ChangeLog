@@ -1,3 +1,9 @@
+Fri Jun 11 18:39:38 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	Patches from Jeff Law, law@cs.utah.edu:
+	* hppa-pinsn.c: Now uses disassembler from opcode library,
+	this contains only the stub function print_insn.
+
 Fri Jun 11 15:19:59 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* main.c (main): back to two periods for elipse.

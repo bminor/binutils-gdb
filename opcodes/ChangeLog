@@ -1,3 +1,13 @@
+Fri Jun 11 18:40:21 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	Changes from Jeff Law, law@cs.utah.edu:
+	* hppa-dis.c (print_insn_hppa): Last argument to fput_reg, 
+	fput_reg_r, fput_creg, fput_const, and fputs_filtered should
+	be a *disassemble_info, not a *FILE.
+	* hppa-dis.c: Support 'd', '!', and 'a'.
+	* hppa-dis.c: Support 's' to extract a 2 bit space register.
+	* hppa-dis.c: Delete cases which are no longer needed.
+
 Fri Jun 11 07:53:48 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* m68k-dis.c (print_insn_{m68k,arg}): Add MMU codes.
