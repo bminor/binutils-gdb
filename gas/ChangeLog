@@ -6,6 +6,97 @@ Thu Jul 14 13:21:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* subsegs.c (subseg_set_rest): Compare segT values directly,
 	without casting to int first.
 
+	* config/tc-ns32k.c (md_begin): Return value from hash_insert
+	should be pointer to const.  Don't call exit explicitly after
+	calling as_fatal; it won't return.
+	(convert_iif): Make local variable j be pointer to bit_fixS, since
+	that's how it's used.
+	(encode_operand, case 'b'): Ignore sprintf return value.  Don't try
+	converting freeptr to int and back.
+
+	Merged in NS32K support update from Ian Dall (dall@hfrd.dsto.gov.au):
+
+	* config/te-pc532mach.h: New file. pc532-mach target emulation.
+
+	* config/te-netbsd532.h: New file. Netbsd532 target emulation.
+
+	* config/tc-ns32k.h: Add definition of NOP_OPCODE.
+
+	* config/tc-ns32k.h: Add prototype for fix_new_ns32k_exp.
+
+	* config/tc-ns32k.h: Add BFD_ASSEMBLER support.
+
+	* config/tc-ns32k.c (tc_gen_reloc): New function for BFD_ASSEMBLER.
+
+	* config/tc-ns32k.c (fix_new_ns32k_exp): Get reloc type
+	differently for BFD_ASSEMBLER.
+
+	* config/tc-ns32k.c (md_estimate_size_before_relax): Get reloc
+	type differently for BFD_ASSEMBLER.
+
+	* config/tc-ns32k.c (md_create_long_jump): Size of opcode is one
+	not 2.
+
+	* config/tc-ns32k.c (md_convert_frag): Code for the BFD_ASSEMBLER
+	case. Also use smart md_pcrel_adjust function.
+
+	* config/tc-ns32k.c (md_apply_fix): Code for the BFD_ASSEMBLER
+	case. Also use smart md_fix_pcrel_adjust function.
+
+	* config/tc-ns32k.c (md_fix_pcrel_adjust): New function which can
+	find offset from opcode to operand even if in another frag
+	and in the presence of relaxing.
+
+	* config/tc-ns32k.c (md_pcrel_adjust): New function which can
+	find offset from opcode to operand even if in another frag
+	and in the presence of relaxing.
+
+	* config/tc-ns32k.c (md_number_to_disp): Check ranges properly.
+
+	* config/tc-ns32k.c (md_atof): use atof_ieee instead of special
+	atof_ns32k.
+
+	* config/tc-ns32k.c (reloc): New (static) function for
+	BFD_ASSEMBLER.
+
+	* config/tc-ns32k.c (convert_iif): More correct pc relative code.
+	md_relax must be able to find opcode address even if in another frag.
+
+	* config/tc-ns32k.c: More extensive comments.
+
+	* config/tc-ns32k.c (encode_operand): Support new operand classes I
+	and Z. Drop Q.
+
+	* config/tc-ns32k.c (fix_new_ns32k_exp): new function and
+	corresponding prototype.
+
+	* config/tc-ns32k.c: make 32532 default machine instead of 32032.
+
+	* config/tc-ns32k.c: include opcode/ns32k.h after as.h
+
+	* aout_gnu.h: r_disp needs to be 2 bits for TC_NS32K
+
+	* write.h: fx_im_disp needs to be 2 bits big for TC_NS32K
+
+	* write.c (relax_segment): Use TC_PCREL_ADJUST macro (if defined)
+	instead of adding pcrel_adjust.
+
+	* write.c (write_object_file): Adjust to_addr for the
+	BROKEN_DOT_WORD feature for the BFD_ASSEMBLER case.
+
+	* write.c (write_object_file): Use TC_CONS_FIX_NEW if it is defined.
+
+	* write.c (write_contents): Add code (currently if
+	BFD_FAST_SECTION_FILL is defined) to make large fills a lot faster.
+
+	* configure.in: Remove ns32k from special FP list. All the ns32k
+	series use ieee float.
+
+	* configure.in: Add ns32k-pc532-mach and ns32k-pc532-netbsd targets
+
+	* as.h: include expr.h before targ-env.h. Some target dependent file
+	want to use expr structures.
+
 Wed Jul 13 14:49:05 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): Change rp to be a const pointer.
