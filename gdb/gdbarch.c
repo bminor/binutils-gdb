@@ -357,6 +357,19 @@ gdbarch_alloc (const struct gdbarch_info *info,
 }
 
 
+/* Free a gdbarch struct.  This should never happen in normal
+   operation --- once you've created a gdbarch, you keep it around.
+   However, if an architecture's init function encounters an error
+   building the structure, it may need to clean up a partially
+   constructed gdbarch.  */
+void
+gdbarch_free (struct gdbarch *arch)
+{
+  /* At the moment, this is trivial.  */
+  free (arch);
+}
+
+
 /* Ensure that all values in a GDBARCH are reasonable. */
 
 static void

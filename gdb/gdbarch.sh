@@ -512,6 +512,10 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
+/* Helper function.  Free a partially-constructed \`\`struct gdbarch''.  */
+extern void gdbarch_free (struct gdbarch *);
+
+
 /* Helper function. Force an update of the current architecture.  Used
    by legacy targets that have added their own target specific
    architecture manipulation commands.
@@ -958,6 +962,23 @@ cat <<EOF
   /* gdbarch_alloc() */
 
   return gdbarch;
+}
+EOF
+
+# Free a gdbarch struct.
+echo ""
+echo ""
+cat <<EOF
+/* Free a gdbarch struct.  This should never happen in normal
+   operation --- once you've created a gdbarch, you keep it around.
+   However, if an architecture's init function encounters an error
+   building the structure, it may need to clean up a partially
+   constructed gdbarch.  */
+void
+gdbarch_free (struct gdbarch *arch)
+{
+  /* At the moment, this is trivial.  */
+  free (arch);
 }
 EOF
 

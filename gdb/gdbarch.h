@@ -909,6 +909,10 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
+/* Helper function.  Free a partially-constructed ``struct gdbarch''.  */
+extern void gdbarch_free (struct gdbarch *);
+
+
 /* Helper function. Force an update of the current architecture.  Used
    by legacy targets that have added their own target specific
    architecture manipulation commands.
