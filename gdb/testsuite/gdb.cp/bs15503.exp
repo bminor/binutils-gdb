@@ -79,8 +79,8 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "break 32" \
-    "Breakpoint $decimal at $hex: file .*bs15503.cc, line 32." \
+gdb_test "break 53" \
+    "Breakpoint $decimal at $hex: file .*bs15503.cc, line 53." \
     "break point on line in function"
 
 gdb_test "run" \
