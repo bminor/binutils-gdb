@@ -1,3 +1,8 @@
+Sat May  9 14:47:28 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* xcoffexec.c (vmap_exec):  Don't assume .text and .data are the
+	first two sections.
+
 Fri May  8 11:42:15 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* mipsread.c (parse_procedure):  Return rather than using

@@ -629,24 +629,29 @@ register struct ld_info *ldi; {
 vmap_exec ()
 {
   static bfd *execbfd;
+  int i;
+
   if (execbfd == exec_bfd)
     return;
 
   execbfd = exec_bfd;
 
-  /* First exec section is `.text', second is `.data'. If this is changed,
-     then this routine will choke. */
+  if (!vmap || !exec_ops.to_sections)
+    error ("vmap_exec: vmap or exec_ops.to_sections == 0\n");
 
-  if (!vmap || !exec_ops.to_sections ||
-	strcmp (exec_ops.to_sections[0].sec_ptr->name, ".text") ||
-	strcmp (exec_ops.to_sections[1].sec_ptr->name, ".data"))
-
-    fatal ("aix: Improper exec_ops sections.");
-
-  exec_ops.to_sections [0].addr += vmap->tstart;
-  exec_ops.to_sections [0].endaddr += vmap->tstart;
-  exec_ops.to_sections [1].addr += vmap->dstart;
-  exec_ops.to_sections [1].endaddr += vmap->dstart;
+  for (i=0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
+    {
+      if (strcmp(".text", exec_ops.to_sections[i].sec_ptr->name) == 0)
+	{
+	  exec_ops.to_sections[i].addr += vmap->tstart;
+	  exec_ops.to_sections[i].endaddr += vmap->tstart;
+	}
+      else if (strcmp(".data", exec_ops.to_sections[i].sec_ptr->name) == 0)
+	{
+	  exec_ops.to_sections[i].addr += vmap->dstart;
+	  exec_ops.to_sections[i].endaddr += vmap->dstart;
+	}
+    }
 }
 
 
