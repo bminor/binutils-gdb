@@ -1,3 +1,11 @@
+Wed Jan 31 13:52:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Merge with gcc/config.sub.
+
+Thu Jan 25 11:01:10 1996  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* mpw-build.in (do-binutils): Add build of stamps.
+
 Thu Jan 25 17:05:26 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config.sub: Add recognition for mips64vr4100*-* targets.
