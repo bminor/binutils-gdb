@@ -2283,9 +2283,12 @@ arm_extract_return_value (struct type *type,
    the address in which a function should return its structure value.  */
 
 static CORE_ADDR
-arm_extract_struct_value_address (char *regbuf)
+arm_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_address (regbuf, REGISTER_RAW_SIZE(ARM_A1_REGNUM));
+  ULONGEST ret;
+
+  regcache_cooked_read_unsigned (regcache, ARM_A1_REGNUM, &ret);
+  return ret;
 }
 
 /* Will a function return an aggregate type in memory or in a
@@ -2933,7 +2936,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+  set_gdbarch_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);
 
   /* Single stepping.  */
