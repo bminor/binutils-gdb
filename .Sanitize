@@ -31,20 +31,6 @@ else
 	lose_these_too="${lose_these_too} ${cygnus_files}"
 fi
 
-mpw_files="mpw-README mpw-configure mpw-config.in mpw-build.in ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null) ; then
-	keep_these_too="${keep_these_too} ${mpw_files}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${mpw_files}
-	fi
-else
-	lose_these_too="${lose_these_too} ${mpw_files}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${mpw_files}
-	fi
-fi
-
 gdbtk_files="tcl tk"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null) ; then
@@ -103,6 +89,10 @@ etc
 # These will only show up if they checked out gas-extra-stuff.
 configure.bat
 makeall.bat
+mpw-README
+mpw-configure
+mpw-config.in
+mpw-build.in
 
 Things-to-lose:
 
@@ -152,37 +142,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if [ -n "${verbose}" ] ; then
-	echo Removing traces of \"mpw\"...
-fi
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping mpw stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"mpw\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
