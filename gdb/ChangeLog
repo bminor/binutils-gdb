@@ -1,5 +1,7 @@
 2001-07-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* README: Mention how to make gdb.pdf.
+
 	* NEWS: Update.
 
 2001-07-24  Stephen P. Smith <ischis2@home.com>

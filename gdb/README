@@ -128,7 +128,14 @@ format.  On its own, TeX cannot read, much less typeset a Texinfo file.
 and print this manual.  First switch to the the `gdb' subdirectory of
 the main source directory (for example, to `gdb-5.0/gdb') and then type:
 
-     make gdb.dvi
+     make doc/gdb.dvi
+
+   If you prefer to have the manual in PDF format, type this from the
+`gdb/doc' subdirectory of the main source directory:
+
+     make gdb.pdf
+
+For this to work, you will need the PDFTeX package to be installed.
 
 
 Installing GDB
