@@ -1,3 +1,8 @@
+2001-12-17  Tom Rix  <trix@porter.hsv.redhat.com>
+
+	* coffcode.h (sec_to_styp_flags): Add STYP_EXCEPT and STYP_TYPCHK for 
+	xcoff.
+
 2001-12-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (elf_discarded_section): Define.

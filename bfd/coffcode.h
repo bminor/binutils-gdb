@@ -428,6 +428,14 @@ sec_to_styp_flags (sec_name, sec_flags)
     {
       styp_flags = STYP_LOADER;
     }
+  else if (!strcmp (sec_name, _EXCEPT))
+    {
+      styp_flags = STYP_EXCEPT;
+    }
+  else if (!strcmp (sec_name, _TYPCHK))
+    {
+      styp_flags = STYP_TYPCHK;
+    }
 #endif
   /* Try and figure out what it should be */
   else if (sec_flags & SEC_CODE)
