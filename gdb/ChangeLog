@@ -1,3 +1,17 @@
+2002-07-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (struct regcache): Add opaque declaration.
+	(EXTRACT_RETURN_VALUE): New architecture method.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Ditto.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c (legacy_extract_return_value): New function.
+	* arch-utils.h (legacy_extract_return_value): Declare.
+	* values.c (value_being_returned): Re-enable code handling
+	EXTRACT_STRUCT_VALUE_ADDRESS.  Move
+	deprecated_grub_regcache_for_registers call to block handling
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS.
+	(EXTRACT_RETURN_VALUE): Do not define.
+
 2002-07-03  Grace Sainsbury  <graces@redhat.com>
 
 	* config/mcore/tm-mcore.h (REGISTER_BYTES, NUM_REGS, PC_REGNUM)

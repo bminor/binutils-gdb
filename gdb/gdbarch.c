@@ -209,6 +209,7 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
+  gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
   gdbarch_push_arguments_ftype *push_arguments;
   gdbarch_push_dummy_frame_ftype *push_dummy_frame;
@@ -216,6 +217,7 @@ struct gdbarch
   gdbarch_pop_frame_ftype *pop_frame;
   gdbarch_store_struct_return_ftype *store_struct_return;
   gdbarch_store_return_value_ftype *store_return_value;
+  gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
   gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
   gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
@@ -322,6 +324,8 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   default_print_float_info,
+  0,
+  0,
   0,
   0,
   0,
@@ -512,6 +516,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
+  current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->push_arguments = default_push_arguments;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
@@ -696,6 +701,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
+  /* Skip verify of extract_return_value, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->deprecated_extract_return_value == 0))
     fprintf_unfiltered (log, "\n\tdeprecated_extract_return_value");
@@ -713,6 +719,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->store_return_value == 0))
     fprintf_unfiltered (log, "\n\tstore_return_value");
+  /* Skip verify of extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -1137,6 +1144,31 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: ELF_MAKE_MSYMBOL_SPECIAL = 0x%08lx\n",
                         (long) current_gdbarch->elf_make_msymbol_special
                         /*ELF_MAKE_MSYMBOL_SPECIAL ()*/);
+#endif
+#ifdef EXTRACT_RETURN_VALUE
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "EXTRACT_RETURN_VALUE(type, regcache, valbuf)",
+                      XSTRING (EXTRACT_RETURN_VALUE (type, regcache, valbuf)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: EXTRACT_RETURN_VALUE = 0x%08lx\n",
+                        (long) current_gdbarch->extract_return_value
+                        /*EXTRACT_RETURN_VALUE ()*/);
+#endif
+#ifdef EXTRACT_STRUCT_VALUE_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
+                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->extract_struct_value_address
+                        /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
 #ifdef EXTRA_STACK_ALIGNMENT_NEEDED
   fprintf_unfiltered (file,
@@ -3744,6 +3776,25 @@ set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
 }
 
 void
+gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, char *valbuf)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->extract_return_value == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_extract_return_value invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_return_value called\n");
+  gdbarch->extract_return_value (type, regcache, valbuf);
+}
+
+void
+set_gdbarch_extract_return_value (struct gdbarch *gdbarch,
+                                  gdbarch_extract_return_value_ftype extract_return_value)
+{
+  gdbarch->extract_return_value = extract_return_value;
+}
+
+void
 gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf)
 {
   gdb_assert (gdbarch != NULL);
@@ -3881,6 +3932,32 @@ set_gdbarch_store_return_value (struct gdbarch *gdbarch,
                                 gdbarch_store_return_value_ftype store_return_value)
 {
   gdbarch->store_return_value = store_return_value;
+}
+
+int
+gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->extract_struct_value_address != 0;
+}
+
+CORE_ADDR
+gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->extract_struct_value_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_extract_struct_value_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_struct_value_address called\n");
+  return gdbarch->extract_struct_value_address (regcache);
+}
+
+void
+set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch,
+                                          gdbarch_extract_struct_value_address_ftype extract_struct_value_address)
+{
+  gdbarch->extract_struct_value_address = extract_struct_value_address;
 }
 
 int

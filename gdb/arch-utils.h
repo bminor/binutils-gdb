@@ -39,6 +39,10 @@ extern gdbarch_frame_num_args_ftype frame_num_args_unknown;
    targets that don't yet implement their own breakpoint_from_pc(). */
 extern gdbarch_breakpoint_from_pc_ftype legacy_breakpoint_from_pc;
 
+/* Implementation of extract return value that grubs around in the
+   register cache.  */
+extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
+
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 
