@@ -5480,6 +5480,9 @@ do
     fi
 done
 
+if test "${with_windres+set}" = set; then
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+fi
 
 
 

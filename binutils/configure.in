@@ -266,6 +266,10 @@ changequote([,])dnl
     fi
 done
 
+if test "${with_windres+set}" = set; then
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+fi
+
 AC_SUBST(NLMCONV_DEFS)
 AC_SUBST(BUILD_NLMCONV)
 AC_SUBST(BUILD_SRCONV)
