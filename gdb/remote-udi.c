@@ -573,6 +573,8 @@ udi_pc()
   UDIBool	HostEndian = 0;
   UDIError	err;
   int pc[2];
+  unsigned long myregs[256];
+  int i;
 
   From.Space = UDI29KPC;
   From.Offset = 0;
@@ -588,6 +590,21 @@ udi_pc()
 
   printf("other pc1 = 0x%x, pc0 = 0x%x\n", *(int *)&registers[4 * PC_REGNUM],
 	  *(int *)&registers[4 * NPC_REGNUM]);
+
+  /* Now, read all the registers globally */
+
+  From.Space = UDI29KGlobalRegs;
+  From.Offset = 0;
+  err = UDIRead(From, myregs, 256, 4, &CountDone, HostEndian);
+
+  printf ("err = %d, CountDone = %d\n", err, CountDone);
+
+  printf("\n");
+
+  for (i = 0; i < 256; i += 2)
+    printf("%d:\t%#10x\t%11d\t%#10x\t%11d\n", i, myregs[i], myregs[i],
+	   myregs[i+1], myregs[i+1]);
+  printf("\n");
 
   return pc[0];
 }
@@ -1437,6 +1454,11 @@ store_register (regno)
       To.Space = UDI29KPC;
       To.Offset = 0;		/* PC1 */
       result = UDIWrite (&From, To, Count, Size, &CountDone, HostEndian);
+
+      /* Writing to this loc actually changes the values of pc0 & pc1 */
+
+      register_valid[PC_REGNUM] = 0; /* pc1 */
+      register_valid[NPC_REGNUM] = 0; /* pc0 */
     }
   else 	/* An unprotected or protected special register */
     {
@@ -1525,6 +1547,14 @@ void  convert32() {;}
 FILE* EchoFile = 0;		/* used for debugging */
 int   QuietMode = 0;		/* used for debugging */
 
+#ifdef NO_HIF_SUPPORT
+service_HIF(msg)
+     union msg_t *msg;
+{
+  return(0);			/* Emulate a failure */
+}
+#endif
+
 /* Target_ops vector.  Not static because there does not seem to be
    any portable way to do a forward declaration of a static variable.
    The RS/6000 doesn't like "extern" followed by "static"; SunOS
@@ -1594,11 +1624,3 @@ _initialize_remote_udi ()
 {
   add_target (&udi_ops);
 }
-
-#ifdef NO_HIF_SUPPORT
-service_HIF(msg)
-union msg_t	*msg;
-{
-	return(0);	/* Emulate a failure */
-}
-#endif

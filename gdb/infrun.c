@@ -335,6 +335,7 @@ The same program may be running in another process.");
 static CORE_ADDR prev_pc;
 static CORE_ADDR prev_sp;
 static CORE_ADDR prev_func_start;
+static CORE_ADDR prev_func_end;
 static char *prev_func_name;
 
 
@@ -979,12 +980,11 @@ switch_thread:
 	      or the call instruction itself saves the PC on the stack.  */
 	   || prologue_pc != stop_func_start
 	   || stop_sp != prev_sp)
-	  && (/* I think this can only happen if stop_func_start is zero
-		 (e.g. stop_pc is in some objfile we don't know about).
-		 If the stop_pc does that (ends up someplace unknown), it
-		 must be some sort of subroutine call.  */
-	      stop_pc < stop_func_start
-	      || stop_pc >= stop_func_end
+	  && (/* PC is out of bounds of the current function.   Note that this
+		 seems sorta redundant w.r.t the prior test of stop_func_start
+		 != prev_func_start...  */
+	      stop_pc < prev_func_start
+	      || stop_pc >= prev_func_end
 
 	      /* If we do a call, we will be at the start of a function.  */
 	      || stop_pc == stop_func_start
@@ -1201,6 +1201,7 @@ step_into_function:
 					  original pc would not have
 					  been at the start of a
 					  function. */
+      prev_func_end = stop_func_end;
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
 
@@ -1275,6 +1276,7 @@ step_into_function:
 	 loop.  */
       prev_pc = read_pc ();
       prev_func_start = stop_func_start;
+      prev_func_end = stop_func_end;
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
     }

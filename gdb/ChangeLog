@@ -1,3 +1,10 @@
+Mon Oct 25 11:08:59 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Fix PC out of subroutine bounds
+	check to use prev_func_start/end instead of stop_func_start/end.
+	* remote-udi.c (store_register):  Invalidate NPC/PC_REGNUM after
+	changing PC.
+
 Mon Oct 25 14:57:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbserver/{low-lynx.c,low-sparc.c,low-sun3.c}, standalone.c,
