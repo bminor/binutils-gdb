@@ -3705,7 +3705,7 @@ mips_call_dummy_address (void)
 }
 
 
-/* If the current gcc for for this target does not produce correct debugging
+/* If the current gcc for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then
    define this macro.  This forces gdb to  always assume that floats are
    passed as doubles and then converted in the callee.

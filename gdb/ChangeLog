@@ -1,3 +1,7 @@
+2001-01-04  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* mips-tdep.c (mips_coerce_float_to_double): Fix typo in comment.
+
 2001-01-04  Nicholas Duffek  <nsd@redhat.com>
 
 	* valops.c (VALUE_SUBSTRING_START): Delete.
