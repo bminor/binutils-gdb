@@ -1,3 +1,15 @@
+2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Michael Fedrowitz  <michael.fedrowitz@informatik.uni-ulm.de>:
+
+	* config/m68k/linux.mh: Remove core-regset.o.
+	* m68klinux-nat.c: Fix comment.
+	(supply_gregset): Change argument to elf_gregset_t *.
+	(supply_fpregset): Change argument to elf_fpregset_t *.
+	(fetch_core_registers): New function.
+	(linux_elf_core_fns): Define.
+	(_initialize_m68k_linux_nat): New function.
+
 2001-07-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.tgt: Mark d10v as pure multi-arch.
