@@ -311,8 +311,8 @@ const struct txvu_operand txvu_operands[] =
    computed at run-time.  We could split this into two, as that would put the
    constant stuff into a readonly section.  */
 
-struct txvu_opcode txvu_upper_opcodes[] = {
-
+struct txvu_opcode txvu_upper_opcodes[] =
+{
   /* Macros appear first, so the disassembler will try them first.  */
   /* ??? Any aliases?  */
   /* ??? When close to being finished, clean up by aligning fields.  */
@@ -413,8 +413,8 @@ const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_
 #define MLUIMM12UNUSED V (7, 3, 22)
 #define MLUIMM15TOP MDEST
 
-struct txvu_opcode txvu_lower_opcodes[] = {
-
+struct txvu_opcode txvu_lower_opcodes[] =
+{
   /* Macros appear first, so the disassembler will try them first.  */
   /* ??? Any aliases?  */
   /* ??? There isn't an explicit nop.  Apparently it's "move vf0,vf0".  */
@@ -1331,4 +1331,608 @@ extract_luimm15 (insn, operand, mods, pinvalid)
      int *pinvalid;
 {
   return (((insn & MLUIMM15TOP) >> 21) << 11) | VLIMM11 (insn);
+}
+
+/* PKE support.  */
+
+PARSE_FN (pke_ibit);
+PRINT_FN (pke_ibit);
+
+PARSE_FN (pke_mode);
+PRINT_FN (pke_mode);
+
+PARSE_FN (pke_ability);
+PRINT_FN (pke_ability);
+
+PARSE_FN (pke_mpgaddr);
+
+PARSE_FN (pke_varlendata);
+
+PARSE_FN (pke_imrbits);
+PRINT_FN (pke_imrbits);
+
+PARSE_FN (pke_unpacktype);
+PRINT_FN (pke_unpacktype);
+
+PARSE_FN (pke_unpackaddr);
+
+const struct txvu_operand txvu_pke_operands[] =
+{
+  /* place holder (??? not sure if needed) */
+#define PKE_UNUSED 128
+  { 0 },
+
+  /* The I bit.  */
+#define PKE_IBIT (PKE_UNUSED + 1)
+  { 1, 31, TXVU_OPERAND_SUFFIX, parse_pke_ibit, 0, 0, print_pke_ibit },
+
+  /* An 8 bit unsigned immediate, stored in upper 8 bits of immed field.  */
+#define PKE_UIMM8UP (PKE_IBIT + 1)
+  { 8, 8, 0, 0, 0, 0, 0 },
+
+  /* An 8 bit unsigned immediate, stored in lower 8 bits of immed field.  */
+#define PKE_UIMM8LO (PKE_UIMM8UP + 1)
+  { 8, 0, 0, 0, 0, 0, 0 },
+
+  /* An 16 bit unsigned immediate, stored in lower 8 bits of immed field.  */
+#define PKE_UIMM16 (PKE_UIMM8LO + 1)
+  { 16, 0, 0, 0, 0, 0, 0 },
+
+  /* The mode operand of `stmod'.  */
+#define PKE_MODE (PKE_UIMM16 + 1)
+  { 2, 0, 0, parse_pke_mode, 0, 0, print_pke_mode },
+
+  /* The ability operand of `mskpath3'.  */
+#define PKE_ABILITY (PKE_MODE + 1)
+  { 1, 15, 0, parse_pke_ability, 0, 0, print_pke_ability },
+
+  /* A VU address.  */
+#define PKE_VUADDR (PKE_ABILITY + 1)
+  { 16, 0, 0, 0, 0, 0, 0 },
+
+  /* A 32 bit immediate, appearing in 2nd,3rd,4th,5th words.  */
+#define PKE_UIMM32 (PKE_VUADDR + 1)
+  { 32, 0, 0, 0, 0, 0, 0 },
+
+  /* VU address used by mpg insn.  */
+#define PKE_MPGADDR (PKE_UIMM32 + 1)
+  { 16, 0, TXVU_OPERAND_ADDRESS, parse_pke_mpgaddr, 0, 0, 0 },
+
+  /* A variable length data specifier.
+     Any of: file name, number, or '*'.  */
+#define PKE_VARLENDATA (PKE_MPGADDR + 1)
+  { 0, 0, 0, parse_pke_varlendata, 0, 0, 0 },
+
+  /* The IMR bits of the unpack insn.  */
+#define PKE_IMRBITS (PKE_VARLENDATA + 1)
+  { 0, 0, 0, parse_pke_imrbits, 0, 0, print_pke_imrbits },
+
+  /* The type of the unpack insn.  */
+#define PKE_UNPACKTYPE (PKE_IMRBITS + 1)
+  { 4, 24, 0, parse_pke_unpacktype, 0, 0, print_pke_unpacktype },
+
+  /* VU address used by unpack insn.  */
+#define PKE_UNPACKADDR (PKE_UIMM32 + 1)
+  { 16, 0, TXVU_OPERAND_ADDRESS, parse_pke_unpackaddr, 0, 0, 0 },
+
+/* end of list place holder */
+  { 0 }
+};
+
+/* Field mask values.  */
+#define MPKECMD 0x7f000000
+#define MPKEUNPACK 0x60000000
+
+/* Field values.  */
+#define VPKECMD(x) V ((x), 7, 24)
+#define VPKEUNPACK V (0x60, 8, 24)
+
+struct txvu_opcode txvu_pke_opcodes[] =
+{
+  { "pkenop", { PKE_IBIT }, 0x7fffffff, 0 },
+  { "stcycle", { PKE_IBIT, SP, PKE_UIMM8UP, C, PKE_UIMM8LO }, MPKECMD, VPKECMD (1) },
+  { "offset", { PKE_IBIT, SP, PKE_UIMM16 }, MPKECMD, VPKECMD (2) },
+  { "base", { PKE_IBIT, SP, PKE_UIMM16 }, MPKECMD, VPKECMD (3) },
+  { "itop", { PKE_IBIT, SP, PKE_UIMM16 }, MPKECMD, VPKECMD (4) },
+  { "stmod", { PKE_IBIT, SP, PKE_MODE }, MPKECMD + V (~0, 14, 2), VPKECMD (5) },
+  { "mskpath3", { PKE_IBIT, SP, PKE_ABILITY }, MPKECMD + V (~0, 15, 0), VPKECMD (6) },
+  { "pkemark", { PKE_IBIT, SP, PKE_UIMM16 }, MPKECMD, VPKECMD (7) },
+  { "flushe", { PKE_IBIT }, MPKECMD, VPKECMD (16) },
+  { "flush", { PKE_IBIT }, MPKECMD, VPKECMD (17) },
+  { "flusha", { PKE_IBIT }, MPKECMD, VPKECMD (19) },
+  { "pkemscal", { PKE_IBIT, SP, PKE_VUADDR }, MPKECMD, VPKECMD (20) },
+  { "pkemscnt", { PKE_IBIT }, MPKECMD, VPKECMD (23) },
+  { "pkemscalf", { PKE_IBIT, SP, PKE_VUADDR }, MPKECMD, VPKECMD (21) },
+
+  /* 2 word instructions */
+  { "stmask", { PKE_IBIT, SP, PKE_UIMM32 }, MPKECMD, VPKECMD (32), PKE_OPCODE_LEN2 },
+
+  /* 5 word instructions */
+  { "strow", { PKE_IBIT, SP, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32 }, MPKECMD, VPKECMD (48), PKE_OPCODE_LEN5 },
+  { "stcol", { PKE_IBIT, SP, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32 }, MPKECMD, VPKECMD (49), PKE_OPCODE_LEN5 },
+
+  /* variable length instructions */
+  { "mpg", { PKE_IBIT, SP, PKE_MPGADDR, PKE_VARLENDATA }, MPKECMD, VPKECMD (0x4a), PKE_OPCODE_LENVAR + PKE_OPCODE_MPG },
+  { "direct", { PKE_IBIT, SP, PKE_VARLENDATA }, MPKECMD, VPKECMD (0x50), PKE_OPCODE_LENVAR + PKE_OPCODE_DIRECT },
+  { "directhl", { PKE_IBIT, SP, PKE_VARLENDATA }, MPKECMD, VPKECMD (0x51), PKE_OPCODE_LENVAR + PKE_OPCODE_DIRECT },
+  { "unpack", { PKE_IMRBITS, SP, PKE_UNPACKTYPE, C, PKE_UNPACKADDR, C, PKE_VARLENDATA }, MPKEUNPACK, VPKEUNPACK, PKE_OPCODE_LENVAR + PKE_OPCODE_UNPACK },
+};
+const int txvu_pke_opcodes_count = sizeof (txvu_pke_opcodes) / sizeof (txvu_pke_opcodes[0]);
+
+/* PKE parse,insert,extract,print helper fns.  */
+
+static long
+parse_pke_ibit (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static void
+print_pke_ibit (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_pke_mode (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static void
+print_pke_mode (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_pke_ability (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static void
+print_pke_ability (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_pke_mpgaddr (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static long
+parse_pke_varlendata (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  /* The result here is either the length specified,
+     or PKE_VARLENDATA_FILE or PKE_VARLENDATA_UNKNOWN.  */
+}
+
+static long
+parse_pke_imrbits (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static void
+print_pke_imrbits (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_pke_unpacktype (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static void
+print_pke_unpacktype (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_pke_unpackaddr (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+/* DMA support.  */
+
+PARSE_FN (dma_flags);
+INSERT_FN (dma_flags);
+EXTRACT_FN (dma_flags);
+PRINT_FN (dma_flags);
+
+PARSE_FN (dma_data);
+INSERT_FN (dma_data);
+EXTRACT_FN (dma_data);
+PRINT_FN (dma_data);
+
+PARSE_FN (dma_next);
+INSERT_FN (dma_next);
+EXTRACT_FN (dma_next);
+PRINT_FN (dma_next);
+
+const struct txvu_operand txvu_dma_operands[] =
+{
+  /* place holder (??? not sure if needed) */
+#define DMA_UNUSED 128
+  { 0 },
+
+  /* dma tag flag bits */
+#define DMA_FLAGS (DMA_UNUSED + 1)
+  { 0, 0, TXVU_OPERAND_SUFFIX,
+      parse_dma_flags, insert_dma_flags, extract_dma_flags, print_dma_flags },
+
+  /* dma tag flag bits */
+#define DMA_DATA (DMA_FLAGS + 1)
+  { 0, 0, 0,
+      parse_dma_data, insert_dma_data, extract_dma_data, print_dma_data },
+
+  /* dma tag flag bits */
+#define DMA_NEXT (DMA_DATA + 1)
+  { 0, 0, 0,
+      parse_dma_next, insert_dma_next, extract_dma_next, print_dma_next },
+
+/* end of list place holder */
+  { 0 }
+};
+
+struct txvu_opcode txvu_dma_opcodes[] =
+{
+  { "dmacnt", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 1 },
+  { "dmanext", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 2 },
+  { "dmaref", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 3 },
+  { "dmarefs", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 4 },
+  { "dmacall", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 5 },
+  { "dmareg", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 6 },
+  { "dmaend", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 7 }
+};
+const int txvu_dma_opcodes_count = sizeof (txvu_dma_opcodes) / sizeof (txvu_dma_opcodes[0]);
+
+/* DMA parse,insert,extract,print helper fns.  */
+
+static long
+parse_dma_flags (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_dma_flags (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_dma_flags (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_dma_flags (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_dma_data (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_dma_data (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_dma_data (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_dma_data (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_dma_next (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_dma_next (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_dma_next (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_dma_next (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+/* GPUIF support.  */
+
+PARSE_FN (gpuif_prim);
+INSERT_FN (gpuif_prim);
+EXTRACT_FN (gpuif_prim);
+PRINT_FN (gpuif_prim);
+
+PARSE_FN (gpuif_regs);
+INSERT_FN (gpuif_regs);
+EXTRACT_FN (gpuif_regs);
+PRINT_FN (gpuif_regs);
+
+PARSE_FN (gpuif_nloop);
+INSERT_FN (gpuif_nloop);
+EXTRACT_FN (gpuif_nloop);
+PRINT_FN (gpuif_nloop);
+
+PARSE_FN (gpuif_eop);
+INSERT_FN (gpuif_eop);
+EXTRACT_FN (gpuif_eop);
+PRINT_FN (gpuif_eop);
+
+const struct txvu_operand txvu_gpuif_operands[] =
+{
+  /* place holder (??? not sure if needed) */
+#define GPUIF_UNUSED 128
+  { 0 },
+
+  /* PRIM=foo operand */
+#define GPUIF_PRIM (GPUIF_UNUSED + 1)
+  { 0, 0, 0, parse_gpuif_prim, insert_gpuif_prim, extract_gpuif_prim, print_gpuif_prim },
+
+  /* REGS=foo operand */
+#define GPUIF_REGS (GPUIF_PRIM + 1)
+  { 0, 0, 0, parse_gpuif_regs, insert_gpuif_regs, extract_gpuif_regs, print_gpuif_regs },
+
+  /* NLOOP=foo operand */
+#define GPUIF_NLOOP (GPUIF_REGS + 1)
+  { 0, 0, 0, parse_gpuif_nloop, insert_gpuif_nloop, extract_gpuif_nloop, print_gpuif_nloop },
+
+  /* EOP operand */
+#define GPUIF_EOP (GPUIF_NLOOP + 1)
+  { 0, 0, 0, parse_gpuif_eop, insert_gpuif_eop, extract_gpuif_eop, print_gpuif_eop },
+
+/* end of list place holder */
+  { 0 }
+};
+
+struct txvu_opcode txvu_gpuif_opcodes[] =
+{
+  { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },
+  { "gpuifreglist", { SP, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 2 },
+  { "gpuifimage", { SP, GPUIF_NLOOP }, 0, 3 },
+};
+const int txvu_gpuif_opcodes_count = sizeof (txvu_gpuif_opcodes) / sizeof (txvu_gpuif_opcodes[0]);
+
+/* GPUIF parse,insert,extract,print helper fns.  */
+
+static long
+parse_gpuif_prim (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_gpuif_prim (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_gpuif_prim (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_gpuif_prim (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_gpuif_regs (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_gpuif_regs (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_gpuif_regs (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_gpuif_regs (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_gpuif_nloop (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_gpuif_nloop (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_gpuif_nloop (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_gpuif_nloop (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
+}
+
+static long
+parse_gpuif_eop (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+}
+
+static TXVU_INSN
+insert_gpuif_eop (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return 0;
+}
+
+static long
+extract_gpuif_eop (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  return 0;
+}
+
+static void
+print_gpuif_eop (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, "???");
 }

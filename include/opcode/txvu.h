@@ -226,3 +226,24 @@ const struct txvu_opcode *txvu_upper_opcode_lookup_asm PARAMS ((const char *));
 const struct txvu_opcode *txvu_lower_opcode_lookup_asm PARAMS ((const char *));
 const struct txvu_opcode *txvu_upper_opcode_lookup_dis PARAMS ((unsigned int));
 const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
+
+/* PKE support.  */
+
+/* PKE instruction flags.
+   The usage here is a bit wasteful of bits, but there's enough bits
+   and we can always make better usage later.  */
+
+/* 2 word instruction */
+#define PKE_OPCODE_LEN2 1
+/* 5 word instruction */
+#define PKE_OPCODE_LEN5 2
+/* variable length instruction */
+#define PKE_OPCODE_LENVAR 4
+/* the mpg instruction */
+#define PKE_OPCODE_MPG 8
+/* the direct instruction */
+#define PKE_OPCODE_DIRECT 16
+/* the directhl instruction */
+#define PKE_OPCODE_DIRECTHL 32
+/* the unpack instruction */
+#define PKE_OPCODE_UNPACK 64

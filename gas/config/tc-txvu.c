@@ -36,6 +36,12 @@ const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "!";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
+
+/* Non-zero if in vu-mode.  */
+static int vu_mode_p;
+
+/* Non-zero if packing pke instructions with dma tags.  */
+static int dma_pack_pke_p;
 
 const char *md_shortopts = "";
 
@@ -68,10 +74,29 @@ md_show_usage (stream)
 static subsegT prev_subseg;
 static segT prev_seg;
 
+static void s_dmadata PARAMS ((int));
+static void s_dmapackpke PARAMS ((int));
+static void s_enddirect PARAMS ((int));
+static void s_enddmadata PARAMS ((int));
+static void s_endgpuif PARAMS ((int));
+static void s_endmpg PARAMS ((int));
+static void s_endunpack PARAMS ((int));
+static void s_vu PARAMS ((int));
+
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word", cons, 4 },
+  { "dmadata", s_dmadata, 0 },
+  { "dmapackpke", s_dmapackpke, 0 },
+  { "enddirect", s_enddirect, 0 },
+  { "enddmadata", s_enddmadata, 0 },
+  { "endgpuif", s_endgpuif, 0 },
+  { "endmpg", s_endmpg, 0 },
+  { "endunpack", s_endunpack, 0 },
+  /* .vu,.endvu added to simplify debugging */
+  { "vu", s_vu, 1 },
+  { "endvu", s_vu, 0 },
   { NULL, NULL, 0 }
 };
 
@@ -92,6 +117,9 @@ md_begin ()
   /* Initialize the opcode tables.
      This involves computing the hash chains.  */
   txvu_opcode_init_tables (0);
+
+  vu_mode_p = 0;
+  dma_pack_pke_p = 0;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -107,10 +135,57 @@ struct txvu_fixup
 
 #define MAX_FIXUPS 5
 
-static char * assemble_insn PARAMS ((char *, int, char *));
+static void assemble_dma PARAMS ((char *));
+static void assemble_gpuif PARAMS ((char *));
+static void assemble_pke PARAMS ((char *));
+static void assemble_vu PARAMS ((char *));
+static char * assemble_vu_insn PARAMS ((char *, int, char *));
 
 void
 md_assemble (str)
+     char *str;
+{
+  if (! vu_mode_p)
+    {
+      if (strncasecmp (str, "dma", 3) == 0)
+	assemble_dma (str);
+      else if (strncasecmp (str, "gpuif", 5) == 0)
+	assemble_gpuif (str);
+      else
+	assemble_pke (str);
+    }
+  else
+    assemble_vu (str);
+}
+
+/* Subroutine of assemble_dpg to assemble DMA instructions.  */
+
+static void
+assemble_dma (str)
+     char *str;
+{
+}
+
+/* Subroutine of assemble_dpg to assemble GPUIF instructions.  */
+
+static void
+assemble_gpuif (str)
+     char *str;
+{
+}
+
+/* Subroutine of assemble_dpg to assemble PKE instructions.  */
+
+static void
+assemble_pke (str)
+     char *str;
+{
+}
+
+/* Subroutine of md_assemble to assemble VU instructions.  */
+
+static void
+assemble_vu (str)
      char *str;
 {
   /* The lower instruction has the lower address.
@@ -128,14 +203,14 @@ md_assemble (str)
     }
 
   *p = 0;
-  assemble_insn (str, 0, f + 4);
+  assemble_vu_insn (str, 0, f + 4);
   *p = '|';
-  assemble_insn (p + 1, 1, f);
+  assemble_vu_insn (p + 1, 1, f);
 #else
-  str = assemble_insn (str, 0, f + 4);
+  str = assemble_vu_insn (str, 0, f + 4);
   /* Don't assemble next one if we couldn't assemble the first.  */
   if (str)
-    assemble_insn (str, 1, f);
+    assemble_vu_insn (str, 1, f);
 #endif
 }
 
@@ -147,14 +222,13 @@ md_assemble (str)
    parse the lower insn.  */
 
 static char *
-assemble_insn (str, lower_p, buf)
+assemble_vu_insn (str, lower_p, buf)
      char *str;
      int lower_p;
      char *buf;
 {
   const struct txvu_opcode *opcode;
   char *start;
-  TXVU_INSN insn_buf[2];
   TXVU_INSN insn;
 
   /* Skip leading white space.  */
@@ -779,4 +853,57 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
 	     << operand->shift);
 
   return insn;
+}
+
+static void
+s_dmadata (int ignore)
+{
+}
+
+static void
+s_dmapackpke (int ignore)
+{
+  /* Syntax: .dmapackpke 0|1 */
+  if (*input_line_pointer == '0')
+    dma_pack_pke_p = 0;
+  else if (*input_line_pointer == '1')
+    dma_pack_pke_p = 1;
+  else
+    as_bad ("illegal argument to `.dmapackpke'");
+
+  input_line_pointer++;
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_enddirect (int ignore)
+{
+}
+
+static void
+s_enddmadata (int ignore)
+{
+}
+
+static void
+s_endgpuif (int ignore)
+{
+}
+
+static void
+s_endmpg (int ignore)
+{
+  vu_mode_p = 0;
+}
+
+static void
+s_endunpack (int ignore)
+{
+  vu_mode_p = 0;
+}
+
+static void
+s_vu (int enable_p)
+{
+  vu_mode_p = enable_p;
 }
