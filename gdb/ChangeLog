@@ -1,3 +1,9 @@
+Wed Sep 23 11:14:53 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* m68k-tdep.c (m68k_saved_pc_after_call):  Use 'GDB_TARGET_IS_SUN3'
+	instead of 'sun' predefined symbol so that trap analysis code is
+	enabled only when the TARGET is a sun3.
+
 Tue Sep 22 17:13:19 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* tm-i960.h (ext_format_i960): Add top-level declaration.
