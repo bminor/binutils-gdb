@@ -40,11 +40,6 @@
 #include "readline/readline.h"
 #include "readline/history.h"
 
-#ifdef __MINGW32__
-#include <windows.h>
-#include <io.h>
-#endif
-
 /* readline defines this.  */
 #undef savestring
 
@@ -1133,20 +1128,6 @@ gdb_setup_readline (void)
       /* When a character is detected on instream by select or poll,
 	 readline will be invoked via this callback function.  */
       call_readline = rl_callback_read_char_wrapper;
-#ifdef WINAPI
-      /* Set the console to character-at-a-time (as opposed to
-	 line-at-a-time) mode.  Otherwise, we will get only a single
-	 keyboard event for the entire line, and readline will not
-	 see each character as it arrives.  */
-      {
-	DWORD mode;
-	HANDLE console_handle;
-	console_handle = (HANDLE) _get_osfhandle (fileno (instream));
-	GetConsoleMode(console_handle, &mode);
-	mode &= ~ENABLE_LINE_INPUT;
-	SetConsoleMode(console_handle, mode);
-      }
-#endif
     }
   else
     {

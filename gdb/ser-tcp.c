@@ -241,9 +241,9 @@ net_read_prim (struct serial *scb, size_t count)
 }
 
 static int
-net_write_prim (struct serial *scb, const char *str, int len)
+net_write_prim (struct serial *scb, const void *buf, size_t count)
 {
-  return send (scb->fd, str, len, 0);
+  return send (scb->fd, buf, count, 0);
 }
 
 void
