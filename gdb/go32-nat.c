@@ -649,7 +649,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
       exit (1);
     }
   environ = env_save;
-  free (cmdline);
+  xfree (cmdline);
 
   edi_init (start_state);
 #if __DJGPP_MINOR__ < 3

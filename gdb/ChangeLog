@@ -1,3 +1,9 @@
+2001-08-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* go32-nat.c (go32_create_inferior): Use xfree instead of free.
+	* config/djgpp/fnchange.lst: Add entries for i386bsd-tdep.c and
+	i386bsd-nat.c.
+
 2001-08-10  Daniel Jacobowitz  <drow@mvista.com>
 	    H.J. Lu  (hjl@gnu.org)
 
